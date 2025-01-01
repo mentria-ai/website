@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "agmovzq",
+  "url": "/2024/12/30/agmovzq.html",
+  "post_url": "/2024/12/30/agmovzq.html",
+  "title": "Duck appreciation post: This is one nice duck.",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 4517,
+  "downVoteCount": 192,
+  "creationTs": 1735571399,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/agmovzq_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/agmovzq_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "/assets/media/agmovzq_video.mp4",
+      "hasAudio": 1,
+      "duration": 20
+    }
+  },
+  "commentsCount": 124,
+  "tags": [
+    {
+      "key": "duck",
+      "url": "/tag/duck"
+    }
+  ],
+  "interests": [
+    "animals"
+  ]
+}

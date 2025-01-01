@@ -179,78 +179,69 @@ def get_existing_posts():
     return existing_posts
 
 def fetch_posts(cursor="", existing_posts=None):
-    """Fetch posts from 9gag API"""
-    url = f"https://9gag.com/v1/feed-posts/type/home"
+    """Fetch posts from 9gag API with enhanced error handling"""
+    
+    # Enhanced headers to look more like a real browser
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Origin': 'https://9gag.com',
+        'Referer': 'https://9gag.com/',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Connection': 'keep-alive'
+    }
+    
+    url = 'https://9gag.com/v1/feed-posts/type/home'
     if cursor:
-        url += f"?after={cursor}"
+        url += f'?after={cursor}'
     
-    print(f"Fetching posts from: {url}")
+    max_retries = 5
+    base_delay = 2
     
-    try:
-        response = requests.get(url, headers=HEADERS)
-        print(f"Response status: {response.status_code}")
-        response.raise_for_status()
-        
+    for attempt in range(max_retries):
         try:
-            data = response.json()
-            print(f"Response data keys: {data.keys() if data else 'None'}")
-            if data and 'data' in data:
-                print(f"Data section keys: {data['data'].keys() if data['data'] else 'None'}")
-                if 'posts' in data['data']:
-                    print(f"Found {len(data['data']['posts'])} posts")
-                    # Print first post structure
-                    if data['data']['posts']:
-                        first_post = data['data']['posts'][0]
-                        print(f"First post keys: {first_post.keys()}")
-                        print(f"First post id: {first_post.get('id')}")
-                        print(f"First post type: {first_post.get('type')}")
-                        print(f"First post creator: {first_post.get('creator')}")
+            print(f"Fetching posts from: {url}")
+            session = requests.Session()
             
-            if not data or 'data' not in data or 'posts' not in data['data']:
-                print(f"Invalid response format: {data}")
-                return None
+            # First make a GET request to the main site
+            session.get('https://9gag.com', headers=headers, timeout=10)
             
-            # Filter out existing posts if needed
-            if existing_posts is not None:
-                filtered_posts = []
-                for post in data['data']['posts']:
-                    if post.get('id') and post['id'] not in existing_posts:
-                        # Clean up URLs in the post
-                        if post.get('url'):
-                            post['url'] = sanitize_url(post['url'])
-                        
-                        # Handle creator data safely
-                        creator = post.get('creator')
-                        if creator:
-                            if isinstance(creator, dict):
-                                if creator.get('profileUrl'):
-                                    creator['profileUrl'] = sanitize_url(creator['profileUrl'])
-                            else:
-                                post['creator'] = {}  # Reset invalid creator data
-                        else:
-                            post['creator'] = {}  # Ensure creator exists
-                            
-                        filtered_posts.append(post)
-                
-                data['data']['posts'] = filtered_posts
-                print(f"Filtered to {len(filtered_posts)} new posts")
+            # Then fetch the actual data
+            response = session.get(url, headers=headers, timeout=10)
+            print(f"Response status: {response.status_code}")
             
-            return data
-        except json.JSONDecodeError as e:
-            print(f"Response content: {response.text[:500]}...")  # Print first 500 chars
-            raise
+            if response.status_code == 200:
+                return response.json()
             
-    except requests.exceptions.RequestException as e:
-        print(f"Error making request: {e}")
-        return None
-    except json.JSONDecodeError as e:
-        print(f"Error parsing response: {e}")
-        return None
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
+            # Log detailed error information
+            print(f"Error response: {response.text[:500]}")  # First 500 chars of error
+            print(f"Response headers: {dict(response.headers)}")
+            
+            if response.status_code == 403:
+                print("Received 403 Forbidden - might be rate limited or IP blocked")
+            
+            # Calculate exponential backoff delay
+            delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+            if attempt < max_retries - 1:
+                print(f"Retrying in {delay:.1f} seconds... (attempt {attempt + 2}/{max_retries})")
+                time.sleep(delay)
+            
+        except Exception as e:
+            print(f"Error making request: {str(e)}")
+            if attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                print(f"Retrying in {delay:.1f} seconds... (attempt {attempt + 2}/{max_retries})")
+                time.sleep(delay)
+    
+    print("Failed to fetch posts after all retries")
+    return None
 
 def create_post_file(post):
     # Download media files first

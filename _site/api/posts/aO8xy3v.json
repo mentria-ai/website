@@ -1,0 +1,75 @@
+{
+  "layout": "post",
+  "id": "aO8xy3v",
+  "url": "/2024/12/30/aO8xy3v.html",
+  "post_url": "/2024/12/30/aO8xy3v.html",
+  "title": "My good man...",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 7866,
+  "downVoteCount": 409,
+  "creationTs": 1735510291,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "https://img-9gag-fun.9cache.com/photo/aO8xy3v_460s.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/aO8xy3v_image460.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/aO8xy3v_460swp.webp"
+    },
+    "imageFbThumbnail": {
+      "width": 220,
+      "height": 220,
+      "url": "https://img-9gag-fun.9cache.com/photo/aO8xy3v_fbthumbnail.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "/assets/media/aO8xy3v_video.mp4",
+      "hasAudio": 1,
+      "duration": 79,
+      "vp8Url": "https://img-9gag-fun.9cache.com/photo/aO8xy3v_460svwm.webm",
+      "h265Url": "https://img-9gag-fun.9cache.com/photo/aO8xy3v_460svh265.mp4",
+      "vp9Url": "https://img-9gag-fun.9cache.com/photo/aO8xy3v_460svvp9.webm",
+      "av1Url": "https://img-9gag-fun.9cache.com/photo/aO8xy3v_460svav1.mp4"
+    }
+  },
+  "creator": {
+    "userId": "13381752",
+    "accountId": "13381752",
+    "username": "_hiji_",
+    "fullName": "Hijikata Toshiro",
+    "emojiStatus": "",
+    "about": "Leader or not, a man's gotta say what he's gotta say",
+    "avatarUrl": "/assets/media/aO8xy3v_creator_avatar.jpg",
+    "profileUrl": "/user/_hiji_",
+    "isActivePro": false,
+    "isActiveProPlus": false,
+    "isVerifiedAccount": false,
+    "creationTs": 1371945600,
+    "activeTs": 0,
+    "preferences": {
+      "hideProBadge": 0,
+      "hideActiveTs": 1,
+      "accentColor": "",
+      "backgroundColor": ""
+    }
+  },
+  "commentsCount": 326,
+  "tags": [
+    {
+      "key": "Random",
+      "url": "/tag/random"
+    }
+  ],
+  "interests": [
+    "random"
+  ]
+}

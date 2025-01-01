@@ -1,0 +1,69 @@
+{
+  "layout": "post",
+  "id": "aD2Y3jK",
+  "url": "/2024/12/30/aD2Y3jK.html",
+  "post_url": "/2024/12/30/aD2Y3jK.html",
+  "title": "A win is a win",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 1944,
+  "downVoteCount": 123,
+  "creationTs": 1735547008,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 779,
+      "url": "/assets/media/aD2Y3jK_image700.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/aD2Y3jK_700bwp.webp"
+    },
+    "image460": {
+      "width": 460,
+      "height": 512,
+      "url": "https://img-9gag-fun.9cache.com/photo/aD2Y3jK_460s.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/aD2Y3jK_460swp.webp"
+    },
+    "imageFbThumbnail": {
+      "width": 220,
+      "height": 220,
+      "url": "https://img-9gag-fun.9cache.com/photo/aD2Y3jK_fbthumbnail.jpg"
+    }
+  },
+  "creator": {
+    "userId": "51753965",
+    "accountId": "52334554",
+    "username": "cheesy_fries",
+    "fullName": "Cheesy_Fries",
+    "emojiStatus": "",
+    "about": "My Funny Collection",
+    "avatarUrl": "/assets/media/aD2Y3jK_creator_avatar.jpg",
+    "profileUrl": "/user/cheesy_fries",
+    "isActivePro": false,
+    "isActiveProPlus": false,
+    "isVerifiedAccount": false,
+    "creationTs": 1561100580,
+    "activeTs": 1735709000,
+    "preferences": {
+      "hideProBadge": 0,
+      "hideActiveTs": 0,
+      "accentColor": "",
+      "backgroundColor": ""
+    }
+  },
+  "commentsCount": 86,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "hol up",
+      "url": "/tag/hol-up"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

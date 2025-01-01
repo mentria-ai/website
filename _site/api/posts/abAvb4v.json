@@ -1,0 +1,92 @@
+{
+  "layout": "post",
+  "id": "abAvb4v",
+  "url": "http://9gag.com/gag/abAvb4v",
+  "post_url": "/2024/12/31/abAvb4v.html",
+  "title": "Mouse patterns in games",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 4370,
+  "downVoteCount": 495,
+  "creationTs": 1735589730,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "https://img-9gag-fun.9cache.com/photo/abAvb4v_460s.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "https://img-9gag-fun.9cache.com/photo/abAvb4v_460s.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/abAvb4v_460swp.webp"
+    },
+    "imageFbThumbnail": {
+      "width": 220,
+      "height": 220,
+      "url": "https://img-9gag-fun.9cache.com/photo/abAvb4v_fbthumbnail.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "https://img-9gag-fun.9cache.com/photo/abAvb4v_460sv.mp4",
+      "hasAudio": 1,
+      "duration": 14,
+      "vp8Url": "https://img-9gag-fun.9cache.com/photo/abAvb4v_460svwm.webm",
+      "h265Url": "https://img-9gag-fun.9cache.com/photo/abAvb4v_460svh265.mp4",
+      "vp9Url": "https://img-9gag-fun.9cache.com/photo/abAvb4v_460svvp9.webm",
+      "av1Url": "https://img-9gag-fun.9cache.com/photo/abAvb4v_460svav1.mp4"
+    }
+  },
+  "creator": {
+    "userId": "4488369",
+    "accountId": "4488369",
+    "username": "wittynicknamehi",
+    "fullName": "wittynicknamehi",
+    "emojiStatus": "",
+    "about": "My Funny Collection",
+    "avatarUrl": "https://accounts-cdn.9gag.com/media/avatar/4488369_100_1.jpg",
+    "profileUrl": "https://9gag.com/u/wittynicknamehi",
+    "isActivePro": false,
+    "isActiveProPlus": false,
+    "isVerifiedAccount": false,
+    "creationTs": 1334016000,
+    "activeTs": 1735653642,
+    "preferences": {
+      "hideProBadge": 0,
+      "hideActiveTs": 0,
+      "accentColor": "",
+      "backgroundColor": ""
+    }
+  },
+  "commentsCount": 112,
+  "tags": [
+    {
+      "key": "gaming",
+      "url": "/tag/gaming"
+    },
+    {
+      "key": "games",
+      "url": "/tag/games"
+    },
+    {
+      "key": "war thunder",
+      "url": "/tag/war-thunder"
+    },
+    {
+      "key": "video",
+      "url": "/tag/video"
+    },
+    {
+      "key": "random",
+      "url": "/tag/random"
+    }
+  ],
+  "interests": [
+    "games",
+    "random"
+  ]
+}

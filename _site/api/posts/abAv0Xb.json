@@ -1,0 +1,75 @@
+{
+  "layout": "post",
+  "id": "abAv0Xb",
+  "url": "http://9gag.com/gag/abAv0Xb",
+  "post_url": "/2024/12/31/abAv0Xb.html",
+  "title": "She did nothing wrong",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 3656,
+  "downVoteCount": 134,
+  "creationTs": 1735607822,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 344,
+      "url": "https://img-9gag-fun.9cache.com/photo/abAv0Xb_460s.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 344,
+      "url": "/assets/media/abAv0Xb_image460.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/abAv0Xb_460swp.webp"
+    },
+    "imageFbThumbnail": {
+      "width": 220,
+      "height": 220,
+      "url": "https://img-9gag-fun.9cache.com/photo/abAv0Xb_fbthumbnail.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 344,
+      "url": "/assets/media/abAv0Xb_video.mp4",
+      "hasAudio": 1,
+      "duration": 10,
+      "vp8Url": "https://img-9gag-fun.9cache.com/photo/abAv0Xb_460svwm.webm",
+      "h265Url": "https://img-9gag-fun.9cache.com/photo/abAv0Xb_460svh265.mp4",
+      "vp9Url": "https://img-9gag-fun.9cache.com/photo/abAv0Xb_460svvp9.webm",
+      "av1Url": "https://img-9gag-fun.9cache.com/photo/abAv0Xb_460svav1.mp4"
+    }
+  },
+  "creator": {
+    "userId": "64774748",
+    "accountId": "66847449",
+    "username": "1544",
+    "fullName": "1542",
+    "emojiStatus": "",
+    "about": "what are you doing here loser?",
+    "avatarUrl": "https://accounts-cdn.9gag.com/media/avatar/66847449_100_3.jpg",
+    "profileUrl": "https://9gag.com/u/1544",
+    "isActivePro": false,
+    "isActiveProPlus": false,
+    "isVerifiedAccount": false,
+    "creationTs": 1685550066,
+    "activeTs": 1735676562,
+    "preferences": {
+      "hideProBadge": 0,
+      "hideActiveTs": 0,
+      "accentColor": "",
+      "backgroundColor": ""
+    }
+  },
+  "commentsCount": 123,
+  "tags": [
+    {
+      "key": "humor",
+      "url": "/tag/humor"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

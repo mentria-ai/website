@@ -1,0 +1,90 @@
+{
+  "layout": "post",
+  "id": "ae9Qp2W",
+  "url": "http://9gag.com/gag/ae9Qp2W",
+  "post_url": "/2024/12/31/ae9Qp2W.html",
+  "title": "Dude stuck in a vortex...",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 2581,
+  "downVoteCount": 108,
+  "creationTs": 1735592735,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 428,
+      "url": "https://img-9gag-fun.9cache.com/photo/ae9Qp2W_460s.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 428,
+      "url": "https://img-9gag-fun.9cache.com/photo/ae9Qp2W_460s.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/ae9Qp2W_460swp.webp"
+    },
+    "imageFbThumbnail": {
+      "width": 220,
+      "height": 220,
+      "url": "https://img-9gag-fun.9cache.com/photo/ae9Qp2W_fbthumbnail.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 428,
+      "url": "https://img-9gag-fun.9cache.com/photo/ae9Qp2W_460sv.mp4",
+      "hasAudio": 1,
+      "duration": 72,
+      "vp8Url": "https://img-9gag-fun.9cache.com/photo/ae9Qp2W_460svwm.webm",
+      "h265Url": "https://img-9gag-fun.9cache.com/photo/ae9Qp2W_460svh265.mp4",
+      "vp9Url": "https://img-9gag-fun.9cache.com/photo/ae9Qp2W_460svvp9.webm",
+      "av1Url": "https://img-9gag-fun.9cache.com/photo/ae9Qp2W_460svav1.mp4"
+    }
+  },
+  "creator": {
+    "userId": "64706639",
+    "accountId": "66780445",
+    "username": "sadness007",
+    "fullName": "Sadness 007",
+    "emojiStatus": "",
+    "about": "My Funny Collection",
+    "avatarUrl": "https://accounts-cdn.9gag.com/media/avatar/66780445_100_13.jpg",
+    "profileUrl": "https://9gag.com/u/sadness007",
+    "isActivePro": false,
+    "isActiveProPlus": false,
+    "isVerifiedAccount": false,
+    "creationTs": 1684120967,
+    "activeTs": 0,
+    "preferences": {
+      "hideProBadge": 0,
+      "hideActiveTs": 1,
+      "accentColor": "",
+      "backgroundColor": ""
+    }
+  },
+  "commentsCount": 117,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "humor",
+      "url": "/tag/humor"
+    },
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    },
+    {
+      "key": "meme",
+      "url": "/tag/meme"
+    }
+  ],
+  "interests": [
+    "random",
+    "humor",
+    "memes",
+    "wtf"
+  ]
+}

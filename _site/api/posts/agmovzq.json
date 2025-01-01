@@ -1,0 +1,75 @@
+{
+  "layout": "post",
+  "id": "agmovzq",
+  "url": "http://9gag.com/gag/agmovzq",
+  "post_url": "/2024/12/30/agmovzq.html",
+  "title": "Duck appreciation post: This is one nice duck.",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 3979,
+  "downVoteCount": 182,
+  "creationTs": 1735571399,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "https://img-9gag-fun.9cache.com/photo/agmovzq_460s.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "https://img-9gag-fun.9cache.com/photo/agmovzq_460s.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/agmovzq_460swp.webp"
+    },
+    "imageFbThumbnail": {
+      "width": 220,
+      "height": 220,
+      "url": "https://img-9gag-fun.9cache.com/photo/agmovzq_fbthumbnail.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "https://img-9gag-fun.9cache.com/photo/agmovzq_460sv.mp4",
+      "hasAudio": 1,
+      "duration": 20,
+      "vp8Url": "https://img-9gag-fun.9cache.com/photo/agmovzq_460svwm.webm",
+      "h265Url": "https://img-9gag-fun.9cache.com/photo/agmovzq_460svh265.mp4",
+      "vp9Url": "https://img-9gag-fun.9cache.com/photo/agmovzq_460svvp9.webm",
+      "av1Url": "https://img-9gag-fun.9cache.com/photo/agmovzq_460svav1.mp4"
+    }
+  },
+  "creator": {
+    "userId": "2135141",
+    "accountId": "2135141",
+    "username": "wudai",
+    "fullName": "wudai",
+    "emojiStatus": "",
+    "about": "My Funny Collection",
+    "avatarUrl": "https://accounts-cdn.9gag.com/media/avatar/2135141_100_1.jpg",
+    "profileUrl": "https://9gag.com/u/wudai",
+    "isActivePro": false,
+    "isActiveProPlus": false,
+    "isVerifiedAccount": false,
+    "creationTs": 1326153600,
+    "activeTs": 1735669830,
+    "preferences": {
+      "hideProBadge": 0,
+      "hideActiveTs": 0,
+      "accentColor": "",
+      "backgroundColor": ""
+    }
+  },
+  "commentsCount": 114,
+  "tags": [
+    {
+      "key": "duck",
+      "url": "/tag/duck"
+    }
+  ],
+  "interests": [
+    "animals"
+  ]
+}

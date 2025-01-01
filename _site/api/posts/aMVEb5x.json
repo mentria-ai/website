@@ -1,0 +1,66 @@
+{
+  "layout": "post",
+  "id": "aMVEb5x",
+  "url": "http://9gag.com/gag/aMVEb5x",
+  "post_url": "/2024/12/30/aMVEb5x.html",
+  "title": "Get out of here, Metroid...",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 3641,
+  "downVoteCount": 168,
+  "creationTs": 1735528878,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 683,
+      "url": "https://img-9gag-fun.9cache.com/photo/aMVEb5x_700b.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/aMVEb5x_700bwp.webp"
+    },
+    "image460": {
+      "width": 460,
+      "height": 449,
+      "url": "https://img-9gag-fun.9cache.com/photo/aMVEb5x_460s.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/aMVEb5x_460swp.webp"
+    },
+    "imageFbThumbnail": {
+      "width": 220,
+      "height": 220,
+      "url": "https://img-9gag-fun.9cache.com/photo/aMVEb5x_fbthumbnail.jpg"
+    }
+  },
+  "creator": {
+    "userId": "47718168",
+    "accountId": "48329652",
+    "username": "_donutthief",
+    "fullName": "unlim0",
+    "emojiStatus": "",
+    "about": "Sometimes memes, but mostly lewd stuff. ~ Gw2, OW.",
+    "avatarUrl": "https://accounts-cdn.9gag.com/media/avatar/48329652_100_34.jpg",
+    "profileUrl": "https://9gag.com/u/_donutthief",
+    "isActivePro": false,
+    "isActiveProPlus": false,
+    "isVerifiedAccount": false,
+    "creationTs": 1523124421,
+    "activeTs": 0,
+    "preferences": {
+      "hideProBadge": 0,
+      "hideActiveTs": 1,
+      "accentColor": "",
+      "backgroundColor": ""
+    }
+  },
+  "commentsCount": 223,
+  "tags": [
+    {
+      "key": "gaming",
+      "url": "/tag/gaming"
+    }
+  ],
+  "interests": [
+    "humor",
+    "games"
+  ]
+}

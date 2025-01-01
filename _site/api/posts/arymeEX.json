@@ -1,0 +1,90 @@
+{
+  "layout": "post",
+  "id": "arymeEX",
+  "url": "http://9gag.com/gag/arymeEX",
+  "post_url": "/2024/12/30/arymeEX.html",
+  "title": "Damn based cats!",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 7483,
+  "downVoteCount": 520,
+  "creationTs": 1735528160,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 670,
+      "url": "https://img-9gag-fun.9cache.com/photo/arymeEX_460s.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 670,
+      "url": "https://img-9gag-fun.9cache.com/photo/arymeEX_460s.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/arymeEX_460swp.webp"
+    },
+    "imageFbThumbnail": {
+      "width": 220,
+      "height": 220,
+      "url": "https://img-9gag-fun.9cache.com/photo/arymeEX_fbthumbnail.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 670,
+      "url": "https://img-9gag-fun.9cache.com/photo/arymeEX_460sv.mp4",
+      "hasAudio": 1,
+      "duration": 59,
+      "vp8Url": "https://img-9gag-fun.9cache.com/photo/arymeEX_460svwm.webm",
+      "h265Url": "https://img-9gag-fun.9cache.com/photo/arymeEX_460svh265.mp4",
+      "av1Url": "https://img-9gag-fun.9cache.com/photo/arymeEX_460svav1.mp4"
+    }
+  },
+  "creator": {
+    "userId": "60250208",
+    "accountId": "60785620",
+    "username": "rgcmoves",
+    "fullName": "Tong Po Jr",
+    "emojiStatus": "🇻🇦",
+    "about": "My Funny Collection",
+    "avatarUrl": "https://accounts-cdn.9gag.com/media/avatar/60785620_100_2.jpg",
+    "profileUrl": "https://9gag.com/u/rgcmoves",
+    "isActivePro": false,
+    "isActiveProPlus": false,
+    "isVerifiedAccount": false,
+    "creationTs": 1625197373,
+    "activeTs": 1735666517,
+    "preferences": {
+      "hideProBadge": 0,
+      "hideActiveTs": 0,
+      "accentColor": "",
+      "backgroundColor": ""
+    }
+  },
+  "commentsCount": 471,
+  "tags": [
+    {
+      "key": "based",
+      "url": "/tag/based"
+    },
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "meme",
+      "url": "/tag/meme"
+    },
+    {
+      "key": "cat",
+      "url": "/tag/cat"
+    }
+  ],
+  "interests": [
+    "wtf",
+    "animals",
+    "humor",
+    "memes",
+    "cats"
+  ]
+}

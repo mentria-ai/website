@@ -1,0 +1,42 @@
+{
+  "layout": "post",
+  "id": "sample1",
+  "url": "/2024/12/31/sample1.html",
+  "post_url": "/2024/12/31/sample1.html",
+  "title": "Amazing Sunset",
+  "description": "A beautiful sunset captured in the mountains",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 1500,
+  "downVoteCount": 50,
+  "creationTs": 1735593116,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "url": "/assets/media/sample1_image700.jpg",
+      "width": 700,
+      "height": 500
+    }
+  },
+  "creator": {
+    "username": "naturephotographer",
+    "profileUrl": "/user/naturephotographer",
+    "avatarUrl": "/assets/media/sample1_creator_avatar.jpg"
+  },
+  "commentsCount": 45,
+  "tags": [
+    {
+      "key": "nature",
+      "url": "/tag/nature"
+    },
+    {
+      "key": "photography",
+      "url": "/tag/photography"
+    }
+  ],
+  "interests": [
+    "Nature",
+    "Photography"
+  ]
+}

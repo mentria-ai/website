@@ -1,0 +1,120 @@
+{
+    "meta": {
+        "timestamp": 1735660035,
+        "status": "Success"
+    },
+    "data": {
+        "nextCursor": "after=eyJmZWVkSWQiOiIiLCJvcmRlcklkIjoxOTk5OTk4OSwib2Zmc2V0IjoxMH0%3D",
+        "posts": [
+            {
+                "id": "mentria001",
+                "url": "http://mentria.ai/posts/ai-innovation",
+                "title": "The Future of AI is Here",
+                "description": "Exploring the cutting-edge developments in artificial intelligence and their impact on our daily lives.",
+                "type": "Photo",
+                "nsfw": 0,
+                "upVoteCount": 1234,
+                "downVoteCount": 45,
+                "creationTs": 1735660035,
+                "promoted": 0,
+                "badges": [],
+                "images": {
+                    "image700": {
+                        "width": 700,
+                        "height": 400,
+                        "url": "https://source.unsplash.com/random/700x400?ai"
+                    },
+                    "image460": {
+                        "width": 460,
+                        "height": 263,
+                        "url": "https://source.unsplash.com/random/460x263?ai"
+                    },
+                    "imageFbThumbnail": {
+                        "width": 220,
+                        "height": 220,
+                        "url": "https://source.unsplash.com/random/220x220?ai"
+                    }
+                },
+                "creator": {
+                    "userId": "admin001",
+                    "username": "mentria_admin",
+                    "fullName": "Mentria Admin",
+                    "avatarUrl": "https://source.unsplash.com/random/100x100?avatar",
+                    "isActivePro": true
+                },
+                "commentsCount": 89,
+                "tags": [
+                    {
+                        "key": "artificial-intelligence",
+                        "url": "/tag/artificial-intelligence"
+                    },
+                    {
+                        "key": "technology",
+                        "url": "/tag/technology"
+                    },
+                    {
+                        "key": "innovation",
+                        "url": "/tag/innovation"
+                    }
+                ],
+                "interests": [
+                    "technology",
+                    "ai",
+                    "future"
+                ]
+            },
+            {
+                "id": "mentria002",
+                "url": "http://mentria.ai/posts/machine-learning",
+                "title": "Breaking Down Machine Learning",
+                "description": "A deep dive into how machine learning is revolutionizing industries across the globe.",
+                "type": "Photo",
+                "nsfw": 0,
+                "upVoteCount": 856,
+                "downVoteCount": 23,
+                "creationTs": 1735659035,
+                "promoted": 0,
+                "badges": [],
+                "images": {
+                    "image700": {
+                        "width": 700,
+                        "height": 400,
+                        "url": "https://source.unsplash.com/random/700x400?machine-learning"
+                    },
+                    "image460": {
+                        "width": 460,
+                        "height": 263,
+                        "url": "https://source.unsplash.com/random/460x263?machine-learning"
+                    },
+                    "imageFbThumbnail": {
+                        "width": 220,
+                        "height": 220,
+                        "url": "https://source.unsplash.com/random/220x220?machine-learning"
+                    }
+                },
+                "creator": {
+                    "userId": "admin002",
+                    "username": "ai_expert",
+                    "fullName": "AI Expert",
+                    "avatarUrl": "https://source.unsplash.com/random/100x100?profile",
+                    "isActivePro": false
+                },
+                "commentsCount": 45,
+                "tags": [
+                    {
+                        "key": "machine-learning",
+                        "url": "/tag/machine-learning"
+                    },
+                    {
+                        "key": "data-science",
+                        "url": "/tag/data-science"
+                    }
+                ],
+                "interests": [
+                    "machine-learning",
+                    "data-science"
+                ]
+            }
+        ]
+    }
+} 

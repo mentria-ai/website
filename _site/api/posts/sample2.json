@@ -1,0 +1,49 @@
+{
+  "layout": "post",
+  "id": "sample2",
+  "url": "/2024/12/31/sample2.html",
+  "post_url": "/2024/12/31/sample2.html",
+  "title": "Cute Puppy Playing",
+  "description": "Watch this adorable puppy playing with a ball",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 2500,
+  "downVoteCount": 30,
+  "creationTs": 1735636316,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image460": {
+      "url": "/assets/media/sample2_image460.jpg",
+      "width": 460,
+      "height": 460
+    },
+    "image460sv": {
+      "url": "/assets/media/sample2_video.mp4",
+      "hasAudio": true,
+      "duration": 15,
+      "width": 460,
+      "height": 460
+    }
+  },
+  "creator": {
+    "username": "puppylover",
+    "profileUrl": "/user/puppylover",
+    "avatarUrl": "/assets/media/sample2_creator_avatar.jpg"
+  },
+  "commentsCount": 120,
+  "tags": [
+    {
+      "key": "dogs",
+      "url": "/tag/dogs"
+    },
+    {
+      "key": "cute",
+      "url": "/tag/cute"
+    }
+  ],
+  "interests": [
+    "Animals",
+    "Entertainment"
+  ]
+}

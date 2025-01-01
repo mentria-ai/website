@@ -1,0 +1,83 @@
+{
+  "layout": "post",
+  "id": "azx2jVm",
+  "url": "http://9gag.com/gag/azx2jVm",
+  "post_url": "/2024/12/31/azx2jVm.html",
+  "title": "What kind of building technique is this?",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 388,
+  "downVoteCount": 44,
+  "creationTs": 1735611571,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 700,
+      "url": "https://img-9gag-fun.9cache.com/photo/azx2jVm_700b.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/azx2jVm_700bwp.webp"
+    },
+    "image460": {
+      "width": 460,
+      "height": 459,
+      "url": "https://img-9gag-fun.9cache.com/photo/azx2jVm_460s.jpg",
+      "webpUrl": "https://img-9gag-fun.9cache.com/photo/azx2jVm_460swp.webp"
+    },
+    "imageFbThumbnail": {
+      "width": 220,
+      "height": 220,
+      "url": "https://img-9gag-fun.9cache.com/photo/azx2jVm_fbthumbnail.jpg"
+    }
+  },
+  "creator": {
+    "userId": "30646200",
+    "accountId": "31190459",
+    "username": "kramrocc",
+    "fullName": "KenRamz",
+    "emojiStatus": "",
+    "about": "Put tank in a mall ",
+    "avatarUrl": "https://accounts-cdn.9gag.com/media/avatar/31190459_100_2.jpg",
+    "profileUrl": "https://9gag.com/u/kramrocc",
+    "isActivePro": false,
+    "isActiveProPlus": false,
+    "isVerifiedAccount": false,
+    "creationTs": 1446639692,
+    "activeTs": 1735612617,
+    "preferences": {
+      "hideProBadge": 0,
+      "hideActiveTs": 0,
+      "accentColor": "",
+      "backgroundColor": ""
+    }
+  },
+  "commentsCount": 61,
+  "tags": [
+    {
+      "key": "oddly terrifying",
+      "url": "/tag/oddly-terrifying"
+    },
+    {
+      "key": "lego",
+      "url": "/tag/lego"
+    },
+    {
+      "key": "ikea",
+      "url": "/tag/ikea"
+    },
+    {
+      "key": "mildly interesting",
+      "url": "/tag/mildly-interesting"
+    },
+    {
+      "key": "cozy",
+      "url": "/tag/cozy"
+    }
+  ],
+  "interests": [
+    "lifestyle",
+    "wtf",
+    "random"
+  ]
+}

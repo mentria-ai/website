@@ -1,0 +1,101 @@
+title: Mentria
+description: Empowering the future through innovative AI solutions and curated content discovery
+baseurl: ""
+url: "https://mentria.ai"
+
+# Social media
+social:
+  twitter: MentriaAI
+  linkedin: mentria
+
+# Organization info
+organization:
+  name: Mentria
+  logo: /assets/images/Mentria logo.png
+  founding_date: 2023
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+permalink: /:year/:month/:day/:title.html
+
+# Include JSON files and directories
+include:
+  - .htaccess
+  - assets
+  - api
+  - api/posts
+  - "*.json"
+  - "api/posts/*.json"
+  - assets/media
+  - "assets/media/*"
+
+# Exclude from processing
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - scripts/
+  - venv/
+  - README.md
+
+# Default settings for different file types
+defaults:
+  - scope:
+      path: "api"
+    values:
+      layout: null
+  - scope:
+      path: "api/posts"
+    values:
+      layout: null
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: "*.json"
+    values:
+      layout: null
+  - scope:
+      path: "assets/media/*.mp4"
+    values:
+      layout: null
+      content_type: "video/mp4"
+  - scope:
+      path: "assets/media/*.jpg"
+    values:
+      layout: null
+      content_type: "image/jpeg"
+  - scope:
+      path: "assets/media/*.png"
+    values:
+      layout: null
+      content_type: "image/png"
+  - scope:
+      path: "api/posts/*.json"
+    values:
+      layout: null
+      content_type: "application/json"
+  - scope:
+      path: ""
+      type: "html"
+    values:
+      layout: "default"
+      content_type: "text/html; charset=utf-8"
+
+# Keep JSON files
+keep_files:
+  - api
+  - api/posts
+  - assets/media 

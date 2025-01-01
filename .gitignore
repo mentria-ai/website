@@ -27,6 +27,7 @@ posts/*.json
 api/posts_index.json
 api/posts.json
 assets/media/
+scripts/auto_push.py
 
 # Logs
 *.log

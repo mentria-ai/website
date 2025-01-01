@@ -7,8 +7,8 @@
   "description": "",
   "type": "Photo",
   "nsfw": 0,
-  "upVoteCount": 190,
-  "downVoteCount": 19,
+  "upVoteCount": 244,
+  "downVoteCount": 22,
   "creationTs": 1735638196,
   "promoted": 0,
   "badges": [],
@@ -24,7 +24,7 @@
       "url": "/assets/media/aO8xVGR_image460.jpg"
     }
   },
-  "commentsCount": 12,
+  "commentsCount": 13,
   "tags": [
     {
       "key": "anime",

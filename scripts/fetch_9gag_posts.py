@@ -442,11 +442,12 @@ def main():
         print(f"Continuing from last cursor: {cursor}")
     
     total_posts = 0
+    max_posts = 50  # Limit to 50 posts per run
     retries = 3  # Number of retries for failed requests
     empty_pages = 0  # Counter for consecutive empty pages
     
     try:
-        while empty_pages < 3:  # Only stop after 3 consecutive empty pages
+        while total_posts < max_posts and empty_pages < 3:  # Stop after 50 posts or 3 empty pages
             for attempt in range(retries):
                 data = fetch_posts(cursor, existing_posts)
                 if data is not None:
@@ -473,17 +474,24 @@ def main():
                     if create_post_file(post):
                         total_posts += 1
                         existing_posts.add(post['id'])
-                        print(f"Created post {post['id']} (Total: {total_posts})")
+                        print(f"Created post {post['id']} ({total_posts}/{max_posts})")
                         
                         # Save index after each post
                         posts_index = create_posts_index()
                         save_posts_index(posts_index, cursor)
                         
-                        # Add longer delay between posts (5-10 seconds)
-                        delay = random.uniform(5, 10)
+                        # Add delay between posts (3-5 seconds)
+                        delay = random.uniform(3, 5)
                         print(f"Waiting {delay:.1f} seconds before next post...")
                         time.sleep(delay)
+                        
+                        if total_posts >= max_posts:
+                            print(f"\nReached maximum limit of {max_posts} posts")
+                            break
             
+            if total_posts >= max_posts:
+                break
+                
             cursor = data['data'].get('nextCursor', '').replace('after=', '')
             if not cursor:
                 print("No more pages available")
@@ -503,6 +511,8 @@ def main():
         print(f"\nFetched {total_posts} new posts and created index")
         if cursor:
             print(f"Last cursor saved: {cursor}")
+        if total_posts >= max_posts:
+            print("Run the script again to fetch more posts")
 
 if __name__ == "__main__":
     main() 

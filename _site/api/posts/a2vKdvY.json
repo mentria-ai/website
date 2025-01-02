@@ -1,0 +1,57 @@
+{
+  "layout": "post",
+  "id": "a2vKdvY",
+  "url": "/2025/01/01/a2vKdvY.html",
+  "post_url": "/2025/01/01/a2vKdvY.html",
+  "title": "A Veterans nightmare",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 56,
+  "downVoteCount": 18,
+  "creationTs": 1735690838,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/a2vKdvY_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/a2vKdvY_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "/assets/media/a2vKdvY_video.mp4",
+      "hasAudio": 1,
+      "duration": 31
+    }
+  },
+  "commentsCount": 9,
+  "tags": [
+    {
+      "key": "humor",
+      "url": "/tag/humor"
+    },
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "dark humor",
+      "url": "/tag/dark-humor"
+    },
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    }
+  ],
+  "interests": [
+    "humor",
+    "wtf"
+  ]
+}

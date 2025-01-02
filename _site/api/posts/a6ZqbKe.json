@@ -1,0 +1,41 @@
+{
+  "layout": "post",
+  "id": "a6ZqbKe",
+  "url": "/2025/01/01/a6ZqbKe.html",
+  "post_url": "/2025/01/01/a6ZqbKe.html",
+  "title": "It's Wednesday my dudes",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 129,
+  "downVoteCount": 33,
+  "creationTs": 1735731790,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 806,
+      "url": "/assets/media/a6ZqbKe_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 529,
+      "url": "/assets/media/a6ZqbKe_image460.jpg"
+    }
+  },
+  "commentsCount": 6,
+  "tags": [
+    {
+      "key": "latest news",
+      "url": "/tag/latest-news"
+    },
+    {
+      "key": "its wednesday my dudes",
+      "url": "/tag/its-wednesday-my-dudes"
+    }
+  ],
+  "interests": [
+    "news"
+  ]
+}

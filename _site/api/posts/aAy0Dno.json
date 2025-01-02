@@ -1,0 +1,49 @@
+{
+  "layout": "post",
+  "id": "aAy0Dno",
+  "url": "/2025/01/02/aAy0Dno.html",
+  "post_url": "/2025/01/02/aAy0Dno.html",
+  "title": "A 9gagger dream job",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 315,
+  "downVoteCount": 86,
+  "creationTs": 1735787927,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 484,
+      "url": "/assets/media/aAy0Dno_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 484,
+      "url": "/assets/media/aAy0Dno_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 484,
+      "url": "/assets/media/aAy0Dno_video.mp4",
+      "hasAudio": 1,
+      "duration": 96
+    }
+  },
+  "commentsCount": 21,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "random",
+      "url": "/tag/random"
+    }
+  ],
+  "interests": [
+    "humor",
+    "random"
+  ]
+}

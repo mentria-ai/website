@@ -1,0 +1,46 @@
+{
+  "layout": "post",
+  "id": "aBydxYz",
+  "url": "/2025/01/02/aBydxYz.html",
+  "post_url": "/2025/01/02/aBydxYz.html",
+  "title": "Pure mathematics meme",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 17,
+  "downVoteCount": 10,
+  "creationTs": 1735796032,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 492,
+      "url": "/assets/media/aBydxYz_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 323,
+      "url": "/assets/media/aBydxYz_image460.jpg"
+    }
+  },
+  "commentsCount": 3,
+  "tags": [
+    {
+      "key": "math",
+      "url": "/tag/math"
+    },
+    {
+      "key": "maths",
+      "url": "/tag/maths"
+    },
+    {
+      "key": "science",
+      "url": "/tag/science"
+    }
+  ],
+  "interests": [
+    "memes",
+    "science"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "a87q3N6",
+  "url": "/2025/01/03/a87q3N6.html",
+  "post_url": "/2025/01/03/a87q3N6.html",
+  "title": "Of a Brush",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 3,
+  "downVoteCount": 4,
+  "creationTs": 1735854806,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/a87q3N6_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/a87q3N6_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/a87q3N6_video.mp4",
+      "hasAudio": 1,
+      "duration": 55
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "Absolute Units",
+      "url": "/tag/absolute-units"
+    }
+  ],
+  "interests": [
+    "woah"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "layout": "post",
+  "id": "aBydxLN",
+  "url": "/2025/01/02/aBydxLN.html",
+  "post_url": "/2025/01/02/aBydxLN.html",
+  "title": "Volume",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 7,
+  "downVoteCount": 24,
+  "creationTs": 1735811581,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aBydxLN_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aBydxLN_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aBydxLN_video.mp4",
+      "hasAudio": 1,
+      "duration": 198
+    }
+  },
+  "commentsCount": 6,
+  "tags": [
+    {
+      "key": "metal",
+      "url": "/tag/metal"
+    },
+    {
+      "key": "awesome",
+      "url": "/tag/awesome"
+    },
+    {
+      "key": "heavy metal",
+      "url": "/tag/heavy-metal"
+    },
+    {
+      "key": "music",
+      "url": "/tag/music"
+    },
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    }
+  ],
+  "interests": [
+    "wtf",
+    "wholesome",
+    "lifestyle",
+    "woah"
+  ]
+}

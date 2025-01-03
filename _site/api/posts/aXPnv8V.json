@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "aXPnv8V",
+  "url": "/2025/01/02/aXPnv8V.html",
+  "post_url": "/2025/01/02/aXPnv8V.html",
+  "title": "A very polite \"awoo\"",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 7,
+  "downVoteCount": 0,
+  "creationTs": 1735787535,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/aXPnv8V_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/aXPnv8V_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/aXPnv8V_video.mp4",
+      "hasAudio": 1,
+      "duration": 12
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "animals",
+      "url": "/tag/animals"
+    },
+    {
+      "key": "aww",
+      "url": "/tag/aww"
+    }
+  ],
+  "interests": [
+    "animals"
+  ]
+}

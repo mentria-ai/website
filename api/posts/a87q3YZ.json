@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "a87q3YZ",
+  "url": "/2025/01/02/a87q3YZ.html",
+  "post_url": "/2025/01/02/a87q3YZ.html",
+  "title": "The skill involved in Calligraphy",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 6,
+  "downVoteCount": 3,
+  "creationTs": 1735833798,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/a87q3YZ_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/a87q3YZ_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/a87q3YZ_video.mp4",
+      "hasAudio": 1,
+      "duration": 55
+    }
+  },
+  "commentsCount": 2,
+  "tags": [
+    {
+      "key": "awesome",
+      "url": "/tag/awesome"
+    },
+    {
+      "key": "amazed",
+      "url": "/tag/amazed"
+    }
+  ],
+  "interests": [
+    "woah"
+  ]
+}

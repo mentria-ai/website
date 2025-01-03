@@ -1,64 +1,37 @@
 {
   "layout": "post",
-  "id": "a9yqrrZ",
-  "url": "/2025/01/01/a9yqrrZ.html",
-  "post_url": "/2025/01/01/a9yqrrZ.html",
-  "title": "Ponytail blade",
+  "id": "a9yqRrZ",
+  "url": "/2025/01/03/a9yqRrZ.html",
+  "post_url": "/2025/01/03/a9yqRrZ.html",
+  "title": "I hope whatever sick bastard first proposed this system is burning in Hell.",
   "description": "",
-  "type": "Animated",
+  "type": "Photo",
   "nsfw": 0,
-  "upVoteCount": 435,
-  "downVoteCount": 107,
-  "creationTs": 1735727211,
+  "upVoteCount": 13,
+  "downVoteCount": 13,
+  "creationTs": 1735871654,
   "promoted": 0,
   "badges": [],
   "images": {
     "image700": {
-      "width": 460,
-      "height": 336,
-      "url": "/assets/media/a9yqrrZ_image700.jpg"
+      "width": 500,
+      "height": 764,
+      "url": "/assets/media/a9yqRrZ_image700.jpg"
     },
     "image460": {
       "width": 460,
-      "height": 336,
-      "url": "/assets/media/a9yqrrZ_image460.jpg"
-    },
-    "image460sv": {
-      "width": 460,
-      "height": 336,
-      "url": "/assets/media/a9yqrrZ_video.mp4",
-      "hasAudio": 1,
-      "duration": 20
+      "height": 702,
+      "url": "/assets/media/a9yqRrZ_image460.jpg"
     }
   },
-  "commentsCount": 68,
+  "commentsCount": 11,
   "tags": [
     {
-      "key": "wtf",
-      "url": "/tag/wtf"
-    },
-    {
-      "key": "random",
-      "url": "/tag/random"
-    },
-    {
-      "key": "awesome",
-      "url": "/tag/awesome"
-    },
-    {
-      "key": "interesting",
-      "url": "/tag/interesting"
-    },
-    {
-      "key": "damn thats interesting",
-      "url": "/tag/damn-thats-interesting"
+      "key": "at least 1 tag",
+      "url": "/tag/at-least-1-tag"
     }
   ],
   "interests": [
-    "woah",
-    "humor",
-    "wtf",
-    "wholesome",
-    "random"
+    "humor"
   ]
 }

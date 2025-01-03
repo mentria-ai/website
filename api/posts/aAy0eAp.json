@@ -1,0 +1,61 @@
+{
+  "layout": "post",
+  "id": "aAy0eAp",
+  "url": "/2025/01/04/aAy0eAp.html",
+  "post_url": "/2025/01/04/aAy0eAp.html",
+  "title": "POV: You are playing Stalker 2",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 4,
+  "downVoteCount": 9,
+  "creationTs": 1735933190,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aAy0eAp_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aAy0eAp_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aAy0eAp_video.mp4",
+      "hasAudio": 1,
+      "duration": 3
+    }
+  },
+  "commentsCount": 2,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "gaming",
+      "url": "/tag/gaming"
+    },
+    {
+      "key": "humor",
+      "url": "/tag/humor"
+    },
+    {
+      "key": "stalker 2",
+      "url": "/tag/stalker-2"
+    },
+    {
+      "key": "stalker",
+      "url": "/tag/stalker"
+    }
+  ],
+  "interests": [
+    "games",
+    "humor"
+  ]
+}

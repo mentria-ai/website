@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "a87q5B6",
+  "url": "/2025/01/03/a87q5B6.html",
+  "post_url": "/2025/01/03/a87q5B6.html",
+  "title": "It do be like that",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 0,
+  "downVoteCount": 1,
+  "creationTs": 1735906992,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 359,
+      "url": "/assets/media/a87q5B6_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 359,
+      "url": "/assets/media/a87q5B6_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 358,
+      "url": "/assets/media/a87q5B6_video.mp4",
+      "hasAudio": 1,
+      "duration": 15
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "warhammer",
+      "url": "/tag/warhammer"
+    }
+  ],
+  "interests": [
+    "games"
+  ]
+}

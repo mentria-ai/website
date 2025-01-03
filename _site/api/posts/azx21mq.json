@@ -1,0 +1,55 @@
+{
+  "layout": "post",
+  "id": "azx21mq",
+  "url": "/2025/01/03/azx21mq.html",
+  "post_url": "/2025/01/03/azx21mq.html",
+  "title": "I wanna go back to 2002.",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 6,
+  "downVoteCount": 6,
+  "creationTs": 1735877821,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 539,
+      "url": "/assets/media/azx21mq_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 354,
+      "url": "/assets/media/azx21mq_image460.jpg"
+    }
+  },
+  "commentsCount": 2,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "memes",
+      "url": "/tag/memes"
+    },
+    {
+      "key": "damn",
+      "url": "/tag/damn"
+    },
+    {
+      "key": "random",
+      "url": "/tag/random"
+    },
+    {
+      "key": "why",
+      "url": "/tag/why"
+    }
+  ],
+  "interests": [
+    "memes",
+    "humor",
+    "random"
+  ]
+}

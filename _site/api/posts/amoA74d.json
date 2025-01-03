@@ -1,0 +1,61 @@
+{
+  "layout": "post",
+  "id": "amoA74d",
+  "url": "/2025/01/02/amoA74d.html",
+  "post_url": "/2025/01/02/amoA74d.html",
+  "title": "Skill check ?",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 86,
+  "downVoteCount": 87,
+  "creationTs": 1735825631,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 320,
+      "height": 568,
+      "url": "/assets/media/amoA74d_image700.jpg"
+    },
+    "image460": {
+      "width": 320,
+      "height": 568,
+      "url": "/assets/media/amoA74d_image460.jpg"
+    },
+    "image460sv": {
+      "width": 320,
+      "height": 568,
+      "url": "/assets/media/amoA74d_video.mp4",
+      "hasAudio": 1,
+      "duration": 90
+    }
+  },
+  "commentsCount": 33,
+  "tags": [
+    {
+      "key": "dank meme",
+      "url": "/tag/dank-meme"
+    },
+    {
+      "key": "shitposting",
+      "url": "/tag/shitposting"
+    },
+    {
+      "key": "fried chicken",
+      "url": "/tag/fried-chicken"
+    },
+    {
+      "key": "not funny",
+      "url": "/tag/not-funny"
+    },
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    }
+  ],
+  "interests": [
+    "memes",
+    "wtf"
+  ]
+}

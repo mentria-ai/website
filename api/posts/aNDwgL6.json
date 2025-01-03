@@ -1,0 +1,45 @@
+{
+  "layout": "post",
+  "id": "aNDwgL6",
+  "url": "/2025/01/03/aNDwgL6.html",
+  "post_url": "/2025/01/03/aNDwgL6.html",
+  "title": "I'm something of a gamer myself",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 46,
+  "downVoteCount": 9,
+  "creationTs": 1735923256,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 376,
+      "url": "/assets/media/aNDwgL6_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 376,
+      "url": "/assets/media/aNDwgL6_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 376,
+      "url": "/assets/media/aNDwgL6_video.mp4",
+      "hasAudio": 1,
+      "duration": 19
+    }
+  },
+  "commentsCount": 9,
+  "tags": [
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    }
+  ],
+  "interests": [
+    "wtf",
+    "news"
+  ]
+}

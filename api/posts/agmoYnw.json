@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "agmoYnw",
+  "url": "/2025/01/02/agmoYnw.html",
+  "post_url": "/2025/01/02/agmoYnw.html",
+  "title": "Struggling haha",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 12,
+  "downVoteCount": 13,
+  "creationTs": 1735761138,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 389,
+      "url": "/assets/media/agmoYnw_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 389,
+      "url": "/assets/media/agmoYnw_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 388,
+      "url": "/assets/media/agmoYnw_video.mp4",
+      "hasAudio": 0,
+      "duration": 4
+    }
+  },
+  "commentsCount": 3,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

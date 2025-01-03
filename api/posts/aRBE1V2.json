@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "aRBE1V2",
+  "url": "/2025/01/02/aRBE1V2.html",
+  "post_url": "/2025/01/02/aRBE1V2.html",
+  "title": "Everyone hates Chris",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 33,
+  "downVoteCount": 48,
+  "creationTs": 1735834569,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 818,
+      "url": "/assets/media/aRBE1V2_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 818,
+      "url": "/assets/media/aRBE1V2_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 818,
+      "url": "/assets/media/aRBE1V2_video.mp4",
+      "hasAudio": 1,
+      "duration": 50
+    }
+  },
+  "commentsCount": 20,
+  "tags": [
+    {
+      "key": "Comedian crowd work",
+      "url": "/tag/comedian-crowd-work"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

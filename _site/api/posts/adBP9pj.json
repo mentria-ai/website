@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "adBP9pj",
+  "url": "/2025/01/01/adBP9pj.html",
+  "post_url": "/2025/01/01/adBP9pj.html",
+  "title": "Duncle",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 60,
+  "downVoteCount": 75,
+  "creationTs": 1735755745,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/adBP9pj_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/adBP9pj_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/adBP9pj_video.mp4",
+      "hasAudio": 1,
+      "duration": 20
+    }
+  },
+  "commentsCount": 13,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "hol up",
+      "url": "/tag/hol-up"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

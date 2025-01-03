@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "aqyeb3P",
+  "url": "/2025/01/01/aqyeb3P.html",
+  "post_url": "/2025/01/01/aqyeb3P.html",
+  "title": "Jordan's jargon...",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 94,
+  "downVoteCount": 102,
+  "creationTs": 1735751493,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/aqyeb3P_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/aqyeb3P_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/aqyeb3P_video.mp4",
+      "hasAudio": 1,
+      "duration": 81
+    }
+  },
+  "commentsCount": 8,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "jordan peterson",
+      "url": "/tag/jordan-peterson"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "layout": "post",
+  "id": "aW4GjGn",
+  "url": "/2025/01/04/aW4GjGn.html",
+  "post_url": "/2025/01/04/aW4GjGn.html",
+  "title": "Coagulator",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 4,
+  "downVoteCount": 1,
+  "creationTs": 1735955600,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 851,
+      "url": "/assets/media/aW4GjGn_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 559,
+      "url": "/assets/media/aW4GjGn_image460.jpg"
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "warhammer",
+      "url": "/tag/warhammer"
+    },
+    {
+      "key": "warhammer 40k",
+      "url": "/tag/warhammer-40k"
+    }
+  ],
+  "interests": [
+    "games"
+  ]
+}

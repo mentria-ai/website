@@ -1,0 +1,37 @@
+{
+  "layout": "post",
+  "id": "awyZBEx",
+  "url": "/2025/01/04/awyZBEx.html",
+  "post_url": "/2025/01/04/awyZBEx.html",
+  "title": "Add at least 1 tag",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 15,
+  "downVoteCount": 8,
+  "creationTs": 1735935829,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 700,
+      "url": "/assets/media/awyZBEx_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 460,
+      "url": "/assets/media/awyZBEx_image460.jpg"
+    }
+  },
+  "commentsCount": 6,
+  "tags": [
+    {
+      "key": "winnie",
+      "url": "/tag/winnie"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

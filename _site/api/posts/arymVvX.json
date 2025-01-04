@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "arymVvX",
+  "url": "/2025/01/03/arymVvX.html",
+  "post_url": "/2025/01/03/arymVvX.html",
+  "title": "The Roar That Shook the Game!",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 0,
+  "downVoteCount": 3,
+  "creationTs": 1735910650,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/arymVvX_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/arymVvX_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/arymVvX_video.mp4",
+      "hasAudio": 1,
+      "duration": 50
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "sport",
+      "url": "/tag/sport"
+    }
+  ],
+  "interests": [
+    "sports"
+  ]
+}

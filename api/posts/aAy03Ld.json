@@ -1,0 +1,54 @@
+{
+  "layout": "post",
+  "id": "aAy03Ld",
+  "url": "/2025/01/03/aAy03Ld.html",
+  "post_url": "/2025/01/03/aAy03Ld.html",
+  "title": "Bruce Lee",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 3933,
+  "downVoteCount": 275,
+  "creationTs": 1735852698,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 608,
+      "url": "/assets/media/aAy03Ld_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 399,
+      "url": "/assets/media/aAy03Ld_image460.jpg"
+    }
+  },
+  "commentsCount": 188,
+  "tags": [
+    {
+      "key": "sports",
+      "url": "/tag/sports"
+    },
+    {
+      "key": "bruce lee",
+      "url": "/tag/bruce-lee"
+    },
+    {
+      "key": "motivation",
+      "url": "/tag/motivation"
+    },
+    {
+      "key": "gym",
+      "url": "/tag/gym"
+    },
+    {
+      "key": "latticeclimbing",
+      "url": "/tag/latticeclimbing"
+    }
+  ],
+  "interests": [
+    "memes",
+    "sports"
+  ]
+}

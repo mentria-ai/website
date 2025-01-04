@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "amoAgWd",
+  "url": "/2025/01/04/amoAgWd.html",
+  "post_url": "/2025/01/04/amoAgWd.html",
+  "title": "Excuse me sir",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 528,
+  "downVoteCount": 51,
+  "creationTs": 1736000548,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 443,
+      "url": "/assets/media/amoAgWd_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 443,
+      "url": "/assets/media/amoAgWd_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 442,
+      "url": "/assets/media/amoAgWd_video.mp4",
+      "hasAudio": 1,
+      "duration": 25
+    }
+  },
+  "commentsCount": 25,
+  "tags": [
+    {
+      "key": "buck",
+      "url": "/tag/buck"
+    },
+    {
+      "key": "Christmas",
+      "url": "/tag/christmas"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

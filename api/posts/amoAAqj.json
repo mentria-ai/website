@@ -1,0 +1,62 @@
+{
+  "layout": "post",
+  "id": "amoAAqj",
+  "url": "/2025/01/05/amoAAqj.html",
+  "post_url": "/2025/01/05/amoAAqj.html",
+  "title": "What did I just watch?",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 234,
+  "downVoteCount": 59,
+  "creationTs": 1736018312,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 332,
+      "url": "/assets/media/amoAAqj_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 332,
+      "url": "/assets/media/amoAAqj_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 332,
+      "url": "/assets/media/amoAAqj_video.mp4",
+      "hasAudio": 1,
+      "duration": 25
+    }
+  },
+  "commentsCount": 30,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    },
+    {
+      "key": "hilarious",
+      "url": "/tag/hilarious"
+    },
+    {
+      "key": "random",
+      "url": "/tag/random"
+    },
+    {
+      "key": "lol",
+      "url": "/tag/lol"
+    }
+  ],
+  "interests": [
+    "humor",
+    "wtf",
+    "random"
+  ]
+}

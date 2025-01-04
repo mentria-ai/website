@@ -7,8 +7,8 @@
   "description": "",
   "type": "Animated",
   "nsfw": 0,
-  "upVoteCount": 735,
-  "downVoteCount": 93,
+  "upVoteCount": 827,
+  "downVoteCount": 98,
   "creationTs": 1735975637,
   "promoted": 0,
   "badges": [],
@@ -31,7 +31,7 @@
       "duration": 9
     }
   },
-  "commentsCount": 67,
+  "commentsCount": 72,
   "tags": [
     {
       "key": "random",

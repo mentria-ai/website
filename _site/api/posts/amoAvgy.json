@@ -1,0 +1,41 @@
+{
+  "layout": "post",
+  "id": "amoAvgy",
+  "url": "/2025/01/03/amoAvgy.html",
+  "post_url": "/2025/01/03/amoAvgy.html",
+  "title": "What they said is true.",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 0,
+  "downVoteCount": 1,
+  "creationTs": 1735921646,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 659,
+      "height": 877,
+      "url": "/assets/media/amoAvgy_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 612,
+      "url": "/assets/media/amoAvgy_image460.jpg"
+    }
+  },
+  "commentsCount": 1,
+  "tags": [
+    {
+      "key": "marvel",
+      "url": "/tag/marvel"
+    },
+    {
+      "key": "marvel memes",
+      "url": "/tag/marvel-memes"
+    }
+  ],
+  "interests": [
+    "superhero"
+  ]
+}

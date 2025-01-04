@@ -1,0 +1,45 @@
+{
+  "layout": "post",
+  "id": "amoABzX",
+  "url": "/2025/01/02/amoABzX.html",
+  "post_url": "/2025/01/02/amoABzX.html",
+  "title": "Sooo funny!",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 0,
+  "downVoteCount": 0,
+  "creationTs": 1735835603,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 933,
+      "url": "/assets/media/amoABzX_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 613,
+      "url": "/assets/media/amoABzX_image460.jpg"
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "zelda",
+      "url": "/tag/zelda"
+    },
+    {
+      "key": "tears of the kingdom",
+      "url": "/tag/tears-of-the-kingdom"
+    },
+    {
+      "key": "gaming",
+      "url": "/tag/gaming"
+    }
+  ],
+  "interests": [
+    "games"
+  ]
+}

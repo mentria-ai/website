@@ -1,0 +1,41 @@
+{
+  "layout": "post",
+  "id": "ajPVm98",
+  "url": "/2025/01/04/ajPVm98.html",
+  "post_url": "/2025/01/04/ajPVm98.html",
+  "title": "WorkingWithPlaywrightBeLike",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 1,
+  "downVoteCount": 3,
+  "creationTs": 1735952604,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 500,
+      "height": 597,
+      "url": "/assets/media/ajPVm98_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 549,
+      "url": "/assets/media/ajPVm98_image460.jpg"
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "programmer humor",
+      "url": "/tag/programmer-humor"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

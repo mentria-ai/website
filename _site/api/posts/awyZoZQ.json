@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "awyZoZQ",
+  "url": "/2025/01/03/awyZoZQ.html",
+  "post_url": "/2025/01/03/awyZoZQ.html",
+  "title": "Getting rid of the Christmas tree",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 4,
+  "downVoteCount": 1,
+  "creationTs": 1735880551,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/awyZoZQ_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/awyZoZQ_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "/assets/media/awyZoZQ_video.mp4",
+      "hasAudio": 1,
+      "duration": 14
+    }
+  },
+  "commentsCount": 1,
+  "tags": [
+    {
+      "key": "awesome",
+      "url": "/tag/awesome"
+    },
+    {
+      "key": "amazed",
+      "url": "/tag/amazed"
+    }
+  ],
+  "interests": [
+    "woah"
+  ]
+}

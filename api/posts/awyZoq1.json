@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "awyZoq1",
+  "url": "/2025/01/03/awyZoq1.html",
+  "post_url": "/2025/01/03/awyZoq1.html",
+  "title": "Spears of Theseus 2024 (new models and tweaks to existing ones last year!)",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 8,
+  "downVoteCount": 0,
+  "creationTs": 1735908733,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/awyZoq1_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/awyZoq1_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "/assets/media/awyZoq1_video.mp4",
+      "hasAudio": 1,
+      "duration": 27
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "warhammer",
+      "url": "/tag/warhammer"
+    },
+    {
+      "key": "warhammer 40k",
+      "url": "/tag/warhammer-40k"
+    }
+  ],
+  "interests": [
+    "games"
+  ]
+}

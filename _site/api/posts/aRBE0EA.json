@@ -1,0 +1,41 @@
+{
+  "layout": "post",
+  "id": "aRBE0EA",
+  "url": "/2025/01/03/aRBE0EA.html",
+  "post_url": "/2025/01/03/aRBE0EA.html",
+  "title": "Setup. Any tips?",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 3,
+  "downVoteCount": 0,
+  "creationTs": 1735880547,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 525,
+      "url": "/assets/media/aRBE0EA_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 345,
+      "url": "/assets/media/aRBE0EA_image460.jpg"
+    }
+  },
+  "commentsCount": 2,
+  "tags": [
+    {
+      "key": "pcmr",
+      "url": "/tag/pcmr"
+    },
+    {
+      "key": "battle stations",
+      "url": "/tag/battle-stations"
+    }
+  ],
+  "interests": [
+    "games"
+  ]
+}

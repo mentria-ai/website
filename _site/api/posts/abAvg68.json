@@ -1,0 +1,41 @@
+{
+  "layout": "post",
+  "id": "abAvg68",
+  "url": "/2025/01/04/abAvg68.html",
+  "post_url": "/2025/01/04/abAvg68.html",
+  "title": "Crazy, right?",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 644,
+  "downVoteCount": 55,
+  "creationTs": 1735991944,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 599,
+      "height": 555,
+      "url": "/assets/media/abAvg68_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 426,
+      "url": "/assets/media/abAvg68_image460.jpg"
+    }
+  },
+  "commentsCount": 99,
+  "tags": [
+    {
+      "key": "politics",
+      "url": "/tag/politics"
+    },
+    {
+      "key": "latest news",
+      "url": "/tag/latest-news"
+    }
+  ],
+  "interests": [
+    "news"
+  ]
+}

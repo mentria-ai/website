@@ -1,0 +1,45 @@
+{
+  "layout": "post",
+  "id": "an7zQ60",
+  "url": "/2025/01/04/an7zQ60.html",
+  "post_url": "/2025/01/04/an7zQ60.html",
+  "title": "The Engineer wants everything to work, and the architect wants everything to look like it works!",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 1863,
+  "downVoteCount": 57,
+  "creationTs": 1735981593,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 700,
+      "url": "/assets/media/an7zQ60_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 460,
+      "url": "/assets/media/an7zQ60_image460.jpg"
+    }
+  },
+  "commentsCount": 79,
+  "tags": [
+    {
+      "key": "architecture",
+      "url": "/tag/architecture"
+    },
+    {
+      "key": "engineers",
+      "url": "/tag/engineers"
+    },
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

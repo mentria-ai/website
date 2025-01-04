@@ -1,0 +1,41 @@
+{
+  "layout": "post",
+  "id": "aByd2oP",
+  "url": "/2025/01/04/aByd2oP.html",
+  "post_url": "/2025/01/04/aByd2oP.html",
+  "title": "Clean?",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 0,
+  "downVoteCount": 0,
+  "creationTs": 1735969390,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 525,
+      "url": "/assets/media/aByd2oP_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 345,
+      "url": "/assets/media/aByd2oP_image460.jpg"
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "pcmr",
+      "url": "/tag/pcmr"
+    },
+    {
+      "key": "battle stations",
+      "url": "/tag/battle-stations"
+    }
+  ],
+  "interests": [
+    "games"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "aKGEmXg",
+  "url": "/2025/01/04/aKGEmXg.html",
+  "post_url": "/2025/01/04/aKGEmXg.html",
+  "title": "Husky version",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 339,
+  "downVoteCount": 45,
+  "creationTs": 1736010305,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 819,
+      "url": "/assets/media/aKGEmXg_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 819,
+      "url": "/assets/media/aKGEmXg_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 818,
+      "url": "/assets/media/aKGEmXg_video.mp4",
+      "hasAudio": 1,
+      "duration": 30
+    }
+  },
+  "commentsCount": 5,
+  "tags": [
+    {
+      "key": "husky",
+      "url": "/tag/husky"
+    },
+    {
+      "key": "system of a down",
+      "url": "/tag/system-of-a-down"
+    }
+  ],
+  "interests": [
+    "animals"
+  ]
+}

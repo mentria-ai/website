@@ -1,0 +1,52 @@
+{
+  "layout": "post",
+  "id": "a0e4ZZB",
+  "url": "/2025/01/04/a0e4ZZB.html",
+  "post_url": "/2025/01/04/a0e4ZZB.html",
+  "title": "Tony being savage again",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 1310,
+  "downVoteCount": 312,
+  "creationTs": 1735998765,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/a0e4ZZB_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/a0e4ZZB_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "/assets/media/a0e4ZZB_video.mp4",
+      "hasAudio": 1,
+      "duration": 15
+    }
+  },
+  "commentsCount": 81,
+  "tags": [
+    {
+      "key": "hello",
+      "url": "/tag/hello"
+    },
+    {
+      "key": "goodbye",
+      "url": "/tag/goodbye"
+    },
+    {
+      "key": "tony",
+      "url": "/tag/tony"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

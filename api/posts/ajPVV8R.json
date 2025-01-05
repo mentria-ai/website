@@ -1,0 +1,62 @@
+{
+  "layout": "post",
+  "id": "ajPVV8R",
+  "url": "/2025/01/05/ajPVV8R.html",
+  "post_url": "/2025/01/05/ajPVV8R.html",
+  "title": "You don’t need any more",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 31,
+  "downVoteCount": 34,
+  "creationTs": 1736026491,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 350,
+      "height": 612,
+      "url": "/assets/media/ajPVV8R_image700.jpg"
+    },
+    "image460": {
+      "width": 350,
+      "height": 612,
+      "url": "/assets/media/ajPVV8R_image460.jpg"
+    },
+    "image460sv": {
+      "width": 350,
+      "height": 612,
+      "url": "/assets/media/ajPVV8R_video.mp4",
+      "hasAudio": 1,
+      "duration": 11
+    }
+  },
+  "commentsCount": 6,
+  "tags": [
+    {
+      "key": "humor",
+      "url": "/tag/humor"
+    },
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    },
+    {
+      "key": "lol",
+      "url": "/tag/lol"
+    },
+    {
+      "key": "meme",
+      "url": "/tag/meme"
+    }
+  ],
+  "interests": [
+    "humor",
+    "memes",
+    "wtf"
+  ]
+}

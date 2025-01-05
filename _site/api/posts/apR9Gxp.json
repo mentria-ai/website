@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "apR9Gxp",
+  "url": "/2025/01/03/apR9Gxp.html",
+  "post_url": "/2025/01/03/apR9Gxp.html",
+  "title": "It's Friday!!!",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 1030,
+  "downVoteCount": 268,
+  "creationTs": 1735925953,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 298,
+      "height": 720,
+      "url": "/assets/media/apR9Gxp_image700.jpg"
+    },
+    "image460": {
+      "width": 298,
+      "height": 720,
+      "url": "/assets/media/apR9Gxp_image460.jpg"
+    },
+    "image460sv": {
+      "width": 298,
+      "height": 720,
+      "url": "/assets/media/apR9Gxp_video.mp4",
+      "hasAudio": 1,
+      "duration": 55
+    }
+  },
+  "commentsCount": 136,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "layout": "post",
+  "id": "a0e4eNQ",
+  "url": "/2025/01/05/a0e4eNQ.html",
+  "post_url": "/2025/01/05/a0e4eNQ.html",
+  "title": "Just train your cats properly",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 30,
+  "downVoteCount": 52,
+  "creationTs": 1736072532,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 820,
+      "url": "/assets/media/a0e4eNQ_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 820,
+      "url": "/assets/media/a0e4eNQ_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 820,
+      "url": "/assets/media/a0e4eNQ_video.mp4",
+      "hasAudio": 1,
+      "duration": 90
+    }
+  },
+  "commentsCount": 3,
+  "tags": [
+    {
+      "key": "cat",
+      "url": "/tag/cat"
+    },
+    {
+      "key": "animals",
+      "url": "/tag/animals"
+    },
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    }
+  ],
+  "interests": [
+    "animals",
+    "humor",
+    "cats"
+  ]
+}

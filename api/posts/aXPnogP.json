@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "aXPnogP",
+  "url": "/2025/01/04/aXPnogP.html",
+  "post_url": "/2025/01/04/aXPnogP.html",
+  "title": "Oz Meets Reality",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 76,
+  "downVoteCount": 33,
+  "creationTs": 1735952662,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aXPnogP_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aXPnogP_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aXPnogP_video.mp4",
+      "hasAudio": 1,
+      "duration": 12
+    }
+  },
+  "commentsCount": 10,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

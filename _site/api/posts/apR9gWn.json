@@ -1,0 +1,52 @@
+{
+  "layout": "post",
+  "id": "apR9gWn",
+  "url": "/2025/01/05/apR9gWn.html",
+  "post_url": "/2025/01/05/apR9gWn.html",
+  "title": "It created this for my Memecoin",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 6,
+  "downVoteCount": 111,
+  "creationTs": 1736015785,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 368,
+      "url": "/assets/media/apR9gWn_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 368,
+      "url": "/assets/media/apR9gWn_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 368,
+      "url": "/assets/media/apR9gWn_video.mp4",
+      "hasAudio": 1,
+      "duration": 40
+    }
+  },
+  "commentsCount": 6,
+  "tags": [
+    {
+      "key": "memecoin",
+      "url": "/tag/memecoin"
+    },
+    {
+      "key": "pumpfun",
+      "url": "/tag/pumpfun"
+    },
+    {
+      "key": "Solana",
+      "url": "/tag/solana"
+    }
+  ],
+  "interests": [
+    "memes"
+  ]
+}

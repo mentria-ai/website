@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "adBPVBM",
+  "url": "/2025/01/03/adBPVBM.html",
+  "post_url": "/2025/01/03/adBPVBM.html",
+  "title": "Hold Up",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 44,
+  "downVoteCount": 19,
+  "creationTs": 1735922652,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/adBPVBM_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/adBPVBM_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/adBPVBM_video.mp4",
+      "hasAudio": 1,
+      "duration": 15
+    }
+  },
+  "commentsCount": 2,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "hol up",
+      "url": "/tag/hol-up"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

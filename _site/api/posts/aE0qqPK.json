@@ -7,8 +7,8 @@
   "description": "",
   "type": "Photo",
   "nsfw": 0,
-  "upVoteCount": 34,
-  "downVoteCount": 111,
+  "upVoteCount": 40,
+  "downVoteCount": 123,
   "creationTs": 1736028530,
   "promoted": 0,
   "badges": [],
@@ -24,7 +24,7 @@
       "url": "/assets/media/aE0qqpK_image460.jpg"
     }
   },
-  "commentsCount": 28,
+  "commentsCount": 30,
   "tags": [
     {
       "key": "awesome",

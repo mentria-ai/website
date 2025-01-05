@@ -1,0 +1,41 @@
+{
+  "layout": "post",
+  "id": "aYQVyyN",
+  "url": "/2025/01/03/aYQVyyN.html",
+  "post_url": "/2025/01/03/aYQVyyN.html",
+  "title": "Rate my first Setup :-D",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 185,
+  "downVoteCount": 96,
+  "creationTs": 1735920014,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 525,
+      "url": "/assets/media/aYQVyyN_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 345,
+      "url": "/assets/media/aYQVyyN_image460.jpg"
+    }
+  },
+  "commentsCount": 79,
+  "tags": [
+    {
+      "key": "gaming",
+      "url": "/tag/gaming"
+    },
+    {
+      "key": "rate my setup",
+      "url": "/tag/rate-my-setup"
+    }
+  ],
+  "interests": [
+    "games"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "layout": "post",
+  "id": "aMVEEjA",
+  "url": "/2025/01/05/aMVEEjA.html",
+  "post_url": "/2025/01/05/aMVEEjA.html",
+  "title": "The beat goes on",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 143,
+  "downVoteCount": 33,
+  "creationTs": 1736025672,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 638,
+      "url": "/assets/media/aMVEEjA_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 638,
+      "url": "/assets/media/aMVEEjA_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 638,
+      "url": "/assets/media/aMVEEjA_video.mp4",
+      "hasAudio": 1,
+      "duration": 8
+    }
+  },
+  "commentsCount": 13,
+  "tags": [
+    {
+      "key": "boss fight",
+      "url": "/tag/boss-fight"
+    },
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    },
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "lol",
+      "url": "/tag/lol"
+    },
+    {
+      "key": "humor",
+      "url": "/tag/humor"
+    }
+  ],
+  "interests": [
+    "humor",
+    "wtf"
+  ]
+}

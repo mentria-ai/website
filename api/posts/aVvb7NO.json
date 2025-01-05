@@ -7,8 +7,8 @@
   "description": "",
   "type": "Photo",
   "nsfw": 0,
-  "upVoteCount": 18,
-  "downVoteCount": 68,
+  "upVoteCount": 20,
+  "downVoteCount": 76,
   "creationTs": 1735983103,
   "promoted": 0,
   "badges": [],
@@ -24,7 +24,7 @@
       "url": "/assets/media/aVvb7nO_image460.jpg"
     }
   },
-  "commentsCount": 115,
+  "commentsCount": 118,
   "tags": [
     {
       "key": "savage",

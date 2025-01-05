@@ -1,59 +1,55 @@
 {
   "layout": "post",
-  "id": "aKGE7N1",
-  "url": "/2025/01/04/aKGE7N1.html",
-  "post_url": "/2025/01/04/aKGE7N1.html",
-  "title": "Started whip cracking. Can't believe how loud these guys sound. Videos don't do it justice.",
+  "id": "aKGE7n1",
+  "url": "/2025/01/04/aKGE7n1.html",
+  "post_url": "/2025/01/04/aKGE7n1.html",
+  "title": "If Not Friendly, Why Friendly Shaped?!",
   "description": "",
-  "type": "Animated",
+  "type": "Photo",
   "nsfw": 0,
-  "upVoteCount": 5,
-  "downVoteCount": 16,
-  "creationTs": 1735930481,
+  "upVoteCount": 144,
+  "downVoteCount": 40,
+  "creationTs": 1735931292,
   "promoted": 0,
   "badges": [],
   "images": {
     "image700": {
-      "width": 460,
-      "height": 476,
-      "url": "/assets/media/aKGE7N1_image700.jpg"
+      "width": 700,
+      "height": 1220,
+      "url": "/assets/media/aKGE7n1_image700.jpg"
     },
     "image460": {
       "width": 460,
-      "height": 476,
-      "url": "/assets/media/aKGE7N1_image460.jpg"
-    },
-    "image460sv": {
-      "width": 460,
-      "height": 476,
-      "url": "/assets/media/aKGE7N1_video.mp4",
-      "hasAudio": 1,
-      "duration": 14
+      "height": 801,
+      "url": "/assets/media/aKGE7n1_image460.jpg"
     }
   },
-  "commentsCount": 12,
+  "commentsCount": 14,
   "tags": [
     {
-      "key": "humor",
-      "url": "/tag/humor"
+      "key": "snek",
+      "url": "/tag/snek"
     },
     {
-      "key": "awesome",
-      "url": "/tag/awesome"
+      "key": "wholesome",
+      "url": "/tag/wholesome"
     },
     {
-      "key": "whip",
-      "url": "/tag/whip"
+      "key": "funny",
+      "url": "/tag/funny"
     },
     {
-      "key": "indiana jones",
-      "url": "/tag/indiana-jones"
+      "key": "cute",
+      "url": "/tag/cute"
+    },
+    {
+      "key": "animals",
+      "url": "/tag/animals"
     }
   ],
   "interests": [
-    "random",
+    "animals",
     "humor",
-    "wholesome",
-    "woah"
+    "wholesome"
   ]
 }

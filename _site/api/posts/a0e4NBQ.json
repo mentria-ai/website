@@ -1,0 +1,53 @@
+{
+  "layout": "post",
+  "id": "a0e4NBQ",
+  "url": "/2025/01/04/a0e4NBQ.html",
+  "post_url": "/2025/01/04/a0e4NBQ.html",
+  "title": "Word of advice from pohx",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 34,
+  "downVoteCount": 33,
+  "creationTs": 1735936742,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/a0e4NBQ_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/a0e4NBQ_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/a0e4NBQ_video.mp4",
+      "hasAudio": 1,
+      "duration": 31
+    }
+  },
+  "commentsCount": 14,
+  "tags": [
+    {
+      "key": "path of exile",
+      "url": "/tag/path-of-exile"
+    },
+    {
+      "key": "gaming",
+      "url": "/tag/gaming"
+    },
+    {
+      "key": "random",
+      "url": "/tag/random"
+    }
+  ],
+  "interests": [
+    "games",
+    "random"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "layout": "post",
+  "id": "agmomWg",
+  "url": "/2025/01/05/agmomWg.html",
+  "post_url": "/2025/01/05/agmomWg.html",
+  "title": "Saturday Nights.",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 20,
+  "downVoteCount": 10,
+  "creationTs": 1736091154,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 1501,
+      "url": "/assets/media/agmomWg_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 986,
+      "url": "/assets/media/agmomWg_image460.jpg"
+    }
+  },
+  "commentsCount": 7,
+  "tags": [
+    {
+      "key": "meme",
+      "url": "/tag/meme"
+    },
+    {
+      "key": "old meme",
+      "url": "/tag/old-meme"
+    }
+  ],
+  "interests": [
+    "memes"
+  ]
+}

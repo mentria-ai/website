@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "aLn1n8z",
+  "url": "/2025/01/05/aLn1n8z.html",
+  "post_url": "/2025/01/05/aLn1n8z.html",
+  "title": "Hawker Food never looks so good",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 41,
+  "downVoteCount": 43,
+  "creationTs": 1736068586,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/aLn1n8z_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/aLn1n8z_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "/assets/media/aLn1n8z_video.mp4",
+      "hasAudio": 1,
+      "duration": 79
+    }
+  },
+  "commentsCount": 25,
+  "tags": [
+    {
+      "key": "hawker",
+      "url": "/tag/hawker"
+    }
+  ],
+  "interests": [
+    "food"
+  ]
+}

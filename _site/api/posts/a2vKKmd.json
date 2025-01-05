@@ -1,0 +1,49 @@
+{
+  "layout": "post",
+  "id": "a2vKKmd",
+  "url": "/2025/01/05/a2vKKmd.html",
+  "post_url": "/2025/01/05/a2vKKmd.html",
+  "title": "Bravo!",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 498,
+  "downVoteCount": 51,
+  "creationTs": 1736021783,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/a2vKKmd_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/a2vKKmd_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/a2vKKmd_video.mp4",
+      "hasAudio": 1,
+      "duration": 39
+    }
+  },
+  "commentsCount": 29,
+  "tags": [
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    },
+    {
+      "key": "lol",
+      "url": "/tag/lol"
+    }
+  ],
+  "interests": [
+    "humor",
+    "wtf"
+  ]
+}

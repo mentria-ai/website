@@ -1,0 +1,50 @@
+{
+  "layout": "post",
+  "id": "aBydgLQ",
+  "url": "/2025/01/03/aBydgLQ.html",
+  "post_url": "/2025/01/03/aBydgLQ.html",
+  "title": "Been there, done that",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 942,
+  "downVoteCount": 230,
+  "creationTs": 1735885610,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/aBydgLQ_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/aBydgLQ_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "/assets/media/aBydgLQ_video.mp4",
+      "hasAudio": 1,
+      "duration": 60
+    }
+  },
+  "commentsCount": 125,
+  "tags": [
+    {
+      "key": "shit",
+      "url": "/tag/shit"
+    },
+    {
+      "key": "shitposting",
+      "url": "/tag/shitposting"
+    }
+  ],
+  "interests": [
+    "lifestyle",
+    "humor",
+    "memes"
+  ]
+}

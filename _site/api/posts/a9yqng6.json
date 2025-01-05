@@ -7,7 +7,7 @@
   "description": "",
   "type": "Photo",
   "nsfw": 0,
-  "upVoteCount": 208,
+  "upVoteCount": 216,
   "downVoteCount": 27,
   "creationTs": 1735934590,
   "promoted": 0,
@@ -24,7 +24,7 @@
       "url": "/assets/media/a9yqnG6_image460.jpg"
     }
   },
-  "commentsCount": 23,
+  "commentsCount": 24,
   "tags": [
     {
       "key": "woodpecker",

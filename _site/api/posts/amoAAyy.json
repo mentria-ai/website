@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "amoAAyy",
+  "url": "/2025/01/05/amoAAyy.html",
+  "post_url": "/2025/01/05/amoAAyy.html",
+  "title": "Never forget.",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 86,
+  "downVoteCount": 1,
+  "creationTs": 1736046089,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 442,
+      "url": "/assets/media/amoAAyy_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 442,
+      "url": "/assets/media/amoAAyy_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 442,
+      "url": "/assets/media/amoAAyy_video.mp4",
+      "hasAudio": 1,
+      "duration": 13
+    }
+  },
+  "commentsCount": 12,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

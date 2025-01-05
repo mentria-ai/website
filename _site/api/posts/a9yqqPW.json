@@ -1,0 +1,45 @@
+{
+  "layout": "post",
+  "id": "a9yqqPW",
+  "url": "/2025/01/05/a9yqqPW.html",
+  "post_url": "/2025/01/05/a9yqqPW.html",
+  "title": "Opposite of cats",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 337,
+  "downVoteCount": 20,
+  "creationTs": 1736020806,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/a9yqqPW_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/a9yqqPW_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "/assets/media/a9yqqPW_video.mp4",
+      "hasAudio": 1,
+      "duration": 33
+    }
+  },
+  "commentsCount": 12,
+  "tags": [
+    {
+      "key": "random",
+      "url": "/tag/random"
+    }
+  ],
+  "interests": [
+    "animals",
+    "random"
+  ]
+}

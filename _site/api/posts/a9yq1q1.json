@@ -1,0 +1,54 @@
+{
+  "layout": "post",
+  "id": "a9yq1q1",
+  "url": "/2025/01/04/a9yq1q1.html",
+  "post_url": "/2025/01/04/a9yq1q1.html",
+  "title": "How Ai supposed to be and how it’s going!!",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 40,
+  "downVoteCount": 68,
+  "creationTs": 1735999108,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/a9yq1q1_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/a9yq1q1_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/a9yq1q1_video.mp4",
+      "hasAudio": 1,
+      "duration": 60
+    }
+  },
+  "commentsCount": 8,
+  "tags": [
+    {
+      "key": "AI",
+      "url": "/tag/ai"
+    },
+    {
+      "key": "awesome",
+      "url": "/tag/awesome"
+    },
+    {
+      "key": "satisfying",
+      "url": "/tag/satisfying"
+    }
+  ],
+  "interests": [
+    "science",
+    "wholesome",
+    "woah"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "layout": "post",
+  "id": "a87qq03",
+  "url": "/2025/01/05/a87qq03.html",
+  "post_url": "/2025/01/05/a87qq03.html",
+  "title": "CandlesWorkingAsIntended",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 49,
+  "downVoteCount": 15,
+  "creationTs": 1736034807,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 500,
+      "height": 515,
+      "url": "/assets/media/a87qq03_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 473,
+      "url": "/assets/media/a87qq03_image460.jpg"
+    }
+  },
+  "commentsCount": 17,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "programmer humor",
+      "url": "/tag/programmer-humor"
+    }
+  ],
+  "interests": [
+    "humor"
+  ]
+}

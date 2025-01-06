@@ -1,42 +1,44 @@
 {
   "layout": "post",
-  "id": "aVvbvzn",
-  "url": "/2025/01/05/aVvbvzn.html",
-  "post_url": "/2025/01/05/aVvbvzn.html",
-  "title": "This right here is how it should be, embrace being humble.",
+  "id": "aVvbvZn",
+  "url": "/2025/01/05/aVvbvZn.html",
+  "post_url": "/2025/01/05/aVvbvZn.html",
+  "title": "Pool Day",
   "description": "",
-  "type": "Photo",
+  "type": "Animated",
   "nsfw": 0,
-  "upVoteCount": 43,
-  "downVoteCount": 9,
-  "creationTs": 1736059343,
+  "upVoteCount": 19,
+  "downVoteCount": 2,
+  "creationTs": 1736080339,
   "promoted": 0,
   "badges": [],
   "images": {
     "image700": {
-      "width": 700,
-      "height": 1130,
-      "url": "/assets/media/aVvbvzn_image700.jpg"
+      "width": 460,
+      "height": 460,
+      "url": "/assets/media/aVvbvZn_image700.jpg"
     },
     "image460": {
       "width": 460,
-      "height": 743,
-      "url": "/assets/media/aVvbvzn_image460.jpg"
+      "height": 460,
+      "url": "/assets/media/aVvbvZn_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 460,
+      "url": "/assets/media/aVvbvZn_video.mp4",
+      "hasAudio": 0,
+      "duration": 19
     }
   },
-  "commentsCount": 11,
+  "commentsCount": 3,
   "tags": [
     {
-      "key": "relationship",
-      "url": "/tag/relationship"
-    },
-    {
-      "key": "love memes",
-      "url": "/tag/love-memes"
+      "key": "random gifs",
+      "url": "/tag/random-gifs"
     }
   ],
   "interests": [
-    "memes",
-    "relationship"
+    "random"
   ]
 }

@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "a6ZqXER",
+  "url": "/2025/01/06/a6ZqXER.html",
+  "post_url": "/2025/01/06/a6ZqXER.html",
+  "title": "He thinks the rain is his treats",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 6,
+  "downVoteCount": 1,
+  "creationTs": 1736139264,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 270,
+      "height": 270,
+      "url": "/assets/media/a6ZqXER_image700.jpg"
+    },
+    "image460": {
+      "width": 270,
+      "height": 270,
+      "url": "/assets/media/a6ZqXER_image460.jpg"
+    },
+    "image460sv": {
+      "width": 270,
+      "height": 270,
+      "url": "/assets/media/a6ZqXER_video.mp4",
+      "hasAudio": 1,
+      "duration": 18
+    }
+  },
+  "commentsCount": 1,
+  "tags": [
+    {
+      "key": "funny",
+      "url": "/tag/funny"
+    },
+    {
+      "key": "animal",
+      "url": "/tag/animal"
+    }
+  ],
+  "interests": [
+    "animals"
+  ]
+}

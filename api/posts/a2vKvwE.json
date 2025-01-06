@@ -1,0 +1,53 @@
+{
+  "layout": "post",
+  "id": "a2vKvwE",
+  "url": "/2025/01/05/a2vKvwE.html",
+  "post_url": "/2025/01/05/a2vKvwE.html",
+  "title": "Oy vey banger.",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 11,
+  "downVoteCount": 40,
+  "creationTs": 1736076450,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 282,
+      "url": "/assets/media/a2vKvwE_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 282,
+      "url": "/assets/media/a2vKvwE_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 282,
+      "url": "/assets/media/a2vKvwE_video.mp4",
+      "hasAudio": 1,
+      "duration": 23
+    }
+  },
+  "commentsCount": 8,
+  "tags": [
+    {
+      "key": "Latest news",
+      "url": "/tag/latest-news"
+    },
+    {
+      "key": "Politics",
+      "url": "/tag/politics"
+    },
+    {
+      "key": "Elon Musk",
+      "url": "/tag/elon-musk"
+    }
+  ],
+  "interests": [
+    "news",
+    "science"
+  ]
+}

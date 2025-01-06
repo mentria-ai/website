@@ -1,0 +1,58 @@
+{
+  "layout": "post",
+  "id": "aMVEB06",
+  "url": "/2025/01/06/aMVEB06.html",
+  "post_url": "/2025/01/06/aMVEB06.html",
+  "title": "Show me your cutest picture of your cat. Here’s mine:",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 63,
+  "downVoteCount": 14,
+  "creationTs": 1736159665,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 1244,
+      "url": "/assets/media/aMVEB06_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/aMVEB06_image460.jpg"
+    }
+  },
+  "commentsCount": 13,
+  "tags": [
+    {
+      "key": "cats",
+      "url": "/tag/cats"
+    },
+    {
+      "key": "random",
+      "url": "/tag/random"
+    },
+    {
+      "key": "meme",
+      "url": "/tag/meme"
+    },
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    },
+    {
+      "key": "humor",
+      "url": "/tag/humor"
+    }
+  ],
+  "interests": [
+    "cats",
+    "animals",
+    "humor",
+    "memes",
+    "wtf",
+    "random"
+  ]
+}

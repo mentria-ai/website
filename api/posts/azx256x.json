@@ -1,0 +1,45 @@
+{
+  "layout": "post",
+  "id": "azx256x",
+  "url": "/2025/01/06/azx256x.html",
+  "post_url": "/2025/01/06/azx256x.html",
+  "title": "Who plays better? \"I am Klaus\" or \"I am Groot\"",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 4,
+  "downVoteCount": 30,
+  "creationTs": 1736124325,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 700,
+      "url": "/assets/media/azx256x_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 459,
+      "url": "/assets/media/azx256x_image460.jpg"
+    }
+  },
+  "commentsCount": 3,
+  "tags": [
+    {
+      "key": "klaus",
+      "url": "/tag/klaus"
+    },
+    {
+      "key": "groot",
+      "url": "/tag/groot"
+    },
+    {
+      "key": "wick",
+      "url": "/tag/wick"
+    }
+  ],
+  "interests": [
+    "memes"
+  ]
+}

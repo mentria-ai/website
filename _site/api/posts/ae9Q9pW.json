@@ -1,60 +1,39 @@
 {
   "layout": "post",
-  "id": "ae9Q9pW",
-  "url": "/2025/01/05/ae9Q9pW.html",
-  "post_url": "/2025/01/05/ae9Q9pW.html",
-  "title": "That experiment will be part of the little squirt's core memory",
+  "id": "ae9Q9PW",
+  "url": "/2025/01/05/ae9Q9PW.html",
+  "post_url": "/2025/01/05/ae9Q9PW.html",
+  "title": "Bought a new dress! How does it look on me?",
   "description": "",
-  "type": "Animated",
+  "type": "Photo",
   "nsfw": 0,
-  "upVoteCount": 21,
-  "downVoteCount": 41,
-  "creationTs": 1736063272,
+  "upVoteCount": 46,
+  "downVoteCount": 27,
+  "creationTs": 1736085147,
   "promoted": 0,
   "badges": [],
   "images": {
     "image700": {
-      "width": 360,
-      "height": 640,
-      "url": "/assets/media/ae9Q9pW_image700.jpg"
+      "width": 700,
+      "height": 1161,
+      "url": "/assets/media/ae9Q9PW_image700.jpg"
     },
     "image460": {
-      "width": 360,
-      "height": 640,
-      "url": "/assets/media/ae9Q9pW_image460.jpg"
-    },
-    "image460sv": {
-      "width": 360,
-      "height": 640,
-      "url": "/assets/media/ae9Q9pW_video.mp4",
-      "hasAudio": 1,
-      "duration": 127
+      "width": 460,
+      "height": 763,
+      "url": "/assets/media/ae9Q9PW_image460.jpg"
     }
   },
-  "commentsCount": 12,
+  "commentsCount": 5,
   "tags": [
     {
-      "key": "experiment",
-      "url": "/tag/experiment"
+      "key": "girl",
+      "url": "/tag/girl"
     },
     {
-      "key": "child",
-      "url": "/tag/child"
-    },
-    {
-      "key": "trauma",
-      "url": "/tag/trauma"
-    },
-    {
-      "key": "science",
-      "url": "/tag/science"
-    },
-    {
-      "key": "parenting",
-      "url": "/tag/parenting"
+      "key": "tight dresses",
+      "url": "/tag/tight-dresses"
     }
   ],
-  "interests": [
-    "science"
-  ]
+  "interests": []
 }

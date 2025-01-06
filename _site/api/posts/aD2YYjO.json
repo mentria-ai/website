@@ -1,0 +1,50 @@
+{
+  "layout": "post",
+  "id": "aD2YYjO",
+  "url": "/2025/01/05/aD2YYjO.html",
+  "post_url": "/2025/01/05/aD2YYjO.html",
+  "title": "Study it",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 11,
+  "downVoteCount": 30,
+  "creationTs": 1736023470,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aD2YYjO_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aD2YYjO_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aD2YYjO_video.mp4",
+      "hasAudio": 1,
+      "duration": 97
+    }
+  },
+  "commentsCount": 9,
+  "tags": [
+    {
+      "key": "bitcoin",
+      "url": "/tag/bitcoin"
+    },
+    {
+      "key": "inflation",
+      "url": "/tag/inflation"
+    }
+  ],
+  "interests": [
+    "science",
+    "news",
+    "crypto"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "aMVEdBR",
+  "url": "/2025/01/06/aMVEdBR.html",
+  "post_url": "/2025/01/06/aMVEdBR.html",
+  "title": "Can you even handle this?",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 3,
+  "downVoteCount": 8,
+  "creationTs": 1736106741,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aMVEdBR_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aMVEdBR_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/aMVEdBR_video.mp4",
+      "hasAudio": 1,
+      "duration": 16
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "gaming",
+      "url": "/tag/gaming"
+    },
+    {
+      "key": "game physics",
+      "url": "/tag/game-physics"
+    }
+  ],
+  "interests": [
+    "games"
+  ]
+}

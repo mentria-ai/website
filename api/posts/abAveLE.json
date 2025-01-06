@@ -1,0 +1,47 @@
+{
+  "layout": "post",
+  "id": "abAveLE",
+  "url": "/2025/01/06/abAveLE.html",
+  "post_url": "/2025/01/06/abAveLE.html",
+  "title": "Fix your shit 9gag",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 11,
+  "downVoteCount": 32,
+  "creationTs": 1736115854,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 996,
+      "url": "/assets/media/abAveLE_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 996,
+      "url": "/assets/media/abAveLE_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 996,
+      "url": "/assets/media/abAveLE_video.mp4",
+      "hasAudio": 1,
+      "duration": 22
+    }
+  },
+  "commentsCount": 9,
+  "tags": [
+    {
+      "key": "at least 1 tag",
+      "url": "/tag/at-least-1-tag"
+    }
+  ],
+  "interests": [
+    "wtf",
+    "humor",
+    "animals",
+    "cats"
+  ]
+}

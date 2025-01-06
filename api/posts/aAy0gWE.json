@@ -1,44 +1,37 @@
 {
   "layout": "post",
-  "id": "aAy0gWE",
-  "url": "/2025/01/03/aAy0gWE.html",
-  "post_url": "/2025/01/03/aAy0gWE.html",
-  "title": "A video of Andrew McAuley at the start of his journey crossing the Tasman Sea. He vanished and his kayak was found 30 nmi short of his destination.",
+  "id": "aAy0GwE",
+  "url": "/2025/01/04/aAy0GwE.html",
+  "post_url": "/2025/01/04/aAy0GwE.html",
+  "title": "Innovative - Vandalizing your own property by spraying ‘for sale’ and your phone number on your perfectly fine facade. (Luxembourg)",
   "description": "",
-  "type": "Animated",
+  "type": "Photo",
   "nsfw": 0,
-  "upVoteCount": 0,
-  "downVoteCount": 0,
-  "creationTs": 1735907603,
+  "upVoteCount": 12,
+  "downVoteCount": 12,
+  "creationTs": 1735991664,
   "promoted": 0,
   "badges": [],
   "images": {
     "image700": {
-      "width": 460,
-      "height": 346,
-      "url": "/assets/media/aAy0gWE_image700.jpg"
+      "width": 700,
+      "height": 842,
+      "url": "/assets/media/aAy0GwE_image700.jpg"
     },
     "image460": {
       "width": 460,
-      "height": 346,
-      "url": "/assets/media/aAy0gWE_image460.jpg"
-    },
-    "image460sv": {
-      "width": 460,
-      "height": 346,
-      "url": "/assets/media/aAy0gWE_video.mp4",
-      "hasAudio": 1,
-      "duration": 49
+      "height": 553,
+      "url": "/assets/media/aAy0GwE_image460.jpg"
     }
   },
-  "commentsCount": 0,
+  "commentsCount": 16,
   "tags": [
     {
-      "key": "interesting as fuck",
-      "url": "/tag/interesting-as-fuck"
+      "key": "funny",
+      "url": "/tag/funny"
     }
   ],
   "interests": [
-    "random"
+    "humor"
   ]
 }

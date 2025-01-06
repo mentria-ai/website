@@ -1,0 +1,52 @@
+{
+  "layout": "post",
+  "id": "aYQVrXm",
+  "url": "/2025/01/04/aYQVrXm.html",
+  "post_url": "/2025/01/04/aYQVrXm.html",
+  "title": "Sawpocalypse",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 10,
+  "downVoteCount": 70,
+  "creationTs": 1736013845,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 840,
+      "url": "/assets/media/aYQVrXm_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 840,
+      "url": "/assets/media/aYQVrXm_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 840,
+      "url": "/assets/media/aYQVrXm_video.mp4",
+      "hasAudio": 1,
+      "duration": 12
+    }
+  },
+  "commentsCount": 3,
+  "tags": [
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    },
+    {
+      "key": "gmod",
+      "url": "/tag/gmod"
+    },
+    {
+      "key": "luigi mangione",
+      "url": "/tag/luigi-mangione"
+    }
+  ],
+  "interests": [
+    "wtf"
+  ]
+}

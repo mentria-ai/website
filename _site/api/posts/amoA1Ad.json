@@ -1,0 +1,53 @@
+{
+  "layout": "post",
+  "id": "amoA1Ad",
+  "url": "/2025/01/06/amoA1Ad.html",
+  "post_url": "/2025/01/06/amoA1Ad.html",
+  "title": "Gladiator 3… the musical",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 12,
+  "downVoteCount": 7,
+  "creationTs": 1736141803,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 264,
+      "url": "/assets/media/amoA1Ad_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 264,
+      "url": "/assets/media/amoA1Ad_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 264,
+      "url": "/assets/media/amoA1Ad_video.mp4",
+      "hasAudio": 1,
+      "duration": 57
+    }
+  },
+  "commentsCount": 1,
+  "tags": [
+    {
+      "key": "Gladiator",
+      "url": "/tag/gladiator"
+    },
+    {
+      "key": "Wtf",
+      "url": "/tag/wtf"
+    },
+    {
+      "key": "Internet is here",
+      "url": "/tag/internet-is-here"
+    }
+  ],
+  "interests": [
+    "humor",
+    "wtf"
+  ]
+}

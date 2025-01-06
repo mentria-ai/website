@@ -1,0 +1,59 @@
+{
+  "layout": "post",
+  "id": "arymyyd",
+  "url": "/2025/01/05/arymyyd.html",
+  "post_url": "/2025/01/05/arymyyd.html",
+  "title": "My cat and my neighbour’s. They hate each other.",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 26,
+  "downVoteCount": 7,
+  "creationTs": 1736075485,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 933,
+      "url": "/assets/media/arymyyd_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 613,
+      "url": "/assets/media/arymyyd_image460.jpg"
+    }
+  },
+  "commentsCount": 5,
+  "tags": [
+    {
+      "key": "cats",
+      "url": "/tag/cats"
+    },
+    {
+      "key": "random",
+      "url": "/tag/random"
+    },
+    {
+      "key": "humor",
+      "url": "/tag/humor"
+    },
+    {
+      "key": "wtf",
+      "url": "/tag/wtf"
+    },
+    {
+      "key": "awesome",
+      "url": "/tag/awesome"
+    }
+  ],
+  "interests": [
+    "cats",
+    "animals",
+    "humor",
+    "wtf",
+    "wholesome",
+    "random",
+    "woah"
+  ]
+}

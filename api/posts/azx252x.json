@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "azx252x",
+  "url": "/2025/01/06/azx252x.html",
+  "post_url": "/2025/01/06/azx252x.html",
+  "title": "Daydreaming at the window",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 1,
+  "downVoteCount": 0,
+  "creationTs": 1736104450,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/azx252x_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/azx252x_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/azx252x_video.mp4",
+      "hasAudio": 1,
+      "duration": 157
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "feels",
+      "url": "/tag/feels"
+    }
+  ],
+  "interests": [
+    "random"
+  ]
+}

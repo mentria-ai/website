@@ -1,0 +1,45 @@
+{
+  "layout": "post",
+  "id": "avyQyvn",
+  "url": "/2025/01/05/avyQyvn.html",
+  "post_url": "/2025/01/05/avyQyvn.html",
+  "title": "Ι fixed it",
+  "description": "",
+  "type": "Photo",
+  "nsfw": 0,
+  "upVoteCount": 0,
+  "downVoteCount": 1,
+  "creationTs": 1736081065,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 700,
+      "height": 393,
+      "url": "/assets/media/avyQyvn_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 258,
+      "url": "/assets/media/avyQyvn_image460.jpg"
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "zelda",
+      "url": "/tag/zelda"
+    },
+    {
+      "key": "tears of the kingdom",
+      "url": "/tag/tears-of-the-kingdom"
+    },
+    {
+      "key": "gaming",
+      "url": "/tag/gaming"
+    }
+  ],
+  "interests": [
+    "games"
+  ]
+}

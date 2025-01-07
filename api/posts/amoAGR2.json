@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "amoAGR2",
+  "url": "/2025/01/06/amoAGR2.html",
+  "post_url": "/2025/01/06/amoAGR2.html",
+  "title": "Fire show in air on water",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 25,
+  "downVoteCount": 16,
+  "creationTs": 1736186008,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/amoAGR2_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/amoAGR2_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/amoAGR2_video.mp4",
+      "hasAudio": 1,
+      "duration": 46
+    }
+  },
+  "commentsCount": 3,
+  "tags": [
+    {
+      "key": "damn thats interesting",
+      "url": "/tag/damn-thats-interesting"
+    }
+  ],
+  "interests": [
+    "random"
+  ]
+}

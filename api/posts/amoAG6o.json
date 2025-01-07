@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "amoAG6o",
+  "url": "/2025/01/06/amoAG6o.html",
+  "post_url": "/2025/01/06/amoAG6o.html",
+  "title": "It do be like that",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 7,
+  "downVoteCount": 1,
+  "creationTs": 1736181921,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 696,
+      "url": "/assets/media/amoAG6o_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 696,
+      "url": "/assets/media/amoAG6o_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 696,
+      "url": "/assets/media/amoAG6o_video.mp4",
+      "hasAudio": 1,
+      "duration": 8
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "f1",
+      "url": "/tag/f1"
+    }
+  ],
+  "interests": [
+    "motorvehicles"
+  ]
+}

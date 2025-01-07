@@ -1,0 +1,48 @@
+{
+  "layout": "post",
+  "id": "amoAWR4",
+  "url": "/2025/01/06/amoAWR4.html",
+  "post_url": "/2025/01/06/amoAWR4.html",
+  "title": "Riley",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 7,
+  "downVoteCount": 0,
+  "creationTs": 1736112205,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/amoAWR4_image700.jpg"
+    },
+    "image460": {
+      "width": 460,
+      "height": 817,
+      "url": "/assets/media/amoAWR4_image460.jpg"
+    },
+    "image460sv": {
+      "width": 460,
+      "height": 816,
+      "url": "/assets/media/amoAWR4_video.mp4",
+      "hasAudio": 1,
+      "duration": 6
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "dog",
+      "url": "/tag/dog"
+    },
+    {
+      "key": "doggo",
+      "url": "/tag/doggo"
+    }
+  ],
+  "interests": [
+    "animals"
+  ]
+}

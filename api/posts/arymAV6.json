@@ -1,0 +1,44 @@
+{
+  "layout": "post",
+  "id": "arymAV6",
+  "url": "/2025/01/06/arymAV6.html",
+  "post_url": "/2025/01/06/arymAV6.html",
+  "title": "This is excitingly terrifying.",
+  "description": "",
+  "type": "Animated",
+  "nsfw": 0,
+  "upVoteCount": 1,
+  "downVoteCount": 0,
+  "creationTs": 1736177549,
+  "promoted": 0,
+  "badges": [],
+  "images": {
+    "image700": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/arymAV6_image700.jpg"
+    },
+    "image460": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/arymAV6_image460.jpg"
+    },
+    "image460sv": {
+      "width": 360,
+      "height": 640,
+      "url": "/assets/media/arymAV6_video.mp4",
+      "hasAudio": 1,
+      "duration": 77
+    }
+  },
+  "commentsCount": 0,
+  "tags": [
+    {
+      "key": "interesting as fuck",
+      "url": "/tag/interesting-as-fuck"
+    }
+  ],
+  "interests": [
+    "random"
+  ]
+}

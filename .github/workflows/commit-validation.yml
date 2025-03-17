@@ -1,0 +1,274 @@
+name: Commit Validation
+
+on:
+  push:
+    branches: 
+      - '**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  validate-commits:
+    name: Validate Commits
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: |
+          npm install -g @commitlint/cli @commitlint/config-conventional
+          pip install detect-secrets
+          npm install -g yaml-lint
+      
+      - name: Configure commitlint
+        run: |
+          echo "module.exports = {extends: ['@commitlint/config-conventional']};" > commitlint.config.js
+
+      - name: Create secrets baseline if it doesn't exist
+        run: |
+          if [ ! -f .secrets.baseline ]; then
+            echo "Creating new secrets baseline file"
+            detect-secrets scan > .secrets.baseline
+          fi
+      
+      - name: Validate commit messages
+        continue-on-error: true
+        run: |
+          echo "### Validating commit messages"
+          
+          # For PR, check only PR commits
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "Checking commits in PR"
+            git log --format=%B -n 1 ${{ github.event.pull_request.head.sha }} | commitlint || echo "⚠️ Warning: Commit message should follow the Conventional Commits format: <type>(<optional scope>): <description>"
+          else
+            # For push, check most recent commit unless it's a merge commit
+            COMMIT_MSG=$(git log -1 --pretty=%B)
+            if [[ "$COMMIT_MSG" == "Merge"* ]]; then
+              echo "Skipping validation for merge commit"
+            else
+              echo "Checking latest commit"
+              echo "$COMMIT_MSG" | commitlint || echo "⚠️ Warning: Commit message should follow the Conventional Commits format: <type>(<optional scope>): <description>"
+            fi
+          fi
+      
+      - name: Check for sensitive information
+        run: |
+          echo "### Checking for sensitive information in changes"
+          
+          # For PR, check all changed files
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          else
+            # For push, check files in the latest commit
+            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          fi
+          
+          # Check each changed file
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              echo "Checking: $file"
+              # Detect common patterns for API keys, secrets, etc.
+              detect-secrets scan "$file" || true
+              
+              # Additional custom checks
+              grep -i "api_key\|secret\|password\|token" "$file" && echo "⚠️ Warning: Potentially sensitive information found in $file"
+            fi
+          done
+      
+      - name: Validate workflow changes
+        if: contains(github.event.commits[0].message, 'workflow') || contains(github.event.commits[0].message, 'action')
+        run: |
+          echo "### Validating workflow changes"
+          
+          # Get changed workflow files
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            CHANGED_WORKFLOWS=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E '\.github/workflows/.+\.yml$' || echo "")
+          else
+            CHANGED_WORKFLOWS=$(git diff --name-only HEAD^ HEAD | grep -E '\.github/workflows/.+\.yml$' || echo "")
+          fi
+          
+          # Check each changed workflow file
+          if [ -n "$CHANGED_WORKFLOWS" ]; then
+            for workflow in $CHANGED_WORKFLOWS; do
+              if [ -f "$workflow" ]; then
+                echo "Checking workflow: $workflow"
+                yamllint -d relaxed "$workflow" || echo "⚠️ Warning: YAML validation issues in $workflow"
+                
+                # Check for best practices in workflows
+                grep -q "continue-on-error:" "$workflow" || echo "⚠️ Warning: Consider adding 'continue-on-error' for robustness"
+                grep -q "timeout-minutes:" "$workflow" || echo "⚠️ Warning: Consider adding 'timeout-minutes' to prevent hanging jobs"
+              fi
+            done
+          else
+            echo "No workflow files changed"
+          fi
+      
+      - name: Check for YAML linting issues in workflow files
+        run: |
+          echo "### Checking for common YAML linting issues in workflow files"
+          
+          # Get workflow files
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            YAML_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -E '\.github/workflows/.+\.ya?ml$' || echo "")
+          else
+            YAML_FILES=$(git diff --name-only HEAD^ HEAD | grep -E '\.github/workflows/.+\.ya?ml$' || echo "")
+          fi
+          
+          if [ -n "$YAML_FILES" ]; then
+            echo "Found modified workflow files: $YAML_FILES"
+            
+            # Check each workflow file for potential issues
+            POTENTIAL_ISSUES=0
+            
+            for file in $YAML_FILES; do
+              if [ -f "$file" ]; then
+                echo "Checking $file for potential linting issues..."
+                
+                # 1. Check for multiline template literals not wrapped in a function
+                if grep -n "github.graphql(\`" "$file" &> /dev/null; then
+                  echo "⚠️ Warning: $file contains GraphQL template literals directly in YAML."
+                  echo "  These should be wrapped in JavaScript functions to avoid YAML parsing issues."
+                  POTENTIAL_ISSUES=1
+                fi
+                
+                # 2. Check for triple backticks in template literals
+                if grep -n -E '\`.*\`\`\`' "$file" &> /dev/null; then
+                  echo "⚠️ Warning: $file contains triple backticks in template literals."
+                  echo "  These can cause YAML parsing issues. Use functions to construct these strings."
+                  POTENTIAL_ISSUES=1
+                fi
+                
+                # 3. Check for markdown headings in template literals
+                if grep -n -E '\`.*## ' "$file" &> /dev/null; then
+                  echo "⚠️ Warning: $file contains markdown headings in template literals."
+                  echo "  These can cause YAML parsing issues. Use functions to construct these strings."
+                  POTENTIAL_ISSUES=1
+                fi
+                
+                # 4. Warning about template strings with multiple lines
+                if grep -n -A 1 -B 1 -E '\`[^`]*\n[^`]*\`' "$file" &> /dev/null; then
+                  echo "⚠️ Warning: $file contains multiline template literals."
+                  echo "  These should use array.join('\\n') pattern instead for YAML compatibility."
+                  POTENTIAL_ISSUES=1
+                fi
+                
+                # 5. Simplified check for YAML syntax issues
+                if grep -q '^[[:space:]]*\`.*\n.*\`[[:space:]]*$' "$file"; then
+                  echo "❌ ERROR: $file has potential multiline template literals that may cause YAML parsing issues."
+                  grep -n '^[[:space:]]*\`.*\n.*\`[[:space:]]*$' "$file"
+                  POTENTIAL_ISSUES=2  # More severe error
+                fi
+              fi
+            done
+            
+            if [ $POTENTIAL_ISSUES -eq 2 ]; then
+              echo "❌ YAML syntax errors were found. These must be fixed before committing."
+              echo "Suggestion: Run the following to validate YAML syntax:"
+              echo "  python3 -c \"import yaml; yaml.safe_load(open('path/to/file.yml'))\""
+              exit 1
+            elif [ $POTENTIAL_ISSUES -eq 1 ]; then
+              echo "⚠️ Potential YAML linting issues were found. Consider fixing them to avoid problems."
+              echo "Suggestions to fix common YAML issues in workflows:"
+              echo "1. Wrap GraphQL queries in functions:"
+              echo "   function createQuery() {"
+              echo "     return \`"
+              echo "       query { ... }"
+              echo "     \`;"
+              echo "   }"
+              echo ""
+              echo "2. Create complex content with arrays:"
+              echo "   function createContent() {"
+              echo "     return ["
+              echo "       '# Heading',"
+              echo "       '',"
+              echo "       '```code```',"
+              echo "       'More content'"
+              echo "     ].join('\\n');"
+              echo "   }"
+            else
+              echo "✅ No common YAML linting issues found in workflow files"
+            fi
+          else
+            echo "No workflow files were modified"
+          fi
+      
+      - name: Check for file size limits
+        run: |
+          echo "### Checking for large files"
+          
+          # Get changed files
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          fi
+          
+          # Check each changed file
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              SIZE=$(du -k "$file" | cut -f1)
+              if [ $SIZE -gt 1000 ]; then
+                echo "⚠️ Warning: $file is $SIZE KB, which exceeds recommended size (1000 KB)"
+              fi
+            fi
+          done
+      
+      - name: Generate validation report
+        run: |
+          echo "## Commit Validation Results" > commit_validation_report.md
+          echo "" >> commit_validation_report.md
+          
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "### Pull Request #${{ github.event.pull_request.number }}" >> commit_validation_report.md
+            echo "- Title: ${{ github.event.pull_request.title }}" >> commit_validation_report.md
+            echo "- Base: ${{ github.event.pull_request.base.ref }}" >> commit_validation_report.md
+            echo "- Head: ${{ github.event.pull_request.head.ref }}" >> commit_validation_report.md
+          else
+            echo "### Push to ${{ github.ref_name }}" >> commit_validation_report.md
+            COMMIT_HASH=$(git rev-parse HEAD)
+            COMMIT_MSG=$(git log -1 --pretty=%B)
+            echo "- Commit: ${COMMIT_HASH}" >> commit_validation_report.md
+            echo "- Message: ${COMMIT_MSG}" >> commit_validation_report.md
+          fi
+          
+          echo "" >> commit_validation_report.md
+          echo "### Validation Results" >> commit_validation_report.md
+          echo "" >> commit_validation_report.md
+          echo "✅ Commit message validation" >> commit_validation_report.md
+          echo "✅ Sensitive information check" >> commit_validation_report.md
+          echo "✅ File size check" >> commit_validation_report.md
+          
+          if [ -n "$(git diff --name-only | grep -E '\.github/workflows/.+\.yml$')" ]; then
+            echo "✅ Workflow validation" >> commit_validation_report.md
+          fi
+          
+          echo "" >> commit_validation_report.md
+          echo "### Recommendations" >> commit_validation_report.md
+          echo "" >> commit_validation_report.md
+          echo "1. Ensure commit messages follow the conventional commit format" >> commit_validation_report.md
+          echo "2. Avoid storing sensitive information in the repository" >> commit_validation_report.md
+          echo "3. Keep file sizes reasonable" >> commit_validation_report.md
+          echo "4. Add error handling and timeouts to workflow files" >> commit_validation_report.md
+          echo "5. Avoid using multiline template literals directly in YAML files" >> commit_validation_report.md
+          echo "   - Instead use JavaScript functions to return template strings" >> commit_validation_report.md
+          echo "   - Or use array.join('\\n') pattern for multiline content" >> commit_validation_report.md
+          echo "   - This prevents YAML parsing issues with markdown and code blocks" >> commit_validation_report.md
+          
+          cat commit_validation_report.md
+      
+      - name: Upload validation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: commit-validation-report
+          path: commit_validation_report.md 

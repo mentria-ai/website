@@ -1,0 +1,249 @@
+{
+  "quotes": [
+    {
+      "id": "quote_21",
+      "quote": "In the snowy mountains of Hokkaido, a dairy farmer crafts a creamy miso soup with fresh milk and locally harvested kombu, a dish that warms the soul during the coldest winter nights.",
+      "image_prompt": "Ghibli Art: A cozy farmhouse kitchen with a large pot of miso soup simmering on a wood stove. Snow falls gently outside the window, and a Japanese Spitz dog curls up by the fire. A blonde female chef in a traditional apron stirs the soup, her breath visible in the cold air. The steam from the soup forms intricate patterns, and a Japanese Bobtail cat watches curiously from a wooden shelf lined with jars of miso and kombu.",
+      "image_url": "assets/img/quotes/quote_21.png",
+      "emphasis": {
+        "Hokkaido": "emphasis-3",
+        "miso": "emphasis-2",
+        "kombu": "emphasis-2",
+        "winter": "emphasis-2",
+        "soul": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_22",
+      "quote": "In the bustling streets of Osaka, a street vendor prepares okonomiyaki with a secret blend of cabbage, pork, and a special sauce, creating a savory pancake that delights every passerby.",
+      "image_prompt": "Ghibli Art: A lively street food stall in Osaka, with the vendor flipping okonomiyaki on a hot griddle. The air is filled with the aroma of sizzling pork and cabbage. A Japanese Bobtail cat with a playful expression peeks out from behind a stack of ingredients. The scene is vibrant with colorful lanterns and bustling crowds, capturing the essence of Osaka's street food culture.",
+      "image_url": "assets/img/quotes/quote_22.png",
+      "emphasis": {
+        "Osaka": "emphasis-3",
+        "okonomiyaki": "emphasis-2",
+        "cabbage": "emphasis-2",
+        "pork": "emphasis-2",
+        "savory": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_23",
+      "quote": "In the serene tea gardens of Kyoto, a tea master prepares a delicate matcha tea ceremony, a ritual that brings peace and clarity to the mind.",
+      "image_prompt": "Ghibli Art: A tranquil tea garden in Kyoto, with cherry blossoms gently falling around a traditional tea house. A tea master in a kimono carefully whisks matcha in a ceramic bowl. A Japanese Spitz cat sits gracefully on the tatami mat, observing the ceremony. The scene is bathed in soft, golden light, with the steam from the tea forming delicate patterns in the air.",
+      "image_url": "assets/img/quotes/quote_23.png",
+      "emphasis": {
+        "Kyoto": "emphasis-3",
+        "matcha": "emphasis-2",
+        "ceremony": "emphasis-2",
+        "peace": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_24",
+      "quote": "In the coastal town of Okinawa, a grandmother prepares a traditional goya champuru, a stir-fry dish with bitter melon, tofu, and eggs, a recipe passed down through generations.",
+      "image_prompt": "Ghibli Art: A rustic kitchen in Okinawa, with a grandmother cooking goya champuru on a cast-iron skillet. The kitchen is filled with the aroma of sizzling tofu and eggs. A Japanese Bobtail cat with a curious expression watches from the windowsill, where the ocean waves can be seen in the distance. The scene is warm and inviting, with traditional Okinawan decor and utensils.",
+      "image_url": "assets/img/quotes/quote_24.png",
+      "emphasis": {
+        "Okinawa": "emphasis-3",
+        "goya": "emphasis-2",
+        "champuru": "emphasis-2",
+        "generations": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_25",
+      "quote": "In the hot spring resorts of Hakone, a chef prepares a luxurious kaiseki meal featuring seasonal ingredients, each dish a work of art that reflects the beauty of nature.",
+      "image_prompt": "Ghibli Art: A traditional ryokan dining room in Hakone, with a kaiseki meal beautifully arranged on lacquered trays. The room overlooks a serene hot spring garden with autumn leaves falling gently. A Japanese Spitz cat sits elegantly on a cushion, observing the meal. The chef, a blonde woman in a kimono, presents a dish with delicate garnishes, capturing the essence of seasonal beauty.",
+      "image_url": "assets/img/quotes/quote_25.png",
+      "emphasis": {
+        "Hakone": "emphasis-3",
+        "kaiseki": "emphasis-2",
+        "seasonal": "emphasis-2",
+        "nature": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_26",
+      "quote": "In the rice fields of Niigata, a family prepares a hearty donburi with freshly harvested rice and grilled eel, a dish that celebrates the bounty of the land.",
+      "image_prompt": "Ghibli Art: A family kitchen in Niigata, with a pot of freshly cooked rice steaming on the stove. Grilled eel is being prepared on a charcoal grill, filling the air with a savory aroma. A Japanese Bobtail cat with a contented expression lounges on a wooden bench. The scene is warm and rustic, with the golden rice fields visible through the window.",
+      "image_url": "assets/img/quotes/quote_26.png",
+      "emphasis": {
+        "Niigata": "emphasis-3",
+        "donburi": "emphasis-2",
+        "eel": "emphasis-2",
+        "bounty": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_27",
+      "quote": "In the bustling fish markets of Fukuoka, a chef prepares a fresh sashimi platter with the day's catch, a dish that showcases the purity of the ocean.",
+      "image_prompt": "Ghibli Art: A vibrant fish market in Fukuoka, with stalls filled with the day's catch. A chef skillfully prepares a sashimi platter with precision and care. A Japanese Spitz cat with a curious expression watches from a nearby crate. The scene is lively and colorful, with the ocean visible in the background and seagulls flying overhead.",
+      "image_url": "assets/img/quotes/quote_27.png",
+      "emphasis": {
+        "Fukuoka": "emphasis-3",
+        "sashimi": "emphasis-2",
+        "ocean": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_28",
+      "quote": "In the mountain villages of Nagano, locals prepare a hearty soba noodle soup with wild mushrooms and mountain vegetables, a dish that warms the body and soul.",
+      "image_prompt": "Ghibli Art: A cozy mountain home in Nagano, with a pot of soba noodle soup simmering on a hearth. Wild mushrooms and mountain vegetables are carefully arranged on a wooden table. A Japanese Bobtail cat with a curious expression watches from a windowsill, where snow-covered mountains are visible. The scene is warm and inviting, with the aroma of the soup filling the air.",
+      "image_url": "assets/img/quotes/quote_28.png",
+      "emphasis": {
+        "Nagano": "emphasis-3",
+        "soba": "emphasis-2",
+        "mushrooms": "emphasis-2",
+        "soul": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_29",
+      "quote": "In the cherry blossom gardens of Nara, a patisserie master creates a delicate sakura mochi, a sweet treat that captures the essence of spring.",
+      "image_prompt": "Ghibli Art: A quaint patisserie in Nara, with cherry blossoms gently falling outside the window. A patisserie master carefully shapes sakura mochi on a wooden counter. A Japanese Spitz cat with a playful expression watches from a nearby shelf. The scene is filled with the soft pink hues of cherry blossoms, and the mochi is adorned with delicate petals.",
+      "image_url": "assets/img/quotes/quote_29.png",
+      "emphasis": {
+        "Nara": "emphasis-3",
+        "sakura": "emphasis-2",
+        "mochi": "emphasis-2",
+        "spring": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_30",
+      "quote": "In the bustling streets of Tokyo, a ramen chef prepares a rich tonkotsu ramen with slow-cooked pork broth, a dish that satisfies every craving.",
+      "image_prompt": "Ghibli Art: A bustling ramen shop in Tokyo, with a chef preparing tonkotsu ramen in a steaming pot. The rich aroma of pork broth fills the air. A Japanese Bobtail cat with a curious expression watches from a corner of the kitchen. The scene is vibrant and lively, with customers enjoying their bowls of ramen and the city lights visible through the window.",
+      "image_url": "assets/img/quotes/quote_30.png",
+      "emphasis": {
+        "Tokyo": "emphasis-3",
+        "tonkotsu": "emphasis-2",
+        "ramen": "emphasis-2",
+        "satisfies": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_31",
+      "quote": "In the tranquil bamboo forests of Arashiyama, a young chef crafts a delicate chawanmushi, a steamed egg custard infused with the subtle flavors of shiitake mushrooms and fresh bamboo shoots, a dish that embodies the harmony of nature.",
+      "image_prompt": "Ghibli Art: A serene bamboo forest bathed in soft morning light, with a traditional wooden kitchen nestled among the trees. A blonde female chef carefully pours a mixture of egg custard into small ceramic cups, steam rising gently. A Japanese Spitz cat with fluffy white fur sits on a bamboo mat, watching intently. The background features tall bamboo stalks swaying in the breeze, and tiny forest spirits peek out from behind the leaves. The scene exudes a sense of peace and natural beauty.",
+      "image_url": "assets/img/quotes/quote_31.png",
+      "emphasis": {
+        "chawanmushi": "emphasis-2",
+        "shiitake": "emphasis-2",
+        "bamboo": "emphasis-2",
+        "Arashiyama": "emphasis-3",
+        "harmony": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_32",
+      "quote": "In the vibrant streets of Hiroshima, a street vendor prepares a sizzling plate of Hiroshima-style okonomiyaki, layering cabbage, noodles, and a perfectly fried egg, topped with a drizzle of savory sauce and bonito flakes that dance in the heat.",
+      "image_prompt": "Ghibli Art: A bustling street food stall in Hiroshima, with colorful lanterns hanging overhead and the scent of sizzling okonomiyaki filling the air. The vendor, a cheerful man with a white headband, flips a large okonomiyaki on a hot griddle. A Japanese Bobtail cat with a calico coat lounges on a nearby crate, its tail flicking lazily. The background is alive with the energy of the city, with people chatting and laughing, and the steam from the griddle forming whimsical shapes in the evening light.",
+      "image_url": "assets/img/quotes/quote_32.png",
+      "emphasis": {
+        "Hiroshima-style": "emphasis-2",
+        "okonomiyaki": "emphasis-2",
+        "bonito": "emphasis-2",
+        "Hiroshima": "emphasis-3",
+        "dance": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_33",
+      "quote": "In the coastal town of Shimoda, a fisherman's wife prepares a hearty miso soup with freshly caught clams and locally grown wakame seaweed, a dish that brings the taste of the ocean to the breakfast table.",
+      "image_prompt": "Ghibli Art: A cozy seaside kitchen with a view of the sparkling ocean through a window. A fisherman's wife stirs a pot of miso soup, the steam rising and mingling with the salty sea breeze. A Japanese Bobtail cat with a sleek black coat sits on the windowsill, gazing out at the waves. The kitchen is filled with the warm glow of the morning sun, and the sound of seagulls can be heard in the distance. The scene captures the simple beauty of coastal life.",
+      "image_url": "assets/img/quotes/quote_33.png",
+      "emphasis": {
+        "miso": "emphasis-2",
+        "clams": "emphasis-2",
+        "wakame": "emphasis-2",
+        "Shimoda": "emphasis-3",
+        "ocean": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_34",
+      "quote": "In the snowy village of Shirakawa-go, a grandmother prepares a comforting nabe hot pot with locally sourced vegetables and tender slices of wagyu beef, a dish that warms the heart during the long winter nights.",
+      "image_prompt": "Ghibli Art: A traditional thatched-roof house in Shirakawa-go, with snow gently falling outside. Inside, a grandmother stirs a bubbling nabe hot pot on a low wooden table, the steam rising and fogging up the windows. A Japanese Spitz cat with fluffy white fur curls up by the hearth, its eyes half-closed in contentment. The room is lit by the warm glow of a lantern, and the scene is filled with the comforting aroma of simmering broth and vegetables.",
+      "image_url": "assets/img/quotes/quote_34.png",
+      "emphasis": {
+        "nabe": "emphasis-2",
+        "wagyu": "emphasis-2",
+        "Shirakawa-go": "emphasis-3",
+        "winter": "emphasis-2",
+        "heart": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_35",
+      "quote": "In the bustling Tsukiji Market in Tokyo, a sushi master crafts a perfect piece of nigiri sushi with the freshest tuna, a dish that showcases the artistry and precision of Japanese culinary tradition.",
+      "image_prompt": "Ghibli Art: The lively Tsukiji Market in Tokyo, with stalls filled with colorful seafood and the sound of vendors calling out to customers. A sushi master, dressed in a traditional white uniform, carefully slices a piece of tuna and places it atop a small mound of rice. A Japanese Bobtail cat with a sleek gray coat watches from a nearby crate, its eyes following the master's every move. The background is alive with the energy of the market, with people bustling about and the morning light casting a golden glow over the scene.",
+      "image_url": "assets/img/quotes/quote_35.png",
+      "emphasis": {
+        "nigiri": "emphasis-2",
+        "tuna": "emphasis-2",
+        "Tsukiji": "emphasis-3",
+        "Tokyo": "emphasis-3",
+        "artistry": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_36",
+      "quote": "In the serene gardens of Kanazawa, a tea master prepares a delicate bowl of matcha tea, whisking it to perfection with a bamboo whisk, a ritual that brings tranquility and mindfulness to the moment.",
+      "image_prompt": "Ghibli Art: A peaceful tea garden in Kanazawa, with cherry blossoms gently falling and a small stream trickling nearby. A tea master kneels on a tatami mat, whisking a bowl of vibrant green matcha tea with a bamboo whisk. A Japanese Spitz cat with fluffy white fur sits nearby, its tail swishing gently. The garden is bathed in the soft light of late afternoon, and the scene exudes a sense of calm and serenity. Tiny spirits of the tea leaves float in the air, adding a touch of magic to the moment.",
+      "image_url": "assets/img/quotes/quote_36.png",
+      "emphasis": {
+        "matcha": "emphasis-2",
+        "Kanazawa": "emphasis-3",
+        "tranquility": "emphasis-2",
+        "mindfulness": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_37",
+      "quote": "In the vibrant summer festival of Aomori, a vendor prepares a refreshing bowl of kakigori, shaved ice topped with sweet syrup and fresh fruit, a treat that cools the body and delights the senses.",
+      "image_prompt": "Ghibli Art: A lively summer festival in Aomori, with colorful lanterns and the sound of taiko drums filling the air. A vendor shaves a block of ice into a fluffy mound, then drizzles it with vibrant syrup and tops it with slices of fresh fruit. A Japanese Bobtail cat with a calico coat sits on a nearby stool, its eyes wide with curiosity. The background is filled with people in yukata, enjoying the festivities, and the warm glow of the lanterns creates a magical atmosphere. The kakigori glistens in the light, a refreshing treat for a summer night.",
+      "image_url": "assets/img/quotes/quote_37.png",
+      "emphasis": {
+        "kakigori": "emphasis-2",
+        "Aomori": "emphasis-3",
+        "summer": "emphasis-2",
+        "senses": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_38",
+      "quote": "In the quiet mountain village of Takayama, a family prepares a traditional hoba miso, grilling miso paste on a magnolia leaf over an open flame, a dish that brings the family together around the hearth.",
+      "image_prompt": "Ghibli Art: A cozy mountain home in Takayama, with snow-covered peaks visible through the window. A family gathers around a hearth, grilling miso paste on a magnolia leaf over an open flame. A Japanese Spitz cat with fluffy white fur sits by the fire, its eyes reflecting the flickering flames. The room is filled with the warm glow of the fire and the comforting aroma of grilling miso. The scene captures the simple joy of family and tradition.",
+      "image_url": "assets/img/quotes/quote_38.png",
+      "emphasis": {
+        "hoba": "emphasis-2",
+        "miso": "emphasis-2",
+        "Takayama": "emphasis-3",
+        "family": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_39",
+      "quote": "In the bustling streets of Yokohama, a ramen chef prepares a rich bowl of tonkotsu ramen, simmering pork bones for hours to create a broth that is both creamy and flavorful, a dish that satisfies every craving.",
+      "image_prompt": "Ghibli Art: A bustling ramen shop in Yokohama, with the sound of sizzling broth and the chatter of customers filling the air. A ramen chef, with a focused expression, ladles rich tonkotsu broth into a bowl, then adds slices of pork, green onions, and a perfectly cooked egg. A Japanese Bobtail cat with a sleek black coat sits on a nearby counter, its eyes following the chef's every move. The background is alive with the energy of the city, and the steam from the broth forms whimsical shapes in the air.",
+      "image_url": "assets/img/quotes/quote_39.png",
+      "emphasis": {
+        "tonkotsu": "emphasis-2",
+        "ramen": "emphasis-2",
+        "Yokohama": "emphasis-3",
+        "craving": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_40",
+      "quote": "In the tranquil tea fields of Shizuoka, a farmer harvests fresh tea leaves, which are then carefully processed to create a fragrant sencha tea, a beverage that embodies the essence of the region.",
+      "image_prompt": "Ghibli Art: Rolling tea fields in Shizuoka, with rows of vibrant green tea plants stretching into the distance. A farmer, wearing a wide-brimmed hat, carefully picks fresh tea leaves and places them in a basket. A Japanese Spitz cat with fluffy white fur follows behind, its nose twitching as it sniffs the air. The background is filled with the soft light of early morning, and the scene exudes a sense of peace and tranquility. Tiny spirits of the tea leaves float in the air, adding a touch of magic to the moment.",
+      "image_url": "assets/img/quotes/quote_40.png",
+      "emphasis": {
+        "sencha": "emphasis-2",
+        "Shizuoka": "emphasis-3",
+        "essence": "emphasis-1"
+      }
+    }
+  ]
+}

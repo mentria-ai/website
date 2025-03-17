@@ -1,0 +1,96 @@
+name: Run Workflow Tests
+
+on:
+  push:
+    paths:
+      - '.github/workflows/**'
+      - 'tests/**'
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - 'tests/**'
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    name: Run Workflow Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Create test outputs directory
+        run: mkdir -p tests/test-output
+      
+      - name: Run workflow content tests
+        run: |
+          echo "### Running workflow content tests"
+          npm run test:workflow-content
+      
+      - name: Run GitHub API tests
+        run: |
+          echo "### Running GitHub API tests"
+          npm run test:github-api
+      
+      - name: Validate workflow YAML
+        run: |
+          echo "### Validating workflow YAML syntax"
+          npm install -g yaml-lint
+          yamllint -d relaxed .github/workflows/*.yml
+      
+      - name: Generate test report
+        if: always()
+        run: |
+          echo "## Workflow Test Results" > test_report.md
+          echo "" >> test_report.md
+          
+          echo "### Test Execution Summary" >> test_report.md
+          echo "" >> test_report.md
+          echo "- Workflow Content Tests: $([ ${{ steps.content-tests.outcome }} == 'success' ] && echo '✅' || echo '❌')" >> test_report.md
+          echo "- GitHub API Tests: $([ ${{ steps.api-tests.outcome }} == 'success' ] && echo '✅' || echo '❌')" >> test_report.md
+          echo "- YAML Validation: $([ ${{ steps.yaml-validation.outcome }} == 'success' ] && echo '✅' || echo '❌')" >> test_report.md
+          
+          echo "" >> test_report.md
+          echo "### Test Details" >> test_report.md
+          echo "" >> test_report.md
+          echo "See test outputs for detailed results." >> test_report.md
+          
+          echo "" >> test_report.md
+          echo "### File Artifact Summary" >> test_report.md
+          echo "" >> test_report.md
+          echo "- PR Content: $(ls -la tests/test-output/better_fix_content.md 2>/dev/null || echo 'Not generated')" >> test_report.md
+          echo "- GitHub API Output: $(ls -la tests/test-output/pr-*.md 2>/dev/null | wc -l) files" >> test_report.md
+          
+          echo "" >> test_report.md
+          echo "### Recommendations" >> test_report.md
+          echo "" >> test_report.md
+          echo "1. Use proper error handling in all GitHub API calls" >> test_report.md
+          echo "2. Avoid direct YAML string interpolation for complex content" >> test_report.md
+          echo "3. Use JavaScript methods to create and escape complex strings" >> test_report.md
+          echo "4. Add timeouts and retry logic to make workflows more robust" >> test_report.md
+          
+          cat test_report.md
+      
+      - name: Upload test outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-outputs
+          path: tests/test-output/
+      
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: test_report.md 

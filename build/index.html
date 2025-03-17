@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motivational Quotes - Ghibli Art Style</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon-96x96.png">
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for animated subtitles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="reel-container">
+        <div class="reel-content">
+            <!-- Media container with all controls inside -->
+            <div class="media-container">
+                <!-- Scroll snap container for smoother scrolling -->
+                <div class="scroll-container">
+                    <!-- Images will be dynamically inserted here -->
+                </div>
+                
+                <!-- Gradient overlay for better text visibility -->
+                <div class="gradient-overlay"></div>
+                
+                <!-- Progress bar at the top -->
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                
+                <!-- Caption and controls container for alignment -->
+                <div class="bottom-controls-container">
+                    <!-- Animated Text Container -->
+                    <div class="animated-text-container">
+                        <div class="animated-text"></div>
+                    </div>
+                    
+                    <!-- Controls -->
+                    <div class="reel-controls">
+                        <div class="control-icon like-btn" id="likeBtn" tabindex="0" role="button" aria-label="Like">
+                            <i class="far fa-heart"></i>
+                        </div>
+                        <div class="control-icon" tabindex="0" role="button" aria-label="Previous quote" onclick="window.quoteNavigation && window.quoteNavigation.prev()">
+                            <i class="fas fa-chevron-up"></i>
+                        </div>
+                        <div class="control-icon" tabindex="0" role="button" aria-label="Next quote" onclick="window.quoteNavigation && window.quoteNavigation.next()">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="control-icon" id="autoplayBtn" tabindex="0" role="button" aria-label="Toggle autoplay">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <div class="control-icon" tabindex="0" role="button" aria-label="More options">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/quotes.js"></script>
+    <script src="assets/js/animated-subtitles.js"></script>
+    <!-- Tests (only loaded in development) -->
+    <script>
+        // Only load tests in development environment
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            const testScript = document.createElement('script');
+            testScript.src = 'assets/js/tests.js';
+            document.body.appendChild(testScript);
+        }
+    </script>
+</body>
+</html>

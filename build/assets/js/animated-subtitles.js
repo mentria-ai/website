@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Remove punctuation for checking
         const cleanWord = word.replace(/[.,!?;:'"]/g, '').toLowerCase();
         
-        // Important culinary terms that could be candidates for emphasis-2 to improve readability
+        // Words that improve readability 
         const readabilityWords = [
             'while', 'when', 'where', 'how', 'which', 'what', 'who',
             'then', 'there', 'these', 'those', 'this', 'that',
@@ -50,14 +50,14 @@ document.addEventListener('DOMContentLoaded', function() {
             'despite', 'however', 'therefore', 'moreover', 'furthermore'
         ];
         
-        // Words that might be candidates for links (emphasis-3)
-        // These would typically be place names, ingredient names, or cooking techniques
+        // Words that might be candidates for links (emphasis-3) related to tiny houses
         const linkableWords = [
-            'japan', 'italy', 'france', 'china', 'india', 'mexico', 'thailand',
-            'peru', 'morocco', 'turkey', 'spain', 'greece', 'vietnam',
-            'pasta', 'sushi', 'curry', 'spice', 'herbs', 'recipe',
-            'technique', 'tradition', 'festival', 'market', 'restaurant',
-            'chef', 'cuisine', 'method', 'bakery', 'cooking', 'brewing'
+            'minimalist', 'compact', 'sustainable', 'eco-friendly', 'off-grid',
+            'solar', 'composting', 'rainwater', 'multifunctional', 'transformable',
+            'murphy', 'storage', 'loft', 'folding', 'convertible',
+            'tiny', 'micro', 'mobile', 'trailer', 'cabin',
+            'container', 'van', 'skoolie', 'treehouse', 'yurt',
+            'bamboo', 'reclaimed', 'salvaged', 'recycled', 'repurposed'
         ];
         
         // Empty emphasis by default

@@ -1,6 +1,126 @@
 {
   "quotes": [
     {
+      "id": "quote_1",
+      "quote": "In a tiny treehouse perched high in an ancient oak, a spiral staircase winds around the trunk, leading to a cozy loft where a hammock sways gently in the breeze, offering a perfect spot for afternoon naps.",
+      "image_prompt": "Ghibli Art: A whimsical treehouse tiny home nestled in the branches of a towering ancient oak. The spiral staircase, crafted from weathered wood, winds gracefully around the trunk. Inside, a cozy loft features a hammock strung between beams, gently swaying in the breeze. Sunlight filters through the leaves, casting dappled shadows on the wooden floor. A sleek black cat lounges on a windowsill, watching birds flutter by. The surrounding forest is alive with the sounds of rustling leaves and distant bird calls, creating a serene and magical atmosphere.",
+      "image_url": "assets/img/quotes/quote_1.png",
+      "emphasis": {
+        "treehouse": "emphasis-2",
+        "oak": "emphasis-3",
+        "hammock": "emphasis-2",
+        "cozy": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_2",
+      "quote": "A tiny beachfront cabin with a retractable glass wall opens to the sound of waves, where a built-in daybed transforms into a stargazing platform under the night sky.",
+      "image_prompt": "Ghibli Art: A charming beachfront tiny cabin with a retractable glass wall that opens to the soothing sound of waves. Inside, a built-in daybed transforms into a stargazing platform under the night sky. The interior is adorned with soft, neutral tones and nautical decor. A ginger cat naps on a cushioned window seat, basking in the moonlight. The beach is illuminated by the soft glow of lanterns, with the ocean stretching endlessly into the horizon. Stars twinkle above, creating a magical and tranquil setting.",
+      "image_url": "assets/img/quotes/quote_2.png",
+      "emphasis": {
+        "beachfront": "emphasis-2",
+        "glass": "emphasis-2",
+        "stargazing": "emphasis-2",
+        "tranquil": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_3",
+      "quote": "In a tiny urban micro-apartment, a wall-mounted desk folds away to reveal a hidden Murphy bed, while vertical gardens bring a touch of nature to the bustling city life.",
+      "image_prompt": "Ghibli Art: A sleek urban micro-apartment with a wall-mounted desk that folds away to reveal a hidden Murphy bed. Vertical gardens line the walls, bringing a touch of nature to the bustling city life. The apartment is bathed in soft, natural light from large windows overlooking the cityscape. A calico cat lounges on a cushioned chair, watching the world go by. The city outside is alive with activity, yet the apartment remains a peaceful oasis. The Ghibli-style art captures the harmony between urban living and natural beauty.",
+      "image_url": "assets/img/quotes/quote_3.png",
+      "emphasis": {
+        "urban": "emphasis-2",
+        "Murphy": "emphasis-2",
+        "vertical": "emphasis-2",
+        "harmony": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_4",
+      "quote": "A tiny mountaintop cabin with a wrap-around porch offers panoramic views of the valley below, where a wood-burning stove keeps the interior warm and inviting during snowy winters.",
+      "image_prompt": "Ghibli Art: A cozy mountaintop tiny cabin with a wrap-around porch offering panoramic views of the valley below. Snow blankets the landscape, and a wood-burning stove keeps the interior warm and inviting. The cabin is adorned with rustic decor, including a plush armchair and a knitted throw. A white cat with blue eyes curls up by the stove, enjoying the warmth. The snowy mountains in the background are painted in soft blues and whites, with smoke gently rising from the chimney. The scene exudes a sense of peace and solitude.",
+      "image_url": "assets/img/quotes/quote_4.png",
+      "emphasis": {
+        "mountaintop": "emphasis-2",
+        "panoramic": "emphasis-2",
+        "wood-burning": "emphasis-2",
+        "solitude": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_5",
+      "quote": "In a tiny off-grid home powered by solar panels, a composting toilet and rainwater collection system ensure sustainable living in harmony with nature.",
+      "image_prompt": "Ghibli Art: A tiny off-grid home nestled in a lush forest, powered by solar panels on the roof. A composting toilet and rainwater collection system are cleverly integrated into the design, ensuring sustainable living. The home is surrounded by vibrant greenery, with wildflowers blooming in the foreground. A tabby cat explores the garden, sniffing at the flowers. The forest is alive with the sounds of chirping birds and rustling leaves. The Ghibli-style art captures the harmony between modern technology and natural beauty.",
+      "image_url": "assets/img/quotes/quote_5.png",
+      "emphasis": {
+        "off-grid": "emphasis-2",
+        "solar": "emphasis-2",
+        "composting": "emphasis-2",
+        "sustainable": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_6",
+      "quote": "A tiny shipping container home with a rooftop garden provides fresh vegetables year-round, while large windows flood the interior with natural light.",
+      "image_prompt": "Ghibli Art: A tiny shipping container home transformed into a cozy living space with a rooftop garden that provides fresh vegetables year-round. Large windows flood the interior with natural light, highlighting the minimalist decor. The rooftop garden is lush with greenery, including tomatoes, lettuce, and herbs. A black cat lounges on the roof, basking in the sunlight. The surrounding landscape is painted in soft greens and yellows, with a clear blue sky overhead. The Ghibli-style art captures the simplicity and beauty of sustainable living.",
+      "image_url": "assets/img/quotes/quote_6.png",
+      "emphasis": {
+        "shipping": "emphasis-2",
+        "rooftop": "emphasis-2",
+        "vegetables": "emphasis-2",
+        "simplicity": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_7",
+      "quote": "In a tiny forest retreat, a loft bedroom overlooks a cozy living area with a fireplace, while a skylight offers a view of the stars at night.",
+      "image_prompt": "Ghibli Art: A tiny forest retreat with a loft bedroom that overlooks a cozy living area featuring a crackling fireplace. A skylight in the loft offers a view of the stars at night, creating a magical atmosphere. The interior is adorned with warm, earthy tones and rustic decor. A gray cat curls up by the fireplace, enjoying the warmth. The surrounding forest is painted in deep greens and browns, with fireflies flickering in the night. The Ghibli-style art captures the enchantment of living close to nature.",
+      "image_url": "assets/img/quotes/quote_7.png",
+      "emphasis": {
+        "forest": "emphasis-2",
+        "loft": "emphasis-2",
+        "skylight": "emphasis-2",
+        "enchantment": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_8",
+      "quote": "A tiny beach house with a fold-out deck extends living space onto the sand, where a hammock swings gently in the ocean breeze.",
+      "image_prompt": "Ghibli Art: A tiny beach house with a fold-out deck that extends living space onto the sand, where a hammock swings gently in the ocean breeze. The interior is bright and airy, with nautical decor and large windows offering stunning ocean views. A blonde character lounges in the hammock, reading a book. A Siamese cat naps on the deck, enjoying the warm sun. The beach is painted in soft pastels, with waves gently lapping at the shore. The Ghibli-style art captures the relaxed and carefree vibe of beach living.",
+      "image_url": "assets/img/quotes/quote_8.png",
+      "emphasis": {
+        "beach": "emphasis-2",
+        "fold-out": "emphasis-2",
+        "hammock": "emphasis-2",
+        "carefree": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_9",
+      "quote": "In a tiny urban loft, a sliding bookshelf reveals a hidden workspace, while a rooftop terrace offers a peaceful escape from the city's hustle and bustle.",
+      "image_prompt": "Ghibli Art: A tiny urban loft with a sliding bookshelf that reveals a hidden workspace, maximizing the use of space. A rooftop terrace offers a peaceful escape from the city's hustle and bustle, with potted plants and string lights creating a cozy atmosphere. The interior is modern and minimalist, with large windows offering views of the city skyline. A calico cat explores the rooftop, sniffing at the plants. The city below is alive with activity, yet the terrace remains a serene retreat. The Ghibli-style art captures the balance between urban living and personal sanctuary.",
+      "image_url": "assets/img/quotes/quote_9.png",
+      "emphasis": {
+        "urban": "emphasis-2",
+        "sliding": "emphasis-2",
+        "terrace": "emphasis-2",
+        "sanctuary": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_10",
+      "quote": "A tiny cabin in the woods features a sunroom filled with potted plants, where a small table and chairs create a perfect spot for morning coffee.",
+      "image_prompt": "Ghibli Art: A tiny cabin in the woods with a sunroom filled with potted plants, creating a lush and green indoor oasis. A small table and chairs in the sunroom offer a perfect spot for morning coffee, with sunlight streaming through the windows. The interior is cozy and rustic, with wooden beams and soft furnishings. A tabby cat lounges on the windowsill, basking in the sunlight. The surrounding forest is painted in vibrant greens, with birds chirping in the distance. The Ghibli-style art captures the tranquility and charm of woodland living.",
+      "image_url": "assets/img/quotes/quote_10.png",
+      "emphasis": {
+        "cabin": "emphasis-2",
+        "sunroom": "emphasis-2",
+        "coffee": "emphasis-2",
+        "tranquility": "emphasis-1"
+      }
+    },
+    {
       "id": "quote_21",
       "quote": "In the snowy mountains of Hokkaido, a dairy farmer crafts a creamy miso soup with fresh milk and locally harvested kombu, a dish that warms the soul during the coldest winter nights.",
       "image_prompt": "Ghibli Art: A cozy farmhouse kitchen with a large pot of miso soup simmering on a wood stove. Snow falls gently outside the window, and a Japanese Spitz dog curls up by the fire. A blonde female chef in a traditional apron stirs the soup, her breath visible in the cold air. The steam from the soup forms intricate patterns, and a Japanese Bobtail cat watches curiously from a wooden shelf lined with jars of miso and kombu.",

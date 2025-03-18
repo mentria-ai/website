@@ -1088,6 +1088,83 @@
         "reusable packages": "emphasis-1",
         "eco-friendly": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_158",
+      "quote": "Did you know? The Sundarbans mangrove forest is home to the only tigers that can swim, adapting to hunt in water as well as on land.",
+      "image_prompt": "Ghibli Art: A majestic Bengal tiger with glowing stripes swims gracefully through a lush mangrove forest, its reflection shimmering in the calm, golden-lit water. The forest is alive with vibrant greens and blues, with tiny glowing fireflies dancing around the trees. A misty morning haze adds a magical atmosphere, and small fish with curious expressions watch the tiger from beneath the water\u2019s surface. The scene is filled with a sense of wonder and harmony.",
+      "image_url": "assets/img/quotes/quote_158.png",
+      "emphasis": {
+        "Sundarbans": "emphasis-2",
+        "tigers": "emphasis-1",
+        "swim": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_159",
+      "quote": "Did you know? The ancient city of Sigiriya in Sri Lanka is built atop a 660-foot-tall rock, with intricate gardens and frescoes carved into its sides.",
+      "image_prompt": "Ghibli Art: A towering rock fortress rises into the sky, surrounded by lush, terraced gardens with vibrant flowers and flowing water. Tiny, glowing lanterns hang from the cliffs, illuminating the intricate frescoes of celestial beings carved into the rock. A soft golden sunset bathes the scene, with misty clouds swirling around the summit. Small, whimsical creatures with wings flit around the gardens, adding a magical touch to this ancient wonder.",
+      "image_url": "assets/img/quotes/quote_159.png",
+      "emphasis": {
+        "Sigiriya": "emphasis-2",
+        "660-foot-tall": "emphasis-1",
+        "frescoes": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_160",
+      "quote": "Did you know? The Kakapo, a flightless parrot from New Zealand, has a unique mating ritual where males inflate like a balloon and emit low-frequency booms to attract females.",
+      "image_prompt": "Ghibli Art: A plump, green Kakapo parrot puffs up like a balloon, its feathers glowing softly in the moonlight. Surrounding it are lush, moss-covered trees and glowing mushrooms, with tiny fireflies adding sparkles to the scene. The parrot emits low-frequency booms that create ripples in the air, visible as shimmering waves. A curious female Kakapo peeks out from behind a tree, her eyes wide with fascination. The forest is alive with magical energy, and the air is filled with a sense of enchantment.",
+      "image_url": "assets/img/quotes/quote_160.png",
+      "emphasis": {
+        "Kakapo": "emphasis-2",
+        "inflate": "emphasis-1",
+        "low-frequency booms": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_161",
+      "quote": "Did you know? The human body contains enough carbon to fill 9,000 pencils, making us walking carbon reservoirs.",
+      "image_prompt": "Ghibli Art: A whimsical scene of a glowing human figure made entirely of shimmering carbon particles, standing in a field of giant pencils. The pencils are vibrant and colorful, with tiny glowing creatures using them as slides and bridges. The sky is a soft gradient of pinks and blues, with golden sunlight filtering through. Magical sparkles float in the air, and the ground is covered in lush grass and flowers. The scene is both surreal and enchanting.",
+      "image_url": "assets/img/quotes/quote_161.png",
+      "emphasis": {
+        "carbon": "emphasis-1",
+        "9,000 pencils": "emphasis-2",
+        "walking carbon reservoirs": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_162",
+      "quote": "Did you know? The rings of Saturn are made up of billions of ice and rock particles, some as small as grains of sand and others as large as mountains.",
+      "image_prompt": "Ghibli Art: A fantastical view of Saturn\u2019s rings, glowing with soft blues and silvers, with tiny ice particles sparkling like diamonds. The rings are dotted with massive, glowing rocks that resemble floating mountains. A small, whimsical spacecraft with exaggerated features drifts through the scene, piloted by a curious alien creature. The background is a deep, star-filled sky with a glowing Saturn casting a warm light. Magical auroras swirl around the planet, adding a dreamlike quality to the scene.",
+      "image_url": "assets/img/quotes/quote_162.png",
+      "emphasis": {
+        "Saturn": "emphasis-2",
+        "billions": "emphasis-1",
+        "ice and rock particles": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_163",
+      "quote": "Did you know? The albatross can glide for thousands of miles without flapping its wings, using wind currents to stay aloft for weeks at a time.",
+      "image_prompt": "Ghibli Art: A majestic albatross with glowing feathers soars effortlessly over a vast, shimmering ocean. The sky is painted with soft pastel colors, and golden sunlight filters through the clouds. Wind currents are visible as swirling, glowing trails, guiding the bird\u2019s flight. Tiny, whimsical sea creatures peek out from the water, watching in awe. The scene is filled with a sense of freedom and wonder, with magical sparkles floating in the air.",
+      "image_url": "assets/img/quotes/quote_163.png",
+      "emphasis": {
+        "albatross": "emphasis-2",
+        "thousands of miles": "emphasis-1",
+        "wind currents": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_164",
+      "quote": "Did you know? The ancient city of Palmyra in Syria was a thriving oasis and trade hub, with towering temples and a unique blend of Greco-Roman and Persian architecture.",
+      "image_prompt": "Ghibli Art: A sprawling ancient city with towering, intricately carved temples glowing softly in the golden light of sunset. The architecture blends Greco-Roman columns with Persian arches, creating a surreal and magical atmosphere. Lush palm trees and vibrant flowers surround the city, with a sparkling oasis at its center. Tiny, whimsical creatures with wings flit around the temples, adding a sense of life and wonder. The air is filled with a soft, glowing mist, and the scene feels both grand and enchanting.",
+      "image_url": "assets/img/quotes/quote_164.png",
+      "emphasis": {
+        "Palmyra": "emphasis-2",
+        "oasis": "emphasis-1",
+        "Greco-Roman and Persian": "emphasis-2"
+      }
     }
   ]
 }

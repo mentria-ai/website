@@ -373,6 +373,83 @@
         "transparent wings": "emphasis-1",
         "nearly invisible": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_95",
+      "quote": "Did you know? The Baobab tree can store up to 32,000 gallons of water in its trunk, helping it survive in arid environments.",
+      "image_prompt": "Ghibli Art: A majestic Baobab tree standing tall in a golden desert, its massive trunk glowing faintly with stored water. The tree's branches stretch out like arms, with tiny glowing creatures flitting around it. The scene is bathed in warm, late afternoon light, with a soft mist rising from the ground. Small animals, like a curious meerkat and a sleepy owl, gather at the base, drinking from tiny pools of water that seep out. Magical water droplets float in the air, sparkling like diamonds.",
+      "image_url": "assets/img/quotes/quote_95.png",
+      "emphasis": {
+        "Baobab tree": "emphasis-2",
+        "32,000 gallons": "emphasis-1",
+        "water": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_96",
+      "quote": "Did you know? The Star-Nosed Mole can identify and eat its prey in as little as 227 milliseconds, making it one of the fastest foragers in the animal kingdom.",
+      "image_prompt": "Ghibli Art: A whimsical Star-Nosed Mole with a glowing, star-shaped nose, darting through a lush, underground tunnel. The tunnel is illuminated by bioluminescent fungi, casting a soft, ethereal glow. The mole moves with lightning speed, its nose twitching as it detects tiny insects. Magical sparkles trail behind it as it zips through the soil. A curious family of rabbits watches from a nearby burrow, their eyes wide with amazement.",
+      "image_url": "assets/img/quotes/quote_96.png",
+      "emphasis": {
+        "Star-Nosed Mole": "emphasis-2",
+        "227 milliseconds": "emphasis-1",
+        "fastest foragers": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_97",
+      "quote": "Did you know? The ancient city of Machu Picchu was built without mortar, and its stones fit together so precisely that not even a knife blade can slide between them.",
+      "image_prompt": "Ghibli Art: The ancient city of Machu Picchu perched on a misty mountain peak, with the sun casting golden rays through the clouds. The stone walls glow faintly, showing their perfect fit without mortar. Tiny, glowing spirits float around the stones, as if guarding the city. A curious llama with a colorful saddle blanket wanders through the ruins, its eyes reflecting the magical light. The scene is serene, with a gentle breeze carrying the scent of wildflowers.",
+      "image_url": "assets/img/quotes/quote_97.png",
+      "emphasis": {
+        "Machu Picchu": "emphasis-2",
+        "without mortar": "emphasis-2",
+        "knife blade": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_98",
+      "quote": "Did you know? The Pistol Shrimp can create a bubble that reaches temperatures as hot as the sun, stunning its prey with a shockwave.",
+      "image_prompt": "Ghibli Art: A vibrant underwater scene with a Pistol Shrimp snapping its claw, creating a glowing bubble that radiates intense heat. The bubble's shockwave sends ripples through the water, surrounded by magical, swirling particles. Colorful fish with exaggerated expressions scatter in all directions, their fins fluttering dramatically. The seabed is dotted with bioluminescent plants, casting a soft, blue glow. A curious octopus peeks out from behind a coral, its eyes wide with wonder.",
+      "image_url": "assets/img/quotes/quote_98.png",
+      "emphasis": {
+        "Pistol Shrimp": "emphasis-2",
+        "bubble": "emphasis-2",
+        "as hot as the sun": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_99",
+      "quote": "Did you know? The human stomach produces a new lining every three to four days to prevent it from digesting itself.",
+      "image_prompt": "Ghibli Art: A whimsical, glowing stomach interior with a magical, self-renewing lining that sparkles as it regenerates. Tiny, glowing creatures resembling friendly bacteria float around, helping with the process. The scene is warm and cozy, with soft, golden light illuminating the stomach walls. A curious, anthropomorphic stomach acid droplet with big eyes watches the process, its expression one of amazement. Magical particles swirl around, creating a sense of wonder and renewal.",
+      "image_url": "assets/img/quotes/quote_99.png",
+      "emphasis": {
+        "human stomach": "emphasis-2",
+        "new lining": "emphasis-2",
+        "digesting itself": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_100",
+      "quote": "Did you know? The Lyrebird can mimic almost any sound it hears, including chainsaws, camera shutters, and even human speech, with astonishing accuracy.",
+      "image_prompt": "Ghibli Art: A majestic Lyrebird perched on a glowing tree branch, its tail feathers shimmering with magical patterns. The bird opens its beak, and a symphony of sounds\u2014chainsaws, camera shutters, and human voices\u2014emanates in colorful, musical waves. The forest around it is alive with glowing plants and curious animals, like a wide-eyed fox and a sleepy koala. Magical sparkles float in the air, enhancing the enchanting atmosphere. The scene is bathed in soft, golden light, creating a sense of wonder.",
+      "image_url": "assets/img/quotes/quote_100.png",
+      "emphasis": {
+        "Lyrebird": "emphasis-2",
+        "mimic": "emphasis-2",
+        "astonishing accuracy": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_101",
+      "quote": "Did you know? The town of Longyearbyen in Norway has a law that requires residents to carry a rifle when leaving town to protect against polar bears.",
+      "image_prompt": "Ghibli Art: A charming, snow-covered town of Longyearbyen nestled in a valley, with colorful houses glowing warmly against the icy landscape. Residents in cozy winter attire carry rifles slung over their shoulders, their breath visible in the crisp air. A curious polar bear with a friendly expression peeks out from behind a snowdrift, its fur sparkling with frost. The sky is painted with the soft hues of the northern lights, casting a magical glow over the scene. Tiny, glowing snowflakes float gently in the air.",
+      "image_url": "assets/img/quotes/quote_101.png",
+      "emphasis": {
+        "Longyearbyen": "emphasis-2",
+        "carry a rifle": "emphasis-2",
+        "polar bears": "emphasis-1"
+      }
     }
   ]
 }

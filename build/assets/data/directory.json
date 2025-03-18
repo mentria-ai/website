@@ -611,6 +611,83 @@
         "phytoplankton": "emphasis-1",
         "glow blue": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_116",
+      "quote": "Did you know? The quokka, a small marsupial from Australia, is known as the 'world's happiest animal' due to its constant smile and friendly demeanor.",
+      "image_prompt": "Ghibli Art: A sunny meadow filled with vibrant wildflowers, where a group of quokkas with glowing smiles frolic and play. Golden hour light bathes the scene, casting warm hues on their fur. Tiny, magical fireflies hover around them, adding a whimsical touch. In the background, a sparkling stream winds through the meadow, with a small wooden bridge adorned with vines. The quokkas' eyes twinkle with joy as they interact with each other and the environment.",
+      "image_url": "assets/img/quotes/quote_116.png",
+      "emphasis": {
+        "quokka": "emphasis-2",
+        "world's happiest animal": "emphasis-1",
+        "constant smile": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_117",
+      "quote": "Did you know? The town of Giethoorn in the Netherlands has no roads; instead, it is connected by canals and footbridges, earning it the nickname 'Venice of the North.'",
+      "image_prompt": "Ghibli Art: A serene village with charming thatched-roof cottages surrounded by lush greenery and sparkling canals. Morning mist rises gently from the water, creating a dreamy atmosphere. Small boats glide silently along the canals, their reflections shimmering in the soft light. Footbridges adorned with blooming flowers connect the cottages, and tiny, glowing fairies flit around, adding a magical touch. The scene is peaceful, with ducks and swans gracefully swimming in the canals.",
+      "image_url": "assets/img/quotes/quote_117.png",
+      "emphasis": {
+        "Giethoorn": "emphasis-2",
+        "no roads": "emphasis-1",
+        "Venice of the North": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_118",
+      "quote": "Did you know? The tardigrade, also known as the water bear, can survive in extreme environments, including the vacuum of space, by entering a state of suspended animation.",
+      "image_prompt": "Ghibli Art: A microscopic view of a tardigrade floating in a glowing, ethereal space environment. The tiny creature is surrounded by shimmering stars and nebulae, with a golden aura protecting it. Its chubby, bear-like body is adorned with tiny, glowing particles, representing its resilience. In the background, a distant planet and a comet add to the cosmic setting. The tardigrade's eyes sparkle with determination as it drifts through the vastness of space.",
+      "image_url": "assets/img/quotes/quote_118.png",
+      "emphasis": {
+        "tardigrade": "emphasis-2",
+        "vacuum of space": "emphasis-1",
+        "suspended animation": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_119",
+      "quote": "Did you know? The town of Chefchaouen in Morocco is entirely painted in shades of blue, believed to symbolize the sky and heaven, creating a surreal, dreamlike atmosphere.",
+      "image_prompt": "Ghibli Art: A labyrinth of narrow, cobblestone streets lined with buildings painted in various shades of blue, from sky blue to deep indigo. The sun casts a golden glow, creating a warm contrast with the cool blue hues. Morning mist lingers in the air, adding a mystical quality. Tiny, glowing lanterns hang from the walls, and a few cats with exaggerated, curious expressions wander the streets. In the background, the Atlas Mountains rise majestically, their peaks touched by the soft light of dawn.",
+      "image_url": "assets/img/quotes/quote_119.png",
+      "emphasis": {
+        "Chefchaouen": "emphasis-2",
+        "blue": "emphasis-1",
+        "dreamlike atmosphere": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_120",
+      "quote": "Did you know? The Kakapo, a flightless parrot from New Zealand, has a unique mating ritual where males inflate like a balloon and emit low-frequency booms to attract females.",
+      "image_prompt": "Ghibli Art: A lush, green forest clearing where a male Kakapo puffs up like a balloon, its feathers glowing softly in the moonlight. Low-frequency booms ripple through the air, visible as shimmering waves. Females with curious expressions watch from the branches of ancient trees, their eyes reflecting the magical scene. Fireflies dance around the Kakapo, adding to the enchantment. The forest is alive with the sounds of nature, and the air is filled with a sense of wonder and anticipation.",
+      "image_url": "assets/img/quotes/quote_120.png",
+      "emphasis": {
+        "Kakapo": "emphasis-2",
+        "inflate like a balloon": "emphasis-1",
+        "low-frequency booms": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_121",
+      "quote": "Did you know? The Giant\u2019s Causeway in Northern Ireland is made up of 40,000 interlocking basalt columns, formed by ancient volcanic activity and steeped in mythical legends.",
+      "image_prompt": "Ghibli Art: A dramatic coastline where hexagonal basalt columns rise from the sea, their surfaces glistening with morning dew. The sun breaks through the clouds, casting a golden light on the columns and the crashing waves. Tiny, mythical creatures with glowing eyes peek out from the crevices, adding a magical touch. In the distance, a rainbow arches over the sea, and a lone figure stands on the columns, gazing out at the horizon. The scene is both majestic and mysterious.",
+      "image_url": "assets/img/quotes/quote_121.png",
+      "emphasis": {
+        "Giant\u2019s Causeway": "emphasis-2",
+        "40,000 interlocking basalt columns": "emphasis-1",
+        "mythical legends": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_122",
+      "quote": "Did you know? The bioluminescent waves of the Maldives glow blue at night due to millions of tiny marine organisms called phytoplankton.",
+      "image_prompt": "Ghibli Art: A serene beach at night, where the waves glow with an ethereal blue light, illuminating the shoreline. The sand sparkles with tiny, glowing particles, and the sky is filled with stars. A small boat with a lantern drifts on the glowing water, its reflection shimmering in the waves. Tiny, glowing fish leap out of the water, creating ripples of light. The air is filled with a sense of magic and tranquility, as if the ocean itself is alive with light.",
+      "image_url": "assets/img/quotes/quote_122.png",
+      "emphasis": {
+        "bioluminescent waves": "emphasis-2",
+        "glow blue": "emphasis-1",
+        "phytoplankton": "emphasis-2"
+      }
     }
   ]
 }

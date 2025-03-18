@@ -15,7 +15,7 @@ client = Together()
 
 def load_existing_stories():
     """Load existing tiny house stories from the directory.json file if it exists."""
-    json_path = Path("build/assets/data/directory.json")
+    json_path = Path("assets/data/directory.json")
     if json_path.exists():
         with open(json_path, "r") as f:
             return json.load(f)
@@ -36,7 +36,7 @@ def get_highest_quote_number(quotes_data):
 
 def save_stories(stories_data):
     """Save tiny house stories data to the directory.json file."""
-    json_path = Path("build/assets/data/directory.json")
+    json_path = Path("assets/data/directory.json")
     with open(json_path, "w") as f:
         json.dump(stories_data, f, indent=2)
     print(f"Saved {len(stories_data['quotes'])} tiny house stories to {json_path}")
@@ -182,8 +182,8 @@ def generate_and_save_image(prompt, image_path):
 
 def main():
     # Create necessary directories
-    os.makedirs("build/assets/img/quotes", exist_ok=True)
-    os.makedirs("build/assets/data", exist_ok=True)  # Ensure data directory exists too
+    os.makedirs("assets/img/quotes", exist_ok=True)
+    os.makedirs("assets/data", exist_ok=True)  # Ensure data directory exists too
     
     # Load existing stories
     stories_data = load_existing_stories()
@@ -207,7 +207,7 @@ def main():
         
         # Define image path
         image_filename = f"{story_id}.png"
-        image_path = f"build/assets/img/quotes/{image_filename}"
+        image_path = f"assets/img/quotes/{image_filename}"
         image_url = f"assets/img/quotes/{image_filename}"
         
         # Check if this image already exists, skip if it does

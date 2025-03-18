@@ -67,11 +67,23 @@ jobs:
         with:
           node-version: '20'
       
+      - name: Install jq
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            apt-get install -y jq
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install jq
+          elif [[ "$RUNNER_OS" == "Windows" ]]; then
+            choco install jq
+          fi
+        
+      
       - name: Log setup steps
         run: |
           echo "### Setup steps completed at $(date)" >> ${{ steps.init-log.outputs.log_file }}
           echo "- Repository checkout: ✅" >> ${{ steps.init-log.outputs.log_file }}
           echo "- Node.js setup: ✅" >> ${{ steps.init-log.outputs.log_file }}
+          echo "- jq installed: ✅" >> ${{ steps.init-log.outputs.log_file }}
           echo "" >> ${{ steps.init-log.outputs.log_file }}
           
       - name: Get discussion content
@@ -333,6 +345,8 @@ jobs:
       
       - name: Call Together AI API
         id: ai-response
+        env:
+          JQ_PATH: ${{ env.JQ_PATH }}
         run: |
           echo "### Calling Together AI API at $(date)" >> ${{ steps.init-log.outputs.log_file }}
           

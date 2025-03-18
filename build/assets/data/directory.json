@@ -364,6 +364,136 @@
         "Shizuoka": "emphasis-3",
         "essence": "emphasis-1"
       }
+    },
+    {
+      "id": "quote_41",
+      "quote": "In a tiny houseboat floating on a tranquil lake, a retractable roof opens to reveal a stargazing platform, while underwater windows offer glimpses of fish swimming beneath the surface.",
+      "image_prompt": "Ghibli Art: A charming tiny houseboat gently bobbing on a serene lake surrounded by lush greenery. The retractable roof is open, revealing a cozy stargazing platform with soft cushions and blankets. Underwater windows glow softly, showing colorful fish swimming beneath. A sleek black cat lounges on the deck, lazily watching dragonflies hover above the water. The scene is bathed in the warm golden light of sunset, with the lake reflecting the vibrant hues of the sky.",
+      "image_url": "assets/img/quotes/quote_41.png",
+      "emphasis": {
+        "houseboat": "emphasis-2",
+        "lake": "emphasis-3",
+        "stargazing": "emphasis-2",
+        "underwater": "emphasis-2",
+        "tranquil": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_42",
+      "quote": "A tiny greenhouse home in a blooming meadow features walls of glass that let in sunlight year-round, with a spiral staircase leading to a loft bedroom surrounded by hanging plants.",
+      "image_prompt": "Ghibli Art: A whimsical tiny greenhouse home nestled in a meadow bursting with wildflowers. The glass walls shimmer in the sunlight, revealing an interior filled with lush greenery and hanging plants. A spiral staircase winds up to a cozy loft bedroom, where a soft bed is surrounded by trailing vines. A curious calico cat peeks out from behind a potted fern, while butterflies flutter around the blooming flowers outside. The meadow stretches into the distance, with a soft haze of golden light enveloping the scene.",
+      "image_url": "assets/img/quotes/quote_42.png",
+      "emphasis": {
+        "greenhouse": "emphasis-2",
+        "meadow": "emphasis-3",
+        "sunlight": "emphasis-2",
+        "loft": "emphasis-2",
+        "blooming": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_43",
+      "quote": "In a tiny urban micro-apartment, a wall-mounted desk folds away to reveal a hidden Murphy bed, while vertical gardens bring a touch of nature to the bustling city life.",
+      "image_prompt": "Ghibli Art: A cozy tiny urban micro-apartment with cleverly designed interiors. A wall-mounted desk folds neatly into the wall, revealing a hidden Murphy bed. Vertical gardens line the walls, filled with vibrant green plants and tiny flowers. A blonde character sits at the desk, sketching in a notebook, while a fluffy white cat naps on the windowsill. Outside, the bustling city is alive with activity, but inside, the space feels calm and serene. The room is bathed in soft, warm light from a nearby lamp.",
+      "image_url": "assets/img/quotes/quote_43.png",
+      "emphasis": {
+        "micro-apartment": "emphasis-2",
+        "urban": "emphasis-3",
+        "Murphy": "emphasis-2",
+        "vertical": "emphasis-2",
+        "nature": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_44",
+      "quote": "A tiny mountaintop cabin with a wrap-around porch offers panoramic views of the valley below, where a wood-burning stove keeps the interior warm and inviting during snowy winters.",
+      "image_prompt": "Ghibli Art: A quaint tiny mountaintop cabin surrounded by snow-covered pines. The wrap-around porch offers breathtaking panoramic views of the valley below, with a soft blanket of snow covering the landscape. Inside, a wood-burning stove glows warmly, casting a cozy light on the rustic interiors. A ginger cat curls up on a plush rug near the stove, while a blonde character sips hot cocoa by the window. The scene is peaceful, with snowflakes gently falling outside and the mountains painted in soft blues and whites.",
+      "image_url": "assets/img/quotes/quote_44.png",
+      "emphasis": {
+        "mountaintop": "emphasis-2",
+        "cabin": "emphasis-2",
+        "panoramic": "emphasis-2",
+        "wood-burning": "emphasis-2",
+        "inviting": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_45",
+      "quote": "In a tiny off-grid home powered by solar panels, a composting toilet and rainwater collection system ensure sustainable living in harmony with nature.",
+      "image_prompt": "Ghibli Art: A rustic tiny off-grid home nestled in a dense forest. Solar panels glint on the roof, harnessing the power of the sun. A rainwater collection system channels water into a barrel, while a composting toilet is discreetly tucked away. The interior is simple yet cozy, with wooden furnishings and soft, natural light filtering through the windows. A sleek black cat lounges on the porch, watching birds flit through the trees. The forest is alive with the sounds of nature, creating a peaceful and harmonious atmosphere.",
+      "image_url": "assets/img/quotes/quote_45.png",
+      "emphasis": {
+        "off-grid": "emphasis-2",
+        "solar": "emphasis-2",
+        "composting": "emphasis-2",
+        "rainwater": "emphasis-2",
+        "sustainable": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_46",
+      "quote": "A tiny shipping container home with a rooftop garden provides fresh vegetables year-round, while large windows flood the interior with natural light.",
+      "image_prompt": "Ghibli Art: A vibrant tiny shipping container home transformed into a cozy living space. The rooftop garden is lush with fresh vegetables and herbs, thriving under the bright sun. Large windows let in streams of natural light, illuminating the cheerful interior. A tabby cat naps on a sunny windowsill, while a blonde character tends to the garden on the roof. The surrounding area is filled with wildflowers, and the sky is a brilliant blue with fluffy white clouds. The scene is full of life and color, embodying the joy of sustainable living.",
+      "image_url": "assets/img/quotes/quote_46.png",
+      "emphasis": {
+        "shipping": "emphasis-2",
+        "container": "emphasis-2",
+        "rooftop": "emphasis-2",
+        "vegetables": "emphasis-2",
+        "natural": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_47",
+      "quote": "In a tiny forest retreat, a loft bedroom overlooks a cozy living area with a fireplace, while a skylight offers a view of the stars at night.",
+      "image_prompt": "Ghibli Art: A charming tiny forest retreat surrounded by tall trees and lush greenery. The loft bedroom overlooks a cozy living area with a crackling fireplace, casting a warm glow on the wooden interiors. A skylight above the bed offers a clear view of the starry night sky. A curious calico cat explores the loft, while a blonde character relaxes by the fire with a book. The forest is peaceful, with the soft sounds of rustling leaves and distant owls. The scene is magical, with the stars twinkling brightly above.",
+      "image_url": "assets/img/quotes/quote_47.png",
+      "emphasis": {
+        "forest": "emphasis-3",
+        "loft": "emphasis-2",
+        "fireplace": "emphasis-2",
+        "skylight": "emphasis-2",
+        "cozy": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_48",
+      "quote": "A tiny beach house with a fold-out deck extends living space onto the sand, where a hammock swings gently in the ocean breeze.",
+      "image_prompt": "Ghibli Art: A delightful tiny beach house perched on the edge of a sandy shore. The fold-out deck extends the living space onto the sand, where a hammock swings gently in the ocean breeze. The interior is bright and airy, with large windows offering stunning views of the turquoise sea. A sleek black cat lounges on the deck, watching seagulls soar overhead. The beach is dotted with seashells, and the waves crash softly against the shore. The scene is serene, with the sun casting a golden glow over everything.",
+      "image_url": "assets/img/quotes/quote_48.png",
+      "emphasis": {
+        "beach": "emphasis-3",
+        "fold-out": "emphasis-2",
+        "hammock": "emphasis-2",
+        "ocean": "emphasis-2",
+        "gentle": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_49",
+      "quote": "In a tiny urban loft, a sliding bookshelf reveals a hidden workspace, while a rooftop terrace offers a peaceful escape from the city's hustle and bustle.",
+      "image_prompt": "Ghibli Art: A stylish tiny urban loft with cleverly designed interiors. A sliding bookshelf reveals a hidden workspace, complete with a desk and shelves filled with books. The rooftop terrace is a peaceful oasis, with potted plants and a cozy seating area offering a view of the city skyline. A fluffy white cat lounges on the terrace, basking in the sunlight. The city below is alive with activity, but the loft feels calm and serene. The scene is bathed in soft, warm light, creating a tranquil atmosphere.",
+      "image_url": "assets/img/quotes/quote_49.png",
+      "emphasis": {
+        "urban": "emphasis-3",
+        "sliding": "emphasis-2",
+        "workspace": "emphasis-2",
+        "rooftop": "emphasis-2",
+        "peaceful": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_50",
+      "quote": "A tiny cabin in the woods features a sunroom filled with potted plants, where a small table and chairs create a perfect spot for morning coffee.",
+      "image_prompt": "Ghibli Art: A quaint tiny cabin nestled in a dense forest. The sunroom is filled with potted plants, creating a lush, green oasis. A small table and chairs sit in the center, offering a perfect spot for morning coffee. A ginger cat lounges on the windowsill, basking in the sunlight. The forest outside is alive with the sounds of birds and rustling leaves. The scene is peaceful and serene, with the sun casting a warm glow on everything. The cabin feels like a hidden retreat, perfectly blending with the natural surroundings.",
+      "image_url": "assets/img/quotes/quote_50.png",
+      "emphasis": {
+        "cabin": "emphasis-2",
+        "woods": "emphasis-3",
+        "sunroom": "emphasis-2",
+        "plants": "emphasis-2",
+        "perfect": "emphasis-1"
+      }
     }
   ]
 }

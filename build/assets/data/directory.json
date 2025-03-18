@@ -850,6 +850,83 @@
         "new cells": "emphasis-2",
         "renewing itself": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_137",
+      "quote": "Did you know? The Greenland shark can live for over 400 years, making it the longest-living vertebrate on Earth, and it doesn\u2019t reach sexual maturity until it\u2019s about 150 years old.",
+      "image_prompt": "Ghibli Art: A majestic Greenland shark gliding through deep, icy waters, its ancient eyes glowing softly with wisdom. Golden sunlight filters through cracks in the ice above, casting ethereal beams into the dark blue depths. Tiny, bioluminescent creatures swirl around the shark, adding a magical touch. The shark\u2019s slow, deliberate movements exude a sense of timelessness, while a school of curious fish with exaggerated expressions follows it, marveling at its longevity.",
+      "image_url": "assets/img/quotes/quote_137.png",
+      "emphasis": {
+        "Greenland shark": "emphasis-2",
+        "400 years": "emphasis-1",
+        "sexual maturity": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_138",
+      "quote": "Did you know? The town of Rjukan in Norway uses giant mirrors to reflect sunlight into its valley during the winter months, bringing light to the shadowed town.",
+      "image_prompt": "Ghibli Art: A quaint Norwegian village nestled in a deep valley, with towering mountains on either side. Giant, gleaming mirrors mounted on the mountainside reflect golden sunlight onto the town below, creating a warm, magical glow. Villagers with rosy cheeks and cozy clothing gather in the illuminated square, their faces lit with joy. Tiny, glowing particles float in the air, enhancing the enchanted atmosphere. A curious fox with a fluffy tail watches from the edge of the forest, its eyes reflecting the light.",
+      "image_url": "assets/img/quotes/quote_138.png",
+      "emphasis": {
+        "giant mirrors": "emphasis-2",
+        "reflect sunlight": "emphasis-1",
+        "winter months": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_139",
+      "quote": "Did you know? The human body produces about 25 million new cells every second, constantly renewing itself to keep you alive and healthy.",
+      "image_prompt": "Ghibli Art: A whimsical, microscopic view inside the human body, with vibrant, glowing cells multiplying in a magical dance. Tiny, anthropomorphic cells with cheerful expressions work together, building new structures and repairing old ones. Golden light streams through translucent tissues, creating a warm, ethereal glow. Magical particles swirl around the cells, emphasizing their rapid activity. A curious, glowing white blood cell with a tiny hat watches over the process, ensuring everything runs smoothly.",
+      "image_url": "assets/img/quotes/quote_139.png",
+      "emphasis": {
+        "25 million": "emphasis-1",
+        "new cells": "emphasis-2",
+        "every second": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_140",
+      "quote": "Did you know? The narwhal\u2019s tusk is actually an elongated tooth that can grow up to 10 feet long and is used for sensing changes in its environment.",
+      "image_prompt": "Ghibli Art: A graceful narwhal swimming through icy Arctic waters, its long, spiraled tusk glowing faintly with a magical aura. Golden sunlight filters through the ice above, casting shimmering patterns on the water. Tiny, bioluminescent creatures swirl around the narwhal, adding a fantastical touch. The narwhal\u2019s tusk emits soft pulses of light, sensing the environment. A curious seal with wide eyes watches from a distance, fascinated by the narwhal\u2019s unique feature.",
+      "image_url": "assets/img/quotes/quote_140.png",
+      "emphasis": {
+        "narwhal\u2019s tusk": "emphasis-2",
+        "elongated tooth": "emphasis-2",
+        "10 feet long": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_141",
+      "quote": "Did you know? The ancient city of Derinkuyu in Turkey is an underground city that could house up to 20,000 people, complete with stables, chapels, and ventilation shafts.",
+      "image_prompt": "Ghibli Art: A sprawling underground city carved into soft, golden rock, with intricate passageways and chambers illuminated by glowing lanterns. Villagers with traditional clothing go about their daily lives, tending to stables, praying in chapels, and maintaining ventilation shafts. Tiny, magical creatures with glowing eyes peek out from hidden corners, adding a whimsical touch. Golden light filters through cracks in the ceiling, creating a warm, inviting atmosphere. A curious cat with a glowing collar explores the city, its eyes wide with wonder.",
+      "image_url": "assets/img/quotes/quote_141.png",
+      "emphasis": {
+        "Derinkuyu": "emphasis-2",
+        "underground city": "emphasis-1",
+        "20,000 people": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_142",
+      "quote": "Did you know? The Arctic fox\u2019s fur changes color with the seasons, turning white in winter and brown in summer, allowing it to blend seamlessly into its environment.",
+      "image_prompt": "Ghibli Art: A playful Arctic fox standing in a snowy winter landscape, its fur pure white and glowing softly under the pale winter sun. As the scene transitions to summer, the fox\u2019s fur gradually changes to a warm brown, blending perfectly with the lush, green surroundings. Tiny, glowing particles swirl around the fox, emphasizing the magical transformation. A curious hare with oversized ears watches from a distance, its eyes wide with amazement. The background shifts between seasons, creating a dynamic, enchanting scene.",
+      "image_url": "assets/img/quotes/quote_142.png",
+      "emphasis": {
+        "Arctic fox\u2019s fur": "emphasis-2",
+        "changes color": "emphasis-1",
+        "seasons": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_143",
+      "quote": "Did you know? The hummingbird is the only bird that can fly backward, thanks to its unique wing structure that allows it to hover and maneuver with incredible precision.",
+      "image_prompt": "Ghibli Art: A vibrant hummingbird with iridescent feathers hovering in mid-air, its wings a blur of motion. Golden sunlight filters through a lush, flower-filled garden, casting a warm glow. The hummingbird flies backward with ease, its tiny body surrounded by glowing, magical particles. Exaggerated, colorful flowers with cheerful faces sway in the breeze, adding a whimsical touch. A curious butterfly with oversized wings watches from a nearby flower, its eyes wide with wonder.",
+      "image_url": "assets/img/quotes/quote_143.png",
+      "emphasis": {
+        "hummingbird": "emphasis-2",
+        "fly backward": "emphasis-1",
+        "unique wing structure": "emphasis-2"
+      }
     }
   ]
 }

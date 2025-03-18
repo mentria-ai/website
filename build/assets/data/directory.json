@@ -450,6 +450,90 @@
         "carry a rifle": "emphasis-2",
         "polar bears": "emphasis-1"
       }
+    },
+    {
+      "id": "quote_102",
+      "quote": "Did you know? The Giant\u2019s Causeway in Northern Ireland is made up of 40,000 interlocking basalt columns, formed by ancient volcanic activity and steeped in mythical legends.",
+      "image_prompt": "Ghibli Art: A whimsical coastal scene with towering basalt columns stretching into the misty horizon. A small, curious fox with glowing eyes explores the hexagonal stones, while tiny fairies flit around, leaving trails of golden light. The sea sparkles under a soft, ethereal sunset, with waves gently lapping at the columns. In the distance, a faint silhouette of a giant from legend walks through the mist, adding a magical touch to the ancient landscape.",
+      "image_url": "assets/img/quotes/quote_102.png",
+      "emphasis": {
+        "Giant\u2019s Causeway": "emphasis-2",
+        "40,000": "emphasis-1",
+        "basalt columns": "emphasis-2",
+        "mythical legends": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_103",
+      "quote": "Did you know? The tardigrade, also known as the water bear, can survive in extreme environments, including the vacuum of space, by entering a state of suspended animation.",
+      "image_prompt": "Ghibli Art: A tiny, adorable tardigrade floats in the vastness of space, surrounded by glowing stars and swirling galaxies. Its translucent body glows softly, with magical particles emanating from it. A comet streaks by, leaving a trail of sparkling light. The tardigrade\u2019s tiny, expressive eyes look around in wonder, while a nearby planet with a vibrant, colorful atmosphere adds to the cosmic beauty. The scene is bathed in a soft, otherworldly light.",
+      "image_url": "assets/img/quotes/quote_103.png",
+      "emphasis": {
+        "tardigrade": "emphasis-2",
+        "water bear": "emphasis-2",
+        "vacuum of space": "emphasis-1",
+        "suspended animation": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_104",
+      "quote": "Did you know? The ancient city of Teotihuacan in Mexico has pyramids aligned with the stars, and its builders remain a mystery to this day.",
+      "image_prompt": "Ghibli Art: A mystical view of Teotihuacan\u2019s pyramids under a starry night sky. The pyramids glow faintly with an ancient, magical light, perfectly aligned with constellations above. A small, glowing fox with a bushy tail walks along the stone pathways, leaving a trail of shimmering footprints. The air is filled with tiny, floating orbs of light, and the scene is bathed in a soft, ethereal glow. In the distance, shadowy figures of the mysterious builders can be seen, adding an air of intrigue.",
+      "image_url": "assets/img/quotes/quote_104.png",
+      "emphasis": {
+        "Teotihuacan": "emphasis-2",
+        "pyramids": "emphasis-2",
+        "aligned with the stars": "emphasis-1",
+        "mystery": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_105",
+      "quote": "Did you know? The bioluminescent waves of the Maldives glow blue at night due to millions of tiny marine organisms called phytoplankton.",
+      "image_prompt": "Ghibli Art: A serene beach scene at night, with waves glowing a magical blue as they crash onto the shore. The water sparkles with bioluminescent light, creating a dreamlike atmosphere. A small, curious crab with glowing eyes scuttles along the sand, leaving tiny, glowing footprints. The sky is filled with stars, and a crescent moon casts a soft, silvery light over the scene. Tiny, glowing phytoplankton swirl in the water, creating mesmerizing patterns.",
+      "image_url": "assets/img/quotes/quote_105.png",
+      "emphasis": {
+        "bioluminescent waves": "emphasis-2",
+        "Maldives": "emphasis-2",
+        "phytoplankton": "emphasis-1",
+        "glow blue": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_106",
+      "quote": "Did you know? The town of Chefchaouen in Morocco is entirely painted in shades of blue, believed to symbolize the sky and heaven, creating a surreal, dreamlike atmosphere.",
+      "image_prompt": "Ghibli Art: A charming, blue-painted town nestled in the mountains, with narrow, winding streets and vibrant blue buildings. The air is filled with a soft, golden light as the sun sets, casting long shadows. A small, curious cat with a glowing collar explores the streets, while tiny, magical birds with blue feathers flit around. The scene is enhanced by a gentle mist, and the sky above is a deep, serene blue, blending seamlessly with the town.",
+      "image_url": "assets/img/quotes/quote_106.png",
+      "emphasis": {
+        "Chefchaouen": "emphasis-2",
+        "shades of blue": "emphasis-1",
+        "symbolize the sky": "emphasis-2",
+        "dreamlike atmosphere": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_107",
+      "quote": "Did you know? The Kakapo, a flightless parrot from New Zealand, has a unique mating ritual where males inflate like a balloon and emit low-frequency booms to attract females.",
+      "image_prompt": "Ghibli Art: A lush, green forest in New Zealand, with a Kakapo parrot inflated like a balloon, emitting glowing, low-frequency booms that ripple through the air. The scene is bathed in soft, golden light filtering through the trees. Tiny, glowing insects and fairies are drawn to the sound, creating a magical atmosphere. The Kakapo\u2019s feathers shimmer with a subtle glow, and the surrounding plants seem to sway in rhythm with the booms. A curious female Kakapo watches from a nearby branch, her eyes wide with wonder.",
+      "image_url": "assets/img/quotes/quote_107.png",
+      "emphasis": {
+        "Kakapo": "emphasis-2",
+        "flightless parrot": "emphasis-2",
+        "inflate like a balloon": "emphasis-1",
+        "low-frequency booms": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_108",
+      "quote": "Did you know? The ancient city of Mohenjo-Daro in Pakistan had a sophisticated drainage system, complete with covered sewers and manholes, over 4,000 years ago.",
+      "image_prompt": "Ghibli Art: A bustling ancient city with intricate stone buildings and a sophisticated drainage system. Covered sewers and manholes are visible, with tiny, glowing spirits of water flowing through them. The air is filled with a soft, golden light as the sun sets, casting long shadows. A small, curious fox with a glowing tail explores the streets, while tiny, magical birds with colorful feathers flit around. The scene is enhanced by a gentle mist, and the sky above is a deep, serene blue.",
+      "image_url": "assets/img/quotes/quote_108.png",
+      "emphasis": {
+        "Mohenjo-Daro": "emphasis-2",
+        "sophisticated drainage system": "emphasis-1",
+        "covered sewers": "emphasis-2",
+        "4,000 years ago": "emphasis-2"
+      }
     }
   ]
 }

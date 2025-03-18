@@ -1572,6 +1572,83 @@
         "44,000 miles": "emphasis-2",
         "longest migration": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_200",
+      "quote": "Did you know? The bowerbird decorates its nest with blue objects, from feathers to bottle caps, to attract a mate, creating a stunning, color-coordinated display.",
+      "image_prompt": "Ghibli Art: A meticulous bowerbird arranging a nest filled with vibrant blue objects\u2014feathers, flowers, and shiny bottle caps\u2014under the soft glow of a golden sunset. The forest floor is dotted with tiny glowing mushrooms, and a gentle mist swirls around the scene. A curious squirrel watches from a branch, its eyes wide with wonder, as the bird steps back to admire its colorful masterpiece. Magical blue particles float in the air, enhancing the nest\u2019s enchanting allure.",
+      "image_url": "assets/img/quotes/quote_200.png",
+      "emphasis": {
+        "bowerbird": "emphasis-2",
+        "blue objects": "emphasis-1",
+        "color-coordinated display": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_201",
+      "quote": "Did you know? The Great Barrier Reef is so vast it can be seen from space, and it\u2019s home to over 1,500 species of fish and 400 types of coral.",
+      "image_prompt": "Ghibli Art: A breathtaking aerial view of the Great Barrier Reef, its vibrant corals and turquoise waters glowing under the golden light of a setting sun. Schools of colorful fish swim in intricate patterns, their scales shimmering like jewels. A magical mist hovers above the water, and tiny glowing sea creatures add a whimsical touch. In the distance, a Ghibli-style spaceship hovers, its occupants marveling at the reef\u2019s beauty from above.",
+      "image_url": "assets/img/quotes/quote_201.png",
+      "emphasis": {
+        "Great Barrier Reef": "emphasis-1",
+        "space": "emphasis-2",
+        "1,500 species": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_202",
+      "quote": "Did you know? The Venus flytrap counts the number of times its prey touches its hairs before snapping shut, ensuring it only catches live insects.",
+      "image_prompt": "Ghibli Art: A whimsical Venus flytrap in a lush, glowing forest, its red and green leaves sparkling with dewdrops. A curious fly buzzes around, touching the plant\u2019s tiny hairs, which glow faintly with each contact. The flytrap\u2019s inner surface is lined with magical, glowing patterns, and the air is filled with golden light filtering through the trees. Tiny, glowing fireflies watch from nearby leaves as the flytrap prepares to snap shut, its movements slow and deliberate.",
+      "image_url": "assets/img/quotes/quote_202.png",
+      "emphasis": {
+        "Venus flytrap": "emphasis-2",
+        "counts": "emphasis-1",
+        "snaps shut": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_203",
+      "quote": "Did you know? The town of Coober Pedy in Australia is built underground to escape the scorching heat, with homes, churches, and even hotels carved into the earth.",
+      "image_prompt": "Ghibli Art: A charming underground town illuminated by warm, glowing lanterns, with cozy homes and a whimsical church carved into the earth\u2019s walls. The air is cool and filled with a soft, golden light, while tiny glowing crystals embedded in the walls add a magical touch. A family of kangaroos peeks out from a doorway, their eyes wide with curiosity, as a gentle breeze carries the scent of eucalyptus through the tunnels. Outside, the scorching desert sun creates a stark contrast, its heat shimmering in the air.",
+      "image_url": "assets/img/quotes/quote_203.png",
+      "emphasis": {
+        "Coober Pedy": "emphasis-2",
+        "underground": "emphasis-1",
+        "scorching heat": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_204",
+      "quote": "Did you know? The mantis shrimp\u2019s punch is so fast it boils the water around it, creating tiny bubbles that produce light and heat in a phenomenon called cavitation.",
+      "image_prompt": "Ghibli Art: A vibrant mantis shrimp in a coral reef, its claws glowing with energy as it delivers a punch that sends ripples through the water. Tiny bubbles form and burst, creating flashes of light and heat that illuminate the surrounding area. The water shimmers with golden light, and curious fish with exaggerated expressions watch in awe. Magical particles swirl around the shrimp, emphasizing the power of its strike, while the coral reef glows in soft pastel colors.",
+      "image_url": "assets/img/quotes/quote_204.png",
+      "emphasis": {
+        "mantis shrimp": "emphasis-2",
+        "boils": "emphasis-1",
+        "cavitation": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_205",
+      "quote": "Did you know? The ancient city of Machu Picchu was built without mortar, its stones fitting together so precisely that not even a blade of grass can slip between them.",
+      "image_prompt": "Ghibli Art: The majestic ruins of Machu Picchu bathed in the soft glow of sunrise, with mist swirling around the stone structures. The perfectly fitted stones glow faintly, as if imbued with ancient magic. A curious llama with a whimsical expression wanders through the ruins, its fur shimmering in the golden light. Tiny glowing spirits hover around the stones, adding an ethereal touch to the scene, while the surrounding mountains rise dramatically in the background.",
+      "image_url": "assets/img/quotes/quote_205.png",
+      "emphasis": {
+        "Machu Picchu": "emphasis-2",
+        "without mortar": "emphasis-1",
+        "blade of grass": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_206",
+      "quote": "Did you know? The platypus is one of the few mammals that lays eggs and has venomous spurs on its hind legs, making it a truly unique creature.",
+      "image_prompt": "Ghibli Art: A whimsical platypus swimming in a glowing river, its duck-like bill and beaver-like tail creating a charming silhouette. Tiny glowing eggs rest in a nest on the riverbank, while the platypus\u2019s hind legs shimmer with a faint, venomous glow. Fireflies hover around the scene, casting a soft golden light, and magical water droplets sparkle in the air. Curious fish with exaggerated expressions peek out from the water, watching the platypus with fascination.",
+      "image_url": "assets/img/quotes/quote_206.png",
+      "emphasis": {
+        "platypus": "emphasis-2",
+        "lays eggs": "emphasis-1",
+        "venomous spurs": "emphasis-2"
+      }
     }
   ]
 }

@@ -927,6 +927,90 @@
         "fly backward": "emphasis-1",
         "unique wing structure": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_144",
+      "quote": "Did you know? The albatross can glide for thousands of miles without flapping its wings, using wind currents to stay aloft for weeks at a time.",
+      "image_prompt": "Ghibli Art: A majestic albatross soaring gracefully over a vast, shimmering ocean at sunset. Its wings catch the golden light, glowing faintly as it rides invisible wind currents. Tiny, glowing particles trail behind it, symbolizing its effortless flight. Below, playful dolphins leap out of the water, their splashes creating sparkling rainbows. The horizon is painted in warm hues of orange and pink, with a faint mist rising from the sea.",
+      "image_url": "assets/img/quotes/quote_144.png",
+      "emphasis": {
+        "albatross": "emphasis-2",
+        "glide": "emphasis-2",
+        "thousands of miles": "emphasis-1",
+        "wind currents": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_145",
+      "quote": "Did you know? The ancient city of Palmyra in Syria was a thriving oasis and trade hub, with towering temples and a unique blend of Greco-Roman and Persian architecture.",
+      "image_prompt": "Ghibli Art: A bustling ancient city nestled in a golden desert oasis, with towering temples and grand columns glowing under the soft light of a setting sun. Caravans of camels with whimsical, exaggerated expressions carry goods through the streets. Tiny, glowing fireflies hover around the temples, adding a magical touch. The air is filled with the scent of spices and the sound of distant music, creating a vibrant, enchanting atmosphere.",
+      "image_url": "assets/img/quotes/quote_145.png",
+      "emphasis": {
+        "Palmyra": "emphasis-2",
+        "oasis": "emphasis-2",
+        "Greco-Roman": "emphasis-2",
+        "Persian architecture": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_146",
+      "quote": "Did you know? The tardigrade, or water bear, can survive extreme conditions, including radiation, dehydration, and even the vacuum of space, by entering a state of suspended animation.",
+      "image_prompt": "Ghibli Art: A tiny, adorable tardigrade floating in a shimmering, magical bubble in outer space. Its translucent body glows faintly, with tiny stars and galaxies reflected in its eyes. Around it, glowing particles swirl, representing its resilience. The background is a deep, starry expanse with colorful nebulae, creating a sense of wonder and awe. The tardigrade\u2019s tiny legs wiggle as it drifts peacefully through the cosmos.",
+      "image_url": "assets/img/quotes/quote_146.png",
+      "emphasis": {
+        "tardigrade": "emphasis-2",
+        "extreme conditions": "emphasis-2",
+        "vacuum of space": "emphasis-1",
+        "suspended animation": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_147",
+      "quote": "Did you know? The Japanese art of furoshiki involves wrapping objects in cloth, creating beautiful, reusable packages that are both practical and eco-friendly.",
+      "image_prompt": "Ghibli Art: A cozy Japanese home bathed in soft, golden light, with a young woman skillfully wrapping a gift in a vibrant, patterned furoshiki cloth. The cloth seems to come alive, with tiny, glowing threads weaving themselves into intricate designs. Outside, cherry blossoms drift lazily in the breeze, and a curious cat with oversized eyes watches intently. The scene is warm and inviting, with a magical, eco-friendly vibe.",
+      "image_url": "assets/img/quotes/quote_147.png",
+      "emphasis": {
+        "furoshiki": "emphasis-2",
+        "wrapping": "emphasis-2",
+        "reusable": "emphasis-1",
+        "eco-friendly": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_148",
+      "quote": "Did you know? The human body contains enough carbon to fill 9,000 pencils, making us walking carbon reservoirs.",
+      "image_prompt": "Ghibli Art: A whimsical scene of a person standing in a lush, enchanted forest, with glowing carbon particles swirling around them. The particles transform into tiny, animated pencils that float and dance in the air. The forest is alive with vibrant colors, and magical creatures peek out from behind trees. The person smiles, surrounded by the playful pencils, creating a sense of wonder and connection to nature.",
+      "image_url": "assets/img/quotes/quote_148.png",
+      "emphasis": {
+        "human body": "emphasis-2",
+        "carbon": "emphasis-1",
+        "9,000 pencils": "emphasis-2",
+        "walking carbon reservoirs": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_149",
+      "quote": "Did you know? The rings of Saturn are made up of billions of ice and rock particles, some as small as grains of sand and others as large as mountains.",
+      "image_prompt": "Ghibli Art: A breathtaking view of Saturn\u2019s rings glowing softly in the dark expanse of space. Tiny, glowing ice and rock particles swirl around the planet, creating a mesmerizing dance. In the foreground, a whimsical spaceship with exaggerated, Ghibli-style features floats gently, its windows glowing warmly. The background is filled with twinkling stars and colorful nebulae, adding to the magical, otherworldly atmosphere.",
+      "image_url": "assets/img/quotes/quote_149.png",
+      "emphasis": {
+        "Saturn": "emphasis-2",
+        "rings": "emphasis-2",
+        "billions": "emphasis-1",
+        "ice and rock particles": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_150",
+      "quote": "Did you know? The platypus is one of the few mammals that lay eggs and has venomous spurs on its hind legs, making it a truly unique creature.",
+      "image_prompt": "Ghibli Art: A curious platypus waddling along the edge of a sparkling, enchanted river. Its soft fur glows faintly, and its webbed feet leave tiny, glowing footprints in the sand. Nearby, a nest of eggs emits a gentle, golden light. The platypus\u2019s hind legs have faintly glowing spurs, adding a touch of mystery. The river is surrounded by lush, vibrant vegetation, and magical fireflies dance in the air, creating a serene, magical scene.",
+      "image_url": "assets/img/quotes/quote_150.png",
+      "emphasis": {
+        "platypus": "emphasis-2",
+        "mammals": "emphasis-2",
+        "lay eggs": "emphasis-1",
+        "venomous spurs": "emphasis-2"
+      }
     }
   ]
 }

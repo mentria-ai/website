@@ -10,6 +10,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingIndicator = document.querySelector('.loading-indicator');
     const bottomControlsContainer = document.querySelector('.bottom-controls-container');
     
+    // Current quote tracking
+    let currentQuoteId = null;
+    
+    // Listen for quote changes to update like button state
+    document.addEventListener('quoteChanged', function(e) {
+        currentQuoteId = e.detail.id;
+        updateLikeButtonState(e.detail.liked || false);
+    });
+    
     // Show loading indicator if it exists
     if (loadingIndicator) {
         loadingIndicator.style.display = 'block';
@@ -30,6 +39,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     }
     
+    // Update like button state based on saved preferences
+    function updateLikeButtonState(isLiked) {
+        if (!likeBtn) return;
+        
+        const heartIcon = likeBtn.querySelector('i');
+        if (!heartIcon) return;
+        
+        if (isLiked) {
+            // Show as liked
+            heartIcon.classList.remove('far');
+            heartIcon.classList.add('fas', 'liked');
+        } else {
+            // Show as not liked
+            heartIcon.classList.remove('fas', 'liked');
+            heartIcon.classList.add('far');
+        }
+    }
+    
+    // Save liked state to localStorage
+    function saveLikedState(quoteId, isLiked) {
+        try {
+            if (!quoteId) return;
+            
+            // Load existing liked quotes
+            let likedQuotes = JSON.parse(localStorage.getItem('likedQuotes') || '[]');
+            
+            if (isLiked) {
+                // Add to liked quotes if not already present
+                if (!likedQuotes.includes(quoteId)) {
+                    likedQuotes.push(quoteId);
+                }
+            } else {
+                // Remove from liked quotes
+                likedQuotes = likedQuotes.filter(id => id !== quoteId);
+            }
+            
+            // Save back to localStorage
+            localStorage.setItem('likedQuotes', JSON.stringify(likedQuotes));
+            console.log(`Quote ${quoteId} ${isLiked ? 'liked' : 'unliked'}`);
+        } catch (error) {
+            console.error('Error saving liked state:', error);
+        }
+    }
+    
     // Double-click to like
     let lastClickTime = 0;
     mediaContainer.addEventListener('click', function(e) {
@@ -43,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (timeDiff < 300) {
             // Double click detected
-            likeMedia();
+            likeMedia(true); // Force like on double-click
             
             // Create and animate heart icon
             const heart = document.createElement('i');
@@ -81,20 +134,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Like button functionality
-    likeBtn.addEventListener('click', likeMedia);
+    likeBtn.addEventListener('click', () => likeMedia());
     
-    function likeMedia() {
-        const heartIcon = likeBtn.querySelector('i');
+    function likeMedia(forceLike = false) {
+        if (!likeBtn || !currentQuoteId) return;
         
-        if (heartIcon.classList.contains('far')) {
-            // Like
-            heartIcon.classList.remove('far');
-            heartIcon.classList.add('fas', 'liked');
-        } else {
-            // Unlike
-            heartIcon.classList.remove('fas', 'liked');
-            heartIcon.classList.add('far');
-        }
+        const heartIcon = likeBtn.querySelector('i');
+        if (!heartIcon) return;
+        
+        const currentlyLiked = heartIcon.classList.contains('fas');
+        const newLikedState = forceLike ? true : !currentlyLiked;
+        
+        // Update UI
+        updateLikeButtonState(newLikedState);
+        
+        // Save state
+        saveLikedState(currentQuoteId, newLikedState);
     }
     
     // Handle window resize to maintain aspect ratio

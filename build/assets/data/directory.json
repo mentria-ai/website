@@ -1,628 +1,377 @@
 {
   "quotes": [
     {
-      "id": "quote_1",
-      "quote": "In a tiny treehouse perched high in an ancient oak, a spiral staircase winds around the trunk, leading to a cozy loft where a hammock sways gently in the breeze, offering a perfect spot for afternoon naps.",
-      "image_prompt": "Ghibli Art: A whimsical treehouse tiny home nestled in the branches of a towering ancient oak. The spiral staircase, crafted from weathered wood, winds gracefully around the trunk. Inside, a cozy loft features a hammock strung between beams, gently swaying in the breeze. Sunlight filters through the leaves, casting dappled shadows on the wooden floor. A sleek black cat lounges on a windowsill, watching birds flutter by. The surrounding forest is alive with the sounds of rustling leaves and distant bird calls, creating a serene and magical atmosphere.",
-      "image_url": "assets/img/quotes/quote_1.png",
+      "id": "quote_61",
+      "quote": "Did you know? The heart of a blue whale is so large that a small child could crawl through its arteries.",
+      "image_prompt": "Ghibli Art: A colossal blue whale swims gracefully through a shimmering, sunlit ocean. Its massive heart, glowing faintly, is visible through its translucent skin. A curious child, dressed in a whimsical diving suit, floats nearby, peering into the whale's enormous artery. Golden light filters through the water, illuminating tiny glowing plankton. A school of colorful fish with exaggerated expressions watches in awe, while magical bubbles rise around the scene.",
+      "image_url": "assets/img/quotes/quote_61.png",
       "emphasis": {
-        "treehouse": "emphasis-2",
-        "oak": "emphasis-3",
-        "hammock": "emphasis-2",
-        "cozy": "emphasis-1"
+        "blue whale": "emphasis-2",
+        "heart": "emphasis-1",
+        "crawl": "emphasis-2"
       }
     },
     {
-      "id": "quote_2",
-      "quote": "A tiny beachfront cabin with a retractable glass wall opens to the sound of waves, where a built-in daybed transforms into a stargazing platform under the night sky.",
-      "image_prompt": "Ghibli Art: A charming beachfront tiny cabin with a retractable glass wall that opens to the soothing sound of waves. Inside, a built-in daybed transforms into a stargazing platform under the night sky. The interior is adorned with soft, neutral tones and nautical decor. A ginger cat naps on a cushioned window seat, basking in the moonlight. The beach is illuminated by the soft glow of lanterns, with the ocean stretching endlessly into the horizon. Stars twinkle above, creating a magical and tranquil setting.",
-      "image_url": "assets/img/quotes/quote_2.png",
+      "id": "quote_62",
+      "quote": "Did you know? The Eiffel Tower can grow taller by up to 6 inches during the summer due to thermal expansion.",
+      "image_prompt": "Ghibli Art: The Eiffel Tower stands majestically in a bustling Parisian square, its iron structure glowing faintly in the warm summer sun. As the temperature rises, the tower stretches upward, its tip reaching higher into the sky. Tiny, whimsical birds with exaggerated expressions flutter around, chirping in surprise. Golden light bathes the scene, with magical particles shimmering in the air. A group of curious onlookers, dressed in vintage attire, point and marvel at the phenomenon.",
+      "image_url": "assets/img/quotes/quote_62.png",
       "emphasis": {
-        "beachfront": "emphasis-2",
-        "glass": "emphasis-2",
-        "stargazing": "emphasis-2",
-        "tranquil": "emphasis-1"
+        "Eiffel Tower": "emphasis-2",
+        "6 inches": "emphasis-1",
+        "thermal expansion": "emphasis-2"
       }
     },
     {
-      "id": "quote_3",
-      "quote": "In a tiny urban micro-apartment, a wall-mounted desk folds away to reveal a hidden Murphy bed, while vertical gardens bring a touch of nature to the bustling city life.",
-      "image_prompt": "Ghibli Art: A sleek urban micro-apartment with a wall-mounted desk that folds away to reveal a hidden Murphy bed. Vertical gardens line the walls, bringing a touch of nature to the bustling city life. The apartment is bathed in soft, natural light from large windows overlooking the cityscape. A calico cat lounges on a cushioned chair, watching the world go by. The city outside is alive with activity, yet the apartment remains a peaceful oasis. The Ghibli-style art captures the harmony between urban living and natural beauty.",
-      "image_url": "assets/img/quotes/quote_3.png",
+      "id": "quote_63",
+      "quote": "Did you know? Honey never spoils; archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still edible.",
+      "image_prompt": "Ghibli Art: An ancient Egyptian tomb illuminated by soft, golden light filtering through cracks in the stone walls. A clay pot filled with golden honey sits on a pedestal, surrounded by intricate hieroglyphs. Tiny, glowing bees with exaggerated expressions hover around the pot, their wings shimmering with magical particles. A curious archaeologist, dressed in vintage attire, examines the honey with a magnifying glass, while a whimsical cat with glowing eyes watches from the shadows.",
+      "image_url": "assets/img/quotes/quote_63.png",
       "emphasis": {
-        "urban": "emphasis-2",
-        "Murphy": "emphasis-2",
-        "vertical": "emphasis-2",
-        "harmony": "emphasis-1"
+        "Honey": "emphasis-1",
+        "3,000 years old": "emphasis-2",
+        "edible": "emphasis-2"
       }
     },
     {
-      "id": "quote_4",
-      "quote": "A tiny mountaintop cabin with a wrap-around porch offers panoramic views of the valley below, where a wood-burning stove keeps the interior warm and inviting during snowy winters.",
-      "image_prompt": "Ghibli Art: A cozy mountaintop tiny cabin with a wrap-around porch offering panoramic views of the valley below. Snow blankets the landscape, and a wood-burning stove keeps the interior warm and inviting. The cabin is adorned with rustic decor, including a plush armchair and a knitted throw. A white cat with blue eyes curls up by the stove, enjoying the warmth. The snowy mountains in the background are painted in soft blues and whites, with smoke gently rising from the chimney. The scene exudes a sense of peace and solitude.",
-      "image_url": "assets/img/quotes/quote_4.png",
+      "id": "quote_64",
+      "quote": "Did you know? The mantis shrimp can punch with the speed of a bullet, creating shockwaves that stun its prey.",
+      "image_prompt": "Ghibli Art: A vibrant coral reef bathed in golden sunlight, with a mantis shrimp perched on a rock. Its claws glow faintly as it prepares to strike, creating a shockwave that ripples through the water. Tiny, colorful fish with exaggerated expressions are caught in the shockwave, their bodies frozen in mid-air. Magical particles swirl around the shrimp, highlighting its incredible speed. A curious octopus with glowing eyes watches from a nearby crevice.",
+      "image_url": "assets/img/quotes/quote_64.png",
       "emphasis": {
-        "mountaintop": "emphasis-2",
-        "panoramic": "emphasis-2",
-        "wood-burning": "emphasis-2",
-        "solitude": "emphasis-1"
+        "mantis shrimp": "emphasis-2",
+        "bullet": "emphasis-1",
+        "shockwaves": "emphasis-2"
       }
     },
     {
-      "id": "quote_5",
-      "quote": "In a tiny off-grid home powered by solar panels, a composting toilet and rainwater collection system ensure sustainable living in harmony with nature.",
-      "image_prompt": "Ghibli Art: A tiny off-grid home nestled in a lush forest, powered by solar panels on the roof. A composting toilet and rainwater collection system are cleverly integrated into the design, ensuring sustainable living. The home is surrounded by vibrant greenery, with wildflowers blooming in the foreground. A tabby cat explores the garden, sniffing at the flowers. The forest is alive with the sounds of chirping birds and rustling leaves. The Ghibli-style art captures the harmony between modern technology and natural beauty.",
-      "image_url": "assets/img/quotes/quote_5.png",
+      "id": "quote_65",
+      "quote": "Did you know? The Great Wall of China is not a single continuous wall but a series of walls and fortifications built by different dynasties.",
+      "image_prompt": "Ghibli Art: A sprawling landscape of rolling hills and lush greenery, with sections of the Great Wall of China winding through the terrain. Each section has a distinct style, reflecting the dynasty that built it. Tiny, whimsical workers with exaggerated expressions are seen constructing different parts of the wall. Golden light bathes the scene, with magical particles floating in the air. A curious dragon with glowing scales flies overhead, observing the construction.",
+      "image_url": "assets/img/quotes/quote_65.png",
       "emphasis": {
-        "off-grid": "emphasis-2",
-        "solar": "emphasis-2",
-        "composting": "emphasis-2",
-        "sustainable": "emphasis-1"
+        "Great Wall of China": "emphasis-2",
+        "series": "emphasis-1",
+        "dynasties": "emphasis-2"
       }
     },
     {
-      "id": "quote_6",
-      "quote": "A tiny shipping container home with a rooftop garden provides fresh vegetables year-round, while large windows flood the interior with natural light.",
-      "image_prompt": "Ghibli Art: A tiny shipping container home transformed into a cozy living space with a rooftop garden that provides fresh vegetables year-round. Large windows flood the interior with natural light, highlighting the minimalist decor. The rooftop garden is lush with greenery, including tomatoes, lettuce, and herbs. A black cat lounges on the roof, basking in the sunlight. The surrounding landscape is painted in soft greens and yellows, with a clear blue sky overhead. The Ghibli-style art captures the simplicity and beauty of sustainable living.",
-      "image_url": "assets/img/quotes/quote_6.png",
+      "id": "quote_66",
+      "quote": "Did you know? The human nose can detect over 1 trillion different scents, far more than previously thought.",
+      "image_prompt": "Ghibli Art: A whimsical garden filled with vibrant flowers, each emitting a unique, glowing scent. A person with an exaggerated nose sniffs the air, their eyes wide with wonder. Tiny, magical particles representing different scents swirl around them, creating a colorful, fragrant aura. Golden light filters through the trees, illuminating the scene. Curious animals with glowing eyes, like rabbits and birds, watch from the bushes, enchanted by the display.",
+      "image_url": "assets/img/quotes/quote_66.png",
       "emphasis": {
-        "shipping": "emphasis-2",
-        "rooftop": "emphasis-2",
-        "vegetables": "emphasis-2",
-        "simplicity": "emphasis-1"
+        "human nose": "emphasis-2",
+        "1 trillion": "emphasis-1",
+        "scents": "emphasis-2"
       }
     },
     {
-      "id": "quote_7",
-      "quote": "In a tiny forest retreat, a loft bedroom overlooks a cozy living area with a fireplace, while a skylight offers a view of the stars at night.",
-      "image_prompt": "Ghibli Art: A tiny forest retreat with a loft bedroom that overlooks a cozy living area featuring a crackling fireplace. A skylight in the loft offers a view of the stars at night, creating a magical atmosphere. The interior is adorned with warm, earthy tones and rustic decor. A gray cat curls up by the fireplace, enjoying the warmth. The surrounding forest is painted in deep greens and browns, with fireflies flickering in the night. The Ghibli-style art captures the enchantment of living close to nature.",
-      "image_url": "assets/img/quotes/quote_7.png",
+      "id": "quote_67",
+      "quote": "Did you know? The Sahara Desert was once a lush, green landscape with rivers and lakes, home to diverse wildlife.",
+      "image_prompt": "Ghibli Art: A lush, green landscape with flowing rivers and sparkling lakes, teeming with diverse wildlife like elephants, giraffes, and crocodiles. The scene transitions to the present-day Sahara Desert, with golden sand dunes stretching into the distance. Magical particles representing the passage of time swirl around the scene. A curious camel with glowing eyes walks through the desert, while a whimsical bird with exaggerated expressions flies overhead, observing the transformation.",
+      "image_url": "assets/img/quotes/quote_67.png",
       "emphasis": {
-        "forest": "emphasis-2",
-        "loft": "emphasis-2",
-        "skylight": "emphasis-2",
-        "enchantment": "emphasis-1"
+        "Sahara Desert": "emphasis-2",
+        "lush": "emphasis-1",
+        "wildlife": "emphasis-2"
       }
     },
     {
-      "id": "quote_8",
-      "quote": "A tiny beach house with a fold-out deck extends living space onto the sand, where a hammock swings gently in the ocean breeze.",
-      "image_prompt": "Ghibli Art: A tiny beach house with a fold-out deck that extends living space onto the sand, where a hammock swings gently in the ocean breeze. The interior is bright and airy, with nautical decor and large windows offering stunning ocean views. A blonde character lounges in the hammock, reading a book. A Siamese cat naps on the deck, enjoying the warm sun. The beach is painted in soft pastels, with waves gently lapping at the shore. The Ghibli-style art captures the relaxed and carefree vibe of beach living.",
-      "image_url": "assets/img/quotes/quote_8.png",
+      "id": "quote_68",
+      "quote": "Did you know? The Andromeda Galaxy is on a collision course with the Milky Way and will merge with it in about 4 billion years.",
+      "image_prompt": "Ghibli Art: A vast, starry night sky with the Milky Way and Andromeda Galaxy glowing brightly, their spiral arms slowly intertwining. Magical particles representing stars and cosmic dust swirl around the galaxies, creating a mesmerizing display. Tiny, whimsical aliens with exaggerated expressions watch from a nearby planet, their eyes wide with wonder. Golden light bathes the scene, highlighting the beauty of the cosmic dance.",
+      "image_url": "assets/img/quotes/quote_68.png",
       "emphasis": {
-        "beach": "emphasis-2",
-        "fold-out": "emphasis-2",
-        "hammock": "emphasis-2",
-        "carefree": "emphasis-1"
+        "Andromeda Galaxy": "emphasis-2",
+        "collision": "emphasis-1",
+        "4 billion years": "emphasis-2"
       }
     },
     {
-      "id": "quote_9",
-      "quote": "In a tiny urban loft, a sliding bookshelf reveals a hidden workspace, while a rooftop terrace offers a peaceful escape from the city's hustle and bustle.",
-      "image_prompt": "Ghibli Art: A tiny urban loft with a sliding bookshelf that reveals a hidden workspace, maximizing the use of space. A rooftop terrace offers a peaceful escape from the city's hustle and bustle, with potted plants and string lights creating a cozy atmosphere. The interior is modern and minimalist, with large windows offering views of the city skyline. A calico cat explores the rooftop, sniffing at the plants. The city below is alive with activity, yet the terrace remains a serene retreat. The Ghibli-style art captures the balance between urban living and personal sanctuary.",
-      "image_url": "assets/img/quotes/quote_9.png",
+      "id": "quote_69",
+      "quote": "Did you know? The platypus is one of the few mammals that lay eggs and has venomous spurs on its hind legs.",
+      "image_prompt": "Ghibli Art: A serene riverbank bathed in golden sunlight, with a platypus swimming gracefully in the water. Its venomous spurs glow faintly, while a nest with eggs sits on the riverbank. Tiny, whimsical creatures with exaggerated expressions watch from the bushes, enchanted by the platypus. Magical particles swirl around the scene, highlighting the unique features of the platypus. A curious frog with glowing eyes hops nearby, observing the scene.",
+      "image_url": "assets/img/quotes/quote_69.png",
       "emphasis": {
-        "urban": "emphasis-2",
-        "sliding": "emphasis-2",
-        "terrace": "emphasis-2",
-        "sanctuary": "emphasis-1"
+        "platypus": "emphasis-2",
+        "mammals": "emphasis-1",
+        "venomous spurs": "emphasis-2"
       }
     },
     {
-      "id": "quote_10",
-      "quote": "A tiny cabin in the woods features a sunroom filled with potted plants, where a small table and chairs create a perfect spot for morning coffee.",
-      "image_prompt": "Ghibli Art: A tiny cabin in the woods with a sunroom filled with potted plants, creating a lush and green indoor oasis. A small table and chairs in the sunroom offer a perfect spot for morning coffee, with sunlight streaming through the windows. The interior is cozy and rustic, with wooden beams and soft furnishings. A tabby cat lounges on the windowsill, basking in the sunlight. The surrounding forest is painted in vibrant greens, with birds chirping in the distance. The Ghibli-style art captures the tranquility and charm of woodland living.",
-      "image_url": "assets/img/quotes/quote_10.png",
+      "id": "quote_70",
+      "quote": "Did you know? The Dead Sea is so salty that you can float effortlessly on its surface, and it contains minerals with therapeutic properties.",
+      "image_prompt": "Ghibli Art: A serene Dead Sea with a person floating effortlessly on its surface, surrounded by shimmering, golden water. The water glows faintly, highlighting the high salt content. Tiny, whimsical fish with exaggerated expressions swim nearby, enchanted by the floating person. Magical particles representing therapeutic minerals swirl around the scene. A curious bird with glowing eyes flies overhead, observing the unique phenomenon.",
+      "image_url": "assets/img/quotes/quote_70.png",
       "emphasis": {
-        "cabin": "emphasis-2",
-        "sunroom": "emphasis-2",
-        "coffee": "emphasis-2",
-        "tranquility": "emphasis-1"
+        "Dead Sea": "emphasis-2",
+        "float": "emphasis-1",
+        "therapeutic properties": "emphasis-2"
       }
     },
     {
-      "id": "quote_21",
-      "quote": "In the snowy mountains of Hokkaido, a dairy farmer crafts a creamy miso soup with fresh milk and locally harvested kombu, a dish that warms the soul during the coldest winter nights.",
-      "image_prompt": "Ghibli Art: A cozy farmhouse kitchen with a large pot of miso soup simmering on a wood stove. Snow falls gently outside the window, and a Japanese Spitz dog curls up by the fire. A blonde female chef in a traditional apron stirs the soup, her breath visible in the cold air. The steam from the soup forms intricate patterns, and a Japanese Bobtail cat watches curiously from a wooden shelf lined with jars of miso and kombu.",
-      "image_url": "assets/img/quotes/quote_21.png",
+      "id": "quote_71",
+      "quote": "Did you know? The Amazon Rainforest produces 20% of the world's oxygen, earning it the nickname 'the lungs of the Earth.'",
+      "image_prompt": "Ghibli Art: A lush, vibrant Amazon Rainforest scene with towering trees and a misty golden sunrise. Magical glowing particles float in the air, representing oxygen. Tiny, whimsical creatures with leaf-shaped wings flutter around, and a majestic jaguar with glowing eyes watches from the shadows. The atmosphere is filled with life and enchantment, with beams of sunlight breaking through the dense canopy.",
+      "image_url": "assets/img/quotes/quote_71.png",
       "emphasis": {
-        "Hokkaido": "emphasis-3",
-        "miso": "emphasis-2",
-        "kombu": "emphasis-2",
-        "winter": "emphasis-2",
-        "soul": "emphasis-1"
+        "Amazon Rainforest": "emphasis-2",
+        "20%": "emphasis-1",
+        "oxygen": "emphasis-2"
       }
     },
     {
-      "id": "quote_22",
-      "quote": "In the bustling streets of Osaka, a street vendor prepares okonomiyaki with a secret blend of cabbage, pork, and a special sauce, creating a savory pancake that delights every passerby.",
-      "image_prompt": "Ghibli Art: A lively street food stall in Osaka, with the vendor flipping okonomiyaki on a hot griddle. The air is filled with the aroma of sizzling pork and cabbage. A Japanese Bobtail cat with a playful expression peeks out from behind a stack of ingredients. The scene is vibrant with colorful lanterns and bustling crowds, capturing the essence of Osaka's street food culture.",
-      "image_url": "assets/img/quotes/quote_22.png",
+      "id": "quote_72",
+      "quote": "Did you know? The northern lights are caused by collisions between electrically charged particles from the sun and gases in Earth's atmosphere.",
+      "image_prompt": "Ghibli Art: A serene Arctic landscape under a starry sky, with the northern lights dancing in vibrant green and purple hues. A small, curious fox with a glowing tail watches in awe. The lights swirl and shimmer, creating magical patterns in the sky. Tiny, glowing particles represent the charged particles from the sun, and the atmosphere is filled with a sense of wonder and tranquility.",
+      "image_url": "assets/img/quotes/quote_72.png",
       "emphasis": {
-        "Osaka": "emphasis-3",
-        "okonomiyaki": "emphasis-2",
-        "cabbage": "emphasis-2",
-        "pork": "emphasis-2",
-        "savory": "emphasis-1"
+        "northern lights": "emphasis-2",
+        "electrically charged particles": "emphasis-2",
+        "gases": "emphasis-2"
       }
     },
     {
-      "id": "quote_23",
-      "quote": "In the serene tea gardens of Kyoto, a tea master prepares a delicate matcha tea ceremony, a ritual that brings peace and clarity to the mind.",
-      "image_prompt": "Ghibli Art: A tranquil tea garden in Kyoto, with cherry blossoms gently falling around a traditional tea house. A tea master in a kimono carefully whisks matcha in a ceramic bowl. A Japanese Spitz cat sits gracefully on the tatami mat, observing the ceremony. The scene is bathed in soft, golden light, with the steam from the tea forming delicate patterns in the air.",
-      "image_url": "assets/img/quotes/quote_23.png",
+      "id": "quote_73",
+      "quote": "Did you know? The world's largest living organism is a fungus in Oregon, covering over 2,385 acres and estimated to be thousands of years old.",
+      "image_prompt": "Ghibli Art: A vast, enchanted forest in Oregon with a glowing, interconnected network of fungus spreading across the forest floor. The fungus emits a soft, bioluminescent light, and tiny, magical creatures with mushroom caps on their heads explore the area. The scene is bathed in a golden sunset, with mist rising from the ground, creating a mystical and serene atmosphere.",
+      "image_url": "assets/img/quotes/quote_73.png",
       "emphasis": {
-        "Kyoto": "emphasis-3",
-        "matcha": "emphasis-2",
-        "ceremony": "emphasis-2",
-        "peace": "emphasis-1"
+        "largest living organism": "emphasis-2",
+        "fungus": "emphasis-1",
+        "2,385 acres": "emphasis-2"
       }
     },
     {
-      "id": "quote_24",
-      "quote": "In the coastal town of Okinawa, a grandmother prepares a traditional goya champuru, a stir-fry dish with bitter melon, tofu, and eggs, a recipe passed down through generations.",
-      "image_prompt": "Ghibli Art: A rustic kitchen in Okinawa, with a grandmother cooking goya champuru on a cast-iron skillet. The kitchen is filled with the aroma of sizzling tofu and eggs. A Japanese Bobtail cat with a curious expression watches from the windowsill, where the ocean waves can be seen in the distance. The scene is warm and inviting, with traditional Okinawan decor and utensils.",
-      "image_url": "assets/img/quotes/quote_24.png",
+      "id": "quote_74",
+      "quote": "Did you know? The Venus flytrap can count the number of times its prey touches its trigger hairs to conserve energy and ensure a successful capture.",
+      "image_prompt": "Ghibli Art: A whimsical Venus flytrap in a vibrant, sunlit meadow. The plant has a friendly, animated face and glowing trigger hairs. A curious, tiny insect with exaggerated eyes approaches, and the flytrap counts the touches with visible numbers appearing in the air. The scene is filled with magical particles and a warm, golden light, creating a sense of wonder and enchantment.",
+      "image_url": "assets/img/quotes/quote_74.png",
       "emphasis": {
-        "Okinawa": "emphasis-3",
-        "goya": "emphasis-2",
-        "champuru": "emphasis-2",
-        "generations": "emphasis-1"
+        "Venus flytrap": "emphasis-2",
+        "count": "emphasis-1",
+        "trigger hairs": "emphasis-2"
       }
     },
     {
-      "id": "quote_25",
-      "quote": "In the hot spring resorts of Hakone, a chef prepares a luxurious kaiseki meal featuring seasonal ingredients, each dish a work of art that reflects the beauty of nature.",
-      "image_prompt": "Ghibli Art: A traditional ryokan dining room in Hakone, with a kaiseki meal beautifully arranged on lacquered trays. The room overlooks a serene hot spring garden with autumn leaves falling gently. A Japanese Spitz cat sits elegantly on a cushion, observing the meal. The chef, a blonde woman in a kimono, presents a dish with delicate garnishes, capturing the essence of seasonal beauty.",
-      "image_url": "assets/img/quotes/quote_25.png",
+      "id": "quote_75",
+      "quote": "Did you know? The ancient city of Petra in Jordan was carved directly into rose-red sandstone cliffs and remained hidden from the Western world until 1812.",
+      "image_prompt": "Ghibli Art: The ancient city of Petra, with its iconic rose-red sandstone cliffs glowing in the warm light of a setting sun. Tiny, magical creatures with wings explore the intricate carvings, and a gentle breeze carries glowing particles through the air. The scene is filled with a sense of mystery and history, with the cliffs casting long shadows over the hidden city.",
+      "image_url": "assets/img/quotes/quote_75.png",
       "emphasis": {
-        "Hakone": "emphasis-3",
-        "kaiseki": "emphasis-2",
-        "seasonal": "emphasis-2",
-        "nature": "emphasis-1"
+        "Petra": "emphasis-2",
+        "rose-red sandstone": "emphasis-2",
+        "hidden": "emphasis-1"
       }
     },
     {
-      "id": "quote_26",
-      "quote": "In the rice fields of Niigata, a family prepares a hearty donburi with freshly harvested rice and grilled eel, a dish that celebrates the bounty of the land.",
-      "image_prompt": "Ghibli Art: A family kitchen in Niigata, with a pot of freshly cooked rice steaming on the stove. Grilled eel is being prepared on a charcoal grill, filling the air with a savory aroma. A Japanese Bobtail cat with a contented expression lounges on a wooden bench. The scene is warm and rustic, with the golden rice fields visible through the window.",
-      "image_url": "assets/img/quotes/quote_26.png",
+      "id": "quote_76",
+      "quote": "Did you know? The axolotl, a type of salamander, can regenerate entire limbs, including parts of its heart and brain, making it a subject of scientific fascination.",
+      "image_prompt": "Ghibli Art: A whimsical underwater scene with a glowing axolotl swimming gracefully among vibrant aquatic plants. The axolotl's regenerating limb emits a soft, magical light, and tiny, curious fish with exaggerated expressions watch in amazement. The water is filled with glowing particles, and the scene is bathed in a serene, blue-green light, creating a sense of wonder and enchantment.",
+      "image_url": "assets/img/quotes/quote_76.png",
       "emphasis": {
-        "Niigata": "emphasis-3",
-        "donburi": "emphasis-2",
-        "eel": "emphasis-2",
-        "bounty": "emphasis-1"
+        "axolotl": "emphasis-2",
+        "regenerate": "emphasis-1",
+        "limbs": "emphasis-2"
       }
     },
     {
-      "id": "quote_27",
-      "quote": "In the bustling fish markets of Fukuoka, a chef prepares a fresh sashimi platter with the day's catch, a dish that showcases the purity of the ocean.",
-      "image_prompt": "Ghibli Art: A vibrant fish market in Fukuoka, with stalls filled with the day's catch. A chef skillfully prepares a sashimi platter with precision and care. A Japanese Spitz cat with a curious expression watches from a nearby crate. The scene is lively and colorful, with the ocean visible in the background and seagulls flying overhead.",
-      "image_url": "assets/img/quotes/quote_27.png",
+      "id": "quote_77",
+      "quote": "Did you know? The Great Barrier Reef is so large that it can be seen from space and is home to over 1,500 species of fish.",
+      "image_prompt": "Ghibli Art: A breathtaking view of the Great Barrier Reef from space, with vibrant coral formations and colorful fish visible through the crystal-clear water. The Earth is surrounded by a glowing, magical aura, and tiny, whimsical creatures with wings explore the reef. The scene is filled with a sense of wonder and beauty, with the sun casting a golden light over the water.",
+      "image_url": "assets/img/quotes/quote_77.png",
       "emphasis": {
-        "Fukuoka": "emphasis-3",
-        "sashimi": "emphasis-2",
-        "ocean": "emphasis-1"
+        "Great Barrier Reef": "emphasis-2",
+        "space": "emphasis-1",
+        "1,500 species": "emphasis-2"
       }
     },
     {
-      "id": "quote_28",
-      "quote": "In the mountain villages of Nagano, locals prepare a hearty soba noodle soup with wild mushrooms and mountain vegetables, a dish that warms the body and soul.",
-      "image_prompt": "Ghibli Art: A cozy mountain home in Nagano, with a pot of soba noodle soup simmering on a hearth. Wild mushrooms and mountain vegetables are carefully arranged on a wooden table. A Japanese Bobtail cat with a curious expression watches from a windowsill, where snow-covered mountains are visible. The scene is warm and inviting, with the aroma of the soup filling the air.",
-      "image_url": "assets/img/quotes/quote_28.png",
+      "id": "quote_78",
+      "quote": "Did you know? The human brain generates about 20 watts of power, enough to power a small light bulb.",
+      "image_prompt": "Ghibli Art: A whimsical scene inside a human brain, with glowing neurons and synapses creating a network of light. A small, animated light bulb with a friendly face is powered by the brain's energy. The scene is filled with magical particles and a warm, golden light, creating a sense of wonder and enchantment.",
+      "image_url": "assets/img/quotes/quote_78.png",
       "emphasis": {
-        "Nagano": "emphasis-3",
-        "soba": "emphasis-2",
-        "mushrooms": "emphasis-2",
-        "soul": "emphasis-1"
+        "human brain": "emphasis-2",
+        "20 watts": "emphasis-1",
+        "light bulb": "emphasis-2"
       }
     },
     {
-      "id": "quote_29",
-      "quote": "In the cherry blossom gardens of Nara, a patisserie master creates a delicate sakura mochi, a sweet treat that captures the essence of spring.",
-      "image_prompt": "Ghibli Art: A quaint patisserie in Nara, with cherry blossoms gently falling outside the window. A patisserie master carefully shapes sakura mochi on a wooden counter. A Japanese Spitz cat with a playful expression watches from a nearby shelf. The scene is filled with the soft pink hues of cherry blossoms, and the mochi is adorned with delicate petals.",
-      "image_url": "assets/img/quotes/quote_29.png",
+      "id": "quote_79",
+      "quote": "Did you know? The Sahara Desert was once a lush, green landscape with rivers and lakes, home to diverse wildlife.",
+      "image_prompt": "Ghibli Art: A lush, green Sahara Desert with flowing rivers and sparkling lakes, teeming with diverse wildlife. Majestic elephants, giraffes, and other animals roam the landscape, and tiny, magical creatures with wings explore the area. The scene is bathed in a golden sunset, with mist rising from the water, creating a sense of wonder and tranquility.",
+      "image_url": "assets/img/quotes/quote_79.png",
       "emphasis": {
-        "Nara": "emphasis-3",
-        "sakura": "emphasis-2",
-        "mochi": "emphasis-2",
-        "spring": "emphasis-1"
+        "Sahara Desert": "emphasis-2",
+        "lush, green": "emphasis-1",
+        "wildlife": "emphasis-2"
       }
     },
     {
-      "id": "quote_30",
-      "quote": "In the bustling streets of Tokyo, a ramen chef prepares a rich tonkotsu ramen with slow-cooked pork broth, a dish that satisfies every craving.",
-      "image_prompt": "Ghibli Art: A bustling ramen shop in Tokyo, with a chef preparing tonkotsu ramen in a steaming pot. The rich aroma of pork broth fills the air. A Japanese Bobtail cat with a curious expression watches from a corner of the kitchen. The scene is vibrant and lively, with customers enjoying their bowls of ramen and the city lights visible through the window.",
-      "image_url": "assets/img/quotes/quote_30.png",
+      "id": "quote_80",
+      "quote": "Did you know? The Andromeda Galaxy is on a collision course with the Milky Way and will merge with it in about 4 billion years.",
+      "image_prompt": "Ghibli Art: A cosmic scene with the Andromeda Galaxy and the Milky Way slowly merging in a swirl of vibrant colors and glowing stars. Tiny, whimsical creatures with wings explore the galaxies, and magical particles float through the air. The scene is filled with a sense of wonder and awe, with the galaxies casting a soft, ethereal light.",
+      "image_url": "assets/img/quotes/quote_80.png",
       "emphasis": {
-        "Tokyo": "emphasis-3",
-        "tonkotsu": "emphasis-2",
-        "ramen": "emphasis-2",
-        "satisfies": "emphasis-1"
+        "Andromeda Galaxy": "emphasis-2",
+        "collision course": "emphasis-1",
+        "4 billion years": "emphasis-2"
       }
     },
     {
-      "id": "quote_31",
-      "quote": "In the tranquil bamboo forests of Arashiyama, a young chef crafts a delicate chawanmushi, a steamed egg custard infused with the subtle flavors of shiitake mushrooms and fresh bamboo shoots, a dish that embodies the harmony of nature.",
-      "image_prompt": "Ghibli Art: A serene bamboo forest bathed in soft morning light, with a traditional wooden kitchen nestled among the trees. A blonde female chef carefully pours a mixture of egg custard into small ceramic cups, steam rising gently. A Japanese Spitz cat with fluffy white fur sits on a bamboo mat, watching intently. The background features tall bamboo stalks swaying in the breeze, and tiny forest spirits peek out from behind the leaves. The scene exudes a sense of peace and natural beauty.",
-      "image_url": "assets/img/quotes/quote_31.png",
+      "id": "quote_81",
+      "quote": "Did you know? The world's smallest mammal, the bumblebee bat, weighs less than a penny and can fit on the tip of your finger.",
+      "image_prompt": "Ghibli Art: A tiny bumblebee bat flutters gracefully in a lush, sunlit forest clearing. Golden rays of light filter through the canopy, illuminating its delicate wings. Surrounding it are oversized flowers with vibrant petals, and tiny glowing fireflies dance in the air. The bat perches on a human fingertip, its miniature size emphasized by the whimsical, magical atmosphere.",
+      "image_url": "assets/img/quotes/quote_81.png",
       "emphasis": {
-        "chawanmushi": "emphasis-2",
-        "shiitake": "emphasis-2",
-        "bamboo": "emphasis-2",
-        "Arashiyama": "emphasis-3",
-        "harmony": "emphasis-1"
+        "bumblebee bat": "emphasis-2",
+        "less than a penny": "emphasis-1",
+        "fit on the tip of your finger": "emphasis-2"
       }
     },
     {
-      "id": "quote_32",
-      "quote": "In the vibrant streets of Hiroshima, a street vendor prepares a sizzling plate of Hiroshima-style okonomiyaki, layering cabbage, noodles, and a perfectly fried egg, topped with a drizzle of savory sauce and bonito flakes that dance in the heat.",
-      "image_prompt": "Ghibli Art: A bustling street food stall in Hiroshima, with colorful lanterns hanging overhead and the scent of sizzling okonomiyaki filling the air. The vendor, a cheerful man with a white headband, flips a large okonomiyaki on a hot griddle. A Japanese Bobtail cat with a calico coat lounges on a nearby crate, its tail flicking lazily. The background is alive with the energy of the city, with people chatting and laughing, and the steam from the griddle forming whimsical shapes in the evening light.",
-      "image_url": "assets/img/quotes/quote_32.png",
+      "id": "quote_82",
+      "quote": "Did you know? The ancient Library of Alexandria was said to contain over 700,000 scrolls, making it one of the largest collections of knowledge in the ancient world.",
+      "image_prompt": "Ghibli Art: A grand, ethereal library with towering shelves filled with glowing scrolls, bathed in soft, golden light. Scholars in flowing robes walk among the shelves, their faces illuminated by the warm glow. A gentle mist swirls around the floor, and tiny, enchanted bookworms with glowing eyes peek out from the scrolls. The atmosphere is serene and magical, evoking a sense of timeless wisdom.",
+      "image_url": "assets/img/quotes/quote_82.png",
       "emphasis": {
-        "Hiroshima-style": "emphasis-2",
-        "okonomiyaki": "emphasis-2",
-        "bonito": "emphasis-2",
-        "Hiroshima": "emphasis-3",
-        "dance": "emphasis-1"
+        "Library of Alexandria": "emphasis-2",
+        "700,000 scrolls": "emphasis-1",
+        "largest collections of knowledge": "emphasis-2"
       }
     },
     {
-      "id": "quote_33",
-      "quote": "In the coastal town of Shimoda, a fisherman's wife prepares a hearty miso soup with freshly caught clams and locally grown wakame seaweed, a dish that brings the taste of the ocean to the breakfast table.",
-      "image_prompt": "Ghibli Art: A cozy seaside kitchen with a view of the sparkling ocean through a window. A fisherman's wife stirs a pot of miso soup, the steam rising and mingling with the salty sea breeze. A Japanese Bobtail cat with a sleek black coat sits on the windowsill, gazing out at the waves. The kitchen is filled with the warm glow of the morning sun, and the sound of seagulls can be heard in the distance. The scene captures the simple beauty of coastal life.",
-      "image_url": "assets/img/quotes/quote_33.png",
+      "id": "quote_83",
+      "quote": "Did you know? The Arctic tern migrates from the Arctic to the Antarctic and back each year, traveling up to 44,000 miles\u2014the longest migration of any animal.",
+      "image_prompt": "Ghibli Art: An Arctic tern soars gracefully over a vast, shimmering ocean, its wings catching the golden light of the setting sun. Below, the waves sparkle with bioluminescent plankton, creating a magical trail. The tern is surrounded by a flock of other birds, all glowing faintly with a soft, ethereal light. In the distance, the icy peaks of Antarctica rise, bathed in a warm, otherworldly glow.",
+      "image_url": "assets/img/quotes/quote_83.png",
       "emphasis": {
-        "miso": "emphasis-2",
-        "clams": "emphasis-2",
-        "wakame": "emphasis-2",
-        "Shimoda": "emphasis-3",
-        "ocean": "emphasis-1"
+        "Arctic tern": "emphasis-2",
+        "44,000 miles": "emphasis-1",
+        "longest migration": "emphasis-2"
       }
     },
     {
-      "id": "quote_34",
-      "quote": "In the snowy village of Shirakawa-go, a grandmother prepares a comforting nabe hot pot with locally sourced vegetables and tender slices of wagyu beef, a dish that warms the heart during the long winter nights.",
-      "image_prompt": "Ghibli Art: A traditional thatched-roof house in Shirakawa-go, with snow gently falling outside. Inside, a grandmother stirs a bubbling nabe hot pot on a low wooden table, the steam rising and fogging up the windows. A Japanese Spitz cat with fluffy white fur curls up by the hearth, its eyes half-closed in contentment. The room is lit by the warm glow of a lantern, and the scene is filled with the comforting aroma of simmering broth and vegetables.",
-      "image_url": "assets/img/quotes/quote_34.png",
+      "id": "quote_84",
+      "quote": "Did you know? The Japanese art of kintsugi repairs broken pottery with gold, celebrating imperfections and turning flaws into beauty.",
+      "image_prompt": "Ghibli Art: A serene Japanese tea room with sunlight streaming through paper windows. A broken ceramic bowl sits on a wooden table, its cracks filled with glowing gold lines. Tiny, magical spirits with golden wings flutter around the bowl, adding delicate touches of gold. The atmosphere is peaceful and reverent, with cherry blossom petals drifting in the air.",
+      "image_url": "assets/img/quotes/quote_84.png",
       "emphasis": {
-        "nabe": "emphasis-2",
-        "wagyu": "emphasis-2",
-        "Shirakawa-go": "emphasis-3",
-        "winter": "emphasis-2",
-        "heart": "emphasis-1"
+        "kintsugi": "emphasis-2",
+        "gold": "emphasis-1",
+        "celebrating imperfections": "emphasis-2"
       }
     },
     {
-      "id": "quote_35",
-      "quote": "In the bustling Tsukiji Market in Tokyo, a sushi master crafts a perfect piece of nigiri sushi with the freshest tuna, a dish that showcases the artistry and precision of Japanese culinary tradition.",
-      "image_prompt": "Ghibli Art: The lively Tsukiji Market in Tokyo, with stalls filled with colorful seafood and the sound of vendors calling out to customers. A sushi master, dressed in a traditional white uniform, carefully slices a piece of tuna and places it atop a small mound of rice. A Japanese Bobtail cat with a sleek gray coat watches from a nearby crate, its eyes following the master's every move. The background is alive with the energy of the market, with people bustling about and the morning light casting a golden glow over the scene.",
-      "image_url": "assets/img/quotes/quote_35.png",
+      "id": "quote_85",
+      "quote": "Did you know? The human eye can distinguish about 10 million different colors, thanks to the complex structure of the retina.",
+      "image_prompt": "Ghibli Art: A close-up of a human eye, its iris glowing with a spectrum of vibrant colors. Surrounding the eye is a magical, swirling galaxy of hues, each color represented by tiny, glowing particles. A gentle breeze carries these particles into the air, creating a dreamlike, colorful atmosphere. The scene is bathed in soft, golden light, enhancing the wonder of the eye's capabilities.",
+      "image_url": "assets/img/quotes/quote_85.png",
       "emphasis": {
-        "nigiri": "emphasis-2",
-        "tuna": "emphasis-2",
-        "Tsukiji": "emphasis-3",
-        "Tokyo": "emphasis-3",
-        "artistry": "emphasis-1"
+        "human eye": "emphasis-2",
+        "10 million different colors": "emphasis-1",
+        "retina": "emphasis-2"
       }
     },
     {
-      "id": "quote_36",
-      "quote": "In the serene gardens of Kanazawa, a tea master prepares a delicate bowl of matcha tea, whisking it to perfection with a bamboo whisk, a ritual that brings tranquility and mindfulness to the moment.",
-      "image_prompt": "Ghibli Art: A peaceful tea garden in Kanazawa, with cherry blossoms gently falling and a small stream trickling nearby. A tea master kneels on a tatami mat, whisking a bowl of vibrant green matcha tea with a bamboo whisk. A Japanese Spitz cat with fluffy white fur sits nearby, its tail swishing gently. The garden is bathed in the soft light of late afternoon, and the scene exudes a sense of calm and serenity. Tiny spirits of the tea leaves float in the air, adding a touch of magic to the moment.",
-      "image_url": "assets/img/quotes/quote_36.png",
+      "id": "quote_86",
+      "quote": "Did you know? The world's largest cave, Son Doong in Vietnam, is so vast it has its own weather system, including clouds and rain.",
+      "image_prompt": "Ghibli Art: A breathtaking view inside Son Doong Cave, with towering stalagmites and stalactites glowing softly in the dim light. A magical mist fills the air, and tiny clouds drift lazily above a crystal-clear underground river. Sunlight streams through a massive opening in the cave ceiling, illuminating the scene with a golden glow. Tiny, glowing cave creatures with wings flutter around, adding to the enchanting atmosphere.",
+      "image_url": "assets/img/quotes/quote_86.png",
       "emphasis": {
-        "matcha": "emphasis-2",
-        "Kanazawa": "emphasis-3",
-        "tranquility": "emphasis-2",
-        "mindfulness": "emphasis-1"
+        "Son Doong": "emphasis-2",
+        "largest cave": "emphasis-1",
+        "weather system": "emphasis-2"
       }
     },
     {
-      "id": "quote_37",
-      "quote": "In the vibrant summer festival of Aomori, a vendor prepares a refreshing bowl of kakigori, shaved ice topped with sweet syrup and fresh fruit, a treat that cools the body and delights the senses.",
-      "image_prompt": "Ghibli Art: A lively summer festival in Aomori, with colorful lanterns and the sound of taiko drums filling the air. A vendor shaves a block of ice into a fluffy mound, then drizzles it with vibrant syrup and tops it with slices of fresh fruit. A Japanese Bobtail cat with a calico coat sits on a nearby stool, its eyes wide with curiosity. The background is filled with people in yukata, enjoying the festivities, and the warm glow of the lanterns creates a magical atmosphere. The kakigori glistens in the light, a refreshing treat for a summer night.",
-      "image_url": "assets/img/quotes/quote_37.png",
+      "id": "quote_87",
+      "quote": "Did you know? The axolotl can regenerate not only its limbs but also its heart, spinal cord, and parts of its brain, making it a marvel of nature.",
+      "image_prompt": "Ghibli Art: A whimsical underwater scene with an axolotl floating gracefully in a crystal-clear pond. Its body glows faintly as it regenerates a limb, with tiny, magical particles swirling around the healing area. Surrounding it are vibrant aquatic plants and curious fish with exaggerated expressions. The water sparkles with golden light, creating a serene and magical atmosphere.",
+      "image_url": "assets/img/quotes/quote_87.png",
       "emphasis": {
-        "kakigori": "emphasis-2",
-        "Aomori": "emphasis-3",
-        "summer": "emphasis-2",
-        "senses": "emphasis-1"
+        "axolotl": "emphasis-2",
+        "regenerate": "emphasis-1",
+        "heart, spinal cord, and parts of its brain": "emphasis-2"
       }
     },
     {
-      "id": "quote_38",
-      "quote": "In the quiet mountain village of Takayama, a family prepares a traditional hoba miso, grilling miso paste on a magnolia leaf over an open flame, a dish that brings the family together around the hearth.",
-      "image_prompt": "Ghibli Art: A cozy mountain home in Takayama, with snow-covered peaks visible through the window. A family gathers around a hearth, grilling miso paste on a magnolia leaf over an open flame. A Japanese Spitz cat with fluffy white fur sits by the fire, its eyes reflecting the flickering flames. The room is filled with the warm glow of the fire and the comforting aroma of grilling miso. The scene captures the simple joy of family and tradition.",
-      "image_url": "assets/img/quotes/quote_38.png",
+      "id": "quote_88",
+      "quote": "Did you know? The Kakapo, a flightless parrot from New Zealand, has a unique mating ritual where males inflate like a balloon and emit low-frequency booms to attract females.",
+      "image_prompt": "Ghibli Art: A lush, moonlit forest in New Zealand, with a Kakapo parrot puffing up like a glowing balloon, emitting shimmering, low-frequency sound waves. Tiny, enchanted fireflies dance around him, and the forest floor is carpeted with soft, bioluminescent moss. A curious female Kakapo peeks from behind a tree, her eyes wide with wonder. The scene is bathed in a soft, ethereal glow, with mist swirling gently around the trees.",
+      "image_url": "assets/img/quotes/quote_88.png",
       "emphasis": {
-        "hoba": "emphasis-2",
-        "miso": "emphasis-2",
-        "Takayama": "emphasis-3",
-        "family": "emphasis-1"
+        "Kakapo": "emphasis-2",
+        "flightless parrot": "emphasis-2",
+        "low-frequency booms": "emphasis-1"
       }
     },
     {
-      "id": "quote_39",
-      "quote": "In the bustling streets of Yokohama, a ramen chef prepares a rich bowl of tonkotsu ramen, simmering pork bones for hours to create a broth that is both creamy and flavorful, a dish that satisfies every craving.",
-      "image_prompt": "Ghibli Art: A bustling ramen shop in Yokohama, with the sound of sizzling broth and the chatter of customers filling the air. A ramen chef, with a focused expression, ladles rich tonkotsu broth into a bowl, then adds slices of pork, green onions, and a perfectly cooked egg. A Japanese Bobtail cat with a sleek black coat sits on a nearby counter, its eyes following the chef's every move. The background is alive with the energy of the city, and the steam from the broth forms whimsical shapes in the air.",
-      "image_url": "assets/img/quotes/quote_39.png",
+      "id": "quote_89",
+      "quote": "Did you know? The town of Longyearbyen in Norway has a law that requires residents to carry a rifle when leaving town to protect against polar bears?",
+      "image_prompt": "Ghibli Art: A snowy, whimsical town in Norway, with colorful wooden houses and a backdrop of towering, icy mountains. A cheerful resident in a thick coat carries a rifle slung over their shoulder, walking through the snow. A curious polar bear cub peeks out from behind a snowdrift, its mother watching from a distance. The scene is illuminated by the soft, golden light of the Arctic sun, with snowflakes gently falling and tiny, glowing ice crystals sparkling in the air.",
+      "image_url": "assets/img/quotes/quote_89.png",
       "emphasis": {
-        "tonkotsu": "emphasis-2",
-        "ramen": "emphasis-2",
-        "Yokohama": "emphasis-3",
-        "craving": "emphasis-1"
+        "Longyearbyen": "emphasis-2",
+        "carry a rifle": "emphasis-1",
+        "polar bears": "emphasis-2"
       }
     },
     {
-      "id": "quote_40",
-      "quote": "In the tranquil tea fields of Shizuoka, a farmer harvests fresh tea leaves, which are then carefully processed to create a fragrant sencha tea, a beverage that embodies the essence of the region.",
-      "image_prompt": "Ghibli Art: Rolling tea fields in Shizuoka, with rows of vibrant green tea plants stretching into the distance. A farmer, wearing a wide-brimmed hat, carefully picks fresh tea leaves and places them in a basket. A Japanese Spitz cat with fluffy white fur follows behind, its nose twitching as it sniffs the air. The background is filled with the soft light of early morning, and the scene exudes a sense of peace and tranquility. Tiny spirits of the tea leaves float in the air, adding a touch of magic to the moment.",
-      "image_url": "assets/img/quotes/quote_40.png",
+      "id": "quote_90",
+      "quote": "Did you know? The Lyrebird can mimic almost any sound it hears, including chainsaws, camera shutters, and even human speech, with astonishing accuracy.",
+      "image_prompt": "Ghibli Art: A magical forest clearing where a Lyrebird stands on a moss-covered log, its tail feathers fanned out in a stunning display. The air is filled with shimmering sound waves representing the bird's mimicry\u2014chainsaws, camera shutters, and human voices. Tiny, glowing creatures with musical notes for wings float around, enchanted by the performance. The scene is bathed in warm, golden sunlight filtering through the trees, with a soft mist curling around the forest floor.",
+      "image_url": "assets/img/quotes/quote_90.png",
       "emphasis": {
-        "sencha": "emphasis-2",
-        "Shizuoka": "emphasis-3",
-        "essence": "emphasis-1"
+        "Lyrebird": "emphasis-2",
+        "mimic": "emphasis-1",
+        "astonishing accuracy": "emphasis-2"
       }
     },
     {
-      "id": "quote_41",
-      "quote": "In a tiny houseboat floating on a tranquil lake, a retractable roof opens to reveal a stargazing platform, while underwater windows offer glimpses of fish swimming beneath the surface.",
-      "image_prompt": "Ghibli Art: A charming tiny houseboat gently bobbing on a serene lake surrounded by lush greenery. The retractable roof is open, revealing a cozy stargazing platform with soft cushions and blankets. Underwater windows glow softly, showing colorful fish swimming beneath. A sleek black cat lounges on the deck, lazily watching dragonflies hover above the water. The scene is bathed in the warm golden light of sunset, with the lake reflecting the vibrant hues of the sky.",
-      "image_url": "assets/img/quotes/quote_41.png",
+      "id": "quote_91",
+      "quote": "Did you know? The ancient city of Mohenjo-Daro in Pakistan had a sophisticated drainage system, complete with covered sewers and manholes, over 4,000 years ago.",
+      "image_prompt": "Ghibli Art: A bustling ancient city with terracotta buildings and cobblestone streets, where workers in colorful robes maintain a complex network of covered sewers. A glowing, magical stream of water flows through the system, with tiny, enchanted creatures resembling water sprites helping to keep it clean. The scene is illuminated by the warm, golden light of a setting sun, with a soft mist rising from the ground. A curious child peeks into a manhole, marveling at the ingenuity.",
+      "image_url": "assets/img/quotes/quote_91.png",
       "emphasis": {
-        "houseboat": "emphasis-2",
-        "lake": "emphasis-3",
-        "stargazing": "emphasis-2",
-        "underwater": "emphasis-2",
-        "tranquil": "emphasis-1"
+        "Mohenjo-Daro": "emphasis-2",
+        "sophisticated drainage system": "emphasis-1",
+        "4,000 years ago": "emphasis-2"
       }
     },
     {
-      "id": "quote_42",
-      "quote": "A tiny greenhouse home in a blooming meadow features walls of glass that let in sunlight year-round, with a spiral staircase leading to a loft bedroom surrounded by hanging plants.",
-      "image_prompt": "Ghibli Art: A whimsical tiny greenhouse home nestled in a meadow bursting with wildflowers. The glass walls shimmer in the sunlight, revealing an interior filled with lush greenery and hanging plants. A spiral staircase winds up to a cozy loft bedroom, where a soft bed is surrounded by trailing vines. A curious calico cat peeks out from behind a potted fern, while butterflies flutter around the blooming flowers outside. The meadow stretches into the distance, with a soft haze of golden light enveloping the scene.",
-      "image_url": "assets/img/quotes/quote_42.png",
+      "id": "quote_92",
+      "quote": "Did you know? The Pistol Shrimp can snap its claw so fast it creates a bubble that reaches temperatures as hot as the sun, stunning its prey.",
+      "image_prompt": "Ghibli Art: A vibrant underwater scene where a Pistol Shrimp snaps its claw, creating a glowing, sun-like bubble that illuminates the ocean floor. Tiny fish and sea creatures scatter in awe, their exaggerated expressions filled with wonder. The water shimmers with golden light, and magical particles swirl around the bubble. Coral reefs in the background glow in soft pastel colors, with a gentle current swaying the seaweed.",
+      "image_url": "assets/img/quotes/quote_92.png",
       "emphasis": {
-        "greenhouse": "emphasis-2",
-        "meadow": "emphasis-3",
-        "sunlight": "emphasis-2",
-        "loft": "emphasis-2",
-        "blooming": "emphasis-1"
+        "Pistol Shrimp": "emphasis-2",
+        "bubble": "emphasis-1",
+        "hot as the sun": "emphasis-2"
       }
     },
     {
-      "id": "quote_43",
-      "quote": "In a tiny urban micro-apartment, a wall-mounted desk folds away to reveal a hidden Murphy bed, while vertical gardens bring a touch of nature to the bustling city life.",
-      "image_prompt": "Ghibli Art: A cozy tiny urban micro-apartment with cleverly designed interiors. A wall-mounted desk folds neatly into the wall, revealing a hidden Murphy bed. Vertical gardens line the walls, filled with vibrant green plants and tiny flowers. A blonde character sits at the desk, sketching in a notebook, while a fluffy white cat naps on the windowsill. Outside, the bustling city is alive with activity, but inside, the space feels calm and serene. The room is bathed in soft, warm light from a nearby lamp.",
-      "image_url": "assets/img/quotes/quote_43.png",
+      "id": "quote_93",
+      "quote": "Did you know? The ancient Romans used a sponge on a stick, called a 'tersorium,' as a communal toilet paper in public restrooms.",
+      "image_prompt": "Ghibli Art: A whimsical Roman bathhouse with marble columns and steaming pools. A cheerful attendant holds a glowing, sponge-tipped stick, offering it to a group of amused citizens. The air is filled with tiny, magical bubbles, and the scene is bathed in warm, golden light filtering through high windows. A curious cat with a Roman collar watches from the corner, its tail flicking with amusement.",
+      "image_url": "assets/img/quotes/quote_93.png",
       "emphasis": {
-        "micro-apartment": "emphasis-2",
-        "urban": "emphasis-3",
-        "Murphy": "emphasis-2",
-        "vertical": "emphasis-2",
-        "nature": "emphasis-1"
+        "Romans": "emphasis-2",
+        "tersorium": "emphasis-1",
+        "communal toilet paper": "emphasis-2"
       }
     },
     {
-      "id": "quote_44",
-      "quote": "A tiny mountaintop cabin with a wrap-around porch offers panoramic views of the valley below, where a wood-burning stove keeps the interior warm and inviting during snowy winters.",
-      "image_prompt": "Ghibli Art: A quaint tiny mountaintop cabin surrounded by snow-covered pines. The wrap-around porch offers breathtaking panoramic views of the valley below, with a soft blanket of snow covering the landscape. Inside, a wood-burning stove glows warmly, casting a cozy light on the rustic interiors. A ginger cat curls up on a plush rug near the stove, while a blonde character sips hot cocoa by the window. The scene is peaceful, with snowflakes gently falling outside and the mountains painted in soft blues and whites.",
-      "image_url": "assets/img/quotes/quote_44.png",
+      "id": "quote_94",
+      "quote": "Did you know? The Glasswing Butterfly has transparent wings that make it nearly invisible when it flies, blending seamlessly into its surroundings.",
+      "image_prompt": "Ghibli Art: A magical forest glade where a Glasswing Butterfly flutters through the air, its transparent wings reflecting the sunlight like prisms. The background is a blur of vibrant greens and soft blues, with tiny, glowing fairies following the butterfly. The scene is bathed in golden hour light, with a gentle mist rising from the forest floor. A curious deer with glowing antlers watches from the shadows, its eyes wide with wonder.",
+      "image_url": "assets/img/quotes/quote_94.png",
       "emphasis": {
-        "mountaintop": "emphasis-2",
-        "cabin": "emphasis-2",
-        "panoramic": "emphasis-2",
-        "wood-burning": "emphasis-2",
-        "inviting": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_45",
-      "quote": "In a tiny off-grid home powered by solar panels, a composting toilet and rainwater collection system ensure sustainable living in harmony with nature.",
-      "image_prompt": "Ghibli Art: A rustic tiny off-grid home nestled in a dense forest. Solar panels glint on the roof, harnessing the power of the sun. A rainwater collection system channels water into a barrel, while a composting toilet is discreetly tucked away. The interior is simple yet cozy, with wooden furnishings and soft, natural light filtering through the windows. A sleek black cat lounges on the porch, watching birds flit through the trees. The forest is alive with the sounds of nature, creating a peaceful and harmonious atmosphere.",
-      "image_url": "assets/img/quotes/quote_45.png",
-      "emphasis": {
-        "off-grid": "emphasis-2",
-        "solar": "emphasis-2",
-        "composting": "emphasis-2",
-        "rainwater": "emphasis-2",
-        "sustainable": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_46",
-      "quote": "A tiny shipping container home with a rooftop garden provides fresh vegetables year-round, while large windows flood the interior with natural light.",
-      "image_prompt": "Ghibli Art: A vibrant tiny shipping container home transformed into a cozy living space. The rooftop garden is lush with fresh vegetables and herbs, thriving under the bright sun. Large windows let in streams of natural light, illuminating the cheerful interior. A tabby cat naps on a sunny windowsill, while a blonde character tends to the garden on the roof. The surrounding area is filled with wildflowers, and the sky is a brilliant blue with fluffy white clouds. The scene is full of life and color, embodying the joy of sustainable living.",
-      "image_url": "assets/img/quotes/quote_46.png",
-      "emphasis": {
-        "shipping": "emphasis-2",
-        "container": "emphasis-2",
-        "rooftop": "emphasis-2",
-        "vegetables": "emphasis-2",
-        "natural": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_47",
-      "quote": "In a tiny forest retreat, a loft bedroom overlooks a cozy living area with a fireplace, while a skylight offers a view of the stars at night.",
-      "image_prompt": "Ghibli Art: A charming tiny forest retreat surrounded by tall trees and lush greenery. The loft bedroom overlooks a cozy living area with a crackling fireplace, casting a warm glow on the wooden interiors. A skylight above the bed offers a clear view of the starry night sky. A curious calico cat explores the loft, while a blonde character relaxes by the fire with a book. The forest is peaceful, with the soft sounds of rustling leaves and distant owls. The scene is magical, with the stars twinkling brightly above.",
-      "image_url": "assets/img/quotes/quote_47.png",
-      "emphasis": {
-        "forest": "emphasis-3",
-        "loft": "emphasis-2",
-        "fireplace": "emphasis-2",
-        "skylight": "emphasis-2",
-        "cozy": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_48",
-      "quote": "A tiny beach house with a fold-out deck extends living space onto the sand, where a hammock swings gently in the ocean breeze.",
-      "image_prompt": "Ghibli Art: A delightful tiny beach house perched on the edge of a sandy shore. The fold-out deck extends the living space onto the sand, where a hammock swings gently in the ocean breeze. The interior is bright and airy, with large windows offering stunning views of the turquoise sea. A sleek black cat lounges on the deck, watching seagulls soar overhead. The beach is dotted with seashells, and the waves crash softly against the shore. The scene is serene, with the sun casting a golden glow over everything.",
-      "image_url": "assets/img/quotes/quote_48.png",
-      "emphasis": {
-        "beach": "emphasis-3",
-        "fold-out": "emphasis-2",
-        "hammock": "emphasis-2",
-        "ocean": "emphasis-2",
-        "gentle": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_49",
-      "quote": "In a tiny urban loft, a sliding bookshelf reveals a hidden workspace, while a rooftop terrace offers a peaceful escape from the city's hustle and bustle.",
-      "image_prompt": "Ghibli Art: A stylish tiny urban loft with cleverly designed interiors. A sliding bookshelf reveals a hidden workspace, complete with a desk and shelves filled with books. The rooftop terrace is a peaceful oasis, with potted plants and a cozy seating area offering a view of the city skyline. A fluffy white cat lounges on the terrace, basking in the sunlight. The city below is alive with activity, but the loft feels calm and serene. The scene is bathed in soft, warm light, creating a tranquil atmosphere.",
-      "image_url": "assets/img/quotes/quote_49.png",
-      "emphasis": {
-        "urban": "emphasis-3",
-        "sliding": "emphasis-2",
-        "workspace": "emphasis-2",
-        "rooftop": "emphasis-2",
-        "peaceful": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_50",
-      "quote": "A tiny cabin in the woods features a sunroom filled with potted plants, where a small table and chairs create a perfect spot for morning coffee.",
-      "image_prompt": "Ghibli Art: A quaint tiny cabin nestled in a dense forest. The sunroom is filled with potted plants, creating a lush, green oasis. A small table and chairs sit in the center, offering a perfect spot for morning coffee. A ginger cat lounges on the windowsill, basking in the sunlight. The forest outside is alive with the sounds of birds and rustling leaves. The scene is peaceful and serene, with the sun casting a warm glow on everything. The cabin feels like a hidden retreat, perfectly blending with the natural surroundings.",
-      "image_url": "assets/img/quotes/quote_50.png",
-      "emphasis": {
-        "cabin": "emphasis-2",
-        "woods": "emphasis-3",
-        "sunroom": "emphasis-2",
-        "plants": "emphasis-2",
-        "perfect": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_51",
-      "quote": "In a tiny house on wheels parked by a serene lake, a fold-out deck extends over the water, where a hammock sways gently in the summer breeze, offering a perfect spot for afternoon relaxation.",
-      "image_prompt": "Ghibli Art: A whimsical tiny house on wheels parked by a tranquil lake, bathed in the soft glow of a summer afternoon. The fold-out deck extends over the water, with a hammock gently swaying in the breeze. A curious calico cat lounges on the deck, pawing at a dragonfly that hovers nearby. The lake reflects the golden sunlight, with ripples creating a mesmerizing pattern. Lush greenery surrounds the scene, and a light mist rises from the water, adding a magical touch. The tiny house features a cozy interior with large windows that let in the natural light, and a small potted plant sits on the windowsill.",
-      "image_url": "assets/img/quotes/quote_51.png",
-      "emphasis": {
-        "wheels": "emphasis-2",
-        "lake": "emphasis-3",
-        "fold-out": "emphasis-2",
-        "hammock": "emphasis-2",
-        "relaxation": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_52",
-      "quote": "A tiny house nestled in a bamboo forest features a retractable glass roof that opens to the sky, allowing residents to stargaze from the comfort of their loft bed.",
-      "image_prompt": "Ghibli Art: A charming tiny house hidden in a dense bamboo forest, illuminated by the soft light of a full moon. The retractable glass roof is open, revealing a star-filled sky. Inside, a cozy loft bed is perfectly positioned for stargazing, with a warm blanket and plush pillows inviting rest. A sleek black cat sits on the edge of the loft, gazing up at the stars with wide, curious eyes. The bamboo forest sways gently in the night breeze, and fireflies dance around the house, adding a magical glow. The interior is thoughtfully designed with minimalist decor, and a small lantern casts a warm light on the wooden floor.",
-      "image_url": "assets/img/quotes/quote_52.png",
-      "emphasis": {
-        "bamboo": "emphasis-3",
-        "retractable": "emphasis-2",
-        "glass": "emphasis-2",
-        "stargaze": "emphasis-2",
-        "peace": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_53",
-      "quote": "In a tiny urban micro-apartment, a wall-mounted desk ingeniously transforms into a dining table, while vertical gardens bring a touch of nature to the bustling city life.",
-      "image_prompt": "Ghibli Art: A cozy urban micro-apartment bathed in the warm light of a setting sun. The wall-mounted desk cleverly transforms into a dining table, with chairs neatly tucked away when not in use. Vertical gardens line the walls, filled with lush greenery and blooming flowers. A playful tabby cat jumps from one shelf to another, chasing a butterfly that flutters through the open window. The cityscape outside is bustling with life, but the interior feels like a peaceful oasis. The room is thoughtfully designed with multi-functional furniture, and a small reading nook by the window offers a perfect spot to unwind.",
-      "image_url": "assets/img/quotes/quote_53.png",
-      "emphasis": {
-        "urban": "emphasis-3",
-        "micro-apartment": "emphasis-2",
-        "ingeniously": "emphasis-2",
-        "vertical": "emphasis-2",
-        "simplicity": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_54",
-      "quote": "A tiny house in the desert features a solar-powered cooling system that keeps the interior comfortable, while a rooftop terrace offers panoramic views of the vast, starry sky.",
-      "image_prompt": "Ghibli Art: A tiny house in the middle of a vast desert, with the sun setting in the background, casting a warm orange glow. The solar panels on the roof glisten in the fading light, powering a cooling system that keeps the interior comfortable. A rooftop terrace is adorned with cozy cushions and a small telescope, perfect for stargazing. A sleek white cat lounges on a cushion, gazing up at the first stars appearing in the twilight sky. The desert stretches endlessly, with sand dunes creating a mesmerizing pattern. Inside, the house is designed with earthy tones and natural materials, creating a serene and inviting atmosphere.",
-      "image_url": "assets/img/quotes/quote_54.png",
-      "emphasis": {
-        "desert": "emphasis-3",
-        "solar-powered": "emphasis-2",
-        "cooling": "emphasis-2",
-        "panoramic": "emphasis-2",
-        "freedom": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_55",
-      "quote": "In a tiny house perched on a cliff overlooking the ocean, a retractable glass wall opens to the sound of waves, creating a seamless connection between indoor and outdoor living.",
-      "image_prompt": "Ghibli Art: A stunning tiny house perched on a cliff overlooking the vast ocean, with waves crashing against the rocks below. The retractable glass wall is open, allowing the salty sea breeze to fill the interior. A cozy living area with plush cushions and a small fireplace invites relaxation. A curious black cat sits by the open wall, watching the waves with wide eyes. The golden hour light bathes the scene in a warm glow, and seagulls soar in the distance. The interior is designed with nautical decor, and a small bookshelf holds treasures collected from the beach. The seamless connection between indoor and outdoor living creates a sense of peace and tranquility.",
-      "image_url": "assets/img/quotes/quote_55.png",
-      "emphasis": {
-        "cliff": "emphasis-3",
-        "ocean": "emphasis-3",
-        "retractable": "emphasis-2",
-        "seamless": "emphasis-2",
-        "peace": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_56",
-      "quote": "A tiny house in a snowy forest features a wood-burning stove that keeps the interior warm, while a skylight offers a view of the northern lights dancing in the night sky.",
-      "image_prompt": "Ghibli Art: A cozy tiny house nestled in a snowy forest, with smoke gently rising from the chimney of a wood-burning stove. The interior is warm and inviting, with soft blankets and plush cushions. A skylight above the loft bed offers a breathtaking view of the northern lights dancing in the night sky. A fluffy white cat curls up by the stove, basking in the warmth. The forest outside is blanketed in snow, with trees glistening in the moonlight. The interior is designed with rustic decor, and a small window offers a view of the serene winter landscape. The magical atmosphere creates a sense of peace and wonder.",
-      "image_url": "assets/img/quotes/quote_56.png",
-      "emphasis": {
-        "snowy": "emphasis-3",
-        "wood-burning": "emphasis-2",
-        "skylight": "emphasis-2",
-        "northern": "emphasis-2",
-        "wonder": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_57",
-      "quote": "In a tiny house on a hilltop, a rainwater collection system irrigates a lush garden, while a composting toilet ensures sustainable living in harmony with nature.",
-      "image_prompt": "Ghibli Art: A charming tiny house on a hilltop, surrounded by a lush garden irrigated by a rainwater collection system. The garden is filled with vibrant flowers and vegetables, thriving in the fertile soil. A sleek gray cat explores the garden, sniffing at the blooming flowers. The composting toilet is cleverly integrated into the design, ensuring sustainable living. The hilltop offers panoramic views of the rolling countryside, with a soft morning mist rising from the valleys. The interior is designed with eco-friendly materials, and a small window offers a view of the thriving garden. The harmonious connection with nature creates a sense of peace and fulfillment.",
-      "image_url": "assets/img/quotes/quote_57.png",
-      "emphasis": {
-        "hilltop": "emphasis-3",
-        "rainwater": "emphasis-2",
-        "composting": "emphasis-2",
-        "sustainable": "emphasis-2",
-        "harmony": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_58",
-      "quote": "A tiny house in a meadow features a sunroom filled with potted plants, where a small table and chairs create a perfect spot for morning coffee.",
-      "image_prompt": "Ghibli Art: A delightful tiny house in a blooming meadow, with a sunroom filled with potted plants of all shapes and sizes. The sunroom is bathed in the soft light of a spring morning, with sunlight streaming through the windows. A small table and chairs create a perfect spot for morning coffee, with a steaming cup and a fresh croissant on the table. A playful tabby cat lounges on the windowsill, watching butterflies flit through the meadow. The meadow is alive with color, with wildflowers swaying in the gentle breeze. The interior is designed with bright, cheerful decor, and a small bookshelf holds gardening books and trinkets. The serene atmosphere invites creativity and inspiration.",
-      "image_url": "assets/img/quotes/quote_58.png",
-      "emphasis": {
-        "meadow": "emphasis-3",
-        "sunroom": "emphasis-2",
-        "potted": "emphasis-2",
-        "coffee": "emphasis-2",
-        "creativity": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_59",
-      "quote": "In a tiny house on a riverbank, a fold-out deck extends over the water, where a small kayak is stored, ready for morning adventures.",
-      "image_prompt": "Ghibli Art: A picturesque tiny house on a riverbank, with a fold-out deck extending over the calm water. A small kayak is stored on the deck, ready for morning adventures. The river reflects the soft light of dawn, with mist rising from the surface. A curious black cat sits on the deck, watching fish swim beneath the water. The tiny house is surrounded by lush greenery, with trees swaying in the gentle breeze. The interior is designed with nautical decor, and a small window offers a view of the serene river. The peaceful atmosphere creates a sense of freedom and adventure.",
-      "image_url": "assets/img/quotes/quote_59.png",
-      "emphasis": {
-        "riverbank": "emphasis-3",
-        "fold-out": "emphasis-2",
-        "kayak": "emphasis-2",
-        "adventures": "emphasis-2",
-        "freedom": "emphasis-1"
-      }
-    },
-    {
-      "id": "quote_60",
-      "quote": "A tiny house in a cherry blossom grove features a loft bedroom with large windows that offer a view of the blooming trees, creating a magical atmosphere.",
-      "image_prompt": "Ghibli Art: A enchanting tiny house in a cherry blossom grove, with the trees in full bloom. The loft bedroom features large windows that offer a breathtaking view of the pink blossoms. A soft breeze carries petals through the air, creating a magical atmosphere. A fluffy white cat lounges on the windowsill, watching the petals fall. The interior is designed with minimalist decor, and a small ladder leads to the loft. The grove is alive with color, with sunlight filtering through the blossoms. The serene atmosphere creates a sense of peace and wonder.",
-      "image_url": "assets/img/quotes/quote_60.png",
-      "emphasis": {
-        "cherry": "emphasis-3",
-        "blossom": "emphasis-3",
-        "loft": "emphasis-2",
-        "magical": "emphasis-2",
-        "wonder": "emphasis-1"
+        "Glasswing Butterfly": "emphasis-2",
+        "transparent wings": "emphasis-1",
+        "nearly invisible": "emphasis-2"
       }
     }
   ]

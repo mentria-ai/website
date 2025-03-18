@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Remove punctuation for checking
         const cleanWord = word.replace(/[.,!?;:'"]/g, '').toLowerCase();
         
-        // Words that improve readability 
+        // Words that improve readability for fact-based content
         const readabilityWords = [
             'while', 'when', 'where', 'how', 'which', 'what', 'who',
             'then', 'there', 'these', 'those', 'this', 'that',
@@ -48,18 +48,9 @@ document.addEventListener('DOMContentLoaded', function() {
             'inside', 'outside', 'above', 'below', 'between', 'among',
             'through', 'within', 'during', 'because', 'although',
             'despite', 'however', 'therefore', 'moreover', 'furthermore',
-            'cleverly', 'ingeniously', 'thoughtfully'
-        ];
-        
-        // Words that might be candidates for links (emphasis-3) related to tiny houses
-        const linkableWords = [
-            'minimalist', 'compact', 'sustainable', 'eco-friendly', 'off-grid',
-            'solar', 'composting', 'rainwater', 'multifunctional', 'transformable',
-            'murphy', 'storage', 'loft', 'folding', 'convertible',
-            'tiny', 'micro', 'mobile', 'trailer', 'cabin',
-            'container', 'van', 'skoolie', 'treehouse', 'yurt',
-            'bamboo', 'reclaimed', 'salvaged', 'recycled', 'repurposed',
-            'freedom', 'connection', 'simplicity', 'peace', 'creativity'
+            'actually', 'interestingly', 'surprisingly', 'fascinatingly',
+            'approximately', 'nearly', 'roughly', 'about', 'almost',
+            'precisely', 'exactly', 'specifically', 'generally'
         ];
         
         // Empty emphasis by default
@@ -68,11 +59,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Apply emphasis-2 only to words that improve readability
         if (readabilityWords.includes(cleanWord)) {
             emphasis = 'emphasis-2';
-        } 
-        // Apply emphasis-3 only to words that would be links
-        else if (linkableWords.includes(cleanWord)) {
-            emphasis = 'emphasis-3';
         }
+        
+        // emphasis-3 is disabled for now
         
         return emphasis;
     }
@@ -150,8 +139,29 @@ document.addEventListener('DOMContentLoaded', function() {
         currentQuote = quote;
         animatedText.innerHTML = '';
         
+        // Special handling for "Did you know?" prefix
+        let processedQuote = quote;
+        const didYouKnowPrefix = "Did you know?";
+        
+        // Create a special element for the prefix if it exists
+        if (quote.trim().startsWith(didYouKnowPrefix)) {
+            const prefixElement = document.createElement('div');
+            prefixElement.className = 'word-container visible';
+            
+            const prefixSpan = document.createElement('span');
+            prefixSpan.className = 'word emphasis-1'; // Always highlight the prefix
+            prefixSpan.textContent = didYouKnowPrefix + ' ';
+            prefixElement.appendChild(prefixSpan);
+            
+            // Append the prefix to the container
+            animatedText.appendChild(prefixElement);
+            
+            // Remove the prefix from the quote for further processing
+            processedQuote = quote.trim().substring(didYouKnowPrefix.length).trim();
+        }
+        
         // Split quote into words
-        const words = quote.split(' ');
+        const words = processedQuote.split(' ');
         const totalAnimationTime = 200; // 0.2 seconds total animation time
         wordDelay = Math.max(5, totalAnimationTime / words.length); // Make sure we have at least 5ms delay
         

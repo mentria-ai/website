@@ -159,7 +159,7 @@ html, body {
     height: auto;
     background-color: rgba(0, 0, 0, 0.6);
     border-radius: 12px;
-    padding: 12px 16px;
+    padding: 14px 18px; /* Slightly increased padding for better readability */
     backdrop-filter: blur(8px);
     overflow: hidden;
     display: flex;
@@ -221,7 +221,8 @@ html, body {
 }
 
 .word.emphasis-1 {
-    color: #eac54f;
+    color: #ffcc00; /* Brighter gold color for "Did You Know" facts */
+    text-shadow: 0 0 4px rgba(255, 204, 0, 0.5); /* Add a subtle glow */
 }
 
 .word.emphasis-2 {

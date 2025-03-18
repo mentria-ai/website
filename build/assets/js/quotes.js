@@ -12,6 +12,9 @@ class QuoteManager {
         this.scrollTimeout = null;
         this.resizeTimeout = null;
         
+        // Load the last viewed quote index from localStorage
+        this.loadLastPosition();
+        
         this.debug.log('QuoteManager initialized');
         
         this.init();
@@ -23,14 +26,37 @@ class QuoteManager {
             // Initialize the scroll container with images
             if (this.quotes.length > 0) {
                 this.initializeScrollContainer();
-                // Set initial quote details
-                this.updateQuoteInfo(0);
+                // Set initial quote details based on saved position
+                this.updateQuoteInfo(this.currentQuoteIndex);
             }
             
             // Set up event listeners for scroll and other interactions
             this.setupEventListeners();
         } catch (error) {
             this.debug.error('Initialization error:', error);
+        }
+    }
+    
+    // Method to load the last viewed position
+    loadLastPosition() {
+        try {
+            const savedIndex = localStorage.getItem('lastViewedQuoteIndex');
+            if (savedIndex !== null) {
+                this.currentQuoteIndex = parseInt(savedIndex, 10);
+                this.debug.log('Loaded last position:', this.currentQuoteIndex);
+            }
+        } catch (error) {
+            this.debug.error('Error loading last position:', error);
+        }
+    }
+    
+    // Method to save the current position
+    savePosition() {
+        try {
+            localStorage.setItem('lastViewedQuoteIndex', this.currentQuoteIndex.toString());
+            this.debug.log('Saved position:', this.currentQuoteIndex);
+        } catch (error) {
+            this.debug.error('Error saving position:', error);
         }
     }
     
@@ -43,6 +69,12 @@ class QuoteManager {
             
             const data = await response.json();
             this.quotes = data.quotes || [];
+            
+            // If saved index is out of bounds, reset to last item
+            if (this.currentQuoteIndex >= this.quotes.length) {
+                this.currentQuoteIndex = this.quotes.length - 1;
+            }
+            
             this.debug.log('Quotes loaded:', this.quotes.length);
             return this.quotes;
         } catch (error) {
@@ -78,12 +110,12 @@ class QuoteManager {
             this.addScrollItem(this.quotes[i], i, 'end', true);
         }
         
-        // Scroll to the first real item (after the clones)
+        // Scroll to the saved position or first real item (after the clones)
         setTimeout(() => {
-            // Calculate position - number of clones at start * height
-            const startPosition = 3 * this.scrollContainer.clientHeight;
-            this.scrollToPosition(startPosition, false);
-            this.currentQuoteIndex = 0;
+            const adjustedIndex = this.currentQuoteIndex + 3; // Adjust for clones
+            const targetPosition = adjustedIndex * this.scrollContainer.clientHeight;
+            this.scrollToPosition(targetPosition, false);
+            this.debug.log('Scrolled to saved position:', this.currentQuoteIndex);
         }, 10);
     }
     
@@ -229,12 +261,18 @@ class QuoteManager {
         const quote = this.quotes[index];
         this.debug.log('Updating quote info:', { index, quote });
         
+        // Save the current position when changing quotes
+        this.currentQuoteIndex = index;
+        this.savePosition();
+        
         // Dispatch a custom event to notify that the quote has changed
         this.debug.log('Dispatching quoteChanged event with text:', quote.quote || quote.text);
         const quoteChangedEvent = new CustomEvent('quoteChanged', {
             detail: {
                 quote: quote.quote || quote.text,
-                emphasis: quote.emphasis || {}
+                emphasis: quote.emphasis || {},
+                id: quote.id || `quote_${index}`,
+                liked: this.isQuoteLiked(quote.id)
             }
         });
         
@@ -275,6 +313,16 @@ class QuoteManager {
         const prevIndex = (this.currentQuoteIndex - 1 + this.quotes.length) % this.quotes.length;
         this.debug.log('Moving to previous quote:', { current: this.currentQuoteIndex, prev: prevIndex });
         this.scrollToItem(prevIndex);
+    }
+    
+    isQuoteLiked(quoteId) {
+        try {
+            const likedQuotes = JSON.parse(localStorage.getItem('likedQuotes') || '[]');
+            return likedQuotes.includes(quoteId);
+        } catch (error) {
+            this.debug.error('Error checking liked status:', error);
+            return false;
+        }
     }
 }
 

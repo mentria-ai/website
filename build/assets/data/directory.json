@@ -1326,6 +1326,90 @@
         "membrane": "emphasis-2",
         "fingertips and toes": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_179",
+      "quote": "Did you know? The Sunda flying lemur can glide over 330 feet between trees, using a membrane that stretches from its neck to its fingertips and toes.",
+      "image_prompt": "Ghibli Art: A Sunda flying lemur gracefully gliding through a lush, enchanted forest at sunset. Its translucent membrane glows softly, catching the golden light. Tiny glowing fireflies and magical particles float around it, enhancing the dreamlike atmosphere. The lemur\u2019s face is serene, with large, expressive eyes, and the trees below are vibrant and alive with whimsical creatures watching in awe.",
+      "image_url": "assets/img/quotes/quote_179.png",
+      "emphasis": {
+        "Sunda flying lemur": "emphasis-2",
+        "glide": "emphasis-1",
+        "330 feet": "emphasis-2",
+        "membrane": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_180",
+      "quote": "Did you know? The immortal jellyfish can revert its cells to their earliest form, essentially restarting its life cycle and potentially living forever under the right conditions.",
+      "image_prompt": "Ghibli Art: A glowing immortal jellyfish floating in a serene, bioluminescent ocean at night. Its translucent body pulses with soft, magical light as it reverts to its earliest form, surrounded by swirling golden particles. The water is calm, with tiny glowing plankton creating a starry effect. A curious school of fish with exaggerated expressions watches in wonder, and the scene is bathed in a mystical blue hue.",
+      "image_url": "assets/img/quotes/quote_180.png",
+      "emphasis": {
+        "immortal jellyfish": "emphasis-2",
+        "revert": "emphasis-1",
+        "life cycle": "emphasis-2",
+        "forever": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_181",
+      "quote": "Did you know? The town of Colmar in France is known as 'Little Venice' due to its picturesque canals and colorful half-timbered houses, creating a fairy-tale-like atmosphere.",
+      "image_prompt": "Ghibli Art: A charming, colorful town with canals reflecting the vibrant hues of half-timbered houses. The scene is bathed in the warm glow of sunset, with golden light casting long shadows. Tiny boats with whimsical designs float on the water, and magical particles like fireflies add a dreamy touch. A friendly cat with a bowtie sits on a windowsill, watching the scene with curiosity.",
+      "image_url": "assets/img/quotes/quote_181.png",
+      "emphasis": {
+        "Colmar": "emphasis-2",
+        "Little Venice": "emphasis-1",
+        "canals": "emphasis-2",
+        "fairy-tale-like": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_182",
+      "quote": "Did you know? The mantis shrimp punches with the speed of a bullet, creating shockwaves that can stun or kill its prey, and its claws are so strong they can break aquarium glass.",
+      "image_prompt": "Ghibli Art: A vibrant mantis shrimp in a colorful underwater reef, its claws glowing with a fierce, magical energy. The moment it punches, a shockwave radiates out, distorting the water and sending tiny fish flying. The scene is illuminated by shafts of sunlight filtering through the water, with glowing particles and bubbles adding to the dynamic energy. A curious octopus with wide eyes watches from a safe distance.",
+      "image_url": "assets/img/quotes/quote_182.png",
+      "emphasis": {
+        "mantis shrimp": "emphasis-2",
+        "speed of a bullet": "emphasis-1",
+        "shockwaves": "emphasis-2",
+        "break aquarium glass": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_183",
+      "quote": "Did you know? The town of Hallstatt in Austria is so picturesque that China built an exact replica of it, complete with its iconic lake and alpine architecture.",
+      "image_prompt": "Ghibli Art: A serene alpine town with a crystal-clear lake reflecting the colorful houses and towering mountains. The scene is bathed in the soft light of dawn, with mist rising from the water. Magical golden particles float in the air, and a family of ducks swims peacefully. In the background, a whimsical hot air balloon with a dragon design hovers, adding a touch of fantasy.",
+      "image_url": "assets/img/quotes/quote_183.png",
+      "emphasis": {
+        "Hallstatt": "emphasis-2",
+        "picturesque": "emphasis-1",
+        "exact replica": "emphasis-2",
+        "alpine architecture": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_184",
+      "quote": "Did you know? The narwhal\u2019s tusk is actually a sensory organ with millions of nerve endings, allowing it to detect changes in its environment like temperature and salinity.",
+      "image_prompt": "Ghibli Art: A majestic narwhal swimming in a shimmering, icy Arctic ocean. Its long tusk glows softly with a magical blue light, surrounded by swirling golden particles. The water is crystal clear, with tiny glowing plankton creating a starry effect. A curious polar bear with a friendly expression watches from an iceberg, and the scene is bathed in the ethereal light of the aurora borealis.",
+      "image_url": "assets/img/quotes/quote_184.png",
+      "emphasis": {
+        "narwhal\u2019s tusk": "emphasis-2",
+        "sensory organ": "emphasis-1",
+        "millions of nerve endings": "emphasis-2",
+        "detect": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_185",
+      "quote": "Did you know? The ancient city of Hatra in Iraq was built to withstand sieges, with thick walls and a sophisticated water system, and it thrived as a center of trade and culture.",
+      "image_prompt": "Ghibli Art: A grand ancient city with towering, thick walls and intricate carvings, surrounded by a lush oasis. The scene is bathed in the golden light of sunset, with magical particles floating in the air. A sophisticated water system with flowing fountains and canals adds life to the scene. Merchants with colorful robes and exotic goods trade in a bustling marketplace, and a friendly camel with a whimsical saddle watches over the activity.",
+      "image_url": "assets/img/quotes/quote_185.png",
+      "emphasis": {
+        "Hatra": "emphasis-2",
+        "withstand sieges": "emphasis-1",
+        "sophisticated water system": "emphasis-2",
+        "center of trade": "emphasis-2"
+      }
     }
   ]
 }

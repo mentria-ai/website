@@ -21,23 +21,24 @@ jobs:
       - name: Validate event inputs
         id: validate-inputs
         run: |
-          # Simplified check that doesn't require jq
+          # Simplified check using GitHub context variables
           if [[ "${{ github.event_name }}" != "discussion" && "${{ github.event_name }}" != "discussion_comment" ]]; then
             echo "::error::Unsupported event type: ${{ github.event_name }}"
             exit 1
           fi
-          
-          # Basic check for required payload elements
-          if [[ -z "${{ toJson(github.event.discussion) }}" ]]; then
+
+          # Check for required discussion data using ID existence
+          if [[ -z "${{ github.event.discussion.id }}" ]]; then
             echo "::error::Missing discussion data in event payload"
             exit 1
           fi
-          
-          if [[ "${{ github.event_name }}" == "discussion_comment" && -z "${{ toJson(github.event.comment) }}" ]]; then
+
+          # For comment events, check comment ID exists
+          if [[ "${{ github.event_name }}" == "discussion_comment" && -z "${{ github.event.comment.id }}" ]]; then
             echo "::error::Missing comment data in event payload"
             exit 1
           fi
-          
+
           echo "Input validation passed"
       
       - name: Initialize workflow log

@@ -47,7 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
             'first', 'second', 'finally', 'lastly', 'before', 'after',
             'inside', 'outside', 'above', 'below', 'between', 'among',
             'through', 'within', 'during', 'because', 'although',
-            'despite', 'however', 'therefore', 'moreover', 'furthermore'
+            'despite', 'however', 'therefore', 'moreover', 'furthermore',
+            'cleverly', 'ingeniously', 'thoughtfully'
         ];
         
         // Words that might be candidates for links (emphasis-3) related to tiny houses
@@ -57,7 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
             'murphy', 'storage', 'loft', 'folding', 'convertible',
             'tiny', 'micro', 'mobile', 'trailer', 'cabin',
             'container', 'van', 'skoolie', 'treehouse', 'yurt',
-            'bamboo', 'reclaimed', 'salvaged', 'recycled', 'repurposed'
+            'bamboo', 'reclaimed', 'salvaged', 'recycled', 'repurposed',
+            'freedom', 'connection', 'simplicity', 'peace', 'creativity'
         ];
         
         // Empty emphasis by default

@@ -494,6 +494,136 @@
         "plants": "emphasis-2",
         "perfect": "emphasis-1"
       }
+    },
+    {
+      "id": "quote_51",
+      "quote": "In a tiny house on wheels parked by a serene lake, a fold-out deck extends over the water, where a hammock sways gently in the summer breeze, offering a perfect spot for afternoon relaxation.",
+      "image_prompt": "Ghibli Art: A whimsical tiny house on wheels parked by a tranquil lake, bathed in the soft glow of a summer afternoon. The fold-out deck extends over the water, with a hammock gently swaying in the breeze. A curious calico cat lounges on the deck, pawing at a dragonfly that hovers nearby. The lake reflects the golden sunlight, with ripples creating a mesmerizing pattern. Lush greenery surrounds the scene, and a light mist rises from the water, adding a magical touch. The tiny house features a cozy interior with large windows that let in the natural light, and a small potted plant sits on the windowsill.",
+      "image_url": "assets/img/quotes/quote_51.png",
+      "emphasis": {
+        "wheels": "emphasis-2",
+        "lake": "emphasis-3",
+        "fold-out": "emphasis-2",
+        "hammock": "emphasis-2",
+        "relaxation": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_52",
+      "quote": "A tiny house nestled in a bamboo forest features a retractable glass roof that opens to the sky, allowing residents to stargaze from the comfort of their loft bed.",
+      "image_prompt": "Ghibli Art: A charming tiny house hidden in a dense bamboo forest, illuminated by the soft light of a full moon. The retractable glass roof is open, revealing a star-filled sky. Inside, a cozy loft bed is perfectly positioned for stargazing, with a warm blanket and plush pillows inviting rest. A sleek black cat sits on the edge of the loft, gazing up at the stars with wide, curious eyes. The bamboo forest sways gently in the night breeze, and fireflies dance around the house, adding a magical glow. The interior is thoughtfully designed with minimalist decor, and a small lantern casts a warm light on the wooden floor.",
+      "image_url": "assets/img/quotes/quote_52.png",
+      "emphasis": {
+        "bamboo": "emphasis-3",
+        "retractable": "emphasis-2",
+        "glass": "emphasis-2",
+        "stargaze": "emphasis-2",
+        "peace": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_53",
+      "quote": "In a tiny urban micro-apartment, a wall-mounted desk ingeniously transforms into a dining table, while vertical gardens bring a touch of nature to the bustling city life.",
+      "image_prompt": "Ghibli Art: A cozy urban micro-apartment bathed in the warm light of a setting sun. The wall-mounted desk cleverly transforms into a dining table, with chairs neatly tucked away when not in use. Vertical gardens line the walls, filled with lush greenery and blooming flowers. A playful tabby cat jumps from one shelf to another, chasing a butterfly that flutters through the open window. The cityscape outside is bustling with life, but the interior feels like a peaceful oasis. The room is thoughtfully designed with multi-functional furniture, and a small reading nook by the window offers a perfect spot to unwind.",
+      "image_url": "assets/img/quotes/quote_53.png",
+      "emphasis": {
+        "urban": "emphasis-3",
+        "micro-apartment": "emphasis-2",
+        "ingeniously": "emphasis-2",
+        "vertical": "emphasis-2",
+        "simplicity": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_54",
+      "quote": "A tiny house in the desert features a solar-powered cooling system that keeps the interior comfortable, while a rooftop terrace offers panoramic views of the vast, starry sky.",
+      "image_prompt": "Ghibli Art: A tiny house in the middle of a vast desert, with the sun setting in the background, casting a warm orange glow. The solar panels on the roof glisten in the fading light, powering a cooling system that keeps the interior comfortable. A rooftop terrace is adorned with cozy cushions and a small telescope, perfect for stargazing. A sleek white cat lounges on a cushion, gazing up at the first stars appearing in the twilight sky. The desert stretches endlessly, with sand dunes creating a mesmerizing pattern. Inside, the house is designed with earthy tones and natural materials, creating a serene and inviting atmosphere.",
+      "image_url": "assets/img/quotes/quote_54.png",
+      "emphasis": {
+        "desert": "emphasis-3",
+        "solar-powered": "emphasis-2",
+        "cooling": "emphasis-2",
+        "panoramic": "emphasis-2",
+        "freedom": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_55",
+      "quote": "In a tiny house perched on a cliff overlooking the ocean, a retractable glass wall opens to the sound of waves, creating a seamless connection between indoor and outdoor living.",
+      "image_prompt": "Ghibli Art: A stunning tiny house perched on a cliff overlooking the vast ocean, with waves crashing against the rocks below. The retractable glass wall is open, allowing the salty sea breeze to fill the interior. A cozy living area with plush cushions and a small fireplace invites relaxation. A curious black cat sits by the open wall, watching the waves with wide eyes. The golden hour light bathes the scene in a warm glow, and seagulls soar in the distance. The interior is designed with nautical decor, and a small bookshelf holds treasures collected from the beach. The seamless connection between indoor and outdoor living creates a sense of peace and tranquility.",
+      "image_url": "assets/img/quotes/quote_55.png",
+      "emphasis": {
+        "cliff": "emphasis-3",
+        "ocean": "emphasis-3",
+        "retractable": "emphasis-2",
+        "seamless": "emphasis-2",
+        "peace": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_56",
+      "quote": "A tiny house in a snowy forest features a wood-burning stove that keeps the interior warm, while a skylight offers a view of the northern lights dancing in the night sky.",
+      "image_prompt": "Ghibli Art: A cozy tiny house nestled in a snowy forest, with smoke gently rising from the chimney of a wood-burning stove. The interior is warm and inviting, with soft blankets and plush cushions. A skylight above the loft bed offers a breathtaking view of the northern lights dancing in the night sky. A fluffy white cat curls up by the stove, basking in the warmth. The forest outside is blanketed in snow, with trees glistening in the moonlight. The interior is designed with rustic decor, and a small window offers a view of the serene winter landscape. The magical atmosphere creates a sense of peace and wonder.",
+      "image_url": "assets/img/quotes/quote_56.png",
+      "emphasis": {
+        "snowy": "emphasis-3",
+        "wood-burning": "emphasis-2",
+        "skylight": "emphasis-2",
+        "northern": "emphasis-2",
+        "wonder": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_57",
+      "quote": "In a tiny house on a hilltop, a rainwater collection system irrigates a lush garden, while a composting toilet ensures sustainable living in harmony with nature.",
+      "image_prompt": "Ghibli Art: A charming tiny house on a hilltop, surrounded by a lush garden irrigated by a rainwater collection system. The garden is filled with vibrant flowers and vegetables, thriving in the fertile soil. A sleek gray cat explores the garden, sniffing at the blooming flowers. The composting toilet is cleverly integrated into the design, ensuring sustainable living. The hilltop offers panoramic views of the rolling countryside, with a soft morning mist rising from the valleys. The interior is designed with eco-friendly materials, and a small window offers a view of the thriving garden. The harmonious connection with nature creates a sense of peace and fulfillment.",
+      "image_url": "assets/img/quotes/quote_57.png",
+      "emphasis": {
+        "hilltop": "emphasis-3",
+        "rainwater": "emphasis-2",
+        "composting": "emphasis-2",
+        "sustainable": "emphasis-2",
+        "harmony": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_58",
+      "quote": "A tiny house in a meadow features a sunroom filled with potted plants, where a small table and chairs create a perfect spot for morning coffee.",
+      "image_prompt": "Ghibli Art: A delightful tiny house in a blooming meadow, with a sunroom filled with potted plants of all shapes and sizes. The sunroom is bathed in the soft light of a spring morning, with sunlight streaming through the windows. A small table and chairs create a perfect spot for morning coffee, with a steaming cup and a fresh croissant on the table. A playful tabby cat lounges on the windowsill, watching butterflies flit through the meadow. The meadow is alive with color, with wildflowers swaying in the gentle breeze. The interior is designed with bright, cheerful decor, and a small bookshelf holds gardening books and trinkets. The serene atmosphere invites creativity and inspiration.",
+      "image_url": "assets/img/quotes/quote_58.png",
+      "emphasis": {
+        "meadow": "emphasis-3",
+        "sunroom": "emphasis-2",
+        "potted": "emphasis-2",
+        "coffee": "emphasis-2",
+        "creativity": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_59",
+      "quote": "In a tiny house on a riverbank, a fold-out deck extends over the water, where a small kayak is stored, ready for morning adventures.",
+      "image_prompt": "Ghibli Art: A picturesque tiny house on a riverbank, with a fold-out deck extending over the calm water. A small kayak is stored on the deck, ready for morning adventures. The river reflects the soft light of dawn, with mist rising from the surface. A curious black cat sits on the deck, watching fish swim beneath the water. The tiny house is surrounded by lush greenery, with trees swaying in the gentle breeze. The interior is designed with nautical decor, and a small window offers a view of the serene river. The peaceful atmosphere creates a sense of freedom and adventure.",
+      "image_url": "assets/img/quotes/quote_59.png",
+      "emphasis": {
+        "riverbank": "emphasis-3",
+        "fold-out": "emphasis-2",
+        "kayak": "emphasis-2",
+        "adventures": "emphasis-2",
+        "freedom": "emphasis-1"
+      }
+    },
+    {
+      "id": "quote_60",
+      "quote": "A tiny house in a cherry blossom grove features a loft bedroom with large windows that offer a view of the blooming trees, creating a magical atmosphere.",
+      "image_prompt": "Ghibli Art: A enchanting tiny house in a cherry blossom grove, with the trees in full bloom. The loft bedroom features large windows that offer a breathtaking view of the pink blossoms. A soft breeze carries petals through the air, creating a magical atmosphere. A fluffy white cat lounges on the windowsill, watching the petals fall. The interior is designed with minimalist decor, and a small ladder leads to the loft. The grove is alive with color, with sunlight filtering through the blossoms. The serene atmosphere creates a sense of peace and wonder.",
+      "image_url": "assets/img/quotes/quote_60.png",
+      "emphasis": {
+        "cherry": "emphasis-3",
+        "blossom": "emphasis-3",
+        "loft": "emphasis-2",
+        "magical": "emphasis-2",
+        "wonder": "emphasis-1"
+      }
     }
   ]
 }

@@ -53,15 +53,17 @@ Generate unique, delightful stories about tiny house living experiences, innovat
 
 Each image prompt should start with "Ghibli Art," and you have complete artistic freedom to reimagine these tiny house living experiences in the whimsical, magical style of Studio Ghibli.
 IMPORTANT REQUIREMENTS FOR EVERY IMAGE PROMPT:
-1. Include a cat somewhere in the background (different for each image)
-2. Include a blonde character, but only in approximately 30% of the images (not in every one)
+1. Include a cat somewhere in the scene, each engaged in a characteristic activity (napping in a sunny window, exploring storage spaces, watching nature through windows, pawing at a butterfly, etc.)
+2. Include atmospheric elements like morning mist, golden hour light, or nocturnal starlight to enhance the magical Ghibli feeling
 3. Be imaginative in your descriptions, including vibrant tiny home interiors, clever storage solutions, multi-functional furniture, indoor-outdoor connections, and cozy living spaces
-4. Vary the settings to include different seasons (spring flowers, summer greenery, autumn leaves, winter snow), different times of day, different weather conditions, and different locations (forest cabins, beach tiny homes, urban micro-apartments, mountain tiny houses, etc.)
+4. Vary the settings to include diverse weather conditions beyond standard seasons - misty mornings, summer rainstorms, snowy evenings with northern lights, autumn fog, spring showers
+5. For approximately 40% of prompts, highlight sustainable technology (solar panels, rainwater systems, composting) with subtle magical Ghibli interpretations
 
-For each tiny house story, also identify important words that should be emphasized in the animation. There are three levels of emphasis:
-- emphasis-1: VERY SPARINGLY used for the single most important word that captures the essence of the story (use in only 30% of stories)
-- emphasis-2: Used only to improve readability for transitional or key descriptive words
-- emphasis-3: Used ONLY for words that would be links to other content (these will be styled as links with no-follow and target blank attributes)"""
+For each tiny house story, identify important words that should be emphasized in the animation. There are only two levels of emphasis:
+- emphasis-1: VERY SPARINGLY used for the single most important word that captures the essence of the story (use in only 30% of stories). This will be highlighted in gold color.
+- emphasis-2: Used only to improve readability for transitional or key descriptive words (include 'cleverly', 'ingeniously', 'thoughtfully' to highlight intentional design). This will be underlined.
+
+Each story should emphasize one emotional benefit of tiny living (freedom, connection, simplicity, peace, creativity)."""
     
     # Create the user prompt with examples
     user_prompt = f"""Please generate {num_stories} unique and enchanting tiny house living stories that are not in this list: {existing_quotes}.
@@ -76,28 +78,30 @@ Include diverse tiny house experiences:
 - Different settings (forest retreats, beachfront tiny houses, urban micro-living, mountaintop cabins, off-grid tiny homes)
 - Innovative solutions (multi-functional furniture, vertical storage, loft bedrooms, transforming spaces, composting toilets)
 - Lifestyle benefits (financial freedom, environmental impact, mobility, community connection, simplified living)
+- Emotional benefits (freedom, connection, simplicity, peace, creativity)
 
 Remember these REQUIREMENTS for every image prompt:
-- Include a cat in the background (different for each image)
-- Include a blonde character, but only in about 30% of the images
-- Maintain the warm, whimsical Ghibli art style
-- Include varied tiny house settings, seasons, weather conditions, and times of day
+- Include a cat engaged in a characteristic behavior (different for each image)
+- Include atmospheric elements (morning mist, golden hour light, nocturnal starlight, etc.)  
+- Maintain the warm, whimsical Ghibli art style with magical elements
+- Include varied tiny house settings, weather conditions, and times of day
+- For 40% of prompts, highlight sustainable technology with subtle magical Ghibli interpretations
 
 Format your response as a valid JSON array with objects containing:
 1. "quote": The tiny house living story (keep this field name as "quote" for compatibility)
 2. "image_prompt": A detailed Ghibli Art style image prompt following the requirements
-3. "emphasis": An object mapping words to their emphasis level - use emphasis-1 very sparingly (in only 30% of stories), emphasis-2 only for readability, and emphasis-3 only for words that would be links
+3. "emphasis": An object mapping words to their emphasis level - use emphasis-1 very sparingly for color highlighting (in only 30% of stories), and emphasis-2 for underlining key descriptive words (including 'cleverly', 'ingeniously', 'thoughtfully')
 
 Example:
 {{
-    "quote": "In a converted vintage bus nestled in a mountain meadow, every inch is purposefully designed - kitchen shelves fold into dining tables, stairs double as storage drawers, and the rooftop garden provides fresh herbs year-round.",
-    "image_prompt": "Ghibli Art: A magical converted vintage bus tiny home in a serene mountain meadow. Sunlight streams through colorful stained glass windows onto cleverly designed interiors where kitchen shelves transform into a dining table. A spiral staircase with drawers built into each step leads to a loft bedroom. On the rooftop, a thriving herb garden grows with sprigs of rosemary and basil swaying in the gentle breeze. A curious tabby cat watches from a nearby rock as butterflies float around wildflowers surrounding the bus. The mountains in the background are painted in soft purples and blues, with tiny clouds casting dappled shadows on the meadow.",
+    "quote": "In a converted vintage bus nestled in a mountain meadow, every inch is ingeniously designed - kitchen shelves fold into dining tables, stairs double as storage drawers, and the rooftop garden provides fresh herbs year-round.",
+    "image_prompt": "Ghibli Art: A magical converted vintage bus tiny home in a serene mountain meadow bathed in golden hour light. Sunlight streams through colorful stained glass windows onto cleverly designed interiors where kitchen shelves transform into a dining table. A spiral staircase with drawers built into each step leads to a loft bedroom. On the rooftop, a thriving herb garden grows with sprigs of rosemary and basil swaying in the gentle breeze. A curious tabby cat explores the herb garden, pawing at a floating seed pod. The mountains in the background are painted in soft purples and blues, with tiny clouds casting dappled shadows on the meadow as mist rises from the valley below.",
     "emphasis": {{
         "vintage": "emphasis-2",
         "bus": "emphasis-2",
-        "mountain": "emphasis-3",
+        "ingeniously": "emphasis-2",
         "storage": "emphasis-2",
-        "purposefully": "emphasis-1"
+        "freedom": "emphasis-1"
     }}
 }}
 

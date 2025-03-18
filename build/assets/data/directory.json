@@ -688,6 +688,84 @@
         "glow blue": "emphasis-1",
         "phytoplankton": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_123",
+      "quote": "Did you know? The Greenland shark can live for over 400 years, making it the longest-living vertebrate on Earth, and it doesn\u2019t reach sexual maturity until it\u2019s about 150 years old.",
+      "image_prompt": "Ghibli Art: A wise, ancient Greenland shark glides gracefully through the deep, icy waters of the Arctic. Its eyes glow softly with a mystical light, and tiny, glowing plankton swirl around it like stars. The scene is bathed in a cool, ethereal blue light, with faint golden rays breaking through the icy surface above. A small, curious fish with wide eyes follows the shark, marveling at its slow, deliberate movements. Magical bubbles rise around the shark, each one containing a tiny, glowing image of its long life.",
+      "image_url": "assets/img/quotes/quote_123.png",
+      "emphasis": {
+        "Greenland shark": "emphasis-2",
+        "400 years": "emphasis-1",
+        "longest-living vertebrate": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_124",
+      "quote": "Did you know? The town of Centralia, Pennsylvania, has been burning underground since 1962 due to a coal mine fire, and it\u2019s expected to burn for another 250 years.",
+      "image_prompt": "Ghibli Art: A surreal, abandoned townscape with cracked roads and crumbling buildings, where wisps of smoke rise from the ground like ghostly tendrils. The sky is painted in warm, golden hues of sunset, contrasting with the eerie, glowing cracks in the earth. A lone, curious fox with glowing eyes wanders through the town, its fur shimmering with a magical aura. Tiny, glowing embers float in the air, creating a dreamlike atmosphere. In the distance, a small, glowing fire sprite dances playfully above the smoldering ground.",
+      "image_url": "assets/img/quotes/quote_124.png",
+      "emphasis": {
+        "Centralia": "emphasis-2",
+        "burning underground": "emphasis-1",
+        "250 years": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_125",
+      "quote": "Did you know? The human body contains enough iron to make a small nail, and most of it is found in the blood.",
+      "image_prompt": "Ghibli Art: A whimsical scene of a glowing, translucent human figure standing in a field of golden wheat. Inside the figure, a glowing red river of blood flows, with tiny, sparkling iron particles swirling within it. A small, glowing nail hovers in the air beside the figure, connected by a trail of shimmering iron dust. The sky is painted in soft pastel colors, with magical, glowing orbs floating around the figure. A curious rabbit with oversized ears watches from the wheat, its eyes wide with wonder.",
+      "image_url": "assets/img/quotes/quote_125.png",
+      "emphasis": {
+        "iron": "emphasis-2",
+        "small nail": "emphasis-1",
+        "blood": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_126",
+      "quote": "Did you know? The town of Rjukan in Norway uses giant mirrors to reflect sunlight into its valley during the winter months, bringing light to the shadowed town.",
+      "image_prompt": "Ghibli Art: A charming, snow-covered valley town nestled between towering mountains. Giant, ornate mirrors on the mountainside catch the golden rays of the sun, reflecting them down into the town below. The streets are alive with activity as townsfolk bask in the warm, reflected light. A small, magical creature with glowing wings flits around the mirrors, adjusting them with delicate precision. The air is filled with sparkling snowflakes and golden light, creating a cozy, magical atmosphere.",
+      "image_url": "assets/img/quotes/quote_126.png",
+      "emphasis": {
+        "Rjukan": "emphasis-2",
+        "giant mirrors": "emphasis-1",
+        "reflect sunlight": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_127",
+      "quote": "Did you know? The axolotl can regenerate not only its limbs but also its heart, spinal cord, and parts of its brain, making it a marvel of nature.",
+      "image_prompt": "Ghibli Art: A vibrant, underwater scene with a glowing axolotl swimming gracefully through a crystal-clear pond. Its body shimmers with a soft, magical light as it regenerates a limb, with tiny, glowing particles swirling around the new growth. The pond is surrounded by lush, fantastical plants with glowing leaves, and the water sparkles with golden light. A curious, tiny fish with wide eyes watches the axolotl in awe, while glowing bubbles rise to the surface, each one containing a tiny, glowing image of the axolotl\u2019s regenerated parts.",
+      "image_url": "assets/img/quotes/quote_127.png",
+      "emphasis": {
+        "axolotl": "emphasis-2",
+        "regenerate": "emphasis-1",
+        "heart": "emphasis-2",
+        "brain": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_128",
+      "quote": "Did you know? The ancient city of Derinkuyu in Turkey is an underground city that could house up to 20,000 people, complete with stables, chapels, and ventilation shafts.",
+      "image_prompt": "Ghibli Art: A sprawling, underground city carved into the rock, illuminated by glowing, magical lanterns that cast warm, golden light. The city is alive with activity, as tiny, glowing figures move through the labyrinthine tunnels. A majestic, glowing horse stands in a stable, its mane shimmering with light. In the distance, a glowing chapel with intricate carvings stands as the heart of the city. Magical, glowing particles float through the air, and a curious, glowing cat watches from a high ledge, its eyes wide with wonder.",
+      "image_url": "assets/img/quotes/quote_128.png",
+      "emphasis": {
+        "Derinkuyu": "emphasis-2",
+        "underground city": "emphasis-1",
+        "20,000 people": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_129",
+      "quote": "Did you know? The star-nosed mole can identify and eat its prey in as little as 227 milliseconds, making it one of the fastest foragers in the animal kingdom.",
+      "image_prompt": "Ghibli Art: A star-nosed mole with a glowing, star-shaped nose scurries through a lush, fantastical forest. Its nose pulses with a soft, magical light as it quickly locates and devours a glowing insect. The forest is alive with vibrant colors, with glowing mushrooms and plants surrounding the mole. Tiny, glowing fireflies flit around, adding to the magical atmosphere. A curious, glowing squirrel watches from a nearby tree, its eyes wide with amazement as the mole moves with lightning speed.",
+      "image_url": "assets/img/quotes/quote_129.png",
+      "emphasis": {
+        "star-nosed mole": "emphasis-2",
+        "227 milliseconds": "emphasis-1",
+        "fastest foragers": "emphasis-2"
+      }
     }
   ]
 }

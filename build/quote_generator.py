@@ -2,6 +2,9 @@ import os
 import json
 import base64
 import time
+import signal
+import sys
+import subprocess
 from pathlib import Path
 from dotenv import load_dotenv
 from together import Together
@@ -12,6 +15,18 @@ load_dotenv()
 
 # Initialize Together API client
 client = Together()
+
+# Flag to control infinite loop
+running = True
+
+# Handle Ctrl+C gracefully
+def signal_handler(sig, frame):
+    global running
+    print("\nCtrl+C detected! Finishing current batch and exiting...")
+    running = False
+
+# Register the signal handler
+signal.signal(signal.SIGINT, signal_handler)
 
 def load_existing_facts():
     """Load existing 'Did You Know' facts from the directory.json file if it exists."""
@@ -41,11 +56,35 @@ def save_facts(facts_data):
         json.dump(facts_data, f, indent=2)
     print(f"Saved {len(facts_data['quotes'])} fascinating facts to {json_path}")
 
+def git_commit_and_push(num_new_facts):
+    """Commit the latest changes and push to the repository."""
+    try:
+        print("\nCommitting and pushing changes to the repository...")
+        
+        # Stage the changes
+        subprocess.run(["git", "add", "assets/data/directory.json", "assets/img/quotes/"], check=True)
+        
+        # Create a descriptive commit message
+        commit_message = f"Add {num_new_facts} new 'Did You Know' facts with Ghibli art"
+        subprocess.run(["git", "commit", "-m", commit_message], check=True)
+        
+        # Push to the repository (assuming 'main' branch)
+        subprocess.run(["git", "push", "origin", "main"], check=True)
+        
+        print("✓ Successfully committed and pushed new facts to the repository!")
+    except subprocess.CalledProcessError as e:
+        print(f"Error during Git operations: {e}")
+    except Exception as e:
+        print(f"Unexpected error during Git operations: {e}")
+
 def generate_facts_and_prompts(existing_facts, num_facts=5):
     """Generate surprising 'Did You Know' facts and magical Ghibli-style image prompts."""
     
     # Extract existing items to avoid duplicates
     existing_quotes = [q["quote"] for q in existing_facts["quotes"]]
+    
+    # Only use the last 100 quotes to keep the prompt size manageable
+    recent_quotes = existing_quotes[-100:] if len(existing_quotes) > 100 else existing_quotes
     
     # Create the system prompt
     system_prompt = """You are an expert at creating engaging, surprising, and fun "Did You Know" facts, paired with imaginative Ghibli Art style image prompts.
@@ -68,7 +107,7 @@ For each fact, identify important words that should be emphasized in the animati
 Each fact should evoke a sense of wonder, surprise, or delight in the reader."""
     
     # Create the user prompt with examples
-    user_prompt = f"""Please generate {num_facts} unique and fascinating "Did You Know" facts that are not in this list: {existing_quotes}.
+    user_prompt = f"""Please generate {num_facts} unique and fascinating "Did You Know" facts that are not in this list: {recent_quotes}.
 For each fact, create:
 1. A brief, surprising fact (15-40 words MAX)
 2. A detailed image prompt with complete artistic freedom to reimagine it in Ghibli Art style
@@ -188,117 +227,108 @@ def generate_and_save_image(prompt, image_path):
         return False
 
 def main():
+    global running
+    
     # Create necessary directories
     os.makedirs("assets/img/quotes", exist_ok=True)
-    os.makedirs("assets/data", exist_ok=True)  # Ensure data directory exists too
+    os.makedirs("assets/data", exist_ok=True)
     
-    # Load existing facts
-    facts_data = load_existing_facts()
+    print("===== Infinite Fact Generator with Auto-Commit =====")
+    print("Press Ctrl+C to stop the program")
+    print("==================================================")
     
-    # Find the highest quote number to continue from
-    highest_quote_number = get_highest_quote_number(facts_data)
-    print(f"Found highest existing quote number: {highest_quote_number}")
+    batch_size = 7  # Number of facts to generate in each batch
+    pause_duration = 1800  # Seconds to pause between batches (30 minutes)
+    batch_count = 0
     
-    # Generate new facts and prompts - limit to 7 facts per batch
-    new_facts = generate_facts_and_prompts(facts_data, num_facts=7)
-    
-    if not new_facts:
-        print("Failed to generate new 'Did You Know' facts. Exiting.")
-        return
-    
-    # Process each new fact
-    for i, fact_item in enumerate(new_facts):
-        # Generate a sequential ID based on the highest existing quote number
-        next_quote_number = highest_quote_number + i + 1
-        fact_id = f"quote_{next_quote_number}"
+    # Run indefinitely until interrupted
+    while running:
+        batch_count += 1
+        print(f"\n--- Starting Batch #{batch_count} ---")
         
-        # Define image path
-        image_filename = f"{fact_id}.png"
-        image_path = f"assets/img/quotes/{image_filename}"
-        image_url = f"assets/img/quotes/{image_filename}"
+        # Load existing facts (reload each time to ensure we have the latest)
+        facts_data = load_existing_facts()
         
-        # Check if this image already exists, skip if it does
-        if os.path.exists(image_path):
-            print(f"Image {image_path} already exists, skipping...")
+        # Find the highest quote number to continue from
+        highest_quote_number = get_highest_quote_number(facts_data)
+        print(f"Found highest existing quote number: {highest_quote_number}")
+        print(f"Total facts in database: {len(facts_data['quotes'])}")
+        
+        # Generate new facts and prompts
+        new_facts = generate_facts_and_prompts(facts_data, batch_size)
+        
+        if not new_facts:
+            print("Failed to generate new 'Did You Know' facts. Will try again after a pause.")
+            time.sleep(pause_duration)
             continue
         
-        # Generate and save the image
-        success = generate_and_save_image(fact_item["image_prompt"], image_path)
+        # Track successfully processed facts for commit message
+        successful_facts = 0
         
-        # Add to facts data
-        if success:
-            facts_data["quotes"].append({
-                "id": fact_id,
-                "quote": fact_item["quote"],
-                "image_prompt": fact_item["image_prompt"],
-                "image_url": image_url,
-                "emphasis": fact_item.get("emphasis", {})  # Add emphasis data
-            })
+        # Process each new fact
+        for i, fact_item in enumerate(new_facts):
+            if not running:
+                break  # Exit the loop if Ctrl+C was pressed
+                
+            # Generate a sequential ID based on the highest existing quote number
+            next_quote_number = highest_quote_number + i + 1
+            fact_id = f"quote_{next_quote_number}"
             
-            # Save after each successful image generation to preserve progress
-            save_facts(facts_data)
+            # Define image path
+            image_filename = f"{fact_id}.png"
+            image_path = f"assets/img/quotes/{image_filename}"
+            image_url = f"assets/img/quotes/{image_filename}"
             
-            # Add a delay to avoid rate limiting
-            time.sleep(2)
-        else:
-            print(f"Skipping 'Did You Know' fact due to image generation failure: {fact_item['quote']}")
-    
-    print("'Did You Know' fact generation and magical image creation complete!")
-
-def run_forever():
-    """Run the fact generator continuously until interrupted with Ctrl+C."""
-    import signal
-    
-    # Define signal handler for Ctrl+C
-    def signal_handler(sig, frame):
-        print("\nCtrl+C detected. Exiting after current batch completes...")
-        signal.signal(signal.SIGINT, original_handler)  # Restore original handler
-    
-    # Save the original handler to restore later
-    original_handler = signal.getsignal(signal.SIGINT)
-    
-    try:
-        # Set our custom handler
-        signal.signal(signal.SIGINT, signal_handler)
+            # Check if this image already exists, skip if it does
+            if os.path.exists(image_path):
+                print(f"Image {image_path} already exists, skipping...")
+                continue
+            
+            # Generate and save the image
+            success = generate_and_save_image(fact_item["image_prompt"], image_path)
+            
+            # Add to facts data
+            if success:
+                facts_data["quotes"].append({
+                    "id": fact_id,
+                    "quote": fact_item["quote"],
+                    "image_prompt": fact_item["image_prompt"],
+                    "image_url": image_url,
+                    "emphasis": fact_item.get("emphasis", {})  # Add emphasis data
+                })
+                
+                # Increment successful count
+                successful_facts += 1
+                
+                # Save after each successful image generation to preserve progress
+                save_facts(facts_data)
+                
+                # Add a delay to avoid rate limiting
+                time.sleep(2)
+            else:
+                print(f"Skipping 'Did You Know' fact due to image generation failure: {fact_item['quote']}")
         
-        print("===== Infinite Fact Generator =====")
-        print("Press Ctrl+C to stop after current batch")
-        print("===================================")
+        # If any facts were generated successfully, commit and push the changes
+        if successful_facts > 0:
+            git_commit_and_push(successful_facts)
         
-        batch_count = 0
-        while True:
-            batch_count += 1
-            print(f"\n--- Starting Batch #{batch_count} ---")
-            main()  # Run the main function
-            
-            # Pause between batches - 30 minutes
-            pause_time = 1800  # seconds (30 minutes)
+        # If we're still running, pause before the next batch
+        if running:
             print(f"\nBatch #{batch_count} complete! Waiting 30 minutes before next batch...")
-            print("(Press Ctrl+C to exit)")
+            print(f"(Press Ctrl+C to exit)")
             
             # Show a countdown timer during the wait
-            remaining = pause_time
-            while remaining > 0:
+            remaining = pause_duration
+            while remaining > 0 and running:
                 mins = remaining // 60
                 secs = remaining % 60
                 print(f"\rNext batch in: {mins:02d}:{secs:02d}", end="")
                 time.sleep(1)
                 remaining -= 1
-                
-                # Check for Ctrl+C during the countdown
-                if signal.getsignal(signal.SIGINT) != signal_handler:
-                    break
             
             print("\rWait complete. Starting next batch...                ")
-            
-    except KeyboardInterrupt:
-        # This will catch any Ctrl+C not caught by the signal handler
-        pass
-    finally:
-        # Restore the original signal handler
-        signal.signal(signal.SIGINT, original_handler)
-        print("\nInfinite fact generation stopped. Goodbye!")
+    
+    print("\n'Did You Know' fact generation stopped. Exiting...")
 
 if __name__ == "__main__":
-    # Use run_forever() to run continuously, or main() for a single batch
-    run_forever() 
+    main() 

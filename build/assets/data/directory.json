@@ -766,6 +766,90 @@
         "227 milliseconds": "emphasis-1",
         "fastest foragers": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_130",
+      "quote": "Did you know? The Arctic fox\u2019s fur changes color with the seasons, turning white in winter and brown in summer, allowing it to blend seamlessly into its environment.",
+      "image_prompt": "Ghibli Art: A curious Arctic fox standing on a snowy hill, its fur shimmering with a magical transition from white to brown as the seasons shift around it. Golden sunlight bathes the scene in winter, while a warm summer breeze carries glowing pollen particles. Tiny snowflakes and flower petals swirl in the air, creating a whimsical atmosphere. The fox\u2019s eyes sparkle with intelligence as it looks directly at the viewer, surrounded by a glowing aura of seasonal magic.",
+      "image_url": "assets/img/quotes/quote_130.png",
+      "emphasis": {
+        "Arctic fox": "emphasis-2",
+        "changes color": "emphasis-1",
+        "seasons": "emphasis-2",
+        "blend seamlessly": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_131",
+      "quote": "Did you know? The ancient city of Angkor Wat in Cambodia is the largest religious monument in the world, covering over 400 acres and surrounded by a massive moat.",
+      "image_prompt": "Ghibli Art: The majestic Angkor Wat temple complex glowing under a golden sunset, its intricate spires reaching toward the sky. A vast moat reflects the temple\u2019s silhouette, with lotus flowers floating on the water\u2019s surface. Tiny fireflies and glowing spirits drift through the air, adding a magical touch. A small family of monkeys plays on the temple steps, their fur shimmering with golden light. The scene is enveloped in a soft mist, creating a dreamlike atmosphere.",
+      "image_url": "assets/img/quotes/quote_131.png",
+      "emphasis": {
+        "Angkor Wat": "emphasis-2",
+        "largest religious monument": "emphasis-1",
+        "400 acres": "emphasis-2",
+        "massive moat": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_132",
+      "quote": "Did you know? The hummingbird is the only bird that can fly backward, thanks to its unique wing structure that allows it to hover and maneuver with incredible precision.",
+      "image_prompt": "Ghibli Art: A vibrant hummingbird with iridescent feathers hovering in mid-air, its wings a blur of motion as it flies backward. Golden sunlight filters through a lush garden filled with blooming flowers, their petals glowing softly. Tiny magical sparkles trail behind the hummingbird as it zips between flowers, its beak sipping nectar. A curious butterfly with exaggerated eyes watches in awe, surrounded by a warm, whimsical atmosphere.",
+      "image_url": "assets/img/quotes/quote_132.png",
+      "emphasis": {
+        "hummingbird": "emphasis-2",
+        "fly backward": "emphasis-1",
+        "unique wing structure": "emphasis-2",
+        "hover": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_133",
+      "quote": "Did you know? The ancient Romans used heated floors called hypocausts to warm their homes and baths, creating an early form of central heating.",
+      "image_prompt": "Ghibli Art: A cozy Roman villa with glowing, heated floors visible through translucent tiles. Warm steam rises from the hypocaust system beneath, creating a magical mist that fills the room. A family of Romans in traditional attire lounges comfortably, their faces glowing with contentment. Tiny fire spirits dance in the air, adding a whimsical touch. The scene is bathed in golden light, with intricate mosaics and columns adding to the historical charm.",
+      "image_url": "assets/img/quotes/quote_133.png",
+      "emphasis": {
+        "Romans": "emphasis-2",
+        "hypocausts": "emphasis-1",
+        "heated floors": "emphasis-2",
+        "central heating": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_134",
+      "quote": "Did you know? The narwhal\u2019s tusk is actually an elongated tooth that can grow up to 10 feet long and is used for sensing changes in its environment.",
+      "image_prompt": "Ghibli Art: A majestic narwhal swimming gracefully through icy Arctic waters, its long, spiraled tusk glowing with a soft blue light. Golden sunlight filters through the ice above, creating shimmering patterns on the water\u2019s surface. Tiny glowing plankton swirl around the narwhal, adding a magical touch. A curious seal with exaggerated eyes watches from a nearby ice floe, surrounded by a whimsical, icy landscape.",
+      "image_url": "assets/img/quotes/quote_134.png",
+      "emphasis": {
+        "narwhal": "emphasis-2",
+        "elongated tooth": "emphasis-1",
+        "10 feet long": "emphasis-2",
+        "sensing changes": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_135",
+      "quote": "Did you know? The town of Rothenburg ob der Tauber in Germany has a medieval wall that visitors can walk on, offering stunning views of the fairy-tale-like town.",
+      "image_prompt": "Ghibli Art: A charming medieval town with cobblestone streets and half-timbered houses, surrounded by a glowing stone wall. Visitors walk along the wall, their silhouettes illuminated by the golden light of sunset. Tiny glowing lanterns hang from the wall, casting a warm glow. A playful cat with a glowing tail leaps between rooftops, adding a whimsical touch. The scene is enveloped in a soft mist, creating a magical, fairy-tale atmosphere.",
+      "image_url": "assets/img/quotes/quote_135.png",
+      "emphasis": {
+        "Rothenburg ob der Tauber": "emphasis-2",
+        "medieval wall": "emphasis-1",
+        "walk on": "emphasis-2",
+        "fairy-tale-like": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_136",
+      "quote": "Did you know? The human body produces about 25 million new cells every second, constantly renewing itself to keep you alive and healthy.",
+      "image_prompt": "Ghibli Art: A glowing, translucent human figure standing in a magical forest, with tiny, sparkling cells multiplying rapidly inside their body. Golden light filters through the trees, illuminating the scene. Tiny glowing fireflies and magical particles swirl around the figure, representing the constant renewal of cells. A curious fox with glowing eyes watches from the underbrush, surrounded by a whimsical, enchanted atmosphere.",
+      "image_url": "assets/img/quotes/quote_136.png",
+      "emphasis": {
+        "human body": "emphasis-2",
+        "25 million": "emphasis-1",
+        "new cells": "emphasis-2",
+        "renewing itself": "emphasis-2"
+      }
     }
   ]
 }

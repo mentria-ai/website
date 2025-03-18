@@ -1488,6 +1488,90 @@
         "Arctic to the Antarctic": "emphasis-2",
         "44,000 miles": "emphasis-1"
       }
+    },
+    {
+      "id": "quote_193",
+      "quote": "Did you know? The Sunda flying lemur can glide over 330 feet between trees, using a membrane that stretches from its neck to its fingertips and toes.",
+      "image_prompt": "Ghibli Art: A Sunda flying lemur gracefully gliding through a lush, enchanted forest at sunset. Its membrane glows softly with a golden hue, catching the warm light. The trees are vibrant and alive, with tiny glowing fireflies dancing around. The lemur\u2019s expression is serene, as if it\u2019s in perfect harmony with the magical forest. A gentle mist rises from the forest floor, adding a dreamy atmosphere to the scene.",
+      "image_url": "assets/img/quotes/quote_193.png",
+      "emphasis": {
+        "Sunda flying lemur": "emphasis-2",
+        "glide": "emphasis-1",
+        "330 feet": "emphasis-2",
+        "membrane": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_194",
+      "quote": "Did you know? The Etruscan shrew has the fastest heartbeat of any mammal, reaching up to 1,500 beats per minute, allowing it to sustain its hyperactive lifestyle.",
+      "image_prompt": "Ghibli Art: A tiny Etruscan shrew dashing through a sunlit meadow, its heart visibly glowing with a rapid, pulsating light. The meadow is filled with vibrant flowers and tall grass swaying in the breeze. The shrew\u2019s movements are a blur, leaving behind a trail of glowing particles. The sky is painted with soft pastel colors, and the scene is bathed in warm, golden sunlight. Tiny magical creatures watch in awe from the grass.",
+      "image_url": "assets/img/quotes/quote_194.png",
+      "emphasis": {
+        "Etruscan shrew": "emphasis-2",
+        "fastest heartbeat": "emphasis-1",
+        "1,500 beats per minute": "emphasis-2",
+        "hyperactive": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_195",
+      "quote": "Did you know? The ancient city of Petra in Jordan was carved entirely from rose-red sandstone cliffs, and its intricate facades were designed to align with the solstices.",
+      "image_prompt": "Ghibli Art: The rose-red cliffs of Petra glowing under the golden light of the setting sun. The intricate facades are adorned with glowing runes and symbols that align perfectly with the solstice light. A gentle breeze carries golden particles through the air, adding a magical touch. Tiny, whimsical creatures explore the ancient city, their eyes wide with wonder. The scene is filled with a sense of timeless beauty and mystery.",
+      "image_url": "assets/img/quotes/quote_195.png",
+      "emphasis": {
+        "Petra": "emphasis-2",
+        "rose-red sandstone cliffs": "emphasis-1",
+        "intricate facades": "emphasis-2",
+        "solstices": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_196",
+      "quote": "Did you know? The mantis shrimp\u2019s eyes can see 12 to 16 colors, including ultraviolet and polarized light, giving it one of the most complex visual systems in the animal kingdom.",
+      "image_prompt": "Ghibli Art: A mantis shrimp perched on a vibrant coral reef, its eyes glowing with a spectrum of colors. The underwater scene is illuminated by shafts of sunlight filtering through the water, creating a magical, ethereal atmosphere. The shrimp\u2019s eyes project beams of light that reveal hidden patterns in the reef. Tiny, curious fish with exaggerated expressions swim around, mesmerized by the shrimp\u2019s colorful vision. The water is filled with glowing particles, enhancing the magical feel.",
+      "image_url": "assets/img/quotes/quote_196.png",
+      "emphasis": {
+        "mantis shrimp\u2019s eyes": "emphasis-2",
+        "12 to 16 colors": "emphasis-1",
+        "ultraviolet": "emphasis-2",
+        "polarized light": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_197",
+      "quote": "Did you know? The town of Bibury in England is famous for its honey-colored stone cottages, which have remained unchanged for centuries, creating a timeless, storybook village.",
+      "image_prompt": "Ghibli Art: A quaint village of Bibury nestled in a lush valley, with honey-colored stone cottages glowing under the soft light of a golden sunset. The cottages are adorned with blooming flowers and ivy, adding to their charm. A gentle mist rises from the nearby river, creating a dreamy atmosphere. Tiny, whimsical creatures peek out from the cottages, adding a touch of magic. The scene is filled with a sense of timeless beauty and tranquility.",
+      "image_url": "assets/img/quotes/quote_197.png",
+      "emphasis": {
+        "Bibury": "emphasis-2",
+        "honey-colored stone cottages": "emphasis-1",
+        "unchanged": "emphasis-2",
+        "storybook village": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_198",
+      "quote": "Did you know? The platypus detects prey using electroreception, sensing the tiny electric fields generated by the muscles of its prey, even in complete darkness.",
+      "image_prompt": "Ghibli Art: A platypus swimming in a glowing, bioluminescent river at night. Its bill emits faint electric pulses that light up the water, revealing hidden prey. The river is surrounded by lush, vibrant vegetation, with fireflies adding to the magical atmosphere. The platypus\u2019s eyes glow softly, reflecting its heightened senses. Tiny, whimsical creatures watch from the riverbank, their eyes wide with wonder. The scene is filled with a sense of mystery and enchantment.",
+      "image_url": "assets/img/quotes/quote_198.png",
+      "emphasis": {
+        "platypus": "emphasis-2",
+        "electroreception": "emphasis-1",
+        "electric fields": "emphasis-2",
+        "complete darkness": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_199",
+      "quote": "Did you know? The Arctic tern migrates from the Arctic to the Antarctic and back each year, traveling up to 44,000 miles, the longest migration of any bird.",
+      "image_prompt": "Ghibli Art: An Arctic tern soaring gracefully over a vast, shimmering ocean under a starry night sky. Its wings glow softly with a silvery light, leaving a trail of glowing particles. The ocean reflects the stars, creating a magical, endless expanse. The tern\u2019s journey is marked by glowing waypoints in the sky, representing its incredible migration. Tiny, whimsical sea creatures watch from below, their eyes filled with admiration. The scene is filled with a sense of wonder and adventure.",
+      "image_url": "assets/img/quotes/quote_199.png",
+      "emphasis": {
+        "Arctic tern": "emphasis-2",
+        "migrates": "emphasis-1",
+        "44,000 miles": "emphasis-2",
+        "longest migration": "emphasis-2"
+      }
     }
   ]
 }

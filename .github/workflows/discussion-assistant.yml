@@ -28,8 +28,8 @@ jobs:
               # macOS
               brew install jq || (echo "::warning::Failed to install jq via brew, workflow may fail" && exit 1)
             elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-              # Linux
-              sudo apt-get update && sudo apt-get install -y jq || (echo "::warning::Failed to install jq via apt, workflow may fail" && exit 1)
+              # Linux - without sudo
+              apt-get update && apt-get install -y jq || (echo "::warning::Failed to install jq via apt, workflow may fail" && exit 1)
             else
               echo "::error::Unsupported OS for jq installation: $OSTYPE"
               exit 1

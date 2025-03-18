@@ -1165,6 +1165,83 @@
         "oasis": "emphasis-1",
         "Greco-Roman and Persian": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_165",
+      "quote": "Did you know? The Sundarbans mangrove forest is home to the only tigers that can swim, adapting to hunt in water as well as on land.",
+      "image_prompt": "Ghibli Art: A majestic Bengal tiger glides gracefully through a serene mangrove river, its reflection shimmering in the golden sunset. Lush green mangroves with glowing fireflies surround the scene. Tiny fish dart away as the tiger swims, its eyes glowing with determination. The water sparkles with magical golden particles, and a soft mist rises, creating an ethereal atmosphere. A curious heron watches from a branch, adding a whimsical touch.",
+      "image_url": "assets/img/quotes/quote_165.png",
+      "emphasis": {
+        "Sundarbans": "emphasis-2",
+        "only tigers": "emphasis-1",
+        "swim": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_166",
+      "quote": "Did you know? The ancient city of Sigiriya in Sri Lanka is built atop a 660-foot-tall rock, with intricate gardens and frescoes carved into its sides.",
+      "image_prompt": "Ghibli Art: A towering rock fortress rises dramatically into the sky, surrounded by lush, terraced gardens and cascading waterfalls. Intricate frescoes of ancient figures glow faintly on the rock face, illuminated by the soft light of a setting sun. Tiny, magical creatures flit around the gardens, tending to the vibrant flowers. A winding stone staircase leads up to the summit, where a small temple glows with a warm, inviting light. The scene is bathed in a golden haze, evoking a sense of wonder and mystery.",
+      "image_url": "assets/img/quotes/quote_166.png",
+      "emphasis": {
+        "Sigiriya": "emphasis-2",
+        "660-foot-tall rock": "emphasis-1",
+        "frescoes": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_167",
+      "quote": "Did you know? The human body contains enough carbon to fill 9,000 pencils, making us walking carbon reservoirs.",
+      "image_prompt": "Ghibli Art: A whimsical scene of a person walking through a forest, their body glowing faintly with a carbon-like shimmer. Around them, 9,000 pencils float in the air, forming a magical trail. The forest is lush and vibrant, with golden sunlight filtering through the trees. Tiny, glowing carbon particles swirl around the person, creating a sense of wonder. A curious fox with exaggerated eyes watches from the bushes, adding a playful touch.",
+      "image_url": "assets/img/quotes/quote_167.png",
+      "emphasis": {
+        "carbon": "emphasis-1",
+        "9,000 pencils": "emphasis-2",
+        "walking carbon reservoirs": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_168",
+      "quote": "Did you know? The rings of Saturn are made up of billions of ice and rock particles, some as small as grains of sand and others as large as mountains.",
+      "image_prompt": "Ghibli Art: A breathtaking view of Saturn\u2019s rings, glowing softly in the vastness of space. The rings are composed of countless ice and rock particles, some tiny and sparkling like stars, others massive and jagged like mountains. A small, whimsical spacecraft hovers nearby, its windows glowing with warm light. The scene is bathed in a soft, ethereal glow, with distant stars twinkling in the background. Magical, glowing particles float around the rings, adding a sense of wonder and mystery.",
+      "image_url": "assets/img/quotes/quote_168.png",
+      "emphasis": {
+        "rings of Saturn": "emphasis-2",
+        "billions": "emphasis-1",
+        "ice and rock particles": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_169",
+      "quote": "Did you know? The albatross can glide for thousands of miles without flapping its wings, using wind currents to stay aloft for weeks at a time.",
+      "image_prompt": "Ghibli Art: A majestic albatross soars effortlessly through the sky, its wings outstretched and glowing faintly in the golden light of the setting sun. Below, the vast ocean sparkles with magical, glowing particles. The albatross rides the wind currents, surrounded by swirling, golden clouds. Tiny, whimsical birds with exaggerated expressions watch in awe from a nearby cliff. The scene is serene and magical, evoking a sense of freedom and wonder.",
+      "image_url": "assets/img/quotes/quote_169.png",
+      "emphasis": {
+        "albatross": "emphasis-2",
+        "thousands of miles": "emphasis-1",
+        "wind currents": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_170",
+      "quote": "Did you know? The ancient city of Palmyra in Syria was a thriving oasis and trade hub, with towering temples and a unique blend of Greco-Roman and Persian architecture.",
+      "image_prompt": "Ghibli Art: A bustling ancient city rises from the desert, its towering temples and grand arches glowing in the golden light of the setting sun. Caravans of camels and traders move through the streets, their goods sparkling with magical energy. The architecture blends Greco-Roman and Persian styles, with intricate carvings and glowing symbols. A soft mist rises from the oasis, creating a dreamlike atmosphere. Tiny, magical creatures flit around the city, adding a whimsical touch.",
+      "image_url": "assets/img/quotes/quote_170.png",
+      "emphasis": {
+        "Palmyra": "emphasis-2",
+        "thriving oasis": "emphasis-1",
+        "Greco-Roman and Persian architecture": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_171",
+      "quote": "Did you know? The tardigrade, or water bear, can survive extreme conditions, including radiation, dehydration, and even the vacuum of space, by entering a state of suspended animation.",
+      "image_prompt": "Ghibli Art: A tiny, adorable tardigrade floats in the vastness of space, its body glowing faintly with a protective aura. Around it, stars twinkle and magical particles swirl. The tardigrade\u2019s face is determined and cute, with exaggerated, expressive eyes. In the background, a glowing planet and swirling galaxies add to the cosmic wonder. The scene is serene and magical, evoking a sense of resilience and awe.",
+      "image_url": "assets/img/quotes/quote_171.png",
+      "emphasis": {
+        "tardigrade": "emphasis-2",
+        "extreme conditions": "emphasis-1",
+        "suspended animation": "emphasis-2"
+      }
     }
   ]
 }

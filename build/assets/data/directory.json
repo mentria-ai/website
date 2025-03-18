@@ -1011,6 +1011,83 @@
         "lay eggs": "emphasis-1",
         "venomous spurs": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_151",
+      "quote": "Did you know? The Baobab tree can store up to 32,000 gallons of water in its trunk, helping it survive in arid environments.",
+      "image_prompt": "Ghibli Art: A majestic Baobab tree stands tall in a golden savanna, its massive trunk glowing faintly with stored water. Tiny, whimsical creatures with watering cans and buckets gather around, collecting droplets that shimmer like diamonds. The sky is painted in warm hues of sunset, with soft mist rising from the ground. Magical fireflies dance around the tree, casting a gentle glow on the scene. A curious meerkat peeks out from behind the roots, adding a touch of charm.",
+      "image_url": "assets/img/quotes/quote_151.png",
+      "emphasis": {
+        "Baobab tree": "emphasis-2",
+        "32,000 gallons": "emphasis-1",
+        "arid environments": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_152",
+      "quote": "Did you know? The Greenland shark can live for over 400 years, making it the longest-living vertebrate on Earth.",
+      "image_prompt": "Ghibli Art: A serene underwater scene with a wise, ancient Greenland shark gliding through the deep blue. Bioluminescent jellyfish and glowing plankton illuminate the dark waters, creating a magical atmosphere. The shark\u2019s eyes glimmer with centuries of knowledge, while tiny fish with exaggerated expressions swim alongside in awe. Soft beams of sunlight pierce the water\u2019s surface, casting a golden glow on the scene. Enchanted bubbles rise, each containing a tiny, glowing memory of the shark\u2019s long life.",
+      "image_url": "assets/img/quotes/quote_152.png",
+      "emphasis": {
+        "Greenland shark": "emphasis-2",
+        "400 years": "emphasis-1",
+        "longest-living vertebrate": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_153",
+      "quote": "Did you know? The town of Rjukan in Norway uses giant mirrors to reflect sunlight into its valley during the winter months.",
+      "image_prompt": "Ghibli Art: A quaint Norwegian village nestled in a deep valley, surrounded by snow-covered mountains. Giant, golden mirrors on the hillside reflect sunlight, casting warm beams onto the town below. Children with rosy cheeks play in the light, their laughter echoing through the crisp air. Magical snowflakes sparkle as they fall, and a curious reindeer with a glowing nose watches from the edge of the forest. The scene is bathed in a soft, ethereal glow, creating a winter wonderland.",
+      "image_url": "assets/img/quotes/quote_153.png",
+      "emphasis": {
+        "Rjukan": "emphasis-2",
+        "giant mirrors": "emphasis-1",
+        "winter months": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_154",
+      "quote": "Did you know? The albatross can glide for thousands of miles without flapping its wings, using wind currents to stay aloft for weeks at a time.",
+      "image_prompt": "Ghibli Art: A majestic albatross soars gracefully over a vast, shimmering ocean, its wings outstretched to catch the wind. The sky is painted in hues of pink and orange during a breathtaking sunset. Tiny, glowing wind spirits swirl around the bird, guiding it effortlessly through the air. Below, playful dolphins leap from the water, their splashes creating magical, sparkling droplets. The scene is filled with a sense of freedom and wonder, as the albatross glides endlessly across the horizon.",
+      "image_url": "assets/img/quotes/quote_154.png",
+      "emphasis": {
+        "albatross": "emphasis-2",
+        "thousands of miles": "emphasis-1",
+        "wind currents": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_155",
+      "quote": "Did you know? The ancient city of Palmyra in Syria was a thriving oasis and trade hub, with towering temples and a unique blend of Greco-Roman and Persian architecture.",
+      "image_prompt": "Ghibli Art: A bustling ancient city surrounded by golden desert sands, with towering temples and grand arches glowing under the warm sun. Caravans of camels laden with goods move through the streets, while merchants with colorful robes barter in lively markets. The air is filled with the scent of spices and the sound of distant music. Magical sand particles swirl around, creating a dreamlike atmosphere. A curious desert fox with glowing eyes watches from the shadows, adding a touch of whimsy.",
+      "image_url": "assets/img/quotes/quote_155.png",
+      "emphasis": {
+        "Palmyra": "emphasis-2",
+        "thriving oasis": "emphasis-1",
+        "Greco-Roman and Persian architecture": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_156",
+      "quote": "Did you know? The tardigrade, or water bear, can survive extreme conditions, including radiation, dehydration, and even the vacuum of space, by entering a state of suspended animation.",
+      "image_prompt": "Ghibli Art: A tiny, resilient tardigrade floats in a magical, glowing bubble, surrounded by the vastness of space. Stars twinkle in the background, and colorful nebulae create a cosmic tapestry. The tardigrade\u2019s translucent body glows softly, with tiny, glowing particles swirling around it. A whimsical spaceship shaped like a teapot drifts by, piloted by curious alien creatures. The scene is both serene and otherworldly, highlighting the tardigrade\u2019s incredible survival abilities.",
+      "image_url": "assets/img/quotes/quote_156.png",
+      "emphasis": {
+        "tardigrade": "emphasis-2",
+        "extreme conditions": "emphasis-1",
+        "suspended animation": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_157",
+      "quote": "Did you know? The Japanese art of furoshiki involves wrapping objects in cloth, creating beautiful, reusable packages that are both practical and eco-friendly.",
+      "image_prompt": "Ghibli Art: A cozy Japanese home bathed in soft, golden light, with a table covered in vibrant furoshiki cloths. A young girl with a cheerful expression carefully wraps a gift, her hands glowing with a magical touch. The cloths come to life, swirling and folding themselves into intricate patterns. Outside, cherry blossoms drift in the breeze, and a curious cat with a glowing tail watches from the windowsill. The scene is filled with warmth, creativity, and a sense of tradition.",
+      "image_url": "assets/img/quotes/quote_157.png",
+      "emphasis": {
+        "furoshiki": "emphasis-2",
+        "reusable packages": "emphasis-1",
+        "eco-friendly": "emphasis-2"
+      }
     }
   ]
 }

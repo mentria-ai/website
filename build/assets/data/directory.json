@@ -534,6 +534,83 @@
         "covered sewers": "emphasis-2",
         "4,000 years ago": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_109",
+      "quote": "Did you know? The quokka, a small marsupial from Australia, is known as the 'world's happiest animal' due to its constant smile and friendly demeanor.",
+      "image_prompt": "Ghibli Art: A cheerful quokka with a glowing smile, sitting on a sunlit rock surrounded by vibrant wildflowers. Golden hour light bathes the scene, casting a warm glow. Tiny, magical sparkles float around the quokka, enhancing its joyful aura. In the background, a whimsical forest with exaggerated, colorful trees and small, curious animals peeking out adds to the enchanting atmosphere.",
+      "image_url": "assets/img/quotes/quote_109.png",
+      "emphasis": {
+        "quokka": "emphasis-2",
+        "happiest animal": "emphasis-1",
+        "smile": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_110",
+      "quote": "Did you know? The town of Giethoorn in the Netherlands has no roads; instead, it is connected by canals and footbridges, earning it the nickname 'Venice of the North.'",
+      "image_prompt": "Ghibli Art: A serene canal village with charming thatched-roof cottages, surrounded by lush greenery and colorful flowers. The canals reflect the soft, golden light of a setting sun, with small boats gently floating by. Whimsical footbridges connect the cottages, and tiny, glowing fireflies dance in the air. In the background, a soft mist rises, adding a magical touch to the scene.",
+      "image_url": "assets/img/quotes/quote_110.png",
+      "emphasis": {
+        "Giethoorn": "emphasis-2",
+        "Venice of the North": "emphasis-1",
+        "canals": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_111",
+      "quote": "Did you know? The tardigrade, also known as the water bear, can survive in extreme environments, including the vacuum of space, by entering a state of suspended animation.",
+      "image_prompt": "Ghibli Art: A microscopic tardigrade floating in the vastness of space, surrounded by glowing stars and nebulae. The tardigrade is encased in a shimmering, protective bubble, with tiny, magical particles swirling around it. In the background, a distant planet and colorful cosmic clouds add to the otherworldly atmosphere. The scene is bathed in soft, ethereal light, emphasizing the tardigrade's resilience.",
+      "image_url": "assets/img/quotes/quote_111.png",
+      "emphasis": {
+        "tardigrade": "emphasis-2",
+        "vacuum of space": "emphasis-1",
+        "suspended animation": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_112",
+      "quote": "Did you know? The town of Chefchaouen in Morocco is entirely painted in shades of blue, believed to symbolize the sky and heaven, creating a surreal, dreamlike atmosphere.",
+      "image_prompt": "Ghibli Art: A winding, blue-painted alleyway in Chefchaouen, with vibrant blue walls and doors adorned with intricate patterns. The scene is bathed in soft, golden sunlight, casting long shadows. Tiny, glowing lanterns hang from the walls, and small, magical creatures peek out from corners. In the background, the blue hues blend seamlessly with the sky, creating a dreamlike, ethereal atmosphere.",
+      "image_url": "assets/img/quotes/quote_112.png",
+      "emphasis": {
+        "Chefchaouen": "emphasis-2",
+        "shades of blue": "emphasis-1",
+        "dreamlike atmosphere": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_113",
+      "quote": "Did you know? The Kakapo, a flightless parrot from New Zealand, has a unique mating ritual where males inflate like a balloon and emit low-frequency booms to attract females.",
+      "image_prompt": "Ghibli Art: A Kakapo parrot inflating its body like a balloon, surrounded by a lush, green forest. The scene is illuminated by soft, golden light filtering through the trees. Tiny, glowing particles float around the Kakapo, enhancing its magical appearance. In the background, other curious animals watch in amazement, and the low-frequency booms are visualized as gentle, rippling waves in the air.",
+      "image_url": "assets/img/quotes/quote_113.png",
+      "emphasis": {
+        "Kakapo": "emphasis-2",
+        "inflate like a balloon": "emphasis-1",
+        "low-frequency booms": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_114",
+      "quote": "Did you know? The Giant\u2019s Causeway in Northern Ireland is made up of 40,000 interlocking basalt columns, formed by ancient volcanic activity and steeped in mythical legends.",
+      "image_prompt": "Ghibli Art: A mystical landscape of the Giant\u2019s Causeway, with towering, interlocking basalt columns extending into the sea. The scene is bathed in the soft, golden light of a setting sun, with waves gently crashing against the columns. Tiny, magical creatures climb the columns, and glowing particles float in the air. In the background, a distant, mythical giant adds to the legendary atmosphere.",
+      "image_url": "assets/img/quotes/quote_114.png",
+      "emphasis": {
+        "Giant\u2019s Causeway": "emphasis-2",
+        "interlocking basalt columns": "emphasis-1",
+        "mythical legends": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_115",
+      "quote": "Did you know? The bioluminescent waves of the Maldives glow blue at night due to millions of tiny marine organisms called phytoplankton.",
+      "image_prompt": "Ghibli Art: A serene beach in the Maldives at night, with bioluminescent waves glowing a magical blue. The scene is illuminated by the soft light of the moon and stars, casting a gentle glow on the water. Tiny, glowing phytoplankton create mesmerizing patterns in the waves, and magical sparkles float in the air. In the background, a small, whimsical boat with glowing lanterns adds to the enchanting atmosphere.",
+      "image_url": "assets/img/quotes/quote_115.png",
+      "emphasis": {
+        "bioluminescent waves": "emphasis-2",
+        "phytoplankton": "emphasis-1",
+        "glow blue": "emphasis-2"
+      }
     }
   ]
 }

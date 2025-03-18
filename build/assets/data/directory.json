@@ -1242,6 +1242,90 @@
         "extreme conditions": "emphasis-1",
         "suspended animation": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_172",
+      "quote": "Did you know? The mantis shrimp punches with the speed of a bullet, creating shockwaves that can stun or kill its prey, and its claws are so strong they can break aquarium glass.",
+      "image_prompt": "Ghibli Art: A vibrant underwater scene with a mantis shrimp surrounded by glowing coral reefs. The shrimp\u2019s claws are illuminated with a golden aura as it punches, creating rippling shockwaves that distort the water. Tiny fish with wide, amazed eyes scatter in all directions. Sunlight filters through the water, casting shimmering patterns, and magical bubbles rise around the shrimp, each containing a miniature glowing shockwave. The background is a mix of deep blues and warm coral tones, enhancing the magical atmosphere.",
+      "image_url": "assets/img/quotes/quote_172.png",
+      "emphasis": {
+        "mantis shrimp": "emphasis-2",
+        "bullet": "emphasis-1",
+        "shockwaves": "emphasis-2",
+        "aquarium glass": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_173",
+      "quote": "Did you know? The town of Colmar in France is known as 'Little Venice' due to its picturesque canals and colorful half-timbered houses, creating a fairy-tale-like atmosphere.",
+      "image_prompt": "Ghibli Art: A whimsical canal town bathed in the golden light of sunset. Colorful half-timbered houses with flower-filled balconies line the canals, their reflections shimmering in the water. Small boats with glowing lanterns drift peacefully, guided by friendly, anthropomorphic ducks. A soft mist rises from the water, and tiny glowing fireflies dance in the air. The scene is alive with vibrant colors and magical details, like floating flowers and enchanted cobblestone paths.",
+      "image_url": "assets/img/quotes/quote_173.png",
+      "emphasis": {
+        "Colmar": "emphasis-2",
+        "Little Venice": "emphasis-1",
+        "canals": "emphasis-2",
+        "fairy-tale": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_174",
+      "quote": "Did you know? The immortal jellyfish can revert its cells to their earliest form, essentially restarting its life cycle and potentially living forever under the right conditions.",
+      "image_prompt": "Ghibli Art: A glowing, translucent jellyfish floating in a serene underwater cave. Its body pulses with soft, golden light as it transforms, reverting from an adult form to a tiny, glowing polyp. The cave is filled with bioluminescent plants and magical, swirling particles. Small, curious fish with exaggerated expressions watch in awe. The water is a deep, calming blue, with shafts of light filtering down, creating a mystical and peaceful atmosphere.",
+      "image_url": "assets/img/quotes/quote_174.png",
+      "emphasis": {
+        "immortal jellyfish": "emphasis-2",
+        "revert": "emphasis-1",
+        "life cycle": "emphasis-2",
+        "forever": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_175",
+      "quote": "Did you know? The town of Hallstatt in Austria is so picturesque that China built an exact replica of it, complete with its iconic lake and alpine architecture.",
+      "image_prompt": "Ghibli Art: A charming alpine village nestled between towering mountains and a crystal-clear lake. The iconic church steeple rises above colorful houses with flower-filled balconies. A soft morning mist hovers over the lake, and the sun casts a golden glow on the scene. Tiny, whimsical creatures like birds and rabbits with scarves explore the village. In the background, a magical bridge connects the real Hallstatt to its glowing, ethereal replica, shimmering in the distance.",
+      "image_url": "assets/img/quotes/quote_175.png",
+      "emphasis": {
+        "Hallstatt": "emphasis-2",
+        "China": "emphasis-1",
+        "replica": "emphasis-2",
+        "alpine architecture": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_176",
+      "quote": "Did you know? The narwhal\u2019s tusk is actually a sensory organ with millions of nerve endings, allowing it to detect changes in its environment like temperature and salinity.",
+      "image_prompt": "Ghibli Art: A majestic narwhal swimming gracefully in icy Arctic waters, its long tusk glowing with a soft blue light. The tusk is surrounded by tiny, magical particles that shimmer like stars. The narwhal\u2019s environment is filled with floating icebergs and glowing underwater plants. Small, curious fish with exaggerated expressions swim nearby, and the water is illuminated by the aurora borealis, casting a magical, ethereal light over the scene.",
+      "image_url": "assets/img/quotes/quote_176.png",
+      "emphasis": {
+        "narwhal\u2019s tusk": "emphasis-2",
+        "sensory organ": "emphasis-1",
+        "nerve endings": "emphasis-2",
+        "salinity": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_177",
+      "quote": "Did you know? The ancient city of Hatra in Iraq was built to withstand sieges, with thick walls and a sophisticated water system, and it thrived as a center of trade and culture.",
+      "image_prompt": "Ghibli Art: A bustling ancient city surrounded by towering, glowing walls. The streets are alive with merchants, camels, and colorful market stalls. A sophisticated water system with aqueducts and fountains glows softly in the golden light of sunset. Tiny, magical creatures like glowing birds and foxes explore the city. The atmosphere is vibrant and magical, with swirling dust particles and warm, earthy tones dominating the scene.",
+      "image_url": "assets/img/quotes/quote_177.png",
+      "emphasis": {
+        "Hatra": "emphasis-2",
+        "sieges": "emphasis-1",
+        "water system": "emphasis-2",
+        "trade and culture": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_178",
+      "quote": "Did you know? The Sunda flying lemur can glide over 330 feet between trees, using a membrane that stretches from its neck to its fingertips and toes.",
+      "image_prompt": "Ghibli Art: A Sunda flying lemur soaring gracefully through a lush, magical forest. Its membrane glows softly with a golden light as it glides between towering, ancient trees. The forest is filled with bioluminescent plants and tiny, glowing creatures. The air is thick with morning mist, and shafts of sunlight filter through the canopy, creating a dreamy, ethereal atmosphere. The lemur\u2019s expression is one of joy and freedom as it glides effortlessly.",
+      "image_url": "assets/img/quotes/quote_178.png",
+      "emphasis": {
+        "Sunda flying lemur": "emphasis-2",
+        "glide": "emphasis-1",
+        "membrane": "emphasis-2",
+        "fingertips and toes": "emphasis-2"
+      }
     }
   ]
 }

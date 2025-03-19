@@ -2035,6 +2035,86 @@
         "Pleiades star cluster": "emphasis-2",
         "pyramids": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_242",
+      "quote": "Did you know? The axolotl can regenerate its entire brain, heart, and limbs, making it one of the most remarkable creatures in the animal kingdom.",
+      "image_prompt": "Ghibli Art: A whimsical underwater scene with a glowing axolotl floating in a crystal-clear pond. Its limbs and heart are in various stages of regeneration, with soft golden light emanating from the healing areas. Tiny, glowing fish with wide eyes swim around it in awe. The pond is surrounded by lush, oversized ferns and glowing mushrooms, with mist rising gently from the water\u2019s surface. Magical sparkles drift through the air, enhancing the sense of wonder.",
+      "image_url": "assets/img/quotes/quote_242.png",
+      "emphasis": {
+        "regenerate": "emphasis-1",
+        "entire brain": "emphasis-2",
+        "heart": "emphasis-2",
+        "limbs": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_243",
+      "quote": "Did you know? The ancient city of Mohenjo-Daro in Pakistan had a sophisticated drainage system, with covered sewers and manholes, over 4,000 years ago.",
+      "image_prompt": "Ghibli Art: A bustling ancient city with cobblestone streets and intricate clay buildings. Covered sewers run beneath the streets, with glowing blue water flowing smoothly through them. Workers in colorful robes are seen maintaining the system, while children peek curiously into manholes. The scene is bathed in the warm golden light of sunset, with a faint mist rising from the ground. Tiny glowing fireflies hover around the manholes, adding a magical touch.",
+      "image_url": "assets/img/quotes/quote_243.png",
+      "emphasis": {
+        "sophisticated drainage system": "emphasis-1",
+        "covered sewers": "emphasis-2",
+        "manholes": "emphasis-2",
+        "4,000 years ago": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_244",
+      "quote": "Did you know? The glasswing butterfly has transparent wings that make it nearly invisible when it flies, blending seamlessly into its surroundings.",
+      "image_prompt": "Ghibli Art: A serene forest clearing with a glasswing butterfly fluttering gracefully. Its transparent wings catch the sunlight, creating rainbow refractions on the ground. The butterfly is almost invisible against the backdrop of lush green leaves and colorful flowers. Tiny glowing fairies with translucent wings follow the butterfly, adding to the magical atmosphere. The scene is bathed in soft, golden morning light with a gentle mist rising from the forest floor.",
+      "image_url": "assets/img/quotes/quote_244.png",
+      "emphasis": {
+        "transparent wings": "emphasis-1",
+        "nearly invisible": "emphasis-2",
+        "blending seamlessly": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_245",
+      "quote": "Did you know? The Etruscan shrew has the fastest heartbeat of any mammal, reaching up to 1,500 beats per minute, allowing it to sustain its hyperactive lifestyle.",
+      "image_prompt": "Ghibli Art: A tiny Etruscan shrew darts through a vibrant meadow, its heart visibly glowing with rapid pulses of light. The surrounding flowers and grass sway gently in the breeze, with golden sunlight filtering through the trees. Small, glowing fireflies follow the shrew, creating a trail of light. The scene is filled with magical sparkles, emphasizing the shrew\u2019s incredible speed and energy. A faint mist rises from the ground, adding to the enchanted atmosphere.",
+      "image_url": "assets/img/quotes/quote_245.png",
+      "emphasis": {
+        "fastest heartbeat": "emphasis-1",
+        "1,500 beats per minute": "emphasis-2",
+        "hyperactive lifestyle": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_246",
+      "quote": "Did you know? The ancient city of Teotihuacan in Mexico was designed to align with the Pleiades star cluster, and its pyramids reflect the positions of these stars.",
+      "image_prompt": "Ghibli Art: A majestic view of Teotihuacan\u2019s pyramids under a starry night sky. The Pleiades star cluster shines brightly above, with glowing lines connecting the stars to the pyramids. The scene is bathed in soft moonlight, with a faint mist rising from the ground. Tiny glowing spirits float around the pyramids, adding a magical touch. The vibrant colors of the night sky and the intricate details of the pyramids create a sense of awe and wonder.",
+      "image_url": "assets/img/quotes/quote_246.png",
+      "emphasis": {
+        "align with the Pleiades": "emphasis-1",
+        "pyramids": "emphasis-2",
+        "positions of these stars": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_247",
+      "quote": "Did you know? The lyrebird can mimic almost any sound it hears, from chainsaws to camera shutters, creating a symphony of human and natural noises in the forest.",
+      "image_prompt": "Ghibli Art: A lyrebird perched on a moss-covered log in a lush, enchanted forest. Its tail feathers are spread wide, with glowing musical notes and sound waves emanating from them. The bird mimics the sounds of chainsaws, camera shutters, and forest creatures, creating a magical symphony. Tiny glowing fairies dance around the bird, adding to the whimsical atmosphere. The scene is bathed in soft, golden light filtering through the trees, with a gentle mist rising from the forest floor.",
+      "image_url": "assets/img/quotes/quote_247.png",
+      "emphasis": {
+        "mimic almost any sound": "emphasis-1",
+        "chainsaws": "emphasis-2",
+        "camera shutters": "emphasis-2",
+        "symphony": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_248",
+      "quote": "Did you know? The town of Longyearbyen in Norway bans people from dying because the permafrost prevents bodies from decomposing, preserving viruses and bacteria.",
+      "image_prompt": "Ghibli Art: A snowy, magical town nestled in a valley surrounded by towering, icy mountains. The houses are colorful and quaint, with smoke rising from chimneys. A glowing sign in the town square reads \u201cNo Dying Allowed.\u201d Tiny, glowing spirits float around the town, adding a whimsical touch. The scene is bathed in the soft, blue light of twilight, with a faint mist rising from the snow-covered ground. The permafrost beneath the town glows faintly, emphasizing its preservation power.",
+      "image_url": "assets/img/quotes/quote_248.png",
+      "emphasis": {
+        "bans people from dying": "emphasis-1",
+        "permafrost": "emphasis-2",
+        "preserving viruses and bacteria": "emphasis-2"
+      }
     }
   ]
 }

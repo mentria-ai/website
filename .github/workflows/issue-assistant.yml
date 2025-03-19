@@ -379,53 +379,35 @@ jobs:
             # Extract content
             CONTENT=$(cat response_files/api_response.json | jq -r '.choices[0].message.content')
             
-            # Process <think> blocks with a separate script
-            cat > process_thinking.awk << 'AWKEOF'
+            # Process <think> blocks with a simplified approach
+            echo "$CONTENT" > response_files/raw_content.txt
+            
+            # Use awk directly without creating a separate script file
+            processed_content=$(awk '
             BEGIN { in_think = 0; output = ""; thinking = ""; }
             
-            # Start of thinking block
-            /<think>/ { 
-              in_think = 1; 
-              thinking = ""; 
-              next; 
-            }
+            /<think>/ { in_think = 1; thinking = ""; next; }
             
-            # End of thinking block
             /<\/think>/ { 
               in_think = 0;
-              # If there was thinking content, format it as markdown quote
               if (thinking != "") {
-                # Split thinking into lines and prefix each with >
-                split(thinking, lines, "\n");
                 output = output "\n\n> **Thinking process:**\n";
+                split(thinking, lines, "\n");
                 for (i in lines) {
-                  if (lines[i] != "") {
-                    output = output "> " lines[i] "\n";
-                  } else {
-                    output = output ">\n";
-                  }
+                  if (lines[i] != "") output = output "> " lines[i] "\n";
+                  else output = output ">\n";
                 }
                 output = output "\n";
               }
               next;
             }
             
-            # Inside thinking block - collect content
-            in_think == 1 { 
-              thinking = thinking (thinking=="" ? "" : "\n") $0;
-              next;
-            }
+            in_think == 1 { thinking = thinking (thinking=="" ? "" : "\n") $0; next; }
             
-            # Normal content outside thinking blocks
-            in_think == 0 { 
-              output = output (output=="" ? "" : "\n") $0;
-            }
+            in_think == 0 { output = output (output=="" ? "" : "\n") $0; }
             
             END { print output; }
-            AWKEOF
-            
-            # Run the awk script to process thinking blocks
-            processed_content=$(awk -f process_thinking.awk <<< "$CONTENT")
+            ' response_files/raw_content.txt)
             
             # Save processed content
             echo "$processed_content" > response.txt

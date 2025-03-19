@@ -1880,6 +1880,83 @@
         "boils the water": "emphasis-2",
         "cavitation": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_228",
+      "quote": "Did you know? The lyrebird can mimic almost any sound it hears, from chainsaws to camera shutters, creating a symphony of human and natural noises in the forest.",
+      "image_prompt": "Ghibli Art: A majestic lyrebird stands in a lush, enchanted forest, its tail feathers shimmering with golden light. Around it, glowing orbs float, each emitting a different sound\u2014chainsaws, camera shutters, and bird calls. The forest is alive with magical mist, and tiny, curious creatures peek from behind trees, mesmerized by the bird\u2019s performance. Sunlight filters through the canopy, casting a warm, ethereal glow on the scene.",
+      "image_url": "assets/img/quotes/quote_228.png",
+      "emphasis": {
+        "lyrebird": "emphasis-2",
+        "mimic": "emphasis-1",
+        "symphony": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_229",
+      "quote": "Did you know? The Great Barrier Reef is so vast it can be seen from space, and it\u2019s home to over 1,500 species of fish and 400 types of coral.",
+      "image_prompt": "Ghibli Art: A breathtaking underwater scene of the Great Barrier Reef, teeming with vibrant coral and colorful fish. A glowing, ethereal light filters through the water, illuminating the intricate coral structures. Tiny, magical sea creatures with glowing eyes swim among the coral, adding a whimsical touch. Above, a spaceship hovers in the sky, its occupants marveling at the reef\u2019s vastness from above.",
+      "image_url": "assets/img/quotes/quote_229.png",
+      "emphasis": {
+        "Great Barrier Reef": "emphasis-2",
+        "seen from space": "emphasis-1",
+        "1,500 species": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_230",
+      "quote": "Did you know? The Venus flytrap counts the number of times its prey touches its hairs before snapping shut, ensuring it only catches live insects.",
+      "image_prompt": "Ghibli Art: A whimsical Venus flytrap in a magical forest, its leaves glowing faintly with a soft green light. A curious, glowing insect hovers near the plant, touching its tiny hairs. The flytrap\u2019s eyes, represented by small, glowing dots, watch intently. The forest is filled with golden mist, and tiny, enchanted creatures watch from the shadows, fascinated by the plant\u2019s clever mechanism.",
+      "image_url": "assets/img/quotes/quote_230.png",
+      "emphasis": {
+        "Venus flytrap": "emphasis-2",
+        "counts": "emphasis-1",
+        "snapping shut": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_231",
+      "quote": "Did you know? The town of Coober Pedy in Australia is built underground to escape the scorching heat, with homes, churches, and even hotels carved into the earth.",
+      "image_prompt": "Ghibli Art: A charming underground town carved into the earth, with glowing lanterns illuminating the cozy homes and shops. The walls are adorned with intricate carvings, and tiny, magical creatures scurry about, adding life to the scene. Above ground, the scorching sun beats down on a barren landscape, while below, the town thrives in cool, comfortable darkness. Golden light filters through cracks in the earth, creating a warm, inviting atmosphere.",
+      "image_url": "assets/img/quotes/quote_231.png",
+      "emphasis": {
+        "Coober Pedy": "emphasis-2",
+        "underground": "emphasis-1",
+        "scorching heat": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_232",
+      "quote": "Did you know? The mantis shrimp\u2019s punch is so fast it boils the water around it, creating tiny bubbles that produce light and heat in a phenomenon called cavitation.",
+      "image_prompt": "Ghibli Art: A vibrant underwater scene featuring a mantis shrimp with glowing, iridescent colors. As it punches, tiny, glowing bubbles form around its claws, creating a dazzling display of light and heat. The surrounding water shimmers with magical energy, and curious fish with exaggerated expressions watch in awe. Golden sunlight filters through the water, enhancing the magical atmosphere.",
+      "image_url": "assets/img/quotes/quote_232.png",
+      "emphasis": {
+        "mantis shrimp\u2019s punch": "emphasis-2",
+        "boils the water": "emphasis-1",
+        "cavitation": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_233",
+      "quote": "Did you know? The ancient city of Machu Picchu was built without mortar, its stones fitting together so precisely that not even a blade of grass can slip between them.",
+      "image_prompt": "Ghibli Art: A serene, misty morning at Machu Picchu, with the ancient stone structures glowing softly in the golden light of dawn. Tiny, magical creatures with glowing eyes explore the perfectly fitted stones, marveling at their precision. The surrounding mountains are shrouded in ethereal mist, and a gentle breeze carries glowing particles through the air, adding a magical touch to the scene.",
+      "image_url": "assets/img/quotes/quote_233.png",
+      "emphasis": {
+        "Machu Picchu": "emphasis-2",
+        "without mortar": "emphasis-1",
+        "blade of grass": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_234",
+      "quote": "Did you know? The glasswing butterfly has transparent wings that make it nearly invisible when it flies, blending seamlessly into its surroundings.",
+      "image_prompt": "Ghibli Art: A magical forest filled with glowing plants and tiny, enchanted creatures. A glasswing butterfly with nearly invisible wings flutters gracefully through the air, its transparency creating a mesmerizing effect. The sunlight filters through the trees, casting a golden glow on the scene. Tiny, glowing particles dance around the butterfly, enhancing its ethereal beauty.",
+      "image_url": "assets/img/quotes/quote_234.png",
+      "emphasis": {
+        "glasswing butterfly": "emphasis-2",
+        "transparent wings": "emphasis-1",
+        "invisible": "emphasis-2"
+      }
     }
   ]
 }

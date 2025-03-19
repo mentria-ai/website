@@ -325,7 +325,7 @@ jobs:
           fi
           
           # Combine system and user prompts into a single user prompt
-          cat > response_files/combined_prompt.txt << 'EOF'
+          cat > response_files/combined_prompt.txt << 'PROMPTEOF'
           You are an AI assistant that helps with GitHub issues. You provide helpful, accurate, and concise responses to technical questions and issues.
 
           When responding, follow these guidelines:
@@ -341,7 +341,7 @@ jobs:
           Remember that you're responding in a GitHub issue context. Your goal is to be helpful, accurate, and drive toward issue resolution.
 
           Please respond to this 
-          EOF
+          PROMPTEOF
           
           # Append event type and content
           echo "${EVENT_TYPE}:" >> response_files/combined_prompt.txt
@@ -380,7 +380,7 @@ jobs:
             CONTENT=$(cat response_files/api_response.json | jq -r '.choices[0].message.content')
             
             # Process <think> blocks with a separate script
-            cat > process_thinking.awk << 'EOF'
+            cat > process_thinking.awk << 'AWKEOF'
             BEGIN { in_think = 0; output = ""; thinking = ""; }
             
             # Start of thinking block
@@ -422,7 +422,7 @@ jobs:
             }
             
             END { print output; }
-            EOF
+            AWKEOF
             
             # Run the awk script to process thinking blocks
             processed_content=$(awk -f process_thinking.awk <<< "$CONTENT")

@@ -2115,6 +2115,83 @@
         "permafrost": "emphasis-2",
         "preserving viruses and bacteria": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_249",
+      "quote": "Did you know? The star-nosed mole can identify and eat objects in less than 200 milliseconds, making it the fastest forager in the animal kingdom.",
+      "image_prompt": "Ghibli Art: A star-nosed mole with a glowing, star-shaped nose scurries through a lush, misty forest floor. Golden light filters through the trees, illuminating tiny glowing insects and mushrooms. The mole\u2019s nose pulses with light as it detects and devours a worm in a blur of motion. Magical sparkles trail behind it, emphasizing its incredible speed. Whimsical, wide-eyed creatures peek out from behind leaves, watching in awe.",
+      "image_url": "assets/img/quotes/quote_249.png",
+      "emphasis": {
+        "star-nosed mole": "emphasis-2",
+        "200 milliseconds": "emphasis-1",
+        "fastest forager": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_250",
+      "quote": "Did you know? The ancient city of Derinkuyu in Turkey is an underground city that could house 20,000 people, complete with stables, churches, and ventilation shafts.",
+      "image_prompt": "Ghibli Art: A sprawling underground city carved into soft rock, illuminated by glowing lanterns and shafts of golden sunlight filtering from above. People in ancient attire move through the labyrinthine tunnels, tending to stables and gathering in a glowing chapel. Tiny, magical creatures with lantern-like bodies float around, adding a whimsical touch. Mist swirls through the air, enhancing the mystical atmosphere.",
+      "image_url": "assets/img/quotes/quote_250.png",
+      "emphasis": {
+        "Derinkuyu": "emphasis-2",
+        "20,000 people": "emphasis-1",
+        "ventilation shafts": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_251",
+      "quote": "Did you know? The lyrebird\u2019s tail feathers can mimic not only bird calls but also chainsaws, camera shutters, and even car alarms, creating a symphony of sounds.",
+      "image_prompt": "Ghibli Art: A majestic lyrebird with iridescent tail feathers stands in a sunlit forest clearing. Its tail transforms into a glowing, ethereal shape as it mimics sounds\u2014chainsaws, camera shutters, and car alarms\u2014represented by colorful, musical notes floating in the air. Tiny, enchanted creatures with oversized ears listen in amazement. Golden light filters through the trees, casting a magical glow on the scene.",
+      "image_url": "assets/img/quotes/quote_251.png",
+      "emphasis": {
+        "lyrebird": "emphasis-2",
+        "mimic": "emphasis-1",
+        "symphony of sounds": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_252",
+      "quote": "Did you know? The Sahara Desert was once a lush, green landscape filled with rivers, lakes, and even hippos, over 5,000 years ago.",
+      "image_prompt": "Ghibli Art: A vast, green Sahara landscape with shimmering rivers and lakes under a golden sunset. Hippos lounge in the water, surrounded by lush vegetation and colorful flowers. Tiny, glowing fireflies dance above the water, adding a magical touch. Whimsical creatures with oversized eyes peek out from the reeds, watching the scene in wonder. Mist rises from the water, creating a dreamy atmosphere.",
+      "image_url": "assets/img/quotes/quote_252.png",
+      "emphasis": {
+        "Sahara Desert": "emphasis-2",
+        "lush, green landscape": "emphasis-1",
+        "hippos": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_253",
+      "quote": "Did you know? The human brain generates enough electricity to power a small light bulb, even while you sleep.",
+      "image_prompt": "Ghibli Art: A cozy bedroom bathed in soft, golden light from a glowing bedside lamp. A sleeping figure lies in bed, their head surrounded by a halo of tiny, glowing electrical sparks. Whimsical, dream-like creatures with glowing eyes float around, collecting the sparks to power the lamp. The room is filled with a warm, magical atmosphere, enhanced by swirling mist and glowing particles.",
+      "image_url": "assets/img/quotes/quote_253.png",
+      "emphasis": {
+        "human brain": "emphasis-2",
+        "electricity": "emphasis-1",
+        "small light bulb": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_254",
+      "quote": "Did you know? The tardigrade can survive in the vacuum of space, extreme temperatures, and even radiation by entering a state of suspended animation.",
+      "image_prompt": "Ghibli Art: A tiny tardigrade floats in the vastness of space, surrounded by glowing stars and planets. Its body is encased in a shimmering, protective bubble as it drifts through a colorful nebula. Whimsical, star-shaped creatures with glowing eyes watch in awe. Golden light from a nearby star illuminates the scene, creating a magical, otherworldly atmosphere.",
+      "image_url": "assets/img/quotes/quote_254.png",
+      "emphasis": {
+        "tardigrade": "emphasis-2",
+        "vacuum of space": "emphasis-1",
+        "suspended animation": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_255",
+      "quote": "Did you know? The town of Giethoorn in the Netherlands has no roads\u2014residents travel by boat through its picturesque canals, earning it the nickname 'Venice of the North.'",
+      "image_prompt": "Ghibli Art: A charming village with thatched-roof cottages surrounded by serene canals. Residents glide in small, colorful boats under a golden sunset. Whimsical, glowing fish swim beneath the water, and tiny, magical creatures with lantern-like bodies float above. Mist rises from the canals, creating a dreamy, enchanting atmosphere. Vibrant flowers line the banks, adding bursts of color to the scene.",
+      "image_url": "assets/img/quotes/quote_255.png",
+      "emphasis": {
+        "Giethoorn": "emphasis-2",
+        "no roads": "emphasis-1",
+        "Venice of the North": "emphasis-2"
+      }
     }
   ]
 }

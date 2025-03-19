@@ -1726,6 +1726,83 @@
         "blue objects": "emphasis-1",
         "display": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_214",
+      "quote": "Did you know? The lyrebird can mimic almost any sound it hears, from chainsaws to camera shutters, creating a symphony of human and natural noises in the forest.",
+      "image_prompt": "Ghibli Art: A majestic lyrebird perched on a moss-covered branch in a lush, enchanted forest. Its tail feathers fan out, glowing softly with magical light. Around it, floating sound waves depict chainsaws, camera shutters, and bird songs. Golden sunlight filters through the dense canopy, casting dappled shadows. Tiny, glowing forest spirits watch in awe as the lyrebird performs its symphony. The air is filled with a faint, musical hum, enhancing the magical atmosphere.",
+      "image_url": "assets/img/quotes/quote_214.png",
+      "emphasis": {
+        "lyrebird": "emphasis-2",
+        "mimic": "emphasis-1",
+        "symphony": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_215",
+      "quote": "Did you know? The Great Barrier Reef is so vast it can be seen from space, and it\u2019s home to over 1,500 species of fish and 400 types of coral.",
+      "image_prompt": "Ghibli Art: A breathtaking view of the Great Barrier Reef from space, with vibrant blues and greens swirling together. Tiny, glowing fish and coral formations are visible from above, creating a mosaic of life. A whimsical spaceship hovers nearby, with wide-eyed, Ghibli-style astronauts marveling at the sight. The Earth\u2019s atmosphere glows softly with a golden hue, and magical sparkles drift down towards the reef. The scene is alive with movement and color, capturing the reef\u2019s vastness and beauty.",
+      "image_url": "assets/img/quotes/quote_215.png",
+      "emphasis": {
+        "Great Barrier Reef": "emphasis-2",
+        "seen from space": "emphasis-1",
+        "1,500 species": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_216",
+      "quote": "Did you know? The Venus flytrap counts the number of times its prey touches its hairs before snapping shut, ensuring it only catches live insects.",
+      "image_prompt": "Ghibli Art: A whimsical Venus flytrap in a sunlit, magical meadow. Its red and green leaves glow softly, with tiny, glowing hairs that sparkle when touched. A curious, wide-eyed insect hovers nearby, about to trigger the trap. Golden sunlight filters through the meadow, casting a warm glow. Tiny, glowing fairies watch from nearby flowers, their expressions a mix of curiosity and caution. The air is filled with a faint, magical hum, enhancing the sense of wonder.",
+      "image_url": "assets/img/quotes/quote_216.png",
+      "emphasis": {
+        "Venus flytrap": "emphasis-2",
+        "counts": "emphasis-1",
+        "live insects": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_217",
+      "quote": "Did you know? The town of Coober Pedy in Australia is built underground to escape the scorching heat, with homes, churches, and even hotels carved into the earth.",
+      "image_prompt": "Ghibli Art: A charming underground town in Coober Pedy, with cozy, earth-carved homes and glowing lanterns lighting the way. The walls are adorned with intricate, glowing patterns, and the air is cool and refreshing. Whimsical, wide-eyed kangaroos peek out from doorways, and tiny, glowing fireflies drift through the air. The scene is bathed in a soft, golden light, creating a warm and inviting atmosphere. Above ground, the scorching sun blazes, but below, the town thrives in its magical, subterranean world.",
+      "image_url": "assets/img/quotes/quote_217.png",
+      "emphasis": {
+        "Coober Pedy": "emphasis-2",
+        "underground": "emphasis-1",
+        "scorching heat": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_218",
+      "quote": "Did you know? The mantis shrimp\u2019s punch is so fast it boils the water around it, creating tiny bubbles that produce light and heat in a phenomenon called cavitation.",
+      "image_prompt": "Ghibli Art: A vibrant, underwater scene with a mantis shrimp preparing to punch. The water around it glows with intense heat, and tiny, glowing bubbles form, creating a mesmerizing light show. Colorful coral and curious fish watch from a safe distance, their expressions a mix of awe and fear. The shrimp\u2019s claws are highlighted with a magical, fiery glow, and the water shimmers with golden light. The scene is alive with movement and energy, capturing the shrimp\u2019s incredible power.",
+      "image_url": "assets/img/quotes/quote_218.png",
+      "emphasis": {
+        "mantis shrimp": "emphasis-2",
+        "boils": "emphasis-1",
+        "cavitation": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_219",
+      "quote": "Did you know? The ancient city of Machu Picchu was built without mortar, its stones fitting together so precisely that not even a blade of grass can slip between them.",
+      "image_prompt": "Ghibli Art: A mystical view of Machu Picchu at sunrise, with golden light illuminating the ancient stone structures. The stones glow softly, fitting together seamlessly without a trace of mortar. Whimsical llamas graze nearby, their fur shimmering with a magical glow. Tiny, glowing spirits float around the stones, inspecting the perfect craftsmanship. The air is filled with a faint, ancient hum, and the surrounding mountains are shrouded in soft mist, enhancing the sense of wonder and mystery.",
+      "image_url": "assets/img/quotes/quote_219.png",
+      "emphasis": {
+        "Machu Picchu": "emphasis-2",
+        "without mortar": "emphasis-1",
+        "blade of grass": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_220",
+      "quote": "Did you know? The lyrebird can mimic almost any sound it hears, from chainsaws to camera shutters, creating a symphony of human and natural noises in the forest.",
+      "image_prompt": "Ghibli Art: A majestic lyrebird perched on a moss-covered branch in a lush, enchanted forest. Its tail feathers fan out, glowing softly with magical light. Around it, floating sound waves depict chainsaws, camera shutters, and bird songs. Golden sunlight filters through the dense canopy, casting dappled shadows. Tiny, glowing forest spirits watch in awe as the lyrebird performs its symphony. The air is filled with a faint, musical hum, enhancing the magical atmosphere.",
+      "image_url": "assets/img/quotes/quote_220.png",
+      "emphasis": {
+        "lyrebird": "emphasis-2",
+        "mimic": "emphasis-1",
+        "symphony": "emphasis-2"
+      }
     }
   ]
 }

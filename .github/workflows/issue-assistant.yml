@@ -181,26 +181,32 @@ jobs:
           
           # Create directories for analysis
           mkdir -p context_analysis error_logs
-
-          # Prepare and execute API call to analyze if context is needed
-          CONTENT=$(cat content_data.json | jq -r '.content')
           
-          # Create the request JSON directly without template
-          cat > context_analysis/request.json << EOF
-          {
-            "model": "deepseek-ai/DeepSeek-R1",
-            "messages": [
+          # Check if content data exists
+          if [ ! -f "content_data.json" ]; then
+            echo "❌ Error: content_data.json file not found" >> ${{ steps.init.outputs.log_file }}
+            echo "needs_context=false" >> $GITHUB_OUTPUT
+            echo "reason=Failed to analyze context needs - missing content data" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Extract content to a temporary file to avoid shell expansion issues
+          jq -r '.content' content_data.json > context_analysis/content.txt
+          
+          # Create the request JSON using jq to properly handle escaping
+          jq -n --rawfile content context_analysis/content.txt '{
+            model: "deepseek-ai/DeepSeek-R1",
+            messages: [
               {
-                "role": "system",
-                "content": "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. Respond with only a JSON object containing two fields: 'needsContext' (boolean) and 'reason' (string)."
+                role: "system",
+                content: "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string)."
               },
               {
-                "role": "user",
-                "content": "Analyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\\n\\n$(echo "$CONTENT" | sed 's/"/\\"/g' | sed 's/$/\\n/g')\\n\\nRespond with JSON only, format: {\\\"needsContext\\\": boolean, \\\"reason\\\": \\\"your explanation\\\"}"
+                role: "user",
+                content: "Analyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n" + $content + "\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
               }
             ]
-          }
-          EOF
+          }' > context_analysis/request.json
           
           # Call the API
           curl -s -X POST "https://api.together.xyz/v1/chat/completions" \
@@ -211,27 +217,26 @@ jobs:
           
           # Check if the response file exists and has content
           if [ -s "context_analysis/response.json" ]; then
-            # Extract the response and check if context is needed
-            RESPONSE=$(cat context_analysis/response.json)
-            CONTENT=$(echo $RESPONSE | jq -r '.choices[0].message.content')
+            # Extract the response content to a file
+            jq -r '.choices[0].message.content' context_analysis/response.json > context_analysis/ai_response.txt
             
-            # Use grep to extract the JSON content if wrapped in text
-            JSON=$(echo "$CONTENT" | grep -o '{.*}')
+            # Extract JSON using grep
+            grep -o '{.*}' context_analysis/ai_response.txt > context_analysis/json_extract.txt || echo "{}" > context_analysis/json_extract.txt
             
-            # Default to false if parsing fails
+            # Default values
             NEEDS_CONTEXT="false"
             REASON="Failed to analyze context needs"
             
-            # Try to extract needs_context value
-            if [ ! -z "$JSON" ]; then
-              EXTRACTED_NEEDS_CONTEXT=$(echo $JSON | jq -r '.needsContext')
-              EXTRACTED_REASON=$(echo $JSON | jq -r '.reason')
+            # Try to extract values from the JSON if file exists and has content
+            if [ -s "context_analysis/json_extract.txt" ]; then
+              EXTRACTED_NEEDS_CONTEXT=$(jq -r '.needsContext // false' context_analysis/json_extract.txt)
+              EXTRACTED_REASON=$(jq -r '.reason // "No reason provided"' context_analysis/json_extract.txt)
               
               if [ "$EXTRACTED_NEEDS_CONTEXT" == "true" ]; then
                 NEEDS_CONTEXT="true"
               fi
               
-              if [ ! -z "$EXTRACTED_REASON" ]; then
+              if [ ! -z "$EXTRACTED_REASON" ] && [ "$EXTRACTED_REASON" != "null" ]; then
                 REASON="$EXTRACTED_REASON"
               fi
             fi

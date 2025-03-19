@@ -185,8 +185,8 @@ jobs:
           # Prepare and execute API call to analyze if context is needed
           CONTENT=$(cat content_data.json | jq -r '.content')
           
-          # Create a temporary template file
-          cat > context_analysis/request_template.json << 'EOF'
+          # Create the request JSON directly without template
+          cat > context_analysis/request.json << EOF
           {
             "model": "deepseek-ai/DeepSeek-R1",
             "messages": [
@@ -196,14 +196,11 @@ jobs:
               },
               {
                 "role": "user",
-                "content": "Analyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n__CONTENT_PLACEHOLDER__\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
+                "content": "Analyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\\n\\n$(echo "$CONTENT" | sed 's/"/\\"/g' | sed 's/$/\\n/g')\\n\\nRespond with JSON only, format: {\\\"needsContext\\\": boolean, \\\"reason\\\": \\\"your explanation\\\"}"
               }
             ]
           }
           EOF
-          
-          # Create the actual request JSON with jq instead of sed (more reliable with special chars)
-          jq --arg content "$CONTENT" '.messages[1].content = .messages[1].content | gsub("__CONTENT_PLACEHOLDER__"; $content)' context_analysis/request_template.json > context_analysis/request.json
           
           # Call the API
           curl -s -X POST "https://api.together.xyz/v1/chat/completions" \

@@ -1803,6 +1803,83 @@
         "mimic": "emphasis-1",
         "symphony": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_221",
+      "quote": "Did you know? The lyrebird can mimic almost any sound it hears, from chainsaws to camera shutters, creating a symphony of human and natural noises in the forest.",
+      "image_prompt": "Ghibli Art: A majestic lyrebird perched on a moss-covered log in a sun-dappled forest, its tail feathers fanned out in a shimmering display. Around it, glowing musical notes and sound waves float in the air, depicting the sounds it mimics\u2014chainsaws, camera shutters, and bird calls. Tiny forest creatures, like wide-eyed rabbits and curious foxes, gather around, enchanted by the performance. Golden sunlight filters through the trees, casting a magical glow on the scene, while fireflies add a touch of whimsy.",
+      "image_url": "assets/img/quotes/quote_221.png",
+      "emphasis": {
+        "lyrebird": "emphasis-1",
+        "mimic": "emphasis-2",
+        "symphony": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_222",
+      "quote": "Did you know? The glasswing butterfly has transparent wings that make it nearly invisible when it flies, blending seamlessly into its surroundings.",
+      "image_prompt": "Ghibli Art: A delicate glasswing butterfly fluttering through a lush, enchanted forest. Its transparent wings shimmer faintly, reflecting the golden sunlight filtering through the canopy. Tiny glowing particles trail behind it, emphasizing its near-invisibility. Curious animals, like a wide-eyed deer and a playful squirrel, watch in awe as the butterfly blends into the foliage. The scene is bathed in soft, magical light, with dewdrops sparkling on leaves and flowers.",
+      "image_url": "assets/img/quotes/quote_222.png",
+      "emphasis": {
+        "glasswing butterfly": "emphasis-1",
+        "transparent wings": "emphasis-2",
+        "invisible": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_223",
+      "quote": "Did you know? The Etruscan shrew has the fastest heartbeat of any mammal, reaching up to 1,500 beats per minute, allowing it to sustain its hyperactive lifestyle.",
+      "image_prompt": "Ghibli Art: A tiny Etruscan shrew dashing through a vibrant meadow, its heart glowing faintly with a rapid, pulsating light. Golden sunlight bathes the scene, highlighting the dew-covered grass and wildflowers. The shrew\u2019s hyperactive movements are depicted with streaks of light trailing behind it. Curious insects and small animals watch in amazement, their exaggerated expressions adding charm. Magical sparkles and glowing particles emphasize the shrew\u2019s incredible energy and speed.",
+      "image_url": "assets/img/quotes/quote_223.png",
+      "emphasis": {
+        "Etruscan shrew": "emphasis-1",
+        "1,500 beats per minute": "emphasis-2",
+        "hyperactive": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_224",
+      "quote": "Did you know? The ancient city of Petra in Jordan was carved entirely from rose-red sandstone cliffs, and its intricate facades were designed to align with the solstices.",
+      "image_prompt": "Ghibli Art: The rose-red cliffs of Petra glowing under the golden light of a solstice sunrise. The intricate facades of the ancient city are adorned with glowing runes and symbols that align with the sun\u2019s rays. A small caravan of whimsical camels, led by a curious fox, approaches the city. The air is filled with magical dust particles, and the scene is framed by vibrant desert flowers and lush greenery. The atmosphere is both mystical and serene.",
+      "image_url": "assets/img/quotes/quote_224.png",
+      "emphasis": {
+        "Petra": "emphasis-1",
+        "rose-red sandstone": "emphasis-2",
+        "solstices": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_225",
+      "quote": "Did you know? The Venus flytrap counts the number of times its prey touches its hairs before snapping shut, ensuring it only catches live insects.",
+      "image_prompt": "Ghibli Art: A Venus flytrap in a magical swamp, its vibrant green leaves glowing faintly in the soft, misty light. Tiny glowing particles hover around it, representing the counting mechanism. A curious dragonfly hovers nearby, its wings shimmering with iridescent colors. The flytrap\u2019s hairs are depicted as delicate, glowing threads. The swamp is alive with whimsical creatures, like frogs with oversized eyes and fireflies that add a magical touch to the scene.",
+      "image_url": "assets/img/quotes/quote_225.png",
+      "emphasis": {
+        "Venus flytrap": "emphasis-1",
+        "counts": "emphasis-2",
+        "live insects": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_226",
+      "quote": "Did you know? The town of Coober Pedy in Australia is built underground to escape the scorching heat, with homes, churches, and even hotels carved into the earth.",
+      "image_prompt": "Ghibli Art: A whimsical underground town carved into the earth, with glowing lanterns illuminating the cozy, subterranean homes and shops. The walls are adorned with intricate carvings and glowing crystals. A group of cheerful, anthropomorphic kangaroos and wombats go about their daily lives, adding charm to the scene. The air is cool and refreshing, with magical dust particles floating gently. Above ground, the scorching desert sun creates a stark contrast, with heat waves shimmering in the distance.",
+      "image_url": "assets/img/quotes/quote_226.png",
+      "emphasis": {
+        "Coober Pedy": "emphasis-1",
+        "underground": "emphasis-2",
+        "scorching heat": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_227",
+      "quote": "Did you know? The mantis shrimp\u2019s punch is so fast it boils the water around it, creating tiny bubbles that produce light and heat in a phenomenon called cavitation.",
+      "image_prompt": "Ghibli Art: A mantis shrimp in a vibrant coral reef, its claws glowing with energy as it prepares to strike. The punch creates a burst of light and heat, with tiny glowing bubbles and shockwaves radiating outward. Fish and other sea creatures watch in awe, their exaggerated expressions adding charm. The water is filled with magical particles, and the scene is bathed in a golden underwater light. The coral reef is alive with color and movement, emphasizing the shrimp\u2019s incredible power.",
+      "image_url": "assets/img/quotes/quote_227.png",
+      "emphasis": {
+        "mantis shrimp": "emphasis-1",
+        "boils the water": "emphasis-2",
+        "cavitation": "emphasis-2"
+      }
     }
   ]
 }

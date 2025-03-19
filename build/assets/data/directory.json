@@ -1649,6 +1649,83 @@
         "lays eggs": "emphasis-1",
         "venomous spurs": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_207",
+      "quote": "Did you know? The lyrebird can mimic almost any sound it hears, from chainsaws to camera shutters, creating a symphony of human and natural noises in the forest.",
+      "image_prompt": "Ghibli Art: A majestic lyrebird perched on a moss-covered log in a sunlit forest clearing, its tail feathers fanned out in a shimmering display. The air is filled with glowing musical notes and tiny, floating sound waves representing the sounds it mimics\u2014chainsaws, camera shutters, and bird calls. Golden sunlight filters through the trees, casting a magical glow on the scene. Small, curious forest creatures peek out from the underbrush, enchanted by the lyrebird\u2019s performance.",
+      "image_url": "assets/img/quotes/quote_207.png",
+      "emphasis": {
+        "lyrebird": "emphasis-2",
+        "mimic": "emphasis-1",
+        "symphony": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_208",
+      "quote": "Did you know? The ancient city of Teotihuacan in Mexico was designed to align with the Pleiades star cluster, and its pyramids reflect the positions of these stars.",
+      "image_prompt": "Ghibli Art: A sprawling ancient city under a starry night sky, with the Pyramid of the Sun and Moon glowing softly in the moonlight. The Pleiades star cluster shines brightly above, connected to the pyramids by shimmering, golden threads of light. Mist rolls gently across the ground, and tiny, glowing fireflies dance around the structures. A group of ancient astronomers, depicted as whimsical figures, point excitedly at the stars, their robes billowing in the night breeze.",
+      "image_url": "assets/img/quotes/quote_208.png",
+      "emphasis": {
+        "Teotihuacan": "emphasis-2",
+        "Pleiades": "emphasis-1",
+        "align": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_209",
+      "quote": "Did you know? The glasswing butterfly has transparent wings that make it nearly invisible when it flies, blending seamlessly into its surroundings.",
+      "image_prompt": "Ghibli Art: A delicate glasswing butterfly fluttering through a lush, sunlit meadow, its transparent wings catching the light and refracting tiny rainbows. The background is a blur of vibrant flowers and soft green grass, with golden sunlight streaming through. Tiny, glowing particles float around the butterfly, enhancing its ethereal appearance. A curious rabbit with oversized eyes watches from the grass, its nose twitching in wonder.",
+      "image_url": "assets/img/quotes/quote_209.png",
+      "emphasis": {
+        "glasswing butterfly": "emphasis-2",
+        "transparent": "emphasis-1",
+        "invisible": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_210",
+      "quote": "Did you know? The town of Longyearbyen in Norway bans people from dying because the permafrost prevents bodies from decomposing, preserving viruses and bacteria.",
+      "image_prompt": "Ghibli Art: A quaint, snow-covered town nestled in a valley surrounded by icy mountains, with colorful wooden houses glowing warmly under the soft light of the aurora borealis. A whimsical sign at the town entrance reads 'No Dying Allowed' in playful, glowing letters. Tiny, magical snowflakes drift through the air, and a group of friendly, bundled-up townsfolk chat animatedly near a steaming hot spring. A curious Arctic fox with a scarf watches from a snowy hill.",
+      "image_url": "assets/img/quotes/quote_210.png",
+      "emphasis": {
+        "Longyearbyen": "emphasis-2",
+        "bans": "emphasis-1",
+        "permafrost": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_211",
+      "quote": "Did you know? The mantis shrimp\u2019s punch is so fast it creates a shockwave that can stun prey, and it\u2019s one of the fastest movements in the animal kingdom.",
+      "image_prompt": "Ghibli Art: A vibrant mantis shrimp in a coral reef, its claws glowing with energy as it delivers a punch that sends a shockwave through the water. The shockwave is depicted as a glowing, expanding ring of light, scattering colorful fish and coral debris. Golden sunlight filters through the water, illuminating the scene with a magical glow. Tiny, glowing bubbles and particles swirl around the shrimp, emphasizing the power of its punch.",
+      "image_url": "assets/img/quotes/quote_211.png",
+      "emphasis": {
+        "mantis shrimp": "emphasis-2",
+        "shockwave": "emphasis-1",
+        "fastest": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_212",
+      "quote": "Did you know? The ancient city of Hampi in India was once the capital of a vast empire and is home to over 1,600 surviving monuments, including temples and palaces.",
+      "image_prompt": "Ghibli Art: A sprawling ancient city at sunrise, with towering stone temples and palaces glowing softly in the golden light. Mist rises from the ground, creating a dreamy atmosphere. Tiny, glowing fireflies dance around the intricate carvings on the monuments, and a group of whimsical, robed figures explore the ruins. A majestic elephant with ornate decorations walks through the scene, adding to the sense of grandeur.",
+      "image_url": "assets/img/quotes/quote_212.png",
+      "emphasis": {
+        "Hampi": "emphasis-2",
+        "1,600": "emphasis-1",
+        "monuments": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_213",
+      "quote": "Did you know? The bowerbird decorates its nest with blue objects, from feathers to bottle caps, to attract a mate, creating a stunning, color-coordinated display.",
+      "image_prompt": "Ghibli Art: A bowerbird in a lush forest, meticulously arranging a collection of blue objects\u2014feathers, flowers, and bottle caps\u2014around its nest. The nest glows softly in the dappled sunlight filtering through the trees. Tiny, magical blue particles float around the scene, enhancing the bird\u2019s colorful display. A curious, wide-eyed squirrel watches from a nearby branch, its tail twitching in fascination.",
+      "image_url": "assets/img/quotes/quote_213.png",
+      "emphasis": {
+        "bowerbird": "emphasis-2",
+        "blue objects": "emphasis-1",
+        "display": "emphasis-2"
+      }
     }
   ]
 }

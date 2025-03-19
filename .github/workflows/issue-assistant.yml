@@ -190,28 +190,36 @@ jobs:
             exit 0
           fi
           
-          # Extract content to a temporary file
+          # Extract content to a temporary file to avoid shell expansion issues
           jq -r '.content' content_data.json > context_analysis/content.txt
           
-          # Create request template
-          cat > context_analysis/request_template.json << 'EOF'
+          # Create the request JSON using jq to properly handle escaping
+          jq -n --rawfile content context_analysis/content.txt '{
+            model: "deepseek-ai/DeepSeek-R1",
+            messages: [
+              {
+                role: "user",
+                content: "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string).\n\nAnalyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n" + $content + "\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
+              }
+            ]
+          }' > context_analysis/request.json
+          
+          # Make sure the request file was created properly
+          if [ ! -s "context_analysis/request.json" ]; then
+            # Fallback approach
+            cat > context_analysis/request.json << EOL
           {
             "model": "deepseek-ai/DeepSeek-R1",
             "messages": [
               {
                 "role": "user",
-                "content": "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string).\n\nAnalyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n{{CONTENT}}\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
+                "content": "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string).\n\nAnalyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n$(cat context_analysis/content.txt)\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
               }
             ]
           }
-          EOF
-          
-          # Replace placeholder with actual content
-          cat context_analysis/content.txt | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' | sed -e 's/"/\\"/g' > context_analysis/escaped_content.txt
-          ESCAPED_CONTENT=$(cat context_analysis/escaped_content.txt)
-          
-          # Create final request JSON
-          sed "s/{{CONTENT}}/$ESCAPED_CONTENT/g" context_analysis/request_template.json > context_analysis/request.json
+          EOL
+            echo "Used fallback method for request JSON creation" >> ${{ steps.init.outputs.log_file }}
+          fi
           
           # Call the API
           curl -s -X POST "https://api.together.xyz/v1/chat/completions" \
@@ -331,8 +339,8 @@ jobs:
             echo "Loaded repository context ($(wc -c < repo_context.md) bytes)" >> ${{ steps.init.outputs.log_file }}
           fi
           
-          # Create template for combined prompt
-          cat > response_files/prompt_template.txt << 'EOF'
+          # Combine system and user prompts into a single user prompt
+          cat > response_files/combined_prompt.txt << 'EOF'
           You are an AI assistant that helps with GitHub issues. You provide helpful, accurate, and concise responses to technical questions and issues.
 
           When responding, follow these guidelines:
@@ -347,47 +355,32 @@ jobs:
 
           Remember that you're responding in a GitHub issue context. Your goal is to be helpful, accurate, and drive toward issue resolution.
 
-          Please respond to this {{EVENT_TYPE}}:
-
-          {{CONTENT}}
-          {{REPO_CONTEXT}}
+          Please respond to this 
           EOF
           
-          # Save event type, content, and repo context to separate files for easier escaping
-          echo "$EVENT_TYPE" > response_files/event_type.txt
-          echo "$CONTENT" > response_files/content.txt
+          # Append event type and content
+          echo "${EVENT_TYPE}:" >> response_files/combined_prompt.txt
+          echo "" >> response_files/combined_prompt.txt
+          echo "$CONTENT" >> response_files/combined_prompt.txt
+          
+          # Add context if available
           if [[ ! -z "$REPO_CONTEXT" ]]; then
-            echo "$REPO_CONTEXT" > response_files/repo_context.txt
-          else
-            echo "" > response_files/repo_context.txt
+            echo "" >> response_files/combined_prompt.txt
+            echo "$REPO_CONTEXT" >> response_files/combined_prompt.txt
           fi
           
-          # Create final prompt with substitutions
-          EVENT_TYPE_ESCAPED=$(cat response_files/event_type.txt | sed -e 's/\//\\\//g')
-          CONTENT_ESCAPED=$(cat response_files/content.txt | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' | sed -e 's/\//\\\//g')
-          REPO_CONTEXT_ESCAPED=$(cat response_files/repo_context.txt | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' | sed -e 's/\//\\\//g')
-          
-          sed -e "s/{{EVENT_TYPE}}/$EVENT_TYPE_ESCAPED/g" \
-              -e "s/{{CONTENT}}/$CONTENT_ESCAPED/g" \
-              -e "s/{{REPO_CONTEXT}}/$REPO_CONTEXT_ESCAPED/g" \
-              response_files/prompt_template.txt > response_files/combined_prompt.txt
-          
-          # Create request template
-          cat > response_files/request_template.json << 'EOF'
-          {
-            "model": "deepseek-ai/DeepSeek-R1",
-            "messages": [
-              {
-                "role": "user",
-                "content": "{{PROMPT}}"
-              }
-            ]
-          }
-          EOF
-          
-          # Create final request JSON
-          PROMPT_ESCAPED=$(cat response_files/combined_prompt.txt | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' | sed -e 's/"/\\"/g')
-          sed "s/{{PROMPT}}/$PROMPT_ESCAPED/g" response_files/request_template.json > response_files/payload.json
+          # Create request payload using jq to properly escape JSON
+          jq -n \
+            --arg prompt "$(cat response_files/combined_prompt.txt)" \
+            '{
+              "model": "deepseek-ai/DeepSeek-R1",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": $prompt
+                }
+              ]
+            }' > response_files/payload.json
           
           # Make API call
           curl -s -X POST "https://api.together.xyz/v1/chat/completions" \

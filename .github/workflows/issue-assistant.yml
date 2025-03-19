@@ -162,6 +162,14 @@ jobs:
               
               logger.logSuccess(logFile, "Content extraction completed successfully");
               
+              // Explicitly set outputs using core.setOutput
+              core.setOutput('issue_id', contentResult.issueId);
+              core.setOutput('issue_number', contentResult.issueNumber);
+              core.setOutput('comment_id', contentResult.commentId || '');
+              core.setOutput('content_file', contentResult.contentFile || '');
+              core.setOutput('base64_file', contentResult.base64File || '');
+              
+              // Also return values for backward compatibility
               return {
                 issue_id: contentResult.issueId,
                 issue_number: contentResult.issueNumber,
@@ -455,17 +463,30 @@ jobs:
               const responseContent = fs.readFileSync(responseFile, 'utf8');
               logger.logMessage(logFile, `Loaded response content (${responseContent.length} bytes)`);
               
-              // Load issue data from content_data.json to handle potential missing output from previous steps
+              // Load issue data from both step outputs and content_data.json
+              // The step output is explicitly preferred if available, with content_data.json as fallback
               let issueNumber;
               
-              if (fs.existsSync('content_data.json')) {
-                const contentData = JSON.parse(fs.readFileSync('content_data.json', 'utf8'));
-                issueNumber = contentData.issueNumber;
-                logger.logMessage(logFile, `Got issue number ${issueNumber} from content_data.json`);
-              } else {
-                // Fallback to step output
-                issueNumber = parseInt('${{ steps.get-content.outputs.issue_number }}', 10);
+              // First try from step output
+              const stepOutputIssueNumber = '${{ steps.get-content.outputs.issue_number }}';
+              if (stepOutputIssueNumber && stepOutputIssueNumber.trim() !== '') {
+                issueNumber = parseInt(stepOutputIssueNumber, 10);
                 logger.logMessage(logFile, `Got issue number ${issueNumber} from step output`);
+              } 
+              // Then try from content_data.json
+              else if (fs.existsSync('content_data.json')) {
+                try {
+                  const contentData = JSON.parse(fs.readFileSync('content_data.json', 'utf8'));
+                  issueNumber = contentData.issueNumber;
+                  logger.logMessage(logFile, `Got issue number ${issueNumber} from content_data.json`);
+                } catch (error) {
+                  logger.logWarning(logFile, `Error parsing content_data.json: ${error.message}`);
+                }
+              }
+              // Finally, try to extract from context directly
+              if (!issueNumber && context.payload.issue) {
+                issueNumber = context.payload.issue.number;
+                logger.logMessage(logFile, `Got issue number ${issueNumber} directly from context`);
               }
               
               if (!issueNumber || isNaN(issueNumber)) {

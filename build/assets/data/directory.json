@@ -1957,6 +1957,84 @@
         "transparent wings": "emphasis-1",
         "invisible": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_235",
+      "quote": "Did you know? The axolotl can regenerate its entire brain, heart, and limbs, making it one of the most remarkable creatures in the animal kingdom.",
+      "image_prompt": "Ghibli Art: A curious axolotl with a glowing, translucent body, floating in a serene underwater cave. Its limbs and heart are in the process of regenerating, with tiny magical sparks and glowing particles surrounding it. Sunlight filters through the water, creating a golden haze, while small, whimsical fish with oversized eyes watch in awe. The cave is adorned with bioluminescent plants and crystals, adding to the enchanted atmosphere.",
+      "image_url": "assets/img/quotes/quote_235.png",
+      "emphasis": {
+        "axolotl": "emphasis-1",
+        "regenerate": "emphasis-2",
+        "entire brain": "emphasis-2",
+        "limbs": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_236",
+      "quote": "Did you know? The ancient city of Mohenjo-Daro in Pakistan had a sophisticated drainage system, with covered sewers and manholes, over 4,000 years ago.",
+      "image_prompt": "Ghibli Art: A bustling ancient city with cobblestone streets and intricate clay buildings, bathed in the warm glow of a setting sun. Covered sewers run beneath the streets, with tiny, glowing manholes emitting soft light. Workers with exaggerated, friendly faces maintain the system, while children play nearby. The air is filled with magical dust particles, and the sky is painted in vibrant hues of orange and pink.",
+      "image_url": "assets/img/quotes/quote_236.png",
+      "emphasis": {
+        "Mohenjo-Daro": "emphasis-1",
+        "sophisticated drainage system": "emphasis-2",
+        "4,000 years ago": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_237",
+      "quote": "Did you know? The lyrebird can mimic almost any sound it hears, from chainsaws to camera shutters, creating a symphony of human and natural noises in the forest.",
+      "image_prompt": "Ghibli Art: A majestic lyrebird perched on a moss-covered log in a lush, enchanted forest. Its tail feathers fan out, each one glowing with tiny, magical symbols representing different sounds. Around it, whimsical creatures like glowing fireflies and curious rabbits listen in awe. The air is filled with a symphony of sounds, visualized as colorful, swirling notes. The forest is bathed in soft, golden light filtering through the trees.",
+      "image_url": "assets/img/quotes/quote_237.png",
+      "emphasis": {
+        "lyrebird": "emphasis-1",
+        "mimic": "emphasis-2",
+        "symphony": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_238",
+      "quote": "Did you know? The town of Coober Pedy in Australia is built underground to escape the scorching heat, with homes, churches, and even hotels carved into the earth.",
+      "image_prompt": "Ghibli Art: A whimsical underground town with cozy, glowing homes carved into the earth. The walls are adorned with intricate patterns and glowing crystals, casting a warm, magical light. Residents with friendly, exaggerated faces go about their daily lives, while children play in the cool, underground streets. The air is filled with tiny, glowing particles, and the scene is bathed in a soft, golden light from the crystals.",
+      "image_url": "assets/img/quotes/quote_238.png",
+      "emphasis": {
+        "Coober Pedy": "emphasis-1",
+        "underground": "emphasis-2",
+        "scorching heat": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_239",
+      "quote": "Did you know? The glasswing butterfly has transparent wings that make it nearly invisible when it flies, blending seamlessly into its surroundings.",
+      "image_prompt": "Ghibli Art: A delicate glasswing butterfly with transparent, shimmering wings, flying through a lush, enchanted forest. The wings reflect the vibrant colors of the flowers and leaves around it, making it nearly invisible. Tiny, glowing particles float in the air, adding to the magical atmosphere. The forest is bathed in soft, golden light, with whimsical creatures like glowing fireflies and curious rabbits watching the butterfly in awe.",
+      "image_url": "assets/img/quotes/quote_239.png",
+      "emphasis": {
+        "glasswing butterfly": "emphasis-1",
+        "transparent wings": "emphasis-2",
+        "nearly invisible": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_240",
+      "quote": "Did you know? The Etruscan shrew has the fastest heartbeat of any mammal, reaching up to 1,500 beats per minute, allowing it to sustain its hyperactive lifestyle.",
+      "image_prompt": "Ghibli Art: A tiny Etruscan shrew with a glowing, rapidly beating heart visible through its translucent body, darting through a vibrant, enchanted meadow. The heart emits tiny, magical sparks with each beat. Around it, whimsical creatures like glowing fireflies and curious rabbits watch in amazement. The meadow is bathed in soft, golden light, with colorful flowers and magical dust particles filling the air.",
+      "image_url": "assets/img/quotes/quote_240.png",
+      "emphasis": {
+        "Etruscan shrew": "emphasis-1",
+        "fastest heartbeat": "emphasis-2",
+        "1,500 beats per minute": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_241",
+      "quote": "Did you know? The ancient city of Teotihuacan in Mexico was designed to align with the Pleiades star cluster, and its pyramids reflect the positions of these stars.",
+      "image_prompt": "Ghibli Art: The ancient city of Teotihuacan bathed in the soft, golden light of a starry night. The pyramids glow with a magical light, perfectly aligned with the Pleiades star cluster above. Tiny, glowing particles float in the air, and the stars are connected by shimmering, magical lines. Whimsical creatures with glowing eyes watch from the shadows, adding to the enchanted atmosphere.",
+      "image_url": "assets/img/quotes/quote_241.png",
+      "emphasis": {
+        "Teotihuacan": "emphasis-1",
+        "Pleiades star cluster": "emphasis-2",
+        "pyramids": "emphasis-2"
+      }
     }
   ]
 }

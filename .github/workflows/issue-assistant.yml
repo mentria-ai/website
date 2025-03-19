@@ -198,15 +198,28 @@ jobs:
             model: "deepseek-ai/DeepSeek-R1",
             messages: [
               {
-                role: "system",
-                content: "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string)."
-              },
-              {
                 role: "user",
-                content: "Analyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n" + $content + "\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
+                content: "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string).\n\nAnalyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n" + $content + "\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
               }
             ]
           }' > context_analysis/request.json
+          
+          # Make sure the request file was created properly
+          if [ ! -s "context_analysis/request.json" ]; then
+            # Fallback approach
+            cat > context_analysis/request.json << EOL
+          {
+            "model": "deepseek-ai/DeepSeek-R1",
+            "messages": [
+              {
+                "role": "user",
+                "content": "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string).\n\nAnalyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n$(cat context_analysis/content.txt)\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
+              }
+            ]
+          }
+          EOL
+            echo "Used fallback method for request JSON creation" >> ${{ steps.init.outputs.log_file }}
+          fi
           
           # Call the API
           curl -s -X POST "https://api.together.xyz/v1/chat/completions" \
@@ -326,8 +339,8 @@ jobs:
             echo "Loaded repository context ($(wc -c < repo_context.md) bytes)" >> ${{ steps.init.outputs.log_file }}
           fi
           
-          # Write system prompt to file
-          cat > response_files/system_prompt.txt << 'EOF'
+          # Combine system and user prompts into a single user prompt
+          cat > response_files/combined_prompt.txt << 'EOF'
           You are an AI assistant that helps with GitHub issues. You provide helpful, accurate, and concise responses to technical questions and issues.
 
           When responding, follow these guidelines:
@@ -341,33 +354,30 @@ jobs:
           8. Keep your responses focused on the technical issue at hand
 
           Remember that you're responding in a GitHub issue context. Your goal is to be helpful, accurate, and drive toward issue resolution.
+
+          Please respond to this 
           EOF
           
-          # Write user prompt to file
-          echo "Please respond to this ${EVENT_TYPE}:" > response_files/user_prompt.txt
-          echo "" >> response_files/user_prompt.txt
-          echo "$CONTENT" >> response_files/user_prompt.txt
+          # Append event type and content
+          echo "${EVENT_TYPE}:" >> response_files/combined_prompt.txt
+          echo "" >> response_files/combined_prompt.txt
+          echo "$CONTENT" >> response_files/combined_prompt.txt
           
           # Add context if available
           if [[ ! -z "$REPO_CONTEXT" ]]; then
-            echo "" >> response_files/user_prompt.txt
-            echo "$REPO_CONTEXT" >> response_files/user_prompt.txt
+            echo "" >> response_files/combined_prompt.txt
+            echo "$REPO_CONTEXT" >> response_files/combined_prompt.txt
           fi
           
           # Create request payload using jq to properly escape JSON
           jq -n \
-            --arg sys "$(cat response_files/system_prompt.txt)" \
-            --arg usr "$(cat response_files/user_prompt.txt)" \
+            --arg prompt "$(cat response_files/combined_prompt.txt)" \
             '{
               "model": "deepseek-ai/DeepSeek-R1",
               "messages": [
                 {
-                  "role": "system",
-                  "content": $sys
-                },
-                {
                   "role": "user",
-                  "content": $usr
+                  "content": $prompt
                 }
               ]
             }' > response_files/payload.json

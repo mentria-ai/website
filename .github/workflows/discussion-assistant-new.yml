@@ -1,19 +1,19 @@
-name: Issue Assistant
+name: Discussion Assistant
 
 on:
-  issues:
-    types: [opened, edited]
-  issue_comment:
+  discussion:
+    types: [created]
+  discussion_comment:
     types: [created, edited]
 
 # Adding explicit permission scoping for security
 permissions:
   contents: read
-  issues: write
+  discussions: write
   actions: read
 
 jobs:
-  respond-to-issue:
+  respond-to-discussion:
     runs-on: self-hosted
     
     steps:
@@ -39,7 +39,7 @@ jobs:
             }
             
             const logger = require(`${process.env.GITHUB_WORKSPACE}/${loggerPath}`);
-            const logFile = logger.initLogFile('Issue Assistant', context);
+            const logFile = logger.initLogFile('Discussion Assistant', context);
             
             // Start logging
             logger.logSection(logFile, "Workflow Initialization");
@@ -51,21 +51,21 @@ jobs:
             core.setOutput('log_file', logFile);
             
             // Basic validation
-            if (context.eventName !== 'issues' && context.eventName !== 'issue_comment') {
+            if (context.eventName !== 'discussion' && context.eventName !== 'discussion_comment') {
               logger.logError(logFile, `Unsupported event type: ${context.eventName}`);
               return core.setFailed(`Unsupported event type: ${context.eventName}`);
             }
             
             // Validate event payload
-            if (context.eventName === 'issues' && !context.payload.issue) {
-              logger.logError(logFile, 'Missing issue data in event payload');
-              return core.setFailed('Missing issue data in event payload');
+            if (context.eventName === 'discussion' && !context.payload.discussion) {
+              logger.logError(logFile, 'Missing discussion data in event payload');
+              return core.setFailed('Missing discussion data in event payload');
             }
             
-            if (context.eventName === 'issue_comment') {
-              if (!context.payload.issue) {
-                logger.logError(logFile, 'Missing issue data in comment event payload');
-                return core.setFailed('Missing issue data in comment event payload');
+            if (context.eventName === 'discussion_comment') {
+              if (!context.payload.discussion) {
+                logger.logError(logFile, 'Missing discussion data in comment event payload');
+                return core.setFailed('Missing discussion data in comment event payload');
               }
               
               if (!context.payload.comment) {
@@ -77,7 +77,7 @@ jobs:
             logger.logSuccess(logFile, 'Input validation passed');
             return { log_file: logFile };
       
-      - name: Extract issue content
+      - name: Extract discussion content
         id: get-content
         uses: actions/github-script@v6
         with:
@@ -100,8 +100,8 @@ jobs:
             logger.logSection(logFile, "Content Extraction");
             
             try {
-              // Extract content from issue or comment
-              const contentResult = eventExtractor.extractIssueContent(context.payload, logFile, logger);
+              // Extract content from discussion or comment
+              const contentResult = eventExtractor.extractDiscussionContent(context.payload, logFile, logger);
               
               if (!contentResult.success) {
                 logger.logError(logFile, `Failed to extract content: ${contentResult.error}`);
@@ -111,23 +111,43 @@ jobs:
               // Get previous comments for context
               let previousComments = [];
               
-              if (context.eventName === 'issue_comment' || context.payload.action === 'edited') {
+              if (context.eventName === 'discussion_comment') {
                 try {
                   logger.logMessage(logFile, "Fetching previous comments for context");
                   
-                  // Use REST API to fetch issue comments
-                  const { data: comments } = await github.rest.issues.listComments({
+                  // Define GraphQL query for fetching comments
+                  const commentsQuery = `
+                    query($owner: String!, $repo: String!, $discussionNumber: Int!) {
+                      repository(owner: $owner, name: $repo) {
+                        discussion(number: $discussionNumber) {
+                          comments(first: 10) {
+                            nodes {
+                              author {
+                                login
+                              }
+                              body
+                              createdAt
+                            }
+                          }
+                        }
+                      }
+                    }
+                  `;
+                  
+                  const variables = {
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    issue_number: contentResult.issueNumber,
-                    per_page: 10
-                  });
+                    discussionNumber: context.payload.discussion.number
+                  };
+                  
+                  const result = await github.graphql(commentsQuery, variables);
+                  const comments = result.repository.discussion.comments.nodes;
                   
                   // Format comments for context
                   previousComments = comments.map(comment => ({
-                    author: comment.user.login,
+                    author: comment.author.login,
                     body: comment.body,
-                    createdAt: comment.created_at
+                    createdAt: comment.createdAt
                   }));
                   
                   logger.logSuccess(logFile, `Retrieved ${previousComments.length} previous comments`);
@@ -148,8 +168,7 @@ jobs:
               logger.logSuccess(logFile, "Content extraction completed successfully");
               
               return {
-                issue_id: contentResult.issueId,
-                issue_number: contentResult.issueNumber,
+                discussion_id: contentResult.discussionId,
                 comment_id: contentResult.commentId,
                 content_file: contentResult.contentFile,
                 base64_file: contentResult.base64File
@@ -157,141 +176,6 @@ jobs:
             } catch (error) {
               logger.logError(logFile, `Error in content extraction: ${error.message}`);
               return core.setFailed(`Error in content extraction: ${error.message}`);
-            }
-      
-      - name: Check if repository context is needed
-        id: check-context
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const logFile = '${{ steps.init.outputs.log_file }}';
-            
-            // Load utilities
-            const loggerPath = './.github/shared/utils/logging.js';
-            const contextAnalyzerPath = './.github/shared/repo-context/context-analyzer.js';
-            const apiPath = './.github/shared/api/together-ai.js';
-            
-            if (!fs.existsSync(loggerPath) || !fs.existsSync(contextAnalyzerPath) || !fs.existsSync(apiPath)) {
-              return core.setFailed('Required modules not found');
-            }
-            
-            const logger = require(`${process.env.GITHUB_WORKSPACE}/${loggerPath}`);
-            const contextAnalyzer = require(`${process.env.GITHUB_WORKSPACE}/${contextAnalyzerPath}`);
-            
-            try {
-              // Get API key
-              const apiKey = process.env.TOGETHER_API_KEY;
-              if (!apiKey) {
-                logger.logError(logFile, "Missing Together API key");
-                return core.setFailed("Missing Together API key");
-              }
-              
-              // Load content data
-              const contentDataPath = 'content_data.json';
-              if (!fs.existsSync(contentDataPath)) {
-                logger.logError(logFile, "Content data file not found");
-                return core.setFailed("Content data file not found");
-              }
-              
-              const contentData = JSON.parse(fs.readFileSync(contentDataPath, 'utf8'));
-              
-              // Analyze if repository context is needed
-              const contextAnalysis = await contextAnalyzer.needsRepositoryContext(
-                contentData.content, 
-                apiKey, 
-                logFile, 
-                logger
-              );
-              
-              const needsContext = contextAnalysis.needsContext;
-              
-              logger.logMessage(logFile, `Context analysis result: ${needsContext ? 'Context needed' : 'No context needed'}`);
-              logger.logMessage(logFile, `- Reason: ${contextAnalysis.reason}`);
-              
-              return {
-                needs_context: needsContext ? 'true' : 'false',
-                reason: contextAnalysis.reason
-              };
-            } catch (error) {
-              logger.logError(logFile, `Error checking context needs: ${error.message}`);
-              // Default to not using context on error
-              return {
-                needs_context: 'false',
-                reason: `Error during analysis: ${error.message}`
-              };
-            }
-      
-      - name: Get repository context
-        id: get-repo-context
-        if: steps.check-context.outputs.needs_context == 'true'
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const logFile = '${{ steps.init.outputs.log_file }}';
-            
-            // Load utilities
-            const loggerPath = './.github/shared/utils/logging.js';
-            const contextAnalyzerPath = './.github/shared/repo-context/context-analyzer.js';
-            
-            if (!fs.existsSync(loggerPath) || !fs.existsSync(contextAnalyzerPath)) {
-              return core.setFailed('Required modules not found');
-            }
-            
-            const logger = require(`${process.env.GITHUB_WORKSPACE}/${loggerPath}`);
-            const contextAnalyzer = require(`${process.env.GITHUB_WORKSPACE}/${contextAnalyzerPath}`);
-            
-            try {
-              // Get API key
-              const apiKey = process.env.TOGETHER_API_KEY;
-              if (!apiKey) {
-                logger.logError(logFile, "Missing Together API key");
-                return core.setFailed("Missing Together API key");
-              }
-              
-              // Load content data
-              const contentDataPath = 'content_data.json';
-              if (!fs.existsSync(contentDataPath)) {
-                logger.logError(logFile, "Content data file not found");
-                return core.setFailed("Content data file not found");
-              }
-              
-              const contentData = JSON.parse(fs.readFileSync(contentDataPath, 'utf8'));
-              
-              // Get repository root
-              const repoRoot = process.env.GITHUB_WORKSPACE;
-              
-              // Get repository context
-              const repoContext = await contextAnalyzer.getRepositoryContext(
-                contentData.content,
-                apiKey,
-                repoRoot,
-                logFile,
-                logger
-              );
-              
-              // Format repository context for inclusion in prompt
-              const formattedContext = contextAnalyzer.formatRepositoryContext(repoContext);
-              
-              // Save formatted context to file
-              fs.writeFileSync('repo_context.md', formattedContext);
-              
-              logger.logSuccess(logFile, `Repository context extracted with ${repoContext.fileContents.length} files`);
-              
-              return {
-                context_file: 'repo_context.md',
-                file_count: repoContext.fileContents.length
-              };
-            } catch (error) {
-              logger.logError(logFile, `Error extracting repository context: ${error.message}`);
-              // Create empty context file for consistent workflow
-              fs.writeFileSync('repo_context.md', '');
-              return {
-                context_file: 'repo_context.md',
-                file_count: 0,
-                error: error.message
-              };
             }
       
       - name: Generate AI response
@@ -333,25 +217,13 @@ jobs:
               }
               
               const contentData = JSON.parse(fs.readFileSync(contentDataPath, 'utf8'));
-              logger.logMessage(logFile, `Loaded content data: issue_number=${contentData.issueNumber}, event_type=${contentData.eventType}`);
-              
-              // Check if we have repository context
-              let repositoryContext = '';
-              const needsContext = '${{ steps.check-context.outputs.needs_context }}' === 'true';
-              const contextFile = 'repo_context.md';
-              
-              if (needsContext && fs.existsSync(contextFile)) {
-                repositoryContext = fs.readFileSync(contextFile, 'utf8');
-                logger.logMessage(logFile, `Loaded repository context (${repositoryContext.length} bytes)`);
-              }
+              logger.logMessage(logFile, `Loaded content data: discussion_id=${contentData.discussionId}, event_type=${contentData.eventType}`);
               
               // Build prompt using the prompt builder
-              const messages = promptBuilder.buildIssuePrompt({
+              const messages = promptBuilder.buildDiscussionPrompt({
                 content: contentData.content,
                 eventType: contentData.eventType,
-                action: contentData.action,
-                previousComments: contentData.previousComments || [],
-                repositoryContext: repositoryContext
+                previousComments: contentData.previousComments || []
               });
               
               logger.logMessage(logFile, "Built prompt for AI response");
@@ -384,7 +256,7 @@ jobs:
               return core.setFailed(`Error generating AI response: ${error.message}`);
             }
       
-      - name: Post response to issue
+      - name: Post response to discussion
         id: post-response
         uses: actions/github-script@v6
         with:
@@ -417,18 +289,20 @@ jobs:
               const responseContent = fs.readFileSync(responseFile, 'utf8');
               logger.logMessage(logFile, `Loaded response content (${responseContent.length} bytes)`);
               
-              // Load issue number
-              const issueNumber = parseInt('${{ steps.get-content.outputs.issue_number }}', 10);
+              // Load discussion ID and comment ID
+              const discussionId = '${{ steps.get-content.outputs.discussion_id }}';
+              const commentId = '${{ steps.get-content.outputs.comment_id }}' || null;
               
-              if (!issueNumber || isNaN(issueNumber)) {
-                logger.logError(logFile, "Missing or invalid issue number");
-                return core.setFailed("Missing or invalid issue number");
+              if (!discussionId) {
+                logger.logError(logFile, "Missing discussion ID");
+                return core.setFailed("Missing discussion ID");
               }
               
-              // Post to issue
-              const postResult = await responseHandler.postToIssue({
+              // Post to discussion
+              const postResult = await responseHandler.postToDiscussion({
                 github,
-                issueNumber,
+                discussionId,
+                commentId,
                 responseContent,
                 logFile,
                 logger,
@@ -477,8 +351,7 @@ jobs:
               const outcomes = {
                 result: '${{ steps.post-response.outcome }}' === 'success' ? 'success' : 'failure',
                 eventType: context.eventName,
-                action: context.payload.action || 'N/A',
-                repoContextUsed: '${{ steps.check-context.outputs.needs_context }}' === 'true'
+                action: context.payload.action || 'N/A'
               };
               
               logger.finalizeLog(logFile, context, outcomes);

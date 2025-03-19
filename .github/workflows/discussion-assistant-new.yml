@@ -17,6 +17,21 @@ jobs:
     runs-on: self-hosted
     
     steps:
+      - name: Validate API key
+        run: |
+          echo "Validating Together API key..."
+          if [[ -z "${{ secrets.TOGETHER_API_KEY }}" ]]; then
+            echo "::error::Missing Together API key. Please add it to your repository secrets."
+            exit 1
+          fi
+          
+          # Validate format without revealing content
+          if [[ ! "${{ secrets.TOGETHER_API_KEY }}" =~ ^[A-Za-z0-9+/=_-]+$ ]]; then
+            echo "::warning::API key has unexpected format, may cause issues"
+          else
+            echo "API key format validation passed"
+          fi
+      
       - name: Checkout repository
         uses: actions/checkout@v4
         
@@ -178,83 +193,253 @@ jobs:
               return core.setFailed(`Error in content extraction: ${error.message}`);
             }
       
+      - name: Analyze repository context needs
+        id: check-context
+        run: |
+          echo "Starting repository context analysis..." >> ${{ steps.init.outputs.log_file }}
+          
+          # Create directories for analysis
+          mkdir -p context_analysis error_logs
+          
+          # Check if content data exists
+          if [ ! -f "content_data.json" ]; then
+            echo "❌ Error: content_data.json file not found" >> ${{ steps.init.outputs.log_file }}
+            echo "needs_context=false" >> $GITHUB_OUTPUT
+            echo "reason=Failed to analyze context needs - missing content data" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Extract content to a temporary file to avoid shell expansion issues
+          jq -r '.content' content_data.json > context_analysis/content.txt
+          
+          # Create the request JSON directly with heredoc
+          cat > context_analysis/request.json << EOL
+          {
+            "model": "deepseek-ai/DeepSeek-R1",
+            "messages": [
+              {
+                "role": "user",
+                "content": "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string).\n\nAnalyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n$(cat context_analysis/content.txt)\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
+              }
+            ]
+          }
+          EOL
+          
+          # Call the API
+          curl -s -X POST "https://api.together.xyz/v1/chat/completions" \
+            -H "Authorization: Bearer ${{ secrets.TOGETHER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d @context_analysis/request.json \
+            -o context_analysis/response.json
+          
+          # Check if the response file exists and has content
+          if [ -s "context_analysis/response.json" ]; then
+            # Extract the response content to a file
+            jq -r '.choices[0].message.content' context_analysis/response.json > context_analysis/ai_response.txt
+            
+            # Extract JSON using grep
+            grep -o '{.*}' context_analysis/ai_response.txt > context_analysis/json_extract.txt || echo "{}" > context_analysis/json_extract.txt
+            
+            # Default values
+            NEEDS_CONTEXT="false"
+            REASON="Failed to analyze context needs"
+            
+            # Try to extract values from the JSON if file exists and has content
+            if [ -s "context_analysis/json_extract.txt" ]; then
+              EXTRACTED_NEEDS_CONTEXT=$(jq -r '.needsContext // false' context_analysis/json_extract.txt)
+              EXTRACTED_REASON=$(jq -r '.reason // "No reason provided"' context_analysis/json_extract.txt)
+              
+              if [ "$EXTRACTED_NEEDS_CONTEXT" == "true" ]; then
+                NEEDS_CONTEXT="true"
+              fi
+              
+              if [ ! -z "$EXTRACTED_REASON" ] && [ "$EXTRACTED_REASON" != "null" ]; then
+                REASON="$EXTRACTED_REASON"
+              fi
+            fi
+            
+            echo "Context analysis result: $NEEDS_CONTEXT" >> ${{ steps.init.outputs.log_file }}
+            echo "Reason: $REASON" >> ${{ steps.init.outputs.log_file }}
+            
+            # Set outputs
+            echo "needs_context=$NEEDS_CONTEXT" >> $GITHUB_OUTPUT
+            echo "reason=$REASON" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Error: No response from API or empty response" >> ${{ steps.init.outputs.log_file }}
+            # Default to not needing context
+            echo "needs_context=false" >> $GITHUB_OUTPUT
+            echo "reason=Failed to analyze context needs" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Get repository context
+        id: get-repo-context
+        if: steps.check-context.outputs.needs_context == 'true'
+        run: |
+          echo "Getting repository context..." >> ${{ steps.init.outputs.log_file }}
+          
+          # Load content data
+          CONTENT=$(cat content_data.json | jq -r '.content')
+          
+          # We'll use a simpler approach for repo context in the shell script
+          # Just identify some relevant files based on keywords in the content
+          
+          # Extract keywords from content
+          KEYWORDS=$(echo "$CONTENT" | tr -cs '[:alnum:]' '\n' | sort | uniq | grep -v '^$' | head -10)
+          echo "Keywords extracted: $KEYWORDS" >> ${{ steps.init.outputs.log_file }}
+          
+          # Find relevant files (limited to 10)
+          RELEVANT_FILES=""
+          for keyword in $KEYWORDS; do
+            if [ ${#keyword} -gt 3 ]; then  # Only use keywords longer than 3 chars
+              FOUND_FILES=$(find . -type f -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/.git/*" -name "*${keyword}*" | head -3)
+              RELEVANT_FILES="$RELEVANT_FILES $FOUND_FILES"
+            fi
+          done
+          
+          # Deduplicate files and limit to 10
+          RELEVANT_FILES=$(echo "$RELEVANT_FILES" | tr ' ' '\n' | sort | uniq | grep -v '^$' | head -10)
+          
+          # Format the repository context
+          echo -e "## Repository Context\n\n" > repo_context.md
+          echo -e "### Repository Structure\n" >> repo_context.md
+          find . -maxdepth 2 -type d | sort | head -10 | sed 's/^/- /' >> repo_context.md
+          echo -e "\n\n### Relevant Files\n\n" >> repo_context.md
+          
+          # Read file contents and add to context
+          FILE_COUNT=0
+          for file in $RELEVANT_FILES; do
+            if [ -f "$file" ]; then
+              EXTENSION="${file##*.}"
+              echo -e "#### ${file}\n\`\`\`${EXTENSION}" >> repo_context.md
+              head -50 "$file" >> repo_context.md
+              echo -e "\n\`\`\`\n\n" >> repo_context.md
+              FILE_COUNT=$((FILE_COUNT+1))
+            fi
+          done
+          
+          echo "Repository context extracted with ${FILE_COUNT} files" >> ${{ steps.init.outputs.log_file }}
+          
+          # Set output
+          echo "context_file=repo_context.md" >> $GITHUB_OUTPUT
+          echo "file_count=${FILE_COUNT}" >> $GITHUB_OUTPUT
+      
       - name: Generate AI response
         id: generate-response
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const logFile = '${{ steps.init.outputs.log_file }}';
+        run: |
+          echo "Generating AI response..." >> ${{ steps.init.outputs.log_file }}
+          
+          # Create response directory
+          mkdir -p response_files
+          
+          # Load content data
+          CONTENT_DATA=$(cat content_data.json)
+          CONTENT=$(echo "$CONTENT_DATA" | jq -r '.content')
+          EVENT_TYPE=$(echo "$CONTENT_DATA" | jq -r '.eventType')
+          
+          # Load repository context if available
+          REPO_CONTEXT=""
+          if [[ "${{ steps.check-context.outputs.needs_context }}" == "true" ]] && [[ -f "repo_context.md" ]]; then
+            REPO_CONTEXT=$(cat repo_context.md)
+            echo "Loaded repository context ($(wc -c < repo_context.md) bytes)" >> ${{ steps.init.outputs.log_file }}
+          fi
+          
+          # Combine system and user prompts into a single user prompt
+          cat > response_files/combined_prompt.txt << 'PROMPTEOF'
+          You are an AI assistant that helps with GitHub discussions. You provide helpful, accurate, and concise responses to technical questions and discussions.
+
+          When responding, follow these guidelines:
+          1. Be direct and get straight to the point
+          2. Use markdown formatting to structure your responses
+          3. When code is needed, use proper syntax highlighting with markdown code blocks (e.g., ```javascript)
+          4. If you're uncertain, acknowledge limitations rather than making things up
+          5. You may include your reasoning process in <think></think> tags - this will be formatted as a quote block in the final response
+          6. For complex technical questions, break down your approach step by step
+          7. If you reference specific parts of code files, cite the file path and line numbers
+          8. Keep your responses focused on the technical issue at hand
+
+          Remember that you're responding in a GitHub discussion context. Your goal is to be helpful, accurate, and drive toward resolution.
+
+          Please respond to this 
+          PROMPTEOF
+          
+          # Append event type and content
+          echo "${EVENT_TYPE}:" >> response_files/combined_prompt.txt
+          echo "" >> response_files/combined_prompt.txt
+          echo "$CONTENT" >> response_files/combined_prompt.txt
+          
+          # Add context if available
+          if [[ ! -z "$REPO_CONTEXT" ]]; then
+            echo "" >> response_files/combined_prompt.txt
+            echo "$REPO_CONTEXT" >> response_files/combined_prompt.txt
+          fi
+          
+          # Create request payload using jq to properly escape JSON
+          jq -n \
+            --arg prompt "$(cat response_files/combined_prompt.txt)" \
+            '{
+              "model": "deepseek-ai/DeepSeek-R1",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": $prompt
+                }
+              ]
+            }' > response_files/payload.json
+          
+          # Make API call
+          curl -s -X POST "https://api.together.xyz/v1/chat/completions" \
+            -H "Authorization: Bearer ${{ secrets.TOGETHER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d @response_files/payload.json \
+            -o response_files/api_response.json
+          
+          # Check response and extract content
+          if [ -s "response_files/api_response.json" ]; then
+            # Extract content
+            CONTENT=$(cat response_files/api_response.json | jq -r '.choices[0].message.content')
             
-            // Load utilities
-            const loggerPath = './.github/shared/utils/logging.js';
-            const apiPath = './.github/shared/api/together-ai.js';
-            const promptBuilderPath = './.github/shared/utils/prompt-builder.js';
+            # Process <think> blocks with a simplified approach
+            echo "$CONTENT" > response_files/raw_content.txt
             
-            if (!fs.existsSync(loggerPath) || !fs.existsSync(apiPath) || !fs.existsSync(promptBuilderPath)) {
-              return core.setFailed('Required modules not found');
+            # Use awk directly without creating a separate script file
+            processed_content=$(awk '
+            BEGIN { in_think = 0; output = ""; thinking = ""; }
+            
+            /<think>/ { in_think = 1; thinking = ""; next; }
+            
+            /<\/think>/ { 
+              in_think = 0;
+              if (thinking != "") {
+                output = output "\n\n> **Thinking process:**\n";
+                split(thinking, lines, "\n");
+                for (i in lines) {
+                  if (lines[i] != "") output = output "> " lines[i] "\n";
+                  else output = output ">\n";
+                }
+                output = output "\n";
+              }
+              next;
             }
             
-            const logger = require(`${process.env.GITHUB_WORKSPACE}/${loggerPath}`);
-            const api = require(`${process.env.GITHUB_WORKSPACE}/${apiPath}`);
-            const promptBuilder = require(`${process.env.GITHUB_WORKSPACE}/${promptBuilderPath}`);
+            in_think == 1 { thinking = thinking (thinking=="" ? "" : "\n") $0; next; }
             
-            logger.logSection(logFile, "AI Response Generation");
+            in_think == 0 { output = output (output=="" ? "" : "\n") $0; }
             
-            try {
-              // Verify API key before making requests
-              const apiKey = process.env.TOGETHER_API_KEY;
-              if (!apiKey) {
-                logger.logError(logFile, "Missing Together API key");
-                return core.setFailed("Missing Together API key");
-              }
-              
-              // Load extracted content data
-              const contentDataPath = 'content_data.json';
-              if (!fs.existsSync(contentDataPath)) {
-                logger.logError(logFile, "Content data file not found");
-                return core.setFailed("Content data file not found");
-              }
-              
-              const contentData = JSON.parse(fs.readFileSync(contentDataPath, 'utf8'));
-              logger.logMessage(logFile, `Loaded content data: discussion_id=${contentData.discussionId}, event_type=${contentData.eventType}`);
-              
-              // Build prompt using the prompt builder
-              const messages = promptBuilder.buildDiscussionPrompt({
-                content: contentData.content,
-                eventType: contentData.eventType,
-                previousComments: contentData.previousComments || []
-              });
-              
-              logger.logMessage(logFile, "Built prompt for AI response");
-              
-              // Call Together AI API
-              const apiResponse = await api.callTogetherAI({
-                model: "deepseek-ai/DeepSeek-R1",
-                messages: messages,
-                apiKey: apiKey,
-                logFile: logFile,
-                logger: logger
-              });
-              
-              if (!apiResponse.success) {
-                logger.logError(logFile, `API request failed: ${apiResponse.error}`);
-                return core.setFailed(`API request failed: ${apiResponse.error}`);
-              }
-              
-              logger.logSuccess(logFile, "Generated AI response successfully");
-              
-              // Write content to a file for the next step
-              fs.writeFileSync('response.txt', apiResponse.content);
-              
-              return {
-                response_file: 'response.txt',
-                content_length: apiResponse.content.length
-              };
-            } catch (error) {
-              logger.logError(logFile, `Error generating AI response: ${error.message}`);
-              return core.setFailed(`Error generating AI response: ${error.message}`);
-            }
+            END { print output; }
+            ' response_files/raw_content.txt)
+            
+            # Save processed content
+            echo "$processed_content" > response.txt
+            echo "Generated AI response successfully ($(wc -c < response.txt) bytes)" >> ${{ steps.init.outputs.log_file }}
+            
+            # Set output
+            echo "response_file=response.txt" >> $GITHUB_OUTPUT
+            echo "content_length=$(wc -c < response.txt)" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Error: API request failed or returned empty response" >> ${{ steps.init.outputs.log_file }}
+            echo "I apologize, but I'm currently experiencing technical difficulties. Please try again later." > response.txt
+            echo "response_file=response.txt" >> $GITHUB_OUTPUT
+          fi
       
       - name: Post response to discussion
         id: post-response
@@ -289,9 +474,20 @@ jobs:
               const responseContent = fs.readFileSync(responseFile, 'utf8');
               logger.logMessage(logFile, `Loaded response content (${responseContent.length} bytes)`);
               
-              // Load discussion ID and comment ID
-              const discussionId = '${{ steps.get-content.outputs.discussion_id }}';
-              const commentId = '${{ steps.get-content.outputs.comment_id }}' || null;
+              // Load discussion data from content_data.json to handle potential missing outputs
+              let discussionId, commentId;
+              
+              if (fs.existsSync('content_data.json')) {
+                const contentData = JSON.parse(fs.readFileSync('content_data.json', 'utf8'));
+                discussionId = contentData.discussionId;
+                commentId = contentData.commentId;
+                logger.logMessage(logFile, `Got discussion ID ${discussionId} from content_data.json`);
+              } else {
+                // Fallback to step outputs
+                discussionId = '${{ steps.get-content.outputs.discussion_id }}';
+                commentId = '${{ steps.get-content.outputs.comment_id }}' || null;
+                logger.logMessage(logFile, `Got discussion ID ${discussionId} from step output`);
+              }
               
               if (!discussionId) {
                 logger.logError(logFile, "Missing discussion ID");
@@ -351,11 +547,24 @@ jobs:
               const outcomes = {
                 result: '${{ steps.post-response.outcome }}' === 'success' ? 'success' : 'failure',
                 eventType: context.eventName,
-                action: context.payload.action || 'N/A'
+                action: context.payload.action || 'N/A',
+                repoContextUsed: '${{ steps.check-context.outputs.needs_context }}' === 'true'
               };
               
               logger.finalizeLog(logFile, context, outcomes);
               console.log(`Workflow log finalized at ${logFile}`);
             } catch (error) {
               console.error(`Error finalizing workflow: ${error.message}`);
-            } 
+            }
+      
+      - name: Upload workflow logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-logs
+          path: |
+            workflow_*.log
+            content_files/
+            context_analysis/
+            response_files/
+          retention-days: 5 

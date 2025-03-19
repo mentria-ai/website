@@ -455,8 +455,18 @@ jobs:
               const responseContent = fs.readFileSync(responseFile, 'utf8');
               logger.logMessage(logFile, `Loaded response content (${responseContent.length} bytes)`);
               
-              // Load issue number
-              const issueNumber = parseInt('${{ steps.get-content.outputs.issue_number }}', 10);
+              // Load issue data from content_data.json to handle potential missing output from previous steps
+              let issueNumber;
+              
+              if (fs.existsSync('content_data.json')) {
+                const contentData = JSON.parse(fs.readFileSync('content_data.json', 'utf8'));
+                issueNumber = contentData.issueNumber;
+                logger.logMessage(logFile, `Got issue number ${issueNumber} from content_data.json`);
+              } else {
+                // Fallback to step output
+                issueNumber = parseInt('${{ steps.get-content.outputs.issue_number }}', 10);
+                logger.logMessage(logFile, `Got issue number ${issueNumber} from step output`);
+              }
               
               if (!issueNumber || isNaN(issueNumber)) {
                 logger.logError(logFile, "Missing or invalid issue number");

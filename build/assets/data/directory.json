@@ -2249,6 +2249,28 @@
         "14 billion miles": "emphasis-1",
         "golden record": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_261",
+      "quote": "Did you know? The cheetah\u2019s tail acts like a rudder, helping it make sharp turns at high speeds while chasing prey across the savanna.",
+      "image_prompt": "Ghibli Art: A cheetah sprinting across a golden savanna at sunset, its tail glowing faintly as it helps it navigate a sharp turn. Dust swirls around its paws, and tiny, glowing particles trail behind it. A herd of antelope with exaggerated expressions leaps away in the distance. The scene is vibrant, with tall grass swaying in the wind and the sky painted in warm hues of orange and pink. A curious meerkat peeks out from a burrow, watching the chase.",
+      "image_url": "assets/img/quotes/quote_261.png",
+      "emphasis": {
+        "cheetah\u2019s tail": "emphasis-2",
+        "rudder": "emphasis-1",
+        "sharp turns": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_262",
+      "quote": "Did you know? The ancient Egyptians used a board game called Senet, which was believed to guide players through the afterlife and was often buried with the dead.",
+      "image_prompt": "Ghibli Art: A cozy Egyptian chamber illuminated by flickering oil lamps, with a glowing Senet board on a stone table. Two ghostly figures with glowing outlines play the game, their expressions focused and serene. Tiny, magical hieroglyphs float around the board, adding an otherworldly touch. A curious cat with glowing eyes watches from a corner, while a gentle breeze carries the scent of incense. The walls are adorned with colorful murals depicting scenes from the afterlife.",
+      "image_url": "assets/img/quotes/quote_262.png",
+      "emphasis": {
+        "Senet": "emphasis-1",
+        "afterlife": "emphasis-2",
+        "buried": "emphasis-2"
+      }
     }
   ]
 }

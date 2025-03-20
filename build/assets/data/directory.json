@@ -2227,6 +2227,28 @@
         "salinity": "emphasis-1",
         "Atlantic Ocean": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_259",
+      "quote": "Did you know? The Atacama Desert in Chile is so dry that some areas have never recorded rainfall, yet it\u2019s home to vibrant blooms of flowers after rare rain events.",
+      "image_prompt": "Ghibli Art: A vast, golden desert landscape under a soft, glowing sunset, with patches of vibrant flowers blooming in every color imaginable. A curious fox with oversized ears and a bushy tail sniffs the flowers, surrounded by tiny, glowing particles that float in the air. The sky is painted with streaks of pink and orange, and a gentle breeze carries the scent of the blooms. In the distance, a small, whimsical village with adobe houses and windmills adds a touch of life to the arid scene.",
+      "image_url": "assets/img/quotes/quote_259.png",
+      "emphasis": {
+        "Atacama Desert": "emphasis-2",
+        "never recorded rainfall": "emphasis-1",
+        "vibrant blooms": "emphasis-2"
+      }
+    },
+    {
+      "id": "quote_260",
+      "quote": "Did you know? The Voyager 1 spacecraft, launched in 1977, has traveled over 14 billion miles and is now in interstellar space, carrying a golden record of Earth\u2019s sounds and images.",
+      "image_prompt": "Ghibli Art: A whimsical depiction of the Voyager 1 spacecraft floating in the vast, starry expanse of interstellar space. The golden record glows softly, emitting tiny, musical notes and images of Earth that swirl around it. A curious alien creature with large, glowing eyes and delicate wings observes the spacecraft from a distance. The background is filled with swirling galaxies, colorful nebulae, and twinkling stars, creating a magical, otherworldly atmosphere.",
+      "image_url": "assets/img/quotes/quote_260.png",
+      "emphasis": {
+        "Voyager 1": "emphasis-2",
+        "14 billion miles": "emphasis-1",
+        "golden record": "emphasis-2"
+      }
     }
   ]
 }

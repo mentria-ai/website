@@ -2204,6 +2204,17 @@
         "water": "emphasis-2",
         "arid": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_257",
+      "quote": "Did you know? The human eye can distinguish about 10 million different colors, thanks to the complex structure of the retina and the brain\u2019s processing power.",
+      "image_prompt": "Ghibli Art: A magical, colorful landscape where every hue imaginable is represented, from vibrant flowers to glowing, multicolored trees. A curious child with glowing eyes explores the scene, marveling at the beauty around them. The sky is a gradient of colors, with tiny, glowing particles floating through the air. The atmosphere is filled with a sense of wonder and discovery, as if the child is seeing the world in a whole new way.",
+      "image_url": "assets/img/quotes/quote_257.png",
+      "emphasis": {
+        "human eye": "emphasis-2",
+        "10 million": "emphasis-1",
+        "colors": "emphasis-2"
+      }
     }
   ]
 }

@@ -2215,6 +2215,18 @@
         "10 million": "emphasis-1",
         "colors": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_258",
+      "quote": "Did you know? The Amazon River discharges so much water into the ocean that it changes the salinity of the Atlantic Ocean for hundreds of miles from its mouth.",
+      "image_prompt": "Ghibli Art: A breathtaking view of the Amazon River meeting the Atlantic Ocean, with a massive plume of freshwater spreading into the sea. The river is surrounded by lush, vibrant rainforest teeming with life. Whimsical animals like toucans and jaguars watch from the trees. Golden sunlight filters through the canopy, creating a magical glow. Tiny, glowing water spirits dance on the surface, celebrating the river\u2019s power. A sense of awe and wonder fills the scene.",
+      "image_url": "assets/img/quotes/quote_258.png",
+      "emphasis": {
+        "Amazon River": "emphasis-2",
+        "discharges": "emphasis-2",
+        "salinity": "emphasis-1",
+        "Atlantic Ocean": "emphasis-2"
+      }
     }
   ]
 }

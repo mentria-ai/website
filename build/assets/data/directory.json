@@ -2192,6 +2192,18 @@
         "no roads": "emphasis-1",
         "Venice of the North": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_256",
+      "quote": "Did you know? The Baobab tree can store up to 32,000 gallons of water in its trunk, allowing it to survive in the arid climates of Africa and Australia.",
+      "image_prompt": "Ghibli Art: A majestic Baobab tree with a massive, glowing trunk, standing tall in a golden savanna. Animals like elephants, giraffes, and kangaroos gather around the tree, drinking from magical water droplets that fall from its branches. The sky is painted with warm, sunset colors, and tiny glowing particles float around the tree, giving it an enchanted aura.",
+      "image_url": "assets/img/quotes/quote_256.png",
+      "emphasis": {
+        "Baobab": "emphasis-2",
+        "32,000 gallons": "emphasis-1",
+        "water": "emphasis-2",
+        "arid": "emphasis-2"
+      }
     }
   ]
 }

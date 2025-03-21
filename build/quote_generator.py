@@ -5,10 +5,13 @@ import time
 import signal
 import sys
 import subprocess
+import re
+import numpy as np
 from pathlib import Path
 from dotenv import load_dotenv
 from together import Together
 import random
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Load environment variables
 load_dotenv()
@@ -34,7 +37,7 @@ def load_existing_facts():
     if json_path.exists():
         with open(json_path, "r") as f:
             return json.load(f)
-    return {"quotes": []}
+    return {"quotes": [], "embeddings": {}}
 
 def get_highest_quote_number(quotes_data):
     """Find the highest quote number in the existing quotes data."""
@@ -52,9 +55,20 @@ def get_highest_quote_number(quotes_data):
 def save_facts(facts_data):
     """Save 'Did You Know' facts data to the directory.json file."""
     json_path = Path("assets/data/directory.json")
+    
+    # Create a copy without embeddings for the actual JSON file to keep it smaller
+    facts_to_save = {"quotes": facts_data["quotes"]}
+    
+    # Save the actual facts data
     with open(json_path, "w") as f:
-        json.dump(facts_data, f, indent=2)
+        json.dump(facts_to_save, f, indent=2)
     print(f"Saved {len(facts_data['quotes'])} fascinating facts to {json_path}")
+    
+    # Save embeddings separately
+    embeddings_path = Path("assets/data/embeddings.json")
+    with open(embeddings_path, "w") as f:
+        json.dump(facts_data["embeddings"], f)
+    print(f"Saved embeddings to {embeddings_path}")
 
 def git_commit_and_push(num_new_facts):
     """Commit the latest changes and push to the repository."""
@@ -77,14 +91,146 @@ def git_commit_and_push(num_new_facts):
     except Exception as e:
         print(f"Unexpected error during Git operations: {e}")
 
-def generate_facts_and_prompts(existing_facts, num_facts=5):
+def generate_embedding(text):
+    """Generate embeddings for a given text using Together API."""
+    try:
+        # Clean the text for better embedding
+        text = text.replace("Did you know? ", "").strip()
+        
+        response = client.embeddings.create(
+            model="togethercomputer/m2-bert-80M-32k-retrieval",
+            input=text,
+        )
+        return response.data[0].embedding
+    except Exception as e:
+        print(f"Error generating embedding: {e}")
+        return None
+
+def calculate_similarity(embedding1, embedding2):
+    """Calculate cosine similarity between two embeddings."""
+    # Reshape embeddings for sklearn's cosine_similarity
+    emb1 = np.array(embedding1).reshape(1, -1)
+    emb2 = np.array(embedding2).reshape(1, -1)
+    return cosine_similarity(emb1, emb2)[0][0]
+
+def is_semantically_similar(new_fact, facts_data, similarity_threshold=0.85):
+    """
+    Check if a new fact is semantically similar to any existing facts using embeddings.
+    
+    Args:
+        new_fact (str): The new fact to check.
+        facts_data (dict): Dictionary containing existing facts and embeddings.
+        similarity_threshold (float): Threshold for considering two facts as similar (0-1).
+        
+    Returns:
+        bool: True if the fact is semantically similar to existing ones, False otherwise.
+    """
+    # Generate embedding for the new fact
+    new_embedding = generate_embedding(new_fact)
+    if not new_embedding:
+        # If we can't generate embedding, fall back to allowing the fact
+        return False
+    
+    # Initialize embeddings dictionary if it doesn't exist
+    if "embeddings" not in facts_data:
+        facts_data["embeddings"] = {}
+    
+    # Check similarity against all existing embeddings
+    for quote_id, embedding in facts_data["embeddings"].items():
+        similarity = calculate_similarity(new_embedding, embedding)
+        
+        if similarity >= similarity_threshold:
+            # Find the corresponding text for better debugging
+            quote_text = "Unknown"
+            for quote in facts_data["quotes"]:
+                if quote["id"] == quote_id:
+                    quote_text = quote["quote"]
+                    break
+                    
+            print(f"Semantic duplicate detected! Similarity: {similarity:.2f}")
+            print(f"New     : {new_fact}")
+            print(f"Existing: {quote_text} (ID: {quote_id})")
+            return True
+    
+    # Store the new embedding for future reference
+    facts_data["embeddings"][f"temp_embedding_{len(facts_data['embeddings'])}"] = new_embedding
+    return False
+
+def find_diverse_topics(facts_data, num_clusters=5):
+    """
+    Analyze existing facts to identify underrepresented topic areas.
+    Returns a list of topic suggestions for generating more diverse facts.
+    """
+    if len(facts_data["quotes"]) < 10 or "embeddings" not in facts_data or len(facts_data["embeddings"]) < 10:
+        # Not enough data for meaningful clustering
+        return ["science", "history", "geography", "art", "culture", "technology", "space", "animals"]
+    
+    try:
+        from sklearn.cluster import KMeans
+        
+        # Collect all embeddings
+        embeddings_list = list(facts_data["embeddings"].values())
+        embeddings_array = np.array(embeddings_list)
+        
+        # Determine optimal number of clusters (at most 20% of data points or 15, whichever is smaller)
+        max_clusters = min(15, len(embeddings_array) // 5)
+        num_clusters = min(num_clusters, max_clusters)
+        
+        # Perform K-means clustering
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+        cluster_labels = kmeans.fit_predict(embeddings_array)
+        
+        # Count facts in each cluster
+        cluster_counts = np.bincount(cluster_labels)
+        
+        # Find the least populated clusters (underrepresented topics)
+        underrepresented_clusters = np.argsort(cluster_counts)[:3]
+        
+        # Use the centroids of these clusters to query for new, diverse facts
+        diverse_topics = []
+        
+        # Map from cluster indices to general topics (a simplified approach)
+        general_topics = [
+            "astronomy and space exploration",
+            "biology and medicine",
+            "physics and chemistry",
+            "history and archaeology",
+            "geography and geology", 
+            "technology and engineering",
+            "culture and anthropology",
+            "art and literature",
+            "mathematics and statistics",
+            "marine biology and oceanography",
+            "environmental science",
+            "psychology and neuroscience",
+            "economics and trade",
+            "linguistics and languages",
+            "sports and games"
+        ]
+        
+        # Return a mix of underrepresented topics and some standard diverse topics
+        diverse_topics = [general_topics[i % len(general_topics)] for i in underrepresented_clusters]
+        diverse_topics.extend(random.sample([t for t in general_topics if t not in diverse_topics], 2))
+        
+        return diverse_topics
+        
+    except Exception as e:
+        print(f"Error in topic diversity analysis: {e}")
+        # Fallback to basic topics
+        return ["science", "history", "geography", "art", "culture"]
+
+def generate_facts_and_prompts(facts_data, num_facts=5):
     """Generate surprising 'Did You Know' facts and magical Ghibli-style image prompts."""
     
     # Extract existing items to avoid duplicates
-    existing_quotes = [q["quote"] for q in existing_facts["quotes"]]
+    existing_quotes = [q["quote"] for q in facts_data["quotes"]]
     
-    # Only use the last 100 quotes to keep the prompt size manageable
+    # Only use the last 100 quotes in the prompt to keep size manageable
     recent_quotes = existing_quotes[-100:] if len(existing_quotes) > 100 else existing_quotes
+    
+    # Identify underrepresented topics for more diverse fact generation
+    diverse_topics = find_diverse_topics(facts_data)
+    topic_suggestions = ", ".join(diverse_topics)
     
     # Create the system prompt
     system_prompt = """You are an expert at creating engaging, surprising, and fun "Did You Know" facts, paired with imaginative Ghibli Art style image prompts.
@@ -106,12 +252,14 @@ For each fact, identify important words that should be emphasized in the animati
 
 Each fact should evoke a sense of wonder, surprise, or delight in the reader."""
     
-    # Create the user prompt with examples
+    # Create the user prompt with examples and topic guidance
     user_prompt = f"""Please generate {num_facts} unique and fascinating "Did You Know" facts that are not in this list: {recent_quotes}.
 For each fact, create:
 1. A brief, surprising fact (15-40 words MAX)
 2. A detailed image prompt with complete artistic freedom to reimagine it in Ghibli Art style
 3. An emphasis object that marks important words for animation
+
+IMPORTANT: Based on analysis of our existing facts, we need MORE facts about these underrepresented topics: {topic_suggestions}. Please include facts from these areas.
 
 Include diverse facts from these categories: 
 - Natural wonders and wildlife behaviors
@@ -249,6 +397,21 @@ def main():
         # Load existing facts (reload each time to ensure we have the latest)
         facts_data = load_existing_facts()
         
+        # Initialize embeddings dict if it doesn't exist
+        if "embeddings" not in facts_data:
+            facts_data["embeddings"] = {}
+            
+        # If we have facts but no embeddings, generate them
+        if len(facts_data["quotes"]) > 0 and len(facts_data["embeddings"]) == 0:
+            print("Generating embeddings for existing facts...")
+            for quote in facts_data["quotes"]:
+                quote_id = quote["id"]
+                quote_text = quote["quote"]
+                embedding = generate_embedding(quote_text)
+                if embedding:
+                    facts_data["embeddings"][quote_id] = embedding
+                time.sleep(0.2)  # Avoid rate limiting
+        
         # Find the highest quote number to continue from
         highest_quote_number = get_highest_quote_number(facts_data)
         print(f"Found highest existing quote number: {highest_quote_number}")
@@ -269,9 +432,14 @@ def main():
         for i, fact_item in enumerate(new_facts):
             if not running:
                 break  # Exit the loop if Ctrl+C was pressed
+            
+            # Skip if the fact is semantically similar to existing facts
+            if is_semantically_similar(fact_item["quote"], facts_data):
+                print(f"Skipping semantically similar fact: {fact_item['quote'][:50]}...")
+                continue
                 
             # Generate a sequential ID based on the highest existing quote number
-            next_quote_number = highest_quote_number + i + 1
+            next_quote_number = highest_quote_number + successful_facts + 1
             fact_id = f"quote_{next_quote_number}"
             
             # Define image path
@@ -296,6 +464,15 @@ def main():
                     "image_url": image_url,
                     "emphasis": fact_item.get("emphasis", {})  # Add emphasis data
                 })
+                
+                # Generate and store embedding with the correct ID
+                embedding = generate_embedding(fact_item["quote"])
+                if embedding:
+                    # Replace the temporary embedding with the proper quote ID
+                    temp_key = f"temp_embedding_{len(facts_data['embeddings']) - 1}"
+                    if temp_key in facts_data["embeddings"]:
+                        del facts_data["embeddings"][temp_key]
+                    facts_data["embeddings"][fact_id] = embedding
                 
                 # Increment successful count
                 successful_facts += 1

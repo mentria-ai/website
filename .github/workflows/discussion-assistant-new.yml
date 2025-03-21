@@ -219,7 +219,7 @@ jobs:
             "messages": [
               {
                 "role": "user",
-                "content": "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string).\n\nAnalyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n$(cat context_analysis/content.txt)\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
+                "content": "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. You should be liberal in deciding that context is needed - if there's ANY chance code context would help, say yes. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string).\n\nAnalyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n$(cat context_analysis/content.txt)\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
               }
             ]
           }
@@ -266,9 +266,9 @@ jobs:
             echo "reason=$REASON" >> $GITHUB_OUTPUT
           else
             echo "❌ Error: No response from API or empty response" >> ${{ steps.init.outputs.log_file }}
-            # Default to not needing context
-            echo "needs_context=false" >> $GITHUB_OUTPUT
-            echo "reason=Failed to analyze context needs" >> $GITHUB_OUTPUT
+            # Default to needing context in case of error
+            echo "needs_context=true" >> $GITHUB_OUTPUT
+            echo "reason=Failed to analyze context needs, assuming context is needed" >> $GITHUB_OUTPUT
           fi
       
       - name: Get repository context
@@ -284,25 +284,34 @@ jobs:
           # Just identify some relevant files based on keywords in the content
           
           # Extract keywords from content
-          KEYWORDS=$(echo "$CONTENT" | tr -cs '[:alnum:]' '\n' | sort | uniq | grep -v '^$' | head -10)
+          KEYWORDS=$(echo "$CONTENT" | tr -cs '[:alnum:]' '\n' | sort | uniq | grep -v '^$' | head -20)
           echo "Keywords extracted: $KEYWORDS" >> ${{ steps.init.outputs.log_file }}
           
-          # Find relevant files (limited to 10)
+          # Find relevant files (limited to 15)
           RELEVANT_FILES=""
           for keyword in $KEYWORDS; do
             if [ ${#keyword} -gt 3 ]; then  # Only use keywords longer than 3 chars
-              FOUND_FILES=$(find . -type f -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/.git/*" -name "*${keyword}*" | head -3)
-              RELEVANT_FILES="$RELEVANT_FILES $FOUND_FILES"
+              # First try grep to find content matches (more relevant)
+              GREP_FILES=$(grep -l "$keyword" $(find . -type f -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/.git/*" -not -path "*/build/*" -not -path "*/.github/workflows/*" -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.html" -o -name "*.css" 2>/dev/null) 2>/dev/null | head -3)
+              
+              # Then try filename matches
+              FOUND_FILES=$(find . -type f -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/.git/*" -not -path "*/build/*" -not -path "*/.github/workflows/*" -name "*${keyword}*" | head -2)
+              
+              RELEVANT_FILES="$RELEVANT_FILES $GREP_FILES $FOUND_FILES"
             fi
           done
           
-          # Deduplicate files and limit to 10
-          RELEVANT_FILES=$(echo "$RELEVANT_FILES" | tr ' ' '\n' | sort | uniq | grep -v '^$' | head -10)
+          # Also include obviously important files
+          IMPORTANT_FILES=$(find . -maxdepth 2 -type f -name "package.json" -o -name "README.md" -o -name "index.html" -o -name "index.js" -o -name "main.js" -o -name "app.js" -o -name "styles.css" 2>/dev/null)
+          RELEVANT_FILES="$RELEVANT_FILES $IMPORTANT_FILES"
+          
+          # Deduplicate files and limit to 15
+          RELEVANT_FILES=$(echo "$RELEVANT_FILES" | tr ' ' '\n' | sort | uniq | grep -v '^$' | head -15)
           
           # Format the repository context
           echo -e "## Repository Context\n\n" > repo_context.md
           echo -e "### Repository Structure\n" >> repo_context.md
-          find . -maxdepth 2 -type d | sort | head -10 | sed 's/^/- /' >> repo_context.md
+          find . -maxdepth 2 -type d -not -path "*/node_modules/*" -not -path "*/.git/*" | sort | head -10 | sed 's/^/- /' >> repo_context.md
           echo -e "\n\n### Relevant Files\n\n" >> repo_context.md
           
           # Read file contents and add to context
@@ -311,7 +320,7 @@ jobs:
             if [ -f "$file" ]; then
               EXTENSION="${file##*.}"
               echo -e "#### ${file}\n\`\`\`${EXTENSION}" >> repo_context.md
-              head -50 "$file" >> repo_context.md
+              head -100 "$file" >> repo_context.md
               echo -e "\n\`\`\`\n\n" >> repo_context.md
               FILE_COUNT=$((FILE_COUNT+1))
             fi
@@ -336,6 +345,33 @@ jobs:
           CONTENT=$(echo "$CONTENT_DATA" | jq -r '.content')
           EVENT_TYPE=$(echo "$CONTENT_DATA" | jq -r '.eventType')
           
+          # Extract previous comments for context
+          PREVIOUS_COMMENTS=$(echo "$CONTENT_DATA" | jq -r '.previousComments')
+          CONVERSATION_CONTEXT=""
+          
+          # Format previous comments if they exist and aren't empty array
+          if [[ "$PREVIOUS_COMMENTS" != "[]" && "$PREVIOUS_COMMENTS" != "null" ]]; then
+            echo "Processing previous comments for context..." >> ${{ steps.init.outputs.log_file }}
+            CONVERSATION_CONTEXT="### Previous Discussion Context\n\n"
+            
+            # Extract each comment and format it
+            COMMENT_COUNT=$(echo "$CONTENT_DATA" | jq '.previousComments | length')
+            
+            for i in $(seq 0 $(($COMMENT_COUNT - 1))); do
+              AUTHOR=$(echo "$CONTENT_DATA" | jq -r ".previousComments[$i].author")
+              BODY=$(echo "$CONTENT_DATA" | jq -r ".previousComments[$i].body")
+              CREATED_AT=$(echo "$CONTENT_DATA" | jq -r ".previousComments[$i].createdAt")
+              
+              # Format timestamp to be more readable
+              FORMATTED_DATE=$(date -d "$CREATED_AT" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "$CREATED_AT")
+              
+              # Add to conversation context
+              CONVERSATION_CONTEXT="${CONVERSATION_CONTEXT}**@${AUTHOR}** (${FORMATTED_DATE}):\n${BODY}\n\n---\n\n"
+            done
+            
+            echo "Added $COMMENT_COUNT comments to conversation context" >> ${{ steps.init.outputs.log_file }}
+          fi
+          
           # Load repository context if available
           REPO_CONTEXT=""
           if [[ "${{ steps.check-context.outputs.needs_context }}" == "true" ]] && [[ -f "repo_context.md" ]]; then
@@ -358,11 +394,18 @@ jobs:
           8. Keep your responses focused on the technical issue at hand
 
           Remember that you're responding in a GitHub discussion context. Your goal is to be helpful, accurate, and drive toward resolution.
-
-          Please respond to this 
           PROMPTEOF
           
           # Append event type and content
+          echo "" >> response_files/combined_prompt.txt
+          
+          # Add conversation context if available
+          if [[ ! -z "$CONVERSATION_CONTEXT" ]]; then
+            echo -e "$CONVERSATION_CONTEXT" >> response_files/combined_prompt.txt
+            echo "Current message to respond to:" >> response_files/combined_prompt.txt
+            echo "" >> response_files/combined_prompt.txt
+          fi
+          
           echo "${EVENT_TYPE}:" >> response_files/combined_prompt.txt
           echo "" >> response_files/combined_prompt.txt
           echo "$CONTENT" >> response_files/combined_prompt.txt
@@ -370,7 +413,11 @@ jobs:
           # Add context if available
           if [[ ! -z "$REPO_CONTEXT" ]]; then
             echo "" >> response_files/combined_prompt.txt
+            echo "IMPORTANT - Use the following repository context information to assist with your response. Examine this context carefully and refer to specific files and code when relevant to the question:" >> response_files/combined_prompt.txt
+            echo "" >> response_files/combined_prompt.txt
             echo "$REPO_CONTEXT" >> response_files/combined_prompt.txt
+            echo "" >> response_files/combined_prompt.txt
+            echo "Based on the repository context above, please provide a specific and technically accurate response to the question. Reference specific files and code sections when relevant." >> response_files/combined_prompt.txt
           fi
           
           # Create request payload using jq to properly escape JSON

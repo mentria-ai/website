@@ -31,6 +31,11 @@ async function postToDiscussion(options) {
     return { success: false, error: "Missing discussion ID" };
   }
   
+  // Log initial state
+  logger.logMessage(logFile, `Posting to discussion ${discussionId.slice(0, 8)}...`);
+  logger.logMessage(logFile, `Using ${commentId ? 'reply to comment' : 'direct comment'} mode`);
+  logger.logMessage(logFile, `Response content length: ${responseContent.length} chars`);
+  
   // Add enhanced error handling and retry logic with exponential backoff
   async function executeGraphQLWithRetry(query, variables, retries = 3) {
     let lastError = null;

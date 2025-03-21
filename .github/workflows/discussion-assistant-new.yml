@@ -135,7 +135,9 @@ jobs:
                     query($owner: String!, $repo: String!, $discussionNumber: Int!) {
                       repository(owner: $owner, name: $repo) {
                         discussion(number: $discussionNumber) {
-                          comments(first: 10) {
+                          title
+                          body
+                          comments(first: 15) {
                             nodes {
                               author {
                                 login
@@ -155,21 +157,54 @@ jobs:
                     discussionNumber: context.payload.discussion.number
                   };
                   
+                  logger.logMessage(logFile, `Discussion number: ${context.payload.discussion.number}`);
                   const result = await github.graphql(commentsQuery, variables);
+                  
+                  // Add discussion title and body for better context
+                  const discussionTitle = result.repository.discussion.title;
+                  const discussionBody = result.repository.discussion.body;
+                  logger.logMessage(logFile, `Discussion title: ${discussionTitle}`);
+                  logger.logMessage(logFile, `Found discussion body of ${discussionBody.length} chars`);
+                  
                   const comments = result.repository.discussion.comments.nodes;
+                  logger.logMessage(logFile, `Retrieved ${comments.length} comments from GraphQL API`);
+                  
+                  // Add the discussion body as the first "comment" for better context
+                  previousComments.push({
+                    author: context.payload.discussion.user.login,
+                    body: discussionBody,
+                    createdAt: context.payload.discussion.created_at,
+                    isMainPost: true
+                  });
                   
                   // Format comments for context
-                  previousComments = comments.map(comment => ({
-                    author: comment.author.login,
-                    body: comment.body,
-                    createdAt: comment.createdAt
-                  }));
+                  comments.forEach(comment => {
+                    // Skip the current comment to avoid duplication
+                    if (context.payload.comment && 
+                        comment.author.login === context.payload.comment.user.login && 
+                        comment.body === context.payload.comment.body) {
+                      logger.logMessage(logFile, `Skipping current comment from user ${comment.author.login}`);
+                      return;
+                    }
+                    
+                    previousComments.push({
+                      author: comment.author.login,
+                      body: comment.body,
+                      createdAt: comment.createdAt
+                    });
+                  });
                   
-                  logger.logSuccess(logFile, `Retrieved ${previousComments.length} previous comments`);
+                  logger.logSuccess(logFile, `Total context items (discussion + comments): ${previousComments.length}`);
+                  logger.logMessage(logFile, `First comment from: ${previousComments[0]?.author || 'none'}`);
+                  logger.logMessage(logFile, `Last comment from: ${previousComments[previousComments.length-1]?.author || 'none'}`);
                 } catch (error) {
                   logger.logWarning(logFile, `Error retrieving previous comments: ${error.message}`);
+                  logger.logWarning(logFile, `Stack trace: ${error.stack}`);
                   // Continue without previous comments - non-critical error
                 }
+              } else if (context.eventName === 'discussion') {
+                // For new discussions, just log that no previous comments exist
+                logger.logMessage(logFile, "New discussion - no previous comments to retrieve");
               }
               
               // Create a JSON file with all extracted content for the next step
@@ -356,20 +391,42 @@ jobs:
             
             # Extract each comment and format it
             COMMENT_COUNT=$(echo "$CONTENT_DATA" | jq '.previousComments | length')
+            echo "Found $COMMENT_COUNT previous comments/context items to process" >> ${{ steps.init.outputs.log_file }}
+            
+            # Debug raw comments object (truncated)
+            COMMENTS_EXCERPT=$(echo "$PREVIOUS_COMMENTS" | head -c 1000)
+            echo "Comments data excerpt: $COMMENTS_EXCERPT" >> ${{ steps.init.outputs.log_file }}
             
             for i in $(seq 0 $(($COMMENT_COUNT - 1))); do
               AUTHOR=$(echo "$CONTENT_DATA" | jq -r ".previousComments[$i].author")
+              IS_MAIN_POST=$(echo "$CONTENT_DATA" | jq -r ".previousComments[$i].isMainPost // false")
               BODY=$(echo "$CONTENT_DATA" | jq -r ".previousComments[$i].body")
               CREATED_AT=$(echo "$CONTENT_DATA" | jq -r ".previousComments[$i].createdAt")
+              
+              # Log the processing of each comment
+              BODY_EXCERPT=$(echo "$BODY" | head -c 100 | tr -d '\n')
+              echo "Processing comment $i from $AUTHOR (${#BODY} chars): $BODY_EXCERPT..." >> ${{ steps.init.outputs.log_file }}
               
               # Format timestamp to be more readable
               FORMATTED_DATE=$(date -d "$CREATED_AT" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "$CREATED_AT")
               
-              # Add to conversation context
-              CONVERSATION_CONTEXT="${CONVERSATION_CONTEXT}**@${AUTHOR}** (${FORMATTED_DATE}):\n${BODY}\n\n---\n\n"
+              # Add to conversation context with special handling for the main post
+              if [[ "$IS_MAIN_POST" == "true" ]]; then
+                CONVERSATION_CONTEXT="${CONVERSATION_CONTEXT}**Original Post by @${AUTHOR}** (${FORMATTED_DATE}):\n${BODY}\n\n---\n\n"
+              else
+                CONVERSATION_CONTEXT="${CONVERSATION_CONTEXT}**@${AUTHOR}** (${FORMATTED_DATE}):\n${BODY}\n\n---\n\n"
+              fi
             done
             
-            echo "Added $COMMENT_COUNT comments to conversation context" >> ${{ steps.init.outputs.log_file }}
+            # Log some stats about the conversation context
+            CONTEXT_SIZE=${#CONVERSATION_CONTEXT}
+            echo "Added $COMMENT_COUNT items to conversation context. Total size: $CONTEXT_SIZE chars" >> ${{ steps.init.outputs.log_file }}
+            
+            # Log a sample of the generated conversation context
+            CONTEXT_EXCERPT=$(echo -e "$CONVERSATION_CONTEXT" | head -c 500 | tr -d '\n')
+            echo "Conversation context sample: $CONTEXT_EXCERPT..." >> ${{ steps.init.outputs.log_file }}
+          else
+            echo "No previous comments found or invalid format: $PREVIOUS_COMMENTS" >> ${{ steps.init.outputs.log_file }}
           fi
           
           # Load repository context if available
@@ -401,9 +458,12 @@ jobs:
           
           # Add conversation context if available
           if [[ ! -z "$CONVERSATION_CONTEXT" ]]; then
+            echo "Adding conversation context to prompt" >> ${{ steps.init.outputs.log_file }}
             echo -e "$CONVERSATION_CONTEXT" >> response_files/combined_prompt.txt
             echo "Current message to respond to:" >> response_files/combined_prompt.txt
             echo "" >> response_files/combined_prompt.txt
+          else
+            echo "No conversation context available to add to prompt" >> ${{ steps.init.outputs.log_file }}
           fi
           
           echo "${EVENT_TYPE}:" >> response_files/combined_prompt.txt
@@ -412,13 +472,25 @@ jobs:
           
           # Add context if available
           if [[ ! -z "$REPO_CONTEXT" ]]; then
+            echo "Adding repository context to prompt ($(wc -c <<< "$REPO_CONTEXT") bytes)" >> ${{ steps.init.outputs.log_file }}
             echo "" >> response_files/combined_prompt.txt
             echo "IMPORTANT - Use the following repository context information to assist with your response. Examine this context carefully and refer to specific files and code when relevant to the question:" >> response_files/combined_prompt.txt
             echo "" >> response_files/combined_prompt.txt
             echo "$REPO_CONTEXT" >> response_files/combined_prompt.txt
             echo "" >> response_files/combined_prompt.txt
             echo "Based on the repository context above, please provide a specific and technically accurate response to the question. Reference specific files and code sections when relevant." >> response_files/combined_prompt.txt
+          else
+            echo "No repository context available to add to prompt" >> ${{ steps.init.outputs.log_file }}
           fi
+          
+          # Log the size of the combined prompt
+          PROMPT_SIZE=$(wc -c < response_files/combined_prompt.txt)
+          echo "Combined prompt size: $PROMPT_SIZE bytes" >> ${{ steps.init.outputs.log_file }}
+          
+          # Log a sample of the final prompt
+          echo "Prompt sample (first 1000 chars):" >> ${{ steps.init.outputs.log_file }}
+          head -c 1000 response_files/combined_prompt.txt >> ${{ steps.init.outputs.log_file }}
+          echo "..." >> ${{ steps.init.outputs.log_file }}
           
           # Create request payload using jq to properly escape JSON
           jq -n \
@@ -434,6 +506,7 @@ jobs:
             }' > response_files/payload.json
           
           # Make API call
+          echo "Making API call to Together AI (DeepSeek-R1)..." >> ${{ steps.init.outputs.log_file }}
           curl -s -X POST "https://api.together.xyz/v1/chat/completions" \
             -H "Authorization: Bearer ${{ secrets.TOGETHER_API_KEY }}" \
             -H "Content-Type: application/json" \
@@ -442,11 +515,43 @@ jobs:
           
           # Check response and extract content
           if [ -s "response_files/api_response.json" ]; then
+            # Check if the API response has an error
+            API_ERROR=$(jq -r '.error.message // empty' response_files/api_response.json)
+            if [[ ! -z "$API_ERROR" ]]; then
+              echo "❌ API Error: $API_ERROR" >> ${{ steps.init.outputs.log_file }}
+              echo "I apologize, but I encountered an error while processing your request. Please try again later." > response.txt
+              echo "response_file=response.txt" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            
+            # Log API response details
+            RESPONSE_SIZE=$(wc -c < response_files/api_response.json)
+            echo "Received API response ($RESPONSE_SIZE bytes)" >> ${{ steps.init.outputs.log_file }}
+            
+            # Extract model information
+            MODEL=$(jq -r '.model // "unknown"' response_files/api_response.json)
+            USAGE=$(jq -r '.usage // "unknown"' response_files/api_response.json)
+            echo "Model: $MODEL, Usage: $USAGE" >> ${{ steps.init.outputs.log_file }}
+            
             # Extract content
             CONTENT=$(cat response_files/api_response.json | jq -r '.choices[0].message.content')
+            CONTENT_LENGTH=${#CONTENT}
+            echo "Extracted raw content from API response ($CONTENT_LENGTH chars)" >> ${{ steps.init.outputs.log_file }}
+            
+            # Save a sample of the raw content for debugging
+            echo "Raw content sample (first 500 chars):" >> ${{ steps.init.outputs.log_file }}
+            echo "$CONTENT" | head -c 500 >> ${{ steps.init.outputs.log_file }}
+            echo "..." >> ${{ steps.init.outputs.log_file }}
             
             # Process <think> blocks with a simplified approach
             echo "$CONTENT" > response_files/raw_content.txt
+            
+            # Check for think tags in response
+            if grep -q "<think>" response_files/raw_content.txt; then
+              echo "Found <think> tags in response, processing..." >> ${{ steps.init.outputs.log_file }}
+            else
+              echo "No <think> tags found in response" >> ${{ steps.init.outputs.log_file }}
+            fi
             
             # Use awk directly without creating a separate script file
             processed_content=$(awk '
@@ -477,11 +582,17 @@ jobs:
             
             # Save processed content
             echo "$processed_content" > response.txt
-            echo "Generated AI response successfully ($(wc -c < response.txt) bytes)" >> ${{ steps.init.outputs.log_file }}
+            FINAL_SIZE=$(wc -c < response.txt)
+            echo "Generated AI response successfully (${FINAL_SIZE} bytes)" >> ${{ steps.init.outputs.log_file }}
+            
+            # Log a sample of the final response
+            echo "Final response sample (first 500 chars):" >> ${{ steps.init.outputs.log_file }}
+            head -c 500 response.txt >> ${{ steps.init.outputs.log_file }}
+            echo "..." >> ${{ steps.init.outputs.log_file }}
             
             # Set output
             echo "response_file=response.txt" >> $GITHUB_OUTPUT
-            echo "content_length=$(wc -c < response.txt)" >> $GITHUB_OUTPUT
+            echo "content_length=$FINAL_SIZE" >> $GITHUB_OUTPUT
           else
             echo "❌ Error: API request failed or returned empty response" >> ${{ steps.init.outputs.log_file }}
             echo "I apologize, but I'm currently experiencing technical difficulties. Please try again later." > response.txt
@@ -529,11 +640,35 @@ jobs:
                 discussionId = contentData.discussionId;
                 commentId = contentData.commentId;
                 logger.logMessage(logFile, `Got discussion ID ${discussionId} from content_data.json`);
+                
+                // Log comment ID if available
+                if (commentId) {
+                  logger.logMessage(logFile, `Got comment ID ${commentId} from content_data.json`);
+                } else {
+                  logger.logMessage(logFile, `No comment ID found in content_data.json - posting to main discussion`);
+                }
+                
+                // Log the number of previous comments
+                if (contentData.previousComments && Array.isArray(contentData.previousComments)) {
+                  logger.logMessage(logFile, `Content data contains ${contentData.previousComments.length} previous comments`);
+                  
+                  // Log the first few comment authors
+                  if (contentData.previousComments.length > 0) {
+                    const authors = contentData.previousComments
+                      .slice(0, Math.min(3, contentData.previousComments.length))
+                      .map(c => c.author)
+                      .join(', ');
+                    logger.logMessage(logFile, `First few comment authors: ${authors}`);
+                  }
+                } else {
+                  logger.logMessage(logFile, `No previous comments array found in content_data.json`);
+                }
               } else {
                 // Fallback to step outputs
                 discussionId = '${{ steps.get-content.outputs.discussion_id }}';
                 commentId = '${{ steps.get-content.outputs.comment_id }}' || null;
                 logger.logMessage(logFile, `Got discussion ID ${discussionId} from step output`);
+                logger.logMessage(logFile, `Got comment ID ${commentId || 'none'} from step output`);
               }
               
               if (!discussionId) {

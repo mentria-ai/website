@@ -62,6 +62,19 @@ jobs:
             logger.logMessage(logFile, "- Action: " + context.payload.action);
             logger.logMessage(logFile, "- Actor: " + context.actor);
             
+            // Log payload structure for debugging
+            logger.logMessage(logFile, "- Payload Summary:");
+            logger.logMessage(logFile, `  - Has discussion: ${!!context.payload.discussion}`);
+            logger.logMessage(logFile, `  - Has comment: ${!!context.payload.comment}`);
+            if (context.payload.discussion) {
+              logger.logMessage(logFile, `  - Discussion properties: ${Object.keys(context.payload.discussion).join(', ')}`);
+              logger.logMessage(logFile, `  - Discussion has body: ${!!context.payload.discussion.body}`);
+            }
+            if (context.payload.comment) {
+              logger.logMessage(logFile, `  - Comment properties: ${Object.keys(context.payload.comment).join(', ')}`);
+              logger.logMessage(logFile, `  - Comment has body: ${!!context.payload.comment.body}`);
+            }
+            
             // Make log file available to all steps
             core.setOutput('log_file', logFile);
             

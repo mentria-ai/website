@@ -4,116 +4,114 @@
 const fs = require('fs');
 
 /**
- * Extract content from a discussion event
- * @param {object} eventPayload - GitHub event payload
+ * Extract content from a discussion or discussion comment event
+ * @param {object} payload - Event payload
  * @param {string} logFile - Path to log file
  * @param {object} logger - Logger utility
- * @returns {object} - Extracted content and metadata
+ * @returns {object} Extracted content and metadata
  */
-function extractDiscussionContent(eventPayload, logFile, logger) {
-  if (!eventPayload) {
-    logger.logError(logFile, "Missing event payload");
-    return { success: false, error: "Missing event payload" };
-  }
-  
-  const eventName = eventPayload.action ? 'discussion_comment' : 'discussion';
-  logger.logMessage(logFile, `Extracting content from ${eventName} event`);
-  
+function extractDiscussionContent(payload, logFile, logger) {
   try {
-    let discussionContent = '';
-    let discussionId = '';
-    let commentId = null;
-    let discussionTitle = '';
+    logger.logMessage(logFile, "Extracting content from payload");
     
-    // Create a directory for content files
-    if (!fs.existsSync('content_files')) {
-      fs.mkdirSync('content_files', { recursive: true });
+    // Log the payload structure to help debug
+    logger.logMessage(logFile, `Payload event type: ${payload.action || 'unknown'}`);
+    logger.logMessage(logFile, `Has discussion: ${!!payload.discussion}`);
+    logger.logMessage(logFile, `Has comment: ${!!payload.comment}`);
+    
+    if (!payload) {
+      return {
+        success: false,
+        error: "Empty payload"
+      };
     }
     
-    // Helper function for sanitizing content
-    function sanitizeContent(content) {
-      // Replace any potentially troublesome characters
-      return content
-        .replace(/`/g, '\\`')
-        .replace(/\$/g, '\\$')
-        .replace(/\\/g, '\\\\');
+    // Get content from payload
+    let content, eventType, discussionId, commentId;
+    
+    // Check for discussion presence
+    if (!payload.discussion) {
+      logger.logError(logFile, "No discussion data in payload");
+      return {
+        success: false,
+        error: "No discussion data in payload"
+      };
     }
     
-    if (eventName === 'discussion') {
-      const discussion = eventPayload.discussion;
-      // Sanitize discussion content
-      discussionTitle = discussion.title || '';
-      const sanitizedTitle = sanitizeContent(discussionTitle);
-      const sanitizedBody = sanitizeContent(discussion.body || '');
-      discussionContent = sanitizedTitle + '\n\n' + sanitizedBody;
-      discussionId = discussion.node_id;
+    // For discussion events
+    if (payload.action === 'created' && !payload.comment) {
+      logger.logMessage(logFile, "Processing new discussion event");
       
-      // Log discussion details
-      logger.logMessage(logFile,
-        `Retrieved Discussion\n` +
-        `- Title: ${sanitizedTitle.substring(0, 100)}${sanitizedTitle.length > 100 ? '...' : ''}\n` +
-        `- Discussion ID: ${discussionId}\n` +
-        `- Content length: ${discussionContent.length} characters`
-      );
-    } else if (eventName === 'discussion_comment') {
-      const comment = eventPayload.comment;
-      const discussion = eventPayload.discussion;
-      // Sanitize comment content
-      discussionTitle = discussion.title || '';
-      const sanitizedTitle = sanitizeContent(discussionTitle);
-      const sanitizedBody = sanitizeContent(comment.body || '');
-      discussionContent = sanitizedTitle + '\n\n' + sanitizedBody;
-      discussionId = discussion.node_id;
-      commentId = comment.node_id;
+      if (!payload.discussion.body) {
+        logger.logError(logFile, "Discussion body is undefined or empty");
+        return {
+          success: false,
+          error: "Discussion body is undefined or empty"
+        };
+      }
       
-      // Log comment details
-      logger.logMessage(logFile,
-        `Retrieved Discussion Comment\n` +
-        `- Discussion Title: ${sanitizedTitle.substring(0, 100)}${sanitizedTitle.length > 100 ? '...' : ''}\n` +
-        `- Discussion ID: ${discussionId}\n` +
-        `- Comment ID: ${commentId}\n` +
-        `- Content length: ${discussionContent.length} characters\n` +
-        `- Comment body preview: ${sanitizedBody.substring(0, 100)}...`
-      );
+      content = payload.discussion.body;
+      eventType = 'Discussion';
+      discussionId = payload.discussion.node_id;
+    } 
+    // For discussion comment events
+    else if (payload.comment) {
+      logger.logMessage(logFile, "Processing discussion comment event");
+      
+      if (!payload.comment.body) {
+        logger.logError(logFile, "Comment body is undefined or empty");
+        return {
+          success: false,
+          error: "Comment body is undefined or empty"
+        };
+      }
+      
+      content = payload.comment.body;
+      eventType = 'Comment';
+      discussionId = payload.discussion.node_id;
+      commentId = payload.comment.node_id;
+    } 
+    // Unsupported event
+    else {
+      logger.logError(logFile, "Unsupported event type");
+      return {
+        success: false,
+        error: "Unsupported event type"
+      };
     }
     
-    // Create a metadata file with key information
-    const metadata = {
-      event_type: eventName,
-      discussion_id: discussionId,
-      comment_id: commentId,
-      title: discussionTitle,
-      content_length: discussionContent.length,
-      timestamp: new Date().toISOString(),
-      sanitized: true
-    };
+    // Write content to files for use in other steps
+    const contentDir = 'content_files';
     
-    fs.writeFileSync('content_files/metadata.json', JSON.stringify(metadata, null, 2));
+    if (!fs.existsSync(contentDir)) {
+      fs.mkdirSync(contentDir);
+    }
     
-    // Write the full content to a file to preserve all characters exactly
-    fs.writeFileSync('content_files/full_content.txt', discussionContent);
+    const contentFile = `${contentDir}/content.txt`;
+    fs.writeFileSync(contentFile, content);
     
-    // Also create a base64 version for safe passing
-    const base64Content = Buffer.from(discussionContent).toString('base64');
-    fs.writeFileSync('content_files/base64_content.txt', base64Content);
+    // Also create a base64 version for API calls
+    const base64Content = Buffer.from(content).toString('base64');
+    const base64File = `${contentDir}/content_base64.txt`;
+    fs.writeFileSync(base64File, base64Content);
     
-    logger.logSuccess(logFile, "Content extraction completed successfully");
+    logger.logSuccess(logFile, `Content extracted successfully (${content.length} characters)`);
     
     return {
       success: true,
-      content: discussionContent,
-      base64Content: base64Content,
-      discussionId: discussionId,
-      commentId: commentId,
-      title: discussionTitle,
-      eventType: eventName,
-      contentFile: 'content_files/full_content.txt',
-      base64File: 'content_files/base64_content.txt',
-      metadataFile: 'content_files/metadata.json'
+      content,
+      eventType,
+      discussionId,
+      commentId,
+      contentFile,
+      base64File
     };
   } catch (error) {
-    logger.logError(logFile, `Error extracting discussion content: ${error.message}`);
-    return { success: false, error: error.message };
+    logger.logError(logFile, `Error extracting content: ${error.message}`);
+    return {
+      success: false,
+      error: `Error extracting content: ${error.message}`
+    };
   }
 }
 

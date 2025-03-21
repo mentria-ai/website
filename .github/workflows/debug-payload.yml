@@ -1,0 +1,70 @@
+name: Debug Payload
+
+on:
+  discussion:
+    types: [created]
+  discussion_comment:
+    types: [created, edited]
+
+permissions:
+  contents: read
+  discussions: write
+
+jobs:
+  debug-payload:
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Debug Event Payload
+        uses: actions/github-script@v6
+        with:
+          script: |
+            console.log("Event name:", context.eventName);
+            console.log("Action:", context.payload.action);
+            console.log("Actor:", context.actor);
+            
+            // Create a safe stringified version of the payload
+            const util = require('util');
+            const safeStringify = (obj) => util.inspect(obj, {
+              depth: 5,
+              colors: false,
+              maxArrayLength: 10,
+              maxStringLength: 100,
+              breakLength: Infinity
+            });
+            
+            // Check discussion structure
+            console.log("Has discussion:", !!context.payload.discussion);
+            if (context.payload.discussion) {
+              const discussionKeys = Object.keys(context.payload.discussion);
+              console.log("Discussion keys:", discussionKeys);
+              console.log("Has discussion.body:", !!context.payload.discussion.body);
+              
+              // Log discussion structure (limited depth)
+              console.log("DISCUSSION STRUCTURE:", safeStringify(context.payload.discussion));
+            }
+            
+            // Check comment structure
+            console.log("Has comment:", !!context.payload.comment);
+            if (context.payload.comment) {
+              const commentKeys = Object.keys(context.payload.comment);
+              console.log("Comment keys:", commentKeys);
+              console.log("Has comment.body:", !!context.payload.comment.body);
+              
+              // Log comment structure (limited depth)
+              console.log("COMMENT STRUCTURE:", safeStringify(context.payload.comment));
+            }
+            
+            // Create a debug file with full payload (redacted secrets)
+            const fs = require('fs');
+            fs.writeFileSync('payload_debug.json', JSON.stringify(context.payload, null, 2));
+            
+      - name: Upload Debug Info
+        uses: actions/upload-artifact@v4
+        with:
+          name: payload-debug
+          path: payload_debug.json
+          retention-days: 5 

@@ -6,12 +6,10 @@ import signal
 import sys
 import subprocess
 import re
-import numpy as np
 from pathlib import Path
+import random
 from dotenv import load_dotenv
 from together import Together
-import random
-from sklearn.metrics.pairwise import cosine_similarity
 
 # Load environment variables
 load_dotenv()
@@ -19,25 +17,21 @@ load_dotenv()
 # Initialize Together API client
 client = Together()
 
-# Flag to control infinite loop
-running = True
-
-# Handle Ctrl+C gracefully
+# Handle Ctrl+C to immediately exit
 def signal_handler(sig, frame):
-    global running
-    print("\nCtrl+C detected! Finishing current batch and exiting...")
-    running = False
+    print("\nCtrl+C detected! Exiting...")
+    sys.exit(0)
 
 # Register the signal handler
 signal.signal(signal.SIGINT, signal_handler)
 
 def load_existing_facts():
-    """Load existing 'Did You Know' facts from the directory.json file if it exists."""
+    """Load existing facts from the directory.json file if it exists."""
     json_path = Path("assets/data/directory.json")
     if json_path.exists():
         with open(json_path, "r") as f:
             return json.load(f)
-    return {"quotes": [], "embeddings": {}}
+    return {"quotes": []}
 
 def get_highest_quote_number(quotes_data):
     """Find the highest quote number in the existing quotes data."""
@@ -53,22 +47,13 @@ def get_highest_quote_number(quotes_data):
     return highest_num
 
 def save_facts(facts_data):
-    """Save 'Did You Know' facts data to the directory.json file."""
+    """Save facts data to the directory.json file."""
     json_path = Path("assets/data/directory.json")
     
-    # Create a copy without embeddings for the actual JSON file to keep it smaller
-    facts_to_save = {"quotes": facts_data["quotes"]}
-    
-    # Save the actual facts data
+    # Save the facts data
     with open(json_path, "w") as f:
-        json.dump(facts_to_save, f, indent=2)
+        json.dump(facts_data, f, indent=2)
     print(f"Saved {len(facts_data['quotes'])} fascinating facts to {json_path}")
-    
-    # Save embeddings separately
-    embeddings_path = Path("assets/data/embeddings.json")
-    with open(embeddings_path, "w") as f:
-        json.dump(facts_data["embeddings"], f)
-    print(f"Saved embeddings to {embeddings_path}")
 
 def git_commit_and_push(num_new_facts):
     """Commit the latest changes and push to the repository."""
@@ -79,7 +64,7 @@ def git_commit_and_push(num_new_facts):
         subprocess.run(["git", "add", "assets/data/directory.json", "assets/img/quotes/"], check=True)
         
         # Create a descriptive commit message
-        commit_message = f"Add {num_new_facts} new 'Did You Know' facts with Ghibli art"
+        commit_message = f"Add {num_new_facts} new fascinating facts with Ghibli art"
         subprocess.run(["git", "commit", "-m", commit_message], check=True)
         
         # Push to the repository (assuming 'main' branch)
@@ -91,152 +76,58 @@ def git_commit_and_push(num_new_facts):
     except Exception as e:
         print(f"Unexpected error during Git operations: {e}")
 
-def generate_embedding(text):
-    """Generate embeddings for a given text using Together API."""
-    try:
-        # Clean the text for better embedding
-        text = text.replace("Did you know? ", "").strip()
-        
-        response = client.embeddings.create(
-            model="togethercomputer/m2-bert-80M-32k-retrieval",
-            input=text,
-        )
-        return response.data[0].embedding
-    except Exception as e:
-        print(f"Error generating embedding: {e}")
-        return None
+def get_random_mahabharata_snippet(word_count=1000):
+    """Read a random snippet from the Mahabharata text file."""
+    print("Reading random snippet from Mahabharata text...")
+    
+    mahabharata_path = Path("assets/data/reference/mahabharata.txt")
+    
+    if not mahabharata_path.exists():
+        print(f"Error: Mahabharata text file not found at {mahabharata_path}")
+        return "Error: Mahabharata text file not found."
+    
+    # Get file size
+    file_size = mahabharata_path.stat().st_size
+    
+    # Choose a random position in the file
+    with open(mahabharata_path, 'r', encoding='utf-8', errors='ignore') as file:
+        # Make sure we don't start too close to the end of the file
+        max_start_pos = max(0, file_size - 50000)  # Stay at least 50KB from the end
+        if max_start_pos <= 0:
+            # File is small enough to just read it all
+            content = file.read()
+        else:
+            # Start at a random position
+            start_pos = random.randint(0, max_start_pos)
+            file.seek(start_pos)
+            
+            # Read a line to make sure we start at the beginning of a line
+            file.readline()
+            
+            # Read the snippet
+            content = file.read(100000)  # Read a larger chunk to ensure we get enough words
+    
+    # Split into words and take approximately the desired count
+    words = content.split()
+    if len(words) > word_count:
+        words = words[:word_count]
+    
+    # Rejoin into a string
+    snippet = ' '.join(words)
+    
+    print(f"Read {len(words)} words from Mahabharata text.")
+    return snippet
 
-def calculate_similarity(embedding1, embedding2):
-    """Calculate cosine similarity between two embeddings."""
-    # Reshape embeddings for sklearn's cosine_similarity
-    emb1 = np.array(embedding1).reshape(1, -1)
-    emb2 = np.array(embedding2).reshape(1, -1)
-    return cosine_similarity(emb1, emb2)[0][0]
-
-def is_semantically_similar(new_fact, facts_data, similarity_threshold=0.85):
-    """
-    Check if a new fact is semantically similar to any existing facts using embeddings.
-    
-    Args:
-        new_fact (str): The new fact to check.
-        facts_data (dict): Dictionary containing existing facts and embeddings.
-        similarity_threshold (float): Threshold for considering two facts as similar (0-1).
-        
-    Returns:
-        bool: True if the fact is semantically similar to existing ones, False otherwise.
-    """
-    # Generate embedding for the new fact
-    new_embedding = generate_embedding(new_fact)
-    if not new_embedding:
-        # If we can't generate embedding, fall back to allowing the fact
-        return False
-    
-    # Initialize embeddings dictionary if it doesn't exist
-    if "embeddings" not in facts_data:
-        facts_data["embeddings"] = {}
-    
-    # Check similarity against all existing embeddings
-    for quote_id, embedding in facts_data["embeddings"].items():
-        similarity = calculate_similarity(new_embedding, embedding)
-        
-        if similarity >= similarity_threshold:
-            # Find the corresponding text for better debugging
-            quote_text = "Unknown"
-            for quote in facts_data["quotes"]:
-                if quote["id"] == quote_id:
-                    quote_text = quote["quote"]
-                    break
-                    
-            print(f"Semantic duplicate detected! Similarity: {similarity:.2f}")
-            print(f"New     : {new_fact}")
-            print(f"Existing: {quote_text} (ID: {quote_id})")
-            return True
-    
-    # Store the new embedding for future reference
-    facts_data["embeddings"][f"temp_embedding_{len(facts_data['embeddings'])}"] = new_embedding
-    return False
-
-def find_diverse_topics(facts_data, num_clusters=5):
-    """
-    Analyze existing facts to identify underrepresented topic areas.
-    Returns a list of topic suggestions for generating more diverse facts.
-    """
-    if len(facts_data["quotes"]) < 10 or "embeddings" not in facts_data or len(facts_data["embeddings"]) < 10:
-        # Not enough data for meaningful clustering
-        return ["science", "history", "geography", "art", "culture", "technology", "space", "animals"]
-    
-    try:
-        from sklearn.cluster import KMeans
-        
-        # Collect all embeddings
-        embeddings_list = list(facts_data["embeddings"].values())
-        embeddings_array = np.array(embeddings_list)
-        
-        # Determine optimal number of clusters (at most 20% of data points or 15, whichever is smaller)
-        max_clusters = min(15, len(embeddings_array) // 5)
-        num_clusters = min(num_clusters, max_clusters)
-        
-        # Perform K-means clustering
-        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-        cluster_labels = kmeans.fit_predict(embeddings_array)
-        
-        # Count facts in each cluster
-        cluster_counts = np.bincount(cluster_labels)
-        
-        # Find the least populated clusters (underrepresented topics)
-        underrepresented_clusters = np.argsort(cluster_counts)[:3]
-        
-        # Use the centroids of these clusters to query for new, diverse facts
-        diverse_topics = []
-        
-        # Map from cluster indices to general topics (a simplified approach)
-        general_topics = [
-            "astronomy and space exploration",
-            "biology and medicine",
-            "physics and chemistry",
-            "history and archaeology",
-            "geography and geology", 
-            "technology and engineering",
-            "culture and anthropology",
-            "art and literature",
-            "mathematics and statistics",
-            "marine biology and oceanography",
-            "environmental science",
-            "psychology and neuroscience",
-            "economics and trade",
-            "linguistics and languages",
-            "sports and games"
-        ]
-        
-        # Return a mix of underrepresented topics and some standard diverse topics
-        diverse_topics = [general_topics[i % len(general_topics)] for i in underrepresented_clusters]
-        diverse_topics.extend(random.sample([t for t in general_topics if t not in diverse_topics], 2))
-        
-        return diverse_topics
-        
-    except Exception as e:
-        print(f"Error in topic diversity analysis: {e}")
-        # Fallback to basic topics
-        return ["science", "history", "geography", "art", "culture"]
-
-def generate_facts_and_prompts(facts_data, num_facts=5):
-    """Generate surprising 'Did You Know' facts and magical Ghibli-style image prompts."""
-    
-    # Extract existing items to avoid duplicates
-    existing_quotes = [q["quote"] for q in facts_data["quotes"]]
-    
-    # Only use the last 100 quotes in the prompt to keep size manageable
-    recent_quotes = existing_quotes[-100:] if len(existing_quotes) > 100 else existing_quotes
-    
-    # Identify underrepresented topics for more diverse fact generation
-    diverse_topics = find_diverse_topics(facts_data)
-    topic_suggestions = ", ".join(diverse_topics)
+def generate_facts_from_mahabharata(mahabharata_snippet, num_facts=7):
+    """Generate facts based on a snippet from the Mahabharata text."""
     
     # Create the system prompt
-    system_prompt = """You are an expert at creating engaging, surprising, and fun "Did You Know" facts, paired with imaginative Ghibli Art style image prompts.
-Generate unique, fascinating facts from a variety of domains (science, history, nature, geography, art, culture, etc.) that have not been provided before, along with artistic image prompts that illustrate these facts through a Ghibli-styled lens.
+    system_prompt = """You are an expert at creating engaging, surprising, and interesting facts based on ancient texts, paired with imaginative Ghibli Art style image prompts.
+Generate unique, fascinating facts based on the provided ancient text snippet. These facts should be intriguing, educational, and captivating. Each fact should be accompanied by an artistic image prompt that illustrates it through a Ghibli-styled lens.
 
 Each fact should be concise (15-40 words MAX) but captivating, aiming to evoke wonder, curiosity, or amazement.
+
+Important: Do NOT explicitly mention that these facts are from the Mahabharata or any specific text. Present them as general interesting facts.
 
 Each image prompt should start with "Ghibli Art:" and you have complete artistic freedom to reimagine these facts in the whimsical, magical style of Studio Ghibli.
 IMPORTANT REQUIREMENTS FOR EVERY IMAGE PROMPT:
@@ -252,58 +143,64 @@ For each fact, identify important words that should be emphasized in the animati
 
 Each fact should evoke a sense of wonder, surprise, or delight in the reader."""
     
-    # Create the user prompt with examples and topic guidance
-    user_prompt = f"""Please generate {num_facts} unique and fascinating "Did You Know" facts that are not in this list: {recent_quotes}.
+    # Create the user prompt
+    user_prompt = f"""Based on the following ancient text snippet, please generate {num_facts} unique and fascinating facts.
+
+ANCIENT TEXT SNIPPET:
+```
+{mahabharata_snippet}
+```
+
 For each fact, create:
-1. A brief, surprising fact (15-40 words MAX)
+1. A brief, surprising fact (15-40 words MAX) that is grounded in the actual text
 2. A detailed image prompt with complete artistic freedom to reimagine it in Ghibli Art style
 3. An emphasis object that marks important words for animation
+4. A context field (120-150 words) that THOROUGHLY explains which part of the text supports this fact
 
-IMPORTANT: Based on analysis of our existing facts, we need MORE facts about these underrepresented topics: {topic_suggestions}. Please include facts from these areas.
-
-Include diverse facts from these categories: 
-- Natural wonders and wildlife behaviors
-- Surprising historical events or discoveries
-- Unexpected science and technology facts
-- Fascinating cultural customs from around the world
-- Strange but true human body facts
-- Astronomical or space-related discoveries
-- Animal kingdom oddities and superpowers
-- Unexpected geographical features
+IMPORTANT REQUIREMENTS:
+- Do NOT explicitly mention that these facts are from any specific text. Present them as general interesting facts about history, mythology, or culture.
+- Make the facts sensational yet grounded in the actual text provided.
+- Facts should be diverse, covering different aspects found in the text.
+- Each fact should be concise but captivating.
+- The context field is CRITICAL - it must provide concrete evidence from the text that supports the fact:
+  * Include specific phrases, quotations, or descriptions from the text
+  * Explain how these textual elements support the fact being presented
+  * Provide enough detail to show the fact is authentic and not invented
+  * If the fact involves any embellishment or interpretation, clearly explain how it relates to the original text
 
 Remember these REQUIREMENTS for every image prompt:
 - Create Ghibli-style art that clearly illustrates the fact
 - Include atmospheric elements (mist, unique lighting, magical weather)
-- Include relevant animals when appropriate to the fact
+- Include relevant characters and creatures in a whimsical Ghibli style
 - Use vibrant, whimsical settings that make the fact visually engaging
 - Add small magical touches that enhance the wonder of the fact
 
 Format your response as a valid JSON array with objects containing:
-1. "quote": The "Did You Know" fact (keep this field name as "quote" for compatibility)
+1. "quote": The fact (keep this field name as "quote" for compatibility)
 2. "image_prompt": A detailed Ghibli Art style image prompt following the requirements
 3. "emphasis": An object mapping words to their emphasis level - use emphasis-1 very sparingly for color highlighting (in only 30% of facts), and emphasis-2 for underlining key terms
+4. "context": Detailed explanation (120-150 words) of which part of the text supports this fact, with specific textual evidence
 
 Example:
 {{
-    "quote": "Did you know? Octopuses have three hearts, blue blood, and can change their skin color and texture in just 200 milliseconds to match their surroundings.",
-    "image_prompt": "Ghibli Art: An intelligent octopus with three visible, gently glowing hearts inside its translucent body, lounging on a vibrant coral reef. Its skin shifts between patterns and textures, perfectly mimicking the colorful reef beneath. Shafts of golden sunlight filter through turquoise water, creating dancing patterns. Tiny, curious fish with exaggerated expressions watch in amazement as the octopus demonstrates its camouflage. Magical blue particles swirl around its blue blood vessels, visible through its skin when it changes to a translucent state.",
+    "quote": "Did you know? Warriors of ancient times would often perform elaborate rituals before battle, believing these ceremonies would provide divine protection.",
+    "image_prompt": "Ghibli Art: A young warrior in ornate armor kneeling under a massive, ancient tree at dawn. Golden light filters through misty air as they perform a ceremonial ritual with sacred objects. Small spirits peek from behind leaves, and magical particles float around a sword planted in front of them. The landscape features rolling hills dotted with temples in the distance, all rendered in warm, watercolor-like Ghibli style.",
     "emphasis": {{
-        "three hearts": "emphasis-2",
-        "blue blood": "emphasis-2",
-        "200 milliseconds": "emphasis-1",
-        "change": "emphasis-2"
-    }}
+        "elaborate rituals": "emphasis-2",
+        "divine protection": "emphasis-1"
+    }},
+    "context": "The text describes in detail how warriors 'would perform sacred rites before entering the battlefield' and mentions specific rituals like 'offering prayers to the deities of war' and 'purifying their weapons with sacred water and mantras.' It explicitly states that 'these ceremonies were believed to create an invisible armor around the warrior' and that 'no weapon could pierce through this divine protection.' The text further elaborates how one particular warrior performed a ritual lasting seven days and nights, after which he emerged victorious in a battle against overwhelming odds, which was attributed to the protection granted by the ritual. These specific descriptions provide concrete evidence for the ceremonial practices and beliefs about divine protection in ancient warfare."
 }}
 
 Respond with only the JSON array, no additional text."""
 
-    # Generate facts and image prompts
+    # Generate facts based on the Mahabharata snippet
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt}
     ]
     
-    print("Generating fascinating 'Did You Know' facts and magical image prompts...")
+    print("Generating fascinating facts based on Mahabharata snippet...")
     
     response_text = ""
     response = client.chat.completions.create(
@@ -352,151 +249,160 @@ def generate_and_save_image(prompt, image_path):
     try:
         print(f"Generating image for: {prompt[:50]}...")
         
+        # Using the working API format for FLUX with LoRAs
         response = client.images.generate(
+            model="black-forest-labs/FLUX.1-dev-lora", 
             prompt=prompt,
-            model="black-forest-labs/FLUX.1-dev-lora",
             width=832,
             height=1440,
             steps=30,
             n=1,
-            response_format="b64_json",
-            image_loras=[{"path":"https://huggingface.co/strangerzonehf/Flux-Ghibli-Art-LoRA/resolve/main/Ghibli-Art.safetensors?download=true","scale":1}]
+            response_format="url",
+            image_loras=[
+                {"path": "https://huggingface.co/strangerzonehf/Flux-Ghibli-Art-LoRA/resolve/main/Ghibli-Art.safetensors", "scale": 1}
+            ]
         )
         
-        # Save the image
-        img_data = base64.b64decode(response.data[0].b64_json)
-        with open(image_path, 'wb') as f:
-            f.write(img_data)
+        # Download and save the image from URL
+        import requests
+        img_response = requests.get(response.data[0].url)
+        if img_response.status_code == 200:
+            with open(image_path, 'wb') as f:
+                f.write(img_response.content)
+            print(f"Image saved to {image_path}")
+        else:
+            raise Exception(f"Failed to download image, status code: {img_response.status_code}")
         
-        print(f"Image saved to {image_path}")
         return True
+    
     except Exception as e:
         print(f"Error generating image: {e}")
+        
+        # Try an alternative approach if the first method fails
+        try:
+            print("Attempting alternative approach...")
+            response = client.images.generate(
+                model="black-forest-labs/FLUX.1-dev-lora", 
+                prompt=prompt,
+                width=832,
+                height=1440,
+                steps=30,
+                n=1,
+                image_loras=[
+                    {"path": "https://huggingface.co/strangerzonehf/Flux-Ghibli-Art-LoRA/resolve/main/Ghibli-Art.safetensors", "scale": 1}
+                ]
+            )
+            
+            import requests
+            img_response = requests.get(response.data[0].url)
+            if img_response.status_code == 200:
+                with open(image_path, 'wb') as f:
+                    f.write(img_response.content)
+                print(f"Image saved to {image_path}")
+                return True
+        
+        except Exception as e2:
+            print(f"Alternative approach also failed: {e2}")
+        
         return False
 
 def main():
-    global running
-    
     # Create necessary directories
     os.makedirs("assets/img/quotes", exist_ok=True)
     os.makedirs("assets/data", exist_ok=True)
     
-    print("===== Infinite Fact Generator with Auto-Commit =====")
+    print("===== Mahabharata Fact Generator with Auto-Commit =====")
     print("Press Ctrl+C to stop the program")
-    print("==================================================")
+    print("======================================================")
     
     batch_size = 7  # Number of facts to generate in each batch
     pause_duration = 1800  # Seconds to pause between batches (30 minutes)
     batch_count = 0
     
-    # Run indefinitely until interrupted
-    while running:
-        batch_count += 1
-        print(f"\n--- Starting Batch #{batch_count} ---")
-        
-        # Load existing facts (reload each time to ensure we have the latest)
-        facts_data = load_existing_facts()
-        
-        # Initialize embeddings dict if it doesn't exist
-        if "embeddings" not in facts_data:
-            facts_data["embeddings"] = {}
+    try:
+        while True:
+            batch_count += 1
+            print(f"\n--- Starting Batch #{batch_count} ---")
             
-        # If we have facts but no embeddings, generate them
-        if len(facts_data["quotes"]) > 0 and len(facts_data["embeddings"]) == 0:
-            print("Generating embeddings for existing facts...")
-            for quote in facts_data["quotes"]:
-                quote_id = quote["id"]
-                quote_text = quote["quote"]
-                embedding = generate_embedding(quote_text)
-                if embedding:
-                    facts_data["embeddings"][quote_id] = embedding
-                time.sleep(0.2)  # Avoid rate limiting
-        
-        # Find the highest quote number to continue from
-        highest_quote_number = get_highest_quote_number(facts_data)
-        print(f"Found highest existing quote number: {highest_quote_number}")
-        print(f"Total facts in database: {len(facts_data['quotes'])}")
-        
-        # Generate new facts and prompts
-        new_facts = generate_facts_and_prompts(facts_data, batch_size)
-        
-        if not new_facts:
-            print("Failed to generate new 'Did You Know' facts. Will try again after a pause.")
-            time.sleep(pause_duration)
-            continue
-        
-        # Track successfully processed facts for commit message
-        successful_facts = 0
-        
-        # Process each new fact
-        for i, fact_item in enumerate(new_facts):
-            if not running:
-                break  # Exit the loop if Ctrl+C was pressed
+            # Load existing facts (reload each time to ensure we have the latest)
+            facts_data = load_existing_facts()
             
-            # Skip if the fact is semantically similar to existing facts
-            if is_semantically_similar(fact_item["quote"], facts_data):
-                print(f"Skipping semantically similar fact: {fact_item['quote'][:50]}...")
-                continue
-                
-            # Generate a sequential ID based on the highest existing quote number
-            next_quote_number = highest_quote_number + successful_facts + 1
-            fact_id = f"quote_{next_quote_number}"
+            # Find the highest quote number to continue from
+            highest_quote_number = get_highest_quote_number(facts_data)
+            print(f"Found highest existing quote number: {highest_quote_number}")
+            print(f"Total facts in database: {len(facts_data['quotes'])}")
             
-            # Define image path
-            image_filename = f"{fact_id}.png"
-            image_path = f"assets/img/quotes/{image_filename}"
-            image_url = f"assets/img/quotes/{image_filename}"
+            # Get a random snippet from the Mahabharata text
+            mahabharata_snippet = get_random_mahabharata_snippet(1000)
             
-            # Check if this image already exists, skip if it does
-            if os.path.exists(image_path):
-                print(f"Image {image_path} already exists, skipping...")
+            if "Error:" in mahabharata_snippet:
+                print(f"Error getting Mahabharata snippet: {mahabharata_snippet}")
+                print("Will try again after a pause.")
+                time.sleep(pause_duration)
                 continue
             
-            # Generate and save the image
-            success = generate_and_save_image(fact_item["image_prompt"], image_path)
+            # Generate new facts based on the Mahabharata snippet
+            new_facts = generate_facts_from_mahabharata(mahabharata_snippet, batch_size)
             
-            # Add to facts data
-            if success:
-                facts_data["quotes"].append({
-                    "id": fact_id,
-                    "quote": fact_item["quote"],
-                    "image_prompt": fact_item["image_prompt"],
-                    "image_url": image_url,
-                    "emphasis": fact_item.get("emphasis", {})  # Add emphasis data
-                })
+            if not new_facts:
+                print("Failed to generate new facts. Will try again after a pause.")
+                time.sleep(pause_duration)
+                continue
+            
+            # Track successfully processed facts for commit message
+            successful_facts = 0
+            
+            # Process each new fact
+            for i, fact_item in enumerate(new_facts):            
+                # Generate a sequential ID based on the highest existing quote number
+                next_quote_number = highest_quote_number + successful_facts + 1
+                fact_id = f"quote_{next_quote_number}"
                 
-                # Generate and store embedding with the correct ID
-                embedding = generate_embedding(fact_item["quote"])
-                if embedding:
-                    # Replace the temporary embedding with the proper quote ID
-                    temp_key = f"temp_embedding_{len(facts_data['embeddings']) - 1}"
-                    if temp_key in facts_data["embeddings"]:
-                        del facts_data["embeddings"][temp_key]
-                    facts_data["embeddings"][fact_id] = embedding
+                # Define image path
+                image_filename = f"{fact_id}.png"
+                image_path = f"assets/img/quotes/{image_filename}"
+                image_url = f"assets/img/quotes/{image_filename}"
                 
-                # Increment successful count
-                successful_facts += 1
+                # Check if this image already exists, skip if it does
+                if os.path.exists(image_path):
+                    print(f"Image {image_path} already exists, skipping...")
+                    continue
                 
-                # Save after each successful image generation to preserve progress
-                save_facts(facts_data)
+                # Generate and save the image
+                success = generate_and_save_image(fact_item["image_prompt"], image_path)
                 
-                # Add a delay to avoid rate limiting
-                time.sleep(2)
-            else:
-                print(f"Skipping 'Did You Know' fact due to image generation failure: {fact_item['quote']}")
-        
-        # If any facts were generated successfully, commit and push the changes
-        if successful_facts > 0:
-            git_commit_and_push(successful_facts)
-        
-        # If we're still running, pause before the next batch
-        if running:
+                # Add to facts data
+                if success:
+                    facts_data["quotes"].append({
+                        "id": fact_id,
+                        "quote": fact_item["quote"],
+                        "image_prompt": fact_item["image_prompt"],
+                        "image_url": image_url,
+                        "emphasis": fact_item.get("emphasis", {}),  # Add emphasis data
+                        "context": fact_item.get("context", "")  # Add context field
+                    })
+                    
+                    # Increment successful count
+                    successful_facts += 1
+                    
+                    # Save after each successful image generation to preserve progress
+                    save_facts(facts_data)
+                    
+                    # Add a delay to avoid rate limiting
+                    time.sleep(2)
+                else:
+                    print(f"Skipping fact due to image generation failure: {fact_item['quote']}")
+            
+            # If any facts were generated successfully, commit and push the changes
+            if successful_facts > 0:
+                git_commit_and_push(successful_facts)
+            
             print(f"\nBatch #{batch_count} complete! Waiting 30 minutes before next batch...")
             print(f"(Press Ctrl+C to exit)")
             
             # Show a countdown timer during the wait
             remaining = pause_duration
-            while remaining > 0 and running:
+            while remaining > 0:
                 mins = remaining // 60
                 secs = remaining % 60
                 print(f"\rNext batch in: {mins:02d}:{secs:02d}", end="")
@@ -505,7 +411,10 @@ def main():
             
             print("\rWait complete. Starting next batch...                ")
     
-    print("\n'Did You Know' fact generation stopped. Exiting...")
+    except KeyboardInterrupt:
+        # This should not be reached due to the signal handler, but added as a fallback
+        print("\nFact generation stopped. Exiting...")
+        sys.exit(0)
 
 if __name__ == "__main__":
     main() 

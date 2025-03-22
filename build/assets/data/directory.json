@@ -2271,6 +2271,83 @@
         "afterlife": "emphasis-2",
         "buried": "emphasis-2"
       }
+    },
+    {
+      "id": "quote_263",
+      "quote": "In ancient times, it was believed that a person who speaks falsehood in a court of law would be bound by a thousand invisible chains, with one chain breaking each year.",
+      "image_prompt": "Ghibli Art: A solemn courtroom scene at sunset, with golden light streaming through stained glass windows. A man stands at the center, surrounded by shimmering, ethereal chains that float in the air like gossamer threads. Tiny spirits hover around him, their expressions sad yet curious. The atmosphere is heavy with mist, and the walls are adorned with ancient symbols. The chains glow faintly, and magical particles drift through the air, emphasizing the mystical nature of the scene.",
+      "image_url": "assets/img/quotes/quote_263.png",
+      "emphasis": {
+        "falsehood": "emphasis-2",
+        "invisible chains": "emphasis-1"
+      },
+      "context": "The text describes the consequences of lying in a court of law, stating that 'a person who speaks falsehood in a court of law would be bound by a thousand invisible chains, with one chain breaking each year.' This is mentioned in the context of a discussion about the importance of truth and justice, where it is emphasized that 'the truth must be upheld at all costs.' The text further elaborates that 'these chains are a metaphor for the burden of guilt and the gradual process of redemption.' This belief highlights the ancient emphasis on honesty and the severe consequences of deceit in legal matters."
+    },
+    {
+      "id": "quote_264",
+      "quote": "Ancient warriors believed that a single act of injustice could tarnish the honor of an entire lineage, requiring generations to restore.",
+      "image_prompt": "Ghibli Art: A warrior standing on a hilltop at twilight, looking out over a vast, misty valley. Behind him, spectral figures of his ancestors appear, their forms glowing faintly in the dim light. The warrior's expression is one of deep contemplation, as he holds a sword that glows with a soft, ethereal light. The scene is filled with magical particles, and the sky is painted in hues of purple and gold, creating a sense of both beauty and melancholy.",
+      "image_url": "assets/img/quotes/quote_264.png",
+      "emphasis": {
+        "act of injustice": "emphasis-2",
+        "entire lineage": "emphasis-1"
+      },
+      "context": "The text discusses the concept of honor and its importance in ancient warrior culture. It states that 'a single act of injustice could tarnish the honor of an entire lineage, requiring generations to restore.' This is illustrated through a story where a warrior's dishonorable act leads to the downfall of his family, and it takes the efforts of his descendants to regain their lost honor. The text emphasizes that 'honor was not just an individual's responsibility but a collective one, passed down through generations.' This belief underscores the deep connection between personal actions and familial legacy in ancient times."
+    },
+    {
+      "id": "quote_265",
+      "quote": "In ancient courts, it was considered a grave offense to remain silent when asked to speak the truth, as silence was seen as complicity in injustice.",
+      "image_prompt": "Ghibli Art: A grand courtroom filled with ancient symbols and intricate carvings. A figure stands in the center, surrounded by a crowd of onlookers, their faces a mix of curiosity and concern. The air is thick with tension, and a beam of light shines down from a high window, illuminating the figure. Small, glowing spirits hover around, their expressions stern. The atmosphere is heavy with mist, and magical particles float through the air, emphasizing the gravity of the scene.",
+      "image_url": "assets/img/quotes/quote_265.png",
+      "emphasis": {
+        "remain silent": "emphasis-2",
+        "complicity in injustice": "emphasis-1"
+      },
+      "context": "The text highlights the importance of speaking the truth in ancient courts, stating that 'remaining silent when asked to speak the truth was considered a grave offense, as silence was seen as complicity in injustice.' This is illustrated through a story where a witness's silence leads to a wrongful judgment, and the text emphasizes that 'the truth must be spoken, even if it is difficult or dangerous.' The belief that silence equates to complicity underscores the ancient emphasis on justice and the moral responsibility of individuals to uphold it."
+    },
+    {
+      "id": "quote_266",
+      "quote": "Ancient warriors would often swear oaths by invoking the elements, believing that breaking such oaths would bring natural disasters upon them.",
+      "image_prompt": "Ghibli Art: A warrior standing on a rocky cliff, raising a glowing sword towards a stormy sky. Lightning cracks across the heavens, and the wind whips around him, carrying leaves and magical particles. The warrior's expression is one of fierce determination, and small elemental spirits swirl around him, their forms blending with the storm. The scene is dramatic and intense, with the warrior's oath echoing through the thunderous air.",
+      "image_url": "assets/img/quotes/quote_266.png",
+      "emphasis": {
+        "swear oaths": "emphasis-2",
+        "natural disasters": "emphasis-1"
+      },
+      "context": "The text describes the practice of warriors swearing oaths by invoking the elements, stating that 'breaking such oaths would bring natural disasters upon them.' This is illustrated through a story where a warrior's broken oath leads to a devastating storm that ravages his land. The text emphasizes that 'these oaths were sacred and binding, and the elements were seen as witnesses to the warrior's promise.' This belief highlights the ancient connection between human actions and the natural world, and the serious consequences of breaking one's word."
+    },
+    {
+      "id": "quote_267",
+      "quote": "In ancient times, it was believed that a person who spoke the truth in the face of danger would be protected by unseen forces, ensuring their safety.",
+      "image_prompt": "Ghibli Art: A figure stands in a dark forest, surrounded by glowing, ethereal spirits. The figure's face is calm and resolute, as they speak with conviction. The spirits form a protective barrier around them, their forms shimmering with a soft, golden light. The forest is filled with mist, and magical particles float through the air, creating a sense of wonder and safety. The scene is both mystical and serene, emphasizing the power of truth.",
+      "image_url": "assets/img/quotes/quote_267.png",
+      "emphasis": {
+        "spoke the truth": "emphasis-2",
+        "unseen forces": "emphasis-1"
+      },
+      "context": "The text discusses the belief that 'a person who spoke the truth in the face of danger would be protected by unseen forces, ensuring their safety.' This is illustrated through a story where a truthful individual is surrounded by glowing spirits that shield them from harm. The text emphasizes that 'truth was seen as a powerful force that could invoke the protection of the divine.' This belief underscores the ancient reverence for honesty and the idea that truthfulness could bring about supernatural aid."
+    },
+    {
+      "id": "quote_268",
+      "quote": "Ancient courts often required witnesses to swear oaths by the sacred fire, believing that the fire would consume those who lied.",
+      "image_prompt": "Ghibli Art: A courtroom scene with a sacred fire burning in the center, its flames flickering with an otherworldly glow. A witness stands before the fire, their face illuminated by its light. Small, fiery spirits dance around the flames, their expressions stern and watchful. The atmosphere is tense, and magical particles float through the air, emphasizing the sacred nature of the oath. The walls of the courtroom are adorned with ancient symbols, and the scene is rendered in warm, vibrant colors.",
+      "image_url": "assets/img/quotes/quote_268.png",
+      "emphasis": {
+        "swear oaths": "emphasis-2",
+        "sacred fire": "emphasis-1"
+      },
+      "context": "The text describes the practice of witnesses swearing oaths by the sacred fire, stating that 'the fire would consume those who lied.' This is illustrated through a story where a deceitful witness is engulfed by the flames after giving false testimony. The text emphasizes that 'the sacred fire was seen as a divine judge, capable of discerning truth from lies.' This belief highlights the ancient reliance on supernatural elements to ensure justice and the severe consequences of dishonesty in legal matters."
+    },
+    {
+      "id": "quote_269",
+      "quote": "In ancient times, it was believed that a person who upheld justice in the face of adversity would be rewarded with eternal honor and respect.",
+      "image_prompt": "Ghibli Art: A figure stands on a hilltop at sunrise, their silhouette framed by the golden light of the rising sun. Behind them, a crowd of people bows in respect, their faces filled with admiration. The figure holds a glowing sword, symbolizing justice, and small, ethereal spirits hover around them, their forms blending with the light. The scene is filled with magical particles, and the landscape is rendered in warm, vibrant colors, emphasizing the honor and respect bestowed upon the figure.",
+      "image_url": "assets/img/quotes/quote_269.png",
+      "emphasis": {
+        "upheld justice": "emphasis-2",
+        "eternal honor": "emphasis-1"
+      },
+      "context": "The text discusses the belief that 'a person who upheld justice in the face of adversity would be rewarded with eternal honor and respect.' This is illustrated through a story where a just individual is revered by their community, even after their death. The text emphasizes that 'justice was seen as a virtue that transcended time, and those who upheld it would be remembered forever.' This belief underscores the ancient value placed on justice and the lasting impact of righteous actions."
     }
   ]
 }

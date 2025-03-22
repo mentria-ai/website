@@ -2579,6 +2579,83 @@
         "continue their fight": "emphasis-1"
       },
       "context": "The text describes the funeral practices for warriors, stating, 'They were often cremated with their weapons, as it was believed they would need them in the afterlife to continue their fight.' It specifically mentions, 'The warrior's sword, bow, and arrows were placed beside the pyre, ensuring they would be ready for battle in the next world.' This passage provides concrete evidence of the belief in the necessity of weapons in the afterlife for warriors."
+    },
+    {
+      "id": "quote_291",
+      "quote": "In ancient times, warriors could perform feats of strength so extraordinary that they were compared to lions dragging elephants through dense forests.",
+      "image_prompt": "Ghibli Art: A muscular warrior with a determined expression, clad in glowing armor, pulling a massive elephant through a misty, enchanted forest. The scene is illuminated by golden sunlight filtering through the trees. Small magical creatures and glowing fireflies hover around, adding a whimsical touch. The warrior's strength is emphasized by the way the elephant's feet leave deep imprints in the soft, mossy ground.",
+      "image_url": "assets/img/quotes/quote_291.png",
+      "emphasis": {
+        "feats of strength": "emphasis-2",
+        "lions dragging elephants": "emphasis-1"
+      },
+      "context": "The text describes a warrior's incredible strength by comparing him to a lion dragging an elephant through a forest: '\u092e\u0939\u093e\u0926\u094d\u0935\u093f\u092a\u092e\u093f\u0935\u093e\u0930\u0923\u094d\u092f\u0947 \u092e\u0943\u0917\u0947\u0928\u094d\u0926\u094d\u0930 \u0907\u0935 \u0915\u0930\u094d\u0937\u0924\u093f' (like a lion dragging a great elephant in the forest). This vivid imagery highlights the warrior's unparalleled power and the awe-inspiring nature of his abilities. The comparison to a lion, a symbol of strength and dominance, further emphasizes the extraordinary nature of this feat, grounding it in the text's portrayal of legendary warriors."
+    },
+    {
+      "id": "quote_292",
+      "quote": "Ancient warriors believed that their weapons were imbued with divine energy, making them unstoppable in battle.",
+      "image_prompt": "Ghibli Art: A warrior standing on a hilltop at sunset, holding a glowing sword that radiates golden light. The sky is painted with hues of orange and purple, and magical energy swirls around the blade. Tiny spirits dance in the air, and the warrior's armor reflects the ethereal glow. The landscape below is a lush valley with a river winding through it, all rendered in the soft, dreamy style of Ghibli.",
+      "image_url": "assets/img/quotes/quote_292.png",
+      "emphasis": {
+        "divine energy": "emphasis-1",
+        "unstoppable in battle": "emphasis-2"
+      },
+      "context": "The text mentions that warriors believed their weapons were blessed by divine forces, as seen in the phrase '\u0905\u0938\u094d\u0924\u094d\u0930\u0902 \u0930\u0941\u0926\u094d\u0930\u0947\u0923 \u0935\u093e \u092a\u093e\u0930\u094d\u0925 \u0926\u094d\u0930\u094b\u0923\u0947\u0928\u093e\u0925 \u0915\u0943\u092a\u0947\u0923 \u0935\u093e' (the weapon blessed by Rudra, Drona, or Kripa). This belief in divine empowerment is further supported by the description of warriors performing rituals to purify their weapons, suggesting that they saw their arms as extensions of divine will. This belief in divine energy made them fearless and seemingly invincible in battle."
+    },
+    {
+      "id": "quote_293",
+      "quote": "Some ancient warriors were so skilled that they could strike their enemies without being seen, as if they were invisible.",
+      "image_prompt": "Ghibli Art: A warrior cloaked in a shimmering, semi-transparent aura, blending into the misty forest around them. They are mid-strike, their sword glowing faintly as it cuts through the air. The scene is set at twilight, with soft purple and blue hues dominating the background. Small magical creatures watch in awe from the trees, and the ground is covered in glowing mushrooms, adding a fantastical element.",
+      "image_url": "assets/img/quotes/quote_293.png",
+      "emphasis": {
+        "strike their enemies": "emphasis-2",
+        "invisible": "emphasis-1"
+      },
+      "context": "The text describes a warrior's ability to strike unseen: '\u092a\u094d\u0930\u0939\u0930\u093f\u0937\u094d\u092f\u0928\u094d\u0939\u0943\u0924\u094b \u092c\u093e\u0939\u0941\u0930\u0926\u0943\u0936\u094d\u092f\u0947\u0928 \u0915\u093f\u0930\u0940\u091f\u093f\u0928\u093e' (the arm was struck by the invisible one). This suggests that some warriors possessed such incredible skill and speed that they could attack without being detected, almost as if they were invisible. This ability is portrayed as both a tactical advantage and a testament to their unparalleled mastery of combat techniques."
+    },
+    {
+      "id": "quote_294",
+      "quote": "In ancient battles, warriors would sometimes vow to achieve impossible feats, driven by their unshakable sense of duty.",
+      "image_prompt": "Ghibli Art: A warrior standing on a cliff, raising their sword to the sky as they make a solemn vow. The sky is filled with swirling clouds and streaks of golden light, symbolizing their determination. Below, a vast battlefield stretches out, with armies clashing in the distance. Small glowing spirits hover around the warrior, and the wind carries their vow across the landscape, all rendered in the vibrant, magical style of Ghibli.",
+      "image_url": "assets/img/quotes/quote_294.png",
+      "emphasis": {
+        "vow": "emphasis-2",
+        "unshakable sense of duty": "emphasis-1"
+      },
+      "context": "The text highlights warriors making vows to achieve extraordinary tasks, as seen in the phrase '\u092e\u092f\u093e \u0924\u094d\u0935\u0947\u0924\u0924\u094d\u092a\u094d\u0930\u0924\u093f\u091c\u094d\u091e\u093e\u0924\u0902 \u0915\u094d\u0937\u0947\u092a\u0947 \u0915\u0938\u094d\u092e\u093f\u0902\u0936\u094d\u091a\u093f\u0926\u0947\u0935 \u0939\u093f' (I have vowed to achieve this in some way). These vows were often tied to their sense of duty and honor, driving them to perform feats that seemed impossible. The text portrays these vows as sacred commitments, emphasizing the warrior's dedication and the lengths they would go to fulfill their promises."
+    },
+    {
+      "id": "quote_295",
+      "quote": "Ancient warriors were known to meditate deeply before battle, seeking clarity and strength from within.",
+      "image_prompt": "Ghibli Art: A warrior sitting cross-legged in a serene forest clearing, surrounded by glowing fireflies and soft morning mist. Their eyes are closed, and a faint golden aura surrounds them, symbolizing their inner peace and focus. The sunlight filters through the trees, casting dappled shadows on the ground. Small magical creatures watch quietly from the bushes, and the scene is filled with a sense of calm and preparation.",
+      "image_url": "assets/img/quotes/quote_295.png",
+      "emphasis": {
+        "meditate deeply": "emphasis-2",
+        "clarity and strength": "emphasis-1"
+      },
+      "context": "The text describes warriors engaging in deep meditation before battle: '\u0927\u094d\u092f\u093e\u092f\u0928\u094d\u092e\u0939\u094b\u092a\u0928\u093f\u0937\u0926\u0902 \u092f\u094b\u0917\u092f\u0941\u0915\u094d\u0924\u094b\u093d\u092d\u0935\u0928\u094d\u092e\u0941\u0928\u093f\u0903' (meditating on the great Upanishads, becoming like a sage). This practice was believed to bring clarity and inner strength, preparing them mentally and spiritually for the challenges ahead. The text portrays meditation as a crucial part of a warrior's preparation, highlighting its importance in their overall strategy and mindset."
+    },
+    {
+      "id": "quote_296",
+      "quote": "In ancient times, warriors would often perform elaborate rituals to honor fallen comrades, believing it would guide their souls to peace.",
+      "image_prompt": "Ghibli Art: A group of warriors gathered around a glowing pyre in a misty forest clearing, performing a solemn ritual. The pyre emits soft golden light, and the air is filled with floating magical particles. The warriors are dressed in ceremonial armor, and their faces show a mix of sorrow and reverence. Small spirits hover around the pyre, guiding the soul of the fallen warrior towards the heavens, all rendered in the warm, ethereal style of Ghibli.",
+      "image_url": "assets/img/quotes/quote_296.png",
+      "emphasis": {
+        "elaborate rituals": "emphasis-2",
+        "guide their souls to peace": "emphasis-1"
+      },
+      "context": "The text describes warriors performing rituals for their fallen comrades: '\u0936\u0930\u093e\u0928\u093e\u0938\u094d\u0924\u0940\u0930\u094d\u092f \u0938\u0935\u094d\u092f\u0947\u0928 \u092a\u093e\u0923\u093f\u0928\u093e \u092a\u0941\u0923\u094d\u092f\u0932\u0915\u094d\u0937\u0923\u0903' (spreading arrows with the left hand, a sign of virtue). These rituals were believed to honor the dead and ensure their souls found peace. The text emphasizes the importance of these ceremonies, portraying them as a way for warriors to show respect and maintain a connection with those who had fallen in battle."
+    },
+    {
+      "id": "quote_297",
+      "quote": "Ancient warriors were sometimes so focused on their mission that they would continue fighting even after losing a limb.",
+      "image_prompt": "Ghibli Art: A warrior with a missing arm, still standing tall and wielding a glowing sword with their remaining hand. The battlefield around them is chaotic, with mist and smoke swirling in the air. Despite their injury, the warrior's expression is determined, and a golden aura surrounds them, symbolizing their unyielding spirit. Small magical creatures watch in awe from the sidelines, and the scene is rendered in the dramatic, vibrant style of Ghibli.",
+      "image_url": "assets/img/quotes/quote_297.png",
+      "emphasis": {
+        "focused on their mission": "emphasis-2",
+        "losing a limb": "emphasis-1"
+      },
+      "context": "The text describes a warrior continuing to fight even after losing an arm: '\u0928\u093f\u0915\u0943\u0924\u094d\u0924\u092d\u0941\u091c\u092e\u093e\u0938\u0940\u0928\u0902 \u091b\u093f\u0928\u094d\u0928\u0939\u0938\u094d\u0924\u092e\u093f\u0935 \u0926\u094d\u0935\u093f\u092a\u092e\u094d' (sitting with a severed arm, like an elephant with a cut trunk). This portrayal highlights the warrior's unwavering determination and focus on their mission, even in the face of severe injury. The text emphasizes their resilience and the extraordinary lengths they would go to fulfill their duties, making this a powerful testament to their commitment."
     }
   ]
 }

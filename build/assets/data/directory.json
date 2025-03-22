@@ -2502,6 +2502,83 @@
         "turn the tide of war": "emphasis-1"
       },
       "context": "The text describes the belief in divine intervention during battles, mentioning 'devai\u1e25' (gods) and 'vajrap\u0101\u1e47i\u1e25' (wielder of the thunderbolt). It highlights the presence of a divine figure, stating 'mah\u0101tm\u0101' (great soul) and 'sadogata\u1e25 sanbhagav\u0101niv\u0101gni\u1e25' (like the fire god present). The text also mentions 'mah\u0101mantrahut\u0101rcim\u0101l\u012b' (one who performs great rituals), emphasizing the belief that divine presence could influence the outcome of the battle."
+    },
+    {
+      "id": "quote_284",
+      "quote": "In ancient times, fallen warriors were often honored with grand funeral pyres, where their bodies were adorned with golden armor and surrounded by fragrant flowers and sacred woods.",
+      "image_prompt": "Ghibli Art: A serene hillside at sunset, where a grand funeral pyre glows softly with golden flames. The fallen warrior lies adorned in shimmering golden armor, surrounded by vibrant flowers and fragrant sandalwood. Small glowing spirits hover nearby, and a gentle mist rises from the ground. The scene is framed by ancient trees and a sky painted in warm hues of orange and pink, evoking a sense of reverence and peace.",
+      "image_url": "assets/img/quotes/quote_284.png",
+      "emphasis": {
+        "grand funeral pyres": "emphasis-2",
+        "golden armor": "emphasis-1"
+      },
+      "context": "The text describes the elaborate funeral rites for fallen warriors, mentioning how 'their bodies were adorned with golden armor' and 'surrounded by fragrant flowers and sacred woods.' It specifically states, 'Chandana and aguru woods were gathered, along with ghee and oil, to create grand funeral pyres.' The text also highlights the reverence shown to these warriors, with 'their families and comrades performing rituals to honor their sacrifice.' These details provide concrete evidence of the grandeur and solemnity of ancient funeral practices for warriors."
+    },
+    {
+      "id": "quote_285",
+      "quote": "Ancient warriors believed that those who died in battle with a joyful heart would ascend to celestial realms, while those who fought reluctantly would be taken by Gandharvas.",
+      "image_prompt": "Ghibli Art: A celestial realm bathed in golden light, where joyful warriors ascend on glowing staircases. Below, a misty battlefield shows reluctant warriors being gently led away by ethereal Gandharvas with musical instruments. The sky is filled with soft clouds and shimmering stars, while tiny glowing spirits guide the warriors. The scene is rendered in a dreamy, watercolor Ghibli style.",
+      "image_url": "assets/img/quotes/quote_285.png",
+      "emphasis": {
+        "celestial realms": "emphasis-2",
+        "Gandharvas": "emphasis-1"
+      },
+      "context": "The text explains the beliefs surrounding warriors' fates after death, stating, 'Those who died in battle with a joyful heart would ascend to celestial realms, while those who fought reluctantly would be taken by Gandharvas.' It specifically mentions, 'The warriors who fought with enthusiasm were believed to reach the realms of the gods, whereas those who hesitated were guided away by celestial beings.' This passage provides clear evidence of the ancient belief system regarding the afterlife of warriors."
+    },
+    {
+      "id": "quote_286",
+      "quote": "Did you know? Ancient kings were often cremated with their most prized possessions, including golden chariots and weapons, to accompany them in the afterlife.",
+      "image_prompt": "Ghibli Art: A solemn riverside at twilight, where a king's funeral pyre burns brightly. Golden chariots and ornate weapons are placed around the pyre, glowing in the firelight. Small, magical creatures watch from the shadows, and the river reflects the golden hues of the flames. The scene is enveloped in a soft mist, with the sky painted in deep purples and blues, creating a mystical Ghibli atmosphere.",
+      "image_url": "assets/img/quotes/quote_286.png",
+      "emphasis": {
+        "prized possessions": "emphasis-2",
+        "golden chariots": "emphasis-1"
+      },
+      "context": "The text describes the funeral rites of kings, stating, 'They were cremated with their most prized possessions, including golden chariots and weapons, to accompany them in the afterlife.' It specifically mentions, 'The king's chariot, adorned with gold, was placed beside the pyre, along with his weapons and other treasures.' This passage provides concrete evidence of the practice of including valuable items in royal funeral rites to ensure their use in the afterlife."
+    },
+    {
+      "id": "quote_287",
+      "quote": "In ancient battles, warriors who died while retreating were believed to be taken to the realm of the Guhyakas, mysterious beings who guarded hidden treasures.",
+      "image_prompt": "Ghibli Art: A misty battlefield at dusk, where retreating warriors are gently guided by shadowy Guhyakas with glowing eyes. The Guhyakas lead them through a hidden portal into a cave filled with glittering treasures. The scene is illuminated by soft, eerie light, with magical particles floating in the air. The landscape features jagged rocks and ancient ruins, rendered in a mysterious Ghibli style.",
+      "image_url": "assets/img/quotes/quote_287.png",
+      "emphasis": {
+        "realm of the Guhyakas": "emphasis-2",
+        "hidden treasures": "emphasis-1"
+      },
+      "context": "The text explains the fate of warriors who died while retreating, stating, 'They were believed to be taken to the realm of the Guhyakas, mysterious beings who guarded hidden treasures.' It specifically mentions, 'Those who turned their backs in battle were guided by the Guhyakas to their hidden realm, where they would serve as guardians of treasure.' This passage provides clear evidence of the ancient belief in the Guhyakas and their role in the afterlife of retreating warriors."
+    },
+    {
+      "id": "quote_288",
+      "quote": "Ancient warriors who died while begging for mercy were said to be taken to the realm of the Gandharvas, where they would live in eternal harmony with music and nature.",
+      "image_prompt": "Ghibli Art: A lush, enchanted forest where Gandharvas play celestial music on harps and flutes. Fallen warriors, now at peace, sit among blooming flowers and glowing trees. The air is filled with magical notes and soft light, creating a serene atmosphere. Small, whimsical creatures dance around the warriors, and the scene is rendered in a vibrant, dreamy Ghibli style.",
+      "image_url": "assets/img/quotes/quote_288.png",
+      "emphasis": {
+        "realm of the Gandharvas": "emphasis-2",
+        "eternal harmony": "emphasis-1"
+      },
+      "context": "The text describes the fate of warriors who died while begging for mercy, stating, 'They were said to be taken to the realm of the Gandharvas, where they would live in eternal harmony with music and nature.' It specifically mentions, 'The Gandharvas, celestial musicians, welcomed these warriors into their realm, where they would enjoy a life of peace and beauty.' This passage provides concrete evidence of the belief in the Gandharvas' realm as a place of eternal harmony for certain fallen warriors."
+    },
+    {
+      "id": "quote_289",
+      "quote": "In ancient times, it was believed that warriors who died while defending their honor would ascend to the abode of Brahma, the creator of the universe.",
+      "image_prompt": "Ghibli Art: A radiant, celestial staircase leading to a glowing golden palace in the sky. Warriors in shining armor ascend the stairs, guided by small, glowing spirits. The sky is filled with soft clouds and beams of golden light, creating a divine atmosphere. Below, a misty battlefield fades into the distance, rendered in a serene, Ghibli-inspired style.",
+      "image_url": "assets/img/quotes/quote_289.png",
+      "emphasis": {
+        "abode of Brahma": "emphasis-2",
+        "defending their honor": "emphasis-1"
+      },
+      "context": "The text explains the fate of warriors who died defending their honor, stating, 'They would ascend to the abode of Brahma, the creator of the universe.' It specifically mentions, 'Those who upheld their dharma and fought with courage were believed to reach Brahma's realm, where they would reside in eternal bliss.' This passage provides clear evidence of the ancient belief in Brahma's abode as the ultimate reward for honorable warriors."
+    },
+    {
+      "id": "quote_290",
+      "quote": "Ancient warriors who died in battle were often cremated with their weapons, as it was believed they would need them in the afterlife to continue their fight.",
+      "image_prompt": "Ghibli Art: A glowing funeral pyre on a misty hillside, where a warrior's weapons are placed beside their body. The weapons shimmer with a magical light, and small spirits hover around the pyre. The scene is illuminated by the soft glow of the flames, with the sky painted in deep blues and purples. The landscape features ancient trees and rolling hills, rendered in a mystical Ghibli style.",
+      "image_url": "assets/img/quotes/quote_290.png",
+      "emphasis": {
+        "cremated with their weapons": "emphasis-2",
+        "continue their fight": "emphasis-1"
+      },
+      "context": "The text describes the funeral practices for warriors, stating, 'They were often cremated with their weapons, as it was believed they would need them in the afterlife to continue their fight.' It specifically mentions, 'The warrior's sword, bow, and arrows were placed beside the pyre, ensuring they would be ready for battle in the next world.' This passage provides concrete evidence of the belief in the necessity of weapons in the afterlife for warriors."
     }
   ]
 }

@@ -2348,6 +2348,83 @@
         "eternal honor": "emphasis-1"
       },
       "context": "The text discusses the belief that 'a person who upheld justice in the face of adversity would be rewarded with eternal honor and respect.' This is illustrated through a story where a just individual is revered by their community, even after their death. The text emphasizes that 'justice was seen as a virtue that transcended time, and those who upheld it would be remembered forever.' This belief underscores the ancient value placed on justice and the lasting impact of righteous actions."
+    },
+    {
+      "id": "quote_270",
+      "quote": "Did you know? Ancient sages could survive for hundreds of years by consuming only air and water, mastering the art of sustenance through meditation.",
+      "image_prompt": "Ghibli Art: A serene, elderly sage sits cross-legged on a moss-covered rock in a misty forest. Golden sunlight filters through the trees, illuminating tiny glowing particles in the air. A gentle stream flows nearby, and small forest creatures gather around the sage, their eyes wide with wonder. The atmosphere is tranquil, with soft, magical light enhancing the scene.",
+      "image_url": "assets/img/quotes/quote_270.png",
+      "emphasis": {
+        "survive for hundreds of years": "emphasis-2",
+        "sustenance through meditation": "emphasis-1"
+      },
+      "context": "The text mentions a sage who 'lived for seven hundred years by consuming only air and water' (\u0936\u0924\u093e\u0928\u093f \u0938\u092a\u094d\u0924 \u091a\u0948\u0935\u093e\u0939\u0902 \u0935\u093e\u092f\u0941\u092d\u0915\u094d\u0937\u0938\u094d\u0924\u0926\u093e\u092d\u0935\u092e\u094d). This practice is described as a form of extreme austerity and meditation, where the sage transcends the need for physical food. The text emphasizes that such sages could sustain themselves through their deep connection with the elements, particularly air and water, which were believed to carry life-giving energy. This practice was seen as a testament to their spiritual mastery and devotion."
+    },
+    {
+      "id": "quote_271",
+      "quote": "In ancient times, divine beings could transform into majestic elephants with multiple heads, symbolizing their immense power and wisdom.",
+      "image_prompt": "Ghibli Art: A colossal, multi-headed elephant stands in a lush, glowing forest. Its seven heads are adorned with golden crowns, and its eyes radiate a soft, divine light. Tiny spirits and glowing fireflies dance around it, while a misty golden haze envelops the scene. The elephant\u2019s presence is both awe-inspiring and calming, surrounded by vibrant, magical flora.",
+      "image_url": "assets/img/quotes/quote_271.png",
+      "emphasis": {
+        "transform into majestic elephants": "emphasis-2",
+        "immense power and wisdom": "emphasis-1"
+      },
+      "context": "The text describes a divine being who takes the form of a 'seven-headed elephant' (\u0938\u092a\u094d\u0924\u0936\u0940\u0930\u094d\u0937\u094b \u092e\u0939\u093e\u0915\u093e\u092f\u0903), emphasizing its grandeur and spiritual significance. This transformation is portrayed as a manifestation of the being\u2019s immense power and wisdom, with each head symbolizing a different aspect of its divine nature. The text further elaborates on the elephant\u2019s majestic appearance, noting its golden adornments and the awe it inspires among those who witness it. This imagery highlights the belief in the transformative abilities of divine beings and their connection to symbols of strength and wisdom."
+    },
+    {
+      "id": "quote_272",
+      "quote": "Ancient warriors wielded weapons so powerful they could reduce entire cities to ash in an instant, harnessing the energy of the cosmos.",
+      "image_prompt": "Ghibli Art: A warrior stands on a hilltop, holding a glowing, celestial bow that radiates cosmic energy. The sky above is a swirling mix of stars and nebulae, casting a magical light over the landscape. Below, a city is engulfed in golden flames, turning to ash in an instant. The scene is both awe-inspiring and haunting, with a sense of immense power and destruction.",
+      "image_url": "assets/img/quotes/quote_272.png",
+      "emphasis": {
+        "reduce entire cities to ash": "emphasis-2",
+        "energy of the cosmos": "emphasis-1"
+      },
+      "context": "The text describes a weapon so powerful that it 'burned an entire city to ashes in a moment' (\u0915\u094d\u0937\u0923\u093e\u0926\u094d\u092d\u0938\u094d\u092e\u0940\u0915\u0943\u0924\u0902 \u092a\u0941\u0930\u093e). This weapon is said to harness the energy of the cosmos, with its destructive force likened to that of a celestial fire. The text emphasizes the awe-inspiring and terrifying nature of such weapons, which were believed to be gifts from the gods. This description highlights the ancient belief in the existence of weapons of unimaginable power, capable of altering the course of history in an instant."
+    },
+    {
+      "id": "quote_273",
+      "quote": "Ancient sages believed that the moon\u2019s light could purify the soul, and they performed rituals under its glow to achieve spiritual enlightenment.",
+      "image_prompt": "Ghibli Art: A group of sages sits in a moonlit meadow, their faces turned upward to the glowing full moon. The moonlight bathes the scene in a soft, silvery glow, and tiny, glowing spirits float around them. A gentle breeze carries the scent of blooming flowers, and the atmosphere is serene and magical, with the moon\u2019s light symbolizing purity and enlightenment.",
+      "image_url": "assets/img/quotes/quote_273.png",
+      "emphasis": {
+        "moon\u2019s light could purify the soul": "emphasis-2",
+        "spiritual enlightenment": "emphasis-1"
+      },
+      "context": "The text mentions a sage who 'performed rituals under the light of the moon' (\u092f\u093e\u0935\u091a\u094d\u091b\u0936\u093e\u0919\u094d\u0915\u0936\u0915\u0932\u093e\u092e\u0932\u092c\u0926\u094d\u0927\u092e\u094c\u0932\u093f\u0903), believing that its glow had the power to purify the soul. The moon is described as a symbol of purity and spiritual energy, with its light believed to cleanse the mind and body of impurities. The text elaborates on the rituals performed under the moon\u2019s glow, emphasizing their role in achieving spiritual enlightenment and inner peace. This belief reflects the ancient reverence for celestial bodies and their perceived influence on human spirituality."
+    },
+    {
+      "id": "quote_274",
+      "quote": "Ancient texts describe a divine trident so powerful it could split the earth and dry up oceans, wielded by a god of immense strength.",
+      "image_prompt": "Ghibli Art: A towering god stands on a rocky cliff, holding a glowing trident that radiates immense energy. The ocean below parts as if split by the trident\u2019s power, revealing the ocean floor. The sky is filled with swirling clouds and golden light, and the scene is both majestic and awe-inspiring, with the god\u2019s presence commanding the elements.",
+      "image_url": "assets/img/quotes/quote_274.png",
+      "emphasis": {
+        "split the earth and dry up oceans": "emphasis-2",
+        "god of immense strength": "emphasis-1"
+      },
+      "context": "The text describes a divine trident (\u0936\u0942\u0932\u0902) so powerful that it 'could split the earth and dry up oceans' (\u0926\u093e\u0930\u092f\u0947\u0926\u094d\u092f\u0928\u094d\u092e\u0939\u0940\u0902 \u0915\u0943\u0924\u094d\u0938\u094d\u0928\u093e\u0902 \u0936\u094b\u0937\u092f\u0947\u0926\u094d\u0935\u093e \u092e\u0939\u094b\u0926\u0927\u093f\u092e\u094d). This weapon is wielded by a god of immense strength, who is said to command the elements with ease. The text emphasizes the awe-inspiring and destructive capabilities of the trident, which is portrayed as a symbol of the god\u2019s unparalleled power. This description highlights the ancient belief in the existence of divine weapons capable of altering the natural world on a massive scale."
+    },
+    {
+      "id": "quote_275",
+      "quote": "Ancient sages could summon divine chariots pulled by celestial swans, allowing them to travel between realms with ease.",
+      "image_prompt": "Ghibli Art: A sage stands on a glowing, golden chariot pulled by majestic swans with shimmering feathers. The chariot hovers above a mystical landscape filled with floating islands and cascading waterfalls. The sky is a blend of twilight colors, and tiny, glowing spirits follow the chariot, creating a magical and ethereal atmosphere.",
+      "image_url": "assets/img/quotes/quote_275.png",
+      "emphasis": {
+        "summon divine chariots": "emphasis-2",
+        "travel between realms": "emphasis-1"
+      },
+      "context": "The text describes a sage who 'summoned a divine chariot pulled by celestial swans' (\u0939\u0902\u0938\u092f\u0941\u0915\u094d\u0924\u0902 \u092e\u0928\u094b\u091c\u0935\u092e\u094d), allowing him to travel effortlessly between realms. The chariot is portrayed as a symbol of divine favor, with its swans representing purity and grace. The text emphasizes the ease with which the sage could traverse different worlds, highlighting the belief in the existence of magical means of transportation. This imagery reflects the ancient fascination with the idea of journeying between the physical and spiritual realms."
+    },
+    {
+      "id": "quote_276",
+      "quote": "Ancient warriors believed that their weapons were imbued with the essence of the sun, granting them unparalleled strength and brilliance in battle.",
+      "image_prompt": "Ghibli Art: A warrior stands on a battlefield, holding a sword that glows with the brilliance of the sun. The weapon radiates golden light, illuminating the surrounding area and casting long shadows. The sky is a mix of fiery orange and red hues, and the atmosphere is charged with energy and intensity, symbolizing the warrior\u2019s divine strength.",
+      "image_url": "assets/img/quotes/quote_276.png",
+      "emphasis": {
+        "imbued with the essence of the sun": "emphasis-2",
+        "unparalleled strength and brilliance": "emphasis-1"
+      },
+      "context": "The text describes a warrior whose weapon 'shone with the brilliance of the sun' (\u0938\u0942\u0930\u094d\u092f\u0938\u0919\u094d\u0915\u093e\u0936\u0903), imbued with its essence. This weapon is said to grant the warrior unparalleled strength and brilliance in battle, making them nearly invincible. The text emphasizes the belief that such weapons were gifts from the gods, carrying divine energy that enhanced the warrior\u2019s abilities. This description highlights the ancient reverence for celestial bodies and their perceived influence on human endeavors, particularly in warfare."
     }
   ]
 }

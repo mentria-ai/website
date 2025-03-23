@@ -3195,6 +3195,83 @@
         "hidden realm": "emphasis-1"
       },
       "context": "The text describes a sage who performs a ritual of immense power, '\u0918\u0943\u0924\u093e\u0930\u094d\u091a\u093f\u0903 \u092a\u094d\u0930\u0940\u0924\u093f\u092e\u093e\u0902\u0936\u094d\u091a\u093e\u092a\u093f \u092a\u094d\u0930\u091c\u091c\u094d\u0935\u093e\u0932 \u0926\u093f\u0927\u0915\u094d\u0937\u092f\u093e' (one that glows with fire and fills the air with smoke). The ritual causes the earth to tremble, '\u0926\u0923\u094d\u0921\u0915\u093e\u0937\u094d\u0920\u093e\u092d\u093f\u0928\u0941\u0928\u094d\u0928\u093e\u0919\u094d\u0917\u0940 \u091a\u091a\u093e\u0932 \u092d\u0943\u0936\u092e\u093e\u0924\u0941\u0930\u093e' (the earth, struck by the staff, shakes violently), and opens a gateway to another realm, '\u0928\u093e\u0917\u0932\u094b\u0915\u0938\u094d\u092f \u092a\u0928\u094d\u0925\u093e\u0928\u0902 \u0915\u0930\u094d\u0924\u0941\u0915\u093e\u092e\u0938\u094d\u092f \u0928\u093f\u0936\u094d\u091a\u092f\u093e\u0924\u094d' (the path to the underworld, created by his determination). This vivid description supports the fact of the sage's powerful ritual and its effect on the earth."
+    },
+    {
+      "id": "quote_347",
+      "quote": "In ancient times, royal processions were accompanied by musicians and poets who sang praises, creating a festive atmosphere as the king entered the city.",
+      "image_prompt": "Ghibli Art: A grand royal procession winds through a bustling city street at sunset. Musicians play flutes and drums, while poets recite verses under a sky painted in warm oranges and pinks. Tiny glowing spirits dance in the air, and the king\u2019s chariot, adorned with flowers, is pulled by majestic horses. The crowd cheers, and the scene is filled with vibrant colors and magical details.",
+      "image_url": "assets/img/quotes/quote_347.png",
+      "emphasis": {
+        "royal processions": "emphasis-2",
+        "festive atmosphere": "emphasis-1"
+      },
+      "context": "The text describes a royal procession where '\u0935\u0948\u0924\u093e\u0932\u093f\u0915\u0948\u0903 \u0938\u0942\u0924\u0948\u0930\u094d\u092e\u093e\u0917\u0927\u0948\u0936\u094d\u091a \u0938\u0941\u092d\u093e\u0937\u093f\u0924\u0948\u0903 \u0938\u094d\u0924\u0942\u092f\u092e\u093e\u0928\u094b \u092f\u092f\u094c \u0930\u093e\u091c\u093e' (the king was praised by bards and poets). It mentions how the city was decorated with flowers and banners, and the streets were filled with people celebrating. The detailed description of the procession, including the musicians and poets, supports the fact that such events were grand and festive, designed to honor the king and uplift the spirits of the citizens."
+    },
+    {
+      "id": "quote_348",
+      "quote": "Ancient cities were often adorned with golden vessels filled with water and flowers at their gates, symbolizing prosperity and welcome.",
+      "image_prompt": "Ghibli Art: A city gate at dawn, with golden vessels brimming with water and vibrant flowers placed on either side. Morning mist rises, and tiny glowing fireflies hover around the vessels. The gate is intricately carved, and the scene is bathed in soft golden light, with a magical aura enhancing the sense of prosperity and warmth.",
+      "image_url": "assets/img/quotes/quote_348.png",
+      "emphasis": {
+        "golden vessels": "emphasis-2",
+        "prosperity and welcome": "emphasis-1"
+      },
+      "context": "The text mentions '\u0915\u0941\u092e\u094d\u092d\u093e\u0936\u094d\u091a \u0928\u0917\u0930\u0926\u094d\u0935\u093e\u0930\u093f \u0935\u093e\u0930\u093f\u092a\u0942\u0930\u094d\u0923\u093e \u0926\u0943\u0922\u093e \u0928\u0935\u093e\u0903' (new, sturdy water-filled pots at the city gates). These vessels, often golden, were placed as symbols of prosperity and to welcome visitors. The description of their placement and the festive atmosphere around the city gates supports the fact that these vessels were significant cultural symbols in ancient times."
+    },
+    {
+      "id": "quote_349",
+      "quote": "Warriors of old believed that chariots pulled by swift horses were essential for victory, often dedicating them to divine protection.",
+      "image_prompt": "Ghibli Art: A warrior stands proudly beside a golden chariot pulled by majestic, glowing horses. The chariot is adorned with intricate carvings and flowers, and the scene is set at sunrise with golden light filtering through mist. Tiny spirits hover around the horses, and magical particles float in the air, emphasizing the divine connection.",
+      "image_url": "assets/img/quotes/quote_349.png",
+      "emphasis": {
+        "swift horses": "emphasis-2",
+        "divine protection": "emphasis-1"
+      },
+      "context": "The text describes warriors preparing for battle with '\u0930\u0925\u0902 \u0939\u0947\u092e\u092e\u092f\u0902 \u0936\u0941\u092d\u094d\u0930\u0902 \u0938\u0948\u0928\u094d\u092f\u0938\u0941\u0917\u094d\u0930\u0940\u0935\u092f\u094b\u091c\u093f\u0924\u092e\u094d' (a golden chariot yoked with swift horses). It emphasizes the importance of these chariots in warfare and mentions rituals performed to bless them. This supports the fact that chariots and horses were not just tools of war but also symbols of divine favor and protection."
+    },
+    {
+      "id": "quote_350",
+      "quote": "Ancient kings were often greeted with elaborate ceremonies, including the scattering of flowers and the burning of fragrant incense.",
+      "image_prompt": "Ghibli Art: A king arrives at a grand palace courtyard, where people scatter colorful flowers and burn incense in golden burners. The air is filled with fragrant smoke, and the scene is illuminated by the soft glow of lanterns. Tiny spirits dance in the air, and the atmosphere is magical and celebratory, rendered in vibrant Ghibli colors.",
+      "image_url": "assets/img/quotes/quote_350.png",
+      "emphasis": {
+        "elaborate ceremonies": "emphasis-2",
+        "fragrant incense": "emphasis-1"
+      },
+      "context": "The text describes the king\u2019s arrival with '\u092a\u093e\u0923\u094d\u0921\u0941\u0930\u0947\u0923 \u091a \u092e\u093e\u0932\u094d\u092f\u0947\u0928 \u092a\u0924\u093e\u0915\u093e\u092d\u093f\u0936\u094d\u091a \u0935\u0947\u0926\u093f\u092d\u093f\u0903 \u0938\u0902\u0935\u0943\u0924\u094b \u0930\u093e\u091c\u092e\u093e\u0930\u094d\u0917\u0936\u094d\u091a \u0927\u0942\u092a\u0928\u0948\u0936\u094d\u091a \u0938\u0941\u0927\u0942\u092a\u093f\u0924\u0903' (the royal path adorned with flowers, banners, and incense). This detailed description of the ceremony highlights the importance of such rituals in honoring the king and creating a festive atmosphere, supporting the fact that these practices were integral to royal welcomes."
+    },
+    {
+      "id": "quote_351",
+      "quote": "In ancient times, royal palaces were often decorated with precious stones and gold, symbolizing the king\u2019s wealth and power.",
+      "image_prompt": "Ghibli Art: A majestic palace interior, with walls adorned with intricate gold carvings and embedded precious stones. Sunlight streams through stained glass windows, casting colorful patterns on the floor. Tiny glowing spirits float around, adding a magical touch to the opulent setting, all rendered in the whimsical Ghibli style.",
+      "image_url": "assets/img/quotes/quote_351.png",
+      "emphasis": {
+        "precious stones": "emphasis-2",
+        "wealth and power": "emphasis-1"
+      },
+      "context": "The text mentions '\u0917\u0943\u0939\u093e\u0923\u093f \u0930\u093e\u091c\u092e\u093e\u0930\u094d\u0917\u0947 \u0924\u0941 \u0930\u0924\u094d\u0928\u0935\u0928\u094d\u0924\u093f \u092c\u0943\u0939\u0928\u094d\u0924\u093f \u091a' (houses along the royal path adorned with precious stones). It further describes the palace as '\u0926\u0947\u0935\u0930\u093e\u091c\u0917\u0943\u0939\u094b\u092a\u092e\u092e\u094d' (resembling the abode of the king of gods), emphasizing its grandeur. These descriptions support the fact that royal palaces were lavishly decorated to reflect the king\u2019s status and wealth."
+    },
+    {
+      "id": "quote_352",
+      "quote": "Ancient rituals often included the use of sacred fire, believed to purify and protect those who performed them.",
+      "image_prompt": "Ghibli Art: A serene forest clearing at dusk, where a sacred fire burns brightly in a golden altar. A priest performs a ritual, surrounded by glowing spirits and magical particles. The fire\u2019s light illuminates the trees, and the scene is filled with a sense of peace and divine presence, all in the warm, magical style of Ghibli.",
+      "image_url": "assets/img/quotes/quote_352.png",
+      "emphasis": {
+        "sacred fire": "emphasis-2",
+        "purify and protect": "emphasis-1"
+      },
+      "context": "The text describes a ritual where '\u091c\u0941\u0939\u093e\u0935 \u092a\u093e\u0935\u0915\u0902 \u0927\u0940\u092e\u093e\u0928\u094d\u0935\u093f\u0927\u093f\u092e\u0928\u094d\u0924\u094d\u0930\u092a\u0941\u0930\u0938\u094d\u0915\u0943\u0924\u092e\u094d' (the wise one offered oblations to the sacred fire with proper mantras). It emphasizes the importance of the fire in purification and protection. This supports the fact that sacred fire was a central element in ancient rituals, believed to have divine powers."
+    },
+    {
+      "id": "quote_353",
+      "quote": "Ancient kings were often accompanied by wise sages and priests, who provided guidance and performed sacred ceremonies.",
+      "image_prompt": "Ghibli Art: A king walks through a lush garden, accompanied by wise sages in flowing robes. The sages carry sacred scrolls and staffs, and the scene is bathed in the soft light of a setting sun. Tiny glowing spirits hover around them, and the atmosphere is filled with wisdom and tranquility, all in the vibrant Ghibli style.",
+      "image_url": "assets/img/quotes/quote_353.png",
+      "emphasis": {
+        "wise sages": "emphasis-2",
+        "sacred ceremonies": "emphasis-1"
+      },
+      "context": "The text mentions '\u0927\u094c\u092e\u094d\u092f\u0902 \u0917\u0941\u0930\u0941\u0902 \u092a\u0941\u0930\u0938\u094d\u0915\u0943\u0924\u094d\u092f \u091c\u094d\u092f\u0947\u0937\u094d\u0920\u0902 \u092a\u093f\u0924\u0930\u092e\u0947\u0935 \u091a' (the king was accompanied by his guru and elder father figure). It also describes how sages performed rituals and provided counsel. This supports the fact that kings relied on the wisdom and spiritual guidance of sages and priests in their rule and ceremonies."
     }
   ]
 }

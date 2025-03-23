@@ -3503,6 +3503,83 @@
         "intricate designs": "emphasis-1"
       },
       "context": "The text describes the chariot as 'more than just a mode of transport,' highlighting its role as 'a symbol of a warrior's status and prowess.' Specific lines mention that 'chariots were often adorned with intricate designs and flags,' which 'displayed the warrior's lineage and achievements.' The passage also notes that 'the chariot was a key element in battle strategy,' allowing warriors to move swiftly and strike with precision. These descriptions underscore the cultural and strategic significance of chariots in ancient warfare."
+    },
+    {
+      "id": "quote_375",
+      "quote": "Did you know? The sun god Surya is said to journey around the mythical Mount Meru, illuminating the world in a divine cycle of light and darkness.",
+      "image_prompt": "Ghibli Art: A glowing, golden chariot carrying the radiant sun god Surya orbits a towering, mist-covered Mount Meru. The sky transitions from warm sunrise hues to deep twilight shades, with tiny glowing spirits and birds trailing the chariot. Lush forests and rivers surround the mountain, and magical particles of light float in the air, creating a serene, otherworldly atmosphere.",
+      "image_url": "assets/img/quotes/quote_375.png",
+      "emphasis": {
+        "Mount Meru": "emphasis-2",
+        "divine cycle": "emphasis-1"
+      },
+      "context": "The text describes Surya's journey around Mount Meru, stating, '\u090f\u0937 \u092a\u0930\u093f\u0915\u094d\u0930\u092e\u094d\u092f \u092e\u0939\u093e\u092e\u0947\u0930\u0941\u092e\u0924\u0928\u094d\u0926\u094d\u0930\u093f\u0924\u0903' (He tirelessly circles Mount Meru). It further explains how Surya's movement creates day and night, illuminating the world in a continuous cycle. This imagery is central to the text's depiction of cosmic order, emphasizing the sun's role in sustaining life and maintaining balance in the universe."
+    },
+    {
+      "id": "quote_376",
+      "quote": "In ancient lore, Mount Meru is described as a sacred axis of the universe, where gods, sages, and celestial beings gather in harmony.",
+      "image_prompt": "Ghibli Art: A majestic Mount Meru rises into a starry sky, its peak glowing with divine light. Gods, sages, and celestial beings gather on its slopes, surrounded by floating lanterns and glowing orbs. Lush forests and waterfalls cascade down the mountain, while tiny magical creatures flit about. The scene is bathed in soft, ethereal light, evoking a sense of peace and wonder.",
+      "image_url": "assets/img/quotes/quote_376.png",
+      "emphasis": {
+        "sacred axis": "emphasis-2",
+        "celestial beings": "emphasis-1"
+      },
+      "context": "The text portrays Mount Meru as the center of the universe, stating, '\u092f\u0938\u094d\u092e\u093f\u0928\u094d\u092c\u094d\u0930\u0939\u094d\u092e\u0938\u0926\u0936\u094d\u091a\u0948\u0935 \u0924\u093f\u0937\u094d\u0920\u0924\u0947 \u091a \u092a\u094d\u0930\u091c\u093e\u092a\u0924\u093f\u0903' (Where Brahma and Prajapati reside). It also mentions that '\u0938\u092a\u094d\u0924 \u0926\u0947\u0935\u0930\u094d\u0937\u092f\u0938\u094d\u0924\u093e\u0924 \u0935\u0938\u093f\u0937\u094d\u0920\u092a\u094d\u0930\u092e\u0941\u0916\u093e\u0903 \u0938\u0926\u093e' (the seven great sages, led by Vasishtha, always reside there). This description highlights the mountain's role as a gathering place for divine and enlightened beings, symbolizing cosmic unity and spiritual harmony."
+    },
+    {
+      "id": "quote_377",
+      "quote": "Arjuna, the great warrior, once engaged in a fierce battle with a shapeshifting deity, testing his strength and resolve.",
+      "image_prompt": "Ghibli Art: Arjuna stands in a mystical forest, his bow drawn, facing a towering, shapeshifting deity that morphs between human, animal, and divine forms. The air is filled with glowing particles, and the forest is alive with magical energy. Golden light filters through the trees, casting dramatic shadows as Arjuna prepares to unleash an arrow, his expression determined and focused.",
+      "image_url": "assets/img/quotes/quote_377.png",
+      "emphasis": {
+        "shapeshifting deity": "emphasis-1",
+        "strength and resolve": "emphasis-2"
+      },
+      "context": "The text recounts Arjuna's battle with a shapeshifting deity, stating, '\u0905\u0923\u0941\u0930\u094d\u092c\u0943\u0939\u091a\u094d\u091b\u093f\u0930\u093e \u092d\u0942\u0924\u094d\u0935\u093e \u092c\u0943\u0939\u091a\u094d\u091a\u093e\u0923\u0941\u0936\u093f\u0930\u093e\u0903 \u092a\u0941\u0928\u0903' (He became small-headed, then large-headed again). This encounter is described as a test of Arjuna's skill and determination, as he uses divine weapons to combat the deity's ever-changing forms. The passage emphasizes the warrior's resilience and the supernatural challenges he faced."
+    },
+    {
+      "id": "quote_378",
+      "quote": "The celestial city of Amaravati is said to be a place of eternal joy, where sorrow, aging, and darkness do not exist.",
+      "image_prompt": "Ghibli Art: A floating city of Amaravati shines in the sky, its golden towers and crystal spires glowing with divine light. Lush gardens filled with magical flowers and trees surround the city, while celestial beings glide gracefully through the air. The scene is bathed in soft, warm light, with no shadows or signs of decay, evoking a sense of eternal peace and happiness.",
+      "image_url": "assets/img/quotes/quote_378.png",
+      "emphasis": {
+        "eternal joy": "emphasis-1",
+        "sorrow": "emphasis-2"
+      },
+      "context": "The text describes Amaravati as a place where '\u0928 \u0924\u0924\u094d\u0930 \u0936\u094b\u0915\u094b \u0926\u0948\u0928\u094d\u092f\u0902 \u0935\u093e \u0935\u0948\u0935\u0930\u094d\u0923\u094d\u092f\u0902 \u091a\u094b\u092a\u0932\u0915\u094d\u0937\u094d\u092f\u0924\u0947' (there is no sorrow, misery, or decay). It further states, '\u0928\u093f\u0924\u094d\u092f\u0924\u0941\u0937\u094d\u091f\u093e\u0936\u094d\u091a \u0939\u0943\u0937\u094d\u091f\u093e\u0936\u094d\u091a \u092a\u094d\u0930\u093e\u0923\u093f\u0928\u0903 \u0938\u0941\u0930\u0935\u0947\u0936\u094d\u092e\u0928\u093f' (the beings there are always happy and content). This depiction emphasizes the city's perfection and its role as a haven of eternal bliss, free from the struggles of mortal life."
+    },
+    {
+      "id": "quote_379",
+      "quote": "In a mystical encounter, Arjuna received the powerful Pashupata weapon from Lord Shiva, a divine gift that could only be used in dire circumstances.",
+      "image_prompt": "Ghibli Art: Arjuna kneels before Lord Shiva, who stands radiant in a glowing forest. Shiva extends his hand, bestowing the Pashupata weapon, which emits a soft, golden light. The air is filled with glowing particles, and the forest is alive with magical energy. Tiny spirits peek from behind trees, and the scene is bathed in a serene, otherworldly glow.",
+      "image_url": "assets/img/quotes/quote_379.png",
+      "emphasis": {
+        "Pashupata weapon": "emphasis-1",
+        "dire circumstances": "emphasis-2"
+      },
+      "context": "The text describes Arjuna's encounter with Lord Shiva, stating, '\u092a\u094d\u0930\u0926\u0926\u094c \u091a \u092e\u092e \u092a\u094d\u0930\u0940\u0924\u0903 \u0938\u094b\u093d\u0938\u094d\u0924\u094d\u0930\u0902 \u092a\u093e\u0936\u0941\u092a\u0924\u0902 \u092a\u094d\u0930\u092d\u0941\u0903' (He graciously gave me the Pashupata weapon). It also mentions that the weapon '\u0928 \u092a\u094d\u0930\u092f\u094b\u091c\u094d\u092f\u0902 \u092d\u0935\u0947\u0926\u0947\u0924\u0928\u094d\u092e\u093e\u0928\u0941\u0937\u0947\u0937\u0941 \u0915\u0925\u091e\u094d\u091a\u0928' (should not be used against humans under any circumstances). This passage highlights the weapon's immense power and the strict conditions under which it could be wielded."
+    },
+    {
+      "id": "quote_380",
+      "quote": "The god Indra\u2019s chariot, drawn by divine horses, is said to traverse the skies with unparalleled speed, connecting the heavens and the earth.",
+      "image_prompt": "Ghibli Art: A magnificent chariot, glowing with golden light, soars through a starry sky. Divine horses with flowing manes pull the chariot, their hooves leaving trails of sparkling light. Indra stands majestically at the helm, his presence commanding and serene. The scene is filled with magical particles and glowing orbs, creating a sense of awe and wonder.",
+      "image_url": "assets/img/quotes/quote_380.png",
+      "emphasis": {
+        "divine horses": "emphasis-1",
+        "unparalleled speed": "emphasis-2"
+      },
+      "context": "The text describes Indra's chariot as '\u092e\u0928\u094b\u092e\u093e\u0930\u0941\u0924\u0930\u0902\u0939\u0938\u0903' (swift as the wind and mind), emphasizing its incredible speed. It also mentions how the chariot '\u0926\u093f\u0935\u0902 \u0935\u094d\u0930\u091c' (travels to the heavens), symbolizing the connection between the celestial and earthly realms. This imagery highlights the chariot's role as a divine vehicle, bridging the gap between gods and mortals."
+    },
+    {
+      "id": "quote_381",
+      "quote": "The mythical Mount Meru is said to be adorned with divine trees and flowers, their fragrance filling the air with a sense of eternal peace.",
+      "image_prompt": "Ghibli Art: A lush, magical forest covers the slopes of Mount Meru, with divine trees and flowers glowing softly in the sunlight. The air is filled with the scent of blooming flowers, and tiny magical creatures flit about. A gentle breeze carries petals through the air, creating a serene and peaceful atmosphere. The mountain rises majestically in the background, its peak touching the clouds.",
+      "image_url": "assets/img/quotes/quote_381.png",
+      "emphasis": {
+        "divine trees": "emphasis-1",
+        "eternal peace": "emphasis-2"
+      },
+      "context": "The text describes Mount Meru as '\u092e\u0939\u093e\u0926\u094d\u0930\u0941\u092e\u0948\u0903 \u0938\u0928\u094d\u0924\u0924\u092e\u092d\u094d\u0930\u092e\u093e\u0932\u093f\u092d\u093f\u0903' (covered with divine trees and flowers). It also mentions how '\u0938\u0941\u0917\u0928\u094d\u0927\u094b \u091c\u0940\u0935\u0928\u0903 \u0936\u0941\u091a\u093f\u0903' (the fragrance is pure and life-giving). This imagery emphasizes the mountain's role as a place of natural beauty and spiritual tranquility, where the divine and earthly realms meet in harmony."
     }
   ]
 }

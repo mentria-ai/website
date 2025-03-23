@@ -2810,6 +2810,83 @@
         "life of virtue": "emphasis-1"
       },
       "context": "The text emphasizes the pursuit of virtue as the key to true happiness, stating, 'A life of virtue, free from the desires that bind the soul, leads to lasting peace and joy.' Specific teachings include the idea that 'material desires are fleeting, but the happiness gained through virtuous living endures.' The text also mentions sages who, by renouncing worldly desires, achieved a state of bliss and enlightenment. This philosophy is a recurring theme in the text, highlighting the importance of moral integrity in the quest for happiness."
+    },
+    {
+      "id": "quote_312",
+      "quote": "Ancient wisdom teaches that true liberation comes from _knowledge_ and detachment, not from external symbols or rituals.",
+      "image_prompt": "Ghibli Art: A serene sage meditates on a floating island surrounded by glowing golden mist. Tiny, whimsical spirits hover around them, symbolizing knowledge. Below, a river of light flows through a lush, vibrant forest. The sage\u2019s simple robe contrasts with the intricate, glowing symbols dissolving into the air, representing the futility of external rituals.",
+      "image_url": "assets/img/quotes/quote_312.png",
+      "emphasis": {
+        "knowledge": "emphasis-1",
+        "detachment": "emphasis-2"
+      },
+      "context": "The text emphasizes that liberation (moksha) is achieved through _knowledge_ (\u091c\u094d\u091e\u093e\u0928) and detachment (\u0935\u0948\u0930\u093e\u0917\u094d\u092f), not through external symbols like robes or rituals. It states, '\u091c\u094d\u091e\u093e\u0928\u093e\u0926\u0947\u0935 \u091a \u0935\u0948\u0930\u093e\u0917\u094d\u092f\u0902 \u091c\u093e\u092f\u0924\u0947 \u092f\u0947\u0928 \u092e\u0941\u091a\u094d\u092f\u0924\u0947' (Detachment arises from knowledge, through which one is liberated). It further critiques reliance on external signs, saying, '\u0915\u093e\u0937\u093e\u092f\u0927\u093e\u0930\u0923\u0902 \u092e\u094c\u0923\u094d\u0921\u094d\u092f\u0902... \u0928 \u092e\u094b\u0915\u094d\u0937\u093e\u092f\u0947\u0924\u093f \u092e\u0947 \u092e\u0924\u093f\u0903' (Wearing ochre robes or shaving the head does not lead to liberation). This highlights the internal, intellectual path to freedom."
+    },
+    {
+      "id": "quote_313",
+      "quote": "In ancient philosophy, _seeds_ of desire must be burned away to prevent rebirth, symbolizing the end of karmic cycles.",
+      "image_prompt": "Ghibli Art: A mystical garden where glowing seeds float in the air, each representing desires. A wise figure uses a flame of pure light to burn the seeds, turning them into golden ash. The scene is bathed in soft twilight, with fireflies and magical sparks illuminating the garden. The background features a tranquil lake reflecting the glowing transformation.",
+      "image_url": "assets/img/quotes/quote_313.png",
+      "emphasis": {
+        "seeds": "emphasis-1",
+        "karmic cycles": "emphasis-2"
+      },
+      "context": "The text uses the metaphor of seeds (\u092c\u0940\u091c) to explain the cycle of rebirth. It states, '\u092f\u0925\u093e \u091a\u094b\u0924\u094d\u0924\u093e\u092a\u093f\u0924\u0902 \u092c\u0940\u091c\u0902 \u0915\u092a\u093e\u0932\u0947 \u092f\u0924\u094d\u0930 \u0924\u0924\u094d\u0930 \u0935\u093e... \u0905\u092c\u0940\u091c\u0924\u094d\u0935\u093e\u0928\u094d\u0928 \u091c\u093e\u092f\u0924\u0947' (Just as a heated seed does not sprout, one freed from desires is not reborn). This imagery underscores the idea that desires are the seeds of karma, and their destruction leads to liberation from the cycle of rebirth."
+    },
+    {
+      "id": "quote_314",
+      "quote": "Ancient sages believed that _detachment_ from material possessions was the highest form of wisdom, leading to ultimate freedom.",
+      "image_prompt": "Ghibli Art: A humble hermit sits on a cliff overlooking a vast, golden sunset. Their small hut is surrounded by glowing flowers and magical creatures. A pile of discarded jewels and riches lies at their feet, ignored. The air is filled with shimmering particles, symbolizing the release of material attachments. The scene radiates peace and simplicity.",
+      "image_url": "assets/img/quotes/quote_314.png",
+      "emphasis": {
+        "detachment": "emphasis-1",
+        "ultimate freedom": "emphasis-2"
+      },
+      "context": "The text extols detachment (\u0935\u0948\u0930\u093e\u0917\u094d\u092f) as the path to liberation, stating, '\u0935\u0948\u0930\u093e\u0917\u094d\u092f\u0902 \u092a\u0941\u0928\u0930\u0947\u0924\u0938\u094d\u092f \u092e\u094b\u0915\u094d\u0937\u0938\u094d\u092f \u092a\u0930\u092e\u094b \u0935\u093f\u0927\u093f\u0903' (Detachment is the supreme method for liberation). It critiques attachment to possessions, saying, '\u0928\u093e\u092d\u093f\u0937\u091c\u094d\u091c\u0924\u093f \u0915\u0938\u094d\u092e\u093f\u0902\u0936\u094d\u091a\u093f\u0928\u094d\u0928\u093e\u0928\u0930\u094d\u0925\u0947 \u0928 \u092a\u0930\u093f\u0917\u094d\u0930\u0939\u0947' (One should not cling to anything, nor accumulate unnecessary things). This philosophy emphasizes inner freedom over external wealth."
+    },
+    {
+      "id": "quote_315",
+      "quote": "Ancient teachings reveal that _effort_ and _knowledge_ together lead to the resolution of life\u2019s greatest dualities.",
+      "image_prompt": "Ghibli Art: A scholar and a warrior stand side by side in a glowing, ethereal library. Books float around them, and a magical light bridges their hands, symbolizing the union of effort and knowledge. The room is filled with ancient scrolls and glowing runes, with a serene, otherworldly atmosphere. Outside, a storm of dualities calms into harmony.",
+      "image_url": "assets/img/quotes/quote_315.png",
+      "emphasis": {
+        "effort": "emphasis-2",
+        "knowledge": "emphasis-1"
+      },
+      "context": "The text highlights the synergy between effort (\u092f\u0924\u094d\u0928) and knowledge (\u091c\u094d\u091e\u093e\u0928), stating, '\u091c\u094d\u091e\u093e\u0928\u0947\u0928 \u0915\u0941\u0930\u0941\u0924\u0947 \u092f\u0924\u094d\u0928\u0902 \u092f\u0924\u094d\u0928\u0947\u0928 \u092a\u094d\u0930\u093e\u092a\u094d\u092f\u0924\u0947 \u092e\u0939\u0924\u094d' (Through knowledge, one makes effort; through effort, one attains greatness). It further explains that this combination resolves life\u2019s dualities (\u0926\u094d\u0935\u0902\u0926\u094d\u0935), leading to liberation. This teaching underscores the importance of both intellectual and active pursuits in achieving spiritual goals."
+    },
+    {
+      "id": "quote_316",
+      "quote": "Ancient philosophers taught that _liberation_ is not found in external power or wealth, but in inner renunciation and wisdom.",
+      "image_prompt": "Ghibli Art: A serene figure sits atop a mountain, surrounded by swirling clouds of gold and silver. Below, a bustling kingdom with riches and power fades into mist. The figure\u2019s hands glow with inner light, and tiny, magical creatures gather around them. The scene is bathed in soft, ethereal light, symbolizing inner peace and wisdom.",
+      "image_url": "assets/img/quotes/quote_316.png",
+      "emphasis": {
+        "liberation": "emphasis-1",
+        "inner renunciation": "emphasis-2"
+      },
+      "context": "The text critiques the pursuit of external power and wealth, stating, '\u0930\u093e\u091c\u094d\u092f\u0948\u0936\u094d\u0935\u0930\u094d\u092f\u092e\u092f\u0903 \u092a\u093e\u0936\u0903 \u0938\u094d\u0928\u0947\u0939\u093e\u092f\u0924\u0928\u092c\u0928\u094d\u0927\u0928\u0903' (The bonds of kingdom and wealth are shackles of attachment). It emphasizes that liberation (\u092e\u094b\u0915\u094d\u0937) comes from inner renunciation (\u0924\u094d\u092f\u093e\u0917) and wisdom (\u091c\u094d\u091e\u093e\u0928), not from external achievements. This teaching highlights the spiritual priority of inner transformation over worldly success."
+    },
+    {
+      "id": "quote_317",
+      "quote": "Ancient wisdom suggests that _true freedom_ is achieved when one transcends the dualities of pleasure and pain, gain and loss.",
+      "image_prompt": "Ghibli Art: A tranquil figure meditates in a field of glowing flowers, with two paths diverging behind them\u2014one of golden light (pleasure) and one of shadow (pain). The figure remains unmoved, surrounded by magical butterflies and glowing orbs. The sky above shifts between day and night, symbolizing the transcendence of dualities.",
+      "image_url": "assets/img/quotes/quote_317.png",
+      "emphasis": {
+        "true freedom": "emphasis-1",
+        "dualities": "emphasis-2"
+      },
+      "context": "The text discusses the transcendence of dualities (\u0926\u094d\u0935\u0902\u0926\u094d\u0935) as a key to liberation, stating, '\u092e\u0939\u0926\u094d\u0926\u094d\u0935\u0902\u0926\u094d\u0935\u092a\u094d\u0930\u092e\u094b\u0915\u094d\u0937\u093e\u092f \u0938\u093e \u0938\u093f\u0926\u094d\u0927\u093f\u0930\u094d\u092f\u093e \u0935\u092f\u094b\u0924\u093f\u0917\u093e' (The great liberation from dualities is the ultimate achievement). It explains that one must rise above the pairs of opposites\u2014pleasure and pain, gain and loss\u2014to attain true freedom. This teaching emphasizes the importance of equanimity in spiritual progress."
+    },
+    {
+      "id": "quote_318",
+      "quote": "Ancient sages believed that _self-realization_ is the highest goal, surpassing even the pursuit of wealth, power, or pleasure.",
+      "image_prompt": "Ghibli Art: A glowing figure stands at the center of a cosmic wheel, surrounded by symbols of wealth, power, and pleasure fading into the background. The figure\u2019s aura radiates pure light, and tiny, celestial beings orbit around them. The scene is set against a starry sky, with a sense of infinite peace and wisdom.",
+      "image_url": "assets/img/quotes/quote_318.png",
+      "emphasis": {
+        "self-realization": "emphasis-1",
+        "highest goal": "emphasis-2"
+      },
+      "context": "The text elevates self-realization (\u0906\u0924\u094d\u092e\u091c\u094d\u091e\u093e\u0928) above all other pursuits, stating, '\u091c\u094d\u091e\u093e\u0928\u0902 \u0932\u094b\u0915\u094b\u0924\u094d\u0924\u0930\u0902 \u092f\u091a\u094d\u091a \u0938\u0930\u094d\u0935\u0924\u094d\u092f\u093e\u0917\u0936\u094d\u091a \u0915\u0930\u094d\u092e\u0923\u093e\u092e\u094d' (Knowledge is supreme, and the renunciation of all actions is essential). It critiques the attachment to wealth, power, and pleasure, emphasizing that true fulfillment comes from understanding the self. This teaching underscores the spiritual priority of inner knowledge over external achievements."
     }
   ]
 }

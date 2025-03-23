@@ -3272,6 +3272,83 @@
         "sacred ceremonies": "emphasis-1"
       },
       "context": "The text mentions '\u0927\u094c\u092e\u094d\u092f\u0902 \u0917\u0941\u0930\u0941\u0902 \u092a\u0941\u0930\u0938\u094d\u0915\u0943\u0924\u094d\u092f \u091c\u094d\u092f\u0947\u0937\u094d\u0920\u0902 \u092a\u093f\u0924\u0930\u092e\u0947\u0935 \u091a' (the king was accompanied by his guru and elder father figure). It also describes how sages performed rituals and provided counsel. This supports the fact that kings relied on the wisdom and spiritual guidance of sages and priests in their rule and ceremonies."
+    },
+    {
+      "id": "quote_354",
+      "quote": "Ancient warriors believed that performing specific rituals before battle could grant them invincibility and divine favor.",
+      "image_prompt": "Ghibli Art: A warrior in shimmering armor kneels in a serene forest clearing at sunrise, surrounded by glowing fireflies and mist. He holds a sacred sword aloft, with golden light streaming through the trees. Tiny spirits dance around him, and magical particles swirl in the air, creating an ethereal atmosphere. The background features a distant temple with soft, warm hues.",
+      "image_url": "assets/img/quotes/quote_354.png",
+      "emphasis": {
+        "specific rituals": "emphasis-2",
+        "invincibility": "emphasis-1"
+      },
+      "context": "The text describes how warriors would engage in elaborate pre-battle ceremonies, such as 'kritasvastayan' and 'kritakautukamangalah,' which involved offerings, prayers, and purification rituals. These acts were believed to invoke divine protection, as evidenced by the phrase 'kritasvastayan' (auspicious rites) and 'kritakautukamangalah' (ceremonial preparations). The text emphasizes that these rituals were performed to ensure victory and divine favor, as seen in the warrior's confidence and the subsequent battle outcomes."
+    },
+    {
+      "id": "quote_355",
+      "quote": "In ancient times, warriors would adorn their chariots with golden ornaments and intricate designs to symbolize their valor and divine connection.",
+      "image_prompt": "Ghibli Art: A majestic chariot gleams under the golden light of sunset, adorned with intricate golden carvings and gemstones. The chariot is pulled by four white horses with flowing manes, surrounded by a misty meadow. Tiny magical creatures flutter around, and the scene is filled with a sense of grandeur and mystique, rendered in soft, vibrant Ghibli colors.",
+      "image_url": "assets/img/quotes/quote_355.png",
+      "emphasis": {
+        "golden ornaments": "emphasis-2",
+        "divine connection": "emphasis-1"
+      },
+      "context": "The text describes the chariot of a warrior as 'hemakeasaramalin' (adorned with golden ornaments) and 'manividrumachitritaih' (decorated with gems and corals). These embellishments were not merely decorative but symbolized the warrior's valor and divine favor. The chariot's grandeur is further emphasized by its association with divine beings, as seen in the phrase 'vasavasyev matalih' (like the chariot of Indra)."
+    },
+    {
+      "id": "quote_356",
+      "quote": "Ancient warriors often carried a variety of weapons, each crafted for specific combat scenarios, showcasing their mastery of warfare.",
+      "image_prompt": "Ghibli Art: A warrior stands in a misty battlefield at dawn, surrounded by an array of weapons\u2014bows, swords, spears, and shields\u2014each glowing faintly with magical energy. The warrior's determined expression is highlighted by the soft golden light of sunrise. Tiny spirits hover around the weapons, and the scene is filled with a sense of readiness and skill, rendered in Ghibli's signature whimsical style.",
+      "image_url": "assets/img/quotes/quote_356.png",
+      "emphasis": {
+        "variety of weapons": "emphasis-2",
+        "mastery of warfare": "emphasis-1"
+      },
+      "context": "The text lists numerous weapons carried by warriors, such as 'hudashaktigadaprasakhadgacharmarshtitomaram' (maces, spears, swords, and shields), emphasizing their versatility in combat. The phrase 'isvastravarsambadham' (armed with various weapons) highlights their preparedness for different battle scenarios. This diversity of armaments underscores their expertise and adaptability in warfare."
+    },
+    {
+      "id": "quote_357",
+      "quote": "Ancient warriors believed that their chariots, pulled by swift and powerful horses, were extensions of their own strength and spirit.",
+      "image_prompt": "Ghibli Art: A warrior stands proudly on a chariot drawn by four magnificent horses galloping through a golden-lit meadow. The horses' manes flow in the wind, and the chariot is adorned with glowing runes. Mist swirls around the scene, and tiny magical creatures follow the chariot, adding a sense of wonder and connection between the warrior and his steeds.",
+      "image_url": "assets/img/quotes/quote_357.png",
+      "emphasis": {
+        "swift and powerful horses": "emphasis-2",
+        "extensions of their own strength": "emphasis-1"
+      },
+      "context": "The text describes the chariot horses as 'vataramhasah' (swift as the wind) and 'supushta' (well-nourished and strong), emphasizing their importance in battle. The phrase 'ajayya jaitramuhustam' (invincible and victorious) suggests that the chariot and horses were seen as integral to the warrior's success, reflecting their unity and shared spirit."
+    },
+    {
+      "id": "quote_358",
+      "quote": "Ancient warriors often wore armor adorned with precious gems and metals, believed to enhance their protection and valor in battle.",
+      "image_prompt": "Ghibli Art: A warrior in gleaming armor stands on a hilltop at sunset, the armor intricately decorated with gold and gemstones that catch the light. Mist swirls around him, and tiny magical creatures hover nearby, adding a mystical aura. The scene is rendered in warm, vibrant Ghibli colors, emphasizing the warrior's strength and the magical properties of his armor.",
+      "image_url": "assets/img/quotes/quote_358.png",
+      "emphasis": {
+        "precious gems and metals": "emphasis-2",
+        "enhance their protection": "emphasis-1"
+      },
+      "context": "The text describes the warrior's armor as 'kavachi' (armored) and 'varabhushanah' (adorned with ornaments), highlighting its decorative and protective qualities. The phrase 'hemakeasaramalin' (adorned with golden ornaments) further emphasizes the use of precious materials, which were believed to imbue the armor with divine protection and enhance the warrior's valor."
+    },
+    {
+      "id": "quote_359",
+      "quote": "In ancient battles, warriors would often perform acts of bravery to inspire their comrades and demoralize their enemies.",
+      "image_prompt": "Ghibli Art: A warrior charges into battle on a misty battlefield, his sword raised high as golden light breaks through the clouds. His comrades cheer from behind, while enemy soldiers falter in awe. Tiny magical sparks fly around him, and the scene is filled with dynamic energy and determination, rendered in Ghibli's vibrant and whimsical style.",
+      "image_url": "assets/img/quotes/quote_359.png",
+      "emphasis": {
+        "acts of bravery": "emphasis-2",
+        "demoralize their enemies": "emphasis-1"
+      },
+      "context": "The text describes a warrior's heroic charge into enemy lines, 'bhitva praveshyami' (breaking through), which inspires his allies and terrifies his foes. The phrase 'vishrabdho gachcha' (go forth with confidence) underscores the psychological impact of such acts, as they boost morale and create fear among the enemy ranks."
+    },
+    {
+      "id": "quote_360",
+      "quote": "Ancient warriors believed that their weapons were imbued with divine energy, making them unstoppable in battle.",
+      "image_prompt": "Ghibli Art: A warrior holds a glowing sword aloft in a mystical forest at twilight, the blade radiating divine energy. Mist swirls around him, and tiny spirits dance in the air, adding a magical aura. The scene is bathed in soft, ethereal light, with the forest rendered in Ghibli's signature whimsical and vibrant style.",
+      "image_url": "assets/img/quotes/quote_360.png",
+      "emphasis": {
+        "divine energy": "emphasis-2",
+        "unstoppable in battle": "emphasis-1"
+      },
+      "context": "The text describes the warrior's weapons as 'isvastravarsambadham' (imbued with divine energy) and 'agnikalpair' (like fire), emphasizing their supernatural power. The phrase 'vinashamupayasyanti' (they will bring destruction) suggests that these weapons were believed to be unstoppable, granting the warrior an edge in combat through divine favor."
     }
   ]
 }

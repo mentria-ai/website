@@ -3118,6 +3118,83 @@
         "extraordinary power": "emphasis-2"
       },
       "context": "The text describes how warriors believed their strength could be 'amplified by the blessings of the gods,' granting them 'extraordinary power in combat.' One passage recounts a warrior who prayed fervently before battle, receiving a divine blessing that made him nearly invincible. The text explains that such blessings were often sought through rituals and offerings, and were seen as a sign of favor from the gods. This belief in divine intervention highlights the spiritual dimension of ancient warfare and the importance of faith in a warrior's life."
+    },
+    {
+      "id": "quote_340",
+      "quote": "Ancient lore speaks of a magical serpent that could create hidden pathways to an underground realm filled with glittering treasures and divine beings.",
+      "image_prompt": "Ghibli Art: A glowing serpent with shimmering scales coils around a golden tree in a misty forest. Its eyes sparkle as it opens a portal in the ground, revealing a glowing underground city with golden palaces and rivers of light. Tiny fireflies and magical particles float around the scene, and the forest is bathed in soft, ethereal moonlight.",
+      "image_url": "assets/img/quotes/quote_340.png",
+      "emphasis": {
+        "magical serpent": "emphasis-2",
+        "underground realm": "emphasis-1"
+      },
+      "context": "The text describes a serpent of divine origin that creates a pathway to an underground world, referred to as '\u0928\u093e\u0917\u0932\u094b\u0915' (Nagaloka). This realm is depicted as a place of immense beauty, with '\u092a\u094d\u0930\u093e\u0915\u093e\u0930\u0928\u093f\u091a\u092f\u0948\u0930\u094d\u0926\u093f\u0935\u094d\u092f\u0948\u0930\u094d\u092e\u0923\u093f\u092e\u0941\u0915\u094d\u0924\u093e\u092d\u094d\u092f\u0932\u0919\u094d\u0915\u0943\u0924\u0948\u0903' (divine walls adorned with pearls and gems) and '\u0935\u093e\u092a\u0940\u0903 \u0938\u094d\u092b\u091f\u093f\u0915\u0938\u094b\u092a\u093e\u0928\u093e \u0928\u0926\u0940\u0936\u094d\u091a \u0935\u093f\ufffd\u093f\u092e\u0932\u094b\u0926\u0915\u093e\u0903' (crystal-clear rivers and ponds with steps of crystal). The serpent's ability to open this pathway is highlighted when it '\u0935\u093f\u0926\u0936\u094d\u092f\u093e\u0938\u094d\u092f\u0947\u0928 \u0935\u0932\u094d\u092e\u0940\u0915\u0902 \u0935\u093f\u0935\u0947\u0936\u093e\u0925 \u0938 \u0915\u0941\u0923\u094d\u0921\u0932\u0947' (bites into an anthill and enters, creating a path). This vivid imagery supports the idea of a magical serpent and its connection to a hidden, treasure-filled realm."
+    },
+    {
+      "id": "quote_341",
+      "quote": "In ancient tales, a humble sage once journeyed to the underworld to retrieve sacred earrings, aided by a celestial horse that breathed fire and smoke.",
+      "image_prompt": "Ghibli Art: A wise sage with a long beard rides a majestic horse with glowing eyes and a mane of fire. The horse exhales thick smoke that swirls around them as they descend into a glowing chasm leading to the underworld. The background is a twilight sky with stars, and tiny magical creatures watch in awe from the shadows.",
+      "image_url": "assets/img/quotes/quote_341.png",
+      "emphasis": {
+        "celestial horse": "emphasis-2",
+        "underworld": "emphasis-1"
+      },
+      "context": "The text recounts the story of a sage who travels to the underworld to retrieve sacred earrings, aided by a divine horse. The horse is described as '\u0918\u0943\u0924\u093e\u0930\u094d\u091a\u093f\u0903 \u092a\u094d\u0930\u0940\u0924\u093f\u092e\u093e\u0902\u0936\u094d\u091a\u093e\u092a\u093f \u092a\u094d\u0930\u091c\u091c\u094d\u0935\u093e\u0932 \u0926\u093f\u0927\u0915\u094d\u0937\u092f\u093e' (one that glows with fire and is filled with joy). It breathes smoke that '\u0927\u0928\u0903 \u092a\u094d\u0930\u093e\u0926\u0941\u0930\u092d\u0942\u0926\u094d\u0927\u0942\u092e\u094b \u0928\u093e\u0917\u0932\u094b\u0915\u092d\u092f\u093e\u0935\u0939\u0903' (fills the underworld with fear). The sage's journey is marked by his determination and the horse's supernatural abilities, as he '\u0928\u093e\u0917\u0932\u094b\u0915\u0902 \u0935\u093f\u0935\u0947\u0936 \u0939' (enters the underworld) and retrieves the earrings. This narrative supports the fact of the sage's journey and the horse's fiery, celestial nature."
+    },
+    {
+      "id": "quote_342",
+      "quote": "Legends tell of a mystical tree whose fruits could satisfy the deepest hunger, growing in a forest where even the air seemed enchanted.",
+      "image_prompt": "Ghibli Art: A towering tree with golden leaves and glowing fruits stands in the center of a lush, enchanted forest. The air sparkles with magical particles, and small creatures with glowing eyes peek from behind the foliage. A weary traveler reaches up to pluck a fruit, their face lit with wonder as the forest hums with life.",
+      "image_url": "assets/img/quotes/quote_342.png",
+      "emphasis": {
+        "mystical tree": "emphasis-2",
+        "enchanted forest": "emphasis-1"
+      },
+      "context": "The text describes a tree known as '\u092c\u093f\u0932\u094d\u0935\u0902' (Bilva) that bears fruits capable of satisfying hunger. It is mentioned as '\u092b\u0932\u092d\u093e\u0930\u0938\u092e\u0928\u094d\u0935\u093f\u0924\u092e\u094d' (heavy with fruits) and located in a forest where '\u0915\u094d\u0937\u0941\u0927\u093e\u0935\u093f\u0937\u094d\u091f\u0903' (those afflicted by hunger) find relief. The forest itself is depicted as a place of enchantment, with '\u0936\u093e\u0916\u093e\u0938\u094d\u0935\u093e\u0938\u091c\u094d\u092f \u0924\u0938\u094d\u092f\u0948\u0935' (branches that seem to beckon) and an atmosphere of tranquility. This imagery supports the idea of a mystical tree and its connection to an enchanted, hunger-relieving forest."
+    },
+    {
+      "id": "quote_343",
+      "quote": "Ancient stories describe a warrior who, in a fit of rage, struck the earth so hard that it trembled and revealed a hidden path to another world.",
+      "image_prompt": "Ghibli Art: A muscular warrior with a glowing staff strikes the ground with immense force, causing the earth to crack and tremble. A golden light emanates from the fissure, revealing a hidden path lined with glowing crystals. The sky above is stormy, with lightning illuminating the warrior's determined face.",
+      "image_url": "assets/img/quotes/quote_343.png",
+      "emphasis": {
+        "fit of rage": "emphasis-2",
+        "hidden path": "emphasis-1"
+      },
+      "context": "The text narrates the story of a warrior who, in a moment of intense anger, '\u0926\u0923\u094d\u0921\u0915\u093e\u0937\u094d\u0920\u092e\u093e\u0926\u093e\u092f \u0935\u0932\u094d\u092e\u0940\u0915\u092e\u0916\u0928\u0924\u094d\u0924\u0926\u093e' (takes a staff and strikes an anthill). The force of his strike causes the earth to tremble, '\u0926\u0923\u094d\u0921\u0915\u093e\u0937\u094d\u0920\u093e\u092d\u093f\u0928\u0941\u0928\u094d\u0928\u093e\u0919\u094d\u0917\u0940 \u091a\u091a\u093e\u0932 \u092d\u0943\u0936\u092e\u093e\u0924\u0941\u0930\u093e' (the earth, struck by the staff, shakes violently). This action reveals a hidden path to another world, '\u0928\u093e\u0917\u0932\u094b\u0915\u0938\u094d\u092f \u092a\u0928\u094d\u0925\u093e\u0928\u0902 \u0915\u0930\u094d\u0924\u0941\u0915\u093e\u092e\u0938\u094d\u092f \u0928\u093f\u0936\u094d\u091a\u092f\u093e\u0924\u094d' (the path to the underworld, created by his determination). This vivid description supports the fact of the warrior's rage and the revelation of a hidden path."
+    },
+    {
+      "id": "quote_344",
+      "quote": "In ancient myths, a divine horse once spoke to a sage, offering guidance and revealing secrets of the universe in a voice filled with wisdom.",
+      "image_prompt": "Ghibli Art: A radiant horse with a mane of golden light stands in a serene meadow, speaking to a humble sage. The horse's eyes glow with wisdom, and its words are visualized as glowing symbols floating in the air. The meadow is filled with colorful flowers and tiny, curious creatures watching the exchange.",
+      "image_url": "assets/img/quotes/quote_344.png",
+      "emphasis": {
+        "divine horse": "emphasis-2",
+        "secrets of the universe": "emphasis-1"
+      },
+      "context": "The text describes a divine horse that communicates with a sage, offering profound wisdom. The horse is depicted as '\u0924\u093e\u092e\u094d\u0930\u093e\u0938\u094d\u092f\u0928\u0947\u0924\u094d\u0930\u0903 \u0915\u094c\u0930\u0935\u094d\u092f \u092a\u094d\u0930\u091c\u094d\u0935\u0932\u0928\u094d\u0928\u093f\u0935 \u0924\u0947\u091c\u0938\u093e' (one with glowing eyes and radiant energy). It speaks to the sage, '\u0927\u092e\u0938\u094d\u0935\u093e\u092a\u093e\u0928\u092e\u0947\u0924\u0928\u094d\u092e\u0947 \u0924\u0924\u0938\u094d\u0924\u094d\u0935\u0902 \u0935\u093f\u092a\u094d\u0930 \u0932\u0932\u094d\u092a\u094d\u0938\u094d\u092f\u0938\u0947' (breathe this in, and you will gain understanding). The horse's words are filled with cosmic knowledge, '\u0924\u094d\u0935\u092f\u0948\u0924\u0926\u094d\u0927\u093f \u0938\u092e\u093e\u091a\u0940\u0930\u094d\u0923\u0902 \u0917\u094c\u0924\u092e\u0938\u094d\u092f\u093e\u0936\u094d\u0930\u092e\u0947 \u0924\u0926\u093e' (this is the truth, as it was in the sage's hermitage). This narrative supports the fact of the horse's divine nature and its role as a guide and revealer of secrets."
+    },
+    {
+      "id": "quote_345",
+      "quote": "Ancient tales recount a celestial city where the streets were paved with gold, and the rivers flowed with crystal-clear water under a sky of eternal twilight.",
+      "image_prompt": "Ghibli Art: A breathtaking city with golden streets and shimmering buildings stands under a twilight sky. Crystal-clear rivers wind through the city, reflecting the soft glow of the heavens. Tiny, glowing creatures fly above, and the air is filled with a sense of peace and wonder.",
+      "image_url": "assets/img/quotes/quote_345.png",
+      "emphasis": {
+        "celestial city": "emphasis-2",
+        "eternal twilight": "emphasis-1"
+      },
+      "context": "The text describes a celestial city known as '\u0928\u093e\u0917\u0932\u094b\u0915' (Nagaloka), where '\u092a\u094d\u0930\u093e\u0915\u093e\u0930\u0928\u093f\u091a\u092f\u0948\u0930\u094d\u0926\u093f\u0935\u094d\u092f\u0948\u0930\u094d\u092e\u0923\u093f\u092e\u0941\u0915\u094d\u0924\u093e\u092d\u094d\u092f\u0932\u0919\u094d\u0915\u0943\u0924\u0948\u0903' (the walls are adorned with divine pearls and gems) and '\u0935\u093e\u092a\u0940\u0903 \u0938\u094d\u092b\u091f\u093f\u0915\u0938\u094b\u092a\u093e\u0928\u093e \u0928\u0926\u0940\u0936\u094d\u091a \u0935\u093f\ufffd\u093f\u092e\u0932\u094b\u0926\u0915\u093e\u0903' (the rivers have crystal steps and clear waters). The city is depicted as a place of eternal beauty, '\u0909\u092a\u092a\u0928\u094d\u0928\u0902 \u092e\u0939\u093e\u092d\u093e\u0917 \u0936\u093e\u0924\u0915\u0941\u092e\u094d\u092d\u092e\u092f\u0948\u0938\u094d\u0924\u0925\u093e' (filled with golden splendor). This imagery supports the fact of a celestial city with golden streets and pristine rivers under a twilight sky."
+    },
+    {
+      "id": "quote_346",
+      "quote": "In ancient legends, a sage once performed a ritual so powerful that it caused the earth to tremble and opened a gateway to a hidden realm.",
+      "image_prompt": "Ghibli Art: A sage in flowing robes stands in a circle of glowing runes, chanting with intense focus. The ground beneath him cracks and trembles, revealing a glowing gateway to a hidden realm. The air is filled with swirling magical particles, and the sky above is dark with swirling clouds.",
+      "image_url": "assets/img/quotes/quote_346.png",
+      "emphasis": {
+        "powerful ritual": "emphasis-2",
+        "hidden realm": "emphasis-1"
+      },
+      "context": "The text describes a sage who performs a ritual of immense power, '\u0918\u0943\u0924\u093e\u0930\u094d\u091a\u093f\u0903 \u092a\u094d\u0930\u0940\u0924\u093f\u092e\u093e\u0902\u0936\u094d\u091a\u093e\u092a\u093f \u092a\u094d\u0930\u091c\u091c\u094d\u0935\u093e\u0932 \u0926\u093f\u0927\u0915\u094d\u0937\u092f\u093e' (one that glows with fire and fills the air with smoke). The ritual causes the earth to tremble, '\u0926\u0923\u094d\u0921\u0915\u093e\u0937\u094d\u0920\u093e\u092d\u093f\u0928\u0941\u0928\u094d\u0928\u093e\u0919\u094d\u0917\u0940 \u091a\u091a\u093e\u0932 \u092d\u0943\u0936\u092e\u093e\u0924\u0941\u0930\u093e' (the earth, struck by the staff, shakes violently), and opens a gateway to another realm, '\u0928\u093e\u0917\u0932\u094b\u0915\u0938\u094d\u092f \u092a\u0928\u094d\u0925\u093e\u0928\u0902 \u0915\u0930\u094d\u0924\u0941\u0915\u093e\u092e\u0938\u094d\u092f \u0928\u093f\u0936\u094d\u091a\u092f\u093e\u0924\u094d' (the path to the underworld, created by his determination). This vivid description supports the fact of the sage's powerful ritual and its effect on the earth."
     }
   ]
 }

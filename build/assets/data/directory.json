@@ -4120,6 +4120,50 @@
         "Vi\u015bvakarm\u0101": "emphasis-2"
       },
       "context": "The text states, 'Since she was created by bringing together jewels particle by particle [sesame-sized], therefore Pit\u0101maha [Brahm\u0101] named her Tilottam\u0101 [finest particle].' This occurs when Vi\u015bvakarm\u0101, the divine architect, creates Tilottam\u0101 from the most beautiful elements of the three worlds, and Brahm\u0101 bestows her name."
+    },
+    {
+      "id": "quote_431",
+      "quote": "Dak\u1e63a Pr\u0101cetasa, the sage, united with V\u012bri\u1e47\u012b and begot a thousand sons like himself, all of whom were of rigid vows.",
+      "image_prompt": "Ghibli Art: A serene sage stands in a misty forest, surrounded by a thousand glowing orbs representing his sons. Soft light filters through the trees.",
+      "image_url": "assets/img/quotes/quote_431.png",
+      "emphasis": {
+        "Dak\u1e63a Pr\u0101cetasa": "emphasis-2",
+        "thousand sons": "emphasis-1"
+      },
+      "context": "The text describes Dak\u1e63a Pr\u0101cetasa, a sage, who 'united with V\u012bri\u1e47\u012b [his wife]' and 'begot a thousand sons like himself, of rigid vows.' This is found in the lineage section of the Mahabharata, where the genealogy of sages and their descendants is detailed. The passage emphasizes the sage's ability to produce offspring who shared his disciplined nature."
+    },
+    {
+      "id": "quote_432",
+      "quote": "N\u0101rada, the divine sage, taught the thousand sons of Dak\u1e63a the supreme S\u0101\u1e45khya knowledge, leading them to liberation.",
+      "image_prompt": "Ghibli Art: N\u0101rada sits on a rock under a glowing tree, teaching a group of attentive young sages. The scene is bathed in soft, golden light.",
+      "image_url": "assets/img/quotes/quote_432.png",
+      "emphasis": {
+        "N\u0101rada": "emphasis-2",
+        "S\u0101\u1e45khya knowledge": "emphasis-1"
+      },
+      "context": "The text mentions that 'to those thousand sons of Dak\u1e63a, N\u0101rada [divine sage] taught liberation through the supreme S\u0101\u1e45khya knowledge.' This is part of the narrative where the lineage of Dak\u1e63a is discussed, highlighting the role of N\u0101rada in imparting spiritual wisdom to Dak\u1e63a's descendants."
+    },
+    {
+      "id": "quote_433",
+      "quote": "Praj\u0101pati Dak\u1e63a gave twenty-seven of his daughters to Indu, the moon god, to guide the passage of time.",
+      "image_prompt": "Ghibli Art: A crescent moon hangs in a starry sky, with twenty-seven ethereal figures floating around it. The scene is calm and luminous.",
+      "image_url": "assets/img/quotes/quote_433.png",
+      "emphasis": {
+        "Praj\u0101pati Dak\u1e63a": "emphasis-2",
+        "twenty-seven daughters": "emphasis-1"
+      },
+      "context": "The text states that 'twenty-seven (daughters) suited for guiding Time were given to Indu [moon god].' This is part of the section where Dak\u1e63a's distribution of his daughters to various deities is described, emphasizing their roles in cosmic functions."
+    },
+    {
+      "id": "quote_434",
+      "quote": "Pur\u016bravas, the first lunar king, ruled over thirteen islands of the ocean, surrounded by non-human beings.",
+      "image_prompt": "Ghibli Art: A regal figure stands on a rocky island, gazing at the vast ocean. Mystical creatures hover in the misty background.",
+      "image_url": "assets/img/quotes/quote_434.png",
+      "emphasis": {
+        "Pur\u016bravas": "emphasis-2",
+        "thirteen islands": "emphasis-1"
+      },
+      "context": "The text mentions that 'Pur\u016bravas ruled over thirteen islands of the ocean' and was 'surrounded by non-human beings.' This is found in the section detailing the lineage and achievements of Pur\u016bravas, highlighting his unique dominion and the supernatural nature of his court."
     }
   ]
 }

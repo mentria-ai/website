@@ -4428,6 +4428,50 @@
         "mare": "emphasis-2"
       },
       "context": "The text explains that the A\u015bvins, divine twin physicians, were born from the union of Savit\u1e5b and Tv\u0101\u1e63\u1e6dr\u012b, who assumed the form of a mare. This is found in the lines: '\u0924\u094d\u0935\u093e\u0937\u094d\u091f\u094d\u0930\u0940 \u0924\u0941 \u0938\u0935\u093f\u0924\u0941\u0930\u094d\u092d\u093e\u0930\u094d\u092f\u093e \u0935\u0921\u0935\u093e\u0930\u0942\u092a\u0927\u093e\u0930\u093f\u0923\u0940 | \u0905\u0938\u0942\u092f\u0924 \u092e\u0939\u093e\u092d\u093e\u0917\u093e \u0938\u093e\u0928\u094d\u0924\u0930\u093f\u0915\u094d\u0937\u0947\u093d\u0936\u094d\u0935\u093f\u0928\u093e\u0935\u0941\u092d\u094c ||\u0969\u096a||' (Line 7650-7651). The passage highlights the unique circumstances of their birth and their divine nature."
+    },
+    {
+      "id": "quote_459",
+      "quote": "In the Mahabharata, the A\u015bvins, twin deities, granted Nakula and Sahadeva to M\u0101dr\u012b, making them unparalleled in beauty and virtue.",
+      "image_prompt": "Ghibli Art: Twin deities, the A\u015bvins, stand in a serene forest clearing, their divine light softly illuminating the surroundings.",
+      "image_url": "assets/img/quotes/quote_459.png",
+      "emphasis": {
+        "A\u015bvins": "emphasis-1",
+        "Nakula and Sahadeva": "emphasis-2"
+      },
+      "context": "The text mentions that 'the two great archers whom M\u0101dr\u012b bore, best among Kurus, from the A\u015bvins, these two tiger-like men also stand here.' It further describes them as 'unmatched in beauty on earth' and 'endowed with beauty, strength, and virtue.' This is found in the section where the birth of the P\u0101\u1e47\u1e0davas is detailed, specifically focusing on the divine origins of Nakula and Sahadeva."
+    },
+    {
+      "id": "quote_460",
+      "quote": "P\u0101\u1e47\u1e0du, while living in the forest, performed severe austerities to please Indra, seeking a son of great strength and prowess.",
+      "image_prompt": "Ghibli Art: P\u0101\u1e47\u1e0du meditates in a tranquil forest, surrounded by soft mist and the gentle glow of twilight.",
+      "image_url": "assets/img/quotes/quote_460.png",
+      "emphasis": {
+        "severe austerities": "emphasis-2",
+        "Indra": "emphasis-1"
+      },
+      "context": "The text states that 'P\u0101\u1e47\u1e0du, of great splendor, after consulting with the great sages, prescribed for Kunt\u012b an auspicious year-long vow' and 'undertook severe austerities with supreme concentration.' It also mentions that he 'desired to propitiate the god who is the lord of the thirty gods.' This is found in the section where P\u0101\u1e47\u1e0du's efforts to obtain a son through divine means are described."
+    },
+    {
+      "id": "quote_461",
+      "quote": "Kunt\u012b, through a boon from Durv\u0101sas, could invoke any deity to grant her a child, as seen when she invoked Dharma to conceive Yudhi\u1e63\u1e6dhira.",
+      "image_prompt": "Ghibli Art: Kunt\u012b stands in a quiet temple, her hands raised in prayer as a soft divine light descends upon her.",
+      "image_url": "assets/img/quotes/quote_461.png",
+      "emphasis": {
+        "Durv\u0101sas": "emphasis-1",
+        "Yudhi\u1e63\u1e6dhira": "emphasis-2"
+      },
+      "context": "The text mentions that 'Kunt\u012b invoked the infallible Dharma for the purpose of conception' and that 'she obtained a son who was the best among all living beings.' It also describes how 'that venerable one revealed to me a boon connected with magical incantation.' This is found in the section detailing the birth of Yudhi\u1e63\u1e6dhira and the divine boon granted to Kunt\u012b by Durv\u0101sas."
+    },
+    {
+      "id": "quote_462",
+      "quote": "M\u0101dr\u012b, upon P\u0101\u1e47\u1e0du's death, chose to enter the funeral pyre with him, demonstrating her unwavering devotion as a pativrat\u0101.",
+      "image_prompt": "Ghibli Art: M\u0101dr\u012b stands solemnly beside P\u0101\u1e47\u1e0du's funeral pyre, the flames casting a soft, golden glow around her.",
+      "image_url": "assets/img/quotes/quote_462.png",
+      "emphasis": {
+        "funeral pyre": "emphasis-2",
+        "pativrat\u0101": "emphasis-1"
+      },
+      "context": "The text states that 'M\u0101dr\u012b entered the fire, abandoning her own life' and that 'she has gone with him to the world of her husband.' It also describes her as 'devoted to her husband.' This is found in the section where the aftermath of P\u0101\u1e47\u1e0du's death is described, highlighting M\u0101dr\u012b's act of self-sacrifice and devotion."
     }
   ]
 }

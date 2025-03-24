@@ -4472,6 +4472,50 @@
         "pativrat\u0101": "emphasis-1"
       },
       "context": "The text states that 'M\u0101dr\u012b entered the fire, abandoning her own life' and that 'she has gone with him to the world of her husband.' It also describes her as 'devoted to her husband.' This is found in the section where the aftermath of P\u0101\u1e47\u1e0du's death is described, highlighting M\u0101dr\u012b's act of self-sacrifice and devotion."
+    },
+    {
+      "id": "quote_463",
+      "quote": "Yudhi\u1e63\u1e6dhira gambled away four hundred treasures, each containing five dro\u1e47as of pure gold, surrounded by copper and iron.",
+      "image_prompt": "Ghibli Art: A single golden coin rests on a weathered wooden table, surrounded by faint mist and soft light.",
+      "image_url": "assets/img/quotes/quote_463.png",
+      "emphasis": {
+        "four hundred treasures": "emphasis-2",
+        "pure gold": "emphasis-1"
+      },
+      "context": "The text states, 'I have four hundred treasures surrounded by copper and iron, each one containing five dro\u1e47as of pure gold.' This is part of Yudhi\u1e63\u1e6dhira's declaration during the gambling match, where he stakes his immense wealth against \u015aakuni. The specific mention of the treasures and their composition highlights the vastness of his possessions."
+    },
+    {
+      "id": "quote_464",
+      "quote": "Draupad\u012b, wearing a single garment, was dragged into the assembly by Du\u1e25\u015b\u0101sana, who attempted to disrobe her.",
+      "image_prompt": "Ghibli Art: A lone figure in a flowing white garment stands in a vast, empty hall, with soft light filtering through high windows.",
+      "image_url": "assets/img/quotes/quote_464.png",
+      "emphasis": {
+        "single garment": "emphasis-2",
+        "disrobe her": "emphasis-1"
+      },
+      "context": "The text describes how Du\u1e25\u015b\u0101sana 'forcibly seized K\u1e5b\u1e63\u1e47\u0101 by her dark hair' and 'began to drag it off' in the assembly. It also mentions that Draupad\u012b was 'wearing a single garment' and 'in her menstrual period.' This event is a pivotal moment in the Mahabharata, highlighting the humiliation faced by Draupad\u012b."
+    },
+    {
+      "id": "quote_465",
+      "quote": "Bh\u012bma vowed to drink Du\u1e25\u015b\u0101sana's blood in battle, swearing to break his chest open if he failed to fulfill his oath.",
+      "image_prompt": "Ghibli Art: A clenched fist against a dark, stormy sky, with faint raindrops falling in the background.",
+      "image_url": "assets/img/quotes/quote_465.png",
+      "emphasis": {
+        "drink Du\u1e25\u015b\u0101sana's blood": "emphasis-2",
+        "break his chest": "emphasis-1"
+      },
+      "context": "Bh\u012bma declares, 'If I do not forcibly break open his chest and drink his blood in battle, may I not attain the destiny of all my forefathers.' This vow is made in response to the humiliation of Draupad\u012b, and it underscores Bh\u012bma's fierce resolve and loyalty to his family."
+    },
+    {
+      "id": "quote_466",
+      "quote": "Vidura warned that gambling leads to enmity and great fear, comparing it to a wild ox breaking its own horn in rut.",
+      "image_prompt": "Ghibli Art: A solitary ox stands in a misty field, its horn slightly cracked, with soft light breaking through the fog.",
+      "image_url": "assets/img/quotes/quote_466.png",
+      "emphasis": {
+        "gambling": "emphasis-2",
+        "great fear": "emphasis-1"
+      },
+      "context": "Vidura states, 'For gambling leads to enmity and great fear; like a wild ox in rut forcibly breaks its own horn.' This analogy is part of his counsel to Dh\u1e5btar\u0101\u1e63\u1e6dra, warning of the destructive consequences of gambling and the arrogance of Duryodhana."
     }
   ]
 }

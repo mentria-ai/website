@@ -4340,6 +4340,50 @@
         "source of life": "emphasis-1"
       },
       "context": "The hawk's argument is presented in the text: 'From food all beings arise, O ruler of the earth. By food they grow, and by it creatures live.' The hawk further states that without food, its life-breaths would leave its body, taking the path of no return. This dialogue occurs during a moral debate with King U\u015b\u012bnara, who is protecting a pigeon from the hawk. The hawk's perspective highlights the natural order and the necessity of food for survival."
+    },
+    {
+      "id": "quote_451",
+      "quote": "Vy\u0101sa, the compiler of the Mah\u0101bh\u0101rata, divided the Vedas into four parts and taught them to his disciples, including Sumantu, Jaimini, Paila, and \u015auka.",
+      "image_prompt": "Ghibli Art: Vy\u0101sa sits under a serene tree, holding a scroll, with soft mist surrounding him. A single disciple kneels nearby, listening intently.",
+      "image_url": "assets/img/quotes/quote_451.png",
+      "emphasis": {
+        "Vy\u0101sa": "emphasis-1",
+        "Vedas": "emphasis-2"
+      },
+      "context": "The text states that Vy\u0101sa 'divided the Vedas' and 'taught them to his disciples, including Sumantu, Jaimini, Paila, and \u015auka.' This is found in the section where Vy\u0101sa's role as the compiler and teacher of the Vedas is described, emphasizing his contribution to preserving and disseminating sacred knowledge."
+    },
+    {
+      "id": "quote_452",
+      "quote": "The celestial nymph Adrik\u0101, cursed to live as a fish, swallowed the seed of King Vasu, which later resulted in the birth of Matsya, a righteous king.",
+      "image_prompt": "Ghibli Art: A glowing fish swims in a tranquil river, with soft ripples and golden light reflecting on the water's surface.",
+      "image_url": "assets/img/quotes/quote_452.png",
+      "emphasis": {
+        "Adrik\u0101": "emphasis-1",
+        "Matsya": "emphasis-2"
+      },
+      "context": "The text describes how Adrik\u0101, 'cursed by Brahm\u0101, had attained the form of a fish' and 'swallowed the seed of V\u0101sava [Indra],' which later led to the birth of Matsya. This is found in the section detailing the lineage and miraculous births of certain characters in the Mah\u0101bh\u0101rata."
+    },
+    {
+      "id": "quote_453",
+      "quote": "The festival of \u015aakra (Indra) was celebrated by King Vasu, who was honored with a divine aerial vehicle and a garland of unfading lotuses.",
+      "image_prompt": "Ghibli Art: A king stands on a floating crystal chariot in the sky, holding a garland of lotuses, with soft clouds drifting around him.",
+      "image_url": "assets/img/quotes/quote_453.png",
+      "emphasis": {
+        "\u015aakra": "emphasis-1",
+        "aerial vehicle": "emphasis-2"
+      },
+      "context": "The text mentions that King Vasu 'performed the Indra festival' and was given 'a divine, celestial, great crystal chariot' and 'a Vaijayant\u012b wreath of unfading lotuses.' This is found in the section where Indra bestows gifts upon Vasu for his devotion and righteous rule."
+    },
+    {
+      "id": "quote_454",
+      "quote": "The sage Par\u0101\u015bara, while on a pilgrimage, encountered Satyavat\u012b and, through a union with her, fathered Vy\u0101sa, the compiler of the Mah\u0101bh\u0101rata.",
+      "image_prompt": "Ghibli Art: Par\u0101\u015bara stands on a riverbank, holding a staff, with Satyavat\u012b rowing a boat in the misty distance.",
+      "image_url": "assets/img/quotes/quote_454.png",
+      "emphasis": {
+        "Par\u0101\u015bara": "emphasis-1",
+        "Vy\u0101sa": "emphasis-2"
+      },
+      "context": "The text describes how Par\u0101\u015bara, 'traveling on a pilgrimage,' met Satyavat\u012b and 'had union with her,' resulting in the birth of Vy\u0101sa. This is found in the section detailing the lineage and origins of key figures in the Mah\u0101bh\u0101rata."
     }
   ]
 }

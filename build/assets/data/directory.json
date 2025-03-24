@@ -4032,6 +4032,50 @@
         "Puloma": "emphasis-2"
       },
       "context": "The text states, 'From her teardrops flowed a great river,' and later, 'The grandfather of the worlds gave a name to that river. 'Vadhusara,' declared the lord, (as it flowed) towards Chyavana's hermitage.' This passage explains the origin of the river Vadhusara, which was formed from the tears of Puloma after her abduction by a demon. The context is part of the story of Bh\u1e5bgu and Puloma, where Puloma's grief leads to the creation of the river."
+    },
+    {
+      "id": "quote_423",
+      "quote": "King \u1e5atuparna possessed extraordinary skill in calculation, accurately counting 101 leaves and fruits on a Bibh\u012btaka tree.",
+      "image_prompt": "Ghibli Art: A serene forest scene with a single Bibh\u012btaka tree, its leaves gently swaying in the breeze. Soft sunlight filters through the canopy.",
+      "image_url": "assets/img/quotes/quote_423.png",
+      "emphasis": {
+        "extraordinary skill": "emphasis-2",
+        "Bibh\u012btaka tree": "emphasis-1"
+      },
+      "context": "The text describes King \u1e5atuparna's ability to count the leaves and fruits on a Bibh\u012btaka tree with precision. It states, 'On this tree, the leaves and fruits, O B\u0101huka, and those that have fallen here - there are one hundred and one.' This passage highlights his remarkable skill in calculation, which is demonstrated in the forest setting."
+    },
+    {
+      "id": "quote_424",
+      "quote": "Nala, disguised as B\u0101huka, regained his true form after remembering the N\u0101ga king Karkotaka.",
+      "image_prompt": "Ghibli Art: A tranquil moment as Nala transforms back to his true form, with a faint glow around him. A single N\u0101ga symbol hovers in the air.",
+      "image_url": "assets/img/quotes/quote_424.png",
+      "emphasis": {
+        "true form": "emphasis-1",
+        "N\u0101ga king Karkotaka": "emphasis-2"
+      },
+      "context": "The text mentions that Nala, while in disguise as B\u0101huka, remembered the N\u0101ga king Karkotaka and regained his original form. It states, 'Remembering the N\u0101ga king [Karkotaka], he regained his original form.' This transformation occurs after Nala's long period of hardship and disguise."
+    },
+    {
+      "id": "quote_425",
+      "quote": "Damayant\u012b sent a messenger to test B\u0101huka, suspecting him to be her husband Nala in disguise.",
+      "image_prompt": "Ghibli Art: A quiet courtyard where Damayant\u012b stands, her gaze fixed on a distant figure. A soft breeze carries petals through the air.",
+      "image_url": "assets/img/quotes/quote_425.png",
+      "emphasis": {
+        "messenger": "emphasis-2",
+        "Nala in disguise": "emphasis-1"
+      },
+      "context": "The text describes Damayant\u012b's suspicion that B\u0101huka might be her husband Nala in disguise. It states, 'Damayant\u012b sent a messenger to search for the Ni\u1e63adha king, O ruler.' This action reflects her determination to uncover the truth about B\u0101huka's identity."
+    },
+    {
+      "id": "quote_426",
+      "quote": "The Bibh\u012btaka tree became inauspicious after Kali, the personification of the evil age, entered it.",
+      "image_prompt": "Ghibli Art: A lone Bibh\u012btaka tree standing in a misty forest, its leaves slightly wilted. A faint shadow lingers at its base.",
+      "image_url": "assets/img/quotes/quote_426.png",
+      "emphasis": {
+        "inauspicious": "emphasis-1",
+        "Kali": "emphasis-2"
+      },
+      "context": "The text explains that the Bibh\u012btaka tree became inauspicious after Kali entered it. It states, 'And the Bibhitaka [dice tree] became inauspicious due to Kali's [evil age] influence.' This event occurs after Kali is released from Nala's body and seeks refuge in the tree."
     }
   ]
 }

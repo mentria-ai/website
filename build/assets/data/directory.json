@@ -4208,6 +4208,50 @@
         "Dro\u1e47a": "emphasis-1"
       },
       "context": "The text states, 'With his mind attached to her, though he was a celibate from childhood, his excited seed fell, and the sage placed it in a dro\u1e47a [vessel], from which Dro\u1e47a was born.' This describes the unusual circumstances of Dro\u1e47a's birth, where the sage Bharadv\u0101ja's seed is spilled while observing an apsara."
+    },
+    {
+      "id": "quote_439",
+      "quote": "Bathing at Prith\u016bdaka, a sacred ford, purifies seven generations of one's family and grants the merit of a horse sacrifice.",
+      "image_prompt": "Ghibli Art: A serene riverbank with a single figure standing in the water, surrounded by soft mist and golden light.",
+      "image_url": "assets/img/quotes/quote_439.png",
+      "emphasis": {
+        "Prith\u016bdaka": "emphasis-1",
+        "purifies seven generations": "emphasis-2"
+      },
+      "context": "The text mentions that 'By bathing there, O tiger among men, one attains the realm of Brahma' and 'one purifies seven generations of one's family, there is no doubt about this.' It also states that 'one obtains the fruit of the horse sacrifice and goes to the heavenly realm.' These lines highlight the significance of Prith\u016bdaka as a sacred ford with profound spiritual benefits."
+    },
+    {
+      "id": "quote_440",
+      "quote": "At the confluence of the Ganges and Sarasvat\u012b rivers, bathing grants the merit of ten horse sacrifices and uplifts one's family.",
+      "image_prompt": "Ghibli Art: A tranquil river confluence with two streams merging, under a soft, glowing sky with a single bird flying overhead.",
+      "image_url": "assets/img/quotes/quote_440.png",
+      "emphasis": {
+        "Ganges and Sarasvat\u012b": "emphasis-1",
+        "ten horse sacrifices": "emphasis-2"
+      },
+      "context": "The text states, 'At the confluence of the Gang\u0101 and Sarasvat\u012b, O best of men, one who bathes obtains the merit of ten horse sacrifices and uplifts his family.' This emphasizes the spiritual importance of this sacred confluence, where the act of bathing brings immense merit and familial elevation."
+    },
+    {
+      "id": "quote_441",
+      "quote": "At the sacred ford of Vishv\u0101mitra, bathing grants the state of Brahminhood and access to the realm of Brahma.",
+      "image_prompt": "Ghibli Art: A lone figure standing in a shallow, glowing river, with a single tree on the bank and a soft, ethereal light in the background.",
+      "image_url": "assets/img/quotes/quote_441.png",
+      "emphasis": {
+        "Vishv\u0101mitra": "emphasis-1",
+        "Brahminhood": "emphasis-2"
+      },
+      "context": "The text mentions, 'There is also the t\u012brtha of Vishv\u0101mitra, O best of the Bharatas,' and 'By bathing there, O great king, one attains the state of Brahminhood.' It further states, 'By bathing there, O tiger among men, one attains the realm of Brahma.' These lines highlight the transformative power of bathing at Vishv\u0101mitra's sacred ford."
+    },
+    {
+      "id": "quote_442",
+      "quote": "At the sacred ford of Madhusrava, bathing grants the merit of donating a thousand cows.",
+      "image_prompt": "Ghibli Art: A calm river with a single figure bathing, surrounded by soft light and a few scattered flowers floating on the water.",
+      "image_url": "assets/img/quotes/quote_442.png",
+      "emphasis": {
+        "Madhusrava": "emphasis-1",
+        "thousand cows": "emphasis-2"
+      },
+      "context": "The text states, 'And there is also the Madhusrava ford there, O best of Bharata's line,' and 'O king, a man who bathes there obtains the merit of donating a thousand cows.' This highlights the spiritual merit associated with bathing at the Madhusrava ford, equating it to the act of donating a thousand cows."
     }
   ]
 }

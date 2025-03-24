@@ -3988,6 +3988,50 @@
         "instrument of the Creator": "emphasis-2"
       },
       "context": "The text states, 'This body, known as the field [k\u1e63etra], is merely an instrument of the Creator, through which the all-pervading Lord causes actions with good and bad results.' This is part of a discussion on the relationship between the physical body, divine will, and the consequences of actions."
+    },
+    {
+      "id": "quote_419",
+      "quote": "The bull seen while traveling on the road was Air\u0101vata, the king of elephants, and Indra, the king of gods, was mounted on it.",
+      "image_prompt": "Ghibli Art: A majestic white elephant with Indra seated on its back, standing in a misty forest clearing. Soft golden light filters through the trees.",
+      "image_url": "assets/img/quotes/quote_419.png",
+      "emphasis": {
+        "Air\u0101vata": "emphasis-1",
+        "Indra": "emphasis-2"
+      },
+      "context": "The text states, 'The bull you saw while traveling on the road was Air\u0101vata, the king of elephants. And he who was mounted on it was Indra.' This passage describes a divine encounter where a bull is revealed to be the celestial elephant Air\u0101vata, and the rider is identified as Indra, the king of gods. The context is part of a larger narrative where Uttanka encounters these divine beings during his journey."
+    },
+    {
+      "id": "quote_420",
+      "quote": "The dung of the bull, which was eaten, was am\u1e5bta, the nectar of immortality, and it protected Uttanka from destruction in the abode of serpents.",
+      "image_prompt": "Ghibli Art: A glowing golden orb of am\u1e5bta resting on a leaf in a serene forest. Soft mist surrounds it, with faint light illuminating the scene.",
+      "image_url": "assets/img/quotes/quote_420.png",
+      "emphasis": {
+        "am\u1e5bta": "emphasis-1",
+        "Uttanka": "emphasis-2"
+      },
+      "context": "The text states, 'And the dung of that bull which you ate was am\u1e5bta [nectar of immortality]. Because of that, indeed, you were not destroyed in that abode of serpents.' This passage explains how Uttanka's consumption of the bull's dung, which was actually am\u1e5bta, saved him from harm in the serpent's abode. The context is part of a conversation where Uttanka is being informed about the divine nature of his experiences."
+    },
+    {
+      "id": "quote_421",
+      "quote": "Uttanka, angered by Takshaka, sought revenge and departed for Hastinapura to approach King Janamejaya.",
+      "image_prompt": "Ghibli Art: Uttanka walking determinedly through a quiet forest path, his expression resolute. Soft sunlight filters through the trees.",
+      "image_url": "assets/img/quotes/quote_421.png",
+      "emphasis": {
+        "Takshaka": "emphasis-1",
+        "Hastinapura": "emphasis-2"
+      },
+      "context": "The text states, 'Having been permitted by his teacher, Uttanka, angry and desiring to take revenge on Takshaka [serpent king], departed for Hastinapura [capital city].' This passage describes Uttanka's emotional state and his decision to seek revenge against Takshaka by approaching King Janamejaya. The context is part of the narrative where Uttanka's actions set the stage for the serpent sacrifice."
+    },
+    {
+      "id": "quote_422",
+      "quote": "The river Vadhusara was formed from the teardrops of Puloma, the wife of Bh\u1e5bgu, as she wept after being abducted by a demon.",
+      "image_prompt": "Ghibli Art: A gentle river flowing through a serene forest, its waters shimmering with soft light. A single tear falls into the water, creating ripples.",
+      "image_url": "assets/img/quotes/quote_422.png",
+      "emphasis": {
+        "Vadhusara": "emphasis-1",
+        "Puloma": "emphasis-2"
+      },
+      "context": "The text states, 'From her teardrops flowed a great river,' and later, 'The grandfather of the worlds gave a name to that river. 'Vadhusara,' declared the lord, (as it flowed) towards Chyavana's hermitage.' This passage explains the origin of the river Vadhusara, which was formed from the tears of Puloma after her abduction by a demon. The context is part of the story of Bh\u1e5bgu and Puloma, where Puloma's grief leads to the creation of the river."
     }
   ]
 }

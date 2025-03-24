@@ -4164,6 +4164,50 @@
         "thirteen islands": "emphasis-1"
       },
       "context": "The text mentions that 'Pur\u016bravas ruled over thirteen islands of the ocean' and was 'surrounded by non-human beings.' This is found in the section detailing the lineage and achievements of Pur\u016bravas, highlighting his unique dominion and the supernatural nature of his court."
+    },
+    {
+      "id": "quote_435",
+      "quote": "A Brahmin woman advises her husband, a physician, that grief has no place when facing inevitable death, as it is a universal truth for all humans.",
+      "image_prompt": "Ghibli Art: A serene Brahmin woman sits on a stone, her face calm, with soft mist swirling around her. The background is a minimalist forest.",
+      "image_url": "assets/img/quotes/quote_435.png",
+      "emphasis": {
+        "grief": "emphasis-2",
+        "inevitable death": "emphasis-1"
+      },
+      "context": "The text states, 'You should not grieve like an ordinary person at any time. Indeed, this is not a time for grief for you who are a physician. Death must certainly be faced by all human beings here. For what is inevitable, indeed, grief has no place here.' This is part of a conversation where the Brahmin woman consoles her husband, emphasizing the inevitability of death and the futility of grief."
+    },
+    {
+      "id": "quote_436",
+      "quote": "The Mahabharata describes the eternal duty of a woman as acting for her husband's welfare, even at the cost of her life.",
+      "image_prompt": "Ghibli Art: A woman stands in a flowing sari, her hands clasped in devotion, with a soft golden light illuminating her figure against a dark, empty background.",
+      "image_url": "assets/img/quotes/quote_436.png",
+      "emphasis": {
+        "eternal duty": "emphasis-2",
+        "husband's welfare": "emphasis-1"
+      },
+      "context": "The text states, 'This indeed is the highest eternal duty of a woman in this world: That she should act for her husband's welfare, even at the cost of her life.' This is part of a conversation where the Brahmin woman explains her understanding of a woman's duty, emphasizing her commitment to her husband's well-being."
+    },
+    {
+      "id": "quote_437",
+      "quote": "A daughter in the Mahabharata declares that a son is called 'putra' because he saves his family from difficulties, both in this world and after death.",
+      "image_prompt": "Ghibli Art: A young girl stands by a river, her hand outstretched toward the water, with a soft glow around her. The scene is simple, with a calm, reflective mood.",
+      "image_url": "assets/img/quotes/quote_437.png",
+      "emphasis": {
+        "son": "emphasis-2",
+        "putra": "emphasis-1"
+      },
+      "context": "The text states, 'Either he saves from difficulties here or saves after death. In all ways a son saves, hence he is called 'putra' by the wise.' This is part of a conversation where the daughter explains the significance of a son in the family, emphasizing his role as a savior."
+    },
+    {
+      "id": "quote_438",
+      "quote": "In the Mahabharata, a Brahmin sage named Bharadv\u0101ja accidentally spills his seed while observing an apsara, leading to the birth of Dro\u1e47a.",
+      "image_prompt": "Ghibli Art: A sage sits in meditation by a river, his face calm, with a faint glow around him. The background is a minimalist forest with soft mist.",
+      "image_url": "assets/img/quotes/quote_438.png",
+      "emphasis": {
+        "Bharadv\u0101ja": "emphasis-2",
+        "Dro\u1e47a": "emphasis-1"
+      },
+      "context": "The text states, 'With his mind attached to her, though he was a celibate from childhood, his excited seed fell, and the sage placed it in a dro\u1e47a [vessel], from which Dro\u1e47a was born.' This describes the unusual circumstances of Dro\u1e47a's birth, where the sage Bharadv\u0101ja's seed is spilled while observing an apsara."
     }
   ]
 }

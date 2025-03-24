@@ -4252,6 +4252,50 @@
         "thousand cows": "emphasis-2"
       },
       "context": "The text states, 'And there is also the Madhusrava ford there, O best of Bharata's line,' and 'O king, a man who bathes there obtains the merit of donating a thousand cows.' This highlights the spiritual merit associated with bathing at the Madhusrava ford, equating it to the act of donating a thousand cows."
+    },
+    {
+      "id": "quote_443",
+      "quote": "In the Mahabharata, the sage Kindama lived in the forest as a deer, subsisting on roots and fruits, and was accidentally killed by King Pandu.",
+      "image_prompt": "Ghibli Art: A serene forest clearing with a lone deer grazing peacefully. Soft sunlight filters through the trees.",
+      "image_url": "assets/img/quotes/quote_443.png",
+      "emphasis": {
+        "Kindama": "emphasis-2",
+        "deer": "emphasis-1"
+      },
+      "context": "The text describes Kindama as a sage who 'subsisted on roots and fruits, wearing the form of a deer, O king' (Line 13991). It further explains that he was 'living in the forests, always devoted to tranquility' (Line 13993) and was 'harmed by you [Pandu]' (Line 13995). This incident is part of the narrative where Pandu accidentally kills Kindama, leading to a curse that shapes the events of the Mahabharata."
+    },
+    {
+      "id": "quote_444",
+      "quote": "The Mahabharata mentions that women in ancient times were independent and free to move as they pleased, following their own desires.",
+      "image_prompt": "Ghibli Art: A woman stands alone on a hill, her hair flowing in the wind. The vast sky stretches behind her.",
+      "image_url": "assets/img/quotes/quote_444.png",
+      "emphasis": {
+        "independent": "emphasis-1",
+        "free to move": "emphasis-2"
+      },
+      "context": "The text states that 'in ancient times, women were indeed unfettered, free to move as they pleased, independent' (Line 14450). It further elaborates that 'for them, to wander from maidenhood among different husbands was not adharma [unrighteousness]' (Line 14453). This reflects the cultural practices of the time, as described in the Mahabharata, where women had greater autonomy."
+    },
+    {
+      "id": "quote_445",
+      "quote": "The Mahabharata describes the birth of Arjuna, who was destined to be invincible and equal in prowess to the god Vishnu.",
+      "image_prompt": "Ghibli Art: A newborn baby lies in a cradle, surrounded by soft golden light. A faint silhouette of a divine figure hovers above.",
+      "image_url": "assets/img/quotes/quote_445.png",
+      "emphasis": {
+        "Arjuna": "emphasis-2",
+        "Vishnu": "emphasis-1"
+      },
+      "context": "The text narrates the birth of Arjuna, stating that he 'will be invincible like \u015aakra [Indra] and will spread your fame' (Line 14677). It also mentions that he 'will be equal to J\u0101madagnya [Para\u015bur\u0101ma] and possess prowess equal to Vi\u1e63\u1e47u [supreme deity]' (Line 14691). This is part of the prophecy surrounding Arjuna's birth, as told in the Mahabharata."
+    },
+    {
+      "id": "quote_446",
+      "quote": "In the Mahabharata, the Gandharvas and Apsaras sang and danced to celebrate the birth of Arjuna, accompanied by divine music.",
+      "image_prompt": "Ghibli Art: A group of celestial beings dances gracefully in the sky, their forms glowing softly. A gentle melody fills the air.",
+      "image_url": "assets/img/quotes/quote_446.png",
+      "emphasis": {
+        "Gandharvas": "emphasis-2",
+        "Apsaras": "emphasis-1"
+      },
+      "context": "The text describes how 'the Gandharvas [celestial musicians] and Apsaras [celestial nymphs]' (Line 14709) 'sang to B\u012bbhatsu [Arjuna] and the Apsar\u0101s danced' (Line 14719). It further mentions that 'the illustrious Tumburu [chief Gandharva] sang together with the Gandharvas' (Line 14721). This scene is part of the celestial celebrations following Arjuna's birth in the Mahabharata."
     }
   ]
 }

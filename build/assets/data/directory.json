@@ -3844,6 +3844,61 @@
         "maternal love": "emphasis-2"
       },
       "context": "The text describes Jarit\u0101, a mother bird, weeping 'pitifully' as she beheld her sons in the forest. This poignant moment underscores the deep emotional bond between a mother and her children, a theme that resonates throughout the Mahabharata. Jarit\u0101's concern for her sons is evident as she approaches each one, highlighting the universal nature of maternal love. This narrative not only adds emotional depth to the story but also reflects the broader cultural values of family and protection that are central to the epic."
+    },
+    {
+      "id": "quote_406",
+      "quote": "The Mahabharata includes a chapter titled 'Digvijaya Parva,' which translates to 'Conquest of Directions.'",
+      "image_prompt": "Ghibli Art: A single ancient scroll unrolled on a wooden table, with the words 'Digvijaya Parva' softly glowing in golden light.",
+      "image_url": "assets/img/quotes/quote_406.png",
+      "emphasis": {
+        "Digvijaya Parva": "emphasis-1",
+        "Conquest of Directions": "emphasis-2"
+      },
+      "context": "The text snippet explicitly mentions 'Digvijaya Parva [Conquest of Directions chapter]' as one of the chapters in the Mahabharata. This chapter is part of the larger narrative and focuses on the theme of conquest and expansion, as indicated by its title. The phrase is directly extracted from the text, providing a clear reference to this specific section of the epic."
+    },
+    {
+      "id": "quote_407",
+      "quote": "Maya, the demon architect, built an assembly hall for Yudhishthira that resembled a celestial palace, measuring ten thousand kishkus in all directions.",
+      "image_prompt": "Ghibli Art: A vast, shimmering hall with golden pillars under a soft, glowing sky. Empty space emphasizes its grandeur.",
+      "image_url": "assets/img/quotes/quote_407.png",
+      "emphasis": {
+        "Maya": "emphasis-2",
+        "celestial palace": "emphasis-1"
+      },
+      "context": "The text describes how Maya, the demon architect, created an assembly hall for Yudhishthira that 'resembled a celestial palace [vim\u0101na].' It specifies that the hall was 'measured completely as ten thousand ki\u1e63kus [length measure] in all directions.' This is found in the section where Maya's construction of the hall is detailed, emphasizing its divine and immense scale."
+    },
+    {
+      "id": "quote_408",
+      "quote": "Krishna instructed Maya to build an assembly hall for Yudhishthira that would astonish humans and be impossible to imitate.",
+      "image_prompt": "Ghibli Art: Krishna stands calmly in a misty field, gesturing toward a faint outline of a grand hall in the distance.",
+      "image_url": "assets/img/quotes/quote_408.png",
+      "emphasis": {
+        "Krishna": "emphasis-2",
+        "astonish humans": "emphasis-1"
+      },
+      "context": "Krishna instructed Maya to build an assembly hall for Yudhishthira, saying, 'Let an assembly hall [sabh\u0101] be built,' and specifying that it should be 'one which, when built, humans cannot imitate, seeing it with astonishment.' This directive is found in the section where Krishna outlines the requirements for the hall, emphasizing its uniqueness and grandeur."
+    },
+    {
+      "id": "quote_409",
+      "quote": "The assembly hall of Yama, the god of death, was created by Vishwakarma and is radiant, extending a hundred yojanas in width and one hundred and fifty in length.",
+      "image_prompt": "Ghibli Art: A luminous hall with a soft golden glow, surrounded by a tranquil, misty landscape. Minimal details focus on its ethereal beauty.",
+      "image_url": "assets/img/quotes/quote_409.png",
+      "emphasis": {
+        "Yama": "emphasis-2",
+        "radiant": "emphasis-1"
+      },
+      "context": "The text describes the assembly hall of Yama, stating that it 'is radiant [tejas\u012b] and extends for a hundred yojanas [distance measure] in width and one hundred and fifty in length.' It also mentions that it was 'created by Vi\u015bvakarm\u0101 [divine architect].' This is found in the section where Narada describes the divine assembly halls, highlighting Yama's hall's immense and radiant nature."
+    },
+    {
+      "id": "quote_410",
+      "quote": "Varuna's assembly hall, built by Vishwakarma, is adorned with trees made of divine jewels and filled with birds of various forms and sweet voices.",
+      "image_prompt": "Ghibli Art: A serene hall surrounded by shimmering jeweled trees, with a few birds perched on branches. Soft light filters through the leaves.",
+      "image_url": "assets/img/quotes/quote_410.png",
+      "emphasis": {
+        "Varuna": "emphasis-2",
+        "divine jewels": "emphasis-1"
+      },
+      "context": "The text describes Varuna's assembly hall as 'adorned with trees made of divine jewels, bearing fruits and flowers,' and mentions that it is 'filled with birds of various forms with sweet voices.' This is found in the section where Narada describes the divine assembly halls, emphasizing the hall's beauty and the presence of divine elements."
     }
   ]
 }

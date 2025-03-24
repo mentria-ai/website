@@ -4076,6 +4076,50 @@
         "Kali": "emphasis-2"
       },
       "context": "The text explains that the Bibh\u012btaka tree became inauspicious after Kali entered it. It states, 'And the Bibhitaka [dice tree] became inauspicious due to Kali's [evil age] influence.' This event occurs after Kali is released from Nala's body and seeks refuge in the tree."
+    },
+    {
+      "id": "quote_427",
+      "quote": "Vidura, the wise counselor, was received by King Drupada according to dharma, and they exchanged inquiries about each other's welfare.",
+      "image_prompt": "Ghibli Art: Two figures, Vidura and King Drupada, stand in a serene courtyard, exchanging respectful greetings. Soft sunlight bathes the scene.",
+      "image_url": "assets/img/quotes/quote_427.png",
+      "emphasis": {
+        "Vidura": "emphasis-2",
+        "dharma": "emphasis-1"
+      },
+      "context": "The text states, 'And he too received Vidura [wise counselor] then according to dharma,' and 'they both properly exchanged inquiries about each other's welfare.' This interaction occurs when Vidura approaches King Drupada with appropriate conduct, and they engage in a respectful exchange of greetings. The specific lines are found in the section where Vidura's diplomatic mission is described."
+    },
+    {
+      "id": "quote_428",
+      "quote": "The P\u0101\u1e47\u1e0davas, along with K\u1e5b\u1e63\u1e47\u0101 and Kunt\u012b, proceeded to Hastin\u0101pura after receiving permission from King Drupada.",
+      "image_prompt": "Ghibli Art: A group of travelers, including K\u1e5b\u1e63\u1e47\u0101 and Kunt\u012b, walk through a misty forest path. The soft glow of dawn illuminates their journey.",
+      "image_url": "assets/img/quotes/quote_428.png",
+      "emphasis": {
+        "P\u0101\u1e47\u1e0davas": "emphasis-2",
+        "Hastin\u0101pura": "emphasis-1"
+      },
+      "context": "The text mentions, 'Then, with the permission of the magnanimous Drupada [P\u0101\u00f1c\u0101la king], the P\u0101\u1e47\u1e0davas, K\u1e5b\u1e63\u1e47\u0101 [Draupad\u012b], and the wise Vidura [Kuru counselor] proceeded to the city named after the elephant [Hastin\u0101pura].' This occurs after Drupada grants them leave to return to Hastin\u0101pura, and they set out on their journey with their family."
+    },
+    {
+      "id": "quote_429",
+      "quote": "The city of Indraprastha, built by the P\u0101\u1e47\u1e0davas, was adorned with moats resembling the ocean and a rampart that covered the sky.",
+      "image_prompt": "Ghibli Art: A majestic city with towering ramparts and shimmering moats under a twilight sky. The scene is serene and awe-inspiring.",
+      "image_url": "assets/img/quotes/quote_429.png",
+      "emphasis": {
+        "Indraprastha": "emphasis-1",
+        "rampart": "emphasis-2"
+      },
+      "context": "The text describes Indraprastha as 'adorned with moats resembling the ocean, and endowed with a rampart that stood covering the sky.' This description is found in the section where the P\u0101\u1e47\u1e0davas establish their kingdom, and the city's grandeur is detailed, emphasizing its architectural marvels."
+    },
+    {
+      "id": "quote_430",
+      "quote": "Tilottam\u0101, a divine woman created by Vi\u015bvakarm\u0101, was named for being formed from the finest particles of jewels gathered from the three worlds.",
+      "image_prompt": "Ghibli Art: A radiant woman, Tilottam\u0101, stands alone in a field of flowers, her form glowing with a soft, ethereal light.",
+      "image_url": "assets/img/quotes/quote_430.png",
+      "emphasis": {
+        "Tilottam\u0101": "emphasis-1",
+        "Vi\u015bvakarm\u0101": "emphasis-2"
+      },
+      "context": "The text states, 'Since she was created by bringing together jewels particle by particle [sesame-sized], therefore Pit\u0101maha [Brahm\u0101] named her Tilottam\u0101 [finest particle].' This occurs when Vi\u015bvakarm\u0101, the divine architect, creates Tilottam\u0101 from the most beautiful elements of the three worlds, and Brahm\u0101 bestows her name."
     }
   ]
 }

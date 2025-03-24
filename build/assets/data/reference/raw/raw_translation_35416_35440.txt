@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 35416: विदुर उवाच||` | "Vidura [wise counselor] said:" |
+| `Line 35417: ` | "[Blank line]" |
+| `Line 35418: शृणु भीमस्य कर्मेदमतिमानुषकर्मणः |` | "Listen to this deed of Bhīma [mighty Pāṇḍava], whose actions are superhuman," |
+| `Line 35419: श्रुतपूर्वं मया तेषां कथान्तेषु पुनः पुनः ||२||` | "Which I have heard before, repeatedly, at the conclusion of their stories. ||2||" |
+| `Line 35420: ` | "[Blank line]" |
+| `Line 35421: इतः प्रयाता राजेन्द्र पाण्डवा द्यूतनिर्जिताः |` | "From here, O king of kings [rājendra], the Pāṇḍavas, defeated in the gambling match," |
+| `Line 35422: जग्मुस्त्रिभिरहोरात्रैः काम्यकं नाम तद्वनम् ||३||` | "Traveled for three days and nights to that forest named Kāmyaka. ||3||" |
+| `Line 35423: ` | "[Blank line]" |
+| `Line 35424: रात्रौ निशीथे स्वाभीले गतेऽर्धसमये नृप |` | "At midnight, O king, in the terrifying darkness, when half the night had passed," |
+| `Line 35425: प्रचारे पुरुषादानां रक्षसां भीमकर्मणाम् ||४||` | "During the prowling time of man-eating [puruṣāda] rākṣasas of terrible deeds. ||4||" |
+| `Line 35426: ` | "[Blank line]" |
+| `Line 35427: तद्वनं तापसा नित्यं शेषाश्च वनचारिणः |` | "That forest, the ascetics [tāpasa] and other forest-dwellers," |
+| `Line 35428: दूरात्परिहरन्ति स्म पुरुषादभयात्किल ||५||` | "Would always avoid from afar, out of fear of the man-eaters, indeed. ||5||" |
+| `Line 35429: ` | "[Blank line]" |
+| `Line 35430: तेषां प्रविशतां तत्र मार्गमावृत्य भारत |` | "As they were entering there, O descendant of Bharata, blocking their path," |
+| `Line 35431: दीप्ताक्षं भीषणं रक्षः सोल्मुकं प्रत्यदृश्यत ||६||` | "A terrifying rākṣasa [demon] with blazing eyes, holding a firebrand, appeared before them. ||6||" |
+| `Line 35432: ` | "[Blank line]" |
+| `Line 35433: बाहू महान्तौ कृत्वा तु तथास्यं च भयानकम् |` | "Extending his massive arms and with a frightful face," |
+| `Line 35434: स्थितमावृत्य पन्थानं येन यान्ति कुरूद्वहाः ||७||` | "He stood blocking the path by which the Kuru princes [kurūdvaha] were traveling. ||7||" |
+| `Line 35435: ` | "[Blank line]" |
+| `Line 35436: दष्टोष्ठदंष्ट्रं ताम्राक्षं प्रदीप्तोर्ध्वशिरोरुहम् |` | "With bitten lips and fangs, copper-red eyes, and flaming upright hair," |
+| `Line 35437: सार्करश्मितडिच्चक्रं सबलाकमिवाम्बुदम् ||८||` | "Like a thundercloud with lightning flashes and cranes. ||8||" |
+| `Line 35438: ` | "[Blank line]" |
+| `Line 35439: सृजन्तं राक्षसीं मायां महारावविराविणम् |` | "Creating rākṣasa illusion [māyā], roaring with great bellows," |
+| `Line 35440: मुञ्चन्तं विपुलं नादं सतोयमिव तोयदम् ||९||` | "Emitting vast sounds like a rain-filled cloud. ||9||" |

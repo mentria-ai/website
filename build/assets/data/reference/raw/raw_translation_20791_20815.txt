@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 20791: स्वयंवरो महांस्तत्र भविता सुमहाधनः ||५||` | "A grand svayaṃvara [self-choice ceremony] will take place there, with great wealth. ||5||" |
+| `Line 20792: ` | "[Blank line]" |
+| `Line 20793: एकसार्थं प्रयाताः स्मो वयमप्यत्र गामिनः |` | "We too are traveling there in one caravan [sārtha], as travelers," |
+| `Line 20794: तत्र ह्यद्भुतसङ्काशो भविता सुमहोत्सवः ||६||` | "For there will be a magnificent festival of wondrous appearance. ||6||" |
+| `Line 20795: ` | "[Blank line]" |
+| `Line 20796: यज्ञसेनस्य दुहिता द्रुपदस्य महात्मनः |` | "The daughter of Yajñasena [sacrifice-army], the noble-souled Drupada," |
+| `Line 20797: वेदीमध्यात्समुत्पन्ना पद्मपत्रनिभेक्षणा ||७||` | "Born from the middle of the sacrificial altar [vedi], with eyes like lotus petals. ||7||" |
+| `Line 20798: ` | "[Blank line]" |
+| `Line 20799: दर्शनीयानवद्याङ्गी सुकुमारी मनस्विनी |` | "Beautiful, with flawless limbs, delicate, and intelligent," |
+| `Line 20800: धृष्टद्युम्नस्य भगिनी द्रोणशत्रोः प्रतापिनः ||८||` | "The sister of Dhṛṣṭadyumna [bold-splendor], the powerful enemy of Droṇa. ||8||" |
+| `Line 20801: ` | "[Blank line]" |
+| `Line 20802: यो जातः कवची खड्गी सशरः सशरासनः |` | "Who was born armored, with sword, arrows, and bow," |
+| `Line 20803: सुसमिद्धे महाबाहुः पावके पावकप्रभः ||९||` | "The mighty-armed one [mahābāhu], from the blazing fire, with the radiance of fire. ||9||" |
+| `Line 20804: ` | "[Blank line]" |
+| `Line 20805: स्वसा तस्यानवद्याङ्गी द्रौपदी तनुमध्यमा |` | "His sister with flawless limbs is Draupadī [Drupada's daughter], slender-waisted," |
+| `Line 20806: नीलोत्पलसमो गन्धो यस्याः क्रोशात्प्रवायति ||१०||` | "Whose fragrance, like that of a blue lotus, wafts for a krośa [2 miles]. ||10||" |
+| `Line 20807: ` | "[Blank line]" |
+| `Line 20808: तां यज्ञसेनस्य सुतां स्वयंवरकृतक्षणाम् |` | "To see that daughter of Yajñasena, for whom the time of svayaṃvara has been set," |
+| `Line 20809: गच्छामहे वयं द्रष्टुं तं च देवमहोत्सवम् ||११||` | "We are going to see her and that divine great festival. ||11||" |
+| `Line 20810: ` | "[Blank line]" |
+| `Line 20811: राजानो राजपुत्राश्च यज्वानो भूरिदक्षिणाः |` | "Kings and princes, performers of sacrifices, givers of abundant gifts [dakṣiṇā]," |
+| `Line 20812: स्वाध्यायवन्तः शुचयो महात्मानो यतव्रताः ||१२||` | "Learned in Vedas, pure, noble-souled, and of controlled vows. ||12||" |
+| `Line 20813: ` | "[Blank line]" |
+| `Line 20814: तरुणा दर्शनीयाश्च नानादेशसमागताः |` | "Young and handsome, gathered from various countries," |
+| `Line 20815: महारथाः कृतास्त्राश्च समुपैष्यन्ति भूमिपाः ||१३||` | "Great warriors [mahāratha] skilled in weapons, these kings will arrive there. ||13||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 38316: अहन्यनुचरेदेवमेष शास्त्रकृतो विधिः ||३९||` | "One should follow this daily—this is the rule established by the scriptures. ||39||" |
+| `Line 38317: ` | "[Blank line]" |
+| `Line 38318: कामं पूर्वं धनं मध्ये जघन्ये धर्ममाचरेत् |` | "One should pursue pleasure [kāma] in youth, wealth in middle age, and righteousness [dharma] in old age." |
+| `Line 38319: वयस्यनुचरेदेवमेष शास्त्रकृतो विधिः ||४०||` | "One should follow this according to life stages—this is the rule established by the scriptures. ||40||" |
+| `Line 38320: ` | "[Blank line]" |
+| `Line 38321: धर्मं चार्थं च कामं च यथावद्वदतां वर |` | "O best of speakers, the wise person who knows the proper time," |
+| `Line 38322: विभज्य काले कालज्ञः सर्वान्सेवेत पण्डितः ||४१||` | "Should divide and pursue righteousness [dharma], wealth [artha], and pleasure [kāma] at their appropriate times. ||41||" |
+| `Line 38323: ` | "[Blank line]" |
+| `Line 38324: मोक्षो वा परमं श्रेय एष राजन्सुखार्थिनाम् |` | "O king, either liberation [mokṣa] is the highest good for those seeking happiness," |
+| `Line 38325: प्राप्तिर्वा बुद्धिमास्थाय सोपायं कुरुनन्दन ||४२||` | "Or attainment through intelligent means, O joy of the Kurus [Yudhiṣṭhira]. ||42||" |
+| `Line 38326: ` | "[Blank line]" |
+| `Line 38327: तद्वाशु क्रियतां राजन्प्राप्तिर्वाप्यधिगम्यताम् |` | "Therefore, O king, either act quickly or attain your goal," |
+| `Line 38328: जीवितं ह्यातुरस्येव दुःखमन्तरवर्तिनः ||४३||` | "For the life of one suffering inwardly is like that of a sick person. ||43||" |
+| `Line 38329: ` | "[Blank line]" |
+| `Line 38330: विदितश्चैव ते धर्मः सततं चरितश्च ते |` | "Righteousness [dharma] is known to you and constantly practiced by you," |
+| `Line 38331: जानते त्वयि शंसन्ति सुहृदः कर्मचोदनाम् ||४४||` | "Your well-wishers proclaim your inclination toward righteous action, knowing you well. ||44||" |
+| `Line 38332: ` | "[Blank line]" |
+| `Line 38333: दानं यज्ञः सतां पूजा वेदधारणमार्जवम् |` | "Charity, sacrifice, honoring the virtuous, upholding the Vedas, and honesty—" |
+| `Line 38334: एष धर्मः परो राजन्फलवान्प्रेत्य चेह च ||४५||` | "This is the highest dharma, O king, bearing fruit both here and in the hereafter. ||45||" |
+| `Line 38335: ` | "[Blank line]" |
+| `Line 38336: एष नार्थविहीनेन शक्यो राजन्निषेवितुम् |` | "This cannot be practiced, O king, by one without wealth," |
+| `Line 38337: अखिलाः पुरुषव्याघ्र गुणाः स्युर्यद्यपीतरे ||४६||` | "Even if, O tiger among men [puruṣa-vyāghra], one possesses all other qualities. ||46||" |
+| `Line 38338: ` | "[Blank line]" |
+| `Line 38339: धर्ममूलं जगद्राजन्नान्यद्धर्माद्विशिष्यते |` | "The world is rooted in dharma, O king, nothing surpasses dharma," |
+| `Line 38340: धर्मश्चार्थेन महता शक्यो राजन्निषेवितुम् ||४७||` | "And dharma, O king, can be practiced with great wealth. ||47||" |

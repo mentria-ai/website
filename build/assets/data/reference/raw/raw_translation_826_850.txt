@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 826: कीचकानां वधः पर्व पर्व गोग्रहणं ततः ||४८||` | "The section on the slaying of the Kīcakas [Matsya generals], and then the section on the cattle-raid [Go-grahaṇa]. ||48||" |
+| `Line 827: ` | [Blank line] |
+| `Line 828: अभिमन्युना च वैराट्याः पर्व वैवाहिकं स्मृतम् |` | "The section on the marriage of Abhimanyu with the princess of Virāṭa [Uttarā] is remembered as the wedding section." |
+| `Line 829: उद्योगपर्व विज्ञेयमत ऊर्ध्वं महाद्भुतम् ||४९||` | "After this, the highly wonderful Udyoga Parva [Effort section] should be known. ||49||" |
+| `Line 830: ` | [Blank line] |
+| `Line 831: ततः सञ्जययानाख्यं पर्व ज्ञेयमतः परम् |` | "Then after this, the section known as Sañjaya-yāna [Sanjaya's journey] should be known." |
+| `Line 832: प्रजागरं ततः पर्व धृतराष्ट्रस्य चिन्तया ||५०||` | "Then the section called Prajāgara [Sleepless night], with Dhritarashtra's anxieties. ||50||" |
+| `Line 833: ` | [Blank line] |
+| `Line 834: पर्व सानत्सुजातं च गुह्यमध्यात्मदर्शनम् |` | "And the Sanat-sujāta section, containing secret spiritual knowledge [metaphysical teachings]." |
+| `Line 835: यानसन्धिस्ततः पर्व भगवद्यानमेव च ||५१||` | "Then the section on Yāna-sandhi [Preparation for march], and also the section on Bhagavad-yāna [Lord's journey]. ||51||" |
+| `Line 836: ` | [Blank line] |
+| `Line 837: ज्ञेयं विवादपर्वात्र कर्णस्यापि महात्मनः |` | "Here should be known the section on the dispute of the noble-souled Karṇa." |
+| `Line 838: निर्याणं पर्व च ततः कुरुपाण्डवसेनयोः ||५२||` | "And then the section on the marching forth of the armies of the Kurus and Pāṇḍavas. ||52||" |
+| `Line 839: ` | [Blank line] |
+| `Line 840: रथातिरथसङ्ख्या च पर्वोक्तं तदनन्तरम् |` | "And after that is described the section on the enumeration of charioteers and great charioteers [military rankings]." |
+| `Line 841: उलूकदूतागमनं पर्वामर्षविवर्धनम् ||५३||` | "The section on the arrival of Ulūka as messenger, which increases anger [provocation]. ||53||" |
+| `Line 842: ` | [Blank line] |
+| `Line 843: अम्बोपाख्यानमपि च पर्व ज्ञेयमतः परम् |` | "And after this should be known the section containing the story of Ambā [Bhishma's nemesis]." |
+| `Line 844: भीष्माभिषेचनं पर्व ज्ञेयमद्भुतकारणम् ||५४||` | "The section on the installation of Bhīṣma [as commander], which should be known as causing wonder. ||54||" |
+| `Line 845: ` | [Blank line] |
+| `Line 846: जम्बूखण्डविनिर्माणं पर्वोक्तं तदनन्तरम् |` | "After that is described the section on the formation of Jambū-khaṇḍa [geography of India]." |
+| `Line 847: भूमिपर्व ततो ज्ञेयं द्वीपविस्तरकीर्तनम् ||५५||` | "Then should be known the Bhūmi Parva [Earth section], describing the extent of the continents [world geography]. ||55||" |
+| `Line 848: ` | [Blank line] |
+| `Line 849: पर्वोक्तं भगवद्गीता पर्व भीष्मवधस्ततः |` | "Then is described the section on the Bhagavad Gītā [divine song], and after that the section on the slaying of Bhīṣma." |
+| `Line 850: द्रोणाभिषेकः पर्वोक्तं संशप्तकवधस्ततः ||५६||` | "The section on the installation of Droṇa [as commander] is described, and then the slaying of the Saṃśaptakas [oath-bound warriors]. ||56||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 24991: ` | "[Blank line]" |
+| `Line 24992: ` | "[Blank line]" |
+| `Line 24993: २१८` | "218 [chapter number]" |
+| `Line 24994: ` | "[Blank line]" |
+| `Line 24995: ` | "[Blank line]" |
+| `Line 24996: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 24997: ` | "[Blank line]" |
+| `Line 24998: तस्याभिवर्षतो वारि पाण्डवः प्रत्यवारयत् |` | "As he [Indra] showered water, the Pāṇḍava [Arjuna] countered it," |
+| `Line 24999: शरवर्षेण बीभत्सुरुत्तमास्त्राणि दर्शयन् ||१||` | "Bībhatsu [Arjuna] displaying supreme weapons with a shower of arrows. ||1||" |
+| `Line 25000: ` | "[Blank line]" |
+| `Line 25001: शरैः समन्ततः सर्वं खाण्डवं चापि पाण्डवः |` | "The Pāṇḍava [Arjuna] completely covered the entire Khāṇḍava [forest] with arrows," |
+| `Line 25002: छादयामास तद्वर्षमपकृष्य ततो वनात् ||२||` | "Deflecting that rain away from the forest. ||2||" |
+| `Line 25003: ` | "[Blank line]" |
+| `Line 25004: न च स्म किञ्चिच्छक्नोति भूतं निश्चरितुं ततः |` | "And no creature was able to escape from there," |
+| `Line 25005: सञ्छाद्यमाने खगमैरस्यता सव्यसाचिना ||३||` | "As it was covered with arrows shot by Savyasācin [ambidextrous Arjuna]. ||3||" |
+| `Line 25006: ` | "[Blank line]" |
+| `Line 25007: तक्षकस्तु न तत्रासीत्सर्पराजो महाबलः |` | "But Takṣaka [serpent king], the mighty king of serpents, was not there," |
+| `Line 25008: दह्यमाने वने तस्मिन्कुरुक्षेत्रेऽभवत्तदा ||४||` | "When that forest was burning, he was then in Kurukṣetra [sacred battlefield]. ||4||" |
+| `Line 25009: ` | "[Blank line]" |
+| `Line 25010: अश्वसेनस्तु तत्रासीत्तक्षकस्य सुतो बली |` | "But Aśvasena [horse army], the powerful son of Takṣaka, was there," |
+| `Line 25011: स यत्नमकरोत्तीव्रं मोक्षार्थं हव्यवाहनात् ||५||` | "He made intense efforts to escape from Havyavāhana [fire]. ||5||" |
+| `Line 25012: ` | "[Blank line]" |
+| `Line 25013: न शशाक विनिर्गन्तुं कौन्तेयशरपीडितः |` | "He was unable to escape, afflicted by Kaunteya's [Arjuna's] arrows," |
+| `Line 25014: मोक्षयामास तं माता निगीर्य भुजगात्मजा ||६||` | "His mother, the serpent daughter [bhujagātmajā], freed him by swallowing him. ||6||" |
+| `Line 25015: ` | "[Blank line]" |

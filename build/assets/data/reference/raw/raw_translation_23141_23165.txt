@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 23141: ` | "[Blank line]" |
+| `Line 23142: ` | "[Blank line]" |
+| `Line 23143: ` | "[Blank line]" |
+| `Line 23144: ` | "[Blank line]" |
+| `Line 23145: ` | "[Blank line]" |
+| `Line 23146: ` | "[Blank line]" |
+| `Line 23147: सुन्दोपसुन्दोपाख्यानम्` | "The Tale of Sunda and Upasunda [demon brothers]" |
+| `Line 23148: २०१` | "201 [chapter number]" |
+| `Line 23149: ` | "[Blank line]" |
+| `Line 23150: ` | "[Blank line]" |
+| `Line 23151: नारद उवाच||` | "Nārada [divine sage] said:" |
+| `Line 23152: ` | "[Blank line]" |
+| `Line 23153: शृणु मे विस्तरेणेममितिहासं पुरातनम् |` | "Listen to this ancient tale from me in detail," |
+| `Line 23154: भ्रातृभीः सहितः पार्थ यथावृत्तं युधिष्ठिर ||१||` | "Together with your brothers, O Pārtha [Arjuna], as it happened, O Yudhiṣṭhira. ||1||" |
+| `Line 23155: ` | "[Blank line]" |
+| `Line 23156: महासुरस्यान्ववाये हिरण्यकशिपोः पुरा |` | "In the lineage of the great demon [mahāsura] Hiraṇyakaśipu [gold-dressed demon] of old," |
+| `Line 23157: निकुम्भो नाम दैत्येन्द्रस्तेजस्वी बलवानभूत् ||२||` | "There was a powerful and mighty lord of Daityas [demon clan] named Nikumbha. ||2||" |
+| `Line 23158: ` | "[Blank line]" |
+| `Line 23159: तस्य पुत्रौ महावीर्यौ जातौ भीमपराक्रमौ |` | "His two sons were born with great valor and terrible prowess," |
+| `Line 23160: सहान्योन्येन भुञ्जाते विनान्योन्यं न गच्छतः ||३||` | "They would eat together and would not go anywhere without each other. ||3||" |
+| `Line 23161: ` | "[Blank line]" |
+| `Line 23162: अन्योन्यस्य प्रियकरावन्योन्यस्य प्रियंवदौ |` | "They were dear to each other and spoke pleasantly to each other," |
+| `Line 23163: एकशीलसमाचारौ द्विधैवैकं यथा कृतौ ||४||` | "Of identical conduct and character, as if one being divided into two. ||4||" |
+| `Line 23164: ` | "[Blank line]" |
+| `Line 23165: तौ विवृद्धौ महावीर्यौ कार्येष्वप्येकनिश्चयौ |` | "Those two grew up with great strength, single-minded in their purposes," |

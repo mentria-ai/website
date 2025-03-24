@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 17641: बलादितो विनिष्पिष्य व्यपकृष्टो महात्मना ||११||` | "Forcibly crushed and dragged away by the great-souled one [mahātmā]. ||11||" |
+| `Line 17642: ` | "[Blank line]" |
+| `Line 17643: विकर्षन्तौ महावेगौ गर्जमानौ परस्परम् |` | "Both pulling each other with great force, roaring at one another," |
+| `Line 17644: पश्यध्वं युधि विक्रान्तावेतौ तौ नरराक्षसौ ||१२||` | "Behold these two valiant ones in battle, the man and the rākṣasa [demon]. ||12||" |
+| `Line 17645: ` | "[Blank line]" |
+| `Line 17646: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 17647: ` | "[Blank line]" |
+| `Line 17648: तस्याः श्रुत्वैव वचनमुत्पपात युधिष्ठिरः |` | "Having heard her words, Yudhiṣṭhira [eldest Pāṇḍava] sprang up," |
+| `Line 17649: अर्जुनो नकुलश्चैव सहदेवश्च वीर्यवान् ||१३||` | "As did Arjuna, Nakula, and the powerful Sahadeva. ||13||" |
+| `Line 17650: ` | "[Blank line]" |
+| `Line 17651: तौ ते ददृशुरासक्तौ विकर्षन्तौ परस्परम् |` | "They saw those two engaged, pulling each other," |
+| `Line 17652: काङ्क्षमाणौ जयं चैव सिंहाविव रणोत्कटौ ||१४||` | "Both desiring victory, like two lions fierce in battle. ||14||" |
+| `Line 17653: ` | "[Blank line]" |
+| `Line 17654: तावन्योन्यं समाश्लिष्य विकर्षन्तौ परस्परम् |` | "Those two, embracing each other and pulling one another," |
+| `Line 17655: दावाग्निधूमसदृशं चक्रतुः पार्थिवं रजः ||१५||` | "Raised earthly dust resembling smoke from a forest fire [dāvāgni]. ||15||" |
+| `Line 17656: ` | "[Blank line]" |
+| `Line 17657: वसुधारेणुसंवीतौ वसुधाधरसंनिभौ |` | "Covered with earth's dust, resembling mountains [earth-bearers]," |
+| `Line 17658: विभ्राजेतां यथा शैलौ नीहारेणाभिसंवृतौ ||१६||` | "They shone like two mountains enveloped in mist. ||16||" |
+| `Line 17659: ` | "[Blank line]" |
+| `Line 17660: राक्षसेन तथा भीमं क्लिश्यमानं निरीक्ष्य तु |` | "Seeing Bhīma [mighty Pāṇḍava] thus struggling with the rākṣasa," |
+| `Line 17661: उवाचेदं वचः पार्थः प्रहसञ्शनकैरिव ||१७||` | "Pārtha [Arjuna] spoke these words, smiling gently. ||17||" |
+| `Line 17662: ` | "[Blank line]" |
+| `Line 17663: भीम मा भैर्महाबाहो न त्वां बुध्यामहे वयम् |` | "Bhīma, don't fear, O mighty-armed one [mahābāho], we did not recognize you," |
+| `Line 17664: समेतं भीमरूपेण प्रसुप्ताः श्रमकर्शिताः ||१८||` | "Engaged with this terrifying form, as we were asleep, exhausted from fatigue. ||18||" |
+| `Line 17665: ` | "[Blank line]" |

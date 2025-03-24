@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 19666: १६३` | "163 [chapter number]" |
+| `Line 19667: ` | "[Blank line]" |
+| `Line 19668: ` | "[Blank line]" |
+| `Line 19669: वसिष्ठ उवाच||` | "Vasiṣṭha [sage, family priest] said:" |
+| `Line 19670: ` | "[Blank line]" |
+| `Line 19671: यैषा ते तपती नाम सावित्र्यवरजा सुता |` | "This daughter of yours named Tapatī [radiant one], the younger sister of Sāvitrī [solar goddess]," |
+| `Line 19672: तां त्वां संवरणस्यार्थे वरयामि विभावसो ||१||` | "I ask her from you, O Vibhāvasu [Sun god], for the sake of Saṃvaraṇa [king]. ||1||" |
+| `Line 19673: ` | "[Blank line]" |
+| `Line 19674: स हि राजा बृहत्कीर्तिर्धर्मार्थविदुदारधीः |` | "For he is a king of great fame, knowledgeable in dharma [righteousness] and artha [prosperity], of noble intellect," |
+| `Line 19675: युक्तः संवरणो भर्ता दुहितुस्ते विहङ्गम ||२||` | "Saṃvaraṇa is a suitable husband for your daughter, O Vihaṅgama [sky-traveler]. ||2||" |
+| `Line 19676: ` | "[Blank line]" |
+| `Line 19677: गन्धर्व उवाच||` | "The Gandharva [celestial musician] said:" |
+| `Line 19678: ` | "[Blank line]" |
+| `Line 19679: इत्युक्तः सविता तेन ददानीत्येव निश्चितः |` | "Thus addressed, Savitā [Sun god], having firmly decided to give her," |
+| `Line 19680: प्रत्यभाषत तं विप्रं प्रतिनन्द्य दिवाकरः ||३||` | "Replied to that brāhmaṇa [priest], Divākara [day-maker] having welcomed him. ||3||" |
+| `Line 19681: ` | "[Blank line]" |
+| `Line 19682: वरः संवरणो राज्ञां त्वमृषीणां वरो मुने |` | "Saṃvaraṇa is the best among kings, you are the best among sages, O Muni [sage]," |
+| `Line 19683: तपती योषितां श्रेष्ठा किमन्यत्रापवर्जनात् ||४||` | "Tapatī is the foremost among women—what else is there but to give her away? ||4||" |
+| `Line 19684: ` | "[Blank line]" |
+| `Line 19685: ततः सर्वानवद्याग्नीं तपतीं तपनः स्वयम् |` | "Then Tapana [Sun] himself gave Tapatī, who is faultless in all respects," |
+| `Line 19686: ददौ संवरणस्यार्थे वसिष्ठाय महात्मने ||५||` | "To the great-souled Vasiṣṭha for the sake of Saṃvaraṇa. ||5||" |
+| `Line 19687: ` | "[Blank line]" |
+| `Line 19688: प्रतिजग्राह तां कन्यां महर्षिस्तपतीं तदा ||५||` | "The great sage then accepted that maiden Tapatī. ||5||" |
+| `Line 19689: ` | "[Blank line]" |
+| `Line 19690: वसिष्ठोऽथ विसृष्टश्च पुनरेवाजगाम ह |` | "And Vasiṣṭha, having been dismissed, came back again," |

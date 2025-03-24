@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1751: भवत्युपाध्यायेनास्म्यनुज्ञातो गृहं गन्तुम् |` | "I have been permitted by your honorable teacher to go home." |
+| `Line 1752: तदिच्छामीष्टं ते गुर्वर्थमुपहृत्यानृणो गन्तुम् |` | "Therefore, I wish to bring a suitable gift for the teacher and depart free from debt." |
+| `Line 1753: तदाज्ञापयतु भवती |` | "So please instruct me, respected lady [teacher's wife]." |
+| `Line 1754: किमुपहरामि गुर्वर्थमिति | ०९९ |` | "What should I bring as a gift for the teacher? |099|" |
+| `Line 1755: सैवमुक्तोपाध्यायिन्युत्तङ्कं प्रत्युवाच |` | "Thus addressed, the teacher's wife replied to Uttanka:" |
+| `Line 1756: गच्छ पौष्यं राजानम् |` | "Go to King Paushya." |
+| `Line 1757: भिक्षस्व तस्य क्षत्रियया पिनद्धे कुण्डले |` | "Request the earrings worn by his queen [Kshatriya woman]." |
+| `Line 1758: ते आनयस्व |` | "Bring those here." |
+| `Line 1759: इतश्चतुर्थेऽहनि पुण्यकं भविता |` | "Four days from now there will be an auspicious ceremony [punyaka]." |
+| `Line 1760: ताभ्यामाबद्धाभ्यां ब्राह्मणान्परिवेष्टुमिच्छामि |` | "I wish to serve the Brahmins while wearing those earrings." |
+| `Line 1761: शोभमाना यथा ताभ्यां कुण्डलाभ्यां तस्मिन्नहनि सम्पादयस्व |` | "Ensure that I am adorned with those earrings on that day." |
+| `Line 1762: श्रेयो हि ते स्यात्क्षणं कुर्वत इति | १०० |` | "It will be auspicious for you if you accomplish this task. |100|" |
+| `Line 1763: स एवमुक्त उपाध्यायिन्या प्रातिष्ठतोत्तङ्कः |` | "Thus instructed by the teacher's wife, Uttanka set forth." |
+| `Line 1764: स पथि गच्छन्नपश्यदृषभमतिप्रमाणं तमधिरूढं च पुरुषमतिप्रमाणमेव | १०१ |` | "While going along the path, he saw an enormous bull and a man of enormous size mounted on it. |101|" |
+| `Line 1765: स पुरुष उत्तङ्कमभ्यभाषत |` | "That man addressed Uttanka:" |
+| `Line 1766: उत्तङ्कैतत्पुरीषमस्य ऋषभस्य भक्षयस्वेति | १०२ |` | "Uttanka, eat this dung of this bull. |102|" |
+| `Line 1767: स एवमुक्तो नैच्छत् | १०३ |` | "Thus addressed, he refused. |103|" |
+| `Line 1768: तमाह पुरुषो भूयः |` | "The man spoke to him again:" |
+| `Line 1769: भक्षयस्वोत्तङ्क |` | "Eat it, Uttanka." |
+| `Line 1770: मा विचारय |` | "Do not hesitate." |
+| `Line 1771: उपाध्यायेनापि ते भक्षितं पूर्वमिति | १०४ |` | "Your teacher also ate it before. |104|" |
+| `Line 1772: स एवमुक्तो बाढमित्युक्त्वा तदा तदृषभस्य पुरीषं मूत्रं च भक्षयित्वोत्तङ्कः प्रतस्थे यत्र स क्षत्रियः पौष्यः | १०५ |` | "Thus addressed, saying 'Very well,' Uttanka then ate the dung and urine of that bull and proceeded to where King Paushya was. |105|" |
+| `Line 1773: तमुपेत्यापश्यदुत्तङ्क आसीनम् |` | "Approaching, Uttanka saw him seated." |
+| `Line 1774: स तमुपेत्याशीर्भिरभिनन्द्योवाच |` | "He approached him, greeted him with blessings, and said:" |
+| `Line 1775: अर्थी भवन्तमुपगतोऽस्मीति | १०६ |` | "I have come to you as a petitioner. |106|" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 45566: ` | "[Blank line]" |
+| `Line 45567: ब्राह्मणानुमतान्पुण्यानाश्रमान्भरतर्षभ |` | "O bull among Bharatas [Yudhishthira], (hear about) the sacred hermitages approved by Brahmins," |
+| `Line 45568: दिशस्तीर्थानि शैलांश्च शृणु मे गदतो नृप ||२||` | "The directions, sacred fords [tīrthas], and mountains - listen to me as I speak, O king. ||2||" |
+| `Line 45569: ` | "[Blank line]" |
+| `Line 45570: पूर्वं प्राचीं दिशं राजन्राजर्षिगणसेविताम् |` | "First, O king, I shall describe to you the eastern direction, frequented by hosts of royal sages [rājarṣis]," |
+| `Line 45571: रम्यां ते कीर्तयिष्यामि युधिष्ठिर यथास्मृति ||३||` | "The pleasant (region) I shall narrate to you, Yudhiṣṭhira, according to tradition. ||3||" |
+| `Line 45572: ` | "[Blank line]" |
+| `Line 45573: तस्यां देवर्षिजुष्टायां नैमिषं नाम भारत |` | "In that (direction), frequented by divine sages [devarṣis], is (the forest) named Naimiṣa, O Bhārata," |
+| `Line 45574: यत्र तीर्थानि देवानां सुपुण्यानि पृथक्पृथक् ||४||` | "Where there are various most sacred fords [tīrthas] of the gods, each distinct. ||4||" |
+| `Line 45575: ` | "[Blank line]" |
+| `Line 45576: यत्र सा गोमती पुण्या रम्या देवर्षिसेविता |` | "Where flows the sacred and pleasant Gomatī [cow-rich river], frequented by divine sages," |
+| `Line 45577: यज्ञभूमिश्च देवानां शामित्रं च विवस्वतः ||५||` | "And (where is) the sacrificial ground of the gods and the sacrificial fire [śāmitra] of Vivasvat [sun deity]. ||5||" |
+| `Line 45578: ` | "[Blank line]" |
+| `Line 45579: तस्यां गिरिवरः पुण्यो गयो राजर्षिसत्कृतः |` | "In that (direction) is the sacred excellent mountain Gaya, honored by royal sages," |
+| `Line 45580: शिवं ब्रह्मसरो यत्र सेवितं त्रिदशर्षिभिः ||६||` | "Where is the auspicious Brahma-lake [Brahmasaras], frequented by the thirty [tridaśa] divine sages. ||6||" |
+| `Line 45581: ` | "[Blank line]" |
+| `Line 45582: यदर्थं पुरुषव्याघ्र कीर्तयन्ति पुरातनाः |` | "Concerning which, O tiger among men [Yudhishthira], the ancients declare:" |
+| `Line 45583: एष्टव्या बहवः पुत्रा यद्येकोऽपि गयां व्रजेत् ||७||` | "'One should desire many sons, so that even one might go to Gaya.' ||7||" |
+| `Line 45584: ` | "[Blank line]" |
+| `Line 45585: महानदी च तत्रैव तथा गयशिरोऽनघ |` | "And there is the great river and also Gayaśiras [Gaya's head], O sinless one," |
+| `Line 45586: यत्रासौ कीर्त्यते विप्रैरक्षय्यकरणो वटः ||८||` | "Where the Brahmins speak of that imperishable banyan tree [vaṭa]. ||8||" |
+| `Line 45587: ` | "[Blank line]" |
+| `Line 45588: यत्र दत्तं पितृभ्योऽन्नमक्षय्यं भवति प्रभो ||८||` | "Where food offered to the ancestors [pitṛs] becomes inexhaustible, O lord. ||8||" |
+| `Line 45589: ` | "[Blank line]" |
+| `Line 45590: सा च पुण्यजला यत्र फल्गुनामा महानदी |` | "And there is that great river with sacred waters named Phalgu," |

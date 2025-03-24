@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 40066: रामकृष्णप्रणीतानां वृष्णीनां सूतनन्दन |` | "O son of a charioteer [sūta-nandana], the force of the Vrishnis [Krishna's clan] led by Rama and Krishna," |
+| `Line 40067: न शक्यः सहितुं वेगः पर्वतैरपि संयुगे ||७||` | "Cannot be withstood in battle even by mountains. ||7||" |
+| `Line 40068: ` | "[Blank line]" |
+| `Line 40069: तेषां मध्ये महेष्वासो भीमो भीमपराक्रमः |` | "Among them, the great archer [maheṣvāsa] Bhima of terrible prowess," |
+| `Line 40070: शैक्यया वीरघातिन्या गदया विचरिष्यति ||८||` | "Will move about with his hero-slaying [vīra-ghātinī] mace made of iron. ||8||" |
+| `Line 40071: ` | "[Blank line]" |
+| `Line 40072: तथा गाण्डीवनिर्घोषं विस्फूर्जितमिवाशनेः |` | "Likewise, the twang of Gandiva [Arjuna's bow] like the crack of lightning," |
+| `Line 40073: गदावेगं च भीमस्य नालं सोढुं नराधिपाः ||९||` | "And the force of Bhima's mace, the kings will not be able to withstand. ||9||" |
+| `Line 40074: ` | "[Blank line]" |
+| `Line 40075: ततोऽहं सुहृदां वाचो दुर्योधनवशानुगः |` | "Then I, following Duryodhana's will, shall remember the words of well-wishers," |
+| `Line 40076: स्मरणीयाः स्मरिष्यामि मया या न कृताः पुरा ||१०||` | "Those memorable words which I did not heed before. ||10||" |
+| `Line 40077: ` | "[Blank line]" |
+| `Line 40078: सञ्जय उवाच||` | "Sanjaya [messenger-charioteer] said:" |
+| `Line 40079: ` | "[Blank line]" |
+| `Line 40080: व्यतिक्रमोऽयं सुमहांस्त्वया राजन्नुपेक्षितः |` | "This great transgression, O king, was overlooked by you," |
+| `Line 40081: समर्थेनापि यन्मोहात्पुत्रस्ते न निवारितः ||११||` | "That despite being capable, out of delusion, you did not restrain your son. ||11||" |
+| `Line 40082: ` | "[Blank line]" |
+| `Line 40083: श्रुत्वा हि निर्जितान्द्यूते पाण्डवान्मधुसूदनः |` | "Having heard that the Pandavas were defeated in the gambling match, Madhusudana [Krishna]," |
+| `Line 40084: त्वरितः काम्यके पार्थान्समभावयदच्युतः ||१२||` | "The infallible one [Achyuta] quickly visited the Parthas [Pandavas] in Kamyaka forest. ||12||" |
+| `Line 40085: ` | "[Blank line]" |
+| `Line 40086: द्रुपदस्य तथा पुत्रा धृष्टद्युम्नपुरोगमाः |` | "Likewise, Drupada's sons led by Dhrishtadyumna [fire-born warrior]," |
+| `Line 40087: विराटो धृष्टकेतुश्च केकयाश्च महारथाः ||१३||` | "Virata and Dhrishtaketu, and the Kekayas, great chariot-warriors [mahāratha]. ||13||" |
+| `Line 40088: ` | "[Blank line]" |
+| `Line 40089: तैश्च यत्कथितं तत्र दृष्ट्वा पार्थान्पराजितान् |` | "And what was said by them there, seeing the Parthas defeated," |
+| `Line 40090: चारेण विदितं सर्वं तन्मया वेदितं च ते ||१४||` | "All that was learned through spies [chāra], and has been made known to you by me. ||14||" |

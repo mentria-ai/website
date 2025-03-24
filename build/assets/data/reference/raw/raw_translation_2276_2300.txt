@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 2276: अथर्षयः समुद्विग्ना देवान्गत्वाब्रुवन्वचः |` | "Then the sages, greatly distressed, went to the gods and spoke these words:" |
+| `Line 2277: अग्निनाशात्क्रियाभ्रंशाद्भ्रान्ता लोकास्त्रयोऽनघाः ||१४||` | "Due to the disappearance of Agni [fire deity] and the cessation of rituals, the three worlds are confused, O sinless ones. ||14||" |
+| `Line 2278: ` | [Blank line] |
+| `Line 2279: विधध्वमत्र यत्कार्यं न स्यात्कालात्ययो यथा ||१४||` | "Please arrange what needs to be done in this matter so that there is no delay beyond the proper time. ||14||" |
+| `Line 2280: ` | [Blank line] |
+| `Line 2281: अथर्षयश्च देवाश्च ब्रह्माणमुपगम्य तु |` | "Then the sages and the gods, approaching Brahma [creator deity]," |
+| `Line 2282: अग्नेरावेदयञ्शापं क्रियासंहारमेव च ||१५||` | "Informed him about the curse on Agni and the cessation of rituals. ||15||" |
+| `Line 2283: ` | [Blank line] |
+| `Line 2284: भृगुणा वै महाभाग शप्तोऽग्निः कारणान्तरे |` | "O fortunate one, Agni was cursed by Bhrigu [sage] for a particular reason." |
+| `Line 2285: कथं देवमुखो भूत्वा यज्ञभागाग्रभुक्तथा ||१६||` | "How can he, being the mouth of the gods and the primary consumer of sacrificial offerings, ||16||" |
+| `Line 2286: ` | [Blank line] |
+| `Line 2287: हुतभुक्सर्वलोकेषु सर्वभक्षत्वमेष्यति ||१६||` | "The fire [Hutabhuk], who consumes offerings in all worlds, come to consume everything? ||16||" |
+| `Line 2288: ` | [Blank line] |
+| `Line 2289: श्रुत्वा तु तद्वचस्तेषामग्निमाहूय लोककृत् |` | "Having heard their words, the creator of the world [Brahma] summoned Agni," |
+| `Line 2290: उवाच वचनं श्लक्ष्णं भूतभावनमव्ययम् ||१७||` | "And spoke gentle words that were nurturing to beings and imperishable. ||17||" |
+| `Line 2291: ` | [Blank line] |
+| `Line 2292: लोकानामिह सर्वेषां त्वं कर्ता चान्त एव च |` | "You are both the creator and the end of all these worlds," |
+| `Line 2293: त्वं धारयसि लोकांस्त्रीन्क्रियाणां च प्रवर्तकः ||१८||` | "You sustain the three worlds and are the initiator of all rituals. ||18||" |
+| `Line 2294: ` | [Blank line] |
+| `Line 2295: स तथा कुरु लोकेश नोच्छिद्येरन्क्रिया यथा ||१८||` | "Therefore, O lord of worlds, act in such a way that the rituals are not destroyed. ||18||" |
+| `Line 2296: ` | [Blank line] |
+| `Line 2297: कस्मादेवं विमूढस्त्वमीश्वरः सन्हुताशनः |` | "Why are you so confused, being the lord, O consumer of offerings [Agni]?" |
+| `Line 2298: त्वं पवित्रं यदा लोके सर्वभूतगतश्च ह ||१९||` | "When you are the purifier in the world and present in all beings, ||19||" |
+| `Line 2299: ` | [Blank line] |
+| `Line 2300: न त्वं सर्वशरीरेण सर्वभक्षत्वमेष्यसि |` | "You shall not consume everything with your entire body." |

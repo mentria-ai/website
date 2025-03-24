@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 15066: उपोपविविशुः सर्वे पौरजानपदा अपि ||१७||` | "All the citizens and country folk also took their seats. ||17||" |
+| `Line 15067: ` | "[Blank line]" |
+| `Line 15068: तमकूजमिवाज्ञाय जनौघं सर्वशस्तदा |` | "Perceiving that crowd of people as completely silent then," |
+| `Line 15069: भीष्मो राज्यं च राष्ट्रं च महर्षिभ्यो न्यवेदयत् ||१८||` | "Bhīṣma [formidable one] reported about the kingdom and realm to the great sages. ||18||" |
+| `Line 15070: ` | "[Blank line]" |
+| `Line 15071: तेषामथो वृद्धतमः प्रत्युत्थाय जटाजिनी |` | "Then the eldest among them, wearing matted hair and deerskin, rose up," |
+| `Line 15072: महर्षिमतमाज्ञाय महर्षिरिदमब्रवीत् ||१९||` | "And recognizing the opinion of the great sages, that great sage spoke this. ||19||" |
+| `Line 15073: ` | "[Blank line]" |
+| `Line 15074: यः स कौरव्यदायादः पाण्डुर्नाम नराधिपः |` | "That heir of the Kurus, the ruler of men named Pāṇḍu [pale one]," |
+| `Line 15075: कामभोगान्परित्यज्य शतशृङ्गमितो गतः ||२०||` | "Having renounced sensual pleasures, went from here to Śataśṛṅga [hundred-peaked mountain]. ||20||" |
+| `Line 15076: ` | "[Blank line]" |
+| `Line 15077: ब्रह्मचर्यव्रतस्थस्य तस्य दिव्येन हेतुना |` | "To him, who was established in the vow of celibacy, by divine cause," |
+| `Line 15078: साक्षाद्धर्मादयं पुत्रस्तस्य जातो युधिष्ठिरः ||२१||` | "This son Yudhiṣṭhira [steady in battle] was born directly from Dharma [righteousness]. ||21||" |
+| `Line 15079: ` | "[Blank line]" |
+| `Line 15080: तथेमं बलिनां श्रेष्ठं तस्य राज्ञो महात्मनः |` | "Likewise, this foremost among the strong ones, to that great-souled king," |
+| `Line 15081: मातरिश्वा ददौ पुत्रं भीमं नाम महाबलम् ||२२||` | "Mātariśvā [wind god] gave a son named Bhīma [terrible], of great strength. ||22||" |
+| `Line 15082: ` | "[Blank line]" |
+| `Line 15083: पुरुहूतादयं जज्ञे कुन्त्यां सत्यपराक्रमः |` | "From Puruhūta [much-invoked Indra], this one of true prowess was born to Kuntī [princess]," |
+| `Line 15084: यस्य कीरित्र्महेष्वासान्सर्वानभिभविष्यति ||२३||` | "Whose fame will surpass all the great archers. ||23||" |
+| `Line 15085: ` | "[Blank line]" |
+| `Line 15086: यौ तु माद्री महेष्वासावसूत कुरुसत्तमौ |` | "And the two great archers whom Mādrī [princess] bore, best among Kurus," |
+| `Line 15087: अश्विभ्यां मनुजव्याघ्राविमौ तावपि तिष्ठतः ||२४||` | "From the Aśvins [divine twins], these two tiger-like men also stand here. ||24||" |
+| `Line 15088: ` | "[Blank line]" |
+| `Line 15089: चरता धर्मनित्येन वनवासं यशस्विना |` | "By the glorious one who practiced eternal righteousness during forest dwelling," |
+| `Line 15090: एष पैतामहो वंशः पाण्डुना पुनरुद्धृतः ||२५||` | "This ancestral lineage has been raised up again by Pāṇḍu. ||25||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 11516: यदुं च तुर्वसुं चैव देवयानी व्यजायत |` | "Devayānī gave birth to Yadu and Turvasu," |
+| `Line 11517: द्रुह्युं चानुं च पूरुं च शर्मिष्ठा वार्षपर्वणी ||९||` | "And Śarmiṣṭhā, daughter of Vṛṣaparvan [demon king], gave birth to Druhyu, Anu, and Pūru. ||9||" |
+| `Line 11518: ` | "[Blank line]" |
+| `Line 11519: तत्र यदोर्यादवाः |` | "From Yadu came the Yādavas [Yadu's descendants]," |
+| `Line 11520: पूरोः पौरवाः | ०१० |` | "From Pūru came the Pauravas [Pūru's lineage]. |10|" |
+| `Line 11521: पूरोर्भार्या कौसल्या नाम |` | "Pūru's wife was named Kausalyā," |
+| `Line 11522: तस्यामस्य जज्ञे जनमेजयो नाम |` | "Through her was born to him one named Janamejaya," |
+| `Line 11523: यस्त्रीनश्वमेधानाजहार |` | "Who performed three horse sacrifices [aśvamedha]," |
+| `Line 11524: विश्वजिता चेष्ट्वा वनं प्रविवेश | ०११ |` | "And after performing the Viśvajit [all-conquering] sacrifice, he entered the forest. |11|" |
+| `Line 11525: जनमेजयः खल्वनन्तां नामोपयेमे माधवीम् |` | "Janamejaya indeed married a Mādhavī [descendant of Madhu] woman named Anantā," |
+| `Line 11526: तस्यामस्य जज्ञे प्राचिन्वान् |` | "Through her was born to him Prācinvān," |
+| `Line 11527: यः प्राचीं दिशं जिगाय यावत्सूर्योदयात् |` | "Who conquered the eastern direction as far as the sunrise," |
+| `Line 11528: ततस्तस्य प्राचिन्वत्वम् | ०१२ |` | "Hence his name Prācinvān [eastward-conqueror]. |12|" |
+| `Line 11529: प्राचिन्वान्खल्वश्मकीमुपयेमे |` | "Prācinvān indeed married a woman from Aśmaka [kingdom]," |
+| `Line 11530: तस्यामस्य जज्ञे संयातिः | ०१३ |` | "Through her was born to him Saṃyāti. |13|" |
+| `Line 11531: संयातिः खलु दृषद्वतो दुहितरं वराङ्गीं नामोपयेमे |` | "Saṃyāti indeed married Dṛṣadvat's daughter named Varāṅgī [beautiful-limbed]," |
+| `Line 11532: तस्यामस्य जज्ञे अहम्पातिः | ०१४ |` | "Through her was born to him Ahampāti. |14|" |
+| `Line 11533: अहम्पातिस्तु खलु कृतवीर्यदुहितरमुपयेमे भानुमतीं नाम |` | "Ahampāti indeed married Kṛtavīrya's daughter named Bhānumatī [radiant one]," |
+| `Line 11534: तस्यामस्य जज्ञे सार्वभौमः | ०१५ |` | "Through her was born to him Sārvabhauma [universal ruler]. |15|" |
+| `Line 11535: सार्वभौमः खलु जित्वाजहार कैकेयीं सुनन्दां नाम |` | "Sārvabhauma indeed, after conquering, took a Kaikeyī [from Kekeya] woman named Sunandā," |
+| `Line 11536: तस्यामस्य जज्ञे जयत्सेनः | ०१६ |` | "Through her was born to him Jayatsena. |16|" |
+| `Line 11537: जयत्सेनः खलु वैदर्भीमुपयेमे सुषुवां नाम |` | "Jayatsena indeed married a Vaidarbhī [from Vidarbha] woman named Suṣuvā," |
+| `Line 11538: तस्यामस्य जज्ञे अराचीनः | ०१७ |` | "Through her was born to him Arācīna. |17|" |
+| `Line 11539: अराचीनोऽपि वैदर्भीमेवापरामुपयेमे मर्यादां नाम |` | "Arācīna also married another Vaidarbhī woman named Maryādā [boundary]," |
+| `Line 11540: तस्यामस्य जज्ञे महाभौमः | ०१८ |` | "Through her was born to him Mahābhauma. |18|" |

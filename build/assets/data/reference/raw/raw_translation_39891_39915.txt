@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 39891: अमर्षी बलवान्पार्थः संरम्भी दृढविक्रमः ||१०||` | "Pārtha [Arjuna] is impatient, powerful, passionate, and of firm valor. ||10||" |
+| `Line 39892: ` | "[Blank line]" |
+| `Line 39893: भवेत्सुतुमुलं युद्धं सर्वशोऽप्यपराजितम् |` | "The battle would be extremely tumultuous and entirely undefeated," |
+| `Line 39894: सर्वे ह्यस्त्रविदः शूराः सर्वे प्राप्ता महद्यशः ||११||` | "For all are knowers of weapons, all are heroes, all have attained great fame. ||11||" |
+| `Line 39895: ` | "[Blank line]" |
+| `Line 39896: अपि सर्वेश्वरत्वं हि न वाञ्छेरन्पराजिताः |` | "Even universal lordship [sovereignty] would not be desired by the undefeated ones," |
+| `Line 39897: वधे नूनं भवेच्छान्तिस्तेषां वा फल्गुनस्य वा ||१२||` | "Peace would surely come only with the death of either them or Phalguna [Arjuna]. ||12||" |
+| `Line 39898: ` | "[Blank line]" |
+| `Line 39899: न तु हन्तार्जुनस्यास्ति जेता वास्य न विद्यते |` | "But there exists no slayer of Arjuna, nor is there anyone who can defeat him," |
+| `Line 39900: मन्युस्तस्य कथं शाम्येन्मन्दान्प्रति समुत्थितः ||१३||` | "How can his wrath subside once it has risen against these fools? ||13||" |
+| `Line 39901: ` | "[Blank line]" |
+| `Line 39902: त्रिदशेशसमो वीरः खाण्डवेऽग्निमतर्पयत् |` | "This hero, equal to the lord of the thirty gods [Indra], satisfied Agni [fire god] at Khāṇḍava," |
+| `Line 39903: जिगाय पार्थिवान्सर्वान्राजसूये महाक्रतौ ||१४||` | "He conquered all kings at the great Rājasūya [royal sacrifice] ceremony. ||14||" |
+| `Line 39904: ` | "[Blank line]" |
+| `Line 39905: शेषं कुर्याद्गिरेर्वज्रं निपतन्मूर्ध्नि सञ्जय |` | "A thunderbolt falling on a mountain's peak might leave something remaining, O Sañjaya," |
+| `Line 39906: न तु कुर्युः शराः शेषमस्तास्तात किरीटिना ||१५||` | "But arrows shot by Kirīṭin [diadem-wearer, Arjuna] leave nothing behind, O dear one. ||15||" |
+| `Line 39907: ` | "[Blank line]" |
+| `Line 39908: यथा हि किरणा भानोस्तपन्तीह चराचरम् |` | "Just as the rays of the sun [Bhānu] scorch the moving and unmoving beings here," |
+| `Line 39909: तथा पार्थभुजोत्सृष्टाः शरास्तप्स्यन्ति मे सुतान् ||१६||` | "So will the arrows released from Pārtha's [Arjuna's] arms scorch my sons. ||16||" |
+| `Line 39910: ` | "[Blank line]" |
+| `Line 39911: अपि वा रथघोषेण भयार्ता सव्यसाचिनः |` | "Or perhaps, terrified by the mere sound of Savyasāchin's [ambidextrous, Arjuna's] chariot," |
+| `Line 39912: प्रतिभाति विदीर्णेव सर्वतो भारती चमूः ||१७||` | "The Bhārata [Kuru] army appears as if already scattered in all directions. ||17||" |
+| `Line 39913: ` | "[Blank line]" |
+| `Line 39914: यदुद्वपन्प्रवपंश्चैव बाणा; न्स्थाताततायी समरे किरीटी |` | "When Kirīṭin [Arjuna], standing with drawn bow in battle, scatters his arrows," |
+| `Line 39915: सृष्टोऽन्तकः सर्वहरो विधात्रा; भवेद्यथा तद्वदपारणीयः ||१८||` | "He becomes like Antaka [Death] created by Vidhātā [Creator] to take away all—equally unstoppable. ||18||" |

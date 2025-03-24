@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 40341: नलोपाख्यानम्` | "The Story of Nala [Nalopākhyāna]" |
+| `Line 40342: ५०` | "50 [chapter number]" |
+| `Line 40343: ` | "[Blank line]" |
+| `Line 40344: ` | "[Blank line]" |
+| `Line 40345: बृहदश्व उवाच||` | "Bṛhadaśva [sage-narrator] said:" |
+| `Line 40346: ` | "[Blank line]" |
+| `Line 40347: आसीद्राजा नलो नाम वीरसेनसुतो बली |` | "There was a king named Nala, the mighty son of Vīrasena," |
+| `Line 40348: उपपन्नो गुणैरिष्टै रूपवानश्वकोविदः ||१||` | "Endowed with desirable qualities, handsome, and skilled with horses. ||1||" |
+| `Line 40349: ` | "[Blank line]" |
+| `Line 40350: अतिष्ठन्मनुजेन्द्राणां मूर्ध्नि देवपतिर्यथा |` | "He stood among kings as Indra [lord of gods] stands among deities," |
+| `Line 40351: उपर्युपरि सर्वेषामादित्य इव तेजसा ||२||` | "Above all others in splendor, like the sun [Āditya]. ||2||" |
+| `Line 40352: ` | "[Blank line]" |
+| `Line 40353: ब्रह्मण्यो वेदविच्छूरो निषधेषु महीपतिः |` | "Devoted to Brahmins, knower of Vedas, heroic, the ruler of the Niṣadhas [kingdom]," |
+| `Line 40354: अक्षप्रियः सत्यवादी महानक्षौहिणीपतिः ||३||` | "Fond of dice, truthful in speech, the great commander of armies [akṣauhiṇī]. ||3||" |
+| `Line 40355: ` | "[Blank line]" |
+| `Line 40356: ईप्सितो वरनारीणामुदारः संयतेन्द्रियः |` | "Desired by noble women, generous, with controlled senses," |
+| `Line 40357: रक्षिता धन्विनां श्रेष्ठः साक्षादिव मनुः स्वयम् ||४||` | "A protector, foremost among archers, like Manu [first lawgiver] himself in person. ||4||" |
+| `Line 40358: ` | "[Blank line]" |
+| `Line 40359: तथैवासीद्विदर्भेषु भीमो भीमपराक्रमः |` | "Likewise, in Vidarbha there was Bhīma of terrible prowess," |
+| `Line 40360: शूरः सर्वगुणैर्युक्तः प्रजाकामः स चाप्रजः ||५||` | "Valiant, endowed with all virtues, desiring children yet childless. ||5||" |
+| `Line 40361: ` | "[Blank line]" |
+| `Line 40362: स प्रजार्थे परं यत्नमकरोत्सुसमाहितः |` | "He made the greatest effort for offspring, with full concentration," |
+| `Line 40363: तमभ्यगच्छद्ब्रह्मर्षिर्दमनो नाम भारत ||६||` | "To him came the brahmarṣi [sage of Brahmin origin] named Damana, O Bhārata [Yudhiṣṭhira]. ||6||" |
+| `Line 40364: ` | "[Blank line]" |
+| `Line 40365: तं स भीमः प्रजाकामस्तोषयामास धर्मवित् |` | "That Bhīma, desiring progeny and knowing dharma [righteousness], pleased him" |

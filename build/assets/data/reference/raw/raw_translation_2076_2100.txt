@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 2076: शौनक उवाच॥` | "Śaunaka said:" |
+| `Line 2077: ` | [Blank line] |
+| `Line 2078: पुराणमखिलं तात पिता तेऽधीतवान्पुरा |` | "O dear one, your father had formerly studied the entire Purāṇa [ancient text]," |
+| `Line 2079: कच्चित्त्वमपि तत्सर्वमधीषे लोमहर्षणे ॥१॥` | "Have you also, O Lomaharṣaṇa [Sūta's name], studied all of that? ||1||" |
+| `Line 2080: ` | [Blank line] |
+| `Line 2081: पुराणे हि कथा दिव्या आदिवंशाश्च धीमताम् |` | "For in the Purāṇa are divine stories and the original lineages of the wise," |
+| `Line 2082: कथ्यन्ते ताः पुरास्माभिः श्रुताः पूर्वं पितुस्तव ॥२॥` | "These were previously heard by us from your father. ||2||" |
+| `Line 2083: ` | [Blank line] |
+| `Line 2084: तत्र वंशमहं पूर्वं श्रोतुमिच्छामि भार्गवम् |` | "Among those, I first wish to hear about the lineage of Bhārgava [Bhṛgu's descendants]," |
+| `Line 2085: कथयस्व कथामेतां कल्याः स्म श्रवणे तव ॥३॥` | "Narrate this story; we are eager to listen to you. ||3||" |
+| `Line 2086: ` | [Blank line] |
+| `Line 2087: सूत उवाच॥` | "Sūta said:" |
+| `Line 2088: ` | [Blank line] |
+| `Line 2089: यदधीतं पुरा सम्यग्द्विजश्रेष्ठ महात्मभिः |` | "What was properly studied before, O best of twice-born [Brahmin], by the great souls," |
+| `Line 2090: वैशम्पायनविप्राद्यैस्तैश्चापि कथितं पुरा ॥४॥` | "By Vaiśampāyana and other learned Brahmins, and what was narrated by them before, ||4||" |
+| `Line 2091: ` | [Blank line] |
+| `Line 2092: यदधीतं च पित्रा मे सम्यक्चैव ततो मया |` | "And what was properly studied by my father and then by me," |
+| `Line 2093: तत्तावच्छृणु यो देवैः सेन्द्रैः साग्निमरुद्गणैः ॥५॥` | "Listen to that much about the one who by the gods with Indra, Agni, and the Maruts [wind deities], ||5||" |
+| `Line 2094: ` | [Blank line] |
+| `Line 2095: पूजितः प्रवरो वंशो भृगूणां भृगुनन्दन ॥५॥` | "Was honored—the excellent lineage of the Bhṛgus, O descendant of Bhṛgu. ||5||" |
+| `Line 2096: ` | [Blank line] |
+| `Line 2097: इमं वंशमहं ब्रह्मन्भार्गवं ते महामुने |` | "This lineage of the Bhārgavas [Bhṛgu's descendants], O Brahmin, O great sage," |
+| `Line 2098: निगदामि कथायुक्तं पुराणाश्रयसंयुतम् ॥६॥` | "I shall narrate to you, along with stories, supported by the Purāṇas [ancient texts]. ||6||" |
+| `Line 2099: ` | [Blank line] |
+| `Line 2100: भृगोः सुदयितः पुत्रश्च्यवनो नाम भार्गवः |` | "The beloved son of Bhṛgu was named Cyavana, a descendant of Bhṛgu," |

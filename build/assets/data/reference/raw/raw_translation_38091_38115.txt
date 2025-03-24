@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 38091: कर्तृत्वादेव पुरुषः कर्मसिद्धौ प्रशस्यते |` | "Due to his agency alone, a person is praised when action succeeds," |
+| `Line 38092: असिद्धौ निन्द्यते चापि कर्मनाशः कथं त्विह ||२९||` | "And is blamed when it fails; how then can the loss of action's fruit occur here? ||29||" |
+| `Line 38093: ` | "[Blank line]" |
+| `Line 38094: सर्वमेव हठेनैके दिष्टेनैके वदन्त्युत |` | "Some say everything happens by persistence [haṭha], others by fate [diṣṭa]," |
+| `Line 38095: पुरुषप्रयत्नजं केचित्त्रैधमेतन्निरुच्यते ||३०||` | "And some by human effort—thus this threefold division is explained. ||30||" |
+| `Line 38096: ` | "[Blank line]" |
+| `Line 38097: न चैवैतावता कार्यं मन्यन्त इति चापरे |` | "And others think that work is not accomplished by these alone," |
+| `Line 38098: अस्ति सर्वमदृश्यं तु दिष्टं चैव तथा हठः ||३१||` | "Everything exists unseen—both fate and persistence. ||31||" |
+| `Line 38099: ` | "[Blank line]" |
+| `Line 38100: दृश्यते हि हठाच्चैव दिष्टाच्चार्थस्य सन्ततिः ||३१||` | "For the continuity of results is seen to come from both persistence and fate. ||31||" |
+| `Line 38101: ` | "[Blank line]" |
+| `Line 38102: किञ्चिद्दैवाद्धठात्किञ्चित्किञ्चिदेव स्वकर्मतः |` | "A person obtains results partly from destiny [daiva], partly from persistence," |
+| `Line 38103: पुरुषः फलमाप्नोति चतुर्थं नात्र कारणम् ||३२||` | "And partly from one's own actions—there is no fourth cause here. ||32||" |
+| `Line 38104: ` | "[Blank line]" |
+| `Line 38105: कुशलाः प्रतिजानन्ति ये तत्त्वविदुषो जनाः ||३२||` | "So declare the skilled ones who are knowers of truth. ||32||" |
+| `Line 38106: ` | "[Blank line]" |
+| `Line 38107: तथैव धाता भूतानामिष्टानिष्टफलप्रदः |` | "Likewise, the Creator [dhātā] of beings bestows both desired and undesired results," |
+| `Line 38108: यदि न स्यान्न भूतानां कृपणो नाम कश्चन ||३३||` | "If this were not so, no being would ever be called wretched. ||33||" |
+| `Line 38109: ` | "[Blank line]" |
+| `Line 38110: यं यमर्थमभिप्रेप्सुः कुरुते कर्म पूरुषः |` | "Whatever object a person desiring it performs action for," |
+| `Line 38111: तत्तत्सफलमेव स्याद्यदि न स्यात्पुराकृतम् ||३४||` | "That would always bear fruit if there were no past deeds [affecting it]. ||34||" |
+| `Line 38112: ` | "[Blank line]" |
+| `Line 38113: त्रिद्वारामर्थसिद्धिं तु नानुपश्यन्ति ये नराः |` | "Those men who do not perceive that success comes through these three doors [tri-dvāra]," |
+| `Line 38114: तथैवानर्थसिद्धिं च यथा लोकास्तथैव ते ||३५||` | "And likewise failure—as the worlds are, so are they. ||35||" |
+| `Line 38115: ` | "[Blank line]" |

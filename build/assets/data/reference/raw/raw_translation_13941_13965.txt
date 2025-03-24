@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 13941: शश्वद्धर्मात्मनां मुख्ये कुले जातस्य भारत |` | "O Bhārata [Pandu], born in the foremost family of those eternally righteous," |
+| `Line 13942: कामलोभाभिभूतस्य कथं ते चलिता मतिः ||११||` | "How has your mind become wavering, overcome by desire and greed? ||11||" |
+| `Line 13943: ` | "[Blank line]" |
+| `Line 13944: पाण्डुरुवाच||` | "Pāṇḍu [king] said:" |
+| `Line 13945: ` | "[Blank line]" |
+| `Line 13946: शत्रूणां या वधे वृत्तिः सा मृगाणां वधे स्मृता |` | "The method used in slaying enemies is remembered as the same for killing deer," |
+| `Line 13947: राज्ञां मृग न मां मोहात्त्वं गर्हयितुमर्हसि ||१२||` | "O deer, you should not censure me out of delusion, for this is the way of kings. ||12||" |
+| `Line 13948: ` | "[Blank line]" |
+| `Line 13949: अच्छद्मनामायया च मृगाणां वध इष्यते |` | "The killing of deer without deceit or trickery is considered proper," |
+| `Line 13950: स एव धर्मो राज्ञां तु तद्विद्वान्किं नु गर्हसे ||१३||` | "This indeed is the dharma [duty] of kings; knowing this, why do you censure me? ||13||" |
+| `Line 13951: ` | "[Blank line]" |
+| `Line 13952: अगस्त्यः सत्रमासीनश्चचार मृगयामृषिः |` | "Agastya [sage], while engaged in a sacrificial session, went hunting," |
+| `Line 13953: आरण्यान्सर्वदैवत्यान्मृगान्प्रोक्ष्य महावने ||१४||` | "After consecrating the forest deer dedicated to all deities in the great forest. ||14||" |
+| `Line 13954: ` | "[Blank line]" |
+| `Line 13955: प्रमाणदृष्टधर्मेण कथमस्मान्विगर्हसे |` | "How can you censure me according to dharma established by authority?" |
+| `Line 13956: अगस्त्यस्याभिचारेण युष्माकं वै वपा हुता ||१५||` | "Indeed, by Agastya's ritual, the fat of your kind was offered (in sacrifice). ||15||" |
+| `Line 13957: ` | "[Blank line]" |
+| `Line 13958: मृग उवाच||` | "The deer said:" |
+| `Line 13959: ` | "[Blank line]" |
+| `Line 13960: न रिपून्वै समुद्दिश्य विमुञ्चन्ति पुरा शरान् |` | "In ancient times, they did not release arrows specifically targeting enemies," |
+| `Line 13961: रन्ध्र एषां विशेषेण वधकालः प्रशस्यते ||१६||` | "The time for killing is especially praised when they are vulnerable [in weakness]. ||16||" |
+| `Line 13962: ` | "[Blank line]" |
+| `Line 13963: पाण्डुरुवाच||` | "Pāṇḍu said:" |
+| `Line 13964: ` | "[Blank line]" |
+| `Line 13965: प्रमत्तमप्रमत्तं वा विवृतं घ्नन्ति चौजसा |` | "They kill with force whether (the enemy is) careless, vigilant, or exposed," |

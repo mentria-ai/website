@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 41291: ग्राहेणानेन विपिने किमर्थं नाभिधावसि ||२२||` | "Why don't you run away from this crocodile [grāha] in the forest? ||22||" |
+| `Line 41292: ` | "[Blank line]" |
+| `Line 41293: कथं भविष्यसि पुनर्मामनुस्मृत्य नैषध |` | "How will you fare, O Naiṣadha [Nala], remembering me again," |
+| `Line 41294: पापान्मुक्तः पुनर्लब्ध्वा बुद्धिं चेतो धनानि च ||२३||` | "When freed from sin, having regained your intellect, consciousness, and wealth? ||23||" |
+| `Line 41295: ` | "[Blank line]" |
+| `Line 41296: श्रान्तस्य ते क्षुधार्तस्य परिग्लानस्य नैषध |` | "When you are exhausted, hungry, and weary, O Naiṣadha [Nala]," |
+| `Line 41297: कः श्रमं राजशार्दूल नाशयिष्यति मानद ||२४||` | "Who will remove your fatigue, O tiger among kings [rāja-śārdūla], O bestower of honor? ||24||" |
+| `Line 41298: ` | "[Blank line]" |
+| `Line 41299: तामकस्मान्मृगव्याधो विचरन्गहने वने |` | "Suddenly, a hunter [mṛgavyādha], wandering in the dense forest," |
+| `Line 41300: आक्रन्दतीमुपश्रुत्य जवेनाभिससार ह ||२५||` | "Hearing her crying out, rushed toward her with speed. ||25||" |
+| `Line 41301: ` | "[Blank line]" |
+| `Line 41302: तां स दृष्ट्वा तथा ग्रस्तामुरगेणायतेक्षणाम् |` | "Seeing her thus seized by the serpent [uraga], the long-eyed one," |
+| `Line 41303: त्वरमाणो मृगव्याधः समभिक्रम्य वेगितः ||२६||` | "The hunter, hastening, approached quickly. ||26||" |
+| `Line 41304: ` | "[Blank line]" |
+| `Line 41305: मुखतः पातयामास शस्त्रेण निशितेन ह |` | "He struck down with a sharp weapon at the head," |
+| `Line 41306: निर्विचेष्टं भुजङ्गं तं विशस्य मृगजीवनः ||२७||` | "And the hunter [mṛgajīvana] cut up that motionless serpent. ||27||" |
+| `Line 41307: ` | "[Blank line]" |
+| `Line 41308: मोक्षयित्वा च तां व्याधः प्रक्षाल्य सलिलेन च |` | "And having freed her, the hunter washed her with water," |
+| `Line 41309: समाश्वास्य कृताहारामथ पप्रच्छ भारत ||२८||` | "And after comforting her and giving her food, he asked, O Bhārata [Yudhiṣṭhira]. ||28||" |
+| `Line 41310: ` | "[Blank line]" |
+| `Line 41311: कस्य त्वं मृगशावाक्षि कथं चाभ्यागता वनम् |` | "Whose are you, doe-eyed one [mṛgaśāvākṣi], and how did you come to this forest?" |
+| `Line 41312: कथं चेदं महत्कृच्छ्रं प्राप्तवत्यसि भामिनि ||२९||` | "And how did you come to this great distress, O beautiful lady? ||29||" |
+| `Line 41313: ` | "[Blank line]" |
+| `Line 41314: दमयन्ती तथा तेन पृच्छ्यमाना विशां पते |` | "Thus questioned by him, O lord of people [viśāṃ pate], Damayantī," |
+| `Line 41315: सर्वमेतद्यथावृत्तमाचचक्षेऽस्य भारत ||३०||` | "Told him everything that had happened, O Bhārata [Yudhiṣṭhira]. ||30||" |

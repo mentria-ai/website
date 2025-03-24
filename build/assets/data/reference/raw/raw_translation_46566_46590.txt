@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 46566: तेषां तदासीद्रुचितमिल्वलस्योपभिक्षणम् |` | "They desired to visit Ilvala [demon king]," |
+| `Line 46567: ततस्ते सहिता राजन्निल्वलं समुपाद्रवन् ||२०||` | "Then, O king, they went together to Ilvala. ||20||" |
+| `Line 46568: ` | "[Blank line]" |
+| `Line 46569: ` | "[Blank line]" |
+| `Line 46570: ` | "[Blank line]" |
+| `Line 46571: ` | "[Blank line]" |
+| `Line 46572: ९७` | "97 [chapter number]" |
+| `Line 46573: ` | "[Blank line]" |
+| `Line 46574: ` | "[Blank line]" |
+| `Line 46575: लोमश उवाच||` | "Lomaśa [sage with hair] said:" |
+| `Line 46576: ` | "[Blank line]" |
+| `Line 46577: इल्वलस्तान्विदित्वा तु महर्षिसहितान्नृपान् |` | "Ilvala, knowing that the kings had arrived with the great sages," |
+| `Line 46578: उपस्थितान्सहामात्यो विषयान्तेऽभ्यपूजयत् ||१||` | "Came with his ministers to the border of his territory and honored them. ||1||" |
+| `Line 46579: ` | "[Blank line]" |
+| `Line 46580: तेषां ततोऽसुरश्रेष्ठ आतिथ्यमकरोत्तदा |` | "Then that foremost of demons [asura-śreṣṭha] offered them hospitality," |
+| `Line 46581: स संस्कृतेन कौरव्य भ्रात्रा वातापिना किल ||२||` | "O descendant of Kuru [Kauravya], with his prepared brother Vātāpi indeed. ||2||" |
+| `Line 46582: ` | "[Blank line]" |
+| `Line 46583: ततो राजर्षयः सर्वे विषण्णा गतचेतसः |` | "Then all the royal sages [rājarṣi] became dejected and disheartened," |
+| `Line 46584: वातापिं संस्कृतं दृष्ट्वा मेषभूतं महासुरम् ||३||` | "Seeing the prepared Vātāpi, the great demon [mahāsura] in the form of a ram. ||3||" |
+| `Line 46585: ` | "[Blank line]" |
+| `Line 46586: अथाब्रवीदगस्त्यस्तान्राजर्षीनृषिसत्तमः |` | "Then Agastya [pot-born sage], the best of sages, said to those royal sages," |
+| `Line 46587: विषादो वो न कर्तव्यो अहं भोक्ष्ये महासुरम् ||४||` | "Do not be sorrowful, I shall eat this great demon. ||4||" |
+| `Line 46588: ` | "[Blank line]" |
+| `Line 46589: धुर्यासनमथासाद्य निषसाद महामुनिः |` | "Then the great sage [mahāmuni] took the chief seat and sat down," |
+| `Line 46590: तं पर्यवेषद्दैत्येन्द्र इल्वलः प्रहसन्निव ||५||` | "And Ilvala, the lord of Daityas [daitya-indra], served him food, as if smiling. ||5||" |

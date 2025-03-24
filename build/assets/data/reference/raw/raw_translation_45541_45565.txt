@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 45541: वयं तु तमृते वीरं वनेऽस्मिन्द्विपदां वर |` | "But we, without that hero [Arjuna], in this forest, O best of men [dvipada-vara]," |
+| `Line 45542: अवधानं न गच्छामः काम्यके सह कृष्णया ||१६||` | "Cannot find peace in Kāmyaka with Kṛṣṇā [Draupadī]. ||16||" |
+| `Line 45543: ` | "[Blank line]" |
+| `Line 45544: भवानन्यद्वनं साधु बह्वन्नं फलवच्छुचि |` | "Please tell us of another forest that is good, abundant in food, fruit-bearing, pure," |
+| `Line 45545: आख्यातु रमणीयं च सेवितं पुण्यकर्मभिः ||१७||` | "Delightful and frequented by those of virtuous deeds. ||17||" |
+| `Line 45546: ` | "[Blank line]" |
+| `Line 45547: यत्र कञ्चिद्वयं कालं वसन्तः सत्यविक्रमम् |` | "Where we may dwell for some time, awaiting the truly valorous," |
+| `Line 45548: प्रतीक्षामोऽर्जुनं वीरं वर्षकामा इवाम्बुदम् ||१८||` | "Arjuna the hero, as those desiring rain await the cloud. ||18||" |
+| `Line 45549: ` | "[Blank line]" |
+| `Line 45550: विविधानाश्रमान्कांश्चिद्द्विजातिभ्यः परिश्रुतान् |` | "Tell us of various hermitages renowned among the twice-born [dvijāti]," |
+| `Line 45551: सरांसि सरितश्चैव रमणीयांश्च पर्वतान् ||१९||` | "And lakes, rivers, and delightful mountains. ||19||" |
+| `Line 45552: ` | "[Blank line]" |
+| `Line 45553: आचक्ष्व न हि नो ब्रह्मन्रोचते तमृतेऽर्जुनम् |` | "Tell us, O Brahmin [learned priest], for without Arjuna," |
+| `Line 45554: वनेऽस्मिन्काम्यके वासो गच्छामोऽन्यां दिशं प्रति ||२०||` | "Dwelling in this Kāmyaka forest does not please us; let us go to another region. ||20||" |
+| `Line 45555: ` | "[Blank line]" |
+| `Line 45556: ` | "[Blank line]" |
+| `Line 45557: ` | "[Blank line]" |
+| `Line 45558: ` | "[Blank line]" |
+| `Line 45559: ८५` | "85" |
+| `Line 45560: ` | "[Blank line]" |
+| `Line 45561: ` | "[Blank line]" |
+| `Line 45562: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 45563: ` | "[Blank line]" |
+| `Line 45564: तान्सर्वानुत्सुकान्दृष्ट्वा पाण्डवान्दीनचेतसः |` | "Seeing all those Pāṇḍavas [sons of Pandu] anxious and dejected in spirit," |
+| `Line 45565: आश्वासयंस्तदा धौम्यो बृहस्पतिसमोऽब्रवीत् ||१||` | "Dhaumya [family priest], equal to Bṛhaspati [preceptor of gods], then consoling them, spoke: ||1||" |

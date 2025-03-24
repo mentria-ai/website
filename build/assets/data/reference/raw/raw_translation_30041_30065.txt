@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 30041: ` | "[Blank line]" |
+| `Line 30042: ` | "[Blank line]" |
+| `Line 30043: ` | "[Blank line]" |
+| `Line 30044: ` | "[Blank line]" |
+| `Line 30045: शिशुपालवधपर्व` | "The Book of Śiśupāla's [Cedi king] Slaying" |
+| `Line 30046: ३७` | "37" |
+| `Line 30047: ` | "[Blank line]" |
+| `Line 30048: ` | "[Blank line]" |
+| `Line 30049: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 30050: ` | "[Blank line]" |
+| `Line 30051: ततः सागरसङ्काशं दृष्ट्वा नृपतिसागरम् |` | "Then, seeing the ocean-like assembly of kings [nṛpati-sāgaram]," |
+| `Line 30052: रोषात्प्रचलितं सर्वमिदमाह युधिष्ठिरः ||१||` | "Yudhiṣṭhira [eldest Pāṇḍava] spoke these words, as all were agitated with anger. ||1||" |
+| `Line 30053: ` | "[Blank line]" |
+| `Line 30054: भीष्मं मतिमतां श्रेष्ठं वृद्धं कुरुपितामहम् |` | "To Bhīṣma [Kuru elder], foremost among the wise, the venerable grandfather of the Kurus," |
+| `Line 30055: बृहस्पतिं बृहत्तेजाः पुरुहूत इवारिहा ||२||` | "Who was like Bṛhaspati [gods' preceptor] in great wisdom, as Puruhūta [Indra] is in slaying foes. ||2||" |
+| `Line 30056: ` | "[Blank line]" |
+| `Line 30057: असौ रोषात्प्रचलितो महान्नृपतिसागरः |` | "This great ocean of kings is agitated with anger;" |
+| `Line 30058: अत्र यत्प्रतिपत्तव्यं तन्मे ब्रूहि पितामह ||३||` | "Tell me, O grandfather, what should be done in this situation. ||3||" |
+| `Line 30059: ` | "[Blank line]" |
+| `Line 30060: यज्ञस्य च न विघ्नः स्यात्प्रजानां च शिवं भवेत् |` | "So that there may be no obstacle to the sacrifice and welfare may come to the people," |
+| `Line 30061: यथा सर्वत्र तत्सर्वं ब्रूहि मेऽद्य पितामह ||४||` | "Tell me today, O grandfather, how all this may be accomplished everywhere. ||4||" |
+| `Line 30062: ` | "[Blank line]" |
+| `Line 30063: इत्युक्तवति धर्मज्ञे धर्मराजे युधिष्ठिरे |` | "When Yudhiṣṭhira, the Dharmarāja [righteous king] knowledgeable in dharma, had spoken thus," |
+| `Line 30064: उवाचेदं वचो भीष्मस्ततः कुरुपितामहः ||५||` | "Then Bhīṣma, the grandfather of the Kurus, spoke these words. ||5||" |
+| `Line 30065: ` | "[Blank line]" |

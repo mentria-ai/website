@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1051: ` | [Blank line] |
+| `Line 1052: अवाप्य दिव्यान्यस्त्राणि गुर्वर्थे सव्यसाचिना |` | "Having obtained divine weapons by Savyasāchin [Arjuna] for his teacher's sake," |
+| `Line 1053: निवातकवचैर्युद्धं हिरण्यपुरवासिभिः ||१२१||` | "The battle with the Nivātakavacas [demon clan], dwellers of Hiraṇyapura [golden city]. ||121||" |
+| `Line 1054: ` | [Blank line] |
+| `Line 1055: समागमश्च पार्थस्य भ्रातृभिर्गन्धमादने |` | "And the reunion of Pārtha [Arjuna] with his brothers at Gandhamādana [fragrant mountain]," |
+| `Line 1056: घोषयात्रा च गन्धर्वैर्यत्र युद्धं किरीटिनः ||१२२||` | "The Ghoṣayātrā [cattle-station expedition] and where the battle of Kirīṭin [Arjuna] with the Gandharvas [celestial musicians] occurred. ||122||" |
+| `Line 1057: ` | [Blank line] |
+| `Line 1058: पुनरागमनं चैव तेषां द्वैतवनं सरः |` | "And their return to the Dvaitavana [forest of duality] lake," |
+| `Line 1059: जयद्रथेनापहारो द्रौपद्याश्चाश्रमान्तरात् ||१२३||` | "The abduction of Draupadī from the hermitage by Jayadratha. ||123||" |
+| `Line 1060: ` | [Blank line] |
+| `Line 1061: यत्रैनमन्वयाद्भीमो वायुवेगसमो जवे |` | "Where Bhīma pursued him with speed equal to the wind," |
+| `Line 1062: मार्कण्डेयसमस्यायामुपाख्यानानि भागशः ||१२४||` | "The various narratives during the meeting with Mārkaṇḍeya [sage]. ||124||" |
+| `Line 1063: ` | [Blank line] |
+| `Line 1064: संदर्शनं च कृष्णस्य संवादश्चैव सत्यया |` | "The meeting with Kṛṣṇa and his conversation with Satyā [Draupadī]," |
+| `Line 1065: व्रीहिद्रौणिकमाख्यानमैन्द्रद्युम्नं तथैव च ||१२५||` | "The tale of Vrīhidrauṇika [rice measure] and likewise that of Indradyumna. ||125||" |
+| `Line 1066: ` | [Blank line] |
+| `Line 1067: सावित्र्यौद्दालकीयं च वैन्योपाख्यानमेव च |` | "The story of Sāvitrī, the tale of Uddālaka, and also the narrative of Vainya [King Pṛthu]," |
+| `Line 1068: रामायणमुपाख्यानमत्रैव बहुविस्तरम् ||१२६||` | "The narrative of the Rāmāyaṇa [Rama's journey] is also here in great detail. ||126||" |
+| `Line 1069: ` | [Blank line] |
+| `Line 1070: कर्णस्य परिमोषोऽत्र कुण्डलाभ्यां पुरंदरात् |` | "Here is the story of Karṇa being deprived of his earrings by Purandara [Indra]," |
+| `Line 1071: आरणेयमुपाख्यानं यत्र धर्मोऽन्वशात्सुतम् ||१२७||` | "The Āraṇeya tale where Dharma [Yudhiṣṭhira] tested his son. ||127||" |
+| `Line 1072: ` | [Blank line] |
+| `Line 1073: जग्मुर्लब्धवरा यत्र पाण्डवाः पश्चिमां दिशम् ||१२७||` | "Where the Pāṇḍavas, having obtained boons, went toward the western direction. ||127||" |
+| `Line 1074: ` | [Blank line] |
+| `Line 1075: एतदारण्यकं पर्व तृतीयं परिकीर्तितम् |` | "This Āraṇyaka [Forest] Parva is proclaimed as the third book." |

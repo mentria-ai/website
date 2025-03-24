@@ -1,0 +1,7 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 5621: ततो राजा क्षुच्छ्रमार्तस्तं मुनिं स्थाणुवत्स्थितम् |` | "Then the king, afflicted by hunger and fatigue, seeing that sage standing still like a post [sthāṇu]," |
+| `Line 5622: मौनव्रतधरं शान्तं सद्यो मन्युवशं ययौ ||२५||` | "Who was observing a vow of silence and was peaceful, immediately came under the influence of anger. ||25||" |
+| `Line 5623: ` | [Blank line] |
+| `Line 5624: न बुबोध हि तं राजा मौनव्रतधरं मुनिम् |` | "The king did not understand that sage who was observing a vow of silence," |
+| `Line 5625: स तं मन्युसमाविष्टो धर्षयामास ते पिता ||२६||` | "Your father, overcome with anger, insulted him. ||26||" |

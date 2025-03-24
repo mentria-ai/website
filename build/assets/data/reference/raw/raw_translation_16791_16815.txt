@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 16791: ` | "[Blank line]" |
+| `Line 16792: विदुरश्च महाप्राज्ञस्तथान्ये कुरुपुङ्गवाः |` | "Vidura [wise counselor], the highly intelligent one, and other Kuru leaders [kuru-puṅgava]," |
+| `Line 16793: पौराश्च पुरुषव्याघ्रानन्वयुः शोककर्शिताः ||५||` | "And the citizens followed those tiger-like men [puruṣa-vyāghra], overcome with grief. ||5||" |
+| `Line 16794: ` | "[Blank line]" |
+| `Line 16795: तत्र केच्चिद्ब्रुवन्ति स्म ब्राह्मणा निर्भयास्तदा |` | "There, some fearless Brahmins [priestly class] spoke then," |
+| `Line 16796: शोचमानाः पाण्डुपुत्रानतीव भरतर्षभ ||६||` | "Grieving deeply for the sons of Pandu, O bull among Bharatas [bharata-ṛṣabha]. ||6||" |
+| `Line 16797: ` | "[Blank line]" |
+| `Line 16798: विषमं पश्यते राजा सर्वथा तमसावृतः |` | "The king sees unfairly, completely enveloped in darkness," |
+| `Line 16799: धृतराष्ट्रः सुदुर्बुद्धिर्न च धर्मं प्रपश्यति ||७||` | "Dhritarashtra [blind king], of very evil mind, does not perceive righteousness. ||7||" |
+| `Line 16800: ` | "[Blank line]" |
+| `Line 16801: न हि पापमपापात्मा रोचयिष्यति पाण्डवः |` | "For the sinless-souled Pandava [Yudhishthira] will not approve of sin," |
+| `Line 16802: भीमो वा बलिनां श्रेष्ठः कौन्तेयो वा धनञ्जयः ||८||` | "Nor will Bhima [mighty Pandava], foremost among the strong, nor Kunti's son Dhananjaya [wealth-winner]. ||8||" |
+| `Line 16803: ` | "[Blank line]" |
+| `Line 16804: कुत एव महाप्राज्ञौ माद्रीपुत्रौ करिष्यतः ||८||` | "How much less would the highly intelligent sons of Madri [Nakula and Sahadeva] do so? ||8||" |
+| `Line 16805: ` | "[Blank line]" |
+| `Line 16806: तद्राज्यं पितृतः प्राप्तं धृतराष्ट्रो न मृष्यते |` | "Dhritarashtra cannot tolerate the kingdom that came to them from their father," |
+| `Line 16807: अधर्ममखिलं किं नु भीष्मोऽयमनुमन्यते ||९||` | "Why does this Bhishma [grand patriarch] approve of all this unrighteousness? ||9||" |
+| `Line 16808: ` | "[Blank line]" |
+| `Line 16809: विवास्यमानानस्थाने कौन्तेयान्भरतर्षभान् ||९||` | "The sons of Kunti, bulls among Bharatas, being unjustly exiled. ||9||" |
+| `Line 16810: ` | "[Blank line]" |
+| `Line 16811: पितेव हि नृपोऽस्माकमभूच्छान्तनवः पुरा |` | "For formerly, Shantanu's son [Bhishma] was like a father and king to us," |
+| `Line 16812: विचित्रवीर्यो राजर्षिः पाण्डुश्च कुरुनन्दनः ||१०||` | "As were Vichitravirya [varied-valor], the royal sage, and Pandu [pale one], the joy of the Kurus. ||10||" |
+| `Line 16813: ` | "[Blank line]" |
+| `Line 16814: स तस्मिन्पुरुषव्याघ्रे दिष्टभावं गते सति |` | "When that tiger among men [Pandu] met his destined end," |
+| `Line 16815: राजपुत्रानिमान्बालान्धृतराष्ट्रो न मृष्यते ||११||` | "Dhritarashtra cannot tolerate these young princes, the sons of the king. ||11||" |

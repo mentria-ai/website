@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 24641: यद्बभूव मनःकान्तं कर्मणा स चकार तत् ||१०||` | "Whatever was pleasing to the mind, he accomplished that through his actions. ||10||" |
+| `Line 24642: ` | "[Blank line]" |
+| `Line 24643: न ह्ययुक्तं न चासत्यं नानृतं न च विप्रियम् |` | "Neither improper, nor untrue, nor false, nor disagreeable," |
+| `Line 24644: भाषितं चारुभाषस्य जज्ञे पार्थस्य धीमतः ||११||` | "Was the speech of the sweet-spoken, wise Pārtha [Arjuna]. ||11||" |
+| `Line 24645: ` | "[Blank line]" |
+| `Line 24646: स हि सर्वस्य लोकस्य हितमात्मन एव च |` | "He indeed, for the welfare of the entire world and himself," |
+| `Line 24647: चिकीर्षुः सुमहातेजा रेमे भरतसत्तमः ||१२||` | "Desiring to act, that most splendid one, the best of the Bharatas [Arjuna], rejoiced. ||12||" |
+| `Line 24648: ` | "[Blank line]" |
+| `Line 24649: तथा तु मुदिताः सर्वे पाण्डवा विगतज्वराः |` | "Thus, all the Pāṇḍavas [sons of Pandu], joyful and free from distress," |
+| `Line 24650: अवसन्पृथिवीपालांस्त्रासयन्तः स्वतेजसा ||१३||` | "Dwelt there, intimidating the rulers of the earth with their prowess. ||13||" |
+| `Line 24651: ` | "[Blank line]" |
+| `Line 24652: ततः कतिपयाहस्य बीभत्सुः कृष्णमब्रवीत् |` | "Then after a few days, Bībhatsu [Arjuna] said to Krishna," |
+| `Line 24653: उष्णानि कृष्ण वर्तन्ते गच्छामो यमुनां प्रति ||१४||` | "The days are hot, Krishna, let us go to the Yamunā [river]. ||14||" |
+| `Line 24654: ` | "[Blank line]" |
+| `Line 24655: सुहृज्जनवृतास्तत्र विहृत्य मधुसूदन |` | "Surrounded by friends, having enjoyed ourselves there, Madhusūdana [Krishna]," |
+| `Line 24656: सायाह्ने पुनरेष्यामो रोचतां ते जनार्दन ||१५||` | "We shall return in the evening, if it pleases you, Janārdana [Krishna]. ||15||" |
+| `Line 24657: ` | "[Blank line]" |
+| `Line 24658: वासुदेव उवाच||` | "Vāsudeva [Krishna] said:" |
+| `Line 24659: ` | "[Blank line]" |
+| `Line 24660: कुन्तीमातर्ममाप्येतद्रोचते यद्वयं जले |` | "Son of Kuntī [Arjuna], this pleases me too, that we in the water," |
+| `Line 24661: सुहृज्जनवृताः पार्थ विहरेम यथासुखम् ||१६||` | "Surrounded by friends, O Pārtha [Arjuna], should enjoy ourselves as we please. ||16||" |
+| `Line 24662: ` | "[Blank line]" |
+| `Line 24663: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 24664: ` | "[Blank line]" |
+| `Line 24665: आमन्त्र्य धर्मराजानमनुज्ञाप्य च भारत |` | "Having informed Dharmarāja [Yudhishthira] and obtained his permission, O Bhārata [Janamejaya]," |

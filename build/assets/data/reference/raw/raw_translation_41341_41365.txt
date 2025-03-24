@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 41341: ` | "[Blank line]" |
+| `Line 41342: ` | "[Blank line]" |
+| `Line 41343: ` | "[Blank line]" |
+| `Line 41344: ६१` | "61 [chapter number]" |
+| `Line 41345: ` | "[Blank line]" |
+| `Line 41346: ` | "[Blank line]" |
+| `Line 41347: बृहदश्व उवाच||` | "Bṛhadaśva [sage narrator] said:" |
+| `Line 41348: ` | "[Blank line]" |
+| `Line 41349: सा निहत्य मृगव्याधं प्रतस्थे कमलेक्षणा |` | "After slaying the hunter [mṛgavyādha], she of lotus eyes [Damayantī] proceeded," |
+| `Line 41350: वनं प्रतिभयं शून्यं झिल्लिकागणनादितम् ||१||` | "Into a fearsome, desolate forest, resounding with the noise of crickets. ||1||" |
+| `Line 41351: ` | "[Blank line]" |
+| `Line 41352: सिंहव्याघ्रवराहर्क्षरुरुद्वीपिनिषेवितम् |` | "Inhabited by lions, tigers, boars, bears, deer [ruru], and leopards," |
+| `Line 41353: नानापक्षिगणाकीर्णं म्लेच्छतस्करसेवितम् ||२||` | "Filled with various flocks of birds, frequented by barbarians [mleccha] and thieves. ||2||" |
+| `Line 41354: ` | "[Blank line]" |
+| `Line 41355: शालवेणुधवाश्वत्थतिन्दुकेङ्गुदकिंशुकैः |` | "With śāla trees, bamboo, dhava trees, aśvattha [sacred fig], tinduka, iṅguda, and kiṃśuka trees," |
+| `Line 41356: अर्जुनारिष्टसञ्छन्नं चन्दनैश्च सशाल्मलैः ||३||` | "Covered with arjuna and ariṣṭa trees, and with sandalwood and śālmali [silk cotton] trees. ||3||" |
+| `Line 41357: ` | "[Blank line]" |
+| `Line 41358: जम्ब्वाम्रलोध्रखदिरशाकवेत्रसमाकुलम् |` | "Crowded with jambu [rose apple], mango, lodhra, khadira [acacia], teak, and reeds," |
+| `Line 41359: काश्मर्यामलकप्लक्षकदम्बोदुम्बरावृतम् ||४||` | "Covered with kāśmarya, āmalaka [gooseberry], plakṣa, kadamba, and udumbara [fig] trees. ||4||" |
+| `Line 41360: ` | "[Blank line]" |
+| `Line 41361: बदरीबिल्वसञ्छन्नं न्यग्रोधैश्च समाकुलम् |` | "Covered with jujube and bilva trees, and crowded with banyan trees," |
+| `Line 41362: प्रियालतालखर्जूरहरीतकबिभीतकैः ||५||` | "With priyāla, palm, date, harītaka [myrobalan], and bibhītaka trees. ||5||" |
+| `Line 41363: ` | "[Blank line]" |
+| `Line 41364: नानाधातुशतैर्नद्धान्विविधानपि चाचलान् |` | "Mountains bound with hundreds of various minerals," |
+| `Line 41365: निकुञ्जान्पक्षिसङ्घुष्टान्दरीश्चाद्भुतदर्शनाः ||६||` | "Thickets resounding with birds, and caves of wondrous appearance. ||6||" |

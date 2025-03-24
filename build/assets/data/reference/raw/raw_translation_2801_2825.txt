@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 2801: शौनक उवाच॥` | "Śaunaka said:" |
+| `Line 2802: ` | [Blank line] |
+| `Line 2803: सौते कथय तामेतां विस्तरेण कथां पुनः |` | "O Sauti [bard/storyteller], tell that story again in detail," |
+| `Line 2804: आस्तीकस्य कवेः साधोः शुश्रूषा परमा हि नः ॥१॥` | "For we have the utmost desire to hear about the virtuous sage Āstīka. ||1||" |
+| `Line 2805: ` | [Blank line] |
+| `Line 2806: मधुरं कथ्यते सौम्य श्लक्ष्णाक्षरपदं त्वया |` | "You narrate sweetly, O gentle one, with smooth syllables and words," |
+| `Line 2807: प्रीयामहे भृशं तात पितेवेदं प्रभाषसे ॥२॥` | "We are greatly pleased, dear one, as you speak like a father. ||2||" |
+| `Line 2808: ` | [Blank line] |
+| `Line 2809: अस्मच्छुश्रूषणे नित्यं पिता हि निरतस्तव |` | "Your father was always engaged in serving us," |
+| `Line 2810: आचष्टैतद्यथाख्यानं पिता ते त्वं तथा वद ॥३॥` | "As your father narrated this story, so should you tell it. ||3||" |
+| `Line 2811: ` | [Blank line] |
+| `Line 2812: सूत उवाच॥` | "Sūta [bard/narrator] said:" |
+| `Line 2813: ` | [Blank line] |
+| `Line 2814: आयुष्यमिदमाख्यानमास्तीकं कथयामि ते |` | "I shall narrate to you this life-giving story of Āstīka," |
+| `Line 2815: यथा श्रुतं कथयतः सकाशाद्वै पितुर्मया ॥४॥` | "Just as I heard it from my father when he was narrating it. ||4||" |
+| `Line 2816: ` | [Blank line] |
+| `Line 2817: पुरा देवयुगे ब्रह्मन्प्रजापतिसुते शुभे |` | "Long ago in the age of gods, O Brahmin, there were two auspicious daughters of Prajāpati [creator deity]," |
+| `Line 2818: आस्तां भगिन्यौ रूपेण समुपेतेऽद्भुतेऽनघे ॥५॥` | "There were two sisters endowed with wonderful and flawless beauty. ||5||" |
+| `Line 2819: ` | [Blank line] |
+| `Line 2820: ते भार्ये कश्यपस्यास्तां कद्रूश्च विनता च ह |` | "They were the wives of Kaśyapa [ancient sage], namely Kadrū and Vinatā," |
+| `Line 2821: प्रादात्ताभ्यां वरं प्रीतः प्रजापतिसमः पतिः ॥६॥` | "Their husband, equal to Prajāpati, being pleased, granted them a boon. ||6||" |
+| `Line 2822: ` | [Blank line] |
+| `Line 2823: कश्यपो धर्मपत्नीभ्यां मुदा परमया युतः ॥६॥` | "Kaśyapa, filled with supreme joy, to his righteous wives ||6||" |
+| `Line 2824: ` | [Blank line] |
+| `Line 2825: वरातिसर्गं श्रुत्वैव कश्यपादुत्तमं च ते |` | "Having heard the excellent boon offered by Kaśyapa, they" |

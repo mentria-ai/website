@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 9416: ततो गावो निवृत्तास्ता अगोपाः स्वं निवेशनम् |` | "Then those cows returned to their dwelling without a cowherd," |
+| `Line 9417: ता दृष्ट्वा रहिता गास्तु कचेनाभ्यागता वनात् ||२७||` | "Seeing those cows returned from the forest without Kacha [Bṛhaspati's son], ||27||" |
+| `Line 9418: ` | "[Blank line]" |
+| `Line 9419: उवाच वचनं काले देवयान्यथ भारत ||२७||` | "Devayānī [Śukra's daughter] then spoke these words at that time, O Bhārata [Janamejaya], ||27||" |
+| `Line 9420: ` | "[Blank line]" |
+| `Line 9421: अहुतं चाग्निहोत्रं ते सूर्यश्चास्तं गतः प्रभो |` | "Your fire sacrifice [agnihotra] remains unoffered and the sun has set, O master," |
+| `Line 9422: अगोपाश्चागता गावः कचस्तात न दृश्यते ||२८||` | "The cows have returned without their herder, and Kacha, O father, is nowhere to be seen. ||28||" |
+| `Line 9423: ` | "[Blank line]" |
+| `Line 9424: व्यक्तं हतो मृतो वापि कचस्तात भविष्यति |` | "Surely Kacha must have been killed or has died, O father," |
+| `Line 9425: तं विना न च जीवेयं कचं सत्यं ब्रवीमि ते ||२९||` | "Without him I cannot live – I tell you this truth about Kacha. ||29||" |
+| `Line 9426: ` | "[Blank line]" |
+| `Line 9427: शुक्र उवाच||` | "Śukra [preceptor of demons] said:" |
+| `Line 9428: ` | "[Blank line]" |
+| `Line 9429: अयमेहीति शब्देन मृतं सञ्जीवयाम्यहम् |` | "With the words 'Come here,' I shall revive the dead one." |
+| `Line 9430: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 9431: ` | "[Blank line]" |
+| `Line 9432: ततः सञ्जीवनीं विद्यां प्रयुज्य कचमाह्वयत् |` | "Then, employing the reviving knowledge [sañjīvanī vidyā], he called for Kacha," |
+| `Line 9433: आहूतः प्रादुरभवत्कचोऽरिष्टोऽथ विद्यया ||३१||` | "Being summoned, Kacha appeared unharmed through that knowledge. ||31||" |
+| `Line 9434: ` | "[Blank line]" |
+| `Line 9435: हतोऽहमिति चाचख्यौ पृष्टो ब्राह्मणकन्यया ||३१||` | "When questioned by the Brahmin's daughter, he declared, 'I was killed.' ||31||" |
+| `Line 9436: ` | "[Blank line]" |
+| `Line 9437: स पुनर्देवयान्योक्तः पुष्पाहारो यदृच्छया |` | "He, being sent by Devayānī to gather flowers by chance," |
+| `Line 9438: वनं ययौ ततो विप्रो ददृशुर्दानवाश्च तम् ||३२||` | "The Brahmin went to the forest, and there the Dānavas [demons] saw him. ||32||" |
+| `Line 9439: ` | "[Blank line]" |
+| `Line 9440: ततो द्वितीयं हत्वा तं दग्ध्वा कृत्वा च चूर्णशः |` | "Then, killing him a second time, burning him, and reducing him to powder," |

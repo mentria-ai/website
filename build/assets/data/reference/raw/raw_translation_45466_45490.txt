@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 45466: यथा वैन्यो महातेजास्तथा त्वमपि विश्रुतः ||११०||` | "As Vainya [King Pṛthu], the greatly radiant one, so you too are renowned. ||110||" |
+| `Line 45467: ` | "[Blank line]" |
+| `Line 45468: यथा च वृत्रहा सर्वान्सपत्नान्निर्दहत्पुरा |` | "And as Vṛtrahā [Indra, slayer of Vṛtra] once burned all his enemies," |
+| `Line 45469: तथा शत्रुक्षयं कृत्वा प्रजास्त्वं पालयिष्यसि ||१११||` | "So shall you, after destroying your enemies, protect your subjects. ||111||" |
+| `Line 45470: ` | "[Blank line]" |
+| `Line 45471: स्वधर्मविजितामुर्वीं प्राप्य राजीवलोचन |` | "Having conquered the earth through your own dharma [duty], O lotus-eyed one," |
+| `Line 45472: ख्यातिं यास्यसि धर्मेण कार्तवीर्यार्जुनो यथा ||११२||` | "You will attain fame through righteousness, just like Kārtavīrya Arjuna [thousand-armed king]. ||112||" |
+| `Line 45473: ` | "[Blank line]" |
+| `Line 45474: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 45475: ` | "[Blank line]" |
+| `Line 45476: एवमाश्वास्य राजानं नारदो भगवानृषिः |` | "Having thus consoled the king, the divine sage Nārada [celestial sage]," |
+| `Line 45477: अनुज्ञाप्य महात्मानं तत्रैवान्तरधीयत ||११३||` | "After taking leave of that great soul, vanished right there. ||113||" |
+| `Line 45478: ` | "[Blank line]" |
+| `Line 45479: युधिष्ठिरोऽपि धर्मात्मा तमेवार्थं विचिन्तयन् |` | "And Yudhiṣṭhira [eldest Pāṇḍava], righteous-souled, contemplating that very purpose," |
+| `Line 45480: तीर्थयात्राश्रयं पुण्यमृषीणां प्रत्यवेदयत् ||११४||` | "Announced the virtuous pilgrimage to sacred places as advised by the sages. ||114||" |
+| `Line 45481: ` | "[Blank line]" |
+| `Line 45482: ` | "[Blank line]" |
+| `Line 45483: ` | "[Blank line]" |
+| `Line 45484: ` | "[Blank line]" |
+| `Line 45485: ८४` | "84 [chapter number]" |
+| `Line 45486: ` | "[Blank line]" |
+| `Line 45487: ` | "[Blank line]" |
+| `Line 45488: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 45489: ` | "[Blank line]" |
+| `Line 45490: भ्रातॄणां मतमाज्ञाय नारदस्य च धीमतः |` | "Having understood the opinion of his brothers and of the wise Nārada [celestial sage]," |

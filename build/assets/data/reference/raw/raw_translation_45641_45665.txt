@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 45641: ` | "[Blank line]" |
+| `Line 45642: ` | "[Blank line]" |
+| `Line 45643: ` | "[Blank line]" |
+| `Line 45644: ८६` | "86 [chapter number]" |
+| `Line 45645: ` | "[Blank line]" |
+| `Line 45646: ` | "[Blank line]" |
+| `Line 45647: धौम्य उवाच||` | "Dhaumya [sage, priest of Pandavas] said:" |
+| `Line 45648: ` | "[Blank line]" |
+| `Line 45649: दक्षिणस्यां तु पुण्यानि शृणु तीर्थानि भारत |` | "Listen, O Bharata [Yudhishthira], to the sacred pilgrimage sites [tīrtha] in the southern direction," |
+| `Line 45650: विस्तरेण यथाबुद्धि कीर्त्यमानानि भारत ||१||` | "Which I shall describe in detail according to my knowledge, O Bharata. ||1||" |
+| `Line 45651: ` | "[Blank line]" |
+| `Line 45652: यस्यामाख्यायते पुण्या दिशि गोदावरी नदी |` | "In that direction is described the sacred Godavari [major river], a holy river," |
+| `Line 45653: बह्वारामा बहुजला तापसाचरिता शुभा ||२||` | "With many gardens, abundant waters, frequented by ascetics [tapasa], and auspicious. ||2||" |
+| `Line 45654: ` | "[Blank line]" |
+| `Line 45655: वेण्णा भीमरथी चोभे नद्यौ पापभयापहे |` | "Both the Venna and Bhimarathi [rivers], streams that remove the fear of sins," |
+| `Line 45656: मृगद्विजसमाकीर्णे तापसालयभूषिते ||३||` | "Filled with deer and birds, adorned with hermitages of ascetics. ||3||" |
+| `Line 45657: ` | "[Blank line]" |
+| `Line 45658: राजर्षेस्तत्र च सरिन्नृगस्य भरतर्षभ |` | "And there, O bull among Bharatas [honorific], is the river of the royal sage [rajarshi] Nriga," |
+| `Line 45659: रम्यतीर्था बहुजला पयोष्णी द्विजसेविता ||४||` | "The Payoshni [river], with beautiful fords, abundant waters, frequented by the twice-born [brahmins]. ||4||" |
+| `Line 45660: ` | "[Blank line]" |
+| `Line 45661: अपि चात्र महायोगी मार्कण्डेयो महातपाः |` | "And here the great yogi Markandeya [long-lived sage], of great austerity," |
+| `Line 45662: अनुवंष्यां जगौ गाथां नृगस्य धरणीपतेः ||५||` | "Sang a traditional verse about Nriga, the lord of the earth. ||5||" |
+| `Line 45663: ` | "[Blank line]" |
+| `Line 45664: नृगस्य यजमानस्य प्रत्यक्षमिति नः श्रुतम् |` | "We have heard that when Nriga was performing sacrifices, visibly," |
+| `Line 45665: अमाद्यदिन्द्रः सोमेन दक्षिणाभिर्द्विजातयः ||६||` | "Indra [king of gods] became intoxicated with Soma [ritual drink], and the twice-born [brahmins] with the sacrificial gifts. ||6||" |

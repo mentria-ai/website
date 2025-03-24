@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 31766: पूजापूर्वं प्रतिगृह्याजमीढ; स्ततोऽपृच्छद्धृतराष्ट्रं सपुत्रम् ||४||` | "After receiving him with due honors, O Ajamīḍha [Yudhiṣṭhira], he then inquired about Dhṛtarāṣṭra and his sons. ||4||" |
+| `Line 31767: ` | "[Blank line]" |
+| `Line 31768: युधिष्ठिर उवाच||` | "Yudhiṣṭhira said:" |
+| `Line 31769: ` | "[Blank line]" |
+| `Line 31770: विज्ञायते ते मनसो न प्रहर्षः; कच्चित्क्षत्तः कुशलेनागतोऽसि |` | "I perceive there is no joy in your mind; are you well, O Kṣatta [Vidura]? |
+| `Line 31771: कच्चित्पुत्राः स्थविरस्यानुलोमा; वशानुगाश्चापि विशोऽपि कच्चित् ||५||` | "Are the sons of the elder [Dhṛtarāṣṭra] favorable? And are the subjects also obedient? ||5||" |
+| `Line 31772: ` | "[Blank line]" |
+| `Line 31773: विदुर उवाच||` | "Vidura said:" |
+| `Line 31774: ` | "[Blank line]" |
+| `Line 31775: राजा महात्मा कुशली सपुत्र; आस्ते वृतो ज्ञातिभिरिन्द्रकल्पैः |` | "The great-souled king is well with his sons; he sits surrounded by kinsmen who are like Indra [king of gods]. |
+| `Line 31776: प्रीतो राजन्पुत्रगणैर्विनीतै; र्विशोक एवात्मरतिर्दृढात्मा ||६||` | "He is pleased, O king, with his well-mannered sons; he is without sorrow, self-content, and firm in mind. ||6||" |
+| `Line 31777: ` | "[Blank line]" |
+| `Line 31778: इदं तु त्वां कुरुराजोऽभ्युवाच; पूर्वं पृष्ट्वा कुशलं चाव्ययं च |` | "But this the Kuru king said to you, after first inquiring about your welfare and prosperity: |
+| `Line 31779: इयं सभा त्वत्सभातुल्यरूपा; भ्रातॄणां ते पश्य तामेत्य पुत्र ||७||` | "'This assembly hall is similar to your assembly hall; come and see it with your brothers, my son.' ||7||" |
+| `Line 31780: ` | "[Blank line]" |
+| `Line 31781: समागम्य भ्रातृभिः पार्थ तस्यां; सुहृद्द्यूतं क्रियतां रम्यतां च |` | "'Coming together with your brothers in it, O Pārtha [son of Pṛthā], let friendly gambling be conducted and enjoyment be had. |
+| `Line 31782: प्रीयामहे भवतः सङ्गमेन; समागताः कुरवश्चैव सर्वे ||८||` | "We are pleased by your company, and all the Kurus have assembled.' ||8||" |
+| `Line 31783: ` | "[Blank line]" |
+| `Line 31784: दुरोदरा विहिता ये तु तत्र; महात्मना धृतराष्ट्रेण राज्ञा |` | "The dice-boards [durodarā] that have been arranged there by the great-souled King Dhṛtarāṣṭra, |
+| `Line 31785: तान्द्रक्ष्यसे कितवान्संनिविष्टा; नित्यागतोऽहं नृपते तज्जुषस्व ||९||` | "You will see those gamblers seated there. I come as a regular visitor, O king, so please enjoy it." ||9||" |
+| `Line 31786: ` | "[Blank line]" |
+| `Line 31787: युधिष्ठिर उवाच||` | "Yudhiṣṭhira said:" |
+| `Line 31788: ` | "[Blank line]" |
+| `Line 31789: द्यूते क्षत्तः कलहो विद्यते नः; को वै द्यूतं रोचयेद्बुध्यमानः |` | "In gambling, O Kṣatta [Vidura], there exists quarrel for us; who indeed, being aware, would favor gambling? |
+| `Line 31790: किं वा भवान्मन्यते युक्तरूपं; भवद्वाक्ये सर्व एव स्थिताः स्म ||१०||` | "Or what do you think is proper? We all abide by your words. ||10||" |

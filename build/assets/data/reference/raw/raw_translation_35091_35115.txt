@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 35091: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 35092: ` | "[Blank line]" |
+| `Line 35093: एवमुक्तस्तु कर्णेन राजा दुर्योधनस्तदा |` | "Thus addressed by Karṇa [sun's son], King Duryodhana then," |
+| `Line 35094: नातिहृष्टमनाः क्षिप्रमभवत्स पराङ्मुखः ||१३||` | "Became quickly disheartened and turned away. ||13||" |
+| `Line 35095: ` | "[Blank line]" |
+| `Line 35096: उपलभ्य ततः कर्णो विवृत्य नयने शुभे |` | "Perceiving this, Karṇa then, opening wide his beautiful eyes," |
+| `Line 35097: रोषाद्दुःशासनं चैव सौबलेयं च तावुभौ ||१४||` | "In anger (looked at) both Duḥśāsana and Saubaleya [Śakuni, Subala's son]. ||14||" |
+| `Line 35098: ` | "[Blank line]" |
+| `Line 35099: उवाच परमक्रुद्ध उद्यम्यात्मानमात्मना |` | "Extremely enraged, raising himself up by his own effort, he said," |
+| `Line 35100: अहो मम मतं यत्तन्निबोधत नराधिपाः ||१५||` | "Behold, O rulers of men, this opinion of mine. ||15||" |
+| `Line 35101: ` | "[Blank line]" |
+| `Line 35102: प्रियं सर्वे चिकीर्षामो राज्ञः किङ्करपाणयः |` | "We all desire to do what is pleasing to the king, with hands ready to serve," |
+| `Line 35103: न चास्य शक्नुमः सर्वे प्रिये स्थातुमतन्द्रिताः ||१६||` | "Yet we all cannot stand firmly in what is pleasing to him, though we are vigilant. ||16||" |
+| `Line 35104: ` | "[Blank line]" |
+| `Line 35105: वयं तु शस्त्राण्यादाय रथानास्थाय दंशिताः |` | "But let us take up weapons, mount our chariots, armored," |
+| `Line 35106: गच्छामः सहिता हन्तुं पाण्डवान्वनगोचरान् ||१७||` | "And go together to slay the Pāṇḍavas [sons of Pāṇḍu] who roam in the forest. ||17||" |
+| `Line 35107: ` | "[Blank line]" |
+| `Line 35108: तेषु सर्वेषु शान्तेषु गतेष्वविदितां गतिम् |` | "When they all are pacified (dead), having gone to an unknown destination," |
+| `Line 35109: निर्विवादा भविष्यन्ति धार्तराष्ट्रास्तथा वयम् ||१८||` | "The sons of Dhṛtarāṣṭra and we shall be free from conflict. ||18||" |
+| `Line 35110: ` | "[Blank line]" |
+| `Line 35111: यावदेव परिद्यूना यावच्छोकपरायणाः |` | "While they are still distressed, while they are still immersed in sorrow," |
+| `Line 35112: यावन्मित्रविहीनाश्च तावच्छक्या मतं मम ||१९||` | "While they are still without allies, they can be overcome—this is my opinion. ||19||" |
+| `Line 35113: ` | "[Blank line]" |
+| `Line 35114: तस्य तद्वचनं श्रुत्वा पूजयन्तः पुनः पुनः |` | "Hearing these words of his, honoring him again and again," |
+| `Line 35115: बाढमित्येव ते सर्वे प्रत्यूचुः सूतजं तदा ||२०||` | "All of them then replied to the son of a charioteer [sūta-ja], 'Indeed, yes!' ||20||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 4201: भुजङ्गमानां शापस्य मात्रा चैव सुतेन च |` | "Of the serpents' curse by the mother and by the son," |
+| `Line 4202: विनतायास्त्वया प्रोक्तं कारणं सूतनन्दन ||१||` | "You have explained the cause related to Vinatā [Garuḍa's mother], O joy of sūtas [bard/charioteer]. ||1||" |
+| `Line 4203: ` | [Blank line] |
+| `Line 4204: वरप्रदानं भर्त्रा च कद्रूविनतयोस्तथा |` | "The granting of boons by the husband to both Kadrū [serpent mother] and Vinatā," |
+| `Line 4205: नामनी चैव ते प्रोक्ते पक्षिणोर्वैनतेययोः ||२||` | "And you have mentioned the names of the two birds, sons of Vinatā [Garuḍa and Aruṇa]. ||2||" |
+| `Line 4206: ` | [Blank line] |
+| `Line 4207: पन्नगानां तु नामानि न कीर्तयसि सूतज |` | "But you do not recite the names of the serpents [nāgas], O son of a sūta," |
+| `Line 4208: प्राधान्येनापि नामानि श्रोतुमिच्छामहे वयम् ||३||` | "We wish to hear especially the names of the prominent ones. ||3||" |
+| `Line 4209: ` | [Blank line] |
+| `Line 4210: सूत उवाच||` | "The Sūta [narrator] said:" |
+| `Line 4211: ` | [Blank line] |
+| `Line 4212: बहुत्वान्नामधेयानि भुजगानां तपोधन |` | "Due to the multitude of names of the serpents, O wealth of austerities [sage]," |
+| `Line 4213: न कीर्तयिष्ये सर्वेषां प्राधान्येन तु मे शृणु ||४||` | "I will not recite all of them, but listen to me about the prominent ones. ||4||" |
+| `Line 4214: ` | [Blank line] |
+| `Line 4215: शेषः प्रथमतो जातो वासुकिस्तदनन्तरम् |` | "Śeṣa [cosmic serpent] was born first, then Vāsuki [king of serpents]," |
+| `Line 4216: ऐरावतस्तक्षकश्च कर्कोटकधनञ्जयौ ||५||` | "Airāvata, Takṣaka [poison-fanged], and Karkoṭaka and Dhanañjaya. ||5||" |
+| `Line 4217: ` | [Blank line] |
+| `Line 4218: कालियो मणिनागश्च नागश्चापूरणस्तथा |` | "Kāliya [Krishna's adversary], Maṇināga, and also the serpent Āpūraṇa," |
+| `Line 4219: नागस्तथा पिञ्जरक एलापत्रोऽथ वामनः ||६||` | "And the serpent Piñjaraka, Elāpatra, and Vāmana [dwarf serpent]. ||6||" |
+| `Line 4220: ` | [Blank line] |
+| `Line 4221: नीलानीलौ तथा नागौ कल्माषशबलौ तथा |` | "The serpents Nīla and Anīla, and likewise Kalmāṣa and Śabala," |
+| `Line 4222: आर्यकश्चादिकश्चैव नागश्च शलपोतकः ||७||` | "Āryaka and Ādika, and the serpent Śalapotaka. ||7||" |
+| `Line 4223: ` | [Blank line] |
+| `Line 4224: सुमनोमुखो दधिमुखस्तथा विमलपिण्डकः |` | "Sumanomukha, Dadhimukha [curd-faced], and also Vimalapiṇḍaka," |
+| `Line 4225: आप्तः कोटनकश्चैव शङ्खो वालशिखस्तथा ||८||` | "Āpta, Koṭanaka, and also Śaṅkha [conch-like] and Vālaśikha. ||8||" |

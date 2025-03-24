@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 32366: शकुनिरुवाच॥` | "Śakuni [Duryodhana's uncle] said:" |
+| `Line 32367: ` | "[Blank line]" |
+| `Line 32368: प्रियस्ते नकुलो राजन्राजपुत्रो युधिष्ठिर |` | "O King Yudhiṣṭhira, the prince Nakula is dear to you," |
+| `Line 32369: अस्माकं धनतां प्राप्तो भूयस्त्वं केन दीव्यसि ॥१२॥` | "He has come under our possession. What more will you wager now? ||12||" |
+| `Line 32370: ` | "[Blank line]" |
+| `Line 32371: वैशम्पायन उवाच॥` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 32372: ` | "[Blank line]" |
+| `Line 32373: एवमुक्त्वा तु शकुनिस्तानक्षान्प्रत्यपद्यत |` | "Having spoken thus, Śakuni took up those dice," |
+| `Line 32374: जितमित्येव शकुनिर्युधिष्ठिरमभाषत ॥१३॥` | "And Śakuni declared to Yudhiṣṭhira, 'Won!' ||13||" |
+| `Line 32375: ` | "[Blank line]" |
+| `Line 32376: युधिष्ठिर उवाच॥` | "Yudhiṣṭhira [eldest Pāṇḍava] said:" |
+| `Line 32377: ` | "[Blank line]" |
+| `Line 32378: अयं धर्मान्सहदेवोऽनुशास्ति; लोके ह्यस्मिन्पण्डिताख्यां गतश्च |` | "This Sahadeva teaches righteousness; in this world he has attained the reputation of a learned man," |
+| `Line 32379: अनर्हता राजपुत्रेण तेन; त्वया दीव्याम्यप्रियवत्प्रियेण ॥१४॥` | "Though undeserving, I stake this prince who is dear to me as if not dear, against you. ||14||" |
+| `Line 32380: ` | "[Blank line]" |
+| `Line 32381: वैशम्पायन उवाच॥` | "Vaiśampāyana said:" |
+| `Line 32382: ` | "[Blank line]" |
+| `Line 32383: एतच्छ्रुत्वा व्यवसितो निकृतिं समुपाश्रितः |` | "Hearing this, determined and resorting to deceit," |
+| `Line 32384: जितमित्येव शकुनिर्युधिष्ठिरमभाषत ॥१५॥` | "Śakuni declared to Yudhiṣṭhira, 'Won!' ||15||" |
+| `Line 32385: ` | "[Blank line]" |
+| `Line 32386: शकुनिरुवाच॥` | "Śakuni said:" |
+| `Line 32387: ` | "[Blank line]" |
+| `Line 32388: माद्रीपुत्रौ प्रियौ राजंस्तवेमौ विजितौ मया |` | "O king, these two dear sons of Mādrī [Pāṇḍu's wife] have been won by me," |
+| `Line 32389: गरीयांसौ तु ते मन्ये भीमसेनधनञ्जयौ ॥१६॥` | "But I think Bhīmasena and Dhanañjaya [Arjuna] are more important to you. ||16||" |
+| `Line 32390: ` | "[Blank line]" |

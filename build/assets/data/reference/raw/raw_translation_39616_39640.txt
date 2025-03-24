@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 39616: यान्दृष्टवानसि विभो तारारूपाणि भूतले ||३५||` | "Those star-like forms you have seen, O mighty one [vibhu], on the earth. ||35||" |
+| `Line 39617: ` | "[Blank line]" |
+| `Line 39618: ततोऽपश्यत्स्थितं द्वारि सितं वैजयिनं गजम् |` | "Then he saw standing at the gate the white, victorious [vaijayina] elephant," |
+| `Line 39619: ऐरावतं चतुर्दन्तं कैलासमिव शृङ्गिणम् ||३६||` | "Airāvata [Indra's elephant], four-tusked, resembling Mount Kailāsa with its peaks. ||36||" |
+| `Line 39620: ` | "[Blank line]" |
+| `Line 39621: स सिद्धमार्गमाक्रम्य कुरुपाण्डवसत्तमः |` | "That best of the Kuru-Pāṇḍavas [royal lineages], having traversed the path of the perfected beings [siddhas]," |
+| `Line 39622: व्यरोचत यथा पूर्वं मान्धाता पार्थिवोत्तमः ||३७||` | "Shone as formerly did Māndhātā [ancient king], the best of earthly rulers. ||37||" |
+| `Line 39623: ` | "[Blank line]" |
+| `Line 39624: अतिचक्राम लोकान्स राज्ञां राजीवलोचनः |` | "He, the lotus-eyed one [rājīva-lochana], crossed over the worlds of kings," |
+| `Line 39625: ततो ददर्श शक्रस्य पुरीं ताममरावतीम् ||३८||` | "Then he beheld that city of Śakra [Indra], Amarāvatī [immortals' abode]. ||38||" |
+| `Line 39626: ` | "[Blank line]" |
+| `Line 39627: ` | "[Blank line]" |
+| `Line 39628: ` | "[Blank line]" |
+| `Line 39629: ` | "[Blank line]" |
+| `Line 39630: ४४` | "44 [chapter number]" |
+| `Line 39631: ` | "[Blank line]" |
+| `Line 39632: ` | "[Blank line]" |
+| `Line 39633: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 39634: ` | "[Blank line]" |
+| `Line 39635: स ददर्श पुरीं रम्यां सिद्धचारणसेविताम् |` | "He saw the delightful city, frequented by Siddhas [perfected beings] and Cāraṇas [celestial singers]," |
+| `Line 39636: सर्वर्तुकुसुमैः पुण्यैः पादपैरुपशोभिताम् ||१||` | "Adorned with trees bearing sacred flowers of all seasons. ||1||" |
+| `Line 39637: ` | "[Blank line]" |
+| `Line 39638: तत्र सौगन्धिकानां स द्रुमाणां पुण्यगन्धिनाम् |` | "There, among the fragrant [saugandhika] trees with their sacred scents," |
+| `Line 39639: उपवीज्यमानो मिश्रेण वायुना पुण्यगन्धिना ||२||` | "He was fanned by mixed breezes carrying sacred fragrances. ||2||" |
+| `Line 39640: ` | "[Blank line]" |

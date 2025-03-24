@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 29441: तं कृष्णः प्रत्युवाचेदं बहूक्त्वा गुणविस्तरम् |` | "To him, Kṛṣṇa [Vishnu incarnation] replied this, after elaborating at length on his many virtues:" |
+| `Line 29442: त्वमेव राजशार्दूल सम्राडर्हो महाक्रतुम् ||२३||` | "You alone, O tiger among kings [rājaśārdūla], are worthy to be emperor and perform the great sacrifice. ||23||" |
+| `Line 29443: ` | "[Blank line]" |
+| `Line 29444: सम्प्राप्नुहि त्वया प्राप्ते कृतकृत्यास्ततो वयम् ||२३||` | "Accomplish it; when you have achieved it, we too shall have fulfilled our purpose. ||23||" |
+| `Line 29445: ` | "[Blank line]" |
+| `Line 29446: यजस्वाभीप्सितं यज्ञं मयि श्रेयस्यवस्थिते |` | "Perform the sacrifice you desire, while I remain committed to your welfare," |
+| `Line 29447: नियुङ्क्ष्व चापि मां कृत्ये सर्वं कर्तास्मि ते वचः ||२४||` | "And assign me duties as well; I shall do everything according to your word. ||24||" |
+| `Line 29448: ` | "[Blank line]" |
+| `Line 29449: युधिष्ठिर उवाच||` | "Yudhiṣṭhira [eldest Pāṇḍava] said:" |
+| `Line 29450: ` | "[Blank line]" |
+| `Line 29451: सफलः कृष्ण सङ्कल्पः सिद्धिश्च नियता मम |` | "Fruitful, O Kṛṣṇa, is my resolve, and success is assured for me," |
+| `Line 29452: यस्य मे त्वं हृषीकेश यथेप्सितमुपस्थितः ||२५||` | "For you, O Hṛṣīkeśa [lord of senses], have come to me as desired. ||25||" |
+| `Line 29453: ` | "[Blank line]" |
+| `Line 29454: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 29455: ` | "[Blank line]" |
+| `Line 29456: अनुज्ञातस्तु कृष्णेन पाण्डवो भ्रातृभिः सह |` | "Authorized by Kṛṣṇa, the Pāṇḍava [Yudhiṣṭhira], together with his brothers," |
+| `Line 29457: ईहितुं राजसूयाय साधनान्युपचक्रमे ||२६||` | "Began to arrange the means for the Rājasūya [royal consecration sacrifice]. ||26||" |
+| `Line 29458: ` | "[Blank line]" |
+| `Line 29459: तत आज्ञापयामास पाण्डवोऽरिनिबर्हणः |` | "Then the Pāṇḍava, destroyer of enemies [arinibarhaṇa], commanded" |
+| `Line 29460: सहदेवं युधां श्रेष्ठं मन्त्रिणश्चैव सर्वशः ||२७||` | "Sahadeva [youngest Pāṇḍava], foremost among warriors, and all the ministers: ||27||" |
+| `Line 29461: ` | "[Blank line]" |
+| `Line 29462: अस्मिन्क्रतौ यथोक्तानि यज्ञाङ्गानि द्विजातिभिः |` | "For this sacrifice, as prescribed by the twice-born [brāhmaṇas], all the sacrificial components," |
+| `Line 29463: तथोपकरणं सर्वं मङ्गलानि च सर्वशः ||२८||` | "And all the implements and auspicious items in every way, ||28||" |
+| `Line 29464: ` | "[Blank line]" |
+| `Line 29465: अधियज्ञांश्च सम्भारान्धौम्योक्तान्क्षिप्रमेव हि |` | "And the sacrificial materials specified by Dhaumya [family priest], quickly indeed," |

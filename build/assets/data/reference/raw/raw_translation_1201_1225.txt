@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1201: ` | [Blank line] |
+| `Line 1202: अश्वत्थामापि चात्रैव द्रोणे युधि निपातिते |` | "And here, when Drona was slain in battle," |
+| `Line 1203: अस्त्रं प्रादुश्चकारोग्रं नारायणममर्षितः ||१६५||` | "Ashvatthama, enraged, unleashed the terrible Narayana [Vishnu's] weapon. ||165||" |
+| `Line 1204: ` | [Blank line] |
+| `Line 1205: सप्तमं भारते पर्व महदेतदुदाहृतम् |` | "This is declared as the seventh great book in the Bharata [Mahabharata]," |
+| `Line 1206: अत्र ते पृथिवीपालाः प्रायशो निधनं गताः ||१६६||` | "Wherein those rulers of the earth mostly met their death. ||166||" |
+| `Line 1207: ` | [Blank line] |
+| `Line 1208: द्रोणपर्वणि ये शूरा निर्दिष्टाः पुरुषर्षभाः ||१६६||` | "Those heroes, the bulls among men, who are mentioned in the Drona Parva [book of Drona]. ||166||" |
+| `Line 1209: ` | [Blank line] |
+| `Line 1210: अध्यायानां शतं प्रोक्तमध्यायाः सप्ततिस्तथा |` | "One hundred and seventy chapters are said to be," |
+| `Line 1211: अष्टौ श्लोकसहस्राणि तथा नव शतानि च ||१६७||` | "Eight thousand and nine hundred verses. ||167||" |
+| `Line 1212: ` | [Blank line] |
+| `Line 1213: श्लोका नव तथैवात्र सङ्ख्यातास्तत्त्वदर्शिना |` | "And nine verses are counted here by the truth-seer [sage]," |
+| `Line 1214: पाराशर्येण मुनिना सञ्चिन्त्य द्रोणपर्वणि ||१६८||` | "By the sage Parasharyeya [Vyasa], after careful consideration, in the Drona Parva. ||168||" |
+| `Line 1215: ` | [Blank line] |
+| `Line 1216: अतः परं कर्णपर्व प्रोच्यते परमाद्भुतम् |` | "After this, the Karna Parva [book of Karna], which is most wonderful, is described," |
+| `Line 1217: सारथ्ये विनियोगश्च मद्रराजस्य धीमतः ||१६९||` | "And the appointment of the wise king of Madra [Shalya] as charioteer. ||169||" |
+| `Line 1218: ` | [Blank line] |
+| `Line 1219: आख्यातं यत्र पौराणं त्रिपुरस्य निपातनम् ||१६९||` | "Where the ancient story of the destruction of Tripura [demon city] is narrated. ||169||" |
+| `Line 1220: ` | [Blank line] |
+| `Line 1221: प्रयाणे परुषश्चात्र संवादः कर्णशल्ययोः |` | "And here, the harsh dialogue between Karna and Shalya during the march," |
+| `Line 1222: हंसकाकीयमाख्यानमत्रैवाक्षेपसंहितम् ||१७०||` | "The tale of the swan and crow is also included here with criticisms. ||170||" |
+| `Line 1223: ` | [Blank line] |
+| `Line 1224: अन्योन्यं प्रति च क्रोधो युधिष्ठिरकिरीटिनोः |` | "And the anger between Yudhishthira and Kiritina [Arjuna] toward each other," |
+| `Line 1225: द्वैरथे यत्र पार्थेन हतः कर्णो महारथः ||१७१||` | "Where in single combat, Karna the great chariot-warrior was slain by Partha [Arjuna]. ||171||" |

@@ -116,6 +116,12 @@ class QuoteManager {
             const targetPosition = adjustedIndex * this.scrollContainer.clientHeight;
             this.scrollToPosition(targetPosition, false);
             this.debug.log('Scrolled to saved position:', this.currentQuoteIndex);
+            
+            // Ensure the visible video plays immediately
+            const scrollItems = this.scrollContainer.querySelectorAll('.scroll-item');
+            if (scrollItems.length > 0) {
+                this.manageVideoPlayback(adjustedIndex, scrollItems);
+            }
         }, 10);
     }
     
@@ -130,7 +136,14 @@ class QuoteManager {
             scrollItem.dataset.clone = 'true';
         }
         
-        // Create image
+        // Extract quote number for checking video
+        let quoteNumber = null;
+        const imgNameMatch = imgSrc.match(/quote_(\d+)\.png/);
+        if (imgNameMatch && imgNameMatch[1]) {
+            quoteNumber = imgNameMatch[1];
+        }
+        
+        // Create image (will be replaced by video if one exists)
         const img = document.createElement('img');
         img.src = imgSrc;
         img.alt = quote.alt || 'Motivational quote background';
@@ -138,6 +151,46 @@ class QuoteManager {
         
         // Add to the scroll item
         scrollItem.appendChild(img);
+        
+        // Check for video version
+        if (quoteNumber) {
+            const videoSrc = imgSrc.replace('.png', '.mp4');
+            
+            // Use fetch to check if the video exists (more reliable than video error events)
+            fetch(videoSrc, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        // Video exists, create and add it
+                        const video = document.createElement('video');
+                        video.src = videoSrc;
+                        video.className = 'media-content';
+                        video.autoplay = true;
+                        video.loop = true;
+                        video.muted = true;
+                        video.playsInline = true;
+                        video.controls = false;
+                        
+                        // Replace the image with the video
+                        const existingMedia = scrollItem.querySelector('.media-content');
+                        if (existingMedia) {
+                            scrollItem.replaceChild(video, existingMedia);
+                            
+                            // Make sure video plays
+                            video.play().catch(err => {
+                                this.debug.error('Video autoplay failed:', err);
+                                // We'll keep the video element, user may need to interact to play
+                            });
+                        }
+                        
+                        this.debug.log(`Using video for quote ${quoteNumber}: ${videoSrc}`);
+                    } else {
+                        this.debug.log(`No video found for quote ${quoteNumber}, using image`);
+                    }
+                })
+                .catch(error => {
+                    this.debug.error(`Error checking for video at ${videoSrc}:`, error);
+                });
+        }
         
         // Add to the beginning or end of the container
         if (position === 'beginning') {
@@ -155,32 +208,30 @@ class QuoteManager {
             return;
         }
         
-        // Listen for scroll events to track the current quote
+        // Listen for resize events to adjust container size
+        window.addEventListener('resize', this.handleResize.bind(this));
+        
+        // Listen for scroll events
         this.scrollContainer.addEventListener('scroll', () => {
-            // Throttle scroll events
-            const now = Date.now();
-            if (now - this.lastScrollTime > 100) { // Process scroll every 100ms
-                this.lastScrollTime = now;
-                this.handleScroll();
+            if (!this.isScrolling) {
+                this.isScrolling = true;
+                window.requestAnimationFrame(() => {
+                    this.handleScroll();
+                    this.isScrolling = false;
+                });
             }
             
-            // Reset the scroll timeout
-            clearTimeout(this.scrollTimeout);
-            this.scrollTimeout = setTimeout(() => this.handleScrollEnd(), 150);
-        });
-        
-        // Handle window resize to maintain correct scroll positions
-        window.addEventListener('resize', () => {
-            // Small delay to let the resize complete
-            clearTimeout(this.resizeTimeout);
-            this.resizeTimeout = setTimeout(() => {
-                // Recalculate position based on current index
-                if (this.scrollContainer) {
-                    const currentItem = this.currentQuoteIndex + 3; // Adjust for clones
-                    const newPosition = currentItem * this.scrollContainer.clientHeight;
-                    this.scrollToPosition(newPosition, false);
-                }
-            }, 100);
+            this.lastScrollTime = Date.now();
+            
+            // Clear previous timeout
+            if (this.scrollTimeout) {
+                clearTimeout(this.scrollTimeout);
+            }
+            
+            // Set new timeout
+            this.scrollTimeout = setTimeout(() => {
+                this.handleScrollEnd();
+            }, 200);
         });
         
         // Keyboard navigation
@@ -191,6 +242,36 @@ class QuoteManager {
             } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
                 this.nextQuote();
             }
+        });
+        
+        // Add global navigation functions
+        window.quoteNavigation = {
+            next: this.goToNext.bind(this),
+            prev: this.goToPrevious.bind(this)
+        };
+        
+        // Add listener for user interaction to start videos (autoplay policy workaround)
+        const userInteractionEvents = ['click', 'touchstart', 'keydown'];
+        const playVideosOnUserInteraction = () => {
+            // Find visible video and play it
+            const visibleIndex = Math.round(this.scrollContainer.scrollTop / this.scrollContainer.clientHeight);
+            const scrollItems = this.scrollContainer.querySelectorAll('.scroll-item');
+            
+            if (scrollItems.length > 0) {
+                this.manageVideoPlayback(visibleIndex, scrollItems);
+            }
+            
+            // Remove listeners after first interaction
+            userInteractionEvents.forEach(event => {
+                document.removeEventListener(event, playVideosOnUserInteraction);
+            });
+            
+            this.debug.log('User interaction detected, attempting to play videos');
+        };
+        
+        // Add the listeners
+        userInteractionEvents.forEach(event => {
+            document.addEventListener(event, playVideosOnUserInteraction, { once: false });
         });
     }
     
@@ -211,6 +292,9 @@ class QuoteManager {
             const visibleItem = scrollItems[visibleIndex];
             const index = parseInt(visibleItem.dataset.index, 10);
             const isClone = visibleItem.dataset.clone === 'true';
+            
+            // Manage video playback - play the visible video, pause others
+            this.manageVideoPlayback(visibleIndex, scrollItems);
             
             // Only update UI if we're showing a different quote than before
             if (index !== this.currentQuoteIndex) {
@@ -236,6 +320,29 @@ class QuoteManager {
                 }, 300);
             }
         }
+    }
+    
+    // Add new method to handle video playback based on visibility
+    manageVideoPlayback(visibleIndex, scrollItems) {
+        // Pause all videos first
+        scrollItems.forEach((item, idx) => {
+            const video = item.querySelector('video.media-content');
+            if (video) {
+                // If this is the visible item, play the video
+                if (idx === visibleIndex) {
+                    if (video.paused) {
+                        video.play().catch(err => {
+                            this.debug.error('Error playing video:', err);
+                        });
+                    }
+                } else {
+                    // Pause videos that aren't visible
+                    if (!video.paused) {
+                        video.pause();
+                    }
+                }
+            }
+        });
     }
     
     handleScrollEnd() {
@@ -323,6 +430,19 @@ class QuoteManager {
             this.debug.error('Error checking liked status:', error);
             return false;
         }
+    }
+    
+    handleResize() {
+        // Small delay to let the resize complete
+        clearTimeout(this.resizeTimeout);
+        this.resizeTimeout = setTimeout(() => {
+            // Recalculate position based on current index
+            if (this.scrollContainer) {
+                const currentItem = this.currentQuoteIndex + 3; // Adjust for clones
+                const newPosition = currentItem * this.scrollContainer.clientHeight;
+                this.scrollToPosition(newPosition, false);
+            }
+        }, 100);
     }
 }
 

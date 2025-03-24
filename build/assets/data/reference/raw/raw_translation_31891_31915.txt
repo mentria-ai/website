@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 31891: उपस्तीर्णा सभा राजन्रन्तुं चैते कृतक्षणाः |` | "The assembly hall is prepared, O king, and these men have made time to play," |
+| `Line 31892: अक्षानुप्त्वा देवनस्य समयोऽस्तु युधिष्ठिर ||१||` | "Let the time for gambling begin after arranging the dice, Yudhiṣṭhira. ||1||" |
+| `Line 31893: ` | "[Blank line]" |
+| `Line 31894: युधिष्ठिर उवाच||` | "Yudhiṣṭhira [Dharma's son] said:" |
+| `Line 31895: ` | "[Blank line]" |
+| `Line 31896: निकृतिर्देवनं पापं न क्षात्रोऽत्र पराक्रमः |` | "Gambling is deceitful and sinful; there is no kṣatriya [warrior] valor in it," |
+| `Line 31897: न च नीतिर्ध्रुवा राजन्किं त्वं द्यूतं प्रशंससि ||२||` | "Nor is there reliable ethics in it, O king. Why do you praise gambling? ||2||" |
+| `Line 31898: ` | "[Blank line]" |
+| `Line 31899: न हि मानं प्रशंसन्ति निकृतौ कितवस्य ह |` | "Indeed, they do not praise the honor of a gambler in deceit," |
+| `Line 31900: शकुने मैव नो जैषीरमार्गेण नृशंसवत् ||३||` | "O Śakuni [Gāndhāra prince], do not defeat us through improper means like a cruel person. ||3||" |
+| `Line 31901: ` | "[Blank line]" |
+| `Line 31902: शकुनिरुवाच||` | "Śakuni said:" |
+| `Line 31903: ` | "[Blank line]" |
+| `Line 31904: योऽन्वेति सङ्ख्यां निकृतौ विधिज्ञ; श्चेष्टास्वखिन्नः कितवोऽक्षजासु |` | "He who understands calculation in deception, knows the rules, and is tireless in the movements of dice games," |
+| `Line 31905: महामतिर्यश्च जानाति द्यूतं; स वै सर्वं सहते प्रक्रियासु ||४||` | "And he who is intelligent and knows gambling, indeed endures everything in the procedures. ||4||" |
+| `Line 31906: ` | "[Blank line]" |
+| `Line 31907: अक्षग्लहः सोऽभिभवेत्परं न; स्तेनैव कालो भवतीदमात्थ |` | "That dice-player would not overcome another; by that very time this happens, you say," |
+| `Line 31908: दीव्यामहे पार्थिव मा विशङ्कां; कुरुष्व पाणं च चिरं च मा कृथाः ||५||` | "Let us play, O king [pārthiva], do not have doubts; place your stake and do not delay. ||5||" |
+| `Line 31909: ` | "[Blank line]" |
+| `Line 31910: युधिष्ठिर उवाच||` | "Yudhiṣṭhira said:" |
+| `Line 31911: ` | "[Blank line]" |
+| `Line 31912: एवमाहायमसितो देवलो मुनिसत्तमः |` | "Thus speaks this Asita Devala [dark-complexioned sage], the best of sages," |
+| `Line 31913: इमानि लोकद्वाराणि यो वै सञ्चरते सदा ||६||` | "Who indeed always travels through these gateways to the worlds. ||6||" |
+| `Line 31914: ` | "[Blank line]" |
+| `Line 31915: इदं वै देवनं पापं मायया कितवैः सह |` | "This gambling is indeed sinful, with deceit along with gamblers," |

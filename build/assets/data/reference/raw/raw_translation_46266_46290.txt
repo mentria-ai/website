@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 46266: ब्राह्मणास्तत्र शतशः समाजग्मुस्तपोधनाः |` | "Hundreds of Brahmins [priests], rich in austerities [tapodhanāḥ], gathered there," |
+| `Line 46267: चातुर्मास्येनायजन्त आर्षेण विधिना तदा ||१४||` | "They performed sacrifices during the four-month period [Chāturmāsya] according to the ancient sage traditions [ārṣa vidhina]. ||14||" |
+| `Line 46268: ` | "[Blank line]" |
+| `Line 46269: तत्र विद्यातपोनित्या ब्राह्मणा वेदपारगाः |` | "There, Brahmins devoted to knowledge and austerities, masters of the Vedas [vedapāragāḥ]," |
+| `Line 46270: कथाः प्रचक्रिरे पुण्याः सदसिस्था महात्मनाम् ||१५||` | "Seated in the assembly [sadasi], narrated sacred stories of great souls [mahātmanas]. ||15||" |
+| `Line 46271: ` | "[Blank line]" |
+| `Line 46272: तत्र विद्याव्रतस्नातः कौमारं व्रतमास्थितः |` | "There, one who had completed his education vows [vidyāvrata] and was observing the vow of celibacy [kaumāram]," |
+| `Line 46273: शमठोऽकथयद्राजन्नामूर्तरयसं गयम् ||१६||` | "Śamaṭha narrated, O king, about Gaya, the son of Amūrtarayas. ||16||" |
+| `Line 46274: ` | "[Blank line]" |
+| `Line 46275: अमूर्तरयसः पुत्रो गयो राजर्षिसत्तमः |` | "Gaya, son of Amūrtarayas, was the foremost of royal sages [rājarṣi]," |
+| `Line 46276: पुण्यानि यस्य कर्माणि तानि मे शृणु भारत ||१७||` | "Listen to me, O Bhārata [Yudhiṣṭhira], about his virtuous deeds. ||17||" |
+| `Line 46277: ` | "[Blank line]" |
+| `Line 46278: यस्य यज्ञो बभूवेह बह्वन्नो बहुदक्षिणः |` | "His sacrifice was abundant with food and generous in gifts [dakṣiṇa]," |
+| `Line 46279: यत्रान्नपर्वता राजञ्शतशोऽथ सहस्रशः ||१८||` | "Where mountains of food, O king, were piled by hundreds and thousands. ||18||" |
+| `Line 46280: ` | "[Blank line]" |
+| `Line 46281: घृतकुल्याश्च दध्नश्च नद्यो बहुशतास्तथा |` | "There were streams of ghee [clarified butter] and rivers of curd by the hundreds," |
+| `Line 46282: व्यञ्जनानां प्रवाहाश्च महार्हाणां सहस्रशः ||१९||` | "And thousands of flows of precious condiments [vyañjana]. ||19||" |
+| `Line 46283: ` | "[Blank line]" |
+| `Line 46284: अहन्यहनि चाप्येतद्याचतां सम्प्रदीयते |` | "Day after day, these were given to those who asked," |
+| `Line 46285: अन्यत्तु ब्राह्मणा राजन्भुञ्जतेऽन्नं सुसंस्कृतम् ||२०||` | "While elsewhere, O king, Brahmins ate well-prepared food. ||20||" |
+| `Line 46286: ` | "[Blank line]" |
+| `Line 46287: तत्र वै दक्षिणाकाले ब्रह्मघोषो दिवं गतः |` | "There, at the time of giving gifts [dakṣiṇā], the sound of Vedic chants [brahmaghośa] reached heaven," |
+| `Line 46288: न स्म प्रज्ञायते किञ्चिद्ब्रह्मशब्देन भारत ||२१||` | "Nothing else could be heard, O Bhārata, because of the sound of Vedic recitations. ||21||" |
+| `Line 46289: ` | "[Blank line]" |
+| `Line 46290: पुण्येन चरता राजन्भूर्दिशः खं नभस्तथा |` | "O king, the earth, directions, sky, and heavens were filled with sacred sounds," |

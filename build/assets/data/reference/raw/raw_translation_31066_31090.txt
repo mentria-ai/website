@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 31066: दुर्योधनस्य शान्त्यर्थमिति निश्चित्य भूमिपः |` | "Having decided thus for the pacification of Duryodhana [Kaurava prince], the king [bhūmipa]," |
+| `Line 31067: धृतराष्ट्रो महाराज प्राहिणोद्विदुराय वै ||४८||` | "Dhṛtarāṣṭra [blind king], O great king, sent for Vidura indeed. ||48||" |
+| `Line 31068: ` | "[Blank line]" |
+| `Line 31069: अपृष्ट्वा विदुरं ह्यस्य नासीत्कश्चिद्विनिश्चयः |` | "Without consulting Vidura [wise uncle], he could not make any decision," |
+| `Line 31070: द्यूतदोषांश्च जानन्स पुत्रस्नेहादकृष्यत ||४९||` | "And though knowing the evils of gambling [dyūta], he was drawn to it out of affection for his son. ||49||" |
+| `Line 31071: ` | "[Blank line]" |
+| `Line 31072: तच्छ्रुत्वा विदुरो धीमान्कलिद्वारमुपस्थितम् |` | "Hearing this, the wise Vidura, (seeing) the door of Kali [evil age] had arrived," |
+| `Line 31073: विनाशमुखमुत्पन्नं धृतराष्ट्रमुपाद्रवत् ||५०||` | "And destruction's face had appeared, hastened to Dhṛtarāṣṭra. ||50||" |
+| `Line 31074: ` | "[Blank line]" |
+| `Line 31075: सोऽभिगम्य महात्मानं भ्राता भ्रातरमग्रजम् |` | "He, approaching the noble one, brother to elder brother," |
+| `Line 31076: मूर्ध्ना प्रणम्य चरणाविदं वचनमब्रवीत् ||५१||` | "Bowing his head to his feet, spoke these words: ||51||" |
+| `Line 31077: ` | "[Blank line]" |
+| `Line 31078: नाभिनन्दामि ते राजन्व्यवसायमिमं प्रभो |` | "I do not approve of this undertaking of yours, O king, O lord," |
+| `Line 31079: पुत्रैर्भेदो यथा न स्याद्द्यूतहेतोस्तथा कुरु ||५२||` | "Act in such a way that there may not be a division among sons due to gambling. ||52||" |
+| `Line 31080: ` | "[Blank line]" |
+| `Line 31081: धृतराष्ट्र उवाच||` | "Dhṛtarāṣṭra said:" |
+| `Line 31082: ` | "[Blank line]" |
+| `Line 31083: क्षत्तः पुत्रेषु पुत्रैर्मे कलहो न भविष्यति |` | "O Kṣattā [Vidura's title], there will be no quarrel between my sons and my sons [Kauravas and Pandavas]," |
+| `Line 31084: दिवि देवाः प्रसादं नः करिष्यन्ति न संशयः ||५३||` | "The gods in heaven will bestow their grace upon us, there is no doubt. ||53||" |
+| `Line 31085: ` | "[Blank line]" |
+| `Line 31086: अशुभं वा शुभं वापि हितं वा यदि वाहितम् |` | "Whether inauspicious or auspicious, beneficial or harmful," |
+| `Line 31087: प्रवर्ततां सुहृद्द्यूतं दिष्टमेतन्न संशयः ||५४||` | "Let the friendly game proceed; this is destined, there is no doubt. ||54||" |
+| `Line 31088: ` | "[Blank line]" |
+| `Line 31089: मयि संनिहिते चैव भीष्मे च भरतर्षभे |` | "With me present and also Bhīṣma [Kuru elder], the bull among Bharatas," |
+| `Line 31090: अनयो दैवविहितो न कथञ्चिद्भविष्यति ||५५||` | "No impropriety ordained by fate will happen in any way. ||55||" |

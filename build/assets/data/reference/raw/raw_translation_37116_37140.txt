@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 37116: त्वमेव राजञ्जानासि श्रेयःकारणमेव च |` | "You alone, O king, know what causes welfare," |
+| `Line 37117: यत्रेच्छसि महाराज निवासं तत्र कुर्महे ||९||` | "Wherever you wish to dwell, O great king, there we shall make our abode. ||9||" |
+| `Line 37118: ` | "[Blank line]" |
+| `Line 37119: इदं द्वैतवनं नाम सरः पुण्यजनोचितम् |` | "This is the lake called Dvaitavana [dual forest], suitable for virtuous people," |
+| `Line 37120: बहुपुष्पफलं रम्यं नानाद्विजनिषेवितम् ||१०||` | "Abundant with flowers and fruits, delightful, frequented by various birds. ||10||" |
+| `Line 37121: ` | "[Blank line]" |
+| `Line 37122: अत्रेमा द्वादश समा विहरेमेति रोचये |` | "I suggest that we spend these twelve years here," |
+| `Line 37123: यदि तेऽनुमतं राजन्किं वान्यन्मन्यते भवान् ||११||` | "If you approve, O king, or what else does your majesty think? ||11||" |
+| `Line 37124: ` | "[Blank line]" |
+| `Line 37125: युधिष्ठिर उवाच||` | "Yudhiṣṭhira [eldest Pāṇḍava] said:" |
+| `Line 37126: ` | "[Blank line]" |
+| `Line 37127: ममाप्येतन्मतं पार्थ त्वया यत्समुदाहृतम् |` | "This opinion that you have expressed, O Pārtha [son of Pṛthā], is mine as well," |
+| `Line 37128: गच्छाम पुण्यं विख्यातं महद्द्वैतवनं सरः ||१२||` | "Let us go to the sacred, renowned, great lake of Dvaitavana. ||12||" |
+| `Line 37129: ` | "[Blank line]" |
+| `Line 37130: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 37131: ` | "[Blank line]" |
+| `Line 37132: ततस्ते प्रययुः सर्वे पाण्डवा धर्मचारिणः |` | "Then all those Pāṇḍavas [sons of Pāṇḍu], followers of dharma, proceeded," |
+| `Line 37133: ब्राह्मणैर्बहुभिः सार्धं पुण्यं द्वैतवनं सरः ||१३||` | "Along with many Brahmins, to the sacred lake of Dvaitavana. ||13||" |
+| `Line 37134: ` | "[Blank line]" |
+| `Line 37135: ब्राह्मणाः साग्निहोत्राश्च तथैव च निरग्नयः |` | "Brahmins who maintained the sacred fire [agnihotra] and likewise those without fires," |
+| `Line 37136: स्वाध्यायिनो भिक्षवश्च सजपा वनवासिनः ||१४||` | "Those who studied the Vedas, mendicants, those engaged in prayers, and forest-dwellers. ||14||" |
+| `Line 37137: ` | "[Blank line]" |
+| `Line 37138: बहवो ब्राह्मणास्तत्र परिवव्रुर्युधिष्ठिरम् |` | "Many Brahmins there surrounded Yudhiṣṭhira," |
+| `Line 37139: तपस्विनः सत्यशीलाः शतशः संशितव्रताः ||१५||` | "Ascetics devoted to truth, hundreds of them, strict in their vows. ||15||" |
+| `Line 37140: ` | "[Blank line]" |

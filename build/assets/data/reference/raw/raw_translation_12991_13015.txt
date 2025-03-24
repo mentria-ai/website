@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 12991: ततस्तस्मिन्प्रतिज्ञाते भीष्मेण कुरुनन्दन |` | "Then, when this was promised by Bhīṣma [Ganga's son], O Kurunandana [joy of Kurus]," |
+| `Line 12992: कृष्णद्वैपायनं काली चिन्तयामास वै मुनिम् ||२१||` | "Kālī [dark-complexioned one] thought of the sage Kṛṣṇa Dvaipāyana [island-born]. ||21||" |
+| `Line 12993: ` | "[Blank line]" |
+| `Line 12994: स वेदान्विब्रुवन्धीमान्मातुर्विज्ञाय चिन्तितम् |` | "That wise one, while expounding the Vedas, knowing his mother's thoughts," |
+| `Line 12995: प्रादुर्बभूवाविदितः क्षणेन कुरुनन्दन ||२२||` | "Appeared unexpectedly in an instant, O Kurunandana. ||22||" |
+| `Line 12996: ` | "[Blank line]" |
+| `Line 12997: तस्मै पूजां तदा दत्त्वा सुताय विधिपूर्वकम् |` | "Then having offered worship to her son according to proper ritual," |
+| `Line 12998: परिष्वज्य च बाहुभ्यां प्रस्नवैरभिषिच्य च ||२३||` | "And embracing him with her arms, and bathing him with her tears, ||23||" |
+| `Line 12999: ` | "[Blank line]" |
+| `Line 13000: मुमोच बाष्पं दाशेयी पुत्रं दृष्ट्वा चिरस्य तम् ||२३||` | "Dāśeyī [fisherman's daughter] shed tears seeing her son after a long time. ||23||" |
+| `Line 13001: ` | "[Blank line]" |
+| `Line 13002: तामद्भिः परिषिच्यार्तां महर्षिरभिवाद्य च |` | "The great sage, sprinkling her with water as she was distressed, and saluting her," |
+| `Line 13003: मातरं पूर्वजः पुत्रो व्यासो वचनमब्रवीत् ||२४||` | "Vyāsa [compiler], the firstborn son, spoke these words to his mother: ||24||" |
+| `Line 13004: ` | "[Blank line]" |
+| `Line 13005: भवत्या यदभिप्रेतं तदहं कर्तुमागतः |` | "I have come to do whatever is desired by you," |
+| `Line 13006: शाधि मां धर्मतत्त्वज्ञे करवाणि प्रियं तव ||२५||` | "Command me, O knower of dharma's [righteousness] essence, and I shall do what pleases you. ||25||" |
+| `Line 13007: ` | "[Blank line]" |
+| `Line 13008: तस्मै पूजां ततोऽकार्षीत्पुरोधाः परमर्षये |` | "Then the purohita [royal priest] performed worship for that supreme sage," |
+| `Line 13009: स च तां प्रतिजग्राह विधिवन्मन्त्रपूर्वकम् ||२६||` | "And he accepted it properly, with appropriate mantras [sacred verses]. ||26||" |
+| `Line 13010: ` | "[Blank line]" |
+| `Line 13011: तमासनगतं माता पृष्ट्वा कुशलमव्ययम् |` | "His mother, after asking him about his constant well-being as he sat on his seat," |
+| `Line 13012: सत्यवत्यभिवीक्ष्यैनमुवाचेदमनन्तरम् ||२७||` | "Satyavatī, looking at him, spoke these words immediately: ||27||" |
+| `Line 13013: ` | "[Blank line]" |
+| `Line 13014: मातापित्रोः प्रजायन्ते पुत्राः साधारणाः कवे |` | "O sage [kavi], sons are born as common to both mother and father," |
+| `Line 13015: तेषां पिता यथा स्वामी तथा माता न संशयः ||२८||` | "As the father is their master, so is the mother, without doubt. ||28||" |

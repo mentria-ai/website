@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 43566: ` | "[Blank line]" |
+| `Line 43567: ` | "[Blank line]" |
+| `Line 43568: ` | "[Blank line]" |
+| `Line 43569: ` | "[Blank line]" |
+| `Line 43570: तीर्थयात्रापर्व` | "Tīrthayātrāparva [Pilgrimage chapter]" |
+| `Line 43571: ८०` | "80 [chapter number]" |
+| `Line 43572: ` | "[Blank line]" |
+| `Line 43573: ` | "[Blank line]" |
+| `Line 43574: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 43575: ` | "[Blank line]" |
+| `Line 43576: धनञ्जयोत्सुकास्ते तु वने तस्मिन्महारथाः |` | "Eager to see Dhanañjaya [Arjuna], those great chariot-warriors," |
+| `Line 43577: न्यवसन्त महाभागा द्रौपद्या सह पाण्डवाः ||१||` | "The illustrious Pāṇḍavas lived in that forest together with Draupadī. ||1||" |
+| `Line 43578: ` | "[Blank line]" |
+| `Line 43579: अथापश्यन्महात्मानं देवर्षिं तत्र नारदम् |` | "Then they saw there the great-souled divine sage Nārada [celestial sage]," |
+| `Line 43580: दीप्यमानं श्रिया ब्राह्म्या दीप्ताग्निसमतेजसम् ||२||` | "Shining with divine splendor, with radiance equal to blazing fire. ||2||" |
+| `Line 43581: ` | "[Blank line]" |
+| `Line 43582: स तैः परिवृतः श्रीमान्भ्रातृभिः कुरुसत्तमः |` | "That splendid best of Kurus [Yudhishthira], surrounded by his brothers," |
+| `Line 43583: विबभावतिदीप्तौजा देवैरिव शतक्रतुः ||३||` | "Shone with great brilliance like Śatakratu [Indra] among the gods. ||3||" |
+| `Line 43584: ` | "[Blank line]" |
+| `Line 43585: यथा च वेदान्सावित्री याज्ञसेनी तथा सती |` | "And just as Sāvitrī [Vedic verse] is to the Vedas, so was the virtuous Yājñasenī [Draupadī]," |
+| `Line 43586: न जहौ धर्मतः पार्थान्मेरुमर्कप्रभा यथा ||४||` | "She did not leave the Pārthas [Pāṇḍavas] out of righteousness, just as sunlight does not leave Mount Meru. ||4||" |
+| `Line 43587: ` | "[Blank line]" |
+| `Line 43588: प्रतिगृह्य तु तां पूजां नारदो भगवानृषिः |` | "Having accepted their worship, the divine sage Nārada," |
+| `Line 43589: आश्वासयद्धर्मसुतं युक्तरूपमिवानघ ||५||` | "Comforted Dharma's son [Yudhishthira] appropriately, O sinless one. ||5||" |
+| `Line 43590: ` | "[Blank line]" |

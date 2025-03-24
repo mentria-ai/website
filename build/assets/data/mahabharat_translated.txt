@@ -1,0 +1,172 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1: ` | [Blank line] |
+| `Line 2: ||१ महाभारते आदिपर्वम् ||` | "||1 The Ādi Parva [First Book] of the Mahābhārata [Great Epic of Bhārata]||" |
+| `Line 3: ` | [Blank line] |
+| `Line 4: ` | [Blank line] |
+| `Line 5: अनुक्रमणीपर्व` | "Anukramaṇī Parva [Table of Contents Section]" |
+| `Line 6: १` | "1" |
+| `Line 7: ` | [Blank line] |
+| `Line 8: ` | [Blank line] |
+| `Line 9: नारायणं नमस्कृत्य नरं चैव नरोत्तमम् |` | "Having bowed to Nārāyaṇa [Supreme Lord] and also to Nara [primeval man], the best among men," |
+| `Line 10: देवीं सरस्वतीं चैव ततो जयमुदीरयेत् ||०||` | "And to the goddess Sarasvatī [learning deity], thereafter one should proclaim Jaya [Victory epic]. ||0||" |
+| `Line 11: ` | "[Blank line]" |
+| `Line 12: लोमहर्षणपुत्र उग्रश्रवाः सूतः पौराणिको नैमिषारण्ये शौनकस्य कुलपतेर्द्वादशवार्षिके सत्रे | ००१ |` | "Ugraśravās, the son of Lomaharṣaṇa, a sūta [bard-chronicler] and paurāṇika [reciter of ancient tales], approached the twelve-year sacrificial session of Śaunaka, the kulapati [head of school], in the Naimiṣa forest. |001|" |
+| `Line 13: ` | "[Blank line]" |
+| `Line 14: समासीनानभ्यगच्छद्ब्रह्मर्षीन्संशितव्रतान् |` | "He approached the brahmarṣis [sage-seers] of rigid vows who were seated together," |
+| `Line 15: विनयावनतो भूत्वा कदाचित्सूतनन्दनः ||२||` | "The son of the sūta, having bowed with humility, at one time. ||2||" |
+| `Line 16: ` | "[Blank line]" |
+| `Line 17: तमाश्रममनुप्राप्तं नैमिषारण्यवासिनः |` | "The dwellers of the Naimiṣa forest, upon his arrival at that āśrama [hermitage]," |
+| `Line 18: चित्राः श्रोतुं कथास्तत्र परिवव्रुस्तपस्विनः ||३||` | "The ascetics surrounded him there to hear wonderful stories. ||3||" |
+| `Line 19: ` | "[Blank line]" |
+| `Line 20: अभिवाद्य मुनींस्तांस्तु सर्वानेव कृताञ्जलिः |` | "Having saluted all those munis [sages], with folded hands," |
+| `Line 21: अपृच्छत्स तपोवृद्धिं सद्भिश्चैवाभिनन्दितः ||४||` | "He inquired about the progress of their austerities, being welcomed by those virtuous ones. ||4||" |
+| `Line 22: ` | "[Blank line]" |
+| `Line 23: अथ तेषूपविष्टेषु सर्वेष्वेव तपस्विषु |` | "Then, when all those ascetics were seated," |
+| `Line 24: निर्दिष्टमासनं भेजे विनयाल्लोमहर्षणिः ||५||` | "The son of Lomaharṣaṇa humbly took the seat assigned to him. ||5||" |
+| `Line 25: ` | "[Blank line]" |
+| `Line 26: सुखासीनं ततस्तं तु विश्रान्तमुपलक्ष्य च |` | "Then, observing him comfortably seated and rested," |
+| `Line 27: अथापृच्छदृषिस्तत्र कश्चित्प्रस्तावयन्कथाः ||६||` | "A certain ṛṣi [sage] there asked him, introducing topics of conversation. ||6||" |
+| `Line 28: ` | "[Blank line]" |
+| `Line 29: कुत आगम्यते सौते क्व चायं विहृतस्त्वया |` | "From where do you come, O Sūta [bard-chronicler], and where have you spent this time," |
+| `Line 30: कालः कमलपत्राक्ष शंसैतत्पृच्छतो मम ||७||` | "O lotus-eyed one? Tell this to me who asks. ||7||" |
+| `Line 31: ` | "[Blank line]" |
+| `Line 32: सूत उवाच||` | "Sūta [bard-chronicler] said:" |
+| `Line 33: ` | "[Blank line]" |
+| `Line 34: जनमेजयस्य राजर्षेः सर्पसत्रे महात्मनः |` | "At the snake sacrifice of Janamejaya, the royal sage [rājarṣi] of great soul," |
+| `Line 35: समीपे पार्थिवेन्द्रस्य सम्यक्पारिक्षितस्य च ||८||` | "In the presence of that lord of the earth, the worthy son of Parīkṣit. ||8||" |
+| `Line 36: ` | "[Blank line]" |
+| `Line 37: कृष्णद्वैपायनप्रोक्ताः सुपुण्या विविधाः कथाः |` | "The various most sacred stories narrated by Kṛṣṇa Dvaipāyana [Vyāsa]," |
+| `Line 38: कथिताश्चापि विधिवद्या वैशम्पायनेन वै ||९||` | "And which were properly recounted by Vaiśampāyana indeed. ||9||" |
+| `Line 39: ` | "[Blank line]" |
+| `Line 40: श्रुत्वाहं ता विचित्रार्था महाभारतसंश्रिताः |` | "Having heard those wonderful stories contained in the Mahābhārata [Great Epic]," |
+| `Line 41: बहूनि सम्परिक्रम्य तीर्थान्यायतनानि च ||१०||` | "Having visited many tīrthas [sacred waters] and āyatanas [temples], ||10||" |
+| `Line 42: ` | "[Blank line]" |
+| `Line 43: समन्तपञ्चकं नाम पुण्यं द्विजनिषेवितम् |` | "I went to that holy place called Samantapañcaka [Five Lakes region], frequented by the twice-born [Brahmins]," |
+| `Line 44: गतवानस्मि तं देशं युद्धं यत्राभवत्पुरा ||११||` | "I have gone to that land where the battle took place in ancient times, ||11||" |
+| `Line 45: ` | "[Blank line]" |
+| `Line 46: पाण्डवानां कुरूणां च सर्वेषां च महीक्षिताम् ||११||` | "Between the Pāṇḍavas and the Kurus, and all the rulers of the earth. ||11||" |
+| `Line 47: ` | "[Blank line]" |
+| `Line 48: दिदृक्षुरागतस्तस्मात्समीपं भवतामिह |` | "Desiring to see you, I have come here from there into your presence," |
+| `Line 49: आयुष्मन्तः सर्व एव ब्रह्मभूता हि मे मताः ||१२||` | "Long-lived ones, all of you are indeed, in my opinion, embodiments of Brahman [divine essence]. ||12||" |
+| `Line 50: ` | "[Blank line]" |
+| `Line 51: अस्मिन्यज्ञे महाभागाः सूर्यपावकवर्चसः |` | "In this sacrifice, O fortunate ones, who are radiant like the sun and fire," |
+| `Line 52: कृताभिषेकाः शुचयः कृतजप्या हुताग्नयः ||१३||` | "Who have performed ritual baths, are pure, have completed prayers, and made fire offerings. ||13||" |
+| `Line 53: ` | "[Blank line]" |
+| `Line 54: भवन्त आसते स्वस्था ब्रवीमि किमहं द्विजाः ||१३||` | "You all are seated comfortably; what shall I narrate, O twice-born [Brahmins]? ||13||" |
+| `Line 55: ` | "[Blank line]" |
+| `Line 56: पुराणसंश्रिताः पुण्याः कथा वा धर्मसंश्रिताः |` | "Sacred stories contained in the Purāṇas [ancient texts], or tales pertaining to dharma [righteousness]," |
+| `Line 57: इतिवृत्तं नरेन्द्राणामृषीणां च महात्मनाम् ||१४||` | "Or the histories of kings and great-souled ṛṣis [sages]? ||14||" |
+| `Line 58: ` | "[Blank line]" |
+| `Line 59: ऋषय ऊचुः||` | "The Ṛṣis [sages] said:" |
+| `Line 60: ` | "[Blank line]" |
+| `Line 61: द्वैपायनेन यत्प्रोक्तं पुराणं परमर्षिणा |` | "That Purāṇa [ancient text] which was narrated by Dvaipāyana [Vyāsa], the supreme sage [paramarṣi]," |
+| `Line 62: सुरैर्ब्रह्मर्षिभिश्चैव श्रुत्वा यदभिपूजितम् ||१५||` | "And which, having been heard, was revered by the gods and the brahmarṣis [divine sages]. ||15||" |
+| `Line 63: ` | "[Blank line]" |
+| `Line 64: तस्याख्यानवरिष्ठस्य विचित्रपदपर्वणः |` | "Of that most excellent narrative with its wonderful sections and chapters," |
+| `Line 65: सूक्ष्मार्थन्याययुक्तस्य वेदार्थैर्भूषितस्य च ||१६||` | "Endowed with subtle meanings and logic, and adorned with the essence of the Vedas. ||16||" |
+| `Line 66: ` | "[Blank line]" |
+| `Line 67: भारतस्येतिहासस्य पुण्यां ग्रन्थार्थसंयुताम् |` | "Of the Bhārata [epic], the sacred history, complete with its textual meaning," |
+| `Line 68: संस्कारोपगतां ब्राह्मीं नानाशास्त्रोपबृंहिताम् ||१७||` | "Refined in composition, divine [brāhmī], and enriched with various śāstras [sacred treatises]. ||17||" |
+| `Line 69: ` | "[Blank line]" |
+| `Line 70: जनमेजयस्य यां राज्ञो वैशम्पायन उक्तवान् |` | "Which Vaiśampāyana narrated to King Janamejaya," |
+| `Line 71: यथावत्स ऋषिस्तुष्ट्या सत्रे द्वैपायनाज्ञया ||१८||` | "That sage [Vaiśampāyana] narrated it properly with devotion at the sacrifice, by the command of Dvaipāyana [Vyāsa]. ||18||" |
+| `Line 72: ` | "[Blank line]" |
+| `Line 73: वेदैश्चतुर्भिः समितां व्यासस्याद्भुतकर्मणः |` | "That compilation, harmonized with the four Vedas, of Vyāsa of wonderful deeds," |
+| `Line 74: संहितां श्रोतुमिच्छामो धर्म्यां पापभयापहाम् ||१९||` | "That saṃhitā [compilation] we wish to hear, which is righteous and removes the fear of sin. ||19||" |
+| `Line 75: ` | "[Blank line]" |
+| `Line 76: सूत उवाच||` | "Sūta [bard-chronicler] said:" |
+| `Line 77: ` | "[Blank line]" |
+| `Line 78: आद्यं पुरुषमीशानं पुरुहूतं पुरुष्टुतम् |` | "The primeval Puruṣa [cosmic being], the Lord, invoked by many, praised by many," |
+| `Line 79: ऋतमेकाक्षरं ब्रह्म व्यक्ताव्यक्तं सनातनम् ||२०||` | "The cosmic order, the one-syllabled Brahman [absolute reality], manifest and unmanifest, eternal. ||20||" |
+| `Line 80: ` | "[Blank line]" |
+| `Line 81: असच्च सच्चैव च यद्विश्वं सदसतः परम् |` | "The universe which is both non-existence and existence, and which is beyond both existence and non-existence," |
+| `Line 82: परावराणां स्रष्टारं पुराणं परमव्ययम् ||२१||` | "The creator of the high and low, ancient [purāṇa], supreme and imperishable. ||21||" |
+| `Line 83: ` | "[Blank line]" |
+| `Line 84: मङ्गल्यं मङ्गलं विष्णुं वरेण्यमनघं शुचिम् |` | "The auspicious, blessed Viṣṇu [preserver deity], the most excellent, sinless, and pure," |
+| `Line 85: नमस्कृत्य हृषीकेशं चराचरगुरुं हरिम् ||२२||` | "Having bowed to Hṛṣīkeśa [lord of senses], the teacher of the moving and non-moving, Hari [remover of evil]. ||22||" |
+| `Line 86: ` | "[Blank line]" |
+| `Line 87: महर्षेः पूजितस्येह सर्वलोके महात्मनः |` | "Of the great sage [maharṣi] who is worshipped in this world, the great-souled one," |
+| `Line 88: प्रवक्ष्यामि मतं कृत्स्नं व्यासस्यामिततेजसः ||२३||` | "I shall proclaim the complete doctrine of Vyāsa [compiler] of immeasurable splendor. ||23||" |
+| `Line 89: ` | "[Blank line]" |
+| `Line 90: आचख्युः कवयः केचित्सम्प्रत्याचक्षते परे |` | "Some poets have narrated it, others are narrating it now," |
+| `Line 91: आख्यास्यन्ति तथैवान्ये इतिहासमिमं भुवि ||२४||` | "And others will narrate this itihāsa [historical epic] on earth in the future. ||24||" |
+| `Line 92: ` | "[Blank line]" |
+| `Line 93: इदं तु त्रिषु लोकेषु महज्ज्ञानं प्रतिष्ठितम् |` | "This great knowledge is established in the three worlds [triloka]," |
+| `Line 94: विस्तरैश्च समासैश्च धार्यते यद्द्विजातिभिः ||२५||` | "Which is preserved by the twice-born [Brahmins] in both elaborate and condensed forms. ||25||" |
+| `Line 95: ` | "[Blank line]" |
+| `Line 96: अलङ्कृतं शुभैः शब्दैः समयैर्दिव्यमानुषैः |` | "Adorned with auspicious words, with conventions both divine and human," |
+| `Line 97: छन्दोवृत्तैश्च विविधैरन्वितं विदुषां प्रियम् ||२६||` | "Composed in various meters and rhythms, beloved by the learned. ||26||" |
+| `Line 98: ` | "[Blank line]" |
+| `Line 99: निष्प्रभेऽस्मिन्निरालोके सर्वतस्तमसावृते |` | "When this world was without light, without illumination, covered in darkness on all sides," |
+| `Line 100: बृहदण्डमभूदेकं प्रजानां बीजमक्षयम् ||२७||` | "There was one great cosmic egg [Brahmāṇḍa], the imperishable seed of all beings. ||27||" |
+| `Line 101: ` | "[Blank line]" |
+| `Line 102: युगस्यादौ निमित्तं तन्महद्दिव्यं प्रचक्षते |` | "At the beginning of the yuga [cosmic age], they declare that great divine cause," |
+| `Line 103: यस्मिंस्तच्छ्रूयते सत्यं ज्योतिर्ब्रह्म सनातनम् ||२८||` | "In which is heard that truth, the luminous eternal Brahman [absolute reality]. ||28||" |
+| `Line 104: ` | "[Blank line]" |
+| `Line 105: अद्भुतं चाप्यचिन्त्यं च सर्वत्र समतां गतम् |` | "Wonderful and inconceivable, having reached equality everywhere," |
+| `Line 106: अव्यक्तं कारणं सूक्ष्मं यत्तत्सदसदात्मकम् ||२९||` | "Unmanifest, the subtle cause, which is of the nature of both existence and non-existence. ||29||" |
+| `Line 107: ` | "[Blank line]" |
+| `Line 108: यस्मात्पितामहो जज्ञे प्रभुरेकः प्रजापतिः |` | "From which was born Pitāmaha [Grandfather Brahmā], the one lord, Prajāpati [lord of creatures]," |
+| `Line 109: ब्रह्मा सुरगुरुः स्थाणुर्मनुः कः परमेष्ठ्यथ ||३०||` | "Brahmā [creator], Suraguru [teacher of gods], Sthāṇu [immovable Śiva], Manu [progenitor], Ka [Prajāpati], and then Parameṣṭhī [supreme being]. ||30||" |
+| `Line 110: ` | "[Blank line]" |
+| `Line 111: प्राचेतसस्तथा दक्षो दक्षपुत्राश्च सप्त ये |` | "Prācetasa [son of Pracetas], and Dakṣa [creator deity], and the seven sons of Dakṣa," |
+| `Line 112: ततः प्रजानां पतयः प्राभवन्नेकविंशतिः ||३१||` | "Then from them arose twenty-one Prajāpatis [lords of creatures]. ||31||" |
+| `Line 113: ` | "[Blank line]" |
+| `Line 114: पुरुषश्चाप्रमेयात्मा यं सर्वमृषयो विदुः |` | "And the Puruṣa [cosmic being] of immeasurable nature, whom all the sages know," |
+| `Line 115: विश्वेदेवास्तथादित्या वसवोऽथाश्विनावपि ||३२||` | "The Viśvedevas [universal gods], the Ādityas [solar deities], the Vasus [elemental gods], and also the two Aśvins [divine physicians]. ||32||" |
+| `Line 116: ` | "[Blank line]" |
+| `Line 117: यक्षाः साध्याः पिशाचाश्च गुह्यकाः पितरस्तथा |` | "The Yakṣas [wealth-keepers], Sādhyas [celestial beings], Piśācas [flesh-eaters], Guhyakas [hidden beings], and also the Pitṛs [ancestors]," |
+| `Line 118: ततः प्रसूता विद्वांसः शिष्टा ब्रह्मर्षयोऽमलाः ||३३||` | "Then were born the learned ones, the distinguished and pure Brahmarṣis [divine sages]. ||33||" |
+| `Line 119: ` | "[Blank line]" |
+| `Line 120: राजर्षयश्च बहवः सर्वैः समुदिता गुणैः |` | "And many Rājarṣis [royal sages] endowed with all virtues," |
+| `Line 121: आपो द्यौः पृथिवी वायुरन्तरिक्षं दिशस्तथा ||३४||` | "Water, heaven, earth, air, the atmosphere, and the directions [cardinal points]. ||34||" |
+| `Line 122: ` | "[Blank line]" |
+| `Line 123: संवत्सरर्तवो मासाः पक्षाहोरात्रयः क्रमात् |` | "The year, seasons, months, fortnights [pakṣa], days and nights in sequence," |
+| `Line 124: यच्चान्यदपि तत्सर्वं सम्भूतं लोकसाक्षिकम् ||३५||` | "And whatever else exists, all that has come into being with the world as witness. ||35||" |
+| `Line 125: ` | "[Blank line]" |
+| `Line 126: यदिदं दृश्यते किञ्चिद्भूतं स्थावरजङ्गमम् |` | "Whatever is seen here, all beings, both immovable [sthāvara] and movable [jaṅgama]," |
+| `Line 127: पुनः सङ्क्षिप्यते सर्वं जगत्प्राप्ते युगक्षये ||३६||` | "All is withdrawn again when the world reaches the end of the yuga [cosmic age]. ||36||" |
+| `Line 128: ` | "[Blank line]" |
+| `Line 129: यथर्तावृतुलिङ्गानि नानारूपाणि पर्यये |` | "Just as the characteristics of seasons appear in various forms in their cycle," |
+| `Line 130: दृश्यन्ते तानि तान्येव तथा भावा युगादिषु ||३७||` | "Those very same forms are seen, so too are beings at the beginning of yugas [cosmic ages]. ||37||" |
+| `Line 131: ` | "[Blank line]" |
+| `Line 132: एवमेतदनाद्यन्तं भूतसंहारकारकम् |` | "Thus this wheel without beginning or end, causing the dissolution of beings," |
+| `Line 133: अनादिनिधनं लोके चक्रं सम्परिवर्तते ||३८||` | "Without beginning or end, revolves in the world as a wheel [of time]. ||38||" |
+| `Line 134: ` | "[Blank line]" |
+| `Line 135: त्रयस्त्रिंशत्सहस्राणि त्रयस्त्रिंशच्छतानि च |` | "Thirty-three thousand, thirty-three hundred," |
+| `Line 136: त्रयस्त्रिंशच्च देवानां सृष्टिः सङ्क्षेपलक्षणा ||३९||` | "And thirty-three - this is the creation of the gods [devas] described in brief. ||39||" |
+| `Line 137: ` | "[Blank line]" |
+| `Line 138: दिवस्पुत्रो बृहद्भानुश्चक्षुरात्मा विभावसुः |` | "The son of heaven [Diva], Bṛhadbhānu [great light], Cakṣurātmā [eye-soul], Vibhāvasu [radiant one]," |
+| `Line 139: सविता च ऋचीकोऽर्को भानुराशावहो रविः ||४०||` | "Savitā [stimulator], Ṛcīka, Arka [sun], Bhānu [light], Āśāvaha [hope-bearer], and Ravi [sun] ||40||" |
+| `Line 140: ` | "[Blank line]" |
+| `Line 141: पुत्रा विवस्वतः सर्वे मह्यस्तेषां तथावरः |` | "All are sons of Vivasvat [sun deity], and Mahya is the youngest among them," |
+| `Line 142: देवभ्राट्तनयस्तस्य तस्मात्सुभ्राडिति स्मृतः ||४१||` | "His son is Devabhrāṭ [divine light], who is therefore remembered as Subhrāḍ [well-shining]. ||41||" |
+| `Line 143: ` | "[Blank line]" |
+| `Line 144: सुभ्राजस्तु त्रयः पुत्राः प्रजावन्तो बहुश्रुताः |` | "Subhrāja [well-shining one] has three sons, prolific and highly learned," |
+| `Line 145: दशज्योतिः शतज्योतिः सहस्रज्योतिरात्मवान् ||४२||` | "Daśajyoti [ten-lights], Śatajyoti [hundred-lights], and the noble Sahasrajyoti [thousand-lights]. ||42||" |
+| `Line 146: ` | "[Blank line]" |
+| `Line 147: दश पुत्रसहस्राणि दशज्योतेर्महात्मनः |` | "Ten thousand sons were born to the great-souled Daśajyoti," |
+| `Line 148: ततो दशगुणाश्चान्ये शतज्योतेरिहात्मजाः ||४३||` | "And ten times that number were the sons of Śatajyoti here. ||43||" |
+| `Line 149: ` | "[Blank line]" |
+| `Line 150: भूयस्ततो दशगुणाः सहस्रज्योतिषः सुताः |` | "And ten times more numerous were the sons of Sahasrajyoti," |
+| `Line 151: तेभ्योऽयं कुरुवंशश्च यदूनां भरतस्य च ||४४||` | "From them arose this lineage of the Kurus, of the Yadus [Krishna's clan], and of Bharata [legendary king]. ||44||" |
+| `Line 152: ` | "[Blank line]" |
+| `Line 153: ययातीक्ष्वाकुवंशश्च राजर्षीणां च सर्वशः |` | "And the lineages of Yayāti [ancient king], Ikṣvāku [solar dynasty founder], and of all the royal sages completely," |
+| `Line 154: सम्भूता बहवो वंशा भूतसर्गाः सविस्तराः ||४५||` | "Many lineages arose, creations of beings in great detail. ||45||" |
+| `Line 155: ` | "[Blank line]" |
+| `Line 156: भूतस्थानानि सर्वाणि रहस्यं त्रिविधं च यत् |` | "All the abodes of beings, and that which is the threefold mystery [secret knowledge]," |
+| `Line 157: वेदयोगं सविज्ञानं धर्मोऽर्थः काम एव च ||४६||` | "The Vedic discipline with its knowledge, dharma [righteousness], artha [wealth], and kāma [pleasure] as well. ||46||" |
+| `Line 158: ` | "[Blank line]" |
+| `Line 159: धर्मकामार्थशास्त्राणि शास्त्राणि विविधानि च |` | "The treatises on dharma, kāma, and artha, and various other treatises," |
+| `Line 160: लोकयात्राविधानं च सम्भूतं दृष्टवानृषिः ||४७||` | "And the regulations for worldly conduct - the sage [ṛṣi] saw all these come into being. ||47||" |
+| `Line 161: ` | "[Blank line]" |
+| `Line 162: इतिहासाः सवैयाख्या विविधाः श्रुतयोऽपि च |` | "The Itihāsas [historical texts] with their explanations, various Śrutis [revealed texts] as well," |
+| `Line 163: इह सर्वमनुक्रान्तमुक्तं ग्रन्थस्य लक्षणम् ||४८||` | "Here everything has been enumerated, and the characteristics of the text have been stated. ||48||" |
+| `Line 164: ` | "[Blank line]" |
+| `Line 165: विस्तीर्यैतन्महज्ज्ञानमृषिः सङ्क्षेपमब्रवीत् |` | "Having expanded this great knowledge, the sage [ṛṣi] spoke it in condensed form," |
+| `Line 166: इष्टं हि विदुषां लोके समासव्यासधारणम् ||४९||` | "For in the world of the learned, the retention of both concise and elaborate forms is desired. ||49||" |
+| `Line 167: ` | "[Blank line]" |
+| `Line 168: मन्वादि भारतं केचिदास्तीकादि तथापरे |` | "Some study the Bhārata [epic] beginning with Manu [first man], others beginning with Āstīka [serpent sacrifice story]," |
+| `Line 169: तथोपरिचराद्यन्ये विप्राः सम्यगधीयते ||५०||` | "And other Brahmins [learned priests] properly study it beginning with Uparicara [celestial king]. ||50||" |
+| `Line 170: ` | "[Blank line]" |

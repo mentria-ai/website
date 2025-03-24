@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 26391: भर्तुः कुप्यन्ति दौर्गत्यात्सोऽनर्थः सुमहान्स्मृतः ||३९||` | "Wives become angry at their husbands due to poverty—this is considered a great calamity. ||39||" |
+| `Line 26392: ` | "[Blank line]" |
+| `Line 26393: कच्चित्सर्वेऽनुरक्तास्त्वां कुलपुत्राः प्रधानतः |` | "Are all the sons of noble families [kulaputra] devoted to you, especially the prominent ones?" |
+| `Line 26394: कच्चित्प्राणांस्तवार्थेषु सन्त्यजन्ति सदा युधि ||४०||` | "Do they always sacrifice their lives for your cause in battle? ||40||" |
+| `Line 26395: ` | "[Blank line]" |
+| `Line 26396: कच्चिन्नैको बहूनर्थान्सर्वशः साम्परायिकान् |` | "Do you alone not administer many matters, especially those related to war [sāmparāyika]," |
+| `Line 26397: अनुशास्सि यथाकामं कामात्मा शासनातिगः ||४१||` | "According to your whims, being self-indulgent [kāmātmā] and disregarding proper governance? ||41||" |
+| `Line 26398: ` | "[Blank line]" |
+| `Line 26399: कच्चित्पुरुषकारेण पुरुषः कर्म शोभयन् |` | "Does a man who enhances his work through personal effort [puruṣakāra]," |
+| `Line 26400: लभते मानमधिकं भूयो वा भक्तवेतनम् ||४२||` | "Receive greater honor or increased wages for his loyalty? ||42||" |
+| `Line 26401: ` | "[Blank line]" |
+| `Line 26402: कच्चिद्विद्याविनीतांश्च नराञ्ज्ञानविशारदान् |` | "Do you approach men who are disciplined in learning and skilled in knowledge," |
+| `Line 26403: यथार्हं गुणतश्चैव दानेनाभ्यवपद्यसे ||४३||` | "With gifts according to their merit and qualities? ||43||" |
+| `Line 26404: ` | "[Blank line]" |
+| `Line 26405: कच्चिद्दारान्मनुष्याणां तवार्थे मृत्युमेयुषाम् |` | "Do you support the wives of men who have met death for your sake," |
+| `Line 26406: व्यसनं चाभ्युपेतानां बिभर्षि भरतर्षभ ||४४||` | "And those who have fallen into calamity, O bull among Bharatas [bharatarṣabha]? ||44||" |
+| `Line 26407: ` | "[Blank line]" |
+| `Line 26408: कच्चिद्भयादुपनतं क्लीबं वा रिपुमागतम् |` | "Do you protect like a son an enemy who has surrendered out of fear, or a coward [klība], or one defeated" |
+| `Line 26409: युद्धे वा विजितं पार्थ पुत्रवत्परिरक्षसि ||४५||` | "In battle, O Pārtha [Arjuna]? ||45||" |
+| `Line 26410: ` | "[Blank line]" |
+| `Line 26411: कच्चित्त्वमेव सर्वस्याः पृथिव्याः पृथिवीपते |` | "O lord of the earth [pṛthivīpati], are you to the entire earth" |
+| `Line 26412: समश्च नाभिशङ्क्यश्च यथा माता यथा पिता ||४६||` | "Both impartial and beyond suspicion, like a mother and father? ||46||" |
+| `Line 26413: ` | "[Blank line]" |
+| `Line 26414: कच्चिद्व्यसनिनं शत्रुं निशम्य भरतर्षभ |` | "Upon learning of an enemy in distress [vyasanin], O bull among Bharatas," |
+| `Line 26415: अभियासि जवेनैव समीक्ष्य त्रिविधं बलम् ||४७||` | "Do you swiftly march against him after assessing the three types of power [trividha bala]? ||47||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 26366: कच्चिदङ्गेषु निष्णातो ज्योतिषां प्रतिपादकः |` | "Is your astrologer well-versed in all branches [aṅga] and an expert in explaining celestial phenomena [jyotiṣa]?" |
+| `Line 26367: उत्पातेषु च सर्वेषु दैवज्ञः कुशलस्तव ||३१||` | "And is your soothsayer [daivajña] skilled in interpreting all omens and portents? ||31||" |
+| `Line 26368: ` | "[Blank line]" |
+| `Line 26369: कच्चिन्मुख्या महत्स्वेव मध्यमेषु च मध्यमाः |` | "Are your chief servants assigned to important tasks, the middling ones to moderate tasks," |
+| `Line 26370: जघन्याश्च जघन्येषु भृत्याः कर्मसु योजिताः ||३२||` | "And the lowest servants to minor tasks? ||32||" |
+| `Line 26371: ` | "[Blank line]" |
+| `Line 26372: अमात्यानुपधातीतान्पितृपैतामहाञ्शुचीन् |` | "Do you appoint ministers who are beyond reproach, whose fathers and forefathers were pure," |
+| `Line 26373: श्रेष्ठाञ्श्रेष्ठेषु कच्चित्त्वं नियोजयसि कर्मसु ||३३||` | "And do you assign the most excellent men to the most important duties? ||33||" |
+| `Line 26374: ` | "[Blank line]" |
+| `Line 26375: कच्चिन्नोग्रेण दण्डेन भृशमुद्वेजितप्रजाः |` | "Do your ministers govern your kingdom without terrifying the subjects with excessive punishment," |
+| `Line 26376: राष्ट्रं तवानुशासन्ति मन्त्रिणो भरतर्षभ ||३४||` | "O bull among Bharatas [Bharatarṣabha]? ||34||" |
+| `Line 26377: ` | "[Blank line]" |
+| `Line 26378: कच्चित्त्वां नावजानन्ति याजकाः पतितं यथा |` | "Do your priests not despise you as they would an outcast," |
+| `Line 26379: उग्रप्रतिग्रहीतारं कामयानमिव स्त्रियः ||३५||` | "Or as women would despise a lustful man who accepts terrible gifts? ||35||" |
+| `Line 26380: ` | "[Blank line]" |
+| `Line 26381: कच्चिद्धृष्टश्च शूरश्च मतिमान्धृतिमाञ्शुचिः |` | "Is your commander-in-chief bold, brave, intelligent, steadfast, pure," |
+| `Line 26382: कुलीनश्चानुरक्तश्च दक्षः सेनापतिस्तव ||३६||` | "Well-born, loyal, and competent? ||36||" |
+| `Line 26383: ` | "[Blank line]" |
+| `Line 26384: कच्चिद्बलस्य ते मुख्याः सर्वे युद्धविशारदाः |` | "Are all the chiefs of your army skilled in warfare," |
+| `Line 26385: दृष्टापदाना विक्रान्तास्त्वया सत्कृत्य मानिताः ||३७||` | "Of proven valor and prowess, and properly honored and respected by you? ||37||" |
+| `Line 26386: ` | "[Blank line]" |
+| `Line 26387: कच्चिद्बलस्य भक्तं च वेतनं च यथोचितम् |` | "Do you provide your army with food rations and appropriate wages," |
+| `Line 26388: सम्प्राप्तकालं दातव्यं ददासि न विकर्षसि ||३८||` | "Giving them at the proper time without delay? ||38||" |
+| `Line 26389: ` | "[Blank line]" |
+| `Line 26390: कालातिक्रमणाद्ध्येते भक्तवेतनयोर्भृताः |` | "For when there is delay in providing food and wages, these servants" |

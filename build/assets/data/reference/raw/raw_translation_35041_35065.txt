@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 35041: ` | "[Blank line]" |
+| `Line 35042: ` | "[Blank line]" |
+| `Line 35043: ` | "[Blank line]" |
+| `Line 35044: ८` | "8 [chapter number]" |
+| `Line 35045: ` | "[Blank line]" |
+| `Line 35046: ` | "[Blank line]" |
+| `Line 35047: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 35048: ` | "[Blank line]" |
+| `Line 35049: श्रुत्वा च विदुरं प्राप्तं राज्ञा च परिसान्त्वितम् |` | "Having heard that Vidura [wise minister] had arrived and was consoled by the king," |
+| `Line 35050: धृतराष्ट्रात्मजो राजा पर्यतप्यत दुर्मतिः ||१||` | "The king, son of Dhṛtarāṣṭra [blind king], the evil-minded one, was greatly distressed. ||1||" |
+| `Line 35051: ` | "[Blank line]" |
+| `Line 35052: स सौबलं समानाय्य कर्णदुःशासनावपि |` | "He summoned Saubala [Śakuni, son of Subala] and both Karṇa [great warrior] and Duḥśāsana [cruel brother]," |
+| `Line 35053: अब्रवीद्वचनं राजा प्रविश्याबुद्धिजं तमः ||२||` | "The king spoke these words, having entered the darkness born of ignorance. ||2||" |
+| `Line 35054: ` | "[Blank line]" |
+| `Line 35055: एष प्रत्यागतो मन्त्री धृतराष्ट्रस्य संमतः |` | "This minister, approved by Dhṛtarāṣṭra, has returned," |
+| `Line 35056: विदुरः पाण्डुपुत्राणां सुहृद्विद्वान्हिते रतः ||३||` | "Vidura, a friend of the sons of Pāṇḍu [Pāṇḍavas], learned and devoted to their welfare. ||3||" |
+| `Line 35057: ` | "[Blank line]" |
+| `Line 35058: यावदस्य पुनर्बुद्धिं विदुरो नापकर्षति |` | "Before Vidura again diverts his [Dhṛtarāṣṭra's] mind," |
+| `Line 35059: पाण्डवानयने तावन्मन्त्रयध्वं हितं मम ||४||` | "Counsel what is beneficial for me regarding the return of the Pāṇḍavas. ||4||" |
+| `Line 35060: ` | "[Blank line]" |
+| `Line 35061: अथ पश्याम्यहं पार्थान्प्राप्तानिह कथञ्चन |` | "If I somehow see the Pārthas [sons of Pṛthā] returned here," |
+| `Line 35062: पुनः शोषं गमिष्यामि निरासुर्निरवग्रहः ||५||` | "I shall wither away again, lifeless and unrestrained. ||5||" |
+| `Line 35063: ` | "[Blank line]" |
+| `Line 35064: विषमुद्बन्धनं वापि शस्त्रमग्निप्रवेशनम् |` | "Poison, hanging, weapons, or entering fire," |
+| `Line 35065: करिष्ये न हि तानृद्धान्पुनर्द्रष्टुमिहोत्सहे ||६||` | "I shall resort to, for I cannot bear to see them prosperous again. ||6||" |

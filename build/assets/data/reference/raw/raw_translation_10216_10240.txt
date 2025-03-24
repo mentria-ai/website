@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 10216: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 10217: ` | "[Blank line]" |
+| `Line 10218: श्रुत्वा कुमारं जातं तु देवयानी शुचिस्मिता |` | "Having heard that a son was born, Devayānī [daughter of Śukra], with a pure smile," |
+| `Line 10219: चिन्तयामास दुःखार्ता शर्मिष्ठां प्रति भारत ||१||` | "Thought anxiously, afflicted with sorrow, about Śarmiṣṭhā [princess of asuras], O Bhārata [Janamejaya]. ||1||" |
+| `Line 10220: ` | "[Blank line]" |
+| `Line 10221: अभिगम्य च शर्मिष्ठां देवयान्यब्रवीदिदम् |` | "And approaching Śarmiṣṭhā, Devayānī said this:" |
+| `Line 10222: किमिदं वृजिनं सुभ्रु कृतं ते कामलुब्धया ||२||` | "What is this sinful deed, O beautiful-browed one, that you have done, overcome by desire? ||2||" |
+| `Line 10223: ` | "[Blank line]" |
+| `Line 10224: शर्मिष्ठोवाच||` | "Śarmiṣṭhā said:" |
+| `Line 10225: ` | "[Blank line]" |
+| `Line 10226: ऋषिरभ्यागतः कश्चिद्धर्मात्मा वेदपारगः |` | "A certain sage [ṛṣi] came, righteous in nature, well-versed in the Vedas," |
+| `Line 10227: स मया वरदः कामं याचितो धर्मसंहितम् ||३||` | "He, being a bestower of boons, was requested by me for a desire in accordance with dharma [righteousness]. ||3||" |
+| `Line 10228: ` | "[Blank line]" |
+| `Line 10229: नाहमन्यायतः काममाचरामि शुचिस्मिते |` | "I did not pursue desire unjustly, O pure-smiling one," |
+| `Line 10230: तस्मादृषेर्ममापत्यमिति सत्यं ब्रवीमि ते ||४||` | "Therefore, I truthfully tell you that my child is from that sage. ||4||" |
+| `Line 10231: ` | "[Blank line]" |
+| `Line 10232: देवयान्युवाच||` | "Devayānī said:" |
+| `Line 10233: ` | "[Blank line]" |
+| `Line 10234: शोभनं भीरु सत्यं चेदथ स ज्ञायते द्विजः |` | "It is well, O timid one, if it is true. Now, is that twice-born [brāhmaṇa] known?" |
+| `Line 10235: गोत्रनामाभिजनतो वेत्तुमिच्छामि तं द्विजम् ||५||` | "I wish to know that twice-born by his lineage [gotra], name, and family. ||5||" |
+| `Line 10236: ` | "[Blank line]" |
+| `Line 10237: शर्मिष्ठोवाच||` | "Śarmiṣṭhā said:" |
+| `Line 10238: ` | "[Blank line]" |
+| `Line 10239: ओजसा तेजसा चैव दीप्यमानं रविं यथा |` | "Shining with vigor and splendor like the sun [ravi]," |
+| `Line 10240: तं दृष्ट्वा मम सम्प्रष्टुं शक्तिर्नासीच्छुचिस्मिते ||६||` | "Seeing him, I had no power to inquire, O pure-smiling one. ||6||" |

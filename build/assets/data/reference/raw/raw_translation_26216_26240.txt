@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 26216: यथासुरान्कालकेयान्देवो वज्रधरस्तथा ||२०||` | "Just as the god who wields the thunderbolt [Indra] (destroyed) the Kālakeya demons [Asura clan]. ||20||" |
+| `Line 26217: ` | "[Blank line]" |
+| `Line 26218: जटासुरो मद्रकान्तश्च राजा; कुन्तिः कुणिन्दश्च किरातराजः |` | "Jaṭāsura, the king of Madra region, Kunti, Kuṇiṇḍa, and the king of the Kirātas [mountain tribe]," |
+| `Line 26219: तथाङ्गवङ्गौ सह पुण्ड्रकेण; पाण्ड्योड्रराजौ सह चान्ध्रकेण ||२१||` | "Also Aṅga and Vaṅga [eastern kingdoms] with Puṇḍraka, the kings of Pāṇḍya and Oḍra with Andhraka. ||21||" |
+| `Line 26220: ` | "[Blank line]" |
+| `Line 26221: किरातराजः सुमना यवनाधिपतिस्तथा |` | "The king of Kirātas named Sumanā, and likewise the ruler of the Yavanas [western people]," |
+| `Line 26222: चाणूरो देवरातश्च भोजो भीमरथश्च यः ||२२||` | "Cāṇūra, Devarāta, Bhoja, and the one called Bhīmaratha. ||22||" |
+| `Line 26223: ` | "[Blank line]" |
+| `Line 26224: श्रुतायुधश्च कालिङ्गो जयत्सेनश्च मागधः |` | "Śrutāyudha of Kaliṅga [eastern kingdom], and Jayatsena of Magadha [central kingdom]," |
+| `Line 26225: सुशर्मा चेकितानश्च सुरथोऽमित्रकर्षणः ||२३||` | "Suśarmā, Cekitāna, and Suratha, the tormentor of enemies [amitrakarshaṇa]. ||23||" |
+| `Line 26226: ` | "[Blank line]" |
+| `Line 26227: केतुमान्वसुदानश्च वैदेहोऽथ कृतक्षणः |` | "Ketumān, Vasudāna, the king of Videha [eastern kingdom], and Kṛtakṣaṇa," |
+| `Line 26228: सुधर्मा चानिरुद्धश्च श्रुतायुश्च महाबलः ||२४||` | "Sudharmā, Aniruddha, and the mighty Śrutāyu. ||24||" |
+| `Line 26229: ` | "[Blank line]" |
+| `Line 26230: अनूपराजो दुर्धर्षः क्षेमजिच्च सुदक्षिणः |` | "The formidable king of Anūpa [marshy region], Kṣemajit, and Sudakṣiṇa," |
+| `Line 26231: शिशुपालः सहसुतः करूषाधिपतिस्तथा ||२५||` | "Śiśupāla with his son, and likewise the ruler of Karūṣa [central kingdom]. ||25||" |
+| `Line 26232: ` | "[Blank line]" |
+| `Line 26233: वृष्णीनां चैव दुर्धर्षाः कुमारा देवरूपिणः |` | "And the formidable princes of the Vṛṣṇis [Yādava clan], godlike in appearance," |
+| `Line 26234: आहुको विपृथुश्चैव गदः सारण एव च ||२६||` | "Āhuka, Vipṛthu, Gada, and Sāraṇa as well. ||26||" |
+| `Line 26235: ` | "[Blank line]" |
+| `Line 26236: अक्रूरः कृतवर्मा च सात्यकिश्च शिनेः सुतः |` | "Akrūra, Kṛtavarmā, and Sātyaki, the son of Śini," |
+| `Line 26237: भीष्मकोऽथाहृतिश्चैव द्युमत्सेनश्च वीर्यवान् ||२७||` | "Bhīṣmaka, Āhṛti, and the valiant Dyumatsena. ||27||" |
+| `Line 26238: ` | "[Blank line]" |
+| `Line 26239: केकयाश्च महेष्वासा यज्ञसेनश्च सौमकिः ||२७||` | "The Kekayas [northwestern tribe], great archers, and Yajñasena of the Somaka clan. ||27||" |
+| `Line 26240: ` | "[Blank line]" |

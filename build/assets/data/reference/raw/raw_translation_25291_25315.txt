@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 25291: ` | "[Blank line]" |
+| `Line 25292: ` | "[Blank line]" |
+| `Line 25293: शार्ंगकोपाख्यानम्` | "The Story of the Śārṅgaka [bird species]" |
+| `Line 25294: २२०` | "220 [chapter number]" |
+| `Line 25295: ` | "[Blank line]" |
+| `Line 25296: ` | "[Blank line]" |
+| `Line 25297: जनमेजय उवाच||` | "Janamejaya [Pāṇḍava descendant] said:" |
+| `Line 25298: ` | "[Blank line]" |
+| `Line 25299: किमर्थं शार्ङ्गकानग्निर्न ददाह तथागते |` | "For what reason did the fire not burn the Śārṅgakas when it approached" |
+| `Line 25300: तस्मिन्वने दह्यमाने ब्रह्मन्नेतद्वदाशु मे ||१||` | "That forest being consumed by fire? O Brahmin, tell me this quickly. ||1||" |
+| `Line 25301: ` | "[Blank line]" |
+| `Line 25302: अदाहे ह्यश्वसेनस्य दानवस्य मयस्य च |` | "For the non-burning of Aśvasena [serpent] and the Dānava [demon] Maya," |
+| `Line 25303: कारणं कीर्तितं ब्रह्मञ्शार्ङ्गकानां न कीर्तितम् ||२||` | "The reason has been told, O Brahmin, but for the Śārṅgakas it has not been explained. ||2||" |
+| `Line 25304: ` | "[Blank line]" |
+| `Line 25305: तदेतदद्भुतं ब्रह्मञ्शार्ङ्गानामविनाशनम् |` | "This is wonderful, O Brahmin, the non-destruction of the Śārṅgas," |
+| `Line 25306: कीर्तयस्वाग्निसंमर्दे कथं ते न विनाशिताः ||३||` | "Please narrate how they were not destroyed in the onslaught of fire. ||3||" |
+| `Line 25307: ` | "[Blank line]" |
+| `Line 25308: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 25309: ` | "[Blank line]" |
+| `Line 25310: यदर्थं शार्ङ्गकानग्निर्न ददाह तथागते |` | "The reason why the fire did not burn the Śārṅgakas when it approached," |
+| `Line 25311: तत्ते सर्वं यथावृत्तं कथयिष्यामि भारत ||४||` | "All that, as it happened, I shall narrate to you, O descendant of Bharata. ||4||" |
+| `Line 25312: ` | "[Blank line]" |
+| `Line 25313: धर्मज्ञानां मुख्यतमस्तपस्वी संशितव्रतः |` | "Foremost among the knowers of dharma, an ascetic of firm vows," |
+| `Line 25314: आसीन्महर्षिः श्रुतवान्मन्दपाल इति श्रुतः ||५||` | "There was a learned great sage known as Mandapāla [sage's name]. ||5||" |
+| `Line 25315: ` | "[Blank line]" |

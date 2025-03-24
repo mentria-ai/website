@@ -1,0 +1,7 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 5796: ` | "[Blank line]" |
+| `Line 5797: ` | "[Blank line]" |
+| `Line 5798: सूत उवाच||` | "Suta [bard narrator] said:" |
+| `Line 5799: ` | "[Blank line]" |
+| `Line 5800: एवमुक्त्वा ततः श्रीमान्मन्त्रिभिश्चानुमोदितः |` | "Having spoken thus, then the illustrious one [Janamejaya], approved by his ministers," |

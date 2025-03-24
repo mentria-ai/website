@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 15416: तस्याथ मिथुनं जज्ञे गौतमस्य शरद्वतः ||१३||` | "Then to him, Gautama Śaradvat, was born a pair of twins. ||13||" |
+| `Line 15417: ` | "[Blank line]" |
+| `Line 15418: मृगयां चरतो राज्ञः शन्तनोस्तु यदृच्छया |` | "While King Śantanu [Kuru dynasty king] was hunting by chance," |
+| `Line 15419: कश्चित्सेनाचरोऽरण्ये मिथुनं तदपश्यत ||१४||` | "A certain soldier saw that pair of twins in the forest. ||14||" |
+| `Line 15420: ` | "[Blank line]" |
+| `Line 15421: धनुश्च सशरं दृष्ट्वा तथा कृष्णाजिनानि च |` | "Seeing a bow with arrows and black antelope skins," |
+| `Line 15422: व्यवस्य ब्राह्मणापत्यं धनुर्वेदान्तगस्य तत् ||१५||` | "He determined them to be the offspring of a Brahmin versed in archery [dhanurveda]. ||15||" |
+| `Line 15423: ` | "[Blank line]" |
+| `Line 15424: स राज्ञे दर्शयामास मिथुनं सशरं तदा ||१५||` | "He then showed the twins along with the arrows to the king. ||15||" |
+| `Line 15425: ` | "[Blank line]" |
+| `Line 15426: स तदादाय मिथुनं राजाथ कृपयान्वितः |` | "Taking those twins, the king, filled with compassion [kṛpā]," |
+| `Line 15427: आजगाम गृहानेव मम पुत्राविति ब्रुवन् ||१६||` | "Returned to his home saying, 'These are my children.' ||16||" |
+| `Line 15428: ` | "[Blank line]" |
+| `Line 15429: ततः संवर्धयामास संस्कारैश्चाप्ययोजयत् |` | "Then he raised them and performed the proper sacraments [saṃskāra]," |
+| `Line 15430: गौतमोऽपि तदापेत्य धनुर्वेदपरोऽभवत् ||१७||` | "And Gautama, having returned then, became devoted to archery [dhanurveda]. ||17||" |
+| `Line 15431: ` | "[Blank line]" |
+| `Line 15432: कृपया यन्मया बालाविमौ संवर्धिताविति |` | "'Since these children were raised by me out of compassion [kṛpā],'" |
+| `Line 15433: तस्मात्तयोर्नाम चक्रे तदेव स महीपतिः ||१८||` | "Therefore the king gave them names based on that very word. ||18||" |
+| `Line 15434: ` | "[Blank line]" |
+| `Line 15435: निहितौ गौतमस्तत्र तपसा तावविन्दत |` | "Gautama found those two who had been left there through his austerities [tapas]," |
+| `Line 15436: आगम्य चास्मै गोत्रादि सर्वमाख्यातवांस्तदा ||१९||` | "And coming to him (the king), he then explained everything about their lineage [gotra] and so forth. ||19||" |
+| `Line 15437: ` | "[Blank line]" |
+| `Line 15438: चतुर्विधं धनुर्वेदमस्त्राणि विविधानि च |` | "The fourfold science of archery [dhanurveda] and various weapons," |
+| `Line 15439: निखिलेनास्य तत्सर्वं गुह्यमाख्यातवांस्तदा ||२०||` | "He then completely revealed all those secrets to him. ||20||" |
+| `Line 15440: ` | "[Blank line]" |

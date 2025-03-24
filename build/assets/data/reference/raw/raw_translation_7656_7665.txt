@@ -1,0 +1,12 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 7656: त्रयस्त्रिंशत इत्येते देवास्तेषामहं तव |` | "These are the thirty-three gods, and I shall now tell you" |
+| `Line 7657: अन्वयं सम्प्रवक्ष्यामि पक्षैश्च कुलतो गणान् ||३६||` | "their lineage, along with their groups classified by families and divisions. ||36||" |
+| `Line 7658: ` | "[Blank line]" |
+| `Line 7659: रुद्राणामपरः पक्षः साध्यानां मरुतां तथा |` | "Another division consists of the Rudras [storm deities], the Sādhyas [celestial beings], and the Maruts [wind-gods]," |
+| `Line 7660: वसूनां भार्गवं विद्याद्विश्वेदेवांस्तथैव च ||३७||` | "Know the Bhārgava [Bhṛgu's lineage] to be of the Vasus, and likewise the Viśvedevas [universal gods]. ||37||" |
+| `Line 7661: ` | "[Blank line]" |
+| `Line 7662: वैनतेयस्तु गरुडो बलवानरुणस्तथा |` | "Garuḍa, the son of Vinatā [Vainateya], the mighty one, and also Aruṇa," |
+| `Line 7663: बृहस्पतिश्च भगवानादित्येष्वेव गण्यते ||३८||` | "And the illustrious Bṛhaspati [preceptor of gods] are counted among the Ādityas [solar deities]. ||38||" |
+| `Line 7664: ` | "[Blank line]" |
+| `Line 7665: अश्विभ्यां गुह्यकान्विद्धि सर्वौषध्यस्तथा पशून् |` | "Know the Guhyakas [hidden beings] to be from the Aśvins [divine twins], as well as all medicinal herbs and animals." |

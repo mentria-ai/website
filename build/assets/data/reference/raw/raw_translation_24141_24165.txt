@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 24141: ` | "[Blank line]" |
+| `Line 24142: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 24143: ` | "[Blank line]" |
+| `Line 24144: ततः कतिपयाहस्य तस्मिन्रैवतके गिरौ |` | "Then, after a few days, on that Mount Raivataka [sacred mountain]," |
+| `Line 24145: वृष्ण्यन्धकानामभवत्सुमहानुत्सवो नृप ||१||` | "There was a great festival of the Vṛṣṇis and Andhakas [Yādava clans], O king. ||1||" |
+| `Line 24146: ` | "[Blank line]" |
+| `Line 24147: तत्र दानं ददुर्वीरा ब्राह्मणानां सहस्रशः |` | "There the heroes gave gifts to thousands of Brahmins [priest class]," |
+| `Line 24148: भोजवृष्ण्यन्धकाश्चैव महे तस्य गिरेस्तदा ||२||` | "The Bhojas, Vṛṣṇis, and Andhakas, during the festival of that mountain. ||2||" |
+| `Line 24149: ` | "[Blank line]" |
+| `Line 24150: प्रासादै रत्नचित्रैश्च गिरेस्तस्य समन्ततः |` | "With palaces adorned with jewels all around that mountain," |
+| `Line 24151: स देशः शोभितो राजन्दीपवृक्षैश्च सर्वशः ||३||` | "That place was beautified, O king, with lamp-trees [decorated trees] everywhere. ||3||" |
+| `Line 24152: ` | "[Blank line]" |
+| `Line 24153: वादित्राणि च तत्र स्म वादकाः समवादयन् |` | "And there the musicians played various musical instruments," |
+| `Line 24154: ननृतुर्नर्तकाश्चैव जगुर्गानानि गायनाः ||४||` | "Dancers danced, and singers sang songs. ||4||" |
+| `Line 24155: ` | "[Blank line]" |
+| `Line 24156: अलङ्कृताः कुमाराश्च वृष्णीनां सुमहौजसः |` | "And the adorned youths of the Vṛṣṇis, of great prowess," |
+| `Line 24157: यानैर्हाटकचित्राङ्गैश्चञ्चूर्यन्ते स्म सर्वशः ||५||` | "Moved about everywhere in vehicles with parts decorated with gold. ||5||" |
+| `Line 24158: ` | "[Blank line]" |
+| `Line 24159: पौराश्च पादचारेण यानैरुच्चावचैस्तथा |` | "And the citizens, some on foot, some in various vehicles," |
+| `Line 24160: सदाराः सानुयात्राश्च शतशोऽथ सहस्रशः ||६||` | "With their wives and attendants, by hundreds and thousands. ||6||" |
+| `Line 24161: ` | "[Blank line]" |
+| `Line 24162: ततो हलधरः क्षीबो रेवतीसहितः प्रभुः |` | "Then Haladhara [Balarāma] intoxicated, the lord, accompanied by Revatī [his wife]," |
+| `Line 24163: अनुगम्यमानो गन्धर्वैरचरत्तत्र भारत ||७||` | "Followed by Gandharvas [celestial musicians], wandered there, O Bhārata [Janamejaya]. ||7||" |
+| `Line 24164: ` | "[Blank line]" |
+| `Line 24165: तथैव राजा वृष्णीनामुग्रसेनः प्रतापवान् |` | "Likewise, the powerful king of the Vṛṣṇis, Ugrasena [Kaṃsa's father]," |

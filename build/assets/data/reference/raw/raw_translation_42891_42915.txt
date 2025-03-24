@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 42891: ` | "[Blank line]" |
+| `Line 42892: केशिन्युवाच॥` | "Keśinī [Damayantī's maid] said:" |
+| `Line 42893: ` | "[Blank line]" |
+| `Line 42894: योऽसावयोध्यां प्रथमं गतवान्ब्राह्मणस्तदा |` | "That brahmin who first went to Ayodhyā [ancient city] then," |
+| `Line 42895: इमानि नारीवाक्यानि कथयानः पुनः पुनः ॥१७॥` | "Repeatedly reciting these words of a woman. ||17||" |
+| `Line 42896: ` | "[Blank line]" |
+| `Line 42897: क्व नु त्वं कितव छित्त्वा वस्त्रार्धं प्रस्थितो मम |` | "'Where have you gone, you deceiver, after cutting half my garment and leaving me," |
+| `Line 42898: उत्सृज्य विपिने सुप्तामनुरक्तां प्रियां प्रिय ॥१८॥` | "Abandoning in the forest your sleeping, devoted, beloved wife, O beloved?' ||18||" |
+| `Line 42899: ` | "[Blank line]" |
+| `Line 42900: सा वै यथा समादिष्टा तत्रास्ते त्वत्प्रतीक्षिणी |` | "'She indeed, as instructed, remains there waiting for you," |
+| `Line 42901: दह्यमाना दिवारात्रं वस्त्रार्धेनाभिसंवृता ॥१९॥` | "Burning with grief day and night, covered only with half a garment.' ||19||" |
+| `Line 42902: ` | "[Blank line]" |
+| `Line 42903: तस्या रुदन्त्याः सततं तेन दुःखेन पार्थिव |` | "'To her who weeps constantly with that sorrow, O king [pārthiva]," |
+| `Line 42904: प्रसादं कुरु वै वीर प्रतिवाक्यं प्रयच्छ च ॥२०॥` | "Show mercy, O hero, and give a reply.' ||20||" |
+| `Line 42905: ` | "[Blank line]" |
+| `Line 42906: तस्यास्तत्प्रियमाख्यानं प्रब्रवीहि महामते |` | "Tell that beloved story to her, O wise one," |
+| `Line 42907: तदेव वाक्यं वैदर्भी श्रोतुमिच्छत्यनिन्दिता ॥२१॥` | "The blameless Vaidarbhī [Damayantī] wishes to hear those very words again. ||21||" |
+| `Line 42908: ` | "[Blank line]" |
+| `Line 42909: एतच्छ्रुत्वा प्रतिवचस्तस्य दत्तं त्वया किल |` | "Having heard this, the reply that was given by you indeed," |
+| `Line 42910: यत्पुरा तत्पुनस्त्वत्तो वैदर्भी श्रोतुमिच्छति ॥२२॥` | "What you said before, Vaidarbhī wishes to hear again from you. ||22||" |
+| `Line 42911: ` | "[Blank line]" |
+| `Line 42912: बृहदश्व उवाच॥` | "Bṛhadaśva [sage narrator] said:" |
+| `Line 42913: ` | "[Blank line]" |
+| `Line 42914: एवमुक्तस्य केशिन्या नलस्य कुरुनन्दन |` | "When thus addressed by Keśinī, O Kurunandana [Yudhiṣṭhira]," |
+| `Line 42915: हृदयं व्यथितं चासीदश्रुपूर्णे च लोचने ॥२३॥` | "Nala's heart was pained, and his eyes filled with tears. ||23||" |

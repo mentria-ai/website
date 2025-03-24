@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 48766: चुकोप भार्गवश्चापि महेन्द्रस्य महातपाः |` | "And the Bhārgava [descendant of Bhṛgu], of great austerity, became angry with Mahendra [great Indra]," |
+| `Line 48767: संस्तम्भयामास च तं वासवं च्यवनः प्रभुः ||२१||` | "And the powerful Cyavana paralyzed him, Vāsava [Indra]. ||21||" |
+| `Line 48768: ` | "[Blank line]" |
+| `Line 48769: सुकन्यां चापि भार्यां स राजपुत्रीमिवाप्तवान् ||२१||` | "And he obtained Sukanyā, a princess [king's daughter], as his wife. ||21||" |
+| `Line 48770: ` | "[Blank line]" |
+| `Line 48771: युधिष्ठिर उवाच||` | "Yudhiṣṭhira said:" |
+| `Line 48772: ` | "[Blank line]" |
+| `Line 48773: कथं विष्टम्भितस्तेन भगवान्पाकशासनः |` | "How was the lord Pākaśāsana [Indra, punisher of Pāka] paralyzed by him?" |
+| `Line 48774: किमर्थं भार्गवश्चापि कोपं चक्रे महातपाः ||२२||` | "And for what reason did the Bhārgava [descendant of Bhṛgu] of great austerity become angry? ||22||" |
+| `Line 48775: ` | "[Blank line]" |
+| `Line 48776: नासत्यौ च कथं ब्रह्मन्कृतवान्सोमपीथिनौ |` | "And how, O Brahman, did he make the Nāsatyas [Aśvins] Soma-drinkers [ritual participants]?" |
+| `Line 48777: एतत्सर्वं यथावृत्तमाख्यातु भगवान्मम ||२३||` | "Let the venerable one narrate to me all this exactly as it happened. ||23||" |
+| `Line 48778: ` | "[Blank line]" |
+| `Line 48779: ` | "[Blank line]" |
+| `Line 48780: ` | "[Blank line]" |
+| `Line 48781: ` | "[Blank line]" |
+| `Line 48782: सुकन्योपाख्यानम्` | "The Story of Sukanyā" |
+| `Line 48783: १२२` | "122" |
+| `Line 48784: ` | "[Blank line]" |
+| `Line 48785: ` | "[Blank line]" |
+| `Line 48786: लोमश उवाच||` | "Lomaśa said:" |
+| `Line 48787: ` | "[Blank line]" |
+| `Line 48788: भृगोर्महर्षेः पुत्रोऽभूच्च्यवनो नाम भार्गवः |` | "There was a son of the great sage Bhṛgu named Cyavana, a Bhārgava [descendant of Bhṛgu]," |
+| `Line 48789: समीपे सरसः सोऽस्य तपस्तेपे महाद्युतिः ||१||` | "Near a lake, he, of great splendor, performed austerities. ||1||" |
+| `Line 48790: ` | "[Blank line]" |

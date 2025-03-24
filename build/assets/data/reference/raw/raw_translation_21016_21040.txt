@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 21016: समवेतास्त्रयः शूरा भूरिर्भूरिश्रवाः शलः ||१४||` | "Assembled were three heroes: Bhūri, Bhūriśravā, and Śala. ||14||" |
+| `Line 21017: ` | "[Blank line]" |
+| `Line 21018: सुदक्षिणश्च काम्बोजो दृढधन्वा च कौरवः |` | "And Sudakṣiṇa the Kāmboja [kingdom's ruler], and Dṛḍhadhvanvā the Kaurava [Kuru descendant]," |
+| `Line 21019: बृहद्बलः सुषेणश्च शिबिरौशीनरस्तथा ||१५||` | "Bṛhadbala, Suṣeṇa, and Śibi of Uśīnara [kingdom] as well. ||15||" |
+| `Line 21020: ` | "[Blank line]" |
+| `Line 21021: सङ्कर्षणो वासुदेवो रौक्मिणेयश्च वीर्यवान् |` | "Saṅkarṣaṇa [Balarāma], Vāsudeva [Kṛṣṇa], and the mighty Raukmiṇeya [Rukmī's son]," |
+| `Line 21022: साम्बश्च चारुदेष्णश्च सारणोऽथ गदस्तथा ||१६||` | "And Sāmba, Cārudeṣṇa, Sāraṇa, and Gada as well. ||16||" |
+| `Line 21023: ` | "[Blank line]" |
+| `Line 21024: अक्रूरः सात्यकिश्चैव उद्धवश्च महाबलः |` | "Akrūra, and Sātyaki, and the mighty Uddhava," |
+| `Line 21025: कृतवर्मा च हार्दिक्यः पृथुर्विपृथुरेव च ||१७||` | "And Kṛtavarmā the son of Hṛdika, and Pṛthu and Vipṛthu as well. ||17||" |
+| `Line 21026: ` | "[Blank line]" |
+| `Line 21027: विडूरथश्च कङ्कश्च समीकः सारमेजयः |` | "And Viḍūratha, Kaṅka, Samīka, Sāramejeya," |
+| `Line 21028: वीरो वातपतिश्चैव झिल्ली पिण्डारकस्तथा ||१८||` | "The hero Vātapati, and Jhillī, Piṇḍāraka as well. ||18||" |
+| `Line 21029: ` | "[Blank line]" |
+| `Line 21030: उशीनरश्च विक्रान्तो वृष्णयस्ते प्रकीर्तिताः ||१८||` | "And the valiant Uśīnara - these are proclaimed as the Vṛṣṇis [Kṛṣṇa's clan]. ||18||" |
+| `Line 21031: ` | "[Blank line]" |
+| `Line 21032: भगीरथो बृहत्क्षत्रः सैन्धवश्च जयद्रथः |` | "Bhagīratha, Bṛhatkṣatra, and Jayadratha the Saindhava [Sindhu king]," |
+| `Line 21033: बृहद्रथो बाह्लिकश्च श्रुतायुश्च महारथः ||१९||` | "Bṛhadratha, Bāhlīka, and the great chariot-warrior Śrutāyu. ||19||" |
+| `Line 21034: ` | "[Blank line]" |
+| `Line 21035: उलूकः कैतवो राजा चित्राङ्गदशुभाङ्गदौ |` | "King Ulūka Kaitava [son of Śakuni], Citrāṅgada and Śubhāṅgada," |
+| `Line 21036: वत्सराजश्च धृतिमान्कोसलाधिपतिस्तथा ||२०||` | "And the steadfast king of Vatsa, and the ruler of Kosala as well. ||20||" |
+| `Line 21037: ` | "[Blank line]" |
+| `Line 21038: एते चान्ये च बहवो नानाजनपदेश्वराः |` | "These and many others, lords of various kingdoms," |
+| `Line 21039: त्वदर्थमागता भद्रे क्षत्रियाः प्रथिता भुवि ||२१||` | "Have come for your sake, O auspicious one, Kṣatriyas [warrior class] renowned on earth. ||21||" |
+| `Line 21040: ` | "[Blank line]" |

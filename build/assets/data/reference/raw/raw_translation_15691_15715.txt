@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 15691: ततो द्रोणः पाण्डुपुत्रानस्त्राणि विविधानि च |` | "Then Droṇa [weapons master] taught the sons of Pāṇḍu various weapons," |
+| `Line 15692: ग्राहयामास दिव्यानि मानुषाणि च वीर्यवान् ||४५||` | "The powerful one instructed them in both divine and human weapons. ||45||" |
+| `Line 15693: ` | "[Blank line]" |
+| `Line 15694: राजपुत्रास्तथैवान्ये समेत्य भरतर्षभ |` | "Other princes too, O bull of Bharata [Janamejaya], gathered together," |
+| `Line 15695: अभिजग्मुस्ततो द्रोणमस्त्रार्थे द्विजसत्तमम् ||४६||` | "And approached Droṇa, the best of twice-born [brahmin], for weapons training. ||46||" |
+| `Line 15696: ` | "[Blank line]" |
+| `Line 15697: वृष्णयश्चान्धकाश्चैव नानादेश्याश्च पार्थिवाः ||४६||` | "The Vṛṣṇis [Krishna's clan], Andhakas [related clan], and kings from various lands. ||46||" |
+| `Line 15698: ` | "[Blank line]" |
+| `Line 15699: सूतपुत्रश्च राधेयो गुरुं द्रोणमियात्तदा |` | "And the son of a charioteer [sūta], Rādheya [Karna], then approached the teacher Droṇa," |
+| `Line 15700: स्पर्धमानस्तु पार्थेन सूतपुत्रोऽत्यमर्षणः ||४७||` | "Competing with Pārtha [Arjuna], the charioteer's son was extremely intolerant. ||47||" |
+| `Line 15701: ` | "[Blank line]" |
+| `Line 15702: दुर्योधनमुपाश्रित्य पाण्डवानत्यमन्यत ||४७||` | "Taking refuge with Duryodhana, he greatly resented the Pāṇḍavas. ||47||" |
+| `Line 15703: ` | "[Blank line]" |
+| `Line 15704: ` | "[Blank line]" |
+| `Line 15705: ` | "[Blank line]" |
+| `Line 15706: ` | "[Blank line]" |
+| `Line 15707: ` | "[Blank line]" |
+| `Line 15708: ` | "[Blank line]" |
+| `Line 15709: १२३` | "[Chapter number 123]" |
+| `Line 15710: ` | "[Blank line]" |
+| `Line 15711: ` | "[Blank line]" |
+| `Line 15712: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 15713: ` | "[Blank line]" |
+| `Line 15714: अर्जुनस्तु परं यत्नमातस्थे गुरुपूजने |` | "Arjuna [Pandu's son] made the utmost effort in honoring his teacher," |
+| `Line 15715: अस्त्रे च परमं योगं प्रियो द्रोणस्य चाभवत् ||१||` | "And in supreme dedication to weaponry, he became Droṇa's favorite. ||1||" |

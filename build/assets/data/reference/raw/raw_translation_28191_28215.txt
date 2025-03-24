@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 28191: शूद्रायां गौतमो यत्र महात्मा संशितव्रतः |` | "Where the great-souled Gautama [sage name], of firm vows," |
+| `Line 28192: औशीनर्यामजनयत्काक्षीवादीन्सुतानृषिः ||५||` | "Begot sons including Kākṣīvat and others with a woman of Uśīnara [kingdom name], the sage. ||5||" |
+| `Line 28193: ` | "[Blank line]" |
+| `Line 28194: गौतमः क्षयणादस्मादथासौ तत्र वेश्मनि |` | "From Gautama's dwelling place, in that abode," |
+| `Line 28195: भजते मागधं वंशं स नृपाणामनुग्रहात् ||६||` | "He serves the Magadha [kingdom] lineage through the favor of kings. ||6||" |
+| `Line 28196: ` | "[Blank line]" |
+| `Line 28197: अङ्गवङ्गादयश्चैव राजानः सुमहाबलाः |` | "And the kings of Aṅga, Vaṅga and other regions, of great strength," |
+| `Line 28198: गौतमक्षयमभ्येत्य रमन्ते स्म पुरार्जुन ||७||` | "Coming to Gautama's dwelling, used to enjoy themselves formerly, O Arjuna [Pāṇḍava hero]. ||7||" |
+| `Line 28199: ` | "[Blank line]" |
+| `Line 28200: वनराजीस्तु पश्येमाः प्रियालानां मनोरमाः |` | "But look at these charming rows of Priyāla [fruit tree] forests," |
+| `Line 28201: लोध्राणां च शुभाः पार्थ गौतमौकःसमीपजाः ||८||` | "And the beautiful Lodhra [tree species] groves, O Pārtha [Arjuna], growing near Gautama's dwelling. ||8||" |
+| `Line 28202: ` | "[Blank line]" |
+| `Line 28203: अर्बुदः शक्रवापी च पन्नगौ शत्रुतापनौ |` | "Arbuda and Śakravāpī, the two serpents [pannaga] who torment enemies," |
+| `Line 28204: स्वस्तिकस्यालयश्चात्र मणिनागस्य चोत्तमः ||९||` | "And here is the abode of Svastika and the excellent one of Maṇināga [jewel-serpent]. ||9||" |
+| `Line 28205: ` | "[Blank line]" |
+| `Line 28206: अपरिहार्या मेघानां मागधेयं मणेः कृते |` | "Unavoidable for the clouds is this Magadha region for the sake of the jewel," |
+| `Line 28207: कौशिको मणिमांश्चैव ववृधाते ह्यनुग्रहम् ||१०||` | "Kauśika [sage/river] and Maṇimān [jewel-bearer] both increased their favor. ||10||" |
+| `Line 28208: ` | "[Blank line]" |
+| `Line 28209: अर्थसिद्धिं त्वनपगां जरासन्धोऽभिमन्यते |` | "Jarāsandha [Magadha king] considers his prosperity to be unfailing," |
+| `Line 28210: वयमासादने तस्य दर्पमद्य निहन्म हि ||११||` | "We shall today destroy his pride in his own abode indeed. ||11||" |
+| `Line 28211: ` | "[Blank line]" |
+| `Line 28212: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 28213: ` | "[Blank line]" |
+| `Line 28214: एवमुक्त्वा ततः सर्वे भ्रातरो विपुलौजसः |` | "Having spoken thus, then all the brothers of immense prowess," |
+| `Line 28215: वार्ष्णेयः पाण्डवेयौ च प्रतस्थुर्मागधं पुरम् ||१२||` | "The Vārṣṇeya [Kṛṣṇa] and the two Pāṇḍavas [Arjuna and Bhīma] set out for the city of Magadha. ||12||" |

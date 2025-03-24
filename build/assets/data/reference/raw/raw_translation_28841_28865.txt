@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 28841: तत्रस्थः पुरुषैरेव धर्मराजस्य शासनात् |` | "Stationed there, with men only, by the command of Dharmarāja [Yudhiṣṭhira]," |
+| `Line 28842: व्यजयद्धनञ्जयो राजन्देशान्पञ्च प्रमाणतः ||११||` | "Dhanañjaya [Arjuna] conquered, O king, five countries completely. ||11||" |
+| `Line 28843: ` | "[Blank line]" |
+| `Line 28844: स दिवःप्रस्थमासाद्य सेनाबिन्दोः पुरं महत् |` | "Having reached Divaḥprastha, the great city of Senābindu [army-chief]," |
+| `Line 28845: बलेन चतुरङ्गेण निवेशमकरोत्प्रभुः ||१२||` | "The lord established his camp with his four-fold army [chaturanga]. ||12||" |
+| `Line 28846: ` | "[Blank line]" |
+| `Line 28847: स तैः परिवृतः सर्वैर्विष्वगश्वं नराधिपम् |` | "Surrounded by all of them, he approached Viṣvagaśva [all-pervading], the king," |
+| `Line 28848: अभ्यगच्छन्महातेजाः पौरवं पुरुषर्षभः ||१३||` | "The bull among men [Arjuna], of great splendor, went to the Paurava [descendant of Puru]. ||13||" |
+| `Line 28849: ` | "[Blank line]" |
+| `Line 28850: विजित्य चाहवे शूरान्पार्वतीयान्महारथान् |` | "Having conquered in battle the brave mountain-dwelling [pārvatīya] great warriors," |
+| `Line 28851: ध्वजिन्या व्यजयद्राजन्पुरं पौरवरक्षितम् ||१४||` | "With his army [dhvajinī], O king, he conquered the city protected by the Paurava. ||14||" |
+| `Line 28852: ` | "[Blank line]" |
+| `Line 28853: पौरवं तु विनिर्जित्य दस्यून्पर्वतवासिनः |` | "Having defeated the Paurava and the mountain-dwelling robbers [dasyu]," |
+| `Line 28854: गणानुत्सवसङ्केतानजयत्सप्त पाण्डवः ||१५||` | "The Pāṇḍava [Arjuna] conquered seven tribes known for their festivals. ||15||" |
+| `Line 28855: ` | "[Blank line]" |
+| `Line 28856: ततः काश्मीरकान्वीरान्क्षत्रियान्क्षत्रियर्षभः |` | "Then the bull among Kṣatriyas [Arjuna] conquered the heroic Kāśmīraka [Kashmiri] warriors," |
+| `Line 28857: व्यजयल्लोहितं चैव मण्डलैर्दशभिः सह ||१६||` | "And he also conquered Lohita along with the ten territories [maṇḍala]. ||16||" |
+| `Line 28858: ` | "[Blank line]" |
+| `Line 28859: ततस्त्रिगर्तान्कौन्तेयो दार्वान्कोकनदाश्च ये |` | "Then the son of Kuntī [Arjuna] conquered the Trigartas, the Dārvas, and the Kokanadas," |
+| `Line 28860: क्षत्रिया बहवो राजन्नुपावर्तन्त सर्वशः ||१७||` | "And many Kṣatriyas, O king, submitted to him completely. ||17||" |
+| `Line 28861: ` | "[Blank line]" |
+| `Line 28862: अभिसारीं ततो रम्यां विजिग्ये कुरुनन्दनः |` | "Then the descendant of Kuru [Arjuna] conquered the beautiful Abhisārī [region]," |
+| `Line 28863: उरशावासिनं चैव रोचमानं रणेऽजयत् ||१८||` | "And he defeated in battle Rochamāna, the dweller of Uraśā. ||18||" |
+| `Line 28864: ` | "[Blank line]" |
+| `Line 28865: ततः सिंहपुरं रम्यं चित्रायुधसुरक्षितम् |` | "Then the beautiful Siṃhapura [lion-city], well-protected by Citrāyudha [colorful-weaponed]," |

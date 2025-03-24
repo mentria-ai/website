@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 21191: ` | "[Blank line]" |
+| `Line 21192: १८०` | "180 [chapter number]" |
+| `Line 21193: ` | "[Blank line]" |
+| `Line 21194: ` | "[Blank line]" |
+| `Line 21195: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 21196: ` | "[Blank line]" |
+| `Line 21197: तस्मै दित्सति कन्यां तु ब्राह्मणाय महात्मने |` | "When he wished to give the maiden to that noble brāhmaṇa [priest]," |
+| `Line 21198: कोप आसीन्महीपानामालोक्यान्योन्यमन्तिकात् ||१||` | "Anger arose among the kings as they looked at one another closely. ||1||" |
+| `Line 21199: ` | "[Blank line]" |
+| `Line 21200: अस्मानयमतिक्रम्य तृणीकृत्य च सङ्गतान् |` | "This man, disregarding us and treating the assembled kings like straw," |
+| `Line 21201: दातुमिच्छति विप्राय द्रौपदीं योषितां वराम् ||२||` | "Wishes to give Draupadī [Drupada's daughter], the best among women, to a brāhmaṇa. ||2||" |
+| `Line 21202: ` | "[Blank line]" |
+| `Line 21203: निहन्मैनं दुरात्मानं योऽयमस्मान्न मन्यते |` | "Let us kill this evil-minded one who does not respect us," |
+| `Line 21204: न ह्यर्हत्येष सत्कारं नापि वृद्धक्रमं गुणैः ||३||` | "For he deserves neither honor nor the respect due to elders by his qualities. ||3||" |
+| `Line 21205: ` | "[Blank line]" |
+| `Line 21206: हन्मैनं सह पुत्रेण दुराचारं नृपद्विषम् |` | "Let us slay him along with his son, this ill-behaved hater of kings," |
+| `Line 21207: अयं हि सर्वानाहूय सत्कृत्य च नराधिपान् ||४||` | "For he, having invited and honored all the rulers of men, ||4||" |
+| `Line 21208: ` | "[Blank line]" |
+| `Line 21209: गुणवद्भोजयित्वा च ततः पश्चाद्विनिन्दति ||४||` | "And having fed them well, now afterwards insults them. ||4||" |
+| `Line 21210: ` | "[Blank line]" |
+| `Line 21211: अस्मिन्राजसमावाये देवानामिव संनये |` | "In this assembly of kings, like a gathering of gods," |
+| `Line 21212: किमयं सदृशं कञ्चिन्नृपतिं नैव दृष्टवान् ||५||` | "Has he not seen any king worthy (of his daughter)? ||5||" |
+| `Line 21213: ` | "[Blank line]" |
+| `Line 21214: न च विप्रेष्वधीकारो विद्यते वरणं प्रति |` | "Brāhmaṇas have no right regarding the selection (of a groom)," |
+| `Line 21215: स्वयंवरः क्षत्रियाणामितीयं प्रथिता श्रुतिः ||६||` | "The svayaṃvara [self-choice ceremony] is for kṣatriyas [warrior class] - this is the well-known tradition. ||6||" |

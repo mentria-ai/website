@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 401: यदाश्रौषं भीष्मममित्रकर्शनं; निघ्नन्तमाजावयुतं रथानाम् |` | "When I heard that Bhishma, the tormentor of foes, was destroying ten thousand chariots in battle," |
+| `Line 402: नैषां कश्चिद्वध्यते दृश्यरूप; स्तदा नाशंसे विजयाय सञ्जय ||१२५||` | "Yet none of our visible warriors was being slain, then, O Sanjaya, I had no hope for victory. ||125||" |
+| `Line 403: ` | [Blank line] |
+| `Line 404: यदाश्रौषं भीष्ममत्यन्तशूरं; हतं पार्थेनाहवेष्वप्रधृष्यम् |` | "When I heard that Bhishma, the extremely valiant one, unconquerable in battles, was slain by Partha [Arjuna]," |
+| `Line 405: शिखण्डिनं पुरतः स्थापयित्वा; तदा नाशंसे विजयाय सञ्जय ||१२६||` | "After placing Shikhandi in front, then, O Sanjaya, I had no hope for victory. ||126||" |
+| `Line 406: ` | [Blank line] |
+| `Line 407: यदाश्रौषं शरतल्पे शयानं; वृद्धं वीरं सादितं चित्रपुङ्खैः |` | "When I heard that the aged hero was lying on a bed of arrows, brought down by variegated-feathered shafts," |
+| `Line 408: भीष्मं कृत्वा सोमकानल्पशेषां; स्तदा नाशंसे विजयाय सञ्जय ||१२७||` | "And that Bhishma had reduced the Somakas [Pandava allies] to a small remnant, then, O Sanjaya, I had no hope for victory. ||127||" |
+| `Line 409: ` | [Blank line] |
+| `Line 410: यदाश्रौषं शान्तनवे शयाने; पानीयार्थे चोदितेनार्जुनेन |` | "When I heard that while the son of Shantanu [Bhishma] was lying wounded, Arjuna, being urged for water," |
+| `Line 411: भूमिं भित्त्वा तर्पितं तत्र भीष्मं; तदा नाशंसे विजयाय सञ्जय ||१२८||` | "Pierced the earth and satisfied Bhishma's thirst there, then, O Sanjaya, I had no hope for victory. ||128||" |
+| `Line 412: ` | [Blank line] |
+| `Line 413: यदाश्रौषं शुक्रसूर्यौ च युक्तौ; कौन्तेयानामनुलोमौ जयाय |` | "When I heard that Venus and the Sun were favorably positioned for the victory of the sons of Kunti [Pandavas]," |
+| `Line 414: नित्यं चास्माञ्श्वापदा व्याभषन्त; स्तदा नाशंसे विजयाय सञ्जय ||१२९||` | "And that wild beasts were constantly frightening us, then, O Sanjaya, I had no hope for victory. ||129||" |
+| `Line 415: ` | [Blank line] |
+| `Line 416: यदा द्रोणो विविधानस्त्रमार्गा; न्विदर्शयन्समरे चित्रयोधी |` | "When Drona, displaying various paths of weapons in battle, fighting wonderfully," |
+| `Line 417: न पाण्डवाञ्श्रेष्ठतमान्निहन्ति; तदा नाशंसे विजयाय सञ्जय ||१३०||` | "Could not slay the foremost of the Pandavas, then, O Sanjaya, I had no hope for victory. ||130||" |
+| `Line 418: ` | [Blank line] |
+| `Line 419: यदाश्रौषं चास्मदीयान्महारथा; न्व्यवस्थितानर्जुनस्यान्तकाय |` | "When I heard that our great warriors, who had positioned themselves to kill Arjuna," |
+| `Line 420: संशप्तकान्निहतानर्जुनेन; तदा नाशंसे विजयाय सञ्जय ||१३१||` | "The Samsaptakas [oath-bound warriors], were slain by Arjuna, then, O Sanjaya, I had no hope for victory. ||131||" |
+| `Line 421: ` | [Blank line] |
+| `Line 422: यदाश्रौषं व्यूहमभेद्यमन्यै; र्भारद्वाजेनात्तशस्त्रेण गुप्तम् |` | "When I heard that the formation, impenetrable to others, protected by the armed son of Bharadvaja [Drona]," |
+| `Line 423: भित्त्वा सौभद्रं वीरमेकं प्रविष्टं; तदा नाशंसे विजयाय सञ्जय ||१३२||` | "Was penetrated by the heroic son of Subhadra [Abhimanyu] who entered alone, then, O Sanjaya, I had no hope for victory. ||132||" |
+| `Line 424: ` | [Blank line] |
+| `Line 425: यदाभिमन्युं परिवार्य बालं; सर्वे हत्वा हृष्टरूपा बभूवुः |` | "When all our warriors, having surrounded the young Abhimanyu, slew him and became joyful," |

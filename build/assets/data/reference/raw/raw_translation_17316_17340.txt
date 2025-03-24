@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 17316: ` | "[Blank line]" |
+| `Line 17317: ` | "[Blank line]" |
+| `Line 17318: ` | "[Blank line]" |
+| `Line 17319: ` | "[Blank line]" |
+| `Line 17320: ` | "[Blank line]" |
+| `Line 17321: हिडिम्बवधपर्व` | "The Book of Hiḍimba's Slaying [Hiḍimba-vadha-parva]" |
+| `Line 17322: १३९` | "139" |
+| `Line 17323: ` | "[Blank line]" |
+| `Line 17324: ` | "[Blank line]" |
+| `Line 17325: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 17326: ` | "[Blank line]" |
+| `Line 17327: तत्र तेषु शयानेषु हिडिम्बो नाम राक्षसः |` | "There, while they were sleeping, a rākṣasa [demon] named Hiḍimba," |
+| `Line 17328: अविदूरे वनात्तस्माच्छालवृक्षमुपाश्रितः ||१||` | "Not far from that forest, resting against a śāla tree [sal tree]. ||1||" |
+| `Line 17329: ` | "[Blank line]" |
+| `Line 17330: क्रूरो मानुषमांसादो महावीर्यो महाबलः |` | "Cruel, a devourer of human flesh, of great prowess and mighty strength," |
+| `Line 17331: विरूपरूपः पिङ्गाक्षः करालो घोरदर्शनः ||२||` | "Deformed in appearance, with tawny eyes, terrifying, and horrible to behold. ||2||" |
+| `Line 17332: ` | "[Blank line]" |
+| `Line 17333: पिशितेप्सुः क्षुधार्तस्तानपश्यत यदृच्छया ||२||` | "Desiring flesh, tormented by hunger, he saw them by chance. ||2||" |
+| `Line 17334: ` | "[Blank line]" |
+| `Line 17335: ऊर्ध्वाङ्गुलिः स कण्डूयन्धुन्वन्रूक्षाञ्शिरोरुहान् |` | "With fingers raised, scratching and shaking his coarse hair," |
+| `Line 17336: जृम्भमाणो महावक्त्रः पुनः पुनरवेक्ष्य च ||३||` | "Yawning with his huge mouth, and looking again and again. ||3||" |
+| `Line 17337: ` | "[Blank line]" |
+| `Line 17338: दुष्टो मानुषमांसादो महाकायो महाबलः |` | "The wicked man-eater, with his enormous body and great strength," |
+| `Line 17339: आघ्राय मानुषं गन्धं भगिनीमिदमब्रवीत् ||४||` | "Having smelled the human scent, said this to his sister: ||4||" |
+| `Line 17340: ` | "[Blank line]" |

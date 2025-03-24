@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 35941: अभ्यद्रवत वेगेन भीमसेनं तदा किल ||९२||` | "He rushed with great speed toward Bhīmasena [mighty-armed Pāṇḍava] then indeed. ||92||" |
+| `Line 35942: ` | "[Blank line]" |
+| `Line 35943: तमभिद्रुत्य सङ्क्रुद्धो वेगेन महता बली |` | "Rushing toward him, enraged, with great speed, the powerful one [rākṣasa]," |
+| `Line 35944: अगृह्णात्पाणिना पाणिं भीमसेनस्य राक्षसः ||९३||` | "The rākṣasa [demon] seized Bhīmasena's hand with his hand. ||93||" |
+| `Line 35945: ` | "[Blank line]" |
+| `Line 35946: इन्द्राशनिसमस्पर्शं वज्रसंहननं दृढम् |` | "With a touch like Indra's [king of gods] thunderbolt, with a body firm as a vajra [thunderbolt]," |
+| `Line 35947: संहत्य भीमसेनाय व्याक्षिपत्सहसा करम् ||९४||` | "He suddenly struck and threw his hand against Bhīmasena. ||94||" |
+| `Line 35948: ` | "[Blank line]" |
+| `Line 35949: गृहीतं पाणिना पाणिं भीमसेनोऽथ रक्षसा |` | "When his hand was seized by the hand of the rākṣasa, Bhīmasena," |
+| `Line 35950: नामृष्यत महाबाहुस्तत्राक्रुध्यद्वृकोदरः ||९५||` | "The mighty-armed one did not tolerate it; then Vṛkodara [wolf-bellied Bhīma] became enraged. ||95||" |
+| `Line 35951: ` | "[Blank line]" |
+| `Line 35952: तत्रासीत्तुमुलं युद्धं भीमसेनहिडिम्बयोः |` | "There was a tumultuous battle between Bhīmasena and Hiḍimba [rākṣasa]," |
+| `Line 35953: सर्वास्त्रविदुषोर्घोरं वृत्रवासवयोरिव ||९६||` | "Terrible, like that between Vṛtra [demon] and Vāsava [Indra], both skilled in all weapons. ||96||" |
+| `Line 35954: ` | "[Blank line]" |
+| `Line 35955: हत्वा हिडिम्बं भीमोऽथ प्रस्थितो भ्रातृभिः सह |` | "After killing Hiḍimba, Bhīma then departed with his brothers," |
+| `Line 35956: हिडिम्बामग्रतः कृत्वा यस्यां जातो घटोत्कचः ||९७||` | "Taking Hiḍimbā [female rākṣasī] with them, from whom was born Ghaṭotkaca [pot-headed son]. ||97||" |
+| `Line 35957: ` | "[Blank line]" |
+| `Line 35958: ततश्च प्राद्रवन्सर्वे सह मात्रा यशस्विनः |` | "Then all the illustrious ones proceeded with their mother," |
+| `Line 35959: एकचक्रामभिमुखाः संवृता ब्राह्मणव्रजैः ||९८||` | "Heading toward Ekacakrā [one-wheeled town], accompanied by groups of Brahmins. ||98||" |
+| `Line 35960: ` | "[Blank line]" |
+| `Line 35961: प्रस्थाने व्यास एषां च मन्त्री प्रियहितोऽभवत् |` | "And Vyāsa [sage-compiler] became their dear and beneficial advisor in their journey," |
+| `Line 35962: ततोऽगच्छन्नेकचक्रां पाण्डवाः संशितव्रताः ||९९||` | "Then the Pāṇḍavas [sons of Pāṇḍu], firm in their vows, went to Ekacakrā. ||99||" |
+| `Line 35963: ` | "[Blank line]" |
+| `Line 35964: तत्राप्यासादयामासुर्बकं नाम महाबलम् |` | "There too they encountered one named Baka [crane-demon], of great strength," |
+| `Line 35965: पुरुषादं प्रतिभयं हिडिम्बेनैव संमितम् ||१००||` | "A man-eater, terrifying, equal in might to Hiḍimba himself. ||100||" |

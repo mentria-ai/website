@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 326: ` | [Blank line] |
+| `Line 327: तत्र यद्यद्यथा ज्ञातं मया सञ्जय तच्छृणु |` | "Listen, Sanjaya, to what I have known there, in whatever way I have known it." |
+| `Line 328: श्रुत्वा हि मम वाक्यानि बुद्ध्या युक्तानि तत्त्वतः ||१०१||` | "For having heard my words, which are endowed with wisdom and truth. ||101||" |
+| `Line 329: ` | [Blank line] |
+| `Line 330: ततो ज्ञास्यसि मां सौते प्रज्ञाचक्षुषमित्युत ||१०१||` | "Then you will know me, O charioteer's son [Sanjaya], as one who sees with the eye of wisdom. ||101||" |
+| `Line 331: ` | [Blank line] |
+| `Line 332: यदाश्रौषं धनुरायम्य चित्रं; विद्धं लक्ष्यं पातितं वै पृथिव्याम् |` | "When I heard that, drawing the marvelous bow, the target was pierced and made to fall on the earth," |
+| `Line 333: कृष्णां हृतां पश्यतां सर्वराज्ञां; तदा नाशंसे विजयाय सञ्जय ||१०२||` | "And Krishnā [Draupadi] was dragged away in the sight of all kings; then, Sanjaya, I did not hope for victory. ||102||" |
+| `Line 334: ` | [Blank line] |
+| `Line 335: यदाश्रौषं द्वारकायां सुभद्रां; प्रसह्योढां माधवीमर्जुनेन |` | "When I heard that Subhadrā, the daughter of Mādhava [Krishna's family], was forcibly carried away from Dvārakā by Arjuna," |
+| `Line 336: इन्द्रप्रस्थं वृष्णिवीरौ च यातौ; तदा नाशंसे विजयाय सञ्जय ||१०३||` | "And that the two Vrishni heroes [Krishna and Balarama] went to Indraprastha; then, Sanjaya, I did not hope for victory. ||103||" |
+| `Line 337: ` | [Blank line] |
+| `Line 338: यदाश्रौषं देवराजं प्रवृष्टं; शरैर्दिव्यैर्वारितं चार्जुनेन |` | "When I heard that the king of gods [Indra] showering (arrows) was repelled by Arjuna with divine arrows," |
+| `Line 339: अग्निं तथा तर्पितं खाण्डवे च; तदा नाशंसे विजयाय सञ्जय ||१०४||` | "And that the fire god was satisfied in the Khāṇḍava forest; then, Sanjaya, I did not hope for victory. ||104||" |
+| `Line 340: ` | [Blank line] |
+| `Line 341: यदाश्रौषं हृतराज्यं युधिष्ठिरं; पराजितं सौबलेनाक्षवत्याम् |` | "When I heard that Yudhishthira was deprived of his kingdom, defeated by Soubala [Shakuni] in the game of dice," |
+| `Line 342: अन्वागतं भ्रातृभिरप्रमेयै; स्तदा नाशंसे विजयाय सञ्जय ||१०५||` | "And was followed by his immeasurable brothers; then, Sanjaya, I did not hope for victory. ||105||" |
+| `Line 343: ` | [Blank line] |
+| `Line 344: यदाश्रौषं द्रौपदीमश्रुकण्ठीं; सभां नीतां दुःखितामेकवस्त्राम् |` | "When I heard that Draupadi, with tears in her throat, was brought to the assembly hall, distressed, wearing only a single garment," |
+| `Line 345: रजस्वलां नाथवतीमनाथव; त्तदा नाशंसे विजयाय सञ्जय ||१०६||` | "In her monthly period, though having protectors, yet treated as if without protection; then, Sanjaya, I did not hope for victory. ||106||" |
+| `Line 346: ` | [Blank line] |
+| `Line 347: यदाश्रौषं विविधास्तात चेष्टा; धर्मात्मनां प्रस्थितानां वनाय |` | "When I heard, O dear one, of the various efforts of those righteous souls departing for the forest," |
+| `Line 348: ज्येष्ठप्रीत्या क्लिश्यतां पाण्डवानां; तदा नाशंसे विजयाय सञ्जय ||१०७||` | "Of the Pāṇḍavas suffering out of devotion to their eldest brother; then, Sanjaya, I did not hope for victory. ||107||" |
+| `Line 349: ` | [Blank line] |
+| `Line 350: यदाश्रौषं स्नातकानां सहस्रै; रन्वागतं धर्मराजं वनस्थम् |` | "When I heard that Dharmarāja [Yudhishthira], dwelling in the forest, was followed by thousands of graduate students [Snātakas]," |

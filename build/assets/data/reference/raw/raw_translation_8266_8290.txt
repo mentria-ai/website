@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 8266: षट्पदैर्वाप्यनाकीर्णस्तस्मिन्वै काननेऽभवत् ||६||` | "And that forest was not crowded with six-legged creatures [bees]. ||6||" |
+| `Line 8267: ` | "[Blank line]" |
+| `Line 8268: विहगैर्नादितं पुष्पैरलङ्कृतमतीव च |` | "It resounded with birds, was extremely adorned with flowers," |
+| `Line 8269: सर्वर्तुकुसुमैर्वृक्षैरतीव सुखशाद्वलम् ||७||` | "With trees bearing flowers of all seasons, and had very pleasant meadows. ||7||" |
+| `Line 8270: ` | "[Blank line]" |
+| `Line 8271: मनोरमं महेष्वासो विवेश वनमुत्तमम् ||७||` | "The great archer [maheshvasa] entered that delightful, excellent forest. ||7||" |
+| `Line 8272: ` | "[Blank line]" |
+| `Line 8273: मारुतागलितास्तत्र द्रुमाः कुसुमशालिनः |` | "There, the trees rich with flowers, swayed by the wind," |
+| `Line 8274: पुष्पवृष्टिं विचित्रां स्म व्यसृजंस्ते पुनः पुनः ||८||` | "Released a wonderful shower of flowers again and again. ||8||" |
+| `Line 8275: ` | "[Blank line]" |
+| `Line 8276: दिवस्पृशोऽथ सङ्घुष्टाः पक्षिभिर्मधुरस्वरैः |` | "The sky-touching trees, resonant with sweet-voiced birds," |
+| `Line 8277: विरेजुः पादपास्तत्र विचित्रकुसुमाम्बराः ||९||` | "Shone there, clothed in variegated flowers. ||9||" |
+| `Line 8278: ` | "[Blank line]" |
+| `Line 8279: तेषां तत्र प्रवालेषु पुष्पभारावनामिषु |` | "There, on their new shoots bent down by the weight of flowers," |
+| `Line 8280: रुवन्ति रावं विहगाः षट्पदैः सहिता मृदु ||१०||` | "Birds sang softly in harmony with the bees [six-legged ones]. ||10||" |
+| `Line 8281: ` | "[Blank line]" |
+| `Line 8282: तत्र प्रदेशांश्च बहून्कुसुमोत्करमण्डितान् |` | "There, many spots adorned with heaps of flowers," |
+| `Line 8283: लतागृहपरिक्षिप्तान्मनसः प्रीतिवर्धनान् ||११||` | "Surrounded by creeper-bowers, increasing the delight of the mind, ||11||" |
+| `Line 8284: ` | "[Blank line]" |
+| `Line 8285: सम्पश्यन्स महातेजा बभूव मुदितस्तदा ||११||` | "Seeing these, that mighty-splendored one [mahatejas] became joyful then. ||11||" |
+| `Line 8286: ` | "[Blank line]" |
+| `Line 8287: परस्पराश्लिष्टशाखैः पादपैः कुसुमाचितैः |` | "With trees whose branches embraced each other, heaped with flowers," |
+| `Line 8288: अशोभत वनं तत्तैर्महेन्द्रध्वजसंनिभैः ||१२||` | "That forest shone with those trees resembling Indra's [chief deity] banners. ||12||" |
+| `Line 8289: ` | "[Blank line]" |
+| `Line 8290: सुखशीतः सुगन्धी च पुष्परेणुवहोऽनिलः |` | "The pleasantly cool and fragrant breeze carrying flower pollen," |

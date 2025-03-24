@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 42841: ` | "[Blank line]" |
+| `Line 42842: बृहदश्व उवाच॥` | "Bṛhadaśva [sage narrator] said:" |
+| `Line 42843: ` | "[Blank line]" |
+| `Line 42844: एवं समाहिता गत्वा दूती बाहुकमब्रवीत् |` | "Thus, with focused attention, having gone, the messenger spoke to Bāhuka [Nala's disguise]," |
+| `Line 42845: दमयन्त्यपि कल्याणी प्रासादस्थान्ववैक्षत ॥५॥` | "And the auspicious Damayantī [Nala's wife] watched from the palace. ||5||" |
+| `Line 42846: ` | "[Blank line]" |
+| `Line 42847: केशिन्युवाच॥` | "Keśinī [handmaiden] said:" |
+| `Line 42848: ` | "[Blank line]" |
+| `Line 42849: स्वागतं ते मनुष्येन्द्र कुशलं ते ब्रवीम्यहम् |` | "Welcome to you, O best among men, I wish you well," |
+| `Line 42850: दमयन्त्या वचः साधु निबोध पुरुषर्षभ ॥६॥` | "Please understand properly the words of Damayantī, O bull among men. ||6||" |
+| `Line 42851: ` | "[Blank line]" |
+| `Line 42852: कदा वै प्रस्थिता यूयं किमर्थमिह चागताः |` | "When did you set out and for what purpose have you come here?" |
+| `Line 42853: तत्त्वं ब्रूहि यथान्यायं वैदर्भी श्रोतुमिच्छति ॥७॥` | "Tell the truth properly, the princess of Vidarbha [Damayantī] wishes to hear. ||7||" |
+| `Line 42854: ` | "[Blank line]" |
+| `Line 42855: बाहुक उवाच॥` | "Bāhuka [disguised Nala] said:" |
+| `Line 42856: ` | "[Blank line]" |
+| `Line 42857: श्रुतः स्वयंवरो राज्ञा कौसल्येन यशस्विना |` | "The renowned king of Kosala [Ṛtuparṇa] heard about the svayaṃvara [self-choice ceremony]," |
+| `Line 42858: द्वितीयो दमयन्त्या वै श्वोभूत इति भामिनि ॥८॥` | "The second one of Damayantī, to be held tomorrow, O beautiful lady. ||8||" |
+| `Line 42859: ` | "[Blank line]" |
+| `Line 42860: श्रुत्वा तं प्रस्थितो राजा शतयोजनयायिभिः |` | "Having heard this, the king set out with horses that can travel a hundred yojanas [distance measure]," |
+| `Line 42861: हयैर्वातजवैर्मुख्यैरहमस्य च सारथिः ॥९॥` | "With excellent steeds swift as wind, and I am his charioteer. ||9||" |
+| `Line 42862: ` | "[Blank line]" |
+| `Line 42863: केशिन्युवाच॥` | "Keśinī [handmaiden] said:" |
+| `Line 42864: ` | "[Blank line]" |
+| `Line 42865: अथ योऽसौ तृतीयो वः स कुतः कस्य वा पुनः |` | "And that third one with you, where is he from and whose man is he?" |

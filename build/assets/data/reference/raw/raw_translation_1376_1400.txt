@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1376: यं दृष्ट्वा प्रस्थितं साध्वी पृथाप्यनुययौ तदा |` | "Seeing him departing, the virtuous Pritha [Kunti] followed him then," |
+| `Line 1377: पुत्रराज्यं परित्यज्य गुरुशुश्रूषणे रता ||२१३||` | "Abandoning her sons' kingdom, devoted to serving the elders. ||213||" |
+| `Line 1378: ` | [Blank line] |
+| `Line 1379: यत्र राजा हतान्पुत्रान्पौत्रानन्यांश्च पार्थिवान् |` | "Where the king saw his slain sons, grandsons, and other rulers," |
+| `Line 1380: लोकान्तरगतान्वीरानपश्यत्पुनरागतान् ||२१४||` | "The heroes who had gone to the other world [afterlife], returned again. ||214||" |
+| `Line 1381: ` | [Blank line] |
+| `Line 1382: ऋषेः प्रसादात्कृष्णस्य दृष्ट्वाश्चर्यमनुत्तमम् |` | "By the grace of the sage and Krishna, having seen the supreme wonder," |
+| `Line 1383: त्यक्त्वा शोकं सदारश्च सिद्धिं परमिकां गतः ||२१५||` | "Abandoning grief, he along with his wife attained the highest perfection. ||215||" |
+| `Line 1384: ` | [Blank line] |
+| `Line 1385: यत्र धर्मं समाश्रित्य विदुरः सुगतिं गतः |` | "Where Vidura, having taken refuge in dharma [righteousness], attained a good destination," |
+| `Line 1386: सञ्जयश्च महामात्रो विद्वान्गावल्गणिर्वशी ||२१६||` | "And Sanjaya, the great minister, the wise Gavalgani, the self-controlled one. ||216||" |
+| `Line 1387: ` | [Blank line] |
+| `Line 1388: ददर्श नारदं यत्र धर्मराजो युधिष्ठिरः |` | "Where Dharmaraja [righteous king] Yudhishthira saw Narada," |
+| `Line 1389: नारदाच्चैव शुश्राव वृष्णीनां कदनं महत् ||२१७||` | "And from Narada he heard of the great destruction of the Vrishnis. ||217||" |
+| `Line 1390: ` | [Blank line] |
+| `Line 1391: एतदाश्रमवासाख्यं पूर्वोक्तं सुमहाद्भुतम् |` | "This is the previously mentioned, very wonderful section called Ashramavasa [forest dwelling]," |
+| `Line 1392: द्विचत्वारिंशदध्यायाः पर्वैतदभिसङ्ख्यया ||२१८||` | "This parva [section] consists of forty-two chapters by count. ||218||" |
+| `Line 1393: ` | [Blank line] |
+| `Line 1394: सहस्रमेकं श्लोकानां पञ्च श्लोकशतानि च |` | "One thousand verses and five hundred verses," |
+| `Line 1395: षडेव च तथा श्लोकाः सङ्ख्यातास्तत्त्वदर्शिना ||२१९||` | "And six verses have been counted by the knower of truth [sage]. ||219||" |
+| `Line 1396: ` | [Blank line] |
+| `Line 1397: अतः परं निबोधेदं मौसलं पर्व दारुणम् |` | "After this, understand the terrible Mausala Parva [club section]," |
+| `Line 1398: यत्र ते पुरुषव्याघ्राः शस्त्रस्पर्शसहा युधि ||२२०||` | "Where those tiger-like men [great warriors], who could withstand weapons in battle, ||220||" |
+| `Line 1399: ` | [Blank line] |
+| `Line 1400: ब्रह्मदण्डविनिष्पिष्टाः समीपे लवणाम्भसः ||२२०||` | "Were crushed by Brahma's rod [divine punishment] near the salt waters [ocean]. ||220||" |

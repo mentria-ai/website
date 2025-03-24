@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 43466: ` | "[Blank line]" |
+| `Line 43467: ७९` | "79 [chapter number]" |
+| `Line 43468: ` | "[Blank line]" |
+| `Line 43469: ` | "[Blank line]" |
+| `Line 43470: जनमेजय उवाच||` | "Janamejaya [Pāṇḍu's great-grandson] said:" |
+| `Line 43471: ` | "[Blank line]" |
+| `Line 43472: भगवन्काम्यकात्पार्थे गते मे प्रपितामहे |` | "O venerable one, when my great-grandfather Pārtha [Arjuna] departed from Kāmyaka [forest]," |
+| `Line 43473: पाण्डवाः किमकुर्वन्त तमृते सव्यसाचिनम् ||१||` | "What did the Pāṇḍavas do without him, the Savyasāchin [ambidextrous archer]? ||1||" |
+| `Line 43474: ` | "[Blank line]" |
+| `Line 43475: स हि तेषां महेष्वासो गतिरासीदनीकजित् |` | "For he, the great archer, was their refuge, the conqueror of armies," |
+| `Line 43476: आदित्यानां यथा विष्णुस्तथैव प्रतिभाति मे ||२||` | "Just as Viṣṇu [preserver deity] is to the Ādityas [solar deities], so he appears to me. ||2||" |
+| `Line 43477: ` | "[Blank line]" |
+| `Line 43478: तेनेन्द्रसमवीर्येण सङ्ग्रामेष्वनिवर्तिना |` | "Without him who had valor equal to Indra [king of gods], who never retreated in battles," |
+| `Line 43479: विनाभूता वने वीराः कथमासन्पितामहाः ||३||` | "How did those heroes, my ancestors, live in the forest? ||3||" |
+| `Line 43480: ` | "[Blank line]" |
+| `Line 43481: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 43482: ` | "[Blank line]" |
+| `Line 43483: गते तु काम्यकात्तात पाण्डवे सव्यसाचिनि |` | "O dear one, when the Pāṇḍava Savyasāchin departed from Kāmyaka," |
+| `Line 43484: बभूवुः कौरवेयास्ते दुःखशोकपरायणाः ||४||` | "Those Kauravas [Pāṇḍavas] became immersed in sorrow and grief. ||4||" |
+| `Line 43485: ` | "[Blank line]" |
+| `Line 43486: आक्षिप्तसूत्रा मणयश्छिन्नपक्षा इव द्विजाः |` | "Like gems with their threads removed, or birds with clipped wings," |
+| `Line 43487: अप्रीतमनसः सर्वे बभूवुरथ पाण्डवाः ||५||` | "All the Pāṇḍavas became disheartened. ||5||" |
+| `Line 43488: ` | "[Blank line]" |
+| `Line 43489: वनं च तदभूत्तेन हीनमक्लिष्टकर्मणा |` | "And that forest, bereft of him of untainted deeds," |
+| `Line 43490: कुबेरेण यथा हीनं वनं चैत्ररथं तथा ||६||` | "Was like the Chaitraratha [pleasure garden] forest without Kubera [wealth deity]. ||6||" |

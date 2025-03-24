@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 5726: एतद्दृष्टं श्रुतं चापि यथावन्नृपसत्तम |` | "This has been seen and heard exactly as it happened, O best of kings [royal epithet]," |
+| `Line 5727: अस्माभिर्निखिलं सर्वं कथितं ते सुदारुणम् ||२४||` | "Everything has been told to you by us in full, this most terrible event. ||24||" |
+| `Line 5728: ` | "[Blank line]" |
+| `Line 5729: श्रुत्वा चैतं नृपश्रेष्ठ पार्थिवस्य पराभवम् |` | "Having heard this, O foremost of kings [royal epithet], about the defeat of the king [your father]," |
+| `Line 5730: अस्य चर्षेरुत्तङ्कस्य विधत्स्व यदनन्तरम् ||२५||` | "And of this sage Uttanka, decide what should be done next. ||25||" |
+| `Line 5731: ` | "[Blank line]" |
+| `Line 5732: जनमेजय उवाच||` | "Janamejaya said:" |
+| `Line 5733: ` | "[Blank line]" |
+| `Line 5734: एतत्तु श्रोतुमिच्छामि अटव्यां निर्जने वने |` | "But I wish to hear about this, in the desolate forest in the wilderness," |
+| `Line 5735: संवादं पन्नगेन्द्रस्य काश्यपस्य च यत्तदा ||२६||` | "The conversation between the lord of serpents [Takshaka] and Kashyapa [sage] that took place then. ||26||" |
+| `Line 5736: ` | "[Blank line]" |
+| `Line 5737: केन दृष्टं श्रुतं चापि भवतां श्रोत्रमागतम् |` | "By whom was it seen and heard, and how did it come to your ears?" |
+| `Line 5738: श्रुत्वा चाथ विधास्यामि पन्नगान्तकरीं मतिम् ||२७||` | "After hearing it, I shall then form a resolution to destroy the serpents [snake sacrifice]. ||27||" |
+| `Line 5739: ` | "[Blank line]" |
+| `Line 5740: मन्त्रिण ऊचुः||` | "The ministers said:" |
+| `Line 5741: ` | "[Blank line]" |
+| `Line 5742: शृणु राजन्यथास्माकं येनैतत्कथितं पुरा |` | "Listen, O king, how this was told to us before," |
+| `Line 5743: समागमं द्विजेन्द्रस्य पन्नगेन्द्रस्य चाध्वनि ||२८||` | "About the meeting of the foremost Brahmin [Kashyapa] and the lord of serpents on the way. ||28||" |
+| `Line 5744: ` | "[Blank line]" |
+| `Line 5745: तस्मिन्वृक्षे नरः कश्चिदिन्धनार्थाय पार्थिव |` | "In that tree, O ruler [Janamejaya], a certain man in search of firewood," |
+| `Line 5746: विचिन्वन्पूर्वमारूढः शुष्कशाखं वनस्पतिम् ||२९||` | "Had previously climbed that forest tree with dry branches. ||29||" |
+| `Line 5747: ` | "[Blank line]" |
+| `Line 5748: अबुध्यमानौ तं तत्र वृक्षस्थं पन्नगद्विजौ ||२९||` | "The serpent and the twice-born [Brahmin] were unaware of him there in the tree. ||29||" |
+| `Line 5749: ` | "[Blank line]" |
+| `Line 5750: स तु तेनैव वृक्षेण भस्मीभूतोऽभवत्तदा |` | "But he, along with that very tree, was reduced to ashes then," |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 2601: १२` | "12" |
+| `Line 2602: ` | [Blank line] |
+| `Line 2603: ` | [Blank line] |
+| `Line 2604: रुरुरुवाच॥` | "Ruru said:" |
+| `Line 2605: ` | [Blank line] |
+| `Line 2606: कथं हिंसितवान्सर्पान्क्षत्रियो जनमेजयः |` | "How did the Kshatriya [warrior class] Janamejaya harm the serpents?" |
+| `Line 2607: सर्पा वा हिंसितास्तात किमर्थं द्विजसत्तम ॥१॥` | "Or for what reason were the serpents harmed, O father, O best of the twice-born [Brahmin]? ||1||" |
+| `Line 2608: ` | [Blank line] |
+| `Line 2609: किमर्थं मोक्षिताश्चैव पन्नगास्तेन शंस मे |` | "And for what reason were those serpents [nāgas] liberated by him? Tell me," |
+| `Line 2610: आस्तीकेन तदाचक्ष्व श्रोतुमिच्छाम्यशेषतः ॥२॥` | "Narrate to me about Āstīka. I wish to hear it completely. ||2||" |
+| `Line 2611: ` | [Blank line] |
+| `Line 2612: ऋषिरुवाच॥` | "The Sage said:" |
+| `Line 2613: ` | [Blank line] |
+| `Line 2614: श्रोष्यसि त्वं रुरो सर्वमास्तीकचरितं महत् |` | "You shall hear, O Ruru, the entire great story of Āstīka," |
+| `Line 2615: ब्राह्मणानां कथयतामित्युक्त्वान्तरधीयत ॥३॥` | "As narrated by the Brahmins." Having said this, he disappeared. ||3||" |
+| `Line 2616: ` | [Blank line] |
+| `Line 2617: सूत उवाच॥` | "Sūta [bard/narrator] said:" |
+| `Line 2618: ` | [Blank line] |
+| `Line 2619: रुरुश्चापि वनं सर्वं पर्यधावत्समन्ततः |` | "And Ruru ran throughout the entire forest in all directions," |
+| `Line 2620: तमृषिं द्रष्टुमन्विच्छन्संश्रान्तो न्यपतद्भुवि ॥४॥` | "Desiring to see that sage, and exhausted, he fell to the ground. ||4||" |
+| `Line 2621: ` | [Blank line] |
+| `Line 2622: लब्धसञ्ज्ञो रुरुश्चायात्तच्चाचख्यौ पितुस्तदा |` | "Having regained consciousness, Ruru came and told everything to his father then," |
+| `Line 2623: पिता चास्य तदाख्यानं पृष्टः सर्वं न्यवेदयत् ॥५॥` | "And his father, being asked, narrated the entire story. ||5||" |
+| `Line 2624: ` | [Blank line] |
+| `Line 2625: ` | [Blank line] |

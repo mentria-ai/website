@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 37566: ` | "[Blank line]" |
+| `Line 37567: ` | "[Blank line]" |
+| `Line 37568: ` | "[Blank line]" |
+| `Line 37569: ` | "[Blank line]" |
+| `Line 37570: ३०` | "30 [chapter number]" |
+| `Line 37571: ` | "[Blank line]" |
+| `Line 37572: ` | "[Blank line]" |
+| `Line 37573: युधिष्ठिर उवाच||` | "Yudhiṣṭhira [eldest Pāṇḍava] said:" |
+| `Line 37574: ` | "[Blank line]" |
+| `Line 37575: क्रोधो हन्ता मनुष्याणां क्रोधो भावयिता पुनः |` | "Anger is the destroyer of humans, and anger is also their creator." |
+| `Line 37576: इति विद्धि महाप्राज्ञे क्रोधमूलौ भवाभवौ ||१||` | "Know this, O greatly wise one, that existence and non-existence are both rooted in anger. ||1||" |
+| `Line 37577: ` | "[Blank line]" |
+| `Line 37578: यो हि संहरते क्रोधं भावस्तस्य सुशोभने |` | "For he who restrains anger, O beautiful one, has prosperity," |
+| `Line 37579: यः पुनः पुरुषः क्रोधं नित्यं न सहते शुभे ||२||` | "But the person who cannot always endure anger, O auspicious one, ||2||" |
+| `Line 37580: ` | "[Blank line]" |
+| `Line 37581: तस्याभावाय भवति क्रोधः परमदारुणः ||२||` | "For him, anger becomes extremely terrible, leading to his destruction. ||2||" |
+| `Line 37582: ` | "[Blank line]" |
+| `Line 37583: क्रोधमूलो विनाशो हि प्रजानामिह दृश्यते |` | "Destruction rooted in anger is indeed seen among people here," |
+| `Line 37584: तत्कथं मादृशः क्रोधमुत्सृजेल्लोकनाशनम् ||३||` | "How then should one like me give way to anger that destroys the world? ||3||" |
+| `Line 37585: ` | "[Blank line]" |
+| `Line 37586: क्रुद्धः पापं नरः कुर्यात्क्रुद्धो हन्याद्गुरूनपि |` | "An angry person might commit sin; when angry, one might even kill teachers [gurus]," |
+| `Line 37587: क्रुद्धः परुषया वाचा श्रेयसोऽप्यवमन्यते ||४||` | "An angry person with harsh words disrespects even those who are superior. ||4||" |
+| `Line 37588: ` | "[Blank line]" |
+| `Line 37589: वाच्यावाच्ये हि कुपितो न प्रजानाति कर्हिचित् |` | "Indeed, an enraged person never distinguishes between what should and should not be said," |
+| `Line 37590: नाकार्यमस्ति क्रुद्धस्य नावाच्यं विद्यते तथा ||५||` | "For an angry person, there is no improper action, nor is there anything that should not be spoken. ||5||" |

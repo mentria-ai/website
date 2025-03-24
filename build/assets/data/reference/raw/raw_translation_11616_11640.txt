@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 11616: भीष्मः खलु पितुः प्रियचिकीर्षया सत्यवतीमुदवहन्मातरम् |` | "Bhīṣma [son of Śantanu], indeed, out of desire to please his father, brought Satyavatī [truth-embodied] as a mother," |
+| `Line 11617: यामाहुर्गन्धकालीति | ०५१ |` | "Whom they also called Gandhakālī [fragrant one]. |051|" |
+| `Line 11618: तस्यां कानीनो गर्भः पराशराद्द्वैपायनः |` | "From her, while unwed, was born Dvaipāyana [island-born] through Parāśara [sage]," |
+| `Line 11619: तस्यामेव शन्तनोर्द्वौ पुत्रौ बभूवतुः |` | "And from her and Śantanu [beneficent king] were born two sons," |
+| `Line 11620: चित्राङ्गदो विचित्रवीर्यश्च | ०५२ |` | "Citrāṅgada and Vicitravīrya [of wondrous valor]. |052|" |
+| `Line 11621: तयोरप्राप्तयौवन एव चित्राङ्गदो गन्धर्वेण हतः |` | "Of these two, Citrāṅgada was killed by a Gandharva [celestial musician] before reaching youth," |
+| `Line 11622: विचित्रवीर्यस्तु राजा समभवत् | ०५३ |` | "While Vicitravīrya became the king. |053|" |
+| `Line 11623: विचित्रवीर्यः खलु कौसल्यात्मजेऽम्बिकाम्बालिके काशिराजदुहितरावुपयेमे | ०५४ |` | "Vicitravīrya indeed married Ambikā and Ambālikā, daughters of the king of Kāśi [Benares], born to Kausalyā. |054|" |
+| `Line 11624: विचित्रवीर्यस्त्वनपत्य एव विदेहत्वं प्राप्तः | ०५५ |` | "But Vicitravīrya died without offspring. |055|" |
+| `Line 11625: ततः सत्यवती चिन्तयामास |` | "Then Satyavatī thought," |
+| `Line 11626: दौःषन्तो वंश उच्छिद्यते इति | ०५६ |` | "'The lineage of Duṣyanta [ancestor of Kurus] is being cut off.' |056|" |
+| `Line 11627: सा द्वैपायनमृषिं चिन्तयामास | ०५७ |` | "She thought of the sage Dvaipāyana [Vyāsa]. |057|" |
+| `Line 11628: स तस्याः पुरतः स्थितः किं करवाणीति | ०५८ |` | "He appeared before her and asked, 'What shall I do?' |058|" |
+| `Line 11629: सा तमुवाच |` | "She said to him," |
+| `Line 11630: भ्राता तवानपत्य एव स्वर्यातो विचित्रवीर्यः |` | "'Your brother Vicitravīrya has departed to heaven without offspring," |
+| `Line 11631: साध्वपत्यं तस्योत्पादयेति | ०५९ |` | "Please produce offspring for him.' |059|" |
+| `Line 11632: स परमित्युक्त्वा त्रीन्पुत्रानुत्पादयामास धृतराष्ट्रं पाण्डुं विदुरं चेति | ०६० |` | "He, saying 'Very well,' produced three sons: Dhṛtarāṣṭra [holder of kingdom], Pāṇḍu [pale one], and Vidura [wise one]. |060|" |
+| `Line 11633: तत्र धृतराष्ट्रस्य राज्ञः पुत्रशतं बभूव गान्धार्यां वरदानाद्द्वैपायनस्य | ०६१ |` | "Then King Dhṛtarāṣṭra had a hundred sons from Gāndhārī [princess of Gandhara] due to the boon of Dvaipāyana. |061|" |
+| `Line 11634: तेषां धृतराष्ट्रस्य पुत्राणां चत्वारः प्रधाना बभूवुर्दुर्योधनो दुःशासनो विकर्णश्चित्रसेन इति | ०६२ |` | "Among those sons of Dhṛtarāṣṭra, four were prominent: Duryodhana [difficult to fight], Duḥśāsana [difficult to control], Vikarṇa, and Citrasena. |062|" |
+| `Line 11635: पाण्डोस्तु द्वे भार्ये बभूवतुः कुन्ती माद्री चेत्युभे स्त्रीरत्ने | ०६३ |` | "Pāṇḍu had two wives, Kuntī and Mādrī, both jewels among women. |063|" |
+| `Line 11636: अथ पाण्डुर्मृगयां चरन्मैथुनगतमृषिमपश्यन्मृग्यां वर्तमानम् |` | "Then Pāṇḍu, while hunting, saw a sage engaged in mating with a doe," |
+| `Line 11637: तथैवाप्लुतमनासादितकामरसमतृप्तं बाणेनाभिजघान | ०६४ |` | "And shot with an arrow at him who was thus engaged, unsatisfied, not having completed his pleasure. |064|" |
+| `Line 11638: स बाणविद्ध उवाच पाण्डुम् |` | "He, pierced by the arrow, said to Pāṇḍu," |
+| `Line 11639: चरता धर्ममिमं येन त्वयाभिज्ञेन कामरसस्याहमनवाप्तकामरसोऽभिहतस्तस्मात्त्वमप्येतामवस्थामासाद्यानवाप्तकामरसः पञ्चत्वमाप्स्यसि क्षिप्रमेवेति | ०६५ |` | "'Since you, who should know the law of conduct, have struck me before I could fulfill my desire, therefore you too shall die quickly in the same state, unfulfilled in your desire.' |065|" |
+| `Line 11640: स विवर्णरूपः पाण्डुः शापं परिहरमाणो नोपासर्पत भार्ये | ०६६ |` | "That pale-complexioned Pāṇḍu, avoiding the curse, did not approach his wives. |066|" |

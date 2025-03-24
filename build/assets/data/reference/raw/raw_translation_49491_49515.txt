@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 49491: ` | "[Blank line]" |
+| `Line 49492: अत्र सारस्वतैर्यज्ञैरीजानाः परमर्षयः |` | "Here, the supreme sages [paramarṣi] perform sacrifices dedicated to Sarasvatī [river goddess]," |
+| `Line 49493: यूपोलूखलिनस्तात गच्छन्त्यवभृथाप्लवम् ||१४||` | "And with sacrificial posts [yūpa] and mortars [ulūkhala], dear one, they proceed to the final ablution [avabhṛtha]. ||14||" |
+| `Line 49494: ` | "[Blank line]" |
+| `Line 49495: अत्रैव भरतो राजा मेध्यमश्वमवासृजत् |` | "Here indeed King Bharata [legendary king] released the sacrificial horse [medhya-aśva]," |
+| `Line 49496: असकृत्कृष्णसारङ्गं धर्मेणावाप्य मेदिनीम् ||१५||` | "Having righteously conquered the earth multiple times with the black-spotted deer [kṛṣṇasāraṅga]. ||15||" |
+| `Line 49497: ` | "[Blank line]" |
+| `Line 49498: अत्रैव पुरुषव्याघ्र मरुत्तः सत्रमुत्तमम् |` | "Here itself, O tiger among men [puruṣavyāghra], Marutta [ancient king] performed the supreme sacrifice [satra]," |
+| `Line 49499: आस्ते देवर्षिमुख्येन संवर्तेनाभिपालितः ||१६||` | "Being guided by the foremost of divine sages [devarṣi], Saṃvarta. ||16||" |
+| `Line 49500: ` | "[Blank line]" |
+| `Line 49501: अत्रोपस्पृश्य राजेन्द्र सर्वाँल्लोकान्प्रपश्यति |` | "Having performed ablutions here, O king of kings [rājendra], one beholds all the worlds," |
+| `Line 49502: पूयते दुष्कृताच्चैव समुपस्पृश्य भारत ||१७||` | "And is purified from evil deeds upon touching the waters, O Bhārata [Yudhiṣṭhira]. ||17||" |
+| `Line 49503: ` | "[Blank line]" |
+| `Line 49504: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 49505: ` | "[Blank line]" |
+| `Line 49506: तत्र सभ्रातृकः स्नात्वा स्तूयमानो महर्षिभिः |` | "There, having bathed with his brothers and being praised by the great sages [maharṣi]," |
+| `Line 49507: लोमशं पाण्डवश्रेष्ठ इदं वचनमब्रवीत् ||१८||` | "The foremost of Pāṇḍavas [Yudhiṣṭhira] spoke these words to Lomaśa: ||18||" |
+| `Line 49508: ` | "[Blank line]" |
+| `Line 49509: सर्वाँल्लोकान्प्रपश्यामि तपसा सत्यविक्रम |` | "I behold all the worlds through austerity, O truly valorous one [satyavikrama]," |
+| `Line 49510: इहस्थः पाण्डवश्रेष्ठं पश्यामि श्वेतवाहनम् ||१९||` | "Standing here, I see the foremost of Pāṇḍavas [Arjuna], the one with white steeds [śvetavāhana]. ||19||" |
+| `Line 49511: ` | "[Blank line]" |
+| `Line 49512: लोमश उवाच||` | "Lomaśa [sage] said:" |
+| `Line 49513: ` | "[Blank line]" |
+| `Line 49514: एवमेतन्महाबाहो पश्यन्ति परमर्षयः |` | "It is indeed so, O mighty-armed one [mahābāho], the supreme sages [paramarṣi] see thus," |
+| `Line 49515: सरस्वतीमिमां पुण्यां पश्यैकशरणावृताम् ||२०||` | "Behold this sacred Sarasvatī [river goddess] surrounded by a single shelter [ekaśaraṇa]. ||20||" |

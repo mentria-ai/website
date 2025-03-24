@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 47341: सगरान्तिकमागच्छत्तच्च तस्मै न्यवेदयत् ||४||` | "He came to Sagara [great king] and reported that to him. ||4||" |
+| `Line 47342: ` | "[Blank line]" |
+| `Line 47343: स तच्छ्रुत्वा वचो घोरं राजा मुनिमुखोद्गतम् |` | "Having heard those terrible words that came from the sage's mouth, the king" |
+| `Line 47344: मुहूर्तं विमना भूत्वा स्थाणोर्वाक्यमचिन्तयत् ||५||` | "became dejected for a moment and pondered the words of Sthāṇu [Śiva]. ||5||" |
+| `Line 47345: ` | "[Blank line]" |
+| `Line 47346: आत्मानमात्मनाश्वास्य हयमेवान्वचिन्तयत् ||५||` | "Consoling himself by himself, he thought only about the horse. ||5||" |
+| `Line 47347: ` | "[Blank line]" |
+| `Line 47348: अंशुमन्तं समाहूय असमज्ञःसुतं तदा |` | "Then, summoning Aṃśumān [ray-possessing], the son of Asamajña," |
+| `Line 47349: पौत्रं भरतशार्दूल इदं वचनमब्रवीत् ||६||` | "his grandson, O tiger among Bharatas [Yudhiṣṭhira], he spoke these words: ||6||" |
+| `Line 47350: ` | "[Blank line]" |
+| `Line 47351: षष्टिस्तानि सहस्राणि पुत्राणाममितौजसाम् |` | "Those sixty thousand sons of immeasurable strength," |
+| `Line 47352: कापिलं तेज आसाद्य मत्कृते निधनं गताः ||७||` | "having encountered Kapila's [sage's] power, have met their death because of me. ||7||" |
+| `Line 47353: ` | "[Blank line]" |
+| `Line 47354: तव चापि पिता तात परित्यक्तो मयानघ |` | "And your father too, dear one, was abandoned by me, O sinless one," |
+| `Line 47355: धर्मं संरक्षमाणेन पौराणां हितमिच्छता ||८||` | "as I was protecting dharma [righteousness] and desiring the welfare of the citizens. ||8||" |
+| `Line 47356: ` | "[Blank line]" |
+| `Line 47357: युधिष्ठिर उवाच||` | "Yudhiṣṭhira [Pāṇḍava king] said:" |
+| `Line 47358: ` | "[Blank line]" |
+| `Line 47359: किमर्थं राजशार्दूलः सगरः पुत्रमात्मजम् |` | "For what reason did Sagara, that tiger among kings," |
+| `Line 47360: त्यक्तवान्दुस्त्यजं वीरं तन्मे ब्रूहि तपोधन ||९||` | "abandon his own son, the hero difficult to abandon? Tell me that, O wealth of austerities [sage]. ||9||" |
+| `Line 47361: ` | "[Blank line]" |
+| `Line 47362: लोमश उवाच||` | "Lomaśa [sage] said:" |
+| `Line 47363: ` | "[Blank line]" |
+| `Line 47364: असमञ्जा इति ख्यातः सगरस्य सुतो ह्यभूत् |` | "There was a son of Sagara known as Asamañjā," |
+| `Line 47365: यं शैब्या जनयामास पौराणां स हि दारकान् ||१०||` | "whom Śaibyā [queen] gave birth to. He would take the children of the citizens ||10||" |

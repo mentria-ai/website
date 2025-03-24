@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 8191: स गच्छन्ददृशे धीमान्नन्दनप्रतिमं वनम् |` | "Going forth, that wise one saw a forest resembling Nandana [celestial garden]," |
+| `Line 8192: बिल्वार्कखदिराकीर्णं कपित्थधवसङ्कुलम् ||१२||` | "Filled with bilva, arka, and khadira trees, crowded with kapittha and dhava trees. ||12||" |
+| `Line 8193: ` | "[Blank line]" |
+| `Line 8194: विषमं पर्वतप्रस्थैरश्मभिश्च समावृतम् |` | "Uneven, surrounded by mountain slopes and rocks," |
+| `Line 8195: निर्जलं निर्मनुष्यं च बहुयोजनमायतम् ||१३||` | "Waterless and uninhabited, extending many yojanas [distance measure]. ||13||" |
+| `Line 8196: ` | "[Blank line]" |
+| `Line 8197: मृगसङ्घैर्वृतं घोरैरन्यैश्चापि वनेचरैः ||१३||` | "Filled with fearsome herds of wild animals and other forest-dwellers. ||13||" |
+| `Line 8198: ` | "[Blank line]" |
+| `Line 8199: तद्वनं मनुजव्याघ्रः सभृत्यबलवाहनः |` | "That forest, the tiger among men [great hero], with his servants, army and vehicles," |
+| `Line 8200: लोडयामास दुःषन्तः सूदयन्विविधान्मृगान् ||१४||` | "Dushyanta roamed about, killing various wild animals. ||14||" |
+| `Line 8201: ` | "[Blank line]" |
+| `Line 8202: बाणगोचरसम्प्राप्तांस्तत्र व्याघ्रगणान्बहून् |` | "Many tigers that came within the range of his arrows there," |
+| `Line 8203: पातयामास दुःषन्तो निर्बिभेद च सायकैः ||१५||` | "Dushyanta felled and pierced with his arrows. ||15||" |
+| `Line 8204: ` | "[Blank line]" |
+| `Line 8205: दूरस्थान्सायकैः कांश्चिदभिनत्स नरर्षभः |` | "Some distant ones, that bull among men [great hero] struck with arrows," |
+| `Line 8206: अभ्याशमागतांश्चान्यान्खड्गेन निरकृन्तत ||१६||` | "And others that came near, he cut down with his sword. ||16||" |
+| `Line 8207: ` | "[Blank line]" |
+| `Line 8208: कांश्चिदेणान्स निर्जघ्ने शक्त्या शक्तिमतां वरः |` | "Some antelopes he slew with his spear, that foremost among the powerful," |
+| `Line 8209: गदामण्डलतत्त्वज्ञश्चचारामितविक्रमः ||१७||` | "Skilled in mace-wielding techniques, he moved about with immeasurable prowess. ||17||" |
+| `Line 8210: ` | "[Blank line]" |
+| `Line 8211: तोमरैरसिभिश्चापि गदामुसलकर्पणैः |` | "With javelins, swords, maces, clubs, and karpanas [weapons]," |
+| `Line 8212: चचार स विनिघ्नन्वै वन्यांस्तत्र मृगद्विजान् ||१८||` | "He moved about, indeed slaying the wild animals and birds there. ||18||" |
+| `Line 8213: ` | "[Blank line]" |
+| `Line 8214: राज्ञा चाद्भुतवीर्येण योधैश्च समरप्रियैः |` | "By the king of wonderful valor and by warriors who loved battle," |
+| `Line 8215: लोड्यमानं महारण्यं तत्यजुश्च महामृगाः ||१९||` | "As the great forest was being disturbed, the great beasts fled. ||19||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 2101: च्यवनस्यापि दायादः प्रमतिर्नाम धार्मिकः ||७||` | "Cyavana's heir was the righteous one named Pramati. ||7||" |
+| `Line 2102: ` | [Blank line] |
+| `Line 2103: प्रमतेरप्यभूत्पुत्रो घृताच्यां रुरुरित्युत ||७||` | "And Pramati's son, born of Ghṛtācī [celestial nymph], was named Ruru. ||7||" |
+| `Line 2104: ` | [Blank line] |
+| `Line 2105: रुरोरपि सुतो जज्ञे शुनको वेदपारगः |` | "Ruru's son was born as Śunaka, master of the Vedas," |
+| `Line 2106: प्रमद्वरायां धर्मात्मा तव पूर्वपितामहात् ||८||` | "Born to Pramadvarā, righteous-souled, from your great-grandfather. ||8||" |
+| `Line 2107: ` | [Blank line] |
+| `Line 2108: तपस्वी च यशस्वी च श्रुतवान्ब्रह्मवित्तमः |` | "He was austere, famous, learned, and the foremost knower of Brahman [absolute reality]," |
+| `Line 2109: धर्मिष्ठः सत्यवादी च नियतो नियतेन्द्रियः ||९||` | "Most righteous, truthful, disciplined, and with controlled senses. ||9||" |
+| `Line 2110: ` | [Blank line] |
+| `Line 2111: शौनक उवाच||` | "Śaunaka said:" |
+| `Line 2112: ` | [Blank line] |
+| `Line 2113: सूतपुत्र यथा तस्य भार्गवस्य महात्मनः |` | "O son of Sūta, how that great-souled descendant of Bhṛgu [Bhārgava]" |
+| `Line 2114: च्यवनत्वं परिख्यातं तन्ममाचक्ष्व पृच्छतः ||१०||` | "Came to be known as Cyavana, tell me that as I ask. ||10||" |
+| `Line 2115: ` | [Blank line] |
+| `Line 2116: सूत उवाच||` | "Sūta said:" |
+| `Line 2117: ` | [Blank line] |
+| `Line 2118: भृगोः सुदयिता भार्या पुलोमेत्यभिविश्रुता |` | "Bhṛgu's beloved wife was well-known as Pulomā," |
+| `Line 2119: तस्यां गर्भः समभवद्भृगोर्वीर्यसमुद्भवः ||११||` | "In her a fetus was conceived, born of Bhṛgu's virility. ||11||" |
+| `Line 2120: ` | [Blank line] |
+| `Line 2121: तस्मिन्गर्भे सम्भृतेऽथ पुलोमायां भृगूद्वह |` | "When that fetus was formed in Pulomā, O carrier of Bhṛgu's lineage," |
+| `Line 2122: समये समशीलिन्यां धर्मपत्न्यां यशस्विनः ||१२||` | "At that time, in his virtuous and lawful wife of the illustrious one. ||12||" |
+| `Line 2123: ` | [Blank line] |
+| `Line 2124: अभिषेकाय निष्क्रान्ते भृगौ धर्मभृतां वरे |` | "When Bhṛgu, the best among the upholders of dharma, went out for his ablutions," |
+| `Line 2125: आश्रमं तस्य रक्षोऽथ पुलोमाभ्याजगाम ह ||१३||` | "A demon [rakṣas] then came to his hermitage, to Pulomā. ||13||" |

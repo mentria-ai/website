@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 35316: ` | "[Blank line]" |
+| `Line 35317: नैतदौपयिकं राजंस्त्वयि भीष्मे च जीवति |` | "This is not proper, O king, while you and Bhīṣma [Kuru elder] are alive," |
+| `Line 35318: यदन्योन्येन ते पुत्रा विरुध्यन्ते नराधिप ||१५||` | "That your sons quarrel with one another, O lord of men. ||15||" |
+| `Line 35319: ` | "[Blank line]" |
+| `Line 35320: मेढीभूतः स्वयं राजन्निग्रहे प्रग्रहे भवान् |` | "You yourself, O king, are the central post [authority figure] for restraint and guidance," |
+| `Line 35321: किमर्थमनयं घोरमुत्पतन्तमुपेक्षसे ||१६||` | "Why do you ignore this terrible disorder that is arising? ||16||" |
+| `Line 35322: ` | "[Blank line]" |
+| `Line 35323: दस्यूनामिव यद्वृत्तं सभायां कुरुनन्दन |` | "What happened in the assembly hall was like the conduct of robbers [dasyu], O joy of the Kurus," |
+| `Line 35324: तेन न भ्राजसे राजंस्तापसानां समागमे ||१७||` | "Because of that, you do not shine, O king, in this gathering of ascetics. ||17||" |
+| `Line 35325: ` | "[Blank line]" |
+| `Line 35326: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 35327: ` | "[Blank line]" |
+| `Line 35328: ततो व्यावृत्य राजानं दुर्योधनममर्षणम् |` | "Then, turning away from the king toward the intolerant Duryodhana," |
+| `Line 35329: उवाच श्लक्ष्णया वाचा मैत्रेयो भगवानृषिः ||१८||` | "The divine sage Maitreya [friendly sage] spoke with gentle words: ||18||" |
+| `Line 35330: ` | "[Blank line]" |
+| `Line 35331: दुर्योधन महाबाहो निबोध वदतां वर |` | "Duryodhana, mighty-armed one, listen, O best of speakers," |
+| `Line 35332: वचनं मे महाप्राज्ञ ब्रुवतो यद्धितं तव ||१९||` | "To my words, O greatly wise one, as I speak what is beneficial for you. ||19||" |
+| `Line 35333: ` | "[Blank line]" |
+| `Line 35334: मा द्रुहः पाण्डवान्राजन्कुरुष्व हितमात्मनः |` | "Do not bear hatred toward the Pāṇḍavas, O king, do what is beneficial for yourself," |
+| `Line 35335: पाण्डवानां कुरूणां च लोकस्य च नरर्षभ ||२०||` | "For the Pāṇḍavas, for the Kurus, and for the world, O bull among men. ||20||" |
+| `Line 35336: ` | "[Blank line]" |
+| `Line 35337: ते हि सर्वे नरव्याघ्राः शूरा विक्रान्तयोधिनः |` | "For they are all tiger-like men [powerful warriors], heroes and valiant fighters," |
+| `Line 35338: सर्वे नागायुतप्राणा वज्रसंहनना दृढाः ||२१||` | "All with the strength of ten thousand elephants [nāgāyuta], with bodies hard as thunderbolts, firm. ||21||" |
+| `Line 35339: ` | "[Blank line]" |
+| `Line 35340: सत्यव्रतपराः सर्वे सर्वे पुरुषमानिनः |` | "All devoted to truthful vows, all with self-respect as men," |

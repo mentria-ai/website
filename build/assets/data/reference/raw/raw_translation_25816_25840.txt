@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 25816: ऋषीन्वेद हुताशोऽपि ब्रह्म तद्विदितं च वः ||३||` | "Hutāśa [fire god] also knows the sages and the Brahman [absolute truth], and that is known to you all. ||3||" |
+| `Line 25817: ` | "[Blank line]" |
+| `Line 25818: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 25819: ` | "[Blank line]" |
+| `Line 25820: एवमाश्वास्य पुत्रान्स भार्यां चादाय भारत |` | "Having thus reassured his sons and taking his wife, O Bhārata [descendant of Bharata]," |
+| `Line 25821: मन्दपालस्ततो देशादन्यं देशं जगाम ह ||४||` | "Mandapāla [sage's name] then went from that region to another region. ||4||" |
+| `Line 25822: ` | "[Blank line]" |
+| `Line 25823: भगवानपि तिग्मांशुः समिद्धं खाण्डवं वनम् |` | "And the divine Tigmāṃśu [sharp-rayed one/fire] blazed through the Khāṇḍava forest," |
+| `Line 25824: ददाह सह कृष्णाभ्यां जनयञ्जगतोऽभयम् ||५||` | "Burning it along with the two Kṛṣṇas [Arjuna and Krishna], creating fearlessness in the world. ||5||" |
+| `Line 25825: ` | "[Blank line]" |
+| `Line 25826: वसामेदोवहाः कुल्यास्तत्र पीत्वा च पावकः |` | "And Pāvaka [fire god], having drunk the streams carrying fat and marrow there," |
+| `Line 25827: अगच्छत्परमां तृप्तिं दर्शयामास चार्जुनम् ||६||` | "Attained supreme satisfaction and showed himself to Arjuna. ||6||" |
+| `Line 25828: ` | "[Blank line]" |
+| `Line 25829: ततोऽन्तरिक्षाद्भगवानवतीर्य सुरेश्वरः |` | "Then, descending from the sky, the divine lord of gods [Indra]," |
+| `Line 25830: मरुद्गणवृतः पार्थं माधवं चाब्रवीदिदम् ||७||` | "Surrounded by hosts of Maruts [storm deities], spoke these words to Pārtha [Arjuna] and Mādhava [Krishna]. ||7||" |
+| `Line 25831: ` | "[Blank line]" |
+| `Line 25832: कृतं युवाभ्यां कर्मेदममरैरपि दुष्करम् |` | "This deed accomplished by you two is difficult even for the immortals [gods]," |
+| `Line 25833: वरान्वृणीतं तुष्टोऽस्मि दुर्लभानप्यमानुषान् ||८||` | "Choose boons, I am pleased, even those difficult to obtain for humans. ||8||" |
+| `Line 25834: ` | "[Blank line]" |
+| `Line 25835: पार्थस्तु वरयामास शक्रादस्त्राणि सर्वशः |` | "But Pārtha [Arjuna] chose from Śakra [Indra] all the weapons completely," |
+| `Line 25836: ग्रहीतुं तच्च शक्रोऽस्य तदा कालं चकार ह ||९||` | "And Śakra [Indra] then fixed a time for him to receive them. ||9||" |
+| `Line 25837: ` | "[Blank line]" |
+| `Line 25838: यदा प्रसन्नो भगवान्महादेवो भविष्यति |` | "When the divine Mahādeva [Shiva] will be pleased," |
+| `Line 25839: तुभ्यं तदा प्रदास्यामि पाण्डवास्त्राणि सर्वशः ||१०||` | "Then I shall give you, O Pāṇḍava [Arjuna], all the weapons completely. ||10||" |
+| `Line 25840: ` | "[Blank line]" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 25866: रमणीये नदीकूले सहिताः समुपाविशन् ||१९||` | "Together they sat down on the charming riverbank. ||19||" |
+| `Line 25867: ` | "[Blank line]" |
+| `Line 25868: ` | "[Blank line]" |
+| `Line 25869: ||२ महाभारते सभापर्वम् ||` | "||2 The Sabha Parva [Assembly Book] of the Mahabharata||" |
+| `Line 25870: ` | "[Blank line]" |
+| `Line 25871: ` | "[Blank line]" |
+| `Line 25872: सभापर्व` | "Sabha Parva [Assembly Book]" |
+| `Line 25873: १` | "1" |
+| `Line 25874: ` | "[Blank line]" |
+| `Line 25875: ` | "[Blank line]" |
+| `Line 25876: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 25877: ` | "[Blank line]" |
+| `Line 25878: ततोऽब्रवीन्मयः पार्थं वासुदेवस्य संनिधौ |` | "Then Maya [demon architect] spoke to Pārtha [Arjuna] in the presence of Vāsudeva [Krishna]," |
+| `Line 25879: प्राञ्जलिः श्लक्ष्णया वाचा पूजयित्वा पुनः पुनः ||१||` | "With folded hands, in gentle speech, honoring him again and again. ||1||" |
+| `Line 25880: ` | "[Blank line]" |
+| `Line 25881: अस्माच्च कृष्णात्सङ्क्रुद्धात्पावकाच्च दिधक्षतः |` | "From this angry Krishna [Vāsudeva] and from the burning fire [Pāvaka]," |
+| `Line 25882: त्वया त्रातोऽस्मि कौन्तेय ब्रूहि किं करवाणि ते ||२||` | "I was saved by you, O Kaunteya [son of Kunti]. Tell me, what may I do for you? ||2||" |
+| `Line 25883: ` | "[Blank line]" |
+| `Line 25884: अर्जुन उवाच||` | "Arjuna [third Pāṇḍava] said:" |
+| `Line 25885: ` | "[Blank line]" |
+| `Line 25886: कृतमेव त्वया सर्वं स्वस्ति गच्छ महासुर |` | "Everything has already been done by you. Go in peace, great Asura [demon]," |
+| `Line 25887: प्रीतिमान्भव मे नित्यं प्रीतिमन्तो वयं च ते ||३||` | "Be always well-disposed toward me, and we are well-disposed toward you. ||3||" |
+| `Line 25888: ` | "[Blank line]" |
+| `Line 25889: मय उवाच||` | "Maya [demon architect] said:" |
+| `Line 25890: ` | "[Blank line]" |

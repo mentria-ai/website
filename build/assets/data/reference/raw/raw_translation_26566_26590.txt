@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 26566: ` | "[Blank line]" |
+| `Line 26567: मङ्गल्यस्याप्रयोगं च प्रसङ्गं विषयेषु च |` | "Do you avoid the non-performance of auspicious acts [maṅgalya] and excessive indulgence in sensual pleasures?" |
+| `Line 26568: कच्चित्त्वं वर्जयस्येतान्राजदोषांश्चतुर्दश ||९८||` | "Do you avoid these fourteen faults [rāja-doṣa] of kings? ||98||" |
+| `Line 26569: ` | "[Blank line]" |
+| `Line 26570: कच्चित्ते सफला वेदाः कच्चित्ते सफलं धनम् |` | "Are your Vedas [sacred texts] fruitful? Is your wealth fruitful?" |
+| `Line 26571: कच्चित्ते सफला दाराः कच्चित्ते सफलं श्रुतम् ||९९||` | "Is your marriage fruitful? Is your learning fruitful? ||99||" |
+| `Line 26572: ` | "[Blank line]" |
+| `Line 26573: युधिष्ठिर उवाच||` | "Yudhiṣṭhira [eldest Pāṇḍava] said:" |
+| `Line 26574: ` | "[Blank line]" |
+| `Line 26575: कथं वै सफला वेदाः कथं वै सफलं धनम् |` | "How indeed are the Vedas fruitful? How indeed is wealth fruitful?" |
+| `Line 26576: कथं वै सफला दाराः कथं वै सफलं श्रुतम् ||१००||` | "How indeed is marriage fruitful? How indeed is learning fruitful? ||100||" |
+| `Line 26577: ` | "[Blank line]" |
+| `Line 26578: नारद उवाच||` | "Nārada [divine sage] said:" |
+| `Line 26579: ` | "[Blank line]" |
+| `Line 26580: अग्निहोत्रफला वेदा दत्तभुक्तफलं धनम् |` | "The Vedas bear fruit through Agnihotra [fire sacrifice], wealth bears fruit through giving and enjoying," |
+| `Line 26581: रतिपुत्रफला दाराः शीलवृत्तफलं श्रुतम् ||१०१||` | "Marriage bears fruit through pleasure and progeny, learning bears fruit through good character and conduct. ||101||" |
+| `Line 26582: ` | "[Blank line]" |
+| `Line 26583: वैशम्पायन उवाच||` | "Vaiśampāyana [narrator sage] said:" |
+| `Line 26584: ` | "[Blank line]" |
+| `Line 26585: एतदाख्याय स मुनिर्नारदः सुमहातपाः |` | "Having explained this, that sage Nārada of great austerity [mahātapas]," |
+| `Line 26586: पप्रच्छानन्तरमिदं धर्मात्मानं युधिष्ठिरम् ||१०२||` | "Immediately asked this to the righteous [dharmātman] Yudhiṣṭhira. ||102||" |
+| `Line 26587: ` | "[Blank line]" |
+| `Line 26588: नारद उवाच||` | "Nārada said:" |
+| `Line 26589: ` | "[Blank line]" |
+| `Line 26590: कच्चिदभ्यागता दूराद्वणिजो लाभकारणात् |` | "Do merchants who come from afar for the sake of profit," |

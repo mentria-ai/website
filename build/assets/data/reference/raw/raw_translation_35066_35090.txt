@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 35066: ` | "[Blank line]" |
+| `Line 35067: शकुनिरुवाच||` | "Śakuni [Duryodhana's uncle] said:" |
+| `Line 35068: ` | "[Blank line]" |
+| `Line 35069: किं बालिषां मतिं राजन्नास्थितोऽसि विशां पते |` | "Why, O king, lord of people, are you adopting such a childish opinion?" |
+| `Line 35070: गतास्ते समयं कृत्वा नैतदेवं भविष्यति ||७||` | "They have gone after making an agreement; this will not happen thus. ||7||" |
+| `Line 35071: ` | "[Blank line]" |
+| `Line 35072: सत्यवाक्ये स्थिताः सर्वे पाण्डवा भरतर्षभ |` | "All the Pāṇḍavas [Pandu's sons] are committed to truthfulness, O bull of Bharatas [royal lineage]," |
+| `Line 35073: पितुस्ते वचनं तात न ग्रहीष्यन्ति कर्हिचित् ||८||` | "They will never accept your father's words, dear one. ||8||" |
+| `Line 35074: ` | "[Blank line]" |
+| `Line 35075: अथ वा ते ग्रहीष्यन्ति पुनरेष्यन्ति वा पुरम् |` | "Or if they do accept and return to the city," |
+| `Line 35076: निरस्य समयं भूयः पणोऽस्माकं भविष्यति ||९||` | "Rejecting the agreement, there will again be a wager for us. ||9||" |
+| `Line 35077: ` | "[Blank line]" |
+| `Line 35078: सर्वे भवामो मध्यस्था राज्ञश्छन्दानुवर्तिनः |` | "Let us all remain neutral, following the king's wishes," |
+| `Line 35079: छिद्रं बहु प्रपश्यन्तः पाण्डवानां सुसंवृताः ||१०||` | "While secretly watching for many weaknesses of the Pāṇḍavas. ||10||" |
+| `Line 35080: ` | "[Blank line]" |
+| `Line 35081: दुःशासन उवाच||` | "Duḥśāsana [Duryodhana's brother] said:" |
+| `Line 35082: ` | "[Blank line]" |
+| `Line 35083: एवमेतन्महाप्राज्ञ यथा वदसि मातुल |` | "It is exactly so, O greatly wise one, as you say, maternal uncle," |
+| `Line 35084: नित्यं हि मे कथयतस्तव बुद्धिर्हि रोचते ||११||` | "Your intelligence always pleases me whenever you speak. ||11||" |
+| `Line 35085: ` | "[Blank line]" |
+| `Line 35086: कर्ण उवाच||` | "Karṇa [Duryodhana's friend] said:" |
+| `Line 35087: ` | "[Blank line]" |
+| `Line 35088: काममीक्षामहे सर्वे दुर्योधन तवेप्सितम् |` | "We all willingly look to your desire, O Duryodhana," |
+| `Line 35089: ऐकमत्यं हि नो राजन्सर्वेषामेव लक्ष्यते ||१२||` | "For unity of purpose is indeed observed among all of us, O king. ||12||" |
+| `Line 35090: ` | "[Blank line]" |

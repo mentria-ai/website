@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 36766: २२` | "22 [chapter number]" |
+| `Line 36767: ` | "[Blank line]" |
+| `Line 36768: ` | "[Blank line]" |
+| `Line 36769: वासुदेव उवाच||` | "Vāsudeva [Krishna] said:" |
+| `Line 36770: ` | "[Blank line]" |
+| `Line 36771: एवं स पुरुषव्याघ्र शाल्वो राज्ञां महारिपुः |` | "Thus, O tiger among men [puruṣavyāghra], that Śālva, the great enemy of kings," |
+| `Line 36772: युध्यमानो मया सङ्ख्ये वियदभ्यागमत्पुनः ||१||` | "While fighting with me in battle, rose again into the sky. ||1||" |
+| `Line 36773: ` | "[Blank line]" |
+| `Line 36774: ततः शतघ्नीश्च महागदाश्च; दीप्तांश्च शूलान्मुसलानसींश्च |` | "Then he hurled śataghnīs [hundred-killer weapons] and great maces, blazing spears, clubs, and swords," |
+| `Line 36775: चिक्षेप रोषान्मयि मन्दबुद्धिः; शाल्वो महाराज जयाभिकाङ्क्षी ||२||` | "At me in anger, that dim-witted Śālva, O great king, desiring victory. ||2||" |
+| `Line 36776: ` | "[Blank line]" |
+| `Line 36777: तानाशुगैरापततोऽहमाशु; निवार्य तूर्णं खगमान्ख एव |` | "I quickly warded off those swiftly falling weapons with my arrows in the sky itself," |
+| `Line 36778: द्विधा त्रिधा चाच्छिनमाशु मुक्तै; स्ततोऽन्तरिक्षे निनदो बभूव ||३||` | "And cut them into two or three pieces with my swiftly released arrows; then a loud noise resounded in the sky. ||3||" |
+| `Line 36779: ` | "[Blank line]" |
+| `Line 36780: ततः शतसहस्रेण शराणां नतपर्वणाम् |` | "Then with a hundred thousand arrows with bent knots [curved shafts]," |
+| `Line 36781: दारुकं वाजिनश्चैव रथं च समवाकिरत् ||४||` | "He completely covered Dāruka [Krishna's charioteer], the horses, and the chariot. ||4||" |
+| `Line 36782: ` | "[Blank line]" |
+| `Line 36783: ततो मामब्रवीद्वीर दारुको विह्वलन्निव |` | "Then Dāruka, appearing distressed, said to me, O hero," |
+| `Line 36784: स्थातव्यमिति तिष्ठामि शाल्वबाणप्रपीडितः ||५||` | "'I must stand firm,' and so I stand, though afflicted by Śālva's arrows. ||5||" |
+| `Line 36785: ` | "[Blank line]" |
+| `Line 36786: इति तस्य निशम्याहं सारथेः करुणं वचः |` | "Having heard these pitiful words of my charioteer," |
+| `Line 36787: अवेक्षमाणो यन्तारमपश्यं शरपीडितम् ||६||` | "Looking at my driver, I saw him afflicted by arrows. ||6||" |
+| `Line 36788: ` | "[Blank line]" |
+| `Line 36789: न तस्योरसि नो मूर्ध्नि न काये न भुजद्वये |` | "Neither on his chest, nor on his head, nor on his body, nor on his two arms," |
+| `Line 36790: अन्तरं पाण्डवश्रेष्ठ पश्यामि नहतं शरैः ||७||` | "Could I see, O best of the Pāṇḍavas [Yudhishthira], any space not pierced by arrows. ||7||" |

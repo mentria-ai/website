@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 20991: अश्वत्थामा च भोजश्च सर्वशस्त्रभृतां वरौ |` | "Aśvatthāmā [Droṇa's son] and Bhoja [royal clan], the best among all weapon-bearers," |
+| `Line 20992: समवेतौ महात्मानौ त्वदर्थे समलङ्कृतौ ||६||` | "These two great souls have assembled, adorned for your sake. ||6||" |
+| `Line 20993: ` | "[Blank line]" |
+| `Line 20994: बृहन्तो मणिमांश्चैव दण्डधारश्च वीर्यवान् |` | "Bṛhanta, Maṇimān, and the powerful Daṇḍadhāra [staff-bearer]," |
+| `Line 20995: सहदेवो जयत्सेनो मेघसन्धिश्च मागधः ||७||` | "Sahadeva, Jayatsena, and Meghasandhi [cloud-alliance] of Magadha. ||7||" |
+| `Line 20996: ` | "[Blank line]" |
+| `Line 20997: विराटः सह पुत्राभ्यां शङ्खेनैवोत्तरेण च |` | "Virāṭa [king of Matsya] with his two sons, Śaṅkha and Uttara," |
+| `Line 20998: वार्धक्षेमिः सुवर्चाश्च सेनाबिन्दुश्च पार्थिवः ||८||` | "Vārdhakṣemi, Suvarcā, and the king Senābindu [army-point]. ||8||" |
+| `Line 20999: ` | "[Blank line]" |
+| `Line 21000: अभिभूः सह पुत्रेण सुदाम्ना च सुवर्चसा |` | "Abhibhū [conqueror] with his son, and Sudāmna and Suvarcasa," |
+| `Line 21001: सुमित्रः सुकुमारश्च वृकः सत्यधृतिस्तथा ||९||` | "Sumitra, Sukumāra, Vṛka [wolf], and Satyadhṛti [truth-steadfast] as well. ||9||" |
+| `Line 21002: ` | "[Blank line]" |
+| `Line 21003: सूर्यध्वजो रोचमानो नीलश्चित्रायुधस्तथा |` | "Sūryadhvaja [sun-bannered], Rocamāna [shining], Nīla [blue], and Citrāyudha [colorful-weaponed] as well," |
+| `Line 21004: अंशुमांश्चेकितानश्च श्रेणिमांश्च महाबलः ||१०||` | "Aṃśumān, Cekitāna, and the mighty Śreṇimān [rank-possessor]. ||10||" |
+| `Line 21005: ` | "[Blank line]" |
+| `Line 21006: समुद्रसेनपुत्रश्च चन्द्रसेनः प्रतापवान् |` | "The son of Samudrasena [ocean-army], and the valorous Candrasena [moon-army]," |
+| `Line 21007: जलसन्धः पितापुत्रौ सुदण्डो दण्ड एव च ||११||` | "Jalasandha [water-joined], father and son, Sudaṇḍa and Daṇḍa [staff] as well. ||11||" |
+| `Line 21008: ` | "[Blank line]" |
+| `Line 21009: पौण्ड्रको वासुदेवश्च भगदत्तश्च वीर्यवान् |` | "Pauṇḍraka Vāsudeva [false Krishna] and the powerful Bhagadatta [fortune-given]," |
+| `Line 21010: कलिङ्गस्ताम्रलिप्तश्च पत्तनाधिपतिस्तथा ||१२||` | "The king of Kaliṅga, Tāmralipta, and the lord of the city [pattanādhipati] as well. ||12||" |
+| `Line 21011: ` | "[Blank line]" |
+| `Line 21012: मद्रराजस्तथा शल्यः सहपुत्रो महारथः |` | "The king of Madra, Śalya [spear], with his son, the great chariot-warrior," |
+| `Line 21013: रुक्माङ्गदेन वीरेण तथा रुक्मरथेन च ||१३||` | "With the heroic Rukmāṅgada [golden-bracelet] and Rukmaratha [golden-chariot] as well. ||13||" |
+| `Line 21014: ` | "[Blank line]" |
+| `Line 21015: कौरव्यः सोमदत्तश्च पुत्राश्चास्य महारथाः |` | "Kauravya [Kuru descendant] Somadatta [moon-given] and his sons, the great chariot-warriors," |

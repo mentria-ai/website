@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 42216: असंस्कृतमपि व्यक्तं भाति काञ्चनसंनिभम् ||७||` | "Even though unwashed, it clearly shines like gold. ||7||" |
+| `Line 42217: ` | "[Blank line]" |
+| `Line 42218: अनेन वपुषा बाला पिप्लुनानेन चैव ह |` | "By this body and by this birthmark [piplu], the young woman," |
+| `Line 42219: लक्षितेयं मया देवी पिहितोऽग्निरिवोष्मणा ||८||` | "This goddess is recognized by me, like fire concealed by its heat. ||8||" |
+| `Line 42220: ` | "[Blank line]" |
+| `Line 42221: बृहदश्व उवाच||` | "Bṛhadaśva [sage narrator] said:" |
+| `Line 42222: ` | "[Blank line]" |
+| `Line 42223: तच्छ्रुत्वा वचनं तस्य सुदेवस्य विशां पते |` | "Having heard those words of Sudeva, O lord of people [Yudhiṣṭhira]," |
+| `Line 42224: सुनन्दा शोधयामास पिप्लुप्रच्छादनं मलम् ||९||` | "Sunandā cleansed the dirt covering the birthmark. ||9||" |
+| `Line 42225: ` | "[Blank line]" |
+| `Line 42226: स मलेनापकृष्टेन पिप्लुस्तस्या व्यरोचत |` | "With the dirt removed, her birthmark shone forth," |
+| `Line 42227: दमयन्त्यास्तदा व्यभ्रे नभसीव निशाकरः ||१०||` | "Like the moon [niśākara] in a cloudless sky, then did Damayantī's (birthmark shine). ||10||" |
+| `Line 42228: ` | "[Blank line]" |
+| `Line 42229: पिप्लुं दृष्ट्वा सुनन्दा च राजमाता च भारत |` | "Seeing the birthmark, both Sunandā and the queen mother, O Bhārata [Yudhiṣṭhira]," |
+| `Line 42230: रुदन्त्यौ तां परिष्वज्य मुहूर्तमिव तस्थतुः ||११||` | "Weeping, embraced her and stood thus for a moment. ||11||" |
+| `Line 42231: ` | "[Blank line]" |
+| `Line 42232: उत्सृज्य बाष्पं शनकै राजमातेदमब्रवीत् ||११||` | "Slowly releasing her tears, the queen mother spoke thus: ||11||" |
+| `Line 42233: ` | "[Blank line]" |
+| `Line 42234: भगिन्या दुहिता मेऽसि पिप्लुनानेन सूचिता |` | "You are my sister's daughter, indicated by this birthmark," |
+| `Line 42235: अहं च तव माता च राजन्यस्य महात्मनः ||१२||` | "I and your mother are (daughters) of the noble king. ||12||" |
+| `Line 42236: ` | "[Blank line]" |
+| `Line 42237: सुते दशार्णाधिपतेः सुदाम्नश्चारुदर्शने ||१२||` | "O beautiful one, (we are) daughters of Sudāman, the ruler of Daśārṇa [kingdom]. ||12||" |
+| `Line 42238: ` | "[Blank line]" |
+| `Line 42239: भीमस्य राज्ञः सा दत्ता वीरबाहोरहं पुनः |` | "She was given to King Bhīma [mighty one], while I to Vīrabāhu [strong-armed]," |
+| `Line 42240: त्वं तु जाता मया दृष्टा दशार्णेषु पितुर्गृहे ||१३||` | "And you were born and seen by me in your father's house in Daśārṇa. ||13||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 25691: मन्दपालोऽपि कौरव्य चिन्तयानः सुतांस्तदा |` | "Mandapāla [sage's name], O Kauravya [Kuru descendant], thinking about his sons then," |
+| `Line 25692: उक्तवानप्यशीतांशुं नैव स स्म न तप्यते ||१||` | "Though he had spoken to Aśītāṃśu [moon], he was still greatly distressed. ||1||" |
+| `Line 25693: ` | "[Blank line]" |
+| `Line 25694: स तप्यमानः पुत्रार्थे लपितामिदमब्रवीत् |` | "Tormented for the sake of his sons, he said this to Lapitā [female bird]:" |
+| `Line 25695: कथं न्वशक्ताः प्लवने लपिते मम पुत्रकाः ||२||` | "How will my sons, unable to fly, O Lapitā, [survive]? ||2||" |
+| `Line 25696: ` | "[Blank line]" |
+| `Line 25697: वर्धमाने हुतवहे वाते शीघ्रं प्रवायति |` | "As the fire [hutavaha] grows and the wind blows swiftly," |
+| `Line 25698: असमर्था विमोक्षाय भविष्यन्ति ममात्मजाः ||३||` | "My children will be unable to escape. ||3||" |
+| `Line 25699: ` | "[Blank line]" |
+| `Line 25700: कथं न्वशक्ता त्राणाय माता तेषां तपस्विनी |` | "How will their ascetic mother, unable to protect them," |
+| `Line 25701: भविष्यत्यसुखाविष्टा पुत्रत्राणमपश्यती ||४||` | "Be overcome with sorrow, seeing no way to save her sons? ||4||" |
+| `Line 25702: ` | "[Blank line]" |
+| `Line 25703: कथं नु सरणेऽशक्तान्पतने च ममात्मजान् |` | "How will she, running about and crying aloud," |
+| `Line 25704: सन्तप्यमाना अभितो वाशमानाभिधावती ||५||` | "Suffer all around for my children unable to flee or fly? ||5||" |
+| `Line 25705: ` | "[Blank line]" |
+| `Line 25706: जरितारिः कथं पुत्रः सारिसृक्वः कथं च मे |` | "How will my son Jaritāri [bird's name], how will Sārisṛkva [bird's name]," |
+| `Line 25707: स्तम्बमित्रः कथं द्रोणः कथं सा च तपस्विनी ||६||` | "How will Stambamitra [bird's name], how will Droṇa [bird's name], and how will that ascetic [mother]? ||6||" |
+| `Line 25708: ` | "[Blank line]" |
+| `Line 25709: लालप्यमानं तमृषिं मन्दपालं तथा वने |` | "To that sage Mandapāla, thus lamenting in the forest," |
+| `Line 25710: लपिता प्रत्युवाचेदं सासूयमिव भारत ||७||` | "Lapitā replied this, somewhat resentfully, O Bhārata [Kuru descendant]: ||7||" |
+| `Line 25711: ` | "[Blank line]" |
+| `Line 25712: न ते सुतेष्ववेक्षास्ति तानृषीनुक्तवानसि |` | "You have no concern for your sons; you called them sages," |
+| `Line 25713: तेजस्विनो वीर्यवन्तो न तेषां ज्वलनाद्भयम् ||८||` | "Powerful and mighty ones who have no fear from fire. ||8||" |
+| `Line 25714: ` | "[Blank line]" |
+| `Line 25715: तथाग्नौ ते परीत्ताश्च त्वया हि मम संनिधौ |` | "Thus they were entrusted to the fire by you in my presence," |

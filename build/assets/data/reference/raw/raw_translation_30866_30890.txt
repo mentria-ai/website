@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 30866: शकुनिरुवाच॥` | "Śakuni [Gāndhāra king] said:" |
+| `Line 30867: ` | "[Blank line]" |
+| `Line 30868: धनञ्जयो वासुदेवो भीमसेनो युधिष्ठिरः |` | "Dhanañjaya [Arjuna], Vāsudeva [Krishna], Bhīmasena, Yudhiṣṭhira," |
+| `Line 30869: नकुलः सहदेवश्च द्रुपदश्च सहात्मजैः ॥१४॥` | "Nakula, Sahadeva, and Drupada with his sons. ||14||" |
+| `Line 30870: ` | "[Blank line]" |
+| `Line 30871: नैते युधि बलाज्जेतुं शक्याः सुरगणैरपि |` | "These cannot be conquered in battle by force, even by hosts of gods [sura-gaṇa]," |
+| `Line 30872: महारथा महेष्वासाः कृतास्त्रा युद्धदुर्मदाः ॥१५॥` | "Great warriors [mahāratha], mighty archers, skilled in weapons, and intoxicated with battle. ||15||" |
+| `Line 30873: ` | "[Blank line]" |
+| `Line 30874: अहं तु तद्विजानामि विजेतुं येन शक्यते |` | "But I know the means by which they can be conquered," |
+| `Line 30875: युधिष्ठिरं स्वयं राजंस्तन्निबोध जुषस्व च ॥१६॥` | "Yudhiṣṭhira himself, O king. Listen to that and approve it. ||16||" |
+| `Line 30876: ` | "[Blank line]" |
+| `Line 30877: दुर्योधन उवाच॥` | "Duryodhana [Kuru prince] said:" |
+| `Line 30878: ` | "[Blank line]" |
+| `Line 30879: अप्रमादेन सुहृदामन्येषां च महात्मनाम् |` | "Through the vigilance of friends and other noble souls," |
+| `Line 30880: यदि शक्या विजेतुं ते तन्ममाचक्ष्व मातुल ॥१७॥` | "If they can be conquered, then tell me how, O maternal uncle [mātula]. ||17||" |
+| `Line 30881: ` | "[Blank line]" |
+| `Line 30882: शकुनिरुवाच॥` | "Śakuni said:" |
+| `Line 30883: ` | "[Blank line]" |
+| `Line 30884: द्यूतप्रियश्च कौन्तेयो न च जानाति देवितुम् |` | "The son of Kuntī [Yudhiṣṭhira] loves gambling [dyūta] but does not know how to play," |
+| `Line 30885: समाहूतश्च राजेन्द्रो न शक्ष्यति निवर्तितुम् ॥१८॥` | "And when challenged, that king of kings will not be able to refuse. ||18||" |
+| `Line 30886: ` | "[Blank line]" |
+| `Line 30887: देवने कुशलश्चाहं न मेऽस्ति सदृशो भुवि |` | "I am skilled in gambling, and there is no one equal to me on earth," |
+| `Line 30888: त्रिषु लोकेषु कौन्तेयं तं त्वं द्यूते समाह्वय ॥१९॥` | "In all three worlds. Challenge that son of Kuntī to a game of dice. ||19||" |
+| `Line 30889: ` | "[Blank line]" |
+| `Line 30890: तस्याक्षकुशलो राजन्नादास्येऽहमसंशयम् |` | "Being skilled in dice [akṣa], O king, I shall undoubtedly defeat him," |

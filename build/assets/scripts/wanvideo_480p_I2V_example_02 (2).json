@@ -1,0 +1,292 @@
+{
+  "11": {
+    "inputs": {
+      "model_name": "umt5-xxl-enc-bf16.safetensors",
+      "precision": "bf16",
+      "load_device": "offload_device",
+      "quantization": "disabled"
+    },
+    "class_type": "LoadWanVideoT5TextEncoder",
+    "_meta": {
+      "title": "Load WanVideo T5 TextEncoder"
+    }
+  },
+  "16": {
+    "inputs": {
+      "positive_prompt": "whale swimming with a child. splashing water from it's hole",
+      "negative_prompt": "Bright color tone, overexposed, static, unclear details, subtitles, style, work, painting, picture, still, overall gray, worst quality, low quality, JPEG compression artifacts, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn face, deformed, disfigured, anatomically incorrect limbs, finger fusion, static frames, cluttered background, three legs, crowded background, walking backward.",
+      "force_offload": true,
+      "t5": [
+        "11",
+        0
+      ],
+      "model_to_offload": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "WanVideoTextEncode",
+    "_meta": {
+      "title": "WanVideo TextEncode"
+    }
+  },
+  "22": {
+    "inputs": {
+      "model": "Wan2_1-I2V-14B-480P_fp8_e4m3fn.safetensors",
+      "base_precision": "fp16",
+      "quantization": "fp8_e4m3fn",
+      "load_device": "offload_device",
+      "attention_mode": "sdpa",
+      "block_swap_args": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "WanVideoModelLoader",
+    "_meta": {
+      "title": "WanVideo Model Loader"
+    }
+  },
+  "27": {
+    "inputs": {
+      "steps": 28,
+      "cfg": 6,
+      "shift": 5,
+      "seed": 1057359483639287,
+      "force_offload": true,
+      "scheduler": "unipc",
+      "riflex_freq_index": 0,
+      "denoise_strength": 1,
+      "batched_cfg": "",
+      "rope_function": "comfy",
+      "model": [
+        "22",
+        0
+      ],
+      "text_embeds": [
+        "16",
+        0
+      ],
+      "image_embeds": [
+        "63",
+        0
+      ],
+      "feta_args": [
+        "55",
+        0
+      ],
+      "teacache_args": [
+        "52",
+        0
+      ]
+    },
+    "class_type": "WanVideoSampler",
+    "_meta": {
+      "title": "WanVideo Sampler"
+    }
+  },
+  "28": {
+    "inputs": {
+      "enable_vae_tiling": false,
+      "tile_x": 272,
+      "tile_y": 272,
+      "tile_stride_x": 144,
+      "tile_stride_y": 128,
+      "vae": [
+        "38",
+        0
+      ],
+      "samples": [
+        "27",
+        0
+      ]
+    },
+    "class_type": "WanVideoDecode",
+    "_meta": {
+      "title": "WanVideo Decode"
+    }
+  },
+  "30": {
+    "inputs": {
+      "frame_rate": 30,
+      "loop_count": 0,
+      "filename_prefix": "WanVideoWrapper_I2V",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": true,
+      "trim_to_audio": false,
+      "pingpong": false,
+      "save_output": true,
+      "images": [
+        "28",
+        0
+      ]
+    },
+    "class_type": "VHS_VideoCombine",
+    "_meta": {
+      "title": "Video Combine 🎥🅥🅗🅢"
+    }
+  },
+  "35": {
+    "inputs": {
+      "backend": "inductor",
+      "fullgraph": false,
+      "mode": "default",
+      "dynamic": false,
+      "dynamo_cache_size_limit": 64,
+      "compile_transformer_blocks_only": true
+    },
+    "class_type": "WanVideoTorchCompileSettings",
+    "_meta": {
+      "title": "WanVideo Torch Compile Settings"
+    }
+  },
+  "38": {
+    "inputs": {
+      "model_name": "Wan2_1_VAE_bf16.safetensors",
+      "precision": "bf16"
+    },
+    "class_type": "WanVideoVAELoader",
+    "_meta": {
+      "title": "WanVideo VAE Loader"
+    }
+  },
+  "39": {
+    "inputs": {
+      "blocks_to_swap": 10,
+      "offload_img_emb": false,
+      "offload_txt_emb": false,
+      "use_non_blocking": true
+    },
+    "class_type": "WanVideoBlockSwap",
+    "_meta": {
+      "title": "WanVideo BlockSwap"
+    }
+  },
+  "45": {
+    "inputs": {
+      "offload_percent": 1
+    },
+    "class_type": "WanVideoVRAMManagement",
+    "_meta": {
+      "title": "WanVideo VRAM Management"
+    }
+  },
+  "52": {
+    "inputs": {
+      "rel_l1_thresh": 0.25,
+      "start_step": 1,
+      "end_step": -1,
+      "cache_device": "offload_device",
+      "use_coefficients": "true"
+    },
+    "class_type": "WanVideoTeaCache",
+    "_meta": {
+      "title": "WanVideo TeaCache"
+    }
+  },
+  "55": {
+    "inputs": {
+      "weight": 2,
+      "start_percent": 0,
+      "end_percent": 1
+    },
+    "class_type": "WanVideoEnhanceAVideo",
+    "_meta": {
+      "title": "WanVideo Enhance-A-Video"
+    }
+  },
+  "58": {
+    "inputs": {
+      "image": "D://mentria-latest//website//build//assets//img//quotes//quote_61.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "59": {
+    "inputs": {
+      "clip_name": "clip_vision_h.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
+    }
+  },
+  "63": {
+    "inputs": {
+      "width": [
+        "66",
+        1
+      ],
+      "height": [
+        "66",
+        2
+      ],
+      "num_frames": 81,
+      "noise_aug_strength": 0.030000000000000006,
+      "start_latent_strength": 1,
+      "end_latent_strength": 1,
+      "force_offload": true,
+      "start_image": [
+        "66",
+        0
+      ],
+      "vae": [
+        "38",
+        0
+      ],
+      "clip_embeds": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "WanVideoImageToVideoEncode",
+    "_meta": {
+      "title": "WanVideo ImageToVideo Encode"
+    }
+  },
+  "65": {
+    "inputs": {
+      "strength_1": 1,
+      "strength_2": 1,
+      "crop": "center",
+      "combine_embeds": "average",
+      "force_offload": true,
+      "tiles": 4,
+      "ratio": 0.20000000000000004,
+      "clip_vision": [
+        "59",
+        0
+      ],
+      "image_1": [
+        "66",
+        0
+      ]
+    },
+    "class_type": "WanVideoClipVisionEncode",
+    "_meta": {
+      "title": "WanVideo ClipVision Encode"
+    }
+  },
+  "66": {
+    "inputs": {
+      "width": 496,
+      "height": 864,
+      "upscale_method": "lanczos",
+      "keep_proportion": false,
+      "divisible_by": 16,
+      "crop": "disabled",
+      "image": [
+        "58",
+        0
+      ]
+    },
+    "class_type": "ImageResizeKJ",
+    "_meta": {
+      "title": "Resize Image"
+    }
+  }
+}

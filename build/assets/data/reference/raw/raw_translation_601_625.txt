@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 601: सूत उवाच||` | "Sūta [bard-narrator] said:" |
+| `Line 602: ` | [Blank line] |
+| `Line 603: अत्रोपनिषदं पुण्यां कृष्णद्वैपायनोऽब्रवीत् |` | "Here, Krishna Dvaipāyana [Vyāsa] spoke this sacred Upanishad [esoteric teaching]," |
+| `Line 604: भारताध्ययनात्पुण्यादपि पादमधीयतः ||१९१||` | "Even for one who studies just a quarter of the holy Bhārata [Mahābhārata]. ||191||" |
+| `Line 605: ` | [Blank line] |
+| `Line 606: श्रद्दधानस्य पूयन्ते सर्वपापान्यशेषतः ||१९१||` | "For the one who has faith, all sins are purified completely. ||191||" |
+| `Line 607: ` | [Blank line] |
+| `Line 608: देवर्षयो ह्यत्र पुण्या ब्रह्मराजर्षयस्तथा |` | "Indeed, here the divine sages, the brahmarṣis [Brahmin sages] and rājarṣis [royal sages]," |
+| `Line 609: कीर्त्यन्ते शुभकर्माणस्तथा यक्षमहोरगाः ||१९२||` | "Are glorified for their auspicious deeds, as well as the Yakṣas [demigods] and Mahoragas [great serpents]. ||192||" |
+| `Line 610: ` | [Blank line] |
+| `Line 611: भगवान्वासुदेवश्च कीर्त्यतेऽत्र सनातनः |` | "And Lord Vāsudeva [Krishna], the eternal one, is glorified here," |
+| `Line 612: स हि सत्यमृतं चैव पवित्रं पुण्यमेव च ||१९३||` | "For he is truth, immortality, purity, and virtue indeed. ||193||" |
+| `Line 613: ` | [Blank line] |
+| `Line 614: शाश्वतं ब्रह्म परमं ध्रुवं ज्योतिः सनातनम् |` | "The eternal Brahman [Absolute], supreme, immutable, the eternal light," |
+| `Line 615: यस्य दिव्यानि कर्माणि कथयन्ति मनीषिणः ||१९४||` | "Whose divine deeds the wise ones narrate. ||194||" |
+| `Line 616: ` | [Blank line] |
+| `Line 617: असत्सत्सदसच्चैव यस्माद्देवात्प्रवर्तते |` | "From which deity proceeds the unmanifest, the manifest, and that which is both manifest and unmanifest," |
+| `Line 618: सन्ततिश्च प्रवृत्तिश्च जन्म मृत्युः पुनर्भवः ||१९५||` | "And continuity, activity, birth, death, and rebirth. ||195||" |
+| `Line 619: ` | [Blank line] |
+| `Line 620: अध्यात्मं श्रूयते यच्च पञ्चभूतगुणात्मकम् |` | "And what is heard as spiritual knowledge, composed of the qualities of the five elements," |
+| `Line 621: अव्यक्तादि परं यच्च स एव परिगीयते ||१९६||` | "And that which is beyond the unmanifest beginning—He alone is celebrated. ||196||" |
+| `Line 622: ` | [Blank line] |
+| `Line 623: यत्तद्यतिवरा युक्ता ध्यानयोगबलान्विताः |` | "That which the best of ascetics [yatis], concentrated and endowed with the power of meditation yoga," |
+| `Line 624: प्रतिबिम्बमिवादर्शे पश्यन्त्यात्मन्यवस्थितम् ||१९७||` | "See established in their own self, like a reflection in a mirror. ||197||" |
+| `Line 625: ` | [Blank line] |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 2026: उत्तङ्कस्यैव सांनिध्ये पितुः स्वर्गगतिं प्रति ||१९४||` | "In the very presence of Uttanka, regarding his father's journey to heaven. ||194||" |
+| `Line 2027: ` | [Blank line] |
+| `Line 2028: तदैव हि स राजेन्द्रो दुःखशोकाप्लुतोऽभवत् |` | "At that very moment, that king [Janamejaya] became overwhelmed with grief and sorrow," |
+| `Line 2029: यदैव पितरं वृत्तमुत्तङ्कादशृणोत्तदा ||१९५||` | "When he heard from Uttanka about what happened to his father. ||195||" |
+| `Line 2030: ` | [Blank line] |
+| `Line 2031: पौलोमपर्व` | "Pauloma Parva [Section about Puloma]" |
+| `Line 2032: ४` | "4" |
+| `Line 2033: ` | [Blank line] |
+| `Line 2034: लोमहर्षणपुत्र उग्रश्रवाः सूतः पौराणिको नैमिषारण्ये शौनकस्य कुलपतेर्द्वादशवार्षिके सत्रे ऋषीनभ्यागतानुपतस्थे | ००१ |` | "Ugrashravas, the son of Lomaharshana, the suta [bard/chronicler], the reciter of Puranas, approached the sages who had gathered at the twelve-year sacrificial session of Shaunaka, the kulapati [head of school], in the Naimisha forest. |001|" |
+| `Line 2035: पौराणिकः पुराणे कृतश्रमः स तान्कृताञ्जलिरुवाच |` | "That reciter of Puranas, well-versed in the ancient lore, with folded hands addressed them," |
+| `Line 2036: किं भवन्तः श्रोतुमिच्छन्ति |` | "What do you venerable ones wish to hear?" |
+| `Line 2037: किमहं ब्रुवाणीति | ००२ |` | "What shall I narrate? |002|" |
+| `Line 2038: तमृषय ऊचुः |` | "The sages said to him," |
+| `Line 2039: परमं लोमहर्षणे प्रक्ष्यामस्त्वां वक्ष्यसि च नः शुश्रूषतां कथायोगम् |` | "O son of Lomaharshana, we shall ask you the highest knowledge, and you shall narrate to us who are eager to listen, the connection of stories," |
+| `Line 2040: तद्भगवांस्तु तावच्छौनकोऽग्निशरणमध्यास्ते | ००३ |` | "But for now, the venerable Shaunaka is seated at the fire sanctuary [ritual fire altar]. |003|" |
+| `Line 2041: ` | [Blank line] |
+| `Line 2042: योऽसौ दिव्याः कथा वेद देवतासुरसङ्कथाः |` | "He who knows divine stories, tales of gods and asuras [demons]," |
+| `Line 2043: मनुष्योरगगन्धर्वकथा वेद च सर्वशः ||४||` | "And knows completely the stories of humans, nagas [serpents], and gandharvas [celestial musicians]. ||4||" |
+| `Line 2044: ` | [Blank line] |
+| `Line 2045: स चाप्यस्मिन्मखे सौते विद्वान्कुलपतिर्द्विजः |` | "And in this sacrifice, O Suta, he is the learned kulapati [head of school], a twice-born [Brahmin]," |
+| `Line 2046: दक्षो धृतव्रतो धीमाञ्शास्त्रे चारण्यके गुरुः ||५||` | "Skilled, steadfast in vows, wise, and a master in the scriptures and Aranyakas [forest texts]. ||5||" |
+| `Line 2047: ` | [Blank line] |
+| `Line 2048: सत्यवादी शमपरस्तपस्वी नियतव्रतः |` | "Truthful, devoted to tranquility, an ascetic, firm in his vows," |
+| `Line 2049: सर्वेषामेव नो मान्यः स तावत्प्रतिपाल्यताम् ||६||` | "Respected by all of us, let us wait for him for now. ||6||" |
+| `Line 2050: ` | [Blank line] |

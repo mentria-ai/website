@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 8091: ` | "[Blank line]" |
+| `Line 8092: ` | "[Blank line]" |
+| `Line 8093: ` | "[Blank line]" |
+| `Line 8094: ` | "[Blank line]" |
+| `Line 8095: ` | "[Blank line]" |
+| `Line 8096: ` | "[Blank line]" |
+| `Line 8097: संभवपर्व` | "Sambhava Parva [Origin Chapter]" |
+| `Line 8098: शंकुतलोपाख्यानम्` | "Śakuntalopākhyānam [Story of Śakuntalā]" |
+| `Line 8099: ६२` | "62" |
+| `Line 8100: ` | "[Blank line]" |
+| `Line 8101: ` | "[Blank line]" |
+| `Line 8102: जनमेजय उवाच||` | "Janamejaya [Pāṇḍava descendant] said:" |
+| `Line 8103: ` | "[Blank line]" |
+| `Line 8104: त्वत्तः श्रुतमिदं ब्रह्मन्देवदानवरक्षसाम् |` | "From you, O Brahmin [priest-sage], I have heard this account of the gods, dānavas [demons], and rākṣasas [night-wanderers]," |
+| `Line 8105: अंशावतरणं सम्यग्गन्धर्वाप्सरसां तथा ||१||` | "The complete descent of portions [incarnations] of gandharvas [celestial musicians] and apsarās [celestial nymphs] as well. ||1||" |
+| `Line 8106: ` | "[Blank line]" |
+| `Line 8107: इमं तु भूय इच्छामि कुरूणां वंशमादितः |` | "But now I wish to hear the lineage of the Kurus [royal dynasty] from the beginning," |
+| `Line 8108: कथ्यमानं त्वया विप्र विप्रर्षिगणसंनिधौ ||२||` | "As narrated by you, O learned one, in the presence of the assembly of brahmin sages. ||2||" |
+| `Line 8109: ` | "[Blank line]" |
+| `Line 8110: वैशम्पायन उवाच||` | "Vaiśampāyana [disciple of Vyāsa] said:" |
+| `Line 8111: ` | "[Blank line]" |
+| `Line 8112: पौरवाणां वंशकरो दुःषन्तो नाम वीर्यवान् |` | "In the lineage of the Pauravas [Puru's descendants], there was a mighty one named Duḥṣanta [valiant king]," |
+| `Line 8113: पृथिव्याश्चतुरन्ताया गोप्ता भरतसत्तम ||३||` | "The protector of the four-bordered earth, O best of the Bharatas [royal lineage]. ||3||" |
+| `Line 8114: ` | "[Blank line]" |
+| `Line 8115: चतुर्भागं भुवः कृत्स्नं स भुङ्क्ते मनुजेश्वरः |` | "That lord of men ruled over the entire four quarters of the earth," |

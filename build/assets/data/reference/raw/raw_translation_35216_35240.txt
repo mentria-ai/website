@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 35216: ` | "[Blank line]" |
+| `Line 35217: एकस्तत्र बलोपेतो धुरमुद्वहतेऽधिकाम् |` | "One there, endowed with strength, bears the excessive burden," |
+| `Line 35218: अपरोऽल्पबलप्राणः कृशो धमनिसन्ततः ||१२||` | "While another, with little strength and vitality, thin with visible veins, ||12||" |
+| `Line 35219: ` | "[Blank line]" |
+| `Line 35220: कृच्छ्रादुद्वहते भारं तं वै शोचामि वासव ||१२||` | "Struggles to bear the load—for him I grieve, O Vāsava [Indra]. ||12||" |
+| `Line 35221: ` | "[Blank line]" |
+| `Line 35222: वध्यमानः प्रतोदेन तुद्यमानः पुनः पुनः |` | "Being beaten with a goad, being prodded again and again," |
+| `Line 35223: नैव शक्नोति तं भारमुद्वोढुं पश्य वासव ||१३||` | "He is unable to bear that burden—look, O Vāsava [Indra]. ||13||" |
+| `Line 35224: ` | "[Blank line]" |
+| `Line 35225: ततोऽहं तस्य दुःखार्ता विरौमि भृशदुःखिता |` | "Therefore, pained by his suffering, I cry out, deeply distressed," |
+| `Line 35226: अश्रूण्यावर्तयन्ती च नेत्राभ्यां करुणायती ||१४||` | "Shedding tears from my eyes, filled with compassion. ||14||" |
+| `Line 35227: ` | "[Blank line]" |
+| `Line 35228: इन्द्र उवाच||` | "Indra [king of gods] said:" |
+| `Line 35229: ` | "[Blank line]" |
+| `Line 35230: तव पुत्रसहस्रेषु पीड्यमानेषु शोभने |` | "When thousands of your sons are suffering, O beautiful one," |
+| `Line 35231: किं कृपायितमस्त्यत्र पुत्र एकोऽत्र पीड्यते ||१५||` | "Why is there compassion here when only one son is suffering? ||15||" |
+| `Line 35232: ` | "[Blank line]" |
+| `Line 35233: सुरभिरुवाच||` | "Surabhi [divine cow] said:" |
+| `Line 35234: ` | "[Blank line]" |
+| `Line 35235: यदि पुत्रसहस्रं मे सर्वत्र सममेव मे |` | "Though I have a thousand sons, and all are equal to me," |
+| `Line 35236: दीनस्य तु सतः शक्र पुत्रस्याभ्यधिका कृपा ||१६||` | "Yet for the son who is suffering, O Śakra [Indra], my compassion is greater. ||16||" |
+| `Line 35237: ` | "[Blank line]" |
+| `Line 35238: व्यास उवाच||` | "Vyāsa [sage-compiler] said:" |
+| `Line 35239: ` | "[Blank line]" |
+| `Line 35240: तदिन्द्रः सुरभीवाक्यं निशम्य भृशविस्मितः |` | "Hearing those words of Surabhi, Indra was greatly astonished," |

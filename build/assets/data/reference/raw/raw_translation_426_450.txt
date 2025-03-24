@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 426: महारथाः पार्थमशक्नुवन्त; स्तदा नाशंसे विजयाय सञ्जय ||१३३||` | "When the great warriors were unable to defeat Pārtha [Arjuna], then, O Sañjaya, I had no hope for victory. ||133||" |
+| `Line 427: ` | [Blank line] |
+| `Line 428: यदाश्रौषमभिमन्युं निहत्य; हर्षान्मूढान्क्रोशतो धार्तराष्ट्रान् |` | "When I heard the Dhārtarāṣṭras [Duryodhana's forces] shouting foolishly with joy after slaying Abhimanyu," |
+| `Line 429: क्रोधं मुक्तं सैन्धवे चार्जुनेन; तदा नाशंसे विजयाय सञ्जय ||१३४||` | "And Arjuna's unleashed anger against Saindhava [Jayadratha], then, O Sañjaya, I had no hope for victory. ||134||" |
+| `Line 430: ` | [Blank line] |
+| `Line 431: यदाश्रौषं सैन्धवार्थे प्रतिज्ञां; प्रतिज्ञातां तद्वधायार्जुनेन |` | "When I heard the vow regarding Saindhava [Jayadratha], the pledge made by Arjuna for his slaying," |
+| `Line 432: सत्यां निस्तीर्णां शत्रुमध्ये च तेन; तदा नाशंसे विजयाय सञ्जय ||१३५||` | "And that he fulfilled it truthfully in the midst of enemies, then, O Sañjaya, I had no hope for victory. ||135||" |
+| `Line 433: ` | [Blank line] |
+| `Line 434: यदाश्रौषं श्रान्तहये धनञ्जये; मुक्त्वा हयान्पाययित्वोपवृत्तान् |` | "When I heard that Dhanañjaya [Arjuna], whose horses were tired, released them, gave them water, and returned," |
+| `Line 435: पुनर्युक्त्वा वासुदेवं प्रयातं; तदा नाशंसे विजयाय सञ्जय ||१३६||` | "And then, yoking them again, proceeded with Vāsudeva [Krishna], then, O Sañjaya, I had no hope for victory. ||136||" |
+| `Line 436: ` | [Blank line] |
+| `Line 437: यदाश्रौषं वाहनेष्वाश्वसत्सु; रथोपस्थे तिष्ठता गाण्डिवेन |` | "When I heard that while the horses were resting, standing in his chariot with Gāṇḍīva [Arjuna's bow]," |
+| `Line 438: सर्वान्योधान्वारितानर्जुनेन; तदा नाशंसे विजयाय सञ्जय ||१३७||` | "Arjuna warded off all the warriors, then, O Sañjaya, I had no hope for victory. ||137||" |
+| `Line 439: ` | [Blank line] |
+| `Line 440: यदाश्रौषं नागबलैर्दुरुत्सहं; द्रोणानीकं युयुधानं प्रमथ्य |` | "When I heard that Yuyudhāna [Sātyaki], having crushed Droṇa's formation that was formidable with elephant forces," |
+| `Line 441: यातं वार्ष्णेयं यत्र तौ कृष्णपार्थौ; तदा नाशंसे विजयाय सञ्जय ||१३८||` | "That Vārṣṇeya [Sātyaki] went to where Krishna and Pārtha [Arjuna] were, then, O Sañjaya, I had no hope for victory. ||138||" |
+| `Line 442: ` | [Blank line] |
+| `Line 443: यदाश्रौषं कर्णमासाद्य मुक्तं; वधाद्भीमं कुत्सयित्वा वचोभिः |` | "When I heard that Bhīma, having encountered Karṇa, was released from death after being insulted with words," |
+| `Line 444: धनुष्कोट्या तुद्य कर्णेन वीरं; तदा नाशंसे विजयाय सञ्जय ||१३९||` | "And that Karṇa struck the hero with the end of his bow, then, O Sañjaya, I had no hope for victory. ||139||" |
+| `Line 445: ` | [Blank line] |
+| `Line 446: यदा द्रोणः कृतवर्मा कृपश्च; कर्णो द्रौणिर्मद्रराजश्च शूरः |` | "When Droṇa, Kṛtavarman, Kṛpa, Karṇa, Droṇi [Ashvatthāma], and the heroic king of Madra [Shalya]," |
+| `Line 447: अमर्षयन्सैन्धवं वध्यमानं; तदा नाशंसे विजयाय सञ्जय ||१४०||` | "Could not prevent Saindhava [Jayadratha] from being slain, then, O Sañjaya, I had no hope for victory. ||140||" |
+| `Line 448: ` | [Blank line] |
+| `Line 449: यदाश्रौषं देवराजेन दत्तां; दिव्यां शक्तिं व्यंसितां माधवेन |` | "When I heard that the divine spear given by the king of gods [Indra] was thwarted by Mādhava [Krishna]," |
+| `Line 450: घटोत्कचे राक्षसे घोररूपे; तदा नाशंसे विजयाय सञ्जय ||१४१||` | "When aimed at the terrifying rākṣasa [demon] Ghaṭotkaca, then, O Sañjaya, I had no hope for victory. ||141||" |

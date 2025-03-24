@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1101: श्लोकानां द्वे सहस्रे तु श्लोकाः पञ्चाशदेव तु ||१३५||` | "Two thousand and fifty verses only ||135||" |
+| `Line 1102: ` | [Blank line] |
+| `Line 1103: पर्वण्यस्मिन्समाख्याताः सङ्ख्यया परमर्षिणा ||१३५||` | "Have been enumerated in this Parva [section] by count by the great sage ||135||" |
+| `Line 1104: ` | [Blank line] |
+| `Line 1105: उद्योगपर्व विज्ञेयं पञ्चमं शृण्वतः परम् |` | "The Udyoga Parva [Effort/Preparation section] should be known as the fifth, supremely worth listening to," |
+| `Line 1106: उपप्लव्ये निविष्टेषु पाण्डवेषु जिगीषया ||१३६||` | "When the Pandavas were settled in Upaplavya with the desire for victory ||136||" |
+| `Line 1107: ` | [Blank line] |
+| `Line 1108: दुर्योधनोऽर्जुनश्चैव वासुदेवमुपस्थितौ ||१३६||` | "Both Duryodhana and Arjuna approached Vasudeva [Krishna] ||136||" |
+| `Line 1109: ` | [Blank line] |
+| `Line 1110: साहाय्यमस्मिन्समरे भवान्नौ कर्तुमर्हति |` | "'You should render assistance to us in this battle,'" |
+| `Line 1111: इत्युक्ते वचने कृष्णो यत्रोवाच महामतिः ||१३७||` | "When these words were spoken, Krishna, the great-minded one, replied ||137||" |
+| `Line 1112: ` | [Blank line] |
+| `Line 1113: अयुध्यमानमात्मानं मन्त्रिणं पुरुषर्षभौ |` | "'O best among men, myself non-fighting as an advisor,'" |
+| `Line 1114: अक्षौहिणीं वा सैन्यस्य कस्य वा किं ददाम्यहम् ||१३८||` | "'Or an Akshauhini [large army unit] of troops - to whom shall I give what?' ||138||" |
+| `Line 1115: ` | [Blank line] |
+| `Line 1116: वव्रे दुर्योधनः सैन्यं मन्दात्मा यत्र दुर्मतिः |` | "Where the dull-witted, evil-minded Duryodhana chose the army," |
+| `Line 1117: अयुध्यमानं सचिवं वव्रे कृष्णं धनञ्जयः ||१३९||` | "Dhananjaya [Arjuna] chose Krishna as a non-fighting counselor ||139||" |
+| `Line 1118: ` | [Blank line] |
+| `Line 1119: सञ्जयं प्रेषयामास शमार्थं पाण्डवान्प्रति |` | "He [Dhritarashtra] sent Sanjaya to the Pandavas for the purpose of peace," |
+| `Line 1120: यत्र दूतं महाराजो धृतराष्ट्रः प्रतापवान् ||१४०||` | "Where the mighty king Dhritarashtra sent an envoy ||140||" |
+| `Line 1121: ` | [Blank line] |
+| `Line 1122: श्रुत्वा च पाण्डवान्यत्र वासुदेवपुरोगमान् |` | "And having heard about the Pandavas led by Vasudeva [Krishna]," |
+| `Line 1123: प्रजागरः सम्प्रजज्ञे धृतराष्ट्रस्य चिन्तया ||१४१||` | "Sleeplessness arose in Dhritarashtra due to anxiety ||141||" |
+| `Line 1124: ` | [Blank line] |
+| `Line 1125: विदुरो यत्र वाक्यानि विचित्राणि हितानि च |` | "Where Vidura spoke words that were wonderful and beneficial," |

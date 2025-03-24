@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 26666: इतो वा श्रेयसी ब्रह्मंस्तन्ममाचक्ष्व पृच्छतः ||८||` | "Or tell me, O Brahman [sage], if there is one better than this, as I ask you. ||8||" |
+| `Line 26667: ` | "[Blank line]" |
+| `Line 26668: तच्छ्रुत्वा नारदस्तस्य धर्मराजस्य भाषितम् |` | "Having heard those words of Dharmaraja [king of righteousness], Narada [divine sage]" |
+| `Line 26669: पाण्डवं प्रत्युवाचेदं स्मयन्मधुरया गिरा ||९||` | "Replied to the Pandava [Yudhishthira], smiling, with sweet words: ||9||" |
+| `Line 26670: ` | "[Blank line]" |
+| `Line 26671: मानुषेषु न मे तात दृष्टपूर्वा न च श्रुता |` | "Among humans, my dear [tāta], I have neither seen before nor heard of" |
+| `Line 26672: सभा मणिमयी राजन्यथेयं तव भारत ||१०||` | "A jeweled assembly hall like this one of yours, O Bharata [descendant of Bharata]. ||10||" |
+| `Line 26673: ` | "[Blank line]" |
+| `Line 26674: सभां तु पितृराजस्य वरुणस्य च धीमतः |` | "But I shall describe the assembly hall of the king of ancestors [Yama] and of the wise Varuna [water deity]," |
+| `Line 26675: कथयिष्ये तथेन्द्रस्य कैलासनिलयस्य च ||११||` | "And likewise of Indra [king of gods] and of the dweller of Kailasa [Shiva]. ||11||" |
+| `Line 26676: ` | "[Blank line]" |
+| `Line 26677: ब्रह्मणश्च सभां दिव्यां कथयिष्ये गतक्लमाम् |` | "And I shall describe the divine, fatigue-dispelling assembly hall of Brahma [creator god]," |
+| `Line 26678: यदि ते श्रवणे बुद्धिर्वर्तते भरतर्षभ ||१२||` | "If your mind is inclined to hear, O bull among the Bharatas [Yudhishthira]. ||12||" |
+| `Line 26679: ` | "[Blank line]" |
+| `Line 26680: नारदेनैवमुक्तस्तु धर्मराजो युधिष्ठिरः |` | "Thus addressed by Narada, Dharmaraja Yudhishthira [righteous king]," |
+| `Line 26681: प्राञ्जलिर्भ्रातृभिः सार्धं तैश्च सर्वैर्नृपैर्वृतः ||१३||` | "With folded hands, accompanied by his brothers and surrounded by all those kings, ||13||" |
+| `Line 26682: ` | "[Blank line]" |
+| `Line 26683: नारदं प्रत्युवाचेदं धर्मराजो महामनाः |` | "The magnanimous Dharmaraja [Yudhishthira] replied to Narada:" |
+| `Line 26684: सभाः कथय ताः सर्वाः श्रोतुमिच्छामहे वयम् ||१४||` | "Describe all those assembly halls; we wish to hear about them. ||14||" |
+| `Line 26685: ` | "[Blank line]" |
+| `Line 26686: किंद्रव्यास्ताः सभा ब्रह्मन्किंविस्ताराः किमायताः |` | "Of what materials are those halls made, O Brahman [sage], what is their width and length?" |
+| `Line 26687: पितामहं च के तस्यां सभायां पर्युपासते ||१५||` | "And who are those who attend upon the Grandfather [Brahma] in his assembly? ||15||" |
+| `Line 26688: ` | "[Blank line]" |
+| `Line 26689: वासवं देवराजं च यमं वैवस्वतं च के |` | "And who are those who attend upon Vasava [Indra], the king of gods, and Yama Vaivasvata [son of sun]," |
+| `Line 26690: वरुणं च कुबेरं च सभायां पर्युपासते ||१६||` | "And Varuna [water god] and Kubera [wealth god] in their assemblies? ||16||" |

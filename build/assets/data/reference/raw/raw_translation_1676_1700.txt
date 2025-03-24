@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1676: न त्वहमेतमपूपमुपयोक्तुमुत्सहे अनिवेद्य गुरव इति | ०७२ |` | "But I cannot bring myself to eat this cake without informing my teacher. |072|" |
+| `Line 1677: ततस्तमश्विनावूचतुः |` | "Then the Ashvins [divine twin physicians] said to him:" |
+| `Line 1678: आवाभ्यां पुरस्ताद्भवत उपाध्यायेनैवमेवाभिष्टुताभ्यामपूपः प्रीताभ्यां दत्तः |` | "Previously, your teacher himself offered a cake to us when we were pleased by his praises." |
+| `Line 1679: उपयुक्तश्च स तेनानिवेद्य गुरवे |` | "And he consumed it without informing his own teacher." |
+| `Line 1680: त्वमपि तथैव कुरुष्व यथा कृतमुपाध्यायेनेति | ०७३ |` | "You should also do just as your teacher did. |073|" |
+| `Line 1681: स एवमुक्तः पुनरेव प्रत्युवाचैतौ |` | "Having been thus addressed, he again replied to them:" |
+| `Line 1682: प्रत्यनुनये भवन्तावश्विनौ |` | "I beg your pardon, O Ashvins." |
+| `Line 1683: नोत्सहेऽहमनिवेद्योपाध्यायायोपयोक्तुमिति | ०७४ |` | "I cannot bring myself to consume this without informing my teacher. |074|" |
+| `Line 1684: तमश्विनावाहतुः |` | "The Ashvins said to him:" |
+| `Line 1685: प्रीतौ स्वस्तवानया गुरुवृत्त्या |` | "We are pleased with your praise and this devotion to your teacher." |
+| `Line 1686: उपाध्यायस्य ते कार्ष्णायसा दन्ताः |` | "Your teacher's teeth are of iron." |
+| `Line 1687: भवतो हिरण्मया भविष्यन्ति |` | "Yours shall become golden." |
+| `Line 1688: चक्षुष्मांश्च भविष्यसि |` | "And you shall regain your sight." |
+| `Line 1689: श्रेयश्चावाप्स्यसीति | ०७५ |` | "And you shall attain prosperity. |075|" |
+| `Line 1690: स एवमुक्तोऽश्विभ्यां लब्धचक्षुरुपाध्यायसकाशमागम्योपाध्यायमभिवाद्याचचक्षे |` | "Thus addressed by the Ashvins, having regained his sight, he went to his teacher, greeted him, and told him everything." |
+| `Line 1691: स चास्य प्रीतिमानभूत् | ०७६ |` | "And the teacher was pleased with him. |076|" |
+| `Line 1692: आह चैनम् |` | "And he said to him:" |
+| `Line 1693: यथाश्विनावाहतुस्तथा त्वं श्रेयोऽवाप्स्यसीति |` | "As the Ashvins have said, so shall you attain prosperity." |
+| `Line 1694: सर्वे च ते वेदाः प्रतिभास्यन्तीति | ०७७ |` | "And all the Vedas [sacred texts] shall become clear to you. |077|" |
+| `Line 1695: एषा तस्यापि परीक्षोपमन्योः | ०७८ |` | "This was the test of Upamanyu as well. |078|" |
+| `Line 1696: अथापरः शिष्यस्तस्यैवायोदस्य धौम्यस्य वेदो नाम | ०७९ |` | "Now, another disciple of that same Ayoda Dhaumya was named Veda. |079|" |
+| `Line 1697: तमुपाध्यायः संदिदेश |` | "The teacher instructed him:" |
+| `Line 1698: वत्स वेद इहास्यताम् |` | "Dear Veda, stay here." |
+| `Line 1699: भवता मद्गृहे कञ्चित्कालं शुश्रूषमाणेन भवितव्यम् |` | "You must serve in my house for some time." |
+| `Line 1700: श्रेयस्ते भविष्यतीति | ०८० |` | "It will be beneficial for you. |080|" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 3826: ` | [Blank line] |
+| `Line 3827: २७` | "27" |
+| `Line 3828: ` | [Blank line] |
+| `Line 3829: ` | [Blank line] |
+| `Line 3830: शौनक उवाच||` | "Shaunaka said:" |
+| `Line 3831: ` | [Blank line] |
+| `Line 3832: कोऽपराधो महेन्द्रस्य कः प्रमादश्च सूतज |` | "What was the offense of Mahendra [great Indra], and what was his negligence, O son of Suta?" |
+| `Line 3833: तपसा वालखिल्यानां सम्भूतो गरुडः कथम् ||१||` | "How was Garuda born through the austerities of the Valakhilyas [thumb-sized sages]? ||1||" |
+| `Line 3834: ` | [Blank line] |
+| `Line 3835: कश्यपस्य द्विजातेश्च कथं वै पक्षिराट्सुतः |` | "And how did the king of birds become the son of Kashyapa, the lord of the twice-born [Brahmin]?" |
+| `Line 3836: अधृष्यः सर्वभूतानामवध्यश्चाभवत्कथम् ||२||` | "How did he become invincible and unkillable by all beings? ||2||" |
+| `Line 3837: ` | [Blank line] |
+| `Line 3838: कथं च कामचारी स कामवीर्यश्च खेचरः |` | "And how did he become one who moves at will, with strength as desired, and a sky-traveler [bird]?" |
+| `Line 3839: एतदिच्छाम्यहं श्रोतुं पुराणे यदि पठ्यते ||३||` | "I wish to hear this, if it is recited in the Purana [ancient text]. ||3||" |
+| `Line 3840: ` | [Blank line] |
+| `Line 3841: सूत उवाच||` | "Suta said:" |
+| `Line 3842: ` | [Blank line] |
+| `Line 3843: विषयोऽयं पुराणस्य यन्मां त्वं परिपृच्छसि |` | "This subject about which you are questioning me is indeed from the Purana," |
+| `Line 3844: शृणु मे वदतः सर्वमेतत्सङ्क्षेपतो द्विज ||४||` | "Listen as I tell you everything about this in brief, O twice-born [Brahmin]. ||4||" |
+| `Line 3845: ` | [Blank line] |
+| `Line 3846: यजतः पुत्रकामस्य कश्यपस्य प्रजापतेः |` | "When Kashyapa, the Prajapati [lord of creatures], was performing a sacrifice desiring a son," |
+| `Line 3847: साहाय्यमृषयो देवा गन्धर्वाश्च ददुः किल ||५||` | "The sages, gods, and Gandharvas [celestial musicians] indeed gave their assistance. ||5||" |
+| `Line 3848: ` | [Blank line] |
+| `Line 3849: तत्रेध्मानयने शक्रो नियुक्तः कश्यपेन ह |` | "There, Shakra [Indra] was appointed by Kashyapa to bring the sacrificial firewood," |
+| `Line 3850: मुनयो वालखिल्याश्च ये चान्ये देवतागणाः ||६||` | "As were the sages, the Valakhilyas [thumb-sized sages], and other groups of deities. ||6||" |

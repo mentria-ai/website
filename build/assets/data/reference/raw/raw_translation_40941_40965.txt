@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 40941: ` | "[Blank line]" |
+| `Line 40942: ` | "[Blank line]" |
+| `Line 40943: ` | "[Blank line]" |
+| `Line 40944: ५७` | "57 [chapter number]" |
+| `Line 40945: ` | "[Blank line]" |
+| `Line 40946: ` | "[Blank line]" |
+| `Line 40947: बृहदश्व उवाच||` | "Bṛhadaśva [sage narrator] said:" |
+| `Line 40948: ` | "[Blank line]" |
+| `Line 40949: दमयन्ती ततो दृष्ट्वा पुण्यश्लोकं नराधिपम् |` | "Damayantī, then seeing the virtuous [puṇyaśloka] king [narādhipa]," |
+| `Line 40950: उन्मत्तवदनुन्मत्ता देवने गतचेतसम् ||१||` | "Sane yet appearing insane, his mind absorbed in gambling. ||1||" |
+| `Line 40951: ` | "[Blank line]" |
+| `Line 40952: भयशोकसमाविष्टा राजन्भीमसुता ततः |` | "Overcome with fear and grief, O king, Bhīma's daughter [Damayantī] then," |
+| `Line 40953: चिन्तयामास तत्कार्यं सुमहत्पार्थिवं प्रति ||२||` | "Pondered that grave matter concerning the king. ||2||" |
+| `Line 40954: ` | "[Blank line]" |
+| `Line 40955: सा शङ्कमाना तत्पापं चिकीर्षन्ती च तत्प्रियम् |` | "She, fearing that evil and wishing to do what was dear to him," |
+| `Line 40956: नलं च हृतसर्वस्वमुपलभ्येदमब्रवीत् ||३||` | "Seeing Nala bereft of everything, spoke thus: ||3||" |
+| `Line 40957: ` | "[Blank line]" |
+| `Line 40958: बृहत्सेने व्रजामात्यानानाय्य नलशासनात् |` | "Bṛhatsenā [female attendant], go and summon the ministers by Nala's command," |
+| `Line 40959: आचक्ष्व यद्धृतं द्रव्यमवशिष्टं च यद्वसु ||४||` | "Declare what wealth has been taken and what possessions remain. ||4||" |
+| `Line 40960: ` | "[Blank line]" |
+| `Line 40961: ततस्ते मन्त्रिणः सर्वे विज्ञाय नलशासनम् |` | "Then all those ministers, having learned of Nala's command," |
+| `Line 40962: अपि नो भागधेयं स्यादित्युक्त्वा पुनराव्रजन् ||५||` | "Saying 'May there be some fortune for us,' returned again. ||5||" |
+| `Line 40963: ` | "[Blank line]" |
+| `Line 40964: तास्तु सर्वाः प्रकृतयो द्वितीयं समुपस्थिताः |` | "But all those subjects [prakṛti] approached a second time," |
+| `Line 40965: न्यवेदयद्भीमसुता न च तत्प्रत्यनन्दत ||६||` | "Bhīma's daughter informed (Nala), but he did not acknowledge it. ||6||" |

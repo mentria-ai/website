@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 48441: गच्छन्स तीर्थानि महानुभावः; पुण्यानि रम्याणि ददर्श राजा |` | "Going to the sacred fords [tīrtha], that mighty king beheld the holy and delightful places," |
+| `Line 48442: सर्वाणि विप्रैरुपशोभितानि; क्वचित्क्वचिद्भारत सागरस्य ||१||` | "All adorned with Brahmins, at various places along the ocean, O Bhārata [Janamejaya]. ||1||" |
+| `Line 48443: ` | "[Blank line]" |
+| `Line 48444: स वृत्तवांस्तेषु कृताभिषेकः; सहानुजः पार्थिवपुत्रपौत्रः |` | "Having performed ablutions at those places, accompanied by his younger brothers, that son and grandson of kings," |
+| `Line 48445: समुद्रगां पुण्यतमां प्रशस्तां; जगाम पारिक्षित पाण्डुपुत्रः ||२||` | "Went to the most sacred and praiseworthy river flowing to the ocean, O Pārikṣit [Janamejaya], that son of Pāṇḍu. ||2||" |
+| `Line 48446: ` | "[Blank line]" |
+| `Line 48447: तत्रापि चाप्लुत्य महानुभावः; सन्तर्पयामास पितॄन्सुरांश्च |` | "Having bathed there too, the mighty one satisfied the ancestors [pitṛs] and gods," |
+| `Line 48448: द्विजातिमुख्येषु धनं विसृज्य; गोदावरिं सागरगामगच्छत् ||३||` | "And after distributing wealth among the foremost twice-born [Brahmins], he went to the Godāvarī [sacred river] flowing to the ocean. ||3||" |
+| `Line 48449: ` | "[Blank line]" |
+| `Line 48450: ततो विपाप्मा द्रविडेषु राज; न्समुद्रमासाद्य च लोकपुण्यम् |` | "Then, O king, free from sin, reaching the ocean in the Draviḍa country [South India], which is sacred to the world," |
+| `Line 48451: अगस्त्यतीर्थं च पवित्रपुण्यं; नारीतीर्थान्यथ वीरो ददर्श ||४||` | "The hero beheld the holy and pure Agastya-tīrtha [sage's ford] and then the Nārī-tīrthas [women's fords]. ||4||" |
+| `Line 48452: ` | "[Blank line]" |
+| `Line 48453: तत्रार्जुनस्याग्र्यधनुर्धरस्य; निशम्य तत्कर्म परैरसह्यम् |` | "There, hearing of the deeds of Arjuna [Pāṇḍava hero], the foremost wielder of the bow, deeds unbearable for enemies," |
+| `Line 48454: सम्पूज्यमानः परमर्षिसङ्घैः; परां मुदं पाण्डुसुतः स लेभे ||५||` | "Being honored by assemblies of great sages, that son of Pāṇḍu experienced supreme joy. ||5||" |
+| `Line 48455: ` | "[Blank line]" |
+| `Line 48456: स तेषु तीर्थेष्वभिषिक्तगात्रः; कृष्णासहायः सहितोऽनुजैश्च |` | "With his body bathed in those sacred fords, accompanied by Kṛṣṇā [Draupadī] and together with his younger brothers," |
+| `Line 48457: सम्पूजयन्विक्रममर्जुनस्य; रेमे महीपालपतिः पृथिव्याम् ||६||` | "Honoring the valor of Arjuna, that lord of kings rejoiced on earth. ||6||" |
+| `Line 48458: ` | "[Blank line]" |
+| `Line 48459: ततः सहस्राणि गवां प्रदाय; तीर्थेषु तेष्वम्बुधरोत्तमस्य |` | "Then, having given away thousands of cows at those sacred fords of the excellent ocean [ambudharottama]," |
+| `Line 48460: हृष्टः सह भ्रातृभिरर्जुनस्य; सङ्कीर्तयामास गवां प्रदानम् ||७||` | "Delighted, together with his brothers, he celebrated Arjuna's gift of cows. ||7||" |
+| `Line 48461: ` | "[Blank line]" |
+| `Line 48462: स तानि तीर्थानि च सागरस्य; पुण्यानि चान्यानि बहूनि राजन् |` | "Visiting those sacred fords of the ocean and many other holy places, O king," |
+| `Line 48463: क्रमेण गच्छन्परिपूर्णकामः; शूर्पारकं पुण्यतमं ददर्श ||८||` | "Going in sequence, with all his desires fulfilled, he beheld the most sacred Śūrpāraka [coastal city]. ||8||" |
+| `Line 48464: ` | "[Blank line]" |
+| `Line 48465: तत्रोदधेः कञ्चिदतीत्य देशं; ख्यातं पृथिव्यां वनमाससाद |` | "There, after crossing a certain region of the ocean, he reached a forest renowned on earth," |

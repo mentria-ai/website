@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 42941: ७३` | "73 [chapter number]" |
+| `Line 42942: ` | "[Blank line]" |
+| `Line 42943: ` | "[Blank line]" |
+| `Line 42944: बृहदश्व उवाच||` | "Bṛhadaśva [sage narrator] said:" |
+| `Line 42945: ` | "[Blank line]" |
+| `Line 42946: दमयन्ती तु तच्छ्रुत्वा भृशं शोकपरायणा |` | "Damayantī [Nala's wife], having heard that, deeply immersed in sorrow," |
+| `Line 42947: शङ्कमाना नलं तं वै केशिनीमिदमब्रवीत् ||१||` | "Suspecting him to be Nala, said this to Keśinī [handmaiden]: ||1||" |
+| `Line 42948: ` | "[Blank line]" |
+| `Line 42949: गच्छ केशिनि भूयस्त्वं परीक्षां कुरु बाहुके |` | "Go, Keśinī, once more and test Bāhuka [charioteer identity]," |
+| `Line 42950: आब्रुवाणा समीपस्था चरितान्यस्य लक्षय ||२||` | "Standing near him, without speaking, observe his actions. ||2||" |
+| `Line 42951: ` | "[Blank line]" |
+| `Line 42952: यदा च किञ्चित्कुर्यात्स कारणं तत्र भामिनि |` | "And when he does anything, O beautiful one [bhāmini], note the reason there," |
+| `Line 42953: तत्र सञ्चेष्टमानस्य संलक्ष्यं ते विचेष्टितम् ||३||` | "While he is engaged in activity, his movements should be observed by you. ||3||" |
+| `Line 42954: ` | "[Blank line]" |
+| `Line 42955: न चास्य प्रतिबन्धेन देयोऽग्निरपि भामिनि |` | "And do not give him fire when he asks for it, O beautiful one," |
+| `Line 42956: याचते न जलं देयं सम्यगत्वरमाणया ||४||` | "If he asks for water, do not give it, acting with proper haste. ||4||" |
+| `Line 42957: ` | "[Blank line]" |
+| `Line 42958: एतत्सर्वं समीक्ष्य त्वं चरितं मे निवेदय |` | "Having observed all this behavior, report to me," |
+| `Line 42959: यच्चान्यदपि पश्येथास्तच्चाख्येयं त्वया मम ||५||` | "And whatever else you might see should also be told to me by you. ||5||" |
+| `Line 42960: ` | "[Blank line]" |
+| `Line 42961: दमयन्त्यैवमुक्ता सा जगामाथाशु केशिनी |` | "Thus instructed by Damayantī, Keśinī went quickly," |
+| `Line 42962: निशाम्य च हयज्ञस्य लिङ्गानि पुनरागमत् ||६||` | "And having observed the signs of the horse-expert [hayajña], she returned again. ||6||" |
+| `Line 42963: ` | "[Blank line]" |
+| `Line 42964: सा तत्सर्वं यथावृत्तं दमयन्त्यै न्यवेदयत् |` | "She reported to Damayantī everything exactly as it happened," |
+| `Line 42965: निमित्तं यत्तदा दृष्टं बाहुके दिव्यमानुषम् ||७||` | "The signs that were then seen in Bāhuka, both divine and human. ||7||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 3876: तद्बुद्ध्वा भृशसन्तप्तो देवराजः शतक्रतुः |` | "Understanding that, the king of gods, Śatakratu [Indra, hundred sacrifices], became greatly distressed," |
+| `Line 3877: जगाम शरणं तत्र कश्यपं संशितव्रतम् ||१५||` | "And went there for refuge to Kaśyapa of firm vows. ||15||" |
+| `Line 3878: ` | [Blank line] |
+| `Line 3879: तच्छ्रुत्वा देवराजस्य कश्यपोऽथ प्रजापतिः |` | "Hearing that from the king of gods, Kaśyapa, the Prajāpati [lord of creatures]," |
+| `Line 3880: वालखिल्यानुपागम्य कर्मसिद्धिमपृच्छत ||१६||` | "Approached the Vālakhilyas [thumb-sized sages] and asked about the success of their undertaking. ||16||" |
+| `Line 3881: ` | [Blank line] |
+| `Line 3882: एवमस्त्विति तं चापि प्रत्यूचुः सत्यवादिनः |` | "And those truth-speaking ones replied to him, 'Let it be so,'" |
+| `Line 3883: तान्कश्यप उवाचेदं सान्त्वपूर्वं प्रजापतिः ||१७||` | "Then Kaśyapa, the Prajāpati, spoke these conciliatory words to them: ||17||" |
+| `Line 3884: ` | [Blank line] |
+| `Line 3885: अयमिन्द्रस्त्रिभुवने नियोगाद्ब्रह्मणः कृतः |` | "This Indra has been appointed in the three worlds by the command of Brahma," |
+| `Line 3886: इन्द्रार्थं च भवन्तोऽपि यत्नवन्तस्तपोधनाः ||१८||` | "And you too, rich in austerities, have been striving for the position of Indra. ||18||" |
+| `Line 3887: ` | [Blank line] |
+| `Line 3888: न मिथ्या ब्रह्मणो वाक्यं कर्तुमर्हथ सत्तमाः |` | "O excellent ones, you should not render Brahma's words false," |
+| `Line 3889: भवतां च न मिथ्यायं सङ्कल्पो मे चिकीर्षितः ||१९||` | "Nor do I wish to make your resolution fruitless. ||19||" |
+| `Line 3890: ` | [Blank line] |
+| `Line 3891: भवत्वेष पतत्रीणामिन्द्रोऽतिबलसत्त्ववान् |` | "Let this one be the Indra of winged creatures, exceedingly powerful and strong," |
+| `Line 3892: प्रसादः क्रियतां चैव देवराजस्य याचतः ||२०||` | "And let grace be shown to the king of gods who is beseeching you. ||20||" |
+| `Line 3893: ` | [Blank line] |
+| `Line 3894: एवमुक्ताः कश्यपेन वालखिल्यास्तपोधनाः |` | "Thus addressed by Kaśyapa, the Vālakhilyas, rich in austerities," |
+| `Line 3895: प्रत्यूचुरभिसम्पूज्य मुनिश्रेष्ठं प्रजापतिम् ||२१||` | "Replied, after duly honoring the foremost of sages, the Prajāpati: ||21||" |
+| `Line 3896: ` | [Blank line] |
+| `Line 3897: इन्द्रार्थोऽयं समारम्भः सर्वेषां नः प्रजापते |` | "O Prajāpati, this undertaking of all of us was for the purpose of creating an Indra," |
+| `Line 3898: अपत्यार्थं समारम्भो भवतश्चायमीप्सितः ||२२||` | "And this undertaking of yours is desired for the purpose of offspring. ||22||" |
+| `Line 3899: ` | [Blank line] |
+| `Line 3900: तदिदं सफलं कर्म त्वया वै प्रतिगृह्यताम् |` | "Therefore, let this fruitful work be accepted by you." |

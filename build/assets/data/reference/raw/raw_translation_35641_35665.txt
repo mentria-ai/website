@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 35641: वैशम्पायन उवाच॥` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 35642: ` | "[Blank line]" |
+| `Line 35643: एवं विनिहतं सङ्ख्ये किर्मीरं राक्षसोत्तमम् |` | "Having heard that Kirmīra [demon name], the foremost of rākṣasas [demons], was thus slain in battle," |
+| `Line 35644: श्रुत्वा ध्यानपरो राजा निशश्वासार्तवत्तदा ॥७५॥` | "The king, absorbed in thought, sighed deeply like one in pain. ||75||" |
+| `Line 35645: ` | "[Blank line]" |
+| `Line 35646: ` | "[Blank line]" |
+| `Line 35647: ` | "[Blank line]" |
+| `Line 35648: ` | "[Blank line]" |
+| `Line 35649: कैरातपर्व` | "Kairāta Parva [Kirāta episode]" |
+| `Line 35650: १३` | "13" |
+| `Line 35651: ` | "[Blank line]" |
+| `Line 35652: ` | "[Blank line]" |
+| `Line 35653: वैशम्पायन उवाच॥` | "Vaiśampāyana said:" |
+| `Line 35654: ` | "[Blank line]" |
+| `Line 35655: भोजाः प्रव्रजिताञ्श्रुत्वा वृष्णयश्चान्धकैः सह |` | "Hearing that the Pāṇḍavas had gone into exile, the Bhojas [royal clan] and the Vṛṣṇis [Krishna's clan] along with the Andhakas [allied clan]," |
+| `Line 35656: पाण्डवान्दुःखसन्तप्तान्समाजग्मुर्महावने ॥१॥` | "Came together to meet the grief-stricken Pāṇḍavas in the great forest. ||1||" |
+| `Line 35657: ` | "[Blank line]" |
+| `Line 35658: पाञ्चालस्य च दायादा धृष्टकेतुश्च चेदिपः |` | "The heirs of Pāñcāla [Draupadi's kingdom] and Dhṛṣṭaketu, the lord of Cedi [kingdom name]," |
+| `Line 35659: केकयाश्च महावीर्या भ्रातरो लोकविश्रुताः ॥२॥` | "And the mighty Kekayas [tribal kingdom], brothers renowned throughout the world. ||2||" |
+| `Line 35660: ` | "[Blank line]" |
+| `Line 35661: वने तेऽभिययुः पार्थान्क्रोधामर्षसमन्विताः |` | "They approached the Pārthas [sons of Pṛthā] in the forest, filled with anger and indignation," |
+| `Line 35662: गर्हयन्तो धार्तराष्ट्रान्किं कुर्म इति चाब्रुवन् ॥३॥` | "Condemning the Dhārtarāṣṭras [Dhṛtarāṣṭra's sons] and saying, 'What should we do?' ||3||" |
+| `Line 35663: ` | "[Blank line]" |
+| `Line 35664: वासुदेवं पुरस्कृत्य सर्वे ते क्षत्रियर्षभाः |` | "With Vāsudeva [Krishna] at their head, all those bulls among kṣatriyas [warrior class]," |
+| `Line 35665: परिवार्योपविविशुर्धर्मराजं युधिष्ठिरम् ॥४॥` | "Surrounded and sat down before Dharmarāja [king of righteousness] Yudhiṣṭhira. ||4||" |

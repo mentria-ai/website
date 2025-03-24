@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 18741: ` | "[Blank line]" |
+| `Line 18742: ततः समभवद्द्रोणः कुमारस्तस्य धीमतः |` | "Then was born Droṇa, the son of that wise one [Bharadvāja]," |
+| `Line 18743: अध्यगीष्ट स वेदांश्च वेदाङ्गानि च सर्वशः ||५||` | "He thoroughly studied the Vedas and all the Vedāṅgas [auxiliary texts]. ||5||" |
+| `Line 18744: ` | "[Blank line]" |
+| `Line 18745: भरद्वाजस्य तु सखा पृषतो नाम पार्थिवः |` | "But Bharadvāja's friend was a king named Pṛṣata [sprinkled one]," |
+| `Line 18746: तस्यापि द्रुपदो नाम तदा समभवत्सुतः ||६||` | "And to him was born a son named Drupada [swift-footed] at that time. ||6||" |
+| `Line 18747: ` | "[Blank line]" |
+| `Line 18748: स नित्यमाश्रमं गत्वा द्रोणेन सह पार्षतः |` | "That son of Pṛṣata [Drupada], going daily to the hermitage with Droṇa," |
+| `Line 18749: चिक्रीडाध्ययनं चैव चकार क्षत्रियर्षभः ||७||` | "Played and studied together, that bull among Kṣatriyas [warrior class]. ||7||" |
+| `Line 18750: ` | "[Blank line]" |
+| `Line 18751: ततस्तु पृषतेऽतीते स राजा द्रुपदोऽभवत् |` | "Then, after Pṛṣata passed away, Drupada became king," |
+| `Line 18752: द्रोणोऽपि रामं शुश्राव दित्सन्तं वसु सर्वशः ||८||` | "And Droṇa heard that Rāma [Paraśurāma] was giving away all his wealth completely. ||8||" |
+| `Line 18753: ` | "[Blank line]" |
+| `Line 18754: वनं तु प्रस्थितं रामं भरद्वाजसुतोऽब्रवीत् |` | "To Rāma, who was departing for the forest, the son of Bharadvāja [Droṇa] said," |
+| `Line 18755: आगतं वित्तकामं मां विद्धि द्रोणं द्विजर्षभ ||९||` | "Know me, who has come desiring wealth, as Droṇa, O bull among twice-born [brāhmaṇa]. ||9||" |
+| `Line 18756: ` | "[Blank line]" |
+| `Line 18757: राम उवाच||` | "Rāma said:" |
+| `Line 18758: ` | "[Blank line]" |
+| `Line 18759: शरीरमात्रमेवाद्य मयेदमवशेषितम् |` | "Today only my body alone remains with me," |
+| `Line 18760: अस्त्राणि वा शरीरं वा ब्रह्मन्नन्यतरं वृणु ||१०||` | "Either my weapons or my body, O Brahmin, choose one of these. ||10||" |
+| `Line 18761: ` | "[Blank line]" |
+| `Line 18762: द्रोण उवाच||` | "Droṇa said:" |
+| `Line 18763: ` | "[Blank line]" |
+| `Line 18764: अस्त्राणि चैव सर्वाणि तेषां संहारमेव च |` | "All the weapons, and also their withdrawal [saṃhāra]," |
+| `Line 18765: प्रयोगं चैव सर्वेषां दातुमर्हति मे भवान् ||११||` | "And the method of using all of them—may you be pleased to give these to me. ||11||" |

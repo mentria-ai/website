@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 48091: मा परस्वमभिद्रोग्धा मा धर्मान्सकलान्नशीः ||८||` | "Do not covet others' property, do not destroy all dharmas [righteous duties]. ||8||" |
+| `Line 48092: ` | "[Blank line]" |
+| `Line 48093: ततः कल्याणरूपाभिर्वाग्भिस्ते रुद्रमस्तुवन् |` | "Then they praised Rudra [fierce deity] with auspicious words," |
+| `Line 48094: इष्ट्या चैनं तर्पयित्वा मानयां चक्रिरे तदा ||९||` | "And having satisfied him with sacrifice, they honored him then. ||9||" |
+| `Line 48095: ` | "[Blank line]" |
+| `Line 48096: ततः स पशुमुत्सृज्य देवयानेन जग्मिवान् |` | "Then, releasing the sacrificial animal, he departed by the path of the gods [devayāna]," |
+| `Line 48097: अत्रानुवंशो रुद्रस्य तं निबोध युधिष्ठिर ||१०||` | "Here is the lineage of Rudra, understand it, O Yudhiṣṭhira [Pāṇḍava king]. ||10||" |
+| `Line 48098: ` | "[Blank line]" |
+| `Line 48099: अयातयामं सर्वेभ्यो भागेभ्यो भागमुत्तमम् |` | "The gods permanently established the best portion from all portions, fresh [not stale]," |
+| `Line 48100: देवाः सङ्कल्पयामासुर्भयाद्रुद्रस्य शाश्वतम् ||११||` | "Out of fear of Rudra, as an eternal offering. ||11||" |
+| `Line 48101: ` | "[Blank line]" |
+| `Line 48102: इमां गाथामत्र गायन्नपः स्पृशति यो नरः |` | "The man who sings this hymn here while touching water," |
+| `Line 48103: देवयानस्तस्य पन्थाश्चक्षुश्चैव प्रकाशते ||१२||` | "For him the path of the gods becomes clear, and his vision also brightens. ||12||" |
+| `Line 48104: ` | "[Blank line]" |
+| `Line 48105: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 48106: ` | "[Blank line]" |
+| `Line 48107: ततो वैतरणीं सर्वे पाण्डवा द्रौपदी तथा |` | "Then all the Pāṇḍavas [five brothers] and Draupadī [their wife] as well," |
+| `Line 48108: अवतीर्य महाभागा तर्पयां चक्रिरे पितॄन् ||१३||` | "Having descended into the Vaitaraṇī [sacred river], the illustrious ones offered oblations to the ancestors. ||13||" |
+| `Line 48109: ` | "[Blank line]" |
+| `Line 48110: युधिष्ठिर उवाच||` | "Yudhiṣṭhira said:" |
+| `Line 48111: ` | "[Blank line]" |
+| `Line 48112: उपस्पृश्यैव भगवन्नस्यां नद्यां तपोधन |` | "Having touched the water in this river, O venerable one, O treasure of austerities [tapodhana]," |
+| `Line 48113: मानुषादस्मि विषयादपेतः पश्य लोमश ||१४||` | "I have departed from the human realm, behold, O Lomaśa [sage]. ||14||" |
+| `Line 48114: ` | "[Blank line]" |
+| `Line 48115: सर्वाँल्लोकान्प्रपश्यामि प्रसादात्तव सुव्रत |` | "I see all the worlds by your grace, O one of good vows [suvrata]," |

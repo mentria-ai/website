@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 21716: ` | "[Blank line]" |
+| `Line 21717: तल्लक्षयित्वा द्रुपदस्य पुत्रो; राजा च सर्वैः सह मन्त्रिमुख्यैः |` | "Observing that, Drupada's son [Dhṛṣṭadyumna] and the king [Drupada], together with all the chief ministers," |
+| `Line 21718: समर्चयामासुरुपेत्य हृष्टाः; कुन्तीसुतान्पार्थिवपुत्रपौत्रान् ||१५||` | "Approached joyfully and honored the sons of Kuntī, the sons and grandsons of kings. ||15||" |
+| `Line 21719: ` | "[Blank line]" |
+| `Line 21720: ` | "[Blank line]" |
+| `Line 21721: ` | "[Blank line]" |
+| `Line 21722: ` | "[Blank line]" |
+| `Line 21723: ` | "[Blank line]" |
+| `Line 21724: ` | "[Blank line]" |
+| `Line 21725: १८७` | "187 [chapter number]" |
+| `Line 21726: ` | "[Blank line]" |
+| `Line 21727: ` | "[Blank line]" |
+| `Line 21728: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 21729: ` | "[Blank line]" |
+| `Line 21730: तत आहूय पाञ्चाल्यो राजपुत्रं युधिष्ठिरम् |` | "Then the Pāñcālya [king of Pañcāla] summoned the prince Yudhiṣṭhira," |
+| `Line 21731: परिग्रहेण ब्राह्मेण परिगृह्य महाद्युतिः ||१||` | "And the highly radiant one received him with Brahminical hospitality. ||1||" |
+| `Line 21732: ` | "[Blank line]" |
+| `Line 21733: पर्यपृच्छददीनात्मा कुन्तीपुत्रं सुवर्चसम् |` | "The noble-souled one questioned the splendid son of Kuntī," |
+| `Line 21734: कथं जानीम भवतः क्षत्रियान्ब्राह्मणानुत ||२||` | "How shall we know whether you are Kṣatriyas [warrior class] or Brahmins [priest class]? ||2||" |
+| `Line 21735: ` | "[Blank line]" |
+| `Line 21736: वैश्यान्वा गुणसम्पन्नानुत वा शूद्रयोनिजान् |` | "Or are you accomplished Vaiśyas [merchant class], or those born of Śūdra [servant class] origin," |
+| `Line 21737: मायामास्थाय वा सिद्धांश्चरतः सर्वतोदिशम् ||३||` | "Or are you accomplished beings assuming disguise, wandering in all directions? ||3||" |
+| `Line 21738: ` | "[Blank line]" |
+| `Line 21739: कृष्णाहेतोरनुप्राप्तान्दिवः संदर्शनार्थिनः |` | "Have you come for Kṛṣṇā [Draupadī], arriving from heaven seeking to be seen?" |
+| `Line 21740: ब्रवीतु नो भवान्सत्यं संदेहो ह्यत्र नो महान् ||४||` | "Please tell us the truth, for we have great doubt in this matter. ||4||" |

@@ -76,120 +76,146 @@ def git_commit_and_push(num_new_facts):
     except Exception as e:
         print(f"Unexpected error during Git operations: {e}")
 
-def get_random_mahabharata_snippet(word_count=1000):
-    """Read a random snippet from the Mahabharata text file."""
-    print("Reading random snippet from Mahabharata text...")
+def get_random_mahabharata_snippet(line_count=500):
+    """Read a random snippet from the translated Mahabharata text file."""
+    print("Reading random snippet from translated Mahabharata text...")
     
-    mahabharata_path = Path("assets/data/reference/mahabharata.txt")
+    mahabharata_path = Path("assets/data/reference/mahabharat_translated.txt")
     
     if not mahabharata_path.exists():
-        print(f"Error: Mahabharata text file not found at {mahabharata_path}")
-        return "Error: Mahabharata text file not found."
+        print(f"Error: Translated Mahabharata text file not found at {mahabharata_path}")
+        return "Error: Translated Mahabharata text file not found."
     
-    # Get file size
+    # Get file size and line count
     file_size = mahabharata_path.stat().st_size
     
-    # Choose a random position in the file
+    # Read all lines from the file
     with open(mahabharata_path, 'r', encoding='utf-8', errors='ignore') as file:
-        # Make sure we don't start too close to the end of the file
-        max_start_pos = max(0, file_size - 50000)  # Stay at least 50KB from the end
-        if max_start_pos <= 0:
-            # File is small enough to just read it all
-            content = file.read()
-        else:
-            # Start at a random position
-            start_pos = random.randint(0, max_start_pos)
-            file.seek(start_pos)
-            
-            # Read a line to make sure we start at the beginning of a line
-            file.readline()
-            
-            # Read the snippet
-            content = file.read(100000)  # Read a larger chunk to ensure we get enough words
+        all_lines = file.readlines()
     
-    # Split into words and take approximately the desired count
-    words = content.split()
-    if len(words) > word_count:
-        words = words[:word_count]
+    total_lines = len(all_lines)
+    print(f"Total lines in file: {total_lines}")
     
-    # Rejoin into a string
-    snippet = ' '.join(words)
+    # Choose a random starting line
+    max_start_line = max(0, total_lines - line_count - 100)  # Add buffer to ensure we can get enough lines
+    start_line = random.randint(0, max_start_line)
     
-    print(f"Read {len(words)} words from Mahabharata text.")
+    # Collect lines while skipping blank lines
+    collected_lines = []
+    current_line = start_line
+    
+    while len(collected_lines) < line_count and current_line < total_lines:
+        line = all_lines[current_line].strip()
+        # Skip only completely empty lines
+        if line and "[Blank line]" not in line:
+            collected_lines.append(line)
+        current_line += 1
+    
+    # Process the collected lines - just remove pipe characters at start and end
+    processed_lines = []
+    
+    for line in collected_lines:
+        # Remove pipe at start and end if present, preserve all content
+        if line.startswith('|'):
+            line = line[1:]
+        if line.endswith('|'):
+            line = line[:-1]
+        processed_lines.append(line)
+    
+    # Combine all lines into a single text
+    snippet = ' '.join(processed_lines)
+    
+    # Count words for logging
+    word_count = len(snippet.split())
+    
+    print(f"Read {len(collected_lines)} lines with {word_count} words total.")
     return snippet
 
-def generate_facts_from_mahabharata(mahabharata_snippet, num_facts=7):
+def generate_facts_from_mahabharata(mahabharata_snippet, num_facts=4):
     """Generate facts based on a snippet from the Mahabharata text."""
     
     # Create the system prompt
-    system_prompt = """You are an expert at creating engaging, surprising, and interesting facts based on ancient texts, paired with imaginative Ghibli Art style image prompts.
-Generate unique, fascinating facts based on the provided ancient text snippet. These facts should be intriguing, educational, and captivating. Each fact should be accompanied by an artistic image prompt that illustrates it through a Ghibli-styled lens.
+    system_prompt = """You are an expert at creating direct, concise facts based on ancient texts, paired with minimalist Ghibli Art style image prompts.
 
-Each fact should be concise (15-40 words MAX) but captivating, aiming to evoke wonder, curiosity, or amazement.
+Extract unique, fascinating facts directly from the provided ancient text snippet from the translated Mahabharata. These facts should be direct, educational, and presented without unnecessary interpretation. Each fact should be accompanied by a minimalist artistic image prompt that illustrates it through a Ghibli-styled lens.
 
-Important: Do NOT explicitly mention that these facts are from the Mahabharata or any specific text. Present them as general interesting facts.
+EXTREMELY IMPORTANT: Each fact must focus on a completely different aspect of the text. No two facts should cover similar themes, characters, or concepts. Ensure maximum diversity between facts. For example, if one fact covers a battle tactic, another might focus on philosophical teachings, a third on cultural practices, and a fourth on interpersonal relationships. Ensure maximum diversity between facts across all dimensions - topics, characters, locations, objects, and concepts.
 
-Each image prompt should start with "Ghibli Art:" and you have complete artistic freedom to reimagine these facts in the whimsical, magical style of Studio Ghibli.
+Each fact should be concise (15-40 words MAX) and directly extracted from the text without adding your own interpretation or obvious conclusions. Present the fact as it is, without statements like "showcasing the deep bond" or "highlighting the importance" - let the readers draw their own conclusions.
+
+You may explicitly mention the Mahabharata when it's necessary to make the fact complete and meaningful. However, do not overuse the reference - only include it when it adds significant value to the fact.
+
+Each image prompt should start with "Ghibli Art:" and should embody the simplistic, meaningful beauty characteristic of Studio Ghibli.
 IMPORTANT REQUIREMENTS FOR EVERY IMAGE PROMPT:
-1. Create a scene that clearly illustrates the fact in a visually engaging way
-2. Include atmospheric elements like morning mist, golden hour light, or fantastical weather to enhance the magical Ghibli feeling
-3. If relevant, incorporate animals that relate to the fact in charming, whimsical ways
-4. Use vibrant settings, magical elements, and warm color palettes characteristic of Ghibli films
-5. Add small magical touches like glowing particles, tiny creatures, or enchanted natural elements that relate to the fact
+1. Create a MINIMALIST scene with as few elements as possible - focus on one or two main subjects only
+2. Embrace simplicity and empty space - avoid cluttering the image with too many details
+3. Use soft color palettes and gentle atmospherics (like mist or subtle lighting) to create mood rather than adding more objects
+4. If including a character, make them the clear focus of the composition
+5. Aim for a serene, contemplative quality that conveys meaning through simplicity rather than complexity
 
 For each fact, identify important words that should be emphasized in the animation. There are only two levels of emphasis:
-- emphasis-1: VERY SPARINGLY used for the single most important word that captures the essence of the fact (use in only 30% of facts). This will be highlighted in gold color.
+- emphasis-1: Used for the single most important word that captures the essence of the fact (use in only 30% of facts). This will be highlighted in gold color.
 - emphasis-2: Used only for key terms or transitional words that improve readability. This will be underlined.
 
-Each fact should evoke a sense of wonder, surprise, or delight in the reader."""
+IMPORTANT: Never refer to elements from the Mahabharata as "myths" or "mythical." Treat them as historical and cultural elements with reverence."""
     
     # Create the user prompt
-    user_prompt = f"""Based on the following ancient text snippet, please generate {num_facts} unique and fascinating facts.
+    user_prompt = f"""Based on the following translated text snippet from the Mahabharata, please generate {num_facts} unique and fascinating facts.
 
-ANCIENT TEXT SNIPPET:
+TRANSLATED MAHABHARATA SNIPPET:
 ```
 {mahabharata_snippet}
 ```
 
 For each fact, create:
-1. A brief, surprising fact (15-40 words MAX) that is grounded in the actual text
-2. A detailed image prompt with complete artistic freedom to reimagine it in Ghibli Art style
+1. A brief, direct fact (15-40 words MAX) that is extracted directly from the text without your own interpretation
+2. A SIMPLE image prompt with Ghibli Art style that has as few elements as possible while maintaining meaningful beauty
 3. An emphasis object that marks important words for animation
-4. A context field (120-150 words) that THOROUGHLY explains which part of the text supports this fact
+4. A context field (120-150 words) that provides the exact source from the text
 
 IMPORTANT REQUIREMENTS:
-- Do NOT explicitly mention that these facts are from any specific text. Present them as general interesting facts about history, mythology, or culture.
-- Make the facts sensational yet grounded in the actual text provided.
-- Facts should be diverse, covering different aspects found in the text.
-- Each fact should be concise but captivating.
-- The context field is CRITICAL - it must provide concrete evidence from the text that supports the fact:
-  * Include specific phrases, quotations, or descriptions from the text
-  * Explain how these textual elements support the fact being presented
-  * Provide enough detail to show the fact is authentic and not invented
-  * If the fact involves any embellishment or interpretation, clearly explain how it relates to the original text
+- Extract facts directly from the text WITHOUT adding your interpretation or obvious conclusions
+- Do NOT include phrases like "showcasing," "highlighting," or "illustrating" - just state the fact directly
+- You may mention the Mahabharata when necessary to make the fact complete and meaningful, but don't overuse it
+- Present these as interesting facts about history, culture, and tradition from this ancient epic
+- Never describe elements from the Mahabharata as "myths" or "mythical" - treat them with reverence as historical and cultural elements
+- Make the facts interesting yet grounded in the actual translated text provided
 
-Remember these REQUIREMENTS for every image prompt:
-- Create Ghibli-style art that clearly illustrates the fact
-- Include atmospheric elements (mist, unique lighting, magical weather)
-- Include relevant characters and creatures in a whimsical Ghibli style
-- Use vibrant, whimsical settings that make the fact visually engaging
-- Add small magical touches that enhance the wonder of the fact
+EXTREMELY IMPORTANT FOR DIVERSITY:
+- CRITICAL: The {num_facts} facts MUST be about completely different deities, characters, and concepts:
+  * If one fact mentions Agni, NO OTHER fact should mention Agni
+  * Each fact must focus on a different deity, character, concept, or aspect of life
+  * Ensure ZERO thematic overlap between any two facts
+  * Facts should cover entirely different areas like: specific deities, cultural practices, locations, objects, relationships, etc.
+
+THE IMAGE PROMPT MUST BE SIMPLE AND MINIMALIST:
+- Focus on just 1-2 main elements/subjects
+- Embrace empty space and simplicity
+- Use atmospheric elements (like light, mist) to create mood rather than adding more objects
+- Aim for serene, contemplative beauty with minimal details
+- Avoid overly complex or crowded scenes
+
+The context field MUST:
+  * Include the exact phrases or quotations from the text that contain the fact
+  * Provide only the necessary context to understand where the fact comes from
+  * Avoid adding your own interpretation of the significance of the fact
+  * Simply explain which part of the text contains this information
 
 Format your response as a valid JSON array with objects containing:
 1. "quote": The fact (keep this field name as "quote" for compatibility)
-2. "image_prompt": A detailed Ghibli Art style image prompt following the requirements
-3. "emphasis": An object mapping words to their emphasis level - use emphasis-1 very sparingly for color highlighting (in only 30% of facts), and emphasis-2 for underlining key terms
-4. "context": Detailed explanation (120-150 words) of which part of the text supports this fact, with specific textual evidence
+2. "image_prompt": A simple, minimalist Ghibli Art style image prompt following the requirements
+3. "emphasis": An object mapping words to their emphasis level - use emphasis-1 for color highlighting of the most important term, and emphasis-2 for underlining key terms
+4. "context": Reference to the exact source in the text (120-150 words) without adding interpretation
 
 Example:
 {{
-    "quote": "Did you know? Warriors of ancient times would often perform elaborate rituals before battle, believing these ceremonies would provide divine protection.",
-    "image_prompt": "Ghibli Art: A young warrior in ornate armor kneeling under a massive, ancient tree at dawn. Golden light filters through misty air as they perform a ceremonial ritual with sacred objects. Small spirits peek from behind leaves, and magical particles float around a sword planted in front of them. The landscape features rolling hills dotted with temples in the distance, all rendered in warm, watercolor-like Ghibli style.",
+    "quote": "In the Mahabharata, warriors would perform sacred rites before entering the battlefield, offering prayers to the deities of war.",
+    "image_prompt": "Ghibli Art: A lone warrior kneels in silent prayer under a massive tree. Soft morning light filters through branches.",
     "emphasis": {{
-        "elaborate rituals": "emphasis-2",
-        "divine protection": "emphasis-1"
+        "sacred rites": "emphasis-2",
+        "deities of war": "emphasis-1"
     }},
-    "context": "The text describes in detail how warriors 'would perform sacred rites before entering the battlefield' and mentions specific rituals like 'offering prayers to the deities of war' and 'purifying their weapons with sacred water and mantras.' It explicitly states that 'these ceremonies were believed to create an invisible armor around the warrior' and that 'no weapon could pierce through this divine protection.' The text further elaborates how one particular warrior performed a ritual lasting seven days and nights, after which he emerged victorious in a battle against overwhelming odds, which was attributed to the protection granted by the ritual. These specific descriptions provide concrete evidence for the ceremonial practices and beliefs about divine protection in ancient warfare."
+    "context": "The text states that warriors 'would perform sacred rites before entering the battlefield' and specifically mentions them 'offering prayers to the deities of war.' It also describes how they would 'purify their weapons with sacred water and mantras.' These descriptions are found in the section where the preparation for battle is being discussed, providing specific details about the pre-battle rituals that were considered important for warriors."
 }}
 
 Respond with only the JSON array, no additional text."""
@@ -200,7 +226,7 @@ Respond with only the JSON array, no additional text."""
         {"role": "user", "content": user_prompt}
     ]
     
-    print("Generating fascinating facts based on Mahabharata snippet...")
+    print(f"Generating {num_facts} fascinating facts based on Mahabharata snippet...")
     
     response_text = ""
     response = client.chat.completions.create(
@@ -311,12 +337,12 @@ def main():
     os.makedirs("assets/img/quotes", exist_ok=True)
     os.makedirs("assets/data", exist_ok=True)
     
-    print("===== Mahabharata Fact Generator with Auto-Commit =====")
+    print("===== Mahabharata Fact Generator =====")
     print("Press Ctrl+C to stop the program")
-    print("======================================================")
+    print("======================================")
     
-    batch_size = 7  # Number of facts to generate in each batch
-    pause_duration = 1800  # Seconds to pause between batches (30 minutes)
+    batch_size = 4  # Generate 4 high-quality facts per batch
+    pause_duration = 300  # Seconds to pause between batches (5 minutes)
     batch_count = 0
     
     try:
@@ -332,11 +358,11 @@ def main():
             print(f"Found highest existing quote number: {highest_quote_number}")
             print(f"Total facts in database: {len(facts_data['quotes'])}")
             
-            # Get a random snippet from the Mahabharata text
-            mahabharata_snippet = get_random_mahabharata_snippet(1000)
+            # Get a random snippet from the translated Mahabharata text
+            mahabharata_snippet = get_random_mahabharata_snippet(500)
             
             if "Error:" in mahabharata_snippet:
-                print(f"Error getting Mahabharata snippet: {mahabharata_snippet}")
+                print(f"Error getting translated Mahabharata snippet: {mahabharata_snippet}")
                 print("Will try again after a pause.")
                 time.sleep(pause_duration)
                 continue
@@ -397,7 +423,7 @@ def main():
             if successful_facts > 0:
                 git_commit_and_push(successful_facts)
             
-            print(f"\nBatch #{batch_count} complete! Waiting 30 minutes before next batch...")
+            print(f"\nBatch #{batch_count} complete! Waiting 5 minutes before next batch...")
             print(f"(Press Ctrl+C to exit)")
             
             # Show a countdown timer during the wait

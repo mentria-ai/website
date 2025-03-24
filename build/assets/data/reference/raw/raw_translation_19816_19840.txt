@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 19816: इदं वासिष्ठमाख्यानं पुराणं परिचक्षते |` | "This is declared as the ancient narrative [purāṇa] of Vasiṣṭha [sage's name]," |
+| `Line 19817: पार्थ सर्वेषु लोकेषु यथावत्तन्निबोध मे ||२||` | "O Pārtha [Arjuna], it is known in all worlds; understand it properly from me. ||2||" |
+| `Line 19818: ` | "[Blank line]" |
+| `Line 19819: कन्यकुब्जे महानासीत्पार्थिवो भरतर्षभ |` | "In Kanyakubja [ancient kingdom], there was a great king, O bull of the Bharatas [Arjuna]," |
+| `Line 19820: गाधीति विश्रुतो लोके सत्यधर्मपरायणः ||३||` | "Known in the world as Gādhi, devoted to truth and righteousness [dharma]. ||3||" |
+| `Line 19821: ` | "[Blank line]" |
+| `Line 19822: तस्य धर्मात्मनः पुत्रः समृद्धबलवाहनः |` | "The son of that righteous one, possessing abundant forces and vehicles," |
+| `Line 19823: विश्वामित्र इति ख्यातो बभूव रिपुमर्दनः ||४||` | "Became known as Viśvāmitra [friend of all], a crusher of enemies. ||4||" |
+| `Line 19824: ` | "[Blank line]" |
+| `Line 19825: स चचार सहामात्यो मृगयां गहने वने |` | "He went hunting with his ministers in the dense forest," |
+| `Line 19826: मृगान्विध्यन्वराहांश्च रम्येषु मरुधन्वसु ||५||` | "Piercing deer and boars in the pleasant desert regions. ||5||" |
+| `Line 19827: ` | "[Blank line]" |
+| `Line 19828: व्यायामकर्शितः सोऽथ मृगलिप्सुः पिपासितः |` | "Then, exhausted from exertion, eager for game, and thirsty," |
+| `Line 19829: आजगाम नरश्रेष्ठ वसिष्ठस्याश्रमं प्रति ||६||` | "He approached, O best of men [Arjuna], towards Vasiṣṭha's hermitage. ||6||" |
+| `Line 19830: ` | "[Blank line]" |
+| `Line 19831: तमागतमभिप्रेक्ष्य वसिष्ठः श्रेष्ठभागृषिः |` | "Seeing him arrive, Vasiṣṭha, the sage of excellent fortune," |
+| `Line 19832: विश्वामित्रं नरश्रेष्ठं प्रतिजग्राह पूजया ||७||` | "Welcomed Viśvāmitra, the best of men, with honor. ||7||" |
+| `Line 19833: ` | "[Blank line]" |
+| `Line 19834: पाद्यार्घ्याचमनीयेन स्वागतेन च भारत |` | "With water for feet [pādya], offerings [arghya], water for sipping [ācamanīya], and welcome, O Bhārata [Arjuna]," |
+| `Line 19835: तथैव प्रतिजग्राह वन्येन हविषा तथा ||८||` | "Thus he received him, along with forest-gathered oblations. ||8||" |
+| `Line 19836: ` | "[Blank line]" |
+| `Line 19837: तस्याथ कामधुग्धेनुर्वसिष्ठस्य महात्मनः |` | "Then, the wish-fulfilling cow [kāmadhuk] of that great-souled Vasiṣṭha," |
+| `Line 19838: उक्ता कामान्प्रयच्छेति सा कामान्दुदुहे ततः ||९||` | "Being told to yield desires, she then yielded all desires. ||9||" |
+| `Line 19839: ` | "[Blank line]" |
+| `Line 19840: ग्राम्यारण्या ओषधीश्च दुदुहे पय एव च |` | "She yielded cultivated and wild herbs, and milk as well," |

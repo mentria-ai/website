@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 23841: सहायैरल्पकैः शूरः प्रययौ येन सागरम् ||११||` | "With few companions, the hero proceeded toward the ocean. ||11||" |
+| `Line 23842: ` | "[Blank line]" |
+| `Line 23843: स कलिङ्गानतिक्रम्य देशानायतनानि च |` | "He, having crossed the Kaliṅgas [eastern kingdom], their lands and sacred places," |
+| `Line 23844: धर्म्याणि रमणीयानि प्रेक्षमाणो ययौ प्रभुः ||१२||` | "The lord proceeded, observing the righteous and delightful places. ||12||" |
+| `Line 23845: ` | "[Blank line]" |
+| `Line 23846: महेन्द्रपर्वतं दृष्ट्वा तापसैरुपशोभितम् |` | "Having seen Mount Mahendra [great Indra's mountain] adorned with ascetics," |
+| `Line 23847: समुद्रतीरेण शनैर्मणलूरं जगाम ह ||१३||` | "He slowly went along the seashore to Maṇalūra [coastal city]. ||13||" |
+| `Line 23848: ` | "[Blank line]" |
+| `Line 23849: तत्र सर्वाणि तीर्थानि पुण्यान्यायतनानि च |` | "There, having visited all the sacred fords [tīrtha] and holy shrines," |
+| `Line 23850: अभिगम्य महाबाहुरभ्यगच्छन्महीपतिम् ||१४||` | "The mighty-armed one approached the ruler of the land. ||14||" |
+| `Line 23851: ` | "[Blank line]" |
+| `Line 23852: मणलूरेश्वरं राजन्धर्मज्ञं चित्रवाहनम् ||१४||` | "The lord of Maṇalūra, O king, the righteous Citravāhana [having colorful vehicles]. ||14||" |
+| `Line 23853: ` | "[Blank line]" |
+| `Line 23854: तस्य चित्राङ्गदा नाम दुहिता चारुदर्शना |` | "His daughter named Citrāṅgadā [with beautiful ornaments], of lovely appearance," |
+| `Line 23855: तां ददर्श पुरे तस्मिन्विचरन्तीं यदृच्छया ||१५||` | "He saw her wandering in that city by chance. ||15||" |
+| `Line 23856: ` | "[Blank line]" |
+| `Line 23857: दृष्ट्वा च तां वरारोहां चकमे चैत्रवाहिनीम् |` | "And seeing that beautiful woman, he desired the daughter of Citravāhana," |
+| `Line 23858: अभिगम्य च राजानं ज्ञापयत्स्वं प्रयोजनम् ||१६||` | "And approaching the king, he made known his purpose. ||16||" |
+| `Line 23859: ` | "[Blank line]" |
+| `Line 23860: तमुवाचाथ राजा स सान्त्वपूर्वमिदं वचः ||१६||` | "Then the king spoke to him these words, beginning with consolation. ||16||" |
+| `Line 23861: ` | "[Blank line]" |
+| `Line 23862: राजा प्रभङ्करो नाम कुले अस्मिन्बभूव ह |` | "A king named Prabhankara [light-maker] was born in this family," |
+| `Line 23863: अपुत्रः प्रसवेनार्थी तपस्तेपे स उत्तमम् ||१७||` | "Being childless and desiring offspring, he performed severe austerities. ||17||" |
+| `Line 23864: ` | "[Blank line]" |
+| `Line 23865: उग्रेण तपसा तेन प्रणिपातेन शङ्करः |` | "By that intense austerity and prostration, Śaṅkara [Śiva]" |

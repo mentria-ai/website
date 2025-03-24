@@ -3943,6 +3943,51 @@
         "Bh\u1e5bgu": "emphasis-2"
       },
       "context": "The text mentions that 'Bh\u1e5bgutu\u1e45ga, the great mountain, is known as the place where Bh\u1e5bgu performed austerities, attended by groups of great sages.' This is found in the section describing the sacred hermitages and their significance in the Mahabharata."
+    },
+    {
+      "id": "quote_415",
+      "quote": "Forgiveness is described as Brahman, truth, austerity, purity, and the force that upholds the world in the Mahabharata.",
+      "image_prompt": "Ghibli Art: A single glowing lotus floats on a tranquil, mist-covered lake, symbolizing forgiveness and purity.",
+      "image_url": "assets/img/quotes/quote_415.png",
+      "emphasis": {
+        "Forgiveness": "emphasis-1",
+        "Brahman": "emphasis-2",
+        "upholds the world": "emphasis-2"
+      },
+      "context": "The text states, 'Forgiveness is Brahman [absolute reality], forgiveness is truth, forgiveness is austerity, forgiveness is purity, and by forgiveness the world is upheld.' This is part of a dialogue where the sage K\u0101\u015byapa explains the profound nature of forgiveness to Draupad\u012b, emphasizing its role in maintaining cosmic and moral order."
+    },
+    {
+      "id": "quote_416",
+      "quote": "The Mahabharata mentions that the worlds beyond those of the knowers of Brahman and ascetics are attained by the forgiving.",
+      "image_prompt": "Ghibli Art: A serene figure sits meditating on a mountaintop, with ethereal light glowing above, representing higher realms.",
+      "image_url": "assets/img/quotes/quote_416.png",
+      "emphasis": {
+        "worlds beyond": "emphasis-1",
+        "forgiving": "emphasis-2"
+      },
+      "context": "The text states, 'Beyond the worlds of the knowers of Brahman and even beyond those of ascetics, the forgiving ones attain those worlds that are beyond the knowers of sacrifices.' This is part of a discussion on the spiritual rewards of forgiveness, highlighting its superiority over other forms of spiritual practice."
+    },
+    {
+      "id": "quote_417",
+      "quote": "In the Mahabharata, the Creator (Dh\u0101t\u0101) is described as the one who bestows both happiness and sorrow upon beings.",
+      "image_prompt": "Ghibli Art: A gentle figure stands under a vast sky, one hand holding a sun and the other a rain cloud, symbolizing duality.",
+      "image_url": "assets/img/quotes/quote_417.png",
+      "emphasis": {
+        "Creator": "emphasis-1",
+        "happiness and sorrow": "emphasis-2"
+      },
+      "context": "The text states, 'Indeed, it is the Creator [Dh\u0101t\u0101] who bestows upon beings happiness and sorrow, the pleasant and unpleasant.' This is part of a philosophical discourse on the nature of divine will and the distribution of experiences in life."
+    },
+    {
+      "id": "quote_418",
+      "quote": "The Mahabharata describes the body as an instrument of the Creator, through which actions with good and bad results are performed.",
+      "image_prompt": "Ghibli Art: A simple, translucent figure stands in a field of light, with faint threads connecting it to a glowing orb above.",
+      "image_url": "assets/img/quotes/quote_418.png",
+      "emphasis": {
+        "body": "emphasis-1",
+        "instrument of the Creator": "emphasis-2"
+      },
+      "context": "The text states, 'This body, known as the field [k\u1e63etra], is merely an instrument of the Creator, through which the all-pervading Lord causes actions with good and bad results.' This is part of a discussion on the relationship between the physical body, divine will, and the consequences of actions."
     }
   ]
 }

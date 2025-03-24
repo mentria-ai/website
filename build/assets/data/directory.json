@@ -4296,6 +4296,50 @@
         "Apsaras": "emphasis-1"
       },
       "context": "The text describes how 'the Gandharvas [celestial musicians] and Apsaras [celestial nymphs]' (Line 14709) 'sang to B\u012bbhatsu [Arjuna] and the Apsar\u0101s danced' (Line 14719). It further mentions that 'the illustrious Tumburu [chief Gandharva] sang together with the Gandharvas' (Line 14721). This scene is part of the celestial celebrations following Arjuna's birth in the Mahabharata."
+    },
+    {
+      "id": "quote_447",
+      "quote": "The A\u015bvins, divine physicians, restored the sage Cyavana to youth and beauty, transforming him from an aged ascetic to a radiant young man.",
+      "image_prompt": "Ghibli Art: A serene lake under a soft golden sunset, with faint ripples reflecting the light. A single lotus floats in the center.",
+      "image_url": "assets/img/quotes/quote_447.png",
+      "emphasis": {
+        "A\u015bvins": "emphasis-2",
+        "youth and beauty": "emphasis-1"
+      },
+      "context": "The text describes how the A\u015bvins, divine physicians, restored Cyavana to youth and beauty: 'They will make your husband young and handsome [r\u016bpa-sampanna].' Cyavana enters the water and emerges with a 'divine form, young, with polished earrings.' This transformation occurs after Sukany\u0101, Cyavana's wife, approaches him with the A\u015bvins' proposal. The event is part of a larger narrative involving the A\u015bvins' divine powers and their interaction with mortals."
+    },
+    {
+      "id": "quote_448",
+      "quote": "King Somaka performed a ritual sacrifice involving his son Jantu, which resulted in the birth of a hundred sons, with Jantu being reborn among them.",
+      "image_prompt": "Ghibli Art: A single flame flickers in a dark, misty forest, casting soft light on a small altar surrounded by silence.",
+      "image_url": "assets/img/quotes/quote_448.png",
+      "emphasis": {
+        "ritual sacrifice": "emphasis-2",
+        "hundred sons": "emphasis-1"
+      },
+      "context": "The text recounts how King Somaka, desiring a hundred sons, performed a ritual sacrifice involving his son Jantu: 'Sacrifice Jantu, O king, in the ritual I shall perform.' After the sacrifice, the king's wives conceived and gave birth to a hundred sons, with Jantu being reborn among them, marked by a golden birthmark. This event is part of a larger story about Somaka's quest for progeny and the moral dilemmas surrounding the sacrifice."
+    },
+    {
+      "id": "quote_449",
+      "quote": "The river Sarasvat\u012b, considered sacred and purifying, disappeared into the earth to avoid being discovered by the Ni\u1e63\u0101das.",
+      "image_prompt": "Ghibli Art: A tranquil river vanishing into the earth, surrounded by soft mist and faint golden light filtering through the trees.",
+      "image_url": "assets/img/quotes/quote_449.png",
+      "emphasis": {
+        "Sarasvat\u012b": "emphasis-2",
+        "disappeared into the earth": "emphasis-1"
+      },
+      "context": "The text mentions the river Sarasvat\u012b's disappearance: 'This place is called Vina\u015bana [disappearance point] of the Sarasvat\u012b, O lord of people.' It explains that Sarasvat\u012b entered the earth to avoid being discovered by the Ni\u1e63\u0101das, stating, 'May the Ni\u1e63\u0101das not discover me.' This event is part of the sacred geography described in the Mahabharata, highlighting the river's divine and elusive nature."
+    },
+    {
+      "id": "quote_450",
+      "quote": "The hawk argued that eating the pigeon was necessary for its survival, stating that food is the source of life for all beings.",
+      "image_prompt": "Ghibli Art: A hawk perched on a lone branch, its sharp eyes gazing into the distance, with soft morning light illuminating its feathers.",
+      "image_url": "assets/img/quotes/quote_450.png",
+      "emphasis": {
+        "hawk": "emphasis-2",
+        "source of life": "emphasis-1"
+      },
+      "context": "The hawk's argument is presented in the text: 'From food all beings arise, O ruler of the earth. By food they grow, and by it creatures live.' The hawk further states that without food, its life-breaths would leave its body, taking the path of no return. This dialogue occurs during a moral debate with King U\u015b\u012bnara, who is protecting a pigeon from the hawk. The hawk's perspective highlights the natural order and the necessity of food for survival."
     }
   ]
 }

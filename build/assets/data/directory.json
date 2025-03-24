@@ -3899,6 +3899,50 @@
         "divine jewels": "emphasis-1"
       },
       "context": "The text describes Varuna's assembly hall as 'adorned with trees made of divine jewels, bearing fruits and flowers,' and mentions that it is 'filled with birds of various forms with sweet voices.' This is found in the section where Narada describes the divine assembly halls, emphasizing the hall's beauty and the presence of divine elements."
+    },
+    {
+      "id": "quote_411",
+      "quote": "When the great-souled Jamadagni performed sacrifices to the gods, all the rivers came and satisfied them with honey.",
+      "image_prompt": "Ghibli Art: A serene river flows gently, with golden honey droplets shimmering on its surface under soft sunlight.",
+      "image_url": "assets/img/quotes/quote_411.png",
+      "emphasis": {
+        "Jamadagni": "emphasis-2",
+        "honey": "emphasis-1"
+      },
+      "context": "The text mentions that 'when the great-souled Jamadagni was performing sacrifices to the gods, all the rivers came and satisfied them with honey.' This is found in the section describing the divine occurrences during Jamadagni's rituals, highlighting the reverence and natural responses to his sacrifices."
+    },
+    {
+      "id": "quote_412",
+      "quote": "The Ga\u1e45g\u0101 forcefully broke through at Ga\u1e45g\u0101dv\u0101ra, a sacred place frequented by groups of brahmar\u1e63is.",
+      "image_prompt": "Ghibli Art: A powerful river surges through a narrow mountain pass, with mist rising around it. A single sage stands in the distance.",
+      "image_url": "assets/img/quotes/quote_412.png",
+      "emphasis": {
+        "Ga\u1e45g\u0101": "emphasis-1",
+        "brahmar\u1e63is": "emphasis-2"
+      },
+      "context": "The text states that 'the Ga\u1e45g\u0101 forcefully broke through at Ga\u1e45g\u0101dv\u0101ra, O Yudhi\u1e63\u1e6dhira,' and describes it as 'a sacred place frequented by groups of brahmar\u1e63is.' This is part of the narrative where sacred locations and their significance are being recounted."
+    },
+    {
+      "id": "quote_413",
+      "quote": "Agastya, the great sage, created a woman from the most excellent limbs of various creatures and named her Lop\u0101mudr\u0101.",
+      "image_prompt": "Ghibli Art: A serene figure of a woman stands in a tranquil forest, her form glowing softly with a gentle aura.",
+      "image_url": "assets/img/quotes/quote_413.png",
+      "emphasis": {
+        "Agastya": "emphasis-2",
+        "Lop\u0101mudr\u0101": "emphasis-1"
+      },
+      "context": "The text describes how 'Agastya, the great sage, created a woman from the most excellent limbs of various creatures' and named her 'Lop\u0101mudr\u0101.' This is part of the story where Agastya seeks to fulfill his ancestors' desire for progeny, leading to the creation of Lop\u0101mudr\u0101."
+    },
+    {
+      "id": "quote_414",
+      "quote": "The mountain Bh\u1e5bgutu\u1e45ga is known as the place where the great sage Bh\u1e5bgu performed austerities, attended by groups of great sages.",
+      "image_prompt": "Ghibli Art: A towering mountain peak shrouded in mist, with a single sage meditating at its base under a soft, glowing sky.",
+      "image_url": "assets/img/quotes/quote_414.png",
+      "emphasis": {
+        "Bh\u1e5bgutu\u1e45ga": "emphasis-1",
+        "Bh\u1e5bgu": "emphasis-2"
+      },
+      "context": "The text mentions that 'Bh\u1e5bgutu\u1e45ga, the great mountain, is known as the place where Bh\u1e5bgu performed austerities, attended by groups of great sages.' This is found in the section describing the sacred hermitages and their significance in the Mahabharata."
     }
   ]
 }

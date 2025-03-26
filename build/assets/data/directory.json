@@ -351,6 +351,50 @@
         "Durv\u0101sas granted a boon to Vi\u1e63\u1e47u": "emphasis-2"
       },
       "context": "The text mentions 'the sacred ford called Varad\u0101na [boon-giving], O best of the Bharatas, where a boon was given to Vi\u1e63\u1e47u [preserver god] by Durv\u0101sas [sage], O Yudhi\u1e63\u1e6dhira.' This brief reference preserves the memory of a specific interaction between these two divine figures at this location, though the nature of the boon isn't elaborated in this passage."
+    },
+    {
+      "id": "quote_33",
+      "quote": "Yudhishthira declares that when summoned, he never turns back, as this is his eternal vow established long ago.",
+      "image_prompt": "Ghibli Art: A lone figure stands resolute on a windswept plain, his cloak billowing softly. The horizon glows with a subdued golden light.",
+      "image_url": "assets/img/quotes/quote_33.png",
+      "emphasis": {
+        "eternal vow": "emphasis-1",
+        "summoned": "emphasis-2"
+      },
+      "context": "The text states: 'When summoned, I never turn back; that is my eternal vow established long ago. ||16||' This is part of Yudhishthira's declaration when responding to a challenge, emphasizing his unwavering commitment to his principles. The context shows his adherence to dharma (righteousness) even in difficult situations."
+    },
+    {
+      "id": "quote_34",
+      "quote": "Draupadi is described as having eyes like autumn lotus petals, a slender waist, and the fragrance of autumn lotuses.",
+      "image_prompt": "Ghibli Art: A woman's delicate hands holding a single autumn lotus, its petals glowing softly in the dim light. The background is a misty, muted green.",
+      "image_url": "assets/img/quotes/quote_34.png",
+      "emphasis": {
+        "autumn lotus petals": "emphasis-1",
+        "slender waist": "emphasis-2"
+      },
+      "context": "The text provides a detailed description of Draupadi: 'With eyes like autumn lotus petals, with the fragrance of autumn lotuses... with a slender waist, long hair, copper-red eyes.' This appears when Yudhishthira is forced to stake her in the dice game, highlighting her beauty and dignity even in adversity."
+    },
+    {
+      "id": "quote_35",
+      "quote": "Vidura warns that gambling leads to enmity and great fear, comparing it to a self-destructive act like a goat cutting its own throat with a knife.",
+      "image_prompt": "Ghibli Art: A lone goat stands near a half-buried knife in dry grass, its shadow stretching long in the fading light. The scene is stark and minimal.",
+      "image_url": "assets/img/quotes/quote_35.png",
+      "emphasis": {
+        "gambling": "emphasis-1",
+        "self-destructive": "emphasis-2"
+      },
+      "context": "Vidura's warning appears in his speech: 'Gambling leads to enmity and great fear... like a goat once dug up a knife; it became the terrible cutter of its own throat.' He uses this metaphor while cautioning against the dice game's consequences, showing his wisdom and foresight about the coming conflict."
+    },
+    {
+      "id": "quote_36",
+      "quote": "The text describes eight celestial horses, colored like ospreys, that draw Yudhishthira's chariot without their hooves seeming to touch the ground.",
+      "image_prompt": "Ghibli Art: Eight ethereal horses with feathers like ospreys, running in perfect unison just above a misty ground. Their manes glow faintly in dawn light.",
+      "image_url": "assets/img/quotes/quote_36.png",
+      "emphasis": {
+        "celestial horses": "emphasis-1",
+        "ospreys": "emphasis-2"
+      },
+      "context": "The passage states: 'Which is drawn by eight excellent horses, colored like osprey... one should not say of them that they touch the ground with their feet.' This appears when Yudhishthira stakes his possessions in the dice game, showcasing the extraordinary qualities of his royal equipment."
     }
   ]
 }

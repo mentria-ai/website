@@ -307,6 +307,50 @@
         "\u015avetaketu": "emphasis-2"
       },
       "context": "The text states: 'In ancient times, women were indeed unfettered... Free to move as they pleased.' This changed when \u015avetaketu, angered by seeing his mother taken by a Brahmin, 'established this boundary between men and women on earth.' The account is found in lines 14450-14488, detailing the shift from ancient freedom to structured marital norms."
+    },
+    {
+      "id": "quote_29",
+      "quote": "The meritorious pilgrimage to sacred fords (t\u012brtha) surpasses even sacrifices in merit, as stated in the Mahabharata.",
+      "image_prompt": "Ghibli Art: A serene riverbank at dawn, with a single lotus floating on calm waters. Soft mist rises gently.",
+      "image_url": "assets/img/quotes/quote_29.png",
+      "emphasis": {
+        "sacred fords": "emphasis-1",
+        "surpasses even sacrifices": "emphasis-2"
+      },
+      "context": "The text explicitly states, 'The meritorious pilgrimage to sacred fords [t\u012brtha] surpasses even sacrifices. ||38||' This is presented as a supreme secret of the sages, emphasizing the elevated status of pilgrimage over traditional sacrificial rites. The passage continues to describe the benefits of visiting specific sacred sites like Pu\u1e63kara, where even mental desire for the place purifies sins."
+    },
+    {
+      "id": "quote_30",
+      "quote": "At Pu\u1e63kara, ten thousand crores of sacred fords are present during the three junctions of the day, attended by deities like the \u0100dityas, Vasus, and Rudras.",
+      "image_prompt": "Ghibli Art: A tranquil lake at twilight, with faint celestial figures shimmering above the water. The sky is painted in soft hues of orange and purple.",
+      "image_url": "assets/img/quotes/quote_30.png",
+      "emphasis": {
+        "ten thousand crores of sacred fords": "emphasis-1",
+        "\u0100dityas, Vasus, and Rudras": "emphasis-2"
+      },
+      "context": "The text describes Pu\u1e63kara as a place where 'ten thousand crores [ko\u1e6di] of sacred fords... are present during the three junctions of the day [tri-sandhyam].' It further mentions that deities such as 'the \u0100dityas [solar deities], Vasus [wealth gods], Rudras [storm gods]... are always present there.' This highlights the extraordinary concentration of sacred energy and divine presence at Pu\u1e63kara during specific times."
+    },
+    {
+      "id": "quote_31",
+      "quote": "Bathing in the Sarasvat\u012b river during the month of K\u0101rttika grants imperishable merit, according to the Mahabharata.",
+      "image_prompt": "Ghibli Art: A quiet river bend under autumn trees, with golden leaves floating on the water's surface. A single figure stands ankle-deep in the shallows.",
+      "image_url": "assets/img/quotes/quote_31.png",
+      "emphasis": {
+        "Sarasvat\u012b river": "emphasis-1",
+        "month of K\u0101rttika": "emphasis-2"
+      },
+      "context": "The text specifies that 'one who especially visits Pu\u1e63kara during the month of K\u0101rttika [autumn month]... for him, imperishable merit increases there.' Later, it reiterates this for the Sarasvat\u012b river: 'In the Sarasvat\u012b river, O great king, throughout the year, they bathe always during the completed K\u0101rttik\u012b [month of K\u0101rtika].' This establishes a special connection between the river and this particular time period for spiritual practices."
+    },
+    {
+      "id": "quote_32",
+      "quote": "The sacred ford called Varad\u0101na is where the sage Durv\u0101sas granted a boon to Vi\u1e63\u1e47u, as recorded in the Mahabharata.",
+      "image_prompt": "Ghibli Art: An ancient stone altar by a small stream, with a single ray of sunlight breaking through dense forest canopy above.",
+      "image_url": "assets/img/quotes/quote_32.png",
+      "emphasis": {
+        "Varad\u0101na": "emphasis-1",
+        "Durv\u0101sas granted a boon to Vi\u1e63\u1e47u": "emphasis-2"
+      },
+      "context": "The text mentions 'the sacred ford called Varad\u0101na [boon-giving], O best of the Bharatas, where a boon was given to Vi\u1e63\u1e47u [preserver god] by Durv\u0101sas [sage], O Yudhi\u1e63\u1e6dhira.' This brief reference preserves the memory of a specific interaction between these two divine figures at this location, though the nature of the boon isn't elaborated in this passage."
     }
   ]
 }

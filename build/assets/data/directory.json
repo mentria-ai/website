@@ -395,6 +395,54 @@
         "ospreys": "emphasis-2"
       },
       "context": "The passage states: 'Which is drawn by eight excellent horses, colored like osprey... one should not say of them that they touch the ground with their feet.' This appears when Yudhishthira stakes his possessions in the dice game, showcasing the extraordinary qualities of his royal equipment."
+    },
+    {
+      "id": "quote_37",
+      "quote": "Draupadi questions the assembly about her status after being wagered in the dice game, asking whether she was won fairly when Yudhishthira had already lost himself first.",
+      "image_prompt": "Ghibli Art: A single tear falls from Draupadi's eye as she stands alone in a vast, empty hall. Soft golden light casts long shadows.",
+      "image_url": "assets/img/quotes/quote_37.png",
+      "emphasis": {
+        "Draupadi": "emphasis-2",
+        "wagered": "emphasis-1",
+        "Yudhishthira": "emphasis-2"
+      },
+      "context": "Draupadi directly challenges the Kauravas in the assembly, asking 'Did you lose yourself first or me, O Bh\u0101rata?' (Line 32583). She questions the validity of her being staked when Yudhishthira had already lost himself in the gambling match. This occurs during the infamous dice game where the Pandavas lose everything, including Draupadi herself."
+    },
+    {
+      "id": "quote_38",
+      "quote": "Bhima vows to drink Dushasana's blood in battle after witnessing the humiliation of Draupadi, declaring this with his lips quivering in anger.",
+      "image_prompt": "Ghibli Art: Bhima's massive fist clenched tight, his face half-shadowed with intense emotion. A single shaft of light illuminates his determined eyes.",
+      "image_url": "assets/img/quotes/quote_38.png",
+      "emphasis": {
+        "Bhima": "emphasis-2",
+        "drink Dushasana's blood": "emphasis-1",
+        "lips quivering": "emphasis-2"
+      },
+      "context": "Bhima makes a terrible vow when Draupadi is being disrobed: 'If I do not forcibly break open his chest and drink his blood in battle' (Line 32876). This occurs during the most intense moment of Draupadi's humiliation, with Bhima's anger described as making his lips tremble (Line 32868). The text notes this as an unprecedented declaration that shocks the assembly."
+    },
+    {
+      "id": "quote_39",
+      "quote": "Vikarna, a Kaurava prince, argues that Draupadi was not fairly won in the dice game because Yudhishthira had already lost himself first, showing rare dissent among Dhritarashtra's sons.",
+      "image_prompt": "Ghibli Art: A young prince stands defiantly in an empty corridor, his silhouette framed against distant torchlight. His hand rests on his sword hilt.",
+      "image_url": "assets/img/quotes/quote_39.png",
+      "emphasis": {
+        "Vikarna": "emphasis-1",
+        "not fairly won": "emphasis-2",
+        "rare dissent": "emphasis-2"
+      },
+      "context": "Vikarna speaks against his brothers' actions, stating 'Having considered all this, I think she has not been won' (Line 32411). He presents a logical argument that since Yudhishthira staked himself first when already a slave, he couldn't rightfully wager Draupadi. This occurs during the assembly debate about Draupadi's status, where most Kauravas remain silent (Lines 32774-32780)."
+    },
+    {
+      "id": "quote_40",
+      "quote": "The text describes an ancient rule that virtuous women should never be brought into assemblies, which Draupadi cites as evidence of the Kauravas' moral decline.",
+      "image_prompt": "Ghibli Art: An ancient stone pillar with faded inscriptions stands in a field of tall grass. A single butterfly rests on its weathered surface.",
+      "image_url": "assets/img/quotes/quote_40.png",
+      "emphasis": {
+        "virtuous women": "emphasis-1",
+        "never be brought into assemblies": "emphasis-2",
+        "moral decline": "emphasis-2"
+      },
+      "context": "Draupadi states 'We have heard that virtuous women were not formerly brought to the assembly' (Line 33037), referencing an established tradition being violated. She contrasts this with her current humiliation in the Kuru court (Line 33038). The passage highlights how traditional dharma is being overturned during this incident."
     }
   ]
 }

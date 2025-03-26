@@ -87,6 +87,50 @@
         "Lord Shiva": "emphasis-2"
       },
       "context": "Ga\u1e45g\u0101 tells Bhag\u012bratha: 'My force... is unbearable. No one in the three worlds is capable of bearing it... except for... the blue-throated Mahe\u015bvara' (Lines 47541-47545). This occurs after Bhag\u012bratha's thousand-year austerity to bring Ga\u1e45g\u0101 down for his ancestors' salvation (Lines 47473-47545)."
+    },
+    {
+      "id": "quote_9",
+      "quote": "The Ashvins, divine physician twins, were initially deemed unworthy of receiving Soma, the sacred ritual drink, due to their profession of healing gods and mortals.",
+      "image_prompt": "Ghibli Art: Two golden-hued Ashvin twins stand solemnly under a twilight sky, their hands holding medicinal herbs. A single drop of Soma hovers mid-air between them.",
+      "image_url": "assets/img/quotes/quote_9.png",
+      "emphasis": {
+        "Ashvins": "emphasis-1",
+        "Soma": "emphasis-2"
+      },
+      "context": "The text states: 'Both these N\u0101satyas [Ashvin twins] are not worthy of Soma [ritual drink] - this is my opinion. Being physicians to the sons of gods, by their profession they do not deserve this.' This debate occurs during a discussion between Indra and the sage Chyavana, who later defends the Ashvins' right to receive Soma."
+    },
+    {
+      "id": "quote_10",
+      "quote": "King Yuvan\u0101\u015bva unintentionally drank ritual water meant to grant his wife a son, resulting in the miraculous birth of Mandh\u0101t\u0101 from his own side after a hundred years.",
+      "image_prompt": "Ghibli Art: A translucent golden embryo glows within a king's side under moonlight. Delicate lotus petals float in a nearby ritual vessel.",
+      "image_url": "assets/img/quotes/quote_10.png",
+      "emphasis": {
+        "Mandh\u0101t\u0101": "emphasis-1",
+        "ritual water": "emphasis-2"
+      },
+      "context": "The text describes how Yuvan\u0101\u015bva, 'with a dry throat, tormented by thirst,' drank consecrated water from a pot meant for his wife. The sage Bh\u1e5bgu declares: 'Through them, you will yourself beget a son.' After a hundred years, Mandh\u0101t\u0101 emerges from the king's left side 'like another S\u016brya.'"
+    },
+    {
+      "id": "quote_11",
+      "quote": "The demon Mada, created from sage Chyavana's tapas, had jaws spanning earth to heaven and teeth resembling ramparts, terrifying even Indra with his world-devouring form.",
+      "image_prompt": "Ghibli Art: A shadowy giant with one jaw on the earth and another touching clouds, his teeth like mountain peaks. Tiny birds flee from his lightning-like tongue.",
+      "image_url": "assets/img/quotes/quote_11.png",
+      "emphasis": {
+        "Mada": "emphasis-1",
+        "teeth resembling ramparts": "emphasis-2"
+      },
+      "context": "The text details Mada's appearance: 'One of his jaws rested on the earth, the other reached to heaven... teeth resembling ramparts in form, appearing like the points of spears.' This manifestation occurs when Chyavana creates a k\u1e5bty\u0101 (magical weapon) to confront Indra during the Soma dispute."
+    },
+    {
+      "id": "quote_12",
+      "quote": "U\u015b\u012bnara king proved his righteousness by offering his own flesh equal to a pigeon's weight to a hawk, later revealed to be Indra testing dharma.",
+      "image_prompt": "Ghibli Art: A king calmly places strips of his glowing flesh on golden scales against a white pigeon. The hawk's eyes shimmer with divine light.",
+      "image_url": "assets/img/quotes/quote_12.png",
+      "emphasis": {
+        "U\u015b\u012bnara": "emphasis-1",
+        "flesh equal to a pigeon's weight": "emphasis-2"
+      },
+      "context": "The hawk (Indra) demands: 'Cut flesh from your own body equal in weight to the pigeon.' When the king mounts the scale himself after multiple cuttings, Indra reveals: 'I am Indra... the pigeon is Agni.' This occurs during their philosophical debate about dharma at Prabh\u0101sa t\u012brtha."
     }
   ]
 }

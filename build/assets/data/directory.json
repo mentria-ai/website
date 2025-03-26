@@ -175,6 +175,50 @@
         "92 aspects of kingship": "emphasis-2"
       },
       "context": "The text features N\u0101rada's extensive interrogation of Yudhi\u1e63\u1e6dhira, where he asks 92 questions spanning governance, morality, and personal conduct. These include inquiries about 'dharma, artha, and k\u0101ma,' the treatment of subjects, the management of spies, and the king's daily routines. N\u0101rada's questions are designed to assess whether Yudhi\u1e63\u1e6dhira's rule aligns with the ideals of righteous kingship, as practiced by his ancestors and prescribed in the Vedas."
+    },
+    {
+      "id": "quote_17",
+      "quote": "The P\u0101\u1e47\u1e0davas performed auspicious rites with their family priest Dhaumya before departing for the K\u0101myaka forest, surrounded by groups of Brahmins.",
+      "image_prompt": "Ghibli Art: A quiet forest clearing at dawn, with five shadowy figures and an elderly priest standing near a small fire. Soft mist lingers between ancient trees.",
+      "image_url": "assets/img/quotes/quote_17.png",
+      "emphasis": {
+        "auspicious rites": "emphasis-2",
+        "K\u0101myaka forest": "emphasis-1"
+      },
+      "context": "The text states: '\u0924\u0924\u0903 \u0915\u0943\u0924\u0938\u094d\u0935\u0938\u094d\u0924\u094d\u092f\u092f\u0928\u093e \u0927\u094c\u092e\u094d\u092f\u0947\u0928 \u0938\u0939 \u092a\u093e\u0923\u094d\u0921\u0935\u093e\u0903 | \u0926\u094d\u0935\u093f\u091c\u0938\u0919\u094d\u0918\u0948\u0903 \u092a\u0930\u093f\u0935\u0943\u0924\u093e\u0903 \u092a\u094d\u0930\u092f\u092f\u0941\u0903 \u0915\u093e\u092e\u094d\u092f\u0915\u0902 \u0935\u0928\u092e\u094d' (Then, having performed the auspicious rites with Dhaumya, the P\u0101\u1e47\u1e0davas departed for the K\u0101myaka forest, surrounded by groups of twice-born [Brahmins]). This describes their formal departure ritual into exile."
+    },
+    {
+      "id": "quote_18",
+      "quote": "Vidura advised Dhritarashtra that the kingdom's foundation is righteousness (dharma), and he should protect both his sons and Kunti's sons equally.",
+      "image_prompt": "Ghibli Art: A blind king sits on a marble throne, his hands resting on a scroll with glowing golden letters. Moonlight spills through an open archway behind him.",
+      "image_url": "assets/img/quotes/quote_18.png",
+      "emphasis": {
+        "kingdom's foundation": "emphasis-2",
+        "righteousness (dharma)": "emphasis-1"
+      },
+      "context": "Vidura's counsel is recorded: '\u0924\u094d\u0930\u093f\u0935\u0930\u094d\u0917\u094b\u093d\u092f\u0902 \u0927\u0930\u094d\u092e\u092e\u0942\u0932\u094b \u0928\u0930\u0947\u0928\u094d\u0926\u094d\u0930; \u0930\u093e\u091c\u094d\u092f\u0902 \u091a\u0947\u0926\u0902 \u0927\u0930\u094d\u092e\u092e\u0942\u0932\u0902 \u0935\u0926\u0928\u094d\u0924\u093f | \u0927\u0930\u094d\u092e\u0947 \u0930\u093e\u091c\u0928\u094d\u0935\u0930\u094d\u0924\u092e\u093e\u0928\u0903 \u0938\u094d\u0935\u0936\u0915\u094d\u0924\u094d\u092f\u093e; \u092a\u0941\u0924\u094d\u0930\u093e\u0928\u094d\u0938\u0930\u094d\u0935\u093e\u0928\u094d\u092a\u093e\u0939\u093f \u0915\u0941\u0928\u094d\u0924\u0940\u0938\u0941\u0924\u093e\u0902\u0936\u094d\u091a' (This trivarga [three aims of life] is rooted in dharma, O king; they say this kingdom is founded on dharma. Abiding in dharma, protect all your sons and Kunti's sons)."
+    },
+    {
+      "id": "quote_19",
+      "quote": "The demon Kirm\u012bra blocked the P\u0101\u1e47\u1e0davas' path at night, roaring with a voice that made birds flee and trees tremble.",
+      "image_prompt": "Ghibli Art: A towering shadowy figure with glowing eyes stands amidst uprooted trees, his mouth open in a silent roar. A single frightened bird flees across a starry sky.",
+      "image_url": "assets/img/quotes/quote_19.png",
+      "emphasis": {
+        "demon Kirm\u012bra": "emphasis-1",
+        "voice that made birds flee": "emphasis-2"
+      },
+      "context": "The text vividly describes: '\u0926\u0940\u092a\u094d\u0924\u093e\u0915\u094d\u0937\u0902 \u092d\u0940\u0937\u0923\u0902 \u0930\u0915\u094d\u0937\u0903...\u092e\u0941\u091e\u094d\u091a\u0928\u094d\u0924\u0902 \u0935\u093f\u092a\u0941\u0932\u0902 \u0928\u093e\u0926\u0902 \u0938\u0924\u094b\u092f\u092e\u093f\u0935 \u0924\u094b\u092f\u0926\u092e\u094d | \u0924\u0938\u094d\u092f \u0928\u093e\u0926\u0947\u0928 \u0938\u0928\u094d\u0924\u094d\u0930\u0938\u094d\u0924\u093e\u0903 \u092a\u0915\u094d\u0937\u093f\u0923\u0903 \u0938\u0930\u094d\u0935\u0924\u094b\u0926\u093f\u0936\u092e\u094d' (A terrifying r\u0101k\u1e63asa with blazing eyes...emitting vast sounds like a rain-cloud. Terrified by his roar, birds fled in all directions). This occurs when the P\u0101\u1e47\u1e0davas first encounter Kirm\u012bra in K\u0101myaka forest."
+    },
+    {
+      "id": "quote_20",
+      "quote": "Bhima fought Kirm\u012bra by uprooting a ten-vyama-tall tree, stripping its leaves, and wielding it like a club in their battle.",
+      "image_prompt": "Ghibli Art: A muscular warrior swings a massive leafless tree horizontally, its roots still trailing earth. Dust swirls in the golden light of dawn.",
+      "image_url": "assets/img/quotes/quote_20.png",
+      "emphasis": {
+        "ten-vyama-tall tree": "emphasis-1",
+        "wielding it like a club": "emphasis-2"
+      },
+      "context": "The combat is detailed: '\u092d\u0940\u092e\u094b \u0935\u0943\u0915\u094d\u0937\u093e\u092f\u0941\u0927\u0938\u094d\u0924\u0926\u093e...\u0926\u0936\u0935\u094d\u092f\u093e\u092e\u092e\u093f\u0935\u094b\u0926\u094d\u0935\u093f\u0926\u094d\u0927\u0902 \u0928\u093f\u0937\u094d\u092a\u0924\u094d\u0930\u092e\u0915\u0930\u094b\u0924\u094d\u0924\u0926\u093e' (Bh\u012bma, armed with a tree then...uprooted one about ten vyamas tall and stripped it of leaves). This describes the unconventional weapon used against the r\u0101k\u1e63asa before their grappling fight."
     }
   ]
 }

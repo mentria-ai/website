@@ -131,6 +131,50 @@
         "flesh equal to a pigeon's weight": "emphasis-2"
       },
       "context": "The hawk (Indra) demands: 'Cut flesh from your own body equal in weight to the pigeon.' When the king mounts the scale himself after multiple cuttings, Indra reveals: 'I am Indra... the pigeon is Agni.' This occurs during their philosophical debate about dharma at Prabh\u0101sa t\u012brtha."
+    },
+    {
+      "id": "quote_13",
+      "quote": "Arundhat\u012b, the model of wifely devotion, once suspected her husband Vasi\u1e63\u1e6dha, the great sage, despite his pure nature and devotion to her welfare.",
+      "image_prompt": "Ghibli Art: A serene woman with smoke-red complexion stands under a twilight sky, her gaze distant and contemplative.",
+      "image_url": "assets/img/quotes/quote_13.png",
+      "emphasis": {
+        "Arundhat\u012b": "emphasis-1",
+        "Vasi\u1e63\u1e6dha": "emphasis-2"
+      },
+      "context": "The text describes Arundhat\u012b, renowned as a virtuous and auspicious figure, suspecting her husband Vasi\u1e63\u1e6dha, a sage among the seven sages (saptar\u1e63i). This suspicion, despite his 'extremely pure nature' and constant devotion to her welfare, led to her transformation into a 'smoke-red complexion' and becoming 'barely visible, unattractive.' The passage highlights this incident as an example of how even the most devoted relationships can face moments of doubt."
+    },
+    {
+      "id": "quote_14",
+      "quote": "Maya, the asura architect, built an assembly hall for the P\u0101\u1e47\u1e0davas adorned with jewels and resembling a celestial palace, measuring ten thousand ki\u1e63kus in all directions.",
+      "image_prompt": "Ghibli Art: A shimmering hall of crystal and gold floats above a misty lake, reflecting the soft hues of dawn.",
+      "image_url": "assets/img/quotes/quote_14.png",
+      "emphasis": {
+        "Maya": "emphasis-1",
+        "ten thousand ki\u1e63kus": "emphasis-2"
+      },
+      "context": "The text details how Maya, described as the 'Vi\u015bvakarm\u0101 of the D\u0101navas,' constructed a divine assembly hall for Yudhi\u1e63\u1e6dhira. This hall was 'adorned with all kinds of gems,' 'resembling a celestial palace,' and measured 'ten thousand ki\u1e63kus in all directions.' It was so magnificent that it surpassed even the halls of Brahm\u0101 and K\u1e5b\u1e63\u1e47a's Sudharm\u0101, becoming famous across the three worlds."
+    },
+    {
+      "id": "quote_15",
+      "quote": "The fire god Agni, after consuming the Kh\u0101\u1e47\u1e0dava forest for five days and one more, attained supreme satisfaction and showed himself to Arjuna.",
+      "image_prompt": "Ghibli Art: A gentle flame flickers in a vast, charred forest, its light casting long shadows as the sun sets.",
+      "image_url": "assets/img/quotes/quote_15.png",
+      "emphasis": {
+        "Agni": "emphasis-1",
+        "Kh\u0101\u1e47\u1e0dava forest": "emphasis-2"
+      },
+      "context": "The passage describes Agni's consumption of the Kh\u0101\u1e47\u1e0dava forest, where he 'burned that forest with its animals and birds' for 'five days and one more.' After 'having drunk the streams carrying fat and marrow,' he reached 'supreme satisfaction' and revealed himself to Arjuna. This event is part of the larger narrative where Agni's hunger is satiated through the destruction of the forest, aided by Arjuna and K\u1e5b\u1e63\u1e47a."
+    },
+    {
+      "id": "quote_16",
+      "quote": "N\u0101rada, the divine sage, questions Yudhi\u1e63\u1e6dhira on 92 aspects of kingship, covering dharma, artha, and k\u0101ma, to ensure his rule is just and prosperous.",
+      "image_prompt": "Ghibli Art: A wise sage with a lute sits under a blooming tree, his eyes closed in deep thought as petals drift around him.",
+      "image_url": "assets/img/quotes/quote_16.png",
+      "emphasis": {
+        "N\u0101rada": "emphasis-1",
+        "92 aspects of kingship": "emphasis-2"
+      },
+      "context": "The text features N\u0101rada's extensive interrogation of Yudhi\u1e63\u1e6dhira, where he asks 92 questions spanning governance, morality, and personal conduct. These include inquiries about 'dharma, artha, and k\u0101ma,' the treatment of subjects, the management of spies, and the king's daily routines. N\u0101rada's questions are designed to assess whether Yudhi\u1e63\u1e6dhira's rule aligns with the ideals of righteous kingship, as practiced by his ancestors and prescribed in the Vedas."
     }
   ]
 }

@@ -219,6 +219,50 @@
         "wielding it like a club": "emphasis-2"
       },
       "context": "The combat is detailed: '\u092d\u0940\u092e\u094b \u0935\u0943\u0915\u094d\u0937\u093e\u092f\u0941\u0927\u0938\u094d\u0924\u0926\u093e...\u0926\u0936\u0935\u094d\u092f\u093e\u092e\u092e\u093f\u0935\u094b\u0926\u094d\u0935\u093f\u0926\u094d\u0927\u0902 \u0928\u093f\u0937\u094d\u092a\u0924\u094d\u0930\u092e\u0915\u0930\u094b\u0924\u094d\u0924\u0926\u093e' (Bh\u012bma, armed with a tree then...uprooted one about ten vyamas tall and stripped it of leaves). This describes the unconventional weapon used against the r\u0101k\u1e63asa before their grappling fight."
+    },
+    {
+      "id": "quote_21",
+      "quote": "The Ashvins, divine twin physicians, restored Upamanyu's eyesight after he praised them with Rig Vedic verses as instructed by his teacher.",
+      "image_prompt": "Ghibli Art: Two golden-hued divine twins stand in a misty forest, one holding a healing herb. Soft light surrounds them.",
+      "image_url": "assets/img/quotes/quote_21.png",
+      "emphasis": {
+        "Ashvins": "emphasis-1",
+        "Rig Vedic verses": "emphasis-2"
+      },
+      "context": "The text describes how Upamanyu, after eating arka leaves and becoming blind, was told by his teacher to 'praise the Ashvins' (Line 1631). Upon doing so with 'words and Rig Vedic verses' (Line 1633), the Ashvins arrived and restored his vision (Lines 1669-1689). The specific Rig Vedic praise includes descriptions of them as 'divine, well-winged, stainless' (Line 1637) and 'golden birds' (Line 1639)."
+    },
+    {
+      "id": "quote_22",
+      "quote": "Takshaka, the serpent king, stole Uttanka's earrings by transforming into an ascetic and fleeing into a hole that led to the n\u0101galoka (serpent realm).",
+      "image_prompt": "Ghibli Art: A serpentine figure half-transformed into human form slips into a glowing hole in the earth. Dust swirls in the dim light.",
+      "image_url": "assets/img/quotes/quote_22.png",
+      "emphasis": {
+        "Takshaka": "emphasis-1",
+        "n\u0101galoka": "emphasis-2"
+      },
+      "context": "The text recounts how Uttanka placed the earrings on the ground to fetch water (Line 1854), when a 'naked ascetic' (Line 1853) took them. The ascetic then 'abandoned that form and assuming the form of Takshaka... entered a large hole that opened in the earth' leading to the 'realm of serpents' (Lines 1857-1858). This event occurs during Uttanka's mission to retrieve earrings for his teacher's wife."
+    },
+    {
+      "id": "quote_23",
+      "quote": "A bull's dung, revealed to be am\u1e5bta (nectar of immortality), was consumed by Uttanka on Indra's command while traveling to retrieve the earrings.",
+      "image_prompt": "Ghibli Art: A massive white bull stands in a sunlit meadow, its golden dung glowing faintly. Distant mountains fade into mist.",
+      "image_url": "assets/img/quotes/quote_23.png",
+      "emphasis": {
+        "am\u1e5bta": "emphasis-1",
+        "Indra's command": "emphasis-2"
+      },
+      "context": "The text describes Uttanka encountering 'an enormous bull' with a rider who instructs him to 'eat this dung' (Line 1766). Later, his teacher explains this was no ordinary bull but 'Air\u0101vata, the king of elephants' ridden by Indra, and the dung was 'am\u1e5bta' that protected Uttanka in the serpent realm (Lines 1966-1969). This occurs during Uttanka's journey to King Paushya's court."
+    },
+    {
+      "id": "quote_24",
+      "quote": "Two women weave a cosmic cloth on a loom with black and white threads representing night and day, observed by Uttanka in the serpent realm.",
+      "image_prompt": "Ghibli Art: Two shadowy figures weave at an enormous loom, their threads glowing black and white against a starry void. No faces visible.",
+      "image_url": "assets/img/quotes/quote_24.png",
+      "emphasis": {
+        "cosmic cloth": "emphasis-1",
+        "night and day": "emphasis-2"
+      },
+      "context": "Uttanka sees 'two women weaving cloth on a loom' with 'black and white threads' (Lines 1888-1889) during his descent into the serpent world. His teacher later explains these were 'Dh\u0101t\u0101 and Vidh\u0101t\u0101' (creator deities), and the threads symbolize 'Night and Day' (Lines 1961-1962). The text poetically describes this as 'weaving brightness... dispelling darkness' (Line 1640) and 'beings and worlds unceasingly' (Line 1898)."
     }
   ]
 }

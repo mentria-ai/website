@@ -263,6 +263,50 @@
         "night and day": "emphasis-2"
       },
       "context": "Uttanka sees 'two women weaving cloth on a loom' with 'black and white threads' (Lines 1888-1889) during his descent into the serpent world. His teacher later explains these were 'Dh\u0101t\u0101 and Vidh\u0101t\u0101' (creator deities), and the threads symbolize 'Night and Day' (Lines 1961-1962). The text poetically describes this as 'weaving brightness... dispelling darkness' (Line 1640) and 'beings and worlds unceasingly' (Line 1898)."
+    },
+    {
+      "id": "quote_25",
+      "quote": "Dh\u1e5btar\u0101\u1e63\u1e6dra had 100 sons and 1 daughter, all named with specific attributes reflecting their nature, such as Duryodhana (evil fighter) and Yuyutsu (eager to fight).",
+      "image_prompt": "Ghibli Art: A single golden nameplate with the word 'Duryodhana' etched in soft light, floating in a misty forest clearing.",
+      "image_url": "assets/img/quotes/quote_25.png",
+      "emphasis": {
+        "100 sons": "emphasis-2",
+        "Duryodhana": "emphasis-1"
+      },
+      "context": "The text lists Dh\u1e5btar\u0101\u1e63\u1e6dra's sons with their names and meanings: 'Duryodhana [evil fighter], Yuyutsu [eager to fight], O king, and Du\u1e25\u015b\u0101sana [evil ruler] as well,' followed by others like 'Du\u1e25saha [unbearable], Du\u1e25\u015bala, and Jalasandha [water-joiner].' It concludes with 'This makes one hundred, O king, and one daughter is proclaimed.' The names are directly tied to their characteristics, as seen in lines 13846-13883."
+    },
+    {
+      "id": "quote_26",
+      "quote": "The sage Kindama cursed P\u0101\u1e47\u1e0du that he would die if he ever united with his wife, after P\u0101\u1e47\u1e0du unknowingly killed him while he was in deer form mating with his wife.",
+      "image_prompt": "Ghibli Art: A translucent deer spirit fading into mist, its eyes glowing faintly under moonlight, with a single arrow lying broken on the ground.",
+      "image_url": "assets/img/quotes/quote_26.png",
+      "emphasis": {
+        "Kindama": "emphasis-2",
+        "die if he ever united": "emphasis-1"
+      },
+      "context": "P\u0101\u1e47\u1e0du accidentally shoots Kindama, a sage in deer form, during mating. The dying sage says: 'Since I have been harmed by you, therefore without doubt, you who have committed cruelty to both of us... A life-ending situation will likewise come upon you.' This curse is detailed in lines 13995-14011, where Kindama explains P\u0101\u1e47\u1e0du's fate if he engages in union with his wife."
+    },
+    {
+      "id": "quote_27",
+      "quote": "Kunt\u012b possessed a divine mantra from the sage Durv\u0101sas that allowed her to invoke any deity to father a child, which she first used to summon Dharma for Yudhi\u1e63\u1e6dhira.",
+      "image_prompt": "Ghibli Art: A young Kunt\u012b kneeling by a small fire, her hands cupped around a glowing mantra symbol, with faint golden light illuminating her face.",
+      "image_url": "assets/img/quotes/quote_27.png",
+      "emphasis": {
+        "divine mantra": "emphasis-1",
+        "Durv\u0101sas": "emphasis-2"
+      },
+      "context": "Kunt\u012b reveals to P\u0101\u1e47\u1e0du: 'That venerable one [Durv\u0101sas] revealed to me a boon connected with magical incantation... Whichever god you will invoke with this mantra, whether unwilling or willing, he will come under your control.' She later uses it to invoke Dharma for Yudhi\u1e63\u1e6dhira, as described in lines 14544-14557 and 14588-14594."
+    },
+    {
+      "id": "quote_28",
+      "quote": "Ancient women were described as 'unfettered' and free to choose partners until \u015avetaketu established marital boundaries after seeing his mother taken by another man.",
+      "image_prompt": "Ghibli Art: A lone scroll unfurling in the wind, bearing the word 'unfettered' in delicate calligraphy, resting on a weathered stone pedestal.",
+      "image_url": "assets/img/quotes/quote_28.png",
+      "emphasis": {
+        "unfettered": "emphasis-1",
+        "\u015avetaketu": "emphasis-2"
+      },
+      "context": "The text states: 'In ancient times, women were indeed unfettered... Free to move as they pleased.' This changed when \u015avetaketu, angered by seeing his mother taken by a Brahmin, 'established this boundary between men and women on earth.' The account is found in lines 14450-14488, detailing the shift from ancient freedom to structured marital norms."
     }
   ]
 }

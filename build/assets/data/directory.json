@@ -443,6 +443,50 @@
         "moral decline": "emphasis-2"
       },
       "context": "Draupadi states 'We have heard that virtuous women were not formerly brought to the assembly' (Line 33037), referencing an established tradition being violated. She contrasts this with her current humiliation in the Kuru court (Line 33038). The passage highlights how traditional dharma is being overturned during this incident."
+    },
+    {
+      "id": "quote_41",
+      "quote": "The sage Aurva was born from his mother's thigh after being protected there for a hundred years when the Bh\u1e5bgu lineage was being slaughtered by K\u1e63atriyas.",
+      "image_prompt": "Ghibli Art: A luminous infant floats peacefully within a translucent golden thigh, surrounded by soft blue mist.",
+      "image_url": "assets/img/quotes/quote_41.png",
+      "emphasis": {
+        "born from his mother's thigh": "emphasis-1",
+        "hundred years": "emphasis-2"
+      },
+      "context": "The text describes how Aurva's mother protected him in her thigh during the massacre of the Bh\u1e5bgus: 'At that time, this embryo was protected by me in my thigh for a hundred years' (Line 20411). It further explains his unique birth: 'He, the sage Aurva, because he was born breaking through the thigh' (Line 20428). This occurs when the Brahmin woman reveals Aurva's origin story to the blinded kings."
+    },
+    {
+      "id": "quote_42",
+      "quote": "Draupad\u012b's brother Dh\u1e5b\u1e63\u1e6dadyumna was born from sacrificial fire fully armed with armor, sword, arrows, and bow to kill Dro\u1e47a.",
+      "image_prompt": "Ghibli Art: A newborn warrior with miniature armor and bow emerges from dancing flames, his wide eyes reflecting firelight.",
+      "image_url": "assets/img/quotes/quote_42.png",
+      "emphasis": {
+        "born from sacrificial fire": "emphasis-1",
+        "fully armed": "emphasis-2"
+      },
+      "context": "The text states: 'Who was born armored, with sword, arrows, and bow, from the blazing fire' (Lines 20802-20803). This description appears when the Brahmins explain Draupad\u012b's extraordinary birth alongside her brother during the svaya\u1e43vara preparations. The passage emphasizes his divine origin and destined role as 'the powerful enemy of Dro\u1e47a' (Line 20800)."
+    },
+    {
+      "id": "quote_43",
+      "quote": "King Kalm\u0101\u1e63ap\u0101da was cursed by a Brahmin woman to die if he approached his wife during her fertile period after he devoured her husband.",
+      "image_prompt": "Ghibli Art: A distraught woman with glowing tears points at a king, her curse forming visible crimson script in the air between them.",
+      "image_url": "assets/img/quotes/quote_43.png",
+      "emphasis": {
+        "cursed": "emphasis-1",
+        "fertile period": "emphasis-2"
+      },
+      "context": "The Brahmin woman declares: 'Upon approaching your wife during her fertile period, you shall immediately lose your life' (Line 20689). This occurs after Kalm\u0101\u1e63ap\u0101da, under a curse, eats her husband before her eyes (Lines 20676-20677). The passage details how her falling tears turned into blazing fire (Lines 20679-20680) before she delivers this specific reproductive curse."
+    },
+    {
+      "id": "quote_44",
+      "quote": "The anger-born fire of Aurva was released into the ocean where it continues to consume waters as a horse-headed flame.",
+      "image_prompt": "Ghibli Art: A serene seascape at dusk where a translucent horse-shaped flame drinks from rolling waves, its mane blending with mist.",
+      "image_url": "assets/img/quotes/quote_44.png",
+      "emphasis": {
+        "horse-headed flame": "emphasis-1",
+        "consume waters": "emphasis-2"
+      },
+      "context": "The ancestors advise Aurva: 'Release this anger-fire into the waters... Let this remain in the great ocean' (Lines 20537-20538). The text later confirms: 'That fire, spewing from its mouth, drinks the waters in the great ocean' (Line 20549). This occurs during Aurva's crisis when his wrath threatens universal destruction (Lines 20433-20434), and the solution transforms his fury into a permanent oceanic phenomenon."
     }
   ]
 }

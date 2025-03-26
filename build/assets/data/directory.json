@@ -43,6 +43,50 @@
         "ancient boon from Shiva": "emphasis-2"
       },
       "context": "Lines 23862-23872 describe King Citravahana telling Arjuna how his ancestor Prabhankara received Shiva's blessing for 'one offspring in each generation.' His daughter Citrangada thus carries the lineage, as 'she will surely continue our lineage.' This occurs when Arjuna visits coastal Manipura during his travels."
+    },
+    {
+      "id": "quote_5",
+      "quote": "The sage Dadh\u012bca voluntarily relinquished his body so his bones could be used to create a divine thunderbolt for the gods to defeat their enemies.",
+      "image_prompt": "Ghibli Art: A serene sage sits cross-legged in golden light, his translucent form dissolving into the air as white bones remain. Soft mist surrounds.",
+      "image_url": "assets/img/quotes/quote_5.png",
+      "emphasis": {
+        "Dadh\u012bca": "emphasis-1",
+        "divine thunderbolt": "emphasis-2"
+      },
+      "context": "The text describes how Dadh\u012bca, whose radiance equaled the sun, told the gods: 'I shall do what is beneficial for you today, O gods; I shall also relinquish my own body.' After his death, the gods took his bones as instructed to create the thunderbolt (vajra). This occurs when the gods approach Dadh\u012bca's hermitage, which resembled heaven, seeking help against their enemies (Lines 46740-46753)."
+    },
+    {
+      "id": "quote_6",
+      "quote": "The demon V\u1e5btra's roar caused the earth, sky, directions, and mountains to tremble when he confronted Indra in battle.",
+      "image_prompt": "Ghibli Art: A colossal serpentine shadow coils against a stormy sky, its open maw sending visible sound waves that distort the landscape below. Pale moonlight.",
+      "image_url": "assets/img/quotes/quote_6.png",
+      "emphasis": {
+        "V\u1e5btra": "emphasis-1",
+        "tremble": "emphasis-2"
+      },
+      "context": "The text states: 'By his bellowing, the earth, directions, sky, heaven, and mountains\u2014everything trembled' when V\u1e5btra roared against Indra (Line 46806). This occurs during the battle where V\u1e5btra, protected by the K\u0101lakeya demons, stands covering heaven and earth, causing even Indra to faint from fear (Lines 46772-46812)."
+    },
+    {
+      "id": "quote_7",
+      "quote": "King Sagara's 60,000 sons were reduced to ashes by Kapila's gaze after they disturbed his meditation while searching for a sacrificial horse.",
+      "image_prompt": "Ghibli Art: A golden-eyed sage sits motionless amidst swirling ashes that form spectral figures. A single white horse watches from a distance.",
+      "image_url": "assets/img/quotes/quote_7.png",
+      "emphasis": {
+        "Kapila's gaze": "emphasis-1",
+        "60,000 sons": "emphasis-2"
+      },
+      "context": "The text describes how the sons of Sagara, while digging into the earth to find a lost sacrificial horse, encountered Kapila: 'Opening his eyes wide... he burned to ashes those dull-witted sons of Sagara' (Lines 47316-47319). This occurs after they disregard Kapila's presence while violently searching the netherworld (Lines 47301-47319)."
+    },
+    {
+      "id": "quote_8",
+      "quote": "The river Ga\u1e45g\u0101 agreed to descend from heaven to purify the ashes of Sagara's sons, but required Lord Shiva to bear her force.",
+      "image_prompt": "Ghibli Art: A translucent blue river goddess floats above mountain peaks, her cascading hair merging with waterfalls. A single trident leans against rocks.",
+      "image_url": "assets/img/quotes/quote_8.png",
+      "emphasis": {
+        "Ga\u1e45g\u0101": "emphasis-1",
+        "Lord Shiva": "emphasis-2"
+      },
+      "context": "Ga\u1e45g\u0101 tells Bhag\u012bratha: 'My force... is unbearable. No one in the three worlds is capable of bearing it... except for... the blue-throated Mahe\u015bvara' (Lines 47541-47545). This occurs after Bhag\u012bratha's thousand-year austerity to bring Ga\u1e45g\u0101 down for his ancestors' salvation (Lines 47473-47545)."
     }
   ]
 }

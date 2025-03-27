@@ -719,6 +719,46 @@
         "these": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: spiritual realization. Based on lines 600-640 of the Mahabharata. Sanskrit reference: \u0928\u0935\u0928\u0940\u0924\u0902 \u092f\u0925\u093e \u0926\u0927\u094d\u0928\u094b \u0926\u094d\u0935\u093f\u092a\u0926\u093e\u0902 \u092c\u094d\u0930\u093e\u0939\u094d\u092e\u0923\u094b \u092f\u0925\u093e"
+    },
+    {
+      "id": "quote_73",
+      "quote": "The sages gather in the sacred grove, their white beards glowing in the golden light as they discuss the eternal wisdom of the Mahabharata.",
+      "image_prompt": "Ghibli Art: Three elderly men with long white beards and serene expressions sit in a circle, their ochre robes blending with the earth. Golden sunlight filters through ancient trees, illuminating dust motes around them. A large sacred text lies open before them.",
+      "image_url": "assets/img/quotes/quote_73.png",
+      "emphasis": {
+        "the": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: wisdom gathering. Based on lines 640-680 of the Mahabharata. Sanskrit reference: \u090b\u0937\u092f \u090a\u091a\u0941\u0903"
+    },
+    {
+      "id": "quote_74",
+      "quote": "A radiant blue figure appears before the sages, cosmic patterns swirling in his garments as he reveals the sacred verses that purify all sins.",
+      "image_prompt": "Ghibli Art: A luminous blue-skinned figure with four arms floats above the ground, his dark hair flowing as galaxies swirl in his dhoti. The awestruck sages look up with folded hands. Golden butterflies of light dance around the divine vision.",
+      "image_url": "assets/img/quotes/quote_74.png",
+      "emphasis": {
+        "his": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: divine revelation. Based on lines 640-680 of the Mahabharata. Sanskrit reference: \u092f\u0936\u094d\u091a\u0948\u0928\u0902 \u0936\u094d\u0930\u093e\u0935\u092f\u0947\u091a\u094d\u091b\u094d\u0930\u093e\u0926\u094d\u0927\u0947"
+    },
+    {
+      "id": "quote_75",
+      "quote": "The sacred words take physical form as golden script that flows like a river through the air, nourishing both the living and ancestors who hear them.",
+      "image_prompt": "Ghibli Art: Sanskrit verses glow with golden light as they float through the forest clearing. A white-bearded sage reaches reverently toward the luminous letters. Transparent ancestral figures watch from the shadows, their hands joined in prayer.",
+      "image_url": "assets/img/quotes/quote_75.png",
+      "emphasis": {
+        "river": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: sacred transmission. Based on lines 640-680 of the Mahabharata. Sanskrit reference: \u0905\u0915\u094d\u0937\u092f\u094d\u092f\u092e\u0928\u094d\u0928\u092a\u093e\u0928\u0902 \u0924\u0924\u094d\u092a\u093f\u0924\u0943\u0902\u0938\u094d\u0924\u0938\u094d\u092f\u094b\u092a\u0924\u093f\u0937\u094d\u0920\u0924\u093f"
+    },
+    {
+      "id": "quote_76",
+      "quote": "The four Vedas and Mahabharata appear on a cosmic scale, balanced perfectly as the sages understand their equal importance in the cosmic order.",
+      "image_prompt": "Ghibli Art: Four ancient texts hover on one side of golden scales, while the massive Mahabharata balances them alone. The sages gaze upward in wonder, their faces illuminated by the celestial light. The blue figure smiles as starry patterns emerge in the twilight sky.",
+      "image_url": "assets/img/quotes/quote_76.png",
+      "emphasis": {
+        "perfectly": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: cosmic revelation. Based on lines 640-680 of the Mahabharata. Sanskrit reference: \u091a\u0924\u094d\u0935\u093e\u0930 \u090f\u0915\u0924\u094b \u0935\u0947\u0926\u093e \u092d\u093e\u0930\u0924\u0902 \u091a\u0948\u0915\u092e\u0947\u0915\u0924\u0903"
     }
   ]
 }

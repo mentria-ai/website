@@ -79,6 +79,46 @@
         "his": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: epiphany moment. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0935\u0947\u0926\u093e\u0930\u094d\u0925\u0948\u0930\u094d\u092d\u0942\u0937\u093f\u0924\u0938\u094d\u092f \u091a"
+    },
+    {
+      "id": "quote_9",
+      "quote": "Ugrashravas, the son of Lomaharshana, humbly approaches the sages in Naimisha forest, where they gather for a twelve-year sacrifice.",
+      "image_prompt": "Ghibli Art: A slender man with dark, tied-back hair and a gentle expression, wearing simple ochre robes, walks towards a circle of white-bearded men in earth-toned garments. Golden sunlight filters through ancient trees, casting dappled shadows on the forest floor.",
+      "image_url": "assets/img/quotes/quote_9.png",
+      "emphasis": {
+        "in": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: character introduction. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0932\u094b\u092e\u0939\u0930\u094d\u0937\u0923\u092a\u0941\u0924\u094d\u0930 \u0909\u0917\u094d\u0930\u0936\u094d\u0930\u0935\u093e\u0903 \u0938\u0942\u0924\u0903 \u092a\u094c\u0930\u093e\u0923\u093f\u0915\u094b \u0928\u0948\u092e\u093f\u0937\u093e\u0930\u0923\u094d\u092f\u0947 \u0936\u094c\u0928\u0915\u0938\u094d\u092f \u0915\u0941\u0932\u092a\u0924\u0947\u0930\u094d\u0926\u094d\u0935\u093e\u0926\u0936\u0935\u093e\u0930\u094d\u0937\u093f\u0915\u0947 \u0938\u0924\u094d\u0930\u0947"
+    },
+    {
+      "id": "quote_10",
+      "quote": "With folded hands, Ugrashravas respectfully greets the ascetics who eagerly gather to hear sacred stories from the Mahabharata.",
+      "image_prompt": "Ghibli Art: The dark-haired man bows deeply, hands pressed together, before seated figures with serene faces and long white beards. Their ashram surroundings feature simple wooden seats and a sacred fire pit glowing softly in the afternoon light.",
+      "image_url": "assets/img/quotes/quote_10.png",
+      "emphasis": {
+        "eagerly": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: respectful greeting. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0935\u093f\u0928\u092f\u093e\u0935\u0928\u0924\u094b \u092d\u0942\u0924\u094d\u0935\u093e \u0915\u0926\u093e\u091a\u093f\u0924\u094d\u0938\u0942\u0924\u0928\u0928\u094d\u0926\u0928\u0903 \u0924\u092e\u093e\u0936\u094d\u0930\u092e\u092e\u0928\u0941\u092a\u094d\u0930\u093e\u092a\u094d\u0924\u0902 \u0928\u0948\u092e\u093f\u0937\u093e\u0930\u0923\u094d\u092f\u0935\u093e\u0938\u093f\u0928\u0903"
+    },
+    {
+      "id": "quote_11",
+      "quote": "The sages welcome Ugrashravas and inquire about his journey, their faces alight with curiosity about the stories he carries.",
+      "image_prompt": "Ghibli Art: An elder with a flowing silver beard leans forward, his weathered hands gesturing warmly as he speaks to the visitor. Other ascetics with kind eyes and draped in saffron sit attentively in the forest clearing, surrounded by blooming lotuses.",
+      "image_url": "assets/img/quotes/quote_11.png",
+      "emphasis": {
+        "their": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: inquisitive dialogue. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u0925\u093e\u092a\u0943\u091a\u094d\u091b\u0926\u0943\u0937\u093f\u0938\u094d\u0924\u0924\u094d\u0930 \u0915\u0936\u094d\u091a\u093f\u0924\u094d\u092a\u094d\u0930\u0938\u094d\u0924\u093e\u0935\u092f\u0928\u094d\u0915\u0925\u093e\u0903 \u0915\u0941\u0924 \u0906\u0917\u092e\u094d\u092f\u0924\u0947 \u0938\u094c\u0924\u0947 \u0915\u094d\u0935 \u091a\u093e\u092f\u0902 \u0935\u093f\u0939\u0943\u0924\u0938\u094d\u0924\u094d\u0935\u092f\u093e"
+    },
+    {
+      "id": "quote_12",
+      "quote": "Ugrashravas begins his tale of Janamejaya's serpent sacrifice, where the Mahabharata was first recited by Vaisampayana.",
+      "image_prompt": "Ghibli Art: The storyteller sits cross-legged, hands animated as he speaks. His audience of white-robed sages lean in intently. A subtle golden glow surrounds them as sacred smoke curls upward from a small fire between them.",
+      "image_url": "assets/img/quotes/quote_12.png",
+      "emphasis": {
+        "where": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: story beginning. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u091c\u0928\u092e\u0947\u091c\u092f\u0938\u094d\u092f \u0930\u093e\u091c\u0930\u094d\u0937\u0947\u0903 \u0938\u0930\u094d\u092a\u0938\u0924\u094d\u0930\u0947 \u092e\u0939\u093e\u0924\u094d\u092e\u0928\u0903 \u0938\u092e\u0940\u092a\u0947 \u092a\u093e\u0930\u094d\u0925\u093f\u0935\u0947\u0928\u094d\u0926\u094d\u0930\u0938\u094d\u092f \u0938\u092e\u094d\u092f\u0915\u094d\u092a\u093e\u0930\u093f\u0915\u094d\u0937\u093f\u0924\u0938\u094d\u092f \u091a"
     }
   ]
 }

@@ -1119,6 +1119,46 @@
         "and": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: beginning the tale. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0915\u0941\u0924 \u0906\u0917\u092e\u094d\u092f\u0924\u0947 \u0938\u094c\u0924\u0947... \u0915\u0943\u0937\u094d\u0923\u0926\u094d\u0935\u0948\u092a\u093e\u092f\u0928\u092a\u094d\u0930\u094b\u0915\u094d\u0924\u093e\u0903"
+    },
+    {
+      "id": "quote_113",
+      "quote": "Ugrashravas, the son of Lomaharshana, humbly approaches the sages in Naimisha forest, bowing with folded hands as they sit in meditation.",
+      "image_prompt": "Ghibli Art: A tall man with long dark hair and a gentle expression, wearing simple ochre robes, bows deeply before a circle of elderly men with white beards and serene faces. Sunlight filters through ancient banyan trees, casting dappled shadows on the forest floor.",
+      "image_url": "assets/img/quotes/quote_113.png",
+      "emphasis": {
+        "Naimisha": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: character introduction. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0932\u094b\u092e\u0939\u0930\u094d\u0937\u0923\u092a\u0941\u0924\u094d\u0930 \u0909\u0917\u094d\u0930\u0936\u094d\u0930\u0935\u093e\u0903 \u0938\u0942\u0924\u0903 \u092a\u094c\u0930\u093e\u0923\u093f\u0915\u094b \u0928\u0948\u092e\u093f\u0937\u093e\u0930\u0923\u094d\u092f\u0947 \u0936\u094c\u0928\u0915\u0938\u094d\u092f \u0915\u0941\u0932\u092a\u0924\u0947\u0930\u094d\u0926\u094d\u0935\u093e\u0926\u0936\u0935\u093e\u0930\u094d\u0937\u093f\u0915\u0947 \u0938\u0924\u094d\u0930\u0947"
+    },
+    {
+      "id": "quote_114",
+      "quote": "The sages welcome Ugrashravas with kind smiles as he takes his seat among them, the air filled with anticipation for the stories to come.",
+      "image_prompt": "Ghibli Art: The dark-haired man now sits cross-legged on a woven mat, surrounded by white-bearded elders in earth-toned garments. One elder with deep wrinkles gestures warmly while butterflies flutter in the golden afternoon light between them.",
+      "image_url": "assets/img/quotes/quote_114.png",
+      "emphasis": {
+        "among": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: welcoming moment. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u092d\u093f\u0935\u093e\u0926\u094d\u092f \u092e\u0941\u0928\u0940\u0902\u0938\u094d\u0924\u093e\u0902\u0938\u094d\u0924\u0941 \u0938\u0930\u094d\u0935\u093e\u0928\u0947\u0935 \u0915\u0943\u0924\u093e\u091e\u094d\u091c\u0932\u093f\u0903 \u0905\u092a\u0943\u091a\u094d\u091b\u0924\u094d\u0938 \u0924\u092a\u094b\u0935\u0943\u0926\u094d\u0927\u093f\u0902 \u0938\u0926\u094d\u092d\u093f\u0936\u094d\u091a\u0948\u0935\u093e\u092d\u093f\u0928\u0928\u094d\u0926\u093f\u0924\u0903"
+    },
+    {
+      "id": "quote_115",
+      "quote": "An elder with wise eyes leans forward, curious about Ugrashravas's journey. 'From where do you come, and what stories have you gathered?' he asks.",
+      "image_prompt": "Ghibli Art: A particularly ancient sage with silver hair flowing like rivers leans in, his gnarled hands resting on his knees. The storyteller's face lights up as he prepares to speak, with fireflies beginning to glow in the twilight forest behind them.",
+      "image_url": "assets/img/quotes/quote_115.png",
+      "emphasis": {
+        "where": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: question and anticipation. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u0925\u093e\u092a\u0943\u091a\u094d\u091b\u0926\u0943\u0937\u093f\u0938\u094d\u0924\u0924\u094d\u0930 \u0915\u0936\u094d\u091a\u093f\u0924\u094d\u092a\u094d\u0930\u0938\u094d\u0924\u093e\u0935\u092f\u0928\u094d\u0915\u0925\u093e\u0903 \u0915\u0941\u0924 \u0906\u0917\u092e\u094d\u092f\u0924\u0947 \u0938\u094c\u0924\u0947 \u0915\u094d\u0935 \u091a\u093e\u092f\u0902 \u0935\u093f\u0939\u0943\u0924\u0938\u094d\u0924\u094d\u0935\u092f\u093e"
+    },
+    {
+      "id": "quote_116",
+      "quote": "Ugrashravas begins his tale of Janamejaya's serpent sacrifice, his hands moving gracefully as the sages listen intently under the darkening sky.",
+      "image_prompt": "Ghibli Art: The storyteller's hands weave through the air as he speaks, his face animated. The elders' eyes glow with reflected firelight as the first stars appear between the branches. A copper water vessel sits between them, catching the last golden light.",
+      "image_url": "assets/img/quotes/quote_116.png",
+      "emphasis": {
+        "moving": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: beginning the story. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0942\u0924 \u0909\u0935\u093e\u091a \u091c\u0928\u092e\u0947\u091c\u092f\u0938\u094d\u092f \u0930\u093e\u091c\u0930\u094d\u0937\u0947\u0903 \u0938\u0930\u094d\u092a\u0938\u0924\u094d\u0930\u0947 \u092e\u0939\u093e\u0924\u094d\u092e\u0928\u0903"
     }
   ]
 }

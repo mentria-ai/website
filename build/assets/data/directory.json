@@ -639,6 +639,46 @@
         "others": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: storytelling and legacy. Based on lines 520-560 of the Mahabharata. Sanskrit reference: \u0938\u0941\u0939\u094b\u0924\u094d\u0930\u0902 \u0930\u0928\u094d\u0924\u093f\u0926\u0947\u0935\u0902 \u091a \u0915\u0915\u094d\u0937\u0940\u0935\u0928\u094d\u0924\u0902 \u0924\u0925\u094c\u0936\u093f\u091c\u092e\u094d \u0965\u0967\u096c\u096c\u0965"
+    },
+    {
+      "id": "quote_65",
+      "quote": "The wise man speaks of kings who abandoned great riches and power, meeting their fate through the actions of others. Their divine deeds and virtues are still sung by poets.",
+      "image_prompt": "Ghibli Art: A man with long dark hair and serene eyes gestures toward ghostly figures of regal warriors in ornate armor, their forms translucent against a golden sunset. Falling leaves swirl around them as the wind carries petals through the air.",
+      "image_url": "assets/img/quotes/quote_65.png",
+      "emphasis": {
+        "through": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: remembrance of fallen kings. Based on lines 560-600 of the Mahabharata. Sanskrit reference: \u0905\u0935\u093f\u0915\u094d\u0937\u093f\u0924\u094d\u092a\u094d\u0930\u092c\u0932\u094b \u0927\u0942\u0930\u094d\u0924\u0903...\u0938\u0924\u094d\u092f\u0924\u093e \u0936\u094c\u091a\u092e\u093e\u0930\u094d\u091c\u0935\u092e\u094d"
+    },
+    {
+      "id": "quote_66",
+      "quote": "He reminds that even those endowed with all virtues met their end, and that grieving for the wicked is unwise. The wise understand the nature of time and destiny.",
+      "image_prompt": "Ghibli Art: The same dark-haired man points upward where the ghostly kings dissolve into swirling golden light. His face shows quiet wisdom as an elderly silver-haired warrior listens intently, hands folded in contemplation.",
+      "image_url": "assets/img/quotes/quote_66.png",
+      "emphasis": {
+        "grieving": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: wisdom about grief. Based on lines 560-600 of the Mahabharata. Sanskrit reference: \u0935\u093f\u0926\u094d\u0935\u0926\u094d\u092d\u093f\u0903 \u0915\u0925\u094d\u092f\u0924\u0947...\u0928 \u0924\u093e\u091e\u094d\u0936\u094b\u091a\u093f\u0924\u0941\u092e\u0930\u094d\u0939\u0938\u093f"
+    },
+    {
+      "id": "quote_67",
+      "quote": "Time is the root of all things - it ripens all beings, destroys all creatures, then pacifies again. Time transforms all conditions in this world.",
+      "image_prompt": "Ghibli Art: A cosmic vision appears between them - an enormous hourglass with sand flowing between realms. The upper chamber shows vibrant kingdoms, the lower shows ruins reclaimed by nature. The wind carries blossoms through the scene.",
+      "image_url": "assets/img/quotes/quote_67.png",
+      "emphasis": {
+        "destroys": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: concept of time. Based on lines 560-600 of the Mahabharata. Sanskrit reference: \u0915\u093e\u0932\u092e\u0942\u0932\u092e\u093f\u0926\u0902...\u0915\u093e\u0932\u0903 \u0938\u0902\u0939\u0930\u0924\u093f \u092a\u094d\u0930\u091c\u093e\u0903"
+    },
+    {
+      "id": "quote_68",
+      "quote": "Time moves equally through all beings, undisturbed. What was, what will be, and what is - all are governed by time's eternal flow.",
+      "image_prompt": "Ghibli Art: The two men sit peacefully beneath the ancient tree as the vision fades. Golden light filters through leaves, illuminating dust motes. The elderly warrior's face shows acceptance, his hands resting on his lap as a single leaf lands in his palm.",
+      "image_url": "assets/img/quotes/quote_68.png",
+      "emphasis": {
+        "be,": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: acceptance of time's nature. Based on lines 560-600 of the Mahabharata. Sanskrit reference: \u0915\u093e\u0932\u094b \u0935\u093f\u0915\u0941\u0930\u0941\u0924\u0947...\u092f\u0947 \u091a \u0935\u0930\u094d\u0924\u0928\u094d\u0924\u093f \u0938\u093e\u092e\u094d\u092a\u094d\u0930\u0924\u092e\u094d"
     }
   ]
 }

@@ -39,6 +39,46 @@
         "Janamejaya's": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: storytelling commencement. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0942\u0924 \u0909\u0935\u093e\u091a...\u0915\u0943\u0937\u094d\u0923\u0926\u094d\u0935\u0948\u092a\u093e\u092f\u0928\u092a\u094d\u0930\u094b\u0915\u094d\u0924\u093e\u0903"
+    },
+    {
+      "id": "quote_5",
+      "quote": "The aged storyteller with a long white beard begins recounting the Mahabharata's origins, his hands moving gracefully as dust motes dance in golden sunlight.",
+      "image_prompt": "Ghibli Art: A particularly aged figure with a long white beard and piercing almond-shaped eyes gestures gracefully. His wrinkled hands move like river currents as he speaks. The storyteller sits cross-legged on a woven mat, sunlight catching the dust motes between them.",
+      "image_url": "assets/img/quotes/quote_5.png",
+      "emphasis": {
+        "origins,": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: storytelling initiation. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0936\u094d\u0930\u0941\u0924\u094d\u0935\u093e\u0939\u0902 \u0924\u093e \u0935\u093f\u091a\u093f\u0924\u094d\u0930\u093e\u0930\u094d\u0925\u093e \u092e\u0939\u093e\u092d\u093e\u0930\u0924\u0938\u0902\u0936\u094d\u0930\u093f\u0924\u093e\u0903"
+    },
+    {
+      "id": "quote_6",
+      "quote": "The listeners, men with weathered faces and earth-toned garments, lean forward intently as petals float on the breeze around them.",
+      "image_prompt": "Ghibli Art: Three figures with long grey beards and deep-set eyes sit in rapt attention, their ochre robes pooling around them. Pink petals drift through shafts of golden light between them and the storyteller.",
+      "image_url": "assets/img/quotes/quote_6.png",
+      "emphasis": {
+        "forward": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: audience engagement. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u092c\u0939\u0942\u0928\u093f \u0938\u092e\u094d\u092a\u0930\u093f\u0915\u094d\u0930\u092e\u094d\u092f \u0924\u0940\u0930\u094d\u0925\u093e\u0928\u094d\u092f\u093e\u092f\u0924\u0928\u093e\u0928\u093f \u091a"
+    },
+    {
+      "id": "quote_7",
+      "quote": "The storyteller's face glows as he describes the sacred battlefield of Kurukshetra, his fingers tracing the air as if drawing the scene.",
+      "image_prompt": "Ghibli Art: The white-bearded figure raises both hands, fingers shaping invisible forms. His face shines with reverence, casting soft shadows across his deeply lined features. A warm breeze stirs the edges of his saffron robe.",
+      "image_url": "assets/img/quotes/quote_7.png",
+      "emphasis": {
+        "Kurukshetra,": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: sacred place revelation. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0938\u092e\u0928\u094d\u0924\u092a\u091e\u094d\u091a\u0915\u0902 \u0928\u093e\u092e \u092a\u0941\u0923\u094d\u092f\u0902 \u0926\u094d\u0935\u093f\u091c\u0928\u093f\u0937\u0947\u0935\u093f\u0924\u092e\u094d"
+    },
+    {
+      "id": "quote_8",
+      "quote": "One listener with particularly bright eyes clasps his hands together, his expression alight with understanding as the story's deeper meanings unfold.",
+      "image_prompt": "Ghibli Art: A thin man with silver-streaked black hair presses his palms together, his dark eyes wide with realization. Sunlight catches the tears welling in his eyes as he sits among drifting petals and golden dust.",
+      "image_url": "assets/img/quotes/quote_8.png",
+      "emphasis": {
+        "his": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: epiphany moment. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0935\u0947\u0926\u093e\u0930\u094d\u0925\u0948\u0930\u094d\u092d\u0942\u0937\u093f\u0924\u0938\u094d\u092f \u091a"
     }
   ]
 }

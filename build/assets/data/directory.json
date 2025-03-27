@@ -279,6 +279,46 @@
         "of": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: epic narration. Based on lines 160-200 of the Mahabharata. Sanskrit reference: \u0935\u093e\u0938\u0941\u0926\u0947\u0935\u0938\u094d\u092f \u092e\u093e\u0939\u093e\u0924\u094d\u092e\u094d\u092f\u0902 \u092a\u093e\u0923\u094d\u0921\u0935\u093e\u0928\u093e\u0902 \u091a \u0938\u0924\u094d\u092f\u0924\u093e\u092e\u094d"
+    },
+    {
+      "id": "quote_29",
+      "quote": "The sage Vyasa compiles the great epic of 24,000 verses, the Mahabharata, while his disciples listen intently under ancient banyan trees.",
+      "image_prompt": "Ghibli Art: A broad-shouldered man with dark skin and matted hair sits cross-legged, inscribing palm leaves with a reed pen. Around him, young men with shaved heads and ochre robes lean forward attentively. Sunlight filters through heart-shaped banyan leaves, casting dappled shadows on their faces.",
+      "image_url": "assets/img/quotes/quote_29.png",
+      "emphasis": {
+        "the": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: knowledge transmission. Based on lines 200-240 of the Mahabharata. Sanskrit reference: \u091a\u0924\u0941\u0930\u094d\u0935\u093f\u0902\u0936\u0924\u093f\u0938\u093e\u0939\u0938\u094d\u0930\u0940\u0902 \u091a\u0915\u094d\u0930\u0947 \u092d\u093e\u0930\u0924\u0938\u0902\u0939\u093f\u0924\u093e\u092e\u094d"
+    },
+    {
+      "id": "quote_30",
+      "quote": "Sage Shuka teaches the epic to celestial beings - Narada to gods, Asita to ancestors, while Gandharvas and Yakshas gather to hear wisdom.",
+      "image_prompt": "Ghibli Art: A slender youth with luminous eyes stands on a cloud-wreathed mountaintop, hands raised in teaching gesture. Before him float ethereal figures - a white-haired man with a veena, shadowy ancestor spirits, and glowing nature deities. A crescent moon hangs in twilight sky.",
+      "image_url": "assets/img/quotes/quote_30.png",
+      "emphasis": {
+        "gods,": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: divine dissemination. Based on lines 200-240 of the Mahabharata. Sanskrit reference: \u0928\u093e\u0930\u0926\u094b\u093d\u0936\u094d\u0930\u093e\u0935\u092f\u0926\u094d\u0926\u0947\u0935\u093e\u0928\u0938\u093f\u0924\u094b \u0926\u0947\u0935\u0932\u0903 \u092a\u093f\u0924\u0943\u0928\u094d"
+    },
+    {
+      "id": "quote_31",
+      "quote": "The Kuru family tree revealed: Duryodhana as a poisonous tree with Karna and Shakuni as branches, while Yudhishthira's virtue grows with Arjuna and Bhima.",
+      "image_prompt": "Ghibli Art: Two massive trees emerge from the earth - one dark with thorns and scowling faces in its bark, the other golden with serene expressions. A blue-skinned figure stands between them, one hand raised as wind swirls autumn leaves around the contrasting trunks.",
+      "image_url": "assets/img/quotes/quote_31.png",
+      "emphasis": {
+        "and": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: symbolic duality. Based on lines 200-240 of the Mahabharata. Sanskrit reference: \u0926\u0941\u0930\u094d\u092f\u094b\u0927\u0928\u094b \u092e\u0928\u094d\u092f\u0941\u092e\u092f\u094b \u092e\u0939\u093e\u0926\u094d\u0930\u0941\u092e\u0903; \u0938\u094d\u0915\u0928\u094d\u0927\u0903 \u0915\u0930\u094d\u0923\u0903 \u0936\u0915\u0941\u0928\u093f\u0938\u094d\u0924\u0938\u094d\u092f \u0936\u093e\u0916\u093e\u0903"
+    },
+    {
+      "id": "quote_32",
+      "quote": "The Pandavas return to Hastinapura - noble youths raised in sacred forests now presented to the court, sparking both joy and tension among the Kauravas.",
+      "image_prompt": "Ghibli Art: Five young men in simple deerskin garments stand before a golden palace. The tallest has a gentle face, another grips a massive bow, while twins whisper behind them. Citizens cheer from balconies as shadowy figures glower from the royal balcony above.",
+      "image_url": "assets/img/quotes/quote_32.png",
+      "emphasis": {
+        "now": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: dramatic return. Based on lines 200-240 of the Mahabharata. Sanskrit reference: \u092a\u093e\u0923\u094d\u0921\u0935\u093e \u090f\u0924 \u0907\u0924\u094d\u092f\u0941\u0915\u094d\u0924\u094d\u0935\u093e \u092e\u0941\u0928\u092f\u094b\u093d\u0928\u094d\u0924\u0930\u094d\u0939\u093f\u0924\u093e\u0938\u094d\u0924\u0924\u0903"
     }
   ]
 }

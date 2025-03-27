@@ -319,6 +319,46 @@
         "now": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: dramatic return. Based on lines 200-240 of the Mahabharata. Sanskrit reference: \u092a\u093e\u0923\u094d\u0921\u0935\u093e \u090f\u0924 \u0907\u0924\u094d\u092f\u0941\u0915\u094d\u0924\u094d\u0935\u093e \u092e\u0941\u0928\u092f\u094b\u093d\u0928\u094d\u0924\u0930\u094d\u0939\u093f\u0924\u093e\u0938\u094d\u0924\u0924\u0903"
+    },
+    {
+      "id": "quote_33",
+      "quote": "The Pandavas return to Hastinapura, welcomed by cheering crowds as flower petals rain down. The people rejoice at seeing Pandu's lineage restored after long years of exile.",
+      "image_prompt": "Ghibli Art: Five young men in simple deerskin garments walk through city gates, golden sunlight illuminating falling flower petals. The tallest has a gentle smile, another carries a massive bow. Citizens with joyful expressions throw blossoms from balconies as shadowy figures watch from above.",
+      "image_url": "assets/img/quotes/quote_33.png",
+      "emphasis": {
+        "down.": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: Joyous homecoming. Based on lines 240-280 of the Mahabharata. Sanskrit reference: Lines 74-80"
+    },
+    {
+      "id": "quote_34",
+      "quote": "The Pandavas study sacred texts under wise teachers. Yudhishthira's wisdom, Bhima's strength, and Arjuna's skill with the bow earn them great respect among the people.",
+      "image_prompt": "Ghibli Art: In a sunlit courtyard, the five brothers sit with ancient scrolls. A white-bearded teacher with kind eyes gestures toward scriptures. Golden light filters through trees as one brother practices archery in the background, his arrow splitting another mid-air.",
+      "image_url": "assets/img/quotes/quote_34.png",
+      "emphasis": {
+        "and": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: Education and growth. Based on lines 240-280 of the Mahabharata. Sanskrit reference: Lines 81-83"
+    },
+    {
+      "id": "quote_35",
+      "quote": "At Draupadi's swayamvara, Arjuna strings the impossible bow and hits the target, winning her hand in marriage as astonished kings look on.",
+      "image_prompt": "Ghibli Art: A muscular man with focused eyes draws a massive golden bow in a crowded arena. The bow glows as he releases, the arrow splitting the target perfectly. A dark-skinned princess watches intently from a raised platform as other warriors with astonished expressions look on.",
+      "image_url": "assets/img/quotes/quote_35.png",
+      "emphasis": {
+        "target,": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: Arjuna's feat of skill. Based on lines 240-280 of the Mahabharata. Sanskrit reference: Lines 84-85"
+    },
+    {
+      "id": "quote_36",
+      "quote": "After defeating powerful kings including Jarasandha, the Pandavas perform the grand Rajasuya sacrifice, establishing Yudhishthira as emperor with Krishna's guidance.",
+      "image_prompt": "Ghibli Art: The gentle-faced brother sits on a golden throne under a ceremonial canopy, a blue-skinned figure whispering wisdom. Smoke rises from sacred fires as priests chant. The bow-wielding brother presents tribute while the strong one guards the gates, his massive club resting nearby.",
+      "image_url": "assets/img/quotes/quote_36.png",
+      "emphasis": {
+        "grand": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: Imperial consecration. Based on lines 240-280 of the Mahabharata. Sanskrit reference: Lines 86-88"
     }
   ]
 }

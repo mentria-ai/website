@@ -399,6 +399,46 @@
         "and": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: internal conflict and foreshadowing. Based on lines 280-320 of the Mahabharata. Sanskrit reference: \u0938\u091e\u094d\u091c\u092f\u0902 \u0935\u093e\u0915\u094d\u092f\u092e\u092c\u094d\u0930\u0935\u0940\u0924\u094d...\u0905\u0939\u0902 \u0924\u094d\u0935\u091a\u0915\u094d\u0937\u0941\u0903 \u0915\u093e\u0930\u094d\u092a\u0923\u094d\u092f\u093e\u0924\u094d\u092a\u0941\u0924\u094d\u0930\u092a\u094d\u0930\u0940\u0924\u094d\u092f\u093e \u0938\u0939\u093e\u092e\u093f \u0924\u0924\u094d"
+    },
+    {
+      "id": "quote_41",
+      "quote": "Duryodhana, his face twisted with envy, watches from the shadows as Yudhishthira performs the Rajasuya sacrifice, his golden crown gleaming in the firelight.",
+      "image_prompt": "Ghibli Art: A broad-shouldered man with dark, curled hair and a jeweled headband glares from behind marble pillars, his fists clenched. In the foreground, a serene-faced man in white robes offers ghee into sacred flames. Sunset paints the temple courtyard in amber hues.",
+      "image_url": "assets/img/quotes/quote_41.png",
+      "emphasis": {
+        "Yudhishthira": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: envy and contrast. Based on lines 320-360 of the Mahabharata. Sanskrit reference: \u0930\u093e\u091c\u0938\u0942\u092f\u0947 \u0936\u094d\u0930\u093f\u092f\u0902 \u0926\u0943\u0937\u094d\u091f\u094d\u0935\u093e \u092a\u093e\u0923\u094d\u0921\u0935\u0938\u094d\u092f \u092e\u0939\u094c\u091c\u0938\u0903"
+    },
+    {
+      "id": "quote_42",
+      "quote": "Shakuni whispers to Duryodhana beneath a silk canopy, his long fingers gesturing toward dice while oil lamps cast dancing shadows across their conspiratorial faces.",
+      "image_prompt": "Ghibli Art: A gaunt man with sharp features and silver-threaded shawl leans close to the broad-shouldered prince, rolling ivory dice between bony fingers. Their faces are half-lit by flickering lamp flames, revealing cunning and resentment in their eyes.",
+      "image_url": "assets/img/quotes/quote_42.png",
+      "emphasis": {
+        "toward": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: conspiracy. Based on lines 320-360 of the Mahabharata. Sanskrit reference: \u0917\u093e\u0928\u094d\u0927\u093e\u0930\u0930\u093e\u091c\u0938\u0939\u093f\u0924\u0936\u094d\u091b\u0926\u094d\u092e\u0926\u094d\u092f\u0942\u0924\u092e\u092e\u0928\u094d\u0924\u094d\u0930\u092f\u0924\u094d"
+    },
+    {
+      "id": "quote_43",
+      "quote": "Draupadi stands alone in the empty hall, her single white garment fluttering as she clutches her disheveled hair, the marble floor reflecting her despair like a silent witness.",
+      "image_prompt": "Ghibli Art: A woman with luminous dark skin and tear-streaked cheeks stands barefoot, her draped white sari slipping. Moonlight streams through latticed windows, casting geometric shadows across the polished floor where scattered jewels glint.",
+      "image_url": "assets/img/quotes/quote_43.png",
+      "emphasis": {
+        "clutches": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: violation and sorrow. Based on lines 320-360 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0926\u094d\u0930\u094c\u092a\u0926\u0940\u092e\u0936\u094d\u0930\u0941\u0915\u0923\u094d\u0920\u0940\u0902 \u0938\u092d\u093e\u0902 \u0928\u0940\u0924\u093e\u0902"
+    },
+    {
+      "id": "quote_44",
+      "quote": "Arjuna kneels in the Himalayan snows before a radiant figure with matted locks, their glowing trident illuminating the pine trees as divine energy crackles in the thin air.",
+      "image_prompt": "Ghibli Art: A muscular man with battle-worn hands presses his forehead to icy ground before a luminous being with three vertical eyes. Blue energy swirls around the deity's crescent moon crown as snowflakes hover motionless in the charged air.",
+      "image_url": "assets/img/quotes/quote_44.png",
+      "emphasis": {
+        "glowing": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: divine encounter. Based on lines 320-360 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u092e\u0930\u094d\u091c\u0941\u0928\u094b \u0926\u0947\u0935\u0926\u0947\u0935\u0902 \u0915\u093f\u0930\u093e\u0924\u0930\u0942\u092a\u0902"
     }
   ]
 }

@@ -199,6 +199,46 @@
         "and": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: birth of all existence. Based on lines 80-120 of the Mahabharata. Sanskrit reference: \u0935\u093f\u0936\u094d\u0935\u0947\u0926\u0947\u0935\u093e\u0938\u094d\u0924\u0925\u093e\u0926\u093f\u0924\u094d\u092f\u093e...\u092c\u094d\u0930\u0939\u094d\u092e\u0930\u094d\u0937\u092f\u094b\u093d\u092e\u0932\u093e\u0903"
+    },
+    {
+      "id": "quote_21",
+      "quote": "The cosmic wheel turns endlessly, as the thirty-three thousand deities watch over creation and dissolution. Elements of nature\u2014water, sky, earth, and wind\u2014cycle in harmony.",
+      "image_prompt": "Ghibli Art: A massive golden wheel floats in a cosmic expanse, its spokes radiating light. Thirty-three luminous figures with serene expressions, draped in flowing saffron robes, observe from above. Below, swirling elements\u2014blue waters, golden winds, green earth\u2014merge and separate in an eternal dance. Soft amber light bathes the scene.",
+      "image_url": "assets/img/quotes/quote_21.png",
+      "emphasis": {
+        "creation": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: cosmic cycle. Based on lines 120-160 of the Mahabharata. Sanskrit reference: \u0930\u093e\u091c\u0930\u094d\u0937\u092f\u0936\u094d\u091a \u092c\u0939\u0935\u0903... \u0938\u0902\u0935\u0924\u094d\u0938\u0930\u0930\u094d\u0924\u0935\u094b \u092e\u093e\u0938\u093e\u0903"
+    },
+    {
+      "id": "quote_22",
+      "quote": "The radiant sun god Surya, with his golden aura, watches as his descendants multiply\u2014each generation brighter than the last, filling the world with light and wisdom.",
+      "image_prompt": "Ghibli Art: A majestic figure with sunlit bronze skin and flaming hair stands atop a golden chariot, his arms outstretched. Below him, countless glowing figures\u2014each with a unique radiance\u2014emerge like stars. Warm winds carry petals through the air as the sky transitions from dawn to midday hues.",
+      "image_url": "assets/img/quotes/quote_22.png",
+      "emphasis": {
+        "multiply\u2014each": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: divine lineage. Based on lines 120-160 of the Mahabharata. Sanskrit reference: \u0926\u093f\u0935\u0938\u094d\u092a\u0941\u0924\u094d\u0930\u094b \u092c\u0943\u0939\u0926\u094d\u092d\u093e\u0928\u0941\u0903... \u0938\u0939\u0938\u094d\u0930\u091c\u094d\u092f\u094b\u0924\u093f\u0930\u093e\u0924\u094d\u092e\u0935\u093e\u0928\u094d"
+    },
+    {
+      "id": "quote_23",
+      "quote": "From these luminous ancestors arise the great dynasties\u2014the Kurus, the Yadavas, and the Ikshvakus\u2014each branching like rivers from a single sacred source.",
+      "image_prompt": "Ghibli Art: A towering cosmic tree with silver bark and golden leaves stands at the center. Three mighty rivers\u2014one crimson, one sapphire, one emerald\u2014flow from its roots, each carrying figures of noble bearing: warriors in ornate armor, wise elders with silver-streaked hair, and youths with determined gazes. Sunlight dapples through the leaves.",
+      "image_url": "assets/img/quotes/quote_23.png",
+      "emphasis": {
+        "and": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: dynastic origins. Based on lines 120-160 of the Mahabharata. Sanskrit reference: \u0924\u0947\u092d\u094d\u092f\u094b\u093d\u092f\u0902 \u0915\u0941\u0930\u0941\u0935\u0902\u0936\u0936\u094d\u091a... \u0930\u093e\u091c\u0930\u094d\u0937\u0940\u0923\u093e\u0902 \u091a \u0938\u0930\u094d\u0935\u0936\u0903"
+    },
+    {
+      "id": "quote_24",
+      "quote": "The secrets of existence\u2014dharma, artha, kama\u2014are woven into the fabric of the world, as timeless as the Vedas and as vast as the cosmos itself.",
+      "image_prompt": "Ghibli Art: An ancient scroll unfurls across the sky, its surface alive with shimmering symbols. Below, a white-bearded man with deep-set eyes and ochre robes points upward, while a younger figure with dark braided hair gazes in awe. The landscape glows with the soft light of dusk, fireflies dancing at the edges.",
+      "image_url": "assets/img/quotes/quote_24.png",
+      "emphasis": {
+        "world,": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: eternal wisdom. Based on lines 120-160 of the Mahabharata. Sanskrit reference: \u0935\u0947\u0926\u092f\u094b\u0917\u0902 \u0938\u0935\u093f\u091c\u094d\u091e\u093e\u0928\u0902... \u0927\u0930\u094d\u092e\u094b\u093d\u0930\u094d\u0925\u0903 \u0915\u093e\u092e \u090f\u0935 \u091a"
     }
   ]
 }

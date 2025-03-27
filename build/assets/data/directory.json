@@ -359,6 +359,46 @@
         "grand": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: Imperial consecration. Based on lines 240-280 of the Mahabharata. Sanskrit reference: Lines 86-88"
+    },
+    {
+      "id": "quote_37",
+      "quote": "Duryodhana, consumed by envy, gazes upon the Pandavas' magnificent palace filled with gold, jewels, and treasures, his face darkening with resentment.",
+      "image_prompt": "Ghibli Art: A broad-shouldered man with sharp features and a jeweled crown stands in shadow, fists clenched, observing a golden palace hall overflowing with riches. His dark eyes burn with jealousy as sunlight reflects off gem-encrusted pillars and ornate furnishings.",
+      "image_url": "assets/img/quotes/quote_37.png",
+      "emphasis": {
+        "filled": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: envy and resentment. Based on lines 280-320 of the Mahabharata. Sanskrit reference: \u0926\u0941\u0930\u094d\u092f\u094b\u0927\u0928\u092e\u0941\u092a\u093e\u0917\u091a\u094d\u091b\u0928\u094d\u0928\u0930\u094d\u0939\u0923\u093e\u0928\u093f \u0924\u0924\u0938\u094d\u0924\u0924\u0903...\u0908\u0930\u094d\u0937\u094d\u092f\u093e\u0938\u092e\u0941\u0924\u094d\u0925\u0903 \u0938\u0941\u092e\u0939\u093e\u0902\u0938\u094d\u0924\u0938\u094d\u092f \u092e\u0928\u094d\u092f\u0941\u0930\u091c\u093e\u092f\u0924"
+    },
+    {
+      "id": "quote_38",
+      "quote": "Duryodhana stumbles in the illusionary palace, mocked by Bhima as Krishna watches. The humiliated prince's face twists in rage and shame.",
+      "image_prompt": "Ghibli Art: The same broad-shouldered man trips on water-like floors in a shimmering hall, his ornate robes disheveled. A muscular figure with wild hair laughs heartily while a blue-skinned observer stands calmly nearby. Morning light creates deceptive reflections.",
+      "image_url": "assets/img/quotes/quote_38.png",
+      "emphasis": {
+        "Krishna": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: humiliation and anger. Based on lines 280-320 of the Mahabharata. Sanskrit reference: \u092f\u0924\u094d\u0930\u093e\u0935\u0939\u0938\u093f\u0924\u0936\u094d\u091a\u093e\u0938\u0940\u0924\u094d\u092a\u094d\u0930\u0938\u094d\u0915\u0928\u094d\u0926\u0928\u094d\u0928\u093f\u0935 \u0938\u092e\u094d\u092d\u094d\u0930\u092e\u093e\u0924\u094d...\u092d\u0940\u092e\u0947\u0928\u093e\u0928\u092d\u093f\u091c\u093e\u0924\u0935\u0924\u094d"
+    },
+    {
+      "id": "quote_39",
+      "quote": "Dhritarashtra, the blind king, listens with sorrow as his son Duryodhana complains bitterly about the Pandavas' prosperity.",
+      "image_prompt": "Ghibli Art: An elderly man with milky eyes and a long white beard sits on a cushioned throne, his face lined with worry. The broad-shouldered prince kneels before him gesturing wildly, his jeweled crown askew. Dim torchlight flickers in the chamber.",
+      "image_url": "assets/img/quotes/quote_39.png",
+      "emphasis": {
+        "his": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: fatherly concern. Based on lines 280-320 of the Mahabharata. Sanskrit reference: \u0915\u0925\u093f\u0924\u094b \u0927\u0943\u0924\u0930\u093e\u0937\u094d\u091f\u094d\u0930\u0938\u094d\u092f \u0935\u093f\u0935\u0930\u094d\u0923\u094b \u0939\u0930\u093f\u0923\u0903 \u0915\u0943\u0936\u0903...\u0927\u0943\u0924\u0930\u093e\u0937\u094d\u091f\u094d\u0930\u0936\u094d\u091a\u093f\u0930\u0902 \u0927\u094d\u092f\u093e\u0924\u094d\u0935\u093e"
+    },
+    {
+      "id": "quote_40",
+      "quote": "Dhritarashtra confides in Sanjaya, torn between love for his son and wisdom, as the court stands divided in the growing conflict.",
+      "image_prompt": "Ghibli Art: The blind king grips the arm of a composed man with observant eyes, whispering urgently. In the background, armored figures argue heatedly near marble pillars. Golden sunset light streams through arched windows, casting long shadows.",
+      "image_url": "assets/img/quotes/quote_40.png",
+      "emphasis": {
+        "and": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: internal conflict and foreshadowing. Based on lines 280-320 of the Mahabharata. Sanskrit reference: \u0938\u091e\u094d\u091c\u092f\u0902 \u0935\u093e\u0915\u094d\u092f\u092e\u092c\u094d\u0930\u0935\u0940\u0924\u094d...\u0905\u0939\u0902 \u0924\u094d\u0935\u091a\u0915\u094d\u0937\u0941\u0903 \u0915\u093e\u0930\u094d\u092a\u0923\u094d\u092f\u093e\u0924\u094d\u092a\u0941\u0924\u094d\u0930\u092a\u094d\u0930\u0940\u0924\u094d\u092f\u093e \u0938\u0939\u093e\u092e\u093f \u0924\u0924\u094d"
     }
   ]
 }

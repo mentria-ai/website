@@ -919,6 +919,46 @@
         "motionless,": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: absorption. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0938\u0924\u094d\u0930\u0947 \u0926\u094d\u0935\u0948\u092a\u093e\u092f\u0928\u093e\u091c\u094d\u091e\u092f\u093e...\u092a\u093e\u092a\u092d\u092f\u093e\u092a\u0939\u093e\u092e\u094d"
+    },
+    {
+      "id": "quote_93",
+      "quote": "Ugrashravas, the son of Lomaharshana, humbly approaches the sages in Naimisha forest, bowing with folded hands to seek their blessings.",
+      "image_prompt": "Ghibli Art: A broad-shouldered man with dark wavy hair and earnest eyes, wearing simple ochre robes, bows deeply before a circle of seated figures. The elders have long white beards and wear earth-toned garments, their faces lined with wisdom. Sunlight dapples through ancient banyan trees onto the forest floor.",
+      "image_url": "assets/img/quotes/quote_93.png",
+      "emphasis": {
+        "Naimisha": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: humble approach. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0932\u094b\u092e\u0939\u0930\u094d\u0937\u0923\u092a\u0941\u0924\u094d\u0930 \u0909\u0917\u094d\u0930\u0936\u094d\u0930\u0935\u093e\u0903... \u0935\u093f\u0928\u092f\u093e\u0935\u0928\u0924\u094b \u092d\u0942\u0924\u094d\u0935\u093e"
+    },
+    {
+      "id": "quote_94",
+      "quote": "The sages welcome Ugrashravas with kindness, offering him a seat among them in their sacred assembly beneath the ancient trees.",
+      "image_prompt": "Ghibli Art: A white-bearded elder with gentle eyes gestures toward an empty woven mat beside him. The newcomer sits cross-legged, hands folded, surrounded by attentive figures in muted saffron and white. Golden afternoon light filters through dense foliage.",
+      "image_url": "assets/img/quotes/quote_94.png",
+      "emphasis": {
+        "among": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: ritual hospitality. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u092d\u093f\u0935\u093e\u0926\u094d\u092f \u092e\u0941\u0928\u0940\u0902\u0938\u094d\u0924\u093e\u0902\u0938\u094d\u0924\u0941... \u0928\u093f\u0930\u094d\u0926\u093f\u0937\u094d\u091f\u092e\u093e\u0938\u0928\u0902 \u092d\u0947\u091c\u0947"
+    },
+    {
+      "id": "quote_95",
+      "quote": "Curious about his journey, an elder with lotus-petal eyes asks, 'From where have you come, dear son? What sacred tales have you gathered?'",
+      "image_prompt": "Ghibli Art: A thin elder with luminous eyes leans forward, his silver beard brushing folded knees. The visitor's face lights up as wind stirs his dark hair. Butterflies flutter near a small fire pit between them, smoke curling upward.",
+      "image_url": "assets/img/quotes/quote_95.png",
+      "emphasis": {
+        "where": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: questioning. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u0925\u093e\u092a\u0943\u091a\u094d\u091b\u0926\u0943\u0937\u093f\u0938\u094d\u0924\u0924\u094d\u0930... \u0915\u093e\u0932\u0903 \u0915\u092e\u0932\u092a\u0924\u094d\u0930\u093e\u0915\u094d\u0937"
+    },
+    {
+      "id": "quote_96",
+      "quote": "Ugrashravas begins his tale: 'At Janamejaya's serpent sacrifice, I heard Vyasa's divine stories recited by Vaishampayana...'",
+      "image_prompt": "Ghibli Art: The storyteller's hands gesture gracefully as his audience leans in. His brown eyes reflect firelight while distant mountains fade into twilight. A crescent moon appears between drifting clouds above the sacred grove.",
+      "image_url": "assets/img/quotes/quote_96.png",
+      "emphasis": {
+        "I": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: story beginning. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0942\u0924 \u0909\u0935\u093e\u091a... \u0935\u0948\u0936\u092e\u094d\u092a\u093e\u092f\u0928\u0947\u0928 \u0935\u0948"
     }
   ]
 }

@@ -519,6 +519,46 @@
         "steers": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: heroic resolve. Based on lines 400-440 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0935\u093e\u0939\u0928\u0947\u0937\u094d\u0935\u093e\u0936\u094d\u0935\u0938\u0924\u094d\u0938\u0941; \u0930\u0925\u094b\u092a\u0938\u094d\u0925\u0947 \u0924\u093f\u0937\u094d\u0920\u0924\u093e \u0917\u093e\u0923\u094d\u0921\u093f\u0935\u0947\u0928"
+    },
+    {
+      "id": "quote_53",
+      "quote": "Karna, with his golden armor gleaming, releases a divine weapon towards the Pandava forces, his face set in grim determination as the battlefield trembles.",
+      "image_prompt": "Ghibli Art: A muscular warrior with golden armor and piercing eyes stands atop a chariot, releasing a radiant arrow that streaks across the battlefield. Dust swirls around him as soldiers shield their eyes from the blinding light. The sky is streaked with orange and gold, hinting at the chaos of war.",
+      "image_url": "assets/img/quotes/quote_53.png",
+      "emphasis": {
+        "Pandava": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: Conflict. Based on lines 440-480 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0915\u0930\u094d\u0923\u092e\u093e\u0938\u093e\u0926\u094d\u092f \u092e\u0941\u0915\u094d\u0924\u0902; \u0935\u0927\u093e\u0926\u094d\u092d\u0940\u092e\u0902 \u0915\u0941\u0924\u094d\u0938\u092f\u093f\u0924\u094d\u0935\u093e \u0935\u091a\u094b\u092d\u093f\u0903"
+    },
+    {
+      "id": "quote_54",
+      "quote": "Drona, the revered teacher, falls in battle, his white beard stained with dust as Dhrishtadyumna stands over him, his sword raised high.",
+      "image_prompt": "Ghibli Art: An elderly warrior with a white beard and weathered face lies fallen, his ochre robes torn. A fierce warrior with dark, wild hair stands above him, gripping a bloodied sword. The battlefield is littered with broken weapons, and the wind carries ash through the air.",
+      "image_url": "assets/img/quotes/quote_54.png",
+      "emphasis": {
+        "with": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: Tragedy. Based on lines 440-480 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0926\u094d\u0930\u094b\u0923\u092e\u093e\u091a\u093e\u0930\u094d\u092f\u092e\u0947\u0915\u0902; \u0927\u0943\u0937\u094d\u091f\u0926\u094d\u092f\u0941\u092e\u094d\u0928\u0947\u0928\u093e\u092d\u094d\u092f\u0924\u093f\u0915\u094d\u0930\u092e\u094d\u092f \u0927\u0930\u094d\u092e\u092e\u094d"
+    },
+    {
+      "id": "quote_55",
+      "quote": "Ashwatthama, consumed by rage, unleashes the divine Narayana Astra, its terrifying power lighting up the sky as the Pandava forces scatter in fear.",
+      "image_prompt": "Ghibli Art: A young warrior with wild, unkempt hair and fiery eyes raises his arms, summoning a swirling vortex of celestial energy. The sky darkens as the divine weapon crackles with power, casting eerie blue light over the terrified soldiers below.",
+      "image_url": "assets/img/quotes/quote_55.png",
+      "emphasis": {
+        "power": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: Destruction. Based on lines 440-480 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e \u0926\u094d\u0930\u094b\u0923\u0947 \u0928\u093f\u0939\u0924\u0947 \u0926\u094d\u0930\u094b\u0923\u092a\u0941\u0924\u094d\u0930\u094b; \u0928\u093e\u0930\u093e\u092f\u0923\u0902 \u0926\u093f\u0935\u094d\u092f\u092e\u0938\u094d\u0924\u094d\u0930\u0902 \u0935\u093f\u0915\u0941\u0930\u094d\u0935\u0928\u094d"
+    },
+    {
+      "id": "quote_56",
+      "quote": "Duryodhana, exhausted and defeated, staggers towards a lake, his pride shattered as the weight of his choices bears down upon him.",
+      "image_prompt": "Ghibli Art: A broad-shouldered warrior with a wounded body and a broken mace limps towards a tranquil lake, his face etched with pain and regret. The water reflects the golden hues of sunset, contrasting with the darkness in his eyes.",
+      "image_url": "assets/img/quotes/quote_56.png",
+      "emphasis": {
+        "shattered": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: Defeat. Based on lines 440-480 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0936\u094d\u0930\u093e\u0928\u094d\u0924\u092e\u0947\u0915\u0902 \u0936\u092f\u093e\u0928\u0902; \u0939\u094d\u0930\u0926\u0902 \u0917\u0924\u094d\u0935\u093e \u0938\u094d\u0924\u092e\u094d\u092d\u092f\u093f\u0924\u094d\u0935\u093e \u0924\u0926\u092e\u094d\u092d\u0903"
     }
   ]
 }

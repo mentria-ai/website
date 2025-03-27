@@ -959,6 +959,46 @@
         "I": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: story beginning. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0942\u0924 \u0909\u0935\u093e\u091a... \u0935\u0948\u0936\u092e\u094d\u092a\u093e\u092f\u0928\u0947\u0928 \u0935\u0948"
+    },
+    {
+      "id": "quote_97",
+      "quote": "Ugrashravas, the son of Lomaharshana, humbly approaches the sages in Naimisha forest, bowing with folded hands as golden sunlight filters through ancient trees.",
+      "image_prompt": "Ghibli Art: A dark-haired man with gentle eyes and simple brown robes kneels respectfully before a circle of white-bearded figures in ochre garments. Sunlight dapples the forest floor where they sit beneath towering banyan trees.",
+      "image_url": "assets/img/quotes/quote_97.png",
+      "emphasis": {
+        "forest,": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: humble arrival. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0932\u094b\u092e\u0939\u0930\u094d\u0937\u0923\u092a\u0941\u0924\u094d\u0930 \u0909\u0917\u094d\u0930\u0936\u094d\u0930\u0935\u093e\u0903...\u0935\u093f\u0928\u092f\u093e\u0935\u0928\u0924\u094b \u092d\u0942\u0924\u094d\u0935\u093e"
+    },
+    {
+      "id": "quote_98",
+      "quote": "The seated sages, their faces lined with wisdom, welcome Ugrashravas with warm smiles as he takes his place among them in the sacred forest clearing.",
+      "image_prompt": "Ghibli Art: Elderly men with long white beards and kind expressions gesture toward an empty mat. The newcomer sits cross-legged, hands folded, as wind rustles leaves overhead. Soft golden light illuminates their faces.",
+      "image_url": "assets/img/quotes/quote_98.png",
+      "emphasis": {
+        "smiles": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: respectful welcome. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u092d\u093f\u0935\u093e\u0926\u094d\u092f \u092e\u0941\u0928\u0940\u0902\u0938\u094d\u0924\u093e\u0902\u0938\u094d\u0924\u0941...\u0928\u093f\u0930\u094d\u0926\u093f\u0937\u094d\u091f\u092e\u093e\u0938\u0928\u0902 \u092d\u0947\u091c\u0947"
+    },
+    {
+      "id": "quote_99",
+      "quote": "A particularly aged sage with luminous eyes leans forward, his wrinkled hands gesturing as he inquires about Ugrashravas' journey and the stories he carries.",
+      "image_prompt": "Ghibli Art: A thin sage with silver hair reaching his waist raises one hand in inquiry, his deep-set eyes shining. The storyteller leans in attentively, while other sages listen with tilted heads. Sunbeams highlight dust motes between them.",
+      "image_url": "assets/img/quotes/quote_99.png",
+      "emphasis": {
+        "gesturing": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: curious inquiry. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u0925\u093e\u092a\u0943\u091a\u094d\u091b\u0926\u0943\u0937\u093f\u0938\u094d\u0924\u0924\u094d\u0930...\u0915\u093e\u0932\u0903 \u0915\u092e\u0932\u092a\u0924\u094d\u0930\u093e\u0915\u094d\u0937"
+    },
+    {
+      "id": "quote_100",
+      "quote": "Ugrashravas begins his tale of Janamejaya's serpent sacrifice, his hands animated as the sages' faces glow with anticipation in the dappled forest light.",
+      "image_prompt": "Ghibli Art: The dark-haired storyteller gestures expressively, his brown robe sleeves fluttering. The listening sages' faces show rapt attention, some with parted lips. Sunlight creates patterns on their garments through swaying leaves.",
+      "image_url": "assets/img/quotes/quote_100.png",
+      "emphasis": {
+        "as": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: story begins. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0942\u0924 \u0909\u0935\u093e\u091a...\u0935\u0948\u0936\u092e\u094d\u092a\u093e\u092f\u0928\u0947\u0928 \u0935\u0948"
     }
   ]
 }

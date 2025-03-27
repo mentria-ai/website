@@ -799,6 +799,46 @@
         "calming": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: redemption and sanctification. Based on lines 680-720 of the Mahabharata. Sanskrit reference: 'Restrained him saying, 'Desist from this,' and then he stopped. Is celebrated as the sacred Samantapa\u00f1caka.'"
+    },
+    {
+      "id": "quote_81",
+      "quote": "Ugrashravas, the son of Lomaharshana, humbly approaches the sages in Naimisha forest, bowing with folded hands as golden sunlight filters through ancient trees.",
+      "image_prompt": "Ghibli Art: A broad-shouldered man with dark wavy hair and earnest eyes, wearing simple saffron robes, bows deeply before a circle of elderly figures with long white beards and serene expressions. Dappled sunlight illuminates the forest clearing where they sit on woven mats, surrounded by towering sal trees with wind-tossed leaves.",
+      "image_url": "assets/img/quotes/quote_81.png",
+      "emphasis": {
+        "forest,": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: humble arrival. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0932\u094b\u092e\u0939\u0930\u094d\u0937\u0923\u092a\u0941\u0924\u094d\u0930 \u0909\u0917\u094d\u0930\u0936\u094d\u0930\u0935\u093e\u0903 \u0938\u0942\u0924\u0903... \u0935\u093f\u0928\u092f\u093e\u0935\u0928\u0924\u094b \u092d\u0942\u0924\u094d\u0935\u093e"
+    },
+    {
+      "id": "quote_82",
+      "quote": "The ascetics welcome Ugrashravas with curiosity, their faces glowing in the afternoon light as they gesture toward an empty seat among them.",
+      "image_prompt": "Ghibli Art: Close-up of weathered hands with prominent veins gesturing toward a reed mat. In the background, the dark-haired visitor kneels respectfully while elderly figures in faded ochre robes lean forward with kind expressions. Sun-warmed stone pillars frame the scene, draped with flowering vines.",
+      "image_url": "assets/img/quotes/quote_82.png",
+      "emphasis": {
+        "afternoon": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: warm reception. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u092d\u093f\u0935\u093e\u0926\u094d\u092f \u092e\u0941\u0928\u0940\u0902\u0938\u094d\u0924\u093e\u0902\u0938\u094d\u0924\u0941... \u0928\u093f\u0930\u094d\u0926\u093f\u0937\u094d\u091f\u092e\u093e\u0938\u0928\u0902 \u092d\u0947\u091c\u0947"
+    },
+    {
+      "id": "quote_83",
+      "quote": "Seated comfortably, Ugrashravas begins to speak as the sages listen intently, their eyes reflecting the dancing firelight in the gathering dusk.",
+      "image_prompt": "Ghibli Art: The dark-haired man sits cross-legged, hands animated as he speaks. Around him, white-bearded figures with deep-set eyes lean in attentively. A small fire crackles between them, casting flickering shadows on their faces and the surrounding tree roots that form natural benches.",
+      "image_url": "assets/img/quotes/quote_83.png",
+      "emphasis": {
+        "intently,": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: storytelling begins. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0941\u0916\u093e\u0938\u0940\u0928\u0902 \u0924\u0924\u0938\u094d\u0924\u0902 \u0924\u0941... \u0905\u0925\u093e\u092a\u0943\u091a\u094d\u091b\u0926\u0943\u0937\u093f\u0938\u094d\u0924\u0924\u094d\u0930"
+    },
+    {
+      "id": "quote_84",
+      "quote": "An elder with luminous eyes asks about Ugrashravas' journey, his question hanging in the air like the fireflies now dotting the twilight forest.",
+      "image_prompt": "Ghibli Art: A particularly aged figure with silver hair reaching his waist raises one bony finger, his face illuminated by both firelight and emerging fireflies. The storyteller pauses mid-gesture, mouth slightly open in response. Deep purple shadows stretch across the clearing as the last amber light touches the treetops.",
+      "image_url": "assets/img/quotes/quote_84.png",
+      "emphasis": {
+        "hanging": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: question posed. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0915\u0941\u0924 \u0906\u0917\u092e\u094d\u092f\u0924\u0947 \u0938\u094c\u0924\u0947... \u0915\u093e\u0932\u0903 \u0915\u092e\u0932\u092a\u0924\u094d\u0930\u093e\u0915\u094d\u0937"
     }
   ]
 }

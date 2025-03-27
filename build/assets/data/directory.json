@@ -1039,6 +1039,46 @@
         "King": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: story beginning. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0942\u0924 \u0909\u0935\u093e\u091a \u091c\u0928\u092e\u0947\u091c\u092f\u0938\u094d\u092f \u0930\u093e\u091c\u0930\u094d\u0937\u0947\u0903 \u0938\u0930\u094d\u092a\u0938\u0924\u094d\u0930\u0947 \u092e\u0939\u093e\u0924\u094d\u092e\u0928\u0903"
+    },
+    {
+      "id": "quote_105",
+      "quote": "Ugrashravas, the son of Lomaharshana, humbly approaches the sages in Naimisha forest, bowing with folded hands to the assembly of ascetics.",
+      "image_prompt": "Ghibli Art: A dark-haired man with gentle eyes and simple white garments bows deeply before a circle of white-bearded men in ochre robes. Sunlight filters through ancient trees, casting dappled shadows on the forest floor where they sit.",
+      "image_url": "assets/img/quotes/quote_105.png",
+      "emphasis": {
+        "Naimisha": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: character introduction. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0932\u094b\u092e\u0939\u0930\u094d\u0937\u0923\u092a\u0941\u0924\u094d\u0930 \u0909\u0917\u094d\u0930\u0936\u094d\u0930\u0935\u093e\u0903 \u0938\u0942\u0924\u0903... \u0935\u093f\u0928\u092f\u093e\u0935\u0928\u0924\u094b \u092d\u0942\u0924\u094d\u0935\u093e"
+    },
+    {
+      "id": "quote_106",
+      "quote": "The ascetics welcome Ugrashravas, offering him a seat as they gather eagerly to hear his stories from Janamejaya's snake sacrifice.",
+      "image_prompt": "Ghibli Art: The white-bearded men with weathered faces gesture warmly toward an empty mat between them. One with particularly long beard leans forward with keen interest, hands raised in invitation. Golden afternoon light illuminates the peaceful forest clearing.",
+      "image_url": "assets/img/quotes/quote_106.png",
+      "emphasis": {
+        "gather": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: warm welcome. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u0925 \u0924\u0947\u0937\u0942\u092a\u0935\u093f\u0937\u094d\u091f\u0947\u0937\u0941... \u0928\u093f\u0930\u094d\u0926\u093f\u0937\u094d\u091f\u092e\u093e\u0938\u0928\u0902 \u092d\u0947\u091c\u0947"
+    },
+    {
+      "id": "quote_107",
+      "quote": "A particularly aged sage with kind eyes leans forward, asking Ugrashravas about his journey and what sacred tales he brings them.",
+      "image_prompt": "Ghibli Art: Close-up of a wrinkled face with wise eyes beneath bushy white brows, leaning toward the dark-haired visitor. His gnarled hands gesture curiously as wind rustles their simple garments. Sunlight catches dust motes between them.",
+      "image_url": "assets/img/quotes/quote_107.png",
+      "emphasis": {
+        "Ugrashravas": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: curious inquiry. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u0925\u093e\u092a\u0943\u091a\u094d\u091b\u0926\u0943\u0937\u093f\u0938\u094d\u0924\u0924\u094d\u0930... \u0915\u093e\u0932\u0903 \u0915\u092e\u0932\u092a\u0924\u094d\u0930\u093e\u0915\u094d\u0937"
+    },
+    {
+      "id": "quote_108",
+      "quote": "Ugrashravas begins his narration, describing how Vyasa's sacred stories were told at King Janamejaya's great serpent sacrifice.",
+      "image_prompt": "Ghibli Art: The dark-haired man gestures gracefully as he speaks, his face animated. The sages lean in attentively, some with hands raised in wonder. Behind them, the forest glows with late afternoon light filtering through leaves.",
+      "image_url": "assets/img/quotes/quote_108.png",
+      "emphasis": {
+        "stories": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: beginning of tales. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0942\u0924 \u0909\u0935\u093e\u091a... \u0915\u0943\u0937\u094d\u0923\u0926\u094d\u0935\u0948\u092a\u093e\u092f\u0928\u092a\u094d\u0930\u094b\u0915\u094d\u0924\u093e\u0903"
     }
   ]
 }

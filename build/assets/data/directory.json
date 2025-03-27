@@ -487,6 +487,57 @@
         "consume waters": "emphasis-2"
       },
       "context": "The ancestors advise Aurva: 'Release this anger-fire into the waters... Let this remain in the great ocean' (Lines 20537-20538). The text later confirms: 'That fire, spewing from its mouth, drinks the waters in the great ocean' (Line 20549). This occurs during Aurva's crisis when his wrath threatens universal destruction (Lines 20433-20434), and the solution transforms his fury into a permanent oceanic phenomenon."
+    },
+    {
+      "id": "quote_45",
+      "quote": "The river Phalgu grants the merit of an Ashvamedha horse sacrifice and great spiritual accomplishment to those who bathe in its waters.",
+      "image_prompt": "Ghibli Art: A serene river with gentle ripples under a soft golden sunrise. A single leaf floats on the water's surface.",
+      "image_url": "assets/img/quotes/quote_45.png",
+      "emphasis": {
+        "Phalgu": "emphasis-1",
+        "Ashvamedha": "emphasis-2"
+      },
+      "context": "The text states: 'Then, O king, the pilgrim should go to Phalgu [river], one obtains the merit of an Ashvamedha and attains great spiritual accomplishment.' This is found in the section describing the sacred rivers and their merits, where Phalgu is highlighted for its spiritual significance alongside other holy sites."
+    },
+    {
+      "id": "quote_46",
+      "quote": "Ugrashravas, the storyteller, humbly approaches the gathering of sages in Naimisha forest, bowing with folded hands to seek their blessings.",
+      "image_prompt": "Ghibli Art: A humble Ugrashravas bows deeply before seated sages in a sun-dappled forest clearing. The sages, with serene expressions, sit on woven mats under ancient banyan trees. Golden light filters through leaves.",
+      "image_url": "assets/img/quotes/quote_46.png",
+      "emphasis": {
+        "Naimisha": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: character introduction. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0935\u093f\u0928\u092f\u093e\u0935\u0928\u0924\u094b \u092d\u0942\u0924\u094d\u0935\u093e \u0915\u0926\u093e\u091a\u093f\u0924\u094d\u0938\u0942\u0924\u0928\u0928\u094d\u0926\u0928\u0903"
+    },
+    {
+      "id": "quote_47",
+      "quote": "The sages welcome Ugrashravas, gesturing him to sit among them. Their eyes sparkle with anticipation for the sacred stories he will share.",
+      "image_prompt": "Ghibli Art: Elderly sages with long white beards smile warmly as they motion Ugrashravas to a prepared seat. One sage leans forward eagerly, hands resting on his knees. Autumn leaves drift through the air.",
+      "image_url": "assets/img/quotes/quote_47.png",
+      "emphasis": {
+        "eyes": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: warm welcome. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u092d\u093f\u0935\u093e\u0926\u094d\u092f \u092e\u0941\u0928\u0940\u0902\u0938\u094d\u0924\u093e\u0902\u0938\u094d\u0924\u0941 \u0938\u0930\u094d\u0935\u093e\u0928\u0947\u0935 \u0915\u0943\u0924\u093e\u091e\u094d\u091c\u0932\u093f\u0903"
+    },
+    {
+      "id": "quote_48",
+      "quote": "Seated comfortably, Ugrashravas prepares to speak. The sages lean in attentively, their faces glowing in the afternoon sunlight.",
+      "image_prompt": "Ghibli Art: Ugrashravas sits cross-legged on a raised platform, hands resting on his lap. The surrounding sages form a semicircle, their faces lit by golden light. A gentle breeze stirs their robes.",
+      "image_url": "assets/img/quotes/quote_48.png",
+      "emphasis": {
+        "in": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: preparation for storytelling. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0941\u0916\u093e\u0938\u0940\u0928\u0902 \u0924\u0924\u0938\u094d\u0924\u0902 \u0924\u0941 \u0935\u093f\u0936\u094d\u0930\u093e\u0928\u094d\u0924\u092e\u0941\u092a\u0932\u0915\u094d\u0937\u094d\u092f \u091a"
+    },
+    {
+      "id": "quote_49",
+      "quote": "An elder sage breaks the silence, asking Ugrashravas about his journey and the sacred tales he brings from Janamejaya's snake sacrifice.",
+      "image_prompt": "Ghibli Art: A white-bearded sage raises his hand to speak, his wise eyes shining. Ugrashravas turns attentively, while other sages watch with quiet anticipation. Sunlight creates dappled patterns on the forest floor.",
+      "image_url": "assets/img/quotes/quote_49.png",
+      "emphasis": {
+        "journey": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: beginning of dialogue. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u0925\u093e\u092a\u0943\u091a\u094d\u091b\u0926\u0943\u0937\u093f\u0938\u094d\u0924\u0924\u094d\u0930 \u0915\u0936\u094d\u091a\u093f\u0924\u094d\u092a\u094d\u0930\u0938\u094d\u0924\u093e\u0935\u092f\u0928\u094d\u0915\u0925\u093e\u0903"
     }
   ]
 }

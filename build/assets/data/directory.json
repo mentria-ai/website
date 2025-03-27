@@ -879,6 +879,46 @@
         "as": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: storytelling commencement. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0942\u0924 \u0909\u0935\u093e\u091a...\u0935\u0948\u0936\u092e\u094d\u092a\u093e\u092f\u0928\u0947\u0928 \u0935\u0948"
+    },
+    {
+      "id": "quote_89",
+      "quote": "Ugrashravas speaks of his journey to sacred lands, describing the holy battlefield where the great war between the Pandavas and Kauravas once raged.",
+      "image_prompt": "Ghibli Art: A broad-shouldered man with dark skin and expressive hands gestures while speaking, his face lit by campfire glow. Behind him, spectral visions of warriors appear in the smoke. The listeners lean forward, their aged faces filled with wonder. Twilight paints the sky in deep purples.",
+      "image_url": "assets/img/quotes/quote_89.png",
+      "emphasis": {
+        "battlefield": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: storytelling. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0938\u092e\u0928\u094d\u0924\u092a\u091e\u094d\u091a\u0915\u0902 \u0928\u093e\u092e \u092a\u0941\u0923\u094d\u092f\u0902 \u0926\u094d\u0935\u093f\u091c\u0928\u093f\u0937\u0947\u0935\u093f\u0924\u092e\u094d...\u092f\u0941\u0926\u094d\u0927\u0902 \u092f\u0924\u094d\u0930\u093e\u092d\u0935\u0924\u094d\u092a\u0941\u0930\u093e"
+    },
+    {
+      "id": "quote_90",
+      "quote": "The sages respond with reverence, asking to hear Vyasa's sacred composition - the Mahabharata that removes sins and contains all Vedas' wisdom.",
+      "image_prompt": "Ghibli Art: A circle of white-bearded men in ochre robes raise their hands in unison, eyes shining. One with particularly long beard strokes it thoughtfully. Golden light shafts pierce the gathering dusk, illuminating dust motes around them.",
+      "image_url": "assets/img/quotes/quote_90.png",
+      "emphasis": {
+        "-": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: request. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u092d\u093e\u0930\u0924\u0938\u094d\u092f\u0947\u0924\u093f\u0939\u093e\u0938\u0938\u094d\u092f \u092a\u0941\u0923\u094d\u092f\u093e\u0902 \u0917\u094d\u0930\u0928\u094d\u0925\u093e\u0930\u094d\u0925\u0938\u0902\u092f\u0941\u0924\u093e\u092e\u094d...\u0938\u0902\u0939\u093f\u0924\u093e\u0902 \u0936\u094d\u0930\u094b\u0924\u0941\u092e\u093f\u091a\u094d\u091b\u093e\u092e\u094b"
+    },
+    {
+      "id": "quote_91",
+      "quote": "Ugrashravas begins the cosmic origin story, invoking the primal Purusha - the first being worshipped by gods and sages alike.",
+      "image_prompt": "Ghibli Art: The storyteller's face becomes radiant as he raises both palms upward. A shimmering golden light forms between his hands, suggesting a divine form. The listeners' shadows stretch long behind them in the firelight.",
+      "image_url": "assets/img/quotes/quote_91.png",
+      "emphasis": {
+        "-": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: invocation. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0906\u0926\u094d\u092f\u0902 \u092a\u0941\u0930\u0941\u0937\u092e\u0940\u0936\u093e\u0928\u0902 \u092a\u0941\u0930\u0941\u0939\u0942\u0924\u0902 \u092a\u0941\u0930\u0941\u0937\u094d\u091f\u0941\u0924\u092e\u094d"
+    },
+    {
+      "id": "quote_92",
+      "quote": "As night deepens, the sacred fire crackles between them. The sages sit motionless, their faces transformed by the story's power and the fire's glow.",
+      "image_prompt": "Ghibli Art: Close-up of aged hands resting on knees, firelight dancing across wrinkled skin. In the background, the storyteller's silhouette gestures dramatically against a starry sky. Embers rise like fireflies into the darkness.",
+      "image_url": "assets/img/quotes/quote_92.png",
+      "emphasis": {
+        "motionless,": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: absorption. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0938\u0924\u094d\u0930\u0947 \u0926\u094d\u0935\u0948\u092a\u093e\u092f\u0928\u093e\u091c\u094d\u091e\u092f\u093e...\u092a\u093e\u092a\u092d\u092f\u093e\u092a\u0939\u093e\u092e\u094d"
     }
   ]
 }

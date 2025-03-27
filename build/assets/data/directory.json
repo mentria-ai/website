@@ -559,6 +559,46 @@
         "shattered": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: Defeat. Based on lines 440-480 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0936\u094d\u0930\u093e\u0928\u094d\u0924\u092e\u0947\u0915\u0902 \u0936\u092f\u093e\u0928\u0902; \u0939\u094d\u0930\u0926\u0902 \u0917\u0924\u094d\u0935\u093e \u0938\u094d\u0924\u092e\u094d\u092d\u092f\u093f\u0924\u094d\u0935\u093e \u0924\u0926\u092e\u094d\u092d\u0903"
+    },
+    {
+      "id": "quote_57",
+      "quote": "Dhritarashtra, his blind eyes filled with tears, clutches his throne as Sanjaya recounts the horrors of war. The king's face is twisted in grief, unable to bear the news.",
+      "image_prompt": "Ghibli Art: An elderly man with sightless milky eyes and a long white beard sits slumped on an ornate wooden throne, his wrinkled hands gripping the armrests tightly. A middle-aged man with a solemn expression and simple robes stands before him, speaking softly. The palace hall is dimly lit by oil lamps casting long shadows.",
+      "image_url": "assets/img/quotes/quote_57.png",
+      "emphasis": {
+        "horrors": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: emotional reaction. Based on lines 480-520 of the Mahabharata. Sanskrit reference: 158-159"
+    },
+    {
+      "id": "quote_58",
+      "quote": "Overcome by sorrow, Dhritarashtra collapses onto the marble floor. His royal garments spread around him like a fallen banner as attendants rush to his side.",
+      "image_prompt": "Ghibli Art: The elderly king lies motionless on polished stone tiles, his ornate golden crown askew. Two younger figures in simple tunics kneel beside him, their faces showing concern. Sunlight streams through arched windows, illuminating dust motes in the air.",
+      "image_url": "assets/img/quotes/quote_58.png",
+      "emphasis": {
+        "spread": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: physical collapse. Based on lines 480-520 of the Mahabharata. Sanskrit reference: 160"
+    },
+    {
+      "id": "quote_59",
+      "quote": "Sanjaya, his wise eyes filled with compassion, helps the distraught king sit up. He begins to speak words of wisdom to comfort the grieving monarch.",
+      "image_prompt": "Ghibli Art: The middle-aged man with short dark hair and a lined face gently supports the king's shoulders. The elderly ruler's face shows deep sorrow as he listens. Their figures are framed by billowing silk curtains that catch the golden afternoon light.",
+      "image_url": "assets/img/quotes/quote_59.png",
+      "emphasis": {
+        "up.": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: comforting wisdom. Based on lines 480-520 of the Mahabharata. Sanskrit reference: 162"
+    },
+    {
+      "id": "quote_60",
+      "quote": "Sanjaya reminds Dhritarashtra of Vyasa and Narada's teachings. The king's expression softens slightly as these ancient words begin to bring solace.",
+      "image_prompt": "Ghibli Art: The two men sit facing each other on cushions, their hands gesturing in conversation. The king's posture is less rigid now, his blind eyes turned upward as if seeing beyond. The warm glow of sunset fills the chamber through latticed windows.",
+      "image_url": "assets/img/quotes/quote_60.png",
+      "emphasis": {
+        "expression": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: spiritual consolation. Based on lines 480-520 of the Mahabharata. Sanskrit reference: 163"
     }
   ]
 }

@@ -1199,6 +1199,70 @@
         "how": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: sacred revelation. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0915\u0943\u0937\u094d\u0923\u0926\u094d\u0935\u0948\u092a\u093e\u092f\u0928\u092a\u094d\u0930\u094b\u0915\u094d\u0924\u093e\u0903 \u0938\u0941\u092a\u0941\u0923\u094d\u092f\u093e \u0935\u093f\u0935\u093f\u0927\u093e\u0903 \u0915\u0925\u093e\u0903 \u0915\u0925\u093f\u0924\u093e\u0936\u094d\u091a\u093e\u092a\u093f \u0935\u093f\u0927\u093f\u0935\u0926\u094d\u092f\u093e \u0935\u0948\u0936\u092e\u094d\u092a\u093e\u092f\u0928\u0947\u0928 \u0935\u0948"
+    },
+    {
+      "id": "quote_121",
+      "quote": "Ugrashravas, the son of Lomaharshana, humbly approaches the gathering of ascetics in Naimisha forest, his hands folded in respect.",
+      "image_prompt": "Ghibli Art: A slender man with long dark hair and gentle eyes, dressed in simple ochre robes, walks toward a circle of seated figures. His posture is reverent, hands joined before him. The forest clearing is dappled with golden sunlight filtering through ancient trees.",
+      "image_url": "assets/img/quotes/quote_121.png",
+      "emphasis": {
+        "of": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: character introduction. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0932\u094b\u092e\u0939\u0930\u094d\u0937\u0923\u092a\u0941\u0924\u094d\u0930 \u0909\u0917\u094d\u0930\u0936\u094d\u0930\u0935\u093e\u0903 \u0938\u0942\u0924\u0903... \u0935\u093f\u0928\u092f\u093e\u0935\u0928\u0924\u094b \u092d\u0942\u0924\u094d\u0935\u093e",
+      "review_scores": {
+        "artistic_score": 9.0,
+        "prompt_score": 8.0,
+        "total_score": 8.1,
+        "feedback": "The illustration masterfully captures the serene atmosphere of the forest, with a focus on Ugrashravas's reverent approach. However, the depiction of the seated figures is somewhat lacking in detail, diminishing the overall sense of reverence and mysticism."
+      }
+    },
+    {
+      "id": "quote_122",
+      "quote": "The ascetics welcome Ugrashravas with warmth, their faces alight with curiosity as they gesture for him to join their sacred gathering.",
+      "image_prompt": "Ghibli Art: Elderly men with long white beards and kind expressions, dressed in earth-toned garments, smile as they motion toward an empty seat. Sunlight catches the dust motes swirling between them and the approaching figure. The forest forms a peaceful green backdrop.",
+      "image_url": "assets/img/quotes/quote_122.png",
+      "emphasis": {
+        "curiosity": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: welcoming moment. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0924\u092e\u093e\u0936\u094d\u0930\u092e\u092e\u0928\u0941\u092a\u094d\u0930\u093e\u092a\u094d\u0924\u0902 \u0928\u0948\u092e\u093f\u0937\u093e\u0930\u0923\u094d\u092f\u0935\u093e\u0938\u093f\u0928\u0903... \u0905\u092d\u093f\u0935\u093e\u0926\u094d\u092f \u092e\u0941\u0928\u0940\u0902\u0938\u094d\u0924\u093e\u0902\u0938\u094d\u0924\u0941",
+      "review_scores": {
+        "artistic_score": 8.0,
+        "prompt_score": 9.0,
+        "total_score": 8.9,
+        "feedback": "The illustration captures the essence of Ghibli style with its serene forest backdrop and warm character expressions, while faithfully adhering to the prompt's details, particularly the welcoming gesture and peaceful atmosphere."
+      }
+    },
+    {
+      "id": "quote_123",
+      "quote": "Seated among the sages, Ugrashravas prepares to speak as one particularly venerable ascetic leans forward with keen interest.",
+      "image_prompt": "Ghibli Art: A white-bearded man with deep-set wise eyes and sun-weathered skin leans forward intently. The younger man sits cross-legged, hands resting on his knees, surrounded by attentive figures. Dappled shadows play across their faces in the tranquil forest setting.",
+      "image_url": "assets/img/quotes/quote_123.png",
+      "emphasis": {
+        "one": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: anticipation. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u0925 \u0924\u0947\u0937\u0942\u092a\u0935\u093f\u0937\u094d\u091f\u0947\u0937\u0941 \u0938\u0930\u094d\u0935\u0947\u0937\u094d\u0935\u0947\u0935 \u0924\u092a\u0938\u094d\u0935\u093f\u0937\u0941... \u0905\u0925\u093e\u092a\u0943\u091a\u094d\u091b\u0926\u0943\u0937\u093f\u0938\u094d\u0924\u0924\u094d\u0930",
+      "review_scores": {
+        "artistic_score": 8.0,
+        "prompt_score": 7.0,
+        "total_score": 7.1,
+        "feedback": "The image captures the essence of a Ghibli-style scene with its serene forest setting and detailed characters, but it falls short in fully conveying the anticipation and focus on Ugrashravas as described in the prompt."
+      }
+    },
+    {
+      "id": "quote_124",
+      "quote": "The eldest ascetic asks, 'From where have you come, noble one? What sacred stories do you bring to share with us?'",
+      "image_prompt": "Ghibli Art: A particularly aged figure with a long white beard and deep wrinkles raises his hand in gentle inquiry. His piercing yet kind eyes meet those of the seated storyteller. The other ascetics form an attentive semicircle, their faces glowing in the warm forest light.",
+      "image_url": "assets/img/quotes/quote_124.png",
+      "emphasis": {
+        "one?": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: question and preparation. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0915\u0941\u0924 \u0906\u0917\u092e\u094d\u092f\u0924\u0947 \u0938\u094c\u0924\u0947 \u0915\u094d\u0935 \u091a\u093e\u092f\u0902 \u0935\u093f\u0939\u0943\u0924\u0938\u094d\u0924\u094d\u0935\u092f\u093e... \u0938\u0942\u0924 \u0909\u0935\u093e\u091a",
+      "review_scores": {
+        "artistic_score": 8.0,
+        "prompt_score": 8.0,
+        "total_score": 8.0,
+        "feedback": "The image captures the serene forest setting and the gentle inquiry perfectly, yet the eldest ascetic's hand could be more clearly raised, and the facial expressions of the other ascetics might be more detailed."
+      }
     }
   ]
 }

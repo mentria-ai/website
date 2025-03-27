@@ -159,6 +159,46 @@
         "fear": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: Sacred revelation. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0938\u0902\u0939\u093f\u0924\u093e\u0902 \u0936\u094d\u0930\u094b\u0924\u0941\u092e\u093f\u091a\u094d\u091b\u093e\u092e\u094b \u0927\u0930\u094d\u092e\u094d\u092f\u093e\u0902 \u092a\u093e\u092a\u092d\u092f\u093e\u092a\u0939\u093e\u092e\u094d"
+    },
+    {
+      "id": "quote_17",
+      "quote": "In the beginning, there was only darkness. Then emerged a single cosmic egg, glowing with divine light, containing the seed of all creation.",
+      "image_prompt": "Ghibli Art: An endless void of deep indigo, swirling with faint silver mist. At center floats a colossal golden egg, its surface cracked with radiant light pouring through. Tiny star-like sparks dance around it in the cosmic darkness.",
+      "image_url": "assets/img/quotes/quote_17.png",
+      "emphasis": {
+        "cosmic": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: cosmic origin. Based on lines 80-120 of the Mahabharata. Sanskrit reference: \u0928\u093f\u0937\u094d\u092a\u094d\u0930\u092d\u0947\u093d\u0938\u094d\u092e\u093f\u0928\u094d\u0928\u093f\u0930\u093e\u0932\u094b\u0915\u0947...\u092c\u0943\u0939\u0926\u0923\u094d\u0921\u092e\u092d\u0942\u0926\u0947\u0915\u0902"
+    },
+    {
+      "id": "quote_18",
+      "quote": "From the egg arose Brahma, the four-faced creator, whose breath became the Vedas. His golden aura illuminates the newly formed waters of existence.",
+      "image_prompt": "Ghibli Art: A radiant figure with four serene faces emerges from the cracked egg, each face a different age. His long white beard flows like water as he exhales glowing Sanskrit letters. Below him, shimmering blue waters stretch infinitely.",
+      "image_url": "assets/img/quotes/quote_18.png",
+      "emphasis": {
+        "the": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: divine emergence. Based on lines 80-120 of the Mahabharata. Sanskrit reference: \u092f\u0938\u094d\u092e\u093e\u0924\u094d\u092a\u093f\u0924\u093e\u092e\u0939\u094b \u091c\u091c\u094d\u091e\u0947...\u092c\u094d\u0930\u0939\u094d\u092e\u093e \u0938\u0941\u0930\u0917\u0941\u0930\u0941\u0903"
+    },
+    {
+      "id": "quote_19",
+      "quote": "The Prajapatis manifest - twenty-one primordial lords of creation. Their combined energy forms a mandala of cosmic order above the waters.",
+      "image_prompt": "Ghibli Art: Twenty-one luminous figures in flowing saffron robes float in concentric circles. Their outstretched hands emit golden threads that weave into an intricate mandala. The pattern pulses with energy above calm cosmic waters.",
+      "image_url": "assets/img/quotes/quote_19.png",
+      "emphasis": {
+        "combined": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: manifestation of creators. Based on lines 80-120 of the Mahabharata. Sanskrit reference: \u092a\u094d\u0930\u093e\u091a\u0947\u0924\u0938\u0938\u094d\u0924\u0925\u093e \u0926\u0915\u094d\u0937\u094b...\u092a\u094d\u0930\u093e\u092d\u0935\u0928\u094d\u0928\u0947\u0915\u0935\u093f\u0902\u0936\u0924\u093f\u0903"
+    },
+    {
+      "id": "quote_20",
+      "quote": "From this divine order emerge all beings - gods, sages, and creatures visible and invisible. The universe breathes its first breath.",
+      "image_prompt": "Ghibli Art: A cosmic tree grows from the waters, its branches splitting into countless realms. Ethereal figures of deities, sages with glowing eyes, and mystical creatures materialize among its leaves. A warm golden wind carries petals through the scene.",
+      "image_url": "assets/img/quotes/quote_20.png",
+      "emphasis": {
+        "and": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: birth of all existence. Based on lines 80-120 of the Mahabharata. Sanskrit reference: \u0935\u093f\u0936\u094d\u0935\u0947\u0926\u0947\u0935\u093e\u0938\u094d\u0924\u0925\u093e\u0926\u093f\u0924\u094d\u092f\u093e...\u092c\u094d\u0930\u0939\u094d\u092e\u0930\u094d\u0937\u092f\u094b\u093d\u092e\u0932\u093e\u0903"
     }
   ]
 }

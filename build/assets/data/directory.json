@@ -759,6 +759,46 @@
         "perfectly": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: cosmic revelation. Based on lines 640-680 of the Mahabharata. Sanskrit reference: \u091a\u0924\u094d\u0935\u093e\u0930 \u090f\u0915\u0924\u094b \u0935\u0947\u0926\u093e \u092d\u093e\u0930\u0924\u0902 \u091a\u0948\u0915\u092e\u0947\u0915\u0924\u0903"
+    },
+    {
+      "id": "quote_77",
+      "quote": "The sages listen intently as the storyteller begins the tale of Samantapa\u00f1caka, where the warrior Rama once walked.",
+      "image_prompt": "Ghibli Art: A man with long dark hair and humble eyes, dressed in simple ochre robes, gestures gracefully as he speaks. White-bearded men with weathered faces and earth-toned garments sit in rapt attention. Golden afternoon light filters through ancient trees, casting dappled shadows on the forest floor.",
+      "image_url": "assets/img/quotes/quote_77.png",
+      "emphasis": {
+        "tale": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: storytelling introduction. Based on lines 680-720 of the Mahabharata. Sanskrit reference: S\u016bta said: 'Then you deserve to hear about the place called Samantapa\u00f1caka, O excellent ones.'"
+    },
+    {
+      "id": "quote_78",
+      "quote": "Rama, his eyes burning with righteous fury, stands amidst fallen warriors, his sword gleaming in the twilight.",
+      "image_prompt": "Ghibli Art: A muscular figure with royal bearing, clad in ornate golden armor, stands atop a battlefield at dusk. His fierce expression is illuminated by the last crimson rays of sunset. Silhouettes of fallen warriors and broken weapons litter the blood-red earth around him.",
+      "image_url": "assets/img/quotes/quote_78.png",
+      "emphasis": {
+        "amidst": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: warrior's rage. Based on lines 680-720 of the Mahabharata. Sanskrit reference: 'Repeatedly slaughtered the K\u1e63atriya [warrior] class, impelled by anger.'"
+    },
+    {
+      "id": "quote_79",
+      "quote": "Five lakes of blood form at Samantapa\u00f1caka as Rama offers this terrible sacrifice to honor his ancestors.",
+      "image_prompt": "Ghibli Art: The armored figure kneels at the edge of five interconnected crimson pools that reflect the twilight sky. Ethereal ancestral figures with translucent blue forms hover above the blood lakes, their hands extended in blessing. The air shimmers with spiritual energy.",
+      "image_url": "assets/img/quotes/quote_79.png",
+      "emphasis": {
+        "Rama": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: sacred sacrifice. Based on lines 680-720 of the Mahabharata. Sanskrit reference: 'Created five lakes of blood at Samantapa\u00f1caka. He satisfied his ancestors with blood offerings.'"
+    },
+    {
+      "id": "quote_80",
+      "quote": "The sages arrive and gently restrain Rama, their wisdom calming his fury as the land becomes sacred Samantapa\u00f1caka.",
+      "image_prompt": "Ghibli Art: White-bearded men in simple robes place comforting hands on the armored warrior's shoulders. His face softens from anger to sorrow as dawn breaks over the blood lakes, now transforming into shimmering waters. Golden light bathes the landscape, symbolizing purification.",
+      "image_url": "assets/img/quotes/quote_80.png",
+      "emphasis": {
+        "calming": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: redemption and sanctification. Based on lines 680-720 of the Mahabharata. Sanskrit reference: 'Restrained him saying, 'Desist from this,' and then he stopped. Is celebrated as the sacred Samantapa\u00f1caka.'"
     }
   ]
 }

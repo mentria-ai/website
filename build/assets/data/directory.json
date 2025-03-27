@@ -239,6 +239,46 @@
         "world,": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: eternal wisdom. Based on lines 120-160 of the Mahabharata. Sanskrit reference: \u0935\u0947\u0926\u092f\u094b\u0917\u0902 \u0938\u0935\u093f\u091c\u094d\u091e\u093e\u0928\u0902... \u0927\u0930\u094d\u092e\u094b\u093d\u0930\u094d\u0925\u0903 \u0915\u093e\u092e \u090f\u0935 \u091a"
+    },
+    {
+      "id": "quote_25",
+      "quote": "Vyasa, the wise sage with deep-set eyes and matted hair, compiles the sacred knowledge of Dharma, Artha, and Kama into the great epic, surrounded by glowing manuscripts.",
+      "image_prompt": "Ghibli Art: A broad-shouldered man with dark matted hair and intense eyes sits cross-legged, his ochre robes pooling around him. Golden manuscripts float in the air around him, their pages glowing with ancient script. The soft light of dawn filters through the ashram's wooden beams, illuminating dust motes.",
+      "image_url": "assets/img/quotes/quote_25.png",
+      "emphasis": {
+        "knowledge": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: knowledge compilation. Based on lines 160-200 of the Mahabharata. Sanskrit reference: \u0927\u0930\u094d\u092e\u0915\u093e\u092e\u093e\u0930\u094d\u0925\u0936\u093e\u0938\u094d\u0924\u094d\u0930\u093e\u0923\u093f \u0936\u093e\u0938\u094d\u0924\u094d\u0930\u093e\u0923\u093f \u0935\u093f\u0935\u093f\u0927\u093e\u0928\u093f \u091a"
+    },
+    {
+      "id": "quote_26",
+      "quote": "Through sacred fire and meditation, Vyasa fathers three sons who blaze like sacrificial flames - Dhritarashtra, Pandu, and Vidura - destined to shape the Kuru lineage.",
+      "image_prompt": "Ghibli Art: The same broad-shouldered sage stands before three distinct fires - one smoky and turbulent, one bright and steady, one pure and translucent. Within each flame, the silhouettes of infants form. His hands are raised in blessing, backlit by the golden sunset.",
+      "image_url": "assets/img/quotes/quote_26.png",
+      "emphasis": {
+        "flames": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: miraculous births. Based on lines 160-200 of the Mahabharata. Sanskrit reference: \u0924\u094d\u0930\u0940\u0928\u0917\u094d\u0928\u0940\u0928\u093f\u0935 \u0915\u094c\u0930\u0935\u094d\u092f\u093e\u091e\u094d\u091c\u0928\u092f\u093e\u092e\u093e\u0938 \u0935\u0940\u0930\u094d\u092f\u0935\u093e\u0928\u094d"
+    },
+    {
+      "id": "quote_27",
+      "quote": "Years later, Vyasa returns to teach the completed Mahabharata to his disciple Vaishampayana, who sits attentively amidst thousands of Brahmanas.",
+      "image_prompt": "Ghibli Art: The sage now with streaks of gray in his beard gestures toward an unfurling scroll before a dark-haired young man with keen eyes. Behind them, countless figures in white sit in perfect rows under banyan trees, their faces upturned. Dappled sunlight plays across the scene.",
+      "image_url": "assets/img/quotes/quote_27.png",
+      "emphasis": {
+        "his": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: knowledge transmission. Based on lines 160-200 of the Mahabharata. Sanskrit reference: \u0938 \u0938\u0926\u0938\u094d\u092f\u0948\u0903 \u0938\u0939\u093e\u0938\u0940\u0928\u0903 \u0936\u094d\u0930\u093e\u0935\u092f\u093e\u092e\u093e\u0938 \u092d\u093e\u0930\u0924\u092e\u094d"
+    },
+    {
+      "id": "quote_28",
+      "quote": "Vaishampayana recounts the epic to King Janamejaya, detailing the wisdom of Gandhari, the steadfastness of Kunti, and Krishna's divine glory.",
+      "image_prompt": "Ghibli Art: The dark-haired young man now speaks animatedly before a regal figure crowned in gold. Between them, ghostly images emerge - a blindfolded queen, a strong-jawed woman in simple robes, and a blue-skinned figure radiating light. Firelight flickers across their intent faces.",
+      "image_url": "assets/img/quotes/quote_28.png",
+      "emphasis": {
+        "of": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: epic narration. Based on lines 160-200 of the Mahabharata. Sanskrit reference: \u0935\u093e\u0938\u0941\u0926\u0947\u0935\u0938\u094d\u092f \u092e\u093e\u0939\u093e\u0924\u094d\u092e\u094d\u092f\u0902 \u092a\u093e\u0923\u094d\u0921\u0935\u093e\u0928\u093e\u0902 \u091a \u0938\u0924\u094d\u092f\u0924\u093e\u092e\u094d"
     }
   ]
 }

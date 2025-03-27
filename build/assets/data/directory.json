@@ -119,6 +119,46 @@
         "where": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: story beginning. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u091c\u0928\u092e\u0947\u091c\u092f\u0938\u094d\u092f \u0930\u093e\u091c\u0930\u094d\u0937\u0947\u0903 \u0938\u0930\u094d\u092a\u0938\u0924\u094d\u0930\u0947 \u092e\u0939\u093e\u0924\u094d\u092e\u0928\u0903 \u0938\u092e\u0940\u092a\u0947 \u092a\u093e\u0930\u094d\u0925\u093f\u0935\u0947\u0928\u094d\u0926\u094d\u0930\u0938\u094d\u092f \u0938\u092e\u094d\u092f\u0915\u094d\u092a\u093e\u0930\u093f\u0915\u094d\u0937\u093f\u0924\u0938\u094d\u092f \u091a"
+    },
+    {
+      "id": "quote_13",
+      "quote": "The narrator speaks of sacred pilgrimage sites, describing his journey to the holy land of Samantapanchaka where the great war once took place.",
+      "image_prompt": "Ghibli Art: A middle-aged man with deep-set eyes and a contemplative expression, dressed in simple ochre robes, stands on a hilltop. His hand gestures toward a distant battlefield where faint golden glows mark sacred spots. The landscape is bathed in warm afternoon light with gentle wind stirring the tall grass.",
+      "image_url": "assets/img/quotes/quote_13.png",
+      "emphasis": {
+        "the": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: Sacred geography. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0938\u092e\u0928\u094d\u0924\u092a\u091e\u094d\u091a\u0915\u0902 \u0928\u093e\u092e \u092a\u0941\u0923\u094d\u092f\u0902 \u0926\u094d\u0935\u093f\u091c\u0928\u093f\u0937\u0947\u0935\u093f\u0924\u092e\u094d"
+    },
+    {
+      "id": "quote_14",
+      "quote": "He describes the noble warriors who gathered there - the Pandavas, Kauravas, and kings of the earth - their armor gleaming in the sunlight before battle.",
+      "image_prompt": "Ghibli Art: Silhouettes of numerous warriors with ornate armor and banners stand in formation across a vast plain. The foreground shows intricate details of a jeweled sword hilt and embroidered sash. Golden light reflects off polished metal as dust swirls around their feet.",
+      "image_url": "assets/img/quotes/quote_14.png",
+      "emphasis": {
+        "kings": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: Warrior assembly. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u092a\u093e\u0923\u094d\u0921\u0935\u093e\u0928\u093e\u0902 \u0915\u0941\u0930\u0942\u0923\u093e\u0902 \u091a \u0938\u0930\u094d\u0935\u0947\u0937\u093e\u0902 \u091a \u092e\u0939\u0940\u0915\u094d\u0937\u093f\u0924\u093e\u092e\u094d"
+    },
+    {
+      "id": "quote_15",
+      "quote": "The sages listen intently as the narrator explains how Vyasa composed this sacred history, blending Vedic wisdom with profound storytelling.",
+      "image_prompt": "Ghibli Art: A silver-bearded man with wise eyes and a serene smile sits cross-legged, his hands forming mudras as he speaks. Around him, white-robed figures with attentive expressions lean forward. A faint golden aura surrounds them as sacred smoke curls from a small fire.",
+      "image_url": "assets/img/quotes/quote_15.png",
+      "emphasis": {
+        "composed": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: Transmission of wisdom. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0926\u094d\u0935\u0948\u092a\u093e\u092f\u0928\u0947\u0928 \u092f\u0924\u094d\u092a\u094d\u0930\u094b\u0915\u094d\u0924\u0902 \u092a\u0941\u0930\u093e\u0923\u0902 \u092a\u0930\u092e\u0930\u094d\u0937\u093f\u0923\u093e"
+    },
+    {
+      "id": "quote_16",
+      "quote": "The sacred text is revealed - a composition so profound it removes fear of sin, containing the essence of all four Vedas within its verses.",
+      "image_prompt": "Ghibli Art: An ancient palm-leaf manuscript lies open, its pages glowing with golden light. Delicate hands with henna patterns carefully turn a leaf, revealing intricate Sanskrit characters. The background fades into a starry night sky, suggesting cosmic wisdom.",
+      "image_url": "assets/img/quotes/quote_16.png",
+      "emphasis": {
+        "fear": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: Sacred revelation. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0938\u0902\u0939\u093f\u0924\u093e\u0902 \u0936\u094d\u0930\u094b\u0924\u0941\u092e\u093f\u091a\u094d\u091b\u093e\u092e\u094b \u0927\u0930\u094d\u092e\u094d\u092f\u093e\u0902 \u092a\u093e\u092a\u092d\u092f\u093e\u092a\u0939\u093e\u092e\u094d"
     }
   ]
 }

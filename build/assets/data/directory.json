@@ -439,6 +439,46 @@
         "glowing": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: divine encounter. Based on lines 320-360 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u092e\u0930\u094d\u091c\u0941\u0928\u094b \u0926\u0947\u0935\u0926\u0947\u0935\u0902 \u0915\u093f\u0930\u093e\u0924\u0930\u0942\u092a\u0902"
+    },
+    {
+      "id": "quote_45",
+      "quote": "In a land forbidden to mortals, Bhima and the Pandavas stand awestruck before Kubera's divine presence, their faces lit by golden light filtering through ancient trees.",
+      "image_prompt": "Ghibli Art: A broad-shouldered man with wild dark hair stands protectively before four others, all gazing upward in wonder. A radiant figure with emerald skin and jeweled ornaments floats above them, surrounded by glowing treasures. Sunlight streams through dense foliage, casting dappled shadows on the mossy ground.",
+      "image_url": "assets/img/quotes/quote_45.png",
+      "emphasis": {
+        "Kubera's": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: divine encounter. Based on lines 360-400 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0935\u0948\u0936\u094d\u0930\u0935\u0923\u0947\u0928 \u0938\u093e\u0930\u094d\u0927\u0902; \u0938\u092e\u093e\u0917\u0924\u0902 \u092d\u0940\u092e\u092e\u0928\u094d\u092f\u093e\u0902\u0936\u094d\u091a \u092a\u093e\u0930\u094d\u0925\u093e\u0928\u094d"
+    },
+    {
+      "id": "quote_46",
+      "quote": "Arjuna, his Gandiva bow glowing faintly, releases a gandharva prince from enchanted bonds as celestial musicians watch from floating chariots in the twilight sky.",
+      "image_prompt": "Ghibli Art: A lithe archer with coiled dark hair lets loose a golden arrow that shatters shimmering chains. A pale-skinned figure with delicate wings rises from broken bonds, while ethereal beings with moon-shaped harps hover above. The last amber light of dusk paints wispy clouds pink and purple.",
+      "image_url": "assets/img/quotes/quote_46.png",
+      "emphasis": {
+        "bonds": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: heroic action. Based on lines 360-400 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0918\u094b\u0937\u092f\u093e\u0924\u094d\u0930\u093e\u0917\u0924\u093e\u0928\u093e\u0902; \u092c\u0928\u094d\u0927\u0902 \u0917\u0928\u094d\u0927\u0930\u094d\u0935\u0948\u0930\u094d\u092e\u094b\u0915\u094d\u0937\u0923\u0902 \u091a\u093e\u0930\u094d\u091c\u0941\u0928\u0947\u0928"
+    },
+    {
+      "id": "quote_47",
+      "quote": "Yudhishthira kneels before a yaksha disguised as a crane, answering riddles with hands folded in reverence as dawn breaks over the silent lake.",
+      "image_prompt": "Ghibli Art: A tall man with a calm face and worn saffron robes kneels by mist-covered waters. Before him stands a slender crane with knowing golden eyes that glow unnaturally. First morning light turns the lake surface to liquid gold, with lotus buds beginning to unfurl.",
+      "image_url": "assets/img/quotes/quote_47.png",
+      "emphasis": {
+        "with": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: test of wisdom. Based on lines 360-400 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u092f\u0915\u094d\u0937\u0930\u0942\u092a\u0947\u0923 \u0927\u0930\u094d\u092e\u0902; \u0938\u092e\u093e\u0917\u0924\u0902 \u0927\u0930\u094d\u092e\u0930\u093e\u091c\u0947\u0928 \u0938\u0942\u0924"
+    },
+    {
+      "id": "quote_48",
+      "quote": "Krishna stands radiant between Arjuna and Bhima, his blue skin glowing as seven akshauhini armies mass in the distance beneath gathering storm clouds.",
+      "image_prompt": "Ghibli Art: A dark blue-skinned figure raises both hands between two warriors - one muscular with wild hair, the other lean with a silver bow. Behind them, countless banners flutter as armored legions prepare for battle. Dark clouds swirl ominously above the dusty plain, pierced by occasional lightning.",
+      "image_url": "assets/img/quotes/quote_48.png",
+      "emphasis": {
+        "as": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: impending war. Based on lines 360-400 of the Mahabharata. Sanskrit reference: \u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0928\u0930\u0928\u093e\u0930\u093e\u092f\u0923\u094c \u0924\u094c; \u0915\u0943\u0937\u094d\u0923\u093e\u0930\u094d\u091c\u0941\u0928\u094c \u0935\u0926\u0924\u094b \u0928\u093e\u0930\u0926\u0938\u094d\u092f"
     }
   ]
 }

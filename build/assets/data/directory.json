@@ -599,6 +599,46 @@
         "expression": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: spiritual consolation. Based on lines 480-520 of the Mahabharata. Sanskrit reference: 163"
+    },
+    {
+      "id": "quote_61",
+      "quote": "Great warriors of old stand tall, their divine weapons gleaming with splendor equal to Indra himself, as they prepare for battle under the golden sun.",
+      "image_prompt": "Ghibli Art: A group of muscular figures with ornate armor and radiant weapons stand in formation. Their faces show determination, with sunlight reflecting off their golden adornments. The background shows a vast battlefield under a clear blue sky with gentle clouds.",
+      "image_url": "assets/img/quotes/quote_61.png",
+      "emphasis": {
+        "equal": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: character introduction. Based on lines 520-560 of the Mahabharata. Sanskrit reference: \u091c\u093e\u0924\u093e\u0928\u094d\u0926\u093f\u0935\u094d\u092f\u093e\u0938\u094d\u0924\u094d\u0930\u0935\u093f\u0926\u0941\u0937\u0903 \u0936\u0915\u094d\u0930\u092a\u094d\u0930\u0924\u093f\u092e\u0924\u0947\u091c\u0938\u0903 \u0965\u0967\u096c\u096a\u0965"
+    },
+    {
+      "id": "quote_62",
+      "quote": "Through righteous deeds and grand sacrifices, these mighty rulers conquered lands and earned eternal fame, their names sung across the earth.",
+      "image_prompt": "Ghibli Art: A regal figure with a golden crown and flowing robes performs a fire ritual, surrounded by priests. The smoke rises into the sky, forming shapes of blessings. The scene is bathed in warm sunset hues with intricate temple carvings in the background.",
+      "image_url": "assets/img/quotes/quote_62.png",
+      "emphasis": {
+        "lands": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: ritual and conquest. Based on lines 520-560 of the Mahabharata. Sanskrit reference: \u0927\u0930\u094d\u092e\u0947\u0923 \u092a\u0943\u0925\u093f\u0935\u0940\u0902 \u091c\u093f\u0924\u094d\u0935\u093e \u092f\u091c\u094d\u091e\u0948\u0930\u093f\u0937\u094d\u091f\u094d\u0935\u093e\u092a\u094d\u0924\u0926\u0915\u094d\u0937\u093f\u0923\u0948\u0903"
+    },
+    {
+      "id": "quote_63",
+      "quote": "Yet even these great souls could not escape time's embrace, as one by they fell like autumn leaves, returning to the earth from whence they came.",
+      "image_prompt": "Ghibli Art: An elderly warrior with silver hair and weathered face sits beneath a massive banyan tree, his once-shining armor now resting beside him. Falling leaves swirl around him in the golden light as he gazes peacefully at the horizon.",
+      "image_url": "assets/img/quotes/quote_63.png",
+      "emphasis": {
+        "they": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: passage of time. Based on lines 520-560 of the Mahabharata. Sanskrit reference: \u0905\u0938\u094d\u092e\u093f\u0901\u0932\u094d\u0932\u094b\u0915\u0947 \u092f\u0936\u0903 \u092a\u094d\u0930\u093e\u092a\u094d\u092f \u0924\u0924\u0903 \u0915\u093e\u0932\u0935\u0936\u0902 \u0917\u0924\u093e\u0903 \u0965\u0967\u096c\u096b\u0965"
+    },
+    {
+      "id": "quote_64",
+      "quote": "Narada recounts the lineage of kings - Suhotra, Rantideva, Kakshivanta and others - whose deeds still echo through the ages like distant thunder.",
+      "image_prompt": "Ghibli Art: A man with long dark hair and serene eyes gestures gracefully while speaking, his simple ochre robes fluttering in the breeze. Behind him, ghostly images of ancient kings appear like shadows in the golden light, their forms noble yet fading.",
+      "image_url": "assets/img/quotes/quote_64.png",
+      "emphasis": {
+        "others": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: storytelling and legacy. Based on lines 520-560 of the Mahabharata. Sanskrit reference: \u0938\u0941\u0939\u094b\u0924\u094d\u0930\u0902 \u0930\u0928\u094d\u0924\u093f\u0926\u0947\u0935\u0902 \u091a \u0915\u0915\u094d\u0937\u0940\u0935\u0928\u094d\u0924\u0902 \u0924\u0925\u094c\u0936\u093f\u091c\u092e\u094d \u0965\u0967\u096c\u096c\u0965"
     }
   ]
 }

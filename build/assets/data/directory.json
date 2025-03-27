@@ -679,6 +679,46 @@
         "be,": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: acceptance of time's nature. Based on lines 560-600 of the Mahabharata. Sanskrit reference: \u0915\u093e\u0932\u094b \u0935\u093f\u0915\u0941\u0930\u0941\u0924\u0947...\u092f\u0947 \u091a \u0935\u0930\u094d\u0924\u0928\u094d\u0924\u093f \u0938\u093e\u092e\u094d\u092a\u094d\u0930\u0924\u092e\u094d"
+    },
+    {
+      "id": "quote_69",
+      "quote": "Krishna Dvaipayana reveals the sacred Upanishad, his words glowing with divine wisdom as golden light surrounds him.",
+      "image_prompt": "Ghibli Art: A dark-skinned man with intense eyes and matted hair sits cross-legged, his simple ochre robes glowing with golden light. His hands gesture gracefully as radiant symbols float in the air before him. The warm afternoon sun filters through ancient trees, casting dappled shadows on the forest floor.",
+      "image_url": "assets/img/quotes/quote_69.png",
+      "emphasis": {
+        "glowing": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: divine revelation. Based on lines 600-640 of the Mahabharata. Sanskrit reference: \u0915\u0943\u0937\u094d\u0923\u0926\u094d\u0935\u0948\u092a\u093e\u092f\u0928\u094b\u093d\u092c\u094d\u0930\u0935\u0940\u0924\u094d"
+    },
+    {
+      "id": "quote_70",
+      "quote": "Celestial beings - divine sages, yakshas and mighty serpents - manifest in the golden light, listening to the eternal truths being spoken.",
+      "image_prompt": "Ghibli Art: Ethereal figures emerge from swirling golden mist - a white-bearded being with luminous skin, a serpentine form with jeweled scales, and a radiant figure crowned with flames. Their faces show reverence as they lean forward to hear the teachings. Sunlight creates a halo effect around the gathering.",
+      "image_url": "assets/img/quotes/quote_70.png",
+      "emphasis": {
+        "in": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: celestial audience. Based on lines 600-640 of the Mahabharata. Sanskrit reference: \u0926\u0947\u0935\u0930\u094d\u0937\u092f\u094b \u0939\u094d\u092f\u0924\u094d\u0930 \u092a\u0941\u0923\u094d\u092f\u093e \u092c\u094d\u0930\u0939\u094d\u092e\u0930\u093e\u091c\u0930\u094d\u0937\u092f\u0938\u094d\u0924\u0925\u093e"
+    },
+    {
+      "id": "quote_71",
+      "quote": "The eternal Vasudeva appears in his divine form, embodying both truth and illusion, as the source of all creation and destruction.",
+      "image_prompt": "Ghibli Art: A majestic blue-skinned figure with compassionate eyes floats above the ground, his dark hair flowing as cosmic patterns swirl in his garments. His four arms hold symbolic objects while galaxies seem to form and dissolve in his aura. Golden butterflies dance around his form.",
+      "image_url": "assets/img/quotes/quote_71.png",
+      "emphasis": {
+        "truth": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: divine manifestation. Based on lines 600-640 of the Mahabharata. Sanskrit reference: \u092d\u0917\u0935\u093e\u0928\u094d\u0935\u093e\u0938\u0941\u0926\u0947\u0935\u0936\u094d\u091a \u0915\u0940\u0930\u094d\u0924\u094d\u092f\u0924\u0947\u093d\u0924\u094d\u0930 \u0938\u0928\u093e\u0924\u0928\u0903"
+    },
+    {
+      "id": "quote_72",
+      "quote": "A devoted listener, his face alight with understanding, realizes how studying these sacred texts purifies the soul like butter churned from milk.",
+      "image_prompt": "Ghibli Art: A young man with tear-filled eyes and folded hands kneels in reverence, his simple white dhoti glowing in the golden light. Butterflies of light land on his shoulders as a vision of golden butter forming from milk appears beside him. The sunset casts long shadows through the sacred grove.",
+      "image_url": "assets/img/quotes/quote_72.png",
+      "emphasis": {
+        "these": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: spiritual realization. Based on lines 600-640 of the Mahabharata. Sanskrit reference: \u0928\u0935\u0928\u0940\u0924\u0902 \u092f\u0925\u093e \u0926\u0927\u094d\u0928\u094b \u0926\u094d\u0935\u093f\u092a\u0926\u093e\u0902 \u092c\u094d\u0930\u093e\u0939\u094d\u092e\u0923\u094b \u092f\u0925\u093e"
     }
   ]
 }

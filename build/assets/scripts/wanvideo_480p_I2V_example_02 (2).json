@@ -13,8 +13,8 @@
   },
   "16": {
     "inputs": {
-      "positive_prompt": "whale swimming with a child. splashing water from it's hole",
-      "negative_prompt": "Bright color tone, overexposed, static, unclear details, subtitles, style, work, painting, picture, still, overall gray, worst quality, low quality, JPEG compression artifacts, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn face, deformed, disfigured, anatomically incorrect limbs, finger fusion, static frames, cluttered background, three legs, crowded background, walking backward.",
+      "positive_prompt": "leaves falling, birds flapping, hot air balloon rising",
+      "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
       "force_offload": true,
       "t5": [
         "11",
@@ -32,11 +32,15 @@
   },
   "22": {
     "inputs": {
-      "model": "Wan2_1-I2V-14B-480P_fp8_e4m3fn.safetensors",
-      "base_precision": "fp16",
+      "model": "Wan2_1-I2V-14B-720P_fp8_e4m3fn.safetensors",
+      "base_precision": "bf16",
       "quantization": "fp8_e4m3fn",
       "load_device": "offload_device",
       "attention_mode": "sdpa",
+      "compile_args": [
+        "35",
+        0
+      ],
       "block_swap_args": [
         "39",
         0
@@ -52,7 +56,7 @@
       "steps": 28,
       "cfg": 6,
       "shift": 5,
-      "seed": 1057359483639287,
+      "seed": 1057359483639288,
       "force_offload": true,
       "scheduler": "unipc",
       "riflex_freq_index": 0,
@@ -199,7 +203,7 @@
   },
   "58": {
     "inputs": {
-      "image": "D://mentria-latest//website//build//assets//img//quotes//quote_61.png"
+      "image": "quote_113.png"
     },
     "class_type": "LoadImage",
     "_meta": {

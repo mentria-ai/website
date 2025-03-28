@@ -12,6 +12,9 @@ class QuoteManager {
         this.scrollTimeout = null;
         this.resizeTimeout = null;
         
+        // Configuration flag for whether to check for video versions
+        this.checkForVideos = false; // Set to false by default - change to true if you want video support
+        
         // Load the last viewed quote index from localStorage
         this.loadLastPosition();
         
@@ -152,8 +155,8 @@ class QuoteManager {
         // Add to the scroll item
         scrollItem.appendChild(img);
         
-        // Check for video version
-        if (quoteNumber) {
+        // Only check for video version if feature flag is enabled
+        if (this.checkForVideos && quoteNumber) {
             const videoSrc = imgSrc.replace('.png', '.mp4');
             
             // Use fetch to check if the video exists (more reliable than video error events)
@@ -246,8 +249,8 @@ class QuoteManager {
         
         // Add global navigation functions
         window.quoteNavigation = {
-            next: this.goToNext.bind(this),
-            prev: this.goToPrevious.bind(this)
+            next: this.nextQuote.bind(this),
+            prev: this.prevQuote.bind(this)
         };
         
         // Add listener for user interaction to start videos (autoplay policy workaround)

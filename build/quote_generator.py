@@ -6,16 +6,28 @@ import signal
 import sys
 import subprocess
 import re
+import requests
+import uuid
 from pathlib import Path
 import random
 from dotenv import load_dotenv
 from together import Together
+from PIL import Image
 
 # Load environment variables
 load_dotenv()
 
-# Initialize Together API client
+# Initialize Together API client (we'll keep this for generating prompts)
 client = Together()
+
+# ComfyUI RunPod configuration - load from .env file
+COMFY_API_URL = os.getenv('COMFY_API_URL')
+if not COMFY_API_URL:
+    print("WARNING: COMFY_API_URL not found in .env file. Please add it to continue.")
+    print("Example: COMFY_API_URL=https://abcdefg-8188.proxy.runpod.net")
+    sys.exit(1)
+
+client_id = str(uuid.uuid4())  # Generate a unique client ID for this session
 
 # Handle Ctrl+C to immediately exit
 def signal_handler(sig, frame):
@@ -64,13 +76,13 @@ def git_commit_and_push(num_new_facts):
         subprocess.run(["git", "add", "assets/data/directory.json", "assets/img/quotes/"], check=True)
         
         # Create a descriptive commit message
-        commit_message = f"Add {num_new_facts} new Mahabharata comic panels with Ghibli art"
+        commit_message = f"Add {num_new_facts} new Mahabharata lore quote{'s' if num_new_facts > 1 else ''} with e-ink style artwork"
         subprocess.run(["git", "commit", "-m", commit_message], check=True)
         
         # Push to the repository (assuming 'main' branch)
         subprocess.run(["git", "push", "origin", "main"], check=True)
         
-        print("✓ Successfully committed and pushed new comic panels to the repository!")
+        print("✓ Successfully committed and pushed new lore quotes to the repository!")
     except subprocess.CalledProcessError as e:
         print(f"Error during Git operations: {e}")
     except Exception as e:
@@ -79,10 +91,12 @@ def git_commit_and_push(num_new_facts):
 class MahabharataReader:
     def __init__(self, file_path="assets/data/reference/mahabharat_translated.txt"):
         self.file_path = Path(file_path)
+        self.progress_file = Path("assets/data/.last_read_line")
         self.current_line = 0
         self.total_lines = 0
         self.lines = []
         self.load_file()
+        self.load_progress()
         self.previous_prompts = []  # Store previous image prompts for continuity
         self.comic_context = {      # Store context about scenes, characters, and settings
             "current_scene": "Unknown",
@@ -105,6 +119,33 @@ class MahabharataReader:
         print(f"Loaded Mahabharata file with {self.total_lines} lines")
         return True
     
+    def load_progress(self):
+        """Load the last read line from the progress file."""
+        if self.progress_file.exists():
+            try:
+                with open(self.progress_file, 'r') as f:
+                    line_number = int(f.read().strip())
+                    # Ensure it's a valid line number
+                    if 0 <= line_number < self.total_lines:
+                        self.current_line = line_number
+                        print(f"Resuming from line {self.current_line} (saved progress)")
+                    else:
+                        print(f"Invalid line number in progress file: {line_number}. Starting from the beginning.")
+            except (ValueError, IOError) as e:
+                print(f"Error reading progress file: {e}. Starting from the beginning.")
+        else:
+            print("No saved progress found. Starting from the beginning.")
+    
+    def save_progress(self):
+        """Save current line to the progress file."""
+        try:
+            # Create directory if it doesn't exist
+            self.progress_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.progress_file, 'w') as f:
+                f.write(str(self.current_line))
+        except IOError as e:
+            print(f"Error saving progress: {e}")
+    
     def get_next_chunk(self, chunk_size=40):
         """Get the next sequential chunk of the text."""
         if self.current_line >= self.total_lines:
@@ -119,6 +160,9 @@ class MahabharataReader:
         
         # Update the current line for next time
         self.current_line = end_line
+        
+        # Save progress
+        self.save_progress()
         
         return chunk_data
     
@@ -216,729 +260,583 @@ class MahabharataReader:
         
         return self.comic_context
 
-def generate_comic_frames(chunk_data, previous_prompts=None, comic_context=None, num_frames=4):
-    """Generate comic book frames based on a chunk of the Mahabharata text."""
+def generate_legends_and_prompts(chunk_data, client):
+    """Generate quotes and image prompts from a chunk of the Mahabharata."""
+    system_prompt = """You are a sophisticated AI specializing in ancient Sanskrit texts, particularly the Mahabharata.
+    Your task is to extract ONE powerful quote from the provided Mahabharata text chunk and transform it into a "lore quote" styled like Skyrim's loading screen tips.
     
-    # Ensure we have lists even if None was passed
-    previous_prompts = previous_prompts or []
-    comic_context = comic_context or {}
+    REQUIREMENTS:
+    1. Identify ONE profound, philosophical, or impactful quote or concept from the text chunk provided.
+    2. Format your response as follows:
+       - The lore quote in English (short, impactful, philosophical)
+       - The original Sanskrit (if present in the source text)
+       - Reference information (approximate book/parva and chapter)
+       - A brief explanation of the meaning
+       - A lore-style snippet that expands on the quote's wisdom (like Skyrim's loading screens)
+       - A single core concept/object that represents the quote's essence (for image generation)
     
-    # Create the system prompt
-    system_prompt = """You are an expert at creating engaging, visually striking comic book frames based on ancient texts, paired with Ghibli Art style image prompts.
-
-Transform this chunk of the Mahabharata into a 4-frame comic book sequence. Each frame should depict a key moment or concept from the text in a way that creates a coherent visual narrative. Your task is to analyze the content and create a sequential story told in 4 comic panels, with each panel focusing on a different aspect that together tell a complete micro-story.
-
-Each frame MUST include:
-1. A concise caption (15-40 words MAX) that narrates what's happening in that specific panel
-2. A MINIMALIST Ghibli-style image prompt focused on depicting that moment with beauty and clarity
-3. Specific details about character positions, expressions, and environmental elements
-
-EXTREMELY IMPORTANT FOR IMAGE GENERATION SUCCESS:
-- DO NOT use specific character names OR generic role descriptions like "young storyteller" or "elderly sage"
-- Instead, use CONCRETE VISUAL DESCRIPTIONS focusing on physical appearance:
-  * "A man with long dark hair and humble eyes dressed in simple robes" (not "a storyteller")
-  * "A white-bearded man with weathered skin in ochre garments" (not "an elderly sage")
-  * "A muscular figure with a royal bearing and ornate armor" (not "a warrior prince")
-- Focus on exactly what the reader would visualize: clothing colors, facial features, body posture, etc.
-- You can use specific character names in the caption text, just not in the image prompts
-
-IMPORTANT REQUIREMENTS FOR EVERY IMAGE PROMPT:
-1. Create a cohesive visual style across all 4 frames - maintain the same visual descriptions for recurring characters
-2. Embrace the soft, painterly quality of Ghibli art with gentle lighting, atmospheric effects, and thoughtful composition
-3. Focus on emotional storytelling through character expressions and meaningful interactions
-4. Each frame should visually flow to the next, creating a sense of narrative movement
-5. Use symbolic visual elements that connect to the deeper meaning of the text
-6. Create images that match what a reader would visualize when reading the Mahabharata
-
-FORMATTING REQUIREMENTS:
-- Each image prompt should start with "Ghibli Art:" 
-- Include specific details about character appearance, clothing, expressions, and key visual elements
-- Specify a consistent time of day, weather, and lighting across frames to maintain continuity
-- Describe the composition in terms of foreground, middle ground, and background elements
-- Keep prompt length reasonable (40-80 words maximum) with clear, direct descriptions
-
-Context for continuity: 
-Consider the provided context about previous frames to maintain visual and narrative continuity between sequences. Your frames should feel like part of a larger, ongoing visual narrative.
-
-IMPORTANT: Never refer to elements from the Mahabharata as "myths" or "mythical." Treat them as historical and cultural elements with reverence."""
-
-    # Create the user prompt
-    user_prompt = f"""Transform this section of the Mahabharata into a 4-frame comic book sequence with Ghibli Art style.
-
-MAHABHARATA TEXT CHUNK:
-
-SANSKRIT ORIGINAL:
-```
-{chunk_data['sanskrit_text']}
-```
-
-ENGLISH TRANSLATION:
-```
-{chunk_data['english_text']}
-```
-
-CONTEXT FOR CONTINUITY:
-Previous scene setting: {comic_context.get('setting', 'Ancient India')}
-Time of day: {comic_context.get('time_of_day', 'Day')}
-Main characters: {', '.join(comic_context.get('main_characters', ['Unknown']))}
-Color palette: {comic_context.get('color_palette', 'Warm earth tones with golden highlights')}
-
-PREVIOUS IMAGE PROMPTS (for visual continuity):
-{' '.join(previous_prompts[-2:]) if previous_prompts else 'None available yet.'}
-
-Create a 4-panel comic sequence that tells a cohesive visual story based on this text chunk. The frames should flow together while each highlighting a different aspect or moment. Your frames will be presented in sequence, so ensure they create a meaningful narrative progression.
-
-For each frame, provide:
-1. A brief, direct caption (15-40 words) that narrates what's happening in this panel - you CAN use specific character names here
-2. A SIMPLE but evocative Ghibli Art style image prompt that visualizes this moment - use SPECIFIC VISUAL DESCRIPTIONS
-3. Key visual elements including character appearance, expressions, and environmental details
-
-IMPORTANT GUIDELINES:
-- Use detailed visual descriptions of characters in image prompts (physical features, clothing, expressions)
-- Avoid generic terms like "sage", "storyteller", "warrior" - describe EXACTLY what they look like
-- Create images that match what a reader would visualize when reading the Mahabharata
-- Maintain visual continuity with previous prompts if available
-- Create a cohesive art style across all 4 frames
-- Focus on emotional storytelling through character expressions and interactions
-- Use Ghibli's signature atmospheric elements (light shafts, wind effects, etc.)
-- Balance simplicity with meaningful detail
-
-Format your response as a valid JSON array with objects containing:
-1. "caption": The narration for this panel (what would appear in a comic book caption box) - can use character names
-2. "image_prompt": A Ghibli Art style image prompt focused on visualizing this specific moment - use detailed visual descriptions
-3. "frame_number": The sequence number (1-4) of this frame
-4. "sanskrit_reference": Brief reference to which part of the Sanskrit text inspired this frame
-5. "panel_focus": The main focus/theme of this panel (e.g., "character introduction", "revelation", "conflict")
-
-Example of good image prompt:
-"Ghibli Art: A slender man with alert dark eyes and humble posture, dressed in simple orange robes, approaches a forest clearing. Men with flowing white beards and weathered faces sit in a semicircle, wearing earth-toned garments. Golden morning light filters through ancient trees, illuminating dust particles in the air."
-
-Example of bad image prompt (don't do this):
-"Ghibli Art: A young storyteller approaches a group of elderly sages in the forest. The sacred atmosphere surrounds them as sunlight filters through the trees."
-
-Respond with only the JSON array, no additional text."""
-
-    # Generate comic frames based on the Mahabharata chunk
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt}
-    ]
+    3. The core concept should be a singular object, person, or symbol that embodies the quote's central theme.
+       Examples: "a warrior's bow", "scales of justice", "a lotus rising from mud", "two paths diverging"
     
-    print(f"Generating 4-frame comic sequence based on Mahabharata text (lines {chunk_data['start_line']}-{chunk_data['end_line']})...")
+    RESPONSE FORMAT:
+    ```json
+    {
+      "quote": "The concise English quote",
+      "sanskrit": "Original Sanskrit if available",
+      "reference": "Mahabharata, [Parva], Chapter [X]",
+      "meaning": "Brief explanation of the quote's meaning",
+      "lore_snippet": "A Skyrim-style loading screen tip based on this wisdom (2-3 sentences)",
+      "core_concept": "One central object or symbol that represents this quote's essence"
+    }
+    ```
+    """
     
-    response_text = ""
+    user_prompt = f"""Generate a lore quote from this extract of the Mahabharata:
+    
+    ENGLISH TEXT:
+    {chunk_data['english_text']}
+    
+    SANSKRIT TEXT (if available):
+    {chunk_data['sanskrit_text']}
+    
+    Remember to identify ONE powerful quote or concept, provide its Sanskrit original if available, reference information, meaning, a lore-style snippet, and a single core concept that represents its essence.
+    """
+    
+    # Generate the lore quote using Together API
     response = client.chat.completions.create(
         model="deepseek-ai/DeepSeek-V3",
-        messages=messages,
-        max_tokens=4096,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
         temperature=0.7,
-        top_p=0.7,
-        top_k=50,
-        repetition_penalty=1,
-        stop=["\n\n"],
-        stream=True
+        max_tokens=750
     )
     
-    for token in response:
-        if hasattr(token, 'choices'):
-            chunk = token.choices[0].delta.content
-            if chunk:
-                response_text += chunk
-                print(chunk, end='', flush=True)
-    
-    print("\n\nParsing response...")
-    
-    # Extract JSON from response
     try:
-        # Find JSON array in the response
-        json_start = response_text.find('[')
-        json_end = response_text.rfind(']') + 1
-        
-        if json_start >= 0 and json_end > json_start:
-            json_str = response_text[json_start:json_end]
-            comic_frames = json.loads(json_str)
+        # Extract the JSON response
+        response_text = response.choices[0].message.content
+        # Extract JSON from the response
+        json_match = re.search(r'```json\s*(.*?)\s*```', response_text, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(1)
         else:
-            # Fallback if JSON array not found
-            print("JSON array not found in response. Attempting to parse entire response...")
-            comic_frames = json.loads(response_text)
-            
-        return comic_frames
-    except json.JSONDecodeError as e:
-        print(f"Error parsing JSON: {e}")
-        print(f"Response text: {response_text}")
-        return []
+            # If not in code block, try to find valid JSON
+            json_str = response_text
+        
+        # Parse the JSON
+        quote_data = json.loads(json_str)
+        
+        # Get the core concept
+        core_concept = quote_data.get("core_concept", "a philosophical symbol")
+        
+        # Create a more detailed and artistic image prompt based on the core concept
+        enhanced_concept = enhance_image_prompt(core_concept, quote_data.get("quote", ""), quote_data.get("meaning", ""))
+        
+        # Prepare the negative prompt
+        negative_prompt = "color, photorealistic, 3D, glossy, blur, noise, messy, low resolution, distortion, pixelation, vibrant, oversaturated, soft focus, clutter, neon, comic book style, poorly drawn, extra limbs, broken lines, artifacts"
+        
+        # Return a single quote instead of multiple
+        return [{
+            "quote": quote_data.get("quote", ""),
+            "sanskrit": quote_data.get("sanskrit", ""),
+            "reference": quote_data.get("reference", ""),
+            "meaning": quote_data.get("meaning", ""),
+            "lore_snippet": quote_data.get("lore_snippet", ""),
+            "image_prompt": enhanced_concept,
+            "negative_prompt": negative_prompt
+        }]
+    except Exception as e:
+        print(f"Error parsing the response: {e}")
+        print(f"Raw response: {response_text}")
+        # Fallback: return a default quote
+        return [{
+            "quote": "Where there is Dharma, there is Victory.",
+            "sanskrit": "यतो धर्मस्ततो जयः",
+            "reference": "Mahabharata, Bhishma Parva",
+            "meaning": "Where righteousness prevails, there alone is true victory.",
+            "lore_snippet": "Throughout the Mahabharata's greatest battles, the side that upholds righteousness ultimately triumphs. Even if outnumbered, those who guard dharma can never be truly defeated.",
+            "image_prompt": "scales of justice balanced perfectly on a mountain peak, with detailed rays of light breaking through clouds, intricate patterns surrounding the scales, worn stone pedestal, ancient script etched into base, in digital e-ink style, minimal monochrome illustration, high contrast line art with stippling and cross-hatching, clean outlines, paper texture background, elegant sketch aesthetic, tranquil and refined",
+            "negative_prompt": "color, photorealistic, 3D, glossy, blur, noise, messy, low resolution, distortion, pixelation, vibrant, oversaturated, soft focus, clutter, neon, comic book style, poorly drawn, extra limbs, broken lines, artifacts"
+        }]
 
-def review_image(image_path, prompt, original_text):
-    """Review the generated image using the vision model to check if it matches the intended prompt."""
+def enhance_image_prompt(core_concept, quote="", meaning=""):
+    """Create a more detailed and artistic image prompt from the core concept."""
+    # Dictionary of artistic elements to add based on concept types
+    artistic_elements = {
+        "wheel": ["intricate spokes radiating outward", "ancient runes carved around the rim", "wisps of energy emanating from center", "floating above a reflective pool"],
+        "flame": ["dancing wisps", "smoke tendrils curling upward", "embers floating in darkness", "casting dramatic shadows"],
+        "bow": ["ornate carvings along the limbs", "taut string gleaming", "single arrow nocked", "feathers and beads dangling"],
+        "sword": ["intricate hilt design", "ancient runes etched into blade", "light gleaming along edge", "partially wrapped in cloth"],
+        "tree": ["gnarled roots extending outward", "distinct leaf patterns", "symbolic fruits", "birds perched on branches"],
+        "path": ["winding through varied terrain", "stones marking the way", "fork with distinct differences", "footprints showing journey"],
+        "lotus": ["detailed petals with intricate veining", "rising from rippled water", "droplets sliding off surfaces", "stem visible beneath"],
+        "eye": ["detailed iris patterns", "rays of light emanating", "reflected wisdom", "tears forming at corners"],
+        "hand": ["detailed finger joints and knuckles", "ornate patterns on palm", "energy emanating from fingertips", "symbolic gestures"],
+        "scales": ["detailed balance mechanism", "ornate decorations", "weights with symbolic carvings", "stand with intricate designs"],
+        "mountain": ["craggy peaks with detailed rock formations", "mist swirling around base", "small details of vegetation", "dramatic perspective"],
+        "river": ["flowing water with ripple details", "stones breaking the surface", "branching paths", "symbolic items carried in current"],
+        "heart": ["anatomical details", "vines or roots extending outward", "protective cage", "light emanating from within"]
+    }
+    
+    # Composition elements to add dimension and interest
+    compositions = [
+        "dramatic perspective with foreground details",
+        "framed by intricate borders with Sanskrit symbols",
+        "balanced composition with strong center focus",
+        "set against an infinite horizon with subtle depth",
+        "emerging from a backdrop of ancient script",
+        "perspective from below, creating imposing presence",
+        "surrounded by smaller related symbols",
+        "floating in empty space with detailed shadow",
+        "partially revealed through torn parchment",
+        "set on ancient stone pedestal with worn carvings"
+    ]
+    
+    # Symbolic elements to add meaning
+    symbolic_elements = [
+        "subtle contrast between light and shadow",
+        "symbolic duality represented through balanced elements",
+        "tiny figures representing humanity in relation to the symbol",
+        "ancient Sanskrit lettering floating around the edges",
+        "mandala-like geometric patterns in background",
+        "path leading toward or away from central element",
+        "reflections showing different perspective",
+        "phases of moon or sun incorporated subtly",
+        "intertwined opposing elements showing harmony"
+    ]
+    
+    # Textural elements
+    textures = [
+        "richly detailed stippling creating depth",
+        "fine cross-hatching emphasizing volume",
+        "delicate line work showing craftsmanship",
+        "aged paper texture with subtle wear marks",
+        "elegant contrast between fine and bold strokes",
+        "varying line weights creating focal hierarchy"
+    ]
+    
+    # Extract key words from the core concept
+    concept_words = core_concept.lower().split()
+    
+    # Find matching artistic elements
+    matching_elements = []
+    for key, elements in artistic_elements.items():
+        if any(key in word for word in concept_words):
+            # If match found, add 2 random elements from that category
+            random_elements = random.sample(elements, min(2, len(elements)))
+            matching_elements.extend(random_elements)
+    
+    # If no specific matches, use some general artistic elements
+    if not matching_elements:
+        general_elements = [
+            "intricate detailing surrounding the central element",
+            "subtle background patterns adding depth",
+            "dramatic use of negative space",
+            "symbolic smaller elements reinforcing the theme"
+        ]
+        matching_elements = random.sample(general_elements, 2)
+    
+    # Add composition and symbolic elements
+    selected_composition = random.choice(compositions)
+    selected_symbolic = random.choice(symbolic_elements)
+    selected_texture = random.choice(textures)
+    
+    # Create the enhanced prompt
+    base_style = "in digital e-ink style, minimal monochrome illustration, high contrast line art with stippling and cross-hatching, clean outlines, paper texture background, elegant sketch aesthetic, tranquil and refined"
+    
+    # Build the complete prompt with core concept and artistic elements
+    enhanced_prompt = f"{core_concept}, {selected_composition}, {', '.join(matching_elements)}, {selected_symbolic}, {selected_texture}, {base_style}"
+    
+    return enhanced_prompt
+
+def generate_image_with_params(prompt, negative_prompt=None, previous_image_url=None, seed=777):
+    """Generate an image with the given prompt and parameters using ComfyUI API."""
     try:
-        # Read and encode the image file in base64
-        with open(image_path, 'rb') as img_file:
-            image_data = img_file.read()
-            image_base64 = base64.b64encode(image_data).decode('utf-8')
-            
-        print("\n=== Vision Model Review ===")
-        print(f"Reviewing image: {image_path}")
+        # Create the image path
+        os.makedirs("assets/img/quotes", exist_ok=True)
+        # Generate a unique filename based on timestamp
+        timestamp = int(time.time())
+        image_path = f"assets/img/quotes/temp_{timestamp}.png"
         
-        # Create the system and user messages
-        system_message = "You are an art critic reviewing Ghibli-style illustrations. Your task is to provide a simple numerical score and brief feedback."
-        
-        user_message = f"""Rate this image on two aspects:
-
-1. Overall artistic feel and Ghibli style (10% of score)
-2. Adherence to the prompt instructions (90% of score)
-
-ORIGINAL PROMPT:
-{prompt}
-
-CONTEXT:
-{original_text}
-
-Please provide your review in this exact format:
-<review>
-    <artistic_score>X</artistic_score>
-    <prompt_score>X</prompt_score>
-    <total_score>X</total_score>
-    <brief_feedback>One or two sentences of feedback</brief_feedback>
-</review>
-
-Where X is a number from 0-10. The total_score should be: (artistic_score * 0.1) + (prompt_score * 0.9)
-Keep your feedback very brief and focused on the main points."""
-
-        print("\n=== Complete Prompt Being Sent ===")
-        print("SYSTEM MESSAGE:")
-        print("-" * 50)
-        print(system_message)
-        print("-" * 50)
-        print("\nUSER MESSAGE:")
-        print("-" * 50)
-        print(user_message)
-        print("-" * 50)
-        print("\nSending to vision model...")
-            
-        # Create the API request with base64 encoded image
-        response = client.chat.completions.create(
-            model="meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo",
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_message
+        # Prepare the workflow
+        workflow = {
+            "1": {
+                "inputs": {
+                    "model_type": "full-nf4",
+                    "primary_prompt": prompt,
+                    "negative_prompt": negative_prompt or "",
+                    "width": 832,
+                    "height": 1256,
+                    "seed": seed,
+                    "scheduler": "Default for model",
+                    "override_steps": 35,
+                    "override_cfg": 7.5,
+                    "use_uncensored_llm": False,
+                    "clip_l_prompt": "",
+                    "openclip_prompt": "",
+                    "t5_prompt": "",
+                    "llama_prompt": "",
+                    "max_length_clip_l": 77,
+                    "max_length_openclip": 77,
+                    "max_length_t5": 128,
+                    "max_length_llama": 128
                 },
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": user_message
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/png;base64,{image_base64}"
-                            }
-                        }
-                    ]
+                "class_type": "HiDreamSamplerAdvanced",
+                "_meta": {
+                    "title": "HiDream Sampler (Advanced)"
                 }
-            ],
-            max_tokens=1000,
-            temperature=0.7
+            },
+            "3": {
+                "inputs": {
+                    "images": [
+                        "1",
+                        0
+                    ]
+                },
+                "class_type": "PreviewImage",
+                "_meta": {
+                    "title": "Preview Image"
+                }
+            },
+            "4": {
+                "inputs": {
+                    "filename_prefix": os.path.splitext(os.path.basename(image_path))[0],
+                    "images": [
+                        "1",
+                        0
+                    ]
+                },
+                "class_type": "SaveImage",
+                "_meta": {
+                    "title": "Save Image"
+                }
+            }
+        }
+        
+        # Set up parameters
+        params = {
+            "prompt": prompt,
+            "negative_prompt": negative_prompt or "",
+            "width": 832,
+            "height": 1256,
+            "seed": 777,  # Added fixed seed for consistency
+        }
+        
+        # Queue the prompt
+        print("Submitting workflow to ComfyUI...")
+        prompt_data = {
+            "prompt": workflow,
+            "client_id": client_id
+        }
+        
+        response = requests.post(
+            f"{COMFY_API_URL}/api/prompt",
+            json=prompt_data,
+            headers={
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
         )
         
-        # Validate response structure
-        if not hasattr(response, 'choices') or not response.choices:
-            print("\n❌ Vision model returned an empty response")
+        if response.status_code != 200:
+            print(f"Error submitting workflow: {response.status_code}")
+            print(f"Response: {response.text}")
             return None
             
-        # Extract the response
-        try:
-            review_text = response.choices[0].message.content
-            if not review_text:
-                print("\n❌ Vision model returned empty content")
-                return None
-                
-            print("\n=== Vision Model Response ===")
-            print("Raw response:")
-            print("-" * 50)
-            print(review_text)
-            print("-" * 50)
-            
-            # Clean up the response text - remove any text outside XML tags
-            import re
-            review_match = re.search(r'<review>.*?</review>', review_text, re.DOTALL)
-            if not review_match:
-                print("\n❌ No valid XML review tags found in response")
-                return None
-                
-            review_text = review_match.group(0)
-            print("\nExtracted XML:")
-            print("-" * 50)
-            print(review_text)
-            print("-" * 50)
-            
-            # Extract scores and feedback
-            artistic_score_match = re.search(r'<artistic_score>(.*?)</artistic_score>', review_text, re.DOTALL)
-            prompt_score_match = re.search(r'<prompt_score>(.*?)</prompt_score>', review_text, re.DOTALL)
-            total_score_match = re.search(r'<total_score>(.*?)</total_score>', review_text, re.DOTALL)
-            feedback_match = re.search(r'<brief_feedback>(.*?)</brief_feedback>', review_text, re.DOTALL)
-            
-            if not all([artistic_score_match, prompt_score_match, total_score_match, feedback_match]):
-                print("\n❌ Missing required review elements")
-                return None
-                
-            # Convert scores to floats, with error handling
+        prompt_id = response.json().get("prompt_id")
+        print(f"Workflow submitted successfully with ID: {prompt_id}")
+        
+        # Monitor execution
+        start_time = time.time()
+        timeout = 600  # 10 minutes timeout
+        
+        print("Waiting for image generation to complete...")
+        while time.time() - start_time < timeout:
             try:
-                artistic_score = float(artistic_score_match.group(1).strip())
-                prompt_score = float(prompt_score_match.group(1).strip())
-                total_score = float(total_score_match.group(1).strip())
+                # Check queue status
+                queue_response = requests.get(f"{COMFY_API_URL}/api/queue")
+                queue_data = queue_response.json()
                 
-                # Verify score ranges
-                if not (0 <= artistic_score <= 10 and 0 <= prompt_score <= 10 and 0 <= total_score <= 10):
-                    print("\n⚠️ Score values out of range (0-10), clamping...")
-                    artistic_score = max(0, min(10, artistic_score))
-                    prompt_score = max(0, min(10, prompt_score))
-                    total_score = max(0, min(10, total_score))
-            except ValueError:
-                print("\n❌ Error converting scores to numbers")
-                print(f"Artistic score: {artistic_score_match.group(1).strip()}")
-                print(f"Prompt score: {prompt_score_match.group(1).strip()}")
-                print(f"Total score: {total_score_match.group(1).strip()}")
-                return None
+                # Check if our prompt is still in the queue
+                is_in_queue = False
+                for item in queue_data.get("queue_running", []):
+                    if item[1] == prompt_id:
+                        is_in_queue = True
+                        print("  - Still running...")
+                        break
                 
-            feedback = feedback_match.group(1).strip()
-            
-            print("\n=== Review Results ===")
-            print(f"Artistic Score: {artistic_score}/10")
-            print(f"Prompt Score: {prompt_score}/10")
-            print(f"Total Score: {total_score}/10")
-            print(f"Feedback: {feedback}")
-            print("=" * 50)
-            
-            # Return scores and feedback
-            return {
-                "artistic_score": artistic_score,
-                "prompt_score": prompt_score,
-                "total_score": total_score,
-                "feedback": feedback,
-                "verdict": "YES" if total_score >= 7.0 else "NO"  # Consider 7.0 as passing threshold
-            }
-            
-        except (AttributeError, IndexError, ValueError) as e:
-            print(f"\n❌ Error parsing vision model response: {e}")
-            print("Raw response:")
-            print("-" * 50)
-            print(review_text)
-            print("-" * 50)
-            return None
+                for item in queue_data.get("queue_pending", []):
+                    if item[1] == prompt_id:
+                        is_in_queue = True
+                        print("  - Pending in queue...")
+                        break
+                
+                if not is_in_queue:
+                    # Check if execution is done by getting history
+                    history_response = requests.get(f"{COMFY_API_URL}/api/history/{prompt_id}")
+                    if history_response.status_code == 200:
+                        print("✓ Image generation completed!")
+                        
+                        # Try to find the image in the output
+                        history_data = history_response.json()
+                        outputs = history_data.get(prompt_id, {}).get("outputs", {})
+                        
+                        image_filename = None
+                        image_subfolder = ""
+                        
+                        # Look for the output from the SaveImage node
+                        for node_id, node_output in outputs.items():
+                            if "images" in node_output:
+                                for img_info in node_output["images"]:
+                                    image_filename = img_info.get("filename")
+                                    image_subfolder = img_info.get("subfolder", "")
+                                    break
+                                if image_filename:
+                                    break
+                        
+                        if image_filename:
+                            # Download the image
+                            image_url = f"{COMFY_API_URL}/api/view"
+                            params = {
+                                "filename": image_filename,
+                                "subfolder": image_subfolder,
+                                "type": "output"
+                            }
+                            
+                            img_response = requests.get(image_url, params=params)
+                            if img_response.status_code == 200:
+                                # Save the image directly without resizing
+                                with open(image_path, 'wb') as f:
+                                    f.write(img_response.content)
+                                
+                                print(f"✓ Image saved to {image_path}")
+                                return image_path
+                            else:
+                                print(f"Error downloading image: {img_response.status_code}")
+                        else:
+                            print("No image found in output")
+                        
+                        break
+                
+                # Wait a bit before checking again
+                time.sleep(5)
+                
+            except Exception as e:
+                print(f"Error checking status: {e}")
+                time.sleep(5)
         
-    except Exception as e:
-        print(f"\n❌ Error during image review: {e}")
-        print("Attempting to continue with generation...")
+        if time.time() - start_time >= timeout:
+            print("Timed out waiting for image generation")
+        
         return None
-
-def store_review_in_directory(image_path, review_result):
-    """Store the review scores in the directory.json file for the corresponding quote."""
-    try:
-        print("\n=== Storing Review in Directory ===")
-        
-        # Load the existing facts data
-        facts_data = load_existing_facts()
-        
-        # Extract the image filename from the path
-        image_filename = os.path.basename(image_path)
-        expected_image_url = f"assets/img/quotes/{image_filename}"
-        
-        print(f"Looking for quote with image_url: {expected_image_url}")
-        
-        # Find the quote with the matching image URL
-        matching_quotes = [q for q in facts_data["quotes"] if q["image_url"] == expected_image_url]
-        
-        if not matching_quotes:
-            print(f"❌ No matching quote found for image {image_filename}")
-            print("Quotes in directory:")
-            for i, quote in enumerate(facts_data["quotes"][-5:]):  # Show last 5 quotes
-                print(f"  {i}. id: {quote['id']}, image_url: {quote['image_url']}")
-            return False
-        
-        # Update the quote with the review scores
-        quote = matching_quotes[0]
-        print(f"✓ Found matching quote: {quote['id']}")
-        
-        quote["review_scores"] = {
-            "artistic_score": review_result["artistic_score"],
-            "prompt_score": review_result["prompt_score"],
-            "total_score": review_result["total_score"],
-            "feedback": review_result["feedback"]
-        }
-        
-        print("✓ Added review scores to quote")
-        
-        # Save the updated facts data
-        save_facts(facts_data)
-        print("✓ Saved updated directory.json file")
-        
-        return True
-        
-    except Exception as e:
-        print(f"❌ Error storing review in directory: {e}")
-        return False
-
-def generate_and_save_image(prompt, image_path, previous_image_path=None, guidance=5.5, test_guidance=False, test_continuity=False, original_text=None):
-    """Generate an image using the provided prompt and save it to the specified path."""
-    max_attempts = 3  # Maximum number of attempts to generate a satisfactory image
-    review_results = None  # Store review results for later use
-    
-    for attempt in range(max_attempts):
-        current_prompt = prompt  # Use the original prompt for first attempt
-        
-        if test_continuity and previous_image_path:
-            # Test both with and without previous image reference
-            print("\nTesting image generation with and without previous image reference...")
-            
-            # Generate base filename and path
-            base_path = image_path.rsplit('.', 1)[0]  # Remove extension
-            
-            # Generate version without previous image reference
-            no_ref_path = f"{base_path}_no_ref.png"
-            success_no_ref = generate_image_with_params(
-                current_prompt, 
-                no_ref_path,
-                previous_image_path=None,  # Explicitly not using previous image
-                guidance=guidance
-            )
-            if success_no_ref:
-                print("Generated version without previous image reference")
-            
-            # Generate version with previous image reference
-            with_ref_path = f"{base_path}_with_ref.png"
-            success_with_ref = generate_image_with_params(
-                current_prompt, 
-                with_ref_path,
-                previous_image_path=previous_image_path,
-                guidance=guidance
-            )
-            if success_with_ref:
-                print("Generated version with previous image reference")
-            
-            if success_no_ref and success_with_ref:
-                # Ask user to select the better version
-                while True:
-                    print("\nCompare the two versions:")
-                    print("1: Without previous image reference")
-                    print("2: With previous image reference")
-                    selection = input("\nEnter the number of the better version (1/2): ").strip()
-                    
-                    if selection in ['1', '2']:
-                        selected_path = no_ref_path if selection == '1' else with_ref_path
-                        other_path = with_ref_path if selection == '1' else no_ref_path
-                        
-                        # Rename selected file to original name
-                        os.rename(selected_path, image_path)
-                        print(f"Selected version {selection} has been saved as {image_path}")
-                        
-                        # Delete the other version
-                        if os.path.exists(other_path):
-                            os.remove(other_path)
-                        
-                        return True, None  # Return success but no review results
-                    else:
-                        print("Invalid selection. Please enter 1 or 2.")
-            
-            return False, None
-            
-        elif test_guidance:
-            # Define different guidance scales to test
-            guidance_scales = [1.5, 3.5, 5.5, 7.5]
-            test_images = []
-            
-            # Generate base filename and path
-            base_path = image_path.rsplit('.', 1)[0]  # Remove extension
-            
-            print("\nGenerating test images with different guidance values...")
-            
-            # Generate images with different guidance values
-            for idx, scale in enumerate(guidance_scales):
-                test_path = f"{base_path}_{chr(97+idx)}.png"  # a, b, c, d suffixes
-                success = generate_image_with_params(
-                    current_prompt, 
-                    test_path,
-                    previous_image_path,
-                    scale
-                )
-                if success:
-                    test_images.append(test_path)
-                    print(f"Generated test image {chr(97+idx)} with guidance={scale}")
-            
-            if test_images:
-                # Ask user to select the best version
-                while True:
-                    print("\nGuidance values used:")
-                    print(f"a: 1.5 (more creative)")
-                    print(f"b: 3.5 (balanced)")
-                    print(f"c: 5.5 (more faithful/default)")
-                    print(f"d: 7.5 (very faithful)")
-                    selection = input("\nEnter the letter (a/b/c/d) of the best image: ").lower()
-                    if selection in ['a', 'b', 'c', 'd']:
-                        selected_path = f"{base_path}_{selection}.png"
-                        if os.path.exists(selected_path):
-                            # Rename selected file to original name
-                            os.rename(selected_path, image_path)
-                            print(f"Selected image {selection} has been saved as {image_path}")
-                            
-                            # Delete other test images
-                            for test_path in test_images:
-                                if test_path != selected_path and os.path.exists(test_path):
-                                    os.remove(test_path)
-                            
-                            return True, None  # Return success but no review results
-                        else:
-                            print(f"Error: Selected image {selection} not found.")
-                    else:
-                        print("Invalid selection. Please enter a, b, c, or d.")
-            
-            return False, None
-            
-        else:
-            success = generate_image_with_params(current_prompt, image_path, previous_image_path, guidance)
-            
-            if success:
-                print("\nReviewing generated image...")
-                review_result = review_image(image_path, current_prompt, original_text)
-                
-                if review_result:
-                    print(f"\nTotal Score: {review_result['total_score']}/10")
-                    print(f"Feedback: {review_result['feedback']}")
-                    
-                    # Store review results for later use when creating the quote
-                    review_results = review_result
-                    
-                    if review_result["verdict"] == "YES":
-                        print("✓ Image meets quality threshold!")
-                        return True, review_results
-                    else:
-                        if attempt < max_attempts - 1:  # If we still have attempts left
-                            print("\nImage scored below threshold. Attempting regeneration...")
-                            # Delete the rejected image
-                            os.remove(image_path)
-                        else:
-                            print("\n✗ Maximum attempts reached. Using the last generated image.")
-                            return True, review_results
-                else:
-                    print("Failed to review image. Using the generated image anyway.")
-                    return True, None
-            
-            print(f"Attempt {attempt + 1} failed to generate image.")
-    
-    return False, None
-
-def generate_image_with_params(prompt, image_path, previous_image_path=None, guidance=3.5):
-    """Helper function to generate a single image with specified parameters."""
-    try:
-        print(f"Generating image for: {prompt[:50]}...")
-        print(f"Using guidance value: {guidance} (type: {type(guidance)})")
-        
-        # Base parameters for image generation
-        params = {
-            "model": "black-forest-labs/FLUX.1-dev-lora", 
-            "prompt": prompt,
-            "width": 832,
-            "height": 1440,
-            "steps": 30,
-            "n": 1,
-            "response_format": "url",
-            "guidance": float(guidance),
-            "seed": 777,  # Added fixed seed for consistency
-            "image_loras": [
-                {"path": "https://huggingface.co/strangerzonehf/Flux-Ghibli-Art-LoRA/resolve/main/Ghibli-Art.safetensors", "scale": 1}
-            ]
-        }
-        
-        # If we have a previous image, use it as reference for continuity
-        if previous_image_path and os.path.exists(previous_image_path):
-            print(f"Using previous image {previous_image_path} as reference for continuity")
-            params["image_url"] = previous_image_path
-        
-        print(f"API parameters: {params}")
-        
-        # Generate the image
-        response = client.images.generate(**params)
-        
-        # Download and save the image from URL
-        import requests
-        img_response = requests.get(response.data[0].url)
-        if img_response.status_code == 200:
-            with open(image_path, 'wb') as f:
-                f.write(img_response.content)
-            print(f"Image saved to {image_path}")
-            return True
-            
-        raise Exception(f"Failed to download image, status code: {img_response.status_code}")
     
     except Exception as e:
         print(f"Error generating image: {e}")
-        return False
+        return None
+
+def generate_and_save_image(quote_data, quote_number, existing_quotes, previous_image_url=None):
+    """Generate and save an image for a quote using Together API."""
+    # Extract the prompt from the quote data
+    prompt = quote_data.get("image_prompt", "")
+    negative_prompt = quote_data.get("negative_prompt", "")
+    
+    if not prompt:
+        print(f"No image prompt found for quote {quote_number}. Skipping image generation.")
+        return None
+    
+    print(f"\nGenerating image {quote_number} with prompt: {prompt}")
+    print(f"Negative prompt: {negative_prompt}")
+    
+    # Create the final image path
+    os.makedirs("assets/img/quotes", exist_ok=True)
+    final_image_path = Path(f"assets/img/quotes/quote_{quote_number}.png")
+    
+    # Generate the image
+    temp_image_path = generate_image_with_params(
+        prompt=prompt,
+        negative_prompt=negative_prompt,
+        previous_image_url=previous_image_url,
+        seed=777
+    )
+    
+    # If image generation was successful, rename to final path
+    if temp_image_path:
+        try:
+            # Rename temp file to final path
+            os.rename(temp_image_path, final_image_path)
+            print(f"✓ Successfully generated image for quote {quote_number} at {final_image_path}")
+            return final_image_path
+        except Exception as e:
+            print(f"Error renaming image: {e}")
+            return None
+    
+    print(f"× Failed to generate image for quote {quote_number}")
+    return None
+
+def save_quote_to_directory(quote_data, quote_number, image_path=None):
+    """Save a quote to the directory.json file."""
+    # Format the quote data
+    quote_entry = {
+        "id": f"quote_{quote_number}",
+        "quote": quote_data.get("quote", ""),
+        "sanskrit": quote_data.get("sanskrit", ""),
+        "reference": quote_data.get("reference", ""),
+        "meaning": quote_data.get("meaning", ""),
+        "lore_snippet": quote_data.get("lore_snippet", ""),
+        "image": image_path.name if image_path else None,
+        "category": "philosophy",
+        "tags": ["mahabharata", "wisdom", "ancient", "dharma"]
+    }
+    
+    return quote_entry
+
+def process_mahabharata_chunk(chunk_data, client, existing_facts, start_from_number, previous_image_url=None):
+    """Process a chunk of the Mahabharata text to generate facts and images."""
+    # Generate quotes and image prompts
+    quotes_data = generate_legends_and_prompts(chunk_data, client)
+    
+    # Initialize result stats
+    new_facts = []
+    new_quote_numbers = []
+    
+    print(f"\nProcessing 1 lore quote...")
+    
+    # Process each quote (there will just be 1 now)
+    for i, quote_data in enumerate(quotes_data):
+        # Determine the quote number
+        quote_number = start_from_number + i
+        
+        # Generate and save the image
+        image_path = generate_and_save_image(quote_data, quote_number, existing_facts, previous_image_url)
+        
+        # Save the quote to the directory
+        quote_entry = save_quote_to_directory(quote_data, quote_number, image_path)
+        
+        # Add to new facts list
+        new_facts.append(quote_entry)
+        new_quote_numbers.append(quote_number)
+        
+        # Use this image as reference for the next one
+        if image_path:
+            previous_image_url = str(image_path)
+    
+    print(f"\n✓ Generated {len(new_facts)} new lore quote")
+    
+    return {
+        "new_facts": new_facts,
+        "quote_numbers": new_quote_numbers,
+        "last_image_url": previous_image_url
+    }
 
 def main():
+    """Main function to generate Mahabharata lore quotes."""
+    print("\n=== Mahabharata Lore Quotes Generator ===")
+    
     # Create necessary directories
     os.makedirs("assets/img/quotes", exist_ok=True)
     os.makedirs("assets/data", exist_ok=True)
     
-    print("===== Mahabharata Comic Generator =====")
-    print("Press Ctrl+C to stop the program")
-    print("=======================================")
+    # Load existing facts
+    existing_facts = load_existing_facts()
+    highest_quote_number = get_highest_quote_number(existing_facts)
     
-    # Add test flags
-    test_guidance = input("Do you want to test different guidance values? (y/n): ").lower() == 'y'
-    test_continuity = input("Do you want to test with/without previous image reference? (y/n): ").lower() == 'y'
+    print(f"Found {len(existing_facts['quotes'])} existing lore quotes")
+    print(f"Highest quote number: {highest_quote_number}")
     
     # Initialize the Mahabharata reader
-    mahabharata_reader = MahabharataReader()
+    reader = MahabharataReader()
     
-    pause_duration = 300  # Seconds to pause between batches (5 minutes)
-    batch_count = 0
+    # Track the last generated image URL for continuity
+    last_image_url = None
     
+    # Check if we should run once or continuously
+    run_continuously = "--continuous" in sys.argv
+    auto_commit = "--commit" in sys.argv
+    
+    # Get batch size
+    batch_size = 1
     try:
+        for i, arg in enumerate(sys.argv[1:]):
+            if arg.isdigit():
+                batch_size = int(arg)
+                break
+    except ValueError:
+        print("Invalid batch size argument. Using default (1 quote per batch).")
+    
+    # Run continuously until interrupted or once if not specified
+    try:
+        batch_count = 0
         while True:
             batch_count += 1
-            print(f"\n--- Starting Batch #{batch_count} ---")
+            print(f"\n--- Batch #{batch_count} ---")
+            print(f"\nGenerating {batch_size} new lore quotes...")
             
-            # Load existing facts (reload each time to ensure we have the latest)
-            facts_data = load_existing_facts()
+            # Load the latest facts for each batch
+            if batch_count > 1:
+                existing_facts = load_existing_facts()
+                highest_quote_number = get_highest_quote_number(existing_facts)
+                print(f"Updated quote count: {len(existing_facts['quotes'])}")
+                print(f"Updated highest quote number: {highest_quote_number}")
             
-            # Find the highest quote number to continue from
-            highest_quote_number = get_highest_quote_number(facts_data)
-            print(f"Found highest existing quote number: {highest_quote_number}")
-            print(f"Total frames in database: {len(facts_data['quotes'])}")
-            
-            # Get the next sequential chunk of text
-            chunk_data = mahabharata_reader.get_next_chunk(chunk_size=40)
-            
-            if not chunk_data["english_text"]:
-                print("Empty chunk encountered. Moving to the next section.")
-                time.sleep(5)  # Short pause before trying again
-                continue
-            
-            # Generate comic frames based on the chunk
-            comic_frames = generate_comic_frames(
-                chunk_data, 
-                previous_prompts=mahabharata_reader.previous_prompts,
-                comic_context=mahabharata_reader.comic_context
-            )
-            
-            if not comic_frames:
-                print("Failed to generate comic frames. Will try again after a pause.")
-                time.sleep(pause_duration)
-                continue
-            
-            # Track successfully processed frames for commit message
-            successful_frames = 0
-            new_prompts = []
-            
-            # Store the previous image path for continuity
-            previous_image_path = None
-            
-            # Process each comic frame
-            for i, frame in enumerate(comic_frames):
-                # Generate a sequential ID based on the highest existing quote number
-                next_quote_number = highest_quote_number + successful_frames + 1
-                frame_id = f"quote_{next_quote_number}"  # Keep quote_ prefix for compatibility
+            # Process chunks of text
+            new_facts = []
+            for i in range(batch_size):
+                print(f"\n--- Processing Item {i+1}/{batch_size} ---")
                 
-                # Define image path
-                image_filename = f"{frame_id}.png"
-                image_path = f"assets/img/quotes/{image_filename}"
-                image_url = f"assets/img/quotes/{image_filename}"
+                # Get the next chunk of text
+                chunk_data = reader.get_next_chunk(chunk_size=40)
                 
-                # Check if this image already exists, skip if it does
-                if os.path.exists(image_path):
-                    print(f"Image {image_path} already exists, skipping...")
-                    previous_image_path = image_path  # Set as previous for next iteration
-                    continue
-                
-                # Store the prompt for continuity
-                new_prompts.append(frame["image_prompt"])
-                
-                # Generate and save the image with original text context
-                success, review_results = generate_and_save_image(
-                    frame["image_prompt"], 
-                    image_path,
-                    previous_image_path=previous_image_path,
-                    guidance=5.5,  # Updated default value
-                    test_guidance=test_guidance,
-                    test_continuity=test_continuity,
-                    original_text=f"Caption: {frame['caption']}\nSanskrit Reference: {frame.get('sanskrit_reference', 'Not specified')}\nPanel Focus: {frame.get('panel_focus', 'storytelling')}"
+                # Process the chunk
+                result = process_mahabharata_chunk(
+                    chunk_data, 
+                    client, 
+                    existing_facts, 
+                    highest_quote_number + 1 + len(new_facts),
+                    last_image_url
                 )
                 
-                # If successful, update previous_image_path for next frame
-                if success:
-                    previous_image_path = image_path
+                # Add new facts to the list
+                new_facts.extend(result["new_facts"])
                 
-                # Add to data
-                if success:
-                    # Prepare the emphasis data (for compatibility)
-                    emphasis = {}
-                    # Extract key phrases for emphasis (simplified example)
-                    words = frame["caption"].split()
-                    if len(words) > 5:
-                        # Emphasize a few key words for animation
-                        key_word = words[len(words) // 2]  # Middle word
-                        emphasis[key_word] = "emphasis-2"
-                    
-                    quote_data = {
-                        "id": frame_id,
-                        "quote": frame["caption"],
-                        "image_prompt": frame["image_prompt"],
-                        "image_url": image_url,
-                        "emphasis": emphasis,
-                        "context": f"Frame {frame.get('frame_number', i+1)} of a 4-panel sequence. " +
-                                 f"Focus: {frame.get('panel_focus', 'storytelling')}. " +
-                                 f"Based on lines {chunk_data['start_line']}-{chunk_data['end_line']} " +
-                                 f"of the Mahabharata. Sanskrit reference: {frame.get('sanskrit_reference', 'Not specified')}"
-                    }
-                    
-                    # Add review scores if available
-                    if review_results:
-                        quote_data["review_scores"] = {
-                            "artistic_score": review_results["artistic_score"],
-                            "prompt_score": review_results["prompt_score"],
-                            "total_score": review_results["total_score"],
-                            "feedback": review_results["feedback"]
-                        }
-                        print(f"✓ Added review scores to quote {frame_id}")
-                    
-                    # Add quote to facts data
-                    facts_data["quotes"].append(quote_data)
-                    
-                    # Increment successful count
-                    successful_frames += 1
+                # Update the last image URL
+                if result.get("last_image_url"):
+                    last_image_url = result["last_image_url"]
             
-            # Save after each successful image generation to preserve progress
-            save_facts(facts_data)
+            # Add new facts to existing facts
+            existing_facts["quotes"].extend(new_facts)
             
-            # Add a delay to avoid rate limiting
-            time.sleep(2)
+            # Save the updated facts
+            save_facts(existing_facts)
             
-            # Update comic context with new prompts for continuity
-            mahabharata_reader.update_comic_context(new_prompts)
+            print(f"\n✓ Successfully generated {len(new_facts)} new lore quotes!")
+            print(f"Total lore quotes in directory: {len(existing_facts['quotes'])}")
             
-            # If any frames were generated successfully, commit and push the changes
-            if successful_frames > 0:
-                git_commit_and_push(successful_frames)
+            # Commit and push changes if requested
+            if auto_commit and len(new_facts) > 0:
+                git_commit_and_push(len(new_facts))
             
-            print(f"\nBatch #{batch_count} complete! Waiting 5 minutes before next batch...")
-            print(f"(Press Ctrl+C to exit)")
+            # Exit if not running continuously
+            if not run_continuously:
+                print("\nDone!")
+                break
+                
+            # If running continuously, wait before the next batch
+            pause_duration = 300  # 5 minutes
+            print(f"\nWaiting {pause_duration} seconds before next batch...")
+            print("(Press Ctrl+C to exit)")
             
-            # Show a countdown timer during the wait
-            remaining = pause_duration
-            while remaining > 0:
+            # Show a countdown timer
+            for remaining in range(pause_duration, 0, -1):
                 mins = remaining // 60
                 secs = remaining % 60
                 print(f"\rNext batch in: {mins:02d}:{secs:02d}", end="")
                 time.sleep(1)
-                remaining -= 1
             
-            print("\rWait complete. Starting next batch...                ")
-    
+            print("\rStarting next batch...                  ")
+            
     except KeyboardInterrupt:
-        # This should not be reached due to the signal handler, but added as a fallback
-        print("\nComic generation stopped. Exiting...")
+        print("\nCtrl+C detected! Exiting...")
         sys.exit(0)
 
 if __name__ == "__main__":

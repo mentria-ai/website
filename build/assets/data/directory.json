@@ -1263,6 +1263,46 @@
         "total_score": 8.0,
         "feedback": "The image captures the serene forest setting and the gentle inquiry perfectly, yet the eldest ascetic's hand could be more clearly raised, and the facial expressions of the other ascetics might be more detailed."
       }
+    },
+    {
+      "id": "quote_125",
+      "quote": "Ugrashravas, the son of Lomaharshana, humbly approaches the sages of Naimisha forest, bowing with folded hands to the assembled ascetics.",
+      "image_prompt": "Ghibli Art: A tall man with dark wavy hair and gentle eyes, dressed in simple saffron robes, bows deeply before a circle of white-bearded men in earth-toned garments. Sunlight dapples through ancient banyan trees onto the forest floor where they sit.",
+      "image_url": "assets/img/quotes/quote_125.png",
+      "emphasis": {
+        "Naimisha": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: humble approach. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0932\u094b\u092e\u0939\u0930\u094d\u0937\u0923\u092a\u0941\u0924\u094d\u0930 \u0909\u0917\u094d\u0930\u0936\u094d\u0930\u0935\u093e\u0903 \u0938\u0942\u0924\u0903... \u0935\u093f\u0928\u092f\u093e\u0935\u0928\u0924\u094b \u092d\u0942\u0924\u094d\u0935\u093e"
+    },
+    {
+      "id": "quote_126",
+      "quote": "The ascetics welcome Ugrashravas with warmth, their faces glowing with wisdom. They gesture for him to sit among them in the sacred forest clearing.",
+      "image_prompt": "Ghibli Art: Elderly men with long white beards and kind expressions, their wrinkled hands extended in welcome. One with especially bright eyes pats a woven grass mat. Golden afternoon light filters through leaves onto their simple wooden seats.",
+      "image_url": "assets/img/quotes/quote_126.png",
+      "emphasis": {
+        "gesture": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: welcoming gesture. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u092d\u093f\u0935\u093e\u0926\u094d\u092f \u092e\u0941\u0928\u0940\u0902\u0938\u094d\u0924\u093e\u0902\u0938\u094d\u0924\u0941... \u0928\u093f\u0930\u094d\u0926\u093f\u0937\u094d\u091f\u092e\u093e\u0938\u0928\u0902 \u092d\u0947\u091c\u0947"
+    },
+    {
+      "id": "quote_127",
+      "quote": "Seated comfortably, Ugrashravas prepares to speak. The eldest sage leans forward eagerly, asking about his journey and the stories he brings.",
+      "image_prompt": "Ghibli Art: The dark-haired man sits cross-legged on a mat, hands resting on his knees. An elder with a particularly long beard and intense gaze leans toward him, one hand raised in question. Fireflies begin to glow in the twilight forest.",
+      "image_url": "assets/img/quotes/quote_127.png",
+      "emphasis": {
+        "forward": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: anticipation of stories. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0941\u0916\u093e\u0938\u0940\u0928\u0902 \u0924\u0924\u0938\u094d\u0924\u0902 \u0924\u0941... \u0915\u093e\u0932\u0903 \u0915\u092e\u0932\u092a\u0924\u094d\u0930\u093e\u0915\u094d\u0937"
+    },
+    {
+      "id": "quote_128",
+      "quote": "Ugrashravas begins recounting tales from Janamejaya's snake sacrifice, his hands moving gracefully as the sages listen with rapt attention under the ancient trees.",
+      "image_prompt": "Ghibli Art: The storyteller's hands trace shapes in the air as he speaks, his face animated. The elders' eyes shine with fascination, some stroking their beards thoughtfully. Moonlight now mingles with the fading sunset through the forest canopy.",
+      "image_url": "assets/img/quotes/quote_128.png",
+      "emphasis": {
+        "gracefully": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: beginning of narration. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0938\u0942\u0924 \u0909\u0935\u093e\u091a... \u0915\u0943\u0937\u094d\u0923\u0926\u094d\u0935\u0948\u092a\u093e\u092f\u0928\u092a\u094d\u0930\u094b\u0915\u094d\u0924\u093e\u0903"
     }
   ]
 }

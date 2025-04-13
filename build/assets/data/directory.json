@@ -119,6 +119,46 @@
         "his": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: beginning of dialogue. Based on lines 0-40 of the Mahabharata. Sanskrit reference: \u0905\u0925\u093e\u092a\u0943\u091a\u094d\u091b\u0926\u0943\u0937\u093f\u0938\u094d\u0924\u0924\u094d\u0930 \u0915\u0936\u094d\u091a\u093f\u0924\u094d\u092a\u094d\u0930\u0938\u094d\u0924\u093e\u0935\u092f\u0928\u094d\u0915\u0925\u093e\u0903"
+    },
+    {
+      "id": "quote_13",
+      "quote": "A traveler with long dark hair and humble eyes arrives at the sacred land of Samantapanchaka, where the great war once took place between the Pandavas and Kauravas.",
+      "image_prompt": "Ghibli Art: A slender man with long dark hair and humble eyes, dressed in simple ochre robes, stands at the edge of a vast field. The golden light of late afternoon casts long shadows across the land. Distant mountains frame the horizon, with ancient trees swaying gently in the breeze.",
+      "image_url": "assets/img/quotes/quote_13.png",
+      "emphasis": {
+        "of": "emphasis-2"
+      },
+      "context": "Frame 1 of a 4-panel sequence. Focus: arrival at sacred land. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0938\u092e\u0928\u094d\u0924\u092a\u091e\u094d\u091a\u0915\u0902 \u0928\u093e\u092e \u092a\u0941\u0923\u094d\u092f\u0902 \u0926\u094d\u0935\u093f\u091c\u0928\u093f\u0937\u0947\u0935\u093f\u0924\u092e\u094d"
+    },
+    {
+      "id": "quote_14",
+      "quote": "The traveler approaches a group of white-bearded men in earth-toned garments, their faces weathered with wisdom, seated near a sacred fire under ancient trees.",
+      "image_prompt": "Ghibli Art: Three elderly men with long white beards and serene expressions sit cross-legged around a small fire. Their ochre and cream garments blend with the earthy tones of the forest clearing. Golden light filters through leaves, illuminating dust motes in the air.",
+      "image_url": "assets/img/quotes/quote_14.png",
+      "emphasis": {
+        "faces": "emphasis-2"
+      },
+      "context": "Frame 2 of a 4-panel sequence. Focus: meeting the wise ones. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u092d\u0935\u0928\u094d\u0924 \u0906\u0938\u0924\u0947 \u0938\u094d\u0935\u0938\u094d\u0925\u093e \u092c\u094d\u0930\u0935\u0940\u092e\u093f \u0915\u093f\u092e\u0939\u0902 \u0926\u094d\u0935\u093f\u091c\u093e\u0903"
+    },
+    {
+      "id": "quote_15",
+      "quote": "The wise men begin recounting the ancient tales composed by Vyasa, their hands gesturing gracefully as the sacred words fill the air with golden light.",
+      "image_prompt": "Ghibli Art: The central white-bearded man raises his hands in a storytelling gesture, his face illuminated by the fire's glow. The traveler sits attentively, eyes wide with reverence. Golden symbols of Sanskrit script seem to float in the air around them.",
+      "image_url": "assets/img/quotes/quote_15.png",
+      "emphasis": {
+        "hands": "emphasis-2"
+      },
+      "context": "Frame 3 of a 4-panel sequence. Focus: beginning of sacred narration. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0926\u094d\u0935\u0948\u092a\u093e\u092f\u0928\u0947\u0928 \u092f\u0924\u094d\u092a\u094d\u0930\u094b\u0915\u094d\u0924\u0902 \u092a\u0941\u0930\u093e\u0923\u0902 \u092a\u0930\u092e\u0930\u094d\u0937\u093f\u0923\u093e"
+    },
+    {
+      "id": "quote_16",
+      "quote": "As the sun sets, the sacred fire burns brighter, its flames mirroring the celestial light of the first Purusha, while all listen in rapt attention to the eternal wisdom.",
+      "image_prompt": "Ghibli Art: The fire's glow intensifies as twilight descends, casting warm light on the faces of all present. The flames take on symbolic shapes resembling the first Purusha. The last golden rays of sunset streak across the darkening sky.",
+      "image_url": "assets/img/quotes/quote_16.png",
+      "emphasis": {
+        "light": "emphasis-2"
+      },
+      "context": "Frame 4 of a 4-panel sequence. Focus: divine revelation. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0906\u0926\u094d\u092f\u0902 \u092a\u0941\u0930\u0941\u0937\u092e\u0940\u0936\u093e\u0928\u0902 \u092a\u0941\u0930\u0941\u0939\u0942\u0924\u0902 \u092a\u0941\u0930\u0941\u0937\u094d\u091f\u0941\u0924\u092e\u094d"
     }
   ]
 }

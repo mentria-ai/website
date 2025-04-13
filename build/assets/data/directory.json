@@ -207,6 +207,38 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_20",
+      "quote": "Yudhishthira is the tree of righteousness, with Arjuna as its trunk and Bhima as its branches.",
+      "sanskrit": "\u092f\u0941\u0927\u093f\u0937\u094d\u0920\u093f\u0930\u094b \u0927\u0930\u094d\u092e\u092e\u092f\u094b \u092e\u0939\u093e\u0926\u094d\u0930\u0941\u092e\u0903; \u0938\u094d\u0915\u0928\u094d\u0927\u094b\u093d\u0930\u094d\u091c\u0941\u0928\u094b \u092d\u0940\u092e\u0938\u0947\u0928\u094b\u093d\u0938\u094d\u092f \u0936\u093e\u0916\u093e\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 1 (approximate)",
+      "meaning": "The Pandavas are depicted as a divine tree of Dharma (righteousness), with each brother embodying a essential aspect: Yudhishthira as the root (justice), Arjuna as the trunk (strength and skill), and Bhima as the branches (raw power).",
+      "lore_snippet": "Legends speak of the Pandavas as a sacred tree rooted in Dharma. Like a great oak, its trunk stands unbroken by storms, its branches strike with the force of thunder, and its roots hold fast to eternal truth.",
+      "image": "quote_20.png",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_21",
+      "quote": "The world delights in the valor and virtues of those who uphold righteousness.",
+      "sanskrit": "\u0924\u0941\u0924\u094b\u0937 \u0932\u094b\u0915\u0903 \u0938\u0915\u0932\u0938\u094d\u0924\u0947\u0937\u093e\u0902 \u0936\u094c\u0930\u094d\u092f\u0917\u0941\u0923\u0947\u0928 \u091a",
+      "reference": "Mahabharata, Adi Parva, Chapter [Event during Pandavas' return]",
+      "meaning": "This verse reflects how the entire world rejoices in the bravery and moral excellence of the Pandavas, symbolizing the universal admiration for those who embody dharma (righteousness) and strength.",
+      "lore_snippet": "Legends speak of warriors whose deeds are sung by the winds themselves. When righteousness and might walk hand in hand, even the heavens shower blossoms in their path, for such virtues light the way for all mankind.",
+      "image": "quote_21.png",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

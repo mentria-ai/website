@@ -159,6 +159,54 @@
         "light": "emphasis-2"
       },
       "context": "Frame 4 of a 4-panel sequence. Focus: divine revelation. Based on lines 40-80 of the Mahabharata. Sanskrit reference: \u0906\u0926\u094d\u092f\u0902 \u092a\u0941\u0930\u0941\u0937\u092e\u0940\u0936\u093e\u0928\u0902 \u092a\u0941\u0930\u0941\u0939\u0942\u0924\u0902 \u092a\u0941\u0930\u0941\u0937\u094d\u091f\u0941\u0924\u092e\u094d"
+    },
+    {
+      "id": "quote_17",
+      "quote": "The eternal Brahman is both the manifest and the unmanifest, the source of all that is and is not.",
+      "sanskrit": "\u090b\u0924\u092e\u0947\u0915\u093e\u0915\u094d\u0937\u0930\u0902 \u092c\u094d\u0930\u0939\u094d\u092e \u0935\u094d\u092f\u0915\u094d\u0924\u093e\u0935\u094d\u092f\u0915\u094d\u0924\u0902 \u0938\u0928\u093e\u0924\u0928\u092e\u094d",
+      "reference": "Mahabharata, Shanti Parva, Chapter 12 (approximate)",
+      "meaning": "This verse declares Brahman (the ultimate reality) as the singular, eternal truth that transcends dualities\u2014both visible and invisible, existence and non-existence. It is the primordial source of creation.",
+      "lore_snippet": "The sages teach that reality is a tapestry woven from light and shadow, form and void. To perceive Brahman is to see the unity behind all opposites\u2014the unbroken thread connecting the cosmos.",
+      "image": null,
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_18",
+      "quote": "The wheel of time turns without beginning or end, creating and dissolving all worlds.",
+      "sanskrit": "\u0905\u0928\u093e\u0926\u093f\u0928\u093f\u0927\u0928\u0902 \u0932\u094b\u0915\u0947 \u091a\u0915\u094d\u0930\u0902 \u0938\u092e\u094d\u092a\u0930\u093f\u0935\u0930\u094d\u0924\u0924\u0947",
+      "reference": "Mahabharata, Shanti Parva, Chapter 231",
+      "meaning": "This verse speaks of the eternal cycle of creation and destruction in the cosmos, likened to a wheel (chakra) that revolves perpetually without origin or conclusion. It underscores the transient nature of all existence.",
+      "lore_snippet": "Just as the seasons cycle endlessly, so too does the cosmos breathe in and out\u2014worlds rise and fall like waves upon the shore of time. The wise understand this rhythm and act without attachment to fleeting things.",
+      "image": "quote_18.png",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_19",
+      "quote": "The wise illuminate diverse knowledge like lamps, each shining with their own light.",
+      "sanskrit": "\u0935\u093f\u0935\u093f\u0927\u0902 \u0938\u0902\u0939\u093f\u0924\u093e\u091c\u094d\u091e\u093e\u0928\u0902 \u0926\u0940\u092a\u092f\u0928\u094d\u0924\u093f \u092e\u0928\u0940\u0937\u093f\u0923\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 1",
+      "meaning": "This verse celebrates how enlightened sages preserve and disseminate sacred knowledge in various forms, just as multiple lamps collectively dispel darkness.",
+      "lore_snippet": "Ancient rishis compared their wisdom to a constellation of lamps - no single flame holds all truth, yet together they illuminate the path. Thus the Mahabharata itself contains many teachings within its unified epic.",
+      "image": "quote_19.png",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

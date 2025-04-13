@@ -1,4 +1,36 @@
 {
   "quotes": [
+    {
+      "id": "quote_1",
+      "quote": "First bow to Narayana and Nara, the best of men, and to the goddess Saraswati, then proclaim victory.",
+      "sanskrit": "\u0928\u093e\u0930\u093e\u092f\u0923\u0902 \u0928\u092e\u0938\u094d\u0915\u0943\u0924\u094d\u092f \u0928\u0930\u0902 \u091a\u0948\u0935 \u0928\u0930\u094b\u0924\u094d\u0924\u092e\u092e\u094d\n\u0926\u0947\u0935\u0940\u0902 \u0938\u0930\u0938\u094d\u0935\u0924\u0940\u0902 \u091a\u0948\u0935 \u0924\u0924\u094b \u091c\u092f\u092e\u0941\u0926\u0940\u0930\u092f\u0947\u0924\u094d",
+      "reference": "Mahabharata, Adi Parva, Anukramanika Parva (Introductory Section)",
+      "meaning": "This opening invocation emphasizes reverence for divine wisdom (Narayana), human excellence (Nara), and the goddess of knowledge (Saraswati) before embarking on any great endeavor. It symbolizes the trilogy of divine grace, human effort, and enlightened speech required for true success.",
+      "lore_snippet": "Ancient sages held that no undertaking should begin without honoring the three sacred flames: the divine spark within, the strength of mortal hands, and the clarity of inspired words. Thus are great deeds blessed from inception.",
+      "image": "quote_1.png",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_2",
+      "quote": "The wise who are pure in heart shine like the sun and fire.",
+      "sanskrit": "\u0906\u092f\u0941\u0937\u094d\u092e\u0928\u094d\u0924\u0903 \u0938\u0930\u094d\u0935 \u090f\u0935 \u092c\u094d\u0930\u0939\u094d\u092e\u092d\u0942\u0924\u093e \u0939\u093f \u092e\u0947 \u092e\u0924\u093e\u0903 \u0905\u0938\u094d\u092e\u093f\u0928\u094d\u092f\u091c\u094d\u091e\u0947 \u092e\u0939\u093e\u092d\u093e\u0917\u093e\u0903 \u0938\u0942\u0930\u094d\u092f\u092a\u093e\u0935\u0915\u0935\u0930\u094d\u091a\u0938\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 1",
+      "meaning": "This quote reflects the idea that those who are virtuous and spiritually elevated radiate divine light and wisdom, much like the sun and sacred fire.",
+      "lore_snippet": "The sages of old taught that purity of heart and mind ignites an inner radiance, visible to gods and mortals alike. Such souls are said to walk with the brightness of Agni's flame and Surya's golden light.",
+      "image": "quote_2.png",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    }
   ]
 }

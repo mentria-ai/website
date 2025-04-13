@@ -175,3 +175,4 @@ public
 # OS files
 .DS_Store
 Thumbs.db
+build/assets/data/.last_read_line

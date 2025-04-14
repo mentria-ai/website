@@ -16,6 +16,23 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_2",
+      "quote": "Having attained fame in this world, they then succumbed to the power of time.",
+      "sanskrit": "\u0905\u0938\u094d\u092e\u093f\u0901\u0932\u094d\u0932\u094b\u0915\u0947 \u092f\u0936\u0903 \u092a\u094d\u0930\u093e\u092a\u094d\u092f \u0924\u0924\u0903 \u0915\u093e\u0932\u0935\u0936\u0902 \u0917\u0924\u093e\u0903",
+      "reference": "Mahabharata, Vana Parva, Chapter 167",
+      "meaning": "Even the greatest heroes and kings, after achieving glory, inevitably yield to the relentless march of time\u2014a reminder of mortality's universal dominion.",
+      "lore_snippet": "The annals of history remember many mighty souls who shone like stars. Yet even the brightest constellations fade\u2014for time is the one sovereign none may defy.",
+      "image": "quote_2.png",
+      "audio": "quote_2.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

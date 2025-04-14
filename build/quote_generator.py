@@ -65,7 +65,7 @@ def save_facts(facts_data):
     # Save the facts data
     with open(json_path, "w") as f:
         json.dump(facts_data, f, indent=2)
-    print(f"Saved {len(facts_data['quotes'])} comic panels to {json_path}")
+    print(f"Saved {len(facts_data['quotes'])} quotes to {json_path}")
 
 def git_commit_and_push(num_new_facts):
     """Commit the latest changes and push to the repository."""
@@ -73,10 +73,10 @@ def git_commit_and_push(num_new_facts):
         print("\nCommitting and pushing changes to the repository...")
         
         # Stage the changes
-        subprocess.run(["git", "add", "assets/data/directory.json", "assets/img/quotes/"], check=True)
+        subprocess.run(["git", "add", "assets/data/directory.json", "assets/img/quotes/", "assets/audio/quotes/"], check=True)
         
         # Create a descriptive commit message
-        commit_message = f"Add {num_new_facts} new Mahabharata lore quote{'s' if num_new_facts > 1 else ''} with e-ink style artwork"
+        commit_message = f"Add {num_new_facts} new Mahabharata lore quote{'s' if num_new_facts > 1 else ''} with e-ink style artwork and audio"
         subprocess.run(["git", "commit", "-m", commit_message], check=True)
         
         # Push to the repository (assuming 'main' branch)
@@ -146,7 +146,7 @@ class MahabharataReader:
         except IOError as e:
             print(f"Error saving progress: {e}")
     
-    def get_next_chunk(self, chunk_size=40):
+    def get_next_chunk(self, chunk_size=120):
         """Get the next sequential chunk of the text."""
         if self.current_line >= self.total_lines:
             print("Reached the end of the Mahabharata file. Restarting from the beginning.")
@@ -263,11 +263,19 @@ class MahabharataReader:
 def generate_legends_and_prompts(chunk_data, client):
     """Generate quotes and image prompts from a chunk of the Mahabharata."""
     system_prompt = """You are a sophisticated AI specializing in ancient Sanskrit texts, particularly the Mahabharata.
-    Your task is to extract ONE powerful quote from the provided Mahabharata text chunk and transform it into a "lore quote" styled like Skyrim's loading screen tips.
+    Your task is to extract 1-3 powerful quotes from the provided Mahabharata text chunk and transform them into "lore quotes" styled like Skyrim's loading screen tips.
     
     REQUIREMENTS:
-    1. Identify ONE profound, philosophical, or impactful quote or concept from the text chunk provided.
-    2. Format your response as follows:
+    1. Analyze the text chunk and determine if it contains 1, 2, or 3 quote-worthy passages. Only extract multiple quotes if the passages are truly profound and distinct.
+    2. Each quote MUST:
+       - Be philosophical, timeless, and worthy of deep contemplation
+       - Stand complete on its own without requiring additional context
+       - Contain universal wisdom that transcends the specific narrative
+       - Be limited to a MAXIMUM of 35 words (strictly enforce this)
+       - Avoid mundane conversation or simple narrative statements
+       - NOT be a character merely describing their momentary feelings or basic observations
+
+    3. Format your response as an array of 1-3 quotes in JSON, with each quote containing:
        - The lore quote in English (short, impactful, philosophical)
        - The original Sanskrit (if present in the source text)
        - Reference information (approximate book/parva and chapter)
@@ -275,23 +283,40 @@ def generate_legends_and_prompts(chunk_data, client):
        - A lore-style snippet that expands on the quote's wisdom (like Skyrim's loading screens)
        - A single core concept/object that represents the quote's essence (for image generation)
     
-    3. The core concept should be a singular object, person, or symbol that embodies the quote's central theme.
+    4. IMPORTANT: If a quote is someone's direct speech (e.g., "I believe...", "When I...", etc.), ALWAYS prefix it with the speaker's name followed by a colon. 
+       For example: "Duryodhana: When I heard that Krishna and Arjuna had united..."
+       This is crucial for proper context and interpretation.
+    
+    5. The core concept should be a singular object, person, or symbol that embodies the quote's central theme.
        Examples: "a warrior's bow", "scales of justice", "a lotus rising from mud", "two paths diverging"
     
     RESPONSE FORMAT:
     ```json
-    {
-      "quote": "The concise English quote",
-      "sanskrit": "Original Sanskrit if available",
-      "reference": "Mahabharata, [Parva], Chapter [X]",
-      "meaning": "Brief explanation of the quote's meaning",
-      "lore_snippet": "A Skyrim-style loading screen tip based on this wisdom (2-3 sentences)",
-      "core_concept": "One central object or symbol that represents this quote's essence"
-    }
+    [
+      {
+        "quote": "The concise English quote",
+        "sanskrit": "Original Sanskrit if available",
+        "reference": "Mahabharata, [Parva], Chapter [X]",
+        "meaning": "Brief explanation of the quote's meaning",
+        "lore_snippet": "A Skyrim-style loading screen tip based on this wisdom (2-3 sentences)",
+        "core_concept": "One central object or symbol that represents this quote's essence"
+      },
+      {
+        "quote": "Second quote if appropriate",
+        "sanskrit": "Original Sanskrit if available",
+        "reference": "Mahabharata, [Parva], Chapter [X]",
+        "meaning": "Brief explanation of the second quote's meaning",
+        "lore_snippet": "A Skyrim-style loading screen tip for second quote",
+        "core_concept": "Core concept for second quote"
+      },
+      ...
+    ]
     ```
+    
+    NOTE: Only include multiple quotes if the text chunk truly contains multiple profound, distinct philosophical insights. If only one good quote is found, return just one.
     """
     
-    user_prompt = f"""Generate a lore quote from this extract of the Mahabharata:
+    user_prompt = f"""Generate 1-3 lore quotes from this extract of the Mahabharata:
     
     ENGLISH TEXT:
     {chunk_data['english_text']}
@@ -299,7 +324,9 @@ def generate_legends_and_prompts(chunk_data, client):
     SANSKRIT TEXT (if available):
     {chunk_data['sanskrit_text']}
     
-    Remember to identify ONE powerful quote or concept, provide its Sanskrit original if available, reference information, meaning, a lore-style snippet, and a single core concept that represents its essence.
+    Remember to identify powerful quotes or concepts, provide Sanskrit originals if available, reference information, meaning, lore-style snippets, and a single core concept that represents each quote's essence.
+    
+    If the text contains multiple profound insights, extract up to 3 quotes. Otherwise, just extract the single best quote.
     """
     
     # Generate the lore quote using Together API
@@ -310,7 +337,7 @@ def generate_legends_and_prompts(chunk_data, client):
             {"role": "user", "content": user_prompt}
         ],
         temperature=0.7,
-        max_tokens=750
+        max_tokens=1500
     )
     
     try:
@@ -325,27 +352,34 @@ def generate_legends_and_prompts(chunk_data, client):
             json_str = response_text
         
         # Parse the JSON
-        quote_data = json.loads(json_str)
+        quotes_data = json.loads(json_str)
         
-        # Get the core concept
-        core_concept = quote_data.get("core_concept", "a philosophical symbol")
-        
-        # Create a more detailed and artistic image prompt based on the core concept
-        enhanced_concept = enhance_image_prompt(core_concept, quote_data.get("quote", ""), quote_data.get("meaning", ""))
-        
-        # Prepare the negative prompt
-        negative_prompt = "color, photorealistic, 3D, glossy, blur, noise, messy, low resolution, distortion, pixelation, vibrant, oversaturated, soft focus, clutter, neon, comic book style, poorly drawn, extra limbs, broken lines, artifacts"
-        
-        # Return a single quote instead of multiple
-        return [{
-            "quote": quote_data.get("quote", ""),
-            "sanskrit": quote_data.get("sanskrit", ""),
-            "reference": quote_data.get("reference", ""),
-            "meaning": quote_data.get("meaning", ""),
-            "lore_snippet": quote_data.get("lore_snippet", ""),
-            "image_prompt": enhanced_concept,
-            "negative_prompt": negative_prompt
-        }]
+        # Process each quote in the response
+        processed_quotes = []
+        for quote_data in quotes_data:
+            # Get the core concept
+            core_concept = quote_data.get("core_concept", "a philosophical symbol")
+            
+            # Create a more detailed and artistic image prompt based on the core concept
+            enhanced_concept = enhance_image_prompt(core_concept, quote_data.get("quote", ""), quote_data.get("meaning", ""))
+            
+            # Prepare the negative prompt
+            negative_prompt = "color, photorealistic, 3D, glossy, blur, noise, messy, low resolution, distortion, pixelation, vibrant, oversaturated, soft focus, clutter, neon, comic book style, poorly drawn, extra limbs, broken lines, artifacts"
+            
+            # Add the enhanced elements to the quote data
+            processed_quote = {
+                "quote": quote_data.get("quote", ""),
+                "sanskrit": quote_data.get("sanskrit", ""),
+                "reference": quote_data.get("reference", ""),
+                "meaning": quote_data.get("meaning", ""),
+                "lore_snippet": quote_data.get("lore_snippet", ""),
+                "image_prompt": enhanced_concept,
+                "negative_prompt": negative_prompt
+            }
+            
+            processed_quotes.append(processed_quote)
+            
+        return processed_quotes
     except Exception as e:
         print(f"Error parsing the response: {e}")
         print(f"Raw response: {response_text}")
@@ -357,7 +391,7 @@ def generate_legends_and_prompts(chunk_data, client):
             "meaning": "Where righteousness prevails, there alone is true victory.",
             "lore_snippet": "Throughout the Mahabharata's greatest battles, the side that upholds righteousness ultimately triumphs. Even if outnumbered, those who guard dharma can never be truly defeated.",
             "image_prompt": "scales of justice balanced perfectly on a mountain peak, with detailed rays of light breaking through clouds, intricate patterns surrounding the scales, worn stone pedestal, ancient script etched into base, in digital e-ink style, minimal monochrome illustration, high contrast line art with stippling and cross-hatching, clean outlines, paper texture background, elegant sketch aesthetic, tranquil and refined",
-            "negative_prompt": "color, photorealistic, 3D, glossy, blur, noise, messy, low resolution, distortion, pixelation, vibrant, oversaturated, soft focus, clutter, neon, comic book style, poorly drawn, extra limbs, broken lines, artifacts"
+            "negative_prompt": "sketchy, hand-drawn, scribbles, cross-hatching, stippling, rough textures, pencil marks, brush strokes, distortion, pixelation, vibrant, oversaturated, soft focus, clutter, neon, comic book style, poorly drawn, extra limbs, broken lines, artifacts"
         }]
 
 def enhance_image_prompt(core_concept, quote="", meaning=""):
@@ -584,40 +618,118 @@ def generate_image_with_params(prompt, negative_prompt=None, previous_image_url=
                         
                         image_filename = None
                         image_subfolder = ""
+                        image_type = ""
+                        image_url = ""
                         
-                        # Look for the output from the SaveImage node
+                        # Debug - print out the entire outputs structure
+                        print(f"Debug - All node outputs structure:")
+                        for node_id, node_output in outputs.items():
+                            if "images" in node_output:
+                                print(f"  Node {node_id}: {node_output.get('images')}")
+                                
+                        # First look for output type images
                         for node_id, node_output in outputs.items():
                             if "images" in node_output:
                                 for img_info in node_output["images"]:
-                                    image_filename = img_info.get("filename")
-                                    image_subfolder = img_info.get("subfolder", "")
-                                    break
-                                if image_filename:
+                                    if img_info.get("type") == "output":
+                                        image_filename = img_info.get("filename")
+                                        image_subfolder = img_info.get("subfolder", "")
+                                        image_type = img_info.get("type", "")
+                                        image_url = img_info.get("url", "")
+                                        print(f"Found output image: {image_filename}, subfolder: {image_subfolder}, type: {image_type}")
+                                        break
+                                if image_filename and image_type == "output":
                                     break
                         
-                        if image_filename:
-                            # Download the image
-                            image_url = f"{COMFY_API_URL}/api/view"
-                            params = {
+                        # If no output type image found, try any image
+                        if not image_filename:
+                            print("No output-type image found, trying to use any available image...")
+                            for node_id, node_output in outputs.items():
+                                if "images" in node_output:
+                                    for img_info in node_output["images"]:
+                                        image_filename = img_info.get("filename")
+                                        image_subfolder = img_info.get("subfolder", "")
+                                        image_type = img_info.get("type", "")
+                                        image_url = img_info.get("url", "")
+                                        print(f"Found alternate image: {image_filename}, subfolder: {image_subfolder}, type: {image_type}")
+                                        break
+                                    if image_filename:
+                                        break
+                        
+                        # If we still don't have an image, give up
+                        if not image_filename:
+                            print("No image found in any node output")
+                            break
+                            
+                        # Try multiple possible URL patterns for downloading the image
+                        possible_urls = [
+                            # Standard API view endpoint with params
+                            {"url": f"{COMFY_API_URL}/api/view", "params": {
                                 "filename": image_filename,
                                 "subfolder": image_subfolder,
                                 "type": "output"
-                            }
+                            }, "method": "get_with_params"},
                             
-                            img_response = requests.get(image_url, params=params)
-                            if img_response.status_code == 200:
-                                # Save the image directly without resizing
-                                with open(image_path, 'wb') as f:
-                                    f.write(img_response.content)
-                                
-                                print(f"✓ Image saved to {image_path}")
-                                return image_path
-                            else:
-                                print(f"Error downloading image: {img_response.status_code}")
-                        else:
-                            print("No image found in output")
+                            # Direct output path (common pattern)
+                            {"url": f"{COMFY_API_URL}/output/{image_subfolder}/{image_filename}", "params": None, "method": "direct"},
+                            
+                            # Alternative output path without subfolder
+                            {"url": f"{COMFY_API_URL}/output/{image_filename}", "params": None, "method": "direct"},
+                            
+                            # Some ComfyUI instances use a file endpoint
+                            {"url": f"{COMFY_API_URL}/file/output/{image_subfolder}/{image_filename}", "params": None, "method": "direct"},
+                            
+                            # Try without api prefix for some server configurations
+                            {"url": f"{COMFY_API_URL.replace('/api', '')}/output/{image_subfolder}/{image_filename}", "params": None, "method": "direct"},
+                            
+                            # Try with /view endpoint and different param formats
+                            {"url": f"{COMFY_API_URL}/view", "params": {
+                                "filename": image_filename,
+                                "subfolder": image_subfolder,
+                                "type": "output"
+                            }, "method": "get_with_params"},
+                            
+                            # Try with the root ComfyUI URL
+                            {"url": f"{COMFY_API_URL.split('/api')[0]}/output/{image_filename}", "params": None, "method": "direct"}
+                        ]
                         
-                        break
+                        # If we found a direct URL in the response, add that first
+                        if image_url:
+                            possible_urls.insert(0, {"url": image_url, "params": None, "method": "direct"})
+                        
+                        # Try each URL pattern
+                        success = False
+                        print(f"Debug - trying to download image: {image_filename}, subfolder: {image_subfolder}, type: {image_type}")
+                        for idx, url_info in enumerate(possible_urls):
+                            try:
+                                print(f"Download attempt {idx+1}/{len(possible_urls)}: {url_info['method']} - {url_info['url']}")
+                                if url_info["method"] == "get_with_params":
+                                    response = requests.get(url_info["url"], params=url_info["params"])
+                                else:
+                                    response = requests.get(url_info["url"])
+                                
+                                if response.status_code == 200:
+        # Save the image
+        with open(image_path, 'wb') as f:
+                                        f.write(response.content)
+                                    
+                                    print(f"✓ Image saved to {image_path} (method {idx+1})")
+                                    success = True
+                                    return image_path
+                                else:
+                                    print(f"  - Failed with status code: {response.status_code}")
+                            except Exception as e:
+                                print(f"  - Error: {e}")
+                        
+                        if not success:
+                            print(f"× Failed to download image after trying {len(possible_urls)} different methods")
+                        else:
+                            print(f"✓ Image saved to {image_path}")
+                            return image_path
+                    else:
+                        print("No image found in output")
+                    
+                    break
                 
                 # Wait a bit before checking again
                 time.sleep(5)
@@ -635,7 +747,7 @@ def generate_image_with_params(prompt, negative_prompt=None, previous_image_url=
         print(f"Error generating image: {e}")
         return None
 
-def generate_and_save_image(quote_data, quote_number, existing_quotes, previous_image_url=None):
+def generate_and_save_image(quote_data, quote_number, existing_facts, previous_image_url=None):
     """Generate and save an image for a quote using Together API."""
     # Extract the prompt from the quote data
     prompt = quote_data.get("image_prompt", "")
@@ -674,22 +786,326 @@ def generate_and_save_image(quote_data, quote_number, existing_quotes, previous_
     print(f"× Failed to generate image for quote {quote_number}")
     return None
 
-def save_quote_to_directory(quote_data, quote_number, image_path=None):
-    """Save a quote to the directory.json file."""
-    # Format the quote data
-    quote_entry = {
-        "id": f"quote_{quote_number}",
-        "quote": quote_data.get("quote", ""),
-        "sanskrit": quote_data.get("sanskrit", ""),
-        "reference": quote_data.get("reference", ""),
-        "meaning": quote_data.get("meaning", ""),
-        "lore_snippet": quote_data.get("lore_snippet", ""),
-        "image": image_path.name if image_path else None,
-        "category": "philosophy",
-        "tags": ["mahabharata", "wisdom", "ancient", "dharma"]
+def generate_audio_prompt(quote_data):
+    """Generate an appropriate audio prompt based on the quote content."""
+    quote = quote_data.get("quote", "")
+    meaning = quote_data.get("meaning", "")
+    core_concept = quote_data.get("core_concept", "")
+    
+    # Base themes for the audio
+    themes = [
+        "smooth jazz instrumental with subtle piano accents",
+        "upbeat electronic house music with relaxing synth melodies",
+        "lo-fi beats with relaxing piano melodies",
+        "classical crossover with modern string arrangements",
+        "cinematic orchestral theme with emotive string sections",
+        "chill electronic with atmospheric pads and textures"
+    ]
+    
+    # Select a base theme
+    base_theme = random.choice(themes)
+    
+    # Keywords to detect in quotes and their corresponding musical elements
+    keywords = {
+        "battle": "heroic percussion and dramatic string crescendos",
+        "dharma": "righteous, noble melody with deep resonance",
+        "wisdom": "contemplative flute passages with gentle rhythms",
+        "death": "somber, reflective motifs with sparse instrumentation",
+        "god": "divine, ethereal soundscape with bells and chimes",
+        "warrior": "powerful rhythmic patterns with bold brass accents",
+        "peace": "serene, flowing melodies with ambient textures",
+        "karma": "cyclical patterns with layered instrumental textures",
+        "time": "ticking rhythms and flowing temporal progressions",
+        "destiny": "fateful harmonic progressions with tense resolution",
+        "victory": "triumphant melodic theme with uplifting dynamics",
+        "sacrifice": "mournful yet dignified melodic progression",
+        "journey": "progressive musical narrative with evolving motifs",
+        "love": "tender melodic passages with emotional strings"
     }
     
-    return quote_entry
+    # Analyze quote for keywords and add musical elements
+    additional_elements = []
+    for keyword, element in keywords.items():
+        if keyword.lower() in quote.lower() or keyword.lower() in meaning.lower() or keyword.lower() in core_concept.lower():
+            additional_elements.append(element)
+    
+    # Build the final prompt
+    prompt = base_theme
+    
+    # Add up to 2 additional elements from the detected keywords
+    if additional_elements:
+        elements_to_add = additional_elements[:2]  # Limit to 2 elements to avoid overly complex prompts
+        elements_text = " with " + " and ".join(elements_to_add)
+        prompt += elements_text
+    
+    return prompt
+
+def generate_audio_with_params(prompt, audio_length=45, quote_number=1):
+    """Generate an audio file using the ComfyUI stable audio workflow."""
+    try:
+        # Create the audio directory if it doesn't exist
+        os.makedirs("assets/audio/quotes", exist_ok=True)
+        
+        # Define output audio path
+        audio_path = f"assets/audio/quotes/quote_{quote_number}.mp3"
+        
+        # Create the Stable Audio workflow
+        workflow = {
+            "3": {
+                "inputs": {
+                    "seed": random.randint(1, 2**32 - 1),
+                    "steps": 50,
+                    "cfg": 6,
+                    "sampler_name": "dpmpp_3m_sde_gpu",
+                    "scheduler": "exponential",
+                    "denoise": 1,
+                    "model": [
+                        "25",
+                        0
+                    ],
+                    "positive": [
+                        "6",
+                        0
+                    ],
+                    "negative": [
+                        "7",
+                        0
+                    ],
+                    "latent_image": [
+                        "11",
+                        0
+                    ]
+                },
+                "class_type": "KSampler",
+                "_meta": {
+                    "title": "KSampler"
+                }
+            },
+            "6": {
+                "inputs": {
+                    "text": prompt,
+                    "clip": [
+                        "10",
+                        0
+                    ]
+                },
+                "class_type": "CLIPTextEncode",
+                "_meta": {
+                    "title": "CLIP Text Encode (Prompt)"
+                }
+            },
+            "7": {
+                "inputs": {
+                    "text": "",
+                    "clip": [
+                        "10",
+                        0
+                    ]
+                },
+                "class_type": "CLIPTextEncode",
+                "_meta": {
+                    "title": "CLIP Text Encode (Prompt)"
+                }
+            },
+            "10": {
+                "inputs": {
+                    "clip_name": "t5_base.safetensors",
+                    "type": "stable_audio",
+                    "device": "default"
+                },
+                "class_type": "CLIPLoader",
+                "_meta": {
+                    "title": "Load CLIP"
+                }
+            },
+            "11": {
+                "inputs": {
+                    "seconds": audio_length,
+                    "batch_size": 1
+                },
+                "class_type": "EmptyLatentAudio",
+                "_meta": {
+                    "title": "EmptyLatentAudio"
+                }
+            },
+            "12": {
+                "inputs": {
+                    "samples": [
+                        "3",
+                        0
+                    ],
+                    "vae": [
+                        "25",
+                        2
+                    ]
+                },
+                "class_type": "VAEDecodeAudio",
+                "_meta": {
+                    "title": "VAEDecodeAudio"
+                }
+            },
+            "13": {
+                "inputs": {
+                    "filename_prefix": f"audio/quotes/quote_{quote_number}",
+                    "audio": [
+                        "12",
+                        0
+                    ]
+                },
+                "class_type": "SaveAudio",
+                "_meta": {
+                    "title": "SaveAudio"
+                }
+            },
+            "25": {
+                "inputs": {
+                    "ckpt_name": "Instrumental-FT.ckpt"
+                },
+                "class_type": "CheckpointLoaderSimple",
+                "_meta": {
+                    "title": "Load Checkpoint"
+                }
+            }
+        }
+        
+        print(f"\nGenerating audio for quote {quote_number} with prompt: {prompt}")
+        
+        # Queue the audio generation
+        prompt_data = {
+            "prompt": workflow,
+            "client_id": client_id
+        }
+        
+        response = requests.post(
+            f"{COMFY_API_URL}/api/prompt",
+            json=prompt_data,
+            headers={
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        )
+        
+        if response.status_code != 200:
+            print(f"Error submitting audio workflow: {response.status_code}")
+            print(f"Response: {response.text}")
+            return None
+        
+        prompt_id = response.json().get("prompt_id")
+        print(f"Audio workflow submitted successfully with ID: {prompt_id}")
+        
+        # Monitor execution
+        start_time = time.time()
+        timeout = 900  # 15 minutes timeout (audio generation can take longer)
+        
+        print("Waiting for audio generation to complete...")
+        while time.time() - start_time < timeout:
+            try:
+                # Check queue status
+                queue_response = requests.get(f"{COMFY_API_URL}/api/queue")
+                queue_data = queue_response.json()
+                
+                # Check if our prompt is still in the queue
+                is_in_queue = False
+                for item in queue_data.get("queue_running", []):
+                    if item[1] == prompt_id:
+                        is_in_queue = True
+                        print("  - Still running...")
+                        break
+                
+                for item in queue_data.get("queue_pending", []):
+                    if item[1] == prompt_id:
+                        is_in_queue = True
+                        print("  - Pending in queue...")
+                        break
+                
+                if not is_in_queue:
+                    # Check if execution is done by getting history
+                    history_response = requests.get(f"{COMFY_API_URL}/api/history/{prompt_id}")
+                    if history_response.status_code == 200:
+                        print("✓ Audio generation completed!")
+                        
+                        # Get output from SaveAudio node
+                        history_data = history_response.json()
+                        node_outputs = history_data.get(prompt_id, {}).get("outputs", {})
+                        
+                        audio_filename = None
+                        audio_subfolder = ""
+                        
+                        # Look for the output from the SaveAudio node
+                        for node_id, node_output in node_outputs.items():
+                            if "audio" in node_output:
+                                for audio_info in node_output["audio"]:
+                                    audio_filename = audio_info.get("filename")
+                                    audio_subfolder = audio_info.get("subfolder", "")
+                                    break
+                                if audio_filename:
+                                    break
+                        
+                        if audio_filename:
+                            # Download the audio file
+                            audio_url = f"{COMFY_API_URL}/api/view"
+                            params = {
+                                "filename": audio_filename,
+                                "subfolder": audio_subfolder,
+                                "type": "output"
+                            }
+                            
+                            audio_response = requests.get(audio_url, params=params, stream=True)
+                            if audio_response.status_code == 200:
+                                # Save the audio file
+                                with open(audio_path, 'wb') as f:
+                                    for chunk in audio_response.iter_content(chunk_size=8192):
+                                        f.write(chunk)
+                                
+                                print(f"✓ Audio saved to {audio_path}")
+                                return audio_path
+                            else:
+                                print(f"Error downloading audio: {audio_response.status_code}")
+                        else:
+                            print("No audio found in output")
+                        
+                        break
+                
+                # Wait before checking again
+                time.sleep(10)  # Longer interval for audio generation
+                
+            except Exception as e:
+                print(f"Error checking audio status: {e}")
+                time.sleep(10)
+        
+        if time.time() - start_time >= timeout:
+            print("Timed out waiting for audio generation")
+        
+        return None
+    
+    except Exception as e:
+        print(f"Error generating audio: {e}")
+        return None
+
+def generate_and_save_audio(quote_data, quote_number):
+    """Generate and save an audio file for a quote."""
+    # Generate an appropriate audio prompt based on the quote content
+    audio_prompt = generate_audio_prompt(quote_data)
+    
+    # Check if audio already exists
+    audio_path = Path(f"assets/audio/quotes/quote_{quote_number}.mp3")
+    if audio_path.exists():
+        print(f"Audio file for quote {quote_number} already exists at {audio_path}")
+        return audio_path
+    
+    # Generate the audio
+    result_path = generate_audio_with_params(
+        prompt=audio_prompt,
+        audio_length=45,  # 45 seconds is a good length for background music
+        quote_number=quote_number
+    )
+    
+    if result_path:
+        print(f"✓ Successfully generated audio for quote {quote_number} at {result_path}")
+        return Path(result_path)
+    else:
+        print(f"× Failed to generate audio for quote {quote_number}")
+        return None
 
 def process_mahabharata_chunk(chunk_data, client, existing_facts, start_from_number, previous_image_url=None):
     """Process a chunk of the Mahabharata text to generate facts and images."""
@@ -710,8 +1126,11 @@ def process_mahabharata_chunk(chunk_data, client, existing_facts, start_from_num
         # Generate and save the image
         image_path = generate_and_save_image(quote_data, quote_number, existing_facts, previous_image_url)
         
+        # Generate and save the audio
+        audio_path = generate_and_save_audio(quote_data, quote_number)
+        
         # Save the quote to the directory
-        quote_entry = save_quote_to_directory(quote_data, quote_number, image_path)
+        quote_entry = save_quote_to_directory(quote_data, quote_number, image_path, audio_path)
         
         # Add to new facts list
         new_facts.append(quote_entry)
@@ -729,6 +1148,24 @@ def process_mahabharata_chunk(chunk_data, client, existing_facts, start_from_num
         "last_image_url": previous_image_url
     }
 
+def save_quote_to_directory(quote_data, quote_number, image_path=None, audio_path=None):
+    """Save a quote to the directory.json file."""
+    # Format the quote data
+    quote_entry = {
+        "id": f"quote_{quote_number}",
+        "quote": quote_data.get("quote", ""),
+        "sanskrit": quote_data.get("sanskrit", ""),
+        "reference": quote_data.get("reference", ""),
+        "meaning": quote_data.get("meaning", ""),
+        "lore_snippet": quote_data.get("lore_snippet", ""),
+        "image": image_path.name if image_path else None,
+        "audio": f"quote_{quote_number}.mp3" if audio_path else None,
+        "category": "philosophy",
+        "tags": ["mahabharata", "wisdom", "ancient", "dharma"]
+    }
+    
+    return quote_entry
+
 def main():
     """Main function to generate Mahabharata lore quotes."""
     print("\n=== Mahabharata Lore Quotes Generator ===")
@@ -736,6 +1173,7 @@ def main():
     # Create necessary directories
     os.makedirs("assets/img/quotes", exist_ok=True)
     os.makedirs("assets/data", exist_ok=True)
+    os.makedirs("assets/audio/quotes", exist_ok=True)
     
     # Load existing facts
     existing_facts = load_existing_facts()
@@ -785,7 +1223,7 @@ def main():
                 print(f"\n--- Processing Item {i+1}/{batch_size} ---")
                 
                 # Get the next chunk of text
-                chunk_data = reader.get_next_chunk(chunk_size=40)
+                chunk_data = reader.get_next_chunk(chunk_size=120)
                 
                 # Process the chunk
                 result = process_mahabharata_chunk(

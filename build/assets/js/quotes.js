@@ -12,6 +12,19 @@ class QuoteManager {
         this.scrollTimeout = null;
         this.resizeTimeout = null;
         
+        // Add navigation lock to prevent rapid changes
+        this.isNavigating = false;
+        this.navigationTimeout = null;
+        this.pendingNavigation = null;
+        this.navigationDebounceDelay = 800; // ms
+        this.lastNavigationTime = 0;
+        
+        // Image prefetching and loading state
+        this.prefetchedImages = new Set();
+        this.loadingImages = new Map();
+        this.isPrefetchingActive = true;
+        this.prefetchDistance = 2; // Prefetch 2 slides ahead and behind
+        
         // Configuration flag for whether to check for video versions
         this.checkForVideos = false; // Set to false by default - change to true if you want video support
         
@@ -31,6 +44,9 @@ class QuoteManager {
                 this.initializeScrollContainer();
                 // Set initial quote details based on saved position
                 this.updateQuoteInfo(this.currentQuoteIndex);
+                
+                // Start prefetching adjacent slides
+                this.prefetchAdjacentImages(this.currentQuoteIndex);
             }
             
             // Set up event listeners for scroll and other interactions
@@ -128,6 +144,61 @@ class QuoteManager {
         }, 10);
     }
     
+    // Prefetch images for slides adjacent to current index
+    prefetchAdjacentImages(currentIndex) {
+        if (!this.isPrefetchingActive || !this.quotes.length) return;
+        
+        const quoteCount = this.quotes.length;
+        
+        // Prefetch slides ahead and behind within prefetchDistance
+        for (let offset = -this.prefetchDistance; offset <= this.prefetchDistance; offset++) {
+            if (offset === 0) continue; // Skip current slide
+            
+            const slideIndex = (currentIndex + offset + quoteCount) % quoteCount;
+            const quote = this.quotes[slideIndex];
+            
+            if (quote) {
+                const imgSrc = quote.image_url || `assets/img/quotes/${quote.image || 'quote_1.jpg'}`;
+                this.prefetchImage(imgSrc, slideIndex);
+            }
+        }
+    }
+    
+    // Prefetch a single image
+    prefetchImage(imgSrc, indexForLogging) {
+        // Skip if already prefetched or currently loading
+        if (this.prefetchedImages.has(imgSrc) || this.loadingImages.has(imgSrc)) {
+            return;
+        }
+        
+        // Create an image element for prefetching
+        const img = new Image();
+        
+        // Track the loading state
+        this.loadingImages.set(imgSrc, img);
+        
+        // Set up event listeners
+        img.onload = () => {
+            this.debug.log(`Prefetched image for slide ${indexForLogging}: ${imgSrc}`);
+            this.prefetchedImages.add(imgSrc);
+            this.loadingImages.delete(imgSrc);
+        };
+        
+        img.onerror = () => {
+            this.debug.error(`Failed to prefetch image for slide ${indexForLogging}: ${imgSrc}`);
+            this.loadingImages.delete(imgSrc);
+        };
+        
+        // Start the prefetch
+        img.src = imgSrc;
+    }
+    
+    // Check if an image is ready (either prefetched or already in cache)
+    isImageReady(imgSrc) {
+        return this.prefetchedImages.has(imgSrc) || 
+               !this.loadingImages.has(imgSrc);
+    }
+    
     addScrollItem(quote, index, position = 'end', isClone = false) {
         const imgSrc = quote.image_url || `assets/img/quotes/${quote.image || 'quote_1.jpg'}`;
         
@@ -146,14 +217,52 @@ class QuoteManager {
             quoteNumber = imgNameMatch[1];
         }
         
+        // Create image container with loading state
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'media-content-container';
+        
+        // Optional loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'loading-indicator';
+        loadingIndicator.innerHTML = '<div class="spinner"></div>';
+        loadingIndicator.style.display = 'none'; // Hide initially
+        imgContainer.appendChild(loadingIndicator);
+        
         // Create image (will be replaced by video if one exists)
         const img = document.createElement('img');
-        img.src = imgSrc;
-        img.alt = quote.alt || 'Motivational quote background';
         img.className = 'media-content';
+        img.alt = quote.alt || 'Motivational quote background';
         
-        // Add to the scroll item
-        scrollItem.appendChild(img);
+        // Handle loading state
+        if (!this.isImageReady(imgSrc)) {
+            loadingIndicator.style.display = 'flex'; // Show loading indicator
+            img.style.opacity = '0'; // Hide image until loaded
+            
+            // Set up load event
+            img.onload = () => {
+                loadingIndicator.style.display = 'none';
+                img.style.opacity = '1';
+                this.prefetchedImages.add(imgSrc);
+                
+                // Check if we need to update scroll position
+                if (index === this.currentQuoteIndex) {
+                    // If this is the current slide and it just loaded, ensure it's visible
+                    this.scrollToItem(index, false);
+                }
+            };
+            
+            img.onerror = () => {
+                loadingIndicator.innerHTML = '<div class="error-message">Image failed to load</div>';
+                this.debug.error(`Failed to load image: ${imgSrc}`);
+            };
+        }
+        
+        // Set the src after setting up event handlers
+        img.src = imgSrc;
+        imgContainer.appendChild(img);
+        
+        // Add the image container to the scroll item
+        scrollItem.appendChild(imgContainer);
         
         // Only check for video version if feature flag is enabled
         if (this.checkForVideos && quoteNumber) {
@@ -174,9 +283,9 @@ class QuoteManager {
                         video.controls = false;
                         
                         // Replace the image with the video
-                        const existingMedia = scrollItem.querySelector('.media-content');
+                        const existingMedia = imgContainer.querySelector('.media-content');
                         if (existingMedia) {
-                            scrollItem.replaceChild(video, existingMedia);
+                            imgContainer.replaceChild(video, existingMedia);
                             
                             // Make sure video plays
                             video.play().catch(err => {
@@ -301,8 +410,59 @@ class QuoteManager {
             
             // Only update UI if we're showing a different quote than before
             if (index !== this.currentQuoteIndex) {
+                this.debug.log('Scroll detected new quote:', { old: this.currentQuoteIndex, new: index });
                 this.currentQuoteIndex = index;
+                
+                // Force event dispatch regardless of isNavigating state
                 this.updateQuoteInfo(index);
+                
+                // Start prefetching adjacent images from the new position
+                this.prefetchAdjacentImages(index);
+                
+                // Ensure navigation lock is released appropriately
+                if (this.isNavigating) {
+                    // Clear any existing timeout to prevent race conditions
+                    if (this.navigationTimeout) {
+                        clearTimeout(this.navigationTimeout);
+                    }
+                    
+                    // Set a short timeout to release the lock
+                    this.navigationTimeout = setTimeout(() => {
+                        this.debug.log('Navigation lock released after scroll completion');
+                        this.isNavigating = false;
+                        
+                        // Re-dispatch the quote change event to ensure it's processed
+                        if (this.quotes[index]) {
+                            const quote = this.quotes[index];
+                            const reUpdateEvent = new CustomEvent('quoteChanged', {
+                                detail: {
+                                    quote: quote.quote || quote.text,
+                                    emphasis: quote.emphasis || {},
+                                    id: quote.id || `quote_${index}`,
+                                    liked: this.isQuoteLiked(quote.id),
+                                    forceUpdate: true // Add flag to force update
+                                }
+                            });
+                            this.debug.log('Re-dispatching quote change event for', quote.id || `quote_${index}`);
+                            document.dispatchEvent(reUpdateEvent);
+                        }
+                        
+                        // Process any pending navigation
+                        if (this.pendingNavigation) {
+                            const navDirection = this.pendingNavigation;
+                            this.pendingNavigation = null;
+                            this.debug.log('Processing pending navigation:', navDirection);
+                            
+                            setTimeout(() => {
+                                if (navDirection === 'next') {
+                                    this.nextQuote();
+                                } else if (navDirection === 'prev') {
+                                    this.prevQuote();
+                                }
+                            }, 50);
+                        }
+                    }, 100); // Shorter timeout for better responsiveness
+                }
             }
             
             // If we've scrolled to a clone, we need to loop
@@ -369,20 +529,28 @@ class QuoteManager {
         }
         
         const quote = this.quotes[index];
-        this.debug.log('Updating quote info:', { index, quote });
+        this.debug.log('Updating quote info:', { index, quote: quote.id || `quote_${index}` });
         
         // Save the current position when changing quotes
         this.currentQuoteIndex = index;
         this.savePosition();
         
+        // Enhanced debugging info
+        this.debug.log('Dispatching quoteChanged event:', { 
+            id: quote.id || `quote_${index}`,
+            textLength: (quote.quote || quote.text || '').length,
+            timeSinceLastNav: Date.now() - this.lastNavigationTime,
+            isNavigating: this.isNavigating
+        });
+        
         // Dispatch a custom event to notify that the quote has changed
-        this.debug.log('Dispatching quoteChanged event with text:', quote.quote || quote.text);
         const quoteChangedEvent = new CustomEvent('quoteChanged', {
             detail: {
                 quote: quote.quote || quote.text,
                 emphasis: quote.emphasis || {},
                 id: quote.id || `quote_${index}`,
-                liked: this.isQuoteLiked(quote.id)
+                liked: this.isQuoteLiked(quote.id),
+                scrollInitiated: true // Flag to indicate this was from scroll
             }
         });
         
@@ -414,15 +582,149 @@ class QuoteManager {
     }
     
     nextQuote() {
+        // If already navigating, store this as pending and return
+        if (this.isNavigating) {
+            this.debug.log('Next navigation requested while busy - queuing');
+            this.pendingNavigation = 'next';
+            return;
+        }
+        
         const nextIndex = (this.currentQuoteIndex + 1) % this.quotes.length;
+        
+        // Check if the next image is ready before navigating
+        const nextQuote = this.quotes[nextIndex];
+        if (nextQuote) {
+            const imgSrc = nextQuote.image_url || `assets/img/quotes/${nextQuote.image || 'quote_1.jpg'}`;
+            
+            // If image is still loading, prefetch it and show loading state
+            if (!this.isImageReady(imgSrc)) {
+                this.debug.log(`Next image not ready, prefetching: ${imgSrc}`);
+                this.prefetchImage(imgSrc, nextIndex);
+                
+                // Still proceed with navigation, but with a visual loading indicator
+                const scrollItems = this.scrollContainer.querySelectorAll('.scroll-item');
+                const nextAdjustedIndex = nextIndex + 3; // Adjust for clones
+                
+                if (scrollItems[nextAdjustedIndex]) {
+                    const loadingIndicator = scrollItems[nextAdjustedIndex].querySelector('.loading-indicator');
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'flex';
+                    }
+                }
+            }
+        }
+        
+        // Set navigation lock
+        this.setNavigationLock();
+        
         this.debug.log('Moving to next quote:', { current: this.currentQuoteIndex, next: nextIndex });
+        
+        // Immediately update quote info before scrolling
+        this.updateQuoteInfo(nextIndex);
+        
+        // Then scroll to the item
         this.scrollToItem(nextIndex);
+        
+        // Start prefetching for the new position
+        this.prefetchAdjacentImages(nextIndex);
     }
     
     prevQuote() {
+        // If already navigating, store this as pending and return
+        if (this.isNavigating) {
+            this.debug.log('Previous navigation requested while busy - queuing');
+            this.pendingNavigation = 'prev';
+            return;
+        }
+        
         const prevIndex = (this.currentQuoteIndex - 1 + this.quotes.length) % this.quotes.length;
+        
+        // Check if the previous image is ready before navigating
+        const prevQuote = this.quotes[prevIndex];
+        if (prevQuote) {
+            const imgSrc = prevQuote.image_url || `assets/img/quotes/${prevQuote.image || 'quote_1.jpg'}`;
+            
+            // If image is still loading, prefetch it and show loading state
+            if (!this.isImageReady(imgSrc)) {
+                this.debug.log(`Previous image not ready, prefetching: ${imgSrc}`);
+                this.prefetchImage(imgSrc, prevIndex);
+                
+                // Still proceed with navigation, but with a visual loading indicator
+                const scrollItems = this.scrollContainer.querySelectorAll('.scroll-item');
+                const prevAdjustedIndex = prevIndex + 3; // Adjust for clones
+                
+                if (scrollItems[prevAdjustedIndex]) {
+                    const loadingIndicator = scrollItems[prevAdjustedIndex].querySelector('.loading-indicator');
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'flex';
+                    }
+                }
+            }
+        }
+        
+        // Set navigation lock
+        this.setNavigationLock();
+        
         this.debug.log('Moving to previous quote:', { current: this.currentQuoteIndex, prev: prevIndex });
+        
+        // Immediately update quote info before scrolling
+        this.updateQuoteInfo(prevIndex);
+        
+        // Then scroll to the item
         this.scrollToItem(prevIndex);
+        
+        // Start prefetching for the new position
+        this.prefetchAdjacentImages(prevIndex);
+    }
+    
+    // Add method to set navigation lock
+    setNavigationLock() {
+        this.isNavigating = true;
+        this.lastNavigationTime = Date.now();
+        
+        // Clear any existing timeout
+        if (this.navigationTimeout) {
+            clearTimeout(this.navigationTimeout);
+        }
+        
+        // Set timeout to release the lock
+        this.navigationTimeout = setTimeout(() => {
+            this.debug.log('Navigation lock released');
+            this.isNavigating = false;
+            
+            // Re-dispatch the current quote info to ensure everything is in sync
+            const currentIndex = this.currentQuoteIndex;
+            if (this.quotes[currentIndex]) {
+                const quote = this.quotes[currentIndex];
+                const syncEvent = new CustomEvent('quoteChanged', {
+                    detail: {
+                        quote: quote.quote || quote.text,
+                        emphasis: quote.emphasis || {},
+                        id: quote.id || `quote_${currentIndex}`,
+                        liked: this.isQuoteLiked(quote.id),
+                        forceUpdate: true // Force update to ensure sync
+                    }
+                });
+                this.debug.log('Dispatching sync event for', quote.id || `quote_${currentIndex}`);
+                document.dispatchEvent(syncEvent);
+            }
+            
+            // Check for pending navigation
+            if (this.pendingNavigation) {
+                this.debug.log('Processing pending navigation:', this.pendingNavigation);
+                const navDirection = this.pendingNavigation;
+                this.pendingNavigation = null;
+                
+                // Small delay before executing pending navigation
+                setTimeout(() => {
+                    if (navDirection === 'next') {
+                        this.nextQuote();
+                    } else if (navDirection === 'prev') {
+                        this.prevQuote();
+                    }
+                }, 50);
+            }
+        }, this.navigationDebounceDelay);
     }
     
     isQuoteLiked(quoteId) {
@@ -456,11 +758,35 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const quoteManager = new QuoteManager();
     
-    // Expose navigation functions to window
-    window.quoteNavigation = {
-        next: () => quoteManager.nextQuote(),
-        prev: () => quoteManager.prevQuote()
-    };
-    
-    debug.log('Navigation functions exposed to window.quoteNavigation');
+    // Make sure we initialize the QuoteManager first
+    // Wait for a short delay to ensure everything is registered properly
+    setTimeout(() => {
+        // Expose navigation functions to window
+        window.quoteNavigation = {
+            next: () => quoteManager.nextQuote(),
+            prev: () => quoteManager.prevQuote(),
+            isNavigating: () => quoteManager.isNavigating
+        };
+        
+        debug.log('Navigation functions exposed to window.quoteNavigation');
+        
+        // Force a sync after everything is initialized
+        if (quoteManager.quotes.length > 0) {
+            const currentIndex = quoteManager.currentQuoteIndex;
+            if (quoteManager.quotes[currentIndex]) {
+                debug.log('Forcing initial sync for quote:', currentIndex);
+                const quote = quoteManager.quotes[currentIndex];
+                const syncEvent = new CustomEvent('quoteChanged', {
+                    detail: {
+                        quote: quote.quote || quote.text,
+                        emphasis: quote.emphasis || {},
+                        id: quote.id || `quote_${currentIndex}`,
+                        liked: quoteManager.isQuoteLiked(quote.id),
+                        forceUpdate: true
+                    }
+                });
+                document.dispatchEvent(syncEvent);
+            }
+        }
+    }, 500);
 }); 

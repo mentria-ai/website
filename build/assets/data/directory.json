@@ -50,6 +50,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_4",
+      "quote": "The wheel of time turns endlessly\u2014creation and destruction are but its spokes, and all worlds are bound to its revolution.",
+      "sanskrit": "\u0905\u0928\u093e\u0926\u093f\u0928\u093f\u0927\u0928\u0902 \u0932\u094b\u0915\u0947 \u091a\u0915\u094d\u0930\u0902 \u0938\u092e\u094d\u092a\u0930\u093f\u0935\u0930\u094d\u0924\u0924\u0947",
+      "reference": "Mahabharata, Adi Parva, Chapter 1 (approximate)",
+      "meaning": "The universe operates in eternal cycles (yugas), where creation and dissolution are inevitable phases, echoing the impermanence of all existence.",
+      "lore_snippet": "Just as the seasons obey the sun's path, so too does the cosmos revolve in divine rhythm. The wise understand that resistance to change is the root of suffering.",
+      "image": "quote_4.png",
+      "audio": "quote_4.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_5",
+      "quote": "Krishna: Roots of a tree lie hidden, yet they feed its branches. So too does dharma nourish all visible deeds from the unseen depths.",
+      "sanskrit": "\u092e\u0942\u0932\u0902 \u0915\u0943\u0937\u094d\u0923\u094b \u092c\u094d\u0930\u0939\u094d\u092e \u091a \u092c\u094d\u0930\u093e\u0939\u094d\u092e\u0923\u093e\u0936\u094d\u091a",
+      "reference": "Mahabharata, Adi Parva, Chapter 1 (approximate)",
+      "meaning": "The divine (symbolized by Krishna) and cosmic order (dharma) are the invisible foundations supporting all virtuous actions and lineages.",
+      "lore_snippet": "A tree's strength flows from its roots, not its leaves. Seekers of truth must look beyond appearances to the eternal laws that sustain life's forest.",
+      "image": "quote_5.png",
+      "audio": "quote_5.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

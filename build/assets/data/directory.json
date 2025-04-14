@@ -441,6 +441,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_27",
+      "quote": "Ashwatthama: When wrath consumes the wise, even divine weapons become instruments of destruction, blind to kinship or righteousness.",
+      "sanskrit": "\u0905\u0938\u094d\u0924\u094d\u0930\u0902 \u092a\u094d\u0930\u093e\u0926\u0941\u0936\u094d\u091a\u0915\u093e\u0930\u094b\u0917\u094d\u0930\u0902 \u0928\u093e\u0930\u093e\u092f\u0923\u092e\u092e\u0930\u094d\u0937\u093f\u0924\u0903",
+      "reference": "Mahabharata, Drona Parva",
+      "meaning": "Even the most disciplined warriors can lose themselves to rage, wielding power indiscriminately when overcome by emotion.",
+      "lore_snippet": "The Narayanastra, when unleashed in anger, does not discriminate between friend and foe. This teaches that true mastery lies not in power itself, but in the wisdom to wield it justly.",
+      "image": "quote_27.png",
+      "audio": "quote_27.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_28",
+      "quote": "The fallen teach this truth: No valor withstands fate's decree when the wheel of time turns against the mightiest kings.",
+      "sanskrit": "\u0905\u0924\u094d\u0930 \u0924\u0947 \u092a\u0943\u0925\u093f\u0935\u0940\u092a\u093e\u0932\u093e\u0903 \u092a\u094d\u0930\u093e\u092f\u0936\u094b \u0928\u093f\u0927\u0928\u0902 \u0917\u0924\u093e\u0903",
+      "reference": "Mahabharata, Drona Parva",
+      "meaning": "Earth's greatest rulers perish despite their prowess, revealing destiny's inevitability over mortal strength.",
+      "lore_snippet": "Kurukshetra's soil cradles equal dust from the helmets of heroes and cowards alike. Such is the way of war\u2014and of time's relentless march.",
+      "image": "quote_28.png",
+      "audio": "quote_28.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_29",
+      "quote": "Draupadi: Grief is an unending fire\u2014it consumes the heart that feeds it, yet refuses the ashes of closure.",
+      "sanskrit": "\u0926\u094d\u0930\u094c\u092a\u0926\u0940 \u092a\u0941\u0924\u094d\u0930\u0936\u094b\u0915\u093e\u0930\u094d\u0924\u093e \u092a\u093f\u0924\u0943\u092d\u094d\u0930\u093e\u0924\u0943\u0935\u0927\u093e\u0930\u094d\u0926\u093f\u0924\u093e",
+      "reference": "Mahabharata, Sauptika Parva",
+      "meaning": "Loss multiplies sorrow upon sorrow, creating a cycle of anguish that resists consolation.",
+      "lore_snippet": "The widows of Kurukshetra learned that mourning has no measured end. Like embers in the wind, some griefs scatter but never cool.",
+      "image": "quote_29.png",
+      "audio": "quote_29.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

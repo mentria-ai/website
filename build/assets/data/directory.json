@@ -33,6 +33,23 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_3",
+      "quote": "K\u0101l\u1e25 pacati bh\u016bt\u0101ni k\u0101l\u1e25 sa\u1e43harati praj\u0101\u1e25 | Time cooks all creatures, time destroys all beings.",
+      "sanskrit": "\u0915\u093e\u0932\u0903 \u092a\u091a\u0924\u093f \u092d\u0942\u0924\u093e\u0928\u093f \u0915\u093e\u0932\u0903 \u0938\u0902\u0939\u0930\u0924\u093f \u092a\u094d\u0930\u091c\u093e\u0903",
+      "reference": "Mahabharata, Udyoga Parva, Chapter 188",
+      "meaning": "This verse personifies Time (K\u0101la) as the ultimate force that governs creation, preservation, and destruction. It emphasizes the inevitability of time's power over all existence.",
+      "lore_snippet": "The ancient sages taught that Time is the unseen fire that ripens all things\u2014heroes, kings, and empires alike. None escape its touch, for even gods must bow before its eternal cycle.",
+      "image": "quote_3.png",
+      "audio": "quote_3.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

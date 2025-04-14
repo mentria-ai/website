@@ -31,6 +31,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_3",
+      "quote": "Brahman is the eternal syllable, the manifest and unmanifest, the source of all creation.",
+      "sanskrit": "\u090b\u0924\u092e\u0947\u0915\u093e\u0915\u094d\u0937\u0930\u0902 \u092c\u094d\u0930\u0939\u094d\u092e \u0935\u094d\u092f\u0915\u094d\u0924\u093e\u0935\u094d\u092f\u0915\u094d\u0924\u0902 \u0938\u0928\u093e\u0924\u0928\u092e\u094d",
+      "reference": "Mahabharata, Shanti Parva, Moksha Dharma Section",
+      "meaning": "This verse declares Brahman (the ultimate reality) as both the visible and invisible, the eternal foundation of existence, transcending duality (being and non-being).",
+      "lore_snippet": "The sages teach that the universe is but a ripple upon the surface of Brahman\u2014the one syllable that echoes through time. To perceive it is to see the warp and weft of all things, woven from the same divine thread.",
+      "image": null,
+      "audio": "quote_3.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_4",
+      "quote": "The wheel of time turns without beginning or end, creating and dissolving all worlds.",
+      "sanskrit": "\u0905\u0928\u093e\u0926\u093f\u0928\u093f\u0927\u0928\u0902 \u0932\u094b\u0915\u0947 \u091a\u0915\u094d\u0930\u0902 \u0938\u092e\u094d\u092a\u0930\u093f\u0935\u0930\u094d\u0924\u0924\u0947",
+      "reference": "Mahabharata, [Unknown Parva], Chapter [Unknown]",
+      "meaning": "This verse speaks of the cyclical nature of time and existence, where creation and destruction are perpetual and without ultimate beginning or end.",
+      "lore_snippet": "As the sages of old have written, time is a wheel that forever turns. Kingdoms rise and fall, ages dawn and fade, yet the cosmos endures, ever-renewing like the seasons. The wise understand this and act without attachment.",
+      "image": null,
+      "audio": "quote_4.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -65,6 +65,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_5",
+      "quote": "The wise illuminate diverse knowledge like lamps, while others skillfully preserve it.",
+      "sanskrit": "\u0935\u093f\u0935\u093f\u0927\u0902 \u0938\u0902\u0939\u093f\u0924\u093e\u091c\u094d\u091e\u093e\u0928\u0902 \u0926\u0940\u092a\u092f\u0928\u094d\u0924\u093f \u092e\u0928\u0940\u0937\u093f\u0923\u0903\u0964 \u0935\u094d\u092f\u093e\u0916\u094d\u092f\u093e\u0924\u0941\u0902 \u0915\u0941\u0936\u0932\u093e\u0903 \u0915\u0947\u091a\u093f\u0926\u094d\u0917\u094d\u0930\u0928\u094d\u0925\u0902 \u0927\u093e\u0930\u092f\u093f\u0924\u0941\u0902 \u092a\u0930\u0947\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 1 (Approximate)",
+      "meaning": "This verse celebrates the dual roles of sages and scholars - some ignite wisdom by expanding knowledge (like lamps spreading light), while others safeguard and transmit it through generations.",
+      "lore_snippet": "Just as the Atmorans preserved the Elder Scrolls and the Greybeards interpret their whispers, Vedic tradition honors both those who illuminate new wisdom and those who guard ancient truths. A complete tradition requires both flames and vessels.",
+      "image": null,
+      "audio": "quote_5.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_6",
+      "quote": "The tree of anger grows deep roots, but the tree of dharma bears eternal fruit.",
+      "sanskrit": "\u0926\u0941\u0930\u094d\u092f\u094b\u0927\u0928\u094b \u092e\u0928\u094d\u092f\u0941\u092e\u092f\u094b \u092e\u0939\u093e\u0926\u094d\u0930\u0941\u092e\u0903; \u0938\u094d\u0915\u0928\u094d\u0927\u0903 \u0915\u0930\u094d\u0923\u0903 \u0936\u0915\u0941\u0928\u093f\u0938\u094d\u0924\u0938\u094d\u092f \u0936\u093e\u0916\u093e\u0903 | \u092f\u0941\u0927\u093f\u0937\u094d\u0920\u093f\u0930\u094b \u0927\u0930\u094d\u092e\u092e\u092f\u094b \u092e\u0939\u093e\u0926\u094d\u0930\u0941\u092e\u0903; \u0938\u094d\u0915\u0928\u094d\u0927\u094b\u093d\u0930\u094d\u091c\u0941\u0928\u094b \u092d\u0940\u092e\u0938\u0947\u0928\u094b\u093d\u0938\u094d\u092f \u0936\u093e\u0916\u093e\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 1 (approximate)",
+      "meaning": "This metaphor contrasts the Kauravas (led by Duryodhana, whose power stems from anger and allies like Karna) with the Pandavas (led by Yudhishthira, whose strength flows from dharma and brothers like Arjuna). It reveals how foundations of wrath decay, while righteousness endures.",
+      "lore_snippet": "Legends speak of two great trees\u2014one nourished by fury's poison, the other by virtue's light. The first may tower briefly, but only the second withstands the storm. So too do empires rise and fall by their roots.",
+      "image": null,
+      "audio": "quote_6.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

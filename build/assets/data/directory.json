@@ -577,6 +577,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_35",
+      "quote": "Upamanyu: Even in hunger and blindness, I shall not partake of food without first offering it to my teacher.",
+      "sanskrit": "\u0928\u093e\u0928\u0943\u0924\u092e\u0942\u091a\u0924\u0941\u0930\u094d\u092d\u0935\u0928\u094d\u0924\u094c\u0964 \u0928 \u0924\u094d\u0935\u0939\u092e\u0947\u0924\u092e\u092a\u0942\u092a\u092e\u0941\u092a\u092f\u094b\u0915\u094d\u0924\u0941\u092e\u0941\u0924\u094d\u0938\u0939\u0947 \u0905\u0928\u093f\u0935\u0947\u0926\u094d\u092f \u0917\u0941\u0930\u0935 \u0907\u0924\u093f\u0964",
+      "reference": "Mahabharata, Vana Parva, Chapter 3",
+      "meaning": "Upamanyu's unwavering devotion to his guru transcends physical suffering, embodying the principle that spiritual discipline supersedes bodily needs.",
+      "lore_snippet": "Ancient sages teach that true discipleship requires sacrificing even basic sustenance for wisdom. Those who honor their teachers before themselves shall find divine favor, as the Ashvins showed Upamanyu.",
+      "image": "quote_35.png",
+      "audio": "quote_35.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_36",
+      "quote": "Dharma manifests not in blind obedience, but in understanding the spirit behind every prohibition.",
+      "sanskrit": null,
+      "reference": "Mahabharata, Vana Parva (Inspired by Upamanyu's trials)",
+      "meaning": "The guru's repeated tests teach that true dharma requires discernment - mere ritual compliance without wisdom leads to suffering, as shown by Upamanyu's literal blindness.",
+      "lore_snippet": "Like the Ashvins restoring sight, enlightenment comes when one perceives the deeper purpose behind restrictions. Many follow rules, but few comprehend their essence.",
+      "image": "quote_36.png",
+      "audio": "quote_36.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_37",
+      "quote": "The Ashvins: Divine grace flows to those who hold faith tighter than hunger, and duty dearer than sight.",
+      "sanskrit": null,
+      "reference": "Mahabharata, Vana Parva (Ashvins' intervention)",
+      "meaning": "The healing gods reward Upamanyu's extreme devotion, showing that transcendent principles attract divine intervention when upheld despite mortal suffering.",
+      "lore_snippet": "Tales speak of celestial physicians who descend only when mortals demonstrate unbreakable resolve. Such tests separate fleeting devotion from unshakable tapasya.",
+      "image": "quote_37.png",
+      "audio": "quote_37.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

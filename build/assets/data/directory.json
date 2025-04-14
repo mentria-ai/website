@@ -99,6 +99,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_7",
+      "quote": "The world delights in the valor and virtues of the noble.",
+      "sanskrit": "\u0924\u0941\u0924\u094b\u0937 \u0932\u094b\u0915\u0903 \u0938\u0915\u0932\u0938\u094d\u0924\u0947\u0937\u093e\u0902 \u0936\u094c\u0930\u094d\u092f\u0917\u0941\u0923\u0947\u0928 \u091a",
+      "reference": "Mahabharata, Sabha Parva, Chapter 33",
+      "meaning": "The world rejoices in those who embody both courage (shourya) and virtues (guna), as exemplified by the Pandavas. Their righteousness, strength, and humility earned universal admiration.",
+      "lore_snippet": "The bards sing that true greatness lies not in conquest alone, but in the harmony of might and morality. The wise say even the heavens smile upon warriors who temper their steel with compassion.",
+      "image": null,
+      "audio": "quote_7.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_8",
+      "quote": "The blind man's love for his son binds him to folly, as a moth to flame.",
+      "sanskrit": "\u0905\u0939\u0902 \u0924\u094d\u0935\u091a\u0915\u094d\u0937\u0941\u0903 \u0915\u093e\u0930\u094d\u092a\u0923\u094d\u092f\u093e\u0924\u094d\u092a\u0941\u0924\u094d\u0930\u092a\u094d\u0930\u0940\u0924\u094d\u092f\u093e \u0938\u0939\u093e\u092e\u093f \u0924\u0924\u094d",
+      "reference": "Mahabharata, Udyoga Parva, Chapter 63",
+      "meaning": "Dhritarashtra admits his blindness\u2014both physical and moral\u2014as his excessive love for Duryodhana leads him to tolerate injustice, despite knowing the consequences.",
+      "lore_snippet": "Even the wisest rulers may falter when bound by paternal affection. The blind king's lament reminds us that love, untempered by wisdom, becomes a chain that drags kingdoms into ruin.",
+      "image": null,
+      "audio": "quote_8.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

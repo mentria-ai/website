@@ -84,6 +84,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_6",
+      "quote": "Dhritarashtra: The blind man sees not with his eyes, but with his heart's delusions. Even wisdom falters when bound by a father's love for wayward sons.",
+      "sanskrit": "\u0905\u0939\u0902 \u0924\u094d\u0935\u091a\u0915\u094d\u0937\u0941\u0903 \u0915\u093e\u0930\u094d\u092a\u0923\u094d\u092f\u093e\u0924\u094d\u092a\u0941\u0924\u094d\u0930\u092a\u094d\u0930\u0940\u0924\u094d\u092f\u093e \u0938\u0939\u093e\u092e\u093f \u0924\u0924\u094d",
+      "reference": "Mahabharata, Udyoga Parva, Chapter 63",
+      "meaning": "Dhritarashtra admits his moral blindness stems from excessive attachment to his sons, showing how familial love can cloud even a wise man's judgment.",
+      "lore_snippet": "The chronicles tell of King Dhritarashtra, whose physical blindness became metaphorical\u2014unable to see his sons' faults through the fog of paternal love. Thus warns the sage: attachment distorts dharma's lens.",
+      "image": "quote_6.png",
+      "audio": "quote_6.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_7",
+      "quote": "Arjuna's victory lies not in his bow, but in his alignment with cosmic law. Where Krishna walks, even impossible tasks become sacred rites.",
+      "sanskrit": "\u0938 \u0938\u0930\u094d\u0935\u093e\u0928\u094d\u092a\u093e\u0930\u094d\u0925\u093f\u0935\u093e\u091e\u094d\u091c\u093f\u0924\u094d\u0935\u093e \u0938\u0930\u094d\u0935\u093e\u0902\u0936\u094d\u091a \u092e\u0939\u0924\u094b \u0917\u0923\u093e\u0928\u094d",
+      "reference": "Mahabharata, Sabha Parva, Chapter 28",
+      "meaning": "Arjuna's triumphs stem from divine sanction (Krishna's presence) and adherence to dharma, not mere martial skill.",
+      "lore_snippet": "When the archer and the Infinite became one, mountains bowed and kings surrendered. Remember this when facing impossible odds: right action partnered with divine will moves universes.",
+      "image": "quote_7.png",
+      "audio": "quote_7.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_8",
+      "quote": "The dice-game of envy always leaves both winner and loser in rags. Duryodhana's gold cannot clothe his naked spite.",
+      "sanskrit": "\u0908\u0930\u094d\u0937\u094d\u092f\u093e\u0938\u092e\u0941\u0924\u094d\u0925\u0903 \u0938\u0941\u092e\u0939\u093e\u0902\u0938\u094d\u0924\u0938\u094d\u092f \u092e\u0928\u094d\u092f\u0941\u0930\u091c\u093e\u092f\u0924",
+      "reference": "Mahabharata, Sabha Parva, Chapter 43",
+      "meaning": "Duryodhana's jealousy during the Pandavas' prosperity led to destructive decisions, showing how resentment consumes its host.",
+      "lore_snippet": "Ancient scrolls recount how the Kauravas' golden palace became a cage of discontent. Beware the gambler who stakes his soul\u2014the house always claims its due.",
+      "image": "quote_8.png",
+      "audio": "quote_8.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

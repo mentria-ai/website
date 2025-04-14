@@ -709,8 +709,8 @@ def generate_image_with_params(prompt, negative_prompt=None, previous_image_url=
                                     response = requests.get(url_info["url"])
                                 
                                 if response.status_code == 200:
-        # Save the image
-        with open(image_path, 'wb') as f:
+                                    # Save the image
+                                    with open(image_path, 'wb') as f:
                                         f.write(response.content)
                                     
                                     print(f"✓ Image saved to {image_path} (method {idx+1})")

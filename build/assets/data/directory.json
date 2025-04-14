@@ -492,6 +492,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_30",
+      "quote": "Bhishma: He who understands the laws of time and adversity attains true wisdom and liberation.",
+      "sanskrit": "\u0906\u092a\u0926\u094d\u0927\u0930\u094d\u092e\u093e\u0936\u094d\u091a \u0924\u0924\u094d\u0930\u0948\u0935 \u0915\u093e\u0932\u0939\u0947\u0924\u0941\u092a\u094d\u0930\u0926\u0930\u094d\u0936\u0915\u093e\u0903 \u092f\u093e\u0928\u094d\u092c\u0941\u0926\u094d\u0927\u094d\u0935\u093e \u092a\u0941\u0930\u0941\u0937\u0903 \u0938\u092e\u094d\u092f\u0915\u094d\u0938\u0930\u094d\u0935\u091c\u094d\u091e\u0924\u094d\u0935\u092e\u0935\u093e\u092a\u094d\u0928\u0941\u092f\u093e\u0924\u094d",
+      "reference": "Mahabharata, Shanti Parva, Chapter 198-200",
+      "meaning": "This teaches that true wisdom comes from understanding the cyclical nature of time and how to maintain righteousness even in adversity.",
+      "lore_snippet": "The great sages say time is the fire in which all mortals burn. Only by understanding its cycles can one rise above suffering, like the lotus untainted by the mud it grows through.",
+      "image": "quote_30.png",
+      "audio": "quote_30.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_31",
+      "quote": "Vidura: By abandoning sorrow and embracing dharma, even the grieving may attain the highest state of peace.",
+      "sanskrit": "\u0924\u094d\u092f\u0915\u094d\u0924\u094d\u0935\u093e \u0936\u094b\u0915\u0902 \u0938\u0926\u093e\u0930\u0936\u094d\u091a \u0938\u093f\u0926\u094d\u0927\u093f\u0902 \u092a\u0930\u092e\u093f\u0915\u093e\u0902 \u0917\u0924\u0903",
+      "reference": "Mahabharata, Ashramavasika Parva, Chapter 215",
+      "meaning": "This describes how Dhritarashtra attained peace by letting go of grief through spiritual wisdom, showing liberation is possible even after great loss.",
+      "lore_snippet": "As the autumn leaf releases from the branch without resistance, so too does the wise soul release attachment. The weight of sorrow sinks boats, but dharma is the raft to cross turbulent waters.",
+      "image": "quote_31.png",
+      "audio": "quote_31.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_32",
+      "quote": "The downfall of the mighty comes not from enemies, but from the poison of their own pride.",
+      "sanskrit": "\u0906\u092a\u093e\u0928\u0947 \u092a\u093e\u0928\u0917\u0932\u093f\u0924\u093e \u0926\u0948\u0935\u0947\u0928\u093e\u092d\u093f\u092a\u094d\u0930\u091a\u094b\u0926\u093f\u0924\u093e\u0903",
+      "reference": "Mahabharata, Mausala Parva, Chapter 230",
+      "meaning": "Refers to the Yadava clan's self-destruction through drunken violence, illustrating how arrogance becomes one's own undoing.",
+      "lore_snippet": "History remembers how great civilizations fell not by siege weapons, but by the inner rot of hubris. Even steel blades cannot cut what has already crumbled from within.",
+      "image": "quote_32.png",
+      "audio": "quote_32.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

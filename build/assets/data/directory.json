@@ -288,6 +288,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_18",
+      "quote": "Vyasa: The wheel of dharma turns through sacrifice, wisdom, and the unbroken chain of duty that binds the righteous.",
+      "sanskrit": "\u0927\u0930\u094d\u092e\u0938\u094d\u092f \u0928\u0943\u0937\u0941 \u0938\u092e\u094d\u092d\u0942\u0924\u093f\u0930\u0923\u0940\u092e\u093e\u0923\u094d\u0921\u0935\u094d\u092f\u0936\u093e\u092a\u091c\u093e",
+      "reference": "Mahabharata, Swargarohanika Parva",
+      "meaning": "Dharma manifests through human struggles, divine curses, and the cyclical nature of righteous duty\u2014each generation inheriting the consequences and opportunities of the last.",
+      "lore_snippet": "Ancient sages teach that dharma is not a path walked alone, but a fire carried forward by each era's guardians. Even curses may kindle the flames of wisdom in time.",
+      "image": "quote_18.png",
+      "audio": "quote_18.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_19",
+      "quote": "Bhishma: A vow upheld through lifetimes shines brighter than celestial weapons, for it forges destiny itself.",
+      "sanskrit": "\u092a\u094d\u0930\u0924\u093f\u091c\u094d\u091e\u093e\u092a\u093e\u0932\u0928\u0902 \u091a\u0948\u0935 \u0930\u0915\u094d\u0937\u093e \u091a\u093f\u0924\u094d\u0930\u093e\u0919\u094d\u0917\u0926\u0938\u094d\u092f \u091a",
+      "reference": "Mahabharata, Bhishma Parva",
+      "meaning": "Bhishma's lifelong vow becomes a testament to how sacred promises shape history, proving that resolve outlasts even the mightiest arrows.",
+      "lore_snippet": "The Devas whisper that when a mortal's oath echoes in all three worlds, even death must wait at the threshold.",
+      "image": "quote_19.png",
+      "audio": "quote_19.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_20",
+      "quote": "Krishna: What gods weave and demons unravel, wise souls perceive as threads in the same tapestry\u2014each frayed strand leading to renewal.",
+      "sanskrit": "\u0926\u0948\u0924\u094d\u092f\u093e\u0928\u093e\u0902 \u0926\u093e\u0928\u0935\u093e\u0928\u093e\u0902 \u091a \u092f\u0915\u094d\u0937\u093e\u0923\u093e\u0902 \u091a \u092e\u0939\u094c\u091c\u0938\u093e\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva",
+      "meaning": "The cosmic interplay between opposing forces\u2014devas, asuras, yakshas\u2014reveals the hidden unity beneath apparent chaos.",
+      "lore_snippet": "Scholars debate whether the great tapestry depicts war or creation, forgetting the loom requires both tension and harmony.",
+      "image": "quote_20.png",
+      "audio": "quote_20.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

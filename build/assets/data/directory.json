@@ -2,11 +2,11 @@
   "quotes": [
     {
       "id": "quote_1",
-      "quote": "Narayana and Nara, the supreme among men, and the goddess Saraswati\u2014salutations to them. Then only may the victory be proclaimed.",
-      "sanskrit": "\u0928\u093e\u0930\u093e\u092f\u0923\u0902 \u0928\u092e\u0938\u094d\u0915\u0943\u0924\u094d\u092f \u0928\u0930\u0902 \u091a\u0948\u0935 \u0928\u0930\u094b\u0924\u094d\u0924\u092e\u092e\u094d\u0964 \u0926\u0947\u0935\u0940\u0902 \u0938\u0930\u0938\u094d\u0935\u0924\u0940\u0902 \u091a\u0948\u0935 \u0924\u0924\u094b \u091c\u092f\u092e\u0941\u0926\u0940\u0930\u092f\u0947\u0924\u094d\u0965",
-      "reference": "Mahabharata, Adi Parva, Anukramanika Parva (Invocation)",
-      "meaning": "This opening verse emphasizes the reverence for divine and human excellence before embarking on any great endeavor, acknowledging the sources of wisdom and strength.",
-      "lore_snippet": "Before any great undertaking, wise men first honor the divine and the virtuous. Victory is not merely won by strength, but by the blessings of higher powers and wisdom.",
+      "quote": "Vyasa: The universe is both manifest and unmanifest, the eternal Brahma, beyond existence and non-existence, the source of all creation.",
+      "sanskrit": "\u090b\u0924\u092e\u0947\u0915\u093e\u0915\u094d\u0937\u0930\u0902 \u092c\u094d\u0930\u0939\u094d\u092e \u0935\u094d\u092f\u0915\u094d\u0924\u093e\u0935\u094d\u092f\u0915\u094d\u0924\u0902 \u0938\u0928\u093e\u0924\u0928\u092e\u094d\u0964 \u0905\u0938\u091a\u094d\u091a \u0938\u091a\u094d\u091a\u0948\u0935 \u091a \u092f\u0926\u094d\u0935\u093f\u0936\u094d\u0935\u0902 \u0938\u0926\u0938\u0924\u0903 \u092a\u0930\u092e\u094d\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 1",
+      "meaning": "This verse describes the nature of Brahma (the ultimate reality) as both manifest (visible) and unmanifest (invisible), transcending dualities of existence and non-existence.",
+      "lore_snippet": "The sages teach that reality is both seen and unseen, like the roots beneath a mighty tree. To perceive only the visible is to grasp but half the truth of existence.",
       "image": "quote_1.png",
       "audio": "quote_1.mp3",
       "category": "philosophy",
@@ -19,11 +19,11 @@
     },
     {
       "id": "quote_2",
-      "quote": "In the beginning, there was the One\u2014the eternal Brahman, manifest and unmanifest, beyond existence and non-existence, the source of all creation.",
-      "sanskrit": "\u0906\u0926\u094d\u092f\u0902 \u092a\u0941\u0930\u0941\u0937\u092e\u0940\u0936\u093e\u0928\u0902... \u090b\u0924\u092e\u0947\u0915\u093e\u0915\u094d\u0937\u0930\u0902 \u092c\u094d\u0930\u0939\u094d\u092e \u0935\u094d\u092f\u0915\u094d\u0924\u093e\u0935\u094d\u092f\u0915\u094d\u0924\u0902 \u0938\u0928\u093e\u0924\u0928\u092e\u094d\u0964 \u0905\u0938\u091a\u094d\u091a \u0938\u091a\u094d\u091a\u0948\u0935 \u091a \u092f\u0926\u094d\u0935\u093f\u0936\u094d\u0935\u0902 \u0938\u0926\u0938\u0924\u0903 \u092a\u0930\u092e\u094d\u0965",
-      "reference": "Mahabharata, Adi Parva, Anukramanika Parva",
-      "meaning": "This verse describes the primordial, indescribable reality (Brahman) that transcends dualities and is the ultimate cause of the universe.",
-      "lore_snippet": "The sages speak of a time before time, when only the One existed\u2014neither being nor non-being, yet the seed of all that is. Such is the nature of the Absolute.",
+      "quote": "The ancient wisdom is the light in darkness, the imperishable seed from which all creation springs forth.",
+      "sanskrit": "\u0928\u093f\u0937\u094d\u092a\u094d\u0930\u092d\u0947\u093d\u0938\u094d\u092e\u093f\u0928\u094d\u0928\u093f\u0930\u093e\u0932\u094b\u0915\u0947 \u0938\u0930\u094d\u0935\u0924\u0938\u094d\u0924\u092e\u0938\u093e\u0935\u0943\u0924\u0947\u0964 \u092c\u0943\u0939\u0926\u0923\u094d\u0921\u092e\u092d\u0942\u0926\u0947\u0915\u0902 \u092a\u094d\u0930\u091c\u093e\u0928\u093e\u0902 \u092c\u0940\u091c\u092e\u0915\u094d\u0937\u092f\u092e\u094d\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 1",
+      "meaning": "This describes how divine knowledge emerged in primordial darkness as the indestructible source (symbolized by the cosmic egg) of all beings.",
+      "lore_snippet": "Even in the void before time, the spark of wisdom existed. The greatest sages understand that light first shines within before it illuminates the world.",
       "image": "quote_2.png",
       "audio": "quote_2.mp3",
       "category": "philosophy",
@@ -36,234 +36,13 @@
     },
     {
       "id": "quote_3",
-      "quote": "The great knowledge of this epic is established in all three worlds, adorned with divine and human wisdom, and cherished by the learned.",
-      "sanskrit": "\u0907\u0926\u0902 \u0924\u0941 \u0924\u094d\u0930\u093f\u0937\u0941 \u0932\u094b\u0915\u0947\u0937\u0941 \u092e\u0939\u091c\u094d\u091c\u094d\u091e\u093e\u0928\u0902 \u092a\u094d\u0930\u0924\u093f\u0937\u094d\u0920\u093f\u0924\u092e\u094d... \u0935\u093f\u0926\u0941\u0937\u093e\u0902 \u092a\u094d\u0930\u093f\u092f\u092e\u094d\u0965",
-      "reference": "Mahabharata, Adi Parva, Anukramanika Parva",
-      "meaning": "The Mahabharata is revered as a universal scripture, containing profound truths accessible to both gods and mortals.",
-      "lore_snippet": "Like a tree whose roots reach the heavens and whose branches shelter the earth, the Mahabharata spans all realms of knowledge, offering wisdom to gods and men alike.",
+      "quote": "Hrishikesha (Vishnu) is the lord of all moving and unmoving beings, the pure and auspicious one worthy of all homage.",
+      "sanskrit": "\u092e\u0919\u094d\u0917\u0932\u094d\u092f\u0902 \u092e\u0919\u094d\u0917\u0932\u0902 \u0935\u093f\u0937\u094d\u0923\u0941\u0902 \u0935\u0930\u0947\u0923\u094d\u092f\u092e\u0928\u0918\u0902 \u0936\u0941\u091a\u093f\u092e\u094d\u0964 \u0928\u092e\u0938\u094d\u0915\u0943\u0924\u094d\u092f \u0939\u0943\u0937\u0940\u0915\u0947\u0936\u0902 \u091a\u0930\u093e\u091a\u0930\u0917\u0941\u0930\u0941\u0902 \u0939\u0930\u093f\u092e\u094d\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 1",
+      "meaning": "A reverential acknowledgment of Vishnu as the supreme deity who governs all creation and is the essence of auspiciousness.",
+      "lore_snippet": "The wise bow to the cosmic guardian whose presence turns all paths auspicious. Where Vishnu's feet tread, chaos finds order.",
       "image": "quote_3.png",
       "audio": "quote_3.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_4",
-      "quote": "The world is born and dissolved again like the cycles of seasons, witnessed by all beings in their endless turns.",
-      "sanskrit": "\u092f\u0925\u0930\u094d\u0924\u093e\u0935\u0943\u0924\u0941\u0932\u093f\u0919\u094d\u0917\u093e\u0928\u093f \u0928\u093e\u0928\u093e\u0930\u0942\u092a\u093e\u0923\u093f \u092a\u0930\u094d\u092f\u092f\u0947 \u0926\u0943\u0936\u094d\u092f\u0928\u094d\u0924\u0947 \u0924\u093e\u0928\u093f \u0924\u093e\u0928\u094d\u092f\u0947\u0935 \u0924\u0925\u093e \u092d\u093e\u0935\u093e \u092f\u0941\u0917\u093e\u0926\u093f\u0937\u0941",
-      "reference": "Mahabharata, Adi Parva, Chapter 1",
-      "meaning": "This verse describes the eternal cycle of creation and destruction, comparing it to the changing seasons\u2014each phase recurring predictably yet taking varied forms.",
-      "lore_snippet": "Just as winter\u2019s barrenness yields to spring\u2019s bloom, so too do all things rise and fall in time. The wise see this wheel of existence and act without attachment.",
-      "image": "quote_4.png",
-      "audio": "quote_4.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_5",
-      "quote": "Vyasa: Knowledge expands when shared, like a flame that lights countless lamps without diminishing itself.",
-      "sanskrit": "\u0935\u093f\u0938\u094d\u0924\u0940\u0930\u094d\u092f\u0948\u0924\u0928\u094d\u092e\u0939\u091c\u094d\u091c\u094d\u091e\u093e\u0928\u092e\u0943\u0937\u093f\u0903 \u0938\u0919\u094d\u0915\u094d\u0937\u0947\u092a\u092e\u092c\u094d\u0930\u0935\u0940\u0924\u094d",
-      "reference": "Mahabharata, Adi Parva, Chapter 1",
-      "meaning": "Sage Vyasa compressed vast wisdom into the Mahabharata, showing that true knowledge grows when disseminated.",
-      "lore_snippet": "The sages teach that wisdom, unlike treasure, multiplies when given freely. A single torch can banish darkness for thousands\u2014so too does enlightenment spread.",
-      "image": "quote_5.png",
-      "audio": "quote_5.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_6",
-      "quote": "Dhritarashtra\u2019s blindness was not of eyes but of wisdom; roots feed the tree, yet his choices nurtured only poison.",
-      "sanskrit": "\u092e\u0942\u0932\u0902 \u0930\u093e\u091c\u093e \u0927\u0943\u0924\u0930\u093e\u0937\u094d\u091f\u094d\u0930\u094b\u093d\u092e\u0928\u0940\u0937\u0940",
-      "reference": "Mahabharata, Adi Parva, Chapter 1",
-      "meaning": "Dhritarashtra\u2019s lack of discernment (symbolized by his literal blindness) allowed his sons\u2019 wickedness to flourish, dooming his lineage.",
-      "lore_snippet": "A ruler\u2019s duty is to prune vice like a gardener. When the roots embrace rot, even the mightiest tree will fall\u2014and crush the unwise beneath it.",
-      "image": "quote_6.png",
-      "audio": "quote_6.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_7",
-      "quote": "Dhritarashtra: I see no difference between my sons and Pandu's sons. Yet, my blind affection leads me to tolerate Duryodhana's madness.",
-      "sanskrit": "\u0928 \u092e\u0947 \u0935\u093f\u0936\u0947\u0937\u0903 \u092a\u0941\u0924\u094d\u0930\u0947\u0937\u0941 \u0938\u094d\u0935\u0947\u0937\u0941 \u092a\u093e\u0923\u094d\u0921\u0941\u0938\u0941\u0924\u0947\u0937\u0941 \u091a",
-      "reference": "Mahabharata, Udyoga Parva, Chapter 63",
-      "meaning": "Dhritarashtra acknowledges his impartiality in principle, but admits his inability to act justly due to paternal attachment\u2014a confession of weakness in governance.",
-      "lore_snippet": "Even kings gifted with divine sight may stumble when family bonds cloud judgment. The wise warn that unchecked favoritism erodes dharma faster than any enemy's blade.",
-      "image": "quote_7.png",
-      "audio": "quote_7.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_8",
-      "quote": "When the Pandavas entered, flowers rained, conches sounded, and joy arose in all hearts\u2014proving righteousness shines brighter than royal silks.",
-      "sanskrit": "\u092a\u0941\u0937\u094d\u092a\u0935\u0943\u0937\u094d\u091f\u093f\u0903 \u0936\u0941\u092d\u093e \u0917\u0928\u094d\u0927\u093e\u0903 \u0936\u0919\u094d\u0916\u0926\u0941\u0928\u094d\u0926\u0941\u092d\u093f\u0928\u093f\u0938\u094d\u0935\u0928\u093e\u0903",
-      "reference": "Mahabharata, Sabha Parva, Chapter 49",
-      "meaning": "Nature itself celebrated the Pandavas' virtuous return, contrasting their humble exile with Duryodhana's hollow opulence.",
-      "lore_snippet": "Ancient scrolls speak of how the cosmos rejoices when noble souls walk among mortals. Petals fall unbidden, and sacred winds carry their scent to the gods.",
-      "image": "quote_8.png",
-      "audio": "quote_8.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_9",
-      "quote": "Arjuna obtained divine weapons not by birthright, but by pleasing Shiva through trial\u2014no boon comes without tapasya.",
-      "sanskrit": "\u0905\u0935\u093e\u092a \u0924\u0924\u094d\u092a\u093e\u0936\u0941\u092a\u0924\u0902 \u092e\u0939\u093e\u0938\u094d\u0924\u094d\u0930\u0902",
-      "reference": "Mahabharata, Vana Parva, Chapter 41",
-      "meaning": "Even the mightiest warrior had to earn divine arms through austerity and skill, not inheritance.",
-      "lore_snippet": "The Pashupatastra was not gifted\u2014it was won in single combat against the Destroyer himself. This truth humbles princes: divinity favors the disciplined, not the entitled.",
-      "image": "quote_9.png",
-      "audio": "quote_9.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_10",
-      "quote": "Dhritarashtra: I see not even the slightest benefit in continuing to live.",
-      "sanskrit": "\u0938\u094d\u0924\u094b\u0915\u0902 \u0939\u094d\u092f\u092a\u093f \u0928 \u092a\u0936\u094d\u092f\u093e\u092e\u093f \u092b\u0932\u0902 \u091c\u0940\u0935\u093f\u0924\u0927\u093e\u0930\u0923\u0947",
-      "reference": "Mahabharata, Udyoga Parva, Chapter 33",
-      "meaning": "A despairing king expresses the futility of clinging to life when overwhelmed by grief and loss.",
-      "lore_snippet": "Even the mightiest rulers may find their spirit broken by time's cruel march. Yet as the sages teach: 'Kala (Time) cooks all beings in his cauldron\u2014no sorrow lasts forever.'",
-      "image": "quote_10.png",
-      "audio": "quote_10.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_11",
-      "quote": "Sanjaya: Time cooks all beings in his cauldron, Time extinguishes them again.",
-      "sanskrit": "\u0915\u093e\u0932\u0903 \u092a\u091a\u0924\u093f \u092d\u0942\u0924\u093e\u0928\u093f \u0915\u093e\u0932\u0903 \u0938\u0902\u0939\u0930\u0924\u093f \u092a\u094d\u0930\u091c\u093e\u0903",
-      "reference": "Mahabharata, Udyoga Parva, Chapter 33",
-      "meaning": "The immutable law of Time as the ultimate force that creates, sustains, and destroys all existence.",
-      "lore_snippet": "The wheel of Kala grinds kings and beggars alike to dust. Warriors who understand this truth fight not for permanence, but for the righteousness of the moment.",
-      "image": "quote_11.png",
-      "audio": "quote_11.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_12",
-      "quote": "Even those born with divine weapons and splendor equal to Indra succumbed to Time's power.",
-      "sanskrit": "\u091c\u093e\u0924\u093e\u0928\u094d\u0926\u093f\u0935\u094d\u092f\u093e\u0938\u094d\u0924\u094d\u0930\u0935\u093f\u0926\u0941\u0937\u0903 \u0936\u0915\u094d\u0930\u092a\u094d\u0930\u0924\u093f\u092e\u0924\u0947\u091c\u0938\u0903... \u0924\u0924\u0903 \u0915\u093e\u0932\u0935\u0936\u0902 \u0917\u0924\u093e\u0903",
-      "reference": "Mahabharata, Udyoga Parva, Chapter 33",
-      "meaning": "No mortal\u2014regardless of prowess or divine gifts\u2014escapes the inevitable dissolution wrought by Time.",
-      "lore_snippet": "Legends speak of radiant kings who could level mountains with celestial arrows. Where are their thrones now? Only their deeds echo in the halls of memory.",
-      "image": "quote_12.png",
-      "audio": "quote_12.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_13",
-      "quote": "The sages: He who studies this sacred Bharata with devotion is freed from all sins, as butter is churned from curd, as the Brahmana is supreme among men.",
-      "sanskrit": "\u092d\u093e\u0930\u0924\u093e\u0927\u094d\u092f\u092f\u0928\u093e\u0924\u094d\u092a\u0941\u0923\u094d\u092f\u093e\u0926\u092a\u093f \u092a\u093e\u0926\u092e\u0927\u0940\u092f\u0924\u0903\n\u0936\u094d\u0930\u0926\u094d\u0927\u0927\u093e\u0928\u0938\u094d\u092f \u092a\u0942\u092f\u0928\u094d\u0924\u0947 \u0938\u0930\u094d\u0935\u092a\u093e\u092a\u093e\u0928\u094d\u092f\u0936\u0947\u0937\u0924\u0903",
-      "reference": "Mahabharata, Parvasangraha Parva",
-      "meaning": "The study of the Mahabharata with sincere devotion has the power to purify one's soul from all sins, just as the purest essence (butter) emerges from churning.",
-      "lore_snippet": "Ancient scrolls tell us that wisdom purifies like fire purifies gold. Those who contemplate the Bharata's truths with reverence find their karmic burdens lightened, as dawn dispels darkness.",
-      "image": "quote_13.png",
-      "audio": "quote_13.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_14",
-      "quote": "Krishna: To the wise, I offer counsel; to the valiant, I offer armies. But the foolish choose only what serves their pride, not their salvation.",
-      "sanskrit": "\u0905\u092f\u0941\u0927\u094d\u092f\u092e\u093e\u0928\u092e\u093e\u0924\u094d\u092e\u093e\u0928\u0902 \u092e\u0928\u094d\u0924\u094d\u0930\u093f\u0923\u0902 \u092a\u0941\u0930\u0941\u0937\u0930\u094d\u0937\u092d\u094c\u0964 \u0905\u0915\u094d\u0937\u094c\u0939\u093f\u0923\u0940\u0902 \u0935\u093e \u0938\u0948\u0928\u094d\u092f\u0938\u094d\u092f \u0915\u0938\u094d\u092f \u0935\u093e \u0915\u093f\u0902 \u0926\u0926\u093e\u092e\u094d\u092f\u0939\u092e\u094d\u0965",
-      "reference": "Mahabharata, Udyoga Parva, Chapter 7",
-      "meaning": "Krishna reveals the futility of material choices over wisdom. Duryodhana chooses armies, while Arjuna chooses Krishna's guidance\u2014symbolizing the eternal choice between ego and enlightenment.",
-      "lore_snippet": "The truly wise know that strength lies not in numbers, but in discernment. As the Kauravas learned, ten thousand spears cannot match the guidance of a single enlightened soul.",
-      "image": "quote_14.png",
-      "audio": "quote_14.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_15",
-      "quote": "Dhritarashtra: The night brings no rest to those who clutch at kingdoms like straws, for their pillows are woven with thorns of ambition.",
-      "sanskrit": "\u092a\u094d\u0930\u091c\u093e\u0917\u0930\u0903 \u0938\u092e\u094d\u092a\u094d\u0930\u091c\u091c\u094d\u091e\u0947 \u0927\u0943\u0924\u0930\u093e\u0937\u094d\u091f\u094d\u0930\u0938\u094d\u092f \u091a\u093f\u0928\u094d\u0924\u092f\u093e",
-      "reference": "Mahabharata, Udyoga Parva, Chapter 24",
-      "meaning": "Dhritarashtra's sleeplessness symbolizes the torment of unrighteous rulers\u2014their power becomes a prison of endless anxiety.",
-      "lore_snippet": "Kings who build thrones upon injustice will find them crumbling into beds of nails. Peace belongs only to those who walk the path of dharma.",
-      "image": "quote_15.png",
-      "audio": "quote_15.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_16",
-      "quote": "Vidura: Truths spoken in darkness still light the way, for wisdom needs no torch but an open heart.",
-      "sanskrit": "\u0935\u093f\u0926\u0941\u0930\u094b \u092f\u0924\u094d\u0930 \u0935\u093e\u0915\u094d\u092f\u093e\u0928\u093f \u0935\u093f\u091a\u093f\u0924\u094d\u0930\u093e\u0923\u093f \u0939\u093f\u0924\u093e\u0928\u093f \u091a",
-      "reference": "Mahabharata, Udyoga Parva, Chapter 33",
-      "meaning": "Vidura's counsel pierces Dhritarashtra's blindness, proving that enlightenment comes to those who listen beyond their desires.",
-      "lore_snippet": "The wise say darkness flees not from flames, but from awakening. A single word of truth can scatter the shadows of a thousand delusions.",
-      "image": "quote_16.png",
-      "audio": "quote_16.mp3",
       "category": "philosophy",
       "tags": [
         "mahabharata",

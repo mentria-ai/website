@@ -390,6 +390,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_24",
+      "quote": "Krishna: I offer either my army or myself\u2014unarmed and unfighting. Choose wisely, for one path leads to power, the other to wisdom.",
+      "sanskrit": "\u0905\u0915\u094d\u0937\u094c\u0939\u093f\u0923\u0940\u0902 \u0935\u093e \u0938\u0948\u0928\u094d\u092f\u0938\u094d\u092f \u0915\u0938\u094d\u092f \u0935\u093e \u0915\u093f\u0902 \u0926\u0926\u093e\u092e\u094d\u092f\u0939\u092e\u094d",
+      "reference": "Mahabharata, Udyoga Parva, Chapter 7",
+      "meaning": "Krishna presents Duryodhana and Arjuna with a choice between his vast army or his personal counsel (while refusing to fight). This symbolizes the eternal choice between material strength and divine guidance.",
+      "lore_snippet": "The wise know that true power lies not in armies but in righteousness. As Krishna showed at Kurukshetra, the unarmed advisor may wield greater strength than ten thousand warriors.",
+      "image": "quote_24.png",
+      "audio": "quote_24.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_25",
+      "quote": "Dhritarashtra: The night brings no rest when the mind is heavy with consequences.",
+      "sanskrit": "\u092a\u094d\u0930\u091c\u093e\u0917\u0930\u0903 \u0938\u092e\u094d\u092a\u094d\u0930\u091c\u091c\u094d\u091e\u0947 \u0927\u0943\u0924\u0930\u093e\u0937\u094d\u091f\u094d\u0930\u0938\u094d\u092f \u091a\u093f\u0928\u094d\u0924\u092f\u093e",
+      "reference": "Mahabharata, Udyoga Parva, Chapter 24",
+      "meaning": "The blind king's sleeplessness reflects the universal truth that unresolved guilt and impending doom deny peace, foreshadowing the Kurukshetra war's tragedy.",
+      "lore_snippet": "Kings and peasants alike know this truth: when destiny's wheel begins to turn, even the softest bed becomes a bed of thorns for the guilty conscience.",
+      "image": "quote_25.png",
+      "audio": "quote_25.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_26",
+      "quote": "Bhishma: The greatest bowman falls not by arrows, but when he embraces his own end.",
+      "sanskrit": "",
+      "reference": "Mahabharata, Bhishma Parva, Chapter 117",
+      "meaning": "Bhishma's voluntary fall in battle (through Shikhandi) teaches that even invincible warriors meet their fate when they consciously accept it as part of dharma.",
+      "lore_snippet": "Ancient warriors whispered this secret: death comes not when the body is pierced, but when the soul withdraws its consent to live. Thus fell the grandsire of the Kurus.",
+      "image": "quote_26.png",
+      "audio": "quote_26.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

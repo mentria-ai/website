@@ -339,6 +339,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_21",
+      "quote": "Krishna: The flame that burns away illusion also lights the path of dharma\u2014even destruction can be an act of divine grace.",
+      "sanskrit": "\u0928 \u0939\u093f \u091c\u094d\u091e\u093e\u0928\u0947\u0928 \u0938\u0926\u0943\u0936\u0902 \u092a\u0935\u093f\u0924\u094d\u0930\u092e\u093f\u0939 \u0935\u093f\u0926\u094d\u092f\u0924\u0947",
+      "reference": "Mahabharata, Sabh\u0101 Parva (Book 2)",
+      "meaning": "Wisdom suggests that apparent destruction (like Krishna burning Kh\u0101\u1e47\u1e0dava forest) may serve a higher purpose in the cosmic order",
+      "lore_snippet": "The sages tell us fire has two faces\u2014it destroys the old forest so new seeds may sprout. So too does divine will sometimes appear cruel before revealing its mercy.",
+      "image": "quote_21.png",
+      "audio": "quote_21.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_22",
+      "quote": "Narada: A king's court reflects his soul\u2014where gamblers sit upon thrones, even walls whisper of coming ruin.",
+      "sanskrit": "\u092f\u0925\u093e \u0930\u093e\u091c\u093e \u0924\u0925\u093e \u092a\u094d\u0930\u091c\u093e",
+      "reference": "Mahabharata, Sabh\u0101 Parva (Dice Game Chapters)",
+      "meaning": "The infamous dice game symbolizes how moral corruption in leadership dooms an entire kingdom",
+      "lore_snippet": "Ancient texts warn that when dharma leaves the royal throne, it first manifests as small cracks in the pillars, then as the collapse of the roof beams.",
+      "image": "quote_22.png",
+      "audio": "quote_22.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_23",
+      "quote": "The forest exile teaches what palaces cannot: roots grow deeper when winds try to break them.",
+      "sanskrit": "\u0935\u093f\u092a\u0926\u094d \u0927\u093f\u092f\u0902 \u0935\u093f\u0938\u094d\u0924\u093e\u0930\u092f\u0924\u093f \u092a\u094d\u0930\u0936\u093e\u0928\u094d\u0924\u093e\u092e\u094d",
+      "reference": "Mahabharata, \u0100ra\u1e47ya Parva (Book 3)",
+      "meaning": "The Pandavas' adversity in exile strengthened their wisdom and resilience",
+      "lore_snippet": "Wandering rishis observe that the mightiest sal trees grow where storms are fiercest\u2014adversity writes its lessons in rings within the soul.",
+      "image": "quote_23.png",
+      "audio": "quote_23.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -543,6 +543,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_33",
+      "quote": "Dharma is not merely in action but in the intent behind it; even the innocent may suffer when wisdom falters.",
+      "sanskrit": "\u0927\u0930\u094d\u092e\u094b \u0928 \u0915\u0947\u0935\u0932\u0902 \u0915\u0930\u094d\u092e\u0923\u093f, \u0905\u092a\u093f \u0924\u0941 \u0938\u0902\u0915\u0932\u094d\u092a\u0947; \u0905\u091c\u094d\u091e\u093e\u0928\u093e\u0924\u094d \u0905\u092a\u093f \u0928\u093f\u0930\u092a\u0930\u093e\u0927\u093e\u0903 \u092a\u0940\u0921\u094d\u092f\u0928\u094d\u0924\u0947\u0964",
+      "reference": "Mahabharata, Paushya Parva, Chapter 3",
+      "meaning": "The passage illustrates how unintended harm can arise from ignorance, emphasizing that true dharma requires discernment of both action and intention.",
+      "lore_snippet": "The wise of Skyrim often say: 'A blade wielded without thought may cut friend as foe.' So too in life, heed not just deeds but the shadows they cast.",
+      "image": "quote_33.png",
+      "audio": "quote_33.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_34",
+      "quote": "Sage Dhoumya: The disciple who obeys not with duty alone, but with awakened wisdom, shall rise like the dawn beyond his teacher's words.",
+      "sanskrit": "\u092f\u0903 \u0936\u093f\u0937\u094d\u092f\u0903 \u0936\u094d\u0930\u0926\u094d\u0927\u092f\u093e \u0928 \u0915\u0930\u094d\u092e\u092e\u093e\u0924\u094d\u0930\u0947\u0923, \u092c\u0941\u0926\u094d\u0927\u094d\u092f\u093e \u091a \u0938\u092e\u0941\u091c\u094d\u091c\u094d\u0935\u0932\u0903; \u0938 \u0917\u0941\u0930\u0941\u0935\u093e\u0915\u094d\u092f\u093e\u0924\u094d \u0909\u0926\u093f\u0924\u0903 \u0909\u0937\u0938\u093e \u0907\u0935\u0964",
+      "reference": "Mahabharata, Paushya Parva, Chapter 3",
+      "meaning": "Dharma is fulfilled not through blind obedience, but through understanding that transforms duty into enlightenment, as shown by the disciple who innovates to solve a challenge.",
+      "lore_snippet": "As the Tongues of old learned to bend will, not just voice\u2014true mastery lies in seeing beyond the taught path. The Clever Man reaps both wheat and wisdom.",
+      "image": "quote_34.png",
+      "audio": "quote_34.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

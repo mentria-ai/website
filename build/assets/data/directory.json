@@ -2,11 +2,11 @@
   "quotes": [
     {
       "id": "quote_1",
-      "quote": "Dhritarashtra: I cannot maintain consciousness, O Suta, my mind seems to be bewildered.",
-      "sanskrit": "\u0924\u092e\u0938\u093e \u0924\u094d\u0935\u092d\u094d\u092f\u0935\u0938\u094d\u0924\u0940\u0930\u094d\u0923\u094b \u092e\u094b\u0939 \u0906\u0935\u093f\u0936\u0924\u0940\u0935 \u092e\u093e\u092e\u094d\u0964 \u0938\u091e\u094d\u091c\u094d\u091e\u093e\u0902 \u0928\u094b\u092a\u0932\u092d\u0947 \u0938\u0942\u0924 \u092e\u0928\u094b \u0935\u093f\u0939\u094d\u0935\u0932\u0924\u0940\u0935 \u092e\u0947\u0965",
-      "reference": "Mahabharata, Stri Parva, Chapter 25 (approximate)",
-      "meaning": "Blinded king Dhritarashtra expresses his overwhelming grief and mental collapse upon hearing of the Kurukshetra war's devastation. His words symbolize the paralysis of wisdom when consumed by sorrow and attachment.",
-      "lore_snippet": "In the halls of Hastinapura, even kings may find their vision clouded. When the mind is seized by darkness as thick as the blind monarch's eternal night, neither power nor lineage can shield one from despair's embrace.",
+      "quote": "Narayana and Nara, the supreme among men, and the goddess Saraswati\u2014salutations to them. Then only may the victory be proclaimed.",
+      "sanskrit": "\u0928\u093e\u0930\u093e\u092f\u0923\u0902 \u0928\u092e\u0938\u094d\u0915\u0943\u0924\u094d\u092f \u0928\u0930\u0902 \u091a\u0948\u0935 \u0928\u0930\u094b\u0924\u094d\u0924\u092e\u092e\u094d\u0964 \u0926\u0947\u0935\u0940\u0902 \u0938\u0930\u0938\u094d\u0935\u0924\u0940\u0902 \u091a\u0948\u0935 \u0924\u0924\u094b \u091c\u092f\u092e\u0941\u0926\u0940\u0930\u092f\u0947\u0924\u094d\u0965",
+      "reference": "Mahabharata, Adi Parva, Anukramanika Parva (Invocation)",
+      "meaning": "This opening verse emphasizes the reverence for divine and human excellence before embarking on any great endeavor, acknowledging the sources of wisdom and strength.",
+      "lore_snippet": "Before any great undertaking, wise men first honor the divine and the virtuous. Victory is not merely won by strength, but by the blessings of higher powers and wisdom.",
       "image": "quote_1.png",
       "audio": "quote_1.mp3",
       "category": "philosophy",
@@ -19,11 +19,11 @@
     },
     {
       "id": "quote_2",
-      "quote": "Having attained fame in this world, they then succumbed to the power of time.",
-      "sanskrit": "\u0905\u0938\u094d\u092e\u093f\u0901\u0932\u094d\u0932\u094b\u0915\u0947 \u092f\u0936\u0903 \u092a\u094d\u0930\u093e\u092a\u094d\u092f \u0924\u0924\u0903 \u0915\u093e\u0932\u0935\u0936\u0902 \u0917\u0924\u093e\u0903",
-      "reference": "Mahabharata, Vana Parva, Chapter 167",
-      "meaning": "Even the greatest heroes and kings, after achieving glory, inevitably yield to the relentless march of time\u2014a reminder of mortality's universal dominion.",
-      "lore_snippet": "The annals of history remember many mighty souls who shone like stars. Yet even the brightest constellations fade\u2014for time is the one sovereign none may defy.",
+      "quote": "In the beginning, there was the One\u2014the eternal Brahman, manifest and unmanifest, beyond existence and non-existence, the source of all creation.",
+      "sanskrit": "\u0906\u0926\u094d\u092f\u0902 \u092a\u0941\u0930\u0941\u0937\u092e\u0940\u0936\u093e\u0928\u0902... \u090b\u0924\u092e\u0947\u0915\u093e\u0915\u094d\u0937\u0930\u0902 \u092c\u094d\u0930\u0939\u094d\u092e \u0935\u094d\u092f\u0915\u094d\u0924\u093e\u0935\u094d\u092f\u0915\u094d\u0924\u0902 \u0938\u0928\u093e\u0924\u0928\u092e\u094d\u0964 \u0905\u0938\u091a\u094d\u091a \u0938\u091a\u094d\u091a\u0948\u0935 \u091a \u092f\u0926\u094d\u0935\u093f\u0936\u094d\u0935\u0902 \u0938\u0926\u0938\u0924\u0903 \u092a\u0930\u092e\u094d\u0965",
+      "reference": "Mahabharata, Adi Parva, Anukramanika Parva",
+      "meaning": "This verse describes the primordial, indescribable reality (Brahman) that transcends dualities and is the ultimate cause of the universe.",
+      "lore_snippet": "The sages speak of a time before time, when only the One existed\u2014neither being nor non-being, yet the seed of all that is. Such is the nature of the Absolute.",
       "image": "quote_2.png",
       "audio": "quote_2.mp3",
       "category": "philosophy",
@@ -36,64 +36,13 @@
     },
     {
       "id": "quote_3",
-      "quote": "K\u0101l\u1e25 pacati bh\u016bt\u0101ni k\u0101l\u1e25 sa\u1e43harati praj\u0101\u1e25 | Time cooks all creatures, time destroys all beings.",
-      "sanskrit": "\u0915\u093e\u0932\u0903 \u092a\u091a\u0924\u093f \u092d\u0942\u0924\u093e\u0928\u093f \u0915\u093e\u0932\u0903 \u0938\u0902\u0939\u0930\u0924\u093f \u092a\u094d\u0930\u091c\u093e\u0903",
-      "reference": "Mahabharata, Udyoga Parva, Chapter 188",
-      "meaning": "This verse personifies Time (K\u0101la) as the ultimate force that governs creation, preservation, and destruction. It emphasizes the inevitability of time's power over all existence.",
-      "lore_snippet": "The ancient sages taught that Time is the unseen fire that ripens all things\u2014heroes, kings, and empires alike. None escape its touch, for even gods must bow before its eternal cycle.",
+      "quote": "The great knowledge of this epic is established in all three worlds, adorned with divine and human wisdom, and cherished by the learned.",
+      "sanskrit": "\u0907\u0926\u0902 \u0924\u0941 \u0924\u094d\u0930\u093f\u0937\u0941 \u0932\u094b\u0915\u0947\u0937\u0941 \u092e\u0939\u091c\u094d\u091c\u094d\u091e\u093e\u0928\u0902 \u092a\u094d\u0930\u0924\u093f\u0937\u094d\u0920\u093f\u0924\u092e\u094d... \u0935\u093f\u0926\u0941\u0937\u093e\u0902 \u092a\u094d\u0930\u093f\u092f\u092e\u094d\u0965",
+      "reference": "Mahabharata, Adi Parva, Anukramanika Parva",
+      "meaning": "The Mahabharata is revered as a universal scripture, containing profound truths accessible to both gods and mortals.",
+      "lore_snippet": "Like a tree whose roots reach the heavens and whose branches shelter the earth, the Mahabharata spans all realms of knowledge, offering wisdom to gods and men alike.",
       "image": "quote_3.png",
       "audio": "quote_3.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_4",
-      "quote": "Bhagavan Vasudeva is the eternal truth, the pure, the sacred, and the everlasting supreme light.",
-      "sanskrit": "\u0938 \u0939\u093f \u0938\u0924\u094d\u092f\u092e\u0943\u0924\u0902 \u091a\u0948\u0935 \u092a\u0935\u093f\u0924\u094d\u0930\u0902 \u092a\u0941\u0923\u094d\u092f\u092e\u0947\u0935 \u091a\n\u0936\u093e\u0936\u094d\u0935\u0924\u0902 \u092c\u094d\u0930\u0939\u094d\u092e \u092a\u0930\u092e\u0902 \u0927\u094d\u0930\u0941\u0935\u0902 \u091c\u094d\u092f\u094b\u0924\u093f\u0903 \u0938\u0928\u093e\u0924\u0928\u092e\u094d",
-      "reference": "Mahabharata, Anukramanika Parva, Chapter 1",
-      "meaning": "This verse declares Krishna (Vasudeva) as the embodiment of ultimate truth, purity, and divine radiance - the eternal Brahman beyond time and form.",
-      "lore_snippet": "The wise know that the supreme light exists beyond all duality. Like the sun that never truly sets, this divine radiance illuminates both the manifest and unmanifest realms of existence.",
-      "image": "quote_4.png",
-      "audio": "quote_4.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_5",
-      "quote": "Rama: He who acts impelled by anger creates lakes of blood, yet even the mightiest must heed restraint when wisdom commands it.",
-      "sanskrit": "\u0930\u093e\u092e\u0903 \u0936\u0938\u094d\u0924\u094d\u0930\u092d\u0943\u0924\u093e\u0902 \u0935\u0930\u0903 \u0905\u0938\u0915\u0943\u0924\u094d\u092a\u093e\u0930\u094d\u0925\u093f\u0935\u0902 \u0915\u094d\u0937\u0924\u094d\u0930\u0902 \u091c\u0918\u093e\u0928\u093e\u092e\u0930\u094d\u0937\u091a\u094b\u0926\u093f\u0924\u0903",
-      "reference": "Mahabharata, Parvasa\u1e43graha Parva",
-      "meaning": "Even great warriors like Rama, when driven by wrath, can bring destruction. But true strength lies in heeding calls for restraint from wise elders.",
-      "lore_snippet": "The annals speak of warriors who reshaped battlefields with their fury, yet greater still were those who mastered their rage. A blade unchecked cuts friend and foe alike.",
-      "image": "quote_5.png",
-      "audio": "quote_5.mp3",
-      "category": "philosophy",
-      "tags": [
-        "mahabharata",
-        "wisdom",
-        "ancient",
-        "dharma"
-      ]
-    },
-    {
-      "id": "quote_6",
-      "quote": "The sages: Sacred is the ground where fury was stilled, for even places of violence become holy when they teach the limits of power.",
-      "sanskrit": "\u0924\u0947\u0937\u093e\u0902 \u0938\u092e\u0940\u092a\u0947 \u092f\u094b \u0926\u0947\u0936\u094b \u0939\u094d\u0930\u0926\u093e\u0928\u093e\u0902 \u0930\u0941\u0927\u093f\u0930\u093e\u092e\u094d\u092d\u0938\u093e\u092e\u094d \u0938\u092e\u0928\u094d\u0924\u092a\u091e\u094d\u091a\u0915\u092e\u093f\u0924\u093f \u092a\u0941\u0923\u094d\u092f\u0902 \u0924\u0924\u094d\u092a\u0930\u093f\u0915\u0940\u0930\u094d\u0924\u093f\u0924\u092e\u094d",
-      "reference": "Mahabharata, Parvasa\u1e43graha Parva",
-      "meaning": "Samantapa\u00f1caka, though born of bloodshed, became sacred because it witnessed the moment destructive power yielded to higher wisdom.",
-      "lore_snippet": "No ground is inherently cursed\u2014what marks a place as sacred is the wisdom gained there. The blood lakes became shrines when they turned wrath to reverence.",
-      "image": "quote_6.png",
-      "audio": "quote_6.mp3",
       "category": "philosophy",
       "tags": [
         "mahabharata",

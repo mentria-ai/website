@@ -167,6 +167,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_11",
+      "quote": "Even the mightiest fall when fate turns against them.",
+      "sanskrit": "\u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0936\u0930\u0924\u0932\u094d\u092a\u0947 \u0936\u092f\u093e\u0928\u0902; \u0935\u0943\u0926\u094d\u0927\u0902 \u0935\u0940\u0930\u0902 \u0938\u093e\u0926\u093f\u0924\u0902 \u091a\u093f\u0924\u094d\u0930\u092a\u0941\u0919\u094d\u0916\u0948\u0903",
+      "reference": "Mahabharata, Bhishma Parva, Chapter 119",
+      "meaning": "This reflects on Bhishma, the invincible warrior, lying on a bed of arrows\u2014showing that no strength is eternal when destiny intervenes.",
+      "lore_snippet": "The ancients whispered of Bhishma the Unconquered, whose oath made him immortal in battle. Yet even he met his end upon a arrows' bed, pierced by fate as much as by shafts. Remember: no shield lasts forever against time's tide.",
+      "image": "quote_11.png",
+      "audio": "quote_11.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_12",
+      "quote": "When even the mightiest warriors fall, hope itself becomes the greatest weapon.",
+      "sanskrit": "\u0924\u0926\u093e \u0928\u093e\u0936\u0902\u0938\u0947 \u0935\u093f\u091c\u092f\u093e\u092f \u0938\u091e\u094d\u091c\u092f",
+      "reference": "Mahabharata, Bhishma Parva, Chapter 45 (Gita Press edition)",
+      "meaning": "This recurring refrain from Sanjaya's battlefield report to Dhritarashtra captures the moment when all seems lost, yet the will to fight remains. It speaks to the resilience of the human spirit even in the face of overwhelming odds.",
+      "lore_snippet": "Ancient chronicles tell how warriors of the Kurukshetra War fought not with steel alone, but with indomitable will. When all signs pointed to defeat, the Pandavas' persistence became their secret weapon - proving that battles are oft won in the heart before they're won on the field.",
+      "image": "quote_12.png",
+      "audio": "quote_12.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

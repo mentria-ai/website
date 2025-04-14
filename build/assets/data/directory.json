@@ -67,6 +67,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_5",
+      "quote": "Rama: He who acts impelled by anger creates lakes of blood, yet even the mightiest must heed restraint when wisdom commands it.",
+      "sanskrit": "\u0930\u093e\u092e\u0903 \u0936\u0938\u094d\u0924\u094d\u0930\u092d\u0943\u0924\u093e\u0902 \u0935\u0930\u0903 \u0905\u0938\u0915\u0943\u0924\u094d\u092a\u093e\u0930\u094d\u0925\u093f\u0935\u0902 \u0915\u094d\u0937\u0924\u094d\u0930\u0902 \u091c\u0918\u093e\u0928\u093e\u092e\u0930\u094d\u0937\u091a\u094b\u0926\u093f\u0924\u0903",
+      "reference": "Mahabharata, Parvasa\u1e43graha Parva",
+      "meaning": "Even great warriors like Rama, when driven by wrath, can bring destruction. But true strength lies in heeding calls for restraint from wise elders.",
+      "lore_snippet": "The annals speak of warriors who reshaped battlefields with their fury, yet greater still were those who mastered their rage. A blade unchecked cuts friend and foe alike.",
+      "image": "quote_5.png",
+      "audio": "quote_5.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_6",
+      "quote": "The sages: Sacred is the ground where fury was stilled, for even places of violence become holy when they teach the limits of power.",
+      "sanskrit": "\u0924\u0947\u0937\u093e\u0902 \u0938\u092e\u0940\u092a\u0947 \u092f\u094b \u0926\u0947\u0936\u094b \u0939\u094d\u0930\u0926\u093e\u0928\u093e\u0902 \u0930\u0941\u0927\u093f\u0930\u093e\u092e\u094d\u092d\u0938\u093e\u092e\u094d \u0938\u092e\u0928\u094d\u0924\u092a\u091e\u094d\u091a\u0915\u092e\u093f\u0924\u093f \u092a\u0941\u0923\u094d\u092f\u0902 \u0924\u0924\u094d\u092a\u0930\u093f\u0915\u0940\u0930\u094d\u0924\u093f\u0924\u092e\u094d",
+      "reference": "Mahabharata, Parvasa\u1e43graha Parva",
+      "meaning": "Samantapa\u00f1caka, though born of bloodshed, became sacred because it witnessed the moment destructive power yielded to higher wisdom.",
+      "lore_snippet": "No ground is inherently cursed\u2014what marks a place as sacred is the wisdom gained there. The blood lakes became shrines when they turned wrath to reverence.",
+      "image": "quote_6.png",
+      "audio": "quote_6.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

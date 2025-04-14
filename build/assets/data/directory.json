@@ -628,6 +628,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_38",
+      "quote": "Uttanka: A disciple must not act on unjust words, even if spoken by elders, for righteousness transcends all authority.",
+      "sanskrit": "\u0928 \u092e\u092f\u093e \u0938\u094d\u0924\u094d\u0930\u0940\u0923\u093e\u0902 \u0935\u091a\u0928\u093e\u0926\u093f\u0926\u092e\u0915\u093e\u0930\u094d\u092f\u0902 \u0915\u093e\u0930\u094d\u092f\u092e\u094d\u0964 \u0928 \u0939\u094d\u092f\u0939\u092e\u0941\u092a\u093e\u0927\u094d\u092f\u093e\u092f\u0947\u0928 \u0938\u0902\u0926\u093f\u0937\u094d\u091f\u0903\u0964 \u0905\u0915\u093e\u0930\u094d\u092f\u092e\u092a\u093f \u0924\u094d\u0935\u092f\u093e \u0915\u093e\u0930\u094d\u092f\u092e\u093f\u0924\u093f\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 3",
+      "meaning": "Uttanka refuses to obey an unethical request from his guru's wife, demonstrating that dharma (righteousness) supersedes blind obedience.",
+      "lore_snippet": "The ancient sages teach that true devotion lies in upholding dharma above all else. A disciple's duty is to discern, not merely obey\u2014for even the gods honor those who uphold righteousness when tested.",
+      "image": "quote_38.png",
+      "audio": "quote_38.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_39",
+      "quote": "Teacher Dhoumya: Through steadfast service to one's guru, even hardship becomes the forge where wisdom is shaped.",
+      "sanskrit": "\u0917\u094c\u0930\u093f\u0935 \u0928\u093f\u0924\u094d\u092f\u0902 \u0917\u0941\u0930\u0941\u0937\u0941 \u0927\u0942\u0930\u094d\u0937\u0941 \u0928\u093f\u092f\u0941\u091c\u094d\u092f\u092e\u093e\u0928\u0903 \u0936\u0940\u0924\u094b\u0937\u094d\u0923\u0915\u094d\u0937\u0941\u0924\u094d\u0924\u0943\u0937\u094d\u0923\u093e\u0926\u0941\u0903\u0916\u0938\u0939\u0903 \u0938\u0930\u094d\u0935\u0924\u094d\u0930\u093e\u092a\u094d\u0930\u0924\u093f\u0915\u0942\u0932\u0903\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 3",
+      "meaning": "Describing how the student Veda endured hardships like an ox bearing burdens, ultimately gaining enlightenment through unwavering dedication.",
+      "lore_snippet": "The path of learning demands surrender to discipline. Recall how the Rishis of old endured extremes\u2014hunger, thirst, and toil\u2014to kindle the flame of knowledge within.",
+      "image": "quote_39.png",
+      "audio": null,
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

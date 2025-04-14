@@ -135,6 +135,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_9",
+      "quote": "Dhritarashtra: When I heard that Krishna and Arjuna had united, I lost all hope of victory for my sons.",
+      "sanskrit": "\u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0935\u093e\u0938\u0941\u0926\u0947\u0935\u093e\u0930\u094d\u091c\u0941\u0928\u094c \u0924\u094c; \u0924\u0925\u093e \u0927\u0928\u0941\u0930\u094d\u0917\u093e\u0923\u094d\u0921\u093f\u0935\u092e\u092a\u094d\u0930\u092e\u0947\u092f\u092e\u094d",
+      "reference": "Mahabharata, Udyoga Parva, Chapter 129",
+      "meaning": "The union of divine wisdom (Krishna) and human excellence (Arjuna) creates an invincible force that transcends mortal calculations.",
+      "lore_snippet": "When divine guidance walks hand-in-hand with human skill, even the mightiest armies tremble. Thus spoke Dhritarashtra when foreseeing his doom, for no earthly power can overcome this sacred alliance.",
+      "image": "quote_9.png",
+      "audio": "quote_9.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_10",
+      "quote": "Dhritarashtra: When I heard Bhishma fell by placing Shikhandi before him, I knew even the unassailable can be conquered by destiny's design.",
+      "sanskrit": "\u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u092d\u0940\u0937\u094d\u092e\u092e\u0924\u094d\u092f\u0928\u094d\u0924\u0936\u0942\u0930\u0902; \u0939\u0924\u0902 \u092a\u093e\u0930\u094d\u0925\u0947\u0928\u093e\u0939\u0935\u0947\u0937\u094d\u0935\u092a\u094d\u0930\u0927\u0943\u0937\u094d\u092f\u092e\u094d",
+      "reference": "Mahabharata, Bhishma Parva, Chapter 119",
+      "meaning": "The greatest warriors still bear vulnerabilities hidden in their own codes of honor - what cannot be overcome by strength will fall to circumstance.",
+      "lore_snippet": "The Brahmin's vow that made Bhishma invincible also bound him to never strike a woman-born. Thus even mountains may crumble when the tides of fate exploit the cracks in their foundations.",
+      "image": "quote_10.png",
+      "audio": "quote_10.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_11",
+      "quote": "Dhritarashtra: When I heard Arjuna pierced the earth to quench Bhishma's thirst, I understood - true warriors honor even fallen foes.",
+      "sanskrit": "\u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0936\u093e\u0928\u094d\u0924\u0928\u0935\u0947 \u0936\u092f\u093e\u0928\u0947; \u092a\u093e\u0928\u0940\u092f\u093e\u0930\u094d\u0925\u0947 \u091a\u094b\u0926\u093f\u0924\u0947\u0928\u093e\u0930\u094d\u091c\u0941\u0928\u0947\u0928",
+      "reference": "Mahabharata, Bhishma Parva, Chapter 121",
+      "meaning": "The measure of a warrior is not in victory alone, but in maintaining compassion amidst battle's fury.",
+      "lore_snippet": "As the earth yielded her waters to Arjuna's arrow, so too does true dharma demand mercy alongside might. The greatest conquerors are those who remember humanity even in war's crucible.",
+      "image": "quote_11.png",
+      "audio": "quote_11.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

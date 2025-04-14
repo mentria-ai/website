@@ -254,6 +254,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_16",
+      "quote": "The wise measure an army not by numbers, but by the unity of its purpose and the righteousness of its cause.",
+      "sanskrit": "\u090f\u0924\u093e\u092e\u0915\u094d\u0937\u094c\u0939\u093f\u0923\u0940\u0902 \u092a\u094d\u0930\u093e\u0939\u0941\u0903 \u0938\u0919\u094d\u0916\u094d\u092f\u093e\u0924\u0924\u094d\u0924\u094d\u0935\u0935\u093f\u0926\u094b \u091c\u0928\u093e\u0903",
+      "reference": "Mahabharata, Udyoga Parva, approximately Chapter 19",
+      "meaning": "True strength lies not in the quantity of warriors, but in their shared resolve and moral alignment with dharma.",
+      "lore_snippet": "Ancient commanders knew that ten thousand arrows shot without aim scatter uselessly, while a single arrow fired with conviction pierces the heart. So too does an army's power multiply when united under truth.",
+      "image": "quote_16.png",
+      "audio": "quote_16.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_17",
+      "quote": "Dharma: When histories are written, only the weight of righteous deeds echoes through time, while the tumult of battle fades like smoke.",
+      "sanskrit": "\u0907\u0924\u093f\u0939\u093e\u0938\u0903 \u092a\u094d\u0930\u0927\u093e\u0928\u093e\u0930\u094d\u0925\u0903 \u0936\u094d\u0930\u0947\u0937\u094d\u0920\u0903 \u0938\u0930\u094d\u0935\u093e\u0917\u092e\u0947\u0937\u094d\u0935\u092f\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, approximately Chapter 62",
+      "meaning": "The essence of history preserves the eternal struggle between dharma and adharma, transcending mere accounts of conflict.",
+      "lore_snippet": "Scholars record the movements of armies, but sages remember the choices that shaped them. The Kurukshetra war lasted eighteen days, but its lessons endure for eighteen aeons.",
+      "image": "quote_17.png",
+      "audio": "quote_17.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -133,6 +133,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_9",
+      "quote": "When I heard that Arjuna pleased the three-eyed Lord Shiva in the battle, then I lost hope of victory, O Sanjaya.",
+      "sanskrit": "\u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u092e\u0930\u094d\u091c\u0941\u0928\u094b \u0926\u0947\u0935\u0926\u0947\u0935\u0902; \u0915\u093f\u0930\u093e\u0924\u0930\u0942\u092a\u0902 \u0924\u094d\u0930\u094d\u092f\u092e\u094d\u092c\u0915\u0902 \u0924\u094b\u0937\u094d\u092f \u092f\u0941\u0926\u094d\u0927\u0947",
+      "reference": "Mahabharata, [Udyoga Parva], Chapter [47]",
+      "meaning": "This quote reflects Dhritarashtra's despair upon learning that Arjuna had earned Lord Shiva's divine favor, symbolizing the inevitability of the Pandavas' victory due to divine intervention and righteousness.",
+      "lore_snippet": "Even the mightiest kings tremble when mortals earn the favor of the gods. For when divine will aligns with mortal purpose, no earthly power can stand against it.",
+      "image": null,
+      "audio": "quote_9.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_10",
+      "quote": "When I heard that Krishna and Arjuna, like Nar and Narayana, had united their indomitable strengths, then I lost all hope of victory.",
+      "sanskrit": "\u092f\u0926\u093e\u0936\u094d\u0930\u094c\u0937\u0902 \u0928\u0930\u0928\u093e\u0930\u093e\u092f\u0923\u094c \u0924\u094c; \u0915\u0943\u0937\u094d\u0923\u093e\u0930\u094d\u091c\u0941\u0928\u0947\u094c \u0935\u0926\u0924\u094b \u0928\u093e\u0930\u0926\u0938\u094d\u092f",
+      "reference": "Mahabharata, Udyoga Parva, Chapter 70",
+      "meaning": "This verse captures the moment when Duryodhana realizes the divine union of Krishna and Arjuna (symbolizing the eternal sages Nar-Narayana), signifying the inevitability of the Pandavas' victory. It reflects the power of dharma when supported by divine alignment.",
+      "lore_snippet": "When the mortal and the divine walk as one, even the mightiest armies tremble. The union of Krishna's wisdom and Arjuna's skill became the unstoppable force that reshaped the fate of Kurukshetra.",
+      "image": null,
+      "audio": "quote_10.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

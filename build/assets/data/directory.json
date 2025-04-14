@@ -203,6 +203,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_13",
+      "quote": "Bhagavan Vyasa: He who hears this sacred lore with devotion is freed from all sins, as butter is churned from milk.",
+      "sanskrit": "\u0936\u094d\u0930\u0926\u094d\u0926\u0927\u093e\u0928\u0903 \u0938\u0926\u094b\u0926\u094d\u092f\u0941\u0915\u094d\u0924\u0903 \u0938\u0924\u094d\u092f\u0927\u0930\u094d\u092e\u092a\u0930\u093e\u092f\u0923\u0903\u0964 \u0906\u0938\u0947\u0935\u0928\u094d\u0928\u093f\u092e\u092e\u0927\u094d\u092f\u093e\u092f\u0902 \u0928\u0930\u0903 \u092a\u093e\u092a\u093e\u0924\u094d\u092a\u094d\u0930\u092e\u0941\u091a\u094d\u092f\u0924\u0947\u0965",
+      "reference": "Mahabharata, Parvasamgraha Parva, Chapter 1",
+      "meaning": "The verse emphasizes the purifying power of sincerely engaging with sacred wisdom, comparing its transformative effect to the extraction of pure butter (truth) from milk (life's impurities).",
+      "lore_snippet": "Ancient sages held that true wisdom acts as a purifying fire. Just as gold is refined in flames, the soul is cleansed by sacred knowledge when approached with reverence and discipline.",
+      "image": "quote_13.png",
+      "audio": "quote_13.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_14",
+      "quote": "The Mahabharata is declared greater than the four Vedas combined, for it contains both worldly wisdom and spiritual truth in equal measure.",
+      "sanskrit": "\u091a\u0924\u094d\u0935\u093e\u0930 \u090f\u0915\u0924\u094b \u0935\u0947\u0926\u093e \u092d\u093e\u0930\u0924\u0902 \u091a\u0948\u0915\u092e\u0947\u0915\u0924\u0903\u0964 \u092e\u0939\u0924\u094d\u0924\u094d\u0935\u093e\u0926\u094d\u092d\u093e\u0930\u0935\u0924\u094d\u0924\u094d\u0935\u093e\u091a\u094d\u091a \u092e\u0939\u093e\u092d\u093e\u0930\u0924\u092e\u0941\u091a\u094d\u092f\u0924\u0947\u0965",
+      "reference": "Mahabharata, Parvasamgraha Parva, Chapter 1",
+      "meaning": "This proclaims the epic's unique status as encompassing both sacred knowledge (Vedas) and practical wisdom (Itihasa), making it a complete guide for humanity.",
+      "lore_snippet": "When the devas weighed all scriptures, the Mahabharata tipped the scales. Its stories contain the essence of dharma - not as dry precepts but as living truth tested in fire and blood.",
+      "image": "quote_14.png",
+      "audio": "quote_14.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_15",
+      "quote": "At Samantapa\u00f1caka, where time itself bears witness, even righteous wrath must know restraint lest it drown the world in blood.",
+      "sanskrit": "\u0905\u0925\u0930\u094d\u091a\u0940\u0915\u093e\u0926\u092f\u094b\u093d\u092d\u094d\u092f\u0947\u0924\u094d\u092f \u092a\u093f\u0924\u0930\u094b \u092c\u094d\u0930\u093e\u0939\u094d\u092e\u0923\u0930\u094d\u0937\u092d\u092e\u094d\u0964 \u0924\u0902 \u0915\u094d\u0937\u092e\u0938\u094d\u0935\u0947\u0924\u093f \u0938\u093f\u0937\u093f\u0927\u0941\u0938\u094d\u0924\u0924\u0903 \u0938 \u0935\u093f\u0930\u0930\u093e\u092e \u0939\u0965",
+      "reference": "Mahabharata, Parvasamgraha Parva, Chapter 7",
+      "meaning": "Referring to Parasurama's cessation of violence, this teaches that even justified anger requires boundaries to prevent cosmic imbalance.",
+      "lore_snippet": "The five lakes of Samantapa\u00f1caka stand as eternal warning: when warriors forget mercy, the land itself becomes a graveyard. True strength lies in knowing when to sheathe the sword.",
+      "image": "quote_15.png",
+      "audio": "quote_15.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

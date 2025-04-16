@@ -763,7 +763,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Process quote change - animation and audio loading
             // Use a consistent approach for all change types
-            fadeOutWords(() => {
+                fadeOutWords(() => {
                 // Start loading audio FIRST, before animation - this reduces the double-play issue
                 // by ensuring audio is ready or loading before text animations complete
                 loadAndPlayAudio();

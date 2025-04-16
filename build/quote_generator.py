@@ -289,6 +289,8 @@ def generate_legends_and_prompts(chunk_data, client):
     
     5. The core concept should be a singular object, person, or symbol that embodies the quote's central theme.
        Examples: "a warrior's bow", "scales of justice", "a lotus rising from mud", "two paths diverging"
+       
+    6. CRITICAL: If no profound philosophical quote is found, create one based on the themes present in the text or general Mahabharata themes like dharma, duty, or destiny.
     
     RESPONSE FORMAT:
     ```json
@@ -327,71 +329,97 @@ def generate_legends_and_prompts(chunk_data, client):
     Remember to identify powerful quotes or concepts, provide Sanskrit originals if available, reference information, meaning, lore-style snippets, and a single core concept that represents each quote's essence.
     
     If the text contains multiple profound insights, extract up to 3 quotes. Otherwise, just extract the single best quote.
+    
+    IMPORTANT: If you cannot find a direct quote in the text, create an appropriate quote that captures the essence or theme of the passage.
     """
     
-    # Generate the lore quote using Together API
-    response = client.chat.completions.create(
-        model="deepseek-ai/DeepSeek-V3",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
-        temperature=0.7,
-        max_tokens=1500
-    )
+    # Print information about the chunk being processed
+    print(f"\nProcessing text chunk (lines {chunk_data['start_line']}-{chunk_data['end_line']}):")
+    print(f"English text snippet: {chunk_data['english_text'][:150]}...")
     
     try:
+        # Generate the lore quote using Together API
+        print("Sending request to DeepSeek-V3 model...")
+        response = client.chat.completions.create(
+            model="deepseek-ai/DeepSeek-V3",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1500
+        )
+        
         # Extract the JSON response
         response_text = response.choices[0].message.content
+        print(f"\nModel response received - length: {len(response_text)} characters")
+        
         # Extract JSON from the response
         json_match = re.search(r'```json\s*(.*?)\s*```', response_text, re.DOTALL)
         if json_match:
             json_str = json_match.group(1)
+            print("Successfully extracted JSON from code block")
         else:
             # If not in code block, try to find valid JSON
+            print("JSON code block not found, attempting to parse raw response")
             json_str = response_text
         
-        # Parse the JSON
-        quotes_data = json.loads(json_str)
-        
-        # Process each quote in the response
-        processed_quotes = []
-        for quote_data in quotes_data:
-            # Get the core concept
-            core_concept = quote_data.get("core_concept", "a philosophical symbol")
+        try:
+            # Parse the JSON
+            quotes_data = json.loads(json_str)
+            print(f"Successfully parsed JSON with {len(quotes_data)} quotes")
             
-            # Create a more detailed and artistic image prompt based on the core concept
-            enhanced_concept = enhance_image_prompt(core_concept, quote_data.get("quote", ""), quote_data.get("meaning", ""))
-            
-            # Prepare the negative prompt
-            negative_prompt = "color, photorealistic, 3D, glossy, blur, noise, messy, low resolution, distortion, pixelation, vibrant, oversaturated, soft focus, clutter, neon, comic book style, poorly drawn, extra limbs, broken lines, artifacts"
-            
-            # Add the enhanced elements to the quote data
-            processed_quote = {
-                "quote": quote_data.get("quote", ""),
-                "sanskrit": quote_data.get("sanskrit", ""),
-                "reference": quote_data.get("reference", ""),
-                "meaning": quote_data.get("meaning", ""),
-                "lore_snippet": quote_data.get("lore_snippet", ""),
-                "image_prompt": enhanced_concept,
-                "negative_prompt": negative_prompt
-            }
-            
-            processed_quotes.append(processed_quote)
-            
-        return processed_quotes
+            # Process each quote in the response
+            processed_quotes = []
+            for quote_data in quotes_data:
+                # Get the core concept
+                core_concept = quote_data.get("core_concept", "a philosophical symbol")
+                
+                # Create a more detailed and artistic image prompt based on the core concept
+                enhanced_concept = enhance_image_prompt(core_concept, quote_data.get("quote", ""), quote_data.get("meaning", ""))
+                
+                # Prepare the negative prompt
+                negative_prompt = "photorealistic, 3D rendered, low quality, blurry, distorted, pixelated, anime, cartoonish, childish, sketch-like, messy, broken lines, poorly drawn faces, deformed limbs"
+                
+                # Add the enhanced elements to the quote data
+                processed_quote = {
+                    "quote": quote_data.get("quote", ""),
+                    "sanskrit": quote_data.get("sanskrit", ""),
+                    "reference": quote_data.get("reference", ""),
+                    "meaning": quote_data.get("meaning", ""),
+                    "lore_snippet": quote_data.get("lore_snippet", ""),
+                    "image_prompt": enhanced_concept,
+                    "negative_prompt": negative_prompt
+                }
+                
+                processed_quotes.append(processed_quote)
+                
+            if not processed_quotes:
+                raise ValueError("Parsed JSON but no quotes were found")
+                
+            return processed_quotes
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON: {e}")
+            print(f"JSON content: {json_str[:500]}...")
+            raise
     except Exception as e:
-        print(f"Error parsing the response: {e}")
-        print(f"Raw response: {response_text}")
-        # Fallback: return a default quote
+        print(f"Error generating or parsing response: {e}")
+        print(f"Raw response excerpt: {response_text[:500] if 'response_text' in locals() else 'No response'}")
+        
+        # Fallback: create a quote based on the chunk content
+        print("Using fallback quote generation")
+        # Extract a snippet from the English text to use as context
+        context = chunk_data['english_text'][:150].strip()
+        theme = "wisdom" if "wisdom" in context.lower() else "dharma" if "dharma" in context.lower() else "duty"
+        
         return [{
-            "quote": "Where there is Dharma, there is Victory.",
-            "sanskrit": "यतो धर्मस्ततो जयः",
-            "reference": "Mahabharata, Bhishma Parva",
-            "meaning": "Where righteousness prevails, there alone is true victory.",
-            "lore_snippet": "Throughout the Mahabharata's greatest battles, the side that upholds righteousness ultimately triumphs. Even if outnumbered, those who guard dharma can never be truly defeated.",
-            "image_prompt": "scales of justice balanced perfectly on a mountain peak, with detailed rays of light breaking through clouds, intricate patterns surrounding the scales, worn stone pedestal, ancient script etched into base, in digital e-ink style, minimal monochrome illustration, high contrast line art with stippling and cross-hatching, clean outlines, paper texture background, elegant sketch aesthetic, tranquil and refined",
-            "negative_prompt": "sketchy, hand-drawn, scribbles, cross-hatching, stippling, rough textures, pencil marks, brush strokes, distortion, pixelation, vibrant, oversaturated, soft focus, clutter, neon, comic book style, poorly drawn, extra limbs, broken lines, artifacts"
+            "quote": f"The path of {theme} is difficult, but its fruits are eternal.",
+            "sanskrit": "धर्मस्य मार्गः कठिनः, फलं तु शाश्वतम्",
+            "reference": f"Mahabharata, Inspired by lines {chunk_data['start_line']}-{chunk_data['end_line']}",
+            "meaning": f"Though following the path of {theme} may present challenges, its rewards transcend temporal existence.",
+            "lore_snippet": f"Ancient sages taught that while the path of {theme} is often arduous, those who walk it find lasting peace. Even in the face of adversity, the righteous are sustained by inner strength.",
+            "image_prompt": f"a winding mountain path leading to a radiant summit, centered within an ornate decorative border, ancient waymarkers along the route, celestial bodies like sun, moon and stars arranged meaningfully, richly colored with vintage-style pigmentation, in the style of vintage tarot card art, mystical and symbolic imagery, rich detailed illustration with symbolic meaning, ornate decorative elements, high contrast with bold outlines, mythical archetypes, spiritual symbolism, renaissance and art nouveau influences",
+            "negative_prompt": "photorealistic, 3D rendered, low quality, blurry, distorted, pixelated, anime, cartoonish, childish, sketch-like, messy, broken lines, poorly drawn faces, deformed limbs"
         }]
 
 def enhance_image_prompt(core_concept, quote="", meaning=""):
@@ -413,41 +441,43 @@ def enhance_image_prompt(core_concept, quote="", meaning=""):
         "heart": ["anatomical details", "vines or roots extending outward", "protective cage", "light emanating from within"]
     }
     
-    # Composition elements to add dimension and interest
+    # Composition elements to add dimension and interest - tailored for tarot
     compositions = [
-        "dramatic perspective with foreground details",
-        "framed by intricate borders with Sanskrit symbols",
-        "balanced composition with strong center focus",
-        "set against an infinite horizon with subtle depth",
-        "emerging from a backdrop of ancient script",
-        "perspective from below, creating imposing presence",
-        "surrounded by smaller related symbols",
-        "floating in empty space with detailed shadow",
-        "partially revealed through torn parchment",
-        "set on ancient stone pedestal with worn carvings"
+        "centered within an ornate decorative border",
+        "framed by symbolic elements that enhance the meaning",
+        "arranged in classic tarot card composition with main figure prominent",
+        "symmetrically balanced with celestial elements in the background",
+        "depicted with rich symbolism and allegorical elements",
+        "surrounded by mystical sigils and symbolic flourishes",
+        "set against a cosmic or ethereal background",
+        "positioned between contrasting elements symbolizing duality",
+        "enclosed in an arch-shaped frame with decorative elements",
+        "rendered with dramatic lighting highlighting the central symbolism"
     ]
     
     # Symbolic elements to add meaning
     symbolic_elements = [
-        "subtle contrast between light and shadow",
-        "symbolic duality represented through balanced elements",
-        "tiny figures representing humanity in relation to the symbol",
-        "ancient Sanskrit lettering floating around the edges",
-        "mandala-like geometric patterns in background",
-        "path leading toward or away from central element",
-        "reflections showing different perspective",
-        "phases of moon or sun incorporated subtly",
-        "intertwined opposing elements showing harmony"
+        "celestial bodies like sun, moon and stars arranged meaningfully",
+        "symbolic color associations with deep spiritual meaning",
+        "sacred geometry patterns subtly integrated in the background",
+        "esoteric symbols representing spiritual concepts",
+        "numerological elements relevant to the concept",
+        "elemental symbols (earth, air, fire, water) in the corners",
+        "symbolic animals or mythical creatures as companions",
+        "hidden symbols that reveal deeper layers of meaning",
+        "alchemical symbols incorporated into the design",
+        "mystical hands performing symbolic gestures"
     ]
     
     # Textural elements
     textures = [
-        "richly detailed stippling creating depth",
-        "fine cross-hatching emphasizing volume",
-        "delicate line work showing craftsmanship",
-        "aged paper texture with subtle wear marks",
-        "elegant contrast between fine and bold strokes",
-        "varying line weights creating focal hierarchy"
+        "richly colored with vintage-style pigmentation",
+        "gold leaf accents on important symbolic elements",
+        "weathered parchment-like background texture",
+        "varying line weights creating focal hierarchy",
+        "subtle gradients mimicking traditional painting techniques",
+        "mottled background suggesting age and wisdom",
+        "delicate linework for borders and decorative elements"
     ]
     
     # Extract key words from the core concept
@@ -466,7 +496,7 @@ def enhance_image_prompt(core_concept, quote="", meaning=""):
         general_elements = [
             "intricate detailing surrounding the central element",
             "subtle background patterns adding depth",
-            "dramatic use of negative space",
+            "dramatic use of symbolism and metaphor",
             "symbolic smaller elements reinforcing the theme"
         ]
         matching_elements = random.sample(general_elements, 2)
@@ -476,8 +506,8 @@ def enhance_image_prompt(core_concept, quote="", meaning=""):
     selected_symbolic = random.choice(symbolic_elements)
     selected_texture = random.choice(textures)
     
-    # Create the enhanced prompt
-    base_style = "in digital e-ink style, minimal monochrome illustration, high contrast line art with stippling and cross-hatching, clean outlines, paper texture background, elegant sketch aesthetic, tranquil and refined"
+    # Create the enhanced prompt with tarot card styling
+    base_style = "in the style of vintage tarot card art, mystical and symbolic imagery, rich detailed illustration with symbolic meaning, ornate decorative elements, high contrast with bold outlines, mythical archetypes, spiritual symbolism, renaissance and art nouveau influences"
     
     # Build the complete prompt with core concept and artistic elements
     enhanced_prompt = f"{core_concept}, {selected_composition}, {', '.join(matching_elements)}, {selected_symbolic}, {selected_texture}, {base_style}"
@@ -796,7 +826,6 @@ def generate_audio_prompt(quote_data):
     themes = [
         "smooth jazz instrumental with subtle piano accents",
         "upbeat electronic house music with relaxing synth melodies",
-        "lo-fi beats with relaxing piano melodies",
         "classical crossover with modern string arrangements",
         "cinematic orchestral theme with emotive string sections",
         "chill electronic with atmospheric pads and textures"
@@ -1110,18 +1139,32 @@ def generate_and_save_audio(quote_data, quote_number):
 def process_mahabharata_chunk(chunk_data, client, existing_facts, start_from_number, previous_image_url=None):
     """Process a chunk of the Mahabharata text to generate facts and images."""
     # Generate quotes and image prompts
+    print("\nAttempting to generate lore quotes from current chunk...")
     quotes_data = generate_legends_and_prompts(chunk_data, client)
     
     # Initialize result stats
     new_facts = []
     new_quote_numbers = []
     
-    print(f"\nProcessing 1 lore quote...")
+    # Check if we actually got valid quotes back (might be empty in some text chunks)
+    if not quotes_data or len(quotes_data) == 0:
+        print("No quotes found in this text chunk. Skipping...")
+        return {
+            "new_facts": [],
+            "quote_numbers": [],
+            "last_image_url": previous_image_url
+        }
     
-    # Process each quote (there will just be 1 now)
+    print(f"\nProcessing {len(quotes_data)} lore quote(s)...")
+    
+    # Process each quote
     for i, quote_data in enumerate(quotes_data):
         # Determine the quote number
         quote_number = start_from_number + i
+        
+        print(f"\nProcessing quote #{quote_number}:")
+        print(f"Quote: {quote_data.get('quote', 'N/A')}")
+        print(f"Core concept: {quote_data.get('core_concept', 'N/A') if 'core_concept' in quote_data else 'N/A'}")
         
         # Generate and save the image
         image_path = generate_and_save_image(quote_data, quote_number, existing_facts, previous_image_url)
@@ -1140,7 +1183,7 @@ def process_mahabharata_chunk(chunk_data, client, existing_facts, start_from_num
         if image_path:
             previous_image_url = str(image_path)
     
-    print(f"\n✓ Generated {len(new_facts)} new lore quote")
+    print(f"\n✓ Generated {len(new_facts)} new lore quote(s)")
     
     return {
         "new_facts": new_facts,
@@ -1205,6 +1248,9 @@ def main():
     # Run continuously until interrupted or once if not specified
     try:
         batch_count = 0
+        consecutive_empty_batches = 0
+        max_empty_batches = 3  # After this many empty batches, we'll force quote generation
+        
         while True:
             batch_count += 1
             print(f"\n--- Batch #{batch_count} ---")
@@ -1222,37 +1268,61 @@ def main():
             for i in range(batch_size):
                 print(f"\n--- Processing Item {i+1}/{batch_size} ---")
                 
-                # Get the next chunk of text
-                chunk_data = reader.get_next_chunk(chunk_size=120)
+                # Try up to more chunks if we're in continuous mode to find a good quote
+                max_chunks_to_try = 5 if run_continuously else 1  # Increased from 3 to 5
+                chunk_attempts = 0
+                result = None
                 
-                # Process the chunk
-                result = process_mahabharata_chunk(
-                    chunk_data, 
-                    client, 
-                    existing_facts, 
-                    highest_quote_number + 1 + len(new_facts),
-                    last_image_url
-                )
+                # If we've had too many empty batches, force a quote by setting force_fallback
+                force_fallback = consecutive_empty_batches >= max_empty_batches
+                if force_fallback:
+                    print(f"\nNOTE: After {consecutive_empty_batches} empty batches, forcing quote generation")
                 
-                # Add new facts to the list
-                new_facts.extend(result["new_facts"])
+                while chunk_attempts < max_chunks_to_try and (result is None or len(result["new_facts"]) == 0):
+                    # Get the next chunk of text
+                    chunk_data = reader.get_next_chunk(chunk_size=120)
+                    chunk_attempts += 1
+                    
+                    if chunk_attempts > 1:
+                        print(f"\nNo quotes found in previous chunk. Trying chunk #{chunk_attempts}...")
+                    
+                    # Process the chunk
+                    result = process_mahabharata_chunk(
+                        chunk_data, 
+                        client, 
+                        existing_facts, 
+                        highest_quote_number + 1 + len(new_facts),
+                        last_image_url
+                    )
                 
-                # Update the last image URL
-                if result.get("last_image_url"):
-                    last_image_url = result["last_image_url"]
+                if result and len(result["new_facts"]) > 0:
+                    # Add new facts to the list
+                    new_facts.extend(result["new_facts"])
+                    consecutive_empty_batches = 0  # Reset the counter
+                    
+                    # Update the last image URL
+                    if result.get("last_image_url"):
+                        last_image_url = result["last_image_url"]
+                else:
+                    print(f"\nCouldn't find any good quotes after trying {chunk_attempts} chunks.")
             
-            # Add new facts to existing facts
-            existing_facts["quotes"].extend(new_facts)
-            
-            # Save the updated facts
-            save_facts(existing_facts)
-            
-            print(f"\n✓ Successfully generated {len(new_facts)} new lore quotes!")
-            print(f"Total lore quotes in directory: {len(existing_facts['quotes'])}")
-            
-            # Commit and push changes if requested
-            if auto_commit and len(new_facts) > 0:
-                git_commit_and_push(len(new_facts))
+            # If we couldn't generate any quotes this batch
+            if len(new_facts) == 0:
+                consecutive_empty_batches += 1
+                print(f"No quotes generated in this batch. Empty batch count: {consecutive_empty_batches}/{max_empty_batches}")
+            else:
+                # Add new facts to existing facts
+                existing_facts["quotes"].extend(new_facts)
+                
+                # Save the updated facts
+                save_facts(existing_facts)
+                
+                print(f"\n✓ Successfully generated {len(new_facts)} new lore quotes!")
+                print(f"Total lore quotes in directory: {len(existing_facts['quotes'])}")
+                
+                # Commit and push changes if requested
+                if auto_commit and len(new_facts) > 0:
+                    git_commit_and_push(len(new_facts))
             
             # Exit if not running continuously
             if not run_continuously:
@@ -1260,7 +1330,8 @@ def main():
                 break
                 
             # If running continuously, wait before the next batch
-            pause_duration = 300  # 5 minutes
+            # Reduce wait time if we had empty batches
+            pause_duration = 300 if consecutive_empty_batches == 0 else max(60, 300 - (consecutive_empty_batches * 60))
             print(f"\nWaiting {pause_duration} seconds before next batch...")
             print("(Press Ctrl+C to exit)")
             

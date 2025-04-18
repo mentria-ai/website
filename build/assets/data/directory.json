@@ -1495,6 +1495,23 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_89",
+      "quote": "The path of duty is difficult, but its fruits are eternal.",
+      "sanskrit": "\u0927\u0930\u094d\u092e\u0938\u094d\u092f \u092e\u093e\u0930\u094d\u0917\u0903 \u0915\u0920\u093f\u0928\u0903, \u092b\u0932\u0902 \u0924\u0941 \u0936\u093e\u0936\u094d\u0935\u0924\u092e\u094d",
+      "reference": "Mahabharata, Inspired by lines 4200-4320",
+      "meaning": "Though following the path of duty may present challenges, its rewards transcend temporal existence.",
+      "lore_snippet": "Ancient sages taught that while the path of duty is often arduous, those who walk it find lasting peace. Even in the face of adversity, the righteous are sustained by inner strength.",
+      "image": "quote_89.png",
+      "audio": "quote_89.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

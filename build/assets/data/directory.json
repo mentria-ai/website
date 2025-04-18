@@ -1070,6 +1070,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_64",
+      "quote": "The Sudarshana Chakra: Blazing like the sun, it cuts through ignorance and evil, returning always to the hand of righteousness.",
+      "sanskrit": "\u0938\u0941\u0926\u0930\u094d\u0936\u0928\u0902 \u092d\u0940\u092e\u092e\u091c\u092f\u094d\u092f\u092e\u0941\u0924\u094d\u0924\u092e\u092e\u094d",
+      "reference": "Mahabharata, [Unknown Parva], [Unknown Chapter]",
+      "meaning": "The Sudarshana Chakra symbolizes divine justice and the unstoppable force of dharma, which destroys evil and returns to uphold righteousness.",
+      "lore_snippet": "The Sudarshana Chakra, wielded by Lord Vishnu, is said to be forged from the essence of the sun. Its path is unerring, and it returns only when its purpose\u2014destruction of adharma\u2014is fulfilled.",
+      "image": null,
+      "audio": "quote_64.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_65",
+      "quote": "Kadru's curse: Even the mightiest serpents fall when bound by deceit, for falsehood unravels the strongest coils.",
+      "sanskrit": "\u0938\u0930\u094d\u092a\u0938\u0924\u094d\u0930\u0947 \u0935\u0930\u094d\u0924\u092e\u093e\u0928\u0947 \u092a\u093e\u0935\u0915\u094b \u0935\u0903 \u092a\u094d\u0930\u0927\u0915\u094d\u0937\u094d\u092f\u0924\u093f",
+      "reference": "Mahabharata, [Unknown Parva], [Unknown Chapter]",
+      "meaning": "Kadru's curse on her serpent offspring illustrates how deceit and manipulation lead to downfall, even for the powerful.",
+      "lore_snippet": "The Nagas learned too late that a mother's wrath, once kindled by trickery, burns hotter than the fires of Janamejaya's sacrifice. Thus are the proud humbled.",
+      "image": null,
+      "audio": "quote_65.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_66",
+      "quote": "Uchchaihshravas: The celestial stallion rises white as truth, yet men see only the colors of their desires.",
+      "sanskrit": "\u0909\u091a\u094d\u091a\u0948\u0903\u0936\u094d\u0930\u0935\u093e \u0928\u0941 \u0915\u093f\u0902\u0935\u0930\u094d\u0923\u094b",
+      "reference": "Mahabharata, [Unknown Parva], [Unknown Chapter]",
+      "meaning": "The debate over Uchchaihshravas' color symbolizes how perception is clouded by personal bias, while truth remains pure.",
+      "lore_snippet": "Sages say the seven-headed horse of Indra reflects the viewer's soul\u2014the greedy see black manes, the wise see only dawn-colored light.",
+      "image": null,
+      "audio": "quote_66.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

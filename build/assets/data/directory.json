@@ -1019,6 +1019,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_61",
+      "quote": "Vishnu: Strength I grant to all who strive, but the work itself must be done by their own hands.",
+      "sanskrit": "\u092c\u0932\u0902 \u0926\u0926\u093e\u092e\u093f \u0938\u0930\u094d\u0935\u0947\u0937\u093e\u0902 \u0915\u0930\u094d\u092e\u0948\u0924\u0926\u094d\u092f\u0947 \u0938\u092e\u093e\u0938\u094d\u0925\u093f\u0924\u093e\u0903",
+      "reference": "Mahabharata, Adi Parva, Section 18 (Samudra Manthan episode)",
+      "meaning": "Divine assistance empowers action, but true accomplishment requires personal effort and commitment.",
+      "lore_snippet": "The gods learned during the churning of the ocean that even with Vishnu's blessing, they had to grasp the serpent-rope and turn the mountain themselves. No wisdom comes without exertion.",
+      "image": null,
+      "audio": "quote_61.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_62",
+      "quote": "From the clash of opposing forces arises the nectar of wisdom, just as amrita emerged from the churning sea.",
+      "sanskrit": "\u0924\u0947\u0937\u093e\u0902 \u0938\u0919\u094d\u0918\u0930\u094d\u0937\u091c\u0936\u094d\u091a\u093e\u0917\u094d\u0928\u093f\u0930\u0930\u094d\u091a\u093f\u0930\u094d\u092d\u093f\u0903 \u092a\u094d\u0930\u091c\u094d\u0935\u0932\u0928\u094d\u092e\u0941\u0939\u0941\u0903",
+      "reference": "Mahabharata, Adi Parva, Section 18 (Samudra Manthan)",
+      "meaning": "Great treasures often emerge through the friction between opposites - gods and demons cooperating yet conflicting produced the elixir of immortality.",
+      "lore_snippet": "The ancient texts speak of how devas and asuras, though eternal enemies, together churned the ocean of milk. Even enmity can serve creation when balanced properly.",
+      "image": null,
+      "audio": "quote_62.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_63",
+      "quote": "Rahu's severed head still drinks the moonlight, proving that desire outlasts even death.",
+      "sanskrit": "\u0936\u093e\u0936\u094d\u0935\u0924\u0936\u094d\u091a\u0928\u094d\u0926\u094d\u0930\u0938\u0942\u0930\u094d\u092f\u093e\u092d\u094d\u092f\u093e\u0902 \u0917\u094d\u0930\u0938\u0924\u094d\u092f\u0926\u094d\u092f\u093e\u092a\u093f \u091a\u0948\u0935 \u0924\u094c",
+      "reference": "Mahabharata, Adi Parva, Section 18 (Rahu eclipse myth)",
+      "meaning": "The demon Rahu's eternal hunger created eclipses - showing how unchecked ambition transcends physical destruction.",
+      "lore_snippet": "Though Vishnu's discus severed Rahu's head during the amrita theft, his spirit still darkens the moon. Some hungers cannot be quenched by mortal means.",
+      "image": null,
+      "audio": "quote_63.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -1767,6 +1767,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_105",
+      "quote": "Taksaka: Even the mightiest king falls when fate weaves its web, as the serpent's coils tighten unseen.",
+      "sanskrit": "\u0924\u0915\u094d\u0937\u0915\u094b \u0928\u093e\u092e \u092d\u0942\u0924\u094d\u0935\u093e \u0935\u0948 \u0924\u0925\u093e \u092a\u0930\u093f\u0939\u0943\u0924\u0902 \u092d\u0935\u0947\u0924\u094d",
+      "reference": "Mahabharata, Adi Parva, Section 40",
+      "meaning": "The inevitability of fate and hidden dangers that can bring down even powerful rulers, symbolized by King Parikshit's death by the disguised serpent Taksaka.",
+      "lore_snippet": "The Naga Taksaka's vengeance reminds us that destiny often strikes through unexpected forms. Kings and beggars alike are bound by the threads of karma, woven long before the moment of reckoning.",
+      "image": "quote_105.png",
+      "audio": "quote_105.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_106",
+      "quote": "The ministers wept as flames consumed their king, proving no mortal can escape the debts of ancestral karma.",
+      "sanskrit": "\u0924\u0902 \u0924\u0925\u093e \u092e\u0928\u094d\u0924\u094d\u0930\u093f\u0923\u094b \u0926\u0943\u0937\u094d\u091f\u094d\u0935\u093e \u092d\u094b\u0917\u0947\u0928 \u092a\u0930\u093f\u0935\u0947\u0937\u094d\u091f\u093f\u0924\u092e\u094d... \u0930\u0941\u0930\u0941\u0926\u0941\u0930\u094d\u092d\u0943\u0936\u0926\u0941\u0903\u0916\u093f\u0924\u093e\u0903",
+      "reference": "Mahabharata, Adi Parva, Section 40",
+      "meaning": "The tragic consequences of past actions (in this case, Parikshit's insult to a sage) manifest inevitably, witnessed helplessly by those bound to the doomed.",
+      "lore_snippet": "When the palace burned with serpent-fire, the ministers learned what sages know: the flames of karma consume all who inherit unresolved debts, leaving only ashes and wisdom.",
+      "image": "quote_106.png",
+      "audio": "quote_106.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_107",
+      "quote": "Jaratkaru: I see our ancestors hanging by a thread - one last root gnawed by time's relentless teeth.",
+      "sanskrit": "\u090f\u0915\u0924\u0928\u094d\u0924\u094d\u0935\u0935\u0936\u093f\u0937\u094d\u091f\u0902 \u0935\u0948 \u0935\u0940\u0930\u0923\u0938\u094d\u0924\u092e\u094d\u092c\u092e\u093e\u0936\u094d\u0930\u093f\u0924\u093e\u0928\u094d... \u0924\u0926\u092a\u094d\u092f\u092f\u0902 \u0936\u0928\u0948\u0930\u093e\u0916\u0941\u0930\u093e\u0926\u0924\u094d\u0924\u0947",
+      "reference": "Mahabharata, Adi Parva, Section 41",
+      "meaning": "The sage's vision metaphorically portrays how ancestral lineages hang by fragile threads when descendants neglect their duties.",
+      "lore_snippet": "Like rats gnawing the last root holding a cluster of grass, time erodes all unmaintained traditions. Only through conscious effort do we preserve what came before.",
+      "image": "quote_107.png",
+      "audio": "quote_107.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

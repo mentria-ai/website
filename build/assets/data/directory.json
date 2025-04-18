@@ -1121,6 +1121,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_67",
+      "quote": "The ocean of life is deep and fearsome, yet within its depths lie the jewels of wisdom for those who dare to seek them.",
+      "sanskrit": "\u0905\u0917\u093e\u0927\u092a\u093e\u0930\u0902 \u0935\u093f\u0938\u094d\u0924\u0940\u0930\u094d\u0923\u092e\u092a\u094d\u0930\u092e\u0947\u092f\u0902 \u0938\u0930\u093f\u0924\u094d\u092a\u0924\u093f\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 20",
+      "meaning": "The passage describes the vast and terrifying ocean, symbolizing life's challenges, yet also hints at the hidden treasures (wisdom) within its depths for the courageous.",
+      "lore_snippet": "Ancient texts speak of the cosmic ocean, where peril and treasure coexist. Only the wise understand that true knowledge lies beyond the surface turmoil, in the depths few dare to explore.",
+      "image": "quote_67.png",
+      "audio": "quote_67.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_68",
+      "quote": "Garuda: Even the mightiest fire must recognize when another's light equals its own - for true strength lies in perception, not dominance.",
+      "sanskrit": "\u0917\u0930\u0941\u0921\u094b \u092c\u0932\u0935\u093e\u0928\u0947\u0937 \u092e\u092e \u0924\u0941\u0932\u094d\u092f\u0903 \u0938\u094d\u0935\u0924\u0947\u091c\u0938\u093e",
+      "reference": "Mahabharata, Adi Parva, Chapter 20",
+      "meaning": "The fire god Agni acknowledges Garuda's equal brilliance, teaching that recognizing others' power is greater than asserting one's own.",
+      "lore_snippet": "The celestial fire once bowed before Garuda's radiance. This reminds us that wisdom begins when we see reflections of our own power in others, rather than seeking to overshadow them.",
+      "image": "quote_68.png",
+      "audio": "quote_68.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_69",
+      "quote": "The cosmic serpent and eagle teach this: bondage and liberation are but two currents in the same eternal river of existence.",
+      "sanskrit": "\u0935\u093f\u0928\u0924\u093e\u0902 \u0935\u093f\u0937\u0923\u094d\u0923\u0935\u0926\u0928\u093e\u0902 \u0915\u0926\u094d\u0930\u0942\u0930\u094d\u0926\u093e\u0938\u094d\u092f\u0947 \u0928\u094d\u092f\u092f\u094b\u091c\u092f\u0924\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 20-21",
+      "meaning": "The story of Vinata's bondage to Kadru represents the dualities of life - what seems like oppression may lead to greater liberation, as shown by Garuda's eventual birth.",
+      "lore_snippet": "Ancient symbols reveal profound truths - where serpents coil in darkness, eagles soon take flight. The wise see both as necessary turns in destiny's grand design.",
+      "image": "quote_69.png",
+      "audio": "quote_69.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

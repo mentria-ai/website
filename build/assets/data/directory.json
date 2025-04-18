@@ -1342,6 +1342,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_80",
+      "quote": "Kashyapa: The fire of tapas (austerity) can forge even the impossible, for when sages unite their will, the gods themselves tremble.",
+      "sanskrit": "\u0924\u092a\u0938\u094b \u0928\u0903 \u092b\u0932\u0947\u0928\u093e\u0926\u094d\u092f \u0926\u093e\u0930\u0941\u0923\u0903 \u0938\u092e\u094d\u092d\u0935\u0924\u094d\u0935\u093f\u0924\u093f",
+      "reference": "Mahabharata, Adi Parva, Chapter 28",
+      "meaning": "The collective power of disciplined effort (tapas) can achieve what seems unattainable, as demonstrated by the V\u0101lakhilya sages whose austerities threatened Indra's throne.",
+      "lore_snippet": "Ancient texts speak of the V\u0101lakhilyas\u2014thumb-sized sages whose concentrated tapas once shook the heavens. This reminds us that true power lies not in size, but in the unity of purpose and disciplined will.",
+      "image": "quote_80.png",
+      "audio": "quote_80.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_81",
+      "quote": "Indra learns: Arrogance blinds even the mighty to the quiet power of those they scorn, for the smallest light may kindle a sun.",
+      "sanskrit": "\u0905\u0935\u0939\u0938\u094d\u092f\u093e\u0924\u094d\u092f\u0917\u093e\u091a\u094d\u091b\u0940\u0918\u094d\u0930\u0902 \u0932\u0919\u094d\u0918\u092f\u093f\u0924\u094d\u0935\u093e\u0935\u092e\u0928\u094d\u092f \u091a",
+      "reference": "Mahabharata, Adi Parva, Chapter 28",
+      "meaning": "Indra's mockery of the tiny V\u0101lakhilya sages nearly cost him his throne, teaching that no seeker's effort should be dismissed.",
+      "lore_snippet": "The Devas still whisper of Indra's folly\u2014how he laughed at sages smaller than his thumb, until their collective fire birthed Garuda. Never mistake humility for weakness.",
+      "image": "quote_81.png",
+      "audio": "quote_81.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_82",
+      "quote": "The V\u0101lakhilyas prove: When destiny calls, even the insignificant become architects of cosmic change.",
+      "sanskrit": "\u0907\u0928\u094d\u0926\u094d\u0930\u093e\u0930\u094d\u0925\u094b\u093d\u092f\u0902 \u0938\u092e\u093e\u0930\u092e\u094d\u092d\u0903 \u0938\u0930\u094d\u0935\u0947\u0937\u093e\u0902 \u0928\u0903 \u092a\u094d\u0930\u091c\u093e\u092a\u0924\u0947",
+      "reference": "Mahabharata, Adi Parva, Chapter 28",
+      "meaning": "The diminutive sages' determination to create a new Indra shows how seemingly minor beings can alter grand designs.",
+      "lore_snippet": "Legends say the universe balances on the prayers of ants and giants alike. The V\u0101lakhilyas, though no larger than a grain of rice, once remade the heavens with their resolve.",
+      "image": "quote_82.png",
+      "audio": "quote_82.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

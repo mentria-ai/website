@@ -1614,6 +1614,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_96",
+      "quote": "Brahma: Those who are wicked shall perish, but those who walk the path of dharma shall endure.",
+      "sanskrit": "\u0935\u093f\u0928\u0936\u093f\u0937\u094d\u092f\u0928\u094d\u0924\u093f \u092f\u0947 \u092a\u093e\u092a\u093e \u0928 \u0924\u0941 \u092f\u0947 \u0927\u0930\u094d\u092e\u091a\u093e\u0930\u093f\u0923\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 36",
+      "meaning": "This declares the eternal law that evil-doers face destruction while righteous souls survive through adherence to dharma.",
+      "lore_snippet": "The Vedas teach that cosmic balance is maintained not by the gods' intervention, but by the immutable law of dharma. Like fire purifies gold, trials test a mortal's virtue.",
+      "image": "quote_96.png",
+      "audio": "quote_96.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_97",
+      "quote": "The ascetic who masters his senses walks the earth free from fear and fatigue, needing neither worldly possessions nor companionship.",
+      "sanskrit": "\u0938 \u090a\u0930\u094d\u0927\u094d\u0935\u0930\u0947\u0924\u093e\u0938\u094d\u0924\u092a\u0938\u093f \u092a\u094d\u0930\u0938\u0915\u094d\u0924\u0903; \u0938\u094d\u0935\u093e\u0927\u094d\u092f\u093e\u092f\u0935\u093e\u0928\u094d\u0935\u0940\u0924\u092d\u092f\u0915\u094d\u0932\u092e\u0903 \u0938\u0928\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 36",
+      "meaning": "Describes the enlightened sage Jaratkaru who attained complete self-mastery through rigorous spiritual discipline.",
+      "lore_snippet": "Ancient scrolls speak of yogis who, through meditation, turned their bodies into temples. Such practitioners could traverse realms untouched by mortal limitations.",
+      "image": "quote_97.png",
+      "audio": "quote_97.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_98",
+      "quote": "King Parikshit: Anger clouds judgment as smoke obscures fire; my haste has made me blind to a sage's power.",
+      "sanskrit": null,
+      "reference": "Mahabharata, Adi Parva, Chapter 36 (implied)",
+      "meaning": "The king realizes too late that his uncontrolled rage led him to disrespect a holy man, foreshadowing his doom.",
+      "lore_snippet": "The chronicles warn that a ruler's unchecked temper breeds calamity. Even celestial armor cannot shield against karma's arrows when dharma is abandoned.",
+      "image": "quote_98.png",
+      "audio": "quote_98.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

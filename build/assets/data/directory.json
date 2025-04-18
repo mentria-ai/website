@@ -1393,6 +1393,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_83",
+      "quote": "Garuda: Even when surrounded by darkness, the truly mighty create their own light and soar above all obstacles.",
+      "sanskrit": "\u0905\u0926\u0943\u0937\u094d\u091f\u0930\u0942\u092a\u0938\u094d\u0924\u094c \u091a\u093e\u092a\u093f \u0938\u0930\u094d\u0935\u0924\u0903 \u092a\u0930\u094d\u092f\u0915\u093e\u0932\u092f\u0924\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 29",
+      "meaning": "Garuda, blinded by darkness, still found a way to overcome his enemies through inner strength and determination, symbolizing resilience against adversity.",
+      "lore_snippet": "Ancient texts speak of Garuda, who, though shrouded in darkness, defeated his foes through sheer will. This teaches that true strength lies not in sight, but in unwavering resolve.",
+      "image": "quote_83.png",
+      "audio": "quote_83.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_84",
+      "quote": "The fiercest guardians cannot stop one who is destined to fulfill their purpose, for destiny itself clears the path.",
+      "sanskrit": "\u0930\u0915\u094d\u0937\u093e\u0930\u094d\u0925\u092e\u0947\u0935\u093e\u092e\u0943\u0924\u0938\u094d\u092f \u0926\u0926\u0930\u094d\u0936 \u092d\u0941\u091c\u0917\u094b\u0924\u094d\u0924\u092e\u094c",
+      "reference": "Mahabharata, Adi Parva, Chapter 29",
+      "meaning": "Despite terrifying serpent-guards protecting the nectar, Garuda prevailed\u2014showing that no obstacle can halt a fate-aligned mission.",
+      "lore_snippet": "Like Garuda breaking past cosmic serpents, the Scrolls tell us: when one's steps are ordained by the stars, even death will stand aside.",
+      "image": "quote_84.png",
+      "audio": "quote_84.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_85",
+      "quote": "Vishnu: True devotion is measured not by gifts received, but by the purity of one's selfless acts.",
+      "sanskrit": "\u0924\u0938\u094d\u092f \u0928\u093e\u0930\u093e\u092f\u0923\u0938\u094d\u0924\u0941\u0937\u094d\u091f\u0938\u094d\u0924\u0947\u0928\u093e\u0932\u094c\u0932\u094d\u092f\u0947\u0928 \u0915\u0930\u094d\u092e\u0923\u093e",
+      "reference": "Mahabharata, Adi Parva, Chapter 29",
+      "meaning": "Vishnu blessed Garuda not for claiming the nectar, but for his unwavering focus on the mission over personal gain.",
+      "lore_snippet": "The gods favor not those who seek rewards, but those whose deeds shine with undivided purpose\u2014as the sun favors the lotus that blooms without demanding light.",
+      "image": "quote_85.png",
+      "audio": "quote_85.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

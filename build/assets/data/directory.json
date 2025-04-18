@@ -1852,6 +1852,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_110",
+      "quote": "Jaratkaru: Even in sleep, a righteous soul knows the weight of time. To neglect duty is to dishonor the sun's path.",
+      "sanskrit": "\u0928 \u0939\u093f \u0924\u0947\u091c\u094b\u093d\u0938\u094d\u0924\u093f \u0935\u093e\u092e\u094b\u0930\u0941 \u092e\u092f\u093f \u0938\u0941\u092a\u094d\u0924\u0947 \u0935\u093f\u092d\u093e\u0935\u0938\u094b\u0903 \u0905\u0938\u094d\u0924\u0902 \u0917\u0928\u094d\u0924\u0941\u0902 \u092f\u0925\u093e\u0915\u093e\u0932\u092e\u093f\u0924\u093f \u092e\u0947 \u0939\u0943\u0926\u093f \u0935\u0930\u094d\u0924\u0924\u0947",
+      "reference": "Mahabharata, Adi Parva, Astika Parva (approximate)",
+      "meaning": "A sage's devotion to duty persists even in unconscious states, as natural as the sun's movement. Neglecting sacred rituals disrupts cosmic order.",
+      "lore_snippet": "Ancient rishis held that time's flow is woven with sacred obligations. As the sun never delays its setting, so too must the virtuous fulfill their duties without fail\u2014lest the threads of dharma unravel.",
+      "image": "quote_110.png",
+      "audio": "quote_110.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_111",
+      "quote": "Vasuki's Sister: Between a husband's wrath and duty's breach, I choose the heavier burden\u2014for dharma's scales tip toward eternal law.",
+      "sanskrit": "\u0927\u0930\u094d\u092e\u0932\u094b\u092a\u094b \u0917\u0930\u0940\u092f\u093e\u0928\u094d\u0935\u0948 \u0938\u094d\u092f\u093e\u0926\u0924\u094d\u0930\u0947\u0924\u094d\u092f\u0915\u0930\u094b\u0928\u094d\u092e\u0928\u0903",
+      "reference": "Mahabharata, Adi Parva, Astika Parva (approximate)",
+      "meaning": "When torn between personal fear and cosmic duty, the wise opt for preserving universal order, even at personal cost.",
+      "lore_snippet": "Nagakanya's dilemma reveals a truth: some choices weigh souls rather than consequences. When temporal anger clashes with eternal law, the righteous bear the weight of the cosmos upon their shoulders.",
+      "image": "quote_111.png",
+      "audio": "quote_111.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

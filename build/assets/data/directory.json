@@ -1733,6 +1733,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_103",
+      "quote": "Kashyapa: Even a tree reduced to ashes can be revived by the power of knowledge, for wisdom is mightier than the venom of kings and serpents alike.",
+      "sanskrit": "\u092d\u0938\u094d\u092e\u0940\u092d\u0942\u0924\u0902 \u0924\u0924\u094b \u0935\u0943\u0915\u094d\u0937\u0902 \u092a\u0928\u094d\u0928\u0917\u0947\u0928\u094d\u0926\u094d\u0930\u0938\u094d\u092f \u0924\u0947\u091c\u0938\u093e... \u0905\u0939\u0902 \u0938\u091e\u094d\u091c\u0940\u0935\u092f\u093e\u092e\u094d\u092f\u0947\u0928\u0902 \u092a\u0936\u094d\u092f\u0924\u0938\u094d\u0924\u0947 \u092d\u0941\u091c\u0919\u094d\u0917\u092e",
+      "reference": "Mahabharata, Adi Parva, Chapter 39",
+      "meaning": "The sage Kashyapa demonstrates that true knowledge (vidya) can restore life even from ashes, overcoming the destructive power of Takshaka's venom.",
+      "lore_snippet": "Ancient sages teach that knowledge is the ultimate alchemy\u2014it can resurrect what time and poison destroy. But such power demands purity of intent, for misused wisdom burns the wielder.",
+      "image": "quote_103.png",
+      "audio": "quote_103.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_104",
+      "quote": "Takshaka: Even the mightiest kings fall to time's decay, but a scholar's renown shines brighter when his knowledge triumphs over destruction.",
+      "sanskrit": "\u0935\u093f\u092a\u094d\u0930\u0936\u093e\u092a\u093e\u092d\u093f\u092d\u0942\u0924\u0947 \u091a \u0915\u094d\u0937\u0940\u0923\u093e\u092f\u0941\u0937\u093f \u0928\u0930\u093e\u0927\u093f\u092a\u0947... \u0924\u0924\u094b \u092f\u0936\u0903 \u092a\u094d\u0930\u0926\u0940\u092a\u094d\u0924\u0902 \u0924\u0947 \u0924\u094d\u0930\u093f\u0937\u0941 \u0932\u094b\u0915\u0947\u0937\u0941 \u0935\u093f\u0936\u094d\u0930\u0941\u0924\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 39",
+      "meaning": "Takshaka acknowledges that temporal power fades, but a learned person's glory becomes eternal when their wisdom overcomes even divine serpents.",
+      "lore_snippet": "The Naga king's admission reveals a truth: crowns rust and thrones crumble, but the luminosity of attained wisdom pierces through the ages like an undying star.",
+      "image": "quote_104.png",
+      "audio": "quote_104.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

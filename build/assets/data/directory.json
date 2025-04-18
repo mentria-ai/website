@@ -1444,6 +1444,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_86",
+      "quote": "Garuda: True strength lies not in self-praise, but in silent power known only when tested.",
+      "sanskrit": "\u0915\u093e\u092e\u0902 \u0928\u0948\u0924\u0924\u094d\u092a\u094d\u0930\u0936\u0902\u0938\u0928\u094d\u0924\u093f \u0938\u0928\u094d\u0924\u0903 \u0938\u094d\u0935\u092c\u0932\u0938\u0902\u0938\u094d\u0924\u0935\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 31",
+      "meaning": "Garuda rebukes Indra's request to boast of his strength, implying that the wise never glorify their own power\u2014it reveals itself through action.",
+      "lore_snippet": "The mightiest eagles need not declare their wingspan. Likewise, warriors of dharma let their deeds speak where words would falter, for silence carries the weight of mountains.",
+      "image": "quote_86.png",
+      "audio": "quote_86.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_87",
+      "quote": "Indra: Even the sharpest thunderbolt cannot pierce resolve forged in dharma's fire.",
+      "sanskrit": "\u0928 \u0939\u093f \u0935\u091c\u094d\u0930\u0928\u093f\u092a\u093e\u0924\u0947\u0928 \u0930\u0941\u091c\u093e \u092e\u0947\u093d\u0938\u094d\u0924\u093f \u0915\u0926\u093e\u091a\u0928",
+      "reference": "Mahabharata, Adi Parva, Chapter 31",
+      "meaning": "Garuda withstands Indra's vajra (thunderbolt), symbolizing how righteous purpose makes one impervious to even divine weapons.",
+      "lore_snippet": "When the devas hurled their celestial weapons at the eagle-lord, they shattered like glass upon his feathers\u2014for what blade can sever destiny's thread?",
+      "image": "quote_87.png",
+      "audio": "quote_87.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_88",
+      "quote": "Garuda: I could bear the world's weight upon a single feather, yet choose to serve a mother's vow.",
+      "sanskrit": "\u0938\u092a\u0930\u094d\u0935\u0924\u0935\u0928\u093e\u092e\u0941\u0930\u094d\u0935\u0940\u0902 \u0938\u0938\u093e\u0917\u0930\u0935\u0928\u093e\u092e\u093f\u092e\u093e\u092e\u094d... \u0935\u0939\u0947\u092f\u092e\u092a\u0930\u093f\u0936\u094d\u0930\u093e\u0928\u094d\u0924\u094b",
+      "reference": "Mahabharata, Adi Parva, Chapter 31",
+      "meaning": "Garuda demonstrates cosmic strength to Indra but dedicates it to freeing his enslaved mother, showing power's highest purpose is service.",
+      "lore_snippet": "The king of birds teaches that even infinity bows to love\u2014his wings could cradle the three worlds, yet folded gently to break his mother's chains.",
+      "image": "quote_88.png",
+      "audio": "quote_88.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

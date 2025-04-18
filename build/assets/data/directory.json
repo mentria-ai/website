@@ -1818,6 +1818,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_108",
+      "quote": "Jaratkaru: A man who neglects his ancestors' rites is like a tree whose roots are gnawed away by time, destined to fall into darkness.",
+      "sanskrit": "\u0905\u0938\u094d\u0924\u093f \u0928\u0938\u094d\u0924\u093e\u0924 \u0924\u092a\u0938\u0903 \u092b\u0932\u0902 \u092a\u094d\u0930\u0935\u0926\u0924\u093e\u0902 \u0935\u0930\u0964 \u0938\u0928\u094d\u0924\u093e\u0928\u092a\u094d\u0930\u0915\u094d\u0937\u092f\u093e\u0926\u094d\u092c\u094d\u0930\u0939\u094d\u092e\u0928\u094d\u092a\u0924\u093e\u092e\u094b \u0928\u093f\u0930\u092f\u0947\u093d\u0936\u0941\u091a\u094c\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 42",
+      "meaning": "This warns of the spiritual consequences of neglecting one's ancestral duties (Pitru Rin), comparing it to a rootless tree doomed to collapse.",
+      "lore_snippet": "The ancients believed that living men stand upon the shoulders of their ancestors. To ignore their rites is to sever the roots of your own existence, leaving you adrift in the wheel of time.",
+      "image": "quote_108.png",
+      "audio": "quote_108.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_109",
+      "quote": "The Pitrs (Ancestors): No penance or sacrifice equals the power of progeny \u2013 for lineage alone carries the torch of memory across the abyss of time.",
+      "sanskrit": "\u0924\u092a\u094b \u0935\u093e\u092a\u094d\u092f\u0925\u0935\u093e \u092f\u091c\u094d\u091e\u094b \u092f\u091a\u094d\u091a\u093e\u0928\u094d\u092f\u0924\u094d\u092a\u093e\u0935\u0928\u0902 \u092e\u0939\u0924\u094d\u0964 \u0924\u0924\u094d\u0938\u0930\u094d\u0935\u0902 \u0928 \u0938\u092e\u0902 \u0924\u093e\u0924 \u0938\u0928\u094d\u0924\u0924\u094d\u092f\u0947\u0924\u093f \u0938\u0924\u093e\u0902 \u092e\u0924\u092e\u094d\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 42",
+      "meaning": "Ancestors emphasize that even great spiritual practices cannot substitute for continuing one's lineage, as descendants preserve sacred memory.",
+      "lore_snippet": "Sages teach that while asceticism burns bright like a star, parenthood kindles an eternal flame. The former illuminates the self, the latter lights the path for generations unborn.",
+      "image": "quote_109.png",
+      "audio": "quote_109.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

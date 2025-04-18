@@ -1665,6 +1665,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_99",
+      "quote": "Krishna: The wise endure injustice, for vengeance destroys both the avenger and the unjust.",
+      "sanskrit": "\u0915\u094d\u0937\u0928\u094d\u0924\u0935\u094d\u092f\u0902 \u092a\u0941\u0924\u094d\u0930 \u0927\u0930\u094d\u092e\u094b \u0939\u093f \u0939\u0924\u094b \u0939\u0928\u094d\u0924\u093f \u0928 \u0938\u0902\u0936\u092f\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 36-37",
+      "meaning": "This teaches that forgiveness (kshama) is the higher dharma, as anger creates a cycle of destruction that consumes all involved.",
+      "lore_snippet": "Ancient sages warn that curses rebound sevenfold upon the caster. The path of patience, though steep, leads to liberation where vengeance binds souls to eternal strife.",
+      "image": "quote_99.png",
+      "audio": "quote_99.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_100",
+      "quote": "Shringi: Even the mightiest king shall fall when he scorns the power of austerity.",
+      "sanskrit": "\u092a\u0936\u094d\u092f \u092e\u0947 \u0924\u092a\u0938\u094b \u092c\u0932\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 37",
+      "meaning": "The Brahmin's curse demonstrates that spiritual power (tapas) transcends royal authority when dharma is violated.",
+      "lore_snippet": "Records speak of kings who mocked ascetics only to perish by cosmic fire. The universe balances scales unseen by mortal eyes.",
+      "image": "quote_100.png",
+      "audio": "quote_100.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_101",
+      "quote": "The sage's father: Rulers who protect the righteous inherit a share of their virtue.",
+      "sanskrit": "\u0930\u0915\u094d\u0937\u094d\u092f\u092e\u093e\u0923\u093e \u0935\u092f\u0902 \u0924\u093e\u0924 \u0930\u093e\u091c\u092d\u093f\u0903... \u0924\u0947\u0937\u093e\u0902 \u091a\u093e\u0902\u0936\u094b\u093d\u0938\u094d\u0924\u093f \u0927\u0930\u094d\u092e\u0924\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 37",
+      "meaning": "Kings accumulate spiritual merit by safeguarding sages, creating symbiotic dharma between power and wisdom.",
+      "lore_snippet": "Scrolls of governance teach that a kingdom thrives when its shield guards both plow and prayer equally.",
+      "image": "quote_101.png",
+      "audio": "quote_101.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

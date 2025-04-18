@@ -1563,6 +1563,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_93",
+      "quote": "Brahma: The destruction shall come only for the wicked serpents, not those who walk the path of dharma.",
+      "sanskrit": "\u0924\u0947\u0937\u093e\u0902 \u0935\u093f\u0928\u093e\u0936\u094b \u092d\u0935\u093f\u0924\u093e \u0928 \u0924\u0941 \u092f\u0947 \u0927\u0930\u094d\u092e\u091a\u093e\u0930\u093f\u0923\u0903",
+      "reference": "Mahabharata, Astika Parva, Chapter 34",
+      "meaning": "Divine justice spares the righteous while delivering consequences to the wicked, emphasizing the protective power of dharma.",
+      "lore_snippet": "Even in the face of apocalyptic curses, the cosmos shields those who uphold moral law. Ancient texts speak of serpents who escaped doom by adhering to virtue, proving destiny favors the just.",
+      "image": "quote_93.png",
+      "audio": "quote_93.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_94",
+      "quote": "Elapatra: When fate strikes, a wise man seeks refuge in divine will alone.",
+      "sanskrit": "\u0938 \u0926\u0948\u0935\u092e\u0947\u0935\u093e\u0936\u094d\u0930\u092f\u0924\u0947 \u0928\u093e\u0928\u094d\u092f\u0924\u094d\u0924\u0924\u094d\u0930 \u092a\u0930\u093e\u092f\u0923\u092e\u094d",
+      "reference": "Mahabharata, Astika Parva, Chapter 34",
+      "meaning": "In times of crisis, surrender to cosmic design is the ultimate wisdom, transcending mortal solutions.",
+      "lore_snippet": "The Naga elders teach that resisting destiny is like a river fighting the ocean. Those who align with divine timing find their terrors transformed into liberation.",
+      "image": "quote_94.png",
+      "audio": "quote_94.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_95",
+      "quote": "Brahma: From the ashes of fear shall rise a sage who becomes salvation's bridge.",
+      "sanskrit": "\u092f\u093e\u092f\u093e\u0935\u0930\u0915\u0941\u0932\u0947 \u0927\u0940\u092e\u093e\u0928\u094d\u092d\u0935\u093f\u0937\u094d\u092f\u0924\u093f \u092e\u0939\u093e\u0928\u0943\u0937\u093f\u0903",
+      "reference": "Mahabharata, Astika Parva, Chapter 34",
+      "meaning": "The universe always provides a redeemer - often where least expected - to deliver the virtuous from calamity.",
+      "lore_snippet": "Prophecies speak of unassuming saviors: A hermit's son stopped a serpent sacrifice, proving enlightenment blooms even in barren lands when dharma demands.",
+      "image": "quote_95.png",
+      "audio": "quote_95.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

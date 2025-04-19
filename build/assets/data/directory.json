@@ -2906,6 +2906,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_172",
+      "quote": "Dhritarashtra: By the faults of my mother and the sage's wrath, I was born blind, yet wisdom became my eyes to rule.",
+      "sanskrit": "\u092e\u093e\u0924\u0941\u0930\u094d\u0926\u094b\u0937\u093e\u0926\u0943\u0937\u0947\u0903 \u0915\u094b\u092a\u093e\u0926\u0928\u094d\u0927 \u090f\u0935 \u0935\u094d\u092f\u091c\u093e\u092f\u0924",
+      "reference": "Mahabharata, Adi Parva, Chapter 107",
+      "meaning": "Despite physical blindness, Dhritarashtra's inner wisdom and intellect allowed him to govern, showing that true vision transcends the eyes.",
+      "lore_snippet": "The sages teach that wisdom lights the path where eyes fail. A ruler's clarity comes not from sight, but from discernment\u2014as the blind Dhritarashtra judged the weight of kingdoms.",
+      "image": "quote_172.png",
+      "audio": "quote_172.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_173",
+      "quote": "The fire of destiny births warriors; Dhrishtadyumna rose from Agni's essence to become the scourge of oppressors.",
+      "sanskrit": "\u0905\u0917\u094d\u0928\u0947\u0930\u0902\u0936\u0902 \u0924\u0941 \u0935\u093f\u0926\u094d\u0927\u093f \u0924\u094d\u0935\u0902 \u0927\u0943\u0937\u094d\u091f\u0926\u094d\u092f\u0941\u092e\u094d\u0928\u0902 \u092e\u0939\u093e\u0930\u0925\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 107",
+      "meaning": "Dhrishtadyumna's divine origin as an emanation of Agni symbolizes the transformative power of righteous fury against tyranny.",
+      "lore_snippet": "When dharma falters, the cosmos kindles champions. Like flames from sacred altars, they are forged to consume injustice\u2014as Dhrishtadyumna was born to end Drona's reign.",
+      "image": "quote_173.png",
+      "audio": "quote_173.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_174",
+      "quote": "Vidura: Wisdom flourishes even in darkness, for the mind's light outshines the sun.",
+      "sanskrit": "\u0935\u093f\u0926\u0941\u0930\u0902 \u0935\u093f\u0926\u094d\u0927\u093f \u0932\u094b\u0915\u0947\u093d\u0938\u094d\u092e\u093f\u091e\u094d\u091c\u093e\u0924\u0902 \u092c\u0941\u0926\u094d\u0927\u093f\u092e\u0924\u093e\u0902 \u0935\u0930\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 107",
+      "meaning": "Vidura, born of divine wisdom, exemplifies how intellect and virtue illuminate paths where power and birthright fail.",
+      "lore_snippet": "The scrolls of Vyasa declare: knowledge wears no crown, yet governs kings. Vidura's counsel proved brighter than royal scepters\u2014a lamp for the lost Kurus.",
+      "image": "quote_174.png",
+      "audio": "quote_174.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

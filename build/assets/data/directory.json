@@ -2056,6 +2056,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_122",
+      "quote": "Vasuki: My heart trembles as my kin perish in flames. Even the mighty fall when fate's wheel turns against them.",
+      "sanskrit": "\u0938 \u0918\u0942\u0930\u094d\u0923\u092e\u093e\u0928\u0939\u0943\u0926\u092f\u094b \u092d\u0917\u093f\u0928\u0940\u092e\u093f\u0926\u092e\u092c\u094d\u0930\u0935\u0940\u0924\u094d",
+      "reference": "Mahabharata, Astika Parva, Chapter 48-49",
+      "meaning": "Even the powerful Naga king Vasuki feels helpless as his serpent kin are sacrificed in Janamejaya's Sarpa Satra, showing that no being is immune to destiny's cruel turns.",
+      "lore_snippet": "The Nagas learned too late that neither venom nor valor can stay the hand of destiny. When the cosmic scales tip, even kings must seek refuge in higher powers.",
+      "image": "quote_122.png",
+      "audio": "quote_122.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_123",
+      "quote": "Indra to Takshaka: Fear not, for even the gods honor ancient pacts. No fire shall touch those under divine protection.",
+      "sanskrit": "\u092a\u094d\u0930\u0938\u093e\u0926\u093f\u0924\u094b \u092e\u092f\u093e \u092a\u0942\u0930\u094d\u0935\u0902 \u0924\u0935\u093e\u0930\u094d\u0925\u093e\u092f \u092a\u093f\u0924\u093e\u092e\u0939\u0903",
+      "reference": "Mahabharata, Astika Parva, Chapter 48",
+      "meaning": "Indra reassures Takshaka that Brahma's ancient boon protects him, demonstrating that cosmic laws transcend mortal rituals.",
+      "lore_snippet": "The Vedas speak of three unbreakable bonds: a sage's vow, a mother's love, and a god's promise. Wise rulers heed them all.",
+      "image": "quote_123.png",
+      "audio": "quote_123.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

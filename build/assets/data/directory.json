@@ -2328,6 +2328,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_138",
+      "quote": "Dharma is the foundation of all victories, and patience its unshakable pillar.",
+      "sanskrit": "\u0927\u0930\u094d\u092e\u092a\u094d\u0930\u0927\u093e\u0928\u093e\u0938\u094d\u0924\u0947 \u0938\u0924\u094d\u092f\u0935\u094d\u0930\u0924\u092a\u0930\u093e\u092f\u0923\u093e\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 56",
+      "meaning": "The Pandavas, devoted to dharma and truth, achieved their triumphs through righteous conduct and endurance, even in adversity.",
+      "lore_snippet": "The ancient texts teach that true power lies not in strength alone, but in unwavering adherence to one's duty. The wise endure trials with patience, for time favors the righteous.",
+      "image": "quote_138.png",
+      "audio": "quote_138.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_139",
+      "quote": "Krishna: When united with purpose, no burden is too great, no enemy too strong.",
+      "sanskrit": "\u0928\u093e\u0924\u093f\u092d\u093e\u0930\u094b \u0939\u093f \u092a\u093e\u0930\u094d\u0925\u0938\u094d\u092f \u0915\u0947\u0936\u0935\u0947\u0928\u093e\u092d\u0935\u0924\u094d\u0938\u0939",
+      "reference": "Mahabharata, Adi Parva, Chapter 56",
+      "meaning": "Arjuna's burdens became light when allied with Krishna, symbolizing how divine companionship amplifies human capability.",
+      "lore_snippet": "Legend speaks of warriors who achieved the impossible when fighting alongside avatars of the divine. Such alliances make mountains seem like pebbles on the path to destiny.",
+      "image": "quote_139.png",
+      "audio": "quote_139.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_140",
+      "quote": "The fire of greed consumes even palaces built with wisdom's gems.",
+      "sanskrit": "\u0924\u0938\u094d\u092f\u093e\u0902 \u0926\u0941\u0930\u094d\u092f\u094b\u0927\u0928\u094b \u092e\u0928\u094d\u0926\u094b \u0932\u094b\u092d\u0902 \u091a\u0915\u094d\u0930\u0947 \u0938\u0941\u0926\u0941\u0930\u094d\u092e\u0924\u093f\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 56",
+      "meaning": "Duryodhana's covetousness in Maya Sabha illustrates how desire can corrupt even the most magnificent achievements.",
+      "lore_snippet": "Golden halls mean nothing to a heart blackened by envy. The chronicles warn that no treasure shines bright enough to illuminate a soul darkened by avarice.",
+      "image": "quote_140.png",
+      "audio": "quote_140.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

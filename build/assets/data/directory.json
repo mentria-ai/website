@@ -2532,6 +2532,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_150",
+      "quote": "Dharma: The weight of a Brahmin's sin is heavier than any other, for it harms the very fabric of creation.",
+      "sanskrit": "\u0917\u0930\u0940\u092f\u093e\u0928\u094d\u092c\u094d\u0930\u093e\u0939\u094d\u092e\u0923\u0935\u0927\u0903 \u0938\u0930\u094d\u0935\u092d\u0942\u0924\u0935\u0927\u093e\u0926\u094d\u092f\u0924\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 58",
+      "meaning": "This speaks to the profound responsibility of those who uphold dharma\u2014their transgressions carry greater consequences, as they disrupt cosmic order.",
+      "lore_snippet": "The sages teach that a single unvirtuous act by a guardian of wisdom echoes through all realms. Even gods tremble when dharma's pillars falter, for chaos feeds on such fractures.",
+      "image": "quote_150.png",
+      "audio": "quote_150.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_151",
+      "quote": "The Unmanifest is the eternal Brahman\u2014without beginning, without end, the imperishable source of all that is.",
+      "sanskrit": "\u0905\u0928\u093e\u0926\u093f\u0928\u093f\u0927\u0928\u094b \u0926\u0947\u0935\u0903 \u0938 \u0915\u0930\u094d\u0924\u093e \u091c\u0917\u0924\u0903 \u092a\u094d\u0930\u092d\u0941\u0903\n\u0905\u0935\u094d\u092f\u0915\u094d\u0924\u092e\u0915\u094d\u0937\u0930\u0902 \u092c\u094d\u0930\u0939\u094d\u092e \u092a\u094d\u0930\u0927\u093e\u0928\u0902 \u0928\u093f\u0930\u094d\u0917\u0941\u0923\u093e\u0924\u094d\u092e\u0915\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 58",
+      "meaning": "This describes the ultimate reality (Brahman) as transcendent, formless, and the foundational power behind all manifestation.",
+      "lore_snippet": "Seekers of truth meditate upon the Unshaken, that which exists beyond light and shadow. Like the still depths beneath stormy waves, it births worlds yet remains unchanged.",
+      "image": "quote_151.png",
+      "audio": "quote_151.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_152",
+      "quote": "Krishna: I incarnate among mortals not for glory, but to restore the balance trampled by those who mistake power for righteousness.",
+      "sanskrit": "\u0927\u0930\u094d\u092e\u0938\u0902\u0935\u0930\u094d\u0927\u0928\u093e\u0930\u094d\u0925\u093e\u092f \u092a\u094d\u0930\u091c\u091c\u094d\u091e\u0947\u093d\u0928\u094d\u0927\u0915\u0935\u0943\u0937\u094d\u0923\u093f\u0937\u0941",
+      "reference": "Mahabharata, Adi Parva, Chapter 58",
+      "meaning": "Divine incarnations arise not by chance, but as cosmic interventions when dharma decays beyond mortal capacity to mend.",
+      "lore_snippet": "When kings become butchers and priests grow blind, the Unseen takes form. The wise recognize such times by the weeping of sacred rivers and the laughter of demons.",
+      "image": "quote_152.png",
+      "audio": "quote_152.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

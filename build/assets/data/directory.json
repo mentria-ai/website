@@ -3756,6 +3756,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_222",
+      "quote": "Yay\u0101ti: Old age, wrinkles, and gray hair have overtaken me, my child. Due to the curse of K\u0101vya U\u015banas, I am not satisfied with my youth.",
+      "sanskrit": "\u091c\u0930\u093e \u0935\u0932\u0940 \u091a \u092e\u0947 \u0924\u093e\u0924 \u092a\u0932\u093f\u0924\u093e\u0928\u093f \u091a \u092a\u0930\u094d\u092f\u0917\u0941\u0903\u0964 \u0915\u093e\u0935\u094d\u092f\u0938\u094d\u092f\u094b\u0936\u0928\u0938\u0903 \u0936\u093e\u092a\u093e\u0928\u094d\u0928 \u091a \u0924\u0943\u092a\u094d\u0924\u094b\u093d\u0938\u094d\u092e\u093f \u092f\u094c\u0935\u0928\u0947\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 79",
+      "meaning": "Even the mighty are subject to time's decay. No amount of worldly power can satisfy the endless thirst for youth and pleasure when cursed by divine will.",
+      "lore_snippet": "The tale of Yay\u0101ti teaches that no mortal, however powerful, escapes time's march. Those who cling to transient pleasures invite suffering, for desire is a fire never quenched by indulgence.",
+      "image": "quote_222.png",
+      "audio": "quote_222.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_223",
+      "quote": "Yay\u0101ti: You shall become one obsessed with kindling fire [ritual performance], for refusing to bear my burden of age.",
+      "sanskrit": "\u0924\u094d\u0935\u0902 \u091a\u093e\u092a\u094d\u092f\u0947\u0935\u0902 \u092d\u0935\u093f\u0937\u094d\u092f\u0938\u093f \u0905\u0917\u094d\u0928\u093f\u092a\u094d\u0930\u0938\u094d\u0915\u0928\u094d\u0926\u0928\u092a\u0930\u0903\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 79",
+      "meaning": "Those who reject their sacred duties will be condemned to hollow rituals\u2014outward piety without inner wisdom.",
+      "lore_snippet": "Beware empty rites without virtue. The gods see through ceremonial flames to the cold ashes of a faithless heart, as Yay\u0101ti's curse foretold.",
+      "image": null,
+      "audio": null,
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

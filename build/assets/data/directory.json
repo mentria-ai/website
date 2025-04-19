@@ -1988,6 +1988,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_118",
+      "quote": "Shringi: The fire of a curse born from injustice burns both the wrongdoer and the unjust, for wrath untempered by wisdom is a serpent that devours its own tail.",
+      "sanskrit": "\u0905\u0928\u093e\u0917\u0938\u093f \u0917\u0941\u0930\u094c \u092f\u094b \u092e\u0947 \u092e\u0943\u0924\u0902 \u0938\u0930\u094d\u092a\u092e\u0935\u093e\u0938\u0943\u091c\u0924\u094d\u0964 \u0924\u0902 \u0928\u093e\u0917\u0938\u094d\u0924\u0915\u094d\u0937\u0915\u0903 \u0915\u094d\u0930\u0941\u0926\u094d\u0927\u0938\u094d\u0924\u0947\u091c\u0938\u093e \u0938\u093e\u0926\u092f\u093f\u0937\u094d\u092f\u0924\u093f\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 40",
+      "meaning": "The young sage Shringi curses King Parikshit for the unjust killing of his father, showing how uncontrolled anger leads to destructive cycles of vengeance.",
+      "lore_snippet": "Ancient texts warn that curses carry the weight of cosmic balance. A sage's wrath manifests as inevitability - what is sown in injustice must be reaped in fire, as the serpent Takshaka would later prove.",
+      "image": "quote_118.png",
+      "audio": "quote_118.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_119",
+      "quote": "Kashyapa: Even death's approach may be stayed by wisdom's light, but gold dims the eyes of those who would play healer to fate's design.",
+      "sanskrit": "\u092e\u092f\u093e\u092d\u093f\u092a\u0928\u094d\u0928\u0902 \u0924\u0902 \u091a\u093e\u092a\u093f \u0928 \u0938\u0930\u094d\u092a\u094b \u0927\u0930\u094d\u0937\u092f\u093f\u0937\u094d\u092f\u0924\u093f",
+      "reference": "Mahabharata, Adi Parva, Chapter 40",
+      "meaning": "The sage Kashyapa initially intends to save King Parikshit from Takshaka's venom, but abandons this righteous duty when offered greater wealth by the serpent.",
+      "lore_snippet": "Physicians of old knew some doors once opened must remain so. When the great sage accepted Takshaka's gold, he proved even enlightened minds may falter when destiny and desire cross blades.",
+      "image": "quote_119.png",
+      "audio": "quote_119.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

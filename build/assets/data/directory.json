@@ -2226,6 +2226,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_132",
+      "quote": "\u0100st\u012bka: May those who recite the tales of dharma at dawn and dusk, whether scholars or common folk, be forever free from fear.",
+      "sanskrit": "\u0938\u093e\u092f\u0902 \u092a\u094d\u0930\u093e\u0924\u0903 \u0938\u0941\u092a\u094d\u0930\u0938\u0928\u094d\u0928\u093e\u0924\u094d\u092e\u0930\u0942\u092a\u093e; \u0932\u094b\u0915\u0947 \u0935\u093f\u092a\u094d\u0930\u093e \u092e\u093e\u0928\u0935\u093e\u0936\u094d\u091a\u0947\u0924\u0930\u0947\u093d\u092a\u093f\u0964 \u0927\u0930\u094d\u092e\u093e\u0916\u094d\u092f\u093e\u0928\u0902 \u092f\u0947 \u0935\u0926\u0947\u092f\u0941\u0930\u094d\u092e\u092e\u0947\u0926\u0902; \u0924\u0947\u0937\u093e\u0902 \u092f\u0941\u0937\u094d\u092e\u0926\u094d\u092d\u094d\u092f\u094b \u0928\u0948\u0935 \u0915\u093f\u091e\u094d\u091a\u093f\u0926\u094d\u092d\u092f\u0902 \u0938\u094d\u092f\u093e\u0924\u094d\u0965",
+      "reference": "Mahabharata, \u0100diva\u1e43\u015b\u0101vatara\u1e47aparva, Chapter 54",
+      "meaning": "\u0100st\u012bka's blessing promises protection to all who uphold and share the teachings of dharma, emphasizing the power of righteous storytelling as a shield against fear.",
+      "lore_snippet": "Ancient sages held that the recitation of dharma at twilight hours creates an invisible armor against darkness. To speak virtue is to weave a spell of protection around oneself and others.",
+      "image": "quote_132.png",
+      "audio": "quote_132.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_133",
+      "quote": "The serpent sacrifice taught this truth: even the mightiest ritual must yield to wisdom, as fire yields to water when balance is restored.",
+      "sanskrit": null,
+      "reference": "Mahabharata, \u0100diva\u1e43\u015b\u0101vatara\u1e47aparva (thematic)",
+      "meaning": "Janamejaya's snake sacrifice was halted by \u0100st\u012bka's intervention, showing that blind adherence to ritual must bow to higher wisdom and compassion.",
+      "lore_snippet": "Like the great yajna that consumed serpents until checked by a child's plea, no power\u2014divine or mortal\u2014should operate without the counterbalance of mercy and reason.",
+      "image": "quote_133.png",
+      "audio": "quote_133.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_134",
+      "quote": "When serpents and sages alike rejoice in liberation, know this: the truest magic lies not in binding spells, but in the unbinding of fear.",
+      "sanskrit": null,
+      "reference": "Mahabharata, \u0100diva\u1e43\u015b\u0101vatara\u1e47aparva (thematic)",
+      "meaning": "The collective relief of the liberated nagas symbolizes that real power manifests when destructive cycles are transformed into mutual freedom.",
+      "lore_snippet": "The oldest draconic texts speak of two kinds of enchantments: those that chain the body, and those that sever the chains of the spirit. The latter alone endure.",
+      "image": "quote_134.png",
+      "audio": "quote_134.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

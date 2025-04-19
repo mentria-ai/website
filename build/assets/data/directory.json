@@ -3620,6 +3620,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_214",
+      "quote": "Yay\u0101ti: More dangerous is a Brahmin, for a person who understands. An angered Brahmin destroys entire kingdoms and cities too.",
+      "sanskrit": "\u0915\u094d\u0930\u0941\u0926\u094d\u0927\u093e\u0926\u093e\u0936\u0940\u0935\u093f\u0937\u093e\u0924\u094d\u0938\u0930\u094d\u092a\u093e\u091c\u094d\u091c\u094d\u0935\u0932\u0928\u093e\u0924\u094d\u0938\u0930\u094d\u0935\u0924\u094b\u092e\u0941\u0916\u093e\u0924\u094d\u0964 \u0926\u0941\u0930\u093e\u0927\u0930\u094d\u0937\u0924\u0930\u094b \u0935\u093f\u092a\u094d\u0930\u0903 \u092a\u0941\u0930\u0941\u0937\u0947\u0923 \u0935\u093f\u091c\u093e\u0928\u0924\u093e\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 77",
+      "meaning": "A wise Brahmin's wrath is more destructive than poison or fire, capable of annihilating entire civilizations when provoked.",
+      "lore_snippet": "Ancient scrolls warn that the fury of enlightened sages can shake the pillars of realms. Their curses burn longer than dragonfire, for they strike at the roots of cosmic order.",
+      "image": "quote_214.png",
+      "audio": "quote_214.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_215",
+      "quote": "Devay\u0101n\u012b: There is no fear for one who does not solicit, and who accepts what is given.",
+      "sanskrit": "\u0905\u092f\u093e\u091a\u0924\u094b \u092d\u092f\u0902 \u0928\u093e\u0938\u094d\u0924\u093f \u0926\u0924\u094d\u0924\u093e\u0902 \u091a \u092a\u094d\u0930\u0924\u093f\u0917\u0943\u0939\u094d\u0923\u0924\u0903\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 77",
+      "meaning": "True safety lies in neither demanding nor rejecting destiny's gifts, but receiving them with equanimity.",
+      "lore_snippet": "As the river accepts rain without grasping, so too must warriors receive fate's offerings. Unasked gifts carry no debt, unsought battles bear no shame.",
+      "image": "quote_215.png",
+      "audio": "quote_215.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

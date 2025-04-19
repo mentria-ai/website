@@ -34,6 +34,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Mentria.AI">
     <link rel="apple-touch-icon" href="assets/img/favicon-96x96.png">
+    <link rel="manifest" href="manifest.json">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon-96x96.png">
@@ -44,6 +45,7 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/pwa.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts for animated subtitles -->
@@ -76,6 +78,13 @@
     </script>
 </head>
 <body>
+    <!-- Splash Screen for PWA -->
+    <div class="splash-screen" id="splash-screen">
+        <img src="assets/img/favicon-96x96.png" alt="Mentria.AI Logo" class="splash-logo">
+        <div class="splash-text">Mentria.AI</div>
+        <div class="splash-loading"></div>
+    </div>
+    
     <div class="reel-container">
         <div class="reel-content">
             <!-- Media container with all controls inside -->
@@ -130,6 +139,7 @@
     <script src="assets/js/main.js"></script>
     <script src="assets/js/quotes.js"></script>
     <script src="assets/js/animated-subtitles.js"></script>
+    <script src="assets/js/pwa.js"></script>
     <!-- Tests (only loaded in development) -->
     <script>
         // Only load tests in development environment
@@ -138,6 +148,19 @@
             testScript.src = 'assets/js/tests.js';
             document.body.appendChild(testScript);
         }
+
+        // Hide splash screen after content loads
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const splashScreen = document.getElementById('splash-screen');
+                if (splashScreen) {
+                    splashScreen.classList.add('hide');
+                    setTimeout(function() {
+                        splashScreen.style.display = 'none';
+                    }, 500);
+                }
+            }, 1500); // Show splash for at least 1.5 seconds
+        });
     </script>
 </body>
 </html>

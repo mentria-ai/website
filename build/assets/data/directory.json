@@ -3382,6 +3382,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_200",
+      "quote": "Yayati: Youth is a fleeting gift, but wisdom endures when exchanged with those who value its weight.",
+      "sanskrit": "\u092f\u094c\u0935\u0928\u0947\u0928 \u0924\u094d\u0935\u0926\u0940\u092f\u0947\u0928 \u091a\u0930\u0947\u092f\u0902 \u0935\u093f\u0937\u092f\u093e\u0928\u0939\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 71",
+      "meaning": "King Yayati's plea to exchange his old age for youth reflects the transient nature of physical vitality and the enduring value of wisdom through selfless exchange.",
+      "lore_snippet": "The ancients knew that time's currency flows but one way. A wise ruler once traded his years to learn that true legacy lies not in longevity, but in the wisdom passed to worthy heirs.",
+      "image": "quote_200.png",
+      "audio": "quote_200.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_201",
+      "quote": "Shukra: The seeker who bows with pure intent at wisdom's door shall find it opens not once, but through a thousand seasons of devotion.",
+      "sanskrit": "\u092c\u094d\u0930\u0939\u094d\u092e\u091a\u0930\u094d\u092f\u0902 \u091a\u0930\u093f\u0937\u094d\u092f\u093e\u092e\u093f \u0924\u094d\u0935\u092f\u094d\u092f\u0939\u0902 \u092a\u0930\u092e\u0902 \u0917\u0941\u0930\u094c",
+      "reference": "Mahabharata, Adi Parva, Chapter 71",
+      "meaning": "Guru Shukra accepts Kacha as a student, emphasizing that true knowledge requires lifelong discipline (brahmacharya) and surrender to the guru's guidance.",
+      "lore_snippet": "As the sage Shukra taught: mastery of resurrection magic required not merely study, but three hundred years of unwavering service. The deepest arts reveal themselves only to unwavering devotion.",
+      "image": "quote_201.png",
+      "audio": "quote_201.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_202",
+      "quote": "The samjivani vidya teaches: what death unravels, knowledge may restore\u2014but only when wielded by those who honor its sacred balance.",
+      "sanskrit": "\u0938\u091e\u094d\u091c\u0940\u0935\u0928\u0940\u0902 \u0924\u0924\u094b \u0926\u0947\u0935\u093e \u0935\u093f\u0937\u093e\u0926\u092e\u0917\u092e\u0928\u094d\u092a\u0930\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 71",
+      "meaning": "The secret of resurrection (samjivani vidya) becomes a cosmic stakes when asuras repeatedly revive fallen warriors, disrupting the natural order until wisdom tempers its use.",
+      "lore_snippet": "Legends speak of Shukracharya's power to return the slain to battle. Yet even gods learned: such magic, unbound by dharma, breeds only endless war. Some doors should remain closed.",
+      "image": "quote_202.png",
+      "audio": "quote_202.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

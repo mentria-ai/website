@@ -13,6 +13,8 @@ import random
 from dotenv import load_dotenv
 from together import Together
 from PIL import Image
+import datetime
+import urllib.request
 
 # Load environment variables
 load_dotenv()
@@ -20,12 +22,13 @@ load_dotenv()
 # Initialize Together API client (we'll keep this for generating prompts)
 client = Together()
 
-# ComfyUI RunPod configuration - load from .env file
-COMFY_API_URL = os.getenv('COMFY_API_URL')
+# ComfyUI RunPod configuration - load from .env file or use default
+COMFY_API_URL = os.getenv('COMFY_API_URL', 'https://dbc6kcfozwpt1i-8188.proxy.runpod.net')
 if not COMFY_API_URL:
-    print("WARNING: COMFY_API_URL not found in .env file. Please add it to continue.")
-    print("Example: COMFY_API_URL=https://abcdefg-8188.proxy.runpod.net")
-    sys.exit(1)
+    print("WARNING: COMFY_API_URL not found in .env file. Using default URL.")
+    COMFY_API_URL = 'https://dbc6kcfozwpt1i-8188.proxy.runpod.net'
+    
+print(f"Using ComfyUI API URL: {COMFY_API_URL}")
 
 client_id = str(uuid.uuid4())  # Generate a unique client ID for this session
 
@@ -418,363 +421,429 @@ def generate_legends_and_prompts(chunk_data, client):
             "reference": f"Mahabharata, Inspired by lines {chunk_data['start_line']}-{chunk_data['end_line']}",
             "meaning": f"Though following the path of {theme} may present challenges, its rewards transcend temporal existence.",
             "lore_snippet": f"Ancient sages taught that while the path of {theme} is often arduous, those who walk it find lasting peace. Even in the face of adversity, the righteous are sustained by inner strength.",
-            "image_prompt": f"a winding mountain path leading to a radiant summit, centered within an ornate decorative border, ancient waymarkers along the route, celestial bodies like sun, moon and stars arranged meaningfully, richly colored with vintage-style pigmentation, in the style of vintage tarot card art, mystical and symbolic imagery, rich detailed illustration with symbolic meaning, ornate decorative elements, high contrast with bold outlines, mythical archetypes, spiritual symbolism, renaissance and art nouveau influences",
+            "image_prompt": f"a winding mountain path leading to a radiant summit, framed with bold decorative border of geometric patterns, ancient waymarkers along the route, traditional Indian symbolic motifs like peacocks, elephants, or lotus flowers, bold black outlines filled with vibrant flat colors, in Neo-Traditional Indian Art style, modern interpretation of Madhubani or Kalamkari art, bold black outlines with vibrant color fills, intricate pattern work, symbolic color usage, balanced composition with cultural motifs, flat perspective with symbolic representation, decorative borders and geometric framing elements",
             "negative_prompt": "photorealistic, 3D rendered, low quality, blurry, distorted, pixelated, anime, cartoonish, childish, sketch-like, messy, broken lines, poorly drawn faces, deformed limbs"
         }]
 
 def enhance_image_prompt(core_concept, quote="", meaning=""):
-    """Create a more detailed and artistic image prompt from the core concept."""
-    # Dictionary of artistic elements to add based on concept types
-    artistic_elements = {
-        "wheel": ["intricate spokes radiating outward", "ancient runes carved around the rim", "wisps of energy emanating from center", "floating above a reflective pool"],
-        "flame": ["dancing wisps", "smoke tendrils curling upward", "embers floating in darkness", "casting dramatic shadows"],
-        "bow": ["ornate carvings along the limbs", "taut string gleaming", "single arrow nocked", "feathers and beads dangling"],
-        "sword": ["intricate hilt design", "ancient runes etched into blade", "light gleaming along edge", "partially wrapped in cloth"],
-        "tree": ["gnarled roots extending outward", "distinct leaf patterns", "symbolic fruits", "birds perched on branches"],
-        "path": ["winding through varied terrain", "stones marking the way", "fork with distinct differences", "footprints showing journey"],
-        "lotus": ["detailed petals with intricate veining", "rising from rippled water", "droplets sliding off surfaces", "stem visible beneath"],
-        "eye": ["detailed iris patterns", "rays of light emanating", "reflected wisdom", "tears forming at corners"],
-        "hand": ["detailed finger joints and knuckles", "ornate patterns on palm", "energy emanating from fingertips", "symbolic gestures"],
-        "scales": ["detailed balance mechanism", "ornate decorations", "weights with symbolic carvings", "stand with intricate designs"],
-        "mountain": ["craggy peaks with detailed rock formations", "mist swirling around base", "small details of vegetation", "dramatic perspective"],
-        "river": ["flowing water with ripple details", "stones breaking the surface", "branching paths", "symbolic items carried in current"],
-        "heart": ["anatomical details", "vines or roots extending outward", "protective cage", "light emanating from within"]
+    """Create a more detailed and realistic photographic style prompt from the core concept."""
+    # Dictionary of realistic elements to add based on concept types
+    realistic_elements = {
+        "wheel": ["ancient wooden chariot wheel with intricate carvings", "ceremonial golden wheel with ornate detailing", "weathered stone wheel monument", "historical wooden wheel with metal reinforcements"],
+        "flame": ["sacred fire altar with rising flames", "oil lamp with golden flame in darkness", "ritual fire ceremony with smoke", "ceremonial flame with sparks rising into night sky"],
+        "bow": ["ornate warrior bow with decorative metal inlays", "ancient composite bow with taut bowstring", "ceremonial bow with symbolic markings", "weathered battle bow resting against sacred tree"],
+        "sword": ["ancient royal sword with jeweled hilt", "battle-worn sword with ceremonial engravings", "ceremonial sword catching sunlight", "royal sword with gold inlay on display"],
+        "tree": ["ancient banyan tree with sprawling roots at sunset", "sacred peepal tree with sunlight filtering through leaves", "majestic tree in meadow with golden hour lighting", "mystical forest clearing with morning mist"],
+        "path": ["ancient stone pathway through dense forest", "mountain trail with dramatic lighting", "riverbank path with wildflowers at sunrise", "pilgrim route with distant temple structures"],
+        "lotus": ["pink lotus flower floating on still water at dawn", "sacred lotus pond with golden light", "lotus blossom with water droplets", "lotus garden with perfect reflections at sunset"],
+        "eye": ["expressive human eye with detailed iris in close-up", "contemplative gaze captured in portrait", "eye reflecting sacred symbols", "close-up of wise elder's penetrating gaze"],
+        "hand": ["weathered hands in prayer position with traditional jewelry", "warrior's hand gripping weapon hilt", "hands offering sacred items", "detailed close-up of hands performing ritual gesture"],
+        "scales": ["ornate golden scales of justice with intricate detailing", "ancient wooden balance scales with symbolic weights", "royal court judgment scales crafted from precious metals", "traditional measuring scales in historic setting"],
+        "mountain": ["majestic Himalayan peaks at dawn", "holy mountain with pilgrimage path", "mountain vista with dramatic clouds and sunbeams", "snow-capped mountain reflecting in crystal lake"],
+        "river": ["sacred river with golden light reflecting on rippling water", "serene river bend with ancient stone steps", "flowing river with morning mist", "river crossing with weathered stone structures"],
+        "heart": ["anatomical heart with symbolic elements", "chest of warrior with hand over heart", "heart-shaped natural formation", "metaphorical representation of heart through natural elements"]
     }
     
-    # Composition elements to add dimension and interest - tailored for tarot
-    compositions = [
-        "centered within an ornate decorative border",
-        "framed by symbolic elements that enhance the meaning",
-        "arranged in classic tarot card composition with main figure prominent",
-        "symmetrically balanced with celestial elements in the background",
-        "depicted with rich symbolism and allegorical elements",
-        "surrounded by mystical sigils and symbolic flourishes",
-        "set against a cosmic or ethereal background",
-        "positioned between contrasting elements symbolizing duality",
-        "enclosed in an arch-shaped frame with decorative elements",
-        "rendered with dramatic lighting highlighting the central symbolism"
+    # Character dictionary with well-known features - only use when explicitly mentioned
+    characters = {
+        "krishna": ["dark-skinned divine figure with peacock feather crown", "serene face with compassionate expression", "playing divine flute", "royal yellow silk garments"],
+        "arjuna": ["skilled archer with royal bearing", "noble warrior with determined expression", "wearing golden armor with royal insignia", "holding Gandiva bow"],
+        "yudhishthira": ["wise king with calm demeanor", "royal figure with dignified pose", "eldest Pandava with thoughtful expression", "righteous leader with royal staff"],
+        "bhima": ["powerfully built warrior", "strong figure wielding mace", "imposing physique with royal ornaments", "fierce expression with royal garments"],
+        "draupadi": ["regal woman with long dark hair", "queen with dignified expression", "adorned with royal jewelry", "graceful figure in royal attire"],
+        "karna": ["warrior with golden armor and earrings", "noble face with sun symbolism", "royal figure with tragic expression", "skilled archer with divine weapons"],
+        "duryodhana": ["powerful royal figure", "proud warrior in ornate armor", "commanding presence with royal insignia", "determined expression with regal bearing"],
+        "bhishma": ["elder sage with white beard", "wise patriarch with serene expression", "honorable warrior with dignified bearing", "revered figure with divine aura"],
+        "dronacharya": ["venerable teacher with sacred thread", "wise guru with meditative expression", "master archer with calm demeanor", "respected elder in sage attire"],
+        "kunti": ["noble mother with dignified bearing", "wise queen with compassionate expression", "maternal figure with royal attire", "serene woman with spiritual aura"]
+    }
+    
+    # Photographic style elements for realistic imagery
+    photography_styles = [
+        "professional portrait photography with dramatic lighting",
+        "cinematic composition with golden hour lighting",
+        "high-resolution nature photography with rich details",
+        "fine art photography with dramatic shadows",
+        "documentary-style photography with authentic atmosphere",
+        "award-winning National Geographic style photography",
+        "professional landscape photography with perfect lighting",
+        "artistic photography with shallow depth of field",
+        "atmospheric photography with volumetric lighting",
+        "high-quality photography with beautiful color grading",
+        "historic photography with timeless quality",
+        "portrait photography with strong emotional impact"
     ]
     
-    # Symbolic elements to add meaning
-    symbolic_elements = [
-        "celestial bodies like sun, moon and stars arranged meaningfully",
-        "symbolic color associations with deep spiritual meaning",
-        "sacred geometry patterns subtly integrated in the background",
-        "esoteric symbols representing spiritual concepts",
-        "numerological elements relevant to the concept",
-        "elemental symbols (earth, air, fire, water) in the corners",
-        "symbolic animals or mythical creatures as companions",
-        "hidden symbols that reveal deeper layers of meaning",
-        "alchemical symbols incorporated into the design",
-        "mystical hands performing symbolic gestures"
+    # Settings from Mahabharata era
+    settings = [
+        "ancient Indian royal court with ornate pillars",
+        "sacred forest clearing with filtered sunlight",
+        "battlefield at dawn with mist rising from ground",
+        "riverside hermitage with peaceful atmosphere",
+        "mountain ashram with panoramic views",
+        "palace gardens with exotic flowers",
+        "village marketplace with traditional crafts",
+        "temple courtyard with intricate stone carvings",
+        "royal chariot path with ceremonial decorations",
+        "meditation grove with ancient trees at sunrise"
     ]
     
-    # Textural elements
-    textures = [
-        "richly colored with vintage-style pigmentation",
-        "gold leaf accents on important symbolic elements",
-        "weathered parchment-like background texture",
-        "varying line weights creating focal hierarchy",
-        "subtle gradients mimicking traditional painting techniques",
-        "mottled background suggesting age and wisdom",
-        "delicate linework for borders and decorative elements"
+    # Environmental elements to enhance atmosphere
+    atmospheres = [
+        "golden morning light creating long shadows",
+        "dramatic clouds with rays of sunlight breaking through",
+        "soft mist creating ethereal atmosphere",
+        "warm sunset glow adding rich amber tones",
+        "subtle smoke creating depth and atmosphere",
+        "morning dew glistening on foliage",
+        "dramatic shadows adding depth and contrast",
+        "gentle rain creating reflections and mood",
+        "stars visible in deep blue twilight sky",
+        "moonlight creating silvery highlights"
     ]
     
-    # Extract key words from the core concept
+    # Technical photography elements to enhance realism
+    technical_elements = [
+        "shot with high-end DSLR camera",
+        "professional lighting with perfect exposure",
+        "shot with medium format camera for incredible detail",
+        "using natural lighting with reflectors",
+        "captured with telephoto lens for compressed perspective",
+        "high dynamic range capturing both shadows and highlights",
+        "shot with wide aperture for beautiful bokeh",
+        "using long exposure to capture movement",
+        "precise focus highlighting important details",
+        "high resolution with rich textures and details"
+    ]
+    
+    # Extract key words from the core concept and quote
     concept_words = core_concept.lower().split()
+    quote_words = quote.lower().split() if quote else []
+    combined_words = concept_words + quote_words
     
-    # Find matching artistic elements
+    # Find matching realistic elements
     matching_elements = []
-    for key, elements in artistic_elements.items():
-        if any(key in word for word in concept_words):
-            # If match found, add 2 random elements from that category
-            random_elements = random.sample(elements, min(2, len(elements)))
-            matching_elements.extend(random_elements)
+    for key, elements in realistic_elements.items():
+        if any(key in word for word in combined_words):
+            # If match found, add 1 random element from that category
+            random_element = random.choice(elements)
+            matching_elements.append(random_element)
     
-    # If no specific matches, use some general artistic elements
+    # If no specific matches, use a general element
     if not matching_elements:
         general_elements = [
-            "intricate detailing surrounding the central element",
-            "subtle background patterns adding depth",
-            "dramatic use of symbolism and metaphor",
-            "symbolic smaller elements reinforcing the theme"
+            "ancient Indian scene with historical accuracy",
+            "philosophical concept visualized in realistic setting",
+            "sacred space with spiritual significance",
+            "traditional scene with authentic cultural details"
         ]
-        matching_elements = random.sample(general_elements, 2)
+        matching_elements = [random.choice(general_elements)]
     
-    # Add composition and symbolic elements
-    selected_composition = random.choice(compositions)
-    selected_symbolic = random.choice(symbolic_elements)
-    selected_texture = random.choice(textures)
+    # Check for character mentions in the quote or concept
+    mentioned_characters = []
+    for character, features in characters.items():
+        if any(character in word for word in combined_words):
+            # If character is mentioned, add their description
+            mentioned_characters.append(random.choice(features))
     
-    # Create the enhanced prompt with tarot card styling
-    base_style = "in the style of vintage tarot card art, mystical and symbolic imagery, rich detailed illustration with symbolic meaning, ornate decorative elements, high contrast with bold outlines, mythical archetypes, spiritual symbolism, renaissance and art nouveau influences"
+    # Select photography style, setting, atmosphere and technical element
+    selected_style = random.choice(photography_styles)
+    selected_setting = random.choice(settings)
+    selected_atmosphere = random.choice(atmospheres)
+    selected_technical = random.choice(technical_elements)
     
-    # Build the complete prompt with core concept and artistic elements
-    enhanced_prompt = f"{core_concept}, {selected_composition}, {', '.join(matching_elements)}, {selected_symbolic}, {selected_texture}, {base_style}"
+    # Build the prompt starting with the core concept
+    prompt_elements = [core_concept]
+    
+    # Add character descriptions if any were mentioned, otherwise add a setting
+    if mentioned_characters:
+        prompt_elements.extend(mentioned_characters)
+    else:
+        prompt_elements.append(selected_setting)
+    
+    # Add matching elements and atmosphere
+    prompt_elements.extend(matching_elements)
+    prompt_elements.append(selected_atmosphere)
+    
+    # Add photography style and technical elements
+    prompt_elements.append(selected_style)
+    prompt_elements.append(selected_technical)
+    
+    # Join all elements with commas
+    enhanced_prompt = ", ".join(prompt_elements)
     
     return enhanced_prompt
 
-def generate_image_with_params(prompt, negative_prompt=None, previous_image_url=None, seed=777):
-    """Generate an image with the given prompt and parameters using ComfyUI API."""
+def generate_image_with_params(prompt, negative_prompt="", output_folder="assets/img/quotes", width=832, height=1248):
+    """Generate an image using provided prompt and parameters."""
+    # Generate unique filename
+    current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_filename = f"temp_image_{current_time}.png"
+    temp_image_path = os.path.join(output_folder, unique_filename)
+    
+    # Ensure the output folder exists
+    os.makedirs(output_folder, exist_ok=True)
+    
+    # Debug: Print complete prompt
+    print(f"DEBUG: Image prompt: {prompt[:100]}...")
+    
+    # Prepare the workflow based on madhubani_workflow_api2.json
+    workflow = {
+        "3": {
+            "inputs": {
+                "seed": random.randint(1, 2**32 - 1),  # Random seed for variety
+                "steps": 50,
+                "cfg": 5,
+                "sampler_name": "uni_pc",
+                "scheduler": "simple",
+                "denoise": 1,
+                "model": [
+                    "70",
+                    0
+                ],
+                "positive": [
+                    "16",
+                    0
+                ],
+                "negative": [
+                    "40",
+                    0
+                ],
+                "latent_image": [
+                    "53",
+                    0
+                ]
+            },
+            "class_type": "KSampler"
+        },
+        "8": {
+            "inputs": {
+                "samples": [
+                    "3",
+                    0
+                ],
+                "vae": [
+                    "55",
+                    0
+                ]
+            },
+            "class_type": "VAEDecode"
+        },
+        "9": {
+            "inputs": {
+                "filename_prefix": "ComfyUI",
+                "images": [
+                    "8",
+                    0
+                ]
+            },
+            "class_type": "SaveImage"
+        },
+        "16": {
+            "inputs": {
+                "text": prompt,
+                "clip": [
+                    "54",
+                    0
+                ]
+            },
+            "class_type": "CLIPTextEncode"
+        },
+        "40": {
+            "inputs": {
+                "text": negative_prompt or "lowres, worst quality, jpeg artifacts, noisy, blurry, over‑sharpened, watermark, text, logo, oversaturated colors, chromatic aberration, distorted proportions, disfigured face or hands, extra limbs or fingers, cut‑off edges, grainy skin, banding, blown highlights, muddy shadows",
+                "clip": [
+                    "54",
+                    0
+                ]
+            },
+            "class_type": "CLIPTextEncode"
+        },
+        "53": {
+            "inputs": {
+                "width": width,
+                "height": height,
+                "batch_size": 1
+            },
+            "class_type": "EmptySD3LatentImage"
+        },
+        "54": {
+            "inputs": {
+                "clip_name1": "clip_l_hidream.safetensors",
+                "clip_name2": "clip_g_hidream.safetensors",
+                "clip_name3": "t5xxl_fp8_e4m3fn_scaled.safetensors",
+                "clip_name4": "llama_3.1_8b_instruct_fp8_scaled.safetensors"
+            },
+            "class_type": "QuadrupleCLIPLoader"
+        },
+        "55": {
+            "inputs": {
+                "vae_name": "ae.safetensors"
+            },
+            "class_type": "VAELoader"
+        },
+        "70": {
+            "inputs": {
+                "shift": 3.0,
+                "model": [
+                    "76",
+                    0
+                ]
+            },
+            "class_type": "ModelSamplingSD3"
+        },
+        "76": {
+            "inputs": {
+                "unet_name": "hidream_i1_full_fp8.safetensors",
+                "weight_dtype": "default"
+            },
+            "class_type": "UNETLoader"
+        }
+    }
+    
+    # Submit the workflow to the ComfyUI API
     try:
-        # Create the image path
-        os.makedirs("assets/img/quotes", exist_ok=True)
-        # Generate a unique filename based on timestamp
-        timestamp = int(time.time())
-        image_path = f"assets/img/quotes/temp_{timestamp}.png"
+        prompt_id = str(uuid.uuid4())
         
-        # Prepare the workflow
-        workflow = {
-            "1": {
-                "inputs": {
-                    "model_type": "full-nf4",
-                    "primary_prompt": prompt,
-                    "negative_prompt": negative_prompt or "",
-                    "width": 832,
-                    "height": 1256,
-                    "seed": seed,
-                    "scheduler": "Default for model",
-                    "override_steps": 35,
-                    "override_cfg": 7.5,
-                    "use_uncensored_llm": False,
-                    "clip_l_prompt": "",
-                    "openclip_prompt": "",
-                    "t5_prompt": "",
-                    "llama_prompt": "",
-                    "max_length_clip_l": 77,
-                    "max_length_openclip": 77,
-                    "max_length_t5": 128,
-                    "max_length_llama": 128
-                },
-                "class_type": "HiDreamSamplerAdvanced",
-                "_meta": {
-                    "title": "HiDream Sampler (Advanced)"
-                }
-            },
-            "3": {
-                "inputs": {
-                    "images": [
-                        "1",
-                        0
-                    ]
-                },
-                "class_type": "PreviewImage",
-                "_meta": {
-                    "title": "Preview Image"
-                }
-            },
-            "4": {
-                "inputs": {
-                    "filename_prefix": os.path.splitext(os.path.basename(image_path))[0],
-                    "images": [
-                        "1",
-                        0
-                    ]
-                },
-                "class_type": "SaveImage",
-                "_meta": {
-                    "title": "Save Image"
-                }
-            }
+        # Prepare the API request
+        p = {"prompt": workflow, "client_id": client_id}
+        data = json.dumps(p).encode('utf-8')
+        
+        # Get the ComfyUI server address from environment or use default
+        comfy_api_url = os.environ.get("COMFY_API_URL", "http://127.0.0.1:8188")
+        
+        # Check if we have an API key in environment
+        api_key = os.environ.get("COMFY_API_KEY", "")
+        
+        # Submit the prompt
+        print(f"Submitting workflow to ComfyUI ({comfy_api_url})...")
+        print(f"DEBUG: Using API key: {'Yes' if api_key else 'No'}")
+        
+        # Use requests instead of urllib for consistency with audio generation
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
         
-        # Set up parameters
-        params = {
-            "prompt": prompt,
-            "negative_prompt": negative_prompt or "",
-            "width": 832,
-            "height": 1256,
-            "seed": 777,  # Added fixed seed for consistency
-        }
+        # Add API key to headers if available
+        if api_key:
+            headers['Authorization'] = f'Bearer {api_key}'
         
-        # Queue the prompt
-        print("Submitting workflow to ComfyUI...")
-        prompt_data = {
-            "prompt": workflow,
-            "client_id": client_id
-        }
+        # Debug the request
+        print(f"DEBUG: Request headers: {headers}")
+        print(f"DEBUG: Request URL: {comfy_api_url}/api/prompt")
         
         response = requests.post(
-            f"{COMFY_API_URL}/api/prompt",
-            json=prompt_data,
-            headers={
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
+            f"{comfy_api_url}/api/prompt",
+            data=data,
+            headers=headers
         )
         
         if response.status_code != 200:
-            print(f"Error submitting workflow: {response.status_code}")
-            print(f"Response: {response.text}")
+            print(f"Error submitting workflow: HTTP Error {response.status_code}: {response.reason}")
+            print(f"Response content: {response.text[:500]}")
             return None
             
-        prompt_id = response.json().get("prompt_id")
-        print(f"Workflow submitted successfully with ID: {prompt_id}")
+        res = response.json()
+        prompt_id = res.get('prompt_id', prompt_id)
+        print(f"Workflow submitted with prompt ID: {prompt_id}")
         
-        # Monitor execution
-        start_time = time.time()
-        timeout = 600  # 10 minutes timeout
+        # Now wait for the prompt to finish execution
+        waiting_for_output = True
+        output_images = []
         
         print("Waiting for image generation to complete...")
-        while time.time() - start_time < timeout:
-            try:
-                # Check queue status
-                queue_response = requests.get(f"{COMFY_API_URL}/api/queue")
-                queue_data = queue_response.json()
+        while waiting_for_output:
+            # Check if prompt is still in queue
+            queue_response = requests.get(f"{comfy_api_url}/api/queue")
+            if queue_response.status_code != 200:
+                print(f"Error checking queue: {queue_response.status_code}")
+                return None
                 
-                # Check if our prompt is still in the queue
-                is_in_queue = False
-                for item in queue_data.get("queue_running", []):
-                    if item[1] == prompt_id:
-                        is_in_queue = True
-                        print("  - Still running...")
-                        break
-                
-                for item in queue_data.get("queue_pending", []):
-                    if item[1] == prompt_id:
-                        is_in_queue = True
-                        print("  - Pending in queue...")
-                        break
-                
-                if not is_in_queue:
-                    # Check if execution is done by getting history
-                    history_response = requests.get(f"{COMFY_API_URL}/api/history/{prompt_id}")
-                    if history_response.status_code == 200:
-                        print("✓ Image generation completed!")
-                        
-                        # Try to find the image in the output
-                        history_data = history_response.json()
-                        outputs = history_data.get(prompt_id, {}).get("outputs", {})
-                        
-                        image_filename = None
-                        image_subfolder = ""
-                        image_type = ""
-                        image_url = ""
-                        
-                        # Debug - print out the entire outputs structure
-                        print(f"Debug - All node outputs structure:")
-                        for node_id, node_output in outputs.items():
-                            if "images" in node_output:
-                                print(f"  Node {node_id}: {node_output.get('images')}")
-                                
-                        # First look for output type images
-                        for node_id, node_output in outputs.items():
-                            if "images" in node_output:
-                                for img_info in node_output["images"]:
-                                    if img_info.get("type") == "output":
-                                        image_filename = img_info.get("filename")
-                                        image_subfolder = img_info.get("subfolder", "")
-                                        image_type = img_info.get("type", "")
-                                        image_url = img_info.get("url", "")
-                                        print(f"Found output image: {image_filename}, subfolder: {image_subfolder}, type: {image_type}")
-                                        break
-                                if image_filename and image_type == "output":
-                                    break
-                        
-                        # If no output type image found, try any image
-                        if not image_filename:
-                            print("No output-type image found, trying to use any available image...")
-                            for node_id, node_output in outputs.items():
-                                if "images" in node_output:
-                                    for img_info in node_output["images"]:
-                                        image_filename = img_info.get("filename")
-                                        image_subfolder = img_info.get("subfolder", "")
-                                        image_type = img_info.get("type", "")
-                                        image_url = img_info.get("url", "")
-                                        print(f"Found alternate image: {image_filename}, subfolder: {image_subfolder}, type: {image_type}")
-                                        break
-                                    if image_filename:
-                                        break
-                        
-                        # If we still don't have an image, give up
-                        if not image_filename:
-                            print("No image found in any node output")
-                            break
-                            
-                        # Try multiple possible URL patterns for downloading the image
-                        possible_urls = [
-                            # Standard API view endpoint with params
-                            {"url": f"{COMFY_API_URL}/api/view", "params": {
-                                "filename": image_filename,
-                                "subfolder": image_subfolder,
-                                "type": "output"
-                            }, "method": "get_with_params"},
-                            
-                            # Direct output path (common pattern)
-                            {"url": f"{COMFY_API_URL}/output/{image_subfolder}/{image_filename}", "params": None, "method": "direct"},
-                            
-                            # Alternative output path without subfolder
-                            {"url": f"{COMFY_API_URL}/output/{image_filename}", "params": None, "method": "direct"},
-                            
-                            # Some ComfyUI instances use a file endpoint
-                            {"url": f"{COMFY_API_URL}/file/output/{image_subfolder}/{image_filename}", "params": None, "method": "direct"},
-                            
-                            # Try without api prefix for some server configurations
-                            {"url": f"{COMFY_API_URL.replace('/api', '')}/output/{image_subfolder}/{image_filename}", "params": None, "method": "direct"},
-                            
-                            # Try with /view endpoint and different param formats
-                            {"url": f"{COMFY_API_URL}/view", "params": {
-                                "filename": image_filename,
-                                "subfolder": image_subfolder,
-                                "type": "output"
-                            }, "method": "get_with_params"},
-                            
-                            # Try with the root ComfyUI URL
-                            {"url": f"{COMFY_API_URL.split('/api')[0]}/output/{image_filename}", "params": None, "method": "direct"}
-                        ]
-                        
-                        # If we found a direct URL in the response, add that first
-                        if image_url:
-                            possible_urls.insert(0, {"url": image_url, "params": None, "method": "direct"})
-                        
-                        # Try each URL pattern
-                        success = False
-                        print(f"Debug - trying to download image: {image_filename}, subfolder: {image_subfolder}, type: {image_type}")
-                        for idx, url_info in enumerate(possible_urls):
-                            try:
-                                print(f"Download attempt {idx+1}/{len(possible_urls)}: {url_info['method']} - {url_info['url']}")
-                                if url_info["method"] == "get_with_params":
-                                    response = requests.get(url_info["url"], params=url_info["params"])
-                                else:
-                                    response = requests.get(url_info["url"])
-                                
-                                if response.status_code == 200:
-                                    # Save the image
-                                    with open(image_path, 'wb') as f:
-                                        f.write(response.content)
-                                    
-                                    print(f"✓ Image saved to {image_path} (method {idx+1})")
-                                    success = True
-                                    return image_path
-                                else:
-                                    print(f"  - Failed with status code: {response.status_code}")
-                            except Exception as e:
-                                print(f"  - Error: {e}")
-                        
-                        if not success:
-                            print(f"× Failed to download image after trying {len(possible_urls)} different methods")
-                        else:
-                            print(f"✓ Image saved to {image_path}")
-                            return image_path
-                    else:
-                        print("No image found in output")
-                    
+            queue_status = queue_response.json()
+            is_in_queue = False
+            for item in queue_status.get('queue_running', []):
+                if item[1] == prompt_id:
+                    is_in_queue = True
+                    print("  - Still running...")
                     break
+            
+            for item in queue_status.get('queue_pending', []):
+                if item[1] == prompt_id:
+                    is_in_queue = True
+                    print("  - Pending in queue...")
+                    break
+            
+            if not is_in_queue and len(queue_status.get('queue_pending', [])) == 0:
+                waiting_for_output = False
+        
+            # If not in queue, check for outputs
+            if not waiting_for_output:
+                history_response = requests.get(f"{comfy_api_url}/api/history")
+                if history_response.status_code != 200:
+                    print(f"Error getting history: {history_response.status_code}")
+                    return None
+                    
+                history = history_response.json()
+                if prompt_id in history:
+                    for node_id, node_output in history[prompt_id].get('outputs', {}).items():
+                        if 'images' in node_output:
+                            for image_info in node_output['images']:
+                                output_images.append(image_info['filename'])
+        
+            # Wait a bit before checking again to reduce API load
+            time.sleep(2)
+        
+        # Download the image
+        if output_images:
+            print(f"Image generation complete. Found output image: {output_images[0]}")
+            try:
+                # Try different possible image URL patterns
+                possible_urls = [
+                    f"{comfy_api_url}/api/view?filename={output_images[0]}&subfolder=&type=output",
+                    f"{comfy_api_url}/api/view?filename={output_images[0]}",
+                    f"{comfy_api_url}/api/output/{output_images[0]}",
+                    f"{comfy_api_url}/api/file/output/{output_images[0]}"
+                ]
                 
-                # Wait a bit before checking again
-                time.sleep(5)
+                success = False
+                for i, url in enumerate(possible_urls):
+                    try:
+                        print(f"Attempting to download image using URL pattern {i+1}/{len(possible_urls)}")
+                        img_response = requests.get(url, stream=True)
+                        if img_response.status_code == 200:
+                            with open(temp_image_path, 'wb') as f:
+                                for chunk in img_response.iter_content(chunk_size=8192):
+                                    f.write(chunk)
+                            
+                            if os.path.exists(temp_image_path) and os.path.getsize(temp_image_path) > 0:
+                                print(f"✓ Successfully downloaded image using pattern {i+1}")
+                                success = True
+                                break
+                        else:
+                            print(f"  - Failed with pattern {i+1}: HTTP {img_response.status_code}")
+                    except Exception as e:
+                        print(f"  - Failed with pattern {i+1}: {e}")
                 
+                if not success:
+                    print("Failed to download image with all patterns")
+                    return None
             except Exception as e:
-                print(f"Error checking status: {e}")
-                time.sleep(5)
-        
-        if time.time() - start_time >= timeout:
-            print("Timed out waiting for image generation")
-        
+                print(f"Error downloading image: {e}")
+                return None
+        else:
+            print("No images were found in the output")
+            return None
+    except Exception as e:
+        print(f"Error submitting workflow: {e}")
         return None
     
-    except Exception as e:
-        print(f"Error generating image: {e}")
+    # Check if the image was successfully downloaded and exists
+    if os.path.exists(temp_image_path) and os.path.getsize(temp_image_path) > 0:
+        print(f"Image successfully saved to {temp_image_path}")
+        return temp_image_path
+    else:
+        print("Image download completed but file not found or empty")
         return None
 
 def generate_and_save_image(quote_data, quote_number, existing_facts, previous_image_url=None):
@@ -797,9 +866,7 @@ def generate_and_save_image(quote_data, quote_number, existing_facts, previous_i
     # Generate the image
     temp_image_path = generate_image_with_params(
         prompt=prompt,
-        negative_prompt=negative_prompt,
-        previous_image_url=previous_image_url,
-        seed=777
+        negative_prompt=negative_prompt
     )
     
     # If image generation was successful, rename to final path
@@ -1151,8 +1218,7 @@ def process_mahabharata_chunk(chunk_data, client, existing_facts, start_from_num
         print("No quotes found in this text chunk. Skipping...")
         return {
             "new_facts": [],
-            "quote_numbers": [],
-            "last_image_url": previous_image_url
+            "quote_numbers": []
         }
     
     print(f"\nProcessing {len(quotes_data)} lore quote(s)...")
@@ -1167,7 +1233,7 @@ def process_mahabharata_chunk(chunk_data, client, existing_facts, start_from_num
         print(f"Core concept: {quote_data.get('core_concept', 'N/A') if 'core_concept' in quote_data else 'N/A'}")
         
         # Generate and save the image
-        image_path = generate_and_save_image(quote_data, quote_number, existing_facts, previous_image_url)
+        image_path = generate_and_save_image(quote_data, quote_number, existing_facts)
         
         # Generate and save the audio
         audio_path = generate_and_save_audio(quote_data, quote_number)
@@ -1178,17 +1244,12 @@ def process_mahabharata_chunk(chunk_data, client, existing_facts, start_from_num
         # Add to new facts list
         new_facts.append(quote_entry)
         new_quote_numbers.append(quote_number)
-        
-        # Use this image as reference for the next one
-        if image_path:
-            previous_image_url = str(image_path)
     
     print(f"\n✓ Generated {len(new_facts)} new lore quote(s)")
     
     return {
         "new_facts": new_facts,
-        "quote_numbers": new_quote_numbers,
-        "last_image_url": previous_image_url
+        "quote_numbers": new_quote_numbers
     }
 
 def save_quote_to_directory(quote_data, quote_number, image_path=None, audio_path=None):
@@ -1209,6 +1270,72 @@ def save_quote_to_directory(quote_data, quote_number, image_path=None, audio_pat
     
     return quote_entry
 
+def generate_pwa_icons():
+    """Generate various sized icons needed for PWA from the favicon."""
+    print("\nGenerating PWA icons...")
+    
+    # Ensure the img directory exists
+    os.makedirs("assets/img", exist_ok=True)
+    
+    # Source favicon path
+    favicon_path = "assets/img/favicon-96x96.png"
+    
+    # Check if favicon exists
+    if not os.path.exists(favicon_path):
+        print(f"Error: Favicon not found at {favicon_path}")
+        return False
+    
+    try:
+        # Open the source favicon
+        favicon = Image.open(favicon_path)
+        
+        # Define sizes for different icons
+        icon_sizes = {
+            "icon-192x192.png": (192, 192),
+            "icon-512x512.png": (512, 512),
+            "icon-maskable-192x192.png": (192, 192),
+            "icon-maskable-512x512.png": (512, 512),
+        }
+        
+        # Create icons in different sizes
+        for filename, size in icon_sizes.items():
+            output_path = f"assets/img/{filename}"
+            
+            # Skip if file already exists
+            if os.path.exists(output_path):
+                print(f"PWA icon already exists: {output_path}")
+                continue
+            
+            # Create a copy of the favicon
+            icon = favicon.copy()
+            
+            # Resize the icon
+            icon = icon.resize(size, Image.LANCZOS)
+            
+            # For maskable icons, add padding (20% of size)
+            if "maskable" in filename:
+                # Create a new image with padding
+                padding = int(size[0] * 0.2)
+                padded_size = (size[0] + 2 * padding, size[1] + 2 * padding)
+                padded_image = Image.new("RGBA", padded_size, (0, 0, 0, 0))
+                
+                # Paste the original icon in the center
+                padded_image.paste(icon, (padding, padding))
+                
+                # Update the icon
+                icon = padded_image.resize(size, Image.LANCZOS)
+            
+            # Save the icon
+            icon.save(output_path)
+            print(f"Generated PWA icon: {output_path}")
+        
+        print("✓ PWA icons generated successfully")
+        return True
+    
+    except Exception as e:
+        print(f"Error generating PWA icons: {e}")
+        return False
+
 def main():
     """Main function to generate Mahabharata lore quotes."""
     print("\n=== Mahabharata Lore Quotes Generator ===")
@@ -1217,6 +1344,9 @@ def main():
     os.makedirs("assets/img/quotes", exist_ok=True)
     os.makedirs("assets/data", exist_ok=True)
     os.makedirs("assets/audio/quotes", exist_ok=True)
+    
+    # Generate PWA icons if needed
+    generate_pwa_icons()
     
     # Load existing facts
     existing_facts = load_existing_facts()
@@ -1227,9 +1357,6 @@ def main():
     
     # Initialize the Mahabharata reader
     reader = MahabharataReader()
-    
-    # Track the last generated image URL for continuity
-    last_image_url = None
     
     # Check if we should run once or continuously
     run_continuously = "--continuous" in sys.argv
@@ -1291,18 +1418,13 @@ def main():
                         chunk_data, 
                         client, 
                         existing_facts, 
-                        highest_quote_number + 1 + len(new_facts),
-                        last_image_url
+                        highest_quote_number + 1 + len(new_facts)
                     )
                 
                 if result and len(result["new_facts"]) > 0:
                     # Add new facts to the list
                     new_facts.extend(result["new_facts"])
                     consecutive_empty_batches = 0  # Reset the counter
-                    
-                    # Update the last image URL
-                    if result.get("last_image_url"):
-                        last_image_url = result["last_image_url"]
                 else:
                     print(f"\nCouldn't find any good quotes after trying {chunk_attempts} chunks.")
             

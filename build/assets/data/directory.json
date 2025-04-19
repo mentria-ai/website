@@ -2192,6 +2192,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_130",
+      "quote": "The serpent sacrificed in fire cannot be counted, for they are as infinite as the stars\u2014yet even the mightiest bow to the will of destiny.",
+      "sanskrit": "\u0938\u0939\u0938\u094d\u0930\u093e\u0923\u093f \u092c\u0939\u0942\u0928\u094d\u092f\u0938\u094d\u092e\u093f\u0928\u094d\u092a\u094d\u0930\u092f\u0941\u0924\u093e\u0928\u094d\u092f\u0930\u094d\u092c\u0941\u0926\u093e\u0928\u093f \u091a\u0964 \u0928 \u0936\u0915\u094d\u092f\u0902 \u092a\u0930\u093f\u0938\u0919\u094d\u0916\u094d\u092f\u093e\u0924\u0941\u0902 \u092c\u0939\u0941\u0924\u094d\u0935\u093e\u0926\u094d\u0935\u0947\u0926\u0935\u093f\u0924\u094d\u0924\u092e\u0965",
+      "reference": "Mahabharata, Astika Parva, Chapter 52",
+      "meaning": "Even the countless serpents of great power and form (symbolizing ego or primal forces) are ultimately subject to cosmic order and sacrifice.",
+      "lore_snippet": "Ancient texts speak of Nagas who could assume celestial forms, yet none escaped the fire of dharma. Thus, the wise remember: no strength surpasses the universe\u2019s design.",
+      "image": "quote_130.png",
+      "audio": "quote_130.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_131",
+      "quote": "Fear binds tighter than chains\u2014even the venomous Takshaka froze midair, spared by the trembling will of those who doubted their own rites.",
+      "sanskrit": "\u0928 \u0938\u094d\u092e \u0938 \u092a\u094d\u0930\u093e\u092a\u0924\u0926\u094d\u0935\u0939\u094d\u0928\u094c \u0924\u0915\u094d\u0937\u0915\u094b \u092d\u092f\u092a\u0940\u0921\u093f\u0924\u0903\u0965",
+      "reference": "Mahabharata, Astika Parva, Chapter 53",
+      "meaning": "Doubt weakens even the most potent rituals; Takshaka\u2019s suspension in the sky mirrors how hesitation disrupts fate\u2019s course.",
+      "lore_snippet": "The Naga Takshaka hung between earth and fire, proving that fear unravels destiny\u2019s threads. Masters of old warn: conviction is the true sacrifice.",
+      "image": "quote_131.png",
+      "audio": "quote_131.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -2719,6 +2719,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_161",
+      "quote": "Vishwakarma: The creator of a thousand crafts, carpenter of the gods, and architect of divine chariots that carry the celestial.",
+      "sanskrit": "\u0935\u093f\u0936\u094d\u0935\u0915\u0930\u094d\u092e\u093e \u092e\u0939\u093e\u092d\u093e\u0917\u094b \u091c\u091c\u094d\u091e\u0947 \u0936\u093f\u0932\u094d\u092a\u092a\u094d\u0930\u091c\u093e\u092a\u0924\u093f\u0903\u0964 \u0915\u0930\u094d\u0924\u093e \u0936\u093f\u0932\u094d\u092a\u0938\u0939\u0938\u094d\u0930\u093e\u0923\u093e\u0902 \u0924\u094d\u0930\u093f\u0926\u0936\u093e\u0928\u093e\u0902 \u091a \u0935\u0930\u094d\u0927\u0915\u093f\u0903\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 66",
+      "meaning": "This celebrates Vishwakarma as the divine architect and master craftsman whose creations sustain both gods and mortals, embodying the power of divine skill and creativity.",
+      "lore_snippet": "The ancients revered Vishwakarma not merely as a craftsman but as the embodiment of cosmic order. His divine blueprints are said to echo in every temple spire and celestial chariot, reminding mortals that creation itself is sacred labor.",
+      "image": "quote_161.png",
+      "audio": "quote_161.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_162",
+      "quote": "Vasudeva: Dharma emerged from Brahma's right breast\u2014radiant, unshaken, the sustainer of all worlds' joy.",
+      "sanskrit": "\u0938\u094d\u0924\u0928\u0902 \u0924\u0941 \u0926\u0915\u094d\u0937\u093f\u0923\u0902 \u092d\u093f\u0924\u094d\u0924\u094d\u0935\u093e \u092c\u094d\u0930\u0939\u094d\u092e\u0923\u094b \u0928\u0930\u0935\u093f\u0917\u094d\u0930\u0939\u0903\u0964 \u0928\u093f\u0903\u0938\u0943\u0924\u094b \u092d\u0917\u0935\u093e\u0928\u094d\u0927\u0930\u094d\u092e\u0903 \u0938\u0930\u094d\u0935\u0932\u094b\u0915\u0938\u0941\u0916\u093e\u0935\u0939\u0903\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 66",
+      "meaning": "Dharma (cosmic order) is depicted as a primal force born directly from the divine, symbolizing its foundational role in maintaining universal harmony.",
+      "lore_snippet": "Like a mountain spring from stone, Dharma flows pure from creation's heart. Sages teach that where it waters the land, kings rule justly, and warriors fight with honor.",
+      "image": "quote_162.png",
+      "audio": "quote_162.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

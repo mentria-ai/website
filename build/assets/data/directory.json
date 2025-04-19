@@ -2753,6 +2753,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_163",
+      "quote": "Yogacharya: The wise teacher of demons and gods alike",
+      "sanskrit": "\u092f\u094b\u0917\u093e\u091a\u093e\u0930\u094d\u092f\u094b \u092e\u0939\u093e\u092c\u0941\u0926\u094d\u0927\u093f\u0930\u094d\u0926\u0948\u0924\u094d\u092f\u093e\u0928\u093e\u092e\u092d\u0935\u0926\u094d\u0917\u0941\u0930\u0941\u0903",
+      "reference": "Mahabharata, Anushasana Parva, Chapter 50",
+      "meaning": "Wisdom transcends all boundaries and can enlighten both the righteous and the wicked.",
+      "lore_snippet": "The greatest sages often teach without discrimination, for knowledge itself is neither good nor evil. Even demons may become vessels of profound wisdom when enlightened by a true master.",
+      "image": "quote_163.png",
+      "audio": "quote_163.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_164",
+      "quote": "Dharma is born from the fire of self-discipline",
+      "sanskrit": "\u091a\u094d\u092f\u0935\u0928\u0902 \u0926\u0940\u092a\u094d\u0924\u0924\u092a\u0938\u0902 \u0927\u0930\u094d\u092e\u093e\u0924\u094d\u092e\u093e\u0928\u0902 \u092e\u0928\u0940\u0937\u093f\u0923\u092e\u094d",
+      "reference": "Mahabharata, Anushasana Parva, Chapter 50",
+      "meaning": "True righteousness emerges from the crucible of intense spiritual discipline and purification.",
+      "lore_snippet": "Like gold purified in flame, the soul achieves its highest dharma through relentless tapasya. The greatest sages prove that austerity births illumination.",
+      "image": "quote_164.png",
+      "audio": "quote_164.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_165",
+      "quote": "From wrath came liberation, from restraint came power",
+      "sanskrit": "\u092f\u0903 \u0938 \u0930\u094b\u0937\u093e\u091a\u094d\u091a\u094d\u092f\u0941\u0924\u094b \u0917\u0930\u094d\u092d\u093e\u0928\u094d\u092e\u093e\u0924\u0941\u0930\u094d\u092e\u094b\u0915\u094d\u0937\u093e\u092f \u092d\u093e\u0930\u0924",
+      "reference": "Mahabharata, Anushasana Parva, Chapter 50",
+      "meaning": "Sometimes destruction leads to salvation, and controlled energy becomes transformative force.",
+      "lore_snippet": "The ancients understood that even negative emotions can be alchemists' tools when properly channeled. What appears as wrath may break chains, while disciplined fury builds empires.",
+      "image": "quote_165.png",
+      "audio": "quote_165.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

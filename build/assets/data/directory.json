@@ -3059,6 +3059,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_181",
+      "quote": "Vishvamitra: Even Dharma may waver from its path, but a vow-bound ascetic shall never falter.",
+      "sanskrit": "\u091a\u0932\u0947\u0926\u094d\u0927\u093f \u0935\u0943\u0924\u094d\u0924\u093e\u0926\u094d\u0927\u0930\u094d\u092e\u094b\u093d\u092a\u093f \u0928 \u091a\u0932\u0947\u0924\u094d\u0938\u0902\u0936\u093f\u0924\u0935\u094d\u0930\u0924\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 66",
+      "meaning": "Dharma (righteousness) itself may sometimes deviate, but one who is steadfast in their vows remains unshaken.",
+      "lore_snippet": "The greatest sages teach that while the winds of circumstance may bend even divine laws, the resolve of a disciplined soul stands firmer than mountains. Such is the power of tapas (austerity).",
+      "image": "quote_181.png",
+      "audio": "quote_181.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_182",
+      "quote": "Menaka: How can a frail maiden touch fire\u2014one whose brilliance shakes the heavens and whose anger makes even the gods tremble?",
+      "sanskrit": "\u0915\u0925\u092e\u0938\u094d\u092e\u0926\u094d\u0935\u093f\u0927\u093e \u092c\u093e\u0932\u093e \u091c\u093f\u0924\u0947\u0928\u094d\u0926\u094d\u0930\u093f\u092f\u092e\u092d\u093f\u0938\u094d\u092a\u0943\u0936\u0947\u0924\u094d... \u0939\u0941\u0924\u093e\u0936\u0928\u092e\u0941\u0916\u0902 \u0926\u0940\u092a\u094d\u0924\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 66",
+      "meaning": "True power inspires awe\u2014even celestial beings fear to approach those whose spiritual energy burns like purified flame.",
+      "lore_snippet": "Apsaras know well: the radiance of a perfected sage outshines mortal fire. To disturb such tapasya is to grasp lightning with bare hands.",
+      "image": "quote_182.png",
+      "audio": "quote_182.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

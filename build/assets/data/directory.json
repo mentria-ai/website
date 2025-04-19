@@ -3348,6 +3348,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_198",
+      "quote": "Yayati: Though burdened by age's decay, the soul's desires remain evergreen. Youth is but a fleeting garment worn by the eternal spirit.",
+      "sanskrit": "\u091c\u0930\u093e\u092d\u093f\u092d\u0942\u0924\u0903 \u092a\u0941\u0924\u094d\u0930\u093e\u0928\u094d\u0938 \u0930\u093e\u091c\u093e \u0935\u091a\u0928\u092e\u092c\u094d\u0930\u0935\u0940\u0924\u094d... \u092f\u094c\u0935\u0928\u0947\u0928 \u091a\u0930\u0928\u094d\u0915\u093e\u092e\u093e\u0928\u094d\u092f\u0941\u0935\u093e \u092f\u0941\u0935\u0924\u093f\u092d\u093f\u0903 \u0938\u0939",
+      "reference": "Mahabharata, Adi Parva, Chapter 70",
+      "meaning": "King Yayati laments that while his body has aged, his desires remain youthful, illustrating the conflict between mortal decay and eternal longing.",
+      "lore_snippet": "The curse of mortality binds all flesh, yet the Atman's fire burns undimmed. Sages warn that clinging to transient pleasures leads only to the serpent's bite of suffering.",
+      "image": "quote_198.png",
+      "audio": "quote_198.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_199",
+      "quote": "Nahusha: He who rules by dharma commands even the gods; he who rules by force becomes their beast of burden.",
+      "sanskrit": "\u0928\u0939\u0941\u0937\u0903 \u092a\u093e\u0932\u092f\u093e\u092e\u093e\u0938 \u092c\u094d\u0930\u0939\u094d\u092e\u0915\u094d\u0937\u0924\u094d\u0930\u092e\u0925\u094b \u0935\u093f\u0936\u0903... \u092a\u0936\u0941\u0935\u091a\u094d\u091a\u0948\u0935 \u0924\u093e\u0928\u094d\u092a\u0943\u0937\u094d\u0920\u0947 \u0935\u093e\u0939\u092f\u093e\u092e\u093e\u0938 \u0935\u0940\u0930\u094d\u092f\u0935\u093e\u0928\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 70",
+      "meaning": "Nahusha's reign shows the paradox of power - righteous rule earns divine respect, while arrogance reduces even mighty beings to servitude.",
+      "lore_snippet": "Ancient throne carvings depict kings carrying devas when virtuous, but dragged by asuras when prideful. True sovereignty flows from the river of dharma, not the desert of might.",
+      "image": "quote_199.png",
+      "audio": "quote_199.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -2991,6 +2991,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_177",
+      "quote": "The forest, though vast and wild, bows to the disciplined hunter\u2014just as chaos yields to the will of the focused mind.",
+      "sanskrit": "\u0924\u0926\u094d\u0935\u0928\u0902 \u092e\u0928\u0941\u091c\u0935\u094d\u092f\u093e\u0918\u094d\u0930\u0903 \u0938\u092d\u0943\u0924\u094d\u092f\u092c\u0932\u0935\u093e\u0939\u0928\u0903 \u0932\u094b\u0921\u092f\u093e\u092e\u093e\u0938 \u0926\u0941\u0903\u0937\u0928\u094d\u0924\u0903",
+      "reference": "Mahabharata, Vana Parva, Chapter 64",
+      "meaning": "Even the untamed wilderness submits to those who act with purpose and mastery, mirroring how inner turmoil surrenders to disciplined resolve.",
+      "lore_snippet": "Ancient hunters knew: a single arrow loosed with intent fells more prey than a hundred fired in haste. So too does concentrated effort conquer life's chaos.",
+      "image": "quote_177.png",
+      "audio": "quote_177.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_178",
+      "quote": "Kings and beasts alike flee when the balance of nature is undone\u2014for violence begets only desolation.",
+      "sanskrit": "\u0930\u093e\u091c\u094d\u091e\u093e \u091a\u093e\u0926\u094d\u092d\u0941\u0924\u0935\u0940\u0930\u094d\u092f\u0947\u0923 \u092f\u094b\u0927\u0948\u0936\u094d\u091a \u0938\u092e\u0930\u092a\u094d\u0930\u093f\u092f\u0948\u0903 \u0932\u094b\u0921\u094d\u092f\u092e\u093e\u0928\u0902 \u092e\u0939\u093e\u0930\u0923\u094d\u092f\u0902 \u0924\u0924\u094d\u092f\u091c\u0941\u0936\u094d\u091a \u092e\u0939\u093e\u092e\u0943\u0917\u093e\u0903",
+      "reference": "Mahabharata, Vana Parva, Chapter 64",
+      "meaning": "The devastation wrought by unchecked power scatters all life, leaving even rulers and majestic creatures as refugees from their own domain.",
+      "lore_snippet": "Wise is the ruler who remembers: the forest that burns today may tomorrow bear no shade for his own throne.",
+      "image": "quote_178.png",
+      "audio": "quote_178.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_179",
+      "quote": "An oasis blooms where harmony dwells\u2014its beauty a covenant between earth and those who tread lightly upon it.",
+      "sanskrit": "\u0937\u091f\u094d\u092a\u0926\u093e\u0918\u0942\u0930\u094d\u0923\u093f\u0924\u0932\u0924\u0902 \u0932\u0915\u094d\u0937\u094d\u092e\u094d\u092f\u093e \u092a\u0930\u092e\u092f\u093e \u092f\u0941\u0924\u092e\u094d",
+      "reference": "Mahabharata, Vana Parva, Chapter 64",
+      "meaning": "The idyllic grove thrives because it exists in equilibrium, its splendor a testament to coexistence rather than conquest.",
+      "lore_snippet": "Mortal hands may shape stone into cities, but only reverence can coax flowers from the wilderness.",
+      "image": "quote_179.png",
+      "audio": "quote_179.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

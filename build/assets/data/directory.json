@@ -2855,6 +2855,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_169",
+      "quote": "The wheel of time turns both kings and demons to dust, revealing all power as fleeting.",
+      "sanskrit": "\u0915\u093e\u0932\u091a\u0915\u094d\u0930\u0902 \u0928\u0943\u092a\u093e\u0928\u0938\u0941\u0930\u093e\u0902\u0936\u094d\u091a \u0938\u092e\u0902 \u092a\u093e\u0902\u0938\u0941\u0924\u093e\u0902 \u0928\u092f\u0924\u093f\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 67 (approximate)",
+      "meaning": "Time erases distinctions between mighty kings and demons, reminding us of life's impermanence.",
+      "lore_snippet": "Ancient scrolls speak of the Kalachakra - the wheel that grinds empires to sand. Even Asura lords who shook the heavens became mere footnotes in the annals of time.",
+      "image": "quote_169.png",
+      "audio": "quote_169.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_170",
+      "quote": "What the sword conquers, wisdom must govern\u2014else it becomes but another name for chaos.",
+      "sanskrit": "\u092f\u0926\u093f \u0936\u0938\u094d\u0924\u094d\u0930\u0902 \u091c\u092f\u0924\u093f \u0924\u0930\u094d\u0939\u093f \u092a\u094d\u0930\u091c\u094d\u091e\u093e \u0936\u093e\u0938\u0924\u093f, \u0905\u0928\u094d\u092f\u0925\u093e \u0924\u0924\u094d \u0915\u0947\u0935\u0932\u0902 \u0905\u0930\u093e\u091c\u0915\u0924\u093e\u092f\u093e\u0903 \u0928\u093e\u092e\u093e\u0928\u094d\u0924\u0930\u092e\u094d\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 67 (approximate)",
+      "meaning": "Mere conquest without righteous rule leads to destruction rather than order.",
+      "lore_snippet": "The Asura kings learned too late that thrones built on strength alone are altars to ruin. True sovereignty balances the mace and the scroll.",
+      "image": "quote_170.png",
+      "audio": "quote_170.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_171",
+      "quote": "Even demons reborn as kings carry the seeds of their past\u2014such is karma's unbroken chain.",
+      "sanskrit": "\u092f\u0947\u093d\u0938\u0941\u0930\u093e\u0903 \u092a\u0941\u0928\u0930\u094d\u091c\u093e\u0924\u093e \u0928\u0943\u092a\u0924\u092f\u0903, \u0924\u0947\u0937\u093e\u0902 \u092a\u0942\u0930\u094d\u0935\u0938\u0902\u0938\u094d\u0915\u093e\u0930\u093e\u0903 \u0938\u0928\u094d\u0924\u093f \u090f\u0935\u2014\u090f\u0937\u093e \u0915\u0930\u094d\u092e\u0923\u094d\u092f\u0935\u093f\u091a\u094d\u091b\u093f\u0928\u094d\u0928\u093e \u0936\u0943\u0919\u094d\u0916\u0932\u093e\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 67 (approximate)",
+      "meaning": "Reincarnation doesn't erase inherent tendencies; one's nature persists across lifetimes.",
+      "lore_snippet": "The Lunar Chronicles tell of Rakshasas who wore royal diadems yet dreamt of blood. A soul's ledger is written in deeds, not titles.",
+      "image": "quote_171.png",
+      "audio": "quote_171.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

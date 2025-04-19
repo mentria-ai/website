@@ -3484,6 +3484,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_206",
+      "quote": "Kacha: A disciple who learns with devotion becomes equal to the teacher, for knowledge shared is the truest form of dharma.",
+      "sanskrit": "\u0938\u091e\u094d\u091c\u0940\u0935\u0928\u0940\u0902 \u092a\u094d\u0930\u093e\u092a\u094d\u092f \u0935\u093f\u0926\u094d\u092f\u093e\u0902 \u092e\u0939\u093e\u0930\u094d\u0925\u093e\u0902; \u0924\u0941\u0932\u094d\u092f\u092a\u094d\u0930\u092d\u093e\u0935\u094b \u092c\u094d\u0930\u0939\u094d\u092e\u0923\u093e \u092c\u094d\u0930\u0939\u094d\u092e\u092d\u0942\u0924\u0903",
+      "reference": "Mahabharata, Anushasana Parva, Chapter 72",
+      "meaning": "The quote emphasizes the transformative power of knowledge and devotion. A true disciple, through dedication, can attain the same greatness as the teacher, embodying the sacred bond of learning.",
+      "lore_snippet": "The bond between teacher and disciple is sacred. When knowledge is shared with devotion, the disciple becomes a vessel of wisdom, equal in spirit to the guru. Such is the path of true learning.",
+      "image": "quote_206.png",
+      "audio": "quote_206.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_207",
+      "quote": "Devayani: Love born of sacrifice and loyalty binds deeper than duty, but its rejection withers even the mightiest blessings.",
+      "sanskrit": "\u0905\u0938\u0941\u0930\u0948\u0930\u094d\u0939\u0928\u094d\u092f\u092e\u093e\u0928\u0947 \u091a \u0915\u091a \u0924\u094d\u0935\u092f\u093f \u092a\u0941\u0928\u0903 \u092a\u0941\u0928\u0903; \u0924\u0926\u093e \u092a\u094d\u0930\u092d\u0943\u0924\u093f \u092f\u093e \u092a\u094d\u0930\u0940\u0924\u093f\u0938\u094d\u0924\u093e\u0902 \u0924\u094d\u0935\u092e\u0947\u0935 \u0938\u094d\u092e\u0930\u0938\u094d\u0935 \u092e\u0947",
+      "reference": "Mahabharata, Anushasana Parva, Chapter 73",
+      "meaning": "Devayani speaks of the enduring power of love forged through trials, warning that dismissing such devotion risks nullifying even divine boons. Emotional bonds transcend mere obligation.",
+      "lore_snippet": "Beware the heart scorned\u2014love nurtured through adversity holds the power to sustain or sunder destinies. Even celestial gifts fade without the grace of reciprocity.",
+      "image": "quote_207.png",
+      "audio": "quote_207.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

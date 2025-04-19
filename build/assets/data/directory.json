@@ -2685,6 +2685,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_159",
+      "quote": "Bhishma: The lineage of gods and demons alike holds both light and shadow, for even the mightiest may fall to their own nature.",
+      "sanskrit": "\u0907\u0924\u094d\u092f\u0947\u0937 \u0935\u0902\u0936\u092a\u094d\u0930\u092d\u0935\u0903 \u0915\u0925\u093f\u0924\u0938\u094d\u0924\u0947 \u0924\u0930\u0938\u094d\u0935\u093f\u0928\u093e\u092e\u094d \u0905\u0938\u0941\u0930\u093e\u0923\u093e\u0902 \u0938\u0941\u0930\u093e\u0923\u093e\u0902 \u091a \u092a\u0941\u0930\u093e\u0923\u0947 \u0938\u0902\u0936\u094d\u0930\u0941\u0924\u094b \u092e\u092f\u093e",
+      "reference": "Mahabharata, Anushasana Parva, Chapter 60",
+      "meaning": "This reflects the duality within all lineages, where both divine and demonic traits coexist, and greatness is often undone by inherent flaws.",
+      "lore_snippet": "Ancient texts speak of the Asuras and Devas as two sides of the same coin. Even the most powerful beings are bound by their inherent nature, which can be their salvation or downfall.",
+      "image": "quote_159.png",
+      "audio": "quote_159.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_160",
+      "quote": "Vyasa: He who recites the lineages of the wise with reverence shall gain prosperity, glory, and a blessed path beyond life.",
+      "sanskrit": "\u0907\u092e\u0902 \u0924\u0941 \u0935\u0902\u0936\u0902 \u0928\u093f\u092f\u092e\u0947\u0928 \u092f\u0903 \u092a\u0920\u0947\u0928\u094d\u092e\u0939\u093e\u0924\u094d\u092e\u0928\u093e\u0902 \u092c\u094d\u0930\u093e\u0939\u094d\u092e\u0923\u0926\u0947\u0935\u0938\u0902\u0928\u093f\u0927\u094c... \u0936\u094d\u0930\u093f\u092f\u0902 \u092f\u0936\u0903 \u092a\u094d\u0930\u0947\u0924\u094d\u092f \u091a \u0936\u094b\u092d\u0928\u093e\u0902 \u0917\u0924\u093f\u092e\u094d",
+      "reference": "Mahabharata, Anushasana Parva, Chapter 60",
+      "meaning": "Sacred knowledge, when honored through recitation, bestows both worldly and spiritual rewards.",
+      "lore_snippet": "The sages teach that words themselves hold power. To chant the names of the enlightened is to weave their virtues into one's own destiny.",
+      "image": "quote_160.png",
+      "audio": "quote_160.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

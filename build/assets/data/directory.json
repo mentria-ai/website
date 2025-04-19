@@ -3705,6 +3705,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_219",
+      "quote": "Shukra: When righteousness is conquered by unrighteousness, the world turns upside down, and the lowly rise above the noble.",
+      "sanskrit": "\u0905\u0927\u0930\u094d\u092e\u0947\u0923 \u091c\u093f\u0924\u094b \u0927\u0930\u094d\u092e\u0903 \u092a\u094d\u0930\u0935\u0943\u0924\u094d\u0924\u092e\u0927\u0930\u094b\u0924\u094d\u0924\u0930\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 78",
+      "meaning": "This warns of societal chaos when immoral forces overpower dharma (righteousness), reversing the natural order. The sage Shukra condemns King Yayati's ethical lapse.",
+      "lore_snippet": "The ancients taught that when adharma prevails, even kings age prematurely. Observe the scales of your actions\u2014unrighteous deeds bear fruit swifter than arrows.",
+      "image": "quote_219.png",
+      "audio": "quote_219.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_220",
+      "quote": "Yayati: He who refuses a woman\u2019s plea in her fertile season commits the sin of destroying life itself, equal to slaying the unborn.",
+      "sanskrit": "\u090b\u0924\u0941\u0902 \u0935\u0948 \u092f\u093e\u091a\u092e\u093e\u0928\u093e\u092f\u093e \u0928 \u0926\u0926\u093e\u0924\u093f \u092a\u0941\u092e\u093e\u0928\u094d\u0935\u0943\u0924\u0903\u0964 \u092d\u094d\u0930\u0942\u0923\u0939\u0947\u0924\u094d\u092f\u0941\u091a\u094d\u092f\u0924\u0947 \u092c\u094d\u0930\u0939\u094d\u092e\u0928\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 78",
+      "meaning": "Yayati defends fulfilling a woman\u2019s request during her fertile period as sacred duty, equating refusal to the grave sin of feticide (bhru\u1e47ahaty\u0101).",
+      "lore_snippet": "Even the gods respect \u1e5btu-k\u0101la\u2014the season of creation. Denying this dharma withers lineages as frost kills sprouts. Let life\u2019s river flow unhindered.",
+      "image": "quote_220.png",
+      "audio": "quote_220.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_221",
+      "quote": "Shukra: The king who knowingly treads the path of falsehood becomes a thief of dharma, though he wears a crown.",
+      "sanskrit": "\u092e\u093f\u0925\u094d\u092f\u093e\u091a\u093e\u0930\u0938\u094d\u092f \u0927\u0930\u094d\u092e\u0947\u0937\u0941 \u091a\u094c\u0930\u094d\u092f\u0902 \u092d\u0935\u0924\u093f \u0928\u093e\u0939\u0941\u0937",
+      "reference": "Mahabharata, Adi Parva, Chapter 78",
+      "meaning": "Shukra curses Yayati, declaring that ethical violations by rulers are grand theft\u2014stealing the very fabric of cosmic order they swore to uphold.",
+      "lore_snippet": "Kings are but temporary guardians of dharma. Their sins echo in famines and shortened lifespans, for the earth remembers every broken vow.",
+      "image": "quote_221.png",
+      "audio": "quote_221.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

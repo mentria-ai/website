@@ -3246,6 +3246,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_192",
+      "quote": "Shakuntala: Kings see mustard-sized faults in others, but fail to see melon-sized faults in themselves.",
+      "sanskrit": "\u0930\u093e\u091c\u0928\u094d\u0938\u0930\u094d\u0937\u092a\u092e\u093e\u0924\u094d\u0930\u093e\u0923\u093f \u092a\u0930\u091a\u094d\u091b\u093f\u0926\u094d\u0930\u093e\u0923\u093f \u092a\u0936\u094d\u092f\u0938\u093f\u0964 \u0906\u0924\u094d\u092e\u0928\u094b \u092c\u093f\u0932\u094d\u0935\u092e\u093e\u0924\u094d\u0930\u093e\u0923\u093f \u092a\u0936\u094d\u092f\u0928\u094d\u0928\u092a\u093f \u0928 \u092a\u0936\u094d\u092f\u0938\u093f\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 69",
+      "meaning": "This profound rebuke highlights humanity's tendency to magnify others' flaws while being blind to one's own greater shortcomings.",
+      "lore_snippet": "The wise measure their own faults before judging others. As the Rishis say: a mirror shows the face's blemishes, but only self-reflection reveals the soul's imperfections.",
+      "image": "quote_192.png",
+      "audio": "quote_192.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_193",
+      "quote": "When fools hear both wise and wicked words, they embrace the wicked - as swine choose filth over milk.",
+      "sanskrit": "\u092e\u0942\u0930\u094d\u0916\u094b \u0939\u093f \u091c\u0932\u094d\u092a\u0924\u093e\u0902 \u092a\u0941\u0902\u0938\u093e\u0902 \u0936\u094d\u0930\u0941\u0924\u094d\u0935\u093e \u0935\u093e\u091a\u0903 \u0936\u0941\u092d\u093e\u0936\u0941\u092d\u093e\u0903\u0964 \u0905\u0936\u0941\u092d\u0902 \u0935\u093e\u0915\u094d\u092f\u092e\u093e\u0926\u0924\u094d\u0924\u0947 \u092a\u0941\u0930\u0940\u0937\u092e\u093f\u0935 \u0938\u0942\u0915\u0930\u0903\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 69",
+      "meaning": "This illustrates how the unwise instinctively gravitate toward base counsel, just as hogs prefer waste to nourishment.",
+      "lore_snippet": "Like the swan that separates milk from water, the discerning mind extracts wisdom from chaos. But base souls, like beasts, wallow in muddied truths.",
+      "image": "quote_193.png",
+      "audio": "quote_193.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_194",
+      "quote": "The wicked rejoice when slandering others, while the virtuous ache when speaking ill - such is the mark of noble hearts.",
+      "sanskrit": "\u0905\u0928\u094d\u092f\u093e\u0928\u094d\u092a\u0930\u093f\u0935\u0926\u0928\u094d\u0938\u093e\u0927\u0941\u0930\u094d\u092f\u0925\u093e \u0939\u093f \u092a\u0930\u093f\u0924\u092a\u094d\u092f\u0924\u0947\u0964 \u0924\u0925\u093e \u092a\u0930\u093f\u0935\u0926\u0928\u094d\u0928\u0928\u094d\u092f\u093e\u0902\u0938\u094d\u0924\u0941\u0937\u094d\u091f\u094b \u092d\u0935\u0924\u093f \u0926\u0941\u0930\u094d\u091c\u0928\u0903\u0964",
+      "reference": "Mahabharata, Adi Parva, Chapter 69",
+      "meaning": "True nobility suffers when compelled to criticize, while malice delights in speaking evil - revealing one's inner nature.",
+      "lore_snippet": "As fire tests gold and adversity tests character, observe how one speaks of others: the pure grieve while the wicked grin when tongues turn sharp.",
+      "image": "quote_194.png",
+      "audio": "quote_194.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

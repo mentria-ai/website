@@ -2957,6 +2957,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_175",
+      "quote": "Dharma's light shines brightest when kings rule with justice, and fear flees from the land like shadows before the sun.",
+      "sanskrit": "\u0928\u093e\u0938\u0940\u091a\u094d\u091a\u094b\u0930\u092d\u092f\u0902 \u0924\u093e\u0924 \u0928 \u0915\u094d\u0937\u0941\u0927\u093e\u092d\u092f\u092e\u0923\u094d\u0935\u092a\u093f\u0964 \u0928\u093e\u0938\u0940\u0926\u094d\u0935\u094d\u092f\u093e\u0927\u093f\u092d\u092f\u0902 \u091a\u093e\u092a\u093f \u0924\u0938\u094d\u092e\u093f\u091e\u094d\u091c\u0928\u092a\u0926\u0947\u0936\u094d\u0935\u0930\u0947\u0965",
+      "reference": "Mahabharata, Adi Parva, Sambhava Parva, Chapter 63",
+      "meaning": "Under a righteous ruler, society flourishes without fear of thieves, hunger, or disease\u2014showing how dharma manifests as tangible peace.",
+      "lore_snippet": "The chronicles speak of King Du\u1e63yanta's reign, where even the smallest fears vanished like dew at dawn. Such is the power of a sovereign who upholds dharma\u2014not by force, but by the radiance of justice.",
+      "image": "quote_175.png",
+      "audio": "quote_175.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_176",
+      "quote": "Like the earth bears all burdens yet remains unshaken, a true leader stands firm in patience while wielding the strength of Vishnu.",
+      "sanskrit": "\u0938\u0939\u093f\u0937\u094d\u0923\u0941\u0924\u094d\u0935\u0947 \u0927\u0930\u093e\u0938\u092e\u0903\u0964 \u092c\u0932\u0947 \u0935\u093f\u0937\u094d\u0923\u0941\u0938\u092e\u0936\u094d\u091a\u093e\u0938\u0940\u0924\u094d\u0924\u0947\u091c\u0938\u093e \u092d\u093e\u0938\u094d\u0915\u0930\u094b\u092a\u092e\u0903\u0965",
+      "reference": "Mahabharata, Adi Parva, Sambhava Parva, Chapter 63",
+      "meaning": "The ideal ruler combines unyielding patience (like the earth) with divine strength (like Vishnu), embodying both stability and power.",
+      "lore_snippet": "Ancient scrolls compare great kings to the elements: their resolve as deep as the oceans, their mercy as vast as the sky. Yet their might, when roused, can shake the heavens themselves.",
+      "image": "quote_176.png",
+      "audio": "quote_176.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

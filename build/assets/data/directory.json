@@ -2022,6 +2022,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_120",
+      "quote": "Janamejaya: The fire of vengeance burns hotter than any flame, yet its ashes leave only emptiness in their wake.",
+      "sanskrit": "\u0905\u0928\u0928\u094d\u0924\u0930\u092e\u0939\u0902 \u092e\u0928\u094d\u092f\u0947 \u0924\u0915\u094d\u0937\u0915\u093e\u092f \u0926\u0941\u0930\u093e\u0924\u094d\u092e\u0928\u0947 \u092a\u094d\u0930\u0924\u093f\u0915\u0930\u094d\u0924\u0935\u094d\u092f\u092e\u093f\u0924\u094d\u092f\u0947\u0935 \u092f\u0947\u0928 \u092e\u0947 \u0939\u093f\u0902\u0938\u093f\u0924\u0903 \u092a\u093f\u0924\u093e",
+      "reference": "Mahabharata, Astika Parva, Chapter 47",
+      "meaning": "King Janamejaya's oath to avenge his father's death by snake sacrifice reflects how vengeance consumes both the seeker and the target.",
+      "lore_snippet": "Ancient texts warn that revenge is a serpent that bites its own tail. The Sarpa Satra ritual shows how righteous anger, when unchecked, becomes a self-destructive fire.",
+      "image": "quote_120.png",
+      "audio": "quote_120.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_121",
+      "quote": "The wise say: Even justice, when wielded without mercy, becomes another form of violence.",
+      "sanskrit": "\u092e\u0939\u093e\u0928\u0924\u093f\u0915\u094d\u0930\u092e\u094b \u0939\u094d\u092f\u0947\u0937 \u0924\u0915\u094d\u0937\u0915\u0938\u094d\u092f \u0926\u0941\u0930\u093e\u0924\u094d\u092e\u0928\u0903",
+      "reference": "Mahabharata, Astika Parva, Chapter 47",
+      "meaning": "The passage implies that Janamejaya's mass snake sacrifice, though framed as justice for his father's death, crosses ethical boundaries.",
+      "lore_snippet": "As the sages cautioned King Janamejaya, divine law requires balance. A punishment exceeding the crime creates new cycles of suffering, as fire begets more fire.",
+      "image": "quote_121.png",
+      "audio": "quote_121.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

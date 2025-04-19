@@ -3654,6 +3654,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_216",
+      "quote": "Sharmishtha: Five falsehoods are blameless: jest among friends, to women at weddings, in peril of life, when wealth is lost, or when truth would destroy unity.",
+      "sanskrit": "\u0928 \u0928\u0930\u094d\u092e\u092f\u0941\u0915\u094d\u0924\u0902 \u0935\u091a\u0928\u0902 \u0939\u093f\u0928\u0938\u094d\u0924\u093f; \u0928 \u0938\u094d\u0924\u094d\u0930\u0940\u0937\u0941 \u0930\u093e\u091c\u0928\u094d\u0928 \u0935\u093f\u0935\u093e\u0939\u0915\u093e\u0932\u0947\u0964 \u092a\u094d\u0930\u093e\u0923\u093e\u0924\u094d\u092f\u092f\u0947 \u0938\u0930\u094d\u0935\u0927\u0928\u093e\u092a\u0939\u093e\u0930\u0947; \u092a\u091e\u094d\u091a\u093e\u0928\u0943\u0924\u093e\u0928\u094d\u092f\u093e\u0939\u0941\u0930\u092a\u093e\u0924\u0915\u093e\u0928\u093f\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 78",
+      "meaning": "Some lies carry no sin when spoken for protection, harmony, or survival\u2014revealing the complex ethics of truth in extreme circumstances.",
+      "lore_snippet": "Ancient sages debated when falsehood becomes dharma. A jest to ease sorrows, a vow to save lives, or words to preserve unity\u2014these are the threads that sometimes mend the fabric of existence.",
+      "image": null,
+      "audio": null,
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_217",
+      "quote": "Yayati: A king who lies destroys his authority as fire consumes dry wood. Even in direst need, I shall not bend truth.",
+      "sanskrit": "\u0930\u093e\u091c\u093e \u092a\u094d\u0930\u092e\u093e\u0923\u0902 \u092d\u0942\u0924\u093e\u0928\u093e\u0902 \u0938 \u0928\u0936\u094d\u092f\u0947\u0924 \u092e\u0943\u0937\u093e \u0935\u0926\u0928\u094d\u0964 \u0905\u0930\u094d\u0925\u0915\u0943\u091a\u094d\u091b\u094d\u0930\u092e\u092a\u093f \u092a\u094d\u0930\u093e\u092a\u094d\u092f \u0928 \u092e\u093f\u0925\u094d\u092f\u093e \u0915\u0930\u094d\u0924\u0941\u092e\u0941\u0924\u094d\u0938\u0939\u0947\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 78",
+      "meaning": "Leadership demands unwavering integrity; falsehood corrodes the foundation of trust that binds ruler and subjects.",
+      "lore_snippet": "Kings of old knew this truth: once shattered, trust regrows slower than the mightiest banyan tree. Hence they measured words as carefully as golden coins.",
+      "image": null,
+      "audio": "quote_217.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_218",
+      "quote": "Sharmishtha: Three own nothing\u2014a wife, a slave, and a son. What they gain belongs to he who sustains them, as rivers flow to the ocean.",
+      "sanskrit": "\u0924\u094d\u0930\u092f \u090f\u0935\u093e\u0927\u0928\u093e \u0930\u093e\u091c\u0928\u094d\u092d\u093e\u0930\u094d\u092f\u093e \u0926\u093e\u0938\u0938\u094d\u0924\u0925\u093e \u0938\u0941\u0924\u0903\u0964 \u092f\u0924\u094d\u0924\u0947 \u0938\u092e\u0927\u093f\u0917\u091a\u094d\u091b\u0928\u094d\u0924\u093f \u092f\u0938\u094d\u092f \u0924\u0947 \u0924\u0938\u094d\u092f \u0924\u0926\u094d\u0927\u0928\u092e\u094d\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 78",
+      "meaning": "Ancient law viewed dependents as extensions of their protector\u2019s will, their labor and legacy merging with the provider\u2019s destiny.",
+      "lore_snippet": "Debates echo in royal courts: Does the lotus own its fragrance, or the tree its fruit? Thus, the wise ponder the boundaries of possession and duty.",
+      "image": "quote_218.png",
+      "audio": "quote_218.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

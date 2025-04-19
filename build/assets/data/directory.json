@@ -1937,6 +1937,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_115",
+      "quote": "Parikshit: He who protects all beings equally, without hatred or favor, shines like the moon among stars.",
+      "sanskrit": "\u0938\u092e\u0903 \u0938\u0930\u094d\u0935\u0947\u0937\u0941 \u092d\u0942\u0924\u0947\u0937\u0941 \u092a\u094d\u0930\u091c\u093e\u092a\u0924\u093f\u0930\u093f\u0935\u093e\u092d\u0935\u0924\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 46",
+      "meaning": "A true ruler upholds dharma impartially, treating all beings with equality\u2014like the moon that illuminates without discrimination.",
+      "lore_snippet": "The greatest kings are those who govern as guardians of balance, neither swayed by passion nor prejudice. Their legacy outlasts their reign, as light outlasts the dawn.",
+      "image": "quote_115.png",
+      "audio": "quote_115.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_116",
+      "quote": "Janamejaya: No king of our line was ever loved who failed to serve his people's welfare\u2014for duty is the root of royalty.",
+      "sanskrit": "\u0928\u093e\u0938\u094d\u092e\u093f\u0928\u094d\u0915\u0941\u0932\u0947 \u091c\u093e\u0924\u0941 \u092c\u092d\u0942\u0935 \u0930\u093e\u091c\u093e; \u092f\u094b \u0928 \u092a\u094d\u0930\u091c\u093e\u0928\u093e\u0902 \u0939\u093f\u0924\u0915\u0943\u0924\u094d\u092a\u094d\u0930\u093f\u092f\u0936\u094d\u091a",
+      "reference": "Mahabharata, Adi Parva, Chapter 46",
+      "meaning": "A ruler's worth is measured by their devotion to the people's well-being, not by power alone.",
+      "lore_snippet": "Ancient scrolls teach that thrones built on service endure, while those raised on tyranny crumble like autumn leaves. The people's love is the unbreakable foundation.",
+      "image": "quote_116.png",
+      "audio": "quote_116.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_117",
+      "quote": "The Bhagavata: Silence is armor for the wise\u2014but even sages must speak when dharma is trampled.",
+      "sanskrit": "\u092e\u094c\u0928\u0935\u094d\u0930\u0924\u0927\u0930\u0902 \u0936\u093e\u0928\u094d\u0924\u0902 \u0938\u0926\u094d\u092f\u094b \u092e\u0928\u094d\u092f\u0941\u0935\u0936\u0902 \u092f\u092f\u094c",
+      "reference": "Mahabharata, Adi Parva, Chapter 46",
+      "meaning": "The sage's silence broke when injustice demanded action, revealing that patience has limits when righteousness is at stake.",
+      "lore_snippet": "Masters of contemplation warn: stillness is strength, but not when evil thrives. A coiled serpent must strike if the nest is aflame.",
+      "image": null,
+      "audio": null,
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

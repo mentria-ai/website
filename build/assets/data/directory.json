@@ -2277,6 +2277,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_135",
+      "quote": "Vyasa: The wise see all things as transient, for time devours both the mighty and the meek alike.",
+      "sanskrit": "\u0915\u093e\u0932\u0903 \u092a\u093f\u092c\u0924\u093f \u0938\u0930\u094d\u0935\u0902 \u0924\u0941 \u092f\u0925\u093e \u0924\u0943\u0937\u094d\u0923\u093e \u091c\u0932\u0902 \u092a\u093f\u092c\u0947\u0924\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 55",
+      "meaning": "This quote reflects the universal truth of impermanence, where time consumes all beings regardless of their power or status, much like thirst consumes water.",
+      "lore_snippet": "The sages teach that even the mightiest kings and the humblest beggars are equal before time\u2019s relentless march. To grasp this truth is to conquer fear and attachment.",
+      "image": "quote_135.png",
+      "audio": "quote_135.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_136",
+      "quote": "Duryodhana's envy blinds him, for the virtuous shine like the sun, even when others seek to dim their light.",
+      "sanskrit": "\u0926\u0941\u0930\u094d\u092f\u094b\u0927\u0928\u0938\u094d\u092f \u0926\u0943\u0937\u094d\u091f\u093f\u0930\u094d\u0939\u093f \u092e\u094b\u0939\u0947\u0928\u093e\u0935\u0943\u0924\u093e \u092a\u0930\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 55",
+      "meaning": "Envy and malice cannot extinguish the inherent radiance of those who walk the path of dharma, as their virtue remains untainted by others' hostility.",
+      "lore_snippet": "As clouds may veil the sun but never quench its light, so too do the wicked fail to obscure the glory of the righteous. True virtue outshines all shadows.",
+      "image": "quote_136.png",
+      "audio": "quote_136.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_137",
+      "quote": "Bhima: Strength lies not in venom or deceit, but in enduring what lesser men cannot.",
+      "sanskrit": "\u092c\u0932\u0902 \u0928 \u0935\u093f\u0937\u0947 \u0928 \u091b\u0932\u0947, \u0927\u0948\u0930\u094d\u092f\u0947 \u0924\u093f\u0937\u094d\u0920\u0924\u093f \u092a\u0930\u093e\u0915\u094d\u0930\u092e\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 55",
+      "meaning": "True power is demonstrated through resilience and fortitude, not through underhanded means like poison or treachery.",
+      "lore_snippet": "The heroes of old measure their might by the trials they withstand, not the traps they set. Endurance is the forge of greatness.",
+      "image": "quote_137.png",
+      "audio": "quote_137.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -7411,6 +7411,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_437",
+      "quote": "Vasishtha: The wise remember that even the greatest anger must yield to reason, lest it consume the world in its blaze.",
+      "sanskrit": "\u0938\u0930\u094d\u0935\u0932\u094b\u0915\u0935\u093f\u0928\u093e\u0936\u093e\u092f \u092e\u0924\u093f\u0902 \u091a\u0915\u094d\u0930\u0947 \u092e\u0939\u093e\u092e\u0928\u093e\u0903\u0964 \u0924\u0902 \u0924\u0925\u093e \u0928\u093f\u0936\u094d\u091a\u093f\u0924\u093e\u0924\u094d\u092e\u093e\u0928\u0902 \u092e\u0939\u093e\u0924\u094d\u092e\u093e\u0928\u0902 \u092e\u0939\u093e\u0924\u092a\u093e\u0903\u0964 \u0935\u0938\u093f\u0937\u094d\u0920\u094b \u0935\u093e\u0930\u092f\u093e\u092e\u093e\u0938 \u0939\u0947\u0924\u0941\u0928\u093e \u092f\u0947\u0928 \u0924\u091a\u094d\u091b\u0943\u0923\u0941\u0964",
+      "reference": "Mahabharata, Parva unkown, Chapter 170",
+      "meaning": "Even in profound grief and anger, wisdom must prevail to prevent universal destruction. Vasishtha stops a sage from unleashing wrath upon the world.",
+      "lore_snippet": "Ancient scrolls warn that unchecked fury blinds even the enlightened. The sage Vasishtha's intervention averted a cataclysm, proving that reason must temper righteous anger.",
+      "image": null,
+      "audio": "quote_437.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_438",
+      "quote": "The Brahmin woman: A single act of cruelty breeds generations of vengeance, as fire hidden in wood awaits its hour.",
+      "sanskrit": "\u0917\u0930\u094d\u092d\u093e\u0928\u092a\u093f \u092f\u0926\u093e \u092f\u0942\u092f\u0902 \u092d\u0943\u0917\u0942\u0923\u093e\u0902 \u0918\u094d\u0928\u0924 \u092a\u0941\u0924\u094d\u0930\u0915\u093e\u0903\u0964 \u0924\u0926\u093e\u092f\u092e\u0942\u0930\u0941\u0923\u093e \u0917\u0930\u094d\u092d\u094b \u092e\u092f\u093e \u0935\u0930\u094d\u0937\u0936\u0924\u0902 \u0927\u0943\u0924\u0903\u0964",
+      "reference": "Mahabharata, Parva unknown, Chapter 170",
+      "meaning": "The Brahmin woman reveals how violence against her clan's unborn children created an avenger (Aurva) who would later blind the aggressors\u2014showing how harm perpetuates cycles of retribution.",
+      "lore_snippet": "The Puranas teach that no violence dies\u2014it merely sleeps like embers in ash. The birth of Aurva from a century-long pregnancy proves hatred outlives its creators.",
+      "image": null,
+      "audio": "quote_438.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_439",
+      "quote": "Aurva's birth proves: What is nurtured in darkness\u2014whether vengeance or wisdom\u2014will emerge with the force of accumulated time.",
+      "sanskrit": "\u090a\u0930\u0941\u0923\u0948\u0915\u0947\u0928 \u0935\u093e\u092e\u094b\u0930\u0942\u0930\u094d\u092d\u0930\u094d\u0924\u0941\u0903 \u0915\u0941\u0932\u0935\u093f\u0935\u0943\u0926\u094d\u0927\u092f\u0947\u0964 \u0926\u0926\u0943\u0936\u0941\u0930\u094d\u092c\u094d\u0930\u093e\u0939\u094d\u092e\u0923\u0940\u0902 \u0924\u093e\u0902 \u0924\u0947 \u0926\u0940\u092a\u094d\u092f\u092e\u093e\u0928\u093e\u0902 \u0938\u094d\u0935\u0924\u0947\u091c\u0938\u093e\u0964",
+      "reference": "Mahabharata, Parva unknown, Chapter 170",
+      "meaning": "The radiant birth of Aurva after being gestated for 100 years symbolizes how suppressed forces (here, a clan's wrath) gain power through prolonged containment.",
+      "lore_snippet": "Like an arrow held drawn for centuries, Aurva's delayed birth demonstrates that postponed justice gathers terrible momentum. Yogis warn against banking such cosmic debts.",
+      "image": "quote_439.png",
+      "audio": "quote_439.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

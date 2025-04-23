@@ -8737,6 +8737,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_515",
+      "quote": "Krishna: True generosity flows not from obligation, but from the pure joy of giving, as a river nourishes the land without expectation.",
+      "sanskrit": "\u0928 \u0926\u093e\u0928\u0902 \u092a\u094d\u0930\u0924\u093f\u0917\u0943\u0939\u094d\u0923\u093e\u0924\u093f \u0928 \u091a \u092a\u094d\u0930\u0924\u094d\u092f\u0941\u092a\u0915\u0930\u094b\u0924\u093f",
+      "reference": "Mahabharata, Sabha Parva, Chapter 50-55",
+      "meaning": "This emphasizes the selfless nature of true charity, where gifts are given freely without expectation of return, mirroring Krishna's lavish gifts to the Pandavas.",
+      "lore_snippet": "The wise of Skyrim say: A gift given with strings attached is but a debt in disguise. The noblest offerings flow like mountain springs\u2014unforced and life-giving to all they touch.",
+      "image": "quote_515.png",
+      "audio": "quote_515.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_516",
+      "quote": "Yudhishthira: Honor shown to guests reflects the radiance of one's own soul, as polished silver mirrors the sun.",
+      "sanskrit": "\u0905\u0924\u093f\u0925\u093f \u0926\u0947\u0935\u094b \u092d\u0935",
+      "reference": "Mahabharata, Sabha Parva, Chapter 50-55",
+      "meaning": "Highlighting the sacred duty of hospitality, where Yudhishthira welcomes Krishna's entourage with profound respect, embodying the Vedic principle that guests embody divine presence.",
+      "lore_snippet": "Nordic halls and Khajiit caravans agree: The measure of a ruler lies not in their hoarded treasures, but in how they honor the stranger at their gates. For even gods walk unknown among mortals.",
+      "image": "quote_516.png",
+      "audio": "quote_516.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_517",
+      "quote": "The bonds of kinship shine brightest when tested by time, as gold reveals its purity in the refiner's fire.",
+      "sanskrit": "\u092c\u0928\u094d\u0927\u0941\u0924\u094d\u0935\u0902 \u0939\u093f \u092a\u0930\u0902 \u0924\u092a\u0903",
+      "reference": "Mahabharata, Sabha Parva, Chapter 50-55",
+      "meaning": "This reflects the enduring connection between the Pandavas and Krishna's Vrishni clan, whose mutual generosity and respect withstand the gathering storms of conflict.",
+      "lore_snippet": "As the ancient Dwemer wrote: Blood-forged ties outlast even the mightiest constructs. When war comes\u2014as it always does\u2014only true kinship turns allies into shield-brothers.",
+      "image": "quote_517.png",
+      "audio": "quote_517.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

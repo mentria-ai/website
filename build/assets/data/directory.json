@@ -7649,6 +7649,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_451",
+      "quote": "Krishna: Even hidden fire becomes known, O King, just as truth cannot long remain concealed.",
+      "sanskrit": "\u0917\u0942\u0922\u094b\u093d\u092a\u094d\u092f\u0917\u094d\u0928\u093f\u0930\u094d\u091c\u094d\u091e\u093e\u092f\u0924 \u090f\u0935 \u0930\u093e\u091c\u0928\u094d",
+      "reference": "Mahabharata, Vana Parva, Chapter 183",
+      "meaning": "Krishna reminds Yudhishthira that just as fire cannot remain hidden forever, truth and destiny will always reveal themselves in time.",
+      "lore_snippet": "The wise say that dharma burns like an eternal flame - though men may bury it deep or cloak it in deception, its light will always pierce through the darkness of illusion.",
+      "image": "quote_451.png",
+      "audio": "quote_451.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_452",
+      "quote": "Yudhishthira: When brothers stand united by shared purpose, no earthly power can divide them.",
+      "sanskrit": null,
+      "reference": "Mahabharata, Vana Parva, Chapter 183",
+      "meaning": "Yudhishthira's wisdom about the unbreakable bond between the Pandavas when they resolve to share Draupadi as their common wife.",
+      "lore_snippet": "Ancient scrolls tell of bonds stronger than steel - where five hearts beat as one, their shared vow becomes an unconquerable fortress against the arrows of discord.",
+      "image": "quote_452.png",
+      "audio": "quote_452.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_453",
+      "quote": "Arjuna: Never make me partake in adharma, for even desired things become poison when taken unlawfully.",
+      "sanskrit": "\u092e\u093e \u092e\u093e\u0902 \u0928\u0930\u0947\u0928\u094d\u0926\u094d\u0930 \u0924\u094d\u0935\u092e\u0927\u0930\u094d\u092e\u092d\u093e\u091c\u0902; \u0915\u0943\u0925\u093e \u0928 \u0927\u0930\u094d\u092e\u094b \u0939\u094d\u092f\u092f\u092e\u0940\u092a\u094d\u0938\u093f\u0924\u094b\u093d\u0928\u094d\u092f\u0948\u0903",
+      "reference": "Mahabharata, Vana Parva, Chapter 182",
+      "meaning": "Arjuna's refusal to claim Draupadi for himself alone, emphasizing that even cherished desires must bow to dharma.",
+      "lore_snippet": "The warrior's greatest test comes not in battle, but in turning away from glittering treasures that stain the soul - for honey laced with venom still brings death.",
+      "image": "quote_453.png",
+      "audio": "quote_453.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -8516,6 +8516,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_502",
+      "quote": "The ascetics: Five crocodiles dwell in these sacred fords, stealing the penance of holy men. Thus we avoid them, O joy of the Kurus.",
+      "sanskrit": "\u0917\u094d\u0930\u093e\u0939\u093e\u0903 \u092a\u091e\u094d\u091a \u0935\u0938\u0928\u094d\u0924\u094d\u092f\u0947\u0937\u0941 \u0939\u0930\u0928\u094d\u0924\u093f \u091a \u0924\u092a\u094b\u0927\u0928\u093e\u0928\u094d\u0964 \u0905\u0924 \u090f\u0924\u093e\u0928\u093f \u0935\u0930\u094d\u091c\u094d\u092f\u0928\u094d\u0924\u0947 \u0924\u0940\u0930\u094d\u0925\u093e\u0928\u093f \u0915\u0941\u0930\u0941\u0928\u0928\u094d\u0926\u0928\u0965",
+      "reference": "Mahabharata, [Unknown Parva], Chapter 208",
+      "meaning": "Even sacred places can harbor hidden dangers that undermine spiritual progress. True wisdom lies in recognizing when to avoid seemingly holy paths that conceal corruption.",
+      "lore_snippet": "The sages of old warned of sacred springs guarded by unseen predators. Not all that gleams with holiness is pure - some waters steal virtue instead of bestowing it.",
+      "image": "quote_502.png",
+      "audio": "quote_502.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_503",
+      "quote": "Bharadv\u0101ja's ford, the great destroyer of sins, stands among tainted waters - proving even salvation requires discernment.",
+      "sanskrit": "\u092d\u093e\u0930\u0926\u094d\u0935\u093e\u091c\u0938\u094d\u092f \u0924\u0940\u0930\u094d\u0925\u0902 \u091a \u092a\u093e\u092a\u092a\u094d\u0930\u0936\u092e\u0928\u0902 \u092e\u0939\u0924\u094d",
+      "reference": "Mahabharata, [Unknown Parva], Chapter 208",
+      "meaning": "True sacred places retain their power even when surrounded by corruption, but one must approach them with wisdom rather than blind faith.",
+      "lore_snippet": "Ancient texts speak of blessed sites that shine brightest when shadowed by danger. The wise pilgrim learns to distinguish eternal light from temporary radiance.",
+      "image": "quote_503.png",
+      "audio": "quote_503.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

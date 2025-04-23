@@ -8941,6 +8941,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_527",
+      "quote": "Arjuna: In battle, there is none in the three worlds whom the mighty Janardana cannot conquer when he unleashes his discus and arrows.",
+      "sanskrit": "\u0924\u094d\u0930\u093f\u0937\u0941 \u0932\u094b\u0915\u0947\u0937\u0941 \u0924\u0928\u094d\u0928\u093e\u0938\u094d\u0924\u093f \u092f\u0928\u094d\u0928 \u091c\u0940\u092f\u093e\u091c\u094d\u091c\u0928\u093e\u0930\u094d\u0926\u0928\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 217-218 (Kh\u0101\u1e47\u1e0dava-d\u0101ha Parva)",
+      "meaning": "Arjuna declares Krishna's invincibility, emphasizing divine power's supremacy over all realms when wielded with purpose.",
+      "lore_snippet": "The gods themselves retreat before a warrior whose arrows blaze with righteous purpose. Even celestial weapons bow to the wielder who fights for dharma, not glory.",
+      "image": "quote_527.png",
+      "audio": "quote_527.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_528",
+      "quote": "Fire spares none who dwell in illusion's forest\u2014even the golden peaks of Meru would crumble before the flames of transformation.",
+      "sanskrit": "\u0926\u093e\u0935\u0902 \u0926\u0917\u094d\u0927\u0941\u0902 \u092a\u094d\u0930\u091a\u0915\u094d\u0930\u092e\u0947... \u092e\u0947\u0930\u094b\u0930\u093f\u0935 \u0928\u0917\u0947\u0928\u094d\u0926\u094d\u0930\u0938\u094d\u092f \u0915\u093e\u091e\u094d\u091a\u0928\u0938\u094d\u092f \u092e\u0939\u093e\u0926\u094d\u092f\u0941\u0924\u0947\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 218 (Kh\u0101\u1e47\u1e0dava-d\u0101ha Parva)",
+      "meaning": "The burning of Kh\u0101\u1e47\u1e0dava Forest symbolizes the inevitable destruction of false attachments, likened to even the mightiest mountain burning.",
+      "lore_snippet": "Ancient scrolls speak of the Kh\u0101\u1e47\u1e0dava Fire\u2014a purge that separates essence from illusion. Where ordinary flames consume wood, divine fire burns away ignorance itself.",
+      "image": "quote_528.png",
+      "audio": "quote_528.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_529",
+      "quote": "Creatures clung to kin even in annihilation's jaws\u2014such is the power of love that chains souls to burning worlds.",
+      "sanskrit": "\u0924\u094d\u092f\u0915\u094d\u0924\u0941\u0902 \u0928 \u0936\u0947\u0915\u0941\u0903 \u0938\u094d\u0928\u0947\u0939\u0947\u0928 \u0924\u0925\u0948\u0935 \u0928\u093f\u0927\u0928\u0902 \u0917\u0924\u093e\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 218",
+      "meaning": "The tragic image of beings perishing while embracing loved ones illustrates attachment's double-edged nature.",
+      "lore_snippet": "Wise sages warn: the bonds that give life meaning may also bind one to suffering. Only through unattached love can the soul walk through fire unscathed.",
+      "image": "quote_529.png",
+      "audio": "quote_529.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

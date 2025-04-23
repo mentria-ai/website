@@ -8295,6 +8295,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_489",
+      "quote": "Narada: Even the mightiest bonds of brotherhood can be shattered by the flames of desire, as shown by Sunda and Upasunda.",
+      "sanskrit": "\u0938\u0941\u0928\u094d\u0926\u094b\u092a\u0938\u0941\u0928\u094d\u0926\u093e\u0935\u0938\u0941\u0930\u094c \u092d\u094d\u0930\u093e\u0924\u0930\u094c \u0938\u0939\u093f\u0924\u093e\u0935\u0941\u092d\u094c... \u0924\u093f\u0932\u094b\u0924\u094d\u0924\u092e\u093e\u092f\u093e\u0938\u094d\u0924\u094c \u0939\u0947\u0924\u094b\u0930\u0928\u094d\u092f\u094b\u0928\u094d\u092f\u092e\u092d\u093f\u091c\u0918\u094d\u0928\u0924\u0941\u0903",
+      "reference": "Mahabharata, Adi Parva, Chapter 201",
+      "meaning": "The demon brothers Sunda and Upasunda, though united in all things, destroyed each other over their lust for the celestial nymph Tilottama, demonstrating how desire can break even the strongest alliances.",
+      "lore_snippet": "The Asura brothers Sunda and Upasunda remind us that no bond is impervious to the corrupting influence of unchecked desire. Even shared purpose and blood kinship may crumble when selfish passions take root.",
+      "image": "quote_489.png",
+      "audio": "quote_489.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_490",
+      "quote": "Yudhishthira: True sovereignty lies not in dominion over lands, but in ruling one's own senses through dharma.",
+      "sanskrit": "\u092a\u094d\u0930\u093e\u092a\u094d\u092f \u0930\u093e\u091c\u094d\u092f\u0902 \u092e\u0939\u093e\u0924\u0947\u091c\u093e\u0903 \u0938\u0924\u094d\u092f\u0938\u0928\u094d\u0927\u094b \u092f\u0941\u0927\u093f\u0937\u094d\u0920\u093f\u0930\u0903 \u092a\u093e\u0932\u092f\u093e\u092e\u093e\u0938 \u0927\u0930\u094d\u092e\u0947\u0923 \u092a\u0943\u0925\u093f\u0935\u0940\u0902 \u092d\u094d\u0930\u093e\u0924\u0943\u092d\u093f\u0903 \u0938\u0939",
+      "reference": "Mahabharata, Adi Parva, Chapter 201",
+      "meaning": "Yudhishthira's righteous rule after gaining his kingdom demonstrates that real power comes from governing oneself according to moral law, not merely controlling territory.",
+      "lore_snippet": "Kings throughout history have learned that an unconquered mind makes mightier governance than unconquered lands. The wise ruler first establishes sovereignty over his own nature.",
+      "image": "quote_490.png",
+      "audio": "quote_490.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

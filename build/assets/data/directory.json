@@ -8686,6 +8686,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_512",
+      "quote": "Krishna: No man who respects dharma would treat a woman as cattle, nor sell his own progeny like a beast of burden.",
+      "sanskrit": "\u092a\u094d\u0930\u0926\u093e\u0928\u092e\u092a\u093f \u0915\u0928\u094d\u092f\u093e\u092f\u093e\u0903 \u092a\u0936\u0941\u0935\u0924\u094d\u0915\u094b\u093d\u0928\u0941\u092e\u0902\u0938\u094d\u092f\u0924\u0947\n\u0935\u093f\u0915\u094d\u0930\u092f\u0902 \u091a\u093e\u092a\u094d\u092f\u092a\u0924\u094d\u092f\u0938\u094d\u092f \u0915\u0903 \u0915\u0941\u0930\u094d\u092f\u093e\u0924\u094d\u092a\u0941\u0930\u0941\u0937\u094b \u092d\u0941\u0935\u093f",
+      "reference": "Mahabharata, Hara\u1e47ah\u0101rika Parva, Chapter 213",
+      "meaning": "Krishna condemns the objectification of women and children, asserting that true dharma lies in respecting their dignity rather than treating them as tradable commodities.",
+      "lore_snippet": "The wise know that honor is not won through force, but through reverence. To treat the vulnerable as property is to sow the seeds of one's own downfall, as the Kauravas learned at Kurukshetra.",
+      "image": "quote_512.png",
+      "audio": "quote_512.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_513",
+      "quote": "Krishna: When a lotus is plucked by force, its roots remain. But when lifted with care, it blooms anew in worthy hands.",
+      "sanskrit": null,
+      "reference": "Thematic interpretation of Arjuna's abduction of Subhadra",
+      "meaning": "This metaphorical wisdom suggests that true union (like Arjuna and Subhadra's) requires mutual respect, contrasting with the destructive force Duryodhana employed with Draupadi.",
+      "lore_snippet": "The scriptures speak of two kinds of takers: those who seize like storms and leave ruin, and those who receive like the earth welcomes rain - the difference lies not in the act, but in the intent.",
+      "image": "quote_513.png",
+      "audio": "quote_513.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_514",
+      "quote": "Krishna: The warrior who retreats from needless battle preserves more honor than he who wins through reckless pride.",
+      "sanskrit": "\u0928 \u0924\u0941 \u0938\u093e\u0928\u094d\u0924\u094d\u0935\u0947 \u092a\u0930\u093e\u091c\u092f\u0903",
+      "reference": "Mahabharata, Hara\u1e47ah\u0101rika Parva, Chapter 213",
+      "meaning": "Krishna advises the Vrishnis that avoiding conflict through wisdom (as with Arjuna's retreat) brings greater glory than victory achieved through destructive arrogance.",
+      "lore_snippet": "Even Indra's thunderbolt rests when clouds part peacefully. The greatest kshatriyas know that restraint often writes longer legends than conquest.",
+      "image": "quote_514.png",
+      "audio": "quote_514.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

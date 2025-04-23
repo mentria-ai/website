@@ -7547,6 +7547,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_445",
+      "quote": "Arjuna: The bow bends not by strength alone, but by the focus of the warrior's soul.",
+      "sanskrit": "\u0938\u091c\u094d\u092f\u0902 \u091a \u091a\u0915\u094d\u0930\u0947 \u0928\u093f\u092e\u093f\u0937\u093e\u0928\u094d\u0924\u0930\u0947\u0923; \u0936\u0930\u093e\u0902\u0936\u094d\u091a \u091c\u0917\u094d\u0930\u093e\u0939 \u0926\u0936\u093e\u0930\u094d\u0927\u0938\u0919\u094d\u0916\u094d\u092f\u093e\u0928\u094d",
+      "reference": "Mahabharata, Swayamvara Parva, Chapter 180",
+      "meaning": "True mastery comes from inner discipline and concentration, not just physical power. Arjuna's swift and precise actions demonstrate the unity of skill and spirit.",
+      "lore_snippet": "The greatest archers know that the bow is merely an extension of the self. When mind and body move as one, even the mightiest targets fall like autumn leaves.",
+      "image": "quote_445.png",
+      "audio": "quote_445.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_446",
+      "quote": "Krishna: When kings forget dharma, their crowns become heavier than mountains.",
+      "sanskrit": "\u0905\u0935\u092e\u093e\u0928\u092d\u092f\u093e\u0926\u0947\u0924\u0924\u094d\u0938\u094d\u0935\u0927\u0930\u094d\u092e\u0938\u094d\u092f \u091a \u0930\u0915\u094d\u0937\u0923\u093e\u0924\u094d",
+      "reference": "Mahabharata, Swayamvara Parva, Chapter 180",
+      "meaning": "Power without righteousness is a burden that crushes the unworthy. The kings' outrage at Draupadi's swayamvara reveals their attachment to pride over principle.",
+      "lore_snippet": "History remembers not the weight of a ruler's gold, but the depth of their virtue. Many have worn the crown; few have borne its true responsibility.",
+      "image": "quote_446.png",
+      "audio": "quote_446.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_447",
+      "quote": "Bhima: Strength unused for justice is like a tree without roots - mighty yet doomed to fall.",
+      "sanskrit": "\u0909\u0924\u094d\u092a\u093e\u091f\u094d\u092f \u0926\u094b\u0930\u094d\u092d\u094d\u092f\u093e\u0902 \u0926\u094d\u0930\u0941\u092e\u092e\u0947\u0915\u0935\u0940\u0930\u094b; \u0928\u093f\u0937\u094d\u092a\u0924\u094d\u0930\u092f\u093e\u092e\u093e\u0938 \u092f\u0925\u093e \u0917\u091c\u0947\u0928\u094d\u0926\u094d\u0930\u0903",
+      "reference": "Mahabharata, Swayamvara Parva, Chapter 180",
+      "meaning": "Bhima's uprooting of the tree symbolizes that raw power must be grounded in righteous purpose. Without moral foundation, even great strength becomes destructive.",
+      "lore_snippet": "The warrior who wields might without wisdom builds his house upon sand. True power stands firm when rooted in protection of the weak.",
+      "image": "quote_447.png",
+      "audio": "quote_447.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

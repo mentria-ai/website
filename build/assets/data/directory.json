@@ -8601,6 +8601,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_507",
+      "quote": "Arjuna: To free oneself from curses and sins, one must undertake righteous deeds with a pure heart and unwavering resolve.",
+      "sanskrit": "\u0915\u0941\u0930\u0941 \u0915\u0930\u094d\u092e \u0936\u0941\u092d\u0902 \u0935\u0940\u0930 \u090f\u0924\u093e\u0903 \u0938\u0930\u094d\u0935\u093e \u0935\u093f\u092e\u094b\u0915\u094d\u0937\u092f",
+      "reference": "Mahabharata, Subhadra-harana Parva, Chapter 210",
+      "meaning": "This quote emphasizes the power of righteous actions (karma) in liberating oneself from past misdeeds or curses. Only through virtuous deeds can true freedom be attained.",
+      "lore_snippet": "The sages teach that no curse is eternal, nor any sin unforgivable. Liberation comes not from lamenting the past, but from forging a brighter path through righteous action. Even the mightiest warriors must cleanse their souls in the waters of dharma.",
+      "image": "quote_507.png",
+      "audio": "quote_507.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_508",
+      "quote": "Krishna and Arjuna: True friendship shines brightest when reunited after trials, like twin flames merging in darkness.",
+      "sanskrit": "\u0924\u093e\u0935\u0928\u094d\u092f\u094b\u0928\u094d\u092f\u0902 \u0938\u092e\u093e\u0936\u094d\u0932\u093f\u0937\u094d\u092f \u092a\u0943\u0937\u094d\u091f\u094d\u0935\u093e \u091a \u0915\u0941\u0936\u0932\u0902 \u0935\u0928\u0947",
+      "reference": "Mahabharata, Subhadra-harana Parva, Chapter 210",
+      "meaning": "This describes the deep bond between Krishna and Arjuna, showing how true friendship remains unbroken despite separation and grows stronger through shared trials.",
+      "lore_snippet": "The ancients wrote of friendships forged in fire - where separation becomes but a test, and reunion a celebration of souls. Such bonds outlast empires, for they are written not in ink but in the book of existence itself.",
+      "image": "quote_508.png",
+      "audio": "quote_508.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

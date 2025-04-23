@@ -8890,6 +8890,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_524",
+      "quote": "Krishna: With divine weapons and unwavering resolve, even the mightiest adversaries fall like leaves before the storm of destiny.",
+      "sanskrit": "\u0909\u0924\u094d\u0924\u092e\u093e\u0938\u094d\u0924\u094d\u0930\u093e\u0923\u093f \u092e\u0947 \u0938\u0928\u094d\u0924\u093f \u0926\u093f\u0935\u094d\u092f\u093e\u0928\u093f \u091a \u092c\u0939\u0942\u0928\u093f \u091a\n\u092f\u0948\u0930\u0939\u0902 \u0936\u0915\u094d\u0928\u0941\u092f\u093e\u0902 \u092f\u094b\u0926\u094d\u0927\u0941\u092e\u092a\u093f \u0935\u091c\u094d\u0930\u0927\u0930\u093e\u0928\u094d\u092c\u0939\u0942\u0928\u094d",
+      "reference": "Mahabharata, Vana Parva, Chapter 216",
+      "meaning": "The quote emphasizes the power of divine tools (weapons) combined with resolute determination to overcome even the most formidable foes, symbolizing the convergence of divine aid and human will.",
+      "lore_snippet": "Legends speak of warriors who wielded weapons blessed by the gods. Such arms were not mere steel but extensions of fate itself, turning the tide of battles when wielded by the worthy.",
+      "image": "quote_524.png",
+      "audio": "quote_524.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_525",
+      "quote": "Varuna: The gifts of the gods are not mere tools but extensions of cosmic order, meant to restore balance where chaos reigns.",
+      "sanskrit": "\u092a\u094d\u0930\u093e\u0926\u093e\u0926\u094d\u0935\u0948 \u0927\u0928\u0941\u0930\u0924\u094d\u0928\u0902 \u0924\u0926\u0915\u094d\u0937\u092f\u094d\u092f\u094c \u091a \u092e\u0939\u0947\u0937\u0941\u0927\u0940\n\u0930\u0925\u0902 \u091a \u0926\u093f\u0935\u094d\u092f\u093e\u0936\u094d\u0935\u092f\u0941\u091c\u0902 \u0915\u092a\u093f\u092a\u094d\u0930\u0935\u0930\u0915\u0947\u0924\u0928\u092e\u094d",
+      "reference": "Mahabharata, Vana Parva, Chapter 216",
+      "meaning": "Divine gifts like Gandiva (Arjuna\u2019s bow) and Krishna\u2019s Sudarshana Chakra are embodiments of dharma, designed to uphold righteousness rather than serve personal ambition.",
+      "lore_snippet": "The artifacts of old were never owned\u2014they chose their bearers. To wield one was to shoulder the weight of the world\u2019s equilibrium, a trust as sacred as the gods themselves.",
+      "image": "quote_525.png",
+      "audio": "quote_525.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_526",
+      "quote": "Agni: True strength lies not in the weapon, but in the hand that wields it\u2014and the purpose that guides it.",
+      "sanskrit": "\u092a\u094c\u0930\u0941\u0937\u0947\u0923 \u0924\u0941 \u092f\u0924\u094d\u0915\u093e\u0930\u094d\u092f\u0902 \u0924\u0924\u094d\u0915\u0930\u094d\u0924\u093e\u0930\u094c \u0938\u094d\u0935 \u092a\u093e\u0935\u0915",
+      "reference": "Mahabharata, Vana Parva, Chapter 216",
+      "meaning": "Fire god Agni reminds us that divine weapons alone cannot ensure victory; the wielder\u2019s courage and righteous intent are the true forces behind their power.",
+      "lore_snippet": "Many seek enchanted blades, forgetting that a noble heart ignites their magic. The greatest flames burn not in the forge, but in the soul of the warrior who carries them.",
+      "image": "quote_526.png",
+      "audio": "quote_526.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -7989,6 +7989,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_471",
+      "quote": "Dhritarashtra: Devotion is the highest power; human effort is meaningless without divine will.",
+      "sanskrit": "\u0926\u0948\u0935\u0902 \u0924\u0941 \u092a\u0930\u092e\u0902 \u092e\u0928\u094d\u092f\u0947 \u092a\u094c\u0930\u0941\u0937\u0902 \u0924\u0941 \u0928\u093f\u0930\u0930\u094d\u0925\u0915\u092e\u094d",
+      "reference": "Mahabharata, Vidur\u0101gamanaparva, Chapter 192",
+      "meaning": "Dhritarashtra reflects on the supremacy of divine will over human effort, acknowledging that destiny ultimately prevails despite one's struggles.",
+      "lore_snippet": "The wise know that fate weaves its own designs, and mortal striving is but a ripple upon the ocean of time. Yet, the righteous still act, for duty is their compass.",
+      "image": "quote_471.png",
+      "audio": "quote_471.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_472",
+      "quote": "Vidura: May wisdom guide your rule, O King, for a hundred years and more.",
+      "sanskrit": "\u0928\u093f\u0924\u094d\u092f\u0902 \u092d\u0935\u0924\u0941 \u0924\u0947 \u092c\u0941\u0926\u094d\u0927\u093f\u0930\u0947\u0937\u093e \u0930\u093e\u091c\u091e\u094d\u0936\u0924\u0902 \u0938\u092e\u093e\u0903",
+      "reference": "Mahabharata, Vidur\u0101gamanaparva, Chapter 192",
+      "meaning": "Vidura blesses Dhritarashtra with enduring wisdom, emphasizing that righteous governance requires eternal vigilance and discernment.",
+      "lore_snippet": "A ruler's legacy is measured not by the length of their reign, but by the depth of their wisdom. The sages say even the mightiest throne rests upon pillars of justice.",
+      "image": "quote_472.png",
+      "audio": "quote_472.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -7598,6 +7598,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_448",
+      "quote": "Arjuna: A warrior's true strength lies not in weapons alone, but in the wisdom to wield them with restraint and purpose.",
+      "sanskrit": "\u0928 \u0939\u093f \u092e\u093e\u092e\u093e\u0939\u0935\u0947 \u0915\u094d\u0930\u0941\u0926\u094d\u0927\u092e\u0928\u094d\u092f\u0903 \u0938\u093e\u0915\u094d\u0937\u093e\u091a\u094d\u091b\u091a\u0940\u092a\u0924\u0947\u0903 \u092a\u0941\u092e\u093e\u0928\u094d\u092f\u094b\u0927\u092f\u093f\u0924\u0941\u0902 \u0936\u0915\u094d\u0924\u0903 \u092a\u093e\u0923\u094d\u0921\u0935\u093e\u0926\u094d\u0935\u093e \u0915\u093f\u0930\u0940\u091f\u093f\u0928\u0903",
+      "reference": "Mahabharata, Karna Parva, Chapter 89",
+      "meaning": "Arjuna reminds Karna that true combat mastery transcends brute force\u2014it requires discipline, skill, and control. Mere anger cannot overcome one who has mastered both arms and wisdom.",
+      "lore_snippet": "The greatest warriors of Tamriel understand that steel alone does not win battles. Like Arjuna's lesson to Karna, victory flows from the unity of disciplined mind and honed blade\u2014a truth echoed in the Way of the Voice.",
+      "image": "quote_448.png",
+      "audio": "quote_448.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_449",
+      "quote": "Karna: Even the mightiest warrior must acknowledge when he faces not merely a foe, but destiny itself made manifest.",
+      "sanskrit": "\u092c\u094d\u0930\u0939\u094d\u092e\u0902 \u0924\u0947\u091c\u0938\u094d\u0924\u0926\u093e\u091c\u092f\u094d\u092f\u0902 \u092e\u0928\u094d\u092f\u092e\u093e\u0928\u094b \u092e\u0939\u093e\u0930\u0925\u0903",
+      "reference": "Mahabharata, Karna Parva, Chapter 89",
+      "meaning": "Karna recognizes the futility of fighting against Arjuna, realizing some battles are shaped by cosmic forces beyond mortal strength\u2014a moment of tragic self-awareness before his fateful duel.",
+      "lore_snippet": "As the Nords say: 'Do not curse the storm for felling your hall\u2014some gales carry the weight of the world.' Even Tiber Septim knelt when the Greybeards spoke his destiny.",
+      "image": "quote_449.png",
+      "audio": "quote_449.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_450",
+      "quote": "Bhishma: When lions clash, the earth trembles not from their violence, but from the weight of the principles they champion.",
+      "sanskrit": "\u0924\u093e\u0935\u0941\u092d\u093e\u0935\u092a\u094d\u092f\u0928\u093f\u0930\u094d\u0926\u0947\u0936\u094d\u092f\u094c \u0932\u093e\u0918\u0935\u093e\u091c\u094d\u091c\u092f\u0924\u093e\u0902 \u0935\u0930\u094c \u0905\u092f\u0941\u0927\u094d\u092f\u0947\u0924\u093e\u0902 \u0938\u0941\u0938\u0902\u0930\u092c\u094d\u0927\u093e\u0935\u0928\u094d\u092f\u094b\u0928\u094d\u092f\u0935\u093f\u091c\u092f\u0948\u0937\u093f\u0923\u094c",
+      "reference": "Mahabharata, Karna Parva, Chapter 89",
+      "meaning": "The observer notes how epic battles between equals (like Bhima vs. Shalya) transcend physical combat\u2014they become manifestations of conflicting cosmic truths clashing through mortal avatars.",
+      "lore_snippet": "Recall the duel between High King Borgas and the Wild Hunt\u2014what appeared as mere swordplay was reality itself choosing between the rule of law and the song of the untamed wilds.",
+      "image": "quote_450.png",
+      "audio": "quote_450.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

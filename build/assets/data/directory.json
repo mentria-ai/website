@@ -7462,6 +7462,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_440",
+      "quote": "Dhrishtadyumna: He who surpasses this impossible challenge of archery\u2014skilled, noble, and mighty\u2014shall win Draupadi's hand, for destiny favors the worthy.",
+      "sanskrit": "\u090f\u0924\u0924\u094d\u0915\u0930\u094d\u0924\u093e \u0915\u0930\u094d\u092e \u0938\u0941\u0926\u0941\u0937\u094d\u0915\u0930\u0902 \u092f\u0903; \u0915\u0941\u0932\u0947\u0928 \u0930\u0942\u092a\u0947\u0923 \u092c\u0932\u0947\u0928 \u092f\u0941\u0915\u094d\u0924\u0903\u0964 \u0924\u0938\u094d\u092f\u093e\u0926\u094d\u092f \u092d\u093e\u0930\u094d\u092f\u093e \u092d\u0917\u093f\u0928\u0940 \u092e\u092e\u0947\u092f\u0902; \u0915\u0943\u0937\u094d\u0923\u093e \u092d\u0935\u093f\u0924\u094d\u0930\u0940 \u0928 \u092e\u0943\u0937\u093e \u092c\u094d\u0930\u0935\u0940\u092e\u093f\u0965",
+      "reference": "Mahabharata, Swayamvara Parva, Chapter 177",
+      "meaning": "Dhrishtadyumna declares that only the most exceptional warrior, endowed with skill, lineage, and strength, can complete the archery challenge and win Draupadi's hand\u2014a test of both ability and destiny.",
+      "lore_snippet": "The ancients believed trials of skill were divinely ordained. To strike the target is not merely to prove mastery of the bow, but to align oneself with the threads of fate woven by the gods.",
+      "image": "quote_440.png",
+      "audio": "quote_440.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_441",
+      "quote": "Kings and warriors gather not for war, but for a test of destiny\u2014where a single arrow may rewrite the fate of empires.",
+      "sanskrit": "\u0924\u0924\u094d\u0930 \u0928\u093e\u0928\u093e\u092a\u094d\u0930\u0915\u093e\u0930\u0947\u0937\u0941 \u0935\u093f\u092e\u093e\u0928\u0947\u0937\u0941 \u0938\u094d\u0935\u0932\u0919\u094d\u0915\u0943\u0924\u093e\u0903... \u0938\u092e\u0935\u0947\u0924\u093e\u0938\u094d\u0924\u094d\u0930\u092f\u0903 \u0936\u0942\u0930\u093e \u092d\u0942\u0930\u093f\u0930\u094d\u092d\u0942\u0930\u093f\u0936\u094d\u0930\u0935\u093e\u0903 \u0936\u0932\u0903",
+      "reference": "Mahabharata, Swayamvara Parva, Chapter 177",
+      "meaning": "The assembly of legendary kings and warriors for Draupadi's swayamvara symbolizes how singular moments of choice can alter the course of history.",
+      "lore_snippet": "Even the mightiest armies may stand idle before the turning point of fate. In the silence before the bowstring's release, the future holds its breath.",
+      "image": "quote_441.png",
+      "audio": "quote_441.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

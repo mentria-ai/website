@@ -7496,6 +7496,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_442",
+      "quote": "Arjuna: Like the unshaken mountain, the warrior stands firm when tested by fate\u2019s fiercest storms.",
+      "sanskrit": "\u0905\u0930\u094d\u091c\u0941\u0928\u094b \u0927\u0928\u0941\u0937\u094b\u093d\u092d\u094d\u092f\u093e\u0936\u0947 \u0924\u0938\u094d\u0925\u094c \u0917\u093f\u0930\u093f\u0930\u093f\u0935\u093e\u091a\u0932\u0903",
+      "reference": "Mahabharata, Swayamvara Parva, Chapter 179",
+      "meaning": "Arjuna\u2019s unwavering resolve is compared to a mountain\u2019s immovability, symbolizing steadfastness in adversity.",
+      "lore_snippet": "The greatest warriors are not measured by strength alone, but by their unyielding spirit. As mountains endure the wind\u2019s fury, so too does the disciplined mind withstand life\u2019s trials.",
+      "image": "quote_442.png",
+      "audio": "quote_442.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_443",
+      "quote": "Krishna: The bow unstrung by pride shall never strike true, for arrogance blinds the hand that seeks glory.",
+      "sanskrit": "\u0928\u093f\u0937\u094d\u092a\u093f\u0937\u094d\u091f\u092d\u0917\u094d\u0928\u093e\u0919\u094d\u0917\u0926\u0915\u0941\u0923\u094d\u0921\u0932\u0902 \u091a",
+      "reference": "Mahabharata, Swayamvara Parva, Chapter 178",
+      "meaning": "Krishna observes how the kings\u2019 pride leads to failure in stringing the bow, illustrating how hubris undermines skill.",
+      "lore_snippet": "Many a warrior has fallen not by the enemy\u2019s arrow, but by the weight of their own vanity. True mastery begins with humility.",
+      "image": "quote_443.png",
+      "audio": "quote_443.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_444",
+      "quote": "Vyasa: The Brahmin\u2019s strength lies not in arm nor steel, but in the fire of knowledge that outshines the sun.",
+      "sanskrit": "\u092c\u094d\u0930\u093e\u0939\u094d\u092e\u0923\u094b \u0928\u093e\u0935\u092e\u0928\u094d\u0924\u0935\u094d\u092f\u0903 \u0938\u0926\u094d\u0935\u093e\u0938\u0926\u094d\u0935\u093e \u0938\u092e\u093e\u091a\u0930\u0928\u094d",
+      "reference": "Mahabharata, Swayamvara Parva, Chapter 179",
+      "meaning": "The text defends the Brahmin\u2019s spiritual power, which surpasses physical might.",
+      "lore_snippet": "Scholars of old whispered that a sage\u2019s pen could carve deeper than a king\u2019s sword. For what is flesh compared to the eternal flame of wisdom?",
+      "image": "quote_444.png",
+      "audio": "quote_444.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

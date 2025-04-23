@@ -7751,6 +7751,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_457",
+      "quote": "Yudhishthira: When duty and desire align like two rivers merging, a king's path becomes as clear as the sun at noon.",
+      "sanskrit": "\u0938\u094d\u0935\u0927\u0930\u094d\u092e\u0926\u0943\u0937\u094d\u091f\u0947\u0928 \u092f\u0925\u093e\u0928\u0941\u0915\u093e\u092e\u092e\u094d",
+      "reference": "Mahabharata, Adi Parva, Chapter 186-187",
+      "meaning": "True fulfillment comes when one's desires (kama) align harmoniously with righteous duty (dharma), creating a path of clarity and purpose.",
+      "lore_snippet": "The wise of Tamriel often debate whether destiny shapes desire or desire shapes destiny. The ancient Nords believed both must flow together, like twin streams feeding the same mighty river.",
+      "image": "quote_457.png",
+      "audio": "quote_457.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_458",
+      "quote": "Dhrupada: Not by birth but by deed is a man's worth measured, as a bow's strength lies in its bending, not the wood from which it's carved.",
+      "sanskrit": "\u0928 \u0924\u0924\u094d\u0930 \u0935\u0930\u094d\u0923\u0947\u0937\u0941 \u0915\u0943\u0924\u093e \u0935\u093f\u0935\u0915\u094d\u0937\u093e; \u0928 \u091c\u0940\u0935\u0936\u093f\u0932\u094d\u092a\u0947 \u0928 \u0915\u0941\u0932\u0947 \u0928 \u0917\u094b\u0924\u094d\u0930\u0947",
+      "reference": "Mahabharata, Adi Parva, Chapter 186",
+      "meaning": "A person's true merit comes from their actions and capabilities, not their caste, lineage, or superficial attributes - just as a bow's power comes from how it's used.",
+      "lore_snippet": "The Companions of Jorrvaskr teach that honor lives in one's sword-arm, not ancestral blood. Even Ysgramor himself rose from humble beginnings to become the harbinger of an era.",
+      "image": "quote_458.png",
+      "audio": "quote_458.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_459",
+      "quote": "The truest aim cannot be struck by weak hands nor false hearts, for destiny favors only those who master both weapon and will.",
+      "sanskrit": "\u0928 \u0924\u0926\u094d\u0927\u0928\u0941\u0930\u094d\u092e\u0928\u094d\u0926\u092c\u0932\u0947\u0928 \u0936\u0915\u094d\u092f\u0902; \u092e\u094c\u0930\u094d\u0935\u094d\u092f\u093e \u0938\u092e\u093e\u092f\u094b\u091c\u092f\u093f\u0924\u0941\u0902 \u0924\u0925\u093e \u0939\u093f",
+      "reference": "Mahabharata, Adi Parva, Chapter 186",
+      "meaning": "Achieving great purposes requires both physical skill and spiritual discipline - weakness in either will cause one to miss life's most important targets.",
+      "lore_snippet": "Ancient Akaviri swordmasters claimed a blade is but an extension of the soul. The Thalmor forgot this truth, and so their arrows ever fly astray.",
+      "image": "quote_459.png",
+      "audio": "quote_459.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -8465,6 +8465,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_499",
+      "quote": "Arjuna: I will not deviate from truth; by truth I take up my weapons.",
+      "sanskrit": "\u0928 \u0938\u0924\u094d\u092f\u093e\u0926\u094d\u0935\u093f\u091a\u0932\u093f\u0937\u094d\u092f\u093e\u092e\u093f \u0938\u0924\u094d\u092f\u0947\u0928\u093e\u092f\u0941\u0927\u092e\u093e\u0932\u092d\u0947",
+      "reference": "Mahabharata, Vana Parva, Chapter 205",
+      "meaning": "Arjuna declares his unwavering commitment to truth, asserting that his weapons are sanctified by truth itself\u2014highlighting the inseparable bond between righteousness and warriorship.",
+      "lore_snippet": "The greatest warriors are bound not by steel alone, but by vows sworn in truth. To forsake dharma is to blunt one's blade before the battle even begins.",
+      "image": "quote_499.png",
+      "audio": "quote_499.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_500",
+      "quote": "The body may perish, but dharma endures beyond destruction.",
+      "sanskrit": "\u0936\u0930\u0940\u0930\u0938\u094d\u092f\u093e\u092a\u093f \u0928\u093e\u0936\u0947\u0928 \u0927\u0930\u094d\u092e \u090f\u0935 \u0935\u093f\u0936\u093f\u0937\u094d\u092f\u0924\u0947",
+      "reference": "Mahabharata, Vana Parva, Chapter 205",
+      "meaning": "This reflects the eternal nature of dharma (righteousness), which transcends mortal life. Even death cannot diminish its supremacy.",
+      "lore_snippet": "Mortals are fleeting as autumn leaves, but the laws of dharma stand firm as mountains. He who aligns with them leaves footprints across ages.",
+      "image": "quote_500.png",
+      "audio": "quote_500.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -7802,6 +7802,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_460",
+      "quote": "Yudhishthira: The path of dharma is subtle; we do not know its course. We but follow the footsteps of those who walked it before us.",
+      "sanskrit": "\u0938\u0942\u0915\u094d\u0937\u094d\u092e\u094b \u0927\u0930\u094d\u092e\u094b \u092e\u0939\u093e\u0930\u093e\u091c \u0928\u093e\u0938\u094d\u092f \u0935\u093f\u0926\u094d\u092e\u094b \u0935\u092f\u0902 \u0917\u0924\u093f\u092e\u094d\u0964 \u092a\u0942\u0930\u094d\u0935\u0947\u0937\u093e\u092e\u093e\u0928\u0941\u092a\u0942\u0930\u094d\u0935\u094d\u092f\u0947\u0923 \u092f\u093e\u0924\u0902 \u0935\u0930\u094d\u0924\u094d\u092e\u093e\u0928\u0941\u092f\u093e\u092e\u0939\u0947\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 188",
+      "meaning": "Yudhishthira acknowledges the complexity of dharma (righteousness), admitting that its true nature is often unclear. He emphasizes following the wisdom of past sages as guidance.",
+      "lore_snippet": "The wise recognize that righteousness is not always a clear path. Like travelers in an ancient forest, we must sometimes follow the faint footprints left by those who journeyed before us.",
+      "image": "quote_460.png",
+      "audio": "quote_460.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_461",
+      "quote": "Vyasa: When dharma becomes obscured, and sacred texts contradict worldly ways, one must seek the counsel of many wise voices to discern truth.",
+      "sanskrit": "\u0905\u0938\u094d\u092e\u093f\u0928\u094d\u0927\u0930\u094d\u092e\u0947 \u0935\u093f\u092a\u094d\u0930\u0932\u092e\u094d\u092d\u0947 \u0932\u094b\u0915\u0935\u0947\u0926\u0935\u093f\u0930\u094b\u0927\u0915\u0947\u0964 \u092f\u0938\u094d\u092f \u092f\u0938\u094d\u092f \u092e\u0924\u0902 \u092f\u0926\u094d\u092f\u091a\u094d\u091b\u094d\u0930\u094b\u0924\u0941\u092e\u093f\u091a\u094d\u091b\u093e\u092e\u093f \u0924\u0938\u094d\u092f \u0924\u0924\u094d\u0965",
+      "reference": "Mahabharata, Adi Parva, Chapter 188",
+      "meaning": "The sage Vyasa advises that during moral dilemmas where scriptures and practical life seem at odds, collective wisdom should be sought to resolve the conflict.",
+      "lore_snippet": "Even the most learned sages sometimes disagree. In such times of uncertainty, truth emerges not from a single voice, but from the chorus of many wise perspectives.",
+      "image": "quote_461.png",
+      "audio": "quote_461.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

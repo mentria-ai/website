@@ -10012,6 +10012,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_590",
+      "quote": "Krishna: A fool who pursues wealth without foresight becomes despised. True power lies in wisdom, not reckless greed.",
+      "sanskrit": "\u0906\u0926\u0924\u094d\u0924\u0947\u093d\u0930\u094d\u0925\u092a\u0930\u094b \u092c\u093e\u0932\u094b \u0928\u093e\u0928\u0941\u092c\u0928\u094d\u0927\u092e\u0935\u0947\u0915\u094d\u0937\u0924\u0947",
+      "reference": "Mahabharata, Sabh\u0101 Parva, Chapter 14",
+      "meaning": "Krishna warns that blind pursuit of material gain (without considering consequences) leads to ruin. Wisdom and restraint distinguish the truly powerful.",
+      "lore_snippet": "The annals of kingship teach that gold clutched too tightly turns to dust. Those who rule with foresight, like the monsoon nourishing crops, reap enduring kingdoms.",
+      "image": "quote_590.png",
+      "audio": "quote_590.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_591",
+      "quote": "Bhima: A king who hesitates like an anthill crumbles. The weak may overthrow the strong through relentless strategy, not brute force alone.",
+      "sanskrit": "\u0905\u0928\u093e\u0930\u092e\u094d\u092d\u092a\u0930\u094b \u0930\u093e\u091c\u093e \u0935\u0932\u094d\u092e\u0940\u0915 \u0907\u0935 \u0938\u0940\u0926\u0924\u093f",
+      "reference": "Mahabharata, Sabh\u0101 Parva, Chapter 14",
+      "meaning": "Bhima emphasizes that decisive action and clever tactics (naya) allow the seemingly weak to triumph over raw power.",
+      "lore_snippet": "Observe the bamboo\u2014bending where oak breaks. The greatest warriors know when to strike and when to weave shadows until the moment is ripe.",
+      "image": "quote_591.png",
+      "audio": "quote_591.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_592",
+      "quote": "Yudhishthira: One who praises himself is hollow. True honor comes when others, especially rivals, acknowledge your worth.",
+      "sanskrit": "\u0915\u0925\u0902 \u092a\u0930\u093e\u0928\u0941\u092d\u093e\u0935\u091c\u094d\u091e\u0903 \u0938\u094d\u0935\u0902 \u092a\u094d\u0930\u0936\u0902\u0938\u093f\u0924\u0941\u092e\u0930\u094d\u0939\u0924\u093f",
+      "reference": "Mahabharata, Sabh\u0101 Parva, Chapter 14",
+      "meaning": "Self-praise is meaningless; genuine respect arises from the recognition of adversaries and equals.",
+      "lore_snippet": "A mountain does not declare its height\u2014the clouds that break upon its peaks sing its glory to the valleys below.",
+      "image": "quote_592.png",
+      "audio": "quote_592.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -9621,6 +9621,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_567",
+      "quote": "Narada: Knowledge blossoms when lived, wealth when shared, love when fruitful, and wisdom when virtuous.",
+      "sanskrit": "\u0905\u0917\u094d\u0928\u093f\u0939\u094b\u0924\u094d\u0930\u092b\u0932\u093e \u0935\u0947\u0926\u093e \u0926\u0924\u094d\u0924\u092d\u0941\u0915\u094d\u0924\u092b\u0932\u0902 \u0927\u0928\u092e\u094d\u0964 \u0930\u0924\u093f\u092a\u0941\u0924\u094d\u0930\u092b\u0932\u093e \u0926\u093e\u0930\u093e\u0903 \u0936\u0940\u0932\u0935\u0943\u0924\u094d\u0924\u092b\u0932\u0902 \u0936\u094d\u0930\u0941\u0924\u092e\u094d\u0965",
+      "reference": "Mahabharata, Sabha Parva, Chapter 5",
+      "meaning": "True fulfillment comes from applying knowledge (Vedas) through rituals, sharing wealth generously, finding purpose in relationships, and embodying virtue in wisdom.",
+      "lore_snippet": "The sages teach that mere possession grants no merit. A warrior's strength lies in wielding it justly, a scholar's wisdom in teaching it selflessly, and a ruler's wealth in uplifting the needy.",
+      "image": null,
+      "audio": null,
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_568",
+      "quote": "Yudhishthira: A king\u2019s path is lit by the counsel of elders, for they carry the embers of dharma and the oil of experience.",
+      "sanskrit": "\u0915\u091a\u094d\u091a\u093f\u091a\u094d\u091b\u0943\u0923\u094b\u0937\u093f \u0935\u0943\u0926\u094d\u0927\u093e\u0928\u093e\u0902 \u0927\u0930\u094d\u092e\u093e\u0930\u094d\u0925\u0938\u0939\u093f\u0924\u093e \u0917\u093f\u0930\u0903",
+      "reference": "Mahabharata, Sabha Parva, Chapter 5",
+      "meaning": "Rulers must heed the wisdom of elders, whose words unite moral duty (dharma) and practical benefit (artha), guiding like a lamp in darkness.",
+      "lore_snippet": "As the moon reflects the sun\u2019s light, wise rulers reflect ancestral wisdom. Those who ignore such counsel walk blindfolded through a labyrinth of power.",
+      "image": null,
+      "audio": "quote_568.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_569",
+      "quote": "Narada: He who protects the vulnerable as his own children inherits Indra\u2019s throne in the next life.",
+      "sanskrit": "\u0915\u091a\u094d\u091a\u093f\u0926\u0928\u094d\u0927\u093e\u0902\u0936\u094d\u091a \u092e\u0942\u0915\u093e\u0902\u0936\u094d\u091a \u092a\u0919\u094d\u0917\u0942\u0928\u094d\u0935\u094d\u092f\u0919\u094d\u0917\u093e\u0928\u092c\u093e\u0928\u094d\u0927\u0935\u093e\u0928\u094d",
+      "reference": "Mahabharata, Sabha Parva, Chapter 5",
+      "meaning": "Divine favor awaits rulers who shelter the disabled, orphaned, and marginalized, treating them with paternal compassion.",
+      "lore_snippet": "The heavens measure a king not by his crown\u2019s jewels, but by how he lifts the fallen. Even a beggar\u2019s blessing can shake celestial gates.",
+      "image": "quote_569.png",
+      "audio": "quote_569.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

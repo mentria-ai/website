@@ -9978,6 +9978,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_588",
+      "quote": "Fear drives even kings to abandon their thrones, for no fortress is stronger than a mind shackled by terror.",
+      "sanskrit": "\u092d\u092f\u0947 \u0924\u0941 \u0938\u092e\u0941\u092a\u0915\u094d\u0930\u093e\u0928\u094d\u0924\u0947 \u091c\u0930\u093e\u0938\u0928\u094d\u0927\u0947 \u0938\u092e\u0941\u0926\u094d\u092f\u0924\u0947",
+      "reference": "Mahabharata, Sabha Parva, Chapter 14",
+      "meaning": "This reflects how King Jarasandha's terror forced many rulers to flee their kingdoms, illustrating how fear can paralyze even the mightiest.",
+      "lore_snippet": "The chronicles speak of eighteen kingdoms forsaken before Jarasandha's shadow. Remember: A coward's crown is but a hollow ornament, while the resolute endure as mountains endure the wind.",
+      "image": "quote_588.png",
+      "audio": "quote_588.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_589",
+      "quote": "Krishna: When allies stand united like the Himalayas, even the mightiest foe becomes but a ripple upon the ocean of time.",
+      "sanskrit": "\u0938\u0919\u094d\u0915\u0930\u094d\u0937\u0923\u0926\u094d\u0935\u093f\u0924\u0940\u092f\u0947\u0928 \u091c\u094d\u091e\u093e\u0924\u093f\u0915\u093e\u0930\u094d\u092f\u0902 \u092e\u092f\u093e \u0915\u0943\u0924\u092e\u094d",
+      "reference": "Mahabharata, Sabha Parva, Chapter 14",
+      "meaning": "Krishna's words emphasize the power of unity, referencing how he and Balarama (Sankarshana) combined forces to overcome tyranny.",
+      "lore_snippet": "The Yadava scrolls tell of two rivers becoming a flood. So too do kindred spirits, when joined in purpose, sweep away the walls that divide them.",
+      "image": "quote_589.png",
+      "audio": "quote_589.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

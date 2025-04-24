@@ -10947,6 +10947,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_645",
+      "quote": "Dharma without wisdom is like a blind man leading the blind; both shall fall into the pit of delusion.",
+      "sanskrit": "\u0927\u0930\u094d\u092e\u0935\u093e\u0915\u094d\u0924\u094d\u0935\u092e\u0927\u0930\u094d\u092e\u091c\u094d\u091e\u0903 \u0938\u0924\u093e\u0902 \u092e\u093e\u0930\u094d\u0917\u093e\u0926\u0935\u092a\u094d\u0932\u0941\u0924\u0903",
+      "reference": "Mahabharata, Udyoga Parva (approximate)",
+      "meaning": "This warns against hollow adherence to dharma (duty/righteousness) without true understanding. A hypocrite preaching virtue while straying from it harms both themselves and followers.",
+      "lore_snippet": "The ancients spoke of false gurus as 'swans who eat their own eggs'\u2014those who teach dharma yet violate its essence. True wisdom requires alignment of action and principle, lest virtue become a mask for corruption.",
+      "image": "quote_645.png",
+      "audio": "quote_645.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_646",
+      "quote": "Shishupala: The greatest sin is to mistake cruelty for strength, and treachery for cleverness.",
+      "sanskrit": "\u092f\u0926\u094d\u092f\u092f\u0902 \u091c\u0917\u0924\u0903 \u0915\u0930\u094d\u0924\u093e \u092f\u0925\u0948\u0928\u0902 \u092e\u0942\u0930\u094d\u0916 \u092e\u0928\u094d\u092f\u0938\u0947",
+      "reference": "Mahabharata, Shishupala Vadha Parva",
+      "meaning": "Shishupala condemns Krishna's tactics against Jarasandha, revealing how villains often rationalize their defeats by labeling noble strategies as 'trickery' while glorifying their own brutality.",
+      "lore_snippet": "Tyrants throughout history have called their victims deceitful for outsmarting them, while claiming their own violence proves superiority. But the wise know true power lies in restraint, not cruelty.",
+      "image": "quote_646.png",
+      "audio": "quote_646.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_647",
+      "quote": "An act done without progeny to inherit its fruits is like pouring water into sand\u2014labor without legacy.",
+      "sanskrit": "\u0938\u0930\u094d\u0935\u092e\u0947\u0924\u0926\u092a\u0924\u094d\u092f\u0938\u094d\u092f \u0915\u0932\u093e\u0902 \u0928\u093e\u0930\u094d\u0939\u0924\u093f \u0937\u094b\u0921\u0936\u0940\u092e\u094d",
+      "reference": "Mahabharata, Anushasana Parva (approximate)",
+      "meaning": "This critiques Bhishma's lifelong celibacy vow, suggesting even great austerities lose meaning if they sever the thread of lineage that carries wisdom forward.",
+      "lore_snippet": "The sages taught that deeds must plant seeds for forests we'll never see. A life lived only for itself, however virtuous, is but a single note in eternity's symphony.",
+      "image": "quote_647.png",
+      "audio": "quote_647.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

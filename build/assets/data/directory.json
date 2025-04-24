@@ -10250,6 +10250,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_604",
+      "quote": "Krishna: The righteous enter a foe's house without doors, but a friend's home only through the gate. This is the eternal vow of the virtuous.",
+      "sanskrit": "\u0905\u0926\u094d\u0935\u093e\u0930\u0947\u0923 \u0930\u093f\u092a\u094b\u0930\u094d\u0917\u0947\u0939\u0902 \u0926\u094d\u0935\u093e\u0930\u0947\u0923 \u0938\u0941\u0939\u0943\u0926\u094b \u0917\u0943\u0939\u092e\u094d\u0964 \u092a\u094d\u0930\u0935\u093f\u0936\u0928\u094d\u0924\u093f \u0938\u0926\u093e \u0938\u0928\u094d\u0924\u094b \u0926\u094d\u0935\u093e\u0930\u0902 \u0928\u094b \u0935\u0930\u094d\u091c\u093f\u0924\u0902 \u0924\u0924\u0903\u0965",
+      "reference": "Mahabharata, Sabha Parva, Chapter 22",
+      "meaning": "Krishna explains that the virtuous may confront enemies directly (without formalities) but approach allies with proper respect (through doors), distinguishing between confrontation and alliance.",
+      "lore_snippet": "Ancient warriors knew: honor dictates different paths for foes and friends. To storm a rival's stronghold unbidden is duty, but to enter a brother's hall unannounced is dishonor. Such is the code of dharma.",
+      "image": "quote_604.png",
+      "audio": "quote_604.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_605",
+      "quote": "Jarasandha: When no wrong exists, vengeance becomes its own sin. Even a warrior stains his soul by striking the guiltless.",
+      "sanskrit": "\u0905\u0928\u093e\u0917\u0938\u093f \u092a\u094d\u0930\u0938\u0943\u091c\u0924\u093f \u0915\u094d\u0937\u0924\u094d\u0930\u093f\u092f\u094b\u093d\u092a\u093f \u0928 \u0938\u0902\u0936\u092f\u0903\u0964",
+      "reference": "Mahabharata, Sabha Parva, Chapter 22",
+      "meaning": "Jarasandha warns that attacking the innocent violates kshatriya dharma, turning just power into oppression.",
+      "lore_snippet": "The wise say a sword drawn without cause bleeds the wielder's honor. True strength lies not in might alone, but in discerning when to stay the blade.",
+      "image": "quote_605.png",
+      "audio": "quote_605.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

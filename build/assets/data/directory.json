@@ -10420,6 +10420,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_614",
+      "quote": "Arjuna: Strength is not in victory alone, but in knowing when to sheath your sword and seek wisdom.",
+      "sanskrit": "\u0928 \u0936\u0936\u093e\u0915 \u092c\u0943\u0939\u0928\u094d\u0924\u0938\u094d\u0924\u0941 \u0938\u094b\u0922\u0941\u0902 \u092a\u093e\u0923\u094d\u0921\u0935\u0935\u093f\u0915\u094d\u0930\u092e\u092e\u094d",
+      "reference": "Mahabharata, Digvijaya Parva, Chapter 25",
+      "meaning": "True power lies not just in conquest, but in recognizing when to stop fighting and embrace higher understanding.",
+      "lore_snippet": "The greatest warriors of Tamriel often speak of restraint as the companion of true strength. As the ancient Nords wrote: 'A blade kept in its scabbard may yet win more battles than one drawn in haste.'",
+      "image": "quote_614.png",
+      "audio": "quote_614.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_615",
+      "quote": "Bhagadatta: When friendship and duty align like stars, even kings bow to wisdom's call.",
+      "sanskrit": "\u092d\u0935\u093e\u0928\u094d\u092a\u093f\u0924\u0943\u0938\u0916\u093e \u091a\u0948\u0935 \u092a\u094d\u0930\u0940\u092f\u092e\u093e\u0923\u094b \u092e\u092f\u093e\u092a\u093f \u091a",
+      "reference": "Mahabharata, Digvijaya Parva, Chapter 24",
+      "meaning": "When one's obligations to friendship and dharma converge, even mighty rulers must honor this sacred intersection.",
+      "lore_snippet": "The old Altmeri proverb echoes this truth: 'The confluence of oath and affection creates currents even monarchs cannot swim against.' Such was the way of the ancient dragon priests.",
+      "image": "quote_615.png",
+      "audio": "quote_615.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_616",
+      "quote": "Victory travels not just with armies, but with the loyalty of conquered hearts.",
+      "sanskrit": "\u0924\u093e\u0928\u094d\u0935\u0936\u0947 \u0938\u094d\u0925\u093e\u092a\u092f\u093f\u0924\u094d\u0935\u093e \u0938 \u0930\u0924\u094d\u0928\u093e\u0928\u094d\u092f\u093e\u0926\u093e\u092f \u0938\u0930\u094d\u0935\u0936\u0903",
+      "reference": "Mahabharata, Digvijaya Parva, Chapter 26",
+      "meaning": "Lasting conquest comes not from subjugation, but from earning the allegiance of those once considered foes.",
+      "lore_snippet": "As the Redguards of Hammerfell teach their young: 'A castle built on fear will crumble, but one founded on respect shall endure through the eras.' This wisdom shaped the very walls of Orsinium.",
+      "image": "quote_616.png",
+      "audio": "quote_616.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

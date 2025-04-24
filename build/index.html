@@ -52,6 +52,52 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0..200">
+
+    <!-- Menu popup styles -->
+    <style>
+        .menu-popup {
+            position: absolute;
+            bottom: 120px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            min-width: 160px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-popup.show {
+            display: flex;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+    </style>
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -75,6 +121,24 @@
       "browserRequirements": "Requires JavaScript. Requires HTML5.",
       "softwareVersion": "1.0"
     }
+    </script>
+
+    <!-- WebLLM dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.78/dist/webllm.js"></script>
+    <!-- Debug Logger -->
+    <script src="assets/js/debug.js"></script>
+
+    <!-- Import WebLLM from ESM CDN -->
+    <script type="importmap">
+    {
+        "imports": {
+            "@mlc-ai/web-llm": "https://esm.run/@mlc-ai/web-llm@0.2.78"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as webllm from "@mlc-ai/web-llm";
+        window.webllm = webllm;
     </script>
 </head>
 <body>
@@ -104,6 +168,22 @@
                     </div>
                 </div>
                 
+                <!-- Menu popup for more options -->
+                <div class="menu-popup" id="menuPopup">
+                    <a href="games/" class="menu-item">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Play E-Ink Run</span>
+                    </a>
+                    <a href="#" class="menu-item" id="aboutLink">
+                        <i class="fas fa-info-circle"></i>
+                        <span>About</span>
+                    </a>
+                    <a href="#" class="menu-item" id="shareLink">
+                        <i class="fas fa-share-alt"></i>
+                        <span>Share</span>
+                    </a>
+                </div>
+                
                 <!-- Caption and controls container for alignment -->
                 <div class="bottom-controls-container">
                     <!-- Animated Text Container -->
@@ -125,10 +205,60 @@
                         <div class="control-icon" id="autoplayBtn" tabindex="0" role="button" aria-label="Toggle autoplay">
                             <i class="fas fa-play"></i>
                         </div>
-                        <div class="control-icon" tabindex="0" role="button" aria-label="More options">
+                        <div class="control-icon" id="moreOptionsBtn" tabindex="0" role="button" aria-label="More options">
                             <i class="fas fa-ellipsis-h"></i>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chat Button -->
+    <button id="chat-button" class="floating-button">
+        <span class="material-symbols-rounded">chat</span>
+    </button>
+    
+    <!-- Chat Modal -->
+    <div id="chat-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chat About This Fact</h3>
+                <button id="close-chat" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Model Selection -->
+                <div id="model-status">
+                    <select id="model-selector">
+                        <option value="gemma-2b-it-q4f16_1">Gemma 2B</option>
+                        <option value="Llama-3-8B-Instruct-q4f16_1">Llama 3 8B</option>
+                        <option value="Phi-3-mini-4k-instruct-q4f16_1">Phi-3 Mini</option>
+                    </select>
+                    <button id="load-model-button">Load Model</button>
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div id="model-loading" class="hidden">
+                    <div class="spinner"></div>
+                    <div id="loading-message">Loading model...</div>
+                    <div id="loading-progress">0%</div>
+                </div>
+                
+                <!-- Chat Messages -->
+                <div id="chat-messages">
+                    <div class="message system-message">
+                        <div class="message-content">
+                            Select and load a model to start chatting about the current fact!
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Input -->
+                <div class="chat-input-container">
+                    <textarea id="chat-input" placeholder="Ask about this fact..." disabled></textarea>
+                    <button id="send-message" disabled>
+                        <span class="material-symbols-rounded">send</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -140,6 +270,8 @@
     <script src="assets/js/quotes.js"></script>
     <script src="assets/js/animated-subtitles.js"></script>
     <script src="assets/js/pwa.js"></script>
+    <script src="assets/js/webllm-engine.js"></script>
+    <script src="assets/js/chat-ui.js"></script>
     <!-- Tests (only loaded in development) -->
     <script>
         // Only load tests in development environment
@@ -160,6 +292,57 @@
                     }, 500);
                 }
             }, 1500); // Show splash for at least 1.5 seconds
+        });
+        
+        // Menu popup functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const moreOptionsBtn = document.getElementById('moreOptionsBtn');
+            const menuPopup = document.getElementById('menuPopup');
+            
+            // Toggle menu popup
+            moreOptionsBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                menuPopup.classList.toggle('show');
+            });
+            
+            // Close menu when clicking elsewhere
+            document.addEventListener('click', function(e) {
+                if (!menuPopup.contains(e.target) && !moreOptionsBtn.contains(e.target)) {
+                    menuPopup.classList.remove('show');
+                }
+            });
+            
+            // Handle about link
+            document.getElementById('aboutLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Mentria.AI - An AI-driven platform featuring educational facts and games.');
+                menuPopup.classList.remove('show');
+            });
+            
+            // Handle share link
+            document.getElementById('shareLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Mentria.AI',
+                        text: 'Check out this amazing AI-driven platform!',
+                        url: window.location.href
+                    })
+                    .catch(err => console.error('Error sharing:', err));
+                } else {
+                    // Fallback for browsers without Web Share API
+                    const tempInput = document.createElement('input');
+                    tempInput.value = window.location.href;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    alert('URL copied to clipboard!');
+                }
+                
+                menuPopup.classList.remove('show');
+            });
         });
     </script>
 </body>

@@ -34,6 +34,33 @@ class QuoteManager {
         this.debug.log('QuoteManager initialized');
         
         this.init();
+        
+        // Make this instance accessible globally
+        window.quoteNavigation = {
+            nextQuote: this.nextQuote.bind(this),
+            prevQuote: this.prevQuote.bind(this),
+            isNavigating: () => this.isNavigating,
+            getCurrentQuoteId: () => {
+                if (!this.quotes || !this.quotes[this.currentQuoteIndex]) {
+                    return null;
+                }
+                
+                const currentQuote = this.quotes[this.currentQuoteIndex];
+                return currentQuote.id || `quote_${this.currentQuoteIndex + 1}`;
+            }
+        };
+        
+        // Also expose current quote ID directly for compatibility
+        Object.defineProperty(window, 'currentQuoteId', {
+            get: () => {
+                if (!this.quotes || !this.quotes[this.currentQuoteIndex]) {
+                    return null;
+                }
+                
+                const currentQuote = this.quotes[this.currentQuoteIndex];
+                return currentQuote.id || `quote_${this.currentQuoteIndex + 1}`;
+            }
+        });
     }
     
     async init() {

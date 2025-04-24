@@ -329,4 +329,299 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Initialize chat functionality
+    initializeChatUI();
+});
+
+// Initialize chat functionality
+function initializeChatUI() {
+    const chatButton = document.getElementById('chat-button');
+    const chatModal = document.getElementById('chat-modal');
+    const closeChat = document.getElementById('close-chat');
+    const loadModelButton = document.getElementById('load-model-button');
+    const modelSelector = document.getElementById('model-selector');
+    const modelLoading = document.getElementById('model-loading');
+    const loadingMessage = document.getElementById('loading-message');
+    const loadingProgress = document.getElementById('loading-progress');
+    const chatInput = document.getElementById('chat-input');
+    const sendMessageButton = document.getElementById('send-message');
+    const chatMessages = document.getElementById('chat-messages');
+    
+    let modelLoaded = false;
+    
+    // Open chat modal
+    chatButton.addEventListener('click', () => {
+        chatModal.classList.remove('hidden');
+    });
+    
+    // Close chat modal
+    closeChat.addEventListener('click', () => {
+        chatModal.classList.add('hidden');
+    });
+    
+    // Load selected model
+    loadModelButton.addEventListener('click', async () => {
+        if (modelLoaded) {
+            addSystemMessage('Model already loaded and ready to use!');
+            return;
+        }
+        
+        const selectedModel = modelSelector.value;
+        
+        if (!selectedModel) {
+            addSystemMessage('Please select a model first.', true);
+            return;
+        }
+        
+        try {
+            // Disable inputs during loading
+            modelSelector.disabled = true;
+            loadModelButton.disabled = true;
+            modelLoading.classList.remove('hidden');
+            
+            // Initialize WebLLM
+            const success = await webLLMEngine.initialize(selectedModel, {
+                onInit: (msg) => {
+                    loadingMessage.textContent = msg;
+                    loadingProgress.textContent = '0%';
+                },
+                onProgress: (progress) => {
+                    if (progress.progress) {
+                        const percent = Math.round(progress.progress * 100);
+                        loadingProgress.textContent = `${percent}%`;
+                        
+                        if (progress.text) {
+                            loadingMessage.textContent = progress.text;
+                        }
+                    }
+                },
+                onLoad: (msg) => {
+                    modelLoaded = true;
+                    loadingMessage.textContent = msg;
+                    loadingProgress.textContent = '100%';
+                    
+                    // Enable chat after model load
+                    chatInput.disabled = false;
+                    sendMessageButton.disabled = false;
+                    
+                    // Add system message
+                    addSystemMessage('Model loaded successfully! You can now chat about the current fact.');
+                    
+                    // Hide loading indicator after a delay
+                    setTimeout(() => {
+                        modelLoading.classList.add('hidden');
+                    }, 1500);
+                },
+                onError: (errMsg) => {
+                    addSystemMessage(`Error loading model: ${errMsg}`, true);
+                    
+                    // Re-enable inputs
+                    modelSelector.disabled = false;
+                    loadModelButton.disabled = false;
+                    modelLoading.classList.add('hidden');
+                }
+            });
+            
+            if (!success) {
+                modelSelector.disabled = false;
+                loadModelButton.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error initializing model:', error);
+            addSystemMessage(`Error: ${error.message || 'Unknown error'}`, true);
+            
+            // Re-enable inputs
+            modelSelector.disabled = false;
+            loadModelButton.disabled = false;
+            modelLoading.classList.add('hidden');
+        }
+    });
+    
+    // Send message
+    function sendMessage() {
+        const message = chatInput.value.trim();
+        
+        if (!message) return;
+        
+        if (!modelLoaded) {
+            addSystemMessage('Please load a model first before sending a message.', true);
+            return;
+        }
+        
+        // Add user message to chat
+        addUserMessage(message);
+        
+        // Clear input
+        chatInput.value = '';
+        chatInput.style.height = '50px';
+        
+        // Disable inputs during generation
+        chatInput.disabled = true;
+        sendMessageButton.disabled = true;
+        
+        // Current response text
+        let currentResponseText = '';
+        
+        // Generate response
+        webLLMEngine.generateResponse(message, (token) => {
+            // Handle first token
+            if (currentResponseText === '') {
+                addAIMessage('');
+            }
+            
+            // Append token
+            currentResponseText += token;
+            
+            // Update the most recent AI message
+            updateLatestAIMessage(currentResponseText);
+            
+            // Scroll to bottom
+            scrollToBottom();
+        }).then(() => {
+            // Re-enable inputs after generation
+            chatInput.disabled = false;
+            sendMessageButton.disabled = false;
+            chatInput.focus();
+        }).catch((error) => {
+            console.error('Error generating response:', error);
+            
+            // Add error message
+            addSystemMessage(`Error generating response: ${error.message || 'Unknown error'}`, true);
+            
+            // Re-enable inputs
+            chatInput.disabled = false;
+            sendMessageButton.disabled = false;
+        });
+    }
+    
+    // Send message button click
+    sendMessageButton.addEventListener('click', sendMessage);
+    
+    // Send message on Enter (but not with Shift)
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+    
+    // Auto-resize textarea
+    chatInput.addEventListener('input', () => {
+        chatInput.style.height = '50px';
+        chatInput.style.height = `${Math.min(chatInput.scrollHeight, 150)}px`;
+    });
+    
+    // Add system message to chat
+    function addSystemMessage(text, isError = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', 'system-message');
+        
+        if (isError) {
+            messageDiv.classList.add('error');
+        }
+        
+        messageDiv.innerHTML = `
+            <div class="message-content">${text}</div>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    // Add user message to chat
+    function addUserMessage(text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', 'user-message');
+        
+        messageDiv.innerHTML = `
+            <div class="message-header">You</div>
+            <div class="message-content">${escapeHTML(text)}</div>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    // Add AI message to chat
+    function addAIMessage(text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', 'ai-message');
+        
+        messageDiv.innerHTML = `
+            <div class="message-header">AI</div>
+            <div class="message-content">${escapeHTML(text)}</div>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    // Update the latest AI message content
+    function updateLatestAIMessage(text) {
+        const aiMessages = chatMessages.querySelectorAll('.ai-message');
+        if (aiMessages.length > 0) {
+            const latestMessage = aiMessages[aiMessages.length - 1];
+            const contentDiv = latestMessage.querySelector('.message-content');
+            if (contentDiv) {
+                contentDiv.textContent = text;
+            }
+        }
+    }
+    
+    // Scroll chat to bottom
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Escape HTML to prevent XSS
+    function escapeHTML(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+// Add floating chat button styles
+function addChatButtonStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+    .floating-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background-color: #4a86e8;
+        color: white;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+    
+    .floating-button:hover {
+        background-color: #3b78e7;
+        transform: scale(1.05);
+    }
+    
+    .floating-button .material-symbols-rounded {
+        font-size: 24px;
+    }
+    `;
+    document.head.appendChild(style);
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing initialization code ...
+    
+    // Initialize chat UI
+    addChatButtonStyles();
+    initializeChatUI();
 }); 

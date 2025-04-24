@@ -45,8 +45,8 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache or network
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) {
+  // Skip cross-origin requests and non-GET requests
+  if (!event.request.url.startsWith(self.location.origin) || event.request.method !== 'GET') {
     return;
   }
 
@@ -82,8 +82,15 @@ async function fetchWithNetworkFirst(request) {
     const networkResponse = await fetch(request);
     const cache = await caches.open(CACHE_NAME);
     
-    // Update cache with fresh response
-    cache.put(request, networkResponse.clone());
+    // Only cache successful, non-partial responses from GET requests
+    if (request.method === 'GET' && networkResponse.ok && networkResponse.status !== 206) {
+      try {
+        await cache.put(request, networkResponse.clone());
+      } catch (cacheError) {
+        console.error('Service Worker: Caching failed:', cacheError);
+      }
+    }
+    
     return networkResponse;
   } catch (error) {
     // If network fails, try to get from cache
@@ -106,8 +113,17 @@ async function fetchWithCacheFirst(request) {
   // If not in cache, fetch from network and cache
   try {
     const networkResponse = await fetch(request);
-    const cache = await caches.open(CACHE_NAME);
-    cache.put(request, networkResponse.clone());
+    
+    // Only cache successful, non-partial responses from GET requests
+    if (request.method === 'GET' && networkResponse.ok && networkResponse.status !== 206) {
+      const cache = await caches.open(CACHE_NAME);
+      try {
+        await cache.put(request, networkResponse.clone());
+      } catch (cacheError) {
+        console.error('Service Worker: Caching failed:', cacheError);
+      }
+    }
+    
     return networkResponse;
   } catch (error) {
     console.error('Service Worker: Network fetch failed', error);
@@ -128,7 +144,14 @@ async function fetchWithStaleWhileRevalidate(request) {
   
   // Fetch and update cache in background
   const fetchPromise = fetch(request).then(response => {
-    cache.put(request, response.clone());
+    // Only cache successful, non-partial responses from GET requests
+    if (request.method === 'GET' && response.ok && response.status !== 206) {
+      try {
+        cache.put(request, response.clone());
+      } catch (cacheError) {
+        console.error('Service Worker: Caching failed:', cacheError);
+      }
+    }
     return response;
   }).catch(error => {
     console.error('Service Worker: Fetch failed', error);
@@ -158,19 +181,13 @@ async function syncLikes() {
     // Process each pending like
     for (const like of pendingLikes) {
       try {
-        // Here you'd normally make an API call
-        // For this demo, we'll just update localStorage
-        let likedQuotes = JSON.parse(localStorage.getItem('likedQuotes') || '[]');
-        
+        // Here you'd normally make an API call to your backend
+        // For this demo, we'll just update the liked status in IndexedDB
         if (like.action === 'add') {
-          if (!likedQuotes.includes(like.quoteId)) {
-            likedQuotes.push(like.quoteId);
-          }
+          await addLikedQuoteToDB(like.quoteId);
         } else if (like.action === 'remove') {
-          likedQuotes = likedQuotes.filter(id => id !== like.quoteId);
+          await removeLikedQuoteFromDB(like.quoteId);
         }
-        
-        localStorage.setItem('likedQuotes', JSON.stringify(likedQuotes));
         
         // Remove from pending after successful processing
         await removePendingLikeFromDB(like.id);
@@ -180,22 +197,135 @@ async function syncLikes() {
     }
   } catch (error) {
     console.error('Failed to sync likes:', error);
-    throw error;
   }
 }
 
-// IndexedDB mock functions (replace with actual implementation)
-async function getPendingLikesFromDB() {
-  // Mock implementation - would use actual IndexedDB in production
-  const pendingStr = localStorage.getItem('pendingLikes');
-  return pendingStr ? JSON.parse(pendingStr) : [];
+// IndexedDB implementation
+const DB_NAME = 'mentria_quotes_db';
+const DB_VERSION = 1;
+const LIKES_STORE = 'liked_quotes';
+const PENDING_STORE = 'pending_likes';
+
+// Open the database
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    
+    request.onerror = event => {
+      console.error('Error opening IndexedDB:', event.target.error);
+      reject(event.target.error);
+    };
+    
+    request.onsuccess = event => {
+      resolve(event.target.result);
+    };
+    
+    request.onupgradeneeded = event => {
+      const db = event.target.result;
+      
+      // Create stores if they don't exist
+      if (!db.objectStoreNames.contains(LIKES_STORE)) {
+        db.createObjectStore(LIKES_STORE, { keyPath: 'quoteId' });
+      }
+      
+      if (!db.objectStoreNames.contains(PENDING_STORE)) {
+        db.createObjectStore(PENDING_STORE, { keyPath: 'id' });
+      }
+    };
+  });
 }
 
+// Get pending likes from IndexedDB
+async function getPendingLikesFromDB() {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(PENDING_STORE, 'readonly');
+      const store = transaction.objectStore(PENDING_STORE);
+      const request = store.getAll();
+      
+      request.onsuccess = () => {
+        resolve(request.result || []);
+      };
+      
+      request.onerror = event => {
+        console.error('Error getting pending likes:', event.target.error);
+        reject(event.target.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error accessing IndexedDB:', error);
+    return [];
+  }
+}
+
+// Remove pending like from IndexedDB
 async function removePendingLikeFromDB(id) {
-  // Mock implementation - would use actual IndexedDB in production
-  const pending = await getPendingLikesFromDB();
-  const filtered = pending.filter(like => like.id !== id);
-  localStorage.setItem('pendingLikes', JSON.stringify(filtered));
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(PENDING_STORE, 'readwrite');
+      const store = transaction.objectStore(PENDING_STORE);
+      const request = store.delete(id);
+      
+      request.onsuccess = () => {
+        resolve();
+      };
+      
+      request.onerror = event => {
+        console.error('Error removing pending like:', event.target.error);
+        reject(event.target.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error accessing IndexedDB:', error);
+  }
+}
+
+// Add liked quote to IndexedDB
+async function addLikedQuoteToDB(quoteId) {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(LIKES_STORE, 'readwrite');
+      const store = transaction.objectStore(LIKES_STORE);
+      const request = store.put({ quoteId, timestamp: Date.now() });
+      
+      request.onsuccess = () => {
+        resolve();
+      };
+      
+      request.onerror = event => {
+        console.error('Error adding liked quote:', event.target.error);
+        reject(event.target.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error accessing IndexedDB:', error);
+  }
+}
+
+// Remove liked quote from IndexedDB
+async function removeLikedQuoteFromDB(quoteId) {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(LIKES_STORE, 'readwrite');
+      const store = transaction.objectStore(LIKES_STORE);
+      const request = store.delete(quoteId);
+      
+      request.onsuccess = () => {
+        resolve();
+      };
+      
+      request.onerror = event => {
+        console.error('Error removing liked quote:', event.target.error);
+        reject(event.target.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error accessing IndexedDB:', error);
+  }
 }
 
 // Precaching of quotes
@@ -204,7 +334,20 @@ self.addEventListener('message', (event) => {
     const urls = event.data.urls;
     event.waitUntil(
       caches.open(CACHE_NAME).then((cache) => {
-        return cache.addAll(urls);
+        return Promise.all(
+          urls.map(url => {
+            return fetch(url).then(response => {
+              // Only cache successful, non-partial responses
+              if (response.ok && response.status !== 206) {
+                return cache.put(url, response);
+              }
+              return Promise.resolve();
+            }).catch(error => {
+              console.error(`Service Worker: Failed to cache ${url}:`, error);
+              return Promise.resolve();
+            });
+          })
+        );
       })
     );
   }

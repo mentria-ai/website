@@ -15,13 +15,27 @@ document.addEventListener('DOMContentLoaded', function() {
   setupPrecaching();
 });
 
-// Register service worker
+// Register service worker for offline functionality
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
+      // Use a relative path instead of absolute path
+      navigator.serviceWorker.register('./service-worker.js')
         .then(registration => {
-          console.log('PWA: Service Worker registered successfully with scope:', registration.scope);
+          console.log('PWA: Service Worker registered with scope:', registration.scope);
+          
+          // Handle updates
+          registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed') {
+                if (navigator.serviceWorker.controller) {
+                  // New update available
+                  showUpdateNotification();
+                }
+              }
+            };
+          };
         })
         .catch(error => {
           console.error('PWA: Service Worker registration failed:', error);
@@ -283,7 +297,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Override with new handler
     likeBtn.onclick = function(e) {
       // Get current quote ID from the page
-      const currentQuoteId = window.quoteNavigation ? window.quoteNavigation.getCurrentQuoteId() : null;
+      // Access the current quote ID directly from the main.js variable
+      const currentQuoteId = window.currentQuoteId || document.querySelector('.media-container')?.dataset?.quoteId;
       
       if (currentQuoteId) {
         // Determine if we're liking or unliking

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>Mentria.AI - Chat Interface</title>
+    <meta name="title" content="Mentria.AI - AI Chat Interface">
+    <meta name="description" content="Chat with Mentria AI - Browser-based LLM powered by WebLLM">
+    <meta name="keywords" content="AI chat, artificial intelligence, chatbot, mentria">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="author" content="Mentria.AI">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mentria.ai/chat/">
+    <meta property="og:title" content="Mentria.AI - AI Chat Interface">
+    <meta property="og:description" content="Chat with Mentria AI - Your intelligent conversation partner for knowledge, creativity and assistance.">
+    <meta property="og:image" content="../assets/img/mentria-ai.gif">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://mentria.ai/chat/">
+    <meta property="twitter:title" content="Mentria.AI - AI Chat Interface">
+    <meta property="twitter:description" content="Chat with Mentria AI - Your intelligent conversation partner for knowledge, creativity and assistance.">
+    <meta property="twitter:image" content="../assets/img/mentria-ai.gif">
+
+    <!-- PWA Support -->
+    <meta name="theme-color" content="#ffffff">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Mentria.AI Chat">
+    <link rel="apple-touch-icon" href="../assets/img/favicon-96x96.png">
+    <link rel="manifest" href="../manifest.json">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="96x96" href="../assets/img/favicon-96x96.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/pwa.css">
+    <link rel="stylesheet" href="../assets/css/chat.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Use our simple-llm.js as a fallback when WebLLM fails to load -->
+    <script src="assets/lib/simple-llm.js"></script>
+    
+    <!-- Direct include of WebLLM as additional fallback -->
+    <script src="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.78/dist/webllm.js"></script>
+    
+    <!-- Use the official WebLLM library -->
+    <script type="module">
+        // Try to import the official WebLLM
+        try {
+            const importWebLLM = async () => {
+                try {
+                    // Try first CDN option
+                    const webllm = await import("https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.78/dist/webllm.js");
+                    window.officialWebLLM = webllm;
+                    console.log("WebLLM loaded from jsdelivr CDN");
+                    return true;
+                } catch (e) {
+                    console.warn("Failed to load from jsdelivr, trying unpkg", e);
+                    try {
+                        // Try second CDN option
+                        const webllm = await import("https://unpkg.com/@mlc-ai/web-llm@0.2.78/dist/webllm.js");
+                        window.officialWebLLM = webllm;
+                        console.log("WebLLM loaded from unpkg CDN");
+                        return true;
+                    } catch (e2) {
+                        console.error("Failed to load WebLLM from all CDNs", e2);
+                        return false;
+                    }
+                }
+            };
+
+            importWebLLM().then(success => {
+                if (success && window.officialWebLLM) {
+                    // Replace the mock with the official implementation
+                    window.webllm = window.officialWebLLM;
+                    console.log("Using official WebLLM library");
+                } else {
+                    console.warn("Falling back to simplified LLM implementation");
+                }
+            });
+        } catch (error) {
+            console.error("Error loading WebLLM:", error);
+        }
+
+        // Add this script to initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize file upload functionality
+            const fileUploadArea = document.getElementById('file-upload-area');
+            const fileInput = document.getElementById('model-file-input');
+            
+            if (fileUploadArea && fileInput) {
+                // Handle drag and drop
+                fileUploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    fileUploadArea.classList.add('drag-over');
+                });
+                
+                fileUploadArea.addEventListener('dragleave', () => {
+                    fileUploadArea.classList.remove('drag-over');
+                });
+                
+                fileUploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    fileUploadArea.classList.remove('drag-over');
+                    
+                    if (e.dataTransfer.files.length > 0) {
+                        handleModelFiles(e.dataTransfer.files);
+                    }
+                });
+                
+                // Handle file input change
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handleModelFiles(e.target.files);
+                    }
+                });
+                
+                // Handle click on upload area
+                fileUploadArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+            }
+            
+            // Function to handle uploaded model files
+            function handleModelFiles(files) {
+                const statusElement = document.getElementById('upload-status');
+                if (statusElement) {
+                    statusElement.textContent = `Processing ${files.length} files...`;
+                }
+                
+                // Create URLs for the uploaded files
+                const fileUrls = Array.from(files).map(file => {
+                    return {
+                        name: file.name,
+                        url: URL.createObjectURL(file)
+                    };
+                });
+                
+                // Log the uploaded files
+                console.log("Uploaded model files:", fileUrls);
+                
+                // You'd need to implement the logic to load these models
+                // This is where you'd use the WebLLM API to load a model from these URLs
+                if (statusElement) {
+                    statusElement.textContent = `${files.length} files ready for use`;
+                }
+                
+                // Add the model to the dropdown
+                const selectElement = document.getElementById('model-select');
+                if (selectElement) {
+                    const newOption = document.createElement('option');
+                    newOption.value = 'local-model';
+                    newOption.textContent = 'Local Model';
+                    newOption.selected = true;
+                    selectElement.appendChild(newOption);
+                }
+            }
+        });
+    </script>
+    
+    <style>
+        /* Styles for file upload functionality */
+        .file-upload-container {
+            margin-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload-area:hover, .file-upload-area.drag-over {
+            background-color: rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .file-upload-area i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .file-upload-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .upload-status {
+            margin-top: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        #model-file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Model Loading UI -->
+    <div id="model-loading">
+        <div class="model-loading-content">
+            <div class="model-loading-title" id="loading-model-name">Loading Model...</div>
+            <div class="model-loading-status" id="loading-status">Initializing</div>
+            <div class="model-loading-detail" id="loading-detail">Preparing to download the model</div>
+            <div class="model-progress">
+                <div class="model-progress-bar" id="model-progress-bar"></div>
+            </div>
+            <div class="model-note">This may take a few minutes depending on your internet connection and device.</div>
+        </div>
+    </div>
+    
+    <!-- Splash Screen for PWA -->
+    <div class="splash-screen" id="splash-screen">
+        <img src="../assets/img/favicon-96x96.png" alt="Mentria.AI Logo" class="splash-logo">
+        <div class="splash-text">Mentria.AI Chat</div>
+        <div class="splash-loading"></div>
+    </div>
+    
+    <div class="chat-container">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="chat-title">Chat with Mentria AI</div>
+            <div class="header-actions">
+                <div class="control-icon" id="clearChatBtn" tabindex="0" role="button" aria-label="Clear chat">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <div class="control-icon" id="moreOptionsBtn" tabindex="0" role="button" aria-label="More options">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menu popup for more options -->
+        <div class="menu-popup" id="menuPopup">
+            <a href="../" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Back to Home</span>
+            </a>
+            <a href="../games/" class="menu-item">
+                <i class="fas fa-gamepad"></i>
+                <span>Play E-Ink Run</span>
+            </a>
+            <a href="#" class="menu-item" id="aboutLink">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </a>
+            <a href="#" class="menu-item" id="shareLink">
+                <i class="fas fa-share-alt"></i>
+                <span>Share</span>
+            </a>
+        </div>
+        
+        <!-- Model Selector UI -->
+        <div class="model-selector">
+            <div class="model-selector-title">Choose an AI Model</div>
+            <div class="model-selector-content">
+                <div class="model-select-group">
+                    <label class="model-select-label">Select a Model:</label>
+                    <select id="model-select" class="model-select">
+                        <option value="Phi-2">Phi-2 (Small)</option>
+                        <option value="Gemma-2b-it-GPTQ">Gemma 2B</option>
+                        <option value="Llama-3.1-8B-Instruct-q4f32_1-MLC">Llama 3 (8B Instruct)</option>
+                    </select>
+                </div>
+                <button id="load-model-btn" class="load-model-btn">Load Model</button>
+                
+                <!-- File upload area for local models -->
+                <div class="file-upload-container">
+                    <div class="file-upload-area" id="file-upload-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div class="file-upload-text">Drop model files here or click to upload</div>
+                        <input type="file" id="model-file-input" multiple accept=".bin,.json,.wasm">
+                    </div>
+                    <div class="upload-status" id="upload-status">No files uploaded</div>
+                </div>
+                
+                <div class="model-note">
+                    Models run 100% locally in your browser. First load will download the model files (~500MB-1GB).
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Messages -->
+        <div class="chat-messages" id="chatMessages">
+            <!-- AI welcome message -->
+            <div class="chat-message ai-message">
+                <div class="message-avatar">
+                    <img src="../assets/img/ai-avatar.png" alt="AI">
+                </div>
+                <div class="message-content">
+                    Hello! I'm Mentria AI. Please load a model using the selector above to start chatting with me. You can also upload model files directly using the upload area below the model selector.
+                </div>
+                <div class="message-time">Just now</div>
+            </div>
+        </div>
+        
+        <!-- Chat Input Area -->
+        <div class="chat-input-container">
+            <textarea class="chat-input" id="messageInput" placeholder="Type your message..." rows="1" aria-label="Type a message"></textarea>
+            <button class="send-button" id="sendButton" aria-label="Send message">
+                <i class="fas fa-paper-plane" style="color: white;"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="../assets/js/debug.js"></script>
+    <script src="../assets/js/webllm-engine.js"></script>
+    <script src="../assets/js/chat.js"></script>
+    
+    <!-- Fallback script to ensure WebLLM is available -->
+    <script>
+        // Wait for document to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if global WebLLM is available from the script tag
+            if (typeof WebLLM !== 'undefined' && window.webLLMEngine) {
+                console.log("Found global WebLLM object, ensuring engine is properly configured");
+                // Make sure our engine knows about the WebLLM library
+                window.webLLMEngine.setLibraryAvailable();
+            }
+        });
+    </script>
+</body>
+</html>

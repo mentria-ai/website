@@ -10590,6 +10590,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_624",
+      "quote": "Sahadeva: Fire tests the pure and spares the righteous, as the ocean respects its shores.",
+      "sanskrit": "\u0928 \u091a\u0948\u0928\u092e\u0924\u094d\u092f\u0917\u093e\u0926\u094d\u0935\u0939\u094d\u0928\u093f\u0930\u094d\u0935\u0947\u0932\u093e\u092e\u093f\u0935 \u092e\u0939\u094b\u0926\u0927\u093f\u0903",
+      "reference": "Mahabharata, Sabha Parva, Chapter 29",
+      "meaning": "Fire (Agni) recognizes the virtue of Sahadeva and does not harm him, just as the ocean never crosses its boundaries. This symbolizes divine protection for the righteous.",
+      "lore_snippet": "Ancient texts speak of Agni as both destroyer and witness. Like the ocean restrained by Dharma's shores, it spares those who walk the path of purity, proving fire bows to wisdom greater than flame.",
+      "image": "quote_624.png",
+      "audio": "quote_624.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_625",
+      "quote": "Conquest by valor and wisdom alike leaves kings as tributaries to Dharma.",
+      "sanskrit": "\u090f\u0935\u0902 \u0928\u093f\u0930\u094d\u091c\u093f\u0924\u094d\u092f \u0924\u0930\u0938\u093e \u0938\u093e\u0928\u094d\u0924\u094d\u0935\u0947\u0928 \u0935\u093f\u091c\u092f\u0947\u0928 \u091a",
+      "reference": "Mahabharata, Sabha Parva, Chapter 29",
+      "meaning": "Sahadeva subdues kingdoms through both force (valor) and diplomacy (wisdom), showing true victory lies in upholding cosmic order.",
+      "lore_snippet": "The southern campaign teaches that lands won by sword alone rebel, while those tempered by wisdom's conciliation endure. Thus the wise collect both tribute and loyalty.",
+      "image": "quote_625.png",
+      "audio": "quote_625.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

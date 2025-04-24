@@ -9332,6 +9332,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_550",
+      "quote": "Vasudeva: The fire of knowledge burns away ignorance, just as Agni consumes the forest. Seek wisdom, and you shall be free.",
+      "sanskrit": "\u092a\u093e\u0935\u0915\u0936\u094d\u091a\u093e\u092a\u093f \u0924\u0902 \u0926\u093e\u0935\u0902 \u0926\u0917\u094d\u0927\u094d\u0935\u093e \u0938\u092e\u0943\u0917\u092a\u0915\u094d\u0937\u093f\u0923\u092e\u094d",
+      "reference": "Mahabharata, Sabha Parva, Chapter 2",
+      "meaning": "This quote symbolizes the transformative power of knowledge, which destroys ignorance like fire consumes a forest.",
+      "lore_snippet": "Ancient texts speak of Agni as both destroyer and purifier. Those who embrace wisdom find their illusions burned away, leaving only truth behind\u2014just as a wildfire clears the forest for new growth.",
+      "image": "quote_550.png",
+      "audio": "quote_550.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_551",
+      "quote": "Arjuna: True gratitude requires no repayment, but the wise honor it with an open heart.",
+      "sanskrit": "\u092a\u094d\u0930\u093e\u0923\u0915\u0943\u091a\u094d\u091b\u094d\u0930\u093e\u0926\u094d\u0935\u093f\u092e\u0941\u0915\u094d\u0924\u0902 \u0924\u094d\u0935\u092e\u093e\u0924\u094d\u092e\u093e\u0928\u0902 \u092e\u0928\u094d\u092f\u0938\u0947 \u092e\u092f\u093e",
+      "reference": "Mahabharata, Sabha Parva, Chapter 2",
+      "meaning": "Arjuna teaches that genuine acts of kindness should not seek reward, but the virtuous still acknowledge and honor them.",
+      "lore_snippet": "In the courts of kings and the huts of sages, debts of the soul are repaid not in gold, but in mutual respect. Thus do bonds between allies strengthen like tempered steel.",
+      "image": "quote_551.png",
+      "audio": "quote_551.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_552",
+      "quote": "Maya: The greatest creations arise when divine will and mortal skill unite.",
+      "sanskrit": "\u0905\u0939\u0902 \u0939\u093f \u0935\u093f\u0936\u094d\u0935\u0915\u0930\u094d\u092e\u093e \u0935\u0948 \u0926\u093e\u0928\u0935\u093e\u0928\u093e\u0902 \u092e\u0939\u093e\u0915\u0935\u093f\u0903",
+      "reference": "Mahabharata, Sabha Parva, Chapter 2",
+      "meaning": "The architect Maya recognizes that extraordinary achievements occur when celestial guidance meets earthly craftsmanship.",
+      "lore_snippet": "Legend tells of halls built by gods and asuras working in harmony\u2014their pillars carved with stars, their thresholds singing with wind. Such wonders fade when pride divides maker from maker.",
+      "image": "quote_552.png",
+      "audio": "quote_552.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

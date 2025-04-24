@@ -10063,6 +10063,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_593",
+      "quote": "Krishna: Death comes unannounced, be it night or day. No immortal exists, not even one who conquers through battle.",
+      "sanskrit": "\u0928 \u092e\u0943\u0924\u094d\u092f\u094b\u0903 \u0938\u092e\u092f\u0902 \u0935\u093f\u0926\u094d\u092e \u0930\u093e\u0924\u094d\u0930\u094c \u0935\u093e \u092f\u0926\u093f \u0935\u093e \u0926\u093f\u0935\u093e\u0964 \u0928 \u091a\u093e\u092a\u093f \u0915\u091e\u094d\u091a\u093f\u0926\u092e\u0930\u092e\u092f\u0941\u0926\u094d\u0927\u0947\u0928\u093e\u092a\u093f \u0936\u0941\u0936\u094d\u0930\u0941\u092e\u0903\u0965",
+      "reference": "Mahabharata, Sabha Parva, Chapter 22",
+      "meaning": "Krishna reminds us that death is inevitable and unpredictable, and that even the mightiest warriors cannot escape it.",
+      "lore_snippet": "Even the greatest warriors must face mortality. The wise prepare not for endless life, but for a life well-lived, knowing that time favors no one.",
+      "image": "quote_593.png",
+      "audio": "quote_593.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_594",
+      "quote": "The true measure of a person lies not in lineage or wealth, but in their courage and deeds that outlive them.",
+      "sanskrit": "\u0915\u0941\u0932\u0947 \u091c\u0928\u094d\u092e \u092a\u094d\u0930\u0936\u0902\u0938\u0928\u094d\u0924\u093f... \u0938\u0930\u094d\u0935\u0948\u0930\u092a\u093f \u0917\u0941\u0923\u0948\u0930\u094d\u092f\u0941\u0915\u094d\u0924\u094b \u0928\u093f\u0930\u094d\u0935\u0940\u0930\u094d\u092f\u0903 \u0915\u093f\u0902 \u0915\u0930\u093f\u0937\u094d\u092f\u0924\u093f\u0965",
+      "reference": "Mahabharata, Sabha Parva, Chapter 22",
+      "meaning": "While birth in a noble family is praised, true worth is demonstrated through one's actions and inner strength.",
+      "lore_snippet": "A royal pedigree means little without valor to uphold it. History remembers not who you were born as, but what you dared to become.",
+      "image": "quote_594.png",
+      "audio": "quote_594.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_595",
+      "quote": "Yudhishthira: A ruler who seeks victory must abandon both despair in weakness and delusion in strength.",
+      "sanskrit": "\u0926\u0948\u0928\u094d\u092f\u0902 \u092f\u0925\u093e\u092c\u0932\u0935\u0924\u093f \u0924\u0925\u093e \u092e\u094b\u0939\u094b \u092c\u0932\u093e\u0928\u094d\u0935\u093f\u0924\u0947\u0964 \u0924\u093e\u0935\u0941\u092d\u094c \u0928\u093e\u0936\u0915\u094c \u0939\u0947\u0924\u0942 \u0930\u093e\u091c\u094d\u091e\u093e \u0924\u094d\u092f\u093e\u091c\u094d\u092f\u094c \u091c\u092f\u093e\u0930\u094d\u0925\u093f\u0928\u093e\u0965",
+      "reference": "Mahabharata, Sabha Parva, Chapter 22",
+      "meaning": "Effective leadership requires rejecting both the paralysis of self-doubt and the overconfidence of unchecked power.",
+      "lore_snippet": "The path of wisdom lies between cowardice and recklessness. A true leader walks this razor's edge with balanced steps.",
+      "image": "quote_595.png",
+      "audio": "quote_595.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -9434,6 +9434,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_556",
+      "quote": "Maya (the Asura architect): The divine assembly hall I built shines with unmatched splendor, yet only the wise perceive its true essence beyond mere glitter.",
+      "sanskrit": "\u0926\u093f\u0935\u094d\u092f\u093e\u0902 \u092e\u0923\u093f\u092e\u092f\u0940\u0902 \u0936\u0941\u092d\u093e\u092e\u094d... \u0935\u093f\u0936\u094d\u0930\u0941\u0924\u093e\u0902 \u0924\u094d\u0930\u093f\u0937\u0941 \u0932\u094b\u0915\u0947\u0937\u0941",
+      "reference": "Mahabharata, Sabhaparva, Chapter 4",
+      "meaning": "True greatness lies not in outward magnificence but in the wisdom to see beyond material grandeur.",
+      "lore_snippet": "The Maya Sabha's jeweled pillars blinded many kings, but sages saw through its illusions. So too does worldly glory deceive the unprepared mind, while the enlightened perceive deeper truths.",
+      "image": "quote_556.png",
+      "audio": "quote_556.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_557",
+      "quote": "Vyasa: When divine and demonic crafts unite, even impossible creations manifest - yet their purpose determines their ultimate fate.",
+      "sanskrit": "\u0938\u0941\u0915\u0943\u0924\u093e \u0935\u093f\u0936\u094d\u0935\u0915\u0930\u094d\u092e\u0923\u093e... \u092f\u093e\u0902 \u091a\u0915\u094d\u0930\u0947\u093d\u092a\u094d\u0930\u0924\u093f\u092e\u093e\u0902 \u092e\u092f\u0903",
+      "reference": "Mahabharata, Sabhaparva, Chapter 4",
+      "meaning": "Extraordinary achievements require transcending dualities, but must align with dharma to endure.",
+      "lore_snippet": "The Maya Sabha combined asura ingenuity with deva-approved design, much like how true mastery blends opposing forces. But as this hall later burned, so do all works lacking righteous intent.",
+      "image": "quote_557.png",
+      "audio": "quote_557.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

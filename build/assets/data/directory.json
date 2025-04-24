@@ -10114,6 +10114,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_596",
+      "quote": "B\u1e5bhadratha: What use is a boon to one of little fortune, what use is a kingdom to me who is without offspring?",
+      "sanskrit": "\u0915\u093f\u0902 \u0935\u0930\u0947\u0923\u093e\u0932\u094d\u092a\u092d\u093e\u0917\u094d\u092f\u0938\u094d\u092f \u0915\u093f\u0902 \u0930\u093e\u091c\u094d\u092f\u0947\u0928\u093e\u092a\u094d\u0930\u091c\u0938\u094d\u092f \u092e\u0947",
+      "reference": "Mahabharata, [Parva], Chapter [26]",
+      "meaning": "A king laments that material wealth and power are meaningless without progeny to inherit them, highlighting the human longing for legacy.",
+      "lore_snippet": "Even the mightiest rulers know true wealth lies not in gold or land, but in the continuation of one's lineage. A barren kingdom is but an empty hall echoing with lost purpose.",
+      "image": "quote_596.png",
+      "audio": "quote_596.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_597",
+      "quote": "K\u1e5b\u1e63\u1e47a: A single mango fruit, untouched by wind and unbitten by parrots, capable of bringing a son.",
+      "sanskrit": "\u0905\u0935\u093e\u0924\u092e\u0936\u0941\u0915\u093e\u0926\u0937\u094d\u091f\u092e\u0947\u0915\u092e\u093e\u092e\u094d\u0930\u092b\u0932\u0902 \u0915\u093f\u0932",
+      "reference": "Mahabharata, [Parva], Chapter [28-29]",
+      "meaning": "Divine providence often arrives in humble forms - a perfect fruit symbolizing untouched potential and the fulfillment of destiny's promise.",
+      "lore_snippet": "The gods plant seeds of fate in unexpected places. A lone fruit, preserved by unseen hands, may hold the power to shape dynasties.",
+      "image": "quote_597.png",
+      "audio": "quote_597.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

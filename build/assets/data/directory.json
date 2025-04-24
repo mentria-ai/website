@@ -10369,6 +10369,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_611",
+      "quote": "Krishna: The rescue of kings drowning in the terrible ocean of life's sorrows is no wonder for you, O Lord, who upholds righteousness.",
+      "sanskrit": "\u0928\u0948\u0924\u091a\u094d\u091a\u093f\u0924\u094d\u0930\u0902 \u092e\u0939\u093e\u092c\u093e\u0939\u094b \u0924\u094d\u0935\u092f\u093f \u0926\u0947\u0935\u0915\u093f\u0928\u0928\u094d\u0926\u0928, \u092d\u0940\u092e\u093e\u0930\u094d\u091c\u0941\u0928\u092c\u0932\u094b\u092a\u0947\u0924\u0947 \u0927\u0930\u094d\u092e\u0938\u094d\u092f \u092a\u0930\u093f\u092a\u093e\u0932\u0928\u092e\u094d",
+      "reference": "Mahabharata, Digvijaya Parva",
+      "meaning": "Krishna is praised for his divine role in rescuing kings from suffering, emphasizing his natural alignment with dharma (cosmic order).",
+      "lore_snippet": "Just as the sun rises without effort, the righteous act without expectation. The protector of dharma finds liberation not in conquest, but in lifting others from darkness.",
+      "image": "quote_611.png",
+      "audio": "quote_611.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_612",
+      "quote": "True deeds are known by their completion, not by their difficulty.",
+      "sanskrit": "\u0915\u0943\u0924\u092e\u093f\u0924\u094d\u092f\u0947\u0935 \u0924\u091c\u094d\u091c\u094d\u091e\u0947\u092f\u0902 \u0928\u0943\u092a\u0948\u0930\u094d\u092f\u0926\u094d\u092f\u092a\u093f \u0926\u0941\u0937\u094d\u0915\u0930\u092e\u094d",
+      "reference": "Mahabharata, Digvijaya Parva",
+      "meaning": "The value of an action lies in its fulfillment, regardless of how challenging it may seem to observers.",
+      "lore_snippet": "Mountains are moved stone by stone. History remembers not the sweat of the laborer, but the temple that stands when the work is done.",
+      "image": "quote_612.png",
+      "audio": "quote_612.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_613",
+      "quote": "Yudhishthira: When kings unite in dharma's cause, even the impossible bows to their will.",
+      "sanskrit": "",
+      "reference": "Mahabharata, Digvijaya Parva",
+      "meaning": "Collective righteous action transcends individual limitations, echoing the power of unity for higher purpose.",
+      "lore_snippet": "The arrows of a single archer may break, but a sheaf bound together withstands the storm. So too do hearts united by dharma become unbreakable.",
+      "image": "quote_613.png",
+      "audio": "quote_613.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

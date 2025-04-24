@@ -10471,6 +10471,57 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_617",
+      "quote": "Arjuna: The warrior who conquers not just lands, but the hearts of men, achieves true victory.",
+      "sanskrit": "\u0935\u093f\u091c\u093f\u0924\u094d\u092f \u091a\u093e\u0939\u0935\u0947 \u0936\u0942\u0930\u093e\u0928\u094d\u092a\u093e\u0930\u094d\u0935\u0924\u0940\u092f\u093e\u0928\u094d\u092e\u0939\u093e\u0930\u0925\u093e\u0928\u094d",
+      "reference": "Mahabharata, Vana Parva, Chapter 25",
+      "meaning": "Victory is not merely about defeating enemies in battle, but also about winning their allegiance and respect through wisdom and valor.",
+      "lore_snippet": "The greatest conquerors are those who turn foes into allies. True power lies not in destruction, but in the ability to unite and inspire even those once opposed to you.",
+      "image": "quote_617.png",
+      "audio": "quote_617.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_618",
+      "quote": "The path of dharma requires both the might to subdue the wicked and the mercy to uplift the vanquished.",
+      "sanskrit": "\u0924\u093e\u0902\u0938\u094d\u0924\u0941 \u0938\u093e\u0928\u094d\u0924\u094d\u0935\u0947\u0928 \u0928\u093f\u0930\u094d\u091c\u093f\u0924\u094d\u092f",
+      "reference": "Mahabharata, Vana Parva, Chapter 25",
+      "meaning": "Righteous governance demands strength to defeat evil, but also compassion to reintegrate the defeated through peaceful means.",
+      "lore_snippet": "A ruler's duty is twofold: the sword to cut down injustice, and the open hand to raise up those who seek redemption. Balance defines true kingship.",
+      "image": "quote_618.png",
+      "audio": "quote_618.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_619",
+      "quote": "Beyond mortal realms lie wonders not meant for human eyes, reminding us of our place in creation.",
+      "sanskrit": "\u0928 \u0939\u093f \u092e\u093e\u0928\u0941\u0937\u0926\u0947\u0939\u0947\u0928 \u0936\u0915\u094d\u092f\u092e\u0924\u094d\u0930\u093e\u092d\u093f\u0935\u0940\u0915\u094d\u0937\u093f\u0924\u0941\u092e\u094d",
+      "reference": "Mahabharata, Vana Parva, Chapter 25",
+      "meaning": "Some divine mysteries transcend human perception, teaching humility before the greater cosmos.",
+      "lore_snippet": "The wise know that not all doors should be opened, nor all secrets uncovered. Some boundaries exist to preserve the sacred order of things.",
+      "image": "quote_619.png",
+      "audio": "quote_619.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

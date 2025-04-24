@@ -10913,6 +10913,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_643",
+      "quote": "Bhishma: A dog may bark at a lion, but the lion remains undisturbed until it chooses to awaken.",
+      "sanskrit": "\u092a\u094d\u0930\u0938\u0941\u092a\u094d\u0924\u0947 \u0939\u093f \u092f\u0925\u093e \u0938\u093f\u0902\u0939\u0947 \u0936\u094d\u0935\u093e\u0928\u0938\u094d\u0924\u0924\u094d\u0930 \u0938\u092e\u093e\u0917\u0924\u093e\u0903\u0964 \u092d\u0937\u0947\u092f\u0941\u0903 \u0938\u0939\u093f\u0924\u093e\u0903 \u0938\u0930\u094d\u0935\u0947 \u0924\u0925\u0947\u092e\u0947 \u0935\u0938\u0941\u0927\u093e\u0927\u093f\u092a\u093e\u0903\u0965",
+      "reference": "Mahabharata, Shishupala Vadha Parva, Chapter 38",
+      "meaning": "Bhishma advises Yudhishthira not to fear petty kings (like dogs barking) when the mighty (like lions) remain undisturbed until they act.",
+      "lore_snippet": "True power lies not in reaction but in restraint. As the lion ignores the barking of dogs until the moment demands action, so should the wise reserve their strength for battles worth fighting.",
+      "image": "quote_643.png",
+      "audio": "quote_643.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_644",
+      "quote": "Shishupala: The world's greatest fools are those who praise the unworthy, blind to truth like a blind man leading another.",
+      "sanskrit": "\u0928\u093e\u0935\u093f \u0928\u094c\u0930\u093f\u0935 \u0938\u092e\u094d\u092c\u0926\u094d\u0927\u093e \u092f\u0925\u093e\u0928\u094d\u0927\u094b \u0935\u093e\u0928\u094d\u0927\u092e\u0928\u094d\u0935\u093f\u092f\u093e\u0924\u094d\u0964 \u0924\u0925\u093e\u092d\u0942\u0924\u093e \u0939\u093f \u0915\u094c\u0930\u0935\u094d\u092f\u093e \u092d\u0940\u0937\u094d\u092e \u092f\u0947\u0937\u093e\u0902 \u0924\u094d\u0935\u092e\u0917\u094d\u0930\u0923\u0940\u0903\u0965",
+      "reference": "Mahabharata, Shishupala Vadha Parva, Chapter 38",
+      "meaning": "Shishupala mocks Bhishma's wisdom, comparing blind praise to a blind man guiding another\u2014a warning against misplaced reverence.",
+      "lore_snippet": "To follow without discernment is to walk the path of folly twice over. The wise question even the revered, for blind allegiance darkens the lamp of truth.",
+      "image": "quote_644.png",
+      "audio": "quote_644.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

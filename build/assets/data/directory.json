@@ -10522,6 +10522,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_620",
+      "quote": "Bhima: The true warrior conquers not only lands but the hearts of men, turning foes into allies with wisdom rather than force.",
+      "sanskrit": "\u0938\u093e\u0928\u094d\u0924\u094d\u0935\u0947\u0928\u0948\u0935\u093e\u091c\u092f\u0924\u094d\u092a\u094d\u0930\u092d\u0941\u0903 (He conquered through conciliation alone)",
+      "reference": "Mahabharata, Sabha Parva, Chapter 27-28",
+      "meaning": "Victory through compassion and diplomacy is more enduring than conquest by violence. Bhima demonstrates this by subduing kings through both might and wisdom.",
+      "lore_snippet": "The ancient texts speak of kings who ruled for an age by turning former enemies into loyal vassals. A blade may win a battle, but only justice can forge an empire.",
+      "image": "quote_620.png",
+      "audio": "quote_620.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_621",
+      "quote": "The wise ruler knows when to sheathe his sword, for some lands yield to counsel where armies would meet only dust and blood.",
+      "sanskrit": "\u0928\u093e\u0924\u093f\u0924\u0940\u0935\u094d\u0930\u0947\u0923 \u0915\u0930\u094d\u092e\u0923\u093e (Without excessive harshness in action)",
+      "reference": "Mahabharata, Sabha Parva, Chapter 27",
+      "meaning": "Strategic restraint often achieves what brute force cannot. Bhima's campaigns show purposeful moderation in dealing with different kingdoms.",
+      "lore_snippet": "Scrolls of old tell how the greatest conquerors preserved their strength by choosing battles wisely. Not every hill need be stained red to prove one's mastery.",
+      "image": "quote_621.png",
+      "audio": "quote_621.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

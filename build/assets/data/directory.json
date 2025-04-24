@@ -10777,6 +10777,40 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_635",
+      "quote": "Krishna shines in the middle like the radiant sun among the luminaries, considered most worthy of honor on earth.",
+      "sanskrit": "\u090f\u0937 \u0939\u094d\u092f\u0947\u0937\u093e\u0902 \u0938\u092e\u0947\u0924\u093e\u0928\u093e\u0902 \u0924\u0947\u091c\u094b\u092c\u0932\u092a\u0930\u093e\u0915\u094d\u0930\u092e\u0948\u0903 \u092e\u0927\u094d\u092f\u0947 \u0924\u092a\u0928\u094d\u0928\u093f\u0935\u093e\u092d\u093e\u0924\u093f \u091c\u094d\u092f\u094b\u0924\u093f\u0937\u093e\u092e\u093f\u0935 \u092d\u093e\u0938\u094d\u0915\u0930\u0903",
+      "reference": "Mahabharata, Arghabhiharana Parva, Chapter 27-28",
+      "meaning": "Krishna's brilliance and virtue make him stand out among all great beings, just as the sun outshines all other celestial lights. His worthiness is universally acknowledged.",
+      "lore_snippet": "The truly enlightened shine not by force, but by inherent radiance. As fireflies pale before the sun, so do ordinary men before those who embody dharma's purest light.",
+      "image": null,
+      "audio": "quote_635.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_636",
+      "quote": "Bhishma: When worthy guests gather, honor must be given according to merit - for wisdom recognizes the true measure of a soul.",
+      "sanskrit": "\u0915\u094d\u0930\u093f\u092f\u0924\u093e\u092e\u0930\u094d\u0939\u0923\u0902 \u0930\u093e\u091c\u094d\u091e\u093e\u0902 \u092f\u0925\u093e\u0930\u094d\u0939\u092e\u093f\u0924\u093f \u092d\u093e\u0930\u0924",
+      "reference": "Mahabharata, Arghabhiharana Parva, Chapter 26-27",
+      "meaning": "Bhishma advises Yudhishthira to offer honors based on true worthiness, not mere status or kinship. True respect flows from discernment of virtue.",
+      "lore_snippet": "Ancient kings knew this truth: the worth of a guest is measured not by their gold, but by their wisdom. Empty courtesy dishonors both giver and receiver.",
+      "image": "quote_636.png",
+      "audio": "quote_636.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -15367,6 +15367,210 @@
         "ancient",
         "dharma"
       ]
+    },
+    {
+      "id": "quote_905",
+      "quote": "Nala: No creature dies before its time, as the wise elders have taught. All suffering is bound by the threads of destiny.",
+      "sanskrit": "\u0928\u093e\u092a\u094d\u0930\u093e\u092a\u094d\u0924\u0915\u093e\u0932\u094b \u092e\u094d\u0930\u093f\u092f\u0924\u0947 \u0936\u094d\u0930\u0941\u0924\u0902 \u0935\u0943\u0926\u094d\u0927\u093e\u0928\u0941\u0936\u093e\u0938\u0928\u092e\u094d",
+      "reference": "Mahabharata, Vana Parva, Chapter 62",
+      "meaning": "This reflects the Mahabharata's core philosophy that death and suffering follow cosmic timing (k\u0101la), not random chance. It suggests acceptance of life's hardships as part of a greater design.",
+      "lore_snippet": "The sages teach that fate's loom weaves each life's pattern. Neither arrow nor illness may claim one before their destined hour, nor may mortal hands stay death's arrival when the threads run short.",
+      "image": "quote_905.png",
+      "audio": "quote_905.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_906",
+      "quote": "Damayanti: No suffering comes without cause - not by chance, nor by unjust gods. Our own past deeds shape the river of our sorrows.",
+      "sanskrit": "\u0928 \u0939\u094d\u092f\u0926\u0948\u0935\u0915\u0943\u0924\u0902 \u0915\u093f\u091e\u094d\u091a\u093f\u0928\u094d\u0928\u0930\u093e\u0923\u093e\u092e\u093f\u0939 \u0935\u093f\u0926\u094d\u092f\u0924\u0947",
+      "reference": "Mahabharata, Vana Parva, Chapter 62",
+      "meaning": "Expresses the law of karma - all suffering stems from one's own actions (karma), not divine caprice. Even in despair, one must acknowledge self-responsibility.",
+      "lore_snippet": "When misfortune strikes, fools blame the stars. The enlightened search their own soul, for every wave of grief arises from pebbles cast by our former selves into life's endless river.",
+      "image": "quote_906.png",
+      "audio": "quote_906.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_907",
+      "quote": "Brihadashva: The forest cares not for kings or beggars - the elephant's tread crushes all equally when destiny's hour arrives.",
+      "sanskrit": null,
+      "reference": "Mahabharata, Vana Parva, Chapter 62 (narrator's voice)",
+      "meaning": "Nature and fate are great equalizers; human status means nothing before cosmic forces. The passage describes a merchant caravan destroyed indiscriminately by wild elephants.",
+      "lore_snippet": "In the wilderness, gold buys no mercy from beasts or storms. The same wind extinguishes the lord's torch and the peasant's candle, for nature knows only the laws of cause and season.",
+      "image": "quote_907.png",
+      "audio": "quote_907.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_908",
+      "quote": "Nala: Even in deepest despair, one must answer the call of the helpless, for no fire burns hotter than the shame of turning away from dharma.",
+      "sanskrit": "\u092e\u093e \u092d\u0948\u0930\u093f\u0924\u093f \u0928\u0932\u0936\u094d\u091a\u094b\u0915\u094d\u0924\u094d\u0935\u093e \u092e\u0927\u094d\u092f\u092e\u0917\u094d\u0928\u0947\u0903 \u092a\u094d\u0930\u0935\u093f\u0936\u094d\u092f \u0924\u092e\u094d",
+      "reference": "Mahabharata, Vana Parva, Nalopakhyana Parva",
+      "meaning": "King Nala risks entering a burning forest to save a trapped being, embodying the duty to protect others even amidst personal suffering.",
+      "lore_snippet": "The codes of kingship demand courage beyond battle - a true ruler hears the faintest cry for aid. As Nalopakhyana teaches, even exiles carry the fire of righteousness.",
+      "image": "quote_908.png",
+      "audio": "quote_908.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_909",
+      "quote": "Damayanti: Let my vows be my armor - no comfort shall sway me, no stranger's voice tempt me, until I walk again beside my lord.",
+      "sanskrit": "\u0909\u091a\u094d\u091b\u093f\u0937\u094d\u091f\u0902 \u0928\u0948\u0935 \u092d\u0941\u091e\u094d\u091c\u0940\u092f\u093e\u0902 \u0928 \u0915\u0941\u0930\u094d\u092f\u093e\u0902 \u092a\u093e\u0926\u0927\u093e\u0935\u0928\u092e\u094d",
+      "reference": "Mahabharata, Vana Parva, Nalopakhyana Parva",
+      "meaning": "Damayanti declares her austere vows while searching for Nala, showing unwavering marital devotion through self-imposed hardships.",
+      "lore_snippet": "Ancient texts speak of tapasya not just in forests but in hearts. As Damayanti proved, true fidelity builds fortresses of discipline around the soul.",
+      "image": "quote_909.png",
+      "audio": "quote_909.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_910",
+      "quote": "Karkotaka: Those bound by curses may still bear gifts - wisdom often comes coiled in suffering's fangs.",
+      "sanskrit": "\u0909\u092a\u0926\u0947\u0915\u094d\u0937\u094d\u092f\u093e\u092e\u093f \u0924\u0947 \u0936\u094d\u0930\u0947\u092f\u0938\u094d\u0924\u094d\u0930\u093e\u0924\u0941\u092e\u0930\u094d\u0939\u0924\u093f \u092e\u093e\u0902 \u092d\u0935\u093e\u0928\u094d",
+      "reference": "Mahabharata, Vana Parva, Nalopakhyana Parva",
+      "meaning": "The cursed serpent king transforms his suffering into an opportunity to aid Nala, showing adversity's role in enlightenment.",
+      "lore_snippet": "The Naga Lords teach that venom and nectar flow from the same source. A cursed being's guidance often proves most potent, as Karkotaka demonstrated.",
+      "image": "quote_910.png",
+      "audio": "quote_910.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_911",
+      "quote": "Nala: The fire of sorrow burns day and night, but the wise endure it like a mountain withstands the storm.",
+      "sanskrit": "\u0926\u0939\u094d\u092f\u092e\u093e\u0928\u0903 \u0938 \u0936\u094b\u0915\u0947\u0928 \u0926\u093f\u0935\u093e\u0930\u093e\u0924\u094d\u0930\u092e\u0924\u0928\u094d\u0926\u094d\u0930\u093f\u0924\u0903",
+      "reference": "Mahabharata, Vana Parva, Chapter 64-65",
+      "meaning": "Even in great suffering, the steadfast endure without faltering, just as nature's strongest formations resist destruction.",
+      "lore_snippet": "Ancient sages teach that sorrow is the whetstone of the soul\u2014those who withstand its flames without breaking emerge tempered like celestial steel. Endurance is the silent victory.",
+      "image": "quote_911.png",
+      "audio": "quote_911.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_912",
+      "quote": "True strength lies not in dominion, but in mastering the tempest within one's own heart.",
+      "sanskrit": null,
+      "reference": "Inspired by Nala's trials (Vana Parva)",
+      "meaning": "Nala's transformation from king to charioteer illustrates that real power comes from self-control amidst adversity.",
+      "lore_snippet": "The warrior-poet Bh\u0101rata wrote: 'A hundred conquered kingdoms matter not if the self remains unconquered.' Even exiled rulers find sovereignty in stillness.",
+      "image": "quote_912.png",
+      "audio": "quote_912.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_913",
+      "quote": "Bhima: A wife's greatest ornament is her husband; without him, even adorned with jewels, she does not shine.",
+      "sanskrit": "\u092d\u0930\u094d\u0924\u093e \u0928\u093e\u092e \u092a\u0930\u0902 \u0928\u093e\u0930\u094d\u092f\u093e \u092d\u0942\u0937\u0923\u0902 \u092d\u0942\u0937\u0923\u0948\u0930\u094d\u0935\u093f\u0928\u093e",
+      "reference": "Mahabharata, Vana Parva, Nalopakhyana Parva",
+      "meaning": "This quote emphasizes the deep bond between a husband and wife, suggesting that true beauty and worth come from love and companionship rather than material adornments.",
+      "lore_snippet": "As the wise say, no gem or gold can replace the light of a beloved's presence. A soul without its counterpart is like a lamp without flame\u2014hollow and dim, though finely wrought.",
+      "image": "quote_913.png",
+      "audio": "quote_913.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_914",
+      "quote": "Sorrow is an ocean, but the shore of reunion awaits those who endure.",
+      "sanskrit": "\u0926\u0941\u0937\u094d\u0915\u0930\u0902 \u0915\u0941\u0930\u0941\u0924\u0947\u093d\u0924\u094d\u092f\u0930\u094d\u0925\u0902 \u0939\u0940\u0928\u094b \u092f\u0926\u0928\u092f\u093e \u0928\u0932\u0903\n\u0927\u093e\u0930\u092f\u0924\u094d\u092f\u093e\u0924\u094d\u092e\u0928\u094b \u0926\u0947\u0939\u0902 \u0928 \u0936\u094b\u0915\u0947\u0928\u093e\u0935\u0938\u0940\u0926\u0924\u093f",
+      "reference": "Mahabharata, Vana Parva, Nalopakhyana Parva",
+      "meaning": "The verse speaks to the resilience of love and the inevitability of suffering, yet promises that endurance will lead to joy.",
+      "lore_snippet": "Even the moon, swallowed by Rahu, emerges whole again. So too shall the steadfast heart find its way through the darkest night to dawn's embrace.",
+      "image": "quote_914.png",
+      "audio": "quote_914.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_915",
+      "quote": "Sudeva: Yet her beauty is not destroyed, though her body is covered with dirt.",
+      "sanskrit": "\u0928 \u091a\u093e\u0938\u094d\u092f\u093e \u0928\u0936\u094d\u092f\u0924\u0947 \u0930\u0942\u092a\u0902 \u0935\u092a\u0941\u0930\u094d\u092e\u0932\u0938\u092e\u093e\u091a\u093f\u0924\u092e\u094d",
+      "reference": "Mahabharata, Vana Parva, Chapter 66",
+      "meaning": "True inner beauty and virtue remain untouched by external circumstances or temporary hardships.",
+      "lore_snippet": "The wise know that a soul's radiance cannot be dimmed by worldly suffering. As the moonlight pierces through storm clouds, so does virtue shine through adversity.",
+      "image": "quote_915.png",
+      "audio": "quote_915.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
+    },
+    {
+      "id": "quote_916",
+      "quote": "Sudeva: This mark was created by the Creator as a sign of her prosperity.",
+      "sanskrit": "\u091a\u093f\u0939\u094d\u0928\u092d\u0942\u0924\u094b \u0935\u093f\u092d\u0942\u0924\u094d\u092f\u0930\u094d\u0925\u092e\u092f\u0902 \u0927\u093e\u0924\u094d\u0930\u093e \u0935\u093f\u0928\u093f\u0930\u094d\u092e\u093f\u0924\u0903",
+      "reference": "Mahabharata, Vana Parva, Chapter 66",
+      "meaning": "Divine blessings manifest as visible signs, marking one's destined greatness regardless of current circumstances.",
+      "lore_snippet": "The gods mark their chosen ones with subtle signs. These are not mere birthmarks, but celestial sigils of destiny written upon mortal flesh.",
+      "image": "quote_916.png",
+      "audio": "quote_916.mp3",
+      "category": "philosophy",
+      "tags": [
+        "mahabharata",
+        "wisdom",
+        "ancient",
+        "dharma"
+      ]
     }
   ]
 }

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title> 20‑Team Matrix Generator – Auto Mode</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;background:#f4f6fb;color:#222;padding:1.8rem}
+  h1{text-align:center;margin-top:0}
+  .card{background:#fff;padding:1.4rem;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:1.6rem}
+  label{font-weight:600;margin:.6rem 0 .25rem;display:block}
+  textarea{width:100%;min-height:120px;resize:vertical;padding:.6rem;border:1px solid #ccc;border-radius:6px;font-size:.9rem}
+  button{background:#2b6eff;color:#fff;border:none;padding:.66rem 1.4rem;border-radius:8px;font-size:1rem;cursor:pointer;margin-top:.9rem}
+  button:hover{background:#1d55d6}
+  table{width:100%;border-collapse:collapse;margin-top:1rem;font-size:.85rem}
+  th,td{border:1px solid #ddd;padding:.45rem;text-align:left}
+  th{background:#2b6eff;color:#fff}
+  tr:nth-child(even){background:#eef3ff}
+  .small{color:#666;font-size:.75rem}
+</style>
+</head>
+<body>
+  <h1> 20‑Team Matrix Generator</h1>
+
+  <div class="card">
+    <label>Paste Squad Lines (<span class="small">Name | Y/N | C/VC | Sel%</span>)</label>
+    <textarea id="squad"></textarea>
+    <button id="make">Generate Matrix</button>
+  </div>
+
+  <div class="card" id="outWrap" style="display:none">
+    <h2>Auto‑Generated 20‑Team Plan</h2>
+    <p class="small">Captain pool: <span id="capPoolDisp"></span> &nbsp;|&nbsp; Swaps used: <span id="swapSummary"></span></p>
+    <div id="matrix"></div>
+  </div>
+
+<script>
+function parseLines(){
+  const raw=document.getElementById('squad').value.trim().split(/\n+/).filter(x=>x);
+  return raw.map(l=>{
+    const [name,inGuru,cvc,sel]=l.split('|').map(s=>s.trim());
+    return {name,inGuru:inGuru.toUpperCase()==='Y',cvc:cvc||'',sel:parseFloat(sel)||0};
+  });
+}
+
+function chooseCaptainPool(guru){
+  // sort by sel% desc
+  const sorted=[...guru].sort((a,b)=>b.sel-a.sel);
+  const top3=sorted.slice(0,3);          // safe picks
+  const bottom2=sorted.slice(-2);        // riskier
+  const pool=[...top3,...bottom2];
+  return pool.map(p=>p.name);
+}
+
+function permutations(pool){
+  const combos=[];
+  pool.forEach(c=>pool.forEach(v=>{if(c!==v) combos.push([c,v]);}));
+  return combos.slice(0,20);
+}
+
+function chooseSwaps(allPlayers,guru){
+  const notGuru=allPlayers.filter(p=>!p.inGuru).sort((a,b)=>b.sel-a.sel).slice(0,8); // top 8 options
+  const guruByLowSel=[...guru].sort((a,b)=>a.sel-b.sel);
+  const swaps=[];
+  notGuru.forEach(candidate=>{
+    const out=guruByLowSel.find(g=>!swaps.some(s=>s.out===g.name));
+    if(out){swaps.push({out:out.name,outSel:out.sel,inn:candidate.name,innSel:candidate.sel});}
+  });
+  return swaps.slice(0,8); // we need up to 8 swaps for teams 13‑20
+}
+
+function buildMatrix(poolCombos,swaps){
+  const rows=[];
+  for(let i=0;i<20;i++){
+    const [C,VC]=poolCombos[i];
+    let swapInfo='—';
+    if(i>=12 && swaps[i-12]){
+      const s=swaps[i-12];
+      swapInfo=`${s.out} (${s.outSel}%) ➜ ${s.inn} (${s.innSel}%)`;
+    }
+    rows.push({team:i+1,capt:C,vice:VC,swap:swapInfo});
+  }
+  return rows;
+}
+
+function render(rows){
+  let html='<table><thead><tr><th>#</th><th>Captain</th><th>Vice‑Captain</th><th>Swap Detail (Sel%)</th></tr></thead><tbody>';
+  rows.forEach(r=>{html+=`<tr><td>${r.team}</td><td>${r.capt}</td><td>${r.vice}</td><td>${r.swap}</td></tr>`});
+  html+='</tbody></table>';
+  document.getElementById('matrix').innerHTML=html;
+  document.getElementById('outWrap').style.display='block';
+}
+
+document.getElementById('make').addEventListener('click',()=>{
+  const players=parseLines();
+  const guru=players.filter(p=>p.inGuru);
+  if(guru.length!==11){alert('Exactly 11 Guru players (Y) required');return;}
+  const capPool=chooseCaptainPool(guru).slice(0,5);
+  document.getElementById('capPoolDisp').textContent=capPool.join(', ');
+  const combos=permutations(capPool);
+  const swaps=chooseSwaps(players,guru);
+  document.getElementById('swapSummary').textContent=swaps.map(s=>`${s.out}→${s.inn}`).join(', ');
+  const matrix=buildMatrix(combos,swaps);
+  render(matrix);
+});
+</script>
+</body>
+</html>

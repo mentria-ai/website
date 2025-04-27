@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>WebLLM Chat Demo</title>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    #log { white-space: pre-wrap; border: 1px solid #ccc; padding: 0.5rem; height: 300px; overflow-y: auto; }
+    #controls { margin-bottom: 1rem; }
+    input { width: 70%; padding: 0.5rem; }
+    button { padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <h1>WebLLM Chat (Mistral-7B)</h1>
+  <div id="controls">
+    <input id="userInput" type="text" placeholder="Type your message..." />
+    <button id="sendBtn">Send</button>
+  </div>
+  <pre id="log"></pre>
+
+  <!-- load engine logic as an ES module -->
+  <script type="module" src="./engine.js"></script>
+</body>
+</html>

@@ -196,10 +196,12 @@ audio/
 - ✅ Ensure workflow file exists and is valid YAML
 
 #### "Server connection failed"
-- ✅ Verify ACE-Step is running on `localhost:8000`
+- ✅ Verify OctoBeats is running on `localhost:8000`
 - ✅ Test manually: `curl http://localhost:8000/api/status`
 - ✅ Check firewall settings
 - ✅ Ensure self-hosted runner has network access
+- ✅ If using Docker runner, try: `curl http://host.docker.internal:8000/api/status`
+- ✅ Check if runner can access host machine: `curl http://172.17.0.1:8000/api/status`
 
 #### "Generation failed"
 - ✅ Check server isn't busy with another generation

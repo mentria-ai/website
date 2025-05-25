@@ -219,7 +219,7 @@ jobs:
             
             return audioParams;
       
-      - name: Check ACE-Step server status
+      - name: Check OctoBeats server status
         if: steps.validate-trigger.outputs.should_process == 'true'
         id: check-server
         run: |
@@ -227,9 +227,24 @@ jobs:
           echo "" >> ${{ steps.validate-trigger.outputs.log_file }}
           echo "## OctoBeats Server Status Check" >> ${{ steps.validate-trigger.outputs.log_file }}
           
-          # Check if server is running
-          if curl -f -s http://localhost:8000/api/status > server_status.json; then
-            echo "✅ OctoBeats server is running" >> ${{ steps.validate-trigger.outputs.log_file }}
+          # Try multiple server addresses
+          SERVER_URLS=("http://localhost:8000" "http://127.0.0.1:8000" "http://host.docker.internal:8000" "http://172.17.0.1:8000")
+          SERVER_FOUND=false
+          
+          for url in "${SERVER_URLS[@]}"; do
+            echo "Trying server at: $url" >> ${{ steps.validate-trigger.outputs.log_file }}
+            if curl -f -s --connect-timeout 5 "$url/api/status" > server_status.json 2>/dev/null; then
+              echo "✅ OctoBeats server found at: $url" >> ${{ steps.validate-trigger.outputs.log_file }}
+              echo "OCTOBEATS_URL=$url" >> $GITHUB_ENV
+              SERVER_FOUND=true
+              break
+            else
+              echo "❌ Server not accessible at: $url" >> ${{ steps.validate-trigger.outputs.log_file }}
+            fi
+          done
+          
+          if [ "$SERVER_FOUND" = true ]; then
+            echo "✅ OctoBeats server is running at: $OCTOBEATS_URL" >> ${{ steps.validate-trigger.outputs.log_file }}
             
             # Parse server status
             SERVER_STATUS=$(cat server_status.json | jq -r '.status')
@@ -255,9 +270,21 @@ jobs:
             echo "server_ready=true" >> $GITHUB_OUTPUT
             echo "✅ Server is ready for audio generation" >> ${{ steps.validate-trigger.outputs.log_file }}
           else
-            echo "❌ OctoBeats server is not running or not accessible" >> ${{ steps.validate-trigger.outputs.log_file }}
+            echo "❌ OctoBeats server is not accessible at any of the tried URLs" >> ${{ steps.validate-trigger.outputs.log_file }}
+            echo "Tried URLs: ${SERVER_URLS[*]}" >> ${{ steps.validate-trigger.outputs.log_file }}
+            echo "" >> ${{ steps.validate-trigger.outputs.log_file }}
+            echo "🔍 Running network diagnostic..." >> ${{ steps.validate-trigger.outputs.log_file }}
+            
+            # Run network diagnostic
+            if [ -f ".github/scripts/diagnose-network.sh" ]; then
+              chmod +x .github/scripts/diagnose-network.sh
+              ./.github/scripts/diagnose-network.sh >> ${{ steps.validate-trigger.outputs.log_file }} 2>&1
+            else
+              echo "Network diagnostic script not found" >> ${{ steps.validate-trigger.outputs.log_file }}
+            fi
+            
             echo "server_ready=false" >> $GITHUB_OUTPUT
-            echo "error=Server not accessible" >> $GITHUB_OUTPUT
+            echo "error=Server not accessible at any URL" >> $GITHUB_OUTPUT
             exit 1
           fi
       
@@ -296,9 +323,9 @@ jobs:
           echo "" >> ${{ steps.validate-trigger.outputs.log_file }}
           
           # Make API call with timeout
-          echo "Making API call to OctoBeats..." >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "Making API call to OctoBeats at: $OCTOBEATS_URL..." >> ${{ steps.validate-trigger.outputs.log_file }}
           
-          if curl -s -X POST "http://localhost:8000/api/generate" \
+          if curl -s -X POST "$OCTOBEATS_URL/api/generate" \
             -H "Content-Type: application/json" \
             -d @generation_request.json \
             -o generation_response.json \
@@ -348,7 +375,7 @@ jobs:
           mkdir -p generated_audio
           
           # Download the audio file
-          if curl -X GET "http://localhost:8000/api/download/$FILENAME" \
+          if curl -X GET "$OCTOBEATS_URL/api/download/$FILENAME" \
             -o "generated_audio/$FILENAME" \
             --max-time 60; then
             

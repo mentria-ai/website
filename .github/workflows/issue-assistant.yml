@@ -92,7 +92,100 @@ jobs:
             logger.logSuccess(logFile, 'Input validation passed');
             return { log_file: logFile };
       
+      - name: Check if issue should be handled by Issue Assistant
+        id: should-process
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const logFile = '${{ steps.init.outputs.log_file }}';
+            
+            // Load logging utilities
+            const loggerPath = './.github/shared/utils/logging.js';
+            if (!fs.existsSync(loggerPath)) {
+              return core.setFailed('Logging utilities not found');
+            }
+            
+            const logger = require(`${process.env.GITHUB_WORKSPACE}/${loggerPath}`);
+            
+            logger.logSection(logFile, "Issue Filtering");
+            
+            // Get the issue from the event payload (works for both issue and issue_comment events)
+            const issue = context.payload.issue;
+            if (!issue) {
+              logger.logError(logFile, 'No issue found in payload');
+              core.setOutput('should_process', 'false');
+              core.setOutput('reason', 'No issue in payload');
+              return;
+            }
+            
+            // For issue_comment events, also check if the comment is from OctoBeats workflow
+            if (context.eventName === 'issue_comment') {
+              const comment = context.payload.comment;
+              const commentBody = comment.body.toLowerCase();
+              const commentAuthor = comment.user.login.toLowerCase();
+              
+              // Skip if comment is from OctoBeats workflow or contains OctoBeats-related content
+              if (commentAuthor.includes('github-actions') || 
+                  commentBody.includes('octobeats') || 
+                  commentBody.includes('audio generated successfully') ||
+                  commentBody.includes('music generator')) {
+                logger.logMessage(logFile, '⏭️ Skipping: Comment is from OctoBeats workflow');
+                core.setOutput('should_process', 'false');
+                core.setOutput('reason', 'Comment from OctoBeats workflow');
+                return;
+              }
+            }
+            
+            // Check for OctoBeats/music generation labels
+            const labels = issue.labels.map(label => label.name.toLowerCase());
+            const musicLabels = ['audio', 'octobeats', 'music-generation', 'music'];
+            const hasMusicLabel = labels.some(label => musicLabels.includes(label));
+            
+            logger.logMessage(logFile, `Issue #${issue.number}: "${issue.title}"`);
+            logger.logMessage(logFile, `Labels: ${labels.join(', ')}`);
+            logger.logMessage(logFile, `Has music generation label: ${hasMusicLabel}`);
+            
+            // Check for music generation title patterns
+            const title = issue.title.toLowerCase();
+            const musicTitlePatterns = ['[music]', '[audio]', 'music generation', 'audio generation', 'octobeats'];
+            const hasMusicTitle = musicTitlePatterns.some(pattern => title.includes(pattern));
+            
+            logger.logMessage(logFile, `Has music generation title pattern: ${hasMusicTitle}`);
+            
+            // Skip if this is a music generation issue
+            if (hasMusicLabel || hasMusicTitle) {
+              logger.logMessage(logFile, '⏭️ Skipping: This is a music generation issue, will be handled by OctoBeats workflow');
+              core.setOutput('should_process', 'false');
+              core.setOutput('reason', 'Music generation issue - handled by OctoBeats workflow');
+              return;
+            }
+            
+            // Check if the issue author is a bot (to avoid responding to automated issues)
+            const author = issue.user.login.toLowerCase();
+            const botPatterns = ['bot', 'github-actions', 'dependabot', 'renovate'];
+            const isBot = botPatterns.some(pattern => author.includes(pattern));
+            
+            if (isBot) {
+              logger.logMessage(logFile, '⏭️ Skipping: Issue created by bot');
+              core.setOutput('should_process', 'false');
+              core.setOutput('reason', 'Issue created by bot');
+              return;
+            }
+            
+            logger.logSuccess(logFile, '✅ Issue should be processed by Issue Assistant');
+            core.setOutput('should_process', 'true');
+            core.setOutput('reason', 'Regular issue requiring assistance');
+      
+      - name: Skip workflow if not applicable
+        if: steps.should-process.outputs.should_process != 'true'
+        run: |
+          echo "⏭️ Skipping Issue Assistant workflow: ${{ steps.should-process.outputs.reason }}"
+          echo "This issue will be handled by the appropriate specialized workflow."
+          exit 0
+      
       - name: Extract issue content
+        if: steps.should-process.outputs.should_process == 'true'
         id: get-content
         uses: actions/github-script@v6
         with:
@@ -183,6 +276,7 @@ jobs:
             }
       
       - name: Analyze repository context needs
+        if: steps.should-process.outputs.should_process == 'true'
         id: check-context
         run: |
           echo "Starting repository context analysis..." >> ${{ steps.init.outputs.log_file }}
@@ -262,7 +356,7 @@ jobs:
       
       - name: Get repository context
         id: get-repo-context
-        if: steps.check-context.outputs.needs_context == 'true'
+        if: steps.should-process.outputs.should_process == 'true' && steps.check-context.outputs.needs_context == 'true'
         run: |
           echo "Getting repository context..." >> ${{ steps.init.outputs.log_file }}
           
@@ -322,6 +416,7 @@ jobs:
           echo "file_count=${FILE_COUNT}" >> $GITHUB_OUTPUT
       
       - name: Generate AI response
+        if: steps.should-process.outputs.should_process == 'true'
         id: generate-response
         run: |
           echo "Generating AI response..." >> ${{ steps.init.outputs.log_file }}
@@ -443,6 +538,7 @@ jobs:
           fi
       
       - name: Post response to issue
+        if: steps.should-process.outputs.should_process == 'true'
         id: post-response
         uses: actions/github-script@v6
         with:

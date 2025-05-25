@@ -1,0 +1,607 @@
+name: OctoBeats Music Generator
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+  issue_comment:
+    types: [created, edited]
+
+# Explicit permission scoping for security
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  generate-audio:
+    runs-on: self-hosted
+    
+    steps:
+      - name: Validate trigger conditions
+        id: validate-trigger
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Create log file for this workflow
+            const logFile = `octobeats_workflow_${Date.now()}.log`;
+            fs.writeFileSync(logFile, 
+              `# OctoBeats Music Generator Log - ${new Date().toISOString()}\n` +
+              `## Event: ${context.eventName}\n` +
+              `## Action: ${context.payload.action}\n` +
+              `## Actor: ${context.actor}\n` +
+              `## Repository: ${context.repo.owner}/${context.repo.repo}\n\n`
+            );
+            
+            core.setOutput('log_file', logFile);
+            
+            // Check if this is an audio generation request
+            const issue = context.payload.issue;
+            if (!issue) {
+              fs.appendFileSync(logFile, `❌ No issue found in payload\n`);
+              core.setOutput('should_process', 'false');
+              core.setOutput('reason', 'No issue in payload');
+              return;
+            }
+            
+            // Check for required labels
+            const labels = issue.labels.map(label => label.name.toLowerCase());
+            const hasAudioLabel = labels.includes('audio') || labels.includes('octobeats') || labels.includes('music-generation');
+            
+            fs.appendFileSync(logFile, `Issue #${issue.number}: "${issue.title}"\n`);
+            fs.appendFileSync(logFile, `Labels: ${labels.join(', ')}\n`);
+            fs.appendFileSync(logFile, `Has audio label: ${hasAudioLabel}\n`);
+            
+            if (!hasAudioLabel) {
+              fs.appendFileSync(logFile, `❌ Issue does not have required audio generation labels\n`);
+              core.setOutput('should_process', 'false');
+              core.setOutput('reason', 'Missing required labels (audio, octobeats, or music-generation)');
+              return;
+            }
+            
+            // Check if user has permission (owner, admin, maintainer)
+            const issueAuthor = issue.user.login;
+            fs.appendFileSync(logFile, `Issue author: ${issueAuthor}\n`);
+            
+            // Get repository information to check permissions
+            const { data: repo } = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const repoOwner = repo.owner.login;
+            fs.appendFileSync(logFile, `Repository owner: ${repoOwner}\n`);
+            
+            // Check if user is the repository owner
+            if (issueAuthor === repoOwner) {
+              fs.appendFileSync(logFile, `✅ User is repository owner\n`);
+              core.setOutput('should_process', 'true');
+              core.setOutput('user_permission', 'owner');
+              return;
+            }
+            
+            // Check if user is a collaborator with admin or maintain permissions
+            try {
+              const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                username: issueAuthor
+              });
+              
+              fs.appendFileSync(logFile, `User permission level: ${permission.permission}\n`);
+              
+              if (['admin', 'maintain'].includes(permission.permission)) {
+                fs.appendFileSync(logFile, `✅ User has sufficient permissions\n`);
+                core.setOutput('should_process', 'true');
+                core.setOutput('user_permission', permission.permission);
+                return;
+              } else {
+                fs.appendFileSync(logFile, `❌ User does not have sufficient permissions (${permission.permission})\n`);
+                core.setOutput('should_process', 'false');
+                core.setOutput('reason', `Insufficient permissions. User has '${permission.permission}' but needs 'admin' or 'maintain'`);
+                return;
+              }
+            } catch (error) {
+              fs.appendFileSync(logFile, `❌ Error checking user permissions: ${error.message}\n`);
+              core.setOutput('should_process', 'false');
+              core.setOutput('reason', `Error checking permissions: ${error.message}`);
+              return;
+            }
+      
+      - name: Skip workflow if conditions not met
+        if: steps.validate-trigger.outputs.should_process != 'true'
+        run: |
+          echo "⏭️ Skipping workflow: ${{ steps.validate-trigger.outputs.reason }}"
+          echo "This workflow only processes issues with audio generation labels from repository owners/admins/maintainers."
+          exit 0
+      
+      - name: Checkout repository
+        if: steps.validate-trigger.outputs.should_process == 'true'
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract audio parameters
+        if: steps.validate-trigger.outputs.should_process == 'true'
+        id: extract-params
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const logFile = '${{ steps.validate-trigger.outputs.log_file }}';
+            
+            fs.appendFileSync(logFile, `\n## Extracting Audio Parameters\n`);
+            
+            const issue = context.payload.issue;
+            const issueBody = issue.body || '';
+            
+            fs.appendFileSync(logFile, `Issue body length: ${issueBody.length} characters\n`);
+            
+            // Default parameters
+            let audioParams = {
+              prompt: 'electronic, melodic',
+              lyrics: '[inst]',
+              duration: 60,
+              mode: 'quality'
+            };
+            
+            // Extract parameters using regex patterns
+            const patterns = {
+              prompt: /(?:prompt|style|music[_\s]?style)[:\s]*([^\n\r]+)/i,
+              lyrics: /(?:lyrics|text|words)[:\s]*([^\n\r]+)/i,
+              duration: /(?:duration|length|time)[:\s]*(\d+)/i,
+              mode: /(?:mode|quality)[:\s]*(fast|quality|ultra)/i
+            };
+            
+            // Also look for structured format like:
+            // - Prompt: electronic, cyberpunk
+            // - Duration: 90
+            // etc.
+            const structuredPatterns = {
+              prompt: /[-*]\s*(?:prompt|style|music[_\s]?style)[:\s]*([^\n\r]+)/i,
+              lyrics: /[-*]\s*(?:lyrics|text|words)[:\s]*([^\n\r]+)/i,
+              duration: /[-*]\s*(?:duration|length|time)[:\s]*(\d+)/i,
+              mode: /[-*]\s*(?:mode|quality)[:\s]*(fast|quality|ultra)/i
+            };
+            
+            // Extract parameters
+            for (const [key, pattern] of Object.entries(patterns)) {
+              const match = issueBody.match(pattern);
+              if (match && match[1]) {
+                audioParams[key] = match[1].trim();
+                fs.appendFileSync(logFile, `Found ${key}: ${audioParams[key]}\n`);
+              } else {
+                // Try structured format
+                const structuredMatch = issueBody.match(structuredPatterns[key]);
+                if (structuredMatch && structuredMatch[1]) {
+                  audioParams[key] = structuredMatch[1].trim();
+                  fs.appendFileSync(logFile, `Found ${key} (structured): ${audioParams[key]}\n`);
+                }
+              }
+            }
+            
+            // Validate and sanitize parameters
+            if (audioParams.duration) {
+              const duration = parseInt(audioParams.duration);
+              if (duration < 30 || duration > 240) {
+                fs.appendFileSync(logFile, `⚠️ Duration ${duration} out of range, using default 60\n`);
+                audioParams.duration = 60;
+              } else {
+                audioParams.duration = duration;
+              }
+            }
+            
+            if (!['fast', 'quality', 'ultra'].includes(audioParams.mode)) {
+              fs.appendFileSync(logFile, `⚠️ Invalid mode '${audioParams.mode}', using default 'quality'\n`);
+              audioParams.mode = 'quality';
+            }
+            
+            // Clean up prompt and lyrics
+            audioParams.prompt = audioParams.prompt.replace(/[`"']/g, '').trim();
+            audioParams.lyrics = audioParams.lyrics.replace(/[`"']/g, '').trim();
+            
+            fs.appendFileSync(logFile, `\nFinal parameters:\n`);
+            fs.appendFileSync(logFile, `- Prompt: "${audioParams.prompt}"\n`);
+            fs.appendFileSync(logFile, `- Lyrics: "${audioParams.lyrics}"\n`);
+            fs.appendFileSync(logFile, `- Duration: ${audioParams.duration} seconds\n`);
+            fs.appendFileSync(logFile, `- Mode: ${audioParams.mode}\n`);
+            
+            // Save parameters to file for next steps
+            fs.writeFileSync('audio_params.json', JSON.stringify(audioParams, null, 2));
+            
+            // Set outputs
+            core.setOutput('prompt', audioParams.prompt);
+            core.setOutput('lyrics', audioParams.lyrics);
+            core.setOutput('duration', audioParams.duration.toString());
+            core.setOutput('mode', audioParams.mode);
+            
+            return audioParams;
+      
+      - name: Check ACE-Step server status
+        if: steps.validate-trigger.outputs.should_process == 'true'
+        id: check-server
+        run: |
+          echo "🔍 Checking OctoBeats server status..."
+          echo "" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "## OctoBeats Server Status Check" >> ${{ steps.validate-trigger.outputs.log_file }}
+          
+          # Check if server is running
+          if curl -f -s http://localhost:8000/api/status > server_status.json; then
+            echo "✅ OctoBeats server is running" >> ${{ steps.validate-trigger.outputs.log_file }}
+            
+            # Parse server status
+            SERVER_STATUS=$(cat server_status.json | jq -r '.status')
+            IS_GENERATING=$(cat server_status.json | jq -r '.generation.is_generating')
+            
+            echo "Server status: $SERVER_STATUS" >> ${{ steps.validate-trigger.outputs.log_file }}
+            echo "Currently generating: $IS_GENERATING" >> ${{ steps.validate-trigger.outputs.log_file }}
+            
+            if [ "$SERVER_STATUS" != "ready" ]; then
+              echo "❌ Server is not ready (status: $SERVER_STATUS)" >> ${{ steps.validate-trigger.outputs.log_file }}
+              echo "server_ready=false" >> $GITHUB_OUTPUT
+              echo "error=Server not ready" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+            
+            if [ "$IS_GENERATING" = "true" ]; then
+              echo "⚠️ Server is currently generating audio" >> ${{ steps.validate-trigger.outputs.log_file }}
+              echo "server_ready=false" >> $GITHUB_OUTPUT
+              echo "error=Server busy generating audio" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+            
+            echo "server_ready=true" >> $GITHUB_OUTPUT
+            echo "✅ Server is ready for audio generation" >> ${{ steps.validate-trigger.outputs.log_file }}
+          else
+            echo "❌ OctoBeats server is not running or not accessible" >> ${{ steps.validate-trigger.outputs.log_file }}
+            echo "server_ready=false" >> $GITHUB_OUTPUT
+            echo "error=Server not accessible" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+      
+      - name: Generate audio with ACE-Step
+        if: steps.validate-trigger.outputs.should_process == 'true' && steps.check-server.outputs.server_ready == 'true'
+        id: generate-audio
+        run: |
+          echo "🎵 Generating audio with OctoBeats..."
+          echo "" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "## Audio Generation" >> ${{ steps.validate-trigger.outputs.log_file }}
+          
+          # Load parameters
+          PROMPT="${{ steps.extract-params.outputs.prompt }}"
+          LYRICS="${{ steps.extract-params.outputs.lyrics }}"
+          DURATION="${{ steps.extract-params.outputs.duration }}"
+          MODE="${{ steps.extract-params.outputs.mode }}"
+          
+          echo "Generating with parameters:" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "- Prompt: $PROMPT" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "- Lyrics: $LYRICS" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "- Duration: $DURATION seconds" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "- Mode: $MODE" >> ${{ steps.validate-trigger.outputs.log_file }}
+          
+          # Create request payload
+          cat > generation_request.json << EOF
+          {
+            "prompt": "$PROMPT",
+            "lyrics": "$LYRICS",
+            "duration": $DURATION,
+            "mode": "$MODE"
+          }
+          EOF
+          
+          echo "Request payload:" >> ${{ steps.validate-trigger.outputs.log_file }}
+          cat generation_request.json >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "" >> ${{ steps.validate-trigger.outputs.log_file }}
+          
+          # Make API call with timeout
+          echo "Making API call to OctoBeats..." >> ${{ steps.validate-trigger.outputs.log_file }}
+          
+          if curl -s -X POST "http://localhost:8000/api/generate" \
+            -H "Content-Type: application/json" \
+            -d @generation_request.json \
+            -o generation_response.json \
+            --max-time 300; then
+            
+            echo "✅ API call completed" >> ${{ steps.validate-trigger.outputs.log_file }}
+            
+            # Check if generation was successful
+            SUCCESS=$(cat generation_response.json | jq -r '.success // false')
+            
+            if [ "$SUCCESS" = "true" ]; then
+              FILENAME=$(cat generation_response.json | jq -r '.filename')
+              GENERATION_TIME=$(cat generation_response.json | jq -r '.generation_time')
+              
+              echo "✅ Audio generated successfully!" >> ${{ steps.validate-trigger.outputs.log_file }}
+              echo "- Filename: $FILENAME" >> ${{ steps.validate-trigger.outputs.log_file }}
+              echo "- Generation time: ${GENERATION_TIME}s" >> ${{ steps.validate-trigger.outputs.log_file }}
+              
+              echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+              echo "generation_time=$GENERATION_TIME" >> $GITHUB_OUTPUT
+              echo "success=true" >> $GITHUB_OUTPUT
+            else
+              ERROR_MSG=$(cat generation_response.json | jq -r '.error // "Unknown error"')
+              echo "❌ Audio generation failed: $ERROR_MSG" >> ${{ steps.validate-trigger.outputs.log_file }}
+              echo "success=false" >> $GITHUB_OUTPUT
+              echo "error=$ERROR_MSG" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          else
+            echo "❌ API call failed or timed out" >> ${{ steps.validate-trigger.outputs.log_file }}
+            echo "success=false" >> $GITHUB_OUTPUT
+            echo "error=API call failed or timed out" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+      
+      - name: Download generated audio
+        if: steps.generate-audio.outputs.success == 'true'
+        id: download-audio
+        run: |
+          echo "📥 Downloading generated audio..."
+          echo "" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "## Audio Download" >> ${{ steps.validate-trigger.outputs.log_file }}
+          
+          FILENAME="${{ steps.generate-audio.outputs.filename }}"
+          
+          # Create audio directory if it doesn't exist
+          mkdir -p generated_audio
+          
+          # Download the audio file
+          if curl -X GET "http://localhost:8000/api/download/$FILENAME" \
+            -o "generated_audio/$FILENAME" \
+            --max-time 60; then
+            
+            echo "✅ Audio downloaded successfully" >> ${{ steps.validate-trigger.outputs.log_file }}
+            
+            # Check file size
+            FILE_SIZE=$(du -h "generated_audio/$FILENAME" | cut -f1)
+            echo "- File size: $FILE_SIZE" >> ${{ steps.validate-trigger.outputs.log_file }}
+            
+            # Create a more descriptive filename
+            ISSUE_NUMBER="${{ github.event.issue.number }}"
+            TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+            NEW_FILENAME="audio_issue_${ISSUE_NUMBER}_${TIMESTAMP}.mp3"
+            
+            mv "generated_audio/$FILENAME" "generated_audio/$NEW_FILENAME"
+            
+            echo "- Renamed to: $NEW_FILENAME" >> ${{ steps.validate-trigger.outputs.log_file }}
+            echo "local_filename=$NEW_FILENAME" >> $GITHUB_OUTPUT
+            echo "file_size=$FILE_SIZE" >> $GITHUB_OUTPUT
+            echo "download_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Failed to download audio file" >> ${{ steps.validate-trigger.outputs.log_file }}
+            echo "download_success=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+      
+      - name: Create branch and commit audio
+        if: steps.download-audio.outputs.download_success == 'true'
+        id: create-branch
+        run: |
+          echo "🌿 Creating branch and committing audio..."
+          echo "" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "## Branch Creation and Commit" >> ${{ steps.validate-trigger.outputs.log_file }}
+          
+          # Configure git
+          git config user.name "OctoBeats Music Generator"
+          git config user.email "action@github.com"
+          
+          # Create branch name
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          BRANCH_NAME="audio-generation/issue-${ISSUE_NUMBER}"
+          
+          echo "Creating branch: $BRANCH_NAME" >> ${{ steps.validate-trigger.outputs.log_file }}
+          
+          # Create and switch to new branch
+          git checkout -b "$BRANCH_NAME"
+          
+          # Create audio directory in repository if it doesn't exist
+          mkdir -p audio/generated
+          
+          # Copy audio file to repository
+          LOCAL_FILENAME="${{ steps.download-audio.outputs.local_filename }}"
+          cp "generated_audio/$LOCAL_FILENAME" "audio/generated/$LOCAL_FILENAME"
+          
+          # Create metadata file
+          cat > "audio/generated/${LOCAL_FILENAME%.mp3}_metadata.json" << EOF
+          {
+            "issue_number": $ISSUE_NUMBER,
+            "issue_title": "${{ github.event.issue.title }}",
+            "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "parameters": {
+              "prompt": "${{ steps.extract-params.outputs.prompt }}",
+              "lyrics": "${{ steps.extract-params.outputs.lyrics }}",
+              "duration": ${{ steps.extract-params.outputs.duration }},
+              "mode": "${{ steps.extract-params.outputs.mode }}"
+            },
+            "generation_time": "${{ steps.generate-audio.outputs.generation_time }}",
+            "file_size": "${{ steps.download-audio.outputs.file_size }}",
+            "generated_by": "${{ github.actor }}"
+          }
+          EOF
+          
+          # Add files to git
+          git add "audio/generated/$LOCAL_FILENAME"
+          git add "audio/generated/${LOCAL_FILENAME%.mp3}_metadata.json"
+          
+          # Commit changes
+          git commit -m "Add generated audio for issue #$ISSUE_NUMBER
+          
+          Generated audio with OctoBeats using the following parameters:
+          - Prompt: ${{ steps.extract-params.outputs.prompt }}
+          - Duration: ${{ steps.extract-params.outputs.duration }} seconds
+          - Mode: ${{ steps.extract-params.outputs.mode }}
+          - Generation time: ${{ steps.generate-audio.outputs.generation_time }}s
+          
+          Resolves #$ISSUE_NUMBER"
+          
+          # Push branch
+          git push origin "$BRANCH_NAME"
+          
+          echo "✅ Branch created and audio committed" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "audio_filename=$LOCAL_FILENAME" >> $GITHUB_OUTPUT
+      
+      - name: Create pull request
+        if: steps.create-branch.outputs.branch_name
+        id: create-pr
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const logFile = '${{ steps.validate-trigger.outputs.log_file }}';
+            
+            fs.appendFileSync(logFile, `\n## Pull Request Creation\n`);
+            
+            const branchName = '${{ steps.create-branch.outputs.branch_name }}';
+            const audioFilename = '${{ steps.create-branch.outputs.audio_filename }}';
+            const issueNumber = context.payload.issue.number;
+            const issueTitle = context.payload.issue.title;
+            
+            // Create PR body
+            const prBody = `## 🎵 Generated Audio for Issue #${issueNumber}
+            
+            This PR adds the audio file generated using OctoBeats based on the parameters specified in issue #${issueNumber}.
+            
+            ### 📋 Generation Details
+            
+            - **Issue**: #${issueNumber} - ${issueTitle}
+            - **Audio File**: \`audio/generated/${audioFilename}\`
+            - **Prompt**: "${{ steps.extract-params.outputs.prompt }}"
+            - **Lyrics**: "${{ steps.extract-params.outputs.lyrics }}"
+            - **Duration**: ${{ steps.extract-params.outputs.duration }} seconds
+            - **Quality Mode**: ${{ steps.extract-params.outputs.mode }}
+            - **Generation Time**: ${{ steps.generate-audio.outputs.generation_time }}s
+            - **File Size**: ${{ steps.download-audio.outputs.file_size }}
+            - **Generated By**: @${{ github.actor }}
+            - **Generated At**: ${new Date().toISOString()}
+            
+            ### 📁 Files Added
+            
+            - \`audio/generated/${audioFilename}\` - The generated audio file
+            - \`audio/generated/${audioFilename.replace('.mp3', '_metadata.json')}\` - Metadata about the generation
+            
+            ### 🎧 How to Listen
+            
+            1. Download the audio file from this PR
+            2. Or check it out locally: \`git checkout ${branchName}\`
+            3. The audio file is located at \`audio/generated/${audioFilename}\`
+            
+            ---
+            
+            *This PR was automatically created by the OctoBeats Music Generator workflow.*
+            
+            Closes #${issueNumber}`;
+            
+            try {
+              const { data: pr } = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🎵 Add generated audio for issue #${issueNumber}`,
+                head: branchName,
+                base: 'main',
+                body: prBody,
+                draft: false
+              });
+              
+              fs.appendFileSync(logFile, `✅ Pull request created successfully\n`);
+              fs.appendFileSync(logFile, `- PR #${pr.number}: ${pr.title}\n`);
+              fs.appendFileSync(logFile, `- URL: ${pr.html_url}\n`);
+              
+              // Add labels to the PR
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['audio', 'octobeats', 'auto-generated']
+              });
+              
+              fs.appendFileSync(logFile, `- Labels added to PR\n`);
+              
+              core.setOutput('pr_number', pr.number);
+              core.setOutput('pr_url', pr.html_url);
+              
+              return {
+                pr_number: pr.number,
+                pr_url: pr.html_url
+              };
+            } catch (error) {
+              fs.appendFileSync(logFile, `❌ Error creating pull request: ${error.message}\n`);
+              core.setFailed(`Error creating pull request: ${error.message}`);
+            }
+      
+      - name: Comment on original issue
+        if: steps.create-pr.outputs.pr_number
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const logFile = '${{ steps.validate-trigger.outputs.log_file }}';
+            
+            fs.appendFileSync(logFile, `\n## Issue Comment\n`);
+            
+            const prNumber = '${{ steps.create-pr.outputs.pr_number }}';
+            const prUrl = '${{ steps.create-pr.outputs.pr_url }}';
+            const audioFilename = '${{ steps.create-branch.outputs.audio_filename }}';
+            
+            const comment = `## 🎵 Audio Generated Successfully!
+            
+            Your audio has been generated using OctoBeats and is ready for review!
+            
+            ### 📋 Summary
+            
+            - **Generated File**: \`${audioFilename}\`
+            - **Generation Time**: ${{ steps.generate-audio.outputs.generation_time }}s
+            - **File Size**: ${{ steps.download-audio.outputs.file_size }}
+            - **Quality Mode**: ${{ steps.extract-params.outputs.mode }}
+            
+            ### 🔗 Next Steps
+            
+            1. **Review the PR**: [#${prNumber}](${prUrl})
+            2. **Listen to the audio**: Download the file from the PR or check out the branch
+            3. **Merge when satisfied**: The PR will close this issue automatically
+            
+            ### 🎧 Quick Download
+            
+            You can download the audio file directly from the PR or use:
+            \`\`\`bash
+            git checkout ${{ steps.create-branch.outputs.branch_name }}
+            # Audio file is at: audio/generated/${audioFilename}
+            \`\`\`
+            
+            ---
+            
+            *Generated automatically by OctoBeats Music Generator*`;
+            
+            try {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: comment
+              });
+              
+              fs.appendFileSync(logFile, `✅ Comment added to issue #${context.payload.issue.number}\n`);
+            } catch (error) {
+              fs.appendFileSync(logFile, `❌ Error commenting on issue: ${error.message}\n`);
+              // Don't fail the workflow for comment errors
+            }
+      
+      - name: Cleanup temporary files
+        if: always()
+        run: |
+          echo "🧹 Cleaning up temporary files..."
+          rm -f audio_params.json generation_request.json generation_response.json server_status.json
+          rm -rf generated_audio
+          echo "✅ Cleanup completed"
+      
+      - name: Upload workflow logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: octobeats-workflow-logs-${{ github.run_number }}
+          path: |
+            ${{ steps.validate-trigger.outputs.log_file }}
+            *.json
+          retention-days: 7 

@@ -1,0 +1,158 @@
+name: 🎵 Music Generation Request
+description: Request music generation using OctoBeats Studio
+title: "[MUSIC] "
+labels: ["audio", "octobeats"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎵 OctoBeats Music Generation Request
+        
+        Use this template to request music generation using OctoBeats Studio. The workflow will automatically generate music based on your parameters and create a pull request with the result.
+        
+        **⚠️ Important Notes:**
+        - Only repository owners, admins, and maintainers can request music generation
+        - The OctoBeats server must be running on the self-hosted runner
+        - Music generation typically takes 12-35 seconds depending on quality mode
+        - Generated files will be saved to `audio/generated/` directory
+        
+        ---
+
+  - type: input
+    id: prompt
+    attributes:
+      label: 🎼 Music Style Prompt
+      description: Describe the style, genre, mood, and characteristics of the music you want to generate
+      placeholder: "electronic, melodic, cyberpunk, 120 bpm"
+      value: "electronic, melodic"
+    validations:
+      required: true
+
+  - type: textarea
+    id: lyrics
+    attributes:
+      label: 🎤 Lyrics or Structure
+      description: |
+        Provide lyrics or structure tags for the audio. Use structure tags like [verse], [chorus], [bridge], [outro], or [inst] for instrumental.
+      placeholder: |
+        [verse]
+        Walking down the street today
+        [chorus]
+        Feeling good in every way
+        [bridge]
+        Music makes the world go round
+        [outro]
+      value: "[inst]"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: duration
+    attributes:
+      label: ⏱️ Duration (seconds)
+      description: Select the duration for the generated audio (30-240 seconds)
+      options:
+        - "30"
+        - "45"
+        - "60"
+        - "90"
+        - "120"
+        - "150"
+        - "180"
+        - "240"
+      default: 2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: quality_mode
+    attributes:
+      label: 🎚️ Quality Mode
+      description: |
+        Choose the quality mode for generation:
+        - **Fast**: 20 steps, ~12s generation time, good for previews
+        - **Quality**: 35 steps, ~24s generation time, balanced quality (recommended)
+        - **Ultra**: 50 steps, ~35s generation time, maximum quality
+      options:
+        - "fast"
+        - "quality"
+        - "ultra"
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_notes
+    attributes:
+      label: 📝 Additional Notes
+      description: Any additional information, specific requirements, or context for the audio generation
+      placeholder: "This audio will be used for... / Please focus on... / Any specific requirements..."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: ✅ Confirmation
+      description: Please confirm the following before submitting
+      options:
+        - label: I have the necessary permissions (owner/admin/maintainer) to request audio generation
+          required: true
+        - label: I understand that the OctoBeats server must be running for this to work
+          required: true
+        - label: I understand that this will create a new branch and pull request with the generated audio
+          required: true
+        - label: The parameters I've provided are appropriate and follow community guidelines
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 🔄 What happens next?
+        
+        1. **Validation**: The workflow will check if you have the required permissions and if the issue has the correct labels
+        2. **Parameter Extraction**: Your parameters will be extracted and validated
+        3. **Server Check**: The ACE-Step server status will be verified
+        4. **Audio Generation**: Your audio will be generated using the specified parameters
+        5. **Branch & PR Creation**: A new branch will be created with the audio file and a pull request will be opened
+        6. **Notification**: You'll receive a comment on this issue with the results and PR link
+        
+        ## 🎧 Example Parameters
+        
+        **Electronic/Ambient:**
+        ```
+        Prompt: electronic, ambient, atmospheric, synthesizer, 90 bpm
+        Lyrics: [inst]
+        Duration: 120
+        Mode: quality
+        ```
+        
+        **Pop Song:**
+        ```
+        Prompt: pop, upbeat, guitar, catchy melody
+        Lyrics: [verse]\nWalking down the street\n[chorus]\nFeeling so complete
+        Duration: 90
+        Mode: quality
+        ```
+        
+        **Classical:**
+        ```
+        Prompt: classical, piano, orchestral, peaceful, adagio
+        Lyrics: [inst]
+        Duration: 180
+        Mode: ultra
+        ```
+        
+        ## 🛠️ Troubleshooting
+        
+        If the workflow fails, check:
+        - OctoBeats server is running on `localhost:8000`
+        - You have the required repository permissions
+        - The issue has the `audio` or `octobeats` label
+        - Parameters are within valid ranges (duration: 30-240s)
+        
+        For more information, see the [OctoBeats API Documentation](https://github.com/mentria-ai/octobeats-docs). 

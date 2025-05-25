@@ -1,0 +1,14 @@
+{
+  "issue_number": 42,
+  "issue_title": "[MUSIC] chill 3",
+  "generated_at": "2025-05-25T10:55:07Z",
+  "parameters": {
+    "prompt": "pop, upbeat, guitar, catchy melody",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra"
+  },
+  "generation_time": "173.82",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

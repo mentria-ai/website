@@ -155,4 +155,4 @@ body:
         - The issue has the `audio` or `octobeats` label
         - Parameters are within valid ranges (duration: 30-240s)
         
-        For more information, see the [OctoBeats API Documentation](https://github.com/mentria-ai/octobeats-docs). 
+        For more information, see the [OctoBeats Setup Guide](https://github.com/mentria-ai/website/blob/main/.github/OCTOBEATS-SETUP-GUIDE.md). 

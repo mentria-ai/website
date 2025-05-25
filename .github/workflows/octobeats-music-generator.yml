@@ -147,40 +147,73 @@ jobs:
               mode: 'quality'
             };
             
-            // Extract parameters using regex patterns
-            const patterns = {
-              prompt: /(?:prompt|style|music[_\s]?style)[:\s]*([^\n\r]+)/i,
-              lyrics: /(?:lyrics|text|words)[:\s]*([^\n\r]+)/i,
-              duration: /(?:duration|length|time)[:\s]*(\d+)/i,
-              mode: /(?:mode|quality)[:\s]*(fast|quality|ultra)/i
-            };
+            // Log the issue body for debugging
+            fs.appendFileSync(logFile, `Issue body content:\n${issueBody}\n\n`);
             
-            // Also look for structured format like:
-            // - Prompt: electronic, cyberpunk
-            // - Duration: 90
-            // etc.
-            const structuredPatterns = {
-              prompt: /[-*]\s*(?:prompt|style|music[_\s]?style)[:\s]*([^\n\r]+)/i,
-              lyrics: /[-*]\s*(?:lyrics|text|words)[:\s]*([^\n\r]+)/i,
-              duration: /[-*]\s*(?:duration|length|time)[:\s]*(\d+)/i,
-              mode: /[-*]\s*(?:mode|quality)[:\s]*(fast|quality|ultra)/i
-            };
-            
-            // Extract parameters
-            for (const [key, pattern] of Object.entries(patterns)) {
-              const match = issueBody.match(pattern);
-              if (match && match[1]) {
-                audioParams[key] = match[1].trim();
-                fs.appendFileSync(logFile, `Found ${key}: ${audioParams[key]}\n`);
-              } else {
-                // Try structured format
-                const structuredMatch = issueBody.match(structuredPatterns[key]);
-                if (structuredMatch && structuredMatch[1]) {
-                  audioParams[key] = structuredMatch[1].trim();
-                  fs.appendFileSync(logFile, `Found ${key} (structured): ${audioParams[key]}\n`);
+            // Extract parameters using GitHub issue form format
+            const extractGitHubFormParameter = (fieldName, patterns, defaultValue) => {
+              // Try GitHub issue form format first (most reliable)
+              for (const pattern of patterns) {
+                const match = issueBody.match(pattern);
+                if (match && match[1] && match[1].trim()) {
+                  const value = match[1].trim();
+                  fs.appendFileSync(logFile, `Found ${fieldName}: "${value}"\n`);
+                  return value;
                 }
               }
-            }
+              fs.appendFileSync(logFile, `No match found for ${fieldName}, using default: "${defaultValue}"\n`);
+              return defaultValue;
+            };
+            
+            // GitHub issue form patterns (these match the template structure)
+            const promptPatterns = [
+              // GitHub form field format - exact match for our template
+              /### 🎼 Music Style Prompt\s*\n\s*([^\n]+)/i,
+              // Alternative form formats
+              /🎼 Music Style Prompt[:\s]*\n\s*([^\n]+)/i,
+              // Fallback patterns
+              /(?:prompt|style|music[_\s]?style)[:\s]*([^\n\r]+)/i,
+              /[-*]\s*(?:prompt|style|music[_\s]?style)[:\s]*([^\n\r]+)/i
+            ];
+            
+            const lyricsPatterns = [
+              // GitHub form field format - exact match for our template
+              /### 🎤 Lyrics or Structure\s*\n\s*([\s\S]*?)(?=\n### |\n\n### |$)/i,
+              // Alternative form formats
+              /🎤 Lyrics or Structure[:\s]*\n\s*([\s\S]*?)(?=\n### |\n\n### |$)/i,
+              // Fallback patterns
+              /(?:lyrics|text|words|structure)[:\s]*([^\n\r]+)/i,
+              /[-*]\s*(?:lyrics|text|words|structure)[:\s]*([^\n\r]+)/i
+            ];
+            
+            const durationPatterns = [
+              // GitHub form field format - exact match for our template
+              /### ⏱️ Duration \(seconds\)\s*\n\s*(\d+)/i,
+              // Alternative form formats
+              /⏱️ Duration[:\s]*\n\s*(\d+)/i,
+              // Fallback patterns
+              /(?:duration|length|time)[:\s]*(\d+)/i,
+              /[-*]\s*(?:duration|length|time)[:\s]*(\d+)/i
+            ];
+            
+            const modePatterns = [
+              // GitHub form field format - exact match for our template
+              /### 🎚️ Quality Mode\s*\n\s*(fast|quality|ultra)/i,
+              // Alternative form formats
+              /🎚️ Quality Mode[:\s]*\n\s*(fast|quality|ultra)/i,
+              // Fallback patterns
+              /(?:mode|quality)[:\s]*(fast|quality|ultra)/i,
+              /[-*]\s*(?:mode|quality)[:\s]*(fast|quality|ultra)/i
+            ];
+            
+            // Extract parameters using the improved logic
+            audioParams.prompt = extractGitHubFormParameter('prompt', promptPatterns, audioParams.prompt);
+            audioParams.lyrics = extractGitHubFormParameter('lyrics', lyricsPatterns, audioParams.lyrics);
+            
+            const durationStr = extractGitHubFormParameter('duration', durationPatterns, audioParams.duration.toString());
+            audioParams.duration = parseInt(durationStr) || audioParams.duration;
+            
+            audioParams.mode = extractGitHubFormParameter('mode', modePatterns, audioParams.mode);
             
             // Validate and sanitize parameters
             if (audioParams.duration) {
@@ -200,7 +233,17 @@ jobs:
             
             // Clean up prompt and lyrics
             audioParams.prompt = audioParams.prompt.replace(/[`"']/g, '').trim();
-            audioParams.lyrics = audioParams.lyrics.replace(/[`"']/g, '').trim();
+            audioParams.lyrics = audioParams.lyrics
+              .replace(/[`"']/g, '')  // Remove quotes
+              .replace(/^\s*\n+/, '')  // Remove leading newlines
+              .replace(/\n+\s*$/, '')  // Remove trailing newlines
+              .trim();
+            
+            // If lyrics is empty or just whitespace, use default
+            if (!audioParams.lyrics || audioParams.lyrics.length === 0) {
+              audioParams.lyrics = '[inst]';
+              fs.appendFileSync(logFile, `Lyrics was empty, using default: [inst]\n`);
+            }
             
             fs.appendFileSync(logFile, `\nFinal parameters:\n`);
             fs.appendFileSync(logFile, `- Prompt: "${audioParams.prompt}"\n`);

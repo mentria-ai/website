@@ -1,7 +1,7 @@
 blank_issues_enabled: true
 contact_links:
   - name: 📖 OctoBeats Documentation
-    url: https://github.com/mentria-ai/octobeats-docs
+    url: https://github.com/mentria-ai/website/blob/main/.github/OCTOBEATS-SETUP-GUIDE.md
     about: Learn more about OctoBeats Studio and its capabilities
   - name: 🐛 Bug Report
     url: https://github.com/mentria-ai/website/issues/new?template=bug_report.md

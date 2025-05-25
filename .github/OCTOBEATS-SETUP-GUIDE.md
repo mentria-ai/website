@@ -70,7 +70,7 @@ This setup creates the following files in your repository:
 The workflow will automatically:
 1. ✅ Validate your permissions and issue labels
 2. 🔍 Extract parameters from your issue description
-3. 🖥️ Check ACE-Step server status
+3. 🖥️ Check OctoBeats server status
 4. 🎵 Generate audio using your parameters
 5. 📥 Download the generated audio file
 6. 🌿 Create a new branch with the audio
@@ -123,16 +123,16 @@ Run the validation script to test your setup:
 
 ```bash
 # On Linux/macOS
-chmod +x .github/scripts/test-ace-step-setup.sh
-./.github/scripts/test-ace-step-setup.sh
+chmod +x .github/scripts/test-octobeats-setup.sh
+./.github/scripts/test-octobeats-setup.sh
 
 # On Windows (Git Bash)
-bash .github/scripts/test-ace-step-setup.sh
+bash .github/scripts/test-octobeats-setup.sh
 ```
 
 The script will test:
 - Required tools (curl, jq, git)
-- ACE-Step server connectivity
+- OctoBeats server connectivity
 - API endpoint accessibility
 - Workflow file configuration
 - Issue template setup
@@ -191,7 +191,7 @@ audio/
 ### Common Issues
 
 #### "Workflow doesn't trigger"
-- ✅ Check issue has `audio`, `ace-step`, or `music-generation` label
+- ✅ Check issue has `audio`, `octobeats`, or `music-generation` label
 - ✅ Verify you have owner/admin/maintainer permissions
 - ✅ Ensure workflow file exists and is valid YAML
 
@@ -207,7 +207,13 @@ audio/
 - ✅ Check server isn't busy with another generation
 - ✅ Verify parameters are within valid ranges
 - ✅ Ensure sufficient GPU/CPU resources available
-- ✅ Check ACE-Step server logs for errors
+- ✅ Check OctoBeats server logs for errors
+
+#### "Wrong parameters extracted"
+- ✅ Use the GitHub issue template for best results
+- ✅ Ensure issue body follows the expected format
+- ✅ Check workflow logs for parameter extraction details
+- ✅ Test parameter extraction with: `node .github/scripts/test-parameter-extraction.js`
 
 #### "Permission denied"
 - ✅ Verify GitHub token has necessary permissions
@@ -218,23 +224,23 @@ audio/
 
 Workflow logs are available as artifacts:
 1. Go to **Actions** → **Workflow Run**
-2. Download **ace-step-workflow-logs-{run-number}**
+2. Download **octobeats-workflow-logs-{run-number}**
 3. Check the log file for detailed execution information
 
 ## 🔄 Workflow Customization
 
 ### Modifying Parameters
-Edit `.github/workflows/ace-step-audio-generator.yml` to:
+Edit `.github/workflows/octobeats-music-generator.yml` to:
 - Change default parameter values
 - Modify validation rules
 - Adjust file naming conventions
 - Add custom labels or metadata
 
 ### Adding New Quality Modes
-Update the workflow to support additional ACE-Step quality modes:
+Update the workflow to support additional OctoBeats quality modes:
 1. Add new mode to issue template options
 2. Update parameter validation in workflow
-3. Test with ACE-Step server
+3. Test with OctoBeats server
 
 ### Custom File Organization
 Modify the branch creation and file commit steps to:
@@ -244,7 +250,7 @@ Modify the branch creation and file commit steps to:
 
 ## 📚 Additional Resources
 
-- **ACE-Step API Documentation**: Complete API reference
+- **OctoBeats API Documentation**: Complete API reference
 - **GitHub Actions Documentation**: Official GitHub Actions docs
 - **Self-Hosted Runners Guide**: Setting up runners
 - **Issue Templates Guide**: Creating custom templates
@@ -261,4 +267,4 @@ If you encounter issues:
 
 ---
 
-**🎵 Happy audio generating!** Your ACE-Step workflow is ready to create amazing music from GitHub issues. 
+**🎵 Happy audio generating!** Your OctoBeats workflow is ready to create amazing music from GitHub issues. 

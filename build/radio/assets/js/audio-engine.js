@@ -159,6 +159,11 @@ class AudioEngine {
             this.updateProgress();
             this.updateTimeDisplay();
             
+            // Reconnect equalizer to new audio source
+            if (window.equalizer && !window.equalizer.source) {
+                window.equalizer.connectToAudio();
+            }
+            
             return true;
         } catch (error) {
             console.error('Error loading track:', error);
@@ -174,6 +179,11 @@ class AudioEngine {
         }
         
         try {
+            // Ensure equalizer is connected before playing
+            if (window.equalizer && !window.equalizer.source) {
+                window.equalizer.connectToAudio();
+            }
+            
             await this.audio.play();
         } catch (error) {
             console.error('Error playing audio:', error);
@@ -319,7 +329,7 @@ class AudioEngine {
         const metadataEl = document.getElementById('trackMetadata');
         
         titleEl.textContent = track.title || 'Unknown Track';
-        artistEl.textContent = track.artist || 'OctoBeats Studio';
+        artistEl.textContent = track.artist || 'mentria.ai';
         
         // Show metadata if available
         if (track.metadata) {

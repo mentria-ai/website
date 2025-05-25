@@ -1,6 +1,6 @@
 # 🎵 OctoBeats Radio
 
-A modern, minimalist web interface for playing AI-generated music from the OctoBeats workflow.
+A modern, minimalist web interface for playing AI-generated music from the OctoBeats workflow by mentria.ai.
 
 ## 🚀 Features
 

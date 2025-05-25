@@ -21,14 +21,17 @@ class Equalizer {
             // Create audio context for frequency analysis
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             this.analyser = this.audioContext.createAnalyser();
-            this.analyser.fftSize = 64; // Small size for performance
-            this.analyser.smoothingTimeConstant = 0.8;
+            this.analyser.fftSize = 128; // Increased for better frequency resolution
+            this.analyser.smoothingTimeConstant = 0.6; // Reduced for more responsive animation
+            this.analyser.minDecibels = -90;
+            this.analyser.maxDecibels = -10;
             
             const bufferLength = this.analyser.frequencyBinCount;
             this.dataArray = new Uint8Array(bufferLength);
             
             // Connect to audio element when available
             this.connectToAudio();
+            console.log('🎵 Audio context initialized for equalizer');
         } catch (error) {
             console.warn('Web Audio API not supported, using fallback animation');
             this.useSimpleAnimation = true;
@@ -42,6 +45,7 @@ class Equalizer {
                 this.source = this.audioContext.createMediaElementSource(audio);
                 this.source.connect(this.analyser);
                 this.analyser.connect(this.audioContext.destination);
+                console.log('🎵 Audio context connected to equalizer');
             } catch (error) {
                 console.warn('Could not connect to audio source:', error);
                 this.useSimpleAnimation = true;
@@ -65,12 +69,21 @@ class Equalizer {
         
         // Resume audio context if suspended
         if (this.audioContext && this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
+            this.audioContext.resume().then(() => {
+                console.log('🎵 Audio context resumed for equalizer');
+            });
         }
         
-        if (this.useSimpleAnimation) {
+        // Try to connect to audio if not already connected
+        if (!this.source && !this.useSimpleAnimation) {
+            this.connectToAudio();
+        }
+        
+        if (this.useSimpleAnimation || !this.source) {
+            console.log('🎵 Using fallback animation for equalizer');
             this.startSimpleAnimation();
         } else {
+            console.log('🎵 Starting real-time audio analysis for equalizer');
             this.startAudioAnalysis();
         }
     }
@@ -88,7 +101,8 @@ class Equalizer {
         
         // Reset bars to minimum height
         this.bars.forEach(bar => {
-            bar.style.height = '20%';
+            bar.style.height = '15%';
+            bar.style.opacity = '0.3';
         });
     }
     
@@ -97,33 +111,66 @@ class Equalizer {
         
         this.analyser.getByteFrequencyData(this.dataArray);
         
-        // Map frequency data to bars
+        // Map frequency data to bars with better frequency distribution
         const barCount = this.bars.length;
-        const dataPerBar = Math.floor(this.dataArray.length / barCount);
+        const nyquist = this.audioContext.sampleRate / 2;
+        const frequencyBinWidth = nyquist / this.dataArray.length;
         
         this.bars.forEach((bar, index) => {
-            // Get average frequency data for this bar
-            let sum = 0;
-            const start = index * dataPerBar;
-            const end = start + dataPerBar;
+            // Use logarithmic frequency distribution for better visual representation
+            const startFreq = Math.pow(2, (index / barCount) * 10) * 20; // 20Hz to ~20kHz
+            const endFreq = Math.pow(2, ((index + 1) / barCount) * 10) * 20;
             
-            for (let i = start; i < end && i < this.dataArray.length; i++) {
+            const startBin = Math.floor(startFreq / frequencyBinWidth);
+            const endBin = Math.floor(endFreq / frequencyBinWidth);
+            
+            // Get average frequency data for this frequency range
+            let sum = 0;
+            let count = 0;
+            
+            for (let i = startBin; i <= endBin && i < this.dataArray.length; i++) {
                 sum += this.dataArray[i];
+                count++;
             }
             
-            const average = sum / dataPerBar;
-            const normalizedValue = average / 255; // Normalize to 0-1
+            const average = count > 0 ? sum / count : 0;
+            let normalizedValue = average / 255; // Normalize to 0-1
             
-            // Apply some smoothing and minimum height
-            const minHeight = 0.2;
-            const maxHeight = 1.0;
+            // Apply frequency-based weighting (boost mid frequencies)
+            const midFreq = Math.sqrt(startFreq * endFreq);
+            let frequencyWeight = 1.0;
+            
+            if (midFreq < 200) {
+                // Bass frequencies - slight boost
+                frequencyWeight = 1.2;
+            } else if (midFreq < 2000) {
+                // Mid frequencies - significant boost
+                frequencyWeight = 1.5;
+            } else if (midFreq < 8000) {
+                // High-mid frequencies - moderate boost
+                frequencyWeight = 1.3;
+            } else {
+                // High frequencies - normal
+                frequencyWeight = 1.0;
+            }
+            
+            normalizedValue *= frequencyWeight;
+            normalizedValue = Math.min(normalizedValue, 1.0);
+            
+            // Apply exponential scaling for better visual dynamics
+            normalizedValue = Math.pow(normalizedValue, 0.7);
+            
+            // Set minimum and maximum heights
+            const minHeight = 0.15;
+            const maxHeight = 0.95;
             const height = minHeight + (normalizedValue * (maxHeight - minHeight));
             
-            // Add some randomness for more organic feel
-            const randomFactor = parseFloat(bar.style.getPropertyValue('--random-factor')) || 0.5;
-            const finalHeight = height * (0.8 + randomFactor * 0.4);
+            // Smooth the animation with CSS transitions
+            bar.style.height = `${height * 100}%`;
             
-            bar.style.height = `${Math.min(finalHeight * 100, 100)}%`;
+            // Add subtle opacity variation based on intensity
+            const opacity = 0.6 + (normalizedValue * 0.4);
+            bar.style.opacity = opacity;
         });
         
         this.animationId = requestAnimationFrame(() => this.startAudioAnalysis());
@@ -141,7 +188,7 @@ class Equalizer {
             const phase = index * 0.5; // Phase offset
             const amplitude = 0.3 + randomFactor * 0.5; // Vary amplitude
             
-            const height = 0.2 + amplitude * (0.5 + 0.5 * Math.sin(time * frequency + phase));
+            const height = 0.15 + amplitude * (0.5 + 0.5 * Math.sin(time * frequency + phase));
             bar.style.height = `${height * 100}%`;
         });
         

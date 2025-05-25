@@ -294,7 +294,7 @@ class RadioApp {
         if ('mediaSession' in navigator && track) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: track.title || 'Unknown Track',
-                artist: track.artist || 'OctoBeats Studio',
+                artist: track.artist || 'mentria.ai',
                 album: 'Generated Music',
                 artwork: [
                     { src: '/favicon.ico', sizes: '96x96', type: 'image/x-icon' }

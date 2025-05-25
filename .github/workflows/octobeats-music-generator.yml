@@ -509,7 +509,7 @@ jobs:
           {
             "id": "issue_$ISSUE_NUMBER",
             "title": "${{ github.event.issue.title }}",
-            "artist": "OctoBeats Studio",
+            "artist": "mentria.ai",
             "file": "assets/audios/$LOCAL_FILENAME",
             "metadata": {
               "issue_number": $ISSUE_NUMBER,

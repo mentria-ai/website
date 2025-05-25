@@ -128,7 +128,7 @@ class Playlist {
                 return {
                     id: `issue_${issueNumber}`,
                     title: this.generateTitle(metadata),
-                    artist: 'OctoBeats Studio',
+                    artist: 'mentria.ai',
                     file: possibleFiles.audio,
                     metadata: metadata,
                     duration: metadata.duration || 0,

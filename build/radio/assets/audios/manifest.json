@@ -3,7 +3,7 @@
     {
       "id": "sample_track_1",
       "title": "Sample Electronic Track",
-      "artist": "OctoBeats Studio",
+      "artist": "mentria.ai",
       "file": "assets/audios/sample_track.mp3",
       "metadata": {
         "issue_title": "Sample Music Generation",
@@ -23,7 +23,7 @@
     {
       "id": "issue_42",
       "title": "[MUSIC] chill 3",
-      "artist": "OctoBeats Studio",
+      "artist": "mentria.ai",
       "file": "assets/audios/audio_issue_42_20250525_105507.mp3",
       "metadata": {
         "issue_number": 42,

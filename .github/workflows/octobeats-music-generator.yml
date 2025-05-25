@@ -467,14 +467,14 @@ jobs:
           git checkout -b "$BRANCH_NAME"
           
           # Create audio directory in repository if it doesn't exist
-          mkdir -p audio/generated
+          mkdir -p build/radio/assets/audios
           
           # Copy audio file to repository
           LOCAL_FILENAME="${{ steps.download-audio.outputs.local_filename }}"
-          cp "generated_audio/$LOCAL_FILENAME" "audio/generated/$LOCAL_FILENAME"
+          cp "generated_audio/$LOCAL_FILENAME" "build/radio/assets/audios/$LOCAL_FILENAME"
           
           # Create metadata file
-          cat > "audio/generated/${LOCAL_FILENAME%.mp3}_metadata.json" << EOF
+          cat > "build/radio/assets/audios/${LOCAL_FILENAME%.mp3}_metadata.json" << EOF
           {
             "issue_number": $ISSUE_NUMBER,
             "issue_title": "${{ github.event.issue.title }}",
@@ -491,9 +491,60 @@ jobs:
           }
           EOF
           
+          # Update manifest file for radio interface
+          echo "📝 Updating audio manifest..." >> ${{ steps.validate-trigger.outputs.log_file }}
+          
+          # Create or update manifest.json
+          MANIFEST_FILE="build/radio/assets/audios/manifest.json"
+          
+          # Load existing manifest or create new one
+          if [ -f "$MANIFEST_FILE" ]; then
+            cp "$MANIFEST_FILE" manifest_backup.json
+          else
+            echo '{"tracks": [], "last_updated": "", "total_tracks": 0}' > "$MANIFEST_FILE"
+          fi
+          
+          # Create new track entry
+          cat > new_track.json << EOF
+          {
+            "id": "issue_$ISSUE_NUMBER",
+            "title": "${{ github.event.issue.title }}",
+            "artist": "OctoBeats Studio",
+            "file": "assets/audios/$LOCAL_FILENAME",
+            "metadata": {
+              "issue_number": $ISSUE_NUMBER,
+              "issue_title": "${{ github.event.issue.title }}",
+              "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+              "parameters": {
+                "prompt": "${{ steps.extract-params.outputs.prompt }}",
+                "lyrics": "${{ steps.extract-params.outputs.lyrics }}",
+                "duration": ${{ steps.extract-params.outputs.duration }},
+                "mode": "${{ steps.extract-params.outputs.mode }}"
+              },
+              "generation_time": "${{ steps.generate-audio.outputs.generation_time }}",
+              "file_size": "${{ steps.download-audio.outputs.file_size }}",
+              "generated_by": "${{ github.actor }}"
+            },
+            "duration": ${{ steps.extract-params.outputs.duration }},
+            "issueNumber": $ISSUE_NUMBER
+          }
+          EOF
+          
+          # Update manifest using jq
+          jq --argjson newtrack "$(cat new_track.json)" \
+             --arg timestamp "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+             '.tracks += [$newtrack] | .last_updated = $timestamp | .total_tracks = (.tracks | length)' \
+             "$MANIFEST_FILE" > manifest_updated.json
+          
+          mv manifest_updated.json "$MANIFEST_FILE"
+          rm -f new_track.json manifest_backup.json
+          
+          echo "✅ Manifest updated with new track" >> ${{ steps.validate-trigger.outputs.log_file }}
+          
           # Add files to git
-          git add "audio/generated/$LOCAL_FILENAME"
-          git add "audio/generated/${LOCAL_FILENAME%.mp3}_metadata.json"
+          git add "build/radio/assets/audios/$LOCAL_FILENAME"
+          git add "build/radio/assets/audios/${LOCAL_FILENAME%.mp3}_metadata.json"
+          git add "$MANIFEST_FILE"
           
           # Commit changes
           git commit -m "Add generated audio for issue #$ISSUE_NUMBER
@@ -537,7 +588,7 @@ jobs:
             ### 📋 Generation Details
             
             - **Issue**: #${issueNumber} - ${issueTitle}
-            - **Audio File**: \`audio/generated/${audioFilename}\`
+            - **Audio File**: \`build/radio/assets/audios/${audioFilename}\`
             - **Prompt**: "${{ steps.extract-params.outputs.prompt }}"
             - **Lyrics**: "${{ steps.extract-params.outputs.lyrics }}"
             - **Duration**: ${{ steps.extract-params.outputs.duration }} seconds
@@ -549,14 +600,14 @@ jobs:
             
             ### 📁 Files Added
             
-            - \`audio/generated/${audioFilename}\` - The generated audio file
-            - \`audio/generated/${audioFilename.replace('.mp3', '_metadata.json')}\` - Metadata about the generation
+            - \`build/radio/assets/audios/${audioFilename}\` - The generated audio file
+            - \`build/radio/assets/audios/${audioFilename.replace('.mp3', '_metadata.json')}\` - Metadata about the generation
             
             ### 🎧 How to Listen
             
             1. Download the audio file from this PR
             2. Or check it out locally: \`git checkout ${branchName}\`
-            3. The audio file is located at \`audio/generated/${audioFilename}\`
+            3. The audio file is located at \`build/radio/assets/audios/${audioFilename}\`
             
             ---
             
@@ -637,7 +688,7 @@ jobs:
             You can download the audio file directly from the PR or use:
             \`\`\`bash
             git checkout ${{ steps.create-branch.outputs.branch_name }}
-            # Audio file is at: audio/generated/${audioFilename}
+            # Audio file is at: build/radio/assets/audios/${audioFilename}
             \`\`\`
             
             ---

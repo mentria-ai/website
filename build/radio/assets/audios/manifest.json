@@ -1,0 +1,26 @@
+{
+  "tracks": [
+    {
+      "id": "sample_track_1",
+      "title": "Sample Electronic Track",
+      "artist": "OctoBeats Studio",
+      "file": "assets/audios/sample_track.mp3",
+      "metadata": {
+        "issue_title": "Sample Music Generation",
+        "generated_at": "2025-01-25T17:00:00Z",
+        "parameters": {
+          "prompt": "electronic, ambient, chill",
+          "lyrics": "[inst]",
+          "duration": 60,
+          "mode": "quality"
+        },
+        "generation_time": "45s",
+        "file_size": "2.1MB"
+      },
+      "duration": 60,
+      "issueNumber": 0
+    }
+  ],
+  "last_updated": "2025-01-25T17:00:00Z",
+  "total_tracks": 1
+} 

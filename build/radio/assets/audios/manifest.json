@@ -19,8 +19,30 @@
       },
       "duration": 60,
       "issueNumber": 0
+    },
+    {
+      "id": "issue_42",
+      "title": "[MUSIC] chill 3",
+      "artist": "OctoBeats Studio",
+      "file": "assets/audios/audio_issue_42_20250525_105507.mp3",
+      "metadata": {
+        "issue_number": 42,
+        "issue_title": "[MUSIC] chill 3",
+        "generated_at": "2025-05-25T10:55:07Z",
+        "parameters": {
+          "prompt": "pop, upbeat, guitar, catchy melody",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra"
+        },
+        "generation_time": "173.82",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 42
     }
   ],
-  "last_updated": "2025-01-25T17:00:00Z",
-  "total_tracks": 1
-} 
+  "last_updated": "2025-05-25T10:55:07Z",
+  "total_tracks": 2
+}

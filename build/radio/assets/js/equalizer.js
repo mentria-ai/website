@@ -42,14 +42,30 @@ class Equalizer {
         const audio = document.getElementById('audioPlayer');
         if (audio && this.audioContext && !this.source) {
             try {
+                // Check if audio context is in suspended state
+                if (this.audioContext.state === 'suspended') {
+                    console.log('🎵 Audio context suspended, will resume on user interaction');
+                }
+                
                 this.source = this.audioContext.createMediaElementSource(audio);
                 this.source.connect(this.analyser);
                 this.analyser.connect(this.audioContext.destination);
-                console.log('🎵 Audio context connected to equalizer');
+                console.log('🎵 Audio context connected to equalizer successfully');
+                
+                // Test if we can get frequency data
+                this.analyser.getByteFrequencyData(this.dataArray);
+                console.log('🎵 Frequency data array length:', this.dataArray.length);
+                
             } catch (error) {
-                console.warn('Could not connect to audio source:', error);
+                console.warn('❌ Could not connect to audio source:', error);
                 this.useSimpleAnimation = true;
             }
+        } else if (!audio) {
+            console.warn('❌ Audio element not found');
+        } else if (!this.audioContext) {
+            console.warn('❌ Audio context not available');
+        } else if (this.source) {
+            console.log('🎵 Audio source already connected');
         }
     }
     
@@ -61,7 +77,7 @@ class Equalizer {
         });
     }
     
-    start() {
+    async start() {
         if (this.isActive) return;
         
         this.isActive = true;
@@ -69,9 +85,12 @@ class Equalizer {
         
         // Resume audio context if suspended
         if (this.audioContext && this.audioContext.state === 'suspended') {
-            this.audioContext.resume().then(() => {
+            try {
+                await this.audioContext.resume();
                 console.log('🎵 Audio context resumed for equalizer');
-            });
+            } catch (error) {
+                console.warn('❌ Failed to resume audio context:', error);
+            }
         }
         
         // Try to connect to audio if not already connected
@@ -79,13 +98,16 @@ class Equalizer {
             this.connectToAudio();
         }
         
-        if (this.useSimpleAnimation || !this.source) {
-            console.log('🎵 Using fallback animation for equalizer');
-            this.startSimpleAnimation();
-        } else {
-            console.log('🎵 Starting real-time audio analysis for equalizer');
-            this.startAudioAnalysis();
-        }
+        // Wait a bit for connection to establish
+        setTimeout(() => {
+            if (this.useSimpleAnimation || !this.source) {
+                console.log('🎵 Using fallback animation for equalizer');
+                this.startSimpleAnimation();
+            } else {
+                console.log('🎵 Starting real-time audio analysis for equalizer');
+                this.startAudioAnalysis();
+            }
+        }, 100);
     }
     
     stop() {
@@ -107,9 +129,18 @@ class Equalizer {
     }
     
     startAudioAnalysis() {
-        if (!this.isActive || !this.analyser) return;
+        if (!this.isActive || !this.analyser) {
+            console.warn('❌ Cannot start audio analysis - not active or no analyser');
+            return;
+        }
         
         this.analyser.getByteFrequencyData(this.dataArray);
+        
+        // Debug: Check if we're getting any audio data
+        const hasAudioData = this.dataArray.some(value => value > 0);
+        if (!hasAudioData && Math.random() < 0.01) { // Log occasionally
+            console.log('🔍 No audio data detected in frequency analysis');
+        }
         
         // Map frequency data to bars with better frequency distribution
         const barCount = this.bars.length;
@@ -224,10 +255,43 @@ class Equalizer {
         
         this.bars.forEach((bar, index) => {
             if (index < heights.length) {
-                const height = Math.max(0.2, Math.min(1, heights[index]));
+                const height = Math.max(0.15, Math.min(1, heights[index]));
                 bar.style.height = `${height * 100}%`;
+                bar.style.opacity = 0.6 + (heights[index] * 0.4);
             }
         });
+    }
+    
+    // Test function to verify equalizer is working
+    testEqualizer() {
+        console.log('🧪 Testing equalizer with sample data');
+        this.container.classList.add('active');
+        
+        const testData = [];
+        for (let i = 0; i < this.bars.length; i++) {
+            testData.push(Math.random() * 0.8 + 0.2);
+        }
+        
+        this.setBarsHeight(testData);
+        
+        // Animate for 3 seconds
+        let frame = 0;
+        const animate = () => {
+            if (frame < 180) { // 3 seconds at 60fps
+                const newData = [];
+                for (let i = 0; i < this.bars.length; i++) {
+                    newData.push(Math.random() * 0.8 + 0.2);
+                }
+                this.setBarsHeight(newData);
+                frame++;
+                requestAnimationFrame(animate);
+            } else {
+                console.log('🧪 Equalizer test completed');
+                this.stop();
+            }
+        };
+        
+        animate();
     }
     
     // Pulse effect for beats
@@ -270,6 +334,16 @@ class Equalizer {
 // Initialize equalizer when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.equalizer = new Equalizer();
+    
+    // Add test button event listener
+    const testBtn = document.getElementById('testEqualizerBtn');
+    if (testBtn) {
+        testBtn.addEventListener('click', () => {
+            if (window.equalizer) {
+                window.equalizer.testEqualizer();
+            }
+        });
+    }
     
     // Handle window resize
     window.addEventListener('resize', () => {

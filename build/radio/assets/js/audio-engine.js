@@ -179,9 +179,16 @@ class AudioEngine {
         }
         
         try {
-            // Ensure equalizer is connected before playing
-            if (window.equalizer && !window.equalizer.source) {
-                window.equalizer.connectToAudio();
+            // Ensure equalizer audio context is resumed and connected
+            if (window.equalizer) {
+                if (window.equalizer.audioContext && window.equalizer.audioContext.state === 'suspended') {
+                    await window.equalizer.audioContext.resume();
+                    console.log('🎵 Audio context resumed from audio engine');
+                }
+                
+                if (!window.equalizer.source) {
+                    window.equalizer.connectToAudio();
+                }
             }
             
             await this.audio.play();

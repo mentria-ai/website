@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="OctoBeats Radio">
@@ -111,9 +112,14 @@
         <section class="playlist-section">
             <div class="playlist-header">
                 <h2>Generated Tracks</h2>
-                <button class="refresh-btn" id="refreshBtn" title="Refresh playlist">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="refresh-btn" id="testEqualizerBtn" title="Test equalizer" style="background: #8b5cf6;">
+                        <i class="fas fa-flask"></i>
+                    </button>
+                    <button class="refresh-btn" id="refreshBtn" title="Refresh playlist">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
             </div>
             <div class="playlist-container">
                 <div class="playlist" id="playlist">
@@ -154,19 +160,6 @@
     <script src="assets/js/playlist.js"></script>
     <script src="assets/js/radio.js"></script>
     
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/radio/sw.js')
-                    .then((registration) => {
-                        console.log('🎵 Service Worker registered successfully:', registration.scope);
-                    })
-                    .catch((error) => {
-                        console.log('❌ Service Worker registration failed:', error);
-                    });
-            });
-        }
-    </script>
+
 </body>
 </html> 

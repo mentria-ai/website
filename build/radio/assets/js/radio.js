@@ -33,8 +33,7 @@ class RadioApp {
             // Initialize PWA features
             this.initPWA();
             
-            // Initialize performance monitoring
-            this.initPerformanceMonitoring();
+            // Performance monitoring disabled for better performance
             
             // Mark as initialized
             this.isInitialized = true;
@@ -140,42 +139,7 @@ class RadioApp {
         console.log('📱 PWA features initialized');
     }
     
-    initPerformanceMonitoring() {
-        // Monitor memory usage
-        if ('memory' in performance) {
-            setInterval(() => {
-                const memory = performance.memory;
-                if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
-                    console.warn('⚠️ High memory usage detected');
-                }
-            }, 30000);
-        }
-        
-        // Monitor frame rate
-        let lastTime = performance.now();
-        let frameCount = 0;
-        
-        const checkFrameRate = (currentTime) => {
-            frameCount++;
-            
-            if (currentTime - lastTime >= 1000) {
-                const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-                
-                if (fps < 30) {
-                    console.warn('⚠️ Low frame rate detected:', fps, 'fps');
-                }
-                
-                frameCount = 0;
-                lastTime = currentTime;
-            }
-            
-            requestAnimationFrame(checkFrameRate);
-        };
-        
-        requestAnimationFrame(checkFrameRate);
-        
-        console.log('📊 Performance monitoring initialized');
-    }
+
     
     // Keyboard shortcut handlers
     togglePlayPause() {

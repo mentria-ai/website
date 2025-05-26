@@ -28,13 +28,13 @@
     <meta property="twitter:description" content="Experience the future with Mentria.AI - Your all-in-one AI-driven platform for social media, entertainment, and more. Powered by advanced artificial intelligence.">
     <meta property="twitter:image" content="assets/img/mentria-ai.gif">
 
-    <!-- PWA Support -->
-    <meta name="theme-color" content="#ffffff">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Mentria.AI">
-    <link rel="apple-touch-icon" href="assets/img/favicon-96x96.png">
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA Support - Commented out for production -->
+    <!-- <meta name="theme-color" content="#ffffff"> -->
+    <!-- <meta name="mobile-web-app-capable" content="yes"> -->
+    <!-- <meta name="apple-mobile-web-app-status-bar-style" content="black"> -->
+    <!-- <meta name="apple-mobile-web-app-title" content="Mentria.AI"> -->
+    <!-- <link rel="apple-touch-icon" href="assets/img/favicon-96x96.png"> -->
+    <!-- <link rel="manifest" href="manifest.json"> -->
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon-96x96.png">
@@ -45,7 +45,7 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/pwa.css">
+    <!-- <link rel="stylesheet" href="assets/css/pwa.css"> -->
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts for animated subtitles -->
@@ -121,6 +121,17 @@
       "browserRequirements": "Requires JavaScript. Requires HTML5.",
       "softwareVersion": "1.0"
     }
+    </script>
+
+    <!-- Production Redirect Script -->
+    <script>
+        // Redirect to radio page if not on localhost
+        if (window.location.hostname !== 'localhost' && 
+            window.location.hostname !== '127.0.0.1' && 
+            window.location.hostname !== '0.0.0.0' &&
+            !window.location.pathname.includes('/radio')) {
+            window.location.href = '/radio/';
+        }
     </script>
 
     <!-- WebLLM dependency -->
@@ -269,7 +280,7 @@
     <script src="assets/js/main.js"></script>
     <script src="assets/js/quotes.js"></script>
     <script src="assets/js/animated-subtitles.js"></script>
-    <script src="assets/js/pwa.js"></script>
+    <!-- <script src="assets/js/pwa.js"></script> -->
     <script src="assets/js/webllm-engine.js"></script>
     <script src="assets/js/chat-ui.js"></script>
     <!-- Tests (only loaded in development) -->

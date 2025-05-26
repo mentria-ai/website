@@ -1,489 +1,591 @@
 /**
- * Radio App - Main application controller
+ * OctoBeats Radio - Apple-inspired Music Player
+ * Powered by Mentria.AI
  */
-class RadioApp {
+
+class OctoBeatsRadio {
     constructor() {
-        this.isInitialized = false;
-        this.keyboardShortcuts = {
-            'Space': 'togglePlayPause',
-            'ArrowRight': 'nextTrack',
-            'ArrowLeft': 'previousTrack',
-            'ArrowUp': 'volumeUp',
-            'ArrowDown': 'volumeDown',
-            'KeyM': 'toggleMute',
-            'KeyS': 'toggleShuffle',
-            'KeyR': 'toggleRepeat',
-            'KeyF': 'refreshPlaylist'
-        };
+        // Core properties
+        this.audio = null;
+        this.tracks = [];
+        this.currentIndex = 0;
+        this.isPlaying = false;
+        this.isLoading = false;
+        this.volume = 1.0;
+        this.isMuted = false;
         
+        // DOM elements
+        this.elements = {};
+        
+        // Initialize the app
         this.init();
     }
     
+    /**
+     * Initialize the radio application
+     */
     async init() {
         try {
-            // Wait for all components to be ready
-            await this.waitForComponents();
-            
-            // Initialize keyboard shortcuts
-            this.initKeyboardShortcuts();
-            
-            // Initialize media session API
-            this.initMediaSession();
-            
-            // Initialize PWA features
-            this.initPWA();
-            
-            // Performance monitoring disabled for better performance
-            
-            // Mark as initialized
-            this.isInitialized = true;
+            this.initializeElements();
+            this.createAudioElement();
+            this.bindEvents();
+            this.setupMediaSession();
+            this.setupKeyboardShortcuts();
+            await this.loadTracks();
             
             console.log('🎵 OctoBeats Radio initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize OctoBeats Radio:', error);
+            this.showError('Failed to initialize the music player');
+        }
+    }
+    
+    /**
+     * Initialize DOM elements
+     */
+    initializeElements() {
+        this.elements = {
+            // Track info
+            trackTitle: document.getElementById('trackTitle'),
+            trackArtist: document.getElementById('trackArtist'),
             
-            // Show welcome message if no tracks
-            this.checkForWelcomeMessage();
+            // Controls
+            playButton: document.getElementById('playButton'),
+            prevButton: document.getElementById('prevButton'),
+            nextButton: document.getElementById('nextButton'),
+            
+            // Progress
+            progressBar: document.getElementById('progressBar'),
+            progressFill: document.getElementById('progressFill'),
+            progressHandle: document.getElementById('progressHandle'),
+            currentTime: document.getElementById('currentTime'),
+            totalTime: document.getElementById('totalTime'),
+            
+            // Playlist
+            playlist: document.getElementById('playlist'),
+            refreshButton: document.getElementById('refreshButton'),
+            
+            // Download
+            downloadButton: document.getElementById('downloadButton')
+        };
+        
+        // Validate required elements
+        const requiredElements = ['trackTitle', 'trackArtist', 'playButton', 'playlist'];
+        for (const elementId of requiredElements) {
+            if (!this.elements[elementId]) {
+                throw new Error(`Required element not found: ${elementId}`);
+            }
+        }
+    }
+    
+    /**
+     * Create and configure audio element
+     */
+    createAudioElement() {
+        this.audio = document.createElement('audio');
+        this.audio.preload = 'metadata';
+        this.audio.volume = this.volume;
+        
+        // Audio event listeners
+        this.audio.addEventListener('loadstart', () => this.onLoadStart());
+        this.audio.addEventListener('loadedmetadata', () => this.onLoadedMetadata());
+        this.audio.addEventListener('canplay', () => this.onCanPlay());
+        this.audio.addEventListener('play', () => this.onPlay());
+        this.audio.addEventListener('pause', () => this.onPause());
+        this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
+        this.audio.addEventListener('ended', () => this.onEnded());
+        this.audio.addEventListener('error', (e) => this.onError(e));
+        
+        document.body.appendChild(this.audio);
+    }
+    
+    /**
+     * Bind UI event listeners
+     */
+    bindEvents() {
+        // Control buttons
+        this.elements.playButton?.addEventListener('click', () => this.togglePlayPause());
+        this.elements.prevButton?.addEventListener('click', () => this.previousTrack());
+        this.elements.nextButton?.addEventListener('click', () => this.nextTrack());
+        
+        // Progress bar
+        this.elements.progressBar?.addEventListener('click', (e) => this.seekToPosition(e));
+        
+        // Playlist
+        this.elements.refreshButton?.addEventListener('click', () => this.refreshPlaylist());
+        
+        // Download
+        this.elements.downloadButton?.addEventListener('click', () => this.downloadCurrentTrack());
+        
+        // Window events
+        window.addEventListener('beforeunload', () => this.cleanup());
+    }
+    
+    /**
+     * Setup Media Session API for system integration
+     */
+    setupMediaSession() {
+        if (!('mediaSession' in navigator)) return;
+        
+        navigator.mediaSession.setActionHandler('play', () => this.play());
+        navigator.mediaSession.setActionHandler('pause', () => this.pause());
+        navigator.mediaSession.setActionHandler('previoustrack', () => this.previousTrack());
+        navigator.mediaSession.setActionHandler('nexttrack', () => this.nextTrack());
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+            if (details.seekTime && this.audio) {
+                this.audio.currentTime = details.seekTime;
+            }
+        });
+    }
+    
+    /**
+     * Setup keyboard shortcuts
+     */
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Don't handle shortcuts if user is typing
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            switch (e.code) {
+                case 'Space':
+                    e.preventDefault();
+                    this.togglePlayPause();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    this.previousTrack();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    this.nextTrack();
+                    break;
+                case 'KeyR':
+                    if (e.metaKey || e.ctrlKey) return; // Don't override browser refresh
+                    e.preventDefault();
+                    this.refreshPlaylist();
+                    break;
+            }
+        });
+    }
+    
+    /**
+     * Load tracks from manifest
+     */
+    async loadTracks() {
+        try {
+            this.setLoading(true);
+            
+            const response = await fetch('assets/audios/manifest.json');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            this.tracks = data.tracks || [];
+            
+            this.renderPlaylist();
+            
+            if (this.tracks.length > 0) {
+                this.loadTrack(0);
+            } else {
+                this.showEmptyState();
+            }
             
         } catch (error) {
-            console.error('Failed to initialize Radio App:', error);
-            this.showError('Failed to initialize application');
+            console.error('Failed to load tracks:', error);
+            this.showEmptyState('Failed to load music tracks');
+        } finally {
+            this.setLoading(false);
         }
     }
     
-    async waitForComponents() {
-        // Wait for all components to be available
-        const maxWait = 5000; // 5 seconds
-        const startTime = Date.now();
+    /**
+     * Load a specific track
+     */
+    loadTrack(index) {
+        if (index < 0 || index >= this.tracks.length) return;
         
-        while (Date.now() - startTime < maxWait) {
-            if (window.audioEngine && window.equalizer && window.playlist) {
-                return;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
+        const wasPlaying = this.isPlaying;
+        this.pause();
+        
+        this.currentIndex = index;
+        const track = this.tracks[index];
+        
+        // Update UI immediately
+        this.updateTrackInfo(track);
+        this.updatePlaylist();
+        
+        // Load audio
+        this.audio.src = track.file;
+        
+        // Update media session
+        this.updateMediaSession(track);
+        
+        // Show download button
+        if (this.elements.downloadButton) {
+            this.elements.downloadButton.style.display = 'flex';
         }
         
-        throw new Error('Components failed to initialize within timeout');
+        // Resume playback if it was playing
+        if (wasPlaying) {
+            this.audio.addEventListener('canplay', () => this.play(), { once: true });
+        }
     }
     
-    initKeyboardShortcuts() {
-        document.addEventListener('keydown', (event) => {
-            // Don't handle shortcuts if user is typing in an input
-            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
-                return;
-            }
-            
-            const action = this.keyboardShortcuts[event.code];
-            if (action && this[action]) {
-                event.preventDefault();
-                this[action]();
-            }
-        });
+    /**
+     * Update track information display
+     */
+    updateTrackInfo(track) {
+        if (this.elements.trackTitle) {
+            this.elements.trackTitle.textContent = track.title || 'Unknown Track';
+        }
         
-        console.log('⌨️ Keyboard shortcuts initialized');
-    }
-    
-    initMediaSession() {
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('play', () => {
-                if (window.audioEngine) {
-                    window.audioEngine.play();
-                }
-            });
-            
-            navigator.mediaSession.setActionHandler('pause', () => {
-                if (window.audioEngine) {
-                    window.audioEngine.pause();
-                }
-            });
-            
-            navigator.mediaSession.setActionHandler('previoustrack', () => {
-                this.previousTrack();
-            });
-            
-            navigator.mediaSession.setActionHandler('nexttrack', () => {
-                this.nextTrack();
-            });
-            
-            navigator.mediaSession.setActionHandler('seekto', (details) => {
-                if (window.audioEngine && details.seekTime) {
-                    window.audioEngine.audio.currentTime = details.seekTime;
-                }
-            });
-            
-            console.log('📱 Media Session API initialized');
+        if (this.elements.trackArtist) {
+            this.elements.trackArtist.textContent = 'mentria.ai';
         }
     }
     
-    initPWA() {
-        // Handle install prompt
-        window.addEventListener('beforeinstallprompt', (event) => {
-            event.preventDefault();
-            this.deferredPrompt = event;
-            this.showInstallButton();
-        });
-        
-        // Handle app installed
-        window.addEventListener('appinstalled', () => {
-            console.log('📱 OctoBeats Radio installed as PWA');
-            this.hideInstallButton();
-        });
-        
-        // Handle online/offline status
-        window.addEventListener('online', () => {
-            this.updateConnectionStatus(true);
-        });
-        
-        window.addEventListener('offline', () => {
-            this.updateConnectionStatus(false);
-        });
-        
-        console.log('📱 PWA features initialized');
-    }
-    
-
-    
-    // Keyboard shortcut handlers
-    togglePlayPause() {
-        if (window.audioEngine) {
-            window.audioEngine.togglePlayPause();
-        }
-    }
-    
-    nextTrack() {
-        if (window.playlist) {
-            window.playlist.nextTrack();
-        }
-    }
-    
-    previousTrack() {
-        if (window.playlist) {
-            window.playlist.previousTrack();
-        }
-    }
-    
-    volumeUp() {
-        if (window.audioEngine) {
-            const currentVolume = window.audioEngine.getVolume();
-            window.audioEngine.setVolume(Math.min(1, currentVolume + 0.1));
-        }
-    }
-    
-    volumeDown() {
-        if (window.audioEngine) {
-            const currentVolume = window.audioEngine.getVolume();
-            window.audioEngine.setVolume(Math.max(0, currentVolume - 0.1));
-        }
-    }
-    
-    toggleMute() {
-        if (window.audioEngine) {
-            window.audioEngine.toggleMute();
-        }
-    }
-    
-    toggleShuffle() {
-        if (window.audioEngine) {
-            window.audioEngine.toggleShuffle();
-        }
-    }
-    
-    toggleRepeat() {
-        if (window.audioEngine) {
-            window.audioEngine.toggleRepeat();
-        }
-    }
-    
-    refreshPlaylist() {
-        if (window.playlist) {
-            window.playlist.refreshPlaylist();
-        }
-    }
-    
-    // PWA methods
-    showInstallButton() {
-        // Create install button if it doesn't exist
-        if (!document.getElementById('installBtn')) {
-            const installBtn = document.createElement('button');
-            installBtn.id = 'installBtn';
-            installBtn.className = 'install-btn';
-            installBtn.innerHTML = '<i class="fas fa-download"></i> Install App';
-            installBtn.title = 'Install OctoBeats Radio';
-            
-            installBtn.addEventListener('click', () => {
-                this.installApp();
-            });
-            
-            document.querySelector('.radio-header').appendChild(installBtn);
-        }
-    }
-    
-    hideInstallButton() {
-        const installBtn = document.getElementById('installBtn');
-        if (installBtn) {
-            installBtn.remove();
-        }
-    }
-    
-    async installApp() {
-        if (this.deferredPrompt) {
-            this.deferredPrompt.prompt();
-            const { outcome } = await this.deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                console.log('📱 User accepted the install prompt');
-            } else {
-                console.log('📱 User dismissed the install prompt');
-            }
-            
-            this.deferredPrompt = null;
-        }
-    }
-    
-    updateConnectionStatus(isOnline) {
-        const statusText = document.querySelector('.status-text');
-        const statusDot = document.querySelector('.status-dot');
-        
-        if (statusText && statusDot) {
-            if (isOnline) {
-                statusText.textContent = 'Online';
-                statusDot.style.backgroundColor = 'var(--success-color)';
-            } else {
-                statusText.textContent = 'Offline';
-                statusDot.style.backgroundColor = 'var(--warning-color)';
-            }
-        }
-    }
-    
-    // Media Session updates
+    /**
+     * Update Media Session metadata
+     */
     updateMediaSession(track) {
-        if ('mediaSession' in navigator && track) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: track.title || 'Unknown Track',
-                artist: track.artist || 'mentria.ai',
-                album: 'Generated Music',
-                artwork: [
-                    { src: '/favicon.ico', sizes: '96x96', type: 'image/x-icon' }
-                ]
-            });
+        if (!('mediaSession' in navigator)) return;
+        
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: track.title || 'Unknown Track',
+            artist: 'mentria.ai',
+            album: 'AI Generated Music',
+            artwork: [
+                { src: 'icon-192x192.png', sizes: '192x192', type: 'image/png' },
+                { src: 'icon-512x512.png', sizes: '512x512', type: 'image/png' }
+            ]
+        });
+    }
+    
+    /**
+     * Render the playlist
+     */
+    renderPlaylist() {
+        if (!this.elements.playlist) return;
+        
+        if (this.tracks.length === 0) {
+            this.showEmptyState();
+            return;
         }
-    }
-    
-    // Welcome and help
-    checkForWelcomeMessage() {
-        setTimeout(() => {
-            if (window.playlist && window.playlist.getTrackCount() === 0) {
-                this.showWelcomeMessage();
-            }
-        }, 2000);
-    }
-    
-    showWelcomeMessage() {
-        const welcomeHtml = `
-            <div class="welcome-message">
-                <h3>🎵 Welcome to OctoBeats Radio!</h3>
-                <p>Generate music using the OctoBeats workflow to see tracks here.</p>
-                <div class="keyboard-shortcuts">
-                    <h4>Keyboard Shortcuts:</h4>
-                    <div class="shortcuts-grid">
-                        <span><kbd>Space</kbd> Play/Pause</span>
-                        <span><kbd>←</kbd> Previous</span>
-                        <span><kbd>→</kbd> Next</span>
-                        <span><kbd>↑</kbd> Volume Up</span>
-                        <span><kbd>↓</kbd> Volume Down</span>
-                        <span><kbd>M</kbd> Mute</span>
-                        <span><kbd>S</kbd> Shuffle</span>
-                        <span><kbd>R</kbd> Repeat</span>
-                        <span><kbd>F</kbd> Refresh</span>
-                    </div>
+        
+        const playlistHTML = this.tracks.map((track, index) => `
+            <div class="track-item ${index === this.currentIndex ? 'active' : ''}" 
+                 data-index="${index}">
+                <div class="track-number">${index + 1}</div>
+                <div class="track-details">
+                    <div class="track-name">${this.escapeHtml(track.title)}</div>
+                    <div class="track-meta">mentria.ai • Copyright-free</div>
                 </div>
-                <button class="close-welcome" onclick="this.parentElement.remove()">
-                    <i class="fas fa-times"></i> Got it
-                </button>
+            </div>
+        `).join('');
+        
+        this.elements.playlist.innerHTML = playlistHTML;
+        
+        // Add click listeners to track items
+        this.elements.playlist.querySelectorAll('.track-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const index = parseInt(item.dataset.index);
+                this.loadTrack(index);
+            });
+        });
+    }
+    
+    /**
+     * Update playlist active state
+     */
+    updatePlaylist() {
+        if (!this.elements.playlist) return;
+        
+        this.elements.playlist.querySelectorAll('.track-item').forEach((item, index) => {
+            item.classList.toggle('active', index === this.currentIndex);
+        });
+    }
+    
+    /**
+     * Show empty state
+     */
+    showEmptyState(message = null) {
+        if (!this.elements.playlist) return;
+        
+        const emptyStateHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">🎵</div>
+                <div class="empty-state-title">No tracks available</div>
+                <div class="empty-state-description">
+                    ${message || 'Generate music using the OctoBeats workflow to see tracks here.'}
+                </div>
             </div>
         `;
         
-        const welcomeDiv = document.createElement('div');
-        welcomeDiv.className = 'welcome-overlay';
-        welcomeDiv.innerHTML = welcomeHtml;
+        this.elements.playlist.innerHTML = emptyStateHTML;
         
-        document.body.appendChild(welcomeDiv);
+        // Hide download button
+        if (this.elements.downloadButton) {
+            this.elements.downloadButton.style.display = 'none';
+        }
         
-        // Auto-hide after 10 seconds
-        setTimeout(() => {
-            if (welcomeDiv.parentElement) {
-                welcomeDiv.remove();
-            }
-        }, 10000);
+        // Update track info
+        if (this.elements.trackTitle) {
+            this.elements.trackTitle.textContent = 'No tracks available';
+        }
+        if (this.elements.trackArtist) {
+            this.elements.trackArtist.textContent = 'Generate music to get started';
+        }
     }
     
-    // Error handling
-    showError(message) {
-        if (window.audioEngine) {
-            window.audioEngine.showError(message);
+    /**
+     * Play/pause toggle
+     */
+    togglePlayPause() {
+        if (this.isPlaying) {
+            this.pause();
         } else {
-            console.error(message);
+            this.play();
         }
     }
     
-    // Analytics and tracking (privacy-friendly)
-    trackEvent(event, data = {}) {
-        // Simple console logging for now
-        // In production, you might want to use a privacy-friendly analytics service
-        console.log(`📊 Event: ${event}`, data);
+    /**
+     * Play current track
+     */
+    async play() {
+        if (!this.audio || !this.audio.src) return;
+        
+        try {
+            await this.audio.play();
+        } catch (error) {
+            console.error('Failed to play audio:', error);
+            this.showError('Failed to play audio');
+        }
     }
     
-    // Cleanup
-    destroy() {
-        // Remove event listeners
-        document.removeEventListener('keydown', this.keyboardShortcuts);
+    /**
+     * Pause current track
+     */
+    pause() {
+        if (this.audio) {
+            this.audio.pause();
+        }
+    }
+    
+    /**
+     * Go to previous track
+     */
+    previousTrack() {
+        if (this.tracks.length === 0) return;
         
-        // Cleanup components
-        if (window.equalizer) {
-            window.equalizer.destroy();
+        const newIndex = this.currentIndex > 0 
+            ? this.currentIndex - 1 
+            : this.tracks.length - 1;
+        
+        this.loadTrack(newIndex);
+    }
+    
+    /**
+     * Go to next track
+     */
+    nextTrack() {
+        if (this.tracks.length === 0) return;
+        
+        const newIndex = this.currentIndex < this.tracks.length - 1 
+            ? this.currentIndex + 1 
+            : 0;
+        
+        this.loadTrack(newIndex);
+    }
+    
+    /**
+     * Seek to position in track
+     */
+    seekToPosition(event) {
+        if (!this.audio || !this.audio.duration) return;
+        
+        const rect = this.elements.progressBar.getBoundingClientRect();
+        const percent = (event.clientX - rect.left) / rect.width;
+        const newTime = percent * this.audio.duration;
+        
+        this.audio.currentTime = Math.max(0, Math.min(newTime, this.audio.duration));
+    }
+    
+    /**
+     * Refresh playlist
+     */
+    async refreshPlaylist() {
+        await this.loadTracks();
+    }
+    
+    /**
+     * Download current track
+     */
+    downloadCurrentTrack() {
+        if (!this.tracks[this.currentIndex]) return;
+        
+        const track = this.tracks[this.currentIndex];
+        const link = document.createElement('a');
+        link.href = track.file;
+        link.download = `${track.title}.mp3`;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    /**
+     * Set loading state
+     */
+    setLoading(loading) {
+        this.isLoading = loading;
+        
+        if (this.elements.refreshButton) {
+            if (loading) {
+                this.elements.refreshButton.innerHTML = '<div class="loading-spinner"></div>';
+                this.elements.refreshButton.disabled = true;
+            } else {
+                this.elements.refreshButton.innerHTML = '↻';
+                this.elements.refreshButton.disabled = false;
+            }
+        }
+    }
+    
+    /**
+     * Show error message
+     */
+    showError(message) {
+        console.error(message);
+        // In a real app, you might want to show a toast notification
+    }
+    
+    /**
+     * Format time in MM:SS format
+     */
+    formatTime(seconds) {
+        if (!seconds || isNaN(seconds)) return '0:00';
+        
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    /**
+     * Update progress bar
+     */
+    updateProgress() {
+        if (!this.audio || !this.audio.duration) return;
+        
+        const percent = (this.audio.currentTime / this.audio.duration) * 100;
+        
+        if (this.elements.progressFill) {
+            this.elements.progressFill.style.width = `${percent}%`;
         }
         
-        console.log('🧹 Radio App cleaned up');
-    }
-}
-
-// CSS for welcome message and install button
-const additionalStyles = `
-.install-btn {
-    padding: 0.5rem 1rem;
-    background: var(--accent-primary);
-    color: var(--text-primary);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.install-btn:hover {
-    background: var(--accent-secondary);
-    transform: translateY(-1px);
-}
-
-.welcome-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(10, 10, 10, 0.95);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    animation: fadeIn 0.3s ease;
-}
-
-.welcome-message {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-2xl);
-    max-width: 500px;
-    text-align: center;
-    border: 1px solid var(--border-color);
-}
-
-.welcome-message h3 {
-    margin-bottom: var(--spacing-lg);
-    color: var(--accent-primary);
-}
-
-.welcome-message p {
-    margin-bottom: var(--spacing-xl);
-    color: var(--text-secondary);
-}
-
-.keyboard-shortcuts {
-    margin-bottom: var(--spacing-xl);
-    text-align: left;
-}
-
-.keyboard-shortcuts h4 {
-    margin-bottom: var(--spacing-md);
-    color: var(--text-primary);
-}
-
-.shortcuts-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-sm);
-    font-size: 0.875rem;
-}
-
-.shortcuts-grid span {
-    color: var(--text-secondary);
-}
-
-.shortcuts-grid kbd {
-    background: var(--bg-tertiary);
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    font-family: monospace;
-    font-size: 0.75rem;
-    color: var(--text-primary);
-    margin-right: 0.5rem;
-}
-
-.close-welcome {
-    background: var(--accent-primary);
-    color: var(--text-primary);
-    border: none;
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin: 0 auto;
-}
-
-.close-welcome:hover {
-    background: var(--accent-secondary);
-    transform: translateY(-1px);
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@media (max-width: 480px) {
-    .welcome-message {
-        margin: var(--spacing-lg);
-        padding: var(--spacing-lg);
+        if (this.elements.progressHandle) {
+            this.elements.progressHandle.style.left = `${percent}%`;
+        }
+        
+        if (this.elements.currentTime) {
+            this.elements.currentTime.textContent = this.formatTime(this.audio.currentTime);
+        }
     }
     
-    .shortcuts-grid {
-        grid-template-columns: 1fr;
+    /**
+     * Update play button state
+     */
+    updatePlayButton() {
+        if (!this.elements.playButton) return;
+        
+        if (this.isPlaying) {
+            this.elements.playButton.innerHTML = '⏸';
+            this.elements.playButton.setAttribute('aria-label', 'Pause');
+        } else {
+            this.elements.playButton.innerHTML = '▶';
+            this.elements.playButton.setAttribute('aria-label', 'Play');
+        }
+    }
+    
+    // Audio event handlers
+    onLoadStart() {
+        this.setLoading(true);
+    }
+    
+    onLoadedMetadata() {
+        if (this.elements.totalTime) {
+            this.elements.totalTime.textContent = this.formatTime(this.audio.duration);
+        }
+    }
+    
+    onCanPlay() {
+        this.setLoading(false);
+    }
+    
+    onPlay() {
+        this.isPlaying = true;
+        this.updatePlayButton();
+    }
+    
+    onPause() {
+        this.isPlaying = false;
+        this.updatePlayButton();
+    }
+    
+    onTimeUpdate() {
+        this.updateProgress();
+    }
+    
+    onEnded() {
+        this.nextTrack();
+    }
+    
+    onError(event) {
+        console.error('Audio error:', event);
+        this.showError('Failed to load audio track');
+        this.setLoading(false);
+    }
+    
+    /**
+     * Cleanup resources
+     */
+    cleanup() {
+        if (this.audio) {
+            this.audio.pause();
+            this.audio.src = '';
+            this.audio.remove();
+        }
     }
 }
-`;
 
-// Inject additional styles
-const styleSheet = document.createElement('style');
-styleSheet.textContent = additionalStyles;
-document.head.appendChild(styleSheet);
+// Register Service Worker for PWA functionality
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/radio/sw.js')
+            .then((registration) => {
+                console.log('🎵 Service Worker registered successfully:', registration.scope);
+            })
+            .catch((error) => {
+                console.log('❌ Service Worker registration failed:', error);
+            });
+    });
+}
 
-// Initialize the radio app when DOM is loaded
+// Initialize the radio when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.radioApp = new RadioApp();
+    window.octoBeatsRadio = new OctoBeatsRadio();
 });
 
-// Handle page unload
-window.addEventListener('beforeunload', () => {
-    if (window.radioApp) {
-        window.radioApp.destroy();
-    }
-});
-
-// Export for use in other modules
+// Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = RadioApp;
+    module.exports = OctoBeatsRadio;
 } 

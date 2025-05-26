@@ -1,132 +1,137 @@
-# 🎵 OctoBeats Radio
+# OctoBeats Radio - Apple-Inspired Music Player
 
-A modern, minimalist web interface for playing AI-generated music from the OctoBeats workflow by mentria.ai.
+A sleek, Apple-inspired web music player for AI-generated copyright-free music, powered by Mentria.AI.
 
-## 🚀 Features
+## Features
 
-- **Modern UI**: Clean, dark-themed interface with smooth animations
-- **Audio Controls**: Play, pause, next, previous, shuffle, repeat
-- **Equalizer Visualization**: Real-time audio frequency visualization
-- **Playlist Management**: Automatic discovery of generated tracks
-- **Keyboard Shortcuts**: Full keyboard control support
-- **Responsive Design**: Works on desktop and mobile devices
-- **PWA Support**: Can be installed as a Progressive Web App
+### 🎵 Core Functionality
+- **Copyright-free AI Music**: Stream fresh AI-generated music perfect for cafes, hotels, vlogs, and more
+- **Apple-inspired Design**: Clean, minimal interface following Apple's Human Interface Guidelines
+- **Progressive Web App**: Installable on mobile and desktop with offline support
+- **Keyboard Shortcuts**: Full keyboard navigation support
+- **Media Session API**: System-level media controls integration
 
-## 🎮 Controls
+### 🎨 Design System
+- **Apple Typography Scale**: Uses SF Pro Display/Text font stack with proper sizing
+- **Apple Color Palette**: Authentic iOS/macOS color scheme with proper contrast
+- **Smooth Animations**: 60fps animations with proper easing curves
+- **Responsive Design**: Optimized for all screen sizes from mobile to desktop
+- **Accessibility**: WCAG compliant with proper focus states and ARIA labels
 
-### Audio Controls
-- **Play/Pause**: Click the main play button or press `Space`
-- **Next Track**: Click next button or press `→`
-- **Previous Track**: Click previous button or press `←`
-- **Volume**: Use the volume slider or press `↑`/`↓`
-- **Mute**: Click volume button or press `M`
+### 📱 PWA Features
+- **Service Worker**: Offline caching and background sync
+- **App Manifest**: Installable as native app
+- **Media Session**: Lock screen and notification controls
+- **Background Sync**: Seamless updates when online
 
-### Playlist Controls
-- **Shuffle**: Click shuffle button or press `S`
-- **Repeat**: Click repeat button or press `R` (cycles through: off → all → one)
-- **Refresh**: Click refresh button or press `F`
-
-### Additional Shortcuts
-- **Seek**: Click anywhere on the progress bar
-- **Install App**: Click install button (when available)
-
-## 📁 File Structure
+## File Structure
 
 ```
 build/radio/
 ├── index.html              # Main HTML file
+├── manifest.json           # PWA manifest
+├── sw.js                   # Service worker
 ├── assets/
 │   ├── css/
-│   │   └── radio.css       # Styles and animations
+│   │   └── radio.css       # Apple-inspired styles
 │   ├── js/
-│   │   ├── audio-engine.js # Audio playback engine
-│   │   ├── equalizer.js    # Equalizer visualization
-│   │   ├── playlist.js     # Playlist management
-│   │   └── radio.js        # Main application
+│   │   └── radio.js        # Main application logic
 │   └── audios/
-│       ├── manifest.json   # Track listing (auto-generated)
-│       └── *.mp3          # Generated audio files
+│       ├── manifest.json   # Track metadata
+│       └── *.mp3          # Audio files
+├── icon-*.png             # App icons
 └── README.md              # This file
 ```
 
-## 🎵 How It Works
+## Technical Implementation
 
-1. **Audio Generation**: Use the OctoBeats workflow to generate music by creating GitHub issues with the `audio` label
-2. **Automatic Discovery**: Generated tracks are automatically added to the radio interface
-3. **Real-time Updates**: The playlist refreshes every 30 seconds to discover new tracks
-4. **Metadata Integration**: Track information is extracted from the generation metadata
+### CSS Architecture
+- **CSS Custom Properties**: Consistent design tokens
+- **Apple Design System**: Authentic spacing, typography, and colors
+- **Modern CSS**: Flexbox, Grid, and backdrop-filter
+- **Responsive Design**: Mobile-first approach with breakpoints
 
-## 🔧 Technical Details
+### JavaScript Architecture
+- **ES6 Classes**: Clean, modular code structure
+- **Async/Await**: Modern promise handling
+- **Event-driven**: Proper event delegation and cleanup
+- **Error Handling**: Graceful degradation and user feedback
 
-### Audio Engine
-- HTML5 Audio API for playback
-- Web Audio API for frequency analysis
-- Support for MP3 format
-- Automatic volume and playback state management
+### PWA Implementation
+- **Service Worker**: Cache-first strategy for static assets, network-first for audio
+- **Manifest**: Proper app metadata and icons
+- **Media Session**: System integration for media controls
 
-### Equalizer
-- Real-time frequency analysis using Web Audio API
-- Fallback animation for unsupported browsers
-- Responsive bar count based on screen size
-- Smooth animations with CSS transitions
+## Keyboard Shortcuts
 
-### Playlist
-- Automatic track discovery via manifest file
-- Support for metadata display
-- Shuffle and repeat functionality
-- Track duration and file size display
+| Key | Action |
+|-----|--------|
+| `Space` | Play/Pause |
+| `←` | Previous track |
+| `→` | Next track |
+| `R` | Refresh playlist |
 
-## 🌐 Browser Support
+## Browser Support
 
-- **Modern Browsers**: Chrome, Firefox, Safari, Edge (latest versions)
-- **Audio Features**: HTML5 Audio API support required
-- **Equalizer**: Web Audio API support recommended (fallback available)
-- **PWA**: Service Worker support for installation
+- **Modern Browsers**: Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
+- **PWA Features**: Chrome/Edge (full), Firefox (partial), Safari (partial)
+- **Media Session**: Chrome/Edge (full), Firefox (partial), Safari (limited)
 
-## 📱 Mobile Support
+## Development
 
-- Touch-friendly controls
-- Responsive layout
-- Media Session API integration
-- Background playback support
+### Prerequisites
+- Modern web browser
+- Local web server (for development)
+- Audio files in the `assets/audios/` directory
 
-## 🎨 Customization
+### Setup
+1. Ensure audio files are in `assets/audios/`
+2. Update `assets/audios/manifest.json` with track metadata
+3. Serve the `build/radio/` directory via HTTP server
+4. Open in browser and test functionality
 
-The interface uses CSS custom properties for easy theming:
-
-```css
-:root {
-  --accent-primary: #6366f1;    /* Primary accent color */
-  --accent-secondary: #8b5cf6;  /* Secondary accent color */
-  --bg-primary: #0a0a0a;        /* Background color */
-  /* ... more variables */
+### Adding New Tracks
+1. Place MP3 files in `assets/audios/`
+2. Update `manifest.json` with track metadata:
+```json
+{
+  "tracks": [
+    {
+      "id": "unique_id",
+      "title": "Track Title",
+      "artist": "mentria.ai",
+      "file": "assets/audios/filename.mp3",
+      "duration": 120,
+      "metadata": { ... }
+    }
+  ]
 }
 ```
 
-## 🔄 Integration with OctoBeats
+## Design Principles
 
-The radio interface automatically integrates with the OctoBeats workflow:
+### Apple Human Interface Guidelines
+- **Clarity**: Clear visual hierarchy and readable typography
+- **Deference**: Content takes precedence over UI elements
+- **Depth**: Layered interface with appropriate shadows and blur
 
-1. Audio files are saved to `build/radio/assets/audios/`
-2. Metadata files are created alongside audio files
-3. The manifest file is updated automatically
-4. The radio interface discovers new tracks via the manifest
+### Performance
+- **60fps Animations**: Hardware-accelerated transforms
+- **Lazy Loading**: Progressive enhancement
+- **Efficient Caching**: Smart service worker strategies
 
-## 🚀 Getting Started
+### Accessibility
+- **Keyboard Navigation**: Full keyboard support
+- **Screen Readers**: Proper ARIA labels and roles
+- **High Contrast**: Supports system preferences
+- **Reduced Motion**: Respects user preferences
 
-1. **Generate Music**: Create a GitHub issue with the `audio` label and music parameters
-2. **Wait for Generation**: The OctoBeats workflow will generate and save the audio
-3. **Open Radio**: Navigate to `/radio/` in your browser
-4. **Enjoy**: Your generated tracks will appear in the playlist automatically
+## License
 
-## 🎧 Audio Quality
+Copyright-free AI music for commercial and personal use. No attribution required.
 
-- **Fast Mode**: Quick generation, lower quality
-- **Quality Mode**: Balanced generation time and quality
-- **Ultra Mode**: Longer generation, highest quality
+## Credits
 
-All modes produce high-quality MP3 files suitable for web playback.
-
----
-
-**🎵 Enjoy your AI-generated music with OctoBeats Radio!** 
+- **Design**: Inspired by Apple's Human Interface Guidelines
+- **Music**: AI-generated by Mentria.AI
+- **Development**: OctoBeats Radio Team 

@@ -1,0 +1,14 @@
+{
+  "issue_number": 45,
+  "issue_title": "[MUSIC] J",
+  "generated_at": "2025-05-26T10:03:23Z",
+  "parameters": {
+    "prompt": "saxphone, jazz",
+    "lyrics": "[verse]\n\n[chorus]\n\n[solo]\n\n[verse]\n\n[chorus]\n\n[outro]\n",
+    "duration": 90,
+    "mode": "ultra"
+  },
+  "generation_time": "141.2",
+  "file_size": "1.7M",
+  "generated_by": "mentria-ai"
+}

@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Validate trigger conditions
         id: validate-trigger
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
@@ -126,7 +126,7 @@ jobs:
       - name: Extract audio parameters
         if: steps.validate-trigger.outputs.should_process == 'true'
         id: extract-params
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
@@ -154,7 +154,7 @@ jobs:
             const extractGitHubFormParameter = (fieldName, patterns, defaultValue) => {
               // Try GitHub issue form format first (most reliable)
               for (const pattern of patterns) {
-                const match = issueBody.match(pattern);
+              const match = issueBody.match(pattern);
                 if (match && match[1] && match[1].trim()) {
                   const value = match[1].trim();
                   fs.appendFileSync(logFile, `Found ${fieldName}: "${value}"\n`);
@@ -351,15 +351,18 @@ jobs:
           echo "- Duration: $DURATION seconds" >> ${{ steps.validate-trigger.outputs.log_file }}
           echo "- Mode: $MODE" >> ${{ steps.validate-trigger.outputs.log_file }}
           
-          # Create request payload
-          cat > generation_request.json << EOF
-          {
-            "prompt": "$PROMPT",
-            "lyrics": "$LYRICS",
-            "duration": $DURATION,
-            "mode": "$MODE"
-          }
-          EOF
+          # Create request payload using jq for proper JSON formatting
+          jq -n \
+            --arg prompt "$PROMPT" \
+            --arg lyrics "$LYRICS" \
+            --arg duration "$DURATION" \
+            --arg mode "$MODE" \
+            '{
+              "prompt": $prompt,
+              "lyrics": $lyrics,
+              "duration": ($duration | tonumber),
+              "mode": $mode
+            }' > generation_request.json
           
           echo "Request payload:" >> ${{ steps.validate-trigger.outputs.log_file }}
           cat generation_request.json >> ${{ steps.validate-trigger.outputs.log_file }}
@@ -473,23 +476,32 @@ jobs:
           LOCAL_FILENAME="${{ steps.download-audio.outputs.local_filename }}"
           cp "generated_audio/$LOCAL_FILENAME" "build/radio/assets/audios/$LOCAL_FILENAME"
           
-          # Create metadata file
-          cat > "build/radio/assets/audios/${LOCAL_FILENAME%.mp3}_metadata.json" << EOF
-          {
-            "issue_number": $ISSUE_NUMBER,
-            "issue_title": "${{ github.event.issue.title }}",
-            "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-            "parameters": {
-              "prompt": "${{ steps.extract-params.outputs.prompt }}",
-              "lyrics": "${{ steps.extract-params.outputs.lyrics }}",
-              "duration": ${{ steps.extract-params.outputs.duration }},
-              "mode": "${{ steps.extract-params.outputs.mode }}"
-            },
-            "generation_time": "${{ steps.generate-audio.outputs.generation_time }}",
-            "file_size": "${{ steps.download-audio.outputs.file_size }}",
-            "generated_by": "${{ github.actor }}"
-          }
-          EOF
+          # Create metadata file using jq for proper JSON formatting
+          jq -n \
+            --arg issue_number "$ISSUE_NUMBER" \
+            --arg issue_title "${{ github.event.issue.title }}" \
+            --arg generated_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+            --arg prompt "${{ steps.extract-params.outputs.prompt }}" \
+            --arg lyrics "${{ steps.extract-params.outputs.lyrics }}" \
+            --arg duration "${{ steps.extract-params.outputs.duration }}" \
+            --arg mode "${{ steps.extract-params.outputs.mode }}" \
+            --arg generation_time "${{ steps.generate-audio.outputs.generation_time }}" \
+            --arg file_size "${{ steps.download-audio.outputs.file_size }}" \
+            --arg generated_by "${{ github.actor }}" \
+            '{
+              "issue_number": ($issue_number | tonumber),
+              "issue_title": $issue_title,
+              "generated_at": $generated_at,
+              "parameters": {
+                "prompt": $prompt,
+                "lyrics": $lyrics,
+                "duration": ($duration | tonumber),
+                "mode": $mode
+              },
+              "generation_time": $generation_time,
+              "file_size": $file_size,
+              "generated_by": $generated_by
+            }' > "build/radio/assets/audios/${LOCAL_FILENAME%.mp3}_metadata.json"
           
           # Update manifest file for radio interface
           echo "📝 Updating audio manifest..." >> ${{ steps.validate-trigger.outputs.log_file }}
@@ -504,31 +516,52 @@ jobs:
             echo '{"tracks": [], "last_updated": "", "total_tracks": 0}' > "$MANIFEST_FILE"
           fi
           
-          # Create new track entry
-          cat > new_track.json << EOF
-          {
-            "id": "issue_$ISSUE_NUMBER",
-            "title": "${{ github.event.issue.title }}",
-            "artist": "mentria.ai",
-            "file": "assets/audios/$LOCAL_FILENAME",
-            "metadata": {
-              "issue_number": $ISSUE_NUMBER,
-              "issue_title": "${{ github.event.issue.title }}",
-              "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-              "parameters": {
-                "prompt": "${{ steps.extract-params.outputs.prompt }}",
-                "lyrics": "${{ steps.extract-params.outputs.lyrics }}",
-                "duration": ${{ steps.extract-params.outputs.duration }},
-                "mode": "${{ steps.extract-params.outputs.mode }}"
+          # Create new track entry using jq to properly escape JSON
+          ISSUE_TITLE_ESCAPED=$(echo "${{ github.event.issue.title }}" | jq -R .)
+          PROMPT_ESCAPED=$(echo "${{ steps.extract-params.outputs.prompt }}" | jq -R .)
+          LYRICS_ESCAPED=$(echo "${{ steps.extract-params.outputs.lyrics }}" | jq -R .)
+          GENERATION_TIME_ESCAPED=$(echo "${{ steps.generate-audio.outputs.generation_time }}" | jq -R .)
+          FILE_SIZE_ESCAPED=$(echo "${{ steps.download-audio.outputs.file_size }}" | jq -R .)
+          ACTOR_ESCAPED=$(echo "${{ github.actor }}" | jq -R .)
+          
+          # Create new track entry using jq for proper JSON formatting
+          jq -n \
+            --arg id "issue_$ISSUE_NUMBER" \
+            --argjson title "$ISSUE_TITLE_ESCAPED" \
+            --arg artist "mentria.ai" \
+            --arg file "assets/audios/$LOCAL_FILENAME" \
+            --arg issue_number "$ISSUE_NUMBER" \
+            --argjson issue_title "$ISSUE_TITLE_ESCAPED" \
+            --arg generated_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+            --argjson prompt "$PROMPT_ESCAPED" \
+            --argjson lyrics "$LYRICS_ESCAPED" \
+            --arg duration "${{ steps.extract-params.outputs.duration }}" \
+            --arg mode "${{ steps.extract-params.outputs.mode }}" \
+            --argjson generation_time "$GENERATION_TIME_ESCAPED" \
+            --argjson file_size "$FILE_SIZE_ESCAPED" \
+            --argjson generated_by "$ACTOR_ESCAPED" \
+            '{
+              "id": $id,
+              "title": $title,
+              "artist": $artist,
+              "file": $file,
+              "metadata": {
+                "issue_number": ($issue_number | tonumber),
+                "issue_title": $issue_title,
+                "generated_at": $generated_at,
+                "parameters": {
+                  "prompt": $prompt,
+                  "lyrics": $lyrics,
+                  "duration": ($duration | tonumber),
+                  "mode": $mode
+                },
+                "generation_time": $generation_time,
+                "file_size": $file_size,
+                "generated_by": $generated_by
               },
-              "generation_time": "${{ steps.generate-audio.outputs.generation_time }}",
-              "file_size": "${{ steps.download-audio.outputs.file_size }}",
-              "generated_by": "${{ github.actor }}"
-            },
-            "duration": ${{ steps.extract-params.outputs.duration }},
-            "issueNumber": $ISSUE_NUMBER
-          }
-          EOF
+              "duration": ($duration | tonumber),
+              "issueNumber": ($issue_number | tonumber)
+            }' > new_track.json
           
           # Update manifest using jq
           jq --argjson newtrack "$(cat new_track.json)" \
@@ -567,7 +600,7 @@ jobs:
       - name: Create pull request
         if: steps.create-branch.outputs.branch_name
         id: create-pr
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
@@ -654,7 +687,7 @@ jobs:
       
       - name: Comment on original issue
         if: steps.create-pr.outputs.pr_number
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');

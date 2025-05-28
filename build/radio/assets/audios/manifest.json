@@ -173,6 +173,28 @@
       },
       "duration": 80,
       "issueNumber": 44
+    },
+    {
+      "id": "track_49",
+      "title": "[MUSIC] mentria.ai summary",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_49_20250528_132923.mp3",
+      "metadata": {
+        "issue_number": 49,
+        "issue_title": "[MUSIC] mentria.ai summary",
+        "generated_at": "2025-05-28T13:29:23Z",
+        "parameters": {
+          "prompt": "funk, pop, soul, melodic",
+          "lyrics": "[verse 1]\nGray pixels hum with soulful beats\nE-Ink run guides our dancing feet\nRoyalty-free rhythms fill the air\nMentria’s grooves beyond compare\n\n[verse 2]\nGemma 2B whispers next to Llama 3\nPhi-3 Mini joins the melody\nChat the facts as the bassline flows\nAI and music in sweet repose\n\n[chorus]\nStream it live, let the melody shine\nDownload free, make that vibe divine\nOn café walls or hotel halls\nMentria’s music breaks down all walls\n\n[verse 3]\nDiffusion cores craft each funky tone\nAutoencoders shape your soul’s home\nOne-click play, instant harmony\nEmbed the API for unity\n\n[bridge]\nMonochrome game meets melodic dream\nPlay E-Ink Run in a rhythmic stream\nFact-chat pop with rhythmic design\nPrivacy-first, your data’s fine\n\n[verse 4]\nSoulful pop with a future twist\nUninterrupted, you get the gist\nFrom parlors to vlogs, the sound is free\nMentria.ai sets the music free\n",
+          "duration": 90,
+          "mode": "ultra"
+        },
+        "generation_time": "156.21",
+        "file_size": "1.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 90,
+      "issueNumber": 49
     }
   ],
   "schedule_info": {
@@ -181,6 +203,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-05-28T13:06:13Z",
-  "total_tracks": 3
+  "last_updated": "2025-05-28T13:29:23Z",
+  "total_tracks": 4
 }

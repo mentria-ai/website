@@ -195,6 +195,28 @@
       },
       "duration": 90,
       "issueNumber": 49
+    },
+    {
+      "id": "track_51",
+      "title": "[MUSIC] Reggae Fusion 1",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_51_20250528_134956.mp3",
+      "metadata": {
+        "issue_number": 51,
+        "issue_title": "[MUSIC] Reggae Fusion 1",
+        "generated_at": "2025-05-28T13:49:56Z",
+        "parameters": {
+          "prompt": "Reggae, Reggae Fusion",
+          "lyrics": "[verse 1]\nSunrise paints the mountains gold, breeze whispers through the pines\nRivers hum a gentle song, echo through these ancient lines\nBirds in flight keep time with drums, heartbeats of the green terrain\nRoots run deep beneath our feet, bonding earth and soul again\n\n[chorus]\nFeel the rhythm of the land, one love under sky so wide\nNature’s voice within our hands, let the tide of life be our guide\nLet the sunshine warm your mind, let the moonlight heal your soul\nIn this world we’re intertwined, reggae rhythms make us whole\n\n[verse 2]\nLeaves will dance when raindrops fall, cleansing earth and soothing pain\nFlowers lean toward the light, life renewed in every vein\nMountains stand in silent watch, guardians of time and space\nOceans chant their ancient hymns, teaching peace with every wave\n\n[bridge]\nMentria A I in distant streams, echoes pure and free\nLinking human hearts to dreams, singing earth’s true melody\n\n[verse 3]\nWalk the path where roots entwine, breathe the wisdom of the trees\nFeel the pulse of nature’s shrine, carried on the ocean breeze\nEvery step is gratitude, every breath a sacred prayer\nIn this life we stand as one, reggae love is everywhere\n\n[outro]\nOne love for earth and sky, one love for you and me\nLet this melody remind, nature’s bond sets spirits free\n",
+          "duration": 120,
+          "mode": "ultra"
+        },
+        "generation_time": "198.55",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 51
     }
   ],
   "schedule_info": {
@@ -203,6 +225,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-05-28T13:29:23Z",
-  "total_tracks": 4
+  "last_updated": "2025-05-28T13:49:56Z",
+  "total_tracks": 5
 }

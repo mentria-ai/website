@@ -217,6 +217,28 @@
       },
       "duration": 120,
       "issueNumber": 51
+    },
+    {
+      "id": "track_53",
+      "title": "[MUSIC] Reggae Fusion 2",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_53_20250528_142802.mp3",
+      "metadata": {
+        "issue_number": 53,
+        "issue_title": "[MUSIC] Reggae Fusion 2",
+        "generated_at": "2025-05-28T14:28:02Z",
+        "parameters": {
+          "prompt": "reggae, off-beat skank, bass guitar, drums, organ, horn section, medium tempo, laid-back groove, acoustic guitar, one-drop rhythm, nature, life, uplifting, roots, conscious, empowering, Male voice, mentria.ai",
+          "lyrics": "[verse 1]\nSunrise paints the mountains gold, breeze whispers through the pines\nRivers hum a gentle song, echo through these ancient lines\nBirds in flight keep time with drums, heartbeats of the green terrain\nRoots run deep beneath our feet, bonding earth and soul again\n\n[chorus]\nFeel the rhythm of the land, one love under sky so wide\nNature’s voice within our hands, let the tide of life be our guide\nLet the sunshine warm your mind, let the moonlight heal your soul\nIn this world we’re intertwined, reggae rhythms make us whole\n\n[verse 2]\nLeaves will dance when raindrops fall, cleansing earth and soothing pain\nFlowers lean toward the light, life renewed in every vein\nMountains stand in silent watch, guardians of time and space\nOceans chant their ancient hymns, teaching peace with every wave\n\n[bridge]\nMentria.ai in distant streams, echoes pure and free\nLinking human hearts to dreams, singing earth’s true melody\n\n[verse 3]\nWalk the path where roots entwine, breathe the wisdom of the trees\nFeel the pulse of nature’s shrine, carried on the ocean breeze\nEvery step is gratitude, every breath a sacred prayer\nIn this life we stand as one, reggae love is everywhere\n\n[outro]\nOne love for earth and sky, one love for you and me\nLet this melody remind, nature’s bond sets spirits free\n",
+          "duration": 201,
+          "mode": "ultra"
+        },
+        "generation_time": "244.68",
+        "file_size": "3.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 201,
+      "issueNumber": 53
     }
   ],
   "schedule_info": {
@@ -225,6 +247,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-05-28T13:49:56Z",
-  "total_tracks": 5
+  "last_updated": "2025-05-28T14:28:02Z",
+  "total_tracks": 6
 }

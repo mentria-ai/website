@@ -17,7 +17,6 @@ class OctoBeatsRadio {
         // Schedule properties
         this.schedule = new Map();
         this.isLiveMode = true;
-        this.currentTimeSlot = 0; // Minutes from 00:00
         
         // Visualizer properties
         this.audioContext = null;
@@ -30,6 +29,12 @@ class OctoBeatsRadio {
         
         // Clock properties
         this.clockUpdateInterval = null;
+        
+        // Progress tracking
+        this.isSeekingProgress = false;
+        
+        // Track loading
+        this.pendingTrack = null; // Store track info for when audio is ready
         
         // DOM elements
         this.elements = {};
@@ -49,7 +54,6 @@ class OctoBeatsRadio {
             this.setupMediaSession();
             this.setupKeyboardShortcuts();
             this.initializeClock();
-            this.initializeTimeSlider();
             this.initializeVisualizer();
             await this.loadTracks();
             this.startLiveMode();
@@ -77,14 +81,13 @@ class OctoBeatsRadio {
             nextButton: document.getElementById('nextButton'),
             
             // Clock
-            clockFace: document.getElementById('clockFace'),
+            digitalClock: document.getElementById('digitalClock'),
             clockTime: document.getElementById('clockTime'),
-            hourHand: document.getElementById('hourHand'),
-            minuteHand: document.getElementById('minuteHand'),
             
-            // Time slider
-            timeSlider: document.getElementById('timeSlider'),
-            timeTicks: document.getElementById('timeTicks'),
+            // Audio progress
+            audioProgressSlider: document.getElementById('audioProgressSlider'),
+            currentTime: document.getElementById('currentTime'),
+            totalTime: document.getElementById('totalTime'),
             
             // Track info
             currentTrackChip: document.getElementById('currentTrackChip'),
@@ -129,11 +132,11 @@ class OctoBeatsRadio {
     }
     
     /**
-     * Initialize analog-digital clock
+     * Initialize digital clock
      */
     initializeClock() {
         this.updateClock();
-        // Update every second for smooth hand movement
+        // Update every second
         this.clockUpdateInterval = setInterval(() => {
             this.updateClock();
             // Check for schedule updates every minute
@@ -144,56 +147,18 @@ class OctoBeatsRadio {
     }
     
     /**
-     * Update clock display and hands
+     * Update clock display
      */
     updateClock() {
         const now = new Date();
         const hours = now.getHours();
         const minutes = now.getMinutes();
-        const seconds = now.getSeconds();
         
         // Update digital time display
         if (this.elements.clockTime) {
             const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
             this.elements.clockTime.textContent = timeString;
         }
-        
-        // Update analog hands
-        if (this.elements.hourHand) {
-            const hourAngle = ((hours % 12) + minutes / 60) * 30; // 30 degrees per hour
-            this.elements.hourHand.style.transform = `rotate(${hourAngle}deg)`;
-        }
-        
-        if (this.elements.minuteHand) {
-            const minuteAngle = (minutes + seconds / 60) * 6; // 6 degrees per minute
-            this.elements.minuteHand.style.transform = `rotate(${minuteAngle}deg)`;
-        }
-    }
-    
-    /**
-     * Initialize 24h time slider
-     */
-    initializeTimeSlider() {
-        if (!this.elements.timeSlider) return;
-        
-        // Set current time as initial value
-        const now = new Date();
-        const currentMinutes = now.getHours() * 60 + now.getMinutes();
-        this.currentTimeSlot = Math.floor(currentMinutes / 30) * 30; // Round to nearest 30min
-        this.elements.timeSlider.value = this.currentTimeSlot;
-        
-        // Generate time ticks
-        this.generateTimeTicks();
-    }
-    
-    /**
-     * Generate time ticks for the slider
-     */
-    generateTimeTicks() {
-        if (!this.elements.timeTicks) return;
-        
-        // Ticks are handled by CSS repeating-linear-gradient
-        // This creates major ticks every 2 hours (12 total)
     }
     
     /**
@@ -407,13 +372,6 @@ class OctoBeatsRadio {
     startLiveMode() {
         this.isLiveMode = true;
         this.checkScheduleUpdate();
-        
-        // Update time slider to current time
-        const currentTimeSlot = this.getCurrentTimeSlot();
-        if (this.elements.timeSlider) {
-            this.elements.timeSlider.value = currentTimeSlot;
-        }
-        this.currentTimeSlot = currentTimeSlot;
     }
     
     /**
@@ -430,15 +388,9 @@ class OctoBeatsRadio {
         if (!this.isLiveMode) return;
         
         const currentTrack = this.getCurrentTrack();
+        
         if (currentTrack && currentTrack.trackIndex !== this.currentIndex) {
             this.loadTrack(currentTrack.trackIndex);
-        }
-        
-        // Update time slider
-        const currentTimeSlot = this.getCurrentTimeSlot();
-        if (this.elements.timeSlider && currentTimeSlot !== this.currentTimeSlot) {
-            this.elements.timeSlider.value = currentTimeSlot;
-            this.currentTimeSlot = currentTimeSlot;
         }
     }
     
@@ -451,9 +403,11 @@ class OctoBeatsRadio {
         this.elements.prevButton?.addEventListener('click', () => this.previousTrack());
         this.elements.nextButton?.addEventListener('click', () => this.nextTrack());
         
-        // Time slider
-        this.elements.timeSlider?.addEventListener('input', (e) => this.onTimeSliderChange(e));
-        this.elements.timeSlider?.addEventListener('change', (e) => this.onTimeSliderChange(e));
+        // Audio progress slider
+        this.elements.audioProgressSlider?.addEventListener('input', (e) => this.onProgressSliderInput(e));
+        this.elements.audioProgressSlider?.addEventListener('change', (e) => this.onProgressSliderChange(e));
+        this.elements.audioProgressSlider?.addEventListener('mousedown', () => this.isSeekingProgress = true);
+        this.elements.audioProgressSlider?.addEventListener('mouseup', () => this.isSeekingProgress = false);
         
         // Download
         this.elements.downloadButton?.addEventListener('click', () => this.downloadCurrentTrack());
@@ -464,22 +418,48 @@ class OctoBeatsRadio {
     }
     
     /**
-     * Handle time slider change
+     * Handle audio progress slider input
      */
-    onTimeSliderChange(event) {
-        const timeSlot = parseInt(event.target.value);
-        this.currentTimeSlot = timeSlot;
+    onProgressSliderInput(event) {
+        if (!this.audio || !this.audio.duration) return;
         
-        // Stop live mode when manually changing time
-        this.stopLiveMode();
+        this.isSeekingProgress = true;
+        const percent = parseFloat(event.target.value);
+        const newTime = (percent / 100) * this.audio.duration;
         
-        // Find track for this time slot
-        const today = new Date().toISOString().split('T')[0];
-        const scheduleKey = `${today}-${timeSlot}`;
-        const scheduledTrack = this.schedule.get(scheduleKey);
+        // Update time display immediately for responsiveness
+        if (this.elements.currentTime) {
+            this.elements.currentTime.textContent = this.formatTime(newTime);
+        }
+    }
+    
+    /**
+     * Handle audio progress slider change
+     */
+    onProgressSliderChange(event) {
+        if (!this.audio || !this.audio.duration) return;
         
-        if (scheduledTrack) {
-            this.loadTrack(scheduledTrack.trackIndex);
+        const percent = parseFloat(event.target.value);
+        const newTime = (percent / 100) * this.audio.duration;
+        
+        this.audio.currentTime = newTime;
+        this.isSeekingProgress = false;
+    }
+    
+    /**
+     * Update audio progress slider
+     */
+    updateAudioProgress() {
+        if (!this.audio || !this.audio.duration || this.isSeekingProgress) return;
+        
+        const percent = (this.audio.currentTime / this.audio.duration) * 100;
+        
+        if (this.elements.audioProgressSlider) {
+            this.elements.audioProgressSlider.value = percent;
+        }
+        
+        if (this.elements.currentTime) {
+            this.elements.currentTime.textContent = this.formatTime(this.audio.currentTime);
         }
     }
     
@@ -550,8 +530,13 @@ class OctoBeatsRadio {
             const data = await response.json();
             this.tracks = data.tracks || [];
             
+            console.log('Loaded tracks:', this.tracks); // Debug log
+            
             // Generate schedule after loading tracks
             this.generateSchedule();
+            
+            // Stop loading before loading track to prevent overwriting track info
+            this.setLoading(false);
             
             if (this.tracks.length > 0) {
                 // Load current track based on time
@@ -567,9 +552,23 @@ class OctoBeatsRadio {
             
         } catch (error) {
             console.error('Failed to load tracks:', error);
-            this.showEmptyState('Failed to load music tracks');
-        } finally {
+            // Create a fallback track for testing
+            this.tracks = [{
+                id: 'fallback',
+                title: 'Demo Track',
+                artist: 'mentria.ai',
+                file: 'assets/audios/audio_issue_42_20250525_105507.mp3',
+                duration: 120
+            }];
+            
+            // Stop loading before loading track
             this.setLoading(false);
+            
+            if (this.tracks.length > 0) {
+                this.loadTrack(0);
+            } else {
+                this.showEmptyState('Failed to load music tracks');
+            }
         }
     }
     
@@ -577,7 +576,18 @@ class OctoBeatsRadio {
      * Load a specific track
      */
     loadTrack(index) {
-        if (index < 0 || index >= this.tracks.length) return;
+        console.log('🎵 loadTrack called with index:', index, 'current index:', this.currentIndex);
+        
+        if (index < 0 || index >= this.tracks.length) {
+            console.warn('Invalid track index:', index);
+            return;
+        }
+        
+        // Prevent loading the same track multiple times
+        if (index === this.currentIndex && this.audio.src) {
+            console.log('Track already loaded, skipping...');
+            return;
+        }
         
         const wasPlaying = this.isPlaying;
         this.pause();
@@ -585,18 +595,23 @@ class OctoBeatsRadio {
         this.currentIndex = index;
         const track = this.tracks[index];
         
-        // Update UI immediately
-        this.updateTrackInfo(track);
+        console.log('Loading track:', track); // Debug log
         
-        // Load audio
+        // Load audio FIRST (this triggers loadstart and setLoading(true))
+        console.log('Setting audio.src to:', track.file);
         this.audio.src = track.file;
+        
+        // Store track info to update when audio is ready (in onCanPlay)
+        console.log('Storing track info for when audio is ready...');
+        this.pendingTrack = track;
         
         // Update media session
         this.updateMediaSession(track);
         
-        // Show download button
+        // Show download button (but keep it hidden)
         if (this.elements.downloadButton) {
-            this.elements.downloadButton.style.display = 'flex';
+            // Keep download functionality but button remains hidden
+            this.elements.downloadButton.style.display = 'none';
         }
         
         // Resume playback if it was playing
@@ -609,10 +624,25 @@ class OctoBeatsRadio {
      * Update track information display
      */
     updateTrackInfo(track) {
-        if (this.elements.trackInfo) {
+        console.log('updateTrackInfo called with:', track);
+        
+        if (this.elements.trackInfo && track) {
+            // Clean up the title - remove [MUSIC] prefix if present
+            let cleanTitle = track.title || 'Unknown Track';
+            if (cleanTitle.startsWith('[MUSIC]')) {
+                cleanTitle = cleanTitle.replace('[MUSIC]', '').trim();
+            }
+            
             // Format as "Title – Artist"
-            const trackText = `${track.title} – mentria.ai`;
+            const trackText = `${cleanTitle} – mentria.ai`;
             this.elements.trackInfo.textContent = trackText;
+            console.log('Track info set to:', trackText);
+            
+        } else {
+            console.warn('Missing trackInfo element or track data:', { 
+                hasElement: !!this.elements.trackInfo, 
+                track 
+            });
         }
     }
     
@@ -737,11 +767,17 @@ class OctoBeatsRadio {
      * Set loading state
      */
     setLoading(loading) {
+        // Add stack trace to see what's calling this
+        console.log('setLoading called:', loading, 'current track info:', this.elements.trackInfo?.textContent);
+        console.trace('setLoading stack trace');
+        
         this.isLoading = loading;
         
         if (loading && this.elements.trackInfo) {
             this.elements.trackInfo.textContent = 'Loading...';
+            console.log('Set to Loading...');
         }
+        // Don't overwrite track info when loading is false - let the track update handle it
     }
     
     /**
@@ -749,6 +785,17 @@ class OctoBeatsRadio {
      */
     showError(message) {
         console.error(message);
+    }
+    
+    /**
+     * Format time in MM:SS format
+     */
+    formatTime(seconds) {
+        if (!seconds || isNaN(seconds)) return '0:00';
+        
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
     
     /**
@@ -773,18 +820,38 @@ class OctoBeatsRadio {
     
     // Audio event handlers
     onLoadStart() {
+        console.log('🔄 Audio loadstart event - calling setLoading(true)');
         this.setLoading(true);
     }
     
     onLoadedMetadata() {
-        // Metadata loaded
+        console.log('📊 Audio loadedmetadata event');
+        // Update total time display
+        if (this.elements.totalTime) {
+            this.elements.totalTime.textContent = this.formatTime(this.audio.duration);
+        }
+        
+        // Reset progress slider
+        if (this.elements.audioProgressSlider) {
+            this.elements.audioProgressSlider.value = 0;
+        }
     }
     
     onCanPlay() {
-        this.setLoading(false);
+        console.log('✅ Audio canplay event');
+        // Don't call setLoading(false) here as it might overwrite track info
+        this.isLoading = false;
+        
+        // Now update track info when audio is ready
+        if (this.pendingTrack) {
+            console.log('Updating track info from pending track...');
+            this.updateTrackInfo(this.pendingTrack);
+            this.pendingTrack = null;
+        }
     }
     
     onPlay() {
+        console.log('▶️ Audio play event');
         this.isPlaying = true;
         this.updatePlayButton();
         this.startEqualizerAnimation();
@@ -796,16 +863,18 @@ class OctoBeatsRadio {
     }
     
     onPause() {
+        console.log('⏸️ Audio pause event');
         this.isPlaying = false;
         this.updatePlayButton();
         this.stopVisualization();
     }
     
     onTimeUpdate() {
-        // Track progress updates can be handled here if needed
+        this.updateAudioProgress();
     }
     
     onEnded() {
+        console.log('⏹️ Audio ended event');
         if (this.isLiveMode) {
             // In live mode, check for next scheduled track
             this.checkScheduleUpdate();
@@ -816,9 +885,10 @@ class OctoBeatsRadio {
     }
     
     onError(event) {
-        console.error('Audio error:', event);
+        console.error('❌ Audio error:', event);
         this.showError('Failed to load audio track');
-        this.setLoading(false);
+        // Don't call setLoading(false) here as it might overwrite track info
+        this.isLoading = false;
     }
     
     /**

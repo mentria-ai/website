@@ -1,5 +1,5 @@
 /**
- * OctoBeats Radio - Apple-inspired Music Player
+ * OctoBeats Radio - Modern Music Player
  * Powered by Mentria.AI
  */
 
@@ -13,6 +13,19 @@ class OctoBeatsRadio {
         this.isLoading = false;
         this.volume = 1.0;
         this.isMuted = false;
+        
+        // Program guide properties
+        this.selectedDate = null;
+        this.selectedTime = null;
+        this.timeSlots = [];
+        
+        // Visualizer properties
+        this.audioContext = null;
+        this.analyser = null;
+        this.dataArray = null;
+        this.canvas = null;
+        this.canvasContext = null;
+        this.animationId = null;
         
         // DOM elements
         this.elements = {};
@@ -31,6 +44,9 @@ class OctoBeatsRadio {
             this.bindEvents();
             this.setupMediaSession();
             this.setupKeyboardShortcuts();
+            this.initializeDateTime();
+            this.generateTimeSlots();
+            this.initializeVisualizer();
             await this.loadTracks();
             
             console.log('🎵 OctoBeats Radio initialized successfully');
@@ -45,6 +61,10 @@ class OctoBeatsRadio {
      */
     initializeElements() {
         this.elements = {
+            // Date/Time
+            currentDate: document.getElementById('currentDate'),
+            currentTime: document.getElementById('currentTime'),
+            
             // Track info
             trackTitle: document.getElementById('trackTitle'),
             trackArtist: document.getElementById('trackArtist'),
@@ -57,20 +77,25 @@ class OctoBeatsRadio {
             // Progress
             progressBar: document.getElementById('progressBar'),
             progressFill: document.getElementById('progressFill'),
-            progressHandle: document.getElementById('progressHandle'),
-            currentTime: document.getElementById('currentTime'),
+            currentTrackTime: document.getElementById('currentTrackTime'),
             totalTime: document.getElementById('totalTime'),
             
-            // Playlist
-            playlist: document.getElementById('playlist'),
-            refreshButton: document.getElementById('refreshButton'),
+            // Program guide
+            dateDial: document.getElementById('dateDial'),
+            timeDial: document.getElementById('timeDial'),
+            trackDial: document.getElementById('trackDial'),
+            
+            // Visualizer
+            visualizerContainer: document.getElementById('visualizerContainer'),
+            audioVisualizer: document.getElementById('audioVisualizer'),
+            visualizerFallback: document.getElementById('visualizerFallback'),
             
             // Download
             downloadButton: document.getElementById('downloadButton')
         };
         
         // Validate required elements
-        const requiredElements = ['trackTitle', 'trackArtist', 'playButton', 'playlist'];
+        const requiredElements = ['trackTitle', 'trackArtist', 'playButton', 'trackDial'];
         for (const elementId of requiredElements) {
             if (!this.elements[elementId]) {
                 throw new Error(`Required element not found: ${elementId}`);
@@ -85,6 +110,7 @@ class OctoBeatsRadio {
         this.audio = document.createElement('audio');
         this.audio.preload = 'metadata';
         this.audio.volume = this.volume;
+        this.audio.crossOrigin = 'anonymous';
         
         // Audio event listeners
         this.audio.addEventListener('loadstart', () => this.onLoadStart());
@@ -100,6 +126,175 @@ class OctoBeatsRadio {
     }
     
     /**
+     * Initialize date and time display
+     */
+    initializeDateTime() {
+        this.updateDateTime();
+        // Update every minute
+        setInterval(() => this.updateDateTime(), 60000);
+    }
+    
+    /**
+     * Update current date and time display
+     */
+    updateDateTime() {
+        const now = new Date();
+        const dateOptions = { weekday: 'short', day: 'numeric' };
+        const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
+        
+        if (this.elements.currentDate) {
+            this.elements.currentDate.textContent = now.toLocaleDateString('en-US', dateOptions);
+        }
+        
+        if (this.elements.currentTime) {
+            this.elements.currentTime.textContent = now.toLocaleTimeString('en-US', timeOptions);
+        }
+    }
+    
+    /**
+     * Generate time slots for the time dial
+     */
+    generateTimeSlots() {
+        if (!this.elements.timeDial) return;
+        
+        this.timeSlots = [];
+        const slotsHTML = [];
+        
+        // Generate 30-minute slots for 24 hours
+        for (let hour = 0; hour < 24; hour++) {
+            for (let minute = 0; minute < 60; minute += 30) {
+                const timeString = `${hour.toString().padStart(2, '0')}${minute.toString().padStart(2, '0')}`;
+                const displayTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                
+                this.timeSlots.push({ value: timeString, display: displayTime });
+                
+                slotsHTML.push(`
+                    <div class="time-slot" data-time="${timeString}">
+                        ${displayTime}
+                    </div>
+                `);
+            }
+        }
+        
+        this.elements.timeDial.innerHTML = slotsHTML.join('');
+        
+        // Set current time as active
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes() < 30 ? 0 : 30;
+        const currentTimeString = `${currentHour.toString().padStart(2, '0')}${currentMinute.toString().padStart(2, '0')}`;
+        
+        this.selectTime(currentTimeString);
+    }
+    
+    /**
+     * Initialize audio visualizer
+     */
+    initializeVisualizer() {
+        if (!this.elements.audioVisualizer) return;
+        
+        this.canvas = this.elements.audioVisualizer;
+        this.canvasContext = this.canvas.getContext('2d');
+        
+        // Set canvas size
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width * window.devicePixelRatio;
+        this.canvas.height = rect.height * window.devicePixelRatio;
+        this.canvasContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+        
+        // Show fallback initially
+        if (this.elements.visualizerFallback) {
+            this.elements.visualizerFallback.style.display = 'flex';
+        }
+    }
+    
+    /**
+     * Setup audio context for visualizer
+     */
+    setupAudioContext() {
+        if (!this.audio || this.audioContext) return;
+        
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.analyser = this.audioContext.createAnalyser();
+            const source = this.audioContext.createMediaElementSource(this.audio);
+            
+            source.connect(this.analyser);
+            this.analyser.connect(this.audioContext.destination);
+            
+            this.analyser.fftSize = 256;
+            this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+            
+            // Hide fallback and start visualization
+            if (this.elements.visualizerFallback) {
+                this.elements.visualizerFallback.style.display = 'none';
+            }
+            
+            this.startVisualization();
+        } catch (error) {
+            console.warn('Audio visualization not supported:', error);
+        }
+    }
+    
+    /**
+     * Start audio visualization
+     */
+    startVisualization() {
+        if (!this.analyser || !this.canvasContext) return;
+        
+        const draw = () => {
+            this.animationId = requestAnimationFrame(draw);
+            
+            this.analyser.getByteFrequencyData(this.dataArray);
+            
+            const width = this.canvas.width / window.devicePixelRatio;
+            const height = this.canvas.height / window.devicePixelRatio;
+            
+            this.canvasContext.clearRect(0, 0, width, height);
+            
+            const barWidth = width / this.dataArray.length;
+            let x = 0;
+            
+            for (let i = 0; i < this.dataArray.length; i++) {
+                const barHeight = (this.dataArray[i] / 255) * height * 0.8;
+                
+                // Create gradient
+                const gradient = this.canvasContext.createLinearGradient(0, height, 0, height - barHeight);
+                gradient.addColorStop(0, '#007AFF');
+                gradient.addColorStop(1, '#5856D6');
+                
+                this.canvasContext.fillStyle = gradient;
+                this.canvasContext.fillRect(x, height - barHeight, barWidth - 1, barHeight);
+                
+                x += barWidth;
+            }
+        };
+        
+        draw();
+    }
+    
+    /**
+     * Stop audio visualization
+     */
+    stopVisualization() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+        
+        if (this.canvasContext) {
+            const width = this.canvas.width / window.devicePixelRatio;
+            const height = this.canvas.height / window.devicePixelRatio;
+            this.canvasContext.clearRect(0, 0, width, height);
+        }
+        
+        // Show fallback
+        if (this.elements.visualizerFallback) {
+            this.elements.visualizerFallback.style.display = 'flex';
+        }
+    }
+    
+    /**
      * Bind UI event listeners
      */
     bindEvents() {
@@ -111,14 +306,86 @@ class OctoBeatsRadio {
         // Progress bar
         this.elements.progressBar?.addEventListener('click', (e) => this.seekToPosition(e));
         
-        // Playlist
-        this.elements.refreshButton?.addEventListener('click', () => this.refreshPlaylist());
+        // Date selector
+        this.elements.dateDial?.addEventListener('click', (e) => {
+            if (e.target.classList.contains('date-option')) {
+                this.selectDate(e.target.dataset.date);
+            }
+        });
+        
+        // Time selector
+        this.elements.timeDial?.addEventListener('click', (e) => {
+            if (e.target.classList.contains('time-slot')) {
+                this.selectTime(e.target.dataset.time);
+            }
+        });
+        
+        // Track selector
+        this.elements.trackDial?.addEventListener('click', (e) => {
+            const trackItem = e.target.closest('.track-item');
+            if (trackItem) {
+                const index = parseInt(trackItem.dataset.index);
+                this.loadTrack(index);
+            }
+        });
         
         // Download
         this.elements.downloadButton?.addEventListener('click', () => this.downloadCurrentTrack());
         
         // Window events
         window.addEventListener('beforeunload', () => this.cleanup());
+        window.addEventListener('resize', () => this.handleResize());
+    }
+    
+    /**
+     * Handle window resize
+     */
+    handleResize() {
+        if (this.canvas && this.canvasContext) {
+            const rect = this.canvas.getBoundingClientRect();
+            this.canvas.width = rect.width * window.devicePixelRatio;
+            this.canvas.height = rect.height * window.devicePixelRatio;
+            this.canvasContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+    }
+    
+    /**
+     * Select a date
+     */
+    selectDate(date) {
+        this.selectedDate = date;
+        
+        // Update UI
+        this.elements.dateDial?.querySelectorAll('.date-option').forEach(option => {
+            option.classList.toggle('active', option.dataset.date === date);
+        });
+        
+        // Filter tracks based on selection
+        this.filterTracks();
+    }
+    
+    /**
+     * Select a time slot
+     */
+    selectTime(time) {
+        this.selectedTime = time;
+        
+        // Update UI
+        this.elements.timeDial?.querySelectorAll('.time-slot').forEach(slot => {
+            slot.classList.toggle('active', slot.dataset.time === time);
+        });
+        
+        // Filter tracks based on selection
+        this.filterTracks();
+    }
+    
+    /**
+     * Filter tracks based on date/time selection
+     */
+    filterTracks() {
+        // For now, show all tracks regardless of date/time
+        // In a real implementation, you would filter based on schedule
+        this.renderTracks();
     }
     
     /**
@@ -159,11 +426,6 @@ class OctoBeatsRadio {
                     e.preventDefault();
                     this.nextTrack();
                     break;
-                case 'KeyR':
-                    if (e.metaKey || e.ctrlKey) return; // Don't override browser refresh
-                    e.preventDefault();
-                    this.refreshPlaylist();
-                    break;
             }
         });
     }
@@ -183,7 +445,7 @@ class OctoBeatsRadio {
             const data = await response.json();
             this.tracks = data.tracks || [];
             
-            this.renderPlaylist();
+            this.renderTracks();
             
             if (this.tracks.length > 0) {
                 this.loadTrack(0);
@@ -213,7 +475,7 @@ class OctoBeatsRadio {
         
         // Update UI immediately
         this.updateTrackInfo(track);
-        this.updatePlaylist();
+        this.updateTrackSelection();
         
         // Load audio
         this.audio.src = track.file;
@@ -263,17 +525,17 @@ class OctoBeatsRadio {
     }
     
     /**
-     * Render the playlist
+     * Render the track list
      */
-    renderPlaylist() {
-        if (!this.elements.playlist) return;
+    renderTracks() {
+        if (!this.elements.trackDial) return;
         
         if (this.tracks.length === 0) {
             this.showEmptyState();
             return;
         }
         
-        const playlistHTML = this.tracks.map((track, index) => `
+        const tracksHTML = this.tracks.map((track, index) => `
             <div class="track-item ${index === this.currentIndex ? 'active' : ''}" 
                  data-index="${index}">
                 <div class="track-number">${index + 1}</div>
@@ -284,24 +546,16 @@ class OctoBeatsRadio {
             </div>
         `).join('');
         
-        this.elements.playlist.innerHTML = playlistHTML;
-        
-        // Add click listeners to track items
-        this.elements.playlist.querySelectorAll('.track-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const index = parseInt(item.dataset.index);
-                this.loadTrack(index);
-            });
-        });
+        this.elements.trackDial.innerHTML = tracksHTML;
     }
     
     /**
-     * Update playlist active state
+     * Update track selection in the dial
      */
-    updatePlaylist() {
-        if (!this.elements.playlist) return;
+    updateTrackSelection() {
+        if (!this.elements.trackDial) return;
         
-        this.elements.playlist.querySelectorAll('.track-item').forEach((item, index) => {
+        this.elements.trackDial.querySelectorAll('.track-item').forEach((item, index) => {
             item.classList.toggle('active', index === this.currentIndex);
         });
     }
@@ -310,7 +564,7 @@ class OctoBeatsRadio {
      * Show empty state
      */
     showEmptyState(message = null) {
-        if (!this.elements.playlist) return;
+        if (!this.elements.trackDial) return;
         
         const emptyStateHTML = `
             <div class="empty-state">
@@ -322,7 +576,7 @@ class OctoBeatsRadio {
             </div>
         `;
         
-        this.elements.playlist.innerHTML = emptyStateHTML;
+        this.elements.trackDial.innerHTML = emptyStateHTML;
         
         // Hide download button
         if (this.elements.downloadButton) {
@@ -356,6 +610,11 @@ class OctoBeatsRadio {
         if (!this.audio || !this.audio.src) return;
         
         try {
+            // Setup audio context for visualizer on first play
+            if (!this.audioContext) {
+                this.setupAudioContext();
+            }
+            
             await this.audio.play();
         } catch (error) {
             console.error('Failed to play audio:', error);
@@ -412,13 +671,6 @@ class OctoBeatsRadio {
     }
     
     /**
-     * Refresh playlist
-     */
-    async refreshPlaylist() {
-        await this.loadTracks();
-    }
-    
-    /**
      * Download current track
      */
     downloadCurrentTrack() {
@@ -440,16 +692,7 @@ class OctoBeatsRadio {
      */
     setLoading(loading) {
         this.isLoading = loading;
-        
-        if (this.elements.refreshButton) {
-            if (loading) {
-                this.elements.refreshButton.innerHTML = '<div class="loading-spinner"></div>';
-                this.elements.refreshButton.disabled = true;
-            } else {
-                this.elements.refreshButton.innerHTML = '↻';
-                this.elements.refreshButton.disabled = false;
-            }
-        }
+        // Loading state can be shown in the UI if needed
     }
     
     /**
@@ -492,12 +735,8 @@ class OctoBeatsRadio {
             this.elements.progressFill.style.width = `${percent}%`;
         }
         
-        if (this.elements.progressHandle) {
-            this.elements.progressHandle.style.left = `${percent}%`;
-        }
-        
-        if (this.elements.currentTime) {
-            this.elements.currentTime.textContent = this.formatTime(this.audio.currentTime);
+        if (this.elements.currentTrackTime) {
+            this.elements.currentTrackTime.textContent = this.formatTime(this.audio.currentTime);
         }
     }
     
@@ -539,6 +778,7 @@ class OctoBeatsRadio {
     onPause() {
         this.isPlaying = false;
         this.updatePlayButton();
+        this.stopVisualization();
     }
     
     onTimeUpdate() {
@@ -559,6 +799,14 @@ class OctoBeatsRadio {
      * Cleanup resources
      */
     cleanup() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+        }
+        
+        if (this.audioContext) {
+            this.audioContext.close();
+        }
+        
         if (this.audio) {
             this.audio.pause();
             this.audio.src = '';

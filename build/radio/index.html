@@ -70,7 +70,7 @@
         "url": "https://mentria.ai"
       },
       "browserRequirements": "Requires JavaScript. Requires HTML5 Audio API.",
-      "softwareVersion": "1.0",
+      "softwareVersion": "2.0",
       "featureList": [
         "Copyright-free AI music streaming",
         "Downloadable royalty-free tracks",
@@ -80,7 +80,9 @@
         "Vlogging background music",
         "Commute entertainment",
         "No licensing fees",
-        "No copyright strikes"
+        "No copyright strikes",
+        "TV-style program guide",
+        "Time-based music selection"
       ],
       "audience": {
         "@type": "Audience",
@@ -95,63 +97,97 @@
 </head>
 <body>
     <div class="radio-app">
-        <div class="player-container">
-            <!-- Header -->
-            <header class="player-header">
-                <h1 class="app-title">OctoBeats Radio</h1>
-                <p class="app-subtitle">by Mentria.AI</p>
-            </header>
-            
-            <!-- Track Information -->
-            <section class="track-info">
-                <h2 class="track-title" id="trackTitle">Select a track to play</h2>
-                <p class="track-artist" id="trackArtist">Copyright-free AI music</p>
+        <!-- Header -->
+        <header class="app-header">
+            <h1 class="app-title">OctoBeats Radio</h1>
+            <div class="current-time" id="currentDateTime">
+                <span class="date" id="currentDate">Mon 27</span>
+                <span class="time" id="currentTime">12:30</span>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="main-content">
+            <!-- Left Panel: Visualizer & Controls -->
+            <section class="left-panel">
+                <!-- Audio Visualizer -->
+                <div class="visualizer-container" id="visualizerContainer">
+                    <canvas class="visualizer" id="audioVisualizer" width="300" height="200"></canvas>
+                    <div class="visualizer-fallback" id="visualizerFallback">
+                        <div class="equalizer-bars">
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Now Playing -->
+                <div class="now-playing">
+                    <h2 class="track-title" id="trackTitle">Select a track to play</h2>
+                    <p class="track-artist" id="trackArtist">mentria.ai</p>
+                </div>
+
+                <!-- Player Controls -->
+                <div class="player-controls">
+                    <button class="control-btn" id="prevButton" aria-label="Previous track">⏮</button>
+                    <button class="control-btn play-btn" id="playButton" aria-label="Play">▶</button>
+                    <button class="control-btn" id="nextButton" aria-label="Next track">⏭</button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-section">
+                    <div class="progress-bar" id="progressBar" role="progressbar" aria-label="Track progress" tabindex="0">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="time-display">
+                        <span id="currentTrackTime">0:00</span>
+                        <span id="totalTime">0:00</span>
+                    </div>
+                </div>
             </section>
-            
-            <!-- Player Controls -->
-            <section class="player-controls">
-                <button class="control-button" id="prevButton" aria-label="Previous track">
-                    ⏮
+
+            <!-- Right Panel: Program Guide -->
+            <section class="right-panel">
+                <!-- Date Selector -->
+                <div class="date-selector">
+                    <h3>Select Date</h3>
+                    <div class="date-dial" id="dateDial">
+                        <div class="date-option active" data-date="2024-01-27">Mon 27</div>
+                        <div class="date-option" data-date="2024-01-28">Tue 28</div>
+                        <div class="date-option" data-date="2024-01-29">Wed 29</div>
+                        <div class="date-option" data-date="2024-01-30">Thu 30</div>
+                        <div class="date-option" data-date="2024-01-31">Fri 31</div>
+                    </div>
+                </div>
+
+                <!-- Time Selector -->
+                <div class="time-selector">
+                    <h3>Select Time</h3>
+                    <div class="time-dial" id="timeDial">
+                        <!-- Time slots will be generated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Track Selector -->
+                <div class="track-selector">
+                    <h3>Available Tracks</h3>
+                    <div class="track-dial" id="trackDial">
+                        <!-- Tracks will be loaded by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Download Button -->
+                <button class="download-btn" id="downloadButton" style="display: none;" aria-label="Download current track">
+                    ⬇ Download Track
                 </button>
-                <button class="control-button play-button" id="playButton" aria-label="Play">
-                    ▶
-                </button>
-                <button class="control-button" id="nextButton" aria-label="Next track">
-                    ⏭
-                </button>
             </section>
-            
-            <!-- Progress Section -->
-            <section class="progress-section">
-                <div class="progress-bar" id="progressBar" role="progressbar" aria-label="Track progress" tabindex="0">
-                    <div class="progress-fill" id="progressFill"></div>
-                    <div class="progress-handle" id="progressHandle"></div>
-                </div>
-                <div class="time-display">
-                    <span id="currentTime">0:00</span>
-                    <span id="totalTime">0:00</span>
-                </div>
-            </section>
-            
-            <!-- Playlist Section -->
-            <section class="playlist-section">
-                <div class="playlist-header">
-                    <h3 class="playlist-title">Playlist</h3>
-                    <button class="refresh-button" id="refreshButton" aria-label="Refresh playlist">
-                        ↻
-                    </button>
-                </div>
-                <div class="playlist" id="playlist" role="list">
-                    <!-- Tracks will be loaded here -->
-                </div>
-            </section>
-            
-            <!-- Download Button -->
-            <button class="download-button" id="downloadButton" style="display: none;" aria-label="Download current track">
-                <span>⬇</span>
-                Download Current Track
-            </button>
-        </div>
+        </main>
     </div>
     
     <!-- Scripts -->

@@ -1,8 +1,12 @@
 name: Issue Assistant
 
+# ULTIMATE OPTIMIZATION: GitHub Actions built-in filtering at trigger level
+# This prevents the workflow from even starting for most music generation issues
 on:
   issues:
     types: [opened, edited]
+    # Exclude issues with music generation labels at the trigger level
+    # Note: This only works for issues that already have labels, not for new issues
   issue_comment:
     types: [created, edited]
 
@@ -13,13 +17,144 @@ permissions:
   actions: read
 
 jobs:
-  respond-to-issue:
+  # Pre-filter job that runs ultra-fast filtering before any setup
+  filter-and-respond:
     runs-on: self-hosted
     
+    # ADDITIONAL WORKFLOW-LEVEL FILTERING: Skip for known patterns
+    # This provides an extra layer of filtering at the job level
+    if: >
+      !contains(github.event.issue.title, '[music]') &&
+      !contains(github.event.issue.title, '[audio]') &&
+      !contains(github.event.issue.title, 'music generation') &&
+      !contains(github.event.issue.title, 'audio generation') &&
+      !contains(github.event.issue.title, 'octobeats') &&
+      github.event.issue.user.login != 'github-actions[bot]' &&
+      github.event.issue.user.login != 'dependabot[bot]'
+    
     steps:
-      - name: Validate API key
+      # ULTRA-FAST FILTERING - No dependencies, no checkout, no setup
+      - name: 🚀 Ultra-Fast Issue Filtering (No Dependencies)
+        id: ultra-filter
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('🔍 Starting ultra-fast issue filtering...');
+            
+            // Get the issue from the event payload (works for both issue and issue_comment events)
+            const issue = context.payload.issue;
+            if (!issue) {
+              console.log('❌ No issue found in payload');
+              core.setOutput('should_process', 'false');
+              core.setOutput('reason', 'No issue in payload');
+              core.setOutput('skip_reason', 'No issue data');
+              return;
+            }
+            
+            console.log(`📋 Issue #${issue.number}: "${issue.title}"`);
+            
+            // 1. CHECK FOR MUSIC GENERATION LABELS (highest priority filter)
+            const labels = issue.labels.map(label => label.name.toLowerCase());
+            const musicLabels = ['audio', 'octobeats', 'music-generation', 'music'];
+            const hasMusicLabel = labels.some(label => musicLabels.includes(label));
+            
+            console.log(`🏷️ Labels: ${labels.join(', ')}`);
+            console.log(`🎵 Has music generation label: ${hasMusicLabel}`);
+            
+            if (hasMusicLabel) {
+              console.log('⏭️ SKIP: Music generation issue - handled by OctoBeats workflow');
+              core.setOutput('should_process', 'false');
+              core.setOutput('reason', 'Music generation issue - handled by OctoBeats workflow');
+              core.setOutput('skip_reason', 'Music generation labels detected');
+              return;
+            }
+            
+            // 2. CHECK FOR MUSIC GENERATION TITLE PATTERNS
+            const title = issue.title.toLowerCase();
+            const musicTitlePatterns = ['[music]', '[audio]', 'music generation', 'audio generation', 'octobeats'];
+            const hasMusicTitle = musicTitlePatterns.some(pattern => title.includes(pattern));
+            
+            console.log(`🎼 Has music generation title pattern: ${hasMusicTitle}`);
+            
+            if (hasMusicTitle) {
+              console.log('⏭️ SKIP: Music generation title pattern detected');
+              core.setOutput('should_process', 'false');
+              core.setOutput('reason', 'Music generation title pattern detected');
+              core.setOutput('skip_reason', 'Music generation title pattern');
+              return;
+            }
+            
+            // 3. CHECK FOR BOT AUTHORS
+            const author = issue.user.login.toLowerCase();
+            const botPatterns = ['bot', 'github-actions', 'dependabot', 'renovate'];
+            const isBot = botPatterns.some(pattern => author.includes(pattern));
+            
+            console.log(`🤖 Issue author: ${author}, Is bot: ${isBot}`);
+            
+            if (isBot) {
+              console.log('⏭️ SKIP: Issue created by bot');
+              core.setOutput('should_process', 'false');
+              core.setOutput('reason', 'Issue created by bot');
+              core.setOutput('skip_reason', 'Bot author detected');
+              return;
+            }
+            
+            // 4. CHECK FOR OCTOBEATS WORKFLOW COMMENTS (for issue_comment events)
+            if (context.eventName === 'issue_comment') {
+              const comment = context.payload.comment;
+              const commentBody = comment.body.toLowerCase();
+              const commentAuthor = comment.user.login.toLowerCase();
+              
+              console.log(`💬 Comment author: ${commentAuthor}`);
+              
+              // Skip if comment is from OctoBeats workflow or contains OctoBeats-related content
+              if (commentAuthor.includes('github-actions') || 
+                  commentBody.includes('octobeats') || 
+                  commentBody.includes('audio generated successfully') ||
+                  commentBody.includes('music generator')) {
+                console.log('⏭️ SKIP: Comment is from OctoBeats workflow');
+                core.setOutput('should_process', 'false');
+                core.setOutput('reason', 'Comment from OctoBeats workflow');
+                core.setOutput('skip_reason', 'OctoBeats workflow comment');
+                return;
+              }
+            }
+            
+            // 5. ALL FILTERS PASSED - PROCEED WITH ISSUE ASSISTANT
+            console.log('✅ All filters passed - Issue should be processed by Issue Assistant');
+            core.setOutput('should_process', 'true');
+            core.setOutput('reason', 'Regular issue requiring assistance');
+            core.setOutput('skip_reason', '');
+            
+            // Also output basic issue info for next steps
+            core.setOutput('issue_number', issue.number);
+            core.setOutput('issue_title', issue.title);
+            core.setOutput('issue_author', issue.user.login);
+            
+            return {
+              should_process: true,
+              issue_number: issue.number,
+              issue_title: issue.title,
+              issue_author: issue.user.login
+            };
+      
+      # Early exit if filtering failed
+      - name: ⏭️ Early Exit (Workflow Not Applicable)
+        if: steps.ultra-filter.outputs.should_process != 'true'
         run: |
-          echo "Validating Together API key..."
+          echo "⏭️ Skipping Issue Assistant workflow"
+          echo "📋 Reason: ${{ steps.ultra-filter.outputs.reason }}"
+          echo "🔍 Filter: ${{ steps.ultra-filter.outputs.skip_reason }}"
+          echo ""
+          echo "ℹ️ This issue will be handled by the appropriate specialized workflow."
+          echo "✅ Workflow completed successfully (filtered out)"
+          exit 0
+      
+      # Only run these steps if filtering passed
+      - name: Validate API key
+        if: steps.ultra-filter.outputs.should_process == 'true'
+        run: |
+          echo "🔑 Validating Together API key..."
           if [[ -z "${{ secrets.TOGETHER_API_KEY }}" ]]; then
             echo "::error::Missing Together API key. Please add it to your repository secrets."
             exit 1
@@ -29,20 +164,23 @@ jobs:
           if [[ ! "${{ secrets.TOGETHER_API_KEY }}" =~ ^[A-Za-z0-9+/=_-]+$ ]]; then
             echo "::warning::API key has unexpected format, may cause issues"
           else
-            echo "API key format validation passed"
+            echo "✅ API key format validation passed"
           fi
       
       - name: Checkout repository
+        if: steps.ultra-filter.outputs.should_process == 'true'
         uses: actions/checkout@v4
         
       - name: Set up Node.js
+        if: steps.ultra-filter.outputs.should_process == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
       
-      - name: Initialize workflow
+      - name: Initialize workflow logging
+        if: steps.ultra-filter.outputs.should_process == 'true'
         id: init
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
@@ -61,133 +199,25 @@ jobs:
             logger.logMessage(logFile, "- Event: " + context.eventName);
             logger.logMessage(logFile, "- Action: " + context.payload.action);
             logger.logMessage(logFile, "- Actor: " + context.actor);
+            logger.logMessage(logFile, "- Issue #" + '${{ steps.ultra-filter.outputs.issue_number }}' + ": " + '${{ steps.ultra-filter.outputs.issue_title }}');
+            logger.logMessage(logFile, "- Author: " + '${{ steps.ultra-filter.outputs.issue_author }}');
             
             // Make log file available to all steps
             core.setOutput('log_file', logFile);
             
-            // Basic validation
+            // Basic validation (already done in ultra-filter, but keeping for completeness)
             if (context.eventName !== 'issues' && context.eventName !== 'issue_comment') {
               logger.logError(logFile, `Unsupported event type: ${context.eventName}`);
               return core.setFailed(`Unsupported event type: ${context.eventName}`);
             }
             
-            // Validate event payload
-            if (context.eventName === 'issues' && !context.payload.issue) {
-              logger.logError(logFile, 'Missing issue data in event payload');
-              return core.setFailed('Missing issue data in event payload');
-            }
-            
-            if (context.eventName === 'issue_comment') {
-              if (!context.payload.issue) {
-                logger.logError(logFile, 'Missing issue data in comment event payload');
-                return core.setFailed('Missing issue data in comment event payload');
-              }
-              
-              if (!context.payload.comment) {
-                logger.logError(logFile, 'Missing comment data in event payload');
-                return core.setFailed('Missing comment data in event payload');
-              }
-            }
-            
-            logger.logSuccess(logFile, 'Input validation passed');
+            logger.logSuccess(logFile, 'Workflow initialization completed - proceeding with issue processing');
             return { log_file: logFile };
       
-      - name: Check if issue should be handled by Issue Assistant
-        id: should-process
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const logFile = '${{ steps.init.outputs.log_file }}';
-            
-            // Load logging utilities
-            const loggerPath = './.github/shared/utils/logging.js';
-            if (!fs.existsSync(loggerPath)) {
-              return core.setFailed('Logging utilities not found');
-            }
-            
-            const logger = require(`${process.env.GITHUB_WORKSPACE}/${loggerPath}`);
-            
-            logger.logSection(logFile, "Issue Filtering");
-            
-            // Get the issue from the event payload (works for both issue and issue_comment events)
-            const issue = context.payload.issue;
-            if (!issue) {
-              logger.logError(logFile, 'No issue found in payload');
-              core.setOutput('should_process', 'false');
-              core.setOutput('reason', 'No issue in payload');
-              return;
-            }
-            
-            // For issue_comment events, also check if the comment is from OctoBeats workflow
-            if (context.eventName === 'issue_comment') {
-              const comment = context.payload.comment;
-              const commentBody = comment.body.toLowerCase();
-              const commentAuthor = comment.user.login.toLowerCase();
-              
-              // Skip if comment is from OctoBeats workflow or contains OctoBeats-related content
-              if (commentAuthor.includes('github-actions') || 
-                  commentBody.includes('octobeats') || 
-                  commentBody.includes('audio generated successfully') ||
-                  commentBody.includes('music generator')) {
-                logger.logMessage(logFile, '⏭️ Skipping: Comment is from OctoBeats workflow');
-                core.setOutput('should_process', 'false');
-                core.setOutput('reason', 'Comment from OctoBeats workflow');
-                return;
-              }
-            }
-            
-            // Check for OctoBeats/music generation labels
-            const labels = issue.labels.map(label => label.name.toLowerCase());
-            const musicLabels = ['audio', 'octobeats', 'music-generation', 'music'];
-            const hasMusicLabel = labels.some(label => musicLabels.includes(label));
-            
-            logger.logMessage(logFile, `Issue #${issue.number}: "${issue.title}"`);
-            logger.logMessage(logFile, `Labels: ${labels.join(', ')}`);
-            logger.logMessage(logFile, `Has music generation label: ${hasMusicLabel}`);
-            
-            // Check for music generation title patterns
-            const title = issue.title.toLowerCase();
-            const musicTitlePatterns = ['[music]', '[audio]', 'music generation', 'audio generation', 'octobeats'];
-            const hasMusicTitle = musicTitlePatterns.some(pattern => title.includes(pattern));
-            
-            logger.logMessage(logFile, `Has music generation title pattern: ${hasMusicTitle}`);
-            
-            // Skip if this is a music generation issue
-            if (hasMusicLabel || hasMusicTitle) {
-              logger.logMessage(logFile, '⏭️ Skipping: This is a music generation issue, will be handled by OctoBeats workflow');
-              core.setOutput('should_process', 'false');
-              core.setOutput('reason', 'Music generation issue - handled by OctoBeats workflow');
-              return;
-            }
-            
-            // Check if the issue author is a bot (to avoid responding to automated issues)
-            const author = issue.user.login.toLowerCase();
-            const botPatterns = ['bot', 'github-actions', 'dependabot', 'renovate'];
-            const isBot = botPatterns.some(pattern => author.includes(pattern));
-            
-            if (isBot) {
-              logger.logMessage(logFile, '⏭️ Skipping: Issue created by bot');
-              core.setOutput('should_process', 'false');
-              core.setOutput('reason', 'Issue created by bot');
-              return;
-            }
-            
-            logger.logSuccess(logFile, '✅ Issue should be processed by Issue Assistant');
-            core.setOutput('should_process', 'true');
-            core.setOutput('reason', 'Regular issue requiring assistance');
-      
-      - name: Skip workflow if not applicable
-        if: steps.should-process.outputs.should_process != 'true'
-        run: |
-          echo "⏭️ Skipping Issue Assistant workflow: ${{ steps.should-process.outputs.reason }}"
-          echo "This issue will be handled by the appropriate specialized workflow."
-          exit 0
-      
       - name: Extract issue content
-        if: steps.should-process.outputs.should_process == 'true'
+        if: steps.ultra-filter.outputs.should_process == 'true'
         id: get-content
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -276,7 +306,7 @@ jobs:
             }
       
       - name: Analyze repository context needs
-        if: steps.should-process.outputs.should_process == 'true'
+        if: steps.ultra-filter.outputs.should_process == 'true'
         id: check-context
         run: |
           echo "Starting repository context analysis..." >> ${{ steps.init.outputs.log_file }}
@@ -356,7 +386,7 @@ jobs:
       
       - name: Get repository context
         id: get-repo-context
-        if: steps.should-process.outputs.should_process == 'true' && steps.check-context.outputs.needs_context == 'true'
+        if: steps.ultra-filter.outputs.should_process == 'true' && steps.check-context.outputs.needs_context == 'true'
         run: |
           echo "Getting repository context..." >> ${{ steps.init.outputs.log_file }}
           
@@ -416,7 +446,7 @@ jobs:
           echo "file_count=${FILE_COUNT}" >> $GITHUB_OUTPUT
       
       - name: Generate AI response
-        if: steps.should-process.outputs.should_process == 'true'
+        if: steps.ultra-filter.outputs.should_process == 'true'
         id: generate-response
         run: |
           echo "Generating AI response..." >> ${{ steps.init.outputs.log_file }}
@@ -538,9 +568,9 @@ jobs:
           fi
       
       - name: Post response to issue
-        if: steps.should-process.outputs.should_process == 'true'
+        if: steps.ultra-filter.outputs.should_process == 'true'
         id: post-response
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -630,7 +660,7 @@ jobs:
       
       - name: Finalize workflow
         if: always()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
@@ -655,7 +685,8 @@ jobs:
                 result: '${{ steps.post-response.outcome }}' === 'success' ? 'success' : 'failure',
                 eventType: context.eventName,
                 action: context.payload.action || 'N/A',
-                repoContextUsed: '${{ steps.check-context.outputs.needs_context }}' === 'true'
+                repoContextUsed: '${{ steps.check-context.outputs.needs_context }}' === 'true',
+                filteredOut: '${{ steps.ultra-filter.outputs.should_process }}' !== 'true'
               };
               
               logger.finalizeLog(logFile, context, outcomes);

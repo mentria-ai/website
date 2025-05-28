@@ -440,7 +440,7 @@ jobs:
             # Create a more descriptive filename
             ISSUE_NUMBER="${{ github.event.issue.number }}"
             TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-            NEW_FILENAME="audio_issue_${ISSUE_NUMBER}_${TIMESTAMP}.mp3"
+            NEW_FILENAME="audio_${ISSUE_NUMBER}_${TIMESTAMP}.mp3"
             
             mv "generated_audio/$FILENAME" "generated_audio/$NEW_FILENAME"
             
@@ -468,19 +468,33 @@ jobs:
           
           # Create branch name
           ISSUE_NUMBER="${{ github.event.issue.number }}"
-          BRANCH_NAME="audio-generation/issue-${ISSUE_NUMBER}"
+          BRANCH_NAME="audio-generation/track-${ISSUE_NUMBER}"
           
           echo "Creating branch: $BRANCH_NAME" >> ${{ steps.validate-trigger.outputs.log_file }}
           
-          # Create and switch to new branch
-          git checkout -b "$BRANCH_NAME"
+          # Check if branch already exists locally or remotely
+          if git show-ref --verify --quiet refs/heads/"$BRANCH_NAME"; then
+            echo "⚠️ Branch $BRANCH_NAME already exists locally, switching to it" >> ${{ steps.validate-trigger.outputs.log_file }}
+            git checkout "$BRANCH_NAME"
+          elif git ls-remote --exit-code --heads origin "$BRANCH_NAME" >/dev/null 2>&1; then
+            echo "⚠️ Branch $BRANCH_NAME exists remotely, checking it out" >> ${{ steps.validate-trigger.outputs.log_file }}
+            git checkout -b "$BRANCH_NAME" "origin/$BRANCH_NAME"
+          else
+            echo "✅ Creating new branch: $BRANCH_NAME" >> ${{ steps.validate-trigger.outputs.log_file }}
+            git checkout -b "$BRANCH_NAME"
+          fi
           
           # Create audio directory in repository if it doesn't exist
           mkdir -p build/radio/assets/audios
           
-          # Copy audio file to repository
+          # Copy audio file to repository with new naming convention (no "issue" reference)
           LOCAL_FILENAME="${{ steps.download-audio.outputs.local_filename }}"
-          cp "generated_audio/$LOCAL_FILENAME" "build/radio/assets/audios/$LOCAL_FILENAME"
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          NEW_FILENAME="audio_${ISSUE_NUMBER}_${TIMESTAMP}.mp3"
+          
+          cp "generated_audio/$LOCAL_FILENAME" "build/radio/assets/audios/$NEW_FILENAME"
+          
+          echo "- Audio file renamed to: $NEW_FILENAME" >> ${{ steps.validate-trigger.outputs.log_file }}
           
           # Create metadata file using jq for proper JSON formatting
           # Save multiline lyrics to a temporary file to handle newlines properly
@@ -510,7 +524,7 @@ jobs:
               "generation_time": $generation_time,
               "file_size": $file_size,
               "generated_by": $generated_by
-            }' > "build/radio/assets/audios/${LOCAL_FILENAME%.mp3}_metadata.json"
+            }' > "build/radio/assets/audios/${NEW_FILENAME%.mp3}_metadata.json"
           
           # Clean up temporary file
           rm -f temp_lyrics.txt
@@ -534,10 +548,10 @@ jobs:
           
           # Create new track entry using jq for proper JSON formatting
           jq -n \
-            --arg id "issue_$ISSUE_NUMBER" \
+            --arg id "track_$ISSUE_NUMBER" \
             --arg title "${{ github.event.issue.title }}" \
             --arg artist "mentria.ai" \
-            --arg file "assets/audios/$LOCAL_FILENAME" \
+            --arg file "assets/audios/$NEW_FILENAME" \
             --arg issue_number "$ISSUE_NUMBER" \
             --arg issue_title "${{ github.event.issue.title }}" \
             --arg generated_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
@@ -574,39 +588,60 @@ jobs:
           # Clean up temporary file
           rm -f temp_lyrics_manifest.txt
           
-          # Update manifest using jq
-          jq --argjson newtrack "$(cat new_track.json)" \
-             --arg timestamp "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-             '.tracks += [$newtrack] | .last_updated = $timestamp | .total_tracks = (.tracks | length)' \
-             "$MANIFEST_FILE" > manifest_updated.json
+          # Check if this track already exists in manifest (avoid duplicates)
+          TRACK_EXISTS=$(jq --arg id "track_$ISSUE_NUMBER" '.tracks[] | select(.id == $id)' "$MANIFEST_FILE")
+          
+          if [ -n "$TRACK_EXISTS" ]; then
+            echo "⚠️ Track already exists in manifest, updating it" >> ${{ steps.validate-trigger.outputs.log_file }}
+            # Remove existing track and add new one
+            jq --arg id "track_$ISSUE_NUMBER" \
+               --argjson newtrack "$(cat new_track.json)" \
+               --arg timestamp "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+               '.tracks = (.tracks | map(select(.id != $id))) + [$newtrack] | .last_updated = $timestamp | .total_tracks = (.tracks | length)' \
+               "$MANIFEST_FILE" > manifest_updated.json
+          else
+            echo "✅ Adding new track to manifest" >> ${{ steps.validate-trigger.outputs.log_file }}
+            # Add new track
+            jq --argjson newtrack "$(cat new_track.json)" \
+               --arg timestamp "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+               '.tracks += [$newtrack] | .last_updated = $timestamp | .total_tracks = (.tracks | length)' \
+               "$MANIFEST_FILE" > manifest_updated.json
+          fi
           
           mv manifest_updated.json "$MANIFEST_FILE"
           rm -f new_track.json manifest_backup.json
           
-          echo "✅ Manifest updated with new track" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "✅ Manifest updated with track" >> ${{ steps.validate-trigger.outputs.log_file }}
           
           # Add files to git
-          git add "build/radio/assets/audios/$LOCAL_FILENAME"
-          git add "build/radio/assets/audios/${LOCAL_FILENAME%.mp3}_metadata.json"
+          git add "build/radio/assets/audios/$NEW_FILENAME"
+          git add "build/radio/assets/audios/${NEW_FILENAME%.mp3}_metadata.json"
           git add "$MANIFEST_FILE"
           
-          # Commit changes
-          git commit -m "Add generated audio for issue #$ISSUE_NUMBER
+          # Check if there are any changes to commit
+          if git diff --staged --quiet; then
+            echo "⚠️ No changes to commit (files may already exist)" >> ${{ steps.validate-trigger.outputs.log_file }}
+          else
+            # Commit changes
+            git commit -m "Add generated audio for #$ISSUE_NUMBER
+            
+            Generated audio with OctoBeats using the following parameters:
+            - Prompt: ${{ steps.extract-params.outputs.prompt }}
+            - Duration: ${{ steps.extract-params.outputs.duration }} seconds
+            - Mode: ${{ steps.extract-params.outputs.mode }}
+            - Generation time: ${{ steps.generate-audio.outputs.generation_time }}s
+            
+            Resolves #$ISSUE_NUMBER"
+            
+            echo "✅ Changes committed" >> ${{ steps.validate-trigger.outputs.log_file }}
+          fi
           
-          Generated audio with OctoBeats using the following parameters:
-          - Prompt: ${{ steps.extract-params.outputs.prompt }}
-          - Duration: ${{ steps.extract-params.outputs.duration }} seconds
-          - Mode: ${{ steps.extract-params.outputs.mode }}
-          - Generation time: ${{ steps.generate-audio.outputs.generation_time }}s
+          # Push branch (force push in case of conflicts)
+          git push origin "$BRANCH_NAME" || git push --force-with-lease origin "$BRANCH_NAME"
           
-          Resolves #$ISSUE_NUMBER"
-          
-          # Push branch
-          git push origin "$BRANCH_NAME"
-          
-          echo "✅ Branch created and audio committed" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "✅ Branch pushed successfully" >> ${{ steps.validate-trigger.outputs.log_file }}
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          echo "audio_filename=$LOCAL_FILENAME" >> $GITHUB_OUTPUT
+          echo "audio_filename=$NEW_FILENAME" >> $GITHUB_OUTPUT
       
       - name: Create pull request
         if: steps.create-branch.outputs.branch_name
@@ -625,13 +660,13 @@ jobs:
             const issueTitle = context.payload.issue.title;
             
             // Create PR body
-            const prBody = `## 🎵 Generated Audio for Issue #${issueNumber}
+            const prBody = `## 🎵 Generated Audio for #${issueNumber}
             
-            This PR adds the audio file generated using OctoBeats based on the parameters specified in issue #${issueNumber}.
+            This PR adds the audio file generated using OctoBeats based on the parameters specified in #${issueNumber}.
             
             ### 📋 Generation Details
             
-            - **Issue**: #${issueNumber} - ${issueTitle}
+            - **Request**: #${issueNumber} - ${issueTitle}
             - **Audio File**: \`build/radio/assets/audios/${audioFilename}\`
             - **Prompt**: "${{ steps.extract-params.outputs.prompt }}"
             - **Lyrics**: "${{ steps.extract-params.outputs.lyrics }}"
@@ -660,47 +695,82 @@ jobs:
             Closes #${issueNumber}`;
             
             try {
-              const { data: pr } = await github.rest.pulls.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: `🎵 Add generated audio for issue #${issueNumber}`,
-                head: branchName,
-                base: 'main',
-                body: prBody,
-                draft: false
-              });
+              // Check if PR already exists for this branch
+              let existingPR = null;
+              try {
+                const { data: prs } = await github.rest.pulls.list({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  head: `${context.repo.owner}:${branchName}`,
+                  state: 'open'
+                });
+                
+                if (prs.length > 0) {
+                  existingPR = prs[0];
+                  fs.appendFileSync(logFile, `⚠️ Found existing PR #${existingPR.number} for branch ${branchName}\n`);
+                }
+              } catch (error) {
+                fs.appendFileSync(logFile, `ℹ️ No existing PR found for branch ${branchName}\n`);
+              }
               
-              fs.appendFileSync(logFile, `✅ Pull request created successfully\n`);
-              fs.appendFileSync(logFile, `- PR #${pr.number}: ${pr.title}\n`);
-              fs.appendFileSync(logFile, `- URL: ${pr.html_url}\n`);
+              let pr;
+              if (existingPR) {
+                // Update existing PR
+                pr = await github.rest.pulls.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: existingPR.number,
+                  title: `🎵 Add generated audio for #${issueNumber}`,
+                  body: prBody
+                });
+                
+                fs.appendFileSync(logFile, `✅ Updated existing PR #${existingPR.number}\n`);
+                pr = { data: existingPR };
+              } else {
+                // Create new PR
+                pr = await github.rest.pulls.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: `🎵 Add generated audio for #${issueNumber}`,
+                  head: branchName,
+                  base: 'main',
+                  body: prBody,
+                  draft: false
+                });
+                
+                fs.appendFileSync(logFile, `✅ Created new PR #${pr.data.number}\n`);
+              }
+              
+              fs.appendFileSync(logFile, `- PR #${pr.data.number}: ${pr.data.title}\n`);
+              fs.appendFileSync(logFile, `- URL: ${pr.data.html_url}\n`);
               
               // Add labels to the PR
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: pr.number,
+                issue_number: pr.data.number,
                 labels: ['audio', 'octobeats', 'auto-generated']
               });
               
               fs.appendFileSync(logFile, `- Labels added to PR\n`);
               
-              core.setOutput('pr_number', pr.number);
-              core.setOutput('pr_url', pr.html_url);
+              core.setOutput('pr_number', pr.data.number);
+              core.setOutput('pr_url', pr.data.html_url);
               
               return {
-                pr_number: pr.number,
-                pr_url: pr.html_url
+                pr_number: pr.data.number,
+                pr_url: pr.data.html_url
               };
             } catch (error) {
-              fs.appendFileSync(logFile, `❌ Error creating pull request: ${error.message}\n`);
-              core.setFailed(`Error creating pull request: ${error.message}`);
+              fs.appendFileSync(logFile, `❌ Error creating/updating pull request: ${error.message}\n`);
+              core.setFailed(`Error creating/updating pull request: ${error.message}`);
             }
       
       - name: Upload audio as artifact for preview
         if: steps.download-audio.outputs.download_success == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: generated-audio-issue-${{ github.event.issue.number }}
+          name: generated-audio-track-${{ github.event.issue.number }}
           path: build/radio/assets/audios/${{ steps.create-branch.outputs.audio_filename }}
           retention-days: 30
       
@@ -731,7 +801,7 @@ jobs:
             
             **[⬇️ Download Generated Audio: \`${audioFilename}\`](${artifactDownloadUrl})**
             
-            > 💡 **How to preview**: Click the link above → Go to "Artifacts" section → Download \`generated-audio-issue-${issueNumber}\` → Extract and play the MP3 file
+            > 💡 **How to preview**: Click the link above → Go to "Artifacts" section → Download \`generated-audio-track-${issueNumber}\` → Extract and play the MP3 file
             
             ### 📋 Generation Summary
             

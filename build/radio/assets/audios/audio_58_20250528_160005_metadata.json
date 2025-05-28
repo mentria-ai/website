@@ -1,0 +1,14 @@
+{
+  "issue_number": 58,
+  "issue_title": "[MUSIC] Jazz 2",
+  "generated_at": "2025-05-28T16:00:05Z",
+  "parameters": {
+    "prompt": "saxphone, jazz",
+    "lyrics": "[verse]\n\n[chorus]\n\n[solo]\n\n[verse]\n\n[chorus]\n\n[outro]\n",
+    "duration": 90,
+    "mode": "ultra"
+  },
+  "generation_time": "138.15",
+  "file_size": "1.7M",
+  "generated_by": "mentria-ai"
+}

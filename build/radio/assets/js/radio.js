@@ -18,6 +18,8 @@ class OctoBeatsRadio {
         this.selectedDate = null;
         this.selectedTime = null;
         this.timeSlots = [];
+        this.schedule = new Map(); // Map of date-time to track
+        this.isLiveMode = true; // Auto-play based on current time
         
         // Visualizer properties
         this.audioContext = null;
@@ -48,6 +50,7 @@ class OctoBeatsRadio {
             this.generateTimeSlots();
             this.initializeVisualizer();
             await this.loadTracks();
+            this.startLiveMode();
             
             console.log('🎵 OctoBeats Radio initialized successfully');
         } catch (error) {
@@ -68,6 +71,7 @@ class OctoBeatsRadio {
             // Track info
             trackTitle: document.getElementById('trackTitle'),
             trackArtist: document.getElementById('trackArtist'),
+            trackSchedule: document.getElementById('trackSchedule'),
             
             // Controls
             playButton: document.getElementById('playButton'),
@@ -80,10 +84,14 @@ class OctoBeatsRadio {
             currentTrackTime: document.getElementById('currentTrackTime'),
             totalTime: document.getElementById('totalTime'),
             
-            // Program guide
+            // Program guide popup
+            programGuidePopup: document.getElementById('programGuidePopup'),
+            closePopup: document.getElementById('closePopup'),
             dateDial: document.getElementById('dateDial'),
             timeDial: document.getElementById('timeDial'),
             trackDial: document.getElementById('trackDial'),
+            cancelSelection: document.getElementById('cancelSelection'),
+            playSelected: document.getElementById('playSelected'),
             
             // Visualizer
             visualizerContainer: document.getElementById('visualizerContainer'),
@@ -95,7 +103,7 @@ class OctoBeatsRadio {
         };
         
         // Validate required elements
-        const requiredElements = ['trackTitle', 'trackArtist', 'playButton', 'trackDial'];
+        const requiredElements = ['trackTitle', 'trackArtist', 'playButton'];
         for (const elementId of requiredElements) {
             if (!this.elements[elementId]) {
                 throw new Error(`Required element not found: ${elementId}`);
@@ -131,7 +139,12 @@ class OctoBeatsRadio {
     initializeDateTime() {
         this.updateDateTime();
         // Update every minute
-        setInterval(() => this.updateDateTime(), 60000);
+        setInterval(() => {
+            this.updateDateTime();
+            if (this.isLiveMode) {
+                this.checkScheduleUpdate();
+            }
+        }, 60000);
     }
     
     /**
@@ -155,10 +168,7 @@ class OctoBeatsRadio {
      * Generate time slots for the time dial
      */
     generateTimeSlots() {
-        if (!this.elements.timeDial) return;
-        
         this.timeSlots = [];
-        const slotsHTML = [];
         
         // Generate 30-minute slots for 24 hours
         for (let hour = 0; hour < 24; hour++) {
@@ -167,24 +177,101 @@ class OctoBeatsRadio {
                 const displayTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
                 
                 this.timeSlots.push({ value: timeString, display: displayTime });
-                
-                slotsHTML.push(`
-                    <div class="time-slot" data-time="${timeString}">
-                        ${displayTime}
-                    </div>
-                `);
             }
         }
+    }
+    
+    /**
+     * Generate schedule for tracks
+     */
+    generateSchedule() {
+        if (this.tracks.length === 0) return;
         
-        this.elements.timeDial.innerHTML = slotsHTML.join('');
+        this.schedule.clear();
         
-        // Set current time as active
+        // Start from May 28, 2025
+        const startDate = new Date('2025-05-28');
+        const today = new Date();
+        
+        // Generate schedule for 7 days from start date
+        for (let day = 0; day < 7; day++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + day);
+            
+            // Skip future dates
+            if (currentDate > today) continue;
+            
+            const dateString = currentDate.toISOString().split('T')[0];
+            
+            // Assign tracks to time slots for this date
+            this.timeSlots.forEach((slot, index) => {
+                const trackIndex = (day * this.timeSlots.length + index) % this.tracks.length;
+                const scheduleKey = `${dateString}-${slot.value}`;
+                this.schedule.set(scheduleKey, {
+                    trackIndex,
+                    date: dateString,
+                    time: slot.value,
+                    displayTime: slot.display
+                });
+            });
+        }
+    }
+    
+    /**
+     * Get current time slot
+     */
+    getCurrentTimeSlot() {
         const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes() < 30 ? 0 : 30;
-        const currentTimeString = `${currentHour.toString().padStart(2, '0')}${currentMinute.toString().padStart(2, '0')}`;
+        const hour = now.getHours();
+        const minute = now.getMinutes() < 30 ? 0 : 30;
+        return `${hour.toString().padStart(2, '0')}${minute.toString().padStart(2, '0')}`;
+    }
+    
+    /**
+     * Get track for current time
+     */
+    getCurrentTrack() {
+        const now = new Date();
+        const dateString = now.toISOString().split('T')[0];
+        const timeSlot = this.getCurrentTimeSlot();
+        const scheduleKey = `${dateString}-${timeSlot}`;
         
-        this.selectTime(currentTimeString);
+        return this.schedule.get(scheduleKey);
+    }
+    
+    /**
+     * Start live mode - auto-play based on current time
+     */
+    startLiveMode() {
+        this.isLiveMode = true;
+        this.checkScheduleUpdate();
+        
+        if (this.elements.trackSchedule) {
+            this.elements.trackSchedule.textContent = 'Live Radio • Auto-playing based on time';
+        }
+    }
+    
+    /**
+     * Stop live mode
+     */
+    stopLiveMode() {
+        this.isLiveMode = false;
+        
+        if (this.elements.trackSchedule) {
+            this.elements.trackSchedule.textContent = 'Manual Mode • Selected from program guide';
+        }
+    }
+    
+    /**
+     * Check if schedule needs to be updated
+     */
+    checkScheduleUpdate() {
+        if (!this.isLiveMode) return;
+        
+        const currentTrack = this.getCurrentTrack();
+        if (currentTrack && currentTrack.trackIndex !== this.currentIndex) {
+            this.loadTrack(currentTrack.trackIndex);
+        }
     }
     
     /**
@@ -306,16 +393,24 @@ class OctoBeatsRadio {
         // Progress bar
         this.elements.progressBar?.addEventListener('click', (e) => this.seekToPosition(e));
         
+        // Clock click to open program guide
+        this.elements.currentTime?.addEventListener('click', () => this.openProgramGuide());
+        
+        // Program guide popup
+        this.elements.closePopup?.addEventListener('click', () => this.closeProgramGuide());
+        this.elements.cancelSelection?.addEventListener('click', () => this.closeProgramGuide());
+        this.elements.playSelected?.addEventListener('click', () => this.playSelectedTrack());
+        
         // Date selector
         this.elements.dateDial?.addEventListener('click', (e) => {
-            if (e.target.classList.contains('date-option')) {
+            if (e.target.classList.contains('date-option') && !e.target.classList.contains('disabled')) {
                 this.selectDate(e.target.dataset.date);
             }
         });
         
         // Time selector
         this.elements.timeDial?.addEventListener('click', (e) => {
-            if (e.target.classList.contains('time-slot')) {
+            if (e.target.classList.contains('time-slot') && !e.target.classList.contains('disabled')) {
                 this.selectTime(e.target.dataset.time);
             }
         });
@@ -325,16 +420,197 @@ class OctoBeatsRadio {
             const trackItem = e.target.closest('.track-item');
             if (trackItem) {
                 const index = parseInt(trackItem.dataset.index);
-                this.loadTrack(index);
+                this.selectTrackInPopup(index);
             }
         });
         
         // Download
         this.elements.downloadButton?.addEventListener('click', () => this.downloadCurrentTrack());
         
+        // Close popup on overlay click
+        this.elements.programGuidePopup?.addEventListener('click', (e) => {
+            if (e.target === this.elements.programGuidePopup) {
+                this.closeProgramGuide();
+            }
+        });
+        
         // Window events
         window.addEventListener('beforeunload', () => this.cleanup());
         window.addEventListener('resize', () => this.handleResize());
+    }
+    
+    /**
+     * Open program guide popup
+     */
+    openProgramGuide() {
+        if (this.elements.programGuidePopup) {
+            this.elements.programGuidePopup.style.display = 'flex';
+            this.generateDateOptions();
+            this.renderTimeSlots();
+            this.renderTracksInPopup();
+        }
+    }
+    
+    /**
+     * Close program guide popup
+     */
+    closeProgramGuide() {
+        if (this.elements.programGuidePopup) {
+            this.elements.programGuidePopup.style.display = 'none';
+        }
+    }
+    
+    /**
+     * Generate date options for popup
+     */
+    generateDateOptions() {
+        if (!this.elements.dateDial) return;
+        
+        const startDate = new Date('2025-05-28');
+        const today = new Date();
+        const datesHTML = [];
+        
+        for (let day = 0; day < 7; day++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + day);
+            
+            const dateString = currentDate.toISOString().split('T')[0];
+            const displayDate = currentDate.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+            const isDisabled = currentDate > today;
+            const isActive = dateString === this.selectedDate;
+            
+            datesHTML.push(`
+                <div class="date-option ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}" 
+                     data-date="${dateString}">
+                    ${displayDate}
+                </div>
+            `);
+        }
+        
+        this.elements.dateDial.innerHTML = datesHTML.join('');
+        
+        // Select today by default
+        if (!this.selectedDate) {
+            const todayString = today.toISOString().split('T')[0];
+            this.selectDate(todayString);
+        }
+    }
+    
+    /**
+     * Render time slots in popup
+     */
+    renderTimeSlots() {
+        if (!this.elements.timeDial) return;
+        
+        const now = new Date();
+        const today = now.toISOString().split('T')[0];
+        const currentTimeSlot = this.getCurrentTimeSlot();
+        
+        const slotsHTML = this.timeSlots.map(slot => {
+            const isDisabled = this.selectedDate === today && slot.value > currentTimeSlot;
+            const isActive = slot.value === this.selectedTime;
+            
+            return `
+                <div class="time-slot ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}" 
+                     data-time="${slot.value}">
+                    ${slot.display}
+                </div>
+            `;
+        }).join('');
+        
+        this.elements.timeDial.innerHTML = slotsHTML;
+    }
+    
+    /**
+     * Render tracks in popup
+     */
+    renderTracksInPopup() {
+        if (!this.elements.trackDial || !this.selectedDate || !this.selectedTime) {
+            if (this.elements.trackDial) {
+                this.elements.trackDial.innerHTML = '<div class="empty-state"><div class="empty-state-description">Select date and time to see available tracks</div></div>';
+            }
+            return;
+        }
+        
+        const scheduleKey = `${this.selectedDate}-${this.selectedTime}`;
+        const scheduledTrack = this.schedule.get(scheduleKey);
+        
+        if (!scheduledTrack) {
+            this.elements.trackDial.innerHTML = '<div class="empty-state"><div class="empty-state-description">No tracks scheduled for this time</div></div>';
+            return;
+        }
+        
+        const track = this.tracks[scheduledTrack.trackIndex];
+        if (!track) return;
+        
+        const trackHTML = `
+            <div class="track-item active" data-index="${scheduledTrack.trackIndex}">
+                <div class="track-number">1</div>
+                <div class="track-details">
+                    <div class="track-name">${this.escapeHtml(track.title)}</div>
+                    <div class="track-meta">mentria.ai • Scheduled for ${scheduledTrack.displayTime}</div>
+                </div>
+            </div>
+        `;
+        
+        this.elements.trackDial.innerHTML = trackHTML;
+    }
+    
+    /**
+     * Select a date in popup
+     */
+    selectDate(date) {
+        this.selectedDate = date;
+        
+        // Update UI
+        this.elements.dateDial?.querySelectorAll('.date-option').forEach(option => {
+            option.classList.toggle('active', option.dataset.date === date);
+        });
+        
+        // Update time slots and tracks
+        this.renderTimeSlots();
+        this.renderTracksInPopup();
+    }
+    
+    /**
+     * Select a time slot in popup
+     */
+    selectTime(time) {
+        this.selectedTime = time;
+        
+        // Update UI
+        this.elements.timeDial?.querySelectorAll('.time-slot').forEach(slot => {
+            slot.classList.toggle('active', slot.dataset.time === time);
+        });
+        
+        // Update tracks
+        this.renderTracksInPopup();
+    }
+    
+    /**
+     * Select a track in popup
+     */
+    selectTrackInPopup(index) {
+        // Track is already selected by schedule, just update UI
+        this.elements.trackDial?.querySelectorAll('.track-item').forEach((item, i) => {
+            item.classList.toggle('active', parseInt(item.dataset.index) === index);
+        });
+    }
+    
+    /**
+     * Play selected track from popup
+     */
+    playSelectedTrack() {
+        if (!this.selectedDate || !this.selectedTime) return;
+        
+        const scheduleKey = `${this.selectedDate}-${this.selectedTime}`;
+        const scheduledTrack = this.schedule.get(scheduleKey);
+        
+        if (scheduledTrack) {
+            this.stopLiveMode();
+            this.loadTrack(scheduledTrack.trackIndex);
+            this.closeProgramGuide();
+        }
     }
     
     /**
@@ -347,45 +623,6 @@ class OctoBeatsRadio {
             this.canvas.height = rect.height * window.devicePixelRatio;
             this.canvasContext.scale(window.devicePixelRatio, window.devicePixelRatio);
         }
-    }
-    
-    /**
-     * Select a date
-     */
-    selectDate(date) {
-        this.selectedDate = date;
-        
-        // Update UI
-        this.elements.dateDial?.querySelectorAll('.date-option').forEach(option => {
-            option.classList.toggle('active', option.dataset.date === date);
-        });
-        
-        // Filter tracks based on selection
-        this.filterTracks();
-    }
-    
-    /**
-     * Select a time slot
-     */
-    selectTime(time) {
-        this.selectedTime = time;
-        
-        // Update UI
-        this.elements.timeDial?.querySelectorAll('.time-slot').forEach(slot => {
-            slot.classList.toggle('active', slot.dataset.time === time);
-        });
-        
-        // Filter tracks based on selection
-        this.filterTracks();
-    }
-    
-    /**
-     * Filter tracks based on date/time selection
-     */
-    filterTracks() {
-        // For now, show all tracks regardless of date/time
-        // In a real implementation, you would filter based on schedule
-        this.renderTracks();
     }
     
     /**
@@ -410,8 +647,14 @@ class OctoBeatsRadio {
      */
     setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
-            // Don't handle shortcuts if user is typing
+            // Don't handle shortcuts if user is typing or popup is open
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (this.elements.programGuidePopup?.style.display === 'flex') {
+                if (e.code === 'Escape') {
+                    this.closeProgramGuide();
+                }
+                return;
+            }
             
             switch (e.code) {
                 case 'Space':
@@ -425,6 +668,14 @@ class OctoBeatsRadio {
                 case 'ArrowRight':
                     e.preventDefault();
                     this.nextTrack();
+                    break;
+                case 'KeyG':
+                    e.preventDefault();
+                    this.openProgramGuide();
+                    break;
+                case 'KeyL':
+                    e.preventDefault();
+                    this.startLiveMode();
                     break;
             }
         });
@@ -445,10 +696,17 @@ class OctoBeatsRadio {
             const data = await response.json();
             this.tracks = data.tracks || [];
             
-            this.renderTracks();
+            // Generate schedule after loading tracks
+            this.generateSchedule();
             
             if (this.tracks.length > 0) {
-                this.loadTrack(0);
+                // Load current track based on time
+                const currentTrack = this.getCurrentTrack();
+                if (currentTrack) {
+                    this.loadTrack(currentTrack.trackIndex);
+                } else {
+                    this.loadTrack(0);
+                }
             } else {
                 this.showEmptyState();
             }
@@ -475,7 +733,6 @@ class OctoBeatsRadio {
         
         // Update UI immediately
         this.updateTrackInfo(track);
-        this.updateTrackSelection();
         
         // Load audio
         this.audio.src = track.file;
@@ -525,70 +782,23 @@ class OctoBeatsRadio {
     }
     
     /**
-     * Render the track list
-     */
-    renderTracks() {
-        if (!this.elements.trackDial) return;
-        
-        if (this.tracks.length === 0) {
-            this.showEmptyState();
-            return;
-        }
-        
-        const tracksHTML = this.tracks.map((track, index) => `
-            <div class="track-item ${index === this.currentIndex ? 'active' : ''}" 
-                 data-index="${index}">
-                <div class="track-number">${index + 1}</div>
-                <div class="track-details">
-                    <div class="track-name">${this.escapeHtml(track.title)}</div>
-                    <div class="track-meta">mentria.ai • Copyright-free</div>
-                </div>
-            </div>
-        `).join('');
-        
-        this.elements.trackDial.innerHTML = tracksHTML;
-    }
-    
-    /**
-     * Update track selection in the dial
-     */
-    updateTrackSelection() {
-        if (!this.elements.trackDial) return;
-        
-        this.elements.trackDial.querySelectorAll('.track-item').forEach((item, index) => {
-            item.classList.toggle('active', index === this.currentIndex);
-        });
-    }
-    
-    /**
      * Show empty state
      */
     showEmptyState(message = null) {
-        if (!this.elements.trackDial) return;
-        
-        const emptyStateHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">🎵</div>
-                <div class="empty-state-title">No tracks available</div>
-                <div class="empty-state-description">
-                    ${message || 'Generate music using the OctoBeats workflow to see tracks here.'}
-                </div>
-            </div>
-        `;
-        
-        this.elements.trackDial.innerHTML = emptyStateHTML;
-        
-        // Hide download button
-        if (this.elements.downloadButton) {
-            this.elements.downloadButton.style.display = 'none';
-        }
-        
         // Update track info
         if (this.elements.trackTitle) {
             this.elements.trackTitle.textContent = 'No tracks available';
         }
         if (this.elements.trackArtist) {
             this.elements.trackArtist.textContent = 'Generate music to get started';
+        }
+        if (this.elements.trackSchedule) {
+            this.elements.trackSchedule.textContent = message || 'Generate music using the OctoBeats workflow';
+        }
+        
+        // Hide download button
+        if (this.elements.downloadButton) {
+            this.elements.downloadButton.style.display = 'none';
         }
     }
     
@@ -637,6 +847,8 @@ class OctoBeatsRadio {
     previousTrack() {
         if (this.tracks.length === 0) return;
         
+        this.stopLiveMode();
+        
         const newIndex = this.currentIndex > 0 
             ? this.currentIndex - 1 
             : this.tracks.length - 1;
@@ -649,6 +861,8 @@ class OctoBeatsRadio {
      */
     nextTrack() {
         if (this.tracks.length === 0) return;
+        
+        this.stopLiveMode();
         
         const newIndex = this.currentIndex < this.tracks.length - 1 
             ? this.currentIndex + 1 
@@ -692,7 +906,10 @@ class OctoBeatsRadio {
      */
     setLoading(loading) {
         this.isLoading = loading;
-        // Loading state can be shown in the UI if needed
+        
+        if (loading && this.elements.trackTitle) {
+            this.elements.trackTitle.textContent = 'Loading...';
+        }
     }
     
     /**
@@ -786,7 +1003,13 @@ class OctoBeatsRadio {
     }
     
     onEnded() {
-        this.nextTrack();
+        if (this.isLiveMode) {
+            // In live mode, check for next scheduled track
+            this.checkScheduleUpdate();
+        } else {
+            // In manual mode, go to next track
+            this.nextTrack();
+        }
     }
     
     onError(event) {

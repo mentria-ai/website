@@ -101,68 +101,80 @@
         <header class="app-header">
             <h1 class="app-title">OctoBeats Radio</h1>
             <div class="current-time" id="currentDateTime">
-                <span class="date" id="currentDate">Mon 27</span>
-                <span class="time" id="currentTime">12:30</span>
+                <span class="date" id="currentDate">Tue 28</span>
+                <span class="time clickable" id="currentTime" title="Click to open program guide">12:30</span>
             </div>
         </header>
 
-        <!-- Main Content Grid -->
-        <main class="main-content">
-            <!-- Left Panel: Visualizer & Controls -->
-            <section class="left-panel">
-                <!-- Audio Visualizer -->
-                <div class="visualizer-container" id="visualizerContainer">
-                    <canvas class="visualizer" id="audioVisualizer" width="300" height="200"></canvas>
-                    <div class="visualizer-fallback" id="visualizerFallback">
-                        <div class="equalizer-bars">
-                            <div class="bar"></div>
-                            <div class="bar"></div>
-                            <div class="bar"></div>
-                            <div class="bar"></div>
-                            <div class="bar"></div>
-                            <div class="bar"></div>
-                            <div class="bar"></div>
-                            <div class="bar"></div>
-                        </div>
+        <!-- Main Player Interface -->
+        <main class="player-interface">
+            <!-- Audio Visualizer -->
+            <div class="visualizer-container" id="visualizerContainer">
+                <canvas class="visualizer" id="audioVisualizer" width="600" height="300"></canvas>
+                <div class="visualizer-fallback" id="visualizerFallback">
+                    <div class="equalizer-bars">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Now Playing -->
-                <div class="now-playing">
-                    <h2 class="track-title" id="trackTitle">Select a track to play</h2>
-                    <p class="track-artist" id="trackArtist">mentria.ai</p>
+            <!-- Now Playing -->
+            <div class="now-playing">
+                <h2 class="track-title" id="trackTitle">Loading...</h2>
+                <p class="track-artist" id="trackArtist">mentria.ai</p>
+                <p class="track-schedule" id="trackSchedule">Live Radio • Auto-playing based on time</p>
+            </div>
+
+            <!-- Player Controls -->
+            <div class="player-controls">
+                <button class="control-btn" id="prevButton" aria-label="Previous track">⏮</button>
+                <button class="control-btn play-btn" id="playButton" aria-label="Play">▶</button>
+                <button class="control-btn" id="nextButton" aria-label="Next track">⏭</button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-section">
+                <div class="progress-bar" id="progressBar" role="progressbar" aria-label="Track progress" tabindex="0">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
-
-                <!-- Player Controls -->
-                <div class="player-controls">
-                    <button class="control-btn" id="prevButton" aria-label="Previous track">⏮</button>
-                    <button class="control-btn play-btn" id="playButton" aria-label="Play">▶</button>
-                    <button class="control-btn" id="nextButton" aria-label="Next track">⏭</button>
+                <div class="time-display">
+                    <span id="currentTrackTime">0:00</span>
+                    <span id="totalTime">0:00</span>
                 </div>
+            </div>
 
-                <!-- Progress Bar -->
-                <div class="progress-section">
-                    <div class="progress-bar" id="progressBar" role="progressbar" aria-label="Track progress" tabindex="0">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <div class="time-display">
-                        <span id="currentTrackTime">0:00</span>
-                        <span id="totalTime">0:00</span>
-                    </div>
-                </div>
-            </section>
+            <!-- Download Button -->
+            <button class="download-btn" id="downloadButton" style="display: none;" aria-label="Download current track">
+                ⬇ Download Track
+            </button>
+        </main>
+    </div>
 
-            <!-- Right Panel: Program Guide -->
-            <section class="right-panel">
+    <!-- Program Guide Popup -->
+    <div class="popup-overlay" id="programGuidePopup" style="display: none;">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h2>Program Guide</h2>
+                <button class="close-btn" id="closePopup" aria-label="Close program guide">×</button>
+            </div>
+            
+            <div class="popup-body">
                 <!-- Date Selector -->
                 <div class="date-selector">
                     <h3>Select Date</h3>
                     <div class="date-dial" id="dateDial">
-                        <div class="date-option active" data-date="2024-01-27">Mon 27</div>
-                        <div class="date-option" data-date="2024-01-28">Tue 28</div>
-                        <div class="date-option" data-date="2024-01-29">Wed 29</div>
-                        <div class="date-option" data-date="2024-01-30">Thu 30</div>
-                        <div class="date-option" data-date="2024-01-31">Fri 31</div>
+                        <!-- Dates will be generated by JavaScript -->
                     </div>
                 </div>
 
@@ -182,12 +194,12 @@
                     </div>
                 </div>
 
-                <!-- Download Button -->
-                <button class="download-btn" id="downloadButton" style="display: none;" aria-label="Download current track">
-                    ⬇ Download Track
-                </button>
-            </section>
-        </main>
+                <div class="popup-actions">
+                    <button class="action-btn secondary" id="cancelSelection">Cancel</button>
+                    <button class="action-btn primary" id="playSelected">Play Selected</button>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Scripts -->

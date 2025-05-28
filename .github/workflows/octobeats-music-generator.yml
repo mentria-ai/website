@@ -23,6 +23,7 @@ permissions:
 jobs:
   generate-audio:
     runs-on: self-hosted
+    timeout-minutes: 120
     
     steps:
       - name: Validate trigger conditions
@@ -435,6 +436,7 @@ jobs:
       - name: Generate audio with ACE-Step
         if: steps.validate-trigger.outputs.should_process == 'true' && steps.check-existing.outputs.should_continue == 'true' && steps.check-server.outputs.server_ready == 'true'
         id: generate-audio
+        timeout-minutes: 90
         run: |
           echo "🎵 Generating audio with OctoBeats..."
           echo "" >> ${{ steps.validate-trigger.outputs.log_file }}
@@ -482,7 +484,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d @generation_request.json \
             -o generation_response.json \
-            --max-time 300; then
+            ; then
             
             echo "✅ API call completed" >> ${{ steps.validate-trigger.outputs.log_file }}
             

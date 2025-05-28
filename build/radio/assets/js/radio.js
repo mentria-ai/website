@@ -36,6 +36,16 @@ class OctoBeatsRadio {
         // Track loading
         this.pendingTrack = null; // Store track info for when audio is ready
         
+        // Audio fade properties
+        this.fadeInterval = null;
+        this.targetVolume = 1.0;
+        this.fadeStep = 0.05;
+        this.fadeDuration = 300; // 300ms fade
+        
+        // Debounce properties
+        this.lastPlayPauseTime = 0;
+        this.playPauseDebounce = 300; // 300ms debounce
+        
         // DOM elements
         this.elements = {};
         
@@ -72,8 +82,7 @@ class OctoBeatsRadio {
         this.elements = {
             // Visualizer
             audioVisualizer: document.getElementById('audioVisualizer'),
-            visualizerCanvas: document.getElementById('visualizerCanvas'),
-            visualizerFallback: document.getElementById('visualizerFallback'),
+            equalizerGrid: document.getElementById('equalizerGrid'),
             
             // Controls
             playButton: document.getElementById('playButton'),
@@ -96,9 +105,6 @@ class OctoBeatsRadio {
             // Download
             downloadButton: document.getElementById('downloadButton')
         };
-        
-        // Get equalizer bars
-        this.equalizerBars = this.elements.visualizerFallback?.querySelector('.equalizer-bars');
         
         // Validate required elements
         const requiredElements = ['playButton', 'trackInfo'];
@@ -165,24 +171,119 @@ class OctoBeatsRadio {
      * Initialize audio visualizer
      */
     initializeVisualizer() {
-        if (!this.elements.visualizerCanvas) return;
+        // Create grid cells for visualizer
+        this.createVisualizerGrid();
         
-        this.canvas = this.elements.visualizerCanvas;
-        this.canvasContext = this.canvas.getContext('2d');
+        // Set initial dim state
+        this.setVisualizerDimState();
         
-        // Set canvas size
-        const rect = this.canvas.getBoundingClientRect();
-        this.canvas.width = rect.width * window.devicePixelRatio;
-        this.canvas.height = rect.height * window.devicePixelRatio;
-        this.canvasContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+        // Setup audio context for real-time visualization
+        this.setupAudioContextForGrid();
+    }
+    
+    /**
+     * Setup audio context for grid visualization
+     */
+    setupAudioContextForGrid() {
+        // We'll setup audio context when first playing
+        this.audioContext = null;
+        this.analyser = null;
+        this.dataArray = null;
+    }
+    
+    /**
+     * Create the grid-based visualizer
+     */
+    createVisualizerGrid() {
+        if (!this.elements.equalizerGrid) return;
         
-        // Show fallback initially
-        if (this.elements.visualizerFallback) {
-            this.elements.visualizerFallback.style.display = 'flex';
+        // Clear existing cells
+        this.elements.equalizerGrid.innerHTML = '';
+        
+        // Create 20 columns x 8 rows = 160 cells
+        const columns = 20;
+        const rows = 8;
+        this.visualizerCells = [];
+        
+        for (let row = 0; row < rows; row++) {
+            this.visualizerCells[row] = [];
+            for (let col = 0; col < columns; col++) {
+                const cell = document.createElement('div');
+                cell.className = 'equalizer-cell';
+                
+                // Mark top 2 rows as peak cells
+                if (row < 2) {
+                    cell.classList.add('peak');
+                }
+                
+                this.elements.equalizerGrid.appendChild(cell);
+                this.visualizerCells[row][col] = cell;
+            }
         }
+    }
+    
+    /**
+     * Set visualizer to dim state (when not playing)
+     */
+    setVisualizerDimState() {
+        if (!this.visualizerCells) return;
         
-        // Stop equalizer animation initially
-        this.stopEqualizerAnimation();
+        this.visualizerCells.forEach((row, rowIndex) => {
+            row.forEach((cell, colIndex) => {
+                // Remove all level classes
+                cell.className = cell.className.replace(/level-\d+/g, '');
+                // Set to dim level
+                cell.classList.add('level-0');
+            });
+        });
+        
+        // Remove playing class
+        if (this.elements.equalizerGrid) {
+            this.elements.equalizerGrid.classList.remove('playing');
+        }
+    }
+    
+    /**
+     * Update visualizer grid based on audio data
+     */
+    updateVisualizerGrid(dataArray) {
+        if (!this.visualizerCells || !dataArray) return;
+        
+        const columns = this.visualizerCells[0].length;
+        const rows = this.visualizerCells.length;
+        
+        // Process audio data for each column
+        for (let col = 0; col < columns; col++) {
+            // Map column to frequency range
+            const freqIndex = Math.floor((col / columns) * dataArray.length);
+            let amplitude = dataArray[freqIndex] / 255; // Normalize to 0-1
+            
+            // Slightly more conservative amplification
+            amplitude = Math.pow(amplitude, 0.85); // Even gentler power curve
+            amplitude = Math.min(1, amplitude * 1.6); // Slightly lower multiplier
+            
+            // Calculate how many rows should be lit for this column
+            const activeRows = Math.floor(amplitude * rows);
+            
+            // Update cells in this column (FIXED: start from bottom)
+            for (let row = 0; row < rows; row++) {
+                const cell = this.visualizerCells[row][col]; // Direct row mapping
+                
+                // Remove all level classes
+                cell.className = cell.className.replace(/level-\d+/g, '');
+                
+                // Check if this row should be active (from bottom up)
+                const rowFromBottom = rows - 1 - row;
+                if (rowFromBottom < activeRows) {
+                    // Calculate intensity level (0-5) with balanced distribution
+                    const intensity = Math.min(5, Math.floor((amplitude * 5)));
+                    cell.classList.add(`level-${Math.max(1, intensity)}`); // Minimum level 1 for active cells
+                } else {
+                    // Dim cell
+                    cell.classList.add('level-0');
+                }
+            }
+        }
     }
     
     /**
@@ -203,15 +304,10 @@ class OctoBeatsRadio {
             this.analyser.smoothingTimeConstant = 0.8;
             this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
             
-            // Hide fallback and start visualization
-            if (this.elements.visualizerFallback) {
-                this.elements.visualizerFallback.style.display = 'none';
-            }
-            
             this.startVisualization();
         } catch (error) {
             console.warn('Audio visualization not supported:', error);
-            // Keep using fallback equalizer
+            // Keep using fallback animation
         }
     }
     
@@ -219,7 +315,11 @@ class OctoBeatsRadio {
      * Start audio visualization
      */
     startVisualization() {
-        if (!this.analyser || !this.canvasContext) return;
+        if (!this.analyser) {
+            // Fallback to animation
+            this.startGridAnimation();
+            return;
+        }
         
         const draw = () => {
             if (!this.isPlaying) return; // Stop when not playing
@@ -228,32 +328,13 @@ class OctoBeatsRadio {
             
             this.analyser.getByteFrequencyData(this.dataArray);
             
-            const width = this.canvas.width / window.devicePixelRatio;
-            const height = this.canvas.height / window.devicePixelRatio;
-            
-            this.canvasContext.clearRect(0, 0, width, height);
-            
-            // Focus on mid-range frequencies (more common in music)
-            const startFreq = 20; // Skip very low frequencies
-            const endFreq = 80;   // Skip very high frequencies
+            // Balanced frequency range
+            const startFreq = 15; // Slightly lower than original
+            const endFreq = 100;  // Slightly higher than original
             const usefulData = this.dataArray.slice(startFreq, endFreq);
             
-            const barWidth = width / usefulData.length;
-            let x = 0;
-            
-            for (let i = 0; i < usefulData.length; i++) {
-                const barHeight = (usefulData[i] / 255) * height * 0.8;
-                
-                // Create gradient
-                const gradient = this.canvasContext.createLinearGradient(0, height, 0, height - barHeight);
-                gradient.addColorStop(0, '#0A84FF');
-                gradient.addColorStop(1, '#0066CC');
-                
-                this.canvasContext.fillStyle = gradient;
-                this.canvasContext.fillRect(x, height - barHeight, barWidth - 1, barHeight);
-                
-                x += barWidth;
-            }
+            // Update grid with audio data
+            this.updateVisualizerGrid(usefulData);
         };
         
         if (this.isPlaying) {
@@ -270,36 +351,25 @@ class OctoBeatsRadio {
             this.animationId = null;
         }
         
-        if (this.canvasContext) {
-            const width = this.canvas.width / window.devicePixelRatio;
-            const height = this.canvas.height / window.devicePixelRatio;
-            this.canvasContext.clearRect(0, 0, width, height);
-        }
-        
-        // Show fallback
-        if (this.elements.visualizerFallback) {
-            this.elements.visualizerFallback.style.display = 'flex';
-        }
-        
-        // Stop equalizer animation
-        this.stopEqualizerAnimation();
+        // Set grid to dim state
+        this.setVisualizerDimState();
     }
     
     /**
-     * Start equalizer animation
+     * Start grid animation (fallback)
      */
-    startEqualizerAnimation() {
-        if (this.equalizerBars) {
-            this.equalizerBars.classList.add('playing');
+    startGridAnimation() {
+        if (this.elements.equalizerGrid) {
+            this.elements.equalizerGrid.classList.add('playing');
         }
     }
     
     /**
-     * Stop equalizer animation
+     * Stop grid animation
      */
-    stopEqualizerAnimation() {
-        if (this.equalizerBars) {
-            this.equalizerBars.classList.remove('playing');
+    stopGridAnimation() {
+        if (this.elements.equalizerGrid) {
+            this.elements.equalizerGrid.classList.remove('playing');
         }
     }
     
@@ -424,6 +494,10 @@ class OctoBeatsRadio {
         if (!this.audio || !this.audio.duration) return;
         
         this.isSeekingProgress = true;
+        
+        // Switch to manual mode when user seeks
+        this.stopLiveMode();
+        
         const percent = parseFloat(event.target.value);
         const newTime = (percent / 100) * this.audio.duration;
         
@@ -431,6 +505,9 @@ class OctoBeatsRadio {
         if (this.elements.currentTime) {
             this.elements.currentTime.textContent = this.formatTime(newTime);
         }
+        
+        // Ensure progress fill stays in sync during seeking
+        this.updateProgressFill(percent);
     }
     
     /**
@@ -442,8 +519,14 @@ class OctoBeatsRadio {
         const percent = parseFloat(event.target.value);
         const newTime = (percent / 100) * this.audio.duration;
         
+        // Switch to manual mode when user seeks
+        this.stopLiveMode();
+        
         this.audio.currentTime = newTime;
         this.isSeekingProgress = false;
+        
+        // Force synchronization after seeking
+        this.setProgressPosition(percent);
     }
     
     /**
@@ -454,13 +537,47 @@ class OctoBeatsRadio {
         
         const percent = (this.audio.currentTime / this.audio.duration) * 100;
         
-        if (this.elements.audioProgressSlider) {
-            this.elements.audioProgressSlider.value = percent;
-        }
+        // Update both slider and fill simultaneously
+        this.setProgressPosition(percent);
         
         if (this.elements.currentTime) {
             this.elements.currentTime.textContent = this.formatTime(this.audio.currentTime);
         }
+    }
+    
+    /**
+     * Set progress position for both slider and fill (synchronized)
+     */
+    setProgressPosition(percent) {
+        // Clamp percent between 0 and 100
+        const clampedPercent = Math.max(0, Math.min(100, percent));
+        
+        if (this.elements.audioProgressSlider) {
+            this.elements.audioProgressSlider.value = clampedPercent;
+        }
+        
+        // Always update the visual progress fill in sync
+        this.updateProgressFill(clampedPercent);
+    }
+    
+    /**
+     * Update progress slider visual fill
+     */
+    updateProgressFill(percent) {
+        if (!this.elements.audioProgressSlider) return;
+        
+        // Create or update the progress fill overlay
+        const progressWrapper = this.elements.audioProgressSlider.parentElement;
+        let progressFill = progressWrapper.querySelector('.progress-fill');
+        
+        if (!progressFill) {
+            progressFill = document.createElement('div');
+            progressFill.className = 'progress-fill';
+            progressWrapper.insertBefore(progressFill, this.elements.audioProgressSlider);
+        }
+        
+        // Ensure exact synchronization by using the same percent value
+        progressFill.style.width = `${percent}%`;
     }
     
     /**
@@ -576,8 +693,6 @@ class OctoBeatsRadio {
      * Load a specific track
      */
     loadTrack(index) {
-        console.log('🎵 loadTrack called with index:', index, 'current index:', this.currentIndex);
-        
         if (index < 0 || index >= this.tracks.length) {
             console.warn('Invalid track index:', index);
             return;
@@ -585,7 +700,6 @@ class OctoBeatsRadio {
         
         // Prevent loading the same track multiple times
         if (index === this.currentIndex && this.audio.src) {
-            console.log('Track already loaded, skipping...');
             return;
         }
         
@@ -595,14 +709,10 @@ class OctoBeatsRadio {
         this.currentIndex = index;
         const track = this.tracks[index];
         
-        console.log('Loading track:', track); // Debug log
-        
         // Load audio FIRST (this triggers loadstart and setLoading(true))
-        console.log('Setting audio.src to:', track.file);
         this.audio.src = track.file;
         
         // Store track info to update when audio is ready (in onCanPlay)
-        console.log('Storing track info for when audio is ready...');
         this.pendingTrack = track;
         
         // Update media session
@@ -624,8 +734,6 @@ class OctoBeatsRadio {
      * Update track information display
      */
     updateTrackInfo(track) {
-        console.log('updateTrackInfo called with:', track);
-        
         if (this.elements.trackInfo && track) {
             // Clean up the title - remove [MUSIC] prefix if present
             let cleanTitle = track.title || 'Unknown Track';
@@ -636,7 +744,6 @@ class OctoBeatsRadio {
             // Format as "Title – Artist"
             const trackText = `${cleanTitle} – mentria.ai`;
             this.elements.trackInfo.textContent = trackText;
-            console.log('Track info set to:', trackText);
             
         } else {
             console.warn('Missing trackInfo element or track data:', { 
@@ -678,18 +785,119 @@ class OctoBeatsRadio {
     }
     
     /**
-     * Play/pause toggle
+     * Play/pause toggle with debounce
      */
     togglePlayPause() {
+        const now = Date.now();
+        if (now - this.lastPlayPauseTime < this.playPauseDebounce) {
+            return; // Ignore rapid clicks
+        }
+        this.lastPlayPauseTime = now;
+        
         if (this.isPlaying) {
-            this.pause();
+            this.fadeOutAndPause();
         } else {
-            this.play();
+            this.playWithFadeIn();
         }
     }
     
     /**
-     * Play current track
+     * Play with fade in
+     */
+    async playWithFadeIn() {
+        if (!this.audio || !this.audio.src) return;
+        
+        try {
+            // Setup audio context for visualizer on first play
+            if (!this.audioContext) {
+                this.setupAudioContext();
+            }
+            
+            // Start with volume at 0
+            this.audio.volume = 0;
+            await this.audio.play();
+            
+            // Fade in
+            this.fadeIn();
+            
+        } catch (error) {
+            console.error('Failed to play audio:', error);
+            this.showError('Failed to play audio');
+        }
+    }
+    
+    /**
+     * Fade out and pause
+     */
+    fadeOutAndPause() {
+        if (!this.audio) return;
+        
+        this.fadeOut(() => {
+            this.audio.pause();
+        });
+    }
+    
+    /**
+     * Fade in audio
+     */
+    fadeIn() {
+        if (this.fadeInterval) {
+            clearInterval(this.fadeInterval);
+        }
+        
+        const startVolume = 0;
+        const endVolume = this.targetVolume;
+        const steps = Math.ceil(this.fadeDuration / 16); // 60fps
+        const volumeStep = (endVolume - startVolume) / steps;
+        let currentStep = 0;
+        
+        this.audio.volume = startVolume;
+        
+        this.fadeInterval = setInterval(() => {
+            currentStep++;
+            const newVolume = startVolume + (volumeStep * currentStep);
+            
+            if (currentStep >= steps || newVolume >= endVolume) {
+                this.audio.volume = endVolume;
+                clearInterval(this.fadeInterval);
+                this.fadeInterval = null;
+            } else {
+                this.audio.volume = newVolume;
+            }
+        }, 16);
+    }
+    
+    /**
+     * Fade out audio
+     */
+    fadeOut(callback) {
+        if (this.fadeInterval) {
+            clearInterval(this.fadeInterval);
+        }
+        
+        const startVolume = this.audio.volume;
+        const endVolume = 0;
+        const steps = Math.ceil(this.fadeDuration / 16); // 60fps
+        const volumeStep = (startVolume - endVolume) / steps;
+        let currentStep = 0;
+        
+        this.fadeInterval = setInterval(() => {
+            currentStep++;
+            const newVolume = startVolume - (volumeStep * currentStep);
+            
+            if (currentStep >= steps || newVolume <= endVolume) {
+                this.audio.volume = endVolume;
+                clearInterval(this.fadeInterval);
+                this.fadeInterval = null;
+                if (callback) callback();
+            } else {
+                this.audio.volume = newVolume;
+            }
+        }, 16);
+    }
+    
+    /**
+     * Play current track (direct play without fade)
      */
     async play() {
         if (!this.audio || !this.audio.src) return;
@@ -700,6 +908,8 @@ class OctoBeatsRadio {
                 this.setupAudioContext();
             }
             
+            // Restore volume if it was faded out
+            this.audio.volume = this.targetVolume;
             await this.audio.play();
         } catch (error) {
             console.error('Failed to play audio:', error);
@@ -708,7 +918,7 @@ class OctoBeatsRadio {
     }
     
     /**
-     * Pause current track
+     * Pause current track (direct pause without fade)
      */
     pause() {
         if (this.audio) {
@@ -726,7 +936,7 @@ class OctoBeatsRadio {
         
         const newIndex = this.currentIndex > 0 
             ? this.currentIndex - 1 
-            : this.tracks.length - 1;
+            : this.tracks.length - 1; // Loop to last track
         
         this.loadTrack(newIndex);
     }
@@ -741,7 +951,7 @@ class OctoBeatsRadio {
         
         const newIndex = this.currentIndex < this.tracks.length - 1 
             ? this.currentIndex + 1 
-            : 0;
+            : 0; // Loop back to first track
         
         this.loadTrack(newIndex);
     }
@@ -767,15 +977,10 @@ class OctoBeatsRadio {
      * Set loading state
      */
     setLoading(loading) {
-        // Add stack trace to see what's calling this
-        console.log('setLoading called:', loading, 'current track info:', this.elements.trackInfo?.textContent);
-        console.trace('setLoading stack trace');
-        
         this.isLoading = loading;
         
         if (loading && this.elements.trackInfo) {
             this.elements.trackInfo.textContent = 'Loading...';
-            console.log('Set to Loading...');
         }
         // Don't overwrite track info when loading is false - let the track update handle it
     }
@@ -820,41 +1025,34 @@ class OctoBeatsRadio {
     
     // Audio event handlers
     onLoadStart() {
-        console.log('🔄 Audio loadstart event - calling setLoading(true)');
         this.setLoading(true);
     }
     
     onLoadedMetadata() {
-        console.log('📊 Audio loadedmetadata event');
         // Update total time display
         if (this.elements.totalTime) {
             this.elements.totalTime.textContent = this.formatTime(this.audio.duration);
         }
         
-        // Reset progress slider
-        if (this.elements.audioProgressSlider) {
-            this.elements.audioProgressSlider.value = 0;
-        }
+        // Reset progress to 0 and ensure sync
+        this.setProgressPosition(0);
     }
     
     onCanPlay() {
-        console.log('✅ Audio canplay event');
         // Don't call setLoading(false) here as it might overwrite track info
         this.isLoading = false;
         
         // Now update track info when audio is ready
         if (this.pendingTrack) {
-            console.log('Updating track info from pending track...');
             this.updateTrackInfo(this.pendingTrack);
             this.pendingTrack = null;
         }
     }
     
     onPlay() {
-        console.log('▶️ Audio play event');
         this.isPlaying = true;
         this.updatePlayButton();
-        this.startEqualizerAnimation();
+        this.startGridAnimation();
         
         // Start visualization if available
         if (this.audioContext) {
@@ -863,7 +1061,6 @@ class OctoBeatsRadio {
     }
     
     onPause() {
-        console.log('⏸️ Audio pause event');
         this.isPlaying = false;
         this.updatePlayButton();
         this.stopVisualization();
@@ -874,13 +1071,19 @@ class OctoBeatsRadio {
     }
     
     onEnded() {
-        console.log('⏹️ Audio ended event');
         if (this.isLiveMode) {
             // In live mode, check for next scheduled track
             this.checkScheduleUpdate();
         } else {
-            // In manual mode, go to next track
+            // In manual mode, go to next track (which will loop)
             this.nextTrack();
+            
+            // Auto-play the next track to maintain continuous playback
+            setTimeout(() => {
+                if (!this.isPlaying) {
+                    this.playWithFadeIn();
+                }
+            }, 200); // Slightly longer delay for better reliability
         }
     }
     
@@ -901,6 +1104,10 @@ class OctoBeatsRadio {
         
         if (this.clockUpdateInterval) {
             clearInterval(this.clockUpdateInterval);
+        }
+        
+        if (this.fadeInterval) {
+            clearInterval(this.fadeInterval);
         }
         
         if (this.audioContext) {

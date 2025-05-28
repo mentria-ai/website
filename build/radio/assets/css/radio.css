@@ -23,7 +23,9 @@
     /* Spacing System (8pt grid) */
     --spacing-4: 4px;
     --spacing-8: 8px;
+    --spacing-12: 12px;
     --spacing-16: 16px;
+    --spacing-20: 20px;
     --spacing-24: 24px;
     --spacing-32: 32px;
     --spacing-48: 48px;
@@ -74,93 +76,84 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: var(--spacing-48);
     padding: var(--spacing-32);
+    padding-top: var(--spacing-64);
 }
 
 /* 1. Audio Visualizer */
 .audio-visualizer {
     width: 400px;
     height: 120px;
-    background: var(--surface-elevated);
+    background: transparent;
     border-radius: var(--radius-medium);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
+    padding: var(--spacing-16);
 }
 
-.visualizer-canvas {
+.equalizer-grid {
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 2px;
     width: 100%;
     height: 100%;
-    border-radius: var(--radius-medium);
-}
-
-.visualizer-fallback {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.equalizer-bars {
-    display: flex;
     align-items: end;
-    gap: var(--spacing-8);
-    height: 60px;
 }
 
-.equalizer-bars .bar {
-    width: 4px;
-    background: var(--accent-blue);
-    border-radius: 2px;
-    transition: height var(--transition-fast);
+.equalizer-cell {
+    background: rgba(10, 132, 255, 0.1);
+    border-radius: 1px;
+    transition: background-color var(--transition-fast);
+    aspect-ratio: 1;
 }
 
-/* Static heights when not playing */
-.equalizer-bars .bar:nth-child(1) { height: 20px; }
-.equalizer-bars .bar:nth-child(2) { height: 35px; }
-.equalizer-bars .bar:nth-child(3) { height: 45px; }
-.equalizer-bars .bar:nth-child(4) { height: 55px; }
-.equalizer-bars .bar:nth-child(5) { height: 50px; }
-.equalizer-bars .bar:nth-child(6) { height: 40px; }
-.equalizer-bars .bar:nth-child(7) { height: 30px; }
-.equalizer-bars .bar:nth-child(8) { height: 25px; }
+/* Cell brightness levels */
+.equalizer-cell.level-0 { background: rgba(10, 132, 255, 0.05); }
+.equalizer-cell.level-1 { background: rgba(10, 132, 255, 0.2); }
+.equalizer-cell.level-2 { background: rgba(10, 132, 255, 0.4); }
+.equalizer-cell.level-3 { background: rgba(10, 132, 255, 0.6); }
+.equalizer-cell.level-4 { background: rgba(10, 132, 255, 0.8); }
+.equalizer-cell.level-5 { background: rgba(10, 132, 255, 1.0); }
+
+/* Peak cells (top rows) get lighter when not at full strength */
+.equalizer-cell.peak.level-1 { background: rgba(10, 132, 255, 0.3); }
+.equalizer-cell.peak.level-2 { background: rgba(10, 132, 255, 0.5); }
+.equalizer-cell.peak.level-3 { background: rgba(10, 132, 255, 0.7); }
+.equalizer-cell.peak.level-4 { background: rgba(10, 132, 255, 0.9); }
 
 /* Animation when playing */
-.equalizer-bars.playing .bar {
-    animation: equalizer 1.2s ease-in-out infinite;
+.equalizer-grid.playing .equalizer-cell {
+    animation: cellPulse 1.5s ease-in-out infinite;
 }
 
-.equalizer-bars.playing .bar:nth-child(1) { animation-delay: 0s; }
-.equalizer-bars.playing .bar:nth-child(2) { animation-delay: 0.1s; }
-.equalizer-bars.playing .bar:nth-child(3) { animation-delay: 0.2s; }
-.equalizer-bars.playing .bar:nth-child(4) { animation-delay: 0.3s; }
-.equalizer-bars.playing .bar:nth-child(5) { animation-delay: 0.4s; }
-.equalizer-bars.playing .bar:nth-child(6) { animation-delay: 0.5s; }
-.equalizer-bars.playing .bar:nth-child(7) { animation-delay: 0.6s; }
-.equalizer-bars.playing .bar:nth-child(8) { animation-delay: 0.7s; }
+@keyframes cellPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
 
-@keyframes equalizer {
-    0%, 100% { transform: scaleY(1); }
-    50% { transform: scaleY(0.3); }
+/* Remove old bar styles */
+.equalizer-bars {
+    display: none;
 }
 
 /* 2. Playback Strip */
 .playback-strip {
     display: flex;
     align-items: center;
-    gap: var(--spacing-8);
+    gap: var(--spacing-32);
 }
 
 .control-btn {
-    width: 48px;
-    height: 48px;
-    background: transparent;
-    border: none;
+    width: 64px;
+    height: 64px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-subtle);
     color: var(--fg-primary);
     cursor: pointer;
     border-radius: var(--radius-medium);
@@ -168,14 +161,27 @@ body {
     align-items: center;
     justify-content: center;
     transition: all var(--transition-fast);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .control-btn:hover {
-    background: var(--surface-elevated);
+    background: var(--surface-secondary);
+    transform: translateY(-1px);
+    box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.2),
+        0 3px 6px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .control-btn:active {
-    transform: scale(0.95);
+    transform: translateY(0);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        0 1px 3px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .play-dial {
@@ -188,7 +194,10 @@ body {
     align-items: center;
     justify-content: center;
     position: relative;
-    box-shadow: var(--shadow-medium);
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.3),
+        0 3px 8px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .play-dial::before {
@@ -231,6 +240,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .clock-time {
@@ -246,59 +259,137 @@ body {
     width: 100%;
     max-width: 600px;
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-16);
 }
 
 .time-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: var(--spacing-8);
     font-size: 14px;
     color: var(--text-secondary);
     font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    min-width: 40px;
+    text-align: center;
+}
+
+.progress-wrapper {
+    flex: 1;
+    position: relative;
+    height: 10px;
 }
 
 .audio-progress-slider {
     width: 100%;
-    height: 6px;
-    background: var(--surface-elevated);
-    border-radius: 3px;
+    height: 10px;
+    background: transparent;
+    border-radius: 4px;
     outline: none;
     cursor: pointer;
     -webkit-appearance: none;
     appearance: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+
+.audio-progress-slider::-webkit-slider-track {
+    width: 100%;
+    height: 10px;
+    background: transparent;
+    border-radius: 4px;
 }
 
 .audio-progress-slider::-webkit-slider-thumb {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 16px;
     background: var(--accent-blue);
-    border-radius: var(--radius-full);
+    border-radius: 2px;
     cursor: pointer;
     -webkit-appearance: none;
     appearance: none;
-    box-shadow: var(--shadow-subtle);
+    box-shadow: 
+        0 2px 8px rgba(10, 132, 255, 0.4),
+        0 1px 4px rgba(0, 0, 0, 0.2);
     transition: all var(--transition-fast);
+    border: none;
+    position: relative;
 }
 
 .audio-progress-slider::-webkit-slider-thumb:hover {
     background: var(--accent-blue-hover);
-    transform: scale(1.1);
+    height: 24px;
+    box-shadow: 
+        0 4px 12px rgba(10, 132, 255, 0.5),
+        0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.audio-progress-slider::-moz-range-track {
+    width: 100%;
+    height: 10px;
+    background: transparent;
+    border-radius: 4px;
+    border: none;
 }
 
 .audio-progress-slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 16px;
     background: var(--accent-blue);
-    border-radius: var(--radius-full);
+    border-radius: 2px;
     cursor: pointer;
     border: none;
-    box-shadow: var(--shadow-subtle);
+    box-shadow: 
+        0 2px 8px rgba(10, 132, 255, 0.4),
+        0 1px 4px rgba(0, 0, 0, 0.2);
     transition: all var(--transition-fast);
 }
 
 .audio-progress-slider::-moz-range-thumb:hover {
     background: var(--accent-blue-hover);
-    transform: scale(1.1);
+    height: 24px;
+    box-shadow: 
+        0 4px 12px rgba(10, 132, 255, 0.5),
+        0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.audio-progress-slider::-moz-range-progress {
+    background: var(--accent-blue);
+    height: 10px;
+    border-radius: 4px;
+}
+
+/* Progress fill overlay for cross-browser compatibility */
+.progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 10px;
+    background: var(--accent-blue);
+    border-radius: 4px;
+    pointer-events: none;
+    transition: width 0.1s ease-out;
+    box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.2),
+        0 0 8px rgba(10, 132, 255, 0.3);
+    z-index: 1;
+}
+
+/* Track background */
+.progress-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: var(--surface-elevated);
+    border-radius: 4px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.1);
+    z-index: 0;
 }
 
 /* 5. Current Track Chip */
@@ -306,18 +397,25 @@ body {
     background: var(--surface-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-large);
-    padding: var(--spacing-16) var(--spacing-24);
-    max-width: 400px;
+    padding: var(--spacing-20) var(--spacing-32);
+    max-width: 500px;
     text-align: center;
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
 }
 
 .track-info {
-    font-size: 17px;
-    font-weight: 400;
+    font-size: 18px;
+    font-weight: 500;
     color: var(--fg-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    letter-spacing: 0.3px;
+    text-transform: capitalize;
 }
 
 /* Download Button */
@@ -371,7 +469,7 @@ body {
     }
     
     .playback-strip {
-        gap: var(--spacing-16);
+        gap: var(--spacing-24);
     }
     
     .play-dial {
@@ -380,8 +478,13 @@ body {
     }
     
     .control-btn {
-        width: 44px;
-        height: 44px;
+        width: 56px;
+        height: 56px;
+    }
+    
+    .control-btn svg {
+        width: 22px;
+        height: 22px;
     }
     
     .clock-time {
@@ -394,11 +497,11 @@ body {
     
     .current-track-chip {
         max-width: 100%;
-        padding: var(--spacing-12) var(--spacing-16);
+        padding: var(--spacing-16) var(--spacing-24);
     }
     
     .track-info {
-        font-size: 15px;
+        font-size: 16px;
     }
     
     .download-btn {
@@ -417,23 +520,9 @@ body {
         height: 80px;
     }
     
-    .equalizer-bars {
-        height: 40px;
-        gap: var(--spacing-4);
+    .playback-strip {
+        gap: var(--spacing-16);
     }
-    
-    .equalizer-bars .bar {
-        width: 3px;
-    }
-    
-    .equalizer-bars .bar:nth-child(1) { height: 12px; }
-    .equalizer-bars .bar:nth-child(2) { height: 20px; }
-    .equalizer-bars .bar:nth-child(3) { height: 28px; }
-    .equalizer-bars .bar:nth-child(4) { height: 32px; }
-    .equalizer-bars .bar:nth-child(5) { height: 30px; }
-    .equalizer-bars .bar:nth-child(6) { height: 24px; }
-    .equalizer-bars .bar:nth-child(7) { height: 18px; }
-    .equalizer-bars .bar:nth-child(8) { height: 15px; }
     
     .play-dial {
         width: 60px;
@@ -441,8 +530,8 @@ body {
     }
     
     .control-btn {
-        width: 40px;
-        height: 40px;
+        width: 48px;
+        height: 48px;
     }
     
     .control-btn svg {
@@ -458,6 +547,14 @@ body {
     .clock-time {
         font-size: 18px;
     }
+    
+    .current-track-chip {
+        padding: var(--spacing-12) var(--spacing-20);
+    }
+    
+    .track-info {
+        font-size: 15px;
+    }
 }
 
 /* Reduced Motion */
@@ -470,7 +567,7 @@ body {
         transition-duration: 0.01ms !important;
     }
     
-    .equalizer-bars .bar {
+    .equalizer-grid .equalizer-cell {
         animation: none !important;
     }
 }

@@ -397,32 +397,35 @@ jobs:
         if: steps.generate-params.outputs.generation_success == 'true'
         id: create-issue
         uses: actions/github-script@v7
+        env:
+          STYLE_PROMPT_B64: ${{ steps.generate-params.outputs.style_prompt_encoded }}
+          LYRICS_B64: ${{ steps.generate-params.outputs.lyrics_encoded }}
+          DURATION: ${{ steps.generate-params.outputs.duration }}
+          TITLE_B64: ${{ steps.generate-params.outputs.title_suggestion_encoded }}
+          INSPIRATION_B64: ${{ steps.generate-params.outputs.inspiration_encoded }}
+          CUSTOM_THEME: ${{ github.event.inputs.custom_theme }}
+          LOG_FILE: ${{ steps.validate-setup.outputs.log_file }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const logFile = '${{ steps.validate-setup.outputs.log_file }}';
+            const logFile = process.env.LOG_FILE;
             
             fs.appendFileSync(logFile, '\n## Creating GitHub Issue\n');
             
-            // Get generated parameters
-            const stylePrompt = '${{ steps.generate-params.outputs.style_prompt_encoded }}';
-            const lyrics = '${{ steps.generate-params.outputs.lyrics_encoded }}';
-            const duration = '${{ steps.generate-params.outputs.duration }}';
-            const titleSuggestion = '${{ steps.generate-params.outputs.title_suggestion_encoded }}';
-            const inspiration = '${{ steps.generate-params.outputs.inspiration_encoded }}';
-            
-            // Decode base64 encoded parameters
-            const stylePromptDecoded = stylePrompt ? Buffer.from(stylePrompt, 'base64').toString('utf8') : 'electronic, ambient, melodic';
-            const lyricsDecoded = lyrics ? Buffer.from(lyrics, 'base64').toString('utf8') : '[inst]';
-            const titleSuggestionDecoded = titleSuggestion ? Buffer.from(titleSuggestion, 'base64').toString('utf8') : 'AI Generated Track';
-            const inspirationDecoded = inspiration ? Buffer.from(inspiration, 'base64').toString('utf8') : 'Automatically generated music';
+            // Get and decode parameters from environment variables
+            const stylePrompt = process.env.STYLE_PROMPT_B64 ? Buffer.from(process.env.STYLE_PROMPT_B64, 'base64').toString('utf8') : 'electronic, ambient, melodic';
+            const lyrics = process.env.LYRICS_B64 ? Buffer.from(process.env.LYRICS_B64, 'base64').toString('utf8') : '[inst]';
+            const duration = process.env.DURATION || '90';
+            const titleSuggestion = process.env.TITLE_B64 ? Buffer.from(process.env.TITLE_B64, 'base64').toString('utf8') : 'AI Generated Track';
+            const inspiration = process.env.INSPIRATION_B64 ? Buffer.from(process.env.INSPIRATION_B64, 'base64').toString('utf8') : 'Automatically generated music';
+            const customTheme = process.env.CUSTOM_THEME || 'None';
             
             // Current timestamp for unique issue titles
             const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
             
             // Create issue title
-            const issueTitle = `[MUSIC] ${titleSuggestionDecoded} - Auto Generated ${timestamp}`;
+            const issueTitle = `[MUSIC] ${titleSuggestion} - Auto Generated ${timestamp}`;
             
             // Create issue body following the template format
             const issueBody = [
@@ -431,10 +434,10 @@ jobs:
               'This music generation request was automatically created by the Auto Music Generator workflow.',
               '',
               '### 🎼 Music Style Prompt',
-              stylePromptDecoded,
+              stylePrompt,
               '',
               '### 🎤 Lyrics or Structure',
-              lyricsDecoded,
+              lyrics,
               '',
               '### ⏱️ Duration (seconds)',
               duration,
@@ -443,10 +446,10 @@ jobs:
               'ultra',
               '',
               '### 📝 Additional Notes',
-              `**AI Inspiration:** ${inspirationDecoded}`,
+              `**AI Inspiration:** ${inspiration}`,
               '',
               `**Generated at:** ${timestamp}`,
-              `**Custom theme:** ${{ github.event.inputs.custom_theme || 'None' }}`,
+              `**Custom theme:** ${customTheme}`,
               '',
               '---',
               '',
@@ -521,23 +524,30 @@ jobs:
       - name: Create fallback issue
         if: steps.generate-params.outputs.generation_success != 'true'
         uses: actions/github-script@v7
+        env:
+          FALLBACK_STYLE_B64: ${{ steps.handle-generation-failure.outputs.fallback_style_encoded }}
+          FALLBACK_LYRICS_B64: ${{ steps.handle-generation-failure.outputs.fallback_lyrics_encoded }}
+          FALLBACK_DURATION: ${{ steps.handle-generation-failure.outputs.fallback_duration }}
+          FALLBACK_TITLE_B64: ${{ steps.handle-generation-failure.outputs.fallback_title_encoded }}
+          FALLBACK_INSPIRATION_B64: ${{ steps.handle-generation-failure.outputs.fallback_inspiration_encoded }}
+          LOG_FILE: ${{ steps.validate-setup.outputs.log_file }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const logFile = '${{ steps.validate-setup.outputs.log_file }}';
+            const logFile = process.env.LOG_FILE;
             
             fs.appendFileSync(logFile, '\n## Creating Fallback Issue\n');
             
-            // Get fallback parameters
-            const fallbackStyle = '${{ steps.handle-generation-failure.outputs.fallback_style_encoded }}';
-            const fallbackLyrics = '${{ steps.handle-generation-failure.outputs.fallback_lyrics_encoded }}';
-            const fallbackDuration = '${{ steps.handle-generation-failure.outputs.fallback_duration }}';
-            const fallbackTitle = '${{ steps.handle-generation-failure.outputs.fallback_title_encoded }}';
-            const fallbackInspiration = '${{ steps.handle-generation-failure.outputs.fallback_inspiration_encoded }}';
+            // Get and decode fallback parameters from environment variables
+            const fallbackStyle = process.env.FALLBACK_STYLE_B64 ? Buffer.from(process.env.FALLBACK_STYLE_B64, 'base64').toString('utf8') : 'electronic, ambient, melodic';
+            const fallbackLyrics = process.env.FALLBACK_LYRICS_B64 ? Buffer.from(process.env.FALLBACK_LYRICS_B64, 'base64').toString('utf8') : '[inst]';
+            const fallbackDuration = process.env.FALLBACK_DURATION || '90';
+            const fallbackTitle = process.env.FALLBACK_TITLE_B64 ? Buffer.from(process.env.FALLBACK_TITLE_B64, 'base64').toString('utf8') : 'AI Generated Track';
+            const fallbackInspiration = process.env.FALLBACK_INSPIRATION_B64 ? Buffer.from(process.env.FALLBACK_INSPIRATION_B64, 'base64').toString('utf8') : 'Generated using fallback parameters';
             
             const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
-            const issueTitle = `[MUSIC] ${Buffer.from(fallbackTitle, 'base64').toString('utf8')} - Auto Generated ${timestamp}`;
+            const issueTitle = `[MUSIC] ${fallbackTitle} - Auto Generated ${timestamp}`;
             
             const issueBody = [
               '## 🎵 Auto-Generated Music Request (Fallback)',
@@ -545,10 +555,10 @@ jobs:
               'This music generation request was automatically created using fallback parameters due to AI generation failure.',
               '',
               '### 🎼 Music Style Prompt',
-              Buffer.from(fallbackStyle, 'base64').toString('utf8'),
+              fallbackStyle,
               '',
               '### 🎤 Lyrics or Structure',
-              Buffer.from(fallbackLyrics, 'base64').toString('utf8'),
+              fallbackLyrics,
               '',
               '### ⏱️ Duration (seconds)',
               fallbackDuration,
@@ -557,7 +567,7 @@ jobs:
               'ultra',
               '',
               '### 📝 Additional Notes',
-              `**AI Inspiration:** ${Buffer.from(fallbackInspiration, 'base64').toString('utf8')}`,
+              `**AI Inspiration:** ${fallbackInspiration}`,
               '',
               `**Generated at:** ${timestamp}`,
               '',

@@ -1,0 +1,481 @@
+name: Auto Music Generator
+
+on:
+  schedule:
+    # Runs every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:  # Allow manual triggering for testing
+    inputs:
+      custom_theme:
+        description: 'Optional theme for music generation (e.g., "ambient", "electronic", "rock")'
+        required: false
+        default: ''
+
+# Explicit permission scoping
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  generate-music-request:
+    runs-on: self-hosted
+    timeout-minutes: 10  # Should complete quickly
+    
+    steps:
+      - name: Validate API key and setup
+        id: validate-setup
+        run: |
+          echo "🔑 Validating Together API key..."
+          if [[ -z "${{ secrets.TOGETHER_API_KEY }}" ]]; then
+            echo "::error::Missing Together API key. Please add it to your repository secrets."
+            exit 1
+          fi
+          
+          # Create log file
+          LOG_FILE="auto_music_generator_$(date +%Y%m%d_%H%M%S).log"
+          echo "# Auto Music Generator Log - $(date -u +"%Y-%m-%dT%H:%M:%SZ")" > "$LOG_FILE"
+          echo "## Workflow Started" >> "$LOG_FILE"
+          echo "- Triggered by: ${{ github.event_name }}" >> "$LOG_FILE"
+          echo "- Run ID: ${{ github.run_id }}" >> "$LOG_FILE"
+          echo "- Repository: ${{ github.repository }}" >> "$LOG_FILE"
+          echo "" >> "$LOG_FILE"
+          
+          echo "log_file=$LOG_FILE" >> $GITHUB_OUTPUT
+          echo "✅ Setup validation completed"
+      
+      - name: Generate music parameters with AI
+        id: generate-params
+        run: |
+          echo "🎵 Generating music parameters using DeepSeek-V3..."
+          echo "" >> ${{ steps.validate-setup.outputs.log_file }}
+          echo "## AI Music Parameter Generation" >> ${{ steps.validate-setup.outputs.log_file }}
+          
+          # Get custom theme if provided
+          CUSTOM_THEME="${{ github.event.inputs.custom_theme }}"
+          if [[ -n "$CUSTOM_THEME" ]]; then
+            echo "🎨 Using custom theme: $CUSTOM_THEME" >> ${{ steps.validate-setup.outputs.log_file }}
+          fi
+          
+          # Create the system prompt with current context
+          CURRENT_TIME=$(date +"%H:%M")
+          CURRENT_DATE=$(date +"%A, %B %d, %Y")
+          
+          cat > music_generation_prompt.txt << 'PROMPTEOF'
+          You are an AI music production specialist with deep expertise in ACE-Step, a state-of-the-art diffusion-based text-to-music generation system. Your task is to generate creative, high-quality music parameters optimized for ACE-Step's advanced capabilities including superior lyric alignment, fast generation, and musical coherence across diverse genres.
+
+          **ACE-Step Context & Capabilities:**
+          - ACE-Step uses diffusion-based architecture for coherent, full-length music generation
+          - Supports structured lyrics with section markers ([verse], [chorus], [bridge]) for optimal vocal alignment
+          - Handles diverse genres with authentic instrumentation and style adaptation
+          - Provides localized lyric editing while preserving melody and accompaniment
+          - Achieves superior lyric-to-melody alignment compared to other models
+          - Supports flexible duration control and maintains long-range structural coherence
+
+          **Current Context:**
+          - Current time: CURRENT_TIME_PLACEHOLDER
+          - Current date: CURRENT_DATE_PLACEHOLDER
+          - Target system: ACE-Step AI music generation
+          - Output destination: Digital radio station content
+          - Quality mode: Ultra (maximum fidelity)
+
+          **Generation Guidelines:**
+
+          **1. Style Prompt (ACE-Step Tags):**
+          Create 4-8 descriptive tags in ACE-Step's format: comma-separated, lowercase descriptors covering:
+          - **Genre**: pop, rock, jazz, electronic, classical, hip-hop, folk, ambient, etc.
+          - **Mood/Energy**: upbeat, mellow, energetic, chill, dramatic, nostalgic, dreamy
+          - **Era/Style**: 1980s, retro, modern, futuristic, vintage, contemporary  
+          - **Instruments**: piano, guitar, synthesizer, orchestral, acoustic, electric
+          - **Production**: reverb-heavy, lo-fi, crisp, analog, digital, atmospheric
+          - **Vocals**: male vocal, female vocal, harmonies (if applicable)
+
+          Examples: "electronic, ambient, ethereal, 85 bpm, reverb-heavy, synthesizer"
+          Examples: "jazzy hip-hop, vinyl crackle, saxophone, laid-back, nostalgic"
+
+          **2. Lyrics (ACE-Step Structure):**
+          Generate structured lyrics optimized for ACE-Step's vocal alignment:
+
+          **For Instrumental Tracks:** Use "[inst]" or creative structure tags like "[intro][build][drop][outro]"
+
+          **For Vocal Tracks:** Create original lyrics with proper section structure:
+          - Use section markers: [verse], [chorus], [bridge], [outro], [intro]
+          - Ensure sections flow logically and tell a coherent story/theme
+          - Match lyrical tone, themes, and language to the genre authentically
+          - Use poetic devices (rhymes, rhythm, metaphors) appropriate to the style
+          - Keep lines singable with natural rhythm and balanced syllable counts
+          - Maintain consistent perspective and tense throughout
+          - Avoid copying existing songs - create original, creative content
+
+          **Genre-Style Alignment Examples:**
+          - **Jazz**: Smooth, soulful, sophisticated language with emotional depth
+          - **Pop**: Catchy, accessible, relatable themes with strong hooks  
+          - **Folk**: Storytelling narrative with simple, heartfelt language
+          - **Electronic**: Modern themes, possibly abstract or futuristic imagery
+          - **Blues**: Emotionally heavy, personal struggles, authentic expression
+          - **Hip-hop**: Rhythmic flow, contemporary references, cultural authenticity
+
+          **3. Duration Selection:**
+          Choose duration based on lyrical scope and genre conventions:
+          - **30-60s**: Intros, transitions, ambient pieces, short-form content
+          - **90-120s**: Complete songs with standard verse/chorus structure
+          - **150-180s**: Extended compositions with multiple verses, bridge sections
+          - **240s**: Complex arrangements, progressive structures, full narrative arcs
+
+          **4. Title Creation:**
+          Generate creative, genre-appropriate titles that:
+          - Reflect the song's theme and mood
+          - Sound authentic to the musical style
+          - Are memorable and radio-friendly
+          - Avoid clichés unless they serve the genre authentically
+
+          **5. Creative Inspiration:**
+          Provide brief insight into your creative process, mentioning:
+          - Genre influences or fusion elements
+          - Thematic inspiration (time of day, season, emotion, story)
+          - Unique musical or lyrical approaches
+          - Cultural or regional influences incorporated
+
+          **Output Format (JSON only):**
+          ```json
+          {
+            "style_prompt": "comma-separated, lowercase ACE-Step tags",
+            "lyrics": "structured lyrics with [section] markers OR [inst] for instrumental",
+            "duration": number (30, 45, 60, 90, 120, 150, 180, or 240),
+            "title_suggestion": "creative, genre-appropriate title",
+            "inspiration": "brief explanation of creative choices and influences"
+          }
+          ```
+
+          **Quality Standards:**
+          - **Authenticity**: Lyrics and tags must feel genuine to the specified genre
+          - **Coherence**: Story/theme should flow logically from start to finish  
+          - **Originality**: All content must be original, avoiding copyright infringement
+          - **Cultural Sensitivity**: Respectful representation of musical traditions
+          - **Appropriateness**: Suitable for radio broadcast, avoiding offensive content
+          - **ACE-Step Optimization**: Structure designed for optimal vocal-melody alignment
+
+          **Diversity Goals:**
+          - Explore different musical cultures and regional influences
+          - Mix traditional and experimental genre combinations  
+          - Consider time-appropriate themes (morning energy, evening chill, etc.)
+          - Balance instrumental and vocal compositions
+          - Vary emotional ranges and energy levels
+          - Incorporate seasonal and temporal context
+
+          **Examples of ACE-Step Optimized Outputs:**
+
+          **Ambient Electronic:**
+          - Tags: "ambient, electronic, atmospheric, downtempo, synthesizer, ethereal"
+          - Structure: Often instrumental ([inst]) or minimal vocals with [intro][ambient][outro]
+
+          **Singer-Songwriter Folk:**
+          - Tags: "folk, acoustic, storytelling, intimate, guitar, contemplative"  
+          - Structure: [verse][chorus][verse][chorus][bridge][chorus] with narrative lyrics
+
+          **Synthwave Retro:**
+          - Tags: "synthwave, retro, 1980s, electronic, nostalgic, analog"
+          - Structure: [intro][verse][chorus][verse][chorus][bridge][outro] with period-appropriate themes
+
+          Generate something musically compelling and ACE-Step optimized now:
+          PROMPTEOF
+          
+          # Replace placeholders with actual values
+          sed -i "s/CURRENT_TIME_PLACEHOLDER/$CURRENT_TIME/g" music_generation_prompt.txt
+          sed -i "s/CURRENT_DATE_PLACEHOLDER/$CURRENT_DATE/g" music_generation_prompt.txt
+          
+          # Add custom theme to prompt if provided
+          if [[ -n "$CUSTOM_THEME" ]]; then
+            echo "" >> music_generation_prompt.txt
+            echo "**Special Theme Request:** Focus on or incorporate elements of: $CUSTOM_THEME" >> music_generation_prompt.txt
+          fi
+          
+          # Create API request payload
+          jq -n \
+            --arg prompt "$(cat music_generation_prompt.txt)" \
+            '{
+              "model": "deepseek-ai/DeepSeek-V3",
+              "messages": [
+                {
+                  "role": "user", 
+                  "content": $prompt
+                }
+              ],
+              "max_tokens": 1000,
+              "temperature": 0.8
+            }' > api_request.json
+          
+          echo "📡 Making API call to Together AI..." >> ${{ steps.validate-setup.outputs.log_file }}
+          
+          # Make API call
+          if curl -s -X POST "https://api.together.xyz/v1/chat/completions" \
+            -H "Authorization: Bearer ${{ secrets.TOGETHER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d @api_request.json \
+            -o api_response.json; then
+            
+            echo "✅ API call completed successfully" >> ${{ steps.validate-setup.outputs.log_file }}
+            
+            # Extract content from response
+            RESPONSE_CONTENT=$(cat api_response.json | jq -r '.choices[0].message.content')
+            
+            if [[ "$RESPONSE_CONTENT" != "null" && -n "$RESPONSE_CONTENT" ]]; then
+              echo "🎼 AI Response received (${#RESPONSE_CONTENT} characters)" >> ${{ steps.validate-setup.outputs.log_file }}
+              
+              # Extract JSON from response (handle cases where AI adds explanatory text)
+              echo "$RESPONSE_CONTENT" | grep -o '{.*}' > extracted_json.txt || echo "$RESPONSE_CONTENT" > extracted_json.txt
+              
+              # Validate and extract parameters
+              STYLE_PROMPT=$(cat extracted_json.txt | jq -r '.style_prompt // "electronic, ambient, melodic"')
+              LYRICS=$(cat extracted_json.txt | jq -r '.lyrics // "[inst]"')
+              DURATION=$(cat extracted_json.txt | jq -r '.duration // 90')
+              TITLE_SUGGESTION=$(cat extracted_json.txt | jq -r '.title_suggestion // "AI Generated Track"')
+              INSPIRATION=$(cat extracted_json.txt | jq -r '.inspiration // "Automatically generated music"')
+              
+              # Validate duration (must be one of the allowed values)
+              case "$DURATION" in
+                30|45|60|90|120|150|180|240)
+                  echo "✅ Valid duration: $DURATION seconds" >> ${{ steps.validate-setup.outputs.log_file }}
+                  ;;
+                *)
+                  echo "⚠️ Invalid duration $DURATION, defaulting to 90 seconds" >> ${{ steps.validate-setup.outputs.log_file }}
+                  DURATION=90
+                  ;;
+              esac
+              
+              # Clean up parameters
+              STYLE_PROMPT=$(echo "$STYLE_PROMPT" | sed 's/[""""]//g' | head -c 200)
+              LYRICS=$(echo "$LYRICS" | sed 's/[""""]//g' | head -c 400)
+              TITLE_SUGGESTION=$(echo "$TITLE_SUGGESTION" | sed 's/[""""]//g' | head -c 80)
+              
+              echo "🎵 Generated Parameters:" >> ${{ steps.validate-setup.outputs.log_file }}
+              echo "- Style: $STYLE_PROMPT" >> ${{ steps.validate-setup.outputs.log_file }}
+              echo "- Lyrics: ${LYRICS:0:100}..." >> ${{ steps.validate-setup.outputs.log_file }}
+              echo "- Duration: $DURATION seconds" >> ${{ steps.validate-setup.outputs.log_file }}
+              echo "- Title: $TITLE_SUGGESTION" >> ${{ steps.validate-setup.outputs.log_file }}
+              echo "- Inspiration: $INSPIRATION" >> ${{ steps.validate-setup.outputs.log_file }}
+              
+              # Set outputs for next step
+              echo "style_prompt=$STYLE_PROMPT" >> $GITHUB_OUTPUT
+              echo "lyrics=$LYRICS" >> $GITHUB_OUTPUT
+              echo "duration=$DURATION" >> $GITHUB_OUTPUT
+              echo "title_suggestion=$TITLE_SUGGESTION" >> $GITHUB_OUTPUT
+              echo "inspiration=$INSPIRATION" >> $GITHUB_OUTPUT
+              echo "generation_success=true" >> $GITHUB_OUTPUT
+            else
+              echo "❌ Empty or invalid response from AI" >> ${{ steps.validate-setup.outputs.log_file }}
+              echo "generation_success=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "❌ API call failed" >> ${{ steps.validate-setup.outputs.log_file }}
+            echo "generation_success=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create music generation issue
+        if: steps.generate-params.outputs.generation_success == 'true'
+        id: create-issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const logFile = '${{ steps.validate-setup.outputs.log_file }}';
+            
+            fs.appendFileSync(logFile, '\n## Creating GitHub Issue\n');
+            
+            // Get generated parameters
+            const stylePrompt = '${{ steps.generate-params.outputs.style_prompt }}';
+            const lyrics = '${{ steps.generate-params.outputs.lyrics }}';
+            const duration = '${{ steps.generate-params.outputs.duration }}';
+            const titleSuggestion = '${{ steps.generate-params.outputs.title_suggestion }}';
+            const inspiration = '${{ steps.generate-params.outputs.inspiration }}';
+            
+            // Current timestamp for unique issue titles
+            const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+            
+            // Create issue title
+            const issueTitle = `[MUSIC] ${titleSuggestion} - Auto Generated ${timestamp}`;
+            
+            // Create issue body following the template format
+            const issueBody = [
+              '## 🎵 Auto-Generated Music Request',
+              '',
+              'This music generation request was automatically created by the Auto Music Generator workflow.',
+              '',
+              '### 🎼 Music Style Prompt',
+              stylePrompt,
+              '',
+              '### 🎤 Lyrics or Structure',
+              lyrics,
+              '',
+              '### ⏱️ Duration (seconds)',
+              duration,
+              '',
+              '### 🎚️ Quality Mode',
+              'ultra',
+              '',
+              '### 📝 Additional Notes',
+              `**AI Inspiration:** ${inspiration}`,
+              '',
+              `**Generated at:** ${timestamp}`,
+              `**Custom theme:** ${{ github.event.inputs.custom_theme || 'None' }}`,
+              '',
+              '---',
+              '',
+              '### ✅ Confirmation',
+              '- [x] I have the necessary permissions (owner/admin/maintainer) to request audio generation',
+              '- [x] I understand that the OctoBeats server must be running for this to work',
+              '- [x] I understand that this will create a new branch and pull request with the generated audio',
+              '- [x] The parameters I've provided are appropriate and follow community guidelines',
+              '',
+              '---',
+              '',
+              '*This issue was automatically generated by the Auto Music Generator workflow. The parameters were created using DeepSeek-V3 AI model to ensure creative diversity and musical interest.*'
+            ].join('\n');
+            
+            try {
+              // Create the issue
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issueTitle,
+                body: issueBody,
+                labels: ['audio', 'octobeats', 'auto-generated']
+              });
+              
+              fs.appendFileSync(logFile, `✅ Created issue #${issue.data.number}: "${issue.data.title}"\n`);
+              fs.appendFileSync(logFile, `🔗 Issue URL: ${issue.data.html_url}\n`);
+              
+              core.setOutput('issue_number', issue.data.number);
+              core.setOutput('issue_url', issue.data.html_url);
+              core.setOutput('issue_title', issue.data.title);
+              
+              return {
+                issue_number: issue.data.number,
+                issue_url: issue.data.html_url,
+                issue_title: issue.data.title
+              };
+            } catch (error) {
+              fs.appendFileSync(logFile, `❌ Error creating issue: ${error.message}\n`);
+              core.setFailed(`Error creating issue: ${error.message}`);
+            }
+      
+      - name: Handle generation failure
+        if: steps.generate-params.outputs.generation_success != 'true'
+        run: |
+          echo "❌ Music parameter generation failed" >> ${{ steps.validate-setup.outputs.log_file }}
+          echo "" >> ${{ steps.validate-setup.outputs.log_file }}
+          echo "## Fallback Parameters" >> ${{ steps.validate-setup.outputs.log_file }}
+          echo "Using fallback parameters to create a basic music request..." >> ${{ steps.validate-setup.outputs.log_file }}
+          
+          # Set fallback parameters
+          FALLBACK_STYLES=("electronic, ambient, chill" "acoustic, folk, peaceful" "jazz, smooth, relaxing" "classical, orchestral, elegant" "synthwave, retro, nostalgic")
+          FALLBACK_DURATIONS=(60 90 120)
+          
+          # Select random fallback values
+          RANDOM_STYLE=${FALLBACK_STYLES[$RANDOM % ${#FALLBACK_STYLES[@]}]}
+          RANDOM_DURATION=${FALLBACK_DURATIONS[$RANDOM % ${#FALLBACK_DURATIONS[@]}]}
+          
+          echo "fallback_style=$RANDOM_STYLE" >> $GITHUB_OUTPUT
+          echo "fallback_duration=$RANDOM_DURATION" >> $GITHUB_OUTPUT
+          echo "fallback_title=Auto Generated Track $(date +%H%M)" >> $GITHUB_OUTPUT
+      
+      - name: Create fallback issue
+        if: steps.generate-params.outputs.generation_success != 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const logFile = '${{ steps.validate-setup.outputs.log_file }}';
+            
+            fs.appendFileSync(logFile, '\n## Creating Fallback Issue\n');
+            
+            // Get fallback parameters
+            const fallbackStyle = '${{ steps.handle-generation-failure.outputs.fallback_style }}';
+            const fallbackDuration = '${{ steps.handle-generation-failure.outputs.fallback_duration }}';
+            const fallbackTitle = '${{ steps.handle-generation-failure.outputs.fallback_title }}';
+            
+            const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+            const issueTitle = `[MUSIC] ${fallbackTitle} - Auto Generated ${timestamp}`;
+            
+            const issueBody = [
+              '## 🎵 Auto-Generated Music Request (Fallback)',
+              '',
+              'This music generation request was automatically created using fallback parameters due to AI generation failure.',
+              '',
+              '### 🎼 Music Style Prompt',
+              fallbackStyle,
+              '',
+              '### 🎤 Lyrics or Structure',
+              '[inst]',
+              '',
+              '### ⏱️ Duration (seconds)',
+              fallbackDuration,
+              '',
+              '### 🎚️ Quality Mode',
+              'ultra',
+              '',
+              '### 📝 Additional Notes',
+              '**Generation Method:** Fallback parameters (AI generation failed)',
+              `**Generated at:** ${timestamp}`,
+              '',
+              '---',
+              '',
+              '### ✅ Confirmation',
+              '- [x] I have the necessary permissions (owner/admin/maintainer) to request audio generation',
+              '- [x] I understand that the OctoBeats server must be running for this to work',
+              '- [x] I understand that this will create a new branch and pull request with the generated audio',
+              '- [x] The parameters I've provided are appropriate and follow community guidelines',
+              '',
+              '---',
+              '',
+              '*This issue was automatically generated using fallback parameters after AI generation failed.*'
+            ].join('\n');
+            
+            try {
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issueTitle,
+                body: issueBody,
+                labels: ['audio', 'octobeats', 'auto-generated', 'fallback']
+              });
+              
+              fs.appendFileSync(logFile, `✅ Created fallback issue #${issue.data.number}\n`);
+              fs.appendFileSync(logFile, `🔗 Issue URL: ${issue.data.html_url}\n`);
+              
+            } catch (error) {
+              fs.appendFileSync(logFile, `❌ Error creating fallback issue: ${error.message}\n`);
+            }
+      
+      - name: Cleanup and finalize
+        if: always()
+        run: |
+          echo "" >> ${{ steps.validate-setup.outputs.log_file }}
+          echo "## Workflow Completion" >> ${{ steps.validate-setup.outputs.log_file }}
+          echo "- Completed at: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> ${{ steps.validate-setup.outputs.log_file }}
+          echo "- Status: ${{ job.status }}" >> ${{ steps.validate-setup.outputs.log_file }}
+          
+          if [[ "${{ steps.create-issue.outputs.issue_number }}" != "" ]]; then
+            echo "- Created issue: #${{ steps.create-issue.outputs.issue_number }}" >> ${{ steps.validate-setup.outputs.log_file }}
+            echo "🎵 Successfully created auto-generated music request!"
+          else
+            echo "- No issue created (workflow failed or used fallback)" >> ${{ steps.validate-setup.outputs.log_file }}
+          fi
+          
+          # Clean up temporary files
+          rm -f music_generation_prompt.txt api_request.json api_response.json extracted_json.txt
+          
+          echo "✅ Auto Music Generator workflow completed"
+      
+      - name: Upload workflow logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-music-generator-logs-${{ github.run_number }}
+          path: |
+            ${{ steps.validate-setup.outputs.log_file }}
+            *.json
+            *.txt
+          retention-days: 7

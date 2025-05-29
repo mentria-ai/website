@@ -535,6 +535,7 @@ jobs:
       
       - name: Handle generation failure
         if: steps.generate-params.outputs.generation_success != 'true'
+        id: handle-generation-failure
         run: |
           echo "❌ Music parameter generation failed" >> ${{ steps.validate-setup.outputs.log_file }}
           echo "" >> ${{ steps.validate-setup.outputs.log_file }}

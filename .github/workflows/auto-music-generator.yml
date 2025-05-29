@@ -262,49 +262,33 @@ jobs:
                   echo "🎼 AI Response received (${#RESPONSE_CONTENT} characters)" >> ${{ steps.validate-setup.outputs.log_file }}
                   
                   # Extract JSON from response using Python
-                  echo "import sys" > extract_json.py
-                  echo "import json" >> extract_json.py
-                  echo "import re" >> extract_json.py
-                  echo "" >> extract_json.py
-                  echo "content = '''$RESPONSE_CONTENT'''" >> extract_json.py
-                  echo "" >> extract_json.py
-                  echo "# Try multiple approaches to find JSON in the content" >> extract_json.py
-                  echo "json_patterns = [" >> extract_json.py
-                  echo "    r'\\{[^{}]*\"style_prompt\"[^{}]*\\}',  # JSON with style_prompt field" >> extract_json.py
-                  echo "    r'\\{.*?\\}',  # Any JSON-like structure" >> extract_json.py
-                  echo "    r'```json\\s*(\\{.*?\\})\\s*```',  # JSON in code blocks" >> extract_json.py
-                  echo "]" >> extract_json.py
-                  echo "" >> extract_json.py
-                  echo "json_found = False" >> extract_json.py
-                  echo "for pattern in json_patterns:" >> extract_json.py
-                  echo "    json_match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)" >> extract_json.py
-                  echo "    if json_match:" >> extract_json.py
+                  # Create a simple Python script to extract JSON
+                  echo "import sys, json" > extract_json.py
+                  echo "try:" >> extract_json.py
+                  echo "    with open('response_content.txt', 'r') as f:" >> extract_json.py
+                  echo "        content = f.read()" >> extract_json.py
+                  echo "    # Find first { and last }" >> extract_json.py
+                  echo "    start = content.find('{')" >> extract_json.py
+                  echo "    end = content.rfind('}') + 1" >> extract_json.py
+                  echo "    if start != -1 and end > start:" >> extract_json.py
+                  echo "        json_text = content[start:end]" >> extract_json.py
                   echo "        try:" >> extract_json.py
-                  echo "            if 'json' in pattern:  # Code block pattern" >> extract_json.py
-                  echo "                json_text = json_match.group(1)" >> extract_json.py
-                  echo "            else:" >> extract_json.py
-                  echo "                json_text = json_match.group(0)" >> extract_json.py
-                  echo "            json_data = json.loads(json_text)" >> extract_json.py
+                  echo "            data = json.loads(json_text)" >> extract_json.py
                   echo "            with open('extracted_json.txt', 'w') as f:" >> extract_json.py
-                  echo "                json.dump(json_data, f)" >> extract_json.py
-                  echo "            print('JSON_EXTRACTED')" >> extract_json.py
-                  echo "            json_found = True" >> extract_json.py
-                  echo "            break" >> extract_json.py
-                  echo "        except:" >> extract_json.py
-                  echo "            continue" >> extract_json.py
-                  echo "" >> extract_json.py
-                  echo "if not json_found:" >> extract_json.py
-                  echo "    # If no valid JSON found, try to create one from the text" >> extract_json.py
-                  echo "    fallback_data = {" >> extract_json.py
-                  echo "        'style_prompt': 'electronic, ambient, melodic'," >> extract_json.py
-                  echo "        'lyrics': '[inst]'," >> extract_json.py
-                  echo "        'duration': 90," >> extract_json.py
-                  echo "        'title_suggestion': 'AI Generated Track'," >> extract_json.py
-                  echo "        'inspiration': 'Generated from AI text response'" >> extract_json.py
-                  echo "    }" >> extract_json.py
+                  echo "                json.dump(data, f)" >> extract_json.py
+                  echo "            print('SUCCESS')" >> extract_json.py
+                  echo "            sys.exit(0)" >> extract_json.py
+                  echo "        except: pass" >> extract_json.py
+                  echo "    # Fallback" >> extract_json.py
+                  echo "    fallback = {'style_prompt': 'electronic, ambient, melodic', 'lyrics': '[inst]', 'duration': 90, 'title_suggestion': 'AI Generated Track', 'inspiration': 'Auto-generated'}" >> extract_json.py
                   echo "    with open('extracted_json.txt', 'w') as f:" >> extract_json.py
-                  echo "        json.dump(fallback_data, f)" >> extract_json.py
-                  echo "    print('FALLBACK_JSON')" >> extract_json.py
+                  echo "        json.dump(fallback, f)" >> extract_json.py
+                  echo "    print('FALLBACK')" >> extract_json.py
+                  echo "except Exception as e:" >> extract_json.py
+                  echo "    print('ERROR')" >> extract_json.py
+                  
+                  # Save response content to file (safer than shell variables)
+                  printf '%s' "$RESPONSE_CONTENT" > response_content.txt
                   
                   python3 extract_json.py
                   
@@ -622,7 +606,7 @@ jobs:
           fi
           
           # Clean up temporary files
-          rm -f music_generation_prompt.txt api_request.json api_response.json extracted_json.txt create_json.py extract_response.py extract_json.py extract_params.py
+          rm -f music_generation_prompt.txt api_request.json api_response.json extracted_json.txt create_json.py extract_response.py extract_json.py extract_params.py response_content.txt
           
           echo "✅ Auto Music Generator workflow completed"
       

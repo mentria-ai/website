@@ -212,67 +212,173 @@ jobs:
           
           echo "📡 Making API call to Together AI..." >> ${{ steps.validate-setup.outputs.log_file }}
           
-          # Make API call
-          if curl -s -X POST "https://api.together.xyz/v1/chat/completions" \
+          # Make API call with detailed error handling
+          HTTP_STATUS=$(curl -s -w "%{http_code}" -X POST "https://api.together.xyz/v1/chat/completions" \
             -H "Authorization: Bearer ${{ secrets.TOGETHER_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d @api_request.json \
-            -o api_response.json; then
-            
+            -o api_response.json)
+          
+          echo "📊 HTTP Status Code: $HTTP_STATUS" >> ${{ steps.validate-setup.outputs.log_file }}
+          
+          # Check if API call was successful
+          if [[ "$HTTP_STATUS" == "200" ]]; then
             echo "✅ API call completed successfully" >> ${{ steps.validate-setup.outputs.log_file }}
             
-            # Extract content from response
-            RESPONSE_CONTENT=$(cat api_response.json | jq -r '.choices[0].message.content')
-            
-            if [[ "$RESPONSE_CONTENT" != "null" && -n "$RESPONSE_CONTENT" ]]; then
-              echo "🎼 AI Response received (${#RESPONSE_CONTENT} characters)" >> ${{ steps.validate-setup.outputs.log_file }}
+            # Check if response file exists and has content
+            if [[ -f "api_response.json" && -s "api_response.json" ]]; then
+              echo "📁 Response file exists and has content" >> ${{ steps.validate-setup.outputs.log_file }}
               
-              # Extract JSON from response (handle cases where AI adds explanatory text)
-              echo "$RESPONSE_CONTENT" | grep -o '{.*}' > extracted_json.txt || echo "$RESPONSE_CONTENT" > extracted_json.txt
+              # Log first 200 characters of response for debugging
+              echo "🔍 Response preview: $(head -c 200 api_response.json)" >> ${{ steps.validate-setup.outputs.log_file }}
               
-              # Validate and extract parameters
-              STYLE_PROMPT=$(cat extracted_json.txt | jq -r '.style_prompt // "electronic, ambient, melodic"')
-              LYRICS=$(cat extracted_json.txt | jq -r '.lyrics // "[inst]"')
-              DURATION=$(cat extracted_json.txt | jq -r '.duration // 90')
-              TITLE_SUGGESTION=$(cat extracted_json.txt | jq -r '.title_suggestion // "AI Generated Track"')
-              INSPIRATION=$(cat extracted_json.txt | jq -r '.inspiration // "Automatically generated music"')
-              
-              # Validate duration (must be one of the allowed values)
-              case "$DURATION" in
-                30|45|60|90|120|150|180|240)
-                  echo "✅ Valid duration: $DURATION seconds" >> ${{ steps.validate-setup.outputs.log_file }}
-                  ;;
-                *)
-                  echo "⚠️ Invalid duration $DURATION, defaulting to 90 seconds" >> ${{ steps.validate-setup.outputs.log_file }}
-                  DURATION=90
-                  ;;
-              esac
-              
-              # Clean up parameters
-              STYLE_PROMPT=$(echo "$STYLE_PROMPT" | sed 's/[""""]//g' | head -c 200)
-              LYRICS=$(echo "$LYRICS" | sed 's/[""""]//g' | head -c 400)
-              TITLE_SUGGESTION=$(echo "$TITLE_SUGGESTION" | sed 's/[""""]//g' | head -c 80)
-              
-              echo "🎵 Generated Parameters:" >> ${{ steps.validate-setup.outputs.log_file }}
-              echo "- Style: $STYLE_PROMPT" >> ${{ steps.validate-setup.outputs.log_file }}
-              echo "- Lyrics: ${LYRICS:0:100}..." >> ${{ steps.validate-setup.outputs.log_file }}
-              echo "- Duration: $DURATION seconds" >> ${{ steps.validate-setup.outputs.log_file }}
-              echo "- Title: $TITLE_SUGGESTION" >> ${{ steps.validate-setup.outputs.log_file }}
-              echo "- Inspiration: $INSPIRATION" >> ${{ steps.validate-setup.outputs.log_file }}
-              
-              # Set outputs for next step
-              echo "style_prompt=$STYLE_PROMPT" >> $GITHUB_OUTPUT
-              echo "lyrics=$LYRICS" >> $GITHUB_OUTPUT
-              echo "duration=$DURATION" >> $GITHUB_OUTPUT
-              echo "title_suggestion=$TITLE_SUGGESTION" >> $GITHUB_OUTPUT
-              echo "inspiration=$INSPIRATION" >> $GITHUB_OUTPUT
-              echo "generation_success=true" >> $GITHUB_OUTPUT
+              # Validate JSON format before parsing
+              if python3 -c "import json; json.load(open('api_response.json'))" 2>/dev/null; then
+                echo "✅ Response is valid JSON" >> ${{ steps.validate-setup.outputs.log_file }}
+                
+                # Extract content from response using Python for better error handling
+                echo "import json" > extract_response.py
+                echo "import sys" >> extract_response.py
+                echo "" >> extract_response.py
+                echo "try:" >> extract_response.py
+                echo "    with open('api_response.json', 'r') as f:" >> extract_response.py
+                echo "        response = json.load(f)" >> extract_response.py
+                echo "" >> extract_response.py
+                echo "    # Extract the content" >> extract_response.py
+                echo "    content = response.get('choices', [{}])[0].get('message', {}).get('content', '')" >> extract_response.py
+                echo "" >> extract_response.py
+                echo "    if content:" >> extract_response.py
+                echo "        print(f'SUCCESS:{content}')" >> extract_response.py
+                echo "    else:" >> extract_response.py
+                echo "        print('ERROR:No content found in response')" >> extract_response.py
+                echo "" >> extract_response.py
+                echo "except Exception as e:" >> extract_response.py
+                echo "    print(f'ERROR:Failed to parse response: {e}')" >> extract_response.py
+                
+                EXTRACTION_RESULT=$(python3 extract_response.py)
+                
+                if [[ "$EXTRACTION_RESULT" == SUCCESS:* ]]; then
+                  RESPONSE_CONTENT="${EXTRACTION_RESULT#SUCCESS:}"
+                  echo "🎼 AI Response received (${#RESPONSE_CONTENT} characters)" >> ${{ steps.validate-setup.outputs.log_file }}
+                  
+                  # Extract JSON from response using Python
+                  echo "import sys" > extract_json.py
+                  echo "import json" >> extract_json.py
+                  echo "import re" >> extract_json.py
+                  echo "" >> extract_json.py
+                  echo "content = '''$RESPONSE_CONTENT'''" >> extract_json.py
+                  echo "" >> extract_json.py
+                  echo "# Try to find JSON block in the content" >> extract_json.py
+                  echo "json_match = re.search(r'\\{[^}]*\\}', content, re.DOTALL)" >> extract_json.py
+                  echo "if json_match:" >> extract_json.py
+                  echo "    try:" >> extract_json.py
+                  echo "        json_data = json.loads(json_match.group())" >> extract_json.py
+                  echo "        with open('extracted_json.txt', 'w') as f:" >> extract_json.py
+                  echo "            json.dump(json_data, f)" >> extract_json.py
+                  echo "        print('JSON_EXTRACTED')" >> extract_json.py
+                  echo "    except:" >> extract_json.py
+                  echo "        with open('extracted_json.txt', 'w') as f:" >> extract_json.py
+                  echo "            f.write(content)" >> extract_json.py
+                  echo "        print('RAW_CONTENT')" >> extract_json.py
+                  echo "else:" >> extract_json.py
+                  echo "    with open('extracted_json.txt', 'w') as f:" >> extract_json.py
+                  echo "        f.write(content)" >> extract_json.py
+                  echo "    print('RAW_CONTENT')" >> extract_json.py
+                  
+                  python3 extract_json.py
+                  
+                  # Validate and extract parameters using Python
+                  echo "import json" > extract_params.py
+                  echo "import sys" >> extract_params.py
+                  echo "" >> extract_params.py
+                  echo "try:" >> extract_params.py
+                  echo "    with open('extracted_json.txt', 'r') as f:" >> extract_params.py
+                  echo "        content = f.read().strip()" >> extract_params.py
+                  echo "" >> extract_params.py
+                  echo "    try:" >> extract_params.py
+                  echo "        data = json.loads(content)" >> extract_params.py
+                  echo "    except:" >> extract_params.py
+                  echo "        # If not valid JSON, create fallback" >> extract_params.py
+                  echo "        data = {}" >> extract_params.py
+                  echo "" >> extract_params.py
+                  echo "    # Extract parameters with fallbacks" >> extract_params.py
+                  echo "    style_prompt = data.get('style_prompt', 'electronic, ambient, melodic')" >> extract_params.py
+                  echo "    lyrics = data.get('lyrics', '[inst]')" >> extract_params.py
+                  echo "    duration = data.get('duration', 90)" >> extract_params.py
+                  echo "    title_suggestion = data.get('title_suggestion', 'AI Generated Track')" >> extract_params.py
+                  echo "    inspiration = data.get('inspiration', 'Automatically generated music')" >> extract_params.py
+                  echo "" >> extract_params.py
+                  echo "    # Validate duration" >> extract_params.py
+                  echo "    valid_durations = [30, 45, 60, 90, 120, 150, 180, 240]" >> extract_params.py
+                  echo "    if duration not in valid_durations:" >> extract_params.py
+                  echo "        duration = 90" >> extract_params.py
+                  echo "" >> extract_params.py
+                  echo "    # Clean parameters" >> extract_params.py
+                  echo "    style_prompt = str(style_prompt).replace('\"', '').replace(\"'\", '')[:200]" >> extract_params.py
+                  echo "    lyrics = str(lyrics).replace('\"', '').replace(\"'\", '')[:400]" >> extract_params.py
+                  echo "    title_suggestion = str(title_suggestion).replace('\"', '').replace(\"'\", '')[:80]" >> extract_params.py
+                  echo "    inspiration = str(inspiration).replace('\"', '').replace(\"'\", '')[:200]" >> extract_params.py
+                  echo "" >> extract_params.py
+                  echo "    print(f'STYLE_PROMPT={style_prompt}')" >> extract_params.py
+                  echo "    print(f'LYRICS={lyrics}')" >> extract_params.py
+                  echo "    print(f'DURATION={duration}')" >> extract_params.py
+                  echo "    print(f'TITLE_SUGGESTION={title_suggestion}')" >> extract_params.py
+                  echo "    print(f'INSPIRATION={inspiration}')" >> extract_params.py
+                  echo "    print('SUCCESS=true')" >> extract_params.py
+                  echo "" >> extract_params.py
+                  echo "except Exception as e:" >> extract_params.py
+                  echo "    print(f'ERROR: {e}')" >> extract_params.py
+                  echo "    print('SUCCESS=false')" >> extract_params.py
+                  
+                  # Extract parameters
+                  PARAM_RESULT=$(python3 extract_params.py)
+                  
+                  if echo "$PARAM_RESULT" | grep -q "SUCCESS=true"; then
+                    # Extract each parameter
+                    STYLE_PROMPT=$(echo "$PARAM_RESULT" | grep "STYLE_PROMPT=" | cut -d'=' -f2-)
+                    LYRICS=$(echo "$PARAM_RESULT" | grep "LYRICS=" | cut -d'=' -f2-)
+                    DURATION=$(echo "$PARAM_RESULT" | grep "DURATION=" | cut -d'=' -f2-)
+                    TITLE_SUGGESTION=$(echo "$PARAM_RESULT" | grep "TITLE_SUGGESTION=" | cut -d'=' -f2-)
+                    INSPIRATION=$(echo "$PARAM_RESULT" | grep "INSPIRATION=" | cut -d'=' -f2-)
+                    
+                    echo "🎵 Generated Parameters:" >> ${{ steps.validate-setup.outputs.log_file }}
+                    echo "- Style: $STYLE_PROMPT" >> ${{ steps.validate-setup.outputs.log_file }}
+                    echo "- Lyrics: ${LYRICS:0:100}..." >> ${{ steps.validate-setup.outputs.log_file }}
+                    echo "- Duration: $DURATION seconds" >> ${{ steps.validate-setup.outputs.log_file }}
+                    echo "- Title: $TITLE_SUGGESTION" >> ${{ steps.validate-setup.outputs.log_file }}
+                    echo "- Inspiration: $INSPIRATION" >> ${{ steps.validate-setup.outputs.log_file }}
+                    
+                    # Set outputs for next step
+                    echo "style_prompt=$STYLE_PROMPT" >> $GITHUB_OUTPUT
+                    echo "lyrics=$LYRICS" >> $GITHUB_OUTPUT
+                    echo "duration=$DURATION" >> $GITHUB_OUTPUT
+                    echo "title_suggestion=$TITLE_SUGGESTION" >> $GITHUB_OUTPUT
+                    echo "inspiration=$INSPIRATION" >> $GITHUB_OUTPUT
+                    echo "generation_success=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "❌ Failed to extract parameters from AI response" >> ${{ steps.validate-setup.outputs.log_file }}
+                    echo "generation_success=false" >> $GITHUB_OUTPUT
+                  fi
+                else
+                  echo "❌ Failed to extract content from API response" >> ${{ steps.validate-setup.outputs.log_file }}
+                  echo "generation_success=false" >> $GITHUB_OUTPUT
+                fi
+              else
+                echo "❌ API response is not valid JSON" >> ${{ steps.validate-setup.outputs.log_file }}
+                echo "📄 Raw response content:" >> ${{ steps.validate-setup.outputs.log_file }}
+                cat api_response.json >> ${{ steps.validate-setup.outputs.log_file }}
+                echo "generation_success=false" >> $GITHUB_OUTPUT
+              fi
             else
-              echo "❌ Empty or invalid response from AI" >> ${{ steps.validate-setup.outputs.log_file }}
+              echo "❌ API response file is missing or empty" >> ${{ steps.validate-setup.outputs.log_file }}
               echo "generation_success=false" >> $GITHUB_OUTPUT
             fi
           else
-            echo "❌ API call failed" >> ${{ steps.validate-setup.outputs.log_file }}
+            echo "❌ API call failed with HTTP status: $HTTP_STATUS" >> ${{ steps.validate-setup.outputs.log_file }}
+            if [[ -f "api_response.json" ]]; then
+              echo "📄 Error response content:" >> ${{ steps.validate-setup.outputs.log_file }}
+              cat api_response.json >> ${{ steps.validate-setup.outputs.log_file }}
+            fi
             echo "generation_success=false" >> $GITHUB_OUTPUT
           fi
       
@@ -470,7 +576,7 @@ jobs:
           fi
           
           # Clean up temporary files
-          rm -f music_generation_prompt.txt api_request.json api_response.json extracted_json.txt create_json.py
+          rm -f music_generation_prompt.txt api_request.json api_response.json extracted_json.txt create_json.py extract_response.py extract_json.py extract_params.py
           
           echo "✅ Auto Music Generator workflow completed"
       

@@ -263,24 +263,58 @@ jobs:
                   
                   # Extract JSON from response using Python
                   # Create a simple Python script to extract JSON
-                  echo "import sys, json" > extract_json.py
+                  echo "import sys, json, re" > extract_json.py
                   echo "try:" >> extract_json.py
                   echo "    with open('response_content.txt', 'r') as f:" >> extract_json.py
                   echo "        content = f.read()" >> extract_json.py
-                  echo "    # Find first { and last }" >> extract_json.py
-                  echo "    start = content.find('{')" >> extract_json.py
-                  echo "    end = content.rfind('}') + 1" >> extract_json.py
-                  echo "    if start != -1 and end > start:" >> extract_json.py
-                  echo "        json_text = content[start:end]" >> extract_json.py
+                  echo "    " >> extract_json.py
+                  echo "    # Multiple extraction strategies" >> extract_json.py
+                  echo "    json_found = False" >> extract_json.py
+                  echo "    " >> extract_json.py
+                  echo "    # Strategy 1: Look for JSON in markdown code blocks" >> extract_json.py
+                  echo "    code_block_match = re.search(r'```(?:json)?\\s*({.*?})\\s*```', content, re.DOTALL | re.IGNORECASE)" >> extract_json.py
+                  echo "    if code_block_match:" >> extract_json.py
                   echo "        try:" >> extract_json.py
-                  echo "            data = json.loads(json_text)" >> extract_json.py
+                  echo "            data = json.loads(code_block_match.group(1))" >> extract_json.py
                   echo "            with open('extracted_json.txt', 'w') as f:" >> extract_json.py
                   echo "                json.dump(data, f)" >> extract_json.py
                   echo "            print('SUCCESS')" >> extract_json.py
                   echo "            sys.exit(0)" >> extract_json.py
                   echo "        except: pass" >> extract_json.py
+                  echo "    " >> extract_json.py
+                  echo "    # Strategy 2: Find JSON object with braces" >> extract_json.py
+                  echo "    brace_match = re.search(r'({[^{}]*\"style_prompt\"[^{}]*})', content, re.DOTALL)" >> extract_json.py
+                  echo "    if brace_match:" >> extract_json.py
+                  echo "        try:" >> extract_json.py
+                  echo "            data = json.loads(brace_match.group(1))" >> extract_json.py
+                  echo "            with open('extracted_json.txt', 'w') as f:" >> extract_json.py
+                  echo "                json.dump(data, f)" >> extract_json.py
+                  echo "            print('SUCCESS')" >> extract_json.py
+                  echo "            sys.exit(0)" >> extract_json.py
+                  echo "        except: pass" >> extract_json.py
+                  echo "    " >> extract_json.py
+                  echo "    # Strategy 3: Find first complete JSON object" >> extract_json.py
+                  echo "    start = content.find('{')" >> extract_json.py
+                  echo "    if start != -1:" >> extract_json.py
+                  echo "        brace_count = 0" >> extract_json.py
+                  echo "        for i, char in enumerate(content[start:], start):" >> extract_json.py
+                  echo "            if char == '{':" >> extract_json.py
+                  echo "                brace_count += 1" >> extract_json.py
+                  echo "            elif char == '}':" >> extract_json.py
+                  echo "                brace_count -= 1" >> extract_json.py
+                  echo "                if brace_count == 0:" >> extract_json.py
+                  echo "                    try:" >> extract_json.py
+                  echo "                        json_text = content[start:i+1]" >> extract_json.py
+                  echo "                        data = json.loads(json_text)" >> extract_json.py
+                  echo "                        with open('extracted_json.txt', 'w') as f:" >> extract_json.py
+                  echo "                            json.dump(data, f)" >> extract_json.py
+                  echo "                        print('SUCCESS')" >> extract_json.py
+                  echo "                        sys.exit(0)" >> extract_json.py
+                  echo "                    except: pass" >> extract_json.py
+                  echo "                    break" >> extract_json.py
+                  echo "    " >> extract_json.py
                   echo "    # Fallback" >> extract_json.py
-                  echo "    fallback = {'style_prompt': 'electronic, ambient, melodic', 'lyrics': '[inst]', 'duration': 90, 'title_suggestion': 'AI Generated Track', 'inspiration': 'Auto-generated'}" >> extract_json.py
+                  echo "    fallback = {'style_prompt': 'saxophone, jazz, smooth, lounge, mellow, acoustic', 'lyrics': '[verse]\\n\\n[chorus]\\n\\n[solo]\\n\\n[verse]\\n\\n[chorus]\\n\\n[outro]', 'duration': 90, 'title_suggestion': 'Jazz Lounge Track', 'inspiration': 'Auto-generated jazz composition'}" >> extract_json.py
                   echo "    with open('extracted_json.txt', 'w') as f:" >> extract_json.py
                   echo "        json.dump(fallback, f)" >> extract_json.py
                   echo "    print('FALLBACK')" >> extract_json.py
@@ -307,11 +341,11 @@ jobs:
                   echo "        data = {}" >> extract_params.py
                   echo "" >> extract_params.py
                   echo "    # Extract parameters with fallbacks" >> extract_params.py
-                  echo "    style_prompt = data.get('style_prompt', 'electronic, ambient, melodic')" >> extract_params.py
-                  echo "    lyrics = data.get('lyrics', '[inst]')" >> extract_params.py
+                  echo "    style_prompt = data.get('style_prompt', 'saxophone, jazz, smooth, lounge, mellow, acoustic')" >> extract_params.py
+                  echo "    lyrics = data.get('lyrics', '[verse]\\n\\n[chorus]\\n\\n[solo]\\n\\n[verse]\\n\\n[chorus]\\n\\n[outro]')" >> extract_params.py
                   echo "    duration = data.get('duration', 90)" >> extract_params.py
-                  echo "    title_suggestion = data.get('title_suggestion', 'AI Generated Track')" >> extract_params.py
-                  echo "    inspiration = data.get('inspiration', 'Automatically generated music')" >> extract_params.py
+                  echo "    title_suggestion = data.get('title_suggestion', 'Jazz Lounge Track')" >> extract_params.py
+                  echo "    inspiration = data.get('inspiration', 'Auto-generated jazz composition')" >> extract_params.py
                   echo "" >> extract_params.py
                   echo "    # Validate duration" >> extract_params.py
                   echo "    valid_durations = [30, 45, 60, 90, 120, 150, 180, 240]" >> extract_params.py
@@ -418,11 +452,11 @@ jobs:
               fs.appendFileSync(logFile, '\n## Creating GitHub Issue\n');
               
               // Decode parameters
-              const stylePrompt = process.env.STYLE_PROMPT_B64 ? Buffer.from(process.env.STYLE_PROMPT_B64, 'base64').toString('utf8') : 'electronic, ambient, melodic';
-              const lyrics = process.env.LYRICS_B64 ? Buffer.from(process.env.LYRICS_B64, 'base64').toString('utf8') : '[inst]';
+              const stylePrompt = process.env.STYLE_PROMPT_B64 ? Buffer.from(process.env.STYLE_PROMPT_B64, 'base64').toString('utf8') : 'saxophone, jazz, smooth, lounge, mellow, acoustic';
+              const lyrics = process.env.LYRICS_B64 ? Buffer.from(process.env.LYRICS_B64, 'base64').toString('utf8') : '[verse]\n\n[chorus]\n\n[solo]\n\n[verse]\n\n[chorus]\n\n[outro]';
               const duration = process.env.DURATION || '90';
-              const titleSuggestion = process.env.TITLE_B64 ? Buffer.from(process.env.TITLE_B64, 'base64').toString('utf8') : 'AI Generated Track';
-              const inspiration = process.env.INSPIRATION_B64 ? Buffer.from(process.env.INSPIRATION_B64, 'base64').toString('utf8') : 'Auto-generated';
+              const titleSuggestion = process.env.TITLE_B64 ? Buffer.from(process.env.TITLE_B64, 'base64').toString('utf8') : 'Jazz Lounge Track';
+              const inspiration = process.env.INSPIRATION_B64 ? Buffer.from(process.env.INSPIRATION_B64, 'base64').toString('utf8') : 'Auto-generated jazz composition';
               const customTheme = process.env.CUSTOM_THEME || 'None';
               
               const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
@@ -480,7 +514,9 @@ jobs:
               // Use the newer GitHub Actions output format instead of deprecated set-output
               fs.appendFileSync(process.env.GITHUB_OUTPUT, `issue_number=${issue.data.number}\n`);
               fs.appendFileSync(process.env.GITHUB_OUTPUT, `issue_url=${issue.data.html_url}\n`);
-              fs.appendFileSync(process.env.GITHUB_OUTPUT, `issue_title=${issue.data.title}\n`);
+              // Encode title to prevent GitHub Actions output format issues
+              const encodedTitle = Buffer.from(issue.data.title).toString('base64');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `issue_title_encoded=${encodedTitle}\n`);
               
             } catch (error) {
               fs.appendFileSync(logFile, `❌ Error creating issue: ${error.message}\n`);
@@ -506,18 +542,21 @@ jobs:
           echo "Using fallback parameters to create a basic music request..." >> ${{ steps.validate-setup.outputs.log_file }}
           
           # Set fallback parameters
-          FALLBACK_STYLES=("electronic, ambient, chill" "acoustic, folk, peaceful" "jazz, smooth, relaxing" "classical, orchestral, elegant" "synthwave, retro, nostalgic")
+          FALLBACK_STYLES=("saxophone, jazz, smooth, lounge" "acoustic, folk, peaceful" "blues, soulful, emotional" "classical, orchestral, elegant" "bossa nova, brazilian, gentle")
           FALLBACK_DURATIONS=(60 90 120)
           
           # Select random fallback values
           RANDOM_STYLE=${FALLBACK_STYLES[$RANDOM % ${#FALLBACK_STYLES[@]}]}
           RANDOM_DURATION=${FALLBACK_DURATIONS[$RANDOM % ${#FALLBACK_DURATIONS[@]}]}
-          FALLBACK_TITLE="Auto Generated Track $(date +%H%M)"
-          FALLBACK_INSPIRATION="Generated using fallback parameters after AI generation failed"
+          FALLBACK_TITLE="Jazz Lounge Track $(date +%H%M)"
+          FALLBACK_INSPIRATION="Generated using jazz-themed fallback parameters after AI generation failed"
+          
+          # Create fallback lyrics structure
+          FALLBACK_LYRICS="[verse]\n\n[chorus]\n\n[solo]\n\n[verse]\n\n[chorus]\n\n[outro]"
           
           # Encode fallback parameters for JavaScript safety
           FALLBACK_STYLE_ENCODED=$(echo "$RANDOM_STYLE" | base64 -w 0)
-          FALLBACK_LYRICS_ENCODED=$(echo "[inst]" | base64 -w 0)
+          FALLBACK_LYRICS_ENCODED=$(echo -e "$FALLBACK_LYRICS" | base64 -w 0)
           FALLBACK_TITLE_ENCODED=$(echo "$FALLBACK_TITLE" | base64 -w 0)
           FALLBACK_INSPIRATION_ENCODED=$(echo "$FALLBACK_INSPIRATION" | base64 -w 0)
           
@@ -550,11 +589,11 @@ jobs:
               fs.appendFileSync(logFile, '\n## Creating Fallback Issue\n');
               
               // Decode fallback parameters
-              const fallbackStyle = process.env.FALLBACK_STYLE_B64 ? Buffer.from(process.env.FALLBACK_STYLE_B64, 'base64').toString('utf8') : 'electronic, ambient, melodic';
-              const fallbackLyrics = process.env.FALLBACK_LYRICS_B64 ? Buffer.from(process.env.FALLBACK_LYRICS_B64, 'base64').toString('utf8') : '[inst]';
+              const fallbackStyle = process.env.FALLBACK_STYLE_B64 ? Buffer.from(process.env.FALLBACK_STYLE_B64, 'base64').toString('utf8') : 'saxophone, jazz, smooth, lounge, mellow, acoustic';
+              const fallbackLyrics = process.env.FALLBACK_LYRICS_B64 ? Buffer.from(process.env.FALLBACK_LYRICS_B64, 'base64').toString('utf8') : '[verse]\n\n[chorus]\n\n[solo]\n\n[verse]\n\n[chorus]\n\n[outro]';
               const fallbackDuration = process.env.FALLBACK_DURATION || '90';
-              const fallbackTitle = process.env.FALLBACK_TITLE_B64 ? Buffer.from(process.env.FALLBACK_TITLE_B64, 'base64').toString('utf8') : 'AI Generated Track';
-              const fallbackInspiration = process.env.FALLBACK_INSPIRATION_B64 ? Buffer.from(process.env.FALLBACK_INSPIRATION_B64, 'base64').toString('utf8') : 'Fallback parameters';
+              const fallbackTitle = process.env.FALLBACK_TITLE_B64 ? Buffer.from(process.env.FALLBACK_TITLE_B64, 'base64').toString('utf8') : 'Jazz Lounge Track';
+              const fallbackInspiration = process.env.FALLBACK_INSPIRATION_B64 ? Buffer.from(process.env.FALLBACK_INSPIRATION_B64, 'base64').toString('utf8') : 'Auto-generated jazz composition';
               
               const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
               const issueTitle = `[MUSIC] ${fallbackTitle} - Auto Generated ${timestamp}`;

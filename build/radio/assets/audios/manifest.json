@@ -327,6 +327,28 @@
       },
       "duration": 90,
       "issueNumber": 64
+    },
+    {
+      "id": "track_72",
+      "title": "[MUSIC] Auto Generated Track 1330\n - Auto Generated 2025-05-29 13:30",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_72_20250529_133300.mp3",
+      "metadata": {
+        "issue_number": 72,
+        "issue_title": "[MUSIC] Auto Generated Track 1330\n - Auto Generated 2025-05-29 13:30",
+        "generated_at": "2025-05-29T13:33:00Z",
+        "parameters": {
+          "prompt": "acoustic, folk, peaceful",
+          "lyrics": "[inst]\n",
+          "duration": 60,
+          "mode": "ultra"
+        },
+        "generation_time": "109.03",
+        "file_size": "1.2M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 60,
+      "issueNumber": 72
     }
   ],
   "schedule_info": {
@@ -335,6 +357,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-05-29T09:01:18Z",
-  "total_tracks": 10
+  "last_updated": "2025-05-29T13:33:00Z",
+  "total_tracks": 11
 }

@@ -438,6 +438,7 @@ jobs:
           INSPIRATION_B64: ${{ steps.generate-params.outputs.inspiration_encoded }}
           CUSTOM_THEME: ${{ github.event.inputs.custom_theme }}
           LOG_FILE: ${{ steps.validate-setup.outputs.log_file }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           # Create JavaScript file to avoid YAML parsing issues
           cat > create_issue.js << 'JSEOF'
@@ -531,7 +532,7 @@ jobs:
           # Install required packages and run
           npm init -y > /dev/null 2>&1
           npm install @octokit/rest > /dev/null 2>&1
-          GITHUB_TOKEN="${{ secrets.PAT }}" node create_issue.js
+          node create_issue.js
       
       - name: Handle generation failure
         if: steps.generate-params.outputs.generation_success != 'true'
@@ -576,6 +577,7 @@ jobs:
           FALLBACK_TITLE_B64: ${{ steps.handle-generation-failure.outputs.fallback_title_encoded }}
           FALLBACK_INSPIRATION_B64: ${{ steps.handle-generation-failure.outputs.fallback_inspiration_encoded }}
           LOG_FILE: ${{ steps.validate-setup.outputs.log_file }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           # Create JavaScript file for fallback issue
           cat > create_fallback_issue.js << 'JSEOF'
@@ -661,7 +663,7 @@ jobs:
             npm init -y > /dev/null 2>&1
             npm install @octokit/rest > /dev/null 2>&1
           fi
-          GITHUB_TOKEN="${{ secrets.PAT }}" node create_fallback_issue.js
+          node create_fallback_issue.js
       
       - name: Cleanup and finalize
         if: always()

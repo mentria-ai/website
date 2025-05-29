@@ -269,7 +269,7 @@ jobs:
                   echo "        content = f.read()" >> extract_json.py
                   echo "    " >> extract_json.py
                   echo "    # Try to find JSON in markdown code blocks first" >> extract_json.py
-                  echo "    code_block = re.search(r'```(?:json)?\\s*({.*?})\\s*```', content, re.DOTALL)" >> extract_json.py
+                  echo "    code_block = re.search(r'```[a-z]*\\s*({.*?})\\s*```', content, re.DOTALL)" >> extract_json.py
                   echo "    if code_block:" >> extract_json.py
                   echo "        json_text = code_block.group(1)" >> extract_json.py
                   echo "    else:" >> extract_json.py

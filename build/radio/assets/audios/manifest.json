@@ -305,6 +305,28 @@
       },
       "duration": 180,
       "issueNumber": 60
+    },
+    {
+      "id": "track_68",
+      "title": "[MUSIC] AI Generated Track\n - Auto Generated 2025-05-29 09:41",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_68_20250529_094409.mp3",
+      "metadata": {
+        "issue_number": 68,
+        "issue_title": "[MUSIC] AI Generated Track\n - Auto Generated 2025-05-29 09:41",
+        "generated_at": "2025-05-29T09:44:09Z",
+        "parameters": {
+          "prompt": "electronic, ambient, melodic",
+          "lyrics": "[inst]\n",
+          "duration": 90,
+          "mode": "ultra"
+        },
+        "generation_time": "140.5",
+        "file_size": "1.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 90,
+      "issueNumber": 68
     }
   ],
   "schedule_info": {
@@ -313,6 +335,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-05-28T16:38:26Z",
-  "total_tracks": 9
+  "last_updated": "2025-05-29T09:44:09Z",
+  "total_tracks": 10
 }

@@ -268,22 +268,43 @@ jobs:
                   echo "" >> extract_json.py
                   echo "content = '''$RESPONSE_CONTENT'''" >> extract_json.py
                   echo "" >> extract_json.py
-                  echo "# Try to find JSON block in the content" >> extract_json.py
-                  echo "json_match = re.search(r'\\{[^}]*\\}', content, re.DOTALL)" >> extract_json.py
-                  echo "if json_match:" >> extract_json.py
-                  echo "    try:" >> extract_json.py
-                  echo "        json_data = json.loads(json_match.group())" >> extract_json.py
-                  echo "        with open('extracted_json.txt', 'w') as f:" >> extract_json.py
-                  echo "            json.dump(json_data, f)" >> extract_json.py
-                  echo "        print('JSON_EXTRACTED')" >> extract_json.py
-                  echo "    except:" >> extract_json.py
-                  echo "        with open('extracted_json.txt', 'w') as f:" >> extract_json.py
-                  echo "            f.write(content)" >> extract_json.py
-                  echo "        print('RAW_CONTENT')" >> extract_json.py
-                  echo "else:" >> extract_json.py
+                  echo "# Try multiple approaches to find JSON in the content" >> extract_json.py
+                  echo "json_patterns = [" >> extract_json.py
+                  echo "    r'\\{[^{}]*\"style_prompt\"[^{}]*\\}',  # JSON with style_prompt field" >> extract_json.py
+                  echo "    r'\\{.*?\\}',  # Any JSON-like structure" >> extract_json.py
+                  echo "    r'```json\\s*(\\{.*?\\})\\s*```',  # JSON in code blocks" >> extract_json.py
+                  echo "]" >> extract_json.py
+                  echo "" >> extract_json.py
+                  echo "json_found = False" >> extract_json.py
+                  echo "for pattern in json_patterns:" >> extract_json.py
+                  echo "    json_match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)" >> extract_json.py
+                  echo "    if json_match:" >> extract_json.py
+                  echo "        try:" >> extract_json.py
+                  echo "            if 'json' in pattern:  # Code block pattern" >> extract_json.py
+                  echo "                json_text = json_match.group(1)" >> extract_json.py
+                  echo "            else:" >> extract_json.py
+                  echo "                json_text = json_match.group(0)" >> extract_json.py
+                  echo "            json_data = json.loads(json_text)" >> extract_json.py
+                  echo "            with open('extracted_json.txt', 'w') as f:" >> extract_json.py
+                  echo "                json.dump(json_data, f)" >> extract_json.py
+                  echo "            print('JSON_EXTRACTED')" >> extract_json.py
+                  echo "            json_found = True" >> extract_json.py
+                  echo "            break" >> extract_json.py
+                  echo "        except:" >> extract_json.py
+                  echo "            continue" >> extract_json.py
+                  echo "" >> extract_json.py
+                  echo "if not json_found:" >> extract_json.py
+                  echo "    # If no valid JSON found, try to create one from the text" >> extract_json.py
+                  echo "    fallback_data = {" >> extract_json.py
+                  echo "        'style_prompt': 'electronic, ambient, melodic'," >> extract_json.py
+                  echo "        'lyrics': '[inst]'," >> extract_json.py
+                  echo "        'duration': 90," >> extract_json.py
+                  echo "        'title_suggestion': 'AI Generated Track'," >> extract_json.py
+                  echo "        'inspiration': 'Generated from AI text response'" >> extract_json.py
+                  echo "    }" >> extract_json.py
                   echo "    with open('extracted_json.txt', 'w') as f:" >> extract_json.py
-                  echo "        f.write(content)" >> extract_json.py
-                  echo "    print('RAW_CONTENT')" >> extract_json.py
+                  echo "        json.dump(fallback_data, f)" >> extract_json.py
+                  echo "    print('FALLBACK_JSON')" >> extract_json.py
                   
                   python3 extract_json.py
                   
@@ -341,6 +362,12 @@ jobs:
                     TITLE_SUGGESTION=$(echo "$PARAM_RESULT" | grep "TITLE_SUGGESTION=" | cut -d'=' -f2-)
                     INSPIRATION=$(echo "$PARAM_RESULT" | grep "INSPIRATION=" | cut -d'=' -f2-)
                     
+                    # Encode parameters to prevent JavaScript syntax errors
+                    STYLE_PROMPT_ENCODED=$(echo "$STYLE_PROMPT" | base64 -w 0)
+                    LYRICS_ENCODED=$(echo "$LYRICS" | base64 -w 0)
+                    TITLE_SUGGESTION_ENCODED=$(echo "$TITLE_SUGGESTION" | base64 -w 0)
+                    INSPIRATION_ENCODED=$(echo "$INSPIRATION" | base64 -w 0)
+                    
                     echo "🎵 Generated Parameters:" >> ${{ steps.validate-setup.outputs.log_file }}
                     echo "- Style: $STYLE_PROMPT" >> ${{ steps.validate-setup.outputs.log_file }}
                     echo "- Lyrics: ${LYRICS:0:100}..." >> ${{ steps.validate-setup.outputs.log_file }}
@@ -348,12 +375,12 @@ jobs:
                     echo "- Title: $TITLE_SUGGESTION" >> ${{ steps.validate-setup.outputs.log_file }}
                     echo "- Inspiration: $INSPIRATION" >> ${{ steps.validate-setup.outputs.log_file }}
                     
-                    # Set outputs for next step
-                    echo "style_prompt=$STYLE_PROMPT" >> $GITHUB_OUTPUT
-                    echo "lyrics=$LYRICS" >> $GITHUB_OUTPUT
+                    # Set outputs for next step (using encoded versions for JavaScript safety)
+                    echo "style_prompt_encoded=$STYLE_PROMPT_ENCODED" >> $GITHUB_OUTPUT
+                    echo "lyrics_encoded=$LYRICS_ENCODED" >> $GITHUB_OUTPUT
                     echo "duration=$DURATION" >> $GITHUB_OUTPUT
-                    echo "title_suggestion=$TITLE_SUGGESTION" >> $GITHUB_OUTPUT
-                    echo "inspiration=$INSPIRATION" >> $GITHUB_OUTPUT
+                    echo "title_suggestion_encoded=$TITLE_SUGGESTION_ENCODED" >> $GITHUB_OUTPUT
+                    echo "inspiration_encoded=$INSPIRATION_ENCODED" >> $GITHUB_OUTPUT
                     echo "generation_success=true" >> $GITHUB_OUTPUT
                   else
                     echo "❌ Failed to extract parameters from AI response" >> ${{ steps.validate-setup.outputs.log_file }}
@@ -395,17 +422,23 @@ jobs:
             fs.appendFileSync(logFile, '\n## Creating GitHub Issue\n');
             
             // Get generated parameters
-            const stylePrompt = '${{ steps.generate-params.outputs.style_prompt }}';
-            const lyrics = '${{ steps.generate-params.outputs.lyrics }}';
+            const stylePrompt = '${{ steps.generate-params.outputs.style_prompt_encoded }}';
+            const lyrics = '${{ steps.generate-params.outputs.lyrics_encoded }}';
             const duration = '${{ steps.generate-params.outputs.duration }}';
-            const titleSuggestion = '${{ steps.generate-params.outputs.title_suggestion }}';
-            const inspiration = '${{ steps.generate-params.outputs.inspiration }}';
+            const titleSuggestion = '${{ steps.generate-params.outputs.title_suggestion_encoded }}';
+            const inspiration = '${{ steps.generate-params.outputs.inspiration_encoded }}';
+            
+            // Decode base64 encoded parameters
+            const stylePromptDecoded = stylePrompt ? Buffer.from(stylePrompt, 'base64').toString('utf8') : 'electronic, ambient, melodic';
+            const lyricsDecoded = lyrics ? Buffer.from(lyrics, 'base64').toString('utf8') : '[inst]';
+            const titleSuggestionDecoded = titleSuggestion ? Buffer.from(titleSuggestion, 'base64').toString('utf8') : 'AI Generated Track';
+            const inspirationDecoded = inspiration ? Buffer.from(inspiration, 'base64').toString('utf8') : 'Automatically generated music';
             
             // Current timestamp for unique issue titles
             const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
             
             // Create issue title
-            const issueTitle = `[MUSIC] ${titleSuggestion} - Auto Generated ${timestamp}`;
+            const issueTitle = `[MUSIC] ${titleSuggestionDecoded} - Auto Generated ${timestamp}`;
             
             // Create issue body following the template format
             const issueBody = [
@@ -414,10 +447,10 @@ jobs:
               'This music generation request was automatically created by the Auto Music Generator workflow.',
               '',
               '### 🎼 Music Style Prompt',
-              stylePrompt,
+              stylePromptDecoded,
               '',
               '### 🎤 Lyrics or Structure',
-              lyrics,
+              lyricsDecoded,
               '',
               '### ⏱️ Duration (seconds)',
               duration,
@@ -426,7 +459,7 @@ jobs:
               'ultra',
               '',
               '### 📝 Additional Notes',
-              `**AI Inspiration:** ${inspiration}`,
+              `**AI Inspiration:** ${inspirationDecoded}`,
               '',
               `**Generated at:** ${timestamp}`,
               `**Custom theme:** ${{ github.event.inputs.custom_theme || 'None' }}`,
@@ -486,10 +519,20 @@ jobs:
           # Select random fallback values
           RANDOM_STYLE=${FALLBACK_STYLES[$RANDOM % ${#FALLBACK_STYLES[@]}]}
           RANDOM_DURATION=${FALLBACK_DURATIONS[$RANDOM % ${#FALLBACK_DURATIONS[@]}]}
+          FALLBACK_TITLE="Auto Generated Track $(date +%H%M)"
+          FALLBACK_INSPIRATION="Generated using fallback parameters after AI generation failed"
           
-          echo "fallback_style=$RANDOM_STYLE" >> $GITHUB_OUTPUT
+          # Encode fallback parameters for JavaScript safety
+          FALLBACK_STYLE_ENCODED=$(echo "$RANDOM_STYLE" | base64 -w 0)
+          FALLBACK_LYRICS_ENCODED=$(echo "[inst]" | base64 -w 0)
+          FALLBACK_TITLE_ENCODED=$(echo "$FALLBACK_TITLE" | base64 -w 0)
+          FALLBACK_INSPIRATION_ENCODED=$(echo "$FALLBACK_INSPIRATION" | base64 -w 0)
+          
+          echo "fallback_style_encoded=$FALLBACK_STYLE_ENCODED" >> $GITHUB_OUTPUT
+          echo "fallback_lyrics_encoded=$FALLBACK_LYRICS_ENCODED" >> $GITHUB_OUTPUT
           echo "fallback_duration=$RANDOM_DURATION" >> $GITHUB_OUTPUT
-          echo "fallback_title=Auto Generated Track $(date +%H%M)" >> $GITHUB_OUTPUT
+          echo "fallback_title_encoded=$FALLBACK_TITLE_ENCODED" >> $GITHUB_OUTPUT
+          echo "fallback_inspiration_encoded=$FALLBACK_INSPIRATION_ENCODED" >> $GITHUB_OUTPUT
       
       - name: Create fallback issue
         if: steps.generate-params.outputs.generation_success != 'true'
@@ -503,12 +546,14 @@ jobs:
             fs.appendFileSync(logFile, '\n## Creating Fallback Issue\n');
             
             // Get fallback parameters
-            const fallbackStyle = '${{ steps.handle-generation-failure.outputs.fallback_style }}';
+            const fallbackStyle = '${{ steps.handle-generation-failure.outputs.fallback_style_encoded }}';
+            const fallbackLyrics = '${{ steps.handle-generation-failure.outputs.fallback_lyrics_encoded }}';
             const fallbackDuration = '${{ steps.handle-generation-failure.outputs.fallback_duration }}';
-            const fallbackTitle = '${{ steps.handle-generation-failure.outputs.fallback_title }}';
+            const fallbackTitle = '${{ steps.handle-generation-failure.outputs.fallback_title_encoded }}';
+            const fallbackInspiration = '${{ steps.handle-generation-failure.outputs.fallback_inspiration_encoded }}';
             
             const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
-            const issueTitle = `[MUSIC] ${fallbackTitle} - Auto Generated ${timestamp}`;
+            const issueTitle = `[MUSIC] ${Buffer.from(fallbackTitle, 'base64').toString('utf8')} - Auto Generated ${timestamp}`;
             
             const issueBody = [
               '## 🎵 Auto-Generated Music Request (Fallback)',
@@ -516,10 +561,10 @@ jobs:
               'This music generation request was automatically created using fallback parameters due to AI generation failure.',
               '',
               '### 🎼 Music Style Prompt',
-              fallbackStyle,
+              Buffer.from(fallbackStyle, 'base64').toString('utf8'),
               '',
               '### 🎤 Lyrics or Structure',
-              '[inst]',
+              Buffer.from(fallbackLyrics, 'base64').toString('utf8'),
               '',
               '### ⏱️ Duration (seconds)',
               fallbackDuration,
@@ -528,7 +573,8 @@ jobs:
               'ultra',
               '',
               '### 📝 Additional Notes',
-              '**Generation Method:** Fallback parameters (AI generation failed)',
+              `**AI Inspiration:** ${Buffer.from(fallbackInspiration, 'base64').toString('utf8')}`,
+              '',
               `**Generated at:** ${timestamp}`,
               '',
               '---',

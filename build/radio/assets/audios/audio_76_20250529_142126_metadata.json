@@ -1,0 +1,14 @@
+{
+  "issue_number": 76,
+  "issue_title": "[MUSIC] Auto Generated Track 1417\n - Auto Generated 2025-05-29 14:17",
+  "generated_at": "2025-05-29T14:21:26Z",
+  "parameters": {
+    "prompt": "jazz, smooth, relaxing",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra"
+  },
+  "generation_time": "201.97",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

@@ -327,6 +327,28 @@
       },
       "duration": 90,
       "issueNumber": 64
+    },
+    {
+      "id": "track_78",
+      "title": "[MUSIC] Auto Generated Track 1443\n - Auto Generated 2025-05-29 14:43",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_78_20250529_152005.mp3",
+      "metadata": {
+        "issue_number": 78,
+        "issue_title": "[MUSIC] Auto Generated Track 1443\n - Auto Generated 2025-05-29 14:43",
+        "generated_at": "2025-05-29T15:20:05Z",
+        "parameters": {
+          "prompt": "jazz, smooth, relaxing",
+          "lyrics": "[inst]\n",
+          "duration": 90,
+          "mode": "ultra"
+        },
+        "generation_time": "2195.62",
+        "file_size": "1.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 90,
+      "issueNumber": 78
     }
   ],
   "schedule_info": {
@@ -335,6 +357,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-05-29T09:01:18Z",
-  "total_tracks": 10
+  "last_updated": "2025-05-29T15:20:05Z",
+  "total_tracks": 11
 }

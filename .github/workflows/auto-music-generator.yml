@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   generate-music-request:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 10  # Should complete quickly
     
     steps:

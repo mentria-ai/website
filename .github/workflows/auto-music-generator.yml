@@ -190,20 +190,11 @@ jobs:
             echo "**Special Theme Request:** Focus on or incorporate elements of: $CUSTOM_THEME" >> music_generation_prompt.txt
           fi
           
-          # Create API request payload
-          jq -n \
-            --arg prompt "$(cat music_generation_prompt.txt)" \
-            '{
-              "model": "deepseek-ai/DeepSeek-V3",
-              "messages": [
-                {
-                  "role": "user", 
-                  "content": $prompt
-                }
-              ],
-              "max_tokens": 1000,
-              "temperature": 0.8
-            }' > api_request.json
+          # Create API request payload with proper escaping
+          # Use a simple approach that handles the prompt content safely
+          PROMPT_CONTENT=$(cat music_generation_prompt.txt | jq -Rs .)
+          
+          echo "{\"model\":\"deepseek-ai/DeepSeek-V3\",\"messages\":[{\"role\":\"user\",\"content\":$PROMPT_CONTENT}],\"max_tokens\":1000,\"temperature\":0.8}" > api_request.json
           
           echo "📡 Making API call to Together AI..." >> ${{ steps.validate-setup.outputs.log_file }}
           

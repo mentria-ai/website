@@ -190,11 +190,25 @@ jobs:
             echo "**Special Theme Request:** Focus on or incorporate elements of: $CUSTOM_THEME" >> music_generation_prompt.txt
           fi
           
-          # Create API request payload with proper escaping
-          # Use a simple approach that handles the prompt content safely
-          PROMPT_CONTENT=$(cat music_generation_prompt.txt | jq -Rs .)
+          # Create API request payload using Python to avoid jq parsing issues
+          # Build Python script using echo to avoid YAML parsing conflicts
+          echo "import json" > create_json.py
+          echo "" >> create_json.py
+          echo "with open('music_generation_prompt.txt', 'r') as f:" >> create_json.py
+          echo "    prompt_content = f.read()" >> create_json.py
+          echo "" >> create_json.py
+          echo "payload = {" >> create_json.py
+          echo "    'model': 'deepseek-ai/DeepSeek-V3'," >> create_json.py
+          echo "    'messages': [{'role': 'user', 'content': prompt_content}]," >> create_json.py
+          echo "    'max_tokens': 1000," >> create_json.py
+          echo "    'temperature': 0.8" >> create_json.py
+          echo "}" >> create_json.py
+          echo "" >> create_json.py
+          echo "with open('api_request.json', 'w') as f:" >> create_json.py
+          echo "    json.dump(payload, f)" >> create_json.py
           
-          echo "{\"model\":\"deepseek-ai/DeepSeek-V3\",\"messages\":[{\"role\":\"user\",\"content\":$PROMPT_CONTENT}],\"max_tokens\":1000,\"temperature\":0.8}" > api_request.json
+          # Execute the Python script
+          python3 create_json.py
           
           echo "📡 Making API call to Together AI..." >> ${{ steps.validate-setup.outputs.log_file }}
           
@@ -456,7 +470,7 @@ jobs:
           fi
           
           # Clean up temporary files
-          rm -f music_generation_prompt.txt api_request.json api_response.json extracted_json.txt
+          rm -f music_generation_prompt.txt api_request.json api_response.json extracted_json.txt create_json.py
           
           echo "✅ Auto Music Generator workflow completed"
       

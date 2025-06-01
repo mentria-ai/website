@@ -69,129 +69,40 @@ jobs:
           CURRENT_TIME=$(date +"%H:%M")
           CURRENT_DATE=$(date +"%A, %B %d, %Y")
           
-          cat > music_generation_prompt.txt << 'PROMPTEOF'
-          You are an AI music production specialist with deep expertise in ACE-Step, a state-of-the-art diffusion-based text-to-music generation system. Your task is to generate creative, high-quality music parameters optimized for ACE-Step's advanced capabilities including superior lyric alignment, fast generation, and musical coherence across diverse genres.
-
-          **ACE-Step Context & Capabilities:**
-          - ACE-Step uses diffusion-based architecture for coherent, full-length music generation
-          - Supports structured lyrics with section markers ([verse], [chorus], [bridge]) for optimal vocal alignment
-          - Handles diverse genres with authentic instrumentation and style adaptation
-          - Provides localized lyric editing while preserving melody and accompaniment
-          - Achieves superior lyric-to-melody alignment compared to other models
-          - Supports flexible duration control and maintains long-range structural coherence
-
-          **Current Context:**
-          - Current time: CURRENT_TIME_PLACEHOLDER
-          - Current date: CURRENT_DATE_PLACEHOLDER
-          - Target system: ACE-Step AI music generation
-          - Output destination: Digital radio station content
-          - Quality mode: Ultra (maximum fidelity)
-
-          **Generation Guidelines:**
-
-          **1. Style Prompt (ACE-Step Tags):**
-          Create 4-8 descriptive tags in ACE-Step's format: comma-separated, lowercase descriptors covering:
-          - **Genre**: pop, rock, jazz, electronic, classical, hip-hop, folk, ambient, etc.
-          - **Mood/Energy**: upbeat, mellow, energetic, chill, dramatic, nostalgic, dreamy
-          - **Era/Style**: 1980s, retro, modern, futuristic, vintage, contemporary  
-          - **Instruments**: piano, guitar, synthesizer, orchestral, acoustic, electric
-          - **Production**: reverb-heavy, lo-fi, crisp, analog, digital, atmospheric
-          - **Vocals**: male vocal, female vocal, harmonies (if applicable)
-
-          Examples: "electronic, ambient, ethereal, 85 bpm, reverb-heavy, synthesizer"
-          Examples: "jazzy hip-hop, vinyl crackle, saxophone, laid-back, nostalgic"
-
-          **2. Lyrics (ACE-Step Structure):**
-          Generate structured lyrics optimized for ACE-Step's vocal alignment:
-
-          **For Instrumental Tracks:** Use "[inst]" or creative structure tags like "[intro][build][drop][outro]"
-
-          **For Vocal Tracks:** Create original lyrics with proper section structure:
-          - Use section markers: [verse], [chorus], [bridge], [outro], [intro]
-          - Ensure sections flow logically and tell a coherent story/theme
-          - Match lyrical tone, themes, and language to the genre authentically
-          - Use poetic devices (rhymes, rhythm, metaphors) appropriate to the style
-          - Keep lines singable with natural rhythm and balanced syllable counts
-          - Maintain consistent perspective and tense throughout
-          - Avoid copying existing songs - create original, creative content
-
-          **Genre-Style Alignment Examples:**
-          - **Jazz**: Smooth, soulful, sophisticated language with emotional depth
-          - **Pop**: Catchy, accessible, relatable themes with strong hooks  
-          - **Folk**: Storytelling narrative with simple, heartfelt language
-          - **Electronic**: Modern themes, possibly abstract or futuristic imagery
-          - **Blues**: Emotionally heavy, personal struggles, authentic expression
-          - **Hip-hop**: Rhythmic flow, contemporary references, cultural authenticity
-
-          **3. Duration Selection:**
-          Choose duration based on lyrical scope and genre conventions:
-          - **30-60s**: Intros, transitions, ambient pieces, short-form content
-          - **90-120s**: Complete songs with standard verse/chorus structure
-          - **150-180s**: Extended compositions with multiple verses, bridge sections
-          - **240s**: Complex arrangements, progressive structures, full narrative arcs
-
-          **4. Title Creation:**
-          Generate creative, genre-appropriate titles that:
-          - Reflect the song's theme and mood
-          - Sound authentic to the musical style
-          - Are memorable and radio-friendly
-          - Avoid clichés unless they serve the genre authentically
-
-          **5. Creative Inspiration:**
-          Provide brief insight into your creative process, mentioning:
-          - Genre influences or fusion elements
-          - Thematic inspiration (time of day, season, emotion, story)
-          - Unique musical or lyrical approaches
-          - Cultural or regional influences incorporated
-
-          **Output Format (JSON only):**
-          ```json
-          {
-            "style_prompt": "comma-separated, lowercase ACE-Step tags",
-            "lyrics": "structured lyrics with [section] markers OR [inst] for instrumental",
-            "duration": number (30, 45, 60, 90, 120, 150, 180, or 240),
-            "title_suggestion": "creative, genre-appropriate title",
-            "inspiration": "brief explanation of creative choices and influences",
-            "seed": number (0-4294967295, optional - only include if specifically requested by user, otherwise omit this field)
-          }
-          ```
-
-          **Quality Standards:**
-          - **Authenticity**: Lyrics and tags must feel genuine to the specified genre
-          - **Coherence**: Story/theme should flow logically from start to finish  
-          - **Originality**: All content must be original, avoiding copyright infringement
-          - **Cultural Sensitivity**: Respectful representation of musical traditions
-          - **Appropriateness**: Suitable for radio broadcast, avoiding offensive content
-          - **ACE-Step Optimization**: Structure designed for optimal vocal-melody alignment
-
-          **Diversity Goals:**
-          - Explore different musical cultures and regional influences
-          - Mix traditional and experimental genre combinations  
-          - Consider time-appropriate themes (morning energy, evening chill, etc.)
-          - Balance instrumental and vocal compositions
-          - Vary emotional ranges and energy levels
-          - Incorporate seasonal and temporal context
-
-          **Examples of ACE-Step Optimized Outputs:**
-
-          **Ambient Electronic:**
-          - Tags: "ambient, electronic, atmospheric, downtempo, synthesizer, ethereal"
-          - Structure: Often instrumental ([inst]) or minimal vocals with [intro][ambient][outro]
-
-          **Singer-Songwriter Folk:**
-          - Tags: "folk, acoustic, storytelling, intimate, guitar, contemplative"  
-          - Structure: [verse][chorus][verse][chorus][bridge][chorus] with narrative lyrics
-
-          **Synthwave Retro:**
-          - Tags: "synthwave, retro, 1980s, electronic, nostalgic, analog"
-          - Structure: [intro][verse][chorus][verse][chorus][bridge][outro] with period-appropriate themes
-
-          Generate something musically compelling and ACE-Step optimized now:
-          PROMPTEOF
-          
-          # Replace placeholders with actual values
-          sed -i "s/CURRENT_TIME_PLACEHOLDER/$CURRENT_TIME/g" music_generation_prompt.txt
-          sed -i "s/CURRENT_DATE_PLACEHOLDER/$CURRENT_DATE/g" music_generation_prompt.txt
+          # Create prompt in smaller chunks to avoid GitHub Actions parsing issues
+          echo "You are an AI music production specialist with deep expertise in ACE-Step. Generate creative music parameters optimized for ACE-Step's capabilities." > music_generation_prompt.txt
+          echo "" >> music_generation_prompt.txt
+          echo "**Current Context:**" >> music_generation_prompt.txt
+          echo "- Current time: $CURRENT_TIME" >> music_generation_prompt.txt
+          echo "- Current date: $CURRENT_DATE" >> music_generation_prompt.txt
+          echo "- Target system: ACE-Step AI music generation" >> music_generation_prompt.txt
+          echo "" >> music_generation_prompt.txt
+          echo "**1. Style Prompt:** Create 4-8 comma-separated, lowercase tags covering genre, mood, instruments, production style." >> music_generation_prompt.txt
+          echo "Examples: \"electronic, ambient, ethereal, synthesizer\" or \"folk, acoustic, storytelling, guitar\"" >> music_generation_prompt.txt
+          echo "" >> music_generation_prompt.txt
+          echo "**2. Lyrics:** Use structured format with [verse], [chorus], [bridge], [outro] markers OR [inst] for instrumental." >> music_generation_prompt.txt
+          echo "Create original, genre-appropriate lyrics that flow naturally and tell a coherent story." >> music_generation_prompt.txt
+          echo "" >> music_generation_prompt.txt
+          echo "**3. Duration:** Choose from 30, 45, 60, 90, 120, 150, 180, or 240 seconds based on content scope." >> music_generation_prompt.txt
+          echo "" >> music_generation_prompt.txt
+          echo "**4. Title:** Generate creative, genre-appropriate, radio-friendly titles." >> music_generation_prompt.txt
+          echo "" >> music_generation_prompt.txt
+          echo "**5. Inspiration:** Brief explanation of creative choices and influences." >> music_generation_prompt.txt
+          echo "" >> music_generation_prompt.txt
+          echo "**Output Format (JSON only):**" >> music_generation_prompt.txt
+          echo '{' >> music_generation_prompt.txt
+          echo '  "style_prompt": "comma-separated, lowercase tags",' >> music_generation_prompt.txt
+          echo '  "lyrics": "structured lyrics with [section] markers OR [inst]",' >> music_generation_prompt.txt
+          echo '  "duration": number (30-240),' >> music_generation_prompt.txt
+          echo '  "title_suggestion": "creative title",' >> music_generation_prompt.txt
+          echo '  "inspiration": "brief explanation",' >> music_generation_prompt.txt
+          echo '  "seed": number (0-4294967295, optional - only if requested)' >> music_generation_prompt.txt
+          echo '}' >> music_generation_prompt.txt
+          echo "" >> music_generation_prompt.txt
+          echo "**Quality Standards:** All content must be original, culturally sensitive, and radio-appropriate." >> music_generation_prompt.txt
+          echo "**Diversity Goals:** Explore different genres, cultures, and emotional ranges." >> music_generation_prompt.txt
+          echo "" >> music_generation_prompt.txt
+          echo "Generate something musically compelling and ACE-Step optimized now:" >> music_generation_prompt.txt
           
           # Add custom theme to prompt if provided
           if [[ -n "$CUSTOM_THEME" ]]; then
@@ -591,6 +502,7 @@ jobs:
           FALLBACK_INSPIRATION_ENCODED=$(echo "$FALLBACK_INSPIRATION" | base64 -w 0)
           
           # Handle seed for fallback
+          CUSTOM_SEED="${{ github.event.inputs.use_seed }}"
           FALLBACK_SEED_ENCODED=""
           if [[ -n "$CUSTOM_SEED" ]]; then
             FALLBACK_SEED_ENCODED=$(echo "$CUSTOM_SEED" | base64 -w 0)

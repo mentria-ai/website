@@ -10,6 +10,10 @@ on:
         description: 'Optional theme for music generation (e.g., "ambient", "electronic", "rock")'
         required: false
         default: ''
+      use_seed:
+        description: 'Use a specific seed for reproducible generation (0-4294967295, or leave blank for random)'
+        required: false
+        default: ''
 
 # Explicit permission scoping
 permissions:
@@ -51,10 +55,14 @@ jobs:
           echo "" >> ${{ steps.validate-setup.outputs.log_file }}
           echo "## AI Music Parameter Generation" >> ${{ steps.validate-setup.outputs.log_file }}
           
-          # Get custom theme if provided
+          # Get custom theme and seed if provided
           CUSTOM_THEME="${{ github.event.inputs.custom_theme }}"
+          CUSTOM_SEED="${{ github.event.inputs.use_seed }}"
           if [[ -n "$CUSTOM_THEME" ]]; then
             echo "🎨 Using custom theme: $CUSTOM_THEME" >> ${{ steps.validate-setup.outputs.log_file }}
+          fi
+          if [[ -n "$CUSTOM_SEED" ]]; then
+            echo "🎲 Using specified seed: $CUSTOM_SEED" >> ${{ steps.validate-setup.outputs.log_file }}
           fi
           
           # Create the system prompt with current context
@@ -143,7 +151,8 @@ jobs:
             "lyrics": "structured lyrics with [section] markers OR [inst] for instrumental",
             "duration": number (30, 45, 60, 90, 120, 150, 180, or 240),
             "title_suggestion": "creative, genre-appropriate title",
-            "inspiration": "brief explanation of creative choices and influences"
+            "inspiration": "brief explanation of creative choices and influences",
+            "seed": number (0-4294967295, optional - only include if specifically requested by user, otherwise omit this field)
           }
           ```
 
@@ -188,6 +197,12 @@ jobs:
           if [[ -n "$CUSTOM_THEME" ]]; then
             echo "" >> music_generation_prompt.txt
             echo "**Special Theme Request:** Focus on or incorporate elements of: $CUSTOM_THEME" >> music_generation_prompt.txt
+          fi
+          
+          # Add seed information if provided
+          if [[ -n "$CUSTOM_SEED" ]]; then
+            echo "" >> music_generation_prompt.txt
+            echo "**Seed Requirement:** The user has specified seed $CUSTOM_SEED for reproducible generation. Include this exact seed value in your response." >> music_generation_prompt.txt
           fi
           
           # Create API request payload using Python to avoid jq parsing issues
@@ -334,12 +349,23 @@ jobs:
                   echo "    lyrics = str(lyrics).replace('\"', '').replace(\"'\", '')[:400]" >> extract_params.py
                   echo "    title_suggestion = str(title_suggestion).replace('\"', '').replace(\"'\", '')[:80]" >> extract_params.py
                   echo "    inspiration = str(inspiration).replace('\"', '').replace(\"'\", '')[:200]" >> extract_params.py
+                  echo "    seed = data.get('seed', None)" >> extract_params.py
+                  echo "" >> extract_params.py
+                  echo "    # Validate seed if provided" >> extract_params.py
+                  echo "    if seed is not None:" >> extract_params.py
+                  echo "        try:" >> extract_params.py
+                  echo "            seed = int(seed)" >> extract_params.py
+                  echo "            if seed < 0 or seed > 4294967295:" >> extract_params.py
+                  echo "                seed = None" >> extract_params.py
+                  echo "        except:" >> extract_params.py
+                  echo "            seed = None" >> extract_params.py
                   echo "" >> extract_params.py
                   echo "    print(f'STYLE_PROMPT={style_prompt}')" >> extract_params.py
                   echo "    print(f'LYRICS={lyrics}')" >> extract_params.py
                   echo "    print(f'DURATION={duration}')" >> extract_params.py
                   echo "    print(f'TITLE_SUGGESTION={title_suggestion}')" >> extract_params.py
                   echo "    print(f'INSPIRATION={inspiration}')" >> extract_params.py
+                  echo "    print(f'SEED={seed if seed is not None else \"\"}')" >> extract_params.py
                   echo "    print('SUCCESS=true')" >> extract_params.py
                   echo "" >> extract_params.py
                   echo "except Exception as e:" >> extract_params.py
@@ -356,12 +382,26 @@ jobs:
                     DURATION=$(echo "$PARAM_RESULT" | grep "DURATION=" | cut -d'=' -f2-)
                     TITLE_SUGGESTION=$(echo "$PARAM_RESULT" | grep "TITLE_SUGGESTION=" | cut -d'=' -f2-)
                     INSPIRATION=$(echo "$PARAM_RESULT" | grep "INSPIRATION=" | cut -d'=' -f2-)
+                    AI_GENERATED_SEED=$(echo "$PARAM_RESULT" | grep "SEED=" | cut -d'=' -f2-)
+                    
+                    # Use custom seed if provided, otherwise use AI-generated seed
+                    FINAL_SEED=""
+                    if [[ -n "$CUSTOM_SEED" ]]; then
+                      FINAL_SEED="$CUSTOM_SEED"
+                      echo "Using provided seed: $FINAL_SEED" >> ${{ steps.validate-setup.outputs.log_file }}
+                    elif [[ -n "$AI_GENERATED_SEED" ]]; then
+                      FINAL_SEED="$AI_GENERATED_SEED"
+                      echo "Using AI-generated seed: $FINAL_SEED" >> ${{ steps.validate-setup.outputs.log_file }}
+                    else
+                      echo "No seed specified, will use random generation" >> ${{ steps.validate-setup.outputs.log_file }}
+                    fi
                     
                     # Encode parameters to prevent JavaScript syntax errors
                     STYLE_PROMPT_ENCODED=$(echo "$STYLE_PROMPT" | base64 -w 0)
                     LYRICS_ENCODED=$(echo "$LYRICS" | base64 -w 0)
                     TITLE_SUGGESTION_ENCODED=$(echo "$TITLE_SUGGESTION" | base64 -w 0)
                     INSPIRATION_ENCODED=$(echo "$INSPIRATION" | base64 -w 0)
+                    SEED_ENCODED=$(echo "$FINAL_SEED" | base64 -w 0)
                     
                     echo "🎵 Generated Parameters:" >> ${{ steps.validate-setup.outputs.log_file }}
                     echo "- Style: $STYLE_PROMPT" >> ${{ steps.validate-setup.outputs.log_file }}
@@ -369,6 +409,7 @@ jobs:
                     echo "- Duration: $DURATION seconds" >> ${{ steps.validate-setup.outputs.log_file }}
                     echo "- Title: $TITLE_SUGGESTION" >> ${{ steps.validate-setup.outputs.log_file }}
                     echo "- Inspiration: $INSPIRATION" >> ${{ steps.validate-setup.outputs.log_file }}
+                    echo "- Seed: ${FINAL_SEED:-'random'}" >> ${{ steps.validate-setup.outputs.log_file }}
                     
                     # Set outputs for next step (using encoded versions for JavaScript safety)
                     echo "style_prompt_encoded=$STYLE_PROMPT_ENCODED" >> $GITHUB_OUTPUT
@@ -376,6 +417,7 @@ jobs:
                     echo "duration=$DURATION" >> $GITHUB_OUTPUT
                     echo "title_suggestion_encoded=$TITLE_SUGGESTION_ENCODED" >> $GITHUB_OUTPUT
                     echo "inspiration_encoded=$INSPIRATION_ENCODED" >> $GITHUB_OUTPUT
+                    echo "seed_encoded=$SEED_ENCODED" >> $GITHUB_OUTPUT
                     echo "generation_success=true" >> $GITHUB_OUTPUT
                   else
                     echo "❌ Failed to extract parameters from AI response" >> ${{ steps.validate-setup.outputs.log_file }}
@@ -413,6 +455,7 @@ jobs:
           DURATION: ${{ steps.generate-params.outputs.duration }}
           TITLE_B64: ${{ steps.generate-params.outputs.title_suggestion_encoded }}
           INSPIRATION_B64: ${{ steps.generate-params.outputs.inspiration_encoded }}
+          SEED_B64: ${{ steps.generate-params.outputs.seed_encoded }}
           CUSTOM_THEME: ${{ github.event.inputs.custom_theme }}
           LOG_FILE: ${{ steps.validate-setup.outputs.log_file }}
         run: |
@@ -434,10 +477,17 @@ jobs:
               const duration = process.env.DURATION || '90';
               const titleSuggestion = process.env.TITLE_B64 ? Buffer.from(process.env.TITLE_B64, 'base64').toString('utf8') : 'AI Generated Track';
               const inspiration = process.env.INSPIRATION_B64 ? Buffer.from(process.env.INSPIRATION_B64, 'base64').toString('utf8') : 'Auto-generated';
+              const seedValue = process.env.SEED_B64 ? Buffer.from(process.env.SEED_B64, 'base64').toString('utf8') : '';
               const customTheme = process.env.CUSTOM_THEME || 'None';
               
               const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
               const issueTitle = `[MUSIC] ${titleSuggestion} - Auto Generated ${timestamp}`;
+              
+              // Build seed section
+              let seedSection = '';
+              if (seedValue && seedValue.trim() !== '') {
+                seedSection = `### 🎲 Random Seed (Optional)\n${seedValue}\n\n`;
+              }
               
               const issueBody = [
                 '## 🎵 Auto-Generated Music Request',
@@ -456,11 +506,17 @@ jobs:
                 '### 🎚️ Quality Mode',
                 'ultra',
                 '',
+                ...(seedValue && seedValue.trim() !== '' ? [
+                  '### 🎲 Random Seed (Optional)',
+                  seedValue,
+                  ''
+                ] : []),
                 '### 📝 Additional Notes',
                 `**AI Inspiration:** ${inspiration}`,
                 '',
                 `**Generated at:** ${timestamp}`,
                 `**Custom theme:** ${customTheme}`,
+                ...(seedValue && seedValue.trim() !== '' ? [`**Seed:** ${seedValue} (for reproducible generation)`] : []),
                 '',
                 '---',
                 '',
@@ -501,6 +557,13 @@ jobs:
           
           createIssue();
           JSEOF
+          
+          # Install required packages and run (if not already installed)
+          if [ ! -d "node_modules" ]; then
+            npm init -y > /dev/null 2>&1
+            npm install @octokit/rest > /dev/null 2>&1
+          fi
+          GITHUB_TOKEN="${{ secrets.PAT || secrets.GITHUB_TOKEN }}" node create_issue.js
       
       - name: Handle generation failure
         if: steps.generate-params.outputs.generation_success != 'true'
@@ -527,11 +590,19 @@ jobs:
           FALLBACK_TITLE_ENCODED=$(echo "$FALLBACK_TITLE" | base64 -w 0)
           FALLBACK_INSPIRATION_ENCODED=$(echo "$FALLBACK_INSPIRATION" | base64 -w 0)
           
+          # Handle seed for fallback
+          FALLBACK_SEED_ENCODED=""
+          if [[ -n "$CUSTOM_SEED" ]]; then
+            FALLBACK_SEED_ENCODED=$(echo "$CUSTOM_SEED" | base64 -w 0)
+            echo "Using custom seed for fallback: $CUSTOM_SEED" >> ${{ steps.validate-setup.outputs.log_file }}
+          fi
+          
           echo "fallback_style_encoded=$FALLBACK_STYLE_ENCODED" >> $GITHUB_OUTPUT
           echo "fallback_lyrics_encoded=$FALLBACK_LYRICS_ENCODED" >> $GITHUB_OUTPUT
           echo "fallback_duration=$RANDOM_DURATION" >> $GITHUB_OUTPUT
           echo "fallback_title_encoded=$FALLBACK_TITLE_ENCODED" >> $GITHUB_OUTPUT
           echo "fallback_inspiration_encoded=$FALLBACK_INSPIRATION_ENCODED" >> $GITHUB_OUTPUT
+          echo "fallback_seed_encoded=$FALLBACK_SEED_ENCODED" >> $GITHUB_OUTPUT
       
       - name: Create fallback issue
         if: steps.generate-params.outputs.generation_success != 'true'
@@ -541,6 +612,7 @@ jobs:
           FALLBACK_DURATION: ${{ steps.handle-generation-failure.outputs.fallback_duration }}
           FALLBACK_TITLE_B64: ${{ steps.handle-generation-failure.outputs.fallback_title_encoded }}
           FALLBACK_INSPIRATION_B64: ${{ steps.handle-generation-failure.outputs.fallback_inspiration_encoded }}
+          FALLBACK_SEED_B64: ${{ steps.handle-generation-failure.outputs.fallback_seed_encoded }}
           LOG_FILE: ${{ steps.validate-setup.outputs.log_file }}
         run: |
           # Create JavaScript file for fallback issue
@@ -561,6 +633,7 @@ jobs:
               const fallbackDuration = process.env.FALLBACK_DURATION || '90';
               const fallbackTitle = process.env.FALLBACK_TITLE_B64 ? Buffer.from(process.env.FALLBACK_TITLE_B64, 'base64').toString('utf8') : 'AI Generated Track';
               const fallbackInspiration = process.env.FALLBACK_INSPIRATION_B64 ? Buffer.from(process.env.FALLBACK_INSPIRATION_B64, 'base64').toString('utf8') : 'Fallback parameters';
+              const fallbackSeed = process.env.FALLBACK_SEED_B64 ? Buffer.from(process.env.FALLBACK_SEED_B64, 'base64').toString('utf8') : '';
               
               const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
               const issueTitle = `[MUSIC] ${fallbackTitle} - Auto Generated ${timestamp}`;
@@ -582,10 +655,16 @@ jobs:
                 '### 🎚️ Quality Mode',
                 'ultra',
                 '',
+                ...(fallbackSeed && fallbackSeed.trim() !== '' ? [
+                  '### 🎲 Random Seed (Optional)',
+                  fallbackSeed,
+                  ''
+                ] : []),
                 '### 📝 Additional Notes',
                 `**AI Inspiration:** ${fallbackInspiration}`,
                 '',
                 `**Generated at:** ${timestamp}`,
+                ...(fallbackSeed && fallbackSeed.trim() !== '' ? [`**Seed:** ${fallbackSeed} (for reproducible generation)`] : []),
                 '',
                 '---',
                 '',

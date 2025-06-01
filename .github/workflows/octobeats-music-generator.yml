@@ -246,7 +246,8 @@ jobs:
               prompt: 'electronic, melodic',
               lyrics: '[inst]',
               duration: 60,
-              mode: 'quality'
+              mode: 'quality',
+              seed: null
             };
             
             // Log the issue body for debugging
@@ -308,6 +309,16 @@ jobs:
               /[-*]\s*(?:mode|quality)[:\s]*(fast|quality|ultra)/i
             ];
             
+            const seedPatterns = [
+              // GitHub form field format - exact match for our template
+              /### 🎲 Random Seed \(Optional\)\s*\n\s*(\d+)/i,
+              // Alternative form formats
+              /🎲 Random Seed[:\s]*\n\s*(\d+)/i,
+              // Fallback patterns
+              /(?:seed|random[_\s]?seed)[:\s]*(\d+)/i,
+              /[-*]\s*(?:seed|random[_\s]?seed)[:\s]*(\d+)/i
+            ];
+            
             // Extract parameters using the improved logic
             audioParams.prompt = extractGitHubFormParameter('prompt', promptPatterns, audioParams.prompt);
             audioParams.lyrics = extractGitHubFormParameter('lyrics', lyricsPatterns, audioParams.lyrics);
@@ -316,6 +327,21 @@ jobs:
             audioParams.duration = parseInt(durationStr) || audioParams.duration;
             
             audioParams.mode = extractGitHubFormParameter('mode', modePatterns, audioParams.mode);
+            
+            const seedStr = extractGitHubFormParameter('seed', seedPatterns, '');
+            if (seedStr && seedStr.trim() !== '') {
+              const seedValue = parseInt(seedStr);
+              if (seedValue >= 0 && seedValue <= 4294967295) {
+                audioParams.seed = seedValue;
+                fs.appendFileSync(logFile, `Seed specified: ${seedValue}\n`);
+              } else {
+                fs.appendFileSync(logFile, `⚠️ Seed ${seedValue} out of range (0-4294967295), using random\n`);
+                audioParams.seed = null;
+              }
+            } else {
+              fs.appendFileSync(logFile, `No seed specified, using random generation\n`);
+              audioParams.seed = null;
+            }
             
             // Validate and sanitize parameters
             if (audioParams.duration) {
@@ -352,6 +378,7 @@ jobs:
             fs.appendFileSync(logFile, `- Lyrics: "${audioParams.lyrics}"\n`);
             fs.appendFileSync(logFile, `- Duration: ${audioParams.duration} seconds\n`);
             fs.appendFileSync(logFile, `- Mode: ${audioParams.mode}\n`);
+            fs.appendFileSync(logFile, `- Seed: ${audioParams.seed || 'random'}\n`);
             
             // Save parameters to file for next steps
             fs.writeFileSync('audio_params.json', JSON.stringify(audioParams, null, 2));
@@ -361,6 +388,7 @@ jobs:
             core.setOutput('lyrics', audioParams.lyrics);
             core.setOutput('duration', audioParams.duration.toString());
             core.setOutput('mode', audioParams.mode);
+            core.setOutput('seed', audioParams.seed ? audioParams.seed.toString() : '');
             
             return audioParams;
       
@@ -458,17 +486,37 @@ jobs:
           # Save multiline lyrics to a temporary file to handle newlines properly
           echo "$LYRICS" > temp_lyrics_request.txt
           
-          jq -n \
-            --arg prompt "$PROMPT" \
-            --rawfile lyrics temp_lyrics_request.txt \
-            --arg duration "$DURATION" \
-            --arg mode "$MODE" \
-            '{
-              "prompt": $prompt,
-              "lyrics": $lyrics,
-              "duration": ($duration | tonumber),
-              "mode": $mode
-            }' > generation_request.json
+          SEED="${{ steps.extract-params.outputs.seed }}"
+          
+          if [ -n "$SEED" ] && [ "$SEED" != "" ]; then
+            echo "Including seed in request: $SEED" >> ${{ steps.validate-trigger.outputs.log_file }}
+            jq -n \
+              --arg prompt "$PROMPT" \
+              --rawfile lyrics temp_lyrics_request.txt \
+              --arg duration "$DURATION" \
+              --arg mode "$MODE" \
+              --arg seed "$SEED" \
+              '{
+                "prompt": $prompt,
+                "lyrics": $lyrics,
+                "duration": ($duration | tonumber),
+                "mode": $mode,
+                "seed": ($seed | tonumber)
+              }' > generation_request.json
+          else
+            echo "No seed specified, using random generation" >> ${{ steps.validate-trigger.outputs.log_file }}
+            jq -n \
+              --arg prompt "$PROMPT" \
+              --rawfile lyrics temp_lyrics_request.txt \
+              --arg duration "$DURATION" \
+              --arg mode "$MODE" \
+              '{
+                "prompt": $prompt,
+                "lyrics": $lyrics,
+                "duration": ($duration | tonumber),
+                "mode": $mode
+              }' > generation_request.json
+          fi
           
           # Clean up temporary file
           rm -f temp_lyrics_request.txt
@@ -494,13 +542,16 @@ jobs:
             if [ "$SUCCESS" = "true" ]; then
               FILENAME=$(cat generation_response.json | jq -r '.filename')
               GENERATION_TIME=$(cat generation_response.json | jq -r '.generation_time')
+              USED_SEED=$(cat generation_response.json | jq -r '.parameters.seed // empty')
               
               echo "✅ Audio generated successfully!" >> ${{ steps.validate-trigger.outputs.log_file }}
               echo "- Filename: $FILENAME" >> ${{ steps.validate-trigger.outputs.log_file }}
               echo "- Generation time: ${GENERATION_TIME}s" >> ${{ steps.validate-trigger.outputs.log_file }}
+              echo "- Seed used: ${USED_SEED:-'random'}" >> ${{ steps.validate-trigger.outputs.log_file }}
               
               echo "filename=$FILENAME" >> $GITHUB_OUTPUT
               echo "generation_time=$GENERATION_TIME" >> $GITHUB_OUTPUT
+              echo "used_seed=${USED_SEED:-''}" >> $GITHUB_OUTPUT
               echo "success=true" >> $GITHUB_OUTPUT
             else
               ERROR_MSG=$(cat generation_response.json | jq -r '.error // "Unknown error"')
@@ -603,31 +654,73 @@ jobs:
           # Save multiline lyrics to a temporary file to handle newlines properly
           echo "${{ steps.extract-params.outputs.lyrics }}" > temp_lyrics.txt
           
-          jq -n \
-            --arg issue_number "$ISSUE_NUMBER" \
-            --arg issue_title "${{ github.event.issue.title }}" \
-            --arg generated_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-            --arg prompt "${{ steps.extract-params.outputs.prompt }}" \
-            --rawfile lyrics temp_lyrics.txt \
-            --arg duration "${{ steps.extract-params.outputs.duration }}" \
-            --arg mode "${{ steps.extract-params.outputs.mode }}" \
-            --arg generation_time "${{ steps.generate-audio.outputs.generation_time }}" \
-            --arg file_size "${{ steps.download-audio.outputs.file_size }}" \
-            --arg generated_by "${{ github.actor }}" \
-            '{
-              "issue_number": ($issue_number | tonumber),
-              "issue_title": $issue_title,
-              "generated_at": $generated_at,
-              "parameters": {
-                "prompt": $prompt,
-                "lyrics": $lyrics,
-                "duration": ($duration | tonumber),
-                "mode": $mode
-              },
-              "generation_time": $generation_time,
-              "file_size": $file_size,
-              "generated_by": $generated_by
-            }' > "build/radio/assets/audios/${NEW_FILENAME%.mp3}_metadata.json"
+          USED_SEED="${{ steps.generate-audio.outputs.used_seed }}"
+          REQUESTED_SEED="${{ steps.extract-params.outputs.seed }}"
+          
+          if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ]; then
+            jq -n \
+              --arg issue_number "$ISSUE_NUMBER" \
+              --arg issue_title "${{ github.event.issue.title }}" \
+              --arg generated_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+              --arg prompt "${{ steps.extract-params.outputs.prompt }}" \
+              --rawfile lyrics temp_lyrics.txt \
+              --arg duration "${{ steps.extract-params.outputs.duration }}" \
+              --arg mode "${{ steps.extract-params.outputs.mode }}" \
+              --arg requested_seed "$REQUESTED_SEED" \
+              --arg used_seed "$USED_SEED" \
+              --arg generation_time "${{ steps.generate-audio.outputs.generation_time }}" \
+              --arg file_size "${{ steps.download-audio.outputs.file_size }}" \
+              --arg generated_by "${{ github.actor }}" \
+              '{
+                "issue_number": ($issue_number | tonumber),
+                "issue_title": $issue_title,
+                "generated_at": $generated_at,
+                "parameters": {
+                  "prompt": $prompt,
+                  "lyrics": $lyrics,
+                  "duration": ($duration | tonumber),
+                  "mode": $mode,
+                  "seed": {
+                    "requested": ($requested_seed | if . == "" then null else tonumber end),
+                    "used": ($used_seed | tonumber)
+                  }
+                },
+                "generation_time": $generation_time,
+                "file_size": $file_size,
+                "generated_by": $generated_by
+              }' > "build/radio/assets/audios/${NEW_FILENAME%.mp3}_metadata.json"
+          else
+            jq -n \
+              --arg issue_number "$ISSUE_NUMBER" \
+              --arg issue_title "${{ github.event.issue.title }}" \
+              --arg generated_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+              --arg prompt "${{ steps.extract-params.outputs.prompt }}" \
+              --rawfile lyrics temp_lyrics.txt \
+              --arg duration "${{ steps.extract-params.outputs.duration }}" \
+              --arg mode "${{ steps.extract-params.outputs.mode }}" \
+              --arg requested_seed "$REQUESTED_SEED" \
+              --arg generation_time "${{ steps.generate-audio.outputs.generation_time }}" \
+              --arg file_size "${{ steps.download-audio.outputs.file_size }}" \
+              --arg generated_by "${{ github.actor }}" \
+              '{
+                "issue_number": ($issue_number | tonumber),
+                "issue_title": $issue_title,
+                "generated_at": $generated_at,
+                "parameters": {
+                  "prompt": $prompt,
+                  "lyrics": $lyrics,
+                  "duration": ($duration | tonumber),
+                  "mode": $mode,
+                  "seed": {
+                    "requested": ($requested_seed | if . == "" then null else tonumber end),
+                    "used": null
+                  }
+                },
+                "generation_time": $generation_time,
+                "file_size": $file_size,
+                "generated_by": $generated_by
+              }' > "build/radio/assets/audios/${NEW_FILENAME%.mp3}_metadata.json"
+          fi
           
           # Clean up temporary file
           rm -f temp_lyrics.txt
@@ -650,43 +743,94 @@ jobs:
           echo "${{ steps.extract-params.outputs.lyrics }}" > temp_lyrics_manifest.txt
           
           # Create new track entry using jq for proper JSON formatting
-          jq -n \
-            --arg id "track_$ISSUE_NUMBER" \
-            --arg title "${{ github.event.issue.title }}" \
-            --arg artist "mentria.ai" \
-            --arg file "assets/audios/$NEW_FILENAME" \
-            --arg issue_number "$ISSUE_NUMBER" \
-            --arg issue_title "${{ github.event.issue.title }}" \
-            --arg generated_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-            --arg prompt "${{ steps.extract-params.outputs.prompt }}" \
-            --rawfile lyrics temp_lyrics_manifest.txt \
-            --arg duration "${{ steps.extract-params.outputs.duration }}" \
-            --arg mode "${{ steps.extract-params.outputs.mode }}" \
-            --arg generation_time "${{ steps.generate-audio.outputs.generation_time }}" \
-            --arg file_size "${{ steps.download-audio.outputs.file_size }}" \
-            --arg generated_by "${{ github.actor }}" \
-            '{
-              "id": $id,
-              "title": $title,
-              "artist": $artist,
-              "file": $file,
-              "metadata": {
-                "issue_number": ($issue_number | tonumber),
-                "issue_title": $issue_title,
-                "generated_at": $generated_at,
-                "parameters": {
-                  "prompt": $prompt,
-                  "lyrics": $lyrics,
-                  "duration": ($duration | tonumber),
-                  "mode": $mode
+          if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ]; then
+            jq -n \
+              --arg id "track_$ISSUE_NUMBER" \
+              --arg title "${{ github.event.issue.title }}" \
+              --arg artist "mentria.ai" \
+              --arg file "assets/audios/$NEW_FILENAME" \
+              --arg issue_number "$ISSUE_NUMBER" \
+              --arg issue_title "${{ github.event.issue.title }}" \
+              --arg generated_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+              --arg prompt "${{ steps.extract-params.outputs.prompt }}" \
+              --rawfile lyrics temp_lyrics_manifest.txt \
+              --arg duration "${{ steps.extract-params.outputs.duration }}" \
+              --arg mode "${{ steps.extract-params.outputs.mode }}" \
+              --arg requested_seed "$REQUESTED_SEED" \
+              --arg used_seed "$USED_SEED" \
+              --arg generation_time "${{ steps.generate-audio.outputs.generation_time }}" \
+              --arg file_size "${{ steps.download-audio.outputs.file_size }}" \
+              --arg generated_by "${{ github.actor }}" \
+              '{
+                "id": $id,
+                "title": $title,
+                "artist": $artist,
+                "file": $file,
+                "metadata": {
+                  "issue_number": ($issue_number | tonumber),
+                  "issue_title": $issue_title,
+                  "generated_at": $generated_at,
+                  "parameters": {
+                    "prompt": $prompt,
+                    "lyrics": $lyrics,
+                    "duration": ($duration | tonumber),
+                    "mode": $mode,
+                    "seed": {
+                      "requested": ($requested_seed | if . == "" then null else tonumber end),
+                      "used": ($used_seed | tonumber)
+                    }
+                  },
+                  "generation_time": $generation_time,
+                  "file_size": $file_size,
+                  "generated_by": $generated_by
                 },
-                "generation_time": $generation_time,
-                "file_size": $file_size,
-                "generated_by": $generated_by
-              },
-              "duration": ($duration | tonumber),
-              "issueNumber": ($issue_number | tonumber)
-            }' > new_track.json
+                "duration": ($duration | tonumber),
+                "issueNumber": ($issue_number | tonumber)
+              }' > new_track.json
+          else
+            jq -n \
+              --arg id "track_$ISSUE_NUMBER" \
+              --arg title "${{ github.event.issue.title }}" \
+              --arg artist "mentria.ai" \
+              --arg file "assets/audios/$NEW_FILENAME" \
+              --arg issue_number "$ISSUE_NUMBER" \
+              --arg issue_title "${{ github.event.issue.title }}" \
+              --arg generated_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+              --arg prompt "${{ steps.extract-params.outputs.prompt }}" \
+              --rawfile lyrics temp_lyrics_manifest.txt \
+              --arg duration "${{ steps.extract-params.outputs.duration }}" \
+              --arg mode "${{ steps.extract-params.outputs.mode }}" \
+              --arg requested_seed "$REQUESTED_SEED" \
+              --arg generation_time "${{ steps.generate-audio.outputs.generation_time }}" \
+              --arg file_size "${{ steps.download-audio.outputs.file_size }}" \
+              --arg generated_by "${{ github.actor }}" \
+              '{
+                "id": $id,
+                "title": $title,
+                "artist": $artist,
+                "file": $file,
+                "metadata": {
+                  "issue_number": ($issue_number | tonumber),
+                  "issue_title": $issue_title,
+                  "generated_at": $generated_at,
+                  "parameters": {
+                    "prompt": $prompt,
+                    "lyrics": $lyrics,
+                    "duration": ($duration | tonumber),
+                    "mode": $mode,
+                    "seed": {
+                      "requested": ($requested_seed | if . == "" then null else tonumber end),
+                      "used": null
+                    }
+                  },
+                  "generation_time": $generation_time,
+                  "file_size": $file_size,
+                  "generated_by": $generated_by
+                },
+                "duration": ($duration | tonumber),
+                "issueNumber": ($issue_number | tonumber)
+              }' > new_track.json
+          fi
           
           # Clean up temporary file
           rm -f temp_lyrics_manifest.txt
@@ -725,13 +869,25 @@ jobs:
           if git diff --staged --quiet; then
             echo "⚠️ No changes to commit (files may already exist)" >> ${{ steps.validate-trigger.outputs.log_file }}
           else
-            # Commit changes
+            # Commit changes  
+            SEED_INFO=""
+            if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ]; then
+              if [ -n "$REQUESTED_SEED" ] && [ "$REQUESTED_SEED" != "" ]; then
+                SEED_INFO="- Seed: $USED_SEED (as requested)"
+              else
+                SEED_INFO="- Seed: $USED_SEED (randomly generated)"
+              fi
+            elif [ -n "$REQUESTED_SEED" ] && [ "$REQUESTED_SEED" != "" ]; then
+              SEED_INFO="- Seed: $REQUESTED_SEED (requested)"
+            fi
+            
             git commit -m "Add generated audio for #$ISSUE_NUMBER
             
             Generated audio with OctoBeats using the following parameters:
             - Prompt: ${{ steps.extract-params.outputs.prompt }}
             - Duration: ${{ steps.extract-params.outputs.duration }} seconds
             - Mode: ${{ steps.extract-params.outputs.mode }}
+            $SEED_INFO
             - Generation time: ${{ steps.generate-audio.outputs.generation_time }}s
             
             Resolves #$ISSUE_NUMBER"
@@ -763,6 +919,20 @@ jobs:
             const issueTitle = context.payload.issue.title;
             
             // Create PR body
+            const usedSeed = '${{ steps.generate-audio.outputs.used_seed }}';
+            const requestedSeed = '${{ steps.extract-params.outputs.seed }}';
+            
+            let seedSection = '';
+            if (usedSeed && usedSeed !== '') {
+              if (requestedSeed && requestedSeed !== '') {
+                seedSection = `\n            - **Seed**: ${usedSeed} (as requested)`;
+              } else {
+                seedSection = `\n            - **Seed**: ${usedSeed} (randomly generated)`;
+              }
+            } else if (requestedSeed && requestedSeed !== '') {
+              seedSection = `\n            - **Seed**: ${requestedSeed} (requested, but not confirmed from response)`;
+            }
+            
             const prBody = `## 🎵 Generated Audio for #${issueNumber}
             
             This PR adds the audio file generated using OctoBeats based on the parameters specified in #${issueNumber}.
@@ -774,7 +944,7 @@ jobs:
             - **Prompt**: "${{ steps.extract-params.outputs.prompt }}"
             - **Lyrics**: "${{ steps.extract-params.outputs.lyrics }}"
             - **Duration**: ${{ steps.extract-params.outputs.duration }} seconds
-            - **Quality Mode**: ${{ steps.extract-params.outputs.mode }}
+            - **Quality Mode**: ${{ steps.extract-params.outputs.mode }}${seedSection}
             - **Generation Time**: ${{ steps.generate-audio.outputs.generation_time }}s
             - **File Size**: ${{ steps.download-audio.outputs.file_size }}
             - **Generated By**: @${{ github.actor }}
@@ -892,6 +1062,8 @@ jobs:
             const audioFilename = '${{ steps.create-branch.outputs.audio_filename }}';
             const issueNumber = context.payload.issue.number;
             const runId = context.runId;
+            const usedSeed = '${{ steps.generate-audio.outputs.used_seed }}';
+            const requestedSeed = '${{ steps.extract-params.outputs.seed }}';
             
             // Create download URL for the artifact
             const artifactDownloadUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId}`;
@@ -912,6 +1084,7 @@ jobs:
             - **Prompt**: "${{ steps.extract-params.outputs.prompt }}"
             - **Duration**: ${{ steps.extract-params.outputs.duration }} seconds
             - **Quality Mode**: ${{ steps.extract-params.outputs.mode }}
+            - **Seed**: ${usedSeed || 'Random generation'}${requestedSeed && requestedSeed !== usedSeed ? ` (requested: ${requestedSeed})` : ''}
             - **Generation Time**: ${{ steps.generate-audio.outputs.generation_time }}s
             - **File Size**: ${{ steps.download-audio.outputs.file_size }}
             
@@ -925,7 +1098,11 @@ jobs:
               "prompt": "${{ steps.extract-params.outputs.prompt }}",
               "lyrics": "${{ steps.extract-params.outputs.lyrics }}",
               "duration": ${{ steps.extract-params.outputs.duration }},
-              "mode": "${{ steps.extract-params.outputs.mode }}"
+              "mode": "${{ steps.extract-params.outputs.mode }}",
+              "seed": {
+                "requested": ${requestedSeed || 'null'},
+                "used": ${usedSeed || 'null'}
+              }
             }
             \`\`\`
             </details>

@@ -16,7 +16,7 @@ body:
         - Only repository owners, admins, and maintainers can request music generation
         - The OctoBeats server must be running on the self-hosted runner
         - Music generation typically takes 12-35 seconds depending on quality mode
-        - Generated files will be saved to `audio/generated/` directory
+        - Generated files will be saved to `build/radio/assets/audios/` directory
         
         ---
 
@@ -83,6 +83,17 @@ body:
     validations:
       required: true
 
+  - type: input
+    id: seed
+    attributes:
+      label: 🎲 Random Seed (Optional)
+      description: |
+        Specify a random seed (0-4294967295) for reproducible generation. Leave blank for random generation.
+        **Use cases:** A/B testing, recreating exact results, version control of generations.
+      placeholder: "12345 (or leave blank for random)"
+    validations:
+      required: false
+
   - type: textarea
     id: additional_notes
     attributes:
@@ -100,12 +111,16 @@ body:
       options:
         - label: I have the necessary permissions (owner/admin/maintainer) to request audio generation
           required: true
+          value: true
         - label: I understand that the OctoBeats server must be running for this to work
           required: true
+          value: true
         - label: I understand that this will create a new branch and pull request with the generated audio
           required: true
+          value: true
         - label: The parameters I've provided are appropriate and follow community guidelines
           required: true
+          value: true
 
   - type: markdown
     attributes:
@@ -129,6 +144,7 @@ body:
         Lyrics: [inst]
         Duration: 120
         Mode: quality
+        Seed: 42 (optional)
         ```
         
         **Pop Song:**
@@ -137,6 +153,7 @@ body:
         Lyrics: [verse]\nWalking down the street\n[chorus]\nFeeling so complete
         Duration: 90
         Mode: quality
+        Seed: 12345 (optional)
         ```
         
         **Classical:**
@@ -145,7 +162,18 @@ body:
         Lyrics: [inst]
         Duration: 180
         Mode: ultra
+        Seed: (leave blank for random)
         ```
+        
+        ## 🎲 Reproducible Generation with Seeds
+        
+        Seeds enable you to:
+        - **Recreate exact results**: Use the same seed to generate identical audio
+        - **A/B test prompts**: Compare different prompts with the same random state
+        - **Version control**: Track and reproduce specific generations
+        - **Share reproducible results**: Others can recreate your exact audio using the same parameters and seed
+        
+        **Note**: The seed will be included in the generated metadata and PR description for future reference.
         
         ## 🛠️ Troubleshooting
         
@@ -153,6 +181,6 @@ body:
         - OctoBeats server is running on `localhost:8000`
         - You have the required repository permissions
         - The issue has the `audio` or `octobeats` label
-        - Parameters are within valid ranges (duration: 30-240s)
+        - Parameters are within valid ranges (duration: 30-240s, seed: 0-4294967295)
         
         For more information, see the [OctoBeats Setup Guide](https://github.com/mentria-ai/website/blob/main/.github/OCTOBEATS-SETUP-GUIDE.md). 

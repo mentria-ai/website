@@ -542,7 +542,7 @@ jobs:
             if [ "$SUCCESS" = "true" ]; then
               FILENAME=$(cat generation_response.json | jq -r '.filename')
               GENERATION_TIME=$(cat generation_response.json | jq -r '.generation_time')
-              USED_SEED=$(cat generation_response.json | jq -r '.parameters.seed // empty')
+              USED_SEED=$(cat generation_response.json | jq -r '.parameters.seed // ""')
               
               echo "✅ Audio generated successfully!" >> ${{ steps.validate-trigger.outputs.log_file }}
               echo "- Filename: $FILENAME" >> ${{ steps.validate-trigger.outputs.log_file }}
@@ -657,7 +657,7 @@ jobs:
           USED_SEED="${{ steps.generate-audio.outputs.used_seed }}"
           REQUESTED_SEED="${{ steps.extract-params.outputs.seed }}"
           
-          if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ]; then
+          if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ] && [ "$USED_SEED" != "''" ]; then
             jq -n \
               --arg issue_number "$ISSUE_NUMBER" \
               --arg issue_title "${{ github.event.issue.title }}" \
@@ -743,7 +743,7 @@ jobs:
           echo "${{ steps.extract-params.outputs.lyrics }}" > temp_lyrics_manifest.txt
           
           # Create new track entry using jq for proper JSON formatting
-          if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ]; then
+          if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ] && [ "$USED_SEED" != "''" ]; then
             jq -n \
               --arg id "track_$ISSUE_NUMBER" \
               --arg title "${{ github.event.issue.title }}" \
@@ -871,7 +871,7 @@ jobs:
           else
             # Commit changes  
             SEED_INFO=""
-            if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ]; then
+            if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ] && [ "$USED_SEED" != "''" ]; then
               if [ -n "$REQUESTED_SEED" ] && [ "$REQUESTED_SEED" != "" ]; then
                 SEED_INFO="- Seed: $USED_SEED (as requested)"
               else

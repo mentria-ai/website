@@ -196,34 +196,75 @@ jobs:
                   echo "    with open('response_content.txt', 'r') as f:" >> extract_json.py
                   echo "        content = f.read()" >> extract_json.py
                   echo "    " >> extract_json.py
-                  echo "    # Try to find JSON in markdown code blocks first" >> extract_json.py
-                  echo "    code_block = re.search(r'\`\`\`(?:json)?\\s*(\\{.*?\\})\\s*\`\`\`', content, re.DOTALL)" >> extract_json.py
+                  echo "    # Try multiple strategies to extract JSON" >> extract_json.py
+                  echo "    json_text = None" >> extract_json.py
+                  echo "    " >> extract_json.py
+                  echo "    # Strategy 1: Look for JSON in markdown code blocks (improved pattern)" >> extract_json.py
+                  echo "    code_block = re.search(r'\`\`\`(?:json)?\\s*(\{.*?\})\\s*\`\`\`', content, re.DOTALL)" >> extract_json.py
                   echo "    if code_block:" >> extract_json.py
-                  echo "        json_text = code_block.group(1)" >> extract_json.py
-                  echo "    else:" >> extract_json.py
-                  echo "        # Try to find any JSON object with style_prompt" >> extract_json.py
-                  echo "        json_match = re.search(r'(\\{[^{}]*\"style_prompt\"[^{}]*\\})', content, re.DOTALL)" >> extract_json.py
-                  echo "        if json_match:" >> extract_json.py
-                  echo "            json_text = json_match.group(1)" >> extract_json.py
-                  echo "        else:" >> extract_json.py
-                  echo "            # Find first { and last }" >> extract_json.py
-                  echo "            start = content.find('{')" >> extract_json.py
-                  echo "            end = content.rfind('}') + 1" >> extract_json.py
-                  echo "            if start != -1 and end > start:" >> extract_json.py
-                  echo "                json_text = content[start:end]" >> extract_json.py
-                  echo "            else:" >> extract_json.py
-                  echo "                json_text = None" >> extract_json.py
+                  echo "        potential_json = code_block.group(1)" >> extract_json.py
+                  echo "        # Validate it has required fields" >> extract_json.py
+                  echo "        if 'style_prompt' in potential_json and 'lyrics' in potential_json:" >> extract_json.py
+                  echo "            json_text = potential_json" >> extract_json.py
+                  echo "    " >> extract_json.py
+                  echo "    # Strategy 2: Find complete JSON object using bracket counting" >> extract_json.py
+                  echo "    if not json_text:" >> extract_json.py
+                  echo "        start = content.find('{')" >> extract_json.py
+                  echo "        if start != -1:" >> extract_json.py
+                  echo "            bracket_count = 0" >> extract_json.py
+                  echo "            in_string = False" >> extract_json.py
+                  echo "            escape_next = False" >> extract_json.py
+                  echo "            for i, char in enumerate(content[start:], start):" >> extract_json.py
+                  echo "                if escape_next:" >> extract_json.py
+                  echo "                    escape_next = False" >> extract_json.py
+                  echo "                    continue" >> extract_json.py
+                  echo "                if char == '\\\\' and in_string:" >> extract_json.py
+                  echo "                    escape_next = True" >> extract_json.py
+                  echo "                    continue" >> extract_json.py
+                  echo "                if char == '\"' and not escape_next:" >> extract_json.py
+                  echo "                    in_string = not in_string" >> extract_json.py
+                  echo "                    continue" >> extract_json.py
+                  echo "                if not in_string:" >> extract_json.py
+                  echo "                    if char == '{':" >> extract_json.py
+                  echo "                        bracket_count += 1" >> extract_json.py
+                  echo "                    elif char == '}':" >> extract_json.py
+                  echo "                        bracket_count -= 1" >> extract_json.py
+                  echo "                        if bracket_count == 0:" >> extract_json.py
+                  echo "                            potential_json = content[start:i+1]" >> extract_json.py
+                  echo "                            if 'style_prompt' in potential_json:" >> extract_json.py
+                  echo "                                json_text = potential_json" >> extract_json.py
+                  echo "                            break" >> extract_json.py
+                  echo "    " >> extract_json.py
+                  echo "    # Strategy 3: Simple fallback to first { and last }" >> extract_json.py
+                  echo "    if not json_text:" >> extract_json.py
+                  echo "        start = content.find('{')" >> extract_json.py
+                  echo "        end = content.rfind('}') + 1" >> extract_json.py
+                  echo "        if start != -1 and end > start:" >> extract_json.py
+                  echo "            potential_json = content[start:end]" >> extract_json.py
+                  echo "            if 'style_prompt' in potential_json:" >> extract_json.py
+                  echo "                json_text = potential_json" >> extract_json.py
                   echo "    " >> extract_json.py
                   echo "    if json_text:" >> extract_json.py
                   echo "        try:" >> extract_json.py
+                  echo "            # Debug: Show what JSON we're trying to parse" >> extract_json.py
+                  echo "            print(f'DEBUG: Attempting to parse JSON of length {len(json_text)}', file=sys.stderr)" >> extract_json.py
+                  echo "            print(f'DEBUG: JSON preview: {json_text[:200]}...', file=sys.stderr)" >> extract_json.py
                   echo "            data = json.loads(json_text)" >> extract_json.py
-                  echo "            with open('extracted_json.txt', 'w') as f:" >> extract_json.py
-                  echo "                json.dump(data, f)" >> extract_json.py
-                  echo "            print('SUCCESS')" >> extract_json.py
-                  echo "            sys.exit(0)" >> extract_json.py
-                  echo "        except: pass" >> extract_json.py
+                  echo "            # Validate required fields exist" >> extract_json.py
+                  echo "            if 'style_prompt' in data and 'lyrics' in data:" >> extract_json.py
+                  echo "                with open('extracted_json.txt', 'w') as f:" >> extract_json.py
+                  echo "                    json.dump(data, f)" >> extract_json.py
+                  echo "                print('SUCCESS')" >> extract_json.py
+                  echo "                sys.exit(0)" >> extract_json.py
+                  echo "            else:" >> extract_json.py
+                  echo "                print(f'DEBUG: JSON missing required fields. Has: {list(data.keys())}', file=sys.stderr)" >> extract_json.py
+                  echo "        except Exception as e:" >> extract_json.py
+                  echo "            print(f'DEBUG: JSON parsing failed: {e}', file=sys.stderr)" >> extract_json.py
                   echo "    " >> extract_json.py
-                  echo "    # Fallback" >> extract_json.py
+                  echo "    # Fallback if no valid JSON found" >> extract_json.py
+                  echo "    print('DEBUG: No valid JSON found, using fallback', file=sys.stderr)" >> extract_json.py
+                  echo "    print(f'DEBUG: Content length: {len(content)}', file=sys.stderr)" >> extract_json.py
+                  echo "    print(f'DEBUG: Content preview: {content[:300]}...', file=sys.stderr)" >> extract_json.py
                   echo "    fallback = {'style_prompt': 'electronic, ambient, melodic', 'lyrics': '[inst]', 'duration': 90, 'title_suggestion': 'AI Generated Track', 'inspiration': 'Auto-generated'}" >> extract_json.py
                   echo "    with open('extracted_json.txt', 'w') as f:" >> extract_json.py
                   echo "        json.dump(fallback, f)" >> extract_json.py
@@ -234,14 +275,19 @@ jobs:
                   # Save response content to file (safer than shell variables)
                   printf '%s' "$RESPONSE_CONTENT" > response_content.txt
                   
-                  JSON_EXTRACTION_RESULT=$(python3 extract_json.py)
+                  JSON_EXTRACTION_RESULT=$(python3 extract_json.py 2>&1)
                   echo "🔍 JSON extraction result: $JSON_EXTRACTION_RESULT" >> ${{ steps.validate-setup.outputs.log_file }}
+                  echo "🔍 Full extraction output:" >> ${{ steps.validate-setup.outputs.log_file }}
+                  echo "$JSON_EXTRACTION_RESULT" >> ${{ steps.validate-setup.outputs.log_file }}
                   
                   # Debug: Show what was extracted
                   if [[ -f "extracted_json.txt" ]]; then
-                    echo "📊 Extracted JSON content:" >> ${{ steps.validate-setup.outputs.log_file }}
-                    head -c 200 extracted_json.txt >> ${{ steps.validate-setup.outputs.log_file }}
+                    echo "📊 Extracted JSON file exists, content:" >> ${{ steps.validate-setup.outputs.log_file }}
+                    head -c 300 extracted_json.txt >> ${{ steps.validate-setup.outputs.log_file }}
                     echo "" >> ${{ steps.validate-setup.outputs.log_file }}
+                    echo "📏 File size: $(wc -c < extracted_json.txt) bytes" >> ${{ steps.validate-setup.outputs.log_file }}
+                  else
+                    echo "⚠️ extracted_json.txt file not created!" >> ${{ steps.validate-setup.outputs.log_file }}
                   fi
                   
                   # Validate and extract parameters using Python
@@ -251,10 +297,14 @@ jobs:
                   echo "try:" >> extract_params.py
                   echo "    with open('extracted_json.txt', 'r') as f:" >> extract_params.py
                   echo "        content = f.read().strip()" >> extract_params.py
-                  echo "" >> extract_params.py
+                  echo "    " >> extract_params.py
+                  echo "    print(f'DEBUG: extracted_json.txt content: {content}', file=sys.stderr)" >> extract_params.py
+                  echo "    " >> extract_params.py
                   echo "    try:" >> extract_params.py
                   echo "        data = json.loads(content)" >> extract_params.py
-                  echo "    except:" >> extract_params.py
+                  echo "        print(f'DEBUG: Successfully parsed JSON with keys: {list(data.keys())}', file=sys.stderr)" >> extract_params.py
+                  echo "    except Exception as e:" >> extract_params.py
+                  echo "        print(f'DEBUG: Failed to parse extracted JSON: {e}', file=sys.stderr)" >> extract_params.py
                   echo "        # If not valid JSON, create fallback" >> extract_params.py
                   echo "        data = {}" >> extract_params.py
                   echo "" >> extract_params.py
@@ -299,7 +349,9 @@ jobs:
                   echo "    print('SUCCESS=false')" >> extract_params.py
                   
                   # Extract parameters
-                  PARAM_RESULT=$(python3 extract_params.py)
+                  PARAM_RESULT=$(python3 extract_params.py 2>&1)
+                  echo "🎯 Parameter extraction result:" >> ${{ steps.validate-setup.outputs.log_file }}
+                  echo "$PARAM_RESULT" >> ${{ steps.validate-setup.outputs.log_file }}
                   
                   if echo "$PARAM_RESULT" | grep -q "SUCCESS=true"; then
                     # Extract each parameter

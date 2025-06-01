@@ -111,16 +111,12 @@ body:
       options:
         - label: I have the necessary permissions (owner/admin/maintainer) to request audio generation
           required: true
-          value: true
         - label: I understand that the OctoBeats server must be running for this to work
           required: true
-          value: true
         - label: I understand that this will create a new branch and pull request with the generated audio
           required: true
-          value: true
         - label: The parameters I've provided are appropriate and follow community guidelines
           required: true
-          value: true
 
   - type: markdown
     attributes:

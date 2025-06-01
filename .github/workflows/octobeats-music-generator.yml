@@ -681,8 +681,8 @@ jobs:
                   "duration": ($duration | tonumber),
                   "mode": $mode,
                   "seed": {
-                    "requested": ($requested_seed | if . == "" then null else tonumber end),
-                    "used": ($used_seed | tonumber)
+                    "requested": ($requested_seed | if . == "" or . == null then null else tonumber end),
+                    "used": ($used_seed | if . == "" or . == null then null else tonumber end)
                   }
                 },
                 "generation_time": $generation_time,
@@ -712,7 +712,7 @@ jobs:
                   "duration": ($duration | tonumber),
                   "mode": $mode,
                   "seed": {
-                    "requested": ($requested_seed | if . == "" then null else tonumber end),
+                    "requested": ($requested_seed | if . == "" or . == null then null else tonumber end),
                     "used": null
                   }
                 },
@@ -776,8 +776,8 @@ jobs:
                     "duration": ($duration | tonumber),
                     "mode": $mode,
                     "seed": {
-                      "requested": ($requested_seed | if . == "" then null else tonumber end),
-                      "used": ($used_seed | tonumber)
+                      "requested": ($requested_seed | if . == "" or . == null then null else tonumber end),
+                      "used": ($used_seed | if . == "" or . == null then null else tonumber end)
                     }
                   },
                   "generation_time": $generation_time,
@@ -818,10 +818,10 @@ jobs:
                     "lyrics": $lyrics,
                     "duration": ($duration | tonumber),
                     "mode": $mode,
-                    "seed": {
-                      "requested": ($requested_seed | if . == "" then null else tonumber end),
-                      "used": null
-                    }
+                                         "seed": {
+                       "requested": ($requested_seed | if . == "" or . == null then null else tonumber end),
+                       "used": null
+                     }
                   },
                   "generation_time": $generation_time,
                   "file_size": $file_size,

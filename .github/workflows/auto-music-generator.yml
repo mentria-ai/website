@@ -186,6 +186,8 @@ jobs:
                 if [[ "$EXTRACTION_RESULT" == SUCCESS:* ]]; then
                   RESPONSE_CONTENT="${EXTRACTION_RESULT#SUCCESS:}"
                   echo "🎼 AI Response received (${#RESPONSE_CONTENT} characters)" >> ${{ steps.validate-setup.outputs.log_file }}
+                  echo "📝 AI Response preview (first 500 chars):" >> ${{ steps.validate-setup.outputs.log_file }}
+                  echo "${RESPONSE_CONTENT:0:500}..." >> ${{ steps.validate-setup.outputs.log_file }}
                   
                   # Extract JSON from response using Python
                   # Create a simple Python script to extract JSON
@@ -195,17 +197,22 @@ jobs:
                   echo "        content = f.read()" >> extract_json.py
                   echo "    " >> extract_json.py
                   echo "    # Try to find JSON in markdown code blocks first" >> extract_json.py
-                  echo "    code_block = re.search(r'\`\`\`[a-z]*\\s*(\\{.*?\\})\\s*\`\`\`', content, re.DOTALL)" >> extract_json.py
+                  echo "    code_block = re.search(r'\`\`\`(?:json)?\\s*(\\{.*?\\})\\s*\`\`\`', content, re.DOTALL)" >> extract_json.py
                   echo "    if code_block:" >> extract_json.py
                   echo "        json_text = code_block.group(1)" >> extract_json.py
                   echo "    else:" >> extract_json.py
-                  echo "        # Find first { and last }" >> extract_json.py
-                  echo "        start = content.find('{')" >> extract_json.py
-                  echo "        end = content.rfind('}') + 1" >> extract_json.py
-                  echo "        if start != -1 and end > start:" >> extract_json.py
-                  echo "            json_text = content[start:end]" >> extract_json.py
+                  echo "        # Try to find any JSON object with style_prompt" >> extract_json.py
+                  echo "        json_match = re.search(r'(\\{[^{}]*\"style_prompt\"[^{}]*\\})', content, re.DOTALL)" >> extract_json.py
+                  echo "        if json_match:" >> extract_json.py
+                  echo "            json_text = json_match.group(1)" >> extract_json.py
                   echo "        else:" >> extract_json.py
-                  echo "            json_text = None" >> extract_json.py
+                  echo "            # Find first { and last }" >> extract_json.py
+                  echo "            start = content.find('{')" >> extract_json.py
+                  echo "            end = content.rfind('}') + 1" >> extract_json.py
+                  echo "            if start != -1 and end > start:" >> extract_json.py
+                  echo "                json_text = content[start:end]" >> extract_json.py
+                  echo "            else:" >> extract_json.py
+                  echo "                json_text = None" >> extract_json.py
                   echo "    " >> extract_json.py
                   echo "    if json_text:" >> extract_json.py
                   echo "        try:" >> extract_json.py
@@ -227,7 +234,15 @@ jobs:
                   # Save response content to file (safer than shell variables)
                   printf '%s' "$RESPONSE_CONTENT" > response_content.txt
                   
-                  python3 extract_json.py
+                  JSON_EXTRACTION_RESULT=$(python3 extract_json.py)
+                  echo "🔍 JSON extraction result: $JSON_EXTRACTION_RESULT" >> ${{ steps.validate-setup.outputs.log_file }}
+                  
+                  # Debug: Show what was extracted
+                  if [[ -f "extracted_json.txt" ]]; then
+                    echo "📊 Extracted JSON content:" >> ${{ steps.validate-setup.outputs.log_file }}
+                    head -c 200 extracted_json.txt >> ${{ steps.validate-setup.outputs.log_file }}
+                    echo "" >> ${{ steps.validate-setup.outputs.log_file }}
+                  fi
                   
                   # Validate and extract parameters using Python
                   echo "import json" > extract_params.py

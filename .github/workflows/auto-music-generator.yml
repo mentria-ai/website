@@ -391,8 +391,9 @@ jobs:
               const seedValue = process.env.SEED_B64 ? Buffer.from(process.env.SEED_B64, 'base64').toString('utf8') : '';
               const customTheme = process.env.CUSTOM_THEME || 'None';
               
-              const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
-              const issueTitle = `[MUSIC] ${titleSuggestion} - Auto Generated ${timestamp}`;
+              const timestampForTitle = new Date().toISOString().slice(0, 16).replace('T', '_').replace(/:/g, '');
+              const timestampForBody = new Date().toISOString().slice(0, 16).replace('T', ' ');
+              const issueTitle = `[MUSIC] ${titleSuggestion} - Auto Generated ${timestampForTitle}`;
               
               // Build seed section
               let seedSection = '';
@@ -425,7 +426,7 @@ jobs:
                 '### 📝 Additional Notes',
                 `**AI Inspiration:** ${inspiration}`,
                 '',
-                `**Generated at:** ${timestamp}`,
+                `**Generated at:** ${timestampForBody}`,
                 `**Custom theme:** ${customTheme}`,
                 ...(seedValue && seedValue.trim() !== '' ? [`**Seed:** ${seedValue} (for reproducible generation)`] : []),
                 '',
@@ -455,10 +456,13 @@ jobs:
               fs.appendFileSync(logFile, `✅ Created issue #${issue.data.number}: "${issue.data.title}"\n`);
               fs.appendFileSync(logFile, `🔗 Issue URL: ${issue.data.html_url}\n`);
               
-              // Use the newer GitHub Actions output format instead of deprecated set-output
+              // Use the newer GitHub Actions output format with proper escaping
               fs.appendFileSync(process.env.GITHUB_OUTPUT, `issue_number=${issue.data.number}\n`);
               fs.appendFileSync(process.env.GITHUB_OUTPUT, `issue_url=${issue.data.html_url}\n`);
-              fs.appendFileSync(process.env.GITHUB_OUTPUT, `issue_title=${issue.data.title}\n`);
+              
+              // Escape special characters in issue title for GitHub Actions output
+              const escapedTitle = issue.data.title.replace(/\n/g, '%0A').replace(/\r/g, '%0D').replace(/:/g, '%3A');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `issue_title=${escapedTitle}\n`);
             } catch (error) {
               fs.appendFileSync(logFile, `❌ Error creating GitHub issue: ${error.message}\n`);
               console.log(`::error::Error creating issue: ${error.message}`);
@@ -547,8 +551,9 @@ jobs:
               const fallbackInspiration = process.env.FALLBACK_INSPIRATION_B64 ? Buffer.from(process.env.FALLBACK_INSPIRATION_B64, 'base64').toString('utf8') : 'Fallback parameters';
               const fallbackSeed = process.env.FALLBACK_SEED_B64 ? Buffer.from(process.env.FALLBACK_SEED_B64, 'base64').toString('utf8') : '';
               
-              const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
-              const issueTitle = `[MUSIC] ${fallbackTitle} - Auto Generated ${timestamp}`;
+              const timestampForTitle = new Date().toISOString().slice(0, 16).replace('T', '_').replace(/:/g, '');
+              const timestampForBody = new Date().toISOString().slice(0, 16).replace('T', ' ');
+              const issueTitle = `[MUSIC] ${fallbackTitle} - Auto Generated ${timestampForTitle}`;
               
               const issueBody = [
                 '## 🎵 Auto-Generated Music Request (Fallback)',
@@ -575,7 +580,7 @@ jobs:
                 '### 📝 Additional Notes',
                 `**AI Inspiration:** ${fallbackInspiration}`,
                 '',
-                `**Generated at:** ${timestamp}`,
+                `**Generated at:** ${timestampForBody}`,
                 ...(fallbackSeed && fallbackSeed.trim() !== '' ? [`**Seed:** ${fallbackSeed} (for reproducible generation)`] : []),
                 '',
                 '---',
@@ -603,6 +608,10 @@ jobs:
               
               fs.appendFileSync(logFile, `✅ Created fallback issue #${issue.data.number}\n`);
               fs.appendFileSync(logFile, `🔗 Issue URL: ${issue.data.html_url}\n`);
+              
+              // Set outputs for fallback issue (with proper escaping)
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `fallback_issue_number=${issue.data.number}\n`);
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `fallback_issue_url=${issue.data.html_url}\n`);
               
             } catch (error) {
               fs.appendFileSync(logFile, `❌ Error creating fallback issue: ${error.message}\n`);

@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_127",
+      "title": "[MUSIC] Rainy Sunday Notebook",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_127_20250602_211639.mp3",
+      "metadata": {
+        "issue_number": 127,
+        "issue_title": "[MUSIC] Rainy Sunday Notebook",
+        "generated_at": "2025-06-02T21:16:39Z",
+        "parameters": {
+          "prompt": "lofi, jazzhop, nostalgic, piano, vinyl crackle, warm bass, soft drums",
+          "lyrics": "[inst]\n",
+          "duration": 90,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2152027701,
+            "used": 2152027701
+          }
+        },
+        "generation_time": "2571.33",
+        "file_size": "1.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 90,
+      "issueNumber": 127
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-02T21:16:39Z",
+  "total_tracks": 9
 }

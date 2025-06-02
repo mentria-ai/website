@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_128",
+      "title": "[MUSIC] Fading Echoes of a Paper Moon",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_128_20250602_220059.mp3",
+      "metadata": {
+        "issue_number": 128,
+        "issue_title": "[MUSIC] Fading Echoes of a Paper Moon",
+        "generated_at": "2025-06-02T22:00:59Z",
+        "parameters": {
+          "prompt": "post-rock, cinematic, melancholic, strings, electric guitar, reverb-heavy, crescendo",
+          "lyrics": "[inst]\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 4291616673,
+            "used": 4291616673
+          }
+        },
+        "generation_time": "2627.34",
+        "file_size": "2.9M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 128
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-02T22:00:59Z",
+  "total_tracks": 9
 }

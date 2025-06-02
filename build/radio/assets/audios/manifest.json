@@ -1,82 +1,6 @@
 {
   "tracks": [
     {
-      "id": "issue_42",
-      "title": "[MUSIC] chill 3",
-      "artist": "mentria.ai",
-      "file": "assets/audios/audio_issue_42_20250525_105507.mp3",
-      "metadata": {
-        "issue_number": 42,
-        "issue_title": "[MUSIC] chill 3",
-        "generated_at": "2025-05-25T10:55:07Z",
-        "parameters": {
-          "prompt": "pop, upbeat, guitar, catchy melody",
-          "lyrics": "[inst]",
-          "duration": 120,
-          "mode": "ultra"
-        },
-        "generation_time": "173.82",
-        "file_size": "2.4M",
-        "generated_by": "mentria-ai"
-      },
-      "duration": 120,
-      "issueNumber": 42,
-      "schedule": {
-        "start_date": "2025-05-28",
-        "time_slots": [
-          "0000",
-          "0030",
-          "0100",
-          "0130",
-          "0200",
-          "0230",
-          "0300",
-          "0330",
-          "0400",
-          "0430",
-          "0500",
-          "0530",
-          "0600",
-          "0630",
-          "0700",
-          "0730",
-          "0800",
-          "0830",
-          "0900",
-          "0930",
-          "1000",
-          "1030",
-          "1100",
-          "1130",
-          "1200",
-          "1230",
-          "1300",
-          "1330",
-          "1400",
-          "1430",
-          "1500",
-          "1530",
-          "1600",
-          "1630",
-          "1700",
-          "1730",
-          "1800",
-          "1830",
-          "1900",
-          "1930",
-          "2000",
-          "2030",
-          "2100",
-          "2130",
-          "2200",
-          "2230",
-          "2300",
-          "2330"
-        ],
-        "repeat_pattern": "daily"
-      }
-    },
-    {
       "id": "issue_45",
       "title": "[MUSIC] J",
       "artist": "mentria.ai",
@@ -175,50 +99,6 @@
       "issueNumber": 44
     },
     {
-      "id": "track_49",
-      "title": "[MUSIC] mentria.ai summary",
-      "artist": "mentria.ai",
-      "file": "assets/audios/audio_49_20250528_132923.mp3",
-      "metadata": {
-        "issue_number": 49,
-        "issue_title": "[MUSIC] mentria.ai summary",
-        "generated_at": "2025-05-28T13:29:23Z",
-        "parameters": {
-          "prompt": "funk, pop, soul, melodic",
-          "lyrics": "[verse 1]\nGray pixels hum with soulful beats\nE-Ink run guides our dancing feet\nRoyalty-free rhythms fill the air\nMentria’s grooves beyond compare\n\n[verse 2]\nGemma 2B whispers next to Llama 3\nPhi-3 Mini joins the melody\nChat the facts as the bassline flows\nAI and music in sweet repose\n\n[chorus]\nStream it live, let the melody shine\nDownload free, make that vibe divine\nOn café walls or hotel halls\nMentria’s music breaks down all walls\n\n[verse 3]\nDiffusion cores craft each funky tone\nAutoencoders shape your soul’s home\nOne-click play, instant harmony\nEmbed the API for unity\n\n[bridge]\nMonochrome game meets melodic dream\nPlay E-Ink Run in a rhythmic stream\nFact-chat pop with rhythmic design\nPrivacy-first, your data’s fine\n\n[verse 4]\nSoulful pop with a future twist\nUninterrupted, you get the gist\nFrom parlors to vlogs, the sound is free\nMentria.ai sets the music free\n",
-          "duration": 90,
-          "mode": "ultra"
-        },
-        "generation_time": "156.21",
-        "file_size": "1.8M",
-        "generated_by": "mentria-ai"
-      },
-      "duration": 90,
-      "issueNumber": 49
-    },
-    {
-      "id": "track_51",
-      "title": "[MUSIC] Reggae Fusion 1",
-      "artist": "mentria.ai",
-      "file": "assets/audios/audio_51_20250528_134956.mp3",
-      "metadata": {
-        "issue_number": 51,
-        "issue_title": "[MUSIC] Reggae Fusion 1",
-        "generated_at": "2025-05-28T13:49:56Z",
-        "parameters": {
-          "prompt": "Reggae, Reggae Fusion",
-          "lyrics": "[verse 1]\nSunrise paints the mountains gold, breeze whispers through the pines\nRivers hum a gentle song, echo through these ancient lines\nBirds in flight keep time with drums, heartbeats of the green terrain\nRoots run deep beneath our feet, bonding earth and soul again\n\n[chorus]\nFeel the rhythm of the land, one love under sky so wide\nNature’s voice within our hands, let the tide of life be our guide\nLet the sunshine warm your mind, let the moonlight heal your soul\nIn this world we’re intertwined, reggae rhythms make us whole\n\n[verse 2]\nLeaves will dance when raindrops fall, cleansing earth and soothing pain\nFlowers lean toward the light, life renewed in every vein\nMountains stand in silent watch, guardians of time and space\nOceans chant their ancient hymns, teaching peace with every wave\n\n[bridge]\nMentria A I in distant streams, echoes pure and free\nLinking human hearts to dreams, singing earth’s true melody\n\n[verse 3]\nWalk the path where roots entwine, breathe the wisdom of the trees\nFeel the pulse of nature’s shrine, carried on the ocean breeze\nEvery step is gratitude, every breath a sacred prayer\nIn this life we stand as one, reggae love is everywhere\n\n[outro]\nOne love for earth and sky, one love for you and me\nLet this melody remind, nature’s bond sets spirits free\n",
-          "duration": 120,
-          "mode": "ultra"
-        },
-        "generation_time": "198.55",
-        "file_size": "2.3M",
-        "generated_by": "mentria-ai"
-      },
-      "duration": 120,
-      "issueNumber": 51
-    },
-    {
       "id": "track_53",
       "title": "[MUSIC] Reggae Fusion 2",
       "artist": "mentria.ai",
@@ -241,74 +121,8 @@
       "issueNumber": 53
     },
     {
-      "id": "track_56",
-      "title": "[MUSIC] I'll be alone",
-      "artist": "mentria.ai",
-      "file": "assets/audios/audio_56_20250528_154801.mp3",
-      "metadata": {
-        "issue_number": 56,
-        "issue_title": "[MUSIC] I'll be alone",
-        "generated_at": "2025-05-28T15:48:01Z",
-        "parameters": {
-          "prompt": "Electronic pop, catchy, heavy synth",
-          "lyrics": "[Verse]\nHoney you do this every time\nMess me up and blow my mind\nI know you love to cross that line\nBut that aint workin this time\n\n[Pre-Chorus]\nAnd you love to test me\nAnd you know I hate it\nAnd you think its sexy\nI think its a game\nAnd you love to test me\nAnd you know I hate it\nAnd you think its sexy\nI think its a game\n\n[Chorus]\nWhen I go home\nIll be alone\nBaby\nMy hearts already closed\nWhen I go home\nIll be alone\nBaby\nMy hearts already closed\n\n[Verse]\nHoney you do this every time\nMess me up and blow my mind\nI know you love to cross that line\nBut that aint workin this time \n\n[Pre-Chorus]\nAnd you love to test me\nAnd you know I hate it\nAnd you think its sexy\nI think its a game\nAnd you love to test me\nAnd you know I hate it\nAnd you think its sexy\nI think its a game \n\n[Chorus]\nWhen I go home\nIll be alone\nBaby\nMy hearts already closed\nWhen I go home\nIll be alone\nBaby\nMy hearts already closed\n\n[Pre-Chorus]\nAnd you love to test me\nAnd you know I hate it\nAnd you think its sexy\nI think its a game\nAnd you love to test me\nAnd you know I hate it\nAnd you think its sexy\nI think its a game \n\n[Chorus]\nWhen I go home\nIll be alone\nBaby\nMy hearts already closed\nWhen I go home\nIll be alone\nBaby\nMy hearts already closed\n",
-          "duration": 180,
-          "mode": "ultra"
-        },
-        "generation_time": "255.55",
-        "file_size": "3.5M",
-        "generated_by": "mentria-ai"
-      },
-      "duration": 180,
-      "issueNumber": 56
-    },
-    {
-      "id": "track_58",
-      "title": "[MUSIC] Jazz 2",
-      "artist": "mentria.ai",
-      "file": "assets/audios/audio_58_20250528_160005.mp3",
-      "metadata": {
-        "issue_number": 58,
-        "issue_title": "[MUSIC] Jazz 2",
-        "generated_at": "2025-05-28T16:00:05Z",
-        "parameters": {
-          "prompt": "saxphone, jazz",
-          "lyrics": "[verse]\n\n[chorus]\n\n[solo]\n\n[verse]\n\n[chorus]\n\n[outro]\n",
-          "duration": 90,
-          "mode": "ultra"
-        },
-        "generation_time": "138.15",
-        "file_size": "1.7M",
-        "generated_by": "mentria-ai"
-      },
-      "duration": 90,
-      "issueNumber": 58
-    },
-    {
-      "id": "track_60",
-      "title": "[MUSIC] One nation",
-      "artist": "mentria.ai",
-      "file": "assets/audios/audio_60_20250528_163826.mp3",
-      "metadata": {
-        "issue_number": 60,
-        "issue_title": "[MUSIC] One nation",
-        "generated_at": "2025-05-28T16:38:26Z",
-        "parameters": {
-          "prompt": "reggae, rasta, one nation, one love, unity, Jah, Zion, roots rock, bass guitar, drums, off-beat skank, horn section, conscious, uplifting, Bob Marley style",
-          "lyrics": "[verse 1]\nGather ‘round my brothers, sisters of the land\nRasta heart is beating steady like a drum\nChain no longer hold us, freedom in our hand\nGuided by the light of Zion’s morning sun\n\n[chorus]\nOne love, one heart, one nation under Jah\nKeep the fire burning bright, drive away the dark\nFrom Kingston to the hills, hear the people call\nOne nation under Jah, we stand together tall\n\n[verse 2]\nBabylon may tremble when the people rise as one\nVoices blend in harmony, a song of truth and peace\nEvery chant a healing prayer until the work is done\nTill the walls of hate and fear at last will cease\n\n[bridge]\nJah provide the strength we need, in every trial and storm\nRoots run deep in every soul, keep the spirit warm\nNo weapon formed against us ever shall prevail\nIn the heartbeat of the drum, our victory we hail\n\n[verse 3]\nChildren of the rainbow, gather ‘round and sing\nColours of the earth and sky, painted on our flag\nLet the message ring aloud: love is everything\nEvery woman, child, and man, none shall ever lag\n\n[outro / chorus reprise]\nOne love, one heart, one nation under Jah\nKeep the fire burning bright, drive away the dark\nIn the rhythm of our souls, we’ll never fall\nOne nation under Jah—together we stand tall.\n",
-          "duration": 180,
-          "mode": "ultra"
-        },
-        "generation_time": "270.46",
-        "file_size": "3.5M",
-        "generated_by": "mentria-ai"
-      },
-      "duration": 180,
-      "issueNumber": 60
-    },
-    {
       "id": "track_64",
-      "title": "[MUSIC] AI Generated Track\n - Auto Generated 2025-05-29 08:58",
+      "title": "[MUSIC] electronic thrill",
       "artist": "mentria.ai",
       "file": "assets/audios/audio_64_20250529_090118.mp3",
       "metadata": {

@@ -199,6 +199,8 @@ create_issue() {
     # Install Node.js dependencies if needed
     if [[ ! -d "node_modules" ]]; then
         npm init -y > /dev/null 2>&1
+        # Set package.json to use ES modules
+        npm pkg set type=module > /dev/null 2>&1
         npm install @octokit/rest > /dev/null 2>&1
     fi
     

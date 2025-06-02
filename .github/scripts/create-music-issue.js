@@ -2,8 +2,8 @@
 /**
  * Create GitHub issue for music generation
  */
-const fs = require('fs');
-const { Octokit } = require('@octokit/rest');
+import fs from 'fs';
+import { Octokit } from '@octokit/rest';
 
 function readParametersFromFile() {
     try {
@@ -173,9 +173,7 @@ async function main() {
 }
 
 // Run if called directly
-if (require.main === module) {
-    main().catch(error => {
-        console.error('Unhandled error:', error);
-        process.exit(1);
-    });
-} 
+main().catch(error => {
+    console.error('Unhandled error:', error);
+    process.exit(1);
+}); 

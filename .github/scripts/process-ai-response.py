@@ -125,11 +125,20 @@ def extract_and_validate_parameters():
         if duration not in valid_durations:
             duration = 90
         
-        # Clean parameters (remove quotes and limit length)
-        style_prompt = str(style_prompt).replace('"', '').replace("'", '')[:200]
-        lyrics = str(lyrics).replace('"', '').replace("'", '')[:400]
-        title_suggestion = str(title_suggestion).replace('"', '').replace("'", '')[:80]
-        inspiration = str(inspiration).replace('"', '').replace("'", '')[:200]
+        # Clean parameters and limit length appropriately
+        style_prompt = str(style_prompt).strip()[:200]
+        lyrics = str(lyrics).strip()[:2000]  # Allow much longer lyrics (2000 chars)
+        title_suggestion = str(title_suggestion).strip()[:100]  # Slightly longer titles
+        inspiration = str(inspiration).strip()[:300]
+        
+        # Remove only surrounding quotes, preserve internal quotes in lyrics
+        if style_prompt.startswith('"') and style_prompt.endswith('"'):
+            style_prompt = style_prompt[1:-1]
+        if title_suggestion.startswith('"') and title_suggestion.endswith('"'):
+            title_suggestion = title_suggestion[1:-1]
+        if inspiration.startswith('"') and inspiration.endswith('"'):
+            inspiration = inspiration[1:-1]
+        # Don't modify lyrics quotes - they might be part of the song content
         
         # Validate seed if provided
         if seed is not None:

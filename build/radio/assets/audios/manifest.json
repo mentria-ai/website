@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_126",
+      "title": "[MUSIC] Neon Alley Saxophone",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_126_20250602_203315.mp3",
+      "metadata": {
+        "issue_number": 126,
+        "issue_title": "[MUSIC] Neon Alley Saxophone",
+        "generated_at": "2025-06-02T20:33:15Z",
+        "parameters": {
+          "prompt": "experimental, cyberpunk, glitch, jazz-fusion, modular-synth, nocturnal, pulsating",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 1567131425,
+            "used": 1567131425
+          }
+        },
+        "generation_time": "2899.11",
+        "file_size": "2.5M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 126
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-02T20:33:15Z",
+  "total_tracks": 9
 }

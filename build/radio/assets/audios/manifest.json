@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_123",
+      "title": "[MUSIC] Lemonade Swept the Pavement",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_123_20250602_182433.mp3",
+      "metadata": {
+        "issue_number": 123,
+        "issue_title": "[MUSIC] Lemonade Swept the Pavement",
+        "generated_at": "2025-06-02T18:24:33Z",
+        "parameters": {
+          "prompt": "dream pop, nostalgic, shimmering, electric piano, breathy vocals, tape delay",
+          "lyrics": "[verse] The sidewalks crack like memories / Under August’s fading heat / We traced our names in lemonade sweat / Before the streetlights blinked awake [chorus] Oh, we were infinite then / Just ghosts in the glow / Of a sun that forgot to set [verse] Your laugh still hums in the fan’s slow spin / Through screens where the fireflies press / Like stars too shy to say they’re leaving [chorus] Oh, we were infinite then / Just ghosts in the glow / Of a sun that forgot to set [bridge] Now the yearbook’s spine creaks / A chorus of almosts / Pages stuck at the goodbyes [outro] The sidewalks crack like memories / And I’m still tracing your name\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 1762190430,
+            "used": 1762190430
+          }
+        },
+        "generation_time": "2595.87",
+        "file_size": "2.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 123
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-02T18:24:33Z",
+  "total_tracks": 9
 }

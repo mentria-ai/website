@@ -167,6 +167,32 @@
       },
       "duration": 60,
       "issueNumber": 89
+    },
+    {
+      "id": "track_99",
+      "title": "[MUSIC] Neon Glow - Auto Generated 2025-06-02_0652",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_99_20250602_065706.mp3",
+      "metadata": {
+        "issue_number": 99,
+        "issue_title": "[MUSIC] Neon Glow - Auto Generated 2025-06-02_0652",
+        "generated_at": "2025-06-02T06:57:06Z",
+        "parameters": {
+          "prompt": "pop, upbeat, catchy, synth-pop, electronic, summer vibes, vocal harmonies, punchy drums",
+          "lyrics": "[verse]\n",
+          "duration": 180,
+          "mode": "ultra",
+          "seed": {
+            "requested": 123,
+            "used": 123
+          }
+        },
+        "generation_time": "249.8",
+        "file_size": "3.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 180,
+      "issueNumber": 99
     }
   ],
   "schedule_info": {
@@ -175,6 +201,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-01T05:42:36Z",
-  "total_tracks": 11
+  "last_updated": "2025-06-02T06:57:06Z",
+  "total_tracks": 6
 }

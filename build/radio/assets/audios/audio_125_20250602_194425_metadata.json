@@ -1,0 +1,18 @@
+{
+  "issue_number": 125,
+  "issue_title": "[MUSIC] Wet Pavement Sonata",
+  "generated_at": "2025-06-02T19:44:25Z",
+  "parameters": {
+    "prompt": "lofi, jazzhop, nostalgic, piano, vinyl crackle, rainy day, warm bass",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2822842815,
+      "used": 2822842815
+    }
+  },
+  "generation_time": "2452.04",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

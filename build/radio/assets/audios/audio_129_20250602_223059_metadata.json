@@ -1,0 +1,18 @@
+{
+  "issue_number": 129,
+  "issue_title": "[MUSIC] Fading Photographs in a Rainstorm",
+  "generated_at": "2025-06-02T22:30:59Z",
+  "parameters": {
+    "prompt": "post-rock, cinematic, melancholic, strings, piano, crescendo, atmospheric, lo-fi",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 1941384857,
+      "used": 1941384857
+    }
+  },
+  "generation_time": "1767.85",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

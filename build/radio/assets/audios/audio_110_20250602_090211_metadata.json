@@ -1,0 +1,18 @@
+{
+  "issue_number": 110,
+  "issue_title": "[MUSIC] Tumbleweed Chromatics - Auto Generated 2025-06-02_0836",
+  "generated_at": "2025-06-02T09:02:11Z",
+  "parameters": {
+    "prompt": "synthwave, desert blues, nostalgic, hypnotic, electric guitar, analog synth, tape wobble",
+    "lyrics": "[verse] Sandstorms hum in radio static / Neon palms sway in the heat mirage [chorus] We’re lost in the dunes of time / Chasing echoes of a fading rhyme [verse] Your shadow flickers like film grain / A Super 8 memory, half-erased [chorus] We’re lost in the dunes of time / Chasing echoes of a fading rhyme [bridge] The jukebox plays a backwards prayer / (Rewind me back to you) [outro] Midnight dissolves into turquoise dawn / The cassette finally clicks, and you’re gone\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 19890604,
+      "used": 19890604
+    }
+  },
+  "generation_time": "258.6",
+  "file_size": "3.0M",
+  "generated_by": "mentria-ai"
+}

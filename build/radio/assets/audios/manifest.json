@@ -167,6 +167,32 @@
       },
       "duration": 60,
       "issueNumber": 89
+    },
+    {
+      "id": "track_104",
+      "title": "[MUSIC] Static Joy - Auto Generated 2025-06-02_0732",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_104_20250602_074649.mp3",
+      "metadata": {
+        "issue_number": 104,
+        "issue_title": "[MUSIC] Static Joy - Auto Generated 2025-06-02_0732",
+        "generated_at": "2025-06-02T07:46:49Z",
+        "parameters": {
+          "prompt": "pop, dreamy, nostalgic, synth-pop, electronic, shimmering, vocals, upbeat",
+          "lyrics": "[verse] Stars align in distant skies / Your voice hums through the telephone lines / Static buzz like fireflies / But I still hear you every time [chorus] We’re ghosts in the radio waves / Singing echoes from a brighter day / Lost in the frequency haze / But the signal never fades away [verse] Polaroid stuck in my pocket / Fading colors, but the moment won’t stop it / Rewind the tape, let’s press play / Before the memories slip away [chorus] We’re ghosts in the radio waves / Singing echoes from a brighter day / Lost in the frequency haze / But the signal never fades away [bridge] Dial it back to 1999 / When every song felt like a lifeline / Can you hear me through the noise? / I’m still singing for you, my static joy [outro] Fading out like a distant station / But love’s the perfect modulation\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 123,
+            "used": 123
+          }
+        },
+        "generation_time": "177.55",
+        "file_size": "2.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 104
     }
   ],
   "schedule_info": {
@@ -175,6 +201,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-01T05:42:36Z",
-  "total_tracks": 11
+  "last_updated": "2025-06-02T07:46:49Z",
+  "total_tracks": 6
 }

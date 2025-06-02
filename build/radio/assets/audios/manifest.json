@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_121",
+      "title": "[MUSIC] Tape Hiss Cosmonaut",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_121_20250602_165843.mp3",
+      "metadata": {
+        "issue_number": 121,
+        "issue_title": "[MUSIC] Tape Hiss Cosmonaut",
+        "generated_at": "2025-06-02T16:58:43Z",
+        "parameters": {
+          "prompt": "synthwave, cinematic, nostalgic, spacey, arpeggiator, pulsating bass, reverb-soaked",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2808384879,
+            "used": 2808384879
+          }
+        },
+        "generation_time": "241.65",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 121
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-02T16:58:44Z",
+  "total_tracks": 9
 }

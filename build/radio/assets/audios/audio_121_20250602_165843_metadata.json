@@ -1,0 +1,18 @@
+{
+  "issue_number": 121,
+  "issue_title": "[MUSIC] Tape Hiss Cosmonaut",
+  "generated_at": "2025-06-02T16:58:43Z",
+  "parameters": {
+    "prompt": "synthwave, cinematic, nostalgic, spacey, arpeggiator, pulsating bass, reverb-soaked",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2808384879,
+      "used": 2808384879
+    }
+  },
+  "generation_time": "241.65",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

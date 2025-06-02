@@ -1,0 +1,18 @@
+{
+  "issue_number": 101,
+  "issue_title": "[MUSIC] Neon Dawn Rewind - Auto Generated 2025-06-02_0659",
+  "generated_at": "2025-06-02T07:02:09Z",
+  "parameters": {
+    "prompt": "synthwave, chillwave, nostalgic, dawn, atmospheric, pulsing bass, arpeggiator, tape-hiss",
+    "lyrics": "[verse]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 19850602,
+      "used": 19850602
+    }
+  },
+  "generation_time": "167.52",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

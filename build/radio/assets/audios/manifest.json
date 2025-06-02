@@ -167,6 +167,32 @@
       },
       "duration": 60,
       "issueNumber": 89
+    },
+    {
+      "id": "track_101",
+      "title": "[MUSIC] Neon Dawn Rewind - Auto Generated 2025-06-02_0659",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_101_20250602_070209.mp3",
+      "metadata": {
+        "issue_number": 101,
+        "issue_title": "[MUSIC] Neon Dawn Rewind - Auto Generated 2025-06-02_0659",
+        "generated_at": "2025-06-02T07:02:09Z",
+        "parameters": {
+          "prompt": "synthwave, chillwave, nostalgic, dawn, atmospheric, pulsing bass, arpeggiator, tape-hiss",
+          "lyrics": "[verse]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 19850602,
+            "used": 19850602
+          }
+        },
+        "generation_time": "167.52",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 101
     }
   ],
   "schedule_info": {
@@ -175,6 +201,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-01T05:42:36Z",
-  "total_tracks": 11
+  "last_updated": "2025-06-02T07:02:09Z",
+  "total_tracks": 6
 }

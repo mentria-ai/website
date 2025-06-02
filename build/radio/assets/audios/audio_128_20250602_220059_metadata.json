@@ -1,0 +1,18 @@
+{
+  "issue_number": 128,
+  "issue_title": "[MUSIC] Fading Echoes of a Paper Moon",
+  "generated_at": "2025-06-02T22:00:59Z",
+  "parameters": {
+    "prompt": "post-rock, cinematic, melancholic, strings, electric guitar, reverb-heavy, crescendo",
+    "lyrics": "[inst]\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 4291616673,
+      "used": 4291616673
+    }
+  },
+  "generation_time": "2627.34",
+  "file_size": "2.9M",
+  "generated_by": "mentria-ai"
+}

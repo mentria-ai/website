@@ -219,6 +219,32 @@
       },
       "duration": 150,
       "issueNumber": 108
+    },
+    {
+      "id": "track_111",
+      "title": "[MUSIC] Polaroid Static - Auto Generated 2025-06-02_0858",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_111_20250602_090533.mp3",
+      "metadata": {
+        "issue_number": 111,
+        "issue_title": "[MUSIC] Polaroid Static - Auto Generated 2025-06-02_0858",
+        "generated_at": "2025-06-02T09:05:33Z",
+        "parameters": {
+          "prompt": "jazz-hop, nostalgic, rain, muted-trumpet, vinyl-crackle, lo-fi, upright-bass, midnight-diner",
+          "lyrics": "[verse] Neon signs hum in the key of B flat / Coffee steam curls like a smoky riff / You trace circles where the wax once sat / On a record skip that won’t let go if [chorus] The jukebox heart keeps skipping beats / Playing our song on repeat, repeat / Static love in a 4/4 frame / Drown the silence, say my name [verse] Your laughter’s pressed between the grooves / Side B’s where we left the proof / One last chorus, then the needle lifts / Leaving orbits adrift [bridge] Rewind the tape, it’s all hiss and ache / Even the ghosts need a break [outro] Fade to runway lights / Departure boards blink goodnight\n",
+          "duration": 90,
+          "mode": "ultra",
+          "seed": {
+            "requested": 19890604,
+            "used": 19890604
+          }
+        },
+        "generation_time": "166.56",
+        "file_size": "1.7M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 90,
+      "issueNumber": 111
     }
   ],
   "schedule_info": {
@@ -227,6 +253,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T08:01:01Z",
-  "total_tracks": 7
+  "last_updated": "2025-06-02T09:05:33Z",
+  "total_tracks": 8
 }

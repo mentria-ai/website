@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_122",
+      "title": "[MUSIC] Almost Air",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_122_20250602_174047.mp3",
+      "metadata": {
+        "issue_number": 122,
+        "issue_title": "[MUSIC] Almost Air",
+        "generated_at": "2025-06-02T17:40:47Z",
+        "parameters": {
+          "prompt": "dream-pop, melancholic, nostalgic, electric piano, subtle percussion, reverb-drenched",
+          "lyrics": "[verse] The streetlights hum a lullaby / As midnight pulls the curtains tight / Your ghost still lingers in the air / A whisper fading into light [chorus] We built a home in borrowed time / Now all thats left are empty rhymes / The echoes dance but never stay / Like fireflies in yesterday [verse] The clock hands move but time stands still / Your laughter lingers on the sill / I trace the cracks where we once stood / A masterpiece misunderstood [chorus] We built a home in borrowed time / Now all thats left are empty rhymes / The echoes dance but never stay / Like fireflies in yesterday [bridge] Maybe someday the tides will turn / And all these pages left to burn / Will light the way back to your door / But not tonight, not anymore [outro] The streetlights dim, the music fades / Just shadows left of our parades / Goodbye my almost, my nearly there / My almost love, my almost air\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 229233308,
+            "used": 229233308
+          }
+        },
+        "generation_time": "2492.41",
+        "file_size": "2.9M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 122
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-02T17:40:47Z",
+  "total_tracks": 9
 }

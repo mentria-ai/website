@@ -219,6 +219,32 @@
       },
       "duration": 150,
       "issueNumber": 108
+    },
+    {
+      "id": "track_114",
+      "title": "[MUSIC] Static Lullabies - Auto Generated 2025-06-02_0930",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_114_20250602_093528.mp3",
+      "metadata": {
+        "issue_number": 114,
+        "issue_title": "[MUSIC] Static Lullabies - Auto Generated 2025-06-02_0930",
+        "generated_at": "2025-06-02T09:35:28Z",
+        "parameters": {
+          "prompt": "synthwave, nostalgic, dreamy, retro-futurism, electric piano, arpeggiator, lo-fi beats",
+          "lyrics": "[verse] Neon signs flicker like distant stars / The hum of the city fades into the dark / Ghosts of the past dance on broken glass / Echoes of a melody we used to know [chorus] We’re driving through the night / Headlights painting time / The future’s just a shadow / But we’ll make it glow [verse] Static whispers on the radio / A song we loved a lifetime ago / The streets are empty, but the skyline breathes / A heartbeat buried underneath [chorus] We’re driving through the night / Headlights painting time / The future’s just a shadow / But we’ll make it glow [bridge] Turn the dial, catch a frequency / A voice from 1983 / It hums a tune we can’t forget / A love we haven’t found yet [outro] The highway hums a lullaby / Dawn is bleeding in the sky / We’ll sleep when the last light dies\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 19831985,
+            "used": 19831985
+          }
+        },
+        "generation_time": "251.21",
+        "file_size": "2.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 114
     }
   ],
   "schedule_info": {
@@ -227,6 +253,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T08:01:01Z",
-  "total_tracks": 7
+  "last_updated": "2025-06-02T09:35:28Z",
+  "total_tracks": 8
 }

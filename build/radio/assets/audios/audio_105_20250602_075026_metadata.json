@@ -1,0 +1,18 @@
+{
+  "issue_number": 105,
+  "issue_title": "[MUSIC] Vinyl Solitude in a Paper Cup - Auto Generated 2025-06-02_0744",
+  "generated_at": "2025-06-02T07:50:26Z",
+  "parameters": {
+    "prompt": "lofi, jazzhop, rainy-day, piano, double-bass, brushed-snare, vinyl-crackle",
+    "lyrics": "[verse] The city hums in grayscale hues, / Rain taps a rhythm on the window views. / Steam rises from the pavement cracks, / A saxophone sighs, but never looks back. [chorus] Melodies melt in the neon glow, / Footsteps echo in the afterglow. / We’re just shadows in a coffee stain, / Drifting apart on a midnight train. [verse] The bartender wipes the counter clean, / Stories dissolve where the ice cubes lean. / A flickering sign spells ‘almost home’, / But the night’s too heavy to carry alone. [chorus] Melodies melt in the neon glow, / Footsteps echo in the afterglow. / We’re just shadows in a coffee stain, / Drifting apart on a midnight train. [bridge] The jukebox plays our favorite lie, / A slow surrender, a sweet goodbye. [outro] Dawn pulls the curtain, the rain rewinds, / Left with the bassline and tangled mind.\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2147483647,
+      "used": 2147483647
+    }
+  },
+  "generation_time": "185.9",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

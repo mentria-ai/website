@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_125",
+      "title": "[MUSIC] Wet Pavement Sonata",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_125_20250602_194425.mp3",
+      "metadata": {
+        "issue_number": 125,
+        "issue_title": "[MUSIC] Wet Pavement Sonata",
+        "generated_at": "2025-06-02T19:44:25Z",
+        "parameters": {
+          "prompt": "lofi, jazzhop, nostalgic, piano, vinyl crackle, rainy day, warm bass",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2822842815,
+            "used": 2822842815
+          }
+        },
+        "generation_time": "2452.04",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 125
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-02T19:44:25Z",
+  "total_tracks": 9
 }

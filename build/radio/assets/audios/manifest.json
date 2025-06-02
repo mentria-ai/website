@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_134",
+      "title": "[MUSIC] Polaroid Static",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_134_20250602_235113.mp3",
+      "metadata": {
+        "issue_number": 134,
+        "issue_title": "[MUSIC] Polaroid Static",
+        "generated_at": "2025-06-02T23:51:13Z",
+        "parameters": {
+          "prompt": "dream pop, melancholic, nostalgic, shimmering guitars, soft synths, whispery vocals, lo-fi warmth",
+          "lyrics": "[verse] The streetlights hum a lullaby, flickering like fireflies, we used to dance beneath their glow, but now the night just hears my sighs [chorus] Time rewinds in Polaroid frames, static smiles and faded names, I still hear the echoes calling, through the halls of yesterday [verse] Your laughs a ghost in every room, a vinyl skipping out of tune, the autumn leaves still fall so slow, but they dont taste the same, you know [chorus] Time rewinds in Polaroid frames, static smiles and faded names, I still hear the echoes calling, through the halls of yesterday [bridge] Maybe seasons change their minds, maybe clocks can walk backwards this time, maybe if I close my eyes tight, well be 2AM alibis [outro] The streetlights hum a lullaby...\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2638160232,
+            "used": 2638160232
+          }
+        },
+        "generation_time": "2833.36",
+        "file_size": "2.7M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 134
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-02T23:51:13Z",
+  "total_tracks": 9
 }

@@ -58,9 +58,8 @@ async function createIssue(params, isFallback = false) {
             fs.appendFileSync(logFile, `\n## Creating GitHub Issue${isFallback ? ' (Fallback)' : ''}\n`);
         }
         
-        const timestampForTitle = new Date().toISOString().slice(0, 16).replace('T', '_').replace(/:/g, '');
         const timestampForBody = new Date().toISOString().slice(0, 16).replace('T', ' ');
-        const issueTitle = `[MUSIC] ${params.TITLE_SUGGESTION} - Auto Generated ${timestampForTitle}`;
+        const issueTitle = `[MUSIC] ${params.TITLE_SUGGESTION}`;
         
         const issueBodyParts = [
             `## 🎵 Auto-Generated Music Request${isFallback ? ' (Fallback)' : ''}`,

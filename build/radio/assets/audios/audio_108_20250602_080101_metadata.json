@@ -1,0 +1,18 @@
+{
+  "issue_number": 108,
+  "issue_title": "[MUSIC] Toaster Symphonies - Auto Generated 2025-06-02_0756",
+  "generated_at": "2025-06-02T08:01:01Z",
+  "parameters": {
+    "prompt": "lo-fi, jazzhop, melancholic, vinyl crackle, muted trumpet, soft piano, glitchy percussion",
+    "lyrics": "[verse] The dawn spills ink on empty streets, / my coffee cup collects the heat. / The radio hums a half-remembered tune, / flickering like a drowsy moon. [chorus] Slow-motion shadows start to climb, / rewriting yesterday in pantomime. / I’ll press rewind just one more time— / but the tape’s been chewed by morning light. [verse] The crossword clues stay unresolved, / the cat yawns like a problem solved. / The fridge light buzzes its tiny elegy, / for all the groceries yet to be. [chorus] Slow-motion shadows start to climb, / rewriting yesterday in pantomime. / I’ll press rewind just one more time— / but the tape’s been chewed by morning light. [bridge] The toaster pops, a minor key, / the sun insists on symmetry. / I count the cracks along the ceiling— / oh, the art of fleeting feeling. [outro] The bus exhales and pulls away, / my reflection’s late to say: / We’ll try again another day. / (The cat just blinks and turns to sleep.)\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 19890604,
+      "used": 19890604
+    }
+  },
+  "generation_time": "238.08",
+  "file_size": "2.9M",
+  "generated_by": "mentria-ai"
+}

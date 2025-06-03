@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_138",
+      "title": "[MUSIC] Rainy Alley Conversations",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_138_20250603_004951.mp3",
+      "metadata": {
+        "issue_number": 138,
+        "issue_title": "[MUSIC] Rainy Alley Conversations",
+        "generated_at": "2025-06-03T00:49:51Z",
+        "parameters": {
+          "prompt": "jazz-hop, nostalgic, lo-fi, saxophone, vinyl crackle, chill, late night",
+          "lyrics": "[inst]\n",
+          "duration": 90,
+          "mode": "ultra",
+          "seed": {
+            "requested": 3494270019,
+            "used": 3494270019
+          }
+        },
+        "generation_time": "150.47",
+        "file_size": "1.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 90,
+      "issueNumber": 138
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-03T00:49:51Z",
+  "total_tracks": 9
 }

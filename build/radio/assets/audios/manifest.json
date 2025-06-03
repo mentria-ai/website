@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_140",
+      "title": "[MUSIC] Holographic Raindrops",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_140_20250603_005438.mp3",
+      "metadata": {
+        "issue_number": 140,
+        "issue_title": "[MUSIC] Holographic Raindrops",
+        "generated_at": "2025-06-03T00:54:38Z",
+        "parameters": {
+          "prompt": "synthwave, cyberpunk, nostalgic, pulsing, bass-heavy, retro-futuristic, arpeggiated",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 3527844455,
+            "used": 3527844455
+          }
+        },
+        "generation_time": "225.91",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 140
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-03T00:54:38Z",
+  "total_tracks": 9
 }

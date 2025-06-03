@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_141",
+      "title": "[MUSIC] Fading Streetlight",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_141_20250603_014614.mp3",
+      "metadata": {
+        "issue_number": 141,
+        "issue_title": "[MUSIC] Fading Streetlight",
+        "generated_at": "2025-06-03T01:46:14Z",
+        "parameters": {
+          "prompt": "synthwave, melancholic, dreamy, nostalgic, electric piano, soft drums, reverb-heavy",
+          "lyrics": "[verse] Walking through the neon haze, echoes of a yesterday, flickering like old film frames, whispering your name [chorus] We were electric in the dark, sparks that never left a mark, but the memory glows so bright, like a fading streetlight [verse] Static hums where laughter played, shadows dance but theyre not you, just the ghosts we made [chorus] We were electric in the dark, sparks that never left a mark, but the memory glows so bright, like a fading streetlight [bridge] Maybe in another time, we could rewind, but the tapes worn out tonight [outro] Neon fades to morning blue, all thats left is me and you, in the afterglow\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 991077320,
+            "used": 991077320
+          }
+        },
+        "generation_time": "3062.74",
+        "file_size": "2.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 141
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-03T01:46:14Z",
+  "total_tracks": 9
 }

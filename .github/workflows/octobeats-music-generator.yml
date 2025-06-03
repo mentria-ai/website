@@ -1008,12 +1008,12 @@ jobs:
             const lyricsText = `${{ steps.extract-params.outputs.lyrics }}`.replace(/[`"\\]/g, '\\$&');
             const modeText = `${{ steps.extract-params.outputs.mode }}`.replace(/[`"\\]/g, '\\$&');
             
-            // Create PR body
-            const usedSeed = '${{ steps.generate-audio.outputs.used_seed }}';
-            const requestedSeed = '${{ steps.extract-params.outputs.seed }}';
-            const userPermission = '${{ steps.validate-trigger.outputs.user_permission }}';
-            const approvedBy = '${{ steps.validate-trigger.outputs.approved_by }}';
-            const approvalMethod = '${{ steps.validate-trigger.outputs.approval_method }}';
+            // Create PR body - safely handle potentially empty values
+            const usedSeed = `${{ steps.generate-audio.outputs.used_seed }}` || '';
+            const requestedSeed = `${{ steps.extract-params.outputs.seed }}` || '';
+            const userPermission = `${{ steps.validate-trigger.outputs.user_permission }}` || '';
+            const approvedBy = `${{ steps.validate-trigger.outputs.approved_by }}` || '';
+            const approvalMethod = `${{ steps.validate-trigger.outputs.approval_method }}` || '';
             
             let seedSection = '';
             if (usedSeed && usedSeed !== '') {
@@ -1161,11 +1161,11 @@ jobs:
             const audioFilename = '${{ steps.create-branch.outputs.audio_filename }}';
             const issueNumber = context.payload.issue.number;
             const runId = context.runId;
-            const usedSeed = '${{ steps.generate-audio.outputs.used_seed }}';
-            const requestedSeed = '${{ steps.extract-params.outputs.seed }}';
-            const userPermission = '${{ steps.validate-trigger.outputs.user_permission }}';
-            const approvedBy = '${{ steps.validate-trigger.outputs.approved_by }}';
-            const approvalMethod = '${{ steps.validate-trigger.outputs.approval_method }}';
+            const usedSeed = `${{ steps.generate-audio.outputs.used_seed }}` || '';
+            const requestedSeed = `${{ steps.extract-params.outputs.seed }}` || '';
+            const userPermission = `${{ steps.validate-trigger.outputs.user_permission }}` || '';
+            const approvedBy = `${{ steps.validate-trigger.outputs.approved_by }}` || '';
+            const approvalMethod = `${{ steps.validate-trigger.outputs.approval_method }}` || '';
             
             // Safely escape values for use in template strings
             const promptText = `${{ steps.extract-params.outputs.prompt }}`.replace(/[`"\\]/g, '\\$&');

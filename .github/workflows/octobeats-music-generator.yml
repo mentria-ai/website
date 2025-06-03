@@ -5,6 +5,9 @@ on:
     types: [opened, edited, labeled]
   issue_comment:
     types: [created, edited]
+  # Allow workflow to run when reactions are added (for approval mechanism)
+  # Note: GitHub doesn't have a direct reaction trigger, but we can use issue events
+  # and check for reactions in the validation step
 
 # CONCURRENCY CONTROL: Prevent multiple workflows for the same issue
 # This ensures only one workflow runs per issue, preventing duplicates when
@@ -112,9 +115,81 @@ jobs:
                 return;
               } else {
                 fs.appendFileSync(logFile, `❌ User does not have sufficient permissions (${permission.permission})\n`);
-                core.setOutput('should_process', 'false');
-                core.setOutput('reason', `Insufficient permissions. User has '${permission.permission}' but needs 'admin' or 'maintain'`);
-                return;
+                
+                // Check for approval reactions from qualified users
+                fs.appendFileSync(logFile, `🔍 Checking for approval reactions from qualified users...\n`);
+                
+                try {
+                  // Get all reactions on the issue
+                  const { data: reactions } = await github.rest.reactions.listForIssue({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number
+                  });
+                  
+                  // Approval reactions we're looking for
+                  const approvalReactions = ['+1', 'hooray', 'heart', 'rocket']; // GitHub API names for 👍, 🎉, ❤️, 🚀
+                  
+                  fs.appendFileSync(logFile, `Found ${reactions.length} total reactions\n`);
+                  
+                  // Check each reaction
+                  let approvedByQualifiedUser = false;
+                  
+                  for (const reaction of reactions) {
+                    if (approvalReactions.includes(reaction.content)) {
+                      const reactionUser = reaction.user.login;
+                      fs.appendFileSync(logFile, `Found approval reaction (${reaction.content}) from: ${reactionUser}\n`);
+                      
+                      // Check if this user is the repository owner
+                      if (reactionUser === repoOwner) {
+                        fs.appendFileSync(logFile, `✅ Approval reaction from repository owner: ${reactionUser}\n`);
+                        approvedByQualifiedUser = true;
+                        core.setOutput('approved_by', reactionUser);
+                        core.setOutput('approval_method', 'owner_reaction');
+                        break;
+                      }
+                      
+                      // Check if this user has admin/maintain permissions
+                      try {
+                        const { data: reactorPermission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          username: reactionUser
+                        });
+                        
+                        if (['admin', 'maintain'].includes(reactorPermission.permission)) {
+                          fs.appendFileSync(logFile, `✅ Approval reaction from qualified user: ${reactionUser} (${reactorPermission.permission})\n`);
+                          approvedByQualifiedUser = true;
+                          core.setOutput('approved_by', reactionUser);
+                          core.setOutput('approval_method', `${reactorPermission.permission}_reaction`);
+                          break;
+                        } else {
+                          fs.appendFileSync(logFile, `❌ Reaction from unqualified user: ${reactionUser} (${reactorPermission.permission})\n`);
+                        }
+                      } catch (permError) {
+                        fs.appendFileSync(logFile, `⚠️ Error checking permissions for ${reactionUser}: ${permError.message}\n`);
+                      }
+                    }
+                  }
+                  
+                  if (approvedByQualifiedUser) {
+                    fs.appendFileSync(logFile, `✅ Issue approved by qualified user via reaction\n`);
+                    core.setOutput('should_process', 'true');
+                    core.setOutput('user_permission', 'approved_via_reaction');
+                    return;
+                  } else {
+                    fs.appendFileSync(logFile, `❌ No approval reactions found from qualified users\n`);
+                    fs.appendFileSync(logFile, `💡 Hint: Repository owners/admins/maintainers can approve this request by reacting with 👍, 🎉, ❤️, or 🚀\n`);
+                    core.setOutput('should_process', 'false');
+                    core.setOutput('reason', `Insufficient permissions. User has '${permission.permission}' but needs 'admin' or 'maintain', or approval from a qualified user via reaction (👍, 🎉, ❤️, 🚀)`);
+                    return;
+                  }
+                } catch (reactionError) {
+                  fs.appendFileSync(logFile, `❌ Error checking reactions: ${reactionError.message}\n`);
+                  core.setOutput('should_process', 'false');
+                  core.setOutput('reason', `Error checking approval reactions: ${reactionError.message}`);
+                  return;
+                }
               }
             } catch (error) {
               fs.appendFileSync(logFile, `❌ Error checking user permissions: ${error.message}\n`);
@@ -127,7 +202,17 @@ jobs:
         if: steps.validate-trigger.outputs.should_process != 'true'
         run: |
           echo "⏭️ Skipping workflow: ${{ steps.validate-trigger.outputs.reason }}"
-          echo "This workflow only processes issues with audio generation labels from repository owners/admins/maintainers."
+          echo ""
+          echo "📋 Requirements for OctoBeats Music Generation:"
+          echo "   1. Issue must have labels: 'audio', 'octobeats', or 'music-generation'"
+          echo "   2. Either:"
+          echo "      a) Created by repository owner/admin/maintainer, OR"
+          echo "      b) Approved by owner/admin/maintainer via reaction (👍, 🎉, ❤️, 🚀)"
+          echo ""
+          echo "💡 If you're not an owner/admin/maintainer:"
+          echo "   • Create your issue with the required labels"
+          echo "   • Ask an owner/admin/maintainer to approve it by reacting with 👍, 🎉, ❤️, or 🚀"
+          echo "   • The workflow will automatically run once approved"
           exit 0
       
       - name: Check for existing audio generation
@@ -926,6 +1011,9 @@ jobs:
             // Create PR body
             const usedSeed = '${{ steps.generate-audio.outputs.used_seed }}';
             const requestedSeed = '${{ steps.extract-params.outputs.seed }}';
+            const userPermission = '${{ steps.validate-trigger.outputs.user_permission }}';
+            const approvedBy = '${{ steps.validate-trigger.outputs.approved_by }}';
+            const approvalMethod = '${{ steps.validate-trigger.outputs.approval_method }}';
             
             let seedSection = '';
             if (usedSeed && usedSeed !== '') {
@@ -936,6 +1024,12 @@ jobs:
               }
             } else if (requestedSeed && requestedSeed !== '') {
               seedSection = `\n            - **Seed**: ${requestedSeed} (requested, but not confirmed from response)`;
+            }
+            
+            let approvalSection = '';
+            if (userPermission === 'approved_via_reaction' && approvedBy) {
+              const reactionEmoji = approvalMethod.includes('owner') ? '👑' : '🛡️';
+              approvalSection = `\n            - **Approved By**: @${approvedBy} ${reactionEmoji} (via ${approvalMethod.replace('_', ' ')})`;
             }
             
             const prBody = `## 🎵 Generated Audio for #${issueNumber}
@@ -953,7 +1047,7 @@ jobs:
             - **Generation Time**: ${{ steps.generate-audio.outputs.generation_time }}s
             - **File Size**: ${{ steps.download-audio.outputs.file_size }}
             - **Generated By**: @${{ github.actor }}
-            - **Generated At**: ${new Date().toISOString()}
+            - **Generated At**: ${new Date().toISOString()}${approvalSection}
             
             ### 📁 Files Added
             
@@ -1069,6 +1163,9 @@ jobs:
             const runId = context.runId;
             const usedSeed = '${{ steps.generate-audio.outputs.used_seed }}';
             const requestedSeed = '${{ steps.extract-params.outputs.seed }}';
+            const userPermission = '${{ steps.validate-trigger.outputs.user_permission }}';
+            const approvedBy = '${{ steps.validate-trigger.outputs.approved_by }}';
+            const approvalMethod = '${{ steps.validate-trigger.outputs.approval_method }}';
             
             // Safely escape values for use in template strings
             const promptText = `${{ steps.extract-params.outputs.prompt }}`.replace(/[`"\\]/g, '\\$&');
@@ -1077,6 +1174,13 @@ jobs:
             
             // Create download URL for the artifact
             const artifactDownloadUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId}`;
+            
+            // Create approval information if applicable
+            let approvalInfo = '';
+            if (userPermission === 'approved_via_reaction' && approvedBy) {
+              const reactionEmoji = approvalMethod.includes('owner') ? '👑' : '🛡️';
+              approvalInfo = `\n- **Approved By**: @${approvedBy} ${reactionEmoji} (via ${approvalMethod.replace('_', ' ')})`;
+            }
             
             const comment = `## 🎵 Audio Generated Successfully!
             
@@ -1096,7 +1200,7 @@ jobs:
             - **Quality Mode**: "${modeText}"
             - **Seed**: ${usedSeed || 'Random generation'}${requestedSeed && requestedSeed !== usedSeed ? ` (requested: ${requestedSeed})` : ''}
             - **Generation Time**: ${{ steps.generate-audio.outputs.generation_time }}s
-            - **File Size**: ${{ steps.download-audio.outputs.file_size }}
+            - **File Size**: ${{ steps.download-audio.outputs.file_size }}${approvalInfo}
             
             ### 🎼 Generated Parameters
             

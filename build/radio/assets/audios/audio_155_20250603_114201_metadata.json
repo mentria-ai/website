@@ -1,0 +1,18 @@
+{
+  "issue_number": 155,
+  "issue_title": "[MUSIC] funky house music",
+  "generated_at": "2025-06-03T11:42:01Z",
+  "parameters": {
+    "prompt": "electronic, melodic, funky, house, low key",
+    "lyrics": "[inst]\n",
+    "duration": 60,
+    "mode": "ultra",
+    "seed": {
+      "requested": 12345,
+      "used": 12345
+    }
+  },
+  "generation_time": "2346.3",
+  "file_size": "1.3M",
+  "generated_by": "mentria-ai"
+}

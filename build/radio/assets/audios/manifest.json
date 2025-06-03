@@ -250,23 +250,23 @@
       "id": "track_155",
       "title": "[MUSIC] funky house music",
       "artist": "mentria.ai",
-      "file": "assets/audios/audio_155_20250603_105630.mp3",
+      "file": "assets/audios/audio_155_20250603_114201.mp3",
       "metadata": {
         "issue_number": 155,
         "issue_title": "[MUSIC] funky house music",
-        "generated_at": "2025-06-03T10:56:30Z",
+        "generated_at": "2025-06-03T11:42:01Z",
         "parameters": {
           "prompt": "electronic, melodic, funky, house, low key",
           "lyrics": "[inst]\n",
           "duration": 60,
           "mode": "ultra",
           "seed": {
-            "requested": null,
-            "used": null
+            "requested": 12345,
+            "used": 12345
           }
         },
-        "generation_time": "167.48",
-        "file_size": "1.2M",
+        "generation_time": "2346.3",
+        "file_size": "1.3M",
         "generated_by": "mentria-ai"
       },
       "duration": 60,
@@ -279,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-03T10:56:30Z",
+  "last_updated": "2025-06-03T11:42:01Z",
   "total_tracks": 9
 }

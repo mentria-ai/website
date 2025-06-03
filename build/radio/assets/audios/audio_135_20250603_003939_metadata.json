@@ -1,0 +1,18 @@
+{
+  "issue_number": 135,
+  "issue_title": "[MUSIC] Payphone Constellations",
+  "generated_at": "2025-06-03T00:39:39Z",
+  "parameters": {
+    "prompt": "dream pop, melancholic, nostalgic, electric piano, lo-fi, washed-out vocals, reverb-heavy",
+    "lyrics": "[verse] The streetlights hum a lullaby / Asphalt still warm from the day / I trace the cracks in constellations / But the sky forgot my name [chorus] All my ghosts are out tonight / Dancing in the parking lot / If I close my eyes too tight / Maybe time will stop [verse] Your voice still echoes on the payphone / Static like a distant shore / I keep the quarters but dont call / Cant bear to hear you dont pick up anymore [chorus] All my ghosts are out tonight / Spinning under neon rain / If I hold my breath just right / Maybe youll remain [bridge] The diners fluorescent glow / Writes our story on the glass / Two silhouettes now / One shadow cast [outro] Let the dawn keep waiting / Let the traffic lights sway / Just one more cigarette / Before yesterday fades away\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 3326418872,
+      "used": 3326418872
+    }
+  },
+  "generation_time": "2874.19",
+  "file_size": "2.8M",
+  "generated_by": "mentria-ai"
+}

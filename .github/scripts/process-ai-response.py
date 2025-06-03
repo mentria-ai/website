@@ -127,7 +127,7 @@ def extract_and_validate_parameters():
         
         # Clean parameters and limit length appropriately
         style_prompt = str(style_prompt).strip()[:200]
-        lyrics = str(lyrics).strip()[:2000]  # Allow much longer lyrics (2000 chars)
+        lyrics = str(lyrics).strip()[:4000]  # Allow much longer lyrics (4000 chars)
         title_suggestion = str(title_suggestion).strip()[:100]  # Slightly longer titles
         inspiration = str(inspiration).strip()[:300]
         

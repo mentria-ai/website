@@ -1,0 +1,18 @@
+{
+  "issue_number": 222,
+  "issue_title": "[MUSIC] Answering Machine Constellations",
+  "generated_at": "2025-06-06T22:58:47Z",
+  "parameters": {
+    "prompt": "dream-pop, melancholic, nostalgic, electric piano, soft percussion, reverb-drenched",
+    "lyrics": "[verse] The streetlights hum a lullaby / Asphalt still warm from the day / Your shadow lingers by the door / But youre already miles away [chorus] Static in the telephone / Fading like a radio glow / I dial your number in the dark / But the lines been dead for years, I know [verse] Polaroids curl at the edge / Smiles frozen under glass / The future we sketched in pencil / Just a ghost of the past [chorus] Static in the telephone / Fading like a radio glow / I dial your number in the dark / But the lines been dead for years, I know [bridge] Maybe in some parallel world / Were still eating breakfast at noon / Our laughter spilling through the screen door / To a tune we forgot too soon [outro] The answering machine finally sleeps / Just the hiss of an empty room / And the echo of your voice / Still caught in the wires of the moon\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 657794732,
+      "used": 657794732
+    }
+  },
+  "generation_time": "288.34",
+  "file_size": "2.8M",
+  "generated_by": "mentria-ai"
+}

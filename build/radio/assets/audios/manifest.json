@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_192",
+      "title": "[MUSIC] Neon Monsoon at 3 AM",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_192_20250606_174721.mp3",
+      "metadata": {
+        "issue_number": 192,
+        "issue_title": "[MUSIC] Neon Monsoon at 3 AM",
+        "generated_at": "2025-06-06T17:47:21Z",
+        "parameters": {
+          "prompt": "synthwave, cyberpunk, nostalgic, arpeggiator, cinematic, bass-heavy, retro-futuristic",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 465037657,
+            "used": 465037657
+          }
+        },
+        "generation_time": "259.84",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 192
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T17:47:21Z",
+  "total_tracks": 10
 }

@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_228",
+      "title": "[MUSIC] Streetlamp Lullabies",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_228_20250606_235529.mp3",
+      "metadata": {
+        "issue_number": 228,
+        "issue_title": "[MUSIC] Streetlamp Lullabies",
+        "generated_at": "2025-06-06T23:55:29Z",
+        "parameters": {
+          "prompt": "lo-fi, jazzhop, nocturnal, piano, muted trumpet, vinyl crackle, urban",
+          "lyrics": "[inst]\n",
+          "duration": 90,
+          "mode": "ultra",
+          "seed": {
+            "requested": 4038455203,
+            "used": 4038455203
+          }
+        },
+        "generation_time": "221.19",
+        "file_size": "1.9M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 90,
+      "issueNumber": 228
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T23:55:29Z",
+  "total_tracks": 10
 }

@@ -1,0 +1,18 @@
+{
+  "issue_number": 202,
+  "issue_title": "[MUSIC] Neon Highway Mirage",
+  "generated_at": "2025-06-06T19:42:53Z",
+  "parameters": {
+    "prompt": "synthwave, retro-futuristic, nostalgic, pulsating, arpeggiator, cinematic, midnight drive",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 4076200863,
+      "used": 4076200863
+    }
+  },
+  "generation_time": "247.19",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

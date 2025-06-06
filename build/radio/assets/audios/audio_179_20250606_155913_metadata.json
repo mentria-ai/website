@@ -1,0 +1,18 @@
+{
+  "issue_number": 179,
+  "issue_title": "[MUSIC] Cassette Static for Two",
+  "generated_at": "2025-06-06T15:59:13Z",
+  "parameters": {
+    "prompt": "synthwave, nostalgic, dreamy, retro-futuristic, electric piano, pulsating bass, shimmering arpeggios",
+    "lyrics": "[verse] Neon signs hum in the rain / A flickering ghost of a memory lane / We used to dance under cathode glow / Now the screens just whisper low [chorus] Echoes in the static / Faces we can’t place / Time rewinds in fragments / But we can’t hit erase [verse] Your voice is trapped in a cassette / A love song lost in a pirate net / Rewind, but the tape’s too worn / Just a hiss where our names were sworn [chorus] Echoes in the static / Faces we can’t place / Time rewinds in fragments / But we can’t hit erase [bridge] Dial tone on a payphone heart / Every number leads to a different dark / The city breathes in binary sighs / And our story’s just a corrupted file [outro] Fading into the noise again / A VHS sky with a broken end / Press stop—but the play’s on loop / Just a ghost in the circuit of you\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 221362836,
+      "used": 221362836
+    }
+  },
+  "generation_time": "286.12",
+  "file_size": "2.8M",
+  "generated_by": "mentria-ai"
+}

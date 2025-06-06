@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_212",
+      "title": "[MUSIC] Retrograde Hologram",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_212_20250606_212427.mp3",
+      "metadata": {
+        "issue_number": 212,
+        "issue_title": "[MUSIC] Retrograde Hologram",
+        "generated_at": "2025-06-06T21:24:27Z",
+        "parameters": {
+          "prompt": "synthwave, cinematic, nostalgic, arpeggiator, pulsating bass, vintage drum machine, ethereal pads",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 849329687,
+            "used": 849329687
+          }
+        },
+        "generation_time": "245.2",
+        "file_size": "1.9M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 212
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T21:24:27Z",
+  "total_tracks": 10
 }

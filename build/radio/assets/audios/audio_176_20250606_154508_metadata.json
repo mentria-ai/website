@@ -1,0 +1,18 @@
+{
+  "issue_number": 176,
+  "issue_title": "[MUSIC] Whispering Streetlamps",
+  "generated_at": "2025-06-06T15:45:08Z",
+  "parameters": {
+    "prompt": "jazz-hop, nocturnal, warm, rhodes, brushed drums, vinyl crackle, lo-fi",
+    "lyrics": "[inst]\n",
+    "duration": 90,
+    "mode": "ultra",
+    "seed": {
+      "requested": 4019476235,
+      "used": 4019476235
+    }
+  },
+  "generation_time": "149.35",
+  "file_size": "1.8M",
+  "generated_by": "mentria-ai"
+}

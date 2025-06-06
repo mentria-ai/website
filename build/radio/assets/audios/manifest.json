@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_210",
+      "title": "[MUSIC] Smoke Rings in a Dimly Lit Room",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_210_20250606_205847.mp3",
+      "metadata": {
+        "issue_number": 210,
+        "issue_title": "[MUSIC] Smoke Rings in a Dimly Lit Room",
+        "generated_at": "2025-06-06T20:58:47Z",
+        "parameters": {
+          "prompt": "psychedelic jazz, noir, hypnotic, electric piano, bass clarinet, brushed drums, tape saturation",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 803463641,
+            "used": 803463641
+          }
+        },
+        "generation_time": "243.5",
+        "file_size": "2.5M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 210
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T20:58:47Z",
+  "total_tracks": 10
 }

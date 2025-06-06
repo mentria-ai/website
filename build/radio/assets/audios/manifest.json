@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_198",
+      "title": "[MUSIC] Static Lullaby for a Forgotten Satellite",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_198_20250606_185902.mp3",
+      "metadata": {
+        "issue_number": 198,
+        "issue_title": "[MUSIC] Static Lullaby for a Forgotten Satellite",
+        "generated_at": "2025-06-06T18:59:02Z",
+        "parameters": {
+          "prompt": "synthwave, cinematic, nostalgic, pulsating, arpeggiator, deep bass, reverb-drenched",
+          "lyrics": "[inst]\n",
+          "duration": 90,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2073124615,
+            "used": 2073124615
+          }
+        },
+        "generation_time": "185.76",
+        "file_size": "1.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 90,
+      "issueNumber": 198
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T18:59:02Z",
+  "total_tracks": 10
 }

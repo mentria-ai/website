@@ -1,0 +1,18 @@
+{
+  "issue_number": 196,
+  "issue_title": "[MUSIC] Starlight Highway Chase",
+  "generated_at": "2025-06-06T18:39:40Z",
+  "parameters": {
+    "prompt": "synthwave, cosmic, nostalgic, arpeggiator, bass-driven, retro-futuristic, pulsating, spacey",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 722116579,
+      "used": 722116579
+    }
+  },
+  "generation_time": "193.87",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

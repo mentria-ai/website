@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_196",
+      "title": "[MUSIC] Starlight Highway Chase",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_196_20250606_183940.mp3",
+      "metadata": {
+        "issue_number": 196,
+        "issue_title": "[MUSIC] Starlight Highway Chase",
+        "generated_at": "2025-06-06T18:39:40Z",
+        "parameters": {
+          "prompt": "synthwave, cosmic, nostalgic, arpeggiator, bass-driven, retro-futuristic, pulsating, spacey",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 722116579,
+            "used": 722116579
+          }
+        },
+        "generation_time": "193.87",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 196
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T18:39:40Z",
+  "total_tracks": 10
 }

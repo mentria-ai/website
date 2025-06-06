@@ -1,0 +1,18 @@
+{
+  "issue_number": 192,
+  "issue_title": "[MUSIC] Neon Monsoon at 3 AM",
+  "generated_at": "2025-06-06T17:47:21Z",
+  "parameters": {
+    "prompt": "synthwave, cyberpunk, nostalgic, arpeggiator, cinematic, bass-heavy, retro-futuristic",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 465037657,
+      "used": 465037657
+    }
+  },
+  "generation_time": "259.84",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

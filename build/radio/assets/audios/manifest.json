@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_188",
+      "title": "[MUSIC] Broken Tape Heart",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_188_20250606_165700.mp3",
+      "metadata": {
+        "issue_number": 188,
+        "issue_title": "[MUSIC] Broken Tape Heart",
+        "generated_at": "2025-06-06T16:57:00Z",
+        "parameters": {
+          "prompt": "synthwave, nostalgic, dreamy, retro-futuristic, arpeggiator, warm pads",
+          "lyrics": "[verse] Neon lights paint the streets in blue, shadows dance just like we used to do, whispers drift on the midnight air, echoes of a love that wasn’t there [chorus] We’re rewinding time on a broken tape, static hearts and a lost escape, I still see you in the afterglow, a ghost in the circuits, a faded show [verse] Your hologram flickers on my screen, pixelated smiles and a silent scream, I press delete but you never leave, just a glitch in the code of make-believe [chorus] We’re rewinding time on a broken tape, static hearts and a lost escape, I still see you in the afterglow, a ghost in the circuits, a faded show [bridge] The city hums a lullaby, binary stars in a blackout sky, if love’s just data then let it fly, into the void where all things die [outro] Neon fades to a distant hue, just a memory of me and you, the cassette clicks, the playback’s through—goodbye in 8-bit, forever blue\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 436573478,
+            "used": 436573478
+          }
+        },
+        "generation_time": "264.72",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 188
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T16:57:00Z",
+  "total_tracks": 10
 }

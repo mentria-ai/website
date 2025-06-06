@@ -1,0 +1,18 @@
+{
+  "issue_number": 194,
+  "issue_title": "[MUSIC] Whispering Streetlights",
+  "generated_at": "2025-06-06T17:58:49Z",
+  "parameters": {
+    "prompt": "jazzhop, nocturnal, melancholic, piano, brushed drums, double bass, vinyl crackle",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 199307667,
+      "used": 199307667
+    }
+  },
+  "generation_time": "256.17",
+  "file_size": "2.5M",
+  "generated_by": "mentria-ai"
+}

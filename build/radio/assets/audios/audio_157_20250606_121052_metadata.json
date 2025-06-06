@@ -1,0 +1,18 @@
+{
+  "issue_number": 157,
+  "issue_title": "[MUSIC] club",
+  "generated_at": "2025-06-06T12:10:52Z",
+  "parameters": {
+    "prompt": "Nightclubs, dance parties, workout playlists, radio broadcasts",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 272727,
+      "used": 272727
+    }
+  },
+  "generation_time": "171.56",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

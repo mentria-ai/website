@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_214",
+      "title": "[MUSIC] Hum of the Rain",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_214_20250606_214414.mp3",
+      "metadata": {
+        "issue_number": 214,
+        "issue_title": "[MUSIC] Hum of the Rain",
+        "generated_at": "2025-06-06T21:44:14Z",
+        "parameters": {
+          "prompt": "synthwave, nostalgic, melancholic, electric piano, dreamy, lo-fi, reverb, soft percussion",
+          "lyrics": "[verse] The neon lights blur as the rain comes down, memories flicker like ghosts in this town, I trace the echoes of a voice I once knew, static whispers calling me back to you [chorus] We were electric in the dark, sparks in the night, leave a mark, now the tapes worn and the signals faint, but I still hear you in the hum of the rain [verse] Your name glows on a faded sign, a hologram love lost in time, the city hums but its not the same, just reruns playing our old refrain [chorus] We were electric in the dark, sparks in the night, leave a mark, now the tapes worn and the signals faint, but I still hear you in the hum of the rain [bridge] Rewind the years, press play on the past, the futures a frequency we couldnt hold fast [outro] The streets are empty, the screens all glow, singing our song on the late-night radio\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 1149522984,
+            "used": 1149522984
+          }
+        },
+        "generation_time": "248.25",
+        "file_size": "2.2M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 214
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T21:44:14Z",
+  "total_tracks": 10
 }

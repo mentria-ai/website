@@ -1,0 +1,18 @@
+{
+  "issue_number": 208,
+  "issue_title": "[MUSIC] Static Lullabies",
+  "generated_at": "2025-06-06T20:48:34Z",
+  "parameters": {
+    "prompt": "synthwave, melancholic, nostalgic, electric guitar, dreamy, lo-fi beats, atmospheric",
+    "lyrics": "[verse] Neon lights bleed through my blinds, painting ghosts across the floor. I trace the cracks in fading time, but cant recall what I was searching for. [chorus] Static hums a lullaby, the city sighs in black and white. Were just echoes in the wires, flickering out before the light. [verse] Your voice still lingers on the tape, a whisper tangled in the spools. Rewind wont bring back our mistakes, just the ache of phantom rules. [chorus] Static hums a lullaby, the city sighs in black and white. Were just echoes in the wires, flickering out before the light. [bridge] Polaroids curl at the edges now, faces blurred by August heat. The future we swore to disavow still haunts this obsolete beat. [outro] The VHS whirs as it swallows the past, snow fills the screen at last.\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 1662054888,
+      "used": 1662054888
+    }
+  },
+  "generation_time": "298.09",
+  "file_size": "2.9M",
+  "generated_by": "mentria-ai"
+}

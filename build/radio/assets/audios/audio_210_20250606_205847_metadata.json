@@ -1,0 +1,18 @@
+{
+  "issue_number": 210,
+  "issue_title": "[MUSIC] Smoke Rings in a Dimly Lit Room",
+  "generated_at": "2025-06-06T20:58:47Z",
+  "parameters": {
+    "prompt": "psychedelic jazz, noir, hypnotic, electric piano, bass clarinet, brushed drums, tape saturation",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 803463641,
+      "used": 803463641
+    }
+  },
+  "generation_time": "243.5",
+  "file_size": "2.5M",
+  "generated_by": "mentria-ai"
+}

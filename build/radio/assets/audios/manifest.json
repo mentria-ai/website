@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_220",
+      "title": "[MUSIC] Fading Polaroid Memories",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_220_20250606_224655.mp3",
+      "metadata": {
+        "issue_number": 220,
+        "issue_title": "[MUSIC] Fading Polaroid Memories",
+        "generated_at": "2025-06-06T22:46:55Z",
+        "parameters": {
+          "prompt": "synthwave, cinematic, nostalgic, pulsating, arpeggiator, analog warmth",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 91109073,
+            "used": 91109073
+          }
+        },
+        "generation_time": "255.53",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 220
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T22:46:55Z",
+  "total_tracks": 10
 }

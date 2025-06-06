@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_160",
+      "title": "[MUSIC] Afterglow Static",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_160_20250606_115535.mp3",
+      "metadata": {
+        "issue_number": 160,
+        "issue_title": "[MUSIC] Afterglow Static",
+        "generated_at": "2025-06-06T11:55:35Z",
+        "parameters": {
+          "prompt": "synthwave, nostalgic, melancholic, pulsing bass, shimmering arpeggios, vintage drum machine, cinematic",
+          "lyrics": "[verse] City lights blur through the rain, neon ghosts in the taxi lane, I still hear your voice in the static hum, a broken signal from where we’d begun [chorus] We were echoes in a hollow room, dancing shadows chasing the moon, now the tape’s worn thin, but I press rewind, to the nights we left in the afterglow’s shine [verse] Your number’s faded on my palm, like a relic from a midnight psalm, I dial the stars but they don’t reply, just the hum of the wires and a half-remembered goodbye [chorus] We were echoes in a hollow room, dancing shadows chasing the moon, now the tape’s worn thin, but I press rewind, to the nights we left in the afterglow’s shine [bridge] The jukebox skips on our favorite song, a glitch in time where we still belong, if I close my eyes, we’re 17—headlights carving dreams on a silver screen [outro] The dawn’s a VHS bleed, rewinding you back to me, but the screen just snows…\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 3708882480,
+            "used": 3708882480
+          }
+        },
+        "generation_time": "234.26",
+        "file_size": "4.0K",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 160
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-06T11:55:35Z",
+  "total_tracks": 9
 }

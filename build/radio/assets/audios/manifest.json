@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_204",
+      "title": "[MUSIC] Phantom Hertz",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_204_20250606_195643.mp3",
+      "metadata": {
+        "issue_number": 204,
+        "issue_title": "[MUSIC] Phantom Hertz",
+        "generated_at": "2025-06-06T19:56:43Z",
+        "parameters": {
+          "prompt": "synthwave, nostalgic, dreamy, melancholic, electric piano, arpeggiated bass, sparse percussion, vintage reverb",
+          "lyrics": "[verse] The neon hums a lullaby, a distant echo in the dark / Forgotten faces flicker by like embers fading from a spark [chorus] Were ghosts in the machine, echoes on a screen / Rewind the tape but the pictures never clean [verse] The diner booth still holds your name carved in the vinyl seat / The jukebox plays our song the same but the melodys obsolete [bridge] The city breathes in binary, the streetlights blink and stall / I press my palm against the glass and watch the pixels crawl [outro] The credits roll on empty streets, the night dissolves to blue / I close my eyes and hit delete... but still dream of you\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2831553756,
+            "used": 2831553756
+          }
+        },
+        "generation_time": "280.11",
+        "file_size": "2.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 204
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T19:56:43Z",
+  "total_tracks": 10
 }

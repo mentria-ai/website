@@ -1,0 +1,18 @@
+{
+  "issue_number": 167,
+  "issue_title": "[MUSIC] Static Glow",
+  "generated_at": "2025-06-06T13:25:08Z",
+  "parameters": {
+    "prompt": "synthwave, nostalgic, melancholic, dreamy, electric piano, soft drums, shimmering reverb",
+    "lyrics": "[verse] Streetlights hum a fading tune / Neon ghosts dance beneath the moon / We were young and time was slow / Now the echoes barely show [chorus] I still see you in the static glow / A pixel heart we used to know / Rewind the tape but it’s all snow / Just a ghost in the afterglow [verse] Your voice lives on a cassette / Crackling words I can’t forget / Every click, every pause / A silent film without a cause [chorus] I still see you in the static glow / A pixel heart we used to know / Rewind the tape but it’s all snow / Just a ghost in the afterglow [bridge] The city breathes in monochrome / A hollow dial tone on the phone / If memories were fractal art / Would we ever drift apart? [outro] Frequencies fade to gray / The night eats our yesterday / But somewhere in the circuits’ hum / Our old song plays on…\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 743708748,
+      "used": 743708748
+    }
+  },
+  "generation_time": "251.29",
+  "file_size": "2.7M",
+  "generated_by": "mentria-ai"
+}

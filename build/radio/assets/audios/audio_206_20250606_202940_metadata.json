@@ -1,0 +1,18 @@
+{
+  "issue_number": 206,
+  "issue_title": "[MUSIC] Static constellation",
+  "generated_at": "2025-06-06T20:29:40Z",
+  "parameters": {
+    "prompt": "dream-pop, nostalgic, melancholic, synthesizer, soft-drums, layered-vocals, reverb-heavy, twilight-vibes",
+    "lyrics": "[verse] The streetlights hum a lullaby, the pavement still remembers you [chorus] We were just ghosts in the neon glow, passing through like midnight radio [verse] Your laughter lives in Polaroids, fading slow but never gone [chorus] We were just ghosts in the neon glow, passing through like midnight radio [bridge] Static whispers on the AM band, a song we used to understand [outro] The dial spins but finds no end, just echoes of what might have been\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2481853810,
+      "used": 2481853810
+    }
+  },
+  "generation_time": "288.93",
+  "file_size": "2.7M",
+  "generated_by": "mentria-ai"
+}

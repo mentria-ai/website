@@ -245,6 +245,32 @@
       },
       "duration": 150,
       "issueNumber": 114
+    },
+    {
+      "id": "track_157",
+      "title": "[MUSIC] club",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_157_20250606_113818.mp3",
+      "metadata": {
+        "issue_number": 157,
+        "issue_title": "[MUSIC] club",
+        "generated_at": "2025-06-06T11:38:18Z",
+        "parameters": {
+          "prompt": "Nightclubs, dance parties, workout playlists, radio broadcasts",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": null,
+            "used": null
+          }
+        },
+        "generation_time": "134.89",
+        "file_size": "4.0K",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 157
     }
   ],
   "schedule_info": {
@@ -253,6 +279,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-02T09:35:28Z",
-  "total_tracks": 8
+  "last_updated": "2025-06-06T11:38:18Z",
+  "total_tracks": 9
 }

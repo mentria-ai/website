@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_216",
+      "title": "[MUSIC] Porcelain Ghosts",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_216_20250606_215603.mp3",
+      "metadata": {
+        "issue_number": 216,
+        "issue_title": "[MUSIC] Porcelain Ghosts",
+        "generated_at": "2025-06-06T21:56:03Z",
+        "parameters": {
+          "prompt": "dream pop, melancholic, nostalgic, synthesizer, reverb-drenched, whispered vocals, lo-fi beats",
+          "lyrics": "[verse] The streetlights hum a lullaby / Through the fog of June nights / Your shadow lingers on the wall / A silhouette I still recall [chorus] We were porcelain, we were glass / Fragile things that couldn’t last / Now the cracks show where we broke / Echoes fade with every note [verse] The radio plays our old refrain / Static love, a dying flame / You left your scent on every page / A story lost, a folded stage [chorus] We were porcelain, we were glass / Fragile things that couldn’t last / Now the cracks show where we broke / Echoes fade with every note [bridge] Maybe time will blur the edges / Maybe rain will wash the ledges / But the ghost of you remains / In the quiet, in the frames [outro] The streetlights dim to ember glow / The night exhales, I let you go\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 1630473368,
+            "used": 1630473368
+          }
+        },
+        "generation_time": "247.42",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 216
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T21:56:03Z",
+  "total_tracks": 10
 }

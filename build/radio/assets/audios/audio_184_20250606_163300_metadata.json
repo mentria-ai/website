@@ -1,0 +1,18 @@
+{
+  "issue_number": 184,
+  "issue_title": "[MUSIC] CRT Heartache",
+  "generated_at": "2025-06-06T16:33:00Z",
+  "parameters": {
+    "prompt": "synthwave, nostalgic, melancholic, pulsing bass, shimmering arpeggios, vocal chops",
+    "lyrics": "[verse] Neon signs flicker like distant stars / Whispered names fade in the dark / Your silhouettes etched on every street / A ghost I follow with tired feet [chorus] Rewind the tape, play it again / Static love with no happy end / Were just pixels in a broken screen / Glitching out in a midnight dream [verse] The arcade hums our favorite song / But the joysticks dead, the coins are gone / High score names washed off the glass / Time dont care if were stuck in the past [chorus] Rewind the tape, play it again / Static love with no happy end / Were just pixels in a broken screen / Glitching out in a midnight dream [bridge] Press escape, but the keys wont work / 8-bit hearts in a system crash [outro] All our data turns to dust / Power down—remember us\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2803842258,
+      "used": 2803842258
+    }
+  },
+  "generation_time": "272.84",
+  "file_size": "2.9M",
+  "generated_by": "mentria-ai"
+}

@@ -1,0 +1,18 @@
+{
+  "issue_number": 226,
+  "issue_title": "[MUSIC] Static on the Radio",
+  "generated_at": "2025-06-06T23:44:27Z",
+  "parameters": {
+    "prompt": "indie, dream-pop, melancholic, nostalgic, synthesizer, electric guitar, subtle percussion",
+    "lyrics": "[verse] The streetlights hum a lullaby / As I trace the cracks in the pavement / Your ghost still lingers in the air / Like smoke from an old conversation [chorus] We were paper boats on a river / Drifting with the tide / Now I’m just a bookmark / In a story left behind [verse] The diner’s neon flickers twice / A Morse code with no translation / The jukebox plays our favorite lie / On endless rotation [chorus] We were paper boats on a river / Drifting with the tide / Now I’m just a bookmark / In a story left behind [bridge] Time folds like a worn-out map / Every crease a memory / I still wait at the bus stop / Though the route’s retired, you see [outro] The night rewinds in monochrome / Static on the radio / I press rewind but all I find / Is the echo of a long ago\n",
+    "duration": 90,
+    "mode": "ultra",
+    "seed": {
+      "requested": 1274124690,
+      "used": 1274124690
+    }
+  },
+  "generation_time": "217.74",
+  "file_size": "1.6M",
+  "generated_by": "mentria-ai"
+}

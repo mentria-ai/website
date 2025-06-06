@@ -1,0 +1,18 @@
+{
+  "issue_number": 224,
+  "issue_title": "[MUSIC] Echoes in the Skyline",
+  "generated_at": "2025-06-06T23:25:26Z",
+  "parameters": {
+    "prompt": "synthwave, melancholy, nostalgic, electric piano, glitchy beats, cinematic",
+    "lyrics": "[verse] Neon signs flicker low / Like all the dreams we used to know / Static hums on the radio / Playing songs from long ago [chorus] We were infinite, we were bright / Like constellations in the night / Now we’re just echoes in the sky / Fading out with passing time [verse] Your voice still lingers in the air / A ghost I catch when I’m not there / But every call goes nowhere / Just silence on the wire [chorus] We were infinite, we were bright / Like constellations in the night / Now we’re just echoes in the sky / Fading out with passing time [bridge] Maybe in another life / We’ll find our way back to the light / Until then, I’ll whisper to the stars / Hoping they remember who we are [outro] Neon signs flicker low / Like all the dreams we used to know\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 1867801062,
+      "used": 1867801062
+    }
+  },
+  "generation_time": "299.65",
+  "file_size": "2.9M",
+  "generated_by": "mentria-ai"
+}

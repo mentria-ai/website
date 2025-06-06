@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_200",
+      "title": "[MUSIC] Cassette Memory Heartache",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_200_20250606_192319.mp3",
+      "metadata": {
+        "issue_number": 200,
+        "issue_title": "[MUSIC] Cassette Memory Heartache",
+        "generated_at": "2025-06-06T19:23:19Z",
+        "parameters": {
+          "prompt": "synthwave, nostalgic, dreamy, electric piano, pulsing bass, tape hiss",
+          "lyrics": "[verse] We used to drive with the windows down, chasing the sunset to the edge of town. Static on the radio, your hand in mine, neon reflections in your eyes. [chorus] Rewind the night, play it back in slow motion. Every heartbeat synchronized like ocean waves in time. Rewind the night, we’re just ghosts in the glow. Frozen in the afterlight, where the past still grows. [verse] The diner sign still flickers red, but the jukebox plays songs we never said. Smudged lipstick on a coffee cup, fingerprints we can’t wash up. [chorus] Rewind the night, play it back in slow motion. Every heartbeat synchronized like ocean waves in time. Rewind the night, we’re just ghosts in the glow. Frozen in the afterlight, where the past still grows. [bridge] The city hums a lullaby, but we don’t sleep—we just survive. Static turns to symphony, a broken tune you left with me. [outro] Drive until the tape runs out, where the skyline fades to doubt. Press stop—but we both know, the rewind button’s all we’ve got.\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 4025460526,
+            "used": 4025460526
+          }
+        },
+        "generation_time": "279.1",
+        "file_size": "2.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 200
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-06T19:23:19Z",
+  "total_tracks": 10
 }

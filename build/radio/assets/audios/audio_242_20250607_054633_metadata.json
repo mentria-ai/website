@@ -1,0 +1,18 @@
+{
+  "issue_number": 242,
+  "issue_title": "[MUSIC] VHS Heartache",
+  "generated_at": "2025-06-07T05:46:33Z",
+  "parameters": {
+    "prompt": "electronic, dream-pop, nostalgic, synthesizer, soft-beats, layered-vocals",
+    "lyrics": "[verse] The static hums like a lullaby, fading photos in my mind, rewinding time just to see your face one more night [chorus] Glitch in the system, heart skipping frames, memories flicker but they never stay the same [verse] Old VHS glow on the bedroom wall, pixelated whispers of a love I can’t recall [chorus] Glitch in the system, heart skipping frames, memories flicker but they never stay the same [bridge] Press eject, but the tape’s stuck tight, this old machine won’t let go of the light [outro] Snowfall screen, silent and blue, the only thing left is the ghost of you\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2943469882,
+      "used": 2943469882
+    }
+  },
+  "generation_time": "257.62",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

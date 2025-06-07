@@ -1,0 +1,18 @@
+{
+  "issue_number": 322,
+  "issue_title": "[MUSIC] Radiant Sunrise Synth",
+  "generated_at": "2025-06-07T20:45:22Z",
+  "parameters": {
+    "prompt": "uplifting, bright, energetic, optimistic, synth",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 263237544,
+      "used": 263237544
+    }
+  },
+  "generation_time": "244.1",
+  "file_size": "2.6M",
+  "generated_by": "mentria-ai"
+}

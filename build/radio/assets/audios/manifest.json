@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_238",
+      "title": "[MUSIC] Whispering Streetlights",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_238_20250607_045124.mp3",
+      "metadata": {
+        "issue_number": 238,
+        "issue_title": "[MUSIC] Whispering Streetlights",
+        "generated_at": "2025-06-07T04:51:24Z",
+        "parameters": {
+          "prompt": "jazz-hop, nocturnal, warm, rhodes, brushed drums, bassline-driven, lo-fi textures",
+          "lyrics": "[inst]\n",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 548924687,
+            "used": 548924687
+          }
+        },
+        "generation_time": "253.09",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 238
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-07T04:51:24Z",
+  "total_tracks": 10
 }

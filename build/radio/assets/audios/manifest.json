@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_308",
+      "title": "[MUSIC] Sunrise Energy Pulse",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_308_20250607_175546.mp3",
+      "metadata": {
+        "issue_number": 308,
+        "issue_title": "[MUSIC] Sunrise Energy Pulse",
+        "generated_at": "2025-06-07T17:55:46Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, optimistic, bright, rhythmic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2795097195,
+            "used": 2795097195
+          }
+        },
+        "generation_time": "252.9",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 308
     }
   ],
   "schedule_info": {

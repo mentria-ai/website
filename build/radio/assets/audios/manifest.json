@@ -297,6 +297,32 @@
       },
       "duration": 120,
       "issueNumber": 246
+    },
+    {
+      "id": "track_258",
+      "title": "[MUSIC] Radiant Morning Groove",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_258_20250607_084934.mp3",
+      "metadata": {
+        "issue_number": 258,
+        "issue_title": "[MUSIC] Radiant Morning Groove",
+        "generated_at": "2025-06-07T08:49:34Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, bright, optimistic, synth-pop",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 563874131,
+            "used": 563874131
+          }
+        },
+        "generation_time": "243",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 258
     }
   ],
   "schedule_info": {

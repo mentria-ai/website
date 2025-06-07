@@ -811,7 +811,11 @@ jobs:
           rm -f temp_lyrics.txt
           
           # Update manifest file for radio interface
+          # CONFLICT PREVENTION: We only update the tracks array to avoid merge conflicts
+          # when multiple PRs are created simultaneously. The frontend calculates
+          # total_tracks dynamically from tracks.length, and last_updated is not used.
           echo "📝 Updating audio manifest..." >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "🚫 Note: Not updating total_tracks/last_updated to prevent merge conflicts between concurrent PRs" >> ${{ steps.validate-trigger.outputs.log_file }}
           
           # Create or update manifest.json
           MANIFEST_FILE="build/radio/assets/audios/manifest.json"
@@ -820,7 +824,8 @@ jobs:
           if [ -f "$MANIFEST_FILE" ]; then
             cp "$MANIFEST_FILE" manifest_backup.json
           else
-            echo '{"tracks": [], "last_updated": "", "total_tracks": 0}' > "$MANIFEST_FILE"
+            # Create minimal manifest structure (total_tracks and last_updated are calculated dynamically by frontend)
+            echo '{"tracks": [], "schedule_info": {"timezone": "UTC", "slot_duration": 30, "auto_advance": true, "live_mode_default": true}}' > "$MANIFEST_FILE"
           fi
           
           # Create new track entry using jq to properly escape JSON
@@ -925,18 +930,16 @@ jobs:
           
           if [ -n "$TRACK_EXISTS" ]; then
             echo "⚠️ Track already exists in manifest, updating it" >> ${{ steps.validate-trigger.outputs.log_file }}
-            # Remove existing track and add new one
+            # Remove existing track and add new one (without updating total_tracks or last_updated to prevent conflicts)
             jq --arg id "track_$ISSUE_NUMBER" \
                --argjson newtrack "$(cat new_track.json)" \
-               --arg timestamp "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-               '.tracks = (.tracks | map(select(.id != $id))) + [$newtrack] | .last_updated = $timestamp | .total_tracks = (.tracks | length)' \
+               '.tracks = (.tracks | map(select(.id != $id))) + [$newtrack]' \
                "$MANIFEST_FILE" > manifest_updated.json
           else
             echo "✅ Adding new track to manifest" >> ${{ steps.validate-trigger.outputs.log_file }}
-            # Add new track
+            # Add new track (without updating total_tracks or last_updated to prevent conflicts)
             jq --argjson newtrack "$(cat new_track.json)" \
-               --arg timestamp "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-               '.tracks += [$newtrack] | .last_updated = $timestamp | .total_tracks = (.tracks | length)' \
+               '.tracks += [$newtrack]' \
                "$MANIFEST_FILE" > manifest_updated.json
           fi
           
@@ -944,6 +947,7 @@ jobs:
           rm -f new_track.json manifest_backup.json
           
           echo "✅ Manifest updated with track" >> ${{ steps.validate-trigger.outputs.log_file }}
+          echo "💡 Note: Frontend calculates total_tracks dynamically from tracks.length" >> ${{ steps.validate-trigger.outputs.log_file }}
           
           # Add files to git
           git add "build/radio/assets/audios/$NEW_FILENAME"

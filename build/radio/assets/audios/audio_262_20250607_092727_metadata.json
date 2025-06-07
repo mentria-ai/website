@@ -1,0 +1,18 @@
+{
+  "issue_number": 262,
+  "issue_title": "[MUSIC] Radiant Morning Energy",
+  "generated_at": "2025-06-07T09:27:27Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, optimistic, bright, electronic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 1556401065,
+      "used": 1556401065
+    }
+  },
+  "generation_time": "234.73",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

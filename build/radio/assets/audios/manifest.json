@@ -297,6 +297,32 @@
       },
       "duration": 120,
       "issueNumber": 246
+    },
+    {
+      "id": "track_256",
+      "title": "[MUSIC] Radiant Morning Pulse",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_256_20250607_082941.mp3",
+      "metadata": {
+        "issue_number": 256,
+        "issue_title": "[MUSIC] Radiant Morning Pulse",
+        "generated_at": "2025-06-07T08:29:41Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, bright, rhythmic, optimistic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2243120534,
+            "used": 2243120534
+          }
+        },
+        "generation_time": "232.74",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 256
     }
   ],
   "schedule_info": {

@@ -1,0 +1,18 @@
+{
+  "issue_number": 314,
+  "issue_title": "[MUSIC] Sunrise Sprint Energy",
+  "generated_at": "2025-06-07T19:20:37Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, upbeat, bright, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2465067614,
+      "used": 2465067614
+    }
+  },
+  "generation_time": "261.41",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

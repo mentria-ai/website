@@ -1,0 +1,18 @@
+{
+  "issue_number": 298,
+  "issue_title": "[MUSIC] Radiant Energy Flow",
+  "generated_at": "2025-06-07T15:56:52Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 3108402304,
+      "used": 3108402304
+    }
+  },
+  "generation_time": "247.29",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

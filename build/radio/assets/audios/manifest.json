@@ -297,6 +297,32 @@
       },
       "duration": 120,
       "issueNumber": 246
+    },
+    {
+      "id": "track_252",
+      "title": "[MUSIC] Morning Energy Revival",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_252_20250607_074319.mp3",
+      "metadata": {
+        "issue_number": 252,
+        "issue_title": "[MUSIC] Morning Energy Revival",
+        "generated_at": "2025-06-07T07:43:19Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, bright, rhythmic, optimistic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2757233359,
+            "used": 2757233359
+          }
+        },
+        "generation_time": "263.99",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 252
     }
   ],
   "schedule_info": {

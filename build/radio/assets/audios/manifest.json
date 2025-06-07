@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_272",
+      "title": "[MUSIC] Radiant Morning Run",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_272_20250607_110036.mp3",
+      "metadata": {
+        "issue_number": 272,
+        "issue_title": "[MUSIC] Radiant Morning Run",
+        "generated_at": "2025-06-07T11:00:36Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, optimistic, bright, workout",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2074855120,
+            "used": 2074855120
+          }
+        },
+        "generation_time": "238.08",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 272
     }
   ],
   "schedule_info": {

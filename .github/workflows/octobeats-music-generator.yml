@@ -569,7 +569,8 @@ jobs:
           
           # Create request payload using jq for proper JSON formatting
           # Save multiline lyrics to a temporary file to handle newlines properly
-          echo "$LYRICS" > temp_lyrics_request.txt
+          # Use printf instead of echo to avoid adding trailing newline to lyrics
+          printf '%s' "$LYRICS" > temp_lyrics_request.txt
           
           SEED="${{ steps.extract-params.outputs.seed }}"
           
@@ -736,8 +737,8 @@ jobs:
           echo "- Audio file renamed to: $NEW_FILENAME" >> ${{ steps.validate-trigger.outputs.log_file }}
           
           # Create metadata file using jq for proper JSON formatting
-          # Save multiline lyrics to a temporary file to handle newlines properly
-          echo "${{ steps.extract-params.outputs.lyrics }}" > temp_lyrics.txt
+          # Save multiline lyrics to a temporary file to handle newlines properly (use printf to avoid extra newline)
+          printf '%s' "${{ steps.extract-params.outputs.lyrics }}" > temp_lyrics.txt
           
           USED_SEED="${{ steps.generate-audio.outputs.used_seed }}"
           REQUESTED_SEED="${{ steps.extract-params.outputs.seed }}"
@@ -829,8 +830,8 @@ jobs:
           fi
           
           # Create new track entry using jq to properly escape JSON
-          # Save multiline lyrics to a temporary file to handle newlines properly
-          echo "${{ steps.extract-params.outputs.lyrics }}" > temp_lyrics_manifest.txt
+          # Save multiline lyrics to a temporary file to handle newlines properly (use printf to avoid extra newline)
+          printf '%s' "${{ steps.extract-params.outputs.lyrics }}" > temp_lyrics_manifest.txt
           
           # Create new track entry using jq for proper JSON formatting
           if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ] && [ "$USED_SEED" != "''" ]; then

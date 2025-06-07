@@ -1,0 +1,18 @@
+{
+  "issue_number": 336,
+  "issue_title": "[MUSIC] Radiant Morning Momentum",
+  "generated_at": "2025-06-07T22:57:45Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 578141018,
+      "used": 578141018
+    }
+  },
+  "generation_time": "246.96",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

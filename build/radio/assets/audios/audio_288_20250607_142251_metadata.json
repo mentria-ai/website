@@ -1,0 +1,18 @@
+{
+  "issue_number": 288,
+  "issue_title": "[MUSIC] Sunrise Energy Run",
+  "generated_at": "2025-06-07T14:22:51Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, optimistic, bright, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 3640880270,
+      "used": 3640880270
+    }
+  },
+  "generation_time": "255.74",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

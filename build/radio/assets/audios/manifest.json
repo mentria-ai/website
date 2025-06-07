@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_244",
+      "title": "[MUSIC] Afterimage Arcade",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_244_20250607_055821.mp3",
+      "metadata": {
+        "issue_number": 244,
+        "issue_title": "[MUSIC] Afterimage Arcade",
+        "generated_at": "2025-06-07T05:58:21Z",
+        "parameters": {
+          "prompt": "synthwave, nostalgic, dreamy, retro-futuristic, arpeggiated bass, shimmering pads, punchy drums",
+          "lyrics": "[verse] Neon streets hum a lullaby, flickering lights like fireflies, we drove all night just to feel alive, chasing echoes of a simpler time [chorus] Rewind the tape, let’s play it again, static and gold in the glow of the screen, hearts out of sync but we’re dancing the same, lost in the glow of a pixelated flame [verse] Your voice on the line like a distant AM wave, cracking through time like a ghost in the haze, I still see your face in the arcade’s parade, where our high scores never fade [chorus] Rewind the tape, let’s play it again, static and gold in the glow of the screen, hearts out of sync but we’re dancing the same, lost in the glow of a pixelated flame [bridge] The city’s a circuit, we’re just passing through, but the neon won’t forget you [outro] Press eject, the screen turns blue, but the afterimage lingers like you\n",
+          "duration": 150,
+          "mode": "ultra",
+          "seed": {
+            "requested": 3188867086,
+            "used": 3188867086
+          }
+        },
+        "generation_time": "296.28",
+        "file_size": "2.9M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 150,
+      "issueNumber": 244
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-07T05:58:21Z",
+  "total_tracks": 10
 }

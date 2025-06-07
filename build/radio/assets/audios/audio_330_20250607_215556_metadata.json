@@ -1,0 +1,18 @@
+{
+  "issue_number": 330,
+  "issue_title": "[MUSIC] Neon Sunrise Pulse",
+  "generated_at": "2025-06-07T21:55:56Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, synthwave",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2663354993,
+      "used": 2663354993
+    }
+  },
+  "generation_time": "248.42",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

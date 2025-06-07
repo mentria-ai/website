@@ -1,0 +1,18 @@
+{
+  "issue_number": 236,
+  "issue_title": "[MUSIC] Ghosts in the Machine",
+  "generated_at": "2025-06-07T04:31:14Z",
+  "parameters": {
+    "prompt": "synthwave, melancholic, futuristic, introspective, electric piano, reverb, slow-groove",
+    "lyrics": "[verse] Neon lights reflect in puddles on the street, echoes of a past I cant delete, footsteps fade but memories repeat, a silent film stuck on rewind [chorus] Im dancing with shadows on a lonely screen, pixelated love in a broken dream, every touch is just a hollow gleam, were ghosts in the machine [verse] Static hums where your voice used to be, rewinding tapes of what used to be we, the futures bright but its not for me, not since you left the scene [chorus] Im dancing with shadows on a lonely screen, pixelated love in a broken dream, every touch is just a hollow gleam, were ghosts in the machine [bridge] Maybe in another timeline, wed be more than just a flicker in the night, but here were just data in the light, lost in the glow [outro] Ill press delete but you wont disappear, just another ghost in the atmosphere, another ghost in the atmosphere\n",
+    "duration": 150,
+    "mode": "ultra",
+    "seed": {
+      "requested": 660919428,
+      "used": 660919428
+    }
+  },
+  "generation_time": "294.07",
+  "file_size": "2.9M",
+  "generated_by": "mentria-ai"
+}

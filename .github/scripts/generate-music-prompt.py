@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate AI prompt for music generation
+Generate AI prompt for instrumental music generation optimized for ACE-Step
 """
 import sys
 import os
@@ -8,11 +8,11 @@ import random
 from datetime import datetime
 
 def generate_prompt(custom_theme=None, custom_seed=None):
-    """Generate the music generation prompt"""
+    """Generate the instrumental music generation prompt"""
     current_time = datetime.now().strftime("%H:%M")
     current_date = datetime.now().strftime("%A, %B %d, %Y")
     
-    # Determine seed for odd/even logic
+    # Generate seed for reproducible results
     if custom_seed:
         try:
             seed_value = int(custom_seed)
@@ -21,71 +21,65 @@ def generate_prompt(custom_theme=None, custom_seed=None):
     else:
         seed_value = random.randint(1, 4294967295)
     
-    # Determine if instrumental or vocal based on seed parity
-    is_instrumental = (seed_value % 2 == 1)  # Odd = instrumental, Even = vocal
-    
     prompt_parts = [
-        "You are an AI music production specialist with deep expertise in ACE-Step. Generate creative music parameters optimized for ACE-Step's capabilities.",
+        "You are an AI music production specialist with deep expertise in ACE-Step. Generate creative INSTRUMENTAL music parameters optimized for ACE-Step's capabilities.",
         "",
         "**Current Context:**",
         f"- Current time: {current_time}",
         f"- Current date: {current_date}",
         "- Target system: ACE-Step AI music generation",
+        "- Mode: INSTRUMENTAL ONLY",
         "",
-        "**1. Style Prompt:** Create 4-8 comma-separated, lowercase tags covering genre, mood, instruments, production style.",
-        'Examples: "electronic, ambient, ethereal, synthesizer" or "folk, acoustic, storytelling, guitar"',
+        "**1. Style Prompt:** Create EXACTLY 3-5 comma-separated, lowercase tags focusing on UPLIFTING genres only.",
+        "**REQUIRED MOOD CATEGORIES (choose tags from these categories only):**",
+        "- **Exercise/Energy:** electronic, energetic, upbeat, driving, rhythmic, motivational, pump, cardio, workout",
+        "- **Calm/Relaxation:** ambient, peaceful, tranquil, meditative, soothing, gentle, serene, soft, chill",
+        "- **Focus/Productivity:** minimal, focused, atmospheric, steady, flowing, concentrated, clear, balanced",
+        "- **Uplifting/Positive:** uplifting, bright, optimistic, warm, inspiring, hopeful, joyful, light, positive",
         "",
-        f"**2. Lyrics:** {'INSTRUMENTAL TRACK - Use [inst] only' if is_instrumental else 'VOCAL TRACK - Create COMPLETE song structure with multiple sections'}",
-        *([
-            "- This should be an instrumental piece, so use [inst] only",
-            "- Focus on melody, rhythm, and instrumental arrangement"
-        ] if is_instrumental else [
-            "- Include [verse], [chorus], [bridge], [outro] with full lyrics",
-            "- Example structure: [verse] content here [chorus] content here [verse] more content [chorus] repeat [bridge] bridge content [outro] ending",
-            "- Write actual lyrical content, not just section markers",
-            "- Create meaningful, cohesive lyrics that tell a story or convey emotion"
-        ]),
+        "**INSTRUMENT TAGS (optional, max 1-2):** piano, guitar, synthesizer, strings, nature sounds, bells, flute",
         "",
-        "**3. Duration:** Choose from 30, 45, 60, 90, 120, 150, 180, or 240 seconds based on content scope.",
+        "**FORBIDDEN MOODS/GENRES:** Never use tags like: dark, sad, melancholy, depressing, aggressive, angry, heavy, intense, dramatic, noir, gothic, doom, or any negative emotional descriptors.",
         "",
-        "**4. Title:** Generate UNIQUE, creative titles with variety. Avoid repetitive patterns like 'Neon [Word]' or '[Adjective] Dawn'.",
-        "- Use unexpected word combinations, metaphors, or cultural references",
-        "- Consider time of day, emotions, places, objects, or abstract concepts",
-        "- Examples: 'Digital Butterflies', 'Midnight Coffee Shop', 'Paper Airplane Dreams', 'Velvet Thunder'",
+        "**2. Lyrics:** ALWAYS use exactly [inst] - this is an instrumental track only",
+        "- No vocal content whatsoever",
+        "- Focus purely on instrumental arrangement and melody",
         "",
-        "**5. Inspiration:** Brief explanation of creative choices and influences.",
+        "**3. Duration:** Choose from 60, 90, 120, 150, or 180 seconds (optimal for exercise/relaxation sessions).",
+        "",
+        "**4. Title:** Generate UNIQUE, POSITIVE titles that reflect the uplifting nature.",
+        "- Use inspiring, peaceful, or energetic themes",
+        "- Examples: 'Morning Sunrise Flow', 'Peaceful Garden Walk', 'Energy Boost', 'Calm Waters', 'Focused Mind'",
+        "- Avoid: any dark, sad, or negative terms",
+        "",
+        "**5. Inspiration:** Brief explanation focusing on wellness, exercise, relaxation, or productivity benefits.",
         "",
         "**Output Format (JSON only):**",
         "{",
-        '  "style_prompt": "comma-separated, lowercase tags",',
-        f'  "lyrics": "{"[inst]" if is_instrumental else "[verse] actual verse lyrics here [chorus] actual chorus lyrics here [verse] more verse lyrics [chorus] repeat chorus [bridge] bridge lyrics [outro] ending lyrics"}",',
-        '  "duration": number (30-240),',
-        '  "title_suggestion": "unique creative title",',
-        '  "inspiration": "brief explanation",',
+        '  "style_prompt": "3-5 comma-separated uplifting tags only",',
+        '  "lyrics": "[inst]",',
+        '  "duration": number (60-180),',
+        '  "title_suggestion": "positive, uplifting title",',
+        '  "inspiration": "wellness/exercise/relaxation focused explanation",',
         f'  "seed": {seed_value}',
         "}",
         "",
-        "**Quality Standards:** All content must be original, culturally sensitive, and radio-appropriate.",
-        "**Diversity Goals:** Explore different genres, cultures, and emotional ranges. Avoid repetitive themes.",
-        "**Variety Requirements:**",
-        "- Vary title patterns (avoid 'Neon X', 'Digital X', 'Midnight X' repetition)",
-        "- Explore different time periods, moods, and cultural influences", 
-        "- Create unexpected genre combinations",
+        "**Quality Standards:** All content must be uplifting, positive, and suitable for wellness activities.",
+        "**ACE-Step Optimization:** Focus on clear melodies and arrangements that work well instrumentally.",
+        "**Wellness Focus:** Consider how this music will be used for exercise, meditation, or productivity.",
         "",
-        f"**Current Generation Mode: {'INSTRUMENTAL' if is_instrumental else 'VOCAL'} (Seed {seed_value} - {'Odd' if is_instrumental else 'Even'})**",
-        f"{'Focus on creating an engaging instrumental piece with rich melodies and arrangements.' if is_instrumental else 'Create compelling vocals with meaningful lyrics and strong song structure.'}",
-        "",
-        "Generate something musically compelling, unique, and ACE-Step optimized now:"
+        f"**Seed: {seed_value}**",
+        "Generate uplifting instrumental music parameters now:"
     ]
     
-    # Add custom theme if provided
+    # Add custom theme if provided (but still keep it positive)
     if custom_theme:
         prompt_parts.extend([
             "",
-            f"**Special Theme Request:** Focus on or incorporate elements of: {custom_theme}"
+            f"**Special Theme Request:** Incorporate positive elements of: {custom_theme} (maintain uplifting mood)"
         ])
     
-    # Add seed information (always include the determined seed)
+    # Add seed information
     prompt_parts.extend([
         "",
         f"**Seed Requirement:** Use seed {seed_value} for reproducible generation. Include this exact seed value in your response."
@@ -107,7 +101,7 @@ def main():
     with open('music_generation_prompt.txt', 'w', encoding='utf-8') as f:
         f.write(prompt)
     
-    print("✅ Music generation prompt created successfully")
+    print("✅ Instrumental music generation prompt created successfully")
 
 if __name__ == "__main__":
     main() 

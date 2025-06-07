@@ -180,9 +180,9 @@ jobs:
                   } else {
                     fs.appendFileSync(logFile, `❌ No approval reactions found from qualified users\n`);
                     fs.appendFileSync(logFile, `💡 Hint: Repository owners/admins/maintainers can approve this request by reacting with 👍, 🎉, ❤️, or 🚀\n`);
-                    core.setOutput('should_process', 'false');
+                core.setOutput('should_process', 'false');
                     core.setOutput('reason', `Insufficient permissions. User has '${permission.permission}' but needs 'admin' or 'maintain', or approval from a qualified user via reaction (👍, 🎉, ❤️, 🚀)`);
-                    return;
+                return;
                   }
                 } catch (reactionError) {
                   fs.appendFileSync(logFile, `❌ Error checking reactions: ${reactionError.message}\n`);
@@ -720,7 +720,7 @@ jobs:
             git checkout -b "$BRANCH_NAME" "origin/$BRANCH_NAME"
           else
             echo "✅ Creating new branch: $BRANCH_NAME" >> ${{ steps.validate-trigger.outputs.log_file }}
-            git checkout -b "$BRANCH_NAME"
+          git checkout -b "$BRANCH_NAME"
           fi
           
           # Create audio directory in repository if it doesn't exist
@@ -760,7 +760,7 @@ jobs:
                 "issue_number": ($issue_number | tonumber),
                 "issue_title": $issue_title,
                 "generated_at": $generated_at,
-                "parameters": {
+            "parameters": {
                   "prompt": $prompt,
                   "lyrics": $lyrics,
                   "duration": ($duration | tonumber),
@@ -954,7 +954,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "⚠️ No changes to commit (files may already exist)" >> ${{ steps.validate-trigger.outputs.log_file }}
           else
-            # Commit changes  
+          # Commit changes
             SEED_INFO=""
             if [ -n "$USED_SEED" ] && [ "$USED_SEED" != "" ] && [ "$USED_SEED" != "''" ]; then
               if [ -n "$REQUESTED_SEED" ] && [ "$REQUESTED_SEED" != "" ]; then
@@ -967,16 +967,16 @@ jobs:
             fi
             
             git commit -m "Add generated audio for #$ISSUE_NUMBER
-            
-            Generated audio with OctoBeats using the following parameters:
-            - Prompt: ${{ steps.extract-params.outputs.prompt }}
-            - Duration: ${{ steps.extract-params.outputs.duration }} seconds
-            - Mode: ${{ steps.extract-params.outputs.mode }}
+          
+          Generated audio with OctoBeats using the following parameters:
+          - Prompt: ${{ steps.extract-params.outputs.prompt }}
+          - Duration: ${{ steps.extract-params.outputs.duration }} seconds
+          - Mode: ${{ steps.extract-params.outputs.mode }}
             $SEED_INFO
-            - Generation time: ${{ steps.generate-audio.outputs.generation_time }}s
-            
-            Resolves #$ISSUE_NUMBER"
-            
+          - Generation time: ${{ steps.generate-audio.outputs.generation_time }}s
+          
+          Resolves #$ISSUE_NUMBER"
+          
             echo "✅ Changes committed" >> ${{ steps.validate-trigger.outputs.log_file }}
           fi
           
@@ -1071,8 +1071,8 @@ jobs:
               let existingPR = null;
               try {
                 const { data: prs } = await github.rest.pulls.list({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
                   head: `${context.repo.owner}:${branchName}`,
                   state: 'open'
                 });
@@ -1104,12 +1104,12 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   title: `🎵 Add generated audio for #${issueNumber}`,
-                  head: branchName,
-                  base: 'main',
-                  body: prBody,
-                  draft: false
-                });
-                
+                head: branchName,
+                base: 'main',
+                body: prBody,
+                draft: false
+              });
+              
                 fs.appendFileSync(logFile, `✅ Created new PR #${pr.data.number}\n`);
               }
               

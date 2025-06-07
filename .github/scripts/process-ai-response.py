@@ -90,13 +90,13 @@ def extract_json_from_content(content):
                 print(f"DEBUG: JSON parsing failed: {e}", file=sys.stderr)
         
         # Fallback if no valid JSON found
-        print('DEBUG: No valid JSON found, using fallback', file=sys.stderr)
+        print('DEBUG: No valid JSON found, using uplifting instrumental fallback', file=sys.stderr)
         fallback = {
-            'style_prompt': 'electronic, ambient, melodic',
+            'style_prompt': 'ambient, peaceful, uplifting, gentle',
             'lyrics': '[inst]',
-            'duration': 90,
-            'title_suggestion': 'AI Generated Track',
-            'inspiration': 'Auto-generated'
+            'duration': 120,
+            'title_suggestion': 'Peaceful Moments',
+            'inspiration': 'Calming instrumental music for relaxation and focus'
         }
         with open('extracted_json.json', 'w', encoding='utf-8') as f:
             json.dump(fallback, f, indent=2)
@@ -120,10 +120,10 @@ def extract_and_validate_parameters():
         inspiration = data.get('inspiration', 'Automatically generated music')
         seed = data.get('seed', None)
         
-        # Validate duration
-        valid_durations = [30, 45, 60, 90, 120, 150, 180, 240]
+        # Validate duration (optimized for instrumental wellness music)
+        valid_durations = [60, 90, 120, 150, 180]
         if duration not in valid_durations:
-            duration = 90
+            duration = 120
         
         # Clean parameters and limit length appropriately
         style_prompt = str(style_prompt).strip()[:400]

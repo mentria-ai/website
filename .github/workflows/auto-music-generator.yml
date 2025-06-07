@@ -1,4 +1,4 @@
-name: Auto Music Generator
+name: Auto Instrumental Music Generator
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:  # Allow manual triggering for testing
     inputs:
       custom_theme:
-        description: 'Optional theme for music generation (e.g., "ambient", "electronic", "rock")'
+        description: 'Optional uplifting theme (e.g., "ambient", "electronic", "peaceful") - only positive moods'
         required: false
         default: ''
       use_seed:
@@ -22,7 +22,7 @@ permissions:
   actions: read
 
 jobs:
-  generate-music-request:
+  generate-instrumental-music-request:
     runs-on: ubuntu-latest
     timeout-minutes: 10  # Should complete quickly
     
@@ -48,7 +48,7 @@ jobs:
           chmod +x .github/scripts/process-ai-response.py
           chmod +x .github/scripts/create-music-issue.js
       
-      - name: Run music generation workflow
+      - name: Run instrumental music generation workflow
         env:
           TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
@@ -61,9 +61,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: auto-music-generator-logs-${{ github.run_number }}
+          name: auto-instrumental-music-generator-logs-${{ github.run_number }}
           path: |
             auto_music_generator_*.log
             *.json
             *.txt
           retention-days: 7
+ 

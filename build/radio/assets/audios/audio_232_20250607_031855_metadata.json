@@ -1,0 +1,18 @@
+{
+  "issue_number": 232,
+  "issue_title": "[MUSIC] Retrograde Arcade",
+  "generated_at": "2025-06-07T03:18:55Z",
+  "parameters": {
+    "prompt": "synthwave, futuristic, nostalgic, pulsating, arpeggiator, bass-heavy, cinematic",
+    "lyrics": "[inst]\n",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2331012461,
+      "used": 2331012461
+    }
+  },
+  "generation_time": "263.49",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

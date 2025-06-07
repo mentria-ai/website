@@ -1,0 +1,18 @@
+{
+  "issue_number": 334,
+  "issue_title": "[MUSIC] Radiant Morning Run",
+  "generated_at": "2025-06-07T22:46:48Z",
+  "parameters": {
+    "prompt": "upbeat, uplifting, motivational, energetic, bright",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 3892510055,
+      "used": 3892510055
+    }
+  },
+  "generation_time": "257.85",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

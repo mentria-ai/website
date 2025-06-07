@@ -271,6 +271,32 @@
       },
       "duration": 120,
       "issueNumber": 157
+    },
+    {
+      "id": "track_230",
+      "title": "[MUSIC] Static Lullabies for Electric Sheep",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_230_20250607_015017.mp3",
+      "metadata": {
+        "issue_number": 230,
+        "issue_title": "[MUSIC] Static Lullabies for Electric Sheep",
+        "generated_at": "2025-06-07T01:50:18Z",
+        "parameters": {
+          "prompt": "synthwave, nocturnal, dreamy, pulsating, retro-futuristic, arpeggiated",
+          "lyrics": "[inst]\n",
+          "duration": 90,
+          "mode": "ultra",
+          "seed": {
+            "requested": 3416202583,
+            "used": 3416202583
+          }
+        },
+        "generation_time": "228.18",
+        "file_size": "1.8M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 90,
+      "issueNumber": 230
     }
   ],
   "schedule_info": {
@@ -279,6 +305,6 @@
     "auto_advance": true,
     "live_mode_default": true
   },
-  "last_updated": "2025-06-06T12:17:45Z",
-  "total_tracks": 9
+  "last_updated": "2025-06-07T01:50:18Z",
+  "total_tracks": 10
 }

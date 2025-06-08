@@ -1,0 +1,18 @@
+{
+  "issue_number": 398,
+  "issue_title": "[MUSIC] Midday Energy Surge",
+  "generated_at": "2025-06-08T13:43:01Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, optimistic, bright, workout",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2951063514,
+      "used": 2951063514
+    }
+  },
+  "generation_time": "240.58",
+  "file_size": "2.1M",
+  "generated_by": "mentria-ai"
+}

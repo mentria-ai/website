@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_454",
+      "title": "[MUSIC] Radiance Pulse",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_454_20250608_234415.mp3",
+      "metadata": {
+        "issue_number": 454,
+        "issue_title": "[MUSIC] Radiance Pulse",
+        "generated_at": "2025-06-08T23:44:15Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, optimistic, synthwave, driving",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 247006513,
+            "used": 247006513
+          }
+        },
+        "generation_time": "251.22",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 454
     }
   ],
   "schedule_info": {

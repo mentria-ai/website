@@ -1,0 +1,18 @@
+{
+  "issue_number": 448,
+  "issue_title": "[MUSIC] Radiant Energy Pulse",
+  "generated_at": "2025-06-08T22:46:43Z",
+  "parameters": {
+    "prompt": "uplifting, bright, energetic, optimistic, synthesizer",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 208436295,
+      "used": 208436295
+    }
+  },
+  "generation_time": "248.17",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

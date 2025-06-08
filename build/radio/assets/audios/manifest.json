@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_358",
+      "title": "[MUSIC] Dawn Energy Pulse",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_358_20250608_060052.mp3",
+      "metadata": {
+        "issue_number": 358,
+        "issue_title": "[MUSIC] Dawn Energy Pulse",
+        "generated_at": "2025-06-08T06:00:52Z",
+        "parameters": {
+          "prompt": "uplifting, bright, optimistic, energetic, rhythmic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 1329850496,
+            "used": 1329850496
+          }
+        },
+        "generation_time": "246.13",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 358
     }
   ],
   "schedule_info": {

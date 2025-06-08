@@ -1,0 +1,18 @@
+{
+  "issue_number": 384,
+  "issue_title": "[MUSIC] Radiant Sunrise Sprint",
+  "generated_at": "2025-06-08T10:48:04Z",
+  "parameters": {
+    "prompt": "upbeat, uplifting, energetic, optimistic, bright",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 10878753,
+      "used": 10878753
+    }
+  },
+  "generation_time": "250.69",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

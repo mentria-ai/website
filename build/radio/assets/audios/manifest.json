@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_396",
+      "title": "[MUSIC] Sunbeam Momentum",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_396_20250608_131854.mp3",
+      "metadata": {
+        "issue_number": 396,
+        "issue_title": "[MUSIC] Sunbeam Momentum",
+        "generated_at": "2025-06-08T13:18:54Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, optimistic, bright, rhythmic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2895305263,
+            "used": 2895305263
+          }
+        },
+        "generation_time": "252.3",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 396
     }
   ],
   "schedule_info": {

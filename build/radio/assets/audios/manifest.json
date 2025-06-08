@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_430",
+      "title": "[MUSIC] Sunrise Energy Flow",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_430_20250608_194215.mp3",
+      "metadata": {
+        "issue_number": 430,
+        "issue_title": "[MUSIC] Sunrise Energy Flow",
+        "generated_at": "2025-06-08T19:42:15Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, bright, optimistic, rhythmic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2036264837,
+            "used": 2036264837
+          }
+        },
+        "generation_time": "244.82",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 430
     }
   ],
   "schedule_info": {

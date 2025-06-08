@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_432",
+      "title": "[MUSIC] Energy Boost Sunrise",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_432_20250608_195548.mp3",
+      "metadata": {
+        "issue_number": 432,
+        "issue_title": "[MUSIC] Energy Boost Sunrise",
+        "generated_at": "2025-06-08T19:55:48Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, upbeat, motivational, pump",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 3289220678,
+            "used": 3289220678
+          }
+        },
+        "generation_time": "236.15",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 432
     }
   ],
   "schedule_info": {

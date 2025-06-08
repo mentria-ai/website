@@ -1,0 +1,18 @@
+{
+  "issue_number": 442,
+  "issue_title": "[MUSIC] Sunrise Energy Pulse",
+  "generated_at": "2025-06-08T21:43:13Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, workout",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 101397046,
+      "used": 101397046
+    }
+  },
+  "generation_time": "261.78",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

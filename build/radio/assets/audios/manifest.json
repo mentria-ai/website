@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_348",
+      "title": "[MUSIC] Morning Energy Surge",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_348_20250608_041050.mp3",
+      "metadata": {
+        "issue_number": 348,
+        "issue_title": "[MUSIC] Morning Energy Surge",
+        "generated_at": "2025-06-08T04:10:50Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, bright, rhythmic, optimistic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2324939132,
+            "used": 2324939132
+          }
+        },
+        "generation_time": "249.73",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 348
     }
   ],
   "schedule_info": {

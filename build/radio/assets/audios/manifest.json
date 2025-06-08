@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_422",
+      "title": "[MUSIC] Radiant Momentum",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_422_20250608_175611.mp3",
+      "metadata": {
+        "issue_number": 422,
+        "issue_title": "[MUSIC] Radiant Momentum",
+        "generated_at": "2025-06-08T17:56:11Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, optimistic, bright, rhythmic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 1489968118,
+            "used": 1489968118
+          }
+        },
+        "generation_time": "250.57",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 422
     }
   ],
   "schedule_info": {

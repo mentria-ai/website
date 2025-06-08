@@ -1,0 +1,18 @@
+{
+  "issue_number": 382,
+  "issue_title": "[MUSIC] Solar Momentum",
+  "generated_at": "2025-06-08T10:25:03Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 208255867,
+      "used": 208255867
+    }
+  },
+  "generation_time": "240.65",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

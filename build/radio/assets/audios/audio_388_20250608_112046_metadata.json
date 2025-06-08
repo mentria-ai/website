@@ -1,0 +1,18 @@
+{
+  "issue_number": 388,
+  "issue_title": "[MUSIC] Radiant Dawn Pulse",
+  "generated_at": "2025-06-08T11:20:46Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, optimistic, bright, synthesizer",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 1919525792,
+      "used": 1919525792
+    }
+  },
+  "generation_time": "245.84",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

@@ -1,0 +1,18 @@
+{
+  "issue_number": 396,
+  "issue_title": "[MUSIC] Sunbeam Momentum",
+  "generated_at": "2025-06-08T13:18:54Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, optimistic, bright, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 2895305263,
+      "used": 2895305263
+    }
+  },
+  "generation_time": "252.3",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

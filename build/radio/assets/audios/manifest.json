@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_476",
+      "title": "[MUSIC] Morning Energy Spark",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_476_20250609_073132.mp3",
+      "metadata": {
+        "issue_number": 476,
+        "issue_title": "[MUSIC] Morning Energy Spark",
+        "generated_at": "2025-06-09T07:31:32Z",
+        "parameters": {
+          "prompt": "uplifting, bright, rhythmic, energetic, optimistic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 4049189321,
+            "used": 4049189321
+          }
+        },
+        "generation_time": "236.43",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 476
     }
   ],
   "schedule_info": {

@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_470",
+      "title": "[MUSIC] Radiant Morning Stride",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_470_20250609_055703.mp3",
+      "metadata": {
+        "issue_number": 470,
+        "issue_title": "[MUSIC] Radiant Morning Stride",
+        "generated_at": "2025-06-09T05:57:03Z",
+        "parameters": {
+          "prompt": "uplifting, bright, energetic, rhythmic, optimistic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 3985713574,
+            "used": 3985713574
+          }
+        },
+        "generation_time": "251.32",
+        "file_size": "2.6M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 470
     }
   ],
   "schedule_info": {

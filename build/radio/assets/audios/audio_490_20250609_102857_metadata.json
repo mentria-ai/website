@@ -1,0 +1,18 @@
+{
+  "issue_number": 490,
+  "issue_title": "[MUSIC] Morning Energy Spark",
+  "generated_at": "2025-06-09T10:28:57Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, optimistic, bright, driving",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 262999367,
+      "used": 262999367
+    }
+  },
+  "generation_time": "260.26",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

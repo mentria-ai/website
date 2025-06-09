@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_494",
+      "title": "[MUSIC] Peaceful Moments",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_494_20250609_112318.mp3",
+      "metadata": {
+        "issue_number": 494,
+        "issue_title": "[MUSIC] Peaceful Moments",
+        "generated_at": "2025-06-09T11:23:18Z",
+        "parameters": {
+          "prompt": "ambient, peaceful, uplifting, gentle",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": null,
+            "used": null
+          }
+        },
+        "generation_time": "257.03",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 494
     }
   ],
   "schedule_info": {

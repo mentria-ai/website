@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_526",
+      "title": "[MUSIC] Midday Energy Surge",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_526_20250609_183500.mp3",
+      "metadata": {
+        "issue_number": 526,
+        "issue_title": "[MUSIC] Midday Energy Surge",
+        "generated_at": "2025-06-09T18:35:00Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, upbeat, rhythmic, motivational",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 4083033408,
+            "used": 4083033408
+          }
+        },
+        "generation_time": "255.19",
+        "file_size": "2.1M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 526
     }
   ],
   "schedule_info": {

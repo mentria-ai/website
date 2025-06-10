@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_604",
+      "title": "[MUSIC] Radiant Horizon Pulse",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_604_20250610_125031.mp3",
+      "metadata": {
+        "issue_number": 604,
+        "issue_title": "[MUSIC] Radiant Horizon Pulse",
+        "generated_at": "2025-06-10T12:50:31Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, optimistic, bright, synthesizer",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 1635885167,
+            "used": 1635885167
+          }
+        },
+        "generation_time": "254.29",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 604
     }
   ],
   "schedule_info": {

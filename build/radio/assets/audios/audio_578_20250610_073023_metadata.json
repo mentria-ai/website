@@ -1,0 +1,18 @@
+{
+  "issue_number": 578,
+  "issue_title": "[MUSIC] Morning Energy Surge",
+  "generated_at": "2025-06-10T07:30:23Z",
+  "parameters": {
+    "prompt": "uplifting, bright, energetic, optimistic, motivational",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 3481454651,
+      "used": 3481454651
+    }
+  },
+  "generation_time": "254.11",
+  "file_size": "2.5M",
+  "generated_by": "mentria-ai"
+}

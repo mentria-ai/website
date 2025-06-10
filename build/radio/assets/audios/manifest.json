@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_600",
+      "title": "[MUSIC] Sunrise Energy Surge",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_600_20250610_114423.mp3",
+      "metadata": {
+        "issue_number": 600,
+        "issue_title": "[MUSIC] Sunrise Energy Surge",
+        "generated_at": "2025-06-10T11:44:23Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, bright, optimistic, workout",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2529813783,
+            "used": 2529813783
+          }
+        },
+        "generation_time": "255.18",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 600
     }
   ],
   "schedule_info": {

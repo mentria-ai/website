@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_594",
+      "title": "[MUSIC] Radiant Dawn Pulse",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_594_20250610_102809.mp3",
+      "metadata": {
+        "issue_number": 594,
+        "issue_title": "[MUSIC] Radiant Dawn Pulse",
+        "generated_at": "2025-06-10T10:28:09Z",
+        "parameters": {
+          "prompt": "uplifting, bright, optimistic, energetic, synth",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 2570983809,
+            "used": 2570983809
+          }
+        },
+        "generation_time": "249.43",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 594
     }
   ],
   "schedule_info": {

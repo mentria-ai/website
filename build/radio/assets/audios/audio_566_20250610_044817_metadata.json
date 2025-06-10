@@ -1,0 +1,18 @@
+{
+  "issue_number": 566,
+  "issue_title": "[MUSIC] Auto Generated Track 0444",
+  "generated_at": "2025-06-10T04:48:17Z",
+  "parameters": {
+    "prompt": "jazz, smooth, relaxing",
+    "lyrics": "[inst]",
+    "duration": 60,
+    "mode": "ultra",
+    "seed": {
+      "requested": null,
+      "used": null
+    }
+  },
+  "generation_time": "223.43",
+  "file_size": "1.2M",
+  "generated_by": "mentria-ai"
+}

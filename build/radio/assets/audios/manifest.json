@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_606",
+      "title": "[MUSIC] Radiant Energy Pulse",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_606_20250610_133910.mp3",
+      "metadata": {
+        "issue_number": 606,
+        "issue_title": "[MUSIC] Radiant Energy Pulse",
+        "generated_at": "2025-06-10T13:39:10Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, optimistic, bright, synth",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 3579057844,
+            "used": 3579057844
+          }
+        },
+        "generation_time": "247.71",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 606
     }
   ],
   "schedule_info": {

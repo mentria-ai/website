@@ -1,0 +1,18 @@
+{
+  "issue_number": 616,
+  "issue_title": "[MUSIC] Neon Horizon Glow",
+  "generated_at": "2025-06-10T15:48:07Z",
+  "parameters": {
+    "prompt": "uplifting, bright, energetic, optimistic, synth",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 1207333050,
+      "used": 1207333050
+    }
+  },
+  "generation_time": "253.23",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

@@ -1,0 +1,18 @@
+{
+  "issue_number": 714,
+  "issue_title": "[MUSIC] Sunlit Energy Surge",
+  "generated_at": "2025-06-11T14:24:46Z",
+  "parameters": {
+    "prompt": "upbeat, uplifting, energetic, optimistic, bright",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 4276752061,
+      "used": 4276752061
+    }
+  },
+  "generation_time": "247.47",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

@@ -1,0 +1,18 @@
+{
+  "issue_number": 728,
+  "issue_title": "[MUSIC] Radiant Horizon Flow",
+  "generated_at": "2025-06-11T17:01:57Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 1911826620,
+      "used": 1911826620
+    }
+  },
+  "generation_time": "256.19",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

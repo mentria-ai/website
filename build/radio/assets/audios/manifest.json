@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_666",
+      "title": "[MUSIC] Radiant Energy Flow",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_666_20250611_032311.mp3",
+      "metadata": {
+        "issue_number": 666,
+        "issue_title": "[MUSIC] Radiant Energy Flow",
+        "generated_at": "2025-06-11T03:23:11Z",
+        "parameters": {
+          "prompt": "upbeat, uplifting, energetic, optimistic, bright",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 424214108,
+            "used": 424214108
+          }
+        },
+        "generation_time": "260.8",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 666
     }
   ],
   "schedule_info": {

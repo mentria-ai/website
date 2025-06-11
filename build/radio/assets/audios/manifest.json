@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_676",
+      "title": "[MUSIC] Horizon of Energy",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_676_20250611_055148.mp3",
+      "metadata": {
+        "issue_number": 676,
+        "issue_title": "[MUSIC] Horizon of Energy",
+        "generated_at": "2025-06-11T05:51:48Z",
+        "parameters": {
+          "prompt": "uplifting, bright, energetic, motivating, upbeat",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 3417751876,
+            "used": 3417751876
+          }
+        },
+        "generation_time": "253.67",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 676
     }
   ],
   "schedule_info": {

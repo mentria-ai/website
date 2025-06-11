@@ -1,0 +1,18 @@
+{
+  "issue_number": 686,
+  "issue_title": "[MUSIC] Morning Energy Pulse",
+  "generated_at": "2025-06-11T07:57:34Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 4189248336,
+      "used": 4189248336
+    }
+  },
+  "generation_time": "243.24",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

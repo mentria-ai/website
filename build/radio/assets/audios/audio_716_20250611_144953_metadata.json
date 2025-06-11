@@ -1,0 +1,18 @@
+{
+  "issue_number": 716,
+  "issue_title": "[MUSIC] Radiant Morning Pulse",
+  "generated_at": "2025-06-11T14:49:53Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, upbeat",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 95495298,
+      "used": 95495298
+    }
+  },
+  "generation_time": "257.56",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

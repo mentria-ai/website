@@ -1,0 +1,18 @@
+{
+  "issue_number": 752,
+  "issue_title": "[MUSIC] Radiant Momentum",
+  "generated_at": "2025-06-11T21:25:00Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, optimistic, bright, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 908901272,
+      "used": 908901272
+    }
+  },
+  "generation_time": "258.94",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

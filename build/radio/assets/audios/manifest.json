@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_668",
+      "title": "[MUSIC] Morning Energy Pulse",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_668_20250611_040550.mp3",
+      "metadata": {
+        "issue_number": 668,
+        "issue_title": "[MUSIC] Morning Energy Pulse",
+        "generated_at": "2025-06-11T04:05:50Z",
+        "parameters": {
+          "prompt": "uplifting, upbeat, bright, energetic, rhythmic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 1533089224,
+            "used": 1533089224
+          }
+        },
+        "generation_time": "249.41",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 668
     }
   ],
   "schedule_info": {

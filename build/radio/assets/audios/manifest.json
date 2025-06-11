@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_714",
+      "title": "[MUSIC] Sunlit Energy Surge",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_714_20250611_142446.mp3",
+      "metadata": {
+        "issue_number": 714,
+        "issue_title": "[MUSIC] Sunlit Energy Surge",
+        "generated_at": "2025-06-11T14:24:46Z",
+        "parameters": {
+          "prompt": "upbeat, uplifting, energetic, optimistic, bright",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 4276752061,
+            "used": 4276752061
+          }
+        },
+        "generation_time": "247.47",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 714
     }
   ],
   "schedule_info": {

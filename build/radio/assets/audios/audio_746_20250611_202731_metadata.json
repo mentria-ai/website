@@ -1,0 +1,18 @@
+{
+  "issue_number": 746,
+  "issue_title": "[MUSIC] Synthwave Sunrise Sprint",
+  "generated_at": "2025-06-11T20:27:31Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, synthwave",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 108421757,
+      "used": 108421757
+    }
+  },
+  "generation_time": "254.16",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

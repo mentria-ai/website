@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_746",
+      "title": "[MUSIC] Synthwave Sunrise Sprint",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_746_20250611_202731.mp3",
+      "metadata": {
+        "issue_number": 746,
+        "issue_title": "[MUSIC] Synthwave Sunrise Sprint",
+        "generated_at": "2025-06-11T20:27:31Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, bright, optimistic, synthwave",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 108421757,
+            "used": 108421757
+          }
+        },
+        "generation_time": "254.16",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 746
     }
   ],
   "schedule_info": {

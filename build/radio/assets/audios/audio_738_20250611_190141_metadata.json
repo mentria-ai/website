@@ -1,0 +1,18 @@
+{
+  "issue_number": 738,
+  "issue_title": "[MUSIC] Sunrise Energy Wave",
+  "generated_at": "2025-06-11T19:01:41Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 1576114149,
+      "used": 1576114149
+    }
+  },
+  "generation_time": "268.07",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

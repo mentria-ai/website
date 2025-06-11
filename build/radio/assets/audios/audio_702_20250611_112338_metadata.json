@@ -1,0 +1,18 @@
+{
+  "issue_number": 702,
+  "issue_title": "[MUSIC] Sunbeam Sprint",
+  "generated_at": "2025-06-11T11:23:38Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, optimistic, bright, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 3293393207,
+      "used": 3293393207
+    }
+  },
+  "generation_time": "250.92",
+  "file_size": "2.5M",
+  "generated_by": "mentria-ai"
+}

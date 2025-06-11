@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_762",
+      "title": "[MUSIC] Sunrise Energy Spark",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_762_20250611_225933.mp3",
+      "metadata": {
+        "issue_number": 762,
+        "issue_title": "[MUSIC] Sunrise Energy Spark",
+        "generated_at": "2025-06-11T22:59:33Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, bright, optimistic, rhythmic",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 4010266220,
+            "used": 4010266220
+          }
+        },
+        "generation_time": "249",
+        "file_size": "2.5M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 762
     }
   ],
   "schedule_info": {

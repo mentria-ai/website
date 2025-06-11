@@ -1,0 +1,18 @@
+{
+  "issue_number": 700,
+  "issue_title": "[MUSIC] Golden Sunrise Run",
+  "generated_at": "2025-06-11T10:51:31Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, bright, optimistic, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 3837218162,
+      "used": 3837218162
+    }
+  },
+  "generation_time": "267.73",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

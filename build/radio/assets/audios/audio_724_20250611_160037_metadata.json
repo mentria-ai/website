@@ -1,0 +1,18 @@
+{
+  "issue_number": 724,
+  "issue_title": "[MUSIC] Energy Pulse Horizon",
+  "generated_at": "2025-06-11T16:00:37Z",
+  "parameters": {
+    "prompt": "upbeat, uplifting, rhythmic, motivational, electronic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 73241140,
+      "used": 73241140
+    }
+  },
+  "generation_time": "260.59",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

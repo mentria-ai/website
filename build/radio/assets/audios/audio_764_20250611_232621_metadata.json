@@ -1,0 +1,18 @@
+{
+  "issue_number": 764,
+  "issue_title": "[MUSIC] Radiant Sunrise Pulse",
+  "generated_at": "2025-06-11T23:26:21Z",
+  "parameters": {
+    "prompt": "uplifting, bright, energetic, optimistic, synthesizer",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 3570780893,
+      "used": 3570780893
+    }
+  },
+  "generation_time": "260.34",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

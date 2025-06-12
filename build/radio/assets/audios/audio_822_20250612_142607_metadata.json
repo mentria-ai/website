@@ -1,0 +1,18 @@
+{
+  "issue_number": 822,
+  "issue_title": "[MUSIC] Radiant Morning Climb",
+  "generated_at": "2025-06-12T14:26:07Z",
+  "parameters": {
+    "prompt": "uplifting, bright, energetic, motivational, piano",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 3645160913,
+      "used": 3645160913
+    }
+  },
+  "generation_time": "258.96",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

@@ -1,0 +1,18 @@
+{
+  "issue_number": 824,
+  "issue_title": "[MUSIC] Radiant Horizon",
+  "generated_at": "2025-06-12T14:50:54Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, optimistic, bright, synth",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 1760429650,
+      "used": 1760429650
+    }
+  },
+  "generation_time": "261.57",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_824",
+      "title": "[MUSIC] Radiant Horizon",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_824_20250612_145054.mp3",
+      "metadata": {
+        "issue_number": 824,
+        "issue_title": "[MUSIC] Radiant Horizon",
+        "generated_at": "2025-06-12T14:50:54Z",
+        "parameters": {
+          "prompt": "uplifting, energetic, optimistic, bright, synth",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 1760429650,
+            "used": 1760429650
+          }
+        },
+        "generation_time": "261.57",
+        "file_size": "2.3M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 824
     }
   ],
   "schedule_info": {

@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_800",
+      "title": "[MUSIC] Radiant Morning Energy",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_800_20250612_092806.mp3",
+      "metadata": {
+        "issue_number": 800,
+        "issue_title": "[MUSIC] Radiant Morning Energy",
+        "generated_at": "2025-06-12T09:28:06Z",
+        "parameters": {
+          "prompt": "uplifting, bright, optimistic, energetic, synthesizer",
+          "lyrics": "[inst]",
+          "duration": 120,
+          "mode": "ultra",
+          "seed": {
+            "requested": 3053569900,
+            "used": 3053569900
+          }
+        },
+        "generation_time": "258.78",
+        "file_size": "2.4M",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 120,
+      "issueNumber": 800
     }
   ],
   "schedule_info": {

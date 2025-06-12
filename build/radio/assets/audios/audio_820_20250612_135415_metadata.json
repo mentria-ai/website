@@ -1,0 +1,18 @@
+{
+  "issue_number": 820,
+  "issue_title": "[MUSIC] Auto Generated Track 1350",
+  "generated_at": "2025-06-12T13:54:15Z",
+  "parameters": {
+    "prompt": "acoustic, folk, peaceful",
+    "lyrics": "[inst]",
+    "duration": 60,
+    "mode": "ultra",
+    "seed": {
+      "requested": null,
+      "used": null
+    }
+  },
+  "generation_time": "225.15",
+  "file_size": "964K",
+  "generated_by": "mentria-ai"
+}

@@ -323,6 +323,32 @@
       },
       "duration": 120,
       "issueNumber": 262
+    },
+    {
+      "id": "track_820",
+      "title": "[MUSIC] Auto Generated Track 1350",
+      "artist": "mentria.ai",
+      "file": "assets/audios/audio_820_20250612_135415.mp3",
+      "metadata": {
+        "issue_number": 820,
+        "issue_title": "[MUSIC] Auto Generated Track 1350",
+        "generated_at": "2025-06-12T13:54:16Z",
+        "parameters": {
+          "prompt": "acoustic, folk, peaceful",
+          "lyrics": "[inst]",
+          "duration": 60,
+          "mode": "ultra",
+          "seed": {
+            "requested": null,
+            "used": null
+          }
+        },
+        "generation_time": "225.15",
+        "file_size": "964K",
+        "generated_by": "mentria-ai"
+      },
+      "duration": 60,
+      "issueNumber": 820
     }
   ],
   "schedule_info": {

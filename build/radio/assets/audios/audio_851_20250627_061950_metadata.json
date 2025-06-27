@@ -1,0 +1,18 @@
+{
+  "issue_number": 851,
+  "issue_title": "[MUSIC] Radiant Pulse",
+  "generated_at": "2025-06-27T06:19:50Z",
+  "parameters": {
+    "prompt": "electronic, uplifting, energetic, optimistic, bright",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 7777777,
+      "used": 7777777
+    }
+  },
+  "generation_time": "194.59",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

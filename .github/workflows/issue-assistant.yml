@@ -518,13 +518,24 @@ jobs:
           
           # Read file contents and add to context (increased to 150 lines per file)
           FILE_COUNT=0
+          TOTAL_CONTEXT_SIZE=0
+          MAX_CONTEXT_SIZE=1048576  # 1MB limit to prevent overly large contexts
+          
           for file in $RELEVANT_FILES; do
             if [ -f "$file" ]; then
+              # Check file size before processing
+              FILE_SIZE=$(wc -c < "$file")
+              if [ $((TOTAL_CONTEXT_SIZE + FILE_SIZE)) -gt $MAX_CONTEXT_SIZE ]; then
+                echo "Skipping $file - would exceed context size limit" >> ${{ steps.init.outputs.log_file }}
+                continue
+              fi
+              
               EXTENSION="${file##*.}"
               echo -e "#### ${file}\n\`\`\`${EXTENSION}" >> repo_context.md
               head -150 "$file" >> repo_context.md
               echo -e "\n\`\`\`\n\n" >> repo_context.md
               FILE_COUNT=$((FILE_COUNT+1))
+              TOTAL_CONTEXT_SIZE=$((TOTAL_CONTEXT_SIZE + FILE_SIZE))
             fi
           done
           
@@ -615,8 +626,9 @@ jobs:
           fi
           
           # Create request payload using jq to properly escape JSON with enhanced parameters
+          # Use --rawfile to avoid "Argument list too long" error with large repository context
           jq -n \
-            --arg prompt "$(cat response_files/combined_prompt.txt)" \
+            --rawfile prompt response_files/combined_prompt.txt \
             '{
               "model": "deepseek-ai/DeepSeek-R1",
               "max_tokens": 8192,
@@ -640,8 +652,28 @@ jobs:
           
           # Check response and extract content
           if [ -s "response_files/api_response.json" ]; then
-            # Extract content
-            CONTENT=$(cat response_files/api_response.json | jq -r '.choices[0].message.content')
+            # Check if API returned an error
+            ERROR_MSG=$(cat response_files/api_response.json | jq -r '.error.message // empty' 2>/dev/null)
+            if [ ! -z "$ERROR_MSG" ]; then
+              echo "❌ API Error: $ERROR_MSG" >> ${{ steps.init.outputs.log_file }}
+              echo "API returned an error: $ERROR_MSG. Please try again later." > response.txt
+              echo "response_file=response.txt" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            
+            # Extract content safely
+            CONTENT=$(cat response_files/api_response.json | jq -r '.choices[0].message.content // empty' 2>/dev/null)
+            if [ -z "$CONTENT" ] || [ "$CONTENT" == "null" ]; then
+              echo "❌ No content in API response" >> ${{ steps.init.outputs.log_file }}
+              echo "I apologize, but I didn't receive a proper response from the AI service. Please try again later." > response.txt
+              echo "response_file=response.txt" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            
+            # Log prompt and response sizes for debugging
+            PROMPT_SIZE=$(wc -c < response_files/combined_prompt.txt)
+            echo "Prompt size: $PROMPT_SIZE bytes" >> ${{ steps.init.outputs.log_file }}
+            echo "Raw response length: ${#CONTENT} characters" >> ${{ steps.init.outputs.log_file }}
             
             # Process <think> blocks with a simplified approach
             echo "$CONTENT" > response_files/raw_content.txt

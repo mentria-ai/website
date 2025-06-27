@@ -1,5 +1,8 @@
 blank_issues_enabled: true
 contact_links:
+  - name: 🤖 AI Assistant
+    url: https://github.com/mentria-ai/website/issues/new?template=ai-assistant.yml
+    about: Get comprehensive AI assistance for technical questions, code reviews, and project guidance
   - name: 📖 OctoBeats Documentation
     url: https://github.com/mentria-ai/website/blob/main/.github/OCTOBEATS-SETUP-GUIDE.md
     about: Learn more about OctoBeats Studio and its capabilities

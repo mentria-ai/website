@@ -214,6 +214,54 @@ jobs:
             logger.logSuccess(logFile, 'Workflow initialization completed - proceeding with issue processing');
             return { log_file: logFile };
       
+      # NEW: Enhanced issue classification system
+      - name: 🎭 Classify Issue Type and Determine Strategy
+        if: steps.ultra-filter.outputs.should_process == 'true'
+        id: classify-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const content = `${issue.title} ${issue.body}`.toLowerCase();
+            
+            // Enhanced classification system
+            const classifiers = {
+              bug_report: /bug|error|crash|exception|fail|broken|not working|issue|problem/i,
+              feature_request: /feature|enhancement|improve|add|new|request|suggest/i,
+              question: /question|how to|help|why|what|where|when|\?/i,
+              documentation: /docs|documentation|readme|guide|help|tutorial|explain/i,
+              performance: /slow|performance|optimization|memory|cpu|speed|lag/i,
+              security: /security|vulnerability|exploit|auth|permission|access/i,
+              ai_assistant: /\[ai\]|ai.assistant|artificial.intelligence/i
+            };
+            
+            const classifications = {};
+            for (const [type, pattern] of Object.entries(classifiers)) {
+              classifications[type] = pattern.test(content);
+            }
+            
+            // Determine primary type
+            const suggestedLabels = Object.keys(classifications).filter(key => classifications[key]);
+            const primaryType = suggestedLabels[0] || 'general';
+            
+            // Check if this uses the AI assistant template
+            const isAITemplate = issue.labels.some(label => label.name.toLowerCase() === 'ai-assistant') || 
+                                 content.includes('[ai]');
+            
+            console.log(`🎯 Issue classification: ${primaryType}`);
+            console.log(`🤖 Uses AI template: ${isAITemplate}`);
+            
+            core.setOutput('classifications', JSON.stringify(classifications));
+            core.setOutput('suggested_labels', JSON.stringify(suggestedLabels));
+            core.setOutput('primary_type', primaryType);
+            core.setOutput('is_ai_template', isAITemplate.toString());
+            
+            return {
+              classifications,
+              primaryType,
+              isAITemplate
+            };
+      
       - name: Extract issue content
         if: steps.ultra-filter.outputs.should_process == 'true'
         id: get-content
@@ -278,7 +326,9 @@ jobs:
               // Create a JSON file with all extracted content for the next step
               const extractedData = {
                 ...contentResult,
-                previousComments
+                previousComments,
+                classification: '${{ steps.classify-issue.outputs.primary_type }}',
+                isAITemplate: '${{ steps.classify-issue.outputs.is_ai_template }}' === 'true'
               };
               
               fs.writeFileSync('content_data.json', JSON.stringify(extractedData, null, 2));
@@ -325,14 +375,34 @@ jobs:
           # Extract content to a temporary file to avoid shell expansion issues
           jq -r '.content' content_data.json > context_analysis/content.txt
           
+          # Check if this is an AI template issue (higher chance of needing context)
+          IS_AI_TEMPLATE=$(jq -r '.isAITemplate // false' content_data.json)
+          CLASSIFICATION=$(jq -r '.classification // "general"' content_data.json)
+          
+          echo "Issue classification: $CLASSIFICATION" >> ${{ steps.init.outputs.log_file }}
+          echo "Is AI template: $IS_AI_TEMPLATE" >> ${{ steps.init.outputs.log_file }}
+          
           # Create the request JSON directly with heredoc
           cat > context_analysis/request.json << EOL
           {
             "model": "deepseek-ai/DeepSeek-R1",
+            "max_tokens": 2048,
+            "temperature": 0.1,
             "messages": [
               {
                 "role": "user",
-                "content": "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. You should be liberal in deciding that context is needed - if there's ANY chance code context would help, say yes. Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string).\n\nAnalyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:\n\n$(cat context_analysis/content.txt)\n\nRespond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
+                "content": "You are a tool that analyzes GitHub issue or discussion messages to determine if repository context would be helpful to answer the query. You should be liberal in deciding that context is needed - if there's ANY chance code context would help, say yes. 
+
+                Issue Classification: $CLASSIFICATION
+                Uses AI Template: $IS_AI_TEMPLATE
+
+                Respond with only a JSON object containing two fields: \"needsContext\" (boolean) and \"reason\" (string).
+
+                Analyze this GitHub issue/discussion text and determine if repository code context would be helpful to answer it properly:
+
+                $(cat context_analysis/content.txt)
+
+                Respond with JSON only, format: {\"needsContext\": boolean, \"reason\": \"your explanation\"}"
               }
             ]
           }
@@ -371,6 +441,13 @@ jobs:
               fi
             fi
             
+            # For AI template issues, bias toward needing context
+            if [ "$IS_AI_TEMPLATE" == "true" ] && [ "$NEEDS_CONTEXT" == "false" ]; then
+              echo "AI template detected - overriding to need context" >> ${{ steps.init.outputs.log_file }}
+              NEEDS_CONTEXT="true"
+              REASON="AI template issue - providing comprehensive context"
+            fi
+            
             echo "Context analysis result: $NEEDS_CONTEXT" >> ${{ steps.init.outputs.log_file }}
             echo "Reason: $REASON" >> ${{ steps.init.outputs.log_file }}
             
@@ -379,7 +456,7 @@ jobs:
             echo "reason=$REASON" >> $GITHUB_OUTPUT
           else
             echo "❌ Error: No response from API or empty response" >> ${{ steps.init.outputs.log_file }}
-            # Default to needing context in case of error
+            # Default to needing context in case of error, especially for AI template
             echo "needs_context=true" >> $GITHUB_OUTPUT
             echo "reason=Failed to analyze context needs, assuming context is needed" >> $GITHUB_OUTPUT
           fi
@@ -392,20 +469,21 @@ jobs:
           
           # Load content data
           CONTENT=$(cat content_data.json | jq -r '.content')
+          CLASSIFICATION=$(cat content_data.json | jq -r '.classification // "general"')
           
-          # We'll use a simpler approach for repo context in the shell script
-          # Just identify some relevant files based on keywords in the content
+          # Enhanced context extraction based on classification
+          echo "Extracting context for $CLASSIFICATION type issue..." >> ${{ steps.init.outputs.log_file }}
           
           # Extract keywords from content
-          KEYWORDS=$(echo "$CONTENT" | tr -cs '[:alnum:]' '\n' | sort | uniq | grep -v '^$' | head -20)
+          KEYWORDS=$(echo "$CONTENT" | tr -cs '[:alnum:]' '\n' | sort | uniq | grep -v '^$' | head -30)
           echo "Keywords extracted: $KEYWORDS" >> ${{ steps.init.outputs.log_file }}
           
-          # Find relevant files (limited to 15)
+          # Find relevant files with enhanced search (increased to 20 files)
           RELEVANT_FILES=""
           for keyword in $KEYWORDS; do
             if [ ${#keyword} -gt 3 ]; then  # Only use keywords longer than 3 chars
               # First try grep to find content matches (more relevant)
-              GREP_FILES=$(grep -l "$keyword" $(find . -type f -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/.git/*" -not -path "*/build/*" -not -path "*/.github/workflows/*" -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.html" -o -name "*.css" 2>/dev/null) 2>/dev/null | head -3)
+              GREP_FILES=$(grep -l "$keyword" $(find . -type f -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/.git/*" -not -path "*/build/*" -not -path "*/.github/workflows/*" -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.html" -o -name "*.css" -o -name "*.json" -o -name "*.md" 2>/dev/null) 2>/dev/null | head -3)
               
               # Then try filename matches
               FOUND_FILES=$(find . -type f -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/.git/*" -not -path "*/build/*" -not -path "*/.github/workflows/*" -name "*${keyword}*" | head -2)
@@ -414,26 +492,37 @@ jobs:
             fi
           done
           
-          # Also include obviously important files
-          IMPORTANT_FILES=$(find . -maxdepth 2 -type f -name "package.json" -o -name "README.md" -o -name "index.html" -o -name "index.js" -o -name "main.js" -o -name "app.js" -o -name "styles.css" 2>/dev/null)
+          # Include classification-specific important files
+          case "$CLASSIFICATION" in
+            "bug_report"|"feature_request")
+              IMPORTANT_FILES=$(find . -maxdepth 3 -type f -name "package.json" -o -name "README.md" -o -name "index.html" -o -name "index.js" -o -name "main.js" -o -name "app.js" -o -name "*.config.*" 2>/dev/null)
+              ;;
+            "performance")
+              IMPORTANT_FILES=$(find . -maxdepth 3 -type f -name "webpack.config.*" -o -name "vite.config.*" -o -name "package.json" -o -name "*.performance.*" 2>/dev/null)
+              ;;
+            *)
+              IMPORTANT_FILES=$(find . -maxdepth 2 -type f -name "package.json" -o -name "README.md" -o -name "index.html" -o -name "index.js" -o -name "main.js" -o -name "app.js" -o -name "styles.css" 2>/dev/null)
+              ;;
+          esac
+          
           RELEVANT_FILES="$RELEVANT_FILES $IMPORTANT_FILES"
           
-          # Deduplicate files and limit to 15
-          RELEVANT_FILES=$(echo "$RELEVANT_FILES" | tr ' ' '\n' | sort | uniq | grep -v '^$' | head -15)
+          # Deduplicate files and limit to 20
+          RELEVANT_FILES=$(echo "$RELEVANT_FILES" | tr ' ' '\n' | sort | uniq | grep -v '^$' | head -20)
           
           # Format the repository context
           echo -e "## Repository Context\n\n" > repo_context.md
           echo -e "### Repository Structure\n" >> repo_context.md
-          find . -maxdepth 2 -type d -not -path "*/node_modules/*" -not -path "*/.git/*" | sort | head -10 | sed 's/^/- /' >> repo_context.md
+          find . -maxdepth 2 -type d -not -path "*/node_modules/*" -not -path "*/.git/*" | sort | head -15 | sed 's/^/- /' >> repo_context.md
           echo -e "\n\n### Relevant Files\n\n" >> repo_context.md
           
-          # Read file contents and add to context
+          # Read file contents and add to context (increased to 150 lines per file)
           FILE_COUNT=0
           for file in $RELEVANT_FILES; do
             if [ -f "$file" ]; then
               EXTENSION="${file##*.}"
               echo -e "#### ${file}\n\`\`\`${EXTENSION}" >> repo_context.md
-              head -100 "$file" >> repo_context.md
+              head -150 "$file" >> repo_context.md
               echo -e "\n\`\`\`\n\n" >> repo_context.md
               FILE_COUNT=$((FILE_COUNT+1))
             fi
@@ -458,6 +547,8 @@ jobs:
           CONTENT_DATA=$(cat content_data.json)
           CONTENT=$(echo "$CONTENT_DATA" | jq -r '.content')
           EVENT_TYPE=$(echo "$CONTENT_DATA" | jq -r '.eventType')
+          CLASSIFICATION=$(echo "$CONTENT_DATA" | jq -r '.classification // "general"')
+          IS_AI_TEMPLATE=$(echo "$CONTENT_DATA" | jq -r '.isAITemplate // false')
           
           # Load repository context if available
           REPO_CONTEXT=""
@@ -466,19 +557,43 @@ jobs:
             echo "Loaded repository context ($(wc -c < repo_context.md) bytes)" >> ${{ steps.init.outputs.log_file }}
           fi
           
-          # Combine system and user prompts into a single user prompt
-          cat > response_files/combined_prompt.txt << 'PROMPTEOF'
-          You are an AI assistant that helps with GitHub issues. You provide helpful, accurate, and concise responses to technical questions and issues.
+          # Enhanced prompting based on classification
+          case "$CLASSIFICATION" in
+            "bug_report")
+              ROLE_PROMPT="You are an expert debugging assistant. Focus on identifying root causes, providing step-by-step debugging approaches, and offering concrete solutions."
+              ;;
+            "feature_request")
+              ROLE_PROMPT="You are a software architecture consultant. Provide implementation strategies, consider edge cases, and suggest best practices for the requested feature."
+              ;;
+            "performance")
+              ROLE_PROMPT="You are a performance optimization specialist. Analyze bottlenecks, suggest profiling approaches, and recommend specific optimization techniques."
+              ;;
+            "security")
+              ROLE_PROMPT="You are a security expert. Focus on identifying vulnerabilities, suggesting secure implementations, and providing security best practices."
+              ;;
+            *)
+              ROLE_PROMPT="You are an AI assistant that helps with GitHub issues. You provide helpful, accurate, and comprehensive responses to technical questions and issues."
+              ;;
+          esac
+          
+          # Combine system and user prompts into a single user prompt with enhanced guidelines
+          cat > response_files/combined_prompt.txt << PROMPTEOF
+          $ROLE_PROMPT
+
+          Issue Classification: $CLASSIFICATION
+          Uses AI Assistant Template: $IS_AI_TEMPLATE
 
           When responding, follow these guidelines:
           1. Be direct and get straight to the point
-          2. Use markdown formatting to structure your responses
-          3. When code is needed, use proper syntax highlighting with markdown code blocks (e.g., ```javascript)
+          2. Use markdown formatting to structure your responses with clear headings
+          3. When code is needed, use proper syntax highlighting with markdown code blocks (e.g., \`\`\`javascript)
           4. If you're uncertain, acknowledge limitations rather than making things up
           5. You may include your reasoning process in <think></think> tags - this will be formatted as a quote block in the final response
           6. For complex technical questions, break down your approach step by step
           7. If you reference specific parts of code files, cite the file path and line numbers
           8. Keep your responses focused on the technical issue at hand
+          9. Provide actionable next steps when appropriate
+          10. If suggesting code changes, explain why the changes are needed
 
           Remember that you're responding in a GitHub issue context. Your goal is to be helpful, accurate, and drive toward issue resolution.
           PROMPTEOF
@@ -499,11 +614,14 @@ jobs:
             echo "Based on the repository context above, please provide a specific and technically accurate response to the question. Reference specific files and code sections when relevant." >> response_files/combined_prompt.txt
           fi
           
-          # Create request payload using jq to properly escape JSON
+          # Create request payload using jq to properly escape JSON with enhanced parameters
           jq -n \
             --arg prompt "$(cat response_files/combined_prompt.txt)" \
             '{
               "model": "deepseek-ai/DeepSeek-R1",
+              "max_tokens": 8192,
+              "temperature": 0.1,
+              "top_p": 0.95,
               "messages": [
                 {
                   "role": "user",
@@ -512,10 +630,11 @@ jobs:
               ]
             }' > response_files/payload.json
           
-          # Make API call
+          # Make API call with increased timeout
           curl -s -X POST "https://api.together.xyz/v1/chat/completions" \
             -H "Authorization: Bearer ${{ secrets.TOGETHER_API_KEY }}" \
             -H "Content-Type: application/json" \
+            --max-time 90 \
             -d @response_files/payload.json \
             -o response_files/api_response.json
           
@@ -686,7 +805,9 @@ jobs:
                 eventType: context.eventName,
                 action: context.payload.action || 'N/A',
                 repoContextUsed: '${{ steps.check-context.outputs.needs_context }}' === 'true',
-                filteredOut: '${{ steps.ultra-filter.outputs.should_process }}' !== 'true'
+                filteredOut: '${{ steps.ultra-filter.outputs.should_process }}' !== 'true',
+                classification: '${{ steps.classify-issue.outputs.primary_type }}',
+                isAITemplate: '${{ steps.classify-issue.outputs.is_ai_template }}'
               };
               
               logger.finalizeLog(logFile, context, outcomes);

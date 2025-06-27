@@ -1,0 +1,161 @@
+name: 🤖 AI Assistant Request
+description: Get help from the AI assistant with technical questions, troubleshooting, or general guidance
+title: "[AI] "
+labels: ["ai-assistant"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🤖 AI Assistant
+        
+        This template is optimized for communication with our AI assistant. The AI can help with:
+        - **Code questions** and debugging
+        - **Architecture** and design guidance  
+        - **Feature implementation** suggestions
+        - **Documentation** and explanations
+        - **Troubleshooting** issues
+        - **Best practices** recommendations
+        
+        💡 **Tip**: Be specific about your context and what you're trying to achieve for the best assistance!
+        
+        ---
+
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: 🎯 Request Type
+      description: What kind of assistance do you need?
+      options:
+        - "Question / How-to"
+        - "Bug Investigation" 
+        - "Feature Implementation"
+        - "Code Review"
+        - "Architecture Guidance"
+        - "Performance Optimization"
+        - "Documentation"
+        - "General Discussion"
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 📝 Your Question or Request
+      description: Describe your question, issue, or what you're trying to accomplish
+      placeholder: |
+        Be specific about:
+        - What you're trying to do
+        - What you've already tried
+        - What's not working as expected
+        - What outcome you're looking for
+    validations:
+      required: true
+
+  - type: input
+    id: relevant_files
+    attributes:
+      label: 📂 Relevant Files/Components (Optional)
+      description: List specific files, components, or areas of the codebase related to your question
+      placeholder: "e.g., src/components/Header.jsx, styles/main.css, package.json"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: context_level
+    attributes:
+      label: 🔍 Context Needed
+      description: How much repository context should the AI analyze?
+      options:
+        - "Minimal - Just answer the question"
+        - "Standard - Include relevant files" 
+        - "Deep - Comprehensive codebase analysis"
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempted_solutions
+    attributes:
+      label: 🔧 What You've Tried (Optional)
+      description: List any solutions you've already attempted
+      placeholder: |
+        - Tried solution A, but got error X
+        - Looked at documentation Y, but unclear about Z
+        - Modified file.js but still seeing issue
+    validations:
+      required: false
+
+  - type: input
+    id: environment
+    attributes:
+      label: 💻 Environment (Optional)
+      description: Relevant environment details (OS, browser, Node version, etc.)
+      placeholder: "Windows 11, Chrome 120, Node 18.17.0"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: ⚡ Priority Level
+      description: How urgent is this request?
+      options:
+        - "Low - When convenient"
+        - "Medium - This week"
+        - "High - Within 24 hours"
+        - "Critical - Blocking development"
+      default: 1
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 🚀 What happens next?
+        
+        1. **AI Analysis**: The assistant will analyze your request and determine if repository context is needed
+        2. **Context Gathering**: If needed, relevant code files will be automatically analyzed
+        3. **Response Generation**: A comprehensive, technical response will be generated
+        4. **Follow-up**: The AI can continue the conversation if you have additional questions
+        
+        ## 💡 Tips for Better Responses
+        
+        **Be Specific**: Instead of "Why isn't this working?", try "The login function returns undefined when I call it with valid credentials"
+        
+        **Include Context**: Mention what you're building, what technologies you're using, and what you've already tried
+        
+        **Use Examples**: Provide code snippets, error messages, or expected vs. actual behavior
+        
+        **Ask Follow-ups**: Don't hesitate to ask for clarification or dive deeper into specific aspects
+        
+        ## 🔧 Example Good Requests
+        
+        **Code Question:**
+        ```
+        Type: Question / How-to
+        Question: How can I implement user authentication in this React app? I want to use JWT tokens and need to protect certain routes. I see there's already a context system set up but I'm not sure how to integrate auth.
+        Relevant Files: src/context/UserContext.js, src/components/Router.jsx
+        Context: Standard
+        ```
+        
+        **Bug Investigation:**
+        ```
+        Type: Bug Investigation  
+        Question: The image carousel component stops working after navigating back from another page. The slides don't advance automatically and clicking next/prev buttons has no effect.
+        Relevant Files: src/components/Carousel.jsx, src/hooks/useAutoplay.js
+        What I've Tried: Added console logs, checked for memory leaks, tried remounting the component
+        Context: Deep
+        ```
+        
+        **Architecture Guidance:**
+        ```
+        Type: Architecture Guidance
+        Question: I need to add real-time notifications to the app. Should I use WebSockets, Server-Sent Events, or polling? The app needs to handle ~1000 concurrent users and notifications aren't super frequent.
+        Context: Standard
+        Priority: Medium
+        ``` 

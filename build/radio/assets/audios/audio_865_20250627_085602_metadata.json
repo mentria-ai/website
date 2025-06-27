@@ -1,0 +1,18 @@
+{
+  "issue_number": 865,
+  "issue_title": "[MUSIC] Sunrise Energy Surge",
+  "generated_at": "2025-06-27T08:56:02Z",
+  "parameters": {
+    "prompt": "uplifting, bright, energetic, motivating, upbeat",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 417190043,
+      "used": 417190043
+    }
+  },
+  "generation_time": "221.56",
+  "file_size": "2.4M",
+  "generated_by": "mentria-ai"
+}

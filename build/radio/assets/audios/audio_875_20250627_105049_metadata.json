@@ -1,0 +1,18 @@
+{
+  "issue_number": 875,
+  "issue_title": "[MUSIC] Sunrise Energy Spark",
+  "generated_at": "2025-06-27T10:50:49Z",
+  "parameters": {
+    "prompt": "uplifting, energetic, optimistic, bright, rhythmic",
+    "lyrics": "[inst]",
+    "duration": 120,
+    "mode": "ultra",
+    "seed": {
+      "requested": 3171976435,
+      "used": 3171976435
+    }
+  },
+  "generation_time": "226.86",
+  "file_size": "2.3M",
+  "generated_by": "mentria-ai"
+}

@@ -211,7 +211,7 @@ async function callTogetherAI(options) {
 /**
  * Process thinking blocks in content
  * @param {string} content - Content with <think>...</think> blocks
- * @returns {string} - Processed content with thinking blocks as markdown quotes
+ * @returns {string} - Processed content with thinking blocks as collapsible HTML dropdowns
  */
 function processThinkingBlocks(content) {
   if (!content.includes('<think>')) {
@@ -245,17 +245,17 @@ function processThinkingBlocks(content) {
         thinkingContent += parts[0] + '\n';
       }
       
-      // Format thinking content as markdown quote
+      // Format thinking content as collapsible dropdown
       if (thinkingContent.trim()) {
-        processed += '\n\n> **Thinking process:**\n';
+        processed += '\n\n<details>\n<summary>🤔 <strong>Thinking process</strong></summary>\n\n';
         thinkingContent.split('\n').forEach(thinkLine => {
           if (thinkLine.trim()) {
-            processed += '> ' + thinkLine + '\n';
+            processed += thinkLine + '\n';
           } else {
-            processed += '>\n';
+            processed += '\n';
           }
         });
-        processed += '\n';
+        processed += '\n</details>\n';
       }
       
       thinkingContent = '';

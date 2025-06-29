@@ -458,7 +458,7 @@ jobs:
           2. Use markdown formatting to structure your responses
           3. When code is needed, use proper syntax highlighting with markdown code blocks (e.g., ```javascript)
           4. If you're uncertain, acknowledge limitations rather than making things up
-          5. You may include your reasoning process in <think></think> tags - this will be formatted as a quote block in the final response
+          5. You may include your reasoning process in <think></think> tags - this will be formatted as a collapsible dropdown in the final response
           6. For complex technical questions, break down your approach step by step
           7. If you reference specific parts of code files, cite the file path and line numbers
           8. Keep your responses focused on the technical issue at hand

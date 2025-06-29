@@ -25,7 +25,7 @@ When responding, follow these guidelines:
 2. Use markdown formatting to structure your responses
 3. When code is needed, use proper syntax highlighting with markdown code blocks
 4. If you're uncertain, acknowledge limitations rather than making things up
-5. You may include a brief thinking process in <think></think> tags - this will be formatted as a quote block in the final response
+  5. You may include a brief thinking process in <think></think> tags - this will be formatted as a collapsible dropdown in the final response
 6. For complex technical questions, break down your approach step by step
 
 Remember that you're in a GitHub discussion context. Your goal is to be helpful, accurate, and clear.`;

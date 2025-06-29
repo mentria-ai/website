@@ -599,7 +599,7 @@ jobs:
           2. Use markdown formatting to structure your responses with clear headings
           3. When code is needed, use proper syntax highlighting with markdown code blocks (e.g., \`\`\`javascript)
           4. If you're uncertain, acknowledge limitations rather than making things up
-          5. You may include your reasoning process in <think></think> tags - this will be formatted as a quote block in the final response
+          5. You may include your reasoning process in <think></think> tags - this will be formatted as a collapsible dropdown in the final response
           6. For complex technical questions, break down your approach step by step
           7. If you reference specific parts of code files, cite the file path and line numbers
           8. Keep your responses focused on the technical issue at hand
@@ -679,6 +679,7 @@ jobs:
             echo "$CONTENT" > response_files/raw_content.txt
             
             # Use awk directly without creating a separate script file
+            # Process <think> blocks into collapsible HTML details/summary elements
             processed_content=$(awk '
             BEGIN { in_think = 0; output = ""; thinking = ""; }
             
@@ -687,13 +688,13 @@ jobs:
             /<\/think>/ { 
               in_think = 0;
               if (thinking != "") {
-                output = output "\n\n> **Thinking process:**\n";
+                output = output "\n\n<details>\n<summary>🤔 <strong>Thinking process</strong></summary>\n\n";
                 split(thinking, lines, "\n");
                 for (i in lines) {
-                  if (lines[i] != "") output = output "> " lines[i] "\n";
-                  else output = output ">\n";
+                  if (lines[i] != "") output = output lines[i] "\n";
+                  else output = output "\n";
                 }
-                output = output "\n";
+                output = output "\n</details>\n";
               }
               next;
             }

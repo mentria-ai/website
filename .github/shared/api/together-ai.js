@@ -245,9 +245,10 @@ function processThinkingBlocks(content) {
         thinkingContent += parts[0] + '\n';
       }
       
-      // Format thinking content as collapsible dropdown
+      // Format thinking content as collapsible dropdown with styling
       if (thinkingContent.trim()) {
         processed += '\n\n<details>\n<summary>🤔 <strong>Thinking process</strong></summary>\n\n';
+        processed += '<div style="background-color: #f6f8fa; border-left: 4px solid #0969da; padding: 12px; margin: 8px 0; font-style: italic; color: #656d76; border-radius: 6px;">\n\n';
         thinkingContent.split('\n').forEach(thinkLine => {
           if (thinkLine.trim()) {
             processed += thinkLine + '\n';
@@ -255,7 +256,7 @@ function processThinkingBlocks(content) {
             processed += '\n';
           }
         });
-        processed += '\n</details>\n';
+        processed += '\n</div>\n</details>\n';
       }
       
       thinkingContent = '';

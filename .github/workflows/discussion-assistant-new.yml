@@ -575,13 +575,14 @@ jobs:
             /<\/think>/ { 
               in_think = 0;
               if (thinking != "") {
-                output = output "\n\n> **Thinking process:**\n";
+                output = output "\n\n<details>\n<summary>🤔 <strong>Thinking process</strong></summary>\n\n";
+                output = output "<div style=\"background-color: #f6f8fa; border-left: 4px solid #0969da; padding: 12px; margin: 8px 0; font-style: italic; color: #656d76; border-radius: 6px;\">\n\n";
                 split(thinking, lines, "\n");
                 for (i in lines) {
-                  if (lines[i] != "") output = output "> " lines[i] "\n";
-                  else output = output ">\n";
+                  if (lines[i] != "") output = output lines[i] "\n";
+                  else output = output "\n";
                 }
-                output = output "\n";
+                output = output "\n</div>\n</details>\n";
               }
               next;
             }

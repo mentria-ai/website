@@ -176,3 +176,5 @@ public
 .DS_Store
 Thumbs.db
 build/assets/data/.last_read_line
+
+models/

@@ -1,0 +1,71 @@
+---
+layout: base.njk
+title: Home
+eleventyComputed:
+  description: "{{ site.description }}"
+---
+<section class="hero">
+  <p class="eyebrow">{{ site.tagline }}</p>
+  <h1>Content, Experiments & Everyday Utilities</h1>
+  <p>
+    Think of Mentria as a laboratory for long-form writing, tiny single-page tools,
+    and playful media experiments. Everything is static-first, progressively enhanced
+    with HTMX or vanilla JS only when it truly matters.
+  </p>
+</section>
+
+<section>
+  <h2 class="section-heading">Latest feed entries</h2>
+  {% set latestPosts = collections.post | reverse | head(3) %}
+  {% if latestPosts.length %}
+  <div class="card-grid">
+    {% for post in latestPosts %}
+    <article class="card">
+      <p class="eyebrow">{{ post.date | date("MMM d, yyyy") }}</p>
+      <h3><a href="{{ post.url }}">{{ post.data.title }}</a></h3>
+      <p>{{ post.data.description or post.templateContent | striptags | truncate(140, true) }}</p>
+      <span>Read post →</span>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p>No entries yet. Once you write your first Markdown file in <code>src/feed</code>, it will show up here.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2 class="section-heading">Utility web tools</h2>
+  {% set toolCards = tools | default([]) %}
+  {% if toolCards.length %}
+  <div class="card-grid">
+    {% for tool in toolCards %}
+    <article class="card">
+      <p class="eyebrow">{{ tool.category }}</p>
+      <h3><a href="/tools/{{ tool.slug }}/">{{ tool.title }}</a></h3>
+      <p>{{ tool.summary }}</p>
+      <span>Launch tool →</span>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p>Add entries to <code>src/_data/tools.json</code> to populate this list.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2 class="section-heading">What makes this stack simple</h2>
+  <div class="card-grid">
+    <article class="card">
+      <h3>Eleventy + Nunjucks</h3>
+      <p>Write Markdown or HTML, sprinkle in shortcodes when needed, and Eleventy compiles everything into the <code>build</code> directory.</p>
+    </article>
+    <article class="card">
+      <h3>HTMX Friendly</h3>
+      <p>Enhance any page with HTMX attributes or custom scripts without committing to a heavy SPA framework.</p>
+    </article>
+    <article class="card">
+      <h3>PWA Ready</h3>
+      <p>Service worker and manifest live next to your templates, so shipping app-like experiences stays within the same workflow.</p>
+    </article>
+  </div>
+</section>

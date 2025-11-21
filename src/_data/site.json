@@ -1,0 +1,15 @@
+{
+  "title": "Mentria",
+  "tagline": "A living notebook of experiments, essays, and web-native utilities.",
+  "description": "Tools, essays, and fun experiments for the curious web citizen.",
+  "author": "Mihir Dave",
+  "baseUrl": "/",
+  "siteUrl": "https://mentria.ai",
+  "metaTitle": "Mentria.AI - AI-Driven All-Purpose Platform",
+  "metaDescription": "Experience the future with Mentria.AI - Your all-in-one AI-driven platform for social media, entertainment, and more. Powered by advanced artificial intelligence.",
+  "keywords": "AI platform, artificial intelligence, social media, digital entertainment, mentria",
+  "revisitAfter": "7 days",
+  "socialImage": "/assets/img/mentria-ai.gif",
+  "robots": "index, follow",
+  "language": "English"
+}

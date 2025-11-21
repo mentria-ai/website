@@ -1,0 +1,30 @@
+---
+layout: base.njk
+title: Tools & Web Apps
+description: Launch single-page tools, validators, and playful experiments.
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">Tools</p>
+  <h1>Launchpads for everyday tasks</h1>
+  <p>
+    Every tool lives in its own folder inside <code>src/tools</code>. Stick to vanilla JS or sprinkle on HTMX—
+    Eleventy will route each folder to <code>/tools/&lt;slug&gt;/</code> automatically.
+    Duplicate the <strong>Starter Tool</strong> page to begin a new experiment.
+  </p>
+</section>
+
+{% set grouped = tools | groupby('category') %}
+{% for group in grouped %}
+<section>
+  <h2 class="section-heading">{{ group.grouper }}</h2>
+  <div class="card-grid">
+    {% for item in group.list %}
+    <article class="card">
+      <h3><a href="/tools/{{ item.slug }}/">{{ item.title }}</a></h3>
+      <p>{{ item.summary }}</p>
+      <span>Open tool →</span>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}

@@ -1,0 +1,28 @@
+---
+layout: base.njk
+title: Feed
+description: Notes, essays, and dispatches about whatever is currently shipping.
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">Feed</p>
+  <h1>Thinking in public</h1>
+  <p>
+    Long-form posts explaining new tools, research rabbit holes, and the messy notes that eventually become ship-ready products.
+  </p>
+</section>
+
+{% set posts = collections.post | reverse %}
+{% if posts.length %}
+  <div class="card-grid">
+    {% for post in posts %}
+    <article class="card">
+      <p class="eyebrow">{{ post.date | date("MMM d, yyyy") }}</p>
+      <h3><a href="{{ post.url }}">{{ post.data.title }}</a></h3>
+      <p>{{ post.data.description or post.templateContent | striptags | truncate(120, true) }}</p>
+      <span>Read article →</span>
+    </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>No posts yet. Create a Markdown file in <code>src/feed</code> with <code>tags: ["post"]</code> to publish.</p>
+{% endif %}

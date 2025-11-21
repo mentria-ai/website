@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="{{ site.language | default('en') | lower }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% set baseUrl = site.siteUrl | default(site.baseUrl) | default('/') %}
+    {% set pageUrl = baseUrl ~ page.url %}
+    {% set defaultTitle = site.metaTitle | default(site.title) %}
+    {% set metaTitle = (title and (title ~ " | " ~ site.title)) or defaultTitle %}
+    {% set metaDescription = description | default(site.metaDescription) | default(site.description) %}
+    {% set socialImage = site.socialImage | default('/assets/img/icon-512x512.png') %}
+    <title>{{ metaTitle }}</title>
+    <meta name="title" content="{{ metaTitle }}">
+    <meta name="description" content="{{ metaDescription }}">
+    <meta name="keywords" content="{{ site.keywords }}">
+    <meta name="robots" content="{{ site.robots | default('index, follow') }}">
+    <meta name="language" content="{{ site.language | default('English') }}">
+    <meta name="author" content="{{ site.author }}">
+    <meta name="revisit-after" content="{{ site.revisitAfter | default('7 days') }}">
+    <meta name="theme-color" content="#0b0b0c">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ pageUrl }}">
+    <meta property="og:title" content="{{ metaTitle }}">
+    <meta property="og:description" content="{{ metaDescription }}">
+    <meta property="og:image" content="{{ socialImage }}">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ pageUrl }}">
+    <meta property="twitter:title" content="{{ metaTitle }}">
+    <meta property="twitter:description" content="{{ metaDescription }}">
+    <meta property="twitter:image" content="{{ socialImage }}">
+
+    <link rel="icon" href="/assets/img/favicon-96x96.png" type="image/png">
+    <link rel="alternate" hreflang="x-default" href="{{ site.siteUrl }}">
+    <link rel="alternate" hreflang="en" href="{{ site.siteUrl }}">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <!-- HTMX for interactivity -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="manifest" href="/manifest.json">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "{{ site.metaTitle | default(site.title) }}",
+      "description": "{{ site.metaDescription | default(site.description) }}",
+      "url": "{{ site.siteUrl }}",
+      "applicationCategory": "SocialNetworking",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0" },
+      "creator": { "@type": "Organization", "name": "{{ site.title }}", "url": "{{ site.siteUrl }}" },
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "softwareVersion": "1.0"
+    }
+    </script>
+</head>
+<body>
+    {% include "header.njk" %}
+
+    <main>
+        {{ content | safe }}
+    </main>
+
+    {% include "footer.njk" %}
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+      }
+    </script>
+</body>
+</html>

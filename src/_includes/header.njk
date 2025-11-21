@@ -1,0 +1,9 @@
+<header class="site-header">
+    <div class="site-header__inner">
+        <a class="brand" href="/">Mentria</a>
+        <nav class="site-nav">
+            <a href="/feed/" class="nav-link{% if page.url | startsWith('/feed/') %} active{% endif %}">Feed</a>
+            <a href="/tools/" class="nav-link{% if page.url | startsWith('/tools/') %} active{% endif %}">Tools</a>
+        </nav>
+    </div>
+</header>

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 17866: ` | "[Blank line]" |
+| `Line 17867: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 17868: ` | "[Blank line]" |
+| `Line 17869: ते वनेन वनं वीरा घ्नन्तो मृगगणान्बहून् |` | "Those heroes, slaying many groups of deer, went from forest to forest," |
+| `Line 17870: अपक्रम्य ययू राजंस्त्वरमाणा महारथाः ||१||` | "Departing hastily, O king, those great warriors [mahāratha] proceeded. ||1||" |
+| `Line 17871: ` | "[Blank line]" |
+| `Line 17872: मत्स्यांस्त्रिगर्तान्पाञ्चालान्कीचकानन्तरेण च |` | "Through the territories of the Matsyas, Trigartas, Pañcālas, and Kīcakas," |
+| `Line 17873: रमणीयान्वनोद्देशान्प्रेक्षमाणाः सरांसि च ||२||` | "Gazing at beautiful forest regions and lakes. ||2||" |
+| `Line 17874: ` | "[Blank line]" |
+| `Line 17875: जटाः कृत्वात्मनः सर्वे वल्कलाजिनवाससः |` | "All of them, having made matted locks, wearing bark and animal skins," |
+| `Line 17876: सह कुन्त्या महात्मानो बिभ्रतस्तापसं वपुः ||३||` | "Together with Kuntī [Pāṇḍavas' mother], those noble souls bearing the appearance of ascetics. ||3||" |
+| `Line 17877: ` | "[Blank line]" |
+| `Line 17878: क्वचिद्वहन्तो जननीं त्वरमाणा महारथाः |` | "Sometimes carrying their mother, those hurrying great warriors," |
+| `Line 17879: क्वचिच्छन्देन गच्छन्तस्ते जग्मुः प्रसभं पुनः ||४||` | "Sometimes going at her pace, they again proceeded forcefully. ||4||" |
+| `Line 17880: ` | "[Blank line]" |
+| `Line 17881: ब्राह्मं वेदमधीयाना वेदाङ्गानि च सर्वशः |` | "Studying the Brahmic Veda [sacred knowledge] and all the Vedāṅgas [auxiliary texts] completely," |
+| `Line 17882: नीतिशास्त्रं च धर्मज्ञा ददृशुस्ते पितामहम् ||५||` | "And the science of ethics, those knowers of dharma saw their grandfather [Vyāsa]. ||5||" |
+| `Line 17883: ` | "[Blank line]" |
+| `Line 17884: तेऽभिवाद्य महात्मानं कृष्णद्वैपायनं तदा |` | "Having saluted the great-souled Kṛṣṇa Dvaipāyana [Vyāsa] then," |
+| `Line 17885: तस्थुः प्राञ्जलयः सर्वे सह मात्रा परन्तपाः ||६||` | "They all stood with folded hands, together with their mother, those scorchers of foes. ||6||" |
+| `Line 17886: ` | "[Blank line]" |
+| `Line 17887: व्यास उवाच||` | "Vyāsa [sage composer] said:" |
+| `Line 17888: ` | "[Blank line]" |
+| `Line 17889: मयेदं मनसा पूर्वं विदितं भरतर्षभाः |` | "This was known to me earlier through my mind, O bulls among the Bharatas [Pāṇḍavas]," |
+| `Line 17890: यथा स्थितैरधर्मेण धार्तराष्ट्रैर्विवासिताः ||७||` | "How you were exiled by the sons of Dhṛtarāṣṭra [Kauravas] who were established in unrighteousness. ||7||" |

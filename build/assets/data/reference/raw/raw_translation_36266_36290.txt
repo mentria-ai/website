@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 36266: सर्वायुधसमोपेतं सर्वशस्त्रविशारदम् |` | "Equipped with all weapons and skilled in all arms," |
+| `Line 36267: रथनागाश्वकलिलं पदातिध्वजसङ्कुलम् ||५||` | "Crowded with chariots, elephants, and horses, teeming with foot soldiers and banners. ||5||" |
+| `Line 36268: ` | "[Blank line]" |
+| `Line 36269: तुष्टपुष्टजनोपेतं वीरलक्षणलक्षितम् |` | "Filled with contented and well-nourished people, marked with the signs of heroism," |
+| `Line 36270: विचित्रध्वजसंनाहं विचित्ररथकार्मुकम् ||६||` | "With diverse banners and armor, with magnificent chariots and bows. ||6||" |
+| `Line 36271: ` | "[Blank line]" |
+| `Line 36272: संनिवेश्य च कौरव्य द्वारकायां नरर्षभ |` | "Having stationed it at Dvārakā [Krishna's city], O descendant of Kuru, O bull among men," |
+| `Line 36273: अभिसारयामास तदा वेगेन पतगेन्द्रवत् ||७||` | "He then dispatched it with speed, like the king of birds [Garuda]. ||7||" |
+| `Line 36274: ` | "[Blank line]" |
+| `Line 36275: तदापतन्तं संदृश्य बलं शाल्वपतेस्तदा |` | "Seeing that army of King Śālva approaching then," |
+| `Line 36276: निर्याय योधयामासुः कुमारा वृष्णिनन्दनाः ||८||` | "The young princes, descendants of Vṛṣṇi [Krishna's clan], marched forth and engaged in battle. ||8||" |
+| `Line 36277: ` | "[Blank line]" |
+| `Line 36278: असहन्तोऽभियानं तच्छाल्वराजस्य कौरव |` | "Unable to tolerate that attack of King Śālva, O Kaurava," |
+| `Line 36279: चारुदेष्णश्च साम्बश्च प्रद्युम्नश्च महारथः ||९||` | "Cārudeṣṇa, Sāmba, and Pradyumna [Krishna's son], the great chariot warrior. ||9||" |
+| `Line 36280: ` | "[Blank line]" |
+| `Line 36281: ते रथैर्दंशिताः सर्वे विचित्राभरणध्वजाः |` | "All of them, armored in their chariots, with magnificent ornaments and banners," |
+| `Line 36282: संसक्ताः शाल्वराजस्य बहुभिर्योधपुङ्गवैः ||१०||` | "Engaged with many warrior chiefs of King Śālva. ||10||" |
+| `Line 36283: ` | "[Blank line]" |
+| `Line 36284: गृहीत्वा तु धनुः साम्बः शाल्वस्य सचिवं रणे |` | "Taking up his bow, Sāmba [Krishna's son] in battle with the minister of Śālva," |
+| `Line 36285: योधयामास संहृष्टः क्षेमवृद्धिं चमूपतिम् ||११||` | "Fought joyfully with Kṣemavṛddhi, the army commander. ||11||" |
+| `Line 36286: ` | "[Blank line]" |
+| `Line 36287: तस्य बाणमयं वर्षं जाम्बवत्याः सुतो महत् |` | "The son of Jāmbavatī [bear-king's daughter] released a great shower of arrows at him," |
+| `Line 36288: मुमोच भरतश्रेष्ठ यथा वर्षं सहस्रदृक् ||१२||` | "O best of the Bharatas, like the thousand-eyed one [Indra] releases rain. ||12||" |
+| `Line 36289: ` | "[Blank line]" |
+| `Line 36290: तद्बाणवर्षं तुमुलं विषेहे स चमूपतिः |` | "That tumultuous shower of arrows, the army commander endured," |

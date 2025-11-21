@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 47141: त्रिदशा विष्णुना सार्धमुपजग्मुः पितामहम् |` | "The thirty gods [tridaśa] along with Viṣṇu [preserver deity] approached the Grandfather [Brahmā]," |
+| `Line 47142: पूरणार्थं समुद्रस्य मन्त्रयित्वा पुनः पुनः ||१९||` | "To discuss repeatedly the purpose of filling the ocean. ||19||" |
+| `Line 47143: ` | "[Blank line]" |
+| `Line 47144: ऊचुः प्राञ्जलयः सर्वे सागरस्याभिपूरणम् ||१९||` | "All of them, with folded hands [prāñjali], spoke about filling the ocean. ||19||" |
+| `Line 47145: ` | "[Blank line]" |
+| `Line 47146: ` | "[Blank line]" |
+| `Line 47147: ` | "[Blank line]" |
+| `Line 47148: ` | "[Blank line]" |
+| `Line 47149: १०४` | "104" |
+| `Line 47150: ` | "[Blank line]" |
+| `Line 47151: ` | "[Blank line]" |
+| `Line 47152: लोमश उवाच||` | "Lomaśa [sage with hair] said:" |
+| `Line 47153: ` | "[Blank line]" |
+| `Line 47154: तानुवाच समेतांस्तु ब्रह्मा लोकपितामहः |` | "Brahmā [creator god], the Grandfather of the worlds, addressed them who had assembled," |
+| `Line 47155: गच्छध्वं विबुधाः सर्वे यथाकामं यथेप्सितम् ||१||` | "'Go, all you wise gods [vibudha], as you desire, as you wish. ||1||'" |
+| `Line 47156: ` | "[Blank line]" |
+| `Line 47157: महता कालयोगेन प्रकृतिं यास्यतेऽर्णवः |` | "'In due course of time [kālayoga], the ocean will return to its natural state," |
+| `Line 47158: ज्ञातीन्वै कारणं कृत्वा महाराज्ञो भगीरथात् ||२||` | "With relatives being the cause, through the great king Bhagīratha [descendant of Sagara]. ||2||'" |
+| `Line 47159: ` | "[Blank line]" |
+| `Line 47160: युधिष्ठिर उवाच||` | "Yudhiṣṭhira [steadfast in war] said:" |
+| `Line 47161: ` | "[Blank line]" |
+| `Line 47162: कथं वै ज्ञातयो ब्रह्मन्कारणं चात्र किं मुने |` | "'How indeed were the relatives the cause, O Brahmin, and what was the reason here, O sage?" |
+| `Line 47163: कथं समुद्रः पूर्णश्च भगीरथपरिश्रमात् ||३||` | "How was the ocean filled through Bhagīratha's efforts? ||3||" |
+| `Line 47164: ` | "[Blank line]" |
+| `Line 47165: एतदिच्छाम्यहं श्रोतुं विस्तरेण तपोधन |` | "I wish to hear this in detail, O wealth of austerities [tapodhan]," |

@@ -1,0 +1,22 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 6556: ` | "[Blank line]" |
+| `Line 6557: ५५` | "55 [chapter number]" |
+| `Line 6558: ` | "[Blank line]" |
+| `Line 6559: ` | "[Blank line]" |
+| `Line 6560: वैशम्पायन उवाच||` | "Vaiśampāyana said:" |
+| `Line 6561: ` | "[Blank line]" |
+| `Line 6562: गुरवे प्राङ्नमस्कृत्य मनोबुद्धिसमाधिभिः |` | "Having first bowed to the guru [teacher] with mind, intellect, and concentration," |
+| `Line 6563: सम्पूज्य च द्विजान्सर्वांस्तथान्यान्विदुषो जनान् ||१||` | "And having honored all the twice-born [brahmins] and other learned people. ||1||" |
+| `Line 6564: ` | "[Blank line]" |
+| `Line 6565: महर्षेः सर्वलोकेषु विश्रुतस्यास्य धीमतः |` | "Of this great sage [maharṣi], renowned in all worlds, the wise one," |
+| `Line 6566: प्रवक्ष्यामि मतं कृत्स्नं व्यासस्यामिततेजसः ||२||` | "I shall proclaim the complete doctrine of Vyāsa of immeasurable splendor. ||2||" |
+| `Line 6567: ` | "[Blank line]" |
+| `Line 6568: श्रोतुं पात्रं च राजंस्त्वं प्राप्येमां भारतीं कथाम् |` | "And you, O king, are a worthy vessel to hear this story of Bharata [epic tale]," |
+| `Line 6569: गुरोर्वक्तुं परिस्पन्दो मुदा प्रोत्साहतीव माम् ||३||` | "The eagerness to speak of my guru seems to encourage me with joy. ||3||" |
+| `Line 6570: ` | "[Blank line]" |
+| `Line 6571: शृणु राजन्यथा भेदः कुरुपाण्डवयोरभूत् |` | "Listen, O king, how the division between the Kurus and Pāṇḍavas occurred," |
+| `Line 6572: राज्यार्थे द्यूतसम्भूतो वनवासस्तथैव च ||४||` | "Arising from the gambling match for the kingdom, and likewise the forest exile. ||4||" |
+| `Line 6573: ` | "[Blank line]" |
+| `Line 6574: यथा च युद्धमभवत्पृथिवीक्षयकारकम् |` | "And how the war that caused the destruction of the earth came to be," |
+| `Line 6575: तत्तेऽहं सम्प्रवक्ष्यामि पृच्छते भरतर्षभ ||५||` | "All that I shall now narrate to you who ask, O bull among the Bharatas [bharatarṣabha]. ||5||" |

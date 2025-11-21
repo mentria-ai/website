@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 29116: ` | "[Blank line]" |
+| `Line 29117: ` | "[Blank line]" |
+| `Line 29118: ` | "[Blank line]" |
+| `Line 29119: २८` | "28 [chapter number]" |
+| `Line 29120: ` | "[Blank line]" |
+| `Line 29121: ` | "[Blank line]" |
+| `Line 29122: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 29123: ` | "[Blank line]" |
+| `Line 29124: तथैव सहदेवोऽपि धर्मराजेन पूजितः |` | "Similarly, Sahadeva [youngest Pāṇḍava], honored by Dharmarāja [Yudhiṣṭhira]," |
+| `Line 29125: महत्या सेनया सार्धं प्रययौ दक्षिणां दिशम् ||१||` | "Set forth toward the southern direction with a great army. ||1||" |
+| `Line 29126: ` | "[Blank line]" |
+| `Line 29127: स शूरसेनान्कार्त्स्न्येन पूर्वमेवाजयत्प्रभुः |` | "That lord first completely conquered the Śūrasenas [warrior tribe]," |
+| `Line 29128: मत्स्यराजं च कौरव्यो वशे चक्रे बलाद्बली ||२||` | "And the mighty Kauravya [Pāṇḍava descendant] forcibly brought the king of Matsya under his control. ||2||" |
+| `Line 29129: ` | "[Blank line]" |
+| `Line 29130: अधिराजाधिपं चैव दन्तवक्रं महाहवे |` | "And in a great battle, he conquered Dantavakra [curved-tooth king], the overlord of kings," |
+| `Line 29131: जिगाय करदं चैव स्वराज्ये संन्यवेशयत् ||३||` | "He defeated him and made him a tributary within his own kingdom. ||3||" |
+| `Line 29132: ` | "[Blank line]" |
+| `Line 29133: सुकुमारं वशे चक्रे सुमित्रं च नराधिपम् |` | "He brought under control Sukumāra [delicate one] and King Sumitra [good friend]," |
+| `Line 29134: तथैवापरमत्स्यांश्च व्यजयत्स पटच्चरान् ||४||` | "And likewise he conquered the other Matsyas [fish kingdom] and the Paṭaccaras [cloth-wearers]. ||4||" |
+| `Line 29135: ` | "[Blank line]" |
+| `Line 29136: निषादभूमिं गोशृङ्गं पर्वतप्रवरं तथा |` | "The land of the Niṣādas [forest tribe], Gośṛṅga [cow-horn mountain], and the excellent mountain," |
+| `Line 29137: तरसा व्यजयद्धीमाञ्श्रेणिमन्तं च पार्थिवम् ||५||` | "The intelligent one swiftly conquered, as well as King Śreṇimān [possessor of glory]. ||5||" |
+| `Line 29138: ` | "[Blank line]" |
+| `Line 29139: नवराष्ट्रं विनिर्जित्य कुन्तिभोजमुपाद्रवत् |` | "Having conquered Navaraṣṭra [new kingdom], he approached Kuntibhoja [Kunti's foster father]," |
+| `Line 29140: प्रीतिपूर्वं च तस्यासौ प्रतिजग्राह शासनम् ||६||` | "And with affection, he accepted his authority. ||6||" |

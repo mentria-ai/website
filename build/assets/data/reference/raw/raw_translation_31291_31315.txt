@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 31291: न पारयाम्यभिगतान्विविधान्द्वारि वारितान् |` | "I cannot manage the various visitors who are stopped at the door," |
+| `Line 31292: बल्यर्थं ददतस्तस्य नानारूपाननेकशः ||२०||` | "Who bring offerings [bali] of various kinds in great numbers for him. ||20||" |
+| `Line 31293: ` | "[Blank line]" |
+| `Line 31294: कृष्णग्रीवान्महाकायान्रासभाञ्शतपातिनः |` | "Black-necked, large-bodied donkeys [rāsabha], swift as the wind [śatapātin]," |
+| `Line 31295: आहार्षुर्दशसाहस्रान्विनीतान्दिक्षु विश्रुतान् ||२१||` | "They brought ten thousand well-trained ones, renowned in all directions. ||21||" |
+| `Line 31296: ` | "[Blank line]" |
+| `Line 31297: प्रमाणरागस्पर्शाढ्यं बाह्लीचीनसमुद्भवम् |` | "Rich in size, color, and texture, produced in Bāhlīka [Bactria] and China," |
+| `Line 31298: और्णं च राङ्कवं चैव कीटजं पट्टजं तथा ||२२||` | "Woolen [aurṇa], wild sheep wool [rāṅkava], silkworm-produced [kītaja], and fine silk [paṭṭaja]. ||22||" |
+| `Line 31299: ` | "[Blank line]" |
+| `Line 31300: कुट्टीकृतं तथैवान्यत्कमलाभं सहस्रशः |` | "Pounded fabric and others lotus-like by the thousands," |
+| `Line 31301: श्लक्ष्णं वस्त्रमकार्पासमाविकं मृदु चाजिनम् ||२३||` | "Smooth garments not of cotton, soft sheep's wool, and animal skins. ||23||" |
+| `Line 31302: ` | "[Blank line]" |
+| `Line 31303: निशितांश्चैव दीर्घासीनृष्टिशक्तिपरश्वधान् |` | "And sharp, long-bladed swords [āsī], lances [ṛṣṭi], spears [śakti], and battle-axes [paraśvadha]," |
+| `Line 31304: अपरान्तसमुद्भूतांस्तथैव परशूञ्शितान् ||२४||` | "As well as sharp axes [paraśu] produced in the western regions [Aparānta]. ||24||" |
+| `Line 31305: ` | "[Blank line]" |
+| `Line 31306: रसान्गन्धांश्च विविधान्रत्नानि च सहस्रशः |` | "Various juices [rasa], perfumes [gandha], and thousands of jewels [ratna]," |
+| `Line 31307: बलिं च कृत्स्नमादाय द्वारि तिष्ठन्ति वारिताः ||२५||` | "Bringing all these offerings, they stand at the door, held back. ||25||" |
+| `Line 31308: ` | "[Blank line]" |
+| `Line 31309: शकास्तुखाराः कङ्काश्च रोमशाः शृङ्गिणो नराः |` | "Śakas [Central Asian tribe], Tukharas [Bactrians], Kaṅkas, hairy men, and horned people," |
+| `Line 31310: महागमान्दूरगमान्गणितानर्बुदं हयान् ||२६||` | "Bringing a hundred million horses that travel far and wide. ||26||" |
+| `Line 31311: ` | "[Blank line]" |
+| `Line 31312: कोटिशश्चैव बहुशः सुवर्णं पद्मसंमितम् |` | "And crores [ten millions] of gold measured in padmas [lotus-weight]," |
+| `Line 31313: बलिमादाय विविधं द्वारि तिष्ठन्ति वारिताः ||२७||` | "Bringing various tributes, they stand at the door, held back. ||27||" |
+| `Line 31314: ` | "[Blank line]" |
+| `Line 31315: आसनानि महार्हाणि यानानि शयनानि च |` | "Precious seats, vehicles, and beds," |

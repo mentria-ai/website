@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 40166: ` | "[Blank line]" |
+| `Line 40167: रामश्च कृष्णश्च धनञ्जयश्च; प्रद्युम्नसाम्बौ युयुधानभीमौ |` | "Rāma [Balarāma] and Kṛṣṇa and Dhanañjaya [Arjuna]; Pradyumna and Sāmba, Yuyudhāna [Sātyaki] and Bhīma;" |
+| `Line 40168: माद्रीसुतौ केकयराजपुत्राः; पाञ्चालपुत्राः सह धर्मराज्ञा ||३८||` | "The two sons of Mādrī [Nakula, Sahadeva], the sons of the Kekaya king; the sons of Pāñcāla along with Dharmarāja [Yudhiṣṭhira]. ||38||" |
+| `Line 40169: ` | "[Blank line]" |
+| `Line 40170: एतान्सर्वाँल्लोकवीरानजेया; न्महात्मनः सानुबन्धान्ससैन्यान् |` | "All these world-heroes are invincible; these great souls with their kinsmen and armies." |
+| `Line 40171: को जीवितार्थी समरे प्रत्युदीया; त्क्रुद्धान्सिंहान्केसरिणो यथैव ||३९||` | "Who, desiring to live, would confront them in battle; like angry lions with manes [kesarin]? ||39||" |
+| `Line 40172: ` | "[Blank line]" |
+| `Line 40173: धृतराष्ट्र उवाच||` | "Dhṛtarāṣṭra [blind king] said:" |
+| `Line 40174: ` | "[Blank line]" |
+| `Line 40175: यन्माब्रवीद्विदुरो द्यूतकाले; त्वं पाण्डवाञ्जेष्यसि चेन्नरेन्द्र |` | "What Vidura told me at the time of the gambling match; 'If you defeat the Pāṇḍavas, O king [narendraḥ]," |
+| `Line 40176: ध्रुवं कुरूणामयमन्तकालो; महाभयो भविता शोणितौघः ||४०||` | "Surely this will be the end-time for the Kurus; there will be a terrifying flood of blood.' ||40||" |
+| `Line 40177: ` | "[Blank line]" |
+| `Line 40178: मन्ये तथा तद्भवितेति सूत; यथा क्षत्ता प्राह वचः पुरा माम् |` | "I think it will happen just so, O charioteer [sūta]; as Kṣattā [Vidura] told me before." |
+| `Line 40179: असंशयं भविता युद्धमेत; द्गते काले पाण्डवानां यथोक्तम् ||४१||` | "Without doubt this war will happen; when the time has come for the Pāṇḍavas as foretold. ||41||" |
+| `Line 40180: ` | "[Blank line]" |
+| `Line 40181: ` | "[Blank line]" |
+| `Line 40182: ` | "[Blank line]" |
+| `Line 40183: ` | "[Blank line]" |
+| `Line 40184: ४९` | "49 [chapter number]" |
+| `Line 40185: ` | "[Blank line]" |
+| `Line 40186: ` | "[Blank line]" |
+| `Line 40187: जनमेजय उवाच||` | "Janamejaya [snake sacrifice king] said:" |
+| `Line 40188: ` | "[Blank line]" |
+| `Line 40189: अस्त्रहेतोर्गते पार्थे शक्रलोकं महात्मनि |` | "When Pārtha [Arjuna], the great soul, had gone to Śakra's realm [Indra's heaven] for weapons," |
+| `Line 40190: युधिष्ठिरप्रभृतयः किमकुर्वन्त पाण्डवाः ||१||` | "What did Yudhiṣṭhira and the other Pāṇḍavas do? ||1||" |

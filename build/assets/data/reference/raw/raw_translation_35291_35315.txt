@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 35291: एवमुक्त्वा ययौ व्यासो मैत्रेयः प्रत्यदृश्यत |` | "Having spoken thus, Vyāsa [sage-compiler] departed, and Maitreya [sage] appeared." |
+| `Line 35292: पूजया प्रतिजग्राह सपुत्रस्तं नराधिपः ||७||` | "The king [narādhipa], along with his son, received him with due honors. ||7||" |
+| `Line 35293: ` | "[Blank line]" |
+| `Line 35294: दत्त्वार्घ्याद्याः क्रियाः सर्वा विश्रान्तं मुनिपुङ्गवम् |` | "After offering arghya [respectful offering] and performing all the rituals, to the rested eminent sage [muni-puṅgava]," |
+| `Line 35295: प्रश्रयेणाब्रवीद्राजा धृतराष्ट्रोऽम्बिकासुतः ||८||` | "King Dhṛtarāṣṭra [blind king], son of Ambikā, spoke with humility: ||8||" |
+| `Line 35296: ` | "[Blank line]" |
+| `Line 35297: सुखेनागमनं कच्चिद्भगवन्कुरुजाङ्गले |` | "Was your journey to Kurujāṅgala [Kuru territory] comfortable, O venerable one?" |
+| `Line 35298: कच्चित्कुशलिनो वीरा भ्रातरः पञ्च पाण्डवाः ||९||` | "Are the five heroic Pāṇḍava [sons of Pāṇḍu] brothers well? ||9||" |
+| `Line 35299: ` | "[Blank line]" |
+| `Line 35300: समये स्थातुमिच्छन्ति कच्चिच्च पुरुषर्षभाः |` | "Do those bulls among men [puruṣarṣabhāḥ] wish to abide by the agreement?" |
+| `Line 35301: कच्चित्कुरूणां सौभ्रात्रमव्युच्छिन्नं भविष्यति ||१०||` | "Will the brotherhood among the Kurus remain unbroken? ||10||" |
+| `Line 35302: ` | "[Blank line]" |
+| `Line 35303: मैत्रेय उवाच||` | "Maitreya said:" |
+| `Line 35304: ` | "[Blank line]" |
+| `Line 35305: तीर्थयात्रामनुक्रामन्प्राप्तोऽस्मि कुरुजाङ्गलम् |` | "While traveling on a pilgrimage [tīrtha-yātrā], I arrived at Kurujāṅgala," |
+| `Line 35306: यदृच्छया धर्मराजं दृष्टवान्काम्यके वने ||११||` | "And by chance, I saw Dharmarāja [Yudhiṣṭhira] in the Kāmyaka forest. ||11||" |
+| `Line 35307: ` | "[Blank line]" |
+| `Line 35308: तं जटाजिनसंवीतं तपोवननिवासिनम् |` | "Him, covered with matted hair and animal hide, dwelling in the forest of penance," |
+| `Line 35309: समाजग्मुर्महात्मानं द्रष्टुं मुनिगणाः प्रभो ||१२||` | "Groups of sages came to see that great soul, O lord. ||12||" |
+| `Line 35310: ` | "[Blank line]" |
+| `Line 35311: तत्राश्रौषं महाराज पुत्राणां तव विभ्रमम् |` | "There I heard, O great king, of your sons' misconduct," |
+| `Line 35312: अनयं द्यूतरूपेण महापायमुपस्थितम् ||१३||` | "The impropriety in the form of gambling, a great calamity that has occurred. ||13||" |
+| `Line 35313: ` | "[Blank line]" |
+| `Line 35314: ततोऽहं त्वामनुप्राप्तः कौरवाणामवेक्षया |` | "Therefore I have come to you out of concern for the Kauravas," |
+| `Line 35315: सदा ह्यभ्यधिकः स्नेहः प्रीतिश्च त्वयि मे प्रभो ||१४||` | "For I have always had great affection and love for you, O lord. ||14||" |

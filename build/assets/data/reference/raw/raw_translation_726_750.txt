@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 726: एको रथो गजश्चैको नराः पञ्च पदातयः |` | "One chariot, one elephant, five men as foot-soldiers," |
+| `Line 727: त्रयश्च तुरगास्तज्ज्ञैः पत्तिरित्यभिधीयते ||१५||` | "And three horses - by those who know, this is called a patti [basic military unit]. ||15||" |
+| `Line 728: ` | [Blank line] |
+| `Line 729: पत्तिं तु त्रिगुणामेतामाहुः सेनामुखं बुधाः |` | "The wise call three such pattis a senāmukha [battalion head]," |
+| `Line 730: त्रीणि सेनामुखान्येको गुल्म इत्यभिधीयते ||१६||` | "Three senāmukhas are called one gulma [troop division]. ||16||" |
+| `Line 731: ` | [Blank line] |
+| `Line 732: त्रयो गुल्मा गणो नाम वाहिनी तु गणास्त्रयः |` | "Three gulmas are named a gaṇa [brigade], and three gaṇas are a vāhinī [division]," |
+| `Line 733: स्मृतास्तिस्रस्तु वाहिन्यः पृतनेति विचक्षणैः ||१७||` | "Three vāhinīs are remembered by the discerning as a pṛtanā [army corps]. ||17||" |
+| `Line 734: ` | [Blank line] |
+| `Line 735: चमूस्तु पृतनास्तिस्रस्तिस्रश्चम्वस्त्वनीकिनी |` | "Three pṛtanās make a camū [army], and three camūs make an anīkinī [large army]," |
+| `Line 736: अनीकिनीं दशगुणां प्राहुरक्षौहिणीं बुधाः ||१८||` | "The wise declare ten anīkinīs to be an akṣauhiṇī [complete army]. ||18||" |
+| `Line 737: ` | [Blank line] |
+| `Line 738: अक्षौहिण्याः प्रसङ्ख्यानं रथानां द्विजसत्तमाः |` | "The enumeration of chariots in an akṣauhiṇī, O best of twice-born [Brahmins]," |
+| `Line 739: सङ्ख्यागणिततत्त्वज्ञैः सहस्राण्येकविंशतिः ||१९||` | "According to those who know the principles of numerical calculation, is twenty-one thousand. ||19||" |
+| `Line 740: ` | [Blank line] |
+| `Line 741: शतान्युपरि चैवाष्टौ तथा भूयश्च सप्ततिः |` | "And eight hundred, and furthermore seventy," |
+| `Line 742: गजानां तु परीमाणमेतदेवात्र निर्दिशेत् ||२०||` | "The measure of elephants should be indicated as exactly the same here. ||20||" |
+| `Line 743: ` | [Blank line] |
+| `Line 744: ज्ञेयं शतसहस्रं तु सहस्राणि तथा नव |` | "It should be known that one hundred thousand and nine thousand," |
+| `Line 745: नराणामपि पञ्चाशच्छतानि त्रीणि चानघाः ||२१||` | "And fifty and three hundred men, O sinless ones [sages]. ||21||" |
+| `Line 746: ` | [Blank line] |
+| `Line 747: पञ्चषष्टिसहस्राणि तथाश्वानां शतानि च |` | "Sixty-five thousand, and hundreds of horses," |
+| `Line 748: दशोत्तराणि षट्प्राहुर्यथावदिह सङ्ख्यया ||२२||` | "Six hundred and ten more, they declare here according to the proper count. ||22||" |
+| `Line 749: ` | [Blank line] |
+| `Line 750: एतामक्षौहिणीं प्राहुः सङ्ख्यातत्त्वविदो जनाः |` | "This is what those who know the principles of enumeration declare to be an akṣauhiṇī [complete army]." |

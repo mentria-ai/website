@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1426: इत्येतन्मौसलं पर्व षोडशं परिकीर्तितम् |` | "Thus, this Mausala Parva [Club War chapter] is declared as the sixteenth," |
+| `Line 1427: अध्यायाष्टौ समाख्याताः श्लोकानां च शतत्रयम् ||२२९||` | "Comprising eight chapters and three hundred verses. ||229||" |
+| `Line 1428: ` | [Blank line] |
+| `Line 1429: महाप्रस्थानिकं तस्मादूर्ध्वं सप्तदशं स्मृतम् |` | "After that, the seventeenth is known as Mahaprasthanika [Great Departure chapter]," |
+| `Line 1430: यत्र राज्यं परित्यज्य पाण्डवाः पुरुषर्षभाः ||२३०||` | "Where the Pandavas [sons of Pandu], those bulls among men, abandoning their kingdom, ||230||" |
+| `Line 1431: ` | [Blank line] |
+| `Line 1432: द्रौपद्या सहिता देव्या सिद्धिं परमिकां गताः ||२३०||` | "Along with the divine Draupadi [Pandavas' wife], attained the supreme perfection. ||230||" |
+| `Line 1433: ` | [Blank line] |
+| `Line 1434: अत्राध्यायास्त्रयः प्रोक्ताः श्लोकानां च शतं तथा |` | "Here three chapters are mentioned, as well as one hundred verses," |
+| `Line 1435: विंशतिश्च तथा श्लोकाः सङ्ख्यातास्तत्त्वदर्शिना ||२३१||` | "And twenty verses are counted by the knower of truth [sage]. ||231||" |
+| `Line 1436: ` | [Blank line] |
+| `Line 1437: स्वर्गपर्व ततो ज्ञेयं दिव्यं यत्तदमानुषम् |` | "Then should be known the Svarga Parva [Heaven chapter], which is divine and superhuman," |
+| `Line 1438: अध्यायाः पञ्च सङ्ख्याताः पर्वैतदभिसङ्ख्यया ||२३२||` | "Five chapters are counted in this Parva [section] by enumeration. ||232||" |
+| `Line 1439: ` | [Blank line] |
+| `Line 1440: श्लोकानां द्वे शते चैव प्रसङ्ख्याते तपोधनाः ||२३२||` | "And two hundred verses are counted, O wealth of austerities [ascetics]. ||232||" |
+| `Line 1441: ` | [Blank line] |
+| `Line 1442: अष्टादशैवमेतानि पर्वाण्युक्तान्यशेषतः |` | "Thus these eighteen Parvas [major sections] have been described completely," |
+| `Line 1443: खिलेषु हरिवंशश्च भविष्यच्च प्रकीर्तितम् ||२३३||` | "Among the supplements, the Harivamsha [Krishna's lineage] and the Bhavishya [future events] are proclaimed. ||233||" |
+| `Line 1444: ` | [Blank line] |
+| `Line 1445: एतदखिलमाख्यातं भारतं पर्वसङ्ग्रहात् |` | "This entire Bharata [epic] has been narrated in the compilation of Parvas [sections]," |
+| `Line 1446: अष्टादश समाजग्मुरक्षौहिण्यो युयुत्सया ||२३४||` | "Eighteen Akshauhinis [army units] came together with the desire to fight. ||234||" |
+| `Line 1447: ` | [Blank line] |
+| `Line 1448: तन्महद्दारुणं युद्धमहान्यष्टादशाभवत् ||२३४||` | "That great and terrible war lasted for eighteen days. ||234||" |
+| `Line 1449: ` | [Blank line] |
+| `Line 1450: यो विद्याच्चतुरो वेदान्साङ्गोपनिषदान्द्विजः |` | "That twice-born [Brahmin] who knows the four Vedas along with their Angas [auxiliary texts] and Upanishads [philosophical texts]," |

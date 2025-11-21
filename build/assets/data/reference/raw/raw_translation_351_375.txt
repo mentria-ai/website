@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 351: भिक्षाभुजां ब्राह्मणानां महात्मनां; तदा नाशंसे विजयाय सञ्जय ||१०८||` | "Of the alms-eating Brahmins, the great souls; then, O Sanjaya, I had no hope for victory. ||108||" |
+| `Line 352: ` | [Blank line] |
+| `Line 353: यदाश्रौषमर्जुनो देवदेवं; किरातरूपं त्र्यम्बकं तोष्य युद्धे |` | "When I heard that Arjuna had pleased the God of gods, Tryambaka [three-eyed Shiva] in the form of a Kirata [hunter], in battle," |
+| `Line 354: अवाप तत्पाशुपतं महास्त्रं; तदा नाशंसे विजयाय सञ्जय ||१०९||` | "And obtained that mighty Pashupata [Shiva's weapon] weapon; then, O Sanjaya, I had no hope for victory. ||109||" |
+| `Line 355: ` | [Blank line] |
+| `Line 356: यदाश्रौषं त्रिदिवस्थं धनञ्जयं; शक्रात्साक्षाद्दिव्यमस्त्रं यथावत् |` | "When I heard that Dhananjaya [Arjuna] was in heaven [Tridiva], properly learning divine weapons directly from Shakra [Indra]," |
+| `Line 357: अधीयानं शंसितं सत्यसन्धं; तदा नाशंसे विजयाय सञ्जय ||११०||` | "He who is praised, truthful and steadfast in his vows; then, O Sanjaya, I had no hope for victory. ||110||" |
+| `Line 358: ` | [Blank line] |
+| `Line 359: यदाश्रौषं वैश्रवणेन सार्धं; समागतं भीममन्यांश्च पार्थान् |` | "When I heard that Bhima and the other Parthas [Pandavas] had met with Vaishravana [Kubera]," |
+| `Line 360: तस्मिन्देशे मानुषाणामगम्ये; तदा नाशंसे विजयाय सञ्जय ||१११||` | "In that region inaccessible to humans; then, O Sanjaya, I had no hope for victory. ||111||" |
+| `Line 361: ` | [Blank line] |
+| `Line 362: यदाश्रौषं घोषयात्रागतानां; बन्धं गन्धर्वैर्मोक्षणं चार्जुनेन |` | "When I heard of the capture of those who had gone on the Ghoshayatra [cattle expedition], by the Gandharvas, and their release by Arjuna," |
+| `Line 363: स्वेषां सुतानां कर्णबुद्धौ रतानां; तदा नाशंसे विजयाय सञ्जय ||११२||` | "Of my sons who relied on Karna's wisdom; then, O Sanjaya, I had no hope for victory. ||112||" |
+| `Line 364: ` | [Blank line] |
+| `Line 365: यदाश्रौषं यक्षरूपेण धर्मं; समागतं धर्मराजेन सूत |` | "When I heard that Dharma [Yama] in the form of a Yaksha [supernatural being] had met with Dharmaraja [Yudhishthira], O charioteer," |
+| `Line 366: प्रश्नानुक्तान्विब्रुवन्तं च सम्य; क्तदा नाशंसे विजयाय सञ्जय ||११३||` | "And that he correctly answered all the questions asked; then, O Sanjaya, I had no hope for victory. ||113||" |
+| `Line 367: ` | [Blank line] |
+| `Line 368: यदाश्रौषं मामकानां वरिष्ठा; न्धनञ्जयेनैकरथेन भग्नान् |` | "When I heard that the best of my warriors were defeated by Dhananjaya [Arjuna] alone in his chariot," |
+| `Line 369: विराटराष्ट्रे वसता महात्मना; तदा नाशंसे विजयाय सञ्जय ||११४||` | "By that great soul residing in the kingdom of Virata; then, O Sanjaya, I had no hope for victory. ||114||" |
+| `Line 370: ` | [Blank line] |
+| `Line 371: यदाश्रौषं सत्कृतां मत्स्यराज्ञा; सुतां दत्तामुत्तरामर्जुनाय |` | "When I heard that the honored daughter of the Matsya king, Uttara, was given to Arjuna," |
+| `Line 372: तां चार्जुनः प्रत्यगृह्णात्सुतार्थे; तदा नाशंसे विजयाय सञ्जय ||११५||` | "And that Arjuna accepted her for his son's sake; then, O Sanjaya, I had no hope for victory. ||115||" |
+| `Line 373: ` | [Blank line] |
+| `Line 374: यदाश्रौषं निर्जितस्याधनस्य; प्रव्राजितस्य स्वजनात्प्रच्युतस्य |` | "When I heard that Yudhishthira, who was defeated, made penniless, exiled, and separated from his kinsmen," |
+| `Line 375: अक्षौहिणीः सप्त युधिष्ठिरस्य; तदा नाशंसे विजयाय सञ्जय ||११६||` | "Had seven akshauhinis [large army divisions] at his command; then, O Sanjaya, I had no hope for victory. ||116||" |

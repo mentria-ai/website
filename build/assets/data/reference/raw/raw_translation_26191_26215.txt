@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 26191: पवित्रपाणिः सावर्णिर्भालुकिर्गालवस्तथा ||१३||` | "Pavitrapāṇi [pure-handed], Sāvarṇi, Bhāluki, and Gālava as well. ||13||" |
+| `Line 26192: ` | "[Blank line]" |
+| `Line 26193: जङ्घाबन्धुश्च रैभ्यश्च कोपवेगश्रवा भृगुः |` | "Jaṅghābandhu, Raibhya, Kopavegaśravā, Bhṛgu [sage patriarch]," |
+| `Line 26194: हरिबभ्रुश्च कौण्डिन्यो बभ्रुमाली सनातनः ||१४||` | "Haribabhru, Kauṇḍinya, Babhrumalī, and Sanātana [eternal one]. ||14||" |
+| `Line 26195: ` | "[Blank line]" |
+| `Line 26196: कक्षीवानौशिजश्चैव नाचिकेतोऽथ गौतमः |` | "Kakṣīvān, Auśija, Nāciketa, and Gautama [sage lineage]," |
+| `Line 26197: पैङ्गो वराहः शुनकः शाण्डिल्यश्च महातपाः ||१५||` | "Paiṅga, Varāha, Śunaka, and Śāṇḍilya of great austerity [mahātapāḥ]. ||15||" |
+| `Line 26198: ` | "[Blank line]" |
+| `Line 26199: कर्करो वेणुजङ्घश्च कलापः कठ एव च ||१५||` | "Karkara, Veṇujaṅgha, Kalāpa, and Kaṭha as well. ||15||" |
+| `Line 26200: ` | "[Blank line]" |
+| `Line 26201: मुनयो धर्मसहिता धृतात्मानो जितेन्द्रियाः |` | "These sages [munis], accompanied by dharma, self-controlled, with conquered senses," |
+| `Line 26202: एते चान्ये च बहवो वेदवेदाङ्गपारगाः ||१६||` | "These and many others, masters of the Vedas and Vedāṅgas [auxiliary texts]. ||16||" |
+| `Line 26203: ` | "[Blank line]" |
+| `Line 26204: उपासते महात्मानं सभायामृषिसत्तमाः |` | "These best of sages worship the great soul [Yudhiṣṭhira] in the assembly," |
+| `Line 26205: कथयन्तः कथाः पुण्या धर्मज्ञाः शुचयोऽमलाः ||१७||` | "Narrating sacred stories, knowers of dharma, pure and spotless. ||17||" |
+| `Line 26206: ` | "[Blank line]" |
+| `Line 26207: तथैव क्षत्रियश्रेष्ठा धर्मराजमुपासते |` | "Likewise, the foremost Kṣatriyas [warrior class] attend upon Dharmarāja [Yudhiṣṭhira]," |
+| `Line 26208: श्रीमान्महात्मा धर्मात्मा मुञ्जकेतुर्विवर्धनः ||१८||` | "The illustrious, great-souled, righteous Muñjaketu and Vivardhana. ||18||" |
+| `Line 26209: ` | "[Blank line]" |
+| `Line 26210: सङ्ग्रामजिद्दुर्मुखश्च उग्रसेनश्च वीर्यवान् |` | "Saṅgrāmajit, Durmukha, and the valiant Ugrasena," |
+| `Line 26211: कक्षसेनः क्षितिपतिः क्षेमकश्चापराजितः ||१९||` | "Kakṣasena the ruler [kṣitipati], Kṣemaka, and the undefeated [aparājita] one. ||19||" |
+| `Line 26212: ` | "[Blank line]" |
+| `Line 26213: काम्बोजराजः कमलः कम्पनश्च महाबलः ||१९||` | "The king of Kāmboja, Kamala, and the mighty Kampana. ||19||" |
+| `Line 26214: ` | "[Blank line]" |
+| `Line 26215: सततं कम्पयामास यवनानेक एव यः |` | "He who alone constantly made the Yavanas [Greeks/foreigners] tremble," |

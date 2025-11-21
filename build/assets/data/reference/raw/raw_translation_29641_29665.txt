@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 29641: अभिवाद्य ततो राजन्निदं वचनमब्रवीत् ||१||` | "After saluting them, O king, he then spoke these words. ||1||" |
+| `Line 29642: ` | "[Blank line]" |
+| `Line 29643: भीष्मं द्रोणं कृपं द्रौणिं दुर्योधनविविंशती ||१||` | "To Bhīṣma, Droṇa, Kṛpa, Drauṇi [Aśvatthāmā], Duryodhana, and Vivimśati, ||1||" |
+| `Line 29644: ` | "[Blank line]" |
+| `Line 29645: अस्मिन्यज्ञे भवन्तो मामनुगृह्णन्तु सर्वशः |` | "In this sacrifice, may you all favor me completely." |
+| `Line 29646: इदं वः स्वमहं चैव यदिहास्ति धनं मम ||२||` | "This is yours, and I too am yours, as is whatever wealth I have here. ||2||" |
+| `Line 29647: ` | "[Blank line]" |
+| `Line 29648: प्रीणयन्तु भवन्तो मां यथेष्टमनियन्त्रिताः ||२||` | "May you all please me as you wish, without restraint. ||2||" |
+| `Line 29649: ` | "[Blank line]" |
+| `Line 29650: एवमुक्त्वा स तान्सर्वान्दीक्षितः पाण्डवाग्रजः |` | "Having spoken thus to all of them, the consecrated [dīkṣita] eldest Pāṇḍava [Yudhiṣṭhira]," |
+| `Line 29651: युयोज ह यथायोगमधिकारेष्वनन्तरम् ||३||` | "Appointed them immediately to various responsibilities according to their abilities. ||3||" |
+| `Line 29652: ` | "[Blank line]" |
+| `Line 29653: भक्ष्यभोज्याधिकारेषु दुःशासनमयोजयत् |` | "He appointed Duḥśāsana to be in charge of food and provisions," |
+| `Line 29654: परिग्रहे ब्राह्मणानामश्वत्थामानमुक्तवान् ||४||` | "And he assigned Aśvatthāmā to the reception of the Brahmins. ||4||" |
+| `Line 29655: ` | "[Blank line]" |
+| `Line 29656: राज्ञां तु प्रतिपूजार्थं सञ्जयं संन्ययोजयत् |` | "He appointed Sañjaya for the purpose of honoring the kings," |
+| `Line 29657: कृताकृतपरिज्ञाने भीष्मद्रोणौ महामती ||५||` | "And the highly intelligent Bhīṣma and Droṇa for supervising what was done and not done. ||5||" |
+| `Line 29658: ` | "[Blank line]" |
+| `Line 29659: हिरण्यस्य सुवर्णस्य रत्नानां चान्ववेक्षणे |` | "For the supervision of silver, gold, and gems," |
+| `Line 29660: दक्षिणानां च वै दाने कृपं राजा न्ययोजयत् ||६||` | "And for the distribution of gifts [dakṣiṇā], the king appointed Kṛpa. ||6||" |
+| `Line 29661: ` | "[Blank line]" |
+| `Line 29662: तथान्यान्पुरुषव्याघ्रांस्तस्मिंस्तस्मिन्न्ययोजयत् ||६||` | "Similarly, he appointed other tiger-like men [puruṣa-vyāghra] to this and that duty. ||6||" |
+| `Line 29663: ` | "[Blank line]" |
+| `Line 29664: बाह्लिको धृतराष्ट्रश्च सोमदत्तो जयद्रथः |` | "Bāhlika, Dhṛtarāṣṭra, Somadatta, and Jayadratha," |
+| `Line 29665: नकुलेन समानीताः स्वामिवत्तत्र रेमिरे ||७||` | "Brought there by Nakula, enjoyed themselves there as if they were masters. ||7||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 45016: विराजति यथा सोम ऋणैर्मुक्तो युधिष्ठिर ||१०९||` | "Shines like the moon [Soma] freed from debts, O Yudhiṣṭhira [Pāṇḍava king]. ||109||" |
+| `Line 45017: ` | "[Blank line]" |
+| `Line 45018: जातिस्मर उपस्पृश्य शुचिः प्रयतमानसः |` | "One who remembers past lives [jātismara], having performed ablutions, pure and with controlled mind," |
+| `Line 45019: जातिस्मरत्वं प्राप्नोति स्नात्वा तत्र न संशयः ||११०||` | "Attains the ability to remember past lives by bathing there, without doubt. ||110||" |
+| `Line 45020: ` | "[Blank line]" |
+| `Line 45021: वटेश्वरपुरं गत्वा अर्चयित्वा तु केशवम् |` | "Going to Vaṭeśvarapura [city of banyan lord] and worshiping Keśava [Kṛṣṇa]," |
+| `Line 45022: ईप्सिताँल्लभते कामानुपवासान्न संशयः ||१११||` | "One obtains desired wishes through fasting, without doubt. ||111||" |
+| `Line 45023: ` | "[Blank line]" |
+| `Line 45024: ततस्तु वामनं गत्वा सर्वपापप्रमोचनम् |` | "Then, going to Vāmana [dwarf incarnation], which liberates from all sins," |
+| `Line 45025: अभिवाद्य हरिं देवं न दुर्गतिमवाप्नुयात् ||११२||` | "After saluting Lord Hari [Viṣṇu], one does not meet with misfortune. ||112||" |
+| `Line 45026: ` | "[Blank line]" |
+| `Line 45027: भरतस्याश्रमं गत्वा सर्वपापप्रमोचनम् |` | "Going to Bharata's [sage/king] hermitage, which liberates from all sins," |
+| `Line 45028: कौशिकीं तत्र सेवेत महापातकनाशिनीम् ||११३||` | "One should serve there the Kauśikī [river], destroyer of great sins. ||113||" |
+| `Line 45029: ` | "[Blank line]" |
+| `Line 45030: राजसूयस्य यज्ञस्य फलं प्राप्नोति मानवः ||११३||` | "A person obtains the fruit of the Rājasūya [royal consecration] sacrifice. ||113||" |
+| `Line 45031: ` | "[Blank line]" |
+| `Line 45032: ततो गच्छेत धर्मज्ञ चम्पकारण्यमुत्तमम् |` | "Then one should go, O knower of dharma [righteousness], to the excellent Campaka forest [champak trees]," |
+| `Line 45033: तत्रोष्य रजनीमेकां गोसहस्रफलं लभेत् ||११४||` | "Staying there for one night, one obtains the merit of gifting a thousand cows. ||114||" |
+| `Line 45034: ` | "[Blank line]" |
+| `Line 45035: अथ ज्येष्ठिलमासाद्य तीर्थं परमसंमतम् |` | "Then, reaching Jyeṣṭhila [pilgrimage site], the supremely esteemed sacred ford," |
+| `Line 45036: उपोष्य रजनीमेकामग्निष्टोमफलं लभेत् ||११५||` | "Fasting for one night, one obtains the fruit of the Agniṣṭoma [fire ritual] sacrifice. ||115||" |
+| `Line 45037: ` | "[Blank line]" |
+| `Line 45038: तत्र विश्वेश्वरं दृष्ट्वा देव्या सह महाद्युतिम् |` | "Seeing there Viśveśvara [Lord of Universe] with the Goddess, of great splendor," |
+| `Line 45039: मित्रावरुणयोर्लोकानाप्नोति पुरुषर्षभ ||११६||` | "One attains the worlds of Mitra and Varuṇa [Vedic deities], O bull among men. ||116||" |
+| `Line 45040: ` | "[Blank line]" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 41891: यद्येवमिह कर्तव्यं वसाम्यहमसंशयम् |` | "If this is to be done here, I shall stay without doubt," |
+| `Line 41892: अतोऽन्यथा न मे वासो वर्तते हृदये क्वचित् ||४०||` | "Otherwise, my heart does not incline to stay anywhere else. ||40||" |
+| `Line 41893: ` | "[Blank line]" |
+| `Line 41894: तां प्रहृष्टेन मनसा राजमातेदमब्रवीत् |` | "With a delighted mind, the queen mother [rāja-mātā] said this to her," |
+| `Line 41895: सर्वमेतत्करिष्यामि दिष्ट्या ते व्रतमीदृशम् ||४१||` | "I will do all this; fortunately, such is your vow. ||41||" |
+| `Line 41896: ` | "[Blank line]" |
+| `Line 41897: एवमुक्त्वा ततो भैमीं राजमाता विशां पते |` | "Having spoken thus to Bhaimī [Damayantī, daughter of Bhīma], O lord of people [viśām-pate]," |
+| `Line 41898: उवाचेदं दुहितरं सुनन्दां नाम भारत ||४२||` | "She spoke this to her daughter named Sunandā, O Bhārata [descendant of Bharata]. ||42||" |
+| `Line 41899: ` | "[Blank line]" |
+| `Line 41900: सैरन्ध्रीमभिजानीष्व सुनन्दे देवरूपिणीम् |` | "Recognize this Sairandhrī [lady's attendant], O Sunandā, who has a divine form," |
+| `Line 41901: एतया सह मोदस्व निरुद्विग्नमनाः स्वयम् ||४३||` | "Enjoy yourself with her, with a mind free from anxiety. ||43||" |
+| `Line 41902: ` | "[Blank line]" |
+| `Line 41903: ` | "[Blank line]" |
+| `Line 41904: ` | "[Blank line]" |
+| `Line 41905: ` | "[Blank line]" |
+| `Line 41906: ६३` | "63" |
+| `Line 41907: ` | "[Blank line]" |
+| `Line 41908: ` | "[Blank line]" |
+| `Line 41909: बृहदश्व उवाच||` | "Bṛhadaśva [sage narrator] said:" |
+| `Line 41910: ` | "[Blank line]" |
+| `Line 41911: उत्सृज्य दमयन्तीं तु नलो राजा विशां पते |` | "Having abandoned Damayantī, King Nala, O lord of people [viśām-pate]," |
+| `Line 41912: ददर्श दावं दह्यन्तं महान्तं गहने वने ||१||` | "Saw a great forest fire burning in the dense forest. ||1||" |
+| `Line 41913: ` | "[Blank line]" |
+| `Line 41914: तत्र शुश्राव मध्येऽग्नौ शब्दं भूतस्य कस्यचित् |` | "There, in the midst of the fire, he heard the voice of some being," |
+| `Line 41915: अभिधाव नलेत्युच्चैः पुण्यश्लोकेति चासकृत् ||२||` | "Crying loudly, 'Run here, Nala!' and 'O Puṇyaśloka [of virtuous fame]!' repeatedly. ||2||" |

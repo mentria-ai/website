@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 27491: तमेव च महाराज शिष्यवत्समुपस्थितः |` | "And that very person, O great king, approached like a disciple," |
+| `Line 27492: वक्रः करूषाधिपतिर्मायायोधी महाबलः ||१०||` | "Vakra, the ruler of Karūṣa [kingdom name], a fighter using illusion, of great strength. ||10||" |
+| `Line 27493: ` | "[Blank line]" |
+| `Line 27494: अपरौ च महावीर्यौ महात्मानौ समाश्रितौ |` | "And two others of great valor, noble-souled ones, have taken refuge," |
+| `Line 27495: जरासन्धं महावीर्यं तौ हंसडिभकावुभौ ||११||` | "With Jarāsandha [powerful king] of great prowess, they are both Haṃsa and Ḍibhaka. ||11||" |
+| `Line 27496: ` | "[Blank line]" |
+| `Line 27497: दन्तवक्रः करूषश्च कलभो मेघवाहनः |` | "Dantavakra, Karūṣa, Kalabha, and Meghavāhana [cloud-rider]," |
+| `Line 27498: मूर्ध्ना दिव्यं मणिं बिभ्रद्यं तं भूतमणिं विदुः ||१२||` | "Wearing on his head a divine jewel, which they know as the Bhūtamaṇi [elemental gem]. ||12||" |
+| `Line 27499: ` | "[Blank line]" |
+| `Line 27500: मुरं च नरकं चैव शास्ति यो यवनाधिपौ |` | "He who rules over Mura and Naraka, the two Yavana [foreign/Greek] lords," |
+| `Line 27501: अपर्यन्तबलो राजा प्रतीच्यां वरुणो यथा ||१३||` | "A king of boundless strength, like Varuṇa [water deity] in the western region. ||13||" |
+| `Line 27502: ` | "[Blank line]" |
+| `Line 27503: भगदत्तो महाराज वृद्धस्तव पितुः सखा |` | "Bhagadatta, O great king, the elderly friend of your father," |
+| `Line 27504: स वाचा प्रणतस्तस्य कर्मणा चैव भारत ||१४||` | "He is submissive to him in speech and action, O Bhārata [descendant of Bharata]. ||14||" |
+| `Line 27505: ` | "[Blank line]" |
+| `Line 27506: स्नेहबद्धस्तु पितृवन्मनसा भक्तिमांस्त्वयि |` | "Though bound by affection, like a father, with a mind devoted to you," |
+| `Line 27507: प्रतीच्यां दक्षिणं चान्तं पृथिव्याः पाति यो नृपः ||१५||` | "The king who protects the southwestern border of the earth. ||15||" |
+| `Line 27508: ` | "[Blank line]" |
+| `Line 27509: मातुलो भवतः शूरः पुरुजित्कुन्तिवर्धनः |` | "Your maternal uncle, the hero Purujit, the enhancer of the Kunti [tribe]," |
+| `Line 27510: स ते संनतिमानेकः स्नेहतः शत्रुतापनः ||१६||` | "He alone is respectful to you out of affection, that tormentor of enemies. ||16||" |
+| `Line 27511: ` | "[Blank line]" |
+| `Line 27512: जरासन्धं गतस्त्वेवं पुरा यो न मया हतः |` | "Thus gone to Jarāsandha is he who was not slain by me before," |
+| `Line 27513: पुरुषोत्तमविज्ञातो योऽसौ चेदिषु दुर्मतिः ||१७||` | "Known as Puruṣottama [supreme person], that evil-minded one among the Cedis. ||17||" |
+| `Line 27514: ` | "[Blank line]" |
+| `Line 27515: आत्मानं प्रतिजानाति लोकेऽस्मिन्पुरुषोत्तमम् |` | "He declares himself in this world to be Puruṣottama [supreme person]," |

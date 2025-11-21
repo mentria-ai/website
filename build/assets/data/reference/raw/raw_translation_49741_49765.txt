@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 49741: ` | "[Blank line]" |
+| `Line 49742: युधिष्ठिर उवाच||` | "Yudhiṣṭhira [eldest Pāṇḍava] said:" |
+| `Line 49743: ` | "[Blank line]" |
+| `Line 49744: कथम्प्रभावः स बभूव विप्र; स्तथायुक्तं यो निजग्राह बन्दिम् |` | "How powerful was that brahmin who captured Bandi [court debater] in such a manner?" |
+| `Line 49745: अष्टावक्रः केन चासौ बभूव; तत्सर्वं मे लोमश शंस तत्त्वम् ||५||` | "How did Aṣṭāvakra [eight-curved sage] come to be? O Lomaśa, tell me all this truth in detail. ||5||" |
+| `Line 49746: ` | "[Blank line]" |
+| `Line 49747: लोमश उवाच||` | "Lomaśa [hairy sage] said:" |
+| `Line 49748: ` | "[Blank line]" |
+| `Line 49749: उद्दालकस्य नियतः शिष्य एको; नाम्ना कहोडेति बभूव राजन् |` | "O king, Uddālaka [sage's name] had a devoted disciple named Kahoḍa," |
+| `Line 49750: शुश्रूषुराचार्यवशानुवर्ती; दीर्घं कालं सोऽध्ययनं चकार ||६||` | "Who was obedient, following his teacher's will, and studied for a long time. ||6||" |
+| `Line 49751: ` | "[Blank line]" |
+| `Line 49752: तं वै विप्राः पर्यभवंश्च शिष्या; स्तं च ज्ञात्वा विप्रकारं गुरुः सः |` | "The other brahmins and disciples insulted him; and knowing this mistreatment, that guru [teacher]," |
+| `Line 49753: तस्मै प्रादात्सद्य एव श्रुतं च; भार्यां च वै दुहितरं स्वां सुजाताम् ||७||` | "Immediately gave him knowledge and his own daughter Sujātā [well-born] as wife. ||7||" |
+| `Line 49754: ` | "[Blank line]" |
+| `Line 49755: तस्या गर्भः समभवदग्निकल्पः; सोऽधीयानं पितरमथाभ्युवाच |` | "Her womb bore a child radiant like fire; he spoke to his father who was studying," |
+| `Line 49756: सर्वां रात्रिमध्ययनं करोषि; नेदं पितः सम्यगिवोपवर्तते ||८||` | "You study all night; father, this is not quite proper. ||8||" |
+| `Line 49757: ` | "[Blank line]" |
+| `Line 49758: उपालब्धः शिष्यमध्ये महर्षिः; स तं कोपादुदरस्थं शशाप |` | "Rebuked in front of his disciples, the great sage angrily cursed him in the womb," |
+| `Line 49759: यस्मात्कुक्षौ वर्तमानो ब्रवीषि; तस्माद्वक्रो भवितास्यष्टकृत्वः ||९||` | "Since you speak while still in the womb, you shall be crooked in eight ways. ||9||" |
+| `Line 49760: ` | "[Blank line]" |
+| `Line 49761: स वै तथा वक्र एवाभ्यजाय; दष्टावक्रः प्रथितो वै महर्षिः |` | "Thus he was born crooked, the great sage known as Aṣṭāvakra [eight-curved]," |
+| `Line 49762: तस्यासीद्वै मातुलः श्वेतकेतुः; स तेन तुल्यो वयसा बभूव ||१०||` | "His maternal uncle was Śvetaketu [white banner]; he was of the same age as him. ||10||" |
+| `Line 49763: ` | "[Blank line]" |
+| `Line 49764: सम्पीड्यमाना तु तदा सुजाता; विवर्धमानेन सुतेन कुक्षौ |` | "But then Sujātā, distressed by her growing son in her womb," |
+| `Line 49765: उवाच भर्तारमिदं रहोगता; प्रसाद्य हीनं वसुना धनार्थिनी ||११||` | "Approached her husband in private, and pleading, said to him who was without wealth, as she needed money: ||11||" |

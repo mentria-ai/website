@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 9541: ` | "[Blank line]" |
+| `Line 9542: ` | "[Blank line]" |
+| `Line 9543: ` | "[Blank line]" |
+| `Line 9544: ` | "[Blank line]" |
+| `Line 9545: ७२` | "72 [chapter number]" |
+| `Line 9546: ` | "[Blank line]" |
+| `Line 9547: ` | "[Blank line]" |
+| `Line 9548: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 9549: ` | "[Blank line]" |
+| `Line 9550: समावृत्तव्रतं तं तु विसृष्टं गुरुणा तदा |` | "To him who had completed his vows [samāvṛtta-vrata] and was then dismissed by his teacher," |
+| `Line 9551: प्रस्थितं त्रिदशावासं देवयान्यब्रवीदिदम् ||१||` | "As he was departing for the abode of the thirty gods [heaven], Devayānī [Śukra's daughter] said this: ||1||" |
+| `Line 9552: ` | "[Blank line]" |
+| `Line 9553: ऋषेरङ्गिरसः पौत्र वृत्तेनाभिजनेन च |` | "O grandson of the sage Aṅgiras [fire priest], by your conduct and by your lineage," |
+| `Line 9554: भ्राजसे विद्यया चैव तपसा च दमेन च ||२||` | "You shine with knowledge, austerity, and self-control. ||2||" |
+| `Line 9555: ` | "[Blank line]" |
+| `Line 9556: ऋषिर्यथाङ्गिरा मान्यः पितुर्मम महायशाः |` | "Just as the sage Aṅgiras, of great fame, is respected by my father," |
+| `Line 9557: तथा मान्यश्च पूज्यश्च भूयो मम बृहस्पतिः ||३||` | "So too is Bṛhaspati [preceptor of gods] even more respected and revered by me. ||3||" |
+| `Line 9558: ` | "[Blank line]" |
+| `Line 9559: एवं ज्ञात्वा विजानीहि यद्ब्रवीमि तपोधन |` | "Knowing this, understand what I say, O wealth of austerities [tapodhaṇa]," |
+| `Line 9560: व्रतस्थे नियमोपेते यथा वर्ताम्यहं त्वयि ||४||` | "How I behave toward you who stands firm in vows and observances. ||4||" |
+| `Line 9561: ` | "[Blank line]" |
+| `Line 9562: स समावृत्तविद्यो मां भक्तां भजितुमर्हसि |` | "You, who have completed your studies, should accept me who am devoted to you," |
+| `Line 9563: गृहाण पाणिं विधिवन्मम मन्त्रपुरस्कृतम् ||५||` | "Take my hand according to proper ritual, with sacred mantras. ||5||" |
+| `Line 9564: ` | "[Blank line]" |
+| `Line 9565: कच उवाच||` | "Kacha [Bṛhaspati's son] said:" |

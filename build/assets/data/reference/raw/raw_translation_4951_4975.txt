@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 4951: ` | [Blank line] |
+| `Line 4952: ` | [Blank line] |
+| `Line 4953: ३९` | "39" |
+| `Line 4954: ` | [Blank line] |
+| `Line 4955: ` | [Blank line] |
+| `Line 4956: तक्षक उवाच||` | "Takshaka [serpent king] said:" |
+| `Line 4957: ` | [Blank line] |
+| `Line 4958: दष्टं यदि मयेह त्वं शक्तः किञ्चिच्चिकित्सितुम् |` | "If you are able to heal anything that has been bitten by me here," |
+| `Line 4959: ततो वृक्षं मया दष्टमिमं जीवय काश्यप ||१||` | "Then revive this tree that has been bitten by me, O Kashyapa. ||1||" |
+| `Line 4960: ` | [Blank line] |
+| `Line 4961: परं मन्त्रबलं यत्ते तद्दर्शय यतस्व च |` | "Show the supreme power of your mantras and exert yourself," |
+| `Line 4962: न्यग्रोधमेनं धक्ष्यामि पश्यतस्ते द्विजोत्तम ||२||` | "I will burn this banyan tree before your eyes, O best of the twice-born [Brahmin]. ||2||" |
+| `Line 4963: ` | [Blank line] |
+| `Line 4964: काश्यप उवाच||` | "Kashyapa [sage] said:" |
+| `Line 4965: ` | [Blank line] |
+| `Line 4966: दश नागेन्द्र वृक्षं त्वं यमेनमभिमन्यसे |` | "Bite this tree, O lord of serpents, which you have in mind," |
+| `Line 4967: अहमेनं त्वया दष्टं जीवयिष्ये भुजङ्गम ||३||` | "I will revive it after it has been bitten by you, O serpent. ||3||" |
+| `Line 4968: ` | [Blank line] |
+| `Line 4969: सूत उवाच||` | "Suta [narrator sage] said:" |
+| `Line 4970: ` | [Blank line] |
+| `Line 4971: एवमुक्तः स नागेन्द्रः काश्यपेन महात्मना |` | "Thus addressed by the great-souled Kashyapa, that lord of serpents," |
+| `Line 4972: अदशद्वृक्षमभ्येत्य न्यग्रोधं पन्नगोत्तमः ||४||` | "The foremost of serpents approached and bit the banyan tree. ||4||" |
+| `Line 4973: ` | [Blank line] |
+| `Line 4974: स वृक्षस्तेन दष्टः सन्सद्य एव महाद्युते |` | "That tree, having been bitten by him, O greatly radiant one [addressing the listener]," |
+| `Line 4975: आशीविषविषोपेतः प्रजज्वाल समन्ततः ||५||` | "Filled with the poison of the venomous snake, burst into flames all around. ||5||" |

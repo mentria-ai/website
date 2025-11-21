@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 13716: जनमेजय उवाच॥` | "Janamejaya [Pāṇḍava descendant] said:" |
+| `Line 13717: ` | "[Blank line]" |
+| `Line 13718: कथं पुत्रशतं जज्ञे गान्धार्यां द्विजसत्तम |` | "How were a hundred sons born to Gāndhārī [Dhṛtarāṣṭra's wife], O best of twice-born [brahmin]?" |
+| `Line 13719: कियता चैव कालेन तेषामायुश्च किं परम् ॥३॥` | "And in how much time, and what was the maximum lifespan of those (sons)? ||3||" |
+| `Line 13720: ` | "[Blank line]" |
+| `Line 13721: कथं चैकः स वैश्यायां धृतराष्ट्रसुतोऽभवत् |` | "And how was that one son of Dhṛtarāṣṭra [blind king] born to a Vaiśya [merchant caste] woman?" |
+| `Line 13722: कथं च सदृशीं भार्यां गान्धारीं धर्मचारिणीम् ॥४॥` | "And how did Dhṛtarāṣṭra disregard Gāndhārī, his suitable wife, devoted to dharma [righteousness]? ||4||" |
+| `Line 13723: ` | "[Blank line]" |
+| `Line 13724: आनुकूल्ये वर्तमानां धृतराष्ट्रोऽत्यवर्तत ॥४॥` | "Who was always favorable to him, yet Dhṛtarāṣṭra transgressed against her? ||4||" |
+| `Line 13725: ` | "[Blank line]" |
+| `Line 13726: कथं च शप्तस्य सतः पाण्डोस्तेन महात्मना |` | "And how, when Pāṇḍu [pale king] was under a curse by that great soul," |
+| `Line 13727: समुत्पन्ना दैवतेभ्यः पञ्च पुत्रा महारथाः ॥५॥` | "Were five sons, great chariot-warriors [mahāratha], born to him from the gods? ||5||" |
+| `Line 13728: ` | "[Blank line]" |
+| `Line 13729: एतद्विद्वन्यथावृत्तं विस्तरेण तपोधन |` | "O learned one, O wealth of austerities [tapodhan], tell me in detail how all this happened," |
+| `Line 13730: कथयस्व न मे तृप्तिः कथ्यमानेषु बन्धुषु ॥६॥` | "Please narrate it, for I am not satisfied when hearing about my relatives. ||6||" |
+| `Line 13731: ` | "[Blank line]" |
+| `Line 13732: वैशम्पायन उवाच॥` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 13733: ` | "[Blank line]" |
+| `Line 13734: क्षुच्छ्रमाभिपरिग्लानं द्वैपायनमुपस्थितम् |` | "When Dvaipāyana [Vyāsa] arrived, exhausted from hunger and fatigue," |
+| `Line 13735: तोषयामास गान्धारी व्यासस्तस्यै वरं ददौ ॥७॥` | "Gāndhārī pleased him, and Vyāsa [author of Mahābhārata] granted her a boon. ||7||" |
+| `Line 13736: ` | "[Blank line]" |
+| `Line 13737: सा वव्रे सदृशं भर्तुः पुत्राणां शतमात्मनः |` | "She asked for a hundred sons for herself, equal to her husband," |
+| `Line 13738: ततः कालेन सा गर्भं धृतराष्ट्रादथाग्रहीत् ॥८॥` | "Then, in time, she conceived a child from Dhṛtarāṣṭra. ||8||" |
+| `Line 13739: ` | "[Blank line]" |
+| `Line 13740: संवत्सरद्वयं तं तु गान्धारी गर्भमाहितम् |` | "For two years, Gāndhārī carried that embryo," |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 43241: तमानाय्य नलो राजा क्षमयामास पार्थिवम् |` | "Having summoned him, King Nala made the king [pārthiva] ask for forgiveness," |
+| `Line 43242: स च तं क्षमयामास हेतुभिर्बुद्धिसंमतः ||९||` | "And he, agreeing with the reasoning, also asked Nala for forgiveness. ||9||" |
+| `Line 43243: ` | "[Blank line]" |
+| `Line 43244: स सत्कृतो महीपालो नैषधं विस्मयान्वितः |` | "That honored ruler [mahīpāla], filled with wonder, to the king of Nishadha," |
+| `Line 43245: दिष्ट्या समेतो दारैः स्वैर्भवानित्यभ्यनन्दत ||१०||` | "Said with joy, 'By good fortune you are reunited with your wife.' ||10||" |
+| `Line 43246: ` | "[Blank line]" |
+| `Line 43247: कच्चित्तु नापराधं ते कृतवानस्मि नैषध |` | "'I hope I have not committed any offense against you, O Naishadha," |
+| `Line 43248: अज्ञातवासं वसतो मद्गृहे निषधाधिप ||११||` | "While you were living incognito [ajñāta-vāsa] in my house, O lord of Nishadha. ||11||" |
+| `Line 43249: ` | "[Blank line]" |
+| `Line 43250: यदि वा बुद्धिपूर्वाणि यद्यबुद्धानि कानिचित् |` | "'Whether intentionally [buddhi-pūrva] or unintentionally," |
+| `Line 43251: मया कृतान्यकार्याणि तानि मे क्षन्तुमर्हसि ||१२||` | "If I have done any improper deeds, please forgive me for them.' ||12||" |
+| `Line 43252: ` | "[Blank line]" |
+| `Line 43253: नल उवाच||` | "Nala said:" |
+| `Line 43254: ` | "[Blank line]" |
+| `Line 43255: न मेऽपराधं कृतवांस्त्वं स्वल्पमपि पार्थिव |` | "'You have not committed even the slightest offense against me, O king," |
+| `Line 43256: कृतेऽपि च न मे कोपः क्षन्तव्यं हि मया तव ||१३||` | "And even if you had, I would not be angry; indeed, I should forgive you. ||13||" |
+| `Line 43257: ` | "[Blank line]" |
+| `Line 43258: पूर्वं ह्यसि सखा मेऽसि सम्बन्धी च नराधिप |` | "'For you were formerly my friend, and you are my relative, O ruler of men," |
+| `Line 43259: अत ऊर्ध्वं तु भूयस्त्वं प्रीतिमाहर्तुमर्हसि ||१४||` | "And henceforth you should bring even more affection. ||14||" |
+| `Line 43260: ` | "[Blank line]" |
+| `Line 43261: सर्वकामैः सुविहितः सुखमस्म्युषितस्त्वयि |` | "'Well-provided with all desires, I have lived happily with you," |
+| `Line 43262: न तथा स्वगृहे राजन्यथा तव गृहे सदा ||१५||` | "Not even in my own home, O king, was I as comfortable as in your house always. ||15||" |
+| `Line 43263: ` | "[Blank line]" |
+| `Line 43264: इदं चैव हयज्ञानं त्वदीयं मयि तिष्ठति |` | "'And this knowledge of horses [haya-jñāna] of yours now resides in me," |
+| `Line 43265: तदुपाकर्तुमिच्छामि मन्यसे यदि पार्थिव ||१६||` | "I wish to impart it to you, if you desire, O king.' ||16||" |

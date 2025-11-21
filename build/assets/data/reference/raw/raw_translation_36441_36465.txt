@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 36441: शाल्वबाणार्दिते तस्मिन्प्रद्युम्ने बलिनां वरे |` | "When Pradyumna [Krishna's son], the best among the mighty, was afflicted by Śālva's [enemy king] arrows," |
+| `Line 36442: वृष्णयो भग्नसङ्कल्पा विव्यथुः पृतनागताः ||१||` | "The Vṛṣṇis [Krishna's clan], their resolve broken, trembled as they stood in battle. ||1||" |
+| `Line 36443: ` | "[Blank line]" |
+| `Line 36444: हाहाकृतमभूत्सार्वं वृष्ण्यन्धकबलं तदा |` | "The entire army of Vṛṣṇis and Andhakas [allied clans] then cried out in dismay," |
+| `Line 36445: प्रद्युम्ने पतिते राजन्परे च मुदिताभवन् ||२||` | "When Pradyumna fell, O King, while the enemies became delighted. ||2||" |
+| `Line 36446: ` | "[Blank line]" |
+| `Line 36447: तं तथा मोहितं दृष्ट्वा सारथिर्जवनैर्हयैः |` | "Seeing him thus unconscious, his charioteer with swift horses," |
+| `Line 36448: रणादपाहरत्तूर्णं शिक्षितो दारुकिस्ततः ||३||` | "Quickly removed him from the battlefield, that trained son of Dāruka [Krishna's charioteer]. ||3||" |
+| `Line 36449: ` | "[Blank line]" |
+| `Line 36450: नातिदूरापयाते तु रथे रथवरप्रणुत् |` | "When the chariot had not gone very far, the destroyer of excellent chariots [Pradyumna]," |
+| `Line 36451: धनुर्गृहीत्वा यन्तारं लब्धसञ्ज्ञोऽब्रवीदिदम् ||४||` | "Having regained consciousness, took his bow and said this to the charioteer: ||4||" |
+| `Line 36452: ` | "[Blank line]" |
+| `Line 36453: सौते किं ते व्यवसितं कस्माद्यासि पराङ्मुखः |` | "O charioteer, what have you decided? Why are you going away, turning your back?" |
+| `Line 36454: नैष वृष्णिप्रवीराणामाहवे धर्म उच्यते ||५||` | "This is not said to be the duty [dharma] of Vṛṣṇi heroes in battle. ||5||" |
+| `Line 36455: ` | "[Blank line]" |
+| `Line 36456: कच्चित्सौते न ते मोहः शाल्वं दृष्ट्वा महाहवे |` | "O charioteer, did you not become confused seeing Śālva in the great battle," |
+| `Line 36457: विषादो वा रणं दृष्ट्वा ब्रूहि मे त्वं यथातथम् ||६||` | "Or despondent seeing the battle? Tell me the truth as it is. ||6||" |
+| `Line 36458: ` | "[Blank line]" |
+| `Line 36459: सूत उवाच||` | "The charioteer said:" |
+| `Line 36460: ` | "[Blank line]" |
+| `Line 36461: जानार्दने न मे मोहो नापि मे भयमाविशत् |` | "O Jānārdana [Pradyumna], neither confusion nor fear entered me," |
+| `Line 36462: अतिभारं तु ते मन्ये शाल्वं केशवनन्दन ||७||` | "But I consider Śālva too heavy a burden for you, O son of Keśava [Krishna]. ||7||" |
+| `Line 36463: ` | "[Blank line]" |
+| `Line 36464: सोऽपयामि शनैर्वीर बलवानेष पापकृत् |` | "I am withdrawing slowly, O hero; powerful is this evil-doer," |
+| `Line 36465: मोहितश्च रणे शूरो रक्ष्यः सारथिना रथी ||८||` | "And a warrior who is unconscious in battle should be protected by his charioteer. ||8||" |

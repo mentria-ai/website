@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 9316: ` | "[Blank line]" |
+| `Line 9317: ७१` | "71 [chapter number]" |
+| `Line 9318: ` | "[Blank line]" |
+| `Line 9319: ` | "[Blank line]" |
+| `Line 9320: जनमेजय उवाच||` | "Janamejaya [Pāṇḍava descendant] said:" |
+| `Line 9321: ` | "[Blank line]" |
+| `Line 9322: ययातिः पूर्वकोऽस्माकं दशमो यः प्रजापतेः |` | "Yayāti [ancient king], our ancestor, who was tenth from Prajāpati [creator lord]," |
+| `Line 9323: कथं स शुक्रतनयां लेभे परमदुर्लभाम् ||१||` | "How did he obtain the extremely rare daughter of Śukra [sage Uśanas]? ||1||" |
+| `Line 9324: ` | "[Blank line]" |
+| `Line 9325: एतदिच्छाम्यहं श्रोतुं विस्तरेण द्विजोत्तम |` | "I wish to hear this in detail, O best of the twice-born [brāhmaṇa]," |
+| `Line 9326: आनुपूर्व्या च मे शंस पूरोर्वंशकरान्पृथक् ||२||` | "And tell me in sequence separately about the lineage-makers of Pūru [Yayāti's son]. ||2||" |
+| `Line 9327: ` | "[Blank line]" |
+| `Line 9328: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 9329: ` | "[Blank line]" |
+| `Line 9330: ययातिरासीद्राजर्षिर्देवराजसमद्युतिः |` | "Yayāti was a royal sage [rājarṣi] with splendor equal to the king of gods [Indra]," |
+| `Line 9331: तं शुक्रवृषपर्वाणौ वव्राते वै यथा पुरा ||३||` | "Śukra and Vṛṣaparvan [demon king] both chose him, as happened in ancient times. ||3||" |
+| `Line 9332: ` | "[Blank line]" |
+| `Line 9333: तत्तेऽहं सम्प्रवक्ष्यामि पृच्छतो जनमेजय |` | "I shall now narrate that to you who are asking, O Janamejaya," |
+| `Line 9334: देवयान्याश्च संयोगं ययातेर्नाहुषस्य च ||४||` | "The union of Devayānī [Śukra's daughter] and Yayāti, son of Nahuṣa. ||4||" |
+| `Line 9335: ` | "[Blank line]" |
+| `Line 9336: सुराणामसुराणां च समजायत वै मिथः |` | "Between the gods [suras] and demons [asuras] arose mutually," |
+| `Line 9337: ऐश्वर्यं प्रति सङ्घर्षस्त्रैलोक्ये सचराचरे ||५||` | "A conflict over sovereignty in the three worlds [triloka] with their moving and unmoving beings. ||5||" |
+| `Line 9338: ` | "[Blank line]" |
+| `Line 9339: जिगीषया ततो देवा वव्रिरेऽऽङ्गिरसं मुनिम् |` | "With a desire for victory, the gods then chose the sage Āṅgirasa [Bṛhaspati]," |
+| `Line 9340: पौरोहित्येन याज्यार्थे काव्यं तूशनसं परे ||६||` | "As their priest for performing sacrifices, while the others (chose) Kāvya Uśanas [Śukra]. ||6||" |

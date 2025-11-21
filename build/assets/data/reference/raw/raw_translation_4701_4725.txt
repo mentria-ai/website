@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 4701: ` | [Blank line] |
+| `Line 4702: ` | [Blank line] |
+| `Line 4703: ` | [Blank line] |
+| `Line 4704: ` | [Blank line] |
+| `Line 4705: ` | [Blank line] |
+| `Line 4706: ` | [Blank line] |
+| `Line 4707: ३७` | "37" |
+| `Line 4708: ` | [Blank line] |
+| `Line 4709: ` | [Blank line] |
+| `Line 4710: सूत उवाच||` | "Sūta [bard-narrator] said:" |
+| `Line 4711: ` | [Blank line] |
+| `Line 4712: एवमुक्तः स तेजस्वी शृङ्गी कोपसमन्वितः |` | "Thus addressed, that radiant Śṛṅgī [sage's son], filled with anger," |
+| `Line 4713: मृतधारं गुरुं श्रुत्वा पर्यतप्यत मन्युना ||१||` | "Having heard that his teacher bore a dead snake, was consumed by wrath. ||1||" |
+| `Line 4714: ` | [Blank line] |
+| `Line 4715: स तं कृशमभिप्रेष्क्य सूनृतां वाचमुत्सृजन् |` | "He, looking at Kṛśa [messenger], speaking gentle words," |
+| `Line 4716: अपृच्छत कथं तातः स मेऽद्य मृतधारकः ||२||` | "Asked, 'How is my father today bearing a dead snake?' ||2||" |
+| `Line 4717: ` | [Blank line] |
+| `Line 4718: कृश उवाच||` | "Kṛśa [messenger] said:" |
+| `Line 4719: ` | [Blank line] |
+| `Line 4720: राज्ञा परिक्षिता तात मृगयां परिधावता |` | "By King Parikṣit [Abhimanyu's son], O dear one, while roaming on a hunt," |
+| `Line 4721: अवसक्तः पितुस्तेऽद्य मृतः स्कन्धे भुजङ्गमः ||३||` | "A dead serpent was placed on your father's shoulder today. ||3||" |
+| `Line 4722: ` | [Blank line] |
+| `Line 4723: शृङ्ग्युवाच||` | "Śṛṅgī [sage's son] said:" |
+| `Line 4724: ` | [Blank line] |
+| `Line 4725: किं मे पित्रा कृतं तस्य राज्ञोऽनिष्टं दुरात्मनः |` | "What harm was done by my father to that evil-minded king?" |

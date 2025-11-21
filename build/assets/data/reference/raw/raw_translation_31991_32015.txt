@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 31991: ५४` | "54 [chapter number]" |
+| `Line 31992: ` | "[Blank line]" |
+| `Line 31993: ` | "[Blank line]" |
+| `Line 31994: युधिष्ठिर उवाच||` | "Yudhiṣṭhira [eldest Pāṇḍava] said:" |
+| `Line 31995: ` | "[Blank line]" |
+| `Line 31996: मत्तः कैतवकेनैव यज्जितोऽस्मि दुरोदरम् |` | "Though I was defeated by you through deceit [kaitava] in gambling, O Durodara [Śakuni's epithet]," |
+| `Line 31997: शकुने हन्त दीव्यामो ग्लहमानाः सहस्रशः ||१||` | "O Śakuni [Duryodhana's uncle], come, let us gamble, wagering thousands upon thousands. ||1||" |
+| `Line 31998: ` | "[Blank line]" |
+| `Line 31999: इमे निष्कसहस्रस्य कुण्डिनो भरिताः शतम् |` | "Here are a hundred vessels filled with thousands of niṣkas [gold coins]," |
+| `Line 32000: कोशो हिरण्यमक्षय्यं जातरूपमनेकशः ||२||` | "A treasury of inexhaustible gold and numerous forms of refined gold. ||2||" |
+| `Line 32001: ` | "[Blank line]" |
+| `Line 32002: एतद्राजन्धनं मह्यं तेन दीव्याम्यहं त्वया ||२||` | "This wealth is mine, O king, and with it I shall gamble with you. ||2||" |
+| `Line 32003: ` | "[Blank line]" |
+| `Line 32004: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 32005: ` | "[Blank line]" |
+| `Line 32006: इत्युक्तः शकुनिः प्राह जितमित्येव तं नृपम् |` | "Thus addressed, Śakuni said to the king, 'It is won' [claiming victory before playing]." |
+| `Line 32007: युधिष्ठिर उवाच||` | "Yudhiṣṭhira said:" |
+| `Line 32008: ` | "[Blank line]" |
+| `Line 32009: अयं सहस्रसमितो वैयाघ्रः सुप्रवर्तितः |` | "This chariot adorned with tiger skins [vaiyāghra], well-constructed, worth a thousand," |
+| `Line 32010: सुचक्रोपस्करः श्रीमान्किङ्किणीजालमण्डितः ||४||` | "With excellent wheels and equipment, splendid, decorated with a network of small bells [kiṅkiṇī]. ||4||" |
+| `Line 32011: ` | "[Blank line]" |
+| `Line 32012: संह्रादनो राजरथो य इहास्मानुपावहत् |` | "This resounding royal chariot which has carried us here," |
+| `Line 32013: जैत्रो रथवरः पुण्यो मेघसागरनिःस्वनः ||५||` | "This victorious, excellent, auspicious chariot, rumbling like the ocean of clouds. ||5||" |
+| `Line 32014: ` | "[Blank line]" |
+| `Line 32015: अष्टौ यं कुररच्छायाः सदश्वा राष्ट्रसंमताः |` | "Which is drawn by eight excellent horses, colored like osprey [kurara], approved throughout the kingdom," |

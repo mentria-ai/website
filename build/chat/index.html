@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  <!-- Primary Meta Tags -->
+  <title>WebLLM Chat - Free AI Assistant Running Locally in Your Browser | Mentria.AI</title>
+  <meta name="title" content="WebLLM Chat - Free AI Assistant Running Locally in Your Browser | Mentria.AI">
+  <meta name="description" content="Chat with Qwen3 1.7B AI model running entirely in your browser. No data sent to servers, completely private, offline-capable AI assistant. Free WebLLM-powered conversational AI with reset functionality and PWA support.">
+  <meta name="keywords" content="WebLLM, AI chat, browser AI, offline AI, local AI assistant, Qwen3, privacy AI, free AI chat, JavaScript AI, WebGPU AI, client-side AI, conversational AI, Mentria.AI, private AI assistant">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
+  <meta name="author" content="Mentria.AI">
+  <meta name="revisit-after" content="7 days">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mentria.ai/chat/">
+  <meta property="og:title" content="WebLLM Chat - Free AI Assistant Running Locally in Your Browser">
+  <meta property="og:description" content="Chat with Qwen3 1.7B AI model running entirely in your browser. No data sent to servers, completely private, offline-capable AI assistant with WebLLM technology.">
+  <meta property="og:image" content="icon-512x512.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://mentria.ai/chat/">
+  <meta property="twitter:title" content="WebLLM Chat - Free AI Assistant Running Locally in Your Browser">
+  <meta property="twitter:description" content="Chat with Qwen3 1.7B AI model running entirely in your browser. No data sent to servers, completely private, offline-capable AI assistant with WebLLM technology.">
+  <meta property="twitter:image" content="icon-512x512.png">
+
+  <!-- Favicon and Icons -->
+  <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512x512.png">
+  <link rel="apple-touch-icon" href="icon-192x192.png">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://mentria.ai/chat/">
+  
+  <!-- Alternate Languages -->
+  <link rel="alternate" hreflang="x-default" href="https://mentria.ai/chat/">
+  <link rel="alternate" hreflang="en" href="https://mentria.ai/chat/">
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#007AFF">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WebLLM Chat">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "WebLLM Chat - Local AI Assistant",
+    "description": "Chat with Qwen3 1.7B AI model running entirely in your browser. No data sent to servers, completely private, offline-capable AI assistant powered by WebLLM technology.",
+    "url": "https://mentria.ai/chat/",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Mentria.AI",
+      "url": "https://mentria.ai"
+    },
+    "browserRequirements": "Requires JavaScript. Requires WebGPU support for optimal performance.",
+    "softwareVersion": "1.0",
+    "featureList": [
+      "Local AI model execution",
+      "Complete privacy - no data sent to servers",
+      "Offline-capable AI assistant",
+      "Qwen3 1.7B language model",
+      "WebLLM-powered inference",
+      "Progressive Web App (PWA)",
+      "Chat history reset functionality",
+      "Real-time streaming responses",
+      "WebGPU acceleration",
+      "Service Worker caching",
+      "Mobile-optimized interface"
+    ],
+    "audience": {
+      "@type": "Audience",
+      "audienceType": ["Developers", "Privacy-conscious Users", "AI Enthusiasts", "Students", "Researchers"]
+    },
+    "usageInfo": "Free for personal and commercial use. All processing happens locally in your browser.",
+    "requirements": "Modern browser with WebGPU support (Chrome, Edge, Firefox with WebGPU enabled)"
+  }
+  </script>
+  
+  <!-- Styles & icons -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- Load WebLLM as an ES-module and pin it to the latest patch of 0.2.79 -->
+  <script type="module">
+    import * as webllm from "https://esm.run/@mlc-ai/web-llm@0.2.79";
+    // Make the namespace globally visible so app.js can see it
+    window.webllm = webllm;
+  </script>
+
+  <!-- Your logic -->
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header>🤖 WebLLM Chat — AI assistant in your browser</header>
+
+  <main id="chat">
+    <!-- messages appear here -->
+    <div id="loading">Download & load the model… <span id="progress">0 %</span></div>
+  </main>
+
+  <form id="prompt-form">
+    <textarea id="prompt" rows="1" placeholder="Ask me anything… (Enter to send, Shift+Enter for new line. I'll show my thinking process!)"></textarea>
+    <button type="submit">➤</button>
+  </form>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((registration) => {
+            console.log('Service Worker registered successfully:', registration.scope);
+          })
+          .catch((error) => {
+            console.log('Service Worker registration failed:', error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>

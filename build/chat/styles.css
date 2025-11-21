@@ -1,0 +1,212 @@
+/* minimalist dark mode */
+*{box-sizing:border-box;font-family:"Noto Sans",sans-serif;margin:0}
+body{display:flex;flex-direction:column;height:100dvh;background:#101114;color:#e7e7e7}
+header{padding:10px 16px;font-weight:600;background:#18191d;flex:0 0 auto}
+#chat{flex:1 1 auto;overflow-y:auto;padding:12px 16px;scroll-behavior:smooth}
+.message{margin-bottom:14px;line-height:1.4}
+.me   {text-align:right}
+.ai   {text-align:left}
+.ai   span{background:#224; padding:6px 10px;border-radius:8px 8px 8px 2px;display:inline-block}
+.me   span{background:#343a40;padding:6px 10px;border-radius:8px 2px 8px 8px;display:inline-block}
+#loading{opacity:.8;font-style:italic}
+form{display:flex;gap:8px;padding:12px 16px;background:#18191d;flex:0 0 auto}
+textarea{flex:1 1 auto;background:#222;border:none;outline:none;border-radius:6px;padding:8px;color:#eee;resize:none}
+button{background:#3375ff;border:none;color:#fff;font-size:1rem;border-radius:6px;padding:8px 14px;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+
+/* PWA and additional styles */
+button:hover{background:#2d65e6}
+button:active{transform:scale(0.98)}
+
+/* Reset button styles */
+button[onclick*="resetChat"]{background:#ff4444;margin:10px;padding:8px 16px}
+button[onclick*="resetChat"]:hover{background:#e03333}
+
+/* Install prompt styles */
+.install-prompt{background:#007AFF;color:white;padding:12px 16px;text-align:center;border:none;width:100%;margin-bottom:8px}
+.install-prompt:hover{background:#0056cc}
+
+/* Thinking accordion styles */
+.thinking-accordion{
+  margin:8px 0;
+  border:1px solid #333;
+  border-radius:6px;
+  background:#1a1a1a;
+  overflow:hidden;
+}
+
+.thinking-summary{
+  padding:8px 12px;
+  background:#252525;
+  cursor:pointer;
+  font-size:0.9rem;
+  color:#bbb;
+  user-select:none;
+  border:none;
+  outline:none;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  transition:background-color 0.2s ease;
+}
+
+.thinking-summary:hover{
+  background:#2a2a2a;
+  color:#fff;
+}
+
+.thinking-summary:focus{
+  outline:2px solid #007AFF;
+  outline-offset:2px;
+}
+
+.accordion-icon{
+  font-size:0.8rem;
+  transition:transform 0.2s ease;
+  color:#666;
+}
+
+.thinking-accordion[open] .accordion-icon{
+  transform:rotate(180deg);
+}
+
+.thinking-accordion[open] .thinking-summary{
+  background:#2a2a2a;
+  color:#fff;
+}
+
+.thinking-content{
+  padding:12px;
+  border-top:1px solid #333;
+  font-size:0.85rem;
+  color:#ccc;
+  line-height:1.4;
+}
+
+/* Live thinking styles (during streaming) */
+.live-thinking{
+  margin:8px 0;
+  padding:10px 12px;
+  background:linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,165,0,0.1));
+  border:1px solid rgba(255,193,7,0.3);
+  border-left:4px solid #ffc107;
+  border-radius:6px;
+  font-style:italic;
+  color:#ffcd39;
+  font-size:0.9rem;
+  animation:thinking-pulse 2s ease-in-out infinite;
+  position:relative;
+  overflow:hidden;
+}
+
+/* Simplified shimmer - only when visible and reduced frequency */
+.live-thinking::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-100%;
+  width:100%;
+  height:100%;
+  background:linear-gradient(90deg, transparent, rgba(255,193,7,0.15), transparent);
+  animation:thinking-shimmer 3s infinite;
+  will-change:transform;
+}
+
+.live-thinking em{
+  position:relative;
+  z-index:1;
+  display:block;
+  color:#ffcd39;
+  font-weight:500;
+}
+
+@keyframes thinking-pulse {
+  0%, 100% { 
+    opacity: 0.9; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.01);
+  }
+}
+
+@keyframes thinking-shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Markdown styles */
+.message span h1, .message span h2, .message span h3{
+  margin:8px 0 4px 0;
+  color:#fff;
+  font-weight:600;
+}
+
+.message span h1{font-size:1.2rem}
+.message span h2{font-size:1.1rem}
+.message span h3{font-size:1rem}
+
+.message span strong{
+  font-weight:600;
+  color:#fff;
+}
+
+.message span em{
+  font-style:italic;
+  color:#ddd;
+}
+
+.message span code{
+  background:#333;
+  padding:2px 4px;
+  border-radius:3px;
+  font-family:monospace;
+  font-size:0.9rem;
+  color:#ff6b6b;
+}
+
+.message span pre{
+  background:#1a1a1a;
+  border:1px solid #333;
+  border-radius:6px;
+  padding:12px;
+  margin:8px 0;
+  overflow-x:auto;
+  font-family:monospace;
+  font-size:0.85rem;
+  color:#ddd;
+}
+
+.message span pre code{
+  background:transparent;
+  padding:0;
+  border-radius:0;
+  color:inherit;
+}
+
+.message span a{
+  color:#4dabf7;
+  text-decoration:none;
+}
+
+.message span a:hover{
+  text-decoration:underline;
+  color:#74c0fc;
+}
+
+/* Textarea improvements */
+textarea{
+  font-family:inherit;
+  line-height:1.4;
+}
+
+textarea::placeholder{
+  color:#666;
+}
+
+/* Standalone app styles */
+@media (display-mode: standalone) {
+  header{padding-top:calc(env(safe-area-inset-top) + 10px)}
+  body{background:#0a0a0a}
+}

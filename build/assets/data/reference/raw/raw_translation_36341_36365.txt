@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 36341: सर्वे भवन्तस्तिष्ठन्तु सर्वे पश्यन्तु मां युधि |` | "Let all of you stand firm, let all witness me in battle," |
+| `Line 36342: निवारयन्तं सङ्ग्रामे बलात्सौभं सराजकम् ||३०||` | "As I forcibly stop in combat the aerial city Saubha [magical fortress] along with its king. ||30||" |
+| `Line 36343: ` | "[Blank line]" |
+| `Line 36344: अहं सौभपतेः सेनामायसैर्भुजगैरिव |` | "I shall destroy the army of the lord of Saubha with iron arrows like serpents," |
+| `Line 36345: धनुर्भुजविनिर्मुक्तैर्नाशयाम्यद्य यादवाः ||३१||` | "Released from my bow by my arms, O Yādavas [Krishna's clan], today. ||31||" |
+| `Line 36346: ` | "[Blank line]" |
+| `Line 36347: आश्वसध्वं न भीः कार्या सौभराडद्य नश्यति |` | "Be reassured, fear not, the king of Saubha perishes today," |
+| `Line 36348: मयाभिपन्नो दुष्टात्मा ससौभो विनशिष्यति ||३२||` | "Attacked by me, the evil-souled one will be destroyed along with Saubha. ||32||" |
+| `Line 36349: ` | "[Blank line]" |
+| `Line 36350: एवं ब्रुवति संहृष्टे प्रद्युम्ने पाण्डुनन्दन |` | "As the delighted Pradyumna [Krishna's son] spoke thus, O descendant of Pandu [Arjuna]," |
+| `Line 36351: विष्ठितं तद्बलं वीर युयुधे च यथासुखम् ||३३||` | "That army stood firm, O hero, and fought at ease. ||33||" |
+| `Line 36352: ` | "[Blank line]" |
+| `Line 36353: ` | "[Blank line]" |
+| `Line 36354: ` | "[Blank line]" |
+| `Line 36355: ` | "[Blank line]" |
+| `Line 36356: १८` | "18 [chapter number]" |
+| `Line 36357: ` | "[Blank line]" |
+| `Line 36358: ` | "[Blank line]" |
+| `Line 36359: वासुदेव उवाच||` | "Vāsudeva [Krishna] said:" |
+| `Line 36360: ` | "[Blank line]" |
+| `Line 36361: एवमुक्त्वा रौक्मिणेयो यादवान्भरतर्षभ |` | "Having spoken thus to the Yādavas, O bull among the Bharatas [Arjuna]," |
+| `Line 36362: दंशितैर्हरिभिर्युक्तं रथमास्थाय काञ्चनम् ||१||` | "Mounting a golden chariot yoked with armored tawny horses, ||1||" |
+| `Line 36363: ` | "[Blank line]" |
+| `Line 36364: उच्छ्रित्य मकरं केतुं व्यात्ताननमलङ्कृतम् |` | "Raising his banner bearing a makara [sea creature] with open jaws, adorned," |
+| `Line 36365: उत्पतद्भिरिवाकाशं तैर्हयैरन्वयात्परान् ||२||` | "With those horses that seemed to fly through the sky, he pursued the enemies. ||2||" |

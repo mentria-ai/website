@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 38641: ` | "[Blank line]" |
+| `Line 38642: ३७` | "37 [chapter number]" |
+| `Line 38643: ` | "[Blank line]" |
+| `Line 38644: ` | "[Blank line]" |
+| `Line 38645: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 38646: ` | "[Blank line]" |
+| `Line 38647: भीमसेनवचः श्रुत्वा कुन्तीपुत्रो युधिष्ठिरः |` | "Having heard Bhīmasena's [mighty Pāṇḍava] words, Kuntī's son Yudhiṣṭhira [eldest Pāṇḍava]," |
+| `Line 38648: निःश्वस्य पुरुषव्याघ्रः सम्प्रदध्यौ परन्तपः ||१||` | "Sighing deeply, that tiger among men [puruṣavyāghra], the scorcher of enemies [parantapa], contemplated deeply. ||1||" |
+| `Line 38649: ` | "[Blank line]" |
+| `Line 38650: स मुहूर्तमिव ध्यात्वा विनिश्चित्येतिकृत्यताम् |` | "After thinking for what seemed like a moment and determining the proper course of action," |
+| `Line 38651: भीमसेनमिदं वाक्यमपदान्तरमब्रवीत् ||२||` | "He spoke these words to Bhīmasena, without hesitation [apadāntaram]. ||2||" |
+| `Line 38652: ` | "[Blank line]" |
+| `Line 38653: एवमेतन्महाबाहो यथा वदसि भारत |` | "It is indeed so, O mighty-armed one [mahābāho], as you say, O descendant of Bharata [Bhārata]," |
+| `Line 38654: इदमन्यत्समाधत्स्व वाक्यं मे वाक्यकोविद ||३||` | "But consider this other statement of mine, O skilled speaker [vākyakovida]. ||3||" |
+| `Line 38655: ` | "[Blank line]" |
+| `Line 38656: महापापानि कर्माणि यानि केवलसाहसात् |` | "Those greatly sinful actions which are undertaken from mere rashness [kevalasāhasāt]," |
+| `Line 38657: आरभ्यन्ते भीमसेन व्यथन्ते तानि भारत ||४||` | "Come to naught, O Bhīmasena, O descendant of Bharata. ||4||" |
+| `Line 38658: ` | "[Blank line]" |
+| `Line 38659: सुमन्त्रिते सुविक्रान्ते सुकृते सुविचारिते |` | "In matters well-counseled, well-executed, well-performed, and well-considered," |
+| `Line 38660: सिध्यन्त्यर्था महाबाहो दैवं चात्र प्रदक्षिणम् ||५||` | "Objectives are accomplished, O mighty-armed one, and fate [daivam] is favorable. ||5||" |
+| `Line 38661: ` | "[Blank line]" |
+| `Line 38662: त्वं तु केवलचापल्याद्बलदर्पोच्छ्रितः स्वयम् |` | "But you, from mere impulsiveness [chapalyāt], puffed up with pride in your strength," |
+| `Line 38663: आरब्धव्यमिदं कर्म मन्यसे शृणु तत्र मे ||६||` | "Think this action should be undertaken—listen to me on this matter. ||6||" |
+| `Line 38664: ` | "[Blank line]" |
+| `Line 38665: भूरिश्रवाः शलश्चैव जलसन्धश्च वीर्यवान् |` | "Bhūriśravas [Kuru warrior], Śala [Kuru ally], and the powerful Jalasandha [mighty warrior]," |

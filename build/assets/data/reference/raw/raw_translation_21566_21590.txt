@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 21566: ` | "[Blank line]" |
+| `Line 21567: ` | "[Blank line]" |
+| `Line 21568: ` | "[Blank line]" |
+| `Line 21569: ` | "[Blank line]" |
+| `Line 21570: ` | "[Blank line]" |
+| `Line 21571: ` | "[Blank line]" |
+| `Line 21572: १८५` | "185 [chapter number]" |
+| `Line 21573: ` | "[Blank line]" |
+| `Line 21574: ` | "[Blank line]" |
+| `Line 21575: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 21576: ` | "[Blank line]" |
+| `Line 21577: ततस्तथोक्तः परिहृष्टरूपः; पित्रे शशंसाथ स राजपुत्रः |` | "Then, thus addressed, with a delighted countenance, that prince [rājaputra] narrated to his father," |
+| `Line 21578: धृष्टद्युम्नः सोमकानां प्रबर्हो; वृत्तं यथा येन हृता च कृष्णा ||१||` | "Dhṛṣṭadyumna [Pāñcāla prince], the foremost of the Somakas, (told) exactly what happened and how Kṛṣṇā [Draupadī] was taken away. ||1||" |
+| `Line 21579: ` | "[Blank line]" |
+| `Line 21580: योऽसौ युवा स्वायतलोहिताक्षः; कृष्णाजिनी देवसमानरूपः |` | "That youth with large reddish eyes, wearing black deerskin [kṛṣṇājina], with a form equal to the gods," |
+| `Line 21581: यः कार्मुकाग्र्यं कृतवानधिज्यं; लक्ष्यं च तत्पातितवान्पृथिव्याम् ||२||` | "Who strung that excellent bow and brought down the target to the ground. ||2||" |
+| `Line 21582: ` | "[Blank line]" |
+| `Line 21583: असज्जमानश्च गतस्तरस्वी; वृतो द्विजाग्र्यैरभिपूज्यमानः |` | "And moving without hindrance, that energetic one, surrounded by foremost Brahmins [dvijāgrya] who honored him," |
+| `Line 21584: चक्राम वज्रीव दितेः सुतेषु; सर्वैश्च देवैरृषिभिश्च जुष्टः ||३||` | "Strode like Indra [vajrī] among the sons of Diti [demons], honored by all the gods and sages. ||3||" |
+| `Line 21585: ` | "[Blank line]" |
+| `Line 21586: कृष्णा च गृह्याजिनमन्वयात्तं; नागं यथा नागवधूः प्रहृष्टा |` | "And Kṛṣṇā [Draupadī], grasping his deerskin, followed him, delighted like a female serpent [nāgavadhū] following a male serpent," |
+| `Line 21587: अमृष्यमाणेषु नराधिपेषु; क्रुद्धेषु तं तत्र समापतत्सु ||४||` | "While the kings [narādhipa], unable to tolerate it, enraged, rushed toward him there. ||4||" |
+| `Line 21588: ` | "[Blank line]" |
+| `Line 21589: ततोऽपरः पार्थिवराजमध्ये; प्रवृद्धमारुज्य महीप्ररोहम् |` | "Then another, in the midst of the kings [pārthiva], breaking the mighty royal sapling [mahīpraroha]," |
+| `Line 21590: प्रकालयन्नेव स पार्थिवौघा; न्क्रुद्धोऽन्तकः प्राणभृतो यथैव ||५||` | "Shook the multitude of kings, like angry Death [antaka] (shakes) living beings. ||5||" |

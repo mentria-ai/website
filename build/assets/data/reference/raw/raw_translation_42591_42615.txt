@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 42591: ` | "[Blank line]" |
+| `Line 42592: एवमुक्ते नलेनाथ तदा भाङ्गस्वरिर्नृपः |` | "When thus spoken by Nala [protagonist king], then King Bhāṅgasvari [Ṛtuparṇa]" |
+| `Line 42593: आससाद वने राजन्फलवन्तं बिभीतकम् ||६||` | "Came upon a fruit-bearing Bibhītaka [Terminalia bellirica] tree in the forest, O King. ||6||" |
+| `Line 42594: ` | "[Blank line]" |
+| `Line 42595: तं दृष्ट्वा बाहुकं राजा त्वरमाणोऽभ्यभाषत |` | "Seeing Bāhuka [Nala's disguise], the king spoke hastily:" |
+| `Line 42596: ममापि सूत पश्य त्वं सङ्ख्याने परमं बलम् ||७||` | "'O charioteer, behold my supreme skill in calculation as well. ||7||'" |
+| `Line 42597: ` | "[Blank line]" |
+| `Line 42598: सर्वः सर्वं न जानाति सर्वज्ञो नास्ति कश्चन |` | "'No one knows everything; there is no one who is omniscient.'" |
+| `Line 42599: नैकत्र परिनिष्ठास्ति ज्ञानस्य पुरुषे क्वचित् ||८||` | "'Knowledge is never perfectly complete in any single person. ||8||'" |
+| `Line 42600: ` | "[Blank line]" |
+| `Line 42601: वृक्षेऽस्मिन्यानि पर्णानि फलान्यपि च बाहुक |` | "'On this tree, the leaves and fruits, O Bāhuka,'" |
+| `Line 42602: पतितानि च यान्यत्र तत्रैकमधिकं शतम् ||९||` | "'And those that have fallen here - there are one hundred and one. ||9||'" |
+| `Line 42603: ` | "[Blank line]" |
+| `Line 42604: एकपत्राधिकं पत्रं फलमेकं च बाहुक ||९||` | "'One leaf more than a hundred leaves, and one fruit, O Bāhuka. ||9||'" |
+| `Line 42605: ` | "[Blank line]" |
+| `Line 42606: पञ्च कोट्योऽथ पत्राणां द्वयोरपि च शाखयोः |` | "'There are five crores [fifty million] of leaves on these two branches,'" |
+| `Line 42607: प्रचिनुह्यस्य शाखे द्वे याश्चाप्यन्याः प्रशाखिकाः ||१०||` | "'Gather these two branches and also the other smaller branches. ||10||'" |
+| `Line 42608: ` | "[Blank line]" |
+| `Line 42609: आभ्यां फलसहस्रे द्वे पञ्चोनं शतमेव च ||१०||` | "'On these two are two thousand and ninety-five fruits. ||10||'" |
+| `Line 42610: ` | "[Blank line]" |
+| `Line 42611: ततो रथादवप्लुत्य राजानं बाहुकोऽब्रवीत् |` | "Then, leaping down from the chariot, Bāhuka said to the king:" |
+| `Line 42612: परोक्षमिव मे राजन्कत्थसे शत्रुकर्शन ||११||` | "'O King, enemy-destroyer, you boast to me about something unseen. ||11||'" |
+| `Line 42613: ` | "[Blank line]" |
+| `Line 42614: अथ ते गणिते राजन्विद्यते न परोक्षता |` | "'Now, if in your calculation, O King, there is no uncertainty,'" |
+| `Line 42615: प्रत्यक्षं ते महाराज गणयिष्ये बिभीतकम् ||१२||` | "'I shall count this Bibhītaka tree before your eyes, O great king. ||12||'" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 30816: ` | "[Blank line]" |
+| `Line 30817: ` | "[Blank line]" |
+| `Line 30818: ` | "[Blank line]" |
+| `Line 30819: ` | "[Blank line]" |
+| `Line 30820: ४४` | "44 [chapter number]" |
+| `Line 30821: ` | "[Blank line]" |
+| `Line 30822: ` | "[Blank line]" |
+| `Line 30823: शकुनिरुवाच||` | "Śakuni [Duryodhana's uncle] said:" |
+| `Line 30824: ` | "[Blank line]" |
+| `Line 30825: दुर्योधन न तेऽमर्षः कार्यः प्रति युधिष्ठिरम् |` | "Duryodhana [Kaurava prince], you should not harbor anger against Yudhiṣṭhira [eldest Pāṇḍava]," |
+| `Line 30826: भागधेयानि हि स्वानि पाण्डवा भुञ्जते सदा ||१||` | "For the Pāṇḍavas [five brothers] are merely enjoying their own destined fortune. ||1||" |
+| `Line 30827: ` | "[Blank line]" |
+| `Line 30828: अनेकैरभ्युपायैश्च त्वयारब्धाः पुरासकृत् |` | "Though you have repeatedly attempted against them with numerous strategies in the past," |
+| `Line 30829: विमुक्ताश्च नरव्याघ्रा भागधेयपुरस्कृताः ||२||` | "Those tiger-like men were freed, protected by their destiny. ||2||" |
+| `Line 30830: ` | "[Blank line]" |
+| `Line 30831: तैर्लब्धा द्रौपदी भार्या द्रुपदश्च सुतैः सह |` | "They obtained Draupadī [Pāṇḍavas' wife] as their wife, and Drupada [king] with his sons," |
+| `Line 30832: सहायः पृथिवीलाभे वासुदेवश्च वीर्यवान् ||३||` | "And the mighty Vāsudeva [Krishna] as an ally in gaining the earth. ||3||" |
+| `Line 30833: ` | "[Blank line]" |
+| `Line 30834: लब्धश्च नाभिभूतोऽर्थः पित्र्योंऽशः पृथिवीपते |` | "And they have obtained, O ruler of the earth, their paternal share which cannot be overcome," |
+| `Line 30835: विवृद्धस्तेजसा तेषां तत्र का परिदेवना ||४||` | "Increased by their own prowess - what is there to lament about? ||4||" |
+| `Line 30836: ` | "[Blank line]" |
+| `Line 30837: धनञ्जयेन गाण्डीवमक्षय्यौ च महेषुधी |` | "Dhanañjaya [Arjuna] has obtained the Gāṇḍīva [divine bow] and two inexhaustible quivers," |
+| `Line 30838: लब्धान्यस्त्राणि दिव्यानि तर्पयित्वा हुताशनम् ||५||` | "And acquired divine weapons after satisfying Hutāśana [fire god]. ||5||" |
+| `Line 30839: ` | "[Blank line]" |
+| `Line 30840: तेन कार्मुकमुख्येन बाहुवीर्येण चात्मनः |` | "With that foremost bow and by the strength of his arms," |

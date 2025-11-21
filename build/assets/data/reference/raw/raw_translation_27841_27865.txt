@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 27841: कृष्ण कोऽयं जरासन्धः किंवीर्यः किम्पराक्रमः |` | "Krishna, who is this Jarāsandha [split-joined king]? What is his strength? What is his prowess?" |
+| `Line 27842: यस्त्वां स्पृष्ट्वाग्निसदृशं न दग्धः शलभो यथा ||१०||` | "Who, having touched you who are like fire, was not burnt like a moth? ||10||" |
+| `Line 27843: ` | "[Blank line]" |
+| `Line 27844: कृष्ण उवाच||` | "Krishna said:" |
+| `Line 27845: ` | "[Blank line]" |
+| `Line 27846: शृणु राजञ्जरासन्धो यद्वीर्यो यत्पराक्रमः |` | "Listen, O king, about Jarāsandha's strength and prowess," |
+| `Line 27847: यथा चोपेक्षितोऽस्माभिर्बहुशः कृतविप्रियः ||११||` | "And how he was overlooked by us despite his many hostile acts. ||11||" |
+| `Line 27848: ` | "[Blank line]" |
+| `Line 27849: अक्षौहिणीनां तिसृणामासीत्समरदर्पितः |` | "Proud in battle with three akṣauhiṇīs [complete armies]," |
+| `Line 27850: राजा बृहद्रथो नाम मगधाधिपतिः पतिः ||१२||` | "Was a king named Bṛhadratha [great chariot], the lord and ruler of Magadha. ||12||" |
+| `Line 27851: ` | "[Blank line]" |
+| `Line 27852: रूपवान्वीर्यसम्पन्नः श्रीमानतुलविक्रमः |` | "Handsome, endowed with strength, prosperous, of unequaled valor," |
+| `Line 27853: नित्यं दीक्षाकृशतनुः शतक्रतुरिवापरः ||१३||` | "His body always thin from ritual observances [dīkṣā], like another Śatakratu [Indra]. ||13||" |
+| `Line 27854: ` | "[Blank line]" |
+| `Line 27855: तेजसा सूर्यसदृशः क्षमया पृथिवीसमः |` | "Like the sun in splendor, like the earth in patience," |
+| `Line 27856: यमान्तकसमः कोपे श्रिया वैश्रवणोपमः ||१४||` | "Equal to Yama [death god] in anger, comparable to Vaiśravaṇa [Kubera] in prosperity. ||14||" |
+| `Line 27857: ` | "[Blank line]" |
+| `Line 27858: तस्याभिजनसंयुक्तैर्गुणैर्भरतसत्तम |` | "By his qualities combined with noble birth, O best of Bharatas," |
+| `Line 27859: व्याप्तेयं पृथिवी सर्वा सूर्यस्येव गभस्तिभिः ||१५||` | "This entire earth was pervaded, as if by the rays of the sun. ||15||" |
+| `Line 27860: ` | "[Blank line]" |
+| `Line 27861: स काशिराजस्य सुते यमजे भरतर्षभ |` | "He married the twin daughters of the king of Kāśi, O bull among Bharatas," |
+| `Line 27862: उपयेमे महावीर्यो रूपद्रविणसंमते ||१६||` | "That mighty hero, to those respected for beauty and wealth. ||16||" |
+| `Line 27863: ` | "[Blank line]" |
+| `Line 27864: तयोश्चकार समयं मिथः स पुरुषर्षभः |` | "That bull among men made an agreement between them," |
+| `Line 27865: नातिवर्तिष्य इत्येवं पत्नीभ्यां संनिधौ तदा ||१७||` | "That he would not transgress it, thus in the presence of his wives then. ||17||" |

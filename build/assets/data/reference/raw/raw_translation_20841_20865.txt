@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 20841: ` | "[Blank line]" |
+| `Line 20842: ` | "[Blank line]" |
+| `Line 20843: ` | "[Blank line]" |
+| `Line 20844: ` | "[Blank line]" |
+| `Line 20845: १७६` | "176 [chapter number]" |
+| `Line 20846: ` | "[Blank line]" |
+| `Line 20847: ` | "[Blank line]" |
+| `Line 20848: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 20849: ` | "[Blank line]" |
+| `Line 20850: एवमुक्ताः प्रयातास्ते पाण्डवा जनमेजय |` | "Thus addressed, O Janamejaya [king listener], those Pāṇḍavas [sons of Pāṇḍu] departed" |
+| `Line 20851: राज्ञा दक्षिणपाञ्चालान्द्रुपदेनाभिरक्षितान् ||१||` | "To the southern Pāñcālas [kingdom], protected by King Drupada. ||1||" |
+| `Line 20852: ` | "[Blank line]" |
+| `Line 20853: ततस्ते तं महात्मानं शुद्धात्मानमकल्मषम् |` | "Then, O King, those Pāṇḍavas saw on their path" |
+| `Line 20854: ददृशुः पाण्डवा राजन्पथि द्वैपायनं तदा ||२||` | "The great-souled, pure-hearted, sinless Dvaipāyana [Vyāsa] at that time. ||2||" |
+| `Line 20855: ` | "[Blank line]" |
+| `Line 20856: तस्मै यथावत्सत्कारं कृत्वा तेन च सान्त्विताः |` | "After paying him proper respects and being comforted by him," |
+| `Line 20857: कथान्ते चाभ्यनुज्ञाताः प्रययुर्द्रुपदक्षयम् ||३||` | "At the end of their conversation, with his permission, they proceeded to Drupada's abode. ||3||" |
+| `Line 20858: ` | "[Blank line]" |
+| `Line 20859: पश्यन्तो रमणीयानि वनानि च सरांसि च |` | "Beholding charming forests and lakes," |
+| `Line 20860: तत्र तत्र वसन्तश्च शनैर्जग्मुर्महारथाः ||४||` | "And dwelling here and there, the great warriors [mahārathās] traveled slowly. ||4||" |
+| `Line 20861: ` | "[Blank line]" |
+| `Line 20862: स्वाध्यायवन्तः शुचयो मधुराः प्रियवादिनः |` | "Devoted to Vedic study, pure, sweet and pleasant in speech," |
+| `Line 20863: आनुपूर्व्येण सम्प्राप्ताः पाञ्चालान्कुरुनन्दनाः ||५||` | "The descendants of Kuru [Pāṇḍavas] gradually reached the Pāñcāla kingdom. ||5||" |
+| `Line 20864: ` | "[Blank line]" |
+| `Line 20865: ते तु दृष्ट्वा पुरं तच्च स्कन्धावारं च पाण्डवाः |` | "And those Pāṇḍavas, having seen that city and the military camp," |

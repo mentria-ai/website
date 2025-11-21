@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 26641: ` | "[Blank line]" |
+| `Line 26642: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 26643: ` | "[Blank line]" |
+| `Line 26644: सम्पूज्याथाभ्यनुज्ञातो महर्षेर्वचनात्परम् |` | "After worshiping and being permitted by the great sage's [maharṣi] words," |
+| `Line 26645: प्रत्युवाचानुपूर्व्येण धर्मराजो युधिष्ठिरः ||१||` | "Dharmarāja [king of righteousness] Yudhiṣṭhira replied in proper sequence. ||1||" |
+| `Line 26646: ` | "[Blank line]" |
+| `Line 26647: भगवन्न्याय्यमाहैतं यथावद्धर्मनिश्चयम् |` | "O Lord [Bhagavan], you have spoken this righteous and proper determination of dharma [duty]," |
+| `Line 26648: यथाशक्ति यथान्यायं क्रियतेऽयं विधिर्मया ||२||` | "According to my ability and according to justice, this procedure will be performed by me. ||2||" |
+| `Line 26649: ` | "[Blank line]" |
+| `Line 26650: राजभिर्यद्यथा कार्यं पुरा तत्तन्न संशयः |` | "Whatever was to be done by kings of old, there is no doubt about that," |
+| `Line 26651: यथान्यायोपनीतार्थं कृतं हेतुमदर्थवत् ||३||` | "It was done according to justice, with purpose, reason, and meaning. ||3||" |
+| `Line 26652: ` | "[Blank line]" |
+| `Line 26653: वयं तु सत्पथं तेषां यातुमिच्छामहे प्रभो |` | "But we wish to follow the righteous path [satpatha] of those kings, O Lord," |
+| `Line 26654: न तु शक्यं तथा गन्तुं यथा तैर्नियतात्मभिः ||४||` | "Though it is not possible to proceed exactly as they did with their disciplined souls. ||4||" |
+| `Line 26655: ` | "[Blank line]" |
+| `Line 26656: एवमुक्त्वा स धर्मात्मा वाक्यं तदभिपूज्य च |` | "Having spoken thus, that righteous-souled one [Yudhiṣṭhira], honoring those words," |
+| `Line 26657: मुहूर्तात्प्राप्तकालं च दृष्ट्वा लोकचरं मुनिम् ||५||` | "Seeing after a moment the sage [muni] who travels through the worlds arriving at the right time. ||5||" |
+| `Line 26658: ` | "[Blank line]" |
+| `Line 26659: नारदं स्वस्थमासीनमुपासीनो युधिष्ठिरः |` | "Yudhiṣṭhira, seated near Nārada [divine sage] who was comfortably seated," |
+| `Line 26660: अपृच्छत्पाण्डवस्तत्र राजमध्ये महामतिः ||६||` | "The wise Pāṇḍava [son of Pāṇḍu] asked there in the midst of kings. ||6||" |
+| `Line 26661: ` | "[Blank line]" |
+| `Line 26662: भवान्सञ्चरते लोकान्सदा नानाविधान्बहून् |` | "You travel always through many various worlds," |
+| `Line 26663: ब्रह्मणा निर्मितान्पूर्वं प्रेक्षमाणो मनोजवः ||७||` | "Created earlier by Brahmā [creator god], observing them with mind-swift speed. ||7||" |
+| `Line 26664: ` | "[Blank line]" |
+| `Line 26665: ईदृशी भवता काचिद्दृष्टपूर्वा सभा क्वचित् |` | "Have you ever seen anywhere an assembly hall [sabhā] like this one?" |

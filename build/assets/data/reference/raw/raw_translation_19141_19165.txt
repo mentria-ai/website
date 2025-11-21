@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 19141: ` | "[Blank line]" |
+| `Line 19142: लोभात्प्रचारं चरतस्तासु वेलासु वै नरान् |` | "Men who wander about out of greed during those forbidden hours," |
+| `Line 19143: उपक्रान्ता निगृह्णीमो राक्षसैः सह बालिशान् ||९||` | "We seize those foolish ones, together with the rākṣasas [demons], when they approach. ||9||" |
+| `Line 19144: ` | "[Blank line]" |
+| `Line 19145: ततो रात्रौ प्राप्नुवतो जलं ब्रह्मविदो जनाः |` | "Therefore, knowers of Brahman [sacred knowledge] who approach the water at night," |
+| `Line 19146: गर्हयन्ति नरान्सर्वान्बलस्थान्नृपतीनपि ||१०||` | "Censure all men, even kings established in power. ||10||" |
+| `Line 19147: ` | "[Blank line]" |
+| `Line 19148: आरात्तिष्ठत मा मह्यं समीपमुपसर्पत |` | "Stand at a distance! Do not approach me closely!" |
+| `Line 19149: कस्मान्मां नाभिजानीत प्राप्तं भागीरथीजलम् ||११||` | "Why do you not recognize me who has reached the waters of Bhāgīrathī [Ganges]? ||11||" |
+| `Line 19150: ` | "[Blank line]" |
+| `Line 19151: अङ्गारपर्णं गन्धर्वं वित्त मां स्वबलाश्रयम् |` | "Know me as the Gandharva [celestial musician] Aṅgāraparṇa, relying on my own strength." |
+| `Line 19152: अहं हि मानी चेर्ष्युश्च कुबेरस्य प्रियः सखा ||१२||` | "For I am proud and jealous, and a dear friend of Kubera [wealth deity]. ||12||" |
+| `Line 19153: ` | "[Blank line]" |
+| `Line 19154: अङ्गारपर्णमिति च ख्यतं वनमिदं मम |` | "And this forest of mine is known as Aṅgāraparṇa," |
+| `Line 19155: अनु गङ्गां च वाकां च चित्रं यत्र वसाम्यहम् ||१३||` | "Along the Ganges and the Vākā, where I dwell wonderfully. ||13||" |
+| `Line 19156: ` | "[Blank line]" |
+| `Line 19157: न कुणपाः शृङ्गिणो वा न देवा न च मानुषाः |` | "Neither corpses, nor horned beings, nor gods, nor humans," |
+| `Line 19158: इदं समुपसर्पन्ति तत्किं समुपसर्पथ ||१४||` | "Approach this place. So why do you approach? ||14||" |
+| `Line 19159: ` | "[Blank line]" |
+| `Line 19160: अर्जुन उवाच||` | "Arjuna [Pāṇḍava hero] said:" |
+| `Line 19161: ` | "[Blank line]" |
+| `Line 19162: समुद्रे हिमवत्पार्श्वे नद्यामस्यां च दुर्मते |` | "In the ocean, on the side of Himavat [Himalayas], and in this river, O evil-minded one," |
+| `Line 19163: रात्रावहनि सन्धौ च कस्य कॢप्तः परिग्रहः ||१५||` | "At night, day, or twilight, whose possession is established? ||15||" |
+| `Line 19164: ` | "[Blank line]" |
+| `Line 19165: वयं च शक्तिसम्पन्ना अकाले त्वामधृष्णुमः |` | "And we, endowed with power, approach you at an improper time," |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 49466: मज्जन्तीमिव चाक्रान्तां ययातेर्यज्ञकर्मभिः ||५||` | "As if submerged and overwhelmed by the sacrificial rites of Yayāti [legendary king]. ||5||" |
+| `Line 49467: ` | "[Blank line]" |
+| `Line 49468: एषा शम्येकपत्रा सा शरकं चैतदुत्तमम् |` | "This is that single-leaved sacrificial peg [śamī], and this is the excellent sacred enclosure [śaraka]," |
+| `Line 49469: पश्य रामह्रदानेतान्पश्य नारायणाश्रमम् ||६||` | "Behold these lakes of Rāma [hero-sage], behold the hermitage of Nārāyaṇa [Supreme Lord]. ||6||" |
+| `Line 49470: ` | "[Blank line]" |
+| `Line 49471: एतदार्चीकपुत्रस्य योगैर्विचरतो महीम् |` | "This is the place of departure of Ārchīka's son [Jamadagni], of immeasurable splendor," |
+| `Line 49472: अपसर्पणं महीपाल रौप्यायाममितौजसः ||७||` | "Who wandered the earth with his yogic powers, O protector of the earth [mahīpāla]. ||7||" |
+| `Line 49473: ` | "[Blank line]" |
+| `Line 49474: अत्रानुवंशं पठतः शृणु मे कुरुनन्दन |` | "Here, O joy of the Kurus [Yudhishthira], listen to me reciting the genealogical account," |
+| `Line 49475: उलूखलैराभरणैः पिशाची यदभाषत ||८||` | "What the demoness [piśācī] adorned with mortars as ornaments once said. ||8||" |
+| `Line 49476: ` | "[Blank line]" |
+| `Line 49477: युगन्धरे दधि प्राश्य उषित्वा चाच्युतस्थले |` | "Having eaten curds at Yugandharā, having stayed at Achyuta's place [Vishnu's site]," |
+| `Line 49478: तद्वद्भूतिलये स्नात्वा सपुत्रा वस्तुमिच्छसि ||९||` | "And likewise having bathed at Bhūtilaya, you wish to dwell with your sons. ||9||" |
+| `Line 49479: ` | "[Blank line]" |
+| `Line 49480: एकरात्रमुषित्वेह द्वितीयं यदि वत्स्यसि |` | "Having stayed here for one night, if you stay for a second," |
+| `Line 49481: एतद्वै ते दिवा वृत्तं रात्रौ वृत्तमतोऽन्यथा ||१०||` | "What happened to you during the day will happen differently at night. ||10||" |
+| `Line 49482: ` | "[Blank line]" |
+| `Line 49483: अत्राद्याहो निवत्स्यामः क्षपां भरतसत्तम |` | "Here we shall stay today and for the night, O best of Bharatas [Yudhishthira]," |
+| `Line 49484: द्वारमेतद्धि कौन्तेय कुरुक्षेत्रस्य भारत ||११||` | "For this, O son of Kunti [Yudhishthira], is the gateway to Kurukshetra [sacred field], O descendant of Bharata. ||11||" |
+| `Line 49485: ` | "[Blank line]" |
+| `Line 49486: अत्रैव नाहुषो राजा राजन्क्रतुभिरिष्टवान् |` | "It was right here that King Nāhuṣa [Yayāti's father], O king, performed sacrifices," |
+| `Line 49487: ययातिर्बहुरत्नाढ्यैर्यत्रेन्द्रो मुदमभ्यगात् ||१२||` | "Where Yayāti with his many jewel-rich sacrifices brought joy to Indra [king of gods]. ||12||" |
+| `Line 49488: ` | "[Blank line]" |
+| `Line 49489: एतत्प्लक्षावतरणं यमुनातीर्थमुच्यते |` | "This is Plakshāvataraṇa, which is called the sacred ford [tīrtha] of the Yamunā [sacred river]," |
+| `Line 49490: एतद्वै नाकपृष्ठस्य द्वारमाहुर्मनीषिणः ||१३||` | "This, indeed, the wise ones call the gateway to the vault of heaven [nākapṛṣṭha]. ||13||" |

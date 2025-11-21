@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 16841: अलोहं निशितं शस्त्रं शरीरपरिकर्तनम् ||१९||` | "A non-metal [aloha] sharp weapon that cuts through the body. ||19||" |
+| `Line 16842: ` | "[Blank line]" |
+| `Line 16843: यो वेत्ति न तमाघ्नन्ति प्रतिघातविदं द्विषः ||१९||` | "Enemies do not slay one who knows this and knows how to counter it. ||19||" |
+| `Line 16844: ` | "[Blank line]" |
+| `Line 16845: कक्षघ्नः शिशिरघ्नश्च महाकक्षे बिलौकसः |` | "The destroyer of dry grass [forest fire] and destroyer of cold [summer], and creatures dwelling in holes in the great forest," |
+| `Line 16846: न दहेदिति चात्मानं यो रक्षति स जीवति ||२०||` | "One who protects himself thinking 'may it not burn me' survives. ||20||" |
+| `Line 16847: ` | "[Blank line]" |
+| `Line 16848: नाचक्षुर्वेत्ति पन्थानं नाचक्षुर्विन्दते दिशः |` | "One without eyes [blind] cannot know the path, one without eyes cannot find directions," |
+| `Line 16849: नाधृतिर्भूतिमाप्नोति बुध्यस्वैवं प्रबोधितः ||२१||` | "One without firmness cannot attain prosperity; understand this, thus being instructed. ||21||" |
+| `Line 16850: ` | "[Blank line]" |
+| `Line 16851: अनाप्तैर्दत्तमादत्ते नरः शस्त्रमलोहजम् |` | "A man accepts a non-metal weapon given by untrusted persons," |
+| `Line 16852: श्वाविच्छरणमासाद्य प्रमुच्येत हुताशनात् ||२२||` | "Finding refuge like a dog-hunter [śvāvit], one may escape from fire [hutāśana]. ||22||" |
+| `Line 16853: ` | "[Blank line]" |
+| `Line 16854: चरन्मार्गान्विजानाति नक्षत्रैर्विन्दते दिशः |` | "By traveling one knows the paths, by stars one finds directions," |
+| `Line 16855: आत्मना चात्मनः पञ्च पीडयन्नानुपीड्यते ||२३||` | "One who controls the five [senses] of oneself by oneself is not afflicted. ||23||" |
+| `Line 16856: ` | "[Blank line]" |
+| `Line 16857: अनुशिष्ट्वानुगत्वा च कृत्वा चैनान्प्रदक्षिणम् |` | "Having instructed them, having followed them, and having circumambulated them," |
+| `Line 16858: पाण्डवानभ्यनुज्ञाय विदुरः प्रययौ गृहान् ||२४||` | "Having taken leave of the Pāṇḍavas [sons of Pandu], Vidura [wise counselor] departed for home. ||24||" |
+| `Line 16859: ` | "[Blank line]" |
+| `Line 16860: निवृत्ते विदुरे चैव भीष्मे पौरजने तथा |` | "When Vidura had departed, and Bhīṣma [patriarch] and the townspeople likewise," |
+| `Line 16861: अजातशत्रुमामन्त्र्य कुन्ती वचनमब्रवीत् ||२५||` | "Addressing Ajātaśatru [Yudhishthira, 'one with no enemies born'], Kuntī [mother of Pandavas] spoke these words. ||25||" |
+| `Line 16862: ` | "[Blank line]" |
+| `Line 16863: क्षत्ता यदब्रवीद्वाक्यं जनमध्येऽब्रुवन्निव |` | "The words that Kṣattā [Vidura, chamberlain] spoke, as if not speaking in the midst of people," |
+| `Line 16864: त्वया च तत्तथेत्युक्तो जानीमो न च तद्वयम् ||२६||` | "And you replied to him 'so be it'—we do not understand that. ||26||" |
+| `Line 16865: ` | "[Blank line]" |

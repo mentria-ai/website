@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1026: यत्र मन्दारपुष्पार्थं नलिनीं तामधर्षयत् ||११२||` | "Where he violated that Nalinī for the sake of Mandāra flowers [celestial blooms]. ||112||" |
+| `Line 1027: ` | [Blank line] |
+| `Line 1028: यत्रास्य सुमहद्युद्धमभवत्सह राक्षसैः |` | "Where his great battle occurred with the Rākṣasas [demons]," |
+| `Line 1029: यक्षैश्चापि महावीर्यैर्मणिमत्प्रमुखैस्तथा ||११३||` | "And also with the mighty Yakṣas [wealth guardians], led by Maṇimat. ||113||" |
+| `Line 1030: ` | [Blank line] |
+| `Line 1031: आगस्त्यमपि चाख्यानं यत्र वातापिभक्षणम् |` | "Also the tale of Agastya, where the devouring of Vātāpi [demon brother] occurred," |
+| `Line 1032: लोपामुद्राभिगमनमपत्यार्थमृषेरपि ||११४||` | "And the sage's union with Lopāmudrā for the sake of offspring. ||114||" |
+| `Line 1033: ` | [Blank line] |
+| `Line 1034: ततः श्येनकपोतीयमुपाख्यानमनन्तरम् |` | "Then immediately follows the story of the hawk and the dove," |
+| `Line 1035: इन्द्रोऽग्निर्यत्र धर्मश्च अजिज्ञासञ्शिबिं नृपम् ||११५||` | "Where Indra [king of gods], Agni [fire god], and Dharma [righteousness] tested King Śibi. ||115||" |
+| `Line 1036: ` | [Blank line] |
+| `Line 1037: ऋश्यशृङ्गस्य चरितं कौमारब्रह्मचारिणः |` | "The story of Ṛśyaśṛṅga [deer-horned sage], who practiced celibacy from childhood," |
+| `Line 1038: जामदग्न्यस्य रामस्य चरितं भूरितेजसः ||११६||` | "And the story of Rāma Jāmadagnya [Paraśurāma], of immense splendor. ||116||" |
+| `Line 1039: ` | [Blank line] |
+| `Line 1040: कार्तवीर्यवधो यत्र हैहयानां च वर्ण्यते |` | "Where the slaying of Kārtavīrya [thousand-armed king] and the Haihayas is described," |
+| `Line 1041: सौकन्यमपि चाख्यानं च्यवनो यत्र भार्गवः ||११७||` | "And also the tale of Sukanyā, where Cyavana of Bhṛgu's lineage [sage Bhārgava] appears. ||117||" |
+| `Line 1042: ` | [Blank line] |
+| `Line 1043: शर्यातियज्ञे नासत्यौ कृतवान्सोमपीथिनौ |` | "In Śaryāti's sacrifice, he made the Nāsatyas [Aśvin twins] drinkers of Soma [ritual beverage]," |
+| `Line 1044: ताभ्यां च यत्र स मुनिर्यौवनं प्रतिपादितः ||११८||` | "And where that sage was restored to youth by those two. ||118||" |
+| `Line 1045: ` | [Blank line] |
+| `Line 1046: जन्तूपाख्यानमत्रैव यत्र पुत्रेण सोमकः |` | "Here also is the story of Jantu, where Somaka with his son," |
+| `Line 1047: पुत्रार्थमयजद्राजा लेभे पुत्रशतं च सः ||११९||` | "The king performed a sacrifice for sons and obtained a hundred sons. ||119||" |
+| `Line 1048: ` | [Blank line] |
+| `Line 1049: अष्टावक्रीयमत्रैव विवादे यत्र बन्दिनम् |` | "Here also is the story of Aṣṭāvakra [eight-crooked sage], where in a debate with Bandin," |
+| `Line 1050: विजित्य सागरं प्राप्तं पितरं लब्धवानृषिः ||१२०||` | "Having conquered him, the sage recovered his father who had gone to the ocean. ||120||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 10341: इत्येतानि समीक्ष्याहं कारणानि भृगूद्वह |` | "Having considered these reasons, O descendant of Bhṛgu [sage lineage]," |
+| `Line 10342: अधर्मभयसंविग्नः शर्मिष्ठामुपजग्मिवान् ||३४||` | "Terrified by the fear of unrighteousness, I approached Śarmiṣṭhā. ||34||" |
+| `Line 10343: ` | "[Blank line]" |
+| `Line 10344: शुक्र उवाच||` | "Śukra [sage, Bhṛgu's son] said:" |
+| `Line 10345: ` | "[Blank line]" |
+| `Line 10346: नन्वहं प्रत्यवेक्ष्यस्ते मदधीनोऽसि पार्थिव |` | "Indeed, I will look after you; you are dependent on me, O king [earth-ruler]," |
+| `Line 10347: मिथ्याचारस्य धर्मेषु चौर्यं भवति नाहुष ||३५||` | "But for one of false conduct, there is theft in matters of dharma [righteousness], O son of Nahuṣa. ||35||" |
+| `Line 10348: ` | "[Blank line]" |
+| `Line 10349: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 10350: ` | "[Blank line]" |
+| `Line 10351: क्रुद्धेनोशनसा शप्तो ययातिर्नाहुषस्तदा |` | "Cursed by the angry Uśanas [Śukra], Yayāti [king], son of Nahuṣa, then" |
+| `Line 10352: पूर्वं वयः परित्यज्य जरां सद्योऽन्वपद्यत ||३६||` | "Abandoning his youth, immediately fell into old age. ||36||" |
+| `Line 10353: ` | "[Blank line]" |
+| `Line 10354: ययातिरुवाच||` | "Yayāti said:" |
+| `Line 10355: ` | "[Blank line]" |
+| `Line 10356: अतृप्तो यौवनस्याहं देवयान्यां भृगूद्वह |` | "I am unsatisfied with youth in relation to Devayānī [Śukra's daughter], O descendant of Bhṛgu," |
+| `Line 10357: प्रसादं कुरु मे ब्रह्मञ्जरेयं मा विशेत माम् ||३७||` | "Show me grace, O brahmin [learned one], may this old age not enter me. ||37||" |
+| `Line 10358: ` | "[Blank line]" |
+| `Line 10359: शुक्र उवाच||` | "Śukra said:" |
+| `Line 10360: ` | "[Blank line]" |
+| `Line 10361: नाहं मृषा ब्रवीम्येतज्जरां प्राप्तोऽसि भूमिप |` | "I do not speak falsely about this; you have attained old age, O king [earth-protector]," |
+| `Line 10362: जरां त्वेतां त्वमन्यस्मै सङ्क्रामय यदीच्छसि ||३८||` | "But this old age you may transfer to another, if you wish. ||38||" |
+| `Line 10363: ` | "[Blank line]" |
+| `Line 10364: ययातिरुवाच||` | "Yayāti said:" |
+| `Line 10365: ` | "[Blank line]" |

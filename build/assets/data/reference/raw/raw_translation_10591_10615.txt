@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 10591: अभ्यषिञ्चत्ततः पूरुं राज्ये स्वे सुतमात्मजम् ||२४||` | "Then he anointed Pūru [youngest son], his own son, to his kingdom. ||24||" |
+| `Line 10592: ` | "[Blank line]" |
+| `Line 10593: दत्त्वा च पूरवे राज्यं वनवासाय दीक्षितः |` | "And having given the kingdom to Pūru, he was initiated into forest dwelling [vanaprastha stage]," |
+| `Line 10594: पुरात्स निर्ययौ राजा ब्राह्मणैस्तापसैः सह ||२५||` | "The king departed from the city accompanied by brahmins and ascetics. ||25||" |
+| `Line 10595: ` | "[Blank line]" |
+| `Line 10596: यदोस्तु यादवा जातास्तुर्वसोर्यवनाः सुताः |` | "From Yadu were born the Yādavas [Krishna's clan], from Turvasu the Yavanas [western people] as sons," |
+| `Line 10597: द्रुह्योरपि सुता भोजा अनोस्तु म्लेच्छजातयः ||२६||` | "From Druhyu were born the Bhojas, and from Anu the Mleccha [foreign/barbarian] races. ||26||" |
+| `Line 10598: ` | "[Blank line]" |
+| `Line 10599: पूरोस्तु पौरवो वंशो यत्र जातोऽसि पार्थिव |` | "From Pūru came the Paurava lineage in which you were born, O king [pārthiva]," |
+| `Line 10600: इदं वर्षसहस्राय राज्यं कारयितुं वशी ||२७||` | "This kingdom to be ruled for a thousand years by one with self-control. ||27||" |
+| `Line 10601: ` | "[Blank line]" |
+| `Line 10602: ` | "[Blank line]" |
+| `Line 10603: ` | "[Blank line]" |
+| `Line 10604: ` | "[Blank line]" |
+| `Line 10605: ` | "[Blank line]" |
+| `Line 10606: ` | "[Blank line]" |
+| `Line 10607: उत्तरयायातम्` | "Uttarayāyātam [Journey to the North/Next Section]" |
+| `Line 10608: ८१` | "81 [chapter number]" |
+| `Line 10609: ` | "[Blank line]" |
+| `Line 10610: ` | "[Blank line]" |
+| `Line 10611: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 10612: ` | "[Blank line]" |
+| `Line 10613: एवं स नाहुषो राजा ययातिः पुत्रमीप्सितम् |` | "Thus that Nāhuṣa's son, King Yayāti, his desired son" |
+| `Line 10614: राज्येऽभिषिच्य मुदितो वानप्रस्थोऽभवन्मुनिः ||१||` | "Having installed in the kingdom, joyfully became a forest-dweller [vānaprastha], a sage. ||1||" |
+| `Line 10615: ` | "[Blank line]" |

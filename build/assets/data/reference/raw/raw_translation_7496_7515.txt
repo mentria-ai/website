@@ -1,0 +1,22 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 7496: कलिः पञ्चदशश्चैव नारदश्चैव षोडशः ||४३||` | "Kali is the fifteenth and Nārada is the sixteenth. ||43||" |
+| `Line 7497: ` | "[Blank line]" |
+| `Line 7498: इत्येते देवगन्धर्वा मौनेयाः परिकीर्तिताः ||४३||` | "Thus these divine Gandharvas [celestial musicians], born of Muni [sage], have been enumerated. ||43||" |
+| `Line 7499: ` | "[Blank line]" |
+| `Line 7500: अतस्तु भूतान्यन्यानि कीर्तयिष्यामि भारत |` | "Now, O Bhārata [Yudhiṣṭhira], I shall describe other beings," |
+| `Line 7501: अनवद्यामनुवशामनूनामरुणां प्रियाम् ||४४||` | "Anavadyā, Anuvaśā, Anūnā, and Aruṇā the beloved. ||44||" |
+| `Line 7502: ` | "[Blank line]" |
+| `Line 7503: अनूपां सुभगां भासीमिति प्रावा व्यजायत ||४४||` | "Anūpā, Subhagā, and Bhāsī - these were born to Pravā. ||44||" |
+| `Line 7504: ` | "[Blank line]" |
+| `Line 7505: सिद्धः पूर्णश्च बर्ही च पूर्णाशश्च महायशाः |` | "Siddha, Pūrṇa, Barhi, and Pūrṇāśa of great fame," |
+| `Line 7506: ब्रह्मचारी रतिगुणः सुपर्णश्चैव सप्तमः ||४५||` | "Brahmacārī [celibate], Ratiguṇa, and Suparṇa as the seventh. ||45||" |
+| `Line 7507: ` | "[Blank line]" |
+| `Line 7508: विश्वावसुश्च भानुश्च सुचन्द्रो दशमस्तथा |` | "Viśvāvasu, Bhānu, and Sucandra as the tenth," |
+| `Line 7509: इत्येते देवगन्धर्वाः प्रावेयाः परिकीर्तिताः ||४६||` | "Thus these divine Gandharvas [celestial musicians], born of Pravā, have been enumerated. ||46||" |
+| `Line 7510: ` | "[Blank line]" |
+| `Line 7511: इमं त्वप्सरसां वंशं विदितं पुण्यलक्षणम् |` | "Now this lineage of Apsarās [celestial nymphs], known for auspicious characteristics," |
+| `Line 7512: प्रावासूत महाभागा देवी देवर्षितः पुरा ||४७||` | "The blessed goddess Pravā bore them from the divine sage [devarṣi] in ancient times. ||47||" |
+| `Line 7513: ` | "[Blank line]" |
+| `Line 7514: अलम्बुसा मिश्रकेषी विद्युत्पर्णा तुलानघा |` | "Alambuṣā, Miśrakeśī, Vidyutparṇā, Tulānaghā," |
+| `Line 7515: अरुणा रक्षिता चैव रम्भा तद्वन्मनोरमा ||४८||` | "Aruṇā, Rakṣitā, and Rambhā, likewise Manoramā. ||48||" |

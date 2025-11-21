@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 26841: औशीनरः पुण्डरीकः शर्यातिः शरभः शुचिः |` | "Auśīnara, Puṇḍarīka [lotus-like], Śaryāti, Śarabha, Śuci [pure one]," |
+| `Line 26842: अङ्गोऽरिष्टश्च वेनश्च दुःषन्तः सञ्जयो जयः ||१४||` | "Aṅga, Ariṣṭa, Vena, Duḥṣanta, Sañjaya, and Jaya. ||14||" |
+| `Line 26843: ` | "[Blank line]" |
+| `Line 26844: भाङ्गास्वरिः सुनीथश्च निषधोऽथ त्विषीरथः |` | "Bhāṅgāsvari, Sunītha [good leader], Niṣadha, and Tviṣīratha," |
+| `Line 26845: करन्धमो बाह्लिकश्च सुद्युम्नो बलवान्मधुः ||१५||` | "Karandhama, Bāhlika, Sudyumna [splendid one], and the powerful Madhu. ||15||" |
+| `Line 26846: ` | "[Blank line]" |
+| `Line 26847: कपोतरोमा तृणकः सहदेवार्जुनौ तथा |` | "Kapotaromā [dove-haired], Tṛṇaka, as well as Sahadeva and Arjuna," |
+| `Line 26848: रामो दाशरथिश्चैव लक्ष्मणोऽथ प्रतर्दनः ||१६||` | "Rāma Dāśarathi [son of Daśaratha], Lakṣmaṇa, and Pratardana. ||16||" |
+| `Line 26849: ` | "[Blank line]" |
+| `Line 26850: अलर्कः कक्षसेनश्च गयो गौराश्व एव च |` | "Alarka, Kakṣasena, Gaya, and Gaurāśva," |
+| `Line 26851: जामदग्न्योऽथ रामोऽत्र नाभागसगरौ तथा ||१७||` | "And here Rāma Jāmadagnya [Paraśurāma], as well as Nābhāga and Sagara. ||17||" |
+| `Line 26852: ` | "[Blank line]" |
+| `Line 26853: भूरिद्युम्नो महाश्वश्च पृथ्वश्वो जनकस्तथा |` | "Bhūridyumna, Mahāśva, Pṛthvaśva, and Janaka [father of Sītā]," |
+| `Line 26854: वैन्यो राजा वारिषेणः पुरुजो जनमेजयः ||१८||` | "King Vainya [Pṛthu], Vāriṣeṇa, Puruja, and Janamejaya. ||18||" |
+| `Line 26855: ` | "[Blank line]" |
+| `Line 26856: ब्रह्मदत्तस्त्रिगर्तश्च राजोपरिचरस्तथा |` | "Brahmadatta, Trigarta, and Rājoparicarā [sky-traveling king]," |
+| `Line 26857: इन्द्रद्युम्नो भीमजानुर्गयः पृष्ठो नयोऽनघः ||१९||` | "Indradyumna, Bhīmajānu [terrible-kneed], Gaya, Pṛṣṭha, and the sinless Naya. ||19||" |
+| `Line 26858: ` | "[Blank line]" |
+| `Line 26859: पद्मोऽथ मुचुकुन्दश्च भूरिद्युम्नः प्रसेनजित् |` | "Padma, Mucukunda, Bhūridyumna, Prasenajit," |
+| `Line 26860: अरिष्टनेमिः प्रद्युम्नः पृथगश्वोऽजकस्तथा ||२०||` | "Ariṣṭanemi, Pradyumna [son of Krishna], Pṛthagaśva, and Ajaka. ||20||" |
+| `Line 26861: ` | "[Blank line]" |
+| `Line 26862: शतं मत्स्या नृपतयः शतं नीपाः शतं हयाः |` | "A hundred Matsya [fish] kings, a hundred Nīpas, a hundred Hayas [horse-named kings]," |
+| `Line 26863: धृतराष्ट्राश्चैकशतमशीतिर्जनमेजयाः ||२१||` | "One hundred Dhṛtarāṣṭras and eighty Janamejayas. ||21||" |
+| `Line 26864: ` | "[Blank line]" |
+| `Line 26865: शतं च ब्रह्मदत्तानामीरिणां वैरिणां शतम् |` | "A hundred Brahmadattas, a hundred Īriṇas, and a hundred Vairiṇas." |

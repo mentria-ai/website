@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 26766: अग्नीषोमौ तथेन्द्राग्नी मित्रोऽथ सवितार्यमा |` | "Agnīṣomau [fire-moon deities], and Indrāgnī [Indra-Agni pair], Mitra [friendship deity], then Savitā [sun god], Aryamā [ancestral deity]," |
+| `Line 26767: भगो विश्वे च साध्याश्च शुक्रो मन्थी च भारत ||१९||` | "Bhaga [prosperity deity], the Viśvedevas [universal gods], the Sādhyas [celestial beings], Śukra [Venus deity], and Manthī [churning deity], O Bhārata [descendant of Bharata]. ||19||" |
+| `Line 26768: ` | "[Blank line]" |
+| `Line 26769: यज्ञाश्च दक्षिणाश्चैव ग्रहाः स्तोभाश्च सर्वशः |` | "The sacrifices [yajñas], the ritual gifts [dakṣiṇās], the planets [grahas], and the chants [stobhas] in their entirety," |
+| `Line 26770: यज्ञवाहाश्च ये मन्त्राः सर्वे तत्र समासते ||२०||` | "And those mantras [sacred formulas] that carry sacrifices—all these were assembled there. ||20||" |
+| `Line 26771: ` | "[Blank line]" |
+| `Line 26772: तथैवाप्सरसो राजन्गन्धर्वाश्च मनोरमाः |` | "Likewise, O king, the Apsarās [celestial nymphs] and the charming Gandharvas [celestial musicians]," |
+| `Line 26773: नृत्यवादित्रगीतैश्च हास्यैश्च विविधैरपि ||२१||` | "With dances, instrumental music, songs, and various forms of humor as well ||21||" |
+| `Line 26774: ` | "[Blank line]" |
+| `Line 26775: रमयन्ति स्म नृपते देवराजं शतक्रतुम् ||२१||` | "Were entertaining, O ruler, the king of gods, Śatakratu [hundred-sacrifices Indra]. ||21||" |
+| `Line 26776: ` | "[Blank line]" |
+| `Line 26777: स्तुतिभिर्मङ्गलैश्चैव स्तुवन्तः कर्मभिस्तथा |` | "With praises, auspicious words, and also extolling his deeds," |
+| `Line 26778: विक्रमैश्च महात्मानं बलवृत्रनिषूदनम् ||२२||` | "And his heroic feats, the great-souled slayer of Bala and Vṛtra [demon enemies]. ||22||" |
+| `Line 26779: ` | "[Blank line]" |
+| `Line 26780: ब्रह्मराजर्षयः सर्वे सर्वे देवर्षयस्तथा |` | "All the Brahmarṣis [brahmin sages] and all the Devarṣis [divine sages] as well," |
+| `Line 26781: विमानैर्विविधैर्दिव्यैर्भ्राजमानैरिवाग्निभिः ||२३||` | "With various divine aerial chariots [vimānas] shining like fires, ||23||" |
+| `Line 26782: ` | "[Blank line]" |
+| `Line 26783: स्रग्विणो भूषिताश्चान्ये यान्ति चायान्ति चापरे |` | "Some adorned with garlands and ornaments, some coming and others going," |
+| `Line 26784: बृहस्पतिश्च शुक्रश्च तस्यामाययतुः सह ||२४||` | "And Bṛhaspati [preceptor of gods] and Śukra [preceptor of demons] came there together. ||24||" |
+| `Line 26785: ` | "[Blank line]" |
+| `Line 26786: एते चान्ये च बहवो यतात्मानो यतव्रताः |` | "These and many others, self-controlled and observant of vows," |
+| `Line 26787: विमानैश्चन्द्रसङ्काशैः सोमवत्प्रियदर्शनाः ||२५||` | "With moon-like aerial chariots, pleasing to behold like Soma [moon deity], ||25||" |
+| `Line 26788: ` | "[Blank line]" |
+| `Line 26789: ब्रह्मणो वचनाद्राजन्भृगुः सप्तर्षयस्तथा ||२५||` | "By Brahmā's [creator god] command, O king, Bhṛgu [sage progenitor] and the seven sages [saptarṣis] as well. ||25||" |
+| `Line 26790: ` | "[Blank line]" |

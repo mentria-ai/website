@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 20116: स समुद्रमभिप्रेत्य शोकाविष्टो महामुनिः |` | "That great sage [mahāmuni], overcome with grief, approached the ocean," |
+| `Line 20117: बद्ध्वा कण्ठे शिलां गुर्वीं निपपात तदम्भसि ||४४||` | "And tying a heavy stone around his neck, he fell into those waters. ||44||" |
+| `Line 20118: ` | "[Blank line]" |
+| `Line 20119: स समुद्रोर्मिवेगेन स्थले न्यस्तो महामुनिः |` | "That great sage was deposited on the shore by the force of the ocean's waves," |
+| `Line 20120: जगाम स ततः खिन्नः पुनरेवाश्रमं प्रति ||४५||` | "And from there, dejected, he went back again to his hermitage. ||45||" |
+| `Line 20121: ` | "[Blank line]" |
+| `Line 20122: ` | "[Blank line]" |
+| `Line 20123: ` | "[Blank line]" |
+| `Line 20124: ` | "[Blank line]" |
+| `Line 20125: ` | "[Blank line]" |
+| `Line 20126: ` | "[Blank line]" |
+| `Line 20127: १६७` | "167 [chapter number]" |
+| `Line 20128: ` | "[Blank line]" |
+| `Line 20129: ` | "[Blank line]" |
+| `Line 20130: गन्धर्व उवाच||` | "The Gandharva [celestial musician] said:" |
+| `Line 20131: ` | "[Blank line]" |
+| `Line 20132: ततो दृष्ट्वाश्रमपदं रहितं तैः सुतैर्मुनिः |` | "Then, seeing his hermitage bereft of those sons, the sage," |
+| `Line 20133: निर्जगाम सुदुःखार्तः पुनरेवाश्रमात्ततः ||१||` | "Afflicted with great sorrow, again departed from that hermitage. ||1||" |
+| `Line 20134: ` | "[Blank line]" |
+| `Line 20135: सोऽपश्यत्सरितं पूर्णां प्रावृट्काले नवाम्भसा |` | "He saw a river full with fresh water in the rainy season," |
+| `Line 20136: वृक्षान्बहुविधान्पार्थ वहन्तीं तीरजान्बहून् ||२||` | "Carrying many kinds of trees, O Pārtha [Arjuna], many that had grown on its banks. ||2||" |
+| `Line 20137: ` | "[Blank line]" |
+| `Line 20138: अथ चिन्तां समापेदे पुनः पौरवनन्दन |` | "Then he fell into thought again, O joy of the Purus [Paurava-nandana]," |
+| `Line 20139: अम्भस्यस्या निमज्जेयमिति दुःखसमन्वितः ||३||` | "'I shall drown myself in these waters,' thus overcome with sorrow. ||3||" |
+| `Line 20140: ` | "[Blank line]" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 9741: आत्मदोषैर्नियच्छन्ति सर्वे दुःखसुखे जनाः |` | "All people restrain themselves in happiness and sorrow by their own faults," |
+| `Line 9742: मन्ये दुश्चरितं तेऽस्ति यस्येयं निष्कृतिः कृता ||२९||` | "I think you must have committed some misconduct for which this atonement [niṣkṛti] is made. ||29||" |
+| `Line 9743: ` | "[Blank line]" |
+| `Line 9744: देवयान्युवाच||` | "Devayānī [divine traveler] said:" |
+| `Line 9745: ` | "[Blank line]" |
+| `Line 9746: निष्कृतिर्मेऽस्तु वा मास्तु शृणुष्वावहितो मम |` | "Whether there is atonement for me or not, listen attentively to me," |
+| `Line 9747: शर्मिष्ठया यदुक्तास्मि दुहित्रा वृषपर्वणः ||३०||` | "What I was told by Śarmiṣṭhā [protection-giver], daughter of Vṛṣaparvan [bull-jointed]. ||30||" |
+| `Line 9748: ` | "[Blank line]" |
+| `Line 9749: सत्यं किलैतत्सा प्राह दैत्यानामसि गायनः ||३०||` | "She indeed spoke this truth: 'You are a singer [bard] of the Daityas [demon clan].' ||30||" |
+| `Line 9750: ` | "[Blank line]" |
+| `Line 9751: एवं हि मे कथयति शर्मिष्ठा वार्षपर्वणी |` | "Thus did Śarmiṣṭhā, daughter of Vṛṣaparvan, say to me," |
+| `Line 9752: वचनं तीक्ष्णपरुषं क्रोधरक्तेक्षणा भृशम् ||३१||` | "Sharp and harsh words, with eyes intensely red with anger. ||31||" |
+| `Line 9753: ` | "[Blank line]" |
+| `Line 9754: स्तुवतो दुहिता हि त्वं याचतः प्रतिगृह्णतः |` | "'You are indeed the daughter of one who praises, begs, and accepts gifts," |
+| `Line 9755: सुताहं स्तूयमानस्य ददतोऽप्रतिगृह्णतः ||३२||` | "While I am the daughter of one who is praised, who gives but does not accept.' ||32||" |
+| `Line 9756: ` | "[Blank line]" |
+| `Line 9757: इति मामाह शर्मिष्ठा दुहिता वृषपर्वणः |` | "Thus did Śarmiṣṭhā, daughter of Vṛṣaparvan, speak to me," |
+| `Line 9758: क्रोधसंरक्तनयना दर्पपूर्णा पुनः पुनः ||३३||` | "With eyes red with anger, full of pride, again and again. ||33||" |
+| `Line 9759: ` | "[Blank line]" |
+| `Line 9760: यद्यहं स्तुवतस्तात दुहिता प्रतिगृह्णतः |` | "If I am, dear father, the daughter of one who praises and accepts gifts," |
+| `Line 9761: प्रसादयिष्ये शर्मिष्ठामित्युक्ता हि सखी मया ||३४||` | "I will appease Śarmiṣṭhā' - thus was my friend addressed by me. ||34||" |
+| `Line 9762: ` | "[Blank line]" |
+| `Line 9763: शुक्र उवाच||` | "Śukra [bright one] said:" |
+| `Line 9764: ` | "[Blank line]" |
+| `Line 9765: स्तुवतो दुहिता न त्वं भद्रे न प्रतिगृह्णतः |` | "You are not, O blessed one, the daughter of one who praises or accepts gifts," |

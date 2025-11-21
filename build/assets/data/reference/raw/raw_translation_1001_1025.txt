@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1001: ` | [Blank line] |
+| `Line 1002: अतः परं तृतीयं तु ज्ञेयमारण्यकं महत् |` | "Next after this, the third great section to be known is the Āraṇyaka [Forest Book]," |
+| `Line 1003: पौरानुगमनं चैव धर्मपुत्रस्य धीमतः ||१०५||` | "And the following of the wise Dharmaputra [Yudhiṣṭhira] by the citizens. ||105||" |
+| `Line 1004: ` | [Blank line] |
+| `Line 1005: वृष्णीनामागमो यत्र पाञ्चालानां च सर्वशः |` | "Where the arrival of the Vṛṣṇis [Krishna's clan] and all the Pāñcālas [Draupadi's people] is described," |
+| `Line 1006: यत्र सौभवधाख्यानं किर्मीरवध एव च ||१०६||` | "Where the narrative of Saubha's destruction and the killing of Kirmīra [demon] are also told. ||106||" |
+| `Line 1007: ` | [Blank line] |
+| `Line 1008: अस्त्रहेतोर्विवासश्च पार्थस्यामिततेजसः ||१०६||` | "And the departure of Pārtha [Arjuna] of immeasurable splendor for the sake of weapons. ||106||" |
+| `Line 1009: ` | [Blank line] |
+| `Line 1010: महादेवेन युद्धं च किरातवपुषा सह |` | "And the battle with Mahādeva [Shiva] in the form of a Kirāta [mountain hunter]," |
+| `Line 1011: दर्शनं लोकपालानां स्वर्गारोहणमेव च ||१०७||` | "The vision of the Lokapālas [world guardians] and the ascent to heaven as well. ||107||" |
+| `Line 1012: ` | [Blank line] |
+| `Line 1013: दर्शनं बृहदश्वस्य महर्षेर्भावितात्मनः |` | "The meeting with Bṛhadaśva, the great sage of purified soul," |
+| `Line 1014: युधिष्ठिरस्य चार्तस्य व्यसने परिदेवनम् ||१०८||` | "And the lamentation of the distressed Yudhiṣṭhira in his misfortune. ||108||" |
+| `Line 1015: ` | [Blank line] |
+| `Line 1016: नलोपाख्यानमत्रैव धर्मिष्ठं करुणोदयम् |` | "The story of Nala is also here, righteous and arousing compassion," |
+| `Line 1017: दमयन्त्याः स्थितिर्यत्र नलस्य व्यसनागमे ||१०९||` | "Where is described Damayantī's steadfastness during Nala's misfortune. ||109||" |
+| `Line 1018: ` | [Blank line] |
+| `Line 1019: वनवासगतानां च पाण्डवानां महात्मनाम् |` | "And of the noble-souled Pāṇḍavas dwelling in the forest," |
+| `Line 1020: स्वर्गे प्रवृत्तिराख्याता लोमशेनार्जुनस्य वै ||११०||` | "The account of Arjuna in heaven is narrated by Lomaśa [sage]. ||110||" |
+| `Line 1021: ` | [Blank line] |
+| `Line 1022: तीर्थयात्रा तथैवात्र पाण्डवानां महात्मनाम् |` | "The pilgrimage to sacred places of the noble-souled Pāṇḍavas is likewise here," |
+| `Line 1023: जटासुरस्य तत्रैव वधः समुपवर्ण्यते ||१११||` | "The killing of Jaṭāsura [demon] is also described there. ||111||" |
+| `Line 1024: ` | [Blank line] |
+| `Line 1025: नियुक्तो भीमसेनश्च द्रौपद्या गन्धमादने |` | "And Bhīmasena was sent by Draupadī to Gandhamādana [mountain]," |

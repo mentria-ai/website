@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 851: ` | [Blank line] |
+| `Line 852: अभिमन्युवधः पर्व प्रतिज्ञापर्व चोच्यते |` | "The Abhimanyu-vadha Parva [Abhimanyu's death section] and the Pratijñā Parva [vow section] are described." |
+| `Line 853: जयद्रथवधः पर्व घटोत्कचवधस्ततः ||५७||` | "Then the Jayadratha-vadha Parva [Jayadratha's death section] and after that the Ghatotkaca-vadha [Ghatotkaca's death section]. ||57||" |
+| `Line 854: ` | [Blank line] |
+| `Line 855: ततो द्रोणवधः पर्व विज्ञेयं लोमहर्षणम् |` | "Then comes the Drona-vadha Parva [Drona's death section], which should be known as hair-raising [terrifying]." |
+| `Line 856: मोक्षो नारायणास्त्रस्य पर्वानन्तरमुच्यते ||५८||` | "The release of the Nārāyaṇāstra [divine weapon] is described in the section immediately following. ||58||" |
+| `Line 857: ` | [Blank line] |
+| `Line 858: कर्णपर्व ततो ज्ञेयं शल्यपर्व ततः परम् |` | "Then should be known the Karna Parva [Karna section], and after that the Shalya Parva [Shalya section]." |
+| `Line 859: ह्रदप्रवेशनं पर्व गदायुद्धमतः परम् ||५९||` | "The Hrada-praveshana Parva [lake-entering section] and after that the Gadāyuddha [mace battle section]. ||59||" |
+| `Line 860: ` | [Blank line] |
+| `Line 861: सारस्वतं ततः पर्व तीर्थवंशगुणान्वितम् |` | "Then the Sarasvata Parva [Sarasvati river section], endowed with the qualities of pilgrimage places and lineages." |
+| `Line 862: अत ऊर्ध्वं तु बीभत्सं पर्व सौप्तिकमुच्यते ||६०||` | "After this comes the dreadful Sauptika Parva [sleeping warriors section]. ||60||" |
+| `Line 863: ` | [Blank line] |
+| `Line 864: ऐषीकं पर्व निर्दिष्टमत ऊर्ध्वं सुदारुणम् |` | "The Aishika Parva [arrow section] is designated next, which is extremely terrible." |
+| `Line 865: जलप्रदानिकं पर्व स्त्रीपर्व च ततः परम् ||६१||` | "The Jala-pradānika Parva [water-offering section] and after that the Stri Parva [women's section]. ||61||" |
+| `Line 866: ` | [Blank line] |
+| `Line 867: श्राद्धपर्व ततो ज्ञेयं कुरूणामौर्ध्वदेहिकम् |` | "Then should be known the Shraddha Parva [funeral rites section], concerning the post-death ceremonies of the Kurus." |
+| `Line 868: आभिषेचनिकं पर्व धर्मराजस्य धीमतः ||६२||` | "The Abhishechanika Parva [coronation section] of the wise Dharmaraja [Yudhishthira]. ||62||" |
+| `Line 869: ` | [Blank line] |
+| `Line 870: चार्वाकनिग्रहः पर्व रक्षसो ब्रह्मरूपिणः |` | "The Charvaka-nigraha Parva [Charvaka's punishment section], about the demon in Brahmin form." |
+| `Line 871: प्रविभागो गृहाणां च पर्वोक्तं तदनन्तरम् ||६३||` | "And the distribution of households section is described immediately after that. ||63||" |
+| `Line 872: ` | [Blank line] |
+| `Line 873: शान्तिपर्व ततो यत्र राजधर्मानुकीर्तनम् |` | "Then the Shanti Parva [peace section], wherein is the exposition of Raja-dharma [royal duties]." |
+| `Line 874: आपद्धर्मश्च पर्वोक्तं मोक्षधर्मस्ततः परम् ||६४||` | "And the Apad-dharma [emergency duties] section is described, followed by the Moksha-dharma [liberation principles]. ||64||" |
+| `Line 875: ` | [Blank line] |

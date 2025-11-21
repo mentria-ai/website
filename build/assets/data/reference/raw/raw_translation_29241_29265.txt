@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 29241: त्रैपुरं स वशे कृत्वा राजानममितौजसम् |` | "Having brought under his control the king of Tripura [three cities], of immeasurable prowess," |
+| `Line 29242: निजग्राह महाबाहुस्तरसा पोतनेश्वरम् ||३८||` | "The mighty-armed one [mahābāhu] swiftly captured the lord of Potana. ||38||" |
+| `Line 29243: ` | "[Blank line]" |
+| `Line 29244: आहृतिं कौशिकाचार्यं यत्नेन महता ततः |` | "Then with great effort, he brought under control Āhṛti, the preceptor [āchārya] of the Kauśikas," |
+| `Line 29245: वशे चक्रे महाबाहुः सुराष्ट्राधिपतिं तथा ||३९||` | "The mighty-armed one also subjugated the ruler of Surāṣṭra [good country]. ||39||" |
+| `Line 29246: ` | "[Blank line]" |
+| `Line 29247: सुराष्ट्रविषयस्थश्च प्रेषयामास रुक्मिणे |` | "And while stationed in the territory of Surāṣṭra, he sent (a message) to Rukmin," |
+| `Line 29248: राज्ञे भोजकटस्थाय महामात्राय धीमते ||४०||` | "The wise king residing in Bhojkaṭa, the great minister. ||40||" |
+| `Line 29249: ` | "[Blank line]" |
+| `Line 29250: भीष्मकाय स धर्मात्मा साक्षादिन्द्रसखाय वै |` | "That righteous one (sent a message) to Bhīṣmaka, who was indeed a friend of Indra [king of gods]," |
+| `Line 29251: स चास्य ससुतो राजन्प्रतिजग्राह शासनम् ||४१||` | "And he, O king, along with his son, accepted his command. ||41||" |
+| `Line 29252: ` | "[Blank line]" |
+| `Line 29253: प्रीतिपूर्वं महाबाहुर्वासुदेवमवेक्ष्य च |` | "The mighty-armed one, looking upon Vāsudeva [Krishna] with affection," |
+| `Line 29254: ततः स रत्नान्यादाय पुनः प्रायाद्युधां पतिः ||४२||` | "Then, taking jewels, that lord of warriors proceeded again. ||42||" |
+| `Line 29255: ` | "[Blank line]" |
+| `Line 29256: ततः शूर्पारकं चैव गणं चोपकृताह्वयम् |` | "Then, the mighty-splendored one of great strength brought under his control Śūrpāraka," |
+| `Line 29257: वशे चक्रे महातेजा दण्डकांश्च महाबलः ||४३||` | "And the tribe called Upakṛta, as well as the Daṇḍakas. ||43||" |
+| `Line 29258: ` | "[Blank line]" |
+| `Line 29259: सागरद्वीपवासांश्च नृपतीन्म्लेच्छयोनिजान् |` | "And the kings dwelling on ocean islands, born of Mleccha [foreign/barbarian] origin," |
+| `Line 29260: निषादान्पुरुषादांश्च कर्णप्रावरणानपि ||४४||` | "The Niṣādas [tribal people], the man-eaters [cannibals], and also those with ear-coverings. ||44||" |
+| `Line 29261: ` | "[Blank line]" |
+| `Line 29262: ये च कालमुखा नाम नरा राक्षसयोनयः |` | "And those men called Kālamukhas [black-faced], born of Rākṣasa [demon] origin," |
+| `Line 29263: कृत्स्नं कोल्लगिरिं चैव मुरचीपत्तनं तथा ||४५||` | "The entire Kollagiri [mountain], and also the city of Murachī. ||45||" |
+| `Line 29264: ` | "[Blank line]" |
+| `Line 29265: द्वीपं ताम्राह्वयं चैव पर्वतं रामकं तथा |` | "And the island called Tāmra [copper], as well as the mountain Rāmaka," |

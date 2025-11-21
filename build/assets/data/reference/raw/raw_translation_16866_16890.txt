@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 16866: यदि तच्छक्यमस्माभिः श्रोतुं न च सदोषवत् |` | "If it is possible for us to hear it, and not improper [sadoṣavat]," |
+| `Line 16867: श्रोतुमिच्छामि तत्सर्वं संवादं तव तस्य च ||२७||` | "I wish to hear all of that conversation between you and him. ||27||" |
+| `Line 16868: ` | "[Blank line]" |
+| `Line 16869: युधिष्ठिर उवाच||` | "Yudhiṣṭhira [eldest Pāṇḍava] said:" |
+| `Line 16870: ` | "[Blank line]" |
+| `Line 16871: विषादग्नेश्च बोद्धव्यमिति मां विदुरोऽब्रवीत् |` | "Vidura [wise uncle] told me, 'The fire of despair must be understood,'" |
+| `Line 16872: पन्थाश्च वो नाविदितः कश्चित्स्यादिति चाब्रवीत् ||२८||` | "And he also said, 'No path should remain unknown to you.' ||28||" |
+| `Line 16873: ` | "[Blank line]" |
+| `Line 16874: जितेन्द्रियश्च वसुधां प्राप्स्यसीति च माब्रवीत् |` | "And he told me, 'With conquered senses [jitendriya], you will obtain the earth,'" |
+| `Line 16875: विज्ञातमिति तत्सर्वमित्युक्तो विदुरो मया ||२९||` | "I told Vidura, 'All that is understood.' ||29||" |
+| `Line 16876: ` | "[Blank line]" |
+| `Line 16877: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 16878: ` | "[Blank line]" |
+| `Line 16879: अष्टमेऽहनि रोहिण्यां प्रयाताः फल्गुनस्य ते |` | "On the eighth day, in the Rohiṇī [star] of Phālguna [month], they departed," |
+| `Line 16880: वारणावतमासाद्य ददृशुर्नागरं जनम् ||३०||` | "Having reached Vāraṇāvata [city name], they saw the city people. ||30||" |
+| `Line 16881: ` | "[Blank line]" |
+| `Line 16882: ` | "[Blank line]" |
+| `Line 16883: ` | "[Blank line]" |
+| `Line 16884: ` | "[Blank line]" |
+| `Line 16885: ` | "[Blank line]" |
+| `Line 16886: ` | "[Blank line]" |
+| `Line 16887: १३४` | "134 [chapter number]" |
+| `Line 16888: ` | "[Blank line]" |
+| `Line 16889: ` | "[Blank line]" |
+| `Line 16890: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |

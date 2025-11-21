@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 22191: ` | "[Blank line]" |
+| `Line 22192: ` | "[Blank line]" |
+| `Line 22193: ` | "[Blank line]" |
+| `Line 22194: १९१` | "191 [chapter number]" |
+| `Line 22195: ` | "[Blank line]" |
+| `Line 22196: ` | "[Blank line]" |
+| `Line 22197: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 22198: ` | "[Blank line]" |
+| `Line 22199: पाण्डवैः सह संयोगं गतस्य द्रुपदस्य तु |` | "After Drupada [king of Panchala] had formed an alliance with the Pāṇḍavas," |
+| `Line 22200: न बभूव भयं किञ्चिद्देवेभ्योऽपि कथञ्चन ||१||` | "He had no fear whatsoever, not even of the gods in any way. ||1||" |
+| `Line 22201: ` | "[Blank line]" |
+| `Line 22202: कुन्तीमासाद्य ता नार्यो द्रुपदस्य महात्मनः |` | "Approaching Kuntī [Pāṇḍavas' mother], those women of the noble-souled Drupada," |
+| `Line 22203: नाम सङ्कीर्तयन्त्यस्ताः पादौ जग्मुः स्वमूर्धभिः ||२||` | "Announcing their names, touched her feet with their heads. ||2||" |
+| `Line 22204: ` | "[Blank line]" |
+| `Line 22205: कृष्णा च क्षौमसंवीता कृतकौतुकमङ्गला |` | "And Kṛṣṇā [Draupadī], dressed in silk, with auspicious marriage threads tied," |
+| `Line 22206: कृताभिवादना श्वश्र्वास्तस्थौ प्रह्वा कृताञ्जलिः ||३||` | "Having greeted her mother-in-law, stood humbly with folded hands. ||3||" |
+| `Line 22207: ` | "[Blank line]" |
+| `Line 22208: रूपलक्षणसम्पन्नां शीलाचारसमन्विताम् |` | "To Draupadī, endowed with beauty and auspicious marks, possessed of good character and conduct," |
+| `Line 22209: द्रौपदीमवदत्प्रेम्णा पृथाशीर्वचनं स्नुषाम् ||४||` | "Pṛthā [Kuntī] lovingly spoke these words of blessing to her daughter-in-law. ||4||" |
+| `Line 22210: ` | "[Blank line]" |
+| `Line 22211: यथेन्द्राणी हरिहये स्वाहा चैव विभावसौ |` | "As Indrāṇī [Indra's wife] is to Hari-haya [Indra], as Svāhā [oblation deity] is to Vibhāvasu [fire god]," |
+| `Line 22212: रोहिणी च यथा सोमे दमयन्ती यथा नले ||५||` | "As Rohiṇī [star deity] is to Soma [moon], as Damayantī was to Nala, ||5||" |
+| `Line 22213: ` | "[Blank line]" |
+| `Line 22214: यथा वैश्रवणे भद्रा वसिष्ठे चाप्यरुन्धती |` | "As Bhadrā is to Vaiśravaṇa [Kubera], as Arundhatī is to Vasiṣṭha [sage]," |
+| `Line 22215: यथा नारायणे लक्ष्मीस्तथा त्वं भव भर्तृषु ||६||` | "As Lakṣmī [goddess of fortune] is to Nārāyaṇa [Vishnu], so may you be to your husbands. ||6||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 29691: सर्वाञ्जनान्सर्वकामैः समृद्धैः समतर्पयत् ||१५||` | "He satisfied all people with abundant fulfillment of all their desires. ||15||" |
+| `Line 29692: ` | "[Blank line]" |
+| `Line 29693: अन्नवान्बहुभक्ष्यश्च भुक्तवज्जनसंवृतः |` | "Abundant with food and many delicacies, surrounded by people who had eaten their fill," |
+| `Line 29694: रत्नोपहारकर्मण्यो बभूव स समागमः ||१६||` | "That assembly was engaged in offering jewels as gifts. ||16||" |
+| `Line 29695: ` | "[Blank line]" |
+| `Line 29696: इडाज्यहोमाहुतिभिर्मन्त्रशिक्षासमन्वितैः |` | "With oblations of clarified butter [ājya] and sacred food [iḍā], accompanied by properly recited mantras," |
+| `Line 29697: तस्मिन्हि ततृपुर्देवास्तते यज्ञे महर्षिभिः ||१७||` | "In that sacrifice, the gods were satisfied by the great sages. ||17||" |
+| `Line 29698: ` | "[Blank line]" |
+| `Line 29699: यथा देवास्तथा विप्रा दक्षिणान्नमहाधनैः |` | "Just as the gods, so too the brahmins [vipra] were satisfied with gifts, food, and great wealth," |
+| `Line 29700: ततृपुः सर्ववर्णाश्च तस्मिन्यज्ञे मुदान्विताः ||१८||` | "All the castes [varṇa] were satisfied in that sacrifice, filled with joy. ||18||" |
+| `Line 29701: ` | "[Blank line]" |
+| `Line 29702: ` | "[Blank line]" |
+| `Line 29703: ` | "[Blank line]" |
+| `Line 29704: ` | "[Blank line]" |
+| `Line 29705: अर्घाभिहरणपर्व` | "The Section on the Presentation of Respectful Offerings [argha]" |
+| `Line 29706: ३३` | "33" |
+| `Line 29707: ` | "[Blank line]" |
+| `Line 29708: ` | "[Blank line]" |
+| `Line 29709: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 29710: ` | "[Blank line]" |
+| `Line 29711: ततोऽभिषेचनीयेऽह्नि ब्राह्मणा राजभिः सह |` | "Then, on the day of the consecration [abhiṣecanīya], the brahmins along with the kings," |
+| `Line 29712: अन्तर्वेदीं प्रविविशुः सत्कारार्थं महर्षयः ||१||` | "The great sages entered the inner sacrificial area [antarvedī] for the purpose of paying homage. ||1||" |
+| `Line 29713: ` | "[Blank line]" |
+| `Line 29714: नारदप्रमुखास्तस्यामन्तर्वेद्यां महात्मनः |` | "Led by Nārada [divine sage], those great souls in that inner sacrificial area," |
+| `Line 29715: समासीनाः शुशुभिरे सह राजर्षिभिस्तदा ||२||` | "Seated together with the royal sages [rājarṣi], shone brilliantly then. ||2||" |

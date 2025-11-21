@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 32191: ५६` | "56 [chapter number]" |
+| `Line 32192: ` | "[Blank line]" |
+| `Line 32193: ` | "[Blank line]" |
+| `Line 32194: विदुर उवाच||` | "Vidura [wise counselor] said:" |
+| `Line 32195: ` | "[Blank line]" |
+| `Line 32196: द्यूतं मूलं कलहस्यानुपाति; मिथोभेदाय महते वा रणाय |` | "Gambling is the root of conflict, leading to mutual discord or great warfare." |
+| `Line 32197: यदास्थितोऽयं धृतराष्ट्रस्य पुत्रो; दुर्योधनः सृजते वैरमुग्रम् ||१||` | "When this son of Dhṛtarāṣṭra [blind king], Duryodhana, resorts to it, he creates terrible enmity. ||1||" |
+| `Line 32198: ` | "[Blank line]" |
+| `Line 32199: प्रातिपीयाः शान्तनवा भैमसेनाः सबाह्लिकाः |` | "The descendants of Pratīpa [king], the sons of Śāntanu [Bhīṣma's father], the sons of Bhīmasena [elder], along with the Bāhlīkas [tribe]," |
+| `Line 32200: दुर्योधनापराधेन कृच्छ्रं प्राप्स्यन्ति सर्वशः ||२||` | "Due to Duryodhana's offense, will all completely fall into difficulty. ||2||" |
+| `Line 32201: ` | "[Blank line]" |
+| `Line 32202: दुर्योधनो मदेनैव क्षेमं राष्ट्रादपोहति |` | "Duryodhana, through his arrogance alone, drives away prosperity from the kingdom." |
+| `Line 32203: विषाणं गौरिव मदात्स्वयमारुजते बलात् ||३||` | "Like a wild ox [gaur] in rut forcibly breaks its own horn. ||3||" |
+| `Line 32204: ` | "[Blank line]" |
+| `Line 32205: यश्चित्तमन्वेति परस्य राज; न्वीरः कविः स्वामतिपत्य दृष्टिम् |` | "O king, a hero or wise man who follows another's mind, overlooking his own insight," |
+| `Line 32206: नावं समुद्र इव बालनेत्रा; मारुह्य घोरे व्यसने निमज्जेत् ||४||` | "Would sink in terrible calamity, like boarding a ship in the ocean steered by a child. ||4||" |
+| `Line 32207: ` | "[Blank line]" |
+| `Line 32208: दुर्योधनो ग्लहते पाण्डवेन; प्रियायसे त्वं जयतीति तच्च |` | "Duryodhana gambles with the Pāṇḍava [Yudhiṣṭhira], and you are pleased thinking, 'He is winning'," |
+| `Line 32209: अतिनर्माज्जायते सम्प्रहारो; यतो विनाशः समुपैति पुंसाम् ||५||` | "From excessive sport arises conflict, from which comes the destruction of men. ||5||" |
+| `Line 32210: ` | "[Blank line]" |
+| `Line 32211: आकर्षस्तेऽवाक्फलः कुप्रणीतो; हृदि प्रौढो मन्त्रपदः समाधिः |` | "Your attraction is downward-resulting, ill-directed; mature in your heart is the concentration on words of counsel." |
+| `Line 32212: युधिष्ठिरेण सफलः संस्तवोऽस्तु; साम्नः सुरिक्तोऽरिमतेः सुधन्वा ||६||` | "May your alliance with Yudhiṣṭhira [eldest Pāṇḍava] be fruitful; may conciliation, well-emptied of hostile intent, be well-armed. ||6||" |
+| `Line 32213: ` | "[Blank line]" |
+| `Line 32214: प्रातिपीयाः शान्तनवाश्च राज; न्काव्यां वाचं शृणुत मात्यगाद्वः |` | "O king, descendants of Pratīpa and sons of Śāntanu, listen to my poetic words, lest they escape you." |
+| `Line 32215: वैश्वानरं प्रज्वलितं सुघोर; मयुद्धेन प्रशमयतोत्पतन्तम् ||७||` | "Extinguish without war the terribly blazing fire [Vaiśvānara] that is rising up. ||7||" |

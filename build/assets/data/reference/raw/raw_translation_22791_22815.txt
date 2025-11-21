@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 22791: ` | "[Blank line]" |
+| `Line 22792: धृतराष्ट्र उवाच॥` | "Dhṛtarāṣṭra [blind king] said:" |
+| `Line 22793: ` | "[Blank line]" |
+| `Line 22794: भीष्मः शान्तनवो विद्वान्द्रोणश्च भगवानृषिः |` | "Bhīṣma [son of Śantanu], the learned one, and Droṇa [weapons master], the venerable sage," |
+| `Line 22795: हितं परमकं वाक्यं त्वं च सत्यं ब्रवीषि माम् ॥१॥` | "Speak supremely beneficial words, and you too speak truth to me. ||1||" |
+| `Line 22796: ` | "[Blank line]" |
+| `Line 22797: यथैव पाण्डोस्ते वीराः कुन्तीपुत्रा महारथाः |` | "Just as those heroes of Pāṇḍu, the sons of Kuntī, are great warriors [mahāratha]," |
+| `Line 22798: तथैव धर्मतः सर्वे मम पुत्रा न संशयः ॥२॥` | "So too, according to dharma [righteousness], are all my sons, without doubt. ||2||" |
+| `Line 22799: ` | "[Blank line]" |
+| `Line 22800: यथैव मम पुत्राणामिदं राज्यं विधीयते |` | "Just as this kingdom is ordained for my sons," |
+| `Line 22801: तथैव पाण्डुपुत्राणामिदं राज्यं न संशयः ॥३॥` | "So too it belongs to the sons of Pāṇḍu, without doubt. ||3||" |
+| `Line 22802: ` | "[Blank line]" |
+| `Line 22803: क्षत्तरानय गच्छैतान्सह मात्रा सुसत्कृतान् |` | "Kṣatta [Vidura], go and bring them, well-honored, together with their mother," |
+| `Line 22804: तया च देवरूपिण्या कृष्णया सह भारत ॥४॥` | "And with that goddess-like Kṛṣṇā [Draupadī], O Bhārata. ||4||" |
+| `Line 22805: ` | "[Blank line]" |
+| `Line 22806: दिष्ट्या जीवन्ति ते पार्था दिष्ट्या जीवति सा पृथा |` | "By good fortune, those sons of Pṛthā [Pāṇḍavas] live; by good fortune, that Pṛthā [Kuntī] lives;" |
+| `Line 22807: दिष्ट्या द्रुपदकन्यां च लब्धवन्तो महारथाः ॥५॥` | "By good fortune, the great warriors have obtained the daughter of Drupada [Draupadī]. ||5||" |
+| `Line 22808: ` | "[Blank line]" |
+| `Line 22809: दिष्ट्या वर्धामहे सर्वे दिष्ट्या शान्तः पुरोचनः |` | "By good fortune, we all prosper; by good fortune, Purocana [palace builder] is pacified;" |
+| `Line 22810: दिष्ट्या मम परं दुःखमपनीतं महाद्युते ॥६॥` | "By good fortune, my extreme sorrow is removed, O greatly radiant one. ||6||" |
+| `Line 22811: ` | "[Blank line]" |
+| `Line 22812: वैशम्पायन उवाच॥` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 22813: ` | "[Blank line]" |
+| `Line 22814: ततो जगाम विदुरो धृतराष्ट्रस्य शासनात् |` | "Then Vidura [wise uncle] went, by Dhṛtarāṣṭra's command," |
+| `Line 22815: सकाशं यज्ञसेनस्य पाण्डवानां च भारत ॥७॥` | "To the presence of Yajñasena [Drupada] and the Pāṇḍavas, O Bhārata. ||7||" |

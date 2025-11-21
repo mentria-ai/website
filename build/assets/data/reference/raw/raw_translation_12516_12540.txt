@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 12516: ९६` | "96 [chapter number]" |
+| `Line 12517: ` | "[Blank line]" |
+| `Line 12518: ` | "[Blank line]" |
+| `Line 12519: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 12520: ` | "[Blank line]" |
+| `Line 12521: हते चित्राङ्गदे भीष्मो बाले भ्रातरि चानघ |` | "After Citrāṅgada [Bhīṣma's brother] was slain, O sinless one, Bhīṣma [son of Gaṅgā]," |
+| `Line 12522: पालयामास तद्राज्यं सत्यवत्या मते स्थितः ||१||` | "Protected that kingdom, abiding by Satyavatī's [Bhīṣma's stepmother] wishes. ||1||" |
+| `Line 12523: ` | "[Blank line]" |
+| `Line 12524: सम्प्राप्तयौवनं पश्यन्भ्रातरं धीमतां वरम् |` | "Seeing his brother, the best among the wise, having attained youth," |
+| `Line 12525: भीष्मो विचित्रवीर्यस्य विवाहायाकरोन्मतिम् ||२||` | "Bhīṣma set his mind on arranging a marriage for Vicitravīrya [Bhīṣma's half-brother]. ||2||" |
+| `Line 12526: ` | "[Blank line]" |
+| `Line 12527: अथ काशिपतेर्भीष्मः कन्यास्तिस्रोऽप्सरःसमाः |` | "Then Bhīṣma heard that the king of Kāśi [Benares] had three daughters, equal to celestial nymphs [apsaras]," |
+| `Line 12528: शुश्राव सहिता राजन्वृण्वतीर्वै स्वयं वरम् ||३||` | "Who were together, O king, choosing their own husbands in a svayaṃvara [self-choice ceremony]. ||3||" |
+| `Line 12529: ` | "[Blank line]" |
+| `Line 12530: ततः स रथिनां श्रेष्ठो रथेनैकेन वर्मभृत् |` | "Then that best of chariot-warriors, wearing armor, with a single chariot," |
+| `Line 12531: जगामानुमते मातुः पुरीं वाराणसीं प्रति ||४||` | "Went with his mother's permission toward the city of Vārāṇasī [Benares]. ||4||" |
+| `Line 12532: ` | "[Blank line]" |
+| `Line 12533: तत्र राज्ञः समुदितान्सर्वतः समुपागतान् |` | "There Bhīṣma, son of Śantanu, saw kings assembled," |
+| `Line 12534: ददर्श कन्यास्ताश्चैव भीष्मः शन्तनुनन्दनः ||५||` | "Who had come from all directions, and also those maidens. ||5||" |
+| `Line 12535: ` | "[Blank line]" |
+| `Line 12536: कीर्त्यमानेषु राज्ञां तु नामस्वथ सहस्रशः |` | "While the names of thousands of kings were being announced," |
+| `Line 12537: भीष्मः स्वयं तदा राजन्वरयामास ताः प्रभुः ||६||` | "Bhīṣma himself, O king, the mighty one, chose those maidens. ||6||" |
+| `Line 12538: ` | "[Blank line]" |
+| `Line 12539: उवाच च महीपालान्राजञ्जलदनिःस्वनः |` | "And he addressed the kings, O king, in a voice deep as thunder," |
+| `Line 12540: रथमारोप्य ताः कन्या भीष्मः प्रहरतां वरः ||७||` | "Having placed those maidens on his chariot, Bhīṣma, the best of warriors [praharatām vara]. ||7||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 46766: ` | "[Blank line]" |
+| `Line 46767: ९९` | "99 [chapter number]" |
+| `Line 46768: ` | "[Blank line]" |
+| `Line 46769: ` | "[Blank line]" |
+| `Line 46770: लोमश उवाच||` | "Lomaśa [sage with hair] said:" |
+| `Line 46771: ` | "[Blank line]" |
+| `Line 46772: ततः स वज्री बलिभिर्दैवतैरभिरक्षितः |` | "Then he, the wielder of the thunderbolt [Indra], protected by the powerful deities," |
+| `Line 46773: आससाद ततो वृत्रं स्थितमावृत्य रोदसी ||१||` | "Approached Vṛtra [cosmic serpent], who stood covering heaven and earth. ||1||" |
+| `Line 46774: ` | "[Blank line]" |
+| `Line 46775: कालकेयैर्महाकायैः समन्तादभिरक्षितम् |` | "Protected on all sides by the large-bodied Kālakeyas [demon clan]," |
+| `Line 46776: समुद्यतप्रहरणैः सशृङ्गैरिव पर्वतैः ||२||` | "With weapons raised, like mountains with peaks. ||2||" |
+| `Line 46777: ` | "[Blank line]" |
+| `Line 46778: ततो युद्धं समभवद्देवानां सह दानवैः |` | "Then a battle commenced between the gods and the demons [dānavas]," |
+| `Line 46779: मुहूर्तं भरतश्रेष्ठ लोकत्रासकरं महत् ||३||` | "For a moment, O best of Bharatas [Yudhishthira], a great terror-causing battle for the worlds. ||3||" |
+| `Line 46780: ` | "[Blank line]" |
+| `Line 46781: उद्यतप्रतिपिष्टानां खड्गानां वीरबाहुभिः |` | "Of swords raised and struck by the arms of heroes," |
+| `Line 46782: आसीत्सुतुमुलः शब्दः शरीरेष्वभिपात्यताम् ||४||` | "There was a tremendous sound as they fell upon bodies. ||4||" |
+| `Line 46783: ` | "[Blank line]" |
+| `Line 46784: शिरोभिः प्रपतद्भिश्च अन्तरिक्षान्महीतलम् |` | "And with heads falling from the sky to the earth," |
+| `Line 46785: तालैरिव महीपाल वृन्ताद्भ्रष्टैरदृश्यत ||५||` | "It appeared, O protector of the earth [king], like palm fruits fallen from their stalks. ||5||" |
+| `Line 46786: ` | "[Blank line]" |
+| `Line 46787: ते हेमकवचा भूत्वा कालेयाः परिघायुधाः |` | "Those Kāleyas [demons], clad in golden armor, wielding iron clubs as weapons," |
+| `Line 46788: त्रिदशानभ्यवर्तन्त दावदग्धा इवाद्रयः ||६||` | "Attacked the thirty gods [tridaśas], like mountains consumed by forest fire. ||6||" |
+| `Line 46789: ` | "[Blank line]" |
+| `Line 46790: तेषां वेगवतां वेगं सहितानां प्रधावताम् |` | "The force of those swift ones, rushing together," |

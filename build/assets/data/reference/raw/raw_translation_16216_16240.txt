@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 16216: दीप्तिकान्तिद्युतिगुणैः सूर्येन्दुज्वलनोपमः ||४||` | "With qualities of brilliance, beauty and splendor, he resembled the sun, moon, and fire. ||4||" |
+| `Line 16217: ` | "[Blank line]" |
+| `Line 16218: प्रांशुः कनकतालाभः सिंहसंहननो युवा |` | "Tall, with a golden palm-tree-like complexion, having a lion-like physique, youthful," |
+| `Line 16219: असङ्ख्येयगुणः श्रीमान्भास्करस्यात्मसम्भवः ||५||` | "Possessing countless virtues, splendid, born of the Sun [Bhāskara] himself. ||5||" |
+| `Line 16220: ` | "[Blank line]" |
+| `Line 16221: स निरीक्ष्य महाबाहुः सर्वतो रङ्गमण्डलम् |` | "That mighty-armed one [mahābāhu], looking around at the entire arena," |
+| `Line 16222: प्रणामं द्रोणकृपयोर्नात्यादृतमिवाकरोत् ||६||` | "Made obeisance to Droṇa and Kṛpa, though somewhat casually. ||6||" |
+| `Line 16223: ` | "[Blank line]" |
+| `Line 16224: स सामाजजनः सर्वो निश्चलः स्थिरलोचनः |` | "All the spectators [in the arena] became motionless, with fixed gazes," |
+| `Line 16225: कोऽयमित्यागतक्षोभः कौतूहलपरोऽभवत् ||७||` | "Agitated with curiosity, wondering 'Who is this?', they became filled with excitement. ||7||" |
+| `Line 16226: ` | "[Blank line]" |
+| `Line 16227: सोऽब्रवीन्मेघधीरेण स्वरेण वदतां वरः |` | "He, the best of speakers, spoke in a voice deep as thunder," |
+| `Line 16228: भ्राता भ्रातरमज्ञातं सावित्रः पाकशासनिम् ||८||` | "The son of Sāvitrī [Sun's wife] addressed his unknown brother, the son of Pākaśāsana [Indra]. ||8||" |
+| `Line 16229: ` | "[Blank line]" |
+| `Line 16230: पार्थ यत्ते कृतं कर्म विशेषवदहं ततः |` | "Pārtha [Arjuna], whatever special feat you have performed, I shall therefore," |
+| `Line 16231: करिष्ये पश्यतां नृणां मात्मना विस्मयं गमः ||९||` | "Perform before these watching men. Do not be amazed at yourself. ||9||" |
+| `Line 16232: ` | "[Blank line]" |
+| `Line 16233: असमाप्ते ततस्तस्य वचने वदतां वर |` | "Before his speech was completed, O best of speakers," |
+| `Line 16234: यन्त्रोत्क्षिप्त इव क्षिप्रमुत्तस्थौ सर्वतो जनः ||१०||` | "The entire crowd quickly rose up as if propelled by a machine. ||10||" |
+| `Line 16235: ` | "[Blank line]" |
+| `Line 16236: प्रीतिश्च पुरुषव्याघ्र दुर्योधनमथास्पृशत् |` | "And joy, O tiger among men [puruṣavyāghra], then touched Duryodhana," |
+| `Line 16237: ह्रीश्च क्रोधश्च बीभत्सुं क्षणेनान्वविशच्च ह ||११||` | "While shame and anger instantly entered Bībhatsu [Arjuna]. ||11||" |
+| `Line 16238: ` | "[Blank line]" |
+| `Line 16239: ततो द्रोणाभ्यनुज्ञातः कर्णः प्रियरणः सदा |` | "Then, with Droṇa's permission, Karṇa, who always delighted in battle," |
+| `Line 16240: यत्कृतं तत्र पार्थेन तच्चकार महाबलः ||१२||` | "Performed whatever had been done there by Pārtha [Arjuna], that mighty-armed one. ||12||" |

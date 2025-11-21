@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 23916: ` | "[Blank line]" |
+| `Line 23917: तेषां श्रुत्वा महाबाहुर्वार्यमाणस्तपोधनैः |` | "Hearing about them, the mighty-armed one [mahābāhu], though being dissuaded by the ascetics [tapodhanaiḥ]," |
+| `Line 23918: जगाम तानि तीर्थानि द्रष्टुं पुरुषसत्तमः ||७||` | "That best of men went to see those sacred fords [tīrtha]. ||7||" |
+| `Line 23919: ` | "[Blank line]" |
+| `Line 23920: ततः सौभद्रमासाद्य महर्षेस्तीर्थमुत्तमम् |` | "Then, approaching Saubhadra, the excellent sacred ford [tīrtha] of the great sage," |
+| `Line 23921: विगाह्य तरसा शूरः स्नानं चक्रे परन्तपः ||८||` | "The hero, scorcher of foes [parantapa], quickly plunged in and performed his ablutions. ||8||" |
+| `Line 23922: ` | "[Blank line]" |
+| `Line 23923: अथ तं पुरुषव्याघ्रमन्तर्जलचरो महान् |` | "Then, that tiger among men [puruṣavyāghra], a great aquatic creature," |
+| `Line 23924: निजग्राह जले ग्राहः कुन्तीपुत्रं धनञ्जयम् ||९||` | "A crocodile [grāha] seized in the water Kunti's son, Dhananjaya [wealth-conqueror]. ||9||" |
+| `Line 23925: ` | "[Blank line]" |
+| `Line 23926: स तमादाय कौन्तेयो विस्फुरन्तं जलेचरम् |` | "Kunti's son, grasping that thrashing water-creature," |
+| `Line 23927: उदतिष्ठन्महाबाहुर्बलेन बलिनां वरः ||१०||` | "Rose up, the mighty-armed one, foremost among the strong, with his strength. ||10||" |
+| `Line 23928: ` | "[Blank line]" |
+| `Line 23929: उत्कृष्ट एव तु ग्राहः सोऽर्जुनेन यशस्विना |` | "But as soon as that crocodile was pulled out by the illustrious Arjuna," |
+| `Line 23930: बभूव नारी कल्याणी सर्वाभरणभूषिता ||११||` | "It transformed into an auspicious woman adorned with all ornaments. ||11||" |
+| `Line 23931: ` | "[Blank line]" |
+| `Line 23932: दीप्यमाना श्रिया राजन्दिव्यरूपा मनोरमा ||११||` | "Shining with splendor, O king, divine in form and captivating. ||11||" |
+| `Line 23933: ` | "[Blank line]" |
+| `Line 23934: तदद्भुतं महद्दृष्ट्वा कुन्तीपुत्रो धनञ्जयः |` | "Seeing that great wonder, Kunti's son Dhananjaya," |
+| `Line 23935: तां स्त्रियं परमप्रीत इदं वचनमब्रवीत् ||१२||` | "Extremely pleased, spoke these words to that woman: ||12||" |
+| `Line 23936: ` | "[Blank line]" |
+| `Line 23937: का वै त्वमसि कल्याणि कुतो वासि जलेचरी |` | "Who are you, O auspicious one, and from where do you come, water-dweller?" |
+| `Line 23938: किमर्थं च महत्पापमिदं कृतवती पुरा ||१३||` | "And for what purpose did you commit this great sin before? ||13||" |
+| `Line 23939: ` | "[Blank line]" |
+| `Line 23940: नार्युवाच||` | "The woman said:" |

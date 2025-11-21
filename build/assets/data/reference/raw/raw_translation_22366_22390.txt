@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 22366: ` | "[Blank line]" |
+| `Line 22367: १९३` | "193 [chapter number]" |
+| `Line 22368: ` | "[Blank line]" |
+| `Line 22369: ` | "[Blank line]" |
+| `Line 22370: धृतराष्ट्र उवाच||` | "Dhṛtarāṣṭra [blind king] said:" |
+| `Line 22371: ` | "[Blank line]" |
+| `Line 22372: अहमप्येवमेवैतच्चिन्तयामि यथा युवाम् |` | "I too think about this matter exactly as you two do," |
+| `Line 22373: विवेक्तुं नाहमिच्छामि त्वाकारं विदुरं प्रति ||१||` | "I do not wish to reveal my intentions regarding Vidura [wise counselor]. ||1||" |
+| `Line 22374: ` | "[Blank line]" |
+| `Line 22375: अतस्तेषां गुणानेव कीर्तयामि विशेषतः |` | "Therefore, I specifically praise their qualities," |
+| `Line 22376: नावबुध्येत विदुरो ममाभिप्रायमिङ्गितैः ||२||` | "So that Vidura may not understand my intentions through my gestures. ||2||" |
+| `Line 22377: ` | "[Blank line]" |
+| `Line 22378: यच्च त्वं मन्यसे प्राप्तं तद्ब्रूहि त्वं सुयोधन |` | "Whatever you think is appropriate, tell me that, Suyodhana [Duryodhana]," |
+| `Line 22379: राधेय मन्यसे त्वं च यत्प्राप्तं तद्ब्रवीहि मे ||३||` | "And Rādheya [Karṇa], whatever you think is appropriate, tell that to me. ||3||" |
+| `Line 22380: ` | "[Blank line]" |
+| `Line 22381: दुर्योधन उवाच||` | "Duryodhana [eldest Kaurava] said:" |
+| `Line 22382: ` | "[Blank line]" |
+| `Line 22383: अद्य तान्कुशलैर्विप्रैः सुकृतैराप्तकारिभिः |` | "Today, through skilled Brahmins [priests], well-trained and trustworthy," |
+| `Line 22384: कुन्तीपुत्रान्भेदयामो माद्रीपुत्रौ च पाण्डवौ ||४||` | "Let us create division among Kuntī's sons and the two Pāṇḍava sons of Mādrī. ||4||" |
+| `Line 22385: ` | "[Blank line]" |
+| `Line 22386: अथ वा द्रुपदो राजा महद्भिर्वित्तसञ्चयैः |` | "Or else, King Drupada [Pāñcāla ruler], with great accumulations of wealth," |
+| `Line 22387: पुत्राश्चास्य प्रलोभ्यन्ताममात्याश्चैव सर्वशः ||५||` | "And his sons and all his ministers should be tempted. ||5||" |
+| `Line 22388: ` | "[Blank line]" |
+| `Line 22389: परित्यजध्वं राजानं कुन्तीपुत्रं युधिष्ठिरम् |` | "'Abandon King Yudhiṣṭhira [eldest Pāṇḍava], the son of Kuntī,'" |
+| `Line 22390: अथ तत्रैव वा तेषां निवासं रोचयन्तु ते ||६||` | "Or let them encourage the Pāṇḍavas to continue residing there itself. ||6||" |

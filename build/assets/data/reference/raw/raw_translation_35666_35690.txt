@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 35666: ` | "[Blank line]" |
+| `Line 35667: वासुदेव उवाच||` | "Vāsudeva [Krishna] said:" |
+| `Line 35668: ` | "[Blank line]" |
+| `Line 35669: दुर्योधनस्य कर्णस्य शकुनेश्च दुरात्मनः |` | "The earth will drink the blood of Duryodhana, Karṇa, the evil-minded Śakuni," |
+| `Line 35670: दुःशासनचतुर्थानां भूमिः पास्यति शोणितम् ||५||` | "And Duḥśāsana, the fourth among them. ||5||" |
+| `Line 35671: ` | "[Blank line]" |
+| `Line 35672: ततः सर्वेऽभिषिञ्चामो धर्मराजं युधिष्ठिरम् |` | "Then we shall all anoint Dharmarāja [righteous king] Yudhiṣṭhira," |
+| `Line 35673: निकृत्योपचरन्वध्य एष धर्मः सनातनः ||६||` | "For one who behaves deceitfully deserves to be slain—this is the eternal dharma [righteousness]. ||6||" |
+| `Line 35674: ` | "[Blank line]" |
+| `Line 35675: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 35676: ` | "[Blank line]" |
+| `Line 35677: पार्थानामभिषङ्गेण तथा क्रुद्धं जनार्दनम् |` | "When Janārdana [Krishna] was thus enraged due to his attachment to the Pārthas [Pāṇḍavas]," |
+| `Line 35678: अर्जुनः शमयामासा दिधक्षन्तमिव प्रजाः ||७||` | "Arjuna pacified him, who seemed ready to burn the people like fire. ||7||" |
+| `Line 35679: ` | "[Blank line]" |
+| `Line 35680: सङ्क्रुद्धं केशवं दृष्ट्वा पूर्वदेहेषु फल्गुनः |` | "Seeing Keśava [Krishna] enraged, Phalguna [Arjuna] recalled," |
+| `Line 35681: कीर्तयामास कर्माणि सत्यकीर्तेर्महात्मनः ||८||` | "The deeds of the great-souled Satyakīrti [Krishna, of true fame] in his previous bodies. ||8||" |
+| `Line 35682: ` | "[Blank line]" |
+| `Line 35683: पुरुषस्याप्रमेयस्य सत्यस्यामिततेजसः |` | "Of the immeasurable Puruṣa [Supreme Person], the Truth, of boundless splendor," |
+| `Line 35684: प्रजापतिपतेर्विष्णोर्लोकनाथस्य धीमतः ||९||` | "Of Viṣṇu [preserver god], the lord of Prajāpatis [creation lords], the wise master of worlds. ||9||" |
+| `Line 35685: ` | "[Blank line]" |
+| `Line 35686: अर्जुन उवाच||` | "Arjuna said:" |
+| `Line 35687: ` | "[Blank line]" |
+| `Line 35688: दश वर्षसहस्राणि यत्रसायङ्गृहो मुनिः |` | "For ten thousand years, O Krishna, you lived as a sage with evening as your home," |
+| `Line 35689: व्यचरस्त्वं पुरा कृष्ण पर्वते गन्धमादने ||१०||` | "You wandered in ancient times on Mount Gandhamādana [fragrant mountain]. ||10||" |
+| `Line 35690: ` | "[Blank line]" |

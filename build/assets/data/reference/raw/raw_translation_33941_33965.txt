@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 33941: धृतराष्ट्र उवाच॥` | "Dhṛtarāṣṭra [blind king] said:" |
+| `Line 33942: ` | "[Blank line]" |
+| `Line 33943: कथं गच्छति कौन्तेयो धर्मराजो युधिष्ठिरः |` | "How does the son of Kuntī, Dharmarāja [king of righteousness] Yudhiṣṭhira, proceed?" |
+| `Line 33944: भीमसेनः सव्यसाची माद्रीपुत्रौ च तावुभौ ॥१॥` | "And Bhīmasena, Savyasācī [Arjuna], and both those sons of Mādrī? ||1||" |
+| `Line 33945: ` | "[Blank line]" |
+| `Line 33946: धौम्यश्चैव कथं क्षत्तर्द्रौपदी वा तपस्विनी |` | "And how, O Kṣattṛ [Vidura], does Dhaumya and the ascetic Draupadī proceed?" |
+| `Line 33947: श्रोतुमिच्छाम्यहं सर्वं तेषामङ्गविचेष्टितम् ॥२॥` | "I wish to hear all about their bodily movements [deportment]. ||2||" |
+| `Line 33948: ` | "[Blank line]" |
+| `Line 33949: विदुर उवाच॥` | "Vidura [wise counselor] said:" |
+| `Line 33950: ` | "[Blank line]" |
+| `Line 33951: वस्त्रेण संवृत्य मुखं कुन्तीपुत्रो युधिष्ठिरः |` | "Covering his face with a cloth, Kuntī's son Yudhiṣṭhira," |
+| `Line 33952: बाहू विशालौ कृत्वा तु भीमो गच्छति पाण्डवः ॥३॥` | "While Bhīma, the Pāṇḍava, proceeds with his broad arms extended. ||3||" |
+| `Line 33953: ` | "[Blank line]" |
+| `Line 33954: सिकता वपन्सव्यसाची राजानमनुगच्छति |` | "Savyasācī [Arjuna] follows the king scattering sand," |
+| `Line 33955: माद्रीपुत्रः सहदेवो मुखमालिप्य गच्छति ॥४॥` | "Mādrī's son Sahadeva proceeds with his face smeared [with dust]. ||4||" |
+| `Line 33956: ` | "[Blank line]" |
+| `Line 33957: पांसूपलिप्तसर्वाङ्गो नकुलश्चित्तविह्वलः |` | "Nakula, with his entire body smeared with dust, his mind distressed," |
+| `Line 33958: दर्शनीयतमो लोके राजानमनुगच्छति ॥५॥` | "The most handsome in the world, follows the king. ||5||" |
+| `Line 33959: ` | "[Blank line]" |
+| `Line 33960: कृष्णा केशैः प्रतिच्छाद्य मुखमायतलोचना |` | "Kṛṣṇā [Draupadī], the long-eyed one, covering her face with her hair," |
+| `Line 33961: दर्शनीया प्ररुदती राजानमनुगच्छति ॥६॥` | "Beautiful to behold, weeping, follows the king. ||6||" |
+| `Line 33962: ` | "[Blank line]" |
+| `Line 33963: धौम्यो याम्यानि सामानि रौद्राणि च विशां पते |` | "Dhaumya [family priest], O lord of people, chanting Sāma hymns dedicated to Yama and Rudra," |
+| `Line 33964: गायन्गच्छति मार्गेषु कुशानादाय पाणिना ॥७॥` | "Goes along the paths singing, holding kuśa grass [sacred grass] in his hand. ||7||" |
+| `Line 33965: ` | "[Blank line]" |

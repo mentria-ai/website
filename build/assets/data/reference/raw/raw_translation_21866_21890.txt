@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 21866: पप्रच्छ तं महात्मानं द्रौपद्यर्थे विशां पतिः ||४||` | "The king [lord of people] asked that great soul regarding Draupadī's matter. ||4||" |
+| `Line 21867: ` | "[Blank line]" |
+| `Line 21868: कथमेका बहूनां स्यान्न च स्याद्धर्मसङ्करः |` | "How can one woman belong to many, and how would this not cause confusion of dharma [religious duty]?" |
+| `Line 21869: एतन्नो भगवान्सर्वं प्रब्रवीतु यथातथम् ||५||` | "Let the venerable one explain all this to us exactly as it is. ||5||" |
+| `Line 21870: ` | "[Blank line]" |
+| `Line 21871: व्यास उवाच||` | "Vyāsa [compiler of Vedas] said:" |
+| `Line 21872: ` | "[Blank line]" |
+| `Line 21873: अस्मिन्धर्मे विप्रलम्भे लोकवेदविरोधके |` | "In this confusing matter of dharma that seems contrary to worldly and Vedic customs," |
+| `Line 21874: यस्य यस्य मतं यद्यच्छ्रोतुमिच्छामि तस्य तत् ||६||` | "I wish to hear whatever opinion each of you holds on this matter. ||6||" |
+| `Line 21875: ` | "[Blank line]" |
+| `Line 21876: द्रुपद उवाच||` | "Drupada [Draupadī's father] said:" |
+| `Line 21877: ` | "[Blank line]" |
+| `Line 21878: अधर्मोऽयं मम मतो विरुद्धो लोकवेदयोः |` | "In my opinion, this is adharma [unrighteousness], contrary to both worldly custom and the Vedas," |
+| `Line 21879: न ह्येका विद्यते पत्नी बहूनां द्विजसत्तम ||७||` | "For one woman cannot be the wife of many, O best of twice-born [brahmin]. ||7||" |
+| `Line 21880: ` | "[Blank line]" |
+| `Line 21881: न चाप्याचरितः पूर्वैरयं धर्मो महात्मभिः |` | "Nor has this practice been followed before by great souls," |
+| `Line 21882: न च धर्मोऽप्यनेकस्थश्चरितव्यः सनातनः ||८||` | "And the eternal dharma should not be practiced in diverse contradictory ways. ||8||" |
+| `Line 21883: ` | "[Blank line]" |
+| `Line 21884: अतो नाहं करोम्येवं व्यवसायं क्रियां प्रति |` | "Therefore, I cannot make a determination regarding this action," |
+| `Line 21885: धर्मसंदेहसंदिग्धं प्रतिभाति हि मामिदम् ||९||` | "For this appears to me fraught with doubt regarding dharma. ||9||" |
+| `Line 21886: ` | "[Blank line]" |
+| `Line 21887: धृष्टद्युम्न उवाच||` | "Dhṛṣṭadyumna [Draupadī's brother] said:" |
+| `Line 21888: ` | "[Blank line]" |
+| `Line 21889: यवीयसः कथं भार्यां ज्येष्ठो भ्राता द्विजर्षभ |` | "How, O bull among twice-born [brahmin sage], can an elder brother" |
+| `Line 21890: ब्रह्मन्समभिवर्तेत सद्वृत्तः संस्तपोधन ||१०||` | "Approach the wife of his younger brother, O brahmin, O virtuous one rich in austerities? ||10||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 32041: युधिष्ठिर उवाच॥` | "Yudhiṣṭhira [eldest Pāṇḍava] said:" |
+| `Line 32042: ` | "[Blank line]" |
+| `Line 32043: शतं दासीसहस्राणि तरुण्यो मे प्रभद्रिकाः |` | "I have a hundred thousand young female servants [dāsī], beautiful and auspicious," |
+| `Line 32044: कम्बुकेयूरधारिण्यो निष्ककण्ठ्यः स्वलङ्कृताः ॥१२॥` | "Wearing conch-shell bracelets [keyūra], gold coins [niṣka] around their necks, and well adorned. ||12||" |
+| `Line 32045: ` | "[Blank line]" |
+| `Line 32046: महार्हमाल्याभरणाः सुवस्त्राश्चन्दनोक्षिताः |` | "Wearing precious garlands and ornaments, fine clothes, anointed with sandal paste," |
+| `Line 32047: मणीन्हेम च बिभ्रत्यः सर्वा वै सूक्ष्मवाससः ॥१३॥` | "All bearing gems and gold, dressed in delicate garments. ||13||" |
+| `Line 32048: ` | "[Blank line]" |
+| `Line 32049: अनुसेवां चरन्तीमाः कुशला नृत्यसामसु |` | "These skilled in dance and song perform service," |
+| `Line 32050: स्नातकानाममात्यानां राज्ञां च मम शासनात् ॥१४॥` | "To the graduates [snātaka], ministers, and kings by my command. ||14||" |
+| `Line 32051: ` | "[Blank line]" |
+| `Line 32052: एतद्राजन्धनं मह्यं तेन दीव्याम्यहं त्वया ॥१४॥` | "This, O king, is my wealth, with this I will gamble with you. ||14||" |
+| `Line 32053: ` | "[Blank line]" |
+| `Line 32054: वैशम्पायन उवाच॥` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 32055: ` | "[Blank line]" |
+| `Line 32056: एतच्छ्रुत्वा व्यवसितो निकृतिं समुपाश्रितः |` | "Hearing this, determined and resorting to deceit," |
+| `Line 32057: जितमित्येव शकुनिर्युधिष्ठिरमभाषत ॥१५॥` | "Śakuni [Duryodhana's uncle] said to Yudhiṣṭhira, 'It is won!' ||15||" |
+| `Line 32058: ` | "[Blank line]" |
+| `Line 32059: युधिष्ठिर उवाच॥` | "Yudhiṣṭhira said:" |
+| `Line 32060: ` | "[Blank line]" |
+| `Line 32061: एतावन्त्येव दासानां सहस्राण्युत सन्ति मे |` | "I also have this many thousands of male servants [dāsa]," |
+| `Line 32062: प्रदक्षिणानुलोमाश्च प्रावारवसनाः सदा ॥१६॥` | "Obedient [pradakṣiṇa], compliant, always dressed in fine garments. ||16||" |
+| `Line 32063: ` | "[Blank line]" |
+| `Line 32064: प्राज्ञा मेधाविनो दक्षा युवानो मृष्टकुण्डलाः |` | "Wise, intelligent, skillful, young, wearing polished earrings," |
+| `Line 32065: पात्रीहस्ता दिवारात्रमतिथीन्भोजयन्त्युत ॥१७॥` | "With vessels in hand, day and night they feed the guests. ||17||" |

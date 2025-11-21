@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 16641: ` | "[Blank line]" |
+| `Line 16642: ` | "[Blank line]" |
+| `Line 16643: ` | "[Blank line]" |
+| `Line 16644: १३१` | "131 [chapter number]" |
+| `Line 16645: ` | "[Blank line]" |
+| `Line 16646: ` | "[Blank line]" |
+| `Line 16647: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 16648: ` | "[Blank line]" |
+| `Line 16649: ततो दुर्योधनो राजा सर्वास्ताः प्रकृतीः शनैः |` | "Then King Duryodhana gradually won over all those subjects [prakṛti]," |
+| `Line 16650: अर्थमानप्रदानाभ्यां सञ्जहार सहानुजः ||१||` | "Through gifts of wealth and honors, he attracted them along with his younger brothers. ||1||" |
+| `Line 16651: ` | "[Blank line]" |
+| `Line 16652: धृतराष्ट्रप्रयुक्तास्तु केचित्कुशलमन्त्रिणः |` | "But certain skilled counselors, employed by Dhṛtarāṣṭra [blind king]," |
+| `Line 16653: कथयां चक्रिरे रम्यं नगरं वारणावतम् ||२||` | "Began to speak about the delightful city of Vāraṇāvata. ||2||" |
+| `Line 16654: ` | "[Blank line]" |
+| `Line 16655: अयं समाजः सुमहान्रमणीयतमो भुवि |` | "This great festival, most delightful on earth," |
+| `Line 16656: उपस्थितः पशुपतेर्नगरे वारणावते ||३||` | "Is taking place in Vāraṇāvata, the city of Paśupati [Śiva]. ||3||" |
+| `Line 16657: ` | "[Blank line]" |
+| `Line 16658: सर्वरत्नसमाकीर्णे पुंसां देशे मनोरमे |` | "In a place filled with all kinds of jewels, delightful to men," |
+| `Line 16659: इत्येवं धृतराष्ट्रस्य वचनाच्चक्रिरे कथाः ||४||` | "Thus, at Dhṛtarāṣṭra's command, they made these statements. ||4||" |
+| `Line 16660: ` | "[Blank line]" |
+| `Line 16661: कथ्यमाने तथा रम्ये नगरे वारणावते |` | "When the delightful city of Vāraṇāvata was thus being described," |
+| `Line 16662: गमने पाण्डुपुत्राणां जज्ञे तत्र मतिर्नृप ||५||` | "The king's mind turned to sending the sons of Pāṇḍu [Pāṇḍavas] there. ||5||" |
+| `Line 16663: ` | "[Blank line]" |
+| `Line 16664: यदा त्वमन्यत नृपो जातकौतूहला इति |` | "When the king thought they had become curious," |
+| `Line 16665: उवाचैनानथ तदा पाण्डवानम्बिकासुतः ||६||` | "Then the son of Ambikā [Dhṛtarāṣṭra] spoke to the Pāṇḍavas. ||6||" |

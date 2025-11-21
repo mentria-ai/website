@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 976: द्वितीयं तु सभापर्व बहुवृत्तान्तमुच्यते |` | "The second, the Sabha Parva [Assembly Book], is said to contain many episodes." |
+| `Line 977: सभाक्रिया पाण्डवानां किङ्कराणां च दर्शनम् ||९७||` | "The construction of the assembly hall by the Pandavas and the appearance of the servants. ||97||" |
+| `Line 978: ` | [Blank line] |
+| `Line 979: लोकपालसभाख्यानं नारदाद्देवदर्शनात् |` | "The description of the assemblies of the Lokapalas [world guardians] as seen by Narada among the gods." |
+| `Line 980: राजसूयस्य चारम्भो जरासन्धवधस्तथा ||९८||` | "The commencement of the Rajasuya [royal sacrifice] and the slaying of Jarasandha. ||98||" |
+| `Line 981: ` | [Blank line] |
+| `Line 982: गिरिव्रजे निरुद्धानां राज्ञां कृष्णेन मोक्षणम् |` | "The liberation by Krishna of the kings imprisoned in Girivraja [mountain fortress]." |
+| `Line 983: राजसूयेऽर्घसंवादे शिशुपालवधस्तथा ||९९||` | "The slaying of Shishupala during the dispute about the offering at the Rajasuya sacrifice. ||99||" |
+| `Line 984: ` | [Blank line] |
+| `Line 985: यज्ञे विभूतिं तां दृष्ट्वा दुःखामर्षान्वितस्य च |` | "Having seen that splendor at the sacrifice, and filled with sorrow and envy," |
+| `Line 986: दुर्योधनस्यावहासो भीमेन च सभातले ||१००||` | "Duryodhana was mocked by Bhima on the floor of the assembly hall. ||100||" |
+| `Line 987: ` | [Blank line] |
+| `Line 988: यत्रास्य मन्युरुद्भूतो येन द्यूतमकारयत् |` | "Where his anger arose, because of which he arranged the gambling match." |
+| `Line 989: यत्र धर्मसुतं द्यूते शकुनिः कितवोऽजयत् ||१०१||` | "Where Shakuni, the deceitful gambler, defeated Dharma's son [Yudhishthira] in the game. ||101||" |
+| `Line 990: ` | [Blank line] |
+| `Line 991: यत्र द्यूतार्णवे मग्नान्द्रौपदी नौरिवार्णवात् |` | "Where Draupadi, like a boat in the ocean, rescued those who were drowning in the ocean of gambling." |
+| `Line 992: तारयामास तांस्तीर्णाञ्ज्ञात्वा दुर्योधनो नृपः ||१०२||` | "King Duryodhana, knowing they had been saved, ||102||" |
+| `Line 993: ` | [Blank line] |
+| `Line 994: पुनरेव ततो द्यूते समाह्वयत पाण्डवान् ||१०२||` | "Again challenged the Pandavas to another game of dice. ||102||" |
+| `Line 995: ` | [Blank line] |
+| `Line 996: एतत्सर्वं सभापर्व समाख्यातं महात्मना |` | "All this is narrated in the Sabha Parva by the great-souled one [Vyasa]." |
+| `Line 997: अध्यायाः सप्ततिर्ज्ञेयास्तथा द्वौ चात्र सङ्ख्यया ||१०३||` | "Seventy-two chapters are to be known here by count. ||103||" |
+| `Line 998: ` | [Blank line] |
+| `Line 999: श्लोकानां द्वे सहस्रे तु पञ्च श्लोकशतानि च |` | "Two thousand and five hundred verses," |
+| `Line 1000: श्लोकाश्चैकादश ज्ञेयाः पर्वण्यस्मिन्प्रकीर्तिताः ||१०४||` | "And eleven verses are to be known as proclaimed in this Parva [book section]. ||104||" |

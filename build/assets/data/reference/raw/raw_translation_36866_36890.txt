@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 36866: २३` | "23 [chapter number]" |
+| `Line 36867: ` | "[Blank line]" |
+| `Line 36868: ` | "[Blank line]" |
+| `Line 36869: वासुदेव उवाच||` | "Vāsudeva [Krishna] said:" |
+| `Line 36870: ` | "[Blank line]" |
+| `Line 36871: ततोऽहं भरतश्रेष्ठ प्रगृह्य रुचिरं धनुः |` | "Then, O best of Bharatas [Arjuna], taking up my splendid bow," |
+| `Line 36872: शरैरपातयं सौभाच्छिरांसि विबुधद्विषाम् ||१||` | "With arrows I struck down from Saubha [aerial city] the heads of the enemies of the gods. ||1||" |
+| `Line 36873: ` | "[Blank line]" |
+| `Line 36874: शरांश्चाशीविषाकारानूर्ध्वगांस्तिग्मतेजसः |` | "And arrows resembling venomous serpents, rising upward with fierce energy," |
+| `Line 36875: अप्रैषं शाल्वराजाय शार्ङ्गमुक्तान्सुवाससः ||२||` | "I dispatched toward King Śālva, arrows released from Śārṅga [Krishna's bow], well-feathered. ||2||" |
+| `Line 36876: ` | "[Blank line]" |
+| `Line 36877: ततो नादृश्यत तदा सौभं कुरुकुलोद्वह |` | "Then, O upholder of the Kuru race, that Saubha became invisible," |
+| `Line 36878: अन्तर्हितं माययाभूत्ततोऽहं विस्मितोऽभवम् ||३||` | "Concealed by illusion [māyā], and I was astonished. ||3||" |
+| `Line 36879: ` | "[Blank line]" |
+| `Line 36880: अथ दानवसङ्घास्ते विकृताननमूर्धजाः |` | "Then those hosts of Dānavas [demons], with distorted faces and hair," |
+| `Line 36881: उदक्रोशन्महाराज विष्ठिते मयि भारत ||४||` | "Raised a loud cry, O great king, as I stood there, O Bhārata. ||4||" |
+| `Line 36882: ` | "[Blank line]" |
+| `Line 36883: ततोऽस्त्रं शब्दसाहं वै त्वरमाणो महाहवे |` | "Then, hurrying in that great battle, I employed the sound-neutralizing weapon [śabdasāha]," |
+| `Line 36884: अयोजयं तद्वधाय ततः शब्द उपारमत् ||५||` | "I released it for their destruction, and then the sound ceased. ||5||" |
+| `Line 36885: ` | "[Blank line]" |
+| `Line 36886: हतास्ते दानवाः सर्वे यैः स शब्द उदीरितः |` | "All those Dānavas who had raised that sound were slain," |
+| `Line 36887: शरैरादित्यसङ्काशैर्ज्वलितैः शब्दसाधनैः ||६||` | "By arrows blazing like the sun, which neutralized the sound. ||6||" |
+| `Line 36888: ` | "[Blank line]" |
+| `Line 36889: तस्मिन्नुपरते शब्दे पुनरेवान्यतोऽभवत् |` | "When that sound ceased, again from another direction arose," |
+| `Line 36890: शब्दोऽपरो महाराज तत्रापि प्राहरं शरान् ||७||` | "Another sound, O great king, and there too I discharged arrows. ||7||" |

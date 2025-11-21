@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 201: चतुर्विंशतिसाहस्रीं चक्रे भारतसंहिताम् |` | "He composed the Bhārata Saṃhitā [epic compilation] of twenty-four thousand verses," |
+| `Line 202: उपाख्यानैर्विना तावद्भारतं प्रोच्यते बुधैः ||६१||` | "Without the sub-narratives, that much is called Bhārata by the wise. ||61||" |
+| `Line 203: ` | [Blank line] |
+| `Line 204: ततोऽध्यर्धशतं भूयः सङ्क्षेपं कृतवानृषिः |` | "Then the sage further composed a summary of one hundred and fifty," |
+| `Line 205: अनुक्रमणिमध्यायं वृत्तान्तानां सपर्वणाम् ||६२||` | "An index chapter of the contents along with the Parvas [sections]. ||62||" |
+| `Line 206: ` | [Blank line] |
+| `Line 207: इदं द्वैपायनः पूर्वं पुत्रमध्यापयच्छुकम् |` | "This was first taught by Dvaipāyana [Vyāsa] to his son Śuka," |
+| `Line 208: ततोऽन्येभ्योऽनुरूपेभ्यः शिष्येभ्यः प्रददौ प्रभुः ||६३||` | "Then the master gave it to other suitable disciples. ||63||" |
+| `Line 209: ` | [Blank line] |
+| `Line 210: नारदोऽश्रावयद्देवानसितो देवलः पितृन् |` | "Nārada recited it to the gods, Asita Devala to the ancestors," |
+| `Line 211: गन्धर्वयक्षरक्षांसि श्रावयामास वै शुकः ||६४||` | "And Śuka indeed recited it to the Gandharvas [celestial musicians], Yakṣas [wealth spirits], and Rākṣasas [demons]. ||64||" |
+| `Line 212: ` | [Blank line] |
+| `Line 213: दुर्योधनो मन्युमयो महाद्रुमः; स्कन्धः कर्णः शकुनिस्तस्य शाखाः |` | "Duryodhana is a great tree made of anger; Karṇa is its trunk, Śakuni its branches," |
+| `Line 214: दुःशासनः पुष्पफले समृद्धे; मूलं राजा धृतराष्ट्रोऽमनीषी ||६५||` | "Duḥśāsana its abundant flowers and fruits; the unwise king Dhṛtarāṣṭra is its root. ||65||" |
+| `Line 215: ` | [Blank line] |
+| `Line 216: युधिष्ठिरो धर्ममयो महाद्रुमः; स्कन्धोऽर्जुनो भीमसेनोऽस्य शाखाः |` | "Yudhiṣṭhira is a great tree made of dharma [righteousness]; Arjuna is its trunk, Bhīmasena its branches," |
+| `Line 217: माद्रीसुतौ पुष्पफले समृद्धे; मूलं कृष्णो ब्रह्म च ब्राह्मणाश्च ||६६||` | "The sons of Mādrī [Nakula and Sahadeva] are its abundant flowers and fruits; Kṛṣṇa, Brahman, and the Brāhmaṇas are its roots. ||66||" |
+| `Line 218: ` | [Blank line] |
+| `Line 219: पाण्डुर्जित्वा बहून्देशान्युधा विक्रमणेन च |` | "Pāṇḍu, having conquered many lands through battle and valor," |
+| `Line 220: अरण्ये मृगयाशीलो न्यवसत्सजनस्तदा ||६७||` | "Then lived in the forest with his people, devoted to hunting. ||67||" |
+| `Line 221: ` | [Blank line] |
+| `Line 222: मृगव्यवायनिधने कृच्छ्रां प्राप स आपदम् |` | "He met with a terrible calamity due to intercourse while in the form of a deer [during hunting]," |
+| `Line 223: जन्मप्रभृति पार्थानां तत्राचारविधिक्रमः ||६८||` | "From the birth of the Pārthas [sons of Pṛthā/Kuntī], there is the sequence of their conduct and rules. ||68||" |
+| `Line 224: ` | [Blank line] |
+| `Line 225: मात्रोरभ्युपपत्तिश्च धर्मोपनिषदं प्रति |` | "And the approach of their mothers regarding the secret doctrine of dharma [divine conception]," |

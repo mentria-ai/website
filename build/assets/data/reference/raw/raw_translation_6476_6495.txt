@@ -1,0 +1,22 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 6476: ` | "[Blank line]" |
+| `Line 6477: ` | "[Blank line]" |
+| `Line 6478: सूत उवाच||` | "Sūta [bard-narrator] said:" |
+| `Line 6479: ` | "[Blank line]" |
+| `Line 6480: श्रुत्वा तु सर्पसत्राय दीक्षितं जनमेजयम् |` | "Having heard that Janamejaya was initiated for the serpent sacrifice [sarpasatra]," |
+| `Line 6481: अभ्यागच्छदृषिर्विद्वान्कृष्णद्वैपायनस्तदा ||१||` | "The learned sage Kṛṣṇa Dvaipāyana [Vyāsa] then approached. ||1||" |
+| `Line 6482: ` | "[Blank line]" |
+| `Line 6483: जनयामास यं काली शक्तेः पुत्रात्पराशरात् |` | "Whom Kālī [Satyavatī] bore from Parāśara, the son of Śakti," |
+| `Line 6484: कन्यैव यमुनाद्वीपे पाण्डवानां पितामहम् ||२||` | "While still a maiden, on an island in the Yamunā, the grandfather of the Pāṇḍavas. ||2||" |
+| `Line 6485: ` | "[Blank line]" |
+| `Line 6486: जातमात्रश्च यः सद्य इष्ट्या देहमवीवृधत् |` | "Who, as soon as he was born, by his will made his body grow," |
+| `Line 6487: वेदांश्चाधिजगे साङ्गान्सेतिहासान्महायशाः ||३||` | "And mastered the Vedas with their auxiliary texts [aṅgas] and histories [itihāsas], the greatly renowned one. ||3||" |
+| `Line 6488: ` | "[Blank line]" |
+| `Line 6489: यं नातितपसा कश्चिन्न वेदाध्ययनेन च |` | "Whom no one could surpass, neither through austerities [tapas] nor through Vedic study," |
+| `Line 6490: न व्रतैर्नोपवासैश्च न प्रसूत्या न मन्युना ||४||` | "Nor through vows, nor through fasting, nor through progeny, nor through anger. ||4||" |
+| `Line 6491: ` | "[Blank line]" |
+| `Line 6492: विव्यासैकं चतुर्धा यो वेदं वेदविदां वरः |` | "Who, the best among knowers of the Vedas [vedavidām], divided the one Veda into four parts," |
+| `Line 6493: परावरज्ञो ब्रह्मर्षिः कविः सत्यव्रतः शुचिः ||५||` | "Knower of higher and lower truths [parāvarajña], a brahmarṣi [brahmin sage], a poet, truthful in his vows, and pure. ||5||" |
+| `Line 6494: ` | "[Blank line]" |
+| `Line 6495: यः पाण्डुं धृतराष्ट्रं च विदुरं चाप्यजीजनत् |` | "Who begot Pāṇḍu, Dhṛtarāṣṭra, and also Vidura," |

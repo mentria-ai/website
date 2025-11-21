@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 37241: ` | "[Blank line]" |
+| `Line 37242: ` | "[Blank line]" |
+| `Line 37243: २७` | "27 [chapter number]" |
+| `Line 37244: ` | "[Blank line]" |
+| `Line 37245: ` | "[Blank line]" |
+| `Line 37246: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 37247: ` | "[Blank line]" |
+| `Line 37248: वसत्स्वथ द्वैतवने पाण्डवेषु महात्मसु |` | "While the noble-souled Pāṇḍavas [sons of Pāṇḍu] were dwelling in the Dvaitavana [forest]," |
+| `Line 37249: अनुकीर्णं महारण्यं ब्राह्मणैः समपद्यत ||१||` | "The great forest became filled with Brāhmaṇas [priest class]. ||1||" |
+| `Line 37250: ` | "[Blank line]" |
+| `Line 37251: ईर्यमाणेन सततं ब्रह्मघोषेण सर्वतः |` | "With the constant chanting of Vedic hymns [brahmaghosa] from all directions," |
+| `Line 37252: ब्रह्मलोकसमं पुण्यमासीद्द्वैतवनं सरः ||२||` | "The Dvaitavana lake became as sacred as Brahmaloka [Brahmā's realm]. ||2||" |
+| `Line 37253: ` | "[Blank line]" |
+| `Line 37254: यजुषामृचां च साम्नां च गद्यानां चैव सर्वशः |` | "Of the Yajus [sacrificial formulas], Ṛks [verses], Sāmans [chants], and prose texts everywhere," |
+| `Line 37255: आसीदुच्चार्यमाणानां निस्वनो हृदयङ्गमः ||३||` | "The sound of their recitation was heart-touching. ||3||" |
+| `Line 37256: ` | "[Blank line]" |
+| `Line 37257: ज्याघोषः पाण्डवेयानां ब्रह्मघोषश्च धीमताम् |` | "The twang of bowstrings of the Pāṇḍavas and the Vedic chants of the wise ones," |
+| `Line 37258: संसृष्टं ब्रह्मणा क्षत्रं भूय एव व्यरोचत ||४||` | "The Kṣatriya [warrior class] united with the Brāhmaṇa [priest class] shone forth even more brilliantly. ||4||" |
+| `Line 37259: ` | "[Blank line]" |
+| `Line 37260: अथाब्रवीद्बको दाल्भ्यो धर्मराजं युधिष्ठिरम् |` | "Then Baka Dālbhya [sage] spoke to Dharmarāja [king of righteousness] Yudhiṣṭhira," |
+| `Line 37261: सन्ध्यां कौन्तेयमासीनमृषिभिः परिवारितम् ||५||` | "Who was seated at twilight [sandhyā], the son of Kuntī, surrounded by sages. ||5||" |
+| `Line 37262: ` | "[Blank line]" |
+| `Line 37263: पश्य द्वैतवने पार्थ ब्राह्मणानां तपस्विनाम् |` | "Behold, O Pārtha [Arjuna/Yudhiṣṭhira], in Dvaitavana, the ascetic Brāhmaṇas," |
+| `Line 37264: होमवेलां कुरुश्रेष्ठ सम्प्रज्वलितपावकाम् ||६||` | "At the time of oblation [homa], O best of Kurus, with their sacred fires blazing. ||6||" |
+| `Line 37265: ` | "[Blank line]" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 39516: दिशः सम्पूरयन्नादैर्महामेघरवोपमैः ||३||` | "Filling the directions with sounds resembling great thunderclouds. ||3||" |
+| `Line 39517: ` | "[Blank line]" |
+| `Line 39518: असयः शक्तयो भीमा गदाश्चोग्रप्रदर्शनाः |` | "Swords, spears, fearsome powers, and terrifying maces," |
+| `Line 39519: दिव्यप्रभावाः प्रासाश्च विद्युतश्च महाप्रभाः ||४||` | "Divine javelins of great power, and lightning bolts of immense brilliance. ||4||" |
+| `Line 39520: ` | "[Blank line]" |
+| `Line 39521: तथैवाशनयस्तत्र चक्रयुक्ता हुडागुडाः |` | "Likewise, there were thunderbolts with discs, and whirling weapons [huḍāguḍā]," |
+| `Line 39522: वायुस्फोटाः सनिर्घाता बर्हिमेघनिभस्वनाः ||५||` | "Wind-bursts with thunderclaps, roaring like peacock-feathered clouds. ||5||" |
+| `Line 39523: ` | "[Blank line]" |
+| `Line 39524: तत्र नागा महाकाया ज्वलितास्याः सुदारुणाः |` | "There were serpents [nāga] of enormous bodies, with flaming mouths, extremely terrifying," |
+| `Line 39525: सिताभ्रकूटप्रतिमाः संहताश्च यथोपलाः ||६||` | "Resembling white mountain peaks, and compact like stones. ||6||" |
+| `Line 39526: ` | "[Blank line]" |
+| `Line 39527: दश वाजिसहस्राणि हरीणां वातरंहसाम् |` | "Ten thousand tawny horses [harī], swift as wind," |
+| `Line 39528: वहन्ति यं नेत्रमुषं दिव्यं मायामयं रथम् ||७||` | "Drew that eye-dazzling, divine, magical chariot. ||7||" |
+| `Line 39529: ` | "[Blank line]" |
+| `Line 39530: तत्रापश्यन्महानीलं वैजयन्तं महाप्रभम् |` | "There he saw the great blue Vaijayanta [victory banner], of great splendor," |
+| `Line 39531: ध्वजमिन्दीवरश्यामं वंशं कनकभूषणम् ||८||` | "A flag dark as a blue lotus, with a pole adorned with gold. ||8||" |
+| `Line 39532: ` | "[Blank line]" |
+| `Line 39533: तस्मिन्रथे स्थितं सूतं तप्तहेमविभूषितम् |` | "Standing in that chariot was a charioteer [sūta], adorned with burnished gold," |
+| `Line 39534: दृष्ट्वा पार्थो महाबाहुर्देवमेवान्वतर्कयत् ||९||` | "Seeing him, Pārtha [Arjuna], the mighty-armed, thought he must be a god. ||9||" |
+| `Line 39535: ` | "[Blank line]" |
+| `Line 39536: तथा तर्कयतस्तस्य फल्गुनस्याथ मातलिः |` | "While Phalguna [Arjuna] was thinking thus, Mātali [Indra's charioteer]," |
+| `Line 39537: संनतः प्रश्रितो भूत्वा वाक्यमर्जुनमब्रवीत् ||१०||` | "Bowing humbly and respectfully, spoke these words to Arjuna. ||10||" |
+| `Line 39538: ` | "[Blank line]" |
+| `Line 39539: भो भो शक्रात्मज श्रीमाञ्शक्रस्त्वां द्रष्टुमिच्छति |` | "O illustrious son of Śakra [Indra], Śakra wishes to see you," |
+| `Line 39540: आरोहतु भवाञ्शीघ्रं रथमिन्द्रस्य संमतम् ||११||` | "Please quickly mount this chariot approved by Indra [king of gods]. ||11||" |

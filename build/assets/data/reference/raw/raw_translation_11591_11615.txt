@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 11591: तस्यामस्य जज्ञे कुरुः | ०४० |` | "From her was born to him Kuru [dynastic founder]. |040|" |
+| `Line 11592: कुरुः खलु दाशार्हीमुपयेमे शुभाङ्गीं नाम |` | "Kuru indeed married a Dāśārhī [Yadava clan] woman named Śubhāṅgī [beautiful-limbed]." |
+| `Line 11593: तस्यामस्य जज्ञे विडूरथः | ०४१ |` | "From her was born to him Viḍūratha. |041|" |
+| `Line 11594: विडूरथस्तु मागधीमुपयेमे सम्प्रियां नाम |` | "Viḍūratha married a Māgadhī [from Magadha] woman named Sampriyā [well-beloved]." |
+| `Line 11595: तस्यामस्य जज्ञेऽरुग्वान्नाम | ०४२ |` | "From her was born to him one named Arugvān [disease-free]. |042|" |
+| `Line 11596: अरुग्वान्खलु मागधीमुपयेमेऽमृतां नाम |` | "Arugvān indeed married a Māgadhī woman named Amṛtā [immortal]." |
+| `Line 11597: तस्यामस्य जज्ञे परिक्षित् | ०४३ |` | "From her was born to him Parikṣit [all-seeing]. |043|" |
+| `Line 11598: परिक्षित्खलु बाहुदामुपयेमे सुयशां नाम |` | "Parikṣit indeed married a Bāhudā [strong-armed clan] woman named Suyaśā [well-famed]." |
+| `Line 11599: तस्यामस्य जज्ञे भीमसेनः | ०४४ |` | "From her was born to him Bhīmasena [terrible army]. |044|" |
+| `Line 11600: भीमसेनः खलु कैकेयीमुपयेमे सुकुमारीं नाम |` | "Bhīmasena indeed married a Kaikeyī [from Kekeya] woman named Sukumārī [very delicate]." |
+| `Line 11601: तस्यामस्य जज्ञे पर्यश्रवाः |` | "From her was born to him Paryaśravās." |
+| `Line 11602: यमाहुः प्रतीपं नाम | ०४५ |` | "Whom they call by the name Pratīpa [against the stream]. |045|" |
+| `Line 11603: प्रतीपः खलु शैब्यामुपयेमे सुनन्दां नाम |` | "Pratīpa indeed married a Śaibyā [from Śibi] woman named Sunandā [well-joyful]." |
+| `Line 11604: तस्यां पुत्रानुत्पादयामास देवापिं शन्तनुं बाह्लीकं चेति | ०४६ |` | "In her he begot sons: Devāpi, Śantanu, and Bāhlīka. |046|" |
+| `Line 11605: देवापिः खलु बाल एवारण्यं प्रविवेश |` | "Devāpi indeed entered the forest while still a boy." |
+| `Line 11606: शन्तनुस्तु महीपालोऽभवत् |` | "But Śantanu became the protector of the earth [king]." |
+| `Line 11607: अत्रानुवंशो भवति | ०४७ |` | "Here follows a genealogical verse. |047|" |
+| `Line 11608: ` | "[Blank line]" |
+| `Line 11609: यं यं कराभ्यां स्पृशति जीर्णं स सुखमश्नुते |` | "Whomever aged he touches with his hands experiences happiness," |
+| `Line 11610: पुनर्युवा च भवति तस्मात्तं शन्तनुं विदुः ||४८||` | "And becomes young again; therefore they know him as Śantanu [beneficial-bodied]. ||48||" |
+| `Line 11611: ` | "[Blank line]" |
+| `Line 11612: तदस्य शन्तनुत्वम् | ०४९ |` | "That is his Śantanu-ness [origin of name]. |049|" |
+| `Line 11613: शन्तनुः खलु गङ्गां भागीरथीमुपयेमे |` | "Śantanu indeed married Gaṅgā [river goddess] Bhāgīrathī [brought by Bhagīratha]." |
+| `Line 11614: तस्यामस्य जज्ञे देवव्रतः |` | "From her was born to him Devavrata [divine vow]." |
+| `Line 11615: यमाहुर्भीष्म इति | ०५० |` | "Whom they call Bhīṣma [terrible]. |050|" |

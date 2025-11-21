@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 24216: ` | "[Blank line]" |
+| `Line 24217: वैशम्पायन उवाच॥` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 24218: ` | "[Blank line]" |
+| `Line 24219: ततोऽर्जुनश्च कृष्णश्च विनिश्चित्येतिकृत्यताम् |` | "Then Arjuna and Kṛṣṇa [Pāṇḍava hero and divine ally], having determined the course of action," |
+| `Line 24220: शीघ्रगान्पुरुषान्राजन्प्रेषयामासतुस्तदा ॥२४॥` | "Sent swift messengers at that time, O King [Janamejaya]. ||24||" |
+| `Line 24221: ` | "[Blank line]" |
+| `Line 24222: धर्मराजाय तत्सर्वमिन्द्रप्रस्थगताय वै |` | "All that information to Dharmarāja [Yudhiṣṭhira], who was then in Indraprastha [Pāṇḍava capital]," |
+| `Line 24223: श्रुत्वैव च महाबाहुरनुजज्ञे स पाण्डवः ॥२५॥` | "And having heard it, that mighty-armed Pāṇḍava [Yudhiṣṭhira] gave his consent. ||25||" |
+| `Line 24224: ` | "[Blank line]" |
+| `Line 24225: ` | "[Blank line]" |
+| `Line 24226: ` | "[Blank line]" |
+| `Line 24227: ` | "[Blank line]" |
+| `Line 24228: ` | "[Blank line]" |
+| `Line 24229: ` | "[Blank line]" |
+| `Line 24230: २१२` | "212 [chapter/section number]" |
+| `Line 24231: ` | "[Blank line]" |
+| `Line 24232: ` | "[Blank line]" |
+| `Line 24233: वैशम्पायन उवाच॥` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 24234: ` | "[Blank line]" |
+| `Line 24235: ततः संवादिते तस्मिन्ननुज्ञातो धनञ्जयः |` | "Then, after this was communicated, Dhanañjaya [Arjuna] having been permitted," |
+| `Line 24236: गतां रैवतके कन्यां विदित्वा जनमेजय ॥१॥` | "Having learned that the maiden had gone to Raivataka [mountain], O Janamejaya [king listener]. ||1||" |
+| `Line 24237: ` | "[Blank line]" |
+| `Line 24238: वासुदेवाभ्यनुज्ञातः कथयित्वेतिकृत्यताम् |` | "With Vāsudeva's [Kṛṣṇa's] permission, having explained the plan of action," |
+| `Line 24239: कृष्णस्य मतमाज्ञाय प्रययौ भरतर्षभः ॥२॥` | "Understanding Kṛṣṇa's opinion, that bull among the Bharatas [Arjuna] departed. ||2||" |
+| `Line 24240: ` | "[Blank line]" |

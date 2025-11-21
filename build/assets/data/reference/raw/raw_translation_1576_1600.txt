@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1576: तमुपाध्यायस्तथापि पीवानमेव दृष्ट्वोवाच |` | "Seeing him still well-nourished, the teacher [upādhyāya] said to him:" |
+| `Line 1577: वत्सोपमन्यो सर्वमशेषतस्ते भैक्षं गृह्णामि |` | "My child Upamanyu, I take all your alms [bhaikṣa] without exception," |
+| `Line 1578: केनेदानीं वृत्तिं कल्पयसीति | ०३९ |` | "How are you now sustaining yourself? ||39||" |
+| `Line 1579: स एवमुक्त उपाध्यायेन प्रत्युवाच |` | "Being thus addressed by the teacher, he replied:" |
+| `Line 1580: भगवते निवेद्य पूर्वमपरं चरामि |` | "After offering to you, revered one, I go for a second round of begging," |
+| `Line 1581: तेन वृत्तिं कल्पयामीति | ०४० |` | "By that I sustain myself. ||40||" |
+| `Line 1582: तमुपाध्यायः प्रत्युवाच |` | "The teacher replied to him:" |
+| `Line 1583: नैषा न्याय्या गुरुवृत्तिः |` | "This is not a proper conduct toward a guru [teacher]," |
+| `Line 1584: अन्येषामपि वृत्त्युपरोधं करोष्येवं वर्तमानः |` | "By acting this way, you also obstruct the livelihood of others," |
+| `Line 1585: लुब्धोऽसीति | ०४१ |` | "You are greedy. ||41||" |
+| `Line 1586: स तथेत्युक्त्वा गा अरक्षत् |` | "Having said 'so be it,' he tended the cows," |
+| `Line 1587: रक्षित्वा च पुनरुपाध्यायगृहमागम्योपाध्यायस्याग्रतः स्थित्वा नमश्चक्रे | ०४२ |` | "And after tending them, he returned to the teacher's house, stood before the teacher and paid his respects. ||42||" |
+| `Line 1588: तमुपाध्यायस्तथापि पीवानमेव दृष्ट्वा पुनरुवाच |` | "Seeing him still well-nourished, the teacher again said to him:" |
+| `Line 1589: अहं ते सर्वं भैक्षं गृह्णामि न चान्यच्चरसि |` | "I take all your alms, and you do not go for a second round," |
+| `Line 1590: पीवानसि |` | "Yet you are well-nourished," |
+| `Line 1591: केन वृत्तिं कल्पयसीति | ०४३ |` | "How are you sustaining yourself? ||43||" |
+| `Line 1592: स उपाध्यायं प्रत्युवाच |` | "He replied to the teacher:" |
+| `Line 1593: भो एतासां गवां पयसा वृत्तिं कल्पयामीति | ०४४ |` | "Sir, I sustain myself with the milk of these cows. ||44||" |
+| `Line 1594: तमुपाध्यायः प्रत्युवाच |` | "The teacher replied to him:" |
+| `Line 1595: नैतन्न्याय्यं पय उपयोक्तुं भवतो मयाननुज्ञातमिति | ०४५ |` | "It is not proper for you to consume milk without my permission. ||45||" |
+| `Line 1596: स तथेति प्रतिज्ञाय गा रक्षित्वा पुनरुपाध्यायगृहानेत्य गुरोरग्रतः स्थित्वा नमश्चक्रे | ०४६ |` | "Having promised 'so be it,' he tended the cows and again, returning to the teacher's house, stood before the guru and paid his respects. ||46||" |
+| `Line 1597: तमुपाध्यायः पीवानमेवापश्यत् |` | "The teacher saw him still well-nourished," |
+| `Line 1598: उवाच चैनम् |` | "And said to him:" |
+| `Line 1599: भैक्षं नाश्नासि न चान्यच्चरसि |` | "You do not eat alms, nor do you go for a second round," |
+| `Line 1600: पयो न पिबसि |` | "You do not drink milk," |

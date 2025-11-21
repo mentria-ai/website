@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 41991: ` | "[Blank line]" |
+| `Line 41992: ` | "[Blank line]" |
+| `Line 41993: बृहदश्व उवाच||` | "Bṛhadaśva [sage narrator] said:" |
+| `Line 41994: ` | "[Blank line]" |
+| `Line 41995: तस्मिन्नन्तर्हिते नागे प्रययौ नैषधो नलः |` | "When that serpent [nāga] had disappeared, Nala of Niṣadha [kingdom] departed," |
+| `Line 41996: ऋतुपर्णस्य नगरं प्राविशद्दशमेऽहनि ||१||` | "And entered the city of Ṛtuparṇa [king's name] on the tenth day. ||1||" |
+| `Line 41997: ` | "[Blank line]" |
+| `Line 41998: स राजानमुपातिष्ठद्बाहुकोऽहमिति ब्रुवन् |` | "He approached the king, saying, 'I am Bāhuka [arm-deformed]'," |
+| `Line 41999: अश्वानां वाहने युक्तः पृथिव्यां नास्ति मत्समः ||२||` | "'In driving horses, there is no one on earth equal to me. ||2||'" |
+| `Line 42000: ` | "[Blank line]" |
+| `Line 42001: अर्थकृच्छ्रेषु चैवाहं प्रष्टव्यो नैपुणेषु च |` | "'I should be consulted in financial difficulties and in matters requiring skill,'" |
+| `Line 42002: अन्नसंस्कारमपि च जानाम्यन्यैर्विशेषतः ||३||` | "'And I also know food preparation especially well compared to others. ||3||'" |
+| `Line 42003: ` | "[Blank line]" |
+| `Line 42004: यानि शिल्पानि लोकेऽस्मिन्यच्चाप्यन्यत्सुदुष्करम् |` | "'Whatever crafts there are in this world, and whatever else is very difficult,'" |
+| `Line 42005: सर्वं यतिष्ये तत्कर्तुमृतुपर्ण भरस्व माम् ||४||` | "'I will strive to do it all, O Ṛtuparṇa, employ me.' ||4||" |
+| `Line 42006: ` | "[Blank line]" |
+| `Line 42007: ऋतुपर्ण उवाच||` | "Ṛtuparṇa [king] said:" |
+| `Line 42008: ` | "[Blank line]" |
+| `Line 42009: वस बाहुक भद्रं ते सर्वमेतत्करिष्यसि |` | "'Stay, Bāhuka, good fortune to you! You shall do all this.'" |
+| `Line 42010: शीघ्रयाने सदा बुद्धिर्धीयते मे विशेषतः ||५||` | "'My mind is especially set on swift chariots. ||5||'" |
+| `Line 42011: ` | "[Blank line]" |
+| `Line 42012: स त्वमातिष्ठ योगं तं येन शीघ्रा हया मम |` | "'You attend to that skill by which my horses may become swift.'" |
+| `Line 42013: भवेयुरश्वाध्यक्षोऽसि वेतनं ते शतं शताः ||६||` | "'You shall be the superintendent of horses, and your wages will be a hundred hundred [coins]. ||6||'" |
+| `Line 42014: ` | "[Blank line]" |
+| `Line 42015: त्वामुपस्थास्यतश्चेमौ नित्यं वार्ष्णेयजीवलौ |` | "'And these two, Vārṣṇeya and Jīvala [charioteer names], will always assist you.'" |

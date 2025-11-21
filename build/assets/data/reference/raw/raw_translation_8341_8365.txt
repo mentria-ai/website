@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 8341: तद्वनं नन्दनप्रख्यमासाद्य मनुजेश्वरः |` | "Having reached that forest resembling Nandana [celestial garden], the lord of men," |
+| `Line 8342: क्षुत्पिपासे जहौ राजा हर्षं चावाप पुष्कलम् ||२८||` | "The king abandoned hunger and thirst, and obtained abundant joy. ||28||" |
+| `Line 8343: ` | "[Blank line]" |
+| `Line 8344: सामात्यो राजलिङ्गानि सोऽपनीय नराधिपः |` | "That ruler of men, along with his ministers, removing the royal insignia," |
+| `Line 8345: पुरोहितसहायश्च जगामाश्रममुत्तमम् ||२९||` | "And accompanied by his priest, went to the excellent hermitage. ||29||" |
+| `Line 8346: ` | "[Blank line]" |
+| `Line 8347: दिदृक्षुस्तत्र तमृषिं तपोराशिमथाव्ययम् ||२९||` | "Desiring to see there that sage, the imperishable repository of austerities. ||29||" |
+| `Line 8348: ` | "[Blank line]" |
+| `Line 8349: ब्रह्मलोकप्रतीकाशमाश्रमं सोऽभिवीक्ष्य च |` | "And beholding that hermitage resembling Brahmaloka [Brahma's realm]," |
+| `Line 8350: षट्पदोद्गीतसङ्घुष्टं नानाद्विज गणायुतम् ||३०||` | "Resonating with the humming of bees [six-footed ones], filled with various groups of twice-born [brahmins]. ||30||" |
+| `Line 8351: ` | "[Blank line]" |
+| `Line 8352: ऋचो बह्वृचमुख्यैश्च प्रेर्यमाणाः पदक्रमैः |` | "The tiger among men heard the Rig verses being recited by foremost Bahvricha [Rigveda scholars] in proper sequence," |
+| `Line 8353: शुश्राव मनुजव्याघ्रो विततेष्विह कर्मसु ||३१||` | "During the elaborate rituals being performed there. ||31||" |
+| `Line 8354: ` | "[Blank line]" |
+| `Line 8355: यज्ञविद्याङ्गविद्भिश्च क्रमद्भिश्च क्रमानपि |` | "With those knowledgeable in sacrificial science and its auxiliaries, and those reciting in proper sequence," |
+| `Line 8356: अमितात्मभिः सुनियतैः शुशुभे स तदाश्रमः ||३२||` | "With those of immeasurable souls and well-disciplined, that hermitage shone brilliantly. ||32||" |
+| `Line 8357: ` | "[Blank line]" |
+| `Line 8358: अथर्ववेदप्रवराः पूगयाज्ञिक संमताः |` | "The foremost scholars of the Atharvaveda, respected by groups of sacrificial priests," |
+| `Line 8359: संहितामीरयन्ति स्म पदक्रमयुतां तु ते ||३३||` | "They were reciting the Samhita [collection] with proper sequence of words. ||33||" |
+| `Line 8360: ` | "[Blank line]" |
+| `Line 8361: शब्दसंस्कारसंयुक्तं ब्रुवद्भिश्चापरैर्द्विजैः |` | "With other twice-born [brahmins] speaking with proper pronunciation and refinement," |
+| `Line 8362: नादितः स बभौ श्रीमान्ब्रह्मलोक इवाश्रमः ||३४||` | "Resounding with their voices, that splendid hermitage shone like Brahmaloka [Brahma's realm]. ||34||" |
+| `Line 8363: ` | "[Blank line]" |
+| `Line 8364: यज्ञसंस्कारविद्भिश्च क्रमशिक्षा विशारदैः |` | "With those knowledgeable in sacrificial rites and adept in the sequential learning," |
+| `Line 8365: न्यायतत्त्वार्थविज्ञानसम्पन्नैर्वेदपारगैः ||३५||` | "Endowed with knowledge of the principles of logic and accomplished in the Vedas. ||35||" |

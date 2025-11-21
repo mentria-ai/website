@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 48366: ` | "[Blank line]" |
+| `Line 48367: ` | "[Blank line]" |
+| `Line 48368: ` | "[Blank line]" |
+| `Line 48369: ` | "[Blank line]" |
+| `Line 48370: ११७` | "117 [chapter number]" |
+| `Line 48371: ` | "[Blank line]" |
+| `Line 48372: ` | "[Blank line]" |
+| `Line 48373: राम उवाच||` | "Rāma [Paraśurāma] said:" |
+| `Line 48374: ` | "[Blank line]" |
+| `Line 48375: ममापराधात्तैः क्षुद्रैर्हतस्त्वं तात बालिशैः |` | "Due to my fault, you have been slain by those contemptible, childish ones, O father," |
+| `Line 48376: कार्तवीर्यस्य दायादैर्वने मृग इवेषुभिः ||१||` | "By the descendants of Kārtavīrya [thousand-armed king], like a deer in the forest by arrows. ||1||" |
+| `Line 48377: ` | "[Blank line]" |
+| `Line 48378: धर्मज्ञस्य कथं तात वर्तमानस्य सत्पथे |` | "How is it, O father, that one who knows dharma [righteousness], who follows the path of truth," |
+| `Line 48379: मृत्युरेवंविधो युक्तः सर्वभूतेष्वनागसः ||२||` | "Should meet such a death, you who are innocent among all beings? ||2||" |
+| `Line 48380: ` | "[Blank line]" |
+| `Line 48381: किं नु तैर्न कृतं पापं यैर्भवांस्तपसि स्थितः |` | "What sin have they not committed, those who killed you while you were engaged in austerities," |
+| `Line 48382: अयुध्यमानो वृद्धः सन्हतः शरशतैः शितैः ||३||` | "Not fighting, being elderly, slain with hundreds of sharp arrows? ||3||" |
+| `Line 48383: ` | "[Blank line]" |
+| `Line 48384: किं नु ते तत्र वक्ष्यन्ति सचिवेषु सुहृत्सु च |` | "What will they say there, among their ministers and friends," |
+| `Line 48385: अयुध्यमानं धर्मज्ञमेकं हत्वानपत्रपाः ||४||` | "Those shameless ones, having killed a single, non-fighting, dharma-knowing sage? ||4||" |
+| `Line 48386: ` | "[Blank line]" |
+| `Line 48387: अकृतव्रण उवाच||` | "Akṛtavraṇa [narrator sage] said:" |
+| `Line 48388: ` | "[Blank line]" |
+| `Line 48389: विलप्यैवं स करुणं बहु नानाविधं नृप |` | "Having thus lamented piteously in many different ways, O king," |
+| `Line 48390: प्रेतकार्याणि सर्वाणि पितुश्चक्रे महातपाः ||५||` | "The great ascetic performed all the funeral rites for his father. ||5||" |

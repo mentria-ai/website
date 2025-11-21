@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 38041: अवसीदेत्सुदुर्बुद्धिरामो घट इवाम्भसि ||१२||` | "One with very poor intelligence would sink like a clay pot in water. ||12||" |
+| `Line 38042: ` | "[Blank line]" |
+| `Line 38043: तथैव हठबुद्धिर्यः शक्तः कर्मण्यकर्मकृत् |` | "Likewise, one with an obstinate mind who is capable but does not perform actions," |
+| `Line 38044: आसीत न चिरं जीवेदनाथ इव दुर्बलः ||१३||` | "Would not live long, sitting idle like a helpless weakling. ||13||" |
+| `Line 38045: ` | "[Blank line]" |
+| `Line 38046: अकस्मादपि यः कश्चिदर्थं प्राप्नोति पूरुषः |` | "When a person obtains wealth unexpectedly," |
+| `Line 38047: तं हठेनेति मन्यन्ते स हि यत्नो न कस्यचित् ||१४||` | "People consider it obtained by chance, for it is not the result of anyone's effort. ||14||" |
+| `Line 38048: ` | "[Blank line]" |
+| `Line 38049: यच्चापि किञ्चित्पुरुषो दिष्टं नाम लभत्युत |` | "And whatever a person obtains that is called destined," |
+| `Line 38050: दैवेन विधिना पार्थ तद्दैवमिति निश्चितम् ||१५||` | "By divine ordinance, O Pārtha [Arjuna], that is certainly fate [daiva]. ||15||" |
+| `Line 38051: ` | "[Blank line]" |
+| `Line 38052: यत्स्वयं कर्मणा किञ्चित्फलमाप्नोति पूरुषः |` | "Whatever fruit a person obtains through his own actions," |
+| `Line 38053: प्रत्यक्षं चक्षुषा दृष्टं तत्पौरुषमिति स्मृतम् ||१६||` | "Visibly seen with the eyes, that is remembered as human effort [pauruṣa]. ||16||" |
+| `Line 38054: ` | "[Blank line]" |
+| `Line 38055: स्वभावतः प्रवृत्तोऽन्यः प्राप्नोत्यर्थानकारणात् |` | "Another, acting from natural disposition, obtains wealth without apparent cause," |
+| `Line 38056: तत्स्वभावात्मकं विद्धि फलं पुरुषसत्तम ||१७||` | "Know that fruit to be born of nature [svabhāva], O best of men. ||17||" |
+| `Line 38057: ` | "[Blank line]" |
+| `Line 38058: एवं हठाच्च दैवाच्च स्वभावात्कर्मणस्तथा |` | "Thus, from chance, from fate, from nature, and from action," |
+| `Line 38059: यानि प्राप्नोति पुरुषस्तत्फलं पूर्वकर्मणः ||१८||` | "Whatever a person obtains, that fruit is from previous actions. ||18||" |
+| `Line 38060: ` | "[Blank line]" |
+| `Line 38061: धातापि हि स्वकर्मैव तैस्तैर्हेतुभिरीश्वरः |` | "Even the Creator [Dhātā], the Lord, through various causes," |
+| `Line 38062: विदधाति विभज्येह फलं पूर्वकृतं नृणाम् ||१९||` | "Distributes and apportions here the fruits of men's previous actions. ||19||" |
+| `Line 38063: ` | "[Blank line]" |
+| `Line 38064: यद्ध्ययं पुरुषः किञ्चित्कुरुते वै शुभाशुभम् |` | "Whatever good or evil a person performs," |
+| `Line 38065: तद्धातृविहितं विद्धि पूर्वकर्मफलोदयम् ||२०||` | "Know that to be ordained by the Creator, arising from the fruits of previous actions. ||20||" |

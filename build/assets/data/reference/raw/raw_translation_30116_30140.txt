@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 30116: अवलिप्तस्य मूर्खस्य केशवं स्तोतुमिच्छतः |` | "Of an arrogant fool who wishes to praise Keśava [Krishna, hair-bearer]," |
+| `Line 30117: कथं भीष्म न ते जिह्वा शतधेयं विदीर्यते ||५||` | "How is it, Bhīṣma, that your tongue does not split into a hundred pieces? ||5||" |
+| `Line 30118: ` | "[Blank line]" |
+| `Line 30119: यत्र कुत्सा प्रयोक्तव्या भीष्म बालतरैर्नरैः |` | "Where censure should be employed, Bhīṣma, even by younger men," |
+| `Line 30120: तमिमं ज्ञानवृद्धः सन्गोपं संस्तोतुमिच्छसि ||६||` | "You, being mature in wisdom, wish to praise this cowherd [gopa]. ||6||" |
+| `Line 30121: ` | "[Blank line]" |
+| `Line 30122: यद्यनेन हता बाल्ये शकुनिश्चित्रमत्र किम् |` | "If in childhood he killed a bird, what is so wonderful in that?" |
+| `Line 30123: तौ वाश्ववृषभौ भीष्म यौ न युद्धविशारदौ ||७||` | "Or those horse and bull, Bhīṣma, who were not skilled in battle? ||7||" |
+| `Line 30124: ` | "[Blank line]" |
+| `Line 30125: चेतनारहितं काष्ठं यद्यनेन निपातितम् |` | "If he knocked down a lifeless wooden cart," |
+| `Line 30126: पादेन शकटं भीष्म तत्र किं कृतमद्भुतम् ||८||` | "With his foot, Bhīṣma, what marvel was accomplished there? ||8||" |
+| `Line 30127: ` | "[Blank line]" |
+| `Line 30128: वल्मीकमात्रः सप्ताहं यद्यनेन धृतोऽचलः |` | "If he held up a mountain the size of an anthill for seven days," |
+| `Line 30129: तदा गोवर्धनो भीष्म न तच्चित्रं मतं मम ||९||` | "That Govardhana [cow-nourishing mountain], Bhīṣma, I do not consider it wonderful. ||9||" |
+| `Line 30130: ` | "[Blank line]" |
+| `Line 30131: भुक्तमेतेन बह्वन्नं क्रीडता नगमूर्धनि |` | "He ate much food while playing on the mountain top," |
+| `Line 30132: इति ते भीष्म शृण्वानाः परं विस्मयमागताः ||१०||` | "Hearing this from you, Bhīṣma, people are greatly astonished. ||10||" |
+| `Line 30133: ` | "[Blank line]" |
+| `Line 30134: यस्य चानेन धर्मज्ञ भुक्तमन्नं बलीयसः |` | "And the powerful one whose food he ate, O knower of dharma," |
+| `Line 30135: स चानेन हतः कंस इत्येतन्न महाद्भुतम् ||११||` | "That Kaṃsa was killed by him—this is not greatly wonderful. ||11||" |
+| `Line 30136: ` | "[Blank line]" |
+| `Line 30137: न ते श्रुतमिदं भीष्म नूनं कथयतां सताम् |` | "You have surely not heard this, Bhīṣma, from the good people who speak it," |
+| `Line 30138: यद्वक्ष्ये त्वामधर्मज्ञ वाक्यं कुरुकुलाधम ||१२||` | "What I shall tell you, O ignorant of dharma, O disgrace to the Kuru family. ||12||" |
+| `Line 30139: ` | "[Blank line]" |
+| `Line 30140: स्त्रीषु गोषु न शस्त्राणि पातयेद्ब्राह्मणेषु च |` | "One should not use weapons against women, cows, and Brahmins [priestly class]," |

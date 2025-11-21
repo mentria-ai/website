@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 21466: ` | "[Blank line]" |
+| `Line 21467: ` | "[Blank line]" |
+| `Line 21468: ` | "[Blank line]" |
+| `Line 21469: १८३` | "183 [chapter number]" |
+| `Line 21470: ` | "[Blank line]" |
+| `Line 21471: ` | "[Blank line]" |
+| `Line 21472: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 21473: ` | "[Blank line]" |
+| `Line 21474: भ्रातुर्वचस्तत्प्रसमीक्ष्य सर्वे; ज्येष्ठस्य पाण्डोस्तनयास्तदानीम् |` | "Having considered those words of their eldest brother, all the sons of Pāṇḍu [father of Pāṇḍavas] at that time," |
+| `Line 21475: तमेवार्थं ध्यायमाना मनोभि; रासां चक्रुरथ तत्रामितौजाः ||१||` | "Contemplating that very purpose in their minds, they took their seats there, those of immeasurable prowess. ||1||" |
+| `Line 21476: ` | "[Blank line]" |
+| `Line 21477: वृष्णिप्रवीरस्तु कुरुप्रवीरा; नाशङ्कमानः सहरौहिणेयः |` | "Then the hero of the Vṛṣṇis [Kṛṣṇa's clan], without any hesitation, along with Rauhinẹya [Balarāma], approached the heroes of the Kurus," |
+| `Line 21478: जगाम तां भार्गवकर्मशालां; यत्रासते ते पुरुषप्रवीराः ||२||` | "Went to that workshop of Bhārgava [Parāśurāma], where those heroic men were seated. ||2||" |
+| `Line 21479: ` | "[Blank line]" |
+| `Line 21480: तत्रोपविष्टं पृथुदीर्घबाहुं; ददर्श कृष्णः सहरौहिणेयः |` | "There Kṛṣṇa, along with Rauhinẹya, saw seated the broad and long-armed one [Yudhiṣṭhira]," |
+| `Line 21481: अजातशत्रुं परिवार्य तांश्च; उपोपविष्टाञ्ज्वलनप्रकाशान् ||३||` | "Ajātaśatru [Yudhiṣṭhira] surrounded by those (brothers) who were seated nearby, radiant like fire. ||3||" |
+| `Line 21482: ` | "[Blank line]" |
+| `Line 21483: ततोऽब्रवीद्वासुदेवोऽभिगम्य; कुन्तीसुतं धर्मभृतां वरिष्ठम् |` | "Then Vāsudeva [Kṛṣṇa], approaching the son of Kuntī [Yudhiṣṭhira], the foremost among the upholders of dharma, said," |
+| `Line 21484: कृष्णोऽहमस्मीति निपीड्य पादौ; युधिष्ठिरस्याजमीढस्य राज्ञः ||४||` | "'I am Kṛṣṇa,' pressing the feet of King Yudhiṣṭhira, descendant of Ajamīḍha [ancestor of Kurus]. ||4||" |
+| `Line 21485: ` | "[Blank line]" |
+| `Line 21486: तथैव तस्याप्यनु रौहिणेय; स्तौ चापि हृष्टाः कुरवोऽभ्यनन्दन् |` | "Likewise, Rauhinẹya [Balarāma] followed him, and the delighted Kurus [Pāṇḍavas] welcomed those two," |
+| `Line 21487: पितृष्वसुश्चापि यदुप्रवीरा; वगृह्णतां भारतमुख्य पादौ ||५||` | "And the heroes of the Yadus [Kṛṣṇa's clan] touched the feet of their father's sister's son [Yudhiṣṭhira], O foremost of the Bharatas. ||5||" |
+| `Line 21488: ` | "[Blank line]" |
+| `Line 21489: अजातशत्रुश्च कुरुप्रवीरः; पप्रच्छ कृष्णं कुशलं निवेद्य |` | "And Ajātaśatru [Yudhiṣṭhira], the hero of the Kurus, after inquiring about Kṛṣṇa's welfare," |
+| `Line 21490: कथं वयं वासुदेव त्वयेह; गूढा वसन्तो विदिताः स्म सर्वे ||६||` | "'How is it, O Vāsudeva [Kṛṣṇa], that you have discovered all of us living here in hiding?' ||6||" |

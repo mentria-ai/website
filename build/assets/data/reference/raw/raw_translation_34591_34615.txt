@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 34591: षडिन्द्रियाणि विषयं समागच्छन्ति वै यदा |` | "When the six senses [indriyas] come in contact with their objects," |
+| `Line 34592: तदा प्रादुर्भवत्येषां पूर्वसङ्कल्पजं मनः ||६३||` | "Then arises in them the mind born of previous intentions [saṅkalpa]. ||63||" |
+| `Line 34593: ` | "[Blank line]" |
+| `Line 34594: मनो यस्येन्द्रियग्रामविषयं प्रति चोदितम् |` | "When one's mind is impelled toward the objects of the group of senses," |
+| `Line 34595: तस्यौत्सुक्यं सम्भवति प्रवृत्तिश्चोपजायते ||६४||` | "Eagerness arises in that person, and inclination [pravṛtti] is born. ||64||" |
+| `Line 34596: ` | "[Blank line]" |
+| `Line 34597: ततः सङ्कल्पवीर्येण कामेन विषयेषुभिः |` | "Then, by the power of intention, with desire for sense objects," |
+| `Line 34598: विद्धः पतति लोभाग्नौ ज्योतिर्लोभात्पतङ्गवत् ||६५||` | "Pierced, one falls into the fire of greed, like a moth [patanga] into a flame due to attraction. ||65||" |
+| `Line 34599: ` | "[Blank line]" |
+| `Line 34600: ततो विहारैराहारैर्मोहितश्च विशां पते |` | "Then, deluded by pleasures and food, O lord of people [viśām pate]," |
+| `Line 34601: महामोहमुखे मग्नो नात्मानमवबुध्यते ||६६||` | "Immersed in the mouth of great delusion, one does not recognize one's true self. ||66||" |
+| `Line 34602: ` | "[Blank line]" |
+| `Line 34603: एवं पतति संसारे तासु तास्विह योनिषु |` | "Thus one falls into worldly existence [saṃsāra], into various births [yoni] here," |
+| `Line 34604: अविद्याकर्मतृष्णाभिर्भ्राम्यमाणोऽथ चक्रवत् ||६७||` | "Whirling like a wheel due to ignorance, actions, and cravings. ||67||" |
+| `Line 34605: ` | "[Blank line]" |
+| `Line 34606: ब्रह्मादिषु तृणान्तेषु हूतेषु परिवर्तते |` | "One revolves among beings from Brahmā down to a blade of grass," |
+| `Line 34607: जले भुवि तथाकाशे जायमानः पुनः पुनः ||६८||` | "Being born again and again in water, on earth, and in the sky. ||68||" |
+| `Line 34608: ` | "[Blank line]" |
+| `Line 34609: अबुधानां गतिस्त्वेषा बुधानामपि मे शृणु |` | "This is the path of the unwise; now hear from me about the wise," |
+| `Line 34610: ये धर्मे श्रेयसि रता विमोक्षरतयो जनाः ||६९||` | "Those people who are devoted to righteousness [dharma], to the highest good, and to liberation [vimokṣa]. ||69||" |
+| `Line 34611: ` | "[Blank line]" |
+| `Line 34612: यदिदं वेदवचनं कुरु कर्म त्यजेति च |` | "This Vedic statement says 'perform action and renounce'," |
+| `Line 34613: तस्माद्धर्मानिमान्सर्वान्नाभिमानात्समाचरेत् ||७०||` | "Therefore, one should practice all these dharmas without egotism [abhimāna]. ||70||" |
+| `Line 34614: ` | "[Blank line]" |
+| `Line 34615: इज्याध्ययनदानानि तपः सत्यं क्षमा दमः |` | "Sacrifice, study, charity, austerity [tapas], truth, patience, self-control," |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 47641: ततः प्रयातः कौन्तेयः क्रमेण भरतर्षभ |` | "Then the son of Kunti [Arjuna] proceeded gradually, O bull among the Bharatas [king]," |
+| `Line 47642: नन्दामपरनन्दां च नद्यौ पापभयापहे ||१||` | "To the rivers Nandā and Aparanandā, which remove the fear of sins. ||1||" |
+| `Line 47643: ` | "[Blank line]" |
+| `Line 47644: स पर्वतं समासाद्य हेमकूटमनामयम् |` | "He, approaching the mountain Hemakūṭa [golden peak], free from afflictions," |
+| `Line 47645: अचिन्त्यानद्भुतान्भावान्ददर्श सुबहून्नृपः ||२||` | "The king beheld many inconceivable and wonderful phenomena. ||2||" |
+| `Line 47646: ` | "[Blank line]" |
+| `Line 47647: वाचो यत्राभवन्मेघा उपलाश्च सहस्रशः |` | "Where voices became clouds and stones appeared by thousands," |
+| `Line 47648: नाशक्नुवंस्तमारोढुं विषण्णमनसो जनाः ||३||` | "People with dejected minds were unable to climb it. ||3||" |
+| `Line 47649: ` | "[Blank line]" |
+| `Line 47650: वायुर्नित्यं ववौ यत्र नित्यं देवश्च वर्षति |` | "Where the wind constantly blew and the god [Indra] constantly rained," |
+| `Line 47651: सायं प्रातश्च भगवान्दृश्यते हव्यवाहनः ||४||` | "And morning and evening, the divine carrier of oblations [Agni] could be seen. ||4||" |
+| `Line 47652: ` | "[Blank line]" |
+| `Line 47653: एवं बहुविधान्भावानद्भुतान्वीक्ष्य पाण्डवः |` | "Having seen such various wonderful phenomena, the Pāṇḍava [Arjuna]," |
+| `Line 47654: लोमशं पुनरेव स्म पर्यपृच्छत्तदद्भुतम् ||५||` | "Again inquired of Lomaśa [sage] about those wonders. ||5||" |
+| `Line 47655: ` | "[Blank line]" |
+| `Line 47656: लोमश उवाच||` | "Lomaśa said:" |
+| `Line 47657: ` | "[Blank line]" |
+| `Line 47658: यथाश्रुतमिदं पूर्वमस्माभिररिकर्शन |` | "As I have heard this before, O tormentor of enemies [Arjuna]," |
+| `Line 47659: तदेकाग्रमना राजन्निबोध गदतो मम ||६||` | "Listen with single-minded attention, O king, as I tell you. ||6||" |
+| `Line 47660: ` | "[Blank line]" |
+| `Line 47661: अस्मिन्नृषभकूटेऽभूदृषभो नाम तापसः |` | "On this Ṛṣabhakūṭa [bull peak] lived an ascetic named Ṛṣabha [bull]," |
+| `Line 47662: अनेकशतवर्षायुस्तपस्वी कोपनो भृशम् ||७||` | "Who lived for many hundreds of years, an ascetic extremely prone to anger. ||7||" |
+| `Line 47663: ` | "[Blank line]" |
+| `Line 47664: स वै सम्भाष्यमाणोऽन्यैः कोपाद्गिरिमुवाच ह |` | "He, when spoken to by others, in anger addressed the mountain, saying," |
+| `Line 47665: य इह व्याहरेत्कश्चिदुपलानुत्सृजेस्तदा ||८||` | "'If anyone speaks here, then you shall release stones upon them.' ||8||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 8241: ` | "[Blank line]" |
+| `Line 8242: ` | "[Blank line]" |
+| `Line 8243: ६४` | "64 [chapter number]" |
+| `Line 8244: ` | "[Blank line]" |
+| `Line 8245: ` | "[Blank line]" |
+| `Line 8246: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 8247: ` | "[Blank line]" |
+| `Line 8248: ततो मृगसहस्राणि हत्वा विपुलवाहनः |` | "Then, after killing thousands of deer, the one with many vehicles [king]," |
+| `Line 8249: राजा मृगप्रसङ्गेन वनमन्यद्विवेश ह ||१||` | "The king, in pursuit of deer, entered another forest. ||1||" |
+| `Line 8250: ` | "[Blank line]" |
+| `Line 8251: एक एवोत्तमबलः क्षुत्पिपासासमन्वितः |` | "Alone, with excellent strength, afflicted by hunger and thirst," |
+| `Line 8252: स वनस्यान्तमासाद्य महदीरिणमासदत् ||२||` | "He reached the edge of the forest and came upon a vast wilderness [īriṇa]. ||2||" |
+| `Line 8253: ` | "[Blank line]" |
+| `Line 8254: तच्चाप्यतीत्य नृपतिरुत्तमाश्रमसंयुतम् |` | "And having crossed that, the king found an excellent hermitage [āśrama]," |
+| `Line 8255: मनःप्रह्लादजननं दृष्टिकान्तमतीव च ||३||` | "Which was delightful to the mind and extremely pleasing to the sight. ||3||" |
+| `Line 8256: ` | "[Blank line]" |
+| `Line 8257: शीतमारुतसंयुक्तं जगामान्यन्महद्वनम् ||३||` | "With cool breezes, he went to another great forest. ||3||" |
+| `Line 8258: ` | "[Blank line]" |
+| `Line 8259: पुष्पितैः पादपैः कीर्णमतीव सुखशाद्वलम् |` | "Filled with flowering trees, with extremely pleasant grass," |
+| `Line 8260: विपुलं मधुरारावैर्नादितं विहगैस्तथा ||४||` | "Vast, resounding with the sweet calls of birds. ||4||" |
+| `Line 8261: ` | "[Blank line]" |
+| `Line 8262: प्रवृद्धविटपैर्वृक्षैः सुखच्छायैः समावृतम् |` | "Covered with trees having large branches and pleasant shade," |
+| `Line 8263: षट्पदाघूर्णितलतं लक्ष्म्या परमया युतम् ||५||` | "With creepers swarming with bees [ṣaṭpada], endowed with supreme beauty [Lakṣmī]. ||5||" |
+| `Line 8264: ` | "[Blank line]" |
+| `Line 8265: नापुष्पः पादपः कश्चिन्नाफलो नापि कण्टकी |` | "There was no tree without flowers, none without fruit, and none with thorns," |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 10391: काव्यस्योशनसः शापान्न च तृप्तोऽस्मि यौवने ||२||` | "Due to the curse of Kāvya Uśanas [sage-preceptor], I am not satisfied with my youth. ||2||" |
+| `Line 10392: ` | "[Blank line]" |
+| `Line 10393: त्वं यदो प्रतिपद्यस्व पाप्मानं जरया सह |` | "You, Yadu [eldest son], accept this sin along with old age," |
+| `Line 10394: यौवनेन त्वदीयेन चरेयं विषयानहम् ||३||` | "So that with your youth, I may enjoy the pleasures of the senses. ||3||" |
+| `Line 10395: ` | "[Blank line]" |
+| `Line 10396: पूर्णे वर्षसहस्रे तु पुनस्ते यौवनं त्वहम् |` | "After a thousand years have passed, I will return your youth to you," |
+| `Line 10397: दत्त्वा स्वं प्रतिपत्स्यामि पाप्मानं जरया सह ||४||` | "And having given it back, I will accept my sin along with old age. ||4||" |
+| `Line 10398: ` | "[Blank line]" |
+| `Line 10399: यदुरुवाच||` | "Yadu said:" |
+| `Line 10400: ` | "[Blank line]" |
+| `Line 10401: सितश्मश्रुशिरा दीनो जरया शिथिलीकृतः |` | "With white beard and hair, wretched, made feeble by old age," |
+| `Line 10402: वलीसन्ततगात्रश्च दुर्दर्शो दुर्बलः कृशः ||५||` | "With a body covered in wrinkles, unsightly, weak, and emaciated. ||5||" |
+| `Line 10403: ` | "[Blank line]" |
+| `Line 10404: अशक्तः कार्यकरणे परिभूतः स यौवनैः |` | "Unable to perform tasks, despised by the young," |
+| `Line 10405: सहोपजीविभिश्चैव तां जरां नाभिकामये ||६||` | "And even by dependents—such old age I do not desire. ||6||" |
+| `Line 10406: ` | "[Blank line]" |
+| `Line 10407: ययातिरुवाच||` | "Yayāti [king] said:" |
+| `Line 10408: ` | "[Blank line]" |
+| `Line 10409: यत्त्वं मे हृदयाज्जातो वयः स्वं न प्रयच्छसि |` | "Since you, born from my heart, do not give me your youth," |
+| `Line 10410: तस्मादराज्यभाक्तात प्रजा ते वै भविष्यति ||७||` | "Therefore, O son, your progeny shall not inherit the kingdom. ||7||" |
+| `Line 10411: ` | "[Blank line]" |
+| `Line 10412: तुर्वसो प्रतिपद्यस्व पाप्मानं जरया सह |` | "Turvasu [second son], accept this sin along with old age," |
+| `Line 10413: यौवनेन चरेयं वै विषयांस्तव पुत्रक ||८||` | "So that with your youth, I may enjoy the pleasures, O my son. ||8||" |
+| `Line 10414: ` | "[Blank line]" |
+| `Line 10415: पूर्णे वर्षसहस्रे तु पुनर्दास्यामि यौवनम् |` | "After a thousand years have passed, I will give back your youth," |

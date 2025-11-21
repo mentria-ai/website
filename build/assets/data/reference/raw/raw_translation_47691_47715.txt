@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 47691: देवाश्च ऋषयश्चैव वसन्त्यद्यापि भारत |` | "The gods and sages still dwell here even today, O Bhārata [Yudhiṣṭhira]," |
+| `Line 47692: तेषां सायं तथा प्रातर्दृश्यते हव्यवाहनः ||१७||` | "And morning and evening, the fire [havyavāhana] that carries offerings to them is seen. ||17||" |
+| `Line 47693: ` | "[Blank line]" |
+| `Line 47694: इहाप्लुतानां कौन्तेय सद्यः पाप्मा विहन्यते |` | "For those who bathe here, O son of Kuntī [Yudhiṣṭhira], sins are immediately destroyed," |
+| `Line 47695: कुरुश्रेष्ठाभिषेकं वै तस्मात्कुरु सहानुजः ||१८||` | "Therefore, O best of the Kurus, perform your ablutions here along with your younger brothers. ||18||" |
+| `Line 47696: ` | "[Blank line]" |
+| `Line 47697: ततो नन्दाप्लुताङ्गस्त्वं कौशिकीमभियास्यसि |` | "Then, after bathing in the Nandā [river], you shall proceed to the Kauśikī [river]," |
+| `Line 47698: विश्वामित्रेण यत्रोग्रं तपस्तप्तमनुत्तमम् ||१९||` | "Where Viśvāmitra [sage-king] performed severe and unsurpassed austerities. ||19||" |
+| `Line 47699: ` | "[Blank line]" |
+| `Line 47700: वैशम्पायन उवाच||` | "Vaiśampāyana [narrator sage] said:" |
+| `Line 47701: ` | "[Blank line]" |
+| `Line 47702: ततस्तत्र समाप्लुत्य गात्राणि सगणो नृपः |` | "Then, having bathed his limbs there, the king with his companions," |
+| `Line 47703: जगाम कौशिकीं पुण्यां रम्यां शिवजलां नदीम् ||२०||` | "Went to the sacred Kauśikī, the beautiful river with auspicious waters. ||20||" |
+| `Line 47704: ` | "[Blank line]" |
+| `Line 47705: ` | "[Blank line]" |
+| `Line 47706: ` | "[Blank line]" |
+| `Line 47707: ` | "[Blank line]" |
+| `Line 47708: ऋश्यशृङ्गोपाख्यानम्` | "The Story of Ṛśyaśṛṅga [deer-horned sage]" |
+| `Line 47709: ११०` | "110" |
+| `Line 47710: ` | "[Blank line]" |
+| `Line 47711: ` | "[Blank line]" |
+| `Line 47712: लोमश उवाच||` | "Lomaśa [sage] said:" |
+| `Line 47713: ` | "[Blank line]" |
+| `Line 47714: एषा देवनदी पुण्या कौशिकी भरतर्षभ |` | "This is the sacred divine river Kauśikī, O bull among the Bharatas [Yudhiṣṭhira]," |
+| `Line 47715: विश्वामित्राश्रमो रम्य एष चात्र प्रकाशते ||१||` | "And here shines the beautiful hermitage of Viśvāmitra. ||1||" |

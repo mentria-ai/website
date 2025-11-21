@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 8391: ` | "[Blank line]" |
+| `Line 8392: ` | "[Blank line]" |
+| `Line 8393: ६५` | "65 [chapter number]" |
+| `Line 8394: ` | "[Blank line]" |
+| `Line 8395: ` | "[Blank line]" |
+| `Line 8396: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 8397: ` | "[Blank line]" |
+| `Line 8398: ततो गच्छन्महाबाहुरेकोऽमात्यान्विसृज्य तान् |` | "Then, going alone, the mighty-armed one [mahābāhu], having dismissed those ministers," |
+| `Line 8399: नापश्यदाश्रमे तस्मिंस्तमृषिं संशितव्रतम् ||१||` | "Did not see in that hermitage the sage of rigid vows [saṃśita-vrata]. ||1||" |
+| `Line 8400: ` | "[Blank line]" |
+| `Line 8401: सोऽपश्यमानस्तमृषिं शून्यं दृष्ट्वा तमाश्रमम् |` | "Not seeing that sage and finding that hermitage empty," |
+| `Line 8402: उवाच क इहेत्युच्चैर्वनं संनादयन्निव ||२||` | "He called out loudly, 'Who is here?', as if making the forest resound. ||2||" |
+| `Line 8403: ` | "[Blank line]" |
+| `Line 8404: श्रुत्वाथ तस्य तं शब्दं कन्या श्रीरिव रूपिणी |` | "Hearing that sound of his, a maiden beautiful as Śrī [goddess of fortune] incarnate," |
+| `Line 8405: निश्चक्रामाश्रमात्तस्मात्तापसीवेषधारिणी ||३||` | "Came out from that hermitage, dressed in the garments of an ascetic woman. ||3||" |
+| `Line 8406: ` | "[Blank line]" |
+| `Line 8407: सा तं दृष्ट्वैव राजानं दुःषन्तमसितेक्षणा |` | "That dark-eyed one, upon seeing King Duḥṣanta [ancestor of Kurus]," |
+| `Line 8408: स्वागतं त इति क्षिप्रमुवाच प्रतिपूज्य च ||४||` | "Quickly said, 'Welcome to you,' after honoring him. ||4||" |
+| `Line 8409: ` | "[Blank line]" |
+| `Line 8410: आसनेनार्चयित्वा च पाद्येनार्घ्येण चैव हि |` | "Having honored him with a seat, water for the feet [pādya], and a respectful offering [arghya]," |
+| `Line 8411: पप्रच्छानामयं राजन्कुशलं च नराधिपम् ||५||` | "She asked the king, the lord of men, about his well-being and health. ||5||" |
+| `Line 8412: ` | "[Blank line]" |
+| `Line 8413: यथावदर्चयित्वा सा पृष्ट्वा चानामयं तदा |` | "Having properly honored him and inquired about his welfare then," |
+| `Line 8414: उवाच स्मयमानेव किं कार्यं क्रियतामिति ||६||` | "She said, smiling slightly, 'What service may be done for you?' ||6||" |
+| `Line 8415: ` | "[Blank line]" |

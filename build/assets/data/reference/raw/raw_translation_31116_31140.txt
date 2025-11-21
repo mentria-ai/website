@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 31116: मूलं ह्येतद्विनाशस्य पृथिव्या द्विजसत्तम ||३||` | "For this is the root cause of destruction for the earth, O best of twice-born [brahmin sage]. ||3||" |
+| `Line 31117: ` | "[Blank line]" |
+| `Line 31118: सूत उवाच||` | "Sūta [bard narrator] said:" |
+| `Line 31119: ` | "[Blank line]" |
+| `Line 31120: एवमुक्तस्तदा राज्ञा व्यासशिष्यः प्रतापवान् |` | "Thus addressed by the king, the illustrious disciple of Vyāsa [sage compiler]," |
+| `Line 31121: आचचक्षे यथावृत्तं तत्सर्वं सर्ववेदवित् ||४||` | "Narrated everything as it happened, he who knows all the Vedas. ||4||" |
+| `Line 31122: ` | "[Blank line]" |
+| `Line 31123: वैशम्पायन उवाच||` | "Vaiśampāyana [Vyāsa's disciple] said:" |
+| `Line 31124: ` | "[Blank line]" |
+| `Line 31125: शृणु मे विस्तरेणेमां कथां भरतसत्तम |` | "Listen to this story from me in detail, O best of the Bharatas [royal lineage]," |
+| `Line 31126: भूय एव महाराज यदि ते श्रवणे मतिः ||५||` | "Once again, O great king, if you have the inclination to hear. ||5||" |
+| `Line 31127: ` | "[Blank line]" |
+| `Line 31128: विदुरस्य मतं ज्ञात्वा धृतराष्ट्रोऽम्बिकासुतः |` | "Having learned Vidura's [wise minister] opinion, Dhritarashtra [blind king], son of Ambika," |
+| `Line 31129: दुर्योधनमिदं वाक्यमुवाच विजने पुनः ||६||` | "Spoke these words to Duryodhana [eldest Kaurava] again in private. ||6||" |
+| `Line 31130: ` | "[Blank line]" |
+| `Line 31131: अलं द्यूतेन गान्धारे विदुरो न प्रशंसति |` | "Enough with the gambling, O son of Gandhari [Duryodhana], Vidura does not approve of it," |
+| `Line 31132: न ह्यसौ सुमहाबुद्धिरहितं नो वदिष्यति ||७||` | "For that highly intelligent one would not tell us what is harmful. ||7||" |
+| `Line 31133: ` | "[Blank line]" |
+| `Line 31134: हितं हि परमं मन्ये विदुरो यत्प्रभाषते |` | "I consider what Vidura speaks to be the highest good," |
+| `Line 31135: क्रियतां पुत्र तत्सर्वमेतन्मन्ये हितं तव ||८||` | "Let all that be done, my son, I consider this beneficial for you. ||8||" |
+| `Line 31136: ` | "[Blank line]" |
+| `Line 31137: देवर्षिर्वासवगुरुर्देवराजाय धीमते |` | "The divine sage [Brihaspati], the preceptor of Vasava [Indra], to the wise king of gods," |
+| `Line 31138: यत्प्राह शास्त्रं भगवान्बृहस्पतिरुदारधीः ||९||` | "Whatever scripture the venerable Brihaspati [gods' preceptor] of noble intellect taught. ||9||" |
+| `Line 31139: ` | "[Blank line]" |
+| `Line 31140: तद्वेद विदुरः सर्वं सरहस्यं महाकविः |` | "Vidura, the great sage [mahākavi], knows all that, including its secrets," |

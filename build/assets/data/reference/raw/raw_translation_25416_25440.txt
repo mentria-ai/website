@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 25416: ` | "[Blank line]" |
+| `Line 25417: ` | "[Blank line]" |
+| `Line 25418: २२१` | "221 [chapter number]" |
+| `Line 25419: ` | "[Blank line]" |
+| `Line 25420: ` | "[Blank line]" |
+| `Line 25421: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 25422: ` | "[Blank line]" |
+| `Line 25423: ततः प्रज्वलिते शुक्रे शार्ङ्गकास्ते सुदुःखिताः |` | "Then, when the fire blazed forth, those Śārṅgaka birds [specific bird species] became very distressed," |
+| `Line 25424: व्यथिताः परमोद्विग्ना नाधिजग्मुः परायणम् ||१||` | "Afflicted and extremely anxious, they could not find refuge. ||1||" |
+| `Line 25425: ` | "[Blank line]" |
+| `Line 25426: निशाम्य पुत्रकान्बालान्माता तेषां तपस्विनी |` | "Seeing her young children, their mother, the ascetic [tapasvinī]," |
+| `Line 25427: जरिता दुःखसन्तप्ता विललाप नरेश्वर ||२||` | "Jaritā [bird mother], tormented with grief, lamented, O lord of men [nareśvara]. ||2||" |
+| `Line 25428: ` | "[Blank line]" |
+| `Line 25429: अयमग्निर्दहन्कक्षमित आयाति भीषणः |` | "This terrifying fire, burning the dry grass, comes this way," |
+| `Line 25430: जगत्संदीपयन्भीमो मम दुःखविवर्धनः ||३||` | "The fearsome one, setting the world ablaze, increasing my sorrow. ||3||" |
+| `Line 25431: ` | "[Blank line]" |
+| `Line 25432: इमे च मां कर्षयन्ति शिशवो मन्दचेतसः |` | "And these helpless [manda-cetasaḥ] children torment me," |
+| `Line 25433: अबर्हाश्चरणैर्हीनाः पूर्वेषां नः परायणम् ||४||` | "Without feathers, unable to walk, the refuge of our ancestors. ||4||" |
+| `Line 25434: ` | "[Blank line]" |
+| `Line 25435: त्रासयंश्चायमायाति लेलिहानो महीरुहान् ||४||` | "And this fire comes terrifying, licking up the trees. ||4||" |
+| `Line 25436: ` | "[Blank line]" |
+| `Line 25437: अशक्तिमत्त्वाच्च सुता न शक्ताः सरणे मम |` | "Due to their helplessness, my children are unable to follow me," |
+| `Line 25438: आदाय च न शक्तास्मि पुत्रान्सरितुमन्यतः ||५||` | "And I am unable to take my children and flee elsewhere. ||5||" |
+| `Line 25439: ` | "[Blank line]" |
+| `Line 25440: न च त्यक्तुमहं शक्ता हृदयं दूयतीव मे |` | "I am unable to abandon them, as my heart seems to break," |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 23016: उद्यानानि च रम्याणि नगरस्य समन्ततः |` | "And there were delightful gardens all around the city," |
+| `Line 23017: आम्रैराम्रातकैर्नीपैरशोकैश्चम्पकैस्तथा ||३९||` | "With mango trees, hog plum trees, kadamba trees, ashoka trees, and champaka [fragrant flower] trees. ||39||" |
+| `Line 23018: ` | "[Blank line]" |
+| `Line 23019: पुंनागैर्नागपुष्पैश्च लकुचैः पनसैस्तथा |` | "With punnaga trees, nagakesara [snake-flower] trees, lakucha trees, and jackfruit trees," |
+| `Line 23020: शालतालकदम्बैश्च बकुलैश्च सकेतकैः ||४०||` | "With sala, palm, and kadamba trees, bakula trees along with ketaki [screw pine] trees. ||40||" |
+| `Line 23021: ` | "[Blank line]" |
+| `Line 23022: मनोहरैः पुष्पितैश्च फलभारावनामितैः |` | "With charming flowering trees and those bending under the weight of fruits," |
+| `Line 23023: प्राचीनामलकैर्लोध्रैरङ्कोलैश्च सुपुष्पितैः ||४१||` | "With ancient myrobalan trees, lodhra trees, and beautifully flowering ankola trees. ||41||" |
+| `Line 23024: ` | "[Blank line]" |
+| `Line 23025: जम्बूभिः पाटलाभिश्च कुब्जकैरतिमुक्तकैः |` | "With jambu [rose apple] trees, patala [trumpet flower] trees, kubjaka trees, and atimukta [jasmine] creepers," |
+| `Line 23026: करवीरैः पारिजातैरन्यैश्च विविधैर्द्रुमैः ||४२||` | "With karavira [oleander] trees, parijata [coral jasmine] trees, and various other kinds of trees. ||42||" |
+| `Line 23027: ` | "[Blank line]" |
+| `Line 23028: नित्यपुष्पफलोपेतैर्नानाद्विजगणायुतम् |` | "Adorned with trees that always bear flowers and fruits, filled with various flocks of birds," |
+| `Line 23029: मत्तबर्हिणसङ्घुष्टं कोकिलैश्च सदामदैः ||४३||` | "Resounding with the calls of intoxicated peacocks and the ever-joyful cuckoos. ||43||" |
+| `Line 23030: ` | "[Blank line]" |
+| `Line 23031: गृहैरादर्शविमलैर्विविधैश्च लतागृहैः |` | "With houses clear as mirrors, and various arbors [creeper-houses]," |
+| `Line 23032: मनोहरैश्चित्रगृहैस्तथा जगतिपर्वतैः ||४४||` | "With charming picture houses and terraced mountains [artificial hills]. ||44||" |
+| `Line 23033: ` | "[Blank line]" |
+| `Line 23034: वापीभिर्विविधाभिश्च पूर्णाभिः परमाम्भसा ||४४||` | "With various step-wells filled with excellent water. ||44||" |
+| `Line 23035: ` | "[Blank line]" |
+| `Line 23036: सरोभिरतिरम्यैश्च पद्मोत्पलसुगन्धिभिः |` | "With extremely beautiful lakes fragrant with lotuses and water lilies," |
+| `Line 23037: हंसकारण्डवयुतैश्चक्रवाकोपशोभितैः ||४५||` | "Filled with swans and karandava ducks, adorned with chakravaka [ruddy shelduck] birds. ||45||" |
+| `Line 23038: ` | "[Blank line]" |
+| `Line 23039: रम्याश्च विविधास्तत्र पुष्करिण्यो वनावृताः |` | "There were various delightful lotus ponds surrounded by forests," |
+| `Line 23040: तडागानि च रम्याणि बृहन्ति च महान्ति च ||४६||` | "And charming tanks, both extensive and grand. ||46||" |

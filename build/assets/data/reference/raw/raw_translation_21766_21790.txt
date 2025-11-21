@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 21766: इति तथ्यं महाराज सर्वमेतद्ब्रवीमि ते |` | "Thus, O great king, I tell you all this truthfully," |
+| `Line 21767: भवान्हि गुरुरस्माकं परमं च परायणम् ||११||` | "For you are our teacher and supreme refuge. ||11||" |
+| `Line 21768: ` | "[Blank line]" |
+| `Line 21769: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 21770: ` | "[Blank line]" |
+| `Line 21771: ततः स द्रुपदो राजा हर्षव्याकुललोचनः |` | "Then King Drupada [Pāñcāla ruler], with eyes agitated by joy," |
+| `Line 21772: प्रतिवक्तुं तदा युक्तं नाशकत्तं युधिष्ठिरम् ||१२||` | "Was unable to give a proper reply to Yudhiṣṭhira [eldest Pāṇḍava] at that time. ||12||" |
+| `Line 21773: ` | "[Blank line]" |
+| `Line 21774: यत्नेन तु स तं हर्षं संनिगृह्य परन्तपः |` | "But with effort, that scorcher of foes [Drupada] restrained his joy," |
+| `Line 21775: अनुरूपं ततो राजा प्रत्युवाच युधिष्ठिरम् ||१३||` | "And then the king replied appropriately to Yudhiṣṭhira. ||13||" |
+| `Line 21776: ` | "[Blank line]" |
+| `Line 21777: पप्रच्छ चैनं धर्मात्मा यथा ते प्रद्रुताः पुरा |` | "And the righteous one [Drupada] asked him how they had fled before," |
+| `Line 21778: स तस्मै सर्वमाचख्यावानुपूर्व्येण पाण्डवः ||१४||` | "And the Pāṇḍava [Yudhiṣṭhira] narrated everything to him in sequence. ||14||" |
+| `Line 21779: ` | "[Blank line]" |
+| `Line 21780: तच्छ्रुत्वा द्रुपदो राजा कुन्तीपुत्रस्य भाषितम् |` | "Having heard the words of Kuntī's son [Yudhiṣṭhira], King Drupada," |
+| `Line 21781: विगर्हयामास तदा धृतराष्ट्रं जनेश्वरम् ||१५||` | "Then condemned Dhṛtarāṣṭra [blind king], the ruler of people. ||15||" |
+| `Line 21782: ` | "[Blank line]" |
+| `Line 21783: आश्वासयामास च तं कुन्तीपुत्रं युधिष्ठिरम् |` | "And he consoled Kuntī's son, Yudhiṣṭhira," |
+| `Line 21784: प्रतिजज्ञे च राज्याय द्रुपदो वदतां वरः ||१६||` | "And Drupada, best among speakers, promised to help him regain his kingdom. ||16||" |
+| `Line 21785: ` | "[Blank line]" |
+| `Line 21786: ततः कुन्ती च कृष्णा च भीमसेनार्जुनावपि |` | "Then Kuntī [Pāṇḍavas' mother] and Kṛṣṇā [Draupadī], and also Bhīmasena and Arjuna," |
+| `Line 21787: यमौ च राज्ञा संदिष्टौ विविशुर्भवनं महत् ||१७||` | "And the twins [Nakula-Sahadeva], directed by the king, entered the great palace. ||17||" |
+| `Line 21788: ` | "[Blank line]" |
+| `Line 21789: तत्र ते न्यवसन्राजन्यज्ञसेनेन पूजिताः |` | "There they dwelt, O king, honored by Yajñasena [Drupada]," |
+| `Line 21790: प्रत्याश्वस्तांस्ततो राजा सह पुत्रैरुवाच तान् ||१८||` | "And then the king, along with his sons, addressed them when they were comforted. ||18||" |

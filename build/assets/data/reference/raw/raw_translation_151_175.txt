@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 151: तेभ्योऽयं कुरुवंशश्च यदूनां भरतस्य च ||४४||` | "From them arose this lineage of the Kurus, of the Yadus [Krishna's clan], and of Bharata [ancient king]. ||44||" |
+| `Line 152: ` | [Blank line] |
+| `Line 153: ययातीक्ष्वाकुवंशश्च राजर्षीणां च सर्वशः |` | "And the lineages of Yayāti [legendary king] and Ikṣvāku [solar dynasty founder], and of all the royal sages [rājarṣis] completely," |
+| `Line 154: सम्भूता बहवो वंशा भूतसर्गाः सविस्तराः ||४५||` | "Many lineages arose, and the detailed creation of beings. ||45||" |
+| `Line 155: ` | [Blank line] |
+| `Line 156: भूतस्थानानि सर्वाणि रहस्यं त्रिविधं च यत् |` | "All the abodes of beings, and the threefold mysteries [esoteric knowledge]," |
+| `Line 157: वेदयोगं सविज्ञानं धर्मोऽर्थः काम एव च ||४६||` | "The application of Vedas with special knowledge, and dharma [righteousness], artha [wealth], and kāma [pleasure] as well. ||46||" |
+| `Line 158: ` | [Blank line] |
+| `Line 159: धर्मकामार्थशास्त्राणि शास्त्राणि विविधानि च |` | "The treatises on dharma, kāma, and artha, and various other treatises," |
+| `Line 160: लोकयात्राविधानं च सम्भूतं दृष्टवानृषिः ||४७||` | "And the rules for worldly conduct, the sage saw all these manifested. ||47||" |
+| `Line 161: ` | [Blank line] |
+| `Line 162: इतिहासाः सवैयाख्या विविधाः श्रुतयोऽपि च |` | "Histories with their explanations, various sacred texts [śrutis] as well," |
+| `Line 163: इह सर्वमनुक्रान्तमुक्तं ग्रन्थस्य लक्षणम् ||४८||` | "Here everything is enumerated, thus the characteristics of this work are described. ||48||" |
+| `Line 164: ` | [Blank line] |
+| `Line 165: विस्तीर्यैतन्महज्ज्ञानमृषिः सङ्क्षेपमब्रवीत् |` | "Having expanded this great knowledge, the sage spoke it in condensed form," |
+| `Line 166: इष्टं हि विदुषां लोके समासव्यासधारणम् ||४९||` | "For in the world of the learned, the grasp of both concise and elaborate forms is desired. ||49||" |
+| `Line 167: ` | [Blank line] |
+| `Line 168: मन्वादि भारतं केचिदास्तीकादि तथापरे |` | "Some study the Bharata beginning with Manu [first man], others beginning with Āstīka [serpent sacrifice story]," |
+| `Line 169: तथोपरिचराद्यन्ये विप्राः सम्यगधीयते ||५०||` | "And other Brahmins study it properly beginning with Uparicara [King Vasu]. ||50||" |
+| `Line 170: ` | [Blank line] |
+| `Line 171: विविधं संहिताज्ञानं दीपयन्ति मनीषिणः |` | "The wise illuminate the diverse knowledge of the Saṃhitās [collections]," |
+| `Line 172: व्याख्यातुं कुशलाः केचिद्ग्रन्थं धारयितुं परे ||५१||` | "Some are skilled in explaining, others in memorizing the text. ||51||" |
+| `Line 173: ` | [Blank line] |
+| `Line 174: तपसा ब्रह्मचर्येण व्यस्य वेदं सनातनम् |` | "Having divided the eternal Veda through austerity and celibacy," |
+| `Line 175: इतिहासमिमं चक्रे पुण्यं सत्यवतीसुतः ||५२||` | "The son of Satyavatī [Vyāsa] created this sacred history. ||52||" |

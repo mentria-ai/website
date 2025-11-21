@@ -1,0 +1,22 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 6096: ` | "[Blank line]" |
+| `Line 6097: ` | "[Blank line]" |
+| `Line 6098: ५०` | "50 [chapter number]" |
+| `Line 6099: ` | "[Blank line]" |
+| `Line 6100: ` | "[Blank line]" |
+| `Line 6101: आस्तीक उवाच||` | "Āstīka said:" |
+| `Line 6102: ` | "[Blank line]" |
+| `Line 6103: सोमस्य यज्ञो वरुणस्य यज्ञः; प्रजापतेर्यज्ञ आसीत्प्रयागे |` | "The sacrifice of Soma [moon deity], the sacrifice of Varuṇa [water deity]; the sacrifice of Prajāpati [creation lord] was at Prayāga [sacred confluence]." |
+| `Line 6104: तथा यज्ञोऽयं तव भारताग्र्य; पारिक्षित स्वस्ति नोऽस्तु प्रियेभ्यः ||१||` | "So is this sacrifice of yours, O foremost of Bharatas [Kuru dynasty]; O Pārīkṣita [Parikshit's son], may there be well-being for our dear ones. ||1||" |
+| `Line 6105: ` | "[Blank line]" |
+| `Line 6106: शक्रस्य यज्ञः शतसङ्ख्य उक्त; स्तथापरस्तुल्यसङ्ख्यः शतं वै |` | "The sacrifices of Śakra [Indra] are said to number a hundred; likewise another hundred of equal number indeed." |
+| `Line 6107: तथा यज्ञोऽयं तव भारताग्र्य; पारिक्षित स्वस्ति नोऽस्तु प्रियेभ्यः ||२||` | "So is this sacrifice of yours, O foremost of Bharatas [Kuru dynasty]; O Pārīkṣita [Parikshit's son], may there be well-being for our dear ones. ||2||" |
+| `Line 6108: ` | "[Blank line]" |
+| `Line 6109: यमस्य यज्ञो हरिमेधसश्च; यथा यज्ञो रन्तिदेवस्य राज्ञः |` | "The sacrifice of Yama [death deity] and of Harimedhasa [sage]; like the sacrifice of King Rantideva [legendary king]." |
+| `Line 6110: तथा यज्ञोऽयं तव भारताग्र्य; पारिक्षित स्वस्ति नोऽस्तु प्रियेभ्यः ||३||` | "So is this sacrifice of yours, O foremost of Bharatas [Kuru dynasty]; O Pārīkṣita [Parikshit's son], may there be well-being for our dear ones. ||3||" |
+| `Line 6111: ` | "[Blank line]" |
+| `Line 6112: गयस्य यज्ञः शशबिन्दोश्च राज्ञो; यज्ञस्तथा वैश्रवणस्य राज्ञः |` | "The sacrifice of Gaya [royal sage] and of King Śaśabindu [ancient king]; likewise the sacrifice of King Vaiśravaṇa [Kubera]." |
+| `Line 6113: तथा यज्ञोऽयं तव भारताग्र्य; पारिक्षित स्वस्ति नोऽस्तु प्रियेभ्यः ||४||` | "So is this sacrifice of yours, O foremost of Bharatas [Kuru dynasty]; O Pārīkṣita [Parikshit's son], may there be well-being for our dear ones. ||4||" |
+| `Line 6114: ` | "[Blank line]" |
+| `Line 6115: नृगस्य यज्ञस्त्वजमीढस्य चासी; द्यथा यज्ञो दाशरथेश्च राज्ञः |` | "The sacrifice of Nṛga [ancient king] and of Ajamīḍha [Kuru ancestor] was; like the sacrifice of King Dāśaratha [Rama's father]." |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1776: स एनमभिवाद्योवाच |` | "He, having greeted him, said:" |
+| `Line 1777: भगवन्पौष्यः खल्वहम् |` | "Venerable sir, I am indeed Paushya." |
+| `Line 1778: किं करवाणीति | १०७ |` | "What shall I do for you? ||107||" |
+| `Line 1779: तमुवाचोत्तङ्कः |` | "Uttanka said to him:" |
+| `Line 1780: गुर्वर्थे कुण्डलाभ्यामर्थ्यागतोऽस्मीति ये ते क्षत्रियया पिनद्धे कुण्डले ते भवान्दातुमर्हतीति | १०८ |` | "I have come to request the earrings for my guru's sake. Those earrings worn by your Kshatriya [warrior-class wife], you should give them to me. ||108||" |
+| `Line 1781: तं पौष्यः प्रत्युवाच |` | "Paushya replied to him:" |
+| `Line 1782: प्रविश्यान्तःपुरं क्षत्रिया याच्यतामिति | १०९ |` | "Enter the inner chambers and request them from the Kshatriya lady. ||109||" |
+| `Line 1783: स तेनैवमुक्तः प्रविश्यान्तःपुरं क्षत्रियां नापश्यत् | ११० |` | "Having been thus instructed by him, he entered the inner chambers but did not see the Kshatriya lady. ||110||" |
+| `Line 1784: स पौष्यं पुनरुवाच |` | "He again said to Paushya:" |
+| `Line 1785: न युक्तं भवता वयमनृतेनोपचरितुम् |` | "It is not proper for you to treat us with falsehood." |
+| `Line 1786: न हि ते क्षत्रियान्तःपुरे संनिहिता |` | "Your Kshatriya wife is not present in the inner chambers." |
+| `Line 1787: नैनां पश्यामीति | १११ |` | "I do not see her. ||111||" |
+| `Line 1788: स एवमुक्तः पौष्यस्तं प्रत्युवाच |` | "Thus addressed, Paushya replied to him:" |
+| `Line 1789: सम्प्रति भवानुच्छिष्टः |` | "At present you are ucchishta [ritually impure from eating]." |
+| `Line 1790: स्मर तावत् |` | "Think about it for a moment." |
+| `Line 1791: न हि सा क्षत्रिया उच्छिष्टेनाशुचिना वा शक्या द्रष्टुम् |` | "Indeed, that Kshatriya lady cannot be seen by someone who is ucchishta or impure." |
+| `Line 1792: पतिव्रतात्वादेषा नाशुचेर्दर्शनमुपैतीति | ११२ |` | "Because of her devotion to her husband, she does not appear before one who is impure. ||112||" |
+| `Line 1793: अथैवमुक्त उत्तङ्कः स्मृत्वोवाच |` | "Then, thus addressed, Uttanka, after reflecting, said:" |
+| `Line 1794: अस्ति खलु मयोच्छिष्टेनोपस्पृष्टं शीघ्रं गच्छता चेति | ११३ |` | "Indeed, I did touch something while being ucchishta and while walking quickly. ||113||" |
+| `Line 1795: तं पौष्यः प्रत्युवाच |` | "Paushya replied to him:" |
+| `Line 1796: एतत्तदेवं हि |` | "That is indeed so." |
+| `Line 1797: न गच्छतोपस्पृष्टं भवति न स्थितेनेति | ११४ |` | "One should not touch anything while walking, nor while standing still. ||114||" |
+| `Line 1798: अथोत्तङ्कस्तथेत्युक्त्वा प्राङ्मुख उपविश्य सुप्रक्षालितपाणिपादवदनोऽशब्दाभिर् हृदयङ्गमाभिरद्भिरुपस्पृश्य त्रिः पीत्वा द्विः परिमृज्य खान्यद्भिरुपस्पृश्यान्तःपुरं प्रविश्य तां क्षत्रियामपश्यत् | ११५ |` | "Then Uttanka, saying 'So be it,' sat facing east, thoroughly washed his hands, feet, and face, sipped water that was silent and pleasing to the heart three times, wiped twice, touched the bodily apertures with water, entered the inner chambers, and saw that Kshatriya lady. ||115||" |
+| `Line 1799: सा च दृष्ट्वैवोत्तङ्कमभ्युत्थायाभिवाद्योवाच |` | "And she, upon seeing Uttanka, rose up, greeted him, and said:" |
+| `Line 1800: स्वागतं ते भगवन् |` | "Welcome to you, venerable sir." |

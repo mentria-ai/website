@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 11566: तत्र श्लोकौ भवतः | ०३० |` | "There are these two verses. |030|" |
+| `Line 11567: ` | "[Blank line]" |
+| `Line 11568: माता भस्त्रा पितुः पुत्रो येन जातः स एव सः |` | "The mother is merely the pouch [receptacle], the son belongs to the father; he is indeed the same from whom he is born." |
+| `Line 11569: भरस्व पुत्रं दुःषन्त मावमंस्थाः शकुन्तलाम् ||३१||` | "Support your son, Duḥṣanta, do not disrespect Śakuntalā. ||31||" |
+| `Line 11570: ` | "[Blank line]" |
+| `Line 11571: रेतोधाः पुत्र उन्नयति नरदेव यमक्षयात् |` | "O king [nara-deva], a son born of your seed raises you from the abode of Yama [death realm]." |
+| `Line 11572: त्वं चास्य धाता गर्भस्य सत्यमाह शकुन्तला ||३२||` | "And you are the creator of this embryo; Śakuntalā speaks the truth. ||32||" |
+| `Line 11573: ` | "[Blank line]" |
+| `Line 11574: ततोऽस्य भरतत्वम् | ०३३ |` | "Hence his name Bharata [to be supported]. |033|" |
+| `Line 11575: भरतः खलु काशेयीमुपयेमे सार्वसेनीं सुनन्दां नाम |` | "Bharata indeed married Sunandā by name, a princess of Kāśī [Benares] and daughter of Sarvaseṇa." |
+| `Line 11576: तस्यामस्य जज्ञे भुमन्युः | ०३४ |` | "To her was born his son Bhumanyu. |034|" |
+| `Line 11577: भुमन्युः खलु दाशार्हीमुपयेमे जयां नाम |` | "Bhumanyu indeed married Jayā by name, a princess of the Daśārha [royal clan]." |
+| `Line 11578: तस्यामस्य जज्ञे सुहोत्रः | ०३५ |` | "To her was born his son Suhotra. |035|" |
+| `Line 11579: सुहोत्रः खल्विक्ष्वाकुकन्यामुपयेमे सुवर्णां नाम |` | "Suhotra indeed married Suvarṇā by name, a daughter of the Ikṣvāku [solar dynasty]." |
+| `Line 11580: तस्यामस्य जज्ञे हस्ती |` | "To her was born his son Hastī." |
+| `Line 11581: य इदं हास्तिनपुरं मापयामास |` | "Who measured out [founded] this Hāstinapura [elephant city]." |
+| `Line 11582: एतदस्य हास्तिनपुरत्वम् | ०३६ |` | "This is why it is called Hāstinapura. |036|" |
+| `Line 11583: हस्ती खलु त्रैगर्तीमुपयेमे यशोधरां नाम |` | "Hastī indeed married Yaśodharā by name, a princess of Trigarta [three strongholds]." |
+| `Line 11584: तस्यामस्य जज्ञे विकुण्ठनः | ०३७ |` | "To her was born his son Vikuṇṭhana. |037|" |
+| `Line 11585: विकुण्ठनः खलु दाशार्हीमुपयेमे सुदेवां नाम |` | "Vikuṇṭhana indeed married Sudevā by name, a princess of the Daśārha [royal clan]." |
+| `Line 11586: तस्यामस्य जज्ञेऽजमीढः | ०३८ |` | "To her was born his son Ajamīḍha. |038|" |
+| `Line 11587: अजमीढस्य चतुर्विंशं पुत्रशतं बभूव कैकेय्यां नागायां गान्धार्यां विमलायामृक्षायां चेति |` | "Ajamīḍha had one hundred and twenty-four sons from Kaikeyī, Nāgā, Gāndhārī, Vimalā, and Ṛkṣā." |
+| `Line 11588: पृथक्पृथग्वंशकरा नृपतयः |` | "They became kings, each founding separate dynasties." |
+| `Line 11589: तत्र वंशकरः संवरणः | ०३९ |` | "Among them, Saṃvaraṇa was the dynasty-maker [main lineage]. |039|" |
+| `Line 11590: संवरणः खलु वैवस्वतीं तपतीं नामोपयेमे |` | "Saṃvaraṇa indeed married Tapatī by name, daughter of Vivasvat [sun god]." |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1126: श्रावयामास राजानं धृतराष्ट्रं मनीषिणम् ||१४२||` | "He made the wise king Dhritarashtra listen. ||142||" |
+| `Line 1127: ` | [Blank line] |
+| `Line 1128: तथा सनत्सुजातेन यत्राध्यात्ममनुत्तमम् |` | "Thus, through Sanatsujata [eternal youth sage], where the supreme spiritual knowledge," |
+| `Line 1129: मनस्तापान्वितो राजा श्रावितः शोकलालसः ||१४३||` | "Was made to be heard by the king who was afflicted with mental anguish and overwhelmed with grief. ||143||" |
+| `Line 1130: ` | [Blank line] |
+| `Line 1131: प्रभाते राजसमितौ सञ्जयो यत्र चाभिभोः |` | "At dawn, in the royal assembly, where Sanjaya [charioteer-messenger] of the sovereign," |
+| `Line 1132: ऐकात्म्यं वासुदेवस्य प्रोक्तवानर्जुनस्य च ||१४४||` | "Declared the oneness of Vasudeva [Krishna] and Arjuna. ||144||" |
+| `Line 1133: ` | [Blank line] |
+| `Line 1134: यत्र कृष्णो दयापन्नः सन्धिमिच्छन्महायशाः |` | "Where Krishna, filled with compassion, desiring peace, the greatly renowned one," |
+| `Line 1135: स्वयमागाच्छमं कर्तुं नगरं नागसाह्वयम् ||१४५||` | "Himself came to make peace to the city called Nagasahvaya [Hastinapura]. ||145||" |
+| `Line 1136: ` | [Blank line] |
+| `Line 1137: प्रत्याख्यानं च कृष्णस्य राज्ञा दुर्योधनेन वै |` | "And the rejection of Krishna by King Duryodhana indeed," |
+| `Line 1138: शमार्थं याचमानस्य पक्षयोरुभयोर्हितम् ||१४६||` | "Who was pleading for peace, for the benefit of both sides. ||146||" |
+| `Line 1139: ` | [Blank line] |
+| `Line 1140: कर्णदुर्योधनादीनां दुष्टं विज्ञाय मन्त्रितम् |` | "Having known the evil counsel of Karna, Duryodhana and others," |
+| `Line 1141: योगेश्वरत्वं कृष्णेन यत्र राजसु दर्शितम् ||१४७||` | "Where Krishna displayed his lordship of yoga [divine powers] among the kings. ||147||" |
+| `Line 1142: ` | [Blank line] |
+| `Line 1143: रथमारोप्य कृष्णेन यत्र कर्णोऽनुमन्त्रितः |` | "Where Karna was counseled by Krishna, having taken him up in his chariot," |
+| `Line 1144: उपायपूर्वं शौण्डीर्यात्प्रत्याख्यातश्च तेन सः ||१४८||` | "With diplomatic means, but he (Karna) rejected him (Krishna) out of valor. ||148||" |
+| `Line 1145: ` | [Blank line] |
+| `Line 1146: ततश्चाप्यभिनिर्यात्रा रथाश्वनरदन्तिनाम् |` | "And then also the marching forth of chariots, horses, men, and elephants," |
+| `Line 1147: नगराद्धास्तिनपुराद्बलसङ्ख्यानमेव च ||१४९||` | "From the city of Hastinapura, and also the enumeration of forces. ||149||" |
+| `Line 1148: ` | [Blank line] |
+| `Line 1149: यत्र राज्ञा उलूकस्य प्रेषणं पाण्डवान्प्रति |` | "Where the king's sending of Uluka [owl-named messenger] to the Pandavas," |
+| `Line 1150: श्वोभाविनि महायुद्धे दूत्येन क्रूरवादिना ||१५०||` | "For the great battle to come tomorrow, as an envoy with harsh words. ||150||" |

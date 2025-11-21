@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 48716: स्वयमुत्थापयामासुर्देवाः सेन्द्रा युधिष्ठिर ||६||` | "The gods themselves, along with Indra [king of gods], raised him up, O Yudhiṣṭhira. ||6||" |
+| `Line 48717: ` | "[Blank line]" |
+| `Line 48718: तेषु तस्य मखाग्र्येषु गयस्य पृथिवीपतेः |` | "In those excellent sacrifices [makhāgrya] of Gaya, the lord of the earth," |
+| `Line 48719: अमाद्यदिन्द्रः सोमेन दक्षिणाभिर्द्विजातयः ||७||` | "Indra rejoiced with Soma [ritual drink], and the twice-born [brāhmaṇas] with gifts. ||7||" |
+| `Line 48720: ` | "[Blank line]" |
+| `Line 48721: सिकता वा यथा लोके यथा वा दिवि तारकाः |` | "Just as the grains of sand in the world, or the stars in the sky," |
+| `Line 48722: यथा वा वर्षतो धारा असङ्ख्येयाश्च केनचित् ||८||` | "Or as the streams of rain falling are uncountable by anyone, ||8||" |
+| `Line 48723: ` | "[Blank line]" |
+| `Line 48724: तथैव तदसङ्ख्येयं धनं यत्प्रददौ गयः |` | "So too was uncountable the wealth that Gaya distributed," |
+| `Line 48725: सदस्येभ्यो महाराज तेषु यज्ञेषु सप्तसु ||९||` | "To the priests [sadasyās], O great king, in those seven sacrifices. ||9||" |
+| `Line 48726: ` | "[Blank line]" |
+| `Line 48727: भवेत्सङ्ख्येयमेतद्वै यदेतत्परिकीर्तितम् |` | "What has been described here might be countable," |
+| `Line 48728: न सा शक्या तु सङ्ख्यातुं दक्षिणा दक्षिणावतः ||१०||` | "But the gifts [dakṣiṇā] of that generous one cannot be counted. ||10||" |
+| `Line 48729: ` | "[Blank line]" |
+| `Line 48730: हिरण्मयीभिर्गोभिश्च कृताभिर्विश्वकर्मणा |` | "With golden cows crafted by Viśvakarmā [divine architect]," |
+| `Line 48731: ब्राह्मणांस्तर्पयामास नानादिग्भ्यः समागतान् ||११||` | "He satisfied the Brāhmaṇas who had gathered from various directions. ||11||" |
+| `Line 48732: ` | "[Blank line]" |
+| `Line 48733: अल्पावशेषा पृथिवी चैत्यैरासीन्महात्मनः |` | "The earth was left with little space due to the memorial pillars [caitya] of that great-souled," |
+| `Line 48734: गयस्य यजमानस्य तत्र तत्र विशां पते ||१२||` | "Gaya, the sacrificer, erected here and there, O lord of people. ||12||" |
+| `Line 48735: ` | "[Blank line]" |
+| `Line 48736: स लोकान्प्राप्तवानैन्द्रान्कर्मणा तेन भारत |` | "By that deed, O Bhārata [descendant of Bharata], he attained the worlds of Indra," |
+| `Line 48737: सलोकतां तस्य गच्छेत्पयोष्ण्यां य उपस्पृशेत् ||१३||` | "One who bathes in the Payoṣṇī [warm-watered river] would reach the same world as him. ||13||" |
+| `Line 48738: ` | "[Blank line]" |
+| `Line 48739: तस्मात्त्वमत्र राजेन्द्र भ्रातृभिः सहितोऽनघ |` | "Therefore, O king of kings, sinless one, along with your brothers," |
+| `Line 48740: उपस्पृश्य महीपाल धूतपाप्मा भविष्यसि ||१४||` | "By bathing here, O protector of the earth, you will become cleansed of sins. ||14||" |

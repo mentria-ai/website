@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1801: आज्ञापय किं करवाणीति | ११६ |` | "Command me, what shall I do? |116|" |
+| `Line 1802: स तामुवाच |` | "He said to her:" |
+| `Line 1803: एते कुण्डले गुर्वर्थं मे भिक्षिते दातुमर्हसीति | ११७ |` | "You should give me these two earrings which I am begging for my teacher's sake. |117|" |
+| `Line 1804: सा प्रीता तेन तस्य सद्भावेन पात्रमयमनतिक्रमणीयश्चेति मत्वा ते कुण्डले अवमुच्यास्मै प्रायच्छत् | ११८ |` | "She, pleased by his sincerity and thinking 'he is a worthy recipient who should not be refused,' removed those earrings and gave them to him. |118|" |
+| `Line 1805: आह चैनम् |` | "And she said to him:" |
+| `Line 1806: एते कुण्डले तक्षको नागराजः प्रार्थयति |` | "Takshaka, the king of serpents [nāga lord], desires these earrings." |
+| `Line 1807: अप्रमत्तो नेतुमर्हसीति | ११९ |` | "You should carry them with vigilance. |119|" |
+| `Line 1808: स एवमुक्तस्तां क्षत्रियां प्रत्युवाच |` | "He, thus addressed, replied to that Kshatriya woman:" |
+| `Line 1809: भवति सुनिर्वृता भव |` | "Lady, be at ease," |
+| `Line 1810: न मां शक्तस्तक्षको नागराजो धर्षयितुमिति | १२० |` | "Takshaka, the king of serpents, is not capable of harming me. |120|" |
+| `Line 1811: स एवमुक्त्वा तां क्षत्रियामामन्त्र्य पौष्यसकाशमागच्छत् | १२१ |` | "Having spoken thus and taking leave of that Kshatriya woman, he went to Paushya. |121|" |
+| `Line 1812: स तं दृष्ट्वोवाच |` | "Seeing him, he said:" |
+| `Line 1813: भोः पौष्य प्रीतोऽस्मीति | १२२ |` | "O Paushya, I am pleased. |122|" |
+| `Line 1814: तं पौष्यः प्रत्युवाच |` | "Paushya replied to him:" |
+| `Line 1815: भगवंश्चिरस्य पात्रमासाद्यते |` | "Venerable sir, after a long time a worthy recipient has arrived," |
+| `Line 1816: भवांश्च गुणवानतिथिः |` | "And you are a virtuous guest." |
+| `Line 1817: तत्करिष्ये श्राद्धम् |` | "Therefore, I will perform a śrāddha [ancestral rite]." |
+| `Line 1818: क्षणः क्रियतामिति | १२३ |` | "Please wait a moment. |123|" |
+| `Line 1819: तमुत्तङ्कः प्रत्युवाच |` | "Uttanka replied to him:" |
+| `Line 1820: कृतक्षण एवास्मि |` | "I have already waited enough," |
+| `Line 1821: शीघ्रमिच्छामि यथोपपन्नमन्नमुपहृतं भवतेति | १२४ |` | "I wish for food to be served quickly, whatever is readily available. |124|" |
+| `Line 1822: स तथेत्युक्त्वा यथोपपन्नेनान्नेनैनं भोजयामास | १२५ |` | "He, saying 'so be it,' fed him with whatever food was available. |125|" |
+| `Line 1823: अथोत्तङ्कः शीतमन्नं सकेशं दृष्ट्वा अशुच्येतदिति मत्वा पौष्यमुवाच |` | "Then Uttanka, seeing the food was cold and contained hair, thinking 'this is impure,' said to Paushya:" |
+| `Line 1824: यस्मान्मे अशुच्यन्नं ददासि तस्मदन्धो भविष्यसीति | १२६ |` | "Because you give me impure food, therefore you shall become blind. |126|" |
+| `Line 1825: तं पौष्यः प्रत्युवाच |` | "Paushya replied to him:" |

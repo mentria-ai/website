@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 15566: ` | "[Blank line]" |
+| `Line 15567: न दरिद्रो वसुमतो नाविद्वान्विदुषः सखा |` | "A poor man is not a friend to a wealthy one, nor an ignorant man to a learned one [vidush]," |
+| `Line 15568: शूरस्य न सखा क्लीबः सखिपूर्वं किमिष्यते ||७||` | "A coward is not a friend to a hero; what friendship [sakhi] is desired with one who was formerly a friend? ||7||" |
+| `Line 15569: ` | "[Blank line]" |
+| `Line 15570: ययोरेव समं वित्तं ययोरेव समं कुलम् |` | "Only those whose wealth is equal, only those whose family status [kula] is equal," |
+| `Line 15571: तयोः सख्यं विवाहश्च न तु पुष्टविपुष्टयोः ||८||` | "Between them friendship and marriage exist, but not between the prosperous and the impoverished. ||8||" |
+| `Line 15572: ` | "[Blank line]" |
+| `Line 15573: नाश्रोत्रियः श्रोत्रियस्य नारथी रथिनः सखा |` | "One who is not learned in Vedas [ashrotriya] is not a friend to a Vedic scholar [shrotriya], nor is a man without a chariot a friend to a charioteer," |
+| `Line 15574: नाराज्ञा सङ्गतं राज्ञः सखिपूर्वं किमिष्यते ||९||` | "A king has no association with a non-king; what friendship is desired with one who was formerly a friend? ||9||" |
+| `Line 15575: ` | "[Blank line]" |
+| `Line 15576: वैशम्पायन उवाच||` | "Vaishampayana [sage narrator] said:" |
+| `Line 15577: ` | "[Blank line]" |
+| `Line 15578: द्रुपदेनैवमुक्तस्तु भारद्वाजः प्रतापवान् |` | "Thus addressed by Drupada [Panchala king], the mighty Bharadvaja [Drona's lineage]," |
+| `Line 15579: मुहूर्तं चिन्तयामास मन्युनाभिपरिप्लुतः ||१०||` | "Reflected for a moment, overwhelmed with anger. ||10||" |
+| `Line 15580: ` | "[Blank line]" |
+| `Line 15581: स विनिश्चित्य मनसा पाञ्चालं प्रति बुद्धिमान् |` | "Having decided in his mind about the Panchala [kingdom], that intelligent one," |
+| `Line 15582: जगाम कुरुमुख्यानां नगरं नागसाह्वयम् ||११||` | "Went to the city of the foremost Kurus, named Nagasahvaya [Hastinapura]. ||11||" |
+| `Line 15583: ` | "[Blank line]" |
+| `Line 15584: कुमारास्त्वथ निष्क्रम्य समेता गजसाह्वयात् |` | "Then the princes, having come out together from Gajasahvaya [Hastinapura]," |
+| `Line 15585: क्रीडन्तो वीटया तत्र वीराः पर्यचरन्मुदा ||१२||` | "Playing there with a ball [vita], those heroes moved about with joy. ||12||" |
+| `Line 15586: ` | "[Blank line]" |
+| `Line 15587: पपात कूपे सा वीटा तेषां वै क्रीडतां तदा |` | "That ball fell into a well while they were playing then," |
+| `Line 15588: न च ते प्रत्यपद्यन्त कर्म वीटोपलब्धये ||१३||` | "And they could not determine a way to retrieve the ball. ||13||" |
+| `Line 15589: ` | "[Blank line]" |
+| `Line 15590: अथ द्रोणः कुमारांस्तान्दृष्ट्वा कृत्यवतस्तदा |` | "Then Drona [Bharadvaja's son], seeing those princes busy with that task," |

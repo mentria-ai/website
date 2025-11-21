@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 1301: राज्ञां तानि शरीराणि दाहयामास शास्त्रतः ||१९३||` | "He caused the bodies of those kings to be cremated according to the scriptures. ||193||" |
+| `Line 1302: ` | [Blank line] |
+| `Line 1303: एतदेकादशं प्रोक्तं पर्वातिकरुणं महत् |` | "This has been declared as the eleventh Parva [section], extremely sorrowful and great." |
+| `Line 1304: सप्तविंशतिरध्यायाः पर्वण्यस्मिन्नुदाहृताः ||१९४||` | "Twenty-seven chapters are enumerated in this Parva [section]. ||194||" |
+| `Line 1305: ` | [Blank line] |
+| `Line 1306: श्लोकाः सप्तशतं चात्र पञ्चसप्ततिरुच्यते |` | "Seven hundred and seventy-five verses are said to be here," |
+| `Line 1307: सङ्ख्यया भारताख्यानं कर्त्रा ह्यत्र महात्मना ||१९५||` | "By count in the Bharata narrative, composed here by the great-souled author. ||195||" |
+| `Line 1308: ` | [Blank line] |
+| `Line 1309: प्रणीतं सज्जनमनोवैक्लव्याश्रुप्रवर्तकम् ||१९५||` | "Composed to bring forth tears of distress in the minds of good people. ||195||" |
+| `Line 1310: ` | [Blank line] |
+| `Line 1311: अतः परं शान्तिपर्व द्वादशं बुद्धिवर्धनम् |` | "After this comes the Shanti Parva [Peace section], the twelfth, which increases wisdom," |
+| `Line 1312: यत्र निर्वेदमापन्नो धर्मराजो युधिष्ठिरः ||१९६||` | "Where Dharmaraja [righteous king] Yudhishthira fell into despondency. ||196||" |
+| `Line 1313: ` | [Blank line] |
+| `Line 1314: घातयित्वा पितृन्भ्रातृन्पुत्रान्सम्बन्धिबान्धवान् ||१९६||` | "After causing the slaughter of fathers, brothers, sons, relatives and kinsmen. ||196||" |
+| `Line 1315: ` | [Blank line] |
+| `Line 1316: शान्तिपर्वणि धर्माश्च व्याख्याताः शरतल्पिकाः |` | "In the Shanti Parva [Peace section], the duties are explained to the one lying on the arrow-bed [Bhishma]," |
+| `Line 1317: राजभिर्वेदितव्या ये सम्यङ्नयबुभुत्सुभिः ||१९७||` | "Which should be known by kings who properly desire to understand statecraft. ||197||" |
+| `Line 1318: ` | [Blank line] |
+| `Line 1319: आपद्धर्माश्च तत्रैव कालहेतुप्रदर्शकाः |` | "And there also are the duties for times of distress, showing the causes of time [circumstances]," |
+| `Line 1320: यान्बुद्ध्वा पुरुषः सम्यक्सर्वज्ञत्वमवाप्नुयात् ||१९८||` | "Understanding which, a person may properly attain omniscience. ||198||" |
+| `Line 1321: ` | [Blank line] |
+| `Line 1322: मोक्षधर्माश्च कथिता विचित्रा बहुविस्तराः ||१९८||` | "And the duties relating to liberation are narrated, varied and extensive. ||198||" |
+| `Line 1323: ` | [Blank line] |
+| `Line 1324: द्वादशं पर्व निर्दिष्टमेतत्प्राज्ञजनप्रियम् |` | "This twelfth Parva [section] is designated as dear to wise people," |
+| `Line 1325: पर्वण्यत्र परिज्ञेयमध्यायानां शतत्रयम् ||१९९||` | "In this Parva [section], three hundred chapters are to be known. ||199||" |

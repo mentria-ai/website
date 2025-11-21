@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 301: विग्रहे तुमुले तस्मिन्नहन्क्षत्रं परस्परम् ||९४||` | "In that tumultuous battle, the warriors [kṣatriyas] slew one another. ||94||" |
+| `Line 302: ` | [Blank line] |
+| `Line 303: जयत्सु पाण्डुपुत्रेषु श्रुत्वा सुमहदप्रियम् |` | "When the sons of Pandu were victorious, having heard this greatly unpleasant news," |
+| `Line 304: दुर्योधनमतं ज्ञात्वा कर्णस्य शकुनेस्तथा ||९५||` | "And knowing the intentions of Duryodhana, Karna, and Shakuni as well, ||95||" |
+| `Line 305: ` | [Blank line] |
+| `Line 306: धृतराष्ट्रश्चिरं ध्यात्वा सञ्जयं वाक्यमब्रवीत् ||९५||` | "Dhritarashtra, after reflecting for a long time, spoke these words to Sanjaya. ||95||" |
+| `Line 307: ` | [Blank line] |
+| `Line 308: शृणु सञ्जय मे सर्वं न मेऽसूयितुमर्हसि |` | "Listen, Sanjaya, to all I say, and you should not find fault with me," |
+| `Line 309: श्रुतवानसि मेधावी बुद्धिमान्प्राज्ञसंमतः ||९६||` | "You are learned, intelligent, and esteemed by the wise. ||96||" |
+| `Line 310: ` | [Blank line] |
+| `Line 311: न विग्रहे मम मतिर्न च प्रीये कुरुक्षये |` | "My mind is not inclined toward conflict, nor do I delight in the destruction of the Kurus," |
+| `Line 312: न मे विशेषः पुत्रेषु स्वेषु पाण्डुसुतेषु च ||९७||` | "I have no preference between my own sons and the sons of Pandu. ||97||" |
+| `Line 313: ` | [Blank line] |
+| `Line 314: वृद्धं मामभ्यसूयन्ति पुत्रा मन्युपरायणाः |` | "My sons, devoted to anger, find fault with me, an old man," |
+| `Line 315: अहं त्वचक्षुः कार्पण्यात्पुत्रप्रीत्या सहामि तत् ||९८||` | "But being blind, out of weakness and love for my sons, I endure it. ||98||" |
+| `Line 316: ` | [Blank line] |
+| `Line 317: मुह्यन्तं चानुमुह्यामि दुर्योधनमचेतनम् ||९८||` | "And I follow in delusion my deluded and senseless Duryodhana. ||98||" |
+| `Line 318: ` | [Blank line] |
+| `Line 319: राजसूये श्रियं दृष्ट्वा पाण्डवस्य महौजसः |` | "Having seen the prosperity of the mighty Pandava at the Rajasuya [royal sacrifice]," |
+| `Line 320: तच्चावहसनं प्राप्य सभारोहणदर्शने ||९९||` | "And having experienced humiliation at the sight of the assembly hall, ||99||" |
+| `Line 321: ` | [Blank line] |
+| `Line 322: अमर्षितः स्वयं जेतुमशक्तः पाण्डवान्रणे |` | "Filled with intolerance, yet himself unable to defeat the Pandavas in battle," |
+| `Line 323: निरुत्साहश्च सम्प्राप्तुं श्रियमक्षत्रियो यथा ||१००||` | "And lacking the energy to attain prosperity, like one who is not a kshatriya [warrior], ||100||" |
+| `Line 324: ` | [Blank line] |
+| `Line 325: गान्धारराजसहितश्छद्मद्यूतममन्त्रयत् ||१००||` | "Together with the king of Gandhara [Shakuni], he plotted the fraudulent game of dice. ||100||" |

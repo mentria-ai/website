@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 28891: स विनिर्जित्य सङ्ग्रामे हिमवन्तं सनिष्कुटम् |` | "Having conquered in battle Himavanta [Himalaya mountains] with its gardens," |
+| `Line 28892: श्वेतपर्वतमासाद्य न्यवसत्पुरुषर्षभः ||२७||` | "That bull among men reached the White Mountain and dwelled there. ||27||" |
+| `Line 28893: ` | "[Blank line]" |
+| `Line 28894: ` | "[Blank line]" |
+| `Line 28895: ` | "[Blank line]" |
+| `Line 28896: ` | "[Blank line]" |
+| `Line 28897: २५` | "[Chapter 25]" |
+| `Line 28898: ` | "[Blank line]" |
+| `Line 28899: ` | "[Blank line]" |
+| `Line 28900: वैशम्पायन उवाच||` | "Vaiśampāyana [sage narrator] said:" |
+| `Line 28901: ` | "[Blank line]" |
+| `Line 28902: स श्वेतपर्वतं वीरः समतिक्रम्य भारत |` | "That hero, having crossed over the White Mountain, O Bhārata [Janamejaya]," |
+| `Line 28903: देशं किम्पुरुषावासं द्रुमपुत्रेण रक्षितम् ||१||` | "Reached the land inhabited by Kimpuruṣas [half-human beings], protected by the son of Druma. ||1||" |
+| `Line 28904: ` | "[Blank line]" |
+| `Line 28905: महता संनिपातेन क्षत्रियान्तकरेण ह |` | "With a great army that was destructive to warriors," |
+| `Line 28906: व्यजयत्पाण्डवश्रेष्ठः करे चैव न्यवेशयत् ||२||` | "The best of the Pāṇḍavas [Arjuna] conquered it and made it pay tribute. ||2||" |
+| `Line 28907: ` | "[Blank line]" |
+| `Line 28908: तं जित्वा हाटकं नाम देशं गुह्यकरक्षितम् |` | "Having conquered that land called Hāṭaka, protected by the Guhyakas [semi-divine beings]," |
+| `Line 28909: पाकशासनिरव्यग्रः सहसैन्यः समासदत् ||३||` | "The son of Pākaśāsana [Indra's son, Arjuna], undistracted, approached with his army. ||3||" |
+| `Line 28910: ` | "[Blank line]" |
+| `Line 28911: तांस्तु सान्त्वेन निर्जित्य मानसं सर उत्तमम् |` | "Having conquered them through conciliation, the excellent Lake Mānasa [sacred lake]," |
+| `Line 28912: ऋषिकुल्याश्च ताः सर्वा ददर्श कुरुनन्दनः ||४||` | "And all those streams of the sages were seen by the joy of the Kurus [Arjuna]. ||4||" |
+| `Line 28913: ` | "[Blank line]" |
+| `Line 28914: सरो मानसमासाद्य हाटकानभितः प्रभुः |` | "Having reached Lake Mānasa, the lord conquered the region," |
+| `Line 28915: गन्धर्वरक्षितं देशं व्यजयत्पाण्डवस्ततः ||५||` | "The land protected by Gandharvas [celestial musicians], which the Pāṇḍava then conquered. ||5||" |

@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 3426: आपूर्यत मही चापि सलिलेन समन्ततः ||५||` | "And the earth was filled with water on all sides. ||5||" |
+| `Line 3427: ` | [Blank line] |
+| `Line 3428: ` | [Blank line] |
+| `Line 3429: ` | [Blank line] |
+| `Line 3430: ` | [Blank line] |
+| `Line 3431: ` | [Blank line] |
+| `Line 3432: ` | [Blank line] |
+| `Line 3433: २३` | "23" |
+| `Line 3434: ` | [Blank line] |
+| `Line 3435: ` | [Blank line] |
+| `Line 3436: सूत उवाच||` | "Sūta [bard-narrator] said:" |
+| `Line 3437: ` | [Blank line] |
+| `Line 3438: सुपर्णेनोह्यमानास्ते जग्मुस्तं देशमाशु वै |` | "Being carried by Suparṇa [Garuḍa], they quickly went to that region," |
+| `Line 3439: सागराम्बुपरिक्षिप्तं पक्षिसङ्घनिनादितम् ||१||` | "Surrounded by ocean waters, resonating with flocks of birds. ||1||" |
+| `Line 3440: ` | [Blank line] |
+| `Line 3441: विचित्रफलपुष्पाभिर्वनराजिभिरावृतम् |` | "Covered with rows of forests with various fruits and flowers," |
+| `Line 3442: भवनैरावृतं रम्यैस्तथा पद्माकरैरपि ||२||` | "Surrounded by beautiful dwellings and also lotus ponds. ||2||" |
+| `Line 3443: ` | [Blank line] |
+| `Line 3444: प्रसन्नसलिलैश्चापि ह्रदैश्चित्रैर्विभूषितम् |` | "Adorned with clear-watered and variegated lakes," |
+| `Line 3445: दिव्यगन्धवहैः पुण्यैर्मारुतैरुपवीजितम् ||३||` | "Fanned by sacred breezes carrying divine fragrances. ||3||" |
+| `Line 3446: ` | [Blank line] |
+| `Line 3447: उपजिघ्रद्भिराकाशं वृक्षैर्मलयजैरपि |` | "With sandalwood [Malaya mountain] trees seeming to perfume the sky," |
+| `Line 3448: शोभितं पुष्पवर्षाणि मुञ्चद्भिर्मारुतोद्धुतैः ||४||` | "Beautified by trees releasing showers of flowers stirred by the wind. ||4||" |
+| `Line 3449: ` | [Blank line] |
+| `Line 3450: किरद्भिरिव तत्रस्थान्नागान्पुष्पाम्बुवृष्टिभिः |` | "As if sprinkling the nāgas [serpents] dwelling there with showers of flowers and water." |

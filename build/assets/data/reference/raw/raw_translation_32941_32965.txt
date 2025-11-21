@@ -1,0 +1,27 @@
+| **Sanskrit** | **English Translation** |
+|-------------|-------------------------|
+| `Line 32941: के वै तस्य परे लोकास्तन्ममाचक्ष्व पृच्छतः ||६६||` | "What are the higher worlds for such a person? Tell me this as I ask. ||66||" |
+| `Line 32942: ` | "[Blank line]" |
+| `Line 32943: कश्यप उवाच||` | "Kaśyapa [sage, progenitor] said:" |
+| `Line 32944: ` | "[Blank line]" |
+| `Line 32945: जानन्न विब्रुवन्प्रश्नं कामात्क्रोधात्तथा भयात् |` | "One who knows but does not answer a question out of desire, anger, or fear," |
+| `Line 32946: सहस्रं वारुणान्पाशानात्मनि प्रतिमुञ्चति ||६७||` | "Binds upon himself a thousand nooses of Varuṇa [water deity]. ||67||" |
+| `Line 32947: ` | "[Blank line]" |
+| `Line 32948: तस्य संवत्सरे पूर्णे पाश एकः प्रमुच्यते |` | "For such a person, only one noose is released after a full year," |
+| `Line 32949: तस्मात्सत्यं तु वक्तव्यं जानता सत्यमञ्जसा ||६८||` | "Therefore, truth must be spoken by one who knows the truth directly. ||68||" |
+| `Line 32950: ` | "[Blank line]" |
+| `Line 32951: विद्धो धर्मो ह्यधर्मेण सभां यत्र प्रपद्यते |` | "When righteousness pierced by unrighteousness enters an assembly," |
+| `Line 32952: न चास्य शल्यं कृन्तन्ति विद्धास्तत्र सभासदः ||६९||` | "And the members of that assembly do not remove the arrow, they too are pierced. ||69||" |
+| `Line 32953: ` | "[Blank line]" |
+| `Line 32954: अर्धं हरति वै श्रेष्ठः पादो भवति कर्तृषु |` | "The chief takes half the sin, a quarter falls upon the doers," |
+| `Line 32955: पादश्चैव सभासत्सु ये न निन्दन्ति निन्दितम् ||७०||` | "And a quarter upon the assembly members who do not censure what deserves censure. ||70||" |
+| `Line 32956: ` | "[Blank line]" |
+| `Line 32957: अनेना भवति श्रेष्ठो मुच्यन्ते च सभासदः |` | "The chief becomes free of sin, and the assembly members are released," |
+| `Line 32958: एनो गच्छति कर्तारं निन्दार्हो यत्र निन्द्यते ||७१||` | "When the sin goes to the doer, where the blameworthy is blamed. ||71||" |
+| `Line 32959: ` | "[Blank line]" |
+| `Line 32960: वितथं तु वदेयुर्ये धर्मं प्रह्लाद पृच्छते |` | "Those who speak falsely about dharma [righteousness] when Prahlāda [daitya king] asks," |
+| `Line 32961: इष्टापूर्तं च ते घ्नन्ति सप्त चैव परावरान् ||७२||` | "Destroy their religious merits and seven generations before and after them. ||72||" |
+| `Line 32962: ` | "[Blank line]" |
+| `Line 32963: हृतस्वस्य हि यद्दुःखं हतपुत्रस्य चापि यत् |` | "The sorrow of one whose property is stolen, and of one whose son is killed," |
+| `Line 32964: ऋणिनं प्रति यच्चैव राज्ञा ग्रस्तस्य चापि यत् ||७३||` | "And the sorrow of a debtor, and of one oppressed by the king. ||73||" |
+| `Line 32965: ` | "[Blank line]" |

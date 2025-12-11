@@ -1,0 +1,242 @@
+---
+layout: base.njk
+title: Decision Wheel
+description: Offline-ready spinner for quick binary or gut-check decisions.
+permalink: /tools/decision-wheel/index.html
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">Decision Maker</p>
+  <h1>Spin the Minimal Wheel</h1>
+  <p>
+    When a call could go either way, tap the button, watch the wheel rotate, and get a clear answer. This tool runs
+    entirely offline once cached, so it keeps working even when the site is installed as a PWA.
+  </p>
+</section>
+
+<section class="tool-shell decision-tool">
+  <div class="decision-tool__wheel-wrapper" aria-live="polite">
+    <div class="decision-tool__pointer" aria-hidden="true"></div>
+    <div class="decision-tool__wheel" id="decision-wheel" role="img" aria-label="Decision wheel">
+      <div class="decision-tool__center"></div>
+      <span class="decision-tool__slice-label decision-tool__slice-label--0">Yes</span>
+      <span class="decision-tool__slice-label decision-tool__slice-label--1">No</span>
+      <span class="decision-tool__slice-label decision-tool__slice-label--2">Up to you</span>
+      <span class="decision-tool__slice-label decision-tool__slice-label--3">Wait &amp;<br>try again</span>
+    </div>
+  </div>
+
+  <p class="decision-tool__result" id="decision-result">Ready when you are.</p>
+
+  <div class="decision-tool__controls">
+    <button class="decision-tool__button" id="decision-spin">Spin the wheel</button>
+  </div>
+
+  <div class="decision-tool__legend">
+    <p>Legend</p>
+    <ul>
+      <li><span class="swatch swatch--yes"></span> Yes</li>
+      <li><span class="swatch swatch--no"></span> No</li>
+      <li><span class="swatch swatch--upto"></span> Up to you</li>
+      <li><span class="swatch swatch--wait"></span> Wait &amp; try again</li>
+    </ul>
+  </div>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Decision Wheel",
+  "operatingSystem": "Web",
+  "applicationCategory": "ProductivityApplication",
+  "description": "A minimal offline-ready decision wheel that helps you commit to an answer.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0"
+  }
+}
+</script>
+
+<script>
+(() => {
+  const outcomes = [
+    { label: "Yes", colorClass: "yes" },
+    { label: "No", colorClass: "no" },
+    { label: "Up to you", colorClass: "upto" },
+    { label: "Wait & try again", colorClass: "wait" }
+  ];
+
+  const wheel = document.getElementById("decision-wheel");
+  const resultEl = document.getElementById("decision-result");
+  const spinBtn = document.getElementById("decision-spin");
+  const segmentAngle = 360 / outcomes.length;
+
+  let currentRotation = 0;
+
+  function updateResultFromRotation() {
+    const normalized = (360 - (currentRotation % 360)) % 360;
+    const index = Math.floor(normalized / segmentAngle) % outcomes.length;
+    const outcome = outcomes[index];
+    resultEl.textContent = outcome.label;
+    resultEl.dataset.outcome = outcome.colorClass;
+  }
+
+  function spin() {
+    const extraSpins = Math.floor(Math.random() * 4) + 4;
+    const extraDegrees = Math.floor(Math.random() * 360);
+    currentRotation += extraSpins * 360 + extraDegrees;
+    wheel.style.transition = "transform 2.2s cubic-bezier(.19,1,.22,1)";
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+    wheel.ontransitionend = () => {
+      wheel.style.transition = "none";
+      updateResultFromRotation();
+    };
+  }
+
+  if (spinBtn) spinBtn.addEventListener("click", spin);
+})();
+</script>
+
+<style>
+.decision-tool {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: center;
+  text-align: center;
+}
+
+.decision-tool__wheel-wrapper {
+  position: relative;
+  width: min(320px, 80vw);
+  aspect-ratio: 1;
+}
+
+.decision-tool__wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    #a7f3d0 0deg 90deg,
+    #fecdd3 90deg 180deg,
+    #bfdbfe 180deg 270deg,
+    #fde68a 270deg 360deg
+  );
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.35), 0 10px 25px rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.decision-tool__center {
+  width: 24%;
+  height: 24%;
+  border-radius: 50%;
+  background: #050505;
+  border: 4px solid rgba(255,255,255,0.35);
+}
+
+.decision-tool__pointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 26px solid #111827;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+
+.decision-tool__result {
+  font-size: 1.5rem;
+  font-weight: 600;
+  min-height: 2em;
+}
+
+.decision-tool__controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.decision-tool__button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.65rem 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #050505;
+  background: linear-gradient(120deg,#6ef3c5,#5d96ff);
+  transition: opacity 0.2s ease;
+}
+
+.decision-tool__button:disabled {
+  opacity: 0.6;
+}
+
+.decision-tool__button--ghost {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.decision-tool__legend {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.decision-tool__legend ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.35rem;
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.swatch--yes { background: #a7f3d0; }
+.swatch--no { background: #fecdd3; }
+.swatch--upto { background: #bfdbfe; }
+.swatch--wait { background: #fde68a; }
+
+.decision-tool__slice-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.7);
+}
+
+.decision-tool__slice-label--0 {
+  transform: translate(-50%, -50%) rotate(0deg) translateY(-42%) rotate(0deg);
+}
+
+.decision-tool__slice-label--1 {
+  transform: translate(-50%, -50%) rotate(90deg) translateY(-42%) rotate(-90deg);
+}
+
+.decision-tool__slice-label--2 {
+  transform: translate(-50%, -50%) rotate(180deg) translateY(-42%) rotate(-180deg);
+}
+
+.decision-tool__slice-label--3 {
+  transform: translate(-50%, -50%) rotate(270deg) translateY(-42%) rotate(-270deg);
+}
+</style>
+

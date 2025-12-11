@@ -2,7 +2,9 @@ const CACHE_NAME = 'mentria-cache-v1';
 const ASSETS = [
   '/',
   '/assets/css/style.css',
-  '/manifest.json'
+  '/manifest.json',
+  '/tools/decision-wheel/',
+  '/tools/decision-wheel/index.html'
 ];
 
 self.addEventListener('install', event => {

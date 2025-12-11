@@ -1,8 +1,8 @@
 [
   {
-    "slug": "starter-tool",
-    "title": "Starter Tool",
-    "summary": "A placeholder single-page app that demonstrates how to wire up future utilities.",
+    "slug": "decision-wheel",
+    "title": "Decision Wheel",
+    "summary": "Offline-ready spinner for quick calls: Yes, No, Up to you, or Wait & try again.",
     "category": "Utility"
   }
 ]

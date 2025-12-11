@@ -1,4 +1,4 @@
-LL---
+---
 layout: base.njk
 title: Starter Tool
 description: A bare-bones utility template you can duplicate for new tools.
@@ -21,6 +21,31 @@ permalink: /tools/starter-tool/index.html
       <li>Add inline scripts or import files from <code>src/assets/js</code>.</li>
       <li>Keep things progressive-enhancement friendly—no framework required.</li>
     </ol>
+
+    <p><strong>HTMX dual-mode prototype</strong></p>
+    <p>
+      Point <code>hx-post</code> at the same endpoint that API consumers call. HTMX takes care of serializing the form,
+      sending the request, and injecting the response into <code>hx-target</code>.
+    </p>
+
+<pre><code>&lt;form
+  hx-post="/api/json-validate"
+  hx-trigger="submit"
+  hx-target="#result"
+  hx-indicator="#loader"
+  hx-headers='{"Accept":"text/html"}'&gt;
+  &lt;textarea name="payload"&gt;&lt;/textarea&gt;
+  &lt;button type="submit"&gt;Validate&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;div id="loader" class="loading hidden"&gt;Validating…&lt;/div&gt;
+&lt;div id="result"&gt;&lt;/div&gt;</code></pre>
+
+    <p>
+      The API remains fetch-friendly (accepting JSON) while the UI benefits from declarative updates. For manual testing
+      before the backend exists, temporarily point <code>hx-post</code> to a mock service such as
+      <code>https://httpbin.org/post</code>.
+    </p>
   </div>
 </section>
 

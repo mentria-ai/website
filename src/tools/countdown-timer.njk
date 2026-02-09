@@ -1,0 +1,556 @@
+---
+layout: base.njk
+title: Countdown Timer
+description: Set a custom countdown timer with alarm sound. Works offline as a PWA.
+permalink: /tools/countdown-timer/index.html
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">Timer</p>
+  <h1>Countdown Timer</h1>
+  <p>
+    Set hours, minutes, and seconds for your countdown. When time's up, an alarm will ring.
+    This tool works entirely offline once cached.
+  </p>
+</section>
+
+<section class="tool-shell countdown-tool">
+  <div class="countdown-tool__display-wrapper">
+    <div class="countdown-tool__title" id="timer-title">Ready</div>
+    <div class="countdown-tool__display" id="timer-display">
+      <span class="countdown-tool__segment" id="display-hours">00</span>
+      <span class="countdown-tool__colon">:</span>
+      <span class="countdown-tool__segment" id="display-mins">00</span>
+      <span class="countdown-tool__colon">:</span>
+      <span class="countdown-tool__segment" id="display-secs">00</span>
+    </div>
+  </div>
+
+  <div class="countdown-tool__inputs" id="input-section">
+    <div class="countdown-tool__input-group">
+      <label for="input-hours">Hours</label>
+      <input type="number" id="input-hours" min="0" max="99" value="0" />
+    </div>
+    <div class="countdown-tool__input-group">
+      <label for="input-mins">Minutes</label>
+      <input type="number" id="input-mins" min="0" max="59" value="0" />
+    </div>
+    <div class="countdown-tool__input-group">
+      <label for="input-secs">Seconds</label>
+      <input type="number" id="input-secs" min="0" max="59" value="0" />
+    </div>
+  </div>
+
+  <div class="countdown-tool__controls">
+    <button class="countdown-tool__button countdown-tool__button--primary" id="btn-start">Start</button>
+    <button class="countdown-tool__button countdown-tool__button--secondary" id="btn-pause" disabled>Pause</button>
+    <button class="countdown-tool__button countdown-tool__button--ghost" id="btn-reset" disabled>Reset</button>
+  </div>
+
+  <div class="countdown-tool__presets">
+    <p>Quick presets:</p>
+    <div class="countdown-tool__preset-buttons">
+      <button class="countdown-tool__preset" data-seconds="60">1 min</button>
+      <button class="countdown-tool__preset" data-seconds="300">5 min</button>
+      <button class="countdown-tool__preset" data-seconds="600">10 min</button>
+      <button class="countdown-tool__preset" data-seconds="1500">25 min</button>
+      <button class="countdown-tool__preset" data-seconds="3600">1 hour</button>
+    </div>
+  </div>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Countdown Timer",
+  "operatingSystem": "Web",
+  "applicationCategory": "ProductivityApplication",
+  "description": "A customizable countdown timer with alarm sound that works offline.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0"
+  }
+}
+</script>
+
+<script>
+(() => {
+  // Elements
+  const displayHours = document.getElementById('display-hours');
+  const displayMins = document.getElementById('display-mins');
+  const displaySecs = document.getElementById('display-secs');
+  const timerTitle = document.getElementById('timer-title');
+  const timerDisplay = document.querySelector('.countdown-tool__display');
+  const inputSection = document.getElementById('input-section');
+  const inputHours = document.getElementById('input-hours');
+  const inputMins = document.getElementById('input-mins');
+  const inputSecs = document.getElementById('input-secs');
+  const btnStart = document.getElementById('btn-start');
+  const btnPause = document.getElementById('btn-pause');
+  const btnReset = document.getElementById('btn-reset');
+  const presetButtons = document.querySelectorAll('.countdown-tool__preset');
+
+  let countdown = null;
+  let totalSeconds = 0;
+  let isPaused = false;
+  let originalTitle = document.title;
+
+  // Audio context for alarm
+  let audioContext = null;
+  let alarmInterval = null;
+  let isAlarming = false;
+
+  function initAudio() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioContext;
+  }
+
+  function playBellOnce() {
+    const ctx = initAudio();
+    const duration = 0.15;
+    const gap = 0.08;
+    const bellCount = 4;
+    
+    for (let i = 0; i < bellCount; i++) {
+      const startTime = ctx.currentTime + i * (duration + gap);
+      
+      // Create oscillator for bell sound
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, startTime); // A5
+      osc.frequency.exponentialRampToValueAtTime(440, startTime + duration);
+      
+      gain.gain.setValueAtTime(0.4, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+
+      // Add harmonic for richer bell sound
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1760, startTime);
+      osc2.frequency.exponentialRampToValueAtTime(880, startTime + duration);
+      
+      gain2.gain.setValueAtTime(0.2, startTime);
+      gain2.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      
+      osc2.start(startTime);
+      osc2.stop(startTime + duration);
+    }
+  }
+
+  function startAlarm() {
+    if (isAlarming) return;
+    isAlarming = true;
+    playBellOnce();
+    // Repeat the bell sound every 1.2 seconds
+    alarmInterval = setInterval(() => {
+      if (isAlarming) {
+        playBellOnce();
+      }
+    }, 1200);
+  }
+
+  function stopAlarm() {
+    isAlarming = false;
+    if (alarmInterval) {
+      clearInterval(alarmInterval);
+      alarmInterval = null;
+    }
+  }
+
+  function formatNumber(num) {
+    return String(num).padStart(2, '0');
+  }
+
+  function updateDisplay() {
+    const hours = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+
+    displayHours.textContent = formatNumber(hours);
+    displayMins.textContent = formatNumber(mins);
+    displaySecs.textContent = formatNumber(secs);
+
+    // Update page title with remaining time
+    if (totalSeconds > 0) {
+      document.title = `${formatNumber(hours)}:${formatNumber(mins)}:${formatNumber(secs)} - Timer`;
+    } else {
+      document.title = originalTitle;
+    }
+  }
+
+  function tick() {
+    if (totalSeconds > 0) {
+      totalSeconds--;
+      updateDisplay();
+    } else {
+      clearInterval(countdown);
+      countdown = null;
+      timerTitle.textContent = "Time's Up!";
+      timerDisplay.classList.add('countdown-tool__display--finished');
+      startAlarm();
+      btnPause.disabled = true;
+      btnStart.textContent = 'Start';
+      btnStart.disabled = true;
+      btnReset.disabled = false;
+      document.title = "⏰ Time's Up!";
+    }
+  }
+
+  function startTimer() {
+    // Initialize audio on user gesture
+    initAudio();
+    
+    if (countdown) {
+      // Timer is running, pause it
+      clearInterval(countdown);
+      countdown = null;
+      isPaused = true;
+      btnStart.textContent = 'Resume';
+      btnPause.disabled = true;
+      timerTitle.textContent = 'Paused';
+      return;
+    }
+
+    if (isPaused && totalSeconds > 0) {
+      // Resume from pause
+      isPaused = false;
+      countdown = setInterval(tick, 1000);
+      btnStart.textContent = 'Pause';
+      btnPause.disabled = false;
+      timerTitle.textContent = 'Running';
+      return;
+    }
+
+    // Start new timer
+    const h = parseInt(inputHours.value) || 0;
+    const m = parseInt(inputMins.value) || 0;
+    const s = parseInt(inputSecs.value) || 0;
+    totalSeconds = h * 3600 + m * 60 + s;
+
+    if (totalSeconds <= 0) {
+      timerTitle.textContent = 'Set a time first!';
+      setTimeout(() => timerTitle.textContent = 'Ready', 2000);
+      return;
+    }
+
+    timerDisplay.classList.remove('countdown-tool__display--finished');
+    timerTitle.textContent = 'Running';
+    updateDisplay();
+    
+    countdown = setInterval(tick, 1000);
+    btnStart.textContent = 'Pause';
+    btnPause.disabled = false;
+    btnReset.disabled = false;
+    inputSection.classList.add('countdown-tool__inputs--hidden');
+  }
+
+  function resetTimer() {
+    // Stop the alarm if it's playing
+    stopAlarm();
+    if (countdown) {
+      clearInterval(countdown);
+      countdown = null;
+    }
+    isPaused = false;
+    totalSeconds = 0;
+    updateDisplay();
+    timerTitle.textContent = 'Ready';
+    timerDisplay.classList.remove('countdown-tool__display--finished');
+    btnStart.textContent = 'Start';
+    btnStart.disabled = false;
+    btnPause.disabled = true;
+    btnReset.disabled = true;
+    inputSection.classList.remove('countdown-tool__inputs--hidden');
+    document.title = originalTitle;
+  }
+
+  function setPreset(seconds) {
+    resetTimer();
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    inputHours.value = h;
+    inputMins.value = m;
+    inputSecs.value = s;
+    totalSeconds = seconds;
+    updateDisplay();
+  }
+
+  // Event listeners
+  btnStart.addEventListener('click', startTimer);
+  btnPause.addEventListener('click', () => {
+    if (countdown) {
+      clearInterval(countdown);
+      countdown = null;
+      isPaused = true;
+      btnStart.textContent = 'Resume';
+      timerTitle.textContent = 'Paused';
+    }
+  });
+  btnReset.addEventListener('click', resetTimer);
+
+  presetButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const seconds = parseInt(btn.dataset.seconds);
+      setPreset(seconds);
+    });
+  });
+
+  // Update display when inputs change
+  [inputHours, inputMins, inputSecs].forEach(input => {
+    input.addEventListener('input', () => {
+      if (!countdown && !isPaused) {
+        const h = parseInt(inputHours.value) || 0;
+        const m = parseInt(inputMins.value) || 0;
+        const s = parseInt(inputSecs.value) || 0;
+        totalSeconds = h * 3600 + m * 60 + s;
+        updateDisplay();
+      }
+    });
+  });
+})();
+</script>
+
+<style>
+.countdown-tool {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.countdown-tool__display-wrapper {
+  background: #0a0a0a;
+  border-radius: 16px;
+  padding: 2rem 3rem;
+  box-shadow: 
+    inset 0 2px 20px rgba(0,0,0,0.8),
+    0 10px 40px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255, 165, 0, 0.15);
+  width: 100%;
+  max-width: 500px;
+  overflow: visible;
+}
+
+.countdown-tool__title {
+  font-size: 1.1rem;
+  color: #ff9500;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.countdown-tool__display {
+  font-family: 'Courier New', 'Lucida Console', monospace;
+  font-size: clamp(2.5rem, 10vw, 4.5rem);
+  font-weight: 700;
+  color: #ff9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15em;
+  text-shadow: 
+    0 0 20px rgba(255, 149, 0, 0.6),
+    0 0 40px rgba(255, 149, 0, 0.3);
+  overflow: visible;
+  padding: 0.1em 0;
+  transition: all 0.3s ease;
+}
+
+.countdown-tool__display--finished {
+  animation: flash 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes flash {
+  from { opacity: 1; }
+  to { opacity: 0.4; }
+}
+
+.countdown-tool__segment {
+  min-width: 2ch;
+  text-align: center;
+  display: inline-block;
+  overflow: visible;
+  background: linear-gradient(180deg, #ff9500 0%, #ff6b00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.countdown-tool__colon {
+  color: #ff9500;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0.3; }
+}
+
+.countdown-tool__inputs {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.countdown-tool__inputs--hidden {
+  opacity: 0.3;
+  pointer-events: none;
+  transform: scale(0.95);
+}
+
+.countdown-tool__input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.countdown-tool__input-group label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.countdown-tool__input-group input {
+  width: 80px;
+  padding: 0.6rem 0.8rem;
+  font-size: 1.2rem;
+  text-align: center;
+  border: 2px solid rgba(255, 149, 0, 0.3);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #ff9500;
+  font-weight: 600;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.countdown-tool__input-group input:focus {
+  outline: none;
+  border-color: #ff9500;
+  box-shadow: 0 0 15px rgba(255, 149, 0, 0.3);
+}
+
+.countdown-tool__input-group input::-webkit-outer-spin-button,
+.countdown-tool__input-group input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.countdown-tool__controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.countdown-tool__button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.countdown-tool__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.countdown-tool__button--primary {
+  background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+  color: #000;
+  box-shadow: 0 4px 15px rgba(255, 149, 0, 0.4);
+}
+
+.countdown-tool__button--primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 149, 0, 0.5);
+}
+
+.countdown-tool__button--secondary {
+  background: rgba(255, 149, 0, 0.15);
+  color: #ff9500;
+  border: 1px solid rgba(255, 149, 0, 0.3);
+}
+
+.countdown-tool__button--secondary:hover:not(:disabled) {
+  background: rgba(255, 149, 0, 0.25);
+}
+
+.countdown-tool__button--ghost {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.countdown-tool__button--ghost:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.countdown-tool__presets {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.countdown-tool__presets p {
+  margin: 0 0 0.6rem;
+}
+
+.countdown-tool__preset-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.countdown-tool__preset {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 149, 0, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 149, 0, 0.08);
+  color: #ff9500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.countdown-tool__preset:hover {
+  background: rgba(255, 149, 0, 0.2);
+  border-color: rgba(255, 149, 0, 0.5);
+}
+
+/* Dark theme enhancements */
+@media (prefers-color-scheme: light) {
+  .countdown-tool__display-wrapper {
+    background: #1a1a1a;
+  }
+  
+  .countdown-tool__input-group input {
+    background: rgba(0, 0, 0, 0.6);
+  }
+}
+</style>

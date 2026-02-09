@@ -4,5 +4,11 @@
     "title": "Decision Wheel",
     "summary": "Offline-ready spinner for quick calls: Yes, No, Up to you, or Wait & try again.",
     "category": "Utility"
+  },
+  {
+    "slug": "countdown-timer",
+    "title": "Countdown Timer",
+    "summary": "Set hours, minutes, and seconds for a countdown with alarm sound when complete.",
+    "category": "Timer"
   }
 ]

@@ -8,7 +8,7 @@
   {
     "slug": "countdown-timer",
     "title": "Countdown Timer",
-    "summary": "Set hours, minutes, and seconds for a countdown with alarm sound when complete.",
+    "summary": "Up to 4 simultaneous countdown timers with custom titles. Set a duration or pick a target date & time (max 99 hrs).",
     "category": "Timer"
   }
 ]

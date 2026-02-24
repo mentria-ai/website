@@ -8,55 +8,90 @@ permalink: /tools/countdown-timer/index.html
   <p class="eyebrow">Timer</p>
   <h1>Countdown Timer</h1>
   <p>
-    Set hours, minutes, and seconds for your countdown. When time's up, an alarm will ring.
-    This tool works entirely offline once cached.
+    Set a duration or pick a target date &amp; time (up to 99 hours). Add up to 4 independent timers.
   </p>
 </section>
 
+<!-- ── Widget Grid ────────────────────────────────────── -->
 <section class="tool-shell countdown-tool">
-  <div class="countdown-tool__display-wrapper">
-    <div class="countdown-tool__title" id="timer-title">Ready</div>
-    <div class="countdown-tool__display" id="timer-display">
-      <span class="countdown-tool__segment" id="display-hours">00</span>
-      <span class="countdown-tool__colon">:</span>
-      <span class="countdown-tool__segment" id="display-mins">00</span>
-      <span class="countdown-tool__colon">:</span>
-      <span class="countdown-tool__segment" id="display-secs">00</span>
-    </div>
+  <div class="ct-grid" id="ct-grid">
+    <!-- widgets injected here -->
   </div>
-
-  <div class="countdown-tool__inputs" id="input-section">
-    <div class="countdown-tool__input-group">
-      <label for="input-hours">Hours</label>
-      <input type="number" id="input-hours" min="0" max="99" value="0" />
-    </div>
-    <div class="countdown-tool__input-group">
-      <label for="input-mins">Minutes</label>
-      <input type="number" id="input-mins" min="0" max="59" value="0" />
-    </div>
-    <div class="countdown-tool__input-group">
-      <label for="input-secs">Seconds</label>
-      <input type="number" id="input-secs" min="0" max="59" value="0" />
-    </div>
-  </div>
-
-  <div class="countdown-tool__controls">
-    <button class="countdown-tool__button countdown-tool__button--primary" id="btn-start">Start</button>
-    <button class="countdown-tool__button countdown-tool__button--secondary" id="btn-pause" disabled>Pause</button>
-    <button class="countdown-tool__button countdown-tool__button--ghost" id="btn-reset" disabled>Reset</button>
-  </div>
-
-  <div class="countdown-tool__presets">
-    <p>Quick presets:</p>
-    <div class="countdown-tool__preset-buttons">
-      <button class="countdown-tool__preset" data-seconds="60">1 min</button>
-      <button class="countdown-tool__preset" data-seconds="300">5 min</button>
-      <button class="countdown-tool__preset" data-seconds="600">10 min</button>
-      <button class="countdown-tool__preset" data-seconds="1500">25 min</button>
-      <button class="countdown-tool__preset" data-seconds="3600">1 hour</button>
-    </div>
-  </div>
+  <button class="ct-add-btn" id="ct-add-btn" title="Add timer">
+    <span class="ct-add-btn__icon">+</span>
+    <span>Add Timer</span>
+  </button>
 </section>
+
+<!-- ── Widget Template ───────────────────────────────── -->
+<template id="ct-widget-tpl">
+  <div class="ct-widget" data-widget-id="">
+    <button class="ct-widget__close" title="Remove timer">&times;</button>
+
+    <!-- Editable title -->
+    <div class="ct-widget__title" contenteditable="true" spellcheck="false" data-placeholder="Timer"></div>
+
+    <!-- Display -->
+    <div class="ct-widget__display-wrap">
+      <div class="ct-widget__display">
+        <span class="ct-widget__seg" data-role="hours">00</span>
+        <span class="ct-widget__colon">:</span>
+        <span class="ct-widget__seg" data-role="mins">00</span>
+        <span class="ct-widget__colon">:</span>
+        <span class="ct-widget__seg" data-role="secs">00</span>
+      </div>
+      <div class="ct-widget__status">Ready</div>
+    </div>
+
+    <!-- Mode toggle -->
+    <div class="ct-widget__mode-toggle">
+      <button class="ct-mode-btn ct-mode-btn--active" data-mode="duration">Duration</button>
+      <button class="ct-mode-btn" data-mode="datetime">Date &amp; Time</button>
+    </div>
+
+    <!-- Duration inputs -->
+    <div class="ct-widget__inputs" data-panel="duration">
+      <div class="ct-input-grp">
+        <label>Hours</label>
+        <input type="number" data-input="hours" min="0" max="99" value="0" />
+      </div>
+      <div class="ct-input-grp">
+        <label>Minutes</label>
+        <input type="number" data-input="mins" min="0" max="59" value="0" />
+      </div>
+      <div class="ct-input-grp">
+        <label>Seconds</label>
+        <input type="number" data-input="secs" min="0" max="59" value="0" />
+      </div>
+    </div>
+
+    <!-- Date-time input -->
+    <div class="ct-widget__inputs ct-widget__inputs--hidden" data-panel="datetime">
+      <div class="ct-input-grp ct-input-grp--wide">
+        <label>Count down until</label>
+        <input type="datetime-local" data-input="datetime" />
+      </div>
+      <div class="ct-widget__dt-error" data-role="dt-error"></div>
+    </div>
+
+    <!-- Quick presets -->
+    <div class="ct-widget__presets">
+      <span>Presets:</span>
+      <button class="ct-preset" data-seconds="60">1 min</button>
+      <button class="ct-preset" data-seconds="300">5 min</button>
+      <button class="ct-preset" data-seconds="600">10 min</button>
+      <button class="ct-preset" data-seconds="1500">25 min</button>
+      <button class="ct-preset" data-seconds="3600">1 hr</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="ct-widget__controls">
+      <button class="ct-btn ct-btn--primary" data-action="start">Start</button>
+      <button class="ct-btn ct-btn--secondary" data-action="pause" disabled>Pause</button>
+      <button class="ct-btn ct-btn--ghost" data-action="reset" disabled>Reset</button>
+    </div>
+  </div>
+</template>
 
 <script type="application/ld+json">
 {
@@ -75,366 +110,581 @@ permalink: /tools/countdown-timer/index.html
 
 <script>
 (() => {
-  // Elements
-  const displayHours = document.getElementById('display-hours');
-  const displayMins = document.getElementById('display-mins');
-  const displaySecs = document.getElementById('display-secs');
-  const timerTitle = document.getElementById('timer-title');
-  const timerDisplay = document.querySelector('.countdown-tool__display');
-  const inputSection = document.getElementById('input-section');
-  const inputHours = document.getElementById('input-hours');
-  const inputMins = document.getElementById('input-mins');
-  const inputSecs = document.getElementById('input-secs');
-  const btnStart = document.getElementById('btn-start');
-  const btnPause = document.getElementById('btn-pause');
-  const btnReset = document.getElementById('btn-reset');
-  const presetButtons = document.querySelectorAll('.countdown-tool__preset');
+  /* ── Constants ─────────────────────────────────────── */
+  const MAX_WIDGETS = 4;
+  const MAX_SECONDS = 99 * 3600; // 99 hours
+  const grid = document.getElementById('ct-grid');
+  const addBtn = document.getElementById('ct-add-btn');
+  const tpl = document.getElementById('ct-widget-tpl');
+  const originalTitle = document.title;
 
-  let countdown = null;
-  let totalSeconds = 0;
-  let isPaused = false;
-  let originalTitle = document.title;
+  let nextId = 1;
+  const widgets = new Map(); // id → state
 
-  // Audio context for alarm
-  let audioContext = null;
-  let alarmInterval = null;
-  let isAlarming = false;
+  /* ── Audio ─────────────────────────────────────────── */
+  let audioCtx = null;
 
   function initAudio() {
-    if (!audioContext) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    return audioContext;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
   }
 
   function playBellOnce() {
     const ctx = initAudio();
-    const duration = 0.15;
-    const gap = 0.08;
-    const bellCount = 4;
-    
-    for (let i = 0; i < bellCount; i++) {
-      const startTime = ctx.currentTime + i * (duration + gap);
-      
-      // Create oscillator for bell sound
+    const dur = 0.15, gap = 0.08;
+    for (let i = 0; i < 4; i++) {
+      const t = ctx.currentTime + i * (dur + gap);
       const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      
+      const g = ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, startTime); // A5
-      osc.frequency.exponentialRampToValueAtTime(440, startTime + duration);
-      
-      gain.gain.setValueAtTime(0.4, startTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-      
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      
-      osc.start(startTime);
-      osc.stop(startTime + duration);
+      osc.frequency.setValueAtTime(880, t);
+      osc.frequency.exponentialRampToValueAtTime(440, t + dur);
+      g.gain.setValueAtTime(0.4, t);
+      g.gain.exponentialRampToValueAtTime(0.01, t + dur);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t); osc.stop(t + dur);
 
-      // Add harmonic for richer bell sound
       const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      
+      const g2 = ctx.createGain();
       osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(1760, startTime);
-      osc2.frequency.exponentialRampToValueAtTime(880, startTime + duration);
-      
-      gain2.gain.setValueAtTime(0.2, startTime);
-      gain2.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-      
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-      
-      osc2.start(startTime);
-      osc2.stop(startTime + duration);
+      osc2.frequency.setValueAtTime(1760, t);
+      osc2.frequency.exponentialRampToValueAtTime(880, t + dur);
+      g2.gain.setValueAtTime(0.2, t);
+      g2.gain.exponentialRampToValueAtTime(0.01, t + dur);
+      osc2.connect(g2); g2.connect(ctx.destination);
+      osc2.start(t); osc2.stop(t + dur);
     }
   }
 
-  function startAlarm() {
-    if (isAlarming) return;
-    isAlarming = true;
+  function startAlarmFor(state) {
+    if (state.isAlarming) return;
+    state.isAlarming = true;
     playBellOnce();
-    // Repeat the bell sound every 1.2 seconds
-    alarmInterval = setInterval(() => {
-      if (isAlarming) {
-        playBellOnce();
+    state.alarmInterval = setInterval(() => { if (state.isAlarming) playBellOnce(); }, 1200);
+  }
+
+  function stopAlarmFor(state) {
+    state.isAlarming = false;
+    if (state.alarmInterval) { clearInterval(state.alarmInterval); state.alarmInterval = null; }
+  }
+
+  /* ── Helpers ───────────────────────────────────────── */
+  const pad = n => String(n).padStart(2, '0');
+
+  function updatePageTitle() {
+    for (const [, s] of widgets) {
+      if (s.countdown && s.totalSeconds > 0) {
+        const h = Math.floor(s.totalSeconds / 3600);
+        const m = Math.floor((s.totalSeconds % 3600) / 60);
+        const sc = s.totalSeconds % 60;
+        document.title = `${pad(h)}:${pad(m)}:${pad(sc)} - Timer`;
+        return;
       }
-    }, 1200);
-  }
-
-  function stopAlarm() {
-    isAlarming = false;
-    if (alarmInterval) {
-      clearInterval(alarmInterval);
-      alarmInterval = null;
     }
-  }
-
-  function formatNumber(num) {
-    return String(num).padStart(2, '0');
-  }
-
-  function updateDisplay() {
-    const hours = Math.floor(totalSeconds / 3600);
-    const mins = Math.floor((totalSeconds % 3600) / 60);
-    const secs = totalSeconds % 60;
-
-    displayHours.textContent = formatNumber(hours);
-    displayMins.textContent = formatNumber(mins);
-    displaySecs.textContent = formatNumber(secs);
-
-    // Update page title with remaining time
-    if (totalSeconds > 0) {
-      document.title = `${formatNumber(hours)}:${formatNumber(mins)}:${formatNumber(secs)} - Timer`;
-    } else {
-      document.title = originalTitle;
+    // Check for any alarming
+    for (const [, s] of widgets) {
+      if (s.isAlarming) { document.title = "⏰ Time's Up!"; return; }
     }
-  }
-
-  function tick() {
-    if (totalSeconds > 0) {
-      totalSeconds--;
-      updateDisplay();
-    } else {
-      clearInterval(countdown);
-      countdown = null;
-      timerTitle.textContent = "Time's Up!";
-      timerDisplay.classList.add('countdown-tool__display--finished');
-      startAlarm();
-      btnPause.disabled = true;
-      btnStart.textContent = 'Start';
-      btnStart.disabled = true;
-      btnReset.disabled = false;
-      document.title = "⏰ Time's Up!";
-    }
-  }
-
-  function startTimer() {
-    // Initialize audio on user gesture
-    initAudio();
-    
-    if (countdown) {
-      // Timer is running, pause it
-      clearInterval(countdown);
-      countdown = null;
-      isPaused = true;
-      btnStart.textContent = 'Resume';
-      btnPause.disabled = true;
-      timerTitle.textContent = 'Paused';
-      return;
-    }
-
-    if (isPaused && totalSeconds > 0) {
-      // Resume from pause
-      isPaused = false;
-      countdown = setInterval(tick, 1000);
-      btnStart.textContent = 'Pause';
-      btnPause.disabled = false;
-      timerTitle.textContent = 'Running';
-      return;
-    }
-
-    // Start new timer
-    const h = parseInt(inputHours.value) || 0;
-    const m = parseInt(inputMins.value) || 0;
-    const s = parseInt(inputSecs.value) || 0;
-    totalSeconds = h * 3600 + m * 60 + s;
-
-    if (totalSeconds <= 0) {
-      timerTitle.textContent = 'Set a time first!';
-      setTimeout(() => timerTitle.textContent = 'Ready', 2000);
-      return;
-    }
-
-    timerDisplay.classList.remove('countdown-tool__display--finished');
-    timerTitle.textContent = 'Running';
-    updateDisplay();
-    
-    countdown = setInterval(tick, 1000);
-    btnStart.textContent = 'Pause';
-    btnPause.disabled = false;
-    btnReset.disabled = false;
-    inputSection.classList.add('countdown-tool__inputs--hidden');
-  }
-
-  function resetTimer() {
-    // Stop the alarm if it's playing
-    stopAlarm();
-    if (countdown) {
-      clearInterval(countdown);
-      countdown = null;
-    }
-    isPaused = false;
-    totalSeconds = 0;
-    updateDisplay();
-    timerTitle.textContent = 'Ready';
-    timerDisplay.classList.remove('countdown-tool__display--finished');
-    btnStart.textContent = 'Start';
-    btnStart.disabled = false;
-    btnPause.disabled = true;
-    btnReset.disabled = true;
-    inputSection.classList.remove('countdown-tool__inputs--hidden');
     document.title = originalTitle;
   }
 
-  function setPreset(seconds) {
-    resetTimer();
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    inputHours.value = h;
-    inputMins.value = m;
-    inputSecs.value = s;
-    totalSeconds = seconds;
+  function refreshAddBtn() {
+    addBtn.style.display = widgets.size >= MAX_WIDGETS ? 'none' : '';
+  }
+
+  /* ── Widget Lifecycle ──────────────────────────────── */
+
+  function addWidget() {
+    if (widgets.size >= MAX_WIDGETS) return;
+    const id = nextId++;
+    const el = tpl.content.firstElementChild.cloneNode(true);
+    el.dataset.widgetId = id;
+
+    // Set default title
+    const titleEl = el.querySelector('.ct-widget__title');
+    titleEl.textContent = `Timer ${widgets.size + 1}`;
+
+    // Scoped refs
+    const $ = sel => el.querySelector(sel);
+    const $$ = sel => el.querySelectorAll(sel);
+
+    const displayH = $('[data-role="hours"]');
+    const displayM = $('[data-role="mins"]');
+    const displayS = $('[data-role="secs"]');
+    const statusEl = $('.ct-widget__status');
+    const displayWrap = $('.ct-widget__display');
+    const panelDuration = $('[data-panel="duration"]');
+    const panelDatetime = $('[data-panel="datetime"]');
+    const inputH = $('[data-input="hours"]');
+    const inputM = $('[data-input="mins"]');
+    const inputS = $('[data-input="secs"]');
+    const inputDT = $('[data-input="datetime"]');
+    const dtError = $('[data-role="dt-error"]');
+    const btnStart = $('[data-action="start"]');
+    const btnPause = $('[data-action="pause"]');
+    const btnReset = $('[data-action="reset"]');
+    const btnClose = $('.ct-widget__close');
+    const modeButtons = $$('.ct-mode-btn');
+
+    const state = {
+      id,
+      totalSeconds: 0,
+      countdown: null,
+      isPaused: false,
+      isAlarming: false,
+      alarmInterval: null,
+      mode: 'duration', // 'duration' | 'datetime'
+    };
+
+    widgets.set(id, state);
+
+    // ── Display ──
+    function updateDisplay() {
+      const h = Math.floor(state.totalSeconds / 3600);
+      const m = Math.floor((state.totalSeconds % 3600) / 60);
+      const s = state.totalSeconds % 60;
+      displayH.textContent = pad(h);
+      displayM.textContent = pad(m);
+      displayS.textContent = pad(s);
+      updatePageTitle();
+    }
+
+    // ── Tick ──
+    function tick() {
+      if (state.totalSeconds > 0) {
+        state.totalSeconds--;
+        updateDisplay();
+      } else {
+        clearInterval(state.countdown);
+        state.countdown = null;
+        statusEl.textContent = "Time's Up!";
+        displayWrap.classList.add('ct-widget__display--finished');
+        startAlarmFor(state);
+        btnPause.disabled = true;
+        btnStart.textContent = 'Start';
+        btnStart.disabled = true;
+        btnReset.disabled = false;
+        updatePageTitle();
+      }
+    }
+
+    // ── Compute seconds from datetime ──
+    function getSecondsFromDatetime() {
+      const val = inputDT.value;
+      if (!val) { dtError.textContent = 'Pick a date & time.'; return -1; }
+      const target = new Date(val).getTime();
+      const diff = Math.floor((target - Date.now()) / 1000);
+      if (diff <= 0) { dtError.textContent = 'This time has already passed.'; return -1; }
+      if (diff > MAX_SECONDS) { dtError.textContent = 'Maximum countdown is 99 hours.'; return -1; }
+      dtError.textContent = '';
+      return diff;
+    }
+
+    // ── Start / Pause / Resume ──
+    function startTimer() {
+      initAudio();
+
+      if (state.countdown) {
+        // Running → pause
+        clearInterval(state.countdown);
+        state.countdown = null;
+        state.isPaused = true;
+        btnStart.textContent = 'Resume';
+        btnPause.disabled = true;
+        statusEl.textContent = 'Paused';
+        return;
+      }
+
+      if (state.isPaused && state.totalSeconds > 0) {
+        // Resume
+        state.isPaused = false;
+        state.countdown = setInterval(tick, 1000);
+        btnStart.textContent = 'Pause';
+        btnPause.disabled = false;
+        statusEl.textContent = 'Running';
+        return;
+      }
+
+      // New start
+      if (state.mode === 'datetime') {
+        const secs = getSecondsFromDatetime();
+        if (secs < 0) return;
+        state.totalSeconds = secs;
+      } else {
+        const h = parseInt(inputH.value) || 0;
+        const m = parseInt(inputM.value) || 0;
+        const s = parseInt(inputS.value) || 0;
+        state.totalSeconds = h * 3600 + m * 60 + s;
+      }
+
+      if (state.totalSeconds <= 0) {
+        statusEl.textContent = 'Set a time first!';
+        setTimeout(() => { if (!state.countdown) statusEl.textContent = 'Ready'; }, 2000);
+        return;
+      }
+      if (state.totalSeconds > MAX_SECONDS) {
+        statusEl.textContent = 'Max 99 hours!';
+        setTimeout(() => { if (!state.countdown) statusEl.textContent = 'Ready'; }, 2000);
+        return;
+      }
+
+      displayWrap.classList.remove('ct-widget__display--finished');
+      statusEl.textContent = 'Running';
+      updateDisplay();
+      state.countdown = setInterval(tick, 1000);
+      btnStart.textContent = 'Pause';
+      btnPause.disabled = false;
+      btnReset.disabled = false;
+      panelDuration.classList.add('ct-widget__inputs--hidden');
+      panelDatetime.classList.add('ct-widget__inputs--hidden');
+    }
+
+    function resetTimer() {
+      stopAlarmFor(state);
+      if (state.countdown) { clearInterval(state.countdown); state.countdown = null; }
+      state.isPaused = false;
+      state.totalSeconds = 0;
+      updateDisplay();
+      statusEl.textContent = 'Ready';
+      displayWrap.classList.remove('ct-widget__display--finished');
+      btnStart.textContent = 'Start';
+      btnStart.disabled = false;
+      btnPause.disabled = true;
+      btnReset.disabled = true;
+      dtError.textContent = '';
+      // Show the active panel
+      if (state.mode === 'duration') {
+        panelDuration.classList.remove('ct-widget__inputs--hidden');
+      } else {
+        panelDatetime.classList.remove('ct-widget__inputs--hidden');
+      }
+      updatePageTitle();
+    }
+
+    function setPreset(seconds) {
+      resetTimer();
+      if (state.mode === 'datetime') {
+        // Switch to duration mode for presets
+        state.mode = 'duration';
+        modeButtons.forEach(b => b.classList.toggle('ct-mode-btn--active', b.dataset.mode === 'duration'));
+        panelDuration.classList.remove('ct-widget__inputs--hidden');
+        panelDatetime.classList.add('ct-widget__inputs--hidden');
+      }
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      inputH.value = h;
+      inputM.value = m;
+      inputS.value = s;
+      state.totalSeconds = seconds;
+      updateDisplay();
+    }
+
+    // ── Events ──
+    btnStart.addEventListener('click', startTimer);
+    btnPause.addEventListener('click', () => {
+      if (state.countdown) {
+        clearInterval(state.countdown);
+        state.countdown = null;
+        state.isPaused = true;
+        btnStart.textContent = 'Resume';
+        statusEl.textContent = 'Paused';
+      }
+    });
+    btnReset.addEventListener('click', resetTimer);
+
+    btnClose.addEventListener('click', () => removeWidget(id));
+
+    // Mode switching
+    modeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (state.countdown || state.isPaused) return; // don't switch while running
+        state.mode = btn.dataset.mode;
+        modeButtons.forEach(b => b.classList.toggle('ct-mode-btn--active', b === btn));
+        panelDuration.classList.toggle('ct-widget__inputs--hidden', state.mode !== 'duration');
+        panelDatetime.classList.toggle('ct-widget__inputs--hidden', state.mode !== 'datetime');
+      });
+    });
+
+    // Duration inputs update display
+    [inputH, inputM, inputS].forEach(inp => {
+      inp.addEventListener('input', () => {
+        if (!state.countdown && !state.isPaused) {
+          const h = parseInt(inputH.value) || 0;
+          const m = parseInt(inputM.value) || 0;
+          const s = parseInt(inputS.value) || 0;
+          state.totalSeconds = h * 3600 + m * 60 + s;
+          updateDisplay();
+        }
+      });
+    });
+
+    // Datetime input live preview
+    inputDT.addEventListener('input', () => {
+      if (!state.countdown && !state.isPaused) {
+        const secs = getSecondsFromDatetime();
+        if (secs > 0) { state.totalSeconds = secs; updateDisplay(); }
+      }
+    });
+
+    // Presets
+    el.querySelectorAll('.ct-preset').forEach(btn => {
+      btn.addEventListener('click', () => setPreset(parseInt(btn.dataset.seconds)));
+    });
+
+    // Placeholder behaviour for contenteditable title
+    titleEl.addEventListener('focus', () => {
+      if (titleEl.textContent.startsWith('Timer ')) titleEl.textContent = '';
+    });
+    titleEl.addEventListener('blur', () => {
+      if (!titleEl.textContent.trim()) titleEl.textContent = `Timer ${id}`;
+    });
+    titleEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
+    });
+
+    // Set default datetime-local to 5 minutes from now
+    const now = new Date(Date.now() + 5 * 60 * 1000);
+    const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    inputDT.value = iso;
+
+    grid.appendChild(el);
+    refreshAddBtn();
     updateDisplay();
   }
 
-  // Event listeners
-  btnStart.addEventListener('click', startTimer);
-  btnPause.addEventListener('click', () => {
-    if (countdown) {
-      clearInterval(countdown);
-      countdown = null;
-      isPaused = true;
-      btnStart.textContent = 'Resume';
-      timerTitle.textContent = 'Paused';
-    }
-  });
-  btnReset.addEventListener('click', resetTimer);
+  function removeWidget(id) {
+    const state = widgets.get(id);
+    if (!state) return;
+    stopAlarmFor(state);
+    if (state.countdown) clearInterval(state.countdown);
+    widgets.delete(id);
+    const el = grid.querySelector(`[data-widget-id="${id}"]`);
+    if (el) el.remove();
+    refreshAddBtn();
+    updatePageTitle();
+  }
 
-  presetButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const seconds = parseInt(btn.dataset.seconds);
-      setPreset(seconds);
-    });
-  });
-
-  // Update display when inputs change
-  [inputHours, inputMins, inputSecs].forEach(input => {
-    input.addEventListener('input', () => {
-      if (!countdown && !isPaused) {
-        const h = parseInt(inputHours.value) || 0;
-        const m = parseInt(inputMins.value) || 0;
-        const s = parseInt(inputSecs.value) || 0;
-        totalSeconds = h * 3600 + m * 60 + s;
-        updateDisplay();
-      }
-    });
-  });
+  // ── Boot ──
+  addBtn.addEventListener('click', addWidget);
+  addWidget(); // spawn first widget on load
 })();
 </script>
 
 <style>
+/* ── Container ─────────────────────────────────────── */
 .countdown-tool {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   align-items: center;
-  text-align: center;
-  max-width: 600px;
+  max-width: 960px;
   margin: 0 auto;
 }
 
-.countdown-tool__display-wrapper {
+/* ── Grid ──────────────────────────────────────────── */
+.ct-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* ── Add Button ────────────────────────────────────── */
+.ct-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 300px;
+  padding: 1rem;
+  border: 2px dashed rgba(255, 149, 0, 0.3);
+  border-radius: 16px;
+  background: transparent;
+  color: rgba(255, 149, 0, 0.7);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.ct-add-btn:hover {
+  border-color: #ff9500;
+  color: #ff9500;
+  background: rgba(255, 149, 0, 0.06);
+}
+.ct-add-btn__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* ── Widget Card ───────────────────────────────────── */
+.ct-widget {
+  position: relative;
   background: #0a0a0a;
   border-radius: 16px;
-  padding: 2rem 3rem;
-  box-shadow: 
-    inset 0 2px 20px rgba(0,0,0,0.8),
-    0 10px 40px rgba(0,0,0,0.5);
+  padding: 1.5rem 1.5rem 1.25rem;
   border: 1px solid rgba(255, 165, 0, 0.15);
-  width: 100%;
-  max-width: 500px;
-  overflow: visible;
+  box-shadow:
+    inset 0 2px 16px rgba(0,0,0,0.7),
+    0 8px 32px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  text-align: center;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.ct-widget:hover {
+  border-color: rgba(255, 165, 0, 0.3);
 }
 
-.countdown-tool__title {
-  font-size: 1.1rem;
+/* Close button */
+.ct-widget__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+}
+.ct-widget__close:hover {
+  color: #ff5555;
+  background: rgba(255, 85, 85, 0.1);
+}
+
+/* ── Title ─────────────────────────────────────────── */
+.ct-widget__title {
+  font-size: 1rem;
   color: #ff9500;
-  margin-bottom: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  outline: none;
+  border-bottom: 1px dashed transparent;
+  padding: 0.1rem 0.5rem;
+  min-width: 60px;
+  transition: border-color 0.2s;
+  cursor: text;
+}
+.ct-widget__title:hover {
+  border-bottom-color: rgba(255, 149, 0, 0.35);
+}
+.ct-widget__title:focus {
+  border-bottom-color: #ff9500;
 }
 
-.countdown-tool__display {
+/* ── Display ───────────────────────────────────────── */
+.ct-widget__display-wrap {
+  width: 100%;
+}
+.ct-widget__display {
   font-family: 'Courier New', 'Lucida Console', monospace;
-  font-size: clamp(2.5rem, 10vw, 4.5rem);
+  font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 700;
   color: #ff9500;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.15em;
-  text-shadow: 
+  gap: 0.1em;
+  text-shadow:
     0 0 20px rgba(255, 149, 0, 0.6),
     0 0 40px rgba(255, 149, 0, 0.3);
-  overflow: visible;
-  padding: 0.1em 0;
+  padding: 0.15em 0;
   transition: all 0.3s ease;
 }
-
-.countdown-tool__display--finished {
-  animation: flash 0.5s ease-in-out infinite alternate;
+.ct-widget__display--finished {
+  animation: ct-flash 0.5s ease-in-out infinite alternate;
 }
-
-@keyframes flash {
+@keyframes ct-flash {
   from { opacity: 1; }
   to { opacity: 0.4; }
 }
-
-.countdown-tool__segment {
+.ct-widget__seg {
   min-width: 2ch;
   text-align: center;
   display: inline-block;
-  overflow: visible;
   background: linear-gradient(180deg, #ff9500 0%, #ff6b00 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
-.countdown-tool__colon {
+.ct-widget__colon {
   color: #ff9500;
-  animation: blink 1s step-end infinite;
+  animation: ct-blink 1s step-end infinite;
 }
-
-@keyframes blink {
+@keyframes ct-blink {
   50% { opacity: 0.3; }
 }
+.ct-widget__status {
+  font-size: 0.85rem;
+  color: rgba(255, 149, 0, 0.7);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
 
-.countdown-tool__inputs {
+/* ── Mode Toggle ───────────────────────────────────── */
+.ct-widget__mode-toggle {
   display: flex;
-  gap: 1rem;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 149, 0, 0.25);
+}
+.ct-mode-btn {
+  flex: 1;
+  padding: 0.45rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: rgba(255, 149, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.ct-mode-btn--active {
+  background: rgba(255, 149, 0, 0.18);
+  color: #ff9500;
+}
+.ct-mode-btn:hover:not(.ct-mode-btn--active) {
+  color: rgba(255, 149, 0, 0.8);
+}
+
+/* ── Inputs ────────────────────────────────────────── */
+.ct-widget__inputs {
+  display: flex;
+  gap: 0.75rem;
   flex-wrap: wrap;
   justify-content: center;
   transition: all 0.3s ease;
 }
-
-.countdown-tool__inputs--hidden {
-  opacity: 0.3;
-  pointer-events: none;
-  transform: scale(0.95);
+.ct-widget__inputs--hidden {
+  display: none;
 }
-
-.countdown-tool__input-group {
+.ct-input-grp {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.3rem;
 }
-
-.countdown-tool__input-group label {
-  font-size: 0.85rem;
+.ct-input-grp--wide {
+  flex: 1;
+  min-width: 200px;
+}
+.ct-input-grp label {
+  font-size: 0.78rem;
   color: var(--muted);
   font-weight: 500;
 }
-
-.countdown-tool__input-group input {
-  width: 80px;
-  padding: 0.6rem 0.8rem;
-  font-size: 1.2rem;
+.ct-input-grp input[type="number"],
+.ct-input-grp input[type="datetime-local"] {
+  padding: 0.55rem 0.7rem;
+  font-size: 1.1rem;
   text-align: center;
   border: 2px solid rgba(255, 149, 0, 0.3);
   border-radius: 8px;
@@ -443,92 +693,45 @@ permalink: /tools/countdown-timer/index.html
   font-weight: 600;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
-.countdown-tool__input-group input:focus {
+.ct-input-grp input[type="number"] { width: 72px; }
+.ct-input-grp input[type="datetime-local"] {
+  width: 100%;
+  text-align: left;
+  color-scheme: dark;
+  font-size: 0.95rem;
+}
+.ct-input-grp input:focus {
   outline: none;
   border-color: #ff9500;
-  box-shadow: 0 0 15px rgba(255, 149, 0, 0.3);
+  box-shadow: 0 0 12px rgba(255, 149, 0, 0.3);
 }
-
-.countdown-tool__input-group input::-webkit-outer-spin-button,
-.countdown-tool__input-group input::-webkit-inner-spin-button {
+.ct-input-grp input[type="number"]::-webkit-outer-spin-button,
+.ct-input-grp input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.countdown-tool__controls {
+/* Date-time error */
+.ct-widget__dt-error {
+  width: 100%;
+  font-size: 0.8rem;
+  color: #ff5555;
+  min-height: 1.2em;
+}
+
+/* ── Presets ────────────────────────────────────────── */
+.ct-widget__presets {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-}
-
-.countdown-tool__button {
-  border: none;
-  border-radius: 999px;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.countdown-tool__button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.countdown-tool__button--primary {
-  background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
-  color: #000;
-  box-shadow: 0 4px 15px rgba(255, 149, 0, 0.4);
-}
-
-.countdown-tool__button--primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 149, 0, 0.5);
-}
-
-.countdown-tool__button--secondary {
-  background: rgba(255, 149, 0, 0.15);
-  color: #ff9500;
-  border: 1px solid rgba(255, 149, 0, 0.3);
-}
-
-.countdown-tool__button--secondary:hover:not(:disabled) {
-  background: rgba(255, 149, 0, 0.25);
-}
-
-.countdown-tool__button--ghost {
-  background: transparent;
-  color: var(--fg);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.countdown-tool__button--ghost:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.countdown-tool__presets {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: var(--muted);
 }
-
-.countdown-tool__presets p {
-  margin: 0 0 0.6rem;
-}
-
-.countdown-tool__preset-buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.countdown-tool__preset {
-  padding: 0.4rem 0.9rem;
-  font-size: 0.85rem;
+.ct-preset {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
   font-weight: 500;
   border: 1px solid rgba(255, 149, 0, 0.25);
   border-radius: 999px;
@@ -537,20 +740,76 @@ permalink: /tools/countdown-timer/index.html
   cursor: pointer;
   transition: all 0.2s ease;
 }
-
-.countdown-tool__preset:hover {
+.ct-preset:hover {
   background: rgba(255, 149, 0, 0.2);
   border-color: rgba(255, 149, 0, 0.5);
 }
 
-/* Dark theme enhancements */
+/* ── Controls ──────────────────────────────────────── */
+.ct-widget__controls {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ct-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.ct-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ct-btn--primary {
+  background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+  color: #000;
+  box-shadow: 0 4px 15px rgba(255, 149, 0, 0.4);
+}
+.ct-btn--primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 149, 0, 0.5);
+}
+.ct-btn--secondary {
+  background: rgba(255, 149, 0, 0.15);
+  color: #ff9500;
+  border: 1px solid rgba(255, 149, 0, 0.3);
+}
+.ct-btn--secondary:hover:not(:disabled) {
+  background: rgba(255, 149, 0, 0.25);
+}
+.ct-btn--ghost {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.ct-btn--ghost:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Light theme override ──────────────────────────── */
 @media (prefers-color-scheme: light) {
-  .countdown-tool__display-wrapper {
+  .ct-widget {
     background: #1a1a1a;
   }
-  
-  .countdown-tool__input-group input {
+  .ct-input-grp input[type="number"],
+  .ct-input-grp input[type="datetime-local"] {
     background: rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* ── Responsive ────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ct-grid {
+    grid-template-columns: 1fr;
+  }
+  .ct-widget {
+    padding: 1.25rem 1rem 1rem;
   }
 }
 </style>

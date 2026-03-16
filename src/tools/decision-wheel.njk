@@ -5,15 +5,16 @@ description: Offline-ready spinner for quick binary or gut-check decisions.
 permalink: /tools/decision-wheel/index.html
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow">Decision Maker</p>
-  <h1>Spin the Minimal Wheel</h1>
+  <p class="eyebrow">~/tools/decision-wheel</p>
+  <h1>Decision Wheel</h1>
   <p>
-    When a call could go either way, tap the button, watch the wheel rotate, and get a clear answer. This tool runs
-    entirely offline once cached, so it keeps working even when the site is installed as a PWA.
+    Can't decide? Spin the wheel and let fate choose. Works offline.
   </p>
 </section>
 
-<section class="tool-shell decision-tool">
+{% set terminalTitle = "decision-wheel.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="decision-tool">
   <div class="decision-tool__wheel-wrapper" aria-live="polite">
     <div class="decision-tool__pointer" aria-hidden="true"></div>
     <div class="decision-tool__wheel" id="decision-wheel" role="img" aria-label="Decision wheel">
@@ -41,6 +42,7 @@ permalink: /tools/decision-wheel/index.html
     </ul>
   </div>
 </section>
+{% include "terminal-frame-close.njk" %}
 
 <script type="application/ld+json">
 {
@@ -181,13 +183,13 @@ permalink: /tools/decision-wheel/index.html
 
 .decision-tool__button--ghost {
   background: transparent;
-  color: var(--fg);
+  color: var(--term-fg);
   border: 1px solid rgba(255,255,255,0.3);
 }
 
 .decision-tool__legend {
   font-size: 0.9rem;
-  color: var(--muted);
+  color: var(--term-muted);
 }
 
 .decision-tool__legend ul {

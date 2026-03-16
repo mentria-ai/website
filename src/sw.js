@@ -1,12 +1,14 @@
-const CACHE_NAME = 'mentria-cache-v2';
+const CACHE_NAME = 'mentria-cache-v3';
 const ASSETS = [
   '/',
   '/assets/css/style.css',
+  '/assets/css/terminal.css',
+  '/assets/js/mentria-cli.js',
   '/manifest.json',
+  '/feed/',
+  '/tools/',
   '/tools/decision-wheel/',
-  '/tools/decision-wheel/index.html',
-  '/tools/countdown-timer/',
-  '/tools/countdown-timer/index.html'
+  '/tools/countdown-timer/'
 ];
 
 self.addEventListener('install', event => {

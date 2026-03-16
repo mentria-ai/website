@@ -1,26 +1,21 @@
 ---
 layout: base.njk
-title: Page not found
+title: 404
 permalink: 404.html
 eleventyExcludeFromCollections: true
 ---
-<section class="hero" style="padding-top:2rem;">
-  <p class="eyebrow">404</p>
-  <h1>Nothing to see here… yet</h1>
-  <p>
-    The URL you followed doesn’t map to any post, tool, or experiment. Double-check the link,
-    or head back to the main feed to keep exploring Mentria.
-  </p>
+<section class="hero" style="padding-top:3rem;">
+    <div style="font-family: var(--font-mono); text-align: center;">
+        <p style="color: var(--syn-pink); font-size: 0.9rem;">$ navigate {{ page.url | default('/unknown') }}</p>
+        <h1 style="font-size: clamp(3rem, 8vw, 5rem); margin: 1rem 0;">404</h1>
+        <p style="color: var(--syn-amber);">page not found<span class="cursor-blink"></span></p>
+        <div style="margin-top: 2rem; font-size: 0.9rem; color: var(--term-muted);">
+            <p>> try one of these:</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="/" style="margin-right: 1.5rem;">~/home</a>
+                <a href="/feed/" style="margin-right: 1.5rem;">~/feed</a>
+                <a href="/tools/">~/tools</a>
+            </p>
+        </div>
+    </div>
 </section>
-
-<section class="tool-shell">
-  <div class="tool-placeholder">
-    <p><strong>Quick navigation</strong></p>
-    <ul>
-      <li><a href="/">Return home</a></li>
-      <li><a href="/feed/">Browse the feed</a></li>
-      <li><a href="/tools/">Launch a tool</a></li>
-    </ul>
-  </div>
-</section>
-

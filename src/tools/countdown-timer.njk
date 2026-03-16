@@ -5,15 +5,17 @@ description: Set a custom countdown timer with alarm sound. Works offline as a P
 permalink: /tools/countdown-timer/index.html
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow">Timer</p>
+  <p class="eyebrow">~/tools/countdown-timer</p>
   <h1>Countdown Timer</h1>
   <p>
-    Set a duration or pick a target date &amp; time (up to 99 hours). Add up to 4 independent timers.
+    Set a duration or pick a target time. Up to 4 independent timers with alarm sound.
   </p>
 </section>
 
 <!-- ── Widget Grid ────────────────────────────────────── -->
-<section class="tool-shell countdown-tool">
+{% set terminalTitle = "countdown-timer.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="countdown-tool">
   <div class="ct-grid" id="ct-grid">
     <!-- widgets injected here -->
   </div>
@@ -22,6 +24,7 @@ permalink: /tools/countdown-timer/index.html
     <span>Add Timer</span>
   </button>
 </section>
+{% include "terminal-frame-close.njk" %}
 
 <!-- ── Widget Template ───────────────────────────────── -->
 <template id="ct-widget-tpl">
@@ -678,7 +681,7 @@ permalink: /tools/countdown-timer/index.html
 }
 .ct-input-grp label {
   font-size: 0.78rem;
-  color: var(--muted);
+  color: var(--term-muted);
   font-weight: 500;
 }
 .ct-input-grp input[type="number"],
@@ -727,7 +730,7 @@ permalink: /tools/countdown-timer/index.html
   align-items: center;
   justify-content: center;
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--term-muted);
 }
 .ct-preset {
   padding: 0.3rem 0.7rem;
@@ -784,7 +787,7 @@ permalink: /tools/countdown-timer/index.html
 }
 .ct-btn--ghost {
   background: transparent;
-  color: var(--fg);
+  color: var(--term-fg);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 .ct-btn--ghost:hover:not(:disabled) {

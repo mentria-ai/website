@@ -1,0 +1,42 @@
+[
+  {
+    "type": "image",
+    "color": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    "title": "Welcome to Mentria",
+    "caption": "A creative studio for tools and transmissions.",
+    "tags": ["announcement"],
+    "date": "2026-03-16"
+  },
+  {
+    "type": "image",
+    "color": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    "title": "Tools, Reimagined",
+    "caption": "Simple utilities designed with craft and care.",
+    "tags": ["tools", "design"],
+    "date": "2026-03-15"
+  },
+  {
+    "type": "image",
+    "color": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    "title": "The Terminal Aesthetic",
+    "caption": "When code meets design. A visual language for the curious.",
+    "tags": ["design"],
+    "date": "2026-03-14"
+  },
+  {
+    "type": "image",
+    "color": "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+    "title": "Building in Public",
+    "caption": "Every experiment starts somewhere. This is ours.",
+    "tags": ["studio"],
+    "date": "2026-03-13"
+  },
+  {
+    "type": "image",
+    "color": "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+    "title": "Stay Tuned",
+    "caption": "More transmissions incoming. Follow the signal.",
+    "tags": ["update"],
+    "date": "2026-03-12"
+  }
+]

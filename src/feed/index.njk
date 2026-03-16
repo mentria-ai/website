@@ -1,28 +1,160 @@
 ---
-layout: base.njk
+layout: feed-layout.njk
 title: Feed
-description: Notes, essays, and dispatches about whatever is currently shipping.
+description: Visual transmissions from the Mentria studio.
 ---
-<section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow">Feed</p>
-  <h1>Thinking in public</h1>
-  <p>
-    Long-form posts explaining new tools, research rabbit holes, and the messy notes that eventually become ship-ready products.
-  </p>
-</section>
+{% set entries = feed | default([]) %}
+{% if entries.length %}
+<div class="feed-scroll" id="feed-scroll">
+    {% for item in entries %}
+    <section class="feed-card" tabindex="0" data-index="{{ loop.index0 }}">
+        {% if item.type == "video" and item.src %}
+        <video class="feed-card__media" src="{{ item.src }}" {% if item.poster %}poster="{{ item.poster }}"{% endif %} muted loop playsinline preload="metadata"></video>
+        {% elif item.type == "image" and item.src %}
+        <img class="feed-card__media" src="{{ item.src }}" alt="{{ item.title }}" loading="lazy">
+        {% elif item.color %}
+        <div class="feed-card__color-bg" style="background: {{ item.color }};"></div>
+        {% endif %}
 
-{% set posts = collections.post | reverse %}
-{% if posts.length %}
-  <div class="card-grid">
-    {% for post in posts %}
-    <article class="card">
-      <p class="eyebrow">{{ post.date | date("MMM d, yyyy") }}</p>
-      <h3><a href="{{ post.url }}">{{ post.data.title }}</a></h3>
-      <p>{{ post.data.description or post.templateContent | striptags | truncate(120, true) }}</p>
-      <span>Read article →</span>
-    </article>
+        <div class="feed-card__gradient"></div>
+
+        {% if item.tags %}
+        <div class="feed-card__tags">
+            {% for tag in item.tags %}
+            <span class="feed-card__tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="feed-card__info">
+            <h2 class="feed-card__title">{{ item.title }}</h2>
+            {% if item.caption %}
+            <p class="feed-card__caption">{{ item.caption }}</p>
+            {% endif %}
+            {% if item.date %}
+            <time class="feed-card__date" datetime="{{ item.date }}">{{ item.date | date }}</time>
+            {% endif %}
+        </div>
+
+        {% if item.type == "video" and item.src %}
+        <button class="feed-card__mute-btn" aria-label="Toggle mute">🔇</button>
+        <div class="feed-card__progress" role="progressbar" aria-valuenow="0" aria-valuemax="100" style="width: 0%;"></div>
+        {% endif %}
+
+        {% if loop.first %}
+        <div class="feed-card__scroll-hint" aria-hidden="true">↓</div>
+        {% endif %}
+    </section>
     {% endfor %}
-  </div>
+</div>
 {% else %}
-  <p>No posts yet. Create a Markdown file in <code>src/feed</code> with <code>tags: ["post"]</code> to publish.</p>
+<div class="feed-empty">
+    <p class="feed-empty__command">$ feed --list</p>
+    <p class="feed-empty__message">> no transmissions yet. check back soon.<span class="cursor-blink"></span></p>
+</div>
 {% endif %}
+
+<script>
+(function () {
+  'use strict';
+
+  var feedScroll = document.getElementById('feed-scroll');
+  if (!feedScroll) return;
+
+  var cards = feedScroll.querySelectorAll('.feed-card');
+  if (!cards.length) return;
+
+  // Video autoplay/pause with Intersection Observer
+  var videos = feedScroll.querySelectorAll('video');
+  if (videos.length) {
+    var observer = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        var video = entries[i].target;
+        if (entries[i].isIntersecting) {
+          video.play().catch(function () {});
+        } else {
+          video.pause();
+        }
+      }
+    }, { threshold: 0.5 });
+
+    for (var i = 0; i < videos.length; i++) {
+      observer.observe(videos[i]);
+    }
+  }
+
+  // Mute toggle
+  feedScroll.addEventListener('click', function (e) {
+    var muteBtn = e.target.closest('.feed-card__mute-btn');
+    if (muteBtn) {
+      var card = muteBtn.closest('.feed-card');
+      var video = card ? card.querySelector('video') : null;
+      if (video) {
+        video.muted = !video.muted;
+        muteBtn.textContent = video.muted ? '🔇' : '🔊';
+        muteBtn.setAttribute('aria-label', video.muted ? 'Unmute' : 'Mute');
+      }
+      return;
+    }
+
+    // Tap card to play/pause video
+    var card = e.target.closest('.feed-card');
+    if (card) {
+      var video = card.querySelector('video');
+      if (video) {
+        if (video.paused) {
+          video.play().catch(function () {});
+        } else {
+          video.pause();
+        }
+      }
+    }
+  });
+
+  // Keyboard play/pause
+  feedScroll.addEventListener('keydown', function (e) {
+    if (e.key === ' ' || e.key === 'Enter') {
+      var card = e.target.closest('.feed-card');
+      if (card) {
+        e.preventDefault();
+        var video = card.querySelector('video');
+        if (video) {
+          if (video.paused) {
+            video.play().catch(function () {});
+          } else {
+            video.pause();
+          }
+        }
+      }
+    }
+  });
+
+  // Video progress bar
+  for (var i = 0; i < videos.length; i++) {
+    (function (video) {
+      var card = video.closest('.feed-card');
+      var progressBar = card ? card.querySelector('.feed-card__progress') : null;
+      if (!progressBar) return;
+
+      video.addEventListener('timeupdate', function () {
+        if (video.duration) {
+          var pct = (video.currentTime / video.duration) * 100;
+          progressBar.style.width = pct + '%';
+          progressBar.setAttribute('aria-valuenow', Math.round(pct));
+        }
+      });
+    })(videos[i]);
+  }
+
+  // Hide scroll hint after first scroll
+  var scrollHint = feedScroll.querySelector('.feed-card__scroll-hint');
+  if (scrollHint) {
+    feedScroll.addEventListener('scroll', function () {
+      if (feedScroll.scrollTop > 50) {
+        scrollHint.style.opacity = '0';
+        scrollHint.style.transition = 'opacity 0.3s';
+      }
+    }, { once: true });
+  }
+})();
+</script>

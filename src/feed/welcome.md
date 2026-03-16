@@ -1,5 +1,5 @@
 ---
-layout: base.njk
+layout: post-layout.njk
 title: Rebooting Mentria
 description: Why I swapped Jekyll for Eleventy, introduced templates, and drew a new roadmap that keeps content in focus.
 date: 2025-11-21

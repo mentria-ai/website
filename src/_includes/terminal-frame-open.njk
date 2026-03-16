@@ -1,0 +1,12 @@
+<div class="terminal-frame">
+    <div class="terminal-frame__titlebar">
+        <div class="terminal-frame__dots">
+            <span class="terminal-frame__dot terminal-frame__dot--red"></span>
+            <span class="terminal-frame__dot terminal-frame__dot--yellow"></span>
+            <span class="terminal-frame__dot terminal-frame__dot--green"></span>
+        </div>
+        {% if terminalTitle %}
+        <span class="terminal-frame__filename">{{ terminalTitle }}</span>
+        {% endif %}
+    </div>
+    <div class="terminal-frame__body">

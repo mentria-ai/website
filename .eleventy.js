@@ -25,6 +25,10 @@ module.exports = function(eleventyConfig) {
     }
   });
 
+  eleventyConfig.addFilter("year", function() {
+    return new Date().getFullYear();
+  });
+
   // Passthrough copy for assets
   eleventyConfig.addPassthroughCopy("src/assets");
   // Passthrough copy for PWA files

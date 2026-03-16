@@ -1,11 +1,11 @@
 {
   "name": "Mentria",
   "short_name": "Mentria",
-  "description": "A curated mix of essays, utility tools, and playful experiments.",
+  "description": "A creative studio for tools, experiments, and visual transmissions.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0b0b0c",
-  "theme_color": "#0b0b0c",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "icons": [
     { "src": "/assets/img/favicon-96x96.png", "sizes": "96x96", "type": "image/png" },
     { "src": "/assets/img/icon-192x192.png", "sizes": "192x192", "type": "image/png" },

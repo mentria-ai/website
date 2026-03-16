@@ -22,7 +22,7 @@ permalink: /tools/decision-wheel/index.html
       <span class="decision-tool__slice-label decision-tool__slice-label--0">Yes</span>
       <span class="decision-tool__slice-label decision-tool__slice-label--1">No</span>
       <span class="decision-tool__slice-label decision-tool__slice-label--2">Up to you</span>
-      <span class="decision-tool__slice-label decision-tool__slice-label--3">Wait &amp;<br>try again</span>
+      <span class="decision-tool__slice-label decision-tool__slice-label--3">Wait &amp; try again</span>
     </div>
   </div>
 
@@ -216,29 +216,36 @@ permalink: /tools/decision-wheel/index.html
 
 .decision-tool__slice-label {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform-origin: center;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 700;
   color: #111;
-  text-shadow: 0 1px 2px rgba(255,255,255,0.7);
+  text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
+/* Yes — top-right quadrant (green) */
 .decision-tool__slice-label--0 {
-  transform: translate(-50%, -50%) rotate(0deg) translateY(-42%) rotate(0deg);
+  top: 20%;
+  right: 15%;
 }
 
+/* No — bottom-right quadrant (pink) */
 .decision-tool__slice-label--1 {
-  transform: translate(-50%, -50%) rotate(90deg) translateY(-42%) rotate(-90deg);
+  bottom: 20%;
+  right: 18%;
 }
 
+/* Up to you — bottom-left quadrant (blue) */
 .decision-tool__slice-label--2 {
-  transform: translate(-50%, -50%) rotate(180deg) translateY(-42%) rotate(-180deg);
+  bottom: 20%;
+  left: 12%;
 }
 
+/* Wait & try again — top-left quadrant (yellow) */
 .decision-tool__slice-label--3 {
-  transform: translate(-50%, -50%) rotate(270deg) translateY(-42%) rotate(-270deg);
+  top: 20%;
+  left: 8%;
 }
 </style>
 

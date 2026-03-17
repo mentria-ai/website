@@ -25,10 +25,10 @@ permalink: /tools/decision-wheel/index.html
         <svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 28L0 0h20z" fill="var(--syn-cyan)"/></svg>
       </div>
       <div class="dw__wheel" id="dw-wheel" role="img" aria-label="Decision wheel" aria-live="polite">
-        <div class="dw__segment dw__segment--0"><span>Yes</span></div>
-        <div class="dw__segment dw__segment--1"><span>No</span></div>
-        <div class="dw__segment dw__segment--2"><span>Up to you</span></div>
-        <div class="dw__segment dw__segment--3"><span>Wait</span></div>
+        <div class="dw__segment dw__segment--0"></div>
+        <div class="dw__segment dw__segment--1"></div>
+        <div class="dw__segment dw__segment--2"></div>
+        <div class="dw__segment dw__segment--3"></div>
         <div class="dw__hub"></div>
       </div>
     </div>
@@ -202,14 +202,6 @@ permalink: /tools/decision-wheel/index.html
   overflow: hidden;
 }
 
-.dw__segment span {
-  position: absolute;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
 
 /* Yes — top-right (green) */
 .dw__segment--0 {
@@ -219,12 +211,6 @@ permalink: /tools/decision-wheel/index.html
   border-bottom: 1px solid rgba(74, 222, 128, 0.15);
   border-left: 1px solid rgba(74, 222, 128, 0.08);
 }
-.dw__segment--0 span {
-  color: var(--syn-green);
-  top: 35%;
-  left: 25%;
-  text-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
-}
 
 /* No — bottom-right (pink) */
 .dw__segment--1 {
@@ -232,12 +218,6 @@ permalink: /tools/decision-wheel/index.html
   background: linear-gradient(225deg, rgba(244, 114, 182, 0.12) 0%, rgba(244, 114, 182, 0.03) 100%);
   border-top: 1px solid rgba(244, 114, 182, 0.15);
   border-left: 1px solid rgba(244, 114, 182, 0.08);
-}
-.dw__segment--1 span {
-  color: var(--syn-pink);
-  top: 25%;
-  left: 25%;
-  text-shadow: 0 0 12px rgba(244, 114, 182, 0.4);
 }
 
 /* Up to you — bottom-left (cyan) */
@@ -248,12 +228,6 @@ permalink: /tools/decision-wheel/index.html
   border-top: 1px solid rgba(34, 211, 238, 0.15);
   border-right: 1px solid rgba(34, 211, 238, 0.08);
 }
-.dw__segment--2 span {
-  color: var(--syn-cyan);
-  top: 25%;
-  right: 20%;
-  text-shadow: 0 0 12px rgba(34, 211, 238, 0.4);
-}
 
 /* Wait — top-left (amber) */
 .dw__segment--3 {
@@ -262,12 +236,6 @@ permalink: /tools/decision-wheel/index.html
   background: linear-gradient(45deg, rgba(251, 191, 36, 0.12) 0%, rgba(251, 191, 36, 0.03) 100%);
   border-bottom: 1px solid rgba(251, 191, 36, 0.15);
   border-right: 1px solid rgba(251, 191, 36, 0.08);
-}
-.dw__segment--3 span {
-  color: var(--syn-amber);
-  bottom: 35%;
-  right: 25%;
-  text-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
 }
 
 /* ── Hub ──────────────────────────────────────────── */
@@ -435,9 +403,6 @@ permalink: /tools/decision-wheel/index.html
   .dw__legend {
     gap: 0.75rem;
     font-size: 0.7rem;
-  }
-  .dw__segment span {
-    font-size: 0.6rem;
   }
 }
 </style>

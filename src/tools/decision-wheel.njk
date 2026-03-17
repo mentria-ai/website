@@ -14,32 +14,48 @@ permalink: /tools/decision-wheel/index.html
 
 {% set terminalTitle = "decision-wheel.js" %}
 {% include "terminal-frame-open.njk" %}
-<section class="decision-tool">
-  <div class="decision-tool__wheel-wrapper" aria-live="polite">
-    <div class="decision-tool__pointer" aria-hidden="true"></div>
-    <div class="decision-tool__wheel" id="decision-wheel" role="img" aria-label="Decision wheel">
-      <div class="decision-tool__center"></div>
-      <span class="decision-tool__slice-label decision-tool__slice-label--0">Yes</span>
-      <span class="decision-tool__slice-label decision-tool__slice-label--1">No</span>
-      <span class="decision-tool__slice-label decision-tool__slice-label--2">Up to you</span>
-      <span class="decision-tool__slice-label decision-tool__slice-label--3">Wait &amp; try again</span>
+<section class="dw">
+  <div class="dw__stage">
+    <!-- Outer ring decoration -->
+    <div class="dw__ring-outer"></div>
+
+    <!-- The wheel -->
+    <div class="dw__wheel-wrap">
+      <div class="dw__pointer" aria-hidden="true">
+        <svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 28L0 0h20z" fill="var(--syn-cyan)"/></svg>
+      </div>
+      <div class="dw__wheel" id="dw-wheel" role="img" aria-label="Decision wheel" aria-live="polite">
+        <div class="dw__segment dw__segment--0"><span>Yes</span></div>
+        <div class="dw__segment dw__segment--1"><span>No</span></div>
+        <div class="dw__segment dw__segment--2"><span>Up to you</span></div>
+        <div class="dw__segment dw__segment--3"><span>Wait</span></div>
+        <div class="dw__hub"></div>
+      </div>
     </div>
   </div>
 
-  <p class="decision-tool__result" id="decision-result">Ready when you are.</p>
-
-  <div class="decision-tool__controls">
-    <button class="decision-tool__button" id="decision-spin">Spin the wheel</button>
+  <!-- Result -->
+  <div class="dw__result-wrap">
+    <div class="dw__result-label">RESULT</div>
+    <div class="dw__result" id="dw-result" data-outcome="">
+      <span class="dw__result-text">Ready</span>
+    </div>
   </div>
 
-  <div class="decision-tool__legend">
-    <p>Legend</p>
-    <ul>
-      <li><span class="swatch swatch--yes"></span> Yes</li>
-      <li><span class="swatch swatch--no"></span> No</li>
-      <li><span class="swatch swatch--upto"></span> Up to you</li>
-      <li><span class="swatch swatch--wait"></span> Wait &amp; try again</li>
-    </ul>
+  <!-- Controls -->
+  <div class="dw__controls">
+    <button class="dw__spin-btn" id="dw-spin">
+      <span class="dw__spin-icon">&#x25B6;</span>
+      Spin
+    </button>
+  </div>
+
+  <!-- Legend -->
+  <div class="dw__legend">
+    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-green)"></span>Yes</div>
+    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-pink)"></span>No</div>
+    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-cyan)"></span>Up to you</div>
+    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-amber)"></span>Wait &amp; try again</div>
   </div>
 </section>
 {% include "terminal-frame-close.njk" %}
@@ -62,37 +78,51 @@ permalink: /tools/decision-wheel/index.html
 <script>
 (() => {
   const outcomes = [
-    { label: "Yes", colorClass: "yes" },
-    { label: "No", colorClass: "no" },
-    { label: "Up to you", colorClass: "upto" },
-    { label: "Wait & try again", colorClass: "wait" }
+    { label: "Yes", cls: "yes", color: "var(--syn-green)" },
+    { label: "No", cls: "no", color: "var(--syn-pink)" },
+    { label: "Up to you", cls: "upto", color: "var(--syn-cyan)" },
+    { label: "Wait & try again", cls: "wait", color: "var(--syn-amber)" }
   ];
 
-  const wheel = document.getElementById("decision-wheel");
-  const resultEl = document.getElementById("decision-result");
-  const spinBtn = document.getElementById("decision-spin");
+  const wheel = document.getElementById("dw-wheel");
+  const resultEl = document.getElementById("dw-result");
+  const resultText = resultEl.querySelector(".dw__result-text");
+  const spinBtn = document.getElementById("dw-spin");
   const segmentAngle = 360 / outcomes.length;
 
   let currentRotation = 0;
+  let spinning = false;
 
-  function updateResultFromRotation() {
+  function updateResult() {
     const normalized = (360 - (currentRotation % 360)) % 360;
     const index = Math.floor(normalized / segmentAngle) % outcomes.length;
     const outcome = outcomes[index];
-    resultEl.textContent = outcome.label;
-    resultEl.dataset.outcome = outcome.colorClass;
+    resultText.textContent = outcome.label;
+    resultEl.dataset.outcome = outcome.cls;
+    resultEl.style.setProperty('--result-color', outcome.color);
+    spinning = false;
+    spinBtn.disabled = false;
+    wheel.classList.remove("dw__wheel--spinning");
   }
 
   function spin() {
-    const extraSpins = Math.floor(Math.random() * 4) + 4;
-    const extraDegrees = Math.floor(Math.random() * 360);
-    currentRotation += extraSpins * 360 + extraDegrees;
-    wheel.style.transition = "transform 2.2s cubic-bezier(.19,1,.22,1)";
+    if (spinning) return;
+    spinning = true;
+    spinBtn.disabled = true;
+    wheel.classList.add("dw__wheel--spinning");
+    resultText.textContent = "...";
+    resultEl.dataset.outcome = "";
+
+    const extraSpins = Math.floor(Math.random() * 4) + 5;
+    const extraDeg = Math.floor(Math.random() * 360);
+    currentRotation += extraSpins * 360 + extraDeg;
+
+    wheel.style.transition = "transform 3.5s cubic-bezier(.15,.85,.25,1)";
     wheel.style.transform = `rotate(${currentRotation}deg)`;
 
     wheel.ontransitionend = () => {
       wheel.style.transition = "none";
-      updateResultFromRotation();
+      updateResult();
     };
   }
 
@@ -101,151 +131,313 @@ permalink: /tools/decision-wheel/index.html
 </script>
 
 <style>
-.decision-tool {
+/* ── Decision Wheel — Terminal HUD ────────────────── */
+.dw {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
   align-items: center;
-  text-align: center;
+  gap: 2rem;
+  padding: 1rem 0;
+  font-family: var(--font-mono);
 }
 
-.decision-tool__wheel-wrapper {
+/* ── Stage ────────────────────────────────────────── */
+.dw__stage {
   position: relative;
-  width: min(320px, 80vw);
+  width: min(340px, 80vw);
   aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.decision-tool__wheel {
+.dw__ring-outer {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(34, 211, 238, 0.12);
+  pointer-events: none;
+}
+.dw__ring-outer::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 1px dashed rgba(34, 211, 238, 0.06);
+}
+
+/* ── Wheel ────────────────────────────────────────── */
+.dw__wheel-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.dw__wheel {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: conic-gradient(
-    #a7f3d0 0deg 90deg,
-    #fecdd3 90deg 180deg,
-    #bfdbfe 180deg 270deg,
-    #fde68a 270deg 360deg
-  );
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.35), 0 10px 25px rgba(0,0,0,0.45);
+  position: relative;
+  overflow: hidden;
+  background: #0d0d0d;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,0.06),
+    0 0 40px rgba(0,0,0,0.6),
+    inset 0 0 30px rgba(0,0,0,0.8);
+}
+
+.dw__wheel--spinning {
+  box-shadow:
+    0 0 0 2px rgba(34, 211, 238, 0.2),
+    0 0 60px rgba(34, 211, 238, 0.1),
+    inset 0 0 30px rgba(0,0,0,0.8);
+}
+
+/* ── Segments ─────────────────────────────────────── */
+.dw__segment {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  transform-origin: 100% 100%;
+  overflow: hidden;
+}
+
+.dw__segment span {
+  position: absolute;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Yes — top-right (green) */
+.dw__segment--0 {
+  top: 0; left: 50%;
+  transform: rotate(0deg) skewY(0deg);
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.12) 0%, rgba(74, 222, 128, 0.03) 100%);
+  border-bottom: 1px solid rgba(74, 222, 128, 0.15);
+  border-left: 1px solid rgba(74, 222, 128, 0.08);
+}
+.dw__segment--0 span {
+  color: var(--syn-green);
+  top: 35%;
+  left: 25%;
+  text-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
+}
+
+/* No — bottom-right (pink) */
+.dw__segment--1 {
+  top: 50%; left: 50%;
+  background: linear-gradient(225deg, rgba(244, 114, 182, 0.12) 0%, rgba(244, 114, 182, 0.03) 100%);
+  border-top: 1px solid rgba(244, 114, 182, 0.15);
+  border-left: 1px solid rgba(244, 114, 182, 0.08);
+}
+.dw__segment--1 span {
+  color: var(--syn-pink);
+  top: 25%;
+  left: 25%;
+  text-shadow: 0 0 12px rgba(244, 114, 182, 0.4);
+}
+
+/* Up to you — bottom-left (cyan) */
+.dw__segment--2 {
+  top: 50%; left: 0;
+  transform-origin: 100% 0%;
+  background: linear-gradient(315deg, rgba(34, 211, 238, 0.12) 0%, rgba(34, 211, 238, 0.03) 100%);
+  border-top: 1px solid rgba(34, 211, 238, 0.15);
+  border-right: 1px solid rgba(34, 211, 238, 0.08);
+}
+.dw__segment--2 span {
+  color: var(--syn-cyan);
+  top: 25%;
+  right: 20%;
+  text-shadow: 0 0 12px rgba(34, 211, 238, 0.4);
+}
+
+/* Wait — top-left (amber) */
+.dw__segment--3 {
+  top: 0; left: 0;
+  transform-origin: 100% 100%;
+  background: linear-gradient(45deg, rgba(251, 191, 36, 0.12) 0%, rgba(251, 191, 36, 0.03) 100%);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.15);
+  border-right: 1px solid rgba(251, 191, 36, 0.08);
+}
+.dw__segment--3 span {
+  color: var(--syn-amber);
+  bottom: 35%;
+  right: 25%;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+}
+
+/* ── Hub ──────────────────────────────────────────── */
+.dw__hub {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1a1a1a 0%, #0a0a0a 100%);
+  border: 2px solid rgba(255,255,255,0.08);
+  box-shadow:
+    0 0 20px rgba(0,0,0,0.8),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  z-index: 2;
+}
+.dw__hub::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--syn-cyan);
+  box-shadow: 0 0 10px var(--syn-cyan), 0 0 20px rgba(34, 211, 238, 0.3);
+}
+
+/* ── Pointer ──────────────────────────────────────── */
+.dw__pointer {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.5));
+  animation: dw-pointer-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dw-pointer-pulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.4)); }
+  50% { filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.7)); }
+}
+
+/* ── Result ───────────────────────────────────────── */
+.dw__result-wrap {
+  text-align: center;
+}
+
+.dw__result-label {
+  font-size: 0.65rem;
+  color: var(--term-muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.dw__result {
+  --result-color: var(--term-muted);
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 700;
+  color: var(--result-color);
+  min-height: 1.5em;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  text-shadow: 0 0 20px color-mix(in srgb, var(--result-color) 50%, transparent);
+  transition: color 0.3s ease;
 }
 
-.decision-tool__center {
-  width: 24%;
-  height: 24%;
-  border-radius: 50%;
-  background: #050505;
-  border: 4px solid rgba(255,255,255,0.35);
-}
+.dw__result[data-outcome="yes"] { --result-color: var(--syn-green); }
+.dw__result[data-outcome="no"] { --result-color: var(--syn-pink); }
+.dw__result[data-outcome="upto"] { --result-color: var(--syn-cyan); }
+.dw__result[data-outcome="wait"] { --result-color: var(--syn-amber); }
 
-.decision-tool__pointer {
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-  border-top: 26px solid #111827;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
-}
-
-.decision-tool__result {
-  font-size: 1.5rem;
-  font-weight: 600;
-  min-height: 2em;
-}
-
-.decision-tool__controls {
+/* ── Spin Button ──────────────────────────────────── */
+.dw__controls {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
   justify-content: center;
 }
 
-.decision-tool__button {
+.dw__spin-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   border: none;
   border-radius: 999px;
-  padding: 0.65rem 1.6rem;
-  font-weight: 600;
-  cursor: pointer;
-  color: #050505;
-  background: linear-gradient(120deg,#6ef3c5,#5d96ff);
-  transition: opacity 0.2s ease;
-}
-
-.decision-tool__button:disabled {
-  opacity: 0.6;
-}
-
-.decision-tool__button--ghost {
-  background: transparent;
-  color: var(--term-fg);
-  border: 1px solid rgba(255,255,255,0.3);
-}
-
-.decision-tool__legend {
+  padding: 0.7rem 2rem;
+  font-family: var(--font-mono);
   font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #000;
+  background: linear-gradient(135deg, var(--syn-cyan) 0%, #0ea5e9 100%);
+  box-shadow: 0 4px 20px rgba(34, 211, 238, 0.3);
+  transition: all 0.25s ease;
+}
+
+.dw__spin-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(34, 211, 238, 0.45);
+}
+
+.dw__spin-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.dw__spin-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dw__spin-icon {
+  font-size: 0.75rem;
+}
+
+/* ── Legend ────────────────────────────────────────── */
+.dw__legend {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.75rem;
   color: var(--term-muted);
 }
 
-.decision-tool__legend ul {
-  list-style: none;
-  padding: 0;
-  margin: 0.5rem 0 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.35rem;
+.dw__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-.swatch {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
+.dw__legend-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  margin-right: 6px;
+  box-shadow: 0 0 6px currentColor;
 }
 
-.swatch--yes { background: #a7f3d0; }
-.swatch--no { background: #fecdd3; }
-.swatch--upto { background: #bfdbfe; }
-.swatch--wait { background: #fde68a; }
-
-.decision-tool__slice-label {
+/* ── Cross-hair lines ─────────────────────────────── */
+.dw__wheel::before {
+  content: '';
   position: absolute;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #111;
-  text-shadow: 0 1px 2px rgba(255,255,255,0.5);
-  white-space: nowrap;
-  pointer-events: none;
+  top: 0; left: 50%;
+  width: 1px;
+  height: 100%;
+  background: rgba(255,255,255,0.04);
+  z-index: 1;
+}
+.dw__wheel::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.04);
+  z-index: 1;
 }
 
-/* Yes — top-right quadrant (green) */
-.decision-tool__slice-label--0 {
-  top: 20%;
-  right: 15%;
-}
-
-/* No — bottom-right quadrant (pink) */
-.decision-tool__slice-label--1 {
-  bottom: 20%;
-  right: 18%;
-}
-
-/* Up to you — bottom-left quadrant (blue) */
-.decision-tool__slice-label--2 {
-  bottom: 20%;
-  left: 12%;
-}
-
-/* Wait & try again — top-left quadrant (yellow) */
-.decision-tool__slice-label--3 {
-  top: 20%;
-  left: 8%;
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 480px) {
+  .dw__legend {
+    gap: 0.75rem;
+    font-size: 0.7rem;
+  }
+  .dw__segment span {
+    font-size: 0.6rem;
+  }
 }
 </style>
-

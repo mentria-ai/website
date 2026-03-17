@@ -88,42 +88,96 @@ permalink: /tools/decision-wheel/index.html
   const resultEl = document.getElementById("dw-result");
   const resultText = resultEl.querySelector(".dw__result-text");
   const spinBtn = document.getElementById("dw-spin");
+  const segments = wheel.querySelectorAll(".dw__segment");
   const segmentAngle = 360 / outcomes.length;
 
-  let currentRotation = 0;
-  let spinning = false;
+  let rotation = 0;
+  let velocity = 0;
+  let animating = false;
+  let lastActiveIndex = -1;
+  const FRICTION = 0.985;
+  const STOP_THRESHOLD = 0.3;
+  const SPIN_BOOST = 15 + Math.random() * 10;
 
-  function updateResult() {
-    const normalized = (360 - (currentRotation % 360)) % 360;
-    const index = Math.floor(normalized / segmentAngle) % outcomes.length;
-    const outcome = outcomes[index];
-    resultText.textContent = outcome.label;
-    resultEl.dataset.outcome = outcome.cls;
-    resultEl.style.setProperty('--result-color', outcome.color);
-    spinning = false;
-    spinBtn.disabled = false;
-    wheel.classList.remove("dw__wheel--spinning");
+  function getSegmentAtPointer() {
+    const norm = ((rotation % 360) + 360) % 360;
+    const pointerAngle = (360 - norm) % 360;
+    return Math.floor(pointerAngle / segmentAngle) % outcomes.length;
+  }
+
+  function highlightSegment(index) {
+    if (index === lastActiveIndex) return;
+    segments.forEach(function(s) { s.classList.remove("dw__segment--active"); });
+    if (index >= 0 && index < segments.length) {
+      segments[index].classList.add("dw__segment--active");
+    }
+    lastActiveIndex = index;
+  }
+
+  function clearHighlights() {
+    segments.forEach(function(s) {
+      s.classList.remove("dw__segment--active");
+      s.classList.remove("dw__segment--winner");
+    });
+    lastActiveIndex = -1;
+  }
+
+  function setWinner(index) {
+    segments.forEach(function(s) { s.classList.remove("dw__segment--active"); });
+    if (index >= 0 && index < segments.length) {
+      segments[index].classList.add("dw__segment--winner");
+    }
+  }
+
+  function tick() {
+    if (!animating) return;
+
+    velocity *= FRICTION;
+    rotation += velocity;
+
+    wheel.style.transform = "rotate(" + rotation + "deg)";
+
+    var idx = getSegmentAtPointer();
+    highlightSegment(idx);
+
+    if (velocity < STOP_THRESHOLD) {
+      // Stopped
+      animating = false;
+      velocity = 0;
+      wheel.classList.remove("dw__wheel--spinning");
+
+      var finalIndex = getSegmentAtPointer();
+      var outcome = outcomes[finalIndex];
+      resultText.textContent = outcome.label;
+      resultEl.dataset.outcome = outcome.cls;
+      resultEl.style.setProperty("--result-color", outcome.color);
+
+      clearHighlights();
+      setWinner(finalIndex);
+      return;
+    }
+
+    requestAnimationFrame(tick);
   }
 
   function spin() {
-    if (spinning) return;
-    spinning = true;
-    spinBtn.disabled = true;
-    wheel.classList.add("dw__wheel--spinning");
+    // Clear previous winner
+    segments.forEach(function(s) { s.classList.remove("dw__segment--winner"); });
+
+    // Add velocity — stacks on repeated clicks
+    velocity += SPIN_BOOST + Math.random() * 8;
+
+    // Cap max velocity
+    if (velocity > 80) velocity = 80;
+
     resultText.textContent = "...";
     resultEl.dataset.outcome = "";
+    wheel.classList.add("dw__wheel--spinning");
 
-    const extraSpins = Math.floor(Math.random() * 4) + 5;
-    const extraDeg = Math.floor(Math.random() * 360);
-    currentRotation += extraSpins * 360 + extraDeg;
-
-    wheel.style.transition = "transform 3.5s cubic-bezier(.15,.85,.25,1)";
-    wheel.style.transform = `rotate(${currentRotation}deg)`;
-
-    wheel.ontransitionend = () => {
-      wheel.style.transition = "none";
-      updateResult();
-    };
+    if (!animating) {
+      animating = true;
+      requestAnimationFrame(tick);
+    }
   }
 
   if (spinBtn) spinBtn.addEventListener("click", spin);
@@ -200,6 +254,43 @@ permalink: /tools/decision-wheel/index.html
   height: 50%;
   transform-origin: 100% 100%;
   overflow: hidden;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Active glow — segment passing under pointer */
+.dw__segment--active.dw__segment--0 {
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.3) 0%, rgba(74, 222, 128, 0.08) 100%);
+  box-shadow: inset 0 0 30px rgba(74, 222, 128, 0.15);
+}
+.dw__segment--active.dw__segment--1 {
+  background: linear-gradient(225deg, rgba(244, 114, 182, 0.3) 0%, rgba(244, 114, 182, 0.08) 100%);
+  box-shadow: inset 0 0 30px rgba(244, 114, 182, 0.15);
+}
+.dw__segment--active.dw__segment--2 {
+  background: linear-gradient(315deg, rgba(34, 211, 238, 0.3) 0%, rgba(34, 211, 238, 0.08) 100%);
+  box-shadow: inset 0 0 30px rgba(34, 211, 238, 0.15);
+}
+.dw__segment--active.dw__segment--3 {
+  background: linear-gradient(45deg, rgba(251, 191, 36, 0.3) 0%, rgba(251, 191, 36, 0.08) 100%);
+  box-shadow: inset 0 0 30px rgba(251, 191, 36, 0.15);
+}
+
+/* Winner glow — final result */
+.dw__segment--winner.dw__segment--0 {
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.4) 0%, rgba(74, 222, 128, 0.1) 100%);
+  box-shadow: inset 0 0 40px rgba(74, 222, 128, 0.2), 0 0 20px rgba(74, 222, 128, 0.1);
+}
+.dw__segment--winner.dw__segment--1 {
+  background: linear-gradient(225deg, rgba(244, 114, 182, 0.4) 0%, rgba(244, 114, 182, 0.1) 100%);
+  box-shadow: inset 0 0 40px rgba(244, 114, 182, 0.2), 0 0 20px rgba(244, 114, 182, 0.1);
+}
+.dw__segment--winner.dw__segment--2 {
+  background: linear-gradient(315deg, rgba(34, 211, 238, 0.4) 0%, rgba(34, 211, 238, 0.1) 100%);
+  box-shadow: inset 0 0 40px rgba(34, 211, 238, 0.2), 0 0 20px rgba(34, 211, 238, 0.1);
+}
+.dw__segment--winner.dw__segment--3 {
+  background: linear-gradient(45deg, rgba(251, 191, 36, 0.4) 0%, rgba(251, 191, 36, 0.1) 100%);
+  box-shadow: inset 0 0 40px rgba(251, 191, 36, 0.2), 0 0 20px rgba(251, 191, 36, 0.1);
 }
 
 
@@ -346,10 +437,6 @@ permalink: /tools/decision-wheel/index.html
   transform: translateY(0);
 }
 
-.dw__spin-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .dw__spin-icon {
   font-size: 0.75rem;

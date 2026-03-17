@@ -29,7 +29,7 @@ permalink: /tools/decision-wheel/index.html
         <div class="dw__segment dw__segment--1"></div>
         <div class="dw__segment dw__segment--2"></div>
         <div class="dw__segment dw__segment--3"></div>
-        <div class="dw__hub"></div>
+        <button class="dw__hub" id="dw-hub" type="button" aria-label="Spin the wheel"></button>
       </div>
     </div>
   </div>
@@ -181,6 +181,8 @@ permalink: /tools/decision-wheel/index.html
   }
 
   if (spinBtn) spinBtn.addEventListener("click", spin);
+  var hubBtn = document.getElementById("dw-hub");
+  if (hubBtn) hubBtn.addEventListener("click", spin);
 })();
 </script>
 
@@ -343,6 +345,16 @@ permalink: /tools/decision-wheel/index.html
     0 0 20px rgba(0,0,0,0.8),
     inset 0 1px 0 rgba(255,255,255,0.05);
   z-index: 2;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.dw__hub:hover {
+  border-color: rgba(34, 211, 238, 0.3);
+  box-shadow:
+    0 0 20px rgba(0,0,0,0.8),
+    0 0 12px rgba(34, 211, 238, 0.15),
+    inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .dw__hub::after {
   content: '';

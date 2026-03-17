@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mentria-cache-v5';
+const CACHE_NAME = 'mentria-cache-v6';
 const ASSETS = [
   '/',
   '/assets/css/style.css',

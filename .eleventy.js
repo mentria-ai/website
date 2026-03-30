@@ -1,4 +1,15 @@
+const { execSync } = require("child_process");
+
 module.exports = function(eleventyConfig) {
+  // Inject short git commit hash as a global data value for cache busting
+  const buildHash = (() => {
+    try {
+      return execSync("git rev-parse --short HEAD").toString().trim();
+    } catch {
+      return Date.now().toString(36);
+    }
+  })();
+  eleventyConfig.addGlobalData("buildHash", buildHash);
   eleventyConfig.addNunjucksFilter("startsWith", function(str = "", prefix = "") {
     if (typeof str !== "string") return false;
     return str.startsWith(prefix);
@@ -31,8 +42,7 @@ module.exports = function(eleventyConfig) {
 
   // Passthrough copy for assets
   eleventyConfig.addPassthroughCopy("src/assets");
-  // Passthrough copy for PWA files
-  eleventyConfig.addPassthroughCopy({ "src/sw.js": "sw.js" });
+  // Passthrough copy for PWA files (sw.js is now a Nunjucks template)
   eleventyConfig.addPassthroughCopy({ "src/manifest.json": "manifest.json" });
 
   return {

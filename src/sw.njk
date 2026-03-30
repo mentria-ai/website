@@ -1,4 +1,8 @@
-const CACHE_NAME = 'mentria-cache-v6';
+---
+permalink: /sw.js
+eleventyExcludeFromCollections: true
+---
+const CACHE_NAME = 'mentria-cache-{{ buildHash }}';
 const ASSETS = [
   '/',
   '/assets/css/style.css',
@@ -8,10 +12,15 @@ const ASSETS = [
   '/feed/',
   '/tools/',
   '/tools/decision-wheel/',
-  '/tools/countdown-timer/'
+  '/tools/countdown-timer/',
+  '/tools/coin-flip/',
+  '/tools/quick-notes/',
+  '/tools/base64-codec/',
+  '/tools/color-picker/'
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );

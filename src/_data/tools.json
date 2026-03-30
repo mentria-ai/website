@@ -10,5 +10,29 @@
     "title": "Countdown Timer",
     "summary": "Up to 4 simultaneous countdown timers with custom titles. Set a duration or pick a target date & time (max 99 hrs).",
     "category": "Timer"
+  },
+  {
+    "slug": "coin-flip",
+    "title": "Coin Flip",
+    "summary": "Animated heads or tails coin flip with optional best-of-N series mode. Works offline.",
+    "category": "Utility"
+  },
+  {
+    "slug": "quick-notes",
+    "title": "Quick Notes",
+    "summary": "Minimal scratchpad that saves to your browser. Supports multiple notes with localStorage persistence.",
+    "category": "Productivity"
+  },
+  {
+    "slug": "base64-codec",
+    "title": "Base64 Codec",
+    "summary": "Encode and decode text or files (including images) to and from Base64. All processing stays in your browser.",
+    "category": "Developer"
+  },
+  {
+    "slug": "color-picker",
+    "title": "Color Picker",
+    "summary": "Pick colors, generate harmonious palettes, and copy values in HEX, RGB, and HSL. Works offline.",
+    "category": "Design"
   }
 ]

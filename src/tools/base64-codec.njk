@@ -1,0 +1,735 @@
+---
+layout: base.njk
+title: Base64 Codec
+description: Encode and decode text or files (including images) to and from Base64. All processing stays in your browser.
+permalink: /tools/base64-codec/index.html
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">~/tools/base64-codec</p>
+  <h1>Base64 Codec</h1>
+  <p>
+    Encode and decode text or files to and from Base64. Supports images, documents, and any file type. Everything runs locally in your browser.
+  </p>
+</section>
+
+{% set terminalTitle = "base64-codec.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="b64">
+  <!-- Mode Toggle -->
+  <div class="b64-mode-tabs">
+    <button class="b64-mode-tab b64-mode-tab--active" data-mode="text">Text</button>
+    <button class="b64-mode-tab" data-mode="file">File</button>
+  </div>
+
+  <!-- ── Text Mode ──────────────────────────────────── -->
+  <div class="b64-panel" id="b64-text-panel">
+    <div class="b64-text-grid">
+      <div class="b64-text-col">
+        <label class="b64-label" for="b64-input">Input</label>
+        <textarea class="b64-textarea" id="b64-input" placeholder="Paste text or Base64 string here..." spellcheck="false"></textarea>
+      </div>
+      <div class="b64-text-col">
+        <label class="b64-label" for="b64-output">Output</label>
+        <textarea class="b64-textarea" id="b64-output" placeholder="Result will appear here..." spellcheck="false" readonly></textarea>
+      </div>
+    </div>
+    <div class="b64-text-actions">
+      <button class="b64-btn b64-btn--primary" id="b64-encode-btn">Encode</button>
+      <button class="b64-btn b64-btn--primary" id="b64-decode-btn">Decode</button>
+      <button class="b64-btn b64-btn--secondary" id="b64-copy-btn">Copy Output</button>
+      <button class="b64-btn b64-btn--ghost" id="b64-clear-btn">Clear</button>
+    </div>
+    <div class="b64-status" id="b64-text-status"></div>
+  </div>
+
+  <!-- ── File Mode ──────────────────────────────────── -->
+  <div class="b64-panel b64-panel--hidden" id="b64-file-panel">
+    <!-- Encode: file to base64 -->
+    <div class="b64-file-section">
+      <h3 class="b64-section-title">File to Base64</h3>
+      <div class="b64-dropzone" id="b64-dropzone">
+        <div class="b64-dropzone__content">
+          <div class="b64-dropzone__icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <path d="M24 32V16m0 0l-8 8m8-8l8 8" stroke="var(--syn-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="4" y="4" width="40" height="40" rx="8" stroke="var(--term-muted)" stroke-width="2" stroke-dasharray="4 4"/>
+            </svg>
+          </div>
+          <p class="b64-dropzone__text">Drop a file here or <button class="b64-dropzone__browse" id="b64-browse-btn" type="button">browse</button></p>
+          <p class="b64-dropzone__hint">Images, documents, or any file type</p>
+        </div>
+        <input type="file" id="b64-file-input" class="b64-sr-only" accept="*/*" />
+      </div>
+
+      <!-- File info + preview -->
+      <div class="b64-file-info b64-file-info--hidden" id="b64-file-info">
+        <div class="b64-file-meta">
+          <div class="b64-file-meta__row"><span class="b64-file-meta__label">Name:</span> <span id="b64-file-name">-</span></div>
+          <div class="b64-file-meta__row"><span class="b64-file-meta__label">Type:</span> <span id="b64-file-type">-</span></div>
+          <div class="b64-file-meta__row"><span class="b64-file-meta__label">Size:</span> <span id="b64-file-size">-</span></div>
+          <div class="b64-file-meta__row"><span class="b64-file-meta__label">Base64 size:</span> <span id="b64-file-b64size">-</span></div>
+        </div>
+        <div class="b64-file-preview" id="b64-file-preview"></div>
+        <div class="b64-file-output">
+          <label class="b64-label">Data URI</label>
+          <textarea class="b64-textarea b64-textarea--sm" id="b64-file-datauri" readonly spellcheck="false"></textarea>
+          <div class="b64-file-actions">
+            <button class="b64-btn b64-btn--secondary" id="b64-copy-datauri">Copy Data URI</button>
+            <button class="b64-btn b64-btn--secondary" id="b64-copy-raw">Copy Base64 Only</button>
+            <button class="b64-btn b64-btn--ghost" id="b64-file-clear">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decode: base64 to file -->
+    <div class="b64-file-section">
+      <h3 class="b64-section-title">Base64 to File</h3>
+      <label class="b64-label" for="b64-decode-input">Paste a Base64 data URI</label>
+      <textarea class="b64-textarea b64-textarea--sm" id="b64-decode-input" placeholder="data:image/png;base64,iVBOR..." spellcheck="false"></textarea>
+      <div class="b64-file-actions" style="margin-top:0.75rem;">
+        <button class="b64-btn b64-btn--primary" id="b64-decode-file-btn">Decode &amp; Preview</button>
+        <button class="b64-btn b64-btn--secondary" id="b64-download-btn" disabled>Download File</button>
+      </div>
+      <div class="b64-decode-preview" id="b64-decode-preview"></div>
+      <div class="b64-status" id="b64-file-status"></div>
+    </div>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Base64 Codec",
+  "operatingSystem": "Web",
+  "applicationCategory": "DeveloperApplication",
+  "description": "Encode and decode text or files (including images) to and from Base64. All processing stays in your browser.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0"
+  }
+}
+</script>
+
+<script>
+(() => {
+  /* ── DOM refs ─────────────────────────────────────── */
+  const modeTabs      = document.querySelectorAll('.b64-mode-tab');
+  const textPanel     = document.getElementById('b64-text-panel');
+  const filePanel     = document.getElementById('b64-file-panel');
+
+  // Text mode
+  const inputEl       = document.getElementById('b64-input');
+  const outputEl      = document.getElementById('b64-output');
+  const encodeBtn     = document.getElementById('b64-encode-btn');
+  const decodeBtn     = document.getElementById('b64-decode-btn');
+  const copyBtn       = document.getElementById('b64-copy-btn');
+  const clearBtn      = document.getElementById('b64-clear-btn');
+  const textStatus    = document.getElementById('b64-text-status');
+
+  // File mode — encode
+  const dropzone      = document.getElementById('b64-dropzone');
+  const browseBtn     = document.getElementById('b64-browse-btn');
+  const fileInput     = document.getElementById('b64-file-input');
+  const fileInfoWrap  = document.getElementById('b64-file-info');
+  const fileNameEl    = document.getElementById('b64-file-name');
+  const fileTypeEl    = document.getElementById('b64-file-type');
+  const fileSizeEl    = document.getElementById('b64-file-size');
+  const fileB64SizeEl = document.getElementById('b64-file-b64size');
+  const filePreview   = document.getElementById('b64-file-preview');
+  const fileDataUri   = document.getElementById('b64-file-datauri');
+  const copyDataUri   = document.getElementById('b64-copy-datauri');
+  const copyRaw       = document.getElementById('b64-copy-raw');
+  const fileClearBtn  = document.getElementById('b64-file-clear');
+
+  // File mode — decode
+  const decodeInput   = document.getElementById('b64-decode-input');
+  const decodeFileBtn = document.getElementById('b64-decode-file-btn');
+  const downloadBtn   = document.getElementById('b64-download-btn');
+  const decodePreview = document.getElementById('b64-decode-preview');
+  const fileStatus    = document.getElementById('b64-file-status');
+
+  let currentDataUri  = '';
+  let currentRawB64   = '';
+  let decodedBlob     = null;
+  let decodedFilename = 'decoded-file';
+
+  /* ── Helpers ──────────────────────────────────────── */
+  function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  function showStatus(el, msg, type) {
+    el.textContent = msg;
+    el.className = 'b64-status' + (type === 'error' ? ' b64-status--error' : type === 'success' ? ' b64-status--success' : '');
+    if (type !== 'error') {
+      setTimeout(() => { el.textContent = ''; el.className = 'b64-status'; }, 3000);
+    }
+  }
+
+  async function copyText(text, statusEl) {
+    try {
+      await navigator.clipboard.writeText(text);
+      showStatus(statusEl, 'Copied to clipboard!', 'success');
+    } catch {
+      showStatus(statusEl, 'Copy failed — use Ctrl+C manually.', 'error');
+    }
+  }
+
+  function isBase64(str) {
+    const s = str.trim();
+    if (s.startsWith('data:')) return true;
+    if (s.length < 4) return false;
+    return /^[A-Za-z0-9+/\n\r]+=*$/.test(s);
+  }
+
+  function isImageMime(mime) {
+    return /^image\//i.test(mime);
+  }
+
+  function mimeToExt(mime) {
+    const map = {
+      'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif',
+      'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/bmp': 'bmp',
+      'image/tiff': 'tiff', 'image/x-icon': 'ico', 'image/avif': 'avif',
+      'application/pdf': 'pdf', 'application/json': 'json',
+      'text/plain': 'txt', 'text/html': 'html', 'text/css': 'css',
+      'application/javascript': 'js',
+    };
+    return map[mime] || 'bin';
+  }
+
+  /* ── Mode Switching ───────────────────────────────── */
+  modeTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      modeTabs.forEach(t => t.classList.remove('b64-mode-tab--active'));
+      tab.classList.add('b64-mode-tab--active');
+      const mode = tab.dataset.mode;
+      textPanel.classList.toggle('b64-panel--hidden', mode !== 'text');
+      filePanel.classList.toggle('b64-panel--hidden', mode !== 'file');
+    });
+  });
+
+  /* ── Text Mode Logic ──────────────────────────────── */
+  encodeBtn.addEventListener('click', () => {
+    const raw = inputEl.value;
+    if (!raw) { showStatus(textStatus, 'Nothing to encode.', 'error'); return; }
+    try {
+      const encoded = btoa(unescape(encodeURIComponent(raw)));
+      outputEl.value = encoded;
+      showStatus(textStatus, 'Encoded! Output: ' + formatBytes(encoded.length), 'success');
+    } catch (e) {
+      showStatus(textStatus, 'Encoding failed: ' + e.message, 'error');
+    }
+  });
+
+  decodeBtn.addEventListener('click', () => {
+    let raw = inputEl.value.trim();
+    if (!raw) { showStatus(textStatus, 'Nothing to decode.', 'error'); return; }
+    // Strip data URI prefix if present
+    const dataUriMatch = raw.match(/^data:[^;]*;base64,(.*)$/s);
+    if (dataUriMatch) raw = dataUriMatch[1];
+    try {
+      const decoded = decodeURIComponent(escape(atob(raw)));
+      outputEl.value = decoded;
+      showStatus(textStatus, 'Decoded! Output: ' + formatBytes(decoded.length), 'success');
+    } catch (e) {
+      showStatus(textStatus, 'Decoding failed: invalid Base64 string.', 'error');
+    }
+  });
+
+  copyBtn.addEventListener('click', () => {
+    if (!outputEl.value) { showStatus(textStatus, 'Nothing to copy.', 'error'); return; }
+    copyText(outputEl.value, textStatus);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    inputEl.value = '';
+    outputEl.value = '';
+    textStatus.textContent = '';
+  });
+
+  /* ── File Mode: Encode ────────────────────────────── */
+  browseBtn.addEventListener('click', () => fileInput.click());
+
+  // Drag and drop
+  ['dragenter', 'dragover'].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add('b64-dropzone--active');
+    });
+  });
+  ['dragleave', 'drop'].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('b64-dropzone--active');
+    });
+  });
+
+  dropzone.addEventListener('drop', e => {
+    const files = e.dataTransfer.files;
+    if (files.length) handleFile(files[0]);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) handleFile(fileInput.files[0]);
+  });
+
+  function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      currentDataUri = reader.result;
+      // Extract raw base64 after the comma
+      const commaIdx = currentDataUri.indexOf(',');
+      currentRawB64 = commaIdx !== -1 ? currentDataUri.slice(commaIdx + 1) : currentDataUri;
+
+      fileNameEl.textContent = file.name;
+      fileTypeEl.textContent = file.type || 'unknown';
+      fileSizeEl.textContent = formatBytes(file.size);
+      fileB64SizeEl.textContent = formatBytes(currentRawB64.length);
+      fileDataUri.value = currentDataUri;
+
+      // Preview if image
+      filePreview.innerHTML = '';
+      if (isImageMime(file.type)) {
+        const img = document.createElement('img');
+        img.src = currentDataUri;
+        img.alt = 'Preview of ' + file.name;
+        img.className = 'b64-preview-img';
+        filePreview.appendChild(img);
+      } else {
+        filePreview.innerHTML = '<p class="b64-preview-placeholder">No preview available for this file type.</p>';
+      }
+
+      fileInfoWrap.classList.remove('b64-file-info--hidden');
+      showStatus(fileStatus, 'File loaded: ' + file.name, 'success');
+    };
+    reader.onerror = () => {
+      showStatus(fileStatus, 'Failed to read file.', 'error');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  copyDataUri.addEventListener('click', () => {
+    if (!currentDataUri) return;
+    copyText(currentDataUri, fileStatus);
+  });
+
+  copyRaw.addEventListener('click', () => {
+    if (!currentRawB64) return;
+    copyText(currentRawB64, fileStatus);
+  });
+
+  fileClearBtn.addEventListener('click', () => {
+    currentDataUri = '';
+    currentRawB64 = '';
+    fileInfoWrap.classList.add('b64-file-info--hidden');
+    filePreview.innerHTML = '';
+    fileDataUri.value = '';
+    fileInput.value = '';
+    fileStatus.textContent = '';
+  });
+
+  /* ── File Mode: Decode ────────────────────────────── */
+  decodeFileBtn.addEventListener('click', () => {
+    const val = decodeInput.value.trim();
+    if (!val) { showStatus(fileStatus, 'Paste a Base64 data URI first.', 'error'); return; }
+
+    let mime = 'application/octet-stream';
+    let b64 = val;
+
+    const dataUriMatch = val.match(/^data:([^;]+);base64,(.*)$/s);
+    if (dataUriMatch) {
+      mime = dataUriMatch[1];
+      b64 = dataUriMatch[2];
+    } else if (!isBase64(val)) {
+      showStatus(fileStatus, 'Invalid Base64 string.', 'error');
+      return;
+    }
+
+    try {
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      decodedBlob = new Blob([bytes], { type: mime });
+      decodedFilename = 'decoded-file.' + mimeToExt(mime);
+
+      // Preview
+      decodePreview.innerHTML = '';
+      if (isImageMime(mime)) {
+        const img = document.createElement('img');
+        img.src = val.startsWith('data:') ? val : 'data:' + mime + ';base64,' + b64;
+        img.alt = 'Decoded image preview';
+        img.className = 'b64-preview-img';
+        decodePreview.appendChild(img);
+      } else {
+        decodePreview.innerHTML = '<p class="b64-preview-placeholder">Decoded: ' + mime + ' (' + formatBytes(decodedBlob.size) + ')</p>';
+      }
+
+      downloadBtn.disabled = false;
+      showStatus(fileStatus, 'Decoded! Size: ' + formatBytes(decodedBlob.size), 'success');
+    } catch (e) {
+      showStatus(fileStatus, 'Decoding failed: invalid Base64.', 'error');
+      decodedBlob = null;
+      downloadBtn.disabled = true;
+    }
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    if (!decodedBlob) return;
+    const url = URL.createObjectURL(decodedBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = decodedFilename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+})();
+</script>
+
+<style>
+/* ── Base Container ───────────────────────────────── */
+.b64 {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* ── Mode Tabs ────────────────────────────────────── */
+.b64-mode-tabs {
+  display: flex;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  align-self: center;
+}
+.b64-mode-tab {
+  padding: 0.55rem 1.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  border: none;
+  background: transparent;
+  color: var(--term-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.b64-mode-tab--active {
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--syn-cyan, #22d3ee);
+}
+.b64-mode-tab:hover:not(.b64-mode-tab--active) {
+  color: var(--term-fg, #e2e8f0);
+}
+
+/* ── Panels ───────────────────────────────────────── */
+.b64-panel--hidden {
+  display: none !important;
+}
+
+/* ── Labels ───────────────────────────────────────── */
+.b64-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--syn-cyan, #22d3ee);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+/* ── Section Titles ───────────────────────────────── */
+.b64-section-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--syn-purple, #a78bfa);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--term-border, rgba(255,255,255,0.06));
+}
+
+/* ── Text Grid ────────────────────────────────────── */
+.b64-text-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.b64-text-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Textareas ────────────────────────────────────── */
+.b64-textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 0.85rem 1rem;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--term-fg, #e2e8f0);
+  background: var(--term-bg, #0a0a0a);
+  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  border-radius: 8px;
+  resize: vertical;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  box-sizing: border-box;
+}
+.b64-textarea:focus {
+  outline: none;
+  border-color: var(--syn-cyan, #22d3ee);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.15);
+}
+.b64-textarea--sm {
+  min-height: 100px;
+}
+
+/* ── Buttons ──────────────────────────────────────── */
+.b64-text-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.b64-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.55rem 1.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.b64-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.b64-btn--primary {
+  background: linear-gradient(135deg, var(--syn-cyan, #22d3ee), #06b6d4);
+  color: #000;
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+}
+.b64-btn--primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);
+}
+.b64-btn--secondary {
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--syn-cyan, #22d3ee);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+}
+.b64-btn--secondary:hover:not(:disabled) {
+  background: rgba(34, 211, 238, 0.2);
+  border-color: rgba(34, 211, 238, 0.45);
+}
+.b64-btn--ghost {
+  background: transparent;
+  color: var(--term-fg, #e2e8f0);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.b64-btn--ghost:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ── Status ───────────────────────────────────────── */
+.b64-status {
+  text-align: center;
+  font-size: 0.82rem;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  color: var(--term-muted, #64748b);
+  min-height: 1.4em;
+  transition: color 0.2s ease;
+}
+.b64-status--success {
+  color: var(--syn-green, #4ade80);
+}
+.b64-status--error {
+  color: var(--syn-pink, #f472b6);
+}
+
+/* ── Drop Zone ────────────────────────────────────── */
+.b64-dropzone {
+  position: relative;
+  border: 2px dashed rgba(34, 211, 238, 0.25);
+  border-radius: 12px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(34, 211, 238, 0.02);
+}
+.b64-dropzone:hover {
+  border-color: rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.04);
+}
+.b64-dropzone--active {
+  border-color: var(--syn-cyan, #22d3ee);
+  background: rgba(34, 211, 238, 0.08);
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.15), inset 0 0 24px rgba(34, 211, 238, 0.05);
+}
+.b64-dropzone__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+.b64-dropzone__icon {
+  margin-bottom: 0.25rem;
+}
+.b64-dropzone__text {
+  font-size: 0.9rem;
+  color: var(--term-fg, #e2e8f0);
+  margin: 0;
+  pointer-events: auto;
+}
+.b64-dropzone__browse {
+  background: none;
+  border: none;
+  color: var(--syn-cyan, #22d3ee);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+  pointer-events: auto;
+}
+.b64-dropzone__browse:hover {
+  color: #67e8f9;
+}
+.b64-dropzone__hint {
+  font-size: 0.78rem;
+  color: var(--term-muted, #64748b);
+  margin: 0;
+}
+
+/* ── Screen-reader only ───────────────────────────── */
+.b64-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── File Info ────────────────────────────────────── */
+.b64-file-info--hidden {
+  display: none !important;
+}
+.b64-file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.b64-file-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+  font-size: 0.82rem;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  color: var(--term-fg, #e2e8f0);
+}
+.b64-file-meta__row {
+  display: flex;
+  gap: 0.4rem;
+}
+.b64-file-meta__label {
+  color: var(--term-muted, #64748b);
+  font-weight: 600;
+}
+
+/* ── Preview ──────────────────────────────────────── */
+.b64-file-preview {
+  display: flex;
+  justify-content: center;
+}
+.b64-preview-img {
+  max-width: 100%;
+  max-height: 320px;
+  border-radius: 8px;
+  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  object-fit: contain;
+}
+.b64-preview-placeholder {
+  font-size: 0.82rem;
+  color: var(--term-muted, #64748b);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── File Output ──────────────────────────────────── */
+.b64-file-output {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.b64-file-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* ── Decode Preview ───────────────────────────────── */
+.b64-decode-preview {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+/* ── File Section spacing ─────────────────────────── */
+.b64-file-section {
+  background: var(--term-bg-raised, #111111);
+  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+.b64-file-section + .b64-file-section {
+  margin-top: 1.25rem;
+}
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 640px) {
+  .b64-text-grid {
+    grid-template-columns: 1fr;
+  }
+  .b64-textarea {
+    min-height: 140px;
+  }
+  .b64-dropzone {
+    padding: 1.5rem 1rem;
+  }
+  .b64-file-section {
+    padding: 1rem;
+  }
+  .b64-file-actions {
+    flex-direction: column;
+  }
+  .b64-file-actions .b64-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+</style>

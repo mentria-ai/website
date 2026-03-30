@@ -1,0 +1,615 @@
+---
+layout: base.njk
+title: Quick Notes
+description: Minimal scratchpad that saves to your browser. Supports multiple notes with localStorage persistence.
+permalink: /tools/quick-notes/index.html
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">~/tools/quick-notes</p>
+  <h1>Quick Notes</h1>
+  <p>
+    A minimal scratchpad that lives in your browser. Create multiple notes, auto-saved on every keystroke.
+  </p>
+</section>
+
+<!-- ── Quick Notes Tool ─────────────────────────────── -->
+{% set terminalTitle = "quick-notes.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="qn-tool" id="qn-tool">
+  <!-- Sidebar -->
+  <aside class="qn-sidebar" id="qn-sidebar">
+    <div class="qn-sidebar__header">
+      <span class="qn-sidebar__label">Notes</span>
+      <button class="qn-sidebar__toggle" id="qn-sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+        <span class="qn-sidebar__toggle-icon"></span>
+      </button>
+    </div>
+    <div class="qn-sidebar__list" id="qn-note-list">
+      <!-- note tabs injected here -->
+    </div>
+    <button class="qn-sidebar__new" id="qn-new-btn" title="New note">
+      <span>+</span> New Note
+    </button>
+  </aside>
+
+  <!-- Editor -->
+  <main class="qn-editor" id="qn-editor">
+    <div class="qn-editor__titlebar">
+      <input
+        type="text"
+        class="qn-editor__title"
+        id="qn-title-input"
+        placeholder="Untitled Note"
+        spellcheck="false"
+        autocomplete="off"
+      />
+      <div class="qn-editor__actions">
+        <button class="qn-action-btn" id="qn-export-btn" title="Export as .txt">Export</button>
+        <button class="qn-action-btn qn-action-btn--danger" id="qn-delete-btn" title="Delete note">Delete</button>
+      </div>
+    </div>
+    <textarea
+      class="qn-editor__textarea"
+      id="qn-textarea"
+      placeholder="Start typing..."
+      spellcheck="false"
+    ></textarea>
+    <div class="qn-editor__statusbar">
+      <span class="qn-status__counts" id="qn-counts">0 words &middot; 0 chars</span>
+      <span class="qn-status__saved" id="qn-saved"></span>
+    </div>
+  </main>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Quick Notes",
+  "operatingSystem": "Web",
+  "applicationCategory": "ProductivityApplication",
+  "description": "A minimal scratchpad that saves to your browser with multiple notes and localStorage persistence.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0"
+  }
+}
+</script>
+
+<script>
+(() => {
+  /* ── Constants ─────────────────────────────────────── */
+  const STORAGE_KEY = 'mentria-quick-notes';
+  const DEBOUNCE_MS = 500;
+
+  /* ── DOM refs ──────────────────────────────────────── */
+  const noteList    = document.getElementById('qn-note-list');
+  const newBtn      = document.getElementById('qn-new-btn');
+  const titleInput  = document.getElementById('qn-title-input');
+  const textarea    = document.getElementById('qn-textarea');
+  const countsEl    = document.getElementById('qn-counts');
+  const savedEl     = document.getElementById('qn-saved');
+  const exportBtn   = document.getElementById('qn-export-btn');
+  const deleteBtn   = document.getElementById('qn-delete-btn');
+  const sidebar     = document.getElementById('qn-sidebar');
+  const sidebarToggle = document.getElementById('qn-sidebar-toggle');
+
+  /* ── State ─────────────────────────────────────────── */
+  let notes = [];        // [{id, title, body, createdAt, updatedAt}]
+  let activeId = null;
+  let saveTimer = null;
+
+  /* ── Persistence ───────────────────────────────────── */
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) notes = JSON.parse(raw);
+    } catch (_) { /* ignore corrupt data */ }
+    if (!Array.isArray(notes) || notes.length === 0) {
+      notes = [];
+      createNote();
+    }
+  }
+
+  function persist() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch (_) {}
+  }
+
+  /* ── Note CRUD ─────────────────────────────────────── */
+  function genId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  function createNote() {
+    const note = {
+      id: genId(),
+      title: '',
+      body: '',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    notes.unshift(note);
+    persist();
+    selectNote(note.id);
+    renderList();
+    titleInput.focus();
+  }
+
+  function deleteNote(id) {
+    const idx = notes.findIndex(n => n.id === id);
+    if (idx === -1) return;
+    notes.splice(idx, 1);
+    if (notes.length === 0) {
+      createNote();
+      return;
+    }
+    if (activeId === id) {
+      selectNote(notes[0].id);
+    }
+    persist();
+    renderList();
+  }
+
+  function getNote(id) {
+    return notes.find(n => n.id === id) || null;
+  }
+
+  /* ── Selection ─────────────────────────────────────── */
+  function selectNote(id) {
+    activeId = id;
+    const note = getNote(id);
+    if (!note) return;
+    titleInput.value = note.title;
+    textarea.value = note.body;
+    updateCounts();
+    updateSavedLabel(note.updatedAt);
+    renderList();
+    // Collapse sidebar on mobile after selection
+    if (window.innerWidth <= 640) {
+      sidebar.classList.remove('qn-sidebar--open');
+    }
+  }
+
+  /* ── Sidebar Rendering ─────────────────────────────── */
+  function renderList() {
+    noteList.innerHTML = '';
+    notes.forEach(note => {
+      const btn = document.createElement('button');
+      btn.className = 'qn-note-tab' + (note.id === activeId ? ' qn-note-tab--active' : '');
+      btn.dataset.id = note.id;
+      const title = note.title || 'Untitled Note';
+      const preview = note.body ? note.body.slice(0, 50).replace(/\n/g, ' ') : 'Empty';
+      btn.innerHTML =
+        '<span class="qn-note-tab__title">' + escHtml(title) + '</span>' +
+        '<span class="qn-note-tab__preview">' + escHtml(preview) + '</span>';
+      btn.addEventListener('click', () => selectNote(note.id));
+      noteList.appendChild(btn);
+    });
+  }
+
+  function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  /* ── Auto-save (debounced) ─────────────────────────── */
+  function scheduleSave() {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const note = getNote(activeId);
+      if (!note) return;
+      note.title = titleInput.value;
+      note.body = textarea.value;
+      note.updatedAt = Date.now();
+      persist();
+      updateSavedLabel(note.updatedAt);
+      renderList();
+    }, DEBOUNCE_MS);
+  }
+
+  /* ── Counts ────────────────────────────────────────── */
+  function updateCounts() {
+    const text = textarea.value;
+    const chars = text.length;
+    const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+    countsEl.textContent = words + ' word' + (words !== 1 ? 's' : '') + ' \u00B7 ' + chars + ' char' + (chars !== 1 ? 's' : '');
+  }
+
+  /* ── Saved label ───────────────────────────────────── */
+  function updateSavedLabel(ts) {
+    if (!ts) { savedEl.textContent = ''; return; }
+    const d = new Date(ts);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    const ss = String(d.getSeconds()).padStart(2, '0');
+    savedEl.textContent = 'Saved ' + hh + ':' + mm + ':' + ss;
+  }
+
+  /* ── Export ────────────────────────────────────────── */
+  function exportNote() {
+    const note = getNote(activeId);
+    if (!note) return;
+    const filename = (note.title || 'untitled') .replace(/[^a-z0-9_\-]/gi, '_') + '.txt';
+    const blob = new Blob([note.body], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+
+  /* ── Delete with confirmation ──────────────────────── */
+  function confirmDelete() {
+    const note = getNote(activeId);
+    if (!note) return;
+    const name = note.title || 'Untitled Note';
+    if (confirm('Delete "' + name + '"? This cannot be undone.')) {
+      deleteNote(activeId);
+    }
+  }
+
+  /* ── Sidebar toggle (mobile) ───────────────────────── */
+  function toggleSidebar() {
+    sidebar.classList.toggle('qn-sidebar--open');
+  }
+
+  /* ── Events ────────────────────────────────────────── */
+  textarea.addEventListener('input', () => {
+    updateCounts();
+    scheduleSave();
+  });
+
+  titleInput.addEventListener('input', () => {
+    scheduleSave();
+  });
+
+  newBtn.addEventListener('click', createNote);
+  exportBtn.addEventListener('click', exportNote);
+  deleteBtn.addEventListener('click', confirmDelete);
+  sidebarToggle.addEventListener('click', toggleSidebar);
+
+  /* ── Boot ───────────────────────────────────────────── */
+  load();
+  if (activeId === null && notes.length > 0) {
+    selectNote(notes[0].id);
+  }
+  renderList();
+})();
+</script>
+
+<style>
+/* ── Tool Container ───────────────────────────────── */
+.qn-tool {
+  display: flex;
+  min-height: 520px;
+  max-height: 80vh;
+  background: var(--term-bg, #0a0a0a);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ── Sidebar ──────────────────────────────────────── */
+.qn-sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--term-bg-raised, #111111);
+  border-right: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.qn-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--term-border, rgba(255,255,255,0.06));
+}
+
+.qn-sidebar__label {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--syn-cyan, #22d3ee);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.qn-sidebar__toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.qn-sidebar__toggle-icon {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--term-muted, #64748b);
+  position: relative;
+  transition: background 0.2s;
+}
+.qn-sidebar__toggle-icon::before,
+.qn-sidebar__toggle-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--term-muted, #64748b);
+  transition: transform 0.2s;
+}
+.qn-sidebar__toggle-icon::before { top: -6px; }
+.qn-sidebar__toggle-icon::after  { top: 6px; }
+
+.qn-sidebar__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+/* ── Note Tabs ────────────────────────────────────── */
+.qn-note-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-left: 2px solid transparent;
+}
+.qn-note-tab:hover {
+  background: rgba(255,255,255,0.03);
+}
+.qn-note-tab--active {
+  background: rgba(34, 211, 238, 0.06);
+  border-left-color: var(--syn-cyan, #22d3ee);
+}
+
+.qn-note-tab__title {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--term-fg, #e2e8f0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.qn-note-tab--active .qn-note-tab__title {
+  color: var(--syn-cyan, #22d3ee);
+}
+
+.qn-note-tab__preview {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.68rem;
+  color: var(--term-muted, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── New Note Button ──────────────────────────────── */
+.qn-sidebar__new {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem;
+  margin: 0.5rem 0.6rem;
+  border: 1px dashed var(--syn-purple, #a78bfa);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--syn-purple, #a78bfa);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.qn-sidebar__new:hover {
+  background: rgba(167, 139, 250, 0.08);
+  border-color: rgba(167, 139, 250, 0.6);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.15);
+}
+
+/* ── Editor ───────────────────────────────────────── */
+.qn-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.qn-editor__titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--term-border, rgba(255,255,255,0.06));
+}
+
+.qn-editor__title {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--term-fg, #e2e8f0);
+  padding: 0.25rem 0;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+.qn-editor__title::placeholder {
+  color: var(--term-muted, #64748b);
+}
+.qn-editor__title:focus {
+  border-bottom-color: var(--syn-cyan, #22d3ee);
+}
+
+.qn-editor__actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+/* ── Action Buttons ───────────────────────────────── */
+.qn-action-btn {
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.72rem;
+  font-weight: 500;
+  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  border-radius: 4px;
+  background: transparent;
+  color: var(--term-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.qn-action-btn:hover {
+  color: var(--term-fg, #e2e8f0);
+  border-color: var(--syn-cyan, #22d3ee);
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.15);
+}
+.qn-action-btn--danger:hover {
+  color: #f87171;
+  border-color: #f87171;
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.15);
+}
+
+/* ── Textarea ─────────────────────────────────────── */
+.qn-editor__textarea {
+  flex: 1;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: var(--term-bg, #0a0a0a);
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--term-fg, #e2e8f0);
+  tab-size: 2;
+  -moz-tab-size: 2;
+}
+.qn-editor__textarea::placeholder {
+  color: var(--term-muted, #64748b);
+  opacity: 0.6;
+}
+.qn-editor__textarea:focus {
+  background: rgba(10, 10, 10, 0.95);
+}
+
+/* ── Status Bar ───────────────────────────────────── */
+.qn-editor__statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 1rem;
+  border-top: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  background: var(--term-bg-raised, #111111);
+}
+
+.qn-status__counts {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.7rem;
+  color: var(--term-muted, #64748b);
+}
+
+.qn-status__saved {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.7rem;
+  color: var(--syn-green, #4ade80);
+  opacity: 0.8;
+}
+
+/* ── Scrollbar ────────────────────────────────────── */
+.qn-sidebar__list::-webkit-scrollbar,
+.qn-editor__textarea::-webkit-scrollbar {
+  width: 6px;
+}
+.qn-sidebar__list::-webkit-scrollbar-track,
+.qn-editor__textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+.qn-sidebar__list::-webkit-scrollbar-thumb,
+.qn-editor__textarea::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+}
+.qn-sidebar__list::-webkit-scrollbar-thumb:hover,
+.qn-editor__textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 640px) {
+  .qn-tool {
+    flex-direction: column;
+    min-height: 460px;
+  }
+
+  .qn-sidebar {
+    width: 100%;
+    min-width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    border-right: none;
+    border-bottom: 1px solid var(--term-border, rgba(255,255,255,0.06));
+    transition: max-height 0.3s ease;
+  }
+  .qn-sidebar--open {
+    max-height: 260px;
+  }
+
+  .qn-sidebar__header {
+    cursor: pointer;
+  }
+
+  .qn-sidebar__toggle {
+    display: block;
+  }
+
+  /* Always show header row on mobile */
+  .qn-sidebar {
+    max-height: 42px;
+  }
+  .qn-sidebar--open {
+    max-height: 300px;
+  }
+
+  .qn-editor__titlebar {
+    flex-wrap: wrap;
+  }
+
+  .qn-editor__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* ── Light theme override ─────────────────────────── */
+@media (prefers-color-scheme: light) {
+  .qn-tool {
+    background: #1a1a1a;
+  }
+  .qn-editor__textarea {
+    background: #141414;
+  }
+}
+</style>

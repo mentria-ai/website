@@ -1,0 +1,748 @@
+---
+layout: base.njk
+title: Color Picker
+description: Pick colors, generate harmonious palettes, and copy values in HEX, RGB, and HSL. Works offline.
+permalink: /tools/color-picker/index.html
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">~/tools/color-picker</p>
+  <h1>Color Picker</h1>
+  <p>
+    Pick any color, view its HEX / RGB / HSL values, and generate harmonious palettes. Works offline.
+  </p>
+</section>
+
+{% set terminalTitle = "color-picker.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="cp">
+  <!-- Main color area -->
+  <div class="cp__main">
+    <div class="cp__swatch-wrap">
+      <div class="cp__swatch" id="cp-swatch" title="Click to pick a color">
+        <input type="color" id="cp-native" value="#22d3ee" aria-label="Pick a color" />
+      </div>
+      <div class="cp__hex-input-wrap">
+        <span class="cp__hash">#</span>
+        <input type="text" id="cp-hex-input" class="cp__hex-input" maxlength="6" spellcheck="false" value="22d3ee" aria-label="Hex color value" />
+      </div>
+    </div>
+
+    <!-- Color values -->
+    <div class="cp__values">
+      <div class="cp__value-row" data-format="hex">
+        <span class="cp__value-label">HEX</span>
+        <code class="cp__value-code" id="cp-val-hex">#22d3ee</code>
+        <button class="cp__copy-btn" data-copy="hex" title="Copy HEX">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        </button>
+      </div>
+      <div class="cp__value-row" data-format="rgb">
+        <span class="cp__value-label">RGB</span>
+        <code class="cp__value-code" id="cp-val-rgb">rgb(34, 211, 238)</code>
+        <button class="cp__copy-btn" data-copy="rgb" title="Copy RGB">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        </button>
+      </div>
+      <div class="cp__value-row" data-format="hsl">
+        <span class="cp__value-label">HSL</span>
+        <code class="cp__value-code" id="cp-val-hsl">hsl(187, 82%, 53%)</code>
+        <button class="cp__copy-btn" data-copy="hsl" title="Copy HSL">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="cp__actions">
+    <button class="cp__btn cp__btn--accent" id="cp-random" title="Random color">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 4l3 3-3 3"/><path d="M18 20l3-3-3-3"/><path d="M3 7h4a5 5 0 015 5 5 5 0 005 5h4"/><path d="M21 7h-4a5 5 0 00-3.07 1.05"/><path d="M3 17h4a5 5 0 003.07-1.05"/></svg>
+      Random
+    </button>
+    <button class="cp__btn cp__btn--save" id="cp-save" title="Save color">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Save
+    </button>
+  </div>
+
+  <!-- Saved colors -->
+  <div class="cp__saved" id="cp-saved" style="display:none;">
+    <div class="cp__section-label">Saved Colors</div>
+    <div class="cp__saved-list" id="cp-saved-list"></div>
+  </div>
+
+  <!-- Palette generation -->
+  <div class="cp__palette-section">
+    <div class="cp__section-label">Generate Palette</div>
+    <div class="cp__palette-btns">
+      <button class="cp__palette-btn" data-harmony="complementary">Complementary</button>
+      <button class="cp__palette-btn" data-harmony="analogous">Analogous</button>
+      <button class="cp__palette-btn" data-harmony="triadic">Triadic</button>
+      <button class="cp__palette-btn" data-harmony="split">Split-Comp</button>
+      <button class="cp__palette-btn" data-harmony="tetradic">Tetradic</button>
+    </div>
+    <div class="cp__palette" id="cp-palette"></div>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Color Picker",
+  "operatingSystem": "Web",
+  "applicationCategory": "DesignApplication",
+  "description": "Pick colors, generate harmonious palettes, and copy values in HEX, RGB, and HSL. Works offline.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0"
+  }
+}
+</script>
+
+<script>
+(() => {
+  /* ── DOM refs ──────────────────────────────────────── */
+  const swatch     = document.getElementById('cp-swatch');
+  const native     = document.getElementById('cp-native');
+  const hexInput   = document.getElementById('cp-hex-input');
+  const valHex     = document.getElementById('cp-val-hex');
+  const valRgb     = document.getElementById('cp-val-rgb');
+  const valHsl     = document.getElementById('cp-val-hsl');
+  const paletteEl  = document.getElementById('cp-palette');
+  const savedWrap  = document.getElementById('cp-saved');
+  const savedList  = document.getElementById('cp-saved-list');
+  const STORAGE_KEY = 'mentria-color-picker-saved';
+
+  let currentHex = '#22d3ee';
+  let currentHarmony = null;
+
+  /* ── Color conversion helpers ──────────────────────── */
+  function hexToRgb(hex) {
+    const h = hex.replace('#', '');
+    return {
+      r: parseInt(h.substring(0, 2), 16),
+      g: parseInt(h.substring(2, 4), 16),
+      b: parseInt(h.substring(4, 6), 16)
+    };
+  }
+
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+    if (max === min) {
+      h = s = 0;
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+    return {
+      h: Math.round(h * 360),
+      s: Math.round(s * 100),
+      l: Math.round(l * 100)
+    };
+  }
+
+  function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => {
+      const k = (n + h / 30) % 12;
+      const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * color).toString(16).padStart(2, '0');
+    };
+    return '#' + f(0) + f(8) + f(4);
+  }
+
+  function rgbString(r, g, b) {
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  function hslString(h, s, l) {
+    return `hsl(${h}, ${s}%, ${l}%)`;
+  }
+
+  /* ── Update UI with current color ──────────────────── */
+  function setColor(hex, skipNative) {
+    hex = hex.toLowerCase();
+    if (!/^#[0-9a-f]{6}$/.test(hex)) return;
+    currentHex = hex;
+
+    swatch.style.backgroundColor = hex;
+    if (!skipNative) native.value = hex;
+    hexInput.value = hex.replace('#', '');
+
+    const { r, g, b } = hexToRgb(hex);
+    const hsl = rgbToHsl(r, g, b);
+
+    valHex.textContent = hex;
+    valRgb.textContent = rgbString(r, g, b);
+    valHsl.textContent = hslString(hsl.h, hsl.s, hsl.l);
+
+    // Re-generate palette if one is active
+    if (currentHarmony) generatePalette(currentHarmony);
+  }
+
+  /* ── Palette generation ────────────────────────────── */
+  function getHarmonyColors(hex, type) {
+    const { r, g, b } = hexToRgb(hex);
+    const { h, s, l } = rgbToHsl(r, g, b);
+    const colors = [hex];
+
+    switch (type) {
+      case 'complementary':
+        colors.push(hslToHex((h + 180) % 360, s, l));
+        break;
+      case 'analogous':
+        colors.push(hslToHex((h + 30) % 360, s, l));
+        colors.push(hslToHex((h + 330) % 360, s, l));
+        break;
+      case 'triadic':
+        colors.push(hslToHex((h + 120) % 360, s, l));
+        colors.push(hslToHex((h + 240) % 360, s, l));
+        break;
+      case 'split':
+        colors.push(hslToHex((h + 150) % 360, s, l));
+        colors.push(hslToHex((h + 210) % 360, s, l));
+        break;
+      case 'tetradic':
+        colors.push(hslToHex((h + 90) % 360, s, l));
+        colors.push(hslToHex((h + 180) % 360, s, l));
+        colors.push(hslToHex((h + 270) % 360, s, l));
+        break;
+    }
+    return colors;
+  }
+
+  function generatePalette(type) {
+    currentHarmony = type;
+    const colors = getHarmonyColors(currentHex, type);
+    paletteEl.innerHTML = '';
+    colors.forEach((c, i) => {
+      const item = document.createElement('div');
+      item.className = 'cp__palette-item';
+      item.innerHTML = `
+        <div class="cp__palette-swatch" style="background:${c}" title="Click to select / copy ${c}"></div>
+        <span class="cp__palette-label">${c}</span>
+      `;
+      item.addEventListener('click', () => {
+        copyText(c);
+        if (i !== 0) setColor(c);
+      });
+      paletteEl.appendChild(item);
+    });
+
+    // highlight active button
+    document.querySelectorAll('.cp__palette-btn').forEach(btn => {
+      btn.classList.toggle('cp__palette-btn--active', btn.dataset.harmony === type);
+    });
+  }
+
+  /* ── Copy helper ───────────────────────────────────── */
+  function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Copied ' + text);
+    }).catch(() => {});
+  }
+
+  function showToast(msg) {
+    let toast = document.querySelector('.cp__toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.className = 'cp__toast';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.remove('cp__toast--visible');
+    void toast.offsetWidth; // reflow
+    toast.classList.add('cp__toast--visible');
+    clearTimeout(toast._tid);
+    toast._tid = setTimeout(() => toast.classList.remove('cp__toast--visible'), 1600);
+  }
+
+  /* ── Saved colors ──────────────────────────────────── */
+  function loadSaved() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function saveSaved(arr) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  }
+
+  function renderSaved() {
+    const saved = loadSaved();
+    savedList.innerHTML = '';
+    if (saved.length === 0) {
+      savedWrap.style.display = 'none';
+      return;
+    }
+    savedWrap.style.display = '';
+    saved.forEach((c, i) => {
+      const el = document.createElement('div');
+      el.className = 'cp__saved-item';
+      el.innerHTML = `
+        <div class="cp__saved-swatch" style="background:${c}" title="${c}"></div>
+        <button class="cp__saved-remove" title="Remove" data-index="${i}">&times;</button>
+      `;
+      el.querySelector('.cp__saved-swatch').addEventListener('click', () => setColor(c));
+      el.querySelector('.cp__saved-remove').addEventListener('click', e => {
+        e.stopPropagation();
+        const arr = loadSaved();
+        arr.splice(i, 1);
+        saveSaved(arr);
+        renderSaved();
+      });
+      // Right-click to remove
+      el.addEventListener('contextmenu', e => {
+        e.preventDefault();
+        const arr = loadSaved();
+        arr.splice(i, 1);
+        saveSaved(arr);
+        renderSaved();
+      });
+      savedList.appendChild(el);
+    });
+  }
+
+  /* ── Event listeners ───────────────────────────────── */
+  // Native color input
+  native.addEventListener('input', () => setColor(native.value, true));
+
+  // Click swatch to open native picker
+  swatch.addEventListener('click', e => {
+    if (e.target === native) return;
+    native.click();
+  });
+
+  // Hex text input
+  hexInput.addEventListener('input', () => {
+    const v = hexInput.value.replace(/[^0-9a-fA-F]/g, '').substring(0, 6);
+    hexInput.value = v;
+    if (v.length === 6) setColor('#' + v);
+  });
+
+  hexInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') hexInput.blur();
+  });
+
+  // Copy buttons
+  document.querySelectorAll('.cp__copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const fmt = btn.dataset.copy;
+      const el = document.getElementById('cp-val-' + fmt);
+      if (el) copyText(el.textContent);
+    });
+  });
+
+  // Random
+  document.getElementById('cp-random').addEventListener('click', () => {
+    const hex = '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+    setColor(hex);
+  });
+
+  // Save
+  document.getElementById('cp-save').addEventListener('click', () => {
+    const saved = loadSaved();
+    if (!saved.includes(currentHex)) {
+      saved.push(currentHex);
+      saveSaved(saved);
+      renderSaved();
+      showToast('Saved ' + currentHex);
+    } else {
+      showToast('Already saved');
+    }
+  });
+
+  // Palette harmony buttons
+  document.querySelectorAll('.cp__palette-btn').forEach(btn => {
+    btn.addEventListener('click', () => generatePalette(btn.dataset.harmony));
+  });
+
+  /* ── Init ──────────────────────────────────────────── */
+  setColor('#22d3ee');
+  renderSaved();
+})();
+</script>
+
+<style>
+/* ── Color Picker Styles ─────────────────────────────── */
+.cp {
+  padding: 1.5rem;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  color: var(--term-fg, #e2e8f0);
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.cp__main {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Swatch ──────────────────────────────────────────── */
+.cp__swatch-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.cp__swatch {
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  border: 2px solid var(--term-border, rgba(255,255,255,0.06));
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background: #22d3ee;
+  transition: box-shadow 0.25s ease;
+}
+
+.cp__swatch:hover {
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+}
+
+.cp__swatch input[type="color"] {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.cp__hex-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--term-bg-raised, #111111);
+  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+}
+
+.cp__hash {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.85rem;
+  color: var(--term-muted, #64748b);
+}
+
+.cp__hex-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.85rem;
+  color: var(--term-fg, #e2e8f0);
+  width: 5.5ch;
+  letter-spacing: 0.04em;
+}
+
+/* ── Color values ────────────────────────────────────── */
+.cp__values {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cp__value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--term-bg-raised, #111111);
+  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+}
+
+.cp__value-label {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--syn-cyan, #22d3ee);
+  width: 2.5rem;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cp__value-code {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.8rem;
+  color: var(--term-fg, #e2e8f0);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cp__copy-btn {
+  background: none;
+  border: none;
+  color: var(--term-muted, #64748b);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+
+.cp__copy-btn:hover {
+  color: var(--syn-cyan, #22d3ee);
+  background: rgba(34, 211, 238, 0.08);
+}
+
+/* ── Action buttons ──────────────────────────────────── */
+.cp__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.cp__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  background: var(--term-bg-raised, #111111);
+  color: var(--term-fg, #e2e8f0);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.cp__btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cp__btn--accent {
+  border-color: rgba(167, 139, 250, 0.3);
+  color: var(--syn-purple, #a78bfa);
+}
+
+.cp__btn--accent:hover {
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.15);
+  border-color: var(--syn-purple, #a78bfa);
+}
+
+.cp__btn--save {
+  border-color: rgba(74, 222, 128, 0.3);
+  color: var(--syn-green, #4ade80);
+}
+
+.cp__btn--save:hover {
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.15);
+  border-color: var(--syn-green, #4ade80);
+}
+
+/* ── Section labels ──────────────────────────────────── */
+.cp__section-label {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.7rem;
+  color: var(--term-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.6rem;
+}
+
+/* ── Saved colors ────────────────────────────────────── */
+.cp__saved {
+  margin-bottom: 1.25rem;
+}
+
+.cp__saved-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cp__saved-item {
+  position: relative;
+}
+
+.cp__saved-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+
+.cp__saved-swatch:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.cp__saved-remove {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: var(--syn-pink, #f472b6);
+  color: #000;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.cp__saved-item:hover .cp__saved-remove {
+  opacity: 1;
+}
+
+/* ── Palette section ─────────────────────────────────── */
+.cp__palette-section {
+  margin-bottom: 0.5rem;
+}
+
+.cp__palette-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.cp__palette-btn {
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  background: var(--term-bg-raised, #111111);
+  color: var(--term-muted, #64748b);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.cp__palette-btn:hover {
+  color: var(--term-fg, #e2e8f0);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.cp__palette-btn--active {
+  color: var(--syn-cyan, #22d3ee);
+  border-color: var(--syn-cyan, #22d3ee);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.15);
+}
+
+.cp__palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.cp__palette-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+.cp__palette-swatch {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  border: 2px solid var(--term-border, rgba(255,255,255,0.06));
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+
+.cp__palette-item:hover .cp__palette-swatch {
+  transform: scale(1.08);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.12);
+}
+
+.cp__palette-label {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.65rem;
+  color: var(--term-muted, #64748b);
+}
+
+/* ── Toast ───────────────────────────────────────────── */
+.cp__toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--term-bg-raised, #111111);
+  border: 1px solid var(--syn-cyan, #22d3ee);
+  color: var(--term-fg, #e2e8f0);
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 9999;
+}
+
+.cp__toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 520px) {
+  .cp { padding: 1rem; }
+
+  .cp__main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .cp__swatch-wrap {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .cp__swatch {
+    width: 72px;
+    height: 72px;
+  }
+
+  .cp__palette-swatch {
+    width: 44px;
+    height: 44px;
+  }
+
+  .cp__palette-btns {
+    gap: 0.3rem;
+  }
+
+  .cp__palette-btn {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.55rem;
+  }
+}
+</style>

@@ -1,0 +1,610 @@
+---
+layout: base.njk
+title: Coin Flip
+description: Animated heads or tails coin flip with optional best-of-N series mode. Works offline.
+permalink: /tools/coin-flip/index.html
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">~/tools/coin-flip</p>
+  <h1>Coin Flip</h1>
+  <p>
+    Heads or tails — flip a coin instantly. Run a best-of series for tiebreakers. Works offline.
+  </p>
+</section>
+
+{% set terminalTitle = "coin-flip.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="cf">
+  <!-- Coin stage -->
+  <div class="cf__stage">
+    <button class="cf__coin" id="cf-coin" type="button" aria-label="Flip the coin" aria-live="polite">
+      <div class="cf__coin-inner" id="cf-coin-inner">
+        <div class="cf__face cf__face--heads">
+          <span class="cf__face-letter">H</span>
+          <span class="cf__face-label">HEADS</span>
+        </div>
+        <div class="cf__face cf__face--tails">
+          <span class="cf__face-letter">T</span>
+          <span class="cf__face-label">TAILS</span>
+        </div>
+      </div>
+    </button>
+  </div>
+
+  <!-- Result -->
+  <div class="cf__result-wrap">
+    <div class="cf__result-label">RESULT</div>
+    <div class="cf__result" id="cf-result" data-outcome="">
+      <span class="cf__result-text" id="cf-result-text">Ready</span>
+    </div>
+  </div>
+
+  <!-- Series mode -->
+  <div class="cf__series">
+    <div class="cf__series-label">BEST OF</div>
+    <div class="cf__series-btns" id="cf-series-btns">
+      <button class="cf__series-btn cf__series-btn--active" data-bo="1" type="button">1</button>
+      <button class="cf__series-btn" data-bo="3" type="button">3</button>
+      <button class="cf__series-btn" data-bo="5" type="button">5</button>
+      <button class="cf__series-btn" data-bo="7" type="button">7</button>
+    </div>
+  </div>
+
+  <!-- Score -->
+  <div class="cf__score" id="cf-score">
+    <span class="cf__score-side cf__score-side--heads">Heads <strong id="cf-heads-count">0</strong></span>
+    <span class="cf__score-divider">—</span>
+    <span class="cf__score-side cf__score-side--tails"><strong id="cf-tails-count">0</strong> Tails</span>
+  </div>
+
+  <!-- Controls -->
+  <div class="cf__controls">
+    <button class="cf__flip-btn" id="cf-flip" type="button">
+      <span class="cf__flip-icon">&#x21BB;</span>
+      Flip
+    </button>
+    <button class="cf__reset-btn" id="cf-reset" type="button">Reset</button>
+  </div>
+
+  <!-- History -->
+  <div class="cf__history-wrap">
+    <div class="cf__history-label">HISTORY</div>
+    <div class="cf__history" id="cf-history">
+      <span class="cf__history-empty">No flips yet</span>
+    </div>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Coin Flip",
+  "operatingSystem": "Web",
+  "applicationCategory": "UtilitiesApplication",
+  "description": "Animated heads or tails coin flip with optional best-of-N series mode. Works offline.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0"
+  }
+}
+</script>
+
+<script>
+(() => {
+  var coin = document.getElementById("cf-coin");
+  var coinInner = document.getElementById("cf-coin-inner");
+  var resultText = document.getElementById("cf-result-text");
+  var resultEl = document.getElementById("cf-result");
+  var flipBtn = document.getElementById("cf-flip");
+  var resetBtn = document.getElementById("cf-reset");
+  var seriesBtns = document.getElementById("cf-series-btns");
+  var scoreEl = document.getElementById("cf-score");
+  var headsCountEl = document.getElementById("cf-heads-count");
+  var tailsCountEl = document.getElementById("cf-tails-count");
+  var historyEl = document.getElementById("cf-history");
+
+  var bestOf = 1;
+  var heads = 0;
+  var tails = 0;
+  var history = [];
+  var flipping = false;
+  var flipCount = 0;
+  var seriesOver = false;
+
+  function neededToWin() {
+    return Math.ceil(bestOf / 2);
+  }
+
+  function updateScore() {
+    headsCountEl.textContent = heads;
+    tailsCountEl.textContent = tails;
+
+    if (bestOf > 1) {
+      scoreEl.classList.add("cf__score--visible");
+    } else {
+      scoreEl.classList.toggle("cf__score--visible", heads > 0 || tails > 0);
+    }
+  }
+
+  function updateHistory() {
+    if (history.length === 0) {
+      historyEl.innerHTML = '<span class="cf__history-empty">No flips yet</span>';
+      return;
+    }
+    var html = "";
+    for (var i = history.length - 1; i >= 0; i--) {
+      var h = history[i];
+      var cls = h === "Heads" ? "cf__history-pip--heads" : "cf__history-pip--tails";
+      var label = h === "Heads" ? "H" : "T";
+      html += '<span class="cf__history-pip ' + cls + '" title="' + h + '">' + label + "</span>";
+    }
+    historyEl.innerHTML = html;
+  }
+
+  function checkSeriesWinner() {
+    var need = neededToWin();
+    if (heads >= need) {
+      seriesOver = true;
+      resultText.textContent = "Heads wins the series!";
+      resultEl.dataset.outcome = "heads";
+      return true;
+    }
+    if (tails >= need) {
+      seriesOver = true;
+      resultText.textContent = "Tails wins the series!";
+      resultEl.dataset.outcome = "tails";
+      return true;
+    }
+    return false;
+  }
+
+  function doFlip() {
+    if (flipping) return;
+    if (seriesOver) {
+      resetSeries();
+    }
+
+    flipping = true;
+    flipCount++;
+
+    var isHeads = Math.random() < 0.5;
+    var outcome = isHeads ? "Heads" : "Tails";
+
+    resultText.textContent = "...";
+    resultEl.dataset.outcome = "";
+
+    // Determine rotation: even number of half-turns = heads face, odd = tails face
+    var extraTurns = 5 + Math.floor(Math.random() * 4); // 5-8 half-turns
+    if (isHeads) {
+      // Ensure even number of half-turns
+      if (extraTurns % 2 !== 0) extraTurns++;
+    } else {
+      // Ensure odd number of half-turns
+      if (extraTurns % 2 === 0) extraTurns++;
+    }
+
+    var deg = extraTurns * 180;
+    coinInner.style.transition = "transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)";
+    var currentRotation = flipCount * 360; // reset base
+    coinInner.style.transform = "rotateX(" + deg + "deg)";
+
+    coinInner.addEventListener("transitionend", function handler() {
+      coinInner.removeEventListener("transitionend", handler);
+
+      // Normalize rotation
+      var finalDeg = isHeads ? 0 : 180;
+      coinInner.style.transition = "none";
+      coinInner.style.transform = "rotateX(" + finalDeg + "deg)";
+
+      if (isHeads) heads++;
+      else tails++;
+      history.push(outcome);
+
+      updateScore();
+      updateHistory();
+
+      if (bestOf > 1 && checkSeriesWinner()) {
+        flipping = false;
+        return;
+      }
+
+      resultText.textContent = outcome;
+      resultEl.dataset.outcome = isHeads ? "heads" : "tails";
+      flipping = false;
+    }, { once: true });
+  }
+
+  function resetSeries() {
+    heads = 0;
+    tails = 0;
+    history = [];
+    seriesOver = false;
+    resultText.textContent = "Ready";
+    resultEl.dataset.outcome = "";
+    coinInner.style.transition = "none";
+    coinInner.style.transform = "rotateX(0deg)";
+    updateScore();
+    updateHistory();
+  }
+
+  function selectBestOf(n) {
+    bestOf = n;
+    var btns = seriesBtns.querySelectorAll(".cf__series-btn");
+    btns.forEach(function(b) {
+      b.classList.toggle("cf__series-btn--active", parseInt(b.dataset.bo) === n);
+    });
+    resetSeries();
+  }
+
+  // Events
+  flipBtn.addEventListener("click", doFlip);
+  coin.addEventListener("click", doFlip);
+  resetBtn.addEventListener("click", resetSeries);
+
+  seriesBtns.addEventListener("click", function(e) {
+    var btn = e.target.closest(".cf__series-btn");
+    if (!btn) return;
+    selectBestOf(parseInt(btn.dataset.bo));
+  });
+
+  // Keyboard: space/enter on page flips
+  document.addEventListener("keydown", function(e) {
+    if (e.key === " " && e.target === document.body) {
+      e.preventDefault();
+      doFlip();
+    }
+  });
+})();
+</script>
+
+<style>
+/* ── Coin Flip — Terminal HUD ──────────────────────── */
+.cf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  font-family: var(--font-mono);
+}
+
+/* ── Coin Stage ────────────────────────────────────── */
+.cf__stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 800px;
+}
+
+.cf__coin {
+  width: min(180px, 50vw);
+  aspect-ratio: 1;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  perspective: 800px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cf__coin:focus-visible {
+  outline: 2px solid var(--syn-cyan);
+  outline-offset: 8px;
+  border-radius: 50%;
+}
+
+.cf__coin-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(0deg);
+}
+
+/* ── Faces ─────────────────────────────────────────── */
+.cf__face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backface-visibility: hidden;
+  border: 2px solid rgba(255,255,255,0.08);
+}
+
+.cf__face--heads {
+  background: radial-gradient(circle at 40% 35%, #1a2a1a 0%, #0d1a0d 100%);
+  border-color: rgba(74, 222, 128, 0.25);
+  box-shadow:
+    0 0 30px rgba(74, 222, 128, 0.1),
+    inset 0 0 30px rgba(74, 222, 128, 0.05);
+}
+
+.cf__face--tails {
+  background: radial-gradient(circle at 40% 35%, #2a1a24 0%, #1a0d14 100%);
+  border-color: rgba(244, 114, 182, 0.25);
+  box-shadow:
+    0 0 30px rgba(244, 114, 182, 0.1),
+    inset 0 0 30px rgba(244, 114, 182, 0.05);
+  transform: rotateX(180deg);
+}
+
+.cf__face-letter {
+  font-size: clamp(2.4rem, 10vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.cf__face--heads .cf__face-letter {
+  color: var(--syn-green);
+  text-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+}
+
+.cf__face--tails .cf__face-letter {
+  color: var(--syn-pink);
+  text-shadow: 0 0 20px rgba(244, 114, 182, 0.5);
+}
+
+.cf__face-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 0.2rem;
+}
+
+.cf__face--heads .cf__face-label {
+  color: rgba(74, 222, 128, 0.6);
+}
+
+.cf__face--tails .cf__face-label {
+  color: rgba(244, 114, 182, 0.6);
+}
+
+/* ── Result ────────────────────────────────────────── */
+.cf__result-wrap {
+  text-align: center;
+}
+
+.cf__result-label {
+  font-size: 0.65rem;
+  color: var(--term-muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.cf__result {
+  --result-color: var(--term-muted);
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  font-weight: 700;
+  color: var(--result-color);
+  min-height: 1.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 0 20px color-mix(in srgb, var(--result-color) 50%, transparent);
+  transition: color 0.3s ease;
+}
+
+.cf__result[data-outcome="heads"] { --result-color: var(--syn-green); }
+.cf__result[data-outcome="tails"] { --result-color: var(--syn-pink); }
+
+/* ── Series Mode ───────────────────────────────────── */
+.cf__series {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cf__series-label {
+  font-size: 0.65rem;
+  color: var(--term-muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.cf__series-btns {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.cf__series-btn {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 6px;
+  border: 1px solid var(--term-border);
+  background: var(--term-bg-raised);
+  color: var(--term-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.cf__series-btn:hover {
+  border-color: rgba(34, 211, 238, 0.3);
+  color: var(--term-fg);
+}
+
+.cf__series-btn--active {
+  border-color: var(--syn-cyan);
+  color: var(--syn-cyan);
+  background: rgba(34, 211, 238, 0.08);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.15);
+}
+
+/* ── Score ──────────────────────────────────────────── */
+.cf__score {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--term-muted);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+}
+
+.cf__score--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  height: auto;
+}
+
+.cf__score-side--heads strong {
+  color: var(--syn-green);
+  font-size: 1.2rem;
+}
+
+.cf__score-side--tails strong {
+  color: var(--syn-pink);
+  font-size: 1.2rem;
+}
+
+.cf__score-divider {
+  color: rgba(255,255,255,0.15);
+}
+
+/* ── Controls ──────────────────────────────────────── */
+.cf__controls {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.cf__flip-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #000;
+  background: linear-gradient(135deg, var(--syn-cyan) 0%, #0ea5e9 100%);
+  box-shadow: 0 4px 20px rgba(34, 211, 238, 0.3);
+  transition: all 0.25s ease;
+}
+
+.cf__flip-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(34, 211, 238, 0.45);
+}
+
+.cf__flip-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.cf__flip-icon {
+  font-size: 1rem;
+}
+
+.cf__reset-btn {
+  border: 1px solid var(--term-border);
+  border-radius: 999px;
+  padding: 0.7rem 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--term-muted);
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.cf__reset-btn:hover {
+  border-color: rgba(255,255,255,0.15);
+  color: var(--term-fg);
+}
+
+/* ── History ───────────────────────────────────────── */
+.cf__history-wrap {
+  width: 100%;
+  max-width: 360px;
+}
+
+.cf__history-label {
+  font-size: 0.65rem;
+  color: var(--term-muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.cf__history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: center;
+  min-height: 1.8rem;
+  align-items: center;
+}
+
+.cf__history-empty {
+  font-size: 0.75rem;
+  color: var(--term-muted);
+  font-style: italic;
+}
+
+.cf__history-pip {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.cf__history-pip--heads {
+  color: var(--syn-green);
+  background: rgba(74, 222, 128, 0.1);
+  border-color: rgba(74, 222, 128, 0.2);
+}
+
+.cf__history-pip--tails {
+  color: var(--syn-pink);
+  background: rgba(244, 114, 182, 0.1);
+  border-color: rgba(244, 114, 182, 0.2);
+}
+
+/* ── Responsive ────────────────────────────────────── */
+@media (max-width: 480px) {
+  .cf {
+    gap: 1.25rem;
+  }
+
+  .cf__series {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .cf__controls {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+</style>

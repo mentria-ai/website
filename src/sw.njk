@@ -16,7 +16,8 @@ const ASSETS = [
   '/tools/coin-flip/',
   '/tools/quick-notes/',
   '/tools/base64-codec/',
-  '/tools/color-picker/'
+  '/tools/color-picker/',
+  '/tools/ai-chat/'
 ];
 
 self.addEventListener('install', event => {
@@ -32,11 +33,23 @@ self.addEventListener('activate', event => {
       Promise.all(keys.map(key => key !== CACHE_NAME && caches.delete(key)))
     )
   );
+  return self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
+    (async () => {
+      const cached = await caches.match(event.request);
+      const response = cached || await fetch(event.request);
+      const headers = new Headers(response.headers);
+      headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+      headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+      });
+    })()
   );
 });

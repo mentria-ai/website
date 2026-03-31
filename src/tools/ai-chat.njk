@@ -79,9 +79,37 @@ permalink: /tools/ai-chat/index.html
 </script>
 
 <script type="module">
-import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3';
+const LIB_URLS = [
+  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3',
+  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest'
+];
 
-(() => {
+const statusDot     = document.getElementById('ac-status-dot');
+const statusText    = document.getElementById('ac-status-text');
+
+function setStatus(state, text) {
+  statusDot.className = 'ac__status-dot ac__status-dot--' + state;
+  statusText.textContent = text;
+}
+
+// Dynamic import with fallback
+let lib = null;
+for (const url of LIB_URLS) {
+  try {
+    lib = await import(url);
+    break;
+  } catch (e) {
+    console.warn('Failed to load', url, e);
+  }
+}
+
+if (!lib) {
+  setStatus('error', 'Failed to load Transformers.js library. Check network/ad-blocker.');
+} else {
+  runApp(lib);
+}
+
+function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStreamer }) {
   /* ── Config ──────────────────────────────────────── */
   const MODEL_ID = 'onnx-community/Qwen3.5-0.8B-ONNX';
   const DTYPE = {
@@ -92,8 +120,6 @@ import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer,
   const MAX_TOKENS = 512;
 
   /* ── DOM refs ────────────────────────────────────── */
-  const statusDot     = document.getElementById('ac-status-dot');
-  const statusText    = document.getElementById('ac-status-text');
   const deleteBtn     = document.getElementById('ac-delete-model');
   const progressWrap  = document.getElementById('ac-progress-wrap');
   const progressLabel = document.getElementById('ac-progress-label');
@@ -113,16 +139,11 @@ import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer,
   let processor = null;
   let model = null;
   let generating = false;
-  let attachedImage = null; // RawImage or null
+  let attachedImage = null;
   let attachedDataUrl = null;
   let messages = [];
 
   /* ── Helpers ─────────────────────────────────────── */
-  function setStatus(state, text) {
-    statusDot.className = 'ac__status-dot ac__status-dot--' + state;
-    statusText.textContent = text;
-  }
-
   function scrollToBottom() {
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
@@ -136,12 +157,6 @@ import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer,
     if (b < 1024) return b + ' B';
     if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
     return (b / 1048576).toFixed(1) + ' MB';
-  }
-
-  function escapeHtml(s) {
-    const d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
   }
 
   function addMessage(role, content, imageUrl) {
@@ -198,7 +213,7 @@ import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer,
         progress_callback: onProgress
       });
 
-      model = await Qwen3_5ForConditionalGeneration.from_pretrained(MODEL_ID, {
+      model = await AutoModelForImageTextToText.from_pretrained(MODEL_ID, {
         dtype: DTYPE,
         device: 'webgpu',
         progress_callback: onProgress
@@ -224,6 +239,8 @@ import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer,
     if (!text && !attachedImage) return;
 
     generating = true;
+    inputEl.value = '';
+    autoResize();
     sendBtn.disabled = true;
     setStatus('generating', 'Generating…');
 
@@ -270,7 +287,6 @@ import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer,
             firstToken = false;
           }
           fullText += token;
-          // Strip thinking tags for display
           const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
           bodyEl.textContent = display || '…';
           scrollToBottom();
@@ -303,14 +319,12 @@ import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer,
   async function deleteModel() {
     if (!confirm('Delete the cached model (~850 MB)? You will need to re-download it next time.')) return;
     try {
-      // Clear Transformers.js cache from Cache API
       const keys = await caches.keys();
       for (const key of keys) {
         if (key.includes('transformers')) {
           await caches.delete(key);
         }
       }
-      // Clear from IndexedDB (ONNX Runtime uses this)
       const dbs = await indexedDB.databases();
       for (const db of dbs) {
         if (db.name && (db.name.includes('transformers') || db.name.includes('onnxruntime'))) {
@@ -373,7 +387,6 @@ import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer,
 
   deleteBtn.addEventListener('click', deleteModel);
 
-  // Paste image from clipboard
   document.addEventListener('paste', e => {
     const items = e.clipboardData?.items;
     if (!items) return;
@@ -388,14 +401,35 @@ import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer,
 
   /* ── Init ────────────────────────────────────────── */
   async function init() {
-    // Check WebGPU
     if (!navigator.gpu) {
-      setStatus('error', 'WebGPU not supported in this browser. Try Chrome or Edge.');
+      setStatus('error', 'WebGPU not supported in this browser. Try Chrome 113+ or Edge.');
       return;
     }
-    const adapter = await navigator.gpu.requestAdapter();
-    if (!adapter) {
-      setStatus('error', 'No WebGPU adapter found. GPU may not be available.');
+    try {
+      const adapter = await navigator.gpu.requestAdapter();
+      if (!adapter) {
+        setStatus('error', 'No WebGPU adapter found. GPU may not be available.');
+        return;
+      }
+    } catch (err) {
+      setStatus('error', 'WebGPU check failed: ' + err.message);
+      return;
+    }
+
+    if (!crossOriginIsolated) {
+      setStatus('loading', 'Activating cross-origin isolation… reload may be needed.');
+      // Service worker needs to control the page for COOP/COEP headers.
+      // On first visit the SW isn't active yet — register and reload once.
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration('/');
+        if (!reg || !navigator.serviceWorker.controller) {
+          await navigator.serviceWorker.register('/sw.js');
+          // Wait briefly for the SW to install, then reload
+          await new Promise(r => setTimeout(r, 500));
+          return location.reload();
+        }
+      }
+      setStatus('error', 'Cross-origin isolation required for WebGPU. Try reloading the page.');
       return;
     }
 
@@ -404,7 +438,7 @@ import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer,
   }
 
   init();
-})();
+}
 </script>
 
 <style>

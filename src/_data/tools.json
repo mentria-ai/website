@@ -34,5 +34,11 @@
     "title": "Color Picker",
     "summary": "Pick colors, generate harmonious palettes, and copy values in HEX, RGB, and HSL. Works offline.",
     "category": "Design"
+  },
+  {
+    "slug": "ai-chat",
+    "title": "AI Chat",
+    "summary": "Chat with Qwen3.5-0.8B running locally in your browser via WebGPU. Supports vision. No data leaves your device.",
+    "category": "AI"
   }
 ]

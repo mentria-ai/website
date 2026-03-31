@@ -1,0 +1,701 @@
+---
+layout: base.njk
+title: AI Chat
+description: Chat with Qwen3.5-0.8B running entirely in your browser via WebGPU. Supports image input. No data leaves your device.
+permalink: /tools/ai-chat/index.html
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">~/tools/ai-chat</p>
+  <h1>AI Chat</h1>
+  <p>
+    Qwen3.5-0.8B running locally in your browser. No server, no API keys. Supports vision.
+  </p>
+</section>
+
+{% set terminalTitle = "ai-chat.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="ac">
+  <!-- Status bar -->
+  <div class="ac__status" id="ac-status">
+    <span class="ac__status-dot" id="ac-status-dot"></span>
+    <span class="ac__status-text" id="ac-status-text">Checking WebGPU…</span>
+    <button class="ac__delete-btn" id="ac-delete-model" title="Delete cached model" style="display:none;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      <span>Delete model</span>
+    </button>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="ac__progress-wrap" id="ac-progress-wrap" style="display:none;">
+    <div class="ac__progress-info">
+      <span id="ac-progress-label">Downloading model…</span>
+      <span id="ac-progress-pct">0%</span>
+    </div>
+    <div class="ac__progress-bar">
+      <div class="ac__progress-fill" id="ac-progress-fill"></div>
+    </div>
+    <div class="ac__progress-detail" id="ac-progress-detail"></div>
+  </div>
+
+  <!-- Chat messages -->
+  <div class="ac__messages" id="ac-messages">
+    <div class="ac__empty" id="ac-empty">
+      <div class="ac__empty-icon">&#9670;</div>
+      <p>Send a message or attach an image to begin.</p>
+      <p class="ac__empty-sub">~850 MB model download on first use, cached after.</p>
+    </div>
+  </div>
+
+  <!-- Image preview -->
+  <div class="ac__img-preview" id="ac-img-preview" style="display:none;">
+    <img id="ac-img-thumb" alt="Attached image" />
+    <button class="ac__img-remove" id="ac-img-remove" title="Remove image">&times;</button>
+  </div>
+
+  <!-- Input area -->
+  <div class="ac__input-wrap">
+    <label class="ac__attach-btn" id="ac-attach-label" title="Attach image">
+      <input type="file" id="ac-file-input" accept="image/*" hidden />
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </label>
+    <textarea class="ac__input" id="ac-input" rows="1" placeholder="Message…" disabled></textarea>
+    <button class="ac__send-btn" id="ac-send" title="Send" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria AI Chat",
+  "operatingSystem": "Web",
+  "applicationCategory": "UtilitiesApplication",
+  "description": "Chat with a local AI model (Qwen3.5-0.8B) running entirely in your browser via WebGPU. Supports image input.",
+  "offers": { "@type": "Offer", "price": "0" }
+}
+</script>
+
+<script type="module">
+import { AutoProcessor, Qwen3_5ForConditionalGeneration, RawImage, TextStreamer, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3';
+
+(() => {
+  /* ── Config ──────────────────────────────────────── */
+  const MODEL_ID = 'onnx-community/Qwen3.5-0.8B-ONNX';
+  const DTYPE = {
+    embed_tokens: 'q4',
+    vision_encoder: 'fp16',
+    decoder_model_merged: 'q4'
+  };
+  const MAX_TOKENS = 512;
+
+  /* ── DOM refs ────────────────────────────────────── */
+  const statusDot     = document.getElementById('ac-status-dot');
+  const statusText    = document.getElementById('ac-status-text');
+  const deleteBtn     = document.getElementById('ac-delete-model');
+  const progressWrap  = document.getElementById('ac-progress-wrap');
+  const progressLabel = document.getElementById('ac-progress-label');
+  const progressPct   = document.getElementById('ac-progress-pct');
+  const progressFill  = document.getElementById('ac-progress-fill');
+  const progressDetail= document.getElementById('ac-progress-detail');
+  const messagesEl    = document.getElementById('ac-messages');
+  const emptyEl       = document.getElementById('ac-empty');
+  const imgPreview    = document.getElementById('ac-img-preview');
+  const imgThumb      = document.getElementById('ac-img-thumb');
+  const imgRemoveBtn  = document.getElementById('ac-img-remove');
+  const fileInput     = document.getElementById('ac-file-input');
+  const inputEl       = document.getElementById('ac-input');
+  const sendBtn       = document.getElementById('ac-send');
+
+  /* ── State ───────────────────────────────────────── */
+  let processor = null;
+  let model = null;
+  let generating = false;
+  let attachedImage = null; // RawImage or null
+  let attachedDataUrl = null;
+  let messages = [];
+
+  /* ── Helpers ─────────────────────────────────────── */
+  function setStatus(state, text) {
+    statusDot.className = 'ac__status-dot ac__status-dot--' + state;
+    statusText.textContent = text;
+  }
+
+  function scrollToBottom() {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function autoResize() {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+  }
+
+  function formatBytes(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1048576).toFixed(1) + ' MB';
+  }
+
+  function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function addMessage(role, content, imageUrl) {
+    if (emptyEl) emptyEl.style.display = 'none';
+    const bubble = document.createElement('div');
+    bubble.className = 'ac__msg ac__msg--' + role;
+
+    const label = document.createElement('div');
+    label.className = 'ac__msg-label';
+    label.textContent = role === 'user' ? 'you' : 'qwen-0.8B';
+    bubble.appendChild(label);
+
+    if (imageUrl) {
+      const img = document.createElement('img');
+      img.className = 'ac__msg-img';
+      img.src = imageUrl;
+      img.alt = 'Attached';
+      bubble.appendChild(img);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'ac__msg-body';
+    bubble.appendChild(body);
+
+    messagesEl.appendChild(bubble);
+    scrollToBottom();
+    return body;
+  }
+
+  /* ── Progress tracking ───────────────────────────── */
+  const fileProgress = {};
+  function onProgress(event) {
+    if (event.status === 'progress' && event.total) {
+      fileProgress[event.file] = { loaded: event.loaded, total: event.total };
+      const totals = Object.values(fileProgress);
+      const loaded = totals.reduce((s, f) => s + f.loaded, 0);
+      const total = totals.reduce((s, f) => s + f.total, 0);
+      const pct = Math.round((loaded / total) * 100);
+      progressFill.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+      progressDetail.textContent = formatBytes(loaded) + ' / ' + formatBytes(total);
+    } else if (event.status === 'ready') {
+      progressLabel.textContent = 'Loading model…';
+    }
+  }
+
+  /* ── Load model ──────────────────────────────────── */
+  async function loadModel() {
+    setStatus('loading', 'Loading model…');
+    progressWrap.style.display = '';
+
+    try {
+      processor = await AutoProcessor.from_pretrained(MODEL_ID, {
+        progress_callback: onProgress
+      });
+
+      model = await Qwen3_5ForConditionalGeneration.from_pretrained(MODEL_ID, {
+        dtype: DTYPE,
+        device: 'webgpu',
+        progress_callback: onProgress
+      });
+
+      progressWrap.style.display = 'none';
+      setStatus('ready', 'Ready');
+      deleteBtn.style.display = '';
+      inputEl.disabled = false;
+      sendBtn.disabled = false;
+      inputEl.focus();
+    } catch (err) {
+      progressWrap.style.display = 'none';
+      setStatus('error', 'Failed to load: ' + err.message);
+      console.error('Model load error:', err);
+    }
+  }
+
+  /* ── Generate ────────────────────────────────────── */
+  async function generate() {
+    if (generating || !model) return;
+    const text = inputEl.value.trim();
+    if (!text && !attachedImage) return;
+
+    generating = true;
+    sendBtn.disabled = true;
+    setStatus('generating', 'Generating…');
+
+    // Build user content
+    const userContent = [];
+    if (attachedImage) {
+      userContent.push({ type: 'image' });
+    }
+    userContent.push({ type: 'text', text: text || 'Describe this image.' });
+
+    // Show user message
+    addMessage('user', text, attachedDataUrl);
+
+    // Build messages array
+    messages.push({ role: 'user', content: userContent });
+
+    const bodyEl = addMessage('assistant', '');
+
+    try {
+      const textContent = processor.apply_chat_template(messages, {
+        tokenize: false,
+        add_generation_prompt: true
+      });
+
+      const inputs = await processor(
+        attachedImage ? [textContent, attachedImage] : textContent
+      );
+
+      // Clear attached image after use
+      attachedImage = null;
+      attachedDataUrl = null;
+      imgPreview.style.display = 'none';
+      fileInput.value = '';
+
+      let fullText = '';
+      let firstToken = true;
+
+      const streamer = new TextStreamer(processor.tokenizer, {
+        skip_prompt: true,
+        skip_special_tokens: true,
+        callback_function(token) {
+          if (firstToken) {
+            token = token.trimStart();
+            firstToken = false;
+          }
+          fullText += token;
+          // Strip thinking tags for display
+          const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+          bodyEl.textContent = display || '…';
+          scrollToBottom();
+        }
+      });
+
+      await model.generate({
+        ...inputs,
+        max_new_tokens: MAX_TOKENS,
+        do_sample: false,
+        streamer
+      });
+
+      const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      bodyEl.textContent = display || '(empty response)';
+      messages.push({ role: 'assistant', content: display });
+
+    } catch (err) {
+      bodyEl.textContent = 'Error: ' + err.message;
+      console.error('Generation error:', err);
+    }
+
+    generating = false;
+    sendBtn.disabled = false;
+    setStatus('ready', 'Ready');
+    inputEl.focus();
+  }
+
+  /* ── Delete cached model ─────────────────────────── */
+  async function deleteModel() {
+    if (!confirm('Delete the cached model (~850 MB)? You will need to re-download it next time.')) return;
+    try {
+      // Clear Transformers.js cache from Cache API
+      const keys = await caches.keys();
+      for (const key of keys) {
+        if (key.includes('transformers')) {
+          await caches.delete(key);
+        }
+      }
+      // Clear from IndexedDB (ONNX Runtime uses this)
+      const dbs = await indexedDB.databases();
+      for (const db of dbs) {
+        if (db.name && (db.name.includes('transformers') || db.name.includes('onnxruntime'))) {
+          indexedDB.deleteDatabase(db.name);
+        }
+      }
+      model = null;
+      processor = null;
+      messages = [];
+      messagesEl.innerHTML = '';
+      if (emptyEl) {
+        messagesEl.appendChild(emptyEl);
+        emptyEl.style.display = '';
+      }
+      deleteBtn.style.display = 'none';
+      inputEl.disabled = true;
+      sendBtn.disabled = true;
+      setStatus('idle', 'Model deleted. Reload to re-download.');
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete cache: ' + err.message);
+    }
+  }
+
+  /* ── Image handling ──────────────────────────────── */
+  async function attachFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const url = URL.createObjectURL(file);
+    imgThumb.src = url;
+    imgPreview.style.display = '';
+    attachedDataUrl = url;
+    attachedImage = await RawImage.fromURL(url);
+  }
+
+  function removeImage() {
+    attachedImage = null;
+    attachedDataUrl = null;
+    imgPreview.style.display = 'none';
+    imgThumb.src = '';
+    fileInput.value = '';
+  }
+
+  /* ── Events ──────────────────────────────────────── */
+  sendBtn.addEventListener('click', generate);
+
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      generate();
+    }
+  });
+
+  inputEl.addEventListener('input', autoResize);
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) attachFile(fileInput.files[0]);
+  });
+
+  imgRemoveBtn.addEventListener('click', removeImage);
+
+  deleteBtn.addEventListener('click', deleteModel);
+
+  // Paste image from clipboard
+  document.addEventListener('paste', e => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        attachFile(item.getAsFile());
+        break;
+      }
+    }
+  });
+
+  /* ── Init ────────────────────────────────────────── */
+  async function init() {
+    // Check WebGPU
+    if (!navigator.gpu) {
+      setStatus('error', 'WebGPU not supported in this browser. Try Chrome or Edge.');
+      return;
+    }
+    const adapter = await navigator.gpu.requestAdapter();
+    if (!adapter) {
+      setStatus('error', 'No WebGPU adapter found. GPU may not be available.');
+      return;
+    }
+
+    setStatus('idle', 'WebGPU available. Loading model…');
+    await loadModel();
+  }
+
+  init();
+})();
+</script>
+
+<style>
+/* ── AI Chat — Terminal HUD ─────────────────────── */
+.ac {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  height: min(600px, 70vh);
+}
+
+/* ── Status bar ─────────────────────────────────── */
+.ac__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+  font-size: 0.75rem;
+  color: var(--term-muted);
+  flex-shrink: 0;
+}
+
+.ac__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--term-muted);
+  flex-shrink: 0;
+}
+.ac__status-dot--idle     { background: var(--term-muted); }
+.ac__status-dot--loading  { background: var(--syn-amber); box-shadow: 0 0 6px var(--syn-amber); animation: ac-pulse 1.5s ease-in-out infinite; }
+.ac__status-dot--ready    { background: var(--syn-green); box-shadow: 0 0 6px var(--syn-green); }
+.ac__status-dot--generating { background: var(--syn-cyan); box-shadow: 0 0 6px var(--syn-cyan); animation: ac-pulse 1s ease-in-out infinite; }
+.ac__status-dot--error    { background: var(--syn-pink); box-shadow: 0 0 6px var(--syn-pink); }
+
+@keyframes ac-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.ac__delete-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: 1px solid rgba(244, 114, 182, 0.2);
+  color: var(--syn-pink);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.ac__delete-btn:hover {
+  background: rgba(244, 114, 182, 0.1);
+  border-color: rgba(244, 114, 182, 0.4);
+}
+
+/* ── Progress bar ───────────────────────────────── */
+.ac__progress-wrap {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+  flex-shrink: 0;
+}
+.ac__progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--term-muted);
+  margin-bottom: 0.4rem;
+}
+.ac__progress-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.ac__progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--syn-cyan), var(--syn-purple));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+.ac__progress-detail {
+  font-size: 0.65rem;
+  color: var(--term-muted);
+  margin-top: 0.3rem;
+  text-align: right;
+}
+
+/* ── Messages ───────────────────────────────────── */
+.ac__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+
+.ac__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--term-muted);
+  text-align: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+.ac__empty-icon {
+  font-size: 1.8rem;
+  color: var(--syn-cyan);
+  opacity: 0.4;
+  margin-bottom: 0.5rem;
+}
+.ac__empty-sub {
+  font-size: 0.65rem;
+  opacity: 0.6;
+}
+
+/* ── Message bubble ─────────────────────────────── */
+.ac__msg {
+  max-width: 85%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.ac__msg--user {
+  align-self: flex-end;
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.15);
+}
+
+.ac__msg--assistant {
+  align-self: flex-start;
+  background: rgba(167, 139, 250, 0.06);
+  border: 1px solid rgba(167, 139, 250, 0.12);
+}
+
+.ac__msg-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.3rem;
+  opacity: 0.5;
+}
+
+.ac__msg-img {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: 6px;
+  margin-bottom: 0.4rem;
+  display: block;
+  border: 1px solid var(--term-border);
+}
+
+.ac__msg-body {
+  white-space: pre-wrap;
+  color: var(--term-fg);
+}
+
+/* ── Image preview ──────────────────────────────── */
+.ac__img-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-top: 1px solid var(--term-border);
+  flex-shrink: 0;
+}
+.ac__img-preview img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--term-border);
+}
+.ac__img-remove {
+  background: none;
+  border: none;
+  color: var(--term-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  line-height: 1;
+}
+.ac__img-remove:hover {
+  color: var(--syn-pink);
+}
+
+/* ── Input area ─────────────────────────────────── */
+.ac__input-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  padding: 0.6rem 0.75rem;
+  border-top: 1px solid var(--term-border);
+  flex-shrink: 0;
+}
+
+.ac__attach-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--term-muted);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.ac__attach-btn:hover {
+  color: var(--syn-cyan);
+  background: rgba(34, 211, 238, 0.08);
+}
+
+.ac__input {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--term-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  resize: none;
+  overflow-y: auto;
+  max-height: 120px;
+  transition: border-color 0.2s ease;
+}
+.ac__input:focus {
+  outline: none;
+  border-color: rgba(34, 211, 238, 0.3);
+}
+.ac__input::placeholder {
+  color: var(--term-muted);
+  opacity: 0.6;
+}
+.ac__input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ac__send-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 6px;
+  background: var(--syn-cyan);
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.ac__send-btn:hover:not(:disabled) {
+  background: #67e8f9;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
+}
+.ac__send-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .ac {
+    height: min(500px, 65vh);
+  }
+  .ac__msg {
+    max-width: 92%;
+    font-size: 0.75rem;
+  }
+  .ac__delete-btn span {
+    display: none;
+  }
+}
+</style>

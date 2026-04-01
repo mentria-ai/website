@@ -80,7 +80,7 @@ permalink: /tools/ai-chat/index.html
 
 <script type="module">
 const LIB_URLS = [
-  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3',
+  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4',
   'https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest'
 ];
 
@@ -414,20 +414,6 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
       }
     } catch (err) {
       setStatus('error', 'WebGPU check failed: ' + err.message);
-      return;
-    }
-
-    if (!crossOriginIsolated) {
-      setStatus('loading', 'Activating cross-origin isolation…');
-      if ('serviceWorker' in navigator) {
-        const reg = await navigator.serviceWorker.getRegistration('/');
-        if (!reg || !navigator.serviceWorker.controller) {
-          await navigator.serviceWorker.register('/sw.js');
-          await new Promise(r => setTimeout(r, 500));
-          return location.reload();
-        }
-      }
-      setStatus('error', 'Cross-origin isolation required for WebGPU. Try reloading the page.');
       return;
     }
 

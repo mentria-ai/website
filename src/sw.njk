@@ -39,17 +39,6 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    (async () => {
-      const cached = await caches.match(event.request);
-      const response = cached || await fetch(event.request);
-      const headers = new Headers(response.headers);
-      headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-      headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers
-      });
-    })()
+    caches.match(event.request).then(cached => cached || fetch(event.request))
   );
 });

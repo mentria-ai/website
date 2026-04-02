@@ -273,7 +273,9 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
       });
 
       const inputs = await processor(
-        attachedImage ? [textContent, attachedImage] : textContent
+        textContent,
+        attachedImage ? [attachedImage] : null,
+        { padding: true, truncation: true }
       );
 
       // Clear attached image after use

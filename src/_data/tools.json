@@ -40,5 +40,11 @@
     "title": "AI Chat",
     "summary": "Chat with Qwen3.5-0.8B running locally in your browser via WebGPU. Supports vision. No data leaves your device.",
     "category": "AI"
+  },
+  {
+    "slug": "quote",
+    "title": "Motivational Quote",
+    "summary": "AI-generated original motivational quotes. Runs locally in your browser.",
+    "category": "AI"
   }
 ]

@@ -112,12 +112,19 @@ if (!lib) {
 function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStreamer }) {
   /* ── Config ──────────────────────────────────────── */
   const MODEL_ID = 'onnx-community/Qwen3.5-0.8B-ONNX';
-  const DTYPE = {
-    embed_tokens: 'q4',
-    vision_encoder: 'fp16',
-    decoder_model_merged: 'q4'
-  };
   const MAX_TOKENS = 512;
+
+  function getBestDevice() {
+    if (!navigator.gpu) return 'wasm';
+    const ua = navigator.userAgent;
+    if (ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Android')) return 'wasm';
+    return 'webgpu';
+  }
+
+  const DEVICE = getBestDevice();
+  const DTYPE = DEVICE === 'webgpu'
+    ? { embed_tokens: 'q4', vision_encoder: 'fp16', decoder_model_merged: 'q4' }
+    : { embed_tokens: 'q4', vision_encoder: 'q4', decoder_model_merged: 'q4' };
 
   /* ── DOM refs ────────────────────────────────────── */
   const deleteBtn     = document.getElementById('ac-delete-model');
@@ -178,6 +185,7 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
 
     const body = document.createElement('div');
     body.className = 'ac__msg-body';
+    if (content) body.textContent = content;
     bubble.appendChild(body);
 
     messagesEl.appendChild(bubble);
@@ -214,20 +222,20 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
 
       model = await AutoModelForImageTextToText.from_pretrained(MODEL_ID, {
         dtype: DTYPE,
-        device: 'webgpu',
+        device: DEVICE,
         progress_callback: onProgress
       });
 
       progressWrap.style.display = 'none';
-      setStatus('ready', 'Ready');
+      setStatus('ready', DEVICE === 'webgpu' ? 'Ready' : 'Ready (WASM — slower)');
       deleteBtn.style.display = '';
       inputEl.disabled = false;
       sendBtn.disabled = false;
       inputEl.focus();
     } catch (err) {
       progressWrap.style.display = 'none';
-      setStatus('error', 'Failed to load: ' + err.message);
       console.error('Model load error:', err);
+      setStatus('error', 'Failed to load: ' + (err.message || err));
     }
   }
 
@@ -276,6 +284,14 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
 
       let fullText = '';
       let firstToken = true;
+      let pendingPaint = false;
+
+      function paintToken() {
+        const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        bodyEl.textContent = display || '…';
+        scrollToBottom();
+        pendingPaint = false;
+      }
 
       const streamer = new TextStreamer(processor.tokenizer, {
         skip_prompt: true,
@@ -286,10 +302,10 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
             firstToken = false;
           }
           fullText += token;
-          // Strip thinking tags for display
-          const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-          bodyEl.textContent = display || '…';
-          scrollToBottom();
+          if (!pendingPaint) {
+            pendingPaint = true;
+            requestAnimationFrame(paintToken);
+          }
         }
       });
 
@@ -402,22 +418,7 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
 
   /* ── Init ────────────────────────────────────────── */
   async function init() {
-    if (!navigator.gpu) {
-      setStatus('error', 'WebGPU not supported in this browser. Try Chrome 113+ or Edge.');
-      return;
-    }
-    try {
-      const adapter = await navigator.gpu.requestAdapter();
-      if (!adapter) {
-        setStatus('error', 'No WebGPU adapter found. GPU may not be available.');
-        return;
-      }
-    } catch (err) {
-      setStatus('error', 'WebGPU check failed: ' + err.message);
-      return;
-    }
-
-    setStatus('idle', 'WebGPU available. Loading model…');
+    setStatus('idle', DEVICE === 'webgpu' ? 'WebGPU available. Loading model…' : 'Using WASM backend. Loading model…');
     await loadModel();
   }
 

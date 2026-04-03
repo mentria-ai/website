@@ -53,7 +53,7 @@ permalink: /tools/quote/index.html
   "name": "Mentria Motivational Quote",
   "operatingSystem": "Web",
   "applicationCategory": "UtilitiesApplication",
-  "description": "AI-generated original motivational quotes running locally in your browser via Qwen3.5-0.8B.",
+  "description": "AI-generated original motivational quotes running locally in your browser via custom finetuned Qwen3.5-0.8B model.",
   "offers": { "@type": "Offer", "price": "0" }
 }
 </script>
@@ -89,7 +89,7 @@ if (!lib) {
 }
 
 function runApp({ AutoProcessor, AutoModelForImageTextToText, TextStreamer }) {
-  const MODEL_ID = 'onnx-community/Qwen3.5-0.8B-ONNX';
+  const MODEL_ID = 'mentriaai/Qwen3.5-0.8B-quotes-ONNX';
   const SYSTEM_PROMPT = 'You are a poetic thinker. Write one short, original motivational quote (1-2 sentences). Do not attribute it to anyone. No preamble, no quotation marks \u2014 just the quote itself.';
   const MAX_TOKENS = 128;
 

@@ -46,5 +46,11 @@
     "title": "Motivational Quote",
     "summary": "AI-generated original motivational quotes. Runs locally in your browser.",
     "category": "AI"
+  },
+  {
+    "slug": "radio",
+    "title": "Infinite Radio",
+    "summary": "AI-generated epic cinematic music streaming infinitely. Learns your taste locally. No data leaves your device.",
+    "category": "AI"
   }
 ]

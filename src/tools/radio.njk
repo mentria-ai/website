@@ -1,0 +1,298 @@
+---
+layout: base.njk
+title: Infinite Radio
+description: AI-generated epic cinematic music streaming infinitely. Learns your taste locally. No data leaves your device.
+permalink: /tools/radio/index.html
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">~/tools/radio</p>
+  <h1>Infinite Radio</h1>
+  <p>
+    AI-generated epic cinematic music, streaming infinitely. Learns your taste locally — no data leaves your device.
+  </p>
+</section>
+
+{% set terminalTitle = "radio.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="rd">
+
+  <!-- Status bar -->
+  <div class="rd__status">
+    <span class="rd__status-dot" id="rd-status-dot"></span>
+    <span class="rd__status-text" id="rd-status-text">Loading catalog…</span>
+    <span class="rd__track-count" id="rd-track-count"></span>
+  </div>
+
+  <!-- Now playing -->
+  <div class="rd__now">
+    <span class="rd__label">NOW PLAYING</span>
+    <div class="rd__track">
+      <span class="rd__title" id="rd-title">Press play to start</span>
+      <span class="rd__mood" id="rd-mood"></span>
+    </div>
+    <div class="rd__progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="rd__progress-fill" id="rd-progress-fill"></div>
+    </div>
+    <div class="rd__time">
+      <span class="rd__elapsed" id="rd-elapsed">0:00</span>
+      <span class="rd__duration" id="rd-duration">0:00</span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="rd__controls">
+    <button class="rd__btn rd__btn--play" id="rd-play" aria-label="Play" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+    </button>
+    <button class="rd__btn" id="rd-skip" aria-label="Skip" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,4 15,12 5,20"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+    </button>
+    <button class="rd__btn rd__btn--like" id="rd-like" aria-label="Like" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+    <div class="rd__volume-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      <input type="range" class="rd__volume" id="rd-volume" min="0" max="100" value="80" aria-label="Volume">
+    </div>
+  </div>
+
+  <!-- Up next -->
+  <div class="rd__next">
+    <span class="rd__label">UP NEXT</span>
+    <span class="rd__next-title" id="rd-next-title">&mdash;</span>
+  </div>
+
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Infinite Radio",
+  "description": "AI-generated epic cinematic music streaming infinitely. Learns your taste locally. No data leaves your device.",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0" }
+}
+</script>
+
+<script type="module" src="/assets/radio/radio.js"></script>
+
+<style>
+/* ── Infinite Radio ─────────────────────────────── */
+.rd {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+}
+
+/* ── Status bar ─────────────────────────────────── */
+.rd__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+  font-size: 0.75rem;
+  color: var(--term-muted);
+  flex-shrink: 0;
+}
+
+.rd__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--term-muted);
+  flex-shrink: 0;
+}
+.rd__status-dot--idle      { background: var(--term-muted); }
+.rd__status-dot--loading   { background: var(--syn-amber); box-shadow: 0 0 6px var(--syn-amber); animation: rd-pulse 1.5s ease-in-out infinite; }
+.rd__status-dot--ready     { background: var(--syn-green);  box-shadow: 0 0 6px var(--syn-green); }
+.rd__status-dot--playing   { background: var(--syn-cyan);   box-shadow: 0 0 6px var(--syn-cyan);  animation: rd-pulse 1s ease-in-out infinite; }
+.rd__status-dot--error     { background: var(--syn-pink);   box-shadow: 0 0 6px var(--syn-pink); }
+
+@keyframes rd-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.rd__track-count {
+  margin-left: auto;
+  font-size: 0.65rem;
+  opacity: 0.5;
+}
+
+/* ── Now playing ────────────────────────────────── */
+.rd__now {
+  padding: 1.25rem 0.75rem 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+}
+
+.rd__label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+  margin-bottom: 0.4rem;
+}
+
+.rd__track {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.rd__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--term-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rd__mood {
+  font-size: 0.7rem;
+  color: var(--syn-purple);
+  text-transform: capitalize;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+/* ── Progress bar ───────────────────────────────── */
+.rd__progress {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.3rem;
+}
+
+.rd__progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--syn-cyan), var(--syn-purple));
+  border-radius: 2px;
+  transition: width 0.25s linear;
+}
+
+.rd__time {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--term-muted);
+}
+
+/* ── Controls ───────────────────────────────────── */
+.rd__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+}
+
+.rd__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--term-border);
+  background: none;
+  color: var(--term-fg);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.rd__btn:hover:not(:disabled) {
+  border-color: var(--syn-cyan);
+  color: var(--syn-cyan);
+}
+
+.rd__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.rd__btn--play {
+  width: 44px;
+  height: 44px;
+  background: rgba(34, 211, 238, 0.08);
+  border-color: rgba(34, 211, 238, 0.25);
+  color: var(--syn-cyan);
+}
+
+.rd__btn--play:hover:not(:disabled) {
+  background: rgba(34, 211, 238, 0.15);
+  border-color: var(--syn-cyan);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.2);
+}
+
+.rd__btn--play.playing {
+  background: rgba(34, 211, 238, 0.12);
+  border-color: var(--syn-cyan);
+}
+
+.rd__btn--like.liked {
+  color: var(--syn-pink);
+  border-color: rgba(244, 114, 182, 0.5);
+  background: rgba(244, 114, 182, 0.08);
+}
+
+/* ── Volume ─────────────────────────────────────── */
+.rd__volume-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  color: var(--term-muted);
+}
+
+.rd__volume {
+  width: 90px;
+  accent-color: var(--syn-cyan);
+  cursor: pointer;
+}
+
+/* ── Up next ────────────────────────────────────── */
+.rd__next {
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--term-muted);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.rd__next .rd__label {
+  display: inline;
+  margin-bottom: 0;
+}
+
+.rd__next-title {
+  color: var(--term-fg);
+  opacity: 0.5;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Responsive ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .rd__title {
+    font-size: 0.9rem;
+  }
+  .rd__volume {
+    width: 70px;
+  }
+}
+</style>

@@ -7,3 +7,5 @@ CLAUDE.md
 
 .superpowers/
 .playwright-mcp/
+custom_inference_engine.md
+webgpu_engine_guide.md

@@ -7,6 +7,8 @@ import {
   exportJSONL,
 } from "./preferences.js";
 
+const ART_BASE = "https://raw.githubusercontent.com/mentria-ai/radio-catalog/main/";
+
 const PLAY_SVG =
   '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>';
 const PAUSE_SVG =
@@ -38,6 +40,7 @@ class MentriaRadio {
       trackCount: document.getElementById("rd-track-count"),
       title: document.getElementById("rd-title"),
       mood: document.getElementById("rd-mood"),
+      art: document.getElementById("rd-art"),
       progressFill: document.getElementById("rd-progress-fill"),
       elapsed: document.getElementById("rd-elapsed"),
       duration: document.getElementById("rd-duration"),
@@ -262,6 +265,31 @@ class MentriaRadio {
     this.el.duration.textContent = formatTime(this.currentDuration);
     this.el.elapsed.textContent = "0:00";
     this.el.progressFill.style.width = "0%";
+
+    // Album art
+    const artFile = this.currentTrack.art;
+    if (artFile) {
+      this.el.art.src = ART_BASE + artFile;
+      this.el.art.alt = this.currentTrack.mood;
+    } else {
+      this.el.art.src = "";
+    }
+
+    // Media Session API — shows track info in OS media widgets
+    if ("mediaSession" in navigator) {
+      const artUrl = artFile ? ART_BASE + artFile : "";
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: this.currentTrack.title || "Untitled",
+        artist: "Mentria Infinite Radio",
+        album: (this.currentTrack.mood || "").replace(/_/g, " "),
+        artwork: artUrl ? [
+          { src: artUrl, sizes: "512x512", type: "image/jpeg" },
+        ] : [],
+      });
+      navigator.mediaSession.setActionHandler("play", () => this.player.resume());
+      navigator.mediaSession.setActionHandler("pause", () => this.player.pause());
+      navigator.mediaSession.setActionHandler("nexttrack", () => this.skip());
+    }
 
     const pref = this.preferences[this.currentTrack.id];
     this.el.like.classList.toggle("liked", !!(pref && pref.liked));

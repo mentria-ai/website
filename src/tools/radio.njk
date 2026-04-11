@@ -26,9 +26,12 @@ permalink: /tools/radio/index.html
   <!-- Now playing -->
   <div class="rd__now">
     <span class="rd__label">NOW PLAYING</span>
-    <div class="rd__track">
-      <span class="rd__title" id="rd-title">Press play to start</span>
-      <span class="rd__mood" id="rd-mood"></span>
+    <div class="rd__now-inner">
+      <img class="rd__art" id="rd-art" src="" alt="" aria-hidden="true">
+      <div class="rd__track-info">
+        <span class="rd__title" id="rd-title">Press play to start</span>
+        <span class="rd__mood" id="rd-mood"></span>
+      </div>
     </div>
     <div class="rd__progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
       <div class="rd__progress-fill" id="rd-progress-fill"></div>
@@ -127,6 +130,33 @@ permalink: /tools/radio/index.html
 .rd__now {
   padding: 1.25rem 0.75rem 0.75rem;
   border-bottom: 1px solid var(--term-border);
+}
+
+.rd__now-inner {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.rd__art {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: none;
+  border: 1px solid var(--term-border);
+}
+.rd__art[src]:not([src=""]) {
+  display: block;
+}
+
+.rd__track-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
 }
 
 .rd__label {

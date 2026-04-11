@@ -7,7 +7,7 @@ import {
   exportJSONL,
 } from "./preferences.js";
 
-const ART_BASE = "https://raw.githubusercontent.com/mentria-ai/radio-catalog/main/";
+const ART_BASE = "https://mentria-ai.github.io/radio-catalog/";
 
 const PLAY_SVG =
   '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>';

@@ -1,5 +1,5 @@
 const CATALOG_URL =
-  "https://raw.githubusercontent.com/mentria-ai/radio-catalog/main/catalog.json";
+  "https://mentria-ai.github.io/radio-catalog/catalog.json";
 
 let cache = null;
 

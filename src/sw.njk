@@ -41,23 +41,9 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
-  // GitHub release audio: fetch with no-cors to bypass Safari redirect issues,
-  // cache the opaque response, and serve from cache on repeat plays.
-  const url = event.request.url;
-  if (url.includes('github.com') && url.includes('releases/download')) {
-    event.respondWith(
-      caches.open('radio-audio-v1').then(cache =>
-        cache.match(event.request).then(hit => {
-          if (hit) return hit;
-          return fetch(event.request, { mode: 'no-cors', redirect: 'follow' }).then(res => {
-            cache.put(event.request, res.clone());
-            return res;
-          });
-        })
-      )
-    );
-    return;
-  }
+  // Don't intercept cross-origin requests (audio served from GitHub Pages)
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))

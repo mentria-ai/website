@@ -1,0 +1,784 @@
+---
+layout: base.njk
+title: Markdown → PDF
+description: Write markdown, see a live preview, and download a clean professional PDF. All processing stays in your browser.
+permalink: /tools/markdown-pdf/index.html
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">~/tools/markdown-pdf</p>
+  <h1>Markdown → PDF</h1>
+  <p>
+    Write markdown, see a live preview, and download a clean professional PDF. Auto-saves to your browser. No data leaves your device.
+  </p>
+</section>
+
+{% set terminalTitle = "markdown-pdf.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="mp">
+  <!-- Action bar -->
+  <div class="mp__actions no-print">
+    <button class="mp__btn mp__btn--primary" id="mp-download" title="Download as PDF (uses your browser's print dialog)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download PDF
+    </button>
+    <button class="mp__btn" id="mp-export" title="Download the markdown source as .md">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Export .md
+    </button>
+    <label class="mp__btn mp__btn--label" for="mp-file" title="Load markdown from a .md file">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import .md
+      <input type="file" id="mp-file" accept=".md,.markdown,text/markdown,text/plain" hidden>
+    </label>
+    <button class="mp__btn mp__btn--danger" id="mp-clear" title="Clear the editor and reset">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      Clear
+    </button>
+
+    <!-- Mobile tabs (hidden on desktop) -->
+    <div class="mp__tabs" role="tablist" aria-label="Switch between editor and preview">
+      <button class="mp__tab is-active" id="mp-tab-edit" role="tab" aria-selected="true" aria-controls="mp-input">Edit</button>
+      <button class="mp__tab" id="mp-tab-preview" role="tab" aria-selected="false" aria-controls="mp-preview">Preview</button>
+    </div>
+  </div>
+
+  <!-- Split panes -->
+  <div class="mp__panes">
+    <section class="mp__pane mp__pane--editor" data-tab="edit">
+      <header class="mp__pane-header no-print">
+        <span class="mp__pane-label">Markdown</span>
+      </header>
+      <textarea
+        class="mp__input"
+        id="mp-input"
+        spellcheck="false"
+        autocomplete="off"
+        autocapitalize="off"
+        placeholder="# Start writing…"
+      ></textarea>
+      <footer class="mp__pane-status no-print">
+        <span id="mp-counts">0 words · 0 chars</span>
+        <span id="mp-saved" class="mp__saved" aria-live="polite"></span>
+      </footer>
+    </section>
+
+    <section class="mp__pane mp__pane--preview" data-tab="preview" hidden>
+      <header class="mp__pane-header no-print">
+        <span class="mp__pane-label">Preview</span>
+      </header>
+      <article class="mp__preview" id="mp-preview" aria-live="polite"></article>
+    </section>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Markdown → PDF",
+  "operatingSystem": "Web",
+  "applicationCategory": "ProductivityApplication",
+  "description": "Write markdown in your browser, see a live preview, and download a clean professional PDF.",
+  "offers": { "@type": "Offer", "price": "0" }
+}
+</script>
+
+<script type="module">
+/* ─────────────────────────────────────────────────────────────────────
+   Markdown → PDF — vanilla JS + marked.js (loaded from jsDelivr ESM).
+   PDF is produced via the browser's print-to-PDF; no PDF libs needed.
+   ───────────────────────────────────────────────────────────────────── */
+
+const inputEl     = document.getElementById('mp-input');
+const previewEl   = document.getElementById('mp-preview');
+const countsEl    = document.getElementById('mp-counts');
+const savedEl     = document.getElementById('mp-saved');
+const downloadBtn = document.getElementById('mp-download');
+const exportBtn   = document.getElementById('mp-export');
+const clearBtn    = document.getElementById('mp-clear');
+const fileInput   = document.getElementById('mp-file');
+const tabEdit     = document.getElementById('mp-tab-edit');
+const tabPreview  = document.getElementById('mp-tab-preview');
+const editorPane  = document.querySelector('.mp__pane--editor');
+const previewPane = document.querySelector('.mp__pane--preview');
+
+const LS_KEY = 'mentria-mdpdf-content';
+
+const SAMPLE = `# Welcome to Markdown → PDF
+
+This is a quick demo so you can see how your document will print.
+**Edit on the left**, see the preview on the right, and click **Download PDF** when you're happy.
+
+## Features
+
+- GitHub-Flavored Markdown — tables, task lists, strikethrough
+- Clean code blocks
+- Fast live preview, debounced
+- Auto-saved to your browser
+
+### Code
+
+\`\`\`js
+function greet(name) {
+  return \`Hello, \${name}!\`;
+}
+\`\`\`
+
+### Table
+
+| Feature      | Status |
+| ------------ | :----: |
+| Tables       | ✓      |
+| Lists        | ✓      |
+| Code blocks  | ✓      |
+| Math (KaTeX) | later  |
+
+### Task list
+
+- [x] Type some markdown
+- [x] Watch the preview update
+- [ ] Hit **Download PDF**
+
+> Tip: in the print dialog, choose **Save as PDF** as the destination, set margins to *Default*, and turn off headers/footers for the cleanest result.
+
+---
+
+Made with [Mentria](https://mentria.ai).
+`;
+
+/* ── Load marked.js ──────────────────────────────────────────────── */
+let marked = null;
+try {
+  ({ marked } = await import('https://cdn.jsdelivr.net/npm/marked@13/+esm'));
+  marked.setOptions({ gfm: true, breaks: true, pedantic: false });
+} catch (err) {
+  console.error('Failed to load marked.js:', err);
+  previewEl.innerHTML = '<p style="color:var(--syn-pink);padding:1rem;">Couldn’t load the markdown library. Check your network or ad-blocker.</p>';
+  inputEl.disabled = true;
+  downloadBtn.disabled = true;
+}
+
+/* ── Render ─────────────────────────────────────────────────────── */
+let renderTimer = null;
+function scheduleRender() {
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(render, 100);
+}
+
+function render() {
+  if (!marked) return;
+  const scroll = previewEl.scrollTop;
+  const html = marked.parse(inputEl.value || '');
+  // Light safety net: strip raw <script> tags (real XSS sanitization is overkill
+  // for a single-user markdown tool; this just blocks the most obvious foot-gun).
+  previewEl.innerHTML = html.replace(/<script[\s\S]*?<\/script>/gi, '');
+  previewEl.scrollTop = scroll;
+  updateCounts();
+}
+
+function updateCounts() {
+  const text = inputEl.value || '';
+  const chars = text.length;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  countsEl.textContent = `${words.toLocaleString()} words · ${chars.toLocaleString()} chars`;
+}
+
+/* ── Persistence ────────────────────────────────────────────────── */
+let saveTimer = null;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(LS_KEY, inputEl.value);
+      flashSaved();
+    } catch (_) { /* quota etc. — ignore */ }
+  }, 500);
+}
+
+let flashTimer = null;
+function flashSaved() {
+  savedEl.textContent = 'Saved';
+  savedEl.classList.add('is-visible');
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => savedEl.classList.remove('is-visible'), 1200);
+}
+
+function loadInitial() {
+  let stored = null;
+  try { stored = localStorage.getItem(LS_KEY); } catch (_) {}
+  inputEl.value = (stored !== null && stored !== '') ? stored : SAMPLE;
+}
+
+/* ── PDF (via browser print) ────────────────────────────────────── */
+function slugify(s) {
+  return String(s || '')
+    .normalize('NFKD').replace(/[̀-ͯ]/g, '')   // strip diacritics
+    .replace(/[^A-Za-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase()
+    .slice(0, 64) || 'document';
+}
+
+function deriveTitle() {
+  const h1 = previewEl.querySelector('h1');
+  return (h1?.textContent?.trim()) || 'document';
+}
+
+function downloadPDF() {
+  // Setting document.title before print() makes most browsers default the
+  // PDF filename to that title.
+  const original = document.title;
+  document.title = slugify(deriveTitle());
+  // Make sure preview is fully rendered before printing
+  if (renderTimer) { clearTimeout(renderTimer); render(); }
+  window.print();
+  // Restore the title shortly after — Chrome/Edge/Safari finish the dialog
+  // synchronously enough that 1s is safe; Firefox handles it inline.
+  setTimeout(() => { document.title = original; }, 1000);
+}
+
+/* ── Export / Import .md ────────────────────────────────────────── */
+function exportMD() {
+  const filename = slugify(deriveTitle()) + '.md';
+  const blob = new Blob([inputEl.value || ''], { type: 'text/markdown;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function importMD(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    inputEl.value = e.target.result || '';
+    render();
+    scheduleSave();
+  };
+  reader.readAsText(file);
+}
+
+/* ── Tabs (mobile) ──────────────────────────────────────────────── */
+function setTab(tab) {
+  const editing = tab === 'edit';
+  tabEdit.classList.toggle('is-active', editing);
+  tabPreview.classList.toggle('is-active', !editing);
+  tabEdit.setAttribute('aria-selected', String(editing));
+  tabPreview.setAttribute('aria-selected', String(!editing));
+  // hidden attribute drives mobile-only display via CSS
+  editorPane.hidden  = !editing;
+  previewPane.hidden =  editing;
+}
+
+/* ── Events ─────────────────────────────────────────────────────── */
+inputEl.addEventListener('input', () => {
+  scheduleRender();
+  scheduleSave();
+});
+
+// Tab key inserts 2 spaces (instead of leaving the textarea)
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab' && !e.shiftKey) {
+    e.preventDefault();
+    const start = inputEl.selectionStart;
+    const end   = inputEl.selectionEnd;
+    const v = inputEl.value;
+    inputEl.value = v.slice(0, start) + '  ' + v.slice(end);
+    inputEl.selectionStart = inputEl.selectionEnd = start + 2;
+    scheduleRender();
+    scheduleSave();
+  }
+});
+
+downloadBtn.addEventListener('click', downloadPDF);
+exportBtn.addEventListener('click', exportMD);
+clearBtn.addEventListener('click', () => {
+  if (!confirm('Clear the editor? Your auto-saved draft will be lost.')) return;
+  inputEl.value = '';
+  try { localStorage.removeItem(LS_KEY); } catch (_) {}
+  render();
+});
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files?.[0];
+  if (file) importMD(file);
+  fileInput.value = '';
+});
+
+tabEdit.addEventListener('click', () => setTab('edit'));
+tabPreview.addEventListener('click', () => setTab('preview'));
+
+/* ── Init ───────────────────────────────────────────────────────── */
+loadInitial();
+render();
+// Both panes visible on desktop; tabs are no-ops there. On mobile (≤720px)
+// the CSS hides the inactive pane via `hidden`. Force a default tab state.
+setTab('edit');
+</script>
+
+<style>
+/* ── Tool shell ───────────────────────────────────────────────── */
+.mp {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  height: min(680px, 76vh);
+}
+
+/* ── Action bar ───────────────────────────────────────────────── */
+.mp__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid var(--term-border);
+  flex-shrink: 0;
+}
+.mp__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.45rem 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--term-border);
+  color: var(--term-fg);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.mp__btn:hover { border-color: rgba(255,255,255,0.18); }
+.mp__btn--primary {
+  background: var(--syn-cyan);
+  color: #000;
+  border-color: var(--syn-cyan);
+}
+.mp__btn--primary:hover {
+  background: #67e8f9;
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.3);
+}
+.mp__btn--danger { color: var(--syn-pink); border-color: rgba(244, 114, 182, 0.25); }
+.mp__btn--danger:hover {
+  background: rgba(244, 114, 182, 0.1);
+  border-color: rgba(244, 114, 182, 0.5);
+}
+.mp__btn--label { cursor: pointer; }
+.mp__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Mobile tabs (desktop hides them) */
+.mp__tabs {
+  display: none;
+  margin-left: auto;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--term-border);
+  border-radius: 5px;
+  padding: 2px;
+  gap: 2px;
+}
+.mp__tab {
+  background: transparent;
+  border: none;
+  color: var(--term-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.mp__tab.is-active {
+  background: var(--syn-cyan);
+  color: #000;
+}
+
+/* ── Split panes ──────────────────────────────────────────────── */
+.mp__panes {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--term-border);
+  min-height: 0;
+}
+.mp__pane {
+  display: flex;
+  flex-direction: column;
+  background: var(--term-bg);
+  min-height: 0;
+}
+.mp__pane[hidden] { display: none; }
+.mp__pane-header {
+  flex-shrink: 0;
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--term-muted);
+}
+.mp__pane-status {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0.75rem;
+  border-top: 1px solid var(--term-border);
+  font-size: 0.65rem;
+  color: var(--term-muted);
+}
+.mp__saved {
+  opacity: 0;
+  color: var(--syn-green);
+  transition: opacity 0.3s ease;
+}
+.mp__saved.is-visible { opacity: 1; }
+
+/* Editor */
+.mp__input {
+  flex: 1;
+  min-height: 0;
+  background: transparent;
+  border: none;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  padding: 0.85rem 1rem;
+  resize: none;
+  outline: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  tab-size: 2;
+}
+.mp__input::placeholder { color: var(--term-muted); opacity: 0.5; }
+
+/* Preview (on-screen, dark / Mentria) */
+.mp__preview {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1rem 1.25rem 2rem;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--term-fg);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.mp__preview > :first-child { margin-top: 0; }
+.mp__preview h1, .mp__preview h2, .mp__preview h3,
+.mp__preview h4, .mp__preview h5, .mp__preview h6 {
+  font-family: var(--font-mono);
+  line-height: 1.25;
+  margin: 1.6em 0 0.5em;
+}
+.mp__preview h1 { font-size: 1.7rem; color: var(--syn-cyan); }
+.mp__preview h2 {
+  font-size: 1.3rem; color: var(--syn-purple);
+  border-bottom: 1px solid var(--term-border);
+  padding-bottom: 0.3em;
+}
+.mp__preview h3 { font-size: 1.1rem; color: var(--syn-pink); }
+.mp__preview h4 { font-size: 1rem;   color: var(--term-fg); }
+.mp__preview h5 { font-size: 0.92rem; color: var(--term-fg); text-transform: uppercase; letter-spacing: 0.05em; }
+.mp__preview h6 { font-size: 0.85rem; color: var(--term-muted); }
+
+.mp__preview p   { margin: 0 0 0.9em; }
+.mp__preview ul, .mp__preview ol { margin: 0 0 0.9em; padding-left: 1.4em; }
+.mp__preview li  { margin: 0.2em 0; }
+.mp__preview ul ul, .mp__preview ol ol, .mp__preview ul ol, .mp__preview ol ul {
+  margin: 0.2em 0;
+}
+.mp__preview a { color: var(--syn-cyan); text-decoration: underline; text-decoration-color: rgba(34,211,238,0.4); }
+.mp__preview a:hover { color: #67e8f9; text-decoration-color: var(--syn-cyan); }
+
+.mp__preview blockquote {
+  margin: 0 0 0.9em;
+  padding: 0.4em 0.9em;
+  border-left: 3px solid var(--syn-cyan);
+  background: rgba(34, 211, 238, 0.05);
+  color: var(--term-muted);
+  font-style: italic;
+}
+.mp__preview blockquote p:last-child { margin-bottom: 0; }
+
+.mp__preview code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: rgba(251, 191, 36, 0.08);
+  color: var(--syn-amber);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+.mp__preview pre {
+  margin: 0 0 0.9em;
+  padding: 0.85em 1em;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--term-border);
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.mp__preview pre code {
+  background: transparent;
+  color: var(--term-fg);
+  padding: 0;
+  font-size: inherit;
+  border-radius: 0;
+}
+
+.mp__preview hr {
+  border: none;
+  border-top: 1px solid var(--term-border);
+  margin: 1.6em 0;
+}
+
+.mp__preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 0.9em;
+  font-size: 0.82rem;
+}
+.mp__preview th, .mp__preview td {
+  padding: 0.45em 0.7em;
+  border-bottom: 1px solid var(--term-border);
+  text-align: left;
+  vertical-align: top;
+}
+.mp__preview th {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--syn-purple);
+  border-bottom: 1.5px solid var(--term-border);
+}
+
+.mp__preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid var(--term-border);
+}
+
+.mp__preview input[type="checkbox"] {
+  margin-right: 0.4em;
+  accent-color: var(--syn-cyan);
+}
+.mp__preview ul:has(> li > input[type="checkbox"]) {
+  list-style: none;
+  padding-left: 0.2em;
+}
+
+.mp__preview strong { color: var(--term-fg); }
+.mp__preview em     { color: var(--term-fg); }
+.mp__preview del    { color: var(--term-muted); }
+
+/* Mobile — single pane with tabs */
+@media (max-width: 720px) {
+  .mp { height: min(560px, 75vh); }
+  .mp__tabs { display: inline-flex; }
+  .mp__panes { grid-template-columns: 1fr; }
+  /* `hidden` on the inactive pane handles which one's shown */
+  .mp__pane[hidden] { display: none; }
+}
+
+/* ── Print mode (clean professional A4) ───────────────────────── */
+@media print {
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 18mm 16mm;
+  }
+
+  /* Strip site chrome */
+  body {
+    background: #fff !important;
+    color: #111 !important;
+    display: block !important;
+  }
+  body::before, body::after { display: none !important; }
+  .site-header, .site-footer, .skip-link, .hero { display: none !important; }
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  .terminal-frame {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .terminal-frame__titlebar { display: none !important; }
+  .terminal-frame__body { padding: 0 !important; }
+  .no-print { display: none !important; }
+
+  /* Tool reset */
+  .mp { height: auto !important; display: block !important; }
+  .mp__panes {
+    display: block !important;
+    background: transparent !important;
+    gap: 0 !important;
+  }
+  .mp__pane--editor { display: none !important; }
+  .mp__pane--preview {
+    display: block !important;
+    background: transparent !important;
+  }
+  .mp__pane--preview[hidden] { display: block !important; }
+  .mp__pane-header, .mp__pane-status { display: none !important; }
+
+  /* The document itself — clean professional typography */
+  .mp__preview {
+    overflow: visible !important;
+    height: auto !important;
+    padding: 0 !important;
+    font-family: 'Charter', 'Iowan Old Style', 'Cambria', 'Georgia', 'Times New Roman', serif !important;
+    font-size: 11pt !important;
+    line-height: 1.55 !important;
+    color: #111 !important;
+  }
+
+  /* Headings — sans, bold, well-spaced */
+  .mp__preview h1, .mp__preview h2, .mp__preview h3,
+  .mp__preview h4, .mp__preview h5, .mp__preview h6 {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+    color: #111 !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .mp__preview h1 { font-size: 22pt !important; margin: 0 0 12pt; }
+  .mp__preview h2 { font-size: 16pt !important; margin: 16pt 0 8pt; }
+  .mp__preview h3 { font-size: 13pt !important; margin: 14pt 0 6pt; }
+  .mp__preview h4 { font-size: 11.5pt !important; margin: 12pt 0 4pt; }
+  .mp__preview h5 { font-size: 10.5pt !important; margin: 10pt 0 4pt; text-transform: uppercase; letter-spacing: 0.05em; }
+  .mp__preview h6 { font-size: 10pt !important; margin: 10pt 0 4pt; color: #555 !important; }
+
+  /* Paragraphs */
+  .mp__preview p {
+    margin: 0 0 8pt !important;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Lists */
+  .mp__preview ul, .mp__preview ol {
+    margin: 0 0 8pt !important;
+    padding-left: 18pt !important;
+  }
+  .mp__preview li { margin: 2pt 0 !important; }
+  .mp__preview li > p { margin: 0 0 4pt !important; }
+
+  /* Links — keep blue but readable on print */
+  .mp__preview a {
+    color: #0a558c !important;
+    text-decoration: underline !important;
+    text-decoration-color: #0a558c !important;
+  }
+
+  /* Blockquotes */
+  .mp__preview blockquote {
+    margin: 0 0 8pt !important;
+    padding: 4pt 12pt !important;
+    border-left: 3px solid #888 !important;
+    background: transparent !important;
+    color: #444 !important;
+    font-style: italic;
+    page-break-inside: avoid;
+  }
+
+  /* Code */
+  .mp__preview code {
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace !important;
+    font-size: 9.5pt !important;
+    background: #f3f3f3 !important;
+    color: #111 !important;
+    border-radius: 2px;
+    padding: 0.05em 0.3em;
+  }
+  .mp__preview pre {
+    margin: 0 0 8pt !important;
+    padding: 6pt 8pt !important;
+    background: #f6f6f6 !important;
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 3px;
+    font-size: 9pt !important;
+    line-height: 1.45 !important;
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    page-break-inside: avoid;
+  }
+  .mp__preview pre code {
+    background: transparent !important;
+    color: #111 !important;
+    padding: 0 !important;
+    font-size: inherit !important;
+  }
+
+  /* Tables */
+  .mp__preview table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 0 0 8pt !important;
+    font-size: 9.5pt !important;
+    page-break-inside: auto;
+  }
+  .mp__preview thead { display: table-header-group; }
+  .mp__preview tr { page-break-inside: avoid; }
+  .mp__preview th, .mp__preview td {
+    padding: 4pt 6pt !important;
+    border-bottom: 1px solid #ddd !important;
+    text-align: left;
+    vertical-align: top;
+    color: #111 !important;
+  }
+  .mp__preview th {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 9pt !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: #111 !important;
+    border-bottom: 1.5px solid #111 !important;
+  }
+
+  /* Horizontal rule */
+  .mp__preview hr {
+    border: none !important;
+    border-top: 1px solid #ccc !important;
+    margin: 14pt 0 !important;
+  }
+
+  /* Images */
+  .mp__preview img {
+    max-width: 100% !important;
+    height: auto !important;
+    border: none !important;
+    border-radius: 0 !important;
+    page-break-inside: avoid;
+  }
+
+  /* Task lists */
+  .mp__preview input[type="checkbox"] {
+    margin-right: 4pt;
+    accent-color: #111;
+  }
+
+  .mp__preview strong { color: #111 !important; font-weight: 700; }
+  .mp__preview em     { color: #111 !important; font-style: italic; }
+  .mp__preview del    { color: #888 !important; }
+}
+</style>

@@ -1,0 +1,1118 @@
+---
+layout: base.njk
+title: Invoice Generator
+description: Build clean, single-page invoices in your browser. Auto-saves as you type, prints to A4, exports/imports JSON. No data leaves your device.
+permalink: /tools/invoice/index.html
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">~/tools/invoice</p>
+  <h1>Invoice Generator</h1>
+  <p>
+    Build clean, single-page invoices in your browser. Auto-saves as you type. Print to A4 or export to JSON.
+  </p>
+</section>
+
+{% set terminalTitle = "invoice.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="iv">
+  <!-- Action bar (hidden on print) -->
+  <div class="iv__actions no-print">
+    <button class="iv__btn iv__btn--primary" id="iv-print" title="Print invoice / Save as PDF">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print / Save PDF
+    </button>
+    <button class="iv__btn" id="iv-export" title="Export invoice as JSON">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export JSON
+    </button>
+    <label class="iv__btn iv__btn--label" for="iv-file" title="Import an invoice JSON file">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import JSON
+      <input type="file" id="iv-file" accept="application/json,.json" hidden>
+    </label>
+    <button class="iv__btn iv__btn--danger" id="iv-clear" title="Clear all saved invoice data">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      Clear
+    </button>
+  </div>
+
+  <!-- The printable invoice document -->
+  <div class="iv__doc" id="iv-doc">
+    <div class="iv__header">
+      <div class="iv__title">INVOICE</div>
+    </div>
+
+    <div class="iv__parties">
+      <div class="iv__section">
+        <div class="iv__section-title">From</div>
+        <input class="iv__input iv__input--heavy" type="text" id="nameInp" placeholder="Your name" value="John Doe">
+        <label class="iv__label" for="addr1Inp">Address</label>
+        <input class="iv__input" type="text" id="addr1Inp" placeholder="Address line 1">
+        <input class="iv__input" type="text" id="addr2Inp" placeholder="Address line 2">
+        <label class="iv__label" for="phoneInp">Phone</label>
+        <input class="iv__input" type="tel" id="phoneInp" placeholder="Phone number">
+        <label class="iv__label" for="emailInp">Email</label>
+        <input class="iv__input" type="email" id="emailInp" placeholder="Email">
+        <input class="iv__input" type="text" id="extraInp" placeholder="Extra info (optional)">
+      </div>
+
+      <div class="iv__section">
+        <div class="iv__section-title">Bill To</div>
+        <input class="iv__input iv__input--heavy" type="text" id="companyNameInp" placeholder="Company name">
+        <input class="iv__input" type="text" id="companyStreetInp" placeholder="Street">
+        <input class="iv__input" type="text" id="companyCityInp" placeholder="City / postcode">
+        <input class="iv__input" type="text" id="companyCountryInp" placeholder="Country">
+        <label class="iv__label" for="companyVatInp">VAT</label>
+        <input class="iv__input" type="text" id="companyVatInp" placeholder="VAT number">
+      </div>
+    </div>
+
+    <div class="iv__meta">
+      <div class="iv__meta-left">
+        <p>
+          <span class="iv__meta-label">Invoice #:</span>
+          <input class="iv__meta-input" type="text" id="invnoInp" placeholder="0001">
+        </p>
+        <p>
+          <span class="iv__meta-label">Invoice date:</span>
+          <input class="iv__meta-input iv__meta-input--date" type="date" id="invoiceDate">
+        </p>
+        <p class="no-print">
+          <span class="iv__meta-label">Currency:</span>
+          <select class="iv__meta-input" id="currencyInp">
+            <option value="₹">INR ₹</option>
+            <option value="€">EUR €</option>
+            <option value="$">USD $</option>
+          </select>
+        </p>
+      </div>
+      <div class="iv__meta-right">
+        <p class="iv__amount-label">Amount due</p>
+        <p class="iv__amount-value">
+          <span class="grand-total">0</span><span class="currency">₹</span>
+        </p>
+      </div>
+    </div>
+
+    <table class="iv__table">
+      <thead>
+        <tr>
+          <th class="iv__col-desc">Description</th>
+          <th class="iv__col-sac">SAC Code</th>
+          <th class="iv__col-qty">Quantity</th>
+          <th class="iv__col-price">Unit Price</th>
+          <th class="iv__col-total">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <span class="remove-row no-print" title="Remove row" aria-label="Remove row">−</span>
+            <textarea id="desc1Inp" placeholder="Line description" rows="1"></textarea>
+          </td>
+          <td><input id="sac1Inp" type="text" value="998314" placeholder="______"></td>
+          <td><input id="qty1Inp" class="input-qty-cell" type="text" value="1" placeholder="QTY" pattern="^[0-9]+$" inputmode="numeric"></td>
+          <td>
+            <span class="iv__cell-price">
+              <input id="price1Inp" class="input-price-cell" type="text" value="0" placeholder="0.00" pattern="^[0-9]+(\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
+            </span>
+          </td>
+          <td><span class="line-total">0</span><span class="currency">₹</span></td>
+        </tr>
+        <tr class="last-row">
+          <td class="last-row-first-col" colspan="4">
+            <span class="add-row no-print" title="Add row" aria-label="Add row">+</span>
+            <span class="last-row-label">Total</span>
+          </td>
+          <td class="total"><span class="grand-total">0</span><span class="currency">₹</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="iv__section iv__notes">
+      <div class="iv__section-title">Notes</div>
+      <textarea
+        id="notesInp"
+        class="iv__notes-input"
+        rows="2"
+        placeholder="Footnotes for line items, terms, payment instructions, etc.&#10;e.g.  * Subject to additional taxes.&#10;     ** Includes hosting for 12 months."
+      ></textarea>
+    </div>
+
+    <div class="iv__section iv__bank">
+      <div class="iv__section-title">Bank Account Details</div>
+      <label class="iv__label" for="panInp">PAN number</label>
+      <input class="iv__input" type="text" id="panInp" placeholder="PAN number">
+      <label class="iv__label" for="bankAccNoInp">Bank Account Number</label>
+      <input class="iv__input" type="text" id="bankAccNoInp" placeholder="Bank account number">
+      <label class="iv__label" for="accHolderNameInp">Account Holder Name</label>
+      <input class="iv__input" type="text" id="accHolderNameInp" placeholder="Account holder name">
+      <label class="iv__label" for="ifscCodeInp">IFSC Code</label>
+      <input class="iv__input" type="text" id="ifscCodeInp" placeholder="IFSC code">
+      <label class="iv__label" for="bankNameInp">Bank Name</label>
+      <input class="iv__input" type="text" id="bankNameInp" placeholder="Bank name">
+      <p class="iv__declaration">
+        I hereby solemnly affirm and declare that the information furnished
+        above is accurate and complete to the best of my knowledge and belief.
+        I acknowledge that I am solely responsible for compliance with all
+        applicable tax laws, including the filing of returns and payment of
+        taxes to the Income Tax Department of India.
+      </p>
+    </div>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Invoice Generator",
+  "operatingSystem": "Web",
+  "applicationCategory": "BusinessApplication",
+  "description": "Build clean, single-page invoices in your browser. Auto-saves, prints to A4, supports JSON import/export.",
+  "offers": { "@type": "Offer", "price": "0" }
+}
+</script>
+
+<script>
+(() => {
+  /* ── Constants ─────────────────────────────────────── */
+  // Prefix LS keys to avoid collisions with other tools
+  const LS = 'mentria-iv-';
+
+  /* ── DOM refs ──────────────────────────────────────── */
+  const table            = document.querySelector('.iv__table');
+  const currencyInput    = document.getElementById('currencyInp');
+  const invoiceDateInput = document.getElementById('invoiceDate');
+  const fileInput        = document.getElementById('iv-file');
+  const printBtn         = document.getElementById('iv-print');
+  const exportBtn        = document.getElementById('iv-export');
+  const clearBtn         = document.getElementById('iv-clear');
+
+  /* ── Persistence ───────────────────────────────────── */
+  const restore = (el) => {
+    const v = localStorage.getItem(LS + el.id);
+    if (v !== null) el.value = v;
+  };
+  const persist = (el) => localStorage.setItem(LS + el.id, el.value);
+
+  /* ── Validation / sanitization ─────────────────────── */
+  const validateInputPattern = (input) => {
+    const pattern = input.getAttribute('pattern');
+    if (pattern && !new RegExp(`^${pattern}$`).test(input.value)) {
+      input.value = '';
+    }
+  };
+  const sanitizeDecimalInput = (value) => {
+    let s = value.replace(/[^0-9.]/g, '');
+    const dot = s.indexOf('.');
+    if (dot !== -1) {
+      s = s.slice(0, dot + 1) + s.slice(dot + 1).replace(/\./g, '');
+    }
+    if (s.startsWith('.')) s = '0' + s;
+    return s;
+  };
+
+  /* ── Layout / dates ────────────────────────────────── */
+  const autoResizeTextarea = (ta) => {
+    ta.style.height = 'auto';
+    ta.style.height = Math.max(ta.scrollHeight, 38.4) + 'px';
+  };
+  const setCurrentDateIfEmpty = () => {
+    if (!invoiceDateInput.value) {
+      invoiceDateInput.value = new Date().toISOString().split('T')[0];
+      persist(invoiceDateInput);
+    }
+  };
+
+  /* ── Math ──────────────────────────────────────────── */
+  const roundToTwo = (n) => (typeof n !== 'number' || isNaN(n))
+    ? 0 : Math.round((n + Number.EPSILON) * 100) / 100;
+  const formatToTwo = (n) => parseFloat(roundToTwo(n).toFixed(2)).toString();
+
+  const calculateLineTotal = (row) => {
+    const qty   = parseInt(row.querySelector('.input-qty-cell')?.value, 10);
+    const price = parseFloat(row.querySelector('.input-price-cell')?.value);
+    const total = (!isNaN(qty) && !isNaN(price)) ? qty * price : 0;
+    row.querySelector('.line-total').textContent = formatToTwo(total);
+  };
+  const calculateGrandTotal = () => {
+    const lineTotals = Array.from(document.querySelectorAll('.line-total'));
+    const grand = lineTotals.reduce((acc, el) => {
+      const v = parseFloat(el.textContent);
+      return acc + (isNaN(v) ? 0 : v);
+    }, 0);
+    document.querySelectorAll('.grand-total').forEach(el => {
+      el.textContent = formatToTwo(grand);
+    });
+  };
+
+  /* ── Currency ──────────────────────────────────────── */
+  const changeCurrency = () => {
+    const c = currencyInput.value;
+    document.querySelectorAll('.currency').forEach(el => el.textContent = c);
+  };
+
+  /* ── HTML escaping for templated row ───────────────── */
+  const esc = (s) => String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  /* ── Row management ────────────────────────────────── */
+  const addRow = (data) => {
+    const tbody        = table.querySelector('tbody');
+    const existingRows = Array.from(tbody.children).slice(0, -1); // exclude total row
+    const rowIndex     = existingRows.length + 1;
+
+    const isEmpty = !data || Object.keys(data).length === 0;
+    if (isEmpty) {
+      data = { Description: '', 'SAC code': '998314', Quantity: '1', 'Unit Price': '0' };
+    }
+
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+      <td>
+        <span class="remove-row no-print" title="Remove row" aria-label="Remove row">−</span>
+        <textarea id="desc${rowIndex}Inp" placeholder="Line description" rows="1">${esc(data.Description)}</textarea>
+      </td>
+      <td><input id="sac${rowIndex}Inp" type="text" value="${esc(data['SAC code'] ?? '')}" placeholder="______"></td>
+      <td><input id="qty${rowIndex}Inp" class="input-qty-cell" type="text" value="${esc(data.Quantity ?? '1')}" placeholder="QTY" pattern="^[0-9]+$" inputmode="numeric"></td>
+      <td>
+        <span class="iv__cell-price">
+          <input id="price${rowIndex}Inp" class="input-price-cell" type="text" value="${esc(data['Unit Price'] ?? '0')}" placeholder="0.00" pattern="^[0-9]+(\\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
+        </span>
+      </td>
+      <td><span class="line-total">0</span><span class="currency">₹</span></td>
+    `;
+    tbody.insertBefore(newRow, tbody.lastElementChild);
+
+    // Wire persistence for this row's fields
+    newRow.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(el => {
+      // If we're rebuilding from LS replay, prefer LS value over the templated one
+      restore(el);
+      el.addEventListener('input', () => persist(el));
+      el.dataset.wired = '1';
+    });
+    newRow.querySelectorAll('textarea').forEach(autoResizeTextarea);
+
+    // Persist the templated values immediately so reload reconstructs the row
+    if (!isEmpty || localStorage.getItem(LS + `desc${rowIndex}Inp`) === null) {
+      newRow.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(persist);
+    }
+
+    changeCurrency();
+    calculateLineTotal(newRow);
+    calculateGrandTotal();
+  };
+
+  const removeRow = (event) => {
+    if (!event.target.classList.contains('remove-row')) return;
+    const row = event.target.closest('tr');
+    row.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(el => {
+      localStorage.removeItem(LS + el.id);
+    });
+    row.remove();
+    calculateGrandTotal();
+  };
+
+  /* ── Import / Export ───────────────────────────────── */
+  const FROM_FIELDS = ['nameInp','addr1Inp','addr2Inp','phoneInp','emailInp','extraInp'];
+  const BILL_FIELDS = ['companyNameInp','companyStreetInp','companyCityInp','companyCountryInp','companyVatInp'];
+  const META_FIELDS = ['invnoInp','invoiceDate','currencyInp'];
+  const BANK_FIELDS = ['panInp','bankAccNoInp','accHolderNameInp','ifscCodeInp','bankNameInp'];
+
+  const collectFields = (ids) => {
+    const out = {};
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) out[id] = el.value;
+    });
+    return out;
+  };
+
+  const collectLines = () => {
+    const tbody = table.querySelector('tbody');
+    const rows  = Array.from(tbody.children).slice(0, -1);
+    return rows.map(row => ({
+      Description:  row.querySelector('textarea')?.value || '',
+      'SAC code':   row.querySelector('input[id^="sac"]')?.value || '',
+      Quantity:     row.querySelector('.input-qty-cell')?.value || '',
+      'Unit Price': row.querySelector('.input-price-cell')?.value || ''
+    }));
+  };
+
+  const exportJSON = () => {
+    const payload = {
+      version: 1,
+      from:    collectFields(FROM_FIELDS),
+      billTo:  collectFields(BILL_FIELDS),
+      meta:    collectFields(META_FIELDS),
+      lines:   collectLines(),
+      notes:   document.getElementById('notesInp')?.value || '',
+      bank:    collectFields(BANK_FIELDS)
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const inv  = (document.getElementById('invnoInp')?.value || 'draft').replace(/[^A-Za-z0-9_-]/g, '');
+    const date = invoiceDateInput.value || new Date().toISOString().split('T')[0];
+    a.href = url;
+    a.download = `invoice-${inv || 'draft'}-${date}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const applyFields = (ids, obj) => {
+    if (!obj) return;
+    ids.forEach(id => {
+      if (obj[id] !== undefined) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.value = obj[id];
+          persist(el);
+        }
+      }
+    });
+  };
+
+  const replaceLines = (lines) => {
+    if (!Array.isArray(lines)) return;
+    const tbody = table.querySelector('tbody');
+
+    // Drop dynamic rows (skip first + last total row)
+    const dynamicRows = Array.from(tbody.children).slice(1, -1);
+    dynamicRows.forEach(row => {
+      row.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]')
+         .forEach(el => localStorage.removeItem(LS + el.id));
+      row.remove();
+    });
+
+    if (lines.length === 0) {
+      calculateGrandTotal();
+      return;
+    }
+
+    // Apply first line into existing row 1
+    const firstRow = tbody.children[0];
+    const setIf = (sel, val) => {
+      const el = firstRow.querySelector(sel);
+      if (el && val !== undefined) {
+        el.value = val;
+        persist(el);
+      }
+    };
+    const f = lines[0];
+    setIf('textarea[id^="desc"]', f.Description);
+    setIf('input[id^="sac"]',     f['SAC code']);
+    setIf('.input-qty-cell',      f.Quantity);
+    setIf('.input-price-cell',    f['Unit Price']);
+    autoResizeTextarea(firstRow.querySelector('textarea'));
+    calculateLineTotal(firstRow);
+
+    // Append the rest as new rows
+    for (let i = 1; i < lines.length; i++) addRow(lines[i]);
+    calculateGrandTotal();
+  };
+
+  const importJSON = (text) => {
+    let parsed;
+    try { parsed = JSON.parse(text); }
+    catch { alert('Invalid JSON file.'); return; }
+
+    if (Array.isArray(parsed)) {
+      // Legacy: array of line items
+      replaceLines(parsed);
+    } else if (parsed && typeof parsed === 'object') {
+      applyFields(FROM_FIELDS, parsed.from);
+      applyFields(BILL_FIELDS, parsed.billTo);
+      applyFields(META_FIELDS, parsed.meta);
+      applyFields(BANK_FIELDS, parsed.bank);
+      if (typeof parsed.notes === 'string') {
+        const notesEl = document.getElementById('notesInp');
+        if (notesEl) {
+          notesEl.value = parsed.notes;
+          persist(notesEl);
+          autoResizeTextarea(notesEl);
+        }
+      }
+      changeCurrency();
+      replaceLines(parsed.lines || []);
+    } else {
+      alert('Unrecognised JSON format.');
+    }
+  };
+
+  /* ── Event wiring ──────────────────────────────────── */
+  table.addEventListener('click', removeRow);
+
+  table.addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.tagName === 'INPUT') {
+      if (t.classList.contains('input-price-cell')) {
+        const before = t.value;
+        const after  = sanitizeDecimalInput(before);
+        if (before !== after) {
+          const pos = (t.selectionStart || 0) - (before.length - after.length);
+          t.value = after;
+          if (!isNaN(pos)) t.setSelectionRange(Math.max(0, pos), Math.max(0, pos));
+        }
+      } else {
+        validateInputPattern(t);
+      }
+      if (t.classList.contains('input-qty-cell') ||
+          t.classList.contains('input-price-cell')) {
+        calculateLineTotal(t.closest('tr'));
+        calculateGrandTotal();
+      }
+    } else if (t.tagName === 'TEXTAREA') {
+      autoResizeTextarea(t);
+    }
+  });
+
+  table.addEventListener('focusout', (e) => {
+    const t = e.target;
+    if (t.tagName !== 'INPUT') return;
+    validateInputPattern(t);
+    if (t.classList.contains('input-price-cell')) {
+      if (t.value === '.') t.value = '0';
+      else if (/^\d+\.$/.test(t.value)) t.value = t.value.slice(0, -1);
+      calculateLineTotal(t.closest('tr'));
+      calculateGrandTotal();
+    }
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.type !== 'application/json' && !file.name.toLowerCase().endsWith('.json')) {
+      alert('Please select a JSON file.');
+      fileInput.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      importJSON(ev.target.result);
+      fileInput.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  document.querySelector('.add-row').addEventListener('click', () => addRow());
+  currencyInput.addEventListener('change', changeCurrency);
+  printBtn.addEventListener('click', () => window.print());
+  exportBtn.addEventListener('click', exportJSON);
+  clearBtn.addEventListener('click', () => {
+    if (!confirm('Clear all saved invoice data? This cannot be undone.')) return;
+    Object.keys(localStorage)
+      .filter(k => k.startsWith(LS))
+      .forEach(k => localStorage.removeItem(k));
+    location.reload();
+  });
+
+  /* ── Init ──────────────────────────────────────────── */
+  // 1. Recreate dynamic rows from LS (rows beyond row 1)
+  let rowIndex = 2;
+  while (
+    localStorage.getItem(LS + `desc${rowIndex}Inp`)  !== null ||
+    localStorage.getItem(LS + `qty${rowIndex}Inp`)   !== null ||
+    localStorage.getItem(LS + `price${rowIndex}Inp`) !== null
+  ) {
+    addRow();
+    rowIndex++;
+  }
+
+  // 2. Restore + wire all fields not already wired by addRow
+  document.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"], select[id$="Inp"], #invoiceDate')
+    .forEach(el => {
+      if (el.dataset.wired) return;
+      restore(el);
+      const handler = () => persist(el);
+      el.addEventListener('input', handler);
+      el.addEventListener('change', handler);
+      el.dataset.wired = '1';
+    });
+
+  // 3. Apply currency, recompute totals, resize textareas
+  changeCurrency();
+  Array.from(table.querySelector('tbody').children).slice(0, -1).forEach(calculateLineTotal);
+  calculateGrandTotal();
+  document.querySelectorAll('textarea[id$="Inp"]').forEach(autoResizeTextarea);
+
+  // Auto-resize for textareas outside the table (notes etc.) on input —
+  // the table's delegated handler doesn't reach them.
+  document.querySelectorAll('.iv__doc textarea[id$="Inp"]').forEach(ta => {
+    if (!ta.closest('.iv__table')) {
+      ta.addEventListener('input', () => autoResizeTextarea(ta));
+    }
+  });
+
+  // 4. Auto-set today's date (only if no stored value)
+  setCurrentDateIfEmpty();
+})();
+</script>
+
+<style>
+/* ─── Edit mode (terminal/synthwave aesthetic) ────────────────────────── */
+.iv {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+/* Action bar */
+.iv__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+}
+.iv__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.45rem 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--term-border);
+  color: var(--term-fg);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.iv__btn:hover { border-color: rgba(255,255,255,0.18); }
+.iv__btn--primary {
+  background: var(--syn-cyan);
+  color: #000;
+  border-color: var(--syn-cyan);
+}
+.iv__btn--primary:hover {
+  background: #67e8f9;
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.3);
+}
+.iv__btn--danger {
+  color: var(--syn-pink);
+  border-color: rgba(244, 114, 182, 0.25);
+}
+.iv__btn--danger:hover {
+  background: rgba(244, 114, 182, 0.1);
+  border-color: rgba(244, 114, 182, 0.5);
+}
+.iv__btn--label { cursor: pointer; }
+
+/* Document container */
+.iv__doc {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--term-border);
+  border-radius: 6px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Header */
+.iv__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--term-border);
+  padding-bottom: 0.75rem;
+}
+.iv__title {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  letter-spacing: 0.18em;
+  color: var(--syn-cyan);
+}
+
+/* Parties grid */
+.iv__parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.iv__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.iv__section-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--syn-purple);
+  margin-bottom: 0.25rem;
+}
+.iv__label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+  margin-top: 0.35rem;
+}
+
+/* Inputs */
+.iv__input {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--term-border);
+  border-radius: 4px;
+  padding: 0.45rem 0.6rem;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+.iv__input:focus {
+  outline: none;
+  border-color: rgba(34,211,238,0.45);
+}
+.iv__input::placeholder { color: var(--term-muted); opacity: 0.55; }
+.iv__input--heavy { font-weight: 700; font-size: 0.95rem; }
+
+/* Meta row */
+.iv__meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--term-border);
+  border-bottom: 1px solid var(--term-border);
+}
+.iv__meta p {
+  margin: 0.25rem 0;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.iv__meta-label {
+  color: var(--term-muted);
+  font-size: 0.7rem;
+  min-width: 6.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.iv__meta-input {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--term-border);
+  border-radius: 4px;
+  padding: 0.3rem 0.55rem;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.iv__meta-input:focus {
+  outline: none;
+  border-color: rgba(34,211,238,0.45);
+}
+.iv__meta-right { text-align: right; }
+.iv__amount-label {
+  margin: 0 !important;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--term-muted);
+  display: block !important;
+}
+.iv__amount-value {
+  margin: 0.25rem 0 0 !important;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--syn-amber);
+  display: block !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Table */
+.iv__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  table-layout: fixed;
+}
+.iv__col-desc  { width: 42%; }
+.iv__col-sac   { width: 14%; }
+.iv__col-qty   { width: 11%; }
+.iv__col-price { width: 17%; }
+.iv__col-total { width: 16%; text-align: right; }
+
+.iv__table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--syn-purple);
+  border-bottom: 1px solid var(--term-border);
+  padding: 0.5rem 0.6rem;
+}
+.iv__table td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: top;
+}
+.iv__col-total, td.total { text-align: right; }
+
+.iv__table input,
+.iv__table textarea {
+  background: transparent;
+  border: 1px dashed transparent;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 3px;
+  width: 100%;
+  resize: none;
+}
+.iv__table input:focus,
+.iv__table textarea:focus {
+  outline: none;
+  border-color: rgba(34,211,238,0.45);
+  background: rgba(255,255,255,0.03);
+}
+.iv__table textarea {
+  min-height: 38.4px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+.line-total, .grand-total { font-variant-numeric: tabular-nums; }
+
+/* Price cell — keep input + currency symbol inline */
+.iv__cell-price {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  width: 100%;
+}
+.iv__table .input-price-cell {
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Add / remove row buttons */
+.remove-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: rgba(244, 114, 182, 0.1);
+  color: var(--syn-pink);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-right: 0.35rem;
+  user-select: none;
+  vertical-align: middle;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.remove-row:hover { background: var(--syn-pink); color: #000; }
+
+.add-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--syn-green);
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-right: 0.6rem;
+  user-select: none;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.add-row:hover { background: var(--syn-green); color: #000; }
+
+.last-row td { border-bottom: none; padding-top: 0.85rem; }
+.last-row-first-col {
+  text-align: right;
+  color: var(--term-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.last-row-label { vertical-align: middle; }
+td.total {
+  color: var(--syn-amber);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* Currency */
+.currency {
+  color: var(--term-muted);
+  margin-left: 0.15rem;
+  font-size: 0.75rem;
+}
+.iv__amount-value .currency,
+td.total .currency {
+  color: var(--syn-amber);
+  font-size: 0.85rem;
+}
+
+/* Notes */
+.iv__notes-input {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--term-border);
+  border-radius: 4px;
+  padding: 0.55rem 0.7rem;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  width: 100%;
+  resize: vertical;
+  line-height: 1.5;
+  min-height: 3rem;
+  transition: border-color 0.2s ease;
+  white-space: pre-wrap;
+}
+.iv__notes-input:focus {
+  outline: none;
+  border-color: rgba(34,211,238,0.45);
+}
+.iv__notes-input::placeholder {
+  color: var(--term-muted);
+  opacity: 0.5;
+  white-space: pre-wrap;
+}
+
+/* Bank */
+.iv__bank .iv__declaration {
+  margin-top: 0.85rem;
+  font-size: 0.72rem;
+  color: var(--term-muted);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* Mobile */
+@media (max-width: 720px) {
+  .iv__doc { padding: 1rem; }
+  .iv__parties, .iv__meta { grid-template-columns: 1fr; }
+  .iv__meta-right { text-align: left; }
+  .iv__title { font-size: 1.3rem; }
+  .iv__table { font-size: 0.72rem; table-layout: auto; }
+  .iv__table th, .iv__table td { padding: 0.4rem 0.35rem; }
+  .iv__col-desc, .iv__col-sac, .iv__col-qty, .iv__col-price, .iv__col-total { width: auto; }
+  .iv__meta-label { min-width: 5.5rem; }
+  .iv__amount-value { font-size: 1.25rem; }
+}
+
+/* ─── Print mode (clean A4, single page where possible) ───────────────── */
+@media print {
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  /* Strip site chrome */
+  body {
+    background: #fff !important;
+    color: #111 !important;
+    display: block !important;
+  }
+  body::before, body::after { display: none !important; }
+  .site-header, .site-footer, .skip-link { display: none !important; }
+  .hero { display: none !important; }
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  .terminal-frame {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .terminal-frame__titlebar { display: none !important; }
+  .terminal-frame__body { padding: 0 !important; }
+  .no-print { display: none !important; }
+
+  /* Tool reset */
+  .iv {
+    padding: 0 !important;
+    gap: 0 !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    color: #111 !important;
+  }
+  .iv__doc {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    gap: 12px !important;
+    font-size: 10pt !important;
+    color: #111 !important;
+  }
+
+  /* Header */
+  .iv__header {
+    border-bottom: 2px solid #111 !important;
+    padding-bottom: 6px !important;
+  }
+  .iv__title {
+    color: #111 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 22pt !important;
+    letter-spacing: 0.18em !important;
+  }
+
+  /* Section titles & labels */
+  .iv__section-title {
+    color: #444 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 8pt !important;
+    letter-spacing: 0.1em !important;
+    margin-bottom: 4px !important;
+  }
+  .iv__label {
+    color: #666 !important;
+    font-size: 7pt !important;
+    margin-top: 4px !important;
+  }
+
+  /* Parties */
+  .iv__parties { gap: 18px !important; page-break-inside: avoid; }
+  .iv__section { gap: 2px !important; }
+
+  /* Inputs render as flat text, no borders */
+  .iv__input,
+  .iv__meta-input {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: #111 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 10pt !important;
+    line-height: 1.35 !important;
+  }
+  .iv__input--heavy { font-weight: 700 !important; font-size: 11pt !important; }
+
+  /* Hide empty inputs and their labels for a clean print */
+  .iv__input:placeholder-shown { display: none !important; }
+  .iv__label:has(+ .iv__input:placeholder-shown) { display: none !important; }
+
+  /* Meta */
+  .iv__meta {
+    border-top: 1px solid #ccc !important;
+    border-bottom: 1px solid #ccc !important;
+    padding: 6px 0 !important;
+    gap: 18px !important;
+    page-break-inside: avoid;
+  }
+  .iv__meta p { font-size: 9pt !important; }
+  .iv__meta-label {
+    color: #444 !important;
+    font-size: 8pt !important;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    min-width: 6rem !important;
+  }
+  .iv__amount-label {
+    color: #444 !important;
+    font-size: 8pt !important;
+  }
+  .iv__amount-value {
+    color: #111 !important;
+    font-size: 14pt !important;
+  }
+
+  /* Table */
+  .iv__table {
+    font-size: 9pt !important;
+    page-break-inside: auto;
+  }
+  .iv__table thead { display: table-header-group; }
+  .iv__table tr { page-break-inside: avoid; }
+  .iv__table th {
+    color: #333 !important;
+    border-bottom: 1.5px solid #111 !important;
+    padding: 4px 6px !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 7.5pt !important;
+  }
+  .iv__table td {
+    border-bottom: 1px solid #eee !important;
+    padding: 4px 6px !important;
+    color: #111 !important;
+  }
+  .iv__table input,
+  .iv__table textarea {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: #111 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 9pt !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    resize: none !important;
+  }
+
+  /* Strip neon colors */
+  .currency,
+  .iv__amount-value .currency,
+  td.total .currency { color: inherit !important; margin-left: 0.1em; }
+  td.total {
+    color: #111 !important;
+    font-weight: 700 !important;
+    font-size: 10pt !important;
+  }
+  .last-row-first-col {
+    color: #444 !important;
+    font-size: 8pt !important;
+  }
+  .last-row td { padding-top: 6px !important; }
+
+  /* Notes */
+  .iv__notes { page-break-inside: avoid; }
+  /* Hide the entire notes block on print if the textarea is empty */
+  .iv__notes:has(.iv__notes-input:placeholder-shown) { display: none !important; }
+  .iv__notes .iv__section-title {
+    margin-bottom: 4px !important;
+  }
+  .iv__notes-input {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: #333 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 8.5pt !important;
+    line-height: 1.5 !important;
+    resize: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+  }
+
+  /* Bank */
+  .iv__bank { page-break-inside: avoid; }
+  .iv__bank .iv__declaration {
+    color: #444 !important;
+    font-size: 8pt !important;
+    margin-top: 8px !important;
+    font-family: 'Inter', sans-serif !important;
+    line-height: 1.5 !important;
+  }
+}
+</style>

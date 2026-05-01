@@ -52,5 +52,11 @@
     "title": "Infinite Radio",
     "summary": "AI-generated epic cinematic music streaming infinitely. Learns your taste locally. No data leaves your device.",
     "category": "AI"
+  },
+  {
+    "slug": "invoice",
+    "title": "Invoice Generator",
+    "summary": "Build clean, single-page invoices in your browser. Auto-saves, prints to A4, exports/imports JSON. No data leaves your device.",
+    "category": "Utility"
   }
 ]

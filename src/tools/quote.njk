@@ -3,7 +3,16 @@ layout: base.njk
 title: Motivational Quote
 description: AI-generated original motivational quotes running locally in your browser. No server, no API keys.
 permalink: /tools/quote/index.html
+tldr: >
+  Motivational Quote generates original aphorisms with a Qwen3.5-0.8B model
+  fine-tuned on curated quote data, running entirely in your browser via
+  WebGPU. No server, no API key, no account. The model loads on first visit
+  and is cached locally for instant reuse.
 ---
+<section class="tldr">
+  <h2 class="tldr__heading">What is Motivational Quote?</h2>
+  <p class="tldr__body">{{ tldr }}</p>
+</section>
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/quote</p>
   <h1>Motivational Quote</h1>
@@ -58,65 +67,74 @@ permalink: /tools/quote/index.html
 }
 </script>
 
-<script type="module">
-const LIB_URLS = [
-  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4',
-  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest'
-];
+<script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 
+<script type="module">
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Motivational Quote \u2014 Qwen3.5-0.8B running locally via mentria-engine.
+   WebGPU-only (no transformers.js fallback). Same gating model as
+   ai-chat.njk \u2014 see that file's header for context.
+   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+
+const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
+const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
+const MENTRIA_TOKEN_BASE = MENTRIA_MODEL_BASE;
+
+const QUOTES_LORA_CONFIG_URL  = MENTRIA_MODEL_BASE + 'loras/quotes/adapter_config.json';
+const QUOTES_LORA_WEIGHTS_URL = MENTRIA_MODEL_BASE + 'loras/quotes/adapter_model.safetensors';
+
+const SYSTEM_PROMPT =
+  'You are a poetic thinker. Write one short, original motivational quote ' +
+  '(1-2 sentences). Do not attribute it to anyone. No preamble, no ' +
+  'quotation marks \u2014 just the quote itself.';
+const MAX_TOKENS = 128;
+
+/* \u2500\u2500 Status helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 const statusDot  = document.getElementById('mq-status-dot');
 const statusText = document.getElementById('mq-status-text');
-
 function setStatus(state, text) {
   statusDot.className = 'mq__status-dot mq__status-dot--' + state;
   statusText.textContent = text;
 }
 
-let lib = null;
-for (const url of LIB_URLS) {
-  try {
-    lib = await import(url);
-    break;
-  } catch (e) {
-    console.warn('Failed to load', url, e);
+/* \u2500\u2500 WebGPU gate \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+function showUnsupportedError(reason) {
+  setStatus('error', reason);
+  const quoteEl = document.getElementById('mq-quote');
+  if (quoteEl) {
+    quoteEl.textContent =
+      'This tool requires WebGPU, which your browser doesn\u2019t expose. ' +
+      'Try the latest Chrome, Edge, or Brave on desktop, or Safari 26+ ' +
+      'on macOS / iOS 26+.';
   }
+  document.getElementById('mq-new').disabled = true;
 }
 
-if (!lib) {
-  setStatus('error', 'Failed to load Transformers.js library. Check network/ad-blocker.');
+if (!navigator.gpu) {
+  showUnsupportedError('WebGPU not available in this browser');
 } else {
-  runApp(lib);
+  let MentriaEngine;
+  try {
+    ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
+  } catch (err) {
+    console.error('Failed to load mentria-engine bundle:', err);
+    showUnsupportedError('Failed to load runtime \u2014 check network/ad-blocker');
+  }
+  if (MentriaEngine) runApp(MentriaEngine);
 }
 
-function runApp({ AutoProcessor, AutoModelForImageTextToText, TextStreamer }) {
-  const MODEL_ID = 'mentriaai/Qwen3.5-0.8B-quotes-ONNX';
-  const SYSTEM_PROMPT = 'You are a poetic thinker. Write one short, original motivational quote (1-2 sentences). Do not attribute it to anyone. No preamble, no quotation marks \u2014 just the quote itself.';
-  const MAX_TOKENS = 128;
-
-  function getBestDevice() {
-    if (!navigator.gpu) return 'wasm';
-    const ua = navigator.userAgent;
-    if (ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Android')) return 'wasm';
-    return 'webgpu';
-  }
-
-  const DEVICE = getBestDevice();
-  const DTYPE = DEVICE === 'webgpu'
-    ? { embed_tokens: 'q4', vision_encoder: 'fp16', decoder_model_merged: 'q4' }
-    : { embed_tokens: 'q4', vision_encoder: 'q4', decoder_model_merged: 'q4' };
-
+function runApp(MentriaEngine) {
   /* DOM refs */
-  const progressWrap  = document.getElementById('mq-progress-wrap');
-  const progressLabel = document.getElementById('mq-progress-label');
-  const progressPct   = document.getElementById('mq-progress-pct');
-  const progressFill  = document.getElementById('mq-progress-fill');
+  const progressWrap   = document.getElementById('mq-progress-wrap');
+  const progressLabel  = document.getElementById('mq-progress-label');
+  const progressPct    = document.getElementById('mq-progress-pct');
+  const progressFill   = document.getElementById('mq-progress-fill');
   const progressDetail = document.getElementById('mq-progress-detail');
-  const quoteEl       = document.getElementById('mq-quote');
-  const newBtn        = document.getElementById('mq-new');
-  const copyBtn       = document.getElementById('mq-copy');
+  const quoteEl        = document.getElementById('mq-quote');
+  const newBtn         = document.getElementById('mq-new');
+  const copyBtn        = document.getElementById('mq-copy');
 
-  let processor = null;
-  let model = null;
+  let engine = null;
   let generating = false;
 
   function formatBytes(b) {
@@ -125,38 +143,59 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, TextStreamer }) {
     return (b / 1048576).toFixed(1) + ' MB';
   }
 
-  /* Progress tracking */
-  const fileProgress = {};
-  function onProgress(event) {
-    if (event.status === 'progress' && event.total) {
-      fileProgress[event.file] = { loaded: event.loaded, total: event.total };
-      const totals = Object.values(fileProgress);
-      const loaded = totals.reduce((s, f) => s + f.loaded, 0);
-      const total  = totals.reduce((s, f) => s + f.total, 0);
-      const pct = Math.round((loaded / total) * 100);
+  /* Progress tracking — clamps ratio to [0,1] and suppresses the byte-line
+     for non-byte stages (engine multiplexes byte counts and step counters
+     on the same channel; see ai-chat.njk for the long-form rationale). */
+  function onEngineProgress(p) {
+    if (!p) return;
+    progressWrap.style.display = '';
+    if (p.message) progressLabel.textContent = p.message;
+    if (p.loaded != null && p.total != null && p.total > 0) {
+      const ratio = Math.max(0, Math.min(1, p.loaded / p.total));
+      const pct = Math.round(ratio * 100);
       progressFill.style.width = pct + '%';
       progressPct.textContent = pct + '%';
-      progressDetail.textContent = formatBytes(loaded) + ' / ' + formatBytes(total);
-    } else if (event.status === 'ready') {
-      progressLabel.textContent = 'Loading model…';
+      progressDetail.textContent =
+        p.total >= 1024 ? (formatBytes(p.loaded) + ' / ' + formatBytes(p.total)) : '';
     }
   }
 
-  /* Load model */
+  /* Load engine + model */
   async function loadModel() {
     setStatus('loading', 'Loading model…');
     progressWrap.style.display = '';
     try {
-      processor = await AutoProcessor.from_pretrained(MODEL_ID, {
-        progress_callback: onProgress
+      engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+      engine.onProgress = onEngineProgress;
+      engine.onDeviceLost = (info) => {
+        setStatus('error', 'GPU device lost — reload to recover');
+        newBtn.disabled = true;
+        console.error('WebGPU device lost:', info);
+      };
+      await engine.init();
+      // Text-only — no vision tower needed for quote generation.
+      await engine.loadModel({
+        modelUrl: MENTRIA_MODEL_BASE,
+        shards: ['qwen3.5-0.8b-q4.safetensors'],
+        tokenizerUrl: MENTRIA_TOKEN_BASE,
       });
-      model = await AutoModelForImageTextToText.from_pretrained(MODEL_ID, {
-        dtype: DTYPE,
-        device: DEVICE,
-        progress_callback: onProgress
-      });
+
+      // Optional LoRA — load only if both URLs are configured. Failure is
+      // not fatal; falls back to base model + system-prompt shaping.
+      if (QUOTES_LORA_CONFIG_URL && QUOTES_LORA_WEIGHTS_URL) {
+        try {
+          await engine.swapAdapter({
+            name: 'quotes-v1',
+            configUrl: QUOTES_LORA_CONFIG_URL,
+            weightsUrl: QUOTES_LORA_WEIGHTS_URL,
+          });
+        } catch (err) {
+          console.warn('Quotes LoRA load failed, using base model:', err);
+        }
+      }
+
       progressWrap.style.display = 'none';
-      setStatus('ready', DEVICE === 'webgpu' ? 'Ready' : 'Ready (WASM)');
+      setStatus('ready', 'Ready');
       newBtn.disabled = false;
     } catch (err) {
       progressWrap.style.display = 'none';
@@ -167,7 +206,7 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, TextStreamer }) {
 
   /* Generate quote */
   async function generateQuote() {
-    if (generating || !model) return;
+    if (generating || !engine) return;
     generating = true;
     newBtn.disabled = true;
     copyBtn.style.display = 'none';
@@ -177,36 +216,36 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, TextStreamer }) {
 
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: [{ type: 'text', text: 'Give me a motivational quote.' }] }
+      { role: 'user',   content: 'Give me a motivational quote.' },
     ];
 
+    let fullText = '';
+    let pendingPaint = false;
+
+    function paintToken() {
+      const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      // Markdown-rendered output (escapes html first → safe). Falls back to text.
+      if (window.renderMarkdown) quoteEl.innerHTML = renderMarkdown(display) || '<p>…</p>';
+      else quoteEl.textContent = display || '…';
+      pendingPaint = false;
+    }
+
     try {
-      const textContent = processor.apply_chat_template(messages, {
-        tokenize: false,
-        add_generation_prompt: true
-      });
-
-      const inputs = await processor(textContent, null, { padding: true, truncation: true });
-
-      let fullText = '';
-      let firstToken = true;
-      let pendingPaint = false;
-
-      function paintToken() {
-        const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-        quoteEl.textContent = display || '\u2026';
-        pendingPaint = false;
-      }
-
-      const streamer = new TextStreamer(processor.tokenizer, {
-        skip_prompt: true,
-        skip_special_tokens: true,
-        callback_function(token) {
-          if (firstToken) {
-            token = token.trimStart();
-            firstToken = false;
-          }
-          fullText += token;
+      await engine.generate({
+        messages,
+        maxTokens: MAX_TOKENS,
+        // Match the original transformers.js sampling for similar
+        // creative variance: do_sample=true, temp=0.9, top_p=0.95.
+        temperature: 0.9,
+        topP: 0.95,
+        topK: 50,
+        repetitionPenalty: 1.1,
+        enableThinking: false,
+      }, (event) => {
+        if (typeof event.token === 'string' && event.token.length > 0) {
+          // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
+          if (/^<\|[^|]*\|>$/.test(event.token)) return;
+          fullText += event.token;
           if (!pendingPaint) {
             pendingPaint = true;
             requestAnimationFrame(paintToken);
@@ -214,19 +253,13 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, TextStreamer }) {
         }
       });
 
-      await model.generate({
-        ...inputs,
-        max_new_tokens: MAX_TOKENS,
-        do_sample: true,
-        temperature: 0.9,
-        top_p: 0.95,
-        streamer
-      });
-
-      const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-      quoteEl.textContent = display || 'Couldn\u2019t generate a quote. Try again.';
+      const display = fullText
+        .replace(/<think>[\s\S]*?<\/think>/g, '')
+        .replace(/<\|[^|]*\|>/g, '')
+        .trim();
+      if (window.renderMarkdown) quoteEl.innerHTML = renderMarkdown(display) || '<p>Couldn’t generate a quote. Try again.</p>';
+      else quoteEl.textContent = display || 'Couldn’t generate a quote. Try again.';
       quoteEl.classList.remove('mq__quote--typing');
-
       if (display) copyBtn.style.display = '';
     } catch (err) {
       console.error('Generation error:', err);
@@ -236,7 +269,7 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, TextStreamer }) {
 
     generating = false;
     newBtn.disabled = false;
-    setStatus('ready', DEVICE === 'webgpu' ? 'Ready' : 'Ready (WASM)');
+    setStatus('ready', 'Ready');
   }
 
   /* Copy to clipboard */
@@ -258,13 +291,11 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, TextStreamer }) {
   copyBtn.addEventListener('click', copyQuote);
 
   /* Init */
-  async function init() {
-    setStatus('idle', DEVICE === 'webgpu' ? 'WebGPU available. Loading model…' : 'Using WASM backend. Loading model…');
+  (async () => {
+    setStatus('idle', 'Loading model…');
     await loadModel();
-    if (model) generateQuote();
-  }
-
-  init();
+    if (engine) generateQuote();
+  })();
 }
 </script>
 
@@ -356,9 +387,22 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, TextStreamer }) {
   max-width: 540px;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  white-space: pre-wrap;
+  /* white-space: pre-wrap dropped; markdown render now owns whitespace */
   min-height: 1.7em;
 }
+/* ── Markdown-rendered quote: tight, centered ─────────────────── */
+.mq__quote p              { margin: 0 0 0.4rem; }
+.mq__quote p:last-child   { margin-bottom: 0; }
+.mq__quote ol,
+.mq__quote ul             { margin: 0.3rem auto; padding-left: 0; list-style-position: inside; display: inline-block; text-align: left; }
+.mq__quote li             { margin: 0.05rem 0; }
+.mq__quote li > p         { margin: 0; }
+.mq__quote h1,
+.mq__quote h2,
+.mq__quote h3             { margin: 0.4rem 0 0.25rem; font-family: var(--font-mono); color: var(--syn-cyan); }
+.mq__quote strong         { font-weight: 700; }
+.mq__quote em             { font-style: italic; }
+.mq__quote code           { font-family: var(--font-mono); background: rgba(255,255,255,0.06); padding: 0.05em 0.3em; border-radius: 3px; }
 
 .mq__quote--typing::after {
   content: '';

@@ -102,3 +102,18 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
     transition-duration: 0.01ms !important;
   }
 }
+
+.tldr {
+  background: var(--term-bg-raised);
+  border: 1px solid var(--term-border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0 2rem;
+}
+.tldr__heading {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--syn-cyan);
+  margin: 0 0 0.5rem;
+}
+.tldr__body { margin: 0; line-height: 1.6; }

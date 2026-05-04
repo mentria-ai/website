@@ -1,0 +1,22 @@
+---
+permalink: /llms.txt
+eleventyExcludeFromCollections: true
+layout: null
+---
+# {{ site.title }}
+
+> {{ site.metaDescription }}
+
+## Tools
+{%- for t in tools | default([]) %}
+- [{{ t.title }}]({{ site.siteUrl }}/tools/{{ t.slug }}/): {{ t.summary }}
+{%- endfor %}
+
+## Feed
+- [Feed]({{ site.siteUrl }}/feed/): Latest posts.
+
+## Optional
+- [Manifest]({{ site.siteUrl }}/manifest.json)
+- [Service worker]({{ site.siteUrl }}/sw.js)
+- [robots.txt]({{ site.siteUrl }}/robots.txt)
+- [sitemap.xml]({{ site.siteUrl }}/sitemap.xml)

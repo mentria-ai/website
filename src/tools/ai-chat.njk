@@ -3,7 +3,16 @@ layout: base.njk
 title: AI Chat
 description: Chat with Qwen3.5-0.8B running entirely in your browser via WebGPU. Supports image input. No data leaves your device.
 permalink: /tools/ai-chat/index.html
+tldr: >
+  AI Chat runs Qwen3.5-0.8B locally in your browser via WebGPU. Your messages
+  and any uploaded images never leave your device — no server, no API key, no
+  account. Supports vision input. The model loads on first click; subsequent
+  visits start instantly from local cache.
 ---
+<section class="tldr">
+  <h2 class="tldr__heading">What is AI Chat?</h2>
+  <p class="tldr__body">{{ tldr }}</p>
+</section>
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/ai-chat</p>
   <h1>AI Chat</h1>
@@ -78,54 +87,83 @@ permalink: /tools/ai-chat/index.html
 }
 </script>
 
+<script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
+
 <script type="module">
-const LIB_URLS = [
-  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4',
-  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest'
-];
+/* ─────────────────────────────────────────────────────────────────────────
+   AI Chat — Qwen3.5-0.8B (text + vision) running locally in your browser
+   via mentria-engine (custom WebGPU runtime). WebGPU is required.
+   ───────────────────────────────────────────────────────────────────────── */
 
-const statusDot     = document.getElementById('ac-status-dot');
-const statusText    = document.getElementById('ac-status-text');
+const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
+const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
+const MENTRIA_TOKEN_BASE = MENTRIA_MODEL_BASE;
 
+// Vision tower config — mirrors src/model/vision_config.js
+// QWEN35_VL_08B_VISION_CONFIG. Matches the on-disk layout of the
+// qwen3.5-0.8b-vl-q4.safetensors file (S585).
+const MENTRIA_VL_CONFIG = {
+  hidden_size: 768,
+  intermediate_size: 3072,
+  num_heads: 12,
+  head_dim: 64,                 // 768 / 12
+  out_hidden_size: 1024,        // matches text H for 0.8B
+  depth: 12,
+  patch_size: 16,
+  temporal_patch_size: 2,
+  spatial_merge_size: 2,
+  num_position_embeddings: 2304,
+  num_grid_per_side: 48,        // sqrt(2304)
+  eps: 1e-6,
+  prefix: 'visual',
+};
+
+const MAX_TOKENS = 512;
+
+/* ── Status helpers ────────────────────────────────────────────────────── */
+const statusDot  = document.getElementById('ac-status-dot');
+const statusText = document.getElementById('ac-status-text');
 function setStatus(state, text) {
   statusDot.className = 'ac__status-dot ac__status-dot--' + state;
   statusText.textContent = text;
 }
 
-// Dynamic import with fallback
-let lib = null;
-for (const url of LIB_URLS) {
-  try {
-    lib = await import(url);
-    break;
-  } catch (e) {
-    console.warn('Failed to load', url, e);
+/* ── WebGPU gate ───────────────────────────────────────────────────────── */
+// Mentria is WebGPU-only by design. If the browser doesn't expose WebGPU,
+// surface a clean error rather than silently degrading. Common cases:
+//   - Safari < 26 (no WebGPU)
+//   - Firefox stable (WebGPU still in nightly as of 2026-04)
+//   - Chrome on Linux without `--enable-features=Vulkan`
+//   - Mobile browsers without WebGPU yet
+function showUnsupportedError(reason) {
+  setStatus('error', reason);
+  const messagesEl = document.getElementById('ac-messages');
+  const emptyEl    = document.getElementById('ac-empty');
+  if (emptyEl) {
+    emptyEl.innerHTML =
+      '<div class="ac__empty-icon">&#9888;</div>' +
+      '<p>This tool requires <strong>WebGPU</strong>, which your browser doesn’t expose.</p>' +
+      '<p class="ac__empty-sub">Try the latest Chrome, Edge, or Brave on desktop, or Safari 26+ on macOS / iOS 26+.</p>';
   }
+  document.getElementById('ac-input').disabled = true;
+  document.getElementById('ac-send').disabled  = true;
+  document.getElementById('ac-attach-label').style.display = 'none';
 }
 
-if (!lib) {
-  setStatus('error', 'Failed to load Transformers.js library. Check network/ad-blocker.');
+if (!navigator.gpu) {
+  showUnsupportedError('WebGPU not available in this browser');
 } else {
-  runApp(lib);
+  let MentriaEngine;
+  try {
+    ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
+  } catch (err) {
+    console.error('Failed to load mentria-engine bundle:', err);
+    showUnsupportedError('Failed to load runtime — check network/ad-blocker');
+  }
+  if (MentriaEngine) runApp(MentriaEngine);
 }
 
-function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStreamer }) {
-  /* ── Config ──────────────────────────────────────── */
-  const MODEL_ID = 'onnx-community/Qwen3.5-0.8B-ONNX';
-  const MAX_TOKENS = 512;
-
-  function getBestDevice() {
-    if (!navigator.gpu) return 'wasm';
-    const ua = navigator.userAgent;
-    if (ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Android')) return 'wasm';
-    return 'webgpu';
-  }
-
-  const DEVICE = getBestDevice();
-  const DTYPE = DEVICE === 'webgpu'
-    ? { embed_tokens: 'q4', vision_encoder: 'fp16', decoder_model_merged: 'q4' }
-    : { embed_tokens: 'q4', vision_encoder: 'q4', decoder_model_merged: 'q4' };
-
+function runApp(MentriaEngine) {
   /* ── DOM refs ────────────────────────────────────── */
   const deleteBtn     = document.getElementById('ac-delete-model');
   const progressWrap  = document.getElementById('ac-progress-wrap');
@@ -143,22 +181,29 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
   const sendBtn       = document.getElementById('ac-send');
 
   /* ── State ───────────────────────────────────────── */
-  let processor = null;
-  let model = null;
+  let engine = null;
   let generating = false;
-  let attachedImage = null;
+  let attachedImage = null;       // {rgbHwc, h, w} — pending attach for the NEXT send
   let attachedDataUrl = null;
-  let messages = [];
+  // conversationImages keeps every image sent in this conversation, in order.
+  // The chat template re-renders the full message history every turn, so each
+  // {type:'image'} placeholder needs its corresponding rgbHwc on every call —
+  // not just the turn the image was first attached on.
+  let conversationImages = [];
+  let messages = [
+    { role: 'system', content:
+      'You are a vision-capable assistant running locally in the user\'s browser. ' +
+      'When the user shares an image, describe what you see directly and concisely — ' +
+      'do not say you can\'t access photos or apologize. Just describe the image. ' +
+      'Be helpful, accurate, and brief.'
+    },
+  ];
 
-  function scrollToBottom() {
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
+  function scrollToBottom() { messagesEl.scrollTop = messagesEl.scrollHeight; }
   function autoResize() {
     inputEl.style.height = 'auto';
     inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
   }
-
   function formatBytes(b) {
     if (b < 1024) return b + ' B';
     if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
@@ -169,65 +214,97 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
     if (emptyEl) emptyEl.style.display = 'none';
     const bubble = document.createElement('div');
     bubble.className = 'ac__msg ac__msg--' + role;
-
     const label = document.createElement('div');
     label.className = 'ac__msg-label';
     label.textContent = role === 'user' ? 'you' : 'qwen-0.8B';
     bubble.appendChild(label);
-
     if (imageUrl) {
       const img = document.createElement('img');
-      img.className = 'ac__msg-img';
-      img.src = imageUrl;
-      img.alt = 'Attached';
+      img.className = 'ac__msg-img'; img.src = imageUrl; img.alt = 'Attached';
       bubble.appendChild(img);
     }
-
     const body = document.createElement('div');
     body.className = 'ac__msg-body';
     if (content) body.textContent = content;
     bubble.appendChild(body);
-
     messagesEl.appendChild(bubble);
     scrollToBottom();
     return body;
   }
 
+  /* ── Image preprocessing ─────────────────────────── */
+  // Mentria expects {rgbHwc: Uint8Array, h, w} where h,w are multiples of
+  // patch_size * spatial_merge_size = 32. We cap at 448² for predictable
+  // prefill latency (~286 ms vision-tower pass on M-series; chat-friendly
+  // per the engine's S463 bench).
+  async function fileToEngineImage(file, targetSize = 448) {
+    const bitmap = await createImageBitmap(file);
+    const maxDim = Math.max(bitmap.width, bitmap.height);
+    const scale = maxDim > targetSize ? (targetSize / maxDim) : 1;
+    let w = Math.round(bitmap.width * scale);
+    let h = Math.round(bitmap.height * scale);
+    w = Math.max(32, Math.round(w / 32) * 32);
+    h = Math.max(32, Math.round(h / 32) * 32);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    const { data } = ctx.getImageData(0, 0, w, h);
+    const rgbHwc = new Uint8Array(w * h * 3);
+    for (let i = 0, j = 0; i < data.length; i += 4, j += 3) {
+      rgbHwc[j]     = data[i];
+      rgbHwc[j + 1] = data[i + 1];
+      rgbHwc[j + 2] = data[i + 2];
+    }
+    return { rgbHwc, h, w };
+  }
+
   /* ── Progress tracking ───────────────────────────── */
-  const fileProgress = {};
-  function onProgress(event) {
-    if (event.status === 'progress' && event.total) {
-      fileProgress[event.file] = { loaded: event.loaded, total: event.total };
-      const totals = Object.values(fileProgress);
-      const loaded = totals.reduce((s, f) => s + f.loaded, 0);
-      const total = totals.reduce((s, f) => s + f.total, 0);
-      const pct = Math.round((loaded / total) * 100);
+  // The engine multiplexes two progress semantics on one channel: BYTE counts
+  // for shard download/upload (loaded/total in the hundreds-of-millions) and
+  // STEP counters for discrete stage transitions (loaded=0/1, loaded=1/1).
+  // We clamp the ratio to [0,1] so a stale byte loaded paired with a step
+  // total can't render as "60-billion-percent", and we only show the
+  // human-readable byte line when total looks like real bytes (>= 1 KiB).
+  function onEngineProgress(p) {
+    if (!p) return;
+    progressWrap.style.display = '';
+    if (p.message) progressLabel.textContent = p.message;
+    if (p.loaded != null && p.total != null && p.total > 0) {
+      const ratio = Math.max(0, Math.min(1, p.loaded / p.total));
+      const pct = Math.round(ratio * 100);
       progressFill.style.width = pct + '%';
       progressPct.textContent = pct + '%';
-      progressDetail.textContent = formatBytes(loaded) + ' / ' + formatBytes(total);
-    } else if (event.status === 'ready') {
-      progressLabel.textContent = 'Loading model…';
+      progressDetail.textContent =
+        p.total >= 1024 ? (formatBytes(p.loaded) + ' / ' + formatBytes(p.total)) : '';
     }
   }
 
-  /* ── Load model ──────────────────────────────────── */
+  /* ── Load engine + model ─────────────────────────── */
   async function loadModel() {
     setStatus('loading', 'Loading model…');
     progressWrap.style.display = '';
-
     try {
-      processor = await AutoProcessor.from_pretrained(MODEL_ID, {
-        progress_callback: onProgress
+      engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+      engine.onProgress = onEngineProgress;
+      // onDeviceLost is wired by the engine's S410 device-loss handler;
+      // surface it to the user with a clear "reload to recover" message.
+      engine.onDeviceLost = (info) => {
+        setStatus('error', 'GPU device lost — reload to recover');
+        inputEl.disabled = true; sendBtn.disabled = true;
+        console.error('WebGPU device lost:', info);
+      };
+      await engine.init();
+      await engine.loadModel({
+        modelUrl: MENTRIA_MODEL_BASE,
+        shards: ['qwen3.5-0.8b-q4.safetensors'],
+        tokenizerUrl: MENTRIA_TOKEN_BASE,
+        visionModelUrl: MENTRIA_MODEL_BASE,
+        visionShards: ['qwen3.5-0.8b-vl-q4.safetensors'],
+        visionConfig: MENTRIA_VL_CONFIG,
       });
-
-      model = await AutoModelForImageTextToText.from_pretrained(MODEL_ID, {
-        dtype: DTYPE,
-        device: DEVICE,
-        progress_callback: onProgress
-      });
-
       progressWrap.style.display = 'none';
-      setStatus('ready', DEVICE === 'webgpu' ? 'Ready' : 'Ready (WASM — slower)');
+      setStatus('ready', 'Ready');
       deleteBtn.style.display = '';
       inputEl.disabled = false;
       sendBtn.disabled = false;
@@ -241,7 +318,7 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
 
   /* ── Generate ────────────────────────────────────── */
   async function generate() {
-    if (generating || !model) return;
+    if (generating || !engine) return;
     const text = inputEl.value.trim();
     if (!text && !attachedImage) return;
 
@@ -251,59 +328,64 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
     sendBtn.disabled = true;
     setStatus('generating', 'Generating…');
 
-    // Build user content
+    // Build user content (mirrors HF chat-template content-array shape)
     const userContent = [];
-    if (attachedImage) {
-      userContent.push({ type: 'image' });
-    }
+    if (attachedImage) userContent.push({ type: 'image' });
     userContent.push({ type: 'text', text: text || 'Describe this image.' });
 
-    // Show user message
     addMessage('user', text, attachedDataUrl);
-
-    // Build messages array
     messages.push({ role: 'user', content: userContent });
 
     const bodyEl = addMessage('assistant', '');
+    let fullText = '';
+    let pendingPaint = false;
+
+    function paintToken() {
+      const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      // window.renderMarkdown escapes html before applying markdown patterns,
+      // so model-emitted <script> tags are inert. Falls back to textContent if
+      // markdown.js failed to load.
+      if (window.renderMarkdown) bodyEl.innerHTML = renderMarkdown(display) || '<p>…</p>';
+      else bodyEl.textContent = display || '…';
+      scrollToBottom();
+      pendingPaint = false;
+    }
+
+    // If a NEW image was just attached, append it to the persistent conversation
+    // history so it stays bound to its placeholder in the messages array on every
+    // future turn. Then clear the staging state.
+    if (attachedImage) {
+      conversationImages.push({
+        rgbHwc: attachedImage.rgbHwc,
+        h: attachedImage.h,
+        w: attachedImage.w,
+      });
+    }
+    // Pass the FULL conversation image history to the engine on every call.
+    // The engine matches placeholders to images by order across the whole
+    // chat-template render, so dropping prior images crashes build3DPositions.
+    const imagesForRequest = conversationImages.length ? conversationImages : undefined;
+    attachedImage = null;
+    attachedDataUrl = null;
+    imgPreview.style.display = 'none';
+    fileInput.value = '';
 
     try {
-      const textContent = processor.apply_chat_template(messages, {
-        tokenize: false,
-        add_generation_prompt: true
-      });
+      const params = {
+        messages: [...messages],
+        maxTokens: MAX_TOKENS,
+        // Greedy decoding (matches transformers.js do_sample:false)
+        temperature: 0, topK: 1, topP: 1.0,
+        repetitionPenalty: 1.15,   // bumped 1.10 → 1.15 to break list-cycle pattern (S+1 test)
+        enableThinking: false,
+      };
+      if (imagesForRequest) params.images = imagesForRequest;
 
-      const inputs = await processor(
-        textContent,
-        attachedImage ? [attachedImage] : null,
-        { padding: true, truncation: true }
-      );
-
-      // Clear attached image after use
-      attachedImage = null;
-      attachedDataUrl = null;
-      imgPreview.style.display = 'none';
-      fileInput.value = '';
-
-      let fullText = '';
-      let firstToken = true;
-      let pendingPaint = false;
-
-      function paintToken() {
-        const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-        bodyEl.textContent = display || '…';
-        scrollToBottom();
-        pendingPaint = false;
-      }
-
-      const streamer = new TextStreamer(processor.tokenizer, {
-        skip_prompt: true,
-        skip_special_tokens: true,
-        callback_function(token) {
-          if (firstToken) {
-            token = token.trimStart();
-            firstToken = false;
-          }
-          fullText += token;
+      await engine.generate(params, (event) => {
+        if (typeof event.token === 'string' && event.token.length > 0) {
+          // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
+          if (/^<\|[^|]*\|>$/.test(event.token)) return;
+          fullText += event.token;
           if (!pendingPaint) {
             pendingPaint = true;
             requestAnimationFrame(paintToken);
@@ -311,17 +393,13 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
         }
       });
 
-      await model.generate({
-        ...inputs,
-        max_new_tokens: MAX_TOKENS,
-        do_sample: false,
-        streamer
-      });
-
-      const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-      bodyEl.textContent = display || '(empty response)';
+      const display = fullText
+        .replace(/<think>[\s\S]*?<\/think>/g, '')
+        .replace(/<\|[^|]*\|>/g, '')   // belt-and-suspenders strip if a multi-piece special leaks through
+        .trim();
+      if (window.renderMarkdown) bodyEl.innerHTML = renderMarkdown(display) || '<p>(empty response)</p>';
+      else bodyEl.textContent = display || '(empty response)';
       messages.push({ role: 'assistant', content: display });
-
     } catch (err) {
       bodyEl.textContent = 'Error: ' + err.message;
       console.error('Generation error:', err);
@@ -335,22 +413,22 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
 
   /* ── Delete cached model ─────────────────────────── */
   async function deleteModel() {
-    if (!confirm('Delete the cached model (~850 MB)? You will need to re-download it next time.')) return;
+    if (!confirm('Delete the cached model (~660 MB)? You will need to re-download it next time.')) return;
     try {
       const keys = await caches.keys();
       for (const key of keys) {
-        if (key.includes('transformers')) {
+        if (key.includes('mentria') || key.includes('huggingface') || key.includes('transformers')) {
           await caches.delete(key);
         }
       }
-      const dbs = await indexedDB.databases();
+      const dbs = (typeof indexedDB.databases === 'function') ? await indexedDB.databases() : [];
       for (const db of dbs) {
-        if (db.name && (db.name.includes('transformers') || db.name.includes('onnxruntime'))) {
+        if (db.name && (db.name.includes('mentria') || db.name.includes('transformers') || db.name.includes('onnxruntime'))) {
           indexedDB.deleteDatabase(db.name);
         }
       }
-      model = null;
-      processor = null;
+      try { await engine?.unload(); } catch {}
+      engine = null;
       messages = [];
       messagesEl.innerHTML = '';
       if (emptyEl) {
@@ -370,11 +448,18 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
   /* ── Image handling ──────────────────────────────── */
   async function attachFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
-    const url = URL.createObjectURL(file);
-    imgThumb.src = url;
-    imgPreview.style.display = '';
-    attachedDataUrl = url;
-    attachedImage = await RawImage.fromURL(url);
+    try {
+      const url = URL.createObjectURL(file);
+      imgThumb.src = url;
+      imgPreview.style.display = '';
+      attachedDataUrl = url;
+      attachedImage = await fileToEngineImage(file);
+    } catch (err) {
+      console.error('Image attach error:', err);
+      attachedImage = null;
+      attachedDataUrl = null;
+      imgPreview.style.display = 'none';
+    }
   }
 
   function removeImage() {
@@ -402,7 +487,6 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
   });
 
   imgRemoveBtn.addEventListener('click', removeImage);
-
   deleteBtn.addEventListener('click', deleteModel);
 
   // Paste image from clipboard
@@ -419,12 +503,7 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
   });
 
   /* ── Init ────────────────────────────────────────── */
-  async function init() {
-    setStatus('idle', DEVICE === 'webgpu' ? 'WebGPU available. Loading model…' : 'Using WASM backend. Loading model…');
-    await loadModel();
-  }
-
-  init();
+  loadModel();
 }
 </script>
 
@@ -595,8 +674,52 @@ function runApp({ AutoProcessor, AutoModelForImageTextToText, RawImage, TextStre
 }
 
 .ac__msg-body {
-  white-space: pre-wrap;
+  /* white-space: pre-wrap dropped; html now controls whitespace via markdown render */
   color: var(--term-fg);
+  word-wrap: break-word;
+}
+/* ── Markdown-rendered output: tight spacing for chat bubbles ──── */
+.ac__msg-body p              { margin: 0 0 0.45rem; }
+.ac__msg-body p:last-child   { margin-bottom: 0; }
+.ac__msg-body ol,
+.ac__msg-body ul             { margin: 0.4rem 0; padding-left: 1.4rem; }
+.ac__msg-body li             { margin: 0.05rem 0; }
+.ac__msg-body li > p         { margin: 0; }
+.ac__msg-body li + li        { margin-top: 0.15rem; }
+.ac__msg-body h1, .ac__msg-body h2, .ac__msg-body h3 {
+  font-family: var(--font-mono);
+  margin: 0.6rem 0 0.3rem;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: var(--syn-cyan);
+}
+.ac__msg-body h1 { font-size: 1.15rem; }
+.ac__msg-body h2 { font-size: 1.05rem; }
+.ac__msg-body code {
+  font-family: var(--font-mono);
+  background: rgba(255,255,255,0.06);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.92em;
+}
+.ac__msg-body pre {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--term-border);
+  border-radius: 5px;
+  padding: 0.55rem 0.7rem;
+  margin: 0.45rem 0;
+  overflow-x: auto;
+  font-size: 0.85em;
+}
+.ac__msg-body pre code { background: transparent; padding: 0; border-radius: 0; }
+.ac__msg-body strong         { color: var(--term-fg); font-weight: 700; }
+.ac__msg-body em             { color: var(--term-fg); font-style: italic; }
+.ac__msg-body a              { color: var(--syn-cyan); text-decoration: underline; }
+.ac__msg-body blockquote {
+  margin: 0.4rem 0;
+  padding: 0 0 0 0.75rem;
+  border-left: 2px solid var(--term-border);
+  color: var(--term-muted);
 }
 
 /* ── Image preview ──────────────────────────────── */

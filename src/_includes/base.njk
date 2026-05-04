@@ -31,8 +31,8 @@
     <link rel="canonical" href="{{ pageUrl }}">
     <link rel="icon" href="/assets/img/favicon-96x96.png" type="image/png">
     <link rel="apple-touch-icon" href="/assets/img/icon-192x192.png">
-    <link rel="alternate" hreflang="x-default" href="{{ site.siteUrl }}">
-    <link rel="alternate" hreflang="en" href="{{ site.siteUrl }}">
+    <link rel="alternate" hreflang="{{ site.language | default('en') }}" href="{{ pageUrl }}">
+    <link rel="alternate" hreflang="x-default" href="{{ pageUrl }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

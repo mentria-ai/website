@@ -25,7 +25,9 @@ const ASSETS = [
   '/tools/tetris/',
   '/tools/pong/',
   '/tools/flappy/',
-  '/tools/minesweeper/'
+  '/tools/minesweeper/',
+  '/assets/img/badge.svg',
+  '/assets/img/icon-192x192.png'
 ];
 
 self.addEventListener('install', event => {
@@ -54,4 +56,38 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
+});
+
+// Notification click → focus the originating tool tab. Action buttons
+// post a typed message back to the page so it can react (e.g. stop alarm).
+self.addEventListener('notificationclick', event => {
+  const action  = event.action;
+  const data    = event.notification.data || {};
+  const target  = data.url || '/';
+  const timerId = data.timerId;
+
+  event.notification.close();
+
+  event.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    // Prefer a client already on the same path; fall back to any open client
+    let client = all.find(c => {
+      try { return new URL(c.url).pathname === target; } catch { return false; }
+    }) || all[0];
+
+    if (action === 'stop-alarm') {
+      if (client) {
+        client.postMessage({ type: 'STOP_ALARM', timerId });
+        try { await client.focus(); } catch (_) {}
+      }
+      return;
+    }
+
+    // Default click: focus existing tab or open the tool fresh.
+    if (client) {
+      try { await client.focus(); } catch (_) {}
+    } else if (self.clients.openWindow) {
+      await self.clients.openWindow(target);
+    }
+  })());
 });

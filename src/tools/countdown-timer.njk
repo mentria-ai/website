@@ -16,6 +16,16 @@ permalink: /tools/countdown-timer/index.html
 {% set terminalTitle = "countdown-timer.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="countdown-tool">
+  <!-- Notifications status / permission row -->
+  <div class="ct-notif-bar" id="ct-notif-bar" role="status" aria-live="polite">
+    <span class="ct-notif-dot" id="ct-notif-dot" aria-hidden="true"></span>
+    <span class="ct-notif-text" id="ct-notif-text">Checking notification support…</span>
+    <span class="ct-notif-actions">
+      <button class="ct-notif-btn" id="ct-notif-enable" hidden>Enable notifications</button>
+      <button class="ct-notif-btn ct-notif-btn--ghost" id="ct-notif-test" hidden>Test</button>
+    </span>
+  </div>
+
   <div class="ct-grid" id="ct-grid">
     <!-- widgets injected here -->
   </div>
@@ -123,6 +133,119 @@ permalink: /tools/countdown-timer/index.html
 
   let nextId = 1;
   const widgets = new Map(); // id → state
+
+  /* ── Notifications ─────────────────────────────────── */
+  // Wires the system notification tray to timer expiry. When the tab is
+  // hidden and a timer hits 0, we show a system notification via the
+  // service worker registration so it survives the page being backgrounded.
+  // Notification clicks/actions post a message back to focus + stop alarm.
+  const NOTIF_ICON  = '/assets/img/icon-192x192.png';
+  const NOTIF_BADGE = '/assets/img/badge.svg';
+  const NOTIF_TAG_PREFIX = 'mentria-timer-';
+
+  const notifBar    = document.getElementById('ct-notif-bar');
+  const notifText   = document.getElementById('ct-notif-text');
+  const notifEnable = document.getElementById('ct-notif-enable');
+  const notifTest   = document.getElementById('ct-notif-test');
+
+  function notifSupported() {
+    return 'Notification' in window && 'serviceWorker' in navigator;
+  }
+  function notifState() {
+    if (!notifSupported()) return 'unsupported';
+    return Notification.permission; // 'granted' | 'denied' | 'default'
+  }
+
+  function refreshNotifBar() {
+    const s = notifState();
+    notifBar.classList.toggle('is-unsupported', s === 'unsupported');
+    notifBar.classList.toggle('is-granted',     s === 'granted');
+    notifBar.classList.toggle('is-denied',      s === 'denied');
+    notifEnable.hidden = (s !== 'default');
+    notifTest.hidden   = (s !== 'granted');
+    if (s === 'unsupported')  notifText.textContent = "Browser doesn't support notifications.";
+    else if (s === 'default') notifText.textContent = "Get notified when timers finish while the tab is hidden.";
+    else if (s === 'granted') notifText.textContent = "Notifications enabled — alerts fire when timers finish in the background.";
+    else if (s === 'denied')  notifText.textContent = "Notifications blocked. Allow them in browser settings to get background alerts.";
+  }
+
+  async function requestNotifPermission() {
+    if (!notifSupported()) return;
+    try {
+      const result = await Notification.requestPermission();
+      refreshNotifBar();
+      if (result === 'granted') {
+        await showRawNotification('Notifications on', {
+          body: "You'll get an alert when a timer finishes in the background.",
+          tag: 'mentria-timer-welcome',
+          silent: true,
+        });
+      }
+    } catch (e) { console.error('Notification permission request failed:', e); }
+  }
+
+  async function showRawNotification(title, options = {}) {
+    if (notifState() !== 'granted') return;
+    if (!('serviceWorker' in navigator)) return;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const payload = Object.assign({
+        icon:  NOTIF_ICON,
+        badge: NOTIF_BADGE,
+        vibrate: [200, 100, 200],
+      }, options);
+      return reg.showNotification(title, payload);
+    } catch (e) { console.error('showNotification failed:', e); }
+  }
+
+  async function notifyTimerFinished(state, label) {
+    if (notifState() !== 'granted') return;
+    // Only notify when the tab is hidden — visible tabs already have the
+    // in-page alarm + flash + page-title flag. Notifying both ways is noisy.
+    if (!document.hidden) return;
+    await showRawNotification(`${label} — Time's Up`, {
+      body: 'Tap to return to the timer and stop the alarm.',
+      tag:  NOTIF_TAG_PREFIX + state.id,
+      renotify: true,
+      requireInteraction: true,
+      data: { url: location.pathname, timerId: state.id },
+      actions: [
+        { action: 'stop-alarm', title: 'Stop alarm' }
+      ],
+    });
+  }
+
+  async function testNotification() {
+    if (notifState() !== 'granted') return;
+    await showRawNotification('Test notification', {
+      body: 'This is what an alert will look like when a timer finishes.',
+      tag: 'mentria-timer-test',
+      data: { url: location.pathname },
+    });
+  }
+
+  // Listen for messages from the service worker (notification action clicks)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (!event.data) return;
+      if (event.data.type === 'STOP_ALARM') {
+        const id = event.data.timerId;
+        if (id != null) {
+          const state = widgets.get(id);
+          if (state) stopAlarmFor(state);
+        } else {
+          for (const [, s] of widgets) stopAlarmFor(s);
+        }
+        updatePageTitle();
+      }
+    });
+  }
+
+  notifEnable.addEventListener('click', requestNotifPermission);
+  notifTest.addEventListener('click', testNotification);
+  // Refresh on visibility change — picks up permission changes made elsewhere.
+  document.addEventListener('visibilitychange', refreshNotifBar);
+  refreshNotifBar();
 
   /* ── Audio ─────────────────────────────────────────── */
   let audioCtx = null;
@@ -268,6 +391,8 @@ permalink: /tools/countdown-timer/index.html
         btnStart.disabled = true;
         btnReset.disabled = false;
         updatePageTitle();
+        const label = (titleEl.textContent || '').trim() || `Timer ${state.id}`;
+        notifyTimerFinished(state, label);
       }
     }
 
@@ -483,6 +608,82 @@ permalink: /tools/countdown-timer/index.html
   align-items: center;
   max-width: 960px;
   margin: 0 auto;
+}
+
+/* ── Notification bar ──────────────────────────────── */
+.ct-notif-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.85rem;
+  width: 100%;
+  background: rgba(255, 149, 0, 0.05);
+  border: 1px solid rgba(255, 149, 0, 0.2);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--term-fg);
+  flex-wrap: wrap;
+}
+.ct-notif-bar.is-unsupported { display: none; }
+.ct-notif-bar.is-granted {
+  background: rgba(74, 222, 128, 0.05);
+  border-color: rgba(74, 222, 128, 0.22);
+}
+.ct-notif-bar.is-denied {
+  background: rgba(244, 114, 182, 0.05);
+  border-color: rgba(244, 114, 182, 0.22);
+}
+.ct-notif-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255, 149, 0, 0.75);
+  box-shadow: 0 0 6px rgba(255, 149, 0, 0.5);
+  flex-shrink: 0;
+}
+.ct-notif-bar.is-granted .ct-notif-dot {
+  background: var(--syn-green);
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+}
+.ct-notif-bar.is-denied .ct-notif-dot {
+  background: var(--syn-pink);
+  box-shadow: 0 0 6px rgba(244, 114, 182, 0.5);
+}
+.ct-notif-text {
+  flex: 1 1 200px;
+  line-height: 1.45;
+  color: rgba(226, 232, 240, 0.85);
+}
+.ct-notif-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.ct-notif-btn {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 149, 0, 0.4);
+  background: rgba(255, 149, 0, 0.14);
+  color: #ff9500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.ct-notif-btn:hover {
+  background: rgba(255, 149, 0, 0.24);
+  border-color: #ff9500;
+}
+.ct-notif-btn--ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(226, 232, 240, 0.7);
+}
+.ct-notif-btn--ghost:hover {
+  color: var(--term-fg);
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+}
+@media (max-width: 480px) {
+  .ct-notif-bar { font-size: 0.78rem; gap: 0.5rem; padding: 0.5rem 0.7rem; }
+  .ct-notif-text { flex-basis: 100%; }
+  .ct-notif-actions { flex-basis: 100%; }
 }
 
 /* ── Grid ──────────────────────────────────────────── */

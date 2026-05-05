@@ -1,0 +1,727 @@
+---
+layout: base.njk
+title: Minesweeper
+description: Classic logic puzzle in terminal dress. Click to dig, right-click (or F-mode) to flag. Numbers count adjacent mines. Don't pop the pink ones.
+permalink: /tools/minesweeper/index.html
+---
+<div class="game-page">
+
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">~/tools/minesweeper</p>
+  <h1>Minesweeper<span style="color:var(--syn-cyan)">.</span>js</h1>
+  <p>Classic logic puzzle in terminal dress. Click to dig, right-click (or F-mode) to flag. Numbers count adjacent mines. Don't pop the pink ones.</p>
+</section>
+
+{% set terminalTitle = "minesweeper.js" %}
+{% include "terminal-frame-open.njk" %}
+
+<div class="ms-controls">
+  <span class="ctrl-label">Difficulty</span>
+  <div class="seg" id="diff-seg">
+    <button data-d="easy">easy · 9×9 · 10</button>
+    <button data-d="medium" class="active">medium · 14×14 · 32</button>
+    <button data-d="hard">hard · 18×22 · 70</button>
+  </div>
+  <div class="stats-spread">
+    <div class="stat-item">
+      <span class="stat-key">Mines</span>
+      <span class="stat-val pink"><span id="stat-mines">32</span></span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-key">Time</span>
+      <span class="stat-val cyan" id="stat-time">000</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-key">Best</span>
+      <span class="stat-val amber" id="stat-best">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="ms-toolbar">
+  <button class="mode-toggle" id="flag-toggle">
+    <span class="indicator"></span>
+    <span id="flag-mode-label">DIG mode · click to reveal</span>
+  </button>
+  <button class="mode-toggle" id="restart-btn" style="background: transparent;">
+    <span style="color: var(--syn-cyan)">↻</span>
+    <span>restart</span>
+  </button>
+  <span class="hint">right-click to flag · long-press on mobile</span>
+</div>
+
+<div class="board-wrap">
+  <div class="board" id="board"></div>
+
+  <div class="overlay hidden" id="overlay">
+    <div class="modal" id="modal"></div>
+  </div>
+</div>
+
+<div class="footer-hints">
+  <div class="keys">
+    <span><span class="kbd">click</span> dig</span>
+    <span><span class="kbd">right-click</span> flag</span>
+    <span><span class="kbd">F</span> toggle flag mode</span>
+    <span><span class="kbd">R</span> restart</span>
+  </div>
+  <div>
+    <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--syn-green); box-shadow:var(--glow-green); margin-right:6px"></span>
+    local · offline ready
+  </div>
+</div>
+
+{% include "terminal-frame-close.njk" %}
+
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Minesweeper",
+  "operatingSystem": "Web",
+  "applicationCategory": "GameApplication",
+  "description": "Minesweeper styled as a terminal HUD. Three difficulties, mouse and touch input, best-time tracking. Runs locally, plays offline.",
+  "offers": { "@type": "Offer", "price": "0" }
+}
+</script>
+
+<style>
+html, body { overscroll-behavior: none; }
+main { max-width: 1100px; }
+
+.game-page .hero { text-align: center; padding: 0; margin-bottom: 28px; position: relative; z-index: 1; }
+.game-page .hero .eyebrow { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--term-muted); letter-spacing: 0.1em; margin: 0 0 12px; }
+.game-page .hero h1 { font-family: var(--font-mono); font-weight: 700; font-size: clamp(2rem, 4vw, 2.6rem); color: var(--term-fg-strong); margin: 0 0 12px; letter-spacing: -0.005em; line-height: 1.2; }
+.game-page .hero p { font-family: var(--font-mono); color: var(--term-muted); font-size: var(--text-sm); margin: 0 auto; max-width: 56ch; line-height: 1.6; }
+
+/* Difficulty + stats row */
+.ms-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--term-border);
+  flex-wrap: wrap;
+}
+.ctrl-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--term-muted);
+  font-weight: 500;
+  margin-right: 4px;
+}
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.seg button {
+  background: transparent;
+  border: none;
+  color: var(--term-muted);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-right: 1px solid var(--term-border);
+  transition: all 150ms;
+}
+.seg button:last-child { border-right: none; }
+.seg button:hover { color: var(--term-fg); background: rgba(255,255,255,0.03); }
+.seg button.active { color: var(--syn-cyan); background: var(--cyan-8); box-shadow: inset 0 -2px 0 var(--syn-cyan); }
+.stats-spread { margin-left: auto; display: flex; gap: 18px; font-size: 13px; }
+.stat-item { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.stat-key { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); }
+.stat-val { font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat-val.pink  { color: var(--syn-pink); }
+.stat-val.cyan  { color: var(--syn-cyan); }
+.stat-val.amber { color: var(--syn-amber); }
+
+.ms-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--term-border);
+  background: rgba(255,255,255,0.01);
+  font-size: 12px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+}
+.mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--term-border);
+  color: var(--term-muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: transparent;
+  transition: all 150ms;
+}
+.mode-toggle.flag-mode {
+  background: var(--pink-10);
+  border-color: var(--syn-pink);
+  color: var(--syn-pink);
+  box-shadow: var(--glow-pink);
+}
+.mode-toggle .indicator {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--term-subtle);
+}
+.mode-toggle.flag-mode .indicator {
+  background: var(--syn-pink);
+  box-shadow: var(--glow-pink);
+}
+.hint {
+  color: var(--term-subtle);
+  margin-left: auto;
+  font-family: var(--font-mono);
+}
+
+.board-wrap {
+  position: relative;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050507;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  min-height: 400px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.board {
+  display: grid;
+  gap: 2px;
+  user-select: none;
+  touch-action: manipulation;
+}
+.cell {
+  background: var(--term-surface-2);
+  border: 1px solid var(--term-border);
+  border-radius: 3px;
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 100ms;
+  position: relative;
+  color: transparent;
+}
+.cell:hover:not(.revealed):not(.exploded) {
+  background: var(--term-surface-3);
+  border-color: var(--term-border-strong);
+}
+.cell.revealed {
+  background: rgba(255,255,255,0.015);
+  border-color: var(--term-divider);
+  cursor: default;
+}
+.cell.empty { color: transparent; }
+.cell.flag {
+  color: var(--syn-pink);
+  background: var(--pink-10);
+  border-color: rgba(244,114,182,0.3);
+  box-shadow: 0 0 6px rgba(244,114,182,0.25);
+}
+.cell.flag::after { content: "⚑"; font-size: 16px; }
+.cell.q { color: var(--syn-amber); }
+.cell.q::after { content: "?"; font-size: 16px; }
+
+.cell.mine.exploded {
+  background: var(--syn-pink);
+  border-color: var(--syn-pink);
+  color: #0a0a0a;
+  box-shadow: var(--glow-pink), 0 0 18px rgba(244,114,182,0.6);
+}
+.cell.mine.revealed:not(.exploded) {
+  background: rgba(244,114,182,0.08);
+  border-color: rgba(244,114,182,0.25);
+  color: var(--syn-pink);
+}
+.cell.mine.exploded::after,
+.cell.mine.revealed:not(.exploded)::after {
+  content: "✱";
+  font-size: 16px;
+}
+.cell.flag.wrong {
+  background: rgba(244,114,182,0.05);
+  color: var(--syn-pink);
+  text-decoration: line-through;
+}
+.cell.flag.wrong::after { content: "⚑"; }
+
+/* number colors */
+.n1 { color: var(--syn-cyan)   !important; }
+.n2 { color: var(--syn-green)  !important; }
+.n3 { color: var(--syn-amber)  !important; }
+.n4 { color: var(--syn-purple) !important; }
+.n5 { color: var(--syn-pink)   !important; }
+.n6 { color: #5EEAD4 !important; }
+.n7 { color: #FB923C !important; }
+.n8 { color: #F8FAFC !important; }
+
+.pulse-cyan { animation: ms-pulse-cyan 600ms ease-out; }
+@keyframes ms-pulse-cyan {
+  0%   { box-shadow: 0 0 0 0 rgba(34,211,238,0.5); }
+  100% { box-shadow: 0 0 0 8px rgba(34,211,238,0); }
+}
+
+.overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(5,5,7,0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 5;
+}
+.overlay.hidden { display: none; }
+.modal {
+  background: var(--term-surface-2);
+  border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  text-align: center;
+  max-width: 420px;
+  box-shadow: var(--elev-3);
+  font-family: var(--font-mono);
+}
+.modal.win  { box-shadow: var(--elev-3), var(--glow-cyan-soft); }
+.modal.lose { box-shadow: var(--elev-3), var(--glow-pink); }
+.modal .eyebrow { font-size: var(--text-xs); letter-spacing: 0.15em; margin: 0 0 8px; }
+.modal.win  .eyebrow { color: var(--syn-cyan); }
+.modal.lose .eyebrow { color: var(--syn-pink); }
+.modal h2 { font-size: 24px; margin: 0 0 12px; color: var(--term-fg-strong); }
+.modal p  { color: var(--term-muted); font-size: 13px; line-height: 1.6; margin: 0 0 20px; }
+.modal .stats-mini {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  text-align: left;
+}
+.stats-mini .k { color: var(--term-muted); }
+.stats-mini .v { color: var(--syn-cyan); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+.btn {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: var(--syn-cyan);
+  color: #041016;
+  box-shadow: var(--glow-cyan-soft);
+  transition: all 150ms;
+}
+.btn:hover { background: var(--syn-cyan-soft); box-shadow: var(--glow-cyan); }
+
+.footer-hints {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid var(--term-border);
+  font-size: 11px;
+  color: var(--term-muted);
+  flex-wrap: wrap; gap: 12px;
+  font-family: var(--font-mono);
+}
+.footer-hints .keys { display: flex; gap: 14px; flex-wrap: wrap; }
+.kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--term-border);
+  border-radius: 3px;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  margin-right: 4px;
+}
+
+@media (max-width: 600px) {
+  .game-page .hero { margin-bottom: 18px; }
+  .game-page .hero h1 { font-size: 1.6rem; }
+  .game-page .hero p  { font-size: 12px; }
+  .cell { width: 30px; height: 30px; font-size: 13px; }
+  .cell.flag::after, .cell.q::after, .cell.mine.exploded::after, .cell.mine.revealed:not(.exploded)::after { font-size: 14px; }
+  .stats-spread { width: 100%; justify-content: space-between; margin-left: 0; }
+  .board-wrap { padding: 14px 12px; min-height: 320px; justify-content: flex-start; }
+  .modal { padding: 20px 18px; max-width: 92vw; }
+  .modal h2 { font-size: 20px; }
+  .footer-hints { font-size: 10px; padding: 10px 12px; }
+}
+</style>
+
+<script>
+(() => {
+  const DIFFS = {
+    easy:   { rows: 9,  cols: 9,  mines: 10 },
+    medium: { rows: 14, cols: 14, mines: 32 },
+    hard:   { rows: 18, cols: 22, mines: 70 },
+  };
+
+  const State = {
+    diff: 'medium',
+    rows: 14, cols: 14, mines: 32,
+    grid: [],
+    started: false,
+    over: false,
+    won: false,
+    startedAt: 0,
+    timer: null,
+    flagsPlaced: 0,
+    revealedCount: 0,
+    flagMode: false,
+    pressTimers: new Map(),
+  };
+
+  const boardEl = document.getElementById('board');
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
+
+  function loadBest(d) {
+    const v = localStorage.getItem('mentria_msw_best_' + d);
+    return v ? parseInt(v, 10) : null;
+  }
+  function saveBest(d, t) {
+    const cur = loadBest(d);
+    if (cur === null || t < cur) localStorage.setItem('mentria_msw_best_' + d, String(t));
+  }
+
+  function build() {
+    const cfg = DIFFS[State.diff];
+    State.rows = cfg.rows; State.cols = cfg.cols; State.mines = cfg.mines;
+    State.grid = [];
+    State.started = false; State.over = false; State.won = false;
+    State.flagsPlaced = 0; State.revealedCount = 0;
+    if (State.timer) { clearInterval(State.timer); State.timer = null; }
+
+    for (let r = 0; r < State.rows; r++) {
+      const row = [];
+      for (let c = 0; c < State.cols; c++) {
+        row.push({ mine: false, revealed: false, flag: false, q: false, n: 0 });
+      }
+      State.grid.push(row);
+    }
+
+    boardEl.style.gridTemplateColumns = `repeat(${State.cols}, auto)`;
+    boardEl.innerHTML = '';
+    for (let r = 0; r < State.rows; r++) {
+      for (let c = 0; c < State.cols; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.r = r; cell.dataset.c = c;
+        boardEl.appendChild(cell);
+      }
+    }
+
+    overlay.classList.add('hidden');
+    updateHUD();
+  }
+
+  function placeMines(safeR, safeC) {
+    let placed = 0;
+    const safeSet = new Set();
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const r = safeR + dr, c = safeC + dc;
+      if (r >= 0 && r < State.rows && c >= 0 && c < State.cols) safeSet.add(r * State.cols + c);
+    }
+    while (placed < State.mines) {
+      const r = Math.floor(Math.random() * State.rows);
+      const c = Math.floor(Math.random() * State.cols);
+      if (State.grid[r][c].mine) continue;
+      if (safeSet.has(r * State.cols + c)) continue;
+      State.grid[r][c].mine = true;
+      placed++;
+    }
+    for (let r = 0; r < State.rows; r++) {
+      for (let c = 0; c < State.cols; c++) {
+        if (State.grid[r][c].mine) continue;
+        let n = 0;
+        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const rr = r + dr, cc = c + dc;
+          if (rr < 0 || rr >= State.rows || cc < 0 || cc >= State.cols) continue;
+          if (State.grid[rr][cc].mine) n++;
+        }
+        State.grid[r][c].n = n;
+      }
+    }
+  }
+
+  function startTimer() {
+    State.startedAt = performance.now();
+    State.timer = setInterval(() => {
+      if (State.over) return;
+      const sec = Math.floor((performance.now() - State.startedAt) / 1000);
+      document.getElementById('stat-time').textContent = String(Math.min(sec, 999)).padStart(3, '0');
+    }, 250);
+  }
+
+  function reveal(r, c) {
+    if (r < 0 || r >= State.rows || c < 0 || c >= State.cols) return;
+    const cell = State.grid[r][c];
+    if (cell.revealed || cell.flag) return;
+    cell.revealed = true;
+    State.revealedCount++;
+
+    const el = cellEl(r, c);
+    el.classList.add('revealed');
+    if (cell.mine) {
+      el.classList.add('mine', 'exploded');
+      gameOver(false);
+      return;
+    }
+    if (cell.n > 0) {
+      el.textContent = String(cell.n);
+      el.classList.add('n' + cell.n);
+    } else {
+      el.classList.add('empty', 'pulse-cyan');
+      setTimeout(() => el.classList.remove('pulse-cyan'), 600);
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        reveal(r + dr, c + dc);
+      }
+    }
+    checkWin();
+  }
+
+  function chord(r, c) {
+    const cell = State.grid[r][c];
+    if (!cell.revealed || cell.n === 0) return;
+    let flags = 0;
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const rr = r + dr, cc = c + dc;
+      if (rr < 0 || rr >= State.rows || cc < 0 || cc >= State.cols) continue;
+      if (State.grid[rr][cc].flag) flags++;
+    }
+    if (flags === cell.n) {
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const rr = r + dr, cc = c + dc;
+        if (rr < 0 || rr >= State.rows || cc < 0 || cc >= State.cols) continue;
+        const nb = State.grid[rr][cc];
+        if (!nb.flag && !nb.revealed) reveal(rr, cc);
+      }
+    }
+  }
+
+  function flag(r, c) {
+    const cell = State.grid[r][c];
+    if (cell.revealed) return;
+    if (cell.flag) {
+      cell.flag = false; cell.q = true;
+      State.flagsPlaced--;
+    } else if (cell.q) {
+      cell.q = false;
+    } else {
+      cell.flag = true;
+      State.flagsPlaced++;
+    }
+    const el = cellEl(r, c);
+    el.classList.toggle('flag', cell.flag);
+    el.classList.toggle('q', cell.q);
+    updateHUD();
+  }
+
+  function checkWin() {
+    const total = State.rows * State.cols;
+    if (State.revealedCount === total - State.mines) {
+      gameOver(true);
+    }
+  }
+
+  function gameOver(won) {
+    State.over = true;
+    State.won = won;
+    if (State.timer) { clearInterval(State.timer); State.timer = null; }
+
+    for (let r = 0; r < State.rows; r++) {
+      for (let c = 0; c < State.cols; c++) {
+        const cell = State.grid[r][c];
+        const el = cellEl(r, c);
+        if (won && cell.mine && !cell.flag) {
+          cell.flag = true;
+          el.classList.add('flag');
+        }
+        if (!won && cell.mine && !cell.flag) {
+          el.classList.add('revealed', 'mine');
+        }
+        if (!won && cell.flag && !cell.mine) {
+          el.classList.add('wrong');
+        }
+      }
+    }
+
+    const elapsed = Math.floor((performance.now() - State.startedAt) / 1000);
+    const best = loadBest(State.diff);
+    if (won) saveBest(State.diff, elapsed);
+
+    showOverlay(won, elapsed, best);
+    updateHUD();
+  }
+
+  function showOverlay(won, elapsed, prevBest) {
+    const cfg = DIFFS[State.diff];
+    if (won) {
+      modal.className = 'modal win';
+      modal.innerHTML = `
+        <p class="eyebrow">&gt; FIELD CLEARED</p>
+        <h2>victory</h2>
+        <p>You swept the field without detonation.</p>
+        <div class="stats-mini">
+          <span class="k">Difficulty</span><span class="v">${State.diff}</span>
+          <span class="k">Grid</span><span class="v">${cfg.rows} × ${cfg.cols}</span>
+          <span class="k">Mines avoided</span><span class="v">${cfg.mines}</span>
+          <span class="k">Time</span><span class="v">${String(elapsed).padStart(3,'0')}s</span>
+          <span class="k">Best</span><span class="v">${prevBest !== null && prevBest <= elapsed ? String(prevBest).padStart(3,'0')+'s' : 'new best!'}</span>
+        </div>
+        <button class="btn" id="play-again">$ new_game</button>
+      `;
+    } else {
+      modal.className = 'modal lose';
+      modal.innerHTML = `
+        <p class="eyebrow">&gt; SEGFAULT — MINE DETONATED</p>
+        <h2>game over</h2>
+        <p>Process terminated. ${State.revealedCount} / ${cfg.rows * cfg.cols - cfg.mines} cells cleared.</p>
+        <div class="stats-mini">
+          <span class="k">Difficulty</span><span class="v">${State.diff}</span>
+          <span class="k">Time elapsed</span><span class="v">${String(elapsed).padStart(3,'0')}s</span>
+          <span class="k">Cells revealed</span><span class="v">${State.revealedCount}</span>
+          <span class="k">Best</span><span class="v">${prevBest !== null ? String(prevBest).padStart(3,'0')+'s' : '—'}</span>
+        </div>
+        <button class="btn" id="play-again">$ try_again</button>
+      `;
+    }
+    overlay.classList.remove('hidden');
+    document.getElementById('play-again').onclick = () => build();
+  }
+
+  function cellEl(r, c) { return boardEl.children[r * State.cols + c]; }
+
+  function updateHUD() {
+    const remaining = Math.max(0, State.mines - State.flagsPlaced);
+    document.getElementById('stat-mines').textContent = String(remaining).padStart(2, '0');
+    const best = loadBest(State.diff);
+    document.getElementById('stat-best').textContent = best === null ? '—' : String(best).padStart(3,'0') + 's';
+    if (!State.started) {
+      document.getElementById('stat-time').textContent = '000';
+    }
+  }
+
+  function setFlagMode(on) {
+    State.flagMode = on;
+    const btn = document.getElementById('flag-toggle');
+    const lbl = document.getElementById('flag-mode-label');
+    btn.classList.toggle('flag-mode', on);
+    lbl.textContent = on ? 'FLAG mode · click to mark' : 'DIG mode · click to reveal';
+  }
+
+  // ---------- Input ----------
+  boardEl.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    if (State.over) return;
+    const t = e.target.closest('.cell');
+    if (!t) return;
+    const r = +t.dataset.r, c = +t.dataset.c;
+    if (!State.started) return;
+    flag(r, c);
+  });
+
+  boardEl.addEventListener('click', e => {
+    if (State.over) return;
+    if (longPressed) { longPressed = false; return; }
+    const t = e.target.closest('.cell');
+    if (!t) return;
+    const r = +t.dataset.r, c = +t.dataset.c;
+
+    if (!State.started) {
+      placeMines(r, c);
+      State.started = true;
+      startTimer();
+    }
+
+    if (State.flagMode) { flag(r, c); return; }
+
+    const cell = State.grid[r][c];
+    if (cell.flag) return;
+    if (cell.revealed) {
+      chord(r, c);
+    } else {
+      reveal(r, c);
+    }
+  });
+
+  let longPressed = false;
+  boardEl.addEventListener('touchstart', e => {
+    const t = e.target.closest('.cell');
+    if (!t || State.over) return;
+    longPressed = false;
+    const r = +t.dataset.r, c = +t.dataset.c;
+    const id = setTimeout(() => {
+      if (!State.started) return;
+      flag(r, c);
+      longPressed = true;
+      if (navigator.vibrate) navigator.vibrate(20);
+      State.pressTimers.delete(t);
+    }, 350);
+    State.pressTimers.set(t, id);
+  }, { passive: true });
+  boardEl.addEventListener('touchend', e => {
+    const t = e.target.closest('.cell');
+    if (!t) return;
+    const id = State.pressTimers.get(t);
+    if (id) { clearTimeout(id); State.pressTimers.delete(t); }
+    if (longPressed) { e.preventDefault(); longPressed = false; }
+  });
+  boardEl.addEventListener('touchmove', e => {
+    const t = e.target.closest('.cell');
+    if (!t) return;
+    const id = State.pressTimers.get(t);
+    if (id) { clearTimeout(id); State.pressTimers.delete(t); }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'f' || e.key === 'F') setFlagMode(!State.flagMode);
+    else if (e.key === 'r' || e.key === 'R') build();
+  });
+
+  document.getElementById('diff-seg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-d]');
+    if (!b) return;
+    [...e.currentTarget.children].forEach(x => x.classList.toggle('active', x === b));
+    State.diff = b.dataset.d;
+    build();
+  });
+
+  document.getElementById('flag-toggle').addEventListener('click', () => setFlagMode(!State.flagMode));
+  document.getElementById('restart-btn').addEventListener('click', () => build());
+
+  build();
+})();
+</script>

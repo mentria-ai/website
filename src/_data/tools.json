@@ -64,5 +64,29 @@
     "title": "Markdown → PDF",
     "summary": "Write markdown, see a live preview, and download a clean professional PDF. Auto-saves to your browser. No data leaves your device.",
     "category": "Utility"
+  },
+  {
+    "slug": "tetris",
+    "title": "Tetris",
+    "summary": "Browser-native Tetris in the Mentria synthwave palette. Touch, keyboard, and mouse supported. Plays offline.",
+    "category": "Game"
+  },
+  {
+    "slug": "pong",
+    "title": "Pong",
+    "summary": "Brick-buster paddle game with synthwave powerups, lives, and a high-score table. Plays offline.",
+    "category": "Game"
+  },
+  {
+    "slug": "flappy",
+    "title": "Flappy",
+    "summary": "Paper plane flapping through stacks of command prompts. Tap, click, or SPACE. Plays offline.",
+    "category": "Game"
+  },
+  {
+    "slug": "minesweeper",
+    "title": "Minesweeper",
+    "summary": "Classic logic puzzle in terminal dress. Three difficulties, mouse + touch input, best-time tracking. Plays offline.",
+    "category": "Game"
   }
 ]

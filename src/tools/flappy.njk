@@ -1,0 +1,620 @@
+---
+layout: base.njk
+title: Flappy
+description: A paper plane threading a stack of command prompts. Tap, click, or press SPACE to flap. Don't crash the prompt.
+permalink: /tools/flappy/index.html
+---
+<div class="game-page">
+
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow">~/tools/flappy</p>
+  <h1>Flappy<span style="color:var(--syn-cyan)">.</span>js</h1>
+  <p>A paper plane threading a stack of command prompts. Tap, click, or press SPACE to flap. Don't crash the prompt.</p>
+</section>
+
+{% set terminalTitle = "flappy.js" %}
+{% include "terminal-frame-open.njk" %}
+
+<div class="stats">
+  <div class="stat">
+    <span class="stat-label">Score</span>
+    <span class="stat-value v-cyan" id="stat-score">0</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Tier</span>
+    <span class="stat-value v-purple" id="stat-tier">novice</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Best</span>
+    <span class="stat-value v-amber" id="stat-best">0</span>
+  </div>
+</div>
+
+<div class="canvas-wrap" id="wrap">
+  <canvas id="game" width="640" height="720"></canvas>
+
+  <div class="toast" id="toast">tier up — apprentice</div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal" id="modal">
+      <p class="eyebrow" style="color: var(--syn-cyan)">&gt; READY</p>
+      <h2>flappy.js</h2>
+      <p>Steer the paper plane through gaps in the command prompts.<br/>Each prompt cleared = +1. Hit anything = SIGSEGV.</p>
+      <p style="font-size: 11px; color: var(--term-subtle); margin-bottom: 18px">
+        <span class="kbd">SPACE</span> / <span class="kbd">click</span> / <span class="kbd">tap</span> to flap
+      </p>
+      <button class="btn" id="btn-start">$ start</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer-hints">
+  <div class="keys">
+    <span><span class="kbd">SPACE</span> flap</span>
+    <span><span class="kbd">click</span> flap</span>
+    <span><span class="kbd">P</span> pause</span>
+    <span><span class="kbd">R</span> restart</span>
+  </div>
+  <div>
+    <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--syn-green); box-shadow:var(--glow-green); margin-right:6px"></span>
+    local · offline ready
+  </div>
+</div>
+
+{% include "terminal-frame-close.njk" %}
+
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mentria Flappy",
+  "operatingSystem": "Web",
+  "applicationCategory": "GameApplication",
+  "description": "Paper-plane Flappy clone styled as terminal prompts. Touch, click, or keyboard. Runs locally, plays offline.",
+  "offers": { "@type": "Offer", "price": "0" }
+}
+</script>
+
+<style>
+html, body { overscroll-behavior: none; }
+main { max-width: 1100px; }
+
+/* Center the smaller flappy frame */
+.game-page .terminal-frame { max-width: 720px; margin-left: auto; margin-right: auto; }
+
+.game-page .hero { text-align: center; padding: 0; margin-bottom: 28px; position: relative; z-index: 1; }
+.game-page .hero .eyebrow { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--term-muted); letter-spacing: 0.1em; margin: 0 0 12px; }
+.game-page .hero h1 { font-family: var(--font-mono); font-weight: 700; font-size: clamp(2rem, 4vw, 2.6rem); color: var(--term-fg-strong); margin: 0 0 12px; letter-spacing: -0.005em; line-height: 1.2; }
+.game-page .hero p { font-family: var(--font-mono); color: var(--term-muted); font-size: var(--text-sm); margin: 0 auto; max-width: 56ch; line-height: 1.6; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--term-border);
+}
+.stat { padding: 12px 16px; border-right: 1px solid var(--term-border); display: flex; flex-direction: column; gap: 4px; }
+.stat:last-child { border-right: none; }
+.stat-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
+.stat-value { font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: var(--term-fg-strong); font-variant-numeric: tabular-nums; }
+.v-cyan   { color: var(--syn-cyan); text-shadow: 0 0 8px rgba(34,211,238,0.4); }
+.v-purple { color: var(--syn-purple); }
+.v-amber  { color: var(--syn-amber); }
+
+.canvas-wrap {
+  position: relative;
+  background: #050507;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-action: none; }
+
+.overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(5,5,7,0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 5;
+}
+.overlay.hidden { display: none; }
+.modal {
+  background: var(--term-surface-2);
+  border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  text-align: center;
+  max-width: 380px;
+  box-shadow: var(--elev-3), var(--glow-cyan-soft);
+}
+.modal.lose { box-shadow: var(--elev-3), var(--glow-pink); }
+.modal .eyebrow { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.15em; margin: 0 0 8px; color: var(--syn-pink); }
+.modal h2 { font-family: var(--font-mono); font-size: 22px; margin: 0 0 12px; color: var(--term-fg-strong); }
+.modal p { font-family: var(--font-mono); color: var(--term-muted); font-size: 13px; line-height: 1.6; margin: 0 0 16px; }
+.stats-mini {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px;
+  background: rgba(0,0,0,0.3); border: 1px solid var(--term-border);
+  border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 18px;
+  font-size: 12px; text-align: left; font-family: var(--font-mono);
+}
+.stats-mini .k { color: var(--term-muted); }
+.stats-mini .v { color: var(--syn-cyan); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-family: var(--font-mono); font-weight: 600; font-size: 13px;
+  padding: 10px 20px; border-radius: var(--radius-md); border: 1px solid transparent;
+  cursor: pointer; background: var(--syn-cyan); color: #041016;
+  box-shadow: var(--glow-cyan-soft); transition: all 150ms;
+}
+.btn:hover { background: var(--syn-cyan-soft); box-shadow: var(--glow-cyan); }
+
+.footer-hints {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px; border-top: 1px solid var(--term-border);
+  font-size: 11px; color: var(--term-muted); flex-wrap: wrap; gap: 12px;
+  font-family: var(--font-mono);
+}
+.keys { display: flex; gap: 14px; flex-wrap: wrap; }
+.kbd {
+  display: inline-block; padding: 1px 6px; background: rgba(255,255,255,0.05);
+  border: 1px solid var(--term-border); border-radius: 3px; color: var(--term-fg);
+  font-family: var(--font-mono); font-size: 10px; margin-right: 4px;
+}
+
+.toast {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  padding: 6px 14px; border-radius: var(--radius-pill);
+  background: rgba(34,211,238,0.15); border: 1px solid var(--cyan-30);
+  color: var(--syn-cyan); font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  box-shadow: var(--glow-cyan); z-index: 4; opacity: 0;
+  transition: opacity 250ms ease; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+@media (max-width: 600px) {
+  .game-page .hero { margin-bottom: 18px; }
+  .game-page .hero h1 { font-size: 1.6rem; }
+  .game-page .hero p { font-size: 12px; }
+  .stat { padding: 10px 12px; }
+  .stat-value { font-size: 16px; }
+  .modal { padding: 20px 18px; max-width: 92vw; }
+  .modal h2 { font-size: 20px; }
+  .modal p { font-size: 12px; }
+  .footer-hints { flex-direction: column; align-items: flex-start; gap: 6px; font-size: 10px; padding: 10px 12px; }
+}
+</style>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.aspectRatio = `${W} / ${H}`;
+  ctx.scale(dpr, dpr);
+
+  const C = {
+    plane: '#22D3EE',
+    pipe: '#A78BFA',
+    pipeFill: 'rgba(167,139,250,0.10)',
+    pipeBorder: 'rgba(167,139,250,0.55)',
+    pipeStrong: '#A78BFA',
+    ground: '#171717',
+    line: 'rgba(244,114,182,0.5)',
+    pink: '#F472B6',
+    cyan: '#22D3EE',
+    star: 'rgba(255,255,255,0.6)',
+    amber: '#FBBF24',
+  };
+
+  const TIERS = [
+    { score: 0, name: 'novice' },
+    { score: 5, name: 'apprentice' },
+    { score: 10, name: 'engineer' },
+    { score: 20, name: 'sysadmin' },
+    { score: 35, name: 'wizard' },
+    { score: 60, name: 'kernel-dev' },
+  ];
+
+  const State = {
+    running: false,
+    paused: false,
+    over: false,
+    score: 0,
+    tier: 0,
+    best: parseInt(localStorage.getItem('mentria_flappy_best') || '0', 10),
+    started: false,
+    distance: 0,
+  };
+
+  const plane = { x: 160, y: H/2, vy: 0, r: 12, rot: 0 };
+  const GRAV = 0.45;
+  const FLAP = -7.6;
+  let pipeSpeed = 2.6;
+  let pipeGap = 180;
+
+  const pipes = [];
+  const stars = [];
+  const particles = [];
+  const groundOffset = { x: 0 };
+
+  for (let i = 0; i < 60; i++) {
+    stars.push({ x: Math.random() * W, y: Math.random() * (H - 80), s: Math.random() * 1.4 + 0.3, a: Math.random() * 0.6 + 0.2 });
+  }
+
+  function reset() {
+    State.running = true; State.paused = false; State.over = false;
+    State.score = 0; State.tier = 0; State.distance = 0;
+    pipes.length = 0; particles.length = 0;
+    pipeSpeed = 2.6;
+    pipeGap = 180;
+    plane.x = 160; plane.y = H/2; plane.vy = 0; plane.rot = 0;
+    State.started = false;
+    spawnInitialPipes();
+    hideOverlay();
+    updateHUD();
+  }
+
+  function spawnInitialPipes() {
+    const startX = W + 100;
+    for (let i = 0; i < 4; i++) addPipe(startX + i * 240);
+  }
+
+  function addPipe(x) {
+    const minTop = 70;
+    const maxTop = H - 80 - pipeGap - minTop;
+    const top = minTop + Math.random() * Math.max(40, maxTop - minTop);
+    pipes.push({ x, top, scored: false });
+  }
+
+  function flap() {
+    if (!State.running) return;
+    if (State.over) return;
+    if (State.paused) return;
+    if (!State.started) State.started = true;
+    plane.vy = FLAP;
+    spawnPuff(plane.x - 10, plane.y + 4, 5);
+  }
+
+  function spawnPuff(x, y, n) {
+    for (let i = 0; i < n; i++) {
+      particles.push({
+        x, y,
+        vx: -Math.random() * 1.4 - 0.4,
+        vy: (Math.random() - 0.5) * 1.2,
+        life: 1, color: C.cyan,
+      });
+    }
+  }
+  function spawnHit(x, y) {
+    for (let i = 0; i < 18; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = 1 + Math.random() * 3;
+      particles.push({
+        x, y,
+        vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+        life: 1, color: i % 3 === 0 ? C.pink : C.cyan,
+      });
+    }
+  }
+
+  function tierFor(score) {
+    let t = 0;
+    for (let i = 0; i < TIERS.length; i++) if (score >= TIERS[i].score) t = i;
+    return t;
+  }
+
+  function update() {
+    if (!State.running || State.paused || State.over) return;
+
+    groundOffset.x = (groundOffset.x - pipeSpeed) % 32;
+
+    if (State.started) {
+      plane.vy += GRAV;
+      plane.y += plane.vy;
+      plane.rot = Math.max(-0.5, Math.min(1.2, plane.vy / 12));
+
+      for (const p of pipes) p.x -= pipeSpeed;
+      while (pipes.length && pipes[0].x < -80) pipes.shift();
+      while (pipes.length < 5) addPipe(pipes[pipes.length - 1].x + 240);
+
+      if (plane.y + plane.r > H - 60) { plane.y = H - 60 - plane.r; die(); }
+      if (plane.y - plane.r < 0) { plane.y = plane.r; plane.vy = 0; }
+
+      const pw = 64;
+      for (const p of pipes) {
+        const inX = plane.x + plane.r > p.x && plane.x - plane.r < p.x + pw;
+        if (inX) {
+          if (plane.y - plane.r < p.top || plane.y + plane.r > p.top + pipeGap) {
+            die();
+            break;
+          }
+        }
+        if (!p.scored && p.x + pw < plane.x) {
+          p.scored = true;
+          State.score++;
+          const newTier = tierFor(State.score);
+          if (newTier !== State.tier) {
+            State.tier = newTier;
+            showToast('tier up — ' + TIERS[newTier].name);
+            pipeSpeed = 2.6 + newTier * 0.45;
+            pipeGap = Math.max(125, 180 - newTier * 11);
+          }
+          updateHUD();
+        }
+      }
+      State.distance += pipeSpeed;
+    }
+
+    for (const s of stars) {
+      s.x -= 0.2 + s.s * 0.15;
+      if (s.x < 0) { s.x = W; s.y = Math.random() * (H - 80); }
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= 0.96; p.vy *= 0.96; p.vy += 0.04;
+      p.life -= 0.025;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+  }
+
+  function die() {
+    if (State.over) return;
+    State.over = true;
+    State.running = false;
+    spawnHit(plane.x, plane.y);
+    if (State.score > State.best) {
+      State.best = State.score;
+      localStorage.setItem('mentria_flappy_best', String(State.best));
+    }
+    setTimeout(() => showGameOver(), 600);
+    updateHUD();
+  }
+
+  function render() {
+    ctx.fillStyle = '#050507';
+    ctx.fillRect(0, 0, W, H);
+
+    for (const s of stars) {
+      ctx.globalAlpha = s.a;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(s.x, s.y, s.s, s.s);
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.strokeStyle = 'rgba(244,114,182,0.18)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, 80); ctx.lineTo(W, 80); ctx.stroke();
+
+    drawPipes();
+
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, H - 60, W, 60);
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, H - 60); ctx.lineTo(W, H - 60); ctx.stroke();
+    ctx.fillStyle = 'rgba(167,139,250,0.18)';
+    ctx.font = '600 12px JetBrains Mono, monospace';
+    ctx.textBaseline = 'middle';
+    for (let x = groundOffset.x; x < W + 16; x += 32) {
+      ctx.fillText('//', x, H - 30);
+    }
+
+    drawPlane(plane.x, plane.y, plane.rot);
+
+    for (const p of particles) {
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3);
+    }
+    ctx.globalAlpha = 1;
+
+    if (State.paused && !State.over) {
+      ctx.fillStyle = 'rgba(5,5,7,0.6)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = C.cyan;
+      ctx.font = '600 14px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('> SIGINT — PAUSED · press P to resume', W/2, H/2);
+      ctx.textAlign = 'start';
+    }
+
+    if (State.running && !State.started && !State.over) {
+      ctx.fillStyle = 'rgba(34,211,238,0.85)';
+      ctx.font = '600 13px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('press SPACE or click to flap ▲', W/2, H/2 - 60);
+      ctx.textAlign = 'start';
+    }
+  }
+
+  function drawPipes() {
+    const pw = 64;
+    ctx.font = '700 14px JetBrains Mono, monospace';
+    ctx.textBaseline = 'top';
+
+    for (const p of pipes) {
+      ctx.fillStyle = C.pipeFill;
+      ctx.strokeStyle = C.pipeBorder;
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, p.x, 0, pw, p.top, 6, true);
+      ctx.stroke();
+      const by = p.top + pipeGap;
+      roundRect(ctx, p.x, by, pw, H - 60 - by, 6, true);
+      ctx.stroke();
+
+      ctx.fillStyle = '#FF5F57'; ctx.beginPath(); ctx.arc(p.x + 12, 14, 3, 0, 6.3); ctx.fill();
+      ctx.fillStyle = '#FEBC2E'; ctx.beginPath(); ctx.arc(p.x + 22, 14, 3, 0, 6.3); ctx.fill();
+      ctx.fillStyle = '#28C840'; ctx.beginPath(); ctx.arc(p.x + 32, 14, 3, 0, 6.3); ctx.fill();
+
+      ctx.fillStyle = 'rgba(244,114,182,0.85)';
+      ctx.font = '700 16px JetBrains Mono, monospace';
+      const promptCount = Math.max(0, Math.floor((p.top - 30) / 22));
+      for (let i = 0; i < promptCount; i++) {
+        ctx.fillText('$', p.x + 14, 32 + i * 22);
+        if (i === promptCount - 1) {
+          ctx.fillStyle = 'rgba(34,211,238,0.7)';
+          ctx.fillRect(p.x + 26, 32 + i * 22 + 2, 8, 14);
+          ctx.fillStyle = 'rgba(244,114,182,0.85)';
+        }
+      }
+
+      ctx.strokeStyle = 'rgba(34,211,238,0.7)';
+      ctx.lineWidth = 1.5;
+      const gx = p.x;
+      ctx.beginPath();
+      ctx.moveTo(gx - 6, p.top); ctx.lineTo(gx, p.top); ctx.lineTo(gx, p.top + 6); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(gx + pw + 6, p.top); ctx.lineTo(gx + pw, p.top); ctx.lineTo(gx + pw, p.top + 6); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(gx - 6, by); ctx.lineTo(gx, by); ctx.lineTo(gx, by - 6); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(gx + pw + 6, by); ctx.lineTo(gx + pw, by); ctx.lineTo(gx + pw, by - 6); ctx.stroke();
+
+      ctx.fillStyle = 'rgba(226,232,240,0.35)';
+      ctx.font = '500 11px JetBrains Mono, monospace';
+      const linesY = by + 14;
+      const lineCount = Math.max(0, Math.floor((H - 60 - linesY) / 16));
+      const seedH = (p.top | 0);
+      for (let i = 0; i < lineCount; i++) {
+        const len = 4 + ((seedH + i * 7) % 20);
+        ctx.fillText('-'.repeat(len) + ' ok', p.x + 10, linesY + i * 16);
+      }
+    }
+  }
+
+  function drawPlane(x, y, rot) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = 'rgba(34,211,238,0.6)';
+
+    ctx.fillStyle = C.plane;
+    ctx.beginPath();
+    ctx.moveTo(18, 0);
+    ctx.lineTo(-14, -10);
+    ctx.lineTo(-6, 0);
+    ctx.lineTo(-14, 10);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.strokeStyle = 'rgba(4,16,22,0.6)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(18, 0); ctx.lineTo(-6, 0);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.beginPath();
+    ctx.moveTo(18, 0);
+    ctx.lineTo(-14, -10);
+    ctx.lineTo(-6, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function roundRect(ctx, x, y, w, h, r, fill) {
+    if (h <= 0) return;
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    if (fill) ctx.fill();
+  }
+
+  function updateHUD() {
+    document.getElementById('stat-score').textContent = State.score;
+    document.getElementById('stat-tier').textContent = TIERS[State.tier].name;
+    document.getElementById('stat-best').textContent = State.best;
+  }
+
+  function hideOverlay() { document.getElementById('overlay').classList.add('hidden'); }
+  function showGameOver() {
+    const ov = document.getElementById('overlay');
+    const m = document.getElementById('modal');
+    m.className = 'modal lose';
+    m.innerHTML = `
+      <p class="eyebrow">&gt; SIGSEGV — CRASH AT 0x${(State.distance|0).toString(16).padStart(6,'0').toUpperCase()}</p>
+      <h2>game over</h2>
+      <div class="stats-mini">
+        <span class="k">Score</span><span class="v">${State.score}</span>
+        <span class="k">Tier</span><span class="v">${TIERS[State.tier].name}</span>
+        <span class="k">Best</span><span class="v">${State.best}</span>
+        <span class="k">Distance</span><span class="v">${(State.distance/100).toFixed(1)}m</span>
+      </div>
+      <button class="btn" id="btn-again">$ retry</button>
+    `;
+    ov.classList.remove('hidden');
+    document.getElementById('btn-again').onclick = () => reset();
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1500);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (!State.running && !State.over) reset();
+      else if (State.over) reset();
+      else flap();
+    } else if (e.key === 'p' || e.key === 'P') {
+      if (State.running && !State.over) State.paused = !State.paused;
+    } else if (e.key === 'r' || e.key === 'R') {
+      reset();
+    }
+  });
+  canvas.addEventListener('mousedown', e => {
+    e.preventDefault();
+    if (State.over) reset();
+    else if (!State.running) reset();
+    else flap();
+  });
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (State.over) reset();
+    else if (!State.running) reset();
+    else flap();
+  }, { passive: false });
+  canvas.style.touchAction = 'none';
+
+  document.getElementById('btn-start').onclick = () => reset();
+
+  function loop() {
+    update();
+    render();
+    requestAnimationFrame(loop);
+  }
+  loop();
+  updateHUD();
+})();
+</script>

@@ -23,16 +23,16 @@ eleventyComputed:
   <!-- Sidebar -->
   <aside class="qn-sidebar" id="qn-sidebar">
     <div class="qn-sidebar__header">
-      <span class="qn-sidebar__label">Notes</span>
-      <button class="qn-sidebar__toggle" id="qn-sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+      <span class="qn-sidebar__label">{{ "tool.quick-notes.notes_label" | t }}</span>
+      <button class="qn-sidebar__toggle" id="qn-sidebar-toggle" title="{{ 'tool.quick-notes.toggle_sidebar' | t }}" aria-label="{{ 'tool.quick-notes.toggle_sidebar' | t }}">
         <span class="qn-sidebar__toggle-icon"></span>
       </button>
     </div>
     <div class="qn-sidebar__list" id="qn-note-list">
       <!-- note tabs injected here -->
     </div>
-    <button class="qn-sidebar__new" id="qn-new-btn" title="New note">
-      <span>+</span> New Note
+    <button class="qn-sidebar__new" id="qn-new-btn" title="{{ 'tool.quick-notes.new_note_title' | t }}">
+      <span>+</span> {{ "tool.quick-notes.new_note_btn" | t }}
     </button>
   </aside>
 
@@ -43,19 +43,19 @@ eleventyComputed:
         type="text"
         class="qn-editor__title"
         id="qn-title-input"
-        placeholder="Untitled Note"
+        placeholder="{{ 'tool.quick-notes.untitled' | t }}"
         spellcheck="false"
         autocomplete="off"
       />
       <div class="qn-editor__actions">
-        <button class="qn-action-btn" id="qn-export-btn" title="Export as .txt">Export</button>
-        <button class="qn-action-btn qn-action-btn--danger" id="qn-delete-btn" title="Delete note">Delete</button>
+        <button class="qn-action-btn" id="qn-export-btn" title="{{ 'tool.quick-notes.export_title' | t }}">{{ "tool.quick-notes.export_btn" | t }}</button>
+        <button class="qn-action-btn qn-action-btn--danger" id="qn-delete-btn" title="{{ 'tool.quick-notes.delete_title' | t }}">{{ "tool.quick-notes.delete_btn" | t }}</button>
       </div>
     </div>
     <textarea
       class="qn-editor__textarea"
       id="qn-textarea"
-      placeholder="Start typing..."
+      placeholder="{{ 'tool.quick-notes.start_typing' | t }}"
       spellcheck="false"
     ></textarea>
     <div class="qn-editor__statusbar">
@@ -83,7 +83,12 @@ eleventyComputed:
 
 <script>
 (() => {
-  /* ── Constants ─────────────────────────────────────── */
+  const COPY = {
+    untitled:      {{ ("tool.quick-notes.untitled"       | t) | dump | safe }},
+    savedPrefix:   {{ ("tool.quick-notes.saved_prefix"   | t) | dump | safe }},
+    confirmDelete: {{ ("tool.quick-notes.confirm_delete" | t) | dump | safe }}
+  };
+
   const STORAGE_KEY = 'mentria-quick-notes';
   const DEBOUNCE_MS = 500;
 
@@ -182,7 +187,7 @@ eleventyComputed:
       const btn = document.createElement('button');
       btn.className = 'qn-note-tab' + (note.id === activeId ? ' qn-note-tab--active' : '');
       btn.dataset.id = note.id;
-      const title = note.title || 'Untitled Note';
+      const title = note.title || COPY.untitled;
       const preview = note.body ? note.body.slice(0, 50).replace(/\n/g, ' ') : 'Empty';
       btn.innerHTML =
         '<span class="qn-note-tab__title">' + escHtml(title) + '</span>' +
@@ -228,7 +233,7 @@ eleventyComputed:
     const hh = String(d.getHours()).padStart(2, '0');
     const mm = String(d.getMinutes()).padStart(2, '0');
     const ss = String(d.getSeconds()).padStart(2, '0');
-    savedEl.textContent = 'Saved ' + hh + ':' + mm + ':' + ss;
+    savedEl.textContent = COPY.savedPrefix + ' ' + hh + ':' + mm + ':' + ss;
   }
 
   /* ── Export ────────────────────────────────────────── */
@@ -250,8 +255,8 @@ eleventyComputed:
   function confirmDelete() {
     const note = getNote(activeId);
     if (!note) return;
-    const name = note.title || 'Untitled Note';
-    if (confirm('Delete "' + name + '"? This cannot be undone.')) {
+    const name = note.title || COPY.untitled;
+    if (confirm(COPY.confirmDelete.replace('{name}', name))) {
       deleteNote(activeId);
     }
   }

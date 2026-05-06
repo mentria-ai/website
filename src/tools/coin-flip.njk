@@ -21,31 +21,29 @@ eleventyComputed:
 <section class="cf">
   <!-- Coin stage -->
   <div class="cf__stage">
-    <button class="cf__coin" id="cf-coin" type="button" aria-label="Flip the coin" aria-live="polite">
+    <button class="cf__coin" id="cf-coin" type="button" aria-label="{{ 'tool.coin-flip.aria_flip' | t }}" aria-live="polite">
       <div class="cf__coin-inner" id="cf-coin-inner">
         <div class="cf__face cf__face--heads">
           <span class="cf__face-letter">H</span>
-          <span class="cf__face-label">HEADS</span>
+          <span class="cf__face-label">{{ "tool.coin-flip.face_heads" | t }}</span>
         </div>
         <div class="cf__face cf__face--tails">
           <span class="cf__face-letter">T</span>
-          <span class="cf__face-label">TAILS</span>
+          <span class="cf__face-label">{{ "tool.coin-flip.face_tails" | t }}</span>
         </div>
       </div>
     </button>
   </div>
 
-  <!-- Result -->
   <div class="cf__result-wrap">
-    <div class="cf__result-label">RESULT</div>
+    <div class="cf__result-label">{{ "tool.coin-flip.result_label" | t }}</div>
     <div class="cf__result" id="cf-result" data-outcome="">
-      <span class="cf__result-text" id="cf-result-text">Ready</span>
+      <span class="cf__result-text" id="cf-result-text">{{ "tool.coin-flip.result_ready" | t }}</span>
     </div>
   </div>
 
-  <!-- Series mode -->
   <div class="cf__series">
-    <div class="cf__series-label">BEST OF</div>
+    <div class="cf__series-label">{{ "tool.coin-flip.best_of_label" | t }}</div>
     <div class="cf__series-btns" id="cf-series-btns">
       <button class="cf__series-btn cf__series-btn--active" data-bo="1" type="button">1</button>
       <button class="cf__series-btn" data-bo="3" type="button">3</button>
@@ -54,27 +52,24 @@ eleventyComputed:
     </div>
   </div>
 
-  <!-- Score -->
   <div class="cf__score" id="cf-score">
-    <span class="cf__score-side cf__score-side--heads">Heads <strong id="cf-heads-count">0</strong></span>
+    <span class="cf__score-side cf__score-side--heads">{{ "tool.coin-flip.score_heads" | t }} <strong id="cf-heads-count">0</strong></span>
     <span class="cf__score-divider">—</span>
-    <span class="cf__score-side cf__score-side--tails"><strong id="cf-tails-count">0</strong> Tails</span>
+    <span class="cf__score-side cf__score-side--tails"><strong id="cf-tails-count">0</strong> {{ "tool.coin-flip.score_tails" | t }}</span>
   </div>
 
-  <!-- Controls -->
   <div class="cf__controls">
     <button class="cf__flip-btn" id="cf-flip" type="button">
       <span class="cf__flip-icon">&#x21BB;</span>
-      Flip
+      {{ "tool.coin-flip.btn_flip" | t }}
     </button>
-    <button class="cf__reset-btn" id="cf-reset" type="button">Reset</button>
+    <button class="cf__reset-btn" id="cf-reset" type="button">{{ "tool.coin-flip.btn_reset" | t }}</button>
   </div>
 
-  <!-- History -->
   <div class="cf__history-wrap">
-    <div class="cf__history-label">HISTORY</div>
+    <div class="cf__history-label">{{ "tool.coin-flip.history_label" | t }}</div>
     <div class="cf__history" id="cf-history">
-      <span class="cf__history-empty">No flips yet</span>
+      <span class="cf__history-empty">{{ "tool.coin-flip.history_empty" | t }}</span>
     </div>
   </div>
 </section>
@@ -132,17 +127,27 @@ eleventyComputed:
     }
   }
 
+  var COPY = {
+    headsLabel: {{ ("tool.coin-flip.result_heads"      | t) | dump | safe }},
+    tailsLabel: {{ ("tool.coin-flip.result_tails"      | t) | dump | safe }},
+    historyEmpty: {{ ("tool.coin-flip.history_empty"   | t) | dump | safe }},
+    headsWins: {{ ("tool.coin-flip.result_heads_wins"  | t) | dump | safe }},
+    tailsWins: {{ ("tool.coin-flip.result_tails_wins"  | t) | dump | safe }},
+    ready: {{ ("tool.coin-flip.result_ready"           | t) | dump | safe }}
+  };
+
   function updateHistory() {
     if (history.length === 0) {
-      historyEl.innerHTML = '<span class="cf__history-empty">No flips yet</span>';
+      historyEl.innerHTML = '<span class="cf__history-empty">' + COPY.historyEmpty + '</span>';
       return;
     }
     var html = "";
     for (var i = history.length - 1; i >= 0; i--) {
       var h = history[i];
       var cls = h === "Heads" ? "cf__history-pip--heads" : "cf__history-pip--tails";
-      var label = h === "Heads" ? "H" : "T";
-      html += '<span class="cf__history-pip ' + cls + '" title="' + h + '">' + label + "</span>";
+      var letter = h === "Heads" ? "H" : "T";
+      var titleText = h === "Heads" ? COPY.headsLabel : COPY.tailsLabel;
+      html += '<span class="cf__history-pip ' + cls + '" title="' + titleText + '">' + letter + "</span>";
     }
     historyEl.innerHTML = html;
   }
@@ -151,13 +156,13 @@ eleventyComputed:
     var need = neededToWin();
     if (heads >= need) {
       seriesOver = true;
-      resultText.textContent = "Heads wins the series!";
+      resultText.textContent = COPY.headsWins;
       resultEl.dataset.outcome = "heads";
       return true;
     }
     if (tails >= need) {
       seriesOver = true;
-      resultText.textContent = "Tails wins the series!";
+      resultText.textContent = COPY.tailsWins;
       resultEl.dataset.outcome = "tails";
       return true;
     }
@@ -214,7 +219,7 @@ eleventyComputed:
         return;
       }
 
-      resultText.textContent = outcome;
+      resultText.textContent = isHeads ? COPY.headsLabel : COPY.tailsLabel;
       resultEl.dataset.outcome = isHeads ? "heads" : "tails";
       flipping = false;
     }, { once: true });
@@ -225,7 +230,7 @@ eleventyComputed:
     tails = 0;
     history = [];
     seriesOver = false;
-    resultText.textContent = "Ready";
+    resultText.textContent = COPY.ready;
     resultEl.dataset.outcome = "";
     coinInner.style.transition = "none";
     coinInner.style.transform = "rotateX(0deg)";

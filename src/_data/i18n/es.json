@@ -191,5 +191,50 @@
       "footer_toggle_flag": "alternar modo bandera",
       "footer_restart": "reiniciar"
     }
+  },
+  "tool": {
+    "decision-wheel": {
+      "aria_wheel": "Rueda de decisiones",
+      "aria_spin": "Girar la rueda",
+      "result_label": "RESULTADO",
+      "result_ready": "Listo",
+      "btn_spin": "Girar",
+      "outcome_yes": "Sí",
+      "outcome_no": "No",
+      "outcome_upto": "Tú decides",
+      "outcome_wait": "Espera y prueba de nuevo"
+    },
+    "coin-flip": {
+      "aria_flip": "Lanzar la moneda",
+      "face_heads": "CARA",
+      "face_tails": "CRUZ",
+      "result_label": "RESULTADO",
+      "result_ready": "Listo",
+      "best_of_label": "MEJOR DE",
+      "score_heads": "Cara",
+      "score_tails": "Cruz",
+      "btn_flip": "Lanzar",
+      "btn_reset": "Reiniciar",
+      "history_label": "HISTORIAL",
+      "history_empty": "Aún no hay lanzamientos",
+      "result_heads": "Cara",
+      "result_tails": "Cruz",
+      "result_heads_wins": "¡Cara gana la serie!",
+      "result_tails_wins": "¡Cruz gana la serie!"
+    },
+    "quick-notes": {
+      "toggle_sidebar": "Alternar barra lateral",
+      "notes_label": "Notas",
+      "new_note_btn": "Nueva Nota",
+      "new_note_title": "Nueva nota",
+      "untitled": "Nota sin título",
+      "start_typing": "Empieza a escribir...",
+      "export_btn": "Exportar",
+      "export_title": "Exportar como .txt",
+      "delete_btn": "Eliminar",
+      "delete_title": "Eliminar nota",
+      "saved_prefix": "Guardado",
+      "confirm_delete": "¿Eliminar \"{name}\"? Esto no se puede deshacer."
+    }
   }
 }

@@ -28,38 +28,35 @@ eleventyComputed:
       <div class="dw__pointer" aria-hidden="true">
         <svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 28L0 0h20z" fill="var(--syn-cyan)"/></svg>
       </div>
-      <div class="dw__wheel" id="dw-wheel" role="img" aria-label="Decision wheel" aria-live="polite">
+      <div class="dw__wheel" id="dw-wheel" role="img" aria-label="{{ 'tool.decision-wheel.aria_wheel' | t }}" aria-live="polite">
         <div class="dw__segment dw__segment--0"></div>
         <div class="dw__segment dw__segment--1"></div>
         <div class="dw__segment dw__segment--2"></div>
         <div class="dw__segment dw__segment--3"></div>
-        <button class="dw__hub" id="dw-hub" type="button" aria-label="Spin the wheel"></button>
+        <button class="dw__hub" id="dw-hub" type="button" aria-label="{{ 'tool.decision-wheel.aria_spin' | t }}"></button>
       </div>
     </div>
   </div>
 
-  <!-- Result -->
   <div class="dw__result-wrap">
-    <div class="dw__result-label">RESULT</div>
+    <div class="dw__result-label">{{ "tool.decision-wheel.result_label" | t }}</div>
     <div class="dw__result" id="dw-result" data-outcome="">
-      <span class="dw__result-text">Ready</span>
+      <span class="dw__result-text">{{ "tool.decision-wheel.result_ready" | t }}</span>
     </div>
   </div>
 
-  <!-- Controls -->
   <div class="dw__controls">
     <button class="dw__spin-btn" id="dw-spin">
       <span class="dw__spin-icon">&#x25B6;</span>
-      Spin
+      {{ "tool.decision-wheel.btn_spin" | t }}
     </button>
   </div>
 
-  <!-- Legend -->
   <div class="dw__legend">
-    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-green)"></span>Yes</div>
-    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-pink)"></span>No</div>
-    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-cyan)"></span>Up to you</div>
-    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-amber)"></span>Wait &amp; try again</div>
+    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-green)"></span>{{ "tool.decision-wheel.outcome_yes"   | t }}</div>
+    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-pink)"></span>{{ "tool.decision-wheel.outcome_no"    | t }}</div>
+    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-cyan)"></span>{{ "tool.decision-wheel.outcome_upto"  | t }}</div>
+    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-amber)"></span>{{ "tool.decision-wheel.outcome_wait"  | t }}</div>
   </div>
 </section>
 {% include "terminal-frame-close.njk" %}
@@ -82,10 +79,10 @@ eleventyComputed:
 <script>
 (() => {
   const outcomes = [
-    { label: "Yes", cls: "yes", color: "var(--syn-green)" },
-    { label: "No", cls: "no", color: "var(--syn-pink)" },
-    { label: "Up to you", cls: "upto", color: "var(--syn-cyan)" },
-    { label: "Wait & try again", cls: "wait", color: "var(--syn-amber)" }
+    { label: {{ ("tool.decision-wheel.outcome_yes"  | t) | dump | safe }}, cls: "yes",  color: "var(--syn-green)" },
+    { label: {{ ("tool.decision-wheel.outcome_no"   | t) | dump | safe }}, cls: "no",   color: "var(--syn-pink)" },
+    { label: {{ ("tool.decision-wheel.outcome_upto" | t) | dump | safe }}, cls: "upto", color: "var(--syn-cyan)" },
+    { label: {{ ("tool.decision-wheel.outcome_wait" | t) | dump | safe }}, cls: "wait", color: "var(--syn-amber)" }
   ];
 
   const wheel = document.getElementById("dw-wheel");

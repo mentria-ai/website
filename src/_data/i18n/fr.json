@@ -191,5 +191,50 @@
       "footer_toggle_flag": "basculer mode drapeau",
       "footer_restart": "redémarrer"
     }
+  },
+  "tool": {
+    "decision-wheel": {
+      "aria_wheel": "Roue de décision",
+      "aria_spin": "Faire tourner la roue",
+      "result_label": "RÉSULTAT",
+      "result_ready": "Prêt",
+      "btn_spin": "Tourner",
+      "outcome_yes": "Oui",
+      "outcome_no": "Non",
+      "outcome_upto": "À vous de choisir",
+      "outcome_wait": "Attendez et réessayez"
+    },
+    "coin-flip": {
+      "aria_flip": "Lancer la pièce",
+      "face_heads": "PILE",
+      "face_tails": "FACE",
+      "result_label": "RÉSULTAT",
+      "result_ready": "Prêt",
+      "best_of_label": "MEILLEUR DE",
+      "score_heads": "Pile",
+      "score_tails": "Face",
+      "btn_flip": "Lancer",
+      "btn_reset": "Réinitialiser",
+      "history_label": "HISTORIQUE",
+      "history_empty": "Aucun lancer pour l'instant",
+      "result_heads": "Pile",
+      "result_tails": "Face",
+      "result_heads_wins": "Pile gagne la série !",
+      "result_tails_wins": "Face gagne la série !"
+    },
+    "quick-notes": {
+      "toggle_sidebar": "Basculer la barre latérale",
+      "notes_label": "Notes",
+      "new_note_btn": "Nouvelle Note",
+      "new_note_title": "Nouvelle note",
+      "untitled": "Note sans titre",
+      "start_typing": "Commencez à taper...",
+      "export_btn": "Exporter",
+      "export_title": "Exporter comme .txt",
+      "delete_btn": "Supprimer",
+      "delete_title": "Supprimer la note",
+      "saved_prefix": "Enregistré",
+      "confirm_delete": "Supprimer « {name} » ? Cela ne peut pas être annulé."
+    }
   }
 }

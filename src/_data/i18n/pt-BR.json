@@ -191,5 +191,50 @@
       "footer_toggle_flag": "alternar modo bandeira",
       "footer_restart": "reiniciar"
     }
+  },
+  "tool": {
+    "decision-wheel": {
+      "aria_wheel": "Roda de decisões",
+      "aria_spin": "Girar a roda",
+      "result_label": "RESULTADO",
+      "result_ready": "Pronto",
+      "btn_spin": "Girar",
+      "outcome_yes": "Sim",
+      "outcome_no": "Não",
+      "outcome_upto": "Você decide",
+      "outcome_wait": "Espere e tente de novo"
+    },
+    "coin-flip": {
+      "aria_flip": "Jogar a moeda",
+      "face_heads": "CARA",
+      "face_tails": "COROA",
+      "result_label": "RESULTADO",
+      "result_ready": "Pronto",
+      "best_of_label": "MELHOR DE",
+      "score_heads": "Cara",
+      "score_tails": "Coroa",
+      "btn_flip": "Jogar",
+      "btn_reset": "Reiniciar",
+      "history_label": "HISTÓRICO",
+      "history_empty": "Sem jogadas ainda",
+      "result_heads": "Cara",
+      "result_tails": "Coroa",
+      "result_heads_wins": "Cara vence a série!",
+      "result_tails_wins": "Coroa vence a série!"
+    },
+    "quick-notes": {
+      "toggle_sidebar": "Alternar barra lateral",
+      "notes_label": "Notas",
+      "new_note_btn": "Nova Nota",
+      "new_note_title": "Nova nota",
+      "untitled": "Nota sem título",
+      "start_typing": "Comece a digitar...",
+      "export_btn": "Exportar",
+      "export_title": "Exportar como .txt",
+      "delete_btn": "Excluir",
+      "delete_title": "Excluir nota",
+      "saved_prefix": "Salvo",
+      "confirm_delete": "Excluir \"{name}\"? Isso não pode ser desfeito."
+    }
   }
 }

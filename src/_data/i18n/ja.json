@@ -191,5 +191,50 @@
       "footer_toggle_flag": "旗モード切替",
       "footer_restart": "リスタート"
     }
+  },
+  "tool": {
+    "decision-wheel": {
+      "aria_wheel": "決定の輪",
+      "aria_spin": "ホイールを回す",
+      "result_label": "結果",
+      "result_ready": "準備完了",
+      "btn_spin": "回す",
+      "outcome_yes": "はい",
+      "outcome_no": "いいえ",
+      "outcome_upto": "あなた次第",
+      "outcome_wait": "待ってもう一度"
+    },
+    "coin-flip": {
+      "aria_flip": "コインを投げる",
+      "face_heads": "表",
+      "face_tails": "裏",
+      "result_label": "結果",
+      "result_ready": "準備完了",
+      "best_of_label": "ベストオブ",
+      "score_heads": "表",
+      "score_tails": "裏",
+      "btn_flip": "投げる",
+      "btn_reset": "リセット",
+      "history_label": "履歴",
+      "history_empty": "まだ投げていません",
+      "result_heads": "表",
+      "result_tails": "裏",
+      "result_heads_wins": "表がシリーズに勝ちました!",
+      "result_tails_wins": "裏がシリーズに勝ちました!"
+    },
+    "quick-notes": {
+      "toggle_sidebar": "サイドバーを切り替え",
+      "notes_label": "ノート",
+      "new_note_btn": "新規ノート",
+      "new_note_title": "新規ノート",
+      "untitled": "無題のノート",
+      "start_typing": "入力を開始...",
+      "export_btn": "エクスポート",
+      "export_title": ".txtでエクスポート",
+      "delete_btn": "削除",
+      "delete_title": "ノートを削除",
+      "saved_prefix": "保存済み",
+      "confirm_delete": "「{name}」を削除しますか？元に戻せません。"
+    }
   }
 }

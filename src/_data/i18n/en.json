@@ -191,5 +191,50 @@
       "footer_toggle_flag": "toggle flag mode",
       "footer_restart": "restart"
     }
+  },
+  "tool": {
+    "decision-wheel": {
+      "aria_wheel": "Decision wheel",
+      "aria_spin": "Spin the wheel",
+      "result_label": "RESULT",
+      "result_ready": "Ready",
+      "btn_spin": "Spin",
+      "outcome_yes": "Yes",
+      "outcome_no": "No",
+      "outcome_upto": "Up to you",
+      "outcome_wait": "Wait & try again"
+    },
+    "coin-flip": {
+      "aria_flip": "Flip the coin",
+      "face_heads": "HEADS",
+      "face_tails": "TAILS",
+      "result_label": "RESULT",
+      "result_ready": "Ready",
+      "best_of_label": "BEST OF",
+      "score_heads": "Heads",
+      "score_tails": "Tails",
+      "btn_flip": "Flip",
+      "btn_reset": "Reset",
+      "history_label": "HISTORY",
+      "history_empty": "No flips yet",
+      "result_heads": "Heads",
+      "result_tails": "Tails",
+      "result_heads_wins": "Heads wins the series!",
+      "result_tails_wins": "Tails wins the series!"
+    },
+    "quick-notes": {
+      "toggle_sidebar": "Toggle sidebar",
+      "notes_label": "Notes",
+      "new_note_btn": "New Note",
+      "new_note_title": "New note",
+      "untitled": "Untitled Note",
+      "start_typing": "Start typing...",
+      "export_btn": "Export",
+      "export_title": "Export as .txt",
+      "delete_btn": "Delete",
+      "delete_title": "Delete note",
+      "saved_prefix": "Saved",
+      "confirm_delete": "Delete \"{name}\"? This cannot be undone."
+    }
   }
 }

@@ -78,10 +78,10 @@
       for (var i = 0; i < welcomeLines.length; i++) {
         appendLine(outputEl, welcomeLines[i].text, welcomeLines[i].type);
       }
-      inputEl.focus();
+      inputEl.focus({ preventScroll: true });
     } else {
       typeLines(outputEl, welcomeLines, 0, function () {
-        inputEl.focus();
+        inputEl.focus({ preventScroll: true });
       });
     }
 
@@ -141,7 +141,7 @@
 
     // Click anywhere in CLI area to focus input
     containerEl.addEventListener('click', function () {
-      inputEl.focus();
+      inputEl.focus({ preventScroll: true });
     });
   }
 

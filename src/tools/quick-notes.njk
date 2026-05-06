@@ -11,7 +11,7 @@ eleventyComputed:
   description: "{{ 'tools.quick-notes.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow">~/tools/quick-notes</p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">quick-notes</span></p>
   <h1>{{ "tools.quick-notes.title" | t }}</h1>
   <p>{{ "tools.quick-notes.lede" | t }}</p>
 </section>

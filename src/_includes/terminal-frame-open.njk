@@ -3,10 +3,11 @@
         <div class="terminal-frame__dots">
             <span class="terminal-frame__dot terminal-frame__dot--red"></span>
             <span class="terminal-frame__dot terminal-frame__dot--yellow"></span>
-            <span class="terminal-frame__dot terminal-frame__dot--green"></span>
+            <button type="button" class="terminal-frame__dot terminal-frame__dot--green" data-action="toggle-fullscreen" aria-label="Toggle fullscreen" title="Toggle fullscreen"></button>
         </div>
         {% if terminalTitle %}
         <span class="terminal-frame__filename">{{ terminalTitle }}</span>
         {% endif %}
     </div>
     <div class="terminal-frame__body">
+

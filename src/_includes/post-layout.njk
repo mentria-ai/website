@@ -3,7 +3,7 @@ layout: base.njk
 ---
 <article style="max-width: 700px; margin: 0 auto;">
     <header class="hero" style="padding-top: 1rem; text-align: left;">
-        <p class="eyebrow">~/feed</p>
+        <p class="eyebrow eyebrow--crumbs eyebrow--start"><a class="eyebrow__link" href="/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">feed</span></p>
         <h1>{{ title }}</h1>
         {% if date %}
         <time datetime="{{ date | date }}" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--syn-amber);">{{ date | date }}</time>

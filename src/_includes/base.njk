@@ -124,5 +124,37 @@
         navigator.serviceWorker.register('/sw.js');
       }
     </script>
+    <script>
+      (function () {
+        var FS = 'terminal-frame--fullscreen';
+        var BODY_FS = 'is-fullscreen-tool';
+        function activeFrame() { return document.querySelector('.' + FS); }
+        function exit() {
+          var frame = activeFrame();
+          if (!frame) return;
+          frame.classList.remove(FS);
+          document.body.classList.remove(BODY_FS);
+          window.dispatchEvent(new Event('resize'));
+        }
+        function enter(frame) {
+          var current = activeFrame();
+          if (current && current !== frame) current.classList.remove(FS);
+          frame.classList.add(FS);
+          document.body.classList.add(BODY_FS);
+          window.dispatchEvent(new Event('resize'));
+        }
+        document.addEventListener('click', function (e) {
+          var btn = e.target.closest && e.target.closest('[data-action="toggle-fullscreen"]');
+          if (!btn) return;
+          var frame = btn.closest('.terminal-frame');
+          if (!frame) return;
+          e.preventDefault();
+          if (frame.classList.contains(FS)) exit(); else enter(frame);
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && activeFrame()) exit();
+        });
+      })();
+    </script>
 </body>
 </html>

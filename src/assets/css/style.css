@@ -358,19 +358,67 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 }
 
 .tldr {
-  background: var(--term-bg-raised);
+  margin: 0.75rem auto 0;
+  font-family: var(--font-mono);
+  max-width: 56ch;
+  text-align: left;
+}
+.tldr__summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.5rem;
+  margin: 0 auto;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  color: var(--term-muted);
+  letter-spacing: 0.05em;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.tldr__summary::-webkit-details-marker { display: none; }
+.tldr__summary:hover,
+.tldr__summary:focus-visible {
+  color: var(--syn-cyan);
+  outline: none;
+  background: rgba(34, 211, 238, 0.06);
+}
+.tldr__caret {
+  display: inline-block;
+  transition: transform 0.2s ease;
+  font-size: 0.85em;
+}
+.tldr[open] .tldr__caret { transform: rotate(180deg); }
+.tldr__cta-less { display: none; }
+.tldr[open] .tldr__cta-more { display: none; }
+.tldr[open] .tldr__cta-less { display: inline; }
+.tldr__panel {
+  margin-top: 0.5rem;
+  padding: 0.85rem 1rem;
   border: 1px solid var(--term-border);
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
-  margin: 1rem 0 2rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  animation: tldr-fade 0.2s ease-out;
+}
+@keyframes tldr-fade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .tldr__heading {
   font-family: var(--font-mono);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--syn-cyan);
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.4rem;
+  letter-spacing: 0.02em;
 }
-.tldr__body { margin: 0; line-height: 1.6; }
+.tldr__body {
+  margin: 0;
+  line-height: 1.6;
+  font-size: 0.85rem;
+  color: var(--term-fg);
+}
+.hero .tldr { display: flex; flex-direction: column; align-items: center; }
 
 /* iOS Safari auto-zooms when a focused text field has computed
    font-size < 16px. Even with user-scalable=no on the viewport this

@@ -13,6 +13,13 @@
   "footer": {
     "copyright": "© 2026 Mentria. Tous droits réservés."
   },
+  "common": {
+    "tldr": {
+      "read_more": "Qu'est-ce que c'est ?",
+      "read_less": "Masquer les détails",
+      "what_is": "Qu'est-ce que {name} ?"
+    }
+  },
   "home": {
     "cli": {
       "welcomeCmd": "$ welcome --to mentria",

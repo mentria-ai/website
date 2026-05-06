@@ -1,0 +1,14 @@
+{% if tldr %}
+{%- set toolTitle = ("tools." + page.fileSlug + ".title") | t -%}
+<details class="tldr">
+  <summary class="tldr__summary">
+    <span class="tldr__cta-more">{{ "common.tldr.read_more" | t }}</span>
+    <span class="tldr__cta-less">{{ "common.tldr.read_less" | t }}</span>
+    <span class="tldr__caret" aria-hidden="true">▾</span>
+  </summary>
+  <div class="tldr__panel">
+    <h2 class="tldr__heading">{{ "common.tldr.what_is" | t | replace("{name}", toolTitle) }}</h2>
+    <p class="tldr__body">{{ tldr }}</p>
+  </div>
+</details>
+{% endif %}

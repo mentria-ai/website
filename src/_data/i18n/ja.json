@@ -13,6 +13,13 @@
   "footer": {
     "copyright": "© 2026 Mentria. All rights reserved."
   },
+  "common": {
+    "tldr": {
+      "read_more": "これは何?",
+      "read_less": "詳細を隠す",
+      "what_is": "{name}とは?"
+    }
+  },
   "home": {
     "cli": {
       "welcomeCmd": "$ welcome --to mentria",

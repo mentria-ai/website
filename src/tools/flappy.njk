@@ -9,6 +9,8 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.flappy.title' | t }}"
   description: "{{ 'tools.flappy.lede' | t }}"
+tldr: >
+  A browser-native take on Flappy Bird with a synthwave-terminal aesthetic. Pure HTML5 Canvas — no install, no signup, no third-party scripts. Game state, high score, and audio all run client-side and stay on your device. Tap, click, or press space to flap. Works offline once cached.
 ---
 <div class="game-page">
 
@@ -16,6 +18,7 @@ eleventyComputed:
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">flappy</span></p>
   <h1>{{ "tools.flappy.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
   <p>{{ "tools.flappy.lede" | t }}</p>
+  {% include "tldr.njk" %}
 </section>
 
 {% set terminalTitle = "flappy.js" %}

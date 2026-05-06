@@ -9,11 +9,14 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.decision-wheel.title' | t }}"
   description: "{{ 'tools.decision-wheel.lede' | t }}"
+tldr: >
+  Spin a customizable wheel to pick from your own list of options. Add or remove choices on the fly; the outcome is selected locally with the browser's RNG. No accounts, no trackers, no server. Useful for restaurant picks, task assignment, or anything you would otherwise flip a coin for.
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">decision-wheel</span></p>
   <h1>{{ "tools.decision-wheel.title" | t }}</h1>
   <p>{{ "tools.decision-wheel.lede" | t }}</p>
+  {% include "tldr.njk" %}
 </section>
 
 {% set terminalTitle = "decision-wheel.js" %}

@@ -9,11 +9,14 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.quick-notes.title' | t }}"
   description: "{{ 'tools.quick-notes.lede' | t }}"
+tldr: >
+  A keyboard-first notepad that auto-saves every keystroke to your browser's localStorage. Multiple notes, instant search, dark synthwave aesthetic. Notes never leave your device — no sync, no accounts, no server. Use it as a scratchpad for tasks, snippets, or thoughts you will come back to in a tab.
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">quick-notes</span></p>
   <h1>{{ "tools.quick-notes.title" | t }}</h1>
   <p>{{ "tools.quick-notes.lede" | t }}</p>
+  {% include "tldr.njk" %}
 </section>
 
 <!-- ── Quick Notes Tool ─────────────────────────────── -->

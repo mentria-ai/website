@@ -9,11 +9,14 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.invoice.title' | t }}"
   description: "{{ 'tools.invoice.lede' | t }}"
+tldr: >
+  Build clean A4 invoices in your browser and save them as PDF via the browser's print dialog. Add line items, currency, bank details, footnotes; auto-saves to localStorage so refreshes do not lose data. Import or export the whole invoice as JSON. No accounts, no server — every byte stays on your device.
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">invoice</span></p>
   <h1>{{ "tools.invoice.title" | t }}</h1>
   <p>{{ "tools.invoice.lede" | t }}</p>
+  {% include "tldr.njk" %}
 </section>
 
 {% set terminalTitle = "invoice.js" %}

@@ -9,6 +9,8 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.pong.title' | t }}"
   description: "{{ 'tools.pong.lede' | t }}"
+tldr: >
+  Browser-native Pong with single-player versus CPU. HTML5 Canvas, deterministic physics, mouse, keyboard, and touch input. Score, paddle position, and the AI opponent all live in client-side JavaScript — no third-party scripts, no server. Works offline once cached. Quick reflex breaks at the desk.
 ---
 <div class="game-page">
 
@@ -16,6 +18,7 @@ eleventyComputed:
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">pong</span></p>
   <h1>{{ "tools.pong.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
   <p>{{ "tools.pong.lede" | t }}</p>
+  {% include "tldr.njk" %}
 </section>
 
 {% set terminalTitle = "pong.js" %}

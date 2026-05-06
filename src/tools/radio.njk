@@ -9,11 +9,14 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.radio.title' | t }}"
   description: "{{ 'tools.radio.lede' | t }}"
+tldr: >
+  Infinite AI-generated cinematic music streaming in your browser. Tracks come from a public catalog and play via the Web Audio API; your listening history and likes stay on-device in IndexedDB to learn your taste locally over time. No accounts, no tracking, no server-side personalization — pure client-side.
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">radio</span></p>
   <h1>{{ "tools.radio.title" | t }}</h1>
   <p>{{ "tools.radio.lede" | t }}</p>
+  {% include "tldr.njk" %}
 </section>
 
 {% set terminalTitle = "radio.js" %}

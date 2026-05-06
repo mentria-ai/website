@@ -15,14 +15,11 @@ tldr: >
   account. Supports vision input. The model loads on first click; subsequent
   visits start instantly from local cache.
 ---
-<section class="tldr">
-  <h2 class="tldr__heading">{{ "tool.ai-chat.tldr_heading" | t }}</h2>
-  <p class="tldr__body">{{ tldr }}</p>
-</section>
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">ai-chat</span></p>
   <h1>{{ "tools.ai-chat.title" | t }}</h1>
   <p>{{ "tools.ai-chat.lede" | t }}</p>
+  {% include "tldr.njk" %}
 </section>
 
 {% set terminalTitle = "ai-chat.js" %}

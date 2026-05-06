@@ -9,11 +9,14 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.markdown-pdf.title' | t }}"
   description: "{{ 'tools.markdown-pdf.lede' | t }}"
+tldr: >
+  A markdown editor with live preview and one-click PDF export through your browser's print dialog. Imports and exports .md files, auto-saves drafts locally, supports GitHub-flavored markdown including tables and task lists. No upload, no account, no server — everything runs in pure client-side JavaScript and works offline.
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">markdown-pdf</span></p>
   <h1>{{ "tools.markdown-pdf.title" | t }}</h1>
   <p>{{ "tools.markdown-pdf.lede" | t }}</p>
+  {% include "tldr.njk" %}
 </section>
 
 {% set terminalTitle = "markdown-pdf.js" %}

@@ -1,15 +1,21 @@
 ---
 layout: base.njk
-title: Flappy
-description: A paper plane threading a stack of command prompts. Tap, click, or press SPACE to flap. Don't crash the prompt.
-permalink: /tools/flappy/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/flappy/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.flappy.title' | t }}"
+  description: "{{ 'tools.flappy.lede' | t }}"
 ---
 <div class="game-page">
 
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/flappy</p>
-  <h1>Flappy<span style="color:var(--syn-cyan)">.</span>js</h1>
-  <p>A paper plane threading a stack of command prompts. Tap, click, or press SPACE to flap. Don't crash the prompt.</p>
+  <h1>{{ "tools.flappy.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
+  <p>{{ "tools.flappy.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "flappy.js" %}

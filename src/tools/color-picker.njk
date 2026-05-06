@@ -1,15 +1,19 @@
 ---
 layout: base.njk
-title: Color Picker
-description: Pick colors, generate harmonious palettes, and copy values in HEX, RGB, and HSL. Works offline.
-permalink: /tools/color-picker/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/color-picker/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.color-picker.title' | t }}"
+  description: "{{ 'tools.color-picker.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/color-picker</p>
-  <h1>Color Picker</h1>
-  <p>
-    Pick any color, view its HEX / RGB / HSL values, and generate harmonious palettes. Works offline.
-  </p>
+  <h1>{{ "tools.color-picker.title" | t }}</h1>
+  <p>{{ "tools.color-picker.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "color-picker.js" %}

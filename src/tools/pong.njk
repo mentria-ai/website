@@ -1,15 +1,21 @@
 ---
 layout: base.njk
-title: Pong
-description: Brick-buster meets paddle game. Catch falling powerups, clear the wall, survive levels that get faster and meaner. Runs locally.
-permalink: /tools/pong/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/pong/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.pong.title' | t }}"
+  description: "{{ 'tools.pong.lede' | t }}"
 ---
 <div class="game-page">
 
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/pong</p>
-  <h1>Pong<span style="color:var(--syn-cyan)">.</span>js</h1>
-  <p>Brick-buster meets paddle game. Catch falling powerups, clear the wall, survive levels that get faster and meaner. Runs locally — no data leaves your device.</p>
+  <h1>{{ "tools.pong.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
+  <p>{{ "tools.pong.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "pong.js" %}

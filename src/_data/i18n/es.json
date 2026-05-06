@@ -68,5 +68,22 @@
   "lang_switcher": {
     "label": "Idioma",
     "current_label": "Idioma actual"
+  },
+  "tools": {
+    "ai-chat":         { "title": "Chat IA",                "lede": "Qwen3.5-0.8B ejecutándose localmente en tu navegador. Sin servidor, sin claves de API. Compatible con imágenes." },
+    "base64-codec":    { "title": "Codificador Base64",     "lede": "Codifica y decodifica texto o archivos en Base64. Compatible con imágenes, documentos y cualquier tipo de archivo. Todo se ejecuta localmente en tu navegador." },
+    "coin-flip":       { "title": "Lanzar Moneda",          "lede": "Cara o cruz — lanza una moneda al instante. Ejecuta una serie al mejor de N para desempates. Funciona sin conexión." },
+    "color-picker":    { "title": "Selector de Color",      "lede": "Elige cualquier color, ve sus valores HEX / RGB / HSL, y genera paletas armoniosas. Funciona sin conexión." },
+    "countdown-timer": { "title": "Temporizador",           "lede": "Establece una duración o elige una hora objetivo. Hasta 4 temporizadores independientes con sonido de alarma." },
+    "decision-wheel":  { "title": "Rueda de Decisiones",    "lede": "¿No puedes decidir? Gira la rueda y deja que el destino elija. Funciona sin conexión." },
+    "flappy":          { "title": "Flappy",                 "lede": "Un avión de papel sorteando una pila de prompts del terminal. Toca, haz clic o presiona ESPACIO para aletear. No choques con el prompt." },
+    "invoice":         { "title": "Generador de Facturas",  "lede": "Crea facturas limpias de una página en tu navegador. Se guardan mientras escribes. Imprime en A4 o exporta a JSON." },
+    "markdown-pdf":    { "title": "Markdown → PDF",         "lede": "Escribe markdown, ve una vista previa en vivo, y descarga un PDF profesional y limpio. Se guarda automáticamente en tu navegador. Tus datos no salen de tu dispositivo." },
+    "minesweeper":     { "title": "Buscaminas",             "lede": "Clásico rompecabezas lógico con vestimenta de terminal. Haz clic para cavar, clic derecho (o modo F) para marcar bandera. Los números cuentan minas adyacentes. No pulses los rosas." },
+    "pong":            { "title": "Pong",                   "lede": "Rompe-ladrillos con paleta. Atrapa los power-ups que caen, despeja el muro, sobrevive niveles cada vez más rápidos y duros. Se ejecuta localmente — tus datos no salen de tu dispositivo." },
+    "quick-notes":     { "title": "Notas Rápidas",          "lede": "Una libreta mínima que vive en tu navegador. Crea múltiples notas, guardadas automáticamente en cada pulsación." },
+    "quote":           { "title": "Cita Motivadora",        "lede": "Citas originales generadas por IA, ejecutándose localmente en tu navegador. Tus datos no salen de tu dispositivo." },
+    "radio":           { "title": "Radio Infinita",         "lede": "Música cinematográfica épica generada por IA, transmitiendo infinitamente. Aprende tu gusto localmente — tus datos no salen de tu dispositivo." },
+    "tetris":          { "title": "Tetris",                 "lede": "Apila tetrominós. Despeja líneas. La velocidad aumenta cada 10 líneas. Piezas en cian, púrpura, rosa, ámbar, verde — la paleta de Mentria." }
   }
 }

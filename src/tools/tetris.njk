@@ -1,15 +1,21 @@
 ---
 layout: base.njk
-title: Tetris
-description: Stack tetrominoes, clear lines, ramp up the speed. Cyan, purple, pink, amber, green — Mentria palette. Runs locally, plays offline.
-permalink: /tools/tetris/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/tetris/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.tetris.title' | t }}"
+  description: "{{ 'tools.tetris.lede' | t }}"
 ---
 <div class="game-page">
 
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/tetris</p>
-  <h1>Tetris<span style="color:var(--syn-cyan)">.</span>js</h1>
-  <p>Stack tetrominoes. Clear lines. Speed ramps every 10 lines. Pieces in cyan, purple, pink, amber, green — the Mentria palette.</p>
+  <h1>{{ "tools.tetris.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
+  <p>{{ "tools.tetris.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "tetris.js" %}

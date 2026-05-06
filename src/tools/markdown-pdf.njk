@@ -1,15 +1,19 @@
 ---
 layout: base.njk
-title: Markdown → PDF
-description: Write markdown, see a live preview, and download a clean professional PDF. All processing stays in your browser.
-permalink: /tools/markdown-pdf/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/markdown-pdf/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.markdown-pdf.title' | t }}"
+  description: "{{ 'tools.markdown-pdf.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/markdown-pdf</p>
-  <h1>Markdown → PDF</h1>
-  <p>
-    Write markdown, see a live preview, and download a clean professional PDF. Auto-saves to your browser. No data leaves your device.
-  </p>
+  <h1>{{ "tools.markdown-pdf.title" | t }}</h1>
+  <p>{{ "tools.markdown-pdf.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "markdown-pdf.js" %}

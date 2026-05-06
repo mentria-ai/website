@@ -1,15 +1,19 @@
 ---
 layout: base.njk
-title: Quick Notes
-description: Minimal scratchpad that saves to your browser. Supports multiple notes with localStorage persistence.
-permalink: /tools/quick-notes/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/quick-notes/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.quick-notes.title' | t }}"
+  description: "{{ 'tools.quick-notes.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/quick-notes</p>
-  <h1>Quick Notes</h1>
-  <p>
-    A minimal scratchpad that lives in your browser. Create multiple notes, auto-saved on every keystroke.
-  </p>
+  <h1>{{ "tools.quick-notes.title" | t }}</h1>
+  <p>{{ "tools.quick-notes.lede" | t }}</p>
 </section>
 
 <!-- ── Quick Notes Tool ─────────────────────────────── -->

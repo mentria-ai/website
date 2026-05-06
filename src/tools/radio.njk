@@ -1,15 +1,19 @@
 ---
 layout: base.njk
-title: Infinite Radio
-description: AI-generated epic cinematic music streaming infinitely. Learns your taste locally. No data leaves your device.
-permalink: /tools/radio/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/radio/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.radio.title' | t }}"
+  description: "{{ 'tools.radio.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/radio</p>
-  <h1>Infinite Radio</h1>
-  <p>
-    AI-generated epic cinematic music, streaming infinitely. Learns your taste locally — no data leaves your device.
-  </p>
+  <h1>{{ "tools.radio.title" | t }}</h1>
+  <p>{{ "tools.radio.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "radio.js" %}

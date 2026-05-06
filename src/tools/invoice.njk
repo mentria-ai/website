@@ -1,15 +1,19 @@
 ---
 layout: base.njk
-title: Invoice Generator
-description: Build clean, single-page invoices in your browser. Auto-saves as you type, prints to A4, exports/imports JSON. No data leaves your device.
-permalink: /tools/invoice/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/invoice/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.invoice.title' | t }}"
+  description: "{{ 'tools.invoice.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/invoice</p>
-  <h1>Invoice Generator</h1>
-  <p>
-    Build clean, single-page invoices in your browser. Auto-saves as you type. Print to A4 or export to JSON.
-  </p>
+  <h1>{{ "tools.invoice.title" | t }}</h1>
+  <p>{{ "tools.invoice.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "invoice.js" %}

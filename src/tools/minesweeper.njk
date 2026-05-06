@@ -1,15 +1,21 @@
 ---
 layout: base.njk
-title: Minesweeper
-description: Classic logic puzzle in terminal dress. Click to dig, right-click (or F-mode) to flag. Numbers count adjacent mines. Don't pop the pink ones.
-permalink: /tools/minesweeper/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/minesweeper/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.minesweeper.title' | t }}"
+  description: "{{ 'tools.minesweeper.lede' | t }}"
 ---
 <div class="game-page">
 
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/minesweeper</p>
-  <h1>Minesweeper<span style="color:var(--syn-cyan)">.</span>js</h1>
-  <p>Classic logic puzzle in terminal dress. Click to dig, right-click (or F-mode) to flag. Numbers count adjacent mines. Don't pop the pink ones.</p>
+  <h1>{{ "tools.minesweeper.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
+  <p>{{ "tools.minesweeper.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "minesweeper.js" %}

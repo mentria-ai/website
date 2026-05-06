@@ -1,15 +1,19 @@
 ---
 layout: base.njk
-title: Decision Wheel
-description: Offline-ready spinner for quick binary or gut-check decisions.
-permalink: /tools/decision-wheel/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/decision-wheel/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.decision-wheel.title' | t }}"
+  description: "{{ 'tools.decision-wheel.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/decision-wheel</p>
-  <h1>Decision Wheel</h1>
-  <p>
-    Can't decide? Spin the wheel and let fate choose. Works offline.
-  </p>
+  <h1>{{ "tools.decision-wheel.title" | t }}</h1>
+  <p>{{ "tools.decision-wheel.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "decision-wheel.js" %}

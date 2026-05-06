@@ -1,15 +1,19 @@
 ---
 layout: base.njk
-title: Coin Flip
-description: Animated heads or tails coin flip with optional best-of-N series mode. Works offline.
-permalink: /tools/coin-flip/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/coin-flip/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.coin-flip.title' | t }}"
+  description: "{{ 'tools.coin-flip.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/coin-flip</p>
-  <h1>Coin Flip</h1>
-  <p>
-    Heads or tails — flip a coin instantly. Run a best-of series for tiebreakers. Works offline.
-  </p>
+  <h1>{{ "tools.coin-flip.title" | t }}</h1>
+  <p>{{ "tools.coin-flip.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "coin-flip.js" %}

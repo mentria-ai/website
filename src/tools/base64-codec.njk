@@ -1,15 +1,19 @@
 ---
 layout: base.njk
-title: Base64 Codec
-description: Encode and decode text or files (including images) to and from Base64. All processing stays in your browser.
-permalink: /tools/base64-codec/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/base64-codec/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.base64-codec.title' | t }}"
+  description: "{{ 'tools.base64-codec.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/base64-codec</p>
-  <h1>Base64 Codec</h1>
-  <p>
-    Encode and decode text or files to and from Base64. Supports images, documents, and any file type. Everything runs locally in your browser.
-  </p>
+  <h1>{{ "tools.base64-codec.title" | t }}</h1>
+  <p>{{ "tools.base64-codec.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "base64-codec.js" %}

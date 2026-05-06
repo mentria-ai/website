@@ -1,8 +1,14 @@
 ---
 layout: base.njk
-title: AI Chat
-description: Chat with Qwen3.5-0.8B running entirely in your browser via WebGPU. Supports image input. No data leaves your device.
-permalink: /tools/ai-chat/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/ai-chat/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.ai-chat.title' | t }}"
+  description: "{{ 'tools.ai-chat.lede' | t }}"
 tldr: >
   AI Chat runs Qwen3.5-0.8B locally in your browser via WebGPU. Your messages
   and any uploaded images never leave your device — no server, no API key, no
@@ -15,10 +21,8 @@ tldr: >
 </section>
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/ai-chat</p>
-  <h1>AI Chat</h1>
-  <p>
-    Qwen3.5-0.8B running locally in your browser. No server, no API keys. Supports vision.
-  </p>
+  <h1>{{ "tools.ai-chat.title" | t }}</h1>
+  <p>{{ "tools.ai-chat.lede" | t }}</p>
 </section>
 
 {% set terminalTitle = "ai-chat.js" %}

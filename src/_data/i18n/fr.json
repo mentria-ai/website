@@ -68,5 +68,22 @@
   "lang_switcher": {
     "label": "Langue",
     "current_label": "Langue actuelle"
+  },
+  "tools": {
+    "ai-chat":         { "title": "Chat IA",                "lede": "Qwen3.5-0.8B fonctionnant localement dans votre navigateur. Pas de serveur, pas de clés API. Prend en charge la vision." },
+    "base64-codec":    { "title": "Codec Base64",           "lede": "Encodez et décodez du texte ou des fichiers en Base64. Prend en charge les images, les documents et tout type de fichier. Tout fonctionne localement dans votre navigateur." },
+    "coin-flip":       { "title": "Pile ou Face",           "lede": "Pile ou face — lancez une pièce instantanément. Lancez une série au meilleur des N pour départager. Fonctionne hors ligne." },
+    "color-picker":    { "title": "Sélecteur de Couleurs",  "lede": "Choisissez n'importe quelle couleur, voyez ses valeurs HEX / RGB / HSL, et générez des palettes harmonieuses. Fonctionne hors ligne." },
+    "countdown-timer": { "title": "Compte à Rebours",       "lede": "Définissez une durée ou choisissez une heure cible. Jusqu'à 4 minuteries indépendantes avec son d'alarme." },
+    "decision-wheel":  { "title": "Roue de Décision",       "lede": "Indécis ? Faites tourner la roue et laissez le destin choisir. Fonctionne hors ligne." },
+    "flappy":          { "title": "Flappy",                 "lede": "Un avion en papier traversant une pile de prompts terminal. Touchez, cliquez ou appuyez sur ESPACE pour battre des ailes. Ne crashez pas le prompt." },
+    "invoice":         { "title": "Générateur de Factures", "lede": "Créez des factures épurées d'une page dans votre navigateur. Auto-enregistrement pendant la saisie. Imprimez en A4 ou exportez en JSON." },
+    "markdown-pdf":    { "title": "Markdown → PDF",         "lede": "Écrivez du markdown, voyez un aperçu en direct, et téléchargez un PDF professionnel et propre. Sauvegarde automatique dans votre navigateur. Vos données restent sur votre appareil." },
+    "minesweeper":     { "title": "Démineur",               "lede": "Casse-tête logique classique en tenue de terminal. Cliquez pour creuser, clic droit (ou mode F) pour marquer un drapeau. Les chiffres comptent les mines adjacentes. Ne touchez pas aux roses." },
+    "pong":            { "title": "Pong",                   "lede": "Casse-briques rencontre raquette. Attrapez les power-ups qui tombent, dégagez le mur, survivez à des niveaux de plus en plus rapides et exigeants. Fonctionne localement — vos données restent sur votre appareil." },
+    "quick-notes":     { "title": "Notes Rapides",          "lede": "Un bloc-notes minimaliste qui vit dans votre navigateur. Créez plusieurs notes, sauvegardées à chaque frappe." },
+    "quote":           { "title": "Citation Motivante",     "lede": "Citations originales générées par IA, fonctionnant localement dans votre navigateur. Vos données restent sur votre appareil." },
+    "radio":           { "title": "Radio Infinie",          "lede": "Musique cinématographique épique générée par IA, en streaming infini. Apprend vos goûts localement — vos données restent sur votre appareil." },
+    "tetris":          { "title": "Tetris",                 "lede": "Empilez des tétrominos. Effacez des lignes. La vitesse augmente toutes les 10 lignes. Pièces en cyan, violet, rose, ambre, vert — la palette Mentria." }
   }
 }

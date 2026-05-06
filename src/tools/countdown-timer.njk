@@ -1,15 +1,19 @@
 ---
 layout: base.njk
-title: Countdown Timer
-description: Set a custom countdown timer with alarm sound. Works offline as a PWA.
-permalink: /tools/countdown-timer/index.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/countdown-timer/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.countdown-timer.title' | t }}"
+  description: "{{ 'tools.countdown-timer.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow">~/tools/countdown-timer</p>
-  <h1>Countdown Timer</h1>
-  <p>
-    Set a duration or pick a target time. Up to 4 independent timers with alarm sound.
-  </p>
+  <h1>{{ "tools.countdown-timer.title" | t }}</h1>
+  <p>{{ "tools.countdown-timer.lede" | t }}</p>
 </section>
 
 <!-- ── Widget Grid ────────────────────────────────────── -->

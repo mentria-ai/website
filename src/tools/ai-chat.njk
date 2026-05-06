@@ -16,7 +16,7 @@ tldr: >
   visits start instantly from local cache.
 ---
 <section class="tldr">
-  <h2 class="tldr__heading">What is AI Chat?</h2>
+  <h2 class="tldr__heading">{{ "tool.ai-chat.tldr_heading" | t }}</h2>
   <p class="tldr__body">{{ tldr }}</p>
 </section>
 <section class="hero" style="padding-top:1rem;">
@@ -28,20 +28,18 @@ tldr: >
 {% set terminalTitle = "ai-chat.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="ac">
-  <!-- Status bar -->
   <div class="ac__status" id="ac-status">
     <span class="ac__status-dot" id="ac-status-dot"></span>
-    <span class="ac__status-text" id="ac-status-text">Checking WebGPU…</span>
-    <button class="ac__delete-btn" id="ac-delete-model" title="Delete cached model" style="display:none;">
+    <span class="ac__status-text" id="ac-status-text">{{ "tool.ai-chat.status_checking_webgpu" | t }}</span>
+    <button class="ac__delete-btn" id="ac-delete-model" title="{{ 'tool.ai-chat.btn_delete_model_title' | t }}" style="display:none;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-      <span>Delete model</span>
+      <span>{{ "tool.ai-chat.btn_delete_model" | t }}</span>
     </button>
   </div>
 
-  <!-- Progress bar -->
   <div class="ac__progress-wrap" id="ac-progress-wrap" style="display:none;">
     <div class="ac__progress-info">
-      <span id="ac-progress-label">Downloading model…</span>
+      <span id="ac-progress-label">{{ "tool.ai-chat.progress_label" | t }}</span>
       <span id="ac-progress-pct">0%</span>
     </div>
     <div class="ac__progress-bar">
@@ -50,29 +48,26 @@ tldr: >
     <div class="ac__progress-detail" id="ac-progress-detail"></div>
   </div>
 
-  <!-- Chat messages -->
   <div class="ac__messages" id="ac-messages">
     <div class="ac__empty" id="ac-empty">
       <div class="ac__empty-icon">&#9670;</div>
-      <p>Send a message or attach an image to begin.</p>
-      <p class="ac__empty-sub">~850 MB model download on first use, cached after.</p>
+      <p>{{ "tool.ai-chat.empty_msg" | t }}</p>
+      <p class="ac__empty-sub">{{ "tool.ai-chat.empty_sub" | t }}</p>
     </div>
   </div>
 
-  <!-- Image preview -->
   <div class="ac__img-preview" id="ac-img-preview" style="display:none;">
-    <img id="ac-img-thumb" alt="Attached image" />
-    <button class="ac__img-remove" id="ac-img-remove" title="Remove image">&times;</button>
+    <img id="ac-img-thumb" alt="{{ 'tool.ai-chat.img_alt_attached' | t }}" />
+    <button class="ac__img-remove" id="ac-img-remove" title="{{ 'tool.ai-chat.btn_remove_image' | t }}">&times;</button>
   </div>
 
-  <!-- Input area -->
   <div class="ac__input-wrap">
-    <label class="ac__attach-btn" id="ac-attach-label" title="Attach image">
+    <label class="ac__attach-btn" id="ac-attach-label" title="{{ 'tool.ai-chat.btn_attach_image' | t }}">
       <input type="file" id="ac-file-input" accept="image/*" hidden />
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
     </label>
-    <textarea class="ac__input" id="ac-input" rows="1" placeholder="Message…" disabled></textarea>
-    <button class="ac__send-btn" id="ac-send" title="Send" disabled>
+    <textarea class="ac__input" id="ac-input" rows="1" placeholder="{{ 'tool.ai-chat.input_placeholder' | t }}" disabled></textarea>
+    <button class="ac__send-btn" id="ac-send" title="{{ 'tool.ai-chat.btn_send' | t }}" disabled>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
     </button>
   </div>
@@ -94,10 +89,24 @@ tldr: >
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 
 <script type="module">
-/* ─────────────────────────────────────────────────────────────────────────
-   AI Chat — Qwen3.5-0.8B (text + vision) running locally in your browser
-   via mentria-engine (custom WebGPU runtime). WebGPU is required.
-   ───────────────────────────────────────────────────────────────────────── */
+const COPY = {
+  statusLoadingModel:  {{ ("tool.ai-chat.status_loading_model"  | t) | dump | safe }},
+  statusGenerating:    {{ ("tool.ai-chat.status_generating"     | t) | dump | safe }},
+  statusReady:         {{ ("tool.ai-chat.status_ready"          | t) | dump | safe }},
+  statusModelDeleted:  {{ ("tool.ai-chat.status_model_deleted"  | t) | dump | safe }},
+  imgAltAttachedShort: {{ ("tool.ai-chat.img_alt_attached_short" | t) | dump | safe }},
+  labelYou:            {{ ("tool.ai-chat.label_you"             | t) | dump | safe }},
+  errNoWebGpu:         {{ ("tool.ai-chat.err_no_webgpu"         | t) | dump | safe }},
+  errUnsupportedMain:  {{ ("tool.ai-chat.err_unsupported_main"  | t) | dump | safe }},
+  errUnsupportedSub:   {{ ("tool.ai-chat.err_unsupported_sub"   | t) | dump | safe }},
+  errLoadRuntime:      {{ ("tool.ai-chat.err_load_runtime"      | t) | dump | safe }},
+  errDeviceLost:       {{ ("tool.ai-chat.err_device_lost"       | t) | dump | safe }},
+  errLoadPrefix:       {{ ("tool.ai-chat.err_load_prefix"       | t) | dump | safe }},
+  errPrefix:           {{ ("tool.ai-chat.err_prefix"            | t) | dump | safe }},
+  errDeletePrefix:     {{ ("tool.ai-chat.err_delete_prefix"     | t) | dump | safe }},
+  emptyResponse:       {{ ("tool.ai-chat.empty_response"        | t) | dump | safe }},
+  confirmDelete:       {{ ("tool.ai-chat.confirm_delete"        | t) | dump | safe }}
+};
 
 const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
 const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
@@ -144,10 +153,11 @@ function showUnsupportedError(reason) {
   const messagesEl = document.getElementById('ac-messages');
   const emptyEl    = document.getElementById('ac-empty');
   if (emptyEl) {
+    const escSub = COPY.errUnsupportedSub.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     emptyEl.innerHTML =
       '<div class="ac__empty-icon">&#9888;</div>' +
-      '<p>This tool requires <strong>WebGPU</strong>, which your browser doesn’t expose.</p>' +
-      '<p class="ac__empty-sub">Try the latest Chrome, Edge, or Brave on desktop, or Safari 26+ on macOS / iOS 26+.</p>';
+      '<p>' + COPY.errUnsupportedMain + '</p>' +
+      '<p class="ac__empty-sub">' + escSub + '</p>';
   }
   document.getElementById('ac-input').disabled = true;
   document.getElementById('ac-send').disabled  = true;
@@ -155,14 +165,14 @@ function showUnsupportedError(reason) {
 }
 
 if (!navigator.gpu) {
-  showUnsupportedError('WebGPU not available in this browser');
+  showUnsupportedError(COPY.errNoWebGpu);
 } else {
   let MentriaEngine;
   try {
     ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
   } catch (err) {
     console.error('Failed to load mentria-engine bundle:', err);
-    showUnsupportedError('Failed to load runtime — check network/ad-blocker');
+    showUnsupportedError(COPY.errLoadRuntime);
   }
   if (MentriaEngine) runApp(MentriaEngine);
 }
@@ -220,11 +230,11 @@ function runApp(MentriaEngine) {
     bubble.className = 'ac__msg ac__msg--' + role;
     const label = document.createElement('div');
     label.className = 'ac__msg-label';
-    label.textContent = role === 'user' ? 'you' : 'qwen-0.8B';
+    label.textContent = role === 'user' ? COPY.labelYou : 'qwen-0.8B';
     bubble.appendChild(label);
     if (imageUrl) {
       const img = document.createElement('img');
-      img.className = 'ac__msg-img'; img.src = imageUrl; img.alt = 'Attached';
+      img.className = 'ac__msg-img'; img.src = imageUrl; img.alt = COPY.imgAltAttachedShort;
       bubble.appendChild(img);
     }
     const body = document.createElement('div');
@@ -286,7 +296,7 @@ function runApp(MentriaEngine) {
 
   /* ── Load engine + model ─────────────────────────── */
   async function loadModel() {
-    setStatus('loading', 'Loading model…');
+    setStatus('loading', COPY.statusLoadingModel);
     progressWrap.style.display = '';
     try {
       engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
@@ -294,7 +304,7 @@ function runApp(MentriaEngine) {
       // onDeviceLost is wired by the engine's S410 device-loss handler;
       // surface it to the user with a clear "reload to recover" message.
       engine.onDeviceLost = (info) => {
-        setStatus('error', 'GPU device lost — reload to recover');
+        setStatus('error', COPY.errDeviceLost);
         inputEl.disabled = true; sendBtn.disabled = true;
         console.error('WebGPU device lost:', info);
       };
@@ -308,7 +318,7 @@ function runApp(MentriaEngine) {
         visionConfig: MENTRIA_VL_CONFIG,
       });
       progressWrap.style.display = 'none';
-      setStatus('ready', 'Ready');
+      setStatus('ready', COPY.statusReady);
       deleteBtn.style.display = '';
       inputEl.disabled = false;
       sendBtn.disabled = false;
@@ -316,7 +326,7 @@ function runApp(MentriaEngine) {
     } catch (err) {
       progressWrap.style.display = 'none';
       console.error('Model load error:', err);
-      setStatus('error', 'Failed to load: ' + (err.message || err));
+      setStatus('error', COPY.errLoadPrefix + (err.message || err));
     }
   }
 
@@ -330,7 +340,7 @@ function runApp(MentriaEngine) {
     inputEl.value = '';
     autoResize();
     sendBtn.disabled = true;
-    setStatus('generating', 'Generating…');
+    setStatus('generating', COPY.statusGenerating);
 
     // Build user content (mirrors HF chat-template content-array shape)
     const userContent = [];
@@ -401,23 +411,24 @@ function runApp(MentriaEngine) {
         .replace(/<think>[\s\S]*?<\/think>/g, '')
         .replace(/<\|[^|]*\|>/g, '')   // belt-and-suspenders strip if a multi-piece special leaks through
         .trim();
-      if (window.renderMarkdown) bodyEl.innerHTML = renderMarkdown(display) || '<p>(empty response)</p>';
-      else bodyEl.textContent = display || '(empty response)';
+      const escEmpty = COPY.emptyResponse.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      if (window.renderMarkdown) bodyEl.innerHTML = renderMarkdown(display) || `<p>${escEmpty}</p>`;
+      else bodyEl.textContent = display || COPY.emptyResponse;
       messages.push({ role: 'assistant', content: display });
     } catch (err) {
-      bodyEl.textContent = 'Error: ' + err.message;
+      bodyEl.textContent = COPY.errPrefix + err.message;
       console.error('Generation error:', err);
     }
 
     generating = false;
     sendBtn.disabled = false;
-    setStatus('ready', 'Ready');
+    setStatus('ready', COPY.statusReady);
     inputEl.focus();
   }
 
   /* ── Delete cached model ─────────────────────────── */
   async function deleteModel() {
-    if (!confirm('Delete the cached model (~660 MB)? You will need to re-download it next time.')) return;
+    if (!confirm(COPY.confirmDelete)) return;
     try {
       const keys = await caches.keys();
       for (const key of keys) {
@@ -442,10 +453,10 @@ function runApp(MentriaEngine) {
       deleteBtn.style.display = 'none';
       inputEl.disabled = true;
       sendBtn.disabled = true;
-      setStatus('idle', 'Model deleted. Reload to re-download.');
+      setStatus('idle', COPY.statusModelDeleted);
     } catch (err) {
       console.error('Delete error:', err);
-      alert('Failed to delete cache: ' + err.message);
+      alert(COPY.errDeletePrefix + err.message);
     }
   }
 

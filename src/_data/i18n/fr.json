@@ -472,6 +472,36 @@
       "err_load_track": "Échec du chargement de la piste",
       "track_count_format": "{n} pistes",
       "untitled": "Sans titre"
+    },
+    "ai-chat": {
+      "tldr_heading": "Qu'est-ce que AI Chat ?",
+      "status_checking_webgpu": "Vérification WebGPU…",
+      "status_loading_model": "Chargement du modèle…",
+      "status_generating": "Génération…",
+      "status_ready": "Prêt",
+      "status_model_deleted": "Modèle supprimé. Recharge pour le retélécharger.",
+      "btn_delete_model": "Supprimer le modèle",
+      "btn_delete_model_title": "Supprimer le modèle en cache",
+      "btn_attach_image": "Joindre une image",
+      "btn_remove_image": "Retirer l'image",
+      "btn_send": "Envoyer",
+      "input_placeholder": "Message…",
+      "progress_label": "Téléchargement du modèle…",
+      "empty_msg": "Envoie un message ou joins une image pour commencer.",
+      "empty_sub": "Téléchargement du modèle ~850 Mo à la première utilisation, ensuite en cache.",
+      "img_alt_attached": "Image jointe",
+      "img_alt_attached_short": "Jointe",
+      "label_you": "toi",
+      "err_no_webgpu": "WebGPU non disponible dans ce navigateur",
+      "err_unsupported_main": "Cet outil nécessite <strong>WebGPU</strong>, que ton navigateur n'expose pas.",
+      "err_unsupported_sub": "Essaie la dernière version de Chrome, Edge ou Brave sur ordinateur, ou Safari 26+ sur macOS / iOS 26+.",
+      "err_load_runtime": "Échec du chargement du runtime — vérifie le réseau/bloqueur",
+      "err_device_lost": "GPU perdu — recharge pour récupérer",
+      "err_load_prefix": "Échec du chargement : ",
+      "err_prefix": "Erreur : ",
+      "err_delete_prefix": "Échec de la suppression du cache : ",
+      "empty_response": "(réponse vide)",
+      "confirm_delete": "Supprimer le modèle en cache (~660 Mo) ? Tu devras le retélécharger la prochaine fois."
     }
   }
 }

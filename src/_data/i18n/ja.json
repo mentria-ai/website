@@ -472,6 +472,36 @@
       "err_load_track": "トラック読込失敗",
       "track_count_format": "{n} 曲",
       "untitled": "無題"
+    },
+    "ai-chat": {
+      "tldr_heading": "AI Chatとは?",
+      "status_checking_webgpu": "WebGPUを確認中…",
+      "status_loading_model": "モデル読込中…",
+      "status_generating": "生成中…",
+      "status_ready": "準備完了",
+      "status_model_deleted": "モデル削除済み。再読込して再ダウンロード。",
+      "btn_delete_model": "モデルを削除",
+      "btn_delete_model_title": "キャッシュ済みモデルを削除",
+      "btn_attach_image": "画像を添付",
+      "btn_remove_image": "画像を削除",
+      "btn_send": "送信",
+      "input_placeholder": "メッセージ…",
+      "progress_label": "モデルをダウンロード中…",
+      "empty_msg": "メッセージを送るか、画像を添付して始めましょう。",
+      "empty_sub": "初回は約850 MBのモデルをダウンロード、以降はキャッシュ。",
+      "img_alt_attached": "添付画像",
+      "img_alt_attached_short": "添付",
+      "label_you": "あなた",
+      "err_no_webgpu": "このブラウザはWebGPUに対応していません",
+      "err_unsupported_main": "このツールには <strong>WebGPU</strong> が必要ですが、ブラウザが提供していません。",
+      "err_unsupported_sub": "デスクトップでは最新のChrome、Edge、Braveを、macOS / iOS 26+ではSafari 26+をお試しください。",
+      "err_load_runtime": "ランタイム読込失敗 — ネットワーク/広告ブロッカーを確認",
+      "err_device_lost": "GPUデバイス喪失 — 再読込で復旧",
+      "err_load_prefix": "読込失敗: ",
+      "err_prefix": "エラー: ",
+      "err_delete_prefix": "キャッシュ削除失敗: ",
+      "empty_response": "(空の応答)",
+      "confirm_delete": "キャッシュされたモデル(~660 MB)を削除しますか? 次回は再ダウンロードが必要です。"
     }
   }
 }

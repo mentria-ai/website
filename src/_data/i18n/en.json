@@ -472,6 +472,36 @@
       "err_load_track": "Failed to load track",
       "track_count_format": "{n} tracks",
       "untitled": "Untitled"
+    },
+    "ai-chat": {
+      "tldr_heading": "What is AI Chat?",
+      "status_checking_webgpu": "Checking WebGPU…",
+      "status_loading_model": "Loading model…",
+      "status_generating": "Generating…",
+      "status_ready": "Ready",
+      "status_model_deleted": "Model deleted. Reload to re-download.",
+      "btn_delete_model": "Delete model",
+      "btn_delete_model_title": "Delete cached model",
+      "btn_attach_image": "Attach image",
+      "btn_remove_image": "Remove image",
+      "btn_send": "Send",
+      "input_placeholder": "Message…",
+      "progress_label": "Downloading model…",
+      "empty_msg": "Send a message or attach an image to begin.",
+      "empty_sub": "~850 MB model download on first use, cached after.",
+      "img_alt_attached": "Attached image",
+      "img_alt_attached_short": "Attached",
+      "label_you": "you",
+      "err_no_webgpu": "WebGPU not available in this browser",
+      "err_unsupported_main": "This tool requires <strong>WebGPU</strong>, which your browser doesn't expose.",
+      "err_unsupported_sub": "Try the latest Chrome, Edge, or Brave on desktop, or Safari 26+ on macOS / iOS 26+.",
+      "err_load_runtime": "Failed to load runtime — check network/ad-blocker",
+      "err_device_lost": "GPU device lost — reload to recover",
+      "err_load_prefix": "Failed to load: ",
+      "err_prefix": "Error: ",
+      "err_delete_prefix": "Failed to delete cache: ",
+      "empty_response": "(empty response)",
+      "confirm_delete": "Delete the cached model (~660 MB)? You will need to re-download it next time."
     }
   }
 }

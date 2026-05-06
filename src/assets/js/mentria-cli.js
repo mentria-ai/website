@@ -64,11 +64,13 @@
     var inputEl = containerEl.querySelector('.cli__input');
     if (!outputEl || !inputEl) return;
 
-    // Typing animation for welcome message
+    // Typing animation for welcome message — strings come from the page
+    // (window.MENTRIA_CLI_WELCOME) so they're localized per locale.
+    var w = (window.MENTRIA_CLI_WELCOME) || {};
     var welcomeLines = [
-      { text: '$ welcome --to mentria', type: 'command' },
-      { text: '> creative studio. tools & transmissions.', type: 'result' },
-      { text: "> type 'help' for commands.", type: 'muted' }
+      { text: w.cmd  || '$ welcome --to mentria',                 type: 'command' },
+      { text: '> ' + (w.out1 || 'creative studio. tools & transmissions.'), type: 'result' },
+      { text: '> ' + (w.out2 || "type 'help' for commands."),     type: 'muted'   }
     ];
 
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -78,11 +80,8 @@
       for (var i = 0; i < welcomeLines.length; i++) {
         appendLine(outputEl, welcomeLines[i].text, welcomeLines[i].type);
       }
-      inputEl.focus({ preventScroll: true });
     } else {
-      typeLines(outputEl, welcomeLines, 0, function () {
-        inputEl.focus({ preventScroll: true });
-      });
+      typeLines(outputEl, welcomeLines, 0, function () {});
     }
 
     // Input handling
@@ -139,10 +138,6 @@
       }
     });
 
-    // Click anywhere in CLI area to focus input
-    containerEl.addEventListener('click', function () {
-      inputEl.focus({ preventScroll: true });
-    });
   }
 
   function appendLine(outputEl, text, type) {

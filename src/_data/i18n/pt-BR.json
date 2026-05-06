@@ -1,0 +1,72 @@
+{
+  "site": {
+    "tagline": "estúdio criativo. ferramentas e transmissões.",
+    "description": "Um estúdio criativo para ferramentas, experimentos e transmissões visuais.",
+    "metaTitle": "Mentria — Estúdio Criativo",
+    "metaDescription": "Um estúdio criativo para ferramentas, experimentos e transmissões visuais. Feito com capricho."
+  },
+  "nav": {
+    "feed": "Feed",
+    "tools": "Ferramentas",
+    "home": "Início"
+  },
+  "footer": {
+    "copyright": "© 2026 Mentria. Todos os direitos reservados."
+  },
+  "home": {
+    "cli": {
+      "welcomeCmd": "$ welcome --to mentria",
+      "welcomeOut1": "estúdio criativo. ferramentas e transmissões.",
+      "welcomeOut2": "digite 'help' para ver os comandos.",
+      "placeholder": "digite um comando..."
+    },
+    "tools_heading": "Ferramentas",
+    "feed_heading": "Mais Recentes do Feed",
+    "launch_tool": "Abrir ferramenta →"
+  },
+  "tools_page": {
+    "title": "Ferramentas Úteis",
+    "lede": "Utilitários simples e focados que funcionam offline. Cada um faz uma coisa bem feita.",
+    "header": {
+      "category": "categoria",
+      "name": "nome",
+      "summary": "resumo"
+    },
+    "empty_cmd": "$ ls -la tools/",
+    "empty_msg": "> nenhuma ferramenta encontrada."
+  },
+  "feed_page": {
+    "title": "Feed",
+    "lede": "Transmissões visuais do estúdio Mentria.",
+    "empty_cmd": "$ feed --list",
+    "empty_msg": "> sem transmissões por enquanto. volte em breve.",
+    "chapter_badge": "CAPÍTULO · APRENDA"
+  },
+  "errors": {
+    "not_found_cmd_prefix": "$ navigate",
+    "not_found_msg": "página não encontrada",
+    "try_these": "> tente uma destas:"
+  },
+  "pwa": {
+    "banner_title": "Instalar Mentria",
+    "banner_desc": "Adicionar à tela inicial — funciona offline.",
+    "install_btn": "Instalar",
+    "dismiss": "Fechar",
+    "sheet_title_ios": "Instalar Mentria no iPhone",
+    "sheet_title_macos": "Instalar Mentria no Mac",
+    "sheet_title_chrome": "Instalar Mentria",
+    "ios_step1": "Toque no botão <strong>Compartilhar</strong> na parte inferior da tela",
+    "ios_step2": "Escolha <strong>Adicionar à Tela de Início</strong>",
+    "ios_step3": "Toque em <strong>Adicionar</strong> no canto superior direito.",
+    "macos_step1": "Abra esta página no <strong>Safari 17+</strong>.",
+    "macos_step2": "Na barra de menus, escolha <strong>Arquivo → Adicionar ao Dock…</strong>",
+    "macos_step3": "Clique em <strong>Adicionar</strong>.",
+    "chrome_step1": "Clique no ícone de <strong>instalação</strong> na barra de endereços do seu navegador.",
+    "chrome_step2": "Ou abra o menu (⋮) e escolha <strong>Instalar Mentria</strong>.",
+    "note": "Depois de instalada, a Mentria funciona offline e seus dados locais permanecem no seu dispositivo."
+  },
+  "lang_switcher": {
+    "label": "Idioma",
+    "current_label": "Idioma atual"
+  }
+}

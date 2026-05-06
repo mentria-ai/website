@@ -1,0 +1,72 @@
+{
+  "site": {
+    "tagline": "studio créatif. outils & transmissions.",
+    "description": "Un studio créatif d'outils, d'expériences et de transmissions visuelles.",
+    "metaTitle": "Mentria — Studio Créatif",
+    "metaDescription": "Un studio créatif d'outils, d'expériences et de transmissions visuelles. Conçu avec soin."
+  },
+  "nav": {
+    "feed": "Fil",
+    "tools": "Outils",
+    "home": "Accueil"
+  },
+  "footer": {
+    "copyright": "© 2026 Mentria. Tous droits réservés."
+  },
+  "home": {
+    "cli": {
+      "welcomeCmd": "$ welcome --to mentria",
+      "welcomeOut1": "studio créatif. outils & transmissions.",
+      "welcomeOut2": "tapez 'help' pour voir les commandes.",
+      "placeholder": "tapez une commande..."
+    },
+    "tools_heading": "Outils",
+    "feed_heading": "Dernières du Fil",
+    "launch_tool": "Ouvrir l'outil →"
+  },
+  "tools_page": {
+    "title": "Outils Utilitaires",
+    "lede": "Des utilitaires simples et ciblés qui fonctionnent hors ligne. Chacun fait une chose bien.",
+    "header": {
+      "category": "catégorie",
+      "name": "nom",
+      "summary": "résumé"
+    },
+    "empty_cmd": "$ ls -la tools/",
+    "empty_msg": "> aucun outil trouvé."
+  },
+  "feed_page": {
+    "title": "Fil",
+    "lede": "Transmissions visuelles du studio Mentria.",
+    "empty_cmd": "$ feed --list",
+    "empty_msg": "> aucune transmission pour le moment. revenez bientôt.",
+    "chapter_badge": "CHAPITRE · APPRENDRE"
+  },
+  "errors": {
+    "not_found_cmd_prefix": "$ navigate",
+    "not_found_msg": "page introuvable",
+    "try_these": "> essayez l'une de celles-ci :"
+  },
+  "pwa": {
+    "banner_title": "Installer Mentria",
+    "banner_desc": "Ajouter à l'écran d'accueil — fonctionne hors ligne.",
+    "install_btn": "Installer",
+    "dismiss": "Fermer",
+    "sheet_title_ios": "Installer Mentria sur iPhone",
+    "sheet_title_macos": "Installer Mentria sur Mac",
+    "sheet_title_chrome": "Installer Mentria",
+    "ios_step1": "Appuyez sur le bouton <strong>Partager</strong> en bas de l'écran",
+    "ios_step2": "Choisissez <strong>Sur l'écran d'accueil</strong>",
+    "ios_step3": "Appuyez sur <strong>Ajouter</strong> en haut à droite.",
+    "macos_step1": "Ouvrez cette page dans <strong>Safari 17+</strong>.",
+    "macos_step2": "Dans la barre de menus, choisissez <strong>Fichier → Ajouter au Dock…</strong>",
+    "macos_step3": "Cliquez sur <strong>Ajouter</strong>.",
+    "chrome_step1": "Cliquez sur l'icône d'<strong>installation</strong> dans la barre d'adresse de votre navigateur.",
+    "chrome_step2": "Ou ouvrez le menu (⋮) et choisissez <strong>Installer Mentria</strong>.",
+    "note": "Une fois installée, Mentria fonctionne hors ligne et vos données locales restent sur votre appareil."
+  },
+  "lang_switcher": {
+    "label": "Langue",
+    "current_label": "Langue actuelle"
+  }
+}

@@ -1,10 +1,34 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 <header class="site-header">
     <div class="site-header__inner">
-        <a class="brand" href="/" aria-label="Mentria home">MENTRIA<span class="brand__cursor">_</span></a>
+        <a class="brand" href="{{ '/' | localeUrl(lang) }}" aria-label="Mentria home">MENTRIA<span class="brand__cursor">_</span></a>
         <nav class="site-nav">
-            <a href="/feed/" class="nav-link{% if page.url | startsWith('/feed/') %} active{% endif %}">Feed</a>
-            <a href="/tools/" class="nav-link{% if page.url | startsWith('/tools/') %} active{% endif %}">Tools</a>
+            {% set feedHref  = '/feed/'  | localeUrl(lang) %}
+            {% set toolsHref = '/tools/' | localeUrl(lang) %}
+            <a href="{{ feedHref }}"  class="nav-link{% if page.url | startsWith(feedHref) %} active{% endif %}">{{ "nav.feed"  | t }}</a>
+            <a href="{{ toolsHref }}" class="nav-link{% if page.url | startsWith(toolsHref) %} active{% endif %}">{{ "nav.tools" | t }}</a>
+
+            {%- set currentLocale = lang | findLocale -%}
+            <details class="lang-switcher">
+                <summary aria-label="{{ 'lang_switcher.current_label' | t }}">
+                    <span aria-hidden="true">🌐</span>
+                    <span class="lang-switcher__current">{{ currentLocale.nativeName }}</span>
+                    <span class="lang-switcher__chevron" aria-hidden="true">▾</span>
+                </summary>
+                <ul class="lang-switcher__menu" role="menu">
+                    {%- for loc in locales %}
+                    <li role="none">
+                        <a role="menuitem"
+                           hreflang="{{ loc.code }}"
+                           href="{{ page.url | switchLocale(loc.code) }}"
+                           class="lang-switcher__item{% if loc.code == lang %} is-active{% endif %}">
+                            <span class="lang-switcher__name">{{ loc.nativeName }}</span>
+                            <span class="lang-switcher__code">{{ loc.code }}</span>
+                        </a>
+                    </li>
+                    {%- endfor %}
+                </ul>
+            </details>
         </nav>
     </div>
 </header>

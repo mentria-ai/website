@@ -1,35 +1,40 @@
 ---
 layout: base.njk
-title: Tools
-description: Utility tools built with craft. Spin up a timer, make a decision, or explore what's available.
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools_page.title' | t }}"
+  description: "{{ 'tools_page.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
     <p class="eyebrow">~/tools</p>
-    <h1>Utility Tools</h1>
-    <p>
-        Simple, focused utilities that work offline. Each one does one thing well.
-    </p>
+    <h1>{{ "tools_page.title" | t }}</h1>
+    <p>{{ "tools_page.lede" | t }}</p>
 </section>
 
 {% set toolList = tools | default([]) %}
 {% if toolList.length %}
 <div class="tools-listing">
     <div class="tools-listing__header">
-        <span>category</span>
-        <span>name</span>
-        <span>summary</span>
+        <span>{{ "tools_page.header.category" | t }}</span>
+        <span>{{ "tools_page.header.name" | t }}</span>
+        <span>{{ "tools_page.header.summary" | t }}</span>
     </div>
     {% for tool in toolList %}
     <div class="tools-listing__row">
         <span class="tools-listing__category">{{ tool.category }}</span>
-        <span class="tools-listing__name"><a href="/tools/{{ tool.slug }}/">{{ tool.title }}</a></span>
+        <span class="tools-listing__name"><a href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">{{ tool.title }}</a></span>
         <span class="tools-listing__summary">{{ tool.summary }}</span>
     </div>
     {% endfor %}
 </div>
 {% else %}
 <div style="margin-top: 2rem; font-family: var(--font-mono); color: var(--term-muted);">
-    <p>$ ls -la tools/</p>
-    <p>> no tools found.<span class="cursor-blink"></span></p>
+    <p>{{ "tools_page.empty_cmd" | t }}</p>
+    <p>{{ "tools_page.empty_msg" | t }}<span class="cursor-blink"></span></p>
 </div>
 {% endif %}

@@ -1,32 +1,46 @@
 ---
 layout: base.njk
-title: Home
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/index.html"
 eleventyComputed:
-  description: "{{ site.description }}"
+  lang: "{{ locale.code }}"
+  title: "{{ 'nav.home' | t }}"
+  description: "{{ 'site.metaDescription' | t }}"
 ---
 <section class="cli grid-bg">
     <div class="cli__output" role="log" aria-live="polite"></div>
     <div class="cli__prompt-line">
         <span class="cli__prompt">$&nbsp;</span>
-        <input type="text" class="cli__input" aria-label="Command input" placeholder="type a command..." autocomplete="off" spellcheck="false">
+        <input type="text" class="cli__input" aria-label="{{ 'home.cli.placeholder' | t }}" placeholder="{{ 'home.cli.placeholder' | t }}" autocomplete="off" spellcheck="false">
     </div>
 </section>
 
 <section id="tools-preview" class="reveal">
-    <h2 class="section-heading">Tools</h2>
+    <h2 class="section-heading">{{ "home.tools_heading" | t }}</h2>
     {% set toolCards = tools | default([]) %}
     {% if toolCards.length %}
     <div class="card-grid">
         {% for tool in toolCards %}
         <article class="card">
             <p class="eyebrow">{{ tool.category }}</p>
-            <h3><a href="/tools/{{ tool.slug }}/">{{ tool.title }}</a></h3>
+            <h3><a href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">{{ tool.title }}</a></h3>
             <p>{{ tool.summary }}</p>
-            <span class="card-link">Launch tool →</span>
+            <span class="card-link">{{ "home.launch_tool" | t }}</span>
         </article>
         {% endfor %}
     </div>
     {% endif %}
 </section>
 
+<script>
+  // Welcome lines for the home CLI, localized per page.
+  window.MENTRIA_CLI_WELCOME = {
+    cmd:  {{ ("home.cli.welcomeCmd"  | t) | dump | safe }},
+    out1: {{ ("home.cli.welcomeOut1" | t) | dump | safe }},
+    out2: {{ ("home.cli.welcomeOut2" | t) | dump | safe }}
+  };
+</script>
 <script src="/assets/js/mentria-cli.js"></script>

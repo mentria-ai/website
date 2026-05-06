@@ -1,20 +1,26 @@
 ---
 layout: base.njk
-title: 404
-permalink: 404.html
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/404.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "404"
 eleventyExcludeFromCollections: true
 ---
 <section class="hero" style="padding-top:3rem;">
     <div style="font-family: var(--font-mono); text-align: center;">
-        <p style="color: var(--syn-pink); font-size: 0.9rem;">$ navigate {{ page.url | default('/unknown') }}</p>
+        <p style="color: var(--syn-pink); font-size: 0.9rem;">{{ "errors.not_found_cmd_prefix" | t }} {{ page.url | default('/unknown') }}</p>
         <h1 style="font-size: clamp(3rem, 8vw, 5rem); margin: 1rem 0;">404</h1>
-        <p style="color: var(--syn-amber);">page not found<span class="cursor-blink"></span></p>
+        <p style="color: var(--syn-amber);">{{ "errors.not_found_msg" | t }}<span class="cursor-blink"></span></p>
         <div style="margin-top: 2rem; font-size: 0.9rem; color: var(--term-muted);">
-            <p>> try one of these:</p>
+            <p>{{ "errors.try_these" | t }}</p>
             <p style="margin-top: 0.5rem;">
-                <a href="/" style="margin-right: 1.5rem;">~/home</a>
-                <a href="/feed/" style="margin-right: 1.5rem;">~/feed</a>
-                <a href="/tools/">~/tools</a>
+                <a href="{{ '/' | localeUrl(lang) }}" style="margin-right: 1.5rem;">~/home</a>
+                <a href="{{ '/feed/' | localeUrl(lang) }}" style="margin-right: 1.5rem;">~/feed</a>
+                <a href="{{ '/tools/' | localeUrl(lang) }}">~/tools</a>
             </p>
         </div>
     </div>

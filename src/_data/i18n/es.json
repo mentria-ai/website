@@ -1,0 +1,72 @@
+{
+  "site": {
+    "tagline": "estudio creativo. herramientas y transmisiones.",
+    "description": "Un estudio creativo de herramientas, experimentos y transmisiones visuales.",
+    "metaTitle": "Mentria — Estudio Creativo",
+    "metaDescription": "Un estudio creativo de herramientas, experimentos y transmisiones visuales. Hecho con cuidado."
+  },
+  "nav": {
+    "feed": "Feed",
+    "tools": "Herramientas",
+    "home": "Inicio"
+  },
+  "footer": {
+    "copyright": "© 2026 Mentria. Todos los derechos reservados."
+  },
+  "home": {
+    "cli": {
+      "welcomeCmd": "$ welcome --to mentria",
+      "welcomeOut1": "estudio creativo. herramientas y transmisiones.",
+      "welcomeOut2": "escribe 'help' para ver los comandos.",
+      "placeholder": "escribe un comando..."
+    },
+    "tools_heading": "Herramientas",
+    "feed_heading": "Últimas del Feed",
+    "launch_tool": "Abrir herramienta →"
+  },
+  "tools_page": {
+    "title": "Herramientas Útiles",
+    "lede": "Utilidades sencillas y enfocadas que funcionan sin conexión. Cada una hace una cosa bien.",
+    "header": {
+      "category": "categoría",
+      "name": "nombre",
+      "summary": "resumen"
+    },
+    "empty_cmd": "$ ls -la tools/",
+    "empty_msg": "> no se encontraron herramientas."
+  },
+  "feed_page": {
+    "title": "Feed",
+    "lede": "Transmisiones visuales del estudio Mentria.",
+    "empty_cmd": "$ feed --list",
+    "empty_msg": "> no hay transmisiones todavía. vuelve pronto.",
+    "chapter_badge": "CAPÍTULO · APRENDE"
+  },
+  "errors": {
+    "not_found_cmd_prefix": "$ navigate",
+    "not_found_msg": "página no encontrada",
+    "try_these": "> prueba con una de estas:"
+  },
+  "pwa": {
+    "banner_title": "Instalar Mentria",
+    "banner_desc": "Añadir a la pantalla de inicio — funciona sin conexión.",
+    "install_btn": "Instalar",
+    "dismiss": "Cerrar",
+    "sheet_title_ios": "Instalar Mentria en iPhone",
+    "sheet_title_macos": "Instalar Mentria en Mac",
+    "sheet_title_chrome": "Instalar Mentria",
+    "ios_step1": "Toca el botón <strong>Compartir</strong> en la parte inferior de la pantalla",
+    "ios_step2": "Elige <strong>Añadir a Pantalla de Inicio</strong>",
+    "ios_step3": "Toca <strong>Añadir</strong> en la esquina superior derecha.",
+    "macos_step1": "Abre esta página en <strong>Safari 17+</strong>.",
+    "macos_step2": "En la barra de menú, elige <strong>Archivo → Añadir al Dock…</strong>",
+    "macos_step3": "Haz clic en <strong>Añadir</strong>.",
+    "chrome_step1": "Haz clic en el icono de <strong>instalación</strong> en la barra de direcciones de tu navegador.",
+    "chrome_step2": "O abre el menú (⋮) y elige <strong>Instalar Mentria</strong>.",
+    "note": "Una vez instalada, Mentria funciona sin conexión y tus datos locales permanecen en tu dispositivo."
+  },
+  "lang_switcher": {
+    "label": "Idioma",
+    "current_label": "Idioma actual"
+  }
+}

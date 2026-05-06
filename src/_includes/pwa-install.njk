@@ -7,11 +7,11 @@
 <div id="pwaInstallBanner" class="pwa-install-banner" hidden>
   <img src="/assets/img/icon-192x192.png" alt="" class="pwa-install-banner__icon" width="40" height="40">
   <div class="pwa-install-banner__body">
-    <div class="pwa-install-banner__title">Install Mentria</div>
-    <div class="pwa-install-banner__desc">Add to home screen — works offline.</div>
+    <div class="pwa-install-banner__title">{{ "pwa.banner_title" | t }}</div>
+    <div class="pwa-install-banner__desc">{{ "pwa.banner_desc" | t }}</div>
   </div>
-  <button type="button" id="pwaInstallBannerBtn" class="pwa-install-banner__cta">Install</button>
-  <button type="button" id="pwaInstallBannerClose" class="pwa-install-banner__close" aria-label="Dismiss">
+  <button type="button" id="pwaInstallBannerBtn" class="pwa-install-banner__cta">{{ "pwa.install_btn" | t }}</button>
+  <button type="button" id="pwaInstallBannerClose" class="pwa-install-banner__close" aria-label="{{ 'pwa.dismiss' | t }}">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <line x1="18" y1="6" x2="6" y2="18"/>
       <line x1="6" y1="6" x2="18" y2="18"/>
@@ -23,14 +23,14 @@
   <div class="pwa-install-sheet__backdrop" data-close="1"></div>
   <div class="pwa-install-sheet__panel">
     <div class="pwa-install-sheet__handle"></div>
-    <button type="button" class="pwa-install-sheet__close" aria-label="Dismiss" data-close="1">
+    <button type="button" class="pwa-install-sheet__close" aria-label="{{ 'pwa.dismiss' | t }}" data-close="1">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="18" y1="6" x2="6" y2="18"/>
         <line x1="6" y1="6" x2="18" y2="18"/>
       </svg>
     </button>
     <div class="pwa-install-sheet__body">
-      <h2 class="pwa-install-sheet__title" id="pwaInstallSheetTitle">Install Mentria</h2>
+      <h2 class="pwa-install-sheet__title" id="pwaInstallSheetTitle">{{ "pwa.banner_title" | t }}</h2>
       <!--
         MP4 listed first so iOS Safari (no WebM) picks it up. Square
         720x720 source. width/height attrs + poster + preload give
@@ -134,6 +134,23 @@
   var ADD_SVG =
     '<svg class="pwa-inline-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
 
+  // Localized strings for sheet content — emitted from the template so
+  // the JS doesn't have to know the active language.
+  var COPY = {
+    iosTitle:    {{ ("pwa.sheet_title_ios"   | t) | dump | safe }},
+    macosTitle:  {{ ("pwa.sheet_title_macos" | t) | dump | safe }},
+    chromeTitle: {{ ("pwa.sheet_title_chrome"| t) | dump | safe }},
+    iosStep1:    {{ ("pwa.ios_step1"  | t) | dump | safe }},
+    iosStep2:    {{ ("pwa.ios_step2"  | t) | dump | safe }},
+    iosStep3:    {{ ("pwa.ios_step3"  | t) | dump | safe }},
+    macosStep1:  {{ ("pwa.macos_step1"| t) | dump | safe }},
+    macosStep2:  {{ ("pwa.macos_step2"| t) | dump | safe }},
+    macosStep3:  {{ ("pwa.macos_step3"| t) | dump | safe }},
+    chromeStep1: {{ ("pwa.chrome_step1"| t) | dump | safe }},
+    chromeStep2: {{ ("pwa.chrome_step2"| t) | dump | safe }},
+    note:        {{ ("pwa.note"       | t) | dump | safe }}
+  };
+
   function populateSheet() {
     var stepsHtml = '';
     var noteHtml  = '';
@@ -141,26 +158,26 @@
     var showVideo = true; // single Mentria install video — works for any platform
 
     if (isIos) {
-      title = 'Install Mentria on iPhone';
+      title = COPY.iosTitle;
       stepsHtml =
-        '<li>Tap the <strong>Share</strong> button at the bottom of the screen ' + SHARE_SVG + '</li>' +
-        '<li>Choose <strong>Add to Home Screen</strong> ' + ADD_SVG + '</li>' +
-        '<li>Tap <strong>Add</strong> in the top-right corner.</li>';
-      noteHtml = 'Once installed, Mentria runs offline and your local data stays on your device.';
+        '<li>' + COPY.iosStep1 + ' ' + SHARE_SVG + '</li>' +
+        '<li>' + COPY.iosStep2 + ' ' + ADD_SVG + '</li>' +
+        '<li>' + COPY.iosStep3 + '</li>';
+      noteHtml = COPY.note;
     } else if (isApplePlatform) {
-      title = 'Install Mentria on Mac';
+      title = COPY.macosTitle;
       stepsHtml =
-        '<li>Open this page in <strong>Safari 17+</strong>.</li>' +
-        '<li>From the menu bar, choose <strong>File → Add to Dock…</strong></li>' +
-        '<li>Click <strong>Add</strong>.</li>';
-      noteHtml = 'Once installed, Mentria runs offline and your local data stays on your device.';
+        '<li>' + COPY.macosStep1 + '</li>' +
+        '<li>' + COPY.macosStep2 + '</li>' +
+        '<li>' + COPY.macosStep3 + '</li>';
+      noteHtml = COPY.note;
     } else {
       // Chrome-family fallback if beforeinstallprompt never fired
-      title = 'Install Mentria';
+      title = COPY.chromeTitle;
       stepsHtml =
-        '<li>Click the <strong>install</strong> icon in your browser’s address bar.</li>' +
-        '<li>Or open the menu (⋮) and choose <strong>Install Mentria</strong>.</li>';
-      noteHtml = 'Once installed, Mentria runs offline and your local data stays on your device.';
+        '<li>' + COPY.chromeStep1 + '</li>' +
+        '<li>' + COPY.chromeStep2 + '</li>';
+      noteHtml = COPY.note;
     }
 
     sheetTitle.textContent = title;

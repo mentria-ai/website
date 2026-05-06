@@ -1,0 +1,72 @@
+{
+  "site": {
+    "tagline": "creative studio. tools & transmissions.",
+    "description": "A creative studio for tools, experiments, and visual transmissions.",
+    "metaTitle": "Mentria — Creative Studio",
+    "metaDescription": "A creative studio for tools, experiments, and visual transmissions. Built with craft."
+  },
+  "nav": {
+    "feed": "Feed",
+    "tools": "Tools",
+    "home": "Home"
+  },
+  "footer": {
+    "copyright": "© 2026 Mentria. All rights reserved."
+  },
+  "home": {
+    "cli": {
+      "welcomeCmd": "$ welcome --to mentria",
+      "welcomeOut1": "creative studio. tools & transmissions.",
+      "welcomeOut2": "type 'help' for commands.",
+      "placeholder": "type a command..."
+    },
+    "tools_heading": "Tools",
+    "feed_heading": "Latest from the Feed",
+    "launch_tool": "Launch tool →"
+  },
+  "tools_page": {
+    "title": "Utility Tools",
+    "lede": "Simple, focused utilities that work offline. Each one does one thing well.",
+    "header": {
+      "category": "category",
+      "name": "name",
+      "summary": "summary"
+    },
+    "empty_cmd": "$ ls -la tools/",
+    "empty_msg": "> no tools found."
+  },
+  "feed_page": {
+    "title": "Feed",
+    "lede": "Visual transmissions from the Mentria studio.",
+    "empty_cmd": "$ feed --list",
+    "empty_msg": "> no transmissions yet. check back soon.",
+    "chapter_badge": "CHAPTER · LEARN"
+  },
+  "errors": {
+    "not_found_cmd_prefix": "$ navigate",
+    "not_found_msg": "page not found",
+    "try_these": "> try one of these:"
+  },
+  "pwa": {
+    "banner_title": "Install Mentria",
+    "banner_desc": "Add to home screen — works offline.",
+    "install_btn": "Install",
+    "dismiss": "Dismiss",
+    "sheet_title_ios": "Install Mentria on iPhone",
+    "sheet_title_macos": "Install Mentria on Mac",
+    "sheet_title_chrome": "Install Mentria",
+    "ios_step1": "Tap the <strong>Share</strong> button at the bottom of the screen",
+    "ios_step2": "Choose <strong>Add to Home Screen</strong>",
+    "ios_step3": "Tap <strong>Add</strong> in the top-right corner.",
+    "macos_step1": "Open this page in <strong>Safari 17+</strong>.",
+    "macos_step2": "From the menu bar, choose <strong>File → Add to Dock…</strong>",
+    "macos_step3": "Click <strong>Add</strong>.",
+    "chrome_step1": "Click the <strong>install</strong> icon in your browser's address bar.",
+    "chrome_step2": "Or open the menu (⋮) and choose <strong>Install Mentria</strong>.",
+    "note": "Once installed, Mentria runs offline and your local data stays on your device."
+  },
+  "lang_switcher": {
+    "label": "Language",
+    "current_label": "Current language"
+  }
+}

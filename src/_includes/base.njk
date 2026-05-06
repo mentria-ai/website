@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ site.language | default('en') | lower }}"{% if feedLayout %} class="feed-layout"{% endif %}>
+<html lang="{{ lang | default('en') }}"{% if feedLayout %} class="feed-layout"{% endif %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,47 @@
         document.documentElement.classList.add('is-standalone');
       }
     </script>
+    <script>
+      // Soft-redirect: on a visitor's first hit at the default-locale root,
+      // if their browser language matches a supported non-default locale,
+      // bounce them to that locale's path once. Sticky-dismissable.
+      (function () {
+        try {
+          var FLAG = 'mentria_lang_redirected_at';
+          if (localStorage.getItem(FLAG)) return;
+          // Map: each entry is [lang code, path prefix used in URLs].
+          var supported = [
+            ['es', '/es'],
+            ['pt-BR', '/pt-br'],
+            ['fr', '/fr'],
+            ['ja', '/ja']
+          ];
+          var path = location.pathname || '/';
+          // Already in a non-default locale path? Nothing to do.
+          for (var i = 0; i < supported.length; i++) {
+            if (path === supported[i][1] || path.indexOf(supported[i][1] + '/') === 0) return;
+          }
+          var pref = (navigator.language || 'en').toLowerCase();
+          var match = null;
+          for (var j = 0; j < supported.length; j++) {
+            var code = supported[j][0].toLowerCase();
+            var base = code.split('-')[0];
+            if (pref === code || pref === base || pref.indexOf(base + '-') === 0) {
+              match = supported[j];
+              break;
+            }
+          }
+          if (!match) return;
+          localStorage.setItem(FLAG, String(Date.now()));
+          var dest = match[1] + (path === '/' ? '/' : path) + (location.search || '') + (location.hash || '');
+          location.replace(dest);
+        } catch (_) { /* ignore */ }
+      })();
+    </script>
     {% set baseUrl = site.siteUrl | default('/') %}
     {% set pageUrl = baseUrl ~ page.url %}
-    {% set defaultTitle = site.metaTitle | default(site.title) %}
-    {% set metaTitle = (title and (title ~ " | " ~ site.title)) or defaultTitle %}
-    {% set metaDescription = description | default(site.metaDescription) | default(site.description) %}
+    {% set metaTitle = (title and (title ~ " | " ~ site.title)) or ("site.metaTitle" | t) %}
+    {% set metaDescription = description | default(("site.metaDescription" | t)) %}
     {% set socialImage = site.siteUrl ~ (site.socialImage | default('/assets/img/icon-512x512.png')) %}
     <title>{{ metaTitle }}</title>
     <meta name="description" content="{{ metaDescription }}">
@@ -28,6 +64,7 @@
     <meta property="og:title" content="{{ metaTitle }}">
     <meta property="og:description" content="{{ metaDescription }}">
     <meta property="og:image" content="{{ socialImage }}">
+    <meta property="og:locale" content="{{ lang | default('en') | replace('-', '_') }}">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ pageUrl }}">
@@ -38,8 +75,12 @@
     <link rel="canonical" href="{{ pageUrl }}">
     <link rel="icon" href="/assets/img/favicon-96x96.png" type="image/png">
     <link rel="apple-touch-icon" href="/assets/img/icon-192x192.png">
-    <link rel="alternate" hreflang="{{ site.language | default('en') }}" href="{{ pageUrl }}">
-    <link rel="alternate" hreflang="x-default" href="{{ pageUrl }}">
+
+    {#- Reciprocal hreflang matrix — one alternate per supported locale -#}
+    {%- for loc in locales %}
+    <link rel="alternate" hreflang="{{ loc.code }}" href="{{ site.siteUrl }}{{ page.url | switchLocale(loc.code) }}">
+    {%- endfor %}
+    <link rel="alternate" hreflang="x-default" href="{{ site.siteUrl }}{{ page.url | switchLocale('en') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

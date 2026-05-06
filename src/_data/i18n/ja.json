@@ -1,0 +1,72 @@
+{
+  "site": {
+    "tagline": "クリエイティブスタジオ。ツール & トランスミッション。",
+    "description": "ツール、実験、ビジュアル・トランスミッションのクリエイティブスタジオ。",
+    "metaTitle": "Mentria — クリエイティブスタジオ",
+    "metaDescription": "ツール、実験、ビジュアル・トランスミッションのクリエイティブスタジオ。職人技で構築。"
+  },
+  "nav": {
+    "feed": "フィード",
+    "tools": "ツール",
+    "home": "ホーム"
+  },
+  "footer": {
+    "copyright": "© 2026 Mentria. All rights reserved."
+  },
+  "home": {
+    "cli": {
+      "welcomeCmd": "$ welcome --to mentria",
+      "welcomeOut1": "クリエイティブスタジオ。ツール & トランスミッション。",
+      "welcomeOut2": "コマンド一覧は 'help' と入力してください。",
+      "placeholder": "コマンドを入力..."
+    },
+    "tools_heading": "ツール",
+    "feed_heading": "フィードの最新",
+    "launch_tool": "ツールを開く →"
+  },
+  "tools_page": {
+    "title": "ユーティリティツール",
+    "lede": "シンプルでオフラインで動作する焦点を絞ったユーティリティ。各ツールは一つのことを上手にこなします。",
+    "header": {
+      "category": "カテゴリ",
+      "name": "名前",
+      "summary": "概要"
+    },
+    "empty_cmd": "$ ls -la tools/",
+    "empty_msg": "> ツールが見つかりません。"
+  },
+  "feed_page": {
+    "title": "フィード",
+    "lede": "Mentriaスタジオからのビジュアル・トランスミッション。",
+    "empty_cmd": "$ feed --list",
+    "empty_msg": "> まだトランスミッションはありません。また後で確認してください。",
+    "chapter_badge": "チャプター · 学ぶ"
+  },
+  "errors": {
+    "not_found_cmd_prefix": "$ navigate",
+    "not_found_msg": "ページが見つかりません",
+    "try_these": "> 以下を試してみてください:"
+  },
+  "pwa": {
+    "banner_title": "Mentriaをインストール",
+    "banner_desc": "ホーム画面に追加 — オフラインで動作します。",
+    "install_btn": "インストール",
+    "dismiss": "閉じる",
+    "sheet_title_ios": "iPhoneにMentriaをインストール",
+    "sheet_title_macos": "MacにMentriaをインストール",
+    "sheet_title_chrome": "Mentriaをインストール",
+    "ios_step1": "画面下部の<strong>共有</strong>ボタンをタップ",
+    "ios_step2": "<strong>ホーム画面に追加</strong>を選択",
+    "ios_step3": "右上の<strong>追加</strong>をタップ。",
+    "macos_step1": "このページを<strong>Safari 17+</strong>で開きます。",
+    "macos_step2": "メニューバーから<strong>ファイル → Dockに追加…</strong>を選択。",
+    "macos_step3": "<strong>追加</strong>をクリック。",
+    "chrome_step1": "ブラウザのアドレスバーにある<strong>インストール</strong>アイコンをクリック。",
+    "chrome_step2": "または、メニュー(⋮)を開いて<strong>Mentriaをインストール</strong>を選択。",
+    "note": "インストール後、Mentriaはオフラインで動作し、ローカルデータはお使いのデバイスに保存されます。"
+  },
+  "lang_switcher": {
+    "label": "言語",
+    "current_label": "現在の言語"
+  }
+}

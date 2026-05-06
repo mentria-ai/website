@@ -1,7 +1,14 @@
 ---
 layout: feed-layout.njk
-title: Feed
-description: Visual transmissions from the Mentria studio.
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/feed/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'feed_page.title' | t }}"
+  description: "{{ 'feed_page.lede' | t }}"
 ---
 {% set entries = feed | default([]) %}
 {% if entries.length %}
@@ -17,7 +24,7 @@ description: Visual transmissions from the Mentria studio.
         {% endif %}
 
         {% if item.type == "chapter" %}
-        <div class="feed-card__chapter-badge">CHAPTER · LEARN</div>
+        <div class="feed-card__chapter-badge">{{ "feed_page.chapter_badge" | t }}</div>
         {% endif %}
 
         <div class="feed-card__gradient"></div>
@@ -53,8 +60,8 @@ description: Visual transmissions from the Mentria studio.
 </div>
 {% else %}
 <div class="feed-empty">
-    <p class="feed-empty__command">$ feed --list</p>
-    <p class="feed-empty__message">> no transmissions yet. check back soon.<span class="cursor-blink"></span></p>
+    <p class="feed-empty__command">{{ "feed_page.empty_cmd" | t }}</p>
+    <p class="feed-empty__message">{{ "feed_page.empty_msg" | t }}<span class="cursor-blink"></span></p>
 </div>
 {% endif %}
 

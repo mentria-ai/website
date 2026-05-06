@@ -20,22 +20,21 @@ eleventyComputed:
 {% set terminalTitle = "countdown-timer.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="countdown-tool">
-  <!-- Notifications status / permission row -->
   <div class="ct-notif-bar" id="ct-notif-bar" role="status" aria-live="polite">
     <span class="ct-notif-dot" id="ct-notif-dot" aria-hidden="true"></span>
-    <span class="ct-notif-text" id="ct-notif-text">Checking notification support…</span>
+    <span class="ct-notif-text" id="ct-notif-text">{{ "tool.countdown-timer.notif_check" | t }}</span>
     <span class="ct-notif-actions">
-      <button class="ct-notif-btn" id="ct-notif-enable" hidden>Enable notifications</button>
-      <button class="ct-notif-btn ct-notif-btn--ghost" id="ct-notif-test" hidden>Test</button>
+      <button class="ct-notif-btn" id="ct-notif-enable" hidden>{{ "tool.countdown-timer.notif_enable_btn" | t }}</button>
+      <button class="ct-notif-btn ct-notif-btn--ghost" id="ct-notif-test" hidden>{{ "tool.countdown-timer.notif_test_btn" | t }}</button>
     </span>
   </div>
 
   <div class="ct-grid" id="ct-grid">
     <!-- widgets injected here -->
   </div>
-  <button class="ct-add-btn" id="ct-add-btn" title="Add timer">
+  <button class="ct-add-btn" id="ct-add-btn" title="{{ 'tool.countdown-timer.btn_add_timer' | t }}">
     <span class="ct-add-btn__icon">+</span>
-    <span>Add Timer</span>
+    <span>{{ "tool.countdown-timer.btn_add_timer" | t }}</span>
   </button>
 </section>
 {% include "terminal-frame-close.njk" %}
@@ -43,9 +42,8 @@ eleventyComputed:
 <!-- ── Widget Template ───────────────────────────────── -->
 <template id="ct-widget-tpl">
   <div class="ct-widget" data-widget-id="">
-    <button class="ct-widget__close" title="Remove timer">&times;</button>
+    <button class="ct-widget__close" title="{{ 'tool.countdown-timer.btn_remove_timer' | t }}">&times;</button>
 
-    <!-- Editable title -->
     <div class="ct-widget__title" contenteditable="true" spellcheck="false" data-placeholder="Timer"></div>
 
     <!-- Display -->
@@ -57,55 +55,50 @@ eleventyComputed:
         <span class="ct-widget__colon">:</span>
         <span class="ct-widget__seg" data-role="secs">00</span>
       </div>
-      <div class="ct-widget__status">Ready</div>
+      <div class="ct-widget__status">{{ "tool.countdown-timer.status_ready" | t }}</div>
     </div>
 
-    <!-- Mode toggle -->
     <div class="ct-widget__mode-toggle">
-      <button class="ct-mode-btn ct-mode-btn--active" data-mode="duration">Duration</button>
-      <button class="ct-mode-btn" data-mode="datetime">Date &amp; Time</button>
+      <button class="ct-mode-btn ct-mode-btn--active" data-mode="duration">{{ "tool.countdown-timer.mode_duration" | t }}</button>
+      <button class="ct-mode-btn" data-mode="datetime">{{ "tool.countdown-timer.mode_datetime" | t }}</button>
     </div>
 
-    <!-- Duration inputs -->
     <div class="ct-widget__inputs" data-panel="duration">
       <div class="ct-input-grp">
-        <label>Hours</label>
+        <label>{{ "tool.countdown-timer.input_hours" | t }}</label>
         <input type="number" data-input="hours" min="0" max="99" value="0" />
       </div>
       <div class="ct-input-grp">
-        <label>Minutes</label>
+        <label>{{ "tool.countdown-timer.input_minutes" | t }}</label>
         <input type="number" data-input="mins" min="0" max="59" value="0" />
       </div>
       <div class="ct-input-grp">
-        <label>Seconds</label>
+        <label>{{ "tool.countdown-timer.input_seconds" | t }}</label>
         <input type="number" data-input="secs" min="0" max="59" value="0" />
       </div>
     </div>
 
-    <!-- Date-time input -->
     <div class="ct-widget__inputs ct-widget__inputs--hidden" data-panel="datetime">
       <div class="ct-input-grp ct-input-grp--wide">
-        <label>Count down until</label>
+        <label>{{ "tool.countdown-timer.input_until_label" | t }}</label>
         <input type="datetime-local" data-input="datetime" />
       </div>
       <div class="ct-widget__dt-error" data-role="dt-error"></div>
     </div>
 
-    <!-- Quick presets -->
     <div class="ct-widget__presets">
-      <span>Presets:</span>
-      <button class="ct-preset" data-seconds="60">1 min</button>
-      <button class="ct-preset" data-seconds="300">5 min</button>
-      <button class="ct-preset" data-seconds="600">10 min</button>
-      <button class="ct-preset" data-seconds="1500">25 min</button>
-      <button class="ct-preset" data-seconds="3600">1 hr</button>
+      <span>{{ "tool.countdown-timer.presets_label" | t }}</span>
+      <button class="ct-preset" data-seconds="60">{{ "tool.countdown-timer.preset_1min" | t }}</button>
+      <button class="ct-preset" data-seconds="300">{{ "tool.countdown-timer.preset_5min" | t }}</button>
+      <button class="ct-preset" data-seconds="600">{{ "tool.countdown-timer.preset_10min" | t }}</button>
+      <button class="ct-preset" data-seconds="1500">{{ "tool.countdown-timer.preset_25min" | t }}</button>
+      <button class="ct-preset" data-seconds="3600">{{ "tool.countdown-timer.preset_1hr" | t }}</button>
     </div>
 
-    <!-- Controls -->
     <div class="ct-widget__controls">
-      <button class="ct-btn ct-btn--primary" data-action="start">Start</button>
-      <button class="ct-btn ct-btn--secondary" data-action="pause" disabled>Pause</button>
-      <button class="ct-btn ct-btn--ghost" data-action="reset" disabled>Reset</button>
+      <button class="ct-btn ct-btn--primary" data-action="start">{{ "tool.countdown-timer.btn_start" | t }}</button>
+      <button class="ct-btn ct-btn--secondary" data-action="pause" disabled>{{ "tool.countdown-timer.btn_pause" | t }}</button>
+      <button class="ct-btn ct-btn--ghost" data-action="reset" disabled>{{ "tool.countdown-timer.btn_reset" | t }}</button>
     </div>
   </div>
 </template>
@@ -127,7 +120,36 @@ eleventyComputed:
 
 <script>
 (() => {
-  /* ── Constants ─────────────────────────────────────── */
+  const COPY = {
+    statusReady:    {{ ("tool.countdown-timer.status_ready"     | t) | dump | safe }},
+    statusRunning:  {{ ("tool.countdown-timer.status_running"   | t) | dump | safe }},
+    statusPaused:   {{ ("tool.countdown-timer.status_paused"    | t) | dump | safe }},
+    statusTimesUp:  {{ ("tool.countdown-timer.status_times_up"  | t) | dump | safe }},
+    btnStart:       {{ ("tool.countdown-timer.btn_start"        | t) | dump | safe }},
+    btnPause:       {{ ("tool.countdown-timer.btn_pause"        | t) | dump | safe }},
+    btnResume:      {{ ("tool.countdown-timer.btn_resume"       | t) | dump | safe }},
+    errPickDt:      {{ ("tool.countdown-timer.err_pick_dt"      | t) | dump | safe }},
+    errPassed:      {{ ("tool.countdown-timer.err_passed"       | t) | dump | safe }},
+    errMax99:       {{ ("tool.countdown-timer.err_max_99"       | t) | dump | safe }},
+    errSetTime:     {{ ("tool.countdown-timer.err_set_time"     | t) | dump | safe }},
+    errMax99Brief:  {{ ("tool.countdown-timer.err_max_99_brief" | t) | dump | safe }},
+    timerDefault:   {{ ("tool.countdown-timer.timer_default"    | t) | dump | safe }},
+    titleAlarm:     {{ ("tool.countdown-timer.title_alarm"      | t) | dump | safe }},
+    titleRunFmt:    {{ ("tool.countdown-timer.title_running_format" | t) | dump | safe }},
+    notifUnsup:     {{ ("tool.countdown-timer.notif_unsupported" | t) | dump | safe }},
+    notifDefault:   {{ ("tool.countdown-timer.notif_default"    | t) | dump | safe }},
+    notifGranted:   {{ ("tool.countdown-timer.notif_granted"    | t) | dump | safe }},
+    notifDenied:    {{ ("tool.countdown-timer.notif_denied"     | t) | dump | safe }},
+    notifOnTitle:   {{ ("tool.countdown-timer.notif_on_title"   | t) | dump | safe }},
+    notifOnBody:    {{ ("tool.countdown-timer.notif_on_body"    | t) | dump | safe }},
+    notifTestTitle: {{ ("tool.countdown-timer.notif_test_title" | t) | dump | safe }},
+    notifTestBody:  {{ ("tool.countdown-timer.notif_test_body"  | t) | dump | safe }},
+    notifFinishFmt: {{ ("tool.countdown-timer.notif_finished_format" | t) | dump | safe }},
+    notifBodyOpen:  {{ ("tool.countdown-timer.notif_body_open"  | t) | dump | safe }},
+    notifStopAlarm: {{ ("tool.countdown-timer.notif_stop_alarm" | t) | dump | safe }}
+  };
+  const fmtTimer = n => COPY.timerDefault.replace('{n}', n);
+
   const MAX_WIDGETS = 4;
   const MAX_SECONDS = 99 * 3600; // 99 hours
   const grid = document.getElementById('ct-grid');
@@ -167,10 +189,10 @@ eleventyComputed:
     notifBar.classList.toggle('is-denied',      s === 'denied');
     notifEnable.hidden = (s !== 'default');
     notifTest.hidden   = (s !== 'granted');
-    if (s === 'unsupported')  notifText.textContent = "Browser doesn't support notifications.";
-    else if (s === 'default') notifText.textContent = "Get notified when timers finish while the tab is hidden.";
-    else if (s === 'granted') notifText.textContent = "Notifications enabled — alerts fire when timers finish in the background.";
-    else if (s === 'denied')  notifText.textContent = "Notifications blocked. Allow them in browser settings to get background alerts.";
+    if (s === 'unsupported')  notifText.textContent = COPY.notifUnsup;
+    else if (s === 'default') notifText.textContent = COPY.notifDefault;
+    else if (s === 'granted') notifText.textContent = COPY.notifGranted;
+    else if (s === 'denied')  notifText.textContent = COPY.notifDenied;
   }
 
   async function requestNotifPermission() {
@@ -179,8 +201,8 @@ eleventyComputed:
       const result = await Notification.requestPermission();
       refreshNotifBar();
       if (result === 'granted') {
-        await showRawNotification('Notifications on', {
-          body: "You'll get an alert when a timer finishes in the background.",
+        await showRawNotification(COPY.notifOnTitle, {
+          body: COPY.notifOnBody,
           tag: 'mentria-timer-welcome',
           silent: true,
         });
@@ -207,22 +229,22 @@ eleventyComputed:
     // Only notify when the tab is hidden — visible tabs already have the
     // in-page alarm + flash + page-title flag. Notifying both ways is noisy.
     if (!document.hidden) return;
-    await showRawNotification(`${label} — Time's Up`, {
-      body: 'Tap to return to the timer and stop the alarm.',
+    await showRawNotification(COPY.notifFinishFmt.replace('{label}', label), {
+      body: COPY.notifBodyOpen,
       tag:  NOTIF_TAG_PREFIX + state.id,
       renotify: true,
       requireInteraction: true,
       data: { url: location.pathname, timerId: state.id },
       actions: [
-        { action: 'stop-alarm', title: 'Stop alarm' }
+        { action: 'stop-alarm', title: COPY.notifStopAlarm }
       ],
     });
   }
 
   async function testNotification() {
     if (notifState() !== 'granted') return;
-    await showRawNotification('Test notification', {
-      body: 'This is what an alert will look like when a timer finishes.',
+    await showRawNotification(COPY.notifTestTitle, {
+      body: COPY.notifTestBody,
       tag: 'mentria-timer-test',
       data: { url: location.pathname },
     });
@@ -307,13 +329,12 @@ eleventyComputed:
         const h = Math.floor(s.totalSeconds / 3600);
         const m = Math.floor((s.totalSeconds % 3600) / 60);
         const sc = s.totalSeconds % 60;
-        document.title = `${pad(h)}:${pad(m)}:${pad(sc)} - Timer`;
+        document.title = COPY.titleRunFmt.replace('{time}', `${pad(h)}:${pad(m)}:${pad(sc)}`);
         return;
       }
     }
-    // Check for any alarming
     for (const [, s] of widgets) {
-      if (s.isAlarming) { document.title = "⏰ Time's Up!"; return; }
+      if (s.isAlarming) { document.title = COPY.titleAlarm; return; }
     }
     document.title = originalTitle;
   }
@@ -330,9 +351,9 @@ eleventyComputed:
     const el = tpl.content.firstElementChild.cloneNode(true);
     el.dataset.widgetId = id;
 
-    // Set default title
     const titleEl = el.querySelector('.ct-widget__title');
-    titleEl.textContent = `Timer ${widgets.size + 1}`;
+    titleEl.textContent = fmtTimer(widgets.size + 1);
+    titleEl.dataset.isDefault = '1';
 
     // Scoped refs
     const $ = sel => el.querySelector(sel);
@@ -387,15 +408,15 @@ eleventyComputed:
       } else {
         clearInterval(state.countdown);
         state.countdown = null;
-        statusEl.textContent = "Time's Up!";
+        statusEl.textContent = COPY.statusTimesUp;
         displayWrap.classList.add('ct-widget__display--finished');
         startAlarmFor(state);
         btnPause.disabled = true;
-        btnStart.textContent = 'Start';
+        btnStart.textContent = COPY.btnStart;
         btnStart.disabled = true;
         btnReset.disabled = false;
         updatePageTitle();
-        const label = (titleEl.textContent || '').trim() || `Timer ${state.id}`;
+        const label = (titleEl.textContent || '').trim() || fmtTimer(state.id);
         notifyTimerFinished(state, label);
       }
     }
@@ -403,11 +424,11 @@ eleventyComputed:
     // ── Compute seconds from datetime ──
     function getSecondsFromDatetime() {
       const val = inputDT.value;
-      if (!val) { dtError.textContent = 'Pick a date & time.'; return -1; }
+      if (!val) { dtError.textContent = COPY.errPickDt; return -1; }
       const target = new Date(val).getTime();
       const diff = Math.floor((target - Date.now()) / 1000);
-      if (diff <= 0) { dtError.textContent = 'This time has already passed.'; return -1; }
-      if (diff > MAX_SECONDS) { dtError.textContent = 'Maximum countdown is 99 hours.'; return -1; }
+      if (diff <= 0) { dtError.textContent = COPY.errPassed; return -1; }
+      if (diff > MAX_SECONDS) { dtError.textContent = COPY.errMax99; return -1; }
       dtError.textContent = '';
       return diff;
     }
@@ -417,23 +438,21 @@ eleventyComputed:
       initAudio();
 
       if (state.countdown) {
-        // Running → pause
         clearInterval(state.countdown);
         state.countdown = null;
         state.isPaused = true;
-        btnStart.textContent = 'Resume';
+        btnStart.textContent = COPY.btnResume;
         btnPause.disabled = true;
-        statusEl.textContent = 'Paused';
+        statusEl.textContent = COPY.statusPaused;
         return;
       }
 
       if (state.isPaused && state.totalSeconds > 0) {
-        // Resume
         state.isPaused = false;
         state.countdown = setInterval(tick, 1000);
-        btnStart.textContent = 'Pause';
+        btnStart.textContent = COPY.btnPause;
         btnPause.disabled = false;
-        statusEl.textContent = 'Running';
+        statusEl.textContent = COPY.statusRunning;
         return;
       }
 
@@ -450,21 +469,21 @@ eleventyComputed:
       }
 
       if (state.totalSeconds <= 0) {
-        statusEl.textContent = 'Set a time first!';
-        setTimeout(() => { if (!state.countdown) statusEl.textContent = 'Ready'; }, 2000);
+        statusEl.textContent = COPY.errSetTime;
+        setTimeout(() => { if (!state.countdown) statusEl.textContent = COPY.statusReady; }, 2000);
         return;
       }
       if (state.totalSeconds > MAX_SECONDS) {
-        statusEl.textContent = 'Max 99 hours!';
-        setTimeout(() => { if (!state.countdown) statusEl.textContent = 'Ready'; }, 2000);
+        statusEl.textContent = COPY.errMax99Brief;
+        setTimeout(() => { if (!state.countdown) statusEl.textContent = COPY.statusReady; }, 2000);
         return;
       }
 
       displayWrap.classList.remove('ct-widget__display--finished');
-      statusEl.textContent = 'Running';
+      statusEl.textContent = COPY.statusRunning;
       updateDisplay();
       state.countdown = setInterval(tick, 1000);
-      btnStart.textContent = 'Pause';
+      btnStart.textContent = COPY.btnPause;
       btnPause.disabled = false;
       btnReset.disabled = false;
       panelDuration.classList.add('ct-widget__inputs--hidden');
@@ -477,9 +496,9 @@ eleventyComputed:
       state.isPaused = false;
       state.totalSeconds = 0;
       updateDisplay();
-      statusEl.textContent = 'Ready';
+      statusEl.textContent = COPY.statusReady;
       displayWrap.classList.remove('ct-widget__display--finished');
-      btnStart.textContent = 'Start';
+      btnStart.textContent = COPY.btnStart;
       btnStart.disabled = false;
       btnPause.disabled = true;
       btnReset.disabled = true;
@@ -519,8 +538,8 @@ eleventyComputed:
         clearInterval(state.countdown);
         state.countdown = null;
         state.isPaused = true;
-        btnStart.textContent = 'Resume';
-        statusEl.textContent = 'Paused';
+        btnStart.textContent = COPY.btnResume;
+        statusEl.textContent = COPY.statusPaused;
       }
     });
     btnReset.addEventListener('click', resetTimer);
@@ -566,10 +585,14 @@ eleventyComputed:
 
     // Placeholder behaviour for contenteditable title
     titleEl.addEventListener('focus', () => {
-      if (titleEl.textContent.startsWith('Timer ')) titleEl.textContent = '';
+      if (titleEl.dataset.isDefault === '1') titleEl.textContent = '';
     });
+    titleEl.addEventListener('input', () => { titleEl.dataset.isDefault = ''; });
     titleEl.addEventListener('blur', () => {
-      if (!titleEl.textContent.trim()) titleEl.textContent = `Timer ${id}`;
+      if (!titleEl.textContent.trim()) {
+        titleEl.textContent = fmtTimer(id);
+        titleEl.dataset.isDefault = '1';
+      }
     });
     titleEl.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }

@@ -19,38 +19,35 @@ eleventyComputed:
 {% set terminalTitle = "markdown-pdf.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="mp">
-  <!-- Action bar -->
   <div class="mp__actions no-print">
-    <button class="mp__btn mp__btn--primary" id="mp-download" title="Download as PDF (uses your browser's print dialog)">
+    <button class="mp__btn mp__btn--primary" id="mp-download" title="{{ 'tool.markdown-pdf.title_download' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Download PDF
+      {{ "tool.markdown-pdf.btn_download" | t }}
     </button>
-    <button class="mp__btn" id="mp-export" title="Download the markdown source as .md">
+    <button class="mp__btn" id="mp-export" title="{{ 'tool.markdown-pdf.title_export' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      Export .md
+      {{ "tool.markdown-pdf.btn_export" | t }}
     </button>
-    <label class="mp__btn mp__btn--label" for="mp-file" title="Load markdown from a .md file">
+    <label class="mp__btn mp__btn--label" for="mp-file" title="{{ 'tool.markdown-pdf.title_import' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Import .md
+      {{ "tool.markdown-pdf.btn_import" | t }}
       <input type="file" id="mp-file" accept=".md,.markdown,text/markdown,text/plain" hidden>
     </label>
-    <button class="mp__btn mp__btn--danger" id="mp-clear" title="Clear the editor and reset">
+    <button class="mp__btn mp__btn--danger" id="mp-clear" title="{{ 'tool.markdown-pdf.title_clear' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-      Clear
+      {{ "tool.markdown-pdf.btn_clear" | t }}
     </button>
 
-    <!-- Mobile tabs (hidden on desktop) -->
-    <div class="mp__tabs" role="tablist" aria-label="Switch between editor and preview">
-      <button class="mp__tab is-active" id="mp-tab-edit" role="tab" aria-selected="true" aria-controls="mp-input">Edit</button>
-      <button class="mp__tab" id="mp-tab-preview" role="tab" aria-selected="false" aria-controls="mp-preview">Preview</button>
+    <div class="mp__tabs" role="tablist" aria-label="{{ 'tool.markdown-pdf.tab_aria' | t }}">
+      <button class="mp__tab is-active" id="mp-tab-edit" role="tab" aria-selected="true" aria-controls="mp-input">{{ "tool.markdown-pdf.tab_edit" | t }}</button>
+      <button class="mp__tab" id="mp-tab-preview" role="tab" aria-selected="false" aria-controls="mp-preview">{{ "tool.markdown-pdf.tab_preview" | t }}</button>
     </div>
   </div>
 
-  <!-- Split panes -->
   <div class="mp__panes">
     <section class="mp__pane mp__pane--editor" data-tab="edit">
       <header class="mp__pane-header no-print">
-        <span class="mp__pane-label">Markdown</span>
+        <span class="mp__pane-label">{{ "tool.markdown-pdf.pane_markdown" | t }}</span>
       </header>
       <textarea
         class="mp__input"
@@ -58,17 +55,17 @@ eleventyComputed:
         spellcheck="false"
         autocomplete="off"
         autocapitalize="off"
-        placeholder="# Start writing…"
+        placeholder="{{ 'tool.markdown-pdf.ph_input' | t }}"
       ></textarea>
       <footer class="mp__pane-status no-print">
-        <span id="mp-counts">0 words · 0 chars</span>
+        <span id="mp-counts"></span>
         <span id="mp-saved" class="mp__saved" aria-live="polite"></span>
       </footer>
     </section>
 
     <section class="mp__pane mp__pane--preview" data-tab="preview" hidden>
       <header class="mp__pane-header no-print">
-        <span class="mp__pane-label">Preview</span>
+        <span class="mp__pane-label">{{ "tool.markdown-pdf.pane_preview" | t }}</span>
       </header>
       <article class="mp__preview" id="mp-preview" aria-live="polite"></article>
     </section>
@@ -89,10 +86,12 @@ eleventyComputed:
 </script>
 
 <script type="module">
-/* ─────────────────────────────────────────────────────────────────────
-   Markdown → PDF — vanilla JS + marked.js (loaded from jsDelivr ESM).
-   PDF is produced via the browser's print-to-PDF; no PDF libs needed.
-   ───────────────────────────────────────────────────────────────────── */
+const COPY = {
+  saved:        {{ ("tool.markdown-pdf.saved"        | t) | dump | safe }},
+  countsFmt:    {{ ("tool.markdown-pdf.counts_format" | t) | dump | safe }},
+  errLoadLib:   {{ ("tool.markdown-pdf.err_load_lib" | t) | dump | safe }},
+  confirmClear: {{ ("tool.markdown-pdf.confirm_clear" | t) | dump | safe }}
+};
 
 const inputEl     = document.getElementById('mp-input');
 const previewEl   = document.getElementById('mp-preview');
@@ -158,7 +157,7 @@ try {
   marked.setOptions({ gfm: true, breaks: true, pedantic: false });
 } catch (err) {
   console.error('Failed to load marked.js:', err);
-  previewEl.innerHTML = '<p style="color:var(--syn-pink);padding:1rem;">Couldn’t load the markdown library. Check your network or ad-blocker.</p>';
+  previewEl.innerHTML = `<p style="color:var(--syn-pink);padding:1rem;">${COPY.errLoadLib.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`;
   inputEl.disabled = true;
   downloadBtn.disabled = true;
 }
@@ -185,7 +184,9 @@ function updateCounts() {
   const text = inputEl.value || '';
   const chars = text.length;
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-  countsEl.textContent = `${words.toLocaleString()} words · ${chars.toLocaleString()} chars`;
+  countsEl.textContent = COPY.countsFmt
+    .replace('{words}', words.toLocaleString())
+    .replace('{chars}', chars.toLocaleString());
 }
 
 /* ── Persistence ────────────────────────────────────────────────── */
@@ -202,7 +203,7 @@ function scheduleSave() {
 
 let flashTimer = null;
 function flashSaved() {
-  savedEl.textContent = 'Saved';
+  savedEl.textContent = COPY.saved;
   savedEl.classList.add('is-visible');
   clearTimeout(flashTimer);
   flashTimer = setTimeout(() => savedEl.classList.remove('is-visible'), 1200);
@@ -300,7 +301,7 @@ inputEl.addEventListener('keydown', (e) => {
 downloadBtn.addEventListener('click', downloadPDF);
 exportBtn.addEventListener('click', exportMD);
 clearBtn.addEventListener('click', () => {
-  if (!confirm('Clear the editor? Your auto-saved draft will be lost.')) return;
+  if (!confirm(COPY.confirmClear)) return;
   inputEl.value = '';
   try { localStorage.removeItem(LS_KEY); } catch (_) {}
   render();

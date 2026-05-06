@@ -19,70 +19,68 @@ eleventyComputed:
 {% set terminalTitle = "invoice.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="iv">
-  <!-- Action bar (hidden on print) -->
   <div class="iv__actions no-print">
-    <button class="iv__btn iv__btn--primary" id="iv-print" title="Print invoice / Save as PDF">
+    <button class="iv__btn iv__btn--primary" id="iv-print" title="{{ 'tool.invoice.title_print' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-      Print / Save PDF
+      {{ "tool.invoice.btn_print" | t }}
     </button>
-    <button class="iv__btn" id="iv-export" title="Export invoice as JSON">
+    <button class="iv__btn" id="iv-export" title="{{ 'tool.invoice.title_export' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Export JSON
+      {{ "tool.invoice.btn_export" | t }}
     </button>
-    <label class="iv__btn iv__btn--label" for="iv-file" title="Import an invoice JSON file">
+    <label class="iv__btn iv__btn--label" for="iv-file" title="{{ 'tool.invoice.title_import' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Import JSON
+      {{ "tool.invoice.btn_import" | t }}
       <input type="file" id="iv-file" accept="application/json,.json" hidden>
     </label>
-    <button class="iv__btn iv__btn--danger" id="iv-clear" title="Clear all saved invoice data">
+    <button class="iv__btn iv__btn--danger" id="iv-clear" title="{{ 'tool.invoice.title_clear' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-      Clear
+      {{ "tool.invoice.btn_clear" | t }}
     </button>
   </div>
 
-  <!-- The printable invoice document -->
   <div class="iv__doc" id="iv-doc">
     <div class="iv__header">
-      <div class="iv__title">INVOICE</div>
+      <div class="iv__title">{{ "tool.invoice.hdr_invoice" | t }}</div>
     </div>
 
     <div class="iv__parties">
       <div class="iv__section">
-        <div class="iv__section-title">From</div>
-        <input class="iv__input iv__input--heavy" type="text" id="nameInp" placeholder="Your name" value="John Doe">
-        <label class="iv__label" for="addr1Inp">Address</label>
-        <input class="iv__input" type="text" id="addr1Inp" placeholder="Address line 1">
-        <input class="iv__input" type="text" id="addr2Inp" placeholder="Address line 2">
-        <label class="iv__label" for="phoneInp">Phone</label>
-        <input class="iv__input" type="tel" id="phoneInp" placeholder="Phone number">
-        <label class="iv__label" for="emailInp">Email</label>
-        <input class="iv__input" type="email" id="emailInp" placeholder="Email">
-        <input class="iv__input" type="text" id="extraInp" placeholder="Extra info (optional)">
+        <div class="iv__section-title">{{ "tool.invoice.section_from" | t }}</div>
+        <input class="iv__input iv__input--heavy" type="text" id="nameInp" placeholder="{{ 'tool.invoice.ph_name' | t }}" value="John Doe">
+        <label class="iv__label" for="addr1Inp">{{ "tool.invoice.lbl_address" | t }}</label>
+        <input class="iv__input" type="text" id="addr1Inp" placeholder="{{ 'tool.invoice.ph_addr1' | t }}">
+        <input class="iv__input" type="text" id="addr2Inp" placeholder="{{ 'tool.invoice.ph_addr2' | t }}">
+        <label class="iv__label" for="phoneInp">{{ "tool.invoice.lbl_phone" | t }}</label>
+        <input class="iv__input" type="tel" id="phoneInp" placeholder="{{ 'tool.invoice.ph_phone' | t }}">
+        <label class="iv__label" for="emailInp">{{ "tool.invoice.lbl_email" | t }}</label>
+        <input class="iv__input" type="email" id="emailInp" placeholder="{{ 'tool.invoice.ph_email' | t }}">
+        <input class="iv__input" type="text" id="extraInp" placeholder="{{ 'tool.invoice.ph_extra' | t }}">
       </div>
 
       <div class="iv__section">
-        <div class="iv__section-title">Bill To</div>
-        <input class="iv__input iv__input--heavy" type="text" id="companyNameInp" placeholder="Company name">
-        <input class="iv__input" type="text" id="companyStreetInp" placeholder="Street">
-        <input class="iv__input" type="text" id="companyCityInp" placeholder="City / postcode">
-        <input class="iv__input" type="text" id="companyCountryInp" placeholder="Country">
-        <label class="iv__label" for="companyVatInp">VAT</label>
-        <input class="iv__input" type="text" id="companyVatInp" placeholder="VAT number">
+        <div class="iv__section-title">{{ "tool.invoice.section_bill_to" | t }}</div>
+        <input class="iv__input iv__input--heavy" type="text" id="companyNameInp" placeholder="{{ 'tool.invoice.ph_company' | t }}">
+        <input class="iv__input" type="text" id="companyStreetInp" placeholder="{{ 'tool.invoice.ph_street' | t }}">
+        <input class="iv__input" type="text" id="companyCityInp" placeholder="{{ 'tool.invoice.ph_city' | t }}">
+        <input class="iv__input" type="text" id="companyCountryInp" placeholder="{{ 'tool.invoice.ph_country' | t }}">
+        <label class="iv__label" for="companyVatInp">{{ "tool.invoice.lbl_vat" | t }}</label>
+        <input class="iv__input" type="text" id="companyVatInp" placeholder="{{ 'tool.invoice.ph_vat' | t }}">
       </div>
     </div>
 
     <div class="iv__meta">
       <div class="iv__meta-left">
         <p>
-          <span class="iv__meta-label">Invoice #:</span>
-          <input class="iv__meta-input" type="text" id="invnoInp" placeholder="0001">
+          <span class="iv__meta-label">{{ "tool.invoice.meta_invoice_no" | t }}</span>
+          <input class="iv__meta-input" type="text" id="invnoInp" placeholder="{{ 'tool.invoice.ph_invno' | t }}">
         </p>
         <p>
-          <span class="iv__meta-label">Invoice date:</span>
+          <span class="iv__meta-label">{{ "tool.invoice.meta_invoice_date" | t }}</span>
           <input class="iv__meta-input iv__meta-input--date" type="date" id="invoiceDate">
         </p>
         <p class="no-print">
-          <span class="iv__meta-label">Currency:</span>
+          <span class="iv__meta-label">{{ "tool.invoice.meta_currency" | t }}</span>
           <select class="iv__meta-input" id="currencyInp">
             <option value="₹">INR ₹</option>
             <option value="€">EUR €</option>
@@ -91,7 +89,7 @@ eleventyComputed:
         </p>
       </div>
       <div class="iv__meta-right">
-        <p class="iv__amount-label">Amount due</p>
+        <p class="iv__amount-label">{{ "tool.invoice.amount_due" | t }}</p>
         <p class="iv__amount-value">
           <span class="grand-total">0</span><span class="currency">₹</span>
         </p>
@@ -101,32 +99,32 @@ eleventyComputed:
     <table class="iv__table">
       <thead>
         <tr>
-          <th class="iv__col-desc">Description</th>
-          <th class="iv__col-sac">SAC Code</th>
-          <th class="iv__col-qty">Quantity</th>
-          <th class="iv__col-price">Unit Price</th>
-          <th class="iv__col-total">Total</th>
+          <th class="iv__col-desc">{{ "tool.invoice.tbl_description" | t }}</th>
+          <th class="iv__col-sac">{{ "tool.invoice.tbl_sac" | t }}</th>
+          <th class="iv__col-qty">{{ "tool.invoice.tbl_quantity" | t }}</th>
+          <th class="iv__col-price">{{ "tool.invoice.tbl_unit_price" | t }}</th>
+          <th class="iv__col-total">{{ "tool.invoice.tbl_total" | t }}</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>
-            <span class="remove-row no-print" title="Remove row" aria-label="Remove row">−</span>
-            <textarea id="desc1Inp" placeholder="Line description" rows="1"></textarea>
+            <span class="remove-row no-print" title="{{ 'tool.invoice.row_remove' | t }}" aria-label="{{ 'tool.invoice.row_remove' | t }}">−</span>
+            <textarea id="desc1Inp" placeholder="{{ 'tool.invoice.ph_line_desc' | t }}" rows="1"></textarea>
           </td>
           <td><input id="sac1Inp" type="text" value="998314" placeholder="______"></td>
-          <td><input id="qty1Inp" class="input-qty-cell" type="text" value="1" placeholder="QTY" pattern="^[0-9]+$" inputmode="numeric"></td>
+          <td><input id="qty1Inp" class="input-qty-cell" type="text" value="1" placeholder="{{ 'tool.invoice.ph_qty' | t }}" pattern="^[0-9]+$" inputmode="numeric"></td>
           <td>
             <span class="iv__cell-price">
-              <input id="price1Inp" class="input-price-cell" type="text" value="0" placeholder="0.00" pattern="^[0-9]+(\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
+              <input id="price1Inp" class="input-price-cell" type="text" value="0" placeholder="{{ 'tool.invoice.ph_price' | t }}" pattern="^[0-9]+(\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
             </span>
           </td>
           <td><span class="line-total">0</span><span class="currency">₹</span></td>
         </tr>
         <tr class="last-row">
           <td class="last-row-first-col" colspan="4">
-            <span class="add-row no-print" title="Add row" aria-label="Add row">+</span>
-            <span class="last-row-label">Total</span>
+            <span class="add-row no-print" title="{{ 'tool.invoice.row_add' | t }}" aria-label="{{ 'tool.invoice.row_add' | t }}">+</span>
+            <span class="last-row-label">{{ "tool.invoice.footer_total" | t }}</span>
           </td>
           <td class="total"><span class="grand-total">0</span><span class="currency">₹</span></td>
         </tr>
@@ -134,34 +132,28 @@ eleventyComputed:
     </table>
 
     <div class="iv__section iv__notes">
-      <div class="iv__section-title">Notes</div>
+      <div class="iv__section-title">{{ "tool.invoice.section_notes" | t }}</div>
       <textarea
         id="notesInp"
         class="iv__notes-input"
         rows="2"
-        placeholder="Footnotes for line items, terms, payment instructions, etc.&#10;e.g.  * Subject to additional taxes.&#10;     ** Includes hosting for 12 months."
+        placeholder="{{ 'tool.invoice.ph_notes' | t }}"
       ></textarea>
     </div>
 
     <div class="iv__section iv__bank">
-      <div class="iv__section-title">Bank Account Details</div>
-      <label class="iv__label" for="panInp">PAN number</label>
-      <input class="iv__input" type="text" id="panInp" placeholder="PAN number">
-      <label class="iv__label" for="bankAccNoInp">Bank Account Number</label>
-      <input class="iv__input" type="text" id="bankAccNoInp" placeholder="Bank account number">
-      <label class="iv__label" for="accHolderNameInp">Account Holder Name</label>
-      <input class="iv__input" type="text" id="accHolderNameInp" placeholder="Account holder name">
-      <label class="iv__label" for="ifscCodeInp">IFSC Code</label>
-      <input class="iv__input" type="text" id="ifscCodeInp" placeholder="IFSC code">
-      <label class="iv__label" for="bankNameInp">Bank Name</label>
-      <input class="iv__input" type="text" id="bankNameInp" placeholder="Bank name">
-      <p class="iv__declaration">
-        I hereby solemnly affirm and declare that the information furnished
-        above is accurate and complete to the best of my knowledge and belief.
-        I acknowledge that I am solely responsible for compliance with all
-        applicable tax laws, including the filing of returns and payment of
-        taxes to the Income Tax Department of India.
-      </p>
+      <div class="iv__section-title">{{ "tool.invoice.section_bank" | t }}</div>
+      <label class="iv__label" for="panInp">{{ "tool.invoice.lbl_pan" | t }}</label>
+      <input class="iv__input" type="text" id="panInp" placeholder="{{ 'tool.invoice.ph_pan' | t }}">
+      <label class="iv__label" for="bankAccNoInp">{{ "tool.invoice.lbl_bank_acc" | t }}</label>
+      <input class="iv__input" type="text" id="bankAccNoInp" placeholder="{{ 'tool.invoice.ph_bank_acc' | t }}">
+      <label class="iv__label" for="accHolderNameInp">{{ "tool.invoice.lbl_acc_holder" | t }}</label>
+      <input class="iv__input" type="text" id="accHolderNameInp" placeholder="{{ 'tool.invoice.ph_acc_holder' | t }}">
+      <label class="iv__label" for="ifscCodeInp">{{ "tool.invoice.lbl_ifsc" | t }}</label>
+      <input class="iv__input" type="text" id="ifscCodeInp" placeholder="{{ 'tool.invoice.ph_ifsc' | t }}">
+      <label class="iv__label" for="bankNameInp">{{ "tool.invoice.lbl_bank_name" | t }}</label>
+      <input class="iv__input" type="text" id="bankNameInp" placeholder="{{ 'tool.invoice.ph_bank_name' | t }}">
+      <p class="iv__declaration">{{ "tool.invoice.declaration" | t }}</p>
     </div>
   </div>
 </section>
@@ -181,8 +173,17 @@ eleventyComputed:
 
 <script>
 (() => {
-  /* ── Constants ─────────────────────────────────────── */
-  // Prefix LS keys to avoid collisions with other tools
+  const COPY = {
+    rowRemove:        {{ ("tool.invoice.row_remove"        | t) | dump | safe }},
+    phLineDesc:       {{ ("tool.invoice.ph_line_desc"      | t) | dump | safe }},
+    phQty:            {{ ("tool.invoice.ph_qty"            | t) | dump | safe }},
+    phPrice:          {{ ("tool.invoice.ph_price"          | t) | dump | safe }},
+    alertInvalidJson: {{ ("tool.invoice.alert_invalid_json" | t) | dump | safe }},
+    alertUnknownFmt:  {{ ("tool.invoice.alert_unknown_format" | t) | dump | safe }},
+    alertSelectJson:  {{ ("tool.invoice.alert_select_json" | t) | dump | safe }},
+    confirmClear:     {{ ("tool.invoice.confirm_clear"     | t) | dump | safe }}
+  };
+
   const LS = 'mentria-iv-';
 
   /* ── DOM refs ──────────────────────────────────────── */
@@ -277,14 +278,14 @@ eleventyComputed:
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
       <td>
-        <span class="remove-row no-print" title="Remove row" aria-label="Remove row">−</span>
-        <textarea id="desc${rowIndex}Inp" placeholder="Line description" rows="1">${esc(data.Description)}</textarea>
+        <span class="remove-row no-print" title="${esc(COPY.rowRemove)}" aria-label="${esc(COPY.rowRemove)}">−</span>
+        <textarea id="desc${rowIndex}Inp" placeholder="${esc(COPY.phLineDesc)}" rows="1">${esc(data.Description)}</textarea>
       </td>
       <td><input id="sac${rowIndex}Inp" type="text" value="${esc(data['SAC code'] ?? '')}" placeholder="______"></td>
-      <td><input id="qty${rowIndex}Inp" class="input-qty-cell" type="text" value="${esc(data.Quantity ?? '1')}" placeholder="QTY" pattern="^[0-9]+$" inputmode="numeric"></td>
+      <td><input id="qty${rowIndex}Inp" class="input-qty-cell" type="text" value="${esc(data.Quantity ?? '1')}" placeholder="${esc(COPY.phQty)}" pattern="^[0-9]+$" inputmode="numeric"></td>
       <td>
         <span class="iv__cell-price">
-          <input id="price${rowIndex}Inp" class="input-price-cell" type="text" value="${esc(data['Unit Price'] ?? '0')}" placeholder="0.00" pattern="^[0-9]+(\\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
+          <input id="price${rowIndex}Inp" class="input-price-cell" type="text" value="${esc(data['Unit Price'] ?? '0')}" placeholder="${esc(COPY.phPrice)}" pattern="^[0-9]+(\\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
         </span>
       </td>
       <td><span class="line-total">0</span><span class="currency">₹</span></td>
@@ -422,7 +423,7 @@ eleventyComputed:
   const importJSON = (text) => {
     let parsed;
     try { parsed = JSON.parse(text); }
-    catch { alert('Invalid JSON file.'); return; }
+    catch { alert(COPY.alertInvalidJson); return; }
 
     if (Array.isArray(parsed)) {
       // Legacy: array of line items
@@ -443,7 +444,7 @@ eleventyComputed:
       changeCurrency();
       replaceLines(parsed.lines || []);
     } else {
-      alert('Unrecognised JSON format.');
+      alert(COPY.alertUnknownFmt);
     }
   };
 
@@ -490,7 +491,7 @@ eleventyComputed:
     const file = e.target.files[0];
     if (!file) return;
     if (file.type !== 'application/json' && !file.name.toLowerCase().endsWith('.json')) {
-      alert('Please select a JSON file.');
+      alert(COPY.alertSelectJson);
       fileInput.value = '';
       return;
     }
@@ -507,7 +508,7 @@ eleventyComputed:
   printBtn.addEventListener('click', () => window.print());
   exportBtn.addEventListener('click', exportJSON);
   clearBtn.addEventListener('click', () => {
-    if (!confirm('Clear all saved invoice data? This cannot be undone.')) return;
+    if (!confirm(COPY.confirmClear)) return;
     Object.keys(localStorage)
       .filter(k => k.startsWith(LS))
       .forEach(k => localStorage.removeItem(k));

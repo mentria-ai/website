@@ -1,0 +1,220 @@
+[
+  {
+    "id": "chapter01",
+    "type": "chapter",
+    "order": 1,
+    "title": "Why Mentria exists",
+    "subtitle": "The 60-second elevator pitch",
+    "cover_image": "/assets/img/feed/chapter01/00_cover.png",
+    "concept_tags": [
+      "browser-llm",
+      "privacy",
+      "offline",
+      "cloud-cost",
+      "round-trip",
+      "transformers-js",
+      "lora-hotswap",
+      "optimization-freedom",
+      "trade-offs",
+      "model-shrink"
+    ],
+    "status": "draft",
+    "estimated_minutes": 4,
+    "slides": [
+      {
+        "id": "01-s01",
+        "concept_tags": [
+          "intro"
+        ],
+        "story_type": "cover",
+        "scene_prompt": "Tok the small glowing translucent crystal-shard character (blue and pink luminous facets, two big curious eyes, friendly smile) and Weight the elderly bearded librarian (robes woven from tiny floating numbers and equations, half-moon spectacles) stand side by side in a warm cozy library at golden hour, both looking at the reader and waving. Big chalkboard behind them reads 'Chapter 1' in chalk script. Soft window light, dust motes in the air, towering bookshelves",
+        "caption": "Meet Tok and Weight. They're going to walk you through Mentria.",
+        "long_press": "Tok is a *token* — the smallest unit a language model thinks in. Weight is, well, a *weight* — one of the 800 million numbers that make up the model's brain. They will be the recurring narrators of every chapter.",
+        "actions": [],
+        "image": "/assets/img/feed/chapter01/01_intro.png",
+        "image_status": "rendered",
+        "seed": 11,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s02",
+        "concept_tags": [
+          "round-trip",
+          "browser-llm"
+        ],
+        "story_type": "metaphor_reveal",
+        "scene_prompt": "Tok the glowing crystal-shard character looking nervous, sealed inside a paper airmail envelope marked 'AIR MAIL — to: DATACENTER'. The envelope is being launched into the sky on a tiny rocket, headed toward a vast cold blue server farm visible in the distance on the horizon. Sunset sky, dramatic perspective from below",
+        "caption": "Old way: every word you typed flew across the planet first.",
+        "long_press": "When you talk to a normal AI app, your text leaves your device, crosses the internet, hits a giant warehouse full of GPUs, and the answer travels all the way back. That round trip is 100–300 ms even on great wifi — and it's billed by the word.",
+        "actions": [],
+        "image": "/assets/img/feed/chapter01/02_air_mail.png",
+        "image_status": "rendered",
+        "seed": 23,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s03",
+        "concept_tags": [
+          "cloud-cost"
+        ],
+        "story_type": "punchline",
+        "scene_prompt": "Weight sits at a worn wooden desk, frowning as he holds a long unfurling paper invoice that cascades down to the floor in folds. The invoice has line after line of small charges in neat handwriting. A small stamped header at the top of the invoice reads 'PER WORD'. Beside him on the desk floats Tok looking guilty and small. Cozy library, warm candlelight, towering bookshelves in the background",
+        "caption": "$0.003 a word. Tok talks a LOT.",
+        "long_press": "OpenAI charges around $0.0015–$0.06 per 1000 tokens depending on the model. For a chat app with 10k daily users averaging 200 tokens each, that's $30–$1200/day. Local inference: $0.",
+        "actions": [
+          {
+            "type": "open_url",
+            "label": "API pricing",
+            "url": "https://openai.com/api/pricing/"
+          }
+        ],
+        "image": "/assets/img/feed/chapter01/03_invoice.png",
+        "image_status": "rendered",
+        "seed": 10037,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s04",
+        "concept_tags": [
+          "privacy"
+        ],
+        "story_type": "metaphor_reveal",
+        "scene_prompt": "Tok sits on the floor reading a small leather-bound book labelled 'My Diary' on its cover. From the dark sky above, dozens of cartoon robot eyes on long telescoping metal necks lean in to peek over Tok's shoulder. The robots wear sterile white labcoats with chest badges reading 'TRAINING DATA'. Tok looks worried and tries to shield the diary with one tiny crystal arm. Dramatic spotlight on the diary, ominous purple cloud background",
+        "caption": "Whatever you typed up there… got read.",
+        "long_press": "Most cloud APIs reserve the right to log inputs for 'service improvement' (read: training). Even when they don't, network operators between you and them can. Local inference means the words literally never leave your device.",
+        "actions": [],
+        "image": "/assets/img/feed/chapter01/04_diary_robots.png",
+        "image_status": "rendered",
+        "seed": 10041,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s05",
+        "concept_tags": [
+          "offline"
+        ],
+        "story_type": "reveal",
+        "scene_prompt": "Split panel comic. TOP HALF: Tok sits in an airplane window seat at cruising altitude, fluffy clouds visible through the round window, Tok holding a phone that prominently displays an airplane mode icon. Tok has a panicked expression with comic sweat drops. BOTTOM HALF: the same airplane window seat scene but Tok now smiles relaxed, the phone screen glowing with a chat conversation, reply text visible. Bold horizontal panel divider between the two halves",
+        "caption": "Cloud AI at 30,000 feet: silence. Mentria: still talking.",
+        "long_press": "Browser-local LLMs work on subway commutes, intercontinental flights, rural areas with bad signal, school networks that block API endpoints, and that one cafe where the wifi pretends to work but doesn't.",
+        "actions": [],
+        "image": "/assets/img/feed/chapter01/05_airplane_split.png",
+        "image_status": "rendered",
+        "seed": 10053,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s06",
+        "concept_tags": [
+          "browser-llm"
+        ],
+        "story_type": "metaphor_reveal",
+        "scene_prompt": "Weight holds up a tiny luminous brain made of pulsing neural threads, no bigger than a marble, balanced on his fingertip. Beside him stands Tok with eyes wide with wonder, mouth open in surprise. Weight has a sly knowing smile. Setting: cozy library with towering bookshelves, golden hour window light streaming in, dust motes",
+        "caption": "What if the warehouse… came home?",
+        "long_press": "The whole bet of Mentria: shrink the model small enough that it fits inside a browser tab. No round trip. No bill. No data leaving the device. The brain lives where you live.",
+        "actions": [],
+        "image": "/assets/img/feed/chapter01/06_warehouse_home.png",
+        "image_status": "rendered",
+        "seed": 10067,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s07",
+        "concept_tags": [
+          "browser-llm"
+        ],
+        "story_type": "metaphor_reveal",
+        "scene_prompt": "A close-up of a single open laptop screen on a wooden desk. The screen displays an open Chrome browser tab. Inside that tab, instead of a normal webpage, a glowing translucent brain made of pulsing neural threads pulses softly across the entire visible page area. INSIDE the glowing brain itself, two tiny chibi figures wave at the viewer: Tok and Weight. The browser URL bar reads 'mentria.ai'. NO other characters or people in the scene. Warm desk lamp light, plants in soft focus background. Empty desk in front of the laptop",
+        "caption": "Your brain. Your tab. No cloud.",
+        "long_press": "Once loaded (~600 MB, cached forever), the model runs entirely on your device's GPU via WebGPU. The page never phones home for inference — only for the initial weight download.",
+        "actions": [],
+        "image": "/assets/img/feed/chapter01/07_brain_in_tab.png",
+        "image_status": "rendered",
+        "seed": 15079,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s08",
+        "concept_tags": [
+          "model-shrink"
+        ],
+        "story_type": "character_beat",
+        "scene_prompt": "Weight stands holding up three fingers in a teaching pose, lecturing seriously. Beside him on the floor sits Tok cross-legged, taking notes in a tiny notebook with a tiny pencil. Behind them is a large chalkboard with chalk script text reading: '1. Smaller models    2. WebGPU    3. Quantization'. Cozy library, warm lantern light, leather books on shelves",
+        "caption": "Three things had to land first. They all did, around 2024.",
+        "long_press": "1) Models like Qwen3.5-0.8B are small enough to run locally yet smart enough to be useful. 2) Browsers got direct GPU access via WebGPU. 3) Quantization techniques got good enough to shrink models 3× without breaking them.",
+        "actions": [],
+        "image": "/assets/img/feed/chapter01/08_three_trends.png",
+        "image_status": "rendered",
+        "seed": 10089,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s09",
+        "concept_tags": [
+          "transformers-js",
+          "optimization-freedom"
+        ],
+        "story_type": "aside",
+        "scene_prompt": "Tok looks up curiously at Weight. Above Tok's head floats a thought bubble containing the small text 'transformers.js?'. Weight smiles patiently and gestures with one open hand showing a 'so-so' wobble, while pulling out an old pocket stopwatch with the other hand showing a slow tick on its face. Cozy library backdrop with warm light",
+        "caption": "But transformers.js already exists. Why build another one?",
+        "long_press": "Transformers.js is a generalist that supports every model, every backend, every browser. That's a hard contract. To uphold it, it can't deeply optimize for any one model. Mentria does the opposite — one model family, one backend, as fast as possible.",
+        "actions": [],
+        "image": "/assets/img/feed/chapter01/09_why_not_tjs.png",
+        "image_status": "rendered",
+        "seed": 10097,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s10",
+        "concept_tags": [
+          "lora-hotswap"
+        ],
+        "story_type": "punchline",
+        "scene_prompt": "Tok stands in front of a wall-mounted closet of glowing costumes — a wizard pointed hat, a chef white apron, a poet cravat, a math tutor knit sweater, a code reviewer monocle. Tok is mid-quick-change, half-wearing the wizard hat and a chef apron, big grin. Behind Tok stands Weight holding up an old pocket stopwatch reading '00:00:020'. Comic motion lines around Tok",
+        "caption": "Same brain, 25 personalities. Costume change: 20 milliseconds.",
+        "long_press": "LoRA adapters are tiny files (40 MB or as small as 150 KB) that change what the model is *good at* — math, code, poetry, summarization. Mentria swaps them mid-conversation in under 20 ms without reloading the 600 MB base. transformers.js can't do this.",
+        "actions": [],
+        "image": "/assets/img/feed/chapter01/10_lora_costumes.png",
+        "image_status": "rendered",
+        "seed": 10113,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s11",
+        "concept_tags": [
+          "trade-offs"
+        ],
+        "story_type": "reveal",
+        "scene_prompt": "A large brass balance scale at the center of the panel, slightly tilting. On the LEFT pan are stacked together: a glowing five-pointed star labelled 'GPT-5 quality', a sleek tall server tower icon, and a cloud icon. On the RIGHT pan are: a tiny laptop, a padlock labelled 'privacy', a small airplane icon labelled 'offline', a piggy bank labelled '$0'. Standing BEHIND the scale post, ONLY ONE figure visible: Weight rubbing his beard thoughtfully looking at the scale. NO other people in the scene. Warm earthy backdrop, soft inkwork shading",
+        "caption": "You give up frontier-model quality. You get every other thing.",
+        "long_press": "Local will not match GPT-5 or Claude Opus on hard tasks. But it wins on privacy, offline, cost, latency, and 'works inside an app that can't afford per-query billing.' Pick the right tool per task — Mentria is for the second column.",
+        "actions": [],
+        "image": "/assets/img/feed/chapter01/11_balance_scale.png",
+        "image_status": "rendered",
+        "seed": 15127,
+        "text_status": "text_approved"
+      },
+      {
+        "id": "01-s12",
+        "concept_tags": [
+          "recap"
+        ],
+        "story_type": "recap",
+        "scene_prompt": "Tok is back home, wearing tiny slippers, holding a steaming mug of tea, smiling contentedly at the reader. Beside Tok stands Weight pointing forward toward an arched stone doorway with a wooden sign above it reading 'Chapter 2'. Through the doorway, a long corridor with numbered doors is visible. Warm fireplace glow, cozy library setting, soft armchair",
+        "caption": "Tok's home. Next chapter: follow him through the engine itself.",
+        "long_press": "Now that you know *why* Mentria exists, the next chapter walks one token through the entire engine end-to-end. After that, we zoom into one component per chapter for the next twelve chapters.",
+        "actions": [
+          {
+            "type": "goto_chapter",
+            "label": "Chapter 2 →",
+            "to": "chapter02"
+          }
+        ],
+        "image": "/assets/img/feed/chapter01/12_recap.png",
+        "image_status": "rendered",
+        "seed": 10139,
+        "text_status": "text_approved"
+      }
+    ]
+  }
+]

@@ -1,0 +1,100 @@
+---
+layout: deck-layout.njk
+pagination:
+  data: chapter_list
+  size: 1
+  alias: chapter
+permalink: "/feed/chapter/{{ chapter.id }}/"
+eleventyComputed:
+  title: "{{ chapter.title }} · Chapter {{ chapter.order }}"
+  description: "{{ chapter.subtitle }}"
+---
+<link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
+
+<div class="deck"
+     id="deckRoot"
+     data-chapter-id="{{ chapter.id }}"
+     data-chapter-title="{{ chapter.title }}"
+     data-slide-count="{{ chapter.slides.length }}">
+
+  <div class="deck__progress" role="progressbar" aria-label="Chapter progress">
+    {% for slide in chapter.slides %}
+    <div class="deck__progress-seg" data-idx="{{ loop.index0 }}">
+      <span class="deck__progress-fill"></span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <button class="deck__close" id="deckClose" aria-label="Exit chapter">×</button>
+
+  <div class="deck__chapter-meta">
+    <span class="deck__chapter-num">CH·{% if chapter.order < 10 %}0{% endif %}{{ chapter.order }}</span>
+    <span class="deck__chapter-title">{{ chapter.title }}</span>
+  </div>
+
+  <button class="deck__tap deck__tap--prev" aria-label="Previous slide"></button>
+  <button class="deck__tap deck__tap--next" aria-label="Next slide"></button>
+
+  {% for slide in chapter.slides %}
+  <article class="deck__slide{% if loop.first %} is-active{% endif %}"
+           data-idx="{{ loop.index0 }}"
+           data-slide-id="{{ slide.id }}"
+           data-story-type="{{ slide.story_type }}">
+    {% if slide.image_status == "pending" %}
+    <div class="deck__slide-img deck__slide-img--placeholder">
+      <span class="deck__placeholder-tag">{{ slide.story_type }}</span>
+    </div>
+    {% else %}
+    <img class="deck__slide-img" src="{{ slide.image }}" alt="" loading="lazy">
+    {% endif %}
+
+    <div class="deck__slide-overlay">
+      <p class="deck__caption">{{ slide.caption }}</p>
+
+      {% if slide.long_press or slide.actions.length %}
+      <div class="deck__actions">
+        {% if slide.long_press %}
+        <button class="deck__action deck__action--expand" data-action="expand">
+          <span class="deck__action-icon">↑</span> Tell me more
+        </button>
+        {% endif %}
+        {% for action in slide.actions %}
+          {% if action.type == "open_url" %}
+          <a class="deck__action deck__action--link" href="{{ action.url }}" target="_blank" rel="noopener">
+            {{ action.label }} →
+          </a>
+          {% elif action.type == "goto_chapter" %}
+          <a class="deck__action deck__action--next" href="/feed/chapter/{{ action.to }}/">
+            {{ action.label }}
+          </a>
+          {% elif action.type == "goto_slide" %}
+          <button class="deck__action" data-action="goto_slide" data-target="{{ action.to }}">
+            {{ action.label }}
+          </button>
+          {% elif action.type == "share" %}
+          <button class="deck__action deck__action--share" data-action="share">
+            {{ action.label }}
+          </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if slide.long_press %}
+    <template class="deck__long-press" data-for="{{ slide.id }}">{{ slide.long_press | safe }}</template>
+    {% endif %}
+  </article>
+  {% endfor %}
+
+  <aside class="deck__sheet" id="deckSheet" hidden>
+    <button class="deck__sheet-close" id="deckSheetClose" aria-label="Close detail">×</button>
+    <div class="deck__sheet-body" id="deckSheetBody"></div>
+  </aside>
+
+  <div class="deck__hint" id="deckHint">
+    <span>tap →</span><span>swipe ↑ for depth</span><span>swipe ↓ to exit</span>
+  </div>
+</div>
+
+<script src="/assets/js/feed-deck.js?v={{ buildHash }}" defer></script>

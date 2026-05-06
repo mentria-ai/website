@@ -1,10 +1,26 @@
 [
   {
+    "type": "chapter",
+    "id": "chapter01",
+    "src": "/assets/img/feed/chapter01/00_cover.png",
+    "color": "linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #0c4a6e 100%)",
+    "title": "Why Mentria exists",
+    "caption": "Tok and Weight kick off the tour. ~4 min · 12 slides.",
+    "tags": [
+      "learn",
+      "chapter-01"
+    ],
+    "date": "2026-05-02",
+    "link": "/feed/chapter/chapter01/"
+  },
+  {
     "type": "image",
     "color": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     "title": "Welcome to Mentria",
     "caption": "A creative studio for tools and transmissions.",
-    "tags": ["announcement"],
+    "tags": [
+      "announcement"
+    ],
     "date": "2026-03-16"
   },
   {
@@ -12,7 +28,10 @@
     "color": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
     "title": "Tools, Reimagined",
     "caption": "Simple utilities designed with craft and care.",
-    "tags": ["tools", "design"],
+    "tags": [
+      "tools",
+      "design"
+    ],
     "date": "2026-03-15"
   },
   {
@@ -20,7 +39,9 @@
     "color": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
     "title": "The Terminal Aesthetic",
     "caption": "When code meets design. A visual language for the curious.",
-    "tags": ["design"],
+    "tags": [
+      "design"
+    ],
     "date": "2026-03-14"
   },
   {
@@ -28,7 +49,9 @@
     "color": "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
     "title": "Building in Public",
     "caption": "Every experiment starts somewhere. This is ours.",
-    "tags": ["studio"],
+    "tags": [
+      "studio"
+    ],
     "date": "2026-03-13"
   },
   {
@@ -36,7 +59,9 @@
     "color": "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
     "title": "Stay Tuned",
     "caption": "More transmissions incoming. Follow the signal.",
-    "tags": ["update"],
+    "tags": [
+      "update"
+    ],
     "date": "2026-03-12"
   }
 ]

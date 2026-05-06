@@ -433,3 +433,29 @@
   }
   .tools-listing__summary { text-align: left; }
 }
+
+/* ── Chapter cards on the feed (linked, with badge) ───────── */
+.feed-card--linked {
+  cursor: pointer;
+  transition: filter 0.18s ease;
+}
+.feed-card--linked:hover { filter: brightness(1.08); }
+.feed-card--linked:active { filter: brightness(0.95); }
+
+.feed-card__chapter-badge {
+  position: absolute;
+  top: calc(20px + env(safe-area-inset-top));
+  left: 16px;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--syn-cyan);
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  padding: 5px 10px;
+  border-radius: 3px;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}

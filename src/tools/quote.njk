@@ -9,11 +9,6 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.quote.title' | t }}"
   description: "{{ 'tools.quote.lede' | t }}"
-tldr: >
-  Motivational Quote generates original aphorisms with a Qwen3.5-0.8B model
-  fine-tuned on curated quote data, running entirely in your browser via
-  WebGPU. No server, no API key, no account. The model loads on first visit
-  and is cached locally for instant reuse.
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">quote</span></p>

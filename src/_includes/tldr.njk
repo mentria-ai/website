@@ -1,4 +1,6 @@
-{% if tldr %}
+{%- set tldrKey = "tools." + page.fileSlug + ".tldr" -%}
+{%- set tldrText = tldrKey | t -%}
+{%- if tldrText and tldrText !== tldrKey -%}
 {%- set toolTitle = ("tools." + page.fileSlug + ".title") | t -%}
 <details class="tldr">
   <summary class="tldr__summary">
@@ -8,7 +10,7 @@
   </summary>
   <div class="tldr__panel">
     <h2 class="tldr__heading">{{ "common.tldr.what_is" | t | replace("{name}", toolTitle) }}</h2>
-    <p class="tldr__body">{{ tldr }}</p>
+    <p class="tldr__body">{{ tldrText }}</p>
   </div>
 </details>
-{% endif %}
+{%- endif %}

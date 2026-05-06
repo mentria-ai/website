@@ -77,21 +77,81 @@
     "current_label": "Idioma atual"
   },
   "tools": {
-    "ai-chat":         { "title": "Chat IA",               "lede": "Qwen3.5-0.8B rodando localmente no seu navegador. Sem servidor, sem chaves de API. Suporta visão." },
-    "base64-codec":    { "title": "Codec Base64",          "lede": "Codifique e decodifique texto ou arquivos para e de Base64. Suporta imagens, documentos e qualquer tipo de arquivo. Tudo roda localmente no seu navegador." },
-    "coin-flip":       { "title": "Cara ou Coroa",         "lede": "Cara ou coroa — jogue uma moeda instantaneamente. Faça uma série de melhor-de-N para desempates. Funciona offline." },
-    "color-picker":    { "title": "Seletor de Cores",      "lede": "Escolha qualquer cor, veja seus valores HEX / RGB / HSL e gere paletas harmônicas. Funciona offline." },
-    "countdown-timer": { "title": "Cronômetro Regressivo", "lede": "Defina uma duração ou escolha um horário alvo. Até 4 cronômetros independentes com som de alarme." },
-    "decision-wheel":  { "title": "Roda de Decisões",      "lede": "Não consegue decidir? Gire a roda e deixe o destino escolher. Funciona offline." },
-    "flappy":          { "title": "Flappy",                "lede": "Um avião de papel passando por uma pilha de prompts de terminal. Toque, clique ou pressione ESPAÇO para bater asas. Não bata no prompt." },
-    "invoice":         { "title": "Gerador de Notas",      "lede": "Crie notas fiscais limpas de uma página no seu navegador. Salva automaticamente conforme você digita. Imprima em A4 ou exporte para JSON." },
-    "markdown-pdf":    { "title": "Markdown → PDF",        "lede": "Escreva markdown, veja uma pré-visualização ao vivo, e baixe um PDF profissional e limpo. Salva automaticamente no seu navegador. Seus dados não saem do seu dispositivo." },
-    "minesweeper":     { "title": "Campo Minado",          "lede": "Quebra-cabeça lógico clássico em traje de terminal. Clique para escavar, clique-direito (ou modo F) para marcar bandeira. Os números contam minas adjacentes. Não toque nas rosas." },
-    "pong":            { "title": "Pong",                  "lede": "Quebra-blocos encontra jogo de raquete. Pegue os power-ups caindo, limpe a parede, sobreviva a níveis cada vez mais rápidos e difíceis. Roda localmente — seus dados não saem do seu dispositivo." },
-    "quick-notes":     { "title": "Notas Rápidas",         "lede": "Um bloco de notas mínimo que vive no seu navegador. Crie várias notas, salvas automaticamente a cada tecla pressionada." },
-    "quote":           { "title": "Frase Motivacional",    "lede": "Frases originais geradas por IA, rodando localmente no seu navegador. Seus dados não saem do seu dispositivo." },
-    "radio":           { "title": "Rádio Infinita",        "lede": "Música cinematográfica épica gerada por IA, transmitindo infinitamente. Aprende seu gosto localmente — seus dados não saem do seu dispositivo." },
-    "tetris":          { "title": "Tetris",                "lede": "Empilhe tetraminós. Limpe linhas. A velocidade acelera a cada 10 linhas. Peças em ciano, roxo, rosa, âmbar e verde — a paleta da Mentria." }
+    "ai-chat": {
+      "title": "Chat IA",
+      "lede": "Qwen3.5-0.8B rodando localmente no seu navegador. Sem servidor, sem chaves de API. Suporta visão.",
+      "tldr": "AI Chat executa Qwen3.5-0.8B localmente no seu navegador via WebGPU. Suas mensagens e qualquer imagem enviada nunca saem do seu dispositivo — sem servidor, sem chave de API, sem conta. Suporta entrada de imagem. O modelo carrega no primeiro clique; visitas seguintes iniciam instantaneamente do cache local."
+    },
+    "base64-codec": {
+      "title": "Codec Base64",
+      "lede": "Codifique e decodifique texto ou arquivos para e de Base64. Suporta imagens, documentos e qualquer tipo de arquivo. Tudo roda localmente no seu navegador.",
+      "tldr": "Codificador e decodificador focado em privacidade para texto e arquivos. Codificação e decodificação acontecem no seu navegador com JavaScript puro — sem upload, sem servidor. Arraste um arquivo ou cole uma string Base64 e copie ou baixe o resultado. Funciona offline, sem limite de tamanho além da memória do navegador."
+    },
+    "coin-flip": {
+      "title": "Cara ou Coroa",
+      "lede": "Cara ou coroa — jogue uma moeda instantaneamente. Faça uma série de melhor-de-N para desempates. Funciona offline.",
+      "tldr": "Cara ou coroa simples apoiado no RNG seguro do navegador (Web Crypto). O resultado é decidido localmente; nada é registrado nem enviado a servidor. Mantém histórico por sessão. Útil para decisões rápidas, sorteios justos ou resolver discussões de mesa — instantâneo em qualquer dispositivo."
+    },
+    "color-picker": {
+      "title": "Seletor de Cores",
+      "lede": "Escolha qualquer cor, veja seus valores HEX / RGB / HSL e gere paletas harmônicas. Funciona offline.",
+      "tldr": "Escolha, amostre e salve cores totalmente no seu navegador. Exibe HEX, RGB e HSL lado a lado. Os swatches salvos persistem via localStorage; nada é enviado. Clique no seletor, copie qualquer valor para a área de transferência ou monte uma pequena paleta para design ou código. Funciona offline."
+    },
+    "countdown-timer": {
+      "title": "Cronômetro Regressivo",
+      "lede": "Defina uma duração ou escolha um horário alvo. Até 4 cronômetros independentes com som de alarme.",
+      "tldr": "Rode até quatro cronômetros em paralelo com notificações opcionais do sistema ao terminar, mesmo com a aba escondida. Defina uma duração ou data e hora alvo, nomeie cada cronômetro, salve presets. O alarme sonoro e a notificação disparam do seu navegador; nada é registrado nem enviado a servidor."
+    },
+    "decision-wheel": {
+      "title": "Roda de Decisões",
+      "lede": "Não consegue decidir? Gire a roda e deixe o destino escolher. Funciona offline.",
+      "tldr": "Gire uma roda personalizável para escolher na sua própria lista de opções. Adicione ou remova escolhas na hora; o resultado é selecionado localmente com o RNG do navegador. Sem contas, sem trackers, sem servidor. Útil para escolher restaurante, distribuir tarefas ou qualquer coisa em que você tiraria cara ou coroa."
+    },
+    "flappy": {
+      "title": "Flappy",
+      "lede": "Um avião de papel passando por uma pilha de prompts de terminal. Toque, clique ou pressione ESPAÇO para bater asas. Não bata no prompt.",
+      "tldr": "Uma versão para navegador de Flappy Bird com estética synthwave-terminal. HTML5 Canvas puro — sem instalação, sem cadastro, sem scripts de terceiros. Estado do jogo, recorde e áudio rodam no cliente e permanecem no seu dispositivo. Toque, clique ou pressione espaço para bater asas. Funciona offline depois do cache."
+    },
+    "invoice": {
+      "title": "Gerador de Notas",
+      "lede": "Crie notas fiscais limpas de uma página no seu navegador. Salva automaticamente conforme você digita. Imprima em A4 ou exporte para JSON.",
+      "tldr": "Monte faturas A4 limpas no seu navegador e salve como PDF pelo diálogo de impressão. Adicione itens, moeda, dados bancários, notas; salva automaticamente no localStorage para que recargas não percam dados. Importe ou exporte a fatura inteira como JSON. Sem contas, sem servidor — cada byte fica no seu dispositivo."
+    },
+    "markdown-pdf": {
+      "title": "Markdown → PDF",
+      "lede": "Escreva markdown, veja uma pré-visualização ao vivo, e baixe um PDF profissional e limpo. Salva automaticamente no seu navegador. Seus dados não saem do seu dispositivo.",
+      "tldr": "Um editor de markdown com prévia ao vivo e exportação para PDF em um clique pelo diálogo de impressão do navegador. Importa e exporta arquivos .md, salva rascunhos localmente, suporta markdown estilo GitHub incluindo tabelas e listas de tarefas. Sem upload, sem conta, sem servidor — tudo roda em JavaScript no cliente e funciona offline."
+    },
+    "minesweeper": {
+      "title": "Campo Minado",
+      "lede": "Quebra-cabeça lógico clássico em traje de terminal. Clique para escavar, clique-direito (ou modo F) para marcar bandeira. Os números contam minas adjacentes. Não toque nas rosas.",
+      "tldr": "Campo Minado clássico reconstruído com estética synthwave/terminal. Presets de dificuldade (fácil, médio, difícil, extremo), controles por teclado e toque, melhores tempos persistentes via localStorage. Sem instalação, sem cadastro, sem analítica; lógica do jogo e cronômetro rodam localmente no navegador. Funciona offline depois que a página carrega."
+    },
+    "pong": {
+      "title": "Pong",
+      "lede": "Quebra-blocos encontra jogo de raquete. Pegue os power-ups caindo, limpe a parede, sobreviva a níveis cada vez mais rápidos e difíceis. Roda localmente — seus dados não saem do seu dispositivo.",
+      "tldr": "Pong nativo do navegador com um jogador contra a CPU. HTML5 Canvas, física determinística, entrada por mouse, teclado e toque. Pontuação, posição da raquete e o oponente IA vivem em JavaScript no cliente — sem scripts de terceiros, sem servidor. Funciona offline depois do cache. Pausa rápida de reflexos no escritório."
+    },
+    "quick-notes": {
+      "title": "Notas Rápidas",
+      "lede": "Um bloco de notas mínimo que vive no seu navegador. Crie várias notas, salvas automaticamente a cada tecla pressionada.",
+      "tldr": "Um bloco de notas focado em teclado que salva automaticamente cada tecla no localStorage do navegador. Várias notas, busca instantânea, estética synthwave escura. As notas nunca saem do seu dispositivo — sem sincronização, sem contas, sem servidor. Use como rascunho para tarefas, trechos de código ou ideias que você vai retomar em uma aba."
+    },
+    "quote": {
+      "title": "Frase Motivacional",
+      "lede": "Frases originais geradas por IA, rodando localmente no seu navegador. Seus dados não saem do seu dispositivo.",
+      "tldr": "Frase Motivacional gera aforismos originais com um modelo Qwen3.5-0.8B ajustado em dados de frases curados, rodando inteiramente no seu navegador via WebGPU. Sem servidor, sem chave de API, sem conta. O modelo é baixado na primeira visita e fica em cache localmente para reutilização instantânea."
+    },
+    "radio": {
+      "title": "Rádio Infinita",
+      "lede": "Música cinematográfica épica gerada por IA, transmitindo infinitamente. Aprende seu gosto localmente — seus dados não saem do seu dispositivo.",
+      "tldr": "Música cinematográfica infinita gerada por IA, em streaming direto no seu navegador. Faixas vêm de um catálogo público e tocam via Web Audio API; seu histórico de escuta e curtidas ficam no dispositivo no IndexedDB para aprender seu gosto localmente ao longo do tempo. Sem contas, sem rastreamento, sem personalização do lado do servidor."
+    },
+    "tetris": {
+      "title": "Tetris",
+      "lede": "Empilhe tetraminós. Limpe linhas. A velocidade acelera a cada 10 linhas. Peças em ciano, roxo, rosa, âmbar e verde — a paleta da Mentria.",
+      "tldr": "Tetris nativo do navegador com estética terminal. HTML5 Canvas, geração precisa de peças com a lógica do Super Rotation System, fila de hold, peça-fantasma, gravidade por nível. Recorde salvo no localStorage. Sem instalação, sem cadastro, sem scripts de terceiros — lógica do jogo e timing rodam no cliente e o jogo funciona offline."
+    }
   },
   "game": {
     "common": {

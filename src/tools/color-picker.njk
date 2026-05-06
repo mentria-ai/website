@@ -22,68 +22,64 @@ eleventyComputed:
   <!-- Main color area -->
   <div class="cp__main">
     <div class="cp__swatch-wrap">
-      <div class="cp__swatch" id="cp-swatch" title="Click to pick a color">
-        <input type="color" id="cp-native" value="#22d3ee" aria-label="Pick a color" />
+      <div class="cp__swatch" id="cp-swatch" title="{{ 'tool.color-picker.title_pick_color' | t }}">
+        <input type="color" id="cp-native" value="#22d3ee" aria-label="{{ 'tool.color-picker.aria_pick_color' | t }}" />
       </div>
       <div class="cp__hex-input-wrap">
         <span class="cp__hash">#</span>
-        <input type="text" id="cp-hex-input" class="cp__hex-input" maxlength="6" spellcheck="false" value="22d3ee" aria-label="Hex color value" />
+        <input type="text" id="cp-hex-input" class="cp__hex-input" maxlength="6" spellcheck="false" value="22d3ee" aria-label="{{ 'tool.color-picker.aria_hex_value' | t }}" />
       </div>
     </div>
 
-    <!-- Color values -->
     <div class="cp__values">
       <div class="cp__value-row" data-format="hex">
         <span class="cp__value-label">HEX</span>
         <code class="cp__value-code" id="cp-val-hex">#22d3ee</code>
-        <button class="cp__copy-btn" data-copy="hex" title="Copy HEX">
+        <button class="cp__copy-btn" data-copy="hex" title="{{ 'tool.color-picker.title_copy_hex' | t }}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
         </button>
       </div>
       <div class="cp__value-row" data-format="rgb">
         <span class="cp__value-label">RGB</span>
         <code class="cp__value-code" id="cp-val-rgb">rgb(34, 211, 238)</code>
-        <button class="cp__copy-btn" data-copy="rgb" title="Copy RGB">
+        <button class="cp__copy-btn" data-copy="rgb" title="{{ 'tool.color-picker.title_copy_rgb' | t }}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
         </button>
       </div>
       <div class="cp__value-row" data-format="hsl">
         <span class="cp__value-label">HSL</span>
         <code class="cp__value-code" id="cp-val-hsl">hsl(187, 82%, 53%)</code>
-        <button class="cp__copy-btn" data-copy="hsl" title="Copy HSL">
+        <button class="cp__copy-btn" data-copy="hsl" title="{{ 'tool.color-picker.title_copy_hsl' | t }}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Action buttons -->
   <div class="cp__actions">
-    <button class="cp__btn cp__btn--accent" id="cp-random" title="Random color">
+    <button class="cp__btn cp__btn--accent" id="cp-random" title="{{ 'tool.color-picker.title_random' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 4l3 3-3 3"/><path d="M18 20l3-3-3-3"/><path d="M3 7h4a5 5 0 015 5 5 5 0 005 5h4"/><path d="M21 7h-4a5 5 0 00-3.07 1.05"/><path d="M3 17h4a5 5 0 003.07-1.05"/></svg>
-      Random
+      {{ "tool.color-picker.btn_random" | t }}
     </button>
-    <button class="cp__btn cp__btn--save" id="cp-save" title="Save color">
+    <button class="cp__btn cp__btn--save" id="cp-save" title="{{ 'tool.color-picker.title_save' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      Save
+      {{ "tool.color-picker.btn_save" | t }}
     </button>
   </div>
 
-  <!-- Saved colors -->
   <div class="cp__saved" id="cp-saved" style="display:none;">
-    <div class="cp__section-label">Saved Colors</div>
+    <div class="cp__section-label">{{ "tool.color-picker.saved_label" | t }}</div>
     <div class="cp__saved-list" id="cp-saved-list"></div>
   </div>
 
-  <!-- Palette generation -->
   <div class="cp__palette-section">
-    <div class="cp__section-label">Generate Palette</div>
+    <div class="cp__section-label">{{ "tool.color-picker.palette_label" | t }}</div>
     <div class="cp__palette-btns">
-      <button class="cp__palette-btn" data-harmony="complementary">Complementary</button>
-      <button class="cp__palette-btn" data-harmony="analogous">Analogous</button>
-      <button class="cp__palette-btn" data-harmony="triadic">Triadic</button>
-      <button class="cp__palette-btn" data-harmony="split">Split-Comp</button>
-      <button class="cp__palette-btn" data-harmony="tetradic">Tetradic</button>
+      <button class="cp__palette-btn" data-harmony="complementary">{{ "tool.color-picker.harmony_complementary" | t }}</button>
+      <button class="cp__palette-btn" data-harmony="analogous">{{ "tool.color-picker.harmony_analogous" | t }}</button>
+      <button class="cp__palette-btn" data-harmony="triadic">{{ "tool.color-picker.harmony_triadic" | t }}</button>
+      <button class="cp__palette-btn" data-harmony="split">{{ "tool.color-picker.harmony_split" | t }}</button>
+      <button class="cp__palette-btn" data-harmony="tetradic">{{ "tool.color-picker.harmony_tetradic" | t }}</button>
     </div>
     <div class="cp__palette" id="cp-palette"></div>
   </div>
@@ -118,6 +114,14 @@ eleventyComputed:
   const savedWrap  = document.getElementById('cp-saved');
   const savedList  = document.getElementById('cp-saved-list');
   const STORAGE_KEY = 'mentria-color-picker-saved';
+
+  const COPY = {
+    selectSwatchTitle: {{ ("tool.color-picker.title_select_swatch" | t) | dump | safe }},
+    removeTitle:       {{ ("tool.color-picker.title_remove"        | t) | dump | safe }},
+    toastCopied:       {{ ("tool.color-picker.toast_copied"        | t) | dump | safe }},
+    toastSaved:        {{ ("tool.color-picker.toast_saved"         | t) | dump | safe }},
+    toastAlreadySaved: {{ ("tool.color-picker.toast_already_saved" | t) | dump | safe }}
+  };
 
   let currentHex = '#22d3ee';
   let currentHarmony = null;
@@ -232,10 +236,9 @@ eleventyComputed:
     colors.forEach((c, i) => {
       const item = document.createElement('div');
       item.className = 'cp__palette-item';
-      item.innerHTML = `
-        <div class="cp__palette-swatch" style="background:${c}" title="Click to select / copy ${c}"></div>
-        <span class="cp__palette-label">${c}</span>
-      `;
+      item.innerHTML =
+        '<div class="cp__palette-swatch" style="background:' + c + '" title="' + COPY.selectSwatchTitle.replace('{color}', c) + '"></div>' +
+        '<span class="cp__palette-label">' + c + '</span>';
       item.addEventListener('click', () => {
         copyText(c);
         if (i !== 0) setColor(c);
@@ -252,7 +255,7 @@ eleventyComputed:
   /* ── Copy helper ───────────────────────────────────── */
   function copyText(text) {
     navigator.clipboard.writeText(text).then(() => {
-      showToast('Copied ' + text);
+      showToast(COPY.toastCopied.replace('{color}', text));
     }).catch(() => {});
   }
 
@@ -292,10 +295,9 @@ eleventyComputed:
     saved.forEach((c, i) => {
       const el = document.createElement('div');
       el.className = 'cp__saved-item';
-      el.innerHTML = `
-        <div class="cp__saved-swatch" style="background:${c}" title="${c}"></div>
-        <button class="cp__saved-remove" title="Remove" data-index="${i}">&times;</button>
-      `;
+      el.innerHTML =
+        '<div class="cp__saved-swatch" style="background:' + c + '" title="' + c + '"></div>' +
+        '<button class="cp__saved-remove" title="' + COPY.removeTitle + '" data-index="' + i + '">&times;</button>';
       el.querySelector('.cp__saved-swatch').addEventListener('click', () => setColor(c));
       el.querySelector('.cp__saved-remove').addEventListener('click', e => {
         e.stopPropagation();
@@ -359,9 +361,9 @@ eleventyComputed:
       saved.push(currentHex);
       saveSaved(saved);
       renderSaved();
-      showToast('Saved ' + currentHex);
+      showToast(COPY.toastSaved.replace('{color}', currentHex));
     } else {
-      showToast('Already saved');
+      showToast(COPY.toastAlreadySaved);
     }
   });
 

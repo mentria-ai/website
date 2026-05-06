@@ -19,38 +19,34 @@ eleventyComputed:
 {% set terminalTitle = "base64-codec.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="b64">
-  <!-- Mode Toggle -->
   <div class="b64-mode-tabs">
-    <button class="b64-mode-tab b64-mode-tab--active" data-mode="text">Text</button>
-    <button class="b64-mode-tab" data-mode="file">File</button>
+    <button class="b64-mode-tab b64-mode-tab--active" data-mode="text">{{ "tool.base64-codec.tab_text" | t }}</button>
+    <button class="b64-mode-tab" data-mode="file">{{ "tool.base64-codec.tab_file" | t }}</button>
   </div>
 
-  <!-- ── Text Mode ──────────────────────────────────── -->
   <div class="b64-panel" id="b64-text-panel">
     <div class="b64-text-grid">
       <div class="b64-text-col">
-        <label class="b64-label" for="b64-input">Input</label>
-        <textarea class="b64-textarea" id="b64-input" placeholder="Paste text or Base64 string here..." spellcheck="false"></textarea>
+        <label class="b64-label" for="b64-input">{{ "tool.base64-codec.input_label" | t }}</label>
+        <textarea class="b64-textarea" id="b64-input" placeholder="{{ 'tool.base64-codec.input_placeholder' | t }}" spellcheck="false"></textarea>
       </div>
       <div class="b64-text-col">
-        <label class="b64-label" for="b64-output">Output</label>
-        <textarea class="b64-textarea" id="b64-output" placeholder="Result will appear here..." spellcheck="false" readonly></textarea>
+        <label class="b64-label" for="b64-output">{{ "tool.base64-codec.output_label" | t }}</label>
+        <textarea class="b64-textarea" id="b64-output" placeholder="{{ 'tool.base64-codec.output_placeholder' | t }}" spellcheck="false" readonly></textarea>
       </div>
     </div>
     <div class="b64-text-actions">
-      <button class="b64-btn b64-btn--primary" id="b64-encode-btn">Encode</button>
-      <button class="b64-btn b64-btn--primary" id="b64-decode-btn">Decode</button>
-      <button class="b64-btn b64-btn--secondary" id="b64-copy-btn">Copy Output</button>
-      <button class="b64-btn b64-btn--ghost" id="b64-clear-btn">Clear</button>
+      <button class="b64-btn b64-btn--primary"   id="b64-encode-btn">{{ "tool.base64-codec.btn_encode" | t }}</button>
+      <button class="b64-btn b64-btn--primary"   id="b64-decode-btn">{{ "tool.base64-codec.btn_decode" | t }}</button>
+      <button class="b64-btn b64-btn--secondary" id="b64-copy-btn">{{ "tool.base64-codec.btn_copy_output" | t }}</button>
+      <button class="b64-btn b64-btn--ghost"     id="b64-clear-btn">{{ "tool.base64-codec.btn_clear" | t }}</button>
     </div>
     <div class="b64-status" id="b64-text-status"></div>
   </div>
 
-  <!-- ── File Mode ──────────────────────────────────── -->
   <div class="b64-panel b64-panel--hidden" id="b64-file-panel">
-    <!-- Encode: file to base64 -->
     <div class="b64-file-section">
-      <h3 class="b64-section-title">File to Base64</h3>
+      <h3 class="b64-section-title">{{ "tool.base64-codec.section_file_to_b64" | t }}</h3>
       <div class="b64-dropzone" id="b64-dropzone">
         <div class="b64-dropzone__content">
           <div class="b64-dropzone__icon">
@@ -59,41 +55,39 @@ eleventyComputed:
               <rect x="4" y="4" width="40" height="40" rx="8" stroke="var(--term-muted)" stroke-width="2" stroke-dasharray="4 4"/>
             </svg>
           </div>
-          <p class="b64-dropzone__text">Drop a file here or <button class="b64-dropzone__browse" id="b64-browse-btn" type="button">browse</button></p>
-          <p class="b64-dropzone__hint">Images, documents, or any file type</p>
+          <p class="b64-dropzone__text">{{ "tool.base64-codec.dropzone_text_prefix" | t }} <button class="b64-dropzone__browse" id="b64-browse-btn" type="button">{{ "tool.base64-codec.dropzone_browse" | t }}</button></p>
+          <p class="b64-dropzone__hint">{{ "tool.base64-codec.dropzone_hint" | t }}</p>
         </div>
         <input type="file" id="b64-file-input" class="b64-sr-only" accept="*/*" />
       </div>
 
-      <!-- File info + preview -->
       <div class="b64-file-info b64-file-info--hidden" id="b64-file-info">
         <div class="b64-file-meta">
-          <div class="b64-file-meta__row"><span class="b64-file-meta__label">Name:</span> <span id="b64-file-name">-</span></div>
-          <div class="b64-file-meta__row"><span class="b64-file-meta__label">Type:</span> <span id="b64-file-type">-</span></div>
-          <div class="b64-file-meta__row"><span class="b64-file-meta__label">Size:</span> <span id="b64-file-size">-</span></div>
-          <div class="b64-file-meta__row"><span class="b64-file-meta__label">Base64 size:</span> <span id="b64-file-b64size">-</span></div>
+          <div class="b64-file-meta__row"><span class="b64-file-meta__label">{{ "tool.base64-codec.meta_name" | t }}</span> <span id="b64-file-name">-</span></div>
+          <div class="b64-file-meta__row"><span class="b64-file-meta__label">{{ "tool.base64-codec.meta_type" | t }}</span> <span id="b64-file-type">-</span></div>
+          <div class="b64-file-meta__row"><span class="b64-file-meta__label">{{ "tool.base64-codec.meta_size" | t }}</span> <span id="b64-file-size">-</span></div>
+          <div class="b64-file-meta__row"><span class="b64-file-meta__label">{{ "tool.base64-codec.meta_b64_size" | t }}</span> <span id="b64-file-b64size">-</span></div>
         </div>
         <div class="b64-file-preview" id="b64-file-preview"></div>
         <div class="b64-file-output">
-          <label class="b64-label">Data URI</label>
+          <label class="b64-label">{{ "tool.base64-codec.data_uri_label" | t }}</label>
           <textarea class="b64-textarea b64-textarea--sm" id="b64-file-datauri" readonly spellcheck="false"></textarea>
           <div class="b64-file-actions">
-            <button class="b64-btn b64-btn--secondary" id="b64-copy-datauri">Copy Data URI</button>
-            <button class="b64-btn b64-btn--secondary" id="b64-copy-raw">Copy Base64 Only</button>
-            <button class="b64-btn b64-btn--ghost" id="b64-file-clear">Clear</button>
+            <button class="b64-btn b64-btn--secondary" id="b64-copy-datauri">{{ "tool.base64-codec.btn_copy_datauri" | t }}</button>
+            <button class="b64-btn b64-btn--secondary" id="b64-copy-raw">{{ "tool.base64-codec.btn_copy_raw" | t }}</button>
+            <button class="b64-btn b64-btn--ghost" id="b64-file-clear">{{ "tool.base64-codec.btn_clear" | t }}</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Decode: base64 to file -->
     <div class="b64-file-section">
-      <h3 class="b64-section-title">Base64 to File</h3>
-      <label class="b64-label" for="b64-decode-input">Paste a Base64 data URI</label>
-      <textarea class="b64-textarea b64-textarea--sm" id="b64-decode-input" placeholder="data:image/png;base64,iVBOR..." spellcheck="false"></textarea>
+      <h3 class="b64-section-title">{{ "tool.base64-codec.section_b64_to_file" | t }}</h3>
+      <label class="b64-label" for="b64-decode-input">{{ "tool.base64-codec.decode_input_label" | t }}</label>
+      <textarea class="b64-textarea b64-textarea--sm" id="b64-decode-input" placeholder="{{ 'tool.base64-codec.decode_input_placeholder' | t }}" spellcheck="false"></textarea>
       <div class="b64-file-actions" style="margin-top:0.75rem;">
-        <button class="b64-btn b64-btn--primary" id="b64-decode-file-btn">Decode &amp; Preview</button>
-        <button class="b64-btn b64-btn--secondary" id="b64-download-btn" disabled>Download File</button>
+        <button class="b64-btn b64-btn--primary"   id="b64-decode-file-btn">{{ "tool.base64-codec.btn_decode_preview" | t }}</button>
+        <button class="b64-btn b64-btn--secondary" id="b64-download-btn" disabled>{{ "tool.base64-codec.btn_download" | t }}</button>
       </div>
       <div class="b64-decode-preview" id="b64-decode-preview"></div>
       <div class="b64-status" id="b64-file-status"></div>
@@ -119,6 +113,27 @@ eleventyComputed:
 
 <script>
 (() => {
+  const COPY = {
+    unknown:                 {{ ("tool.base64-codec.meta_unknown"                | t) | dump | safe }},
+    noPreview:               {{ ("tool.base64-codec.preview_no_preview"          | t) | dump | safe }},
+    decodedPreview:          {{ ("tool.base64-codec.preview_decoded_template"    | t) | dump | safe }},
+    statusCopied:            {{ ("tool.base64-codec.status_copied"               | t) | dump | safe }},
+    statusCopyFailed:        {{ ("tool.base64-codec.status_copy_failed"          | t) | dump | safe }},
+    statusNothingEncode:     {{ ("tool.base64-codec.status_nothing_encode"       | t) | dump | safe }},
+    statusEncoded:           {{ ("tool.base64-codec.status_encoded_template"     | t) | dump | safe }},
+    statusEncodeFailed:      {{ ("tool.base64-codec.status_encode_failed"        | t) | dump | safe }},
+    statusNothingDecode:     {{ ("tool.base64-codec.status_nothing_decode"       | t) | dump | safe }},
+    statusDecoded:           {{ ("tool.base64-codec.status_decoded_template"     | t) | dump | safe }},
+    statusDecodeFailedInv:   {{ ("tool.base64-codec.status_decode_failed_invalid"| t) | dump | safe }},
+    statusNothingCopy:       {{ ("tool.base64-codec.status_nothing_copy"         | t) | dump | safe }},
+    statusFileLoaded:        {{ ("tool.base64-codec.status_file_loaded"          | t) | dump | safe }},
+    statusFileReadFailed:    {{ ("tool.base64-codec.status_file_read_failed"     | t) | dump | safe }},
+    statusPasteFirst:        {{ ("tool.base64-codec.status_paste_first"          | t) | dump | safe }},
+    statusInvalidB64:        {{ ("tool.base64-codec.status_invalid_b64"          | t) | dump | safe }},
+    statusFileDecoded:       {{ ("tool.base64-codec.status_file_decoded_template"| t) | dump | safe }},
+    statusDecodeFailedB64:   {{ ("tool.base64-codec.status_decode_failed_b64"    | t) | dump | safe }}
+  };
+
   /* ── DOM refs ─────────────────────────────────────── */
   const modeTabs      = document.querySelectorAll('.b64-mode-tab');
   const textPanel     = document.getElementById('b64-text-panel');
@@ -179,9 +194,9 @@ eleventyComputed:
   async function copyText(text, statusEl) {
     try {
       await navigator.clipboard.writeText(text);
-      showStatus(statusEl, 'Copied to clipboard!', 'success');
+      showStatus(statusEl, COPY.statusCopied, 'success');
     } catch {
-      showStatus(statusEl, 'Copy failed — use Ctrl+C manually.', 'error');
+      showStatus(statusEl, COPY.statusCopyFailed, 'error');
     }
   }
 
@@ -222,33 +237,32 @@ eleventyComputed:
   /* ── Text Mode Logic ──────────────────────────────── */
   encodeBtn.addEventListener('click', () => {
     const raw = inputEl.value;
-    if (!raw) { showStatus(textStatus, 'Nothing to encode.', 'error'); return; }
+    if (!raw) { showStatus(textStatus, COPY.statusNothingEncode, 'error'); return; }
     try {
       const encoded = btoa(unescape(encodeURIComponent(raw)));
       outputEl.value = encoded;
-      showStatus(textStatus, 'Encoded! Output: ' + formatBytes(encoded.length), 'success');
+      showStatus(textStatus, COPY.statusEncoded.replace('{size}', formatBytes(encoded.length)), 'success');
     } catch (e) {
-      showStatus(textStatus, 'Encoding failed: ' + e.message, 'error');
+      showStatus(textStatus, COPY.statusEncodeFailed.replace('{reason}', e.message), 'error');
     }
   });
 
   decodeBtn.addEventListener('click', () => {
     let raw = inputEl.value.trim();
-    if (!raw) { showStatus(textStatus, 'Nothing to decode.', 'error'); return; }
-    // Strip data URI prefix if present
+    if (!raw) { showStatus(textStatus, COPY.statusNothingDecode, 'error'); return; }
     const dataUriMatch = raw.match(/^data:[^;]*;base64,(.*)$/s);
     if (dataUriMatch) raw = dataUriMatch[1];
     try {
       const decoded = decodeURIComponent(escape(atob(raw)));
       outputEl.value = decoded;
-      showStatus(textStatus, 'Decoded! Output: ' + formatBytes(decoded.length), 'success');
+      showStatus(textStatus, COPY.statusDecoded.replace('{size}', formatBytes(decoded.length)), 'success');
     } catch (e) {
-      showStatus(textStatus, 'Decoding failed: invalid Base64 string.', 'error');
+      showStatus(textStatus, COPY.statusDecodeFailedInv, 'error');
     }
   });
 
   copyBtn.addEventListener('click', () => {
-    if (!outputEl.value) { showStatus(textStatus, 'Nothing to copy.', 'error'); return; }
+    if (!outputEl.value) { showStatus(textStatus, COPY.statusNothingCopy, 'error'); return; }
     copyText(outputEl.value, textStatus);
   });
 
@@ -295,7 +309,7 @@ eleventyComputed:
       currentRawB64 = commaIdx !== -1 ? currentDataUri.slice(commaIdx + 1) : currentDataUri;
 
       fileNameEl.textContent = file.name;
-      fileTypeEl.textContent = file.type || 'unknown';
+      fileTypeEl.textContent = file.type || COPY.unknown;
       fileSizeEl.textContent = formatBytes(file.size);
       fileB64SizeEl.textContent = formatBytes(currentRawB64.length);
       fileDataUri.value = currentDataUri;
@@ -309,14 +323,14 @@ eleventyComputed:
         img.className = 'b64-preview-img';
         filePreview.appendChild(img);
       } else {
-        filePreview.innerHTML = '<p class="b64-preview-placeholder">No preview available for this file type.</p>';
+        filePreview.innerHTML = '<p class="b64-preview-placeholder">' + COPY.noPreview + '</p>';
       }
 
       fileInfoWrap.classList.remove('b64-file-info--hidden');
-      showStatus(fileStatus, 'File loaded: ' + file.name, 'success');
+      showStatus(fileStatus, COPY.statusFileLoaded.replace('{name}', file.name), 'success');
     };
     reader.onerror = () => {
-      showStatus(fileStatus, 'Failed to read file.', 'error');
+      showStatus(fileStatus, COPY.statusFileReadFailed, 'error');
     };
     reader.readAsDataURL(file);
   }
@@ -344,7 +358,7 @@ eleventyComputed:
   /* ── File Mode: Decode ────────────────────────────── */
   decodeFileBtn.addEventListener('click', () => {
     const val = decodeInput.value.trim();
-    if (!val) { showStatus(fileStatus, 'Paste a Base64 data URI first.', 'error'); return; }
+    if (!val) { showStatus(fileStatus, COPY.statusPasteFirst, 'error'); return; }
 
     let mime = 'application/octet-stream';
     let b64 = val;
@@ -354,7 +368,7 @@ eleventyComputed:
       mime = dataUriMatch[1];
       b64 = dataUriMatch[2];
     } else if (!isBase64(val)) {
-      showStatus(fileStatus, 'Invalid Base64 string.', 'error');
+      showStatus(fileStatus, COPY.statusInvalidB64, 'error');
       return;
     }
 
@@ -374,13 +388,13 @@ eleventyComputed:
         img.className = 'b64-preview-img';
         decodePreview.appendChild(img);
       } else {
-        decodePreview.innerHTML = '<p class="b64-preview-placeholder">Decoded: ' + mime + ' (' + formatBytes(decodedBlob.size) + ')</p>';
+        decodePreview.innerHTML = '<p class="b64-preview-placeholder">' + COPY.decodedPreview.replace('{mime}', mime).replace('{size}', formatBytes(decodedBlob.size)) + '</p>';
       }
 
       downloadBtn.disabled = false;
-      showStatus(fileStatus, 'Decoded! Size: ' + formatBytes(decodedBlob.size), 'success');
+      showStatus(fileStatus, COPY.statusFileDecoded.replace('{size}', formatBytes(decodedBlob.size)), 'success');
     } catch (e) {
-      showStatus(fileStatus, 'Decoding failed: invalid Base64.', 'error');
+      showStatus(fileStatus, COPY.statusDecodeFailedB64, 'error');
       decodedBlob = null;
       downloadBtn.disabled = true;
     }

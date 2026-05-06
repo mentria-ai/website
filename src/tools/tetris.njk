@@ -24,31 +24,31 @@ eleventyComputed:
 <div class="play-area">
   <div class="side side-left">
     <div class="panel">
-      <div class="panel-label">Score</div>
+      <div class="panel-label">{{ "game.tetris.score" | t }}</div>
       <div class="panel-value cyan" id="stat-score">0</div>
     </div>
     <div class="panel">
-      <div class="panel-label">Level</div>
+      <div class="panel-label">{{ "game.tetris.level" | t }}</div>
       <div class="panel-value purple" id="stat-level">01</div>
     </div>
     <div class="panel">
-      <div class="panel-label">Lines</div>
+      <div class="panel-label">{{ "game.tetris.lines" | t }}</div>
       <div class="panel-value amber" id="stat-lines">0</div>
     </div>
     <div class="panel">
-      <div class="panel-label">Hold</div>
+      <div class="panel-label">{{ "game.tetris.hold" | t }}</div>
       <canvas class="preview-canvas" id="hold-canvas" width="120" height="90"></canvas>
     </div>
   </div>
 
   <div class="board-wrap">
     <canvas id="game" width="320" height="640"></canvas>
-    <div class="toast" id="toast">level 2 — speed up</div>
+    <div class="toast" id="toast"></div>
     <div class="overlay" id="overlay">
       <div class="modal" id="modal">
         <p class="eyebrow">&gt; READY</p>
         <h2>tetris.js</h2>
-        <p>Move with ← →, rotate with ↑, soft drop with ↓, hard drop with SPACE. C to hold a piece.</p>
+        <p>{{ "game.tetris.modal_intro" | t }}</p>
         <button class="btn" id="btn-start">$ start</button>
       </div>
     </div>
@@ -56,15 +56,15 @@ eleventyComputed:
 
   <div class="side side-right">
     <div class="panel">
-      <div class="panel-label">Next</div>
+      <div class="panel-label">{{ "game.tetris.next" | t }}</div>
       <canvas class="preview-canvas" id="next-canvas" width="120" height="90"></canvas>
     </div>
     <div class="panel">
-      <div class="panel-label">Best</div>
+      <div class="panel-label">{{ "game.tetris.best" | t }}</div>
       <div class="panel-value pink" id="stat-best">0</div>
     </div>
     <div class="panel">
-      <div class="panel-label">Combo</div>
+      <div class="panel-label">{{ "game.tetris.combo" | t }}</div>
       <div class="panel-value" id="stat-combo">—</div>
     </div>
   </div>
@@ -74,22 +74,22 @@ eleventyComputed:
   <button class="tc-btn" data-tc="left" aria-label="left">←</button>
   <button class="tc-btn" data-tc="rotate" aria-label="rotate">↻</button>
   <button class="tc-btn" data-tc="right" aria-label="right">→</button>
-  <button class="tc-btn" data-tc="hold" aria-label="hold">HOLD</button>
-  <button class="tc-btn tc-drop" data-tc="drop" aria-label="drop">DROP</button>
+  <button class="tc-btn" data-tc="hold" aria-label="{{ 'game.tetris.key_hold_action' | t }}">{{ "game.tetris.tc_hold" | t }}</button>
+  <button class="tc-btn tc-drop" data-tc="drop" aria-label="{{ 'game.tetris.key_hard_drop' | t }}">{{ "game.tetris.tc_drop" | t }}</button>
 </div>
 
 <div class="footer-hints">
   <div class="keys">
-    <span><span class="kbd">←</span><span class="kbd">→</span> move</span>
-    <span><span class="kbd">↑</span> rotate</span>
-    <span><span class="kbd">↓</span> soft drop</span>
-    <span><span class="kbd">SPACE</span> hard drop</span>
-    <span><span class="kbd">C</span> hold</span>
-    <span><span class="kbd">P</span> pause</span>
+    <span><span class="kbd">←</span><span class="kbd">→</span> {{ "game.tetris.key_move" | t }}</span>
+    <span><span class="kbd">↑</span> {{ "game.tetris.key_rotate" | t }}</span>
+    <span><span class="kbd">↓</span> {{ "game.tetris.key_soft_drop" | t }}</span>
+    <span><span class="kbd">SPACE</span> {{ "game.tetris.key_hard_drop" | t }}</span>
+    <span><span class="kbd">C</span> {{ "game.tetris.key_hold_action" | t }}</span>
+    <span><span class="kbd">P</span> {{ "game.tetris.key_pause" | t }}</span>
   </div>
   <div>
     <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--syn-green); box-shadow:var(--glow-green); margin-right:6px"></span>
-    local · offline ready
+    {{ "game.common.offline" | t }}
   </div>
 </div>
 
@@ -363,7 +363,7 @@ canvas#game {
     const newLevel = Math.floor(State.lines / 10) + 1;
     if (newLevel !== State.level) {
       State.level = newLevel;
-      showToast('level ' + State.level + ' — speed up');
+      showToast({{ ("game.tetris.toast_speed_up" | t) | dump | safe }}.replace('{n}', State.level));
     }
     updateHUD();
     return n;
@@ -493,7 +493,7 @@ canvas#game {
       ctx.fillText('> SIGINT — PAUSED', BOARD_W/2, BOARD_H/2);
       ctx.fillStyle = 'rgba(226,232,240,0.6)';
       ctx.font = '500 11px JetBrains Mono, monospace';
-      ctx.fillText('press P to resume', BOARD_W/2, BOARD_H/2 + 22);
+      ctx.fillText({{ ("game.tetris.pause_resume" | t) | dump | safe }}, BOARD_W/2, BOARD_H/2 + 22);
       ctx.textAlign = 'start';
     }
   }
@@ -553,12 +553,12 @@ canvas#game {
     m.className = 'modal lose';
     m.innerHTML =
       '<p class="eyebrow">&gt; STACK OVERFLOW</p>' +
-      '<h2>game over</h2>' +
+      '<h2>{{ "game.common.game_over" | t }}</h2>' +
       '<div class="stats-mini">' +
-        '<span class="k">Score</span><span class="v">' + State.score.toLocaleString() + '</span>' +
-        '<span class="k">Level</span><span class="v">' + State.level + '</span>' +
-        '<span class="k">Lines</span><span class="v">' + State.lines + '</span>' +
-        '<span class="k">Best</span><span class="v">' + State.best.toLocaleString() + '</span>' +
+        '<span class="k">{{ "game.tetris.score" | t }}</span><span class="v">' + State.score.toLocaleString() + '</span>' +
+        '<span class="k">{{ "game.tetris.level" | t }}</span><span class="v">' + State.level + '</span>' +
+        '<span class="k">{{ "game.tetris.lines" | t }}</span><span class="v">' + State.lines + '</span>' +
+        '<span class="k">{{ "game.tetris.best" | t }}</span><span class="v">' + State.best.toLocaleString() + '</span>' +
       '</div>' +
       '<button class="btn" id="btn-again">$ retry</button>';
     ov.classList.remove('hidden');

@@ -22,23 +22,23 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 
 <div class="ms-controls">
-  <span class="ctrl-label">Difficulty</span>
+  <span class="ctrl-label">{{ "game.minesweeper.difficulty" | t }}</span>
   <div class="seg" id="diff-seg">
-    <button data-d="easy">easy · 9×9 · 10</button>
-    <button data-d="medium" class="active">medium · 14×14 · 32</button>
-    <button data-d="hard">hard · 18×22 · 70</button>
+    <button data-d="easy">{{ "game.minesweeper.diff_easy" | t }}</button>
+    <button data-d="medium" class="active">{{ "game.minesweeper.diff_medium" | t }}</button>
+    <button data-d="hard">{{ "game.minesweeper.diff_hard" | t }}</button>
   </div>
   <div class="stats-spread">
     <div class="stat-item">
-      <span class="stat-key">Mines</span>
+      <span class="stat-key">{{ "game.minesweeper.mines" | t }}</span>
       <span class="stat-val pink"><span id="stat-mines">32</span></span>
     </div>
     <div class="stat-item">
-      <span class="stat-key">Time</span>
+      <span class="stat-key">{{ "game.minesweeper.time" | t }}</span>
       <span class="stat-val cyan" id="stat-time">000</span>
     </div>
     <div class="stat-item">
-      <span class="stat-key">Best</span>
+      <span class="stat-key">{{ "game.minesweeper.best" | t }}</span>
       <span class="stat-val amber" id="stat-best">—</span>
     </div>
   </div>
@@ -47,13 +47,13 @@ eleventyComputed:
 <div class="ms-toolbar">
   <button class="mode-toggle" id="flag-toggle">
     <span class="indicator"></span>
-    <span id="flag-mode-label">DIG mode · click to reveal</span>
+    <span id="flag-mode-label">{{ "game.minesweeper.mode_dig" | t }}</span>
   </button>
   <button class="mode-toggle" id="restart-btn" style="background: transparent;">
     <span style="color: var(--syn-cyan)">↻</span>
-    <span>restart</span>
+    <span>{{ "game.minesweeper.restart" | t }}</span>
   </button>
-  <span class="hint">right-click to flag · long-press on mobile</span>
+  <span class="hint">{{ "game.minesweeper.hint" | t }}</span>
 </div>
 
 <div class="board-wrap">
@@ -66,14 +66,14 @@ eleventyComputed:
 
 <div class="footer-hints">
   <div class="keys">
-    <span><span class="kbd">click</span> dig</span>
-    <span><span class="kbd">right-click</span> flag</span>
-    <span><span class="kbd">F</span> toggle flag mode</span>
-    <span><span class="kbd">R</span> restart</span>
+    <span><span class="kbd">click</span> {{ "game.minesweeper.footer_dig" | t }}</span>
+    <span><span class="kbd">right-click</span> {{ "game.minesweeper.footer_flag" | t }}</span>
+    <span><span class="kbd">F</span> {{ "game.minesweeper.footer_toggle_flag" | t }}</span>
+    <span><span class="kbd">R</span> {{ "game.minesweeper.footer_restart" | t }}</span>
   </div>
   <div>
     <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--syn-green); box-shadow:var(--glow-green); margin-right:6px"></span>
-    local · offline ready
+    {{ "game.common.offline" | t }}
   </div>
 </div>
 
@@ -594,35 +594,37 @@ main { max-width: 1100px; }
 
   function showOverlay(won, elapsed, prevBest) {
     const cfg = DIFFS[State.diff];
+    const NEW_BEST = {{ ("game.minesweeper.new_best" | t) | dump | safe }};
     if (won) {
       modal.className = 'modal win';
-      modal.innerHTML = `
-        <p class="eyebrow">&gt; FIELD CLEARED</p>
-        <h2>victory</h2>
-        <p>You swept the field without detonation.</p>
-        <div class="stats-mini">
-          <span class="k">Difficulty</span><span class="v">${State.diff}</span>
-          <span class="k">Grid</span><span class="v">${cfg.rows} × ${cfg.cols}</span>
-          <span class="k">Mines avoided</span><span class="v">${cfg.mines}</span>
-          <span class="k">Time</span><span class="v">${String(elapsed).padStart(3,'0')}s</span>
-          <span class="k">Best</span><span class="v">${prevBest !== null && prevBest <= elapsed ? String(prevBest).padStart(3,'0')+'s' : 'new best!'}</span>
-        </div>
-        <button class="btn" id="play-again">$ new_game</button>
-      `;
+      modal.innerHTML =
+        '<p class="eyebrow">&gt; FIELD CLEARED</p>' +
+        '<h2>{{ "game.minesweeper.title_won" | t }}</h2>' +
+        '<p>{{ "game.minesweeper.desc_won" | t }}</p>' +
+        '<div class="stats-mini">' +
+          '<span class="k">{{ "game.minesweeper.stats_difficulty"    | t }}</span><span class="v">' + State.diff + '</span>' +
+          '<span class="k">{{ "game.minesweeper.stats_grid"          | t }}</span><span class="v">' + cfg.rows + ' × ' + cfg.cols + '</span>' +
+          '<span class="k">{{ "game.minesweeper.stats_mines_avoided" | t }}</span><span class="v">' + cfg.mines + '</span>' +
+          '<span class="k">{{ "game.minesweeper.stats_time"          | t }}</span><span class="v">' + String(elapsed).padStart(3,'0') + 's</span>' +
+          '<span class="k">{{ "game.minesweeper.stats_best"          | t }}</span><span class="v">' + (prevBest !== null && prevBest <= elapsed ? String(prevBest).padStart(3,'0')+'s' : NEW_BEST) + '</span>' +
+        '</div>' +
+        '<button class="btn" id="play-again">$ new_game</button>';
     } else {
+      const lostDesc = {{ ("game.minesweeper.desc_lost" | t) | dump | safe }}
+        .replace('{n}', State.revealedCount)
+        .replace('{total}', cfg.rows * cfg.cols - cfg.mines);
       modal.className = 'modal lose';
-      modal.innerHTML = `
-        <p class="eyebrow">&gt; SEGFAULT — MINE DETONATED</p>
-        <h2>game over</h2>
-        <p>Process terminated. ${State.revealedCount} / ${cfg.rows * cfg.cols - cfg.mines} cells cleared.</p>
-        <div class="stats-mini">
-          <span class="k">Difficulty</span><span class="v">${State.diff}</span>
-          <span class="k">Time elapsed</span><span class="v">${String(elapsed).padStart(3,'0')}s</span>
-          <span class="k">Cells revealed</span><span class="v">${State.revealedCount}</span>
-          <span class="k">Best</span><span class="v">${prevBest !== null ? String(prevBest).padStart(3,'0')+'s' : '—'}</span>
-        </div>
-        <button class="btn" id="play-again">$ try_again</button>
-      `;
+      modal.innerHTML =
+        '<p class="eyebrow">&gt; SEGFAULT — MINE DETONATED</p>' +
+        '<h2>{{ "game.common.game_over" | t }}</h2>' +
+        '<p>' + lostDesc + '</p>' +
+        '<div class="stats-mini">' +
+          '<span class="k">{{ "game.minesweeper.stats_difficulty" | t }}</span><span class="v">' + State.diff + '</span>' +
+          '<span class="k">{{ "game.minesweeper.stats_time"       | t }}</span><span class="v">' + String(elapsed).padStart(3,'0') + 's</span>' +
+          '<span class="k">{{ "game.minesweeper.stats_cells"      | t }}</span><span class="v">' + State.revealedCount + '</span>' +
+          '<span class="k">{{ "game.minesweeper.stats_best"       | t }}</span><span class="v">' + (prevBest !== null ? String(prevBest).padStart(3,'0')+'s' : '—') + '</span>' +
+        '</div>' +
+        '<button class="btn" id="play-again">$ try_again</button>';
     }
     overlay.classList.remove('hidden');
     document.getElementById('play-again').onclick = () => build();
@@ -645,7 +647,9 @@ main { max-width: 1100px; }
     const btn = document.getElementById('flag-toggle');
     const lbl = document.getElementById('flag-mode-label');
     btn.classList.toggle('flag-mode', on);
-    lbl.textContent = on ? 'FLAG mode · click to mark' : 'DIG mode · click to reveal';
+    lbl.textContent = on
+      ? {{ ("game.minesweeper.mode_flag" | t) | dump | safe }}
+      : {{ ("game.minesweeper.mode_dig"  | t) | dump | safe }};
   }
 
   // ---------- Input ----------

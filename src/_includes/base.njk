@@ -2,7 +2,14 @@
 <html lang="{{ lang | default('en') }}"{% if feedLayout %} class="feed-layout"{% endif %}>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {# Disable user pinch-to-zoom + iOS focus auto-zoom. The site has
+       multi-tap interactions (CLI input, game touch controls, install
+       sheet, language switcher) that iOS otherwise hijacks for zoom
+       gestures. maximum-scale=1.0 + user-scalable=no together cover the
+       older iOS versions that occasionally ignore one or the other.
+       The CSS also forces 16px on inputs to prevent the focus-zoom
+       that fires even when scaling is locked. #}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script>
       // Anti-FOUC: detect standalone (installed) mode before first paint so
       // the install prompt CSS can hide everything via .is-standalone.

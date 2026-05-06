@@ -23,15 +23,15 @@ eleventyComputed:
 
 <div class="stats">
   <div class="stat">
-    <span class="stat-label">Score</span>
+    <span class="stat-label">{{ "game.flappy.score" | t }}</span>
     <span class="stat-value v-cyan" id="stat-score">0</span>
   </div>
   <div class="stat">
-    <span class="stat-label">Tier</span>
-    <span class="stat-value v-purple" id="stat-tier">novice</span>
+    <span class="stat-label">{{ "game.flappy.tier" | t }}</span>
+    <span class="stat-value v-purple" id="stat-tier">{{ "game.flappy.tier_novice" | t }}</span>
   </div>
   <div class="stat">
-    <span class="stat-label">Best</span>
+    <span class="stat-label">{{ "game.flappy.best" | t }}</span>
     <span class="stat-value v-amber" id="stat-best">0</span>
   </div>
 </div>
@@ -39,15 +39,15 @@ eleventyComputed:
 <div class="canvas-wrap" id="wrap">
   <canvas id="game" width="640" height="720"></canvas>
 
-  <div class="toast" id="toast">tier up — apprentice</div>
+  <div class="toast" id="toast"></div>
 
   <div class="overlay" id="overlay">
     <div class="modal" id="modal">
       <p class="eyebrow" style="color: var(--syn-cyan)">&gt; READY</p>
       <h2>flappy.js</h2>
-      <p>Steer the paper plane through gaps in the command prompts.<br/>Each prompt cleared = +1. Hit anything = SIGSEGV.</p>
+      <p>{{ "game.flappy.modal_intro" | t | safe }}</p>
       <p style="font-size: 11px; color: var(--term-subtle); margin-bottom: 18px">
-        <span class="kbd">SPACE</span> / <span class="kbd">click</span> / <span class="kbd">tap</span> to flap
+        <span class="kbd">SPACE</span> / <span class="kbd">click</span> / <span class="kbd">tap</span> {{ "game.flappy.input_hint_prefix" | t }}
       </p>
       <button class="btn" id="btn-start">$ start</button>
     </div>
@@ -56,14 +56,14 @@ eleventyComputed:
 
 <div class="footer-hints">
   <div class="keys">
-    <span><span class="kbd">SPACE</span> flap</span>
-    <span><span class="kbd">click</span> flap</span>
-    <span><span class="kbd">P</span> pause</span>
-    <span><span class="kbd">R</span> restart</span>
+    <span><span class="kbd">SPACE</span> {{ "game.flappy.footer_flap" | t }}</span>
+    <span><span class="kbd">click</span> {{ "game.flappy.footer_flap" | t }}</span>
+    <span><span class="kbd">P</span> {{ "game.flappy.footer_pause" | t }}</span>
+    <span><span class="kbd">R</span> {{ "game.flappy.footer_restart" | t }}</span>
   </div>
   <div>
     <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--syn-green); box-shadow:var(--glow-green); margin-right:6px"></span>
-    local · offline ready
+    {{ "game.common.offline" | t }}
   </div>
 </div>
 
@@ -223,12 +223,12 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
   };
 
   const TIERS = [
-    { score: 0, name: 'novice' },
-    { score: 5, name: 'apprentice' },
-    { score: 10, name: 'engineer' },
-    { score: 20, name: 'sysadmin' },
-    { score: 35, name: 'wizard' },
-    { score: 60, name: 'kernel-dev' },
+    { score: 0,  name: {{ ("game.flappy.tier_novice"     | t) | dump | safe }} },
+    { score: 5,  name: {{ ("game.flappy.tier_apprentice" | t) | dump | safe }} },
+    { score: 10, name: {{ ("game.flappy.tier_engineer"   | t) | dump | safe }} },
+    { score: 20, name: {{ ("game.flappy.tier_sysadmin"   | t) | dump | safe }} },
+    { score: 35, name: {{ ("game.flappy.tier_wizard"     | t) | dump | safe }} },
+    { score: 60, name: {{ ("game.flappy.tier_kernel_dev" | t) | dump | safe }} },
   ];
 
   const State = {
@@ -351,7 +351,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
           const newTier = tierFor(State.score);
           if (newTier !== State.tier) {
             State.tier = newTier;
-            showToast('tier up — ' + TIERS[newTier].name);
+            showToast({{ ("game.flappy.toast_tier_up" | t) | dump | safe }}.replace('{name}', TIERS[newTier].name));
             pipeSpeed = 2.6 + newTier * 0.45;
             pipeGap = Math.max(125, 180 - newTier * 11);
           }
@@ -432,7 +432,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
       ctx.fillStyle = C.cyan;
       ctx.font = '600 14px JetBrains Mono, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('> SIGINT — PAUSED · press P to resume', W/2, H/2);
+      ctx.fillText('> ' + {{ ("game.flappy.pause_text" | t) | dump | safe }}, W/2, H/2);
       ctx.textAlign = 'start';
     }
 
@@ -440,7 +440,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
       ctx.fillStyle = 'rgba(34,211,238,0.85)';
       ctx.font = '600 13px JetBrains Mono, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('press SPACE or click to flap ▲', W/2, H/2 - 60);
+      ctx.fillText({{ ("game.flappy.start_hint" | t) | dump | safe }}, W/2, H/2 - 60);
       ctx.textAlign = 'start';
     }
   }
@@ -563,17 +563,16 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     const ov = document.getElementById('overlay');
     const m = document.getElementById('modal');
     m.className = 'modal lose';
-    m.innerHTML = `
-      <p class="eyebrow">&gt; SIGSEGV — CRASH AT 0x${(State.distance|0).toString(16).padStart(6,'0').toUpperCase()}</p>
-      <h2>game over</h2>
-      <div class="stats-mini">
-        <span class="k">Score</span><span class="v">${State.score}</span>
-        <span class="k">Tier</span><span class="v">${TIERS[State.tier].name}</span>
-        <span class="k">Best</span><span class="v">${State.best}</span>
-        <span class="k">Distance</span><span class="v">${(State.distance/100).toFixed(1)}m</span>
-      </div>
-      <button class="btn" id="btn-again">$ retry</button>
-    `;
+    m.innerHTML =
+      '<p class="eyebrow">&gt; SIGSEGV — CRASH AT 0x' + (State.distance|0).toString(16).padStart(6,'0').toUpperCase() + '</p>' +
+      '<h2>{{ "game.common.game_over" | t }}</h2>' +
+      '<div class="stats-mini">' +
+        '<span class="k">{{ "game.flappy.score"         | t }}</span><span class="v">' + State.score + '</span>' +
+        '<span class="k">{{ "game.flappy.tier"          | t }}</span><span class="v">' + TIERS[State.tier].name + '</span>' +
+        '<span class="k">{{ "game.flappy.best"          | t }}</span><span class="v">' + State.best + '</span>' +
+        '<span class="k">{{ "game.flappy.stats_distance"| t }}</span><span class="v">' + (State.distance/100).toFixed(1) + 'm</span>' +
+      '</div>' +
+      '<button class="btn" id="btn-again">$ retry</button>';
     ov.classList.remove('hidden');
     document.getElementById('btn-again').onclick = () => reset();
   }

@@ -117,6 +117,12 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+html {
+  /* Don't let iOS bloat headings on rotation. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   font-family: var(--font-body);
@@ -316,6 +322,29 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
   margin: 0 0 0.5rem;
 }
 .tldr__body { margin: 0; line-height: 1.6; }
+
+/* iOS Safari auto-zooms when a focused text field has computed
+   font-size < 16px. Even with user-scalable=no on the viewport this
+   focus-zoom still fires on some iOS versions. Force a 16px floor on
+   any text-entering element on touch-only devices so fields read at
+   their visual size (often 12–14px) but Safari keeps its hands off. */
+@media (hover: none) and (pointer: coarse) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"],
+  input:not([type]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
 
 /* ── PWA install: slim banner + bottom sheet ────────────────────────── */
 

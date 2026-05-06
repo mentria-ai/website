@@ -23,52 +23,52 @@ eleventyComputed:
 
 <div class="stats">
   <div class="stat">
-    <span class="stat-label">Score</span>
+    <span class="stat-label">{{ "game.pong.score" | t }}</span>
     <span class="stat-value v-cyan" id="stat-score">0</span>
   </div>
   <div class="stat">
-    <span class="stat-label">Level</span>
+    <span class="stat-label">{{ "game.pong.level" | t }}</span>
     <span class="stat-value v-purple" id="stat-level">1</span>
   </div>
   <div class="stat">
-    <span class="stat-label">Lives</span>
+    <span class="stat-label">{{ "game.pong.lives" | t }}</span>
     <span class="stat-value v-pink" id="stat-lives">♥ ♥ ♥</span>
   </div>
   <div class="stat">
-    <span class="stat-label">High Score</span>
+    <span class="stat-label">{{ "game.pong.high_score" | t }}</span>
     <span class="stat-value v-amber" id="stat-high">0</span>
   </div>
 </div>
 
 <div class="tray" id="tray">
-  <span class="tray-label">Active</span>
-  <span class="tray-empty" id="tray-empty">no powerups · catch the falling tokens</span>
+  <span class="tray-label">{{ "game.pong.active" | t }}</span>
+  <span class="tray-empty" id="tray-empty">{{ "game.pong.empty_powerups" | t }}</span>
 </div>
 
 <div class="canvas-wrap" id="canvasWrap">
   <canvas id="game" width="900" height="640"></canvas>
 
-  <div class="toast" id="toast">level 1 — initialized</div>
+  <div class="toast" id="toast"></div>
 
   <div class="overlay" id="overlay">
     <div class="modal">
       <p class="eyebrow">&gt; READY PLAYER ONE</p>
       <h2>pong.js</h2>
-      <p>Bounce the ball off your paddle. Break every brick to advance. Catch the falling powerup tokens — but watch out for the red ones.</p>
+      <p>{{ "game.pong.modal_intro" | t }}</p>
 
       <div class="key-hints">
-        <div class="row"><span>Move paddle</span><span>← → / A D / Mouse</span></div>
-        <div class="row"><span>Launch ball</span><span>SPACE</span></div>
-        <div class="row"><span>Pause</span><span>P</span></div>
+        <div class="row"><span>{{ "game.pong.key_move_paddle" | t }}</span><span>← → / A D / Mouse</span></div>
+        <div class="row"><span>{{ "game.pong.key_launch" | t }}</span><span>SPACE</span></div>
+        <div class="row"><span>{{ "game.pong.key_pause" | t }}</span><span>P</span></div>
       </div>
 
       <div class="legend">
-        <div class="li"><span class="swatch" style="background:var(--syn-cyan); box-shadow: var(--glow-cyan-soft)"></span>Wide paddle</div>
-        <div class="li"><span class="swatch" style="background:var(--syn-purple); box-shadow: var(--glow-purple)"></span>Slow ball</div>
-        <div class="li"><span class="swatch" style="background:var(--syn-green); box-shadow: var(--glow-green)"></span>Multi-ball</div>
-        <div class="li"><span class="swatch" style="background:var(--syn-amber); box-shadow: var(--glow-amber)"></span>+1 life</div>
-        <div class="li"><span class="swatch" style="background:var(--syn-pink); box-shadow: var(--glow-pink)"></span>Shrink (avoid!)</div>
-        <div class="li"><span class="swatch" style="background:#475569"></span>Brick</div>
+        <div class="li"><span class="swatch" style="background:var(--syn-cyan); box-shadow: var(--glow-cyan-soft)"></span>{{ "game.pong.legend_wide" | t }}</div>
+        <div class="li"><span class="swatch" style="background:var(--syn-purple); box-shadow: var(--glow-purple)"></span>{{ "game.pong.legend_slow" | t }}</div>
+        <div class="li"><span class="swatch" style="background:var(--syn-green); box-shadow: var(--glow-green)"></span>{{ "game.pong.legend_multi" | t }}</div>
+        <div class="li"><span class="swatch" style="background:var(--syn-amber); box-shadow: var(--glow-amber)"></span>{{ "game.pong.legend_life" | t }}</div>
+        <div class="li"><span class="swatch" style="background:var(--syn-pink); box-shadow: var(--glow-pink)"></span>{{ "game.pong.legend_shrink" | t }}</div>
+        <div class="li"><span class="swatch" style="background:#475569"></span>{{ "game.pong.legend_brick" | t }}</div>
       </div>
 
       <button class="btn" id="btn-start">$ start_game</button>
@@ -78,13 +78,13 @@ eleventyComputed:
 
 <div class="footer-controls">
   <div class="keys">
-    <span><span class="kbd">←</span><span class="kbd">→</span> move</span>
-    <span><span class="kbd">SPACE</span> launch</span>
-    <span><span class="kbd">P</span> pause</span>
+    <span><span class="kbd">←</span><span class="kbd">→</span> {{ "game.pong.footer_move" | t }}</span>
+    <span><span class="kbd">SPACE</span> {{ "game.pong.footer_launch" | t }}</span>
+    <span><span class="kbd">P</span> {{ "game.pong.footer_pause" | t }}</span>
   </div>
   <div>
     <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--syn-green); box-shadow:var(--glow-green); margin-right:6px"></span>
-    local · offline ready
+    {{ "game.common.offline" | t }}
   </div>
 </div>
 
@@ -437,11 +437,11 @@ canvas {
   const activeEffects = [];
 
   const POWER_KINDS = [
-    { id: 'wide',  label: 'WIDE PADDLE', color: C.cyan,   pclass: 'cyan',   weight: 22, dur: 10000 },
-    { id: 'slow',  label: 'SLOW BALL',   color: C.purple, pclass: '',       weight: 20, dur: 8000  },
-    { id: 'multi', label: 'MULTI-BALL',  color: C.green,  pclass: 'green',  weight: 14, dur: 0     },
-    { id: 'life',  label: '+1 LIFE',     color: C.amber,  pclass: 'amber',  weight: 8,  dur: 0     },
-    { id: 'shrink',label: 'SHRINK',      color: C.pink,   pclass: '',       weight: 14, dur: 7000  },
+    { id: 'wide',  label: {{ ("game.pong.power_wide"   | t) | dump | safe }}, color: C.cyan,   pclass: 'cyan',   weight: 22, dur: 10000 },
+    { id: 'slow',  label: {{ ("game.pong.power_slow"   | t) | dump | safe }}, color: C.purple, pclass: '',       weight: 20, dur: 8000  },
+    { id: 'multi', label: {{ ("game.pong.power_multi"  | t) | dump | safe }}, color: C.green,  pclass: 'green',  weight: 14, dur: 0     },
+    { id: 'life',  label: {{ ("game.pong.power_life"   | t) | dump | safe }}, color: C.amber,  pclass: 'amber',  weight: 8,  dur: 0     },
+    { id: 'shrink',label: {{ ("game.pong.power_shrink" | t) | dump | safe }}, color: C.pink,   pclass: '',       weight: 14, dur: 7000  },
   ];
 
   const keys = { left: false, right: false };
@@ -555,7 +555,7 @@ canvas {
     State.lives = 3;
     buildLevel(State.level);
     showOverlay(null);
-    showToast('level 1 — initialized');
+    showToast({{ ("game.pong.toast_level_init" | t) | dump | safe }}.replace('{n}', State.level));
     updateHUD();
   }
 
@@ -585,7 +585,7 @@ canvas {
   function nextLevel() {
     State.level++;
     buildLevel(State.level);
-    showToast(`level ${State.level} — wall rebuilt`);
+    showToast({{ ("game.pong.toast_wall_rebuilt" | t) | dump | safe }}.replace('{n}', State.level));
     flash(C.cyan, 0.15);
     updateHUD();
   }
@@ -667,7 +667,7 @@ canvas {
 
   function flashEffect(kind) {
     flash(kind.color, 0.12);
-    showToast(`+ ${kind.label.toLowerCase()}`);
+    showToast({{ ("game.pong.toast_powerup" | t) | dump | safe }}.replace('{label}', kind.label.toLowerCase()));
   }
 
   let flashColor = null, flashAlpha = 0;
@@ -866,7 +866,7 @@ canvas {
       ctx.fillStyle = 'rgba(34,211,238,0.7)';
       ctx.font = '600 12px JetBrains Mono, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('press SPACE or click to launch ▲', W / 2, paddle.y - 40);
+      ctx.fillText({{ ("game.pong.launch_hint" | t) | dump | safe }}, W / 2, paddle.y - 40);
     }
 
     if (flashAlpha > 0 && flashColor) {
@@ -931,24 +931,26 @@ canvas {
     if (!kind) { ov.classList.add('hidden'); return; }
     const modal = ov.querySelector('.modal');
     if (kind === 'paused') {
-      modal.innerHTML = `
-        <p class="eyebrow">&gt; SIGINT — PAUSED</p>
-        <h2>paused</h2>
-        <p>Press P to resume, or restart from scratch.</p>
-        <button class="btn" id="btn-resume">$ resume</button>
-        <div style="height:8px"></div>
-        <button class="btn ghost" id="btn-restart">$ restart</button>
-      `;
+      modal.innerHTML =
+        '<p class="eyebrow">&gt; SIGINT — PAUSED</p>' +
+        '<h2>{{ "game.pong.paused" | t }}</h2>' +
+        '<p>{{ "game.pong.pause_desc" | t }}</p>' +
+        '<button class="btn" id="btn-resume">$ resume</button>' +
+        '<div style="height:8px"></div>' +
+        '<button class="btn ghost" id="btn-restart">$ restart</button>';
       ov.classList.remove('hidden');
       document.getElementById('btn-resume').onclick = () => togglePause();
       document.getElementById('btn-restart').onclick = () => startGame();
     } else if (kind === 'gameover') {
-      modal.innerHTML = `
-        <p class="eyebrow" style="color:var(--syn-pink)">&gt; PROCESS TERMINATED</p>
-        <h2>game over</h2>
-        <p>You reached level <b style="color:var(--syn-purple)">${State.level}</b> with a score of <b style="color:var(--syn-cyan)">${State.score.toLocaleString()}</b>.<br/>High score: <b style="color:var(--syn-amber)">${State.high.toLocaleString()}</b></p>
-        <button class="btn" id="btn-again">$ play_again</button>
-      `;
+      var goDesc = {{ ("game.pong.gameover_desc" | t) | dump | safe }}
+        .replace('{level}', State.level)
+        .replace('{score}', State.score.toLocaleString())
+        .replace('{high}', State.high.toLocaleString());
+      modal.innerHTML =
+        '<p class="eyebrow" style="color:var(--syn-pink)">&gt; PROCESS TERMINATED</p>' +
+        '<h2>{{ "game.common.game_over" | t }}</h2>' +
+        '<p>' + goDesc + '</p>' +
+        '<button class="btn" id="btn-again">$ play_again</button>';
       ov.classList.remove('hidden');
       document.getElementById('btn-again').onclick = () => startGame();
     }

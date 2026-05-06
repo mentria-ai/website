@@ -64,8 +64,8 @@
         "actions": [
           {
             "type": "open_url",
-            "label": "API pricing",
-            "url": "https://openai.com/api/pricing/"
+            "label": "Try AI Chat — runs locally, free",
+            "url": "/tools/ai-chat/"
           }
         ],
         "image": "/assets/img/feed/chapter01/03_invoice.png",

@@ -154,7 +154,7 @@ Made with [Mentria](https://mentria.ai).
 /* ── Load marked.js ──────────────────────────────────────────────── */
 let marked = null;
 try {
-  ({ marked } = await import('https://cdn.jsdelivr.net/npm/marked@13/+esm'));
+  ({ marked } = await import('/assets/js/marked.esm.js'));
   marked.setOptions({ gfm: true, breaks: true, pedantic: false });
 } catch (err) {
   console.error('Failed to load marked.js:', err);

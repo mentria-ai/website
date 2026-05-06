@@ -100,7 +100,7 @@
      blockquotes, autolinks, etc.). */
   (async function upgradeToMarked() {
     try {
-      const mod = await import('https://cdn.jsdelivr.net/npm/marked@13/+esm');
+      const mod = await import('/assets/js/marked.esm.js');
       const marked = mod.marked || mod.default;
       if (!marked || typeof marked.parse !== 'function') return;
       marked.setOptions({ gfm: true, breaks: true, pedantic: false });

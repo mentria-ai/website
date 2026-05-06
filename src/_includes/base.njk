@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      // Anti-FOUC: detect standalone (installed) mode before first paint so
+      // the install prompt CSS can hide everything via .is-standalone.
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+        document.documentElement.classList.add('is-standalone');
+      }
+    </script>
     {% set baseUrl = site.siteUrl | default('/') %}
     {% set pageUrl = baseUrl ~ page.url %}
     {% set defaultTitle = site.metaTitle | default(site.title) %}
@@ -62,6 +69,8 @@
     {% if not feedLayout %}
     {% include "footer.njk" %}
     {% endif %}
+
+    {% include "pwa-install.njk" %}
 
     <script>
       if ('serviceWorker' in navigator) {

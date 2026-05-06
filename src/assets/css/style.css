@@ -217,3 +217,269 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
   margin: 0 0 0.5rem;
 }
 .tldr__body { margin: 0; line-height: 1.6; }
+
+/* ── PWA install: slim banner + bottom sheet ────────────────────────── */
+
+/* Hide everything if already installed (set pre-paint in base.njk). */
+.is-standalone .pwa-install-banner,
+.is-standalone .pwa-install-sheet { display: none !important; }
+@media all and (display-mode: standalone) {
+  .pwa-install-banner,
+  .pwa-install-sheet { display: none !important; }
+}
+
+/* ── Banner ─────────────────────────────────────────────────────────── */
+.pwa-install-banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 9990;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 10px 12px;
+  background: var(--term-bg-raised);
+  color: var(--term-fg);
+  border: 1px solid var(--term-border-strong);
+  border-radius: 14px;
+  box-shadow: var(--elev-3), var(--glow-cyan-soft);
+  transform: translateY(calc(100% + 24px));
+  opacity: 0;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease;
+  max-width: 420px;
+  margin: 0 auto;
+  /* Don't intercept taps until visible. */
+  pointer-events: none;
+  font-family: var(--font-mono);
+}
+.pwa-install-banner--visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pwa-install-banner__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.pwa-install-banner__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.25;
+}
+
+.pwa-install-banner__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--term-fg-strong);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pwa-install-banner__desc {
+  font-size: 11.5px;
+  color: var(--term-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pwa-install-banner__cta {
+  flex-shrink: 0;
+  background: var(--syn-cyan);
+  color: #041016;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+.pwa-install-banner__cta:hover {
+  transform: translateY(-1px);
+  background: var(--syn-cyan-soft);
+  box-shadow: var(--glow-cyan);
+}
+.pwa-install-banner__cta:active { transform: translateY(0); }
+
+.pwa-install-banner__close {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  color: var(--term-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.pwa-install-banner__close:hover {
+  color: var(--term-fg);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Bottom sheet ───────────────────────────────────────────────────── */
+.pwa-install-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0s linear 0.28s;
+}
+.pwa-install-sheet--open {
+  pointer-events: auto;
+  visibility: visible;
+  transition: visibility 0s linear 0s;
+}
+
+.pwa-install-sheet__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  opacity: 0;
+  transition: opacity 0.24s ease;
+  cursor: pointer;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.pwa-install-sheet--open .pwa-install-sheet__backdrop { opacity: 1; }
+
+.pwa-install-sheet__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--term-bg-raised);
+  border-top: 1px solid var(--term-border-strong);
+  border-radius: 22px 22px 0 0;
+  padding: 10px 22px calc(28px + env(safe-area-inset-bottom, 0px));
+  max-width: 540px;
+  margin: 0 auto;
+  max-height: 88vh;
+  max-height: 88dvh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6), var(--glow-cyan-soft);
+  color: var(--term-fg);
+  font-family: var(--font-body);
+}
+.pwa-install-sheet--open .pwa-install-sheet__panel { transform: translateY(0); }
+
+.pwa-install-sheet__handle {
+  width: 44px;
+  height: 4px;
+  margin: 0 auto 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.pwa-install-sheet__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  padding: 6px;
+  color: var(--term-muted);
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.pwa-install-sheet__close:hover {
+  color: var(--term-fg);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pwa-install-sheet__body { text-align: left; }
+
+.pwa-install-sheet__title {
+  margin: 4px 40px 16px 0;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--term-fg-strong);
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+}
+
+.pwa-install-sheet__video {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  /* Square crop — width/height attrs + aspect-ratio lock the box even
+     before metadata loads in Safari. */
+  aspect-ratio: 1 / 1;
+  height: auto;
+  margin: 0 auto 20px;
+  border-radius: 18px;
+  background: #000;
+  object-fit: cover;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), var(--glow-cyan-soft);
+  animation: pwa-sheet-video-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes pwa-sheet-video-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pwa-install-sheet__video { animation: none; }
+}
+
+.pwa-install-sheet__steps {
+  margin: 0 0 16px;
+  padding-left: 22px;
+  color: var(--term-fg);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.pwa-install-sheet__steps li { margin-bottom: 8px; }
+.pwa-install-sheet__steps li::marker { color: var(--syn-cyan); }
+.pwa-install-sheet__steps strong {
+  color: var(--term-fg-strong);
+  font-weight: 700;
+}
+.pwa-install-sheet__steps .pwa-inline-icon {
+  display: inline-block;
+  vertical-align: text-bottom;
+  margin-left: 4px;
+  color: var(--syn-cyan);
+}
+
+.pwa-install-sheet__note {
+  margin: 12px 0 0;
+  color: var(--term-muted);
+  font-size: 12.5px;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Prevent body scroll while the sheet is open. */
+body.pwa-sheet-open { overflow: hidden; }
+
+/* Compact phones: tighten the banner spacing a touch. */
+@media (max-width: 380px) {
+  .pwa-install-banner { gap: 8px; padding: 8px 8px 8px 10px; }
+  .pwa-install-banner__cta { padding: 7px 11px; font-size: 12px; }
+  .pwa-install-banner__title { font-size: 12.5px; }
+  .pwa-install-banner__desc { font-size: 11px; }
+}

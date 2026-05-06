@@ -434,6 +434,44 @@
       "err_load_lib": "Impossible de charger la bibliothèque markdown. Vérifie ton réseau ou bloqueur.",
       "alert_invalid_md": "Sélectionne un fichier Markdown (.md).",
       "confirm_clear": "Effacer l'éditeur ? Ton brouillon auto-enregistré sera perdu."
+    },
+    "quote": {
+      "tldr_heading": "Qu'est-ce que Citation Motivante ?",
+      "status_initializing": "Initialisation…",
+      "status_loading_model": "Chargement du modèle…",
+      "status_ready": "Prêt",
+      "status_generating": "Génération…",
+      "progress_label": "Téléchargement du modèle…",
+      "btn_new": "Nouvelle citation",
+      "btn_copy": "Copier",
+      "btn_copied": "Copié !",
+      "btn_failed": "Échec",
+      "err_no_webgpu": "WebGPU non disponible dans ce navigateur",
+      "err_unsupported_body": "Cet outil nécessite WebGPU, que ton navigateur n'expose pas. Essaie la dernière version de Chrome, Edge ou Brave sur ordinateur, ou Safari 26+ sur macOS / iOS 26+.",
+      "err_load_runtime": "Échec du chargement du runtime — vérifie le réseau/bloqueur",
+      "err_device_lost": "GPU perdu — recharge pour récupérer",
+      "err_load_prefix": "Échec du chargement : ",
+      "err_no_quote": "Impossible de générer une citation. Réessaie.",
+      "err_generation": "Erreur lors de la génération. Réessaie."
+    },
+    "radio": {
+      "now_playing_label": "EN COURS",
+      "up_next_label": "À SUIVRE",
+      "press_play": "Appuie sur lecture pour commencer",
+      "btn_play_aria": "Lecture",
+      "btn_skip_aria": "Suivant",
+      "btn_like_aria": "J'aime",
+      "volume_aria": "Volume",
+      "loading_catalog": "Chargement du catalogue…",
+      "ready": "Prêt",
+      "paused": "En pause",
+      "playing": "Lecture",
+      "selecting_track": "Sélection de la piste…",
+      "loading_track": "Chargement de la piste…",
+      "err_load_catalog": "Échec du chargement du catalogue",
+      "err_load_track": "Échec du chargement de la piste",
+      "track_count_format": "{n} pistes",
+      "untitled": "Sans titre"
     }
   }
 }

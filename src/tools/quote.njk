@@ -16,7 +16,7 @@ tldr: >
   and is cached locally for instant reuse.
 ---
 <section class="tldr">
-  <h2 class="tldr__heading">What is Motivational Quote?</h2>
+  <h2 class="tldr__heading">{{ "tool.quote.tldr_heading" | t }}</h2>
   <p class="tldr__body">{{ tldr }}</p>
 </section>
 <section class="hero" style="padding-top:1rem;">
@@ -28,16 +28,14 @@ tldr: >
 {% set terminalTitle = "quote.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="mq">
-  <!-- Status bar -->
   <div class="mq__status">
     <span class="mq__status-dot" id="mq-status-dot"></span>
-    <span class="mq__status-text" id="mq-status-text">Initializing…</span>
+    <span class="mq__status-text" id="mq-status-text">{{ "tool.quote.status_initializing" | t }}</span>
   </div>
 
-  <!-- Progress bar -->
   <div class="mq__progress-wrap" id="mq-progress-wrap" style="display:none;">
     <div class="mq__progress-info">
-      <span id="mq-progress-label">Downloading model…</span>
+      <span id="mq-progress-label">{{ "tool.quote.progress_label" | t }}</span>
       <span id="mq-progress-pct">0%</span>
     </div>
     <div class="mq__progress-bar">
@@ -46,15 +44,13 @@ tldr: >
     <div class="mq__progress-detail" id="mq-progress-detail"></div>
   </div>
 
-  <!-- Quote area -->
   <div class="mq__quote-area">
     <div class="mq__quote" id="mq-quote"></div>
   </div>
 
-  <!-- Buttons -->
   <div class="mq__actions">
-    <button class="mq__btn mq__btn--primary" id="mq-new" disabled>New Quote</button>
-    <button class="mq__btn mq__btn--secondary" id="mq-copy" style="display:none;">Copy</button>
+    <button class="mq__btn mq__btn--primary" id="mq-new" disabled>{{ "tool.quote.btn_new" | t }}</button>
+    <button class="mq__btn mq__btn--secondary" id="mq-copy" style="display:none;">{{ "tool.quote.btn_copy" | t }}</button>
   </div>
 </section>
 {% include "terminal-frame-close.njk" %}
@@ -74,11 +70,21 @@ tldr: >
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 
 <script type="module">
-/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-   Motivational Quote \u2014 Qwen3.5-0.8B running locally via mentria-engine.
-   WebGPU-only (no transformers.js fallback). Same gating model as
-   ai-chat.njk \u2014 see that file's header for context.
-   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+const COPY = {
+  statusLoadingModel: {{ ("tool.quote.status_loading_model" | t) | dump | safe }},
+  statusReady:        {{ ("tool.quote.status_ready"         | t) | dump | safe }},
+  statusGenerating:   {{ ("tool.quote.status_generating"    | t) | dump | safe }},
+  btnCopy:            {{ ("tool.quote.btn_copy"             | t) | dump | safe }},
+  btnCopied:          {{ ("tool.quote.btn_copied"           | t) | dump | safe }},
+  btnFailed:          {{ ("tool.quote.btn_failed"           | t) | dump | safe }},
+  errNoWebGpu:        {{ ("tool.quote.err_no_webgpu"        | t) | dump | safe }},
+  errUnsupportedBody: {{ ("tool.quote.err_unsupported_body" | t) | dump | safe }},
+  errLoadRuntime:     {{ ("tool.quote.err_load_runtime"     | t) | dump | safe }},
+  errDeviceLost:      {{ ("tool.quote.err_device_lost"      | t) | dump | safe }},
+  errLoadPrefix:      {{ ("tool.quote.err_load_prefix"      | t) | dump | safe }},
+  errNoQuote:         {{ ("tool.quote.err_no_quote"         | t) | dump | safe }},
+  errGeneration:      {{ ("tool.quote.err_generation"       | t) | dump | safe }}
+};
 
 const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
 const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
@@ -106,23 +112,20 @@ function showUnsupportedError(reason) {
   setStatus('error', reason);
   const quoteEl = document.getElementById('mq-quote');
   if (quoteEl) {
-    quoteEl.textContent =
-      'This tool requires WebGPU, which your browser doesn\u2019t expose. ' +
-      'Try the latest Chrome, Edge, or Brave on desktop, or Safari 26+ ' +
-      'on macOS / iOS 26+.';
+    quoteEl.textContent = COPY.errUnsupportedBody;
   }
   document.getElementById('mq-new').disabled = true;
 }
 
 if (!navigator.gpu) {
-  showUnsupportedError('WebGPU not available in this browser');
+  showUnsupportedError(COPY.errNoWebGpu);
 } else {
   let MentriaEngine;
   try {
     ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
   } catch (err) {
     console.error('Failed to load mentria-engine bundle:', err);
-    showUnsupportedError('Failed to load runtime \u2014 check network/ad-blocker');
+    showUnsupportedError(COPY.errLoadRuntime);
   }
   if (MentriaEngine) runApp(MentriaEngine);
 }
@@ -166,13 +169,13 @@ function runApp(MentriaEngine) {
 
   /* Load engine + model */
   async function loadModel() {
-    setStatus('loading', 'Loading model…');
+    setStatus('loading', COPY.statusLoadingModel);
     progressWrap.style.display = '';
     try {
       engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
       engine.onProgress = onEngineProgress;
       engine.onDeviceLost = (info) => {
-        setStatus('error', 'GPU device lost — reload to recover');
+        setStatus('error', COPY.errDeviceLost);
         newBtn.disabled = true;
         console.error('WebGPU device lost:', info);
       };
@@ -199,12 +202,12 @@ function runApp(MentriaEngine) {
       }
 
       progressWrap.style.display = 'none';
-      setStatus('ready', 'Ready');
+      setStatus('ready', COPY.statusReady);
       newBtn.disabled = false;
     } catch (err) {
       progressWrap.style.display = 'none';
       console.error('Model load error:', err);
-      setStatus('error', 'Failed to load: ' + (err.message || err));
+      setStatus('error', COPY.errLoadPrefix + (err.message || err));
     }
   }
 
@@ -216,7 +219,7 @@ function runApp(MentriaEngine) {
     copyBtn.style.display = 'none';
     quoteEl.textContent = '';
     quoteEl.classList.add('mq__quote--typing');
-    setStatus('generating', 'Generating…');
+    setStatus('generating', COPY.statusGenerating);
 
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
@@ -261,19 +264,20 @@ function runApp(MentriaEngine) {
         .replace(/<think>[\s\S]*?<\/think>/g, '')
         .replace(/<\|[^|]*\|>/g, '')
         .trim();
-      if (window.renderMarkdown) quoteEl.innerHTML = renderMarkdown(display) || '<p>Couldn’t generate a quote. Try again.</p>';
-      else quoteEl.textContent = display || 'Couldn’t generate a quote. Try again.';
+      const escNoQuote = COPY.errNoQuote.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      if (window.renderMarkdown) quoteEl.innerHTML = renderMarkdown(display) || `<p>${escNoQuote}</p>`;
+      else quoteEl.textContent = display || COPY.errNoQuote;
       quoteEl.classList.remove('mq__quote--typing');
       if (display) copyBtn.style.display = '';
     } catch (err) {
       console.error('Generation error:', err);
-      quoteEl.textContent = 'Error generating quote. Try again.';
+      quoteEl.textContent = COPY.errGeneration;
       quoteEl.classList.remove('mq__quote--typing');
     }
 
     generating = false;
     newBtn.disabled = false;
-    setStatus('ready', 'Ready');
+    setStatus('ready', COPY.statusReady);
   }
 
   /* Copy to clipboard */
@@ -282,11 +286,11 @@ function runApp(MentriaEngine) {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      copyBtn.textContent = 'Copied!';
-      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+      copyBtn.textContent = COPY.btnCopied;
+      setTimeout(() => { copyBtn.textContent = COPY.btnCopy; }, 1500);
     } catch {
-      copyBtn.textContent = 'Failed';
-      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+      copyBtn.textContent = COPY.btnFailed;
+      setTimeout(() => { copyBtn.textContent = COPY.btnCopy; }, 1500);
     }
   }
 
@@ -296,7 +300,7 @@ function runApp(MentriaEngine) {
 
   /* Init */
   (async () => {
-    setStatus('idle', 'Loading model…');
+    setStatus('idle', COPY.statusLoadingModel);
     await loadModel();
     if (engine) generateQuote();
   })();

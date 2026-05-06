@@ -434,6 +434,44 @@
       "err_load_lib": "Couldn't load the markdown library. Check your network or ad-blocker.",
       "alert_invalid_md": "Please select a Markdown (.md) file.",
       "confirm_clear": "Clear the editor? Your auto-saved draft will be lost."
+    },
+    "quote": {
+      "tldr_heading": "What is Motivational Quote?",
+      "status_initializing": "Initializing…",
+      "status_loading_model": "Loading model…",
+      "status_ready": "Ready",
+      "status_generating": "Generating…",
+      "progress_label": "Downloading model…",
+      "btn_new": "New Quote",
+      "btn_copy": "Copy",
+      "btn_copied": "Copied!",
+      "btn_failed": "Failed",
+      "err_no_webgpu": "WebGPU not available in this browser",
+      "err_unsupported_body": "This tool requires WebGPU, which your browser doesn't expose. Try the latest Chrome, Edge, or Brave on desktop, or Safari 26+ on macOS / iOS 26+.",
+      "err_load_runtime": "Failed to load runtime — check network/ad-blocker",
+      "err_device_lost": "GPU device lost — reload to recover",
+      "err_load_prefix": "Failed to load: ",
+      "err_no_quote": "Couldn't generate a quote. Try again.",
+      "err_generation": "Error generating quote. Try again."
+    },
+    "radio": {
+      "now_playing_label": "NOW PLAYING",
+      "up_next_label": "UP NEXT",
+      "press_play": "Press play to start",
+      "btn_play_aria": "Play",
+      "btn_skip_aria": "Skip",
+      "btn_like_aria": "Like",
+      "volume_aria": "Volume",
+      "loading_catalog": "Loading catalog…",
+      "ready": "Ready",
+      "paused": "Paused",
+      "playing": "Playing",
+      "selecting_track": "Selecting track…",
+      "loading_track": "Loading track…",
+      "err_load_catalog": "Failed to load catalog",
+      "err_load_track": "Failed to load track",
+      "track_count_format": "{n} tracks",
+      "untitled": "Untitled"
     }
   }
 }

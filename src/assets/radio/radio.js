@@ -9,6 +9,19 @@ import {
 
 const ART_BASE = "https://mentria-ai.github.io/radio-catalog/";
 
+const COPY = window.RADIO_COPY || {
+  ready: "Ready",
+  paused: "Paused",
+  playing: "Playing",
+  selectingTrack: "Selecting track…",
+  loadingTrack: "Loading track…",
+  loadingCatalog: "Loading catalog…",
+  errLoadCatalog: "Failed to load catalog",
+  errLoadTrack: "Failed to load track",
+  trackCountFmt: "{n} tracks",
+  untitled: "Untitled",
+};
+
 const PLAY_SVG =
   '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>';
 const PAUSE_SVG =
@@ -55,18 +68,18 @@ class MentriaRadio {
   // ── Init ──────────────────────────────────────────
 
   async init() {
-    this.setStatus("loading", "Loading catalog\u2026");
+    this.setStatus("loading", COPY.loadingCatalog);
     this.bindUI();
 
     try {
       this.catalog = await loadCatalog();
       this.preferences = await getAllPreferences();
-      this.el.trackCount.textContent = `${this.catalog.length} tracks`;
-      this.setStatus("ready", "Ready");
+      this.el.trackCount.textContent = COPY.trackCountFmt.replace("{n}", this.catalog.length);
+      this.setStatus("ready", COPY.ready);
       this.el.play.disabled = false;
     } catch (err) {
       console.error("[radio] init failed:", err);
-      this.setStatus("error", "Failed to load catalog");
+      this.setStatus("error", COPY.errLoadCatalog);
     }
   }
 
@@ -76,7 +89,7 @@ class MentriaRadio {
     this.player.init();
     this.player.setVolume(this.el.volume.value / 100);
 
-    this.setStatus("loading", "Selecting track\u2026");
+    this.setStatus("loading", COPY.selectingTrack);
 
     const currentMood = this.currentTrack ? this.currentTrack.mood : null;
     const currentEnergy = this.currentTrack ? this.currentTrack.energy : null;
@@ -93,7 +106,7 @@ class MentriaRadio {
   }
 
   async loadAndPlay(track) {
-    this.setStatus("loading", "Loading track\u2026");
+    this.setStatus("loading", COPY.loadingTrack);
     try {
       const loaded = await this.player.loadTrack(track.url);
       const { duration } = this.player.playAudio(loaded);
@@ -104,7 +117,7 @@ class MentriaRadio {
       this.startProgressTimer();
       this.scheduleCrossfade();
 
-      this.setStatus("playing", "Playing");
+      this.setStatus("playing", COPY.playing);
       this.el.play.innerHTML = PAUSE_SVG;
       this.el.play.classList.add("playing");
       this.el.play.disabled = false;
@@ -112,7 +125,7 @@ class MentriaRadio {
       this.el.like.disabled = false;
     } catch (err) {
       console.error("[radio] loadAndPlay failed:", err);
-      this.setStatus("error", "Failed to load track");
+      this.setStatus("error", COPY.errLoadTrack);
     }
   }
 
@@ -132,7 +145,7 @@ class MentriaRadio {
       this.updateNowPlaying();
       this.startProgressTimer();
       this.scheduleCrossfade();
-      this.setStatus("playing", "Playing");
+      this.setStatus("playing", COPY.playing);
       this.prepareNext();
     } else {
       await this.play();
@@ -186,7 +199,7 @@ class MentriaRadio {
       this.updateNowPlaying();
       this.startProgressTimer();
       this.scheduleCrossfade();
-      this.setStatus("playing", "Playing");
+      this.setStatus("playing", COPY.playing);
       this.prepareNext();
     } else {
       await this.play();
@@ -279,7 +292,7 @@ class MentriaRadio {
     if ("mediaSession" in navigator) {
       const artUrl = artFile ? ART_BASE + artFile : "";
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: this.currentTrack.title || "Untitled",
+        title: this.currentTrack.title || COPY.untitled,
         artist: "Mentria Infinite Radio",
         album: (this.currentTrack.mood || "").replace(/_/g, " "),
         artwork: artUrl ? [
@@ -311,13 +324,13 @@ class MentriaRadio {
         this.player.pause();
         this.el.play.innerHTML = PLAY_SVG;
         this.el.play.classList.remove("playing");
-        this.setStatus("ready", "Paused");
+        this.setStatus("ready", COPY.paused);
         if (this.progressTimer) clearInterval(this.progressTimer);
       } else {
         this.player.resume();
         this.el.play.innerHTML = PAUSE_SVG;
         this.el.play.classList.add("playing");
-        this.setStatus("playing", "Playing");
+        this.setStatus("playing", COPY.playing);
         this.startProgressTimer();
       }
     });

@@ -434,6 +434,44 @@
       "err_load_lib": "Markdownライブラリを読み込めませんでした。ネットワークまたは広告ブロッカーを確認してください。",
       "alert_invalid_md": "Markdown(.md)ファイルを選択してください。",
       "confirm_clear": "エディタをクリアしますか? 自動保存された下書きは失われます。"
+    },
+    "quote": {
+      "tldr_heading": "モチベーション名言とは?",
+      "status_initializing": "初期化中…",
+      "status_loading_model": "モデル読込中…",
+      "status_ready": "準備完了",
+      "status_generating": "生成中…",
+      "progress_label": "モデルをダウンロード中…",
+      "btn_new": "新しい名言",
+      "btn_copy": "コピー",
+      "btn_copied": "コピー済み!",
+      "btn_failed": "失敗",
+      "err_no_webgpu": "このブラウザはWebGPUに対応していません",
+      "err_unsupported_body": "このツールにはWebGPUが必要ですが、ブラウザが提供していません。デスクトップでは最新のChrome、Edge、Braveを、macOS / iOS 26+ではSafari 26+をお試しください。",
+      "err_load_runtime": "ランタイム読込失敗 — ネットワーク/広告ブロッカーを確認",
+      "err_device_lost": "GPUデバイス喪失 — 再読込で復旧",
+      "err_load_prefix": "読込失敗: ",
+      "err_no_quote": "名言を生成できませんでした。再試行してください。",
+      "err_generation": "生成中にエラー。再試行してください。"
+    },
+    "radio": {
+      "now_playing_label": "再生中",
+      "up_next_label": "次の曲",
+      "press_play": "再生を押して開始",
+      "btn_play_aria": "再生",
+      "btn_skip_aria": "スキップ",
+      "btn_like_aria": "いいね",
+      "volume_aria": "音量",
+      "loading_catalog": "カタログ読込中…",
+      "ready": "準備完了",
+      "paused": "一時停止",
+      "playing": "再生中",
+      "selecting_track": "トラック選択中…",
+      "loading_track": "トラック読込中…",
+      "err_load_catalog": "カタログ読込失敗",
+      "err_load_track": "トラック読込失敗",
+      "track_count_format": "{n} 曲",
+      "untitled": "無題"
     }
   }
 }

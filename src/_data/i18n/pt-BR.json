@@ -434,6 +434,44 @@
       "err_load_lib": "Não foi possível carregar a biblioteca de markdown. Verifique sua rede ou bloqueador.",
       "alert_invalid_md": "Selecione um arquivo Markdown (.md).",
       "confirm_clear": "Limpar o editor? Seu rascunho salvo será perdido."
+    },
+    "quote": {
+      "tldr_heading": "O que é Frase Motivacional?",
+      "status_initializing": "Inicializando…",
+      "status_loading_model": "Carregando modelo…",
+      "status_ready": "Pronto",
+      "status_generating": "Gerando…",
+      "progress_label": "Baixando modelo…",
+      "btn_new": "Nova frase",
+      "btn_copy": "Copiar",
+      "btn_copied": "Copiado!",
+      "btn_failed": "Falha",
+      "err_no_webgpu": "WebGPU não disponível neste navegador",
+      "err_unsupported_body": "Esta ferramenta requer WebGPU, que seu navegador não expõe. Tente a versão mais recente de Chrome, Edge ou Brave no desktop, ou Safari 26+ no macOS / iOS 26+.",
+      "err_load_runtime": "Falha ao carregar runtime — verifique rede/bloqueador",
+      "err_device_lost": "GPU perdida — recarregue para recuperar",
+      "err_load_prefix": "Falha ao carregar: ",
+      "err_no_quote": "Não foi possível gerar uma frase. Tente novamente.",
+      "err_generation": "Erro ao gerar a frase. Tente novamente."
+    },
+    "radio": {
+      "now_playing_label": "TOCANDO AGORA",
+      "up_next_label": "A SEGUIR",
+      "press_play": "Toque em reproduzir para começar",
+      "btn_play_aria": "Reproduzir",
+      "btn_skip_aria": "Pular",
+      "btn_like_aria": "Curtir",
+      "volume_aria": "Volume",
+      "loading_catalog": "Carregando catálogo…",
+      "ready": "Pronto",
+      "paused": "Em pausa",
+      "playing": "Reproduzindo",
+      "selecting_track": "Selecionando faixa…",
+      "loading_track": "Carregando faixa…",
+      "err_load_catalog": "Falha ao carregar catálogo",
+      "err_load_track": "Falha ao carregar faixa",
+      "track_count_format": "{n} faixas",
+      "untitled": "Sem título"
     }
   }
 }

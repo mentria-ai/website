@@ -9,5 +9,6 @@ CLAUDE.md
 .playwright-mcp/
 custom_inference_engine.md
 webgpu_engine_guide.md
+docs/
 src/assets/mentria/models/
 src/assets/mentria/loras/

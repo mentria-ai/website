@@ -436,6 +436,7 @@ main { max-width: 1100px; }
     }
 
     boardEl.style.gridTemplateColumns = `repeat(${State.cols}, auto)`;
+    boardEl.style.setProperty('--ms-cols', State.cols);
     boardEl.innerHTML = '';
     for (let r = 0; r < State.rows; r++) {
       for (let c = 0; c < State.cols; c++) {

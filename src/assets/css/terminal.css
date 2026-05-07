@@ -125,6 +125,7 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .terminal-frame__titlebar { 
 body.is-fullscreen-tool .terminal-frame--fullscreen .terminal-frame__body {
   flex: 1;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
@@ -134,11 +135,45 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .ac,
 body.is-fullscreen-tool .terminal-frame--fullscreen .mq,
 body.is-fullscreen-tool .terminal-frame--fullscreen .mp,
 body.is-fullscreen-tool .terminal-frame--fullscreen .rd,
-body.is-fullscreen-tool .terminal-frame--fullscreen .countdown-tool {
+body.is-fullscreen-tool .terminal-frame--fullscreen .countdown-tool,
+body.is-fullscreen-tool .terminal-frame--fullscreen .qn-tool,
+body.is-fullscreen-tool .terminal-frame--fullscreen .b64 {
   flex: 1;
   height: auto !important;
   max-height: none !important;
   min-height: 0 !important;
+}
+body.is-fullscreen-tool .terminal-frame--fullscreen .b64 {
+  max-width: none !important;
+  width: 100%;
+}
+@media (min-width: 721px) {
+  body.is-fullscreen-tool .terminal-frame--fullscreen .b64 {
+    gap: 1.5rem;
+  }
+  body.is-fullscreen-tool .terminal-frame--fullscreen .b64-panel:not(.b64-panel--hidden) {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  body.is-fullscreen-tool .terminal-frame--fullscreen .b64-text-grid {
+    flex: 1;
+    min-height: 0;
+  }
+  body.is-fullscreen-tool .terminal-frame--fullscreen .b64-text-col {
+    min-height: 0;
+  }
+  body.is-fullscreen-tool .terminal-frame--fullscreen .b64-textarea {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    resize: none;
+  }
+  body.is-fullscreen-tool .terminal-frame--fullscreen .b64-text-actions {
+    flex-shrink: 0;
+  }
 }
 body.is-fullscreen-tool .terminal-frame--fullscreen .mp__panes {
   flex: 1;
@@ -161,6 +196,225 @@ body.is-fullscreen-tool .lang-switcher { display: none !important; }
 @media (max-width: 640px) {
   body.is-fullscreen-tool .terminal-frame--fullscreen .terminal-frame__body { padding: 0.75rem; }
   body.is-fullscreen-tool .terminal-frame--fullscreen .terminal-frame__titlebar { padding: 0.5rem 0.75rem; }
+}
+
+body.is-fullscreen-tool .game-page > .hero { display: none; }
+body.is-fullscreen-tool .game-page .terminal-frame__body { padding: 0; gap: 0; }
+body.is-fullscreen-tool .game-page .canvas-wrap,
+body.is-fullscreen-tool .game-page .board-wrap,
+body.is-fullscreen-tool .game-page .play-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+body.is-fullscreen-tool .game-page .canvas-wrap canvas,
+body.is-fullscreen-tool .game-page .board-wrap canvas {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+body.is-fullscreen-tool .game-page canvas#game {
+  max-width: 100% !important;
+  max-height: 100%;
+  height: auto;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+}
+body.is-fullscreen-tool .game-page .board {
+  --ms-cell: clamp(18px, calc((100vw - 36px) / var(--ms-cols, 14)), 36px);
+}
+body.is-fullscreen-tool .game-page .board .cell {
+  width: var(--ms-cell, 28px) !important;
+  height: var(--ms-cell, 28px) !important;
+  font-size: clamp(9px, calc(var(--ms-cell, 28px) * 0.5), 15px) !important;
+}
+body.is-fullscreen-tool .game-page .board .cell.flag::after,
+body.is-fullscreen-tool .game-page .board .cell.q::after,
+body.is-fullscreen-tool .game-page .board .cell.mine.exploded::after,
+body.is-fullscreen-tool .game-page .board .cell.mine.revealed:not(.exploded)::after {
+  font-size: clamp(10px, calc(var(--ms-cell, 28px) * 0.55), 16px) !important;
+}
+
+@media (max-width: 720px) {
+  body.is-fullscreen-tool .game-page .footer-hints,
+  body.is-fullscreen-tool .game-page .footer-controls { display: none; }
+  body.is-fullscreen-tool .game-page #canvasWrap,
+  body.is-fullscreen-tool .game-page .canvas-wrap {
+    flex: 1;
+    min-height: 0;
+    padding: 0 !important;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: none !important;
+  }
+  body.is-fullscreen-tool .game-page #canvasWrap canvas#game,
+  body.is-fullscreen-tool .game-page .canvas-wrap canvas#game {
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+  body.is-fullscreen-tool .game-page .stats {
+    flex-shrink: 0;
+    font-size: 11px;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)) !important;
+  }
+  body.is-fullscreen-tool .game-page .stat { padding: 6px 10px !important; }
+  body.is-fullscreen-tool .game-page .stat .label,
+  body.is-fullscreen-tool .game-page .stat-label { font-size: 9px !important; letter-spacing: 0.08em; }
+  body.is-fullscreen-tool .game-page .stat .value,
+  body.is-fullscreen-tool .game-page .stat-value { font-size: 14px !important; }
+  body.is-fullscreen-tool .game-page .tray {
+    flex-shrink: 0;
+    padding: 4px 10px !important;
+    gap: 6px !important;
+    font-size: 11px !important;
+  }
+  body.is-fullscreen-tool .game-page .ms-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px !important;
+  }
+  body.is-fullscreen-tool .game-page .ms-toolbar {
+    flex-shrink: 0;
+    padding: 8px 10px !important;
+  }
+  body.is-fullscreen-tool .game-page .stats-spread {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+  body.is-fullscreen-tool .game-page .play-area {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
+    padding: 8px !important;
+    gap: 8px !important;
+  }
+  body.is-fullscreen-tool .game-page .play-area .side-left {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 4px !important;
+    flex: 0 0 auto;
+  }
+  body.is-fullscreen-tool .game-page .play-area .side-right {
+    flex-direction: row !important;
+    gap: 4px !important;
+    flex: 0 0 auto;
+  }
+  body.is-fullscreen-tool .game-page .play-area .side .panel {
+    flex: 1 1 0;
+    padding: 4px 8px !important;
+    min-width: 0;
+  }
+  body.is-fullscreen-tool .game-page .play-area .panel-label {
+    font-size: 8px !important;
+    margin-bottom: 1px !important;
+  }
+  body.is-fullscreen-tool .game-page .play-area .panel-value { font-size: 13px !important; }
+  body.is-fullscreen-tool .game-page .play-area .preview-canvas { max-height: 36px; }
+  body.is-fullscreen-tool .game-page .play-area .board-wrap {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  body.is-fullscreen-tool .game-page .touch-controls {
+    flex-shrink: 0;
+    padding: 6px 8px 8px !important;
+    gap: 4px !important;
+    border-top: 1px solid var(--term-border);
+  }
+  body.is-fullscreen-tool .game-page .touch-controls .tc-btn {
+    font-size: 11px !important;
+    padding: 6px 0 !important;
+    min-height: 36px !important;
+  }
+  body.is-fullscreen-tool .game-page .board-wrap {
+    padding: 6px !important;
+    min-height: 0 !important;
+    overflow: hidden;
+  }
+}
+
+body.is-fullscreen-tool .terminal-frame--fullscreen .iv__actions {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--term-bg, #0a0a0a);
+  padding-bottom: 0.5rem;
+}
+@media (max-width: 720px) {
+  body.is-fullscreen-tool .iv__table,
+  body.is-fullscreen-tool .iv__table thead,
+  body.is-fullscreen-tool .iv__table tbody,
+  body.is-fullscreen-tool .iv__table tr,
+  body.is-fullscreen-tool .iv__table td {
+    display: block;
+    width: 100%;
+  }
+  body.is-fullscreen-tool .iv__table thead { display: none; }
+  body.is-fullscreen-tool .iv__table tbody tr {
+    border: 1px solid var(--term-border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem 0.75rem;
+    margin-bottom: 0.75rem;
+    background: rgba(255, 255, 255, 0.015);
+    position: relative;
+  }
+  body.is-fullscreen-tool .iv__table tbody tr.last-row {
+    border: none;
+    background: transparent;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0;
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+  }
+  body.is-fullscreen-tool .iv__table tbody tr.last-row .last-row-first-col,
+  body.is-fullscreen-tool .iv__table tbody tr.last-row .total {
+    display: inline-flex;
+    align-items: center;
+    width: auto;
+    padding: 0;
+    border: none;
+  }
+  body.is-fullscreen-tool .iv__table td {
+    padding: 0.35rem 0;
+    border-bottom: none;
+    text-align: left;
+  }
+  body.is-fullscreen-tool .iv__table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--syn-purple);
+    margin-bottom: 2px;
+  }
+  body.is-fullscreen-tool .iv__table .remove-row {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+  }
+  body.is-fullscreen-tool .iv__table textarea,
+  body.is-fullscreen-tool .iv__table input { font-size: 0.85rem; }
+}
+
+body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
+  flex: 1;
 }
 
 .terminal-frame__filename {

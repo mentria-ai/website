@@ -109,18 +109,18 @@ eleventyComputed:
       </thead>
       <tbody>
         <tr>
-          <td>
+          <td data-label="{{ 'tool.invoice.tbl_description' | t }}">
             <span class="remove-row no-print" title="{{ 'tool.invoice.row_remove' | t }}" aria-label="{{ 'tool.invoice.row_remove' | t }}">−</span>
             <textarea id="desc1Inp" placeholder="{{ 'tool.invoice.ph_line_desc' | t }}" rows="1"></textarea>
           </td>
-          <td><input id="sac1Inp" type="text" value="998314" placeholder="______"></td>
-          <td><input id="qty1Inp" class="input-qty-cell" type="text" value="1" placeholder="{{ 'tool.invoice.ph_qty' | t }}" pattern="^[0-9]+$" inputmode="numeric"></td>
-          <td>
+          <td data-label="{{ 'tool.invoice.tbl_sac' | t }}"><input id="sac1Inp" type="text" value="998314" placeholder="______"></td>
+          <td data-label="{{ 'tool.invoice.tbl_quantity' | t }}"><input id="qty1Inp" class="input-qty-cell" type="text" value="1" placeholder="{{ 'tool.invoice.ph_qty' | t }}" pattern="^[0-9]+$" inputmode="numeric"></td>
+          <td data-label="{{ 'tool.invoice.tbl_unit_price' | t }}">
             <span class="iv__cell-price">
               <input id="price1Inp" class="input-price-cell" type="text" value="0" placeholder="{{ 'tool.invoice.ph_price' | t }}" pattern="^[0-9]+(\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
             </span>
           </td>
-          <td><span class="line-total">0</span><span class="currency">₹</span></td>
+          <td data-label="{{ 'tool.invoice.tbl_total' | t }}"><span class="line-total">0</span><span class="currency">₹</span></td>
         </tr>
         <tr class="last-row">
           <td class="last-row-first-col" colspan="4">
@@ -276,20 +276,21 @@ eleventyComputed:
       data = { Description: '', 'SAC code': '998314', Quantity: '1', 'Unit Price': '0' };
     }
 
+    const labels = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
-      <td>
+      <td data-label="${esc(labels[0] || '')}">
         <span class="remove-row no-print" title="${esc(COPY.rowRemove)}" aria-label="${esc(COPY.rowRemove)}">−</span>
         <textarea id="desc${rowIndex}Inp" placeholder="${esc(COPY.phLineDesc)}" rows="1">${esc(data.Description)}</textarea>
       </td>
-      <td><input id="sac${rowIndex}Inp" type="text" value="${esc(data['SAC code'] ?? '')}" placeholder="______"></td>
-      <td><input id="qty${rowIndex}Inp" class="input-qty-cell" type="text" value="${esc(data.Quantity ?? '1')}" placeholder="${esc(COPY.phQty)}" pattern="^[0-9]+$" inputmode="numeric"></td>
-      <td>
+      <td data-label="${esc(labels[1] || '')}"><input id="sac${rowIndex}Inp" type="text" value="${esc(data['SAC code'] ?? '')}" placeholder="______"></td>
+      <td data-label="${esc(labels[2] || '')}"><input id="qty${rowIndex}Inp" class="input-qty-cell" type="text" value="${esc(data.Quantity ?? '1')}" placeholder="${esc(COPY.phQty)}" pattern="^[0-9]+$" inputmode="numeric"></td>
+      <td data-label="${esc(labels[3] || '')}">
         <span class="iv__cell-price">
           <input id="price${rowIndex}Inp" class="input-price-cell" type="text" value="${esc(data['Unit Price'] ?? '0')}" placeholder="${esc(COPY.phPrice)}" pattern="^[0-9]+(\\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
         </span>
       </td>
-      <td><span class="line-total">0</span><span class="currency">₹</span></td>
+      <td data-label="${esc(labels[4] || '')}"><span class="line-total">0</span><span class="currency">₹</span></td>
     `;
     tbody.insertBefore(newRow, tbody.lastElementChild);
 

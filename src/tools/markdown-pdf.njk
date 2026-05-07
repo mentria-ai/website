@@ -417,6 +417,9 @@ setTab('edit');
   min-height: 0;
 }
 .mp__pane[hidden] { display: none; }
+@media (min-width: 721px) {
+  .mp__pane[hidden] { display: flex; }
+}
 .mp__pane-header {
   flex-shrink: 0;
   padding: 0.4rem 0.75rem;

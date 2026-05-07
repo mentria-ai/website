@@ -386,6 +386,10 @@ canvas {
 <script>
 (() => {
   const canvas = document.getElementById('game');
+  if (window.innerWidth <= 720) {
+    canvas.width = 640;
+    canvas.height = 1100;
+  }
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
 

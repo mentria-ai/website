@@ -104,20 +104,7 @@ eleventyComputed:
   </div>
 </template>
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria Countdown Timer",
-  "operatingSystem": "Web",
-  "applicationCategory": "ProductivityApplication",
-  "description": "A customizable countdown timer with alarm sound that works offline.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0"
-  }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <script>
 (() => {

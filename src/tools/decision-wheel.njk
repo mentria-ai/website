@@ -62,20 +62,7 @@ eleventyComputed:
 </section>
 {% include "terminal-frame-close.njk" %}
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria Decision Wheel",
-  "operatingSystem": "Web",
-  "applicationCategory": "ProductivityApplication",
-  "description": "A minimal offline-ready decision wheel that helps you commit to an answer.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0"
-  }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <script>
 (() => {

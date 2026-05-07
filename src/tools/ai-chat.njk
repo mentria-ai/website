@@ -66,17 +66,7 @@ eleventyComputed:
 </section>
 {% include "terminal-frame-close.njk" %}
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria AI Chat",
-  "operatingSystem": "Web",
-  "applicationCategory": "UtilitiesApplication",
-  "description": "Chat with a local AI model (Qwen3.5-0.8B) running entirely in your browser via WebGPU. Supports image input.",
-  "offers": { "@type": "Offer", "price": "0" }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 

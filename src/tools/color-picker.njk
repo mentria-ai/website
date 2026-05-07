@@ -87,20 +87,7 @@ eleventyComputed:
 </section>
 {% include "terminal-frame-close.njk" %}
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria Color Picker",
-  "operatingSystem": "Web",
-  "applicationCategory": "DesignApplication",
-  "description": "Pick colors, generate harmonious palettes, and copy values in HEX, RGB, and HSL. Works offline.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0"
-  }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <script>
 (() => {

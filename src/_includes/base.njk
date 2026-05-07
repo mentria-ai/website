@@ -99,12 +99,88 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "{{ site.title }}",
-      "description": "{{ metaDescription }}",
-      "url": "{{ site.siteUrl }}"
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "{{ site.siteUrl }}/#organization",
+          "name": "{{ site.title }}",
+          "url": "{{ site.siteUrl }}",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "{{ site.siteUrl }}/assets/img/icon-512x512.png",
+            "width": 512,
+            "height": 512
+          },
+          "sameAs": [
+            "https://github.com/mentria-ai",
+            "https://huggingface.co/mentriaai",
+            "https://x.com/mentria_ai"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "{{ site.siteUrl }}/#website",
+          "url": "{{ site.siteUrl }}",
+          "name": "{{ site.title }}",
+          "description": "{{ ('site.metaDescription' | t) | default(site.metaDescription) }}",
+          "publisher": { "@id": "{{ site.siteUrl }}/#organization" },
+          "inLanguage": "{{ lang | default('en') }}"
+        }
+      ]
     }
     </script>
+
+    {%- set localePrefix = (locale.pathPrefix | default("")) -%}
+    {%- set isHomePage = (page.url == "/" or page.url == localePrefix + "/") -%}
+    {%- set inTools = page.url | startsWith(localePrefix + "/tools/") -%}
+    {%- set isToolIndex = (page.url == localePrefix + "/tools/") -%}
+    {%- set inFeed = page.url | startsWith(localePrefix + "/feed/") -%}
+    {%- set isFeedIndex = (page.url == localePrefix + "/feed/") -%}
+    {%- set isPost = tags and ("post" in tags) -%}
+    {%- if not isHomePage %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": {{ ("nav.home" | t) | dump | safe }}, "item": "{{ site.siteUrl }}{{ localePrefix }}/" }
+        {%- if inTools %},
+        { "@type": "ListItem", "position": 2, "name": {{ ("nav.tools" | t) | dump | safe }}, "item": "{{ site.siteUrl }}{{ localePrefix }}/tools/" }
+        {%- if not isToolIndex %},
+        { "@type": "ListItem", "position": 3, "name": {{ title | dump | safe }}, "item": "{{ pageUrl }}" }
+        {%- endif %}
+        {%- elif inFeed %},
+        { "@type": "ListItem", "position": 2, "name": {{ ("nav.feed" | t) | dump | safe }}, "item": "{{ site.siteUrl }}{{ localePrefix }}/feed/" }
+        {%- if not isFeedIndex %},
+        { "@type": "ListItem", "position": 3, "name": {{ title | dump | safe }}, "item": "{{ pageUrl }}" }
+        {%- endif %}
+        {%- endif %}
+      ]
+    }
+    </script>
+    {%- endif %}
+
+    {%- if isPost %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "{{ pageUrl }}" },
+      "headline": {{ title | dump | safe }},
+      "description": {{ (description or "") | dump | safe }},
+      {%- if cover %}
+      "image": "{{ site.siteUrl }}{{ cover }}",
+      {%- else %}
+      "image": "{{ socialImage }}",
+      {%- endif %}
+      "datePublished": "{{ page.date.toISOString() }}",
+      "dateModified": "{{ page.date.toISOString() }}",
+      "author": { "@type": "Organization", "@id": "{{ site.siteUrl }}/#organization" },
+      "publisher": { "@id": "{{ site.siteUrl }}/#organization" },
+      "inLanguage": "{{ lang | default('en') }}"
+    }
+    </script>
+    {%- endif %}
 </head>
 <body class="scanlines">
     {% include "header.njk" %}

@@ -82,17 +82,7 @@ eleventyComputed:
 
 </div>
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria Minesweeper",
-  "operatingSystem": "Web",
-  "applicationCategory": "GameApplication",
-  "description": "Minesweeper styled as a terminal HUD. Three difficulties, mouse and touch input, best-time tracking. Runs locally, plays offline.",
-  "offers": { "@type": "Offer", "price": "0" }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <style>
 html, body { overscroll-behavior: none; }

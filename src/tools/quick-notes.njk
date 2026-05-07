@@ -67,20 +67,7 @@ eleventyComputed:
 </section>
 {% include "terminal-frame-close.njk" %}
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria Quick Notes",
-  "operatingSystem": "Web",
-  "applicationCategory": "ProductivityApplication",
-  "description": "A minimal scratchpad that saves to your browser with multiple notes and localStorage persistence.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0"
-  }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <script>
 (() => {

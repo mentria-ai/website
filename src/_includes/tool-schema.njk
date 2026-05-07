@@ -1,0 +1,28 @@
+{%- set _isAI = page.fileSlug == "ai-chat" or page.fileSlug == "quote" -%}
+{%- set _isGame = page.fileSlug == "tetris" or page.fileSlug == "pong" or page.fileSlug == "flappy" or page.fileSlug == "minesweeper" -%}
+{%- set _category = toolSchemaCategory | default(_isGame and "GameApplication" or "UtilitiesApplication") -%}
+{%- set _browserReq = toolSchemaBrowserReq | default(_isAI and "Requires WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+" or "Requires JavaScript") -%}
+{%- set _toolUrl = site.siteUrl ~ page.url -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": {{ title | dump | safe }},
+  "url": "{{ _toolUrl }}",
+  "description": {{ description | dump | safe }},
+  "applicationCategory": "{{ _category }}",
+  "operatingSystem": "Any (modern web browser)",
+  "browserRequirements": "{{ _browserReq }}",
+  "softwareVersion": "{{ buildHash | default('1.0') }}",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "featureList": [
+    "Runs entirely in your browser",
+    "No data leaves your device",
+    "No API key required",
+    "Works offline once cached"
+  ],
+  "publisher": { "@id": "{{ site.siteUrl }}/#organization" },
+  "inLanguage": "{{ lang | default('en') }}"
+}
+</script>

@@ -74,17 +74,7 @@ eleventyComputed:
 </section>
 {% include "terminal-frame-close.njk" %}
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria Markdown → PDF",
-  "operatingSystem": "Web",
-  "applicationCategory": "ProductivityApplication",
-  "description": "Write markdown in your browser, see a live preview, and download a clean professional PDF.",
-  "offers": { "@type": "Offer", "price": "0" }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <script type="module">
 const COPY = {

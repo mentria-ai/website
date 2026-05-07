@@ -160,17 +160,7 @@ eleventyComputed:
 </section>
 {% include "terminal-frame-close.njk" %}
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria Invoice Generator",
-  "operatingSystem": "Web",
-  "applicationCategory": "BusinessApplication",
-  "description": "Build clean, single-page invoices in your browser. Auto-saves, prints to A4, supports JSON import/export.",
-  "offers": { "@type": "Offer", "price": "0" }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <script>
 (() => {

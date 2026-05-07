@@ -47,17 +47,7 @@ eleventyComputed:
 </section>
 {% include "terminal-frame-close.njk" %}
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria Motivational Quote",
-  "operatingSystem": "Web",
-  "applicationCategory": "UtilitiesApplication",
-  "description": "AI-generated original motivational quotes running locally in your browser via custom finetuned Qwen3.5-0.8B model.",
-  "offers": { "@type": "Offer", "price": "0" }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 

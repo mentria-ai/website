@@ -69,17 +69,7 @@ eleventyComputed:
 </section>
 {% include "terminal-frame-close.njk" %}
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria Infinite Radio",
-  "description": "AI-generated epic cinematic music streaming infinitely. Learns your taste locally. No data leaves your device.",
-  "applicationCategory": "MultimediaApplication",
-  "operatingSystem": "Web",
-  "offers": { "@type": "Offer", "price": "0" }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <script>
 window.RADIO_COPY = {

@@ -76,20 +76,7 @@ eleventyComputed:
 </section>
 {% include "terminal-frame-close.njk" %}
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mentria Coin Flip",
-  "operatingSystem": "Web",
-  "applicationCategory": "UtilitiesApplication",
-  "description": "Animated heads or tails coin flip with optional best-of-N series mode. Works offline.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0"
-  }
-}
-</script>
+{% include "tool-schema.njk" %}
 
 <script>
 (() => {

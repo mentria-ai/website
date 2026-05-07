@@ -1,95 +1,40 @@
-# Mentria (mentria.ai)
+# Mentria
 
-Static-first blog + tool stack powered by [Eleventy](https://www.11ty.dev/), Nunjucks templates, HTMX-friendly markup, and a lightweight PWA shell. The goal is to make publishing long-form posts, single-page utility apps, or playful media experiments as simple as dropping files into `src/` and running one command.
+[mentria.ai](https://mentria.ai) — a creative studio shipping browser-native AI tools and serialized writing. The headline experiment is a **custom WebGPU inference engine** that runs **Qwen3.5-0.8B** locally in your browser, with **dynamic LoRA hot-swapping** for task-specific behavior. No server, no API key, no account, no data leaving your device.
 
----
+## What's novel here
 
-## What’s inside
+**A from-scratch browser LLM stack.** Most "run an LLM in your browser" projects wrap [transformers.js](https://github.com/huggingface/transformers.js) or [WebLLM](https://github.com/mlc-ai/web-llm). Mentria's engine is its own runtime — written from scratch against raw WebGPU, with WGSL compute shaders for matmul, the Gated DeltaNet recurrent state update (Qwen3.5's hybrid Mamba-style linear-attention layers), grouped-query attention with partial RoPE, and a fused base + LoRA matmul that lets adapters swap in under a second.
 
-- **Eleventy 3** with Nunjucks layouts and computed front‑matter.
-- **Reusable chrome** via `_includes/base.njk`, `_includes/header.njk`, `_includes/footer.njk`.
-- **Content buckets**
-  - `src/feed` – Markdown posts (`tags: ["post"]` show up on the feed index + homepage cards).
-  - `src/tools` – Each `.njk` file or folder becomes `/tools/<slug>/`.
-  - `src/assets` – Images and datasets (copied verbatim during the build).
-- **Global data** in `src/_data`
-  - `site.json` drives titles, descriptions, and social tags.
-  - `tools.json` feeds the homepage + `/tools` directory cards.
-- **PWA plumbing** – `src/manifest.json` + `src/sw.js` register automatically from the base layout.
+**Why bother building it.** Off-the-shelf browser LLM runtimes don't expose the internals you'd need to attach/detach LoRA adapters at runtime. Mentria does. A 2–8 MB adapter at rank 8 is trivially downloadable, so a single 660 MB base model can become a quote generator, a chat assistant, or anything else by hot-swapping spice racks at the matmul boundary.
 
-Legacy static output (`build/`) is no longer tracked. The raw content that mattered (Mahabharata translations, audio, etc.) now lives under `src/assets/**` so it stays versioned while the final HTML is generated on demand.
+**What it integrates with.** Two production tools rely on the engine today:
 
----
+- **[AI Chat](https://mentria.ai/tools/ai-chat/)** — text + vision chat with the base Qwen3.5-0.8B model. Image inputs go through a 12-layer ViT vision tower (also running on WebGPU). Conversation history stays in memory; nothing reaches a server.
+- **[Motivational Quote](https://mentria.ai/tools/quote/)** — same base model, with a curated quote-corpus LoRA loaded on demand. First visit downloads weights once, cached locally; subsequent visits start instantly.
 
-## Quick start
+Both pages gate the 660 MB model fetch behind user intent so the LCP element on first paint is a static CTA, not a long progress bar.
+
+## SEO-relevant terms
+
+If you found this from a search, the relevant keywords are: **browser llm**, **webgpu llm**, **on-device llm**, **qwen in browser**, **qwen3 webgpu**, **lora in browser**, **client-side llm**, **private ai chat**, **webgpu inference engine**, **dynamic lora swap browser**.
+
+## The rest of the site
+
+Beyond the AI tools, Mentria publishes ~15 small browser-native utilities and games — markdown→PDF, base64 codec, color picker, decision wheel, countdown timer, infinite AI-generated radio, plus terminal-aesthetic takes on tetris/pong/flappy/minesweeper. Everything works offline (PWA), in 5 languages (en/es/pt-BR/fr/ja), with zero third-party scripts and self-hosted fonts.
+
+## Stack
+
+Static-first: **Eleventy 3** + Nunjucks templates, vanilla JS, single runtime dependency. The whole thing builds to a flat directory and ships from GitHub Pages.
 
 ```bash
-git clone https://github.com/<you>/website.git
-cd website
 npm install
-npm run start   # hot-reload dev server on http://localhost:8080
-npm run build   # writes production files to ./build
+npm run start    # http://localhost:8080
+npm run build    # → ./build
 ```
 
-Node 20+ works, Node 22 LTS is what the CI uses (`actions/setup-node@v4`).
-
----
-
-## Adding content
-
-### Feed entries
-
-1. Create `src/feed/my-entry.md`.
-2. Front matter **must** include `tags: ["post"]`.
-3. Optionally set `description`, `date`, and `permalink`.
-
-Eleventy will add it to `collections.post`, which feeds `/feed/` and the homepage “Latest feed entries” list.
-
-### Tools / micro apps
-
-1. Create a template (HTML/Nunjucks or Markdown) under `src/tools/<slug>.njk`.
-2. Add an entry to `src/_data/tools.json` so it appears in cards:
-
-```json
-{
-  "slug": "starter-tool",
-  "title": "Starter Tool",
-  "summary": "Duplicate me to launch the next utility.",
-  "category": "Utility"
-}
-```
-
-3. Use inline `<script>` blocks, import HTMX, or reference files under `src/assets/js/`.
-
-### Assets & datasets
-
-- Drop general static files into `src/assets/**`.
-- Large reference corpora (e.g., `src/assets/data/reference/…`) are copied via passthrough.
-
----
-
-## PWA + HTMX approach
-
-- `base.njk` injects `<link rel="manifest">`, an HTMX CDN import, and registers `/sw.js`.
-- Update `src/sw.js` if you add more offline-critical routes; it currently caches the shell + CSS.
-- Feel free to swap HTMX for vanilla JS on a per-tool basis—there’s no front-end framework lock-in.
-
----
-
-## Deployment (GitHub Pages)
-
-`.github/workflows/static.yml` handles the pipeline:
-
-1. Checkout repo.
-2. `actions/setup-node@v4` (Node 22, npm cache).
-3. `npm ci && npm run build`.
-4. Upload the `build/` artifact.
-5. Deploy with `actions/deploy-pages@v4`.
-
-Pushes to `main` automatically publish; you can also trigger it manually via the “Run workflow” button.
-
----
+Deeper engineering notes on the runtime live in [`webgpu_engine_guide.md`](webgpu_engine_guide.md) and [`custom_inference_engine.md`](custom_inference_engine.md).
 
 ## License
 
-[MIT](LICENSE) – go build your own lab if you like this shape. Contributions welcome once the new structure settles in.
+MIT — see [LICENSE](LICENSE).

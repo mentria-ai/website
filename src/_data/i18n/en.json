@@ -151,6 +151,11 @@
       "title": "Tetris",
       "lede": "Stack tetrominoes. Clear lines. Speed ramps every 10 lines. Pieces in cyan, purple, pink, amber, green — the Mentria palette.",
       "tldr": "Browser-native Tetris with a terminal aesthetic. HTML5 Canvas, accurate piece spawning with Super Rotation System logic, hold queue, ghost piece, level-based gravity. High score saved to localStorage. No install, no signup, no third-party scripts — game logic and timing all run client-side and the game works offline."
+    },
+    "search": {
+      "title": "Search",
+      "lede": "Find tools and feed posts. Type any query — keyword or natural language.",
+      "tldr": "Site-wide search backed by a build-time index of every tool and feed post in 5 languages. Default mode is instant fuzzy keyword matching across titles, descriptions, and TL;DRs — no model download required, no server round-trip. When the Qwen3.5-0.8B model is already cached locally (after using AI Chat or Quote), an optional AI summary appears above the results."
     }
   },
   "game": {
@@ -569,6 +574,21 @@
       "err_delete_prefix": "Failed to delete cache: ",
       "empty_response": "(empty response)",
       "confirm_delete": "Delete the cached model (~660 MB)? You will need to re-download it next time."
+    },
+    "search": {
+      "ph_input": "Search…",
+      "result_count_one": "{n} result",
+      "result_count_many": "{n} results",
+      "no_results": "No results. Try a different keyword.",
+      "empty_hint": "Type a tool name, a feature, or describe what you're looking for.",
+      "ai_summary_label": "AI summary",
+      "ai_run_btn": "Generate AI summary",
+      "ai_thinking": "Generating…",
+      "ai_unavailable": "Open AI Chat or Quote once to cache the model — then AI summaries appear here.",
+      "type_all": "All",
+      "type_tool": "Tools",
+      "type_post": "Posts",
+      "type_chapter": "Chapters"
     }
   }
 }

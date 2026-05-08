@@ -1,5 +1,11 @@
 [
   {
+    "slug": "search",
+    "title": "Search",
+    "summary": "AI-aware site search across tools and feed posts. Falls back to instant fuzzy keyword matching; uses Qwen3.5-0.8B for natural-language summaries when the model is already cached locally.",
+    "category": "AI"
+  },
+  {
     "slug": "decision-wheel",
     "title": "Decision Wheel",
     "summary": "Offline-ready spinner for quick calls: Yes, No, Up to you, or Wait & try again.",

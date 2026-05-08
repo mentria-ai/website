@@ -1,0 +1,418 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/search/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.search.title' | t }}"
+  description: "{{ 'tools.search.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">search</span></p>
+  <h1>{{ "tools.search.title" | t }}</h1>
+  <p>{{ "tools.search.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "search.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="sx">
+  <div class="sx__bar">
+    <svg class="sx__bar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="sx-input" class="sx__input" placeholder="{{ 'tool.search.ph_input' | t }}" autocomplete="off" autocapitalize="off" spellcheck="false">
+  </div>
+
+  <div class="sx__filters" id="sx-filters">
+    <button class="sx__chip is-active" data-type="all">{{ "tool.search.type_all" | t }}</button>
+    <button class="sx__chip" data-type="tool">{{ "tool.search.type_tool" | t }}</button>
+    <button class="sx__chip" data-type="post">{{ "tool.search.type_post" | t }}</button>
+    <button class="sx__chip" data-type="chapter">{{ "tool.search.type_chapter" | t }}</button>
+  </div>
+
+  <div class="sx__ai" id="sx-ai" hidden>
+    <div class="sx__ai-head">
+      <span class="sx__ai-label">{{ "tool.search.ai_summary_label" | t }}</span>
+      <button class="sx__ai-btn" id="sx-ai-btn">{{ "tool.search.ai_run_btn" | t }}</button>
+    </div>
+    <div class="sx__ai-body" id="sx-ai-body"></div>
+  </div>
+
+  <p class="sx__count" id="sx-count" aria-live="polite"></p>
+  <ol class="sx__results" id="sx-results"></ol>
+  <p class="sx__hint" id="sx-hint">{{ "tool.search.empty_hint" | t }}</p>
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(() => {
+  const COPY = {
+    placeholder:    {{ ("tool.search.ph_input"          | t) | dump | safe }},
+    countOne:       {{ ("tool.search.result_count_one"  | t) | dump | safe }},
+    countMany:      {{ ("tool.search.result_count_many" | t) | dump | safe }},
+    noResults:      {{ ("tool.search.no_results"        | t) | dump | safe }},
+    emptyHint:      {{ ("tool.search.empty_hint"        | t) | dump | safe }},
+    aiThinking:     {{ ("tool.search.ai_thinking"       | t) | dump | safe }},
+    aiUnavailable:  {{ ("tool.search.ai_unavailable"    | t) | dump | safe }}
+  };
+  const LANG = {{ (lang | default("en")) | dump | safe }};
+  const LOCALE_PREFIX = {{ (locale.pathPrefix | default("")) | dump | safe }};
+  const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
+  const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
+
+  const $input   = document.getElementById('sx-input');
+  const $count   = document.getElementById('sx-count');
+  const $results = document.getElementById('sx-results');
+  const $hint    = document.getElementById('sx-hint');
+  const $ai      = document.getElementById('sx-ai');
+  const $aiBtn   = document.getElementById('sx-ai-btn');
+  const $aiBody  = document.getElementById('sx-ai-body');
+  const $filters = document.getElementById('sx-filters');
+
+  let INDEX = [];
+  let activeType = 'all';
+  let lastResults = [];
+  let aiEngine = null;
+  let modelCacheChecked = false;
+
+  function normalize(s) {
+    return (s || '').toString().toLowerCase()
+      .normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  }
+
+  function tokenize(s) {
+    return normalize(s).split(/[^a-z0-9]+/).filter(Boolean);
+  }
+
+  function scoreEntry(entry, qTokens, qNorm) {
+    const haystackTitle = normalize(entry.title);
+    const haystackDesc  = normalize(entry.description);
+    const haystackTldr  = normalize(entry.tldr);
+    const haystackAll   = haystackTitle + ' ' + haystackDesc + ' ' + haystackTldr + ' ' + normalize(entry.slug) + ' ' + normalize(entry.category);
+
+    let score = 0;
+    if (haystackTitle.startsWith(qNorm)) score += 200;
+    if (haystackTitle.includes(qNorm)) score += 100;
+    if (haystackAll.includes(qNorm)) score += 25;
+
+    for (const t of qTokens) {
+      if (haystackTitle.includes(t)) score += 30;
+      if (haystackDesc.includes(t))  score += 12;
+      if (haystackTldr.includes(t))  score += 6;
+      if (normalize(entry.slug).includes(t)) score += 20;
+      if (normalize(entry.category).includes(t)) score += 4;
+    }
+    return score;
+  }
+
+  function snippet(text, qNorm) {
+    if (!text) return '';
+    const norm = normalize(text);
+    const idx = norm.indexOf(qNorm);
+    if (idx < 0 || qNorm.length < 2) return text.slice(0, 140) + (text.length > 140 ? '…' : '');
+    const start = Math.max(0, idx - 40);
+    const end   = Math.min(text.length, idx + qNorm.length + 80);
+    return (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
+  }
+
+  function escape(s) {
+    return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function highlight(text, qNorm) {
+    if (!qNorm || qNorm.length < 2) return escape(text);
+    const out = escape(text);
+    const re = new RegExp(qNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return out.replace(re, m => '<mark>' + m + '</mark>');
+  }
+
+  function search(query) {
+    const qNorm = normalize(query.trim());
+    if (!qNorm) return [];
+    const qTokens = tokenize(query);
+
+    const scored = [];
+    for (const entry of INDEX) {
+      if (entry.lang !== LANG) continue;
+      if (activeType !== 'all' && entry.type !== activeType) continue;
+      const score = scoreEntry(entry, qTokens, qNorm);
+      if (score > 0) scored.push({ entry, score });
+    }
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 30).map(s => s.entry);
+  }
+
+  function pluralize(n) {
+    return (n === 1 ? COPY.countOne : COPY.countMany).replace('{n}', n);
+  }
+
+  function render(results, qNorm) {
+    lastResults = results;
+    $results.innerHTML = '';
+    if (results.length === 0) {
+      $count.textContent = qNorm ? COPY.noResults : '';
+      $hint.style.display = qNorm ? 'none' : '';
+      $ai.hidden = true;
+      return;
+    }
+    $count.textContent = pluralize(results.length);
+    $hint.style.display = 'none';
+    for (const r of results) {
+      const li = document.createElement('li');
+      li.className = 'sx__result';
+      li.innerHTML =
+        '<a class="sx__result-link" href="' + escape(r.url) + '">' +
+          '<span class="sx__result-type">' + escape(r.type) + '</span>' +
+          '<h3 class="sx__result-title">' + highlight(r.title, qNorm) + '</h3>' +
+          (r.description ? '<p class="sx__result-desc">' + highlight(snippet(r.description, qNorm), qNorm) + '</p>' : '') +
+        '</a>';
+      $results.appendChild(li);
+    }
+    if (modelCacheChecked && aiEngine) $ai.hidden = false;
+  }
+
+  // ── Cache detection ─────────────────────────────────────────────
+  // Try to reach the engine bundle and probe whether a previous visit
+  // has cached the model weights. Done once per page load.
+  async function detectCachedModel() {
+    if (modelCacheChecked) return;
+    modelCacheChecked = true;
+    if (!('caches' in window) || !navigator.gpu) return;
+    try {
+      const keys = await caches.keys();
+      const hit = keys.some(k => k.includes('mentria') || k.includes('huggingface'));
+      if (!hit) return;
+      // Found cached weights — flag UI; defer engine init until user clicks.
+      aiEngine = { cached: true };
+      if (lastResults.length) $ai.hidden = false;
+    } catch (_) { /* ignore */ }
+  }
+
+  // ── AI summary ──────────────────────────────────────────────────
+  // LoRA-ready hook: when a "search-rerank" adapter ships under
+  // /loras/search/ on the model bucket, wire it via engine.swapAdapter()
+  // before the generate() call below.
+  async function runAISummary() {
+    if (!lastResults.length) return;
+    $aiBtn.disabled = true;
+    $aiBody.textContent = COPY.aiThinking;
+
+    try {
+      if (!aiEngine || aiEngine.cached) {
+        const { MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs');
+        const engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+        await engine.init();
+        await engine.loadModel({
+          modelUrl: MENTRIA_MODEL_BASE,
+          shards: ['qwen3.5-0.8b-q4.safetensors'],
+          tokenizerUrl: MENTRIA_MODEL_BASE
+        });
+        aiEngine = engine;
+      }
+
+      const top = lastResults.slice(0, 5).map((r, i) =>
+        (i + 1) + '. ' + r.title + ' — ' + (r.description || '')).join('\n');
+      const messages = [
+        { role: 'system', content:
+          'You are a concise search assistant for a personal site. ' +
+          'Given a user query and the top 5 ranked results, write ONE sentence ' +
+          '(max 25 words) that helps the user pick a result. No preamble. ' +
+          'Reference results by number when useful.' },
+        { role: 'user', content: 'Query: ' + $input.value.trim() + '\n\nTop results:\n' + top }
+      ];
+
+      let buffer = '';
+      $aiBody.textContent = '';
+      await aiEngine.generate({
+        messages, maxTokens: 96,
+        temperature: 0.2, topP: 0.9, topK: 30,
+        repetitionPenalty: 1.1, enableThinking: false
+      }, (event) => {
+        if (typeof event.token === 'string' && event.token.length > 0) {
+          if (/^<\|[^|]*\|>$/.test(event.token)) return;
+          buffer += event.token;
+          $aiBody.textContent = buffer.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        }
+      });
+    } catch (err) {
+      console.warn('AI summary failed:', err);
+      $aiBody.textContent = COPY.aiUnavailable;
+    } finally {
+      $aiBtn.disabled = false;
+    }
+  }
+
+  // ── Boot ────────────────────────────────────────────────────────
+  fetch('/search-index.json').then(r => r.json()).then(idx => {
+    INDEX = idx;
+    const params = new URLSearchParams(location.search);
+    const initial = params.get('q') || '';
+    if (initial) { $input.value = initial; runQuery(initial); }
+    $input.focus();
+  }).catch(err => {
+    console.error('search index load failed:', err);
+    $hint.textContent = COPY.noResults;
+  });
+
+  function runQuery(q) {
+    const results = search(q);
+    const qNorm = normalize(q.trim());
+    render(results, qNorm);
+    detectCachedModel();
+    const url = new URL(location.href);
+    if (q.trim()) url.searchParams.set('q', q.trim());
+    else url.searchParams.delete('q');
+    history.replaceState(null, '', url);
+  }
+
+  let debounce = null;
+  $input.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => runQuery($input.value), 80);
+  });
+  $input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); runQuery($input.value); }
+  });
+
+  $filters.addEventListener('click', e => {
+    const btn = e.target.closest('[data-type]');
+    if (!btn) return;
+    activeType = btn.dataset.type;
+    Array.from($filters.querySelectorAll('[data-type]')).forEach(b =>
+      b.classList.toggle('is-active', b === btn));
+    runQuery($input.value);
+  });
+
+  $aiBtn.addEventListener('click', runAISummary);
+})();
+</script>
+
+<style>
+.sx { display: flex; flex-direction: column; gap: 1rem; max-width: 720px; margin: 0 auto; }
+.sx__bar {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--term-border);
+  border-radius: 999px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.sx__bar:focus-within {
+  border-color: var(--syn-cyan);
+  box-shadow: 0 0 12px rgba(34,211,238,0.18);
+}
+.sx__bar-icon { color: var(--term-muted); flex-shrink: 0; }
+.sx__input {
+  flex: 1; min-width: 0;
+  background: transparent; border: none; outline: none;
+  color: var(--term-fg);
+  font-family: var(--font-mono); font-size: 1rem;
+}
+.sx__input::placeholder { color: var(--term-muted); opacity: 0.7; }
+
+.sx__filters { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.sx__chip {
+  font-family: var(--font-mono); font-size: 0.75rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--term-border);
+  background: transparent;
+  color: var(--term-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.sx__chip:hover { color: var(--term-fg); border-color: rgba(255,255,255,0.18); }
+.sx__chip.is-active {
+  background: rgba(34,211,238,0.12);
+  border-color: rgba(34,211,238,0.35);
+  color: var(--syn-cyan);
+}
+
+.sx__ai {
+  border: 1px solid rgba(167,139,250,0.25);
+  background: rgba(167,139,250,0.05);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+.sx__ai-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.sx__ai-label {
+  font-family: var(--font-mono); font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--syn-purple);
+}
+.sx__ai-btn {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167,139,250,0.4);
+  background: rgba(167,139,250,0.1);
+  color: var(--syn-purple);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.sx__ai-btn:hover:not(:disabled) {
+  background: rgba(167,139,250,0.2);
+  border-color: var(--syn-purple);
+}
+.sx__ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.sx__ai-body {
+  margin-top: 0.6rem;
+  font-family: var(--font-mono); font-size: 0.85rem;
+  line-height: 1.55; color: var(--term-fg);
+  min-height: 1.55em;
+}
+.sx__ai-body:empty::before { content: ''; }
+
+.sx__count {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  color: var(--term-muted); margin: 0;
+}
+.sx__hint {
+  font-family: var(--font-mono); font-size: 0.85rem;
+  color: var(--term-muted); margin: 0;
+  text-align: center; padding: 1.5rem 0;
+}
+.sx__results { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.sx__result {}
+.sx__result-link {
+  display: block; padding: 0.85rem 1rem;
+  border: 1px solid var(--term-border);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.015);
+  text-decoration: none; color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.sx__result-link:hover {
+  border-color: rgba(34,211,238,0.4);
+  transform: translateY(-1px);
+}
+.sx__result-type {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 0.6rem;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--syn-cyan);
+  margin-bottom: 0.3rem;
+}
+.sx__result-title {
+  font-family: var(--font-mono); font-size: 1rem;
+  margin: 0 0 0.25rem; color: var(--term-fg);
+}
+.sx__result-desc {
+  font-size: 0.85rem; line-height: 1.5;
+  color: var(--term-muted); margin: 0;
+}
+.sx__result mark {
+  background: rgba(34,211,238,0.2);
+  color: inherit;
+  padding: 0 0.1em;
+  border-radius: 2px;
+}
+
+@media (max-width: 480px) {
+  .sx__input { font-size: 16px; }
+  .sx__bar { padding: 0.6rem 0.85rem; }
+}
+</style>

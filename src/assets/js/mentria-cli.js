@@ -5,6 +5,15 @@
 (function () {
   'use strict';
 
+  function localePrefix() {
+    var path = window.location.pathname || '/';
+    var prefixes = ['/es', '/pt-br', '/fr', '/ja'];
+    for (var i = 0; i < prefixes.length; i++) {
+      if (path === prefixes[i] || path.indexOf(prefixes[i] + '/') === 0) return prefixes[i];
+    }
+    return '';
+  }
+
   const COMMANDS = {
     help: {
       description: 'list available commands',
@@ -12,7 +21,9 @@
         var lines = ['Available commands:', ''];
         var keys = Object.keys(COMMANDS);
         for (var i = 0; i < keys.length; i++) {
-          lines.push('  ' + keys[i].padEnd(10) + ' — ' + COMMANDS[keys[i]].description);
+          var cmd = COMMANDS[keys[i]];
+          var name = cmd.usage || keys[i];
+          lines.push('  ' + name.padEnd(18) + ' — ' + cmd.description);
         }
         return { lines: lines, type: 'result' };
       }
@@ -25,15 +36,27 @@
           toolsSection.scrollIntoView({ behavior: 'smooth' });
           return { lines: ['> scrolling to tools...'], type: 'result' };
         }
-        window.location.href = '/tools/';
+        window.location.href = localePrefix() + '/tools/';
         return { lines: ['> navigating to /tools/...'], type: 'result' };
       }
     },
     feed: {
       description: 'view the feed',
       run: function () {
-        window.location.href = '/feed/';
+        window.location.href = localePrefix() + '/feed/';
         return { lines: ['> navigating to /feed/...'], type: 'result' };
+      }
+    },
+    search: {
+      description: 'search the site (e.g. `search base64`)',
+      usage: 'search <query>',
+      argv: true,
+      run: function (args) {
+        var query = (args || '').trim();
+        var dest = localePrefix() + '/tools/search/';
+        if (query) dest += '?q=' + encodeURIComponent(query);
+        window.location.href = dest;
+        return { lines: ['> navigating to ' + dest + '...'], type: 'result' };
       }
     },
     about: {
@@ -88,21 +111,24 @@
     inputEl.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         e.preventDefault();
-        var cmd = inputEl.value.trim().toLowerCase();
+        var raw = inputEl.value.trim();
         inputEl.value = '';
-        if (!cmd) return;
+        if (!raw) return;
+
+        // Split into command + remaining args.
+        var spaceIdx = raw.indexOf(' ');
+        var name = (spaceIdx === -1 ? raw : raw.slice(0, spaceIdx)).toLowerCase();
+        var args = (spaceIdx === -1 ? '' : raw.slice(spaceIdx + 1)).trim();
 
         // Add to history
-        history.unshift(cmd);
+        history.unshift(raw);
         if (history.length > MAX_HISTORY) history.pop();
         historyIndex = -1;
 
-        // Echo command
-        appendLine(outputEl, '$ ' + cmd, 'command');
+        appendLine(outputEl, '$ ' + raw, 'command');
 
-        // Execute
-        if (COMMANDS[cmd]) {
-          var result = COMMANDS[cmd].run();
+        if (COMMANDS[name]) {
+          var result = COMMANDS[name].argv ? COMMANDS[name].run(args) : COMMANDS[name].run();
           if (result.type === 'clear') {
             outputEl.innerHTML = '';
           } else {
@@ -111,10 +137,9 @@
             }
           }
         } else {
-          appendLine(outputEl, 'command not found: ' + cmd + ". type 'help' for available commands.", 'error');
+          appendLine(outputEl, 'command not found: ' + name + ". type 'help' for available commands.", 'error');
         }
 
-        // Scroll output into view
         outputEl.scrollTop = outputEl.scrollHeight;
       }
 

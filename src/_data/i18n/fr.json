@@ -151,6 +151,11 @@
       "title": "Tetris",
       "lede": "Empilez des tétrominos. Effacez des lignes. La vitesse augmente toutes les 10 lignes. Pièces en cyan, violet, rose, ambre, vert — la palette Mentria.",
       "tldr": "Tetris natif navigateur à l'esthétique terminal. HTML5 Canvas, apparition de pièces fidèle avec la logique Super Rotation System, file de hold, pièce fantôme, gravité par niveau. Meilleur score sauvegardé dans localStorage. Pas d'installation, pas d'inscription, pas de scripts tiers — logique de jeu et timing côté client, et le jeu fonctionne hors ligne."
+    },
+    "search": {
+      "title": "Recherche",
+      "lede": "Trouve des outils et des publications du fil. Tape n'importe quelle requête — mot-clé ou langage naturel.",
+      "tldr": "Recherche sur l'ensemble du site appuyée par un index construit à la compilation, couvrant chaque outil et chaque publication en 5 langues. Le mode par défaut est une correspondance floue instantanée par mots-clés sur titres, descriptions et TL;DR — sans téléchargement de modèle, sans serveur. Quand le modèle Qwen3.5-0.8B est déjà en cache local (après avoir utilisé AI Chat ou Citation Motivante), un résumé IA optionnel apparaît au-dessus des résultats."
     }
   },
   "game": {
@@ -569,6 +574,21 @@
       "err_delete_prefix": "Échec de la suppression du cache : ",
       "empty_response": "(réponse vide)",
       "confirm_delete": "Supprimer le modèle en cache (~660 Mo) ? Tu devras le retélécharger la prochaine fois."
+    },
+    "search": {
+      "ph_input": "Rechercher…",
+      "result_count_one": "{n} résultat",
+      "result_count_many": "{n} résultats",
+      "no_results": "Aucun résultat. Essaie un autre mot-clé.",
+      "empty_hint": "Tape un nom d'outil, une fonctionnalité, ou décris ce que tu cherches.",
+      "ai_summary_label": "Résumé IA",
+      "ai_run_btn": "Générer le résumé IA",
+      "ai_thinking": "Génération…",
+      "ai_unavailable": "Ouvre AI Chat ou Citation Motivante une fois pour mettre en cache le modèle — les résumés IA apparaîtront ici ensuite.",
+      "type_all": "Tout",
+      "type_tool": "Outils",
+      "type_post": "Publications",
+      "type_chapter": "Chapitres"
     }
   }
 }

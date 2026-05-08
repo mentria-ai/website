@@ -151,6 +151,11 @@
       "title": "Tetris",
       "lede": "Empilhe tetraminós. Limpe linhas. A velocidade acelera a cada 10 linhas. Peças em ciano, roxo, rosa, âmbar e verde — a paleta da Mentria.",
       "tldr": "Tetris nativo do navegador com estética terminal. HTML5 Canvas, geração precisa de peças com a lógica do Super Rotation System, fila de hold, peça-fantasma, gravidade por nível. Recorde salvo no localStorage. Sem instalação, sem cadastro, sem scripts de terceiros — lógica do jogo e timing rodam no cliente e o jogo funciona offline."
+    },
+    "search": {
+      "title": "Busca",
+      "lede": "Encontre ferramentas e posts do feed. Digite qualquer consulta — palavra-chave ou linguagem natural.",
+      "tldr": "Busca em todo o site apoiada por um índice gerado em tempo de build, cobrindo cada ferramenta e post do feed em 5 idiomas. O modo padrão é correspondência fuzzy instantânea por palavras-chave em títulos, descrições e TL;DRs — sem download de modelo, sem ida ao servidor. Quando o modelo Qwen3.5-0.8B já está em cache local (após usar AI Chat ou Frase Motivacional), um resumo IA opcional aparece acima dos resultados."
     }
   },
   "game": {
@@ -569,6 +574,21 @@
       "err_delete_prefix": "Falha ao excluir cache: ",
       "empty_response": "(resposta vazia)",
       "confirm_delete": "Excluir o modelo em cache (~660 MB)? Você precisará baixar de novo na próxima vez."
+    },
+    "search": {
+      "ph_input": "Buscar…",
+      "result_count_one": "{n} resultado",
+      "result_count_many": "{n} resultados",
+      "no_results": "Sem resultados. Tente outra palavra-chave.",
+      "empty_hint": "Digite o nome de uma ferramenta, uma funcionalidade ou descreva o que procura.",
+      "ai_summary_label": "Resumo IA",
+      "ai_run_btn": "Gerar resumo IA",
+      "ai_thinking": "Gerando…",
+      "ai_unavailable": "Abra o AI Chat ou Frase Motivacional uma vez para cachear o modelo — depois resumos IA aparecerão aqui.",
+      "type_all": "Tudo",
+      "type_tool": "Ferramentas",
+      "type_post": "Posts",
+      "type_chapter": "Capítulos"
     }
   }
 }

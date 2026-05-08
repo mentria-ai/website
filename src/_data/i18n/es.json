@@ -151,6 +151,11 @@
       "title": "Tetris",
       "lede": "Apila tetrominós. Despeja líneas. La velocidad aumenta cada 10 líneas. Piezas en cian, púrpura, rosa, ámbar, verde — la paleta de Mentria.",
       "tldr": "Tetris nativo del navegador con estética terminal. HTML5 Canvas, generación de piezas precisa con la lógica del Super Rotation System, cola de hold, pieza fantasma, gravedad por nivel. Récord guardado en localStorage. Sin instalación, sin registro, sin scripts de terceros — la lógica del juego y los tiempos corren del lado del cliente y el juego funciona sin conexión."
+    },
+    "search": {
+      "title": "Búsqueda",
+      "lede": "Encuentra herramientas y entradas del feed. Escribe cualquier consulta — palabra clave o lenguaje natural.",
+      "tldr": "Búsqueda en todo el sitio respaldada por un índice generado al compilar, con todas las herramientas y entradas del feed en 5 idiomas. El modo por defecto es coincidencia difusa instantánea por palabras clave en títulos, descripciones y TL;DRs — sin descarga de modelo, sin servidor. Si el modelo Qwen3.5-0.8B ya está en caché localmente (tras usar AI Chat o Frase Motivacional), aparece un resumen de IA opcional sobre los resultados."
     }
   },
   "game": {
@@ -569,6 +574,21 @@
       "err_delete_prefix": "Fallo al eliminar caché: ",
       "empty_response": "(respuesta vacía)",
       "confirm_delete": "¿Eliminar el modelo en caché (~660 MB)? Tendrás que volver a descargarlo la próxima vez."
+    },
+    "search": {
+      "ph_input": "Buscar…",
+      "result_count_one": "{n} resultado",
+      "result_count_many": "{n} resultados",
+      "no_results": "Sin resultados. Prueba otra palabra clave.",
+      "empty_hint": "Escribe el nombre de una herramienta, una función o describe lo que buscas.",
+      "ai_summary_label": "Resumen IA",
+      "ai_run_btn": "Generar resumen IA",
+      "ai_thinking": "Generando…",
+      "ai_unavailable": "Abre AI Chat o Frase Motivacional una vez para cachear el modelo — luego los resúmenes IA aparecerán aquí.",
+      "type_all": "Todo",
+      "type_tool": "Herramientas",
+      "type_post": "Entradas",
+      "type_chapter": "Capítulos"
     }
   }
 }

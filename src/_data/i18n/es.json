@@ -505,7 +505,14 @@
       "counts_format": "{words} palabras · {chars} caracteres",
       "err_load_lib": "No se pudo cargar la librería de markdown. Revisa tu red o bloqueador.",
       "alert_invalid_md": "Selecciona un archivo Markdown (.md).",
-      "confirm_clear": "¿Limpiar el editor? Tu borrador autoguardado se perderá."
+      "confirm_clear": "¿Limpiar el editor? Tu borrador autoguardado se perderá.",
+      "filename_label": "Nombre del archivo",
+      "filename_placeholder": "haz clic en Generar o escribe un nombre",
+      "btn_ai_generate": "Generar nombre",
+      "btn_ai_generating": "Generando…",
+      "ai_unavailable_hint": "Abre AI Chat o Frase Motivacional una vez para habilitar el nombrado IA",
+      "ai_confirm_download": "El nombrado IA requiere una descarga única del modelo (~660 MB). ¿Continuar?",
+      "btn_ai_loading": "Cargando {pct}%"
     },
     "quote": {
       "tldr_heading": "¿Qué es Frase Motivacional?",

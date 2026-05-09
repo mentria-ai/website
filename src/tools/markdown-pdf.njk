@@ -45,6 +45,15 @@ eleventyComputed:
     </div>
   </div>
 
+  <div class="mp__filename no-print">
+    <label class="mp__filename-label" for="mp-filename">{{ "tool.markdown-pdf.filename_label" | t }}</label>
+    <input class="mp__filename-input" id="mp-filename" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="{{ 'tool.markdown-pdf.filename_placeholder' | t }}">
+    <button class="mp__filename-btn" id="mp-ai-name" type="button" title="{{ 'tool.markdown-pdf.btn_ai_generate' | t }}">
+      <svg class="mp__filename-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3m0 12v3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1M3 12h3m12 0h3M5.6 18.4l2.1-2.1m8.6-8.6 2.1-2.1"/></svg>
+      <span class="mp__filename-btn-label">{{ "tool.markdown-pdf.btn_ai_generate" | t }}</span>
+    </button>
+  </div>
+
   <div class="mp__panes">
     <section class="mp__pane mp__pane--editor" data-tab="edit">
       <header class="mp__pane-header no-print">
@@ -78,10 +87,14 @@ eleventyComputed:
 
 <script type="module">
 const COPY = {
-  saved:        {{ ("tool.markdown-pdf.saved"        | t) | dump | safe }},
-  countsFmt:    {{ ("tool.markdown-pdf.counts_format" | t) | dump | safe }},
-  errLoadLib:   {{ ("tool.markdown-pdf.err_load_lib" | t) | dump | safe }},
-  confirmClear: {{ ("tool.markdown-pdf.confirm_clear" | t) | dump | safe }}
+  saved:              {{ ("tool.markdown-pdf.saved"              | t) | dump | safe }},
+  countsFmt:          {{ ("tool.markdown-pdf.counts_format"      | t) | dump | safe }},
+  errLoadLib:         {{ ("tool.markdown-pdf.err_load_lib"       | t) | dump | safe }},
+  confirmClear:       {{ ("tool.markdown-pdf.confirm_clear"      | t) | dump | safe }},
+  aiGenerating:       {{ ("tool.markdown-pdf.btn_ai_generating"  | t) | dump | safe }},
+  aiUnavailableHint:  {{ ("tool.markdown-pdf.ai_unavailable_hint" | t) | dump | safe }},
+  aiConfirmDownload:  {{ ("tool.markdown-pdf.ai_confirm_download" | t) | dump | safe }},
+  aiLoadingFmt:       {{ ("tool.markdown-pdf.btn_ai_loading"      | t) | dump | safe }}
 };
 
 const inputEl     = document.getElementById('mp-input');
@@ -218,25 +231,198 @@ function slugify(s) {
 
 function deriveTitle() {
   const h1 = previewEl.querySelector('h1');
-  return (h1?.textContent?.trim()) || 'document';
+  if (h1?.textContent?.trim()) return h1.textContent.trim();
+  // No H1 — use the first meaningful words from the source so the fallback
+  // is at least content-shaped instead of a generic 'document'.
+  const cleaned = (inputEl.value || '')
+    .replace(/```[\s\S]*?```/g, ' ')   // drop fenced code blocks
+    .replace(/[#>*_`~\[\]()!]/g, ' ')  // strip markdown punctuation
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned.slice(0, 60) || 'document';
+}
+
+// ── AI naming ────────────────────────────────────────────────────
+// Visible button hook. Lazy-instantiates the WebGPU engine only if a
+// previous visit has cached the Qwen weights. Names are cached by a
+// session-only content hash so re-pasting the same doc restores the
+// last AI-generated name without another inference run.
+const filenameInput = document.getElementById('mp-filename');
+const aiBtn         = document.getElementById('mp-ai-name');
+const aiBtnLabel    = aiBtn?.querySelector('.mp__filename-btn-label');
+const AI_LABEL_DEFAULT = aiBtnLabel?.textContent || '';
+
+let aiEngine = null;
+const aiNameByHash = new Map();
+let lastHash = '';
+
+// Tiny, fast non-cryptographic hash (cyrb53). Fine for a session-only key.
+function contentHash(s) {
+  let h1 = 0xdeadbeef ^ 0, h2 = 0x41c6ce57 ^ 0;
+  s = (s || '').trim();
+  for (let i = 0, ch; i < s.length; i++) {
+    ch = s.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+
+// Mirror the cache probe used by /tools/search/. A positive hit on any
+// mentria/huggingface cache key is a weak signal that the user has
+// touched an AI tool before — actual model load happens on click and
+// will download on demand if the weights aren't truly cached yet.
+const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
+const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
+
+async function detectCachedSignal() {
+  if (!('caches' in window) || !navigator.gpu) return false;
+  try {
+    const keys = await caches.keys();
+    return keys.some(k => k.includes('mentria') || k.includes('huggingface'));
+  } catch (_) {
+    return false;
+  }
+}
+
+async function reflectAvailability() {
+  if (!aiBtn) return;
+  if (!('caches' in window) || !navigator.gpu) {
+    aiBtn.disabled = true;
+    aiBtn.title = COPY.aiUnavailableHint || '';
+    return;
+  }
+  const cached = await detectCachedSignal();
+  aiBtn.disabled = !cached;
+  aiBtn.title = cached ? '' : (COPY.aiUnavailableHint || '');
+}
+
+async function isModelTrulyCached() {
+  if (!('caches' in window)) return false;
+  try {
+    const r = await caches.match(MENTRIA_MODEL_BASE + 'qwen3.5-0.8b-q4.safetensors');
+    return !!r;
+  } catch (_) { return false; }
+}
+
+async function ensureEngine(onProgress) {
+  if (aiEngine && aiEngine.generate) return aiEngine;
+  const { MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs');
+  const engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+  if (typeof onProgress === 'function') engine.onProgress = onProgress;
+  await engine.init();
+  await engine.loadModel({
+    modelUrl: MENTRIA_MODEL_BASE,
+    shards: ['qwen3.5-0.8b-q4.safetensors'],
+    tokenizerUrl: MENTRIA_MODEL_BASE
+  });
+  aiEngine = engine;
+  return engine;
+}
+
+async function aiSuggestFilename(onLoadProgress) {
+  const engine = await ensureEngine(onLoadProgress);
+  if (!engine) return null;
+  const text = (inputEl.value || '').trim().slice(0, 1500);
+  if (text.length < 8) return null;
+  const messages = [
+    { role: 'system', content:
+      'You generate concise filenames from document content. ' +
+      'Reply with ONLY a hyphenated kebab-case slug — lowercase a-z, ' +
+      'digits, and hyphens, max 6 words, no extension, no prose, no quotes.' },
+    { role: 'user', content: 'Document:\n\n' + text + '\n\nReturn just the slug.' }
+  ];
+  let buf = '';
+  await engine.generate({
+    messages, maxTokens: 20,
+    temperature: 0.2, topP: 0.9, topK: 30,
+    repetitionPenalty: 1.1, enableThinking: false
+  }, (event) => {
+    if (typeof event.token === 'string' && event.token.length > 0) {
+      if (/^<\|[^|]*\|>$/.test(event.token)) return;
+      buf += event.token;
+    }
+  });
+  const clean = buf
+    .replace(/<think>[\s\S]*?<\/think>/g, '')
+    .replace(/<\|[^|]*\|>/g, '')
+    .trim()
+    .toLowerCase()
+    .split(/[\n\r]/)[0]
+    .replace(/^[`'"\s]+|[`'"\s.]+$/g, '')
+    .replace(/[^a-z0-9-\s]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 64);
+  return clean.length >= 3 ? clean : null;
+}
+
+async function runAINameGeneration() {
+  if (!aiBtn || aiBtn.disabled) return;
+
+  // If the model file isn't actually in the Cache API, the click would
+  // silently kick off a multi-minute 660 MB download. Confirm first.
+  if (!aiEngine && !(await isModelTrulyCached())) {
+    if (!confirm(COPY.aiConfirmDownload)) return;
+  }
+
+  aiBtn.disabled = true;
+  if (aiBtnLabel) aiBtnLabel.textContent = (COPY.aiGenerating || 'Generating…');
+
+  function onProgress(p) {
+    if (!p || p.total == null || p.loaded == null || p.total <= 0) return;
+    const pct = Math.max(0, Math.min(100, Math.round((p.loaded / p.total) * 100)));
+    if (aiBtnLabel) aiBtnLabel.textContent = (COPY.aiLoadingFmt || 'Loading {pct}%').replace('{pct}', pct);
+  }
+
+  try {
+    const name = await aiSuggestFilename(onProgress);
+    if (name) {
+      aiNameByHash.set(lastHash, name);
+      filenameInput.value = name;
+    }
+  } catch (err) {
+    console.warn('AI naming failed:', err);
+  } finally {
+    if (aiBtnLabel) aiBtnLabel.textContent = AI_LABEL_DEFAULT;
+    reflectAvailability();
+  }
+}
+
+// Track content hash and respond to content changes:
+// - if input was showing the previous hash's AI name, clear it
+// - if input is empty AND new hash has a cached AI name, restore it
+// - any user-typed value that diverges from the cache persists across edits
+function syncFilenameForContent() {
+  const newHash = contentHash(inputEl.value);
+  if (newHash === lastHash) return;
+  const prevAIName = aiNameByHash.get(lastHash);
+  const showingPrevAI = prevAIName && filenameInput.value === prevAIName;
+  lastHash = newHash;
+  if (showingPrevAI) {
+    filenameInput.value = aiNameByHash.get(newHash) || '';
+  } else if (filenameInput.value === '' && aiNameByHash.has(newHash)) {
+    filenameInput.value = aiNameByHash.get(newHash);
+  }
 }
 
 function downloadPDF() {
-  // Setting document.title before print() makes most browsers default the
-  // PDF filename to that title.
   const original = document.title;
-  document.title = slugify(deriveTitle());
-  // Make sure preview is fully rendered before printing
+  const fromInput = (filenameInput.value || '').trim();
+  const name = fromInput ? slugify(fromInput) : slugify(deriveTitle());
+  document.title = name;
   if (renderTimer) { clearTimeout(renderTimer); render(); }
   window.print();
-  // Restore the title shortly after — Chrome/Edge/Safari finish the dialog
-  // synchronously enough that 1s is safe; Firefox handles it inline.
   setTimeout(() => { document.title = original; }, 1000);
 }
 
 /* ── Export / Import .md ────────────────────────────────────────── */
 function exportMD() {
-  const filename = slugify(deriveTitle()) + '.md';
+  const fromInput = (filenameInput.value || '').trim();
+  const filename = (fromInput ? slugify(fromInput) : slugify(deriveTitle())) + '.md';
   const blob = new Blob([inputEl.value || ''], { type: 'text/markdown;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
@@ -273,6 +459,7 @@ function setTab(tab) {
 inputEl.addEventListener('input', () => {
   scheduleRender();
   scheduleSave();
+  syncFilenameForContent();
 });
 
 // Tab key inserts 2 spaces (instead of leaving the textarea)
@@ -291,10 +478,13 @@ inputEl.addEventListener('keydown', (e) => {
 
 downloadBtn.addEventListener('click', downloadPDF);
 exportBtn.addEventListener('click', exportMD);
+aiBtn?.addEventListener('click', runAINameGeneration);
 clearBtn.addEventListener('click', () => {
   if (!confirm(COPY.confirmClear)) return;
   inputEl.value = '';
+  filenameInput.value = '';
   try { localStorage.removeItem(LS_KEY); } catch (_) {}
+  syncFilenameForContent();
   render();
 });
 fileInput.addEventListener('change', (e) => {
@@ -312,6 +502,10 @@ render();
 // Both panes visible on desktop; tabs are no-ops there. On mobile (≤720px)
 // the CSS hides the inactive pane via `hidden`. Force a default tab state.
 setTab('edit');
+lastHash = contentHash(inputEl.value);
+reflectAvailability();
+const idle = window.requestIdleCallback || (cb => setTimeout(cb, 1500));
+idle(() => reflectAvailability());
 </script>
 
 <style>
@@ -392,6 +586,65 @@ setTab('edit');
 }
 
 /* ── Split panes ──────────────────────────────────────────────── */
+.mp__filename {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+  background: rgba(255,255,255,0.015);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.mp__filename-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--term-muted);
+}
+.mp__filename-input {
+  flex: 1 1 200px;
+  min-width: 0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--term-border);
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  transition: border-color 0.15s ease;
+}
+.mp__filename-input:focus {
+  outline: none;
+  border-color: rgba(34,211,238,0.4);
+}
+.mp__filename-input::placeholder { color: var(--term-muted); opacity: 0.55; }
+.mp__filename-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600;
+  padding: 0.35rem 0.7rem;
+  border-radius: 4px;
+  border: 1px solid rgba(167,139,250,0.3);
+  background: rgba(167,139,250,0.08);
+  color: var(--syn-purple);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.mp__filename-btn:hover:not(:disabled) {
+  background: rgba(167,139,250,0.18);
+  border-color: var(--syn-purple);
+}
+.mp__filename-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: var(--term-muted);
+  border-color: var(--term-border);
+  background: transparent;
+}
+.mp__filename-icon { flex-shrink: 0; }
+
 .mp__panes {
   flex: 1;
   display: grid;

@@ -505,7 +505,14 @@
       "counts_format": "{words} mots · {chars} caractères",
       "err_load_lib": "Impossible de charger la bibliothèque markdown. Vérifie ton réseau ou bloqueur.",
       "alert_invalid_md": "Sélectionne un fichier Markdown (.md).",
-      "confirm_clear": "Effacer l'éditeur ? Ton brouillon auto-enregistré sera perdu."
+      "confirm_clear": "Effacer l'éditeur ? Ton brouillon auto-enregistré sera perdu.",
+      "filename_label": "Nom du fichier",
+      "filename_placeholder": "clique sur Générer ou tape un nom",
+      "btn_ai_generate": "Générer un nom",
+      "btn_ai_generating": "Génération…",
+      "ai_unavailable_hint": "Ouvre AI Chat ou Citation Motivante une fois pour activer le nommage IA",
+      "ai_confirm_download": "Le nommage IA nécessite un téléchargement unique du modèle (~660 Mo). Continuer ?",
+      "btn_ai_loading": "Chargement {pct}%"
     },
     "quote": {
       "tldr_heading": "Qu'est-ce que Citation Motivante ?",

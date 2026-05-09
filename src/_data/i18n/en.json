@@ -505,7 +505,14 @@
       "counts_format": "{words} words · {chars} chars",
       "err_load_lib": "Couldn't load the markdown library. Check your network or ad-blocker.",
       "alert_invalid_md": "Please select a Markdown (.md) file.",
-      "confirm_clear": "Clear the editor? Your auto-saved draft will be lost."
+      "confirm_clear": "Clear the editor? Your auto-saved draft will be lost.",
+      "filename_label": "Filename",
+      "filename_placeholder": "click Generate or type a name",
+      "btn_ai_generate": "Generate name",
+      "btn_ai_generating": "Generating…",
+      "ai_unavailable_hint": "Open AI Chat or Quote once to enable AI naming",
+      "ai_confirm_download": "AI naming needs a one-time ~660 MB model download. Continue?",
+      "btn_ai_loading": "Loading {pct}%"
     },
     "quote": {
       "tldr_heading": "What is Motivational Quote?",

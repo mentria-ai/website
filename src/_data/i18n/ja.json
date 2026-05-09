@@ -505,7 +505,14 @@
       "counts_format": "{words} 単語 · {chars} 文字",
       "err_load_lib": "Markdownライブラリを読み込めませんでした。ネットワークまたは広告ブロッカーを確認してください。",
       "alert_invalid_md": "Markdown(.md)ファイルを選択してください。",
-      "confirm_clear": "エディタをクリアしますか? 自動保存された下書きは失われます。"
+      "confirm_clear": "エディタをクリアしますか? 自動保存された下書きは失われます。",
+      "filename_label": "ファイル名",
+      "filename_placeholder": "「AIで命名」を押すか名前を入力",
+      "btn_ai_generate": "AIで命名",
+      "btn_ai_generating": "生成中…",
+      "ai_unavailable_hint": "AI ChatまたはQuoteを一度開くとAI命名が有効になります",
+      "ai_confirm_download": "AI命名には初回約660 MBのモデルダウンロードが必要です。続行しますか?",
+      "btn_ai_loading": "読込中 {pct}%"
     },
     "quote": {
       "tldr_heading": "モチベーション名言とは?",

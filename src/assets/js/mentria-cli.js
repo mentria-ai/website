@@ -107,12 +107,132 @@
       typeLines(outputEl, welcomeLines, 0, function () {});
     }
 
+    // ── Autocomplete popover ───────────────────────────────────────
+    var suggestEl = document.getElementById('cli-suggestions');
+    var suggestState = { items: [], idx: -1 };
+
+    function popoverSupported() {
+      return suggestEl && typeof suggestEl.showPopover === 'function';
+    }
+
+    function positionSuggestions() {
+      if (!suggestEl) return;
+      var r = inputEl.getBoundingClientRect();
+      // Cap at 320px wide, anchored to the input column.
+      suggestEl.style.left = (window.scrollX + r.left) + 'px';
+      suggestEl.style.top  = (window.scrollY + r.bottom + 4) + 'px';
+      suggestEl.style.minWidth = r.width + 'px';
+    }
+
+    function filterCommands(prefix) {
+      var p = (prefix || '').toLowerCase();
+      if (!p) return [];
+      var matches = [];
+      var keys = Object.keys(COMMANDS);
+      for (var i = 0; i < keys.length; i++) {
+        if (keys[i].indexOf(p) === 0) matches.push(keys[i]);
+      }
+      return matches;
+    }
+
+    function renderSuggestions() {
+      if (!suggestEl) return;
+      suggestEl.innerHTML = '';
+      for (var i = 0; i < suggestState.items.length; i++) {
+        var name = suggestState.items[i];
+        var cmd = COMMANDS[name];
+        var row = document.createElement('div');
+        row.className = 'cli__suggestion' + (i === suggestState.idx ? ' is-active' : '');
+        row.setAttribute('role', 'option');
+        row.dataset.name = name;
+        row.innerHTML =
+          '<span class="cli__suggestion-name">' + (cmd.usage || name) + '</span>' +
+          '<span class="cli__suggestion-desc">' + cmd.description + '</span>';
+        row.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          inputEl.value = (COMMANDS[this.dataset.name].argv ? this.dataset.name + ' ' : this.dataset.name);
+          hideSuggestions();
+          inputEl.focus();
+          if (!COMMANDS[this.dataset.name].argv) {
+            // Run immediately for arg-less commands.
+            inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+          }
+        });
+        suggestEl.appendChild(row);
+      }
+    }
+
+    function showSuggestions(prefix) {
+      if (!popoverSupported()) return;
+      var matches = filterCommands(prefix);
+      if (matches.length === 0 || (matches.length === 1 && matches[0] === prefix)) {
+        return hideSuggestions();
+      }
+      suggestState.items = matches;
+      if (suggestState.idx >= matches.length) suggestState.idx = -1;
+      renderSuggestions();
+      positionSuggestions();
+      if (!suggestEl.matches(':popover-open')) {
+        try { suggestEl.showPopover(); } catch (_) {}
+      }
+    }
+
+    function hideSuggestions() {
+      suggestState.items = [];
+      suggestState.idx = -1;
+      if (popoverSupported() && suggestEl.matches(':popover-open')) {
+        try { suggestEl.hidePopover(); } catch (_) {}
+      }
+    }
+
+    inputEl.addEventListener('input', function () {
+      var raw = inputEl.value.trim();
+      // Only suggest while user hasn't yet started args (no space).
+      if (raw.indexOf(' ') !== -1) return hideSuggestions();
+      showSuggestions(raw.toLowerCase());
+    });
+    inputEl.addEventListener('blur', function () {
+      // Defer so click-on-suggestion lands first.
+      setTimeout(hideSuggestions, 120);
+    });
+    window.addEventListener('resize', function () {
+      if (suggestEl && suggestEl.matches(':popover-open')) positionSuggestions();
+    });
+
     // Input handling
     inputEl.addEventListener('keydown', function (e) {
+      var sugOpen = suggestEl && suggestEl.matches(':popover-open') && suggestState.items.length > 0;
+
+      // Tab or Right-arrow at end-of-input: complete to highlighted (or first) suggestion.
+      if (sugOpen && (e.key === 'Tab' || (e.key === 'ArrowRight' && inputEl.selectionStart === inputEl.value.length))) {
+        e.preventDefault();
+        var pickIdx = suggestState.idx >= 0 ? suggestState.idx : 0;
+        var name = suggestState.items[pickIdx];
+        inputEl.value = (COMMANDS[name].argv ? name + ' ' : name);
+        hideSuggestions();
+        return;
+      }
+
+      if (e.key === 'Escape' && sugOpen) {
+        e.preventDefault();
+        hideSuggestions();
+        return;
+      }
+
       if (e.key === 'Enter') {
         e.preventDefault();
+
+        // If a suggestion is highlighted, treat Enter as accept-and-run.
+        if (sugOpen && suggestState.idx >= 0) {
+          var picked = suggestState.items[suggestState.idx];
+          inputEl.value = (COMMANDS[picked].argv ? picked + ' ' : picked);
+          hideSuggestions();
+          if (COMMANDS[picked].argv) return; // wait for args
+        }
+
         var raw = inputEl.value.trim();
         inputEl.value = '';
+        hideSuggestions();
         if (!raw) return;
 
         // Split into command + remaining args.
@@ -141,6 +261,18 @@
         }
 
         outputEl.scrollTop = outputEl.scrollHeight;
+      }
+
+      // Suggestion navigation (preempts history when popover is open).
+      if (sugOpen && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        e.preventDefault();
+        if (e.key === 'ArrowDown') {
+          suggestState.idx = (suggestState.idx + 1) % suggestState.items.length;
+        } else {
+          suggestState.idx = suggestState.idx <= 0 ? suggestState.items.length - 1 : suggestState.idx - 1;
+        }
+        renderSuggestions();
+        return;
       }
 
       // History navigation

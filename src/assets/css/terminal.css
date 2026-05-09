@@ -424,6 +424,83 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
   margin-left: auto;
 }
 
+.terminal-frame__help {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  margin-left: 0.5rem;
+  border: 1px solid var(--term-border);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.03);
+  color: var(--term-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.terminal-frame__help:hover,
+.terminal-frame__help:focus-visible {
+  color: var(--syn-cyan);
+  border-color: var(--syn-cyan);
+  outline: none;
+}
+@media (max-width: 720px) {
+  body.is-fullscreen-tool .terminal-frame__help { display: inline-flex; }
+}
+
+.game-help {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--term-border);
+  border-radius: 10px;
+  background: var(--term-bg-raised, #111);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--term-fg);
+  max-width: min(360px, calc(100vw - 1.5rem));
+  inset: unset;
+}
+.game-help::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.game-help-title {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--syn-cyan);
+  margin: 0 0 0.6rem;
+}
+.game-help-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.game-help-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+}
+.game-help-list .kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--term-border);
+  border-radius: 3px;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  margin-right: 3px;
+}
+.game-help-label { color: var(--term-muted); flex: 1; }
+
 .terminal-frame__body {
   padding: 1.5rem;
   position: relative;
@@ -478,6 +555,47 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
   outline: none;
   padding: 0.25rem 0;
   min-height: 44px;
+}
+
+.cli__suggestions {
+  position: fixed;
+  inset: unset;
+  margin: 0;
+  padding: 0.25rem;
+  border: 1px solid var(--term-border);
+  border-radius: 6px;
+  background: var(--term-bg-raised, #111);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  max-width: min(420px, calc(100vw - 1rem));
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.cli__suggestions:not(:popover-open) { display: none; }
+.cli__suggestion {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cli__suggestion:hover,
+.cli__suggestion.is-active {
+  background: rgba(34, 211, 238, 0.1);
+}
+.cli__suggestion-name {
+  color: var(--syn-cyan);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.cli__suggestion-desc {
+  color: var(--term-muted);
+  font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cli__input::placeholder {

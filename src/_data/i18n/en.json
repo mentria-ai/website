@@ -596,6 +596,9 @@
       "type_tool": "Tools",
       "type_post": "Posts",
       "type_chapter": "Chapters"
+    },
+    "common": {
+      "controls": "Controls"
     }
   }
 }

@@ -20,7 +20,20 @@ eleventyComputed:
 </section>
 
 {% set terminalTitle = "tetris.js" %}
+{% set terminalHelpId = "tetris-help" %}
 {% include "terminal-frame-open.njk" %}
+
+<div id="tetris-help" popover class="game-help">
+  <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
+  <ul class="game-help-list">
+    <li><span><span class="kbd">←</span><span class="kbd">→</span></span><span class="game-help-label">{{ "game.tetris.key_move" | t }}</span></li>
+    <li><span><span class="kbd">↑</span></span><span class="game-help-label">{{ "game.tetris.key_rotate" | t }}</span></li>
+    <li><span><span class="kbd">↓</span></span><span class="game-help-label">{{ "game.tetris.key_soft_drop" | t }}</span></li>
+    <li><span><span class="kbd">SPACE</span></span><span class="game-help-label">{{ "game.tetris.key_hard_drop" | t }}</span></li>
+    <li><span><span class="kbd">C</span></span><span class="game-help-label">{{ "game.tetris.key_hold_action" | t }}</span></li>
+    <li><span><span class="kbd">P</span></span><span class="game-help-label">{{ "game.tetris.key_pause" | t }}</span></li>
+  </ul>
+</div>
 
 <div class="play-area">
   <div class="side side-left">

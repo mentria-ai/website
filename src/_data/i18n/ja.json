@@ -596,6 +596,9 @@
       "type_tool": "ツール",
       "type_post": "投稿",
       "type_chapter": "チャプター"
+    },
+    "common": {
+      "controls": "操作"
     }
   }
 }

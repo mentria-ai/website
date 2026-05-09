@@ -20,7 +20,18 @@ eleventyComputed:
 </section>
 
 {% set terminalTitle = "minesweeper.js" %}
+{% set terminalHelpId = "minesweeper-help" %}
 {% include "terminal-frame-open.njk" %}
+
+<div id="minesweeper-help" popover class="game-help">
+  <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
+  <ul class="game-help-list">
+    <li><span><span class="kbd">click</span></span><span class="game-help-label">{{ "game.minesweeper.footer_dig" | t }}</span></li>
+    <li><span><span class="kbd">right-click</span></span><span class="game-help-label">{{ "game.minesweeper.footer_flag" | t }}</span></li>
+    <li><span><span class="kbd">F</span></span><span class="game-help-label">{{ "game.minesweeper.footer_toggle_flag" | t }}</span></li>
+    <li><span><span class="kbd">R</span></span><span class="game-help-label">{{ "game.minesweeper.footer_restart" | t }}</span></li>
+  </ul>
+</div>
 
 <div class="ms-controls">
   <span class="ctrl-label">{{ "game.minesweeper.difficulty" | t }}</span>

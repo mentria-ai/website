@@ -596,6 +596,9 @@
       "type_tool": "Ferramentas",
       "type_post": "Posts",
       "type_chapter": "Capítulos"
+    },
+    "common": {
+      "controls": "Controles"
     }
   }
 }

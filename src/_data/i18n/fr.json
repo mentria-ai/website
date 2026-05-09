@@ -596,6 +596,9 @@
       "type_tool": "Outils",
       "type_post": "Publications",
       "type_chapter": "Chapitres"
+    },
+    "common": {
+      "controls": "Commandes"
     }
   }
 }

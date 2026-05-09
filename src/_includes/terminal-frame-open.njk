@@ -8,6 +8,9 @@
         {% if terminalTitle %}
         <span class="terminal-frame__filename">{{ terminalTitle }}</span>
         {% endif %}
+        {% if terminalHelpId %}
+        <button type="button" class="terminal-frame__help" popovertarget="{{ terminalHelpId }}" aria-label="{{ 'tool.common.controls' | t }}" title="{{ 'tool.common.controls' | t }}">?</button>
+        {% endif %}
     </div>
     <div class="terminal-frame__body">
 

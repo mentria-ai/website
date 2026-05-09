@@ -600,5 +600,14 @@
     "common": {
       "controls": "Controls"
     }
+  },
+  "category": {
+    "AI": "AI",
+    "Design": "Design",
+    "Developer": "Developer",
+    "Game": "Game",
+    "Productivity": "Productivity",
+    "Timer": "Timer",
+    "Utility": "Utility"
   }
 }

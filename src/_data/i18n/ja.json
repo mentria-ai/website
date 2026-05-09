@@ -600,5 +600,14 @@
     "common": {
       "controls": "操作"
     }
+  },
+  "category": {
+    "AI": "AI",
+    "Design": "デザイン",
+    "Developer": "開発",
+    "Game": "ゲーム",
+    "Productivity": "生産性",
+    "Timer": "タイマー",
+    "Utility": "ユーティリティ"
   }
 }

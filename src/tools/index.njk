@@ -26,9 +26,9 @@ eleventyComputed:
     </div>
     {% for tool in toolList %}
     <div class="tools-listing__row">
-        <span class="tools-listing__category">{{ tool.category }}</span>
-        <span class="tools-listing__name"><a href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">{{ tool.title }}</a></span>
-        <span class="tools-listing__summary">{{ tool.summary }}</span>
+        <span class="tools-listing__category">{{ ("category." + tool.category) | t }}</span>
+        <span class="tools-listing__name"><a href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">{{ ("tools." + tool.slug + ".title") | t }}</a></span>
+        <span class="tools-listing__summary">{{ ("tools." + tool.slug + ".lede") | t }}</span>
     </div>
     {% endfor %}
 </div>

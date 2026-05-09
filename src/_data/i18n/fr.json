@@ -600,5 +600,14 @@
     "common": {
       "controls": "Commandes"
     }
+  },
+  "category": {
+    "AI": "IA",
+    "Design": "Design",
+    "Developer": "Développement",
+    "Game": "Jeu",
+    "Productivity": "Productivité",
+    "Timer": "Minuteur",
+    "Utility": "Utilitaire"
   }
 }

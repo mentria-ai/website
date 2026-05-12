@@ -33,7 +33,6 @@ npm run start    # http://localhost:8080
 npm run build    # → ./build
 ```
 
-Deeper engineering notes on the runtime live in [`webgpu_engine_guide.md`](webgpu_engine_guide.md) and [`custom_inference_engine.md`](custom_inference_engine.md).
 
 ## License
 

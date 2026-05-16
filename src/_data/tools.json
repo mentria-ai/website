@@ -6,6 +6,12 @@
     "category": "AI"
   },
   {
+    "slug": "step-counter",
+    "title": "Step Counter",
+    "summary": "Session pedometer that counts steps from your phone's motion sensor — distance, pace, and a daily goal ring, all on-device.",
+    "category": "Health"
+  },
+  {
     "slug": "decision-wheel",
     "title": "Decision Wheel",
     "summary": "Offline-ready spinner for quick calls: Yes, No, Up to you, or Wait & try again.",

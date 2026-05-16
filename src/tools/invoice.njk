@@ -415,7 +415,7 @@ eleventyComputed:
   const importJSON = (text) => {
     let parsed;
     try { parsed = JSON.parse(text); }
-    catch { alert(COPY.alertInvalidJson); return; }
+    catch { mentriaAlert(COPY.alertInvalidJson); return; }
 
     if (Array.isArray(parsed)) {
       // Legacy: array of line items
@@ -436,7 +436,7 @@ eleventyComputed:
       changeCurrency();
       replaceLines(parsed.lines || []);
     } else {
-      alert(COPY.alertUnknownFmt);
+      mentriaAlert(COPY.alertUnknownFmt);
     }
   };
 
@@ -483,7 +483,7 @@ eleventyComputed:
     const file = e.target.files[0];
     if (!file) return;
     if (file.type !== 'application/json' && !file.name.toLowerCase().endsWith('.json')) {
-      alert(COPY.alertSelectJson);
+      mentriaAlert(COPY.alertSelectJson);
       fileInput.value = '';
       return;
     }
@@ -499,8 +499,8 @@ eleventyComputed:
   currencyInput.addEventListener('change', changeCurrency);
   printBtn.addEventListener('click', () => window.print());
   exportBtn.addEventListener('click', exportJSON);
-  clearBtn.addEventListener('click', () => {
-    if (!confirm(COPY.confirmClear)) return;
+  clearBtn.addEventListener('click', async () => {
+    if (!(await mentriaConfirm(COPY.confirmClear))) return;
     Object.keys(localStorage)
       .filter(k => k.startsWith(LS))
       .forEach(k => localStorage.removeItem(k));

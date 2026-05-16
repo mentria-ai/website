@@ -18,6 +18,11 @@
       "read_more": "What is this?",
       "read_less": "Hide details",
       "what_is": "What is {name}?"
+    },
+    "dialog": {
+      "ok": "OK",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
     }
   },
   "home": {
@@ -156,6 +161,11 @@
       "title": "Search",
       "lede": "Find tools and feed posts. Type any query — keyword or natural language.",
       "tldr": "Site-wide search backed by a build-time index of every tool and feed post in 5 languages. Default mode is instant fuzzy keyword matching across titles, descriptions, and TL;DRs — no model download required, no server round-trip. When the Qwen3.5-0.8B model is already cached locally (after using AI Chat or Quote), an optional AI summary appears above the results."
+    },
+    "step-counter": {
+      "title": "Step Counter",
+      "lede": "Count your steps on a walk, right in the browser. Uses your phone's motion sensor — nothing is uploaded.",
+      "tldr": "A session-based pedometer that reads your phone's accelerometer through the DeviceMotion API and counts steps with on-device peak detection. Start a session and walk with the screen on — it tracks steps, distance, pace, and a daily goal ring. All processing stays in the browser: no account, no upload, no background tracking. Desktops and devices without a motion sensor show a disabled state."
     }
   },
   "game": {
@@ -599,6 +609,38 @@
     },
     "common": {
       "controls": "Controls"
+    },
+    "step-counter": {
+      "steps_today": "steps today",
+      "goal_of": "of {goal}",
+      "btn_start": "Start walk",
+      "btn_pause": "Pause",
+      "btn_resume": "Resume",
+      "stat_distance": "Distance",
+      "stat_session": "Session",
+      "stat_pace": "Pace",
+      "pace_unit": "spm",
+      "settings": "Settings",
+      "goal_label": "Daily step goal",
+      "stride_label": "Stride length (cm)",
+      "sensitivity_label": "Sensitivity",
+      "sens_low": "Low",
+      "sens_med": "Medium",
+      "sens_high": "High",
+      "reset_today": "Reset today",
+      "history_label": "Last 7 days",
+      "perm_title": "Motion access needed",
+      "perm_body": "This counter reads your phone's motion sensor. Grant access to begin.",
+      "perm_btn": "Grant motion access",
+      "denied_title": "Motion access denied",
+      "denied_body": "Re-enable motion access in your browser settings, then reload the page.",
+      "unsupported_title": "No motion sensor",
+      "unsupported_body": "Step counting needs a phone or tablet with an accelerometer. This device doesn't expose one.",
+      "screen_hint": "Keep the screen on and this tab open while you walk.",
+      "goal_reached": "Daily goal reached",
+      "confirm_reset": "Reset today's step count to zero?",
+      "insecure_title": "Secure connection needed",
+      "insecure_body": "Motion sensors only work over HTTPS. Open this tool on the live site (https://mentria.ai). A local dev server reached by LAN IP over plain HTTP cannot expose the sensor."
     }
   },
   "category": {
@@ -608,6 +650,7 @@
     "Game": "Game",
     "Productivity": "Productivity",
     "Timer": "Timer",
-    "Utility": "Utility"
+    "Utility": "Utility",
+    "Health": "Health"
   }
 }

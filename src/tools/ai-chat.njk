@@ -410,7 +410,7 @@ function runApp(MentriaEngine) {
 
   /* ── Delete cached model ─────────────────────────── */
   async function deleteModel() {
-    if (!confirm(COPY.confirmDelete)) return;
+    if (!(await mentriaConfirm(COPY.confirmDelete))) return;
     try {
       const keys = await caches.keys();
       for (const key of keys) {
@@ -438,7 +438,7 @@ function runApp(MentriaEngine) {
       setStatus('idle', COPY.statusModelDeleted);
     } catch (err) {
       console.error('Delete error:', err);
-      alert(COPY.errDeletePrefix + err.message);
+      mentriaAlert(COPY.errDeletePrefix + err.message);
     }
   }
 

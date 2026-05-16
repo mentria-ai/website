@@ -195,6 +195,50 @@
 
     {% include "pwa-install.njk" %}
 
+    <div id="m-dialog" popover="manual" class="m-dialog" role="alertdialog" aria-modal="true" aria-labelledby="m-dialog-msg">
+      <p class="m-dialog__msg" id="m-dialog-msg"></p>
+      <div class="m-dialog__actions">
+        <button type="button" class="m-dialog__btn m-dialog__btn--ghost" id="m-dialog-cancel">{{ "common.dialog.cancel" | t }}</button>
+        <button type="button" class="m-dialog__btn m-dialog__btn--primary" id="m-dialog-ok">{{ "common.dialog.ok" | t }}</button>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var dlg = document.getElementById('m-dialog');
+        if (!dlg || typeof dlg.showPopover !== 'function') {
+          window.mentriaConfirm = function (m) { return Promise.resolve(window.confirm(m)); };
+          window.mentriaAlert = function (m) { window.alert(m); return Promise.resolve(); };
+          return;
+        }
+        var msgEl = document.getElementById('m-dialog-msg');
+        var okBtn = document.getElementById('m-dialog-ok');
+        var cancelBtn = document.getElementById('m-dialog-cancel');
+        var okLabel = {{ ("common.dialog.ok" | t) | dump | safe }};
+        var confirmLabel = {{ ("common.dialog.confirm" | t) | dump | safe }};
+        var resolver = null;
+        function settle(result) {
+          var r = resolver; resolver = null;
+          if (dlg.matches(':popover-open')) dlg.hidePopover();
+          if (r) r(result);
+        }
+        okBtn.addEventListener('click', function () { settle(true); });
+        cancelBtn.addEventListener('click', function () { settle(false); });
+        dlg.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') { e.preventDefault(); settle(false); }
+        });
+        function open(message, mode) {
+          if (resolver) settle(false);
+          msgEl.textContent = message;
+          cancelBtn.hidden = (mode === 'alert');
+          okBtn.textContent = (mode === 'alert') ? okLabel : confirmLabel;
+          dlg.showPopover();
+          okBtn.focus();
+          return new Promise(function (res) { resolver = res; });
+        }
+        window.mentriaConfirm = function (m) { return open(m, 'confirm'); };
+        window.mentriaAlert = function (m) { return open(m, 'alert'); };
+      })();
+    </script>
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js');

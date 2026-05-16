@@ -240,11 +240,11 @@ eleventyComputed:
   }
 
   /* ── Delete with confirmation ──────────────────────── */
-  function confirmDelete() {
+  async function confirmDelete() {
     const note = getNote(activeId);
     if (!note) return;
     const name = note.title || COPY.untitled;
-    if (confirm(COPY.confirmDelete.replace('{name}', name))) {
+    if (await mentriaConfirm(COPY.confirmDelete.replace('{name}', name))) {
       deleteNote(activeId);
     }
   }

@@ -1,0 +1,663 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/step-counter/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.step-counter.title' | t }}"
+  description: "{{ 'tools.step-counter.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">step-counter</span></p>
+  <h1>{{ "tools.step-counter.title" | t }}</h1>
+  <p>{{ "tools.step-counter.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "step-counter.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="sc" id="sc">
+
+  <div class="sc__tracker" id="sc-tracker">
+    <div class="sc__ring-wrap">
+      <svg class="sc__ring" viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="sc__ring-track" cx="100" cy="100" r="86"></circle>
+        <circle class="sc__ring-fill" id="sc-ring" cx="100" cy="100" r="86"></circle>
+      </svg>
+      <div class="sc__ring-center">
+        <span class="sc__count" id="sc-count">0</span>
+        <span class="sc__count-label" id="sc-count-label">{{ "tool.step-counter.steps_today" | t }}</span>
+        <span class="sc__goal" id="sc-goal-text"></span>
+      </div>
+    </div>
+
+    <div class="sc__stats">
+      <div class="sc__stat">
+        <span class="sc__stat-label">{{ "tool.step-counter.stat_distance" | t }}</span>
+        <span class="sc__stat-value" id="sc-distance">0 m</span>
+      </div>
+      <div class="sc__stat">
+        <span class="sc__stat-label">{{ "tool.step-counter.stat_session" | t }}</span>
+        <span class="sc__stat-value" id="sc-session">0:00</span>
+      </div>
+      <div class="sc__stat">
+        <span class="sc__stat-label">{{ "tool.step-counter.stat_pace" | t }}</span>
+        <span class="sc__stat-value" id="sc-pace">—</span>
+      </div>
+    </div>
+
+    <p class="sc__hint" id="sc-hint" hidden>{{ "tool.step-counter.screen_hint" | t }}</p>
+
+    <div class="sc__controls">
+      <button class="sc__btn sc__btn--primary" id="sc-toggle">{{ "tool.step-counter.btn_start" | t }}</button>
+      <button class="sc__btn sc__btn--ghost" id="sc-settings-btn" popovertarget="sc-settings">{{ "tool.step-counter.settings" | t }}</button>
+    </div>
+
+    <div class="sc__history">
+      <span class="sc__history-label">{{ "tool.step-counter.history_label" | t }}</span>
+      <div class="sc__bars" id="sc-bars"></div>
+    </div>
+  </div>
+
+  <div class="sc__panel" id="sc-perm" hidden>
+    <h2 class="sc__panel-title">{{ "tool.step-counter.perm_title" | t }}</h2>
+    <p class="sc__panel-body">{{ "tool.step-counter.perm_body" | t }}</p>
+    <button class="sc__btn sc__btn--primary" id="sc-perm-btn">{{ "tool.step-counter.perm_btn" | t }}</button>
+  </div>
+
+  <div class="sc__panel" id="sc-denied" hidden>
+    <h2 class="sc__panel-title sc__panel-title--warn">{{ "tool.step-counter.denied_title" | t }}</h2>
+    <p class="sc__panel-body">{{ "tool.step-counter.denied_body" | t }}</p>
+  </div>
+
+  <div class="sc__panel" id="sc-unsupported" hidden>
+    <h2 class="sc__panel-title sc__panel-title--warn">{{ "tool.step-counter.unsupported_title" | t }}</h2>
+    <p class="sc__panel-body">{{ "tool.step-counter.unsupported_body" | t }}</p>
+  </div>
+
+  <div class="sc__panel" id="sc-insecure" hidden>
+    <h2 class="sc__panel-title sc__panel-title--warn">{{ "tool.step-counter.insecure_title" | t }}</h2>
+    <p class="sc__panel-body">{{ "tool.step-counter.insecure_body" | t }}</p>
+  </div>
+
+  <div id="sc-settings" popover class="sc__settings">
+    <div class="sc__field">
+      <label for="sc-goal">{{ "tool.step-counter.goal_label" | t }}</label>
+      <input type="number" id="sc-goal" min="1000" max="100000" step="500" inputmode="numeric">
+    </div>
+    <div class="sc__field">
+      <label for="sc-stride">{{ "tool.step-counter.stride_label" | t }}</label>
+      <input type="number" id="sc-stride" min="40" max="120" step="1" inputmode="numeric">
+    </div>
+    <div class="sc__field">
+      <label>{{ "tool.step-counter.sensitivity_label" | t }}</label>
+      <div class="sc__seg" id="sc-sens">
+        <button data-sens="low">{{ "tool.step-counter.sens_low" | t }}</button>
+        <button data-sens="med">{{ "tool.step-counter.sens_med" | t }}</button>
+        <button data-sens="high">{{ "tool.step-counter.sens_high" | t }}</button>
+      </div>
+    </div>
+    <button class="sc__btn sc__btn--danger" id="sc-reset">{{ "tool.step-counter.reset_today" | t }}</button>
+  </div>
+
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(() => {
+  const COPY = {
+    btnStart:    {{ ("tool.step-counter.btn_start"    | t) | dump | safe }},
+    btnPause:    {{ ("tool.step-counter.btn_pause"    | t) | dump | safe }},
+    btnResume:   {{ ("tool.step-counter.btn_resume"   | t) | dump | safe }},
+    goalOf:      {{ ("tool.step-counter.goal_of"      | t) | dump | safe }},
+    paceUnit:    {{ ("tool.step-counter.pace_unit"    | t) | dump | safe }},
+    goalReached: {{ ("tool.step-counter.goal_reached" | t) | dump | safe }},
+    confirmReset:{{ ("tool.step-counter.confirm_reset"| t) | dump | safe }}
+  };
+
+  const LS = 'mentria-step-counter';
+  const RING_CIRC = 2 * Math.PI * 86;
+  const SENS = { low: 1.7, med: 1.1, high: 0.7 };
+
+  const $ = id => document.getElementById(id);
+  const tracker     = $('sc-tracker');
+  const panelPerm   = $('sc-perm');
+  const panelDenied = $('sc-denied');
+  const panelUnsup  = $('sc-unsupported');
+  const panelInsec  = $('sc-insecure');
+  const countEl     = $('sc-count');
+  const goalTextEl  = $('sc-goal-text');
+  const ringEl      = $('sc-ring');
+  const distEl      = $('sc-distance');
+  const sessionEl   = $('sc-session');
+  const paceEl      = $('sc-pace');
+  const hintEl      = $('sc-hint');
+  const toggleBtn   = $('sc-toggle');
+  const barsEl      = $('sc-bars');
+  const goalInput   = $('sc-goal');
+  const strideInput = $('sc-stride');
+  const sensSeg     = $('sc-sens');
+  const resetBtn    = $('sc-reset');
+  const permBtn     = $('sc-perm-btn');
+
+  ringEl.style.strokeDasharray = RING_CIRC;
+
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function loadState() {
+    let s = {};
+    try { s = JSON.parse(localStorage.getItem(LS)) || {}; } catch (_) {}
+    s.history = s.history || {};
+    s.goal = s.goal || 10000;
+    s.stride = s.stride || 75;
+    s.sensitivity = SENS[s.sensitivity] ? s.sensitivity : 'med';
+    if (s.date && s.date !== todayKey()) {
+      if (s.steps > 0) s.history[s.date] = s.steps;
+      s.steps = 0;
+    }
+    s.date = todayKey();
+    s.steps = s.steps || 0;
+    return s;
+  }
+
+  function persist() {
+    try { localStorage.setItem(LS, JSON.stringify(state)); } catch (_) {}
+  }
+
+  const state = loadState();
+
+  let running = false;
+  let sessionStart = 0;
+  let sessionElapsed = 0;
+  let sessionSteps = 0;
+  let wakeLock = null;
+  let watchdog = null;
+  let sawSensorData = false;
+  let tickTimer = null;
+
+  let gravityEMA = 9.81;
+  let acEMA = 0;
+  let waitingForPeak = true;
+  let peaked = false;
+  let lastStepAt = 0;
+
+  function fmtDistance(steps) {
+    const m = steps * (state.stride / 100);
+    if (m < 1000) return Math.round(m) + ' m';
+    return (m / 1000).toFixed(2) + ' km';
+  }
+
+  function fmtClock(ms) {
+    const total = Math.floor(ms / 1000);
+    const mm = Math.floor(total / 60);
+    const ss = total % 60;
+    return mm + ':' + String(ss).padStart(2, '0');
+  }
+
+  function renderCount() {
+    countEl.textContent = state.steps.toLocaleString();
+    goalTextEl.textContent = COPY.goalOf.replace('{goal}', state.goal.toLocaleString());
+    const pct = Math.max(0, Math.min(1, state.steps / state.goal));
+    ringEl.style.strokeDashoffset = RING_CIRC * (1 - pct);
+    ringEl.classList.toggle('is-complete', pct >= 1);
+    distEl.textContent = fmtDistance(state.steps);
+  }
+
+  function renderHistory() {
+    const days = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      const steps = key === state.date ? state.steps : (state.history[key] || 0);
+      days.push({ key, steps, label: d.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 2) });
+    }
+    const max = Math.max(state.goal, ...days.map(d => d.steps), 1);
+    barsEl.innerHTML = '';
+    for (const d of days) {
+      const col = document.createElement('div');
+      col.className = 'sc__bar-col';
+      const h = Math.max(2, Math.round((d.steps / max) * 100));
+      col.innerHTML =
+        '<div class="sc__bar-track"><div class="sc__bar-fill' +
+        (d.steps >= state.goal ? ' is-goal' : '') + '" style="height:' + h + '%"></div></div>' +
+        '<span class="sc__bar-label">' + d.label + '</span>';
+      col.title = d.steps.toLocaleString();
+      barsEl.appendChild(col);
+    }
+  }
+
+  function renderSettings() {
+    goalInput.value = state.goal;
+    strideInput.value = state.stride;
+    Array.from(sensSeg.children).forEach(b =>
+      b.classList.toggle('is-active', b.dataset.sens === state.sensitivity));
+  }
+
+  function updateSession() {
+    const elapsed = sessionElapsed + (running ? Date.now() - sessionStart : 0);
+    sessionEl.textContent = fmtClock(elapsed);
+    if (sessionSteps > 0 && elapsed > 10000) {
+      const spm = Math.round(sessionSteps / (elapsed / 60000));
+      paceEl.textContent = spm + ' ' + COPY.paceUnit;
+    }
+  }
+
+  function registerStep(now) {
+    state.steps += 1;
+    sessionSteps += 1;
+    lastStepAt = now;
+    renderCount();
+    renderHistory();
+    persist();
+  }
+
+  function onMotion(e) {
+    const a = e.accelerationIncludingGravity || e.acceleration;
+    if (!a || a.x == null || a.y == null || a.z == null) return;
+    sawSensorData = true;
+    const mag = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    gravityEMA += (mag - gravityEMA) * 0.05;
+    const ac = mag - gravityEMA;
+    acEMA += (ac - acEMA) * 0.4;
+    const thr = SENS[state.sensitivity];
+    const now = performance.now();
+    if (waitingForPeak && acEMA > thr) {
+      peaked = true;
+      waitingForPeak = false;
+    } else if (peaked && acEMA < -thr * 0.4) {
+      if (now - lastStepAt > 260) registerStep(now);
+      peaked = false;
+      waitingForPeak = true;
+    }
+  }
+
+  async function requestWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try { wakeLock = await navigator.wakeLock.request('screen'); }
+    catch (_) { wakeLock = null; }
+  }
+  function releaseWakeLock() {
+    if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+  }
+
+  function showPanel(panel) {
+    tracker.hidden = panel !== null;
+    panelPerm.hidden = panel !== 'perm';
+    panelDenied.hidden = panel !== 'denied';
+    panelUnsup.hidden = panel !== 'unsupported';
+    panelInsec.hidden = panel !== 'insecure';
+  }
+
+  function beginTracking() {
+    running = true;
+    sessionStart = Date.now();
+    sawSensorData = false;
+    waitingForPeak = true;
+    peaked = false;
+    lastStepAt = 0;
+    toggleBtn.textContent = COPY.btnPause;
+    hintEl.hidden = false;
+    window.addEventListener('devicemotion', onMotion);
+    requestWakeLock();
+    tickTimer = setInterval(updateSession, 1000);
+    watchdog = setTimeout(() => {
+      if (!sawSensorData) {
+        stopTracking(true);
+        showPanel('unsupported');
+      }
+    }, 3500);
+  }
+
+  function stopTracking(silent) {
+    running = false;
+    sessionElapsed += sessionStart ? Date.now() - sessionStart : 0;
+    sessionStart = 0;
+    window.removeEventListener('devicemotion', onMotion);
+    releaseWakeLock();
+    if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
+    if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+    if (!silent) {
+      toggleBtn.textContent = COPY.btnResume;
+      hintEl.hidden = true;
+    }
+  }
+
+  async function start() {
+    if (!window.isSecureContext) {
+      showPanel('insecure');
+      return;
+    }
+    if (typeof DeviceMotionEvent === 'undefined') {
+      showPanel('unsupported');
+      return;
+    }
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      showPanel('perm');
+      return;
+    }
+    beginTracking();
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    if (running) stopTracking(false);
+    else if (sessionElapsed > 0) beginTracking();
+    else start();
+  });
+
+  permBtn.addEventListener('click', async () => {
+    try {
+      const res = await DeviceMotionEvent.requestPermission();
+      if (res === 'granted') {
+        showPanel(null);
+        beginTracking();
+      } else {
+        showPanel('denied');
+      }
+    } catch (_) {
+      showPanel('denied');
+    }
+  });
+
+  goalInput.addEventListener('change', () => {
+    const v = parseInt(goalInput.value, 10);
+    if (v >= 1000 && v <= 100000) { state.goal = v; persist(); renderCount(); renderHistory(); }
+  });
+  strideInput.addEventListener('change', () => {
+    const v = parseInt(strideInput.value, 10);
+    if (v >= 40 && v <= 120) { state.stride = v; persist(); renderCount(); }
+  });
+  sensSeg.addEventListener('click', e => {
+    const btn = e.target.closest('[data-sens]');
+    if (!btn) return;
+    state.sensitivity = btn.dataset.sens;
+    persist();
+    renderSettings();
+  });
+  resetBtn.addEventListener('click', async () => {
+    if (!(await mentriaConfirm(COPY.confirmReset))) return;
+    state.steps = 0;
+    sessionSteps = 0;
+    persist();
+    renderCount();
+    renderHistory();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && running && !wakeLock) requestWakeLock();
+  });
+
+  renderCount();
+  renderHistory();
+  renderSettings();
+})();
+</script>
+
+<style>
+.sc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  font-family: var(--font-mono);
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0.5rem 0 1rem;
+}
+.sc__tracker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.sc__ring-wrap { position: relative; width: 240px; height: 240px; }
+.sc__ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.sc__ring-track {
+  fill: none;
+  stroke: rgba(255,255,255,0.06);
+  stroke-width: 14;
+}
+.sc__ring-fill {
+  fill: none;
+  stroke: var(--syn-cyan);
+  stroke-width: 14;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s ease, stroke 0.3s ease;
+  filter: drop-shadow(0 0 6px rgba(34,211,238,0.5));
+}
+.sc__ring-fill.is-complete { stroke: var(--syn-green); filter: drop-shadow(0 0 8px rgba(74,222,128,0.6)); }
+.sc__ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+}
+.sc__count {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--term-fg);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.sc__count-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--term-muted);
+}
+.sc__goal {
+  font-size: 0.72rem;
+  color: var(--syn-cyan);
+  margin-top: 0.2rem;
+}
+
+.sc__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+.sc__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.7rem 0.5rem;
+  border: 1px solid var(--term-border);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.015);
+}
+.sc__stat-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+}
+.sc__stat-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--term-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.sc__hint {
+  font-size: 0.75rem;
+  color: var(--term-muted);
+  text-align: center;
+  margin: 0;
+}
+
+.sc__controls { display: flex; gap: 0.6rem; }
+.sc__btn {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+.sc__btn--primary {
+  background: var(--syn-cyan);
+  color: #041016;
+  box-shadow: 0 0 12px rgba(34,211,238,0.3);
+}
+.sc__btn--primary:hover { background: #67e8f9; }
+.sc__btn--ghost {
+  background: transparent;
+  border-color: var(--term-border);
+  color: var(--term-muted);
+}
+.sc__btn--ghost:hover { color: var(--term-fg); border-color: rgba(255,255,255,0.2); }
+.sc__btn--danger {
+  background: transparent;
+  border-color: rgba(244,114,182,0.4);
+  color: var(--syn-pink);
+  width: 100%;
+}
+.sc__btn--danger:hover { background: rgba(244,114,182,0.1); }
+
+.sc__history { width: 100%; }
+.sc__history-label {
+  display: block;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+  margin-bottom: 0.5rem;
+}
+.sc__bars {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.4rem;
+  height: 90px;
+}
+.sc__bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+.sc__bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(255,255,255,0.03);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.sc__bar-fill {
+  width: 100%;
+  background: var(--syn-cyan);
+  opacity: 0.55;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+}
+.sc__bar-fill.is-goal { opacity: 1; background: var(--syn-green); }
+.sc__bar-label {
+  font-size: 0.6rem;
+  color: var(--term-muted);
+}
+
+.sc__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border: 1px solid var(--term-border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.015);
+  width: 100%;
+}
+.sc__panel[hidden] { display: none; }
+.sc__panel-title {
+  font-size: 1rem;
+  color: var(--syn-cyan);
+  margin: 0;
+}
+.sc__panel-title--warn { color: var(--syn-amber); }
+.sc__panel-body {
+  font-size: 0.85rem;
+  color: var(--term-muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 36ch;
+}
+
+.sc__settings {
+  margin: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--term-border);
+  border-radius: 10px;
+  background: var(--term-bg-raised, #111);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  font-family: var(--font-mono);
+  width: min(320px, calc(100vw - 2rem));
+  inset: unset;
+}
+.sc__settings:not(:popover-open) { display: none; }
+.sc__settings:popover-open {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.sc__settings::backdrop { background: rgba(0,0,0,0.4); }
+.sc__field { display: flex; flex-direction: column; gap: 0.4rem; }
+.sc__field label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+}
+.sc__field input {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--term-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+.sc__field input:focus { outline: none; border-color: var(--syn-cyan); }
+.sc__seg {
+  display: flex;
+  border: 1px solid var(--term-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.sc__seg button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  color: var(--term-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.sc__seg button.is-active { background: rgba(34,211,238,0.15); color: var(--syn-cyan); }
+
+@media (max-width: 480px) {
+  .sc__ring-wrap { width: 200px; height: 200px; }
+  .sc__count { font-size: 2.5rem; }
+  .sc__field input { font-size: 16px; }
+}
+</style>

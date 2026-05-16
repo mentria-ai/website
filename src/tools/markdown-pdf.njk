@@ -366,7 +366,7 @@ async function runAINameGeneration() {
   // If the model file isn't actually in the Cache API, the click would
   // silently kick off a multi-minute 660 MB download. Confirm first.
   if (!aiEngine && !(await isModelTrulyCached())) {
-    if (!confirm(COPY.aiConfirmDownload)) return;
+    if (!(await mentriaConfirm(COPY.aiConfirmDownload))) return;
   }
 
   aiBtn.disabled = true;
@@ -479,8 +479,8 @@ inputEl.addEventListener('keydown', (e) => {
 downloadBtn.addEventListener('click', downloadPDF);
 exportBtn.addEventListener('click', exportMD);
 aiBtn?.addEventListener('click', runAINameGeneration);
-clearBtn.addEventListener('click', () => {
-  if (!confirm(COPY.confirmClear)) return;
+clearBtn.addEventListener('click', async () => {
+  if (!(await mentriaConfirm(COPY.confirmClear))) return;
   inputEl.value = '';
   filenameInput.value = '';
   try { localStorage.removeItem(LS_KEY); } catch (_) {}

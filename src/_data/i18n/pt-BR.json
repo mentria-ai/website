@@ -18,6 +18,11 @@
       "read_more": "O que é isso?",
       "read_less": "Ocultar detalhes",
       "what_is": "O que é {name}?"
+    },
+    "dialog": {
+      "ok": "OK",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar"
     }
   },
   "home": {
@@ -156,6 +161,11 @@
       "title": "Busca",
       "lede": "Encontre ferramentas e posts do feed. Digite qualquer consulta — palavra-chave ou linguagem natural.",
       "tldr": "Busca em todo o site apoiada por um índice gerado em tempo de build, cobrindo cada ferramenta e post do feed em 5 idiomas. O modo padrão é correspondência fuzzy instantânea por palavras-chave em títulos, descrições e TL;DRs — sem download de modelo, sem ida ao servidor. Quando o modelo Qwen3.5-0.8B já está em cache local (após usar AI Chat ou Frase Motivacional), um resumo IA opcional aparece acima dos resultados."
+    },
+    "step-counter": {
+      "title": "Contador de Passos",
+      "lede": "Conte seus passos durante uma caminhada, direto no navegador. Usa o sensor de movimento do seu telefone — nada é enviado.",
+      "tldr": "Um pedômetro por sessão que lê o acelerômetro do seu telefone pela API DeviceMotion e conta passos com detecção de picos no dispositivo. Inicie uma sessão e caminhe com a tela ligada — ele acompanha passos, distância, ritmo e um anel de meta diária. Todo o processamento fica no navegador: sem conta, sem upload, sem rastreamento em segundo plano. Dispositivos sem sensor de movimento mostram um estado desativado."
     }
   },
   "game": {
@@ -599,6 +609,38 @@
     },
     "common": {
       "controls": "Controles"
+    },
+    "step-counter": {
+      "steps_today": "passos hoje",
+      "goal_of": "de {goal}",
+      "btn_start": "Iniciar caminhada",
+      "btn_pause": "Pausar",
+      "btn_resume": "Retomar",
+      "stat_distance": "Distância",
+      "stat_session": "Sessão",
+      "stat_pace": "Ritmo",
+      "pace_unit": "ppm",
+      "settings": "Ajustes",
+      "goal_label": "Meta diária de passos",
+      "stride_label": "Comprimento da passada (cm)",
+      "sensitivity_label": "Sensibilidade",
+      "sens_low": "Baixa",
+      "sens_med": "Média",
+      "sens_high": "Alta",
+      "reset_today": "Zerar hoje",
+      "history_label": "Últimos 7 dias",
+      "perm_title": "Acesso a movimento necessário",
+      "perm_body": "Este contador lê o sensor de movimento do seu telefone. Conceda acesso para começar.",
+      "perm_btn": "Conceder acesso a movimento",
+      "denied_title": "Acesso a movimento negado",
+      "denied_body": "Reative o acesso a movimento nas configurações do navegador e recarregue a página.",
+      "unsupported_title": "Sem sensor de movimento",
+      "unsupported_body": "Contar passos requer um telefone ou tablet com acelerômetro. Este dispositivo não expõe nenhum.",
+      "screen_hint": "Mantenha a tela ligada e esta aba aberta enquanto caminha.",
+      "goal_reached": "Meta diária alcançada",
+      "confirm_reset": "Zerar a contagem de passos de hoje?",
+      "insecure_title": "Conexão segura necessária",
+      "insecure_body": "Sensores de movimento só funcionam com HTTPS. Abra esta ferramenta no site publicado (https://mentria.ai). Um servidor de desenvolvimento local acessado por IP de LAN em HTTP não expõe o sensor."
     }
   },
   "category": {
@@ -608,6 +650,7 @@
     "Game": "Jogo",
     "Productivity": "Produtividade",
     "Timer": "Cronômetro",
-    "Utility": "Utilitário"
+    "Utility": "Utilitário",
+    "Health": "Saúde"
   }
 }

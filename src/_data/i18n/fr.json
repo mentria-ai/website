@@ -18,6 +18,11 @@
       "read_more": "Qu'est-ce que c'est ?",
       "read_less": "Masquer les détails",
       "what_is": "Qu'est-ce que {name} ?"
+    },
+    "dialog": {
+      "ok": "OK",
+      "cancel": "Annuler",
+      "confirm": "Confirmer"
     }
   },
   "home": {
@@ -156,6 +161,11 @@
       "title": "Recherche",
       "lede": "Trouve des outils et des publications du fil. Tape n'importe quelle requête — mot-clé ou langage naturel.",
       "tldr": "Recherche sur l'ensemble du site appuyée par un index construit à la compilation, couvrant chaque outil et chaque publication en 5 langues. Le mode par défaut est une correspondance floue instantanée par mots-clés sur titres, descriptions et TL;DR — sans téléchargement de modèle, sans serveur. Quand le modèle Qwen3.5-0.8B est déjà en cache local (après avoir utilisé AI Chat ou Citation Motivante), un résumé IA optionnel apparaît au-dessus des résultats."
+    },
+    "step-counter": {
+      "title": "Compteur de Pas",
+      "lede": "Compte tes pas en marchant, directement dans le navigateur. Utilise le capteur de mouvement de ton téléphone — rien n'est envoyé.",
+      "tldr": "Un podomètre par session qui lit l'accéléromètre de ton téléphone via l'API DeviceMotion et compte les pas par détection de pics sur l'appareil. Lance une session et marche avec l'écran allumé — il suit les pas, la distance, le rythme et un anneau d'objectif quotidien. Tout le traitement reste dans le navigateur : pas de compte, pas d'envoi, pas de suivi en arrière-plan. Les appareils sans capteur de mouvement affichent un état désactivé."
     }
   },
   "game": {
@@ -599,6 +609,38 @@
     },
     "common": {
       "controls": "Commandes"
+    },
+    "step-counter": {
+      "steps_today": "pas aujourd'hui",
+      "goal_of": "sur {goal}",
+      "btn_start": "Démarrer la marche",
+      "btn_pause": "Pause",
+      "btn_resume": "Reprendre",
+      "stat_distance": "Distance",
+      "stat_session": "Session",
+      "stat_pace": "Rythme",
+      "pace_unit": "ppm",
+      "settings": "Réglages",
+      "goal_label": "Objectif quotidien de pas",
+      "stride_label": "Longueur de foulée (cm)",
+      "sensitivity_label": "Sensibilité",
+      "sens_low": "Basse",
+      "sens_med": "Moyenne",
+      "sens_high": "Haute",
+      "reset_today": "Réinitialiser aujourd'hui",
+      "history_label": "7 derniers jours",
+      "perm_title": "Accès au mouvement requis",
+      "perm_body": "Ce compteur lit le capteur de mouvement de ton téléphone. Accorde l'accès pour commencer.",
+      "perm_btn": "Autoriser l'accès au mouvement",
+      "denied_title": "Accès au mouvement refusé",
+      "denied_body": "Réactive l'accès au mouvement dans les réglages du navigateur, puis recharge la page.",
+      "unsupported_title": "Aucun capteur de mouvement",
+      "unsupported_body": "Compter les pas nécessite un téléphone ou une tablette avec accéléromètre. Cet appareil n'en expose aucun.",
+      "screen_hint": "Garde l'écran allumé et cet onglet ouvert pendant que tu marches.",
+      "goal_reached": "Objectif quotidien atteint",
+      "confirm_reset": "Réinitialiser le compteur de pas d'aujourd'hui à zéro ?",
+      "insecure_title": "Connexion sécurisée requise",
+      "insecure_body": "Les capteurs de mouvement ne fonctionnent qu en HTTPS. Ouvre cet outil sur le site en ligne (https://mentria.ai). Un serveur de dev local atteint par IP LAN en HTTP ne peut pas exposer le capteur."
     }
   },
   "category": {
@@ -608,6 +650,7 @@
     "Game": "Jeu",
     "Productivity": "Productivité",
     "Timer": "Minuteur",
-    "Utility": "Utilitaire"
+    "Utility": "Utilitaire",
+    "Health": "Santé"
   }
 }

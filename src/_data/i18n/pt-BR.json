@@ -324,7 +324,19 @@
       "delete_btn": "Excluir",
       "delete_title": "Excluir nota",
       "saved_prefix": "Salvo",
-      "confirm_delete": "Excluir \"{name}\"? Isso não pode ser desfeito."
+      "confirm_delete": "Excluir \"{name}\"? Isso não pode ser desfeito.",
+      "lock_btn": "Bloquear",
+      "remove_lock_btn": "Remover bloqueio",
+      "lock_title": "Criptografar esta nota com a chave de acesso do dispositivo",
+      "locked_tag": "Bloqueada",
+      "unlock_btn": "Desbloquear",
+      "locked_heading": "Esta nota está bloqueada",
+      "locked_body": "O conteúdo está criptografado. Desbloqueie com a chave de acesso do dispositivo para ver e editar.",
+      "confirm_lock": "Bloquear criptografa esta nota com a chave de acesso do dispositivo. Se você perder essa chave ou limpar os dados deste navegador, a nota não poderá ser recuperada. Bloquear?",
+      "confirm_remove_lock": "Remover a criptografia desta nota? Ela será salva novamente como texto simples.",
+      "lock_failed": "Não foi possível bloquear a nota — a chave de acesso do dispositivo não estava disponível.",
+      "unlock_failed": "Não foi possível desbloquear a nota — a chave de acesso não correspondeu ou não estava disponível.",
+      "prf_unsupported": "Este navegador ou dispositivo não pode usar uma chave de acesso para criptografia. Tente uma versão recente do Chrome, Edge ou Safari."
     },
     "color-picker": {
       "title_pick_color": "Clique para escolher uma cor",

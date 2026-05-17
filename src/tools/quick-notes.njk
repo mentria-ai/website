@@ -51,6 +51,7 @@ eleventyComputed:
       <div class="qn-editor__actions">
         <button class="qn-action-btn" id="qn-export-btn" title="{{ 'tool.quick-notes.export_title' | t }}">{{ "tool.quick-notes.export_btn" | t }}</button>
         <button class="qn-action-btn" id="qn-share-btn" title="{{ 'common.share' | t }}">{{ "common.share" | t }}</button>
+        <button class="qn-action-btn" id="qn-lock-btn" title="{{ 'tool.quick-notes.lock_title' | t }}">{{ "tool.quick-notes.lock_btn" | t }}</button>
         <button class="qn-action-btn qn-action-btn--danger" id="qn-delete-btn" title="{{ 'tool.quick-notes.delete_title' | t }}">{{ "tool.quick-notes.delete_btn" | t }}</button>
       </div>
     </div>
@@ -60,6 +61,15 @@ eleventyComputed:
       placeholder="{{ 'tool.quick-notes.start_typing' | t }}"
       spellcheck="false"
     ></textarea>
+    <div class="qn-locked" id="qn-locked" hidden>
+      <svg class="qn-locked__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="11" width="16" height="10" rx="2"/>
+        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+      </svg>
+      <h2 class="qn-locked__heading">{{ "tool.quick-notes.locked_heading" | t }}</h2>
+      <p class="qn-locked__body">{{ "tool.quick-notes.locked_body" | t }}</p>
+      <button class="qn-unlock-btn" id="qn-unlock-btn">{{ "tool.quick-notes.unlock_btn" | t }}</button>
+    </div>
     <div class="qn-editor__statusbar">
       <span class="qn-status__counts" id="qn-counts">0 words &middot; 0 chars</span>
       <span class="qn-status__saved" id="qn-saved"></span>
@@ -73,9 +83,17 @@ eleventyComputed:
 <script>
 (() => {
   const COPY = {
-    untitled:      {{ ("tool.quick-notes.untitled"       | t) | dump | safe }},
-    savedPrefix:   {{ ("tool.quick-notes.saved_prefix"   | t) | dump | safe }},
-    confirmDelete: {{ ("tool.quick-notes.confirm_delete" | t) | dump | safe }}
+    untitled:          {{ ("tool.quick-notes.untitled"           | t) | dump | safe }},
+    savedPrefix:       {{ ("tool.quick-notes.saved_prefix"       | t) | dump | safe }},
+    confirmDelete:     {{ ("tool.quick-notes.confirm_delete"     | t) | dump | safe }},
+    lockBtn:           {{ ("tool.quick-notes.lock_btn"           | t) | dump | safe }},
+    removeLockBtn:     {{ ("tool.quick-notes.remove_lock_btn"    | t) | dump | safe }},
+    lockedTag:         {{ ("tool.quick-notes.locked_tag"         | t) | dump | safe }},
+    confirmLock:       {{ ("tool.quick-notes.confirm_lock"       | t) | dump | safe }},
+    confirmRemoveLock: {{ ("tool.quick-notes.confirm_remove_lock" | t) | dump | safe }},
+    lockFailed:        {{ ("tool.quick-notes.lock_failed"        | t) | dump | safe }},
+    unlockFailed:      {{ ("tool.quick-notes.unlock_failed"      | t) | dump | safe }},
+    prfUnsupported:    {{ ("tool.quick-notes.prf_unsupported"    | t) | dump | safe }}
   };
 
   const STORAGE_KEY = 'mentria-quick-notes';
@@ -90,7 +108,10 @@ eleventyComputed:
   const savedEl     = document.getElementById('qn-saved');
   const exportBtn   = document.getElementById('qn-export-btn');
   const shareBtn    = document.getElementById('qn-share-btn');
+  const lockBtn     = document.getElementById('qn-lock-btn');
   const deleteBtn   = document.getElementById('qn-delete-btn');
+  const lockedPanel = document.getElementById('qn-locked');
+  const unlockBtn   = document.getElementById('qn-unlock-btn');
   const sidebar     = document.getElementById('qn-sidebar');
   const sidebarToggle = document.getElementById('qn-sidebar-toggle');
 
@@ -98,6 +119,11 @@ eleventyComputed:
   let notes = [];        // [{id, title, body, createdAt, updatedAt}]
   let activeId = null;
   let saveTimer = null;
+
+  const CRED_KEY = 'mentria-qn-cred';
+  const SALT_KEY = 'mentria-qn-salt';
+  let sessionKey = null;
+  const cryptoOK = !!(window.PublicKeyCredential && window.isSecureContext && window.crypto && crypto.subtle);
 
   /* ── Persistence ───────────────────────────────────── */
   function load() {
@@ -113,6 +139,100 @@ eleventyComputed:
 
   function persist() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch (_) {}
+  }
+
+  function b64enc(buf) {
+    const bytes = new Uint8Array(buf);
+    let s = '';
+    for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s);
+  }
+  function b64dec(str) {
+    const bin = atob(str);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
+  function prfSalt() {
+    let s = localStorage.getItem(SALT_KEY);
+    if (!s) {
+      s = b64enc(crypto.getRandomValues(new Uint8Array(32)));
+      localStorage.setItem(SALT_KEY, s);
+    }
+    return b64dec(s);
+  }
+
+  async function ensureKey() {
+    if (sessionKey) return sessionKey;
+    if (!cryptoOK) throw new Error('prf-unsupported');
+    const salt = prfSalt();
+    let credId = localStorage.getItem(CRED_KEY);
+    let prfResult = null;
+    if (!credId) {
+      const cred = await navigator.credentials.create({
+        publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(32)),
+          rp: { name: 'Mentria Quick Notes' },
+          user: {
+            id: crypto.getRandomValues(new Uint8Array(16)),
+            name: 'quick-notes',
+            displayName: 'Quick Notes'
+          },
+          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+          authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
+          extensions: { prf: { eval: { first: salt } } }
+        }
+      });
+      if (!cred) throw new Error('cancelled');
+      const prf = cred.getClientExtensionResults().prf;
+      if (!prf || prf.enabled === false) throw new Error('prf-unsupported');
+      localStorage.setItem(CRED_KEY, b64enc(cred.rawId));
+      credId = localStorage.getItem(CRED_KEY);
+      if (prf.results && prf.results.first) prfResult = prf.results.first;
+    }
+    if (!prfResult) {
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(32)),
+          allowCredentials: [{ type: 'public-key', id: b64dec(credId) }],
+          userVerification: 'required',
+          extensions: { prf: { eval: { first: salt } } }
+        }
+      });
+      if (!assertion) throw new Error('cancelled');
+      const prf = assertion.getClientExtensionResults().prf;
+      if (!prf || !prf.results || !prf.results.first) throw new Error('prf-unsupported');
+      prfResult = prf.results.first;
+    }
+    sessionKey = await crypto.subtle.importKey(
+      'raw', new Uint8Array(prfResult), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']
+    );
+    return sessionKey;
+  }
+
+  async function encryptText(text) {
+    const key = await ensureKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: iv }, key, new TextEncoder().encode(text)
+    );
+    return { body: b64enc(ct), iv: b64enc(iv) };
+  }
+
+  async function decryptNote(note) {
+    const key = await ensureKey();
+    const pt = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: b64dec(note.iv) }, key, b64dec(note.body)
+    );
+    return new TextDecoder().decode(pt);
+  }
+
+  function handleCryptoError(err, fallbackMsg) {
+    if (err && err.name === 'NotAllowedError') return;
+    if (err && err.message === 'prf-unsupported') { mentriaAlert(COPY.prfUnsupported); return; }
+    if (err && err.message === 'cancelled') return;
+    mentriaAlert(fallbackMsg);
   }
 
   /* ── Note CRUD ─────────────────────────────────────── */
@@ -159,14 +279,51 @@ eleventyComputed:
     activeId = id;
     const note = getNote(id);
     if (!note) return;
-    titleInput.value = note.title;
-    textarea.value = note.body;
-    updateCounts();
-    updateSavedLabel(note.updatedAt);
+    renderEditor();
     renderList();
     // Collapse sidebar on mobile after selection
     if (window.innerWidth <= 640) {
       sidebar.classList.remove('qn-sidebar--open');
+    }
+  }
+
+  async function renderEditor() {
+    const note = getNote(activeId);
+    if (!note) return;
+    titleInput.value = note.title || '';
+    let mode;
+    if (!note.enc) {
+      mode = 'plain';
+      textarea.value = note.body || '';
+    } else if (sessionKey) {
+      mode = 'unlocked';
+      try {
+        const text = await decryptNote(note);
+        if (activeId !== note.id) return;
+        textarea.value = text;
+      } catch (_) {
+        mode = 'locked';
+      }
+    } else {
+      mode = 'locked';
+    }
+    if (mode === 'locked') textarea.value = '';
+    applyEditorMode(mode);
+    updateCounts();
+    updateSavedLabel(note.updatedAt);
+  }
+
+  function applyEditorMode(mode) {
+    const locked = mode === 'locked';
+    textarea.hidden = locked;
+    lockedPanel.hidden = !locked;
+    exportBtn.hidden = locked;
+    shareBtn.hidden = locked || !navigator.share;
+    if (!cryptoOK) {
+      lockBtn.hidden = true;
+    } else {
+      lockBtn.hidden = locked;
+      lockBtn.textContent = mode === 'unlocked' ? COPY.removeLockBtn : COPY.lockBtn;
     }
   }
 
@@ -178,7 +335,9 @@ eleventyComputed:
       btn.className = 'qn-note-tab' + (note.id === activeId ? ' qn-note-tab--active' : '');
       btn.dataset.id = note.id;
       const title = note.title || COPY.untitled;
-      const preview = note.body ? note.body.slice(0, 50).replace(/\n/g, ' ') : 'Empty';
+      let preview;
+      if (note.enc) preview = '🔒 ' + COPY.lockedTag;
+      else preview = note.body ? note.body.slice(0, 50).replace(/\n/g, ' ') : 'Empty';
       btn.innerHTML =
         '<span class="qn-note-tab__title">' + escHtml(title) + '</span>' +
         '<span class="qn-note-tab__preview">' + escHtml(preview) + '</span>';
@@ -196,11 +355,19 @@ eleventyComputed:
   /* ── Auto-save (debounced) ─────────────────────────── */
   function scheduleSave() {
     if (saveTimer) clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
+    saveTimer = setTimeout(async () => {
       const note = getNote(activeId);
       if (!note) return;
       note.title = titleInput.value;
-      note.body = textarea.value;
+      if (note.enc) {
+        try {
+          const enc = await encryptText(textarea.value);
+          note.body = enc.body;
+          note.iv = enc.iv;
+        } catch (_) { return; }
+      } else {
+        note.body = textarea.value;
+      }
       note.updatedAt = Date.now();
       persist();
       updateSavedLabel(note.updatedAt);
@@ -231,7 +398,7 @@ eleventyComputed:
     const note = getNote(activeId);
     if (!note) return;
     const filename = (note.title || 'untitled') .replace(/[^a-z0-9_\-]/gi, '_') + '.txt';
-    const blob = new Blob([note.body], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([textarea.value], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -244,10 +411,64 @@ eleventyComputed:
   /* ── Share active note ─────────────────────────────── */
   async function shareNote() {
     const note = getNote(activeId);
-    if (!note || !note.body) return;
+    if (!note || !textarea.value) return;
     try {
-      await navigator.share({ title: note.title || COPY.untitled, text: note.body });
+      await navigator.share({ title: note.title || COPY.untitled, text: textarea.value });
     } catch (_) { /* dismissed */ }
+  }
+
+  function handleLockClick() {
+    const note = getNote(activeId);
+    if (!note) return;
+    if (note.enc) removeLock();
+    else lockNote();
+  }
+
+  async function lockNote() {
+    const note = getNote(activeId);
+    if (!note || note.enc) return;
+    if (!cryptoOK) { mentriaAlert(COPY.prfUnsupported); return; }
+    if (!(await mentriaConfirm(COPY.confirmLock))) return;
+    let enc;
+    try {
+      enc = await encryptText(textarea.value);
+    } catch (err) {
+      handleCryptoError(err, COPY.lockFailed);
+      return;
+    }
+    note.title = titleInput.value;
+    note.enc = true;
+    note.body = enc.body;
+    note.iv = enc.iv;
+    note.updatedAt = Date.now();
+    persist();
+    renderEditor();
+    renderList();
+  }
+
+  async function unlockNote() {
+    const note = getNote(activeId);
+    if (!note || !note.enc) return;
+    try {
+      await ensureKey();
+    } catch (err) {
+      handleCryptoError(err, COPY.unlockFailed);
+      return;
+    }
+    renderEditor();
+  }
+
+  async function removeLock() {
+    const note = getNote(activeId);
+    if (!note || !note.enc) return;
+    if (!(await mentriaConfirm(COPY.confirmRemoveLock))) return;
+    note.enc = false;
+    note.body = textarea.value;
+    delete note.iv;
+    note.updatedAt = Date.now();
+    persist();
+    renderEditor();
+    renderList();
   }
 
   /* ── Delete with confirmation ──────────────────────── */
@@ -279,6 +500,8 @@ eleventyComputed:
   exportBtn.addEventListener('click', exportNote);
   if (navigator.share) shareBtn.addEventListener('click', shareNote);
   else shareBtn.hidden = true;
+  lockBtn.addEventListener('click', handleLockClick);
+  unlockBtn.addEventListener('click', unlockNote);
   deleteBtn.addEventListener('click', confirmDelete);
   sidebarToggle.addEventListener('click', toggleSidebar);
 
@@ -547,6 +770,53 @@ eleventyComputed:
 .qn-editor__textarea:focus {
   background: rgba(10, 10, 10, 0.95);
 }
+.qn-editor__textarea[hidden] { display: none; }
+.qn-action-btn[hidden] { display: none; }
+
+.qn-locked {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: var(--term-bg, #0a0a0a);
+}
+.qn-locked[hidden] { display: none; }
+.qn-locked__icon {
+  width: 40px;
+  height: 40px;
+  color: var(--syn-cyan, #22d3ee);
+}
+.qn-locked__heading {
+  margin: 0;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.95rem;
+  color: var(--term-fg, #e2e8f0);
+}
+.qn-locked__body {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--term-muted, #64748b);
+}
+.qn-unlock-btn {
+  margin-top: 0.3rem;
+  padding: 0.55rem 1.6rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--syn-cyan, #22d3ee);
+  color: #041016;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.qn-unlock-btn:hover { background: #67e8f9; }
 
 /* ── Status Bar ───────────────────────────────────── */
 .qn-editor__statusbar {

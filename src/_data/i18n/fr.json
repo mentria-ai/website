@@ -324,7 +324,19 @@
       "delete_btn": "Supprimer",
       "delete_title": "Supprimer la note",
       "saved_prefix": "Enregistré",
-      "confirm_delete": "Supprimer « {name} » ? Cela ne peut pas être annulé."
+      "confirm_delete": "Supprimer « {name} » ? Cela ne peut pas être annulé.",
+      "lock_btn": "Verrouiller",
+      "remove_lock_btn": "Retirer le verrou",
+      "lock_title": "Chiffrer cette note avec la clé d'accès de ton appareil",
+      "locked_tag": "Verrouillée",
+      "unlock_btn": "Déverrouiller",
+      "locked_heading": "Cette note est verrouillée",
+      "locked_body": "Son contenu est chiffré. Déverrouille-la avec la clé d'accès de ton appareil pour la voir et la modifier.",
+      "confirm_lock": "Le verrouillage chiffre cette note avec la clé d'accès de ton appareil. Si tu perds cette clé ou effaces les données de ce navigateur, la note sera irrécupérable. La verrouiller ?",
+      "confirm_remove_lock": "Retirer le chiffrement de cette note ? Elle sera de nouveau enregistrée en texte clair.",
+      "lock_failed": "Impossible de verrouiller la note — la clé d'accès de l'appareil n'était pas disponible.",
+      "unlock_failed": "Impossible de déverrouiller la note — la clé d'accès ne correspondait pas ou n'était pas disponible.",
+      "prf_unsupported": "Ce navigateur ou cet appareil ne peut pas utiliser de clé d'accès pour le chiffrement. Essaie une version récente de Chrome, Edge ou Safari."
     },
     "color-picker": {
       "title_pick_color": "Cliquez pour choisir une couleur",

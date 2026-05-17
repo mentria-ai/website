@@ -324,7 +324,19 @@
       "delete_btn": "Eliminar",
       "delete_title": "Eliminar nota",
       "saved_prefix": "Guardado",
-      "confirm_delete": "¿Eliminar \"{name}\"? Esto no se puede deshacer."
+      "confirm_delete": "¿Eliminar \"{name}\"? Esto no se puede deshacer.",
+      "lock_btn": "Bloquear",
+      "remove_lock_btn": "Quitar bloqueo",
+      "lock_title": "Cifrar esta nota con la llave de acceso de tu dispositivo",
+      "locked_tag": "Bloqueada",
+      "unlock_btn": "Desbloquear",
+      "locked_heading": "Esta nota está bloqueada",
+      "locked_body": "Su contenido está cifrado. Desbloquéala con la llave de acceso de tu dispositivo para verla y editarla.",
+      "confirm_lock": "Bloquear cifra esta nota con la llave de acceso de tu dispositivo. Si pierdes esa llave o borras los datos de este navegador, la nota no se podrá recuperar. ¿Bloquearla?",
+      "confirm_remove_lock": "¿Quitar el cifrado de esta nota? Se guardará de nuevo como texto sin formato.",
+      "lock_failed": "No se pudo bloquear la nota: la llave de acceso del dispositivo no estaba disponible.",
+      "unlock_failed": "No se pudo desbloquear la nota: la llave de acceso no coincidió o no estaba disponible.",
+      "prf_unsupported": "Este navegador o dispositivo no puede usar una llave de acceso para cifrar. Prueba una versión reciente de Chrome, Edge o Safari."
     },
     "color-picker": {
       "title_pick_color": "Haz clic para elegir un color",

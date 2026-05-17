@@ -324,7 +324,19 @@
       "delete_btn": "Delete",
       "delete_title": "Delete note",
       "saved_prefix": "Saved",
-      "confirm_delete": "Delete \"{name}\"? This cannot be undone."
+      "confirm_delete": "Delete \"{name}\"? This cannot be undone.",
+      "lock_btn": "Lock",
+      "remove_lock_btn": "Remove lock",
+      "lock_title": "Encrypt this note with your device passkey",
+      "locked_tag": "Locked",
+      "unlock_btn": "Unlock",
+      "locked_heading": "This note is locked",
+      "locked_body": "Its contents are encrypted. Unlock with your device passkey to view and edit.",
+      "confirm_lock": "Locking encrypts this note with your device's passkey. If you lose that passkey or clear this browser's data, the note can't be recovered. Lock it?",
+      "confirm_remove_lock": "Remove encryption from this note? It will be stored as plain text again.",
+      "lock_failed": "Couldn't lock the note — the device passkey was unavailable.",
+      "unlock_failed": "Couldn't unlock the note — the passkey didn't match or was unavailable.",
+      "prf_unsupported": "This browser or device can't use a passkey for encryption. Try a recent version of Chrome, Edge, or Safari."
     },
     "color-picker": {
       "title_pick_color": "Click to pick a color",

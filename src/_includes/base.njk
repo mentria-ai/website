@@ -240,6 +240,24 @@
       })();
     </script>
     <script>
+      window.mentriaConfirmHeavyDownload = async function () {
+        try {
+          if ('caches' in window) {
+            var hit = await caches.match('https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/qwen3.5-0.8b-q4.safetensors');
+            if (hit) return true;
+          }
+        } catch (_) {}
+        var c = navigator.connection;
+        if (!c) return true;
+        var slow = c.saveData === true || ['slow-2g', '2g', '3g'].indexOf(c.effectiveType) !== -1;
+        if (!slow) return true;
+        if (typeof window.mentriaConfirm === 'function') {
+          return window.mentriaConfirm({{ ("common.heavy_download" | t) | dump | safe }});
+        }
+        return true;
+      };
+    </script>
+    <script>
       (function () {
         if (!navigator.share) return;
         if (!/^(\/(es|fr|ja|pt-br))?\/tools\/[^/]+\/?$/.test(location.pathname)) return;

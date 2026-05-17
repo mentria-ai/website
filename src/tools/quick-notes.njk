@@ -282,9 +282,32 @@ eleventyComputed:
   deleteBtn.addEventListener('click', confirmDelete);
   sidebarToggle.addEventListener('click', toggleSidebar);
 
+  function ingestSharedContent() {
+    let p;
+    try { p = new URLSearchParams(location.search); } catch (_) { return false; }
+    const title = (p.get('title') || '').trim();
+    const text  = (p.get('text')  || '').trim();
+    const url   = (p.get('url')   || '').trim();
+    if (!title && !text && !url) return false;
+    const note = {
+      id: genId(),
+      title: title,
+      body: [text, url].filter(Boolean).join('\n\n'),
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    notes.unshift(note);
+    persist();
+    history.replaceState(null, '', location.pathname);
+    activeId = note.id;
+    return true;
+  }
+
   /* ── Boot ───────────────────────────────────────────── */
   load();
-  if (activeId === null && notes.length > 0) {
+  if (ingestSharedContent()) {
+    selectNote(activeId);
+  } else if (activeId === null && notes.length > 0) {
     selectNote(notes[0].id);
   }
   renderList();

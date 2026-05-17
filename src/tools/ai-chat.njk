@@ -87,7 +87,8 @@ const COPY = {
   errPrefix:           {{ ("tool.ai-chat.err_prefix"            | t) | dump | safe }},
   errDeletePrefix:     {{ ("tool.ai-chat.err_delete_prefix"     | t) | dump | safe }},
   emptyResponse:       {{ ("tool.ai-chat.empty_response"        | t) | dump | safe }},
-  confirmDelete:       {{ ("tool.ai-chat.confirm_delete"        | t) | dump | safe }}
+  confirmDelete:       {{ ("tool.ai-chat.confirm_delete"        | t) | dump | safe }},
+  downloadPostponed:   {{ ("common.download_postponed"          | t) | dump | safe }}
 };
 
 const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
@@ -500,7 +501,10 @@ function runApp(MentriaEngine) {
   });
 
   /* ── Init ────────────────────────────────────────── */
-  loadModel();
+  (async () => {
+    if (await window.mentriaConfirmHeavyDownload()) loadModel();
+    else setStatus('idle', COPY.downloadPostponed);
+  })();
 }
 </script>
 

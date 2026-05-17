@@ -17,5 +17,23 @@
     { "name": "AI Chat", "short_name": "AI Chat", "description": "Chat with a local AI model in your browser", "url": "/tools/ai-chat/" },
     { "name": "Markdown → PDF", "short_name": "MD → PDF", "description": "Write markdown and export a clean PDF", "url": "/tools/markdown-pdf/" },
     { "name": "Quick Notes", "short_name": "Notes", "description": "A minimal scratchpad saved in your browser", "url": "/tools/quick-notes/" }
+  ],
+  "share_target": {
+    "action": "/tools/quick-notes/",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "/tools/markdown-pdf/",
+      "accept": {
+        "text/markdown": [".md", ".markdown"]
+      }
+    }
   ]
 }

@@ -24,7 +24,9 @@
       "cancel": "Cancelar",
       "confirm": "Confirmar"
     },
-    "share": "Compartir"
+    "share": "Compartir",
+    "heavy_download": "Esto descarga unos 660 MB de datos del modelo y parece que tu conexión es lenta o tiene ahorro de datos. ¿Continuar?",
+    "download_postponed": "Descarga en pausa: recarga la página para empezar."
   },
   "home": {
     "cli": {

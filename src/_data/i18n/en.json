@@ -24,7 +24,9 @@
       "cancel": "Cancel",
       "confirm": "Confirm"
     },
-    "share": "Share"
+    "share": "Share",
+    "heavy_download": "This downloads about 660 MB of model data and you appear to be on a slow or data-saving connection. Continue?",
+    "download_postponed": "Download paused — reload the page to start."
   },
   "home": {
     "cli": {

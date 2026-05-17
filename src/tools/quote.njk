@@ -66,7 +66,8 @@ const COPY = {
   errDeviceLost:      {{ ("tool.quote.err_device_lost"      | t) | dump | safe }},
   errLoadPrefix:      {{ ("tool.quote.err_load_prefix"      | t) | dump | safe }},
   errNoQuote:         {{ ("tool.quote.err_no_quote"         | t) | dump | safe }},
-  errGeneration:      {{ ("tool.quote.err_generation"       | t) | dump | safe }}
+  errGeneration:      {{ ("tool.quote.err_generation"       | t) | dump | safe }},
+  downloadPostponed:  {{ ("common.download_postponed"       | t) | dump | safe }}
 };
 
 const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
@@ -296,6 +297,10 @@ function runApp(MentriaEngine) {
   /* Init */
   (async () => {
     setStatus('idle', COPY.statusLoadingModel);
+    if (!(await window.mentriaConfirmHeavyDownload())) {
+      setStatus('idle', COPY.downloadPostponed);
+      return;
+    }
     await loadModel();
     if (engine) generateQuote();
   })();

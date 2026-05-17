@@ -527,6 +527,15 @@ lastHash = contentHash(inputEl.value);
 reflectAvailability();
 const idle = window.requestIdleCallback || (cb => setTimeout(cb, 1500));
 idle(() => reflectAvailability());
+
+if ('launchQueue' in window) {
+  window.launchQueue.setConsumer(async (params) => {
+    if (!params || !params.files || !params.files.length) return;
+    try {
+      importMD(await params.files[0].getFile());
+    } catch (_) {}
+  });
+}
 </script>
 
 <style>

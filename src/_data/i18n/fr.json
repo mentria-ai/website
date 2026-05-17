@@ -24,7 +24,9 @@
       "cancel": "Annuler",
       "confirm": "Confirmer"
     },
-    "share": "Partager"
+    "share": "Partager",
+    "heavy_download": "Cela télécharge environ 660 Mo de données du modèle et votre connexion semble lente ou en mode économie de données. Continuer ?",
+    "download_postponed": "Téléchargement en pause — rechargez la page pour démarrer."
   },
   "home": {
     "cli": {

@@ -23,7 +23,8 @@
       "ok": "OK",
       "cancel": "Annuler",
       "confirm": "Confirmer"
-    }
+    },
+    "share": "Partager"
   },
   "home": {
     "cli": {

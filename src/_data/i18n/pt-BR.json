@@ -23,7 +23,8 @@
       "ok": "OK",
       "cancel": "Cancelar",
       "confirm": "Confirmar"
-    }
+    },
+    "share": "Compartilhar"
   },
   "home": {
     "cli": {

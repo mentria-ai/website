@@ -143,6 +143,7 @@ eleventyComputed:
 
       clearHighlights();
       setWinner(finalIndex);
+      if (navigator.vibrate) navigator.vibrate(30);
       return;
     }
 

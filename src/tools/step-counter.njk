@@ -252,12 +252,16 @@ eleventyComputed:
   }
 
   function registerStep(now) {
+    const wasUnderGoal = state.steps < state.goal;
     state.steps += 1;
     sessionSteps += 1;
     lastStepAt = now;
     renderCount();
     renderHistory();
     persist();
+    if (wasUnderGoal && state.steps >= state.goal && navigator.vibrate) {
+      navigator.vibrate([120, 60, 120, 60, 200]);
+    }
   }
 
   function onMotion(e) {

@@ -29,6 +29,10 @@ eleventyComputed:
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       {{ "tool.markdown-pdf.btn_export" | t }}
     </button>
+    <button class="mp__btn" id="mp-share" title="{{ 'common.share' | t }}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      {{ "common.share" | t }}
+    </button>
     <label class="mp__btn mp__btn--label" for="mp-file" title="{{ 'tool.markdown-pdf.title_import' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       {{ "tool.markdown-pdf.btn_import" | t }}
@@ -103,6 +107,7 @@ const countsEl    = document.getElementById('mp-counts');
 const savedEl     = document.getElementById('mp-saved');
 const downloadBtn = document.getElementById('mp-download');
 const exportBtn   = document.getElementById('mp-export');
+const shareBtn    = document.getElementById('mp-share');
 const clearBtn    = document.getElementById('mp-clear');
 const fileInput   = document.getElementById('mp-file');
 const tabEdit     = document.getElementById('mp-tab-edit');
@@ -432,6 +437,20 @@ function exportMD() {
   URL.revokeObjectURL(url);
 }
 
+async function shareMD() {
+  const fromInput = (filenameInput.value || '').trim();
+  const filename = (fromInput ? slugify(fromInput) : slugify(deriveTitle())) + '.md';
+  const file = new File([inputEl.value || ''], filename, { type: 'text/markdown' });
+  const withFile = { files: [file], title: filename };
+  try {
+    if (navigator.canShare && navigator.canShare(withFile)) {
+      await navigator.share(withFile);
+    } else {
+      await navigator.share({ title: filename, text: inputEl.value || '', url: location.href });
+    }
+  } catch (_) { /* dismissed */ }
+}
+
 function importMD(file) {
   if (!file) return;
   const reader = new FileReader();
@@ -478,6 +497,8 @@ inputEl.addEventListener('keydown', (e) => {
 
 downloadBtn.addEventListener('click', downloadPDF);
 exportBtn.addEventListener('click', exportMD);
+if (navigator.share) shareBtn.addEventListener('click', shareMD);
+else shareBtn.style.display = 'none';
 aiBtn?.addEventListener('click', runAINameGeneration);
 clearBtn.addEventListener('click', async () => {
   if (!(await mentriaConfirm(COPY.confirmClear))) return;

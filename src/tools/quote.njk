@@ -43,6 +43,7 @@ eleventyComputed:
   <div class="mq__actions">
     <button class="mq__btn mq__btn--primary" id="mq-new" disabled>{{ "tool.quote.btn_new" | t }}</button>
     <button class="mq__btn mq__btn--secondary" id="mq-copy" style="display:none;">{{ "tool.quote.btn_copy" | t }}</button>
+    <button class="mq__btn mq__btn--secondary" id="mq-share" style="display:none;">{{ "common.share" | t }}</button>
   </div>
 </section>
 {% include "terminal-frame-close.njk" %}
@@ -122,6 +123,7 @@ function runApp(MentriaEngine) {
   const quoteEl        = document.getElementById('mq-quote');
   const newBtn         = document.getElementById('mq-new');
   const copyBtn        = document.getElementById('mq-copy');
+  const shareBtn       = document.getElementById('mq-share');
 
   let engine = null;
   let generating = false;
@@ -199,6 +201,7 @@ function runApp(MentriaEngine) {
     generating = true;
     newBtn.disabled = true;
     copyBtn.style.display = 'none';
+    shareBtn.style.display = 'none';
     quoteEl.textContent = '';
     quoteEl.classList.add('mq__quote--typing');
     setStatus('generating', COPY.statusGenerating);
@@ -251,6 +254,7 @@ function runApp(MentriaEngine) {
       else quoteEl.textContent = display || COPY.errNoQuote;
       quoteEl.classList.remove('mq__quote--typing');
       if (display) copyBtn.style.display = '';
+      if (display && navigator.share) shareBtn.style.display = '';
     } catch (err) {
       console.error('Generation error:', err);
       quoteEl.textContent = COPY.errGeneration;
@@ -276,9 +280,18 @@ function runApp(MentriaEngine) {
     }
   }
 
+  async function shareQuote() {
+    const text = quoteEl.textContent;
+    if (!text) return;
+    try {
+      await navigator.share({ title: document.title, text: text, url: location.href });
+    } catch (_) {}
+  }
+
   /* Events */
   newBtn.addEventListener('click', generateQuote);
   copyBtn.addEventListener('click', copyQuote);
+  shareBtn.addEventListener('click', shareQuote);
 
   /* Init */
   (async () => {

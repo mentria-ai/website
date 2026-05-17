@@ -23,7 +23,8 @@
       "ok": "OK",
       "cancel": "キャンセル",
       "confirm": "確認"
-    }
+    },
+    "share": "共有"
   },
   "home": {
     "cli": {

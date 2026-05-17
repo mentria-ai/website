@@ -767,3 +767,41 @@ body.pwa-sheet-open { overflow: hidden; }
   .pwa-install-banner__title { font-size: 12.5px; }
   .pwa-install-banner__desc { font-size: 11px; }
 }
+
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+.tool-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.15rem 0 0.5rem;
+  padding: 0.35rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--syn-cyan);
+  background: transparent;
+  border: 1px solid var(--term-border-strong);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.tool-share:hover {
+  border-color: var(--syn-cyan);
+  background: var(--cyan-8);
+}
+
+.tool-share svg {
+  width: 13px;
+  height: 13px;
+}

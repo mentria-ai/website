@@ -50,6 +50,7 @@ eleventyComputed:
       />
       <div class="qn-editor__actions">
         <button class="qn-action-btn" id="qn-export-btn" title="{{ 'tool.quick-notes.export_title' | t }}">{{ "tool.quick-notes.export_btn" | t }}</button>
+        <button class="qn-action-btn" id="qn-share-btn" title="{{ 'common.share' | t }}">{{ "common.share" | t }}</button>
         <button class="qn-action-btn qn-action-btn--danger" id="qn-delete-btn" title="{{ 'tool.quick-notes.delete_title' | t }}">{{ "tool.quick-notes.delete_btn" | t }}</button>
       </div>
     </div>
@@ -88,6 +89,7 @@ eleventyComputed:
   const countsEl    = document.getElementById('qn-counts');
   const savedEl     = document.getElementById('qn-saved');
   const exportBtn   = document.getElementById('qn-export-btn');
+  const shareBtn    = document.getElementById('qn-share-btn');
   const deleteBtn   = document.getElementById('qn-delete-btn');
   const sidebar     = document.getElementById('qn-sidebar');
   const sidebarToggle = document.getElementById('qn-sidebar-toggle');
@@ -239,6 +241,15 @@ eleventyComputed:
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
   }
 
+  /* ── Share active note ─────────────────────────────── */
+  async function shareNote() {
+    const note = getNote(activeId);
+    if (!note || !note.body) return;
+    try {
+      await navigator.share({ title: note.title || COPY.untitled, text: note.body });
+    } catch (_) { /* dismissed */ }
+  }
+
   /* ── Delete with confirmation ──────────────────────── */
   async function confirmDelete() {
     const note = getNote(activeId);
@@ -266,6 +277,8 @@ eleventyComputed:
 
   newBtn.addEventListener('click', createNote);
   exportBtn.addEventListener('click', exportNote);
+  if (navigator.share) shareBtn.addEventListener('click', shareNote);
+  else shareBtn.hidden = true;
   deleteBtn.addEventListener('click', confirmDelete);
   sidebarToggle.addEventListener('click', toggleSidebar);
 

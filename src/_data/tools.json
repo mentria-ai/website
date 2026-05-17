@@ -12,6 +12,12 @@
     "category": "Health"
   },
   {
+    "slug": "qr-scanner",
+    "title": "QR & Barcode Scanner",
+    "summary": "Scan QR codes and barcodes with your camera or an image file — decoded on-device, nothing uploaded.",
+    "category": "Utility"
+  },
+  {
     "slug": "decision-wheel",
     "title": "Decision Wheel",
     "summary": "Offline-ready spinner for quick calls: Yes, No, Up to you, or Wait & try again.",

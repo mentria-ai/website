@@ -169,6 +169,11 @@
       "title": "Contador de Pasos",
       "lede": "Cuenta tus pasos al caminar, directamente en el navegador. Usa el sensor de movimiento de tu teléfono — nada se sube.",
       "tldr": "Un podómetro por sesión que lee el acelerómetro de tu teléfono mediante la API DeviceMotion y cuenta pasos con detección de picos en el dispositivo. Inicia una sesión y camina con la pantalla encendida — registra pasos, distancia, ritmo y un anillo de meta diaria. Todo el procesamiento ocurre en el navegador: sin cuenta, sin subida, sin seguimiento en segundo plano. Los equipos sin sensor de movimiento muestran un estado desactivado."
+    },
+    "qr-scanner": {
+      "title": "Escáner de QR y códigos de barras",
+      "lede": "Escanea códigos QR y de barras con tu cámara o una imagen — decodificado en el dispositivo, nada se sube.",
+      "tldr": "Un escáner basado en la API BarcodeDetector del navegador que lee códigos QR y códigos de barras comunes desde la cámara de tu dispositivo o una imagen cargada. La decodificación ocurre por completo en el dispositivo: ninguna foto ni resultado sale del navegador y no hay ida y vuelta al servidor. Apunta la cámara a un código o elige un archivo de imagen; el texto decodificado aparece con acciones de copiar y abrir enlace. BarcodeDetector es una API exclusiva de Chromium, por lo que los navegadores sin ella muestran un aviso claro de no compatible."
     }
   },
   "game": {
@@ -644,6 +649,26 @@
       "confirm_reset": "¿Reiniciar el conteo de pasos de hoy a cero?",
       "insecure_title": "Se necesita conexión segura",
       "insecure_body": "Los sensores de movimiento solo funcionan con HTTPS. Abre esta herramienta en el sitio publicado (https://mentria.ai). Un servidor de desarrollo local accedido por IP de LAN sobre HTTP no puede exponer el sensor."
+    },
+    "qr-scanner": {
+      "aria_video": "Vista previa de la cámara en vivo",
+      "idle_prompt": "Apunta tu cámara a un código QR o de barras, o escanea un archivo de imagen.",
+      "scanning": "Escaneando…",
+      "result_label": "Decodificado",
+      "btn_start_camera": "Iniciar cámara",
+      "btn_stop": "Detener",
+      "btn_scan_again": "Escanear de nuevo",
+      "btn_scan_image": "Escanear una imagen",
+      "btn_copy": "Copiar",
+      "btn_copied": "Copiado",
+      "btn_open": "Abrir enlace",
+      "note_insecure": "La cámara necesita una conexión segura (HTTPS). Aún puedes escanear un archivo de imagen abajo.",
+      "note_denied": "Se bloqueó el acceso a la cámara. Permítelo en la configuración de tu navegador o escanea una imagen.",
+      "note_no_camera": "No se encontró ninguna cámara en este dispositivo. Aún puedes escanear un archivo de imagen.",
+      "note_camera_error": "No se pudo iniciar la cámara. Aún puedes escanear un archivo de imagen.",
+      "note_no_match": "No se encontró ningún código en esa imagen. Prueba con una foto más nítida.",
+      "unsupported_title": "No compatible aquí",
+      "unsupported_body": "Este navegador no admite la detección de códigos de barras. Prueba un navegador Chromium reciente como Chrome o Edge."
     }
   },
   "category": {

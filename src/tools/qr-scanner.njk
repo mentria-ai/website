@@ -1,0 +1,460 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/qr-scanner/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.qr-scanner.title' | t }}"
+  description: "{{ 'tools.qr-scanner.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">qr-scanner</span></p>
+  <h1>{{ "tools.qr-scanner.title" | t }}</h1>
+  <p>{{ "tools.qr-scanner.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "qr-scanner.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="qr qr--idle" id="qr">
+
+  <div class="qr__main" id="qr-main">
+    <div class="qr__stage">
+      <video class="qr__video" id="qr-video" playsinline muted aria-label="{{ 'tool.qr-scanner.aria_video' | t }}"></video>
+      <div class="qr__frame" aria-hidden="true">
+        <span class="qr__corner qr__corner--tl"></span>
+        <span class="qr__corner qr__corner--tr"></span>
+        <span class="qr__corner qr__corner--bl"></span>
+        <span class="qr__corner qr__corner--br"></span>
+        <span class="qr__scanline"></span>
+      </div>
+      <div class="qr__placeholder">
+        <svg class="qr__placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4M21 15v4a2 2 0 0 1-2 2h-4"/>
+          <rect x="7.5" y="7.5" width="3.5" height="3.5"/>
+          <rect x="13" y="13" width="3.5" height="3.5"/>
+          <path d="M13 7.5h3.5V11M7.5 13h3.5v3.5"/>
+        </svg>
+        <p class="qr__placeholder-text">{{ "tool.qr-scanner.idle_prompt" | t }}</p>
+      </div>
+      <p class="qr__status" id="qr-status" aria-live="polite">{{ "tool.qr-scanner.scanning" | t }}</p>
+    </div>
+
+    <div class="qr__result" id="qr-result">
+      <span class="qr__result-label">{{ "tool.qr-scanner.result_label" | t }}</span>
+      <p class="qr__result-value" id="qr-result-value"></p>
+      <span class="qr__result-format" id="qr-result-format"></span>
+    </div>
+
+    <p class="qr__note" id="qr-note" hidden></p>
+
+    <div class="qr__controls">
+      <button type="button" class="qr__btn qr__btn--primary qr__btn--start" id="qr-start">{{ "tool.qr-scanner.btn_start_camera" | t }}</button>
+      <button type="button" class="qr__btn qr__btn--primary qr__btn--stop" id="qr-stop">{{ "tool.qr-scanner.btn_stop" | t }}</button>
+      <button type="button" class="qr__btn qr__btn--primary qr__btn--again" id="qr-again">{{ "tool.qr-scanner.btn_scan_again" | t }}</button>
+      <label class="qr__btn qr__btn--ghost qr__file-label" for="qr-file">
+        {{ "tool.qr-scanner.btn_scan_image" | t }}
+        <input type="file" id="qr-file" accept="image/*" hidden>
+      </label>
+      <button type="button" class="qr__btn qr__btn--ghost" id="qr-copy" hidden>{{ "tool.qr-scanner.btn_copy" | t }}</button>
+      <button type="button" class="qr__btn qr__btn--ghost" id="qr-open" hidden>{{ "tool.qr-scanner.btn_open" | t }}</button>
+    </div>
+  </div>
+
+  <div class="qr__panel" id="qr-unsupported" hidden>
+    <h2 class="qr__panel-title qr__panel-title--warn">{{ "tool.qr-scanner.unsupported_title" | t }}</h2>
+    <p class="qr__panel-body">{{ "tool.qr-scanner.unsupported_body" | t }}</p>
+  </div>
+
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(() => {
+  const COPY = {
+    btnCopy:        {{ ("tool.qr-scanner.btn_copy"        | t) | dump | safe }},
+    btnCopied:      {{ ("tool.qr-scanner.btn_copied"      | t) | dump | safe }},
+    noteInsecure:   {{ ("tool.qr-scanner.note_insecure"   | t) | dump | safe }},
+    noteDenied:     {{ ("tool.qr-scanner.note_denied"     | t) | dump | safe }},
+    noteNoCamera:   {{ ("tool.qr-scanner.note_no_camera"  | t) | dump | safe }},
+    noteCameraErr:  {{ ("tool.qr-scanner.note_camera_error" | t) | dump | safe }},
+    noteNoMatch:    {{ ("tool.qr-scanner.note_no_match"   | t) | dump | safe }}
+  };
+
+  const $ = id => document.getElementById(id);
+  const qr          = $('qr');
+  const main        = $('qr-main');
+  const panelUnsup  = $('qr-unsupported');
+  const video       = $('qr-video');
+  const noteEl      = $('qr-note');
+  const resultValue = $('qr-result-value');
+  const resultFmt   = $('qr-result-format');
+  const startBtn    = $('qr-start');
+  const stopBtn     = $('qr-stop');
+  const againBtn    = $('qr-again');
+  const fileInput   = $('qr-file');
+  const copyBtn     = $('qr-copy');
+  const openBtn     = $('qr-open');
+
+  let detector = null;
+  let stream = null;
+  let rafId = 0;
+  let lastDetect = 0;
+  let scanning = false;
+  let lastValue = '';
+
+  function showUnsupported() {
+    main.hidden = true;
+    panelUnsup.hidden = false;
+  }
+
+  if (!('BarcodeDetector' in window)) {
+    showUnsupported();
+    return;
+  }
+
+  function setState(s) {
+    qr.className = 'qr qr--' + s;
+    copyBtn.hidden = s !== 'result';
+    if (s !== 'result') openBtn.hidden = true;
+  }
+
+  function showNote(msg) {
+    noteEl.textContent = msg;
+    noteEl.hidden = false;
+  }
+  function hideNote() {
+    noteEl.hidden = true;
+  }
+
+  function stopCamera() {
+    scanning = false;
+    if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    video.srcObject = null;
+  }
+
+  function showResult(value, format) {
+    lastValue = value || '';
+    resultValue.textContent = lastValue;
+    resultFmt.textContent = format ? format.replace(/_/g, ' ') : '';
+    setState('result');
+    openBtn.hidden = !/^https?:\/\/\S+$/i.test(lastValue.trim());
+    if (navigator.vibrate) navigator.vibrate(40);
+  }
+
+  function onCode(code) {
+    stopCamera();
+    showResult(code.rawValue, code.format);
+  }
+
+  async function scanLoop(ts) {
+    if (!scanning) return;
+    rafId = requestAnimationFrame(scanLoop);
+    if (ts - lastDetect < 220) return;
+    lastDetect = ts;
+    if (video.readyState < 2) return;
+    let codes;
+    try { codes = await detector.detect(video); }
+    catch (_) { return; }
+    if (codes && codes.length) onCode(codes[0]);
+  }
+
+  async function startCamera() {
+    hideNote();
+    if (!detector) return;
+    if (!window.isSecureContext) { showNote(COPY.noteInsecure); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showNote(COPY.noteNoCamera);
+      return;
+    }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    } catch (err) {
+      const name = err && err.name;
+      if (name === 'NotAllowedError' || name === 'SecurityError') showNote(COPY.noteDenied);
+      else if (name === 'NotFoundError' || name === 'OverconstrainedError') showNote(COPY.noteNoCamera);
+      else showNote(COPY.noteCameraErr);
+      return;
+    }
+    video.srcObject = stream;
+    scanning = true;
+    setState('scanning');
+    try { await video.play(); } catch (_) {}
+    lastDetect = 0;
+    rafId = requestAnimationFrame(scanLoop);
+  }
+
+  async function scanImage(file) {
+    hideNote();
+    if (!file || !detector) return;
+    let bitmap;
+    try { bitmap = await createImageBitmap(file); }
+    catch (_) { showNote(COPY.noteNoMatch); return; }
+    let codes;
+    try { codes = await detector.detect(bitmap); }
+    catch (_) { codes = []; }
+    if (bitmap.close) bitmap.close();
+    if (codes && codes.length) showResult(codes[0].rawValue, codes[0].format);
+    else showNote(COPY.noteNoMatch);
+  }
+
+  startBtn.addEventListener('click', startCamera);
+  stopBtn.addEventListener('click', () => { stopCamera(); setState('idle'); });
+  againBtn.addEventListener('click', () => { hideNote(); setState('idle'); });
+  fileInput.addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    if (f) scanImage(f);
+    fileInput.value = '';
+  });
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(lastValue);
+      copyBtn.textContent = COPY.btnCopied;
+      setTimeout(() => { copyBtn.textContent = COPY.btnCopy; }, 1500);
+    } catch (_) {}
+  });
+  openBtn.addEventListener('click', () => {
+    if (/^https?:\/\//i.test(lastValue)) window.open(lastValue, '_blank', 'noopener');
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && scanning) { stopCamera(); setState('idle'); }
+  });
+  window.addEventListener('pagehide', stopCamera);
+
+  (async () => {
+    try {
+      const formats = await BarcodeDetector.getSupportedFormats();
+      if (!formats || !formats.length) { showUnsupported(); return; }
+      detector = new BarcodeDetector({ formats });
+    } catch (_) {
+      showUnsupported();
+    }
+  })();
+
+  setState('idle');
+})();
+</script>
+
+<style>
+.qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  font-family: var(--font-mono);
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0.5rem 0 1rem;
+}
+.qr__main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  width: 100%;
+}
+.qr__main[hidden] { display: none; }
+
+.qr__stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 360px;
+  border: 1px solid var(--term-border);
+  border-radius: 12px;
+  background: #060606;
+  overflow: hidden;
+}
+
+.qr__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+.qr--scanning .qr__video { display: block; }
+
+.qr__placeholder {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+.qr:not(.qr--scanning) .qr__placeholder { display: flex; }
+.qr__placeholder-icon { width: 56px; height: 56px; color: var(--term-muted); }
+.qr__placeholder-text {
+  font-size: 0.8rem;
+  color: var(--term-muted);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 28ch;
+}
+
+.qr__frame {
+  position: absolute;
+  inset: 17.5%;
+  display: none;
+  pointer-events: none;
+}
+.qr--scanning .qr__frame { display: block; }
+.qr__corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--syn-cyan);
+}
+.qr__corner--tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+.qr__corner--tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+.qr__corner--bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+.qr__corner--br { bottom: 0; right: 0; border-left: none; border-top: none; }
+.qr__scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--syn-cyan);
+  box-shadow: 0 0 10px var(--syn-cyan);
+  animation: qr-scan 2.2s ease-in-out infinite;
+}
+@keyframes qr-scan {
+  0%, 100% { top: 0; }
+  50% { top: 100%; }
+}
+
+.qr__status {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  padding: 0.45rem;
+  text-align: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--syn-cyan);
+  background: linear-gradient(0deg, rgba(0,0,0,0.75), transparent);
+}
+.qr--scanning .qr__status { display: block; }
+
+.qr__result {
+  display: none;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid var(--term-border-strong);
+  border-radius: 10px;
+  background: rgba(34,211,238,0.04);
+}
+.qr--result .qr__result { display: flex; }
+.qr__result-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--term-muted);
+}
+.qr__result-value {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--term-fg);
+  word-break: break-all;
+  line-height: 1.5;
+}
+.qr__result-format {
+  font-size: 0.65rem;
+  color: var(--syn-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.qr__note {
+  margin: 0;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(251,191,36,0.35);
+  border-radius: 8px;
+  background: rgba(251,191,36,0.06);
+  color: var(--syn-amber);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.qr__controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+.qr__btn {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+.qr__btn[hidden] { display: none; }
+.qr__btn--primary {
+  background: var(--syn-cyan);
+  color: #041016;
+  box-shadow: 0 0 12px rgba(34,211,238,0.3);
+}
+.qr__btn--primary:hover { background: #67e8f9; }
+.qr__btn--ghost {
+  background: transparent;
+  border-color: var(--term-border-strong);
+  color: var(--term-muted);
+}
+.qr__btn--ghost:hover { color: var(--term-fg); border-color: var(--syn-cyan); }
+
+.qr__btn--start, .qr__btn--stop, .qr__btn--again { display: none; }
+.qr--idle .qr__btn--start { display: inline-block; }
+.qr--scanning .qr__btn--stop { display: inline-block; }
+.qr--result .qr__btn--again { display: inline-block; }
+.qr--scanning .qr__file-label { display: none; }
+
+.qr__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border: 1px solid var(--term-border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.015);
+  width: 100%;
+}
+.qr__panel[hidden] { display: none; }
+.qr__panel-title {
+  font-size: 1rem;
+  color: var(--syn-cyan);
+  margin: 0;
+}
+.qr__panel-title--warn { color: var(--syn-amber); }
+.qr__panel-body {
+  font-size: 0.85rem;
+  color: var(--term-muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 40ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qr__scanline { animation: none; top: 50%; }
+}
+</style>

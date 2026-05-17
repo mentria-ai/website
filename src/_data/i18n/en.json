@@ -169,6 +169,11 @@
       "title": "Step Counter",
       "lede": "Count your steps on a walk, right in the browser. Uses your phone's motion sensor — nothing is uploaded.",
       "tldr": "A session-based pedometer that reads your phone's accelerometer through the DeviceMotion API and counts steps with on-device peak detection. Start a session and walk with the screen on — it tracks steps, distance, pace, and a daily goal ring. All processing stays in the browser: no account, no upload, no background tracking. Desktops and devices without a motion sensor show a disabled state."
+    },
+    "qr-scanner": {
+      "title": "QR & Barcode Scanner",
+      "lede": "Scan QR codes and barcodes with your camera or an image — decoded on-device, nothing uploaded.",
+      "tldr": "A scanner built on the browser's BarcodeDetector API that reads QR codes and common barcodes from your device camera or an uploaded image. Decoding happens entirely on-device — no photo or scan result leaves the browser, and there is no server round-trip. Point the camera at a code or pick an image file; the decoded text appears with copy and open-link actions. BarcodeDetector is a Chromium-only API, so browsers without it show a clear unsupported notice."
     }
   },
   "game": {
@@ -644,6 +649,26 @@
       "confirm_reset": "Reset today's step count to zero?",
       "insecure_title": "Secure connection needed",
       "insecure_body": "Motion sensors only work over HTTPS. Open this tool on the live site (https://mentria.ai). A local dev server reached by LAN IP over plain HTTP cannot expose the sensor."
+    },
+    "qr-scanner": {
+      "aria_video": "Live camera preview",
+      "idle_prompt": "Point your camera at a QR code or barcode — or scan an image file.",
+      "scanning": "Scanning…",
+      "result_label": "Decoded",
+      "btn_start_camera": "Start camera",
+      "btn_stop": "Stop",
+      "btn_scan_again": "Scan again",
+      "btn_scan_image": "Scan an image",
+      "btn_copy": "Copy",
+      "btn_copied": "Copied",
+      "btn_open": "Open link",
+      "note_insecure": "The camera needs a secure (HTTPS) connection. You can still scan an image file below.",
+      "note_denied": "Camera access was blocked. Allow it in your browser settings, or scan an image file instead.",
+      "note_no_camera": "No camera was found on this device. You can still scan an image file.",
+      "note_camera_error": "The camera could not be started. You can still scan an image file.",
+      "note_no_match": "No code found in that image. Try a clearer photo.",
+      "unsupported_title": "Not supported here",
+      "unsupported_body": "This browser doesn't support barcode detection. Try a recent Chromium browser such as Chrome or Edge."
     }
   },
   "category": {

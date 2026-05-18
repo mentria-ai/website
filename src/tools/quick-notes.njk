@@ -901,8 +901,16 @@ eleventyComputed:
   }
 
   .qn-editor__actions {
-    width: 100%;
-    justify-content: flex-end;
+    width: calc(100% + 2rem);
+    margin: 0 -1rem;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .qn-editor__actions::-webkit-scrollbar { display: none; }
+
+  .qn-action-btn {
+    flex-shrink: 0;
   }
 }
 

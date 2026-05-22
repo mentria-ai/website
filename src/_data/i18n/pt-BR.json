@@ -13,6 +13,33 @@
   "footer": {
     "copyright": "© 2026 Mentria. Todos os direitos reservados."
   },
+  "about": {
+    "title": "Sobre",
+    "meta_description": "A Mentria é um pequeno estúdio criativo. Ferramentas, jogos e IA com foco em privacidade que rodam inteiramente no seu navegador — sem servidores, sem contas, sem rastreamento.",
+    "tagline": "estúdio criativo. ferramentas e transmissões.",
+    "s1_label": "o que é isto",
+    "s1_p1": "A Mentria é um pequeno estúdio criativo que faz software como os fanzines eram impressos — localmente, de propósito e sem pedir permissão. O site que você está lendo é um progressive web app. Tudo nele — as ferramentas, os jogos, a IA — roda no dispositivo à sua frente. Não há um backend enviando seus prompts para um data center. Não há rastreadores medindo quanto tempo você encarou a página inicial.",
+    "s1_p2": "Fazemos <strong>ferramentas que respeitam você</strong>: um tokenizador no navegador, um motor de inferência WebGPU, alguns joguinhos e um feed de transmissões com textos. Sem contas, sem captura de e-mail, sem aviso de cookies. Se algo aqui é útil para você, continua útil quando o wifi cai — e continua útil daqui a cinco anos, quando a startup em que você se cadastrou tiver pivotado, expirado ou desaparecido.",
+    "ship_label": "o que publicamos",
+    "ship_h": "Quatro prateleiras",
+    "shelf_tools": "Ferramentas",
+    "shelf_games": "Jogos",
+    "shelf_ai": "IA",
+    "shelf_writing": "Textos",
+    "stack_label": "stack",
+    "stack_h": "Feito com",
+    "stack_1": "eleventy 3 + nunjucks",
+    "stack_2": "vanilla js, sem framework, uma única dependência npm",
+    "stack_3": "inferência webgpu (motor próprio)",
+    "stack_4": "5 idiomas, i18n feito à mão",
+    "stack_5": "pwa, funciona offline, hospedado no github pages",
+    "principles_label": "princípios",
+    "principles_h": "Três regras",
+    "principle_1": "sem servidores no circuito",
+    "principle_2": "sem rastreamento, sem contas",
+    "principle_3": "código no github",
+    "contact": "contato"
+  },
   "common": {
     "tldr": {
       "read_more": "O que é isso?",

@@ -1,3 +1,4 @@
 <footer class="site-footer">
-    <p>{{ "footer.copyright" | t }}</p>
+    {%- set aboutHref = '/about/' | localeUrl(lang) -%}
+    <p>{{ "footer.copyright" | t | replace("Mentria", '<a href="' ~ aboutHref ~ '">Mentria</a>') | safe }}</p>
 </footer>

@@ -13,6 +13,33 @@
   "footer": {
     "copyright": "© 2026 Mentria. Tous droits réservés."
   },
+  "about": {
+    "title": "À propos",
+    "meta_description": "Mentria est un petit studio créatif. Des outils, des jeux et une IA respectueux de la vie privée qui s'exécutent entièrement dans votre navigateur — sans serveurs, sans comptes, sans pistage.",
+    "tagline": "studio créatif. outils & transmissions.",
+    "s1_label": "ce que c'est",
+    "s1_p1": "Mentria est un petit studio créatif qui fabrique des logiciels comme on imprimait les fanzines : localement, délibérément et sans demander la permission. Le site que vous lisez est une application web progressive. Tout ce qu'il contient — les outils, les jeux, l'IA — s'exécute sur l'appareil devant vous. Aucun backend n'envoie vos prompts vers une ferme de serveurs. Aucun traqueur ne mesure le temps passé à regarder la page d'accueil.",
+    "s1_p2": "Nous créons des <strong>outils qui vous respectent</strong> : un tokeniseur dans le navigateur, un moteur d'inférence WebGPU, une poignée de petits jeux et un fil de transmissions de textes. Pas de comptes, pas de capture d'e-mail, pas de bandeau cookies. Si quelque chose ici vous est utile, ça le reste quand votre wifi coupe — et ça le reste dans cinq ans, quand la startup à laquelle vous vous êtes inscrit aura pivoté, périclité ou disparu.",
+    "ship_label": "ce que nous publions",
+    "ship_h": "Quatre étagères",
+    "shelf_tools": "Outils",
+    "shelf_games": "Jeux",
+    "shelf_ai": "IA",
+    "shelf_writing": "Écrits",
+    "stack_label": "stack",
+    "stack_h": "Construit avec",
+    "stack_1": "eleventy 3 + nunjucks",
+    "stack_2": "vanilla js, sans framework, une seule dépendance npm",
+    "stack_3": "inférence webgpu (moteur maison)",
+    "stack_4": "5 langues, i18n fait main",
+    "stack_5": "pwa, hors ligne, hébergé sur github pages",
+    "principles_label": "principes",
+    "principles_h": "Trois règles",
+    "principle_1": "aucun serveur dans la boucle",
+    "principle_2": "aucun pistage, aucun compte",
+    "principle_3": "code source sur github",
+    "contact": "contact"
+  },
   "common": {
     "tldr": {
       "read_more": "Qu'est-ce que c'est ?",

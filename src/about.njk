@@ -1,0 +1,224 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/about/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'about.title' | t }}"
+  description: "{{ 'about.meta_description' | t }}"
+---
+<div class="about-page">
+
+  <div class="about-hero reveal">
+    <p class="about-crumb"><a href="{{ locale.pathPrefix }}/">~</a><span class="slash">/</span>about</p>
+    <h1 class="about-wordmark">MENTRIA<span class="underscore">_</span></h1>
+    <p class="about-tagline">{{ "about.tagline" | t }}</p>
+  </div>
+
+  <section class="reveal">
+    <div class="about-section-label">{{ "about.s1_label" | t }}</div>
+    <div class="about-essay">
+      <p>{{ "about.s1_p1" | t }}</p>
+      <p>{{ "about.s1_p2" | t | safe }}</p>
+      <span class="about-estd">estd. 2025</span>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <div class="about-section-label">{{ "about.ship_label" | t }}</div>
+    <h2 class="about-section-h">{{ "about.ship_h" | t }}</h2>
+    <div class="about-ship-grid">
+      <a class="about-ship-card cyan" href="{{ '/tools/' | localeUrl(lang) }}">
+        <span class="about-ship-num">{{ shelves.utility }}</span>
+        <span class="about-ship-label">{{ "about.shelf_tools" | t }}</span>
+        <div class="about-spark"><svg viewBox="0 0 100 36" preserveAspectRatio="none">
+          <polyline fill="none" stroke="#22D3EE" stroke-width="1.5" points="0,28 12,22 24,26 36,18 48,20 60,12 72,14 84,8 100,4" />
+          <circle cx="100" cy="4" r="2.5" fill="#22D3EE"/>
+        </svg></div>
+      </a>
+      <a class="about-ship-card purple" href="{{ '/tools/' | localeUrl(lang) }}">
+        <span class="about-ship-num">{{ shelves.games }}</span>
+        <span class="about-ship-label">{{ "about.shelf_games" | t }}</span>
+        <div class="about-spark"><svg viewBox="0 0 100 36" preserveAspectRatio="none">
+          <g stroke="#A78BFA" stroke-width="1.5" fill="none">
+            <rect x="4" y="12" width="14" height="20" />
+            <rect x="28" y="6" width="14" height="26" />
+            <rect x="52" y="18" width="14" height="14" />
+            <rect x="76" y="2" width="14" height="30" />
+          </g>
+        </svg></div>
+      </a>
+      <a class="about-ship-card pink" href="{{ '/tools/' | localeUrl(lang) }}">
+        <span class="about-ship-num">{{ shelves.ai }}</span>
+        <span class="about-ship-label">{{ "about.shelf_ai" | t }}</span>
+        <div class="about-spark"><svg viewBox="0 0 100 36" preserveAspectRatio="none">
+          <g fill="none" stroke="#F472B6" stroke-width="1.5">
+            <path d="M0,18 Q25,4 50,18 T100,18" />
+            <path d="M0,18 Q25,32 50,18 T100,18" opacity="0.5" />
+          </g>
+        </svg></div>
+      </a>
+      <a class="about-ship-card amber" href="{{ '/feed/' | localeUrl(lang) }}">
+        <span class="about-ship-num">{{ collections.post | length }}</span>
+        <span class="about-ship-label">{{ "about.shelf_writing" | t }}</span>
+        <div class="about-spark"><svg viewBox="0 0 100 36" preserveAspectRatio="none">
+          <g stroke="#FBBF24" stroke-width="1.5">
+            <line x1="6" y1="10" x2="76" y2="10" />
+            <line x1="6" y1="18" x2="88" y2="18" />
+            <line x1="6" y1="26" x2="60" y2="26" />
+          </g>
+        </svg></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <div class="about-section-label">{{ "about.stack_label" | t }}</div>
+    <h2 class="about-section-h">{{ "about.stack_h" | t }}</h2>
+    <div class="about-stack">
+      <div class="about-stack-row"><span class="bullet">·</span> <span>{{ "about.stack_1" | t }}</span></div>
+      <div class="about-stack-row"><span class="bullet">·</span> <span>{{ "about.stack_2" | t }}</span></div>
+      <div class="about-stack-row"><span class="bullet">·</span> <span>{{ "about.stack_3" | t }}</span></div>
+      <div class="about-stack-row"><span class="bullet">·</span> <span>{{ "about.stack_4" | t }}</span></div>
+      <div class="about-stack-row"><span class="bullet">·</span> <span>{{ "about.stack_5" | t }}</span></div>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <div class="about-section-label">{{ "about.principles_label" | t }}</div>
+    <h2 class="about-section-h">{{ "about.principles_h" | t }}</h2>
+    <div class="about-principles">
+      <div class="about-principle"><span class="num">01</span><span class="text">{{ "about.principle_1" | t }}</span></div>
+      <div class="about-principle"><span class="num">02</span><span class="text">{{ "about.principle_2" | t }}</span></div>
+      <div class="about-principle"><span class="num">03</span><span class="text">{{ "about.principle_3" | t }}</span></div>
+    </div>
+  </section>
+
+  <div class="about-end reveal">
+    <div class="left">
+      <a class="about-contact-link" href="https://x.com/mentria_ai">{{ "about.contact" | t }}</a>
+      <span class="about-build">build <span class="h">{{ buildHash }}</span></span>
+    </div>
+    <div class="right">
+      <div class="about-socials">
+        <a href="https://github.com/mentria-ai" aria-label="GitHub" title="GitHub" rel="me noopener" target="_blank">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.5-.3-5.2-1.3-5.2-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2.9-.3 1.9-.4 2.9-.4s2 .1 2.9.4c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.7.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.2 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+        </a>
+        <a href="https://huggingface.co/mentriaai" aria-label="Hugging Face" title="Hugging Face" rel="me noopener" target="_blank">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10.5" r="1.2" fill="currentColor"/><circle cx="15" cy="10.5" r="1.2" fill="currentColor"/><path d="M8.5 14.5c1 1.4 2.2 2 3.5 2s2.5-.6 3.5-2"/></svg>
+        </a>
+        <a href="https://x.com/mentria_ai" aria-label="X" title="X" rel="me noopener" target="_blank">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2H21.5l-7.46 8.53L23 22h-6.84l-5.36-7-6.13 7H1.41l7.98-9.12L1 2h7.02l4.85 6.42L18.244 2zm-2.4 18h1.9L7.27 4h-2L15.844 20z"/></svg>
+        </a>
+      </div>
+      <span class="about-build">© <span id="about-year">2026</span></span>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .about-page { position: relative; }
+  .about-page::before { content: ""; position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: 100%; height: 30%; background: var(--gradient-aura); pointer-events: none; z-index: 0; }
+
+  .about-page .reveal { opacity: 0; transform: translateY(16px); transition: opacity 700ms ease, transform 700ms cubic-bezier(.2,.7,.2,1); }
+  .about-page .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .about-page .reveal { opacity: 1; transform: none; transition: none; } }
+
+  .about-hero { text-align: center; padding: 56px 0 48px; position: relative; z-index: 1; }
+  .about-crumb { font-size: var(--text-xs); color: var(--term-muted); letter-spacing: 0.12em; margin: 0 0 18px; }
+  .about-crumb .slash { color: var(--syn-cyan); }
+  .about-crumb a { color: inherit; text-decoration: none; transition: color 120ms; }
+  .about-crumb a:hover { color: var(--syn-cyan); }
+  .about-wordmark { font-family: var(--font-mono); font-weight: 700; font-size: clamp(3rem, 11vw, 7.5rem); letter-spacing: -0.02em; color: var(--term-fg-strong); margin: 0; line-height: 0.95; text-shadow: 0 0 30px rgba(34,211,238,0.18); }
+  .about-wordmark .underscore { color: var(--syn-cyan); text-shadow: 0 0 18px rgba(34,211,238,0.55); animation: about-blink 1s steps(2, end) infinite; display: inline-block; }
+  @keyframes about-blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+  .about-tagline { color: var(--term-muted); font-size: 14px; margin-top: 22px; letter-spacing: 0.02em; }
+
+  .about-page section { position: relative; z-index: 1; padding: 56px 0; border-top: 1px solid var(--term-divider); }
+  .about-page section:first-of-type { border-top: none; }
+  .about-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--term-muted); font-weight: 500; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+  .about-section-label::before { content: "§"; color: var(--syn-cyan); font-weight: 700; }
+  .about-section-h { font-family: var(--font-mono); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--term-fg-strong); margin: 0 0 20px; letter-spacing: -0.005em; }
+
+  .about-essay { max-width: 56ch; font-family: var(--font-body, var(--font-mono)); }
+  .about-essay p { color: var(--term-fg); font-size: 16px; line-height: 1.7; margin: 0 0 18px; }
+  .about-essay strong { color: var(--term-fg-strong); font-weight: 600; }
+  .about-estd { display: block; margin-top: 28px; font-family: var(--font-mono); font-size: 11px; color: var(--term-muted); letter-spacing: 0.18em; text-transform: uppercase; }
+  .about-estd::before { content: "// "; color: var(--syn-cyan); }
+
+  .about-ship-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .about-ship-card { background: var(--term-bg-raised); border: 1px solid var(--term-border); border-radius: var(--radius-lg); padding: 22px 20px 18px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 10px; transition: all 200ms; position: relative; overflow: hidden; }
+  .about-ship-card::after { content: "→"; position: absolute; top: 16px; right: 18px; color: var(--term-subtle); font-size: 14px; transition: all 200ms; }
+  .about-ship-card:hover { border-color: var(--cyan-30); box-shadow: var(--glow-cyan-soft); transform: translateY(-2px); }
+  .about-ship-card:hover::after { color: var(--syn-cyan); transform: translate(2px, -2px); }
+  .about-ship-num { font-family: var(--font-mono); font-size: 36px; font-weight: 700; line-height: 1; color: var(--term-fg-strong); letter-spacing: -0.02em; }
+  .about-ship-card.cyan .about-ship-num { color: var(--syn-cyan); text-shadow: 0 0 12px rgba(34,211,238,0.3); }
+  .about-ship-card.purple .about-ship-num { color: var(--syn-purple); }
+  .about-ship-card.pink .about-ship-num { color: var(--syn-pink); }
+  .about-ship-card.amber .about-ship-num { color: var(--syn-amber); }
+  .about-ship-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
+  .about-spark { margin-top: auto; padding-top: 8px; height: 36px; }
+  .about-spark svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+  .about-stack { border-left: 2px solid var(--cyan-30); padding: 4px 0 4px 22px; display: flex; flex-direction: column; gap: 12px; }
+  .about-stack-row { font-family: var(--font-mono); font-size: 14px; color: var(--term-fg); display: flex; gap: 12px; align-items: baseline; }
+  .about-stack-row .bullet { color: var(--syn-cyan); flex-shrink: 0; font-weight: 700; }
+
+  .about-principles { display: flex; flex-direction: column; gap: 18px; }
+  .about-principle { display: flex; align-items: baseline; gap: 24px; padding: 14px 0; border-bottom: 1px solid var(--term-divider); }
+  .about-principle:last-child { border-bottom: none; }
+  .about-principle .num { font-family: var(--font-mono); font-weight: 700; font-size: clamp(2rem, 5vw, 3rem); color: var(--syn-cyan); line-height: 1; text-shadow: 0 0 14px rgba(34,211,238,0.35); letter-spacing: -0.02em; flex-shrink: 0; min-width: 80px; }
+  .about-principle .text { font-family: var(--font-mono); font-weight: 600; font-size: clamp(1.1rem, 2.4vw, 1.6rem); color: var(--term-fg-strong); letter-spacing: -0.005em; }
+
+  .about-end { margin-top: 60px; padding: 24px 0; border-top: 1px solid var(--term-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 12px; color: var(--term-muted); }
+  .about-end a { color: var(--term-fg); text-decoration: none; transition: color 120ms; }
+  .about-end a:hover { color: var(--syn-cyan); }
+  .about-end .left, .about-end .right { display: flex; align-items: center; gap: 18px; }
+  .about-socials { display: flex; gap: 14px; }
+  .about-socials a { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 1px solid var(--term-border); border-radius: 6px; transition: all 150ms; }
+  .about-socials a:hover { border-color: var(--cyan-30); color: var(--syn-cyan); box-shadow: var(--glow-cyan-soft); }
+  .about-socials svg { width: 14px; height: 14px; }
+  .about-build { font-family: var(--font-mono); font-size: 11px; color: var(--term-subtle); }
+  .about-build .h { color: var(--syn-cyan); }
+  .about-contact-link { font-family: var(--font-mono); padding: 6px 12px; border: 1px solid var(--term-border); border-radius: 6px; }
+  .about-contact-link::before { content: "$ "; color: var(--syn-cyan); }
+
+  @media (max-width: 760px) {
+    .about-ship-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .about-hero { padding: 32px 0 28px; }
+    .about-tagline { font-size: 12px; }
+    .about-page section { padding: 36px 0; }
+    .about-section-h { font-size: 1.3rem; }
+    .about-essay p { font-size: 14px; line-height: 1.65; }
+    .about-ship-card { padding: 16px 14px 14px; }
+    .about-ship-num { font-size: 28px; }
+    .about-stack-row { font-size: 13px; }
+    .about-principle { flex-direction: column; gap: 4px; padding: 10px 0; }
+    .about-principle .num { min-width: 0; }
+    .about-end { flex-direction: column; align-items: flex-start; padding: 18px 0; }
+  }
+</style>
+
+<script>
+  (function () {
+    var y = document.getElementById('about-year');
+    if (y) y.textContent = String(new Date().getFullYear());
+    var els = document.querySelectorAll('.about-page .reveal');
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      els.forEach(function (el) { io.observe(el); });
+    } else {
+      els.forEach(function (el) { el.classList.add('in'); });
+    }
+  })();
+</script>

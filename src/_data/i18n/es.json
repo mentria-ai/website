@@ -13,6 +13,33 @@
   "footer": {
     "copyright": "© 2026 Mentria. Todos los derechos reservados."
   },
+  "about": {
+    "title": "Acerca de",
+    "meta_description": "Mentria es un pequeño estudio creativo. Herramientas, juegos e IA centrados en la privacidad que se ejecutan por completo en tu navegador, sin servidores, sin cuentas, sin rastreo.",
+    "tagline": "estudio creativo. herramientas y transmisiones.",
+    "s1_label": "qué es esto",
+    "s1_p1": "Mentria es un pequeño estudio creativo que construye software como se imprimían los fanzines: localmente, con intención y sin pedir permiso. El sitio que estás leyendo es una aplicación web progresiva. Todo lo que contiene —las herramientas, los juegos, la IA— se ejecuta en el dispositivo que tienes delante. No hay un backend enviando tus prompts a una granja de servidores. No hay rastreadores midiendo cuánto tiempo miraste la página de inicio.",
+    "s1_p2": "Hacemos <strong>herramientas que te respetan</strong>: un tokenizador en el navegador, un motor de inferencia WebGPU, un puñado de juegos pequeños y un feed de transmisiones con textos. Sin cuentas, sin captura de correo, sin aviso de cookies. Si algo aquí te resulta útil, sigue siéndolo cuando se corta tu wifi, y sigue siéndolo dentro de cinco años, cuando la startup en la que te registraste haya pivotado, caducado o desaparecido.",
+    "ship_label": "qué publicamos",
+    "ship_h": "Cuatro estantes",
+    "shelf_tools": "Herramientas",
+    "shelf_games": "Juegos",
+    "shelf_ai": "IA",
+    "shelf_writing": "Textos",
+    "stack_label": "stack",
+    "stack_h": "Construido con",
+    "stack_1": "eleventy 3 + nunjucks",
+    "stack_2": "vanilla js, sin framework, una sola dependencia npm",
+    "stack_3": "inferencia webgpu (motor propio)",
+    "stack_4": "5 idiomas, i18n hecho a mano",
+    "stack_5": "pwa, lista sin conexión, alojada en github pages",
+    "principles_label": "principios",
+    "principles_h": "Tres reglas",
+    "principle_1": "sin servidores en el circuito",
+    "principle_2": "sin rastreo, sin cuentas",
+    "principle_3": "código en github",
+    "contact": "contacto"
+  },
   "common": {
     "tldr": {
       "read_more": "¿Qué es esto?",

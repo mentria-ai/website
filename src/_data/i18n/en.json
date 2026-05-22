@@ -13,6 +13,33 @@
   "footer": {
     "copyright": "© 2026 Mentria. All rights reserved."
   },
+  "about": {
+    "title": "About",
+    "meta_description": "Mentria is a small creative studio. Privacy-first tools, games, and AI that run entirely in your browser — no servers, no accounts, no tracking.",
+    "tagline": "creative studio. tools & transmissions.",
+    "s1_label": "what this is",
+    "s1_p1": "Mentria is a small creative studio building software the way zines used to get printed — locally, deliberately, and without permission. The site you're reading is a progressive web app. Everything inside it — the tools, the games, the AI — runs on the device in front of you. There is no backend pinging your prompts to a server farm. There are no trackers measuring how long you stared at the homepage.",
+    "s1_p2": "We make <strong>tools that respect you</strong>: an in-browser tokenizer, a WebGPU inference engine, a handful of small games, a transmissions feed of writing. No accounts, no email capture, no cookie banner. If something here is useful to you, it stays useful when your wifi cuts out — and stays useful five years from now, when whichever startup you signed up to has pivoted, lapsed, or vanished.",
+    "ship_label": "what we ship",
+    "ship_h": "Four shelves",
+    "shelf_tools": "Tools",
+    "shelf_games": "Games",
+    "shelf_ai": "AI",
+    "shelf_writing": "Writing",
+    "stack_label": "stack",
+    "stack_h": "Built with",
+    "stack_1": "eleventy 3 + nunjucks",
+    "stack_2": "vanilla js, no framework, single npm dep",
+    "stack_3": "webgpu inference (custom engine)",
+    "stack_4": "5 locales, hand-rolled i18n",
+    "stack_5": "pwa, offline-capable, hosted on github pages",
+    "principles_label": "principles",
+    "principles_h": "Three rules",
+    "principle_1": "no servers in the loop",
+    "principle_2": "no tracking, no accounts",
+    "principle_3": "source on github",
+    "contact": "contact"
+  },
   "common": {
     "tldr": {
       "read_more": "What is this?",

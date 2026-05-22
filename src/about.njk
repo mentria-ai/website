@@ -124,10 +124,6 @@ eleventyComputed:
   .about-page { position: relative; }
   .about-page::before { content: ""; position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: 100%; height: 30%; background: var(--gradient-aura); pointer-events: none; z-index: 0; }
 
-  .about-page .reveal { opacity: 0; transform: translateY(16px); transition: opacity 700ms ease, transform 700ms cubic-bezier(.2,.7,.2,1); }
-  .about-page .reveal.in { opacity: 1; transform: none; }
-  @media (prefers-reduced-motion: reduce) { .about-page .reveal { opacity: 1; transform: none; transition: none; } }
-
   .about-hero { text-align: center; padding: 56px 0 48px; position: relative; z-index: 1; }
   .about-crumb { font-size: var(--text-xs); color: var(--term-muted); letter-spacing: 0.12em; margin: 0 0 18px; }
   .about-crumb .slash { color: var(--syn-cyan); }
@@ -209,16 +205,5 @@ eleventyComputed:
   (function () {
     var y = document.getElementById('about-year');
     if (y) y.textContent = String(new Date().getFullYear());
-    var els = document.querySelectorAll('.about-page .reveal');
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-        });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-      els.forEach(function (el) { io.observe(el); });
-    } else {
-      els.forEach(function (el) { el.classList.add('in'); });
-    }
   })();
 </script>

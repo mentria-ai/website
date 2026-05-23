@@ -294,7 +294,8 @@ function runApp(MentriaEngine) {
       await engine.init();
       await engine.loadModel({
         modelUrl: MENTRIA_MODEL_BASE,
-        shards: ['qwen3.5-0.8b-q4.safetensors'],
+        shards: ['qwen3.5-0.8b-q4-tied.safetensors'],
+        allowTiedEmbed: true,
         tokenizerUrl: MENTRIA_TOKEN_BASE,
         visionModelUrl: MENTRIA_MODEL_BASE,
         visionShards: ['qwen3.5-0.8b-vl-q4.safetensors'],

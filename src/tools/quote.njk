@@ -168,7 +168,8 @@ function runApp(MentriaEngine) {
       // Text-only — no vision tower needed for quote generation.
       await engine.loadModel({
         modelUrl: MENTRIA_MODEL_BASE,
-        shards: ['qwen3.5-0.8b-q4.safetensors'],
+        shards: ['qwen3.5-0.8b-q4-tied.safetensors'],
+        allowTiedEmbed: true,
         tokenizerUrl: MENTRIA_TOKEN_BASE,
       });
 

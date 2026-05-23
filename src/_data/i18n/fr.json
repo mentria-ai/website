@@ -52,7 +52,7 @@
       "confirm": "Confirmer"
     },
     "share": "Partager",
-    "heavy_download": "Cela télécharge environ 660 Mo de données du modèle et votre connexion semble lente ou en mode économie de données. Continuer ?",
+    "heavy_download": "Cela télécharge environ 490 Mo de données du modèle et votre connexion semble lente ou en mode économie de données. Continuer ?",
     "download_postponed": "Téléchargement en pause — rechargez la page pour démarrer."
   },
   "home": {
@@ -568,7 +568,7 @@
       "btn_ai_generate": "Générer un nom",
       "btn_ai_generating": "Génération…",
       "ai_unavailable_hint": "Ouvre AI Chat ou Citation Motivante une fois pour activer le nommage IA",
-      "ai_confirm_download": "Le nommage IA nécessite un téléchargement unique du modèle (~660 Mo). Continuer ?",
+      "ai_confirm_download": "Le nommage IA nécessite un téléchargement unique du modèle (~490 Mo). Continuer ?",
       "btn_ai_loading": "Chargement {pct}%"
     },
     "quote": {
@@ -624,7 +624,7 @@
       "input_placeholder": "Message…",
       "progress_label": "Téléchargement du modèle…",
       "empty_msg": "Envoie un message ou joins une image pour commencer.",
-      "empty_sub": "Téléchargement du modèle ~850 Mo à la première utilisation, ensuite en cache.",
+      "empty_sub": "Téléchargement du modèle ~550 Mo à la première utilisation, ensuite en cache.",
       "img_alt_attached": "Image jointe",
       "img_alt_attached_short": "Jointe",
       "label_you": "toi",
@@ -637,7 +637,7 @@
       "err_prefix": "Erreur : ",
       "err_delete_prefix": "Échec de la suppression du cache : ",
       "empty_response": "(réponse vide)",
-      "confirm_delete": "Supprimer le modèle en cache (~660 Mo) ? Tu devras le retélécharger la prochaine fois."
+      "confirm_delete": "Supprimer le modèle en cache (~490 Mo) ? Tu devras le retélécharger la prochaine fois."
     },
     "search": {
       "ph_input": "Rechercher…",

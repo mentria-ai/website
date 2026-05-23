@@ -307,7 +307,7 @@ async function reflectAvailability() {
 async function isModelTrulyCached() {
   if (!('caches' in window)) return false;
   try {
-    const r = await caches.match(MENTRIA_MODEL_BASE + 'qwen3.5-0.8b-q4.safetensors');
+    const r = await caches.match(MENTRIA_MODEL_BASE + 'qwen3.5-0.8b-q4-tied.safetensors');
     return !!r;
   } catch (_) { return false; }
 }
@@ -320,7 +320,8 @@ async function ensureEngine(onProgress) {
   await engine.init();
   await engine.loadModel({
     modelUrl: MENTRIA_MODEL_BASE,
-    shards: ['qwen3.5-0.8b-q4.safetensors'],
+    shards: ['qwen3.5-0.8b-q4-tied.safetensors'],
+    allowTiedEmbed: true,
     tokenizerUrl: MENTRIA_MODEL_BASE
   });
   aiEngine = engine;

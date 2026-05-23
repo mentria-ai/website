@@ -52,7 +52,7 @@
       "confirm": "Confirm"
     },
     "share": "Share",
-    "heavy_download": "This downloads about 660 MB of model data and you appear to be on a slow or data-saving connection. Continue?",
+    "heavy_download": "This downloads about 490 MB of model data and you appear to be on a slow or data-saving connection. Continue?",
     "download_postponed": "Download paused — reload the page to start."
   },
   "home": {
@@ -568,7 +568,7 @@
       "btn_ai_generate": "Generate name",
       "btn_ai_generating": "Generating…",
       "ai_unavailable_hint": "Open AI Chat or Quote once to enable AI naming",
-      "ai_confirm_download": "AI naming needs a one-time ~660 MB model download. Continue?",
+      "ai_confirm_download": "AI naming needs a one-time ~490 MB model download. Continue?",
       "btn_ai_loading": "Loading {pct}%"
     },
     "quote": {
@@ -624,7 +624,7 @@
       "input_placeholder": "Message…",
       "progress_label": "Downloading model…",
       "empty_msg": "Send a message or attach an image to begin.",
-      "empty_sub": "~850 MB model download on first use, cached after.",
+      "empty_sub": "~550 MB model download on first use, cached after.",
       "img_alt_attached": "Attached image",
       "img_alt_attached_short": "Attached",
       "label_you": "you",
@@ -637,7 +637,7 @@
       "err_prefix": "Error: ",
       "err_delete_prefix": "Failed to delete cache: ",
       "empty_response": "(empty response)",
-      "confirm_delete": "Delete the cached model (~660 MB)? You will need to re-download it next time."
+      "confirm_delete": "Delete the cached model (~490 MB)? You will need to re-download it next time."
     },
     "search": {
       "ph_input": "Search…",

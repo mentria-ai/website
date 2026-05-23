@@ -568,7 +568,7 @@
       "btn_ai_generate": "AIで命名",
       "btn_ai_generating": "生成中…",
       "ai_unavailable_hint": "AI ChatまたはQuoteを一度開くとAI命名が有効になります",
-      "ai_confirm_download": "AI命名には初回約660 MBのモデルダウンロードが必要です。続行しますか?",
+      "ai_confirm_download": "AI命名には初回約490 MBのモデルダウンロードが必要です。続行しますか?",
       "btn_ai_loading": "読込中 {pct}%"
     },
     "quote": {
@@ -624,7 +624,7 @@
       "input_placeholder": "メッセージ…",
       "progress_label": "モデルをダウンロード中…",
       "empty_msg": "メッセージを送るか、画像を添付して始めましょう。",
-      "empty_sub": "初回は約850 MBのモデルをダウンロード、以降はキャッシュ。",
+      "empty_sub": "初回は約550 MBのモデルをダウンロード、以降はキャッシュ。",
       "img_alt_attached": "添付画像",
       "img_alt_attached_short": "添付",
       "label_you": "あなた",
@@ -637,7 +637,7 @@
       "err_prefix": "エラー: ",
       "err_delete_prefix": "キャッシュ削除失敗: ",
       "empty_response": "(空の応答)",
-      "confirm_delete": "キャッシュされたモデル(~660 MB)を削除しますか? 次回は再ダウンロードが必要です。"
+      "confirm_delete": "キャッシュされたモデル(~490 MB)を削除しますか? 次回は再ダウンロードが必要です。"
     },
     "search": {
       "ph_input": "検索…",

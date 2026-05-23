@@ -44,7 +44,9 @@ var c = class {
         return new Uint8Array(a.buffer).set(i), f(a);
       }
       case "Q4_0":
-      case "Q4_KAXIS_DP4A": {
+      case "Q4_KAXIS_DP4A":
+      case "Q1.58P_0":
+      case "Q1P58_0": {
         if (s % 4 === 0) return new Uint32Array(this.buffer, s, n / 4);
         const i = new Uint8Array(this.buffer, s, n), a = new Uint32Array(n / 4);
         return new Uint8Array(a.buffer).set(i), a;
@@ -88,4 +90,4 @@ export {
   c as t
 };
 
-//# sourceMappingURL=safetensors-D5rcjRcU.mjs.map
+//# sourceMappingURL=safetensors-FogF7D__.mjs.map

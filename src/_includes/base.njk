@@ -243,7 +243,7 @@
       window.mentriaConfirmHeavyDownload = async function () {
         try {
           if ('caches' in window) {
-            var hit = await caches.match('https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/qwen3.5-0.8b-q4.safetensors');
+            var hit = await caches.match('https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/qwen3.5-0.8b-q4-tied.safetensors');
             if (hit) return true;
           }
         } catch (_) {}

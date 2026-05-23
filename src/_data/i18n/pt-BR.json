@@ -52,7 +52,7 @@
       "confirm": "Confirmar"
     },
     "share": "Compartilhar",
-    "heavy_download": "Isto baixa cerca de 660 MB de dados do modelo e você parece estar em uma conexão lenta ou com economia de dados. Continuar?",
+    "heavy_download": "Isto baixa cerca de 490 MB de dados do modelo e você parece estar em uma conexão lenta ou com economia de dados. Continuar?",
     "download_postponed": "Download pausado — recarregue a página para começar."
   },
   "home": {
@@ -568,7 +568,7 @@
       "btn_ai_generate": "Gerar nome",
       "btn_ai_generating": "Gerando…",
       "ai_unavailable_hint": "Abra AI Chat ou Frase Motivacional uma vez para habilitar a nomeação IA",
-      "ai_confirm_download": "A nomeação IA requer um download único do modelo (~660 MB). Continuar?",
+      "ai_confirm_download": "A nomeação IA requer um download único do modelo (~490 MB). Continuar?",
       "btn_ai_loading": "Carregando {pct}%"
     },
     "quote": {
@@ -624,7 +624,7 @@
       "input_placeholder": "Mensagem…",
       "progress_label": "Baixando modelo…",
       "empty_msg": "Envie uma mensagem ou anexe uma imagem para começar.",
-      "empty_sub": "Download do modelo ~850 MB no primeiro uso, depois em cache.",
+      "empty_sub": "Download do modelo ~550 MB no primeiro uso, depois em cache.",
       "img_alt_attached": "Imagem anexada",
       "img_alt_attached_short": "Anexada",
       "label_you": "você",
@@ -637,7 +637,7 @@
       "err_prefix": "Erro: ",
       "err_delete_prefix": "Falha ao excluir cache: ",
       "empty_response": "(resposta vazia)",
-      "confirm_delete": "Excluir o modelo em cache (~660 MB)? Você precisará baixar de novo na próxima vez."
+      "confirm_delete": "Excluir o modelo em cache (~490 MB)? Você precisará baixar de novo na próxima vez."
     },
     "search": {
       "ph_input": "Buscar…",

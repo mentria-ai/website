@@ -204,7 +204,7 @@
     "qr-scanner": {
       "title": "QR & Barcode Scanner + Generator",
       "lede": "Scan QR codes and barcodes, or generate a QR code from any link or text — all on-device, nothing uploaded.",
-      "tldr": "Two tools in one, both fully on-device. Scan mode uses the browser's BarcodeDetector API to read QR codes and common barcodes from your camera or an uploaded image. Generate mode turns any link or text into a QR code with a built-in encoder — no library is fetched and nothing is sent to a server. Decoded results offer copy and open-link actions; generated codes can be downloaded as PNG, copied, or shared. BarcodeDetector is a Chromium-only API, so scanning shows an unsupported notice elsewhere, but generating works in every modern browser."
+      "tldr": "Two tools in one, both fully on-device. Scan mode reads QR codes and barcodes from your camera or an uploaded image: it uses the browser's native BarcodeDetector when available (Chromium, with the widest format support) and falls back to a built-in JavaScript decoder elsewhere, so QR scanning works on Safari and Firefox too. Generate mode turns any link or text into a QR code with a built-in encoder. Nothing is uploaded and there is no server round-trip — decoded results can be copied or opened, and generated codes downloaded as PNG, copied, or shared."
     }
   },
   "game": {

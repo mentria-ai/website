@@ -204,7 +204,7 @@
     "qr-scanner": {
       "title": "Escáner y generador de QR y códigos de barras",
       "lede": "Escanea códigos QR y de barras, o genera un código QR a partir de cualquier enlace o texto, todo en el dispositivo y sin subir nada.",
-      "tldr": "Dos herramientas en una, ambas totalmente en el dispositivo. El modo escáner usa la API BarcodeDetector del navegador para leer códigos QR y de barras comunes desde la cámara o una imagen. El modo generar convierte cualquier enlace o texto en un código QR con un codificador integrado: no se descarga ninguna librería ni se envía nada a un servidor. Los resultados escaneados ofrecen copiar y abrir enlace; los códigos generados se pueden descargar como PNG, copiar o compartir. BarcodeDetector es una API solo de Chromium, así que el escaneo muestra un aviso de no compatible en otros navegadores, pero la generación funciona en cualquier navegador moderno."
+      "tldr": "Dos herramientas en una, ambas totalmente en el dispositivo. El modo escáner lee códigos QR y de barras desde la cámara o una imagen: usa la API nativa BarcodeDetector cuando está disponible (Chromium, con la mayor compatibilidad de formatos) y recurre a un decodificador JavaScript integrado en el resto, así que escanear QR también funciona en Safari y Firefox. El modo generar convierte cualquier enlace o texto en un código QR con un codificador integrado. No se sube nada y no hay ida y vuelta al servidor: los resultados leídos se pueden copiar o abrir, y los códigos generados descargar como PNG, copiar o compartir."
     }
   },
   "game": {

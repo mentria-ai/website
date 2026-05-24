@@ -249,20 +249,39 @@ eleventyComputed:
   setGenActions(false);
 
   let detector = null;
+  let useJsQR = false;
   let stream = null;
   let rafId = 0;
   let lastDetect = 0;
   let scanning = false;
   let lastValue = '';
+  let scanCanvas = null, scanCtx = null;
 
   function showUnsupported() {
     main.hidden = true;
     panelUnsup.hidden = false;
   }
 
-  if (!('BarcodeDetector' in window)) {
-    showUnsupported();
-    return;
+  function loadScript(src) {
+    return new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = src; s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  function jsqrDecode(source, sw, sh, both) {
+    if (!window.jsQR || !sw || !sh) return null;
+    let w = sw, h = sh;
+    const maxDim = 640;
+    if (Math.max(w, h) > maxDim) { const s = maxDim / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
+    if (!scanCanvas) { scanCanvas = document.createElement('canvas'); scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true }); }
+    scanCanvas.width = w; scanCanvas.height = h;
+    scanCtx.drawImage(source, 0, 0, w, h);
+    let img;
+    try { img = scanCtx.getImageData(0, 0, w, h); } catch (_) { return null; }
+    const r = window.jsQR(img.data, w, h, { inversionAttempts: both ? 'attemptBoth' : 'dontInvert' });
+    return r && r.data ? { rawValue: r.data, format: 'qr_code' } : null;
   }
 
   function setState(s) {
@@ -306,15 +325,20 @@ eleventyComputed:
     if (ts - lastDetect < 220) return;
     lastDetect = ts;
     if (video.readyState < 2) return;
-    let codes;
-    try { codes = await detector.detect(video); }
-    catch (_) { return; }
-    if (codes && codes.length) onCode(codes[0]);
+    if (detector) {
+      let codes;
+      try { codes = await detector.detect(video); }
+      catch (_) { return; }
+      if (codes && codes.length) onCode(codes[0]);
+    } else if (useJsQR) {
+      const code = jsqrDecode(video, video.videoWidth, video.videoHeight, false);
+      if (code) onCode(code);
+    }
   }
 
   async function startCamera() {
     hideNote();
-    if (!detector) return;
+    if (!detector && !useJsQR) return;
     if (!window.isSecureContext) { showNote(COPY.noteInsecure); return; }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       showNote(COPY.noteNoCamera);
@@ -339,15 +363,20 @@ eleventyComputed:
 
   async function scanImage(file) {
     hideNote();
-    if (!file || !detector) return;
+    if (!file || (!detector && !useJsQR)) return;
     let bitmap;
     try { bitmap = await createImageBitmap(file); }
     catch (_) { showNote(COPY.noteNoMatch); return; }
-    let codes;
-    try { codes = await detector.detect(bitmap); }
-    catch (_) { codes = []; }
+    let result = null;
+    if (detector) {
+      let codes;
+      try { codes = await detector.detect(bitmap); } catch (_) { codes = []; }
+      if (codes && codes.length) result = { rawValue: codes[0].rawValue, format: codes[0].format };
+    } else if (useJsQR) {
+      result = jsqrDecode(bitmap, bitmap.width, bitmap.height, true);
+    }
     if (bitmap.close) bitmap.close();
-    if (codes && codes.length) showResult(codes[0].rawValue, codes[0].format);
+    if (result) showResult(result.rawValue, result.format);
     else showNote(COPY.noteNoMatch);
   }
 
@@ -375,13 +404,17 @@ eleventyComputed:
   window.addEventListener('pagehide', stopCamera);
 
   (async () => {
-    try {
-      const formats = await BarcodeDetector.getSupportedFormats();
-      if (!formats || !formats.length) { showUnsupported(); return; }
-      detector = new BarcodeDetector({ formats });
-    } catch (_) {
-      showUnsupported();
+    if ('BarcodeDetector' in window) {
+      try {
+        const formats = await BarcodeDetector.getSupportedFormats();
+        if (formats && formats.length) { detector = new BarcodeDetector({ formats }); return; }
+      } catch (_) {}
     }
+    try {
+      if (!window.jsQR) await loadScript('/assets/js/jsqr.js?v={{ buildHash }}');
+      if (window.jsQR) { useJsQR = true; return; }
+    } catch (_) {}
+    showUnsupported();
   })();
 
   setState('idle');

@@ -31,6 +31,14 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+@font-face {
+  font-family: 'mentrialogofont';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/assets/fonts/mentrialogofont.woff2') format('woff2');
+}
+
 i18n-t {
   display: contents;
 }
@@ -196,8 +204,39 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
   max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between;
   align-items: center; padding: 1rem 1.5rem; gap: 1rem;
 }
-.brand { font-family: var(--font-mono); font-weight: 700; font-size: 1.1rem; letter-spacing: 0.05em; color: var(--term-fg); }
+.brand { font-family: 'mentrialogofont', var(--font-mono); font-weight: 800; font-size: 1.05rem; letter-spacing: 0.01em; color: var(--term-fg); }
+.brand .brand__cursor { font-family: var(--font-mono); }
 .brand .brand__cursor { color: var(--syn-cyan); }
+.brand__ai {
+  font-size: 0;
+  opacity: 0;
+  color: #99fe1a;
+  transition: font-size 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s ease;
+}
+.brand--ai .brand__ai { font-size: 1em; opacity: 1; }
+.brand--ai .brand__cursor { display: none; }
+.brand__i { position: relative; }
+.brand__star {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 0.62em;
+  height: 0.62em;
+  margin-bottom: -0.1em;
+  transform: translateX(-50%);
+  color: #99fe1a;
+  pointer-events: none;
+}
+.brand__spark {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.brand--ai .brand__spark { animation: brand-spark-spin 3.5s linear infinite; }
+@keyframes brand-spark-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .brand__ai { transition: opacity 0.2s ease; }
+  .brand--ai .brand__spark { animation: none; }
+}
 .site-nav { display: flex; align-items: center; gap: 1.25rem; }
 .nav-link { font-family: var(--font-mono); font-size: 0.85rem; color: var(--term-muted); font-weight: 500; padding-bottom: 0.15rem; border-bottom: 2px solid transparent; }
 .nav-link:hover { color: var(--term-fg); }

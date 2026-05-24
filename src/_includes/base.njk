@@ -314,6 +314,31 @@
     <script src="/assets/js/mentria-i18n.js?v={{ buildHash }}"></script>
     <script>
       (function () {
+        var brand = document.querySelector('.brand');
+        var count = 0;
+        function update() { if (brand) brand.classList.toggle('brand--ai', count > 0); }
+        document.addEventListener('mentria:ai-start', function () { count++; update(); });
+        document.addEventListener('mentria:ai-stop', function () { count = Math.max(0, count - 1); update(); });
+      })();
+      window.mentriaWrapEngine = function (engine) {
+        if (!engine || engine.__mTracked || typeof engine.generate !== 'function') return engine;
+        engine.__mTracked = true;
+        var orig = engine.generate.bind(engine);
+        engine.generate = function () {
+          document.dispatchEvent(new CustomEvent('mentria:ai-start'));
+          var settled = false;
+          var stop = function () { if (settled) return; settled = true; document.dispatchEvent(new CustomEvent('mentria:ai-stop')); };
+          try {
+            var r = orig.apply(null, arguments);
+            if (r && typeof r.then === 'function') r.then(stop, stop); else stop();
+            return r;
+          } catch (e) { stop(); throw e; }
+        };
+        return engine;
+      };
+    </script>
+    <script>
+      (function () {
         var els = document.querySelectorAll('.reveal');
         if (!els.length) return;
         if (!('IntersectionObserver' in window)) {

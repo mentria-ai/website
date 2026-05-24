@@ -158,6 +158,7 @@ function runApp(MentriaEngine) {
     progressWrap.style.display = '';
     try {
       engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+      window.mentriaWrapEngine && window.mentriaWrapEngine(engine);
       engine.onProgress = onEngineProgress;
       engine.onDeviceLost = (info) => {
         setStatus('error', COPY.errDeviceLost);

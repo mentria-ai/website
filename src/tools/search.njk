@@ -204,6 +204,7 @@ eleventyComputed:
       if (!aiEngine || aiEngine.cached) {
         const { MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs');
         const engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+        window.mentriaWrapEngine && window.mentriaWrapEngine(engine);
         await engine.init();
         await engine.loadModel({
           modelUrl: MENTRIA_MODEL_BASE,

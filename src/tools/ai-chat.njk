@@ -283,6 +283,7 @@ function runApp(MentriaEngine) {
     progressWrap.style.display = '';
     try {
       engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+      window.mentriaWrapEngine && window.mentriaWrapEngine(engine);
       engine.onProgress = onEngineProgress;
       // onDeviceLost is wired by the engine's S410 device-loss handler;
       // surface it to the user with a clear "reload to recover" message.

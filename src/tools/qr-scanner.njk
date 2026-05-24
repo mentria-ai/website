@@ -19,8 +19,14 @@ eleventyComputed:
 
 {% set terminalTitle = "qr-scanner.js" %}
 {% include "terminal-frame-open.njk" %}
-<section class="qr qr--idle" id="qr">
+<section class="qr qr--idle" id="qr" data-mode="scan">
 
+  <div class="qr__modes" role="tablist" aria-label="{{ 'tools.qr-scanner.title' | t }}">
+    <button type="button" class="qr__mode is-active" id="qr-mode-scan" role="tab" aria-selected="true">{{ "tool.qr-scanner.mode_scan" | t }}</button>
+    <button type="button" class="qr__mode" id="qr-mode-gen" role="tab" aria-selected="false">{{ "tool.qr-scanner.mode_generate" | t }}</button>
+  </div>
+
+  <div class="qr__view" id="qr-view-scan">
   <div class="qr__main" id="qr-main">
     <div class="qr__stage">
       <video class="qr__video" id="qr-video" playsinline muted aria-label="{{ 'tool.qr-scanner.aria_video' | t }}"></video>
@@ -68,11 +74,30 @@ eleventyComputed:
     <h2 class="qr__panel-title qr__panel-title--warn">{{ "tool.qr-scanner.unsupported_title" | t }}</h2>
     <p class="qr__panel-body">{{ "tool.qr-scanner.unsupported_body" | t }}</p>
   </div>
+  </div>
+
+  <div class="qr__view" id="qr-view-gen" hidden>
+    <div class="qrg">
+      <input type="text" class="qrg__input" id="qrg-input" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false"
+             placeholder="{{ 'tool.qr-scanner.gen_prompt' | t }}" aria-label="{{ 'tool.qr-scanner.gen_input_label' | t }}">
+      <div class="qrg__stage">
+        <canvas class="qrg__canvas" id="qrg-canvas" role="img" aria-label="{{ 'tool.qr-scanner.gen_alt' | t }}" hidden></canvas>
+        <p class="qrg__empty" id="qrg-empty">{{ "tool.qr-scanner.gen_empty" | t }}</p>
+      </div>
+      <p class="qr__note" id="qrg-note" hidden></p>
+      <div class="qr__controls">
+        <button type="button" class="qr__btn qr__btn--primary" id="qrg-download">{{ "tool.qr-scanner.btn_download" | t }}</button>
+        <button type="button" class="qr__btn qr__btn--ghost" id="qrg-copy" hidden>{{ "tool.qr-scanner.btn_copy_image" | t }}</button>
+        <button type="button" class="qr__btn qr__btn--ghost" id="qrg-share" hidden>{{ "common.share" | t }}</button>
+      </div>
+    </div>
+  </div>
 
 </section>
 {% include "terminal-frame-close.njk" %}
 {% include "tool-schema.njk" %}
 
+<script src="/assets/js/qrcode.js?v={{ buildHash }}"></script>
 <script>
 (() => {
   const COPY = {
@@ -82,7 +107,8 @@ eleventyComputed:
     noteDenied:     {{ ("tool.qr-scanner.note_denied"     | t) | dump | safe }},
     noteNoCamera:   {{ ("tool.qr-scanner.note_no_camera"  | t) | dump | safe }},
     noteCameraErr:  {{ ("tool.qr-scanner.note_camera_error" | t) | dump | safe }},
-    noteNoMatch:    {{ ("tool.qr-scanner.note_no_match"   | t) | dump | safe }}
+    noteNoMatch:    {{ ("tool.qr-scanner.note_no_match"   | t) | dump | safe }},
+    genTooLong:     {{ ("tool.qr-scanner.gen_too_long"    | t) | dump | safe }}
   };
 
   const $ = id => document.getElementById(id);
@@ -99,6 +125,128 @@ eleventyComputed:
   const fileInput   = $('qr-file');
   const copyBtn     = $('qr-copy');
   const openBtn     = $('qr-open');
+
+  const modeScanBtn = $('qr-mode-scan');
+  const modeGenBtn  = $('qr-mode-gen');
+  const viewScan    = $('qr-view-scan');
+  const viewGen     = $('qr-view-gen');
+  const genInput    = $('qrg-input');
+  const genCanvas   = $('qrg-canvas');
+  const genEmpty    = $('qrg-empty');
+  const genNote     = $('qrg-note');
+  const genDl       = $('qrg-download');
+  const genCopy     = $('qrg-copy');
+  const genShare    = $('qrg-share');
+
+  function setMode(m) {
+    const scan = m === 'scan';
+    qr.setAttribute('data-mode', m);
+    viewScan.hidden = !scan;
+    viewGen.hidden = scan;
+    modeScanBtn.classList.toggle('is-active', scan);
+    modeGenBtn.classList.toggle('is-active', !scan);
+    modeScanBtn.setAttribute('aria-selected', String(scan));
+    modeGenBtn.setAttribute('aria-selected', String(!scan));
+    if (!scan) { stopCamera(); setState('idle'); }
+  }
+  modeScanBtn.addEventListener('click', () => setMode('scan'));
+  modeGenBtn.addEventListener('click', () => { setMode('generate'); genRender(); genInput.focus(); });
+
+  let genText = '';
+  let genTimer = 0;
+
+  function setGenActions(on) {
+    genDl.disabled = !on;
+    genCopy.disabled = !on;
+    genShare.disabled = !on;
+  }
+
+  function drawQR(code) {
+    const border = 4;
+    const dim = code.size + border * 2;
+    const px = 10;
+    genCanvas.width = dim * px;
+    genCanvas.height = dim * px;
+    const ctx = genCanvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, genCanvas.width, genCanvas.height);
+    ctx.fillStyle = '#000000';
+    for (let y = 0; y < code.size; y++) {
+      for (let x = 0; x < code.size; x++) {
+        if (code.getModule(x, y)) ctx.fillRect((x + border) * px, (y + border) * px, px, px);
+      }
+    }
+  }
+
+  function genRender() {
+    const text = genInput.value.trim();
+    genText = text;
+    genNote.hidden = true;
+    if (!text || typeof qrcodegen === 'undefined') {
+      genCanvas.hidden = true;
+      genEmpty.hidden = false;
+      setGenActions(false);
+      return;
+    }
+    let code;
+    try {
+      code = qrcodegen.QrCode.encodeText(text, qrcodegen.QrCode.Ecc.MEDIUM);
+    } catch (_) {
+      genCanvas.hidden = true;
+      genEmpty.hidden = true;
+      genNote.textContent = COPY.genTooLong;
+      genNote.hidden = false;
+      setGenActions(false);
+      return;
+    }
+    drawQR(code);
+    genEmpty.hidden = true;
+    genCanvas.hidden = false;
+    setGenActions(true);
+  }
+
+  function canvasToBlob() {
+    return new Promise(res => genCanvas.toBlob(res, 'image/png'));
+  }
+
+  genInput.addEventListener('input', () => {
+    clearTimeout(genTimer);
+    genTimer = setTimeout(genRender, 120);
+  });
+  genDl.addEventListener('click', async () => {
+    const blob = await canvasToBlob();
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'qr-code.png';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 100);
+  });
+  if (navigator.clipboard && window.ClipboardItem) {
+    genCopy.hidden = false;
+    genCopy.addEventListener('click', async () => {
+      const blob = await canvasToBlob();
+      if (!blob) return;
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        const orig = genCopy.textContent;
+        genCopy.textContent = COPY.btnCopied;
+        setTimeout(() => { genCopy.textContent = orig; }, 1500);
+      } catch (_) {}
+    });
+  }
+  if (navigator.canShare && navigator.canShare({ files: [new File([new Blob(['x'])], 'q.png', { type: 'image/png' })] })) {
+    genShare.hidden = false;
+    genShare.addEventListener('click', async () => {
+      const blob = await canvasToBlob();
+      if (!blob) return;
+      const file = new File([blob], 'qr-code.png', { type: 'image/png' });
+      try { await navigator.share({ files: [file], text: genText }); } catch (_) {}
+    });
+  }
+  setGenActions(false);
 
   let detector = null;
   let stream = null;
@@ -457,4 +605,88 @@ eleventyComputed:
 @media (prefers-reduced-motion: reduce) {
   .qr__scanline { animation: none; top: 50%; }
 }
+
+.qr__modes {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--term-border);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.02);
+}
+.qr__mode {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 1.15rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--term-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.qr__mode:hover { color: var(--term-fg); }
+.qr__mode.is-active { background: var(--syn-cyan); color: #041016; }
+
+.qr__view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  width: 100%;
+}
+.qr__view[hidden] { display: none; }
+
+.qrg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  width: 100%;
+}
+.qrg__input {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--term-border-strong);
+  border-radius: 10px;
+  background: #060606;
+  color: var(--term-fg);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.qrg__input:focus { border-color: var(--syn-cyan); }
+.qrg__input::placeholder { color: var(--term-subtle); }
+.qrg__stage {
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--term-border);
+  border-radius: 12px;
+  background: #060606;
+  overflow: hidden;
+}
+.qrg__canvas {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  border-radius: 6px;
+  background: #fff;
+}
+.qrg__canvas[hidden] { display: none; }
+.qrg__empty {
+  margin: 0;
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--term-muted);
+  line-height: 1.5;
+  max-width: 24ch;
+}
+.qr__btn:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

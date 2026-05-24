@@ -13,8 +13,8 @@
   },
   {
     "slug": "qr-scanner",
-    "title": "QR & Barcode Scanner",
-    "summary": "Scan QR codes and barcodes with your camera or an image file — decoded on-device, nothing uploaded.",
+    "title": "QR & Barcode Scanner + Generator",
+    "summary": "Scan QR codes and barcodes, or generate a QR code from any link or text — all on-device, nothing uploaded.",
     "category": "Utility"
   },
   {

@@ -198,9 +198,9 @@
       "tldr": "Um pedômetro por sessão que lê o acelerômetro do seu telefone pela API DeviceMotion e conta passos com detecção de picos no dispositivo. Inicie uma sessão e caminhe com a tela ligada — ele acompanha passos, distância, ritmo e um anel de meta diária. Todo o processamento fica no navegador: sem conta, sem upload, sem rastreamento em segundo plano. Dispositivos sem sensor de movimento mostram um estado desativado."
     },
     "qr-scanner": {
-      "title": "Leitor de QR e código de barras",
-      "lede": "Leia códigos QR e de barras com a câmera ou uma imagem — decodificado no dispositivo, nada é enviado.",
-      "tldr": "Um leitor baseado na API BarcodeDetector do navegador que lê códigos QR e códigos de barras comuns pela câmera do dispositivo ou por uma imagem enviada. A decodificação acontece inteiramente no dispositivo: nenhuma foto ou resultado sai do navegador e não há ida e volta ao servidor. Aponte a câmera para um código ou escolha um arquivo de imagem; o texto decodificado aparece com ações de copiar e abrir link. O BarcodeDetector é uma API exclusiva do Chromium, então navegadores sem ela mostram um aviso claro de não compatível."
+      "title": "Scanner e gerador de QR e códigos de barras",
+      "lede": "Escaneie códigos QR e de barras, ou gere um código QR a partir de qualquer link ou texto — tudo no dispositivo, sem enviar nada.",
+      "tldr": "Duas ferramentas em uma, ambas totalmente no dispositivo. O modo scanner usa a API BarcodeDetector do navegador para ler códigos QR e de barras comuns pela câmera ou por uma imagem. O modo gerar transforma qualquer link ou texto em um código QR com um codificador embutido — nenhuma biblioteca é baixada e nada é enviado a um servidor. Os resultados lidos oferecem copiar e abrir link; os códigos gerados podem ser baixados como PNG, copiados ou compartilhados. O BarcodeDetector é uma API exclusiva do Chromium, então a leitura mostra um aviso de incompatibilidade em outros navegadores, mas a geração funciona em qualquer navegador moderno."
     }
   },
   "game": {
@@ -707,7 +707,16 @@
       "note_camera_error": "Não foi possível iniciar a câmera. Você ainda pode ler um arquivo de imagem.",
       "note_no_match": "Nenhum código encontrado nessa imagem. Tente uma foto mais nítida.",
       "unsupported_title": "Sem suporte aqui",
-      "unsupported_body": "Este navegador não suporta detecção de código de barras. Tente um navegador Chromium recente como Chrome ou Edge."
+      "unsupported_body": "Este navegador não suporta detecção de código de barras. Tente um navegador Chromium recente como Chrome ou Edge.",
+      "mode_scan": "Escanear",
+      "mode_generate": "Gerar",
+      "gen_prompt": "Cole um link ou digite um texto…",
+      "gen_input_label": "Link ou texto para codificar",
+      "gen_empty": "Seu código QR aparece aqui enquanto você digita.",
+      "gen_too_long": "Texto longo demais para um código QR — tente algo mais curto.",
+      "btn_download": "Baixar PNG",
+      "btn_copy_image": "Copiar imagem",
+      "gen_alt": "Código QR gerado"
     }
   },
   "category": {

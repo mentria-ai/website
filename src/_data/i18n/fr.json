@@ -198,9 +198,9 @@
       "tldr": "Un podomètre par session qui lit l'accéléromètre de ton téléphone via l'API DeviceMotion et compte les pas par détection de pics sur l'appareil. Lance une session et marche avec l'écran allumé — il suit les pas, la distance, le rythme et un anneau d'objectif quotidien. Tout le traitement reste dans le navigateur : pas de compte, pas d'envoi, pas de suivi en arrière-plan. Les appareils sans capteur de mouvement affichent un état désactivé."
     },
     "qr-scanner": {
-      "title": "Scanner QR et codes-barres",
-      "lede": "Scanne des codes QR et des codes-barres avec ta caméra ou une image — décodé sur l'appareil, rien n'est envoyé.",
-      "tldr": "Un scanner basé sur l'API BarcodeDetector du navigateur qui lit les codes QR et les codes-barres courants depuis la caméra de ton appareil ou une image importée. Le décodage se fait entièrement sur l'appareil : aucune photo ni résultat ne quitte le navigateur, et il n'y a pas d'aller-retour vers un serveur. Pointe la caméra vers un code ou choisis un fichier image ; le texte décodé apparaît avec des actions copier et ouvrir le lien. BarcodeDetector est une API réservée à Chromium, donc les navigateurs qui ne la prennent pas en charge affichent un avis clair."
+      "title": "Scanner et générateur de QR codes et codes-barres",
+      "lede": "Scannez des QR codes et des codes-barres, ou générez un QR code à partir de n'importe quel lien ou texte — tout en local, rien n'est envoyé.",
+      "tldr": "Deux outils en un, entièrement en local. Le mode scan utilise l'API BarcodeDetector du navigateur pour lire les QR codes et codes-barres courants depuis la caméra ou une image. Le mode génération transforme un lien ou un texte en QR code grâce à un encodeur intégré : aucune bibliothèque n'est téléchargée et rien n'est envoyé à un serveur. Les résultats scannés proposent copier et ouvrir le lien ; les codes générés peuvent être téléchargés en PNG, copiés ou partagés. BarcodeDetector est une API réservée à Chromium, donc le scan affiche un avis d'incompatibilité ailleurs, mais la génération fonctionne dans tout navigateur moderne."
     }
   },
   "game": {
@@ -707,7 +707,16 @@
       "note_camera_error": "Impossible de démarrer la caméra. Tu peux quand même scanner un fichier image.",
       "note_no_match": "Aucun code trouvé dans cette image. Essaie une photo plus nette.",
       "unsupported_title": "Non pris en charge ici",
-      "unsupported_body": "Ce navigateur ne prend pas en charge la détection de codes-barres. Essaie un navigateur Chromium récent comme Chrome ou Edge."
+      "unsupported_body": "Ce navigateur ne prend pas en charge la détection de codes-barres. Essaie un navigateur Chromium récent comme Chrome ou Edge.",
+      "mode_scan": "Scanner",
+      "mode_generate": "Générer",
+      "gen_prompt": "Collez un lien ou saisissez du texte…",
+      "gen_input_label": "Lien ou texte à encoder",
+      "gen_empty": "Votre QR code apparaît ici au fur et à mesure.",
+      "gen_too_long": "C'est trop long pour un QR code — essayez quelque chose de plus court.",
+      "btn_download": "Télécharger le PNG",
+      "btn_copy_image": "Copier l'image",
+      "gen_alt": "QR code généré"
     }
   },
   "category": {

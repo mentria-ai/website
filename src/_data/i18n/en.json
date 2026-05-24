@@ -198,9 +198,9 @@
       "tldr": "A session-based pedometer that reads your phone's accelerometer through the DeviceMotion API and counts steps with on-device peak detection. Start a session and walk with the screen on — it tracks steps, distance, pace, and a daily goal ring. All processing stays in the browser: no account, no upload, no background tracking. Desktops and devices without a motion sensor show a disabled state."
     },
     "qr-scanner": {
-      "title": "QR & Barcode Scanner",
-      "lede": "Scan QR codes and barcodes with your camera or an image — decoded on-device, nothing uploaded.",
-      "tldr": "A scanner built on the browser's BarcodeDetector API that reads QR codes and common barcodes from your device camera or an uploaded image. Decoding happens entirely on-device — no photo or scan result leaves the browser, and there is no server round-trip. Point the camera at a code or pick an image file; the decoded text appears with copy and open-link actions. BarcodeDetector is a Chromium-only API, so browsers without it show a clear unsupported notice."
+      "title": "QR & Barcode Scanner + Generator",
+      "lede": "Scan QR codes and barcodes, or generate a QR code from any link or text — all on-device, nothing uploaded.",
+      "tldr": "Two tools in one, both fully on-device. Scan mode uses the browser's BarcodeDetector API to read QR codes and common barcodes from your camera or an uploaded image. Generate mode turns any link or text into a QR code with a built-in encoder — no library is fetched and nothing is sent to a server. Decoded results offer copy and open-link actions; generated codes can be downloaded as PNG, copied, or shared. BarcodeDetector is a Chromium-only API, so scanning shows an unsupported notice elsewhere, but generating works in every modern browser."
     }
   },
   "game": {
@@ -707,7 +707,16 @@
       "note_camera_error": "The camera could not be started. You can still scan an image file.",
       "note_no_match": "No code found in that image. Try a clearer photo.",
       "unsupported_title": "Not supported here",
-      "unsupported_body": "This browser doesn't support barcode detection. Try a recent Chromium browser such as Chrome or Edge."
+      "unsupported_body": "This browser doesn't support barcode detection. Try a recent Chromium browser such as Chrome or Edge.",
+      "mode_scan": "Scan",
+      "mode_generate": "Generate",
+      "gen_prompt": "Paste a link or type text…",
+      "gen_input_label": "Link or text to encode",
+      "gen_empty": "Your QR code appears here as you type.",
+      "gen_too_long": "That's too much text to fit in a QR code — try something shorter.",
+      "btn_download": "Download PNG",
+      "btn_copy_image": "Copy image",
+      "gen_alt": "Generated QR code"
     }
   },
   "category": {

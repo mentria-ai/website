@@ -30,47 +30,30 @@ eleventyComputed:
   <section class="reveal">
     <div class="about-section-label">{{ "about.ship_label" | t }}</div>
     <h2 class="about-section-h">{{ "about.ship_h" | t }}</h2>
+    {% set postCount = collections.post | length %}
+    {% set maxCount = shelves.utility if shelves.utility > shelves.games else shelves.games %}
+    {% set maxCount = maxCount if maxCount > shelves.ai else shelves.ai %}
+    {% set maxCount = maxCount if maxCount > postCount else postCount %}
     <div class="about-ship-grid">
-      <a class="about-ship-card cyan" href="{{ '/tools/' | localeUrl(lang) }}">
+      <a class="about-ship-card amber" href="{{ '/tools/' | localeUrl(lang) }}">
         <span class="about-ship-num">{{ shelves.utility }}</span>
         <span class="about-ship-label">{{ "about.shelf_tools" | t }}</span>
-        <div class="about-spark"><svg viewBox="0 0 100 36" preserveAspectRatio="none">
-          <polyline fill="none" stroke="#22D3EE" stroke-width="1.5" points="0,28 12,22 24,26 36,18 48,20 60,12 72,14 84,8 100,4" />
-          <circle cx="100" cy="4" r="2.5" fill="#22D3EE"/>
-        </svg></div>
-      </a>
-      <a class="about-ship-card purple" href="{{ '/tools/' | localeUrl(lang) }}">
-        <span class="about-ship-num">{{ shelves.games }}</span>
-        <span class="about-ship-label">{{ "about.shelf_games" | t }}</span>
-        <div class="about-spark"><svg viewBox="0 0 100 36" preserveAspectRatio="none">
-          <g stroke="#A78BFA" stroke-width="1.5" fill="none">
-            <rect x="4" y="12" width="14" height="20" />
-            <rect x="28" y="6" width="14" height="26" />
-            <rect x="52" y="18" width="14" height="14" />
-            <rect x="76" y="2" width="14" height="30" />
-          </g>
-        </svg></div>
+        <div class="about-units" aria-hidden="true">{% for i in range(0, maxCount) %}<i class="unit{% if i < shelves.utility %} on{% endif %}" style="--i:{{ i }}"></i>{% endfor %}</div>
       </a>
       <a class="about-ship-card pink" href="{{ '/tools/' | localeUrl(lang) }}">
+        <span class="about-ship-num">{{ shelves.games }}</span>
+        <span class="about-ship-label">{{ "about.shelf_games" | t }}</span>
+        <div class="about-units" aria-hidden="true">{% for i in range(0, maxCount) %}<i class="unit{% if i < shelves.games %} on{% endif %}" style="--i:{{ i }}"></i>{% endfor %}</div>
+      </a>
+      <a class="about-ship-card cyan" href="{{ '/tools/' | localeUrl(lang) }}">
         <span class="about-ship-num">{{ shelves.ai }}</span>
         <span class="about-ship-label">{{ "about.shelf_ai" | t }}</span>
-        <div class="about-spark"><svg viewBox="0 0 100 36" preserveAspectRatio="none">
-          <g fill="none" stroke="#F472B6" stroke-width="1.5">
-            <path d="M0,18 Q25,4 50,18 T100,18" />
-            <path d="M0,18 Q25,32 50,18 T100,18" opacity="0.5" />
-          </g>
-        </svg></div>
+        <div class="about-units" aria-hidden="true">{% for i in range(0, maxCount) %}<i class="unit{% if i < shelves.ai %} on{% endif %}" style="--i:{{ i }}"></i>{% endfor %}</div>
       </a>
-      <a class="about-ship-card amber" href="{{ '/feed/' | localeUrl(lang) }}">
+      <a class="about-ship-card purple" href="{{ '/feed/' | localeUrl(lang) }}">
         <span class="about-ship-num">{{ collections.post | length }}</span>
         <span class="about-ship-label">{{ "about.shelf_writing" | t }}</span>
-        <div class="about-spark"><svg viewBox="0 0 100 36" preserveAspectRatio="none">
-          <g stroke="#FBBF24" stroke-width="1.5">
-            <line x1="6" y1="10" x2="76" y2="10" />
-            <line x1="6" y1="18" x2="88" y2="18" />
-            <line x1="6" y1="26" x2="60" y2="26" />
-          </g>
-        </svg></div>
+        <div class="about-units" aria-hidden="true">{% for i in range(0, maxCount) %}<i class="unit{% if i < postCount %} on{% endif %}" style="--i:{{ i }}"></i>{% endfor %}</div>
       </a>
     </div>
   </section>
@@ -151,18 +134,24 @@ eleventyComputed:
   .about-estd::before { content: "// "; color: var(--syn-cyan); }
 
   .about-ship-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  .about-ship-card { background: var(--term-bg-raised); border: 1px solid var(--term-border); border-radius: var(--radius-lg); padding: 22px 20px 18px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 10px; transition: all 200ms; position: relative; overflow: hidden; }
+  .about-ship-card { --accent: var(--syn-cyan); --accent-rgb: 34,211,238; background: var(--term-bg-raised); border: 1px solid var(--term-border); border-radius: var(--radius-lg); padding: 22px 20px 18px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 10px; transition: border-color 200ms, box-shadow 200ms, transform 200ms; position: relative; overflow: hidden; }
+  .about-ship-card.cyan { --accent: var(--syn-cyan); --accent-rgb: 34,211,238; }
+  .about-ship-card.pink { --accent: var(--syn-pink); --accent-rgb: 244,114,182; }
+  .about-ship-card.purple { --accent: var(--syn-purple); --accent-rgb: 167,139,250; }
+  .about-ship-card.amber { --accent: var(--syn-amber); --accent-rgb: 251,191,36; }
   .about-ship-card::after { content: "→"; position: absolute; top: 16px; right: 18px; color: var(--term-subtle); font-size: 14px; transition: all 200ms; }
-  .about-ship-card:hover { border-color: var(--cyan-30); box-shadow: var(--glow-cyan-soft); transform: translateY(-2px); }
-  .about-ship-card:hover::after { color: var(--syn-cyan); transform: translate(2px, -2px); }
-  .about-ship-num { font-family: var(--font-mono); font-size: 36px; font-weight: 700; line-height: 1; color: var(--term-fg-strong); letter-spacing: -0.02em; }
-  .about-ship-card.cyan .about-ship-num { color: var(--syn-cyan); text-shadow: 0 0 12px rgba(34,211,238,0.3); }
-  .about-ship-card.purple .about-ship-num { color: var(--syn-purple); }
-  .about-ship-card.pink .about-ship-num { color: var(--syn-pink); }
-  .about-ship-card.amber .about-ship-num { color: var(--syn-amber); }
+  .about-ship-card:hover { border-color: rgba(var(--accent-rgb), 0.45); box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.15); transform: translateY(-2px); }
+  .about-ship-card:hover::after { color: var(--accent); transform: translate(2px, -2px); }
+  .about-ship-num { font-family: var(--font-mono); font-size: 36px; font-weight: 700; line-height: 1; color: var(--accent); letter-spacing: -0.02em; text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.35); }
   .about-ship-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
-  .about-spark { margin-top: auto; padding-top: 8px; height: 36px; }
-  .about-spark svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .about-units { margin-top: auto; display: flex; align-items: flex-end; gap: 4px; height: 34px; }
+  .about-units .unit { flex: 1; height: 36%; border-radius: 3px; background: rgba(var(--accent-rgb), 0.12); transform-origin: bottom; }
+  .about-units .unit.on { height: 100%; background: var(--accent); box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.45); }
+  .reveal .about-units .unit { opacity: 0; transform: scaleY(0.25); }
+  .reveal.revealed .about-units .unit { opacity: 1; transform: scaleY(1); transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.2, 1, 0.3, 1); transition-delay: calc(var(--i) * 35ms); }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal .about-units .unit, .reveal.revealed .about-units .unit { opacity: 1; transform: none; transition: none; }
+  }
 
   .about-stack { border-left: 2px solid var(--cyan-30); padding: 4px 0 4px 22px; display: flex; flex-direction: column; gap: 12px; }
   .about-stack-row { font-family: var(--font-mono); font-size: 14px; color: var(--term-fg); display: flex; gap: 12px; align-items: baseline; }

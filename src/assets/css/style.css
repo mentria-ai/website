@@ -202,40 +202,44 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .site-header { background: var(--term-bg-raised); border-bottom: 1px solid var(--term-border); }
 .site-header__inner {
   max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between;
-  align-items: center; padding: 1rem 1.5rem; gap: 1rem;
+  align-items: center; padding: 1.15rem 1.5rem; gap: 1rem;
 }
 .brand { font-family: 'mentrialogofont', var(--font-mono); font-weight: 800; font-size: 1.05rem; letter-spacing: 0.01em; color: var(--term-fg); }
 .brand .brand__cursor { font-family: var(--font-mono); }
 .brand .brand__cursor { color: var(--syn-cyan); }
-.brand__ai {
-  font-size: 0;
-  opacity: 0;
-  color: #99fe1a;
-  transition: font-size 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s ease;
+.brand__ai { position: relative; display: inline-block; color: #99fe1a; }
+.brand__ai-text {
+  display: inline-block;
+  vertical-align: bottom;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0;
+  transition: width 0.42s steps(2, jump-end);
 }
-.brand--ai .brand__ai { font-size: 1em; opacity: 1; }
-.brand--ai .brand__cursor { display: none; }
-.brand__i { position: relative; }
+.brand--ai .brand__ai-text { width: 1.34em; }
 .brand__star {
   position: absolute;
-  left: 50%;
-  bottom: 100%;
+  right: -0.11em;
+  bottom: 1.32em;
   width: 0.62em;
   height: 0.62em;
-  margin-bottom: -0.1em;
-  transform: translateX(-50%);
   color: #99fe1a;
+  opacity: 0;
+  transform: scale(0.3);
+  transform-origin: center;
+  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.2, 1.5, 0.4, 1);
   pointer-events: none;
 }
-.brand__spark {
-  transform-box: fill-box;
-  transform-origin: center;
-}
+.brand--ai .brand__star { opacity: 1; transform: scale(1); transition-delay: 0.38s; }
+.brand__spark { transform-box: fill-box; transform-origin: center; }
 .brand--ai .brand__spark { animation: brand-spark-spin 3.5s linear infinite; }
 @keyframes brand-spark-spin { to { transform: rotate(360deg); } }
+.brand--ai .brand__cursor { animation: brand-caret 1.05s steps(1) infinite; }
+@keyframes brand-caret { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .brand__ai { transition: opacity 0.2s ease; }
+  .brand__ai-text { transition-duration: 0.25s; }
   .brand--ai .brand__spark { animation: none; }
+  .brand--ai .brand__cursor { animation: none; }
 }
 .site-nav { display: flex; align-items: center; gap: 1.25rem; }
 .nav-link { font-family: var(--font-mono); font-size: 0.85rem; color: var(--term-muted); font-weight: 500; padding-bottom: 0.15rem; border-bottom: 2px solid transparent; }

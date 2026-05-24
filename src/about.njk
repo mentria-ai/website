@@ -133,8 +133,8 @@ eleventyComputed:
   .about-crumb .slash { color: var(--syn-cyan); }
   .about-crumb a { color: inherit; text-decoration: none; transition: color 120ms; }
   .about-crumb a:hover { color: var(--syn-cyan); }
-  .about-wordmark { font-family: var(--font-mono); font-weight: 700; font-size: clamp(3rem, 11vw, 7.5rem); letter-spacing: -0.02em; color: var(--term-fg-strong); margin: 0; line-height: 0.95; text-shadow: 0 0 30px rgba(34,211,238,0.18); }
-  .about-wordmark .underscore { color: var(--syn-cyan); text-shadow: 0 0 18px rgba(34,211,238,0.55); animation: about-blink 1s steps(2, end) infinite; display: inline-block; }
+  .about-wordmark { font-family: 'mentrialogofont', var(--font-mono); font-weight: 700; font-size: clamp(2.4rem, 9vw, 6rem); letter-spacing: 0; color: var(--term-fg-strong); margin: 0; line-height: 0.95; text-shadow: 0 0 30px rgba(34,211,238,0.18); }
+  .about-wordmark .underscore { font-family: var(--font-mono); color: var(--syn-cyan); text-shadow: 0 0 18px rgba(34,211,238,0.55); animation: about-blink 1s steps(2, end) infinite; display: inline-block; }
   @keyframes about-blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
   .about-tagline { color: var(--term-muted); font-size: 14px; margin-top: 22px; letter-spacing: 0.02em; }
 

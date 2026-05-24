@@ -14,9 +14,9 @@
     { "src": "/assets/img/icon-maskable-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "AI Chat", "short_name": "AI Chat", "description": "Chat with a local AI model in your browser", "url": "/tools/ai-chat/" },
-    { "name": "Markdown → PDF", "short_name": "MD → PDF", "description": "Write markdown and export a clean PDF", "url": "/tools/markdown-pdf/" },
-    { "name": "Quick Notes", "short_name": "Notes", "description": "A minimal scratchpad saved in your browser", "url": "/tools/quick-notes/" }
+    { "name": "AI Chat", "short_name": "AI Chat", "description": "Chat with a local AI model in your browser", "url": "/tools/ai-chat/", "icons": [{ "src": "/assets/img/shortcuts/ai-chat.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }] },
+    { "name": "QR Scanner", "short_name": "QR Scan", "description": "Scan or generate QR codes and barcodes", "url": "/tools/qr-scanner/", "icons": [{ "src": "/assets/img/shortcuts/qr-scanner.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }] },
+    { "name": "Quick Notes", "short_name": "Notes", "description": "A minimal scratchpad saved in your browser", "url": "/tools/quick-notes/", "icons": [{ "src": "/assets/img/shortcuts/quick-notes.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }] }
   ],
   "share_target": {
     "action": "/tools/quick-notes/",

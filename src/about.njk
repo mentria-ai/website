@@ -101,6 +101,10 @@ eleventyComputed:
     <div class="left">
       <a class="about-contact-link" href="https://x.com/mentria_ai">{{ "about.contact" | t }}</a>
       <span class="about-build">build <span class="h">{{ buildHash }}</span></span>
+      <button type="button" class="about-refresh" id="about-refresh" aria-label="{{ 'about.update_check' | t }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        <span class="about-refresh__label">{{ "about.update_check" | t }}</span>
+      </button>
     </div>
     <div class="right">
       <div class="about-socials">
@@ -180,6 +184,13 @@ eleventyComputed:
   .about-socials svg { width: 14px; height: 14px; }
   .about-build { font-family: var(--font-mono); font-size: 11px; color: var(--term-subtle); }
   .about-build .h { color: var(--syn-cyan); }
+  .about-refresh { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; padding: 3px 10px; border: 1px solid var(--term-border); border-radius: 999px; background: transparent; color: var(--term-subtle); cursor: pointer; transition: color 120ms, border-color 120ms; }
+  .about-refresh:hover { color: var(--syn-cyan); border-color: var(--syn-cyan); }
+  .about-refresh:disabled { cursor: default; }
+  .about-refresh svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .about-refresh.is-busy svg { animation: about-spin 0.8s linear infinite; }
+  @keyframes about-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .about-refresh.is-busy svg { animation: none; } }
   .about-contact-link { font-family: var(--font-mono); padding: 6px 12px; border: 1px solid var(--term-border); border-radius: 6px; }
   .about-contact-link::before { content: "$ "; color: var(--syn-cyan); }
 
@@ -205,5 +216,52 @@ eleventyComputed:
   (function () {
     var y = document.getElementById('about-year');
     if (y) y.textContent = String(new Date().getFullYear());
+  })();
+  (function () {
+    var btn = document.getElementById('about-refresh');
+    if (!btn) return;
+    var COPY = {
+      idle:     {{ ("about.update_check"    | t) | dump | safe }},
+      checking: {{ ("about.update_checking" | t) | dump | safe }},
+      updating: {{ ("about.update_updating" | t) | dump | safe }},
+      latest:   {{ ("about.update_latest"   | t) | dump | safe }}
+    };
+    function setLabel(txt) {
+      var l = btn.querySelector('.about-refresh__label');
+      if (l) l.textContent = txt;
+    }
+    if (!('serviceWorker' in navigator)) {
+      btn.addEventListener('click', function () { location.reload(); });
+      return;
+    }
+    var reloading = false;
+    var checking = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (!checking || reloading) return;
+      reloading = true;
+      location.reload();
+    });
+    btn.addEventListener('click', async function () {
+      if (btn.disabled) return;
+      btn.disabled = true;
+      checking = true;
+      btn.classList.add('is-busy');
+      setLabel(COPY.checking);
+      var reg = null;
+      try { reg = await navigator.serviceWorker.getRegistration(); } catch (_) {}
+      if (!reg) { location.reload(); return; }
+      var updating = false;
+      function onFound() { if (!updating) { updating = true; setLabel(COPY.updating); } }
+      reg.addEventListener('updatefound', onFound);
+      try { await reg.update(); } catch (_) {}
+      if (reg.installing || reg.waiting) onFound();
+      setTimeout(function () {
+        if (updating || reloading) return;
+        checking = false;
+        setLabel(COPY.latest);
+        btn.classList.remove('is-busy');
+        setTimeout(function () { setLabel(COPY.idle); btn.disabled = false; }, 2000);
+      }, 1500);
+    });
   })();
 </script>

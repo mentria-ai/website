@@ -38,7 +38,11 @@
     "principle_1": "no servers in the loop",
     "principle_2": "no tracking, no accounts",
     "principle_3": "source on github",
-    "contact": "contact"
+    "contact": "contact",
+    "update_check": "Check for updates",
+    "update_checking": "Checking…",
+    "update_updating": "Updating…",
+    "update_latest": "Up to date"
   },
   "common": {
     "tldr": {

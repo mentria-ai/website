@@ -38,7 +38,11 @@
     "principle_1": "ループにサーバーを挟まない",
     "principle_2": "トラッキングなし、アカウントなし",
     "principle_3": "ソースはgithubに",
-    "contact": "連絡先"
+    "contact": "連絡先",
+    "update_check": "更新を確認",
+    "update_checking": "確認中…",
+    "update_updating": "更新中…",
+    "update_latest": "最新です"
   },
   "common": {
     "tldr": {

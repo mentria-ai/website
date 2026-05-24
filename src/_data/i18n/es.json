@@ -38,7 +38,11 @@
     "principle_1": "sin servidores en el circuito",
     "principle_2": "sin rastreo, sin cuentas",
     "principle_3": "código en github",
-    "contact": "contacto"
+    "contact": "contacto",
+    "update_check": "Buscar actualizaciones",
+    "update_checking": "Comprobando…",
+    "update_updating": "Actualizando…",
+    "update_latest": "Actualizado"
   },
   "common": {
     "tldr": {

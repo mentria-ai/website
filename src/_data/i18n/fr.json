@@ -38,7 +38,11 @@
     "principle_1": "aucun serveur dans la boucle",
     "principle_2": "aucun pistage, aucun compte",
     "principle_3": "code source sur github",
-    "contact": "contact"
+    "contact": "contact",
+    "update_check": "Vérifier les mises à jour",
+    "update_checking": "Vérification…",
+    "update_updating": "Mise à jour…",
+    "update_latest": "À jour"
   },
   "common": {
     "tldr": {

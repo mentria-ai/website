@@ -1,10 +1,11 @@
 /* markdown.js — global markdown renderer for Mentria pages.
  *
- * Mirrors the approach in src/tools/markdown-pdf.njk: dynamic-import the
- * `marked` library from jsDelivr (already in the project's dependency
- * footprint via that tool, so this isn't a new external dep).
+ * Loads the locally-vendored `marked` (src/assets/js/marked.esm.js) — the
+ * single markdown renderer shared by ai-chat, quote, and markdown-pdf.
  *
  * Exposes:  window.renderMarkdown(text) → htmlString
+ *           window.renderMarkdownReady → Promise (resolves once the marked
+ *           upgrade settles; await it before a first render that needs tables)
  *
  * Loading model: synchronous-by-fallback. We install a vanilla JS
  * fallback at script-tag execution time so callers never see undefined.
@@ -89,15 +90,11 @@
     return html;
   }
 
-  /* Install fallback first so callers never get undefined */
   global.renderMarkdown = renderFallback;
 
-  /* ── marked.js upgrade path ───────────────────────────────────── */
+  let markReady;
+  global.renderMarkdownReady = new Promise(function (resolve) { markReady = resolve; });
 
-  /* Async-load marked from jsDelivr ESM, same source as
-     src/tools/markdown-pdf.njk. When it arrives, swap the global
-     renderMarkdown over so subsequent calls get richer output (tables,
-     blockquotes, autolinks, etc.). */
   (async function upgradeToMarked() {
     try {
       const mod = await import('/assets/js/marked.esm.js');
@@ -107,16 +104,12 @@
 
       global.renderMarkdown = function (input) {
         if (!input) return '';
-        const html = marked.parse(String(input));
-        /* Same light XSS strip as markdown-pdf.njk: drop any literal
-           <script> tag the model spelled out. marked itself escapes
-           inline html by default with `gfm: true`, so this is belt-
-           and-suspenders. */
-        return html.replace(/<script[\s\S]*?<\/script>/gi, '');
+        return marked.parse(String(input)).replace(/<script[\s\S]*?<\/script>/gi, '');
       };
     } catch (err) {
-      /* CDN unreachable, offline, etc. — fallback is already in place. */
-      console.warn('[markdown] marked.js unavailable, using vanilla fallback:', err);
+      console.warn('[markdown] marked unavailable, using vanilla fallback:', err);
+    } finally {
+      if (markReady) markReady();
     }
   })();
 })(typeof window !== 'undefined' ? window : globalThis);

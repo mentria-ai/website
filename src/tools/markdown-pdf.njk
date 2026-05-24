@@ -89,6 +89,7 @@ eleventyComputed:
 
 {% include "tool-schema.njk" %}
 
+<script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 <script type="module">
 const COPY = {
   saved:              {{ ("tool.markdown-pdf.saved"              | t) | dump | safe }},
@@ -159,19 +160,13 @@ function greet(name) {
 Made with [Mentria](https://mentria.ai).
 `;
 
-/* ── Load marked.js ──────────────────────────────────────────────── */
-let marked = null;
-try {
-  ({ marked } = await import('/assets/js/marked.esm.js'));
-  marked.setOptions({ gfm: true, breaks: true, pedantic: false });
-} catch (err) {
-  console.error('Failed to load marked.js:', err);
+if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
+if (typeof window.renderMarkdown !== 'function') {
   previewEl.innerHTML = `<p style="color:var(--syn-pink);padding:1rem;">${COPY.errLoadLib.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`;
   inputEl.disabled = true;
   downloadBtn.disabled = true;
 }
 
-/* ── Render ─────────────────────────────────────────────────────── */
 let renderTimer = null;
 function scheduleRender() {
   clearTimeout(renderTimer);
@@ -179,12 +174,8 @@ function scheduleRender() {
 }
 
 function render() {
-  if (!marked) return;
   const scroll = previewEl.scrollTop;
-  const html = marked.parse(inputEl.value || '');
-  // Light safety net: strip raw <script> tags (real XSS sanitization is overkill
-  // for a single-user markdown tool; this just blocks the most obvious foot-gun).
-  previewEl.innerHTML = html.replace(/<script[\s\S]*?<\/script>/gi, '');
+  previewEl.innerHTML = window.renderMarkdown ? window.renderMarkdown(inputEl.value || '') : '';
   previewEl.scrollTop = scroll;
   updateCounts();
 }

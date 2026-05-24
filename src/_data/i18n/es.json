@@ -68,7 +68,15 @@
     },
     "tools_heading": "Herramientas",
     "feed_heading": "Últimas del Feed",
-    "launch_tool": "Abrir herramienta →"
+    "launch_tool": "Abrir herramienta →",
+    "launcher": {
+      "recents": "Recientes",
+      "ai": "IA",
+      "games": "Juegos",
+      "create": "Crear",
+      "dev": "Dev",
+      "everyday": "Cotidiano"
+    }
   },
   "tools_page": {
     "title": "Herramientas Útiles",
@@ -167,9 +175,9 @@
       "tldr": "El clásico Buscaminas reconstruido con estética synthwave/terminal. Niveles preestablecidos (fácil, medio, difícil, extremo), controles de teclado y táctil, mejores tiempos persistentes en localStorage. Sin instalación, sin registro, sin analítica; la lógica del juego y el cronómetro se ejecutan localmente en tu navegador. Funciona sin conexión una vez cargada la página."
     },
     "pong": {
-      "title": "Pong",
+      "title": "Breakout",
       "lede": "Rompe-ladrillos con paleta. Atrapa los power-ups que caen, despeja el muro, sobrevive niveles cada vez más rápidos y duros. Se ejecuta localmente — tus datos no salen de tu dispositivo.",
-      "tldr": "Pong nativo del navegador con un jugador contra la CPU. HTML5 Canvas, física determinista, entrada de ratón, teclado y táctil. Puntuación, posición de la pala y el oponente IA viven en JavaScript del lado del cliente — sin scripts de terceros, sin servidor. Funciona sin conexión una vez cacheado. Pausa rápida de reflejos en el escritorio."
+      "tldr": "Un rompeladrillos estilo Breakout: rebota la bola con tu pala para romper muros de ladrillos en niveles que se aceleran, atrapando potenciadores que caen (y esquivando los malos). Construido sobre HTML5 Canvas con física determinista y controles de ratón, teclado y táctiles. La puntuación, las vidas y la tabla de récords viven en JavaScript del lado del cliente: sin scripts de terceros, sin servidor, y funciona sin conexión una vez en caché."
     },
     "quick-notes": {
       "title": "Notas Rápidas",

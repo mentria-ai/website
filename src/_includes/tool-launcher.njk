@@ -1,0 +1,30 @@
+{%- set groups = [
+  ["AI", "home.launcher.ai"], ["Games", "home.launcher.games"],
+  ["Create", "home.launcher.create"], ["Dev", "home.launcher.dev"],
+  ["Everyday", "home.launcher.everyday"]
+] -%}
+{%- macro tile(tool, lang) -%}
+  <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}"
+     href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">
+    <span class="launch-tile__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><use href="/assets/img/tool-icons.svg#tool-{{ tool.slug }}"></use></svg>
+    </span>
+    <span class="launch-tile__label">{{ ("tools." + tool.slug + ".title") | t }}</span>
+  </a>
+{%- endmacro -%}
+<section class="launcher reveal" id="tools-preview" aria-label="{{ 'home.tools_heading' | t }}">
+  <div class="launcher__recents" id="launcher-recents" hidden>
+    <h2 class="launcher__label">{{ "home.launcher.recents" | t }}</h2>
+    <div class="launcher__grid" id="launcher-recents-row"></div>
+  </div>
+  <div class="launcher__pages">
+    {%- for g in groups %}
+    <section class="launcher__cat launcher__cat--{{ g[0] | lower }}" data-group="{{ g[0] }}">
+      <h2 class="launcher__label">{{ g[1] | t }}</h2>
+      <div class="launcher__grid">
+        {%- for tool in tools %}{% if tool.group == g[0] %}{{ tile(tool, lang) }}{% endif %}{%- endfor %}
+      </div>
+    </section>
+    {%- endfor %}
+  </div>
+</section>

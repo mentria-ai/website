@@ -68,7 +68,15 @@
     },
     "tools_heading": "Outils",
     "feed_heading": "Dernières du Fil",
-    "launch_tool": "Ouvrir l'outil →"
+    "launch_tool": "Ouvrir l'outil →",
+    "launcher": {
+      "recents": "Récents",
+      "ai": "IA",
+      "games": "Jeux",
+      "create": "Créer",
+      "dev": "Dev",
+      "everyday": "Quotidien"
+    }
   },
   "tools_page": {
     "title": "Outils Utilitaires",
@@ -167,9 +175,9 @@
       "tldr": "Le Démineur classique reconstruit avec une esthétique synthwave/terminal. Préréglages de difficulté (facile, moyen, difficile, extrême), commandes clavier et tactiles, meilleurs temps persistants dans localStorage. Pas d'installation, pas d'inscription, pas d'analytique ; la logique de jeu et le chrono fonctionnent localement. Hors ligne une fois la page chargée."
     },
     "pong": {
-      "title": "Pong",
+      "title": "Breakout",
       "lede": "Casse-briques rencontre raquette. Attrapez les power-ups qui tombent, dégagez le mur, survivez à des niveaux de plus en plus rapides et exigeants. Fonctionne localement — vos données restent sur votre appareil.",
-      "tldr": "Pong natif navigateur en solo contre l'IA. HTML5 Canvas, physique déterministe, entrée souris, clavier et tactile. Score, position des raquettes et adversaire IA vivent en JavaScript côté client — pas de scripts tiers, pas de serveur. Fonctionne hors ligne une fois en cache. Pause-réflexe rapide au bureau."
+      "tldr": "Un casse-briques façon Breakout : renvoyez la balle avec votre raquette pour détruire des murs de briques au fil de niveaux de plus en plus rapides, en attrapant les bonus qui tombent (et en évitant les mauvais). Construit sur HTML5 Canvas avec une physique déterministe et des commandes souris, clavier et tactiles. Score, vies et tableau des records vivent dans le JavaScript côté client — aucun script tiers, aucun serveur, et ça marche hors ligne une fois en cache."
     },
     "quick-notes": {
       "title": "Notes Rapides",

@@ -3,108 +3,126 @@
     "slug": "search",
     "title": "Search",
     "summary": "AI-aware site search across tools and feed posts. Falls back to instant fuzzy keyword matching; uses Qwen3.5-0.8B for natural-language summaries when the model is already cached locally.",
-    "category": "AI"
+    "category": "AI",
+    "group": "AI"
   },
   {
     "slug": "step-counter",
     "title": "Step Counter",
     "summary": "Session pedometer that counts steps from your phone's motion sensor — distance, pace, and a daily goal ring, all on-device.",
-    "category": "Health"
+    "category": "Health",
+    "group": "Everyday"
   },
   {
     "slug": "qr-scanner",
     "title": "QR & Barcode Scanner + Generator",
     "summary": "Scan QR codes and barcodes, or generate a QR code from any link or text — all on-device, nothing uploaded.",
-    "category": "Utility"
+    "category": "Utility",
+    "group": "Dev"
   },
   {
     "slug": "decision-wheel",
     "title": "Decision Wheel",
     "summary": "Offline-ready spinner for quick calls: Yes, No, Up to you, or Wait & try again.",
-    "category": "Utility"
+    "category": "Utility",
+    "group": "Everyday"
   },
   {
     "slug": "countdown-timer",
     "title": "Countdown Timer",
     "summary": "Up to 4 simultaneous countdown timers with custom titles. Set a duration or pick a target date & time (max 99 hrs).",
-    "category": "Timer"
+    "category": "Timer",
+    "group": "Everyday"
   },
   {
     "slug": "coin-flip",
     "title": "Coin Flip",
     "summary": "Animated heads or tails coin flip with optional best-of-N series mode. Works offline.",
-    "category": "Utility"
+    "category": "Utility",
+    "group": "Everyday"
   },
   {
     "slug": "quick-notes",
     "title": "Quick Notes",
     "summary": "Minimal scratchpad that saves to your browser. Supports multiple notes with localStorage persistence.",
-    "category": "Productivity"
+    "category": "Productivity",
+    "group": "Create"
   },
   {
     "slug": "base64-codec",
     "title": "Base64 Codec",
     "summary": "Encode and decode text or files (including images) to and from Base64. All processing stays in your browser.",
-    "category": "Developer"
+    "category": "Developer",
+    "group": "Dev"
   },
   {
     "slug": "color-picker",
     "title": "Color Picker",
     "summary": "Pick colors, generate harmonious palettes, and copy values in HEX, RGB, and HSL. Works offline.",
-    "category": "Design"
+    "category": "Design",
+    "group": "Create"
   },
   {
     "slug": "ai-chat",
     "title": "AI Chat",
     "summary": "Chat with Qwen3.5-0.8B running locally in your browser via WebGPU. Supports vision. No data leaves your device.",
-    "category": "AI"
+    "category": "AI",
+    "group": "AI"
   },
   {
     "slug": "quote",
     "title": "Motivational Quote",
     "summary": "AI-generated original motivational quotes. Runs locally in your browser.",
-    "category": "AI"
+    "category": "AI",
+    "group": "AI"
   },
   {
     "slug": "radio",
     "title": "Infinite Radio",
     "summary": "AI-generated epic cinematic music streaming infinitely. Learns your taste locally. No data leaves your device.",
-    "category": "AI"
+    "category": "AI",
+    "group": "AI"
   },
   {
     "slug": "invoice",
     "title": "Invoice Generator",
     "summary": "Build clean, single-page invoices in your browser. Auto-saves, prints to A4, exports/imports JSON. No data leaves your device.",
-    "category": "Utility"
+    "category": "Utility",
+    "group": "Create"
   },
   {
     "slug": "markdown-pdf",
     "title": "Markdown → PDF",
     "summary": "Write markdown, see a live preview, and download a clean professional PDF. Auto-saves to your browser. No data leaves your device.",
-    "category": "Utility"
+    "category": "Utility",
+    "group": "Create"
   },
   {
     "slug": "tetris",
     "title": "Tetris",
     "summary": "Browser-native Tetris in the Mentria synthwave palette. Touch, keyboard, and mouse supported. Plays offline.",
-    "category": "Game"
+    "category": "Game",
+    "group": "Games"
   },
   {
     "slug": "pong",
-    "title": "Pong",
+    "title": "Breakout",
     "summary": "Brick-buster paddle game with synthwave powerups, lives, and a high-score table. Plays offline.",
-    "category": "Game"
+    "category": "Game",
+    "group": "Games"
   },
   {
     "slug": "flappy",
     "title": "Flappy",
     "summary": "Paper plane flapping through stacks of command prompts. Tap, click, or SPACE. Plays offline.",
-    "category": "Game"
+    "category": "Game",
+    "group": "Games"
   },
   {
     "slug": "minesweeper",
     "title": "Minesweeper",
     "summary": "Classic logic puzzle in terminal dress. Three difficulties, mouse + touch input, best-time tracking. Plays offline.",
-    "category": "Game"
+    "category": "Game",
+    "group": "Games"
   }
 ]

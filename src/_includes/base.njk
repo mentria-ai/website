@@ -311,6 +311,21 @@
         navigator.serviceWorker.register('/sw.js');
       }
     </script>
+    <script>
+      (function () {
+        try {
+          var p = location.pathname, locs = window.MENTRIA_LOCALES || [];
+          for (var i = 0; i < locs.length; i++) { var pre = locs[i].prefix; if (pre && p.indexOf(pre + '/') === 0) { p = p.slice(pre.length); break; } }
+          var m = p.match(/^\/tools\/([^/]+)\/?$/);
+          if (!m) return;
+          var KEY = 'mentria_tool_usage', u = {};
+          try { u = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (_) {}
+          var e = u[m[1]] || { count: 0, last: 0 };
+          e.count++; e.last = Date.now(); u[m[1]] = e;
+          localStorage.setItem(KEY, JSON.stringify(u));
+        } catch (_) {}
+      })();
+    </script>
     <script src="/assets/js/mentria-i18n.js?v={{ buildHash }}"></script>
     <script>
       (function () {

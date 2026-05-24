@@ -68,7 +68,15 @@
     },
     "tools_heading": "Ferramentas",
     "feed_heading": "Mais Recentes do Feed",
-    "launch_tool": "Abrir ferramenta →"
+    "launch_tool": "Abrir ferramenta →",
+    "launcher": {
+      "recents": "Recentes",
+      "ai": "IA",
+      "games": "Jogos",
+      "create": "Criar",
+      "dev": "Dev",
+      "everyday": "Cotidiano"
+    }
   },
   "tools_page": {
     "title": "Ferramentas Úteis",
@@ -167,9 +175,9 @@
       "tldr": "Campo Minado clássico reconstruído com estética synthwave/terminal. Presets de dificuldade (fácil, médio, difícil, extremo), controles por teclado e toque, melhores tempos persistentes via localStorage. Sem instalação, sem cadastro, sem analítica; lógica do jogo e cronômetro rodam localmente no navegador. Funciona offline depois que a página carrega."
     },
     "pong": {
-      "title": "Pong",
+      "title": "Breakout",
       "lede": "Quebra-blocos encontra jogo de raquete. Pegue os power-ups caindo, limpe a parede, sobreviva a níveis cada vez mais rápidos e difíceis. Roda localmente — seus dados não saem do seu dispositivo.",
-      "tldr": "Pong nativo do navegador com um jogador contra a CPU. HTML5 Canvas, física determinística, entrada por mouse, teclado e toque. Pontuação, posição da raquete e o oponente IA vivem em JavaScript no cliente — sem scripts de terceiros, sem servidor. Funciona offline depois do cache. Pausa rápida de reflexos no escritório."
+      "tldr": "Um quebra-tijolos no estilo Breakout: rebata a bola com a raquete para destruir paredes de tijolos em níveis que ficam mais rápidos, pegando os power-ups que caem (e desviando dos ruins). Construído em HTML5 Canvas com física determinística e controles de mouse, teclado e toque. Pontuação, vidas e a tabela de recordes ficam no JavaScript do lado do cliente — sem scripts de terceiros, sem servidor, e funciona offline depois de armazenado em cache."
     },
     "quick-notes": {
       "title": "Notas Rápidas",

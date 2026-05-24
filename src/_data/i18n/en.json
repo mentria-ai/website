@@ -68,7 +68,15 @@
     },
     "tools_heading": "Tools",
     "feed_heading": "Latest from the Feed",
-    "launch_tool": "Launch tool →"
+    "launch_tool": "Launch tool →",
+    "launcher": {
+      "recents": "Recents",
+      "ai": "AI",
+      "games": "Games",
+      "create": "Create",
+      "dev": "Dev",
+      "everyday": "Everyday"
+    }
   },
   "tools_page": {
     "title": "Utility Tools",
@@ -167,9 +175,9 @@
       "tldr": "Classic Minesweeper rebuilt with a synthwave terminal aesthetic. Difficulty presets (easy, medium, hard, extreme), keyboard and touch controls, persistent best times via localStorage. No installs, no signup, no analytics; the game logic and timer all run locally in your browser. Works offline once the page loads."
     },
     "pong": {
-      "title": "Pong",
+      "title": "Breakout",
       "lede": "Brick-buster meets paddle game. Catch falling powerups, clear the wall, survive levels that get faster and meaner. Runs locally — no data leaves your device.",
-      "tldr": "Browser-native Pong with single-player versus CPU. HTML5 Canvas, deterministic physics, mouse, keyboard, and touch input. Score, paddle position, and the AI opponent all live in client-side JavaScript — no third-party scripts, no server. Works offline once cached. Quick reflex breaks at the desk."
+      "tldr": "A Breakout-style brick-buster: bounce the ball off your paddle to clear walls of bricks across levels that speed up, catching falling powerups (and dodging the bad ones). Built on HTML5 Canvas with deterministic physics and mouse, keyboard, and touch controls. Score, lives, and the high-score table all live in client-side JavaScript — no third-party scripts, no server, and it works offline once cached."
     },
     "quick-notes": {
       "title": "Quick Notes",

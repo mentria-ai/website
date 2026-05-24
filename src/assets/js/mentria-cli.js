@@ -7,9 +7,10 @@
 
   function localePrefix() {
     var path = window.location.pathname || '/';
-    var prefixes = ['/es', '/pt-br', '/fr', '/ja'];
-    for (var i = 0; i < prefixes.length; i++) {
-      if (path === prefixes[i] || path.indexOf(prefixes[i] + '/') === 0) return prefixes[i];
+    var locs = window.MENTRIA_LOCALES || [];
+    for (var i = 0; i < locs.length; i++) {
+      var p = locs[i].prefix;
+      if (p && (path === p || path.indexOf(p + '/') === 0)) return p;
     }
     return '';
   }

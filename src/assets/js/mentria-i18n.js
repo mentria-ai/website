@@ -5,7 +5,7 @@
   var CHANNEL = 'mentria-locale';
   var DICT_BASE = '/assets/i18n/';
 
-  var LOCALES = [
+  var LOCALES = (window.MENTRIA_LOCALES && window.MENTRIA_LOCALES.length) ? window.MENTRIA_LOCALES : [
     { code: 'en', prefix: '', name: 'English' },
     { code: 'es', prefix: '/es', name: 'Español' },
     { code: 'pt-BR', prefix: '/pt-br', name: 'Português (BR)' },

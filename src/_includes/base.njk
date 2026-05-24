@@ -11,6 +11,13 @@
        that fires even when scaling is locked. #}
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script>
+      window.MENTRIA_LOCALES = [
+        {%- for loc in locales -%}
+        { code: {{ loc.code | dump | safe }}, prefix: {{ loc.pathPrefix | dump | safe }}, name: {{ loc.nativeName | dump | safe }}, isDefault: {{ loc.isDefault | dump | safe }} }{% if not loop.last %},{% endif %}
+        {%- endfor -%}
+      ];
+    </script>
+    <script>
       // Anti-FOUC: detect standalone (installed) mode before first paint so
       // the install prompt CSS can hide everything via .is-standalone.
       if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
@@ -25,13 +32,9 @@
         try {
           var FLAG = 'mentria_lang_redirected_at';
           if (localStorage.getItem(FLAG)) return;
-          // Map: each entry is [lang code, path prefix used in URLs].
-          var supported = [
-            ['es', '/es'],
-            ['pt-BR', '/pt-br'],
-            ['fr', '/fr'],
-            ['ja', '/ja']
-          ];
+          var supported = (window.MENTRIA_LOCALES || [])
+            .filter(function (l) { return !l.isDefault; })
+            .map(function (l) { return [l.code, l.prefix]; });
           var path = location.pathname || '/';
           // Already in a non-default locale path? Nothing to do.
           for (var i = 0; i < supported.length; i++) {
@@ -268,7 +271,9 @@
     <script>
       (function () {
         if (!navigator.share) return;
-        if (!/^(\/(es|fr|ja|pt-br))?\/tools\/[^/]+\/?$/.test(location.pathname)) return;
+        var locs = (window.MENTRIA_LOCALES || []).filter(function (l) { return l.prefix; }).map(function (l) { return l.prefix.slice(1); }).join('|');
+        var toolRe = new RegExp('^(\\/(' + locs + '))?\\/tools\\/[^/]+\\/?$');
+        if (!toolRe.test(location.pathname)) return;
         var h1 = document.querySelector('.hero h1');
         if (!h1) return;
         var btn = document.createElement('button');

@@ -91,21 +91,32 @@
     // (window.MENTRIA_CLI_WELCOME) so they're localized per locale.
     var w = (window.MENTRIA_CLI_WELCOME) || {};
     var welcomeLines = [
-      { text: w.cmd  || '$ welcome --to mentria',                 type: 'command' },
-      { text: '> ' + (w.out1 || 'creative studio. tools & transmissions.'), type: 'result' },
-      { text: '> ' + (w.out2 || "type 'help' for commands."),     type: 'muted'   }
+      { text: w.cmd  || '$ welcome --to mentria',                 type: 'command', key: 'home.cli.welcomeCmd',  prefix: '' },
+      { text: '> ' + (w.out1 || 'creative studio. tools & transmissions.'), type: 'result', key: 'home.cli.welcomeOut1', prefix: '> ' },
+      { text: '> ' + (w.out2 || "type 'help' for commands."),     type: 'muted',   key: 'home.cli.welcomeOut2', prefix: '> ' }
     ];
 
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (reducedMotion) {
-      // Instant render
       for (var i = 0; i < welcomeLines.length; i++) {
-        appendLine(outputEl, welcomeLines[i].text, welcomeLines[i].type);
+        var wp = appendLine(outputEl, welcomeLines[i].text, welcomeLines[i].type);
+        wp.dataset.welcomeKey = welcomeLines[i].key;
+        wp.dataset.welcomePrefix = welcomeLines[i].prefix;
       }
     } else {
       typeLines(outputEl, welcomeLines, 0, function () {});
     }
+
+    document.addEventListener('mentria:localechange', function () {
+      var I = window.MentriaI18n;
+      if (!I || !I.t) return;
+      var els = outputEl.querySelectorAll('[data-welcome-key]');
+      for (var i = 0; i < els.length; i++) {
+        var v = I.t(els[i].dataset.welcomeKey);
+        if (v != null) els[i].textContent = (els[i].dataset.welcomePrefix || '') + v;
+      }
+    });
 
     // ── Autocomplete popover ───────────────────────────────────────
     var suggestEl = document.getElementById('cli-suggestions');
@@ -302,6 +313,7 @@
     p.className = 'cli__line cli__line--' + (type || 'result');
     p.textContent = text;
     outputEl.appendChild(p);
+    return p;
   }
 
   function typeLines(outputEl, lines, index, callback) {
@@ -313,6 +325,7 @@
     var line = lines[index];
     var p = document.createElement('p');
     p.className = 'cli__line cli__line--' + (line.type || 'result');
+    if (line.key) { p.dataset.welcomeKey = line.key; p.dataset.welcomePrefix = line.prefix || ''; }
     outputEl.appendChild(p);
 
     typeText(p, line.text, 0, function () {

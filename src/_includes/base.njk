@@ -237,6 +237,14 @@
         }
         window.mentriaConfirm = function (m) { return open(m, 'confirm'); };
         window.mentriaAlert = function (m) { return open(m, 'alert'); };
+        document.addEventListener('mentria:localechange', function () {
+          if (!window.MentriaI18n || !window.MentriaI18n.t) return;
+          var ok = window.MentriaI18n.t('common.dialog.ok');
+          var cf = window.MentriaI18n.t('common.dialog.confirm');
+          if (ok != null) okLabel = ok;
+          if (cf != null) confirmLabel = cf;
+          if (dlg.matches(':popover-open')) okBtn.textContent = cancelBtn.hidden ? okLabel : confirmLabel;
+        });
       })();
     </script>
     <script>
@@ -284,6 +292,7 @@
         navigator.serviceWorker.register('/sw.js');
       }
     </script>
+    <script src="/assets/js/mentria-i18n.js?v={{ buildHash }}"></script>
     <script>
       (function () {
         var els = document.querySelectorAll('.reveal');

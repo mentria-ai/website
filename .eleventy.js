@@ -1,6 +1,7 @@
 const { execSync } = require("child_process");
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 
 module.exports = function(eleventyConfig) {
   // Inject short git commit hash as a global data value for cache busting
@@ -12,6 +13,27 @@ module.exports = function(eleventyConfig) {
     }
   })();
   eleventyConfig.addGlobalData("buildHash", buildHash);
+
+  const modelsVersion = (() => {
+    try {
+      const parts = [];
+      const walk = (dir) => {
+        if (!fs.existsSync(dir)) return;
+        for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+          const p = path.join(dir, ent.name);
+          if (ent.isDirectory()) walk(p);
+          else parts.push(path.relative(__dirname, p) + ":" + fs.statSync(p).size);
+        }
+      };
+      walk(path.join(__dirname, "src", "assets", "mentria", "models"));
+      walk(path.join(__dirname, "src", "assets", "mentria", "loras"));
+      parts.sort();
+      return crypto.createHash("sha1").update(parts.join("|")).digest("hex").slice(0, 12);
+    } catch {
+      return "0";
+    }
+  })();
+  eleventyConfig.addGlobalData("modelsVersion", modelsVersion);
 
   // ── i18n: load locales + dictionaries once at startup ──────────
   // Layout: src/_data/i18n/<code>.json. Same key tree across all files;

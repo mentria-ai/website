@@ -3,6 +3,8 @@ permalink: /sw.js
 eleventyExcludeFromCollections: true
 ---
 const CACHE_NAME = 'mentria-cache-{{ buildHash }}';
+const MODELS_CACHE = 'mentria-models';
+const MODELS_MARKER = 'mentria-models-{{ modelsVersion }}';
 const ASSETS = [
   '/',
   '/assets/css/style.css',
@@ -64,12 +66,19 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(key => key !== CACHE_NAME && caches.delete(key)))
-    )
-  );
-  return self.clients.claim();
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    const hadOldModels = keys.some(k => k.startsWith('mentria-models-') && k !== MODELS_MARKER);
+    await Promise.all(keys.map(key => {
+      if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER) return;
+      if (key.startsWith('mentria-cache-') || key.startsWith('mentria-models-')) return caches.delete(key);
+    }));
+    if (!keys.includes(MODELS_MARKER)) {
+      if (hadOldModels) await caches.delete(MODELS_CACHE);
+      await caches.open(MODELS_MARKER);
+    }
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener('fetch', event => {

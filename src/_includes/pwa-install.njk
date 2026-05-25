@@ -8,7 +8,7 @@
   <img src="/assets/img/icon-192x192.png" alt="" class="pwa-install-banner__icon" width="40" height="40">
   <div class="pwa-install-banner__body">
     <div class="pwa-install-banner__title">{{ "pwa.banner_title" | t }}</div>
-    <div class="pwa-install-banner__desc">{{ "pwa.banner_desc" | t }}</div>
+    <div class="pwa-install-banner__desc"><span class="pwa-install-banner__desc-inner">{{ "pwa.banner_desc" | t }}</span></div>
   </div>
   <button type="button" id="pwaInstallBannerBtn" class="pwa-install-banner__cta">{{ "pwa.install_btn" | t }}</button>
   <button type="button" id="pwaInstallBannerClose" class="pwa-install-banner__close" aria-label="{{ 'pwa.dismiss' | t }}">
@@ -99,10 +99,29 @@
     localStorage.setItem(DISMISS_KEY, String(Date.now()));
   });
 
+  var bannerDesc = banner.querySelector('.pwa-install-banner__desc');
+  var bannerDescInner = banner.querySelector('.pwa-install-banner__desc-inner');
+  function setupDescMarquee() {
+    if (!bannerDesc || !bannerDescInner || banner.hidden) return;
+    bannerDesc.classList.remove('is-marquee');
+    var overflow = bannerDescInner.scrollWidth - bannerDesc.clientWidth;
+    if (overflow > 2) {
+      bannerDesc.style.setProperty('--marquee-shift', (-overflow) + 'px');
+      bannerDesc.style.setProperty('--marquee-duration', Math.min(16, Math.max(7, 5 + overflow / 16)).toFixed(1) + 's');
+      bannerDesc.classList.add('is-marquee');
+    }
+  }
+  if (window.ResizeObserver) {
+    var descRO = new ResizeObserver(function () { setupDescMarquee(); });
+    if (bannerDesc) descRO.observe(bannerDesc);
+    if (bannerDescInner) descRO.observe(bannerDescInner);
+  }
+
   function showBanner() {
     banner.hidden = false;
     void banner.offsetHeight; // reflow so the slide-in transition runs
     banner.classList.add('pwa-install-banner--visible');
+    setupDescMarquee();
   }
 
   function dismissBanner() {

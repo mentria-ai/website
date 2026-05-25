@@ -672,6 +672,20 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.pwa-install-banner__desc-inner { display: inline-block; white-space: nowrap; will-change: transform; }
+.pwa-install-banner__desc.is-marquee { text-overflow: clip; }
+.pwa-install-banner__desc.is-marquee .pwa-install-banner__desc-inner {
+  animation: pwa-desc-marquee var(--marquee-duration, 10s) ease-in-out infinite;
+}
+@keyframes pwa-desc-marquee {
+  0%, 15% { transform: translateX(0); }
+  50%, 65% { transform: translateX(var(--marquee-shift, 0px)); }
+  100% { transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pwa-install-banner__desc.is-marquee { white-space: normal; overflow: visible; text-overflow: clip; }
+  .pwa-install-banner__desc.is-marquee .pwa-install-banner__desc-inner { white-space: normal; animation: none; }
+}
 
 .pwa-install-banner__cta {
   flex-shrink: 0;

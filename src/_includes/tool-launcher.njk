@@ -1,7 +1,7 @@
 {%- set groups = [
-  ["AI", "home.launcher.ai"], ["Games", "home.launcher.games"],
-  ["Create", "home.launcher.create"], ["Dev", "home.launcher.dev"],
-  ["Everyday", "home.launcher.everyday"]
+  ["Everyday", "home.launcher.everyday"], ["AI", "home.launcher.ai"],
+  ["Games", "home.launcher.games"], ["Create", "home.launcher.create"],
+  ["Dev", "home.launcher.dev"]
 ] -%}
 {%- macro tile(tool, lang) -%}
   <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}"

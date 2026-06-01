@@ -9,6 +9,10 @@ CLAUDE.md
 .playwright-mcp/
 custom_inference_engine.md
 webgpu_engine_guide.md
+p2p-research-handoff.md
 docs/
 src/assets/mentria/models/
 src/assets/mentria/loras/
+
+# Deep Cuts images live on cdn.mentria.ai, not in the repo
+src/assets/img/feed/deepcuts*/

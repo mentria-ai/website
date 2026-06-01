@@ -14,7 +14,7 @@ eleventyComputed:
 {% if entries.length %}
 <div class="feed-scroll" id="feed-scroll">
     {% for item in entries %}
-    <section class="feed-card{% if item.link %} feed-card--linked{% endif %}" tabindex="0" data-index="{{ loop.index0 }}"{% if item.link %} data-link="{{ item.link }}"{% endif %}>
+    <section class="feed-card{% if item.link %} feed-card--linked{% endif %}" tabindex="0" data-index="{{ loop.index0 }}"{% if item.link %} data-link="{{ item.link }}"{% endif %}{% if item.src %} style="--feed-card-bg: url('{{ item.src }}')"{% endif %}>
         {% if item.type == "video" and item.src %}
         <video class="feed-card__media" src="{{ item.src }}" {% if item.poster %}poster="{{ item.poster }}"{% endif %} muted loop playsinline preload="metadata"></video>
         {% elif (item.type == "image" or item.type == "chapter") and item.src %}
@@ -23,7 +23,9 @@ eleventyComputed:
         <div class="feed-card__color-bg" style="background: {{ item.color }};"></div>
         {% endif %}
 
-        {% if item.type == "chapter" %}
+        {% if item.badge %}
+        <div class="feed-card__chapter-badge">{{ item.badge }}</div>
+        {% elif item.type == "chapter" %}
         <div class="feed-card__chapter-badge">{{ "feed_page.chapter_badge" | t }}</div>
         {% endif %}
 
@@ -38,10 +40,10 @@ eleventyComputed:
         {% endif %}
 
         <div class="feed-card__info">
-            <h2 class="feed-card__title">{{ item.title }}</h2>
             {% if item.caption %}
-            <p class="feed-card__caption">{{ item.caption }}</p>
+            <p class="feed-card__caption">{{ item.caption | tloc(locale.code) }}</p>
             {% endif %}
+            <h2 class="feed-card__title">{{ item.title }}</h2>
             {% if item.date %}
             <time class="feed-card__date" datetime="{{ item.date }}">{{ item.date | date }}</time>
             {% endif %}
@@ -74,6 +76,13 @@ eleventyComputed:
 
   var cards = feedScroll.querySelectorAll('.feed-card');
   if (!cards.length) return;
+
+  var currentObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      entry.target.classList.toggle('is-current', entry.isIntersecting && entry.intersectionRatio > 0.55);
+    });
+  }, { threshold: [0.55] });
+  for (var ci = 0; ci < cards.length; ci++) currentObserver.observe(cards[ci]);
 
   // Video autoplay/pause with Intersection Observer
   var videos = feedScroll.querySelectorAll('video');

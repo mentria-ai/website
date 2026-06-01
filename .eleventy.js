@@ -171,6 +171,13 @@ module.exports = function(eleventyConfig) {
     return new Date().getFullYear();
   });
 
+  eleventyConfig.addFilter("tloc", function(value, lang) {
+    if (value == null) return "";
+    if (typeof value === "string") return value;
+    if (typeof value !== "object") return String(value);
+    return value[lang] || value["en"] || value[Object.keys(value)[0]] || "";
+  });
+
   // Passthrough copy for assets
   eleventyConfig.addPassthroughCopy("src/assets");
   // Passthrough copy for PWA files (sw.js is now a Nunjucks template)

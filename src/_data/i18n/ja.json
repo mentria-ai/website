@@ -42,7 +42,10 @@
     "update_check": "更新を確認",
     "update_checking": "確認中…",
     "update_updating": "更新中…",
-    "update_latest": "最新です"
+    "update_latest": "最新です",
+    "cache_clear": "キャッシュを消去",
+    "cache_clearing": "消去中…",
+    "cache_cleared": "完了 — 再読み込み中…"
   },
   "common": {
     "tldr": {

@@ -88,6 +88,10 @@ eleventyComputed:
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         <span class="about-refresh__label">{{ "about.update_check" | t }}</span>
       </button>
+      <button type="button" class="about-refresh about-refresh--hard" id="about-clear" aria-label="{{ 'about.cache_clear' | t }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        <span class="about-refresh__label">{{ "about.cache_clear" | t }}</span>
+      </button>
     </div>
     <div class="right">
       <div class="about-socials">
@@ -251,6 +255,35 @@ eleventyComputed:
         btn.classList.remove('is-busy');
         setTimeout(function () { setLabel(COPY.idle); btn.disabled = false; }, 2000);
       }, 1500);
+    });
+  })();
+
+  (function () {
+    var btn = document.getElementById('about-clear');
+    if (!btn) return;
+    var COPY = {
+      idle:     {{ ("about.cache_clear"    | t) | dump | safe }},
+      clearing: {{ ("about.cache_clearing" | t) | dump | safe }},
+      cleared:  {{ ("about.cache_cleared"  | t) | dump | safe }}
+    };
+    function setLabel(t) { var l = btn.querySelector('.about-refresh__label'); if (l) l.textContent = t; }
+    btn.addEventListener('click', async function () {
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.classList.add('is-busy');
+      setLabel(COPY.clearing);
+      try {
+        if ('serviceWorker' in navigator) {
+          var regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(function (r) { return r.unregister(); }));
+        }
+        if (window.caches) {
+          var keys = await caches.keys();
+          await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+        }
+      } catch (_) {}
+      setLabel(COPY.cleared);
+      setTimeout(function () { location.reload(); }, 500);
     });
   })();
 </script>

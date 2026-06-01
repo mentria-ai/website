@@ -42,7 +42,10 @@
     "update_check": "Vérifier les mises à jour",
     "update_checking": "Vérification…",
     "update_updating": "Mise à jour…",
-    "update_latest": "À jour"
+    "update_latest": "À jour",
+    "cache_clear": "Vider le cache",
+    "cache_clearing": "Vidage…",
+    "cache_cleared": "Vidé — rechargement…"
   },
   "common": {
     "tldr": {

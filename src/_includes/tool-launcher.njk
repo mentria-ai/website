@@ -7,7 +7,7 @@
   <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}"
      href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">
     <span class="launch-tile__icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><use href="/assets/img/tool-icons.svg#tool-{{ tool.slug }}"></use></svg>
+      <svg viewBox="0 0 24 24"><use href="/assets/img/tool-icons.svg?v={{ buildHash }}#tool-{{ tool.slug }}"></use></svg>
     </span>
     <span class="launch-tile__label">{{ ("tools." + tool.slug + ".title") | t }}</span>
   </a>

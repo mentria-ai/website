@@ -42,7 +42,10 @@
     "update_check": "Verificar atualizações",
     "update_checking": "Verificando…",
     "update_updating": "Atualizando…",
-    "update_latest": "Atualizado"
+    "update_latest": "Atualizado",
+    "cache_clear": "Limpar cache",
+    "cache_clearing": "Limpando…",
+    "cache_cleared": "Pronto — recarregando…"
   },
   "common": {
     "tldr": {

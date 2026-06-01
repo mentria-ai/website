@@ -80,6 +80,55 @@ eleventyComputed:
     </div>
   </section>
 
+  <section class="reveal about-data">
+    <h2 class="about-section-h">{{ "about.data_section_title" | t }}</h2>
+    <p class="about-tagline" style="margin-bottom: 20px;">{{ "about.data_section_lede" | t }}</p>
+
+    <div class="about-data-stats">
+      <div class="about-data-stat">
+        <span class="about-data-stat__label">{{ "about.data_persist_status_granted" | t | upper }}</span>
+        <span class="about-data-stat__value" id="about-data-persist">…</span>
+      </div>
+      <div class="about-data-stat">
+        <span class="about-data-stat__label">USAGE</span>
+        <span class="about-data-stat__value" id="about-data-usage">…</span>
+      </div>
+    </div>
+
+    <div class="about-data-grid">
+      <div class="about-data-card">
+        <h3 class="about-data-card__h">{{ "about.data_export_title" | t }}</h3>
+        <p class="about-data-card__p">{{ "about.data_export_lede" | t }}</p>
+        <label class="about-data-field">
+          <span>{{ "about.data_pass_label" | t }}</span>
+          <input type="password" id="about-data-pass" autocomplete="new-password" spellcheck="false">
+        </label>
+        <div class="about-data-strength" id="about-data-strength" aria-live="polite"></div>
+        <label class="about-data-field">
+          <span>{{ "about.data_pass_confirm" | t }}</span>
+          <input type="password" id="about-data-pass2" autocomplete="new-password" spellcheck="false">
+        </label>
+        <button type="button" class="about-data-btn" id="about-data-export-btn">{{ "about.data_export_button" | t }}</button>
+        <div class="about-data-status" id="about-data-export-status" aria-live="polite"></div>
+      </div>
+
+      <div class="about-data-card">
+        <h3 class="about-data-card__h">{{ "about.data_import_title" | t }}</h3>
+        <p class="about-data-card__p">{{ "about.data_import_lede" | t }}</p>
+        <label class="about-data-field">
+          <span>{{ "about.data_import_choose" | t }}</span>
+          <input type="file" id="about-data-import-file" accept="application/json,.json">
+        </label>
+        <label class="about-data-field">
+          <span>{{ "about.data_pass_label" | t }}</span>
+          <input type="password" id="about-data-import-pass" autocomplete="current-password" spellcheck="false">
+        </label>
+        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-data-import-btn">{{ "about.data_import_button" | t }}</button>
+        <div class="about-data-status" id="about-data-import-status" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
   <div class="about-end reveal">
     <div class="left">
       <a class="about-contact-link" href="https://x.com/mentria_ai">{{ "about.contact" | t }}</a>
@@ -194,6 +243,31 @@ eleventyComputed:
   .about-contact-link { font-family: var(--font-mono); padding: 6px 12px; border: 1px solid var(--term-border); border-radius: 6px; }
   .about-contact-link::before { content: "$ "; color: var(--syn-cyan); }
 
+  .about-data-stats { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; font-family: var(--font-mono); font-size: 12px; }
+  .about-data-stat { display: flex; flex-direction: column; gap: 4px; }
+  .about-data-stat__label { color: var(--term-subtle); letter-spacing: 0.1em; font-size: 10px; }
+  .about-data-stat__value { color: var(--term-fg); font-size: 13px; }
+  .about-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .about-data-card { border: 1px solid var(--term-border); border-radius: 8px; padding: 18px; background: var(--term-bg-raised); display: flex; flex-direction: column; gap: 10px; }
+  .about-data-card__h { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--syn-cyan); margin: 0; }
+  .about-data-card__p { font-size: 12px; line-height: 1.5; color: var(--term-muted); margin: 0; }
+  .about-data-field { display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono); font-size: 11px; color: var(--term-muted); }
+  .about-data-field input[type="password"], .about-data-field input[type="file"] { background: var(--term-bg); border: 1px solid var(--term-border); color: var(--term-fg); padding: 7px 9px; border-radius: 5px; font-family: inherit; font-size: 13px; }
+  .about-data-field input[type="password"]:focus { outline: none; border-color: var(--syn-cyan); }
+  .about-data-strength { font-family: var(--font-mono); font-size: 10px; min-height: 14px; letter-spacing: 0.1em; }
+  .about-data-strength[data-level="weak"]   { color: var(--syn-red, #f25fa8); }
+  .about-data-strength[data-level="medium"] { color: var(--syn-amber, #f7b015); }
+  .about-data-strength[data-level="strong"] { color: var(--syn-green, #34c46a); }
+  .about-data-btn { background: transparent; border: 1px solid var(--syn-cyan); color: var(--syn-cyan); padding: 8px 14px; border-radius: 6px; font-family: var(--font-mono); font-size: 12px; cursor: pointer; transition: background 120ms, color 120ms; margin-top: 4px; }
+  .about-data-btn:hover:not(:disabled) { background: var(--syn-cyan); color: var(--term-bg); }
+  .about-data-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .about-data-btn--ghost { border-color: var(--term-border); color: var(--term-fg); }
+  .about-data-btn--ghost:hover:not(:disabled) { background: var(--term-bg-raised); color: var(--syn-cyan); border-color: var(--syn-cyan); }
+  .about-data-status { font-family: var(--font-mono); font-size: 11px; min-height: 14px; color: var(--term-muted); }
+  .about-data-status[data-tone="ok"]   { color: var(--syn-green, #34c46a); }
+  .about-data-status[data-tone="err"]  { color: var(--syn-red, #f25fa8); }
+  @media (max-width: 600px) { .about-data-grid { grid-template-columns: 1fr; } }
+
   @media (max-width: 760px) {
     .about-ship-grid { grid-template-columns: repeat(2, 1fr); }
   }
@@ -212,6 +286,7 @@ eleventyComputed:
   }
 </style>
 
+<script src="/assets/js/mentria-backup.js?v={{ buildHash }}" defer></script>
 <script>
   (function () {
     var y = document.getElementById('about-year');
@@ -291,6 +366,137 @@ eleventyComputed:
       } catch (_) {}
       setLabel(COPY.cleared);
       setTimeout(function () { location.reload(); }, 500);
+    });
+  })();
+
+  (function () {
+    if (!window.MentriaStore || !window.MentriaBackup) return;
+    var COPY = {
+      persistGranted:    {{ ('about.data_persist_status_granted' | t) | dump | safe }},
+      persistPending:    {{ ('about.data_persist_status_pending' | t) | dump | safe }},
+      persistUnsupp:     {{ ('about.data_persist_unsupported'    | t) | dump | safe }},
+      persistRequest:    {{ ('about.data_persist_request'        | t) | dump | safe }},
+      storageUsage:      {{ ('about.data_storage_usage'          | t) | dump | safe }},
+      storageUnknown:    {{ ('about.data_storage_unknown'        | t) | dump | safe }},
+      strengthWeak:      {{ ('about.data_strength_weak'          | t) | dump | safe }},
+      strengthMedium:    {{ ('about.data_strength_medium'        | t) | dump | safe }},
+      strengthStrong:    {{ ('about.data_strength_strong'        | t) | dump | safe }},
+      passMismatch:      {{ ('about.data_pass_mismatch'          | t) | dump | safe }},
+      passTooShort:      {{ ('about.data_pass_too_short'         | t) | dump | safe }},
+      exportButton:      {{ ('about.data_export_button'          | t) | dump | safe }},
+      exportBusy:        {{ ('about.data_export_busy'            | t) | dump | safe }},
+      exportDone:        {{ ('about.data_export_done'            | t) | dump | safe }},
+      importBusy:        {{ ('about.data_import_busy'            | t) | dump | safe }},
+      importDone:        {{ ('about.data_import_done'            | t) | dump | safe }},
+      importFail:        {{ ('about.data_import_fail'            | t) | dump | safe }}
+    };
+
+    var persistEl = document.getElementById('about-data-persist');
+    var usageEl   = document.getElementById('about-data-usage');
+    var passEl    = document.getElementById('about-data-pass');
+    var pass2El   = document.getElementById('about-data-pass2');
+    var strengthEl= document.getElementById('about-data-strength');
+    var exportBtn = document.getElementById('about-data-export-btn');
+    var exportStat= document.getElementById('about-data-export-status');
+    var fileEl    = document.getElementById('about-data-import-file');
+    var importPass= document.getElementById('about-data-import-pass');
+    var importBtn = document.getElementById('about-data-import-btn');
+    var importStat= document.getElementById('about-data-import-status');
+
+    function fmtBytes(n) {
+      if (n == null || isNaN(n)) return '—';
+      if (n < 1024) return n + ' B';
+      if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+      if (n < 1024 * 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
+      return (n / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+    }
+
+    async function refreshStats() {
+      try {
+        var p = await window.MentriaStore.persisted();
+        if (typeof navigator.storage === 'undefined' || !navigator.storage.persist) {
+          persistEl.textContent = COPY.persistUnsupp;
+        } else if (p) {
+          persistEl.textContent = '✓ ' + COPY.persistGranted;
+        } else {
+          persistEl.innerHTML = '';
+          var span = document.createElement('span');
+          span.textContent = COPY.persistPending + ' · ';
+          persistEl.appendChild(span);
+          var link = document.createElement('a');
+          link.href = '#';
+          link.textContent = COPY.persistRequest;
+          link.style.color = 'var(--syn-cyan)';
+          link.addEventListener('click', async function (e) {
+            e.preventDefault();
+            await window.MentriaStore.requestPersist();
+            refreshStats();
+          });
+          persistEl.appendChild(link);
+        }
+      } catch (_) { persistEl.textContent = COPY.persistUnsupp; }
+      try {
+        var est = await window.MentriaStore.estimate();
+        if (est.usage == null || est.quota == null) usageEl.textContent = COPY.storageUnknown;
+        else usageEl.textContent = COPY.storageUsage.replace('{used}', fmtBytes(est.usage)).replace('{quota}', fmtBytes(est.quota));
+      } catch (_) { usageEl.textContent = COPY.storageUnknown; }
+    }
+    refreshStats();
+
+    passEl.addEventListener('input', function () {
+      var s = window.MentriaBackup.scorePassphrase(passEl.value);
+      strengthEl.dataset.level = s.label;
+      strengthEl.textContent = passEl.value ? '· ' + (COPY['strength' + s.label[0].toUpperCase() + s.label.slice(1)] || s.label) : '';
+    });
+
+    function setStatus(el, txt, tone) {
+      el.textContent = txt;
+      if (tone) el.dataset.tone = tone; else delete el.dataset.tone;
+    }
+
+    exportBtn.addEventListener('click', async function () {
+      setStatus(exportStat, '', null);
+      var pw = passEl.value;
+      var pw2 = pass2El.value;
+      if (!pw || pw.length < 8) { setStatus(exportStat, COPY.passTooShort, 'err'); return; }
+      if (pw !== pw2) { setStatus(exportStat, COPY.passMismatch, 'err'); return; }
+      exportBtn.disabled = true;
+      setStatus(exportStat, COPY.exportBusy, null);
+      try {
+        var data = window.MentriaStore.exportAll();
+        var env = await window.MentriaBackup.encryptBackup(data, pw);
+        window.MentriaBackup.downloadBackupJson(env, 'mentria-backup');
+        setStatus(exportStat, COPY.exportDone, 'ok');
+      } catch (err) {
+        setStatus(exportStat, String(err && err.message || err), 'err');
+      } finally {
+        pw = pw2 = ''; passEl.value = ''; pass2El.value = ''; strengthEl.textContent = ''; delete strengthEl.dataset.level;
+        exportBtn.disabled = false;
+      }
+    });
+
+    importBtn.addEventListener('click', async function () {
+      setStatus(importStat, '', null);
+      var f = fileEl.files && fileEl.files[0];
+      var pw = importPass.value;
+      if (!f) { setStatus(importStat, COPY.importFail.replace('{err}', 'no file'), 'err'); return; }
+      if (!pw) { setStatus(importStat, COPY.passTooShort, 'err'); return; }
+      if (f.size > 32 * 1024 * 1024) { setStatus(importStat, COPY.importFail.replace('{err}', 'file too large'), 'err'); return; }
+      importBtn.disabled = true;
+      setStatus(importStat, COPY.importBusy, null);
+      try {
+        var text = await f.text();
+        var env = JSON.parse(text);
+        var data = await window.MentriaBackup.decryptBackup(env, pw);
+        var result = window.MentriaStore.importAll(data, { mode: 'merge' });
+        setStatus(importStat, COPY.importDone.replace('{n}', result.restored), 'ok');
+        setTimeout(function () { location.reload(); }, 1200);
+      } catch (err) {
+        setStatus(importStat, COPY.importFail.replace('{err}', String(err && err.message || err)), 'err');
+      } finally {
+        pw = ''; importPass.value = '';
+        importBtn.disabled = false;
+      }
     });
   })();
 </script>

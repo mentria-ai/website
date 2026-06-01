@@ -174,11 +174,6 @@
       "lede": "Quebra-cabeça lógico clássico em traje de terminal. Clique para escavar, clique-direito (ou modo F) para marcar bandeira. Os números contam minas adjacentes. Não toque nas rosas.",
       "tldr": "Campo Minado clássico reconstruído com estética synthwave/terminal. Presets de dificuldade (fácil, médio, difícil, extremo), controles por teclado e toque, melhores tempos persistentes via localStorage. Sem instalação, sem cadastro, sem analítica; lógica do jogo e cronômetro rodam localmente no navegador. Funciona offline depois que a página carrega."
     },
-    "pong": {
-      "title": "Breakout",
-      "lede": "Quebra-blocos encontra jogo de raquete. Pegue os power-ups caindo, limpe a parede, sobreviva a níveis cada vez mais rápidos e difíceis. Roda localmente — seus dados não saem do seu dispositivo.",
-      "tldr": "Um quebra-tijolos no estilo Breakout: rebata a bola com a raquete para destruir paredes de tijolos em níveis que ficam mais rápidos, pegando os power-ups que caem (e desviando dos ruins). Construído em HTML5 Canvas com física determinística e controles de mouse, teclado e toque. Pontuação, vidas e a tabela de recordes ficam no JavaScript do lado do cliente — sem scripts de terceiros, sem servidor, e funciona offline depois de armazenado em cache."
-    },
     "quick-notes": {
       "title": "Notas Rápidas",
       "lede": "Um bloco de notas mínimo que vive no seu navegador. Crie várias notas, salvas automaticamente a cada tecla pressionada.",
@@ -213,6 +208,11 @@
       "title": "Scanner e gerador de QR e códigos de barras",
       "lede": "Escaneie códigos QR e de barras, ou gere um código QR a partir de qualquer link ou texto — tudo no dispositivo, sem enviar nada.",
       "tldr": "Duas ferramentas em uma, ambas totalmente no dispositivo. O modo scanner lê códigos QR e de barras pela câmera ou por uma imagem: usa a API nativa BarcodeDetector quando disponível (Chromium, com o maior suporte a formatos) e recorre a um decodificador JavaScript embutido nos demais, então a leitura de QR também funciona no Safari e no Firefox. O modo gerar transforma qualquer link ou texto em um código QR com um codificador embutido. Nada é enviado e não há ida e volta ao servidor: os resultados lidos podem ser copiados ou abertos, e os códigos gerados baixados como PNG, copiados ou compartilhados."
+    },
+    "breakout": {
+      "title": "Breakout",
+      "lede": "Quebra-blocos encontra jogo de raquete. Pegue os power-ups caindo, limpe a parede, sobreviva a níveis cada vez mais rápidos e difíceis. Roda localmente — seus dados não saem do seu dispositivo.",
+      "tldr": "Um quebra-tijolos no estilo Breakout: rebata a bola com a raquete para destruir paredes de tijolos em níveis que ficam mais rápidos, pegando os power-ups que caem (e desviando dos ruins). Construído em HTML5 Canvas com física determinística e controles de mouse, teclado e toque. Pontuação, vidas e a tabela de recordes ficam no JavaScript do lado do cliente — sem scripts de terceiros, sem servidor, e funciona offline depois de armazenado em cache."
     }
   },
   "game": {
@@ -239,39 +239,6 @@
       "key_pause": "pausa",
       "toast_speed_up": "nível {n} — mais rápido",
       "pause_resume": "pressione P para retomar"
-    },
-    "pong": {
-      "score": "Pontos",
-      "level": "Nível",
-      "lives": "Vidas",
-      "high_score": "Recorde",
-      "active": "Ativos",
-      "empty_powerups": "sem power-ups · pegue os tokens que caem",
-      "modal_intro": "Rebata a bola com sua raquete. Quebre cada bloco para avançar. Pegue os tokens de power-up que caem — mas cuidado com os vermelhos.",
-      "key_move_paddle": "Mover raquete",
-      "key_launch": "Lançar bola",
-      "key_pause": "Pausa",
-      "legend_wide": "Raquete larga",
-      "legend_slow": "Bola lenta",
-      "legend_multi": "Multi-bola",
-      "legend_life": "+1 vida",
-      "legend_shrink": "Encolher (evitar!)",
-      "legend_brick": "Bloco",
-      "power_wide": "RAQUETE LARGA",
-      "power_slow": "BOLA LENTA",
-      "power_multi": "MULTI-BOLA",
-      "power_life": "+1 VIDA",
-      "power_shrink": "ENCOLHER",
-      "toast_level_init": "nível {n} — iniciado",
-      "toast_wall_rebuilt": "nível {n} — muro reconstruído",
-      "toast_powerup": "+ {label}",
-      "launch_hint": "pressione ESPAÇO ou clique para lançar ▲",
-      "paused": "pausado",
-      "pause_desc": "Pressione P para retomar ou reinicie do zero.",
-      "gameover_desc": "Você chegou ao nível <b style=\"color:var(--syn-purple)\">{level}</b> com uma pontuação de <b style=\"color:var(--syn-cyan)\">{score}</b>.<br/>Recorde: <b style=\"color:var(--syn-amber)\">{high}</b>",
-      "footer_move": "mover",
-      "footer_launch": "lançar",
-      "footer_pause": "pausa"
     },
     "flappy": {
       "score": "Pontos",
@@ -319,6 +286,39 @@
       "footer_flag": "bandeira",
       "footer_toggle_flag": "alternar modo bandeira",
       "footer_restart": "reiniciar"
+    },
+    "breakout": {
+      "score": "Pontos",
+      "level": "Nível",
+      "lives": "Vidas",
+      "high_score": "Recorde",
+      "active": "Ativos",
+      "empty_powerups": "sem power-ups · pegue os tokens que caem",
+      "modal_intro": "Rebata a bola com sua raquete. Quebre cada bloco para avançar. Pegue os tokens de power-up que caem — mas cuidado com os vermelhos.",
+      "key_move_paddle": "Mover raquete",
+      "key_launch": "Lançar bola",
+      "key_pause": "Pausa",
+      "legend_wide": "Raquete larga",
+      "legend_slow": "Bola lenta",
+      "legend_multi": "Multi-bola",
+      "legend_life": "+1 vida",
+      "legend_shrink": "Encolher (evitar!)",
+      "legend_brick": "Bloco",
+      "power_wide": "RAQUETE LARGA",
+      "power_slow": "BOLA LENTA",
+      "power_multi": "MULTI-BOLA",
+      "power_life": "+1 VIDA",
+      "power_shrink": "ENCOLHER",
+      "toast_level_init": "nível {n} — iniciado",
+      "toast_wall_rebuilt": "nível {n} — muro reconstruído",
+      "toast_powerup": "+ {label}",
+      "launch_hint": "pressione ESPAÇO ou clique para lançar ▲",
+      "paused": "pausado",
+      "pause_desc": "Pressione P para retomar ou reinicie do zero.",
+      "gameover_desc": "Você chegou ao nível <b style=\"color:var(--syn-purple)\">{level}</b> com uma pontuação de <b style=\"color:var(--syn-cyan)\">{score}</b>.<br/>Recorde: <b style=\"color:var(--syn-amber)\">{high}</b>",
+      "footer_move": "mover",
+      "footer_launch": "lançar",
+      "footer_pause": "pausa"
     }
   },
   "tool": {

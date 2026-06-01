@@ -1,5 +1,5 @@
 {%- set _isAI = page.fileSlug == "ai-chat" or page.fileSlug == "quote" -%}
-{%- set _isGame = page.fileSlug == "tetris" or page.fileSlug == "pong" or page.fileSlug == "flappy" or page.fileSlug == "minesweeper" -%}
+{%- set _isGame = page.fileSlug == "tetris" or page.fileSlug == "breakout" or page.fileSlug == "flappy" or page.fileSlug == "minesweeper" -%}
 {%- set _category = toolSchemaCategory | default(_isGame and "GameApplication" or "UtilitiesApplication") -%}
 {%- set _browserReq = toolSchemaBrowserReq | default(_isAI and "Requires WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+" or "Requires JavaScript") -%}
 {%- set _toolUrl = site.siteUrl ~ page.url -%}

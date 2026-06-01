@@ -105,7 +105,7 @@
     "group": "Games"
   },
   {
-    "slug": "pong",
+    "slug": "breakout",
     "title": "Breakout",
     "summary": "Brick-buster paddle game with synthwave powerups, lives, and a high-score table. Plays offline.",
     "category": "Game",

@@ -174,11 +174,6 @@
       "lede": "Classic logic puzzle in terminal dress. Click to dig, right-click (or F-mode) to flag. Numbers count adjacent mines. Don't pop the pink ones.",
       "tldr": "Classic Minesweeper rebuilt with a synthwave terminal aesthetic. Difficulty presets (easy, medium, hard, extreme), keyboard and touch controls, persistent best times via localStorage. No installs, no signup, no analytics; the game logic and timer all run locally in your browser. Works offline once the page loads."
     },
-    "pong": {
-      "title": "Breakout",
-      "lede": "Brick-buster meets paddle game. Catch falling powerups, clear the wall, survive levels that get faster and meaner. Runs locally — no data leaves your device.",
-      "tldr": "A Breakout-style brick-buster: bounce the ball off your paddle to clear walls of bricks across levels that speed up, catching falling powerups (and dodging the bad ones). Built on HTML5 Canvas with deterministic physics and mouse, keyboard, and touch controls. Score, lives, and the high-score table all live in client-side JavaScript — no third-party scripts, no server, and it works offline once cached."
-    },
     "quick-notes": {
       "title": "Quick Notes",
       "lede": "A minimal scratchpad that lives in your browser. Create multiple notes, auto-saved on every keystroke.",
@@ -213,6 +208,11 @@
       "title": "QR & Barcode Scanner + Generator",
       "lede": "Scan QR codes and barcodes, or generate a QR code from any link or text — all on-device, nothing uploaded.",
       "tldr": "Two tools in one, both fully on-device. Scan mode reads QR codes and barcodes from your camera or an uploaded image: it uses the browser's native BarcodeDetector when available (Chromium, with the widest format support) and falls back to a built-in JavaScript decoder elsewhere, so QR scanning works on Safari and Firefox too. Generate mode turns any link or text into a QR code with a built-in encoder. Nothing is uploaded and there is no server round-trip — decoded results can be copied or opened, and generated codes downloaded as PNG, copied, or shared."
+    },
+    "breakout": {
+      "title": "Breakout",
+      "lede": "Brick-buster meets paddle game. Catch falling powerups, clear the wall, survive levels that get faster and meaner. Runs locally — no data leaves your device.",
+      "tldr": "A Breakout-style brick-buster: bounce the ball off your paddle to clear walls of bricks across levels that speed up, catching falling powerups (and dodging the bad ones). Built on HTML5 Canvas with deterministic physics and mouse, keyboard, and touch controls. Score, lives, and the high-score table all live in client-side JavaScript — no third-party scripts, no server, and it works offline once cached."
     }
   },
   "game": {
@@ -239,39 +239,6 @@
       "key_pause": "pause",
       "toast_speed_up": "level {n} — speed up",
       "pause_resume": "press P to resume"
-    },
-    "pong": {
-      "score": "Score",
-      "level": "Level",
-      "lives": "Lives",
-      "high_score": "High Score",
-      "active": "Active",
-      "empty_powerups": "no powerups · catch the falling tokens",
-      "modal_intro": "Bounce the ball off your paddle. Break every brick to advance. Catch the falling powerup tokens — but watch out for the red ones.",
-      "key_move_paddle": "Move paddle",
-      "key_launch": "Launch ball",
-      "key_pause": "Pause",
-      "legend_wide": "Wide paddle",
-      "legend_slow": "Slow ball",
-      "legend_multi": "Multi-ball",
-      "legend_life": "+1 life",
-      "legend_shrink": "Shrink (avoid!)",
-      "legend_brick": "Brick",
-      "power_wide": "WIDE PADDLE",
-      "power_slow": "SLOW BALL",
-      "power_multi": "MULTI-BALL",
-      "power_life": "+1 LIFE",
-      "power_shrink": "SHRINK",
-      "toast_level_init": "level {n} — initialized",
-      "toast_wall_rebuilt": "level {n} — wall rebuilt",
-      "toast_powerup": "+ {label}",
-      "launch_hint": "press SPACE or click to launch ▲",
-      "paused": "paused",
-      "pause_desc": "Press P to resume, or restart from scratch.",
-      "gameover_desc": "You reached level <b style=\"color:var(--syn-purple)\">{level}</b> with a score of <b style=\"color:var(--syn-cyan)\">{score}</b>.<br/>High score: <b style=\"color:var(--syn-amber)\">{high}</b>",
-      "footer_move": "move",
-      "footer_launch": "launch",
-      "footer_pause": "pause"
     },
     "flappy": {
       "score": "Score",
@@ -319,6 +286,39 @@
       "footer_flag": "flag",
       "footer_toggle_flag": "toggle flag mode",
       "footer_restart": "restart"
+    },
+    "breakout": {
+      "score": "Score",
+      "level": "Level",
+      "lives": "Lives",
+      "high_score": "High Score",
+      "active": "Active",
+      "empty_powerups": "no powerups · catch the falling tokens",
+      "modal_intro": "Bounce the ball off your paddle. Break every brick to advance. Catch the falling powerup tokens — but watch out for the red ones.",
+      "key_move_paddle": "Move paddle",
+      "key_launch": "Launch ball",
+      "key_pause": "Pause",
+      "legend_wide": "Wide paddle",
+      "legend_slow": "Slow ball",
+      "legend_multi": "Multi-ball",
+      "legend_life": "+1 life",
+      "legend_shrink": "Shrink (avoid!)",
+      "legend_brick": "Brick",
+      "power_wide": "WIDE PADDLE",
+      "power_slow": "SLOW BALL",
+      "power_multi": "MULTI-BALL",
+      "power_life": "+1 LIFE",
+      "power_shrink": "SHRINK",
+      "toast_level_init": "level {n} — initialized",
+      "toast_wall_rebuilt": "level {n} — wall rebuilt",
+      "toast_powerup": "+ {label}",
+      "launch_hint": "press SPACE or click to launch ▲",
+      "paused": "paused",
+      "pause_desc": "Press P to resume, or restart from scratch.",
+      "gameover_desc": "You reached level <b style=\"color:var(--syn-purple)\">{level}</b> with a score of <b style=\"color:var(--syn-cyan)\">{score}</b>.<br/>High score: <b style=\"color:var(--syn-amber)\">{high}</b>",
+      "footer_move": "move",
+      "footer_launch": "launch",
+      "footer_pause": "pause"
     }
   },
   "tool": {

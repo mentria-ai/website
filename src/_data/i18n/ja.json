@@ -174,11 +174,6 @@
       "lede": "ターミナル風の伝統的な論理パズル。クリックで掘る、右クリック(またはFモード)で旗を立てる。数字は隣接する地雷を示す。ピンクは押さないで。",
       "tldr": "シンセウェーブ/ターミナル風に再構築したクラシックなマインスイーパー。難易度プリセット(イージー、ミディアム、ハード、エクストリーム)、キーボードとタッチ操作、localStorageに保存されるベストタイム。インストール不要、登録不要、解析なし — ゲームロジックとタイマーはすべてブラウザでローカル実行。ページ読み込み後はオフライン動作。"
     },
-    "pong": {
-      "title": "Breakout",
-      "lede": "ブロック崩しとパドルゲームの融合。落ちてくるパワーアップをキャッチし、壁を崩し、ますます速く厳しくなるレベルを生き抜こう。ローカル動作 — データはデバイスから出ません。",
-      "tldr": "Breakout系のブロック崩し。パドルでボールを打ち返してブロックの壁を崩し、だんだん速くなるレベルを進み、落ちてくるパワーアップを取り（悪いものは避け）ます。HTML5 Canvasと決定論的な物理、マウス・キーボード・タッチ操作で動作します。スコア・残機・ハイスコア表はすべてクライアント側のJavaScriptにあり、サードパーティのスクリプトもサーバーもなく、一度キャッシュすればオフラインでも動作します。"
-    },
     "quick-notes": {
       "title": "クイックノート",
       "lede": "ブラウザに住むミニマルなスクラッチパッド。複数のノートを作成、キー入力ごとに自動保存。",
@@ -213,6 +208,11 @@
       "title": "QR・バーコード スキャナー＆ジェネレーター",
       "lede": "QRコードやバーコードをスキャンしたり、リンクやテキストからQRコードを生成したり——すべて端末内で処理し、何もアップロードしません。",
       "tldr": "1つで2役、どちらも完全に端末内で動作します。スキャンモードはカメラや画像からQRコードやバーコードを読み取ります。利用できる場合はブラウザ標準のBarcodeDetector（Chromium系、対応フォーマットが最も豊富）を使い、それ以外では内蔵のJavaScriptデコーダーにフォールバックするため、QRのスキャンはSafariやFirefoxでも動作します。生成モードは内蔵エンコーダーでリンクやテキストをQRコードに変換します。アップロードもサーバー通信もなく、読み取り結果はコピーやリンクを開く操作ができ、生成したコードはPNGで保存・コピー・共有できます。"
+    },
+    "breakout": {
+      "title": "Breakout",
+      "lede": "ブロック崩しとパドルゲームの融合。落ちてくるパワーアップをキャッチし、壁を崩し、ますます速く厳しくなるレベルを生き抜こう。ローカル動作 — データはデバイスから出ません。",
+      "tldr": "Breakout系のブロック崩し。パドルでボールを打ち返してブロックの壁を崩し、だんだん速くなるレベルを進み、落ちてくるパワーアップを取り（悪いものは避け）ます。HTML5 Canvasと決定論的な物理、マウス・キーボード・タッチ操作で動作します。スコア・残機・ハイスコア表はすべてクライアント側のJavaScriptにあり、サードパーティのスクリプトもサーバーもなく、一度キャッシュすればオフラインでも動作します。"
     }
   },
   "game": {
@@ -239,39 +239,6 @@
       "key_pause": "一時停止",
       "toast_speed_up": "レベル {n} — スピードアップ",
       "pause_resume": "Pキーで再開"
-    },
-    "pong": {
-      "score": "スコア",
-      "level": "レベル",
-      "lives": "ライフ",
-      "high_score": "ハイスコア",
-      "active": "アクティブ",
-      "empty_powerups": "パワーアップなし · 落ちてくるトークンをキャッチ",
-      "modal_intro": "パドルでボールを跳ね返そう。すべてのブロックを壊して進もう。落ちてくるパワーアップトークンをキャッチ — でも赤いものには注意。",
-      "key_move_paddle": "パドル移動",
-      "key_launch": "ボール発射",
-      "key_pause": "一時停止",
-      "legend_wide": "ワイドパドル",
-      "legend_slow": "スローボール",
-      "legend_multi": "マルチボール",
-      "legend_life": "+1 ライフ",
-      "legend_shrink": "縮小(避けて!)",
-      "legend_brick": "ブロック",
-      "power_wide": "ワイドパドル",
-      "power_slow": "スローボール",
-      "power_multi": "マルチボール",
-      "power_life": "+1 ライフ",
-      "power_shrink": "縮小",
-      "toast_level_init": "レベル {n} — 開始",
-      "toast_wall_rebuilt": "レベル {n} — 壁再構築",
-      "toast_powerup": "+ {label}",
-      "launch_hint": "SPACEキーまたはクリックで発射 ▲",
-      "paused": "一時停止中",
-      "pause_desc": "Pキーで再開、またはゼロから再スタート。",
-      "gameover_desc": "レベル <b style=\"color:var(--syn-purple)\">{level}</b> に到達、スコア <b style=\"color:var(--syn-cyan)\">{score}</b>。<br/>ハイスコア: <b style=\"color:var(--syn-amber)\">{high}</b>",
-      "footer_move": "移動",
-      "footer_launch": "発射",
-      "footer_pause": "一時停止"
     },
     "flappy": {
       "score": "スコア",
@@ -319,6 +286,39 @@
       "footer_flag": "旗",
       "footer_toggle_flag": "旗モード切替",
       "footer_restart": "リスタート"
+    },
+    "breakout": {
+      "score": "スコア",
+      "level": "レベル",
+      "lives": "ライフ",
+      "high_score": "ハイスコア",
+      "active": "アクティブ",
+      "empty_powerups": "パワーアップなし · 落ちてくるトークンをキャッチ",
+      "modal_intro": "パドルでボールを跳ね返そう。すべてのブロックを壊して進もう。落ちてくるパワーアップトークンをキャッチ — でも赤いものには注意。",
+      "key_move_paddle": "パドル移動",
+      "key_launch": "ボール発射",
+      "key_pause": "一時停止",
+      "legend_wide": "ワイドパドル",
+      "legend_slow": "スローボール",
+      "legend_multi": "マルチボール",
+      "legend_life": "+1 ライフ",
+      "legend_shrink": "縮小(避けて!)",
+      "legend_brick": "ブロック",
+      "power_wide": "ワイドパドル",
+      "power_slow": "スローボール",
+      "power_multi": "マルチボール",
+      "power_life": "+1 ライフ",
+      "power_shrink": "縮小",
+      "toast_level_init": "レベル {n} — 開始",
+      "toast_wall_rebuilt": "レベル {n} — 壁再構築",
+      "toast_powerup": "+ {label}",
+      "launch_hint": "SPACEキーまたはクリックで発射 ▲",
+      "paused": "一時停止中",
+      "pause_desc": "Pキーで再開、またはゼロから再スタート。",
+      "gameover_desc": "レベル <b style=\"color:var(--syn-purple)\">{level}</b> に到達、スコア <b style=\"color:var(--syn-cyan)\">{score}</b>。<br/>ハイスコア: <b style=\"color:var(--syn-amber)\">{high}</b>",
+      "footer_move": "移動",
+      "footer_launch": "発射",
+      "footer_pause": "一時停止"
     }
   },
   "tool": {

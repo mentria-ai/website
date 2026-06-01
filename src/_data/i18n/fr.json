@@ -174,11 +174,6 @@
       "lede": "Casse-tête logique classique en tenue de terminal. Cliquez pour creuser, clic droit (ou mode F) pour marquer un drapeau. Les chiffres comptent les mines adjacentes. Ne touchez pas aux roses.",
       "tldr": "Le Démineur classique reconstruit avec une esthétique synthwave/terminal. Préréglages de difficulté (facile, moyen, difficile, extrême), commandes clavier et tactiles, meilleurs temps persistants dans localStorage. Pas d'installation, pas d'inscription, pas d'analytique ; la logique de jeu et le chrono fonctionnent localement. Hors ligne une fois la page chargée."
     },
-    "pong": {
-      "title": "Breakout",
-      "lede": "Casse-briques rencontre raquette. Attrapez les power-ups qui tombent, dégagez le mur, survivez à des niveaux de plus en plus rapides et exigeants. Fonctionne localement — vos données restent sur votre appareil.",
-      "tldr": "Un casse-briques façon Breakout : renvoyez la balle avec votre raquette pour détruire des murs de briques au fil de niveaux de plus en plus rapides, en attrapant les bonus qui tombent (et en évitant les mauvais). Construit sur HTML5 Canvas avec une physique déterministe et des commandes souris, clavier et tactiles. Score, vies et tableau des records vivent dans le JavaScript côté client — aucun script tiers, aucun serveur, et ça marche hors ligne une fois en cache."
-    },
     "quick-notes": {
       "title": "Notes Rapides",
       "lede": "Un bloc-notes minimaliste qui vit dans votre navigateur. Créez plusieurs notes, sauvegardées à chaque frappe.",
@@ -213,6 +208,11 @@
       "title": "Scanner et générateur de QR codes et codes-barres",
       "lede": "Scannez des QR codes et des codes-barres, ou générez un QR code à partir de n'importe quel lien ou texte — tout en local, rien n'est envoyé.",
       "tldr": "Deux outils en un, entièrement en local. Le mode scan lit les QR codes et codes-barres depuis la caméra ou une image : il utilise l'API native BarcodeDetector quand elle est disponible (Chromium, avec la meilleure prise en charge des formats) et bascule sur un décodeur JavaScript intégré ailleurs, donc le scan des QR fonctionne aussi sur Safari et Firefox. Le mode génération transforme un lien ou un texte en QR code grâce à un encodeur intégré. Rien n'est envoyé et il n'y a aucun aller-retour serveur : les résultats lus peuvent être copiés ou ouverts, et les codes générés téléchargés en PNG, copiés ou partagés."
+    },
+    "breakout": {
+      "title": "Breakout",
+      "lede": "Casse-briques rencontre raquette. Attrapez les power-ups qui tombent, dégagez le mur, survivez à des niveaux de plus en plus rapides et exigeants. Fonctionne localement — vos données restent sur votre appareil.",
+      "tldr": "Un casse-briques façon Breakout : renvoyez la balle avec votre raquette pour détruire des murs de briques au fil de niveaux de plus en plus rapides, en attrapant les bonus qui tombent (et en évitant les mauvais). Construit sur HTML5 Canvas avec une physique déterministe et des commandes souris, clavier et tactiles. Score, vies et tableau des records vivent dans le JavaScript côté client — aucun script tiers, aucun serveur, et ça marche hors ligne une fois en cache."
     }
   },
   "game": {
@@ -239,39 +239,6 @@
       "key_pause": "pause",
       "toast_speed_up": "niveau {n} — accélération",
       "pause_resume": "appuyez sur P pour reprendre"
-    },
-    "pong": {
-      "score": "Score",
-      "level": "Niveau",
-      "lives": "Vies",
-      "high_score": "Record",
-      "active": "Actifs",
-      "empty_powerups": "pas de bonus · attrapez les jetons qui tombent",
-      "modal_intro": "Renvoyez la balle avec votre raquette. Cassez toutes les briques pour progresser. Attrapez les jetons bonus qui tombent — mais attention aux rouges.",
-      "key_move_paddle": "Déplacer la raquette",
-      "key_launch": "Lancer la balle",
-      "key_pause": "Pause",
-      "legend_wide": "Raquette large",
-      "legend_slow": "Balle lente",
-      "legend_multi": "Multi-balle",
-      "legend_life": "+1 vie",
-      "legend_shrink": "Rétrécir (évitez !)",
-      "legend_brick": "Brique",
-      "power_wide": "RAQUETTE LARGE",
-      "power_slow": "BALLE LENTE",
-      "power_multi": "MULTI-BALLE",
-      "power_life": "+1 VIE",
-      "power_shrink": "RÉTRÉCIR",
-      "toast_level_init": "niveau {n} — initialisé",
-      "toast_wall_rebuilt": "niveau {n} — mur reconstruit",
-      "toast_powerup": "+ {label}",
-      "launch_hint": "appuyez sur ESPACE ou cliquez pour lancer ▲",
-      "paused": "en pause",
-      "pause_desc": "Appuyez sur P pour reprendre, ou redémarrez de zéro.",
-      "gameover_desc": "Vous avez atteint le niveau <b style=\"color:var(--syn-purple)\">{level}</b> avec un score de <b style=\"color:var(--syn-cyan)\">{score}</b>.<br/>Record : <b style=\"color:var(--syn-amber)\">{high}</b>",
-      "footer_move": "déplacer",
-      "footer_launch": "lancer",
-      "footer_pause": "pause"
     },
     "flappy": {
       "score": "Score",
@@ -319,6 +286,39 @@
       "footer_flag": "drapeau",
       "footer_toggle_flag": "basculer mode drapeau",
       "footer_restart": "redémarrer"
+    },
+    "breakout": {
+      "score": "Score",
+      "level": "Niveau",
+      "lives": "Vies",
+      "high_score": "Record",
+      "active": "Actifs",
+      "empty_powerups": "pas de bonus · attrapez les jetons qui tombent",
+      "modal_intro": "Renvoyez la balle avec votre raquette. Cassez toutes les briques pour progresser. Attrapez les jetons bonus qui tombent — mais attention aux rouges.",
+      "key_move_paddle": "Déplacer la raquette",
+      "key_launch": "Lancer la balle",
+      "key_pause": "Pause",
+      "legend_wide": "Raquette large",
+      "legend_slow": "Balle lente",
+      "legend_multi": "Multi-balle",
+      "legend_life": "+1 vie",
+      "legend_shrink": "Rétrécir (évitez !)",
+      "legend_brick": "Brique",
+      "power_wide": "RAQUETTE LARGE",
+      "power_slow": "BALLE LENTE",
+      "power_multi": "MULTI-BALLE",
+      "power_life": "+1 VIE",
+      "power_shrink": "RÉTRÉCIR",
+      "toast_level_init": "niveau {n} — initialisé",
+      "toast_wall_rebuilt": "niveau {n} — mur reconstruit",
+      "toast_powerup": "+ {label}",
+      "launch_hint": "appuyez sur ESPACE ou cliquez pour lancer ▲",
+      "paused": "en pause",
+      "pause_desc": "Appuyez sur P pour reprendre, ou redémarrez de zéro.",
+      "gameover_desc": "Vous avez atteint le niveau <b style=\"color:var(--syn-purple)\">{level}</b> avec un score de <b style=\"color:var(--syn-cyan)\">{score}</b>.<br/>Record : <b style=\"color:var(--syn-amber)\">{high}</b>",
+      "footer_move": "déplacer",
+      "footer_launch": "lancer",
+      "footer_pause": "pause"
     }
   },
   "tool": {

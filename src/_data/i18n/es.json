@@ -174,11 +174,6 @@
       "lede": "Clásico rompecabezas lógico con vestimenta de terminal. Haz clic para cavar, clic derecho (o modo F) para marcar bandera. Los números cuentan minas adyacentes. No pulses los rosas.",
       "tldr": "El clásico Buscaminas reconstruido con estética synthwave/terminal. Niveles preestablecidos (fácil, medio, difícil, extremo), controles de teclado y táctil, mejores tiempos persistentes en localStorage. Sin instalación, sin registro, sin analítica; la lógica del juego y el cronómetro se ejecutan localmente en tu navegador. Funciona sin conexión una vez cargada la página."
     },
-    "pong": {
-      "title": "Breakout",
-      "lede": "Rompe-ladrillos con paleta. Atrapa los power-ups que caen, despeja el muro, sobrevive niveles cada vez más rápidos y duros. Se ejecuta localmente — tus datos no salen de tu dispositivo.",
-      "tldr": "Un rompeladrillos estilo Breakout: rebota la bola con tu pala para romper muros de ladrillos en niveles que se aceleran, atrapando potenciadores que caen (y esquivando los malos). Construido sobre HTML5 Canvas con física determinista y controles de ratón, teclado y táctiles. La puntuación, las vidas y la tabla de récords viven en JavaScript del lado del cliente: sin scripts de terceros, sin servidor, y funciona sin conexión una vez en caché."
-    },
     "quick-notes": {
       "title": "Notas Rápidas",
       "lede": "Una libreta mínima que vive en tu navegador. Crea múltiples notas, guardadas automáticamente en cada pulsación.",
@@ -213,6 +208,11 @@
       "title": "Escáner y generador de QR y códigos de barras",
       "lede": "Escanea códigos QR y de barras, o genera un código QR a partir de cualquier enlace o texto, todo en el dispositivo y sin subir nada.",
       "tldr": "Dos herramientas en una, ambas totalmente en el dispositivo. El modo escáner lee códigos QR y de barras desde la cámara o una imagen: usa la API nativa BarcodeDetector cuando está disponible (Chromium, con la mayor compatibilidad de formatos) y recurre a un decodificador JavaScript integrado en el resto, así que escanear QR también funciona en Safari y Firefox. El modo generar convierte cualquier enlace o texto en un código QR con un codificador integrado. No se sube nada y no hay ida y vuelta al servidor: los resultados leídos se pueden copiar o abrir, y los códigos generados descargar como PNG, copiar o compartir."
+    },
+    "breakout": {
+      "title": "Breakout",
+      "lede": "Rompe-ladrillos con paleta. Atrapa los power-ups que caen, despeja el muro, sobrevive niveles cada vez más rápidos y duros. Se ejecuta localmente — tus datos no salen de tu dispositivo.",
+      "tldr": "Un rompeladrillos estilo Breakout: rebota la bola con tu pala para romper muros de ladrillos en niveles que se aceleran, atrapando potenciadores que caen (y esquivando los malos). Construido sobre HTML5 Canvas con física determinista y controles de ratón, teclado y táctiles. La puntuación, las vidas y la tabla de récords viven en JavaScript del lado del cliente: sin scripts de terceros, sin servidor, y funciona sin conexión una vez en caché."
     }
   },
   "game": {
@@ -239,39 +239,6 @@
       "key_pause": "pausa",
       "toast_speed_up": "nivel {n} — más rápido",
       "pause_resume": "pulsa P para reanudar"
-    },
-    "pong": {
-      "score": "Puntos",
-      "level": "Nivel",
-      "lives": "Vidas",
-      "high_score": "Récord",
-      "active": "Activos",
-      "empty_powerups": "sin power-ups · atrapa los tokens que caen",
-      "modal_intro": "Rebota la pelota con tu paleta. Rompe cada ladrillo para avanzar. Atrapa los tokens de power-up que caen — pero cuidado con los rojos.",
-      "key_move_paddle": "Mover paleta",
-      "key_launch": "Lanzar pelota",
-      "key_pause": "Pausa",
-      "legend_wide": "Paleta ancha",
-      "legend_slow": "Pelota lenta",
-      "legend_multi": "Multi-pelota",
-      "legend_life": "+1 vida",
-      "legend_shrink": "Encoger (¡evitar!)",
-      "legend_brick": "Ladrillo",
-      "power_wide": "PALETA ANCHA",
-      "power_slow": "PELOTA LENTA",
-      "power_multi": "MULTI-PELOTA",
-      "power_life": "+1 VIDA",
-      "power_shrink": "ENCOGER",
-      "toast_level_init": "nivel {n} — iniciado",
-      "toast_wall_rebuilt": "nivel {n} — muro reconstruido",
-      "toast_powerup": "+ {label}",
-      "launch_hint": "pulsa ESPACIO o clic para lanzar ▲",
-      "paused": "pausado",
-      "pause_desc": "Pulsa P para reanudar, o reinicia desde cero.",
-      "gameover_desc": "Llegaste al nivel <b style=\"color:var(--syn-purple)\">{level}</b> con una puntuación de <b style=\"color:var(--syn-cyan)\">{score}</b>.<br/>Récord: <b style=\"color:var(--syn-amber)\">{high}</b>",
-      "footer_move": "mover",
-      "footer_launch": "lanzar",
-      "footer_pause": "pausa"
     },
     "flappy": {
       "score": "Puntos",
@@ -319,6 +286,39 @@
       "footer_flag": "bandera",
       "footer_toggle_flag": "alternar modo bandera",
       "footer_restart": "reiniciar"
+    },
+    "breakout": {
+      "score": "Puntos",
+      "level": "Nivel",
+      "lives": "Vidas",
+      "high_score": "Récord",
+      "active": "Activos",
+      "empty_powerups": "sin power-ups · atrapa los tokens que caen",
+      "modal_intro": "Rebota la pelota con tu paleta. Rompe cada ladrillo para avanzar. Atrapa los tokens de power-up que caen — pero cuidado con los rojos.",
+      "key_move_paddle": "Mover paleta",
+      "key_launch": "Lanzar pelota",
+      "key_pause": "Pausa",
+      "legend_wide": "Paleta ancha",
+      "legend_slow": "Pelota lenta",
+      "legend_multi": "Multi-pelota",
+      "legend_life": "+1 vida",
+      "legend_shrink": "Encoger (¡evitar!)",
+      "legend_brick": "Ladrillo",
+      "power_wide": "PALETA ANCHA",
+      "power_slow": "PELOTA LENTA",
+      "power_multi": "MULTI-PELOTA",
+      "power_life": "+1 VIDA",
+      "power_shrink": "ENCOGER",
+      "toast_level_init": "nivel {n} — iniciado",
+      "toast_wall_rebuilt": "nivel {n} — muro reconstruido",
+      "toast_powerup": "+ {label}",
+      "launch_hint": "pulsa ESPACIO o clic para lanzar ▲",
+      "paused": "pausado",
+      "pause_desc": "Pulsa P para reanudar, o reinicia desde cero.",
+      "gameover_desc": "Llegaste al nivel <b style=\"color:var(--syn-purple)\">{level}</b> con una puntuación de <b style=\"color:var(--syn-cyan)\">{score}</b>.<br/>Récord: <b style=\"color:var(--syn-amber)\">{high}</b>",
+      "footer_move": "mover",
+      "footer_launch": "lanzar",
+      "footer_pause": "pausa"
     }
   },
   "tool": {

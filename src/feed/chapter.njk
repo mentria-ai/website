@@ -1,24 +1,24 @@
 ---
 layout: deck-layout.njk
 pagination:
-  data: chapter_list
+  data: chaptersLocalized
   size: 1
-  alias: chapter
-permalink: "/feed/chapter/{{ chapter.id }}/"
+  alias: pair
+permalink: "{{ pair.locale.pathPrefix }}/feed/chapter/{{ pair.chapter.id }}/"
 eleventyComputed:
-  title: "{{ chapter.title }} · Chapter {{ chapter.order }}"
-  description: "{{ chapter.subtitle }}"
+  title: "{{ pair.chapter.title }} · Chapter {{ pair.chapter.order }}"
+  description: "{{ pair.chapter.subtitle }}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 
 <div class="deck"
      id="deckRoot"
-     data-chapter-id="{{ chapter.id }}"
-     data-chapter-title="{{ chapter.title }}"
-     data-slide-count="{{ chapter.slides.length }}">
+     data-chapter-id="{{ pair.chapter.id }}"
+     data-chapter-title="{{ pair.chapter.title }}"
+     data-slide-count="{{ pair.chapter.slides.length }}">
 
   <div class="deck__progress" role="progressbar" aria-label="Chapter progress">
-    {% for slide in chapter.slides %}
+    {% for slide in pair.chapter.slides %}
     <div class="deck__progress-seg" data-idx="{{ loop.index0 }}">
       <span class="deck__progress-fill"></span>
     </div>
@@ -28,14 +28,14 @@ eleventyComputed:
   <button class="deck__close" id="deckClose" aria-label="Exit chapter">×</button>
 
   <div class="deck__chapter-meta">
-    <span class="deck__chapter-num">CH·{% if chapter.order < 10 %}0{% endif %}{{ chapter.order }}</span>
-    <span class="deck__chapter-title">{{ chapter.title }}</span>
+    <span class="deck__chapter-num">CH·{% if pair.chapter.order < 10 %}0{% endif %}{{ pair.chapter.order }}</span>
+    <span class="deck__chapter-title">{{ pair.chapter.title }}</span>
   </div>
 
   <button class="deck__tap deck__tap--prev" aria-label="Previous slide"></button>
   <button class="deck__tap deck__tap--next" aria-label="Next slide"></button>
 
-  {% for slide in chapter.slides %}
+  {% for slide in pair.chapter.slides %}
   <article class="deck__slide{% if loop.first %} is-active{% endif %}"
            data-idx="{{ loop.index0 }}"
            data-slide-id="{{ slide.id }}"
@@ -50,7 +50,7 @@ eleventyComputed:
     {% endif %}
 
     <div class="deck__slide-overlay">
-      <p class="deck__caption">{{ slide.caption | tloc(locale.code) }}</p>
+      <p class="deck__caption">{{ slide.caption | tloc(pair.locale.code) }}</p>
 
       {% if slide.long_press or slide.actions.length %}
       <div class="deck__actions">
@@ -83,7 +83,7 @@ eleventyComputed:
     </div>
 
     {% if slide.long_press %}
-    <template class="deck__long-press" data-for="{{ slide.id }}">{{ slide.long_press | tloc(locale.code) | safe }}</template>
+    <template class="deck__long-press" data-for="{{ slide.id }}">{{ slide.long_press | tloc(pair.locale.code) | safe }}</template>
     {% endif %}
   </article>
   {% endfor %}

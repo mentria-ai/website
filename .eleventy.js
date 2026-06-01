@@ -17,10 +17,20 @@ module.exports = function(eleventyConfig) {
   // Inline SVG sprite content so it can be injected directly into the HTML.
   // iOS Safari PWA has a sticky cache layer for external `<use href="X.svg#id">`
   // references that JS can't clear; inlining sidesteps it entirely.
+  //
+  // The source file uses style="display:none" which works for external <use> but
+  // BREAKS <use> resolution when the SVG is inlined into a host document — Safari
+  // and Firefox won't resolve <use> to a descendant of a display:none ancestor.
+  // The visually-hidden-but-rendered pattern (position:absolute + width/height 0)
+  // keeps symbols reachable while taking no layout space.
   eleventyConfig.addGlobalData("toolIconsSvg", () => {
-    return fs.readFileSync(
+    const raw = fs.readFileSync(
       path.join(__dirname, "src/assets/img/tool-icons.svg"),
       "utf8"
+    );
+    return raw.replace(
+      'style="display:none"',
+      'aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"'
     );
   });
 

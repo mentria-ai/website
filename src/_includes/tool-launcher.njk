@@ -12,6 +12,7 @@
     <span class="launch-tile__label">{{ ("tools." + tool.slug + ".title") | t }}</span>
   </a>
 {%- endmacro -%}
+{{ toolIconsSvg | safe }}
 <section class="launcher reveal" id="tools-preview" aria-label="{{ 'home.tools_heading' | t }}">
   <div class="launcher__recents" id="launcher-recents" hidden>
     <h2 class="launcher__label">{{ "home.launcher.recents" | t }}</h2>

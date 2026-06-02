@@ -95,7 +95,24 @@
     "sync_scan_unsupported": "El escaneo de QR no está disponible aquí: escribe el código.",
     "sync_scan_denied": "Acceso a la cámara denegado. Permite el acceso y vuelve a intentarlo.",
     "sync_scan_no_camera": "No hay cámara disponible en este dispositivo.",
-    "sync_scan_secure_required": "El acceso a la cámara requiere HTTPS. Usa el sitio en vivo."
+    "sync_scan_secure_required": "El acceso a la cámara requiere HTTPS. Usa el sitio en vivo.",
+    "identity_title": "Identidad de Mentria",
+    "identity_lede_none": "Un secreto cifrado en este dispositivo que permite que tus otros dispositivos se vinculen automáticamente. Configúralo una vez, restaura desde tu copia en otro lugar y el resto es automático.",
+    "identity_lede_locked": "La identidad está configurada en este dispositivo. Introduce tu contraseña para desbloquearla.",
+    "identity_lede_unlocked": "Identidad desbloqueada. Pulsa «Sincronizar este dispositivo» — otros dispositivos con la misma identidad (restaurada desde tu copia) se unirán automáticamente.",
+    "identity_status_none": "no configurada",
+    "identity_status_locked": "bloqueada",
+    "identity_status_unlocked": "desbloqueada",
+    "identity_pass_label": "Contraseña (8+ caracteres)",
+    "identity_pass_confirm": "Confirmar contraseña",
+    "identity_setup_button": "Crear identidad",
+    "identity_unlock_button": "Desbloquear",
+    "identity_sync_button": "Sincronizar este dispositivo",
+    "identity_lock_button": "Bloquear",
+    "identity_mismatch": "Las contraseñas no coinciden.",
+    "identity_too_short": "La contraseña debe tener al menos 8 caracteres.",
+    "identity_unlock_failed": "Desbloqueo fallido: contraseña incorrecta o bóveda dañada.",
+    "identity_setup_reminder": "Identidad creada. Ahora ve a «Tus datos» arriba y descarga una copia cifrada — restaurarla en otro dispositivo le da la misma identidad."
   },
   "common": {
     "tldr": {

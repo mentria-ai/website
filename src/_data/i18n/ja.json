@@ -95,7 +95,24 @@
     "sync_scan_unsupported": "このデバイスではQRスキャンに対応していません — コードを入力してください。",
     "sync_scan_denied": "カメラへのアクセスが拒否されました。許可してから再試行してください。",
     "sync_scan_no_camera": "このデバイスには利用可能なカメラがありません。",
-    "sync_scan_secure_required": "カメラアクセスにはHTTPSが必要です。公開サイトをご利用ください。"
+    "sync_scan_secure_required": "カメラアクセスにはHTTPSが必要です。公開サイトをご利用ください。",
+    "identity_title": "Mentria ID",
+    "identity_lede_none": "このデバイスに暗号化された秘密を保存し、他のデバイスと自動的にリンクできるようにします。一度設定して、他の場所でバックアップから復元すれば、あとは自動です。",
+    "identity_lede_locked": "このデバイスに ID が設定されています。パスフレーズを入力して解除してください。",
+    "identity_lede_unlocked": "ID を解除しました。「このデバイスを同期」をタップしてください — バックアップから復元した同じ ID を持つ他のデバイスが自動的に接続します。",
+    "identity_status_none": "未設定",
+    "identity_status_locked": "ロック中",
+    "identity_status_unlocked": "解除済み",
+    "identity_pass_label": "パスフレーズ（8文字以上）",
+    "identity_pass_confirm": "パスフレーズの確認",
+    "identity_setup_button": "ID を作成",
+    "identity_unlock_button": "解除",
+    "identity_sync_button": "このデバイスを同期",
+    "identity_lock_button": "ロック",
+    "identity_mismatch": "パスフレーズが一致しません。",
+    "identity_too_short": "パスフレーズは 8 文字以上にしてください。",
+    "identity_unlock_failed": "解除に失敗しました — パスフレーズが違うか保管庫が壊れています。",
+    "identity_setup_reminder": "ID を作成しました。上の「あなたのデータ」から暗号化バックアップをダウンロードしてください — 別のデバイスで復元すれば、そのデバイスにも同じ ID が入ります。"
   },
   "common": {
     "tldr": {

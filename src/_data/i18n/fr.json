@@ -95,7 +95,24 @@
     "sync_scan_unsupported": "Le scan de QR n'est pas pris en charge ici — saisissez le code.",
     "sync_scan_denied": "Accès à la caméra refusé. Autorisez la caméra puis réessayez.",
     "sync_scan_no_camera": "Aucune caméra disponible sur cet appareil.",
-    "sync_scan_secure_required": "L'accès à la caméra nécessite HTTPS."
+    "sync_scan_secure_required": "L'accès à la caméra nécessite HTTPS.",
+    "identity_title": "Identité Mentria",
+    "identity_lede_none": "Un secret chiffré sur cet appareil qui permet à vos autres appareils de s'apparier automatiquement. Configurez-le une fois, restaurez depuis votre sauvegarde ailleurs, et le reste est automatique.",
+    "identity_lede_locked": "L'identité est configurée sur cet appareil. Saisissez votre phrase secrète pour la déverrouiller.",
+    "identity_lede_unlocked": "Identité déverrouillée. Appuyez sur « Synchroniser cet appareil » — les autres avec la même identité (restaurée depuis votre sauvegarde) se connecteront automatiquement.",
+    "identity_status_none": "non configurée",
+    "identity_status_locked": "verrouillée",
+    "identity_status_unlocked": "déverrouillée",
+    "identity_pass_label": "Phrase secrète (8+ caractères)",
+    "identity_pass_confirm": "Confirmer la phrase secrète",
+    "identity_setup_button": "Créer l'identité",
+    "identity_unlock_button": "Déverrouiller",
+    "identity_sync_button": "Synchroniser cet appareil",
+    "identity_lock_button": "Verrouiller",
+    "identity_mismatch": "Les phrases secrètes ne correspondent pas.",
+    "identity_too_short": "La phrase secrète doit comporter au moins 8 caractères.",
+    "identity_unlock_failed": "Échec du déverrouillage — phrase secrète erronée ou coffre corrompu.",
+    "identity_setup_reminder": "Identité créée. Allez maintenant dans « Vos données » ci-dessus et téléchargez une sauvegarde chiffrée — la restaurer sur un autre appareil lui donne la même identité."
   },
   "common": {
     "tldr": {

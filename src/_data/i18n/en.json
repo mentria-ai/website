@@ -95,7 +95,24 @@
     "sync_scan_unsupported": "QR scanning isn't supported here — type the code instead.",
     "sync_scan_denied": "Camera access denied. Allow camera permission and try again.",
     "sync_scan_no_camera": "No camera available on this device.",
-    "sync_scan_secure_required": "Camera access needs HTTPS. Use the live site, not a local URL."
+    "sync_scan_secure_required": "Camera access needs HTTPS. Use the live site, not a local URL.",
+    "identity_title": "Mentria identity",
+    "identity_lede_none": "An encrypted secret on this device that lets your other devices auto-link. Set it up once, restore from your backup elsewhere, and the rest is automatic.",
+    "identity_lede_locked": "Identity is set up on this device. Enter your passphrase to unlock it.",
+    "identity_lede_unlocked": "Identity unlocked. Tap \"Sync this device\" — others with the same identity (restored from your backup) will join automatically.",
+    "identity_status_none": "not set up",
+    "identity_status_locked": "locked",
+    "identity_status_unlocked": "unlocked",
+    "identity_pass_label": "Passphrase (8+ chars)",
+    "identity_pass_confirm": "Confirm passphrase",
+    "identity_setup_button": "Create identity",
+    "identity_unlock_button": "Unlock",
+    "identity_sync_button": "Sync this device",
+    "identity_lock_button": "Lock",
+    "identity_mismatch": "Passphrases do not match.",
+    "identity_too_short": "Passphrase must be at least 8 characters.",
+    "identity_unlock_failed": "Unlock failed — wrong passphrase or corrupt vault.",
+    "identity_setup_reminder": "Identity created. Now go to \"Your data\" above and download an encrypted backup — restoring it on another device gives that device the same identity."
   },
   "common": {
     "tldr": {

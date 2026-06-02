@@ -257,6 +257,60 @@ const joinWithCode = async (codeInput) => {
   return state.code;
 };
 
+const deriveFromIdentity = async (secretBytes) => {
+  if (!(secretBytes instanceof Uint8Array) || secretBytes.length < 16) throw new Error('bad identity');
+  const baseKey = await crypto.subtle.importKey('raw', secretBytes, 'HKDF', false, ['deriveBits', 'deriveKey']);
+  const roomBits = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt: new TextEncoder().encode('mentria-identity-room-v1'), info: new TextEncoder().encode('room-id') },
+    baseKey, 80
+  );
+  const roomId = b32Encode(new Uint8Array(roomBits)).slice(0, ROOM_ID_LEN);
+  const key = await crypto.subtle.deriveKey(
+    { name: 'HKDF', hash: 'SHA-256', salt: new TextEncoder().encode('mentria-identity-key-v1'), info: new TextEncoder().encode('aes-gcm-256') },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+  return { roomId, key };
+};
+
+const joinWithIdentity = async (secretBytes) => {
+  if (state.status !== 'idle') await disconnect();
+  const derived = await deriveFromIdentity(secretBytes);
+  state.code = null;
+  state.roomId = derived.roomId;
+  state.key = derived.key;
+  state.isInitiator = false;
+  state.syncedSinceConnect = 0;
+  state.peers.clear();
+  setStatus('pairing');
+  const ice = await getIce();
+  try {
+    state.room = joinRoom(
+      { appId: APP_ID, relayConfig: { urls: [RELAY] }, rtcConfig: { iceServers: ice } },
+      derived.roomId
+    );
+  } catch (err) {
+    setStatus('idle');
+    state.key = null;
+    throw err;
+  }
+  state.action = state.room.makeAction('sync');
+  state.action.onMessage = (data) => handleIncoming(data);
+  state.room.onPeerJoin = (peerId) => {
+    state.peers.add(peerId);
+    setStatus('connected');
+    sendSnapshot();
+  };
+  state.room.onPeerLeave = (peerId) => {
+    state.peers.delete(peerId);
+    if (state.peers.size === 0) setStatus('pairing');
+  };
+  window.addEventListener('mentria:write', onLocalWrite);
+  return 'identity';
+};
+
 const disconnect = async () => {
   window.removeEventListener('mentria:write', onLocalWrite);
   if (state.room) {
@@ -289,6 +343,6 @@ const status = () => ({
 });
 
 window.MentriaSync = {
-  start, joinWithCode, disconnect, on, status,
+  start, joinWithCode, joinWithIdentity, disconnect, on, status,
   formatCode, normalizeCode
 };

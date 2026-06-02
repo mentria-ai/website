@@ -133,6 +133,39 @@ eleventyComputed:
     <h2 class="about-section-h">{{ "about.sync_section_title" | t }}</h2>
     <p class="about-tagline" style="margin-bottom: 20px;">{{ "about.sync_section_lede" | t }}</p>
 
+    <div class="about-identity-card">
+      <div class="about-identity-card__head">
+        <h3 class="about-data-card__h">{{ "about.identity_title" | t }}</h3>
+        <span class="about-identity-status" id="about-identity-status">—</span>
+      </div>
+      <p class="about-data-card__p" id="about-identity-lede">{{ "about.identity_lede_none" | t }}</p>
+
+      <div class="about-identity-actions" id="about-identity-setup" hidden>
+        <label class="about-data-field">
+          <span>{{ "about.identity_pass_label" | t }}</span>
+          <input type="password" id="about-identity-setup-pass" autocomplete="new-password" minlength="8">
+        </label>
+        <label class="about-data-field">
+          <span>{{ "about.identity_pass_confirm" | t }}</span>
+          <input type="password" id="about-identity-setup-pass2" autocomplete="new-password" minlength="8">
+        </label>
+        <button type="button" class="about-data-btn" id="about-identity-setup-btn">{{ "about.identity_setup_button" | t }}</button>
+      </div>
+
+      <div class="about-identity-actions" id="about-identity-unlock" hidden>
+        <label class="about-data-field">
+          <span>{{ "about.identity_pass_label" | t }}</span>
+          <input type="password" id="about-identity-unlock-pass" autocomplete="current-password">
+        </label>
+        <button type="button" class="about-data-btn" id="about-identity-unlock-btn">{{ "about.identity_unlock_button" | t }}</button>
+      </div>
+
+      <div class="about-identity-actions about-identity-actions--unlocked" id="about-identity-unlocked" hidden>
+        <button type="button" class="about-data-btn" id="about-identity-sync-btn">{{ "about.identity_sync_button" | t }}</button>
+        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-lock-btn">{{ "about.identity_lock_button" | t }}</button>
+      </div>
+    </div>
+
     <div class="about-data-grid">
       <div class="about-data-card">
         <h3 class="about-data-card__h">{{ "about.sync_pair_title" | t }}</h3>
@@ -307,6 +340,13 @@ eleventyComputed:
   .about-data-status[data-tone="err"]  { color: var(--syn-red, #f25fa8); }
   @media (max-width: 600px) { .about-data-grid { grid-template-columns: 1fr; } }
 
+  .about-identity-card { background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .about-identity-card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .about-identity-status { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--term-subtle); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--term-border); }
+  .about-identity-status[data-tone="ok"] { color: var(--syn-green, #34c46a); border-color: var(--syn-green, #34c46a); }
+  .about-identity-status[data-tone="locked"] { color: var(--syn-amber, #f7b015); border-color: var(--syn-amber, #f7b015); }
+  .about-identity-actions { display: flex; flex-direction: column; gap: 10px; }
+  .about-identity-actions--unlocked { flex-direction: row; flex-wrap: wrap; gap: 8px; }
   .about-sync-code { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
   .about-sync-qr { width: 100%; max-width: 220px; height: auto; image-rendering: pixelated; background: #fff; border-radius: 6px; padding: 8px; box-sizing: border-box; }
   .about-sync-code__label { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); letter-spacing: 0.1em; align-self: stretch; }
@@ -796,6 +836,110 @@ eleventyComputed:
     });
     scanCancel.addEventListener('click', function () { stopScan(); });
   })();
+
+  (function () {
+    var COPY = {
+      statusNone:     {{ ('about.identity_status_none'    | t) | dump | safe }},
+      statusLocked:   {{ ('about.identity_status_locked'  | t) | dump | safe }},
+      statusUnlocked: {{ ('about.identity_status_unlocked'| t) | dump | safe }},
+      ledeNone:       {{ ('about.identity_lede_none'      | t) | dump | safe }},
+      ledeLocked:     {{ ('about.identity_lede_locked'    | t) | dump | safe }},
+      ledeUnlocked:   {{ ('about.identity_lede_unlocked'  | t) | dump | safe }},
+      mismatch:       {{ ('about.identity_mismatch'       | t) | dump | safe }},
+      tooShort:       {{ ('about.identity_too_short'      | t) | dump | safe }},
+      unlockFailed:   {{ ('about.identity_unlock_failed'  | t) | dump | safe }},
+      setupReminder:  {{ ('about.identity_setup_reminder' | t) | dump | safe }}
+    };
+    var statusEl = document.getElementById('about-identity-status');
+    var ledeEl   = document.getElementById('about-identity-lede');
+    var setupBox  = document.getElementById('about-identity-setup');
+    var unlockBox = document.getElementById('about-identity-unlock');
+    var unlockedBox = document.getElementById('about-identity-unlocked');
+    var setupBtn = document.getElementById('about-identity-setup-btn');
+    var setupPass = document.getElementById('about-identity-setup-pass');
+    var setupPass2 = document.getElementById('about-identity-setup-pass2');
+    var unlockBtn = document.getElementById('about-identity-unlock-btn');
+    var unlockPass = document.getElementById('about-identity-unlock-pass');
+    var lockBtn = document.getElementById('about-identity-lock-btn');
+    var syncBtn = document.getElementById('about-identity-sync-btn');
+    if (!setupBtn) return;
+
+    function waitFor(name, cb) {
+      if (window[name]) return cb();
+      var t = 0;
+      var iv = setInterval(function () {
+        if (window[name]) { clearInterval(iv); cb(); }
+        else if (++t > 60) clearInterval(iv);
+      }, 100);
+    }
+
+    function refresh() {
+      var setUp = window.MentriaIdentity && window.MentriaIdentity.isSetUp();
+      var unlocked = window.MentriaIdentity && window.MentriaIdentity.isUnlocked();
+      setupBox.hidden = setUp;
+      unlockBox.hidden = !setUp || unlocked;
+      unlockedBox.hidden = !unlocked;
+      if (!setUp) {
+        statusEl.textContent = COPY.statusNone;
+        delete statusEl.dataset.tone;
+        ledeEl.textContent = COPY.ledeNone;
+      } else if (unlocked) {
+        statusEl.textContent = COPY.statusUnlocked;
+        statusEl.dataset.tone = 'ok';
+        ledeEl.textContent = COPY.ledeUnlocked;
+      } else {
+        statusEl.textContent = COPY.statusLocked;
+        statusEl.dataset.tone = 'locked';
+        ledeEl.textContent = COPY.ledeLocked;
+      }
+    }
+    waitFor('MentriaIdentity', refresh);
+
+    setupBtn.addEventListener('click', async function () {
+      var p1 = setupPass.value, p2 = setupPass2.value;
+      if (p1.length < 8) { alert(COPY.tooShort); return; }
+      if (p1 !== p2) { alert(COPY.mismatch); return; }
+      setupBtn.disabled = true;
+      try {
+        await window.MentriaIdentity.setup(p1);
+        setupPass.value = ''; setupPass2.value = '';
+        refresh();
+        alert(COPY.setupReminder);
+      } catch (err) {
+        alert(String(err && err.message || err));
+      } finally { setupBtn.disabled = false; }
+    });
+
+    unlockBtn.addEventListener('click', async function () {
+      var p = unlockPass.value;
+      if (!p) return;
+      unlockBtn.disabled = true;
+      try {
+        await window.MentriaIdentity.unlock(p);
+        unlockPass.value = '';
+        refresh();
+      } catch (err) {
+        alert(COPY.unlockFailed);
+      } finally { unlockBtn.disabled = false; }
+    });
+
+    lockBtn.addEventListener('click', function () {
+      window.MentriaIdentity.lock();
+      refresh();
+    });
+
+    syncBtn.addEventListener('click', async function () {
+      if (!window.MentriaSync) return;
+      syncBtn.disabled = true;
+      try {
+        var secret = window.MentriaIdentity.getSecret();
+        await window.MentriaSync.joinWithIdentity(secret);
+      } catch (err) {
+        alert(String(err && err.message || err));
+      } finally { syncBtn.disabled = false; }
+    });
+  })();
 </script>
+<script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
 <script src="/assets/js/qrcode.js?v={{ buildHash }}" defer></script>
 <script type="module" src="/assets/js/mentria-sync.js?v={{ buildHash }}"></script>

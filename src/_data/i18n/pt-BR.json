@@ -95,7 +95,24 @@
     "sync_scan_unsupported": "O escaneamento de QR não é suportado aqui — digite o código.",
     "sync_scan_denied": "Acesso à câmera negado. Permita o acesso e tente novamente.",
     "sync_scan_no_camera": "Nenhuma câmera disponível neste dispositivo.",
-    "sync_scan_secure_required": "O acesso à câmera requer HTTPS. Use o site em produção."
+    "sync_scan_secure_required": "O acesso à câmera requer HTTPS. Use o site em produção.",
+    "identity_title": "Identidade Mentria",
+    "identity_lede_none": "Um segredo criptografado neste dispositivo que permite que seus outros dispositivos se conectem automaticamente. Configure uma vez, restaure do seu backup em outro lugar e o resto é automático.",
+    "identity_lede_locked": "A identidade está configurada neste dispositivo. Digite sua senha para desbloqueá-la.",
+    "identity_lede_unlocked": "Identidade desbloqueada. Toque em \"Sincronizar este dispositivo\" — outros com a mesma identidade (restaurada do seu backup) entrarão automaticamente.",
+    "identity_status_none": "não configurada",
+    "identity_status_locked": "bloqueada",
+    "identity_status_unlocked": "desbloqueada",
+    "identity_pass_label": "Senha (8+ caracteres)",
+    "identity_pass_confirm": "Confirmar senha",
+    "identity_setup_button": "Criar identidade",
+    "identity_unlock_button": "Desbloquear",
+    "identity_sync_button": "Sincronizar este dispositivo",
+    "identity_lock_button": "Bloquear",
+    "identity_mismatch": "As senhas não correspondem.",
+    "identity_too_short": "A senha deve ter pelo menos 8 caracteres.",
+    "identity_unlock_failed": "Falha ao desbloquear — senha incorreta ou cofre corrompido.",
+    "identity_setup_reminder": "Identidade criada. Agora vá em \"Seus dados\" acima e baixe um backup criptografado — restaurá-lo em outro dispositivo dá a ele a mesma identidade."
   },
   "common": {
     "tldr": {

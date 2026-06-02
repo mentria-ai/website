@@ -1,0 +1,150 @@
+<button class="deck__fb-btn" id="deckFbBtn" type="button" aria-label="Flag a problem with this slide" hidden>!</button>
+<aside class="deck__fb" id="deckFb" hidden>
+  <div class="deck__fb-card">
+    <div class="deck__fb-hdr">
+      <span class="deck__fb-title">flag this slide</span>
+      <button class="deck__fb-close" id="deckFbClose" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="deck__fb-meta" id="deckFbMeta"></div>
+    <label class="deck__fb-label">issue
+      <select class="deck__fb-select" id="deckFbKind">
+        <option value="image-bad">image bad</option>
+        <option value="fact-vague">fact vague</option>
+        <option value="fact-wrong">fact wrong</option>
+        <option value="text-typo">text typo</option>
+        <option value="other">other</option>
+      </select>
+    </label>
+    <label class="deck__fb-label">note (optional)
+      <textarea class="deck__fb-note" id="deckFbNote" rows="3" maxlength="1000" placeholder="what's wrong, what to fix…"></textarea>
+    </label>
+    <div class="deck__fb-actions">
+      <span class="deck__fb-status" id="deckFbStatus"></span>
+      <button class="deck__fb-send" id="deckFbSend" type="button">send</button>
+    </div>
+  </div>
+</aside>
+
+<style>
+.deck__fb-btn {
+  position: absolute;
+  top: calc(20px + env(safe-area-inset-top));
+  right: 60px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  color: #d9a84e;
+  border: 1px solid rgba(217, 168, 78, 0.45);
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 18px; font-weight: 700; line-height: 1;
+  cursor: pointer;
+  z-index: 6;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.deck__fb-btn:hover { background: rgba(0, 0, 0, 0.6); color: #f0c876; }
+.deck__fb {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 20; padding: 1rem;
+}
+.deck__fb[hidden] { display: none; }
+.deck__fb-card {
+  background: #0d0f12;
+  border: 1px solid #2a3138;
+  border-radius: 10px;
+  width: 100%; max-width: 380px;
+  padding: 1rem 1.1rem 1.1rem;
+  font-family: var(--font-mono);
+  color: #e6edf3;
+}
+.deck__fb-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: .7rem; }
+.deck__fb-title { font-size: .82rem; letter-spacing: .05em; text-transform: lowercase; color: #d9a84e; }
+.deck__fb-close { background: transparent; border: none; color: #9ba6b1; font-size: 22px; cursor: pointer; line-height: 1; padding: 0 .25rem; }
+.deck__fb-close:hover { color: #e6edf3; }
+.deck__fb-meta { font-size: .72rem; color: #7a838d; margin-bottom: .8rem; font-family: var(--font-mono); }
+.deck__fb-label { display: flex; flex-direction: column; gap: .25rem; font-size: .72rem; color: #9ba6b1; margin-bottom: .7rem; text-transform: lowercase; letter-spacing: .05em; }
+.deck__fb-select,
+.deck__fb-note {
+  background: #0a0d10; border: 1px solid #2a3138; color: #e6edf3;
+  padding: .45rem .6rem; border-radius: 5px;
+  font-family: inherit; font-size: .82rem; resize: vertical;
+}
+.deck__fb-select:focus,
+.deck__fb-note:focus { outline: none; border-color: #d9a84e; }
+.deck__fb-actions { display: flex; justify-content: space-between; align-items: center; margin-top: .25rem; }
+.deck__fb-status { font-size: .72rem; color: #7a838d; }
+.deck__fb-send {
+  background: transparent; border: 1px solid #d9a84e; color: #d9a84e;
+  padding: .4rem 1rem; border-radius: 5px;
+  font-family: inherit; font-size: .82rem; cursor: pointer;
+  text-transform: lowercase; letter-spacing: .05em;
+}
+.deck__fb-send:hover { background: #d9a84e; color: #0d0f12; }
+.deck__fb-send:disabled { opacity: .4; cursor: not-allowed; }
+</style>
+
+<script>
+(function () {
+  if (!['localhost', '127.0.0.1'].includes(location.hostname)) return;
+  const root = document.getElementById('deckRoot');
+  const btn = document.getElementById('deckFbBtn');
+  const modal = document.getElementById('deckFb');
+  if (!root || !btn || !modal) return;
+
+  const close = document.getElementById('deckFbClose');
+  const meta = document.getElementById('deckFbMeta');
+  const kindSel = document.getElementById('deckFbKind');
+  const note = document.getElementById('deckFbNote');
+  const send = document.getElementById('deckFbSend');
+  const status = document.getElementById('deckFbStatus');
+  const editionId = root.dataset.chapterId || '';
+
+  const currentSlideId = () => {
+    const a = root.querySelector('.deck__slide.is-active');
+    return a ? a.dataset.slideId : '';
+  };
+
+  const open = () => {
+    meta.textContent = editionId + ' · ' + currentSlideId();
+    kindSel.value = 'image-bad';
+    note.value = '';
+    status.textContent = '';
+    send.disabled = false;
+    modal.hidden = false;
+    setTimeout(() => note.focus(), 80);
+  };
+  const closeModal = () => { modal.hidden = true; };
+
+  btn.hidden = false;
+  btn.addEventListener('click', (e) => { e.stopPropagation(); open(); });
+  close.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+
+  send.addEventListener('click', async () => {
+    send.disabled = true;
+    status.textContent = 'sending…';
+    try {
+      const r = await fetch('http://127.0.0.1:8181/feedback', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          edition: editionId,
+          slide: currentSlideId(),
+          kind: kindSel.value,
+          note: note.value.trim()
+        })
+      });
+      if (!r.ok) throw new Error('status ' + r.status);
+      status.textContent = 'saved.';
+      setTimeout(closeModal, 700);
+    } catch (err) {
+      status.textContent = 'failed: ' + (err && err.message || 'collector down?');
+      send.disabled = false;
+    }
+  });
+})();
+</script>

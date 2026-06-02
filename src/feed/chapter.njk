@@ -97,6 +97,7 @@ eleventyComputed:
     <span>tap →</span><span>swipe ↑ for depth</span><span>swipe ↓ to exit</span>
   </div>
 
+{% if devMode %}{% include "dev-feedback.njk" %}{% endif %}
 </div>
 
 <script src="/assets/js/feed-deck.js?v={{ buildHash }}" defer></script>

@@ -200,6 +200,7 @@
     {%- endif %}
 </head>
 <body class="scanlines">
+    <script src="/assets/js/mentria-store.js?v={{ buildHash }}"></script>
     {% include "header.njk" %}
 
     <main id="main-content">
@@ -327,7 +328,6 @@
       })();
     </script>
     <script src="/assets/js/mentria-i18n.js?v={{ buildHash }}"></script>
-    <script src="/assets/js/mentria-store.js?v={{ buildHash }}" defer></script>
     <script>
       (function () {
         var brand = document.querySelector('.brand');

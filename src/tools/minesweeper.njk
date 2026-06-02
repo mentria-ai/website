@@ -412,12 +412,25 @@ main { max-width: 1100px; }
   const modal = document.getElementById('modal');
 
   function loadBest(d) {
+    if (window.MentriaStore) {
+      const v = window.MentriaStore.get('games', 'msw_best_' + d);
+      if (v != null) return v;
+      const legacy = localStorage.getItem('mentria_msw_best_' + d);
+      if (legacy != null) {
+        const n = parseInt(legacy, 10);
+        if (!isNaN(n)) { window.MentriaStore.set('games', 'msw_best_' + d, n); try { localStorage.removeItem('mentria_msw_best_' + d); } catch(_) {} return n; }
+      }
+      return null;
+    }
     const v = localStorage.getItem('mentria_msw_best_' + d);
     return v ? parseInt(v, 10) : null;
   }
   function saveBest(d, t) {
     const cur = loadBest(d);
-    if (cur === null || t < cur) localStorage.setItem('mentria_msw_best_' + d, String(t));
+    if (cur === null || t < cur) {
+      if (window.MentriaStore) window.MentriaStore.set('games', 'msw_best_' + d, t);
+      else try { localStorage.setItem('mentria_msw_best_' + d, String(t)); } catch(_) {}
+    }
   }
 
   function build() {

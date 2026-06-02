@@ -417,6 +417,22 @@ canvas {
     fg: '#E2E8F0',
   };
 
+  const LEGACY_HIGH = 'mentria_breakout_high';
+  function readHigh() {
+    if (window.MentriaStore) {
+      const v = window.MentriaStore.get('games', 'breakout_high');
+      if (v != null) return v;
+      const legacy = parseInt(localStorage.getItem(LEGACY_HIGH) || '0', 10) || 0;
+      if (legacy > 0) { window.MentriaStore.set('games', 'breakout_high', legacy); try { localStorage.removeItem(LEGACY_HIGH); } catch(_) {} }
+      return legacy;
+    }
+    return parseInt(localStorage.getItem(LEGACY_HIGH) || '0', 10) || 0;
+  }
+  function writeHigh(v) {
+    if (window.MentriaStore) window.MentriaStore.set('games', 'breakout_high', v);
+    else try { localStorage.setItem(LEGACY_HIGH, String(v)); } catch(_) {}
+  }
+
   const State = {
     running: false,
     paused: false,
@@ -424,7 +440,7 @@ canvas {
     score: 0,
     level: 1,
     lives: 3,
-    high: parseInt(localStorage.getItem('mentria_breakout_high') || '0', 10),
+    high: readHigh(),
   };
 
   const paddle = {
@@ -581,7 +597,7 @@ canvas {
     State.running = false;
     if (State.score > State.high) {
       State.high = State.score;
-      localStorage.setItem('mentria_breakout_high', String(State.high));
+      writeHigh(State.high);
     }
     showOverlay('gameover');
     updateHUD();

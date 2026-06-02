@@ -89,7 +89,13 @@
     "sync_status_connected": "{n} 台のデバイスに接続済み",
     "sync_status_error": "同期エラー",
     "sync_code_invalid": "コードが短すぎます — 完全なコードを貼り付けてください",
-    "sync_disconnect": "切断"
+    "sync_disconnect": "切断",
+    "sync_scan_button": "📷 もう一方のデバイスのQRをスキャン",
+    "sync_scan_cancel": "スキャンをキャンセル",
+    "sync_scan_unsupported": "このデバイスではQRスキャンに対応していません — コードを入力してください。",
+    "sync_scan_denied": "カメラへのアクセスが拒否されました。許可してから再試行してください。",
+    "sync_scan_no_camera": "このデバイスには利用可能なカメラがありません。",
+    "sync_scan_secure_required": "カメラアクセスにはHTTPSが必要です。公開サイトをご利用ください。"
   },
   "common": {
     "tldr": {

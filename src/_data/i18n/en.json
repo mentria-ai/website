@@ -89,7 +89,13 @@
     "sync_status_connected": "Connected to {n} device(s)",
     "sync_status_error": "Sync error",
     "sync_code_invalid": "Code too short — paste the full code",
-    "sync_disconnect": "Disconnect"
+    "sync_disconnect": "Disconnect",
+    "sync_scan_button": "📷 Scan QR from the other device",
+    "sync_scan_cancel": "Cancel scan",
+    "sync_scan_unsupported": "QR scanning isn't supported here — type the code instead.",
+    "sync_scan_denied": "Camera access denied. Allow camera permission and try again.",
+    "sync_scan_no_camera": "No camera available on this device.",
+    "sync_scan_secure_required": "Camera access needs HTTPS. Use the live site, not a local URL."
   },
   "common": {
     "tldr": {

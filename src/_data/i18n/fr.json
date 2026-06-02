@@ -89,7 +89,13 @@
     "sync_status_connected": "Connecté à {n} appareil(s)",
     "sync_status_error": "Erreur de synchronisation",
     "sync_code_invalid": "Code trop court — collez le code complet",
-    "sync_disconnect": "Déconnecter"
+    "sync_disconnect": "Déconnecter",
+    "sync_scan_button": "📷 Scanner le QR de l'autre appareil",
+    "sync_scan_cancel": "Annuler le scan",
+    "sync_scan_unsupported": "Le scan de QR n'est pas pris en charge ici — saisissez le code.",
+    "sync_scan_denied": "Accès à la caméra refusé. Autorisez la caméra puis réessayez.",
+    "sync_scan_no_camera": "Aucune caméra disponible sur cet appareil.",
+    "sync_scan_secure_required": "L'accès à la caméra nécessite HTTPS."
   },
   "common": {
     "tldr": {

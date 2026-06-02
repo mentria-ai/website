@@ -139,6 +139,7 @@ eleventyComputed:
         <p class="about-data-card__p">{{ "about.sync_pair_lede" | t }}</p>
         <button type="button" class="about-data-btn" id="about-sync-start-btn">{{ "about.sync_pair_button" | t }}</button>
         <div class="about-sync-code" id="about-sync-code" hidden>
+          <canvas class="about-sync-qr" id="about-sync-qr" aria-hidden="true"></canvas>
           <div class="about-sync-code__label">{{ "about.sync_pair_show_code" | t }}</div>
           <code class="about-sync-code__value" id="about-sync-code-value"></code>
         </div>
@@ -147,6 +148,12 @@ eleventyComputed:
       <div class="about-data-card">
         <h3 class="about-data-card__h">{{ "about.sync_join_title" | t }}</h3>
         <p class="about-data-card__p">{{ "about.sync_join_lede" | t }}</p>
+        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-scan-btn">{{ "about.sync_scan_button" | t }}</button>
+        <div class="about-sync-scanner" id="about-sync-scanner" hidden>
+          <video class="about-sync-scanner__video" id="about-sync-scanner-video" playsinline muted></video>
+          <p class="about-sync-scanner__note" id="about-sync-scanner-note" hidden></p>
+          <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-scan-cancel-btn">{{ "about.sync_scan_cancel" | t }}</button>
+        </div>
         <label class="about-data-field">
           <span>{{ "about.sync_join_label" | t }}</span>
           <input type="text" id="about-sync-code-input" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX">
@@ -300,9 +307,13 @@ eleventyComputed:
   .about-data-status[data-tone="err"]  { color: var(--syn-red, #f25fa8); }
   @media (max-width: 600px) { .about-data-grid { grid-template-columns: 1fr; } }
 
-  .about-sync-code { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
-  .about-sync-code__label { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); letter-spacing: 0.1em; }
-  .about-sync-code__value { font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.08em; color: var(--syn-cyan); padding: 8px 12px; background: var(--term-bg); border: 1px solid var(--syn-cyan); border-radius: 5px; word-break: break-all; user-select: all; }
+  .about-sync-code { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .about-sync-qr { width: 100%; max-width: 220px; height: auto; image-rendering: pixelated; background: #fff; border-radius: 6px; padding: 8px; box-sizing: border-box; }
+  .about-sync-code__label { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); letter-spacing: 0.1em; align-self: stretch; }
+  .about-sync-code__value { font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.08em; color: var(--syn-cyan); padding: 8px 12px; background: var(--term-bg); border: 1px solid var(--syn-cyan); border-radius: 5px; word-break: break-all; user-select: all; align-self: stretch; text-align: center; }
+  .about-sync-scanner { display: flex; flex-direction: column; gap: 8px; }
+  .about-sync-scanner__video { width: 100%; aspect-ratio: 1; background: #000; border: 1px solid var(--syn-cyan); border-radius: 6px; object-fit: cover; }
+  .about-sync-scanner__note { font-family: var(--font-mono); font-size: 11px; color: var(--syn-amber, #f7b015); margin: 0; }
   .about-data-field input[type="text"] { background: var(--term-bg); border: 1px solid var(--term-border); color: var(--term-fg); padding: 7px 9px; border-radius: 5px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.05em; }
   .about-data-field input[type="text"]:focus { outline: none; border-color: var(--syn-cyan); }
   .about-sync-status { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 22px; padding: 12px 18px; border: 1px dashed var(--term-border); border-radius: 8px; }
@@ -551,7 +562,11 @@ eleventyComputed:
       statusError:     {{ ('about.sync_status_error'     | t) | dump | safe }},
       pairButton:      {{ ('about.sync_pair_button'      | t) | dump | safe }},
       joinButton:      {{ ('about.sync_join_button'      | t) | dump | safe }},
-      codeInvalid:     {{ ('about.sync_code_invalid'     | t) | dump | safe }}
+      codeInvalid:     {{ ('about.sync_code_invalid'     | t) | dump | safe }},
+      scanUnsupported: {{ ('about.sync_scan_unsupported' | t) | dump | safe }},
+      scanDenied:      {{ ('about.sync_scan_denied'      | t) | dump | safe }},
+      scanNoCamera:    {{ ('about.sync_scan_no_camera'   | t) | dump | safe }},
+      scanSecureRequired: {{ ('about.sync_scan_secure_required' | t) | dump | safe }}
     };
     var startBtn      = document.getElementById('about-sync-start-btn');
     var joinBtn       = document.getElementById('about-sync-join-btn');
@@ -600,6 +615,26 @@ eleventyComputed:
       });
     });
 
+    var qrCanvas = document.getElementById('about-sync-qr');
+
+    function renderQR(text) {
+      if (!qrCanvas || typeof qrcodegen === 'undefined') return;
+      try {
+        var code = qrcodegen.QrCode.encodeText(text, qrcodegen.QrCode.Ecc.MEDIUM);
+        var border = 2, px = 6, dim = code.size + border * 2;
+        qrCanvas.width = dim * px; qrCanvas.height = dim * px;
+        var ctx = qrCanvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+        ctx.fillStyle = '#000000';
+        for (var y = 0; y < code.size; y++) {
+          for (var x = 0; x < code.size; x++) {
+            if (code.getModule(x, y)) ctx.fillRect((x + border) * px, (y + border) * px, px, px);
+          }
+        }
+      } catch (_) {}
+    }
+
     startBtn.addEventListener('click', function () {
       whenReady(async function () {
         startBtn.disabled = true;
@@ -607,6 +642,7 @@ eleventyComputed:
         try {
           var code = await window.MentriaSync.start();
           codeValue.textContent = code;
+          renderQR('mentria-sync://' + code);
           codeBox.hidden = false;
         } catch (err) {
           setStatus(COPY.statusError + ': ' + (err && err.message || err), 'err');
@@ -616,8 +652,14 @@ eleventyComputed:
       });
     });
 
+    function extractCode(input) {
+      var s = String(input || '');
+      var m = s.match(/mentria-sync:\/\/([A-Za-z2-7-]+)/i);
+      if (m) s = m[1];
+      return s;
+    }
     function formatSyncCode(raw) {
-      var clean = String(raw || '').toUpperCase().replace(/[^A-Z2-7]/g, '').slice(0, 16);
+      var clean = extractCode(raw).toUpperCase().replace(/[^A-Z2-7]/g, '').slice(0, 16);
       return clean.match(/.{1,4}/g) ? clean.match(/.{1,4}/g).join('-') : clean;
     }
     codeInput.addEventListener('input', function () {
@@ -654,6 +696,106 @@ eleventyComputed:
         await window.MentriaSync.disconnect();
       });
     });
+
+    var scanBtn = document.getElementById('about-sync-scan-btn');
+    var scanCancel = document.getElementById('about-sync-scan-cancel-btn');
+    var scanPanel = document.getElementById('about-sync-scanner');
+    var scanVideo = document.getElementById('about-sync-scanner-video');
+    var scanNote = document.getElementById('about-sync-scanner-note');
+    var scanScanner = { detector: null, useJsQR: false, stream: null, rafId: 0, scanning: false, lastDetect: 0, canvas: null, ctx: null };
+
+    function showScanNote(msg) {
+      if (!msg) { scanNote.hidden = true; return; }
+      scanNote.textContent = msg;
+      scanNote.hidden = false;
+    }
+    function loadScript(src) {
+      return new Promise(function (res, rej) {
+        var s = document.createElement('script');
+        s.src = src; s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+    async function initScanDetector() {
+      if (scanScanner.detector || scanScanner.useJsQR) return true;
+      if ('BarcodeDetector' in window) {
+        try {
+          var formats = await BarcodeDetector.getSupportedFormats();
+          if (formats && formats.indexOf('qr_code') !== -1) {
+            scanScanner.detector = new BarcodeDetector({ formats: ['qr_code'] });
+            return true;
+          }
+        } catch (_) {}
+      }
+      if (!window.jsQR) { try { await loadScript('/assets/js/jsqr.js?v={{ buildHash }}'); } catch (_) {} }
+      if (window.jsQR) { scanScanner.useJsQR = true; return true; }
+      return false;
+    }
+    function scanJsqrDecode(video) {
+      var sw = video.videoWidth, sh = video.videoHeight;
+      if (!sw || !sh) return null;
+      var w = sw, h = sh, max = 640;
+      if (Math.max(w, h) > max) { var s = max / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
+      if (!scanScanner.canvas) { scanScanner.canvas = document.createElement('canvas'); scanScanner.ctx = scanScanner.canvas.getContext('2d', { willReadFrequently: true }); }
+      scanScanner.canvas.width = w; scanScanner.canvas.height = h;
+      scanScanner.ctx.drawImage(video, 0, 0, w, h);
+      var img;
+      try { img = scanScanner.ctx.getImageData(0, 0, w, h); } catch (_) { return null; }
+      var r = window.jsQR(img.data, w, h, { inversionAttempts: 'dontInvert' });
+      return r && r.data ? r.data : null;
+    }
+    function stopScan() {
+      scanScanner.scanning = false;
+      if (scanScanner.rafId) { cancelAnimationFrame(scanScanner.rafId); scanScanner.rafId = 0; }
+      if (scanScanner.stream) { scanScanner.stream.getTracks().forEach(function (t) { t.stop(); }); scanScanner.stream = null; }
+      scanVideo.srcObject = null;
+      scanPanel.hidden = true;
+    }
+    async function scanLoop(ts) {
+      if (!scanScanner.scanning) return;
+      scanScanner.rafId = requestAnimationFrame(scanLoop);
+      if (ts - scanScanner.lastDetect < 220) return;
+      scanScanner.lastDetect = ts;
+      if (scanVideo.readyState < 2) return;
+      var rawValue = null;
+      if (scanScanner.detector) {
+        try { var codes = await scanScanner.detector.detect(scanVideo); if (codes && codes.length) rawValue = codes[0].rawValue; } catch (_) {}
+      } else if (scanScanner.useJsQR) {
+        rawValue = scanJsqrDecode(scanVideo);
+      }
+      if (!rawValue) return;
+      var extracted = extractCode(rawValue);
+      var norm = String(extracted).toUpperCase().replace(/[^A-Z2-7]/g, '');
+      if (norm.length < 16) { showScanNote(COPY.codeInvalid); return; }
+      if (navigator.vibrate) try { navigator.vibrate(40); } catch (_) {}
+      codeInput.value = formatSyncCode(rawValue);
+      stopScan();
+      joinBtn.click();
+    }
+    scanBtn.addEventListener('click', async function () {
+      showScanNote('');
+      scanPanel.hidden = false;
+      if (!window.isSecureContext) { showScanNote(COPY.scanSecureRequired); return; }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showScanNote(COPY.scanNoCamera); return; }
+      var ok = await initScanDetector();
+      if (!ok) { showScanNote(COPY.scanUnsupported); return; }
+      try {
+        scanScanner.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      } catch (err) {
+        var name = err && err.name;
+        if (name === 'NotAllowedError' || name === 'SecurityError') showScanNote(COPY.scanDenied);
+        else if (name === 'NotFoundError' || name === 'OverconstrainedError') showScanNote(COPY.scanNoCamera);
+        else showScanNote(String(err && err.message || err));
+        return;
+      }
+      scanVideo.srcObject = scanScanner.stream;
+      try { await scanVideo.play(); } catch (_) {}
+      scanScanner.scanning = true;
+      scanScanner.lastDetect = 0;
+      scanScanner.rafId = requestAnimationFrame(scanLoop);
+    });
+    scanCancel.addEventListener('click', function () { stopScan(); });
   })();
 </script>
+<script src="/assets/js/qrcode.js?v={{ buildHash }}" defer></script>
 <script type="module" src="/assets/js/mentria-sync.js?v={{ buildHash }}"></script>

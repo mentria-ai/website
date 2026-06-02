@@ -93,8 +93,12 @@ eleventyComputed:
   <div class="totp-modal" id="totp-backup-modal" hidden>
     <div class="totp-modal__backdrop" data-close></div>
     <div class="totp-modal__card">
-      <h3 class="totp-modal__h">{{ "tool.totp.backup_gate_title" | t }}</h3>
-      <p class="totp-modal__p">{{ "tool.totp.backup_gate_lede" | t }}</p>
+      <h3 class="totp-modal__h" id="totp-backup-title">{{ "tool.totp.backup_gate_title" | t }}</h3>
+      <p class="totp-modal__p" id="totp-backup-lede">{{ "tool.totp.backup_gate_lede" | t }}</p>
+      <label class="totp-field">
+        <span>{{ "tool.totp.backup_pass_label" | t }}</span>
+        <input type="password" id="totp-backup-pass" autocomplete="new-password" minlength="8">
+      </label>
       <div class="totp-modal__actions">
         <button type="button" class="totp-btn totp-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
         <button type="button" class="totp-btn" id="totp-backup-confirm-btn">{{ "tool.totp.backup_gate_confirm" | t }}</button>
@@ -155,7 +159,7 @@ eleventyComputed:
 
   .totp-modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; }
   .totp-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
-  .totp-modal__card { position: relative; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 8px; padding: 18px; width: 100%; max-width: 480px; max-height: 90vh; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+  .totp-modal__card { position: relative; z-index: 1; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 8px; padding: 18px; width: 100%; max-width: 480px; max-height: 90vh; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
   .totp-modal__h { font-family: var(--font-mono); font-size: 14px; margin: 0; color: var(--accent, #6ef3c5); }
   .totp-modal__p { font-size: 13px; color: var(--term-muted); margin: 0; }
   .totp-modal__or { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); text-align: center; margin: 4px 0; }
@@ -638,7 +642,7 @@ eleventyComputed:
     if (state.accounts.length === 0) {
       pendingAdd = account;
       $('totp-add-modal').hidden = true;
-      $('totp-backup-modal').hidden = false;
+      openBackupModal(true);
       return;
     }
     state.accounts.push(account);
@@ -648,25 +652,36 @@ eleventyComputed:
     tick();
   });
 
+  function openBackupModal(forFirstSave) {
+    $('totp-backup-pass').value = '';
+    $('totp-backup-modal').hidden = false;
+    setTimeout(() => $('totp-backup-pass').focus(), 50);
+  }
+
   $('totp-backup-confirm-btn').addEventListener('click', async () => {
-    if (!pendingAdd) { $('totp-backup-modal').hidden = true; return; }
     if (!window.MentriaBackup) { setStatus('backup library not loaded', 'err'); return; }
-    const pass = prompt(COPY.backup_required);
+    const pass = $('totp-backup-pass').value;
     if (!pass || pass.length < 8) { setStatus(COPY.setup_strength_too_short, 'err'); return; }
     $('totp-backup-confirm-btn').disabled = true;
     try {
-      const next = state.accounts.concat([pendingAdd]);
-      const tempEnv = await encryptWith(state.masterKey, new TextEncoder().encode(JSON.stringify(next)));
-      const tempVault = Object.assign({}, state.vault, { secrets: tempEnv });
-      const payload = { version: 1, exportedAt: new Date().toISOString(), store: { 'totp.vault': JSON.stringify(tempVault) }, legacy: {} };
+      const next = pendingAdd ? state.accounts.concat([pendingAdd]) : state.accounts;
+      let vaultForBackup = state.vault;
+      if (pendingAdd) {
+        const tempEnv = await encryptWith(state.masterKey, new TextEncoder().encode(JSON.stringify(next)));
+        vaultForBackup = Object.assign({}, state.vault, { secrets: tempEnv });
+      }
+      const payload = { version: 1, exportedAt: new Date().toISOString(), store: { 'totp.vault': JSON.stringify(vaultForBackup) }, legacy: {} };
       const env = await window.MentriaBackup.encryptBackup(payload, pass);
       window.MentriaBackup.downloadBackupJson(env, 'mentria-totp-backup');
-      state.accounts = next;
-      await reEncryptSecrets();
-      pendingAdd = null;
+      if (pendingAdd) {
+        state.accounts = next;
+        await reEncryptSecrets();
+        pendingAdd = null;
+        renderList();
+        tick();
+      }
+      $('totp-backup-pass').value = '';
       $('totp-backup-modal').hidden = true;
-      renderList();
-      tick();
       setStatus(COPY.backup_done, 'ok');
     } catch (err) {
       setStatus(String(err && err.message || err), 'err');
@@ -675,16 +690,9 @@ eleventyComputed:
     }
   });
 
-  $('totp-backup-btn').addEventListener('click', async () => {
-    if (!window.MentriaBackup) return;
-    const pass = prompt(COPY.backup_required);
-    if (!pass || pass.length < 8) { setStatus(COPY.setup_strength_too_short, 'err'); return; }
-    try {
-      const payload = { version: 1, exportedAt: new Date().toISOString(), store: { 'totp.vault': JSON.stringify(state.vault) }, legacy: {} };
-      const env = await window.MentriaBackup.encryptBackup(payload, pass);
-      window.MentriaBackup.downloadBackupJson(env, 'mentria-totp-backup');
-      setStatus(COPY.backup_done, 'ok');
-    } catch (err) { setStatus(String(err && err.message || err), 'err'); }
+  $('totp-backup-btn').addEventListener('click', () => {
+    pendingAdd = null;
+    openBackupModal(false);
   });
 
   $('totp-list').addEventListener('click', async (e) => {

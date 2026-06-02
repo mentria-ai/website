@@ -823,7 +823,8 @@
       "backup_gate_lede": "Segredos TOTP não podem ser recuperados se você perder este dispositivo ou esquecer a senha. Baixe um backup criptografado agora — usa uma senha de sua escolha (pode ser a mesma do cofre).",
       "backup_gate_confirm": "Baixar backup e salvar",
       "backup_required": "Digite uma senha para o arquivo de backup (8+ caracteres). Você precisará dela para restaurar.",
-      "backup_done": "Backup baixado."
+      "backup_done": "Backup baixado.",
+      "backup_pass_label": "Senha do backup (8+ caracteres)"
     }
   },
   "category": {

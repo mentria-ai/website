@@ -823,7 +823,8 @@
       "backup_gate_lede": "Los secretos TOTP no se pueden recuperar si pierdes este dispositivo o olvidas tu contraseña. Descarga una copia cifrada ahora — usa una contraseña que tú eliges (puede ser la misma que la de tu bóveda).",
       "backup_gate_confirm": "Descargar copia y guardar",
       "backup_required": "Introduce una contraseña para el archivo de copia (8+ caracteres). La necesitarás para restaurar.",
-      "backup_done": "Copia descargada."
+      "backup_done": "Copia descargada.",
+      "backup_pass_label": "Contraseña de la copia (8+ caracteres)"
     }
   },
   "category": {

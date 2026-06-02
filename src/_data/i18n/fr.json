@@ -823,7 +823,8 @@
       "backup_gate_lede": "Les secrets TOTP ne peuvent pas être récupérés si vous perdez cet appareil ou oubliez votre phrase secrète. Téléchargez maintenant une sauvegarde chiffrée — elle utilise une phrase secrète de votre choix (peut être la même que celle du coffre).",
       "backup_gate_confirm": "Télécharger et enregistrer",
       "backup_required": "Saisissez une phrase secrète pour le fichier de sauvegarde (8+ caractères). Vous en aurez besoin pour restaurer.",
-      "backup_done": "Sauvegarde téléchargée."
+      "backup_done": "Sauvegarde téléchargée.",
+      "backup_pass_label": "Phrase secrète de la sauvegarde (8+ caractères)"
     }
   },
   "category": {

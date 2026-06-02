@@ -823,7 +823,8 @@
       "backup_gate_lede": "TOTP secrets cannot be recovered if you lose this device or forget your passphrase. Download an encrypted backup now — it uses a passphrase you choose (can be the same as your vault).",
       "backup_gate_confirm": "Download backup and save",
       "backup_required": "Enter a passphrase for the backup file (8+ chars). You will need it to restore.",
-      "backup_done": "Backup downloaded."
+      "backup_done": "Backup downloaded.",
+      "backup_pass_label": "Backup passphrase (8+ chars)"
     }
   },
   "category": {

@@ -616,6 +616,20 @@ eleventyComputed:
       });
     });
 
+    function formatSyncCode(raw) {
+      var clean = String(raw || '').toUpperCase().replace(/[^A-Z2-7]/g, '').slice(0, 16);
+      return clean.match(/.{1,4}/g) ? clean.match(/.{1,4}/g).join('-') : clean;
+    }
+    codeInput.addEventListener('input', function () {
+      var formatted = formatSyncCode(codeInput.value);
+      if (codeInput.value !== formatted) codeInput.value = formatted;
+    });
+    codeInput.addEventListener('paste', function (e) {
+      e.preventDefault();
+      var pasted = (e.clipboardData || window.clipboardData).getData('text');
+      codeInput.value = formatSyncCode(pasted);
+    });
+
     joinBtn.addEventListener('click', function () {
       whenReady(async function () {
         var raw = codeInput.value;

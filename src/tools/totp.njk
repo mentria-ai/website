@@ -152,9 +152,13 @@ eleventyComputed:
   .totp-row__meta { flex: 1; min-width: 0; }
   .totp-row__issuer { font-family: var(--font-mono); font-size: 11px; color: var(--term-subtle); text-transform: uppercase; letter-spacing: 0.1em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .totp-row__account { font-size: 12px; color: var(--term-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .totp-row__code-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
   .totp-row__code { font-family: var(--font-mono); font-size: 22px; letter-spacing: 0.1em; color: var(--accent, #6ef3c5); cursor: pointer; user-select: all; padding: 4px 8px; border-radius: 4px; }
   .totp-row__code:hover { background: rgba(110,243,197,0.08); }
   .totp-row__code.is-copied { color: var(--syn-green, #34c46a); }
+  .totp-row__next { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--syn-amber, #f7b015); opacity: .8; padding: 0 8px; }
+  .totp-row__next[hidden] { display: none; }
+  .totp-row__next-label { color: var(--term-subtle); margin-right: 4px; }
   .totp-row__ring { width: 32px; height: 32px; flex-shrink: 0; }
   .totp-row__ring circle { fill: none; stroke-width: 3; }
   .totp-row__ring .bg { stroke: var(--term-border); }
@@ -208,7 +212,8 @@ eleventyComputed:
     scan_denied:              {{ ('tool.totp.scan_denied'              | t) | dump | safe }},
     scan_no_camera:           {{ ('tool.totp.scan_no_camera'           | t) | dump | safe }},
     scan_secure_required:     {{ ('tool.totp.scan_secure_required'     | t) | dump | safe }},
-    scan_invalid_qr:          {{ ('tool.totp.scan_invalid_qr'          | t) | dump | safe }}
+    scan_invalid_qr:          {{ ('tool.totp.scan_invalid_qr'          | t) | dump | safe }},
+    next_label:               {{ ('tool.totp.next_label'               | t) | dump | safe }}
   };
 
   function b64uEnc(bytes) {
@@ -278,7 +283,8 @@ eleventyComputed:
     opts = opts || {};
     const period = opts.period || 30;
     const digits = opts.digits || 6;
-    const counter = Math.floor(Date.now() / 1000 / period);
+    const offset = opts.offset || 0;
+    const counter = Math.floor(Date.now() / 1000 / period) + offset;
     const buf = new ArrayBuffer(8);
     const view = new DataView(buf);
     view.setUint32(4, counter >>> 0, false);
@@ -458,7 +464,10 @@ eleventyComputed:
           <div class="totp-row__issuer"></div>
           <div class="totp-row__account"></div>
         </div>
-        <span class="totp-row__code" data-copy>—</span>
+        <div class="totp-row__code-stack">
+          <span class="totp-row__code" data-copy>—</span>
+          <span class="totp-row__next" hidden><span class="totp-row__next-label">${COPY.next_label}</span><span class="totp-row__next-value">—</span></span>
+        </div>
         <button type="button" class="totp-row__del" data-del title="${COPY.delete_confirm.replace(/{name}/g, '')}">×</button>
       `;
       li.querySelector('.totp-row__issuer').textContent = acc.issuer || '—';
@@ -473,16 +482,26 @@ eleventyComputed:
       const row = rows[i];
       const acc = state.accounts.find((a) => a.id === row.dataset.id);
       if (!acc) continue;
-      const code = await totpCode(b64uDec(acc.secret), { period: acc.period, digits: acc.digits });
+      const secretBytes = b64uDec(acc.secret);
+      const period = acc.period || 30;
+      const code = await totpCode(secretBytes, { period, digits: acc.digits });
       const codeEl = row.querySelector('.totp-row__code');
       if (!codeEl.classList.contains('is-copied')) codeEl.textContent = code.match(/.{3}/g).join(' ');
-      const period = acc.period || 30;
       const remaining = period - (Math.floor(Date.now() / 1000) % period);
       const ring = row.querySelector('.totp-row__ring');
       const fg = ring.querySelector('.fg');
       const circumference = 2 * Math.PI * 14;
       fg.setAttribute('stroke-dashoffset', String(circumference * (1 - remaining / period)));
-      ring.classList.toggle('warning', remaining <= 5);
+      const isWarning = remaining <= 5;
+      ring.classList.toggle('warning', isWarning);
+      const nextEl = row.querySelector('.totp-row__next');
+      if (isWarning) {
+        const nextCode = await totpCode(secretBytes, { period, digits: acc.digits, offset: 1 });
+        row.querySelector('.totp-row__next-value').textContent = nextCode.match(/.{3}/g).join(' ');
+        nextEl.hidden = false;
+      } else {
+        nextEl.hidden = true;
+      }
     }
   }
 
@@ -622,23 +641,41 @@ eleventyComputed:
     if (navigator.vibrate) try { navigator.vibrate(40); } catch (_) {}
     $('totp-uri').value = rawValue;
     stopScanner();
+    $('totp-save-btn').click();
   }
 
-  $('totp-scan-btn').addEventListener('click', async () => {
+  async function startScanner(opts) {
+    opts = opts || {};
     showScanNote('');
     $('totp-scanner').hidden = false;
-    if (!window.isSecureContext) { showScanNote(COPY.scan_secure_required); return; }
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showScanNote(COPY.scan_no_camera); return; }
+    if (!window.isSecureContext) {
+      if (!opts.silentOnFail) showScanNote(COPY.scan_secure_required);
+      else $('totp-scanner').hidden = true;
+      return false;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      if (!opts.silentOnFail) showScanNote(COPY.scan_no_camera);
+      else $('totp-scanner').hidden = true;
+      return false;
+    }
     const ok = await initDetector();
-    if (!ok) { showScanNote(COPY.scan_unsupported); return; }
+    if (!ok) {
+      if (!opts.silentOnFail) showScanNote(COPY.scan_unsupported);
+      else $('totp-scanner').hidden = true;
+      return false;
+    }
     try {
       scanner.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
     } catch (err) {
       const name = err && err.name;
+      if (opts.silentOnFail && (name === 'NotAllowedError' || name === 'SecurityError' || name === 'NotFoundError')) {
+        $('totp-scanner').hidden = true;
+        return false;
+      }
       if (name === 'NotAllowedError' || name === 'SecurityError') showScanNote(COPY.scan_denied);
       else if (name === 'NotFoundError' || name === 'OverconstrainedError') showScanNote(COPY.scan_no_camera);
       else showScanNote(String(err && err.message || err));
-      return;
+      return false;
     }
     const video = $('totp-scanner-video');
     video.srcObject = scanner.stream;
@@ -646,7 +683,10 @@ eleventyComputed:
     scanner.scanning = true;
     scanner.lastDetect = 0;
     scanner.rafId = requestAnimationFrame(scanLoop);
-  });
+    return true;
+  }
+
+  $('totp-scan-btn').addEventListener('click', () => startScanner({ silentOnFail: false }));
 
   $('totp-scan-cancel-btn').addEventListener('click', () => { stopScanner(); });
 
@@ -726,6 +766,7 @@ eleventyComputed:
     $('totp-account').value = '';
     $('totp-secret').value = '';
     $('totp-add-modal').hidden = false;
+    startScanner({ silentOnFail: true });
   });
 
   document.querySelectorAll('[data-close]').forEach((el) => {

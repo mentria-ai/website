@@ -831,7 +831,8 @@
       "scan_denied": "Acceso a la cámara denegado. Permite el acceso en los ajustes del navegador y vuelve a intentarlo.",
       "scan_no_camera": "No hay cámara disponible en este dispositivo.",
       "scan_secure_required": "El acceso a la cámara requiere HTTPS. Usa el sitio en vivo, no una URL local.",
-      "scan_invalid_qr": "Ese QR no es una URI otpauth://totp/. Inténtalo con un QR de configuración TOTP."
+      "scan_invalid_qr": "Ese QR no es una URI otpauth://totp/. Inténtalo con un QR de configuración TOTP.",
+      "next_label": "siguiente:"
     }
   },
   "category": {

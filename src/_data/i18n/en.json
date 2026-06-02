@@ -831,7 +831,8 @@
       "scan_denied": "Camera access denied. Allow camera permission in your browser settings and try again.",
       "scan_no_camera": "No camera available on this device.",
       "scan_secure_required": "Camera access needs HTTPS. Use the live site, not a local URL.",
-      "scan_invalid_qr": "That QR code is not an otpauth://totp/ URI. Try again with a TOTP setup QR."
+      "scan_invalid_qr": "That QR code is not an otpauth://totp/ URI. Try again with a TOTP setup QR.",
+      "next_label": "next:"
     }
   },
   "category": {

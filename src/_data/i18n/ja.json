@@ -831,7 +831,8 @@
       "scan_denied": "カメラへのアクセスが拒否されました。ブラウザ設定で許可してから再試行してください。",
       "scan_no_camera": "このデバイスには利用可能なカメラがありません。",
       "scan_secure_required": "カメラアクセスにはHTTPSが必要です。ローカルURLではなく公開サイトをご利用ください。",
-      "scan_invalid_qr": "このQRコードは otpauth://totp/ URI ではありません。TOTP設定用のQRで再試行してください。"
+      "scan_invalid_qr": "このQRコードは otpauth://totp/ URI ではありません。TOTP設定用のQRで再試行してください。",
+      "next_label": "次:"
     }
   },
   "category": {

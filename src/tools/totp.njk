@@ -66,6 +66,12 @@ eleventyComputed:
     <div class="totp-modal__backdrop" data-close></div>
     <div class="totp-modal__card">
       <h3 class="totp-modal__h">{{ "tool.totp.add_title" | t }}</h3>
+      <button type="button" class="totp-btn totp-btn--ghost" id="totp-scan-btn">{{ "tool.totp.scan_button" | t }}</button>
+      <div class="totp-scanner" id="totp-scanner" hidden>
+        <video class="totp-scanner__video" id="totp-scanner-video" playsinline muted></video>
+        <p class="totp-scanner__note" id="totp-scanner-note" hidden></p>
+        <button type="button" class="totp-btn totp-btn--ghost" id="totp-scan-cancel-btn">{{ "tool.totp.scan_cancel" | t }}</button>
+      </div>
       <label class="totp-field">
         <span>{{ "tool.totp.paste_uri_label" | t }}</span>
         <input type="text" id="totp-uri" autocomplete="off" spellcheck="false" placeholder="otpauth://totp/Example:user@example.com?secret=ABCD1234&issuer=Example">
@@ -165,6 +171,10 @@ eleventyComputed:
   .totp-modal__p { font-size: 13px; color: var(--term-muted); margin: 0; }
   .totp-modal__or { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); text-align: center; margin: 4px 0; }
   .totp-modal__actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+
+  .totp-scanner { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+  .totp-scanner__video { width: 100%; aspect-ratio: 1; background: #000; border: 1px solid var(--syn-cyan, #67e8f9); border-radius: 6px; object-fit: cover; }
+  .totp-scanner__note { font-family: var(--font-mono); font-size: 11px; color: var(--syn-amber, #f7b015); margin: 0; }
 </style>
 
 <script>
@@ -193,7 +203,12 @@ eleventyComputed:
     delete_confirm:           {{ ('tool.totp.delete_confirm'           | t) | dump | safe }},
     copied:                   {{ ('tool.totp.copied'                   | t) | dump | safe }},
     backup_required:          {{ ('tool.totp.backup_required'          | t) | dump | safe }},
-    backup_done:              {{ ('tool.totp.backup_done'              | t) | dump | safe }}
+    backup_done:              {{ ('tool.totp.backup_done'              | t) | dump | safe }},
+    scan_unsupported:         {{ ('tool.totp.scan_unsupported'         | t) | dump | safe }},
+    scan_denied:              {{ ('tool.totp.scan_denied'              | t) | dump | safe }},
+    scan_no_camera:           {{ ('tool.totp.scan_no_camera'           | t) | dump | safe }},
+    scan_secure_required:     {{ ('tool.totp.scan_secure_required'     | t) | dump | safe }},
+    scan_invalid_qr:          {{ ('tool.totp.scan_invalid_qr'          | t) | dump | safe }}
   };
 
   function b64uEnc(bytes) {
@@ -528,6 +543,113 @@ eleventyComputed:
     saveVault(state.vault);
   }
 
+  const scanner = { detector: null, useJsQR: false, stream: null, rafId: 0, scanning: false, lastDetect: 0, canvas: null, ctx: null };
+
+  function loadScript(src) {
+    return new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = src; s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function initDetector() {
+    if (scanner.detector || scanner.useJsQR) return true;
+    if ('BarcodeDetector' in window) {
+      try {
+        const formats = await BarcodeDetector.getSupportedFormats();
+        if (formats && formats.includes('qr_code')) {
+          scanner.detector = new BarcodeDetector({ formats: ['qr_code'] });
+          return true;
+        }
+      } catch (_) {}
+    }
+    if (!window.jsQR) {
+      try { await loadScript('/assets/js/jsqr.js?v={{ buildHash }}'); } catch (_) {}
+    }
+    if (window.jsQR) { scanner.useJsQR = true; return true; }
+    return false;
+  }
+
+  function jsqrDecode(video) {
+    const sw = video.videoWidth, sh = video.videoHeight;
+    if (!sw || !sh) return null;
+    let w = sw, h = sh;
+    const max = 640;
+    if (Math.max(w, h) > max) { const s = max / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
+    if (!scanner.canvas) { scanner.canvas = document.createElement('canvas'); scanner.ctx = scanner.canvas.getContext('2d', { willReadFrequently: true }); }
+    scanner.canvas.width = w; scanner.canvas.height = h;
+    scanner.ctx.drawImage(video, 0, 0, w, h);
+    let img; try { img = scanner.ctx.getImageData(0, 0, w, h); } catch (_) { return null; }
+    const r = window.jsQR(img.data, w, h, { inversionAttempts: 'dontInvert' });
+    return r && r.data ? r.data : null;
+  }
+
+  function stopScanner() {
+    scanner.scanning = false;
+    if (scanner.rafId) { cancelAnimationFrame(scanner.rafId); scanner.rafId = 0; }
+    if (scanner.stream) { scanner.stream.getTracks().forEach((t) => t.stop()); scanner.stream = null; }
+    const v = $('totp-scanner-video');
+    if (v) v.srcObject = null;
+    $('totp-scanner').hidden = true;
+  }
+
+  function showScanNote(msg) {
+    const el = $('totp-scanner-note');
+    el.textContent = msg;
+    el.hidden = !msg;
+  }
+
+  async function scanLoop(ts) {
+    if (!scanner.scanning) return;
+    scanner.rafId = requestAnimationFrame(scanLoop);
+    if (ts - scanner.lastDetect < 220) return;
+    scanner.lastDetect = ts;
+    const video = $('totp-scanner-video');
+    if (!video || video.readyState < 2) return;
+    let rawValue = null;
+    if (scanner.detector) {
+      try { const codes = await scanner.detector.detect(video); if (codes && codes.length) rawValue = codes[0].rawValue; }
+      catch (_) {}
+    } else if (scanner.useJsQR) {
+      rawValue = jsqrDecode(video);
+    }
+    if (!rawValue) return;
+    if (!/^otpauth:\/\/totp\//i.test(rawValue)) {
+      showScanNote(COPY.scan_invalid_qr);
+      return;
+    }
+    if (navigator.vibrate) try { navigator.vibrate(40); } catch (_) {}
+    $('totp-uri').value = rawValue;
+    stopScanner();
+  }
+
+  $('totp-scan-btn').addEventListener('click', async () => {
+    showScanNote('');
+    $('totp-scanner').hidden = false;
+    if (!window.isSecureContext) { showScanNote(COPY.scan_secure_required); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showScanNote(COPY.scan_no_camera); return; }
+    const ok = await initDetector();
+    if (!ok) { showScanNote(COPY.scan_unsupported); return; }
+    try {
+      scanner.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    } catch (err) {
+      const name = err && err.name;
+      if (name === 'NotAllowedError' || name === 'SecurityError') showScanNote(COPY.scan_denied);
+      else if (name === 'NotFoundError' || name === 'OverconstrainedError') showScanNote(COPY.scan_no_camera);
+      else showScanNote(String(err && err.message || err));
+      return;
+    }
+    const video = $('totp-scanner-video');
+    video.srcObject = scanner.stream;
+    try { await video.play(); } catch (_) {}
+    scanner.scanning = true;
+    scanner.lastDetect = 0;
+    scanner.rafId = requestAnimationFrame(scanLoop);
+  });
+
+  $('totp-scan-cancel-btn').addEventListener('click', () => { stopScanner(); });
+
   $('totp-setup-pass').addEventListener('input', () => {
     const s = scorePass($('totp-setup-pass').value);
     const el = $('totp-setup-strength');
@@ -608,6 +730,7 @@ eleventyComputed:
 
   document.querySelectorAll('[data-close]').forEach((el) => {
     el.addEventListener('click', () => {
+      stopScanner();
       $('totp-add-modal').hidden = true;
       $('totp-backup-modal').hidden = true;
     });

@@ -824,7 +824,14 @@
       "backup_gate_confirm": "バックアップして保存",
       "backup_required": "バックアップファイル用のパスフレーズを入力してください (8 文字以上)。復元に必要です。",
       "backup_done": "バックアップを保存しました。",
-      "backup_pass_label": "バックアップ用パスフレーズ（8文字以上）"
+      "backup_pass_label": "バックアップ用パスフレーズ（8文字以上）",
+      "scan_button": "📷 QRコードをスキャン",
+      "scan_cancel": "スキャンをキャンセル",
+      "scan_unsupported": "このデバイスではQRスキャンに対応していません。下のURIを貼り付けるか手動で入力してください。",
+      "scan_denied": "カメラへのアクセスが拒否されました。ブラウザ設定で許可してから再試行してください。",
+      "scan_no_camera": "このデバイスには利用可能なカメラがありません。",
+      "scan_secure_required": "カメラアクセスにはHTTPSが必要です。ローカルURLではなく公開サイトをご利用ください。",
+      "scan_invalid_qr": "このQRコードは otpauth://totp/ URI ではありません。TOTP設定用のQRで再試行してください。"
     }
   },
   "category": {

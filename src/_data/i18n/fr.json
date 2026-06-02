@@ -824,7 +824,14 @@
       "backup_gate_confirm": "Télécharger et enregistrer",
       "backup_required": "Saisissez une phrase secrète pour le fichier de sauvegarde (8+ caractères). Vous en aurez besoin pour restaurer.",
       "backup_done": "Sauvegarde téléchargée.",
-      "backup_pass_label": "Phrase secrète de la sauvegarde (8+ caractères)"
+      "backup_pass_label": "Phrase secrète de la sauvegarde (8+ caractères)",
+      "scan_button": "📷 Scanner le QR code",
+      "scan_cancel": "Annuler le scan",
+      "scan_unsupported": "Le scan de QR n'est pas pris en charge sur cet appareil — collez l'URI ou remplissez manuellement ci-dessous.",
+      "scan_denied": "Accès à la caméra refusé. Autorisez la caméra dans les réglages du navigateur puis réessayez.",
+      "scan_no_camera": "Aucune caméra disponible sur cet appareil.",
+      "scan_secure_required": "L'accès à la caméra nécessite HTTPS. Utilisez le site en ligne, pas une URL locale.",
+      "scan_invalid_qr": "Ce QR n'est pas une URI otpauth://totp/. Réessayez avec un QR de configuration TOTP."
     }
   },
   "category": {

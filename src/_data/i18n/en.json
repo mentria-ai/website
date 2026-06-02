@@ -824,7 +824,14 @@
       "backup_gate_confirm": "Download backup and save",
       "backup_required": "Enter a passphrase for the backup file (8+ chars). You will need it to restore.",
       "backup_done": "Backup downloaded.",
-      "backup_pass_label": "Backup passphrase (8+ chars)"
+      "backup_pass_label": "Backup passphrase (8+ chars)",
+      "scan_button": "📷 Scan QR code",
+      "scan_cancel": "Cancel scan",
+      "scan_unsupported": "QR scanning is not supported on this device — paste the URI or fill in manually below.",
+      "scan_denied": "Camera access denied. Allow camera permission in your browser settings and try again.",
+      "scan_no_camera": "No camera available on this device.",
+      "scan_secure_required": "Camera access needs HTTPS. Use the live site, not a local URL.",
+      "scan_invalid_qr": "That QR code is not an otpauth://totp/ URI. Try again with a TOTP setup QR."
     }
   },
   "category": {

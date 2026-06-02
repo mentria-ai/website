@@ -15576,6 +15576,207 @@
     ]
   },
   {
+    "id": "deepcuts78",
+    "type": "deepcuts",
+    "order": 78,
+    "title": "Deep Cuts",
+    "subtitle": {
+      "en": "Eight ways the world navigates by echo",
+      "es": "Ocho maneras en que el mundo se orienta por el eco",
+      "fr": "Huit façons dont le monde se repère grâce à l'écho",
+      "ja": "世界が反響で進む道を見つける8つの方法",
+      "pt-BR": "Oito formas como o mundo se orienta pelo eco"
+    },
+    "cover_image": "https://cdn.mentria.ai/deepcuts78/00_cover.webp",
+    "status": "draft",
+    "slides": [
+      {
+        "id": "dc78-s01",
+        "story_type": "fact",
+        "caption": {
+          "en": "The loudest voice on Earth is a click",
+          "es": "La voz más fuerte de la Tierra es un clic",
+          "fr": "La voix la plus puissante de la Terre est un clic",
+          "ja": "地球で最も大きな声は「カチッ」という音",
+          "pt-BR": "A voz mais alta da Terra é um clique"
+        },
+        "long_press": {
+          "en": "A sperm whale's head is mostly a sound gun. It pushes air through clappers called phonic lips, and the click ricochets back through a barrel of waxy spermaceti oil that focuses it into a beam. Measured close up, those clicks reach about 230 decibels underwater — the loudest sound any animal makes. The whale uses them to find squid a kilometre down in total black.",
+          "es": "La cabeza de un cachalote es casi por completo un cañón de sonido. Empuja aire a través de unos labios llamados labios fónicos, y el clic rebota por un barril de aceite ceroso de espermaceti que lo concentra en un haz. Medidos de cerca, esos clics alcanzan unos 230 decibelios bajo el agua: el sonido más fuerte que produce cualquier animal. El cachalote los usa para encontrar calamares a un kilómetro de profundidad, en la oscuridad total.",
+          "fr": "La tête d'un cachalot est avant tout un canon à sons. Il propulse de l'air à travers des clapets appelés lèvres phoniques, et le clic ricoche dans un réservoir d'huile cireuse de spermaceti qui le concentre en un faisceau. Mesurés de près, ces clics atteignent environ 230 décibels sous l'eau — le son le plus fort produit par un animal. Le cachalot s'en sert pour repérer des calmars à un kilomètre de profondeur, dans le noir total.",
+          "ja": "マッコウクジラの頭は、ほとんどが音を撃ち出す装置だ。フォニックリップと呼ばれる弁に空気を押し当て、その音は蝋のような鯨蝋油の樽の中で跳ね返り、一筋のビームに絞られる。間近で測ると、その音は水中で約230デシベルに達する——あらゆる動物の中で最も大きな音だ。クジラはこれを使い、真っ暗な水深1キロでイカを探し当てる。",
+          "pt-BR": "A cabeça de um cachalote é, na maior parte, um canhão de som. Ele empurra ar por válvulas chamadas lábios fônicos, e o clique ricocheteia por um barril de óleo ceroso de espermacete que o concentra em um feixe. Medidos de perto, esses cliques chegam a cerca de 230 decibéis debaixo d'água — o som mais alto que qualquer animal produz. O cachalote os usa para encontrar lulas a um quilômetro de profundidade, na escuridão total."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts78/01_sperm_whale_loudest_click.webp",
+        "image_status": "rendered",
+        "seed": 723,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc78-s02",
+        "story_type": "fact",
+        "caption": {
+          "en": "A dolphin listens with its jaw",
+          "es": "El delfín escucha con la mandíbula",
+          "fr": "Le dauphin écoute avec sa mâchoire",
+          "ja": "イルカは顎で音を聞く",
+          "pt-BR": "O golfinho escuta com a mandíbula"
+        },
+        "long_press": {
+          "en": "A dolphin's ears don't open to the water — sealing them keeps sound from blurring. Instead, returning echoes enter through a thin, oil-filled panel in the lower jaw, the 'pan bone', and a channel of fatty tissue pipes them straight to the inner ear. The ear bones float in foam-filled sinuses, acoustically cut off from the skull, so each ear hears on its own and the animal can pin down exactly where an echo came from.",
+          "es": "Los oídos del delfín no se abren al agua: cerrarlos evita que el sonido se mezcle. En su lugar, los ecos de vuelta entran por una fina lámina llena de aceite en la mandíbula inferior, el 'hueso timpánico', y un canal de tejido graso los lleva directos al oído interno. Los huesecillos flotan en senos llenos de espuma, aislados acústicamente del cráneo, así que cada oído escucha por su cuenta y el animal puede precisar de dónde vino exactamente un eco.",
+          "fr": "Les oreilles du dauphin ne s'ouvrent pas sur l'eau — les fermer empêche le son de se brouiller. À la place, les échos de retour entrent par une fine lame remplie d'huile dans la mâchoire inférieure, l'« os tympanique », et un canal de tissu graisseux les conduit droit à l'oreille interne. Les osselets flottent dans des sinus remplis de mousse, isolés acoustiquement du crâne, si bien que chaque oreille entend de son côté et l'animal peut localiser exactement d'où vient un écho.",
+          "ja": "イルカの耳は水に向かって開いていない——閉じることで音がぼやけるのを防ぐ。代わりに、戻ってくる反響は下顎にある油で満たされた薄い「パンボーン」から入り、脂肪組織の通り道がそれをまっすぐ内耳へ運ぶ。耳の骨は泡で満たされた空洞に浮かび、頭骨から音響的に切り離されている。そのため左右の耳が別々に聞き取り、反響がどこから来たのかを正確に突き止められる。",
+          "pt-BR": "Os ouvidos do golfinho não se abrem para a água — vedá-los evita que o som se embarale. Em vez disso, os ecos de retorno entram por uma fina lâmina cheia de óleo na mandíbula inferior, o 'osso timpânico', e um canal de tecido gorduroso os leva direto ao ouvido interno. Os ossículos flutuam em seios cheios de espuma, isolados acusticamente do crânio, de modo que cada ouvido escuta por conta própria e o animal consegue precisar exatamente de onde veio um eco."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts78/02_dolphin_hears_through_jaw.webp",
+        "image_status": "rendered",
+        "seed": 724,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc78-s03",
+        "story_type": "fact",
+        "caption": {
+          "en": "The bird that flies by clicks, not sight",
+          "es": "El ave que vuela por clics, no por la vista",
+          "fr": "L'oiseau qui vole aux clics, pas à la vue",
+          "ja": "視覚ではなく音で飛ぶ鳥",
+          "pt-BR": "A ave que voa por cliques, não pela visão"
+        },
+        "long_press": {
+          "en": "Deep in pitch-black caves, the oilbird navigates the way a bat does — firing rapid clicks and listening for the echo. But its clicks sit around 2,000 hertz, well inside human hearing, so you can stand in the cave and hear the bird 'see'. Only two bird groups echolocate at all — oilbirds and some cave swiftlets — and an oilbird can dodge an obstacle as thin as 20 centimetres in complete darkness.",
+          "es": "En lo profundo de cuevas completamente oscuras, el guácharo se orienta como un murciélago: lanza clics rápidos y escucha el eco. Pero sus clics rondan los 2.000 hercios, dentro del oído humano, así que puedes estar en la cueva y oír cómo el ave 've'. Solo dos grupos de aves ecolocalizan: los guácharos y algunos vencejos de cueva, y un guácharo puede esquivar un obstáculo de apenas 20 centímetros en plena oscuridad.",
+          "fr": "Au fond de grottes d'un noir absolu, le guacharo se repère comme une chauve-souris : il lance des clics rapides et écoute l'écho. Mais ses clics tournent autour de 2 000 hertz, bien dans la portée de l'oreille humaine, si bien qu'on peut se tenir dans la grotte et entendre l'oiseau « voir ». Seuls deux groupes d'oiseaux pratiquent l'écholocation — les guacharos et certaines salanganes des cavernes — et un guacharo peut éviter un obstacle de seulement 20 centimètres dans le noir complet.",
+          "ja": "真っ暗な洞窟の奥で、アブラヨタカはコウモリのように進む——素早いクリック音を放ち、その反響を聞き取るのだ。ただしその音は約2,000ヘルツで、人間の可聴域にしっかり収まる。だから洞窟の中に立てば、鳥が「見ている」音が聞こえる。反響定位を行う鳥はわずか2グループだけ——アブラヨタカと一部のアナツバメ——で、アブラヨタカは真っ暗闇の中でわずか20センチの障害物さえよけられる。",
+          "pt-BR": "No fundo de cavernas totalmente escuras, o guácharo se orienta como um morcego: dispara cliques rápidos e escuta o eco. Mas seus cliques ficam em torno de 2.000 hertz, bem dentro da audição humana, então dá para ficar na caverna e ouvir a ave 'enxergar'. Apenas dois grupos de aves fazem ecolocalização — os guácharos e algumas andorinhas-das-cavernas — e um guácharo consegue desviar de um obstáculo de apenas 20 centímetros na escuridão total."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts78/03_oilbird_cave_echolocation.webp",
+        "image_status": "rendered",
+        "seed": 725,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc78-s04",
+        "story_type": "fact",
+        "caption": {
+          "en": "A moth that jams a bat's sonar",
+          "es": "Una polilla que interfiere el sonar de un murciélago",
+          "fr": "Un papillon de nuit qui brouille le sonar d'une chauve-souris",
+          "ja": "コウモリのソナーを妨害する蛾",
+          "pt-BR": "Uma mariposa que interfere no sonar de um morcego"
+        },
+        "long_press": {
+          "en": "When a tiger moth hears a hunting bat closing in, it answers with its own ultrasonic fire — thousands of clicks a second from a buckling patch of cuticle on its sides called a tymbal. The bursts land in the split-millisecond window the bat needs to read its echo and scramble it, like static over a radio. In flight tests, jamming moths slipped attack after attack; moths with the organ silenced were almost all caught.",
+          "es": "Cuando una polilla tigre oye acercarse a un murciélago cazador, responde con su propio fuego ultrasónico: miles de clics por segundo desde un trozo de cutícula que se pandea en sus costados, llamado tímbalo. Las ráfagas caen en la ventana de una fracción de milisegundo que el murciélago necesita para leer su eco y lo revuelven, como estática sobre una radio. En pruebas de vuelo, las polillas que interferían esquivaban ataque tras ataque; las que tenían el órgano silenciado fueron capturadas casi todas.",
+          "fr": "Quand une écaille tigre entend une chauve-souris en chasse approcher, elle répond par son propre tir ultrasonore : des milliers de clics par seconde émis par une plaque de cuticule qui se déforme sur ses flancs, appelée tymbale. Les salves tombent dans la fenêtre d'une fraction de milliseconde dont la chauve-souris a besoin pour lire son écho et le brouillent, comme de la friture sur une radio. Lors d'essais en vol, les papillons brouilleurs déjouaient attaque après attaque ; ceux dont l'organe avait été réduit au silence ont presque tous été pris.",
+          "ja": "ヒトリガは、狩りをするコウモリが近づく音を聞くと、自らの超音波で応戦する——脇腹にある「ティンバル」と呼ばれるクチクラの板を座屈させ、1秒間に数千回のクリック音を出すのだ。その連射は、コウモリが反響を読み取るのに必要なほんの数千分の一秒の隙間に届き、ラジオの雑音のように反響をかき乱す。飛行実験では、妨害する蛾は攻撃を次々とかわした。一方、この器官を黙らせた蛾はほぼすべて捕まった。",
+          "pt-BR": "Quando uma mariposa-tigre ouve um morcego caçador se aproximando, responde com seu próprio fogo ultrassônico: milhares de cliques por segundo a partir de uma placa de cutícula que se flexiona em suas laterais, chamada timbal. As rajadas caem na janela de uma fração de milissegundo que o morcego precisa para ler seu eco e o embaralham, como estática num rádio. Em testes de voo, as mariposas que interferiam escapavam de ataque após ataque; as que tiveram o órgão silenciado foram quase todas capturadas."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts78/04_tiger_moth_jams_sonar.webp",
+        "image_status": "rendered",
+        "seed": 726,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc78-s05",
+        "story_type": "fact",
+        "caption": {
+          "en": "Spinning tails that fool a hunter's ear",
+          "es": "Colas que giran y engañan al oído del cazador",
+          "fr": "Des queues tournoyantes qui trompent l'oreille du chasseur",
+          "ja": "狩人の耳を惑わす、くるくる回る尾",
+          "pt-BR": "Caudas giratórias que enganam o ouvido do caçador"
+        },
+        "long_press": {
+          "en": "The long twisted streamers on a luna moth's hindwings aren't just for show. As the moth flies they whirl and flutter, throwing back a confusing second echo that a bat's sonar mistakes for the moth's body. The bat lunges at the spinning tail instead — and the moth loses a harmless scrap of wing and lives. In flight trials, the tails pulled the strike off target most of the time and raised survival by roughly 47 percent.",
+          "es": "Los largos lazos retorcidos en las alas traseras de la polilla luna no son solo adorno. Mientras la polilla vuela, giran y ondean, devolviendo un segundo eco confuso que el sonar del murciélago confunde con el cuerpo de la polilla. El murciélago se lanza entonces contra la cola giratoria, y la polilla pierde un trozo inofensivo de ala y sobrevive. En pruebas de vuelo, las colas desviaron el golpe la mayoría de las veces y elevaron la supervivencia en torno a un 47 por ciento.",
+          "fr": "Les longs rubans torsadés à l'arrière des ailes du papillon lune ne sont pas qu'une parure. Quand le papillon vole, ils tournoient et battent, renvoyant un second écho trompeur que le sonar de la chauve-souris prend pour le corps du papillon. La chauve-souris se jette alors sur la queue tournoyante — et le papillon ne perd qu'un fragment d'aile inoffensif et survit. Lors d'essais en vol, ces queues ont détourné l'attaque la plupart du temps et augmenté la survie d'environ 47 pour cent.",
+          "ja": "オオミズアオの後翅にある長くねじれた飾り尾は、ただの見栄えではない。蛾が飛ぶとそれは渦を巻いてはためき、コウモリのソナーが蛾の胴体と取り違えるまぎらわしい第二の反響を返す。コウモリは代わりに回転する尾に飛びかかり——蛾は無害な翅の切れ端を失うだけで生き延びる。飛行実験では、この尾は大半の場合で攻撃を的から逸らし、生存率をおよそ47パーセント高めた。",
+          "pt-BR": "As longas fitas retorcidas nas asas traseiras da mariposa-lua não são só enfeite. Enquanto a mariposa voa, elas giram e tremulam, devolvendo um segundo eco confuso que o sonar do morcego confunde com o corpo da mariposa. O morcego então investe contra a cauda giratória — e a mariposa perde apenas um pedaço inofensivo de asa e sobrevive. Em ensaios de voo, as caudas desviaram o ataque na maioria das vezes e elevaram a sobrevivência em cerca de 47 por cento."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts78/05_luna_moth_tail_decoy.webp",
+        "image_status": "rendered",
+        "seed": 727,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc78-s06",
+        "story_type": "fact",
+        "caption": {
+          "en": "This bat aims its sound with its nose",
+          "es": "Este murciélago apunta su sonido con la nariz",
+          "fr": "Cette chauve-souris vise son son avec son nez",
+          "ja": "このコウモリは鼻で音を狙い定める",
+          "pt-BR": "Este morcego mira o som com o nariz"
+        },
+        "long_press": {
+          "en": "A horseshoe bat sings through its nose, and the fleshy folds around its nostrils — the 'nose-leaf' — work like a sculpted megaphone that aims the beam. It holds one long, pure tone and, as it flies, constantly tweaks the pitch so the returning echo stays fixed at the exact frequency its ear is tuned to. That trick lets it pick out the tiny flicker of an insect's beating wings against a wall of clutter.",
+          "es": "El murciélago de herradura canta por la nariz, y los pliegues carnosos alrededor de sus fosas nasales —la 'hoja nasal'— funcionan como un megáfono esculpido que apunta el haz. Mantiene un único tono largo y puro y, mientras vuela, ajusta sin parar la frecuencia para que el eco de vuelta se quede fijo en la frecuencia exacta a la que está afinado su oído. Ese truco le permite distinguir el diminuto parpadeo de las alas de un insecto contra un muro de ruido.",
+          "fr": "Le rhinolophe chante par le nez, et les replis charnus autour de ses narines — la « feuille nasale » — agissent comme un mégaphone sculpté qui oriente le faisceau. Il tient une seule note longue et pure et, en vol, ajuste sans cesse la hauteur pour que l'écho de retour reste fixé à la fréquence exacte sur laquelle son oreille est accordée. Cette astuce lui permet de repérer le minuscule scintillement des ailes battantes d'un insecte au milieu d'un mur de bruit.",
+          "ja": "キクガシラコウモリは鼻で歌い、鼻孔のまわりの肉のひだ——「鼻葉」——が、ビームを向ける彫刻のようなメガホンとして働く。長く澄んだ一つの音を保ちながら飛び、戻ってくる反響が耳の調律された周波数にぴたりと留まるよう、絶えず音の高さを微調整する。この技のおかげで、雑然とした反響の壁の中でも、昆虫の羽ばたきというごく小さなちらつきを聞き分けられる。",
+          "pt-BR": "O morcego-de-ferradura canta pelo nariz, e as dobras carnudas ao redor de suas narinas — a 'folha nasal' — funcionam como um megafone esculpido que mira o feixe. Ele sustenta um único tom longo e puro e, enquanto voa, ajusta o tempo todo a frequência para que o eco de retorno fique fixo na frequência exata em que seu ouvido está sintonizado. Esse truque lhe permite distinguir o minúsculo tremular das asas batendo de um inseto contra uma parede de ruído."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts78/06_horseshoe_bat_noseleaf_doppler.webp",
+        "image_status": "rendered",
+        "seed": 728,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc78-s07",
+        "story_type": "fact",
+        "caption": {
+          "en": "A bat goes deaf to hear its own echo",
+          "es": "Un murciélago se ensordece para oír su propio eco",
+          "fr": "Une chauve-souris se rend sourde pour entendre son propre écho",
+          "ja": "コウモリは自分の反響を聞くために一瞬耳を閉ざす",
+          "pt-BR": "Um morcego fica surdo para ouvir o próprio eco"
+        },
+        "long_press": {
+          "en": "An echolocating bat shouts louder than a smoke alarm held to your ear — over 130 decibels. To keep from deafening itself, a tiny muscle in its middle ear, the stapedius, clenches a few thousandths of a second before each call, pulling the ear bones apart so the blast barely registers. The instant the call ends the muscle lets go, and the ear snaps back to full sensitivity just in time to catch the faint returning echo.",
+          "es": "Un murciélago que ecolocaliza grita más fuerte que una alarma de humo pegada a tu oído: más de 130 decibelios. Para no ensordecerse, un diminuto músculo de su oído medio, el estapedio, se contrae unas milésimas de segundo antes de cada llamada y separa los huesecillos para que el estallido apenas se registre. En cuanto termina la llamada, el músculo se suelta y el oído recupera toda su sensibilidad justo a tiempo para captar el débil eco de vuelta.",
+          "fr": "Une chauve-souris qui pratique l'écholocation crie plus fort qu'un détecteur de fumée collé à votre oreille — plus de 130 décibels. Pour ne pas se rendre sourde, un minuscule muscle de son oreille moyenne, le stapédien, se contracte quelques millièmes de seconde avant chaque cri et écarte les osselets pour que la détonation s'enregistre à peine. À l'instant où le cri s'arrête, le muscle se relâche et l'oreille retrouve toute sa sensibilité juste à temps pour saisir le faible écho de retour.",
+          "ja": "反響定位するコウモリは、耳元で鳴る火災警報より大きな声で叫ぶ——130デシベルを超える。自分の耳を聞こえなくしないために、中耳にあるアブミ骨筋という小さな筋肉が、鳴く数千分の一秒前に締まり、耳の骨を引き離して衝撃がほとんど伝わらないようにする。鳴き終えた瞬間に筋肉はゆるみ、耳は弱々しい戻りの反響をとらえるのにちょうど間に合うよう、再び十分な感度を取り戻す。",
+          "pt-BR": "Um morcego que ecolocaliza grita mais alto que um alarme de fumaça encostado no seu ouvido — mais de 130 decibéis. Para não ficar surdo, um minúsculo músculo do ouvido médio, o estapédio, se contrai alguns milésimos de segundo antes de cada chamado e afasta os ossículos para que a explosão mal seja registrada. No instante em que o chamado termina, o músculo se solta e o ouvido volta à plena sensibilidade bem a tempo de captar o fraco eco de retorno."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts78/07_bat_self_deafens.webp",
+        "image_status": "rendered",
+        "seed": 729,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc78-s08",
+        "story_type": "fact",
+        "caption": {
+          "en": "A moth wears a coat that eats sound",
+          "es": "Una polilla viste un abrigo que se come el sonido",
+          "fr": "Un papillon de nuit porte un manteau qui mange le son",
+          "ja": "音を食べる外套をまとう蛾",
+          "pt-BR": "Uma mariposa veste um casaco que devora o som"
+        },
+        "long_press": {
+          "en": "Some moths carry the first known natural acoustic camouflage. Their wings and bodies are covered in tens of thousands of tiny scales, each tuned like a microscopic tuning fork to a different pitch. When a bat's ultrasound hits them they flex and twist, swallowing the energy instead of bouncing it back — soaking up as much as 72 percent of the sound, so the moth half-vanishes from the bat's sonar screen.",
+          "es": "Algunas polillas portan el primer camuflaje acústico natural conocido. Sus alas y su cuerpo están cubiertos de decenas de miles de diminutas escamas, cada una afinada como un microscópico diapasón a una frecuencia distinta. Cuando el ultrasonido de un murciélago las golpea, se flexionan y retuercen, tragándose la energía en vez de rebotarla, absorbiendo hasta un 72 por ciento del sonido, así que la polilla casi desaparece de la pantalla del sonar del murciélago.",
+          "fr": "Certains papillons de nuit portent le premier camouflage acoustique naturel connu. Leurs ailes et leur corps sont couverts de dizaines de milliers de minuscules écailles, chacune accordée comme un diapason microscopique sur une hauteur différente. Quand l'ultrason d'une chauve-souris les frappe, elles fléchissent et se tordent, avalant l'énergie au lieu de la renvoyer — absorbant jusqu'à 72 pour cent du son, si bien que le papillon s'efface à demi de l'écran du sonar de la chauve-souris.",
+          "ja": "一部の蛾は、知られている中で最初の天然の音響迷彩をまとっている。翅と体は何万もの小さな鱗粉で覆われ、その一枚一枚が顕微鏡的な音叉のように別々の音の高さに調律されている。コウモリの超音波が当たると鱗粉はしなってねじれ、音をはね返さずにエネルギーを飲み込む——音の最大72パーセントを吸い取り、蛾はコウモリのソナー画面から半ば姿を消す。",
+          "pt-BR": "Algumas mariposas carregam a primeira camuflagem acústica natural conhecida. Suas asas e corpo são cobertos por dezenas de milhares de minúsculas escamas, cada uma afinada como um diapasão microscópico em uma frequência diferente. Quando o ultrassom de um morcego as atinge, elas se flexionam e torcem, engolindo a energia em vez de devolvê-la — absorvendo até 72 por cento do som, de modo que a mariposa quase some da tela do sonar do morcego."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts78/08_moth_scale_acoustic_stealth.webp",
+        "image_status": "rendered",
+        "seed": 730,
+        "text_status": "draft",
+        "actions": []
+      }
+    ]
+  },
+  {
     "id": "deepcuts100",
     "type": "deepcuts",
     "order": 100,
@@ -25466,6 +25667,609 @@
         "image": "https://cdn.mentria.ai/deepcuts148/08_nomura_giant_jellyfish.webp",
         "image_status": "rendered",
         "seed": 1290,
+        "text_status": "draft",
+        "actions": []
+      }
+    ]
+  },
+  {
+    "id": "deepcuts149",
+    "type": "deepcuts",
+    "order": 149,
+    "title": "Deep Cuts",
+    "subtitle": {
+      "en": "Eight things hiding in a flake of mica.",
+      "es": "Ocho cosas escondidas en una lámina de mica.",
+      "fr": "Huit choses cachées dans une paillette de mica.",
+      "ja": "雲母のかけらに隠れた8つのこと。",
+      "pt-BR": "Oito coisas escondidas numa lasca de mica."
+    },
+    "cover_image": "https://cdn.mentria.ai/deepcuts149/00_cover.webp",
+    "status": "draft",
+    "slides": [
+      {
+        "id": "dc149-s01",
+        "story_type": "fact",
+        "caption": {
+          "en": "It splits into sheets you can see straight through",
+          "es": "Se divide en láminas que dejan ver a través",
+          "fr": "Il se fend en feuillets transparents",
+          "ja": "透けて見える薄い層にはがれる",
+          "pt-BR": "Ela se separa em folhas transparentes"
+        },
+        "long_press": {
+          "en": "Mica is built from stacked layers held together so weakly that you can peel it apart with a fingernail into sheets thinner than paper, down to a few thousandths of a millimeter, and they stay clear, springy, and tough. A single crystal can be split again and again into hundreds of transparent flakes, each one flexible enough to bend without snapping. That clean splitting is called perfect cleavage.",
+          "es": "La mica está formada por capas apiladas unidas tan débilmente que puedes separarlas con la uña en láminas más finas que el papel, de apenas unas milésimas de milímetro, y siguen siendo transparentes, elásticas y resistentes. Un solo cristal puede dividirse una y otra vez en cientos de hojuelas transparentes, cada una lo bastante flexible para doblarse sin romperse. Esa división limpia se llama exfoliación perfecta.",
+          "fr": "Le mica est fait de couches empilées si faiblement liées qu'on peut les détacher à l'ongle en feuillets plus fins que le papier, jusqu'à quelques millièmes de millimètre, et qui restent transparents, élastiques et solides. Un seul cristal peut être fendu encore et encore en des centaines de paillettes transparentes, chacune assez souple pour plier sans casser. Ce clivage net s'appelle un clivage parfait.",
+          "ja": "雲母は積み重なった層でできていて、その結びつきがとても弱いため、爪で紙より薄い、数千分の1ミリほどの薄片にはがせるのに、透明で弾力があり丈夫なままだ。1つの結晶を何度も割って数百枚の透明なかけらにでき、どれも割れずに曲がるほどしなやかだ。このきれいな割れ方を完全劈開という。",
+          "pt-BR": "A mica é feita de camadas empilhadas unidas tão fracamente que dá para separá-las com a unha em folhas mais finas que papel, de poucos milésimos de milímetro, e elas continuam transparentes, elásticas e resistentes. Um único cristal pode ser dividido vezes sem conta em centenas de lascas transparentes, cada uma flexível o bastante para dobrar sem quebrar. Essa divisão limpa se chama clivagem perfeita."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts149/01_mica_thin_sheets.webp",
+        "image_status": "rendered",
+        "seed": 1291,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc149-s02",
+        "story_type": "fact",
+        "caption": {
+          "en": "It was window glass before glass was cheap",
+          "es": "Fue el vidrio de las ventanas antes de que el vidrio fuera barato",
+          "fr": "Il servait de vitre avant que le verre soit bon marché",
+          "ja": "ガラスが安くなる前は窓ガラスだった",
+          "pt-BR": "Foi vidro de janela antes de o vidro ficar barato"
+        },
+        "long_press": {
+          "en": "Long before clear window glass was affordable, people glazed their windows with mica. Big flat sheets split from crystals in Russia were so commonly used as panes that the mineral picked up the name muscovite, after Muscovy, the old name for the Moscow lands. Across Russia, India, and parts of Europe, homes and churches let in the light through thin slices of stone instead of glass.",
+          "es": "Mucho antes de que el vidrio transparente para ventanas fuera asequible, la gente acristalaba sus ventanas con mica. Las grandes láminas planas separadas de cristales en Rusia se usaban tanto como vidrios que el mineral acabó llamándose moscovita, por Moscovia, el viejo nombre de las tierras de Moscú. En Rusia, la India y partes de Europa, casas e iglesias dejaban entrar la luz a través de finas lonchas de piedra en lugar de vidrio.",
+          "fr": "Bien avant que le verre à vitre transparent ne soit abordable, on vitrait ses fenêtres avec du mica. De grandes plaques planes détachées de cristaux en Russie servaient si couramment de carreaux que le minéral fut baptisé muscovite, d'après la Moscovie, ancien nom des terres de Moscou. En Russie, en Inde et dans certaines régions d'Europe, maisons et églises laissaient entrer la lumière à travers de fines tranches de pierre plutôt que du verre.",
+          "ja": "透明な窓ガラスが手頃になるずっと前、人々は雲母で窓をはめていた。ロシアで結晶から割り出した大きな平らな板が窓として広く使われたため、この鉱物はモスクワ一帯の古名ムスコビーにちなんで白雲母(マスコバイト)と呼ばれるようになった。ロシア、インド、ヨーロッパの一部では、家や教会がガラスの代わりに薄い石の板から光を取り入れていた。",
+          "pt-BR": "Muito antes de o vidro transparente de janela ser acessível, as pessoas envidraçavam as janelas com mica. Grandes folhas planas separadas de cristais na Rússia eram tão usadas como vidraças que o mineral ganhou o nome muscovita, em referência à Moscóvia, o antigo nome das terras de Moscou. Na Rússia, na Índia e em partes da Europa, casas e igrejas deixavam a luz entrar por finas fatias de pedra em vez de vidro."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts149/02_mica_muscovy_glass.webp",
+        "image_status": "rendered",
+        "seed": 1292,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc149-s03",
+        "story_type": "fact",
+        "caption": {
+          "en": "It's the little window in an old stove door",
+          "es": "Es la ventanita en la puerta de una estufa antigua",
+          "fr": "C'est la petite vitre d'une vieille porte de poêle",
+          "ja": "古いストーブの扉の小窓はこれ",
+          "pt-BR": "É a janelinha na porta de um fogão antigo"
+        },
+        "long_press": {
+          "en": "Mica shrugs off heat that shatters ordinary glass, staying clear past 500 to 1000 degrees Celsius and surviving sudden temperature swings without cracking. That made it the classic see-through window in wood and coal stove doors, in lanterns, and in furnace peepholes, where you could watch the flames safely. Old catalogues called these thin amber panes isinglass.",
+          "es": "La mica resiste un calor que haría añicos el vidrio común, manteniéndose transparente más allá de los 500 a 1000 grados Celsius y sobreviviendo a cambios bruscos de temperatura sin agrietarse. Por eso fue la clásica ventanita transparente en las puertas de estufas de leña y carbón, en faroles y en las mirillas de los hornos, donde podías observar las llamas sin peligro. Los catálogos antiguos llamaban isinglás a estas finas láminas de color ámbar.",
+          "fr": "Le mica encaisse une chaleur qui ferait éclater le verre ordinaire : il reste transparent au-delà de 500 à 1000 degrés Celsius et survit aux écarts brusques de température sans se fissurer. Cela en fit la vitre transparente classique des portes de poêles à bois et à charbon, des lanternes et des regards de fournaise, où l'on pouvait observer les flammes sans danger. Les vieux catalogues appelaient ces fines plaques ambrées de l'isinglass.",
+          "ja": "雲母は普通のガラスを砕くほどの熱を平気でしのぎ、500〜1000度を超えても透明なまま、急な温度変化にもひび割れずに耐える。そのため、薪や石炭ストーブの扉、ランタン、炉の覗き窓の定番の透明な窓となり、炎を安全に眺められた。古いカタログはこの薄い琥珀色の板をアイシングラスと呼んだ。",
+          "pt-BR": "A mica ignora um calor que estilhaça o vidro comum, permanecendo transparente acima de 500 a 1000 graus Celsius e sobrevivendo a mudanças bruscas de temperatura sem trincar. Isso fez dela a clássica janelinha transparente em portas de fogões a lenha e a carvão, em lanternas e em visores de fornalhas, onde dava para observar as chamas com segurança. Catálogos antigos chamavam essas finas placas âmbar de isinglass."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts149/03_mica_stove_window.webp",
+        "image_status": "rendered",
+        "seed": 1293,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc149-s04",
+        "story_type": "fact",
+        "caption": {
+          "en": "That shimmer in makeup is powdered stone",
+          "es": "Ese brillo del maquillaje es piedra en polvo",
+          "fr": "Ce miroitement du maquillage, c'est de la pierre en poudre",
+          "ja": "化粧品のきらめきは粉にした石",
+          "pt-BR": "Aquele brilho da maquiagem é pedra em pó"
+        },
+        "long_press": {
+          "en": "The pearly glow in eyeshadow, lipstick, and metallic car paint usually comes from mica ground into tiny flakes. Each flake is a transparent little mirror; coated with a thin film of titanium dioxide, it splits and bounces light so the color seems to shift and shimmer as you move. It isn't a dye at all, just stone shaved thin enough to play tricks with light.",
+          "es": "El brillo nacarado de las sombras de ojos, los labiales y la pintura metalizada de los coches suele venir de mica molida en diminutas hojuelas. Cada hojuela es un pequeño espejo transparente; recubierta con una fina capa de dióxido de titanio, divide y rebota la luz, de modo que el color parece cambiar y centellear cuando te mueves. No es un tinte en absoluto, solo piedra rebanada tan fina como para jugar con la luz.",
+          "fr": "L'éclat nacré des fards à paupières, des rouges à lèvres et des peintures métallisées des voitures vient le plus souvent de mica broyé en minuscules paillettes. Chaque paillette est un petit miroir transparent ; recouverte d'un fin film de dioxyde de titane, elle divise et renvoie la lumière, si bien que la couleur semble changer et scintiller quand on bouge. Ce n'est pas du tout un colorant, juste de la pierre tranchée assez fin pour jouer avec la lumière.",
+          "ja": "アイシャドウや口紅、車のメタリック塗装の真珠のような輝きは、たいてい細かなかけらにすりつぶした雲母から生まれる。各かけらは透明な小さな鏡で、二酸化チタンの薄い膜をまとうと光を分けて跳ね返すため、動くと色が移ろいきらめいて見える。それは染料などではなく、光をもてあそべるほど薄く削った石にすぎない。",
+          "pt-BR": "O brilho perolado em sombras, batons e na tinta metálica dos carros costuma vir de mica moída em lasquinhas minúsculas. Cada lasca é um pequeno espelho transparente; revestida com uma fina película de dióxido de titânio, ela divide e reflete a luz, de modo que a cor parece mudar e cintilar conforme você se move. Não é corante nenhum, só pedra fatiada fina o bastante para brincar com a luz."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts149/04_mica_shimmer_pigment.webp",
+        "image_status": "rendered",
+        "seed": 1294,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc149-s05",
+        "story_type": "fact",
+        "caption": {
+          "en": "It quietly insulated the first radios",
+          "es": "Aisló en silencio las primeras radios",
+          "fr": "Il isolait discrètement les premières radios",
+          "ja": "初期のラジオをひそかに絶縁していた",
+          "pt-BR": "Isolou silenciosamente os primeiros rádios"
+        },
+        "long_press": {
+          "en": "Mica blocks electricity superbly while standing up to high heat, so engineers built it into the small capacitors that tuned early radios and into the insulating spacers inside vacuum tubes. A sheet just a fraction of a millimeter thick can hold off thousands of volts. Through both world wars it was a strategic mineral, vital to nearly every piece of radio and communication equipment.",
+          "es": "La mica bloquea la electricidad de maravilla y soporta altas temperaturas, así que los ingenieros la incorporaron en los pequeños condensadores que sintonizaban las primeras radios y en los separadores aislantes dentro de las válvulas de vacío. Una lámina de apenas una fracción de milímetro puede contener miles de voltios. Durante las dos guerras mundiales fue un mineral estratégico, vital para casi todo equipo de radio y comunicaciones.",
+          "fr": "Le mica bloque l'électricité à merveille tout en résistant à de fortes chaleurs ; les ingénieurs l'ont donc intégré aux petits condensateurs qui accordaient les premières radios et aux entretoises isolantes à l'intérieur des tubes à vide. Une plaque de quelques fractions de millimètre peut retenir des milliers de volts. Pendant les deux guerres mondiales, ce fut un minéral stratégique, vital pour presque tout équipement de radio et de communication.",
+          "ja": "雲母は電気を見事に遮りながら高熱にも耐えるので、技術者は初期のラジオを同調させる小さなコンデンサーや、真空管内部の絶縁スペーサーに組み込んだ。わずか数分の1ミリの板が数千ボルトを食い止められる。二度の世界大戦を通じてこれは戦略鉱物であり、ほぼすべての無線・通信機器に欠かせなかった。",
+          "pt-BR": "A mica bloqueia a eletricidade primorosamente e ainda aguenta calor intenso, então os engenheiros a colocaram nos pequenos capacitores que sintonizavam os primeiros rádios e nos espaçadores isolantes dentro das válvulas. Uma folha de apenas uma fração de milímetro pode conter milhares de volts. Nas duas guerras mundiais foi um mineral estratégico, vital para quase todo equipamento de rádio e comunicação."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts149/05_mica_electrical_insulator.webp",
+        "image_status": "rendered",
+        "seed": 1295,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc149-s06",
+        "story_type": "fact",
+        "caption": {
+          "en": "It grows in giant stone 'books'",
+          "es": "Crece en gigantescos «libros» de piedra",
+          "fr": "Il pousse en gigantesques « livres » de pierre",
+          "ja": "巨大な石の「本」となって育つ",
+          "pt-BR": "Cresce em gigantescos “livros” de pedra"
+        },
+        "long_press": {
+          "en": "Mica crystals grow as stacks of sheets that geologists actually call books, because they look just like the pages of one. In coarse rock called pegmatite they can swell to enormous size. The largest single mica crystal on record, found in Ontario, measured about ten meters long and weighed close to 330 tonnes, a book far too heavy to lift, let alone open.",
+          "es": "Los cristales de mica crecen como pilas de láminas que los geólogos llaman literalmente libros, porque se parecen justo a sus páginas. En una roca gruesa llamada pegmatita pueden alcanzar un tamaño enorme. El mayor cristal de mica registrado, hallado en Ontario, medía unos diez metros de largo y pesaba cerca de 330 toneladas, un libro demasiado pesado para levantarlo, y no digamos para abrirlo.",
+          "fr": "Les cristaux de mica poussent en piles de feuillets que les géologues appellent justement des livres, car ils ressemblent à s'y méprendre à des pages. Dans une roche grossière nommée pegmatite, ils peuvent atteindre une taille énorme. Le plus grand cristal de mica connu, trouvé en Ontario, mesurait environ dix mètres de long et pesait près de 330 tonnes, un livre bien trop lourd à soulever, et encore plus à ouvrir.",
+          "ja": "雲母の結晶は薄い層が積み重なって育ち、地質学者は実際にそれを「本」と呼ぶ。ページそっくりに見えるからだ。ペグマタイトという粗い岩の中では巨大に膨れ上がる。記録上最大の雲母の単結晶はオンタリオで見つかり、長さ約10メートル、重さは330トン近く、持ち上げるどころか開くこともできない本だ。",
+          "pt-BR": "Os cristais de mica crescem como pilhas de folhas que os geólogos de fato chamam de livros, porque parecem exatamente as páginas de um. Numa rocha grossa chamada pegmatito, podem inchar até um tamanho enorme. O maior cristal de mica já registrado, achado em Ontário, media cerca de dez metros de comprimento e pesava perto de 330 toneladas, um livro pesado demais para levantar, quanto mais para abrir."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts149/06_mica_books.webp",
+        "image_status": "rendered",
+        "seed": 1296,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc149-s07",
+        "story_type": "fact",
+        "caption": {
+          "en": "Heat one mica and it puffs up like popcorn",
+          "es": "Calienta cierta mica y se infla como palomitas",
+          "fr": "Chauffez un certain mica et il gonfle comme du pop-corn",
+          "ja": "ある雲母を熱するとポップコーンのように膨らむ",
+          "pt-BR": "Aqueça certa mica e ela estufa feito pipoca"
+        },
+        "long_press": {
+          "en": "One mica, called vermiculite, hides water trapped between its layers. Heat it fast and that water flashes to steam, shoving the sheets apart so the flake unfolds like an accordion and balloons to as much as twenty to thirty times its original size. The light golden worm-shaped curls it leaves behind are what gardeners stir into potting soil and builders pack in as insulation.",
+          "es": "Cierta mica, llamada vermiculita, esconde agua atrapada entre sus capas. Caliéntala rápido y esa agua se convierte de golpe en vapor, separando las láminas, de modo que la hojuela se despliega como un acordeón y se hincha hasta veinte o treinta veces su tamaño original. Los rizos dorados con forma de gusano que deja son lo que los jardineros mezclan en la tierra para macetas y los constructores usan como aislante.",
+          "fr": "Un certain mica, appelé vermiculite, cache de l'eau emprisonnée entre ses couches. Chauffez-le vite et cette eau se transforme d'un coup en vapeur, écartant les feuillets : la paillette se déplie comme un accordéon et gonfle jusqu'à vingt ou trente fois sa taille initiale. Les bouclettes dorées en forme de vers qu'elle laisse sont ce que les jardiniers mêlent au terreau et les bâtisseurs tassent comme isolant.",
+          "ja": "ヴァーミキュライトと呼ばれるある雲母は、層の間に水を閉じ込めている。急いで熱するとその水が一気に蒸気になり、層を押し広げるので、かけらはアコーディオンのように広がり、元の20〜30倍にも膨らむ。あとに残る淡い金色の虫のような巻き毛が、園芸家が培養土に混ぜ、建築家が断熱材として詰めるものだ。",
+          "pt-BR": "Certa mica, chamada vermiculita, esconde água presa entre suas camadas. Aqueça-a depressa e essa água vira vapor num instante, empurrando as folhas para os lados, de modo que a lasca se desdobra feito sanfona e incha até vinte ou trinta vezes o tamanho original. Os cachinhos dourados em forma de verme que ela deixa são o que os jardineiros misturam ao substrato e os construtores usam como isolante."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts149/07_mica_vermiculite_puff.webp",
+        "image_status": "rendered",
+        "seed": 1297,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc149-s08",
+        "story_type": "fact",
+        "caption": {
+          "en": "This lilac mica is mined for battery metal",
+          "es": "Esta mica lila se extrae por el metal de las baterías",
+          "fr": "Ce mica lilas est extrait pour le métal des batteries",
+          "ja": "この藤色の雲母は電池の金属のために採掘される",
+          "pt-BR": "Esta mica lilás é minerada pelo metal das baterias"
+        },
+        "long_press": {
+          "en": "A pinkish-purple mica called lepidolite is one of the main minerals we mine for lithium, the metal at the heart of rechargeable batteries, and it yields the rare metals rubidium and cesium as a bonus. Its pretty lilac color, though, has nothing to do with lithium; that shade comes from faint traces of manganese woven into the crystal.",
+          "es": "Una mica de color rosa púrpura llamada lepidolita es uno de los principales minerales que extraemos para obtener litio, el metal en el corazón de las baterías recargables, y de propina aporta los metales raros rubidio y cesio. Su bonito color lila, sin embargo, no tiene nada que ver con el litio; ese tono proviene de leves trazas de manganeso entretejidas en el cristal.",
+          "fr": "Un mica rose-violet appelé lépidolite est l'un des principaux minéraux que l'on extrait pour le lithium, le métal au cœur des batteries rechargeables, et il fournit en prime les métaux rares rubidium et césium. Sa jolie couleur lilas, pourtant, n'a rien à voir avec le lithium ; cette teinte vient de faibles traces de manganèse tissées dans le cristal.",
+          "ja": "鱗雲母(レピドライト)と呼ばれる桃紫色の雲母は、充電池の心臓部の金属であるリチウムを取るために採掘する主要鉱物の一つで、おまけに希少金属のルビジウムとセシウムも産する。とはいえ、その美しい藤色はリチウムとは無関係で、その色合いは結晶に織り込まれたわずかなマンガンの痕跡から来ている。",
+          "pt-BR": "Uma mica rosa-arroxeada chamada lepidolita é um dos principais minerais que mineramos pelo lítio, o metal no coração das baterias recarregáveis, e de brinde fornece os metais raros rubídio e césio. Sua bela cor lilás, porém, não tem nada a ver com o lítio; esse tom vem de leves traços de manganês entremeados no cristal."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts149/08_mica_lepidolite_lithium.webp",
+        "image_status": "rendered",
+        "seed": 1298,
+        "text_status": "draft",
+        "actions": []
+      }
+    ]
+  },
+  {
+    "id": "deepcuts150",
+    "type": "deepcuts",
+    "order": 150,
+    "title": "Deep Cuts",
+    "subtitle": {
+      "en": "Eight things ferns do that flowering plants never learned",
+      "es": "Ocho cosas que hacen los helechos y que las plantas con flores nunca aprendieron",
+      "fr": "Huit choses que les fougères font et que les plantes à fleurs n'ont jamais apprises",
+      "ja": "シダができて、花を咲かせる植物には決してできなかった8つのこと",
+      "pt-BR": "Oito coisas que as samambaias fazem e que as plantas com flores nunca aprenderam"
+    },
+    "cover_image": "https://cdn.mentria.ai/deepcuts150/00_cover.webp",
+    "status": "draft",
+    "slides": [
+      {
+        "id": "dc150-s01",
+        "story_type": "fact",
+        "caption": {
+          "en": "This fern flings its spores with a tiny catapult",
+          "es": "Este helecho lanza sus esporas con una diminuta catapulta",
+          "fr": "Cette fougère projette ses spores avec une minuscule catapulte",
+          "ja": "このシダは小さなカタパルトで胞子を飛ばす",
+          "pt-BR": "Esta samambaia lança seus esporos com uma minúscula catapulta"
+        },
+        "long_press": {
+          "en": "Look under a fern frond and you find rows of little spore cases. Each one is a catapult. As it dries, a ring of cells called the annulus pulls back; the water inside snaps into vapour and the ring springs forward, hurling the spores at about 6.9 metres per second. The launch lasts only tens of millionths of a second, with accelerations near 100,000 times gravity — among the fastest movements any plant makes.",
+          "es": "Mira bajo una fronda de helecho y encontrarás filas de pequeñas cápsulas de esporas. Cada una es una catapulta. Al secarse, un anillo de células llamado anillo mecánico se retrae; el agua de su interior se convierte de golpe en vapor y el anillo salta hacia adelante, lanzando las esporas a unos 6.9 metros por segundo. El disparo dura solo decenas de millonésimas de segundo, con aceleraciones cercanas a 100,000 veces la gravedad: uno de los movimientos más rápidos que realiza una planta.",
+          "fr": "Regardez sous une fronde de fougère et vous trouverez des rangées de petites capsules à spores. Chacune est une catapulte. En séchant, un anneau de cellules appelé annulus se rétracte ; l'eau qu'il contient se transforme brusquement en vapeur et l'anneau se détend vers l'avant, projetant les spores à environ 6.9 mètres par seconde. Le lancement ne dure que quelques dizaines de millionièmes de seconde, avec des accélérations proches de 100,000 fois la gravité — l'un des mouvements les plus rapides qu'une plante puisse faire.",
+          "ja": "シダの葉の裏を見ると、小さな胞子のうが列をなしている。その一つひとつがカタパルトだ。乾くにつれて、環帯と呼ばれる細胞の輪が後ろへ引かれ、中の水が一気に蒸気に変わると、輪が前へ跳ね返り、胞子を秒速約6.9メートルで飛ばす。発射はわずか数十マイクロ秒で、加速度は重力の約100,000倍に達する——植物が見せる最速級の動きだ。",
+          "pt-BR": "Olhe sob uma fronde de samambaia e você encontra fileiras de pequenas cápsulas de esporos. Cada uma é uma catapulta. Ao secar, um anel de células chamado ânulo se retrai; a água em seu interior vira vapor de repente e o anel salta para a frente, arremessando os esporos a cerca de 6.9 metros por segundo. O lançamento dura apenas dezenas de milionésimos de segundo, com acelerações perto de 100,000 vezes a gravidade — um dos movimentos mais rápidos que uma planta realiza."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts150/01_fern_spore_catapult.webp",
+        "image_status": "rendered",
+        "seed": 1299,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc150-s02",
+        "story_type": "fact",
+        "caption": {
+          "en": "One fern holds more chromosomes than any living thing",
+          "es": "Un helecho tiene más cromosomas que cualquier ser vivo",
+          "fr": "Une fougère possède plus de chromosomes que tout être vivant",
+          "ja": "あるシダは、あらゆる生物より多くの染色体を持つ",
+          "pt-BR": "Uma samambaia tem mais cromossomos que qualquer ser vivo"
+        },
+        "long_press": {
+          "en": "We carry 46 chromosomes. A modest little fern called the adder's-tongue carries the most of any plant — and of any plant or animal known. One species packs roughly 1,440 chromosomes into each cell, about 720 pairs. Nobody is sure why it hoards so many copies of its genome; it simply does, quietly outdoing every flower, tree, bird and beast on Earth for sheer chromosome count.",
+          "es": "Nosotros llevamos 46 cromosomas. Un modesto helecho llamado lengua de serpiente tiene más que cualquier planta, y que cualquier planta o animal conocido. Una especie reúne unos 1,440 cromosomas en cada célula, alrededor de 720 pares. Nadie sabe con certeza por qué acumula tantas copias de su genoma; simplemente lo hace, superando en silencio a toda flor, árbol, ave y bestia de la Tierra en número de cromosomas.",
+          "fr": "Nous portons 46 chromosomes. Une modeste petite fougère appelée langue de serpent en possède plus que toute plante — et que tout végétal ou animal connu. Une espèce entasse environ 1,440 chromosomes dans chaque cellule, soit près de 720 paires. Personne ne sait vraiment pourquoi elle accumule autant de copies de son génome ; elle le fait, tout simplement, surpassant discrètement chaque fleur, arbre, oiseau et bête de la Terre par le seul nombre de chromosomes.",
+          "ja": "私たちは46本の染色体を持つ。ハナヤスリと呼ばれる地味な小さなシダは、あらゆる植物——いや、知られるどんな動植物よりも多くを持つ。ある種は1細胞におよそ1,440本、約720対もの染色体を詰め込んでいる。なぜこれほど多くのゲノムの写しをため込むのか、誰にも確かなことは分からない。ただそうしているだけで、染色体の数の多さでは地球上のあらゆる花も木も鳥も獣も静かに上回っている。",
+          "pt-BR": "Nós carregamos 46 cromossomos. Uma modesta samambaia chamada língua-de-cobra carrega mais que qualquer planta — e que qualquer planta ou animal conhecido. Uma espécie reúne cerca de 1,440 cromossomos em cada célula, mais ou menos 720 pares. Ninguém sabe ao certo por que ela acumula tantas cópias de seu genoma; ela simplesmente o faz, superando em silêncio toda flor, árvore, ave e fera da Terra no puro número de cromossomos."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts150/02_adders_tongue_chromosomes.webp",
+        "image_status": "rendered",
+        "seed": 1300,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc150-s03",
+        "story_type": "fact",
+        "caption": {
+          "en": "A tiny floating fern may have cooled the whole planet",
+          "es": "Un diminuto helecho flotante pudo haber enfriado todo el planeta",
+          "fr": "Une minuscule fougère flottante a peut-être refroidi la planète entière",
+          "ja": "小さな浮き草のようなシダが、地球全体を冷やしたかもしれない",
+          "pt-BR": "Uma minúscula samambaia flutuante pode ter resfriado o planeta inteiro"
+        },
+        "long_press": {
+          "en": "Around 49 million years ago the Arctic Ocean turned fresher on top, and a thumbnail-sized floating fern called Azolla bloomed across it in vast mats, on and off for some 800,000 years. As generation after generation died and sank, their carbon was buried on the seafloor. Many scientists think that long drawdown of carbon dioxide helped tip a hothouse Earth toward the cooler world we live in now.",
+          "es": "Hace unos 49 millones de años, la superficie del océano Ártico se volvió más dulce, y un helecho flotante del tamaño de una uña, llamado Azolla, floreció sobre él en vastas alfombras, de forma intermitente durante unos 800,000 años. A medida que generación tras generación moría y se hundía, su carbono quedaba enterrado en el fondo marino. Muchos científicos creen que esa larga retirada de dióxido de carbono ayudó a inclinar una Tierra de invernadero hacia el mundo más frío en el que vivimos hoy.",
+          "fr": "Il y a environ 49 millions d'années, la surface de l'océan Arctique est devenue plus douce, et une fougère flottante de la taille d'un ongle, appelée Azolla, s'y est épanouie en vastes tapis, par intermittence pendant quelque 800,000 ans. À mesure que les générations mouraient et coulaient, leur carbone s'enfouissait au fond de la mer. De nombreux scientifiques pensent que ce long retrait du dioxyde de carbone a contribué à faire basculer une Terre surchauffée vers le monde plus frais où nous vivons aujourd'hui.",
+          "ja": "およそ4900万年前、北極海の表層が淡水化し、爪ほどの大きさの浮遊性シダ、アゾラが広大なマットとなって水面を覆い、断続的におよそ800,000年にわたって繁茂した。世代が次々に死んで沈むたび、その炭素は海底に埋もれていった。多くの科学者は、この長い二酸化炭素の引き下げが、温室状態の地球を、今私たちが暮らすより涼しい世界へと傾けるのを助けたと考えている。",
+          "pt-BR": "Cerca de 49 milhões de anos atrás, a superfície do oceano Ártico ficou mais doce, e uma samambaia flutuante do tamanho de uma unha, chamada Azolla, floresceu sobre ele em vastos tapetes, de forma intermitente por uns 800,000 anos. À medida que geração após geração morria e afundava, seu carbono ficava enterrado no fundo do mar. Muitos cientistas acham que essa longa retirada de dióxido de carbono ajudou a inclinar uma Terra estufa rumo ao mundo mais frio em que vivemos hoje."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts150/03_azolla_arctic_cooling.webp",
+        "image_status": "rendered",
+        "seed": 1301,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc150-s04",
+        "story_type": "fact",
+        "caption": {
+          "en": "This fern drinks arsenic and stores it in its leaves",
+          "es": "Este helecho bebe arsénico y lo almacena en sus hojas",
+          "fr": "Cette fougère boit l'arsenic et le stocke dans ses feuilles",
+          "ja": "このシダはヒ素を吸い上げ、葉にため込む",
+          "pt-BR": "Esta samambaia bebe arsênico e o armazena nas folhas"
+        },
+        "long_press": {
+          "en": "Most living things flee arsenic. The brake fern does the opposite: it pulls the poison up out of the soil and stockpiles it in its fronds, reaching about 2 percent of their dry weight — over 20,000 milligrams per kilogram — without any harm. People now plant it on purpose to scrub arsenic from contaminated ground, a slow green cleanup that simply grows the toxin away.",
+          "es": "La mayoría de los seres vivos huyen del arsénico. El helecho brake hace lo contrario: extrae el veneno del suelo y lo acumula en sus frondas, alcanzando cerca del 2 por ciento de su peso seco —más de 20,000 miligramos por kilogramo— sin sufrir daño alguno. Hoy se planta a propósito para limpiar el arsénico de terrenos contaminados, una lenta limpieza verde que, sencillamente, hace crecer el tóxico fuera de la tierra.",
+          "fr": "La plupart des êtres vivants fuient l'arsenic. La fougère brake fait l'inverse : elle extrait le poison du sol et l'accumule dans ses frondes, jusqu'à environ 2 pour cent de leur poids sec — plus de 20,000 milligrammes par kilogramme — sans le moindre dommage. On la plante désormais exprès pour épurer l'arsenic des terrains contaminés, un lent nettoyage vert qui fait tout simplement pousser le toxique hors du sol.",
+          "ja": "ほとんどの生き物はヒ素を避ける。ところがイノモトソウの仲間であるブレークファーンは逆だ。土の中から毒を吸い上げ、葉に蓄え、その乾燥重量の約2パーセント——1キログラムあたり20,000ミリグラム以上——に達しても、まったく害を受けない。今では汚染された土地からヒ素を取り除くためにわざわざ植えられている。毒をただ育てて取り去る、ゆっくりとした緑の浄化だ。",
+          "pt-BR": "A maioria dos seres vivos foge do arsênico. A samambaia-brake faz o contrário: puxa o veneno do solo e o acumula em suas frondes, chegando a cerca de 2 por cento de seu peso seco — mais de 20,000 miligramas por quilograma — sem nenhum dano. Hoje as pessoas a plantam de propósito para limpar o arsênico de terrenos contaminados, uma lenta faxina verde que simplesmente faz o tóxico crescer para fora da terra."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts150/04_brake_fern_arsenic.webp",
+        "image_status": "rendered",
+        "seed": 1302,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc150-s05",
+        "story_type": "fact",
+        "caption": {
+          "en": "After the dinosaurs died, ferns took over the world first",
+          "es": "Tras la muerte de los dinosaurios, los helechos conquistaron el mundo primero",
+          "fr": "Après la mort des dinosaures, les fougères ont reconquis le monde les premières",
+          "ja": "恐竜が絶滅したあと、世界を最初に覆ったのはシダだった",
+          "pt-BR": "Depois que os dinossauros morreram, as samambaias dominaram o mundo primeiro"
+        },
+        "long_press": {
+          "en": "In the rock that records the asteroid strike 66 million years ago, geologists find a thin band just above the impact layer where fossil spores are almost all fern — locally 70 to 100 percent. Forests had burned and many plants were gone, but ferns, which spread by dust-fine spores, blanketed the scorched land first. The same recovery shows up after lava flows and landslides today.",
+          "es": "En la roca que registra el impacto del asteroide hace 66 millones de años, los geólogos encuentran una fina banda justo sobre la capa del impacto donde las esporas fósiles son casi todas de helecho: localmente del 70 al 100 por ciento. Los bosques habían ardido y muchas plantas habían desaparecido, pero los helechos, que se propagan por esporas finas como el polvo, cubrieron primero la tierra calcinada. La misma recuperación se observa hoy tras las coladas de lava y los deslizamientos.",
+          "fr": "Dans la roche qui enregistre l'impact de l'astéroïde il y a 66 millions d'années, les géologues trouvent une fine bande juste au-dessus de la couche d'impact où les spores fossiles sont presque toutes de fougère — localement de 70 à 100 pour cent. Les forêts avaient brûlé et bien des plantes avaient disparu, mais les fougères, qui se propagent par des spores fines comme la poussière, ont recouvert les premières la terre calcinée. On observe la même reprise aujourd'hui après les coulées de lave et les glissements de terrain.",
+          "ja": "6600万年前の小惑星衝突を記録する岩石の中に、地質学者は衝突層のすぐ上に薄い帯を見つける。そこでは化石の胞子のほとんどがシダのもので、場所によっては70〜100パーセントを占める。森は焼け、多くの植物が消えたが、塵のように細かい胞子で広がるシダが、焦げた大地を真っ先に覆った。同じ回復は、今日の溶岩流や地滑りのあとにも見られる。",
+          "pt-BR": "Na rocha que registra o impacto do asteroide há 66 milhões de anos, os geólogos encontram uma faixa fina logo acima da camada do impacto onde os esporos fósseis são quase todos de samambaia — localmente de 70 a 100 por cento. As florestas haviam queimado e muitas plantas tinham sumido, mas as samambaias, que se espalham por esporos finos como poeira, cobriram primeiro a terra chamuscada. A mesma recuperação aparece hoje depois de fluxos de lava e deslizamentos."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts150/05_fern_spike_extinction.webp",
+        "image_status": "rendered",
+        "seed": 1303,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc150-s06",
+        "story_type": "fact",
+        "caption": {
+          "en": "A 180-million-year-old fern looks just like today's",
+          "es": "Un helecho de 180 millones de años es igual a los de hoy",
+          "fr": "Une fougère de 180 millions d'années ressemble exactement à celles d'aujourd'hui",
+          "ja": "1億8000万年前のシダは、今のものとそっくりだ",
+          "pt-BR": "Uma samambaia de 180 milhões de anos é igualzinha às de hoje"
+        },
+        "long_press": {
+          "en": "A royal fern that grew in Jurassic Sweden was buried and mineralised so fast that its cells froze mid-life. Under the microscope you can still see the nuclei, and even the chromosomes caught in the act of dividing — virtually the same size as those in royal ferns alive now. After 180 million years, this plant has barely changed: a living thing that found its shape and simply kept it.",
+          "es": "Un helecho real que creció en la Suecia del Jurásico quedó enterrado y mineralizado tan rápido que sus células se congelaron en plena vida. Bajo el microscopio aún pueden verse los núcleos, e incluso los cromosomas sorprendidos en pleno acto de división, casi del mismo tamaño que los de los helechos reales vivos hoy. Tras 180 millones de años, esta planta apenas ha cambiado: un ser vivo que halló su forma y, sencillamente, la conservó.",
+          "fr": "Une fougère royale qui poussait dans la Suède du Jurassique a été enfouie et minéralisée si vite que ses cellules se sont figées en pleine vie. Au microscope, on voit encore les noyaux, et même les chromosomes saisis en plein acte de division — quasiment de la même taille que ceux des fougères royales vivantes aujourd'hui. Après 180 millions d'années, cette plante n'a presque pas changé : un être vivant qui a trouvé sa forme et l'a tout simplement conservée.",
+          "ja": "ジュラ紀のスウェーデンに生えていたゼンマイの仲間が、あまりに速く埋もれて鉱物化したため、細胞が生きたまま凍りついた。顕微鏡をのぞくと今も核が見え、分裂の最中をとらえられた染色体さえ見える——今生きているゼンマイのものとほぼ同じ大きさだ。1億8000万年たっても、この植物はほとんど変わっていない。自らの形を見つけ、ただそれを保ち続けてきた生き物だ。",
+          "pt-BR": "Uma samambaia-real que cresceu na Suécia do Jurássico foi soterrada e mineralizada tão depressa que suas células congelaram em plena vida. Ao microscópio ainda dá para ver os núcleos, e até os cromossomos flagrados em pleno ato de divisão — praticamente do mesmo tamanho que os das samambaias-reais vivas hoje. Após 180 milhões de anos, esta planta mal mudou: um ser vivo que achou sua forma e simplesmente a manteve."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts150/06_royal_fern_stasis.webp",
+        "image_status": "rendered",
+        "seed": 1304,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc150-s07",
+        "story_type": "fact",
+        "caption": {
+          "en": "This fern walks across rock on the tips of its leaves",
+          "es": "Este helecho camina sobre la roca con las puntas de sus hojas",
+          "fr": "Cette fougère marche sur la roche du bout de ses feuilles",
+          "ja": "このシダは葉の先端を使って岩の上を歩く",
+          "pt-BR": "Esta samambaia caminha pela rocha com as pontas das folhas"
+        },
+        "long_press": {
+          "en": "The walking fern grows long, narrow fronds that arch out over bare stone. Where a frond tip touches down, it puts out roots and sprouts a whole new plant, often 20 to 30 centimetres from the parent. That young fern sends out its own arching leaves, takes another step, and over years a single fern strolls across a mossy boulder, stitching itself into a connected colony.",
+          "es": "El helecho caminante produce frondas largas y estrechas que se arquean sobre la piedra desnuda. Donde la punta de una fronda toca el suelo, echa raíces y brota una planta entera nueva, a menudo a 20 o 30 centímetros de la madre. Ese helecho joven extiende sus propias hojas arqueadas, da otro paso, y con los años un solo helecho recorre una roca cubierta de musgo, cosiéndose en una colonia conectada.",
+          "fr": "La fougère marchante produit de longues frondes étroites qui s'arquent au-dessus de la pierre nue. Là où la pointe d'une fronde se pose, elle émet des racines et fait surgir une plante entière, souvent à 20 ou 30 centimètres de la mère. Cette jeune fougère déploie à son tour ses feuilles arquées, fait un autre pas, et au fil des ans une seule fougère parcourt un rocher moussu, se cousant en une colonie reliée.",
+          "ja": "歩くシダは、細長い葉を伸ばし、むき出しの石の上へと弓なりに張り出す。葉の先端が地面に触れると、そこから根を出し、丸ごと新しい株を芽生えさせる——親株からしばしば20〜30センチメートルも離れた場所に。その若いシダもまた弓なりの葉を伸ばし、もう一歩を踏み出す。こうして長い年月をかけて、一株のシダが苔むした岩の上を歩き渡り、つながった群落へと自らを縫い合わせていく。",
+          "pt-BR": "A samambaia-caminhante produz frondes longas e estreitas que se arqueiam sobre a pedra nua. Onde a ponta de uma fronde toca o chão, ela lança raízes e brota uma planta inteira nova, muitas vezes a 20 ou 30 centímetros da mãe. Essa samambaia jovem estende suas próprias folhas arqueadas, dá outro passo, e ao longo dos anos uma única samambaia passeia por uma rocha musgosa, costurando-se em uma colônia conectada."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts150/07_walking_fern.webp",
+        "image_status": "rendered",
+        "seed": 1305,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc150-s08",
+        "story_type": "fact",
+        "caption": {
+          "en": "This fern can shrivel up dead, then revive in a rain",
+          "es": "Este helecho puede secarse como muerto y revivir con la lluvia",
+          "fr": "Cette fougère peut se dessécher comme morte, puis revivre sous la pluie",
+          "ja": "このシダは枯れたように縮んでも、雨で生き返る",
+          "pt-BR": "Esta samambaia pode murchar como morta e reviver com a chuva"
+        },
+        "long_press": {
+          "en": "The resurrection fern lives clinging to tree branches, with no soil to hold water. When drought comes it lets itself dry almost to dust, losing up to 97 percent of its water and curling into grey, brittle, seemingly dead curls. Then rain falls. Within a day the fronds drink, uncurl and turn green again, ready to do the whole thing over — a plant that treats dying of thirst as a nap.",
+          "es": "El helecho de la resurrección vive aferrado a las ramas de los árboles, sin suelo que retenga el agua. Cuando llega la sequía se deja secar casi hasta el polvo, perdiendo hasta el 97 por ciento de su agua y enroscándose en rizos grises, quebradizos y aparentemente muertos. Entonces cae la lluvia. En un día las frondas beben, se despliegan y vuelven a verdecer, listas para repetirlo todo: una planta que toma morir de sed como una siesta.",
+          "fr": "La fougère de la résurrection vit accrochée aux branches des arbres, sans sol pour retenir l'eau. Quand vient la sécheresse, elle se laisse sécher presque jusqu'à la poussière, perdant jusqu'à 97 pour cent de son eau et s'enroulant en boucles grises, cassantes, d'apparence morte. Puis la pluie tombe. En un jour, les frondes boivent, se déroulent et reverdissent, prêtes à tout recommencer — une plante qui prend la mort de soif pour une sieste.",
+          "ja": "復活草と呼ばれるこのシダは、水をためる土もないまま、木の枝にしがみついて生きている。干ばつが来ると、ほとんど塵になるまで自ら乾き、水分を最大97パーセントも失って、灰色のもろい、死んだように見える巻き姿になる。やがて雨が降る。一日のうちに葉は水を吸い、巻きをほどいて再び緑に戻り、また同じことを繰り返す用意を整える——渇いて死ぬことを昼寝のように扱う植物だ。",
+          "pt-BR": "A samambaia-da-ressurreição vive agarrada aos galhos das árvores, sem solo para reter água. Quando vem a seca, ela se deixa secar quase a pó, perdendo até 97 por cento de sua água e enrolando-se em cachos cinzentos, quebradiços e aparentemente mortos. Então cai a chuva. Em um dia as frondes bebem, se desenrolam e ficam verdes de novo, prontas para repetir tudo — uma planta que trata morrer de sede como uma soneca."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts150/08_resurrection_fern.webp",
+        "image_status": "rendered",
+        "seed": 1306,
+        "text_status": "draft",
+        "actions": []
+      }
+    ]
+  },
+  {
+    "id": "deepcuts151",
+    "type": "deepcuts",
+    "order": 151,
+    "title": "Deep Cuts",
+    "subtitle": {
+      "en": "Eight things wasps build, hijack, and outlast",
+      "es": "Ocho cosas que las avispas construyen, secuestran y sobreviven",
+      "fr": "Huit choses que les guêpes construisent, détournent et auxquelles elles survivent",
+      "ja": "ハチが作り、乗っ取り、生き延びる8つのこと",
+      "pt-BR": "Oito coisas que as vespas constroem, sequestram e sobrevivem"
+    },
+    "cover_image": "https://cdn.mentria.ai/deepcuts151/00_cover.webp",
+    "status": "draft",
+    "slides": [
+      {
+        "id": "dc151-s01",
+        "story_type": "fact",
+        "caption": {
+          "en": "Every fig you eat was pollinated by a wasp that died inside",
+          "es": "Cada higo que comes fue polinizado por una avispa que murió dentro",
+          "fr": "Chaque figue que tu manges a été pollinisée par une guêpe morte à l'intérieur",
+          "ja": "あなたが食べるイチジクはすべて、中で死んだハチが受粉させたもの",
+          "pt-BR": "Todo figo que você come foi polinizado por uma vespa que morreu lá dentro"
+        },
+        "long_press": {
+          "en": "A fig is not really a fruit but a pouch full of inward-facing flowers, and nearly every one of the roughly 750 to 900 fig species has its own tiny wasp partner. The female crawls in through a pinhole to pollinate and lay eggs, losing her wings on the way, and dies inside. The fig then dissolves her with an enzyme called ficin — so the crunch you taste is seeds, not wasp.",
+          "es": "Un higo no es en realidad una fruta, sino una bolsa llena de flores que miran hacia dentro, y casi cada una de las aproximadamente 750 a 900 especies de higo tiene su propia diminuta avispa asociada. La hembra se arrastra por un orificio para polinizar y poner huevos, pierde las alas en el camino y muere dentro. El higo luego la disuelve con una enzima llamada ficina, así que el crujido que saboreas son semillas, no avispa.",
+          "fr": "Une figue n'est pas vraiment un fruit mais une poche remplie de fleurs tournées vers l'intérieur, et presque chacune des quelque 750 à 900 espèces de figuiers a sa propre minuscule guêpe partenaire. La femelle se glisse par un trou minuscule pour polliniser et pondre, y perd ses ailes en chemin, et meurt à l'intérieur. La figue la dissout ensuite grâce à une enzyme appelée ficine — le croquant que tu sens, ce sont donc des graines, pas la guêpe.",
+          "ja": "イチジクは実は果実ではなく、内側を向いた花でいっぱいの袋で、約750〜900種あるイチジクのほぼすべてに、それぞれ専用の小さなハチのパートナーがいます。メスは受粉と産卵のために針穴のような穴から入り込み、その途中で翅を失い、中で死にます。するとイチジクはフィシンという酵素で彼女を溶かします——だから噛んだときの食感は種であって、ハチではありません。",
+          "pt-BR": "Um figo não é bem uma fruta, mas uma bolsa cheia de flores voltadas para dentro, e quase cada uma das cerca de 750 a 900 espécies de figo tem sua própria minúscula vespa parceira. A fêmea entra por um furo minúsculo para polinizar e botar ovos, perde as asas no caminho e morre lá dentro. O figo então a dissolve com uma enzima chamada ficina — então a textura crocante que você sente são as sementes, não a vespa."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts151/01_fig_wasp_mutualism.webp",
+        "image_status": "rendered",
+        "seed": 1307,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc151-s02",
+        "story_type": "fact",
+        "caption": {
+          "en": "Wasps were making paper millions of years before we were",
+          "es": "Las avispas hacían papel millones de años antes que nosotros",
+          "fr": "Les guêpes fabriquaient du papier des millions d'années avant nous",
+          "ja": "ハチは私たちより何百万年も前から紙を作っていた",
+          "pt-BR": "As vespas faziam papel milhões de anos antes de nós"
+        },
+        "long_press": {
+          "en": "Humans worked out how to make paper from wood fibre roughly two thousand years ago. Paper wasps had been doing it for tens of millions. A queen scrapes weathered wood with her jaws, chews it with saliva into a soft grey pulp, and spreads it into thin sheets that dry into a sturdy nest of hexagonal cells. It is true paper, the same material, invented by insects long before us.",
+          "es": "Los humanos descubrieron cómo hacer papel a partir de fibra de madera hace unos dos mil años. Las avispas papeleras llevaban decenas de millones de años haciéndolo. Una reina raspa madera erosionada con sus mandíbulas, la mastica con saliva hasta formar una pulpa gris y blanda, y la extiende en finas láminas que se secan formando un nido resistente de celdas hexagonales. Es papel de verdad, el mismo material, inventado por insectos mucho antes que nosotros.",
+          "fr": "Les humains ont découvert comment fabriquer du papier à partir de fibre de bois il y a environ deux mille ans. Les guêpes à papier le faisaient depuis des dizaines de millions d'années. Une reine racle du bois usé avec ses mandibules, le mâche avec sa salive pour en faire une pulpe grise et molle, puis l'étale en fines feuilles qui sèchent en un nid solide de cellules hexagonales. C'est du vrai papier, le même matériau, inventé par des insectes bien avant nous.",
+          "ja": "人類が木の繊維から紙を作る方法を編み出したのは、およそ二千年前のことです。アシナガバチはそれを数千万年も前からやっていました。女王バチは風化した木を顎で削り取り、唾液と混ぜて柔らかな灰色のパルプにし、それを薄いシート状に広げます。それが乾くと、六角形の部屋からなる丈夫な巣になります。それは本物の紙、まったく同じ素材で、私たちよりはるか昔に昆虫が発明したものです。",
+          "pt-BR": "Os humanos descobriram como fazer papel a partir de fibra de madeira há cerca de dois mil anos. As vespas-de-papel já faziam isso havia dezenas de milhões de anos. Uma rainha raspa madeira desgastada com as mandíbulas, mastiga com saliva até virar uma polpa cinza e macia, e a espalha em finas camadas que secam formando um ninho resistente de células hexagonais. É papel de verdade, o mesmo material, inventado por insetos muito antes de nós."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts151/02_paper_wasp_nest.webp",
+        "image_status": "rendered",
+        "seed": 1308,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc151-s03",
+        "story_type": "fact",
+        "caption": {
+          "en": "This emerald wasp turns a cockroach into a zombie",
+          "es": "Esta avispa esmeralda convierte a una cucaracha en zombi",
+          "fr": "Cette guêpe émeraude transforme un cafard en zombie",
+          "ja": "このエメラルド色のハチはゴキブリをゾンビに変える",
+          "pt-BR": "Esta vespa esmeralda transforma uma barata em zumbi"
+        },
+        "long_press": {
+          "en": "The jewel wasp hunts cockroaches far bigger than itself. It stings twice: first into the thorax to briefly stun the legs, then a precise second sting straight into the brain that erases the roach's urge to flee. Calm and obedient, the roach lets the wasp lead it by an antenna into a burrow, where she lays an egg on it and her larva eats it slowly, alive.",
+          "es": "La avispa joya caza cucarachas mucho más grandes que ella. Pica dos veces: primero en el tórax para aturdir brevemente las patas, y luego una segunda picadura precisa directamente en el cerebro que borra el impulso de huir de la cucaracha. Tranquila y obediente, la cucaracha deja que la avispa la guíe por una antena hasta una madriguera, donde pone un huevo sobre ella y su larva se la come lentamente, viva.",
+          "fr": "La guêpe-bijou chasse des cafards bien plus gros qu'elle. Elle pique deux fois : d'abord dans le thorax pour engourdir brièvement les pattes, puis une seconde piqûre précise droit dans le cerveau qui efface l'envie de fuir du cafard. Calme et obéissant, le cafard se laisse mener par une antenne jusqu'à un terrier, où elle pond un œuf sur lui et sa larve le dévore lentement, vivant.",
+          "ja": "セナガアナバチは自分よりずっと大きなゴキブリを狩ります。刺すのは二度。まず胸部を刺して脚を一時的にまひさせ、次に脳へ正確に二度目を刺して、ゴキブリの逃げる衝動を消し去ります。おとなしく従順になったゴキブリは、触角を引かれるままハチに導かれて巣穴へ入り、そこで卵を産みつけられ、幼虫に生きたままゆっくりと食べられます。",
+          "pt-BR": "A vespa-joia caça baratas muito maiores que ela. Ela ferroa duas vezes: primeiro no tórax, para atordoar brevemente as pernas, e depois um segundo ferrão preciso direto no cérebro, que apaga o impulso de fuga da barata. Calma e obediente, a barata deixa a vespa conduzi-la por uma antena até uma toca, onde ela põe um ovo sobre a barata e sua larva a devora lentamente, viva."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts151/03_jewel_wasp_zombie.webp",
+        "image_status": "rendered",
+        "seed": 1309,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc151-s04",
+        "story_type": "fact",
+        "caption": {
+          "en": "Its sting is rated the most painful of any wasp",
+          "es": "Su picadura está clasificada como la más dolorosa de cualquier avispa",
+          "fr": "Sa piqûre est classée comme la plus douloureuse de toutes les guêpes",
+          "ja": "その針はあらゆるハチの中で最も痛いと評価されている",
+          "pt-BR": "Sua ferroada é classificada como a mais dolorosa de qualquer vespa"
+        },
+        "long_press": {
+          "en": "The tarantula hawk earns the top score, a 4, on the Schmidt sting pain index — the man who built the scale by getting stung described it as blinding, fierce and shockingly electric, like a running hair dryer dropped into your bath. Mercifully it fades in a few minutes. The wasp saves that sting to paralyse a tarantula, dragging the living spider home as food for a single larva.",
+          "es": "La avispa cazadora de tarántulas obtiene la puntuación máxima, un 4, en el índice de dolor de picaduras de Schmidt; el hombre que creó la escala dejándose picar la describió como cegadora, feroz y sorprendentemente eléctrica, como un secador de pelo encendido caído en la bañera. Por suerte se desvanece en pocos minutos. La avispa reserva esa picadura para paralizar a una tarántula y arrastra a la araña viva hasta su nido como alimento para una sola larva.",
+          "fr": "La guêpe pepsis obtient la note maximale, un 4, sur l'échelle de douleur des piqûres de Schmidt — l'homme qui a bâti cette échelle en se faisant piquer l'a décrite comme aveuglante, féroce et incroyablement électrique, comme un sèche-cheveux allumé tombé dans votre bain. Heureusement, elle s'estompe en quelques minutes. La guêpe réserve cette piqûre pour paralyser une tarentule, traînant l'araignée vivante jusqu'à son nid comme nourriture pour une seule larve.",
+          "ja": "オオベッコウバチはシュミット刺突疼痛指数で最高点の4を獲得しています——自ら刺されてこの尺度を作った人物は、その痛みを目もくらむほど激しく衝撃的に電気的で、動いているヘアドライヤーを風呂に落とされたようだと表現しました。幸い数分で引いていきます。このハチはその針をタランチュラをまひさせるために使い、生きたクモを巣まで引きずって、たった一匹の幼虫の餌にします。",
+          "pt-BR": "A vespa-caçadora-de-tarântulas recebe a nota máxima, um 4, no índice de dor de ferroadas de Schmidt — o homem que criou a escala deixando-se ferroar a descreveu como cegante, feroz e chocantemente elétrica, como um secador de cabelo ligado caindo na sua banheira. Felizmente, ela passa em poucos minutos. A vespa guarda esse ferrão para paralisar uma tarântula, arrastando a aranha viva até o ninho como alimento para uma única larva."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts151/04_tarantula_hawk_sting.webp",
+        "image_status": "rendered",
+        "seed": 1310,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc151-s05",
+        "story_type": "fact",
+        "caption": {
+          "en": "These wasps carry a virus written into their own genes",
+          "es": "Estas avispas llevan un virus escrito en sus propios genes",
+          "fr": "Ces guêpes portent un virus inscrit dans leurs propres gènes",
+          "ja": "これらのハチは自らの遺伝子に書き込まれたウイルスを持っている",
+          "pt-BR": "Essas vespas carregam um vírus escrito em seus próprios genes"
+        },
+        "long_press": {
+          "en": "Around 100 million years ago, braconid wasps captured a virus and never let it go. Its genes now live permanently inside the wasp's own DNA, passed down through every generation. When a female lays her eggs inside a caterpillar, she injects freshly built viral particles too, and they switch off the caterpillar's immune defences so her young can grow unattacked. The wasp turned an infection into a weapon.",
+          "es": "Hace unos 100 millones de años, las avispas bracónidas capturaron un virus y nunca lo soltaron. Sus genes viven ahora permanentemente dentro del propio ADN de la avispa, transmitidos de generación en generación. Cuando una hembra pone sus huevos dentro de una oruga, también le inyecta partículas virales recién formadas, que desactivan las defensas inmunitarias de la oruga para que sus crías puedan crecer sin ser atacadas. La avispa convirtió una infección en un arma.",
+          "fr": "Il y a environ 100 millions d'années, les guêpes braconides ont capturé un virus et ne l'ont jamais relâché. Ses gènes vivent désormais en permanence dans l'ADN même de la guêpe, transmis à chaque génération. Lorsqu'une femelle pond ses œufs dans une chenille, elle y injecte aussi des particules virales fraîchement fabriquées, qui désactivent les défenses immunitaires de la chenille pour que ses petits puissent grandir sans être attaqués. La guêpe a transformé une infection en arme.",
+          "ja": "約1億年前、コマユバチはあるウイルスを取り込み、二度と手放しませんでした。その遺伝子は今やハチ自身のDNAの中に恒久的に存在し、世代を超えて受け継がれています。メスは芋虫の中に卵を産むとき、新たに作られたウイルス粒子も注入し、それが芋虫の免疫防御を停止させて、自分の子が攻撃されずに育てるようにします。ハチは感染を武器に変えたのです。",
+          "pt-BR": "Há cerca de 100 milhões de anos, as vespas braconídeas capturaram um vírus e nunca mais o soltaram. Seus genes agora vivem permanentemente dentro do próprio DNA da vespa, transmitidos a cada geração. Quando uma fêmea põe seus ovos dentro de uma lagarta, ela também injeta partículas virais recém-formadas, que desligam as defesas imunológicas da lagarta para que seus filhotes possam crescer sem serem atacados. A vespa transformou uma infecção em arma."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts151/05_braconid_bracovirus.webp",
+        "image_status": "rendered",
+        "seed": 1311,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc151-s06",
+        "story_type": "fact",
+        "caption": {
+          "en": "She drills through solid wood to lay a single egg",
+          "es": "Ella perfora madera maciza para poner un solo huevo",
+          "fr": "Elle perce le bois massif pour pondre un seul œuf",
+          "ja": "彼女はたった一つの卵を産むために固い木を掘り抜く",
+          "pt-BR": "Ela perfura madeira maciça para botar um único ovo"
+        },
+        "long_press": {
+          "en": "The giant ichneumon wasp hunts grubs that bore deep inside tree trunks. To reach them she uses an ovipositor finer than a hair and more than three times her own body length. Bracing on the bark, she arches it down like a living drill and works it through solid wood until it touches the hidden larva, then threads a single egg onto her unseen target.",
+          "es": "La avispa ictneumón gigante caza larvas que perforan profundamente los troncos de los árboles. Para alcanzarlas usa un ovipositor más fino que un cabello y más de tres veces la longitud de su propio cuerpo. Apoyándose en la corteza, lo arquea hacia abajo como un taladro vivo y lo introduce a través de la madera maciza hasta que toca a la larva oculta, y luego enhebra un solo huevo en su objetivo invisible.",
+          "fr": "La guêpe ichneumon géante chasse des larves qui forent profondément dans les troncs d'arbres. Pour les atteindre, elle utilise un oviscapte plus fin qu'un cheveu et plus de trois fois la longueur de son propre corps. S'arc-boutant sur l'écorce, elle l'arque vers le bas comme une perceuse vivante et le fait passer à travers le bois massif jusqu'à toucher la larve cachée, puis dépose un seul œuf sur sa cible invisible.",
+          "ja": "オオヒメバチは木の幹の奥深くに穴を掘る幼虫を狩ります。それに届くために、彼女は髪の毛より細く、自分の体長の三倍以上もある産卵管を使います。樹皮に身を支え、それを生きたドリルのように弓なりに下ろし、固い木を貫いて隠れた幼虫に触れるまで進め、目に見えない標的にたった一つの卵を通します。",
+          "pt-BR": "A vespa-icnêumon gigante caça larvas que perfuram bem fundo nos troncos das árvores. Para alcançá-las, ela usa um ovipositor mais fino que um fio de cabelo e mais de três vezes o comprimento do próprio corpo. Apoiando-se na casca, ela o arqueia para baixo como uma furadeira viva e o força através da madeira maciça até tocar a larva escondida, depois conduz um único ovo até seu alvo invisível."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts151/06_giant_ichneumon_ovipositor.webp",
+        "image_status": "rendered",
+        "seed": 1312,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc151-s07",
+        "story_type": "fact",
+        "caption": {
+          "en": "The 'cow killer' isn't an ant — it's an armored wasp",
+          "es": "La «mata vacas» no es una hormiga, es una avispa acorazada",
+          "fr": "La « tueuse de vaches » n'est pas une fourmi — c'est une guêpe cuirassée",
+          "ja": "「カウキラー」はアリではなく、装甲をまとったハチ",
+          "pt-BR": "A \"mata-vaca\" não é uma formiga — é uma vespa blindada"
+        },
+        "long_press": {
+          "en": "The fuzzy red-and-black creature scurrying over dry ground, nicknamed the cow killer, is not an ant at all. It is a wingless female wasp. Her sting is famously fierce, and her shell is built like armour: tests show it takes roughly eleven times the force to crush as a honeybee's. Collectors say a steel pin can bend before it pierces her.",
+          "es": "La criatura peluda roja y negra que corretea por el suelo seco, apodada «mata vacas», no es una hormiga en absoluto. Es una avispa hembra sin alas. Su picadura es célebremente feroz, y su caparazón está construido como una armadura: las pruebas muestran que se necesita unas once veces más fuerza para aplastarla que a una abeja melífera. Los coleccionistas dicen que un alfiler de acero puede doblarse antes de atravesarla.",
+          "fr": "La créature poilue rouge et noire qui détale sur le sol sec, surnommée la tueuse de vaches, n'est pas du tout une fourmi. C'est une guêpe femelle sans ailes. Sa piqûre est réputée féroce, et sa carapace est bâtie comme une armure : des tests montrent qu'il faut environ onze fois plus de force pour l'écraser que pour une abeille. Les collectionneurs disent qu'une épingle en acier peut plier avant de la transpercer.",
+          "ja": "乾いた地面を走り回る、赤と黒のふさふさした生き物、通称「カウキラー」は、実はアリではありません。翅のないメスのハチです。その針は猛烈なことで知られ、外殻は装甲のように作られています。試験によれば、つぶすのにミツバチの約十一倍の力が必要だといいます。採集家は、鋼の針が彼女を貫く前に曲がってしまうこともあると言います。",
+          "pt-BR": "A criatura peluda vermelha e preta que corre pelo chão seco, apelidada de mata-vaca, não é uma formiga. É uma vespa fêmea sem asas. Sua ferroada é famosa por ser feroz, e sua carapaça é feita como uma armadura: testes mostram que é preciso cerca de onze vezes mais força para esmagá-la do que uma abelha. Colecionadores dizem que um alfinete de aço pode entortar antes de perfurá-la."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts151/07_velvet_ant_armor.webp",
+        "image_status": "rendered",
+        "seed": 1313,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc151-s08",
+        "story_type": "fact",
+        "caption": {
+          "en": "This jewel-bright wasp rolls into a ball to survive",
+          "es": "Esta avispa de brillo de joya se enrolla en una bola para sobrevivir",
+          "fr": "Cette guêpe aux reflets de joyau se roule en boule pour survivre",
+          "ja": "この宝石のように輝くハチは生き延びるために体を丸める",
+          "pt-BR": "Esta vespa brilhante como joia se enrola numa bola para sobreviver"
+        },
+        "long_press": {
+          "en": "Cuckoo wasps shimmer in metallic green, blue and gold, and there are around 3,000 kinds. Like their bird namesake they slip their eggs into the nests of other wasps and bees, and their young eat the host's. That dazzling colour is not pigment but structure, light splitting on microscopic ridges. And when an angry host catches one, it tucks head to tail and curls into a hard, armoured ball.",
+          "es": "Las avispas cuco brillan en verde, azul y oro metálicos, y existen unas 3.000 clases. Como el ave que les da nombre, deslizan sus huevos en los nidos de otras avispas y abejas, y sus crías se comen a las del anfitrión. Ese color deslumbrante no es pigmento sino estructura: la luz se descompone en crestas microscópicas. Y cuando un anfitrión furioso atrapa a una, esconde la cabeza hacia la cola y se enrosca en una bola dura y acorazada.",
+          "fr": "Les guêpes-coucous chatoient de vert, de bleu et d'or métalliques, et il en existe environ 3 000 sortes. Comme l'oiseau dont elles tiennent leur nom, elles glissent leurs œufs dans les nids d'autres guêpes et abeilles, et leurs petits dévorent ceux de l'hôte. Cette couleur éblouissante n'est pas un pigment mais une structure : la lumière se décompose sur des stries microscopiques. Et quand un hôte furieux en attrape une, elle replie la tête vers la queue et s'enroule en une boule dure et cuirassée.",
+          "ja": "セイボウは金属的な緑・青・金色にきらめき、約3,000種が知られています。その名の由来である鳥のように、他のハチやハナバチの巣に卵を忍び込ませ、幼虫は宿主の子を食べます。あの目もくらむ色は色素ではなく構造によるもので、光が微細な隆起で分かれて生まれます。そして怒った宿主に捕まると、頭を尾の方へ折りたたみ、硬い装甲のような球になって丸まります。",
+          "pt-BR": "As vespas-cuco reluzem em verde, azul e dourado metálicos, e existem cerca de 3.000 tipos. Como a ave que lhes dá o nome, elas inserem seus ovos nos ninhos de outras vespas e abelhas, e seus filhotes comem os do hospedeiro. Aquela cor deslumbrante não é pigmento, mas estrutura: a luz se decompõe em cristas microscópicas. E quando um hospedeiro furioso captura uma, ela dobra a cabeça em direção à cauda e se enrola numa bola dura e blindada."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts151/08_cuckoo_wasp_metallic.webp",
+        "image_status": "rendered",
+        "seed": 1314,
         "text_status": "draft",
         "actions": []
       }

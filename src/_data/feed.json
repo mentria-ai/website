@@ -1,6 +1,86 @@
 [
   {
     "type": "chapter",
+    "id": "deepcuts151",
+    "src": "https://cdn.mentria.ai/deepcuts151/00_cover.webp",
+    "color": "linear-gradient(160deg, #16161a, #6e5a2e, #e8c83c)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things wasps build, hijack, and outlast. 8 cards.",
+      "es": "Ocho cosas que las avispas construyen, secuestran y sobreviven. 8 tarjetas.",
+      "fr": "Huit choses que les guêpes construisent, détournent et auxquelles elles survivent. 8 cartes.",
+      "ja": "ハチが作り、乗っ取り、生き延びる8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas que as vespas constroem, sequestram e sobrevivem. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-01",
+    "link": "/feed/deepcuts/deepcuts151/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts78",
+    "src": "https://cdn.mentria.ai/deepcuts78/00_cover.webp",
+    "color": "linear-gradient(160deg, #06080f, #3a2a6e, #36c2d6)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight ways the world navigates by echo. 8 cards.",
+      "es": "Ocho maneras en que el mundo se orienta por el eco. 8 tarjetas.",
+      "fr": "Huit façons dont le monde se repère grâce à l'écho. 8 cartes.",
+      "ja": "世界が反響で進む道を見つける8つの方法。カード8枚。",
+      "pt-BR": "Oito formas como o mundo se orienta pelo eco. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-01",
+    "link": "/feed/deepcuts/deepcuts78/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts150",
+    "src": "https://cdn.mentria.ai/deepcuts150/00_cover.webp",
+    "color": "linear-gradient(160deg, #07120f, #246e52, #b87a3a)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things ferns do that flowering plants never learned. 8 cards.",
+      "es": "Ocho cosas que hacen los helechos y que las plantas con flores nunca aprendieron. 8 tarjetas.",
+      "fr": "Huit choses que les fougères font et que les plantes à fleurs n'ont jamais apprises. 8 cartes.",
+      "ja": "シダができて、花を咲かせる植物には決してできなかった8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas que as samambaias fazem e que as plantas com flores nunca aprenderam. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-01",
+    "link": "/feed/deepcuts/deepcuts150/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts149",
+    "src": "https://cdn.mentria.ai/deepcuts149/00_cover.webp",
+    "color": "linear-gradient(160deg, #100e0a, #5e5648, #e4dcc4)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things hiding in a flake of mica. 8 cards.",
+      "es": "Ocho cosas escondidas en una lámina de mica. 8 tarjetas.",
+      "fr": "Huit choses cachées dans une paillette de mica. 8 cartes.",
+      "ja": "雲母のかけらに隠れた8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas escondidas numa lasca de mica. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-01",
+    "link": "/feed/deepcuts/deepcuts149/"
+  },
+  {
+    "type": "chapter",
     "id": "deepcuts77",
     "src": "https://cdn.mentria.ai/deepcuts77/00_cover.webp",
     "color": "linear-gradient(160deg, #06060f, #6e2a8a, #f3c64e)",

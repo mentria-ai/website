@@ -1,0 +1,665 @@
+---
+layout: base.njk
+permalink: /comms/index.html
+eleventyExcludeFromCollections: true
+title: comms (experimental)
+description: Peer-to-peer chat and file drop — experimental, hidden by default.
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">comms</span></p>
+  <h1>comms</h1>
+  <p>Peer-to-peer chat and file drop. No accounts, no server in the middle. Share the URL to invite someone into the same room.</p>
+</section>
+
+{% set terminalTitle = "comms.js" %}
+{% include "terminal-frame-open.njk" %}
+
+<section class="comms">
+  <div class="comms__bar">
+    <div class="comms__room">
+      <label class="comms__lbl" for="comms-room">room</label>
+      <input class="comms__input" id="comms-room" type="text" autocomplete="off" spellcheck="false" placeholder="lobby">
+      <button class="comms__btn" id="comms-join" type="button">join</button>
+    </div>
+    <div class="comms__meta">
+      <span class="comms__badge" id="comms-status">disconnected</span>
+      <span class="comms__badge comms__badge--peers" id="comms-peers" hidden>peers: 0</span>
+      <span class="comms__badge comms__badge--eph" id="comms-eph" title="messages aren't saved (room starts with !)" hidden>ephemeral</span>
+      <span class="comms__badge comms__badge--enc" id="comms-enc" title="end-to-end encrypted; the key is in the URL after the colon" hidden>encrypted</span>
+      <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">sound: on</button>
+    </div>
+  </div>
+
+  <div class="comms__share" id="comms-share" hidden>
+    <span class="comms__lbl">share</span>
+    <code class="comms__url" id="comms-url"></code>
+    <button class="comms__btn comms__btn--ghost" id="comms-copy" type="button">copy</button>
+    <button class="comms__btn comms__btn--ghost" id="comms-genkey" type="button" title="generate a fresh encryption key and append it to the URL">+ key</button>
+  </div>
+
+  <div class="comms__peerlist" id="comms-peerlist" hidden></div>
+
+  <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
+
+  <div class="comms__drop" id="comms-drop">
+    drop files here to send them to everyone in the room
+  </div>
+
+  <form class="comms__send" id="comms-send" autocomplete="off">
+    <input class="comms__input comms__input--msg" id="comms-msg" type="text" placeholder="message…" disabled>
+    <button class="comms__btn" id="comms-go" type="submit" disabled>send</button>
+  </form>
+</section>
+
+{% include "terminal-frame-close.njk" %}
+
+<style>
+.comms{display:flex;flex-direction:column;gap:.75rem;font-family:var(--font-mono);font-size:.9rem}
+.comms__bar{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.comms__room{display:flex;gap:.5rem;align-items:center;flex:1;min-width:14rem}
+.comms__meta{display:flex;gap:.5rem;align-items:center}
+.comms__lbl{color:var(--muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
+.comms__input{background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.45rem .6rem;border-radius:6px;font-family:inherit;font-size:.9rem;flex:1;min-width:6rem}
+.comms__input:focus{outline:none;border-color:var(--accent,#6ef3c5)}
+.comms__btn{background:transparent;border:1px solid var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);padding:.4rem .8rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer;text-transform:lowercase;letter-spacing:.05em}
+.comms__btn:hover:not(:disabled){background:var(--accent,#6ef3c5);color:#0a0d10}
+.comms__btn:disabled{opacity:.4;cursor:not-allowed}
+.comms__btn--ghost{border-color:#3a4148;color:#9ba6b1}
+.comms__btn--ghost:hover{background:#3a4148;color:#e6edf3}
+.comms__badge{background:#1a1f24;border:1px solid #2a3138;color:#9ba6b1;padding:.3rem .55rem;border-radius:4px;font-size:.75rem;text-transform:lowercase;letter-spacing:.05em}
+.comms__badge--peers{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
+.comms__share{display:flex;gap:.5rem;align-items:center;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.5rem .75rem;flex-wrap:wrap}
+.comms__url{color:#e6edf3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}
+.comms__log{min-height:14rem;max-height:24rem;overflow-y:auto;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.75rem;display:flex;flex-direction:column;gap:.4rem}
+.comms__line{display:flex;gap:.5rem;align-items:baseline;line-height:1.4}
+.comms__who{color:var(--accent,#6ef3c5);font-size:.72rem;min-width:5.5rem;text-transform:lowercase;letter-spacing:.05em}
+.comms__who--sys{color:#7a838d}
+.comms__who--me{color:#a8b6c5}
+.comms__what{color:#e6edf3;word-break:break-word;flex:1}
+.comms__what--sys{color:#7a838d;font-style:italic}
+.comms__what a{color:var(--accent,#6ef3c5);text-decoration:underline}
+.comms__drop{border:1px dashed #2a3138;border-radius:6px;padding:.75rem;text-align:center;color:#7a838d;font-size:.82rem;transition:border-color .15s,color .15s,background .15s}
+.comms__drop--hot{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);background:rgba(110,243,197,.04)}
+.comms__prog{display:inline-block;width:96px;height:6px;background:#1a1f24;border-radius:3px;overflow:hidden;margin:0 .4rem;vertical-align:middle}
+.comms__prog-fill{display:block;height:100%;background:var(--accent,#6ef3c5);width:0%;transition:width .12s linear}
+.comms__thumb{display:block;margin-top:.4rem;max-width:240px;max-height:180px;border:1px solid #2a3138;border-radius:4px;cursor:zoom-in}
+.comms__peerlist{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;padding:.2rem 0}
+.comms__chip{font-family:var(--font-mono);font-size:.7rem;padding:.2rem .5rem;border-radius:3px;border:1px solid currentColor;line-height:1;letter-spacing:.05em;text-transform:lowercase}
+.comms__time{color:#5a636d;font-size:.66rem;margin-left:.3rem;font-variant-numeric:tabular-nums}
+.comms__btn--mute{min-width:5.5rem}
+.comms__btn--mute[aria-pressed="true"]{color:#7a838d;border-color:#3a4148}
+.comms__badge--eph{border-color:#d9a84e;color:#d9a84e;cursor:help}
+.comms__badge--enc{border-color:#9b6fd4;color:#9b6fd4;cursor:help}
+.comms__send{display:flex;gap:.5rem;align-items:center}
+.comms__input--msg{min-width:0}
+</style>
+
+<script type="module">
+import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/assets/vendor/trystero-nostr.js';
+
+const RELAY = 'wss://relay.mentria.ai';
+const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';
+
+let cachedIce = null;
+let iceExpiry = 0;
+const REFRESH_LEAD = 60;
+const FALLBACK_ICE = [{ urls: 'stun:turn.mentria.ai:3478' }];
+
+const getIce = async () => {
+  const nowS = Date.now() / 1000;
+  if (cachedIce && nowS < iceExpiry - REFRESH_LEAD) return cachedIce;
+  try {
+    const r = await fetch(TURN_CRED_URL, { cache: 'no-store' });
+    if (!r.ok) throw new Error(`status ${r.status}`);
+    const data = await r.json();
+    iceExpiry = nowS + (data.ttl || 3600);
+    cachedIce = data.iceServers || FALLBACK_ICE;
+    return cachedIce;
+  } catch (err) {
+    console.warn('turn-cred fetch failed, using STUN-only fallback:', err);
+    return FALLBACK_ICE;
+  }
+};
+
+const $ = (id) => document.getElementById(id);
+const els = {
+  room: $('comms-room'), join: $('comms-join'),
+  status: $('comms-status'), peers: $('comms-peers'), mute: $('comms-mute'), eph: $('comms-eph'), enc: $('comms-enc'),
+  share: $('comms-share'), url: $('comms-url'), copy: $('comms-copy'), genkey: $('comms-genkey'),
+  peerlist: $('comms-peerlist'),
+  log: $('comms-log'), drop: $('comms-drop'),
+  send: $('comms-send'), msg: $('comms-msg'), go: $('comms-go')
+};
+
+const MAX_FILE = 50 * 1024 * 1024;
+const MAX_TOTAL_WARN = 100 * 1024 * 1024;
+
+let room = null;
+let chatAction = null;
+let metaAction = null;
+let chunkAction = null;
+const peers = new Set();
+let muted = localStorage.getItem('comms.muted') === '1';
+let audioCtx = null;
+
+const CHAT_TOPIC_PREFIX = 'mentria.chat.v1.';
+const CHAT_KIND = 3838;
+const EPHEMERAL_PREFIX = '!';
+const HISTORY_LOOKBACK_SEC = 7 * 24 * 60 * 60;
+const HISTORY_LIMIT = 100;
+const HISTORY_FLUSH_TIMEOUT_MS = 4000;
+
+let chatSubId = null;
+let chatTopic = null;
+let chatPersist = true;
+let historyBuffered = false;
+let historyBuffer = [];
+let historyTimer = null;
+let seenCmids = new Set();
+const socketListenersAttached = new WeakSet();
+
+const isEphemeralRoom = (name) => typeof name === 'string' && name.startsWith(EPHEMERAL_PREFIX);
+const newCmid = () => selfId + ':' + Math.random().toString(36).slice(2);
+
+let chatKey = null;
+
+const b64encode = (bytes) => btoa(String.fromCharCode(...bytes));
+const b64decode = (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+const b64urlEncode = (bytes) => b64encode(bytes).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
+const b64urlDecode = (str) => {
+  const b64 = str.replaceAll('-','+').replaceAll('_','/');
+  const padded = b64 + '='.repeat((4 - b64.length % 4) % 4);
+  return b64decode(padded);
+};
+
+const parseHash = (hash) => {
+  const raw = (hash || '#lobby').slice(1).trim() || 'lobby';
+  const colonIdx = raw.indexOf(':');
+  if (colonIdx === -1) return { room: raw, b64Key: null };
+  return { room: raw.slice(0, colonIdx), b64Key: raw.slice(colonIdx + 1) || null };
+};
+
+const formatHash = (room, b64Key) => '#' + room + (b64Key ? ':' + b64Key : '');
+
+const deriveKey = async (b64Key) => {
+  try {
+    const raw = b64urlDecode(b64Key);
+    if (raw.length !== 32) throw new Error('key must be 32 bytes');
+    return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  } catch (err) {
+    console.warn('key parse failed:', err);
+    return null;
+  }
+};
+
+const encryptText = async (key, plaintext) => {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(plaintext));
+  return { v: 1, iv: b64encode(iv), ct: b64encode(new Uint8Array(ct)) };
+};
+
+const decryptText = async (key, payload) => {
+  if (!payload || payload.v !== 1) throw new Error('bad payload');
+  const iv = b64decode(payload.iv);
+  const ct = b64decode(payload.ct);
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+  return new TextDecoder().decode(pt);
+};
+
+const short = (id) => id ? id.slice(0, 6) : 'unknown';
+
+const peerColor = (id) => {
+  let h = 0;
+  for (let i = 0; i < (id || '').length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return `hsl(${h % 360}, 55%, 65%)`;
+};
+
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtKB = (n) => (n / 1024).toFixed(1) + ' KB';
+const fmtMB = (n) => (n / 1024 / 1024).toFixed(1) + ' MB';
+const fmtSize = (n) => n >= 1024 * 1024 ? fmtMB(n) : fmtKB(n);
+const nowHHMM = () => { const d = new Date(); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
+
+const playPing = (freq = 880) => {
+  if (muted) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = audioCtx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = freq;
+    osc.type = 'sine';
+    const t = ctx.currentTime;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.22);
+  } catch {}
+};
+
+const renderPeerList = () => {
+  if (!peers.size) { els.peerlist.hidden = true; els.peerlist.innerHTML = ''; return; }
+  els.peerlist.hidden = false;
+  els.peerlist.innerHTML = '';
+  peers.forEach(p => {
+    const chip = document.createElement('span');
+    chip.className = 'comms__chip';
+    chip.style.color = peerColor(p);
+    chip.textContent = short(p);
+    chip.title = p;
+    els.peerlist.append(chip);
+  });
+};
+
+const renderLine = (who, what, opts = {}) => {
+  const line = document.createElement('div');
+  line.className = 'comms__line';
+  const w = document.createElement('span');
+  w.className = 'comms__who' + (opts.sys ? ' comms__who--sys' : opts.me ? ' comms__who--me' : '');
+  w.textContent = who;
+  if (opts.peerId) w.style.color = peerColor(opts.peerId);
+  if (!opts.sys && !opts.me) {
+    const time = document.createElement('span');
+    time.className = 'comms__time';
+    time.textContent = nowHHMM();
+    w.append(time);
+  }
+  const t = document.createElement('span');
+  t.className = 'comms__what' + (opts.sys ? ' comms__what--sys' : '');
+  if (opts.html) t.innerHTML = opts.html; else t.textContent = what;
+  line.append(w, t);
+  els.log.append(line);
+  els.log.scrollTop = els.log.scrollHeight;
+  return { line, what: t };
+};
+
+const sys = (text) => renderLine('--', text, { sys: true });
+
+const progressHTML = (verb, name, size, transferred) => {
+  const pct = size > 0 ? Math.min(100, Math.round((transferred / size) * 100)) : 0;
+  return `${verb} <strong>${escapeHtml(name)}</strong>` +
+    ` <span class="comms__prog"><span class="comms__prog-fill" style="width:${pct}%"></span></span>` +
+    ` <span class="comms__prog-text">${pct}% (${fmtKB(transferred)} / ${fmtKB(size)})</span>`;
+};
+
+const completeHTML = (name, size, type, url) => {
+  const isImg = type && type.startsWith('image/');
+  const preview = isImg ? `<br><a href="${url}" target="_blank" rel="noopener"><img class="comms__thumb" src="${url}" alt="${escapeHtml(name)}"></a>` : '';
+  return `<a href="${url}" download="${escapeHtml(name)}">${escapeHtml(name)}</a> (${fmtKB(size)})${preview}`;
+};
+
+const updatePeers = () => {
+  els.peers.textContent = `peers: ${peers.size}`;
+  els.peers.hidden = false;
+};
+
+const refreshShareUrl = (roomName, b64Key) => {
+  const u = new URL(window.location.href);
+  u.hash = formatHash(roomName, b64Key);
+  els.url.textContent = u.toString();
+  els.share.hidden = false;
+};
+
+const renderRemoteChat = (item, opts = {}) => {
+  renderLine(short(item.senderId), item.text, { peerId: item.senderId });
+  if (!opts.silent) playPing(880);
+};
+
+const flushHistory = () => {
+  if (!historyBuffered) return;
+  historyBuffered = false;
+  if (historyTimer) { clearTimeout(historyTimer); historyTimer = null; }
+  historyBuffer.sort((a, b) => a.ts - b.ts);
+  if (historyBuffer.length) {
+    sys(`— recent history (${historyBuffer.length}) —`);
+    historyBuffer.forEach(item => renderRemoteChat(item, { silent: true }));
+    sys('— live —');
+  }
+  historyBuffer = [];
+};
+
+const handleNostrMsg = async (msgEvent) => {
+  let msg;
+  try { msg = JSON.parse(msgEvent.data); } catch { return; }
+  if (!Array.isArray(msg)) return;
+  if (msg[0] === 'EVENT' && msg[1] === chatSubId && msg[2]) {
+    const ev = msg[2];
+    let content;
+    try { content = JSON.parse(ev.content); } catch { return; }
+    if (!content || !content.cmid || seenCmids.has(content.cmid)) return;
+    let text;
+    if (content.enc) {
+      if (!chatKey) return;
+      try { text = await decryptText(chatKey, content.enc); } catch { return; }
+    } else if (typeof content.text === 'string') {
+      text = content.text;
+    } else {
+      return;
+    }
+    seenCmids.add(content.cmid);
+    const senderId = (content.cmid.split(':')[0]) || ev.pubkey;
+    const ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : ((ev.created_at || 0) * 1000);
+    const item = { senderId, text, ts };
+    if (historyBuffered) historyBuffer.push(item);
+    else renderRemoteChat(item);
+  } else if (msg[0] === 'EOSE' && msg[1] === chatSubId) {
+    flushHistory();
+  }
+};
+
+const closeChatSub = () => {
+  if (!chatSubId) return;
+  const closeMsg = JSON.stringify(['CLOSE', chatSubId]);
+  const sockets = getRelaySockets() || {};
+  for (const ws of Object.values(sockets)) {
+    try { ws.send(closeMsg); } catch {}
+  }
+};
+
+const setupChatPersistence = async (roomName) => {
+  chatTopic = CHAT_TOPIC_PREFIX + roomName;
+  chatPersist = !isEphemeralRoom(roomName);
+  seenCmids = new Set();
+
+  if (!chatPersist) {
+    historyBuffered = false;
+    historyBuffer = [];
+    chatSubId = null;
+    sys('ephemeral room — messages aren\'t saved. drop the leading ! to persist.');
+    return;
+  }
+
+  chatSubId = 'mc-' + Math.random().toString(36).slice(2);
+  historyBuffered = true;
+  historyBuffer = [];
+
+  const deadline = Date.now() + 8000;
+  let openSockets = [];
+  while (Date.now() < deadline) {
+    const socketsMap = getRelaySockets() || {};
+    openSockets = Object.values(socketsMap).filter(ws => ws && ws.readyState === 1);
+    if (openSockets.length > 0) break;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  if (!openSockets.length) {
+    sys('relay unreachable — history disabled this session.');
+    historyBuffered = false;
+    return;
+  }
+
+  const sinceSec = Math.floor(Date.now() / 1000) - HISTORY_LOOKBACK_SEC;
+  const req = JSON.stringify(['REQ', chatSubId, {
+    kinds: [CHAT_KIND],
+    '#x': [chatTopic],
+    since: sinceSec,
+    limit: HISTORY_LIMIT
+  }]);
+
+  for (const ws of openSockets) {
+    try {
+      if (!socketListenersAttached.has(ws)) {
+        ws.addEventListener('message', handleNostrMsg);
+        socketListenersAttached.add(ws);
+      }
+      ws.send(req);
+    } catch (err) {
+      console.warn('chat history setup failed for socket:', err);
+    }
+  }
+
+  historyTimer = setTimeout(flushHistory, HISTORY_FLUSH_TIMEOUT_MS);
+};
+
+const publishChat = async (text, cmid) => {
+  if (!chatTopic || !chatPersist) return;
+  try {
+    let payload;
+    if (chatKey) {
+      const enc = await encryptText(chatKey, text);
+      payload = { cmid, ts: Date.now(), enc };
+    } else {
+      payload = { text, cmid, ts: Date.now() };
+    }
+    const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify(payload));
+    const sockets = getRelaySockets() || {};
+    for (const ws of Object.values(sockets)) {
+      if (ws && ws.readyState === 1) {
+        try { ws.send(eventStr); } catch {}
+      }
+    }
+  } catch (err) {
+    console.warn('chat publish failed:', err);
+  }
+};
+
+const joinNew = async (roomName, b64Key = null) => {
+  if (room) {
+    closeChatSub();
+    try { await room.leave(); } catch {}
+    room = null;
+    chatAction = metaAction = chunkAction = null;
+    peers.clear();
+    if (historyTimer) { clearTimeout(historyTimer); historyTimer = null; }
+    historyBuffered = false;
+    historyBuffer = [];
+    chatSubId = null;
+    chatTopic = null;
+    chatKey = null;
+  }
+  els.log.innerHTML = '';
+  els.status.textContent = 'connecting…';
+  els.peers.hidden = true;
+  els.enc.hidden = true;
+
+  chatKey = b64Key ? await deriveKey(b64Key) : null;
+  if (b64Key && !chatKey) sys('encryption key in URL is invalid — chat will appear unreadable.');
+
+  window.location.hash = formatHash(roomName, b64Key);
+  refreshShareUrl(roomName, b64Key);
+
+  let iceServers;
+  try {
+    iceServers = await getIce();
+  } catch {
+    iceServers = FALLBACK_ICE;
+  }
+
+  try {
+    room = joinRoom(
+      {
+        appId: 'mentria',
+        relayConfig: { urls: [RELAY] },
+        rtcConfig: { iceServers }
+      },
+      roomName
+    );
+  } catch (err) {
+    sys(`failed to join: ${err.message}`);
+    els.status.textContent = 'error';
+    return;
+  }
+
+  els.status.textContent = `room: ${roomName}`;
+  els.eph.hidden = !isEphemeralRoom(roomName);
+  els.enc.hidden = !chatKey;
+  els.msg.disabled = false;
+  els.go.disabled = false;
+  updatePeers();
+  sys(`you are ${short(selfId)} — alone in "${roomName}". share the URL to invite someone.`);
+  if (chatKey) sys('end-to-end encrypted. anyone with the full URL (including the key after the colon) can decrypt.');
+
+  chatAction = room.makeAction('chat');
+  chatAction.onMessage = async (data, ctx) => {
+    const cmid = data && data.cmid;
+    if (cmid && seenCmids.has(cmid)) return;
+    let text;
+    if (data && data.enc) {
+      if (!chatKey) return;
+      try { text = await decryptText(chatKey, data.enc); } catch { return; }
+    } else {
+      text = String(data && data.text || '');
+    }
+    if (cmid) seenCmids.add(cmid);
+    if (historyBuffered) {
+      historyBuffer.push({ senderId: ctx.peerId, text, ts: Date.now() });
+      return;
+    }
+    renderLine(short(ctx.peerId), text, { peerId: ctx.peerId });
+    playPing(880);
+  };
+
+  const incoming = new Map();
+  metaAction = room.makeAction('fmeta');
+  metaAction.onMessage = (meta, ctx) => {
+    const line = renderLine(short(ctx.peerId), '', { peerId: ctx.peerId, html: progressHTML('receiving', meta.name, meta.size, 0) });
+    incoming.set(ctx.peerId + ':' + meta.id, { meta, chunks: [], received: 0, line });
+  };
+
+  chunkAction = room.makeAction('fchunk');
+  chunkAction.onMessage = (data, ctx) => {
+    const m = ctx.metadata || {};
+    const key = ctx.peerId + ':' + m.id;
+    const entry = incoming.get(key);
+    if (!entry) return;
+    entry.chunks.push(data);
+    entry.received += (data.byteLength || data.size || 0);
+    entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.meta.size, entry.received);
+    if (m.done) {
+      const blob = new Blob(entry.chunks, { type: entry.meta.type || 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      entry.line.what.innerHTML = 'received ' + completeHTML(entry.meta.name, entry.meta.size, entry.meta.type, url);
+      incoming.delete(key);
+      playPing(660);
+    }
+  };
+
+  room.onPeerJoin = (peerId) => {
+    peers.add(peerId);
+    updatePeers();
+    renderPeerList();
+    sys(`${short(peerId)} joined`);
+  };
+  room.onPeerLeave = (peerId) => {
+    peers.delete(peerId);
+    updatePeers();
+    renderPeerList();
+    sys(`${short(peerId)} left`);
+  };
+
+  setupChatPersistence(roomName);
+};
+
+els.join.addEventListener('click', () => {
+  const name = (els.room.value || 'lobby').trim().slice(0, 64);
+  const { b64Key } = parseHash(window.location.hash);
+  joinNew(name, b64Key);
+});
+
+els.genkey.addEventListener('click', async () => {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  const key = b64urlEncode(bytes);
+  const name = (els.room.value || 'lobby').trim().slice(0, 64);
+  await joinNew(name, key);
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    els.genkey.textContent = 'key generated · url copied';
+    setTimeout(() => { els.genkey.textContent = '+ key'; }, 2000);
+  } catch {
+    els.genkey.textContent = 'key generated';
+    setTimeout(() => { els.genkey.textContent = '+ key'; }, 2000);
+  }
+});
+
+els.send.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const text = els.msg.value.trim();
+  if (!text || !chatAction) return;
+  const cmid = newCmid();
+  seenCmids.add(cmid);
+  let livePayload;
+  if (chatKey) {
+    try {
+      const enc = await encryptText(chatKey, text);
+      livePayload = { cmid, enc };
+    } catch (err) {
+      sys('encryption failed: ' + err.message);
+      return;
+    }
+  } else {
+    livePayload = { text, cmid };
+  }
+  chatAction.send(livePayload);
+  publishChat(text, cmid);
+  renderLine('you', text, { me: true });
+  els.msg.value = '';
+});
+
+els.copy.addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(els.url.textContent); els.copy.textContent = 'copied'; setTimeout(() => els.copy.textContent = 'copy', 1200); } catch {}
+});
+
+const dragEvents = ['dragenter', 'dragover'];
+const undragEvents = ['dragleave', 'drop'];
+dragEvents.forEach(ev => els.drop.addEventListener(ev, (e) => { e.preventDefault(); els.drop.classList.add('comms__drop--hot'); }));
+undragEvents.forEach(ev => els.drop.addEventListener(ev, (e) => { e.preventDefault(); els.drop.classList.remove('comms__drop--hot'); }));
+const CHUNK = 32 * 1024;
+const sendOne = async (file) => {
+  const id = Math.random().toString(36).slice(2);
+  const line = renderLine('you', '', { me: true, html: progressHTML('sending', file.name, file.size, 0) });
+  await metaAction.send({ id, name: file.name, size: file.size, type: file.type });
+  const buf = await file.arrayBuffer();
+  let sent = 0;
+  for (let offset = 0; offset < buf.byteLength; offset += CHUNK) {
+    const slice = buf.slice(offset, Math.min(offset + CHUNK, buf.byteLength));
+    const done = offset + CHUNK >= buf.byteLength;
+    await chunkAction.send(slice, { metadata: { id, done } });
+    sent += slice.byteLength;
+    line.what.innerHTML = progressHTML('sending', file.name, file.size, sent);
+  }
+  const previewUrl = URL.createObjectURL(file);
+  line.what.innerHTML = 'sent ' + completeHTML(file.name, file.size, file.type, previewUrl);
+};
+
+els.drop.addEventListener('drop', async (e) => {
+  if (!metaAction || !chunkAction || peers.size === 0) { sys('no peers to send to.'); return; }
+  const all = Array.from(e.dataTransfer.files || []);
+  if (!all.length) return;
+  const tooBig = all.filter(f => f.size > MAX_FILE);
+  const ok = all.filter(f => f.size <= MAX_FILE);
+  if (tooBig.length) {
+    sys(`skipped (over ${fmtMB(MAX_FILE)} cap): ${tooBig.map(f => `${f.name} ${fmtSize(f.size)}`).join(', ')}`);
+  }
+  if (!ok.length) return;
+  const total = ok.reduce((s, f) => s + f.size, 0);
+  if (ok.length > 1) sys(`sending ${ok.length} file${ok.length===1?'':'s'} (${fmtSize(total)}) to ${peers.size} peer${peers.size===1?'':'s'}…`);
+  if (total > MAX_TOTAL_WARN) sys(`heads up: ${fmtSize(total)} total — this may take a while.`);
+  for (const file of ok) {
+    try { await sendOne(file); } catch (err) { sys(`send failed for ${file.name}: ${err.message}`); }
+  }
+});
+
+els.mute.addEventListener('click', () => {
+  muted = !muted;
+  els.mute.textContent = muted ? 'sound: off' : 'sound: on';
+  els.mute.setAttribute('aria-pressed', String(muted));
+  localStorage.setItem('comms.muted', muted ? '1' : '0');
+  if (!muted) playPing(880);
+});
+if (muted) { els.mute.textContent = 'sound: off'; els.mute.setAttribute('aria-pressed', 'true'); }
+
+const initial = parseHash(window.location.hash);
+els.room.value = initial.room;
+refreshShareUrl(initial.room, initial.b64Key);
+window.addEventListener('load', () => joinNew(initial.room, initial.b64Key));
+window.addEventListener('hashchange', () => {
+  const next = parseHash(window.location.hash);
+  const sameRoom = next.room === (els.room.value || '').trim();
+  const sameKey = next.b64Key === (chatKey ? next.b64Key : null);
+  if (!sameRoom || !sameKey) {
+    els.room.value = next.room;
+    joinNew(next.room, next.b64Key);
+  }
+});
+</script>

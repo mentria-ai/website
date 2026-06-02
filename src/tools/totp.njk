@@ -152,13 +152,20 @@ eleventyComputed:
   .totp-row__meta { flex: 1; min-width: 0; }
   .totp-row__issuer { font-family: var(--font-mono); font-size: 11px; color: var(--term-subtle); text-transform: uppercase; letter-spacing: 0.1em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .totp-row__account { font-size: 12px; color: var(--term-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .totp-row__code-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-  .totp-row__code { font-family: var(--font-mono); font-size: 22px; letter-spacing: 0.1em; color: var(--accent, #6ef3c5); cursor: pointer; user-select: all; padding: 4px 8px; border-radius: 4px; }
+  .totp-row__code-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 0; }
+  .totp-row__code { font-family: var(--font-mono); font-size: 22px; letter-spacing: 0.1em; color: var(--accent, #6ef3c5); cursor: pointer; user-select: all; padding: 4px 8px; border-radius: 4px; display: inline-block; will-change: transform, opacity; }
   .totp-row__code:hover { background: rgba(110,243,197,0.08); }
   .totp-row__code.is-copied { color: var(--syn-green, #34c46a); }
-  .totp-row__next { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--syn-amber, #f7b015); opacity: .8; padding: 0 8px; }
-  .totp-row__next[hidden] { display: none; }
-  .totp-row__next-label { color: var(--term-subtle); margin-right: 4px; }
+  .totp-row__next { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--term-subtle); opacity: .85; padding: 0 8px; transition: color 0.3s ease; display: inline-block; will-change: transform, opacity; }
+  .totp-row__next.is-warning { color: var(--syn-amber, #f7b015); }
+  .totp-row__next-label { color: var(--term-subtle); margin-right: 4px; opacity: .7; }
+  .totp-row__code.is-flipping, .totp-row__next.is-flipping { animation: totp-flip 0.45s ease-out; }
+  @keyframes totp-flip {
+    0%   { transform: translateY(0); opacity: 1; }
+    45%  { transform: translateY(-6px); opacity: 0; }
+    55%  { transform: translateY(6px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
   .totp-row__ring { width: 32px; height: 32px; flex-shrink: 0; }
   .totp-row__ring circle { fill: none; stroke-width: 3; }
   .totp-row__ring .bg { stroke: var(--term-border); }
@@ -438,6 +445,7 @@ eleventyComputed:
     if (state.timer) { clearInterval(state.timer); state.timer = null; }
     state.masterKey = null;
     state.accounts = [];
+    lastCodes.clear();
     showLocked();
     setStatus('', null);
   }
@@ -466,7 +474,7 @@ eleventyComputed:
         </div>
         <div class="totp-row__code-stack">
           <span class="totp-row__code" data-copy>—</span>
-          <span class="totp-row__next" hidden><span class="totp-row__next-label">${COPY.next_label}</span><span class="totp-row__next-value">—</span></span>
+          <span class="totp-row__next"><span class="totp-row__next-label">${COPY.next_label}</span><span class="totp-row__next-value">—</span></span>
         </div>
         <button type="button" class="totp-row__del" data-del title="${COPY.delete_confirm.replace(/{name}/g, '')}">×</button>
       `;
@@ -474,6 +482,16 @@ eleventyComputed:
       li.querySelector('.totp-row__account').textContent = acc.account || '';
       list.appendChild(li);
     });
+  }
+
+  const lastCodes = new Map();
+
+  function fmtCode(s) { return s.match(/.{3}/g).join(' '); }
+
+  function flipUpdate(el, newText) {
+    el.classList.add('is-flipping');
+    setTimeout(() => { el.textContent = newText; }, 200);
+    setTimeout(() => { el.classList.remove('is-flipping'); }, 460);
   }
 
   async function tick() {
@@ -484,9 +502,32 @@ eleventyComputed:
       if (!acc) continue;
       const secretBytes = b64uDec(acc.secret);
       const period = acc.period || 30;
-      const code = await totpCode(secretBytes, { period, digits: acc.digits });
+      const digits = acc.digits || 6;
+      const code = await totpCode(secretBytes, { period, digits });
+      const nextCode = await totpCode(secretBytes, { period, digits, offset: 1 });
+      const codeFmt = fmtCode(code);
+      const nextFmt = fmtCode(nextCode);
+
       const codeEl = row.querySelector('.totp-row__code');
-      if (!codeEl.classList.contains('is-copied')) codeEl.textContent = code.match(/.{3}/g).join(' ');
+      const nextEl = row.querySelector('.totp-row__next');
+      const nextValueEl = row.querySelector('.totp-row__next-value');
+
+      const prev = lastCodes.get(acc.id);
+      const isFirstRender = !prev;
+      const currentRotated = prev && prev.current !== code;
+
+      if (isFirstRender) {
+        if (!codeEl.classList.contains('is-copied')) codeEl.textContent = codeFmt;
+        nextValueEl.textContent = nextFmt;
+      } else if (currentRotated) {
+        if (!codeEl.classList.contains('is-copied')) flipUpdate(codeEl, codeFmt);
+        flipUpdate(nextValueEl, nextFmt);
+      } else {
+        if (!codeEl.classList.contains('is-copied') && codeEl.textContent !== codeFmt) codeEl.textContent = codeFmt;
+        if (nextValueEl.textContent !== nextFmt) nextValueEl.textContent = nextFmt;
+      }
+      lastCodes.set(acc.id, { current: code, next: nextCode });
+
       const remaining = period - (Math.floor(Date.now() / 1000) % period);
       const ring = row.querySelector('.totp-row__ring');
       const fg = ring.querySelector('.fg');
@@ -494,14 +535,7 @@ eleventyComputed:
       fg.setAttribute('stroke-dashoffset', String(circumference * (1 - remaining / period)));
       const isWarning = remaining <= 5;
       ring.classList.toggle('warning', isWarning);
-      const nextEl = row.querySelector('.totp-row__next');
-      if (isWarning) {
-        const nextCode = await totpCode(secretBytes, { period, digits: acc.digits, offset: 1 });
-        row.querySelector('.totp-row__next-value').textContent = nextCode.match(/.{3}/g).join(' ');
-        nextEl.hidden = false;
-      } else {
-        nextEl.hidden = true;
-      }
+      nextEl.classList.toggle('is-warning', isWarning);
     }
   }
 

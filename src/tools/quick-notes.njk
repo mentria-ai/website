@@ -127,10 +127,27 @@ eleventyComputed:
 
   /* ── Persistence ───────────────────────────────────── */
   function load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) notes = JSON.parse(raw);
-    } catch (_) { /* ignore corrupt data */ }
+    if (window.MentriaStore) {
+      const v = window.MentriaStore.get('quick_notes', 'blob');
+      if (Array.isArray(v)) notes = v;
+      else {
+        try {
+          const legacy = localStorage.getItem(STORAGE_KEY);
+          if (legacy) {
+            notes = JSON.parse(legacy);
+            if (Array.isArray(notes)) {
+              window.MentriaStore.set('quick_notes', 'blob', notes);
+              localStorage.removeItem(STORAGE_KEY);
+            }
+          }
+        } catch (_) {}
+      }
+    } else {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) notes = JSON.parse(raw);
+      } catch (_) {}
+    }
     if (!Array.isArray(notes) || notes.length === 0) {
       notes = [];
       createNote();
@@ -138,7 +155,8 @@ eleventyComputed:
   }
 
   function persist() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch (_) {}
+    if (window.MentriaStore) window.MentriaStore.set('quick_notes', 'blob', notes);
+    else try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch (_) {}
   }
 
   function b64enc(buf) {
@@ -155,10 +173,17 @@ eleventyComputed:
   }
 
   function prfSalt() {
-    let s = localStorage.getItem(SALT_KEY);
+    let s = window.MentriaStore ? window.MentriaStore.get('quick_notes', 'salt') : null;
     if (!s) {
-      s = b64enc(crypto.getRandomValues(new Uint8Array(32)));
-      localStorage.setItem(SALT_KEY, s);
+      const legacy = localStorage.getItem(SALT_KEY);
+      if (legacy) {
+        s = legacy;
+        if (window.MentriaStore) { window.MentriaStore.set('quick_notes', 'salt', s); localStorage.removeItem(SALT_KEY); }
+      } else {
+        s = b64enc(crypto.getRandomValues(new Uint8Array(32)));
+        if (window.MentriaStore) window.MentriaStore.set('quick_notes', 'salt', s);
+        else localStorage.setItem(SALT_KEY, s);
+      }
     }
     return b64dec(s);
   }
@@ -167,7 +192,14 @@ eleventyComputed:
     if (sessionKey) return sessionKey;
     if (!cryptoOK) throw new Error('prf-unsupported');
     const salt = prfSalt();
-    let credId = localStorage.getItem(CRED_KEY);
+    let credId = window.MentriaStore ? window.MentriaStore.get('quick_notes', 'cred_id') : null;
+    if (!credId) {
+      const legacy = localStorage.getItem(CRED_KEY);
+      if (legacy) {
+        credId = legacy;
+        if (window.MentriaStore) { window.MentriaStore.set('quick_notes', 'cred_id', credId); localStorage.removeItem(CRED_KEY); }
+      }
+    }
     let prfResult = null;
     if (!credId) {
       const cred = await navigator.credentials.create({
@@ -187,8 +219,9 @@ eleventyComputed:
       if (!cred) throw new Error('cancelled');
       const prf = cred.getClientExtensionResults().prf;
       if (!prf || prf.enabled === false) throw new Error('prf-unsupported');
-      localStorage.setItem(CRED_KEY, b64enc(cred.rawId));
-      credId = localStorage.getItem(CRED_KEY);
+      credId = b64enc(cred.rawId);
+      if (window.MentriaStore) window.MentriaStore.set('quick_notes', 'cred_id', credId);
+      else localStorage.setItem(CRED_KEY, credId);
       if (prf.results && prf.results.first) prfResult = prf.results.first;
     }
     if (!prfResult) {

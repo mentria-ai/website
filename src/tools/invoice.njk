@@ -187,11 +187,38 @@ eleventyComputed:
   const clearBtn         = document.getElementById('iv-clear');
 
   /* ── Persistence ───────────────────────────────────── */
+  const NS = 'invoice';
+  (function migrateLegacy() {
+    if (!window.MentriaStore) return;
+    const victims = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.indexOf(LS) === 0) victims.push(k);
+    }
+    victims.forEach(k => {
+      const id = k.slice(LS.length);
+      if (window.MentriaStore.get(NS, id) == null) {
+        window.MentriaStore.set(NS, id, localStorage.getItem(k));
+      }
+      localStorage.removeItem(k);
+    });
+  })();
   const restore = (el) => {
-    const v = localStorage.getItem(LS + el.id);
-    if (v !== null) el.value = v;
+    const v = window.MentriaStore ? window.MentriaStore.get(NS, el.id) : localStorage.getItem(LS + el.id);
+    if (v != null) el.value = v;
   };
-  const persist = (el) => localStorage.setItem(LS + el.id, el.value);
+  const persist = (el) => {
+    if (window.MentriaStore) window.MentriaStore.set(NS, el.id, el.value);
+    else localStorage.setItem(LS + el.id, el.value);
+  };
+  const dropField = (id) => {
+    if (window.MentriaStore) window.MentriaStore.remove(NS, id);
+    else localStorage.removeItem(LS + id);
+  };
+  const hasField = (id) => {
+    if (window.MentriaStore) return window.MentriaStore.get(NS, id) != null;
+    return localStorage.getItem(LS + id) !== null;
+  };
 
   /* ── Validation / sanitization ─────────────────────── */
   const validateInputPattern = (input) => {
@@ -294,7 +321,7 @@ eleventyComputed:
     newRow.querySelectorAll('textarea').forEach(autoResizeTextarea);
 
     // Persist the templated values immediately so reload reconstructs the row
-    if (!isEmpty || localStorage.getItem(LS + `desc${rowIndex}Inp`) === null) {
+    if (!isEmpty || !hasField(`desc${rowIndex}Inp`)) {
       newRow.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(persist);
     }
 
@@ -307,7 +334,7 @@ eleventyComputed:
     if (!event.target.classList.contains('remove-row')) return;
     const row = event.target.closest('tr');
     row.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(el => {
-      localStorage.removeItem(LS + el.id);
+      dropField(el.id);
     });
     row.remove();
     calculateGrandTotal();
@@ -381,7 +408,7 @@ eleventyComputed:
     const dynamicRows = Array.from(tbody.children).slice(1, -1);
     dynamicRows.forEach(row => {
       row.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]')
-         .forEach(el => localStorage.removeItem(LS + el.id));
+         .forEach(el => dropField(el.id));
       row.remove();
     });
 
@@ -501,6 +528,7 @@ eleventyComputed:
   exportBtn.addEventListener('click', exportJSON);
   clearBtn.addEventListener('click', async () => {
     if (!(await mentriaConfirm(COPY.confirmClear))) return;
+    if (window.MentriaStore) window.MentriaStore.clear(NS);
     Object.keys(localStorage)
       .filter(k => k.startsWith(LS))
       .forEach(k => localStorage.removeItem(k));
@@ -511,9 +539,9 @@ eleventyComputed:
   // 1. Recreate dynamic rows from LS (rows beyond row 1)
   let rowIndex = 2;
   while (
-    localStorage.getItem(LS + `desc${rowIndex}Inp`)  !== null ||
-    localStorage.getItem(LS + `qty${rowIndex}Inp`)   !== null ||
-    localStorage.getItem(LS + `price${rowIndex}Inp`) !== null
+    hasField(`desc${rowIndex}Inp`) ||
+    hasField(`qty${rowIndex}Inp`) ||
+    hasField(`price${rowIndex}Inp`)
   ) {
     addRow();
     rowIndex++;

@@ -153,7 +153,21 @@ eleventyComputed:
 
   function loadState() {
     let s = {};
-    try { s = JSON.parse(localStorage.getItem(LS)) || {}; } catch (_) {}
+    if (window.MentriaStore) {
+      s = window.MentriaStore.get('tools', 'step_counter') || {};
+      if (!s.date && !s.steps) {
+        try {
+          const legacy = JSON.parse(localStorage.getItem(LS));
+          if (legacy && typeof legacy === 'object') {
+            s = legacy;
+            window.MentriaStore.set('tools', 'step_counter', s);
+            localStorage.removeItem(LS);
+          }
+        } catch (_) {}
+      }
+    } else {
+      try { s = JSON.parse(localStorage.getItem(LS)) || {}; } catch (_) {}
+    }
     s.history = s.history || {};
     s.goal = s.goal || 10000;
     s.stride = s.stride || 75;
@@ -168,7 +182,8 @@ eleventyComputed:
   }
 
   function persist() {
-    try { localStorage.setItem(LS, JSON.stringify(state)); } catch (_) {}
+    if (window.MentriaStore) window.MentriaStore.set('tools', 'step_counter', state);
+    else try { localStorage.setItem(LS, JSON.stringify(state)); } catch (_) {}
   }
 
   const state = loadState();

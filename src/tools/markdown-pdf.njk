@@ -195,7 +195,8 @@ function scheduleSave() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     try {
-      localStorage.setItem(LS_KEY, inputEl.value);
+      if (window.MentriaStore) window.MentriaStore.set('tools', 'mdpdf_content', inputEl.value);
+      else localStorage.setItem(LS_KEY, inputEl.value);
       flashSaved();
     } catch (_) { /* quota etc. — ignore */ }
   }, 500);
@@ -211,8 +212,22 @@ function flashSaved() {
 
 function loadInitial() {
   let stored = null;
-  try { stored = localStorage.getItem(LS_KEY); } catch (_) {}
-  inputEl.value = (stored !== null && stored !== '') ? stored : SAMPLE;
+  if (window.MentriaStore) {
+    stored = window.MentriaStore.get('tools', 'mdpdf_content');
+    if (stored == null) {
+      try {
+        const legacy = localStorage.getItem(LS_KEY);
+        if (legacy != null && legacy !== '') {
+          stored = legacy;
+          window.MentriaStore.set('tools', 'mdpdf_content', stored);
+          localStorage.removeItem(LS_KEY);
+        }
+      } catch (_) {}
+    }
+  } else {
+    try { stored = localStorage.getItem(LS_KEY); } catch (_) {}
+  }
+  inputEl.value = (stored != null && stored !== '') ? stored : SAMPLE;
 }
 
 /* ── PDF (via browser print) ────────────────────────────────────── */
@@ -497,6 +512,7 @@ clearBtn.addEventListener('click', async () => {
   if (!(await mentriaConfirm(COPY.confirmClear))) return;
   inputEl.value = '';
   filenameInput.value = '';
+  if (window.MentriaStore) window.MentriaStore.remove('tools', 'mdpdf_content');
   try { localStorage.removeItem(LS_KEY); } catch (_) {}
   syncFilenameForContent();
   render();

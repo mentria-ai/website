@@ -264,12 +264,26 @@ eleventyComputed:
 
   /* ── Saved colors ──────────────────────────────────── */
   function loadSaved() {
+    if (window.MentriaStore) {
+      const v = window.MentriaStore.get('tools', 'color_picker_palette');
+      if (Array.isArray(v)) return v;
+      try {
+        const legacy = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (Array.isArray(legacy) && legacy.length) {
+          window.MentriaStore.set('tools', 'color_picker_palette', legacy);
+          localStorage.removeItem(STORAGE_KEY);
+          return legacy;
+        }
+      } catch (_) {}
+      return [];
+    }
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
     catch { return []; }
   }
 
   function saveSaved(arr) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    if (window.MentriaStore) window.MentriaStore.set('tools', 'color_picker_palette', arr);
+    else localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
   }
 
   function renderSaved() {

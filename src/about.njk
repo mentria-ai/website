@@ -129,6 +129,38 @@ eleventyComputed:
     </div>
   </section>
 
+  <section class="reveal about-sync">
+    <h2 class="about-section-h">{{ "about.sync_section_title" | t }}</h2>
+    <p class="about-tagline" style="margin-bottom: 20px;">{{ "about.sync_section_lede" | t }}</p>
+
+    <div class="about-data-grid">
+      <div class="about-data-card">
+        <h3 class="about-data-card__h">{{ "about.sync_pair_title" | t }}</h3>
+        <p class="about-data-card__p">{{ "about.sync_pair_lede" | t }}</p>
+        <button type="button" class="about-data-btn" id="about-sync-start-btn">{{ "about.sync_pair_button" | t }}</button>
+        <div class="about-sync-code" id="about-sync-code" hidden>
+          <div class="about-sync-code__label">{{ "about.sync_pair_show_code" | t }}</div>
+          <code class="about-sync-code__value" id="about-sync-code-value"></code>
+        </div>
+      </div>
+
+      <div class="about-data-card">
+        <h3 class="about-data-card__h">{{ "about.sync_join_title" | t }}</h3>
+        <p class="about-data-card__p">{{ "about.sync_join_lede" | t }}</p>
+        <label class="about-data-field">
+          <span>{{ "about.sync_join_label" | t }}</span>
+          <input type="text" id="about-sync-code-input" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX">
+        </label>
+        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-join-btn">{{ "about.sync_join_button" | t }}</button>
+      </div>
+    </div>
+
+    <div class="about-sync-status" id="about-sync-status">
+      <span class="about-sync-status__label" id="about-sync-status-label">{{ "about.sync_status_idle" | t }}</span>
+      <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-disconnect-btn" hidden>{{ "about.sync_disconnect" | t }}</button>
+    </div>
+  </section>
+
   <div class="about-end reveal">
     <div class="left">
       <a class="about-contact-link" href="https://x.com/mentria_ai">{{ "about.contact" | t }}</a>
@@ -267,6 +299,17 @@ eleventyComputed:
   .about-data-status[data-tone="ok"]   { color: var(--syn-green, #34c46a); }
   .about-data-status[data-tone="err"]  { color: var(--syn-red, #f25fa8); }
   @media (max-width: 600px) { .about-data-grid { grid-template-columns: 1fr; } }
+
+  .about-sync-code { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+  .about-sync-code__label { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); letter-spacing: 0.1em; }
+  .about-sync-code__value { font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.08em; color: var(--syn-cyan); padding: 8px 12px; background: var(--term-bg); border: 1px solid var(--syn-cyan); border-radius: 5px; word-break: break-all; user-select: all; }
+  .about-data-field input[type="text"] { background: var(--term-bg); border: 1px solid var(--term-border); color: var(--term-fg); padding: 7px 9px; border-radius: 5px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.05em; }
+  .about-data-field input[type="text"]:focus { outline: none; border-color: var(--syn-cyan); }
+  .about-sync-status { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 22px; padding: 12px 18px; border: 1px dashed var(--term-border); border-radius: 8px; }
+  .about-sync-status__label { font-family: var(--font-mono); font-size: 12px; color: var(--term-muted); }
+  .about-sync-status__label[data-tone="connected"] { color: var(--syn-green, #34c46a); }
+  .about-sync-status__label[data-tone="pairing"]   { color: var(--syn-amber, #f7b015); }
+  .about-sync-status__label[data-tone="err"]       { color: var(--syn-red, #f25fa8); }
 
   @media (max-width: 760px) {
     .about-ship-grid { grid-template-columns: repeat(2, 1fr); }
@@ -499,4 +542,105 @@ eleventyComputed:
       }
     });
   })();
+
+  (function () {
+    var COPY = {
+      statusIdle:      {{ ('about.sync_status_idle'      | t) | dump | safe }},
+      statusPairing:   {{ ('about.sync_status_pairing'   | t) | dump | safe }},
+      statusConnecting:{{ ('about.sync_status_connecting'| t) | dump | safe }},
+      statusConnected: {{ ('about.sync_status_connected' | t) | dump | safe }},
+      statusError:     {{ ('about.sync_status_error'     | t) | dump | safe }},
+      pairButton:      {{ ('about.sync_pair_button'      | t) | dump | safe }},
+      joinButton:      {{ ('about.sync_join_button'      | t) | dump | safe }},
+      codeInvalid:     {{ ('about.sync_code_invalid'     | t) | dump | safe }}
+    };
+    var startBtn      = document.getElementById('about-sync-start-btn');
+    var joinBtn       = document.getElementById('about-sync-join-btn');
+    var disconnectBtn = document.getElementById('about-sync-disconnect-btn');
+    var codeBox       = document.getElementById('about-sync-code');
+    var codeValue     = document.getElementById('about-sync-code-value');
+    var codeInput     = document.getElementById('about-sync-code-input');
+    var statusLabel   = document.getElementById('about-sync-status-label');
+    if (!startBtn || !joinBtn) return;
+
+    function setStatus(text, tone) {
+      statusLabel.textContent = text;
+      if (tone) statusLabel.dataset.tone = tone; else delete statusLabel.dataset.tone;
+    }
+
+    function whenReady(cb) {
+      if (window.MentriaSync) return cb();
+      var t = 0;
+      var iv = setInterval(function () {
+        if (window.MentriaSync) { clearInterval(iv); cb(); }
+        else if (++t > 50) { clearInterval(iv); setStatus(COPY.statusError + ': sync engine not loaded', 'err'); }
+      }, 100);
+    }
+
+    whenReady(function () {
+      window.MentriaSync.on('state', function (st) {
+        if (st.status === 'idle') {
+          setStatus(COPY.statusIdle, null);
+          disconnectBtn.hidden = true;
+          codeBox.hidden = true;
+          startBtn.disabled = false;
+          joinBtn.disabled = false;
+        } else if (st.status === 'pairing') {
+          setStatus(COPY.statusPairing, 'pairing');
+          disconnectBtn.hidden = false;
+        } else if (st.status === 'connecting') {
+          setStatus(COPY.statusConnecting, 'pairing');
+          disconnectBtn.hidden = false;
+        } else if (st.status === 'connected') {
+          setStatus(COPY.statusConnected.replace('{n}', String(st.peers || 1)), 'connected');
+          disconnectBtn.hidden = false;
+        }
+      });
+      window.MentriaSync.on('error', function (err) {
+        setStatus(COPY.statusError + ': ' + (err && err.message || err), 'err');
+      });
+    });
+
+    startBtn.addEventListener('click', function () {
+      whenReady(async function () {
+        startBtn.disabled = true;
+        joinBtn.disabled = true;
+        try {
+          var code = await window.MentriaSync.start();
+          codeValue.textContent = code;
+          codeBox.hidden = false;
+        } catch (err) {
+          setStatus(COPY.statusError + ': ' + (err && err.message || err), 'err');
+          startBtn.disabled = false;
+          joinBtn.disabled = false;
+        }
+      });
+    });
+
+    joinBtn.addEventListener('click', function () {
+      whenReady(async function () {
+        var raw = codeInput.value;
+        var norm = window.MentriaSync.normalizeCode(raw);
+        if (norm.length < 16) { setStatus(COPY.codeInvalid, 'err'); return; }
+        startBtn.disabled = true;
+        joinBtn.disabled = true;
+        codeBox.hidden = true;
+        try {
+          await window.MentriaSync.joinWithCode(raw);
+          codeInput.value = '';
+        } catch (err) {
+          setStatus(COPY.statusError + ': ' + (err && err.message || err), 'err');
+          startBtn.disabled = false;
+          joinBtn.disabled = false;
+        }
+      });
+    });
+
+    disconnectBtn.addEventListener('click', function () {
+      whenReady(async function () {
+        await window.MentriaSync.disconnect();
+      });
+    });
+  })();
 </script>
+<script type="module" src="/assets/js/mentria-sync.js?v={{ buildHash }}"></script>

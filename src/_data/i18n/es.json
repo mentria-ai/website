@@ -72,7 +72,24 @@
     "data_import_button": "Restaurar",
     "data_import_busy": "Descifrando…",
     "data_import_done": "Restauradas {n} entradas — recargando…",
-    "data_import_fail": "Falló: {err}"
+    "data_import_fail": "Falló: {err}",
+    "sync_section_title": "Sincronizar dispositivos",
+    "sync_section_lede": "Empareja dos dispositivos con un código de un solo uso. Los datos se sincronizan entre pares, cifrados de extremo a extremo. Nuestro relé nunca ve tus datos.",
+    "sync_pair_title": "Emparejar un nuevo dispositivo",
+    "sync_pair_lede": "Muestra este código en el otro dispositivo. El código es la clave de cifrado, no lo compartas en otro lugar.",
+    "sync_pair_button": "Generar código",
+    "sync_pair_show_code": "Código de emparejamiento",
+    "sync_join_title": "Unirse con código",
+    "sync_join_lede": "Introduce el código de tu otro dispositivo para sincronizar.",
+    "sync_join_label": "Código de emparejamiento",
+    "sync_join_button": "Conectar",
+    "sync_status_idle": "Sin sincronizar",
+    "sync_status_pairing": "Esperando al otro dispositivo…",
+    "sync_status_connecting": "Conectando…",
+    "sync_status_connected": "Conectado con {n} dispositivo(s)",
+    "sync_status_error": "Error de sincronización",
+    "sync_code_invalid": "Código demasiado corto — pega el código completo",
+    "sync_disconnect": "Desconectar"
   },
   "common": {
     "tldr": {

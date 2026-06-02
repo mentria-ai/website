@@ -31,24 +31,26 @@
     } catch (_) { return null; }
   };
 
-  const set = (ns, key, value) => {
+  const set = (ns, key, value, opts) => {
     if (!lsAvailable) return false;
+    opts = opts || {};
     try {
       global.localStorage.setItem(fullKey(ns, key), JSON.stringify(value));
-      emit({ ns, key, op: 'set', value });
+      emit({ ns, key, op: 'set', value, remote: !!opts.remote });
       if (persistCache !== true) tryPersist();
       return true;
     } catch (err) {
-      emit({ ns, key, op: 'error', error: String(err && err.message || err) });
+      emit({ ns, key, op: 'error', error: String(err && err.message || err), remote: !!opts.remote });
       return false;
     }
   };
 
-  const remove = (ns, key) => {
+  const remove = (ns, key, opts) => {
     if (!lsAvailable) return false;
+    opts = opts || {};
     try {
       global.localStorage.removeItem(fullKey(ns, key));
-      emit({ ns, key, op: 'remove' });
+      emit({ ns, key, op: 'remove', remote: !!opts.remote });
       return true;
     } catch (_) { return false; }
   };

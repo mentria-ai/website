@@ -72,7 +72,24 @@
     "data_import_button": "Restore",
     "data_import_busy": "Decrypting…",
     "data_import_done": "Restored {n} entries — reloading…",
-    "data_import_fail": "Failed: {err}"
+    "data_import_fail": "Failed: {err}",
+    "sync_section_title": "Sync devices",
+    "sync_section_lede": "Pair two devices with a one-time code. Data syncs peer-to-peer, end-to-end encrypted. Our relay never sees your data.",
+    "sync_pair_title": "Pair a new device",
+    "sync_pair_lede": "Show this code on the other device. The code is the encryption key — don't share it elsewhere.",
+    "sync_pair_button": "Generate code",
+    "sync_pair_show_code": "Pairing code",
+    "sync_join_title": "Join with code",
+    "sync_join_lede": "Enter the code from your other device to sync.",
+    "sync_join_label": "Pairing code",
+    "sync_join_button": "Connect",
+    "sync_status_idle": "Not syncing",
+    "sync_status_pairing": "Waiting for the other device…",
+    "sync_status_connecting": "Connecting…",
+    "sync_status_connected": "Connected to {n} device(s)",
+    "sync_status_error": "Sync error",
+    "sync_code_invalid": "Code too short — paste the full code",
+    "sync_disconnect": "Disconnect"
   },
   "common": {
     "tldr": {

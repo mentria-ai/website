@@ -72,7 +72,24 @@
     "data_import_button": "Restaurer",
     "data_import_busy": "Déchiffrement…",
     "data_import_done": "{n} entrées restaurées — rechargement…",
-    "data_import_fail": "Échec : {err}"
+    "data_import_fail": "Échec : {err}",
+    "sync_section_title": "Synchroniser les appareils",
+    "sync_section_lede": "Appariez deux appareils avec un code à usage unique. Les données se synchronisent en pair-à-pair, chiffrées de bout en bout. Notre relais ne voit jamais vos données.",
+    "sync_pair_title": "Appairer un nouvel appareil",
+    "sync_pair_lede": "Affichez ce code sur l'autre appareil. Le code est la clé de chiffrement — ne le partagez pas ailleurs.",
+    "sync_pair_button": "Générer un code",
+    "sync_pair_show_code": "Code d'appairage",
+    "sync_join_title": "Rejoindre avec un code",
+    "sync_join_lede": "Saisissez le code de votre autre appareil pour synchroniser.",
+    "sync_join_label": "Code d'appairage",
+    "sync_join_button": "Connecter",
+    "sync_status_idle": "Pas de synchronisation",
+    "sync_status_pairing": "En attente de l'autre appareil…",
+    "sync_status_connecting": "Connexion…",
+    "sync_status_connected": "Connecté à {n} appareil(s)",
+    "sync_status_error": "Erreur de synchronisation",
+    "sync_code_invalid": "Code trop court — collez le code complet",
+    "sync_disconnect": "Déconnecter"
   },
   "common": {
     "tldr": {

@@ -72,7 +72,24 @@
     "data_import_button": "復元",
     "data_import_busy": "復号中…",
     "data_import_done": "{n} 件を復元しました — 再読み込み中…",
-    "data_import_fail": "失敗: {err}"
+    "data_import_fail": "失敗: {err}",
+    "sync_section_title": "デバイスを同期",
+    "sync_section_lede": "ワンタイムコードで2台のデバイスをペアリング。データはP2Pで同期され、エンドツーエンドで暗号化されます。リレーがあなたのデータを見ることはありません。",
+    "sync_pair_title": "新しいデバイスをペアリング",
+    "sync_pair_lede": "もう一方のデバイスでこのコードを表示してください。コードは暗号化キーです — 他で共有しないでください。",
+    "sync_pair_button": "コードを生成",
+    "sync_pair_show_code": "ペアリングコード",
+    "sync_join_title": "コードで参加",
+    "sync_join_lede": "もう一方のデバイスのコードを入力して同期します。",
+    "sync_join_label": "ペアリングコード",
+    "sync_join_button": "接続",
+    "sync_status_idle": "同期していません",
+    "sync_status_pairing": "もう一方のデバイスを待機中…",
+    "sync_status_connecting": "接続中…",
+    "sync_status_connected": "{n} 台のデバイスに接続済み",
+    "sync_status_error": "同期エラー",
+    "sync_code_invalid": "コードが短すぎます — 完全なコードを貼り付けてください",
+    "sync_disconnect": "切断"
   },
   "common": {
     "tldr": {

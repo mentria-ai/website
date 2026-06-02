@@ -260,6 +260,11 @@
       "title": "Breakout",
       "lede": "Quebra-blocos encontra jogo de raquete. Pegue os power-ups caindo, limpe a parede, sobreviva a níveis cada vez mais rápidos e difíceis. Roda localmente — seus dados não saem do seu dispositivo.",
       "tldr": "Um quebra-tijolos no estilo Breakout: rebata a bola com a raquete para destruir paredes de tijolos em níveis que ficam mais rápidos, pegando os power-ups que caem (e desviando dos ruins). Construído em HTML5 Canvas com física determinística e controles de mouse, teclado e toque. Pontuação, vidas e a tabela de recordes ficam no JavaScript do lado do cliente — sem scripts de terceiros, sem servidor, e funciona offline depois de armazenado em cache."
+    },
+    "totp": {
+      "title": "TOTP",
+      "lede": "Códigos de dois fatores que ficam no seu navegador, criptografados em repouso. Nada em um servidor.",
+      "tldr": "TOTP em conformidade com o padrão (RFC 6238) rodando totalmente no seu navegador. Os segredos são criptografados em repouso com AES-GCM-256; uma chave mestra é embalada por uma senha (PBKDF2-SHA256 × 600k) e opcionalmente por uma chave derivada de WebAuthn PRF para desbloqueio com Touch ID / Windows Hello. Backup JSON criptografado obrigatório antes do primeiro segredo — perder seu único autenticador significa bloqueio. Funciona offline. Sem contas, sem servidor de sincronização."
     }
   },
   "game": {
@@ -776,6 +781,49 @@
       "btn_download": "Baixar PNG",
       "btn_copy_image": "Copiar imagem",
       "gen_alt": "Código QR gerado"
+    },
+    "totp": {
+      "locked_title": "Bloqueado",
+      "locked_lede_setup": "Escolha uma senha para configurar seu cofre. Você a usará a cada desbloqueio.",
+      "locked_lede_unlock": "Digite sua senha para desbloquear seu cofre TOTP.",
+      "pass_label": "Senha",
+      "pass_confirm": "Confirmar senha",
+      "setup_button": "Criar cofre",
+      "unlock_button": "Desbloquear",
+      "unlock_prf": "Desbloquear com Touch ID / Hello",
+      "or": "ou",
+      "strength_weak": "fraca",
+      "strength_medium": "média",
+      "strength_strong": "forte",
+      "setup_strength_too_short": "A senha deve ter pelo menos 8 caracteres.",
+      "setup_mismatch": "As senhas não correspondem.",
+      "unlock_failed": "Falha ao desbloquear — senha incorreta ou cofre corrompido.",
+      "prf_unsupported": "Touch ID / passkey indisponível ou falhou neste dispositivo.",
+      "add_button": "Adicionar conta",
+      "add_title": "Adicionar conta TOTP",
+      "paste_uri_label": "Colar URI otpauth://",
+      "or_manual": "— ou preencha manualmente —",
+      "issuer_label": "Emissor (ex. GitHub)",
+      "account_label": "Conta (ex. usuario@exemplo.com)",
+      "secret_label": "Segredo (base32)",
+      "cancel": "Cancelar",
+      "save_button": "Salvar",
+      "add_invalid_secret": "O segredo não é base32 válido.",
+      "add_invalid_uri": "URI otpauth://totp/ inválida.",
+      "add_missing_fields": "Adicione um segredo e pelo menos um emissor ou conta.",
+      "delete_confirm": "Excluir {name}?",
+      "copied": "copiado",
+      "empty_state": "Ainda sem contas. Clique em \"Adicionar conta\" para começar.",
+      "lock_button": "Bloquear",
+      "backup_button": "Baixar backup",
+      "enroll_prf": "+ Adicionar desbloqueio rápido (Touch ID)",
+      "prf_enroll_done": "Desbloqueio rápido registrado neste dispositivo.",
+      "prf_enroll_failed": "Falha ao registrar desbloqueio rápido",
+      "backup_gate_title": "Faça backup antes de salvar",
+      "backup_gate_lede": "Segredos TOTP não podem ser recuperados se você perder este dispositivo ou esquecer a senha. Baixe um backup criptografado agora — usa uma senha de sua escolha (pode ser a mesma do cofre).",
+      "backup_gate_confirm": "Baixar backup e salvar",
+      "backup_required": "Digite uma senha para o arquivo de backup (8+ caracteres). Você precisará dela para restaurar.",
+      "backup_done": "Backup baixado."
     }
   },
   "category": {
@@ -786,6 +834,7 @@
     "Productivity": "Produtividade",
     "Timer": "Cronômetro",
     "Utility": "Utilitário",
-    "Health": "Saúde"
+    "Health": "Saúde",
+    "Security": "Segurança"
   }
 }

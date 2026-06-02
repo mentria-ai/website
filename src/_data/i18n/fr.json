@@ -260,6 +260,11 @@
       "title": "Breakout",
       "lede": "Casse-briques rencontre raquette. Attrapez les power-ups qui tombent, dégagez le mur, survivez à des niveaux de plus en plus rapides et exigeants. Fonctionne localement — vos données restent sur votre appareil.",
       "tldr": "Un casse-briques façon Breakout : renvoyez la balle avec votre raquette pour détruire des murs de briques au fil de niveaux de plus en plus rapides, en attrapant les bonus qui tombent (et en évitant les mauvais). Construit sur HTML5 Canvas avec une physique déterministe et des commandes souris, clavier et tactiles. Score, vies et tableau des records vivent dans le JavaScript côté client — aucun script tiers, aucun serveur, et ça marche hors ligne une fois en cache."
+    },
+    "totp": {
+      "title": "TOTP",
+      "lede": "Codes de double authentification qui restent dans votre navigateur, chiffrés au repos. Rien sur un serveur.",
+      "tldr": "TOTP conforme au standard (RFC 6238) entièrement dans votre navigateur. Les secrets sont chiffrés au repos avec AES-GCM-256 ; une clé maître est protégée par une phrase secrète (PBKDF2-SHA256 × 600k) et optionnellement par une clé dérivée de WebAuthn PRF pour un déverrouillage Touch ID / Windows Hello. Sauvegarde chiffrée JSON obligatoire avant le premier enregistrement — perdre votre unique authentificateur signifie verrouillage sinon. Fonctionne hors ligne. Sans compte, sans serveur de sync."
     }
   },
   "game": {
@@ -776,6 +781,49 @@
       "btn_download": "Télécharger le PNG",
       "btn_copy_image": "Copier l'image",
       "gen_alt": "QR code généré"
+    },
+    "totp": {
+      "locked_title": "Verrouillé",
+      "locked_lede_setup": "Choisissez une phrase secrète pour configurer votre coffre. Vous l'utiliserez à chaque déverrouillage.",
+      "locked_lede_unlock": "Saisissez votre phrase secrète pour déverrouiller votre coffre TOTP.",
+      "pass_label": "Phrase secrète",
+      "pass_confirm": "Confirmer la phrase secrète",
+      "setup_button": "Créer le coffre",
+      "unlock_button": "Déverrouiller",
+      "unlock_prf": "Déverrouiller avec Touch ID / Hello",
+      "or": "ou",
+      "strength_weak": "faible",
+      "strength_medium": "moyen",
+      "strength_strong": "fort",
+      "setup_strength_too_short": "La phrase secrète doit comporter au moins 8 caractères.",
+      "setup_mismatch": "Les phrases secrètes ne correspondent pas.",
+      "unlock_failed": "Déverrouillage échoué — phrase secrète erronée ou coffre corrompu.",
+      "prf_unsupported": "Touch ID / passkey indisponible ou en échec sur cet appareil.",
+      "add_button": "Ajouter un compte",
+      "add_title": "Ajouter un compte TOTP",
+      "paste_uri_label": "Coller l'URI otpauth://",
+      "or_manual": "— ou remplir manuellement —",
+      "issuer_label": "Émetteur (ex. GitHub)",
+      "account_label": "Compte (ex. utilisateur@exemple.com)",
+      "secret_label": "Secret (base32)",
+      "cancel": "Annuler",
+      "save_button": "Enregistrer",
+      "add_invalid_secret": "Le secret n'est pas un base32 valide.",
+      "add_invalid_uri": "Ce n'est pas une URI otpauth://totp/ valide.",
+      "add_missing_fields": "Ajoutez un secret et au moins un émetteur ou un compte.",
+      "delete_confirm": "Supprimer {name} ?",
+      "copied": "copié",
+      "empty_state": "Aucun compte. Cliquez sur « Ajouter un compte » pour commencer.",
+      "lock_button": "Verrouiller",
+      "backup_button": "Télécharger la sauvegarde",
+      "enroll_prf": "+ Ajouter le déverrouillage rapide (Touch ID)",
+      "prf_enroll_done": "Déverrouillage rapide enregistré sur cet appareil.",
+      "prf_enroll_failed": "L'enregistrement du déverrouillage rapide a échoué",
+      "backup_gate_title": "Sauvegardez avant d'enregistrer",
+      "backup_gate_lede": "Les secrets TOTP ne peuvent pas être récupérés si vous perdez cet appareil ou oubliez votre phrase secrète. Téléchargez maintenant une sauvegarde chiffrée — elle utilise une phrase secrète de votre choix (peut être la même que celle du coffre).",
+      "backup_gate_confirm": "Télécharger et enregistrer",
+      "backup_required": "Saisissez une phrase secrète pour le fichier de sauvegarde (8+ caractères). Vous en aurez besoin pour restaurer.",
+      "backup_done": "Sauvegarde téléchargée."
     }
   },
   "category": {
@@ -786,6 +834,7 @@
     "Productivity": "Productivité",
     "Timer": "Minuteur",
     "Utility": "Utilitaire",
-    "Health": "Santé"
+    "Health": "Santé",
+    "Security": "Sécurité"
   }
 }

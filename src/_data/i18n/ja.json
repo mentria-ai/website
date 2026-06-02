@@ -260,6 +260,11 @@
       "title": "Breakout",
       "lede": "ブロック崩しとパドルゲームの融合。落ちてくるパワーアップをキャッチし、壁を崩し、ますます速く厳しくなるレベルを生き抜こう。ローカル動作 — データはデバイスから出ません。",
       "tldr": "Breakout系のブロック崩し。パドルでボールを打ち返してブロックの壁を崩し、だんだん速くなるレベルを進み、落ちてくるパワーアップを取り（悪いものは避け）ます。HTML5 Canvasと決定論的な物理、マウス・キーボード・タッチ操作で動作します。スコア・残機・ハイスコア表はすべてクライアント側のJavaScriptにあり、サードパーティのスクリプトもサーバーもなく、一度キャッシュすればオフラインでも動作します。"
+    },
+    "totp": {
+      "title": "TOTP",
+      "lede": "ブラウザ内に保存される二要素認証コード。保存時に暗号化。サーバには何もありません。",
+      "tldr": "標準準拠の TOTP (RFC 6238) を完全にブラウザ内で動作。シークレットは AES-GCM-256 で保存時に暗号化、マスターキーはパスフレーズ (PBKDF2-SHA256 × 60万回) と任意で WebAuthn PRF 由来のキー (Touch ID / Windows Hello) でラップ。最初のシークレット保存前に暗号化 JSON バックアップを必須化 — 唯一の認証器を失うとロックアウトされます。オフライン動作。アカウントも同期サーバも不要。"
     }
   },
   "game": {
@@ -776,6 +781,49 @@
       "btn_download": "PNGをダウンロード",
       "btn_copy_image": "画像をコピー",
       "gen_alt": "生成されたQRコード"
+    },
+    "totp": {
+      "locked_title": "ロック中",
+      "locked_lede_setup": "パスフレーズを設定して保管庫を作成します。解除のたびに使用します。",
+      "locked_lede_unlock": "パスフレーズを入力して TOTP 保管庫を解除します。",
+      "pass_label": "パスフレーズ",
+      "pass_confirm": "パスフレーズ確認",
+      "setup_button": "保管庫を作成",
+      "unlock_button": "解除",
+      "unlock_prf": "Touch ID / Hello で解除",
+      "or": "または",
+      "strength_weak": "弱い",
+      "strength_medium": "中",
+      "strength_strong": "強い",
+      "setup_strength_too_short": "パスフレーズは 8 文字以上にしてください。",
+      "setup_mismatch": "パスフレーズが一致しません。",
+      "unlock_failed": "解除に失敗しました — パスフレーズが違うか保管庫が壊れています。",
+      "prf_unsupported": "Touch ID / パスキーがこのデバイスで利用できないか失敗しました。",
+      "add_button": "アカウント追加",
+      "add_title": "TOTP アカウントを追加",
+      "paste_uri_label": "otpauth:// URI を貼り付け",
+      "or_manual": "— または手動入力 —",
+      "issuer_label": "発行者 (例: GitHub)",
+      "account_label": "アカウント (例: user@example.com)",
+      "secret_label": "シークレット (base32)",
+      "cancel": "キャンセル",
+      "save_button": "保存",
+      "add_invalid_secret": "シークレットが有効な base32 ではありません。",
+      "add_invalid_uri": "otpauth://totp/ URI として無効です。",
+      "add_missing_fields": "シークレットと、発行者またはアカウントを少なくとも 1 つ入力してください。",
+      "delete_confirm": "{name} を削除しますか?",
+      "copied": "コピー済み",
+      "empty_state": "アカウントがまだありません。「アカウント追加」で開始してください。",
+      "lock_button": "ロック",
+      "backup_button": "バックアップを保存",
+      "enroll_prf": "+ クイック解除 (Touch ID) を追加",
+      "prf_enroll_done": "このデバイスでクイック解除が登録されました。",
+      "prf_enroll_failed": "クイック解除の登録に失敗しました",
+      "backup_gate_title": "保存前にバックアップ",
+      "backup_gate_lede": "デバイスを失ったりパスフレーズを忘れると TOTP シークレットは復元できません。今すぐ暗号化バックアップを保存してください。任意のパスフレーズを使えます (保管庫と同じでも可)。",
+      "backup_gate_confirm": "バックアップして保存",
+      "backup_required": "バックアップファイル用のパスフレーズを入力してください (8 文字以上)。復元に必要です。",
+      "backup_done": "バックアップを保存しました。"
     }
   },
   "category": {
@@ -786,6 +834,7 @@
     "Productivity": "生産性",
     "Timer": "タイマー",
     "Utility": "ユーティリティ",
-    "Health": "健康"
+    "Health": "健康",
+    "Security": "セキュリティ"
   }
 }

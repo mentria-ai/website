@@ -260,6 +260,11 @@
       "title": "Breakout",
       "lede": "Rompe-ladrillos con paleta. Atrapa los power-ups que caen, despeja el muro, sobrevive niveles cada vez más rápidos y duros. Se ejecuta localmente — tus datos no salen de tu dispositivo.",
       "tldr": "Un rompeladrillos estilo Breakout: rebota la bola con tu pala para romper muros de ladrillos en niveles que se aceleran, atrapando potenciadores que caen (y esquivando los malos). Construido sobre HTML5 Canvas con física determinista y controles de ratón, teclado y táctiles. La puntuación, las vidas y la tabla de récords viven en JavaScript del lado del cliente: sin scripts de terceros, sin servidor, y funciona sin conexión una vez en caché."
+    },
+    "totp": {
+      "title": "TOTP",
+      "lede": "Códigos de doble factor que viven en tu navegador, cifrados en reposo. Nada en un servidor.",
+      "tldr": "TOTP conforme al estándar (RFC 6238) ejecutándose enteramente en tu navegador. Los secretos se cifran en reposo con AES-GCM-256; una clave maestra se envuelve mediante una contraseña (PBKDF2-SHA256 × 600k) y opcionalmente una clave derivada de WebAuthn PRF para desbloquear con Touch ID / Windows Hello. Copia de seguridad cifrada JSON obligatoria antes de guardar el primer secreto: perder tu único autenticador implica bloqueo. Funciona sin conexión. Sin cuentas, sin servidor de sincronización."
     }
   },
   "game": {
@@ -776,6 +781,49 @@
       "btn_download": "Descargar PNG",
       "btn_copy_image": "Copiar imagen",
       "gen_alt": "Código QR generado"
+    },
+    "totp": {
+      "locked_title": "Bloqueado",
+      "locked_lede_setup": "Elige una contraseña para configurar tu bóveda. La usarás cada vez que la desbloquees.",
+      "locked_lede_unlock": "Introduce tu contraseña para desbloquear tu bóveda TOTP.",
+      "pass_label": "Contraseña",
+      "pass_confirm": "Confirmar contraseña",
+      "setup_button": "Crear bóveda",
+      "unlock_button": "Desbloquear",
+      "unlock_prf": "Desbloquear con Touch ID / Hello",
+      "or": "o",
+      "strength_weak": "débil",
+      "strength_medium": "media",
+      "strength_strong": "fuerte",
+      "setup_strength_too_short": "La contraseña debe tener al menos 8 caracteres.",
+      "setup_mismatch": "Las contraseñas no coinciden.",
+      "unlock_failed": "Desbloqueo fallido: contraseña incorrecta o bóveda dañada.",
+      "prf_unsupported": "Touch ID / passkey no disponible o falló en este dispositivo.",
+      "add_button": "Añadir cuenta",
+      "add_title": "Añadir cuenta TOTP",
+      "paste_uri_label": "Pegar URI otpauth://",
+      "or_manual": "— o rellena manualmente —",
+      "issuer_label": "Emisor (p. ej. GitHub)",
+      "account_label": "Cuenta (p. ej. usuario@ejemplo.com)",
+      "secret_label": "Secreto (base32)",
+      "cancel": "Cancelar",
+      "save_button": "Guardar",
+      "add_invalid_secret": "El secreto no es base32 válido.",
+      "add_invalid_uri": "No es una URI otpauth://totp/ válida.",
+      "add_missing_fields": "Añade un secreto y al menos un emisor o cuenta.",
+      "delete_confirm": "¿Eliminar {name}?",
+      "copied": "copiado",
+      "empty_state": "Aún no hay cuentas. Pulsa «Añadir cuenta» para empezar.",
+      "lock_button": "Bloquear",
+      "backup_button": "Descargar copia",
+      "enroll_prf": "+ Añadir desbloqueo rápido (Touch ID)",
+      "prf_enroll_done": "Desbloqueo rápido registrado en este dispositivo.",
+      "prf_enroll_failed": "Registro del desbloqueo rápido falló",
+      "backup_gate_title": "Haz copia antes de guardar",
+      "backup_gate_lede": "Los secretos TOTP no se pueden recuperar si pierdes este dispositivo o olvidas tu contraseña. Descarga una copia cifrada ahora — usa una contraseña que tú eliges (puede ser la misma que la de tu bóveda).",
+      "backup_gate_confirm": "Descargar copia y guardar",
+      "backup_required": "Introduce una contraseña para el archivo de copia (8+ caracteres). La necesitarás para restaurar.",
+      "backup_done": "Copia descargada."
     }
   },
   "category": {
@@ -786,6 +834,7 @@
     "Productivity": "Productividad",
     "Timer": "Temporizador",
     "Utility": "Utilidad",
-    "Health": "Salud"
+    "Health": "Salud",
+    "Security": "Seguridad"
   }
 }

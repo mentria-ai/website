@@ -1,0 +1,719 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/totp/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.totp.title' | t }}"
+  description: "{{ 'tools.totp.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">totp</span></p>
+  <h1>{{ "tools.totp.title" | t }}</h1>
+  <p>{{ "tools.totp.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "totp.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="totp" id="totp">
+  <div class="totp-status" id="totp-status" hidden></div>
+
+  <div class="totp-locked" id="totp-locked" hidden>
+    <h2 class="totp-locked__h">{{ "tool.totp.locked_title" | t }}</h2>
+    <p class="totp-locked__p" id="totp-locked-lede">{{ "tool.totp.locked_lede_setup" | t }}</p>
+
+    <div class="totp-setup" id="totp-setup" hidden>
+      <label class="totp-field">
+        <span>{{ "tool.totp.pass_label" | t }}</span>
+        <input type="password" id="totp-setup-pass" autocomplete="new-password" minlength="8">
+      </label>
+      <label class="totp-field">
+        <span>{{ "tool.totp.pass_confirm" | t }}</span>
+        <input type="password" id="totp-setup-pass2" autocomplete="new-password" minlength="8">
+      </label>
+      <div class="totp-strength" id="totp-setup-strength"></div>
+      <button type="button" class="totp-btn" id="totp-setup-btn">{{ "tool.totp.setup_button" | t }}</button>
+    </div>
+
+    <div class="totp-unlock" id="totp-unlock" hidden>
+      <button type="button" class="totp-btn totp-btn--prf" id="totp-prf-btn" hidden>{{ "tool.totp.unlock_prf" | t }}</button>
+      <div class="totp-divider" id="totp-divider" hidden><span>{{ "tool.totp.or" | t }}</span></div>
+      <label class="totp-field">
+        <span>{{ "tool.totp.pass_label" | t }}</span>
+        <input type="password" id="totp-unlock-pass" autocomplete="current-password">
+      </label>
+      <button type="button" class="totp-btn" id="totp-unlock-btn">{{ "tool.totp.unlock_button" | t }}</button>
+    </div>
+  </div>
+
+  <div class="totp-vault" id="totp-vault" hidden>
+    <div class="totp-toolbar">
+      <button type="button" class="totp-btn totp-btn--ghost" id="totp-add-btn">+ {{ "tool.totp.add_button" | t }}</button>
+      <button type="button" class="totp-btn totp-btn--ghost" id="totp-prf-enroll-btn" hidden>{{ "tool.totp.enroll_prf" | t }}</button>
+      <button type="button" class="totp-btn totp-btn--ghost" id="totp-backup-btn">{{ "tool.totp.backup_button" | t }}</button>
+      <button type="button" class="totp-btn totp-btn--ghost" id="totp-lock-btn">{{ "tool.totp.lock_button" | t }}</button>
+    </div>
+
+    <ul class="totp-list" id="totp-list"></ul>
+    <p class="totp-empty" id="totp-empty" hidden>{{ "tool.totp.empty_state" | t }}</p>
+  </div>
+
+  <div class="totp-modal" id="totp-add-modal" hidden>
+    <div class="totp-modal__backdrop" data-close></div>
+    <div class="totp-modal__card">
+      <h3 class="totp-modal__h">{{ "tool.totp.add_title" | t }}</h3>
+      <label class="totp-field">
+        <span>{{ "tool.totp.paste_uri_label" | t }}</span>
+        <input type="text" id="totp-uri" autocomplete="off" spellcheck="false" placeholder="otpauth://totp/Example:user@example.com?secret=ABCD1234&issuer=Example">
+      </label>
+      <p class="totp-modal__or">{{ "tool.totp.or_manual" | t }}</p>
+      <label class="totp-field">
+        <span>{{ "tool.totp.issuer_label" | t }}</span>
+        <input type="text" id="totp-issuer" autocomplete="off">
+      </label>
+      <label class="totp-field">
+        <span>{{ "tool.totp.account_label" | t }}</span>
+        <input type="text" id="totp-account" autocomplete="off">
+      </label>
+      <label class="totp-field">
+        <span>{{ "tool.totp.secret_label" | t }}</span>
+        <input type="text" id="totp-secret" autocomplete="off" spellcheck="false">
+      </label>
+      <div class="totp-modal__actions">
+        <button type="button" class="totp-btn totp-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
+        <button type="button" class="totp-btn" id="totp-save-btn">{{ "tool.totp.save_button" | t }}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="totp-modal" id="totp-backup-modal" hidden>
+    <div class="totp-modal__backdrop" data-close></div>
+    <div class="totp-modal__card">
+      <h3 class="totp-modal__h">{{ "tool.totp.backup_gate_title" | t }}</h3>
+      <p class="totp-modal__p">{{ "tool.totp.backup_gate_lede" | t }}</p>
+      <div class="totp-modal__actions">
+        <button type="button" class="totp-btn totp-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
+        <button type="button" class="totp-btn" id="totp-backup-confirm-btn">{{ "tool.totp.backup_gate_confirm" | t }}</button>
+      </div>
+    </div>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<style>
+  .totp { display: flex; flex-direction: column; gap: 18px; padding: 8px 0; }
+  .totp-status { font-family: var(--font-mono); font-size: 12px; padding: 10px 14px; border-radius: 6px; }
+  .totp-status[data-tone="err"] { background: rgba(242,95,168,0.12); border: 1px solid var(--syn-pink, #f25fa8); color: var(--syn-pink, #f25fa8); }
+  .totp-status[data-tone="ok"]  { background: rgba(110,243,197,0.10); border: 1px solid var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); }
+
+  .totp-locked { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .totp-locked__h { font-family: var(--font-mono); font-size: 16px; margin: 0; color: var(--accent, #6ef3c5); }
+  .totp-locked__p { font-size: 13px; color: var(--term-muted); margin: 0; }
+  .totp-setup, .totp-unlock { display: flex; flex-direction: column; gap: 10px; }
+
+  .totp-field { display: flex; flex-direction: column; gap: 4px; }
+  .totp-field > span { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--term-subtle); text-transform: uppercase; }
+  .totp-field input { background: var(--term-bg); border: 1px solid var(--term-border); color: var(--term-fg); padding: 8px 10px; border-radius: 5px; font-family: var(--font-mono); font-size: 13px; }
+  .totp-field input:focus { outline: none; border-color: var(--accent, #6ef3c5); }
+
+  .totp-strength { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); min-height: 12px; }
+  .totp-strength[data-level="weak"]   { color: var(--syn-pink, #f25fa8); }
+  .totp-strength[data-level="medium"] { color: var(--syn-amber, #f7b015); }
+  .totp-strength[data-level="strong"] { color: var(--syn-green, #34c46a); }
+
+  .totp-btn { background: var(--accent, #6ef3c5); color: var(--term-bg, #0a0a0a); border: none; padding: 9px 14px; border-radius: 5px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.05em; }
+  .totp-btn:hover { filter: brightness(1.1); }
+  .totp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .totp-btn--ghost { background: transparent; border: 1px solid var(--term-border); color: var(--term-fg); }
+  .totp-btn--prf { background: var(--syn-cyan, #67e8f9); }
+
+  .totp-divider { display: flex; align-items: center; gap: 10px; color: var(--term-subtle); font-family: var(--font-mono); font-size: 10px; }
+  .totp-divider::before, .totp-divider::after { content: ''; flex: 1; height: 1px; background: var(--term-border); }
+
+  .totp-toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+  .totp-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .totp-empty { font-family: var(--font-mono); font-size: 12px; color: var(--term-muted); text-align: center; padding: 24px; }
+
+  .totp-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 6px; }
+  .totp-row__meta { flex: 1; min-width: 0; }
+  .totp-row__issuer { font-family: var(--font-mono); font-size: 11px; color: var(--term-subtle); text-transform: uppercase; letter-spacing: 0.1em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .totp-row__account { font-size: 12px; color: var(--term-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .totp-row__code { font-family: var(--font-mono); font-size: 22px; letter-spacing: 0.1em; color: var(--accent, #6ef3c5); cursor: pointer; user-select: all; padding: 4px 8px; border-radius: 4px; }
+  .totp-row__code:hover { background: rgba(110,243,197,0.08); }
+  .totp-row__code.is-copied { color: var(--syn-green, #34c46a); }
+  .totp-row__ring { width: 32px; height: 32px; flex-shrink: 0; }
+  .totp-row__ring circle { fill: none; stroke-width: 3; }
+  .totp-row__ring .bg { stroke: var(--term-border); }
+  .totp-row__ring .fg { stroke: var(--accent, #6ef3c5); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.95s linear; }
+  .totp-row__ring.warning .fg { stroke: var(--syn-amber, #f7b015); }
+  .totp-row__del { background: transparent; border: none; color: var(--term-subtle); cursor: pointer; padding: 4px 6px; font-family: var(--font-mono); font-size: 11px; }
+  .totp-row__del:hover { color: var(--syn-pink, #f25fa8); }
+
+  .totp-modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .totp-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+  .totp-modal__card { position: relative; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 8px; padding: 18px; width: 100%; max-width: 480px; max-height: 90vh; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+  .totp-modal__h { font-family: var(--font-mono); font-size: 14px; margin: 0; color: var(--accent, #6ef3c5); }
+  .totp-modal__p { font-size: 13px; color: var(--term-muted); margin: 0; }
+  .totp-modal__or { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); text-align: center; margin: 4px 0; }
+  .totp-modal__actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  const NS = 'totp';
+  const VAULT_KEY = 'vault';
+
+  const $ = (id) => document.getElementById(id);
+  const COPY = {
+    setup_strength_too_short: {{ ('tool.totp.setup_strength_too_short' | t) | dump | safe }},
+    setup_mismatch:           {{ ('tool.totp.setup_mismatch'           | t) | dump | safe }},
+    strength_weak:            {{ ('tool.totp.strength_weak'            | t) | dump | safe }},
+    strength_medium:          {{ ('tool.totp.strength_medium'          | t) | dump | safe }},
+    strength_strong:          {{ ('tool.totp.strength_strong'          | t) | dump | safe }},
+    unlock_failed:            {{ ('tool.totp.unlock_failed'            | t) | dump | safe }},
+    prf_unsupported:          {{ ('tool.totp.prf_unsupported'          | t) | dump | safe }},
+    prf_enroll_done:          {{ ('tool.totp.prf_enroll_done'          | t) | dump | safe }},
+    prf_enroll_failed:        {{ ('tool.totp.prf_enroll_failed'        | t) | dump | safe }},
+    locked_lede_setup:        {{ ('tool.totp.locked_lede_setup'        | t) | dump | safe }},
+    locked_lede_unlock:       {{ ('tool.totp.locked_lede_unlock'       | t) | dump | safe }},
+    add_invalid_secret:       {{ ('tool.totp.add_invalid_secret'       | t) | dump | safe }},
+    add_invalid_uri:          {{ ('tool.totp.add_invalid_uri'          | t) | dump | safe }},
+    add_missing_fields:       {{ ('tool.totp.add_missing_fields'       | t) | dump | safe }},
+    delete_confirm:           {{ ('tool.totp.delete_confirm'           | t) | dump | safe }},
+    copied:                   {{ ('tool.totp.copied'                   | t) | dump | safe }},
+    backup_required:          {{ ('tool.totp.backup_required'          | t) | dump | safe }},
+    backup_done:              {{ ('tool.totp.backup_done'              | t) | dump | safe }}
+  };
+
+  function b64uEnc(bytes) {
+    const u8 = new Uint8Array(bytes);
+    let s = '';
+    for (let i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function b64uDec(str) {
+    const pad = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4));
+    const bin = atob(str.replace(/-/g, '+').replace(/_/g, '/') + pad);
+    const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return u8;
+  }
+  function b32Dec(s) {
+    const cleaned = s.toUpperCase().replace(/[^A-Z2-7]/g, '');
+    if (!cleaned) throw new Error('empty');
+    const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    const out = [];
+    let bits = 0, value = 0;
+    for (let i = 0; i < cleaned.length; i++) {
+      const v = alpha.indexOf(cleaned[i]);
+      if (v < 0) throw new Error('bad base32');
+      value = (value << 5) | v;
+      bits += 5;
+      if (bits >= 8) {
+        out.push((value >>> (bits - 8)) & 0xff);
+        bits -= 8;
+      }
+    }
+    return new Uint8Array(out);
+  }
+
+  async function pbkdf2(pass, salt, iter) {
+    const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' },
+      baseKey,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+
+  async function encryptWith(key, plaintextBytes) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintextBytes);
+    return { iv: b64uEnc(iv), ct: b64uEnc(new Uint8Array(ct)) };
+  }
+  async function decryptWith(key, env) {
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64uDec(env.iv) }, key, b64uDec(env.ct));
+    return new Uint8Array(pt);
+  }
+
+  function randomMasterKey() {
+    return crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+  }
+  async function exportRaw(key) {
+    return new Uint8Array(await crypto.subtle.exportKey('raw', key));
+  }
+  async function importRaw(bytes) {
+    return crypto.subtle.importKey('raw', bytes, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+
+  async function totpCode(secretBytes, opts) {
+    opts = opts || {};
+    const period = opts.period || 30;
+    const digits = opts.digits || 6;
+    const counter = Math.floor(Date.now() / 1000 / period);
+    const buf = new ArrayBuffer(8);
+    const view = new DataView(buf);
+    view.setUint32(4, counter >>> 0, false);
+    view.setUint32(0, Math.floor(counter / 0x100000000), false);
+    const key = await crypto.subtle.importKey('raw', secretBytes, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+    const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, buf));
+    const off = sig[sig.length - 1] & 0x0f;
+    const code = ((sig[off] & 0x7f) << 24 | (sig[off + 1] & 0xff) << 16 | (sig[off + 2] & 0xff) << 8 | (sig[off + 3] & 0xff)) % Math.pow(10, digits);
+    return String(code).padStart(digits, '0');
+  }
+
+  function parseOtpauthUri(uri) {
+    if (!/^otpauth:\/\/totp\//i.test(uri)) throw new Error('not totp');
+    const u = new URL(uri);
+    const label = decodeURIComponent(u.pathname.replace(/^\/+/, ''));
+    const params = u.searchParams;
+    const secret = params.get('secret');
+    if (!secret) throw new Error('no secret');
+    let issuer = params.get('issuer') || '';
+    let account = label;
+    const colon = label.indexOf(':');
+    if (colon > -1) {
+      if (!issuer) issuer = label.slice(0, colon);
+      account = label.slice(colon + 1);
+    }
+    return {
+      issuer: issuer.trim(),
+      account: account.trim(),
+      secret_b32: secret.replace(/\s+/g, ''),
+      digits: parseInt(params.get('digits'), 10) || 6,
+      period: parseInt(params.get('period'), 10) || 30
+    };
+  }
+
+  function scorePass(s) {
+    if (!s) return { score: 0, label: 'weak' };
+    let score = 0;
+    if (s.length >= 8) score++;
+    if (s.length >= 12) score++;
+    if (s.length >= 16) score++;
+    if (/[A-Z]/.test(s) && /[a-z]/.test(s)) score++;
+    if (/[0-9]/.test(s)) score++;
+    if (/[^A-Za-z0-9]/.test(s)) score++;
+    if (score <= 2) return { score, label: 'weak' };
+    if (score <= 4) return { score, label: 'medium' };
+    return { score, label: 'strong' };
+  }
+
+  const PRF_INFO = new TextEncoder().encode('mentria-totp-prf-v1');
+  async function prfDeriveKey(prfResult) {
+    const baseKey = await crypto.subtle.importKey('raw', prfResult, 'HKDF', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: PRF_INFO },
+      baseKey,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+
+  const prfSupported = !!(window.PublicKeyCredential && window.isSecureContext && crypto.subtle);
+
+  async function prfCreate(salt) {
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { name: 'Mentria TOTP' },
+        user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'mentria-totp', displayName: 'Mentria TOTP' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+        authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
+        extensions: { prf: { eval: { first: salt } } }
+      }
+    });
+    if (!cred) throw new Error('cancelled');
+    const ext = cred.getClientExtensionResults().prf;
+    if (!ext || ext.enabled === false) throw new Error('prf-unsupported');
+    return { credId: new Uint8Array(cred.rawId), prfResult: ext.results ? ext.results.first : null };
+  }
+  async function prfGet(credId, salt) {
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        allowCredentials: [{ type: 'public-key', id: credId }],
+        userVerification: 'required',
+        extensions: { prf: { eval: { first: salt } } }
+      }
+    });
+    const ext = assertion.getClientExtensionResults().prf;
+    if (!ext || !ext.results || !ext.results.first) throw new Error('prf-no-result');
+    return new Uint8Array(ext.results.first);
+  }
+
+  const state = {
+    vault: null,
+    masterKey: null,
+    accounts: [],
+    timer: null
+  };
+
+  function loadVault() { return window.MentriaStore.get(NS, VAULT_KEY); }
+  function saveVault(v) { window.MentriaStore.set(NS, VAULT_KEY, v); }
+
+  async function reEncryptSecrets() {
+    const json = JSON.stringify(state.accounts);
+    const env = await encryptWith(state.masterKey, new TextEncoder().encode(json));
+    state.vault.secrets = env;
+    saveVault(state.vault);
+  }
+
+  async function decryptSecrets() {
+    if (!state.vault || !state.vault.secrets) { state.accounts = []; return; }
+    const pt = await decryptWith(state.masterKey, state.vault.secrets);
+    state.accounts = JSON.parse(new TextDecoder().decode(pt));
+  }
+
+  function setStatus(msg, tone) {
+    const el = $('totp-status');
+    if (!msg) { el.hidden = true; return; }
+    el.hidden = false;
+    el.textContent = msg;
+    if (tone) el.dataset.tone = tone; else delete el.dataset.tone;
+    if (tone === 'ok') setTimeout(() => { if (el.textContent === msg) { el.hidden = true; } }, 2500);
+  }
+
+  function showLocked() {
+    $('totp-locked').hidden = false;
+    $('totp-vault').hidden = true;
+    const hasVault = !!state.vault;
+    $('totp-setup').hidden = hasVault;
+    $('totp-unlock').hidden = !hasVault;
+    $('totp-locked-lede').textContent = hasVault ? COPY.locked_lede_unlock : COPY.locked_lede_setup;
+    if (hasVault && state.vault.prf && prfSupported) {
+      $('totp-prf-btn').hidden = false;
+      $('totp-divider').hidden = false;
+    } else {
+      $('totp-prf-btn').hidden = true;
+      $('totp-divider').hidden = true;
+    }
+  }
+
+  function showVault() {
+    $('totp-locked').hidden = true;
+    $('totp-vault').hidden = false;
+    $('totp-prf-enroll-btn').hidden = !!state.vault.prf || !prfSupported;
+    renderList();
+    if (!state.timer) state.timer = setInterval(tick, 1000);
+    tick();
+  }
+
+  function lock() {
+    if (state.timer) { clearInterval(state.timer); state.timer = null; }
+    state.masterKey = null;
+    state.accounts = [];
+    showLocked();
+    setStatus('', null);
+  }
+
+  function uuid() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return b64uEnc(crypto.getRandomValues(new Uint8Array(12)));
+  }
+
+  function renderList() {
+    const list = $('totp-list');
+    list.innerHTML = '';
+    $('totp-empty').hidden = state.accounts.length > 0;
+    state.accounts.forEach((acc) => {
+      const li = document.createElement('li');
+      li.className = 'totp-row';
+      li.dataset.id = acc.id;
+      li.innerHTML = `
+        <svg class="totp-row__ring" viewBox="0 0 32 32" aria-hidden="true">
+          <circle class="bg" cx="16" cy="16" r="14"></circle>
+          <circle class="fg" cx="16" cy="16" r="14" stroke-dasharray="${2 * Math.PI * 14}" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="totp-row__meta">
+          <div class="totp-row__issuer"></div>
+          <div class="totp-row__account"></div>
+        </div>
+        <span class="totp-row__code" data-copy>—</span>
+        <button type="button" class="totp-row__del" data-del title="${COPY.delete_confirm.replace(/{name}/g, '')}">×</button>
+      `;
+      li.querySelector('.totp-row__issuer').textContent = acc.issuer || '—';
+      li.querySelector('.totp-row__account').textContent = acc.account || '';
+      list.appendChild(li);
+    });
+  }
+
+  async function tick() {
+    const rows = $('totp-list').querySelectorAll('.totp-row');
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const acc = state.accounts.find((a) => a.id === row.dataset.id);
+      if (!acc) continue;
+      const code = await totpCode(b64uDec(acc.secret), { period: acc.period, digits: acc.digits });
+      const codeEl = row.querySelector('.totp-row__code');
+      if (!codeEl.classList.contains('is-copied')) codeEl.textContent = code.match(/.{3}/g).join(' ');
+      const period = acc.period || 30;
+      const remaining = period - (Math.floor(Date.now() / 1000) % period);
+      const ring = row.querySelector('.totp-row__ring');
+      const fg = ring.querySelector('.fg');
+      const circumference = 2 * Math.PI * 14;
+      fg.setAttribute('stroke-dashoffset', String(circumference * (1 - remaining / period)));
+      ring.classList.toggle('warning', remaining <= 5);
+    }
+  }
+
+  async function unlockWithPassphrase(pass) {
+    if (!state.vault || !state.vault.pass) throw new Error('no vault');
+    const salt = b64uDec(state.vault.pass.salt);
+    const wrapKey = await pbkdf2(pass, salt, state.vault.pass.iter);
+    const masterBytes = await decryptWith(wrapKey, { iv: state.vault.pass.iv, ct: state.vault.pass.wrap });
+    state.masterKey = await importRaw(masterBytes);
+    await decryptSecrets();
+  }
+  async function unlockWithPrf() {
+    if (!state.vault || !state.vault.prf) throw new Error('no prf');
+    const credId = b64uDec(state.vault.prf.cred_id);
+    const salt = b64uDec(state.vault.prf.salt);
+    const prfResult = await prfGet(credId, salt);
+    const wrapKey = await prfDeriveKey(prfResult);
+    const masterBytes = await decryptWith(wrapKey, { iv: state.vault.prf.iv, ct: state.vault.prf.wrap });
+    state.masterKey = await importRaw(masterBytes);
+    await decryptSecrets();
+  }
+
+  async function setupVault(pass) {
+    const masterKey = await randomMasterKey();
+    const rawMaster = await exportRaw(masterKey);
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const wrapKey = await pbkdf2(pass, salt, 600000);
+    const wrap = await encryptWith(wrapKey, rawMaster);
+    const secrets = await encryptWith(masterKey, new TextEncoder().encode('[]'));
+    state.vault = {
+      v: 1,
+      pass: { salt: b64uEnc(salt), iter: 600000, iv: wrap.iv, wrap: wrap.ct },
+      prf: null,
+      secrets
+    };
+    saveVault(state.vault);
+    state.masterKey = masterKey;
+    state.accounts = [];
+  }
+
+  async function enrollPrf() {
+    if (!prfSupported) throw new Error('prf-unsupported');
+    if (!state.masterKey) throw new Error('locked');
+    const salt = crypto.getRandomValues(new Uint8Array(32));
+    const { credId, prfResult } = await prfCreate(salt);
+    if (!prfResult) {
+      const r = await prfGet(credId, salt);
+      const wrapKey = await prfDeriveKey(r);
+      const rawMaster = await exportRaw(state.masterKey);
+      const wrap = await encryptWith(wrapKey, rawMaster);
+      state.vault.prf = { salt: b64uEnc(salt), cred_id: b64uEnc(credId), iv: wrap.iv, wrap: wrap.ct };
+    } else {
+      const wrapKey = await prfDeriveKey(new Uint8Array(prfResult));
+      const rawMaster = await exportRaw(state.masterKey);
+      const wrap = await encryptWith(wrapKey, rawMaster);
+      state.vault.prf = { salt: b64uEnc(salt), cred_id: b64uEnc(credId), iv: wrap.iv, wrap: wrap.ct };
+    }
+    saveVault(state.vault);
+  }
+
+  $('totp-setup-pass').addEventListener('input', () => {
+    const s = scorePass($('totp-setup-pass').value);
+    const el = $('totp-setup-strength');
+    el.dataset.level = s.label;
+    el.textContent = $('totp-setup-pass').value ? '· ' + COPY['strength_' + s.label] : '';
+  });
+
+  $('totp-setup-btn').addEventListener('click', async () => {
+    const pass = $('totp-setup-pass').value;
+    const pass2 = $('totp-setup-pass2').value;
+    if (pass.length < 8) { setStatus(COPY.setup_strength_too_short, 'err'); return; }
+    if (pass !== pass2) { setStatus(COPY.setup_mismatch, 'err'); return; }
+    $('totp-setup-btn').disabled = true;
+    try {
+      await setupVault(pass);
+      $('totp-setup-pass').value = ''; $('totp-setup-pass2').value = '';
+      $('totp-setup-strength').textContent = '';
+      setStatus('', null);
+      showVault();
+    } catch (err) {
+      setStatus(String(err && err.message || err), 'err');
+    } finally {
+      $('totp-setup-btn').disabled = false;
+    }
+  });
+
+  $('totp-unlock-btn').addEventListener('click', async () => {
+    const pass = $('totp-unlock-pass').value;
+    if (!pass) return;
+    $('totp-unlock-btn').disabled = true;
+    try {
+      await unlockWithPassphrase(pass);
+      $('totp-unlock-pass').value = '';
+      setStatus('', null);
+      showVault();
+    } catch (err) {
+      setStatus(COPY.unlock_failed, 'err');
+    } finally {
+      $('totp-unlock-btn').disabled = false;
+    }
+  });
+
+  $('totp-prf-btn').addEventListener('click', async () => {
+    $('totp-prf-btn').disabled = true;
+    try {
+      await unlockWithPrf();
+      setStatus('', null);
+      showVault();
+    } catch (err) {
+      setStatus(COPY.prf_unsupported, 'err');
+    } finally {
+      $('totp-prf-btn').disabled = false;
+    }
+  });
+
+  $('totp-prf-enroll-btn').addEventListener('click', async () => {
+    $('totp-prf-enroll-btn').disabled = true;
+    try {
+      await enrollPrf();
+      setStatus(COPY.prf_enroll_done, 'ok');
+      $('totp-prf-enroll-btn').hidden = true;
+    } catch (err) {
+      setStatus(COPY.prf_enroll_failed + ' — ' + (err && err.message || err), 'err');
+    } finally {
+      $('totp-prf-enroll-btn').disabled = false;
+    }
+  });
+
+  $('totp-lock-btn').addEventListener('click', () => { lock(); });
+
+  $('totp-add-btn').addEventListener('click', () => {
+    $('totp-uri').value = '';
+    $('totp-issuer').value = '';
+    $('totp-account').value = '';
+    $('totp-secret').value = '';
+    $('totp-add-modal').hidden = false;
+  });
+
+  document.querySelectorAll('[data-close]').forEach((el) => {
+    el.addEventListener('click', () => {
+      $('totp-add-modal').hidden = true;
+      $('totp-backup-modal').hidden = true;
+    });
+  });
+
+  let pendingAdd = null;
+  $('totp-save-btn').addEventListener('click', async () => {
+    const uri = $('totp-uri').value.trim();
+    let parsed = null;
+    if (uri) {
+      try { parsed = parseOtpauthUri(uri); } catch (_) { setStatus(COPY.add_invalid_uri, 'err'); return; }
+    } else {
+      const issuer = $('totp-issuer').value.trim();
+      const account = $('totp-account').value.trim();
+      const secret_b32 = $('totp-secret').value.trim().replace(/\s+/g, '');
+      if (!secret_b32 || (!issuer && !account)) { setStatus(COPY.add_missing_fields, 'err'); return; }
+      parsed = { issuer, account, secret_b32, digits: 6, period: 30 };
+    }
+    let secretBytes;
+    try { secretBytes = b32Dec(parsed.secret_b32); }
+    catch (_) { setStatus(COPY.add_invalid_secret, 'err'); return; }
+
+    const account = {
+      id: uuid(),
+      issuer: parsed.issuer,
+      account: parsed.account,
+      secret: b64uEnc(secretBytes),
+      digits: parsed.digits,
+      period: parsed.period,
+      algorithm: 'SHA1'
+    };
+
+    if (state.accounts.length === 0) {
+      pendingAdd = account;
+      $('totp-add-modal').hidden = true;
+      $('totp-backup-modal').hidden = false;
+      return;
+    }
+    state.accounts.push(account);
+    await reEncryptSecrets();
+    $('totp-add-modal').hidden = true;
+    renderList();
+    tick();
+  });
+
+  $('totp-backup-confirm-btn').addEventListener('click', async () => {
+    if (!pendingAdd) { $('totp-backup-modal').hidden = true; return; }
+    if (!window.MentriaBackup) { setStatus('backup library not loaded', 'err'); return; }
+    const pass = prompt(COPY.backup_required);
+    if (!pass || pass.length < 8) { setStatus(COPY.setup_strength_too_short, 'err'); return; }
+    $('totp-backup-confirm-btn').disabled = true;
+    try {
+      const next = state.accounts.concat([pendingAdd]);
+      const tempEnv = await encryptWith(state.masterKey, new TextEncoder().encode(JSON.stringify(next)));
+      const tempVault = Object.assign({}, state.vault, { secrets: tempEnv });
+      const payload = { version: 1, exportedAt: new Date().toISOString(), store: { 'totp.vault': JSON.stringify(tempVault) }, legacy: {} };
+      const env = await window.MentriaBackup.encryptBackup(payload, pass);
+      window.MentriaBackup.downloadBackupJson(env, 'mentria-totp-backup');
+      state.accounts = next;
+      await reEncryptSecrets();
+      pendingAdd = null;
+      $('totp-backup-modal').hidden = true;
+      renderList();
+      tick();
+      setStatus(COPY.backup_done, 'ok');
+    } catch (err) {
+      setStatus(String(err && err.message || err), 'err');
+    } finally {
+      $('totp-backup-confirm-btn').disabled = false;
+    }
+  });
+
+  $('totp-backup-btn').addEventListener('click', async () => {
+    if (!window.MentriaBackup) return;
+    const pass = prompt(COPY.backup_required);
+    if (!pass || pass.length < 8) { setStatus(COPY.setup_strength_too_short, 'err'); return; }
+    try {
+      const payload = { version: 1, exportedAt: new Date().toISOString(), store: { 'totp.vault': JSON.stringify(state.vault) }, legacy: {} };
+      const env = await window.MentriaBackup.encryptBackup(payload, pass);
+      window.MentriaBackup.downloadBackupJson(env, 'mentria-totp-backup');
+      setStatus(COPY.backup_done, 'ok');
+    } catch (err) { setStatus(String(err && err.message || err), 'err'); }
+  });
+
+  $('totp-list').addEventListener('click', async (e) => {
+    const row = e.target.closest('.totp-row');
+    if (!row) return;
+    if (e.target.matches('[data-copy]')) {
+      const code = e.target.textContent.replace(/\s/g, '');
+      try { await navigator.clipboard.writeText(code); } catch (_) {}
+      e.target.classList.add('is-copied');
+      e.target.textContent = COPY.copied;
+      setTimeout(() => { e.target.classList.remove('is-copied'); tick(); }, 900);
+    } else if (e.target.matches('[data-del]')) {
+      const acc = state.accounts.find((a) => a.id === row.dataset.id);
+      if (!acc) return;
+      const name = (acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '');
+      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(COPY.delete_confirm.replace(/{name}/g, name)) : Promise.resolve(confirm(COPY.delete_confirm.replace(/{name}/g, name))));
+      if (!ok) return;
+      state.accounts = state.accounts.filter((a) => a.id !== row.dataset.id);
+      await reEncryptSecrets();
+      renderList();
+      tick();
+    }
+  });
+
+  function init() {
+    if (!window.MentriaStore) { setStatus('storage unavailable', 'err'); return; }
+    state.vault = loadVault();
+    showLocked();
+  }
+  init();
+})();
+</script>

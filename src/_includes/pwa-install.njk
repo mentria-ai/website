@@ -54,9 +54,13 @@
   // Skip entirely if already installed (detected pre-paint in base.njk).
   if (document.documentElement.classList.contains('is-standalone')) return;
 
-  var DISMISS_KEY = 'mentria_pwa_install_dismissed_at';
-  var DISMISS_MS  = 7 * 24 * 60 * 60 * 1000; // 7 days
-  var SHOW_DELAY  = 3000;                     // 3s on first visit
+  var DISMISS_KEY   = 'mentria_pwa_install_dismissed_at';
+  var INSTALLED_KEY = 'mentria_pwa_installed_at';
+  var DISMISS_MS    = 7 * 24 * 60 * 60 * 1000; // 7 days
+  var SHOW_DELAY    = 3000;                     // 3s on first visit
+
+  // Already installed (any prior session)? skip permanently.
+  if (localStorage.getItem(INSTALLED_KEY)) return;
 
   // Respect prior dismissal.
   var dismissed = parseInt(localStorage.getItem(DISMISS_KEY), 10);
@@ -96,8 +100,23 @@
     banner.hidden = true;
     banner.classList.remove('pwa-install-banner--visible');
     closeSheet();
+    localStorage.setItem(INSTALLED_KEY, String(Date.now()));
     localStorage.setItem(DISMISS_KEY, String(Date.now()));
   });
+
+  // Belt-and-suspenders: Chromium exposes getInstalledRelatedApps(); if it
+  // reports this site's PWA already installed (even from a previous browser
+  // session with localStorage cleared), hide the banner and persist the flag.
+  if (navigator.getInstalledRelatedApps) {
+    navigator.getInstalledRelatedApps().then(function (apps) {
+      if (apps && apps.length) {
+        localStorage.setItem(INSTALLED_KEY, String(Date.now()));
+        banner.hidden = true;
+        banner.classList.remove('pwa-install-banner--visible');
+        closeSheet();
+      }
+    }).catch(function () {});
+  }
 
   var bannerDesc = banner.querySelector('.pwa-install-banner__desc');
   var bannerDescInner = banner.querySelector('.pwa-install-banner__desc-inner');

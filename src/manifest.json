@@ -1,9 +1,14 @@
 {
   "name": "Mentria",
   "short_name": "Mentria",
+  "id": "/",
   "description": "A creative studio for tools, experiments, and visual transmissions.",
   "start_url": "/",
   "display": "standalone",
+  "related_applications": [
+    { "platform": "webapp", "url": "https://mentria.ai/manifest.json" }
+  ],
+  "prefer_related_applications": false,
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
   "icons": [

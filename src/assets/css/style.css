@@ -377,10 +377,10 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .launch-tile[data-group="Everyday"] { --cat: var(--syn-green); }
 .launch-tile { display: flex; flex-direction: column; align-items: center; gap: 0.55rem; text-decoration: none; color: var(--term-fg); width: 84px; -webkit-tap-highlight-color: transparent; }
 .launch-tile__icon { position: relative; display: grid; place-items: center; width: 84px; height: 84px; border: 1px solid var(--term-border-strong); border-radius: 22px; background: var(--term-bg-raised); transition: border-color 0.15s ease, box-shadow 0.15s ease; }
-.launch-tile:hover .launch-tile__icon, .launch-tile:focus-visible .launch-tile__icon { border-color: var(--cat); box-shadow: 0 0 16px -3px var(--cat); }
+.launch-tile:hover .launch-tile__icon, .launch-tile:focus-visible .launch-tile__icon, .launch-tile:focus .launch-tile__icon { border-color: var(--cat); box-shadow: 0 0 16px -3px var(--cat); }
 .launch-tile__icon svg { width: 60px; height: 60px; color: var(--cat); }
 .launch-tile__label { font-family: var(--font-mono); font-size: 0.7rem; color: var(--term-muted); text-align: center; line-height: 1.25; min-height: 2.3em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.launch-tile:hover .launch-tile__label, .launch-tile:focus-visible .launch-tile__label { color: var(--term-fg); }
+.launch-tile:hover .launch-tile__label, .launch-tile:focus-visible .launch-tile__label, .launch-tile:focus .launch-tile__label { color: var(--term-fg); }
 @media (max-width: 640px) {
   .launcher { max-width: none; }
   .launcher__label { text-align: left; }

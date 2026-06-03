@@ -29,3 +29,91 @@
     {%- endfor %}
   </div>
 </section>
+
+<script>
+(function () {
+  'use strict';
+  function visibleTiles() {
+    var nodes = document.querySelectorAll('.launcher .launch-tile');
+    var out = [];
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (n.offsetParent !== null) out.push(n);
+    }
+    return out;
+  }
+  function rectCenter(el) {
+    var r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2, el: el, rect: r };
+  }
+  function pickNearest(dir, fromEl) {
+    var tiles = visibleTiles();
+    if (!tiles.length) return null;
+    var from = fromEl ? rectCenter(fromEl) : null;
+    if (!from) return tiles[0];
+    var candidates = [];
+    for (var i = 0; i < tiles.length; i++) {
+      if (tiles[i] === fromEl) continue;
+      var c = rectCenter(tiles[i]);
+      var dx = c.x - from.x, dy = c.y - from.y;
+      var primary, lateral;
+      if (dir === 'right')      { primary = dx;  lateral = dy; }
+      else if (dir === 'left')  { primary = -dx; lateral = dy; }
+      else if (dir === 'down')  { primary = dy;  lateral = dx; }
+      else if (dir === 'up')    { primary = -dy; lateral = dx; }
+      else continue;
+      if (primary <= 0.5) continue;
+      var score = primary * primary + lateral * lateral * 3;
+      candidates.push({ score: score, el: tiles[i] });
+    }
+    if (!candidates.length) return null;
+    candidates.sort(function (a, b) { return a.score - b.score; });
+    return candidates[0].el;
+  }
+  function focusTile(el) {
+    if (!el) return;
+    el.focus({ preventScroll: false });
+    var r = el.getBoundingClientRect();
+    if (r.top < 80 || r.bottom > window.innerHeight - 60) {
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
+  function currentTile() {
+    var a = document.activeElement;
+    if (a && a.classList && a.classList.contains('launch-tile')) return a;
+    return null;
+  }
+  function handleDirection(dir) {
+    var from = currentTile();
+    if (!from) {
+      var first = visibleTiles()[0];
+      if (first) focusTile(first);
+      return;
+    }
+    var next = pickNearest(dir, from);
+    if (next) focusTile(next);
+  }
+  function handleButton(name, pressed) {
+    if (!pressed) return;
+    if (name === 'a') {
+      var el = currentTile();
+      if (el) { el.click(); }
+    } else if (name === 'b') {
+      if (history.length > 1) history.back();
+    } else if (name === 'start') {
+      var cli = document.getElementById('mentria-cli-input') || document.querySelector('.cli__input') || document.querySelector('input[type="text"]');
+      if (cli && typeof cli.focus === 'function') cli.focus();
+    }
+  }
+  window.addEventListener('mentria:gamepad:direction', function (e) { handleDirection(e.detail.direction); });
+  window.addEventListener('mentria:gamepad:button', function (e) { handleButton(e.detail.name, e.detail.pressed); });
+  window.addEventListener('mentria:gamepad:connect', function () {
+    var el = visibleTiles()[0];
+    if (el) focusTile(el);
+  });
+  if (window.MentriaGamepad && window.MentriaGamepad.isConnected()) {
+    var el = visibleTiles()[0];
+    if (el) focusTile(el);
+  }
+})();
+</script>

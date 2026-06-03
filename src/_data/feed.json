@@ -1,6 +1,106 @@
 [
   {
     "type": "chapter",
+    "id": "deepcuts155",
+    "src": "https://cdn.mentria.ai/deepcuts155/00_cover.webp",
+    "color": "linear-gradient(160deg, #0b0f16, #3a4d62, #9bb0c0)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things split out of a grey stone. 8 cards.",
+      "es": "Ocho cosas extraídas de una piedra gris. 8 tarjetas.",
+      "fr": "Huit choses tirées d'une pierre grise. 8 cartes.",
+      "ja": "灰色の石から割り出された八つのこと。カード8枚。",
+      "pt-BR": "Oito coisas tiradas de uma pedra cinzenta. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts155/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts154",
+    "src": "https://cdn.mentria.ai/deepcuts154/00_cover.webp",
+    "color": "linear-gradient(160deg, #0c1012, #d9772a, #7fb0c4)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things hidden behind the giant bill. 8 cards.",
+      "es": "Ocho cosas escondidas tras ese pico gigante. 8 tarjetas.",
+      "fr": "Huit choses cachées derrière le bec géant. 8 cartes.",
+      "ja": "あの巨大なくちばしに隠された八つのこと。カード8枚。",
+      "pt-BR": "Oito coisas escondidas atrás do bico gigante. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts154/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts79",
+    "src": "https://cdn.mentria.ai/deepcuts79/00_cover.webp",
+    "color": "linear-gradient(160deg, #091422, #42627a, #d6c49a)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things the Moon does to the sea. 8 cards.",
+      "es": "Ocho cosas que la Luna le hace al mar. 8 tarjetas.",
+      "fr": "Huit choses que la Lune fait à la mer. 8 cartes.",
+      "ja": "月が海にもたらす8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas que a Lua faz com o mar. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts79/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts153",
+    "src": "https://cdn.mentria.ai/deepcuts153/00_cover.webp",
+    "color": "linear-gradient(160deg, #0d1410, #4a6e3a, #cbb088)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things the slowest mammal hides in plain sight. 8 cards.",
+      "es": "Ocho cosas que el mamífero más lento esconde a plena vista. 8 tarjetas.",
+      "fr": "Huit choses que le mammifère le plus lent cache à la vue de tous. 8 cartes.",
+      "ja": "最も動きの遅い哺乳類が人目につかず隠している八つのこと。カード8枚。",
+      "pt-BR": "Oito coisas que o mamífero mais lento esconde à vista de todos. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts153/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts152",
+    "src": "https://cdn.mentria.ai/deepcuts152/00_cover.webp",
+    "color": "linear-gradient(160deg, #0a0c10, #424652, #9498a0)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things the heaviest everyday metal quietly did. 8 cards.",
+      "es": "Ocho cosas que el metal cotidiano más pesado hizo en silencio. 8 tarjetas.",
+      "fr": "Huit choses que le métal le plus lourd du quotidien a faites en silence. 8 cartes.",
+      "ja": "最も身近で重い金属が静かに成し遂げた八つのこと。カード8枚。",
+      "pt-BR": "Oito coisas que o metal pesado mais comum fez em silêncio. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts152/"
+  },
+  {
+    "type": "chapter",
     "id": "deepcuts151",
     "src": "https://cdn.mentria.ai/deepcuts151/00_cover.webp",
     "color": "linear-gradient(160deg, #16161a, #6e5a2e, #e8c83c)",

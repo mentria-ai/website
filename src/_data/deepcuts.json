@@ -15777,6 +15777,207 @@
     ]
   },
   {
+    "id": "deepcuts79",
+    "type": "deepcuts",
+    "order": 79,
+    "title": "Deep Cuts",
+    "subtitle": {
+      "en": "Eight things the Moon does to the sea",
+      "es": "Ocho cosas que la Luna le hace al mar",
+      "fr": "Huit choses que la Lune fait à la mer",
+      "ja": "月が海にもたらす8つのこと",
+      "pt-BR": "Oito coisas que a Lua faz com o mar"
+    },
+    "cover_image": "https://cdn.mentria.ai/deepcuts79/00_cover.webp",
+    "status": "draft",
+    "slides": [
+      {
+        "id": "dc79-s01",
+        "story_type": "fact",
+        "caption": {
+          "en": "Tides that rise four storeys, twice a day",
+          "es": "Mareas que suben cuatro pisos, dos veces al día",
+          "fr": "Des marées qui montent de quatre étages, deux fois par jour",
+          "ja": "1日に2回、ビル4階分も上がる潮",
+          "pt-BR": "Marés que sobem quatro andares, duas vezes por dia"
+        },
+        "long_press": {
+          "en": "Twice a day the Bay of Fundy empties and refills with more water than every river on Earth combined, the tide climbing over 16 metres — the height of a four-storey building. It happens because the bay's length gives it a natural sloshing rhythm of about 13 hours, almost exactly the gap between tides. Each ocean tide arrives just as the water is swinging back, and like a child pumping a swing, the pushes stack up.",
+          "es": "Dos veces al día, la bahía de Fundy se vacía y se vuelve a llenar con más agua que todos los ríos de la Tierra juntos, y la marea sube más de 16 metros: la altura de un edificio de cuatro pisos. Ocurre porque la longitud de la bahía le da un ritmo natural de vaivén de unas 13 horas, casi exactamente el intervalo entre mareas. Cada marea oceánica llega justo cuando el agua vuelve a oscilar y, como un niño que impulsa un columpio, los empujones se acumulan.",
+          "fr": "Deux fois par jour, la baie de Fundy se vide et se remplit avec plus d'eau que tous les fleuves de la Terre réunis, la marée grimpant de plus de 16 mètres — la hauteur d'un immeuble de quatre étages. Cela tient à la longueur de la baie, qui lui donne un rythme de ballottement naturel d'environ 13 heures, presque exactement l'intervalle entre deux marées. Chaque marée océanique arrive juste au moment où l'eau revient, et, comme un enfant qui lance une balançoire, les poussées s'additionnent.",
+          "ja": "1日に2回、ファンディ湾は地球上のすべての川を合わせたよりも多くの水で空になり、また満ちる。潮は16メートル以上——4階建ての建物の高さ——も上がる。湾の長さが約13時間という自然な揺れの周期を生み、それがちょうど干満の間隔とほぼ一致するためだ。海の潮は水が戻ってくるその瞬間に届き、ブランコをこぐ子どものように、押す力が積み重なっていく。",
+          "pt-BR": "Duas vezes por dia, a baía de Fundy se esvazia e se enche de novo com mais água do que todos os rios da Terra juntos, e a maré sobe mais de 16 metros — a altura de um prédio de quatro andares. Isso acontece porque o comprimento da baía lhe dá um ritmo natural de balanço de cerca de 13 horas, quase exatamente o intervalo entre as marés. Cada maré oceânica chega bem na hora em que a água está voltando e, como uma criança que impulsiona um balanço, os empurrões se somam."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts79/01_fundy_highest_tides_resonance.webp",
+        "image_status": "rendered",
+        "seed": 731,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc79-s02",
+        "story_type": "fact",
+        "caption": {
+          "en": "A wave that charges up the river",
+          "es": "Una ola que sube embistiendo el río",
+          "fr": "Une vague qui remonte le fleuve à toute allure",
+          "ja": "川を逆流して突き進む波",
+          "pt-BR": "Uma onda que sobe o rio em disparada"
+        },
+        "long_press": {
+          "en": "Most waves roll toward shore; this one runs the wrong way. When the great tide of Hangzhou Bay funnels into the narrowing Qiantang River, it stacks into a single wall of water — the 'Silver Dragon' — up to 9 metres tall, racing upstream at around 40 kilometres an hour against the current. It has drawn crowds for over a thousand years, and has swept careless watchers off the banks.",
+          "es": "La mayoría de las olas avanzan hacia la orilla; esta va al revés. Cuando la gran marea de la bahía de Hangzhou se encauza en el estrechamiento del río Qiantang, se apila en un único muro de agua —el 'Dragón de Plata'— de hasta 9 metros de altura, que remonta la corriente a unos 40 kilómetros por hora. Lleva más de mil años atrayendo multitudes, y ha arrastrado de las orillas a espectadores descuidados.",
+          "fr": "La plupart des vagues roulent vers le rivage ; celle-ci va à contresens. Lorsque la grande marée de la baie de Hangzhou s'engouffre dans le rétrécissement du fleuve Qiantang, elle s'empile en un seul mur d'eau — le « Dragon d'argent » — pouvant atteindre 9 mètres de haut, remontant le courant à environ 40 kilomètres à l'heure. Elle attire les foules depuis plus de mille ans, et a emporté des berges des spectateurs imprudents.",
+          "ja": "ほとんどの波は岸に向かって寄せるが、この波は逆方向へ進む。杭州湾の大きな潮が狭まっていく銭塘江に押し寄せると、一枚の水の壁——「銀龍」——となって積み上がり、高さは最大9メートル、流れに逆らって時速約40キロで遡る。千年以上にわたって人々を引き寄せ、不注意な見物人を岸からさらってきた。",
+          "pt-BR": "A maioria das ondas avança em direção à praia; esta vai no sentido contrário. Quando a grande maré da baía de Hangzhou se afunila no estreitamento do rio Qiantang, ela se empilha em uma única parede de água — o 'Dragão de Prata' — de até 9 metros de altura, subindo a correnteza a cerca de 40 quilômetros por hora. Há mais de mil anos atrai multidões, e já arrastou das margens espectadores descuidados."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts79/02_qiantang_tidal_bore.webp",
+        "image_status": "rendered",
+        "seed": 732,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc79-s03",
+        "story_type": "fact",
+        "caption": {
+          "en": "The tide that races in like a horse",
+          "es": "La marea que entra galopando como un caballo",
+          "fr": "La marée qui accourt comme un cheval au galop",
+          "ja": "馬のように駆け込んでくる潮",
+          "pt-BR": "A maré que avança como um cavalo a galope"
+        },
+        "long_press": {
+          "en": "Victor Hugo wrote that the sea here returns 'as swiftly as a galloping horse', and the bay around this island abbey has one of Europe's largest tidal ranges — the water can retreat kilometres and come flooding back across the flats. The real front moves nearer a brisk walking pace, about 6 kilometres an hour, but on the vast level sand that is fast enough to cut off and strand anyone who has wandered too far out.",
+          "es": "Victor Hugo escribió que aquí el mar regresa 'tan veloz como un caballo al galope', y la bahía que rodea esta abadía insular tiene una de las mayores amplitudes de marea de Europa: el agua puede retirarse kilómetros y volver inundando los bancos de arena. El frente real avanza más bien a paso ligero, unos 6 kilómetros por hora, pero sobre la vasta arena llana eso basta para aislar y dejar varado a quien se haya alejado demasiado.",
+          "fr": "Victor Hugo écrivait que la mer revient ici « aussi vite qu'un cheval au galop », et la baie autour de cette abbaye insulaire possède l'un des plus grands marnages d'Europe — l'eau peut se retirer sur des kilomètres puis revenir submerger les grèves. Le véritable front avance plutôt à une allure de marche soutenue, environ 6 kilomètres à l'heure, mais sur l'immense sable plat cela suffit à couper la route et à isoler quiconque s'est trop éloigné.",
+          "ja": "ヴィクトル・ユゴーはここの海が「疾走する馬のように速く」戻ってくると書いた。この島の修道院を囲む湾はヨーロッパ有数の干満差を持ち、水は数キロも引いては砂州を越えて一気に押し戻ってくる。実際の波の先端はむしろ速歩のような速さ、時速約6キロだが、広大で平らな砂の上ではそれでも、遠くまで迷い込んだ人の退路を断ち、取り残すのに十分だ。",
+          "pt-BR": "Victor Hugo escreveu que ali o mar retorna 'tão veloz quanto um cavalo a galope', e a baía em torno desta abadia insular tem uma das maiores amplitudes de maré da Europa — a água pode recuar quilômetros e voltar inundando os bancos de areia. A frente real avança mais perto de um passo apressado, cerca de 6 quilômetros por hora, mas na vasta areia plana isso basta para isolar e deixar preso quem se afastou demais."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts79/03_mont_saint_michel_tide.webp",
+        "image_status": "rendered",
+        "seed": 733,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc79-s04",
+        "story_type": "fact",
+        "caption": {
+          "en": "Why the Moon only shows one face",
+          "es": "Por qué la Luna solo muestra una cara",
+          "fr": "Pourquoi la Lune ne montre qu'un seul visage",
+          "ja": "月がいつも同じ面しか見せない理由",
+          "pt-BR": "Por que a Lua só mostra uma face"
+        },
+        "long_press": {
+          "en": "The Moon spins, but in perfect step with its orbit — one turn for every lap of Earth — so the same face is always turned toward us. Tides did it: Earth's pull stretched the young Moon and slowly braked its spin until it locked. We never see the far side from here, yet because the Moon rocks gently as it travels, peeking a little around each edge, careful watching over a month reveals about 59 percent of its surface.",
+          "es": "La Luna gira, pero en perfecta sintonía con su órbita —una vuelta sobre sí misma por cada vuelta a la Tierra—, de modo que siempre nos muestra la misma cara. Lo hicieron las mareas: la atracción de la Tierra estiró la joven Luna y frenó poco a poco su giro hasta dejarlo acoplado. Desde aquí nunca vemos la cara oculta, pero como la Luna se bambolea suavemente al desplazarse, asomándose un poco por cada borde, observarla con cuidado durante un mes revela cerca del 59 por ciento de su superficie.",
+          "fr": "La Lune tourne, mais en parfaite cadence avec son orbite — un tour sur elle-même pour chaque tour autour de la Terre — si bien que la même face nous est toujours tournée. Ce sont les marées : l'attraction de la Terre a étiré la jeune Lune et freiné peu à peu sa rotation jusqu'au verrouillage. D'ici, nous ne voyons jamais la face cachée, mais comme la Lune se balance doucement en chemin, débordant un peu de chaque côté, une observation attentive sur un mois en révèle environ 59 pour cent de la surface.",
+          "ja": "月は自転しているが、その公転と完全に歩調を合わせている——地球を1周するたびに1回転する——ので、いつも同じ面を私たちに向けている。それをしたのは潮汐だ。地球の引力が若い月を引き伸ばし、その自転をゆっくり制動して、ついに固定した。ここから裏側を見ることは決してないが、月は進みながらゆるやかに揺れ、それぞれの縁から少しずつのぞくため、1か月かけて丁寧に見れば表面の約59パーセントが現れる。",
+          "pt-BR": "A Lua gira, mas em perfeita sintonia com sua órbita — uma volta sobre si mesma a cada volta em torno da Terra —, de modo que a mesma face está sempre voltada para nós. Foram as marés: a atração da Terra esticou a jovem Lua e freou aos poucos sua rotação até travá-la. Daqui nunca vemos o lado oculto, mas, como a Lua balança suavemente enquanto se desloca, espiando um pouco por cada borda, observá-la com atenção ao longo de um mês revela cerca de 59 por cento de sua superfície."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts79/04_moon_tidal_lock_libration.webp",
+        "image_status": "rendered",
+        "seed": 734,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc79-s05",
+        "story_type": "fact",
+        "caption": {
+          "en": "Fish that spawn by the light of the Moon",
+          "es": "Peces que desovan a la luz de la Luna",
+          "fr": "Des poissons qui frayent au clair de Lune",
+          "ja": "月明かりのもとで産卵する魚",
+          "pt-BR": "Peixes que desovam à luz da Lua"
+        },
+        "long_press": {
+          "en": "On a few nights after each full and new moon, California beaches shimmer as thousands of silver grunion ride the highest tides right out of the sea onto the wet sand. The females drill in tail-first to bury their eggs, the males curl around to fertilise them, and the whole run is timed to the falling tides so the next waves won't reach the nest — the eggs wait in the sand until a later high tide washes them free to hatch.",
+          "es": "En algunas noches después de cada luna llena y nueva, las playas de California relucen cuando miles de plateados grunion cabalgan las mareas más altas y salen del mar a la arena húmeda. Las hembras se entierran de cola para depositar sus huevos, los machos se enroscan alrededor para fecundarlos, y toda la corrida se sincroniza con las mareas que bajan para que las siguientes olas no alcancen el nido: los huevos esperan en la arena hasta que una marea alta posterior los libera para eclosionar.",
+          "fr": "Quelques nuits après chaque pleine et nouvelle lune, les plages de Californie scintillent lorsque des milliers de grunions argentés chevauchent les plus hautes marées pour sortir de la mer sur le sable mouillé. Les femelles s'enfoncent par la queue pour enfouir leurs œufs, les mâles s'enroulent autour pour les féconder, et toute la montée est calée sur les marées descendantes afin que les vagues suivantes n'atteignent pas le nid — les œufs attendent dans le sable jusqu'à ce qu'une marée haute plus tardive les libère pour éclore.",
+          "ja": "満月と新月のあとの数夜、カリフォルニアの浜辺はきらめく。何千匹もの銀色のグルニオンが最も高い潮に乗って海から濡れた砂の上へ上がってくるのだ。メスは尾から潜り込んで卵を埋め、オスはその周りに巻きついて受精させる。この一連の動きはすべて引き潮に合わせられていて、次の波が巣に届かないようになっている——卵は砂の中で待ち、後の満潮が洗い出して孵化させる。",
+          "pt-BR": "Em algumas noites após cada lua cheia e nova, as praias da Califórnia reluzem quando milhares de grunhões prateados cavalgam as marés mais altas e saem do mar para a areia molhada. As fêmeas se enterram de cauda para baixo para enterrar seus ovos, os machos se enrolam ao redor para fecundá-los, e toda a corrida é sincronizada com as marés que baixam para que as ondas seguintes não alcancem o ninho — os ovos esperam na areia até que uma maré alta posterior os solte para eclodir."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts79/05_grunion_spawn_spring_tide.webp",
+        "image_status": "rendered",
+        "seed": 735,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc79-s06",
+        "story_type": "fact",
+        "caption": {
+          "en": "An ancient armour that spawns by the Moon",
+          "es": "Una armadura ancestral que desova con la Luna",
+          "fr": "Une armure ancestrale qui fraye au rythme de la Lune",
+          "ja": "月に合わせて産卵する古代の甲冑",
+          "pt-BR": "Uma armadura ancestral que desova com a Lua"
+        },
+        "long_press": {
+          "en": "Every May and June, on the high tides of the new and full moon, Delaware Bay's beaches fill with horseshoe crabs hauling ashore to spawn — a ritual their kind has kept for more than 400 million years, since before the dinosaurs. A single female buries thousands of green eggs in the sand. Whole flocks of migrating shorebirds time their long flights from South America to arrive exactly as that feast appears.",
+          "es": "Cada mayo y junio, en las mareas altas de luna nueva y llena, las playas de la bahía de Delaware se llenan de cangrejos herradura que salen a tierra para desovar, un ritual que su estirpe mantiene desde hace más de 400 millones de años, desde antes de los dinosaurios. Una sola hembra entierra miles de huevos verdes en la arena. Bandadas enteras de aves playeras migratorias ajustan sus largos vuelos desde Sudamérica para llegar justo cuando aparece ese festín.",
+          "fr": "Chaque mai et juin, lors des grandes marées de la nouvelle et de la pleine lune, les plages de la baie du Delaware se couvrent de limules venant à terre pour frayer — un rituel que leur espèce perpétue depuis plus de 400 millions d'années, bien avant les dinosaures. Une seule femelle enfouit des milliers d'œufs verts dans le sable. Des nuées entières d'oiseaux de rivage migrateurs calent leurs longs vols depuis l'Amérique du Sud pour arriver exactement au moment où surgit ce festin.",
+          "ja": "毎年5月と6月、新月と満月の大潮に、デラウェア湾の浜辺はカブトガニで埋め尽くされる。産卵のために岸へ這い上がってくるのだ——恐竜より前、4億年以上ものあいだ彼らの一族が守ってきた儀式である。1匹のメスが数千個の緑色の卵を砂に埋める。渡りをする海岸の鳥の群れは、南アメリカからの長い飛行を、ちょうどこの饗宴が現れる時に合わせて到着する。",
+          "pt-BR": "Todo mês de maio e junho, nas marés altas da lua nova e cheia, as praias da baía de Delaware se enchem de caranguejos-ferradura que sobem à terra para desovar — um ritual que sua espécie mantém há mais de 400 milhões de anos, desde antes dos dinossauros. Uma única fêmea enterra milhares de ovos verdes na areia. Bandos inteiros de aves limícolas migratórias ajustam seus longos voos da América do Sul para chegar exatamente quando esse banquete surge."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts79/06_horseshoe_crab_moon_spawn.webp",
+        "image_status": "rendered",
+        "seed": 1736,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc79-s07",
+        "story_type": "fact",
+        "caption": {
+          "en": "A coral that remembers a 22-hour day",
+          "es": "Un coral que recuerda un día de 22 horas",
+          "fr": "Un corail qui se souvient d'une journée de 22 heures",
+          "ja": "22時間の1日を覚えているサンゴ",
+          "pt-BR": "Um coral que se lembra de um dia de 22 horas"
+        },
+        "long_press": {
+          "en": "Earth's day is getting longer — the Moon's tides act as a brake, stealing a little of our spin each year. The proof is written in old coral. Like trees, corals lay down a fine growth line each day, bundled into yearly bands. Counting the lines on coral that lived about 385 million years ago, a scientist found roughly 400 days packed into one year — meaning back then a single day lasted only about 22 hours.",
+          "es": "El día de la Tierra se está alargando: las mareas de la Luna actúan como un freno y nos roban un poco de giro cada año. La prueba está escrita en corales antiguos. Como los árboles, los corales trazan cada día una fina línea de crecimiento, agrupadas en bandas anuales. Al contar las líneas de un coral que vivió hace unos 385 millones de años, un científico halló cerca de 400 días apretados en un año, lo que significa que entonces un solo día duraba apenas unas 22 horas.",
+          "fr": "La journée terrestre s'allonge — les marées de la Lune agissent comme un frein, nous dérobant un peu de rotation chaque année. La preuve est inscrite dans les vieux coraux. Comme les arbres, les coraux déposent chaque jour une fine ligne de croissance, regroupées en bandes annuelles. En comptant les lignes d'un corail ayant vécu il y a environ 385 millions d'années, un scientifique a trouvé près de 400 jours tassés dans une année — ce qui signifie qu'à l'époque une seule journée ne durait qu'environ 22 heures.",
+          "ja": "地球の1日は長くなりつつある——月の潮汐がブレーキとなり、毎年わずかずつ自転を奪っているのだ。その証拠は古いサンゴに刻まれている。木と同じように、サンゴは1日ごとに細い成長線を刻み、それが年ごとの帯にまとまる。約3億8500万年前に生きていたサンゴの線を数えたある科学者は、1年におよそ400日が詰まっていることを見いだした——つまり当時、1日はわずか22時間ほどしかなかったのだ。",
+          "pt-BR": "O dia da Terra está ficando mais longo — as marés da Lua agem como um freio, roubando um pouco da nossa rotação a cada ano. A prova está escrita em corais antigos. Como as árvores, os corais traçam a cada dia uma fina linha de crescimento, agrupadas em faixas anuais. Ao contar as linhas de um coral que viveu há cerca de 385 milhões de anos, um cientista encontrou cerca de 400 dias espremidos em um ano — o que significa que, naquela época, um único dia durava apenas cerca de 22 horas."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts79/07_coral_devonian_400_days.webp",
+        "image_status": "rendered",
+        "seed": 737,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc79-s08",
+        "story_type": "fact",
+        "caption": {
+          "en": "Shore creatures keep tide time in the dark",
+          "es": "Criaturas de la orilla que marcan la hora de la marea a oscuras",
+          "fr": "Des créatures du rivage qui gardent l'heure des marées dans le noir",
+          "ja": "暗闇でも潮の時刻を刻む磯の生き物",
+          "pt-BR": "Criaturas da costa que marcam a hora da maré no escuro"
+        },
+        "long_press": {
+          "en": "Life between the tidemarks runs on a clock set to the sea, not the sun — a rhythm of about 12.4 hours, the gap between high tides. Crabs, snails and tiny shore crustaceans grow active right on the tidal beat. The remarkable part: scoop one into a black, still tank with no tide at all, and for days it keeps stirring on schedule, proof that the timer is built into the animal itself rather than read from the water.",
+          "es": "La vida entre las marcas de marea se rige por un reloj ajustado al mar, no al sol: un ritmo de unas 12,4 horas, el intervalo entre pleamares. Cangrejos, caracoles y diminutos crustáceos de la orilla se activan justo al compás de la marea. Lo asombroso: mete uno en un tanque oscuro y quieto, sin marea alguna, y durante días sigue agitándose puntualmente, prueba de que el temporizador está incorporado en el propio animal y no se lee del agua.",
+          "fr": "La vie entre les laisses de marée suit une horloge réglée sur la mer, non sur le soleil — un rythme d'environ 12,4 heures, l'intervalle entre deux pleines mers. Crabes, escargots et minuscules crustacés du rivage s'activent juste au tempo de la marée. Le plus remarquable : placez-en un dans un bac noir et immobile, sans aucune marée, et pendant des jours il continue de s'agiter à l'heure, preuve que la minuterie est intégrée à l'animal lui-même plutôt que lue dans l'eau.",
+          "ja": "潮の満ち引きの間に暮らす生き物は、太陽ではなく海に合わせた時計で動いている——満潮どうしの間隔である約12.4時間のリズムだ。カニや巻貝、小さな磯の甲殻類は、ちょうど潮の拍子に合わせて活発になる。驚くべきはここからだ。1匹を潮のまったくない暗く静かな水槽に入れても、何日ものあいだ時間どおりに動き続ける。その時計が水から読み取るものではなく、動物自身に組み込まれている証拠だ。",
+          "pt-BR": "A vida entre as marcas de maré segue um relógio ajustado ao mar, não ao sol — um ritmo de cerca de 12,4 horas, o intervalo entre as preamares. Caranguejos, caramujos e minúsculos crustáceos da costa ficam ativos bem no compasso da maré. O notável: coloque um em um tanque escuro e parado, sem maré alguma, e por dias ele continua se mexendo no horário, prova de que o cronômetro está embutido no próprio animal, e não é lido da água."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts79/08_circatidal_clock_shore.webp",
+        "image_status": "rendered",
+        "seed": 738,
+        "text_status": "draft",
+        "actions": []
+      }
+    ]
+  },
+  {
     "id": "deepcuts100",
     "type": "deepcuts",
     "order": 100,
@@ -26270,6 +26471,810 @@
         "image": "https://cdn.mentria.ai/deepcuts151/08_cuckoo_wasp_metallic.webp",
         "image_status": "rendered",
         "seed": 1314,
+        "text_status": "draft",
+        "actions": []
+      }
+    ]
+  },
+  {
+    "id": "deepcuts152",
+    "type": "deepcuts",
+    "order": 152,
+    "title": "Deep Cuts",
+    "subtitle": {
+      "en": "Eight things the heaviest everyday metal quietly did",
+      "es": "Ocho cosas que el metal cotidiano más pesado hizo en silencio",
+      "fr": "Huit choses que le métal le plus lourd du quotidien a faites en silence",
+      "ja": "最も身近で重い金属が静かに成し遂げた八つのこと",
+      "pt-BR": "Oito coisas que o metal pesado mais comum fez em silêncio"
+    },
+    "cover_image": "https://cdn.mentria.ai/deepcuts152/00_cover.webp",
+    "status": "draft",
+    "slides": [
+      {
+        "id": "dc152-s01",
+        "story_type": "fact",
+        "caption": {
+          "en": "A shiny grey crystal once caught radio from the air",
+          "es": "Un cristal gris brillante captó alguna vez la radio del aire",
+          "fr": "Un cristal gris brillant captait jadis la radio dans l'air",
+          "ja": "光る灰色の結晶がかつて空中から電波を捉えた",
+          "pt-BR": "Um cristal cinza brilhante já captou rádio do ar"
+        },
+        "long_press": {
+          "en": "Galena is lead's ore, growing as silvery cubes with mirror-flat faces. In the earliest radios it did the work a battery and tube would later do: a fine springy wire, the cat's whisker, was touched onto the crystal, and that point of contact behaved as a natural semiconductor, letting current flow one way and pulling a voice out of the airwaves. The effect was first shown in 1874.",
+          "es": "La galena es el mineral del plomo, y crece en cubos plateados de caras lisas como espejos. En las primeras radios hacía el trabajo que luego harían la pila y el tubo: un fino alambre elástico, el bigote de gato, tocaba el cristal, y ese punto de contacto se comportaba como un semiconductor natural, dejando pasar la corriente en un solo sentido y arrancando una voz de las ondas. El efecto se mostró por primera vez en 1874.",
+          "fr": "La galène est le minerai du plomb ; elle pousse en cubes argentés aux faces lisses comme des miroirs. Dans les premières radios, elle faisait le travail que la pile et la lampe accompliraient plus tard : un fin fil souple, la moustache de chat, touchait le cristal, et ce point de contact se comportait comme un semi-conducteur naturel, laissant le courant passer dans un seul sens et tirant une voix des ondes. L'effet fut montré pour la première fois en 1874.",
+          "ja": "方鉛鉱は鉛の鉱石で、鏡のように平らな面をもつ銀色の立方体として育つ。最初期のラジオでは、のちに電池と真空管が担う役目を果たした。猫のひげと呼ばれる細くしなやかな針を結晶に触れさせると、その接点が天然の半導体としてはたらき、電流を一方向にだけ流して、電波から声を引き出した。この効果が初めて示されたのは1874年のことだ。",
+          "pt-BR": "A galena é o minério do chumbo e cresce em cubos prateados com faces lisas como espelhos. Nos primeiros rádios, ela fazia o trabalho que a pilha e a válvula fariam mais tarde: um fio fino e flexível, o bigode de gato, tocava o cristal, e esse ponto de contato se comportava como um semicondutor natural, deixando a corrente passar em um só sentido e tirando uma voz das ondas. O efeito foi mostrado pela primeira vez em 1874."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts152/01_galena_crystal_radio.webp",
+        "image_status": "rendered",
+        "seed": 3315,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc152-s02",
+        "story_type": "fact",
+        "caption": {
+          "en": "Lead atoms told us the Earth is 4.55 billion years old",
+          "es": "Los átomos de plomo nos dijeron que la Tierra tiene 4550 millones de años",
+          "fr": "Les atomes de plomb nous ont révélé que la Terre a 4,55 milliards d'années",
+          "ja": "鉛の原子が地球は45億5000万歳だと教えてくれた",
+          "pt-BR": "Os átomos de chumbo nos disseram que a Terra tem 4,55 bilhões de anos"
+        },
+        "long_press": {
+          "en": "Uranium decays into lead at a steady, known pace, so the mix of lead isotopes in a rock is a clock. In 1956 a chemist measured that mix in metal from a meteorite and read off the age of the Earth: about 4.55 billion years, a figure that still holds. Cleaning his samples free of stray lead, he also realised how thoroughly industry had spread the metal across the modern world.",
+          "es": "El uranio se desintegra en plomo a un ritmo constante y conocido, así que la mezcla de isótopos de plomo en una roca es un reloj. En 1956 un químico midió esa mezcla en el metal de un meteorito y leyó la edad de la Tierra: unos 4550 millones de años, una cifra que aún se mantiene. Al limpiar sus muestras de plomo intruso, también comprendió hasta qué punto la industria había esparcido el metal por el mundo moderno.",
+          "fr": "L'uranium se désintègre en plomb à un rythme constant et connu, si bien que le mélange d'isotopes de plomb dans une roche est une horloge. En 1956, un chimiste mesura ce mélange dans le métal d'une météorite et en lut l'âge de la Terre : environ 4,55 milliards d'années, un chiffre toujours valable. En débarrassant ses échantillons du plomb parasite, il comprit aussi à quel point l'industrie avait répandu le métal dans le monde moderne.",
+          "ja": "ウランは一定の知られた速さで鉛へと崩壊するので、岩石中の鉛の同位体の比率は時計になる。1956年、ある化学者が隕石の金属でその比率を測り、地球の年齢を読み取った——約45億5000万年、いまも通用する数字だ。試料から紛れ込んだ鉛を取り除く作業を通じて、彼は産業が現代の世界にどれほど深くこの金属を撒き散らしたかにも気づいた。",
+          "pt-BR": "O urânio decai em chumbo a um ritmo constante e conhecido, então a mistura de isótopos de chumbo numa rocha é um relógio. Em 1956, um químico mediu essa mistura no metal de um meteorito e leu a idade da Terra: cerca de 4,55 bilhões de anos, número que ainda vale. Ao limpar suas amostras do chumbo intruso, ele também percebeu o quanto a indústria havia espalhado o metal pelo mundo moderno."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts152/02_lead_dated_the_earth.webp",
+        "image_status": "rendered",
+        "seed": 1316,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc152-s03",
+        "story_type": "fact",
+        "caption": {
+          "en": "Round lead shot was made by letting drops fall and freeze",
+          "es": "Los perdigones redondos de plomo se hacían dejando caer y solidificar las gotas",
+          "fr": "Le plomb de chasse rond se fabriquait en laissant les gouttes tomber et figer",
+          "ja": "丸い鉛の弾は、しずくを落として固めて作られた",
+          "pt-BR": "A munição redonda de chumbo era feita deixando as gotas caírem e solidificarem"
+        },
+        "long_press": {
+          "en": "How do you make thousands of identical lead spheres? In 1782 the answer became a tower. Molten lead was poured through a sieve at the top; each droplet, falling through the air, was pulled by surface tension into a near-perfect sphere and hardened on the way down before splashing into a basin of water at the bottom. Gravity and physics did the rounding for free.",
+          "es": "¿Cómo se hacen miles de esferas de plomo idénticas? En 1782 la respuesta se volvió una torre. El plomo fundido se vertía por un tamiz en lo alto; cada gota, al caer por el aire, era moldeada por la tensión superficial en una esfera casi perfecta y se endurecía en el descenso antes de caer en una balsa de agua al fondo. La gravedad y la física hacían el redondeo gratis.",
+          "fr": "Comment fabriquer des milliers de sphères de plomb identiques ? En 1782, la réponse devint une tour. Le plomb fondu était versé par un tamis au sommet ; chaque gouttelette, en tombant dans l'air, était modelée par la tension superficielle en une sphère presque parfaite et durcissait pendant la chute avant de plonger dans un bassin d'eau en bas. La gravité et la physique faisaient l'arrondi gratuitement.",
+          "ja": "同じ大きさの鉛の球を何千個も作るにはどうするか。1782年、その答えは塔になった。溶けた鉛を塔の上のふるいから流すと、空中を落ちる一粒ごとに表面張力がほぼ完全な球へと丸め、落下のあいだに固まり、底の水槽に飛び込む。重力と物理が無料で丸めてくれた。",
+          "pt-BR": "Como fazer milhares de esferas de chumbo idênticas? Em 1782 a resposta virou uma torre. O chumbo derretido era despejado por uma peneira no alto; cada gota, ao cair pelo ar, era moldada pela tensão superficial numa esfera quase perfeita e endurecia na descida antes de mergulhar num tanque de água embaixo. A gravidade e a física faziam o arredondamento de graça."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts152/03_lead_shot_tower.webp",
+        "image_status": "rendered",
+        "seed": 1317,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc152-s04",
+        "story_type": "fact",
+        "caption": {
+          "en": "The car battery is the most recycled thing you own",
+          "es": "La batería del coche es lo más reciclado que tienes",
+          "fr": "La batterie de voiture est l'objet le plus recyclé que vous possédez",
+          "ja": "車のバッテリーはあなたの持ち物で最もリサイクルされている",
+          "pt-BR": "A bateria do carro é a coisa mais reciclada que você tem"
+        },
+        "long_press": {
+          "en": "The lead-acid battery was invented in 1859 and still sits under the hood of nearly every car, stacks of lead plates soaking in acid. It is also the most recycled product around: in the United States about 99 percent of these batteries are collected at the end of their life, their lead melted down and poured straight into new ones, the same metal cycling for over a century.",
+          "es": "La batería de plomo-ácido se inventó en 1859 y sigue bajo el capó de casi todos los coches, pilas de placas de plomo bañadas en ácido. También es el producto más reciclado que existe: en Estados Unidos cerca del 99 por ciento de estas baterías se recogen al final de su vida, su plomo se funde y se vierte directamente en otras nuevas, el mismo metal circulando desde hace más de un siglo.",
+          "fr": "La batterie au plomb fut inventée en 1859 et se trouve encore sous le capot de presque toutes les voitures, des piles de plaques de plomb baignant dans l'acide. C'est aussi le produit le plus recyclé qui soit : aux États-Unis, environ 99 pour cent de ces batteries sont récupérées en fin de vie, leur plomb fondu et coulé directement dans des neuves, le même métal circulant depuis plus d'un siècle.",
+          "ja": "鉛蓄電池は1859年に発明され、いまもほぼすべての車のボンネットの下に収まっている。酸に浸かった鉛の板の積み重ねだ。これは世界で最もリサイクルされている製品でもある。アメリカではこうした電池の約99パーセントが寿命の末に回収され、その鉛は溶かされてそのまま新しい電池に注がれる。同じ金属が一世紀以上めぐり続けているのだ。",
+          "pt-BR": "A bateria de chumbo-ácido foi inventada em 1859 e ainda fica sob o capô de quase todo carro, pilhas de placas de chumbo mergulhadas em ácido. É também o produto mais reciclado que existe: nos Estados Unidos cerca de 99 por cento dessas baterias são recolhidas no fim da vida, seu chumbo derretido e despejado direto em novas, o mesmo metal circulando há mais de um século."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts152/04_lead_acid_battery_recycle.webp",
+        "image_status": "rendered",
+        "seed": 1318,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc152-s05",
+        "story_type": "fact",
+        "caption": {
+          "en": "A brick of this metal stops X-rays cold",
+          "es": "Un ladrillo de este metal detiene en seco los rayos X",
+          "fr": "Une brique de ce métal arrête net les rayons X",
+          "ja": "この金属のれんが一枚がX線をぴたりと止める",
+          "pt-BR": "Um tijolo desse metal barra os raios X por completo"
+        },
+        "long_press": {
+          "en": "Lead is astonishingly heavy for its size, about 11.34 grams per cubic centimetre, packed with big, dense atoms. Those crowded atoms are very good at soaking up X-rays and gamma rays, absorbing the radiation before it can pass through. That is why a thin lead apron drapes over you for a dental scan, and why stacks of grey lead bricks wall off the rooms where radiation is used.",
+          "es": "El plomo es asombrosamente pesado para su tamaño, unos 11,34 gramos por centímetro cúbico, repleto de átomos grandes y densos. Esos átomos apretados absorben muy bien los rayos X y los rayos gamma, atrapando la radiación antes de que pueda atravesarlos. Por eso un fino delantal de plomo se posa sobre ti en una radiografía dental, y por eso muros de ladrillos grises de plomo aíslan las salas donde se usa radiación.",
+          "fr": "Le plomb est étonnamment lourd pour sa taille, environ 11,34 grammes par centimètre cube, bourré d'atomes gros et denses. Ces atomes serrés absorbent très bien les rayons X et les rayons gamma, captant le rayonnement avant qu'il ne traverse. C'est pourquoi un fin tablier de plomb se pose sur vous pour une radio dentaire, et pourquoi des murs de briques de plomb grises isolent les pièces où l'on utilise des rayonnements.",
+          "ja": "鉛は大きさのわりに驚くほど重く、1立方センチあたり約11.34グラム、大きく密な原子が詰まっている。この混み合った原子はX線やガンマ線を吸い取るのがとても得意で、放射線が通り抜ける前に吸収してしまう。歯のレントゲンで薄い鉛のエプロンを掛けられるのも、放射線を使う部屋を灰色の鉛れんがの壁が囲うのも、そのためだ。",
+          "pt-BR": "O chumbo é espantosamente pesado para o seu tamanho, cerca de 11,34 gramas por centímetro cúbico, repleto de átomos grandes e densos. Esses átomos apertados são ótimos em absorver raios X e raios gama, capturando a radiação antes que ela atravesse. É por isso que um fino avental de chumbo é colocado sobre você num raio X dental, e por isso paredes de tijolos cinzentos de chumbo isolam as salas onde se usa radiação."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts152/05_lead_density_shielding.webp",
+        "image_status": "rendered",
+        "seed": 1319,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc152-s06",
+        "story_type": "fact",
+        "caption": {
+          "en": "This metal melts at a temperature your oven can reach",
+          "es": "Este metal se funde a una temperatura que tu horno puede alcanzar",
+          "fr": "Ce métal fond à une température que votre four peut atteindre",
+          "ja": "この金属はオーブンでも届く温度で溶ける",
+          "pt-BR": "Esse metal derrete a uma temperatura que seu forno alcança"
+        },
+        "long_press": {
+          "en": "Most metals need a roaring furnace, but lead turns to liquid at just 327.5 degrees Celsius, low enough that a simple flame will pour it. That easy melting is why lead has always been the metal you cast and join: blended with tin it becomes soft solder, the silvery bead that has fused wires, pipes and stained glass for centuries with nothing more than a hot iron.",
+          "es": "La mayoría de los metales necesitan un horno rugiente, pero el plomo se vuelve líquido a apenas 327,5 grados Celsius, lo bastante bajo para verterlo con una simple llama. Esa fusión fácil es la razón de que el plomo haya sido siempre el metal que se moldea y se une: mezclado con estaño se vuelve soldadura blanda, la gota plateada que ha unido cables, tuberías y vidrieras durante siglos con nada más que un soldador caliente.",
+          "fr": "La plupart des métaux exigent un four rugissant, mais le plomb devient liquide à seulement 327,5 degrés Celsius, assez bas pour qu'une simple flamme le coule. Cette fusion facile explique pourquoi le plomb a toujours été le métal qu'on moule et qu'on assemble : mêlé à l'étain, il devient une soudure tendre, la perle argentée qui soude fils, tuyaux et vitraux depuis des siècles, avec rien de plus qu'un fer chaud.",
+          "ja": "ほとんどの金属はうなりを上げる炉を要するが、鉛はわずか327.5度で液体になり、ただの炎でも注げるほど低い。この溶けやすさこそ、鉛が昔から鋳て継ぐ金属であり続けた理由だ。スズと混ぜれば軟らかいはんだになり、その銀色の玉は、熱したこて一本で何世紀ものあいだ電線や配管やステンドグラスを接いできた。",
+          "pt-BR": "A maioria dos metais exige uma fornalha rugindo, mas o chumbo vira líquido a apenas 327,5 graus Celsius, baixo o bastante para que uma simples chama o derrame. Essa fusão fácil é o motivo de o chumbo ter sido sempre o metal que se molda e se une: misturado ao estanho, vira solda mole, a gota prateada que uniu fios, canos e vitrais por séculos com nada além de um ferro quente."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts152/06_lead_melting_solder.webp",
+        "image_status": "rendered",
+        "seed": 1320,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc152-s07",
+        "story_type": "fact",
+        "caption": {
+          "en": "Rome ran its water through stamped lead pipes",
+          "es": "Roma llevaba su agua por tuberías de plomo estampadas",
+          "fr": "Rome faisait courir son eau dans des tuyaux de plomb estampillés",
+          "ja": "ローマは刻印を打った鉛の管で水を通していた",
+          "pt-BR": "Roma levava sua água por canos de chumbo carimbados"
+        },
+        "long_press": {
+          "en": "Roman plumbers cast water mains from flat sheets of lead, folding them into long pipes called fistulae and soldering the seam. Many were stamped along their length with the name of the maker or the owner who paid for the water. The Latin word for lead, plumbum, never left us: it is still hiding inside the words plumber and plumbing every time a pipe is fixed today.",
+          "es": "Los fontaneros romanos fundían las cañerías a partir de láminas planas de plomo, plegándolas en largos tubos llamados fistulae y soldando la junta. Muchos llevaban estampado a lo largo el nombre del fabricante o del dueño que pagaba el agua. La palabra latina para plomo, plumbum, nunca nos abandonó: sigue escondida en las palabras plomero y plomería cada vez que hoy se arregla una tubería.",
+          "fr": "Les plombiers romains coulaient les conduites d'eau à partir de feuilles plates de plomb, les pliant en longs tuyaux appelés fistulae et soudant la jointure. Beaucoup portaient, sur toute leur longueur, le nom du fabricant ou du propriétaire qui payait l'eau. Le mot latin pour le plomb, plumbum, ne nous a jamais quittés : il se cache encore dans les mots plombier et plomberie chaque fois qu'on répare un tuyau aujourd'hui.",
+          "ja": "ローマの配管工は平らな鉛の板から水道管を作り、フィストゥラエと呼ばれる長い管に折り曲げて継ぎ目をはんだ付けした。その多くには、製造者や水道費を払った所有者の名が長手方向に刻印されていた。鉛を表すラテン語プルンブムは、私たちのもとを去らなかった。今日どこかで管が直されるたび、plumber(配管工)やplumbing(配管)という語の中にいまも潜んでいる。",
+          "pt-BR": "Os encanadores romanos fundiam as adutoras a partir de chapas planas de chumbo, dobrando-as em longos canos chamados fistulae e soldando a emenda. Muitos traziam estampado ao longo do comprimento o nome do fabricante ou do dono que pagava pela água. A palavra latina para chumbo, plumbum, nunca nos deixou: ainda se esconde nas palavras plumber e plumbing toda vez que um cano é consertado hoje."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts152/07_roman_lead_pipes.webp",
+        "image_status": "rendered",
+        "seed": 1321,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc152-s08",
+        "story_type": "fact",
+        "caption": {
+          "en": "Lead tastes sweet — and Rome used it to sweeten wine",
+          "es": "El plomo sabe dulce, y Roma lo usaba para endulzar el vino",
+          "fr": "Le plomb a un goût sucré, et Rome s'en servait pour adoucir le vin",
+          "ja": "鉛は甘い味がする——ローマはそれでワインを甘くした",
+          "pt-BR": "O chumbo tem gosto doce — e Roma o usava para adoçar o vinho"
+        },
+        "long_press": {
+          "en": "One of lead's strangest traits is its flavour: lead acetate, once called sugar of lead, tastes genuinely sweet on the tongue. Romans took advantage of it without knowing the cost, simmering grape juice down in lead pots to make a sweet syrup they stirred into wine and food. The sweetness was real, and so was the slow poisoning that came with every sip they couldn't taste.",
+          "es": "Uno de los rasgos más extraños del plomo es su sabor: el acetato de plomo, antes llamado azúcar de plomo, sabe genuinamente dulce en la lengua. Los romanos lo aprovecharon sin conocer su precio, cociendo a fuego lento el zumo de uva en ollas de plomo para hacer un jarabe dulce que mezclaban con el vino y la comida. El dulzor era real, y también lo era el lento envenenamiento que venía con cada sorbo que no podían saborear.",
+          "fr": "L'un des traits les plus étranges du plomb est son goût : l'acétate de plomb, jadis appelé sucre de plomb, a un goût vraiment sucré sur la langue. Les Romains en profitèrent sans en connaître le prix, faisant réduire du jus de raisin dans des marmites de plomb pour obtenir un sirop sucré qu'ils mêlaient au vin et aux mets. La douceur était réelle, tout comme l'empoisonnement lent qui accompagnait chaque gorgée qu'ils ne pouvaient goûter.",
+          "ja": "鉛の最も奇妙な性質のひとつはその味だ。かつて鉛糖と呼ばれた酢酸鉛は、舌の上で本当に甘い。ローマ人はその代償を知らぬまま利用し、ぶどう果汁を鉛の鍋で煮つめて甘いシロップを作り、ワインや料理に混ぜた。甘さは本物で、味わえぬまま一口ごとに進んだ緩やかな中毒もまた本物だった。",
+          "pt-BR": "Um dos traços mais estranhos do chumbo é o sabor: o acetato de chumbo, antes chamado açúcar de chumbo, tem gosto genuinamente doce na língua. Os romanos se aproveitaram disso sem conhecer o preço, fervendo suco de uva em panelas de chumbo para fazer um xarope doce que misturavam ao vinho e à comida. A doçura era real, e também o lento envenenamento que vinha em cada gole que não conseguiam sentir."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts152/08_sugar_of_lead_sapa.webp",
+        "image_status": "rendered",
+        "seed": 1322,
+        "text_status": "draft",
+        "actions": []
+      }
+    ]
+  },
+  {
+    "id": "deepcuts153",
+    "type": "deepcuts",
+    "order": 153,
+    "title": "Deep Cuts",
+    "subtitle": {
+      "en": "Eight things the slowest mammal hides in plain sight",
+      "es": "Ocho cosas que el mamífero más lento esconde a plena vista",
+      "fr": "Huit choses que le mammifère le plus lent cache à la vue de tous",
+      "ja": "最も動きの遅い哺乳類が人目につかず隠している八つのこと",
+      "pt-BR": "Oito coisas que o mamífero mais lento esconde à vista de todos"
+    },
+    "cover_image": "https://cdn.mentria.ai/deepcuts153/00_cover.webp",
+    "status": "draft",
+    "slides": [
+      {
+        "id": "dc153-s01",
+        "story_type": "fact",
+        "caption": {
+          "en": "Two kinds of sloth, and they're barely related",
+          "es": "Hay dos tipos de perezoso, y apenas son parientes",
+          "fr": "Il existe deux sortes de paresseux, à peine apparentées",
+          "ja": "ナマケモノには二種類いて、実はほとんど別系統",
+          "pt-BR": "Há dois tipos de bicho-preguiça, e mal são parentes"
+        },
+        "long_press": {
+          "en": "Two-toed and three-toed sloths look like cousins, but their lineages split roughly 30 million years ago — two-toed sloths are actually closer to the extinct giant ground sloths than to their three-toed neighbours. Their shared upside-down, slow-motion life is convergent evolution: two separate branches of the family arriving at the same hanging body plan because the same rainforest problem had the same best answer.",
+          "es": "Los perezosos de dos y de tres dedos parecen primos, pero sus linajes se separaron hace unos 30 millones de años: los de dos dedos están en realidad más cerca de los extintos perezosos terrestres gigantes que de sus vecinos de tres dedos. Su vida compartida, boca abajo y a cámara lenta, es evolución convergente: dos ramas distintas de la familia llegaron al mismo plan corporal colgante porque el mismo problema de la selva tenía la misma mejor respuesta.",
+          "fr": "Les paresseux à deux et à trois doigts ont l'air cousins, mais leurs lignées se sont séparées il y a environ 30 millions d'années — ceux à deux doigts sont en fait plus proches des paresseux terrestres géants disparus que de leurs voisins à trois doigts. Leur vie commune, la tête en bas et au ralenti, est une évolution convergente : deux branches distinctes de la famille ont abouti au même plan corporel suspendu parce que le même problème de la forêt avait la même meilleure réponse.",
+          "ja": "フタユビナマケモノとミユビナマケモノは親戚に見えるが、その系統はおよそ3000万年前に分かれた――フタユビの仲間は、隣に暮らすミユビよりも、絶滅した巨大な地上性ナマケモノに近い。逆さまでスローモーションの暮らしを共有するのは収斂進化だ。一族の別々の二つの枝が、同じ熱帯雨林の課題に対する最良の答えが同じだったために、同じぶら下がりの体のかたちにたどり着いた。",
+          "pt-BR": "As preguiças de dois e de três dedos parecem primas, mas suas linhagens se separaram há cerca de 30 milhões de anos — as de dois dedos estão na verdade mais próximas das extintas preguiças-gigantes terrestres do que de suas vizinhas de três dedos. A vida que compartilham, de cabeça para baixo e em câmera lenta, é evolução convergente: dois ramos distintos da família chegaram ao mesmo plano corporal pendurado porque o mesmo problema da floresta tinha a mesma melhor resposta."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts153/01_sloth_two_lineages_convergent.webp",
+        "image_status": "rendered",
+        "seed": 1323,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc153-s02",
+        "story_type": "fact",
+        "caption": {
+          "en": "It breaks the rule every mammal obeys",
+          "es": "Rompe la regla que todo mamífero cumple",
+          "fr": "Il enfreint la règle que tout mammifère respecte",
+          "ja": "あらゆる哺乳類が守る掟を、これだけが破る",
+          "pt-BR": "Ele quebra a regra que todo mamífero obedece"
+        },
+        "long_press": {
+          "en": "Almost every mammal — mouse, giraffe, human — has exactly seven bones in its neck. Three-toed sloths carry as many as nine, and manatees have six; they are among the only mammals that break the seven-vertebra rule. Those spare neck bones let a sloth swivel its head about 270 degrees, scanning the canopy for predators, mates and food without moving its slow body an inch.",
+          "es": "Casi todos los mamíferos —ratón, jirafa, humano— tienen exactamente siete huesos en el cuello. Los perezosos de tres dedos llegan a tener nueve, y los manatíes seis; están entre los únicos mamíferos que rompen la regla de las siete vértebras. Esos huesos de más en el cuello le permiten al perezoso girar la cabeza unos 270 grados, rastreando la copa de los árboles en busca de depredadores, parejas y comida sin mover ni un centímetro su lento cuerpo.",
+          "fr": "Presque tous les mammifères — souris, girafe, humain — ont exactement sept os dans le cou. Les paresseux à trois doigts en comptent jusqu'à neuf, et les lamantins en ont six ; ils sont parmi les seuls mammifères à enfreindre la règle des sept vertèbres. Ces os de cou supplémentaires permettent au paresseux de pivoter la tête d'environ 270 degrés, scrutant la canopée à la recherche de prédateurs, de partenaires et de nourriture sans bouger d'un pouce son corps lent.",
+          "ja": "ほぼすべての哺乳類――ネズミも、キリンも、人間も――は首の骨がきっかり七つだ。ミユビナマケモノは多くて九つ、マナティーは六つで、七つという掟を破る数少ない哺乳類に入る。この余分な首の骨のおかげで、ナマケモノは頭をおよそ270度回し、のろい体を一センチも動かさずに、林冠で捕食者や交尾相手、食べ物を見渡せる。",
+          "pt-BR": "Quase todo mamífero — camundongo, girafa, humano — tem exatamente sete ossos no pescoço. As preguiças de três dedos chegam a ter nove, e os peixes-boi têm seis; estão entre os únicos mamíferos que quebram a regra das sete vértebras. Esses ossos extras no pescoço permitem que a preguiça gire a cabeça cerca de 270 graus, vasculhando a copa em busca de predadores, parceiros e comida sem mover um centímetro do seu corpo lento."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts153/02_sloth_nine_neck_vertebrae.webp",
+        "image_status": "rendered",
+        "seed": 1324,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc153-s03",
+        "story_type": "fact",
+        "caption": {
+          "en": "A mammal that runs almost cold-blooded",
+          "es": "Un mamífero que funciona casi a sangre fría",
+          "fr": "Un mammifère qui fonctionne presque à sang froid",
+          "ja": "ほぼ変温動物のように生きる哺乳類",
+          "pt-BR": "Um mamífero que funciona quase a sangue-frio"
+        },
+        "long_press": {
+          "en": "A sloth's core temperature drifts with the air around it, sliding roughly between 24 and 33°C across a single day — the widest, lowest range of any mammal. When it gets cold, the gut bacteria that digest its leaves slow down too, so a chilled sloth can starve on a full stomach. To warm back up it does what a reptile does: climbs to a high branch and finds a patch of sun.",
+          "es": "La temperatura interna del perezoso varía con el aire que lo rodea, oscilando aproximadamente entre 24 y 33°C a lo largo de un solo día: el rango más amplio y bajo de cualquier mamífero. Cuando hace frío, las bacterias del intestino que digieren sus hojas también se ralentizan, así que un perezoso aterido puede morir de hambre con el estómago lleno. Para volver a calentarse hace lo que haría un reptil: trepa a una rama alta y busca un retazo de sol.",
+          "fr": "La température interne d'un paresseux varie avec l'air ambiant, glissant grosso modo entre 24 et 33°C en une seule journée — l'amplitude la plus large et la plus basse de tous les mammifères. Quand il fait froid, les bactéries intestinales qui digèrent ses feuilles ralentissent aussi, si bien qu'un paresseux transi peut mourir de faim l'estomac plein. Pour se réchauffer, il fait comme un reptile : il grimpe sur une haute branche et trouve une tache de soleil.",
+          "ja": "ナマケモノの体の中心温度は周囲の空気に合わせて漂い、一日のうちにおよそ24〜33℃のあいだを行き来する――哺乳類で最も振れ幅が大きく、最も低い。冷えると、葉を消化する腸内細菌の働きも鈍るため、体が冷えたナマケモノは満腹のまま飢えることがある。温め直すには爬虫類と同じことをする。高い枝に登り、日だまりを探すのだ。",
+          "pt-BR": "A temperatura interna da preguiça varia com o ar ao seu redor, oscilando mais ou menos entre 24 e 33°C ao longo de um único dia — a faixa mais ampla e mais baixa de qualquer mamífero. Quando esfria, as bactérias do intestino que digerem as folhas também desaceleram, de modo que uma preguiça gelada pode morrer de fome com o estômago cheio. Para se reaquecer, ela faz o que um réptil faz: sobe num galho alto e procura um pedaço de sol."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts153/03_sloth_variable_body_temperature.webp",
+        "image_status": "rendered",
+        "seed": 1325,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc153-s04",
+        "story_type": "fact",
+        "caption": {
+          "en": "One trip down costs it a third of itself",
+          "es": "Una sola bajada le cuesta un tercio de su peso",
+          "fr": "Une seule descente lui coûte un tiers de lui-même",
+          "ja": "一度地上に降りるたび、体重の三分の一を手放す",
+          "pt-BR": "Uma única descida lhe custa um terço de si mesmo"
+        },
+        "long_press": {
+          "en": "A sloth digests so slowly that waste builds up for days. When it finally climbs down to relieve itself — almost the only time it ever leaves the trees — it can shed up to a third of its body weight in a single visit to the ground. That descent is the most dangerous thing a sloth does: a large share of sloth deaths from ground predators happen during these rare, exposed trips.",
+          "es": "El perezoso digiere tan despacio que los desechos se acumulan durante días. Cuando por fin baja a hacer sus necesidades —casi la única vez que deja los árboles— puede soltar hasta un tercio de su peso corporal en una sola visita al suelo. Ese descenso es lo más peligroso que hace un perezoso: buena parte de las muertes por depredadores terrestres ocurre durante estos viajes raros y expuestos.",
+          "fr": "Un paresseux digère si lentement que les déchets s'accumulent pendant des jours. Quand il descend enfin pour se soulager — presque la seule fois où il quitte les arbres — il peut perdre jusqu'à un tiers de son poids en une seule visite au sol. Cette descente est la chose la plus dangereuse qu'il fasse : une grande part des paresseux tués par des prédateurs terrestres meurt lors de ces sorties rares et exposées.",
+          "ja": "ナマケモノは消化があまりに遅く、排泄物が何日もたまっていく。ようやく地上に降りて用を足すとき――木を離れるのはほぼこのときだけだ――一度の地上行きで体重の三分の一ほどを手放すことがある。この降下こそナマケモノにとって最も危険な行いで、地上の捕食者に命を奪われる多くは、この稀で無防備な外出の最中に起きる。",
+          "pt-BR": "A preguiça digere tão devagar que os dejetos se acumulam por dias. Quando finalmente desce para se aliviar — quase a única vez em que deixa as árvores — pode perder até um terço do peso corporal numa única visita ao chão. Essa descida é a coisa mais perigosa que uma preguiça faz: grande parte das mortes por predadores terrestres acontece durante essas idas raras e expostas."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts153/04_sloth_ground_trip_weight_loss.webp",
+        "image_status": "rendered",
+        "seed": 1326,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc153-s05",
+        "story_type": "fact",
+        "caption": {
+          "en": "Its grip needs no muscle — it holds on after death",
+          "es": "Su agarre no usa músculo: sigue colgado tras morir",
+          "fr": "Sa prise ne demande aucun muscle — il tient même après la mort",
+          "ja": "その握力に筋肉はいらない――死んでもなお枝にぶら下がる",
+          "pt-BR": "Sua pegada não usa músculo — ele continua preso após a morte"
+        },
+        "long_press": {
+          "en": "A sloth's fingers and toes curl into permanent hooks, and the tendons lock the long curved claws shut so that hanging takes almost no muscular effort — gravity does the gripping for it. The catch is so secure that wild sloths have been found still suspended from a branch after they died. The same passive lock lets one doze for hours hanging below a limb without ever tiring.",
+          "es": "Los dedos de las manos y los pies del perezoso se curvan en ganchos permanentes, y los tendones traban cerradas las largas garras curvas, de modo que colgar casi no exige esfuerzo muscular: la gravedad agarra por él. La sujeción es tan segura que se han hallado perezosos salvajes aún colgados de una rama tras haber muerto. Ese mismo bloqueo pasivo le permite dormitar durante horas colgado bajo una rama sin cansarse nunca.",
+          "fr": "Les doigts et les orteils du paresseux se recourbent en crochets permanents, et les tendons verrouillent fermées ses longues griffes courbes, si bien que rester suspendu ne demande presque aucun effort musculaire — c'est la gravité qui agrippe à sa place. La prise est si sûre qu'on a retrouvé des paresseux sauvages encore suspendus à une branche après leur mort. Ce même verrou passif lui permet de somnoler des heures sous une branche sans jamais se fatiguer.",
+          "ja": "ナマケモノの指は内側に曲がって永久のかぎ爪となり、腱が長く湾曲した爪を閉じたまま固定するので、ぶら下がるのに筋力はほとんどいらない――重力が代わりに握ってくれる。その引っかかりはあまりに確実で、野生のナマケモノが死んだあとも枝にぶら下がったまま見つかったことがある。この受動的なロックのおかげで、枝の下にぶら下がったまま何時間も、疲れることなくまどろめる。",
+          "pt-BR": "Os dedos das mãos e dos pés da preguiça se curvam em ganchos permanentes, e os tendões travam fechadas as longas garras curvas, de modo que ficar pendurada quase não exige esforço muscular — a gravidade segura por ela. A fixação é tão firme que já se encontraram preguiças selvagens ainda penduradas num galho depois de mortas. Essa mesma trava passiva permite que ela cochile por horas pendurada sob um galho sem nunca se cansar."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts153/05_sloth_passive_locking_claws.webp",
+        "image_status": "rendered",
+        "seed": 1327,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc153-s06",
+        "story_type": "fact",
+        "caption": {
+          "en": "Its fur is parted the wrong way on purpose",
+          "es": "Su pelaje está peinado al revés a propósito",
+          "fr": "Son pelage est séparé à l'envers, et c'est voulu",
+          "ja": "その毛並みは、わざと逆向きに分かれている",
+          "pt-BR": "O pelo dele é repartido ao contrário de propósito"
+        },
+        "long_press": {
+          "en": "On every other mammal, fur lies from the spine down toward the belly. A sloth's grows the opposite way — parted along the belly and pointing toward the back — because the animal lives inverted. With the sloth hanging upside down, the coat becomes a roof that channels rain off and away. Micro-cracks in each strand even shelter algae, tinting the fur green for camouflage.",
+          "es": "En cualquier otro mamífero, el pelo cae desde el lomo hacia el vientre. El del perezoso crece al revés —se separa a lo largo del vientre y apunta hacia el lomo— porque el animal vive invertido. Como el perezoso cuelga boca abajo, el pelaje se vuelve un tejado que desvía y escurre la lluvia. Las microgrietas de cada pelo incluso albergan algas, que tiñen el pelaje de verde para camuflarlo.",
+          "fr": "Chez tous les autres mammifères, le poil descend de l'échine vers le ventre. Celui du paresseux pousse à l'inverse — séparé le long du ventre et pointant vers le dos — parce que l'animal vit à l'envers. Comme le paresseux pend la tête en bas, son pelage devient un toit qui évacue la pluie. Les microfissures de chaque poil abritent même des algues, qui teintent la fourrure de vert pour le camoufler.",
+          "ja": "ほかのどの哺乳類でも、毛は背骨から腹へと向かって生える。ナマケモノの毛は逆向きに伸びる――腹に沿って分かれ、背中へと向く――この動物が逆さまに暮らすからだ。逆さにぶら下がるナマケモノにとって、その毛皮は雨を流し落とす屋根になる。一本一本の毛の微細な割れ目には藻まで住みつき、毛皮を緑に染めて身を隠す。",
+          "pt-BR": "Em todo outro mamífero, o pelo desce da espinha em direção à barriga. O da preguiça cresce ao contrário — repartido ao longo da barriga e apontando para as costas — porque o animal vive de cabeça para baixo. Como a preguiça fica pendurada de ponta-cabeça, a pelagem vira um telhado que escoa a chuva para longe. Microfissuras em cada fio até abrigam algas, que tingem o pelo de verde para camuflagem."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts153/06_sloth_reversed_fur_drip_tip.webp",
+        "image_status": "rendered",
+        "seed": 1328,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc153-s07",
+        "story_type": "fact",
+        "caption": {
+          "en": "The slowpoke is three times faster in water",
+          "es": "El lentísimo es tres veces más rápido en el agua",
+          "fr": "Ce lambin est trois fois plus rapide dans l'eau",
+          "ja": "こののろまは、水の中では三倍も速い",
+          "pt-BR": "O lerdo é três vezes mais rápido na água"
+        },
+        "long_press": {
+          "en": "On land a sloth barely crawls, but drop it in a river and it swims — about three times quicker than it moves through the trees, using a steady breaststroke. It can also drop its heart rate to a third of normal and hold its breath for up to 40 minutes, longer than many diving mammals manage. Rivers are highways, not hazards, for an animal built to do everything slowly.",
+          "es": "En tierra el perezoso apenas se arrastra, pero échalo a un río y nada: unas tres veces más rápido de lo que se mueve por los árboles, con una braza constante. También puede bajar su ritmo cardíaco a un tercio de lo normal y aguantar la respiración hasta 40 minutos, más que muchos mamíferos buceadores. Los ríos son autopistas, no peligros, para un animal hecho para hacerlo todo despacio.",
+          "fr": "Sur terre, un paresseux rampe à peine, mais jetez-le dans une rivière et il nage — environ trois fois plus vite qu'il ne se déplace dans les arbres, d'une brasse régulière. Il peut aussi abaisser son rythme cardiaque au tiers de la normale et retenir son souffle jusqu'à 40 minutes, plus longtemps que bien des mammifères plongeurs. Les rivières sont des autoroutes, non des dangers, pour un animal fait pour tout faire lentement.",
+          "ja": "陸ではナマケモノはほとんど這うだけだが、川に落とせば泳ぐ――木々のあいだを進むより三倍ほど速く、安定した平泳ぎで。さらに心拍数を通常の三分の一まで落とし、最長40分も息を止められる。これは多くの潜水性哺乳類を上回る。何ごともゆっくりやるよう作られた動物にとって、川は危険ではなく高速道路なのだ。",
+          "pt-BR": "Em terra a preguiça mal se arrasta, mas jogue-a num rio e ela nada — cerca de três vezes mais rápido do que se move pelas árvores, num nado de peito constante. Ela também pode baixar os batimentos a um terço do normal e prender a respiração por até 40 minutos, mais do que muitos mamíferos mergulhadores conseguem. Rios são rodovias, não perigos, para um animal feito para fazer tudo devagar."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts153/07_sloth_swims_breath_hold.webp",
+        "image_status": "rendered",
+        "seed": 1329,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc153-s08",
+        "story_type": "fact",
+        "caption": {
+          "en": "A single leaf can take a month to digest",
+          "es": "Digerir una sola hoja puede llevarle un mes",
+          "fr": "Digérer une seule feuille peut lui prendre un mois",
+          "ja": "たった一枚の葉を消化するのに一か月かかることも",
+          "pt-BR": "Uma única folha pode levar um mês para ser digerida"
+        },
+        "long_press": {
+          "en": "Leaves are tough and almost empty of calories, so a sloth runs the slowest digestion of any mammal: one leaf may take around 30 days to pass through its four-chambered, cow-like stomach, where bacteria slowly break down the fibre. A full gut can be nearly a third of the animal's weight. This is the real reason sloths move so little — they are running on the thinnest of fuel.",
+          "es": "Las hojas son duras y casi sin calorías, así que el perezoso tiene la digestión más lenta de cualquier mamífero: una sola hoja puede tardar unos 30 días en atravesar su estómago de cuatro cámaras, parecido al de una vaca, donde las bacterias descomponen la fibra poco a poco. Un intestino lleno puede ser casi un tercio del peso del animal. Esta es la verdadera razón de que los perezosos se muevan tan poco: funcionan con el combustible más escaso.",
+          "fr": "Les feuilles sont coriaces et presque vides de calories, si bien que le paresseux a la digestion la plus lente de tous les mammifères : une feuille peut mettre environ 30 jours à traverser son estomac à quatre compartiments, semblable à celui d'une vache, où des bactéries décomposent lentement la fibre. Un ventre plein peut représenter près d'un tiers du poids de l'animal. C'est la vraie raison pour laquelle les paresseux bougent si peu — ils tournent au carburant le plus maigre qui soit.",
+          "ja": "葉は硬く、カロリーもほとんどないため、ナマケモノは哺乳類で最も遅い消化を行う。一枚の葉が、牛に似た四つの部屋を持つ胃を通り抜けるのに30日ほどかかることもあり、そこで細菌が繊維をゆっくり分解する。中身の詰まった消化管は、動物の体重のほぼ三分の一を占めることもある。ナマケモノがほとんど動かない本当の理由はこれだ――ごくわずかな燃料で生きているのである。",
+          "pt-BR": "As folhas são duras e quase sem calorias, então a preguiça tem a digestão mais lenta de qualquer mamífero: uma folha pode levar cerca de 30 dias para atravessar seu estômago de quatro câmaras, parecido com o de uma vaca, onde bactérias decompõem a fibra aos poucos. Um intestino cheio pode ser quase um terço do peso do animal. Essa é a verdadeira razão de as preguiças se moverem tão pouco — funcionam com o mais ralo dos combustíveis."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts153/08_sloth_slowest_digestion_month.webp",
+        "image_status": "rendered",
+        "seed": 1330,
+        "text_status": "draft",
+        "actions": []
+      }
+    ]
+  },
+  {
+    "id": "deepcuts154",
+    "type": "deepcuts",
+    "order": 154,
+    "title": "Deep Cuts",
+    "subtitle": {
+      "en": "Eight things hidden behind the giant bill",
+      "es": "Ocho cosas escondidas tras ese pico gigante",
+      "fr": "Huit choses cachées derrière le bec géant",
+      "ja": "あの巨大なくちばしに隠された八つのこと",
+      "pt-BR": "Oito coisas escondidas atrás do bico gigante"
+    },
+    "cover_image": "https://cdn.mentria.ai/deepcuts154/00_cover.webp",
+    "status": "draft",
+    "slides": [
+      {
+        "id": "dc154-s01",
+        "story_type": "fact",
+        "caption": {
+          "en": "Its giant bill is a built-in radiator",
+          "es": "Su pico gigante es un radiador incorporado",
+          "fr": "Son bec géant est un radiateur intégré",
+          "ja": "あの巨大なくちばしは内蔵ラジエーター",
+          "pt-BR": "O bico gigante é um radiador embutido"
+        },
+        "long_press": {
+          "en": "A toucan's bill is laced with blood vessels it can open and close at will. By flushing the bill with warm blood, the bird dumps heat through the bare surface — infrared studies show it can shed anywhere from 5 to 100 percent of its body heat this way, one of the largest 'thermal windows' of any animal, rivalling an elephant's ears. On cold nights it powers the bill down and tucks it away to stay warm.",
+          "es": "El pico del tucán está recorrido por vasos sanguíneos que puede abrir y cerrar a voluntad. Al inundarlo de sangre caliente, el ave libera calor por esa superficie desnuda: estudios con infrarrojos muestran que así puede disipar entre el 5 y el 100 por ciento de su calor corporal, una de las mayores 'ventanas térmicas' de cualquier animal, comparable a las orejas de un elefante. En las noches frías apaga el pico y lo esconde para mantenerse caliente.",
+          "fr": "Le bec du toucan est parcouru de vaisseaux sanguins qu'il peut ouvrir et fermer à volonté. En l'irriguant de sang chaud, l'oiseau évacue la chaleur par cette surface nue : des études infrarouges montrent qu'il peut ainsi dissiper de 5 à 100 pour cent de sa chaleur corporelle, l'une des plus grandes 'fenêtres thermiques' du règne animal, rivalisant avec les oreilles d'un éléphant. Les nuits froides, il coupe le bec et le range pour rester au chaud.",
+          "ja": "オオハシのくちばしには、自在に開閉できる血管が張り巡らされている。温かい血を流し込むと、むき出しの表面から熱を放出する。赤外線研究によれば、こうして体熱の5〜100パーセントを逃がすことができ、これはゾウの耳に匹敵する、動物界でも最大級の『熱の窓』だ。寒い夜にはくちばしの放熱を止め、しまい込んで暖を保つ。",
+          "pt-BR": "O bico do tucano é repleto de vasos sanguíneos que ele abre e fecha à vontade. Ao inundá-lo de sangue quente, a ave libera calor por essa superfície nua — estudos com infravermelho mostram que assim ela dissipa de 5 a 100 por cento do seu calor corporal, uma das maiores 'janelas térmicas' de qualquer animal, comparável às orelhas de um elefante. Em noites frias, ela desliga o bico e o recolhe para se manter aquecida."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts154/01_toucan_bill_thermal_radiator.webp",
+        "image_status": "rendered",
+        "seed": 1331,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc154-s02",
+        "story_type": "fact",
+        "caption": {
+          "en": "That huge beak weighs almost nothing",
+          "es": "Ese pico enorme casi no pesa",
+          "fr": "Cet énorme bec ne pèse presque rien",
+          "ja": "あの巨大なくちばしはほとんど重さがない",
+          "pt-BR": "Esse bico enorme quase não pesa"
+        },
+        "long_press": {
+          "en": "A toco toucan's bill runs about a third of the bird's entire length — proportionally the largest beak of any bird alive — yet it makes up only a small fraction of the body weight. Inside, a thin shell of keratin covers a scaffold of bony struts and air pockets, a rigid foam that is mostly empty space. The trick gives the toucan an outsized tool without ever grounding it.",
+          "es": "El pico del tucán toco abarca cerca de un tercio del largo total del ave —el mayor en proporción de cualquier ave viva—, pero apenas supone una pequeña fracción de su peso. Por dentro, una fina cáscara de queratina recubre un andamiaje de puntales óseos y bolsas de aire, una espuma rígida casi toda hueca. El truco le da al tucán una herramienta descomunal sin llegar a clavarlo en tierra.",
+          "fr": "Le bec du toucan toco représente environ un tiers de la longueur totale de l'oiseau — proportionnellement le plus grand bec de tous les oiseaux vivants — mais ne compte que pour une petite fraction de son poids. À l'intérieur, une fine coque de kératine recouvre un échafaudage d'entretoises osseuses et de poches d'air, une mousse rigide presque entièrement vide. L'astuce offre au toucan un outil démesuré sans jamais le clouer au sol.",
+          "ja": "オオハシのくちばしは体全体の約三分の一を占め、現生の鳥としては比率で最大だが、体重に占める割合はごくわずかだ。内部では、薄いケラチンの殻が骨の梁と空気の隙間からなる骨組みを覆い、ほとんどが空洞の硬い発泡構造になっている。この仕組みのおかげで、オオハシは体を地に縛りつけることなく、桁外れの道具を手にしている。",
+          "pt-BR": "O bico do tucano-toco chega a cerca de um terço do comprimento total da ave — proporcionalmente o maior bico de qualquer ave viva —, mas representa só uma pequena fração do peso do corpo. Por dentro, uma fina casca de queratina recobre uma estrutura de vigas ósseas e bolsas de ar, uma espuma rígida quase toda vazia. O truque dá ao tucano uma ferramenta descomunal sem nunca prendê-lo ao chão."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts154/02_toucan_bill_lightweight_foam.webp",
+        "image_status": "rendered",
+        "seed": 1332,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc154-s03",
+        "story_type": "fact",
+        "caption": {
+          "en": "Behind the beak hides a frayed, feathery tongue",
+          "es": "Tras el pico se esconde una lengua deshilachada como una pluma",
+          "fr": "Derrière le bec se cache une langue effilochée, comme une plume",
+          "ja": "くちばしの奥には羽毛のようにほつれた舌",
+          "pt-BR": "Atrás do bico esconde-se uma língua desfiada, como uma pena"
+        },
+        "long_press": {
+          "en": "Reach past the bill and you find a tongue up to 15 centimetres long — narrow, grey, and fringed with bristles down both edges so it looks almost like a feather. Those frayed sides turn it into a sensitive tasting and food-handling tool, helping the bird flip fruit back into its throat. It is nothing like the short muscular tongue most birds carry.",
+          "es": "Más allá del pico aparece una lengua de hasta 15 centímetros: estrecha, gris y orlada de cerdas a ambos lados, casi como una pluma. Esos bordes deshilachados la convierten en un sensible instrumento para saborear y manejar la comida, que ayuda al ave a lanzar la fruta hacia la garganta. No se parece en nada a la lengua corta y musculosa de la mayoría de las aves.",
+          "fr": "Passé le bec, on découvre une langue longue de 15 centimètres — étroite, grise et bordée de soies sur les deux côtés, au point de ressembler à une plume. Ces bords effilochés en font un outil sensible pour goûter et manipuler la nourriture, aidant l'oiseau à basculer les fruits vers sa gorge. Rien à voir avec la langue courte et musclée de la plupart des oiseaux.",
+          "ja": "くちばしの奥に進むと、長さ15センチにもなる舌が現れる。細くて灰色で、両縁が剛毛で縁取られ、まるで羽根のようだ。このほつれた縁が、味わい食物を扱うための敏感な道具となり、果実を喉の奥へ送り込むのを助ける。多くの鳥がもつ短く筋肉質の舌とはまるで別物だ。",
+          "pt-BR": "Passando do bico, surge uma língua de até 15 centímetros — estreita, cinza e franjada de cerdas dos dois lados, a ponto de parecer uma pena. Essas bordas desfiadas a tornam um instrumento sensível para provar e manejar o alimento, ajudando a ave a jogar a fruta de volta para a garganta. Nada a ver com a língua curta e musculosa que a maioria das aves carrega."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts154/03_toucan_frayed_feather_tongue.webp",
+        "image_status": "rendered",
+        "seed": 1333,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc154-s04",
+        "story_type": "fact",
+        "caption": {
+          "en": "At night it folds into a ball and vanishes",
+          "es": "De noche se pliega en una bola y desaparece",
+          "fr": "La nuit, il se replie en boule et disparaît",
+          "ja": "夜には丸まって姿を消す",
+          "pt-BR": "À noite ele se dobra em bola e some"
+        },
+        "long_press": {
+          "en": "To sleep, a toucan turns its head right around and lays the big bill flat along its back, then flips its tail up and over to cover it — folding into a round puff of feathers half its waking size. Several adults may pack into a single tree hollow this way. Tucking the bill in among the feathers also keeps that heat-leaking surface warm through the night.",
+          "es": "Para dormir, el tucán gira la cabeza por completo y apoya el gran pico a lo largo del lomo, luego sube la cola y la dobla por encima para taparlo, plegándose en un ovillo de plumas de la mitad de su tamaño despierto. Así, varios adultos pueden apretujarse en un mismo hueco de árbol. Esconder el pico entre las plumas también mantiene caliente esa superficie que pierde calor durante la noche.",
+          "fr": "Pour dormir, le toucan tourne complètement la tête et couche le grand bec le long de son dos, puis relève la queue et la rabat par-dessus pour le couvrir — se repliant en une boule de plumes deux fois plus petite qu'éveillé. Plusieurs adultes peuvent ainsi s'entasser dans un même creux d'arbre. Glisser le bec parmi les plumes garde aussi au chaud, toute la nuit, cette surface qui fuit la chaleur.",
+          "ja": "眠るとき、オオハシは頭をぐるりと後ろに回し、大きなくちばしを背中に沿わせて寝かせ、さらに尾を持ち上げてその上にかぶせる。こうして起きているときの半分ほどの丸い羽毛の塊になる。この姿で複数の成鳥が一つの樹洞に詰め込まれることもある。くちばしを羽毛にうずめることは、熱の逃げるあの表面を一晩じゅう暖かく保つ役にも立つ。",
+          "pt-BR": "Para dormir, o tucano vira a cabeça por completo e deita o grande bico ao longo das costas, depois levanta a cauda e a dobra por cima para cobri-lo — recolhendo-se num novelo de penas com metade do tamanho de quando está acordado. Assim, vários adultos podem se espremer num mesmo oco de árvore. Enfiar o bico entre as penas também mantém aquecida, a noite toda, aquela superfície que perde calor."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts154/04_toucan_sleeps_folded_ball.webp",
+        "image_status": "rendered",
+        "seed": 1334,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc154-s05",
+        "story_type": "fact",
+        "caption": {
+          "en": "Two toes forward, two back — a built-in clamp",
+          "es": "Dos dedos delante, dos detrás: una pinza incorporada",
+          "fr": "Deux doigts devant, deux derrière — une pince intégrée",
+          "ja": "前に二本、後ろに二本——体内蔵のクランプ",
+          "pt-BR": "Dois dedos à frente, dois atrás — uma garra embutida"
+        },
+        "long_press": {
+          "en": "A toucan's foot is zygodactyl: two toes point forward and two point backward, forming an X that grips a perch like a clamp. The arrangement lets the bird hold tight to a thin branch while it leans far out and stretches that long bill to reach fruit on twigs too flimsy to perch on. It also makes toucans nimble, hopping from limb to limb rather than walking.",
+          "es": "El pie del tucán es zigodáctilo: dos dedos apuntan adelante y dos atrás, formando una X que agarra la percha como una pinza. Esa disposición le permite aferrarse a una rama fina mientras se inclina lejos y estira ese largo pico para alcanzar fruta en ramitas demasiado endebles para posarse. También vuelve ágil al tucán, que salta de rama en rama en lugar de caminar.",
+          "fr": "Le pied du toucan est zygodactyle : deux doigts pointent vers l'avant et deux vers l'arrière, formant un X qui agrippe le perchoir comme une pince. Cette disposition permet à l'oiseau de se cramponner à une branche fine tout en se penchant loin et en tendant ce long bec pour atteindre des fruits sur des rameaux trop frêles pour s'y poser. Elle rend aussi le toucan agile, sautant de branche en branche plutôt que de marcher.",
+          "ja": "オオハシの足は対趾足だ。二本の指が前を、二本が後ろを向き、Xの形で止まり木をクランプのように握る。この配置のおかげで、細い枝にしっかりつかまったまま大きく身を乗り出し、あの長いくちばしを伸ばして、止まれないほど頼りない小枝の果実にも届く。また歩くより枝から枝へ跳ね回る、すばしこさももたらしている。",
+          "pt-BR": "O pé do tucano é zigodáctilo: dois dedos apontam para a frente e dois para trás, formando um X que agarra o poleiro como uma garra. Esse arranjo permite que a ave se firme num galho fino enquanto se inclina bem para fora e estica aquele longo bico para alcançar frutos em ramos frágeis demais para pousar. Também a torna ágil, saltando de galho em galho em vez de andar."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts154/05_toucan_zygodactyl_feet.webp",
+        "image_status": "rendered",
+        "seed": 1335,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc154-s06",
+        "story_type": "fact",
+        "caption": {
+          "en": "It can barely fly across a clearing",
+          "es": "Apenas puede cruzar volando un claro",
+          "fr": "Il peine à traverser une clairière en vol",
+          "ja": "開けた場所を横切るのもやっと",
+          "pt-BR": "Mal consegue cruzar uma clareira voando"
+        },
+        "long_press": {
+          "en": "For all its size, a toucan is a poor flier. It beats its wings hard a handful of times, then glides with the heavy bill pulling it downward, rarely crossing more than about 100 metres at a stretch. The bill even blunts its depth perception, so judging a landing is awkward. Toucans get around the canopy mostly by hopping and climbing rather than committing to long flights.",
+          "es": "Pese a su tamaño, el tucán vuela mal. Bate las alas con fuerza unas pocas veces y luego planea con el pesado pico tirando de él hacia abajo, sin cruzar de un tirón mucho más de unos 100 metros. El pico incluso le entorpece la percepción de profundidad, así que calcular un aterrizaje le resulta torpe. Por eso se mueve por la copa sobre todo saltando y trepando, más que lanzándose a vuelos largos.",
+          "fr": "Malgré sa taille, le toucan vole mal. Il bat des ailes vigoureusement quelques fois, puis plane, le bec lourd l'entraînant vers le bas, dépassant rarement une centaine de mètres d'un seul élan. Le bec brouille même sa perception des distances, ce qui rend l'atterrissage délicat. Le toucan circule dans la canopée surtout en sautant et en grimpant, plutôt qu'en se lançant dans de longs vols.",
+          "ja": "その大きさのわりに、オオハシは飛ぶのが下手だ。翼を数回力強く打つと、あとは重いくちばしに引き下げられながら滑空し、一度に100メートルほどを超えることはめったにない。くちばしは奥行きの感覚まで鈍らせるので、着地の見当をつけるのもぎこちない。だからオオハシは、長い飛行に踏み切るより、跳ねたり登ったりして林冠を移動することが多い。",
+          "pt-BR": "Apesar do tamanho, o tucano voa mal. Bate as asas com força algumas vezes e depois plana, com o bico pesado puxando-o para baixo, raramente cruzando muito mais que uns 100 metros de uma só vez. O bico ainda atrapalha sua percepção de profundidade, então calcular um pouso fica desajeitado. Os tucanos circulam pela copa mais saltando e trepando do que se arriscando em voos longos."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts154/06_toucan_weak_undulating_flight.webp",
+        "image_status": "rendered",
+        "seed": 1336,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc154-s07",
+        "story_type": "fact",
+        "caption": {
+          "en": "Chicks hatch bald, blind and beakless",
+          "es": "Los pollos nacen calvos, ciegos y sin pico",
+          "fr": "Les poussins éclosent chauves, aveugles et sans bec",
+          "ja": "ひなは裸で、目も見えず、くちばしもなく生まれる",
+          "pt-BR": "Os filhotes nascem pelados, cegos e sem bico"
+        },
+        "long_press": {
+          "en": "A newly hatched toucan looks nothing like the adult: pink, naked, blind, and with no trace of the famous bill, which takes months to grow to full size. The chicks even have spiky pads on their heels to shield their feet against the bare, rough floor of the nest cavity — and those pads simply slough away once the young bird is ready to leave the hollow.",
+          "es": "Un tucán recién nacido no se parece en nada al adulto: rosado, desnudo, ciego y sin rastro del famoso pico, que tarda meses en alcanzar su tamaño completo. Los pollos tienen incluso almohadillas con púas en los talones para proteger sus patas del suelo desnudo y áspero del hueco del nido, y esas almohadillas se desprenden solas en cuanto el joven está listo para dejar la cavidad.",
+          "fr": "Un toucan qui vient d'éclore ne ressemble en rien à l'adulte : rose, nu, aveugle et sans la moindre trace du fameux bec, qui met des mois à atteindre sa taille définitive. Les poussins ont même des coussinets épineux aux talons pour protéger leurs pattes du plancher nu et rugueux de la cavité du nid — et ces coussinets se détachent d'eux-mêmes dès que le jeune est prêt à quitter le creux.",
+          "ja": "孵ったばかりのオオハシは、成鳥とは似ても似つかない。ピンク色で裸、目も見えず、あの有名なくちばしの痕跡すらない。くちばしが本来の大きさになるには数か月かかる。ひなには、巣穴のむき出しのざらついた床から足を守るため、かかとにとげ状の肉趾まで備わっている。そしてその肉趾は、若鳥が巣穴を出る頃になると自然にはがれ落ちる。",
+          "pt-BR": "Um tucano recém-nascido não se parece em nada com o adulto: rosado, pelado, cego e sem qualquer vestígio do famoso bico, que leva meses para atingir o tamanho pleno. Os filhotes têm até almofadas espinhosas nos calcanhares para proteger os pés do chão nu e áspero da cavidade do ninho — e essas almofadas simplesmente se soltam assim que o jovem está pronto para deixar o oco."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts154/07_toucan_chicks_naked_heel_pads.webp",
+        "image_status": "rendered",
+        "seed": 1337,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc154-s08",
+        "story_type": "fact",
+        "caption": {
+          "en": "The fruit-lover is also a nest robber",
+          "es": "El amante de la fruta es también un saqueador de nidos",
+          "fr": "L'amateur de fruits est aussi un pilleur de nids",
+          "ja": "果実好きは、実は巣を襲う略奪者",
+          "pt-BR": "O amante de frutas também é um saqueador de ninhos"
+        },
+        "long_press": {
+          "en": "Toucans look like gentle fruit-eaters, and they really are vital seed-spreaders — but they are omnivores at heart. With that long bill they probe other birds' nests and eat the eggs and nestlings, and they will take insects, lizards and other small prey too. The extra protein matters most in breeding season. Even another toucan's nest is not safe from them.",
+          "es": "Los tucanes parecen apacibles comedores de fruta, y son de hecho dispersores de semillas esenciales, pero en el fondo son omnívoros. Con ese pico largo hurgan en los nidos de otras aves y se comen los huevos y los polluelos, y también capturan insectos, lagartijas y otras presas pequeñas. La proteína extra importa sobre todo en la época de cría. Ni siquiera el nido de otro tucán está a salvo de ellos.",
+          "fr": "Les toucans ont l'air de paisibles mangeurs de fruits, et ce sont d'ailleurs des disséminateurs de graines essentiels — mais ce sont des omnivores dans l'âme. Avec ce long bec, ils fouillent les nids des autres oiseaux et dévorent les œufs et les oisillons, et ils s'attaquent aussi aux insectes, aux lézards et à d'autres petites proies. Ce surcroît de protéines compte surtout en saison de reproduction. Même le nid d'un autre toucan n'est pas à l'abri.",
+          "ja": "オオハシは穏やかな果実食のように見えるし、実際に欠かせない種子の運び手でもある。だが本質は雑食だ。あの長いくちばしで他の鳥の巣を探り、卵やひなを食べ、昆虫やトカゲなど小さな獲物も捕らえる。この余分なたんぱく質がもっとも重要になるのは繁殖期だ。別のオオハシの巣でさえ、彼らからは安全ではない。",
+          "pt-BR": "Os tucanos parecem mansos comedores de frutas, e são de fato dispersores de sementes essenciais — mas no fundo são onívoros. Com aquele bico longo, vasculham ninhos de outras aves e comem os ovos e os filhotes, e ainda pegam insetos, lagartos e outras presas pequenas. A proteína extra importa sobretudo na época de reprodução. Nem mesmo o ninho de outro tucano está a salvo deles."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts154/08_toucan_omnivore_nest_raider.webp",
+        "image_status": "rendered",
+        "seed": 1338,
+        "text_status": "draft",
+        "actions": []
+      }
+    ]
+  },
+  {
+    "id": "deepcuts155",
+    "type": "deepcuts",
+    "order": 155,
+    "title": "Deep Cuts",
+    "subtitle": {
+      "en": "Eight things split out of a grey stone",
+      "es": "Ocho cosas extraídas de una piedra gris",
+      "fr": "Huit choses tirées d'une pierre grise",
+      "ja": "灰色の石から割り出された八つのこと",
+      "pt-BR": "Oito coisas tiradas de uma pedra cinzenta"
+    },
+    "cover_image": "https://cdn.mentria.ai/deepcuts155/00_cover.webp",
+    "status": "draft",
+    "slides": [
+      {
+        "id": "dc155-s01",
+        "story_type": "fact",
+        "caption": {
+          "en": "It splits along stress, not its own layers",
+          "es": "Se parte según la presión, no según sus capas",
+          "fr": "Elle se fend selon la contrainte, pas selon ses couches",
+          "ja": "自らの層ではなく、応力に沿って割れる",
+          "pt-BR": "Ela racha conforme a tensão, não conforme suas camadas"
+        },
+        "long_press": {
+          "en": "Slate begins as mud, pressed and gently cooked into rock. Under the squeeze of mountain-building, its microscopic mica flakes all swing around to line up at right angles to the pressure, and the stone splits cleanly along that new grain. The strange part: this cleavage usually cuts across the original mud layers — so slate breaks the way the Earth squeezed it, not the way it was first laid down.",
+          "es": "La pizarra empieza como barro, comprimido y cocido suavemente hasta convertirse en roca. Bajo la presión que levanta las montañas, sus microscópicas láminas de mica giran hasta alinearse en ángulo recto con la presión, y la piedra se parte limpiamente siguiendo esa nueva veta. Lo curioso: esa exfoliación suele cortar las capas originales de barro, de modo que la pizarra se rompe según cómo la apretó la Tierra, no según cómo se depositó al principio.",
+          "fr": "L'ardoise débute comme une boue, comprimée et doucement cuite jusqu'à devenir roche. Sous la pression qui soulève les montagnes, ses paillettes microscopiques de mica pivotent toutes pour s'aligner à angle droit de la pression, et la pierre se fend nettement le long de ce nouveau grain. Le plus étrange : ce clivage recoupe en général les couches de boue d'origine — l'ardoise se brise donc selon la façon dont la Terre l'a comprimée, et non selon celle dont elle s'est déposée au départ.",
+          "ja": "スレートは泥として始まり、押し固められて穏やかに熱せられ岩になる。造山運動の圧力を受けると、微細な雲母の薄片がいっせいに向きを変え、圧力に対して直角に並び、石はその新しい筋目に沿ってきれいに割れる。不思議なのは、この劈開がたいてい元の泥の層を横切ること——つまりスレートは、最初に堆積した向きではなく、地球が押し縮めた向きに割れるのだ。",
+          "pt-BR": "A ardósia começa como lama, comprimida e cozida lentamente até virar rocha. Sob o aperto que ergue as montanhas, suas lâminas microscópicas de mica giram todas para se alinhar em ângulo reto com a pressão, e a pedra racha de forma limpa ao longo desse novo veio. O curioso: essa clivagem costuma cortar as camadas originais de lama — então a ardósia se parte conforme a Terra a apertou, não conforme ela foi depositada no início."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts155/01_slate_cleavage_across_bedding.webp",
+        "image_status": "rendered",
+        "seed": 1339,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc155-s02",
+        "story_type": "fact",
+        "caption": {
+          "en": "A roof that can outlive five generations",
+          "es": "Un tejado que puede sobrevivir a cinco generaciones",
+          "fr": "Un toit qui peut survivre à cinq générations",
+          "ja": "五世代を生き延びられる屋根",
+          "pt-BR": "Um telhado que pode sobreviver a cinco gerações"
+        },
+        "long_press": {
+          "en": "Split slate is almost inert — it barely absorbs water, won't rot, won't burn, and shrugs off frost — so a well-laid slate roof routinely lasts beyond a century, and the hardest slates from Wales, Vermont and New York can shelter a building for 150 to 200 years. The nails and the timber underneath almost always fail long before the stone does.",
+          "es": "La pizarra partida es casi inerte: apenas absorbe agua, no se pudre, no arde y resiste las heladas, así que un tejado de pizarra bien colocado supera con facilidad el siglo de vida, y las pizarras más duras de Gales, Vermont y Nueva York pueden proteger un edificio entre 150 y 200 años. Los clavos y la madera de debajo casi siempre fallan mucho antes que la piedra.",
+          "fr": "L'ardoise fendue est presque inerte : elle absorbe à peine l'eau, ne pourrit pas, ne brûle pas et se moque du gel — un toit d'ardoise bien posé dépasse couramment le siècle, et les ardoises les plus dures du pays de Galles, du Vermont et de New York peuvent abriter un bâtiment pendant 150 à 200 ans. Les clous et la charpente en dessous cèdent presque toujours bien avant la pierre.",
+          "ja": "割られたスレートはほぼ不活性で、水をほとんど吸わず、腐らず、燃えず、霜もものともしない。だからきちんと葺かれたスレート屋根はふつう一世紀を超えて持ち、ウェールズやバーモント、ニューヨーク産の最も硬いスレートは建物を150〜200年も守る。たいていは石より先に、下の釘や木材のほうがずっと早く傷む。",
+          "pt-BR": "A ardósia fendida é quase inerte — quase não absorve água, não apodrece, não queima e ignora a geada — então um telhado de ardósia bem assentado costuma passar do século, e as ardósias mais duras de Gales, Vermont e Nova York podem abrigar um prédio por 150 a 200 anos. Os pregos e a madeira embaixo quase sempre falham muito antes da pedra."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts155/02_slate_roof_outlives_generations.webp",
+        "image_status": "rendered",
+        "seed": 1340,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc155-s03",
+        "story_type": "fact",
+        "caption": {
+          "en": "Every serious pool table hides a stone bed",
+          "es": "Toda mesa de billar seria esconde una base de piedra",
+          "fr": "Toute table de billard sérieuse cache un lit de pierre",
+          "ja": "本格的なビリヤード台はどれも石の台座を隠している",
+          "pt-BR": "Toda mesa de bilhar séria esconde uma base de pedra"
+        },
+        "long_press": {
+          "en": "Beneath the cloth of a professional pool or snooker table lies a bed of slate, ground dead flat. Slate is chosen because it can be machined to a near-perfect plane and, unlike wood, it won't warp, swell or sag with damp or heat — so the balls keep rolling true for decades. Tournament tables the world over are slate-bedded; the cheaper tables that aren't never play quite right.",
+          "es": "Bajo el paño de una mesa profesional de billar o snooker hay una base de pizarra, rectificada hasta quedar perfectamente plana. Se elige la pizarra porque puede mecanizarse hasta un plano casi perfecto y, a diferencia de la madera, no se deforma, hincha ni se comba con la humedad o el calor, de modo que las bolas siguen rodando rectas durante décadas. Las mesas de torneo de todo el mundo llevan base de pizarra; las más baratas que no la llevan nunca ruedan del todo bien.",
+          "fr": "Sous le tapis d'une table professionnelle de billard ou de snooker se trouve un lit d'ardoise, rectifié parfaitement plat. On choisit l'ardoise parce qu'elle peut être usinée en un plan quasi parfait et que, contrairement au bois, elle ne gauchit pas, ne gonfle pas et ne s'affaisse pas avec l'humidité ou la chaleur — les billes roulent donc droit pendant des décennies. Les tables de tournoi du monde entier ont un lit d'ardoise ; les tables bon marché qui n'en ont pas ne roulent jamais tout à fait juste.",
+          "ja": "プロ仕様のプール台やスヌーカー台の布の下には、完全に平らに削り出されたスレートの台座がある。スレートが選ばれるのは、ほぼ完璧な平面に加工でき、木材と違って湿気や熱で反ったり膨らんだり垂れたりしないからだ。だから球は何十年もまっすぐ転がり続ける。世界中の大会用テーブルはスレート台座で、それを使わない安価な台は、どうも転がりがしっくりこない。",
+          "pt-BR": "Sob o pano de uma mesa profissional de bilhar ou sinuca há uma base de ardósia, retificada até ficar perfeitamente plana. A ardósia é escolhida porque pode ser usinada até um plano quase perfeito e, ao contrário da madeira, não empena, incha nem cede com umidade ou calor — então as bolas seguem rolando retas por décadas. Mesas de torneio no mundo todo têm base de ardósia; as mais baratas que não têm nunca jogam direito."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts155/03_slate_billiard_table_bed.webp",
+        "image_status": "rendered",
+        "seed": 1341,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc155-s04",
+        "story_type": "fact",
+        "caption": {
+          "en": "One Welsh pit roofed half the world",
+          "es": "Una cantera galesa techó medio mundo",
+          "fr": "Une seule mine galloise a couvert la moitié du monde",
+          "ja": "ウェールズの一つの採石場が世界の半分を屋根で覆った",
+          "pt-BR": "Uma pedreira galesa cobriu metade do mundo"
+        },
+        "long_press": {
+          "en": "Through the 1800s, Welsh slate covered roofs from the Americas to Australia. The Penrhyn quarry in north Wales grew into the largest slate quarry on Earth, employing around 3,000 men and cutting on the order of 100,000 tonnes a year. Whole towns were built around splitting rock by hand, and the terraced quarry landscape they left behind is now a World Heritage Site.",
+          "es": "A lo largo del siglo XIX, la pizarra galesa cubrió tejados desde América hasta Australia. La cantera de Penrhyn, en el norte de Gales, llegó a ser la mayor cantera de pizarra del mundo, con unos 3.000 hombres empleados y una producción del orden de 100.000 toneladas al año. Pueblos enteros surgieron en torno a partir la roca a mano, y el paisaje aterrazado de canteras que dejaron es hoy Patrimonio de la Humanidad.",
+          "fr": "Tout au long du XIXe siècle, l'ardoise galloise a couvert des toits depuis les Amériques jusqu'à l'Australie. La carrière de Penrhyn, dans le nord du pays de Galles, est devenue la plus grande carrière d'ardoise du monde, employant environ 3 000 hommes et extrayant de l'ordre de 100 000 tonnes par an. Des villes entières se sont bâties autour du fendage de la roche à la main, et le paysage en terrasses qu'elles ont laissé est aujourd'hui inscrit au patrimoine mondial.",
+          "ja": "1800年代を通じて、ウェールズ産スレートはアメリカ大陸からオーストラリアまで屋根を覆った。北ウェールズのペンリン採石場は地球最大のスレート採石場へと成長し、約3,000人を雇い、年に10万トン規模を切り出した。手作業で岩を割ることを中心に町がまるごと築かれ、彼らが残した段々状の採石場景観は、今では世界遺産になっている。",
+          "pt-BR": "Ao longo do século XIX, a ardósia galesa cobriu telhados das Américas à Austrália. A pedreira de Penrhyn, no norte de Gales, tornou-se a maior pedreira de ardósia da Terra, empregando cerca de 3.000 homens e extraindo na ordem de 100.000 toneladas por ano. Cidades inteiras foram erguidas em torno de partir a rocha à mão, e a paisagem de pedreiras em terraços que deixaram é hoje Patrimônio Mundial."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts155/04_slate_welsh_penrhyn_quarry.webp",
+        "image_status": "rendered",
+        "seed": 1342,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc155-s05",
+        "story_type": "fact",
+        "caption": {
+          "en": "No machine splits it as well as a hand can",
+          "es": "Ninguna máquina la parte tan bien como una mano",
+          "fr": "Aucune machine ne la fend aussi bien qu'une main",
+          "ja": "人の手ほど上手にこれを割れる機械はない",
+          "pt-BR": "Nenhuma máquina a parte tão bem quanto uma mão"
+        },
+        "long_press": {
+          "en": "Turning a block into roofing slate is still largely handwork. A splitter rests the slab on a knee, sets a wide chisel along the grain, and taps once — and the stone peels into two smooth, nearly identical sheets, again and again, down to a few millimetres thick. The feel for exactly where the rock will part is a craft that takes years to learn and resists machinery.",
+          "es": "Convertir un bloque en pizarra para tejados sigue siendo, en gran medida, trabajo manual. El partidor apoya la losa en la rodilla, coloca un cincel ancho siguiendo la veta y golpea una vez, y la piedra se separa en dos láminas lisas casi idénticas, una y otra vez, hasta dejarlas de unos pocos milímetros de grosor. El tacto para saber exactamente por dónde se partirá la roca es un oficio que cuesta años aprender y que se resiste a las máquinas.",
+          "fr": "Transformer un bloc en ardoise de couverture reste en grande partie un travail manuel. Le fendeur pose la dalle sur son genou, place un large ciseau dans le fil et frappe une fois — la pierre se détache en deux feuilles lisses, presque identiques, encore et encore, jusqu'à quelques millimètres d'épaisseur. Le sens de l'endroit exact où la roche va se séparer est un savoir-faire qui demande des années et résiste à la machine.",
+          "ja": "ブロックを屋根用スレートに変える作業は、今もほとんどが手仕事だ。割り工は石板を膝にのせ、幅広のたがねを筋目に沿わせ、一度たたく——すると石は二枚の滑らかでほぼ同じ薄板にはがれ、それを何度も繰り返して厚さ数ミリにまでする。岩がどこで割れるかを正確に感じ取る勘は、習得に何年もかかり、機械では真似できない職人技だ。",
+          "pt-BR": "Transformar um bloco em ardósia para telhado ainda é, em grande parte, trabalho manual. O fendedor apoia a placa no joelho, encosta um formão largo no veio e dá uma única batida — e a pedra se desprende em duas folhas lisas, quase idênticas, repetidas vezes, até alguns milímetros de espessura. A sensibilidade para saber exatamente onde a rocha vai se partir é um ofício que leva anos para aprender e resiste às máquinas."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts155/05_slate_split_by_hand.webp",
+        "image_status": "rendered",
+        "seed": 1343,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc155-s06",
+        "story_type": "fact",
+        "caption": {
+          "en": "Squashed fossils show how hard mountains pressed",
+          "es": "Los fósiles aplastados revelan cuánto apretaron las montañas",
+          "fr": "Des fossiles écrasés révèlent la force de la poussée des montagnes",
+          "ja": "押しつぶされた化石が、山がどれだけ強く押したかを示す",
+          "pt-BR": "Fósseis achatados mostram a força com que as montanhas pressionaram"
+        },
+        "long_press": {
+          "en": "When mud turned to slate under tectonic pressure, any fossils trapped inside were stretched and sheared along with the rock. Because geologists know the true shape of creatures like trilobites and graptolites, the distortion becomes a ruler: measuring how badly a fossil is squashed reveals the strain the stone endured — in some slates the rock was shortened by 50 to 70 percent.",
+          "es": "Cuando el barro se transformó en pizarra bajo la presión tectónica, los fósiles atrapados en su interior se estiraron y cizallaron junto con la roca. Como los geólogos conocen la forma real de criaturas como los trilobites y los graptolites, la deformación se convierte en una regla: medir cuánto se ha aplastado un fósil revela la deformación que soportó la piedra; en algunas pizarras la roca se acortó entre un 50 y un 70 por ciento.",
+          "fr": "Quand la boue s'est transformée en ardoise sous la pression tectonique, les fossiles piégés à l'intérieur ont été étirés et cisaillés en même temps que la roche. Comme les géologues connaissent la vraie forme de créatures comme les trilobites et les graptolites, la déformation devient une règle : mesurer à quel point un fossile est écrasé révèle la contrainte subie par la pierre — dans certaines ardoises, la roche a été raccourcie de 50 à 70 pour cent.",
+          "ja": "泥がプレートの圧力でスレートに変わるとき、内部に閉じ込められた化石も岩とともに引き伸ばされ、ずり変形した。地質学者は三葉虫や筆石といった生き物の本来の形を知っているので、そのゆがみがものさしになる——化石がどれだけつぶれているかを測れば、石が受けた歪みがわかる。あるスレートでは、岩は50〜70パーセントも縮んでいた。",
+          "pt-BR": "Quando a lama virou ardósia sob a pressão tectônica, os fósseis presos dentro dela foram esticados e cisalhados junto com a rocha. Como os geólogos conhecem a forma real de criaturas como trilobitas e graptólitos, a distorção vira uma régua: medir o quanto um fóssil está achatado revela a deformação que a pedra sofreu — em algumas ardósias a rocha foi encurtada em 50 a 70 por cento."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts155/06_slate_deformed_fossil_strain.webp",
+        "image_status": "rendered",
+        "seed": 1344,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc155-s07",
+        "story_type": "fact",
+        "caption": {
+          "en": "Children once wrote on stone, then wiped it clean",
+          "es": "Antes los niños escribían en piedra y luego la borraban",
+          "fr": "Autrefois, les enfants écrivaient sur la pierre, puis l'effaçaient",
+          "ja": "かつて子どもたちは石に書き、それを拭き消した",
+          "pt-BR": "Antigamente as crianças escreviam na pedra e depois a apagavam"
+        },
+        "long_press": {
+          "en": "Before cheap paper, nearly every schoolchild wrote on a small framed sheet of slate, using a pencil cut from softer slate or soapstone. The marks wiped away with a cloth, so the same surface served all day, every day — far cheaper than paper, which stayed costly well into the 20th century. Whole generations learned their letters and sums on a stone tablet they slowly wore smooth.",
+          "es": "Antes de que el papel fuera barato, casi todos los escolares escribían en una pequeña tablilla de pizarra con marco, usando un pizarrín cortado de pizarra más blanda o de esteatita. Las marcas se borraban con un paño, así que la misma superficie servía todo el día, cada día, mucho más barata que el papel, que siguió siendo caro hasta bien entrado el siglo XX. Generaciones enteras aprendieron las letras y las cuentas en una tablilla de piedra que poco a poco dejaban lisa de tanto uso.",
+          "fr": "Avant le papier bon marché, presque chaque écolier écrivait sur une petite ardoise encadrée, à l'aide d'un crayon taillé dans une ardoise plus tendre ou de la stéatite. Les traces s'effaçaient d'un coup de chiffon, si bien que la même surface servait toute la journée, tous les jours — bien moins cher que le papier, qui resta coûteux jusqu'au XXe siècle bien avancé. Des générations entières ont appris leurs lettres et leurs calculs sur une tablette de pierre qu'elles polissaient peu à peu à l'usage.",
+          "ja": "紙が安くなる前は、ほとんどの学童が枠付きの小さなスレート板に書いた。筆記具は、より軟らかいスレートや凍石を削ったペンシルだ。跡は布で拭き取れたので、同じ面を一日じゅう、毎日使えた——20世紀に入ってもなお高価だった紙よりずっと安い。幾世代もが、使ううちに少しずつなめらかになっていく石の板で、文字や計算を学んだ。",
+          "pt-BR": "Antes do papel barato, quase toda criança em idade escolar escrevia numa pequena lousa de ardósia com moldura, usando um lápis cortado de ardósia mais macia ou de pedra-sabão. As marcas saíam com um pano, então a mesma superfície servia o dia todo, todos os dias — muito mais barata que o papel, que continuou caro até bem dentro do século XX. Gerações inteiras aprenderam as letras e as contas numa tábua de pedra que, aos poucos, iam deixando lisa."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts155/07_slate_school_writing_tablet.webp",
+        "image_status": "rendered",
+        "seed": 1345,
+        "text_status": "draft",
+        "actions": []
+      },
+      {
+        "id": "dc155-s08",
+        "story_type": "fact",
+        "caption": {
+          "en": "It once held the wiring of electric cities",
+          "es": "Antes sostenía el cableado de las ciudades eléctricas",
+          "fr": "Elle a jadis porté le câblage des villes électriques",
+          "ja": "かつて電化された都市の配線を支えていた",
+          "pt-BR": "Já sustentou a fiação das cidades elétricas"
+        },
+        "long_press": {
+          "en": "When cities first wired up for electricity, the panels behind the switches and fuses were often cut from slate. The stone is a natural electrical insulator and will not burn, and it was both tougher and cheaper than the marble it replaced — so early-1900s switchboards and motor controls were built on slabs of polished slate, until steel cabinets finally took over decades later.",
+          "es": "Cuando las ciudades se cablearon por primera vez para la electricidad, los paneles detrás de los interruptores y los fusibles solían cortarse de pizarra. La piedra es un aislante eléctrico natural y no arde, y era a la vez más resistente y más barata que el mármol al que sustituyó, así que los cuadros eléctricos y los mandos de motores de comienzos del siglo XX se montaban sobre losas de pizarra pulida, hasta que décadas después los armarios de acero acabaron imponiéndose.",
+          "fr": "Quand les villes se sont électrifiées pour la première fois, les panneaux derrière les interrupteurs et les fusibles étaient souvent taillés dans l'ardoise. La pierre est un isolant électrique naturel et ne brûle pas, et elle était à la fois plus solide et moins chère que le marbre qu'elle remplaçait — les tableaux électriques et les commandes de moteurs du début des années 1900 étaient donc montés sur des dalles d'ardoise polie, jusqu'à ce que les armoires en acier finissent par s'imposer des décennies plus tard.",
+          "ja": "都市が初めて電気の配線を敷いたころ、スイッチやヒューズの背後にある盤は、しばしばスレートから切り出された。この石は天然の電気絶縁体で燃えず、それまで使われていた大理石より丈夫で安かった。だから1900年代初頭の配電盤やモーター制御盤は、磨かれたスレートの板の上に作られた——数十年後、ついに鋼鉄製のキャビネットに取って代わられるまで。",
+          "pt-BR": "Quando as cidades fizeram sua primeira fiação elétrica, os painéis atrás das chaves e dos fusíveis muitas vezes eram cortados de ardósia. A pedra é um isolante elétrico natural e não queima, e era ao mesmo tempo mais resistente e mais barata que o mármore que substituiu — então os quadros de distribuição e os controles de motor do início do século XX eram montados sobre placas de ardósia polida, até que, décadas depois, os armários de aço finalmente assumiram."
+        },
+        "image": "https://cdn.mentria.ai/deepcuts155/08_slate_electrical_switchboard.webp",
+        "image_status": "rendered",
+        "seed": 1346,
         "text_status": "draft",
         "actions": []
       }

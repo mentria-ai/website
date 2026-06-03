@@ -632,6 +632,18 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
 
   document.getElementById('btn-start').onclick = () => reset();
 
+  window.addEventListener('mentria:gamepad:button', e => {
+    if (!e.detail.pressed) return;
+    const n = e.detail.name;
+    if (n === 'a' || n === 'b' || n === 'x' || n === 'y') {
+      if (!State.running && !State.over) reset();
+      else if (State.over) reset();
+      else flap();
+    } else if (n === 'start') {
+      reset();
+    }
+  });
+
   function loop() {
     update();
     render();

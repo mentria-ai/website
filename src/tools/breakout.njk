@@ -563,6 +563,32 @@ canvas {
 
   document.getElementById('btn-start').addEventListener('click', startGame);
 
+  window.addEventListener('mentria:gamepad:button', e => {
+    if (!e.detail.pressed) return;
+    const n = e.detail.name;
+    if (n === 'a') {
+      if (!State.running) startGame();
+      else launchBall();
+    } else if (n === 'start') {
+      if (State.running) togglePause();
+    }
+  });
+  function pollPaddle() {
+    requestAnimationFrame(pollPaddle);
+    if (!window.MentriaGamepad || !window.MentriaGamepad.isConnected()) return;
+    const pads = window.MentriaGamepad.getPads();
+    let x = 0;
+    for (let i = 0; i < pads.length; i++) {
+      const p = pads[i];
+      if (p.buttons[14] && p.buttons[14].pressed) x = -1;
+      else if (p.buttons[15] && p.buttons[15].pressed) x = 1;
+      else if (p.axes.length >= 1 && Math.abs(p.axes[0]) > 0.2) x = p.axes[0];
+    }
+    keys.left = x < -0.2;
+    keys.right = x > 0.2;
+  }
+  requestAnimationFrame(pollPaddle);
+
   function togglePause() {
     State.paused = !State.paused;
     showOverlay(State.paused ? 'paused' : null);

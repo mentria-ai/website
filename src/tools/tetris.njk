@@ -649,6 +649,43 @@ canvas#game {
 
   document.getElementById('btn-start').addEventListener('click', start);
 
+  window.addEventListener('mentria:gamepad:direction', e => {
+    const d = e.detail.direction;
+    if (State.over) { if (!e.detail.repeat) start(); return; }
+    if (!State.running) { if (!e.detail.repeat) start(); return; }
+    if (State.paused) return;
+    if (d === 'left') move(-1);
+    else if (d === 'right') move(1);
+  });
+  window.addEventListener('mentria:gamepad:button', e => {
+    if (!e.detail.pressed) return;
+    const n = e.detail.name;
+    if (n === 'start') {
+      if (State.running) State.paused = !State.paused;
+      else start();
+      return;
+    }
+    if (State.over) { start(); return; }
+    if (!State.running || State.paused) return;
+    if (n === 'a') rotateCur();
+    else if (n === 'b') { const back = rotate(rotate(rotate(State.cur.shape))); const kicks = [0, -1, 1, -2, 2]; for (const k of kicks) { if (!collides(back, State.cur.x + k, State.cur.y)) { State.cur.shape = back; State.cur.x += k; break; } } }
+    else if (n === 'x') holdPiece();
+    else if (n === 'y') hardDrop();
+  });
+  function pollSoftDrop() {
+    requestAnimationFrame(pollSoftDrop);
+    if (!window.MentriaGamepad || !window.MentriaGamepad.isConnected()) { State.softDrop = State.softDrop && false; return; }
+    const pads = window.MentriaGamepad.getPads();
+    let down = false;
+    for (let i = 0; i < pads.length; i++) {
+      const p = pads[i];
+      if (p.buttons[13] && p.buttons[13].pressed) { down = true; break; }
+      if (p.axes.length >= 2 && p.axes[1] > 0.5) { down = true; break; }
+    }
+    State.softDrop = down;
+  }
+  requestAnimationFrame(pollSoftDrop);
+
   // ---------- Touch controls (mobile) ----------
   const tcRoot = document.getElementById('touch-controls');
   const repeatTimers = {};

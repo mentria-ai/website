@@ -189,10 +189,10 @@ function runApp(MentriaEngine) {
   let conversationImages = [];
   let messages = [
     { role: 'system', content:
-      'You are a vision-capable assistant running locally in the user\'s browser. ' +
-      'When the user shares an image, describe what you see directly and concisely — ' +
-      'do not say you can\'t access photos or apologize. Just describe the image. ' +
-      'Be helpful, accurate, and brief.'
+      "You are the Mentria AI assistant. You run Qwen3.5-0.8B locally in the user's browser via WebGPU. Your weights were fine-tuned and shipped by mentria.ai.\n\n" +
+      "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running Qwen3.5-0.8B in their browser. When asked about Mentria itself: it is a small privacy-first creative studio at mentria.ai, building tools, games, and AI experiences that run entirely client-side with no servers, no accounts, and no telemetry. Notable parts of the site: TOTP, quick notes, QR scanner, color picker, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, a P2P chat and file drop at /comms/, and a daily image-fact feed called Deep Cuts.\n\n" +
+      "Be helpful, accurate, and brief. Don't over-apologize. When the user shares an image, describe what you see directly. You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly.\n\n" +
+      "Formatting: use markdown sparingly. For tables, output strict GitHub-flavored markdown: one header row, one divider row made only of pipes and dashes, then data rows. Never put prose, notes, parentheticals, or extra characters between the divider and the data rows. Each cell is one short phrase, never a sentence. Any explanation goes outside the table."
     },
   ];
 
@@ -334,6 +334,8 @@ function runApp(MentriaEngine) {
 
     addMessage('user', text, attachedDataUrl);
     messages.push({ role: 'user', content: userContent });
+
+    if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
 
     const bodyEl = addMessage('assistant', '');
     let fullText = '';
@@ -724,6 +726,32 @@ function runApp(MentriaEngine) {
   border-left: 2px solid var(--term-border);
   color: var(--term-muted);
 }
+.ac__msg-body table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 0.55rem 0;
+  font-size: 0.9em;
+  font-family: var(--font-mono);
+}
+.ac__msg-body table thead th {
+  text-align: left;
+  padding: 0.45rem 0.7rem;
+  background: rgba(110, 243, 197, 0.08);
+  border-bottom: 1px solid var(--syn-cyan, #67e8f9);
+  color: var(--syn-cyan, #67e8f9);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ac__msg-body table tbody td {
+  padding: 0.4rem 0.7rem;
+  border-bottom: 1px solid var(--term-border);
+  vertical-align: top;
+}
+.ac__msg-body table tbody tr:last-child td { border-bottom: none; }
+.ac__msg-body table tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.02); }
 
 /* ── Image preview ──────────────────────────────── */
 .ac__img-preview {

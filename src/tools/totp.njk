@@ -74,7 +74,7 @@ eleventyComputed:
       </div>
       <label class="totp-field">
         <span>{{ "tool.totp.paste_uri_label" | t }}</span>
-        <input type="text" id="totp-uri" autocomplete="off" spellcheck="false" placeholder="otpauth://totp/Example:user@example.com?secret=ABCD1234&issuer=Example">
+        <input type="text" id="totp-uri" autocomplete="off" spellcheck="false" inputmode="text" lang="en" dir="ltr" autocapitalize="off" placeholder="otpauth://totp/Example:user@example.com?secret=ABCD1234&issuer=Example">
       </label>
       <p class="totp-modal__or">{{ "tool.totp.or_manual" | t }}</p>
       <label class="totp-field">
@@ -87,7 +87,7 @@ eleventyComputed:
       </label>
       <label class="totp-field">
         <span>{{ "tool.totp.secret_label" | t }}</span>
-        <input type="text" id="totp-secret" autocomplete="off" spellcheck="false">
+        <input type="text" id="totp-secret" autocomplete="off" spellcheck="false" inputmode="latin" lang="en" dir="ltr" autocapitalize="characters">
       </label>
       <div class="totp-modal__actions">
         <button type="button" class="totp-btn totp-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>

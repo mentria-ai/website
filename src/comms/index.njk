@@ -18,7 +18,7 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
   <div class="comms__bar">
     <div class="comms__room">
       <label class="comms__lbl" for="comms-room">room</label>
-      <input class="comms__input" id="comms-room" type="text" autocomplete="off" spellcheck="false" placeholder="lobby">
+      <input class="comms__input" id="comms-room" type="text" autocomplete="off" spellcheck="false" placeholder="!ephemeral">
       <button class="comms__btn" id="comms-join" type="button">join</button>
     </div>
     <div class="comms__meta">
@@ -173,7 +173,8 @@ const b64urlDecode = (str) => {
 };
 
 const parseHash = (hash) => {
-  const raw = (hash || '#lobby').slice(1).trim() || 'lobby';
+  const raw = (hash || '').slice(1).trim();
+  if (!raw) return { room: null, b64Key: null };
   const colonIdx = raw.indexOf(':');
   if (colonIdx === -1) return { room: raw, b64Key: null };
   return { room: raw.slice(0, colonIdx), b64Key: raw.slice(colonIdx + 1) || null };
@@ -552,7 +553,7 @@ const joinNew = async (roomName, b64Key = null) => {
 };
 
 els.join.addEventListener('click', () => {
-  const name = (els.room.value || 'lobby').trim().slice(0, 64);
+  const name = (els.room.value || (EPHEMERAL_PREFIX + randomRoomSlug())).trim().slice(0, 64);
   const { b64Key } = parseHash(window.location.hash);
   joinNew(name, b64Key);
 });
@@ -560,7 +561,7 @@ els.join.addEventListener('click', () => {
 els.genkey.addEventListener('click', async () => {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   const key = b64urlEncode(bytes);
-  const name = (els.room.value || 'lobby').trim().slice(0, 64);
+  const name = (els.room.value || (EPHEMERAL_PREFIX + randomRoomSlug())).trim().slice(0, 64);
   await joinNew(name, key);
   try {
     await navigator.clipboard.writeText(window.location.href);
@@ -649,10 +650,31 @@ els.mute.addEventListener('click', () => {
 });
 if (muted) { els.mute.textContent = 'sound: off'; els.mute.setAttribute('aria-pressed', 'true'); }
 
-const initial = parseHash(window.location.hash);
-els.room.value = initial.room;
-refreshShareUrl(initial.room, initial.b64Key);
-window.addEventListener('load', () => joinNew(initial.room, initial.b64Key));
+function randomRoomSlug() {
+  const bytes = crypto.getRandomValues(new Uint8Array(5));
+  const alpha = 'abcdefghijklmnopqrstuvwxyz234567';
+  let bits = 0, value = 0, out = '';
+  for (let i = 0; i < bytes.length; i++) {
+    value = (value << 8) | bytes[i]; bits += 8;
+    while (bits >= 5) { out += alpha[(value >>> (bits - 5)) & 0x1f]; bits -= 5; }
+  }
+  return out;
+}
+
+let initialRoom, initialKey;
+const hasHash = window.location.hash && window.location.hash !== '#';
+if (hasHash) {
+  const parsed = parseHash(window.location.hash);
+  initialRoom = parsed.room;
+  initialKey = parsed.b64Key;
+} else {
+  initialRoom = EPHEMERAL_PREFIX + randomRoomSlug();
+  initialKey = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
+  window.history.replaceState(null, '', formatHash(initialRoom, initialKey));
+}
+els.room.value = initialRoom;
+refreshShareUrl(initialRoom, initialKey);
+window.addEventListener('load', () => joinNew(initialRoom, initialKey));
 window.addEventListener('hashchange', () => {
   const next = parseHash(window.location.hash);
   const sameRoom = next.room === (els.room.value || '').trim();

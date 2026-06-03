@@ -257,16 +257,20 @@ const joinWithCode = async (codeInput) => {
   return state.code;
 };
 
+const WEEK_MS = 7 * 24 * 3600 * 1000;
+const currentBucket = () => String(Math.floor(Date.now() / WEEK_MS));
+
 const deriveFromIdentity = async (secretBytes) => {
   if (!(secretBytes instanceof Uint8Array) || secretBytes.length < 16) throw new Error('bad identity');
+  const bucket = currentBucket();
   const baseKey = await crypto.subtle.importKey('raw', secretBytes, 'HKDF', false, ['deriveBits', 'deriveKey']);
   const roomBits = await crypto.subtle.deriveBits(
-    { name: 'HKDF', hash: 'SHA-256', salt: new TextEncoder().encode('mentria-identity-room-v1'), info: new TextEncoder().encode('room-id') },
+    { name: 'HKDF', hash: 'SHA-256', salt: new TextEncoder().encode('mentria-identity-room-v1'), info: new TextEncoder().encode('room-id|w' + bucket) },
     baseKey, 80
   );
   const roomId = b32Encode(new Uint8Array(roomBits)).slice(0, ROOM_ID_LEN);
   const key = await crypto.subtle.deriveKey(
-    { name: 'HKDF', hash: 'SHA-256', salt: new TextEncoder().encode('mentria-identity-key-v1'), info: new TextEncoder().encode('aes-gcm-256') },
+    { name: 'HKDF', hash: 'SHA-256', salt: new TextEncoder().encode('mentria-identity-key-v1'), info: new TextEncoder().encode('aes-gcm-256|w' + bucket) },
     baseKey,
     { name: 'AES-GCM', length: 256 },
     false,

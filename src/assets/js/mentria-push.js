@@ -71,11 +71,13 @@
     var scheduleId = entry ? entry.scheduleId : newId();
     entry = { spec: spec, scheduleId: scheduleId, posted: entry ? entry.posted : false };
     armed.set(spec.id, entry);
-    await global.MentriaPushDB.putPending({
-      scheduleId: scheduleId, callerId: spec.id, title: spec.title, body: spec.body || '',
-      url: spec.url || '/', tag: spec.tag || scheduleId, icon: spec.icon || null, actions: spec.actions || null
-    });
-    if (document.hidden && spec.fireAt > Date.now() + 10000) { try { await postSchedule(entry); } catch (_) {} }
+    try {
+      await global.MentriaPushDB.putPending({
+        scheduleId: scheduleId, callerId: spec.id, title: spec.title, body: spec.body || '',
+        url: spec.url || '/', tag: spec.tag || scheduleId, icon: spec.icon || null, actions: spec.actions || null
+      });
+      if (document.hidden && spec.fireAt > Date.now() + 10000) await postSchedule(entry);
+    } catch (_) {}
     return true;
   }
 
@@ -83,8 +85,10 @@
     var entry = armed.get(callerId);
     if (entry) {
       armed.delete(callerId);
-      await global.MentriaPushDB.deletePending(entry.scheduleId);
-      if (entry.posted) await deleteSchedule(entry.scheduleId);
+      try {
+        await global.MentriaPushDB.deletePending(entry.scheduleId);
+        if (entry.posted) await deleteSchedule(entry.scheduleId);
+      } catch (_) {}
       return;
     }
     try {
@@ -105,7 +109,7 @@
   }
   function onVisible() {
     armed.forEach(function (entry) {
-      if (entry.posted) { entry.posted = false; deleteSchedule(entry.scheduleId); }
+      if (entry.posted) { deleteSchedule(entry.scheduleId).then(function () { entry.posted = false; }); }
     });
   }
   if (supported()) {

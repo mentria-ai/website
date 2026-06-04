@@ -628,6 +628,7 @@ eleventyComputed:
     if (!state) return;
     stopAlarmFor(state);
     if (state.countdown) clearInterval(state.countdown);
+    if (window.MentriaPush) MentriaPush.cancel('ct-' + state.id);
     widgets.delete(id);
     const el = grid.querySelector(`[data-widget-id="${id}"]`);
     if (el) el.remove();

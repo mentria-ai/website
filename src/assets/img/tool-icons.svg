@@ -377,6 +377,21 @@
    <path d="M20 4h8l-4 7Z" fill="url(#pkdecisionwheel)"></path>
    <path d="M21 4.6h4.5l-2.2 3.8Z" fill="#fff" opacity=".3"></path>
  </g></symbol>
+<symbol id="tool-chess" viewBox="0 0 48 48"><defs>
+<linearGradient id="cychess" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="amchess" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<radialGradient id="dkchess" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#2a2438"></stop><stop offset="1" stop-color="#100e14"></stop></radialGradient>
+<linearGradient id="glosschess" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".4"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<filter id="shchess" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shchess)">
+   <rect x="6" y="6" width="36" height="36" rx="7" fill="url(#dkchess)"></rect>
+   <g fill="url(#cychess)" opacity=".22"><rect x="6" y="6" width="9" height="9"></rect><rect x="24" y="6" width="9" height="9"></rect><rect x="15" y="15" width="9" height="9"></rect><rect x="33" y="15" width="9" height="9"></rect><rect x="6" y="24" width="9" height="9"></rect><rect x="24" y="24" width="9" height="9"></rect><rect x="15" y="33" width="9" height="9"></rect><rect x="33" y="33" width="9" height="9"></rect></g>
+   <rect x="6" y="6" width="36" height="36" rx="7" fill="none" stroke="url(#cychess)" stroke-width="2.2"></rect>
+   <path d="M19 34h11l-0.6-3H19.6Z" fill="url(#amchess)"></path>
+   <path d="M20 31c-1-4 1-6 1-9 0-2-2-2-2-4 0-2 2-3 4-3 4 0 7 3 7 9 0 3 0 5 0.6 7Z" fill="url(#amchess)"></path>
+   <circle cx="22.5" cy="16.5" r="1.1" fill="#0f0d16"></circle>
+   <rect x="6" y="6" width="36" height="17" rx="7" fill="url(#glosschess)" opacity=".4"></rect>
+ </g></symbol>
 <symbol id="tool-ludo" viewBox="0 0 48 48"><defs>
 <linearGradient id="cyludo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
 <linearGradient id="amludo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>

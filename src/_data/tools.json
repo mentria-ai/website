@@ -145,5 +145,12 @@
     "summary": "The cross-and-circle race game on canvas. Roll, capture, race four tokens home. 2–4 players vs built-in bots or pass-and-play. Plays offline.",
     "category": "Game",
     "group": "Games"
+  },
+  {
+    "slug": "chess",
+    "title": "Chess",
+    "summary": "Full-rules chess with a local alpha-beta engine (four strengths), hot-seat, and encrypted online play via share-code. Eval bar, hints, move history. Plays offline.",
+    "category": "Game",
+    "group": "Games"
   }
 ]

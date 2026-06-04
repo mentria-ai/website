@@ -1,0 +1,303 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/chess/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.chess.title' | t }}"
+  description: "{{ 'tools.chess.lede' | t }}"
+---
+<div class="game-page game-page--wide">
+
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">chess</span></p>
+  <h1>{{ "tools.chess.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
+  <p>{{ "tools.chess.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "chess.js" %}
+{% include "terminal-frame-open.njk" %}
+
+<div class="chess-app">
+  <div class="layout">
+    <div class="left-col">
+      <div class="panel">
+        <div class="panel-h">{{ "tool.chess.engine" | t }}</div>
+        <div class="panel-body">
+          <div class="eng-wrap">
+            <div class="evalbar">
+              <div class="white" id="evalWhite" style="height:50%"></div>
+              <div class="label" id="evalLabel">0.00</div>
+            </div>
+            <div class="eng-stats">
+              <div class="eng-row"><span>{{ "tool.chess.depth" | t }}</span><span id="stat-depth">—</span></div>
+              <div class="eng-row"><span>{{ "tool.chess.nodes" | t }}</span><span id="stat-nodes">—</span></div>
+              <div class="eng-row"><span>{{ "tool.chess.nps" | t }}</span><span id="stat-nps">—</span></div>
+              <div class="eng-row"><span>{{ "tool.chess.time" | t }}</span><span id="stat-time">—</span></div>
+              <div class="skill-group">
+                <div class="skill-label">{{ "tool.chess.skill" | t }}</div>
+                <div class="skill-pills" id="skill-pills">
+                  <button data-skill="0">{{ "tool.chess.skill_beginner" | t }}</button>
+                  <button data-skill="1" class="active">{{ "tool.chess.skill_casual" | t }}</button>
+                  <button data-skill="2">{{ "tool.chess.skill_strong" | t }}</button>
+                  <button data-skill="3">{{ "tool.chess.skill_brutal" | t }}</button>
+                </div>
+              </div>
+              <button class="btn" id="btn-hint">{{ "tool.chess.hint" | t }}</button>
+            </div>
+          </div>
+          <div class="lines" id="cand-lines" style="margin-top:14px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="center-col">
+      <div class="board-wrap">
+        <div class="captured black" id="cap-top"></div>
+        <div class="board-shell" id="board-shell">
+          <div class="coords-ranks" id="coords-ranks"></div>
+          <div class="coords-files" id="coords-files"></div>
+          <div class="board" id="board"></div>
+          <svg class="hint-arrow" id="hint-arrow" viewBox="0 0 8 8" preserveAspectRatio="none" style="display:none"></svg>
+          <div class="promo-popover" id="promo" style="display:none"></div>
+        </div>
+        <div class="captured" id="cap-bot"></div>
+
+        <div class="toolbar">
+          <button class="btn primary" id="btn-newgame">{{ "tool.chess.new_game" | t }}</button>
+          <button class="btn" id="btn-flip">{{ "tool.chess.flip" | t }}</button>
+          <button class="btn" id="btn-undo">{{ "tool.chess.undo" | t }}</button>
+          <button class="btn" id="btn-resign">{{ "tool.chess.resign" | t }}</button>
+          <button class="btn" id="btn-swap" style="display:none">{{ "tool.chess.play_black" | t }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-tabs" id="mobile-tabs">
+      <button data-tab="moves" class="active">{{ "tool.chess.tab_moves" | t }}</button>
+      <button data-tab="engine">{{ "tool.chess.tab_engine" | t }}</button>
+      <button data-tab="connect">{{ "tool.chess.tab_connect" | t }}</button>
+    </div>
+
+    <div class="right-col">
+      <div class="panel" data-tab="moves">
+        <div class="panel-h">{{ "tool.chess.game" | t }}</div>
+        <div class="modes">
+          <button data-mode="hotseat" class="active">{{ "tool.chess.mode_hotseat" | t }}</button>
+          <button data-mode="engine">{{ "tool.chess.mode_engine" | t }}</button>
+          <button data-mode="online">{{ "tool.chess.mode_online" | t }}</button>
+        </div>
+        <div class="moves-table" id="moves-table"></div>
+        <button class="btn scrub-back" id="scrub-back">{{ "tool.chess.back_to_live" | t }}</button>
+      </div>
+
+      <div class="panel" data-tab="connect">
+        <div class="panel-h">{{ "tool.chess.connect" | t }}</div>
+        <div class="conn-section">
+          <div class="conn-status"><span class="dot-led" id="peer-led"></span><span id="peer-status">{{ "tool.chess.peer_offline" | t }}</span></div>
+        </div>
+        <div class="conn-section">
+          <div class="conn-row">
+            <button class="btn" id="btn-host">{{ "tool.chess.create_room" | t }}</button>
+            <button class="btn" id="btn-guest">{{ "tool.chess.join_room" | t }}</button>
+          </div>
+          <div id="host-panel" style="display:none; flex-direction:column; gap:8px;">
+            <div class="conn-hint">{{ "tool.chess.share_code" | t }}</div>
+            <div class="conn-row"><input class="text-input" id="room-code" readonly><button class="btn" id="btn-copy-code">{{ "tool.chess.copy" | t }}</button></div>
+            <div class="conn-hint">{{ "tool.chess.host_note" | t }}</div>
+          </div>
+          <div id="guest-panel" style="display:none; flex-direction:column; gap:8px;">
+            <div class="conn-hint">{{ "tool.chess.enter_code" | t }}</div>
+            <input class="text-input" id="join-code" placeholder="ABCD2345" maxlength="8" autocomplete="off" spellcheck="false" inputmode="latin" lang="en" dir="ltr" autocapitalize="characters">
+            <button class="btn primary" id="btn-join">{{ "tool.chess.join" | t }}</button>
+          </div>
+        </div>
+        <div class="conn-section">
+          <div class="chat-list" id="chat-list"></div>
+          <div class="chat-input-row">
+            <input class="text-input" id="chat-input" placeholder="{{ 'tool.chess.message_ph' | t }}" maxlength="200" />
+            <button class="btn" id="btn-send">{{ "tool.chess.send" | t }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="end-modal">
+    <div class="modal">
+      <div class="eyebrow" id="end-eyebrow">checkmate</div>
+      <h2 id="end-title">White wins</h2>
+      <p id="end-reason">by checkmate</p>
+      <button class="btn primary" id="btn-rematch">{{ "tool.chess.rematch" | t }}</button>
+    </div>
+  </div>
+</div>
+
+{% include "terminal-frame-close.njk" %}
+</div>
+
+<style>
+  .game-page--wide .terminal-frame { max-width: 1180px; }
+  .chess-app { font-size: 13px; }
+  .chess-app .layout { display: grid; grid-template-columns: 230px 1fr 290px; gap: 16px; align-items: start; }
+  @media (max-width: 1100px) { .chess-app .layout { grid-template-columns: 200px 1fr 260px; gap: 12px; } }
+  .chess-app .panel { background: var(--term-bg); border: 1px solid var(--term-border); border-radius: var(--radius-lg); overflow: hidden; }
+  .chess-app .panel-h { padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--term-muted); letter-spacing: 0.16em; text-transform: uppercase; border-bottom: 1px solid var(--term-divider); display: flex; align-items: center; gap: 8px; }
+  .chess-app .panel-h::before { content: "▸"; color: var(--syn-cyan); }
+  .chess-app .panel-body { padding: 14px; }
+
+  .chess-app .eng-wrap { display: flex; gap: 12px; }
+  .chess-app .evalbar { width: 22px; height: 280px; background: #0a0a0a; border: 1px solid var(--term-border); border-radius: 6px; position: relative; overflow: hidden; flex-shrink: 0; }
+  .chess-app .evalbar .white { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, #f3f4f6, #d1d5db); transition: height 200ms ease-out; }
+  .chess-app .evalbar .label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-90deg); font-size: 10px; font-weight: 700; color: var(--term-bg); text-shadow: 0 0 4px rgba(255,255,255,0.5); pointer-events: none; white-space: nowrap; }
+  .chess-app .eng-stats { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+  .chess-app .eng-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--term-muted); }
+  .chess-app .eng-row span:last-child { color: var(--term-fg-strong); font-weight: 600; }
+  .chess-app .skill-group { display: flex; flex-direction: column; gap: 6px; }
+  .chess-app .skill-label { font-size: 10px; color: var(--term-muted); text-transform: uppercase; letter-spacing: 0.12em; }
+  .chess-app .skill-pills { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
+  .chess-app .skill-pills button { padding: 6px 4px; background: transparent; color: var(--term-fg); border: 1px solid var(--term-border); border-radius: 5px; font-size: 10px; cursor: pointer; transition: all 120ms; font-family: var(--font-mono); }
+  .chess-app .skill-pills button:hover { border-color: var(--cyan-30); color: var(--syn-cyan); }
+  .chess-app .skill-pills button.active { background: var(--cyan-8); border-color: var(--syn-cyan); color: var(--syn-cyan); }
+
+  .chess-app .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 12px; background: transparent; color: var(--term-fg); border: 1px solid var(--term-border); border-radius: 6px; font-family: var(--font-mono); font-size: 12px; cursor: pointer; transition: all 120ms; white-space: nowrap; }
+  .chess-app .btn:hover { border-color: var(--cyan-30); color: var(--syn-cyan); box-shadow: var(--glow-cyan); }
+  .chess-app .btn.primary { border-color: var(--syn-cyan); color: var(--syn-cyan); background: var(--cyan-8); }
+  .chess-app .btn.primary::before { content: "$ "; }
+  .chess-app .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .chess-app .lines { display: flex; flex-direction: column; gap: 4px; }
+  .chess-app .line { display: flex; gap: 8px; align-items: baseline; padding: 5px 8px; border: 1px solid var(--term-divider); border-radius: 5px; font-size: 10px; color: var(--term-fg); cursor: pointer; transition: all 120ms; background: transparent; text-align: left; width: 100%; font-family: var(--font-mono); }
+  .chess-app .line:hover { border-color: var(--cyan-30); background: var(--cyan-8); }
+  .chess-app .line .rank { color: var(--term-subtle); font-weight: 700; }
+  .chess-app .line .ev { color: var(--syn-amber); font-weight: 600; min-width: 38px; }
+  .chess-app .line .pv { color: var(--term-fg); flex: 1; overflow: hidden; text-overflow: ellipsis; }
+
+  .chess-app .board-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .chess-app .captured { width: 100%; min-height: 24px; display: flex; align-items: center; gap: 2px; padding: 4px 8px; box-sizing: border-box; color: var(--term-muted); font-size: 18px; flex-wrap: wrap; }
+  .chess-app .captured .adv { margin-left: auto; font-size: 11px; color: var(--syn-amber); font-weight: 600; }
+  .chess-app .captured.black span { color: #2a1018; text-shadow: 0 0 6px rgba(244,114,182,0.5); }
+  .chess-app .board-shell { position: relative; aspect-ratio: 1; width: 100%; max-width: 560px; background: #0a0a0a; border: 1px solid var(--term-border); border-radius: var(--radius-lg); box-shadow: 0 0 60px rgba(34,211,238,0.08); padding: 22px; box-sizing: border-box; }
+  .chess-app .board { width: 100%; height: 100%; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); position: relative; }
+  .chess-app .sq { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none; }
+  .chess-app .sq.light { background: rgba(255,255,255,0.06); }
+  .chess-app .sq.dark { background: rgba(0,0,0,0.35); }
+  .chess-app .sq.sel { background: var(--cyan-15) !important; box-shadow: inset 0 0 0 2px var(--syn-cyan); }
+  .chess-app .sq.last { box-shadow: inset 0 0 0 2px rgba(251,191,36,0.45); }
+  .chess-app .sq.last.sel { box-shadow: inset 0 0 0 2px var(--syn-cyan); }
+  .chess-app .sq.check { background: rgba(244,114,182,0.22) !important; box-shadow: inset 0 0 0 2px var(--syn-pink); }
+  .chess-app .sq.dot::after { content: ""; position: absolute; width: 22%; height: 22%; border-radius: 50%; background: var(--syn-cyan); box-shadow: 0 0 8px rgba(34,211,238,0.5); pointer-events: none; }
+  .chess-app .sq.ring::after { content: ""; position: absolute; inset: 6%; border: 3px solid var(--syn-cyan); border-radius: 50%; box-shadow: 0 0 10px rgba(34,211,238,0.4); pointer-events: none; }
+  .chess-app .pc { font-family: var(--font-mono); font-size: clamp(28px, 6vw, 52px); line-height: 1; pointer-events: none; transition: transform 120ms ease-out; }
+  .chess-app .pc.w { color: #f5f7fb; text-shadow: 0 0 10px rgba(34,211,238,0.5), 0 0 4px rgba(34,211,238,0.6); }
+  .chess-app .pc.b { color: #14060c; text-shadow: 0 0 10px rgba(244,114,182,0.55), 0 0 2px rgba(244,114,182,0.7); -webkit-text-stroke: 0.5px rgba(244,114,182,0.4); }
+  .chess-app .pc.ghost { opacity: 0.5; }
+  .chess-app .coords-files, .chess-app .coords-ranks { position: absolute; color: var(--term-subtle); font-size: 9px; font-weight: 600; letter-spacing: 0.12em; pointer-events: none; text-transform: uppercase; }
+  .chess-app .coords-files { bottom: 4px; left: 22px; right: 22px; display: flex; justify-content: space-around; }
+  .chess-app .coords-ranks { top: 22px; bottom: 22px; left: 4px; display: flex; flex-direction: column; justify-content: space-around; }
+  .chess-app .hint-arrow { position: absolute; inset: 22px; pointer-events: none; z-index: 5; }
+
+  .chess-app .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 10px 14px; border-bottom: 1px solid var(--term-divider); }
+  .chess-app .modes button { background: transparent; color: var(--term-fg); border: 1px solid var(--term-border); border-radius: 5px; padding: 6px 4px; font-size: 10px; cursor: pointer; transition: all 120ms; font-family: var(--font-mono); }
+  .chess-app .modes button.active { background: var(--cyan-8); border-color: var(--syn-cyan); color: var(--syn-cyan); }
+  .chess-app .modes button:hover:not(.active) { border-color: var(--cyan-30); }
+  .chess-app .moves-table { max-height: 300px; overflow-y: auto; font-size: 12px; padding: 4px 0; }
+  .chess-app .moves-table .row { display: grid; grid-template-columns: 26px 1fr 1fr; align-items: center; padding: 3px 14px; }
+  .chess-app .moves-table .row:hover { background: var(--term-bg-raised); }
+  .chess-app .moves-table .row .n { color: var(--term-subtle); font-size: 10px; }
+  .chess-app .moves-table .row .m { color: var(--term-fg); cursor: pointer; padding: 2px 6px; border-radius: 3px; }
+  .chess-app .moves-table .row .m:hover { background: var(--cyan-8); color: var(--syn-cyan); }
+  .chess-app .moves-table .row .m.cur { background: var(--cyan-15); color: var(--syn-cyan); font-weight: 600; }
+  .chess-app .moves-table .empty { padding: 12px 14px; color: var(--term-subtle); font-size: 11px; }
+  .chess-app .scrub-back { display: none; margin: 6px 14px 10px; }
+  .chess-app .scrub-back.show { display: inline-flex; }
+
+  .chess-app .conn-section { padding: 12px 14px; border-bottom: 1px solid var(--term-divider); display: flex; flex-direction: column; gap: 8px; }
+  .chess-app .conn-section:last-child { border-bottom: none; }
+  .chess-app .conn-status { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--term-muted); }
+  .chess-app .conn-hint { font-size: 10px; color: var(--term-muted); }
+  .chess-app .dot-led { width: 7px; height: 7px; border-radius: 50%; background: var(--term-subtle); }
+  .chess-app .dot-led.on { background: var(--syn-green); box-shadow: 0 0 6px rgba(34,197,94,0.6); }
+  .chess-app .dot-led.warn { background: var(--syn-amber); box-shadow: 0 0 6px rgba(251,191,36,0.6); }
+  .chess-app input.text-input { width: 100%; box-sizing: border-box; background: #0a0a0a; border: 1px solid var(--term-border); color: var(--term-fg); font-family: var(--font-mono); font-size: 12px; padding: 8px; border-radius: 6px; letter-spacing: 0.08em; }
+  .chess-app input.text-input:focus { outline: none; border-color: var(--syn-cyan); box-shadow: var(--glow-cyan); }
+  .chess-app .conn-row { display: flex; gap: 6px; }
+  .chess-app .conn-row .btn { flex: 1; padding: 6px 8px; font-size: 11px; }
+  .chess-app .chat-list { height: 110px; overflow-y: auto; background: #0a0a0a; border: 1px solid var(--term-border); border-radius: 6px; padding: 8px; font-size: 11px; display: flex; flex-direction: column; gap: 4px; }
+  .chess-app .chat-list .msg { word-break: break-word; }
+  .chess-app .chat-list .msg .who { color: var(--syn-cyan); font-weight: 600; }
+  .chess-app .chat-list .msg.peer .who { color: var(--syn-pink); }
+  .chess-app .chat-input-row { display: flex; gap: 6px; }
+  .chess-app .chat-input-row input { flex: 1; }
+
+  .chess-app .promo-popover { position: absolute; background: var(--term-bg-raised); border: 1px solid var(--syn-cyan); border-radius: 8px; padding: 6px; display: flex; gap: 4px; z-index: 100; box-shadow: var(--glow-cyan); }
+  .chess-app .promo-popover button { background: transparent; border: 1px solid var(--term-border); border-radius: 5px; width: 40px; height: 40px; font-size: 28px; cursor: pointer; color: #f5f7fb; text-shadow: 0 0 8px rgba(34,211,238,0.5); line-height: 1; padding: 0; }
+  .chess-app .promo-popover.b button { color: #14060c; text-shadow: 0 0 8px rgba(244,114,182,0.55); -webkit-text-stroke: 0.5px rgba(244,114,182,0.4); }
+  .chess-app .promo-popover button:hover { border-color: var(--syn-cyan); background: var(--cyan-8); }
+
+  .chess-app .modal-bg { position: fixed; inset: 0; background: rgba(8,9,12,0.78); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 200; }
+  .chess-app .modal-bg.show { display: flex; }
+  .chess-app .modal { background: var(--term-bg-raised); border: 1px solid var(--syn-pink); border-radius: 12px; padding: 28px 32px; max-width: 360px; box-shadow: 0 0 40px rgba(244,114,182,0.25); text-align: center; }
+  .chess-app .modal .eyebrow { font-size: 10px; letter-spacing: 0.2em; color: var(--syn-pink); text-transform: uppercase; font-weight: 600; }
+  .chess-app .modal h2 { margin: 8px 0 6px; font-size: 22px; color: var(--term-fg-strong); font-weight: 700; }
+  .chess-app .modal p { color: var(--term-muted); font-size: 12px; margin: 0 0 18px; }
+  .chess-app .modal .btn { width: 100%; }
+
+  .chess-app .toolbar { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px; justify-content: center; }
+  .chess-app .toolbar .btn { font-size: 11px; padding: 5px 9px; }
+
+  .chess-app .mobile-tabs { display: none; }
+  @media (max-width: 900px) {
+    .chess-app .layout { display: flex; flex-direction: column; gap: 12px; }
+    .chess-app .left-col, .chess-app .right-col { width: 100%; }
+    .chess-app .right-col { order: 2; } .chess-app .center-col { order: 1; }
+    .chess-app .left-col { order: 3; display: none; }
+    .chess-app .left-col.show-tab { display: block; }
+    .chess-app .right-col .panel { display: none; }
+    .chess-app .right-col .panel.show-tab { display: block; }
+    .chess-app .mobile-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 4px; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 8px; order: 0; }
+    .chess-app .mobile-tabs button { background: transparent; color: var(--term-fg); border: 1px solid transparent; border-radius: 5px; padding: 8px 4px; font-size: 11px; cursor: pointer; font-family: var(--font-mono); }
+    .chess-app .mobile-tabs button.active { background: var(--cyan-8); border-color: var(--syn-cyan); color: var(--syn-cyan); }
+  }
+</style>
+
+<script>
+  window.CHESS_I18N = {
+    win_white: {{ ("tool.chess.win_white" | t) | dump | safe }},
+    win_black: {{ ("tool.chess.win_black" | t) | dump | safe }},
+    draw: {{ ("tool.chess.draw" | t) | dump | safe }},
+    by_checkmate: {{ ("tool.chess.by_checkmate" | t) | dump | safe }},
+    by_stalemate: {{ ("tool.chess.by_stalemate" | t) | dump | safe }},
+    by_resignation: {{ ("tool.chess.by_resignation" | t) | dump | safe }},
+    draw_50move: {{ ("tool.chess.draw_50move" | t) | dump | safe }},
+    draw_insufficient: {{ ("tool.chess.draw_insufficient" | t) | dump | safe }},
+    draw_threefold: {{ ("tool.chess.draw_threefold" | t) | dump | safe }},
+    eyebrow_checkmate: {{ ("tool.chess.eyebrow_checkmate" | t) | dump | safe }},
+    eyebrow_stalemate: {{ ("tool.chess.eyebrow_stalemate" | t) | dump | safe }},
+    eyebrow_draw: {{ ("tool.chess.eyebrow_draw" | t) | dump | safe }},
+    eyebrow_resigned: {{ ("tool.chess.eyebrow_resigned" | t) | dump | safe }},
+    no_moves_yet: {{ ("tool.chess.no_moves_yet" | t) | dump | safe }},
+    confirm_resign: {{ ("tool.chess.confirm_resign" | t) | dump | safe }},
+    confirm_new_color: {{ ("tool.chess.confirm_new_color" | t) | dump | safe }},
+    color_white: {{ ("tool.chess.color_white" | t) | dump | safe }},
+    color_black: {{ ("tool.chess.color_black" | t) | dump | safe }},
+    chat_you: {{ ("tool.chess.chat_you" | t) | dump | safe }},
+    chat_peer: {{ ("tool.chess.chat_peer" | t) | dump | safe }},
+    peer_offline: {{ ("tool.chess.peer_offline" | t) | dump | safe }},
+    peer_waiting: {{ ("tool.chess.peer_waiting" | t) | dump | safe }},
+    peer_connecting: {{ ("tool.chess.peer_connecting" | t) | dump | safe }},
+    peer_connected: {{ ("tool.chess.peer_connected" | t) | dump | safe }},
+    peer_disconnected: {{ ("tool.chess.peer_disconnected" | t) | dump | safe }},
+    peer_error: {{ ("tool.chess.peer_error" | t) | dump | safe }},
+    room_invalid: {{ ("tool.chess.room_invalid" | t) | dump | safe }},
+    copied: {{ ("tool.chess.copy" | t) | dump | safe }},
+    play_black: {{ ("tool.chess.play_black" | t) | dump | safe }},
+    play_white: {{ ("tool.chess.play_white" | t) | dump | safe }}
+  };
+</script>
+<script src="/assets/js/chess-engine.js?v={{ buildHash }}"></script>
+<script src="/assets/js/chess-app.js?v={{ buildHash }}"></script>

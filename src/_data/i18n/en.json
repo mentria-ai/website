@@ -293,6 +293,11 @@
       "title": "Sudoku",
       "lede": "Logic puzzle in terminal dress. Unique-solution generator, four difficulties, pencil marks. Runs locally — no data leaves your device.",
       "tldr": "Classic 9×9 Sudoku rebuilt with a synthwave terminal aesthetic. A backtracking generator guarantees exactly one solution at four difficulties (easy → expert); pencil-mark notes, peer + same-number highlighting, live conflict detection, three mistakes before game over, and up to three hints. Best completion times per difficulty are saved on-device. Keyboard, mouse, and touch all work. No installs, no signup, no analytics — the puzzle generation and solving all run locally in your browser, and it works offline once the page loads."
+    },
+    "ludo": {
+      "title": "Ludo",
+      "lede": "Four tokens home wins. Roll a six to break out, capture on contact, dodge to the safe stars. Play the bots or pass & play.",
+      "tldr": "The classic cross-and-circle race game, rebuilt on HTML5 canvas with a synthwave terminal aesthetic. Roll a six to release a token, move clockwise, land on an opponent to send it home, and rest on the safe stars. A 6, a capture, or reaching the center grants another roll. Play 2–4 players against built-in bots or pass-and-play on one device. No installs, no signup, no analytics — all dice and AI run locally in your browser, and it works offline."
     }
   },
   "game": {
@@ -892,6 +897,42 @@
       "key_notes": "Toggle notes",
       "key_hint": "Hint",
       "key_move": "Move selection"
+    },
+    "ludo": {
+      "mode": "Mode",
+      "players": "Players",
+      "dice": "Dice",
+      "mode_ai": "vs bots",
+      "mode_hotseat": "pass & play",
+      "roll": "roll",
+      "new_game": "new game",
+      "rules": "rules",
+      "p_cyan": "Cyan",
+      "p_amber": "Amber",
+      "p_pink": "Pink",
+      "p_green": "Green",
+      "tag_you": "you",
+      "tag_human": "human",
+      "tag_bot": "bot",
+      "st_you_roll": "your turn — roll the die",
+      "st_you_move": "your turn — move a token",
+      "st_name_roll": "{name}'s turn — roll the die",
+      "st_name_move": "{name}'s turn — move a token",
+      "st_bot_roll": "{name} (bot) — rolling",
+      "st_bot_move": "{name} (bot) — moving",
+      "no_moves_you": "no moves — passing",
+      "no_moves_name": "{name} — no moves",
+      "triple_six": "three sixes — turn forfeited",
+      "capture": "{p} captures {o}!",
+      "win_eyebrow": "> ALL TOKENS HOME",
+      "win_title": "{name} wins",
+      "won_you": "you took it",
+      "won_human": "human player took it",
+      "won_bot": "the bot took it",
+      "rules_eyebrow": "> HOW TO PLAY",
+      "rules_title": "ludo rules",
+      "rules_body": "• roll a <b style=\"color:var(--syn-cyan)\">6</b> to move a token out of base<br>• move tokens clockwise by the dice value<br>• land on an opponent to send it home<br>• <b style=\"color:var(--syn-cyan)\">★ stars</b> &amp; start cells are safe<br>• a 6, a capture, or reaching center grants another roll<br>• get all 4 tokens to the center to win",
+      "got_it": "got it"
     }
   },
   "category": {

@@ -138,5 +138,12 @@
     "summary": "Unique-solution generator, four difficulties, pencil marks, conflict highlighting, hints, and per-difficulty best times. Keyboard, mouse, and touch. Plays offline.",
     "category": "Game",
     "group": "Games"
+  },
+  {
+    "slug": "ludo",
+    "title": "Ludo",
+    "summary": "The cross-and-circle race game on canvas. Roll, capture, race four tokens home. 2–4 players vs built-in bots or pass-and-play. Plays offline.",
+    "category": "Game",
+    "group": "Games"
   }
 ]

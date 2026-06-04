@@ -377,6 +377,26 @@
    <path d="M20 4h8l-4 7Z" fill="url(#pkdecisionwheel)"></path>
    <path d="M21 4.6h4.5l-2.2 3.8Z" fill="#fff" opacity=".3"></path>
  </g></symbol>
+<symbol id="tool-ludo" viewBox="0 0 48 48"><defs>
+<linearGradient id="cyludo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="amludo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="pkludo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBA6D2"></stop><stop offset="1" stop-color="#F25FA8"></stop></linearGradient>
+<linearGradient id="gnludo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
+<radialGradient id="dkludo" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#2a2438"></stop><stop offset="1" stop-color="#100e14"></stop></radialGradient>
+<linearGradient id="glossludo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".4"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<filter id="shludo" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shludo)">
+   <rect x="6" y="6" width="36" height="36" rx="8" fill="url(#dkludo)"></rect>
+   <rect x="6" y="6" width="36" height="36" rx="8" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.4"></rect>
+   <path d="M9 9h11v11H9Z" rx="2" fill="url(#cyludo)" opacity=".85"></path>
+   <path d="M28 9h11v11H28Z" fill="url(#amludo)" opacity=".85"></path>
+   <path d="M28 28h11v11H28Z" fill="url(#pkludo)" opacity=".85"></path>
+   <path d="M9 28h11v11H9Z" fill="url(#gnludo)" opacity=".85"></path>
+   <g fill="#0f0d16"><circle cx="14.5" cy="14.5" r="2.4"></circle><circle cx="33.5" cy="14.5" r="2.4"></circle><circle cx="33.5" cy="33.5" r="2.4"></circle><circle cx="14.5" cy="33.5" r="2.4"></circle></g>
+   <path d="M20 24h8M24 20v8" stroke="url(#cyludo)" stroke-width="2.4" stroke-linecap="round"></path>
+   <path d="M24 19l3 5h-6Z" fill="#fff" opacity=".9"></path>
+   <rect x="6" y="6" width="36" height="17" rx="8" fill="url(#glossludo)" opacity=".4"></rect>
+ </g></symbol>
 <symbol id="tool-sudoku" viewBox="0 0 48 48"><defs>
 <linearGradient id="cysudoku" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
 <linearGradient id="amsudoku" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>

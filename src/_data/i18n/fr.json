@@ -303,6 +303,11 @@
       "title": "Échecs",
       "lede": "Moteur local, chacun son tour et jeu en ligne — sans serveurs. Règles complètes avec roque, prise en passant et promotion ; moteur alpha-bêta à quatre niveaux, barre d'évaluation et indices.",
       "tldr": "Une implémentation d'échecs complète qui s'exécute entièrement dans votre navigateur. Le moteur de règles couvre le roque, la prise en passant, la promotion, échec/échec et mat/pat et les nulles (règle des 50 coups, matériel insuffisant, triple répétition), avec notation SAN complète. Jouez chacun son tour sur un appareil, contre un moteur alpha-bêta intégré (quatre niveaux, de Débutant à Brutal, exécuté dans un Web Worker pour que l'interface ne gèle jamais) avec barre d'évaluation en direct, lignes candidates et indices — ou en ligne contre un ami via une connexion P2P chiffrée à l'aide d'un code. Glissez ou touchez pour jouer, parcourez l'historique, retournez l'échiquier, annulez et abandonnez. Sans comptes, sans analytique, fonctionne hors ligne."
+    },
+    "annotate-image": {
+      "title": "Annoter une image",
+      "lede": "Importez une image et obtenez instantanément une description IA, un texte alternatif, une transcription ou des étiquettes — avec des prompts testés en un toucher. S'exécute localement dans votre navigateur, rien n'est envoyé.",
+      "tldr": "Un compagnon ciblé doté de vision pour AI Chat : dépose une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Bascule entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle de vision Qwen3.5-0.8B sur l'appareil qu'AI Chat (cache partagé — si tu as déjà utilisé AI Chat, aucun téléchargement supplémentaire), entièrement dans ton navigateur via WebGPU. Rien n'est envoyé ; l'image ne quitte jamais ton appareil. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis ton gestionnaire de fichiers une fois installé. Copie ou télécharge le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+)."
     }
   },
   "game": {
@@ -1003,6 +1008,33 @@
       "eyebrow_stalemate": "pat",
       "eyebrow_draw": "nulle",
       "eyebrow_resigned": "abandon"
+    },
+    "annotate-image": {
+      "status_idle": "dépose une image pour commencer",
+      "status_loading": "chargement du modèle de vision…",
+      "status_ready": "prêt",
+      "status_generating": "lecture de l'image…",
+      "err_no_webgpu": "WebGPU indisponible — essaie un Chrome/Edge récent, ou Safari 26+",
+      "err_load": "échec du chargement : ",
+      "err_device_lost": "GPU perdu — recharge pour récupérer",
+      "empty_response": "(aucune réponse — essaie un autre mode)",
+      "bad_file": "ça ne ressemble pas à une image",
+      "delete_model": "supprimer le modèle",
+      "copy": "copier",
+      "copied": "copié",
+      "download": "télécharger",
+      "new_image": "nouvelle image",
+      "drop_title": "dépose, colle ou choisis une image",
+      "drop_sub": "png · jpg · webp · gif — reste sur ton appareil",
+      "mode_describe": "Décrire",
+      "mode_ocr": "Lire le texte",
+      "mode_alt": "Texte alt",
+      "mode_tags": "Objets",
+      "sys_prompt": "Tu es l'annotateur d'images local de Mentria, un modèle de vision qui s'exécute dans le navigateur. Observe attentivement l'image et réponds à la demande de façon directe, précise et concise. Décris uniquement ce qui est réellement visible — n'invente jamais de détails absents.",
+      "prompt_describe": "Décris cette image en détail — le sujet principal, le décor, les couleurs et tout détail notable. Écris 2 à 4 phrases claires. Décris uniquement ce qui est réellement visible.",
+      "prompt_ocr": "Transcris exactement tout le texte visible dans cette image, en conservant les sauts de ligne. S'il n'y a aucun texte lisible, réponds exactement : Aucun texte trouvé.",
+      "prompt_alt": "Rédige une phrase concise de texte alternatif (moins d'environ 125 caractères) décrivant cette image pour un utilisateur de lecteur d'écran. Ne renvoie que la phrase, rien d'autre.",
+      "prompt_tags": "Liste les principaux objets, personnes et éléments visibles dans cette image sous forme d'étiquettes courtes séparées par des virgules. Donne 5 à 12 étiquettes. Ne renvoie que les étiquettes."
     }
   },
   "category": {

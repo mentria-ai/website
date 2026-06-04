@@ -303,6 +303,11 @@
       "title": "Ajedrez",
       "lede": "Motor local, por turnos y juego en línea — sin servidores. Reglas completas con enroque, al paso y coronación; motor alfa-beta con cuatro niveles, barra de evaluación y pistas.",
       "tldr": "Una implementación completa de ajedrez que se ejecuta enteramente en tu navegador. El motor de reglas cubre enroque, captura al paso, coronación, jaque/jaque mate/ahogado y tablas (regla de 50 movimientos, material insuficiente, triple repetición), con notación SAN completa. Juega por turnos en un dispositivo, contra un motor alfa-beta integrado (cuatro niveles, de Principiante a Brutal, ejecutándose en un Web Worker para que la interfaz nunca se congele) con barra de evaluación en vivo, líneas candidatas y pistas — o en línea contra un amigo por una conexión P2P cifrada usando un código. Arrastra o toca para mover, repasa el historial, gira el tablero, deshaz y abandona. Sin cuentas, sin analíticas, funciona sin conexión."
+    },
+    "annotate-image": {
+      "title": "Anotar imagen",
+      "lede": "Sube una imagen y obtén al instante una descripción de IA, texto alternativo, transcripción o etiquetas — con prompts probados de un toque. Se ejecuta localmente en tu navegador, nada se sube.",
+      "tldr": "Un complemento enfocado y con visión para AI Chat: suelta una imagen y se ejecuta automáticamente un prompt probado — sin necesidad de escribir uno. Cambia entre Describir, Leer texto (OCR), Texto alternativo y Objetos/etiquetas con un toque. Ejecuta el mismo modelo de visión Qwen3.5-0.8B en el dispositivo que AI Chat (caché compartida — si ya has usado AI Chat, no hay descarga extra), enteramente en tu navegador mediante WebGPU. Nada se sube; la imagen nunca sale de tu dispositivo. Arrastra y suelta, pega, elige un archivo o usa «abrir con» desde tu gestor de archivos una vez instalado. Copia o descarga el resultado. Requiere WebGPU (Chrome/Edge reciente o Safari 26+)."
     }
   },
   "game": {
@@ -1003,6 +1008,33 @@
       "eyebrow_stalemate": "ahogado",
       "eyebrow_draw": "tablas",
       "eyebrow_resigned": "abandono"
+    },
+    "annotate-image": {
+      "status_idle": "suelta una imagen para empezar",
+      "status_loading": "cargando modelo de visión…",
+      "status_ready": "listo",
+      "status_generating": "leyendo la imagen…",
+      "err_no_webgpu": "WebGPU no disponible — prueba con un Chrome/Edge reciente o Safari 26+",
+      "err_load": "fallo al cargar: ",
+      "err_device_lost": "GPU perdida — recarga para recuperar",
+      "empty_response": "(sin respuesta — prueba otro modo)",
+      "bad_file": "eso no parece una imagen",
+      "delete_model": "eliminar modelo",
+      "copy": "copiar",
+      "copied": "copiado",
+      "download": "descargar",
+      "new_image": "nueva imagen",
+      "drop_title": "suelta, pega o elige una imagen",
+      "drop_sub": "png · jpg · webp · gif — permanece en tu dispositivo",
+      "mode_describe": "Describir",
+      "mode_ocr": "Leer texto",
+      "mode_alt": "Texto alt",
+      "mode_tags": "Objetos",
+      "sys_prompt": "Eres el anotador de imágenes local de Mentria, un modelo de visión que se ejecuta en el navegador. Observa la imagen con atención y responde a la petición de forma directa, precisa y concisa. Describe solo lo que es realmente visible — nunca inventes detalles que no estén ahí.",
+      "prompt_describe": "Describe esta imagen en detalle — el sujeto principal, el entorno, los colores y cualquier detalle notable. Escribe de 2 a 4 frases claras. Describe solo lo que es realmente visible.",
+      "prompt_ocr": "Transcribe exactamente todo el texto visible en esta imagen, conservando los saltos de línea. Si no hay texto legible, responde exactamente: No se encontró texto.",
+      "prompt_alt": "Escribe una frase concisa de texto alternativo (de menos de unos 125 caracteres) que describa esta imagen para un usuario de lector de pantalla. Devuelve solo la frase, nada más.",
+      "prompt_tags": "Enumera los principales objetos, personas y elementos visibles en esta imagen como etiquetas cortas separadas por comas. Da de 5 a 12 etiquetas. Devuelve solo las etiquetas."
     }
   },
   "category": {

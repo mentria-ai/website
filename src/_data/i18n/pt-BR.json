@@ -303,6 +303,11 @@
       "title": "Xadrez",
       "lede": "Motor local, revezamento e jogo online — sem servidores. Regras completas com roque, en passant e promoção; motor alfa-beta com quatro níveis, barra de avaliação e dicas.",
       "tldr": "Uma implementação completa de xadrez que roda inteiramente no seu navegador. O motor de regras cobre roque, captura en passant, promoção, xeque/xeque-mate/afogamento e empates (regra dos 50 lances, material insuficiente, tripla repetição), com notação SAN completa. Jogue em revezamento num dispositivo, contra um motor alfa-beta integrado (quatro níveis, de Iniciante a Brutal, rodando em um Web Worker para a interface nunca travar) com barra de avaliação ao vivo, linhas candidatas e dicas — ou online contra um amigo por uma conexão P2P criptografada usando um código. Arraste ou toque para mover, navegue pelo histórico, gire o tabuleiro, desfaça e desista. Sem contas, sem analytics, funciona offline."
+    },
+    "annotate-image": {
+      "title": "Anotar imagem",
+      "lede": "Envie uma imagem e obtenha na hora uma descrição de IA, texto alternativo, transcrição ou tags — com prompts testados de um toque. Roda localmente no seu navegador, nada é enviado.",
+      "tldr": "Um complemento focado e com visão para o AI Chat: solte uma imagem e um prompt testado roda automaticamente — sem precisar escrever um. Alterne entre Descrever, Ler texto (OCR), Texto alternativo e Objetos/tags com um toque. Ele roda o mesmo modelo de visão Qwen3.5-0.8B no dispositivo que o AI Chat (cache compartilhado — se você já usou o AI Chat, não há download extra), inteiramente no seu navegador via WebGPU. Nada é enviado; a imagem nunca sai do seu dispositivo. Arraste e solte, cole, escolha um arquivo ou use «abrir com» no seu gerenciador de arquivos depois de instalado. Copie ou baixe o resultado. Requer WebGPU (Chrome/Edge recente ou Safari 26+)."
     }
   },
   "game": {
@@ -1003,6 +1008,33 @@
       "eyebrow_stalemate": "afogamento",
       "eyebrow_draw": "empate",
       "eyebrow_resigned": "desistência"
+    },
+    "annotate-image": {
+      "status_idle": "solte uma imagem para começar",
+      "status_loading": "carregando modelo de visão…",
+      "status_ready": "pronto",
+      "status_generating": "lendo a imagem…",
+      "err_no_webgpu": "WebGPU indisponível — tente um Chrome/Edge recente ou Safari 26+",
+      "err_load": "falha ao carregar: ",
+      "err_device_lost": "GPU perdida — recarregue para recuperar",
+      "empty_response": "(sem resposta — tente outro modo)",
+      "bad_file": "isso não parece uma imagem",
+      "delete_model": "excluir modelo",
+      "copy": "copiar",
+      "copied": "copiado",
+      "download": "baixar",
+      "new_image": "nova imagem",
+      "drop_title": "solte, cole ou escolha uma imagem",
+      "drop_sub": "png · jpg · webp · gif — permanece no seu dispositivo",
+      "mode_describe": "Descrever",
+      "mode_ocr": "Ler texto",
+      "mode_alt": "Texto alt",
+      "mode_tags": "Objetos",
+      "sys_prompt": "Você é o anotador de imagens local da Mentria, um modelo de visão que roda no navegador. Observe a imagem com atenção e responda ao pedido de forma direta, precisa e concisa. Descreva apenas o que é realmente visível — nunca invente detalhes que não estão ali.",
+      "prompt_describe": "Descreva esta imagem em detalhes — o assunto principal, o cenário, as cores e quaisquer detalhes notáveis. Escreva de 2 a 4 frases claras. Descreva apenas o que é realmente visível.",
+      "prompt_ocr": "Transcreva exatamente todo o texto visível nesta imagem, preservando as quebras de linha. Se não houver texto legível, responda exatamente: Nenhum texto encontrado.",
+      "prompt_alt": "Escreva uma frase concisa de texto alternativo (com menos de cerca de 125 caracteres) descrevendo esta imagem para um usuário de leitor de tela. Devolva apenas a frase, nada mais.",
+      "prompt_tags": "Liste os principais objetos, pessoas e elementos visíveis nesta imagem como tags curtas separadas por vírgulas. Dê de 5 a 12 tags. Devolva apenas as tags."
     }
   },
   "category": {

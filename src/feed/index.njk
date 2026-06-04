@@ -18,7 +18,7 @@ eleventyComputed:
         {% if item.type == "video" and item.src %}
         <video class="feed-card__media" src="{{ item.src }}" {% if item.poster %}poster="{{ item.poster }}"{% endif %} muted loop playsinline preload="metadata"></video>
         {% elif (item.type == "image" or item.type == "chapter") and item.src %}
-        <img class="feed-card__media" src="{{ item.src }}" alt="{{ item.title }}" loading="lazy">
+        <img class="feed-card__media" src="{{ item.src }}" alt="{{ (item.caption | tloc(locale.code)) if item.caption else item.title }}" loading="lazy">
         {% elif item.color %}
         <div class="feed-card__color-bg" style="background: {{ item.color }};"></div>
         {% endif %}

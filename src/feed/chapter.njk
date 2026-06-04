@@ -46,7 +46,7 @@ eleventyComputed:
       <span class="deck__placeholder-tag">{{ slide.story_type }}</span>
     </div>
     {% else %}
-    <img class="deck__slide-img" src="{{ slide.image }}" alt="" loading="lazy">
+    <img class="deck__slide-img" src="{{ slide.image }}" alt="{{ slide.caption | tloc(pair.locale.code) }}" loading="lazy">
     {% endif %}
 
     <div class="deck__slide-overlay">

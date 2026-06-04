@@ -189,6 +189,7 @@ eleventyComputed:
       const result = await Notification.requestPermission();
       refreshNotifBar();
       if (result === 'granted') {
+        if (window.MentriaPush) await MentriaPush.requestPermission();
         await showRawNotification(COPY.notifOnTitle, {
           body: COPY.notifOnBody,
           tag: 'mentria-timer-welcome',
@@ -406,7 +407,28 @@ eleventyComputed:
         updatePageTitle();
         const label = (titleEl.textContent || '').trim() || fmtTimer(state.id);
         notifyTimerFinished(state, label);
+        disarmServerPush(state);
       }
+    }
+
+    function pushSpecFor(state) {
+      const label = (titleEl.textContent || '').trim() || fmtTimer(state.id);
+      return {
+        id: 'ct-' + state.id,
+        fireAt: Date.now() + state.totalSeconds * 1000,
+        title: COPY.notifFinishFmt.replace('{label}', label),
+        body: COPY.notifBodyOpen,
+        url: '/tools/countdown-timer/',
+        tag: NOTIF_TAG_PREFIX + state.id
+      };
+    }
+    function armServerPush(state) {
+      if (window.MentriaPush && MentriaPush.permission() === 'granted' && state.totalSeconds > 0) {
+        MentriaPush.schedule(pushSpecFor(state));
+      }
+    }
+    function disarmServerPush(state) {
+      if (window.MentriaPush) MentriaPush.cancel('ct-' + state.id);
     }
 
     // ── Compute seconds from datetime ──
@@ -429,6 +451,7 @@ eleventyComputed:
         clearInterval(state.countdown);
         state.countdown = null;
         state.isPaused = true;
+        disarmServerPush(state);
         btnStart.textContent = COPY.btnResume;
         btnPause.disabled = true;
         statusEl.textContent = COPY.statusPaused;
@@ -438,6 +461,7 @@ eleventyComputed:
       if (state.isPaused && state.totalSeconds > 0) {
         state.isPaused = false;
         state.countdown = setInterval(tick, 1000);
+        armServerPush(state);
         btnStart.textContent = COPY.btnPause;
         btnPause.disabled = false;
         statusEl.textContent = COPY.statusRunning;
@@ -471,6 +495,7 @@ eleventyComputed:
       statusEl.textContent = COPY.statusRunning;
       updateDisplay();
       state.countdown = setInterval(tick, 1000);
+      armServerPush(state);
       btnStart.textContent = COPY.btnPause;
       btnPause.disabled = false;
       btnReset.disabled = false;
@@ -481,6 +506,7 @@ eleventyComputed:
     function resetTimer() {
       stopAlarmFor(state);
       if (state.countdown) { clearInterval(state.countdown); state.countdown = null; }
+      disarmServerPush(state);
       state.isPaused = false;
       state.totalSeconds = 0;
       updateDisplay();
@@ -526,6 +552,7 @@ eleventyComputed:
         clearInterval(state.countdown);
         state.countdown = null;
         state.isPaused = true;
+        disarmServerPush(state);
         btnStart.textContent = COPY.btnResume;
         statusEl.textContent = COPY.statusPaused;
       }

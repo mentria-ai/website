@@ -1,6 +1,606 @@
 [
   {
     "type": "chapter",
+    "id": "deepcuts172",
+    "src": "https://cdn.mentria.ai/deepcuts172/00_cover.webp",
+    "color": "linear-gradient(160deg, #0b0c0e, #a8302a, #dcd2c0)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things a bird that headbangs for a living gets right. 8 cards.",
+      "es": "Ocho cosas que un pájaro que se gana la vida a cabezazos hace bien. 8 tarjetas.",
+      "fr": "Huit choses qu'un oiseau qui gagne sa vie en se cognant la tête réussit. 8 cartes.",
+      "ja": "頭を打ちつけて生きる鳥が正しくやっている8つのこと。8枚のカード。",
+      "pt-BR": "Oito coisas que um pássaro que vive batendo a cabeça acerta. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts172/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts92",
+    "src": "https://cdn.mentria.ai/deepcuts92/00_cover.webp",
+    "color": "linear-gradient(160deg, #120a0c, #6e1a22, #d8c8a8)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things hidden in a roll of the dice. 8 cards.",
+      "es": "Ocho cosas escondidas en una tirada de dados. 8 tarjetas.",
+      "fr": "Huit choses cachées dans un lancer de dés. 8 cartes.",
+      "ja": "サイコロの一振りに隠された8つのこと。8枚のカード。",
+      "pt-BR": "Oito coisas escondidas em uma jogada de dados. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts92/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts171",
+    "src": "https://cdn.mentria.ai/deepcuts171/00_cover.webp",
+    "color": "linear-gradient(160deg, #1a0810, #c05a2a, #f5d49a)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things a single crystal of topaz is hiding. 8 cards.",
+      "es": "Ocho cosas que esconde un solo cristal de topacio. 8 tarjetas.",
+      "fr": "Huit choses qu'un seul cristal de topaze dissimule. 8 cartes.",
+      "ja": "一粒のトパーズの結晶が隠している8つのこと。8枚のカード。",
+      "pt-BR": "Oito coisas que um único cristal de topázio esconde. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts171/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts91",
+    "src": "https://cdn.mentria.ai/deepcuts91/00_cover.webp",
+    "color": "linear-gradient(160deg, #12150d, #5a6e34, #c9b878)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things animals build without blueprints. 8 cards.",
+      "es": "Ocho cosas que los animales construyen sin planos. 8 tarjetas.",
+      "fr": "Huit choses que les animaux bâtissent sans plan. 8 cartes.",
+      "ja": "動物が設計図なしで作る8つのもの。カード8枚。",
+      "pt-BR": "Oito coisas que os animais constroem sem plantas. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts91/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts90",
+    "src": "https://cdn.mentria.ai/deepcuts90/00_cover.webp",
+    "color": "linear-gradient(160deg, #131508, #6e6a22, #d8c47e)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things hiding in a head of grain. 8 cards.",
+      "es": "Ocho cosas escondidas en una espiga de grano. 8 tarjetas.",
+      "fr": "Huit choses cachées dans un épi de céréale. 8 cartes.",
+      "ja": "穀物の穂に隠れた8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas escondidas em uma espiga de grão. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts90/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts89",
+    "src": "https://cdn.mentria.ai/deepcuts89/00_cover.webp",
+    "color": "linear-gradient(160deg, #0a0e15, #3a4856, #cfd6dc)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight ways the world stores and unleashes a spring. 8 cards.",
+      "es": "Ocho formas en que el mundo almacena y libera un resorte. 8 tarjetas.",
+      "fr": "Huit façons dont le monde emmagasine et libère un ressort. 8 cartes.",
+      "ja": "世界がばねの力を蓄え、解き放つ8つの方法。カード8枚。",
+      "pt-BR": "Oito maneiras pelas quais o mundo armazena e libera uma mola. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts89/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts170",
+    "src": "https://cdn.mentria.ai/deepcuts170/00_cover.webp",
+    "color": "linear-gradient(160deg, #0a0c0e, #3a4248, #7e8a78)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things written in cooled lava. 8 cards.",
+      "es": "Ocho cosas escritas en lava enfriada. 8 tarjetas.",
+      "fr": "Huit choses inscrites dans la lave refroidie. 8 cartes.",
+      "ja": "冷えた溶岩に刻まれた8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas escritas em lava resfriada. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts170/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts88",
+    "src": "https://cdn.mentria.ai/deepcuts88/00_cover.webp",
+    "color": "linear-gradient(160deg, #0a1a18, #2e7a6a, #e8a06a)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight partnerships neither species could pull off alone. 8 cards.",
+      "es": "Ocho alianzas que ninguna de las dos especies lograría sola. 8 tarjetas.",
+      "fr": "Huit partenariats qu'aucune des deux espèces ne réussirait seule. 8 cartes.",
+      "ja": "どちらの種も単独では成し遂げられない8つのパートナーシップ。カード8枚。",
+      "pt-BR": "Oito parcerias que nenhuma das espécies conseguiria sozinha. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts88/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts87",
+    "src": "https://cdn.mentria.ai/deepcuts87/00_cover.webp",
+    "color": "linear-gradient(160deg, #08111f, #34386e, #d98a4e)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight journeys that stretch belief. 8 cards.",
+      "es": "Ocho viajes que desafían lo creíble. 8 tarjetas.",
+      "fr": "Huit voyages qui défient l'imagination. 8 cartes.",
+      "ja": "信じがたい八つの旅。カード8枚。",
+      "pt-BR": "Oito jornadas que desafiam a crença. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts87/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts169",
+    "src": "https://cdn.mentria.ai/deepcuts169/00_cover.webp",
+    "color": "linear-gradient(160deg, #0b0a12, #7a2f6e, #d7b24a)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things hiding in a rainbow metal. 8 cards.",
+      "es": "Ocho cosas que se esconden en un metal de arcoíris. 8 tarjetas.",
+      "fr": "Huit choses cachées dans un métal arc-en-ciel. 8 cartes.",
+      "ja": "虹色の金属に隠れた8つの秘密。カード8枚。",
+      "pt-BR": "Oito coisas escondidas em um metal de arco-íris. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts169/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts168",
+    "src": "https://cdn.mentria.ai/deepcuts168/00_cover.webp",
+    "color": "linear-gradient(160deg, #1a0b06, #b5491c, #ece2d2)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things the fox does that no dog should. 8 cards.",
+      "es": "Ocho cosas que hace el zorro y que ningún perro debería. 8 tarjetas.",
+      "fr": "Huit choses que le renard fait et qu'aucun chien ne devrait. 8 cartes.",
+      "ja": "イヌ科なのにイヌらしくない、キツネの8つの習性。カード8枚。",
+      "pt-BR": "Oito coisas que a raposa faz e que nenhum cachorro deveria. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts168/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts167",
+    "src": "https://cdn.mentria.ai/deepcuts167/00_cover.webp",
+    "color": "linear-gradient(160deg, #100c0a, #5e4636, #b89a78)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things the vulture does with the dead. 8 cards.",
+      "es": "Ocho cosas que el buitre hace con los muertos. 8 tarjetas.",
+      "fr": "Huit choses que le vautour fait avec les morts. 8 cartes.",
+      "ja": "ハゲワシが死者に対して行う8つのこと。8枚のカード。",
+      "pt-BR": "Oito coisas que o abutre faz com os mortos. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts167/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts86",
+    "src": "https://cdn.mentria.ai/deepcuts86/00_cover.webp",
+    "color": "linear-gradient(160deg, #081420, #1f6e7a, #a8e6d6)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight animals that cheat the killing cold. 8 cards.",
+      "es": "Ocho animales que engañan al frío mortal. 8 tarjetas.",
+      "fr": "Huit animaux qui trompent le froid mortel. 8 cartes.",
+      "ja": "命を奪う寒さを出し抜く8匹の動物。カード8枚。",
+      "pt-BR": "Oito animais que enganam o frio mortal. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts86/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts166",
+    "src": "https://cdn.mentria.ai/deepcuts166/00_cover.webp",
+    "color": "linear-gradient(160deg, #181206, #9a6e34, #e6cf9c)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things holding up a giraffe. 8 cards.",
+      "es": "Ocho cosas que sostienen a una jirafa. 8 tarjetas.",
+      "fr": "Huit choses qui maintiennent une girafe debout. 8 cartes.",
+      "ja": "キリンを支える8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas que sustentam uma girafa. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts166/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts85",
+    "src": "https://cdn.mentria.ai/deepcuts85/00_cover.webp",
+    "color": "linear-gradient(160deg, #0a1018, #18564e, #cdaa46)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight secrets hidden in a single feather. 8 cards.",
+      "es": "Ocho secretos escondidos en una sola pluma. 8 cartas.",
+      "fr": "Huit secrets cachés dans une seule plume. 8 cartes.",
+      "ja": "一枚の羽根に隠された八つの秘密。カード8枚。",
+      "pt-BR": "Oito segredos escondidos em uma única pena. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts85/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts165",
+    "src": "https://cdn.mentria.ai/deepcuts165/00_cover.webp",
+    "color": "linear-gradient(160deg, #0c1006, #4a5a1e, #b5402e)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things the cicada hides underground. 8 cards.",
+      "es": "Ocho cosas que la cigarra esconde bajo tierra. 8 tarjetas.",
+      "fr": "Huit choses que la cigale cache sous terre. 8 cartes.",
+      "ja": "セミが地中に隠している8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas que a cigarra esconde debaixo da terra. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts165/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts164",
+    "src": "https://cdn.mentria.ai/deepcuts164/00_cover.webp",
+    "color": "linear-gradient(160deg, #130c0c, #7e4632, #edc2b0)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things hidden under the armor. 8 cards.",
+      "es": "Ocho cosas escondidas bajo la armadura. 8 tarjetas.",
+      "fr": "Huit choses cachées sous l'armure. 8 cartes.",
+      "ja": "甲羅の下に隠された8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas escondidas sob a armadura. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts164/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts84",
+    "src": "https://cdn.mentria.ai/deepcuts84/00_cover.webp",
+    "color": "linear-gradient(160deg, #0a0618, #4a1a6e, #c46ee6)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight creatures that wield electricity. 8 cards.",
+      "es": "Ocho criaturas que dominan la electricidad. 8 tarjetas.",
+      "fr": "Huit créatures qui maîtrisent l'électricité. 8 cartes.",
+      "ja": "電気を操る8つの生き物。カード8枚。",
+      "pt-BR": "Oito criaturas que dominam a eletricidade. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts84/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts83",
+    "src": "https://cdn.mentria.ai/deepcuts83/00_cover.webp",
+    "color": "linear-gradient(160deg, #160a10, #6e2a3a, #e2a487)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things a tongue can do. 8 cards.",
+      "es": "Ocho cosas que una lengua puede hacer. 8 tarjetas.",
+      "fr": "Huit choses qu'une langue peut faire. 8 cartes.",
+      "ja": "舌にできる8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas que uma língua pode fazer. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts83/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts163",
+    "src": "https://cdn.mentria.ai/deepcuts163/00_cover.webp",
+    "color": "linear-gradient(160deg, #1a0c08, #a83a26, #dcb088)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things baked into a plain brick. 8 cards.",
+      "es": "Ocho cosas cocidas en un simple ladrillo. 8 tarjetas.",
+      "fr": "Huit choses cuites dans une simple brique. 8 cartes.",
+      "ja": "ありふれたレンガに焼き込まれた8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas cozidas em um simples tijolo. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts163/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts162",
+    "src": "https://cdn.mentria.ai/deepcuts162/00_cover.webp",
+    "color": "linear-gradient(160deg, #0e0a1e, #2f8f5e, #cdb8f0)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things hidden inside a glassy crystal. 8 cards.",
+      "es": "Ocho cosas escondidas dentro de un cristal vítreo. 8 tarjetas.",
+      "fr": "Huit choses cachées dans un cristal vitreux. 8 cartes.",
+      "ja": "ガラスのような結晶の中に隠された8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas escondidas dentro de um cristal vítreo. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts162/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts161",
+    "src": "https://cdn.mentria.ai/deepcuts161/00_cover.webp",
+    "color": "linear-gradient(160deg, #0e1108, #765022, #e0d0a4)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things hidden in a bow and arrow. 8 cards.",
+      "es": "Ocho cosas escondidas en un arco y una flecha. 8 tarjetas.",
+      "fr": "Huit choses cachées dans un arc et une flèche. 8 cartes.",
+      "ja": "弓と矢に隠された8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas escondidas em um arco e flecha. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-04",
+    "link": "/feed/deepcuts/deepcuts161/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts160",
+    "src": "https://cdn.mentria.ai/deepcuts160/00_cover.webp",
+    "color": "linear-gradient(160deg, #180c07, #9c4e22, #e4c79a)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things written into sandstone. 8 cards.",
+      "es": "Ocho cosas escritas en la arenisca. 8 tarjetas.",
+      "fr": "Huit choses inscrites dans le grès. 8 cartes.",
+      "ja": "砂岩に刻まれた8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas escritas no arenito. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts160/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts159",
+    "src": "https://cdn.mentria.ai/deepcuts159/00_cover.webp",
+    "color": "linear-gradient(160deg, #08080d, #2c2f60, #c4c0ce)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things a crow works out for itself. 8 cards.",
+      "es": "Ocho cosas que un cuervo resuelve por sí mismo. 8 tarjetas.",
+      "fr": "Huit choses qu'un corbeau résout tout seul. 8 cartes.",
+      "ja": "カラスが自分で解き明かす八つのこと。カード8枚。",
+      "pt-BR": "Oito coisas que um corvo descobre sozinho. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts159/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts82",
+    "src": "https://cdn.mentria.ai/deepcuts82/00_cover.webp",
+    "color": "linear-gradient(160deg, #0b1216, #2f5550, #c4b486)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things that refuse to let go. 8 cards.",
+      "es": "Ocho cosas que se niegan a soltar. 8 tarjetas.",
+      "fr": "Huit choses qui refusent de lâcher prise. 8 cartes.",
+      "ja": "決して離さない8つのもの。カード8枚。",
+      "pt-BR": "Oito coisas que se recusam a soltar. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts82/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts158",
+    "src": "https://cdn.mentria.ai/deepcuts158/00_cover.webp",
+    "color": "linear-gradient(160deg, #0c100c, #2f7a5a, #ef9ab0)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things locked inside a tourmaline crystal. 8 cards.",
+      "es": "Ocho cosas encerradas en un cristal de turmalina. 8 tarjetas.",
+      "fr": "Huit choses enfermées dans un cristal de tourmaline. 8 cartes.",
+      "ja": "トルマリンの結晶に閉じ込められた8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas trancadas em um cristal de turmalina. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts158/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts157",
+    "src": "https://cdn.mentria.ai/deepcuts157/00_cover.webp",
+    "color": "linear-gradient(160deg, #0b0a0a, #7a5224, #e0b25a)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things hidden in a record's groove. 8 cards.",
+      "es": "Ocho cosas escondidas en el surco de un disco. 8 tarjetas.",
+      "fr": "Huit choses cachées dans le sillon d'un disque. 8 cartes.",
+      "ja": "レコードの溝に隠された8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas escondidas no sulco de um disco. 8 cartões."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts157/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts81",
+    "src": "https://cdn.mentria.ai/deepcuts81/00_cover.webp",
+    "color": "linear-gradient(160deg, #0c0710, #3a0e2e, #9fd13a)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things that bite, sting, and inject. 8 cards.",
+      "es": "Ocho seres que muerden, pican e inyectan. 8 cartas.",
+      "fr": "Huit créatures qui mordent, piquent et injectent. 8 cartes.",
+      "ja": "噛む、刺す、毒を注ぐ8つの生きもの。カード8枚。",
+      "pt-BR": "Oito seres que mordem, picam e injetam. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts81/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts80",
+    "src": "https://cdn.mentria.ai/deepcuts80/00_cover.webp",
+    "color": "linear-gradient(160deg, #0a0504, #7e1610, #c89a34)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things a coat of lacquer hides. 8 cards.",
+      "es": "Ocho cosas que esconde una capa de laca. 8 tarjetas.",
+      "fr": "Huit choses que cache une couche de laque. 8 cartes.",
+      "ja": "漆の一塗りが隠す8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas que uma camada de laca esconde. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts80/"
+  },
+  {
+    "type": "chapter",
+    "id": "deepcuts156",
+    "src": "https://cdn.mentria.ai/deepcuts156/00_cover.webp",
+    "color": "linear-gradient(160deg, #081420, #34566e, #c4d4d0)",
+    "title": "Deep Cuts",
+    "caption": {
+      "en": "Eight things about the largest animals alive. 8 cards.",
+      "es": "Ocho cosas sobre los animales más grandes que existen. 8 tarjetas.",
+      "fr": "Huit choses sur les plus grands animaux vivants. 8 cartes.",
+      "ja": "現生最大の動物にまつわる8つのこと。カード8枚。",
+      "pt-BR": "Oito coisas sobre os maiores animais vivos. 8 cartas."
+    },
+    "badge": "DEEP CUTS",
+    "tags": [
+      "did-you-know"
+    ],
+    "date": "2026-06-03",
+    "link": "/feed/deepcuts/deepcuts156/"
+  },
+  {
+    "type": "chapter",
     "id": "deepcuts155",
     "src": "https://cdn.mentria.ai/deepcuts155/00_cover.webp",
     "color": "linear-gradient(160deg, #0b0f16, #3a4d62, #9bb0c0)",

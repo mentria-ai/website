@@ -288,6 +288,11 @@
       "title": "Breakout",
       "lede": "Brick-buster meets paddle game. Catch falling powerups, clear the wall, survive levels that get faster and meaner. Runs locally — no data leaves your device.",
       "tldr": "A Breakout-style brick-buster: bounce the ball off your paddle to clear walls of bricks across levels that speed up, catching falling powerups (and dodging the bad ones). Built on HTML5 Canvas with deterministic physics and mouse, keyboard, and touch controls. Score, lives, and the high-score table all live in client-side JavaScript — no third-party scripts, no server, and it works offline once cached."
+    },
+    "sudoku": {
+      "title": "Sudoku",
+      "lede": "Logic puzzle in terminal dress. Unique-solution generator, four difficulties, pencil marks. Runs locally — no data leaves your device.",
+      "tldr": "Classic 9×9 Sudoku rebuilt with a synthwave terminal aesthetic. A backtracking generator guarantees exactly one solution at four difficulties (easy → expert); pencil-mark notes, peer + same-number highlighting, live conflict detection, three mistakes before game over, and up to three hints. Best completion times per difficulty are saved on-device. Keyboard, mouse, and touch all work. No installs, no signup, no analytics — the puzzle generation and solving all run locally in your browser, and it works offline once the page loads."
     }
   },
   "game": {
@@ -856,6 +861,37 @@
       "scan_secure_required": "Camera access needs HTTPS. Use the live site, not a local URL.",
       "scan_invalid_qr": "That QR code is not an otpauth://totp/ URI. Try again with a TOTP setup QR.",
       "next_label": "next:"
+    },
+    "sudoku": {
+      "level": "Level",
+      "diff_easy": "easy",
+      "diff_medium": "medium",
+      "diff_hard": "hard",
+      "diff_expert": "expert",
+      "stat_mistakes": "Mistakes",
+      "stat_time": "Time",
+      "stat_best": "Best",
+      "btn_notes": "notes",
+      "on": "on",
+      "off": "off",
+      "btn_erase": "erase",
+      "btn_hint": "hint",
+      "btn_new": "new game",
+      "solved_eyebrow": "> SOLVED",
+      "solved_title": "puzzle complete",
+      "over_eyebrow": "> SEGFAULT — TOO MANY MISTAKES",
+      "over_title": "game over",
+      "try_again": "try again",
+      "mlabel_level": "Level",
+      "mlabel_time": "Time",
+      "mlabel_mistakes": "Mistakes",
+      "mlabel_best": "Best",
+      "toast_hint": "hint placed · {n} left",
+      "key_place": "Place number",
+      "key_erase": "Erase",
+      "key_notes": "Toggle notes",
+      "key_hint": "Hint",
+      "key_move": "Move selection"
     }
   },
   "category": {

@@ -131,5 +131,12 @@
     "summary": "Classic logic puzzle in terminal dress. Three difficulties, mouse + touch input, best-time tracking. Plays offline.",
     "category": "Game",
     "group": "Games"
+  },
+  {
+    "slug": "sudoku",
+    "title": "Sudoku",
+    "summary": "Unique-solution generator, four difficulties, pencil marks, conflict highlighting, hints, and per-difficulty best times. Keyboard, mouse, and touch. Plays offline.",
+    "category": "Game",
+    "group": "Games"
   }
 ]

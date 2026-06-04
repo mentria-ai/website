@@ -1,0 +1,462 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/sudoku/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.sudoku.title' | t }}"
+  description: "{{ 'tools.sudoku.lede' | t }}"
+---
+<div class="game-page">
+
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">sudoku</span></p>
+  <h1>{{ "tools.sudoku.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
+  <p>{{ "tools.sudoku.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "sudoku.js" %}
+{% set terminalHelpId = "sudoku-help" %}
+{% include "terminal-frame-open.njk" %}
+
+<div id="sudoku-help" popover class="game-help">
+  <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
+  <ul class="game-help-list">
+    <li><span><span class="kbd">1</span>–<span class="kbd">9</span></span><span class="game-help-label">{{ "tool.sudoku.key_place" | t }}</span></li>
+    <li><span><span class="kbd">⌫</span></span><span class="game-help-label">{{ "tool.sudoku.key_erase" | t }}</span></li>
+    <li><span><span class="kbd">N</span></span><span class="game-help-label">{{ "tool.sudoku.key_notes" | t }}</span></li>
+    <li><span><span class="kbd">H</span></span><span class="game-help-label">{{ "tool.sudoku.key_hint" | t }}</span></li>
+    <li><span><span class="kbd">↑↓←→</span></span><span class="game-help-label">{{ "tool.sudoku.key_move" | t }}</span></li>
+  </ul>
+</div>
+
+<div class="sudoku-app">
+  <div class="controls">
+    <span class="ctrl-label">{{ "tool.sudoku.level" | t }}</span>
+    <div class="seg" id="diff-seg">
+      <button data-d="easy">{{ "tool.sudoku.diff_easy" | t }}</button>
+      <button data-d="medium" class="active">{{ "tool.sudoku.diff_medium" | t }}</button>
+      <button data-d="hard">{{ "tool.sudoku.diff_hard" | t }}</button>
+      <button data-d="expert">{{ "tool.sudoku.diff_expert" | t }}</button>
+    </div>
+    <div class="stats-spread">
+      <div class="stat-item"><span class="stat-key">{{ "tool.sudoku.stat_mistakes" | t }}</span><span class="stat-val pink" id="stat-mistakes">0/3</span></div>
+      <div class="stat-item"><span class="stat-key">{{ "tool.sudoku.stat_time" | t }}</span><span class="stat-val cyan" id="stat-time">0:00</span></div>
+      <div class="stat-item"><span class="stat-key">{{ "tool.sudoku.stat_best" | t }}</span><span class="stat-val amber" id="stat-best">—</span></div>
+    </div>
+  </div>
+
+  <div class="board-wrap">
+    <div class="board" id="board"></div>
+    <div class="toast" id="toast"></div>
+    <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+  </div>
+
+  <div class="keypad" id="keypad"></div>
+
+  <div class="toolbar">
+    <button class="btn" id="btn-notes">✎ {{ "tool.sudoku.btn_notes" | t }} <span class="badge" id="notes-state">{{ "tool.sudoku.off" | t }}</span></button>
+    <button class="btn" id="btn-erase">⌫ {{ "tool.sudoku.btn_erase" | t }}</button>
+    <button class="btn" id="btn-hint">◇ {{ "tool.sudoku.btn_hint" | t }} <span class="badge" id="hint-count">3</span></button>
+    <button class="btn primary" id="btn-new">{{ "tool.sudoku.btn_new" | t }}</button>
+  </div>
+</div>
+
+{% include "terminal-frame-close.njk" %}
+</div>
+
+<style>
+  .sudoku-app .controls { display: flex; align-items: center; gap: 14px; padding: 12px 4px 16px; flex-wrap: wrap; }
+  .sudoku-app .ctrl-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
+  .sudoku-app .seg { display: inline-flex; border: 1px solid var(--term-border); border-radius: var(--radius-md); overflow: hidden; }
+  .sudoku-app .seg button { background: transparent; border: none; color: var(--term-muted); font-weight: 600; font-size: 12px; padding: 6px 12px; border-right: 1px solid var(--term-border); transition: all 150ms; font-family: var(--font-mono); cursor: pointer; }
+  .sudoku-app .seg button:last-child { border-right: none; }
+  .sudoku-app .seg button:hover { color: var(--term-fg); background: rgba(255,255,255,0.03); }
+  .sudoku-app .seg button.active { color: var(--syn-cyan); background: var(--cyan-8); box-shadow: inset 0 -2px 0 var(--syn-cyan); }
+  .sudoku-app .stats-spread { margin-left: auto; display: flex; gap: 16px; font-size: 13px; }
+  .sudoku-app .stat-item { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .sudoku-app .stat-key { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); }
+  .sudoku-app .stat-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sudoku-app .stat-val.cyan { color: var(--syn-cyan); } .sudoku-app .stat-val.pink { color: var(--syn-pink); } .sudoku-app .stat-val.amber { color: var(--syn-amber); }
+
+  .sudoku-app .board-wrap { position: relative; display: flex; justify-content: center; padding: 8px 0 16px; }
+  .sudoku-app .board {
+    display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr);
+    width: 100%; max-width: 460px; aspect-ratio: 1;
+    background: var(--term-surface-2); border: 2px solid var(--term-border-strong);
+    border-radius: 6px; overflow: hidden; touch-action: manipulation;
+  }
+  .sudoku-app .sq {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: clamp(15px, 4.4vw, 24px); color: var(--syn-cyan);
+    border-right: 1px solid var(--term-divider); border-bottom: 1px solid var(--term-divider);
+    user-select: none; -webkit-user-select: none; transition: background 100ms; cursor: pointer;
+  }
+  .sudoku-app .sq[data-c="2"], .sudoku-app .sq[data-c="5"] { border-right: 2px solid var(--term-border-strong); }
+  .sudoku-app .sq[data-r="2"], .sudoku-app .sq[data-r="5"] { border-bottom: 2px solid var(--term-border-strong); }
+  .sudoku-app .sq[data-c="8"] { border-right: none; }
+  .sudoku-app .sq[data-r="8"] { border-bottom: none; }
+  .sudoku-app .sq.given { color: var(--term-fg-strong); font-weight: 700; }
+  .sudoku-app .sq.peer { background: rgba(255,255,255,0.022); }
+  .sudoku-app .sq.samenum { background: var(--cyan-8); }
+  .sudoku-app .sq.sel { background: var(--cyan-15) !important; box-shadow: inset 0 0 0 2px var(--syn-cyan); }
+  .sudoku-app .sq.err { color: var(--syn-pink); animation: sk-shake 0.3s; }
+  .sudoku-app .sq.conflict { color: var(--syn-pink); }
+  @keyframes sk-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2px)} 75%{transform:translateX(2px)} }
+
+  .sudoku-app .notes { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); pointer-events: none; padding: 2px; }
+  .sudoku-app .note-cell { display: flex; align-items: center; justify-content: center; font-size: clamp(6px, 1.6vw, 9px); color: var(--term-muted); font-weight: 500; line-height: 1; }
+
+  .sudoku-app .keypad { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; padding: 4px 0 14px; }
+  .sudoku-app .key { aspect-ratio: 1; min-height: 40px; background: var(--term-surface-2); border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); color: var(--term-fg); font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; position: relative; transition: all 100ms; -webkit-tap-highlight-color: transparent; cursor: pointer; font-family: var(--font-mono); }
+  .sudoku-app .key:hover { border-color: var(--cyan-30); color: var(--syn-cyan); }
+  .sudoku-app .key:active { background: var(--term-surface-3); }
+  .sudoku-app .key .remain { position: absolute; bottom: 1px; right: 3px; font-size: 8px; color: var(--term-subtle); font-weight: 500; }
+  .sudoku-app .key.done { opacity: 0.3; }
+
+  .sudoku-app .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sudoku-app .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-weight: 600; font-size: 12px; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--term-border); background: transparent; color: var(--term-muted); transition: all 120ms; font-family: var(--font-mono); cursor: pointer; }
+  .sudoku-app .btn:hover { border-color: var(--term-border-strong); color: var(--term-fg); }
+  .sudoku-app .btn.active { border-color: var(--syn-cyan); color: var(--syn-cyan); background: var(--cyan-8); }
+  .sudoku-app .btn.primary { border-color: var(--syn-cyan); color: var(--syn-cyan); background: var(--cyan-8); }
+  .sudoku-app .btn.primary::before { content: "$ "; }
+  .sudoku-app .btn .badge { font-size: 9px; padding: 1px 5px; border-radius: 999px; background: var(--term-surface-3); color: var(--term-muted); }
+
+  .sudoku-app .overlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5,5,7,0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 5; padding: 16px; }
+  .sudoku-app .overlay.show { display: flex; }
+  .sudoku-app .modal { background: var(--term-surface-2); border: 1px solid var(--syn-cyan); border-radius: var(--radius-lg); padding: 24px 28px; text-align: center; max-width: 340px; box-shadow: var(--elev-3), var(--glow-cyan); }
+  .sudoku-app .modal .eyebrow { font-size: 11px; letter-spacing: 0.15em; margin: 0 0 8px; color: var(--syn-cyan); }
+  .sudoku-app .modal h2 { font-size: 22px; margin: 0 0 12px; color: var(--term-fg-strong); }
+  .sudoku-app .modal .stats-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--term-border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 18px; font-size: 12px; text-align: left; }
+  .sudoku-app .stats-mini .k { color: var(--term-muted); } .sudoku-app .stats-mini .v { color: var(--syn-cyan); font-weight: 600; text-align: right; }
+
+  .sudoku-app .toast { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); padding: 6px 14px; border-radius: var(--radius-pill); background: rgba(34,211,238,0.15); border: 1px solid var(--cyan-30); color: var(--syn-cyan); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; box-shadow: var(--glow-cyan); z-index: 4; opacity: 0; transition: opacity 250ms; pointer-events: none; white-space: nowrap; }
+  .sudoku-app .toast.show { opacity: 1; }
+  .sudoku-app .toast.pink { background: rgba(244,114,182,0.15); border-color: var(--syn-pink); color: var(--syn-pink); box-shadow: var(--glow-pink); }
+
+  @media (max-width: 560px) {
+    .sudoku-app .stats-spread { width: 100%; justify-content: space-between; margin-left: 0; }
+    .sudoku-app .keypad { gap: 4px; }
+    .sudoku-app .key { min-height: 36px; font-size: 16px; }
+  }
+</style>
+
+<script>
+(() => {
+  'use strict';
+  const DIFF = { easy: 40, medium: 32, hard: 28, expert: 24 };
+
+  const COPY = {
+    notesOn:  {{ ("tool.sudoku.on"  | t) | dump | safe }},
+    notesOff: {{ ("tool.sudoku.off" | t) | dump | safe }},
+    solvedEyebrow: {{ ("tool.sudoku.solved_eyebrow" | t) | dump | safe }},
+    solvedTitle:   {{ ("tool.sudoku.solved_title"   | t) | dump | safe }},
+    overEyebrow:   {{ ("tool.sudoku.over_eyebrow"   | t) | dump | safe }},
+    overTitle:     {{ ("tool.sudoku.over_title"     | t) | dump | safe }},
+    tryAgain:      {{ ("tool.sudoku.try_again"      | t) | dump | safe }},
+    newGame:       {{ ("tool.sudoku.btn_new"        | t) | dump | safe }},
+    mLevel:    {{ ("tool.sudoku.mlabel_level"    | t) | dump | safe }},
+    mTime:     {{ ("tool.sudoku.mlabel_time"     | t) | dump | safe }},
+    mMistakes: {{ ("tool.sudoku.mlabel_mistakes" | t) | dump | safe }},
+    mBest:     {{ ("tool.sudoku.mlabel_best"     | t) | dump | safe }},
+    hintToast: {{ ("tool.sudoku.toast_hint"      | t) | dump | safe }},
+    diff: {
+      easy:   {{ ("tool.sudoku.diff_easy"   | t) | dump | safe }},
+      medium: {{ ("tool.sudoku.diff_medium" | t) | dump | safe }},
+      hard:   {{ ("tool.sudoku.diff_hard"   | t) | dump | safe }},
+      expert: {{ ("tool.sudoku.diff_expert" | t) | dump | safe }}
+    }
+  };
+
+  const State = {
+    diff: 'medium',
+    solution: [], puzzle: [], grid: [], notes: [], given: [],
+    sel: -1, notesMode: false,
+    mistakes: 0, maxMistakes: 3, hints: 3,
+    started: 0, timer: null, elapsed: 0,
+    over: false, won: false,
+  };
+
+  const boardEl = document.getElementById('board');
+  const keypadEl = document.getElementById('keypad');
+  const overlay = document.getElementById('overlay');
+
+  function readBest(diff) {
+    const k = 'sudoku_best_' + diff;
+    if (window.MentriaStore) {
+      const v = window.MentriaStore.get('games', k);
+      return (typeof v === 'number') ? v : null;
+    }
+    try { const v = localStorage.getItem('mentria_' + k); return v ? parseInt(v, 10) : null; } catch (_) { return null; }
+  }
+  function writeBest(diff, s) {
+    const cur = readBest(diff);
+    if (cur !== null && s >= cur) return;
+    if (window.MentriaStore) window.MentriaStore.set('games', 'sudoku_best_' + diff, s);
+    else try { localStorage.setItem('mentria_sudoku_best_' + diff, String(s)); } catch (_) {}
+  }
+
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  function solveCount(g, limit){
+    const idx = g.indexOf(0);
+    if (idx === -1) return 1;
+    const r = Math.floor(idx/9), c = idx%9;
+    let count = 0;
+    for (let n=1;n<=9;n++){
+      if (ok(g, r, c, n)){ g[idx] = n; count += solveCount(g, limit); g[idx] = 0; if (count >= limit) return count; }
+    }
+    return count;
+  }
+  function ok(g, r, c, n){
+    for (let i=0;i<9;i++){ if (g[r*9+i]===n || g[i*9+c]===n) return false; }
+    const br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+    for (let i=0;i<3;i++) for (let j=0;j<3;j++) if (g[(br+i)*9+(bc+j)]===n) return false;
+    return true;
+  }
+  function fillFull(g){
+    const idx = g.indexOf(0);
+    if (idx === -1) return true;
+    const r = Math.floor(idx/9), c = idx%9;
+    const nums = shuffle([1,2,3,4,5,6,7,8,9]);
+    for (const n of nums){ if (ok(g, r, c, n)){ g[idx]=n; if (fillFull(g)) return true; g[idx]=0; } }
+    return false;
+  }
+  function generate(givens){
+    const full = new Array(81).fill(0);
+    fillFull(full);
+    const puzzle = full.slice();
+    const order = shuffle([...Array(81).keys()]);
+    let removed = 0, target = 81 - givens;
+    for (const pos of order){
+      if (removed >= target) break;
+      const backup = puzzle[pos];
+      if (backup === 0) continue;
+      puzzle[pos] = 0;
+      const test = puzzle.slice();
+      if (solveCount(test, 2) !== 1){ puzzle[pos] = backup; }
+      else removed++;
+    }
+    return { solution: full, puzzle };
+  }
+
+  function newGame(){
+    const { solution, puzzle } = generate(DIFF[State.diff]);
+    State.solution = solution; State.puzzle = puzzle;
+    State.grid = puzzle.slice();
+    State.given = puzzle.map(v => v !== 0);
+    State.notes = Array.from({length:81}, () => new Set());
+    State.sel = -1; State.mistakes = 0; State.hints = 3;
+    State.over = false; State.won = false; State.elapsed = 0;
+    if (State.timer) clearInterval(State.timer);
+    State.started = performance.now();
+    State.timer = setInterval(tick, 1000);
+    overlay.classList.remove('show');
+    document.getElementById('hint-count').textContent = State.hints;
+    buildBoard(); render(); updateHUD();
+  }
+  function tick(){
+    if (State.over) return;
+    State.elapsed = Math.floor((performance.now() - State.started)/1000);
+    document.getElementById('stat-time').textContent = fmt(State.elapsed);
+  }
+  function fmt(s){ return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+
+  function buildBoard(){
+    boardEl.innerHTML = '';
+    for (let i=0;i<81;i++){
+      const sq = document.createElement('div');
+      sq.className = 'sq';
+      sq.dataset.r = Math.floor(i/9); sq.dataset.c = i%9; sq.dataset.i = i;
+      sq.addEventListener('click', () => selectCell(i));
+      boardEl.appendChild(sq);
+    }
+  }
+  function selectCell(i){ if (State.over) return; State.sel = i; render(); }
+
+  function render(){
+    const cells = boardEl.children;
+    const selVal = State.sel>=0 ? State.grid[State.sel] : 0;
+    const selR = State.sel>=0 ? Math.floor(State.sel/9) : -1;
+    const selC = State.sel>=0 ? State.sel%9 : -1;
+    for (let i=0;i<81;i++){
+      const cell = cells[i];
+      const v = State.grid[i];
+      const r = Math.floor(i/9), c = i%9;
+      cell.className = 'sq';
+      if (State.given[i]) cell.classList.add('given');
+      if (State.sel>=0 && i!==State.sel){
+        const sameBox = Math.floor(r/3)===Math.floor(selR/3) && Math.floor(c/3)===Math.floor(selC/3);
+        if (r===selR || c===selC || sameBox) cell.classList.add('peer');
+        if (v!==0 && v===selVal) cell.classList.add('samenum');
+      }
+      if (i===State.sel) cell.classList.add('sel');
+      if (v!==0 && !State.given[i] && hasConflict(i, v)) cell.classList.add('conflict');
+      cell.innerHTML = '';
+      if (v!==0){ cell.textContent = v; }
+      else if (State.notes[i].size){
+        const nd = document.createElement('div'); nd.className = 'notes';
+        for (let n=1;n<=9;n++){ const nc=document.createElement('div'); nc.className='note-cell'; nc.textContent = State.notes[i].has(n)?n:''; nd.appendChild(nc); }
+        cell.appendChild(nd);
+      }
+    }
+    updateKeypad();
+  }
+  function hasConflict(i, v){
+    const r = Math.floor(i/9), c = i%9;
+    for (let k=0;k<9;k++){ if (k!==c && State.grid[r*9+k]===v) return true; if (k!==r && State.grid[k*9+c]===v) return true; }
+    const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
+    for (let a=0;a<3;a++) for (let b=0;b<3;b++){ const j=(br+a)*9+(bc+b); if (j!==i && State.grid[j]===v) return true; }
+    return false;
+  }
+
+  function placeNumber(n){
+    if (State.over || State.sel<0) return;
+    const i = State.sel;
+    if (State.given[i]) return;
+    if (State.notesMode && n!==0){
+      if (State.notes[i].has(n)) State.notes[i].delete(n); else State.notes[i].add(n);
+      render(); return;
+    }
+    if (n===0){ State.grid[i]=0; State.notes[i].clear(); render(); return; }
+    State.notes[i].clear();
+    State.grid[i] = n;
+    if (n!==0){
+      const r=Math.floor(i/9), c=i%9, br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
+      for (let k=0;k<9;k++){ State.notes[r*9+k].delete(n); State.notes[k*9+c].delete(n); }
+      for (let a=0;a<3;a++) for (let b=0;b<3;b++) State.notes[(br+a)*9+(bc+b)].delete(n);
+    }
+    if (n !== State.solution[i]){
+      State.mistakes++; updateHUD();
+      const cell = boardEl.children[i];
+      cell.classList.add('err'); setTimeout(()=>cell.classList.remove('err'),300);
+      if (State.mistakes >= State.maxMistakes){ render(); gameOver(false); return; }
+    }
+    render(); checkWin();
+  }
+
+  function checkWin(){
+    for (let i=0;i<81;i++) if (State.grid[i] !== State.solution[i]) return;
+    gameOver(true);
+  }
+
+  function gameOver(won){
+    State.over = true; State.won = won;
+    if (State.timer) clearInterval(State.timer);
+    if (won) writeBest(State.diff, State.elapsed);
+    const m = document.getElementById('modal');
+    const best = readBest(State.diff);
+    if (won){
+      m.style.borderColor = 'var(--syn-cyan)';
+      m.innerHTML = `<p class="eyebrow">${COPY.solvedEyebrow}</p><h2>${COPY.solvedTitle}</h2>
+        <div class="stats-mini">
+          <span class="k">${COPY.mLevel}</span><span class="v">${COPY.diff[State.diff]}</span>
+          <span class="k">${COPY.mTime}</span><span class="v">${fmt(State.elapsed)}</span>
+          <span class="k">${COPY.mMistakes}</span><span class="v">${State.mistakes}/${State.maxMistakes}</span>
+          <span class="k">${COPY.mBest}</span><span class="v">${best!==null?fmt(best):'—'}</span>
+        </div>
+        <button class="btn primary" id="m-new">${COPY.newGame}</button>`;
+    } else {
+      m.style.borderColor = 'var(--syn-pink)';
+      m.innerHTML = `<p class="eyebrow" style="color:var(--syn-pink)">${COPY.overEyebrow}</p><h2>${COPY.overTitle}</h2>
+        <div class="stats-mini">
+          <span class="k">${COPY.mLevel}</span><span class="v">${COPY.diff[State.diff]}</span>
+          <span class="k">${COPY.mTime}</span><span class="v">${fmt(State.elapsed)}</span>
+          <span class="k">${COPY.mMistakes}</span><span class="v">${State.mistakes}/${State.maxMistakes}</span>
+        </div>
+        <button class="btn primary" id="m-new">${COPY.tryAgain}</button>`;
+    }
+    overlay.classList.add('show');
+    document.getElementById('m-new').onclick = newGame;
+  }
+
+  function useHint(){
+    if (State.over || State.hints<=0) return;
+    let target = (State.sel>=0 && !State.given[State.sel] && State.grid[State.sel]!==State.solution[State.sel]) ? State.sel : -1;
+    if (target<0){ for (let i=0;i<81;i++){ if (State.grid[i]!==State.solution[i]){ target=i; break; } } }
+    if (target<0) return;
+    State.hints--;
+    State.grid[target] = State.solution[target];
+    State.notes[target].clear();
+    State.given[target] = true;
+    State.sel = target;
+    document.getElementById('hint-count').textContent = State.hints;
+    render(); checkWin();
+    showToast(COPY.hintToast.replace('{n}', State.hints));
+  }
+
+  function buildKeypad(){
+    keypadEl.innerHTML = '';
+    for (let n=1;n<=9;n++){
+      const k = document.createElement('button');
+      k.className = 'key'; k.dataset.n = n;
+      k.innerHTML = n + '<span class="remain"></span>';
+      k.addEventListener('click', () => placeNumber(n));
+      keypadEl.appendChild(k);
+    }
+  }
+  function updateKeypad(){
+    const counts = new Array(10).fill(0);
+    for (let i=0;i<81;i++) if (State.grid[i]) counts[State.grid[i]]++;
+    for (const k of keypadEl.children){
+      const n = +k.dataset.n;
+      const left = 9 - counts[n];
+      k.querySelector('.remain').textContent = left>0 ? left : '';
+      k.classList.toggle('done', left<=0);
+    }
+  }
+
+  function updateHUD(){
+    document.getElementById('stat-mistakes').textContent = State.mistakes + '/' + State.maxMistakes;
+    const best = readBest(State.diff);
+    document.getElementById('stat-best').textContent = best!==null ? fmt(best) : '—';
+    document.getElementById('stat-time').textContent = fmt(State.elapsed);
+  }
+
+  let toastTimer = null;
+  function showToast(msg, pink){
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show' + (pink?' pink':'');
+    clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'),1500);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key >= '1' && e.key <= '9'){ placeNumber(+e.key); return; }
+    if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0'){ placeNumber(0); return; }
+    if (e.key === 'n' || e.key === 'N'){ toggleNotes(); return; }
+    if (e.key === 'h' || e.key === 'H'){ useHint(); return; }
+    if (State.sel<0){ if (e.key.startsWith('Arrow')) { State.sel = 40; render(); } return; }
+    let r = Math.floor(State.sel/9), c = State.sel%9;
+    if (e.key === 'ArrowUp') r=(r+8)%9;
+    else if (e.key === 'ArrowDown') r=(r+1)%9;
+    else if (e.key === 'ArrowLeft') c=(c+8)%9;
+    else if (e.key === 'ArrowRight') c=(c+1)%9;
+    else return;
+    e.preventDefault();
+    State.sel = r*9+c; render();
+  });
+
+  function toggleNotes(){
+    State.notesMode = !State.notesMode;
+    document.getElementById('btn-notes').classList.toggle('active', State.notesMode);
+    document.getElementById('notes-state').textContent = State.notesMode ? COPY.notesOn : COPY.notesOff;
+  }
+
+  document.getElementById('btn-notes').onclick = toggleNotes;
+  document.getElementById('btn-erase').onclick = () => placeNumber(0);
+  document.getElementById('btn-hint').onclick = useHint;
+  document.getElementById('btn-new').onclick = newGame;
+  document.getElementById('diff-seg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-d]'); if (!b) return;
+    [...e.currentTarget.children].forEach(x => x.classList.toggle('active', x===b));
+    State.diff = b.dataset.d;
+    newGame();
+  });
+
+  buildKeypad();
+  newGame();
+})();
+</script>

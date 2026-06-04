@@ -1,0 +1,331 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/annotate-image/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.annotate-image.title' | t }}"
+  description: "{{ 'tools.annotate-image.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">annotate-image</span></p>
+  <h1>{{ "tools.annotate-image.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
+  <p>{{ "tools.annotate-image.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "annotate.js" %}
+{% include "terminal-frame-open.njk" %}
+
+<div class="annotate-app">
+  <div class="an-statusbar">
+    <span class="an-status-dot" id="an-status-dot"></span>
+    <span id="an-status-text">{{ "tool.annotate-image.status_idle" | t }}</span>
+    <button type="button" class="an-mini-btn" id="an-delete" style="display:none">{{ "tool.annotate-image.delete_model" | t }}</button>
+  </div>
+  <div class="an-progress" id="an-progress" style="display:none"><div class="an-progress__bar" id="an-progress-bar"></div><span class="an-progress__label" id="an-progress-label"></span></div>
+
+  <label class="an-drop" id="an-drop">
+    <input type="file" id="an-file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" hidden>
+    <div class="an-drop__inner" id="an-drop-inner">
+      <div class="an-drop__icon" aria-hidden="true">⬆</div>
+      <p class="an-drop__title">{{ "tool.annotate-image.drop_title" | t }}</p>
+      <p class="an-drop__sub">{{ "tool.annotate-image.drop_sub" | t }}</p>
+    </div>
+    <img class="an-drop__preview" id="an-preview" alt="" hidden>
+  </label>
+
+  <div class="an-modes" id="an-modes" hidden>
+    <button class="an-mode active" data-mode="describe">{{ "tool.annotate-image.mode_describe" | t }}</button>
+    <button class="an-mode" data-mode="ocr">{{ "tool.annotate-image.mode_ocr" | t }}</button>
+    <button class="an-mode" data-mode="alt">{{ "tool.annotate-image.mode_alt" | t }}</button>
+    <button class="an-mode" data-mode="tags">{{ "tool.annotate-image.mode_tags" | t }}</button>
+  </div>
+
+  <div class="an-result-wrap" id="an-result-wrap" hidden>
+    <div class="an-result-head">
+      <span class="an-result-label" id="an-result-label"></span>
+      <div class="an-result-actions">
+        <button class="an-mini-btn" id="an-copy">{{ "tool.annotate-image.copy" | t }}</button>
+        <button class="an-mini-btn" id="an-download">{{ "tool.annotate-image.download" | t }}</button>
+        <button class="an-mini-btn" id="an-new">{{ "tool.annotate-image.new_image" | t }}</button>
+      </div>
+    </div>
+    <div class="an-result" id="an-result"></div>
+  </div>
+</div>
+
+{% include "terminal-frame-close.njk" %}
+
+<style>
+  .annotate-app { display: flex; flex-direction: column; gap: 14px; }
+  .annotate-app [hidden] { display: none !important; }
+  .an-statusbar { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--term-muted); }
+  .an-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--term-subtle); flex-shrink: 0; }
+  .an-status-dot--ready { background: var(--syn-green); box-shadow: 0 0 6px var(--syn-green); }
+  .an-status-dot--loading, .an-status-dot--generating { background: var(--syn-amber); box-shadow: 0 0 6px var(--syn-amber); animation: an-pulse 1s ease-in-out infinite; }
+  .an-status-dot--error { background: var(--syn-pink); box-shadow: 0 0 6px var(--syn-pink); }
+  @keyframes an-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  .an-mini-btn { margin-left: auto; background: transparent; border: 1px solid var(--term-border); color: var(--term-muted); font-family: var(--font-mono); font-size: 11px; padding: 4px 9px; border-radius: var(--radius-md); cursor: pointer; transition: all 120ms; }
+  .an-result-actions .an-mini-btn { margin-left: 0; }
+  .an-mini-btn:hover { border-color: var(--syn-cyan); color: var(--syn-cyan); }
+
+  .an-progress { display: flex; align-items: center; gap: 10px; }
+  .an-progress__bar { flex: 1; height: 6px; border-radius: 3px; background: var(--term-surface-2); overflow: hidden; position: relative; }
+  .an-progress__bar::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p, 0%); background: linear-gradient(90deg, var(--syn-cyan), var(--syn-purple)); transition: width 200ms; }
+  .an-progress__label { font-family: var(--font-mono); font-size: 11px; color: var(--term-muted); min-width: 3ch; text-align: right; }
+
+  .an-drop { display: flex; align-items: center; justify-content: center; min-height: 220px; border: 1.5px dashed var(--term-border-strong); border-radius: var(--radius-lg); background: var(--term-surface-2); cursor: pointer; position: relative; overflow: hidden; transition: border-color 150ms, background 150ms; }
+  .an-drop:hover, .an-drop.dragover { border-color: var(--syn-cyan); background: var(--cyan-8); }
+  .an-drop__inner { text-align: center; padding: 28px; pointer-events: none; }
+  .an-drop__icon { font-size: 30px; color: var(--syn-cyan); margin-bottom: 8px; }
+  .an-drop__title { font-family: var(--font-mono); font-size: 14px; color: var(--term-fg); margin: 0 0 4px; }
+  .an-drop__sub { font-family: var(--font-mono); font-size: 11px; color: var(--term-muted); margin: 0; }
+  .an-drop__preview { max-width: 100%; max-height: 420px; display: block; object-fit: contain; }
+  .an-drop.has-image { min-height: 0; border-style: solid; cursor: default; background: #050507; }
+
+  .an-modes { display: flex; gap: 8px; flex-wrap: wrap; }
+  .an-mode { background: transparent; border: 1px solid var(--term-border); color: var(--term-muted); font-family: var(--font-mono); font-weight: 600; font-size: 12px; padding: 8px 14px; border-radius: var(--radius-md); cursor: pointer; transition: all 120ms; }
+  .an-mode:hover:not(:disabled) { border-color: var(--term-border-strong); color: var(--term-fg); }
+  .an-mode.active { border-color: var(--syn-cyan); color: var(--syn-cyan); background: var(--cyan-8); }
+  .an-mode:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .an-result-wrap { border: 1px solid var(--term-border); border-radius: var(--radius-lg); overflow: hidden; background: var(--term-bg); }
+  .an-result-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--term-divider); }
+  .an-result-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--syn-cyan); }
+  .an-result-actions { margin-left: auto; display: flex; gap: 6px; }
+  .an-result { padding: 14px 16px; font-size: 14px; line-height: 1.6; color: var(--term-fg); min-height: 48px; white-space: normal; word-break: break-word; }
+  .an-result p { margin: 0 0 0.6em; } .an-result p:last-child { margin-bottom: 0; }
+  .an-result ul, .an-result ol { margin: 0.3em 0; padding-left: 1.3em; }
+  .an-result pre { background: var(--term-surface-2); border: 1px solid var(--term-border); border-radius: 5px; padding: 0.55rem 0.7rem; overflow-x: auto; font-size: 0.85em; white-space: pre-wrap; }
+  .an-result code { font-family: var(--font-mono); }
+  .an-result .an-cursor { display: inline-block; width: 7px; height: 1.05em; background: var(--syn-cyan); vertical-align: text-bottom; animation: an-pulse 0.9s ease-in-out infinite; }
+
+  .an-error { color: var(--syn-pink); font-family: var(--font-mono); font-size: 13px; }
+</style>
+
+<script>
+(() => {
+  'use strict';
+  const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
+  const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
+  const MENTRIA_VL_CONFIG = { hidden_size: 768, intermediate_size: 3072, num_heads: 12, head_dim: 64, out_hidden_size: 1024, depth: 12, patch_size: 16, temporal_patch_size: 2, spatial_merge_size: 2, num_position_embeddings: 2304, num_grid_per_side: 48, eps: 1e-6, prefix: 'visual' };
+  const MAX_TOKENS = 512;
+
+  const COPY = {
+    statusIdle:       {{ ("tool.annotate-image.status_idle"       | t) | dump | safe }},
+    statusLoading:    {{ ("tool.annotate-image.status_loading"    | t) | dump | safe }},
+    statusReady:      {{ ("tool.annotate-image.status_ready"      | t) | dump | safe }},
+    statusGenerating: {{ ("tool.annotate-image.status_generating" | t) | dump | safe }},
+    errNoWebgpu:      {{ ("tool.annotate-image.err_no_webgpu"     | t) | dump | safe }},
+    errLoad:          {{ ("tool.annotate-image.err_load"          | t) | dump | safe }},
+    errDeviceLost:    {{ ("tool.annotate-image.err_device_lost"   | t) | dump | safe }},
+    emptyResponse:    {{ ("tool.annotate-image.empty_response"    | t) | dump | safe }},
+    copy:             {{ ("tool.annotate-image.copy"              | t) | dump | safe }},
+    copied:           {{ ("tool.annotate-image.copied"           | t) | dump | safe }},
+    badFile:          {{ ("tool.annotate-image.bad_file"          | t) | dump | safe }},
+    sysPrompt:        {{ ("tool.annotate-image.sys_prompt"        | t) | dump | safe }},
+    labels: {
+      describe: {{ ("tool.annotate-image.mode_describe" | t) | dump | safe }},
+      ocr:      {{ ("tool.annotate-image.mode_ocr"      | t) | dump | safe }},
+      alt:      {{ ("tool.annotate-image.mode_alt"      | t) | dump | safe }},
+      tags:     {{ ("tool.annotate-image.mode_tags"     | t) | dump | safe }}
+    },
+    prompts: {
+      describe: {{ ("tool.annotate-image.prompt_describe" | t) | dump | safe }},
+      ocr:      {{ ("tool.annotate-image.prompt_ocr"      | t) | dump | safe }},
+      alt:      {{ ("tool.annotate-image.prompt_alt"      | t) | dump | safe }},
+      tags:     {{ ("tool.annotate-image.prompt_tags"     | t) | dump | safe }}
+    }
+  };
+
+  const dot = document.getElementById('an-status-dot');
+  const statusText = document.getElementById('an-status-text');
+  const progressWrap = document.getElementById('an-progress');
+  const progressBar = document.getElementById('an-progress-bar');
+  const progressLabel = document.getElementById('an-progress-label');
+  const drop = document.getElementById('an-drop');
+  const fileInput = document.getElementById('an-file');
+  const dropInner = document.getElementById('an-drop-inner');
+  const preview = document.getElementById('an-preview');
+  const modesEl = document.getElementById('an-modes');
+  const resultWrap = document.getElementById('an-result-wrap');
+  const resultEl = document.getElementById('an-result');
+  const resultLabel = document.getElementById('an-result-label');
+  const deleteBtn = document.getElementById('an-delete');
+
+  function setStatus(state, text){ dot.className = 'an-status-dot an-status-dot--' + state; statusText.textContent = text; }
+
+  if (!navigator.gpu){ setStatus('error', COPY.errNoWebgpu); drop.style.pointerEvents = 'none'; drop.style.opacity = '0.5'; return; }
+
+  let MentriaEngine = null, engine = null, loaded = false, loadingPromise = null, generating = false;
+  let curImage = null, curMode = 'describe', curName = 'image';
+
+  async function fileToEngineImage(file, targetSize = 448){
+    const bitmap = await createImageBitmap(file);
+    let w = bitmap.width, h = bitmap.height;
+    const scale = Math.min(1, targetSize / Math.max(w, h));
+    w = Math.max(32, Math.round(w * scale / 32) * 32);
+    h = Math.max(32, Math.round(h * scale / 32) * 32);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    const { data } = ctx.getImageData(0, 0, w, h);
+    const rgbHwc = new Uint8Array(w * h * 3);
+    for (let i = 0, j = 0; i < data.length; i += 4, j += 3){ rgbHwc[j] = data[i]; rgbHwc[j+1] = data[i+1]; rgbHwc[j+2] = data[i+2]; }
+    bitmap.close && bitmap.close();
+    return { rgbHwc, h, w };
+  }
+
+  function onProgress(p){
+    if (!p) return;
+    if (typeof p.progress === 'number'){ const pct = Math.round(p.progress * 100); progressBar.style.setProperty('--p', pct + '%'); progressLabel.textContent = pct + '%'; }
+    if (p.message) statusText.textContent = p.message;
+  }
+
+  async function ensureModel(){
+    if (loaded) return true;
+    if (loadingPromise) return loadingPromise;
+    loadingPromise = (async () => {
+      if (window.mentriaConfirmHeavyDownload){ const ok = await window.mentriaConfirmHeavyDownload(); if (!ok){ loadingPromise = null; return false; } }
+      setStatus('loading', COPY.statusLoading); progressWrap.style.display = 'flex';
+      try {
+        if (!MentriaEngine) ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
+        engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+        window.mentriaWrapEngine && window.mentriaWrapEngine(engine);
+        engine.onProgress = onProgress;
+        engine.onDeviceLost = (info) => { setStatus('error', COPY.errDeviceLost); console.error('WebGPU device lost:', info); loaded = false; engine = null; };
+        await engine.init();
+        await engine.loadModel({ modelUrl: MENTRIA_MODEL_BASE, shards: ['qwen3.5-0.8b-q4-tied.safetensors'], allowTiedEmbed: true, tokenizerUrl: MENTRIA_MODEL_BASE, visionModelUrl: MENTRIA_MODEL_BASE, visionShards: ['qwen3.5-0.8b-vl-q4.safetensors'], visionConfig: MENTRIA_VL_CONFIG });
+        progressWrap.style.display = 'none';
+        loaded = true; deleteBtn.style.display = '';
+        return true;
+      } catch (err){
+        progressWrap.style.display = 'none';
+        setStatus('error', COPY.errLoad + (err && err.message || err));
+        console.error('annotate model load error:', err);
+        loadingPromise = null;
+        return false;
+      }
+    })();
+    return loadingPromise;
+  }
+
+  async function run(mode){
+    if (generating || !curImage) return;
+    const ok = await ensureModel();
+    if (!ok || !engine) return;
+    generating = true;
+    setModeButtons(mode, true);
+    setStatus('generating', COPY.statusGenerating);
+    resultWrap.hidden = false;
+    resultLabel.textContent = COPY.labels[mode] || '';
+    if (window.renderMarkdownReady){ try { await window.renderMarkdownReady; } catch(_){} }
+    let full = '', pending = false;
+    const paint = () => {
+      const display = full.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      if (window.renderMarkdown) resultEl.innerHTML = (renderMarkdown(display) || '') + '<span class="an-cursor"></span>';
+      else resultEl.textContent = display;
+      pending = false;
+    };
+    resultEl.innerHTML = '<span class="an-cursor"></span>';
+    try {
+      const params = {
+        messages: [
+          { role: 'system', content: COPY.sysPrompt },
+          { role: 'user', content: [ { type: 'image' }, { type: 'text', text: COPY.prompts[mode] } ] }
+        ],
+        images: [ { rgbHwc: curImage.rgbHwc, h: curImage.h, w: curImage.w } ],
+        maxTokens: MAX_TOKENS, temperature: 0, topK: 1, topP: 1.0, repetitionPenalty: 1.15, enableThinking: false
+      };
+      await engine.generate(params, (event) => {
+        if (typeof event.token === 'string' && event.token.length > 0){
+          if (/^<\|[^|]*\|>$/.test(event.token)) return;
+          full += event.token;
+          if (!pending){ pending = true; requestAnimationFrame(paint); }
+        }
+      });
+      const display = full.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<\|[^|]*\|>/g, '').trim();
+      lastText = display;
+      if (window.renderMarkdown) resultEl.innerHTML = renderMarkdown(display) || ('<p>' + esc(COPY.emptyResponse) + '</p>');
+      else resultEl.textContent = display || COPY.emptyResponse;
+      setStatus('ready', COPY.statusReady);
+    } catch (err){
+      resultEl.innerHTML = '<span class="an-error">' + esc(COPY.errLoad + (err && err.message || err)) + '</span>';
+      setStatus('error', COPY.errLoad);
+    } finally {
+      generating = false;
+      setModeButtons(curMode, false);
+    }
+  }
+  let lastText = '';
+  function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function setModeButtons(active, disabled){
+    modesEl.querySelectorAll('.an-mode').forEach(b => { b.classList.toggle('active', b.dataset.mode === active); b.disabled = !!disabled; });
+  }
+
+  async function loadImage(file){
+    if (!file || !file.type || !file.type.startsWith('image/')){ setStatus('error', COPY.badFile); return; }
+    curName = (file.name || 'image').replace(/\.[^.]+$/, '');
+    try {
+      const url = URL.createObjectURL(file);
+      preview.src = url; preview.hidden = false; dropInner.style.display = 'none';
+      drop.classList.add('has-image');
+      curImage = await fileToEngineImage(file);
+      modesEl.hidden = false;
+      curMode = 'describe';
+      run('describe');
+    } catch (err){ setStatus('error', COPY.badFile); console.error(err); }
+  }
+
+  // upload interactions
+  fileInput.addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; if (f) loadImage(f); fileInput.value = ''; });
+  drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('dragover'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+  drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('dragover'); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) loadImage(f); });
+  // paste from clipboard
+  window.addEventListener('paste', (e) => { const items = e.clipboardData && e.clipboardData.items; if (!items) return; for (const it of items){ if (it.type && it.type.startsWith('image/')){ const f = it.getAsFile(); if (f) loadImage(f); break; } } });
+
+  modesEl.addEventListener('click', (e) => {
+    const b = e.target.closest('.an-mode'); if (!b || generating) return;
+    curMode = b.dataset.mode; setModeButtons(curMode, false); run(curMode);
+  });
+
+  document.getElementById('an-copy').addEventListener('click', () => {
+    const txt = resultEl.textContent.trim(); if (!txt) return;
+    navigator.clipboard.writeText(txt).catch(()=>{});
+    const btn = document.getElementById('an-copy'); btn.textContent = COPY.copied; setTimeout(()=>btn.textContent = COPY.copy, 1200);
+  });
+  document.getElementById('an-download').addEventListener('click', () => {
+    const txt = resultEl.textContent.trim(); if (!txt) return;
+    const blob = new Blob([txt], { type: 'text/plain' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = curName + '-' + curMode + '.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById('an-new').addEventListener('click', () => {
+    curImage = null; preview.hidden = true; preview.removeAttribute('src'); dropInner.style.display = '';
+    drop.classList.remove('has-image'); modesEl.hidden = true; resultWrap.hidden = true; resultEl.innerHTML = '';
+    if (loaded) setStatus('ready', COPY.statusReady); else setStatus('idle', COPY.statusIdle);
+  });
+  deleteBtn.addEventListener('click', async () => {
+    try { if (window.caches){ const keys = await caches.keys(); await Promise.all(keys.filter(k => k === 'mentria-models' || k.startsWith('mentria-models-')).map(k => caches.delete(k))); } } catch(_){}
+    location.reload();
+  });
+
+  setStatus('idle', COPY.statusIdle);
+
+  // "open with" — PWA file handler
+  if ('launchQueue' in window && 'setConsumer' in window.launchQueue){
+    window.launchQueue.setConsumer(async (params) => {
+      if (!params || !params.files || !params.files.length) return;
+      try { const file = await params.files[0].getFile(); if (file) loadImage(file); } catch(_){}
+    });
+  }
+})();
+</script>
+<script src="/assets/js/markdown.js?v={{ buildHash }}"></script>

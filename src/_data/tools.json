@@ -70,6 +70,13 @@
     "group": "Create"
   },
   {
+    "slug": "annotate-image",
+    "title": "Annotate Image",
+    "summary": "Upload an image, get an instant on-device AI description, alt-text, transcription, or tags — tested one-tap prompts, nothing uploaded. Open images straight from your file manager.",
+    "category": "AI",
+    "group": "AI"
+  },
+  {
     "slug": "ai-chat",
     "title": "AI Chat",
     "summary": "Chat with Qwen3.5-0.8B running locally in your browser via WebGPU. Supports vision. No data leaves your device.",

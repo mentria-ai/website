@@ -377,6 +377,24 @@
    <path d="M20 4h8l-4 7Z" fill="url(#pkdecisionwheel)"></path>
    <path d="M21 4.6h4.5l-2.2 3.8Z" fill="#fff" opacity=".3"></path>
  </g></symbol>
+<symbol id="tool-annotate-image" viewBox="0 0 48 48"><defs>
+<linearGradient id="cyannimg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="puannimg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4B5FD"></stop><stop offset="1" stop-color="#9B7DF7"></stop></linearGradient>
+<linearGradient id="amannimg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="gnannimg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
+<radialGradient id="dkannimg" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#2a2438"></stop><stop offset="1" stop-color="#100e14"></stop></radialGradient>
+<linearGradient id="glossannimg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".4"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<filter id="shannimg" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shannimg)">
+   <rect x="7" y="9" width="34" height="30" rx="6" fill="url(#dkannimg)"></rect>
+   <rect x="7" y="9" width="34" height="30" rx="6" fill="none" stroke="url(#cyannimg)" stroke-width="2.2"></rect>
+   <circle cx="16.5" cy="18" r="3" fill="url(#amannimg)"></circle>
+   <path d="M11 35l8.5-10 6 6.5 4.5-5L37 35Z" fill="url(#gnannimg)"></path>
+   <path d="M25.5 31.5l4.5-5L37 35H22Z" fill="url(#cyannimg)" opacity=".85"></path>
+   <rect x="7" y="9" width="34" height="15" rx="6" fill="url(#glossannimg)" opacity=".45"></rect>
+   <path d="M34 8.5l1.5 3.6 3.6 1.5-3.6 1.5L34 18.7l-1.5-3.6L28.9 13.6l3.6-1.5Z" fill="url(#puannimg)"></path>
+   <path d="M34 10.4l0.7 1.7 1.7 0.7-1.7 0.7-0.7 1.7-0.7-1.7-1.7-0.7 1.7-0.7Z" fill="#fff" opacity=".5"></path>
+ </g></symbol>
 <symbol id="tool-chess" viewBox="0 0 48 48"><defs>
 <linearGradient id="cychess" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
 <linearGradient id="amchess" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>

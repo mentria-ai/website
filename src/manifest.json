@@ -39,6 +39,15 @@
       "accept": {
         "text/markdown": [".md", ".markdown"]
       }
+    },
+    {
+      "action": "/tools/annotate-image/",
+      "accept": {
+        "image/png": [".png"],
+        "image/jpeg": [".jpg", ".jpeg"],
+        "image/webp": [".webp"],
+        "image/gif": [".gif"]
+      }
     }
   ]
 }

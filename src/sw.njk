@@ -2,6 +2,7 @@
 permalink: /sw.js
 eleventyExcludeFromCollections: true
 ---
+importScripts('/assets/js/mentria-push-db.js?v={{ buildHash }}');
 const CACHE_NAME = 'mentria-cache-{{ buildHash }}';
 const MODELS_CACHE = 'mentria-models';
 const MODELS_MARKER = 'mentria-models-{{ modelsVersion }}';
@@ -62,6 +63,8 @@ const ASSETS = [
   '/assets/js/mentria-sync.js',
   '/assets/js/mentria-identity.js',
   '/assets/js/mentria-gamepad.js',
+  '/assets/js/mentria-push-db.js',
+  '/assets/js/mentria-push.js',
   '/comms/',
   '/assets/vendor/trystero-nostr.js'
 ];
@@ -86,6 +89,53 @@ self.addEventListener('activate', event => {
       await caches.open(MODELS_MARKER);
     }
     await self.clients.claim();
+  })());
+});
+
+self.addEventListener('push', event => {
+  event.waitUntil((async () => {
+    let data = {};
+    try { data = event.data ? event.data.json() : {}; } catch (_) {}
+    const scheduleId = data.scheduleId;
+    const fallback = data.fallbackTitle || 'Mentria';
+    let spec = null;
+    if (scheduleId && self.MentriaPushDB) {
+      try { spec = await self.MentriaPushDB.getPending(scheduleId); } catch (_) {}
+    }
+    if (spec) {
+      await self.registration.showNotification(spec.title, {
+        body: spec.body || '',
+        tag: spec.tag || scheduleId,
+        icon: spec.icon || '/assets/img/icon-192x192.png',
+        badge: '/assets/img/badge.svg',
+        data: { url: spec.url || '/' },
+        requireInteraction: true,
+        renotify: true,
+        actions: spec.actions || []
+      });
+      try { await self.MentriaPushDB.deletePending(scheduleId); } catch (_) {}
+    } else {
+      await self.registration.showNotification(fallback, {
+        body: 'You have a reminder.',
+        icon: '/assets/img/icon-192x192.png',
+        badge: '/assets/img/badge.svg',
+        data: { url: '/' }
+      });
+    }
+  })());
+});
+
+self.addEventListener('pushsubscriptionchange', event => {
+  event.waitUntil((async () => {
+    try {
+      const r = await fetch('https://relay.mentria.ai/push/vapid-public', { cache: 'no-store' });
+      const { publicKey } = await r.json();
+      const pad = '='.repeat((4 - publicKey.length % 4) % 4);
+      const b64 = (publicKey + pad).replace(/-/g, '+').replace(/_/g, '/');
+      const raw = atob(b64), key = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) key[i] = raw.charCodeAt(i);
+      await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+    } catch (_) {}
   })());
 });
 

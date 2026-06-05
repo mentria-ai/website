@@ -460,7 +460,14 @@
       if (code.length < 6){ P2P.setLed('warn', T.room_invalid); return; }
       try { await P2P.start('guest', code); } catch(e){ P2P.setLed('warn', T.peer_error); }
     };
-    $('btn-copy-code').onclick = () => { navigator.clipboard.writeText($('room-code').value).catch(()=>{}); $('btn-copy-code').textContent = T.copied; setTimeout(()=>$('btn-copy-code').textContent='copy',1200); };
+    $('btn-copy-code').onclick = () => { navigator.clipboard.writeText($('room-code').value).catch(()=>{}); $('btn-copy-code').textContent = T.copied; setTimeout(()=>$('btn-copy-code').textContent = T.copy, 1200); };
+    $('btn-share-link').onclick = async () => {
+      const code = $('room-code').value; if (!code) return;
+      const url = location.origin + location.pathname + '?room=' + code;
+      if (navigator.share){ try { await navigator.share({ title: document.title, url }); return; } catch (e){ if (e && e.name === 'AbortError') return; } }
+      try { await navigator.clipboard.writeText(url); } catch (e){}
+      const b = $('btn-share-link'); b.textContent = T.link_copied; setTimeout(() => b.textContent = T.share_link, 1400);
+    };
 
     $('btn-send').onclick = sendChat;
     $('chat-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
@@ -495,6 +502,14 @@
     if (status){ State.over = status; showEnd(status); }
     else if (State.mode === 'engine' && State.pos.turn !== State.humanColor) engineMove();
     else analyze();
+
+    const roomParam = (new URLSearchParams(location.search).get('room') || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (roomParam.length >= 6){
+      history.replaceState(null, '', location.pathname);
+      $('join-code').value = roomParam;
+      setMode('online');
+      P2P.start('guest', roomParam).catch(() => P2P.setLed('warn', T.peer_error));
+    }
   }
   boot();
 })();

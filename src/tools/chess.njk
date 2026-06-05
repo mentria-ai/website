@@ -108,6 +108,7 @@ eleventyComputed:
           <div id="host-panel" style="display:none; flex-direction:column; gap:8px;">
             <div class="conn-hint">{{ "tool.chess.share_code" | t }}</div>
             <div class="conn-row"><input class="text-input" id="room-code" readonly><button class="btn" id="btn-copy-code">{{ "tool.chess.copy" | t }}</button></div>
+            <button class="btn primary" id="btn-share-link">{{ "tool.chess.share_link" | t }}</button>
             <div class="conn-hint">{{ "tool.chess.host_note" | t }}</div>
           </div>
           <div id="guest-panel" style="display:none; flex-direction:column; gap:8px;">
@@ -294,7 +295,10 @@ eleventyComputed:
     peer_disconnected: {{ ("tool.chess.peer_disconnected" | t) | dump | safe }},
     peer_error: {{ ("tool.chess.peer_error" | t) | dump | safe }},
     room_invalid: {{ ("tool.chess.room_invalid" | t) | dump | safe }},
-    copied: {{ ("tool.chess.copy" | t) | dump | safe }},
+    copy: {{ ("tool.chess.copy" | t) | dump | safe }},
+    copied: {{ ("tool.chess.copied" | t) | dump | safe }},
+    share_link: {{ ("tool.chess.share_link" | t) | dump | safe }},
+    link_copied: {{ ("tool.chess.link_copied" | t) | dump | safe }},
     play_black: {{ ("tool.chess.play_black" | t) | dump | safe }},
     play_white: {{ ("tool.chess.play_white" | t) | dump | safe }}
   };

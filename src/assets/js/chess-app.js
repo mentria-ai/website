@@ -306,8 +306,12 @@
   function backToLive(){ State.cursor = -1; render(); }
   function undo(){
     if (State.history.length === 0 || State.mode === 'online') return;
+    const posAt = () => State.history.length ? applyMove(State.history[State.history.length-1].prePos, State.history[State.history.length-1].move) : startPos();
     State.history.pop();
-    State.pos = State.history.length ? applyMove(State.history[State.history.length-1].prePos, State.history[State.history.length-1].move) : startPos();
+    if (State.mode === 'engine'){
+      while (State.history.length && posAt().turn !== State.humanColor) State.history.pop();
+    }
+    State.pos = posAt();
     State.cursor = -1; State.selected = -1; State.legalForSel = []; State.over = null;
     $('end-modal').classList.remove('show');
     render(); save();

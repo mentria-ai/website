@@ -18,6 +18,12 @@ eleventyComputed:
 
 {% set toolList = tools | default([]) %}
 {% if toolList.length %}
+<div class="tools-filters" id="tools-filters">
+    <button class="tools-filter is-active" type="button" data-shelf="all">{{ "tool.search.type_all" | t }}</button>
+    <button class="tools-filter" type="button" data-shelf="tools">{{ "about.shelf_tools" | t }}</button>
+    <button class="tools-filter" type="button" data-shelf="games">{{ "about.shelf_games" | t }}</button>
+    <button class="tools-filter" type="button" data-shelf="ai">{{ "about.shelf_ai" | t }}</button>
+</div>
 <div class="tools-listing">
     <div class="tools-listing__header">
         <span>{{ "tools_page.header.category" | t }}</span>
@@ -25,7 +31,8 @@ eleventyComputed:
         <span>{{ "tools_page.header.summary" | t }}</span>
     </div>
     {% for tool in toolList %}
-    <div class="tools-listing__row">
+    {% set shelf = "games" if tool.category == "Game" else ("ai" if tool.category == "AI" else "tools") %}
+    <div class="tools-listing__row" data-shelf="{{ shelf }}">
         <span class="tools-listing__category">{{ ("category." + tool.category) | t }}</span>
         <span class="tools-listing__name"><a href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">{{ ("tools." + tool.slug + ".title") | t }}</a></span>
         <span class="tools-listing__summary">{{ ("tools." + tool.slug + ".lede") | t }}</span>
@@ -38,3 +45,38 @@ eleventyComputed:
     <p>{{ "tools_page.empty_msg" | t }}<span class="cursor-blink"></span></p>
 </div>
 {% endif %}
+
+<style>
+  .tools-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 2rem; }
+  .tools-filter { background: transparent; border: 1px solid var(--term-border); color: var(--term-muted); font-family: var(--font-mono); font-size: 0.8rem; padding: 5px 14px; border-radius: 999px; cursor: pointer; transition: all 120ms; }
+  .tools-filter:hover { color: var(--term-fg); border-color: var(--term-border-strong); }
+  .tools-filter.is-active { color: var(--syn-cyan); border-color: var(--syn-cyan); background: var(--cyan-8); }
+  .tools-filters + .tools-listing { margin-top: 0.75rem; }
+  .tools-listing__row[hidden] { display: none; }
+</style>
+
+<script>
+(function () {
+  var filters = document.getElementById('tools-filters');
+  if (!filters) return;
+  var rows = Array.prototype.slice.call(document.querySelectorAll('.tools-listing__row'));
+  var valid = { all: 1, tools: 1, games: 1, ai: 1 };
+  function apply(shelf) {
+    if (!valid[shelf]) shelf = 'all';
+    rows.forEach(function (r) {
+      r.hidden = !(shelf === 'all' || r.getAttribute('data-shelf') === shelf);
+    });
+    Array.prototype.forEach.call(filters.querySelectorAll('[data-shelf]'), function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-shelf') === shelf);
+    });
+    var url = new URL(location.href);
+    if (shelf !== 'all') url.searchParams.set('shelf', shelf); else url.searchParams.delete('shelf');
+    history.replaceState(null, '', url);
+  }
+  filters.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-shelf]');
+    if (b) apply(b.getAttribute('data-shelf'));
+  });
+  apply(new URLSearchParams(location.search).get('shelf') || 'all');
+})();
+</script>

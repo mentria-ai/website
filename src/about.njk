@@ -30,28 +30,27 @@ eleventyComputed:
   <section class="reveal">
     <div class="about-section-label">{{ "about.ship_label" | t }}</div>
     <h2 class="about-section-h">{{ "about.ship_h" | t }}</h2>
-    {% set postCount = collections.post | length %}
+    {% set postCount = (collections.post | length) + shelves.deepcuts %}
     {% set maxCount = shelves.utility if shelves.utility > shelves.games else shelves.games %}
     {% set maxCount = maxCount if maxCount > shelves.ai else shelves.ai %}
-    {% set maxCount = maxCount if maxCount > postCount else postCount %}
     <div class="about-ship-grid">
-      <a class="about-ship-card amber" href="{{ '/tools/' | localeUrl(lang) }}">
+      <a class="about-ship-card amber" href="{{ '/tools/' | localeUrl(lang) }}?shelf=tools">
         <span class="about-ship-num">{{ shelves.utility }}</span>
         <span class="about-ship-label">{{ "about.shelf_tools" | t }}</span>
         <div class="about-units" aria-hidden="true">{% for i in range(0, maxCount) %}<i class="unit{% if i < shelves.utility %} on{% endif %}" style="--i:{{ i }}"></i>{% endfor %}</div>
       </a>
-      <a class="about-ship-card pink" href="{{ '/tools/' | localeUrl(lang) }}">
+      <a class="about-ship-card pink" href="{{ '/tools/' | localeUrl(lang) }}?shelf=games">
         <span class="about-ship-num">{{ shelves.games }}</span>
         <span class="about-ship-label">{{ "about.shelf_games" | t }}</span>
         <div class="about-units" aria-hidden="true">{% for i in range(0, maxCount) %}<i class="unit{% if i < shelves.games %} on{% endif %}" style="--i:{{ i }}"></i>{% endfor %}</div>
       </a>
-      <a class="about-ship-card cyan" href="{{ '/tools/' | localeUrl(lang) }}">
+      <a class="about-ship-card cyan" href="{{ '/tools/' | localeUrl(lang) }}?shelf=ai">
         <span class="about-ship-num">{{ shelves.ai }}</span>
         <span class="about-ship-label">{{ "about.shelf_ai" | t }}</span>
         <div class="about-units" aria-hidden="true">{% for i in range(0, maxCount) %}<i class="unit{% if i < shelves.ai %} on{% endif %}" style="--i:{{ i }}"></i>{% endfor %}</div>
       </a>
       <a class="about-ship-card purple" href="{{ '/feed/' | localeUrl(lang) }}">
-        <span class="about-ship-num">{{ collections.post | length }}</span>
+        <span class="about-ship-num">{{ postCount }}</span>
         <span class="about-ship-label">{{ "about.shelf_writing" | t }}</span>
         <div class="about-units" aria-hidden="true">{% for i in range(0, maxCount) %}<i class="unit{% if i < postCount %} on{% endif %}" style="--i:{{ i }}"></i>{% endfor %}</div>
       </a>

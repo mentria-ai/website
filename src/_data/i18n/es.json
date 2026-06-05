@@ -1032,9 +1032,9 @@
       "mode_tags": "Objetos",
       "sys_prompt": "Eres el anotador de imágenes local de Mentria, un modelo de visión que se ejecuta en el navegador. Observa la imagen con atención y responde a la petición de forma directa, precisa y concisa. Describe solo lo que es realmente visible — nunca inventes detalles que no estén ahí.",
       "prompt_describe": "Describe esta imagen en detalle — el sujeto principal, el entorno, los colores y cualquier detalle notable. Escribe de 2 a 4 frases claras. Describe solo lo que es realmente visible.",
-      "prompt_ocr": "Transcribe exactamente todo el texto visible en esta imagen, conservando los saltos de línea. Si no hay texto legible, responde exactamente: No se encontró texto.",
-      "prompt_alt": "Escribe una frase concisa de texto alternativo (de menos de unos 125 caracteres) que describa esta imagen para un usuario de lector de pantalla. Devuelve solo la frase, nada más.",
-      "prompt_tags": "Enumera los principales objetos, personas y elementos visibles en esta imagen como etiquetas cortas separadas por comas. Da de 5 a 12 etiquetas. Devuelve solo las etiquetas."
+      "prompt_ocr": "Lee todo el texto de esta imagen y transcríbelo exactamente como aparece, conservando el orden y los saltos de línea originales. Incluye todos los títulos, etiquetas, números y la letra pequeña. No añadas comentarios, notas, resúmenes ni explicaciones — devuelve solo el texto transcrito y nada más. Solo si la imagen realmente no contiene ningún texto, responde: (no se encontró texto).",
+      "prompt_alt": "En una sola frase breve de 20 palabras como máximo, describe esta imagen para un usuario de lector de pantalla. Capta solo lo más importante que se muestra — no enumeres cada detalle ni transcribas texto. Devuelve solo esa frase corta y nada más.",
+      "prompt_tags": "Observa la imagen con atención y enumera su contenido como etiquetas cortas separadas por comas: los sujetos principales, objetos, personas, colores y el entorno. Si la imagen es principalmente texto o un documento, etiquétala así (por ejemplo: texto, documento, captura de pantalla). Da de 5 a 12 etiquetas. Produce siempre etiquetas — nunca te niegues ni expliques. Devuelve solo las etiquetas separadas por comas."
     }
   },
   "category": {

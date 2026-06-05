@@ -1032,9 +1032,9 @@
       "mode_tags": "Objects",
       "sys_prompt": "You are Mentria's local image annotator, a vision model running in the browser. Look carefully at the image and answer the request directly, accurately, and concisely. Describe only what is actually visible — never invent details that aren't there.",
       "prompt_describe": "Describe this image in detail — the main subject, the setting, colors, and any notable details. Write 2 to 4 clear sentences. Only describe what is actually visible.",
-      "prompt_ocr": "Transcribe all text visible in this image exactly, preserving line breaks. If there is no readable text, reply with exactly: No text found.",
-      "prompt_alt": "Write one concise alt-text sentence (under about 125 characters) describing this image for a screen-reader user. Output only the sentence, nothing else.",
-      "prompt_tags": "List the main objects, people, and elements visible in this image as short, comma-separated tags. Give 5 to 12 tags. Output only the tags."
+      "prompt_ocr": "Read every piece of text in this image and transcribe it exactly as written, preserving the original line order and line breaks. Include all headings, labels, numbers, and fine print. Do not add any commentary, notes, summaries, or explanation — output the transcribed text and nothing else. Only if the image genuinely contains no text at all, reply: (no text found).",
+      "prompt_alt": "In one brief sentence of at most 20 words, describe this image for a screen-reader user. Capture only the single most important thing shown — do not list every detail or transcribe text. Output just that one short sentence and nothing else.",
+      "prompt_tags": "Look closely at the image and list its contents as short, comma-separated keyword tags: the main subjects, objects, people, colors, and setting. If the image is mostly text or a document, tag it that way (for example: text, document, screenshot). Give 5 to 12 tags. Always produce tags — never refuse or explain. Output only the comma-separated tags."
     }
   },
   "category": {

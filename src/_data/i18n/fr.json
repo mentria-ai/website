@@ -1032,9 +1032,9 @@
       "mode_tags": "Objets",
       "sys_prompt": "Tu es l'annotateur d'images local de Mentria, un modèle de vision qui s'exécute dans le navigateur. Observe attentivement l'image et réponds à la demande de façon directe, précise et concise. Décris uniquement ce qui est réellement visible — n'invente jamais de détails absents.",
       "prompt_describe": "Décris cette image en détail — le sujet principal, le décor, les couleurs et tout détail notable. Écris 2 à 4 phrases claires. Décris uniquement ce qui est réellement visible.",
-      "prompt_ocr": "Transcris exactement tout le texte visible dans cette image, en conservant les sauts de ligne. S'il n'y a aucun texte lisible, réponds exactement : Aucun texte trouvé.",
-      "prompt_alt": "Rédige une phrase concise de texte alternatif (moins d'environ 125 caractères) décrivant cette image pour un utilisateur de lecteur d'écran. Ne renvoie que la phrase, rien d'autre.",
-      "prompt_tags": "Liste les principaux objets, personnes et éléments visibles dans cette image sous forme d'étiquettes courtes séparées par des virgules. Donne 5 à 12 étiquettes. Ne renvoie que les étiquettes."
+      "prompt_ocr": "Lis tout le texte de cette image et transcris-le exactement tel qu'il apparaît, en conservant l'ordre et les sauts de ligne d'origine. Inclus tous les titres, étiquettes, chiffres et le texte en petits caractères. N'ajoute aucun commentaire, note, résumé ni explication — ne renvoie que le texte transcrit, rien d'autre. Seulement si l'image ne contient véritablement aucun texte, réponds : (aucun texte trouvé).",
+      "prompt_alt": "En une seule phrase brève d'au plus 20 mots, décris cette image pour un utilisateur de lecteur d'écran. Ne retiens que l'élément le plus important montré — n'énumère pas chaque détail et ne transcris pas le texte. Ne renvoie que cette courte phrase, rien d'autre.",
+      "prompt_tags": "Observe attentivement l'image et liste son contenu sous forme d'étiquettes courtes séparées par des virgules : les sujets principaux, objets, personnes, couleurs et le décor. Si l'image est surtout du texte ou un document, étiquette-la ainsi (par exemple : texte, document, capture d'écran). Donne 5 à 12 étiquettes. Produis toujours des étiquettes — ne refuse jamais et n'explique pas. Ne renvoie que les étiquettes séparées par des virgules."
     }
   },
   "category": {

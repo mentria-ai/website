@@ -1032,9 +1032,9 @@
       "mode_tags": "Objetos",
       "sys_prompt": "Você é o anotador de imagens local da Mentria, um modelo de visão que roda no navegador. Observe a imagem com atenção e responda ao pedido de forma direta, precisa e concisa. Descreva apenas o que é realmente visível — nunca invente detalhes que não estão ali.",
       "prompt_describe": "Descreva esta imagem em detalhes — o assunto principal, o cenário, as cores e quaisquer detalhes notáveis. Escreva de 2 a 4 frases claras. Descreva apenas o que é realmente visível.",
-      "prompt_ocr": "Transcreva exatamente todo o texto visível nesta imagem, preservando as quebras de linha. Se não houver texto legível, responda exatamente: Nenhum texto encontrado.",
-      "prompt_alt": "Escreva uma frase concisa de texto alternativo (com menos de cerca de 125 caracteres) descrevendo esta imagem para um usuário de leitor de tela. Devolva apenas a frase, nada mais.",
-      "prompt_tags": "Liste os principais objetos, pessoas e elementos visíveis nesta imagem como tags curtas separadas por vírgulas. Dê de 5 a 12 tags. Devolva apenas as tags."
+      "prompt_ocr": "Leia todo o texto desta imagem e transcreva-o exatamente como aparece, preservando a ordem e as quebras de linha originais. Inclua todos os títulos, rótulos, números e o texto em letras miúdas. Não adicione comentários, notas, resumos nem explicações — devolva apenas o texto transcrito e nada mais. Apenas se a imagem realmente não contiver texto algum, responda: (nenhum texto encontrado).",
+      "prompt_alt": "Em uma única frase curta de no máximo 20 palavras, descreva esta imagem para um usuário de leitor de tela. Capture apenas o mais importante que aparece — não liste cada detalhe nem transcreva texto. Devolva apenas essa frase curta e nada mais.",
+      "prompt_tags": "Observe a imagem com atenção e liste seu conteúdo como tags curtas separadas por vírgulas: os principais assuntos, objetos, pessoas, cores e o cenário. Se a imagem for principalmente texto ou um documento, marque-a assim (por exemplo: texto, documento, captura de tela). Dê de 5 a 12 tags. Sempre produza tags — nunca recuse nem explique. Devolva apenas as tags separadas por vírgulas."
     }
   },
   "category": {

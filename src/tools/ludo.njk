@@ -101,8 +101,8 @@ eleventyComputed:
 
   .ludo-app .dice-area { display: flex; flex-direction: column; align-items: center; gap: 12px; }
   .ludo-app .die { width: 72px; height: 72px; border-radius: 14px; background: linear-gradient(155deg, var(--term-surface-3), var(--term-surface-2)); border: 1px solid var(--term-border-strong); display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); padding: 11px; box-sizing: border-box; gap: 2px; box-shadow: var(--elev-2); will-change: transform; }
-  .ludo-app .die.rolling { animation: ld-tumble 0.6s cubic-bezier(0.25, 0.85, 0.35, 1); }
-  @keyframes ld-tumble { 0%{transform:rotate(0deg) scale(1)} 55%{transform:rotate(230deg) scale(1.14)} 100%{transform:rotate(360deg) scale(1)} }
+  .ludo-app .die.rolling { animation: ld-roll 0.5s ease-in-out; }
+  @keyframes ld-roll { 0%,100%{transform:scale(1)} 25%{transform:scale(0.9)} 50%{transform:scale(1)} 75%{transform:scale(0.9)} }
   .ludo-app .pip { border-radius: 50%; background: transparent; align-self: center; justify-self: center; width: 11px; height: 11px; }
   .ludo-app .pip.on { background: var(--die-color, var(--syn-cyan)); box-shadow: 0 0 6px var(--die-color, var(--syn-cyan)); }
   .ludo-app .roll-btn { width: 100%; padding: 11px; border-radius: var(--radius-md); border: 1px solid var(--syn-cyan); background: var(--cyan-8); color: var(--syn-cyan); font-weight: 700; font-size: 14px; letter-spacing: 0.04em; font-family: var(--font-mono); cursor: pointer; transition: all 120ms; }
@@ -273,7 +273,7 @@ eleventyComputed:
   function drawCenter(){
     const cx=6*CELL, cy=6*CELL;
     const tl=[cx,cy], tr=[cx+3*CELL,cy], br=[cx+3*CELL,cy+3*CELL], bl=[cx,cy+3*CELL], mid=[cx+1.5*CELL,cy+1.5*CELL];
-    const tris = [ [tl,tr,mid,0], [tr,br,mid,1], [br,bl,mid,2], [bl,tl,mid,3] ];
+    const tris = [ [tl,tr,mid,1], [tr,br,mid,2], [br,bl,mid,3], [bl,tl,mid,0] ];
     for (const [a,b,m,p] of tris){
       ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.lineTo(m[0],m[1]); ctx.closePath();
       const inPlay = State.active.includes(p);
@@ -393,7 +393,7 @@ eleventyComputed:
       updateDie(d, p);
       State.rolling = false;
       finishRoll(p, d);
-    }, 600);
+    }, 500);
   }
   function finishRoll(p, d){
     State.dice = d; State.rolled = true;

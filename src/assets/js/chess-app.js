@@ -332,8 +332,10 @@
     if (State.over || State.history.length === 0) return;
     const ok = window.mentriaConfirm ? await window.mentriaConfirm(T.confirm_resign) : confirm(T.confirm_resign);
     if (!ok) return;
-    State.over = { type:'resigned', winner: State.pos.turn === 'w' ? 'b' : 'w' };
-    if (State.mode === 'online' && P2P.action) P2P.send({ kind:'resign' });
+    const loser = State.mode === 'online' ? P2P.color : (State.mode === 'engine' ? State.humanColor : State.pos.turn);
+    const winner = loser === 'w' ? 'b' : 'w';
+    State.over = { type:'resigned', winner };
+    if (State.mode === 'online' && P2P.action) P2P.send({ kind:'resign', winner });
     showEnd(State.over);
   }
   function showEnd(s){
@@ -416,7 +418,7 @@
       if (!m || typeof m !== 'object') return;
       if (m.kind === 'move'){ doMove({ ...m.move, fromPeer: true }); }
       else if (m.kind === 'chat'){ appendChat('peer', m.text); }
-      else if (m.kind === 'resign'){ State.over = { type:'resigned', winner: State.pos.turn }; showEnd(State.over); }
+      else if (m.kind === 'resign'){ State.over = { type:'resigned', winner: m.winner || P2P.color }; showEnd(State.over); }
       else if (m.kind === 'sync'){ State.pos = m.pos; State.history = m.history || []; State.over = null; $('end-modal').classList.remove('show'); render(); }
     }
   };

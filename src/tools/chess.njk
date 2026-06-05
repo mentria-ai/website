@@ -182,7 +182,7 @@ eleventyComputed:
   .chess-app .captured .adv { margin-left: auto; font-size: 11px; color: var(--syn-amber); font-weight: 600; }
   .chess-app .captured.black span { color: #2a1018; text-shadow: 0 0 6px rgba(244,114,182,0.5); }
   .chess-app .board-shell { position: relative; aspect-ratio: 1; width: 100%; max-width: 560px; background: #0a0a0a; border: 1px solid var(--term-border); border-radius: var(--radius-lg); box-shadow: 0 0 60px rgba(34,211,238,0.08); padding: 22px; box-sizing: border-box; }
-  .chess-app .board { width: 100%; height: 100%; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); position: relative; }
+  .chess-app .board { width: 100%; height: 100%; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); position: relative; container-type: size; }
   .chess-app .sq { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none; }
   .chess-app .sq.light { background: rgba(255,255,255,0.06); }
   .chess-app .sq.dark { background: rgba(0,0,0,0.35); }
@@ -192,7 +192,7 @@ eleventyComputed:
   .chess-app .sq.check { background: rgba(244,114,182,0.22) !important; box-shadow: inset 0 0 0 2px var(--syn-pink); }
   .chess-app .sq.dot::after { content: ""; position: absolute; width: 22%; height: 22%; border-radius: 50%; background: var(--syn-cyan); box-shadow: 0 0 8px rgba(34,211,238,0.5); pointer-events: none; }
   .chess-app .sq.ring::after { content: ""; position: absolute; inset: 6%; border: 3px solid var(--syn-cyan); border-radius: 50%; box-shadow: 0 0 10px rgba(34,211,238,0.4); pointer-events: none; }
-  .chess-app .pc { font-family: var(--font-mono); font-size: clamp(28px, 6vw, 52px); line-height: 1; pointer-events: none; transition: transform 120ms ease-out; }
+  .chess-app .pc { font-family: var(--font-mono); font-size: clamp(20px, 6vw, 52px); font-size: clamp(18px, 10cqmin, 52px); line-height: 1; pointer-events: none; transition: transform 120ms ease-out; }
   .chess-app .pc.w { color: #f5f7fb; text-shadow: 0 0 10px rgba(34,211,238,0.5), 0 0 4px rgba(34,211,238,0.6); }
   .chess-app .pc.b { color: #14060c; text-shadow: 0 0 10px rgba(244,114,182,0.55), 0 0 2px rgba(244,114,182,0.7); -webkit-text-stroke: 0.5px rgba(244,114,182,0.4); }
   .chess-app .pc.ghost { opacity: 0.5; }
@@ -251,7 +251,7 @@ eleventyComputed:
   .chess-app .toolbar .btn { font-size: 11px; padding: 5px 9px; }
 
   .chess-app .mobile-tabs { display: none; }
-  @media (max-width: 900px) {
+  @media (max-width: 1024px) {
     .chess-app .layout { display: flex; flex-direction: column; gap: 12px; }
     .chess-app .left-col, .chess-app .right-col { width: 100%; }
     .chess-app .right-col { order: 2; } .chess-app .center-col { order: 1; }

@@ -114,6 +114,8 @@ const MENTRIA_VL_CONFIG = {
   prefix: 'visual',
 };
 
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IMG_MAX = IS_IOS ? 256 : 448;
 const MAX_TOKENS = 512;
 
 /* ── Status helpers ────────────────────────────────────────────────────── */
@@ -374,7 +376,7 @@ function runApp(MentriaEngine) {
     try {
       const params = {
         messages: [...messages],
-        maxTokens: MAX_TOKENS,
+        maxTokens: (imagesForRequest && IS_IOS) ? 256 : MAX_TOKENS,
         // Greedy decoding (matches transformers.js do_sample:false)
         temperature: 0, topK: 1, topP: 1.0,
         repetitionPenalty: 1.15,   // bumped 1.10 → 1.15 to break list-cycle pattern (S+1 test)
@@ -455,7 +457,7 @@ function runApp(MentriaEngine) {
       imgThumb.src = url;
       imgPreview.style.display = '';
       attachedDataUrl = url;
-      attachedImage = await fileToEngineImage(file);
+      attachedImage = await fileToEngineImage(file, IMG_MAX);
     } catch (err) {
       console.error('Image attach error:', err);
       attachedImage = null;

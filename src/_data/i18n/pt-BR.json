@@ -141,6 +141,7 @@
     "launch_tool": "Abrir ferramenta →",
     "launcher": {
       "recents": "Recentes",
+      "noMatch": "Nenhuma ferramenta corresponde",
       "ai": "IA",
       "games": "Jogos",
       "create": "Criar",

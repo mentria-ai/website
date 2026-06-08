@@ -141,6 +141,7 @@
     "launch_tool": "Launch tool →",
     "launcher": {
       "recents": "Recents",
+      "noMatch": "No tools match",
       "ai": "AI",
       "games": "Games",
       "create": "Create",

@@ -376,6 +376,9 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .launch-tile[data-group="Dev"] { --cat: var(--syn-amber); }
 .launch-tile[data-group="Everyday"] { --cat: var(--syn-green); }
 .launch-tile { display: flex; flex-direction: column; align-items: center; gap: 0.55rem; text-decoration: none; color: var(--term-fg); width: 84px; -webkit-tap-highlight-color: transparent; }
+.launch-tile[hidden] { display: none; }
+.launcher__cat[hidden], .launcher__recents[hidden] { display: none; }
+.launcher__nomatch { text-align: center; color: var(--term-muted); font-family: var(--font-mono); font-size: 0.85rem; padding: 1.2rem 0; margin: 0; }
 .launch-tile__icon { position: relative; display: grid; place-items: center; width: 84px; height: 84px; border: 1px solid var(--term-border-strong); border-radius: 22px; background: var(--term-bg-raised); transition: border-color 0.15s ease, box-shadow 0.15s ease; }
 .launch-tile:hover .launch-tile__icon, .launch-tile:focus-visible .launch-tile__icon, .launch-tile:focus .launch-tile__icon { border-color: var(--cat); box-shadow: 0 0 16px -3px var(--cat); }
 .launch-tile__icon svg { width: 60px; height: 60px; color: var(--cat); }

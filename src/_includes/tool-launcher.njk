@@ -5,6 +5,7 @@
 ] -%}
 {%- macro tile(tool, lang) -%}
   <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}"
+     data-search="{{ tool.summary }} {{ tool.category }} {{ tool.group }} {{ tool.slug }}"
      href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">
     <span class="launch-tile__icon" aria-hidden="true">
       <svg viewBox="0 0 48 48"><use href="#tool-{{ tool.slug }}"></use></svg>
@@ -28,6 +29,7 @@
     </section>
     {%- endfor %}
   </div>
+  <p class="launcher__nomatch" id="launcher-nomatch" hidden>{{ "home.launcher.noMatch" | t }}</p>
 </section>
 
 <script>
@@ -115,5 +117,42 @@
     var el = visibleTiles()[0];
     if (el) focusTile(el);
   }
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+  var input = document.querySelector('.cli__input');
+  var launcher = document.getElementById('tools-preview');
+  if (!input || !launcher) return;
+  var noMatch = document.getElementById('launcher-nomatch');
+  function normalize(s) {
+    return (s || '').toString().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  }
+  function haystack(tile) {
+    var label = tile.querySelector('.launch-tile__label');
+    return normalize((label ? label.textContent : '') + ' ' + (tile.getAttribute('data-search') || ''));
+  }
+  function applyFilter() {
+    var qNorm = normalize(input.value.trim());
+    var tokens = qNorm.split(/[^a-z0-9]+/).filter(Boolean);
+    var tiles = launcher.querySelectorAll('.launch-tile');
+    var anyVisible = false;
+    for (var i = 0; i < tiles.length; i++) {
+      var hay = haystack(tiles[i]);
+      var match = !qNorm || hay.indexOf(qNorm) !== -1 ||
+        (tokens.length > 0 && tokens.every(function (t) { return hay.indexOf(t) !== -1; }));
+      tiles[i].hidden = !match;
+      if (match && qNorm) anyVisible = true;
+    }
+    var sections = launcher.querySelectorAll('.launcher__cat, .launcher__recents');
+    for (var j = 0; j < sections.length; j++) {
+      sections[j].hidden = !sections[j].querySelector('.launch-tile:not([hidden])');
+    }
+    if (noMatch) noMatch.hidden = !(qNorm && !anyVisible);
+  }
+  input.addEventListener('input', applyFilter);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') setTimeout(applyFilter, 0); });
 })();
 </script>

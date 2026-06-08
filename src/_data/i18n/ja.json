@@ -141,6 +141,7 @@
     "launch_tool": "ツールを開く →",
     "launcher": {
       "recents": "最近",
+      "noMatch": "一致するツールがありません",
       "ai": "AI",
       "games": "ゲーム",
       "create": "作成",

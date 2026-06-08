@@ -1,12 +1,13 @@
+<button class="deck__like-btn" id="deckLikeBtn" type="button" aria-label="Like this slide" hidden>♥</button>
 <button class="deck__fb-btn" id="deckFbBtn" type="button" aria-label="Flag a problem with this slide" hidden>!</button>
 <aside class="deck__fb" id="deckFb" hidden>
   <div class="deck__fb-card">
     <div class="deck__fb-hdr">
-      <span class="deck__fb-title">flag this slide</span>
+      <span class="deck__fb-title" id="deckFbTitle">flag this slide</span>
       <button class="deck__fb-close" id="deckFbClose" type="button" aria-label="Close">×</button>
     </div>
     <div class="deck__fb-meta" id="deckFbMeta"></div>
-    <label class="deck__fb-label">issue
+    <label class="deck__fb-label" id="deckFbKindLabel">issue
       <select class="deck__fb-select" id="deckFbKind">
         <option value="image-bad">image bad</option>
         <option value="fact-vague">fact vague</option>
@@ -44,6 +45,23 @@
   backdrop-filter: blur(8px);
 }
 .deck__fb-btn:hover { background: rgba(0, 0, 0, 0.6); color: #f0c876; }
+.deck__like-btn {
+  position: absolute;
+  top: calc(20px + env(safe-area-inset-top));
+  right: 104px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  color: #f0719a;
+  border: 1px solid rgba(240, 113, 154, 0.45);
+  border-radius: 50%;
+  font-size: 16px; line-height: 1;
+  cursor: pointer;
+  z-index: 6;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.deck__like-btn:hover { background: rgba(0, 0, 0, 0.6); color: #ff8fb0; }
 .deck__fb {
   position: fixed; inset: 0;
   background: rgba(0, 0, 0, 0.55);
@@ -66,6 +84,7 @@
 .deck__fb-close:hover { color: #e6edf3; }
 .deck__fb-meta { font-size: .72rem; color: #7a838d; margin-bottom: .8rem; font-family: var(--font-mono); }
 .deck__fb-label { display: flex; flex-direction: column; gap: .25rem; font-size: .72rem; color: #9ba6b1; margin-bottom: .7rem; text-transform: lowercase; letter-spacing: .05em; }
+.deck__fb-label[hidden] { display: none; }
 .deck__fb-select,
 .deck__fb-note {
   background: #0a0d10; border: 1px solid #2a3138; color: #e6edf3;
@@ -91,10 +110,13 @@
   if (!['localhost', '127.0.0.1'].includes(location.hostname)) return;
   const root = document.getElementById('deckRoot');
   const btn = document.getElementById('deckFbBtn');
+  const likeBtn = document.getElementById('deckLikeBtn');
   const modal = document.getElementById('deckFb');
-  if (!root || !btn || !modal) return;
+  if (!root || !btn || !likeBtn || !modal) return;
 
   const close = document.getElementById('deckFbClose');
+  const title = document.getElementById('deckFbTitle');
+  const kindLabel = document.getElementById('deckFbKindLabel');
   const meta = document.getElementById('deckFbMeta');
   const kindSel = document.getElementById('deckFbKind');
   const note = document.getElementById('deckFbNote');
@@ -107,19 +129,27 @@
     return a ? a.dataset.slideId : '';
   };
 
-  const open = () => {
+  let mode = 'flag';
+  const open = (m) => {
+    mode = m;
+    const liking = m === 'like';
     meta.textContent = editionId + ' · ' + currentSlideId();
     kindSel.value = 'image-bad';
     note.value = '';
     status.textContent = '';
     send.disabled = false;
+    title.textContent = liking ? 'like this slide' : 'flag this slide';
+    kindLabel.hidden = liking;
+    note.placeholder = liking ? "what's good about it… (optional)" : "what's wrong, what to fix…";
     modal.hidden = false;
     setTimeout(() => note.focus(), 80);
   };
   const closeModal = () => { modal.hidden = true; };
 
   btn.hidden = false;
-  btn.addEventListener('click', (e) => { e.stopPropagation(); open(); });
+  likeBtn.hidden = false;
+  btn.addEventListener('click', (e) => { e.stopPropagation(); open('flag'); });
+  likeBtn.addEventListener('click', (e) => { e.stopPropagation(); open('like'); });
   close.addEventListener('click', closeModal);
   modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
@@ -134,7 +164,7 @@
         body: JSON.stringify({
           edition: editionId,
           slide: currentSlideId(),
-          kind: kindSel.value,
+          kind: mode === 'like' ? 'like' : kindSel.value,
           note: note.value.trim()
         })
       });

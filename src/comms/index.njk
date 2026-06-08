@@ -41,9 +41,10 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
 
   <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
 
-  <div class="comms__drop" id="comms-drop">
-    drop files here to send them to everyone in the room
-  </div>
+  <label class="comms__drop" id="comms-drop">
+    <input type="file" id="comms-file" multiple hidden>
+    drop files here, or click to choose — sent to everyone in the room
+  </label>
 
   <form class="comms__send" id="comms-send" autocomplete="off">
     <input class="comms__input comms__input--msg" id="comms-msg" type="text" placeholder="message…" disabled>
@@ -78,7 +79,8 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
 .comms__what{color:#e6edf3;word-break:break-word;flex:1}
 .comms__what--sys{color:#7a838d;font-style:italic}
 .comms__what a{color:var(--accent,#6ef3c5);text-decoration:underline}
-.comms__drop{border:1px dashed #2a3138;border-radius:6px;padding:.75rem;text-align:center;color:#7a838d;font-size:.82rem;transition:border-color .15s,color .15s,background .15s}
+.comms__drop{display:block;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;text-align:center;color:#7a838d;font-size:.82rem;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+.comms__drop:hover{border-color:#3a424a;color:#9ba6b1}
 .comms__drop--hot{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);background:rgba(110,243,197,.04)}
 .comms__prog{display:inline-block;width:96px;height:6px;background:#1a1f24;border-radius:3px;overflow:hidden;margin:0 .4rem;vertical-align:middle}
 .comms__prog-fill{display:block;height:100%;background:var(--accent,#6ef3c5);width:0%;transition:width .12s linear}
@@ -127,7 +129,7 @@ const els = {
   status: $('comms-status'), peers: $('comms-peers'), mute: $('comms-mute'), eph: $('comms-eph'), enc: $('comms-enc'),
   share: $('comms-share'), url: $('comms-url'), copy: $('comms-copy'), genkey: $('comms-genkey'),
   peerlist: $('comms-peerlist'),
-  log: $('comms-log'), drop: $('comms-drop'),
+  log: $('comms-log'), drop: $('comms-drop'), file: $('comms-file'),
   send: $('comms-send'), msg: $('comms-msg'), go: $('comms-go')
 };
 
@@ -623,9 +625,9 @@ const sendOne = async (file) => {
   line.what.innerHTML = 'sent ' + completeHTML(file.name, file.size, file.type, previewUrl);
 };
 
-els.drop.addEventListener('drop', async (e) => {
+const sendFiles = async (fileList) => {
   if (!metaAction || !chunkAction || peers.size === 0) { sys('no peers to send to.'); return; }
-  const all = Array.from(e.dataTransfer.files || []);
+  const all = Array.from(fileList || []);
   if (!all.length) return;
   const tooBig = all.filter(f => f.size > MAX_FILE);
   const ok = all.filter(f => f.size <= MAX_FILE);
@@ -639,7 +641,10 @@ els.drop.addEventListener('drop', async (e) => {
   for (const file of ok) {
     try { await sendOne(file); } catch (err) { sys(`send failed for ${file.name}: ${err.message}`); }
   }
-});
+};
+
+els.drop.addEventListener('drop', (e) => { sendFiles(e.dataTransfer.files); });
+els.file.addEventListener('change', (e) => { sendFiles(e.target.files); e.target.value = ''; });
 
 els.mute.addEventListener('click', () => {
   muted = !muted;

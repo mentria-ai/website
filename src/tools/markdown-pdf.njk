@@ -342,15 +342,19 @@ async function aiSuggestFilename(onLoadProgress) {
   if (text.length < 8) return null;
   const messages = [
     { role: 'system', content:
-      'You generate concise filenames from document content. ' +
-      'Reply with ONLY a hyphenated kebab-case slug — lowercase a-z, ' +
-      'digits, and hyphens, max 6 words, no extension, no prose, no quotes.' },
-    { role: 'user', content: 'Document:\n\n' + text + '\n\nReturn just the slug.' }
+      'You name documents. Read the document the user gives you and reply with a ' +
+      'short, descriptive title of 3 to 6 plain words that say what the document is ' +
+      'about. Reply with the title only: no quotes, no file extension, no explanation.' },
+    { role: 'user', content: 'Document:\n\n# Project Phoenix Kickoff\n\nAgenda for the Q3 launch covering timeline, budget owners, and the marketing plan for the new mobile app.' },
+    { role: 'assistant', content: 'Project Phoenix Q3 Kickoff' },
+    { role: 'user', content: 'Document:\n\nA quick banana bread recipe: cream the butter and sugar, mix in three ripe bananas, fold in flour and baking soda, then bake at 350 degrees for one hour.' },
+    { role: 'assistant', content: 'Banana Bread Recipe' },
+    { role: 'user', content: 'Document:\n\n' + text }
   ];
   let buf = '';
   await engine.generate({
-    messages, maxTokens: 20,
-    temperature: 0.2, topP: 0.9, topK: 30,
+    messages, maxTokens: 24,
+    temperature: 0.3, topP: 0.9, topK: 30,
     repetitionPenalty: 1.1, enableThinking: false
   }, (event) => {
     if (typeof event.token === 'string' && event.token.length > 0) {
@@ -358,19 +362,27 @@ async function aiSuggestFilename(onLoadProgress) {
       buf += event.token;
     }
   });
-  const clean = buf
+  const slug0 = buf
     .replace(/<think>[\s\S]*?<\/think>/g, '')
     .replace(/<\|[^|]*\|>/g, '')
     .trim()
     .toLowerCase()
     .split(/[\n\r]/)[0]
     .replace(/^[`'"\s]+|[`'"\s.]+$/g, '')
-    .replace(/[^a-z0-9-\s]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 64);
-  return clean.length >= 3 ? clean : null;
+    .replace(/^-|-$/g, '');
+  const GARBAGE_NAMES = new Set(['untitled', 'document', 'filename', 'title', 'slug', 'name']);
+  const parts = slug0.split('-').filter(Boolean);
+  const ALPHA = 'abcdefghijklmnopqrstuvwxyz';
+  const looksGarbage =
+    parts.length === 0 ||
+    parts.every((p) => p.length <= 1) ||
+    (parts.length === 1 && ALPHA.indexOf(parts[0]) !== -1) ||
+    GARBAGE_NAMES.has(slug0);
+  const clean = parts.slice(0, 6).join('-').slice(0, 64).replace(/-+$/, '');
+  return (clean.length >= 3 && !looksGarbage) ? clean : null;
 }
 
 async function runAINameGeneration() {

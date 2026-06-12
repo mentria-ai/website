@@ -10,7 +10,7 @@ eleventyComputed:
   title: "{{ 'tools.extensions.title' | t }}"
   description: "{{ 'tools.extensions.lede' | t }}"
 ---
-<section class="xr">
+<section class="xr" data-prefix="{{ locale.pathPrefix }}">
   <div class="xr__bar">
     <a class="xr__back" href="{{ locale.pathPrefix }}/tools/extensions/">←</a>
     <span class="xr__title" id="xr-title">…</span>
@@ -43,7 +43,7 @@ if (!source) {
   document.title = m.name + ' · Mentria';
   const cs = getComputedStyle(document.documentElement);
   const theme = Object.freeze({
-    accent: cs.getPropertyValue('--accent').trim(),
+    accent: cs.getPropertyValue('--accent').trim() || '#6ef3c5',
     bg: cs.getPropertyValue('--term-bg').trim() || '#0b0e11',
     fg: cs.getPropertyValue('--term-fg').trim() || '#e6edf3',
     muted: cs.getPropertyValue('--term-muted').trim(),
@@ -61,7 +61,7 @@ if (!source) {
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 2200);
     },
-    close: () => { location.href = '/'; }
+    close: () => { location.href = (document.querySelector('.xr').dataset.prefix || '') + '/'; }
   });
   const bootstrap = '<scr' + 'ipt>window.mentria = window.parent.__mentriaExtHost;</scr' + 'ipt>';
   frame.srcdoc = bootstrap + source;

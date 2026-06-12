@@ -82,13 +82,24 @@
   window.MentriaCLI = {
     register: function (name, def) {
       if (!name || typeof name !== 'string') return false;
+      name = name.trim().toLowerCase();
+      if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) return false;
       if (COMMANDS[name]) return false;
       if (!def || typeof def.run !== 'function') return false;
+      var argv = !!def.argv;
+      var userRun = def.run;
       COMMANDS[name] = {
-        description: def.description || '',
-        usage: def.usage,
-        argv: !!def.argv,
-        run: def.run
+        description: String(def.description || ''),
+        usage: def.usage == null ? undefined : String(def.usage),
+        argv: argv,
+        run: function (args) {
+          var r;
+          try { r = argv ? userRun(args) : userRun(); }
+          catch (e) { return { lines: ['command failed: ' + (e && e.message || e)], type: 'error' }; }
+          if (!r || typeof r.type !== 'string') return { lines: [], type: 'result' };
+          if (r.type !== 'clear' && !Array.isArray(r.lines)) return { lines: [], type: r.type };
+          return r;
+        }
       };
       return true;
     },
@@ -179,9 +190,15 @@
         row.className = 'cli__suggestion' + (i === suggestState.idx ? ' is-active' : '');
         row.setAttribute('role', 'option');
         row.dataset.name = name;
-        row.innerHTML =
-          '<span class="cli__suggestion-name">' + (cmd.usage || name) + '</span>' +
-          '<span class="cli__suggestion-desc">' + cmd.description + '</span>';
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'cli__suggestion-name';
+        nameSpan.textContent = cmd.usage || name;
+        var descSpan = document.createElement('span');
+        descSpan.className = 'cli__suggestion-desc';
+        descSpan.textContent = cmd.description;
+        row.textContent = '';
+        row.appendChild(nameSpan);
+        row.appendChild(descSpan);
         row.addEventListener('mousedown', function (e) {
           e.preventDefault();
           inputEl.value = (COMMANDS[this.dataset.name].argv ? this.dataset.name + ' ' : this.dataset.name);

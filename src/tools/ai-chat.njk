@@ -23,6 +23,7 @@ eleventyComputed:
   <div class="ac__status" id="ac-status">
     <span class="ac__status-dot" id="ac-status-dot"></span>
     <span class="ac__status-text" id="ac-status-text">{{ "tool.ai-chat.status_checking_webgpu" | t }}</span>
+    <select class="ac__tier" id="ac-tier" aria-label="{{ 'tool.ai-chat.tier_label' | t }}" hidden></select>
     <button class="ac__delete-btn" id="ac-delete-model" title="{{ 'tool.ai-chat.btn_delete_model_title' | t }}" style="display:none;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
       <span>{{ "tool.ai-chat.btn_delete_model" | t }}</span>
@@ -88,31 +89,17 @@ const COPY = {
   errDeletePrefix:     {{ ("tool.ai-chat.err_delete_prefix"     | t) | dump | safe }},
   emptyResponse:       {{ ("tool.ai-chat.empty_response"        | t) | dump | safe }},
   confirmDelete:       {{ ("tool.ai-chat.confirm_delete"        | t) | dump | safe }},
-  downloadPostponed:   {{ ("common.download_postponed"          | t) | dump | safe }}
+  downloadPostponed:   {{ ("common.download_postponed"          | t) | dump | safe }},
+  tierLabel:           {{ ("tool.ai-chat.tier_label"            | t) | dump | safe }},
+  tierFast:            {{ ("tool.ai-chat.tier_fast"             | t) | dump | safe }},
+  tierBetter:          {{ ("tool.ai-chat.tier_better"           | t) | dump | safe }},
+  tierBest:            {{ ("tool.ai-chat.tier_best"             | t) | dump | safe }},
+  tierConfirm:         {{ ("tool.ai-chat.tier_confirm"          | t) | dump | safe }},
+  tierFallback:        {{ ("tool.ai-chat.tier_fallback"         | t) | dump | safe }}
 };
 
 const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
-const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
-const MENTRIA_TOKEN_BASE = MENTRIA_MODEL_BASE;
-
-// Vision tower config — mirrors src/model/vision_config.js
-// QWEN35_VL_08B_VISION_CONFIG. Matches the on-disk layout of the
-// qwen3.5-0.8b-vl-q4.safetensors file (S585).
-const MENTRIA_VL_CONFIG = {
-  hidden_size: 768,
-  intermediate_size: 3072,
-  num_heads: 12,
-  head_dim: 64,                 // 768 / 12
-  out_hidden_size: 1024,        // matches text H for 0.8B
-  depth: 12,
-  patch_size: 16,
-  temporal_patch_size: 2,
-  spatial_merge_size: 2,
-  num_position_embeddings: 2304,
-  num_grid_per_side: 48,        // sqrt(2304)
-  eps: 1e-6,
-  prefix: 'visual',
-};
+const MENTRIA_TIERS_PATH = '/assets/js/mentria-tiers.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const IMG_MAX = IS_IOS ? 256 : 448;
@@ -152,18 +139,20 @@ function showUnsupportedError(reason) {
 if (!navigator.gpu) {
   showUnsupportedError(COPY.errNoWebGpu);
 } else {
-  let MentriaEngine;
+  let MentriaEngine, Tiers;
   try {
     ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
+    Tiers = await import(MENTRIA_TIERS_PATH);
   } catch (err) {
     console.error('Failed to load mentria-engine bundle:', err);
     showUnsupportedError(COPY.errLoadRuntime);
   }
-  if (MentriaEngine) runApp(MentriaEngine);
+  if (MentriaEngine && Tiers) runApp(MentriaEngine, Tiers);
 }
 
-function runApp(MentriaEngine) {
+function runApp(MentriaEngine, Tiers) {
   /* ── DOM refs ────────────────────────────────────── */
+  const tierSel       = document.getElementById('ac-tier');
   const deleteBtn     = document.getElementById('ac-delete-model');
   const progressWrap  = document.getElementById('ac-progress-wrap');
   const progressLabel = document.getElementById('ac-progress-label');
@@ -215,7 +204,7 @@ function runApp(MentriaEngine) {
     bubble.className = 'ac__msg ac__msg--' + role;
     const label = document.createElement('div');
     label.className = 'ac__msg-label';
-    label.textContent = role === 'user' ? COPY.labelYou : 'qwen-0.8B';
+    label.textContent = role === 'user' ? COPY.labelYou : 'qwen-' + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B');
     bubble.appendChild(label);
     if (imageUrl) {
       const img = document.createElement('img');
@@ -279,31 +268,78 @@ function runApp(MentriaEngine) {
     }
   }
 
+  /* ── Tier selection ──────────────────────────────── */
+  let tierDecision = null;
+  let currentTier = null;
+
+  function tierOptionLabel(id) {
+    const t = Tiers.TIERS[id];
+    const quality = id === '0.8b' ? COPY.tierFast : id === '2b' ? COPY.tierBetter : COPY.tierBest;
+    return id === '0.8b' ? (t.name + ' · ' + quality) : (t.name + ' · ' + quality + ' · ' + t.sizeLabel);
+  }
+
+  function syncTierSelector() {
+    if (!tierDecision || !tierDecision.tier) return;
+    const ids = ['0.8b'].concat(tierDecision.eligible);
+    if (ids.length < 2) { tierSel.hidden = true; return; }
+    tierSel.innerHTML = '';
+    for (const id of ids) {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = tierOptionLabel(id);
+      tierSel.appendChild(opt);
+    }
+    tierSel.value = currentTier || tierDecision.tier;
+    tierSel.hidden = false;
+  }
+
+  tierSel.addEventListener('change', async () => {
+    const id = tierSel.value;
+    if (id === currentTier || generating) { tierSel.value = currentTier; return; }
+    if (id !== '0.8b' && !(await Tiers.isTierCached(id))) {
+      const ok = await window.mentriaConfirm(COPY.tierConfirm.replace('{size}', Tiers.TIERS[id].sizeLabel));
+      if (!ok) { tierSel.value = currentTier; return; }
+    }
+    Tiers.setUserTier(id);
+    tierDecision = await Tiers.decideTier();
+    try { engine?.terminate(); } catch (_) {}
+    engine = null;
+    inputEl.disabled = true; sendBtn.disabled = true;
+    loadModel();
+  });
+
   /* ── Load engine + model ─────────────────────────── */
   async function loadModel() {
     setStatus('loading', COPY.statusLoadingModel);
     progressWrap.style.display = '';
     try {
-      engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
-      window.mentriaWrapEngine && window.mentriaWrapEngine(engine);
-      engine.onProgress = onEngineProgress;
-      // onDeviceLost is wired by the engine's S410 device-loss handler;
-      // surface it to the user with a clear "reload to recover" message.
-      engine.onDeviceLost = (info) => {
-        setStatus('error', COPY.errDeviceLost);
-        inputEl.disabled = true; sendBtn.disabled = true;
-        console.error('WebGPU device lost:', info);
+      const startTier = (tierDecision && tierDecision.tier) || '0.8b';
+      const wasCached = await Tiers.isTierCached(startTier);
+      const createEngine = () => {
+        const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+        window.mentriaWrapEngine && window.mentriaWrapEngine(e);
+        e.onProgress = onEngineProgress;
+        // onDeviceLost is wired by the engine's S410 device-loss handler;
+        // surface it to the user with a clear "reload to recover" message.
+        e.onDeviceLost = (info) => {
+          setStatus('error', COPY.errDeviceLost);
+          inputEl.disabled = true; sendBtn.disabled = true;
+          console.error('WebGPU device lost:', info);
+        };
+        return e;
       };
-      await engine.init();
-      await engine.loadModel({
-        modelUrl: MENTRIA_MODEL_BASE,
-        shards: ['qwen3.5-0.8b-q4-tied.safetensors'],
-        allowTiedEmbed: true,
-        tokenizerUrl: MENTRIA_TOKEN_BASE,
-        visionModelUrl: MENTRIA_MODEL_BASE,
-        visionShards: ['qwen3.5-0.8b-vl-q4.safetensors'],
-        visionConfig: MENTRIA_VL_CONFIG,
+      const res = await Tiers.loadWithFallback(createEngine, startTier, {
+        vision: true,
+        onFallback: (failed, next) => {
+          setStatus('loading', COPY.tierFallback.replace('{tier}', Tiers.TIERS[next].name));
+        }
       });
+      engine = res.engine;
+      currentTier = res.tier;
+      if (currentTier !== '0.8b' && !wasCached) {
+        try { await navigator.storage?.persist?.(); } catch (_) {}
+      }
+      syncTierSelector();
       progressWrap.style.display = 'none';
       setStatus('ready', COPY.statusReady);
       deleteBtn.style.display = '';
@@ -508,7 +544,19 @@ function runApp(MentriaEngine) {
 
   /* ── Init ────────────────────────────────────────── */
   (async () => {
-    if (await window.mentriaConfirmHeavyDownload()) loadModel();
+    tierDecision = await Tiers.decideTier();
+    if (!tierDecision.tier) {
+      showUnsupportedError(COPY.errNoWebGpu);
+      return;
+    }
+    syncTierSelector();
+    let ok;
+    if (tierDecision.tier !== '0.8b' && !(await Tiers.isTierCached(tierDecision.tier))) {
+      ok = await window.mentriaConfirm(COPY.tierConfirm.replace('{size}', Tiers.TIERS[tierDecision.tier].sizeLabel));
+    } else {
+      ok = await window.mentriaConfirmHeavyDownload();
+    }
+    if (ok) loadModel();
     else setStatus('idle', COPY.downloadPostponed);
   })();
 }
@@ -552,6 +600,21 @@ function runApp(MentriaEngine) {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
+
+.ac__tier {
+  margin-left: auto;
+  background: var(--term-bg-raised, #0d0f12);
+  border: 1px solid var(--term-border, #2a3138);
+  color: var(--term-muted);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  cursor: pointer;
+  max-width: 45%;
+}
+.ac__tier[hidden] { display: none; }
+.ac__tier:focus { outline: none; border-color: var(--syn-cyan); }
 
 .ac__delete-btn {
   margin-left: auto;

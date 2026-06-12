@@ -470,4 +470,16 @@
      <circle cx="38" cy="24" r="2.2" opacity=".35"></circle>
    </g>
  </g></symbol>
+<symbol id="tool-extensions" viewBox="0 0 48 48"><defs>
+<linearGradient id="gnextensions" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
+<linearGradient id="cyextensions" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="glossextensions" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<filter id="shextensions" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shextensions)">
+   <path d="M16 18h5a4 4 0 1 1 8 0h5a2.5 2.5 0 0 1 2.5 2.5v4.5a4 4 0 1 1 0 8v4.5a2.5 2.5 0 0 1-2.5 2.5h-18a2.5 2.5 0 0 1-2.5-2.5v-17a2.5 2.5 0 0 1 2.5-2.5z" fill="url(#gnextensions)"></path>
+   <rect x="16" y="21" width="18" height="7" rx="3.5" fill="url(#glossextensions)" opacity=".45"></rect>
+   <circle cx="19.5" cy="34" r="2.1" fill="url(#cyextensions)"></circle>
+   <circle cx="25.5" cy="34" r="2.1" fill="url(#cyextensions)" opacity=".7"></circle>
+   <circle cx="31.5" cy="34" r="2.1" fill="url(#cyextensions)" opacity=".4"></circle>
+ </g></symbol>
 </svg>

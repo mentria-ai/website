@@ -24,7 +24,7 @@ export function parseManifest(html) {
 
 export function validateManifest(m, sizeBytes) {
   const fail = (msg) => { throw new Error(msg); };
-  if (!m || typeof m !== 'object') fail('manifest must be a JSON object');
+  if (!m || typeof m !== 'object' || Array.isArray(m)) fail('manifest must be a JSON object');
   if (typeof m.id !== 'string' || !ID_RE.test(m.id) || m.id.length < 3 || m.id.length > 48) fail('id must be kebab-case, 3-48 chars');
   if (RESERVED_IDS.includes(m.id)) fail('id "' + m.id + '" is reserved');
   if (typeof m.name !== 'string' || !m.name.trim() || m.name.length > 40) fail('name is required (max 40 chars)');
@@ -38,10 +38,11 @@ export function validateManifest(m, sizeBytes) {
     if (m[k] !== undefined && (typeof m[k] !== 'string' || m[k].length > 200)) fail(k + ' must be a string up to 200 chars');
   }
   if (m.permissions !== undefined) {
-    if (!Array.isArray(m.permissions) || m.permissions.some((p) => typeof p !== 'string')) fail('permissions must be an array of strings');
+    if (!Array.isArray(m.permissions) || m.permissions.some((p) => typeof p !== 'string' || p.length > 32)) fail('permissions must be an array of short strings');
+    if (m.permissions.length > 16) fail('too many permissions');
   }
   if (m.mounts !== undefined) {
-    if (typeof m.mounts !== 'object') fail('mounts must be an object');
+    if (typeof m.mounts !== 'object' || Array.isArray(m.mounts)) fail('mounts must be an object');
     if (m.mounts.commands !== undefined) {
       if (!Array.isArray(m.mounts.commands)) fail('mounts.commands must be an array');
       for (const c of m.mounts.commands) {
@@ -75,22 +76,26 @@ export function inspect(html) {
 
 export function install(html, manifest) {
   const size = new Blob([html]).size;
+  validateManifest(manifest, size);
+  const prevSource = store().get(NS, 'src.' + manifest.id);
   const ok = store().set(NS, 'src.' + manifest.id, html);
   if (!ok) throw new Error('storage full — remove an extension or free space');
-  const registry = getRegistry().filter((e) => e.manifest.id !== manifest.id);
   const prev = getEntry(manifest.id);
-  registry.push({
+  const registry = getRegistry().filter((e) => e.manifest.id !== manifest.id);
+  const entry = {
     manifest,
     enabled: true,
     installedAt: prev ? prev.installedAt : new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     size
-  });
+  };
+  registry.push(entry);
   if (!store().set(NS, 'registry', registry)) {
-    store().remove(NS, 'src.' + manifest.id);
+    if (prevSource != null) store().set(NS, 'src.' + manifest.id, prevSource);
+    else store().remove(NS, 'src.' + manifest.id);
     throw new Error('storage full — remove an extension or free space');
   }
-  return getEntry(manifest.id);
+  return entry;
 }
 
 export function setEnabled(id, enabled) {
@@ -102,12 +107,15 @@ export function setEnabled(id, enabled) {
 }
 
 export function remove(id) {
-  store().remove(NS, 'src.' + id);
+  if (!getEntry(id)) return false;
+  const srcOk = store().remove(NS, 'src.' + id);
   store().clear(DATA_NS_PREFIX + id);
-  return store().set(NS, 'registry', getRegistry().filter((e) => e.manifest.id !== id));
+  const regOk = store().set(NS, 'registry', getRegistry().filter((e) => e.manifest.id !== id));
+  return srcOk && regOk;
 }
 
 export function compareVersions(a, b) {
+  if (!VERSION_RE.test(a) || !VERSION_RE.test(b)) throw new Error('invalid version');
   const pa = a.split('.').map(Number);
   const pb = b.split('.').map(Number);
   for (let i = 0; i < 3; i++) { if (pa[i] !== pb[i]) return pa[i] - pb[i]; }

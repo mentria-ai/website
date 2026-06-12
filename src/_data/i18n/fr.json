@@ -142,6 +142,7 @@
     "launcher": {
       "recents": "Récents",
       "noMatch": "Aucun outil ne correspond",
+      "extensions": "Extensions",
       "ai": "IA",
       "games": "Jeux",
       "create": "Créer",

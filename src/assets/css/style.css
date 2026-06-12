@@ -369,6 +369,10 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .launcher__cat--create { --cat: var(--syn-purple); }
 .launcher__cat--dev { --cat: var(--syn-amber); }
 .launcher__cat--everyday { --cat: var(--syn-green); }
+.launcher__cat--extensions { --cat: var(--accent); }
+.launch-tile[data-group="Extensions"] { --cat: var(--accent); }
+.launch-tile__icon--ext { font-size: 40px; line-height: 1; }
+.launch-tile__icon--ext img { width: 48px; height: 48px; border-radius: 10px; }
 .launcher__cat .launcher__label { color: var(--cat); }
 .launcher__pages { display: flex; flex-direction: column; gap: 2.25rem; }
 .launcher__grid { display: grid; grid-template-columns: repeat(auto-fill, 84px); justify-content: center; gap: 1.4rem 1.1rem; }

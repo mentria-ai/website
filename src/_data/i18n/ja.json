@@ -142,6 +142,7 @@
     "launcher": {
       "recents": "最近",
       "noMatch": "一致するツールがありません",
+      "extensions": "拡張機能",
       "ai": "AI",
       "games": "ゲーム",
       "create": "作成",

@@ -142,6 +142,7 @@
     "launcher": {
       "recents": "Recents",
       "noMatch": "No tools match",
+      "extensions": "Extensions",
       "ai": "AI",
       "games": "Games",
       "create": "Create",

@@ -77,6 +77,28 @@
     }
   };
 
+  var BUILTIN_COMMANDS = Object.keys(COMMANDS);
+
+  window.MentriaCLI = {
+    register: function (name, def) {
+      if (!name || typeof name !== 'string') return false;
+      if (COMMANDS[name]) return false;
+      if (!def || typeof def.run !== 'function') return false;
+      COMMANDS[name] = {
+        description: def.description || '',
+        usage: def.usage,
+        argv: !!def.argv,
+        run: def.run
+      };
+      return true;
+    },
+    unregister: function (name) {
+      if (!COMMANDS[name] || BUILTIN_COMMANDS.indexOf(name) !== -1) return false;
+      delete COMMANDS[name];
+      return true;
+    }
+  };
+
   var MAX_HISTORY = 20;
   var history = [];
   var historyIndex = -1;

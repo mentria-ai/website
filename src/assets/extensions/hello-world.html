@@ -1,0 +1,55 @@
+<script type="application/json" id="mentria-ext">
+{
+  "id": "hello-world",
+  "name": "Hello World",
+  "version": "1.0.0",
+  "icon": "👋",
+  "author": "mentria",
+  "description": "Smallest possible extension — storage counter, theme tokens, terminal command.",
+  "permissions": ["storage"],
+  "mounts": {
+    "tool": {},
+    "commands": [
+      { "name": "hello", "usage": "hello [name]", "description": "greet from the sample extension" }
+    ]
+  }
+}
+</script>
+<style>
+  body { margin: 0; padding: 2rem; font-family: var(--ext-font, monospace); background: var(--ext-bg, #0b0e11); color: var(--ext-fg, #e6edf3); }
+  .card { max-width: 420px; margin: 0 auto; text-align: center; }
+  h1 { font-size: 1.3rem; }
+  .accent { color: var(--ext-accent, #6ef3c5); }
+  button { background: transparent; border: 1px solid var(--ext-accent, #6ef3c5); color: var(--ext-accent, #6ef3c5); padding: 0.5rem 1.2rem; border-radius: 6px; font-family: inherit; font-size: 1rem; cursor: pointer; }
+  #count { font-size: 2.4rem; margin: 0.6rem 0; }
+</style>
+<div class="card">
+  <h1>Hello <span class="accent" id="who">world</span> 👋</h1>
+  <p>This page is an installed extension — not part of the public site.</p>
+  <div id="count">0</div>
+  <button id="bump">count++</button>
+  <p><small>The count persists in your local encrypted-backup-covered storage.</small></p>
+</div>
+<script>
+  (function () {
+    var m = window.mentria;
+    if (m.theme) {
+      var r = document.documentElement;
+      if (m.theme.accent) r.style.setProperty('--ext-accent', m.theme.accent);
+      if (m.theme.bg) r.style.setProperty('--ext-bg', m.theme.bg);
+      if (m.theme.fg) r.style.setProperty('--ext-fg', m.theme.fg);
+      if (m.theme.fontMono) r.style.setProperty('--ext-font', m.theme.fontMono);
+    }
+    if (m.args && m.args.cmd === 'hello' && m.args.args) {
+      document.getElementById('who').textContent = m.args.args;
+    }
+    var el = document.getElementById('count');
+    el.textContent = String(m.storage.get('count') || 0);
+    document.getElementById('bump').addEventListener('click', function () {
+      var n = (m.storage.get('count') || 0) + 1;
+      m.storage.set('count', n);
+      el.textContent = String(n);
+      m.notify('count saved: ' + n);
+    });
+  })();
+</script>

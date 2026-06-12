@@ -205,6 +205,11 @@
       "lede": "Codifique e decodifique texto ou arquivos para e de Base64. Suporta imagens, documentos e qualquer tipo de arquivo. Tudo roda localmente no seu navegador.",
       "tldr": "Codificador e decodificador focado em privacidade para texto e arquivos. Codificação e decodificação acontecem no seu navegador com JavaScript puro — sem upload, sem servidor. Arraste um arquivo ou cole uma string Base64 e copie ou baixe o resultado. Funciona offline, sem limite de tamanho além da memória do navegador."
     },
+    "extensions": {
+      "title": "Extensões",
+      "lede": "Instale extensões privadas em um único arquivo que vivem apenas neste dispositivo. Elas aparecem no seu lançador e terminal — e nunca no site público.",
+      "tldr": "Uma plataforma traga-sua-própria-ferramenta. Uma extensão é um arquivo HTML com um manifesto embutido; instale aqui e ela ganha um bloco no seu lançador, comandos de terminal opcionais e seu próprio armazenamento local incluído no seu backup criptografado. As extensões rodam com acesso total neste dispositivo, então instale apenas arquivos de quem você confia. Nada sobre elas é enviado para servidor algum."
+    },
     "coin-flip": {
       "title": "Cara ou Coroa",
       "lede": "Cara ou coroa — jogue uma moeda instantaneamente. Faça uma série de melhor-de-N para desempates. Funciona offline.",
@@ -752,6 +757,25 @@
       "err_delete_prefix": "Falha ao excluir cache: ",
       "empty_response": "(resposta vazia)",
       "confirm_delete": "Excluir o modelo em cache (~490 MB)? Você precisará baixar de novo na próxima vez."
+    },
+    "extensions": {
+      "install_heading": "Instalar uma extensão",
+      "drop_hint": "solte um arquivo de extensão aqui ou clique para escolher",
+      "paste_hint": "ou cole o código da extensão",
+      "btn_install": "instalar",
+      "installed_heading": "Instaladas",
+      "empty_list": "Nenhuma extensão instalada ainda.",
+      "btn_open": "abrir",
+      "btn_export": "exportar",
+      "btn_remove": "remover",
+      "confirm_remove": "Remover {name}? O código e os dados salvos serão apagados deste dispositivo.",
+      "trust_prompt": "Instalar {name} v{version}? Será executada com acesso total aos seus dados neste dispositivo. Instale apenas arquivos de quem você confia. Permissões: {perms}",
+      "update_prompt": "Atualizar {name} {old} → {new}? Os dados salvos são mantidos.",
+      "installed_ok": "instalada.",
+      "sample_heading": "Experimente o exemplo",
+      "sample_install": "instalar hello-world",
+      "sample_download": "baixar o arquivo",
+      "err_prefix": "falha ao instalar:"
     },
     "search": {
       "ph_input": "Buscar…",

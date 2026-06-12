@@ -205,6 +205,11 @@
       "lede": "Encodez et décodez du texte ou des fichiers en Base64. Prend en charge les images, les documents et tout type de fichier. Tout fonctionne localement dans votre navigateur.",
       "tldr": "Un encodeur et décodeur axé confidentialité pour texte et fichiers. L'encodage et le décodage s'effectuent dans ton navigateur en JavaScript natif — pas d'envoi, pas de serveur. Glisse un fichier ou colle une chaîne Base64, puis copie ou télécharge le résultat. Fonctionne hors ligne, sans limite de taille au-delà de la mémoire du navigateur."
     },
+    "extensions": {
+      "title": "Extensions",
+      "lede": "Installe des extensions privées en un seul fichier qui vivent uniquement sur cet appareil. Elles apparaissent dans ton lanceur et ton terminal — jamais sur le site public.",
+      "tldr": "Une plateforme apporte-ton-propre-outil. Une extension est un fichier HTML avec un manifeste intégré ; installe-la ici et elle obtient une tuile dans ton lanceur, des commandes de terminal optionnelles, et son propre stockage local inclus dans ta sauvegarde chiffrée. Les extensions s'exécutent avec un accès complet sur cet appareil, donc installe uniquement des fichiers de personnes en qui tu as confiance. Rien ne les concerne n'est jamais envoyé."
+    },
     "coin-flip": {
       "title": "Pile ou Face",
       "lede": "Pile ou face — lancez une pièce instantanément. Lancez une série au meilleur des N pour départager. Fonctionne hors ligne.",
@@ -752,6 +757,25 @@
       "err_delete_prefix": "Échec de la suppression du cache : ",
       "empty_response": "(réponse vide)",
       "confirm_delete": "Supprimer le modèle en cache (~490 Mo) ? Tu devras le retélécharger la prochaine fois."
+    },
+    "extensions": {
+      "install_heading": "Installer une extension",
+      "drop_hint": "dépose un fichier d'extension ici ou clique pour choisir",
+      "paste_hint": "ou colle la source de l'extension",
+      "btn_install": "installer",
+      "installed_heading": "Installées",
+      "empty_list": "Aucune extension installée pour l'instant.",
+      "btn_open": "ouvrir",
+      "btn_export": "exporter",
+      "btn_remove": "supprimer",
+      "confirm_remove": "Supprimer {name} ? Sa source et ses données seront effacées de cet appareil.",
+      "trust_prompt": "Installer {name} v{version} ? Elle s'exécutera avec un accès complet à tes données sur cet appareil. N'installe que des fichiers de personnes de confiance. Permissions : {perms}",
+      "update_prompt": "Mettre à jour {name} {old} → {new} ? Les données sont conservées.",
+      "installed_ok": "installée.",
+      "sample_heading": "Essaie l'exemple",
+      "sample_install": "installer hello-world",
+      "sample_download": "télécharger le fichier",
+      "err_prefix": "échec de l'installation :"
     },
     "search": {
       "ph_input": "Rechercher…",

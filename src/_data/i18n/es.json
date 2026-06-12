@@ -205,6 +205,11 @@
       "lede": "Codifica y decodifica texto o archivos en Base64. Compatible con imágenes, documentos y cualquier tipo de archivo. Todo se ejecuta localmente en tu navegador.",
       "tldr": "Codificador y decodificador para texto y archivos enfocado en privacidad. La codificación y decodificación ocurren en tu navegador con JavaScript estándar — sin subida, sin servidor. Arrastra un archivo o pega una cadena Base64 y copia o descarga el resultado. Funciona sin conexión, sin más límite de tamaño que la memoria del navegador."
     },
+    "extensions": {
+      "title": "Extensiones",
+      "lede": "Instala extensiones privadas de un solo archivo que viven únicamente en este dispositivo. Aparecen en tu lanzador y terminal, y nunca en el sitio público.",
+      "tldr": "Una plataforma trae-tu-propia-herramienta. Una extensión es un archivo HTML con un manifiesto integrado; instálala aquí y obtiene una ficha en tu lanzador, comandos de terminal opcionales y su propio almacenamiento local que se incluye en tu copia de seguridad cifrada. Las extensiones se ejecutan con acceso completo en este dispositivo, así que instala solo archivos de personas de confianza. Nada de ellas se sube jamás."
+    },
     "coin-flip": {
       "title": "Lanzar Moneda",
       "lede": "Cara o cruz — lanza una moneda al instante. Ejecuta una serie al mejor de N para desempates. Funciona sin conexión.",
@@ -752,6 +757,25 @@
       "err_delete_prefix": "Fallo al eliminar caché: ",
       "empty_response": "(respuesta vacía)",
       "confirm_delete": "¿Eliminar el modelo en caché (~490 MB)? Tendrás que volver a descargarlo la próxima vez."
+    },
+    "extensions": {
+      "install_heading": "Instalar una extensión",
+      "drop_hint": "suelta un archivo de extensión aquí o haz clic para elegir",
+      "paste_hint": "o pega el código de la extensión",
+      "btn_install": "instalar",
+      "installed_heading": "Instaladas",
+      "empty_list": "Aún no hay extensiones instaladas.",
+      "btn_open": "abrir",
+      "btn_export": "exportar",
+      "btn_remove": "eliminar",
+      "confirm_remove": "¿Eliminar {name}? Su código y datos guardados se borrarán de este dispositivo.",
+      "trust_prompt": "¿Instalar {name} v{version}? Se ejecutará con acceso completo a tus datos en este dispositivo. Instala solo archivos de personas de confianza. Permisos: {perms}",
+      "update_prompt": "¿Actualizar {name} {old} → {new}? Los datos guardados se conservan.",
+      "installed_ok": "instalada.",
+      "sample_heading": "Prueba el ejemplo",
+      "sample_install": "instalar hello-world",
+      "sample_download": "descargar el archivo",
+      "err_prefix": "error al instalar:"
     },
     "search": {
       "ph_input": "Buscar…",

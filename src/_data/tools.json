@@ -159,5 +159,12 @@
     "summary": "Full-rules chess with a local alpha-beta engine (four strengths), hot-seat, and encrypted online play via share-code. Eval bar, hints, move history. Plays offline.",
     "category": "Game",
     "group": "Games"
+  },
+  {
+    "slug": "extensions",
+    "title": "Extensions",
+    "summary": "Install private single-file extensions that live only on your device — they get a launcher tile, terminal commands, and local storage, and are never part of the public site.",
+    "category": "Utility",
+    "group": "Dev"
   }
 ]

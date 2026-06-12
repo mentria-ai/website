@@ -205,6 +205,11 @@
       "lede": "Encode and decode text or files to and from Base64. Supports images, documents, and any file type. Everything runs locally in your browser.",
       "tldr": "A privacy-first encoder and decoder for text and files. Encoding and decoding both happen in your browser using vanilla JavaScript — no upload, no server. Drag a file in or paste a Base64 string and copy or download the result. Works offline, with no size limit beyond browser memory."
     },
+    "extensions": {
+      "title": "Extensions",
+      "lede": "Install private single-file extensions that live only on this device. They appear in your launcher and terminal — and never on the public site.",
+      "tldr": "A bring-your-own-tool platform. An extension is one HTML file with an embedded manifest; install it here and it gets a tile in your launcher, optional terminal commands, and its own local storage that rides your encrypted backup. Extensions run with full access on this device, so only install files from people you trust. Nothing about them is ever uploaded."
+    },
     "coin-flip": {
       "title": "Coin Flip",
       "lede": "Heads or tails — flip a coin instantly. Run a best-of series for tiebreakers. Works offline.",
@@ -752,6 +757,25 @@
       "err_delete_prefix": "Failed to delete cache: ",
       "empty_response": "(empty response)",
       "confirm_delete": "Delete the cached model (~490 MB)? You will need to re-download it next time."
+    },
+    "extensions": {
+      "install_heading": "Install an extension",
+      "drop_hint": "drop an extension file here, or click to choose",
+      "paste_hint": "or paste the extension source",
+      "btn_install": "install",
+      "installed_heading": "Installed",
+      "empty_list": "No extensions installed yet.",
+      "btn_open": "open",
+      "btn_export": "export",
+      "btn_remove": "remove",
+      "confirm_remove": "Remove {name}? Its source and saved data are deleted from this device.",
+      "trust_prompt": "Install {name} v{version}? It will run with full access to your data on this device. Only install files from people you trust. Permissions: {perms}",
+      "update_prompt": "Update {name} {old} → {new}? Saved data is kept.",
+      "installed_ok": "installed.",
+      "sample_heading": "Try the sample",
+      "sample_install": "install hello-world",
+      "sample_download": "download the file",
+      "err_prefix": "install failed:"
     },
     "search": {
       "ph_input": "Search…",

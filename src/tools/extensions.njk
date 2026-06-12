@@ -1,0 +1,196 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/extensions/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.extensions.title' | t }}"
+  description: "{{ 'tools.extensions.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">extensions</span></p>
+  <h1>{{ "tools.extensions.title" | t }}</h1>
+  <p>{{ "tools.extensions.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "extensions.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="xt">
+  <h2 class="xt__heading">{{ "tool.extensions.install_heading" | t }}</h2>
+  <label class="xt__drop" id="xt-drop">
+    <input type="file" id="xt-file" accept=".html,text/html" hidden>
+    {{ "tool.extensions.drop_hint" | t }}
+  </label>
+  <details class="xt__paste">
+    <summary>{{ "tool.extensions.paste_hint" | t }}</summary>
+    <textarea id="xt-paste" rows="6" spellcheck="false"></textarea>
+    <button class="xt__btn" id="xt-paste-install" type="button">{{ "tool.extensions.btn_install" | t }}</button>
+  </details>
+  <p class="xt__error" id="xt-error" hidden></p>
+
+  <h2 class="xt__heading">{{ "tool.extensions.installed_heading" | t }}</h2>
+  <div class="xt__list" id="xt-list"></div>
+  <p class="xt__empty" id="xt-empty">{{ "tool.extensions.empty_list" | t }}</p>
+
+  <h2 class="xt__heading">{{ "tool.extensions.sample_heading" | t }}</h2>
+  <div class="xt__sample">
+    <button class="xt__btn" id="xt-sample-install" type="button">{{ "tool.extensions.sample_install" | t }}</button>
+    <a class="xt__link" href="/assets/extensions/hello-world.html" download="hello-world.html">{{ "tool.extensions.sample_download" | t }}</a>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+{% include "tool-schema.njk" %}
+
+<script type="module">
+const COPY = {
+  trustPrompt:   {{ ("tool.extensions.trust_prompt"   | t) | dump | safe }},
+  updatePrompt:  {{ ("tool.extensions.update_prompt"  | t) | dump | safe }},
+  confirmRemove: {{ ("tool.extensions.confirm_remove" | t) | dump | safe }},
+  installedOk:   {{ ("tool.extensions.installed_ok"   | t) | dump | safe }},
+  errPrefix:     {{ ("tool.extensions.err_prefix"     | t) | dump | safe }},
+  btnOpen:       {{ ("tool.extensions.btn_open"       | t) | dump | safe }},
+  btnExport:     {{ ("tool.extensions.btn_export"     | t) | dump | safe }},
+  btnRemove:     {{ ("tool.extensions.btn_remove"     | t) | dump | safe }}
+};
+
+const X = await import('/assets/js/mentria-extensions.js');
+const drop = document.getElementById('xt-drop');
+const fileInput = document.getElementById('xt-file');
+const pasteTa = document.getElementById('xt-paste');
+const errEl = document.getElementById('xt-error');
+const listEl = document.getElementById('xt-list');
+const emptyEl = document.getElementById('xt-empty');
+
+function showError(msg) { errEl.classList.remove('xt__error--ok'); errEl.textContent = COPY.errPrefix + ' ' + msg; errEl.hidden = false; }
+function showOk(msg) { errEl.classList.add('xt__error--ok'); errEl.textContent = msg; errEl.hidden = false; }
+function clearError() { errEl.hidden = true; }
+
+function fmt(tpl, vars) {
+  return tpl.replace(/\{(\w+)\}/g, (s, k) => (vars[k] != null ? vars[k] : s));
+}
+
+async function installFlow(html) {
+  clearError();
+  let ins;
+  try { ins = X.inspect(html); } catch (e) { showError(e.message); return; }
+  const m = ins.manifest;
+  let msg;
+  if (ins.existing && X.compareVersions(m.version, ins.existing.manifest.version) > 0) {
+    msg = fmt(COPY.updatePrompt, { name: m.name, old: ins.existing.manifest.version, new: m.version });
+  } else {
+    msg = fmt(COPY.trustPrompt, { name: m.name, version: m.version, perms: (m.permissions || []).join(', ') || '—' });
+  }
+  if (ins.warnLarge) msg += ' (' + Math.round(ins.size / 1024) + ' KB — large for local storage)';
+  if (!(await window.mentriaConfirm(msg))) return;
+  try { X.install(html, m); } catch (e) { showError(e.message); return; }
+  showOk(m.name + ' ' + COPY.installedOk);
+  render();
+}
+
+function row(entry) {
+  const m = entry.manifest;
+  const div = document.createElement('div');
+  div.className = 'xt__row';
+  const icon = document.createElement('span');
+  icon.className = 'xt__icon';
+  if (/^data:image\//.test(m.icon || '')) {
+    const img = document.createElement('img'); img.src = m.icon; img.alt = ''; icon.appendChild(img);
+  } else { icon.textContent = m.icon || '🧩'; }
+  const meta = document.createElement('div');
+  meta.className = 'xt__meta';
+  const title = document.createElement('div');
+  title.className = 'xt__name';
+  title.textContent = m.name + ' · v' + m.version + (m.author ? ' · ' + m.author : '');
+  const perms = document.createElement('div');
+  perms.className = 'xt__perms';
+  perms.textContent = (m.permissions || []).join(' · ') + '  (' + Math.round(entry.size / 1024) + ' KB)';
+  meta.appendChild(title); meta.appendChild(perms);
+  const actions = document.createElement('div');
+  actions.className = 'xt__actions';
+  const toggle = document.createElement('input');
+  toggle.type = 'checkbox'; toggle.checked = entry.enabled; toggle.title = 'enabled';
+  toggle.addEventListener('change', () => { X.setEnabled(m.id, toggle.checked); });
+  const open = btn(COPY.btnOpen, () => { location.href = '/tools/extensions/run/?id=' + encodeURIComponent(m.id); });
+  open.disabled = !entry.enabled || !(m.mounts && m.mounts.tool);
+  const exp = btn(COPY.btnExport, () => {
+    const blob = new Blob([X.getSource(m.id)], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = m.id + '.html';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  const rem = btn(COPY.btnRemove, async () => {
+    if (!(await window.mentriaConfirm(fmt(COPY.confirmRemove, { name: m.name })))) return;
+    X.remove(m.id); render();
+  });
+  actions.append(toggle, open, exp, rem);
+  div.append(icon, meta, actions);
+  return div;
+}
+
+function btn(label, fn) {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'xt__btn xt__btn--small'; b.textContent = label;
+  b.addEventListener('click', fn);
+  return b;
+}
+
+function render() {
+  const reg = X.getRegistry();
+  listEl.innerHTML = '';
+  reg.forEach((e) => listEl.appendChild(row(e)));
+  emptyEl.hidden = reg.length > 0;
+}
+
+['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('xt__drop--hot'); }));
+['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('xt__drop--hot'); }));
+drop.addEventListener('drop', (e) => {
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) f.text().then(installFlow);
+});
+fileInput.addEventListener('change', (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (f) f.text().then(installFlow);
+  e.target.value = '';
+});
+document.getElementById('xt-paste-install').addEventListener('click', () => {
+  if (pasteTa.value.trim()) installFlow(pasteTa.value);
+});
+document.getElementById('xt-sample-install').addEventListener('click', async () => {
+  const html = await fetch('/assets/extensions/hello-world.html').then((r) => r.text());
+  installFlow(html);
+});
+
+render();
+</script>
+
+<style>
+.xt { font-family: var(--font-mono); padding: 1rem 0.75rem; }
+.xt__heading { font-size: 0.85rem; text-transform: lowercase; letter-spacing: 0.08em; color: var(--term-muted); margin: 1.2rem 0 0.6rem; }
+.xt__drop { display: block; border: 1px dashed var(--term-border-strong, #2a3138); border-radius: 8px; padding: 1.2rem; text-align: center; color: var(--term-muted); cursor: pointer; font-size: 0.85rem; transition: border-color 0.15s, color 0.15s; }
+.xt__drop--hot, .xt__drop:hover { border-color: var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); }
+.xt__paste { margin-top: 0.6rem; font-size: 0.8rem; color: var(--term-muted); }
+.xt__paste textarea { width: 100%; margin: 0.5rem 0; background: var(--term-bg-raised, #0d0f12); border: 1px solid var(--term-border, #2a3138); color: var(--term-fg); border-radius: 6px; font-family: inherit; font-size: 0.75rem; padding: 0.5rem; }
+.xt__btn { background: transparent; border: 1px solid var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); border-radius: 6px; padding: 0.35rem 0.9rem; font-family: inherit; font-size: 0.8rem; cursor: pointer; }
+.xt__btn--small { padding: 0.2rem 0.6rem; font-size: 0.7rem; }
+.xt__btn:hover { background: var(--accent, #6ef3c5); color: #0b0e11; }
+.xt__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.xt__error { color: var(--syn-pink, #f472b6); font-size: 0.8rem; }
+.xt__error--ok { color: var(--accent, #6ef3c5); }
+.xt__row { display: flex; align-items: center; gap: 0.8rem; border: 1px solid var(--term-border, #2a3138); border-radius: 8px; padding: 0.6rem 0.8rem; margin-bottom: 0.5rem; }
+.xt__icon { font-size: 1.6rem; width: 2.2rem; text-align: center; }
+.xt__icon img { width: 28px; height: 28px; }
+.xt__meta { flex: 1; min-width: 0; }
+.xt__name { font-size: 0.85rem; color: var(--term-fg); }
+.xt__perms { font-size: 0.7rem; color: var(--term-muted); }
+.xt__actions { display: flex; align-items: center; gap: 0.4rem; }
+.xt__empty { color: var(--term-muted); font-size: 0.8rem; }
+.xt__empty[hidden] { display: none; }
+.xt__error[hidden] { display: none; }
+.xt__sample { display: flex; align-items: center; gap: 1rem; }
+.xt__link { color: var(--term-muted); font-size: 0.8rem; }
+</style>

@@ -166,8 +166,10 @@ document.getElementById('xt-paste-install').addEventListener('click', () => {
   if (pasteTa.value.trim()) installFlow(pasteTa.value);
 });
 document.getElementById('xt-sample-install').addEventListener('click', async () => {
-  const html = await fetch('/assets/extensions/hello-world.html').then((r) => r.text());
-  installFlow(html);
+  try {
+    const html = await fetch('/assets/extensions/hello-world.html').then((r) => r.text());
+    installFlow(html);
+  } catch (e) { showError(e.message); }
 });
 
 render();

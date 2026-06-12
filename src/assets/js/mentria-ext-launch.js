@@ -20,12 +20,13 @@
       grid.className = 'launcher__grid';
       withTool.forEach(function (e) {
         var m = e.manifest;
-        if (document.querySelector('.launcher .launch-tile[data-slug="' + m.id + '"]')) return;
+        var slugSel = (window.CSS && CSS.escape) ? CSS.escape(m.id) : m.id.replace(/[^a-z0-9-]/g, '');
+        if (document.querySelector('.launcher .launch-tile[data-slug="' + slugSel + '"]')) return;
         var a = document.createElement('a');
         a.className = 'launch-tile';
         a.setAttribute('data-slug', m.id);
         a.setAttribute('data-group', 'Extensions');
-        a.setAttribute('data-search', (m.description || '') + ' extension');
+        a.setAttribute('data-search', m.name + ' ' + (m.description || '') + ' extension');
         a.href = '/tools/extensions/run/?id=' + encodeURIComponent(m.id);
         var icon = document.createElement('span');
         icon.className = 'launch-tile__icon launch-tile__icon--ext';
@@ -62,7 +63,7 @@
             run: function (args) {
               var dest = '/tools/extensions/run/?id=' + encodeURIComponent(m.id) +
                 '#cmd=' + encodeURIComponent(c.name) + '&args=' + encodeURIComponent(args || '');
-              window.location.href = dest;
+              setTimeout(function () { window.location.href = dest; }, 0);
               return { lines: ['> opening ' + m.name + '...'], type: 'result' };
             }
           });

@@ -80,7 +80,7 @@ async function installFlow(html) {
   try { ins = X.inspect(html); } catch (e) { showError(e.message); return; }
   const m = ins.manifest;
   let msg;
-  if (ins.existing && X.compareVersions(m.version, ins.existing.manifest.version) > 0) {
+  if (ins.existing) {
     msg = fmt(COPY.updatePrompt, { name: m.name, old: ins.existing.manifest.version, new: m.version });
   } else {
     msg = fmt(COPY.trustPrompt, { name: m.name, version: m.version, perms: (m.permissions || []).join(', ') || '—' });
@@ -114,14 +114,19 @@ function row(entry) {
   actions.className = 'xt__actions';
   const toggle = document.createElement('input');
   toggle.type = 'checkbox'; toggle.checked = entry.enabled; toggle.title = 'enabled';
-  toggle.addEventListener('change', () => { X.setEnabled(m.id, toggle.checked); });
   const open = btn(COPY.btnOpen, () => { location.href = '/tools/extensions/run/?id=' + encodeURIComponent(m.id); });
   open.disabled = !entry.enabled || !(m.mounts && m.mounts.tool);
+  toggle.addEventListener('change', () => {
+    X.setEnabled(m.id, toggle.checked);
+    open.disabled = !toggle.checked || !(m.mounts && m.mounts.tool);
+  });
   const exp = btn(COPY.btnExport, () => {
-    const blob = new Blob([X.getSource(m.id)], { type: 'text/html' });
+    const src = X.getSource(m.id);
+    if (!src) { showError(m.id); return; }
+    const blob = new Blob([src], { type: 'text/html' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = m.id + '.html';
-    document.body.appendChild(a); a.click(); a.remove();
+    document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
   });
   const rem = btn(COPY.btnRemove, async () => {
     if (!(await window.mentriaConfirm(fmt(COPY.confirmRemove, { name: m.name })))) return;
@@ -150,11 +155,11 @@ function render() {
 ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('xt__drop--hot'); }));
 drop.addEventListener('drop', (e) => {
   const f = e.dataTransfer.files && e.dataTransfer.files[0];
-  if (f) f.text().then(installFlow);
+  if (f) f.text().then(installFlow).catch((e) => showError(e.message));
 });
 fileInput.addEventListener('change', (e) => {
   const f = e.target.files && e.target.files[0];
-  if (f) f.text().then(installFlow);
+  if (f) f.text().then(installFlow).catch((e) => showError(e.message));
   e.target.value = '';
 });
 document.getElementById('xt-paste-install').addEventListener('click', () => {

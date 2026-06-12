@@ -1,8 +1,34 @@
-import { a as m, d as l, f as b, o as P, p as L, t as D } from "./capabilities-DjEhHCqr.mjs";
+import { a as w, d as l, f as b, o as P, p as m, t as M } from "./capabilities-DjEhHCqr.mjs";
 var g = {
   numLayers: 24,
   hiddenSize: 1024,
   intermediateSize: 3584,
+  vocabSize: 248320,
+  eps: 1e-6,
+  deltanet: {
+    numHeads: 16,
+    keyHeadDim: 128,
+    valueHeadDim: 128,
+    convKernelSize: 4
+  },
+  attention: {
+    numQHeads: 8,
+    numKVHeads: 2,
+    headDim: 256,
+    maxSeq: 2048
+  },
+  attnLayerIndices: [
+    3,
+    7,
+    11,
+    15,
+    19,
+    23
+  ]
+}, S = {
+  numLayers: 24,
+  hiddenSize: 2048,
+  intermediateSize: 6144,
   vocabSize: 248320,
   eps: 1e-6,
   deltanet: {
@@ -55,7 +81,7 @@ var g = {
     27,
     31
   ]
-}, U = 1, S = class w {
+}, U = 1, I = class E {
   #r = null;
   #e = /* @__PURE__ */ new Map();
   #s = null;
@@ -167,11 +193,11 @@ var g = {
   }
   #f(e) {
     const t = e.code;
-    return t === l.NO_WEBGPU || t === l.NO_ADAPTER || t === l.NO_DEVICE ? new b(t, e.error || "WebGPU unavailable") : t === m.VISION_NOT_LOADED ? new P(t, e.error || "Vision tower not loaded") : new Error(e.error);
+    return t === l.NO_WEBGPU || t === l.NO_ADAPTER || t === l.NO_DEVICE ? new b(t, e.error || "WebGPU unavailable") : t === w.VISION_NOT_LOADED ? new P(t, e.error || "Vision tower not loaded") : new Error(e.error);
   }
   #t(e, t, { onToken: r = null, onLayerNorms: o = null, onL23Residuals: s = null, onL23Mlp: u = null, onL23Attention: h = null, onDeltaState: d = null, signal: i = null, timeoutMs: f = 0 } = {}) {
     const a = crypto.randomUUID();
-    return new Promise((E, p) => {
+    return new Promise((L, p) => {
       if (this.#a) {
         p(new b(l.NO_DEVICE, "WebGPU device was lost; construct a new MentriaEngine to recover."));
         return;
@@ -185,7 +211,7 @@ var g = {
         y !== null && (clearTimeout(y), y = null), n && (i?.removeEventListener("abort", n), n = null);
       };
       this.#e.set(a, {
-        resolve: E,
+        resolve: L,
         reject: p,
         onToken: r,
         onLayerNorms: o,
@@ -218,7 +244,7 @@ var g = {
             });
           } catch {
           }
-          c.reject(L("TimeoutError", `Generation timed out after ${f}ms`));
+          c.reject(m("TimeoutError", `Generation timed out after ${f}ms`));
         }
       }, f)), this.#n.then(() => {
         if (this.#e.has(a))
@@ -237,13 +263,13 @@ var g = {
     });
   }
   #o(e) {
-    return e?.reason !== void 0 ? e.reason instanceof Error ? e.reason : L("AbortError", String(e.reason)) : L("AbortError", "Generation aborted");
+    return e?.reason !== void 0 ? e.reason instanceof Error ? e.reason : m("AbortError", String(e.reason)) : m("AbortError", "Generation aborted");
   }
   static isWebGPUAvailable() {
     return typeof navigator < "u" && !!navigator.gpu;
   }
   static async probeWebGPU() {
-    if (!w.isWebGPUAvailable()) return {
+    if (!E.isWebGPUAvailable()) return {
       available: !1,
       code: l.NO_WEBGPU
     };
@@ -277,7 +303,7 @@ var g = {
     this.#u = e;
   }
   async init(e) {
-    if (!w.isWebGPUAvailable()) throw new b(l.NO_WEBGPU, "WebGPU is not available. Use Chrome 113+, Edge 113+, or Safari 18.2+.");
+    if (!E.isWebGPUAvailable()) throw new b(l.NO_WEBGPU, "WebGPU is not available. Use Chrome 113+, Edge 113+, or Safari 18.2+.");
     const t = await this.#t("init", e);
     if (t && t.protocolVersion !== void 0 && t.protocolVersion !== 1) throw new Error(`MentriaEngine: protocol version mismatch (main=1, worker=${t.protocolVersion}). The main-thread bundle and worker bundle are from incompatible releases — force-reload the page (Ctrl+Shift+R) to clear cached chunks, or pin matching versions.`);
     return t;
@@ -315,7 +341,7 @@ var g = {
           value: void 0,
           done: !0
         });
-    }, E = (n) => {
+    }, L = (n) => {
       if (!(h || d))
         for (d = n; u.length; ) u.shift().reject(n);
     }, p = this.#t("generate", o, {
@@ -323,7 +349,7 @@ var g = {
       signal: t || null,
       timeoutMs: r || 0
     });
-    p.then(a, E);
+    p.then(a, L);
     const y = this;
     return {
       [Symbol.asyncIterator]() {
@@ -369,7 +395,7 @@ var g = {
           } catch {
           }
         }
-        return E(n), p.catch(() => {
+        return L(n), p.catch(() => {
         }), Promise.reject(n);
       }
     };
@@ -478,15 +504,16 @@ var g = {
   }
 };
 export {
-  m as MULTIMODAL_ERROR_CODES,
-  S as MentriaEngine,
+  w as MULTIMODAL_ERROR_CODES,
+  I as MentriaEngine,
   P as MultimodalUnavailableError,
   U as PROTOCOL_VERSION,
   g as QWEN35_08B_CONFIG,
+  S as QWEN35_2B_CONFIG,
   R as QWEN35_4B_CONFIG,
   l as WEBGPU_ERROR_CODES,
   b as WebGPUUnsupportedError,
-  D as canRunLargeModel
+  M as canRunLargeModel
 };
 
 //# sourceMappingURL=mentria.mjs.map

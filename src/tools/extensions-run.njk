@@ -1,0 +1,92 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/extensions/run/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.extensions.title' | t }}"
+  description: "{{ 'tools.extensions.lede' | t }}"
+---
+<section class="xr">
+  <div class="xr__bar">
+    <a class="xr__back" href="{{ locale.pathPrefix }}/tools/extensions/">←</a>
+    <span class="xr__title" id="xr-title">…</span>
+  </div>
+  <p class="xr__error" id="xr-error" hidden></p>
+  <p class="xr__missing" id="xr-missing" hidden>not installed — <a href="{{ locale.pathPrefix }}/tools/extensions/">open the manager</a></p>
+  <iframe class="xr__frame" id="xr-frame" allow="bluetooth; usb; serial; camera; microphone"></iframe>
+</section>
+
+<script type="module">
+const X = await import('/assets/js/mentria-extensions.js');
+const params = new URLSearchParams(location.search);
+const id = params.get('id') || '';
+const entry = X.getEntry(id);
+const frame = document.getElementById('xr-frame');
+const errEl = document.getElementById('xr-error');
+
+function parseHashArgs() {
+  const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+  return h.get('cmd') ? { cmd: h.get('cmd'), args: h.get('args') || '' } : null;
+}
+
+const source = entry && entry.enabled ? X.getSource(id) : null;
+if (!source) {
+  document.getElementById('xr-missing').hidden = false;
+  frame.remove();
+} else {
+  const m = entry.manifest;
+  document.getElementById('xr-title').textContent = m.icon && !/^data:/.test(m.icon) ? m.icon + ' ' + m.name : m.name;
+  document.title = m.name + ' · Mentria';
+  const cs = getComputedStyle(document.documentElement);
+  const theme = Object.freeze({
+    accent: cs.getPropertyValue('--accent').trim(),
+    bg: cs.getPropertyValue('--term-bg').trim() || '#0b0e11',
+    fg: cs.getPropertyValue('--term-fg').trim() || '#e6edf3',
+    muted: cs.getPropertyValue('--term-muted').trim(),
+    fontMono: cs.getPropertyValue('--font-mono').trim()
+  });
+  window.__mentriaExtHost = Object.freeze({
+    manifest: Object.freeze(JSON.parse(JSON.stringify(m))),
+    storage: X.dataApiFor(id),
+    theme,
+    args: parseHashArgs(),
+    notify: (msg) => {
+      const t = document.createElement('div');
+      t.className = 'xr__toast';
+      t.textContent = String(msg).slice(0, 120);
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2200);
+    },
+    close: () => { location.href = '/'; }
+  });
+  const bootstrap = '<scr' + 'ipt>window.mentria = window.parent.__mentriaExtHost;</scr' + 'ipt>';
+  frame.srcdoc = bootstrap + source;
+  frame.addEventListener('load', () => {
+    if (!frame.contentWindow) return;
+    frame.contentWindow.addEventListener('error', (e) => {
+      errEl.textContent = m.name + ': ' + (e.message || 'runtime error');
+      errEl.hidden = false;
+    });
+    frame.contentWindow.addEventListener('unhandledrejection', (e) => {
+      errEl.textContent = m.name + ': ' + String(e.reason || 'unhandled rejection');
+      errEl.hidden = false;
+    });
+  });
+}
+</script>
+
+<style>
+.xr { display: flex; flex-direction: column; min-height: 80vh; }
+.xr__bar { display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--term-border, #2a3138); font-family: var(--font-mono); }
+.xr__back { color: var(--term-muted); text-decoration: none; font-size: 1.1rem; }
+.xr__title { font-size: 0.9rem; color: var(--term-fg); }
+.xr__frame { flex: 1; width: 100%; border: 0; min-height: 70vh; background: transparent; }
+.xr__error, .xr__missing { font-family: var(--font-mono); font-size: 0.8rem; color: var(--syn-pink, #f472b6); padding: 0.6rem 0.8rem; margin: 0; }
+.xr__missing a { color: var(--accent, #6ef3c5); }
+.xr__error[hidden], .xr__missing[hidden] { display: none; }
+.xr__toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--accent, #6ef3c5); color: #0b0e11; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; padding: 8px 16px; border-radius: 16px; z-index: 50; }
+</style>

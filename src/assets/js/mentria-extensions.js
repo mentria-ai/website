@@ -110,7 +110,10 @@ export function remove(id) {
   if (!getEntry(id)) return false;
   const srcOk = store().remove(NS, 'src.' + id);
   store().clear(DATA_NS_PREFIX + id);
-  const regOk = store().set(NS, 'registry', getRegistry().filter((e) => e.manifest.id !== id));
+  const registry = getRegistry().filter((e) => e.manifest.id !== id);
+  const regOk = registry.length
+    ? store().set(NS, 'registry', registry)
+    : store().remove(NS, 'registry');
   return srcOk && regOk;
 }
 

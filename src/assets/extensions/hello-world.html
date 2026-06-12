@@ -32,7 +32,9 @@
 </div>
 <script>
   (function () {
-    var m = window.mentria;
+    var m = window.mentria || {};
+    var storage = m.storage || { get: function () { return null; }, set: function () {} };
+    var notify = m.notify || function () {};
     if (m.theme) {
       var r = document.documentElement;
       if (m.theme.accent) r.style.setProperty('--ext-accent', m.theme.accent);
@@ -44,12 +46,12 @@
       document.getElementById('who').textContent = m.args.args;
     }
     var el = document.getElementById('count');
-    el.textContent = String(m.storage.get('count') || 0);
+    el.textContent = String(storage.get('count') || 0);
     document.getElementById('bump').addEventListener('click', function () {
-      var n = (m.storage.get('count') || 0) + 1;
-      m.storage.set('count', n);
+      var n = (storage.get('count') || 0) + 1;
+      storage.set('count', n);
       el.textContent = String(n);
-      m.notify('count saved: ' + n);
+      notify('count saved: ' + n);
     });
   })();
 </script>

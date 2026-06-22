@@ -59,6 +59,7 @@ const COPY = {
 };
 
 const X = await import('/assets/js/mentria-extensions.js');
+const { confirmInstall } = await import('/assets/js/mentria-ext-install-ui.js');
 const drop = document.getElementById('xt-drop');
 const fileInput = document.getElementById('xt-file');
 const pasteTa = document.getElementById('xt-paste');
@@ -76,20 +77,12 @@ function fmt(tpl, vars) {
 
 async function installFlow(html) {
   clearError();
-  let ins;
-  try { ins = X.inspect(html); } catch (e) { showError(e.message); return; }
-  const m = ins.manifest;
-  let msg;
-  if (ins.existing) {
-    msg = fmt(COPY.updatePrompt, { name: m.name, old: ins.existing.manifest.version, new: m.version });
-  } else {
-    msg = fmt(COPY.trustPrompt, { name: m.name, version: m.version, perms: (m.permissions || []).join(', ') || '—' });
-  }
-  if (ins.warnLarge) msg += ' (' + Math.round(ins.size / 1024) + ' KB — large for local storage)';
-  if (!(await window.mentriaConfirm(msg))) return;
-  try { X.install(html, m); } catch (e) { showError(e.message); return; }
-  showOk(m.name + ' ' + COPY.installedOk);
-  render();
+  try {
+    const entry = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt } });
+    if (!entry) return;
+    showOk(entry.manifest.name + ' ' + COPY.installedOk);
+    render();
+  } catch (e) { showError(e.message); }
 }
 
 function row(entry) {

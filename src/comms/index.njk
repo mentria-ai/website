@@ -48,6 +48,17 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
 
   <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">attach extension</button>
 
+  <div class="comms__picker" id="comms-picker" hidden>
+    <div class="comms__picker-backdrop" data-picker-close></div>
+    <div class="comms__picker-card" role="dialog" aria-modal="true" aria-label="share extension">
+      <h3 class="comms__picker-h">share extension</h3>
+      <div class="comms__picker-list" id="comms-picker-list"></div>
+      <div class="comms__picker-actions">
+        <button type="button" class="comms__btn comms__btn--ghost" data-picker-close>cancel</button>
+      </div>
+    </div>
+  </div>
+
   <form class="comms__send" id="comms-send" autocomplete="off">
     <input class="comms__input comms__input--msg" id="comms-msg" type="text" placeholder="message…" disabled>
     <button class="comms__btn" id="comms-go" type="submit" disabled>send</button>
@@ -96,6 +107,17 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
 .comms__badge--enc{border-color:#9b6fd4;color:#9b6fd4;cursor:help}
 .comms__send{display:flex;gap:.5rem;align-items:center}
 .comms__input--msg{min-width:0}
+.comms__picker{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:1rem}
+.comms__picker[hidden]{display:none}
+.comms__picker-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+.comms__picker-card{position:relative;z-index:1;background:#0d1014;border:1px solid #2a3138;border-radius:8px;padding:1rem;width:100%;max-width:24rem;max-height:80vh;overflow:auto;display:flex;flex-direction:column;gap:.7rem}
+.comms__picker-h{margin:0;font-size:.9rem;color:var(--accent,#6ef3c5);text-transform:lowercase;letter-spacing:.05em}
+.comms__picker-list{display:flex;flex-direction:column;gap:.4rem}
+.comms__picker-item{display:flex;justify-content:space-between;align-items:center;gap:.7rem;width:100%;text-align:left;background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.5rem .7rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer}
+.comms__picker-item:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
+.comms__picker-ver{color:var(--muted);font-size:.75rem;flex:none}
+.comms__picker-actions{display:flex;justify-content:flex-end}
+.comms__picker-empty{color:var(--muted);font-size:.82rem;margin:0}
 </style>
 
 <script type="module">
@@ -683,17 +705,47 @@ const sendFiles = async (fileList) => {
 els.drop.addEventListener('drop', (e) => { sendFiles(e.dataTransfer.files); });
 els.file.addEventListener('change', (e) => { sendFiles(e.target.files); e.target.value = ''; });
 
+const pickerEl = document.getElementById('comms-picker');
+const pickerListEl = document.getElementById('comms-picker-list');
+let pickerResolve = null;
+function closePicker(value) {
+  const r = pickerResolve;
+  pickerResolve = null;
+  pickerEl.hidden = true;
+  pickerListEl.innerHTML = '';
+  if (r) r(value);
+}
+pickerEl.querySelectorAll('[data-picker-close]').forEach((el) => el.addEventListener('click', () => closePicker(null)));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pickerEl.hidden) { e.preventDefault(); closePicker(null); } });
+function pickExtension(list) {
+  pickerListEl.innerHTML = '';
+  list.forEach((ext) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'comms__picker-item';
+    const nm = document.createElement('span');
+    nm.textContent = (ext.icon && !/^data:/.test(ext.icon) ? ext.icon + ' ' : '') + ext.name;
+    const ver = document.createElement('span');
+    ver.className = 'comms__picker-ver';
+    ver.textContent = 'v' + ext.version;
+    item.append(nm, ver);
+    item.addEventListener('click', () => closePicker(ext));
+    pickerListEl.appendChild(item);
+  });
+  pickerEl.hidden = false;
+  const first = pickerListEl.querySelector('.comms__picker-item');
+  if (first) first.focus();
+  return new Promise((res) => { pickerResolve = res; });
+}
+
 const attachExtBtn = document.getElementById('comms-attach-ext');
 attachExtBtn.addEventListener('click', async () => {
   if (peers.size === 0) { sys('no peers to send to.'); return; }
   let list;
   try { list = await MentriaBus.invoke('extensions.list'); } catch (e) { sys('extensions unavailable: ' + e.message); return; }
   if (!list.length) { sys('no installed extensions to share.'); return; }
-  const names = list.map((e, i) => (i + 1) + ') ' + e.name + ' v' + e.version).join('\n');
-  const pick = window.prompt('share which extension?\n' + names, '1');
-  const idx = pick ? parseInt(pick, 10) - 1 : -1;
-  if (!(idx >= 0 && idx < list.length)) return;
-  const chosen = list[idx];
+  const chosen = await pickExtension(list);
+  if (!chosen) return;
   let html;
   try { html = await MentriaBus.invoke('extensions.getSource', { id: chosen.id }); } catch (e) { sys('could not read extension: ' + e.message); return; }
   if (!html) { sys('extension source missing.'); return; }

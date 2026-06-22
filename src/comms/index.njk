@@ -46,6 +46,8 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
     drop files here, or click to choose — sent to everyone in the room
   </label>
 
+  <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">attach extension</button>
+
   <form class="comms__send" id="comms-send" autocomplete="off">
     <input class="comms__input comms__input--msg" id="comms-msg" type="text" placeholder="message…" disabled>
     <button class="comms__btn" id="comms-go" type="submit" disabled>send</button>
@@ -656,6 +658,26 @@ const sendFiles = async (fileList) => {
 
 els.drop.addEventListener('drop', (e) => { sendFiles(e.dataTransfer.files); });
 els.file.addEventListener('change', (e) => { sendFiles(e.target.files); e.target.value = ''; });
+
+const attachExtBtn = document.getElementById('comms-attach-ext');
+attachExtBtn.addEventListener('click', async () => {
+  if (peers.size === 0) { sys('no peers to send to.'); return; }
+  let list;
+  try { list = await MentriaBus.invoke('extensions.list'); } catch (e) { sys('extensions unavailable: ' + e.message); return; }
+  if (!list.length) { sys('no installed extensions to share.'); return; }
+  const names = list.map((e, i) => (i + 1) + ') ' + e.name + ' v' + e.version).join('\n');
+  const pick = window.prompt('share which extension?\n' + names, '1');
+  const idx = pick ? parseInt(pick, 10) - 1 : -1;
+  if (!(idx >= 0 && idx < list.length)) return;
+  const chosen = list[idx];
+  let html;
+  try { html = await MentriaBus.invoke('extensions.getSource', { id: chosen.id }); } catch (e) { sys('could not read extension: ' + e.message); return; }
+  if (!html) { sys('extension source missing.'); return; }
+  try {
+    const file = new File([html], chosen.id + '.html', { type: 'text/html' });
+    await sendOne(file, { kind: 'mentria-ext', extName: chosen.name });
+  } catch (e) { sys('send failed: ' + e.message); }
+});
 
 els.mute.addEventListener('click', () => {
   muted = !muted;

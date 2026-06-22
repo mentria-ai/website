@@ -117,7 +117,6 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
 .comms__picker-item:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
 .comms__picker-ver{color:var(--muted);font-size:.75rem;flex:none}
 .comms__picker-actions{display:flex;justify-content:flex-end}
-.comms__picker-empty{color:var(--muted);font-size:.82rem;margin:0}
 </style>
 
 <script type="module">
@@ -464,6 +463,9 @@ const publishChat = async (text, cmid) => {
 };
 
 const joinNew = async (roomName, b64Key = null) => {
+  MentriaBus.unprovide('comms.peers');
+  MentriaBus.unprovide('comms.share');
+  MentriaBus.unprovide('extensions.requestInstall');
   if (room) {
     closeChatSub();
     try { await room.leave(); } catch {}
@@ -606,6 +608,7 @@ const joinNew = async (roomName, b64Key = null) => {
   MentriaBus.provide('comms.share', async ({ filename, html, name }) => {
     if (!metaAction || !chunkAction) throw new Error('comms not connected');
     if (peers.size === 0) throw new Error('no peers to send to');
+    if (new Blob([html]).size > MAX_FILE) throw new Error('extension too large to send');
     const file = new File([html], filename || 'extension.html', { type: 'text/html' });
     await sendOne(file, { kind: 'mentria-ext', extName: name });
     return { sentTo: peers.size };
@@ -740,19 +743,22 @@ function pickExtension(list) {
 
 const attachExtBtn = document.getElementById('comms-attach-ext');
 attachExtBtn.addEventListener('click', async () => {
-  if (peers.size === 0) { sys('no peers to send to.'); return; }
-  let list;
-  try { list = await MentriaBus.invoke('extensions.list'); } catch (e) { sys('extensions unavailable: ' + e.message); return; }
-  if (!list.length) { sys('no installed extensions to share.'); return; }
-  const chosen = await pickExtension(list);
-  if (!chosen) return;
-  let html;
-  try { html = await MentriaBus.invoke('extensions.getSource', { id: chosen.id }); } catch (e) { sys('could not read extension: ' + e.message); return; }
-  if (!html) { sys('extension source missing.'); return; }
+  if (attachExtBtn.disabled) return;
+  attachExtBtn.disabled = true;
   try {
+    if (peers.size === 0) { sys('no peers to send to.'); return; }
+    let list;
+    try { list = await MentriaBus.invoke('extensions.list'); } catch (e) { sys('extensions unavailable: ' + e.message); return; }
+    if (!list.length) { sys('no installed extensions to share.'); return; }
+    const chosen = await pickExtension(list);
+    if (!chosen) return;
+    let html;
+    try { html = await MentriaBus.invoke('extensions.getSource', { id: chosen.id }); } catch (e) { sys('could not read extension: ' + e.message); return; }
+    if (!html) { sys('extension source missing.'); return; }
     const file = new File([html], chosen.id + '.html', { type: 'text/html' });
     await sendOne(file, { kind: 'mentria-ext', extName: chosen.name });
   } catch (e) { sys('send failed: ' + e.message); }
+  finally { attachExtBtn.disabled = false; }
 });
 
 els.mute.addEventListener('click', () => {

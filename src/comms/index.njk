@@ -98,6 +98,8 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
 
 <script type="module">
 import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/assets/vendor/trystero-nostr.js';
+import { MentriaBus } from '/assets/js/mentria-bus.js';
+import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 
 const RELAY = 'wss://relay.mentria.ai';
 const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';
@@ -552,6 +554,15 @@ const joinNew = async (roomName, b64Key = null) => {
   };
 
   setupChatPersistence(roomName);
+
+  MentriaBus.provide('comms.peers', () => ({ count: peers.size }), { description: 'Number of connected comms peers.', parameters: { type: 'object', properties: {} }, ai: false });
+  MentriaBus.provide('comms.share', async ({ filename, html, name }) => {
+    if (!metaAction || !chunkAction) throw new Error('comms not connected');
+    if (peers.size === 0) throw new Error('no peers to send to');
+    const file = new File([html], filename || 'extension.html', { type: 'text/html' });
+    await sendOne(file, { kind: 'mentria-ext', extName: name });
+    return { sentTo: peers.size };
+  }, { description: 'Send an extension to connected comms peers.', parameters: { type: 'object', properties: { filename: { type: 'string' }, html: { type: 'string' }, name: { type: 'string' } }, required: ['html'] }, ai: false });
 };
 
 els.join.addEventListener('click', () => {
@@ -608,10 +619,10 @@ const undragEvents = ['dragleave', 'drop'];
 dragEvents.forEach(ev => els.drop.addEventListener(ev, (e) => { e.preventDefault(); els.drop.classList.add('comms__drop--hot'); }));
 undragEvents.forEach(ev => els.drop.addEventListener(ev, (e) => { e.preventDefault(); els.drop.classList.remove('comms__drop--hot'); }));
 const CHUNK = 32 * 1024;
-const sendOne = async (file) => {
+const sendOne = async (file, extra) => {
   const id = Math.random().toString(36).slice(2);
   const line = renderLine('you', '', { me: true, html: progressHTML('sending', file.name, file.size, 0) });
-  await metaAction.send({ id, name: file.name, size: file.size, type: file.type });
+  await metaAction.send(Object.assign({ id, name: file.name, size: file.size, type: file.type }, extra || {}));
   const buf = await file.arrayBuffer();
   let sent = 0;
   for (let offset = 0; offset < buf.byteLength; offset += CHUNK) {

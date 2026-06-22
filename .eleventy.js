@@ -200,6 +200,7 @@ module.exports = function(eleventyConfig) {
 
   // Passthrough copy for assets
   eleventyConfig.addPassthroughCopy("src/assets");
+  eleventyConfig.ignores.add("src/assets/extensions/*.html");
   // Passthrough copy for PWA files (sw.js is now a Nunjucks template)
   eleventyConfig.addPassthroughCopy({ "src/manifest.json": "manifest.json" });
   eleventyConfig.addPassthroughCopy({ "src/_data/i18n": "assets/i18n" });

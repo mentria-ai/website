@@ -55,11 +55,15 @@ const COPY = {
   errPrefix:     {{ ("tool.extensions.err_prefix"     | t) | dump | safe }},
   btnOpen:       {{ ("tool.extensions.btn_open"       | t) | dump | safe }},
   btnExport:     {{ ("tool.extensions.btn_export"     | t) | dump | safe }},
-  btnRemove:     {{ ("tool.extensions.btn_remove"     | t) | dump | safe }}
+  btnRemove:     {{ ("tool.extensions.btn_remove"     | t) | dump | safe }},
+  btnShare:      {{ ("tool.extensions.btn_share"      | t) | dump | safe }},
+  shareOk:       {{ ("tool.extensions.share_ok"       | t) | dump | safe }},
+  shareOpenComms:{{ ("tool.extensions.share_open_comms"| t) | dump | safe }}
 };
 
 const X = await import('/assets/js/mentria-extensions.js');
 const { confirmInstall } = await import('/assets/js/mentria-ext-install-ui.js');
+const { MentriaBus } = await import('/assets/js/mentria-bus.js');
 const drop = document.getElementById('xt-drop');
 const fileInput = document.getElementById('xt-file');
 const pasteTa = document.getElementById('xt-paste');
@@ -121,11 +125,24 @@ function row(entry) {
     a.href = URL.createObjectURL(blob); a.download = m.id + '.html';
     document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
   });
+  const share = btn(COPY.btnShare, async () => {
+    const src = X.getSource(m.id);
+    if (!src) { showError(m.id); return; }
+    if (await MentriaBus.has('comms.share')) {
+      try {
+        const r = await MentriaBus.invoke('comms.share', { filename: m.id + '.html', html: src, name: m.name });
+        showOk(fmt(COPY.shareOk, { n: (r && r.sentTo) || 0 }));
+      } catch (e) { showError(e.message); }
+    } else {
+      showOk(COPY.shareOpenComms);
+      window.open('/comms/', '_blank');
+    }
+  });
   const rem = btn(COPY.btnRemove, async () => {
     if (!(await window.mentriaConfirm(fmt(COPY.confirmRemove, { name: m.name })))) return;
     X.remove(m.id); render();
   });
-  actions.append(toggle, open, exp, rem);
+  actions.append(toggle, open, exp, share, rem);
   div.append(icon, meta, actions);
   return div;
 }

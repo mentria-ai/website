@@ -13,8 +13,10 @@
  * parallel with the model weights so it's effectively free). When marked
  * arrives, we swap renderMarkdown to use it for richer output.
  *
- * Safety: BOTH paths HTML-escape untrusted input before applying any
- * markdown patterns. Model output cannot inject script tags.
+ * Safety: rendered HTML is passed through an allowlist sanitizer before
+ * return — only a fixed set of formatting tags/attributes survive, and
+ * scripts, event handlers, and unsafe URL schemes are stripped — so model
+ * or user output cannot inject active content.
  */
 (function (global) {
   'use strict';
@@ -90,7 +92,54 @@
     return html;
   }
 
-  global.renderMarkdown = renderFallback;
+  const SANITIZE_ALLOWED = {
+    A: ['href', 'title'], P: [], BR: [], HR: [], EM: [], STRONG: [], B: [], I: [],
+    DEL: [], INS: [], SUB: [], SUP: [], CODE: ['class'], PRE: ['class'], BLOCKQUOTE: [],
+    UL: [], OL: ['start'], LI: [], H1: [], H2: [], H3: [], H4: [], H5: [], H6: [],
+    TABLE: [], THEAD: [], TBODY: [], TR: [], TH: ['align'], TD: ['align'],
+    IMG: ['src', 'alt', 'title'], SPAN: ['class']
+  };
+
+  function safeUrl(value, isImg) {
+    const u = String(value).replace(/[\u0000-\u0020\u0085\u00a0\u1680\u2000-\u200f\u2028\u2029\u202f\u205f\u2060\u3000\ufeff]+/g, '').toLowerCase();
+    if (/^(https?:|mailto:|tel:)/.test(u)) return true;
+    if (isImg && /^data:image\//.test(u)) return true;
+    if (/^[a-z][a-z0-9+.-]*:/.test(u)) return false;
+    return true;
+  }
+
+  function scrubNode(node) {
+    const kids = Array.prototype.slice.call(node.childNodes);
+    for (let i = 0; i < kids.length; i++) {
+      const el = kids[i];
+      if (el.nodeType === 8) { el.remove(); continue; }
+      if (el.nodeType !== 1) continue;
+      const allow = SANITIZE_ALLOWED[el.tagName];
+      if (!allow) { el.remove(); continue; }
+      const attrs = Array.prototype.slice.call(el.attributes);
+      for (let j = 0; j < attrs.length; j++) {
+        const name = attrs[j].name.toLowerCase();
+        if (allow.indexOf(name) === -1) { el.removeAttribute(attrs[j].name); continue; }
+        if ((name === 'href' || name === 'src') && !safeUrl(attrs[j].value, el.tagName === 'IMG')) {
+          el.removeAttribute(attrs[j].name);
+        }
+      }
+      scrubNode(el);
+    }
+  }
+
+  function sanitizeHtml(html) {
+    if (!html) return '';
+    if (typeof document === 'undefined') return String(html).replace(/<[^>]*>/g, '');
+    const tpl = document.createElement('template');
+    tpl.innerHTML = String(html);
+    scrubNode(tpl.content);
+    return tpl.innerHTML;
+  }
+
+  global.renderMarkdown = function (input) {
+    return input ? sanitizeHtml(renderFallback(input)) : '';
+  };
 
   let markReady;
   global.renderMarkdownReady = new Promise(function (resolve) { markReady = resolve; });
@@ -104,7 +153,7 @@
 
       global.renderMarkdown = function (input) {
         if (!input) return '';
-        return marked.parse(String(input)).replace(/<script[\s\S]*?<\/script>/gi, '');
+        return sanitizeHtml(marked.parse(String(input)));
       };
     } catch (err) {
       console.warn('[markdown] marked unavailable, using vanilla fallback:', err);

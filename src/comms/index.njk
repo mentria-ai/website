@@ -525,7 +525,7 @@ const joinNew = async (roomName, b64Key = null) => {
   };
 
   chunkAction = room.makeAction('fchunk');
-  chunkAction.onMessage = (data, ctx) => {
+  chunkAction.onMessage = async (data, ctx) => {
     const m = ctx.metadata || {};
     const key = ctx.peerId + ':' + m.id;
     const entry = incoming.get(key);
@@ -535,8 +535,31 @@ const joinNew = async (roomName, b64Key = null) => {
     entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.meta.size, entry.received);
     if (m.done) {
       const blob = new Blob(entry.chunks, { type: entry.meta.type || 'application/octet-stream' });
-      const url = URL.createObjectURL(blob);
-      entry.line.what.innerHTML = 'received ' + completeHTML(entry.meta.name, entry.meta.size, entry.meta.type, url);
+      if (entry.meta.kind === 'mentria-ext') {
+        const html = await blob.text();
+        const who = short(ctx.peerId);
+        const label = document.createElement('span');
+        label.textContent = 'extension from ' + who + ': ' + (entry.meta.extName || entry.meta.name) + ' ';
+        const installBtn = document.createElement('button');
+        installBtn.type = 'button';
+        installBtn.className = 'comms__btn comms__btn--ghost';
+        installBtn.textContent = 'install';
+        installBtn.addEventListener('click', async () => {
+          installBtn.disabled = true;
+          try {
+            const installed = await MentriaBus.invoke('extensions.requestInstall', { html, from: who });
+            if (installed) {
+              installBtn.replaceWith(Object.assign(document.createElement('a'), { href: '/tools/extensions/run/?id=' + encodeURIComponent(installed.manifest.id), textContent: 'open' }));
+              label.textContent = 'installed ✓ ';
+            } else { installBtn.disabled = false; }
+          } catch (e) { sys('install failed: ' + e.message); installBtn.disabled = false; }
+        });
+        entry.line.what.innerHTML = '';
+        entry.line.what.append(label, installBtn);
+      } else {
+        const url = URL.createObjectURL(blob);
+        entry.line.what.innerHTML = 'received ' + completeHTML(entry.meta.name, entry.meta.size, entry.meta.type, url);
+      }
       incoming.delete(key);
       playPing(660);
     }
@@ -565,6 +588,7 @@ const joinNew = async (roomName, b64Key = null) => {
     await sendOne(file, { kind: 'mentria-ext', extName: name });
     return { sentTo: peers.size };
   }, { description: 'Send an extension to connected comms peers.', parameters: { type: 'object', properties: { filename: { type: 'string' }, html: { type: 'string' }, name: { type: 'string' } }, required: ['html'] }, ai: false });
+  MentriaBus.provide('extensions.requestInstall', ({ html, from }) => confirmInstall(html, { from }), { description: 'Install a received extension after a human trust prompt.', parameters: { type: 'object', properties: { html: { type: 'string' }, from: { type: 'string' } }, required: ['html'] }, ai: false });
 };
 
 els.join.addEventListener('click', () => {

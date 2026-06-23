@@ -74,9 +74,6 @@ const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
 const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
 const MENTRIA_TOKEN_BASE = MENTRIA_MODEL_BASE;
 
-const QUOTES_LORA_CONFIG_URL  = MENTRIA_MODEL_BASE + 'loras/quotes/adapter_config.json';
-const QUOTES_LORA_WEIGHTS_URL = MENTRIA_MODEL_BASE + 'loras/quotes/adapter_model.safetensors';
-
 const SYSTEM_PROMPT =
   'You are a poetic thinker. Write one short, original motivational quote ' +
   '(1-2 sentences). Do not attribute it to anyone. No preamble, no ' +
@@ -157,37 +154,33 @@ function runApp(MentriaEngine) {
     setStatus('loading', COPY.statusLoadingModel);
     progressWrap.style.display = '';
     try {
-      engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
-      window.mentriaWrapEngine && window.mentriaWrapEngine(engine);
-      engine.onProgress = onEngineProgress;
-      engine.onDeviceLost = (info) => {
-        setStatus('error', COPY.errDeviceLost);
-        newBtn.disabled = true;
-        console.error('WebGPU device lost:', info);
+      const { ensureModel } = await import('/assets/js/mentria-model.js');
+      const Tiers = await import('/assets/js/mentria-tiers.js');
+      const createEngine = () => {
+        const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+        window.mentriaWrapEngine && window.mentriaWrapEngine(e);
+        return e;
       };
-      await engine.init();
-      // Text-only — no vision tower needed for quote generation.
-      await engine.loadModel({
-        modelUrl: MENTRIA_MODEL_BASE,
-        shards: ['qwen3.5-0.8b-q4-tied.safetensors'],
-        allowTiedEmbed: true,
-        tokenizerUrl: MENTRIA_TOKEN_BASE,
-      });
-
-      // Optional LoRA — load only if both URLs are configured. Failure is
-      // not fatal; falls back to base model + system-prompt shaping.
-      if (QUOTES_LORA_CONFIG_URL && QUOTES_LORA_WEIGHTS_URL) {
-        try {
-          await engine.swapAdapter({
-            name: 'quotes-v1',
-            configUrl: QUOTES_LORA_CONFIG_URL,
-            weightsUrl: QUOTES_LORA_WEIGHTS_URL,
-          });
-        } catch (err) {
-          console.warn('Quotes LoRA load failed, using base model:', err);
+      const res = await ensureModel(createEngine, {
+        vision: false,
+        onProgress: onEngineProgress,
+        onDeviceLost: (info) => {
+          setStatus('error', COPY.errDeviceLost);
+          newBtn.disabled = true;
+          console.error('WebGPU device lost:', info);
         }
+      });
+      engine = res.engine;
+      const base = Tiers.TIERS[res.tier].base;
+      try {
+        await engine.swapAdapter({
+          name: 'quotes-v1',
+          configUrl: base + 'loras/quotes/adapter_config.json',
+          weightsUrl: base + 'loras/quotes/adapter_model.safetensors',
+        });
+      } catch (err) {
+        console.warn('Quotes LoRA load failed, using base model:', err);
       }
-
       progressWrap.style.display = 'none';
       setStatus('ready', COPY.statusReady);
       newBtn.disabled = false;

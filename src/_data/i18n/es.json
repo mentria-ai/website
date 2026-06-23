@@ -256,6 +256,13 @@
       "lede": "Una libreta mínima que vive en tu navegador. Crea múltiples notas, guardadas automáticamente en cada pulsación.",
       "tldr": "Un bloc de notas centrado en el teclado que autoguarda cada pulsación en el localStorage del navegador. Múltiples notas, búsqueda instantánea, estética synthwave oscura. Las notas nunca salen de tu dispositivo — sin sincronización, sin cuentas, sin servidor. Úsalo como cuaderno para tareas, fragmentos o ideas a las que volver en una pestaña."
     },
+    "model": {
+      "checking": "Comprobando tu dispositivo…",
+      "testing": "Probando el modelo {name}…",
+      "ready": "✓ {name} listo",
+      "degrade": "{from} no es compatible con este dispositivo — usando {to}",
+      "failed": "No se pudo ejecutar ningún modelo en este dispositivo."
+    },
     "quote": {
       "title": "Cita Motivadora",
       "lede": "Citas originales generadas por IA, ejecutándose localmente en tu navegador. Tus datos no salen de tu dispositivo.",

@@ -256,6 +256,13 @@
       "lede": "Um bloco de notas mínimo que vive no seu navegador. Crie várias notas, salvas automaticamente a cada tecla pressionada.",
       "tldr": "Um bloco de notas focado em teclado que salva automaticamente cada tecla no localStorage do navegador. Várias notas, busca instantânea, estética synthwave escura. As notas nunca saem do seu dispositivo — sem sincronização, sem contas, sem servidor. Use como rascunho para tarefas, trechos de código ou ideias que você vai retomar em uma aba."
     },
+    "model": {
+      "checking": "Verificando seu dispositivo…",
+      "testing": "Testando o modelo {name}…",
+      "ready": "✓ {name} pronto",
+      "degrade": "{from} não é compatível com este dispositivo — usando {to}",
+      "failed": "Não foi possível executar um modelo neste dispositivo."
+    },
     "quote": {
       "title": "Frase Motivacional",
       "lede": "Frases originais geradas por IA, rodando localmente no seu navegador. Seus dados não saem do seu dispositivo.",

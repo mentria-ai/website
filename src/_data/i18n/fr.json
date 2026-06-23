@@ -256,6 +256,13 @@
       "lede": "Un bloc-notes minimaliste qui vit dans votre navigateur. Créez plusieurs notes, sauvegardées à chaque frappe.",
       "tldr": "Un bloc-notes pensé clavier qui auto-enregistre chaque frappe dans le localStorage du navigateur. Notes multiples, recherche instantanée, esthétique synthwave sombre. Tes notes ne quittent jamais ton appareil — pas de synchro, pas de comptes, pas de serveur. À utiliser comme brouillon pour tâches, snippets ou pensées à reprendre dans un onglet."
     },
+    "model": {
+      "checking": "Vérification de votre appareil…",
+      "testing": "Test du modèle {name}…",
+      "ready": "✓ {name} prêt",
+      "degrade": "{from} n’est pas pris en charge sur cet appareil — utilisation de {to}",
+      "failed": "Impossible d’exécuter un modèle sur cet appareil."
+    },
     "quote": {
       "title": "Citation Motivante",
       "lede": "Citations originales générées par IA, fonctionnant localement dans votre navigateur. Vos données restent sur votre appareil.",

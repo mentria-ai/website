@@ -321,18 +321,15 @@ async function isModelTrulyCached() {
 async function ensureEngine(onProgress) {
   if (aiEngine && aiEngine.generate) return aiEngine;
   const { MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs');
-  const engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
-  window.mentriaWrapEngine && window.mentriaWrapEngine(engine);
-  if (typeof onProgress === 'function') engine.onProgress = onProgress;
-  await engine.init();
-  await engine.loadModel({
-    modelUrl: MENTRIA_MODEL_BASE,
-    shards: ['qwen3.5-0.8b-q4-tied.safetensors'],
-    allowTiedEmbed: true,
-    tokenizerUrl: MENTRIA_MODEL_BASE
-  });
-  aiEngine = engine;
-  return engine;
+  const { ensureModel } = await import('/assets/js/mentria-model.js');
+  const createEngine = () => {
+    const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+    window.mentriaWrapEngine && window.mentriaWrapEngine(e);
+    return e;
+  };
+  const res = await ensureModel(createEngine, { vision: false, onProgress });
+  aiEngine = res.engine;
+  return aiEngine;
 }
 
 async function aiSuggestFilename(onLoadProgress) {

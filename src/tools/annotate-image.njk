@@ -193,16 +193,21 @@ eleventyComputed:
     if (loaded) return true;
     if (loadingPromise) return loadingPromise;
     loadingPromise = (async () => {
-      if (window.mentriaConfirmHeavyDownload){ const ok = await window.mentriaConfirmHeavyDownload(); if (!ok){ loadingPromise = null; return false; } }
       setStatus('loading', COPY.statusLoading); progressWrap.style.display = 'flex';
       try {
         if (!MentriaEngine) ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
-        engine = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
-        window.mentriaWrapEngine && window.mentriaWrapEngine(engine);
-        engine.onProgress = onProgress;
-        engine.onDeviceLost = (info) => { setStatus('error', COPY.errDeviceLost); console.error('WebGPU device lost:', info); loaded = false; engine = null; };
-        await engine.init();
-        await engine.loadModel({ modelUrl: MENTRIA_MODEL_BASE, shards: ['qwen3.5-0.8b-q4-tied.safetensors'], allowTiedEmbed: true, tokenizerUrl: MENTRIA_MODEL_BASE, visionModelUrl: MENTRIA_MODEL_BASE, visionShards: ['qwen3.5-0.8b-vl-q4.safetensors'], visionConfig: MENTRIA_VL_CONFIG });
+        const { ensureModel: ensureSharedModel } = await import('/assets/js/mentria-model.js');
+        const createEngine = () => {
+          const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+          window.mentriaWrapEngine && window.mentriaWrapEngine(e);
+          return e;
+        };
+        const res = await ensureSharedModel(createEngine, {
+          vision: true,
+          onProgress: onProgress,
+          onDeviceLost: (info) => { setStatus('error', COPY.errDeviceLost); console.error('WebGPU device lost:', info); loaded = false; engine = null; }
+        });
+        engine = res.engine;
         progressWrap.style.display = 'none';
         loaded = true; deleteBtn.style.display = '';
         return true;

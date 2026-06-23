@@ -1,6 +1,7 @@
 const MENTRIA_DIST = '/assets/mentria/dist/mentria.mjs';
 const LS_PREF = 'mentria-tier';
 const LS_CAP = 'mentria-tier-cap';
+const LS_VALID = 'mentria-tier-validated';
 const GiB = 1073741824;
 
 export const TIER_CHAIN = ['4b', '2b', '0.8b'];
@@ -150,6 +151,52 @@ function capAllows(id) {
   return !cap || TIERS[id].order <= TIERS[cap].order;
 }
 
+export function setTierCap(id) {
+  try {
+    if (!id || !TIERS[id]) return;
+    localStorage.setItem(LS_CAP, id);
+  } catch (_) {}
+}
+
+export function getValidatedTier() {
+  try {
+    const v = localStorage.getItem(LS_VALID);
+    return v && TIERS[v] ? v : null;
+  } catch (_) { return null; }
+}
+
+export function setValidatedTier(id) {
+  try {
+    if (!id || !TIERS[id]) return;
+    const cap = getTierCap();
+    if (cap && TIERS[id].order > TIERS[cap].order) return;
+    const cur = getValidatedTier();
+    if (cur && TIERS[cur].order >= TIERS[id].order) return;
+    localStorage.setItem(LS_VALID, id);
+  } catch (_) {}
+}
+
+export function clearValidatedTier() {
+  try { localStorage.removeItem(LS_VALID); } catch (_) {}
+}
+
+export async function effectiveTier() {
+  if (typeof navigator === 'undefined' || !navigator.gpu) return null;
+  if (IS_IOS) return '0.8b';
+  const caps = await detectCaps();
+  if (!caps) return null;
+  const d = await decideTier();
+  const eligible = new Set([d.tier].concat(d.eligible || []));
+  const cap = getTierCap();
+  const allowed = (id) => !cap || TIERS[id].order <= TIERS[cap].order;
+  const pref = getUserTier();
+  if (pref && eligible.has(pref) && allowed(pref)) return pref;
+  for (const id of TIER_CHAIN) {
+    if (eligible.has(id) && allowed(id) && (await isTierCached(id))) return id;
+  }
+  return '0.8b';
+}
+
 export async function isTierCached(id) {
   try {
     const t = TIERS[id];
@@ -250,7 +297,7 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
   return opts;
 }
 
-export async function loadWithFallback(createEngine, startTier, { vision = true, onFallback = null } = {}) {
+export async function loadWithFallback(createEngine, startTier, { vision = true, onFallback = null, validate = null } = {}) {
   const chain = TIER_CHAIN.slice(TIER_CHAIN.indexOf(startTier));
   let lastErr = null;
   for (let i = 0; i < chain.length; i++) {
@@ -259,6 +306,7 @@ export async function loadWithFallback(createEngine, startTier, { vision = true,
     try {
       await engine.init();
       await engine.loadModel(await loadOptionsFor(id, { vision }));
+      if (validate) await validate(engine, id);
       return { engine, tier: id };
     } catch (err) {
       lastErr = err;

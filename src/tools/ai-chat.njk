@@ -313,32 +313,24 @@ function runApp(MentriaEngine, Tiers) {
     setStatus('loading', COPY.statusLoadingModel);
     progressWrap.style.display = '';
     try {
-      const startTier = (tierDecision && tierDecision.tier) || '0.8b';
-      const wasCached = await Tiers.isTierCached(startTier);
+      const { ensureModel } = await import('/assets/js/mentria-model.js');
       const createEngine = () => {
         const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
         window.mentriaWrapEngine && window.mentriaWrapEngine(e);
-        e.onProgress = onEngineProgress;
-        // onDeviceLost is wired by the engine's S410 device-loss handler;
-        // surface it to the user with a clear "reload to recover" message.
-        e.onDeviceLost = (info) => {
+        return e;
+      };
+      const res = await ensureModel(createEngine, {
+        vision: true,
+        onProgress: onEngineProgress,
+        onDeviceLost: (info) => {
           setStatus('error', COPY.errDeviceLost);
           inputEl.disabled = true; sendBtn.disabled = true;
           console.error('WebGPU device lost:', info);
-        };
-        return e;
-      };
-      const res = await Tiers.loadWithFallback(createEngine, startTier, {
-        vision: true,
-        onFallback: (failed, next) => {
-          setStatus('loading', COPY.tierFallback.replace('{tier}', Tiers.TIERS[next].name));
         }
       });
       engine = res.engine;
       currentTier = res.tier;
-      if (currentTier !== '0.8b' && !wasCached) {
-        try { await navigator.storage?.persist?.(); } catch (_) {}
-      }
+      try { await navigator.storage?.persist?.(); } catch (_) {}
       syncTierSelector();
       progressWrap.style.display = 'none';
       setStatus('ready', COPY.statusReady);

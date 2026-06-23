@@ -61,7 +61,6 @@ eleventyComputed:
   const LANG = {{ (lang | default("en")) | dump | safe }};
   const LOCALE_PREFIX = {{ (locale.pathPrefix | default("")) | dump | safe }};
   const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
-  const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
 
   const $input   = document.getElementById('sx-input');
   const $count   = document.getElementById('sx-count');
@@ -183,7 +182,7 @@ eleventyComputed:
     if (!('caches' in window) || !navigator.gpu) return;
     try {
       const keys = await caches.keys();
-      const hit = keys.some(k => k.includes('mentria') || k.includes('huggingface'));
+      const hit = keys.some(k => k.startsWith('mentria-models'));
       if (!hit) return;
       // Found cached weights — flag UI; defer engine init until user clicks.
       aiEngine = { cached: true };

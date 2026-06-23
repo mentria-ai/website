@@ -180,8 +180,8 @@ function runApp(MentriaEngine, Tiers) {
   let conversationImages = [];
   let messages = [
     { role: 'system', content:
-      "You are the Mentria AI assistant. You run Qwen3.5-0.8B locally in the user's browser via WebGPU. Your weights were fine-tuned and shipped by mentria.ai.\n\n" +
-      "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running Qwen3.5-0.8B in their browser. When asked about Mentria itself: it is a small privacy-first creative studio at mentria.ai, building tools, games, and AI experiences that run entirely client-side with no servers, no accounts, and no telemetry. Notable parts of the site: TOTP, quick notes, QR scanner, color picker, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, a P2P chat and file drop at /comms/, and a daily image-fact feed called Deep Cuts.\n\n" +
+      "You are the Mentria AI assistant. You run Qwen3.5 locally in the user's browser via WebGPU. Your weights were fine-tuned and shipped by mentria.ai.\n\n" +
+      "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running Qwen3.5 in their browser. When asked about Mentria itself: it is a small privacy-first creative studio at mentria.ai, building tools, games, and AI experiences that run entirely client-side with no servers, no accounts, and no telemetry. Notable parts of the site: TOTP, quick notes, QR scanner, color picker, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, a P2P chat and file drop at /comms/, and a daily image-fact feed called Deep Cuts.\n\n" +
       "Be helpful, accurate, and brief. Don't over-apologize. When the user shares an image, describe what you see directly. You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly.\n\n" +
       "Formatting: use markdown sparingly. For tables, output strict GitHub-flavored markdown: one header row, one divider row made only of pipes and dashes, then data rows. Never put prose, notes, parentheticals, or extra characters between the divider and the data rows. Each cell is one short phrase, never a sentence. Any explanation goes outside the table."
     },
@@ -341,6 +341,7 @@ function runApp(MentriaEngine, Tiers) {
       inputEl.focus();
     } catch (err) {
       progressWrap.style.display = 'none';
+      if (err && err.message === 'download-postponed') { setStatus('idle', COPY.downloadPostponed); return; }
       console.error('Model load error:', err);
       setStatus('error', COPY.errLoadPrefix + (err.message || err));
     }
@@ -543,14 +544,7 @@ function runApp(MentriaEngine, Tiers) {
       return;
     }
     syncTierSelector();
-    let ok;
-    if (tierDecision.tier !== '0.8b' && !(await Tiers.isTierCached(tierDecision.tier))) {
-      ok = await window.mentriaConfirm(COPY.tierConfirm.replace('{size}', Tiers.TIERS[tierDecision.tier].sizeLabel));
-    } else {
-      ok = await window.mentriaConfirmHeavyDownload();
-    }
-    if (ok) loadModel();
-    else setStatus('idle', COPY.downloadPostponed);
+    loadModel();
   })();
 }
 </script>

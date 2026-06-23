@@ -111,8 +111,6 @@ eleventyComputed:
 (() => {
   'use strict';
   const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
-  const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
-  const MENTRIA_VL_CONFIG = { hidden_size: 768, intermediate_size: 3072, num_heads: 12, head_dim: 64, out_hidden_size: 1024, depth: 12, patch_size: 16, temporal_patch_size: 2, spatial_merge_size: 2, num_position_embeddings: 2304, num_grid_per_side: 48, eps: 1e-6, prefix: 'visual' };
   const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const IMG_MAX = IS_IOS ? 256 : 448;
   const MAX_TOKENS = IS_IOS ? 256 : 512;
@@ -206,7 +204,7 @@ eleventyComputed:
           vision: true,
           offerUpgrade: true,
           onProgress: onProgress,
-          onDeviceLost: (info) => { setStatus('error', COPY.errDeviceLost); console.error('WebGPU device lost:', info); loaded = false; engine = null; }
+          onDeviceLost: (info) => { setStatus('error', COPY.errDeviceLost); console.error('WebGPU device lost:', info); loaded = false; engine = null; loadingPromise = null; }
         });
         engine = res.engine;
         progressWrap.style.display = 'none';

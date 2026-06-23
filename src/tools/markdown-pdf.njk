@@ -291,7 +291,7 @@ async function detectCachedSignal() {
   if (!('caches' in window) || !navigator.gpu) return false;
   try {
     const keys = await caches.keys();
-    return keys.some(k => k.includes('mentria') || k.includes('huggingface'));
+    return keys.some(k => k.startsWith('mentria-models'));
   } catch (_) {
     return false;
   }

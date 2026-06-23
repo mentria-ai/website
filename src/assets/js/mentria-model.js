@@ -91,7 +91,21 @@ function offerChoice(choices) {
   actions.innerHTML = '';
   actions.hidden = false;
   el.hidden = false;
+  const fallback = choices[choices.length - 1];
   return new Promise((resolve) => {
+    let done = false;
+    const finish = (id) => {
+      if (done) return;
+      done = true;
+      actions.hidden = true;
+      document.removeEventListener('keydown', onKey);
+      el.removeEventListener('click', onBackdrop);
+      resolve(id);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); finish(fallback); } };
+    const onBackdrop = (e) => { if (e.target === el) finish(fallback); };
+    document.addEventListener('keydown', onKey);
+    el.addEventListener('click', onBackdrop);
     choices.forEach((id) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -102,7 +116,7 @@ function offerChoice(choices) {
       sz.className = 'mm-gate__btn-size';
       sz.textContent = tierSize(id);
       b.append(nm, sz);
-      b.addEventListener('click', () => { actions.hidden = true; resolve(id); });
+      b.addEventListener('click', () => finish(id));
       actions.appendChild(b);
     });
   });
@@ -192,6 +206,7 @@ export async function ensureModel(engineFactory, opts) {
   if (proven && cached) {
     hide();
     const res = await Tiers.loadWithFallback(makeEngine, candidate, { vision });
+    if (res.tier !== candidate) Tiers.clearValidatedTier();
     return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier };
   }
 

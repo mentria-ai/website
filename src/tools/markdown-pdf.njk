@@ -286,7 +286,6 @@ function contentHash(s) {
 // touched an AI tool before — actual model load happens on click and
 // will download on demand if the weights aren't truly cached yet.
 const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
-const MENTRIA_MODEL_BASE = 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/';
 
 async function detectCachedSignal() {
   if (!('caches' in window) || !navigator.gpu) return false;
@@ -310,14 +309,6 @@ async function reflectAvailability() {
   aiBtn.title = cached ? '' : (COPY.aiUnavailableHint || '');
 }
 
-async function isModelTrulyCached() {
-  if (!('caches' in window)) return false;
-  try {
-    const r = await caches.match(MENTRIA_MODEL_BASE + 'qwen3.5-0.8b-q4-tied.safetensors');
-    return !!r;
-  } catch (_) { return false; }
-}
-
 async function ensureEngine(onProgress) {
   if (aiEngine && aiEngine.generate) return aiEngine;
   const { MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs');
@@ -327,7 +318,7 @@ async function ensureEngine(onProgress) {
     window.mentriaWrapEngine && window.mentriaWrapEngine(e);
     return e;
   };
-  const res = await ensureModel(createEngine, { vision: false, onProgress });
+  const res = await ensureModel(createEngine, { vision: false, cachedOnly: true, onProgress });
   aiEngine = res.engine;
   return aiEngine;
 }
@@ -384,12 +375,6 @@ async function aiSuggestFilename(onLoadProgress) {
 
 async function runAINameGeneration() {
   if (!aiBtn || aiBtn.disabled) return;
-
-  // If the model file isn't actually in the Cache API, the click would
-  // silently kick off a multi-minute 660 MB download. Confirm first.
-  if (!aiEngine && !(await isModelTrulyCached())) {
-    if (!(await mentriaConfirm(COPY.aiConfirmDownload))) return;
-  }
 
   aiBtn.disabled = true;
   if (aiBtnLabel) aiBtnLabel.textContent = (COPY.aiGenerating || 'Generating…');

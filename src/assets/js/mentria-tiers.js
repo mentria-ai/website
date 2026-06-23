@@ -180,9 +180,10 @@ export function clearValidatedTier() {
   try { localStorage.removeItem(LS_VALID); } catch (_) {}
 }
 
-export async function effectiveTier() {
+export async function effectiveTier(opts) {
+  const cachedOnly = !!(opts && opts.cachedOnly);
   if (typeof navigator === 'undefined' || !navigator.gpu) return null;
-  if (IS_IOS) return '0.8b';
+  if (IS_IOS) return cachedOnly ? ((await isTierCached('0.8b')) ? '0.8b' : null) : '0.8b';
   const caps = await detectCaps();
   if (!caps) return null;
   const d = await decideTier();
@@ -190,11 +191,13 @@ export async function effectiveTier() {
   const cap = getTierCap();
   const allowed = (id) => !cap || TIERS[id].order <= TIERS[cap].order;
   const pref = getUserTier();
-  if (pref && eligible.has(pref) && allowed(pref)) return pref;
+  if (!cachedOnly && pref && eligible.has(pref) && allowed(pref)) return pref;
   for (const id of TIER_CHAIN) {
-    if (eligible.has(id) && allowed(id) && (await isTierCached(id))) return id;
+    if (!allowed(id)) continue;
+    if (!(await isTierCached(id))) continue;
+    if (cachedOnly || eligible.has(id)) return id;
   }
-  return '0.8b';
+  return cachedOnly ? null : '0.8b';
 }
 
 export async function isTierCached(id) {

@@ -209,7 +209,7 @@ eleventyComputed:
           window.mentriaWrapEngine && window.mentriaWrapEngine(e);
           return e;
         };
-        const res = await ensureModel(createEngine, { vision: false });
+        const res = await ensureModel(createEngine, { vision: false, cachedOnly: true });
         aiEngine = res.engine;
       }
 

@@ -144,19 +144,9 @@ export async function ensureModel(engineFactory, opts) {
   const onProgress = opts.onProgress || null;
   const onDeviceLost = opts.onDeviceLost || null;
   const offerUpgrade = !!opts.offerUpgrade;
+  const cachedOnly = !!opts.cachedOnly;
 
   if (typeof navigator === 'undefined' || !navigator.gpu) throw new NoWebGpuError();
-
-  if (offerUpgrade && !Tiers.getUserTier()) {
-    const choices = await tierChoices();
-    if (choices.length > 1) {
-      const pick = await offerChoice(choices);
-      Tiers.setUserTier(pick);
-    }
-  }
-
-  const candidate = await Tiers.effectiveTier();
-  if (!candidate) throw new NoWebGpuError();
 
   const makeEngine = () => {
     const e = engineFactory();
@@ -176,6 +166,24 @@ export async function ensureModel(engineFactory, opts) {
     };
     return engine;
   };
+
+  if (cachedOnly) {
+    const c = await Tiers.effectiveTier({ cachedOnly: true });
+    if (!c) throw new Error('model-not-cached');
+    const res = await Tiers.loadWithFallback(makeEngine, c, { vision });
+    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier };
+  }
+
+  if (offerUpgrade && !Tiers.getUserTier()) {
+    const choices = await tierChoices();
+    if (choices.length > 1) {
+      const pick = await offerChoice(choices);
+      Tiers.setUserTier(pick);
+    }
+  }
+
+  const candidate = await Tiers.effectiveTier();
+  if (!candidate) throw new NoWebGpuError();
 
   const validated = Tiers.getValidatedTier();
   const proven = validated && Tiers.TIERS[candidate].order <= Tiers.TIERS[validated].order;

@@ -321,6 +321,7 @@ function runApp(MentriaEngine, Tiers) {
       };
       const res = await ensureModel(createEngine, {
         vision: true,
+        offerUpgrade: true,
         onProgress: onEngineProgress,
         onDeviceLost: (info) => {
           setStatus('error', COPY.errDeviceLost);

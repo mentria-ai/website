@@ -261,7 +261,9 @@
       "testing": "Testing the {name} model…",
       "ready": "✓ {name} ready",
       "degrade": "{from} isn’t supported on this device — using {to}",
-      "failed": "Couldn’t run an on-device model on this device."
+      "failed": "Couldn’t run an on-device model on this device.",
+      "chooseTitle": "Choose your AI model",
+      "chooseHint": "Your device can run up to {name}. Bigger models are smarter but download more."
     },
     "quote": {
       "title": "Motivational Quote",

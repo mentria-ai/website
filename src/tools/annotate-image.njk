@@ -204,6 +204,7 @@ eleventyComputed:
         };
         const res = await ensureSharedModel(createEngine, {
           vision: true,
+          offerUpgrade: true,
           onProgress: onProgress,
           onDeviceLost: (info) => { setStatus('error', COPY.errDeviceLost); console.error('WebGPU device lost:', info); loaded = false; engine = null; }
         });

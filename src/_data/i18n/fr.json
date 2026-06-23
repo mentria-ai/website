@@ -261,7 +261,9 @@
       "testing": "Test du modèle {name}…",
       "ready": "✓ {name} prêt",
       "degrade": "{from} n’est pas pris en charge sur cet appareil — utilisation de {to}",
-      "failed": "Impossible d’exécuter un modèle sur cet appareil."
+      "failed": "Impossible d’exécuter un modèle sur cet appareil.",
+      "chooseTitle": "Choisissez votre modèle d’IA",
+      "chooseHint": "Votre appareil peut exécuter jusqu’à {name}. Les modèles plus grands sont plus intelligents mais se téléchargent davantage."
     },
     "quote": {
       "title": "Citation Motivante",

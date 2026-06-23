@@ -261,7 +261,9 @@
       "testing": "Testando o modelo {name}…",
       "ready": "✓ {name} pronto",
       "degrade": "{from} não é compatível com este dispositivo — usando {to}",
-      "failed": "Não foi possível executar um modelo neste dispositivo."
+      "failed": "Não foi possível executar um modelo neste dispositivo.",
+      "chooseTitle": "Escolha seu modelo de IA",
+      "chooseHint": "Seu dispositivo pode executar até {name}. Modelos maiores são mais inteligentes, mas baixam mais."
     },
     "quote": {
       "title": "Frase Motivacional",

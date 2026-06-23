@@ -198,8 +198,8 @@
   "tools": {
     "ai-chat": {
       "title": "Chat IA",
-      "lede": "Qwen3.5-0.8B fonctionnant localement dans votre navigateur. Pas de serveur, pas de clés API. Prend en charge la vision.",
-      "tldr": "AI Chat exécute Qwen3.5-0.8B localement dans ton navigateur via WebGPU. Tes messages et toute image envoyée ne quittent jamais ton appareil — pas de serveur, pas de clé API, pas de compte. Prend en charge l'entrée visuelle. Le modèle se charge au premier clic ; les visites suivantes démarrent instantanément depuis le cache local."
+      "lede": "Qwen3.5 fonctionnant localement dans votre navigateur. Pas de serveur, pas de clés API. Prend en charge la vision.",
+      "tldr": "AI Chat exécute Qwen3.5 localement dans ton navigateur via WebGPU. Tes messages et toute image envoyée ne quittent jamais ton appareil — pas de serveur, pas de clé API, pas de compte. Prend en charge l'entrée visuelle. Le modèle se charge au premier clic ; les visites suivantes démarrent instantanément depuis le cache local."
     },
     "base64-codec": {
       "title": "Codec Base64",
@@ -268,7 +268,7 @@
     "quote": {
       "title": "Citation Motivante",
       "lede": "Citations originales générées par IA, fonctionnant localement dans votre navigateur. Vos données restent sur votre appareil.",
-      "tldr": "Citation Motivante génère des aphorismes originaux avec un modèle Qwen3.5-0.8B affiné sur des données de citations sélectionnées, fonctionnant entièrement dans ton navigateur via WebGPU. Pas de serveur, pas de clé API, pas de compte. Le modèle se charge à la première visite et reste en cache localement pour une réutilisation instantanée."
+      "tldr": "Citation Motivante génère des aphorismes originaux avec un modèle Qwen3.5 affiné sur des données de citations sélectionnées, fonctionnant entièrement dans ton navigateur via WebGPU. Pas de serveur, pas de clé API, pas de compte. Le modèle se charge à la première visite et reste en cache localement pour une réutilisation instantanée."
     },
     "radio": {
       "title": "Radio Infinie",
@@ -283,7 +283,7 @@
     "search": {
       "title": "Recherche",
       "lede": "Trouve des outils et des publications du fil. Tape n'importe quelle requête — mot-clé ou langage naturel.",
-      "tldr": "Recherche sur l'ensemble du site appuyée par un index construit à la compilation, couvrant chaque outil et chaque publication en 5 langues. Le mode par défaut est une correspondance floue instantanée par mots-clés sur titres, descriptions et TL;DR — sans téléchargement de modèle, sans serveur. Quand le modèle Qwen3.5-0.8B est déjà en cache local (après avoir utilisé AI Chat ou Citation Motivante), un résumé IA optionnel apparaît au-dessus des résultats."
+      "tldr": "Recherche sur l'ensemble du site appuyée par un index construit à la compilation, couvrant chaque outil et chaque publication en 5 langues. Le mode par défaut est une correspondance floue instantanée par mots-clés sur titres, descriptions et TL;DR — sans téléchargement de modèle, sans serveur. Quand le modèle Qwen3.5 est déjà en cache local (après avoir utilisé AI Chat ou Citation Motivante), un résumé IA optionnel apparaît au-dessus des résultats."
     },
     "step-counter": {
       "title": "Compteur de Pas",
@@ -323,7 +323,7 @@
     "annotate-image": {
       "title": "Annoter une image",
       "lede": "Importez une image et obtenez instantanément une description IA, un texte alternatif, une transcription ou des étiquettes — avec des prompts testés en un toucher. S'exécute localement dans votre navigateur, rien n'est envoyé.",
-      "tldr": "Un compagnon ciblé doté de vision pour AI Chat : dépose une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Bascule entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle de vision Qwen3.5-0.8B sur l'appareil qu'AI Chat (cache partagé — si tu as déjà utilisé AI Chat, aucun téléchargement supplémentaire), entièrement dans ton navigateur via WebGPU. Rien n'est envoyé ; l'image ne quitte jamais ton appareil. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis ton gestionnaire de fichiers une fois installé. Copie ou télécharge le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+)."
+      "tldr": "Un compagnon ciblé doté de vision pour AI Chat : dépose une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Bascule entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle de vision Qwen3.5 sur l'appareil qu'AI Chat (cache partagé — si tu as déjà utilisé AI Chat, aucun téléchargement supplémentaire), entièrement dans ton navigateur via WebGPU. Rien n'est envoyé ; l'image ne quitte jamais ton appareil. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis ton gestionnaire de fichiers une fois installé. Copie ou télécharge le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+)."
     }
   },
   "game": {

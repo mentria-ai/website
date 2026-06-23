@@ -198,8 +198,8 @@
   "tools": {
     "ai-chat": {
       "title": "Chat IA",
-      "lede": "Qwen3.5-0.8B rodando localmente no seu navegador. Sem servidor, sem chaves de API. Suporta visão.",
-      "tldr": "AI Chat executa Qwen3.5-0.8B localmente no seu navegador via WebGPU. Suas mensagens e qualquer imagem enviada nunca saem do seu dispositivo — sem servidor, sem chave de API, sem conta. Suporta entrada de imagem. O modelo carrega no primeiro clique; visitas seguintes iniciam instantaneamente do cache local."
+      "lede": "Qwen3.5 rodando localmente no seu navegador. Sem servidor, sem chaves de API. Suporta visão.",
+      "tldr": "AI Chat executa Qwen3.5 localmente no seu navegador via WebGPU. Suas mensagens e qualquer imagem enviada nunca saem do seu dispositivo — sem servidor, sem chave de API, sem conta. Suporta entrada de imagem. O modelo carrega no primeiro clique; visitas seguintes iniciam instantaneamente do cache local."
     },
     "base64-codec": {
       "title": "Codec Base64",
@@ -268,7 +268,7 @@
     "quote": {
       "title": "Frase Motivacional",
       "lede": "Frases originais geradas por IA, rodando localmente no seu navegador. Seus dados não saem do seu dispositivo.",
-      "tldr": "Frase Motivacional gera aforismos originais com um modelo Qwen3.5-0.8B ajustado em dados de frases curados, rodando inteiramente no seu navegador via WebGPU. Sem servidor, sem chave de API, sem conta. O modelo é baixado na primeira visita e fica em cache localmente para reutilização instantânea."
+      "tldr": "Frase Motivacional gera aforismos originais com um modelo Qwen3.5 ajustado em dados de frases curados, rodando inteiramente no seu navegador via WebGPU. Sem servidor, sem chave de API, sem conta. O modelo é baixado na primeira visita e fica em cache localmente para reutilização instantânea."
     },
     "radio": {
       "title": "Rádio Infinita",
@@ -283,7 +283,7 @@
     "search": {
       "title": "Busca",
       "lede": "Encontre ferramentas e posts do feed. Digite qualquer consulta — palavra-chave ou linguagem natural.",
-      "tldr": "Busca em todo o site apoiada por um índice gerado em tempo de build, cobrindo cada ferramenta e post do feed em 5 idiomas. O modo padrão é correspondência fuzzy instantânea por palavras-chave em títulos, descrições e TL;DRs — sem download de modelo, sem ida ao servidor. Quando o modelo Qwen3.5-0.8B já está em cache local (após usar AI Chat ou Frase Motivacional), um resumo IA opcional aparece acima dos resultados."
+      "tldr": "Busca em todo o site apoiada por um índice gerado em tempo de build, cobrindo cada ferramenta e post do feed em 5 idiomas. O modo padrão é correspondência fuzzy instantânea por palavras-chave em títulos, descrições e TL;DRs — sem download de modelo, sem ida ao servidor. Quando o modelo Qwen3.5 já está em cache local (após usar AI Chat ou Frase Motivacional), um resumo IA opcional aparece acima dos resultados."
     },
     "step-counter": {
       "title": "Contador de Passos",
@@ -323,7 +323,7 @@
     "annotate-image": {
       "title": "Anotar imagem",
       "lede": "Envie uma imagem e obtenha na hora uma descrição de IA, texto alternativo, transcrição ou tags — com prompts testados de um toque. Roda localmente no seu navegador, nada é enviado.",
-      "tldr": "Um complemento focado e com visão para o AI Chat: solte uma imagem e um prompt testado roda automaticamente — sem precisar escrever um. Alterne entre Descrever, Ler texto (OCR), Texto alternativo e Objetos/tags com um toque. Ele roda o mesmo modelo de visão Qwen3.5-0.8B no dispositivo que o AI Chat (cache compartilhado — se você já usou o AI Chat, não há download extra), inteiramente no seu navegador via WebGPU. Nada é enviado; a imagem nunca sai do seu dispositivo. Arraste e solte, cole, escolha um arquivo ou use «abrir com» no seu gerenciador de arquivos depois de instalado. Copie ou baixe o resultado. Requer WebGPU (Chrome/Edge recente ou Safari 26+)."
+      "tldr": "Um complemento focado e com visão para o AI Chat: solte uma imagem e um prompt testado roda automaticamente — sem precisar escrever um. Alterne entre Descrever, Ler texto (OCR), Texto alternativo e Objetos/tags com um toque. Ele roda o mesmo modelo de visão Qwen3.5 no dispositivo que o AI Chat (cache compartilhado — se você já usou o AI Chat, não há download extra), inteiramente no seu navegador via WebGPU. Nada é enviado; a imagem nunca sai do seu dispositivo. Arraste e solte, cole, escolha um arquivo ou use «abrir com» no seu gerenciador de arquivos depois de instalado. Copie ou baixe o resultado. Requer WebGPU (Chrome/Edge recente ou Safari 26+)."
     }
   },
   "game": {

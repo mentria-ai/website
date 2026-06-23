@@ -2,7 +2,7 @@
   {
     "slug": "search",
     "title": "Search",
-    "summary": "AI-aware site search across tools and feed posts. Falls back to instant fuzzy keyword matching; uses Qwen3.5-0.8B for natural-language summaries when the model is already cached locally.",
+    "summary": "AI-aware site search across tools and feed posts. Falls back to instant fuzzy keyword matching; uses Qwen3.5 for natural-language summaries when the model is already cached locally.",
     "category": "AI",
     "group": "AI"
   },
@@ -79,7 +79,7 @@
   {
     "slug": "ai-chat",
     "title": "AI Chat",
-    "summary": "Chat with Qwen3.5-0.8B running locally in your browser via WebGPU. Supports vision. No data leaves your device.",
+    "summary": "Chat with Qwen3.5 running locally in your browser via WebGPU. Supports vision. No data leaves your device.",
     "category": "AI",
     "group": "AI"
   },

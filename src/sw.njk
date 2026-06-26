@@ -155,12 +155,52 @@ self.addEventListener('pushsubscriptionchange', event => {
   })());
 });
 
+let wtCancelled = false;
+
+async function wtRelay(request) {
+  const { url, method, headers, destination } = request;
+  const clientList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  const [response, port] = await new Promise(resolve => {
+    for (const client of clientList) {
+      const { port1, port2 } = new MessageChannel();
+      port1.onmessage = ({ data }) => resolve([data, port1]);
+      client.postMessage({
+        url, method,
+        headers: Object.fromEntries(headers.entries()),
+        scope: self.registration.scope,
+        destination, type: 'webtorrent'
+      }, [port2]);
+    }
+  });
+  let timer = null;
+  const done = () => { port.postMessage(false); clearTimeout(timer); port.onmessage = null; };
+  if (response.body !== 'STREAM') { done(); return new Response(response.body, response); }
+  return new Response(new ReadableStream({
+    pull: ctrl => new Promise(resolve => {
+      port.onmessage = ({ data }) => { if (data) ctrl.enqueue(data); else { done(); ctrl.close(); } resolve(); };
+      if (!wtCancelled) {
+        clearTimeout(timer);
+        if (destination !== 'document') timer = setTimeout(() => { done(); resolve(); }, 5000);
+      }
+      port.postMessage(true);
+    }),
+    cancel() { done(); }
+  }), response);
+}
+
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
-  // Don't intercept cross-origin requests (audio served from GitHub Pages)
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+
+  const wtBase = self.registration.scope + 'webtorrent/';
+  if (event.request.url.startsWith(wtBase)) {
+    if (event.request.url.startsWith(wtBase + 'keepalive/')) { event.respondWith(new Response()); return; }
+    if (event.request.url.startsWith(wtBase + 'cancel/')) { event.respondWith(new Response(new ReadableStream({ cancel() { wtCancelled = true; } }))); return; }
+    event.respondWith(wtRelay(event.request));
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))

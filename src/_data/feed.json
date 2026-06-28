@@ -1,6 +1,1161 @@
 [
   {
     "type": "chapter",
+    "id": "source55",
+    "src": "https://cdn.mentria.ai/source55/00_cover.webp",
+    "color": "linear-gradient(165deg, #161009, #b5946a, #161009)",
+    "title": "Source",
+    "caption": {
+      "en": "How one table reads every word in — and writes every word out. 8 cards.",
+      "es": "Cómo una sola tabla lee cada palabra al entrar — y la escribe al salir. 8 tarjetas.",
+      "fr": "Comment une seule table lit chaque mot à l'entrée — et l'écrit à la sortie. 8 cartes.",
+      "ja": "ひとつの表が、あらゆる単語を読み込み、そして書き出す仕組み。カード8枚。",
+      "pt-BR": "Como uma única tabela lê cada palavra na entrada — e a escreve na saída. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source55/"
+  },
+  {
+    "type": "chapter",
+    "id": "source54",
+    "src": "https://cdn.mentria.ai/source54/00_cover.webp",
+    "color": "linear-gradient(165deg, #160c07, #7a3f24, #160c07)",
+    "title": "Source",
+    "caption": {
+      "en": "Why a stack of straight lines needs one bend to think. 8 cards.",
+      "es": "Por qué un montón de líneas rectas necesita un doblez para pensar. 8 tarjetas.",
+      "fr": "Pourquoi un empilement de lignes droites a besoin d'un pli pour penser. 8 cartes.",
+      "ja": "まっすぐな線の積み重ねが、考えるためになぜ一つの折れ目を要するのか。カード8枚。",
+      "pt-BR": "Por que uma pilha de linhas retas precisa de uma dobra para pensar. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source54/"
+  },
+  {
+    "type": "chapter",
+    "id": "source53",
+    "src": "https://cdn.mentria.ai/source53/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a0c1a, #5470d0, #0a0c1a)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model trains on memory it doesn't have. 8 cards.",
+      "es": "Cómo un modelo entrena con una memoria que no tiene. 8 tarjetas.",
+      "fr": "Comment un modèle s'entraîne avec une mémoire qu'il n'a pas. 8 cartes.",
+      "ja": "持っていないはずのメモリで、モデルはどう学習するのか。カード8枚。",
+      "pt-BR": "Como um modelo treina com uma memória que não tem. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source53/"
+  },
+  {
+    "type": "chapter",
+    "id": "source52",
+    "src": "https://cdn.mentria.ai/source52/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a0707, #7a2e2e, #1a0707)",
+    "title": "Source",
+    "caption": {
+      "en": "How one runaway gradient can wreck a training run — and the cap that saves it. 8 cards.",
+      "es": "Cómo un gradiente desbocado puede arruinar un entrenamiento — y el tope que lo salva. 8 tarjetas.",
+      "fr": "Comment un gradient emballé peut détruire un entraînement — et le plafond qui le sauve. 8 cartes.",
+      "ja": "暴走した勾配が学習を一発で壊す仕組みと、それを救う「上限」。8枚。",
+      "pt-BR": "Como um gradiente desgovernado pode arruinar um treinamento — e o limite que o salva. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source52/"
+  },
+  {
+    "type": "chapter",
+    "id": "source51",
+    "src": "https://cdn.mentria.ai/source51/00_cover.webp",
+    "color": "linear-gradient(165deg, #160a13, #8a4a6a, #160a13)",
+    "title": "Source",
+    "caption": {
+      "en": "Why grabbing the best word now can lose the best sentence. 8 cards.",
+      "es": "Por qué quedarte con la mejor palabra ahora puede costarte la mejor frase. 8 tarjetas.",
+      "fr": "Pourquoi saisir le meilleur mot maintenant peut vous coûter la meilleure phrase. 8 cartes.",
+      "ja": "いま最良の単語をつかむと、最良の文を逃しかねない理由。カード8枚。",
+      "pt-BR": "Por que agarrar a melhor palavra agora pode custar a melhor frase. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source51/"
+  },
+  {
+    "type": "chapter",
+    "id": "source50",
+    "src": "https://cdn.mentria.ai/source50/00_cover.webp",
+    "color": "linear-gradient(165deg, #04151d, #2bb6e0, #04151d)",
+    "title": "Source",
+    "caption": {
+      "en": "Why the step size should warm up before it winds down. 8 cards.",
+      "es": "Por qué el tamaño del paso debe calentarse antes de enfriarse. 8 tarjetas.",
+      "fr": "Pourquoi le pas doit monter en régime avant de redescendre. 8 cartes.",
+      "ja": "なぜ学習の歩幅は、まず温めてから徐々に下げるべきなのか。カード8枚。",
+      "pt-BR": "Por que o tamanho do passo deve aquecer antes de desacelerar. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source50/"
+  },
+  {
+    "type": "chapter",
+    "id": "source49",
+    "src": "https://cdn.mentria.ai/source49/00_cover.webp",
+    "color": "linear-gradient(165deg, #15130f, #8a7f6d, #15130f)",
+    "title": "Source",
+    "caption": {
+      "en": "How a deep net trains fast — by judging each value against its batch. 8 cards.",
+      "es": "Cómo una red profunda entrena rápido: juzgando cada valor frente a su lote. 8 tarjetas.",
+      "fr": "Comment un réseau profond s'entraîne vite — en jugeant chaque valeur face à son lot. 8 cartes.",
+      "ja": "深いネットワークが速く学習する方法——各値をそのバッチと照らして判断する。カード8枚。",
+      "pt-BR": "Como uma rede profunda treina rápido — julgando cada valor diante do seu lote. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source49/"
+  },
+  {
+    "type": "chapter",
+    "id": "source48",
+    "src": "https://cdn.mentria.ai/source48/00_cover.webp",
+    "color": "linear-gradient(165deg, #07141b, #6fb0cf, #07141b)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model's final vector becomes a word — and how we read its mind. 8 cards.",
+      "es": "Cómo el vector final de un modelo se convierte en una palabra — y cómo le leemos la mente. 8 tarjetas.",
+      "fr": "Comment le vecteur final d'un modèle devient un mot — et comment on lit dans ses pensées. 8 cartes.",
+      "ja": "モデルの最後のベクトルがどう単語になるか——そして、その思考をどう読み取るか。8枚。",
+      "pt-BR": "Como o vetor final de um modelo vira uma palavra — e como lemos a mente dele. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source48/"
+  },
+  {
+    "type": "chapter",
+    "id": "source47",
+    "src": "https://cdn.mentria.ai/source47/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a1305, #d1a32b, #1a1305)",
+    "title": "Source",
+    "caption": {
+      "en": "How a tiny winner hides inside a giant from the start. 8 cards.",
+      "es": "Cómo un diminuto ganador se esconde dentro de un gigante desde el principio. 8 tarjetas.",
+      "fr": "Comment un minuscule gagnant se cache dans un géant dès le départ. 8 cartes.",
+      "ja": "巨大なネットワークの中に、小さな“当たり”が最初から潜んでいる仕組み。8枚。",
+      "pt-BR": "Como um vencedor minúsculo se esconde dentro de um gigante desde o início. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source47/"
+  },
+  {
+    "type": "chapter",
+    "id": "source46",
+    "src": "https://cdn.mentria.ai/source46/00_cover.webp",
+    "color": "linear-gradient(165deg, #061318, #1f5f7a, #061318)",
+    "title": "Source",
+    "caption": {
+      "en": "Why a model floods its first word with attention it never reads. 8 cards.",
+      "es": "Por qué un modelo inunda su primera palabra con una atención que nunca lee. 8 tarjetas.",
+      "fr": "Pourquoi un modèle inonde son premier mot d'une attention qu'il ne lit jamais. 8 cartes.",
+      "ja": "なぜモデルは、ほとんど読みもしない最初の単語に注意を注ぎ込むのか。カード8枚。",
+      "pt-BR": "Por que um modelo inunda sua primeira palavra com uma atenção que nunca lê. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source46/"
+  },
+  {
+    "type": "chapter",
+    "id": "source45",
+    "src": "https://cdn.mentria.ai/source45/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a0f0a, #e8a07a, #1a0f0a)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model actually trains — one pace per knob, and a memory. 8 cards.",
+      "es": "Cómo entrena de verdad un modelo: un ritmo por cada perilla, y memoria. 8 tarjetas.",
+      "fr": "Comment un modèle s'entraîne vraiment — une cadence par bouton, et de la mémoire. 8 cartes.",
+      "ja": "モデルが実際に学習する仕組み——つまみごとに歩幅を変え、記憶を持つ。カード8枚。",
+      "pt-BR": "Como um modelo realmente treina — um ritmo por botão, e memória. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source45/"
+  },
+  {
+    "type": "chapter",
+    "id": "source44",
+    "src": "https://cdn.mentria.ai/source44/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a0a05, #bf5a30, #1a0a05)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model finishes a pattern it saw once. 8 cards.",
+      "es": "Cómo un modelo completa un patrón que vio una sola vez. 8 tarjetas.",
+      "fr": "Comment un modèle complète un motif vu une seule fois. 8 cartes.",
+      "ja": "一度見たパターンを、モデルはどう続けるのか。カード8枚。",
+      "pt-BR": "Como um modelo completa um padrão que viu uma só vez. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source44/"
+  },
+  {
+    "type": "chapter",
+    "id": "source43",
+    "src": "https://cdn.mentria.ai/source43/00_cover.webp",
+    "color": "linear-gradient(165deg, #04141a, #1488a8, #04141a)",
+    "title": "Source",
+    "caption": {
+      "en": "The one shared lane every layer writes to and reads from. 8 cards.",
+      "es": "El único carril compartido en el que cada capa escribe y lee. 8 tarjetas.",
+      "fr": "L'unique voie partagée où chaque couche écrit et lit. 8 cartes.",
+      "ja": "すべての層が書き込み、読み取る、たった一本の共有レーン。カード8枚。",
+      "pt-BR": "A única pista compartilhada onde cada camada escreve e lê. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source43/"
+  },
+  {
+    "type": "chapter",
+    "id": "source42",
+    "src": "https://cdn.mentria.ai/source42/00_cover.webp",
+    "color": "linear-gradient(165deg, #070d20, #2563eb, #070d20)",
+    "title": "Source",
+    "caption": {
+      "en": "How we pull a model's tangled ideas into concepts we can read. 8 cards.",
+      "es": "Cómo desenredamos las ideas de un modelo en conceptos que podemos leer. 8 tarjetas.",
+      "fr": "Comment démêler les idées d'un modèle en concepts lisibles. 8 cartes.",
+      "ja": "モデルのもつれた考えを、読める概念へと解きほぐす方法。カード8枚。",
+      "pt-BR": "Como desembaraçamos as ideias de um modelo em conceitos que podemos ler. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source42/"
+  },
+  {
+    "type": "chapter",
+    "id": "source41",
+    "src": "https://cdn.mentria.ai/source41/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a081c, #c026d3, #1a081c)",
+    "title": "Source",
+    "caption": {
+      "en": "How a predictor becomes an agent. 8 cards.",
+      "es": "Cómo un predictor se convierte en un agente. 8 tarjetas.",
+      "fr": "Comment un prédicteur devient un agent. 8 cartes.",
+      "ja": "予測器がエージェントになるまで。カード8枚。",
+      "pt-BR": "Como um preditor se torna um agente. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source41/"
+  },
+  {
+    "type": "chapter",
+    "id": "source40",
+    "src": "https://cdn.mentria.ai/source40/00_cover.webp",
+    "color": "linear-gradient(165deg, #100a20, #5b21b6, #100a20)",
+    "title": "Source",
+    "caption": {
+      "en": "Why a model gets smarter the longer it thinks. 8 cards.",
+      "es": "Por qué un modelo se vuelve más listo cuanto más piensa. 8 tarjetas.",
+      "fr": "Pourquoi un modèle devient plus intelligent à mesure qu'il réfléchit. 8 cartes.",
+      "ja": "なぜモデルは長く考えるほど賢くなるのか。カード8枚。",
+      "pt-BR": "Por que um modelo fica mais inteligente quanto mais pensa. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source40/"
+  },
+  {
+    "type": "chapter",
+    "id": "source39",
+    "src": "https://cdn.mentria.ai/source39/00_cover.webp",
+    "color": "linear-gradient(165deg, #1c0608, #d62b34, #1c0608)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model learns to see by reading. 8 cards.",
+      "es": "Cómo un modelo aprende a ver leyendo. 8 tarjetas.",
+      "fr": "Comment un modèle apprend à voir en lisant. 8 cartes.",
+      "ja": "モデルが読むことで見ることを学ぶ仕組み。カード8枚。",
+      "pt-BR": "Como um modelo aprende a ver lendo. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source39/"
+  },
+  {
+    "type": "chapter",
+    "id": "source38",
+    "src": "https://cdn.mentria.ai/source38/00_cover.webp",
+    "color": "linear-gradient(165deg, #0b120a, #7d9e6a, #0b120a)",
+    "title": "Source",
+    "caption": {
+      "en": "Give the model an open book: let it look things up instead of making them up. 8 cards.",
+      "es": "Dale al modelo un libro abierto: que busque las cosas en vez de inventarlas. 8 tarjetas.",
+      "fr": "Donnez au modèle un livre ouvert : qu'il aille chercher les choses au lieu de les inventer. 8 cartes.",
+      "ja": "モデルに開いた本を渡す——記憶をでっち上げる代わりに、その場で調べさせる。カード8枚。",
+      "pt-BR": "Dê ao modelo um livro aberto: que ele procure as coisas em vez de inventá-las. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source38/"
+  },
+  {
+    "type": "chapter",
+    "id": "source37",
+    "src": "https://cdn.mentria.ai/source37/00_cover.webp",
+    "color": "linear-gradient(165deg, #04140f, #157f6a, #04140f)",
+    "title": "Source",
+    "caption": {
+      "en": "Turn 'A beats B' straight into a better model — no reward model, no RL. 8 cards.",
+      "es": "Convierte 'A gana a B' directamente en un modelo mejor, sin modelo de recompensa ni RL. 8 tarjetas.",
+      "fr": "Transformez « A bat B » directement en un meilleur modèle — sans modèle de récompense ni RL. 8 cartes.",
+      "ja": "「A が B に勝つ」を、そのまま良いモデルへ——報酬モデルも RL もなしに。カード8枚。",
+      "pt-BR": "Transforme 'A vence B' direto em um modelo melhor — sem modelo de recompensa, sem RL. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source37/"
+  },
+  {
+    "type": "chapter",
+    "id": "source36",
+    "src": "https://cdn.mentria.ai/source36/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a0610, #9b1c3d, #1a0610)",
+    "title": "Source",
+    "caption": {
+      "en": "Two ways to learn a language — and what each one becomes. 8 cards.",
+      "es": "Dos formas de aprender un idioma — y en qué se convierte cada una. 8 tarjetas.",
+      "fr": "Deux façons d'apprendre une langue — et ce que chacune devient. 8 cartes.",
+      "ja": "言語を学ぶ二つのやり方 — そして、それぞれが何になるか。8枚。",
+      "pt-BR": "Dois jeitos de aprender uma língua — e no que cada um se torna. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source36/"
+  },
+  {
+    "type": "chapter",
+    "id": "source35",
+    "src": "https://cdn.mentria.ai/source35/00_cover.webp",
+    "color": "linear-gradient(165deg, #160a14, #9b5e8c, #160a14)",
+    "title": "Source",
+    "caption": {
+      "en": "Where a model's facts actually live. 8 cards.",
+      "es": "Dónde viven de verdad los hechos de un modelo. 8 tarjetas.",
+      "fr": "Où vivent vraiment les faits d'un modèle. 8 cartes.",
+      "ja": "モデルの知識が実際に宿る場所。カード8枚。",
+      "pt-BR": "Onde os fatos de um modelo realmente vivem. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source35/"
+  },
+  {
+    "type": "chapter",
+    "id": "source34",
+    "src": "https://cdn.mentria.ai/source34/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a1604, #e0b81e, #1a1604)",
+    "title": "Source",
+    "caption": {
+      "en": "How attention heads share their memory — and shrink it many times over. 8 cards.",
+      "es": "Cómo los cabezales de atención comparten su memoria — y la reducen muchas veces. 8 tarjetas.",
+      "fr": "Comment les têtes d'attention partagent leur mémoire — et la réduisent plusieurs fois. 8 cartes.",
+      "ja": "アテンションのヘッドが記憶を共有し、それを何倍も小さくする仕組み。カード8枚。",
+      "pt-BR": "Como as cabeças de atenção compartilham sua memória — e a encolhem muitas vezes. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source34/"
+  },
+  {
+    "type": "chapter",
+    "id": "source33",
+    "src": "https://cdn.mentria.ai/source33/00_cover.webp",
+    "color": "linear-gradient(165deg, #04140a, #34a853, #04140a)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model reads on and on without re-reading a thing. 8 cards.",
+      "es": "Cómo un modelo lee sin parar sin releer nada. 8 tarjetas.",
+      "fr": "Comment un modèle lit encore et encore sans jamais rien relire. 8 cartes.",
+      "ja": "モデルが何も読み返さずに、どこまでも読み進めるしくみ。カード8枚。",
+      "pt-BR": "Como um modelo lê sem parar sem reler nada. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source33/"
+  },
+  {
+    "type": "chapter",
+    "id": "source32",
+    "src": "https://cdn.mentria.ai/source32/00_cover.webp",
+    "color": "linear-gradient(165deg, #1c0f03, #f0851f, #1c0f03)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model reads the whole without weighing every word against every other. 8 cards.",
+      "es": "Cómo un modelo lee el todo sin sopesar cada palabra contra todas las demás. 8 tarjetas.",
+      "fr": "Comment un modèle lit l'ensemble sans peser chaque mot contre tous les autres. 8 cartes.",
+      "ja": "すべての単語を互いに突き合わせずに、モデルが全体を読み取る仕組み。カード8枚。",
+      "pt-BR": "Como um modelo lê o todo sem pesar cada palavra contra todas as outras. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source32/"
+  },
+  {
+    "type": "chapter",
+    "id": "source31",
+    "src": "https://cdn.mentria.ai/source31/00_cover.webp",
+    "color": "linear-gradient(165deg, #0b0e15, #46587a, #0b0e15)",
+    "title": "Source",
+    "caption": {
+      "en": "Why scale and search keep beating our cleverest tricks. 8 cards.",
+      "es": "Por qué la escala y la búsqueda siempre vencen a nuestros trucos más ingeniosos. 8 tarjetas.",
+      "fr": "Pourquoi l'échelle et la recherche battent toujours nos astuces les plus ingénieuses. 8 cartes.",
+      "ja": "なぜ規模と探索は、私たちの最も巧みな工夫に勝ち続けるのか。カード8枚。",
+      "pt-BR": "Por que a escala e a busca sempre vencem nossos truques mais engenhosos. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-28",
+    "link": "/feed/source/source31/"
+  },
+  {
+    "type": "chapter",
+    "id": "source30",
+    "src": "https://cdn.mentria.ai/source30/00_cover.webp",
+    "color": "linear-gradient(165deg, #04181a, #2bb3a3, #04181a)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model encodes where a word sits — by turning, not tagging. 8 cards.",
+      "es": "Cómo un modelo codifica dónde está una palabra: girando, no etiquetando. 8 tarjetas.",
+      "fr": "Comment un modèle encode où se trouve un mot — en tournant, pas en étiquetant. 8 cartes.",
+      "ja": "モデルが語の位置をどう符号化するか——札を付けるのではなく、回して。カード8枚。",
+      "pt-BR": "Como um modelo codifica onde uma palavra está — girando, não rotulando. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source30/"
+  },
+  {
+    "type": "chapter",
+    "id": "source29",
+    "src": "https://cdn.mentria.ai/source29/00_cover.webp",
+    "color": "linear-gradient(165deg, #0e081c, #7a3fc9, #0e081c)",
+    "title": "Source",
+    "caption": {
+      "en": "How a small model drafts and a big one just checks — same words, far faster. 8 cards.",
+      "es": "Cómo un modelo pequeño propone y uno grande solo verifica: las mismas palabras, mucho más rápido. 8 tarjetas.",
+      "fr": "Comment un petit modèle ébauche et un grand se contente de vérifier — les mêmes mots, bien plus vite. 8 cartes.",
+      "ja": "小さなモデルが下書きし、大きなモデルは確認するだけ——同じ言葉を、はるかに速く。全8枚。",
+      "pt-BR": "Como um modelo pequeno rascunha e um grande apenas confere — as mesmas palavras, muito mais rápido. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source29/"
+  },
+  {
+    "type": "chapter",
+    "id": "source28",
+    "src": "https://cdn.mentria.ai/source28/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a0f06, #b8703a, #1a0f06)",
+    "title": "Source",
+    "caption": {
+      "en": "How a small model inherits a giant's skill. 8 cards.",
+      "es": "Cómo un modelo pequeño hereda la destreza de un gigante. 8 tarjetas.",
+      "fr": "Comment un petit modèle hérite du talent d'un géant. 8 cartes.",
+      "ja": "小さなモデルが巨大モデルの技をどう受け継ぐか。カード8枚。",
+      "pt-BR": "Como um modelo pequeno herda a habilidade de um gigante. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source28/"
+  },
+  {
+    "type": "chapter",
+    "id": "source27",
+    "src": "https://cdn.mentria.ai/source27/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a0710, #c43e72, #1a0710)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model runs in four bits without falling apart. 8 cards.",
+      "es": "Cómo un modelo funciona en cuatro bits sin desmoronarse. 8 tarjetas.",
+      "fr": "Comment un modèle tourne en quatre bits sans s'effondrer. 8 cartes.",
+      "ja": "モデルが崩れずに四ビットで動く仕組み。8枚のカード。",
+      "pt-BR": "Como um modelo roda em quatro bits sem desmoronar. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source27/"
+  },
+  {
+    "type": "chapter",
+    "id": "source26",
+    "src": "https://cdn.mentria.ai/source26/00_cover.webp",
+    "color": "linear-gradient(165deg, #0d1204, #86a81f, #0d1204)",
+    "title": "Source",
+    "caption": {
+      "en": "How understanding arrives long after the memorizing is done. 8 cards.",
+      "es": "Cómo la comprensión llega mucho después de terminar de memorizar. 8 tarjetas.",
+      "fr": "Comment la compréhension arrive bien après que tout est mémorisé. 8 cartes.",
+      "ja": "暗記が終わったずっと後に、理解が訪れる仕組み。カード8枚。",
+      "pt-BR": "Como a compreensão chega muito depois de a memorização terminar. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source26/"
+  },
+  {
+    "type": "chapter",
+    "id": "source25",
+    "src": "https://cdn.mentria.ai/source25/00_cover.webp",
+    "color": "linear-gradient(165deg, #070b1e, #2f4bb5, #070b1e)",
+    "title": "Source",
+    "caption": {
+      "en": "Why one neuron means many things at once. 8 cards.",
+      "es": "Por qué una sola neurona significa muchas cosas a la vez. 8 tarjetas.",
+      "fr": "Pourquoi un seul neurone veut dire plusieurs choses à la fois. 8 cartes.",
+      "ja": "なぜ一つのニューロンが同時にいくつもの意味を持つのか。カード8枚。",
+      "pt-BR": "Por que um único neurônio significa muitas coisas ao mesmo tempo. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source25/"
+  },
+  {
+    "type": "chapter",
+    "id": "source24",
+    "src": "https://cdn.mentria.ai/source24/00_cover.webp",
+    "color": "linear-gradient(165deg, #140d08, #6b4a3a, #140d08)",
+    "title": "Source",
+    "caption": {
+      "en": "The line between memorizing and understanding. 8 cards.",
+      "es": "La línea entre memorizar y entender. 8 tarjetas.",
+      "fr": "La frontière entre mémoriser et comprendre. 8 cartes.",
+      "ja": "丸暗記と理解を分ける一線。カード8枚。",
+      "pt-BR": "A linha entre memorizar e entender. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source24/"
+  },
+  {
+    "type": "chapter",
+    "id": "source23",
+    "src": "https://cdn.mentria.ai/source23/00_cover.webp",
+    "color": "linear-gradient(165deg, #15130a, #9a8a3c, #15130a)",
+    "title": "Source",
+    "caption": {
+      "en": "Why handicapping a model on purpose makes it generalize. 8 cards.",
+      "es": "Por qué poner trabas a un modelo a propósito lo hace generalizar. 8 tarjetas.",
+      "fr": "Pourquoi handicaper un modèle à dessein le fait mieux généraliser. 8 cartes.",
+      "ja": "わざとモデルに足かせをはめると、なぜ汎化するのか。カード8枚。",
+      "pt-BR": "Por que atrapalhar um modelo de propósito o faz generalizar. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source23/"
+  },
+  {
+    "type": "chapter",
+    "id": "source22",
+    "src": "https://cdn.mentria.ai/source22/00_cover.webp",
+    "color": "linear-gradient(165deg, #0c0a1a, #6c63b5, #0c0a1a)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model keeps every layer's signal from exploding or fading. 8 cards.",
+      "es": "Cómo un modelo evita que la señal de cada capa explote o se desvanezca. 8 tarjetas.",
+      "fr": "Comment un modèle empêche le signal de chaque couche d'exploser ou de s'éteindre. 8 cartes.",
+      "ja": "モデルが各層の信号を、爆発させも消えさせもしない仕組み。カード8枚。",
+      "pt-BR": "Como um modelo impede que o sinal de cada camada exploda ou desapareça. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source22/"
+  },
+  {
+    "type": "chapter",
+    "id": "source21",
+    "src": "https://cdn.mentria.ai/source21/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a0606, #c0392b, #1a0606)",
+    "title": "Source",
+    "caption": {
+      "en": "How one tiny wire lets a network go truly deep. 8 cards.",
+      "es": "Cómo un cable diminuto deja que una red sea de verdad profunda. 8 tarjetas.",
+      "fr": "Comment un seul petit fil permet à un réseau d'être vraiment profond. 8 cartes.",
+      "ja": "たった一本の小さな配線が、ネットワークを本当に深くする話。カード8枚。",
+      "pt-BR": "Como um fiozinho deixa uma rede ser de fato profunda. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source21/"
+  },
+  {
+    "type": "chapter",
+    "id": "source20",
+    "src": "https://cdn.mentria.ai/source20/00_cover.webp",
+    "color": "linear-gradient(165deg, #1f0b08, #e06a4f, #1f0b08)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model picks up a new task from the prompt — without changing a thing. 8 cards.",
+      "es": "Cómo un modelo aprende una tarea nueva a partir del prompt — sin cambiar nada. 8 tarjetas.",
+      "fr": "Comment un modèle apprend une nouvelle tâche à partir du prompt — sans rien changer. 8 cartes.",
+      "ja": "モデルがプロンプトだけから新しいタスクを身につける——何ひとつ書き換えずに。カード8枚。",
+      "pt-BR": "Como um modelo aprende uma tarefa nova a partir do prompt — sem mudar nada. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source20/"
+  },
+  {
+    "type": "chapter",
+    "id": "source19",
+    "src": "https://cdn.mentria.ai/source19/00_cover.webp",
+    "color": "linear-gradient(165deg, #04101c, #1c6fb0, #04101c)",
+    "title": "Source",
+    "caption": {
+      "en": "Why 'think step by step' buys real accuracy. 8 cards.",
+      "es": "Por qué 'piensa paso a paso' compra precisión real. 8 tarjetas.",
+      "fr": "Pourquoi « réfléchis étape par étape » achète une vraie précision. 8 cartes.",
+      "ja": "「順を追って考えよう」が本物の正確さを生む理由。カード8枚。",
+      "pt-BR": "Por que 'pense passo a passo' compra precisão de verdade. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source19/"
+  },
+  {
+    "type": "chapter",
+    "id": "source18",
+    "src": "https://cdn.mentria.ai/source18/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a0a0e, #a14d5e, #1a0a0e)",
+    "title": "Source",
+    "caption": {
+      "en": "How a giant model learns your task by training almost nothing. 8 cards.",
+      "es": "Cómo un modelo gigante aprende tu tarea entrenando casi nada. 8 tarjetas.",
+      "fr": "Comment un modèle géant apprend votre tâche en n'entraînant presque rien. 8 cartes.",
+      "ja": "巨大なモデルが、ほぼ何も学習せずにあなたのタスクを覚える仕組み。カード8枚。",
+      "pt-BR": "Como um modelo gigante aprende a sua tarefa treinando quase nada. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source18/"
+  },
+  {
+    "type": "chapter",
+    "id": "source17",
+    "src": "https://cdn.mentria.ai/source17/00_cover.webp",
+    "color": "linear-gradient(165deg, #0d0e12, #565a66, #0d0e12)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model makes a picture by removing noise. 8 cards.",
+      "es": "Cómo un modelo crea una imagen quitando ruido. 8 tarjetas.",
+      "fr": "Comment un modèle crée une image en retirant le bruit. 8 cartes.",
+      "ja": "モデルがノイズを取り除いて絵を生み出す仕組み。カード8枚。",
+      "pt-BR": "Como um modelo cria uma imagem removendo ruído. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source17/"
+  },
+  {
+    "type": "chapter",
+    "id": "source16",
+    "src": "https://cdn.mentria.ai/source16/00_cover.webp",
+    "color": "linear-gradient(165deg, #03140c, #0e7a45, #03140c)",
+    "title": "Source",
+    "caption": {
+      "en": "Exact attention, sped up by never writing the giant grid down. 8 cards.",
+      "es": "Atención exacta, acelerada al no escribir nunca la enorme cuadrícula. 8 tarjetas.",
+      "fr": "Une attention exacte, accélérée en n'écrivant jamais la gigantesque grille. 8 cartes.",
+      "ja": "巨大な格子を一度も書き出さずに速くする、厳密なアテンション。カード8枚。",
+      "pt-BR": "Atenção exata, acelerada por nunca escrever a grade gigante. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source16/"
+  },
+  {
+    "type": "chapter",
+    "id": "source15",
+    "src": "https://cdn.mentria.ai/source15/00_cover.webp",
+    "color": "linear-gradient(165deg, #1a0716, #6e1f5a, #1a0716)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model holds many specialists — and wakes only a few. 8 cards.",
+      "es": "Cómo un modelo alberga muchos especialistas — y despierta solo a unos pocos. 8 tarjetas.",
+      "fr": "Comment un modèle abrite de nombreux spécialistes — et n'en réveille que quelques-uns. 8 cartes.",
+      "ja": "モデルが多数の専門家を抱えながら、ほんの数人だけを呼び起こす仕組み。カード8枚。",
+      "pt-BR": "Como um modelo abriga muitos especialistas — e desperta apenas alguns. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source15/"
+  },
+  {
+    "type": "chapter",
+    "id": "source14",
+    "src": "https://cdn.mentria.ai/source14/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a0917, #2f2a7a, #0a0917)",
+    "title": "Source",
+    "caption": {
+      "en": "Why twice the context costs four times as much. 8 cards.",
+      "es": "Por qué el doble de contexto cuesta cuatro veces más. 8 tarjetas.",
+      "fr": "Pourquoi deux fois plus de contexte coûte quatre fois plus. 8 cartes.",
+      "ja": "なぜ文脈が2倍になると、コストは4倍になるのか。カード8枚。",
+      "pt-BR": "Por que o dobro de contexto custa quatro vezes mais. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source14/"
+  },
+  {
+    "type": "chapter",
+    "id": "source13",
+    "src": "https://cdn.mentria.ai/source13/00_cover.webp",
+    "color": "linear-gradient(165deg, #03161c, #0f7d8c, #03161c)",
+    "title": "Source",
+    "caption": {
+      "en": "Why each next word stays cheap to generate. 8 cards.",
+      "es": "Por qué cada palabra siguiente sigue siendo barata de generar. 8 tarjetas.",
+      "fr": "Pourquoi chaque mot suivant reste bon marché à générer. 8 cartes.",
+      "ja": "次の一語が、なぜ生成し続けても安いままなのか。カード8枚。",
+      "pt-BR": "Por que cada palavra seguinte continua barata de gerar. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source13/"
+  },
+  {
+    "type": "chapter",
+    "id": "source12",
+    "src": "https://cdn.mentria.ai/source12/00_cover.webp",
+    "color": "linear-gradient(165deg, #0e1206, #515c26, #0e1206)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model learns what we want — by being shown what we prefer. 8 cards.",
+      "es": "Cómo un modelo aprende lo que queremos — mostrándole lo que preferimos. 8 tarjetas.",
+      "fr": "Comment un modèle apprend ce que nous voulons — en lui montrant ce que nous préférons. 8 cartes.",
+      "ja": "モデルはどうやって私たちの望みを学ぶのか——好みを見せることで。カード8枚。",
+      "pt-BR": "Como um modelo aprende o que queremos — mostrando a ele o que preferimos. 8 cartas."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source12/"
+  },
+  {
+    "type": "chapter",
+    "id": "source11",
+    "src": "https://cdn.mentria.ai/source11/00_cover.webp",
+    "color": "linear-gradient(165deg, #14111a, #4d3f59, #14111a)",
+    "title": "Source",
+    "caption": {
+      "en": "Why a model makes things up — and sounds so sure doing it. 8 cards.",
+      "es": "Por qué un modelo inventa cosas — y suena tan seguro al hacerlo. 8 tarjetas.",
+      "fr": "Pourquoi un modèle invente — et sonne si sûr en le faisant. 8 cartes.",
+      "ja": "なぜモデルは作り話をするのか——しかもこれほど自信たっぷりに。 8枚。",
+      "pt-BR": "Por que um modelo inventa coisas — e parece tão seguro ao fazê-lo. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source11/"
+  },
+  {
+    "type": "chapter",
+    "id": "source10",
+    "src": "https://cdn.mentria.ai/source10/00_cover.webp",
+    "color": "linear-gradient(165deg, #120d05, #c08a2e, #120d05)",
+    "title": "Source",
+    "caption": {
+      "en": "Why making it bigger keeps making it better — predictably, then suddenly. 8 cards.",
+      "es": "Por qué hacerlo más grande lo sigue mejorando — de forma predecible, y luego de golpe. 8 tarjetas.",
+      "fr": "Pourquoi l'agrandir continue de l'améliorer — de façon prévisible, puis d'un coup. 8 cartes.",
+      "ja": "大きくするほど、なぜ着実に良くなり続けるのか——予測どおりに、そして突然に。 8枚。",
+      "pt-BR": "Por que torná-lo maior continua melhorando-o — de forma previsível, e então de repente. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source10/"
+  },
+  {
+    "type": "chapter",
+    "id": "source09",
+    "src": "https://cdn.mentria.ai/source09/00_cover.webp",
+    "color": "linear-gradient(165deg, #18060a, #5c1326, #18060a)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model assigns blame across a billion knobs at once. 8 cards.",
+      "es": "Cómo un modelo reparte la culpa entre mil millones de perillas a la vez. 8 tarjetas.",
+      "fr": "Comment un modèle répartit le blâme sur un milliard de boutons d'un seul coup. 8 cartes.",
+      "ja": "モデルが十億個のつまみすべてに、一度に責任を割り振る仕組み。 8枚。",
+      "pt-BR": "Como um modelo distribui a culpa por um bilhão de botões de uma só vez. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source09/"
+  },
+  {
+    "type": "chapter",
+    "id": "source08",
+    "src": "https://cdn.mentria.ai/source08/00_cover.webp",
+    "color": "linear-gradient(165deg, #0c1116, #36505e, #0c1116)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model improves at all — one small step downhill. 8 cards.",
+      "es": "Cómo un modelo mejora siquiera: un pequeño paso cuesta abajo. 8 tarjetas.",
+      "fr": "Comment un modèle s'améliore tout court : un petit pas vers le bas. 8 cartes.",
+      "ja": "モデルがそもそも上達する仕組み——坂を下る小さな一歩。カード8枚。",
+      "pt-BR": "Como um modelo melhora, afinal: um pequeno passo ladeira abaixo. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source08/"
+  },
+  {
+    "type": "chapter",
+    "id": "source07",
+    "src": "https://cdn.mentria.ai/source07/00_cover.webp",
+    "color": "linear-gradient(165deg, #06130d, #1f4d34, #06130d)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model learns — by minimizing its own surprise. 8 cards.",
+      "es": "Cómo aprende un modelo: minimizando su propia sorpresa. 8 tarjetas.",
+      "fr": "Comment un modèle apprend : en minimisant sa propre surprise. 8 cartes.",
+      "ja": "モデルはどう学ぶのか——自らの驚きを最小にすることで。カード8枚。",
+      "pt-BR": "Como um modelo aprende: minimizando a própria surpresa. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source07/"
+  },
+  {
+    "type": "chapter",
+    "id": "source06",
+    "src": "https://cdn.mentria.ai/source06/00_cover.webp",
+    "color": "linear-gradient(165deg, #160a04, #9a4e0f, #160a04)",
+    "title": "Source",
+    "caption": {
+      "en": "The one dial between safe and surprising. 8 cards.",
+      "es": "El único dial entre lo seguro y lo sorprendente. 8 tarjetas.",
+      "fr": "Le seul cadran entre sûr et surprenant. 8 cartes.",
+      "ja": "安全と意外性のあいだの、ただ一つのダイヤル。カード8枚。",
+      "pt-BR": "O único dial entre o seguro e o surpreendente. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source06/"
+  },
+  {
+    "type": "chapter",
+    "id": "source05",
+    "src": "https://cdn.mentria.ai/source05/00_cover.webp",
+    "color": "linear-gradient(165deg, #1c0806, #66291a, #1c0806)",
+    "title": "Source",
+    "caption": {
+      "en": "How a row of scores becomes a confident choice. 8 cards.",
+      "es": "Cómo una fila de puntuaciones se convierte en una elección segura. 8 tarjetas.",
+      "fr": "Comment une rangée de scores devient un choix assuré. 8 cartes.",
+      "ja": "スコアの並びが、自信ある選択に変わるまで。カード8枚。",
+      "pt-BR": "Como uma linha de pontuações vira uma escolha confiante. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source05/"
+  },
+  {
+    "type": "chapter",
+    "id": "source04",
+    "src": "https://cdn.mentria.ai/source04/00_cover.webp",
+    "color": "linear-gradient(165deg, #150a1c, #45235a, #150a1c)",
+    "title": "Source",
+    "caption": {
+      "en": "How text becomes the pieces a model reads. 8 cards.",
+      "es": "Cómo el texto se convierte en las piezas que un modelo lee. 8 tarjetas.",
+      "fr": "Comment le texte devient les morceaux qu'un modèle lit. 8 cartes.",
+      "ja": "テキストが、モデルの読む断片になる仕組み。カード8枚。",
+      "pt-BR": "Como o texto vira as peças que um modelo lê. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-27",
+    "link": "/feed/source/source04/"
+  },
+  {
+    "type": "chapter",
+    "id": "source03",
+    "src": "https://cdn.mentria.ai/source03/00_cover.webp",
+    "color": "linear-gradient(165deg, #05141a, #0e4f4a, #05141a)",
+    "title": "Source",
+    "caption": {
+      "en": "How a word becomes a point in space. 8 cards.",
+      "es": "Cómo una palabra se convierte en un punto en el espacio. 8 tarjetas.",
+      "fr": "Comment un mot devient un point dans l'espace. 8 cartes.",
+      "ja": "単語が、空間の中の一点になる仕組み。カード8枚。",
+      "pt-BR": "Como uma palavra vira um ponto no espaço. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-26",
+    "link": "/feed/source/source03/"
+  },
+  {
+    "type": "chapter",
+    "id": "source02",
+    "src": "https://cdn.mentria.ai/source02/00_cover.webp",
+    "color": "linear-gradient(165deg, #130d07, #4a371d, #130d07)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model learns where each word stands. 8 cards.",
+      "es": "Cómo un modelo aprende dónde está cada palabra. 8 tarjetas.",
+      "fr": "Comment un modèle apprend où se tient chaque mot. 8 cartes.",
+      "ja": "モデルが、それぞれの単語がどこにあるかを学ぶ仕組み。カード8枚。",
+      "pt-BR": "Como um modelo aprende onde cada palavra está. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-26",
+    "link": "/feed/source/source02/"
+  },
+  {
+    "type": "chapter",
+    "id": "source01",
+    "src": "https://cdn.mentria.ai/source01/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a0f1f, #1b2b4d, #0a0f1f)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model decides what to look at. 8 cards.",
+      "es": "Cómo un modelo decide en qué fijarse. 8 tarjetas.",
+      "fr": "Comment un modèle décide où regarder. 8 cartes.",
+      "ja": "モデルが「どこを見るか」を決める仕組み。カード8枚。",
+      "pt-BR": "Como um modelo decide para onde olhar. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-06-26",
+    "link": "/feed/source/source01/"
+  },
+  {
+    "type": "chapter",
     "id": "deepcuts235",
     "src": "https://cdn.mentria.ai/deepcuts235/00_cover.webp",
     "color": "linear-gradient(160deg, #0f1a0c, #d9731a, #f2cf3a)",

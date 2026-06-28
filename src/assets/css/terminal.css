@@ -685,6 +685,14 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
   overflow: hidden;
 }
 
+.feed-card__link {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  text-indent: -9999px;
+  overflow: hidden;
+}
+
 .feed-card::before {
   content: "";
   position: fixed;

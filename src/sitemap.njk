@@ -6,11 +6,22 @@ layout: null
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 {%- for page in collections.all -%}
-{%- if not page.data.eleventyExcludeFromSitemap %}
+{%- if not page.data.eleventyExcludeFromSitemap -%}
+{%- for locale in locales %}
   <url>
-    <loc>{{ site.siteUrl }}{{ page.url }}</loc>
+    <loc>{{ site.siteUrl }}{{ locale.pathPrefix }}{{ page.url }}</loc>
     <lastmod>{{ (page.data.modified or page.date).toISOString() }}</lastmod>
   </url>
+{%- endfor -%}
 {%- endif -%}
-{%- endfor %}
+{%- endfor -%}
+{%- for pair in deepcutsLocalized %}
+  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/deepcuts/{{ pair.edition.id }}/</loc></url>
+{%- endfor -%}
+{%- for pair in sourceLocalized %}
+  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/source/{{ pair.deck.id }}/</loc></url>
+{%- endfor -%}
+{%- for pair in chaptersLocalized %}
+  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/chapter/{{ pair.chapter.id }}/</loc></url>
+{%- endfor -%}
 </urlset>

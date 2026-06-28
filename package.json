@@ -11,6 +11,8 @@
   "license": "ISC",
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0"
+  },
+  "dependencies": {
+    "katex": "^0.17.0"
   }
 }
-

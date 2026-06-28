@@ -198,6 +198,44 @@ module.exports = function(eleventyConfig) {
     return value[lang] || value["en"] || value[Object.keys(value)[0]] || "";
   });
 
+  const katex = require("katex");
+  eleventyConfig.addFilter("katex", function(tex) {
+    if (!tex) return "";
+    try {
+      const out = katex.renderToString(String(tex), { displayMode: true, throwOnError: false, output: "mathml" });
+      const m = out.match(/<math[\s\S]*<\/math>/);
+      return m ? m[0] : out;
+    } catch (e) {
+      return '<code class="deck__eq-raw">' + String(tex) + "</code>";
+    }
+  });
+
+  eleventyConfig.addFilter("interleaveFeed", function(feed) {
+    if (!Array.isArray(feed)) return feed;
+    const groups = new Map();
+    const rest = [];
+    for (const card of feed) {
+      const badge = card && card.badge;
+      if (badge) {
+        if (!groups.has(badge)) groups.set(badge, []);
+        groups.get(badge).push(card);
+      } else {
+        rest.push(card);
+      }
+    }
+    if (groups.size <= 1) return feed;
+    const queues = [...groups.values()];
+    const out = [];
+    let any = true;
+    while (any) {
+      any = false;
+      for (const q of queues) {
+        if (q.length) { out.push(q.shift()); any = true; }
+      }
+    }
+    return out.concat(rest);
+  });
+
   // Passthrough copy for assets
   eleventyConfig.addPassthroughCopy("src/assets");
   eleventyConfig.ignores.add("src/assets/extensions/*.html");

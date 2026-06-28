@@ -36,9 +36,6 @@
 .deck--source .deck__slide[data-card-type="hook"] .deck__slide-overlay {
   background-image: linear-gradient(to top, rgba(34, 211, 238, 0.14) 0%, rgba(0, 0, 0, 0.85) 32%, rgba(0, 0, 0, 0) 100%);
 }
-.deck--source .deck__slide[data-card-type="seed"] .deck__slide-overlay {
-  background-image: linear-gradient(to top, rgba(16, 185, 129, 0.16) 0%, rgba(0, 0, 0, 0.88) 36%, rgba(0, 0, 0, 0) 100%);
-}
 .deck--source .deck__slide[data-card-type="seed"] .deck__caption {
   font-size: 1.25rem;
   font-weight: 600;

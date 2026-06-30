@@ -155,8 +155,8 @@ eleventyComputed:
   }
 
   function persist() {
-    if (window.MentriaStore) window.MentriaStore.set('quick_notes', 'blob', notes);
-    else try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch (_) {}
+    if (window.MentriaStore) return window.MentriaStore.set('quick_notes', 'blob', notes);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); return true; } catch (_) { return false; }
   }
 
   function b64enc(buf) {
@@ -412,8 +412,8 @@ eleventyComputed:
       note.body = textarea.value;
     }
     note.updatedAt = Date.now();
-    persist();
-    if (note.id === activeId) updateSavedLabel(note.updatedAt);
+    const ok = persist();
+    if (ok && note.id === activeId) updateSavedLabel(note.updatedAt);
     renderList();
   }
 

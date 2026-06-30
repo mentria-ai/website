@@ -127,7 +127,8 @@
     },
     "share": "Share",
     "heavy_download": "This downloads about 490 MB of model data and you appear to be on a slow or data-saving connection. Continue?",
-    "download_postponed": "Download paused — reload the page to start."
+    "download_postponed": "Download paused — reload the page to start.",
+    "storage_full": "Couldn't save — your browser storage is full. Free up space to keep your changes."
   },
   "home": {
     "cli": {

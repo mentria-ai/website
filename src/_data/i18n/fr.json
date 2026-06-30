@@ -127,7 +127,8 @@
     },
     "share": "Partager",
     "heavy_download": "Cela télécharge environ 490 Mo de données du modèle et votre connexion semble lente ou en mode économie de données. Continuer ?",
-    "download_postponed": "Téléchargement en pause — rechargez la page pour démarrer."
+    "download_postponed": "Téléchargement en pause — rechargez la page pour démarrer.",
+    "storage_full": "Échec de l'enregistrement — le stockage du navigateur est plein. Libérez de l'espace pour conserver vos modifications."
   },
   "home": {
     "cli": {

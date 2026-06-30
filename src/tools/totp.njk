@@ -291,12 +291,13 @@ eleventyComputed:
     const period = opts.period || 30;
     const digits = opts.digits || 6;
     const offset = opts.offset || 0;
+    const hash = { SHA1: 'SHA-1', SHA256: 'SHA-256', SHA512: 'SHA-512' }[(opts.algorithm || 'SHA1').toUpperCase()] || 'SHA-1';
     const counter = Math.floor(Date.now() / 1000 / period) + offset;
     const buf = new ArrayBuffer(8);
     const view = new DataView(buf);
     view.setUint32(4, counter >>> 0, false);
     view.setUint32(0, Math.floor(counter / 0x100000000), false);
-    const key = await crypto.subtle.importKey('raw', secretBytes, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+    const key = await crypto.subtle.importKey('raw', secretBytes, { name: 'HMAC', hash: hash }, false, ['sign']);
     const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, buf));
     const off = sig[sig.length - 1] & 0x0f;
     const code = ((sig[off] & 0x7f) << 24 | (sig[off + 1] & 0xff) << 16 | (sig[off + 2] & 0xff) << 8 | (sig[off + 3] & 0xff)) % Math.pow(10, digits);
@@ -322,7 +323,8 @@ eleventyComputed:
       account: account.trim(),
       secret_b32: secret.replace(/\s+/g, ''),
       digits: parseInt(params.get('digits'), 10) || 6,
-      period: parseInt(params.get('period'), 10) || 30
+      period: parseInt(params.get('period'), 10) || 30,
+      algorithm: (params.get('algorithm') || 'SHA1').toUpperCase()
     };
   }
 
@@ -486,7 +488,7 @@ eleventyComputed:
 
   const lastCodes = new Map();
 
-  function fmtCode(s) { return s.match(/.{3}/g).join(' '); }
+  function fmtCode(s) { const h = Math.ceil(s.length / 2); return s.slice(0, h) + ' ' + s.slice(h); }
 
   function flipUpdate(el, newText) {
     el.classList.add('is-flipping');
@@ -503,8 +505,9 @@ eleventyComputed:
       const secretBytes = b64uDec(acc.secret);
       const period = acc.period || 30;
       const digits = acc.digits || 6;
-      const code = await totpCode(secretBytes, { period, digits });
-      const nextCode = await totpCode(secretBytes, { period, digits, offset: 1 });
+      const algorithm = acc.algorithm || 'SHA1';
+      const code = await totpCode(secretBytes, { period, digits, algorithm });
+      const nextCode = await totpCode(secretBytes, { period, digits, algorithm, offset: 1 });
       const codeFmt = fmtCode(code);
       const nextFmt = fmtCode(nextCode);
 
@@ -822,7 +825,7 @@ eleventyComputed:
       const account = $('totp-account').value.trim();
       const secret_b32 = $('totp-secret').value.trim().replace(/\s+/g, '');
       if (!secret_b32 || (!issuer && !account)) { setStatus(COPY.add_missing_fields, 'err'); return; }
-      parsed = { issuer, account, secret_b32, digits: 6, period: 30 };
+      parsed = { issuer, account, secret_b32, digits: 6, period: 30, algorithm: 'SHA1' };
     }
     let secretBytes;
     try { secretBytes = b32Dec(parsed.secret_b32); }
@@ -835,7 +838,7 @@ eleventyComputed:
       secret: b64uEnc(secretBytes),
       digits: parsed.digits,
       period: parsed.period,
-      algorithm: 'SHA1'
+      algorithm: parsed.algorithm || 'SHA1'
     };
 
     if (state.accounts.length === 0) {

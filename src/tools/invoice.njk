@@ -110,7 +110,7 @@ eleventyComputed:
       <tbody>
         <tr>
           <td data-label="{{ 'tool.invoice.tbl_description' | t }}">
-            <span class="remove-row no-print" title="{{ 'tool.invoice.row_remove' | t }}" aria-label="{{ 'tool.invoice.row_remove' | t }}">−</span>
+            <button type="button" class="remove-row no-print" title="{{ 'tool.invoice.row_remove' | t }}" aria-label="{{ 'tool.invoice.row_remove' | t }}">−</button>
             <textarea id="desc1Inp" placeholder="{{ 'tool.invoice.ph_line_desc' | t }}" rows="1"></textarea>
           </td>
           <td data-label="{{ 'tool.invoice.tbl_sac' | t }}"><input id="sac1Inp" type="text" value="998314" placeholder="______"></td>
@@ -124,7 +124,7 @@ eleventyComputed:
         </tr>
         <tr class="last-row">
           <td class="last-row-first-col" colspan="4">
-            <span class="add-row no-print" title="{{ 'tool.invoice.row_add' | t }}" aria-label="{{ 'tool.invoice.row_add' | t }}">+</span>
+            <button type="button" class="add-row no-print" title="{{ 'tool.invoice.row_add' | t }}" aria-label="{{ 'tool.invoice.row_add' | t }}">+</button>
             <span class="last-row-label">{{ "tool.invoice.footer_total" | t }}</span>
           </td>
           <td class="total"><span class="grand-total">0</span></td>
@@ -301,7 +301,7 @@ eleventyComputed:
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
       <td data-label="${esc(labels[0] || '')}">
-        <span class="remove-row no-print" title="${esc(COPY.rowRemove)}" aria-label="${esc(COPY.rowRemove)}">−</span>
+        <button type="button" class="remove-row no-print" title="${esc(COPY.rowRemove)}" aria-label="${esc(COPY.rowRemove)}">−</button>
         <textarea id="desc${rowIndex}Inp" placeholder="${esc(COPY.phLineDesc)}" rows="1">${esc(data.Description)}</textarea>
       </td>
       <td data-label="${esc(labels[1] || '')}"><input id="sac${rowIndex}Inp" type="text" value="${esc(data['SAC code'] ?? '')}" placeholder="______"></td>
@@ -840,6 +840,10 @@ eleventyComputed:
 
 /* Add / remove row buttons */
 .remove-row {
+  appearance: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -860,6 +864,10 @@ eleventyComputed:
 .remove-row:hover { background: var(--syn-pink); color: #000; }
 
 .add-row {
+  appearance: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
   display: inline-flex;
   align-items: center;
   justify-content: center;

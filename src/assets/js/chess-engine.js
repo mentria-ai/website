@@ -211,7 +211,7 @@ function gameStatus(pos, history){
   if (pcs.length === 0) return { type:'draw', reason: 'insufficient' };
   if (pcs.length === 1 && (pcs[0].toUpperCase()==='B' || pcs[0].toUpperCase()==='N')) return { type:'draw', reason: 'insufficient' };
   const key = pos.b.join('') + pos.turn + pos.cas + pos.ep;
-  let count = 1;
+  let count = key === posKey(startPos()) ? 1 : 0;
   for (const h of history){ if (h.key === key) count++; if (count >= 3) return { type:'draw', reason: 'threefold' }; }
   return null;
 }

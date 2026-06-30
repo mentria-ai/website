@@ -392,8 +392,8 @@ eleventyComputed:
 
     // ── Tick ──
     function tick() {
+      state.totalSeconds = Math.max(0, Math.round((state.endAt - Date.now()) / 1000));
       if (state.totalSeconds > 0) {
-        state.totalSeconds--;
         updateDisplay();
       } else {
         clearInterval(state.countdown);
@@ -461,6 +461,7 @@ eleventyComputed:
 
       if (state.isPaused && state.totalSeconds > 0) {
         state.isPaused = false;
+        state.endAt = Date.now() + state.totalSeconds * 1000;
         state.countdown = setInterval(tick, 1000);
         armServerPush(state);
         btnStart.textContent = COPY.btnPause;
@@ -495,6 +496,7 @@ eleventyComputed:
       displayWrap.classList.remove('ct-widget__display--finished');
       statusEl.textContent = COPY.statusRunning;
       updateDisplay();
+      state.endAt = Date.now() + state.totalSeconds * 1000;
       state.countdown = setInterval(tick, 1000);
       armServerPush(state);
       btnStart.textContent = COPY.btnPause;

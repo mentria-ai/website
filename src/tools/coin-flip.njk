@@ -183,14 +183,16 @@ eleventyComputed:
     }
 
     var deg = extraTurns * 180;
+    flipBtn.disabled = true;
     coinInner.style.transition = "transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)";
-    var currentRotation = flipCount * 360; // reset base
     coinInner.style.transform = "rotateX(" + deg + "deg)";
 
-    coinInner.addEventListener("transitionend", function handler() {
-      coinInner.removeEventListener("transitionend", handler);
+    function settle(e) {
+      coinInner.removeEventListener("transitionend", settle);
+      coinInner.removeEventListener("transitioncancel", settle);
+      flipBtn.disabled = false;
+      if (e.type === "transitioncancel") { flipping = false; return; }
 
-      // Normalize rotation
       var finalDeg = isHeads ? 0 : 180;
       coinInner.style.transition = "none";
       coinInner.style.transform = "rotateX(" + finalDeg + "deg)";
@@ -210,7 +212,9 @@ eleventyComputed:
       resultText.textContent = isHeads ? COPY.headsLabel : COPY.tailsLabel;
       resultEl.dataset.outcome = isHeads ? "heads" : "tails";
       flipping = false;
-    }, { once: true });
+    }
+    coinInner.addEventListener("transitionend", settle);
+    coinInner.addEventListener("transitioncancel", settle);
   }
 
   function resetSeries() {

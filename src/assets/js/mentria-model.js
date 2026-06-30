@@ -51,9 +51,12 @@ function overlay() {
   card.className = 'mm-gate__card';
   card.setAttribute('role', 'dialog');
   card.setAttribute('aria-modal', 'true');
-  card.setAttribute('aria-label', 'device check');
+  card.setAttribute('aria-labelledby', 'mm-gate-title');
   const title = document.createElement('div');
   title.className = 'mm-gate__title';
+  title.id = 'mm-gate-title';
+  title.setAttribute('role', 'heading');
+  title.setAttribute('aria-level', '2');
   const bar = document.createElement('div');
   bar.className = 'mm-gate__bar';
   const fill = document.createElement('div');
@@ -61,6 +64,8 @@ function overlay() {
   bar.appendChild(fill);
   const detail = document.createElement('div');
   detail.className = 'mm-gate__detail';
+  detail.setAttribute('role', 'status');
+  detail.setAttribute('aria-live', 'polite');
   const actions = document.createElement('div');
   actions.className = 'mm-gate__actions';
   actions.hidden = true;
@@ -93,15 +98,30 @@ function offerChoice(choices) {
   el.hidden = false;
   return new Promise((resolve) => {
     let done = false;
+    const prevFocus = document.activeElement;
+    const inerted = Array.prototype.slice.call(document.body.children).filter((c) => c !== el && !c.hasAttribute('inert'));
+    inerted.forEach((c) => c.setAttribute('inert', ''));
     const finish = (id) => {
       if (done) return;
       done = true;
       actions.hidden = true;
       document.removeEventListener('keydown', onKey);
       el.removeEventListener('click', onBackdrop);
+      inerted.forEach((c) => c.removeAttribute('inert'));
+      if (prevFocus && prevFocus.focus) { try { prevFocus.focus(); } catch (_) {} }
       resolve(id);
     };
-    const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); finish(null); } };
+    const onKey = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); finish(null); return; }
+      if (e.key === 'Tab') {
+        const btns = Array.prototype.slice.call(actions.querySelectorAll('button'));
+        if (!btns.length) return;
+        const first = btns[0], last = btns[btns.length - 1];
+        if (!actions.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+        else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
     const onBackdrop = (e) => { if (e.target === el) finish(null); };
     document.addEventListener('keydown', onKey);
     el.addEventListener('click', onBackdrop);
@@ -118,6 +138,8 @@ function offerChoice(choices) {
       b.addEventListener('click', () => finish(id));
       actions.appendChild(b);
     });
+    const firstBtn = actions.querySelector('button');
+    if (firstBtn) firstBtn.focus();
   });
 }
 

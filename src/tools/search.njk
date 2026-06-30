@@ -79,11 +79,22 @@ eleventyComputed:
 
   function normalize(s) {
     return (s || '').toString().toLowerCase()
-      .normalize('NFD').replace(/\p{Diacritic}/gu, '');
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 
+  let wordSegmenter = null;
+  try {
+    if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+      wordSegmenter = new Intl.Segmenter(LANG, { granularity: 'word' });
+    }
+  } catch (_) { wordSegmenter = null; }
+
   function tokenize(s) {
-    return normalize(s).split(/[^a-z0-9]+/).filter(Boolean);
+    const n = normalize(s);
+    if (wordSegmenter) {
+      return Array.from(wordSegmenter.segment(n)).filter(x => x.isWordLike).map(x => x.segment);
+    }
+    return n.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   }
 
   function scoreEntry(entry, qTokens, qNorm) {

@@ -309,6 +309,7 @@ eleventyComputed:
 
   /* ── Selection ─────────────────────────────────────── */
   function selectNote(id) {
+    if (id !== activeId) flushSave();
     activeId = id;
     const note = getNote(id);
     if (!note) return;
@@ -388,24 +389,32 @@ eleventyComputed:
   /* ── Auto-save (debounced) ─────────────────────────── */
   function scheduleSave() {
     if (saveTimer) clearTimeout(saveTimer);
-    saveTimer = setTimeout(async () => {
-      const note = getNote(activeId);
-      if (!note) return;
-      note.title = titleInput.value;
-      if (note.enc) {
-        try {
-          const enc = await encryptText(textarea.value);
-          note.body = enc.body;
-          note.iv = enc.iv;
-        } catch (_) { return; }
-      } else {
-        note.body = textarea.value;
-      }
-      note.updatedAt = Date.now();
-      persist();
-      updateSavedLabel(note.updatedAt);
-      renderList();
-    }, DEBOUNCE_MS);
+    saveTimer = setTimeout(() => { saveTimer = null; saveActive(); }, DEBOUNCE_MS);
+  }
+
+  function flushSave() {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    return saveActive();
+  }
+
+  async function saveActive() {
+    const note = getNote(activeId);
+    if (!note) return;
+    note.title = titleInput.value;
+    if (note.enc) {
+      if (!sessionKey) return;
+      try {
+        const enc = await encryptText(textarea.value);
+        note.body = enc.body;
+        note.iv = enc.iv;
+      } catch (_) { return; }
+    } else {
+      note.body = textarea.value;
+    }
+    note.updatedAt = Date.now();
+    persist();
+    if (note.id === activeId) updateSavedLabel(note.updatedAt);
+    renderList();
   }
 
   /* ── Counts ────────────────────────────────────────── */
@@ -537,6 +546,11 @@ eleventyComputed:
   unlockBtn.addEventListener('click', unlockNote);
   deleteBtn.addEventListener('click', confirmDelete);
   sidebarToggle.addEventListener('click', toggleSidebar);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushSave();
+  });
+  window.addEventListener('pagehide', () => { flushSave(); });
 
   function ingestSharedContent() {
     let p;

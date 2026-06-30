@@ -108,7 +108,8 @@ eleventyComputed:
     removeTitle:       {{ ("tool.color-picker.title_remove"        | t) | dump | safe }},
     toastCopied:       {{ ("tool.color-picker.toast_copied"        | t) | dump | safe }},
     toastSaved:        {{ ("tool.color-picker.toast_saved"         | t) | dump | safe }},
-    toastAlreadySaved: {{ ("tool.color-picker.toast_already_saved" | t) | dump | safe }}
+    toastAlreadySaved: {{ ("tool.color-picker.toast_already_saved" | t) | dump | safe }},
+    confirmRemove:     {{ ("tool.color-picker.confirm_remove"      | t) | dump | safe }}
   };
 
   let currentHex = '#22d3ee';
@@ -224,12 +225,19 @@ eleventyComputed:
     colors.forEach((c, i) => {
       const item = document.createElement('div');
       item.className = 'cp__palette-item';
+      item.setAttribute('role', 'button');
+      item.tabIndex = 0;
+      item.setAttribute('aria-label', COPY.selectSwatchTitle.replace('{color}', c));
       item.innerHTML =
         '<div class="cp__palette-swatch" style="background:' + c + '" title="' + COPY.selectSwatchTitle.replace('{color}', c) + '"></div>' +
         '<span class="cp__palette-label">' + c + '</span>';
-      item.addEventListener('click', () => {
+      const activate = () => {
         copyText(c);
         if (i !== 0) setColor(c);
+      };
+      item.addEventListener('click', activate);
+      item.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
       });
       paletteEl.appendChild(item);
     });
@@ -298,24 +306,22 @@ eleventyComputed:
       const el = document.createElement('div');
       el.className = 'cp__saved-item';
       el.innerHTML =
-        '<div class="cp__saved-swatch" style="background:' + c + '" title="' + c + '"></div>' +
-        '<button class="cp__saved-remove" title="' + COPY.removeTitle + '" data-index="' + i + '">&times;</button>';
-      el.querySelector('.cp__saved-swatch').addEventListener('click', () => setColor(c));
-      el.querySelector('.cp__saved-remove').addEventListener('click', e => {
-        e.stopPropagation();
+        '<div class="cp__saved-swatch" role="button" tabindex="0" style="background:' + c + '" title="' + c + '" aria-label="' + COPY.selectSwatchTitle.replace('{color}', c) + '"></div>' +
+        '<button class="cp__saved-remove" title="' + COPY.removeTitle + '" aria-label="' + COPY.removeTitle + '" data-index="' + i + '">&times;</button>';
+      const sw = el.querySelector('.cp__saved-swatch');
+      sw.addEventListener('click', () => setColor(c));
+      sw.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setColor(c); }
+      });
+      const removeColor = async () => {
+        if (!(await window.mentriaConfirm(COPY.confirmRemove.replace('{color}', c)))) return;
         const arr = loadSaved();
         arr.splice(i, 1);
         saveSaved(arr);
         renderSaved();
-      });
-      // Right-click to remove
-      el.addEventListener('contextmenu', e => {
-        e.preventDefault();
-        const arr = loadSaved();
-        arr.splice(i, 1);
-        saveSaved(arr);
-        renderSaved();
-      });
+      };
+      el.querySelector('.cp__saved-remove').addEventListener('click', e => { e.stopPropagation(); removeColor(); });
+      el.addEventListener('contextmenu', e => { e.preventDefault(); removeColor(); });
       savedList.appendChild(el);
     });
   }
@@ -624,6 +630,16 @@ eleventyComputed:
 
 .cp__saved-item:hover .cp__saved-remove {
   opacity: 1;
+}
+
+@media (hover: none) {
+  .cp__saved-remove { opacity: 1; }
+}
+
+.cp__saved-remove::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
 }
 
 /* ── Palette section ─────────────────────────────────── */

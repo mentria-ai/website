@@ -509,6 +509,7 @@
       "harmony_tetradic": "テトラード",
       "title_select_swatch": "クリックして選択 / コピー {color}",
       "title_remove": "削除",
+      "confirm_remove": "{color} を保存した色から削除しますか？",
       "toast_copied": "コピー: {color}",
       "toast_saved": "保存: {color}",
       "toast_already_saved": "すでに保存済み"

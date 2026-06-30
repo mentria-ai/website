@@ -509,6 +509,7 @@
       "harmony_tetradic": "Tetrádico",
       "title_select_swatch": "Clic para seleccionar / copiar {color}",
       "title_remove": "Eliminar",
+      "confirm_remove": "¿Quitar {color} de tus colores guardados?",
       "toast_copied": "Copiado {color}",
       "toast_saved": "Guardado {color}",
       "toast_already_saved": "Ya guardado"

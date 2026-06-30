@@ -370,11 +370,13 @@ canvas#game {
     if (cleared.length === 0) { State.combo = 0; updateHUD(); return 0; }
     State.flashRows = cleared.slice();
     State.flashUntil = performance.now() + 200;
-    setTimeout(() => {
+    State.cur = null;
+    State.clearTimer = setTimeout(() => {
       const sorted = cleared.slice().sort((a,b) => a - b);
       for (let i = sorted.length - 1; i >= 0; i--) State.board.splice(sorted[i], 1);
       for (let i = 0; i < sorted.length; i++) State.board.unshift(new Array(COLS).fill(null));
       State.flashRows = null;
+      if (State.running && !State.over) spawn();
     }, 200);
     const n = cleared.length;
     State.lines += n;
@@ -399,7 +401,7 @@ canvas#game {
       gameOver();
     }
   }
-  function lock() { merge(State.cur); clearLines(); spawn(); }
+  function lock() { merge(State.cur); if (clearLines() === 0) spawn(); }
 
   function move(dx) {
     if (!State.cur || State.over || State.paused) return;
@@ -587,6 +589,7 @@ canvas#game {
   }
 
   function start() {
+    clearTimeout(State.clearTimer);
     State.board = emptyBoard();
     State.score = 0; State.level = 1; State.lines = 0; State.combo = 0;
     State.cur = null; State.next = null; State.hold = null; State.canHold = true;

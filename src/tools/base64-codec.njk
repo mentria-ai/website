@@ -113,6 +113,7 @@ eleventyComputed:
     statusNothingDecode:     {{ ("tool.base64-codec.status_nothing_decode"       | t) | dump | safe }},
     statusDecoded:           {{ ("tool.base64-codec.status_decoded_template"     | t) | dump | safe }},
     statusDecodeFailedInv:   {{ ("tool.base64-codec.status_decode_failed_invalid"| t) | dump | safe }},
+    statusDecodeBinary:      {{ ("tool.base64-codec.status_decode_binary"        | t) | dump | safe }},
     statusNothingCopy:       {{ ("tool.base64-codec.status_nothing_copy"         | t) | dump | safe }},
     statusFileLoaded:        {{ ("tool.base64-codec.status_file_loaded"          | t) | dump | safe }},
     statusFileReadFailed:    {{ ("tool.base64-codec.status_file_read_failed"     | t) | dump | safe }},
@@ -240,12 +241,19 @@ eleventyComputed:
     if (!raw) { showStatus(textStatus, COPY.statusNothingDecode, 'error'); return; }
     const dataUriMatch = raw.match(/^data:[^;]*;base64,(.*)$/s);
     if (dataUriMatch) raw = dataUriMatch[1];
+    let bytes;
     try {
-      const decoded = decodeURIComponent(escape(atob(raw)));
-      outputEl.value = decoded;
-      showStatus(textStatus, COPY.statusDecoded.replace('{size}', formatBytes(decoded.length)), 'success');
+      bytes = Uint8Array.from(atob(raw), c => c.charCodeAt(0));
     } catch (e) {
       showStatus(textStatus, COPY.statusDecodeFailedInv, 'error');
+      return;
+    }
+    try {
+      outputEl.value = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+      showStatus(textStatus, COPY.statusDecoded.replace('{size}', formatBytes(bytes.length)), 'success');
+    } catch (e) {
+      outputEl.value = '';
+      showStatus(textStatus, COPY.statusDecodeBinary, 'error');
     }
   });
 

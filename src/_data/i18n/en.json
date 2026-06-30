@@ -551,6 +551,7 @@
       "status_nothing_decode": "Nothing to decode.",
       "status_decoded_template": "Decoded! Output: {size}",
       "status_decode_failed_invalid": "Decoding failed: invalid Base64 string.",
+      "status_decode_binary": "Decoded successfully, but the data is binary (not UTF-8 text) — use the File tab to download it.",
       "status_nothing_copy": "Nothing to copy.",
       "status_file_loaded": "File loaded: {name}",
       "status_file_read_failed": "Failed to read file.",

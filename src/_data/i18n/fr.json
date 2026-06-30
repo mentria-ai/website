@@ -551,6 +551,7 @@
       "status_nothing_decode": "Rien à décoder.",
       "status_decoded_template": "Décodé ! Sortie : {size}",
       "status_decode_failed_invalid": "Échec de décodage : chaîne Base64 invalide.",
+      "status_decode_binary": "Décodage réussi, mais les données sont binaires (pas du texte UTF-8) — utilisez l'onglet Fichier pour les télécharger.",
       "status_nothing_copy": "Rien à copier.",
       "status_file_loaded": "Fichier chargé : {name}",
       "status_file_read_failed": "Échec de lecture du fichier.",

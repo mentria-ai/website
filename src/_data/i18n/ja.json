@@ -551,6 +551,7 @@
       "status_nothing_decode": "デコードする内容がありません。",
       "status_decoded_template": "デコード済み! 出力: {size}",
       "status_decode_failed_invalid": "デコード失敗: 無効なBase64文字列。",
+      "status_decode_binary": "デコードは成功しましたが、データはバイナリ（UTF-8テキストではありません）です。ファイルタブからダウンロードしてください。",
       "status_nothing_copy": "コピーする内容がありません。",
       "status_file_loaded": "ファイル読込完了: {name}",
       "status_file_read_failed": "ファイル読込に失敗しました。",

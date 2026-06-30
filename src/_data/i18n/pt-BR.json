@@ -551,6 +551,7 @@
       "status_nothing_decode": "Nada para decodificar.",
       "status_decoded_template": "Decodificado! Saída: {size}",
       "status_decode_failed_invalid": "Falha ao decodificar: string Base64 inválida.",
+      "status_decode_binary": "Decodificado com sucesso, mas os dados são binários (não são texto UTF-8) — use a aba Arquivo para baixá-los.",
       "status_nothing_copy": "Nada para copiar.",
       "status_file_loaded": "Arquivo carregado: {name}",
       "status_file_read_failed": "Falha ao ler arquivo.",

@@ -92,7 +92,7 @@ eleventyComputed:
       <div class="iv__meta-right">
         <p class="iv__amount-label">{{ "tool.invoice.amount_due" | t }}</p>
         <p class="iv__amount-value">
-          <span class="grand-total">0</span><span class="currency">₹</span>
+          <span class="grand-total">0</span>
         </p>
       </div>
     </div>
@@ -120,14 +120,14 @@ eleventyComputed:
               <input id="price1Inp" class="input-price-cell" type="text" value="0" placeholder="{{ 'tool.invoice.ph_price' | t }}" pattern="^[0-9]+(\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
             </span>
           </td>
-          <td data-label="{{ 'tool.invoice.tbl_total' | t }}"><span class="line-total">0</span><span class="currency">₹</span></td>
+          <td data-label="{{ 'tool.invoice.tbl_total' | t }}"><span class="line-total">0</span></td>
         </tr>
         <tr class="last-row">
           <td class="last-row-first-col" colspan="4">
             <span class="add-row no-print" title="{{ 'tool.invoice.row_add' | t }}" aria-label="{{ 'tool.invoice.row_add' | t }}">+</span>
             <span class="last-row-label">{{ "tool.invoice.footer_total" | t }}</span>
           </td>
-          <td class="total"><span class="grand-total">0</span><span class="currency">₹</span></td>
+          <td class="total"><span class="grand-total">0</span></td>
         </tr>
       </tbody>
     </table>
@@ -246,22 +246,30 @@ eleventyComputed:
   /* ── Math ──────────────────────────────────────────── */
   const roundToTwo = (n) => (typeof n !== 'number' || isNaN(n))
     ? 0 : Math.round((n + Number.EPSILON) * 100) / 100;
-  const formatToTwo = (n) => parseFloat(roundToTwo(n).toFixed(2)).toString();
+  const SYMBOL_TO_CODE = { '₹': 'INR', '€': 'EUR', '$': 'USD' };
+  const fmtMoney = (n) => new Intl.NumberFormat(document.documentElement.lang || undefined, {
+    style: 'currency',
+    currency: SYMBOL_TO_CODE[currencyInput.value] || 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(roundToTwo(n));
 
   const calculateLineTotal = (row) => {
     const qty   = parseFloat(row.querySelector('.input-qty-cell')?.value);
     const price = parseFloat(row.querySelector('.input-price-cell')?.value);
     const total = (!isNaN(qty) && !isNaN(price)) ? qty * price : 0;
-    row.querySelector('.line-total').textContent = formatToTwo(total);
+    row.querySelector('.line-total').textContent = fmtMoney(total);
   };
   const calculateGrandTotal = () => {
-    const lineTotals = Array.from(document.querySelectorAll('.line-total'));
-    const grand = lineTotals.reduce((acc, el) => {
-      const v = parseFloat(el.textContent);
-      return acc + (isNaN(v) ? 0 : v);
-    }, 0);
+    let grand = 0;
+    document.querySelectorAll('.input-qty-cell').forEach(qtyEl => {
+      const row = qtyEl.closest('tr');
+      const qty = parseFloat(qtyEl.value);
+      const price = parseFloat(row.querySelector('.input-price-cell')?.value);
+      if (!isNaN(qty) && !isNaN(price)) grand += qty * price;
+    });
     document.querySelectorAll('.grand-total').forEach(el => {
-      el.textContent = formatToTwo(grand);
+      el.textContent = fmtMoney(grand);
     });
   };
 
@@ -269,6 +277,8 @@ eleventyComputed:
   const changeCurrency = () => {
     const c = currencyInput.value;
     document.querySelectorAll('.currency').forEach(el => el.textContent = c);
+    document.querySelectorAll('.input-qty-cell').forEach(qtyEl => calculateLineTotal(qtyEl.closest('tr')));
+    calculateGrandTotal();
   };
 
   /* ── HTML escaping for templated row ───────────────── */
@@ -301,7 +311,7 @@ eleventyComputed:
           <input id="price${rowIndex}Inp" class="input-price-cell" type="text" value="${esc(data['Unit Price'] ?? '0')}" placeholder="${esc(COPY.phPrice)}" pattern="^[0-9]+(\\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
         </span>
       </td>
-      <td data-label="${esc(labels[4] || '')}"><span class="line-total">0</span><span class="currency">₹</span></td>
+      <td data-label="${esc(labels[4] || '')}"><span class="line-total">0</span></td>
     `;
     tbody.insertBefore(newRow, tbody.lastElementChild);
 

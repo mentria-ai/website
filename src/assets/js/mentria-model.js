@@ -91,7 +91,6 @@ function offerChoice(choices) {
   actions.innerHTML = '';
   actions.hidden = false;
   el.hidden = false;
-  const fallback = choices[choices.length - 1];
   return new Promise((resolve) => {
     let done = false;
     const finish = (id) => {
@@ -102,8 +101,8 @@ function offerChoice(choices) {
       el.removeEventListener('click', onBackdrop);
       resolve(id);
     };
-    const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); finish(fallback); } };
-    const onBackdrop = (e) => { if (e.target === el) finish(fallback); };
+    const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); finish(null); } };
+    const onBackdrop = (e) => { if (e.target === el) finish(null); };
     document.addEventListener('keydown', onKey);
     el.addEventListener('click', onBackdrop);
     choices.forEach((id) => {
@@ -192,7 +191,7 @@ export async function ensureModel(engineFactory, opts) {
     const choices = await tierChoices();
     if (choices.length > 1) {
       const pick = await offerChoice(choices);
-      Tiers.setUserTier(pick);
+      if (pick) Tiers.setUserTier(pick);
     }
   }
 

@@ -734,7 +734,7 @@ canvas {
     }
   }
 
-  function update(dt) {
+  function update() {
     if (!State.running || State.paused) return;
 
     if (mouseX !== null) {
@@ -1013,10 +1013,14 @@ canvas {
   }
 
   let last = performance.now();
+  let acc = 0;
+  const STEP = 1000 / 60;
   function loop(now) {
-    const dt = now - last;
+    acc += now - last;
     last = now;
-    update(dt);
+    if (acc > 250) acc = STEP;
+    let steps = 0;
+    while (acc >= STEP && steps < 6) { update(); acc -= STEP; steps++; }
     render();
     requestAnimationFrame(loop);
   }

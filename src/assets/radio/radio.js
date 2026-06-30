@@ -105,8 +105,9 @@ class MentriaRadio {
     this.prepareNext();
   }
 
-  async loadAndPlay(track) {
+  async loadAndPlay(track, failedIds) {
     this.setStatus("loading", COPY.loadingTrack);
+    failedIds = failedIds || new Set();
     try {
       const loaded = await this.player.loadTrack(track.url);
       const { duration } = this.player.playAudio(loaded);
@@ -125,7 +126,23 @@ class MentriaRadio {
       this.el.like.disabled = false;
     } catch (err) {
       console.error("[radio] loadAndPlay failed:", err);
+      failedIds.add(track.id);
+      const okCatalog = this.catalog.filter((t) => !failedIds.has(t.id));
+      if (okCatalog.length > 0 && failedIds.size < 5) {
+        const next = selectNextTrack(
+          okCatalog,
+          this.history,
+          this.preferences,
+          this.currentTrack ? this.currentTrack.mood : null,
+          this.currentTrack ? this.currentTrack.energy : null
+        );
+        if (next) return this.loadAndPlay(next, failedIds);
+      }
       this.setStatus("error", COPY.errLoadTrack);
+      this.el.play.innerHTML = PLAY_SVG;
+      this.el.play.classList.remove("playing");
+      this.el.play.disabled = false;
+      this.el.skip.disabled = false;
     }
   }
 

@@ -214,7 +214,13 @@ eleventyComputed:
   function curPlayer(){ return State.active[State.turnIdx]; }
   function isHuman(p){ return State.mode === 'hotseat' ? true : p === 0; }
 
+  let gen = 0;
+  let diceInterval = null;
+  function gtimeout(fn, ms){ const g = gen; return setTimeout(() => { if (g === gen) fn(); }, ms); }
+
   function newGame(){
+    gen++;
+    if (diceInterval){ clearInterval(diceInterval); diceInterval = null; }
     const n = State.numPlayers;
     if (n === 2) State.active = [0,2];
     else if (n === 3) State.active = [0,1,2];
@@ -386,9 +392,9 @@ eleventyComputed:
     const die = document.getElementById('die');
     die.style.setProperty('--die-color', COLORS[p]);
     die.classList.remove('rolling'); void die.offsetWidth; die.classList.add('rolling');
-    const iv = setInterval(()=>{ updateDie(1 + Math.floor(Math.random()*6), p); }, 80);
-    setTimeout(() => {
-      clearInterval(iv);
+    diceInterval = setInterval(()=>{ updateDie(1 + Math.floor(Math.random()*6), p); }, 80);
+    gtimeout(() => {
+      clearInterval(diceInterval); diceInterval = null;
       die.classList.remove('rolling');
       updateDie(d, p);
       State.rolling = false;
@@ -398,21 +404,21 @@ eleventyComputed:
   function finishRoll(p, d){
     State.dice = d; State.rolled = true;
     if (d === 6) State.sixStreak++; else State.sixStreak = 0;
-    if (State.sixStreak >= 3){ showToast(COPY.tripleSix); setTimeout(endTurn, 800); return; }
+    if (State.sixStreak >= 3){ showToast(COPY.tripleSix); gtimeout(endTurn, 800); return; }
     const moves = getMoves(p, d);
     State.movable = moves;
     if (moves.length === 0){
       const name = `<b>${PNAMES[p]}</b>`;
       setStatus(isHuman(p) && State.mode!=='hotseat' ? COPY.noMovesYou : COPY.noMovesName.replace('{name}', name));
-      setTimeout(endTurn, 850);
+      gtimeout(endTurn, 850);
       return;
     }
     if (isHuman(p)){
       highlightSet = new Set(moves.map(m => m.p+'-'+m.t));
-      if (moves.length === 1){ setTimeout(()=>doMove(moves[0]), 350); }
+      if (moves.length === 1){ gtimeout(()=>doMove(moves[0]), 350); }
       draw(); setStatus(); updateRollBtn();
     } else {
-      setTimeout(()=>{ const m = aiChoose(p, moves); doMove(m); }, 600);
+      gtimeout(()=>{ const m = aiChoose(p, moves); doMove(m); }, 600);
     }
   }
 
@@ -445,7 +451,7 @@ eleventyComputed:
     const stepFn = () => {
       State.tokens[p][t] = steps[si];
       draw(); si++;
-      if (si < steps.length){ setTimeout(stepFn, 110); }
+      if (si < steps.length){ gtimeout(stepFn, 110); }
       else { finishMove(m); }
     };
     if (steps.length) stepFn(); else finishMove(m);
@@ -472,7 +478,7 @@ eleventyComputed:
     if (extra && State.sixStreak < 3){
       State.rolled = false; State.movable = [];
       setStatus(); updateDie(0); updateRollBtn();
-      if (!isHuman(p)) setTimeout(()=>aiRoll(p), 600);
+      if (!isHuman(p)) gtimeout(()=>aiRoll(p), 600);
     } else {
       endTurn();
     }
@@ -488,7 +494,7 @@ eleventyComputed:
   }
   function maybeAITurn(){
     const p = curPlayer();
-    if (!State.over && !isHuman(p)) setTimeout(()=>aiRoll(p), 700);
+    if (!State.over && !isHuman(p)) gtimeout(()=>aiRoll(p), 700);
   }
   function aiRoll(p){ if (State.over) return; if (curPlayer() !== p) return; rollDice(); }
 

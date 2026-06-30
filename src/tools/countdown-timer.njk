@@ -365,6 +365,7 @@ eleventyComputed:
     const btnReset = $('[data-action="reset"]');
     const btnClose = $('.ct-widget__close');
     const modeButtons = $$('.ct-mode-btn');
+    const presetButtons = $$('.ct-preset');
 
     const state = {
       id,
@@ -499,6 +500,7 @@ eleventyComputed:
       btnStart.textContent = COPY.btnPause;
       btnPause.disabled = false;
       btnReset.disabled = false;
+      presetButtons.forEach(b => b.disabled = true);
       panelDuration.classList.add('ct-widget__inputs--hidden');
       panelDatetime.classList.add('ct-widget__inputs--hidden');
     }
@@ -516,6 +518,7 @@ eleventyComputed:
       btnStart.disabled = false;
       btnPause.disabled = true;
       btnReset.disabled = true;
+      presetButtons.forEach(b => b.disabled = false);
       dtError.textContent = '';
       // Show the active panel
       if (state.mode === 'duration') {
@@ -594,8 +597,11 @@ eleventyComputed:
     });
 
     // Presets
-    el.querySelectorAll('.ct-preset').forEach(btn => {
-      btn.addEventListener('click', () => setPreset(parseInt(btn.dataset.seconds)));
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (state.countdown || state.isPaused) return;
+        setPreset(parseInt(btn.dataset.seconds));
+      });
     });
 
     // Placeholder behaviour for contenteditable title
@@ -987,7 +993,11 @@ eleventyComputed:
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.ct-preset:hover {
+.ct-preset:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ct-preset:hover:not(:disabled) {
   background: rgba(255, 149, 0, 0.2);
   border-color: rgba(255, 149, 0, 0.5);
 }

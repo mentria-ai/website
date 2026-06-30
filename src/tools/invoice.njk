@@ -114,7 +114,7 @@ eleventyComputed:
             <textarea id="desc1Inp" placeholder="{{ 'tool.invoice.ph_line_desc' | t }}" rows="1"></textarea>
           </td>
           <td data-label="{{ 'tool.invoice.tbl_sac' | t }}"><input id="sac1Inp" type="text" value="998314" placeholder="______"></td>
-          <td data-label="{{ 'tool.invoice.tbl_quantity' | t }}"><input id="qty1Inp" class="input-qty-cell" type="text" value="1" placeholder="{{ 'tool.invoice.ph_qty' | t }}" pattern="^[0-9]+$" inputmode="numeric"></td>
+          <td data-label="{{ 'tool.invoice.tbl_quantity' | t }}"><input id="qty1Inp" class="input-qty-cell" type="text" value="1" placeholder="{{ 'tool.invoice.ph_qty' | t }}" pattern="^[0-9]+(\.[0-9]+)?$" inputmode="decimal"></td>
           <td data-label="{{ 'tool.invoice.tbl_unit_price' | t }}">
             <span class="iv__cell-price">
               <input id="price1Inp" class="input-price-cell" type="text" value="0" placeholder="{{ 'tool.invoice.ph_price' | t }}" pattern="^[0-9]+(\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
@@ -221,12 +221,6 @@ eleventyComputed:
   };
 
   /* ── Validation / sanitization ─────────────────────── */
-  const validateInputPattern = (input) => {
-    const pattern = input.getAttribute('pattern');
-    if (pattern && !new RegExp(`^${pattern}$`).test(input.value)) {
-      input.value = '';
-    }
-  };
   const sanitizeDecimalInput = (value) => {
     let s = value.replace(/[^0-9.]/g, '');
     const dot = s.indexOf('.');
@@ -255,7 +249,7 @@ eleventyComputed:
   const formatToTwo = (n) => parseFloat(roundToTwo(n).toFixed(2)).toString();
 
   const calculateLineTotal = (row) => {
-    const qty   = parseInt(row.querySelector('.input-qty-cell')?.value, 10);
+    const qty   = parseFloat(row.querySelector('.input-qty-cell')?.value);
     const price = parseFloat(row.querySelector('.input-price-cell')?.value);
     const total = (!isNaN(qty) && !isNaN(price)) ? qty * price : 0;
     row.querySelector('.line-total').textContent = formatToTwo(total);
@@ -301,7 +295,7 @@ eleventyComputed:
         <textarea id="desc${rowIndex}Inp" placeholder="${esc(COPY.phLineDesc)}" rows="1">${esc(data.Description)}</textarea>
       </td>
       <td data-label="${esc(labels[1] || '')}"><input id="sac${rowIndex}Inp" type="text" value="${esc(data['SAC code'] ?? '')}" placeholder="______"></td>
-      <td data-label="${esc(labels[2] || '')}"><input id="qty${rowIndex}Inp" class="input-qty-cell" type="text" value="${esc(data.Quantity ?? '1')}" placeholder="${esc(COPY.phQty)}" pattern="^[0-9]+$" inputmode="numeric"></td>
+      <td data-label="${esc(labels[2] || '')}"><input id="qty${rowIndex}Inp" class="input-qty-cell" type="text" value="${esc(data.Quantity ?? '1')}" placeholder="${esc(COPY.phQty)}" pattern="^[0-9]+(\\.[0-9]+)?$" inputmode="decimal"></td>
       <td data-label="${esc(labels[3] || '')}">
         <span class="iv__cell-price">
           <input id="price${rowIndex}Inp" class="input-price-cell" type="text" value="${esc(data['Unit Price'] ?? '0')}" placeholder="${esc(COPY.phPrice)}" pattern="^[0-9]+(\\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
@@ -473,7 +467,7 @@ eleventyComputed:
   table.addEventListener('input', (e) => {
     const t = e.target;
     if (t.tagName === 'INPUT') {
-      if (t.classList.contains('input-price-cell')) {
+      if (t.classList.contains('input-price-cell') || t.classList.contains('input-qty-cell')) {
         const before = t.value;
         const after  = sanitizeDecimalInput(before);
         if (before !== after) {
@@ -481,11 +475,6 @@ eleventyComputed:
           t.value = after;
           if (!isNaN(pos)) t.setSelectionRange(Math.max(0, pos), Math.max(0, pos));
         }
-      } else {
-        validateInputPattern(t);
-      }
-      if (t.classList.contains('input-qty-cell') ||
-          t.classList.contains('input-price-cell')) {
         calculateLineTotal(t.closest('tr'));
         calculateGrandTotal();
       }
@@ -497,8 +486,7 @@ eleventyComputed:
   table.addEventListener('focusout', (e) => {
     const t = e.target;
     if (t.tagName !== 'INPUT') return;
-    validateInputPattern(t);
-    if (t.classList.contains('input-price-cell')) {
+    if (t.classList.contains('input-price-cell') || t.classList.contains('input-qty-cell')) {
       if (t.value === '.') t.value = '0';
       else if (/^\d+\.$/.test(t.value)) t.value = t.value.slice(0, -1);
       calculateLineTotal(t.closest('tr'));

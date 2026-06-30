@@ -324,6 +324,21 @@ eleventyComputed:
     calculateGrandTotal();
   };
 
+  const renumberRows = () => {
+    const rows = Array.from(table.querySelector('tbody').children).slice(0, -1);
+    rows.forEach((row, i) => {
+      const idx = i + 1;
+      row.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(el => {
+        const newId = el.id.replace(/\d+Inp$/, idx + 'Inp');
+        if (newId !== el.id) {
+          dropField(el.id);
+          el.id = newId;
+          persist(el);
+        }
+      });
+    });
+  };
+
   const removeRow = (event) => {
     if (!event.target.classList.contains('remove-row')) return;
     const row = event.target.closest('tr');
@@ -331,6 +346,7 @@ eleventyComputed:
       dropField(el.id);
     });
     row.remove();
+    renumberRows();
     calculateGrandTotal();
   };
 

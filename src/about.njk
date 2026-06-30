@@ -461,7 +461,7 @@ eleventyComputed:
     });
   })();
 
-  (function () {
+  function aboutBackupPanel() {
     if (!window.MentriaStore || !window.MentriaBackup) return;
     var COPY = {
       persistGranted:    {{ ('about.data_persist_status_granted' | t) | dump | safe }},
@@ -590,7 +590,9 @@ eleventyComputed:
         importBtn.disabled = false;
       }
     });
-  })();
+  }
+  if (window.MentriaBackup) aboutBackupPanel();
+  else window.addEventListener('DOMContentLoaded', aboutBackupPanel);
 
   (function () {
     var COPY = {

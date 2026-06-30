@@ -97,8 +97,10 @@
     DEL: [], INS: [], SUB: [], SUP: [], CODE: ['class'], PRE: ['class'], BLOCKQUOTE: [],
     UL: [], OL: ['start'], LI: [], H1: [], H2: [], H3: [], H4: [], H5: [], H6: [],
     TABLE: [], THEAD: [], TBODY: [], TR: [], TH: ['align'], TD: ['align'],
-    IMG: ['src', 'alt', 'title'], SPAN: ['class']
+    IMG: ['src', 'alt', 'title'], SPAN: ['class'], INPUT: ['type', 'checked', 'disabled']
   };
+
+  const DROP_WITH_CONTENT = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEMPLATE: 1 };
 
   function safeUrl(value, isImg) {
     const u = String(value).replace(/[\u0000-\u0020\u0085\u00a0\u1680\u2000-\u200f\u2028\u2029\u202f\u205f\u2060\u3000\ufeff]+/g, '').toLowerCase();
@@ -115,7 +117,13 @@
       if (el.nodeType === 8) { el.remove(); continue; }
       if (el.nodeType !== 1) continue;
       const allow = SANITIZE_ALLOWED[el.tagName];
-      if (!allow) { el.remove(); continue; }
+      if (!allow) {
+        if (DROP_WITH_CONTENT[el.tagName]) { el.remove(); continue; }
+        scrubNode(el);
+        while (el.firstChild) node.insertBefore(el.firstChild, el);
+        el.remove();
+        continue;
+      }
       const attrs = Array.prototype.slice.call(el.attributes);
       for (let j = 0; j < attrs.length; j++) {
         const name = attrs[j].name.toLowerCase();

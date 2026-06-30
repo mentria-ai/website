@@ -56,7 +56,7 @@
       fallbackTitle: 'Mentria'
     };
     var r = await fetch(BASE + '/schedule', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true
     });
     if (r.ok) entry.posted = true;
   }

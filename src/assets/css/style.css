@@ -922,3 +922,15 @@ body.pwa-sheet-open { overflow: hidden; }
   width: 13px;
   height: 13px;
 }
+
+@media print {
+  :root { color-scheme: light; }
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+  body::before, body::after { display: none !important; }
+  .site-header, .site-footer, .skip-link, .no-print { display: none !important; }
+  main { max-width: none !important; }
+  a { color: #0a4ea3 !important; }
+}

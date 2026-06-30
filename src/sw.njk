@@ -202,9 +202,25 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then(cached => cached || fetch(event.request))
-  );
+  event.respondWith((async () => {
+    if (url.pathname.startsWith('/assets/mentria/dist/')) {
+      const hit = await caches.match(event.request, { ignoreSearch: true });
+      if (hit) return hit;
+      const resp = await fetch(event.request);
+      if (resp && resp.ok) { const copy = resp.clone(); caches.open(MODELS_CACHE).then(c => c.put(event.request, copy)); }
+      return resp;
+    }
+    const cached = await caches.match(event.request, { ignoreSearch: true });
+    if (cached) return cached;
+    if (event.request.mode === 'navigate') {
+      const stripped = url.pathname.replace(/^\/(es|fr|ja|pt-br)(\/|$)/, '/');
+      if (stripped !== url.pathname) {
+        const alt = await caches.match(stripped, { ignoreSearch: true });
+        if (alt) return alt;
+      }
+    }
+    return fetch(event.request);
+  })());
 });
 
 // Notification click → focus the originating tool tab. Action buttons

@@ -265,6 +265,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
   const FLAP = -7.6;
   let pipeSpeed = 2.6;
   let pipeGap = 180;
+  let gameOverTimer = null;
 
   const pipes = [];
   const stars = [];
@@ -276,6 +277,8 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
   }
 
   function reset() {
+    clearTimeout(gameOverTimer);
+    State.dying = false;
     State.running = true; State.paused = false; State.over = false;
     State.score = 0; State.tier = 0; State.distance = 0;
     pipes.length = 0; particles.length = 0;
@@ -396,13 +399,14 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
   function die() {
     if (State.over) return;
     State.over = true;
+    State.dying = true;
     State.running = false;
     spawnHit(plane.x, plane.y);
     if (State.score > State.best) {
       State.best = State.score;
       writeBest(State.best);
     }
-    setTimeout(() => showGameOver(), 600);
+    gameOverTimer = setTimeout(() => showGameOver(), 600);
     updateHUD();
   }
 
@@ -591,6 +595,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
         '<span class="k">{{ "game.flappy.stats_distance"| t }}</span><span class="v">' + (State.distance/100).toFixed(1) + 'm</span>' +
       '</div>' +
       '<button class="btn" id="btn-again">$ retry</button>';
+    State.dying = false;
     ov.classList.remove('hidden');
     document.getElementById('btn-again').onclick = () => reset();
   }
@@ -607,6 +612,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
   document.addEventListener('keydown', e => {
     if (e.code === 'Space') {
       e.preventDefault();
+      if (State.dying) return;
       if (!State.running && !State.over) reset();
       else if (State.over) reset();
       else flap();
@@ -618,12 +624,14 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
   });
   canvas.addEventListener('mousedown', e => {
     e.preventDefault();
+    if (State.dying) return;
     if (State.over) reset();
     else if (!State.running) reset();
     else flap();
   });
   canvas.addEventListener('touchstart', e => {
     e.preventDefault();
+    if (State.dying) return;
     if (State.over) reset();
     else if (!State.running) reset();
     else flap();
@@ -636,6 +644,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     if (!e.detail.pressed) return;
     const n = e.detail.name;
     if (n === 'a' || n === 'b' || n === 'x' || n === 'y') {
+      if (State.dying) return;
       if (!State.running && !State.over) reset();
       else if (State.over) reset();
       else flap();

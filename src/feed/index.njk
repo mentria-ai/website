@@ -134,18 +134,17 @@ eleventyComputed:
 
   // Keyboard play/pause
   feedScroll.addEventListener('keydown', function (e) {
-    if (e.key === ' ' || e.key === 'Enter') {
-      var card = e.target.closest('.feed-card');
-      if (card) {
-        e.preventDefault();
-        var video = card.querySelector('video');
-        if (video) {
-          if (video.paused) {
-            video.play().catch(function () {});
-          } else {
-            video.pause();
-          }
-        }
+    if (e.key !== ' ' && e.key !== 'Enter') return;
+    if (e.target.closest('.feed-card__link')) return;
+    var card = e.target.closest('.feed-card');
+    if (!card) return;
+    var video = card.querySelector('video');
+    if (video) {
+      e.preventDefault();
+      if (video.paused) {
+        video.play().catch(function () {});
+      } else {
+        video.pause();
       }
     }
   });

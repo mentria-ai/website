@@ -130,6 +130,7 @@ class MentriaRadio {
   }
 
   async crossfadeToNext() {
+    if (!this.player.isPlaying) return;
     if (this.currentTrack) {
       await this.recordEnd(false);
       this.history.push(this.currentTrack);
@@ -155,7 +156,7 @@ class MentriaRadio {
   scheduleCrossfade() {
     if (this.crossfadeTimer) clearTimeout(this.crossfadeTimer);
     const crossfadeSec = this.player.crossfadeSec || 4;
-    const delayMs = Math.max(0, (this.currentDuration - crossfadeSec) * 1000);
+    const delayMs = Math.max(0, (this.currentDuration - this.player.currentTime - crossfadeSec) * 1000);
     this.crossfadeTimer = setTimeout(() => this.crossfadeToNext(), delayMs);
   }
 
@@ -326,12 +327,14 @@ class MentriaRadio {
         this.el.play.classList.remove("playing");
         this.setStatus("ready", COPY.paused);
         if (this.progressTimer) clearInterval(this.progressTimer);
+        if (this.crossfadeTimer) clearTimeout(this.crossfadeTimer);
       } else {
         this.player.resume();
         this.el.play.innerHTML = PAUSE_SVG;
         this.el.play.classList.add("playing");
         this.setStatus("playing", COPY.playing);
         this.startProgressTimer();
+        this.scheduleCrossfade();
       }
     });
 

@@ -6,6 +6,7 @@ pagination:
   alias: pair
 permalink: "{{ pair.locale.pathPrefix }}/feed/deepcuts/{{ pair.edition.id }}/"
 eleventyComputed:
+  lang: "{{ pair.locale.code }}"
   title: "{{ pair.edition.title }} · Deep Cuts"
   description: "{{ pair.edition.subtitle | tloc(pair.locale.code) }}"
 ---

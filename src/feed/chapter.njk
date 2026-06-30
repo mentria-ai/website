@@ -6,6 +6,7 @@ pagination:
   alias: pair
 permalink: "{{ pair.locale.pathPrefix }}/feed/chapter/{{ pair.chapter.id }}/"
 eleventyComputed:
+  lang: "{{ pair.locale.code }}"
   title: "{{ pair.chapter.title }} · Chapter {{ pair.chapter.order }}"
   description: "{{ pair.chapter.subtitle }}"
 ---

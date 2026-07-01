@@ -34,6 +34,8 @@ eleventyComputed:
       </div>
     </div>
 
+    <p class="sc__goal-reached" id="sc-goal-reached" role="status" aria-live="polite"></p>
+
     <div class="sc__stats">
       <div class="sc__stat">
         <span class="sc__stat-label">{{ "tool.step-counter.stat_distance" | t }}</span>
@@ -122,6 +124,7 @@ eleventyComputed:
   const LS = 'mentria-step-counter';
   const RING_CIRC = 2 * Math.PI * 86;
   const SENS = { low: 1.7, med: 1.1, high: 0.7 };
+  const STEP_MIN_MS = 300;
 
   const $ = id => document.getElementById(id);
   const tracker     = $('sc-tracker');
@@ -131,6 +134,7 @@ eleventyComputed:
   const panelInsec  = $('sc-insecure');
   const countEl     = $('sc-count');
   const goalTextEl  = $('sc-goal-text');
+  const goalReachedEl = $('sc-goal-reached');
   const ringEl      = $('sc-ring');
   const distEl      = $('sc-distance');
   const sessionEl   = $('sc-session');
@@ -201,7 +205,7 @@ eleventyComputed:
   let acEMA = 0;
   let waitingForPeak = true;
   let peaked = false;
-  let lastStepAt = 0;
+  let lastPeakAt = 0;
 
   function fmtDistance(steps) {
     const m = steps * (state.stride / 100);
@@ -222,6 +226,7 @@ eleventyComputed:
     const pct = Math.max(0, Math.min(1, state.steps / state.goal));
     ringEl.style.strokeDashoffset = RING_CIRC * (1 - pct);
     ringEl.classList.toggle('is-complete', pct >= 1);
+    if (goalReachedEl) goalReachedEl.textContent = pct >= 1 ? COPY.goalReached : '';
     distEl.textContent = fmtDistance(state.steps);
   }
 
@@ -266,11 +271,10 @@ eleventyComputed:
     }
   }
 
-  function registerStep(now) {
+  function registerStep() {
     const wasUnderGoal = state.steps < state.goal;
     state.steps += 1;
     sessionSteps += 1;
-    lastStepAt = now;
     renderCount();
     renderHistory();
     persist();
@@ -293,7 +297,9 @@ eleventyComputed:
       peaked = true;
       waitingForPeak = false;
     } else if (peaked && acEMA < -thr * 0.4) {
-      if (now - lastStepAt > 260) registerStep(now);
+      const interval = now - lastPeakAt;
+      lastPeakAt = now;
+      if (interval >= STEP_MIN_MS) registerStep();
       peaked = false;
       waitingForPeak = true;
     }
@@ -322,7 +328,7 @@ eleventyComputed:
     sawSensorData = false;
     waitingForPeak = true;
     peaked = false;
-    lastStepAt = 0;
+    lastPeakAt = 0;
     toggleBtn.textContent = COPY.btnPause;
     hintEl.hidden = false;
     window.addEventListener('devicemotion', onMotion);
@@ -405,9 +411,13 @@ eleventyComputed:
     if (!(await mentriaConfirm(COPY.confirmReset))) return;
     state.steps = 0;
     sessionSteps = 0;
+    sessionElapsed = 0;
+    sessionStart = running ? Date.now() : 0;
+    paceEl.textContent = '—';
     persist();
     renderCount();
     renderHistory();
+    updateSession();
   });
 
   document.addEventListener('visibilitychange', () => {
@@ -438,6 +448,7 @@ eleventyComputed:
   gap: 1.5rem;
   width: 100%;
 }
+.sc__tracker[hidden] { display: none; }
 
 .sc__ring-wrap { position: relative; width: 240px; height: 240px; }
 .sc__ring { width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -482,6 +493,15 @@ eleventyComputed:
   color: var(--syn-cyan);
   margin-top: 0.2rem;
 }
+
+.sc__goal-reached {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--syn-green);
+  text-align: center;
+}
+.sc__goal-reached:empty { display: none; }
 
 .sc__stats {
   display: grid;
@@ -629,7 +649,7 @@ eleventyComputed:
   box-shadow: 0 12px 32px rgba(0,0,0,0.5);
   font-family: var(--font-mono);
   width: min(320px, calc(100vw - 2rem));
-  inset: unset;
+  inset: 0;
 }
 .sc__settings:not(:popover-open) { display: none; }
 .sc__settings:popover-open {

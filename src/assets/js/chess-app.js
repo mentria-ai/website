@@ -58,6 +58,7 @@
     worker.onmessage = onWorkerMessage;
   }
   let pendingEngineCallback = null, pendingHint = false, pendingAnalyze = false;
+  let engineTimer = null;
   function onWorkerMessage(e){
     const d = e.data;
     if (d.type !== 'best') return;
@@ -78,10 +79,14 @@
     const cfg = SKILL_CFG[State.skill];
     worker.postMessage({ type:'go', pos: State.pos, depth: opts.depth ?? cfg.depth, skill: State.skill });
   }
+  function cancelPendingEngine(){
+    pendingEngineCallback = null;
+    if (engineTimer){ clearTimeout(engineTimer); engineTimer = null; }
+  }
   function engineMove(){
     if (State.over) return;
-    pendingEngineCallback = (m) => { if (!m || State.over) return; doMove(m); };
-    setTimeout(() => askEngine(), 250 + Math.random()*350);
+    pendingEngineCallback = (m) => { if (!m || State.over) return; if (State.mode === 'engine' && State.pos.turn === State.humanColor) return; doMove(m); };
+    engineTimer = setTimeout(() => askEngine(), 250 + Math.random()*350);
   }
   function analyze(){ if (pendingAnalyze) return; pendingAnalyze = true; askEngine(); }
 
@@ -183,10 +188,20 @@
   }
   function renderCaptured(viewPos){
     const startCounts = { P:8, N:2, B:2, R:2, Q:1, p:8, n:2, b:2, r:2, q:1 };
+    const VAL = { P:1, N:3, B:3, R:5, Q:9 };
+    const upto = State.cursor >= 0 ? State.cursor : State.history.length;
+    let promoMat = 0;
+    for (let i=0;i<upto;i++){
+      const mv = State.history[i] && State.history[i].move;
+      if (mv && mv.promo){
+        const t = mv.promo.toUpperCase();
+        if (i % 2 === 0){ startCounts.P -= 1; startCounts[t] += 1; promoMat += VAL[t] - VAL.P; }
+        else { startCounts.p -= 1; startCounts[t.toLowerCase()] += 1; promoMat -= VAL[t] - VAL.P; }
+      }
+    }
     const cur = {};
     for (const p of viewPos.b) if (p !== ' ' && p.toUpperCase() !== 'K') cur[p] = (cur[p]||0)+1;
-    const capByWhite = [], capByBlack = []; let mat = 0;
-    const VAL = { P:1, N:3, B:3, R:5, Q:9 };
+    const capByWhite = [], capByBlack = []; let mat = promoMat;
     for (const k of Object.keys(startCounts)){
       const missing = startCounts[k] - (cur[k]||0);
       for (let i=0;i<missing;i++){ if (isW(k)) capByBlack.push(k); else capByWhite.push(k); mat += isW(k) ? -VAL[k.toUpperCase()] : VAL[k.toUpperCase()]; }
@@ -230,7 +245,26 @@
     const piece = State.pos.b[idx];
     if (State.selected >= 0){
       const move = State.legalForSel.find(m => m.to === idx);
-      if (move){ if (move.promo){ openPromo(move, e.currentTarget); return; } doMove(move); return; }
+      if (move){
+        const target = e.currentTarget;
+        target.setPointerCapture(e.pointerId);
+        const onTapUp = (up) => {
+          target.removeEventListener('pointerup', onTapUp);
+          target.removeEventListener('pointercancel', onTapCancel);
+          const overEl = document.elementFromPoint(up.clientX, up.clientY);
+          const cell = overEl && overEl.closest('.sq');
+          if (!cell || +cell.dataset.sq !== idx) return;
+          if (move.promo){ openPromo(move, target); return; }
+          doMove(move);
+        };
+        const onTapCancel = () => {
+          target.removeEventListener('pointerup', onTapUp);
+          target.removeEventListener('pointercancel', onTapCancel);
+        };
+        target.addEventListener('pointerup', onTapUp);
+        target.addEventListener('pointercancel', onTapCancel);
+        return;
+      }
       if (piece !== ' ' && colorOf(piece) === State.pos.turn){ selectSq(idx); return; }
       State.selected = -1; State.legalForSel = []; render(); return;
     }
@@ -306,6 +340,7 @@
   function backToLive(){ State.cursor = -1; render(); }
   function undo(){
     if (State.history.length === 0 || State.mode === 'online') return;
+    cancelPendingEngine();
     const posAt = () => State.history.length ? applyMove(State.history[State.history.length-1].prePos, State.history[State.history.length-1].move) : startPos();
     State.history.pop();
     if (State.mode === 'engine'){
@@ -320,6 +355,7 @@
 
   /* ===== game flow ===== */
   function newGame(keepMode = true){
+    cancelPendingEngine();
     State.pos = startPos(); State.history = []; State.cursor = -1;
     State.selected = -1; State.legalForSel = []; State.over = null; State.ghostMove = null;
     if (!keepMode){ State.mode = 'hotseat'; State.humanColor = 'w'; State.flipped = false; }

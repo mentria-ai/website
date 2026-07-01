@@ -101,7 +101,7 @@ export class RadioPlayer {
 
   setVolume(value) {
     this._volume = value;
-    if (this._a && !this._a.paused) {
+    if (this._a) {
       this._a.volume = value;
     }
   }
@@ -115,6 +115,7 @@ export class RadioPlayer {
 
   resume() {
     if (this._a && this._a.paused && this._a.src) {
+      this._a.volume = this._volume;
       this._a.play().catch(() => {});
       this.isPlaying = true;
     }

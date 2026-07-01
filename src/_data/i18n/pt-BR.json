@@ -274,7 +274,7 @@
     "radio": {
       "title": "Rádio Infinita",
       "lede": "Música cinematográfica épica gerada por IA, transmitindo infinitamente. Aprende seu gosto localmente — seus dados não saem do seu dispositivo.",
-      "tldr": "Música cinematográfica infinita gerada por IA, em streaming direto no seu navegador. Faixas vêm de um catálogo público e tocam via Web Audio API; seu histórico de escuta e curtidas ficam no dispositivo no IndexedDB para aprender seu gosto localmente ao longo do tempo. Sem contas, sem rastreamento, sem personalização do lado do servidor."
+      "tldr": "Música cinematográfica infinita gerada por IA, em streaming direto no seu navegador. Faixas vêm de um catálogo público e tocam pelo elemento de áudio HTML5 nativo do navegador (com crossfade entre dois reprodutores); seu histórico de escuta e curtidas ficam no dispositivo no IndexedDB para aprender seu gosto localmente ao longo do tempo. Sem contas, sem rastreamento, sem personalização do lado do servidor."
     },
     "tetris": {
       "title": "Tetris",
@@ -733,7 +733,9 @@
       "err_load_catalog": "Falha ao carregar catálogo",
       "err_load_track": "Falha ao carregar faixa",
       "track_count_format": "{n} faixas",
-      "untitled": "Sem título"
+      "untitled": "Sem título",
+      "progress_aria": "Posição de reprodução",
+      "retry": "Tentar novamente"
     },
     "ai-chat": {
       "tldr_heading": "O que é AI Chat?",

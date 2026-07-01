@@ -192,6 +192,20 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+
+  if (url.origin === 'https://mentria-ai.github.io' && url.pathname.startsWith('/radio-catalog/')) {
+    event.respondWith((async () => {
+      const cache = await caches.open('mentria-radio');
+      const cached = await cache.match(event.request);
+      const network = fetch(event.request).then(resp => {
+        if (resp && (resp.ok || resp.type === 'opaque')) cache.put(event.request, resp.clone());
+        return resp;
+      }).catch(() => cached || Response.error());
+      return cached || network;
+    })());
+    return;
+  }
+
   if (url.origin !== self.location.origin) return;
 
   const wtBase = self.registration.scope + 'webtorrent/';

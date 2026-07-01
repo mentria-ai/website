@@ -279,7 +279,7 @@
     "radio": {
       "title": "Infinite Radio",
       "lede": "AI-generated epic cinematic music, streaming infinitely. Learns your taste locally — no data leaves your device.",
-      "tldr": "Infinite AI-generated cinematic music streaming in your browser. Tracks come from a public catalog and play via the Web Audio API; your listening history and likes stay on-device in IndexedDB to learn your taste locally over time. No accounts, no tracking, no server-side personalization — pure client-side."
+      "tldr": "Infinite AI-generated cinematic music streaming in your browser. Tracks come from a public catalog and play through the browser's native HTML5 audio element (crossfaded between two players); your listening history and likes stay on-device in IndexedDB to learn your taste locally over time. No accounts, no tracking, no server-side personalization — pure client-side."
     },
     "tetris": {
       "title": "Tetris",
@@ -733,7 +733,9 @@
       "err_load_catalog": "Failed to load catalog",
       "err_load_track": "Failed to load track",
       "track_count_format": "{n} tracks",
-      "untitled": "Untitled"
+      "untitled": "Untitled",
+      "progress_aria": "Playback position",
+      "retry": "Retry"
     },
     "ai-chat": {
       "tldr_heading": "What is AI Chat?",

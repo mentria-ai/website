@@ -54,6 +54,7 @@ class MentriaRadio {
       title: document.getElementById("rd-title"),
       mood: document.getElementById("rd-mood"),
       art: document.getElementById("rd-art"),
+      progress: document.getElementById("rd-progress"),
       progressFill: document.getElementById("rd-progress-fill"),
       elapsed: document.getElementById("rd-elapsed"),
       duration: document.getElementById("rd-duration"),
@@ -62,14 +63,20 @@ class MentriaRadio {
       like: document.getElementById("rd-like"),
       volume: document.getElementById("rd-volume"),
       nextTitle: document.getElementById("rd-next-title"),
+      retry: document.getElementById("rd-retry"),
     };
   }
 
   // ── Init ──────────────────────────────────────────
 
   async init() {
-    this.setStatus("loading", COPY.loadingCatalog);
     this.bindUI();
+    await this.loadCatalogAndInit();
+  }
+
+  async loadCatalogAndInit() {
+    this.setStatus("loading", COPY.loadingCatalog);
+    if (this.el.retry) this.el.retry.hidden = true;
 
     try {
       this.catalog = await loadCatalog();
@@ -80,7 +87,38 @@ class MentriaRadio {
     } catch (err) {
       console.error("[radio] init failed:", err);
       this.setStatus("error", COPY.errLoadCatalog);
+      if (this.el.retry) this.el.retry.hidden = false;
     }
+  }
+
+  // ── Transport ─────────────────────────────────────
+
+  syncTransport(playing) {
+    this.el.play.innerHTML = playing ? PAUSE_SVG : PLAY_SVG;
+    this.el.play.classList.toggle("playing", playing);
+    if ("mediaSession" in navigator) {
+      try {
+        navigator.mediaSession.playbackState = playing ? "playing" : "paused";
+      } catch (_) {}
+    }
+  }
+
+  pausePlayback() {
+    if (!this.player.isPlaying) return;
+    this.player.pause();
+    this.syncTransport(false);
+    this.setStatus("ready", COPY.paused);
+    if (this.progressTimer) clearInterval(this.progressTimer);
+    if (this.crossfadeTimer) clearTimeout(this.crossfadeTimer);
+  }
+
+  resumePlayback() {
+    if (!this.currentTrack || this.player.isPlaying) return;
+    this.player.resume();
+    this.syncTransport(true);
+    this.setStatus("playing", COPY.playing);
+    this.startProgressTimer();
+    this.scheduleCrossfade();
   }
 
   // ── Playback ──────────────────────────────────────
@@ -119,8 +157,7 @@ class MentriaRadio {
       this.scheduleCrossfade();
 
       this.setStatus("playing", COPY.playing);
-      this.el.play.innerHTML = PAUSE_SVG;
-      this.el.play.classList.add("playing");
+      this.syncTransport(true);
       this.el.play.disabled = false;
       this.el.skip.disabled = false;
       this.el.like.disabled = false;
@@ -139,8 +176,7 @@ class MentriaRadio {
         if (next) return this.loadAndPlay(next, failedIds);
       }
       this.setStatus("error", COPY.errLoadTrack);
-      this.el.play.innerHTML = PLAY_SVG;
-      this.el.play.classList.remove("playing");
+      this.syncTransport(false);
       this.el.play.disabled = false;
       this.el.skip.disabled = false;
     }
@@ -164,6 +200,7 @@ class MentriaRadio {
       this.startProgressTimer();
       this.scheduleCrossfade();
       this.setStatus("playing", COPY.playing);
+      this.syncTransport(true);
       this.prepareNext();
     } else {
       await this.play();
@@ -218,6 +255,7 @@ class MentriaRadio {
       this.startProgressTimer();
       this.scheduleCrossfade();
       this.setStatus("playing", COPY.playing);
+      this.syncTransport(true);
       this.prepareNext();
     } else {
       await this.play();
@@ -233,6 +271,7 @@ class MentriaRadio {
     const updated = await updatePreference(trackId, { liked: isLiked });
     this.preferences[trackId] = updated;
     this.el.like.classList.toggle("liked", isLiked);
+    this.el.like.setAttribute("aria-pressed", isLiked ? "true" : "false");
   }
 
   async recordEnd(skipped) {
@@ -283,6 +322,15 @@ class MentriaRadio {
 
       this.el.progressFill.style.width = `${pct}%`;
       this.el.elapsed.textContent = formatTime(elapsed);
+      if (this.el.progress) this.el.progress.setAttribute("aria-valuenow", Math.round(pct));
+      if ("mediaSession" in navigator && "setPositionState" in navigator.mediaSession && this.currentDuration > 0) {
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: this.currentDuration,
+            position: Math.min(elapsed, this.currentDuration),
+          });
+        } catch (_) {}
+      }
     }, 250);
   }
 
@@ -296,6 +344,7 @@ class MentriaRadio {
     this.el.duration.textContent = formatTime(this.currentDuration);
     this.el.elapsed.textContent = "0:00";
     this.el.progressFill.style.width = "0%";
+    if (this.el.progress) this.el.progress.setAttribute("aria-valuenow", "0");
 
     // Album art
     const artFile = this.currentTrack.art;
@@ -317,13 +366,24 @@ class MentriaRadio {
           { src: artUrl, sizes: "512x512", type: "image/jpeg" },
         ] : [],
       });
-      navigator.mediaSession.setActionHandler("play", () => this.player.resume());
-      navigator.mediaSession.setActionHandler("pause", () => this.player.pause());
-      navigator.mediaSession.setActionHandler("nexttrack", () => this.skip());
+      const setHandler = (action, fn) => {
+        try { navigator.mediaSession.setActionHandler(action, fn); } catch (_) {}
+      };
+      setHandler("play", () => this.resumePlayback());
+      setHandler("pause", () => this.pausePlayback());
+      setHandler("nexttrack", () => this.skip());
+      try {
+        navigator.mediaSession.playbackState = this.player.isPlaying ? "playing" : "paused";
+        if ("setPositionState" in navigator.mediaSession && this.currentDuration > 0) {
+          navigator.mediaSession.setPositionState({ duration: this.currentDuration, position: 0 });
+        }
+      } catch (_) {}
     }
 
     const pref = this.preferences[this.currentTrack.id];
-    this.el.like.classList.toggle("liked", !!(pref && pref.liked));
+    const liked = !!(pref && pref.liked);
+    this.el.like.classList.toggle("liked", liked);
+    this.el.like.setAttribute("aria-pressed", liked ? "true" : "false");
   }
 
   setStatus(state, text) {
@@ -339,24 +399,17 @@ class MentriaRadio {
       if (!this.currentTrack) {
         this.play();
       } else if (this.player.isPlaying) {
-        this.player.pause();
-        this.el.play.innerHTML = PLAY_SVG;
-        this.el.play.classList.remove("playing");
-        this.setStatus("ready", COPY.paused);
-        if (this.progressTimer) clearInterval(this.progressTimer);
-        if (this.crossfadeTimer) clearTimeout(this.crossfadeTimer);
+        this.pausePlayback();
       } else {
-        this.player.resume();
-        this.el.play.innerHTML = PAUSE_SVG;
-        this.el.play.classList.add("playing");
-        this.setStatus("playing", COPY.playing);
-        this.startProgressTimer();
-        this.scheduleCrossfade();
+        this.resumePlayback();
       }
     });
 
     this.el.skip.addEventListener("click", () => this.skip());
     this.el.like.addEventListener("click", () => this.toggleLike());
+    if (this.el.retry) {
+      this.el.retry.addEventListener("click", () => this.loadCatalogAndInit());
+    }
 
     this.el.volume.addEventListener("input", () => {
       this.player.setVolume(this.el.volume.value / 100);

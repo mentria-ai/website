@@ -20,7 +20,7 @@ eleventyComputed:
 {% set terminalTitle = "totp.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="totp" id="totp">
-  <div class="totp-status" id="totp-status" hidden></div>
+  <div class="totp-status" id="totp-status" role="status" aria-live="polite"></div>
 
   <div class="totp-locked" id="totp-locked" hidden>
     <h2 class="totp-locked__h">{{ "tool.totp.locked_title" | t }}</h2>
@@ -35,7 +35,7 @@ eleventyComputed:
         <span>{{ "tool.totp.pass_confirm" | t }}</span>
         <input type="password" id="totp-setup-pass2" autocomplete="new-password" minlength="8">
       </label>
-      <div class="totp-strength" id="totp-setup-strength"></div>
+      <div class="totp-strength" id="totp-setup-strength" aria-live="polite"></div>
       <button type="button" class="totp-btn" id="totp-setup-btn">{{ "tool.totp.setup_button" | t }}</button>
     </div>
 
@@ -117,6 +117,7 @@ eleventyComputed:
 <style>
   .totp { display: flex; flex-direction: column; gap: 18px; padding: 8px 0; }
   .totp-status { font-family: var(--font-mono); font-size: 12px; padding: 10px 14px; border-radius: 6px; }
+  .totp-status:empty { padding: 0; }
   .totp-status[data-tone="err"] { background: rgba(242,95,168,0.12); border: 1px solid var(--syn-pink, #f25fa8); color: var(--syn-pink, #f25fa8); }
   .totp-status[data-tone="ok"]  { background: rgba(110,243,197,0.10); border: 1px solid var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); }
 
@@ -411,11 +412,9 @@ eleventyComputed:
 
   function setStatus(msg, tone) {
     const el = $('totp-status');
-    if (!msg) { el.hidden = true; return; }
-    el.hidden = false;
-    el.textContent = msg;
+    el.textContent = msg || '';
     if (tone) el.dataset.tone = tone; else delete el.dataset.tone;
-    if (tone === 'ok') setTimeout(() => { if (el.textContent === msg) { el.hidden = true; } }, 2500);
+    if (tone === 'ok') setTimeout(() => { if (el.textContent === msg) { el.textContent = ''; delete el.dataset.tone; } }, 2500);
   }
 
   function showLocked() {
@@ -502,43 +501,48 @@ eleventyComputed:
       const row = rows[i];
       const acc = state.accounts.find((a) => a.id === row.dataset.id);
       if (!acc) continue;
-      const secretBytes = b64uDec(acc.secret);
-      const period = acc.period || 30;
-      const digits = acc.digits || 6;
-      const algorithm = acc.algorithm || 'SHA1';
-      const code = await totpCode(secretBytes, { period, digits, algorithm });
-      const nextCode = await totpCode(secretBytes, { period, digits, algorithm, offset: 1 });
-      const codeFmt = fmtCode(code);
-      const nextFmt = fmtCode(nextCode);
+      try {
+        const secretBytes = b64uDec(acc.secret);
+        const period = acc.period || 30;
+        const digits = acc.digits || 6;
+        const algorithm = acc.algorithm || 'SHA1';
+        const code = await totpCode(secretBytes, { period, digits, algorithm });
+        const nextCode = await totpCode(secretBytes, { period, digits, algorithm, offset: 1 });
+        const codeFmt = fmtCode(code);
+        const nextFmt = fmtCode(nextCode);
 
-      const codeEl = row.querySelector('.totp-row__code');
-      const nextEl = row.querySelector('.totp-row__next');
-      const nextValueEl = row.querySelector('.totp-row__next-value');
+        const codeEl = row.querySelector('.totp-row__code');
+        const nextEl = row.querySelector('.totp-row__next');
+        const nextValueEl = row.querySelector('.totp-row__next-value');
+        codeEl.dataset.code = code;
 
-      const prev = lastCodes.get(acc.id);
-      const isFirstRender = !prev;
-      const currentRotated = prev && prev.current !== code;
+        const prev = lastCodes.get(acc.id);
+        const isFirstRender = !prev;
+        const currentRotated = prev && prev.current !== code;
 
-      if (isFirstRender) {
-        if (!codeEl.classList.contains('is-copied')) codeEl.textContent = codeFmt;
-        nextValueEl.textContent = nextFmt;
-      } else if (currentRotated) {
-        if (!codeEl.classList.contains('is-copied')) flipUpdate(codeEl, codeFmt);
-        flipUpdate(nextValueEl, nextFmt);
-      } else {
-        if (!codeEl.classList.contains('is-copied') && codeEl.textContent !== codeFmt) codeEl.textContent = codeFmt;
-        if (nextValueEl.textContent !== nextFmt) nextValueEl.textContent = nextFmt;
+        if (isFirstRender) {
+          if (!codeEl.classList.contains('is-copied')) codeEl.textContent = codeFmt;
+          nextValueEl.textContent = nextFmt;
+        } else if (currentRotated) {
+          if (!codeEl.classList.contains('is-copied')) flipUpdate(codeEl, codeFmt);
+          flipUpdate(nextValueEl, nextFmt);
+        } else {
+          if (!codeEl.classList.contains('is-copied') && codeEl.textContent !== codeFmt) codeEl.textContent = codeFmt;
+          if (nextValueEl.textContent !== nextFmt) nextValueEl.textContent = nextFmt;
+        }
+        lastCodes.set(acc.id, { current: code, next: nextCode });
+
+        const remaining = period - (Math.floor(Date.now() / 1000) % period);
+        const ring = row.querySelector('.totp-row__ring');
+        const fg = ring.querySelector('.fg');
+        const circumference = 2 * Math.PI * 14;
+        fg.setAttribute('stroke-dashoffset', String(circumference * (1 - remaining / period)));
+        const isWarning = remaining <= 5;
+        ring.classList.toggle('warning', isWarning);
+        nextEl.classList.toggle('is-warning', isWarning);
+      } catch (_) {
+        continue;
       }
-      lastCodes.set(acc.id, { current: code, next: nextCode });
-
-      const remaining = period - (Math.floor(Date.now() / 1000) % period);
-      const ring = row.querySelector('.totp-row__ring');
-      const fg = ring.querySelector('.fg');
-      const circumference = 2 * Math.PI * 14;
-      fg.setAttribute('stroke-dashoffset', String(circumference * (1 - remaining / period)));
-      const isWarning = remaining <= 5;
-      ring.classList.toggle('warning', isWarning);
-      nextEl.classList.toggle('is-warning', isWarning);
     }
   }
 
@@ -727,6 +731,11 @@ eleventyComputed:
 
   $('totp-scan-cancel-btn').addEventListener('click', () => { stopScanner(); });
 
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && scanner.scanning) stopScanner();
+  });
+  window.addEventListener('pagehide', () => { stopScanner(); });
+
   $('totp-setup-pass').addEventListener('input', () => {
     const s = scorePass($('totp-setup-pass').value);
     const el = $('totp-setup-strength');
@@ -830,6 +839,7 @@ eleventyComputed:
     let secretBytes;
     try { secretBytes = b32Dec(parsed.secret_b32); }
     catch (_) { setStatus(COPY.add_invalid_secret, 'err'); return; }
+    if (!secretBytes.length) { setStatus(COPY.add_invalid_secret, 'err'); return; }
 
     const account = {
       id: uuid(),
@@ -901,7 +911,7 @@ eleventyComputed:
     const row = e.target.closest('.totp-row');
     if (!row) return;
     if (e.target.matches('[data-copy]')) {
-      const code = e.target.textContent.replace(/\s/g, '');
+      const code = (e.target.dataset.code || e.target.textContent).replace(/\s/g, '');
       try { await navigator.clipboard.writeText(code); } catch (_) {}
       e.target.classList.add('is-copied');
       e.target.textContent = COPY.copied;

@@ -255,7 +255,7 @@
     "quick-notes": {
       "title": "Notes Rapides",
       "lede": "Un bloc-notes minimaliste qui vit dans votre navigateur. Créez plusieurs notes, sauvegardées à chaque frappe.",
-      "tldr": "Un bloc-notes pensé clavier qui auto-enregistre chaque frappe dans le localStorage du navigateur. Notes multiples, recherche instantanée, esthétique synthwave sombre. Tes notes ne quittent jamais ton appareil — pas de synchro, pas de comptes, pas de serveur. À utiliser comme brouillon pour tâches, snippets ou pensées à reprendre dans un onglet."
+      "tldr": "Un bloc-notes pensé clavier qui auto-enregistre chaque frappe dans le localStorage du navigateur. Notes multiples, esthétique synthwave sombre. Tes notes ne quittent jamais ton appareil — pas de synchro, pas de comptes, pas de serveur. À utiliser comme brouillon pour tâches, snippets ou pensées à reprendre dans un onglet."
     },
     "model": {
       "checking": "Vérification de votre appareil…",
@@ -487,7 +487,8 @@
       "confirm_remove_lock": "Retirer le chiffrement de cette note ? Elle sera de nouveau enregistrée en texte clair.",
       "lock_failed": "Impossible de verrouiller la note — la clé d'accès de l'appareil n'était pas disponible.",
       "unlock_failed": "Impossible de déverrouiller la note — la clé d'accès ne correspondait pas ou n'était pas disponible.",
-      "prf_unsupported": "Ce navigateur ou cet appareil ne peut pas utiliser de clé d'accès pour le chiffrement. Essaie une version récente de Chrome, Edge ou Safari."
+      "prf_unsupported": "Ce navigateur ou cet appareil ne peut pas utiliser de clé d'accès pour le chiffrement. Essaie une version récente de Chrome, Edge ou Safari.",
+      "count_summary": "{words} mots · {chars} caractères"
     },
     "color-picker": {
       "title_pick_color": "Cliquez pour choisir une couleur",

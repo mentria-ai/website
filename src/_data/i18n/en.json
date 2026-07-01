@@ -255,7 +255,7 @@
     "quick-notes": {
       "title": "Quick Notes",
       "lede": "A minimal scratchpad that lives in your browser. Create multiple notes, auto-saved on every keystroke.",
-      "tldr": "A keyboard-first notepad that auto-saves every keystroke to your browser's localStorage. Multiple notes, instant search, dark synthwave aesthetic. Notes never leave your device — no sync, no accounts, no server. Use it as a scratchpad for tasks, snippets, or thoughts you will come back to in a tab."
+      "tldr": "A keyboard-first notepad that auto-saves every keystroke to your browser's localStorage. Multiple notes, dark synthwave aesthetic. Notes never leave your device — no sync, no accounts, no server. Use it as a scratchpad for tasks, snippets, or thoughts you will come back to in a tab."
     },
     "model": {
       "checking": "Checking your device…",
@@ -487,7 +487,8 @@
       "confirm_remove_lock": "Remove encryption from this note? It will be stored as plain text again.",
       "lock_failed": "Couldn't lock the note — the device passkey was unavailable.",
       "unlock_failed": "Couldn't unlock the note — the passkey didn't match or was unavailable.",
-      "prf_unsupported": "This browser or device can't use a passkey for encryption. Try a recent version of Chrome, Edge, or Safari."
+      "prf_unsupported": "This browser or device can't use a passkey for encryption. Try a recent version of Chrome, Edge, or Safari.",
+      "count_summary": "{words} words · {chars} chars"
     },
     "color-picker": {
       "title_pick_color": "Click to pick a color",

@@ -255,7 +255,7 @@
     "quick-notes": {
       "title": "Notas Rápidas",
       "lede": "Una libreta mínima que vive en tu navegador. Crea múltiples notas, guardadas automáticamente en cada pulsación.",
-      "tldr": "Un bloc de notas centrado en el teclado que autoguarda cada pulsación en el localStorage del navegador. Múltiples notas, búsqueda instantánea, estética synthwave oscura. Las notas nunca salen de tu dispositivo — sin sincronización, sin cuentas, sin servidor. Úsalo como cuaderno para tareas, fragmentos o ideas a las que volver en una pestaña."
+      "tldr": "Un bloc de notas centrado en el teclado que autoguarda cada pulsación en el localStorage del navegador. Múltiples notas, estética synthwave oscura. Las notas nunca salen de tu dispositivo — sin sincronización, sin cuentas, sin servidor. Úsalo como cuaderno para tareas, fragmentos o ideas a las que volver en una pestaña."
     },
     "model": {
       "checking": "Comprobando tu dispositivo…",
@@ -487,7 +487,8 @@
       "confirm_remove_lock": "¿Quitar el cifrado de esta nota? Se guardará de nuevo como texto sin formato.",
       "lock_failed": "No se pudo bloquear la nota: la llave de acceso del dispositivo no estaba disponible.",
       "unlock_failed": "No se pudo desbloquear la nota: la llave de acceso no coincidió o no estaba disponible.",
-      "prf_unsupported": "Este navegador o dispositivo no puede usar una llave de acceso para cifrar. Prueba una versión reciente de Chrome, Edge o Safari."
+      "prf_unsupported": "Este navegador o dispositivo no puede usar una llave de acceso para cifrar. Prueba una versión reciente de Chrome, Edge o Safari.",
+      "count_summary": "{words} palabras · {chars} caracteres"
     },
     "color-picker": {
       "title_pick_color": "Haz clic para elegir un color",

@@ -38,7 +38,7 @@ eleventyComputed:
   </aside>
 
   <!-- Editor -->
-  <main class="qn-editor" id="qn-editor">
+  <div class="qn-editor" id="qn-editor">
     <div class="qn-editor__titlebar">
       <input
         type="text"
@@ -71,10 +71,10 @@ eleventyComputed:
       <button class="qn-unlock-btn" id="qn-unlock-btn">{{ "tool.quick-notes.unlock_btn" | t }}</button>
     </div>
     <div class="qn-editor__statusbar">
-      <span class="qn-status__counts" id="qn-counts">0 words &middot; 0 chars</span>
+      <span class="qn-status__counts" id="qn-counts">{{ ('tool.quick-notes.count_summary' | t) | replace('{words}', '0') | replace('{chars}', '0') }}</span>
       <span class="qn-status__saved" id="qn-saved"></span>
     </div>
-  </main>
+  </div>
 </section>
 {% include "terminal-frame-close.njk" %}
 
@@ -93,7 +93,8 @@ eleventyComputed:
     confirmRemoveLock: {{ ("tool.quick-notes.confirm_remove_lock" | t) | dump | safe }},
     lockFailed:        {{ ("tool.quick-notes.lock_failed"        | t) | dump | safe }},
     unlockFailed:      {{ ("tool.quick-notes.unlock_failed"      | t) | dump | safe }},
-    prfUnsupported:    {{ ("tool.quick-notes.prf_unsupported"    | t) | dump | safe }}
+    prfUnsupported:    {{ ("tool.quick-notes.prf_unsupported"    | t) | dump | safe }},
+    countSummary:      {{ ("tool.quick-notes.count_summary"      | t) | dump | safe }}
   };
 
   const STORAGE_KEY = 'mentria-quick-notes';
@@ -418,11 +419,27 @@ eleventyComputed:
   }
 
   /* ── Counts ────────────────────────────────────────── */
+  const wordSegmenter = (() => {
+    try { return new Intl.Segmenter(document.documentElement.lang || undefined, { granularity: 'word' }); }
+    catch (_) { return null; }
+  })();
+
+  function countWords(text) {
+    const t = text.trim();
+    if (t === '') return 0;
+    if (wordSegmenter) {
+      let n = 0;
+      for (const seg of wordSegmenter.segment(t)) if (seg.isWordLike) n++;
+      return n;
+    }
+    return t.split(/\s+/).length;
+  }
+
   function updateCounts() {
     const text = textarea.value;
     const chars = text.length;
-    const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-    countsEl.textContent = words + ' word' + (words !== 1 ? 's' : '') + ' \u00B7 ' + chars + ' char' + (chars !== 1 ? 's' : '');
+    const words = countWords(text);
+    countsEl.textContent = COPY.countSummary.replace('{words}', words).replace('{chars}', chars);
   }
 
   /* ── Saved label ───────────────────────────────────── */
@@ -439,7 +456,8 @@ eleventyComputed:
   function exportNote() {
     const note = getNote(activeId);
     if (!note) return;
-    const filename = (note.title || 'untitled') .replace(/[^a-z0-9_\-]/gi, '_') + '.txt';
+    const title = titleInput.value.trim() || COPY.untitled;
+    const filename = title.replace(/[\/\\:*?"<>|\s]/g, '_') + '.txt';
     const blob = new Blob([textarea.value], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -455,7 +473,7 @@ eleventyComputed:
     const note = getNote(activeId);
     if (!note || !textarea.value) return;
     try {
-      await navigator.share({ title: note.title || COPY.untitled, text: textarea.value });
+      await navigator.share({ title: titleInput.value.trim() || COPY.untitled, text: textarea.value });
     } catch (_) { /* dismissed */ }
   }
 
@@ -961,13 +979,4 @@ eleventyComputed:
   }
 }
 
-/* ── Light theme override ─────────────────────────── */
-@media (prefers-color-scheme: light) {
-  .qn-tool {
-    background: #1a1a1a;
-  }
-  .qn-editor__textarea {
-    background: #141414;
-  }
-}
 </style>

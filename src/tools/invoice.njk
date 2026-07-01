@@ -48,14 +48,14 @@ eleventyComputed:
     <div class="iv__parties">
       <div class="iv__section">
         <div class="iv__section-title">{{ "tool.invoice.section_from" | t }}</div>
-        <input class="iv__input iv__input--heavy" type="text" id="nameInp" placeholder="{{ 'tool.invoice.ph_name' | t }}" value="John Doe">
+        <input class="iv__input iv__input--heavy" type="text" id="nameInp" autocomplete="name" placeholder="{{ 'tool.invoice.ph_name' | t }}" value="John Doe">
         <label class="iv__label" for="addr1Inp">{{ "tool.invoice.lbl_address" | t }}</label>
-        <input class="iv__input" type="text" id="addr1Inp" placeholder="{{ 'tool.invoice.ph_addr1' | t }}">
-        <input class="iv__input" type="text" id="addr2Inp" placeholder="{{ 'tool.invoice.ph_addr2' | t }}">
+        <input class="iv__input" type="text" id="addr1Inp" autocomplete="address-line1" placeholder="{{ 'tool.invoice.ph_addr1' | t }}">
+        <input class="iv__input" type="text" id="addr2Inp" autocomplete="address-line2" placeholder="{{ 'tool.invoice.ph_addr2' | t }}">
         <label class="iv__label" for="phoneInp">{{ "tool.invoice.lbl_phone" | t }}</label>
-        <input class="iv__input" type="tel" id="phoneInp" placeholder="{{ 'tool.invoice.ph_phone' | t }}">
+        <input class="iv__input" type="tel" id="phoneInp" autocomplete="tel" placeholder="{{ 'tool.invoice.ph_phone' | t }}">
         <label class="iv__label" for="emailInp">{{ "tool.invoice.lbl_email" | t }}</label>
-        <input class="iv__input" type="email" id="emailInp" placeholder="{{ 'tool.invoice.ph_email' | t }}">
+        <input class="iv__input" type="email" id="emailInp" autocomplete="email" placeholder="{{ 'tool.invoice.ph_email' | t }}">
         <input class="iv__input" type="text" id="extraInp" placeholder="{{ 'tool.invoice.ph_extra' | t }}">
       </div>
 
@@ -97,6 +97,7 @@ eleventyComputed:
       </div>
     </div>
 
+    <div class="iv__table-wrap">
     <table class="iv__table">
       <thead>
         <tr>
@@ -131,6 +132,7 @@ eleventyComputed:
         </tr>
       </tbody>
     </table>
+    </div>
 
     <div class="iv__section iv__notes">
       <div class="iv__section-title">{{ "tool.invoice.section_notes" | t }}</div>
@@ -221,8 +223,14 @@ eleventyComputed:
   };
 
   /* ── Validation / sanitization ─────────────────────── */
+  const DECIMAL_SEP = (() => {
+    try { return (new Intl.NumberFormat(document.documentElement.lang || undefined).formatToParts(1.1).find(p => p.type === 'decimal') || {}).value || '.'; }
+    catch (_) { return '.'; }
+  })();
   const sanitizeDecimalInput = (value) => {
-    let s = value.replace(/[^0-9.]/g, '');
+    let s = String(value);
+    if (DECIMAL_SEP === ',') s = s.replace(/,/g, '.');
+    s = s.replace(/[^0-9.]/g, '');
     const dot = s.indexOf('.');
     if (dot !== -1) {
       s = s.slice(0, dot + 1) + s.slice(dot + 1).replace(/\./g, '');
@@ -236,9 +244,13 @@ eleventyComputed:
     ta.style.height = 'auto';
     ta.style.height = Math.max(ta.scrollHeight, 38.4) + 'px';
   };
+  const localDateStr = () => {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  };
   const setCurrentDateIfEmpty = () => {
     if (!invoiceDateInput.value) {
-      invoiceDateInput.value = new Date().toISOString().split('T')[0];
+      invoiceDateInput.value = localDateStr();
       persist(invoiceDateInput);
     }
   };
@@ -266,7 +278,7 @@ eleventyComputed:
       const row = qtyEl.closest('tr');
       const qty = parseFloat(qtyEl.value);
       const price = parseFloat(row.querySelector('.input-price-cell')?.value);
-      if (!isNaN(qty) && !isNaN(price)) grand += qty * price;
+      if (!isNaN(qty) && !isNaN(price)) grand += roundToTwo(qty * price);
     });
     document.querySelectorAll('.grand-total').forEach(el => {
       el.textContent = fmtMoney(grand);
@@ -277,6 +289,8 @@ eleventyComputed:
   const changeCurrency = () => {
     const c = currencyInput.value;
     document.querySelectorAll('.currency').forEach(el => el.textContent = c);
+    const decl = document.querySelector('.iv__declaration');
+    if (decl) decl.style.display = (c === '₹') ? '' : 'none';
     document.querySelectorAll('.input-qty-cell').forEach(qtyEl => calculateLineTotal(qtyEl.closest('tr')));
     calculateGrandTotal();
   };
@@ -400,7 +414,7 @@ eleventyComputed:
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     const inv  = (document.getElementById('invnoInp')?.value || 'draft').replace(/[^A-Za-z0-9_-]/g, '');
-    const date = invoiceDateInput.value || new Date().toISOString().split('T')[0];
+    const date = invoiceDateInput.value || localDateStr();
     a.href = url;
     a.download = `invoice-${inv || 'draft'}-${date}.json`;
     document.body.appendChild(a); a.click(); a.remove();
@@ -776,6 +790,7 @@ eleventyComputed:
   font-size: 0.8rem;
   table-layout: fixed;
 }
+.iv__table-wrap { overflow-x: auto; }
 .iv__col-desc  { width: 42%; }
 .iv__col-sac   { width: 14%; }
 .iv__col-qty   { width: 11%; }
@@ -954,7 +969,7 @@ td.total .currency {
   .iv__parties, .iv__meta { grid-template-columns: 1fr; }
   .iv__meta-right { text-align: left; }
   .iv__title { font-size: 1.3rem; }
-  .iv__table { font-size: 0.72rem; table-layout: auto; }
+  .iv__table { font-size: 0.72rem; table-layout: auto; min-width: 32rem; }
   .iv__table th, .iv__table td { padding: 0.4rem 0.35rem; }
   .iv__col-desc, .iv__col-sac, .iv__col-qty, .iv__col-price, .iv__col-total { width: auto; }
   .iv__meta-label { min-width: 5.5rem; }
@@ -1083,6 +1098,7 @@ td.total .currency {
   }
 
   /* Table */
+  .iv__table-wrap { overflow-x: visible; }
   .iv__table {
     font-size: 9pt !important;
     page-break-inside: auto;

@@ -157,6 +157,70 @@
     return cache[code];
   }
 
+  var buildTag = null;
+  function i18nBuild() {
+    if (buildTag) return buildTag;
+    buildTag = 'v0';
+    try {
+      var s = document.querySelector('script[src*="mentria-i18n.js"]');
+      if (s && s.src) {
+        var m = s.src.match(/[?&]v=([^&]+)/);
+        if (m) buildTag = decodeURIComponent(m[1]);
+      }
+    } catch (_) {}
+    return buildTag;
+  }
+
+  function shellRoutes(prefix) {
+    var routes = [prefix + '/', prefix + '/tools/', prefix + '/feed/', prefix + '/about/'];
+    var data = window.MENTRIA_PALETTE_DATA;
+    var tools = (data && data.tools) || [];
+    for (var i = 0; i < tools.length; i++) {
+      if (tools[i] && tools[i].slug) routes.push(prefix + '/tools/' + tools[i].slug + '/');
+    }
+    return routes;
+  }
+
+  var shellsBusy = {};
+  function cacheLocaleShells(code) {
+    if (code === 'en' || !('caches' in window)) return Promise.resolve();
+    var loc = byCode(code);
+    if (!loc || !loc.prefix) return Promise.resolve();
+    if (shellsBusy[code]) return shellsBusy[code];
+    var cacheName = 'mentria-locale-' + code + '-' + i18nBuild();
+    var marker = '/__mentria-locale__/' + code;
+    var p = caches.open(cacheName).then(function (shell) {
+      return shell.match(marker).then(function (done) {
+        if (done) return;
+        var chain = Promise.resolve();
+        shellRoutes(loc.prefix).forEach(function (route) {
+          chain = chain.then(function () {
+            return fetch(route).then(function (resp) {
+              if (resp && resp.ok) return shell.put(route, resp.clone());
+            }).catch(function () {});
+          });
+        });
+        return chain
+          .then(function () { return shell.put(marker, new Response('1')); })
+          .then(function () { return caches.keys(); })
+          .then(function (keys) {
+            return Promise.all(keys.map(function (key) {
+              if (key !== cacheName && key.indexOf('mentria-locale-' + code + '-') === 0) return caches.delete(key);
+            }));
+          });
+      });
+    }).catch(function () {}).then(function () { delete shellsBusy[code]; });
+    shellsBusy[code] = p;
+    return p;
+  }
+
+  function scheduleLocaleShells(code) {
+    if (code === 'en' || !('caches' in window)) return;
+    var run = function () { cacheLocaleShells(code); };
+    if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 4000 });
+    else setTimeout(run, 1500);
+  }
+
   var currentCode = (function () {
     var l = document.documentElement.getAttribute('lang');
     return byCode(l) ? l : localeForPath(location.pathname).code;
@@ -176,6 +240,7 @@
       var vt = document.startViewTransition ? document.startViewTransition(run) : null;
       if (!vt) run();
       currentCode = code;
+      scheduleLocaleShells(code);
       try { history.replaceState(history.state, '', urlForLocale(code, location.pathname) + location.search + location.hash); } catch (_) {}
       try { localStorage.setItem(STORE_KEY, code); } catch (_) {}
       if (!opts.fromRemote && bc) { try { bc.postMessage({ type: 'locale', code: code }); } catch (_) {} }
@@ -211,6 +276,9 @@
   window.MentriaI18n = {
     set: function (code) { setLocale(code, {}); },
     locale: function () { return currentCode; },
-    t: function (key) { return activeDict ? lookup(activeDict, key) : null; }
+    t: function (key) { return activeDict ? lookup(activeDict, key) : null; },
+    cacheShells: function (code) { return cacheLocaleShells(code || currentCode); }
   };
+
+  scheduleLocaleShells(currentCode);
 })();

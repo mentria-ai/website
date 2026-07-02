@@ -103,6 +103,7 @@ self.addEventListener('activate', event => {
     await Promise.all(keys.map(key => {
       if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER) return;
       if (key.startsWith('mentria-cache-') || key.startsWith('mentria-models-')) return caches.delete(key);
+      if (key.startsWith('mentria-locale-') && !key.endsWith('-{{ buildHash }}')) return caches.delete(key);
     }));
     if (!keys.includes(MODELS_MARKER)) {
       if (hadOldModels) await caches.delete(MODELS_CACHE);
@@ -228,12 +229,15 @@ self.addEventListener('fetch', event => {
       if (resp && resp.ok) { const copy = resp.clone(); caches.open(MODELS_CACHE).then(c => c.put(event.request, copy)); }
       return resp;
     }
-    const cached = await caches.match(event.request, { ignoreSearch: true });
+    const precache = await caches.open(CACHE_NAME);
+    const cached = await precache.match(event.request, { ignoreSearch: true });
     if (cached) return cached;
     try {
       return await fetch(event.request);
     } catch (err) {
       if (event.request.mode === 'navigate') {
+        const localized = await caches.match(event.request, { ignoreSearch: true });
+        if (localized) return localized;
         const stripped = url.pathname.replace(/^\/(es|fr|ja|pt-br)(\/|$)/, '/');
         if (stripped !== url.pathname) {
           const alt = await caches.match(stripped, { ignoreSearch: true });

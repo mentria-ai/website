@@ -112,7 +112,8 @@
     "identity_mismatch": "Passphrases do not match.",
     "identity_too_short": "Passphrase must be at least 8 characters.",
     "identity_unlock_failed": "Unlock failed — wrong passphrase or corrupt vault.",
-    "identity_setup_reminder": "Identity created. Now go to \"Your data\" above and download an encrypted backup — restoring it on another device gives that device the same identity."
+    "identity_setup_reminder": "Identity created. Now go to \"Your data\" above and download an encrypted backup — restoring it on another device gives that device the same identity.",
+    "sync_confirm_replace": "This device already has data for: {areas}. Pairing will replace it with the other device’s copy — a rescue copy is saved on this device. Continue?"
   },
   "common": {
     "tldr": {

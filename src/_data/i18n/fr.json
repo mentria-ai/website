@@ -112,7 +112,8 @@
     "identity_mismatch": "Les phrases secrètes ne correspondent pas.",
     "identity_too_short": "La phrase secrète doit comporter au moins 8 caractères.",
     "identity_unlock_failed": "Échec du déverrouillage — phrase secrète erronée ou coffre corrompu.",
-    "identity_setup_reminder": "Identité créée. Allez maintenant dans « Vos données » ci-dessus et téléchargez une sauvegarde chiffrée — la restaurer sur un autre appareil lui donne la même identité."
+    "identity_setup_reminder": "Identité créée. Allez maintenant dans « Vos données » ci-dessus et téléchargez une sauvegarde chiffrée — la restaurer sur un autre appareil lui donne la même identité.",
+    "sync_confirm_replace": "Cet appareil contient déjà des données pour : {areas}. Le jumelage les remplacera par la copie de l'autre appareil — une copie de secours est conservée sur cet appareil. Continuer ?"
   },
   "common": {
     "tldr": {

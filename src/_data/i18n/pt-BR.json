@@ -112,7 +112,8 @@
     "identity_mismatch": "As senhas não correspondem.",
     "identity_too_short": "A senha deve ter pelo menos 8 caracteres.",
     "identity_unlock_failed": "Falha ao desbloquear — senha incorreta ou cofre corrompido.",
-    "identity_setup_reminder": "Identidade criada. Agora vá em \"Seus dados\" acima e baixe um backup criptografado — restaurá-lo em outro dispositivo dá a ele a mesma identidade."
+    "identity_setup_reminder": "Identidade criada. Agora vá em \"Seus dados\" acima e baixe um backup criptografado — restaurá-lo em outro dispositivo dá a ele a mesma identidade.",
+    "sync_confirm_replace": "Este dispositivo já tem dados de: {areas}. O pareamento vai substituí-los pela cópia do outro dispositivo — uma cópia de resgate fica salva neste dispositivo. Continuar?"
   },
   "common": {
     "tldr": {

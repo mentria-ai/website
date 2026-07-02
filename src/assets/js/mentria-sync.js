@@ -111,6 +111,8 @@ const getIce = async () => {
   }
 };
 
+const RESCUE_KEY = 'mentria-sync-rescue';
+
 const state = {
   status: 'idle',
   code: null,
@@ -120,6 +122,7 @@ const state = {
   action: null,
   peers: new Set(),
   isInitiator: false,
+  applyApproved: false,
   syncedSinceConnect: 0,
   listeners: { state: [], error: [], synced: [] }
 };
@@ -135,6 +138,41 @@ const setStatus = (status) => {
   emit('state', { status, code: state.code, peers: state.peers.size, syncedSinceConnect: state.syncedSinceConnect });
 };
 
+const CONFIRM_FALLBACK = 'This device already has data for: {areas}. Pairing will replace it with the other device’s copy — a rescue copy is saved on this device. Continue?';
+
+const confirmReplaceText = (areas) => {
+  let s = CONFIRM_FALLBACK;
+  try {
+    const v = window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t('about.sync_confirm_replace');
+    if (v) s = v;
+  } catch (_) {}
+  return s.replace('{areas}', areas);
+};
+
+const collectConflicts = (payload) => {
+  const local = window.MentriaStore.exportAll();
+  const conflicts = [];
+  const store = (payload && payload.store) || {};
+  Object.keys(store).forEach((k) => {
+    if (local.store[k] != null && local.store[k] !== String(store[k])) conflicts.push(k);
+  });
+  const legacy = (payload && payload.legacy) || {};
+  Object.keys(legacy).forEach((k) => {
+    if (local.legacy[k] != null && local.legacy[k] !== String(legacy[k])) conflicts.push(k);
+  });
+  return conflicts;
+};
+
+const saveRescue = () => {
+  try { localStorage.setItem(RESCUE_KEY, JSON.stringify(window.MentriaStore.exportAll())); } catch (_) {}
+};
+
+const restoreRescue = () => {
+  const raw = localStorage.getItem(RESCUE_KEY);
+  if (!raw) return null;
+  return window.MentriaStore.importAll(JSON.parse(raw), { mode: 'replace' });
+};
+
 const handleIncoming = async (payload) => {
   let msg;
   try {
@@ -146,6 +184,18 @@ const handleIncoming = async (payload) => {
   if (!msg || typeof msg !== 'object') return;
   if (msg.op === 'snapshot' && msg.data) {
     try {
+      if (!state.applyApproved) {
+        const conflicts = collectConflicts(msg.data);
+        if (conflicts.length) {
+          const areas = Array.from(new Set(conflicts.map((k) => k.split('.')[0]))).join(', ');
+          const ok = typeof window.mentriaConfirm === 'function'
+            ? await window.mentriaConfirm(confirmReplaceText(areas))
+            : false;
+          if (!ok) { emit('synced', { restored: 0, declined: true }); return; }
+          saveRescue();
+        }
+        state.applyApproved = true;
+      }
       const result = window.MentriaStore.importAll(msg.data, { mode: 'merge' });
       state.syncedSinceConnect += result.restored;
       emit('synced', { restored: result.restored });
@@ -200,6 +250,7 @@ const joinRoomWithCode = async (codeRaw, opts) => {
   state.roomId = derived.roomId;
   state.key = derived.key;
   state.isInitiator = !!opts.initiator;
+  state.applyApproved = false;
   state.syncedSinceConnect = 0;
   state.peers.clear();
 
@@ -286,6 +337,7 @@ const joinWithIdentity = async (secretBytes) => {
   state.roomId = derived.roomId;
   state.key = derived.key;
   state.isInitiator = false;
+  state.applyApproved = false;
   state.syncedSinceConnect = 0;
   state.peers.clear();
   setStatus('pairing');
@@ -327,6 +379,7 @@ const disconnect = async () => {
   state.roomId = null;
   state.key = null;
   state.isInitiator = false;
+  state.applyApproved = false;
   setStatus('idle');
 };
 
@@ -348,5 +401,5 @@ const status = () => ({
 
 window.MentriaSync = {
   start, joinWithCode, joinWithIdentity, disconnect, on, status,
-  formatCode, normalizeCode
+  formatCode, normalizeCode, restoreRescue
 };

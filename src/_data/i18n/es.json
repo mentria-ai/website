@@ -112,7 +112,8 @@
     "identity_mismatch": "Las contraseñas no coinciden.",
     "identity_too_short": "La contraseña debe tener al menos 8 caracteres.",
     "identity_unlock_failed": "Desbloqueo fallido: contraseña incorrecta o bóveda dañada.",
-    "identity_setup_reminder": "Identidad creada. Ahora ve a «Tus datos» arriba y descarga una copia cifrada — restaurarla en otro dispositivo le da la misma identidad."
+    "identity_setup_reminder": "Identidad creada. Ahora ve a «Tus datos» arriba y descarga una copia cifrada — restaurarla en otro dispositivo le da la misma identidad.",
+    "sync_confirm_replace": "Este dispositivo ya tiene datos de: {areas}. La vinculación los reemplazará con la copia del otro dispositivo — se guarda una copia de rescate en este dispositivo. ¿Continuar?"
   },
   "common": {
     "tldr": {

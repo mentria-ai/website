@@ -54,8 +54,8 @@ eleventyComputed:
     <p class="sc__hint" id="sc-hint" hidden>{{ "tool.step-counter.screen_hint" | t }}</p>
 
     <div class="sc__controls">
-      <button class="sc__btn sc__btn--primary" id="sc-toggle">{{ "tool.step-counter.btn_start" | t }}</button>
-      <button class="sc__btn sc__btn--ghost" id="sc-settings-btn" popovertarget="sc-settings">{{ "tool.step-counter.settings" | t }}</button>
+      <button class="sc__btn m-btn m-btn--primary m-btn--pill" id="sc-toggle">{{ "tool.step-counter.btn_start" | t }}</button>
+      <button class="sc__btn m-btn m-btn--ghost m-btn--pill" id="sc-settings-btn" popovertarget="sc-settings">{{ "tool.step-counter.settings" | t }}</button>
     </div>
 
     <div class="sc__history">
@@ -67,7 +67,7 @@ eleventyComputed:
   <div class="sc__panel" id="sc-perm" hidden>
     <h2 class="sc__panel-title">{{ "tool.step-counter.perm_title" | t }}</h2>
     <p class="sc__panel-body">{{ "tool.step-counter.perm_body" | t }}</p>
-    <button class="sc__btn sc__btn--primary" id="sc-perm-btn">{{ "tool.step-counter.perm_btn" | t }}</button>
+    <button class="sc__btn m-btn m-btn--primary m-btn--pill" id="sc-perm-btn">{{ "tool.step-counter.perm_btn" | t }}</button>
   </div>
 
   <div class="sc__panel" id="sc-denied" hidden>
@@ -86,23 +86,23 @@ eleventyComputed:
   </div>
 
   <div id="sc-settings" popover class="sc__settings">
-    <div class="sc__field">
+    <div class="m-field">
       <label for="sc-goal">{{ "tool.step-counter.goal_label" | t }}</label>
-      <input type="number" id="sc-goal" min="1000" max="100000" step="500" inputmode="numeric">
+      <input class="m-input" type="number" id="sc-goal" min="1000" max="100000" step="500" inputmode="numeric">
     </div>
-    <div class="sc__field">
+    <div class="m-field">
       <label for="sc-stride">{{ "tool.step-counter.stride_label" | t }}</label>
-      <input type="number" id="sc-stride" min="40" max="120" step="1" inputmode="numeric">
+      <input class="m-input" type="number" id="sc-stride" min="40" max="120" step="1" inputmode="numeric">
     </div>
-    <div class="sc__field">
+    <div class="m-field">
       <label>{{ "tool.step-counter.sensitivity_label" | t }}</label>
-      <div class="sc__seg" id="sc-sens">
-        <button data-sens="low">{{ "tool.step-counter.sens_low" | t }}</button>
-        <button data-sens="med">{{ "tool.step-counter.sens_med" | t }}</button>
-        <button data-sens="high">{{ "tool.step-counter.sens_high" | t }}</button>
+      <div class="m-seg" id="sc-sens">
+        <button data-sens="low" data-value="low">{{ "tool.step-counter.sens_low" | t }}</button>
+        <button data-sens="med" data-value="med">{{ "tool.step-counter.sens_med" | t }}</button>
+        <button data-sens="high" data-value="high">{{ "tool.step-counter.sens_high" | t }}</button>
       </div>
     </div>
-    <button class="sc__btn sc__btn--danger" id="sc-reset">{{ "tool.step-counter.reset_today" | t }}</button>
+    <button class="sc__btn m-btn m-btn--danger sc__btn--danger" id="sc-reset">{{ "tool.step-counter.reset_today" | t }}</button>
   </div>
 
 </section>
@@ -258,8 +258,7 @@ eleventyComputed:
   function renderSettings() {
     goalInput.value = state.goal;
     strideInput.value = state.stride;
-    Array.from(sensSeg.children).forEach(b =>
-      b.classList.toggle('is-active', b.dataset.sens === state.sensitivity));
+    sensSegCtl.set(state.sensitivity);
   }
 
   function updateSession() {
@@ -400,10 +399,8 @@ eleventyComputed:
     const v = parseInt(strideInput.value, 10);
     if (v >= 40 && v <= 120) { state.stride = v; persist(); renderCount(); }
   });
-  sensSeg.addEventListener('click', e => {
-    const btn = e.target.closest('[data-sens]');
-    if (!btn) return;
-    state.sensitivity = btn.dataset.sens;
+  const sensSegCtl = MentriaUI.segmented(sensSeg, value => {
+    state.sensitivity = value;
     persist();
     renderSettings();
   });
@@ -435,17 +432,17 @@ eleventyComputed:
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-5);
   font-family: var(--font-mono);
   max-width: 480px;
   margin: 0 auto;
-  padding: 0.5rem 0 1rem;
+  padding: var(--space-2) 0 var(--space-4);
 }
 .sc__tracker {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-5);
   width: 100%;
 }
 .sc__tracker[hidden] { display: none; }
@@ -506,14 +503,14 @@ eleventyComputed:
 .sc__stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
+  gap: var(--space-2);
   width: 100%;
 }
 .sc__stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
   padding: 0.7rem 0.5rem;
   border: 1px solid var(--term-border);
   border-radius: 8px;
@@ -540,35 +537,7 @@ eleventyComputed:
 }
 
 .sc__controls { display: flex; gap: 0.6rem; }
-.sc__btn {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 0.6rem 1.5rem;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-}
-.sc__btn--primary {
-  background: var(--syn-cyan);
-  color: #041016;
-  box-shadow: 0 0 12px rgba(34,211,238,0.3);
-}
-.sc__btn--primary:hover { background: #67e8f9; }
-.sc__btn--ghost {
-  background: transparent;
-  border-color: var(--term-border);
-  color: var(--term-muted);
-}
-.sc__btn--ghost:hover { color: var(--term-fg); border-color: rgba(255,255,255,0.2); }
-.sc__btn--danger {
-  background: transparent;
-  border-color: rgba(244,114,182,0.4);
-  color: var(--syn-pink);
-  width: 100%;
-}
-.sc__btn--danger:hover { background: rgba(244,114,182,0.1); }
+.sc__btn--danger { width: 100%; }
 
 .sc__history { width: 100%; }
 .sc__history-label {
@@ -577,7 +546,7 @@ eleventyComputed:
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--term-muted);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 .sc__bars {
   display: grid;
@@ -597,14 +566,14 @@ eleventyComputed:
   display: flex;
   align-items: flex-end;
   background: rgba(255,255,255,0.03);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 .sc__bar-fill {
   width: 100%;
   background: var(--syn-cyan);
   opacity: 0.55;
-  border-radius: 4px 4px 0 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   transition: height 0.3s ease;
 }
 .sc__bar-fill.is-goal { opacity: 1; background: var(--syn-green); }
@@ -617,11 +586,11 @@ eleventyComputed:
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
   text-align: center;
-  padding: 2rem 1.5rem;
+  padding: var(--space-6) var(--space-5);
   border: 1px solid var(--term-border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: rgba(255,255,255,0.015);
   width: 100%;
 }
@@ -644,7 +613,7 @@ eleventyComputed:
   margin: auto;
   padding: 1.25rem;
   border: 1px solid var(--term-border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: var(--term-bg-raised, #111);
   box-shadow: 0 12px 32px rgba(0,0,0,0.5);
   font-family: var(--font-mono);
@@ -655,48 +624,13 @@ eleventyComputed:
 .sc__settings:popover-open {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 .sc__settings::backdrop { background: rgba(0,0,0,0.4); }
-.sc__field { display: flex; flex-direction: column; gap: 0.4rem; }
-.sc__field label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--term-muted);
-}
-.sc__field input {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--term-border);
-  border-radius: 6px;
-  padding: 0.5rem 0.7rem;
-  color: var(--term-fg);
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-}
-.sc__field input:focus { outline: none; border-color: var(--syn-cyan); }
-.sc__seg {
-  display: flex;
-  border: 1px solid var(--term-border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-.sc__seg button {
-  flex: 1;
-  background: transparent;
-  border: none;
-  padding: 0.5rem;
-  color: var(--term-muted);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.sc__seg button.is-active { background: rgba(34,211,238,0.15); color: var(--syn-cyan); }
 
 @media (max-width: 480px) {
   .sc__ring-wrap { width: 200px; height: 200px; }
   .sc__count { font-size: 2.5rem; }
-  .sc__field input { font-size: 16px; }
+  .m-input { font-size: 16px; }
 }
 </style>

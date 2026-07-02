@@ -61,7 +61,7 @@ eleventyComputed:
       <p style="font-size: 11px; color: var(--term-subtle); margin-bottom: 18px">
         <span class="kbd">SPACE</span> / <span class="kbd">click</span> / <span class="kbd">tap</span> {{ "game.flappy.input_hint_prefix" | t }}
       </p>
-      <button class="btn" id="btn-start">$ start</button>
+      <button class="m-btn m-btn--primary" id="btn-start">$ start</button>
     </div>
   </div>
 </div>
@@ -150,18 +150,6 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
 }
 .stats-mini .k { color: var(--term-muted); }
 .stats-mini .v { color: var(--syn-cyan); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  white-space: nowrap;
-  font-family: var(--font-mono); font-weight: 600; font-size: 13px;
-  padding: 10px 20px; border-radius: var(--radius-md); border: 1px solid transparent;
-  cursor: pointer; background: var(--syn-cyan); color: #041016;
-  box-shadow: var(--glow-cyan-soft); transition: all 150ms;
-}
-.btn:hover { background: var(--syn-cyan-soft); box-shadow: var(--glow-cyan); }
 
 .footer-hints {
   display: flex; justify-content: space-between; align-items: center;
@@ -179,7 +167,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
 .toast {
   position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
   padding: 6px 14px; border-radius: var(--radius-pill);
-  background: rgba(34,211,238,0.15); border: 1px solid var(--cyan-30);
+  background: var(--cyan-15); border: 1px solid var(--cyan-30);
   color: var(--syn-cyan); font-family: var(--font-mono); font-size: 11px; font-weight: 600;
   letter-spacing: 0.1em; text-transform: uppercase;
   box-shadow: var(--glow-cyan); z-index: 4; opacity: 0;
@@ -594,7 +582,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
         '<span class="k">{{ "game.flappy.best"          | t }}</span><span class="v">' + State.best + '</span>' +
         '<span class="k">{{ "game.flappy.stats_distance"| t }}</span><span class="v">' + (State.distance/100).toFixed(1) + 'm</span>' +
       '</div>' +
-      '<button class="btn" id="btn-again">$ retry</button>';
+      '<button class="m-btn m-btn--primary" id="btn-again">$ retry</button>';
     State.dying = false;
     ov.classList.remove('hidden');
     document.getElementById('btn-again').onclick = () => reset();

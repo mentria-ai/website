@@ -21,20 +21,20 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 <section class="iv">
   <div class="iv__actions no-print">
-    <button class="iv__btn iv__btn--primary" id="iv-print" title="{{ 'tool.invoice.title_print' | t }}">
+    <button class="m-btn m-btn--primary" id="iv-print" title="{{ 'tool.invoice.title_print' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       {{ "tool.invoice.btn_print" | t }}
     </button>
-    <button class="iv__btn" id="iv-export" title="{{ 'tool.invoice.title_export' | t }}">
+    <button class="m-btn m-btn--ghost" id="iv-export" title="{{ 'tool.invoice.title_export' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       {{ "tool.invoice.btn_export" | t }}
     </button>
-    <label class="iv__btn iv__btn--label" for="iv-file" title="{{ 'tool.invoice.title_import' | t }}">
+    <label class="m-btn m-btn--ghost" for="iv-file" title="{{ 'tool.invoice.title_import' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       {{ "tool.invoice.btn_import" | t }}
       <input type="file" id="iv-file" accept="application/json,.json" hidden>
     </label>
-    <button class="iv__btn iv__btn--danger" id="iv-clear" title="{{ 'tool.invoice.title_clear' | t }}">
+    <button class="m-btn m-btn--danger" id="iv-clear" title="{{ 'tool.invoice.title_clear' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
       {{ "tool.invoice.btn_clear" | t }}
     </button>
@@ -48,25 +48,25 @@ eleventyComputed:
     <div class="iv__parties">
       <div class="iv__section">
         <div class="iv__section-title">{{ "tool.invoice.section_from" | t }}</div>
-        <input class="iv__input iv__input--heavy" type="text" id="nameInp" autocomplete="name" placeholder="{{ 'tool.invoice.ph_name' | t }}" value="John Doe">
+        <input class="iv__input iv__input--heavy m-input" type="text" id="nameInp" autocomplete="name" placeholder="{{ 'tool.invoice.ph_name' | t }}" value="John Doe">
         <label class="iv__label" for="addr1Inp">{{ "tool.invoice.lbl_address" | t }}</label>
-        <input class="iv__input" type="text" id="addr1Inp" autocomplete="address-line1" placeholder="{{ 'tool.invoice.ph_addr1' | t }}">
-        <input class="iv__input" type="text" id="addr2Inp" autocomplete="address-line2" placeholder="{{ 'tool.invoice.ph_addr2' | t }}">
+        <input class="iv__input m-input" type="text" id="addr1Inp" autocomplete="address-line1" placeholder="{{ 'tool.invoice.ph_addr1' | t }}">
+        <input class="iv__input m-input" type="text" id="addr2Inp" autocomplete="address-line2" placeholder="{{ 'tool.invoice.ph_addr2' | t }}">
         <label class="iv__label" for="phoneInp">{{ "tool.invoice.lbl_phone" | t }}</label>
-        <input class="iv__input" type="tel" id="phoneInp" autocomplete="tel" placeholder="{{ 'tool.invoice.ph_phone' | t }}">
+        <input class="iv__input m-input" type="tel" id="phoneInp" autocomplete="tel" placeholder="{{ 'tool.invoice.ph_phone' | t }}">
         <label class="iv__label" for="emailInp">{{ "tool.invoice.lbl_email" | t }}</label>
-        <input class="iv__input" type="email" id="emailInp" autocomplete="email" placeholder="{{ 'tool.invoice.ph_email' | t }}">
-        <input class="iv__input" type="text" id="extraInp" placeholder="{{ 'tool.invoice.ph_extra' | t }}">
+        <input class="iv__input m-input" type="email" id="emailInp" autocomplete="email" placeholder="{{ 'tool.invoice.ph_email' | t }}">
+        <input class="iv__input m-input" type="text" id="extraInp" placeholder="{{ 'tool.invoice.ph_extra' | t }}">
       </div>
 
       <div class="iv__section">
         <div class="iv__section-title">{{ "tool.invoice.section_bill_to" | t }}</div>
-        <input class="iv__input iv__input--heavy" type="text" id="companyNameInp" placeholder="{{ 'tool.invoice.ph_company' | t }}">
-        <input class="iv__input" type="text" id="companyStreetInp" placeholder="{{ 'tool.invoice.ph_street' | t }}">
-        <input class="iv__input" type="text" id="companyCityInp" placeholder="{{ 'tool.invoice.ph_city' | t }}">
-        <input class="iv__input" type="text" id="companyCountryInp" placeholder="{{ 'tool.invoice.ph_country' | t }}">
+        <input class="iv__input iv__input--heavy m-input" type="text" id="companyNameInp" placeholder="{{ 'tool.invoice.ph_company' | t }}">
+        <input class="iv__input m-input" type="text" id="companyStreetInp" placeholder="{{ 'tool.invoice.ph_street' | t }}">
+        <input class="iv__input m-input" type="text" id="companyCityInp" placeholder="{{ 'tool.invoice.ph_city' | t }}">
+        <input class="iv__input m-input" type="text" id="companyCountryInp" placeholder="{{ 'tool.invoice.ph_country' | t }}">
         <label class="iv__label" for="companyVatInp">{{ "tool.invoice.lbl_vat" | t }}</label>
-        <input class="iv__input" type="text" id="companyVatInp" placeholder="{{ 'tool.invoice.ph_vat' | t }}">
+        <input class="iv__input m-input" type="text" id="companyVatInp" placeholder="{{ 'tool.invoice.ph_vat' | t }}">
       </div>
     </div>
 
@@ -74,15 +74,15 @@ eleventyComputed:
       <div class="iv__meta-left">
         <p>
           <span class="iv__meta-label">{{ "tool.invoice.meta_invoice_no" | t }}</span>
-          <input class="iv__meta-input" type="text" id="invnoInp" placeholder="{{ 'tool.invoice.ph_invno' | t }}">
+          <input class="iv__meta-input m-input" type="text" id="invnoInp" placeholder="{{ 'tool.invoice.ph_invno' | t }}">
         </p>
         <p>
           <span class="iv__meta-label">{{ "tool.invoice.meta_invoice_date" | t }}</span>
-          <input class="iv__meta-input iv__meta-input--date" type="date" id="invoiceDate">
+          <input class="iv__meta-input iv__meta-input--date m-input" type="date" id="invoiceDate">
         </p>
         <p class="no-print">
           <span class="iv__meta-label">{{ "tool.invoice.meta_currency" | t }}</span>
-          <select class="iv__meta-input" id="currencyInp">
+          <select class="iv__meta-input m-input" id="currencyInp">
             <option value="₹">INR ₹</option>
             <option value="€">EUR €</option>
             <option value="$">USD $</option>
@@ -111,7 +111,7 @@ eleventyComputed:
       <tbody>
         <tr>
           <td data-label="{{ 'tool.invoice.tbl_description' | t }}">
-            <button type="button" class="remove-row no-print" title="{{ 'tool.invoice.row_remove' | t }}" aria-label="{{ 'tool.invoice.row_remove' | t }}">−</button>
+            <button type="button" class="remove-row no-print m-btn m-btn--ghost m-btn--icon" title="{{ 'tool.invoice.row_remove' | t }}" aria-label="{{ 'tool.invoice.row_remove' | t }}">−</button>
             <textarea id="desc1Inp" placeholder="{{ 'tool.invoice.ph_line_desc' | t }}" rows="1"></textarea>
           </td>
           <td data-label="{{ 'tool.invoice.tbl_sac' | t }}"><input id="sac1Inp" type="text" value="998314" placeholder="______"></td>
@@ -125,7 +125,7 @@ eleventyComputed:
         </tr>
         <tr class="last-row">
           <td class="last-row-first-col" colspan="4">
-            <button type="button" class="add-row no-print" title="{{ 'tool.invoice.row_add' | t }}" aria-label="{{ 'tool.invoice.row_add' | t }}">+</button>
+            <button type="button" class="add-row no-print m-btn m-btn--ghost m-btn--icon" title="{{ 'tool.invoice.row_add' | t }}" aria-label="{{ 'tool.invoice.row_add' | t }}">+</button>
             <span class="last-row-label">{{ "tool.invoice.footer_total" | t }}</span>
           </td>
           <td class="total"><span class="grand-total">0</span></td>
@@ -138,7 +138,7 @@ eleventyComputed:
       <div class="iv__section-title">{{ "tool.invoice.section_notes" | t }}</div>
       <textarea
         id="notesInp"
-        class="iv__notes-input"
+        class="iv__notes-input m-input"
         rows="2"
         placeholder="{{ 'tool.invoice.ph_notes' | t }}"
       ></textarea>
@@ -147,15 +147,15 @@ eleventyComputed:
     <div class="iv__section iv__bank">
       <div class="iv__section-title">{{ "tool.invoice.section_bank" | t }}</div>
       <label class="iv__label" for="panInp">{{ "tool.invoice.lbl_pan" | t }}</label>
-      <input class="iv__input" type="text" id="panInp" placeholder="{{ 'tool.invoice.ph_pan' | t }}">
+      <input class="iv__input m-input" type="text" id="panInp" placeholder="{{ 'tool.invoice.ph_pan' | t }}">
       <label class="iv__label" for="bankAccNoInp">{{ "tool.invoice.lbl_bank_acc" | t }}</label>
-      <input class="iv__input" type="text" id="bankAccNoInp" placeholder="{{ 'tool.invoice.ph_bank_acc' | t }}">
+      <input class="iv__input m-input" type="text" id="bankAccNoInp" placeholder="{{ 'tool.invoice.ph_bank_acc' | t }}">
       <label class="iv__label" for="accHolderNameInp">{{ "tool.invoice.lbl_acc_holder" | t }}</label>
-      <input class="iv__input" type="text" id="accHolderNameInp" placeholder="{{ 'tool.invoice.ph_acc_holder' | t }}">
+      <input class="iv__input m-input" type="text" id="accHolderNameInp" placeholder="{{ 'tool.invoice.ph_acc_holder' | t }}">
       <label class="iv__label" for="ifscCodeInp">{{ "tool.invoice.lbl_ifsc" | t }}</label>
-      <input class="iv__input" type="text" id="ifscCodeInp" placeholder="{{ 'tool.invoice.ph_ifsc' | t }}">
+      <input class="iv__input m-input" type="text" id="ifscCodeInp" placeholder="{{ 'tool.invoice.ph_ifsc' | t }}">
       <label class="iv__label" for="bankNameInp">{{ "tool.invoice.lbl_bank_name" | t }}</label>
-      <input class="iv__input" type="text" id="bankNameInp" placeholder="{{ 'tool.invoice.ph_bank_name' | t }}">
+      <input class="iv__input m-input" type="text" id="bankNameInp" placeholder="{{ 'tool.invoice.ph_bank_name' | t }}">
       <p class="iv__declaration">{{ "tool.invoice.declaration" | t }}</p>
     </div>
   </div>
@@ -315,7 +315,7 @@ eleventyComputed:
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
       <td data-label="${esc(labels[0] || '')}">
-        <button type="button" class="remove-row no-print" title="${esc(COPY.rowRemove)}" aria-label="${esc(COPY.rowRemove)}">−</button>
+        <button type="button" class="remove-row no-print m-btn m-btn--ghost m-btn--icon" title="${esc(COPY.rowRemove)}" aria-label="${esc(COPY.rowRemove)}">−</button>
         <textarea id="desc${rowIndex}Inp" placeholder="${esc(COPY.phLineDesc)}" rows="1">${esc(data.Description)}</textarea>
       </td>
       <td data-label="${esc(labels[1] || '')}"><input id="sac${rowIndex}Inp" type="text" value="${esc(data['SAC code'] ?? '')}" placeholder="______"></td>
@@ -611,7 +611,7 @@ eleventyComputed:
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  padding: 0.75rem;
+  padding: var(--space-3);
   font-family: var(--font-mono);
 }
 
@@ -619,50 +619,22 @@ eleventyComputed:
 .iv__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  padding-bottom: 0.75rem;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--term-border);
 }
-.iv__btn {
+.iv__actions .m-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  padding: 0.45rem 0.75rem;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--term-border);
-  color: var(--term-fg);
-  border-radius: 5px;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  gap: var(--space-2);
 }
-.iv__btn:hover { border-color: rgba(255,255,255,0.18); }
-.iv__btn--primary {
-  background: var(--syn-cyan);
-  color: #000;
-  border-color: var(--syn-cyan);
-}
-.iv__btn--primary:hover {
-  background: #67e8f9;
-  box-shadow: 0 0 14px rgba(34, 211, 238, 0.3);
-}
-.iv__btn--danger {
-  color: var(--syn-pink);
-  border-color: rgba(244, 114, 182, 0.25);
-}
-.iv__btn--danger:hover {
-  background: rgba(244, 114, 182, 0.1);
-  border-color: rgba(244, 114, 182, 0.5);
-}
-.iv__btn--label { cursor: pointer; }
 
 /* Document container */
 .iv__doc {
   background: rgba(255,255,255,0.02);
   border: 1px solid var(--term-border);
-  border-radius: 6px;
-  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -674,7 +646,7 @@ eleventyComputed:
   align-items: baseline;
   justify-content: space-between;
   border-bottom: 1px solid var(--term-border);
-  padding-bottom: 0.75rem;
+  padding-bottom: var(--space-3);
 }
 .iv__title {
   font-family: var(--font-mono);
@@ -687,7 +659,7 @@ eleventyComputed:
 .iv__parties {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: var(--space-5);
 }
 .iv__section {
   display: flex;
@@ -699,10 +671,10 @@ eleventyComputed:
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--syn-purple);
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--space-1);
 }
 .iv__label {
-  font-size: 0.65rem;
+  font-size: var(--text-2xs);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--term-muted);
@@ -711,19 +683,9 @@ eleventyComputed:
 
 /* Inputs */
 .iv__input {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--term-border);
-  border-radius: 4px;
   padding: 0.45rem 0.6rem;
-  color: var(--term-fg);
-  font-family: var(--font-mono);
   font-size: 0.8rem;
   width: 100%;
-  transition: border-color 0.2s ease;
-}
-.iv__input:focus {
-  outline: none;
-  border-color: rgba(34,211,238,0.45);
 }
 .iv__input::placeholder { color: var(--term-muted); opacity: 0.55; }
 .iv__input--heavy { font-weight: 700; font-size: 0.95rem; }
@@ -732,18 +694,18 @@ eleventyComputed:
 .iv__meta {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: var(--space-5);
   align-items: center;
-  padding: 0.75rem 0;
+  padding: var(--space-3) 0;
   border-top: 1px solid var(--term-border);
   border-bottom: 1px solid var(--term-border);
 }
 .iv__meta p {
-  margin: 0.25rem 0;
+  margin: var(--space-1) 0;
   font-size: 0.8rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 .iv__meta-label {
   color: var(--term-muted);
@@ -753,17 +715,8 @@ eleventyComputed:
   letter-spacing: 0.08em;
 }
 .iv__meta-input {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--term-border);
-  border-radius: 4px;
   padding: 0.3rem 0.55rem;
-  color: var(--term-fg);
-  font-family: var(--font-mono);
   font-size: 0.8rem;
-}
-.iv__meta-input:focus {
-  outline: none;
-  border-color: rgba(34,211,238,0.45);
 }
 .iv__meta-right { text-align: right; }
 .iv__amount-label {
@@ -775,8 +728,8 @@ eleventyComputed:
   display: block !important;
 }
 .iv__amount-value {
-  margin: 0.25rem 0 0 !important;
-  font-size: 1.5rem;
+  margin: var(--space-1) 0 0 !important;
+  font-size: var(--text-xl);
   font-weight: 700;
   color: var(--syn-amber);
   display: block !important;
@@ -800,16 +753,16 @@ eleventyComputed:
 .iv__table th {
   text-align: left;
   font-weight: 600;
-  font-size: 0.65rem;
+  font-size: var(--text-2xs);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--syn-purple);
   border-bottom: 1px solid var(--term-border);
-  padding: 0.5rem 0.6rem;
+  padding: var(--space-2) 0.6rem;
 }
 .iv__table td {
-  padding: 0.5rem 0.6rem;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  padding: var(--space-2) 0.6rem;
+  border-bottom: 1px solid var(--term-divider);
   vertical-align: top;
 }
 .iv__col-total, td.total { text-align: right; }
@@ -855,51 +808,16 @@ eleventyComputed:
 
 /* Add / remove row buttons */
 .remove-row {
-  appearance: none;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 1.15rem;
   height: 1.15rem;
-  border-radius: 50%;
-  background: rgba(244, 114, 182, 0.1);
-  color: var(--syn-pink);
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
   margin-right: 0.35rem;
-  user-select: none;
-  vertical-align: middle;
-  line-height: 1;
-  transition: background 0.15s ease, color 0.15s ease;
 }
-.remove-row:hover { background: var(--syn-pink); color: #000; }
 
 .add-row {
-  appearance: none;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 1.4rem;
   height: 1.4rem;
-  border-radius: 50%;
-  background: rgba(74, 222, 128, 0.1);
-  color: var(--syn-green);
-  font-size: 1.15rem;
-  font-weight: 700;
-  cursor: pointer;
   margin-right: 0.6rem;
-  user-select: none;
-  line-height: 1;
-  transition: background 0.15s ease, color 0.15s ease;
 }
-.add-row:hover { background: var(--syn-green); color: #000; }
 
 .last-row td { border-bottom: none; padding-top: 0.85rem; }
 .last-row-first-col {
@@ -920,33 +838,23 @@ td.total {
 .currency {
   color: var(--term-muted);
   margin-left: 0.15rem;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
 }
 .iv__amount-value .currency,
 td.total .currency {
   color: var(--syn-amber);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 
 /* Notes */
 .iv__notes-input {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--term-border);
-  border-radius: 4px;
   padding: 0.55rem 0.7rem;
-  color: var(--term-fg);
-  font-family: var(--font-mono);
   font-size: 0.78rem;
   width: 100%;
   resize: vertical;
   line-height: 1.5;
   min-height: 3rem;
-  transition: border-color 0.2s ease;
   white-space: pre-wrap;
-}
-.iv__notes-input:focus {
-  outline: none;
-  border-color: rgba(34,211,238,0.45);
 }
 .iv__notes-input::placeholder {
   color: var(--term-muted);
@@ -965,10 +873,10 @@ td.total .currency {
 
 /* Mobile */
 @media (max-width: 720px) {
-  .iv__doc { padding: 1rem; }
+  .iv__doc { padding: var(--space-4); }
   .iv__parties, .iv__meta { grid-template-columns: 1fr; }
   .iv__meta-right { text-align: left; }
-  .iv__title { font-size: 1.3rem; }
+  .iv__title { font-size: var(--text-lg); }
   .iv__table { font-size: 0.72rem; table-layout: auto; min-width: 32rem; }
   .iv__table th, .iv__table td { padding: 0.4rem 0.35rem; }
   .iv__col-desc, .iv__col-sac, .iv__col-qty, .iv__col-price, .iv__col-total { width: auto; }

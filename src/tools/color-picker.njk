@@ -58,11 +58,11 @@ eleventyComputed:
   </div>
 
   <div class="cp__actions">
-    <button class="cp__btn cp__btn--accent" id="cp-random" title="{{ 'tool.color-picker.title_random' | t }}">
+    <button class="m-btn m-btn--ghost cp__btn" id="cp-random" title="{{ 'tool.color-picker.title_random' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 4l3 3-3 3"/><path d="M18 20l3-3-3-3"/><path d="M3 7h4a5 5 0 015 5 5 5 0 005 5h4"/><path d="M21 7h-4a5 5 0 00-3.07 1.05"/><path d="M3 17h4a5 5 0 003.07-1.05"/></svg>
       {{ "tool.color-picker.btn_random" | t }}
     </button>
-    <button class="cp__btn cp__btn--save" id="cp-save" title="{{ 'tool.color-picker.title_save' | t }}">
+    <button class="m-btn m-btn--primary cp__btn" id="cp-save" title="{{ 'tool.color-picker.title_save' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
       {{ "tool.color-picker.btn_save" | t }}
     </button>
@@ -76,11 +76,11 @@ eleventyComputed:
   <div class="cp__palette-section">
     <div class="cp__section-label">{{ "tool.color-picker.palette_label" | t }}</div>
     <div class="cp__palette-btns">
-      <button class="cp__palette-btn" data-harmony="complementary">{{ "tool.color-picker.harmony_complementary" | t }}</button>
-      <button class="cp__palette-btn" data-harmony="analogous">{{ "tool.color-picker.harmony_analogous" | t }}</button>
-      <button class="cp__palette-btn" data-harmony="triadic">{{ "tool.color-picker.harmony_triadic" | t }}</button>
-      <button class="cp__palette-btn" data-harmony="split">{{ "tool.color-picker.harmony_split" | t }}</button>
-      <button class="cp__palette-btn" data-harmony="tetradic">{{ "tool.color-picker.harmony_tetradic" | t }}</button>
+      <button class="m-btn m-btn--ghost cp__palette-btn" data-harmony="complementary">{{ "tool.color-picker.harmony_complementary" | t }}</button>
+      <button class="m-btn m-btn--ghost cp__palette-btn" data-harmony="analogous">{{ "tool.color-picker.harmony_analogous" | t }}</button>
+      <button class="m-btn m-btn--ghost cp__palette-btn" data-harmony="triadic">{{ "tool.color-picker.harmony_triadic" | t }}</button>
+      <button class="m-btn m-btn--ghost cp__palette-btn" data-harmony="split">{{ "tool.color-picker.harmony_split" | t }}</button>
+      <button class="m-btn m-btn--ghost cp__palette-btn" data-harmony="tetradic">{{ "tool.color-picker.harmony_tetradic" | t }}</button>
     </div>
     <div class="cp__palette" id="cp-palette"></div>
   </div>
@@ -251,42 +251,14 @@ eleventyComputed:
   /* ── Copy helper ───────────────────────────────────── */
   function copyText(text) {
     navigator.clipboard.writeText(text).then(() => {
-      showToast(COPY.toastCopied.replace('{color}', text));
+      MentriaUI.toast(COPY.toastCopied.replace('{color}', text));
     }).catch(() => {});
-  }
-
-  function showToast(msg) {
-    let toast = document.querySelector('.cp__toast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.className = 'cp__toast';
-      document.body.appendChild(toast);
-    }
-    toast.textContent = msg;
-    toast.classList.remove('cp__toast--visible');
-    void toast.offsetWidth; // reflow
-    toast.classList.add('cp__toast--visible');
-    clearTimeout(toast._tid);
-    toast._tid = setTimeout(() => toast.classList.remove('cp__toast--visible'), 1600);
   }
 
   /* ── Saved colors ──────────────────────────────────── */
   function loadSaved() {
-    if (window.MentriaStore) {
-      const v = window.MentriaStore.get('tools', 'color_picker_palette');
-      if (Array.isArray(v)) return v;
-      try {
-        const legacy = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (Array.isArray(legacy) && legacy.length) {
-          window.MentriaStore.set('tools', 'color_picker_palette', legacy);
-          localStorage.removeItem(STORAGE_KEY);
-          return legacy;
-        }
-      } catch (_) {}
-      return [];
-    }
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch { return []; }
+    const v = MentriaUI.migrateStore('tools', 'color_picker_palette', STORAGE_KEY, []);
+    return Array.isArray(v) ? v : [];
   }
 
   function saveSaved(arr) {
@@ -369,9 +341,9 @@ eleventyComputed:
       saved.push(currentHex);
       saveSaved(saved);
       renderSaved();
-      showToast(COPY.toastSaved.replace('{color}', currentHex));
+      MentriaUI.toast(COPY.toastSaved.replace('{color}', currentHex));
     } else {
-      showToast(COPY.toastAlreadySaved);
+      MentriaUI.toast(COPY.toastAlreadySaved);
     }
   });
 
@@ -381,8 +353,9 @@ eleventyComputed:
   });
 
   /* ── Init ──────────────────────────────────────────── */
-  setColor('#22d3ee');
-  renderSaved();
+  const init = () => { setColor('#22d3ee'); renderSaved(); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 
@@ -391,7 +364,7 @@ eleventyComputed:
 .cp {
   padding: 1.5rem;
   font-family: var(--font-body, 'Inter', sans-serif);
-  color: var(--term-fg, #e2e8f0);
+  color: var(--term-fg);
   max-width: 540px;
   margin: 0 auto;
 }
@@ -416,16 +389,16 @@ eleventyComputed:
   width: 96px;
   height: 96px;
   border-radius: 12px;
-  border: 2px solid var(--term-border, rgba(255,255,255,0.06));
+  border: 2px solid var(--term-border);
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  background: #22d3ee;
+  background: var(--syn-cyan);
   transition: box-shadow 0.25s ease;
 }
 
 .cp__swatch:hover {
-  box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+  box-shadow: 0 0 20px var(--cyan-30);
 }
 
 .cp__swatch input[type="color"] {
@@ -442,16 +415,16 @@ eleventyComputed:
   display: flex;
   align-items: center;
   gap: 2px;
-  background: var(--term-bg-raised, #111111);
-  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
-  border-radius: 6px;
+  background: var(--term-bg-raised);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md);
   padding: 0.25rem 0.5rem;
 }
 
 .cp__hash {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.85rem;
-  color: var(--term-muted, #64748b);
+  color: var(--term-muted);
 }
 
 .cp__hex-input {
@@ -460,7 +433,7 @@ eleventyComputed:
   outline: none;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.85rem;
-  color: var(--term-fg, #e2e8f0);
+  color: var(--term-fg);
   width: 5.5ch;
   letter-spacing: 0.04em;
 }
@@ -477,9 +450,9 @@ eleventyComputed:
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--term-bg-raised, #111111);
-  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
-  border-radius: 6px;
+  background: var(--term-bg-raised);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md);
   padding: 0.45rem 0.65rem;
 }
 
@@ -487,7 +460,7 @@ eleventyComputed:
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--syn-cyan, #22d3ee);
+  color: var(--syn-cyan);
   width: 2.5rem;
   flex-shrink: 0;
   text-transform: uppercase;
@@ -497,7 +470,7 @@ eleventyComputed:
 .cp__value-code {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.8rem;
-  color: var(--term-fg, #e2e8f0);
+  color: var(--term-fg);
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -507,10 +480,10 @@ eleventyComputed:
 .cp__copy-btn {
   background: none;
   border: none;
-  color: var(--term-muted, #64748b);
+  color: var(--term-muted);
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -519,8 +492,8 @@ eleventyComputed:
 }
 
 .cp__copy-btn:hover {
-  color: var(--syn-cyan, #22d3ee);
-  background: rgba(34, 211, 238, 0.08);
+  color: var(--syn-cyan);
+  background: var(--cyan-8);
 }
 
 /* ── Action buttons ──────────────────────────────────── */
@@ -534,46 +507,13 @@ eleventyComputed:
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
-  background: var(--term-bg-raised, #111111);
-  color: var(--term-fg, #e2e8f0);
-  font-family: var(--font-body, 'Inter', sans-serif);
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
-}
-
-.cp__btn:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.cp__btn--accent {
-  border-color: rgba(167, 139, 250, 0.3);
-  color: var(--syn-purple, #a78bfa);
-}
-
-.cp__btn--accent:hover {
-  box-shadow: 0 0 12px rgba(167, 139, 250, 0.15);
-  border-color: var(--syn-purple, #a78bfa);
-}
-
-.cp__btn--save {
-  border-color: rgba(74, 222, 128, 0.3);
-  color: var(--syn-green, #4ade80);
-}
-
-.cp__btn--save:hover {
-  box-shadow: 0 0 12px rgba(74, 222, 128, 0.15);
-  border-color: var(--syn-green, #4ade80);
 }
 
 /* ── Section labels ──────────────────────────────────── */
 .cp__section-label {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.7rem;
-  color: var(--term-muted, #64748b);
+  color: var(--term-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 0.6rem;
@@ -598,7 +538,7 @@ eleventyComputed:
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  border: 1px solid var(--term-border);
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.2s;
 }
@@ -616,7 +556,7 @@ eleventyComputed:
   height: 16px;
   border-radius: 50%;
   border: none;
-  background: var(--syn-pink, #f472b6);
+  background: var(--syn-pink);
   color: #000;
   font-size: 10px;
   line-height: 1;
@@ -656,25 +596,13 @@ eleventyComputed:
 
 .cp__palette-btn {
   padding: 0.35rem 0.7rem;
-  border-radius: 6px;
-  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
-  background: var(--term-bg-raised, #111111);
-  color: var(--term-muted, #64748b);
-  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 0.75rem;
-  cursor: pointer;
-  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
-}
-
-.cp__palette-btn:hover {
-  color: var(--term-fg, #e2e8f0);
-  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .cp__palette-btn--active {
-  color: var(--syn-cyan, #22d3ee);
-  border-color: var(--syn-cyan, #22d3ee);
-  box-shadow: 0 0 10px rgba(34, 211, 238, 0.15);
+  color: var(--syn-cyan);
+  border-color: var(--syn-cyan);
+  box-shadow: 0 0 10px var(--cyan-15);
 }
 
 .cp__palette {
@@ -695,7 +623,7 @@ eleventyComputed:
   width: 56px;
   height: 56px;
   border-radius: 10px;
-  border: 2px solid var(--term-border, rgba(255,255,255,0.06));
+  border: 2px solid var(--term-border);
   transition: transform 0.15s, box-shadow 0.2s;
 }
 
@@ -707,32 +635,7 @@ eleventyComputed:
 .cp__palette-label {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.65rem;
-  color: var(--term-muted, #64748b);
-}
-
-/* ── Toast ───────────────────────────────────────────── */
-.cp__toast {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--term-bg-raised, #111111);
-  border: 1px solid var(--syn-cyan, #22d3ee);
-  color: var(--term-fg, #e2e8f0);
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 0.75rem;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  box-shadow: 0 0 16px rgba(34, 211, 238, 0.2);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s, transform 0.25s;
-  z-index: 9999;
-}
-
-.cp__toast--visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  color: var(--term-muted);
 }
 
 /* ── Responsive ──────────────────────────────────────── */

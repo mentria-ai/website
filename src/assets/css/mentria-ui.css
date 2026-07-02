@@ -1,0 +1,186 @@
+.m-btn {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--term-fg);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.m-btn--primary {
+  background: var(--syn-cyan);
+  color: #041016;
+  font-weight: 600;
+}
+.m-btn--primary:hover {
+  background: var(--syn-cyan-soft);
+  box-shadow: var(--glow-cyan-soft);
+}
+
+.m-btn--ghost {
+  border-color: var(--term-border);
+  color: var(--term-muted);
+}
+.m-btn--ghost:hover {
+  color: var(--term-fg);
+  border-color: var(--term-border-strong);
+}
+
+.m-btn--danger {
+  border-color: var(--syn-pink);
+  color: var(--syn-pink);
+}
+.m-btn--danger:hover {
+  background: var(--pink-10);
+}
+
+.m-btn--icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  border-color: var(--term-border);
+}
+
+.m-btn--pill {
+  border-radius: var(--radius-pill);
+}
+
+.m-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.m-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.m-field > label,
+.m-field > span {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+}
+
+.m-input {
+  background: var(--term-surface-2);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+}
+.m-input:focus {
+  border-color: var(--accent);
+}
+
+.m-seg {
+  display: flex;
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.m-seg > button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: var(--space-2);
+  color: var(--term-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+.m-seg > button.is-active {
+  background: var(--cyan-15);
+  color: var(--syn-cyan);
+}
+
+.m-status {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: var(--space-3) var(--space-3);
+  border-radius: var(--radius-sm);
+}
+.m-status:empty {
+  padding: 0;
+}
+.m-status[data-tone="err"] {
+  background: var(--pink-10);
+  border: 1px solid var(--syn-pink);
+  color: var(--syn-pink);
+}
+.m-status[data-tone="ok"] {
+  background: transparent;
+  border: 1px solid var(--syn-green);
+  color: var(--syn-green);
+}
+
+.m-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  background: var(--term-bg-raised);
+  border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  box-shadow: var(--elev-2);
+  z-index: 10000;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .m-toast {
+    transition: opacity var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+}
+.m-toast--hide {
+  opacity: 0;
+  transform: translateX(-50%) translateY(var(--space-3));
+}
+
+.m-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.m-modal[hidden] {
+  display: none;
+}
+.m-modal__card {
+  background: var(--term-bg-raised);
+  border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-5);
+  max-width: 24rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--elev-3);
+}

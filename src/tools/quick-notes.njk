@@ -17,11 +17,9 @@ eleventyComputed:
   {% include "tldr.njk" %}
 </section>
 
-<!-- ── Quick Notes Tool ─────────────────────────────── -->
 {% set terminalTitle = "quick-notes.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="qn-tool" id="qn-tool">
-  <!-- Sidebar -->
   <aside class="qn-sidebar" id="qn-sidebar">
     <div class="qn-sidebar__header">
       <span class="qn-sidebar__label">{{ "tool.quick-notes.notes_label" | t }}</span>
@@ -30,14 +28,12 @@ eleventyComputed:
       </button>
     </div>
     <div class="qn-sidebar__list" id="qn-note-list">
-      <!-- note tabs injected here -->
     </div>
     <button class="qn-sidebar__new" id="qn-new-btn" title="{{ 'tool.quick-notes.new_note_title' | t }}">
       <span>+</span> {{ "tool.quick-notes.new_note_btn" | t }}
     </button>
   </aside>
 
-  <!-- Editor -->
   <div class="qn-editor" id="qn-editor">
     <div class="qn-editor__titlebar">
       <input
@@ -49,10 +45,10 @@ eleventyComputed:
         autocomplete="off"
       />
       <div class="qn-editor__actions">
-        <button class="qn-action-btn" id="qn-export-btn" title="{{ 'tool.quick-notes.export_title' | t }}">{{ "tool.quick-notes.export_btn" | t }}</button>
-        <button class="qn-action-btn" id="qn-share-btn" title="{{ 'common.share' | t }}">{{ "common.share" | t }}</button>
-        <button class="qn-action-btn" id="qn-lock-btn" title="{{ 'tool.quick-notes.lock_title' | t }}">{{ "tool.quick-notes.lock_btn" | t }}</button>
-        <button class="qn-action-btn qn-action-btn--danger" id="qn-delete-btn" title="{{ 'tool.quick-notes.delete_title' | t }}">{{ "tool.quick-notes.delete_btn" | t }}</button>
+        <button class="qn-action-btn m-btn m-btn--ghost" id="qn-export-btn" title="{{ 'tool.quick-notes.export_title' | t }}">{{ "tool.quick-notes.export_btn" | t }}</button>
+        <button class="qn-action-btn m-btn m-btn--ghost" id="qn-share-btn" title="{{ 'common.share' | t }}">{{ "common.share" | t }}</button>
+        <button class="qn-action-btn m-btn m-btn--ghost" id="qn-lock-btn" title="{{ 'tool.quick-notes.lock_title' | t }}">{{ "tool.quick-notes.lock_btn" | t }}</button>
+        <button class="qn-action-btn m-btn m-btn--danger" id="qn-delete-btn" title="{{ 'tool.quick-notes.delete_title' | t }}">{{ "tool.quick-notes.delete_btn" | t }}</button>
       </div>
     </div>
     <textarea
@@ -68,7 +64,7 @@ eleventyComputed:
       </svg>
       <h2 class="qn-locked__heading">{{ "tool.quick-notes.locked_heading" | t }}</h2>
       <p class="qn-locked__body">{{ "tool.quick-notes.locked_body" | t }}</p>
-      <button class="qn-unlock-btn" id="qn-unlock-btn">{{ "tool.quick-notes.unlock_btn" | t }}</button>
+      <button class="qn-unlock-btn m-btn m-btn--primary m-btn--pill" id="qn-unlock-btn">{{ "tool.quick-notes.unlock_btn" | t }}</button>
     </div>
     <div class="qn-editor__statusbar">
       <span class="qn-status__counts" id="qn-counts">{{ ('tool.quick-notes.count_summary' | t) | replace('{words}', '0') | replace('{chars}', '0') }}</span>
@@ -100,7 +96,6 @@ eleventyComputed:
   const STORAGE_KEY = 'mentria-quick-notes';
   const DEBOUNCE_MS = 500;
 
-  /* ── DOM refs ──────────────────────────────────────── */
   const noteList    = document.getElementById('qn-note-list');
   const newBtn      = document.getElementById('qn-new-btn');
   const titleInput  = document.getElementById('qn-title-input');
@@ -116,39 +111,17 @@ eleventyComputed:
   const sidebar     = document.getElementById('qn-sidebar');
   const sidebarToggle = document.getElementById('qn-sidebar-toggle');
 
-  /* ── State ─────────────────────────────────────────── */
-  let notes = [];        // [{id, title, body, createdAt, updatedAt}]
+  let notes = [];
   let activeId = null;
-  let saveTimer = null;
 
   const CRED_KEY = 'mentria-qn-cred';
   const SALT_KEY = 'mentria-qn-salt';
   let sessionKey = null;
   const cryptoOK = !!(window.PublicKeyCredential && window.isSecureContext && window.crypto && crypto.subtle);
 
-  /* ── Persistence ───────────────────────────────────── */
   function load() {
-    if (window.MentriaStore) {
-      const v = window.MentriaStore.get('quick_notes', 'blob');
-      if (Array.isArray(v)) notes = v;
-      else {
-        try {
-          const legacy = localStorage.getItem(STORAGE_KEY);
-          if (legacy) {
-            notes = JSON.parse(legacy);
-            if (Array.isArray(notes)) {
-              window.MentriaStore.set('quick_notes', 'blob', notes);
-              localStorage.removeItem(STORAGE_KEY);
-            }
-          }
-        } catch (_) {}
-      }
-    } else {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) notes = JSON.parse(raw);
-      } catch (_) {}
-    }
+    const v = MentriaUI.migrateStore('quick_notes', 'blob', STORAGE_KEY, null);
+    if (Array.isArray(v)) notes = v;
     if (!Array.isArray(notes) || notes.length === 0) {
       notes = [];
       createNote();
@@ -269,7 +242,6 @@ eleventyComputed:
     mentriaAlert(fallbackMsg);
   }
 
-  /* ── Note CRUD ─────────────────────────────────────── */
   function genId() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   }
@@ -308,15 +280,13 @@ eleventyComputed:
     return notes.find(n => n.id === id) || null;
   }
 
-  /* ── Selection ─────────────────────────────────────── */
   function selectNote(id) {
-    if (id !== activeId) flushSave();
+    if (id !== activeId) saver.flush();
     activeId = id;
     const note = getNote(id);
     if (!note) return;
     renderEditor();
     renderList();
-    // Collapse sidebar on mobile after selection
     if (window.innerWidth <= 640) {
       sidebar.classList.remove('qn-sidebar--open');
     }
@@ -362,7 +332,6 @@ eleventyComputed:
     }
   }
 
-  /* ── Sidebar Rendering ─────────────────────────────── */
   function renderList() {
     noteList.innerHTML = '';
     notes.forEach(note => {
@@ -387,16 +356,7 @@ eleventyComputed:
     return d.innerHTML;
   }
 
-  /* ── Auto-save (debounced) ─────────────────────────── */
-  function scheduleSave() {
-    if (saveTimer) clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => { saveTimer = null; saveActive(); }, DEBOUNCE_MS);
-  }
-
-  function flushSave() {
-    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
-    return saveActive();
-  }
+  const saver = MentriaUI.debouncedSaver(saveActive, DEBOUNCE_MS);
 
   async function saveActive() {
     const note = getNote(activeId);
@@ -418,7 +378,6 @@ eleventyComputed:
     renderList();
   }
 
-  /* ── Counts ────────────────────────────────────────── */
   const wordSegmenter = (() => {
     try { return new Intl.Segmenter(document.documentElement.lang || undefined, { granularity: 'word' }); }
     catch (_) { return null; }
@@ -442,7 +401,6 @@ eleventyComputed:
     countsEl.textContent = COPY.countSummary.replace('{words}', words).replace('{chars}', chars);
   }
 
-  /* ── Saved label ───────────────────────────────────── */
   function updateSavedLabel(ts) {
     if (!ts) { savedEl.textContent = ''; return; }
     const d = new Date(ts);
@@ -452,29 +410,21 @@ eleventyComputed:
     savedEl.textContent = COPY.savedPrefix + ' ' + hh + ':' + mm + ':' + ss;
   }
 
-  /* ── Export ────────────────────────────────────────── */
   function exportNote() {
     const note = getNote(activeId);
     if (!note) return;
     const title = titleInput.value.trim() || COPY.untitled;
     const filename = title.replace(/[\/\\:*?"<>|\s]/g, '_') + '.txt';
     const blob = new Blob([textarea.value], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    MentriaUI.downloadFile(filename, blob);
   }
 
-  /* ── Share active note ─────────────────────────────── */
   async function shareNote() {
     const note = getNote(activeId);
     if (!note || !textarea.value) return;
     try {
       await navigator.share({ title: titleInput.value.trim() || COPY.untitled, text: textarea.value });
-    } catch (_) { /* dismissed */ }
+    } catch (_) {}
   }
 
   function handleLockClick() {
@@ -531,7 +481,6 @@ eleventyComputed:
     renderList();
   }
 
-  /* ── Delete with confirmation ──────────────────────── */
   async function confirmDelete() {
     const note = getNote(activeId);
     if (!note) return;
@@ -541,19 +490,17 @@ eleventyComputed:
     }
   }
 
-  /* ── Sidebar toggle (mobile) ───────────────────────── */
   function toggleSidebar() {
     sidebar.classList.toggle('qn-sidebar--open');
   }
 
-  /* ── Events ────────────────────────────────────────── */
   textarea.addEventListener('input', () => {
     updateCounts();
-    scheduleSave();
+    saver.schedule();
   });
 
   titleInput.addEventListener('input', () => {
-    scheduleSave();
+    saver.schedule();
   });
 
   newBtn.addEventListener('click', createNote);
@@ -564,11 +511,6 @@ eleventyComputed:
   unlockBtn.addEventListener('click', unlockNote);
   deleteBtn.addEventListener('click', confirmDelete);
   sidebarToggle.addEventListener('click', toggleSidebar);
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') flushSave();
-  });
-  window.addEventListener('pagehide', () => { flushSave(); });
 
   function ingestSharedContent() {
     let p;
@@ -591,7 +533,6 @@ eleventyComputed:
     return true;
   }
 
-  /* ── Boot ───────────────────────────────────────────── */
   load();
   if (ingestSharedContent()) {
     selectNote(activeId);
@@ -603,22 +544,20 @@ eleventyComputed:
 </script>
 
 <style>
-/* ── Tool Container ───────────────────────────────── */
 .qn-tool {
   display: flex;
   min-height: 520px;
   max-height: 80vh;
-  background: var(--term-bg, #0a0a0a);
+  background: var(--term-bg);
   border-radius: 8px;
   overflow: hidden;
 }
 
-/* ── Sidebar ──────────────────────────────────────── */
 .qn-sidebar {
   width: 220px;
   min-width: 220px;
-  background: var(--term-bg-raised, #111111);
-  border-right: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  background: var(--term-bg-raised);
+  border-right: 1px solid var(--term-border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -629,14 +568,14 @@ eleventyComputed:
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 0.85rem;
-  border-bottom: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  border-bottom: 1px solid var(--term-border);
 }
 
 .qn-sidebar__label {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--syn-cyan, #22d3ee);
+  color: var(--syn-cyan);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -653,7 +592,7 @@ eleventyComputed:
   display: block;
   width: 18px;
   height: 2px;
-  background: var(--term-muted, #64748b);
+  background: var(--term-muted);
   position: relative;
   transition: background 0.2s;
 }
@@ -664,7 +603,7 @@ eleventyComputed:
   left: 0;
   width: 100%;
   height: 2px;
-  background: var(--term-muted, #64748b);
+  background: var(--term-muted);
   transition: transform 0.2s;
 }
 .qn-sidebar__toggle-icon::before { top: -6px; }
@@ -676,7 +615,6 @@ eleventyComputed:
   padding: 0.5rem 0;
 }
 
-/* ── Note Tabs ────────────────────────────────────── */
 .qn-note-tab {
   display: flex;
   flex-direction: column;
@@ -695,32 +633,31 @@ eleventyComputed:
 }
 .qn-note-tab--active {
   background: rgba(34, 211, 238, 0.06);
-  border-left-color: var(--syn-cyan, #22d3ee);
+  border-left-color: var(--syn-cyan);
 }
 
 .qn-note-tab__title {
   font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--term-fg, #e2e8f0);
+  color: var(--term-fg);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .qn-note-tab--active .qn-note-tab__title {
-  color: var(--syn-cyan, #22d3ee);
+  color: var(--syn-cyan);
 }
 
 .qn-note-tab__preview {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.68rem;
-  color: var(--term-muted, #64748b);
+  color: var(--term-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ── New Note Button ──────────────────────────────── */
 .qn-sidebar__new {
   display: flex;
   align-items: center;
@@ -728,10 +665,10 @@ eleventyComputed:
   gap: 0.4rem;
   padding: 0.7rem;
   margin: 0.5rem 0.6rem;
-  border: 1px dashed var(--syn-purple, #a78bfa);
-  border-radius: 6px;
+  border: 1px dashed var(--syn-purple);
+  border-radius: var(--radius-md);
   background: transparent;
-  color: var(--syn-purple, #a78bfa);
+  color: var(--syn-purple);
   font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 0.8rem;
   font-weight: 600;
@@ -739,12 +676,11 @@ eleventyComputed:
   transition: all 0.2s ease;
 }
 .qn-sidebar__new:hover {
-  background: rgba(167, 139, 250, 0.08);
+  background: var(--purple-8);
   border-color: rgba(167, 139, 250, 0.6);
   box-shadow: 0 0 12px rgba(167, 139, 250, 0.15);
 }
 
-/* ── Editor ───────────────────────────────────────── */
 .qn-editor {
   flex: 1;
   display: flex;
@@ -757,7 +693,7 @@ eleventyComputed:
   align-items: center;
   gap: 0.75rem;
   padding: 0.6rem 1rem;
-  border-bottom: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  border-bottom: 1px solid var(--term-border);
 }
 
 .qn-editor__title {
@@ -768,16 +704,16 @@ eleventyComputed:
   font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 1rem;
   font-weight: 600;
-  color: var(--term-fg, #e2e8f0);
+  color: var(--term-fg);
   padding: 0.25rem 0;
   border-bottom: 1px solid transparent;
   transition: border-color 0.2s;
 }
 .qn-editor__title::placeholder {
-  color: var(--term-muted, #64748b);
+  color: var(--term-muted);
 }
 .qn-editor__title:focus {
-  border-bottom-color: var(--syn-cyan, #22d3ee);
+  border-bottom-color: var(--syn-cyan);
 }
 
 .qn-editor__actions {
@@ -786,50 +722,31 @@ eleventyComputed:
   flex-shrink: 0;
 }
 
-/* ── Action Buttons ───────────────────────────────── */
 .qn-action-btn {
   padding: 0.35rem 0.75rem;
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.72rem;
-  font-weight: 500;
-  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
-  border-radius: 4px;
-  background: transparent;
-  color: var(--term-muted, #64748b);
-  cursor: pointer;
-  transition: all 0.2s ease;
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.qn-action-btn:hover {
-  color: var(--term-fg, #e2e8f0);
-  border-color: var(--syn-cyan, #22d3ee);
-  box-shadow: 0 0 8px rgba(34, 211, 238, 0.15);
-}
-.qn-action-btn--danger:hover {
-  color: #f87171;
-  border-color: #f87171;
-  box-shadow: 0 0 8px rgba(248, 113, 113, 0.15);
-}
 
-/* ── Textarea ─────────────────────────────────────── */
 .qn-editor__textarea {
   flex: 1;
   width: 100%;
   padding: 1rem 1.25rem;
-  background: var(--term-bg, #0a0a0a);
+  background: var(--term-bg);
   border: none;
   outline: none;
   resize: none;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.88rem;
   line-height: 1.7;
-  color: var(--term-fg, #e2e8f0);
+  color: var(--term-fg);
   tab-size: 2;
   -moz-tab-size: 2;
 }
 .qn-editor__textarea::placeholder {
-  color: var(--term-muted, #64748b);
+  color: var(--term-muted);
   opacity: 0.6;
 }
 .qn-editor__textarea:focus {
@@ -847,66 +764,54 @@ eleventyComputed:
   gap: 0.85rem;
   padding: 2rem 1.5rem;
   text-align: center;
-  background: var(--term-bg, #0a0a0a);
+  background: var(--term-bg);
 }
 .qn-locked[hidden] { display: none; }
 .qn-locked__icon {
   width: 40px;
   height: 40px;
-  color: var(--syn-cyan, #22d3ee);
+  color: var(--syn-cyan);
 }
 .qn-locked__heading {
   margin: 0;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.95rem;
-  color: var(--term-fg, #e2e8f0);
+  color: var(--term-fg);
 }
 .qn-locked__body {
   margin: 0;
   max-width: 34ch;
   font-size: 0.8rem;
   line-height: 1.55;
-  color: var(--term-muted, #64748b);
+  color: var(--term-muted);
 }
 .qn-unlock-btn {
   margin-top: 0.3rem;
   padding: 0.55rem 1.6rem;
-  border: none;
-  border-radius: 999px;
-  background: var(--syn-cyan, #22d3ee);
-  color: #041016;
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s ease;
 }
-.qn-unlock-btn:hover { background: #67e8f9; }
 
-/* ── Status Bar ───────────────────────────────────── */
 .qn-editor__statusbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.4rem 1rem;
-  border-top: 1px solid var(--term-border, rgba(255,255,255,0.06));
-  background: var(--term-bg-raised, #111111);
+  border-top: 1px solid var(--term-border);
+  background: var(--term-bg-raised);
 }
 
 .qn-status__counts {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.7rem;
-  color: var(--term-muted, #64748b);
+  color: var(--term-muted);
 }
 
 .qn-status__saved {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.7rem;
-  color: var(--syn-green, #4ade80);
+  color: var(--syn-green);
   opacity: 0.8;
 }
 
-/* ── Scrollbar ────────────────────────────────────── */
 .qn-sidebar__list::-webkit-scrollbar,
 .qn-editor__textarea::-webkit-scrollbar {
   width: 6px;
@@ -925,7 +830,6 @@ eleventyComputed:
   background: rgba(255,255,255,0.15);
 }
 
-/* ── Responsive ───────────────────────────────────── */
 @media (max-width: 640px) {
   .qn-tool {
     flex-direction: column;
@@ -938,7 +842,7 @@ eleventyComputed:
     max-height: 0;
     overflow: hidden;
     border-right: none;
-    border-bottom: 1px solid var(--term-border, rgba(255,255,255,0.06));
+    border-bottom: 1px solid var(--term-border);
     transition: max-height 0.3s ease;
   }
   .qn-sidebar--open {
@@ -953,7 +857,6 @@ eleventyComputed:
     display: block;
   }
 
-  /* Always show header row on mobile */
   .qn-sidebar {
     max-height: 42px;
   }
@@ -978,5 +881,4 @@ eleventyComputed:
     flex-shrink: 0;
   }
 }
-
 </style>

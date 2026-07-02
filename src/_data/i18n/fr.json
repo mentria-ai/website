@@ -1023,7 +1023,12 @@
       "rules_eyebrow": "> COMMENT JOUER",
       "rules_title": "règles du ludo",
       "rules_body": "• faites un <b style=\"color:var(--syn-cyan)\">6</b> pour sortir un pion de la base<br>• déplacez les pions dans le sens horaire selon le dé<br>• tombez sur un adversaire pour le renvoyer à la maison<br>• les <b style=\"color:var(--syn-cyan)\">★ étoiles</b> et les cases de départ sont sûres<br>• un 6, une capture ou atteindre le centre donne un nouveau lancer<br>• amenez vos 4 pions au centre pour gagner",
-      "got_it": "compris"
+      "got_it": "compris",
+      "a11y_rolled": "a fait {n}",
+      "a11y_moved": "pion {t} déplacé, {home} sur 4 à la maison",
+      "a11y_move_token": "déplacer le pion {t}",
+      "a11y_choose": "choisissez un pion à déplacer",
+      "a11y_summary_player": "{name} : {home} à la maison, {board} en jeu, {base} à la base"
     },
     "chess": {
       "engine": "moteur",

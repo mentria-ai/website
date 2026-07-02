@@ -1023,7 +1023,12 @@
       "rules_eyebrow": "> 遊び方",
       "rules_title": "ルドのルール",
       "rules_body": "• <b style=\"color:var(--syn-cyan)\">6</b>を出すとコマがベースから出る<br>• サイコロの目だけ時計回りに進む<br>• 相手に重なると振り出しに戻す<br>• <b style=\"color:var(--syn-cyan)\">★ 星</b>とスタートマスは安全<br>• 6・捕獲・中央到達でもう一度振れる<br>• 4つのコマすべてを中央に入れたら勝ち",
-      "got_it": "わかった"
+      "got_it": "わかった",
+      "a11y_rolled": "{n} が出ました",
+      "a11y_moved": "コマ {t} を移動、4個中 {home} 個がゴール",
+      "a11y_move_token": "コマ {t} を移動",
+      "a11y_choose": "動かすコマを選択",
+      "a11y_summary_player": "{name}: ゴール {home}、盤上 {board}、基地 {base}"
     },
     "chess": {
       "engine": "エンジン",

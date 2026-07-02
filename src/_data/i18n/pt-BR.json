@@ -1023,7 +1023,12 @@
       "rules_eyebrow": "> COMO JOGAR",
       "rules_title": "regras do ludo",
       "rules_body": "• tire um <b style=\"color:var(--syn-cyan)\">6</b> para tirar uma peça da base<br>• mova as peças no sentido horário pelo valor do dado<br>• caia sobre um adversário para mandá-lo para casa<br>• as <b style=\"color:var(--syn-cyan)\">★ estrelas</b> e casas de saída são seguras<br>• um 6, uma captura ou chegar ao centro dá outra jogada<br>• leve suas 4 peças ao centro para vencer",
-      "got_it": "entendi"
+      "got_it": "entendi",
+      "a11y_rolled": "tirou {n}",
+      "a11y_moved": "peça {t} movida, {home} de 4 em casa",
+      "a11y_move_token": "mover peça {t}",
+      "a11y_choose": "escolha uma peça para mover",
+      "a11y_summary_player": "{name}: {home} em casa, {board} em jogo, {base} na base"
     },
     "chess": {
       "engine": "motor",

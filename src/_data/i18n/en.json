@@ -1023,7 +1023,12 @@
       "rules_eyebrow": "> HOW TO PLAY",
       "rules_title": "ludo rules",
       "rules_body": "• roll a <b style=\"color:var(--syn-cyan)\">6</b> to move a token out of base<br>• move tokens clockwise by the dice value<br>• land on an opponent to send it home<br>• <b style=\"color:var(--syn-cyan)\">★ stars</b> &amp; start cells are safe<br>• a 6, a capture, or reaching center grants another roll<br>• get all 4 tokens to the center to win",
-      "got_it": "got it"
+      "got_it": "got it",
+      "a11y_rolled": "rolled {n}",
+      "a11y_moved": "token {t} moved, {home} of 4 home",
+      "a11y_move_token": "move token {t}",
+      "a11y_choose": "choose a token to move",
+      "a11y_summary_player": "{name}: {home} home, {board} on board, {base} in base"
     },
     "chess": {
       "engine": "engine",

@@ -6,6 +6,7 @@
 {%- macro tile(tool, lang) -%}
   <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}"
      data-search="{{ tool.summary }} {{ tool.category }} {{ tool.group }} {{ tool.slug }}"
+     style="view-transition-name: tool-{{ tool.slug }}"
      href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">
     <span class="launch-tile__icon" aria-hidden="true">
       <svg viewBox="0 0 48 48"><use href="#tool-{{ tool.slug }}"></use></svg>

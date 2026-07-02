@@ -1,9 +1,9 @@
-<div class="terminal-frame">
+<div class="terminal-frame" style="view-transition-name: tool-{{ page.fileSlug }}">
     <div class="terminal-frame__titlebar">
         <div class="terminal-frame__dots">
             <span class="terminal-frame__dot terminal-frame__dot--red"></span>
             <span class="terminal-frame__dot terminal-frame__dot--yellow"></span>
-            <button type="button" class="terminal-frame__dot terminal-frame__dot--green" data-action="toggle-fullscreen" aria-label="Toggle fullscreen" title="Toggle fullscreen"></button>
+            <button type="button" class="terminal-frame__dot terminal-frame__dot--green" data-action="toggle-fullscreen" aria-pressed="false" aria-label="{{ 'common.toggle_fullscreen' | t }}" title="{{ 'common.toggle_fullscreen' | t }}"></button>
         </div>
         {% if terminalTitle %}
         <span class="terminal-frame__filename">{{ terminalTitle }}</span>
@@ -11,6 +11,7 @@
         {% if terminalHelpId %}
         <button type="button" class="terminal-frame__help" popovertarget="{{ terminalHelpId }}" aria-label="{{ 'tool.common.controls' | t }}" title="{{ 'tool.common.controls' | t }}">?</button>
         {% endif %}
+        <button type="button" class="terminal-frame__expand" data-action="toggle-fullscreen" aria-pressed="false" aria-label="{{ 'common.toggle_fullscreen' | t }}" title="{{ 'common.toggle_fullscreen' | t }}">⤢</button>
     </div>
     <div class="terminal-frame__body">
 

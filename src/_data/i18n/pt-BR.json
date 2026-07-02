@@ -131,7 +131,8 @@
     "download_postponed": "Download pausado — recarregue a página para começar.",
     "storage_full": "Não foi possível salvar — o armazenamento do navegador está cheio. Libere espaço para manter suas alterações.",
     "copy_failed": "Falha ao copiar — use Ctrl+C manualmente.",
-    "tool_info": "Sobre esta ferramenta"
+    "tool_info": "Sobre esta ferramenta",
+    "toggle_fullscreen": "Alternar tela cheia"
   },
   "home": {
     "cli": {
@@ -1109,6 +1110,7 @@
     "list_label": "Resultados da busca",
     "no_results": "Nenhum resultado",
     "recents": "Recentes",
-    "open": "Abrir paleta de comandos"
+    "open": "Abrir paleta de comandos",
+    "app_bar": "Navegação do aplicativo"
   }
 }

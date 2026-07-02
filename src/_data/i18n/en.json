@@ -131,7 +131,8 @@
     "download_postponed": "Download paused — reload the page to start.",
     "storage_full": "Couldn't save — your browser storage is full. Free up space to keep your changes.",
     "copy_failed": "Copy failed — use Ctrl+C manually.",
-    "tool_info": "About this tool"
+    "tool_info": "About this tool",
+    "toggle_fullscreen": "Toggle fullscreen"
   },
   "home": {
     "cli": {
@@ -1109,6 +1110,7 @@
     "list_label": "Search results",
     "no_results": "No matches",
     "recents": "Recent",
-    "open": "Open command palette"
+    "open": "Open command palette",
+    "app_bar": "App navigation"
   }
 }

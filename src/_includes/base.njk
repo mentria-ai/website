@@ -245,6 +245,12 @@
     {% include "footer.njk" %}
     {% endif %}
 
+    <nav class="app-bar" aria-label="{{ 'palette.app_bar' | t }}">
+      <a class="app-bar__item" href="{{ localePrefix }}/"{% if isHomePage %} aria-current="page"{% endif %}>{{ 'nav.home' | t }}</a>
+      <button type="button" class="app-bar__item" data-palette-open aria-label="{{ 'palette.open' | t }}">⌘K</button>
+      <a class="app-bar__item" href="{{ localePrefix }}/feed/"{% if inFeed %} aria-current="page"{% endif %}>{{ 'nav.feed' | t }}</a>
+    </nav>
+
     {% include "pwa-install.njk" %}
 
     <div id="m-dialog" popover="manual" class="m-dialog" role="alertdialog" aria-modal="true" aria-labelledby="m-dialog-msg">
@@ -438,18 +444,36 @@
         var FS = 'terminal-frame--fullscreen';
         var BODY_FS = 'is-fullscreen-tool';
         function activeFrame() { return document.querySelector('.' + FS); }
-        function exit() {
+        function toolSlug() {
+          var m = (location.pathname || '').match(/\/tools\/([^/]+)\//);
+          return m ? m[1] : null;
+        }
+        function persist(state) {
+          var slug = toolSlug();
+          if (!slug || !window.MentriaStore || typeof window.MentriaStore.set !== 'function') return;
+          window.MentriaStore.set('ui', 'fullscreen.' + slug, state);
+        }
+        function syncPressed(frame, state) {
+          if (!frame) return;
+          var btns = frame.querySelectorAll('[data-action="toggle-fullscreen"]');
+          for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', state ? 'true' : 'false');
+        }
+        function exit(skipPersist) {
           var frame = activeFrame();
           if (!frame) return;
           frame.classList.remove(FS);
           document.body.classList.remove(BODY_FS);
+          syncPressed(frame, false);
+          if (!skipPersist) persist(false);
           window.dispatchEvent(new Event('resize'));
         }
-        function enter(frame) {
+        function enter(frame, skipPersist) {
           var current = activeFrame();
-          if (current && current !== frame) current.classList.remove(FS);
+          if (current && current !== frame) { current.classList.remove(FS); syncPressed(current, false); }
           frame.classList.add(FS);
           document.body.classList.add(BODY_FS);
+          syncPressed(frame, true);
+          if (!skipPersist) persist(true);
           window.dispatchEvent(new Event('resize'));
         }
         document.addEventListener('click', function (e) {
@@ -462,6 +486,13 @@
         });
         document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape' && activeFrame()) exit();
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+          var slug = toolSlug();
+          if (!slug || !window.MentriaStore || typeof window.MentriaStore.get !== 'function') return;
+          if (window.MentriaStore.get('ui', 'fullscreen.' + slug) !== true) return;
+          var frame = document.querySelector('.terminal-frame');
+          if (frame) enter(frame, true);
         });
       })();
     </script>

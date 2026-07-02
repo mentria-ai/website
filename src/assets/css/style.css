@@ -645,6 +645,34 @@ html.app-chrome body:has(.terminal-frame) .hero.hero--peek {
   border-radius: var(--radius-sm);
 }
 
+.terminal-frame__expand {
+  margin-left: var(--space-2);
+  height: 24px;
+  min-width: 24px;
+  padding: 0 var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  line-height: 1;
+  color: var(--term-muted);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.terminal-frame__expand:hover,
+.terminal-frame__expand:focus-visible {
+  color: var(--syn-cyan);
+  border-color: var(--syn-cyan);
+  outline: none;
+}
+.terminal-frame__expand[aria-pressed="true"] {
+  color: var(--syn-cyan);
+  border-color: var(--syn-cyan);
+}
+
 /* iOS Safari auto-zooms when a focused text field has computed
    font-size < 16px. Even with user-scalable=no on the viewport this
    focus-zoom still fires on some iOS versions. Force a 16px floor on
@@ -952,12 +980,54 @@ body.pwa-sheet-open { overflow: hidden; }
   navigation: auto;
 }
 
+.launcher__recents .launch-tile {
+  view-transition-name: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
   }
+}
+
+.app-bar {
+  display: none;
+}
+html.is-standalone .app-bar {
+  display: flex;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  height: 56px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--term-bg-raised);
+  border-top: 1px solid var(--term-border);
+}
+html.is-standalone .app-bar__item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--term-muted);
+  background: transparent;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+}
+html.is-standalone .app-bar__item[aria-current="page"] {
+  color: var(--syn-cyan);
+}
+html.is-standalone body {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+body.is-fullscreen-tool .app-bar {
+  display: none !important;
 }
 
 .tool-share {

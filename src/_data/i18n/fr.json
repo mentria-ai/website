@@ -131,7 +131,8 @@
     "download_postponed": "Téléchargement en pause — rechargez la page pour démarrer.",
     "storage_full": "Échec de l'enregistrement — le stockage du navigateur est plein. Libérez de l'espace pour conserver vos modifications.",
     "copy_failed": "Échec de copie — utilisez Ctrl+C manuellement.",
-    "tool_info": "À propos de cet outil"
+    "tool_info": "À propos de cet outil",
+    "toggle_fullscreen": "Basculer en plein écran"
   },
   "home": {
     "cli": {
@@ -1109,6 +1110,7 @@
     "list_label": "Résultats de recherche",
     "no_results": "Aucun résultat",
     "recents": "Récents",
-    "open": "Ouvrir la palette de commandes"
+    "open": "Ouvrir la palette de commandes",
+    "app_bar": "Navigation de l'application"
   }
 }

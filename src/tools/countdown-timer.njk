@@ -17,7 +17,6 @@ eleventyComputed:
   {% include "tldr.njk" %}
 </section>
 
-<!-- ── Widget Grid ────────────────────────────────────── -->
 {% set terminalTitle = "countdown-timer.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="countdown-tool">
@@ -25,29 +24,25 @@ eleventyComputed:
     <span class="ct-notif-dot" id="ct-notif-dot" aria-hidden="true"></span>
     <span class="ct-notif-text" id="ct-notif-text">{{ "tool.countdown-timer.notif_check" | t }}</span>
     <span class="ct-notif-actions">
-      <button class="ct-notif-btn" id="ct-notif-enable" hidden>{{ "tool.countdown-timer.notif_enable_btn" | t }}</button>
-      <button class="ct-notif-btn ct-notif-btn--ghost" id="ct-notif-test" hidden>{{ "tool.countdown-timer.notif_test_btn" | t }}</button>
+      <button class="m-btn m-btn--primary m-btn--pill" id="ct-notif-enable" hidden>{{ "tool.countdown-timer.notif_enable_btn" | t }}</button>
+      <button class="m-btn m-btn--ghost m-btn--pill" id="ct-notif-test" hidden>{{ "tool.countdown-timer.notif_test_btn" | t }}</button>
     </span>
   </div>
 
-  <div class="ct-grid" id="ct-grid">
-    <!-- widgets injected here -->
-  </div>
-  <button class="ct-add-btn" id="ct-add-btn" title="{{ 'tool.countdown-timer.btn_add_timer' | t }}">
+  <div class="ct-grid" id="ct-grid"></div>
+  <button class="ct-add-btn m-btn m-btn--ghost" id="ct-add-btn" title="{{ 'tool.countdown-timer.btn_add_timer' | t }}">
     <span class="ct-add-btn__icon">+</span>
     <span>{{ "tool.countdown-timer.btn_add_timer" | t }}</span>
   </button>
 </section>
 {% include "terminal-frame-close.njk" %}
 
-<!-- ── Widget Template ───────────────────────────────── -->
 <template id="ct-widget-tpl">
   <div class="ct-widget" data-widget-id="">
     <button class="ct-widget__close" title="{{ 'tool.countdown-timer.btn_remove_timer' | t }}">&times;</button>
 
     <div class="ct-widget__title" contenteditable="true" spellcheck="false" data-placeholder="Timer"></div>
 
-    <!-- Display -->
     <div class="ct-widget__display-wrap">
       <div class="ct-widget__display">
         <span class="ct-widget__seg" data-role="hours">00</span>
@@ -59,47 +54,47 @@ eleventyComputed:
       <div class="ct-widget__status">{{ "tool.countdown-timer.status_ready" | t }}</div>
     </div>
 
-    <div class="ct-widget__mode-toggle">
-      <button class="ct-mode-btn ct-mode-btn--active" data-mode="duration">{{ "tool.countdown-timer.mode_duration" | t }}</button>
-      <button class="ct-mode-btn" data-mode="datetime">{{ "tool.countdown-timer.mode_datetime" | t }}</button>
+    <div class="ct-widget__mode-toggle m-seg">
+      <button data-mode="duration" data-value="duration" class="is-active">{{ "tool.countdown-timer.mode_duration" | t }}</button>
+      <button data-mode="datetime" data-value="datetime">{{ "tool.countdown-timer.mode_datetime" | t }}</button>
     </div>
 
     <div class="ct-widget__inputs" data-panel="duration">
       <div class="ct-input-grp">
         <label>{{ "tool.countdown-timer.input_hours" | t }}</label>
-        <input type="number" data-input="hours" min="0" max="99" value="0" />
+        <input class="m-input" type="number" data-input="hours" min="0" max="99" value="0" />
       </div>
       <div class="ct-input-grp">
         <label>{{ "tool.countdown-timer.input_minutes" | t }}</label>
-        <input type="number" data-input="mins" min="0" max="59" value="0" />
+        <input class="m-input" type="number" data-input="mins" min="0" max="59" value="0" />
       </div>
       <div class="ct-input-grp">
         <label>{{ "tool.countdown-timer.input_seconds" | t }}</label>
-        <input type="number" data-input="secs" min="0" max="59" value="0" />
+        <input class="m-input" type="number" data-input="secs" min="0" max="59" value="0" />
       </div>
     </div>
 
     <div class="ct-widget__inputs ct-widget__inputs--hidden" data-panel="datetime">
       <div class="ct-input-grp ct-input-grp--wide">
         <label>{{ "tool.countdown-timer.input_until_label" | t }}</label>
-        <input type="datetime-local" data-input="datetime" />
+        <input class="m-input" type="datetime-local" data-input="datetime" />
       </div>
       <div class="ct-widget__dt-error" data-role="dt-error"></div>
     </div>
 
     <div class="ct-widget__presets">
       <span>{{ "tool.countdown-timer.presets_label" | t }}</span>
-      <button class="ct-preset" data-seconds="60">{{ "tool.countdown-timer.preset_1min" | t }}</button>
-      <button class="ct-preset" data-seconds="300">{{ "tool.countdown-timer.preset_5min" | t }}</button>
-      <button class="ct-preset" data-seconds="600">{{ "tool.countdown-timer.preset_10min" | t }}</button>
-      <button class="ct-preset" data-seconds="1500">{{ "tool.countdown-timer.preset_25min" | t }}</button>
-      <button class="ct-preset" data-seconds="3600">{{ "tool.countdown-timer.preset_1hr" | t }}</button>
+      <button class="ct-preset m-btn m-btn--ghost m-btn--pill" data-seconds="60">{{ "tool.countdown-timer.preset_1min" | t }}</button>
+      <button class="ct-preset m-btn m-btn--ghost m-btn--pill" data-seconds="300">{{ "tool.countdown-timer.preset_5min" | t }}</button>
+      <button class="ct-preset m-btn m-btn--ghost m-btn--pill" data-seconds="600">{{ "tool.countdown-timer.preset_10min" | t }}</button>
+      <button class="ct-preset m-btn m-btn--ghost m-btn--pill" data-seconds="1500">{{ "tool.countdown-timer.preset_25min" | t }}</button>
+      <button class="ct-preset m-btn m-btn--ghost m-btn--pill" data-seconds="3600">{{ "tool.countdown-timer.preset_1hr" | t }}</button>
     </div>
 
     <div class="ct-widget__controls">
-      <button class="ct-btn ct-btn--primary" data-action="start">{{ "tool.countdown-timer.btn_start" | t }}</button>
-      <button class="ct-btn ct-btn--secondary" data-action="pause" disabled>{{ "tool.countdown-timer.btn_pause" | t }}</button>
-      <button class="ct-btn ct-btn--ghost" data-action="reset" disabled>{{ "tool.countdown-timer.btn_reset" | t }}</button>
+      <button class="m-btn m-btn--primary" data-action="start">{{ "tool.countdown-timer.btn_start" | t }}</button>
+      <button class="m-btn m-btn--ghost" data-action="pause" disabled>{{ "tool.countdown-timer.btn_pause" | t }}</button>
+      <button class="m-btn m-btn--ghost" data-action="reset" disabled>{{ "tool.countdown-timer.btn_reset" | t }}</button>
     </div>
   </div>
 </template>
@@ -139,20 +134,15 @@ eleventyComputed:
   const fmtTimer = n => COPY.timerDefault.replace('{n}', n);
 
   const MAX_WIDGETS = 4;
-  const MAX_SECONDS = 99 * 3600; // 99 hours
+  const MAX_SECONDS = 99 * 3600;
   const grid = document.getElementById('ct-grid');
   const addBtn = document.getElementById('ct-add-btn');
   const tpl = document.getElementById('ct-widget-tpl');
   const originalTitle = document.title;
 
   let nextId = 1;
-  const widgets = new Map(); // id → state
+  const widgets = new Map();
 
-  /* ── Notifications ─────────────────────────────────── */
-  // Wires the system notification tray to timer expiry. When the tab is
-  // hidden and a timer hits 0, we show a system notification via the
-  // service worker registration so it survives the page being backgrounded.
-  // Notification clicks/actions post a message back to focus + stop alarm.
   const NOTIF_ICON  = '/assets/img/icon-192x192.png';
   const NOTIF_BADGE = '/assets/img/badge.svg';
   const NOTIF_TAG_PREFIX = 'mentria-timer-';
@@ -167,7 +157,7 @@ eleventyComputed:
   }
   function notifState() {
     if (!notifSupported()) return 'unsupported';
-    return Notification.permission; // 'granted' | 'denied' | 'default'
+    return Notification.permission;
   }
 
   function refreshNotifBar() {
@@ -215,8 +205,6 @@ eleventyComputed:
 
   async function notifyTimerFinished(state, label) {
     if (notifState() !== 'granted') return;
-    // Only notify when the tab is hidden — visible tabs already have the
-    // in-page alarm + flash + page-title flag. Notifying both ways is noisy.
     if (!document.hidden) return;
     await showRawNotification(COPY.notifFinishFmt.replace('{label}', label), {
       body: COPY.notifBodyOpen,
@@ -239,7 +227,6 @@ eleventyComputed:
     });
   }
 
-  // Listen for messages from the service worker (notification action clicks)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (!event.data) return;
@@ -258,11 +245,9 @@ eleventyComputed:
 
   notifEnable.addEventListener('click', requestNotifPermission);
   notifTest.addEventListener('click', testNotification);
-  // Refresh on visibility change — picks up permission changes made elsewhere.
   document.addEventListener('visibilitychange', refreshNotifBar);
   refreshNotifBar();
 
-  /* ── Audio ─────────────────────────────────────────── */
   let audioCtx = null;
 
   function initAudio() {
@@ -309,7 +294,6 @@ eleventyComputed:
     if (state.alarmInterval) { clearInterval(state.alarmInterval); state.alarmInterval = null; }
   }
 
-  /* ── Helpers ───────────────────────────────────────── */
   const pad = n => String(n).padStart(2, '0');
 
   function updatePageTitle() {
@@ -332,8 +316,6 @@ eleventyComputed:
     addBtn.style.display = widgets.size >= MAX_WIDGETS ? 'none' : '';
   }
 
-  /* ── Widget Lifecycle ──────────────────────────────── */
-
   function addWidget() {
     if (widgets.size >= MAX_WIDGETS) return;
     const id = nextId++;
@@ -344,7 +326,6 @@ eleventyComputed:
     titleEl.textContent = fmtTimer(widgets.size + 1);
     titleEl.dataset.isDefault = '1';
 
-    // Scoped refs
     const $ = sel => el.querySelector(sel);
     const $$ = sel => el.querySelectorAll(sel);
 
@@ -364,7 +345,7 @@ eleventyComputed:
     const btnPause = $('[data-action="pause"]');
     const btnReset = $('[data-action="reset"]');
     const btnClose = $('.ct-widget__close');
-    const modeButtons = $$('.ct-mode-btn');
+    const modeToggle = $('.ct-widget__mode-toggle');
     const presetButtons = $$('.ct-preset');
 
     const state = {
@@ -374,12 +355,11 @@ eleventyComputed:
       isPaused: false,
       isAlarming: false,
       alarmInterval: null,
-      mode: 'duration', // 'duration' | 'datetime'
+      mode: 'duration',
     };
 
     widgets.set(id, state);
 
-    // ── Display ──
     function updateDisplay() {
       const h = Math.floor(state.totalSeconds / 3600);
       const m = Math.floor((state.totalSeconds % 3600) / 60);
@@ -390,7 +370,6 @@ eleventyComputed:
       updatePageTitle();
     }
 
-    // ── Tick ──
     function tick() {
       state.totalSeconds = Math.max(0, Math.round((state.endAt - Date.now()) / 1000));
       if (state.totalSeconds > 0) {
@@ -432,7 +411,6 @@ eleventyComputed:
       if (window.MentriaPush) MentriaPush.cancel('ct-' + state.id);
     }
 
-    // ── Compute seconds from datetime ──
     function getSecondsFromDatetime() {
       const val = inputDT.value;
       if (!val) { dtError.textContent = COPY.errPickDt; return -1; }
@@ -444,7 +422,6 @@ eleventyComputed:
       return diff;
     }
 
-    // ── Start / Pause / Resume ──
     function startTimer() {
       initAudio();
 
@@ -470,7 +447,6 @@ eleventyComputed:
         return;
       }
 
-      // New start
       if (state.mode === 'datetime') {
         const secs = getSecondsFromDatetime();
         if (secs < 0) return;
@@ -522,7 +498,6 @@ eleventyComputed:
       btnReset.disabled = true;
       presetButtons.forEach(b => b.disabled = false);
       dtError.textContent = '';
-      // Show the active panel
       if (state.mode === 'duration') {
         panelDuration.classList.remove('ct-widget__inputs--hidden');
       } else {
@@ -534,9 +509,8 @@ eleventyComputed:
     function setPreset(seconds) {
       resetTimer();
       if (state.mode === 'datetime') {
-        // Switch to duration mode for presets
         state.mode = 'duration';
-        modeButtons.forEach(b => b.classList.toggle('ct-mode-btn--active', b.dataset.mode === 'duration'));
+        modeSeg.set('duration');
         panelDuration.classList.remove('ct-widget__inputs--hidden');
         panelDatetime.classList.add('ct-widget__inputs--hidden');
       }
@@ -550,7 +524,6 @@ eleventyComputed:
       updateDisplay();
     }
 
-    // ── Events ──
     btnStart.addEventListener('click', startTimer);
     btnPause.addEventListener('click', () => {
       if (state.countdown) {
@@ -566,18 +539,13 @@ eleventyComputed:
 
     btnClose.addEventListener('click', () => removeWidget(id));
 
-    // Mode switching
-    modeButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (state.countdown || state.isPaused) return; // don't switch while running
-        state.mode = btn.dataset.mode;
-        modeButtons.forEach(b => b.classList.toggle('ct-mode-btn--active', b === btn));
-        panelDuration.classList.toggle('ct-widget__inputs--hidden', state.mode !== 'duration');
-        panelDatetime.classList.toggle('ct-widget__inputs--hidden', state.mode !== 'datetime');
-      });
+    const modeSeg = MentriaUI.segmented(modeToggle, (mode) => {
+      if (state.countdown || state.isPaused) { modeSeg.set(state.mode); return; }
+      state.mode = mode;
+      panelDuration.classList.toggle('ct-widget__inputs--hidden', state.mode !== 'duration');
+      panelDatetime.classList.toggle('ct-widget__inputs--hidden', state.mode !== 'datetime');
     });
 
-    // Duration inputs update display
     [inputH, inputM, inputS].forEach(inp => {
       inp.addEventListener('input', () => {
         if (!state.countdown && !state.isPaused) {
@@ -590,7 +558,6 @@ eleventyComputed:
       });
     });
 
-    // Datetime input live preview
     inputDT.addEventListener('input', () => {
       if (!state.countdown && !state.isPaused) {
         const secs = getSecondsFromDatetime();
@@ -598,7 +565,6 @@ eleventyComputed:
       }
     });
 
-    // Presets
     presetButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         if (state.countdown || state.isPaused) return;
@@ -606,7 +572,6 @@ eleventyComputed:
       });
     });
 
-    // Placeholder behaviour for contenteditable title
     titleEl.addEventListener('focus', () => {
       if (titleEl.dataset.isDefault === '1') titleEl.textContent = '';
     });
@@ -621,7 +586,6 @@ eleventyComputed:
       if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
     });
 
-    // Set default datetime-local to 5 minutes from now
     const now = new Date(Date.now() + 5 * 60 * 1000);
     const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     inputDT.value = iso;
@@ -644,14 +608,12 @@ eleventyComputed:
     updatePageTitle();
   }
 
-  // ── Boot ──
   addBtn.addEventListener('click', addWidget);
-  addWidget(); // spawn first widget on load
+  addWidget();
 })();
 </script>
 
 <style>
-/* ── Container ─────────────────────────────────────── */
 .countdown-tool {
   display: flex;
   flex-direction: column;
@@ -661,7 +623,6 @@ eleventyComputed:
   margin: 0 auto;
 }
 
-/* ── Notification bar ──────────────────────────────── */
 .ct-notif-bar {
   display: flex;
   align-items: center;
@@ -670,7 +631,7 @@ eleventyComputed:
   width: 100%;
   background: rgba(255, 149, 0, 0.05);
   border: 1px solid rgba(255, 149, 0, 0.2);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   font-size: 0.82rem;
   color: var(--term-fg);
   flex-wrap: wrap;
@@ -704,32 +665,10 @@ eleventyComputed:
   color: rgba(226, 232, 240, 0.85);
 }
 .ct-notif-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-.ct-notif-btn {
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 149, 0, 0.4);
-  background: rgba(255, 149, 0, 0.14);
-  color: #ff9500;
-  cursor: pointer;
-  transition: all 0.15s ease;
+.ct-notif-actions .m-btn {
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-3);
   white-space: nowrap;
-}
-.ct-notif-btn:hover {
-  background: rgba(255, 149, 0, 0.24);
-  border-color: #ff9500;
-}
-.ct-notif-btn--ghost {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.18);
-  color: rgba(226, 232, 240, 0.7);
-}
-.ct-notif-btn--ghost:hover {
-  color: var(--term-fg);
-  border-color: rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.04);
 }
 @media (max-width: 480px) {
   .ct-notif-bar { font-size: 0.78rem; gap: 0.5rem; padding: 0.5rem 0.7rem; }
@@ -737,7 +676,6 @@ eleventyComputed:
   .ct-notif-actions { flex-basis: 100%; }
 }
 
-/* ── Grid ──────────────────────────────────────────── */
 .ct-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -745,7 +683,6 @@ eleventyComputed:
   width: 100%;
 }
 
-/* ── Add Button ────────────────────────────────────── */
 .ct-add-btn {
   display: flex;
   align-items: center;
@@ -753,31 +690,17 @@ eleventyComputed:
   gap: 0.5rem;
   width: 100%;
   max-width: 300px;
-  padding: 1rem;
-  border: 2px dashed rgba(255, 149, 0, 0.3);
-  border-radius: 16px;
-  background: transparent;
-  color: rgba(255, 149, 0, 0.7);
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-.ct-add-btn:hover {
-  border-color: #ff9500;
-  color: #ff9500;
-  background: rgba(255, 149, 0, 0.06);
+  padding: var(--space-4);
 }
 .ct-add-btn__icon {
   font-size: 1.5rem;
   line-height: 1;
 }
 
-/* ── Widget Card ───────────────────────────────────── */
 .ct-widget {
   position: relative;
-  background: #0a0a0a;
-  border-radius: 16px;
+  background: var(--term-bg);
+  border-radius: var(--radius-xl);
   padding: 1.5rem 1.5rem 1.25rem;
   border: 1px solid rgba(255, 165, 0, 0.15);
   box-shadow:
@@ -794,7 +717,6 @@ eleventyComputed:
   border-color: rgba(255, 165, 0, 0.3);
 }
 
-/* Close button */
 .ct-widget__close {
   position: absolute;
   top: 0.6rem;
@@ -806,7 +728,7 @@ eleventyComputed:
   cursor: pointer;
   line-height: 1;
   padding: 0.2rem 0.4rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: color 0.2s, background 0.2s;
 }
 .ct-widget__close:hover {
@@ -814,7 +736,6 @@ eleventyComputed:
   background: rgba(255, 85, 85, 0.1);
 }
 
-/* ── Title ─────────────────────────────────────────── */
 .ct-widget__title {
   font-size: 1rem;
   color: #ff9500;
@@ -835,7 +756,6 @@ eleventyComputed:
   border-bottom-color: #ff9500;
 }
 
-/* ── Display ───────────────────────────────────────── */
 .ct-widget__display-wrap {
   width: 100%;
 }
@@ -885,33 +805,6 @@ eleventyComputed:
   margin-top: 0.25rem;
 }
 
-/* ── Mode Toggle ───────────────────────────────────── */
-.ct-widget__mode-toggle {
-  display: flex;
-  border-radius: 999px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 149, 0, 0.25);
-}
-.ct-mode-btn {
-  flex: 1;
-  padding: 0.45rem 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border: none;
-  background: transparent;
-  color: rgba(255, 149, 0, 0.5);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.ct-mode-btn--active {
-  background: rgba(255, 149, 0, 0.18);
-  color: #ff9500;
-}
-.ct-mode-btn:hover:not(.ct-mode-btn--active) {
-  color: rgba(255, 149, 0, 0.8);
-}
-
-/* ── Inputs ────────────────────────────────────────── */
 .ct-widget__inputs {
   display: flex;
   gap: 0.75rem;
@@ -936,17 +829,9 @@ eleventyComputed:
   color: var(--term-muted);
   font-weight: 500;
 }
-.ct-input-grp input[type="number"],
-.ct-input-grp input[type="datetime-local"] {
-  padding: 0.55rem 0.7rem;
-  font-size: 1.1rem;
+.ct-input-grp .m-input {
   text-align: center;
-  border: 2px solid rgba(255, 149, 0, 0.3);
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.4);
-  color: #ff9500;
   font-weight: 600;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .ct-input-grp input[type="number"] { width: 72px; }
 .ct-input-grp input[type="datetime-local"] {
@@ -955,18 +840,12 @@ eleventyComputed:
   color-scheme: dark;
   font-size: 0.95rem;
 }
-.ct-input-grp input:focus {
-  outline: none;
-  border-color: #ff9500;
-  box-shadow: 0 0 12px rgba(255, 149, 0, 0.3);
-}
 .ct-input-grp input[type="number"]::-webkit-outer-spin-button,
 .ct-input-grp input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Date-time error */
 .ct-widget__dt-error {
   width: 100%;
   font-size: 0.8rem;
@@ -974,7 +853,6 @@ eleventyComputed:
   min-height: 1.2em;
 }
 
-/* ── Presets ────────────────────────────────────────── */
 .ct-widget__presets {
   display: flex;
   gap: 0.4rem;
@@ -985,73 +863,17 @@ eleventyComputed:
   color: var(--term-muted);
 }
 .ct-preset {
-  padding: 0.3rem 0.7rem;
-  font-size: 0.78rem;
-  font-weight: 500;
-  border: 1px solid rgba(255, 149, 0, 0.25);
-  border-radius: 999px;
-  background: rgba(255, 149, 0, 0.08);
-  color: #ff9500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.ct-preset:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-.ct-preset:hover:not(:disabled) {
-  background: rgba(255, 149, 0, 0.2);
-  border-color: rgba(255, 149, 0, 0.5);
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-3);
 }
 
-/* ── Controls ──────────────────────────────────────── */
 .ct-widget__controls {
   display: flex;
   gap: 0.6rem;
   flex-wrap: wrap;
   justify-content: center;
 }
-.ct-btn {
-  border: none;
-  border-radius: 999px;
-  padding: 0.6rem 1.6rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.ct-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-.ct-btn--primary {
-  background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
-  color: #000;
-  box-shadow: 0 4px 15px rgba(255, 149, 0, 0.4);
-}
-.ct-btn--primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 149, 0, 0.5);
-}
-.ct-btn--secondary {
-  background: rgba(255, 149, 0, 0.15);
-  color: #ff9500;
-  border: 1px solid rgba(255, 149, 0, 0.3);
-}
-.ct-btn--secondary:hover:not(:disabled) {
-  background: rgba(255, 149, 0, 0.25);
-}
-.ct-btn--ghost {
-  background: transparent;
-  color: var(--term-fg);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-.ct-btn--ghost:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.05);
-}
 
-/* ── Responsive ────────────────────────────────────── */
 @media (max-width: 640px) {
   .ct-grid {
     grid-template-columns: 1fr;

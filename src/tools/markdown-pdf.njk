@@ -21,24 +21,24 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 <section class="mp">
   <div class="mp__actions no-print">
-    <button class="mp__btn mp__btn--primary" id="mp-download" title="{{ 'tool.markdown-pdf.title_download' | t }}">
+    <button class="mp__btn m-btn m-btn--primary" id="mp-download" title="{{ 'tool.markdown-pdf.title_download' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       {{ "tool.markdown-pdf.btn_download" | t }}
     </button>
-    <button class="mp__btn" id="mp-export" title="{{ 'tool.markdown-pdf.title_export' | t }}">
+    <button class="mp__btn m-btn m-btn--ghost" id="mp-export" title="{{ 'tool.markdown-pdf.title_export' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       {{ "tool.markdown-pdf.btn_export" | t }}
     </button>
-    <button class="mp__btn" id="mp-share" title="{{ 'common.share' | t }}">
+    <button class="mp__btn m-btn m-btn--ghost" id="mp-share" title="{{ 'common.share' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
       {{ "common.share" | t }}
     </button>
-    <label class="mp__btn mp__btn--label" for="mp-file" title="{{ 'tool.markdown-pdf.title_import' | t }}">
+    <label class="mp__btn m-btn m-btn--ghost" for="mp-file" title="{{ 'tool.markdown-pdf.title_import' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       {{ "tool.markdown-pdf.btn_import" | t }}
       <input type="file" id="mp-file" accept=".md,.markdown,text/markdown,text/plain" hidden>
     </label>
-    <button class="mp__btn mp__btn--danger" id="mp-clear" title="{{ 'tool.markdown-pdf.title_clear' | t }}">
+    <button class="mp__btn m-btn m-btn--danger" id="mp-clear" title="{{ 'tool.markdown-pdf.title_clear' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
       {{ "tool.markdown-pdf.btn_clear" | t }}
     </button>
@@ -190,17 +190,13 @@ function updateCounts() {
 }
 
 /* ── Persistence ────────────────────────────────────────────────── */
-let saveTimer = null;
-function scheduleSave() {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    try {
-      if (window.MentriaStore) window.MentriaStore.set('tools', 'mdpdf_content', inputEl.value);
-      else localStorage.setItem(LS_KEY, inputEl.value);
-      flashSaved();
-    } catch (_) { /* quota etc. — ignore */ }
-  }, 500);
-}
+const saver = MentriaUI.debouncedSaver(() => {
+  try {
+    if (window.MentriaStore) window.MentriaStore.set('tools', 'mdpdf_content', inputEl.value);
+    else localStorage.setItem(LS_KEY, inputEl.value);
+    flashSaved();
+  } catch (_) {}
+}, 500);
 
 let flashTimer = null;
 function flashSaved() {
@@ -459,7 +455,7 @@ function importMD(file) {
   reader.onload = (e) => {
     inputEl.value = e.target.result || '';
     render();
-    scheduleSave();
+    saver.schedule();
   };
   reader.readAsText(file);
 }
@@ -479,7 +475,7 @@ function setTab(tab) {
 /* ── Events ─────────────────────────────────────────────────────── */
 inputEl.addEventListener('input', () => {
   scheduleRender();
-  scheduleSave();
+  saver.schedule();
   syncFilenameForContent();
 });
 
@@ -493,7 +489,7 @@ inputEl.addEventListener('keydown', (e) => {
     inputEl.value = v.slice(0, start) + '  ' + v.slice(end);
     inputEl.selectionStart = inputEl.selectionEnd = start + 2;
     scheduleRender();
-    scheduleSave();
+    saver.schedule();
   }
 });
 
@@ -564,33 +560,9 @@ if ('launchQueue' in window) {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  padding: 0.45rem 0.75rem;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--term-border);
-  color: var(--term-fg);
-  border-radius: 5px;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  padding: 0.4rem 0.7rem;
+  font-size: var(--text-xs);
 }
-.mp__btn:hover { border-color: rgba(255,255,255,0.18); }
-.mp__btn--primary {
-  background: var(--syn-cyan);
-  color: #000;
-  border-color: var(--syn-cyan);
-}
-.mp__btn--primary:hover {
-  background: #67e8f9;
-  box-shadow: 0 0 14px rgba(34, 211, 238, 0.3);
-}
-.mp__btn--danger { color: var(--syn-pink); border-color: rgba(244, 114, 182, 0.25); }
-.mp__btn--danger:hover {
-  background: rgba(244, 114, 182, 0.1);
-  border-color: rgba(244, 114, 182, 0.5);
-}
-.mp__btn--label { cursor: pointer; }
-.mp__btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* Mobile tabs (desktop hides them) */
 .mp__tabs {
@@ -659,7 +631,7 @@ if ('launchQueue' in window) {
   padding: 0.35rem 0.7rem;
   border-radius: 4px;
   border: 1px solid rgba(167,139,250,0.3);
-  background: rgba(167,139,250,0.08);
+  background: var(--purple-8);
   color: var(--syn-purple);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -780,7 +752,7 @@ if ('launchQueue' in window) {
   margin: 0.2em 0;
 }
 .mp__preview a { color: var(--syn-cyan); text-decoration: underline; text-decoration-color: rgba(34,211,238,0.4); }
-.mp__preview a:hover { color: #67e8f9; text-decoration-color: var(--syn-cyan); }
+.mp__preview a:hover { color: var(--syn-cyan-soft); text-decoration-color: var(--syn-cyan); }
 
 .mp__preview blockquote {
   margin: 0 0 0.9em;

@@ -226,14 +226,18 @@ self.addEventListener('fetch', event => {
     }
     const cached = await caches.match(event.request, { ignoreSearch: true });
     if (cached) return cached;
-    if (event.request.mode === 'navigate') {
-      const stripped = url.pathname.replace(/^\/(es|fr|ja|pt-br)(\/|$)/, '/');
-      if (stripped !== url.pathname) {
-        const alt = await caches.match(stripped, { ignoreSearch: true });
-        if (alt) return alt;
+    try {
+      return await fetch(event.request);
+    } catch (err) {
+      if (event.request.mode === 'navigate') {
+        const stripped = url.pathname.replace(/^\/(es|fr|ja|pt-br)(\/|$)/, '/');
+        if (stripped !== url.pathname) {
+          const alt = await caches.match(stripped, { ignoreSearch: true });
+          if (alt) return alt;
+        }
       }
+      throw err;
     }
-    return fetch(event.request);
   })());
 });
 

@@ -20,7 +20,7 @@ eleventyComputed:
 {% set terminalTitle = "totp.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="totp" id="totp">
-  <div class="totp-status" id="totp-status" role="status" aria-live="polite"></div>
+  <div class="totp-status m-status" id="totp-status" role="status" aria-live="polite"></div>
 
   <div class="totp-locked" id="totp-locked" hidden>
     <h2 class="totp-locked__h">{{ "tool.totp.locked_title" | t }}</h2>
@@ -36,41 +36,41 @@ eleventyComputed:
         <input type="password" id="totp-setup-pass2" autocomplete="new-password" minlength="8">
       </label>
       <div class="totp-strength" id="totp-setup-strength" aria-live="polite"></div>
-      <button type="button" class="totp-btn" id="totp-setup-btn">{{ "tool.totp.setup_button" | t }}</button>
+      <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-setup-btn">{{ "tool.totp.setup_button" | t }}</button>
     </div>
 
     <div class="totp-unlock" id="totp-unlock" hidden>
-      <button type="button" class="totp-btn totp-btn--prf" id="totp-prf-btn" hidden>{{ "tool.totp.unlock_prf" | t }}</button>
+      <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-prf-btn" hidden>{{ "tool.totp.unlock_prf" | t }}</button>
       <div class="totp-divider" id="totp-divider" hidden><span>{{ "tool.totp.or" | t }}</span></div>
       <label class="totp-field">
         <span>{{ "tool.totp.pass_label" | t }}</span>
         <input type="password" id="totp-unlock-pass" autocomplete="current-password">
       </label>
-      <button type="button" class="totp-btn" id="totp-unlock-btn">{{ "tool.totp.unlock_button" | t }}</button>
+      <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-unlock-btn">{{ "tool.totp.unlock_button" | t }}</button>
     </div>
   </div>
 
   <div class="totp-vault" id="totp-vault" hidden>
     <div class="totp-toolbar">
-      <button type="button" class="totp-btn totp-btn--ghost" id="totp-add-btn">+ {{ "tool.totp.add_button" | t }}</button>
-      <button type="button" class="totp-btn totp-btn--ghost" id="totp-prf-enroll-btn" hidden>{{ "tool.totp.enroll_prf" | t }}</button>
-      <button type="button" class="totp-btn totp-btn--ghost" id="totp-backup-btn">{{ "tool.totp.backup_button" | t }}</button>
-      <button type="button" class="totp-btn totp-btn--ghost" id="totp-lock-btn">{{ "tool.totp.lock_button" | t }}</button>
+      <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-add-btn">+ {{ "tool.totp.add_button" | t }}</button>
+      <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-prf-enroll-btn" hidden>{{ "tool.totp.enroll_prf" | t }}</button>
+      <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-backup-btn">{{ "tool.totp.backup_button" | t }}</button>
+      <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-lock-btn">{{ "tool.totp.lock_button" | t }}</button>
     </div>
 
     <ul class="totp-list" id="totp-list"></ul>
     <p class="totp-empty" id="totp-empty" hidden>{{ "tool.totp.empty_state" | t }}</p>
   </div>
 
-  <div class="totp-modal" id="totp-add-modal" hidden>
+  <div class="totp-modal m-modal" id="totp-add-modal" hidden>
     <div class="totp-modal__backdrop" data-close></div>
-    <div class="totp-modal__card">
+    <div class="totp-modal__card m-modal__card">
       <h3 class="totp-modal__h">{{ "tool.totp.add_title" | t }}</h3>
-      <button type="button" class="totp-btn totp-btn--ghost" id="totp-scan-btn">{{ "tool.totp.scan_button" | t }}</button>
+      <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-scan-btn">{{ "tool.totp.scan_button" | t }}</button>
       <div class="totp-scanner" id="totp-scanner" hidden>
         <video class="totp-scanner__video" id="totp-scanner-video" playsinline muted></video>
         <p class="totp-scanner__note" id="totp-scanner-note" hidden></p>
-        <button type="button" class="totp-btn totp-btn--ghost" id="totp-scan-cancel-btn">{{ "tool.totp.scan_cancel" | t }}</button>
+        <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-scan-cancel-btn">{{ "tool.totp.scan_cancel" | t }}</button>
       </div>
       <label class="totp-field">
         <span>{{ "tool.totp.paste_uri_label" | t }}</span>
@@ -90,15 +90,15 @@ eleventyComputed:
         <input type="text" id="totp-secret" autocomplete="off" spellcheck="false" inputmode="latin" lang="en" dir="ltr" autocapitalize="characters">
       </label>
       <div class="totp-modal__actions">
-        <button type="button" class="totp-btn totp-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
-        <button type="button" class="totp-btn" id="totp-save-btn">{{ "tool.totp.save_button" | t }}</button>
+        <button type="button" class="totp-btn m-btn m-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
+        <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-save-btn">{{ "tool.totp.save_button" | t }}</button>
       </div>
     </div>
   </div>
 
-  <div class="totp-modal" id="totp-backup-modal" hidden>
+  <div class="totp-modal m-modal" id="totp-backup-modal" hidden>
     <div class="totp-modal__backdrop" data-close></div>
-    <div class="totp-modal__card">
+    <div class="totp-modal__card m-modal__card">
       <h3 class="totp-modal__h" id="totp-backup-title">{{ "tool.totp.backup_gate_title" | t }}</h3>
       <p class="totp-modal__p" id="totp-backup-lede">{{ "tool.totp.backup_gate_lede" | t }}</p>
       <label class="totp-field">
@@ -106,8 +106,8 @@ eleventyComputed:
         <input type="password" id="totp-backup-pass" autocomplete="new-password" minlength="8">
       </label>
       <div class="totp-modal__actions">
-        <button type="button" class="totp-btn totp-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
-        <button type="button" class="totp-btn" id="totp-backup-confirm-btn">{{ "tool.totp.backup_gate_confirm" | t }}</button>
+        <button type="button" class="totp-btn m-btn m-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
+        <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-backup-confirm-btn">{{ "tool.totp.backup_gate_confirm" | t }}</button>
       </div>
     </div>
   </div>
@@ -115,18 +115,14 @@ eleventyComputed:
 {% include "terminal-frame-close.njk" %}
 
 <style>
-  .totp { display: flex; flex-direction: column; gap: 18px; padding: 8px 0; }
-  .totp-status { font-family: var(--font-mono); font-size: 12px; padding: 10px 14px; border-radius: 6px; }
-  .totp-status:empty { padding: 0; }
-  .totp-status[data-tone="err"] { background: rgba(242,95,168,0.12); border: 1px solid var(--syn-pink, #f25fa8); color: var(--syn-pink, #f25fa8); }
-  .totp-status[data-tone="ok"]  { background: rgba(110,243,197,0.10); border: 1px solid var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); }
+  .totp { display: flex; flex-direction: column; gap: 18px; padding: var(--space-2) 0; }
 
   .totp-locked { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
-  .totp-locked__h { font-family: var(--font-mono); font-size: 16px; margin: 0; color: var(--accent, #6ef3c5); }
+  .totp-locked__h { font-family: var(--font-mono); font-size: var(--text-base); margin: 0; color: var(--accent, #6ef3c5); }
   .totp-locked__p { font-size: 13px; color: var(--term-muted); margin: 0; }
   .totp-setup, .totp-unlock { display: flex; flex-direction: column; gap: 10px; }
 
-  .totp-field { display: flex; flex-direction: column; gap: 4px; }
+  .totp-field { display: flex; flex-direction: column; gap: var(--space-1); }
   .totp-field > span { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--term-subtle); text-transform: uppercase; }
   .totp-field input { background: var(--term-bg); border: 1px solid var(--term-border); color: var(--term-fg); padding: 8px 10px; border-radius: 5px; font-family: var(--font-mono); font-size: 13px; }
   .totp-field input:focus { outline: none; border-color: var(--accent, #6ef3c5); }
@@ -136,20 +132,14 @@ eleventyComputed:
   .totp-strength[data-level="medium"] { color: var(--syn-amber, #f7b015); }
   .totp-strength[data-level="strong"] { color: var(--syn-green, #34c46a); }
 
-  .totp-btn { background: var(--accent, #6ef3c5); color: var(--term-bg, #0a0a0a); border: none; padding: 9px 14px; border-radius: 5px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.05em; }
-  .totp-btn:hover { filter: brightness(1.1); }
-  .totp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .totp-btn--ghost { background: transparent; border: 1px solid var(--term-border); color: var(--term-fg); }
-  .totp-btn--prf { background: var(--syn-cyan, #67e8f9); }
-
   .totp-divider { display: flex; align-items: center; gap: 10px; color: var(--term-subtle); font-family: var(--font-mono); font-size: 10px; }
   .totp-divider::before, .totp-divider::after { content: ''; flex: 1; height: 1px; background: var(--term-border); }
 
-  .totp-toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+  .totp-toolbar { display: flex; flex-wrap: wrap; gap: var(--space-2); }
   .totp-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-  .totp-empty { font-family: var(--font-mono); font-size: 12px; color: var(--term-muted); text-align: center; padding: 24px; }
+  .totp-empty { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--term-muted); text-align: center; padding: var(--space-5); }
 
-  .totp-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 6px; }
+  .totp-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: var(--radius-md); }
   .totp-row__meta { flex: 1; min-width: 0; }
   .totp-row__issuer { font-family: var(--font-mono); font-size: 11px; color: var(--term-subtle); text-transform: uppercase; letter-spacing: 0.1em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .totp-row__account { font-size: 12px; color: var(--term-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -175,14 +165,13 @@ eleventyComputed:
   .totp-row__del { background: transparent; border: none; color: var(--term-subtle); cursor: pointer; padding: 4px 6px; font-family: var(--font-mono); font-size: 11px; }
   .totp-row__del:hover { color: var(--syn-pink, #f25fa8); }
 
-  .totp-modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .totp [hidden], .totp-modal[hidden] { display: none; }
-  .totp-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
-  .totp-modal__card { position: relative; z-index: 1; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 8px; padding: 18px; width: 100%; max-width: 480px; max-height: 90vh; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+  .totp [hidden] { display: none; }
+  .totp-modal__backdrop { position: absolute; inset: 0; }
+  .totp-modal__card { position: relative; z-index: 1; max-width: 480px; max-height: 90vh; overflow: auto; }
   .totp-modal__h { font-family: var(--font-mono); font-size: 14px; margin: 0; color: var(--accent, #6ef3c5); }
   .totp-modal__p { font-size: 13px; color: var(--term-muted); margin: 0; }
   .totp-modal__or { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); text-align: center; margin: 4px 0; }
-  .totp-modal__actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+  .totp-modal__actions { display: flex; gap: var(--space-2); justify-content: flex-end; margin-top: 6px; }
 
   .totp-scanner { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
   .totp-scanner__video { width: 100%; aspect-ratio: 1; background: #000; border: 1px solid var(--syn-cyan, #67e8f9); border-radius: 6px; object-fit: cover; }
@@ -806,20 +795,27 @@ eleventyComputed:
 
   $('totp-lock-btn').addEventListener('click', () => { lock(); });
 
+  document.body.appendChild($('totp-add-modal'));
+  document.body.appendChild($('totp-backup-modal'));
+  const addModal = MentriaUI.modal($('totp-add-modal'));
+  const backupModal = MentriaUI.modal($('totp-backup-modal'));
+  new MutationObserver(() => { if ($('totp-add-modal').hidden) stopScanner(); })
+    .observe($('totp-add-modal'), { attributes: true, attributeFilter: ['hidden'] });
+
   $('totp-add-btn').addEventListener('click', () => {
     $('totp-uri').value = '';
     $('totp-issuer').value = '';
     $('totp-account').value = '';
     $('totp-secret').value = '';
-    $('totp-add-modal').hidden = false;
+    addModal.open();
     startScanner({ silentOnFail: true });
   });
 
   document.querySelectorAll('[data-close]').forEach((el) => {
     el.addEventListener('click', () => {
       stopScanner();
-      $('totp-add-modal').hidden = true;
-      $('totp-backup-modal').hidden = true;
+      addModal.close();
+      backupModal.close();
     });
   });
 
@@ -853,21 +849,21 @@ eleventyComputed:
 
     if (state.accounts.length === 0) {
       pendingAdd = account;
-      $('totp-add-modal').hidden = true;
+      addModal.close();
       openBackupModal(true);
       return;
     }
     state.accounts.push(account);
     await reEncryptSecrets();
-    $('totp-add-modal').hidden = true;
+    addModal.close();
     renderList();
     tick();
   });
 
   function openBackupModal(forFirstSave) {
     $('totp-backup-pass').value = '';
-    $('totp-backup-modal').hidden = false;
-    setTimeout(() => $('totp-backup-pass').focus(), 50);
+    backupModal.open();
+    $('totp-backup-pass').focus();
   }
 
   $('totp-backup-confirm-btn').addEventListener('click', async () => {
@@ -893,7 +889,7 @@ eleventyComputed:
         tick();
       }
       $('totp-backup-pass').value = '';
-      $('totp-backup-modal').hidden = true;
+      backupModal.close();
       setStatus(COPY.backup_done, 'ok');
     } catch (err) {
       setStatus(String(err && err.message || err), 'err');

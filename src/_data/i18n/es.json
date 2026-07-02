@@ -129,7 +129,8 @@
     "share": "Compartir",
     "heavy_download": "Esto descarga unos 490 MB de datos del modelo y parece que tu conexión es lenta o tiene ahorro de datos. ¿Continuar?",
     "download_postponed": "Descarga en pausa: recarga la página para empezar.",
-    "storage_full": "No se pudo guardar — el almacenamiento del navegador está lleno. Libera espacio para conservar tus cambios."
+    "storage_full": "No se pudo guardar — el almacenamiento del navegador está lleno. Libera espacio para conservar tus cambios.",
+    "copy_failed": "Copia fallida — usa Ctrl+C manualmente."
   },
   "home": {
     "cli": {

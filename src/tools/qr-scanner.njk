@@ -58,15 +58,15 @@ eleventyComputed:
     <p class="qr__note" id="qr-note" hidden></p>
 
     <div class="qr__controls">
-      <button type="button" class="qr__btn qr__btn--primary qr__btn--start" id="qr-start">{{ "tool.qr-scanner.btn_start_camera" | t }}</button>
-      <button type="button" class="qr__btn qr__btn--primary qr__btn--stop" id="qr-stop">{{ "tool.qr-scanner.btn_stop" | t }}</button>
-      <button type="button" class="qr__btn qr__btn--primary qr__btn--again" id="qr-again">{{ "tool.qr-scanner.btn_scan_again" | t }}</button>
-      <label class="qr__btn qr__btn--ghost qr__file-label" for="qr-file">
+      <button type="button" class="qr__btn--start m-btn m-btn--primary m-btn--pill" id="qr-start">{{ "tool.qr-scanner.btn_start_camera" | t }}</button>
+      <button type="button" class="qr__btn--stop m-btn m-btn--primary m-btn--pill" id="qr-stop">{{ "tool.qr-scanner.btn_stop" | t }}</button>
+      <button type="button" class="qr__btn--again m-btn m-btn--primary m-btn--pill" id="qr-again">{{ "tool.qr-scanner.btn_scan_again" | t }}</button>
+      <label class="qr__file-label m-btn m-btn--ghost m-btn--pill" for="qr-file">
         {{ "tool.qr-scanner.btn_scan_image" | t }}
         <input type="file" id="qr-file" accept="image/*" hidden>
       </label>
-      <button type="button" class="qr__btn qr__btn--ghost" id="qr-copy" hidden>{{ "tool.qr-scanner.btn_copy" | t }}</button>
-      <button type="button" class="qr__btn qr__btn--ghost" id="qr-open" hidden>{{ "tool.qr-scanner.btn_open" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="qr-copy" hidden>{{ "tool.qr-scanner.btn_copy" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="qr-open" hidden>{{ "tool.qr-scanner.btn_open" | t }}</button>
     </div>
   </div>
 
@@ -78,7 +78,7 @@ eleventyComputed:
 
   <div class="qr__view" id="qr-view-gen" hidden>
     <div class="qrg">
-      <input type="text" class="qrg__input" id="qrg-input" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false"
+      <input type="text" class="qrg__input m-input" id="qrg-input" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false"
              placeholder="{{ 'tool.qr-scanner.gen_prompt' | t }}" aria-label="{{ 'tool.qr-scanner.gen_input_label' | t }}">
       <div class="qrg__stage">
         <canvas class="qrg__canvas" id="qrg-canvas" role="img" aria-label="{{ 'tool.qr-scanner.gen_alt' | t }}" hidden></canvas>
@@ -86,9 +86,9 @@ eleventyComputed:
       </div>
       <p class="qr__note" id="qrg-note" hidden></p>
       <div class="qr__controls">
-        <button type="button" class="qr__btn qr__btn--primary" id="qrg-download">{{ "tool.qr-scanner.btn_download" | t }}</button>
-        <button type="button" class="qr__btn qr__btn--ghost" id="qrg-copy" hidden>{{ "tool.qr-scanner.btn_copy_image" | t }}</button>
-        <button type="button" class="qr__btn qr__btn--ghost" id="qrg-share" hidden>{{ "common.share" | t }}</button>
+        <button type="button" class="m-btn m-btn--primary m-btn--pill" id="qrg-download">{{ "tool.qr-scanner.btn_download" | t }}</button>
+        <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="qrg-copy" hidden>{{ "tool.qr-scanner.btn_copy_image" | t }}</button>
+        <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="qrg-share" hidden>{{ "common.share" | t }}</button>
       </div>
     </div>
   </div>
@@ -101,8 +101,8 @@ eleventyComputed:
 <script>
 (() => {
   const COPY = {
-    btnCopy:        {{ ("tool.qr-scanner.btn_copy"        | t) | dump | safe }},
     btnCopied:      {{ ("tool.qr-scanner.btn_copied"      | t) | dump | safe }},
+    btnCopyFailed:  {{ ("common.copy_failed" | t) | dump | safe }},
     noteInsecure:   {{ ("tool.qr-scanner.note_insecure"   | t) | dump | safe }},
     noteDenied:     {{ ("tool.qr-scanner.note_denied"     | t) | dump | safe }},
     noteNoCamera:   {{ ("tool.qr-scanner.note_no_camera"  | t) | dump | safe }},
@@ -216,13 +216,7 @@ eleventyComputed:
   genDl.addEventListener('click', async () => {
     const blob = await canvasToBlob();
     if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'qr-code.png';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 100);
+    MentriaUI.downloadFile('qr-code.png', blob);
   });
   if (navigator.clipboard && window.ClipboardItem) {
     genCopy.hidden = false;
@@ -388,13 +382,7 @@ eleventyComputed:
     if (f) scanImage(f);
     fileInput.value = '';
   });
-  copyBtn.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(lastValue);
-      copyBtn.textContent = COPY.btnCopied;
-      setTimeout(() => { copyBtn.textContent = COPY.btnCopy; }, 1500);
-    } catch (_) {}
-  });
+  MentriaUI.copyButton(copyBtn, () => lastValue, { copiedText: COPY.btnCopied, failedText: COPY.btnCopyFailed, restoreMs: 1500 });
   openBtn.addEventListener('click', () => {
     if (/^https?:\/\//i.test(lastValue)) window.open(lastValue, '_blank', 'noopener');
   });
@@ -536,7 +524,7 @@ eleventyComputed:
   padding: 1rem;
   border: 1px solid var(--term-border-strong);
   border-radius: 10px;
-  background: rgba(34,211,238,0.04);
+  background: var(--cyan-8);
 }
 .qr--result .qr__result { display: flex; }
 .qr__result-label {
@@ -563,9 +551,9 @@ eleventyComputed:
   margin: 0;
   width: 100%;
   padding: 0.7rem 0.85rem;
-  border: 1px solid rgba(251,191,36,0.35);
+  border: 1px solid var(--amber-30);
   border-radius: 8px;
-  background: rgba(251,191,36,0.06);
+  background: var(--amber-8);
   color: var(--syn-amber);
   font-size: 0.78rem;
   line-height: 1.5;
@@ -578,30 +566,6 @@ eleventyComputed:
   justify-content: center;
   gap: 0.6rem;
 }
-.qr__btn {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 0.6rem 1.4rem;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-}
-.qr__btn[hidden] { display: none; }
-.qr__btn--primary {
-  background: var(--syn-cyan);
-  color: #041016;
-  box-shadow: 0 0 12px rgba(34,211,238,0.3);
-}
-.qr__btn--primary:hover { background: #67e8f9; }
-.qr__btn--ghost {
-  background: transparent;
-  border-color: var(--term-border-strong);
-  color: var(--term-muted);
-}
-.qr__btn--ghost:hover { color: var(--term-fg); border-color: var(--syn-cyan); }
-
 .qr__btn--start, .qr__btn--stop, .qr__btn--again { display: none; }
 .qr--idle .qr__btn--start { display: inline-block; }
 .qr--scanning .qr__btn--stop { display: inline-block; }
@@ -680,17 +644,7 @@ eleventyComputed:
 }
 .qrg__input {
   width: 100%;
-  font-family: var(--font-mono);
-  font-size: 16px;
-  padding: 0.7rem 0.9rem;
-  border: 1px solid var(--term-border-strong);
-  border-radius: 10px;
-  background: #060606;
-  color: var(--term-fg);
-  outline: none;
-  transition: border-color 0.15s ease;
 }
-.qrg__input:focus { border-color: var(--syn-cyan); }
 .qrg__input::placeholder { color: var(--term-subtle); }
 .qrg__stage {
   width: 100%;
@@ -721,5 +675,4 @@ eleventyComputed:
   line-height: 1.5;
   max-width: 24ch;
 }
-.qr__btn:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

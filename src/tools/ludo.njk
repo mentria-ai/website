@@ -25,22 +25,21 @@ eleventyComputed:
 <div class="ludo-app">
   <div class="controls">
     <span class="ctrl-label">{{ "tool.ludo.mode" | t }}</span>
-    <div class="seg" id="mode-seg">
-      <button data-m="ai" class="active">{{ "tool.ludo.mode_ai" | t }}</button>
-      <button data-m="hotseat">{{ "tool.ludo.mode_hotseat" | t }}</button>
+    <div class="m-seg" id="mode-seg">
+      <button data-m="ai" data-value="ai" class="is-active">{{ "tool.ludo.mode_ai" | t }}</button>
+      <button data-m="hotseat" data-value="hotseat">{{ "tool.ludo.mode_hotseat" | t }}</button>
     </div>
     <span class="ctrl-label" style="margin-left:8px">{{ "tool.ludo.players" | t }}</span>
-    <div class="seg" id="count-seg">
-      <button data-n="2">2</button>
-      <button data-n="3">3</button>
-      <button data-n="4" class="active">4</button>
+    <div class="m-seg" id="count-seg">
+      <button data-n="2" data-value="2">2</button>
+      <button data-n="3" data-value="3">3</button>
+      <button data-n="4" data-value="4" class="is-active">4</button>
     </div>
   </div>
 
   <div class="layout">
     <div class="board-wrap">
       <canvas id="board" width="600" height="600"></canvas>
-      <div class="toast" id="toast"></div>
       <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
     </div>
 
@@ -72,12 +71,6 @@ eleventyComputed:
 <style>
   .ludo-app .controls { display: flex; align-items: center; gap: 14px; padding: 11px 4px 14px; flex-wrap: wrap; }
   .ludo-app .ctrl-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
-  .ludo-app .seg { display: inline-flex; border: 1px solid var(--term-border); border-radius: var(--radius-md); overflow: hidden; }
-  .ludo-app .seg button { background: transparent; border: none; color: var(--term-muted); font-weight: 600; font-size: 12px; padding: 6px 12px; border-right: 1px solid var(--term-border); transition: all 150ms; font-family: var(--font-mono); cursor: pointer; }
-  .ludo-app .seg button:last-child { border-right: none; }
-  .ludo-app .seg button:hover { color: var(--term-fg); background: rgba(255,255,255,0.03); }
-  .ludo-app .seg button.active { color: var(--syn-cyan); background: var(--cyan-8); box-shadow: inset 0 -2px 0 var(--syn-cyan); }
-
   .ludo-app .layout { display: grid; grid-template-columns: 1fr 220px; gap: 0; border: 1px solid var(--term-border); border-radius: var(--radius-md); overflow: hidden; }
   @media (max-width: 760px) { .ludo-app .layout { grid-template-columns: 1fr; } }
 
@@ -126,9 +119,6 @@ eleventyComputed:
   .ludo-app .modal .winchip { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; }
   .ludo-app .modal .winchip .chip { width: 16px; height: 16px; border-radius: 5px; box-shadow: 0 0 10px currentColor; }
   .ludo-app .modal .btn { width: 100%; }
-
-  .ludo-app .toast { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); padding: 6px 14px; border-radius: var(--radius-pill); background: rgba(34,211,238,0.15); border: 1px solid var(--cyan-30); color: var(--syn-cyan); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; box-shadow: var(--glow-cyan); z-index: 4; opacity: 0; transition: opacity 250ms; pointer-events: none; white-space: nowrap; }
-  .ludo-app .toast.show { opacity: 1; }
 
   @media (max-width: 560px) { .ludo-app .die { width: 60px; height: 60px; } }
 </style>
@@ -555,11 +545,8 @@ eleventyComputed:
     renderPlayers();
   }
 
-  let toastTimer = null;
   function showToast(msg){
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'),1400);
+    MentriaUI.toast(msg, { duration: 1400 });
   }
 
   document.getElementById('roll-btn').onclick = rollDice;
@@ -572,15 +559,11 @@ eleventyComputed:
     document.getElementById('overlay').classList.add('show');
     document.getElementById('m-close').onclick = () => document.getElementById('overlay').classList.remove('show');
   };
-  document.getElementById('mode-seg').addEventListener('click', e => {
-    const b = e.target.closest('button[data-m]'); if (!b) return;
-    [...e.currentTarget.children].forEach(x=>x.classList.toggle('active',x===b));
-    State.mode = b.dataset.m; newGame();
+  MentriaUI.segmented(document.getElementById('mode-seg'), (value) => {
+    State.mode = value; newGame();
   });
-  document.getElementById('count-seg').addEventListener('click', e => {
-    const b = e.target.closest('button[data-n]'); if (!b) return;
-    [...e.currentTarget.children].forEach(x=>x.classList.toggle('active',x===b));
-    State.numPlayers = +b.dataset.n; newGame();
+  MentriaUI.segmented(document.getElementById('count-seg'), (value) => {
+    State.numPlayers = +value; newGame();
   });
   document.addEventListener('keydown', e => {
     if ((e.code==='Space'||e.key==='Enter') && !document.getElementById('roll-btn').disabled){ e.preventDefault(); rollDice(); }

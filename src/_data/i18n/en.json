@@ -406,7 +406,18 @@
       "footer_dig": "dig",
       "footer_flag": "flag",
       "footer_toggle_flag": "toggle flag mode",
-      "footer_restart": "restart"
+      "footer_restart": "restart",
+      "board_label": "Minesweeper grid",
+      "a11y_pos": "row {r}, column {c}",
+      "a11y_hidden": "hidden",
+      "a11y_flagged": "flagged",
+      "a11y_unflagged": "unflagged",
+      "a11y_question": "question mark",
+      "a11y_mine": "mine",
+      "a11y_empty": "empty",
+      "a11y_count": "{n} adjacent mines",
+      "a11y_lost": "mine hit, game over",
+      "a11y_won": "field cleared, you win"
     },
     "breakout": {
       "score": "Score",
@@ -965,7 +976,17 @@
       "key_erase": "Erase",
       "key_notes": "Toggle notes",
       "key_hint": "Hint",
-      "key_move": "Move selection"
+      "key_move": "Move selection",
+      "board_label": "Sudoku grid, 9 by 9",
+      "a11y_pos": "row {r}, column {c}",
+      "a11y_empty": "empty",
+      "a11y_given": "given",
+      "a11y_notes": "notes {list}",
+      "a11y_placed": "{n} placed",
+      "a11y_mistake": "{n} wrong, {m} of {max}",
+      "a11y_erased": "erased",
+      "a11y_win": "puzzle solved",
+      "a11y_over": "game over"
     },
     "ludo": {
       "mode": "Mode",

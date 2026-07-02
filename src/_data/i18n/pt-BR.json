@@ -406,7 +406,18 @@
       "footer_dig": "escavar",
       "footer_flag": "bandeira",
       "footer_toggle_flag": "alternar modo bandeira",
-      "footer_restart": "reiniciar"
+      "footer_restart": "reiniciar",
+      "board_label": "Tabuleiro do campo minado",
+      "a11y_pos": "linha {r}, coluna {c}",
+      "a11y_hidden": "oculta",
+      "a11y_flagged": "marcada",
+      "a11y_unflagged": "desmarcada",
+      "a11y_question": "interrogação",
+      "a11y_mine": "mina",
+      "a11y_empty": "vazia",
+      "a11y_count": "{n} minas adjacentes",
+      "a11y_lost": "mina atingida, fim de jogo",
+      "a11y_won": "campo limpo, você venceu"
     },
     "breakout": {
       "score": "Pontos",
@@ -965,7 +976,17 @@
       "key_erase": "Apagar",
       "key_notes": "Alternar notas",
       "key_hint": "Dica",
-      "key_move": "Mover seleção"
+      "key_move": "Mover seleção",
+      "board_label": "Tabuleiro de sudoku, 9 por 9",
+      "a11y_pos": "linha {r}, coluna {c}",
+      "a11y_empty": "vazia",
+      "a11y_given": "fixa",
+      "a11y_notes": "notas {list}",
+      "a11y_placed": "{n} colocado",
+      "a11y_mistake": "{n} incorreto, {m} de {max}",
+      "a11y_erased": "apagada",
+      "a11y_win": "quebra-cabeça resolvido",
+      "a11y_over": "fim de jogo"
     },
     "ludo": {
       "mode": "Modo",

@@ -406,7 +406,18 @@
       "footer_dig": "開く",
       "footer_flag": "旗",
       "footer_toggle_flag": "旗モード切替",
-      "footer_restart": "リスタート"
+      "footer_restart": "リスタート",
+      "board_label": "マインスイーパの盤面",
+      "a11y_pos": "{r}行{c}列",
+      "a11y_hidden": "未開放",
+      "a11y_flagged": "旗",
+      "a11y_unflagged": "旗解除",
+      "a11y_question": "はてな",
+      "a11y_mine": "地雷",
+      "a11y_empty": "空",
+      "a11y_count": "隣接する地雷 {n}",
+      "a11y_lost": "地雷、ゲームオーバー",
+      "a11y_won": "クリア、勝利"
     },
     "breakout": {
       "score": "スコア",
@@ -965,7 +976,17 @@
       "key_erase": "消去",
       "key_notes": "メモ切替",
       "key_hint": "ヒント",
-      "key_move": "選択を移動"
+      "key_move": "選択を移動",
+      "board_label": "数独の盤面、9×9",
+      "a11y_pos": "{r}行{c}列",
+      "a11y_empty": "空",
+      "a11y_given": "固定",
+      "a11y_notes": "メモ {list}",
+      "a11y_placed": "{n} を入力",
+      "a11y_mistake": "{n} は誤り、{m}/{max}",
+      "a11y_erased": "消去",
+      "a11y_win": "パズル完成",
+      "a11y_over": "ゲームオーバー"
     },
     "ludo": {
       "mode": "モード",

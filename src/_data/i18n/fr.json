@@ -406,7 +406,18 @@
       "footer_dig": "creuser",
       "footer_flag": "drapeau",
       "footer_toggle_flag": "basculer mode drapeau",
-      "footer_restart": "redémarrer"
+      "footer_restart": "redémarrer",
+      "board_label": "Grille du démineur",
+      "a11y_pos": "ligne {r}, colonne {c}",
+      "a11y_hidden": "masquée",
+      "a11y_flagged": "marquée",
+      "a11y_unflagged": "démarquée",
+      "a11y_question": "point d'interrogation",
+      "a11y_mine": "mine",
+      "a11y_empty": "vide",
+      "a11y_count": "{n} mines adjacentes",
+      "a11y_lost": "mine touchée, partie terminée",
+      "a11y_won": "terrain déminé, gagné"
     },
     "breakout": {
       "score": "Score",
@@ -965,7 +976,17 @@
       "key_erase": "Effacer",
       "key_notes": "Basculer les notes",
       "key_hint": "Indice",
-      "key_move": "Déplacer la sélection"
+      "key_move": "Déplacer la sélection",
+      "board_label": "Grille de sudoku, 9 sur 9",
+      "a11y_pos": "ligne {r}, colonne {c}",
+      "a11y_empty": "vide",
+      "a11y_given": "fixe",
+      "a11y_notes": "notes {list}",
+      "a11y_placed": "{n} placé",
+      "a11y_mistake": "{n} incorrect, {m} sur {max}",
+      "a11y_erased": "effacé",
+      "a11y_win": "grille résolue",
+      "a11y_over": "partie terminée"
     },
     "ludo": {
       "mode": "Mode",

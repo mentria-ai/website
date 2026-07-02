@@ -76,6 +76,8 @@ eleventyComputed:
   </div>
 </div>
 
+<div id="ms-live" class="sr-only" role="status" aria-live="polite"></div>
+
 <div class="footer-hints">
   <div class="keys">
     <span><span class="kbd">click</span> {{ "game.minesweeper.footer_dig" | t }}</span>
@@ -104,7 +106,6 @@ main { max-width: 1100px; }
 .game-page .hero h1 { font-family: var(--font-mono); font-weight: 700; font-size: clamp(2rem, 4vw, 2.6rem); color: var(--term-fg-strong); margin: 0 0 12px; letter-spacing: -0.005em; line-height: 1.2; }
 .game-page .hero p { font-family: var(--font-mono); color: var(--term-muted); font-size: var(--text-sm); margin: 0 auto; max-width: 56ch; line-height: 1.6; }
 
-/* Difficulty + stats row */
 .ms-controls {
   display: flex;
   align-items: center;
@@ -212,6 +213,9 @@ main { max-width: 1100px; }
   position: relative;
   color: transparent;
 }
+.ms-row { display: contents; }
+.cell:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -2px; z-index: 1; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .cell:hover:not(.revealed):not(.exploded) {
   background: var(--term-surface-3);
   border-color: var(--term-border-strong);
@@ -255,7 +259,6 @@ main { max-width: 1100px; }
 }
 .cell.flag.wrong::after { content: "⚑"; }
 
-/* number colors */
 .n1 { color: var(--syn-cyan)   !important; }
 .n2 { color: var(--syn-green)  !important; }
 .n3 { color: var(--syn-amber)  !important; }
@@ -356,6 +359,20 @@ main { max-width: 1100px; }
     hard:   { rows: 18, cols: 22, mines: 70 },
   };
 
+  const MS_COPY = {
+    boardLabel: {{ ("game.minesweeper.board_label" | t) | dump | safe }},
+    aPos:       {{ ("game.minesweeper.a11y_pos"      | t) | dump | safe }},
+    aHidden:    {{ ("game.minesweeper.a11y_hidden"   | t) | dump | safe }},
+    aFlagged:   {{ ("game.minesweeper.a11y_flagged"  | t) | dump | safe }},
+    aUnflagged: {{ ("game.minesweeper.a11y_unflagged"| t) | dump | safe }},
+    aQuestion:  {{ ("game.minesweeper.a11y_question" | t) | dump | safe }},
+    aMine:      {{ ("game.minesweeper.a11y_mine"     | t) | dump | safe }},
+    aEmpty:     {{ ("game.minesweeper.a11y_empty"    | t) | dump | safe }},
+    aCount:     {{ ("game.minesweeper.a11y_count"    | t) | dump | safe }},
+    aLost:      {{ ("game.minesweeper.a11y_lost"     | t) | dump | safe }},
+    aWon:       {{ ("game.minesweeper.a11y_won"      | t) | dump | safe }},
+  };
+
   const State = {
     diff: 'medium',
     rows: 14, cols: 14, mines: 32,
@@ -374,6 +391,37 @@ main { max-width: 1100px; }
   const boardEl = document.getElementById('board');
   const overlay = document.getElementById('overlay');
   const modal = document.getElementById('modal');
+  const liveEl = document.getElementById('ms-live');
+  let cellEls = [];
+  let focusIdx = 0;
+
+  function announce(msg){ if (liveEl){ liveEl.textContent = ''; liveEl.textContent = msg; } }
+
+  function cellStateText(r, c) {
+    const cell = State.grid[r][c];
+    if (!cell.revealed) {
+      if (cell.flag) return MS_COPY.aFlagged;
+      if (cell.q) return MS_COPY.aQuestion;
+      return MS_COPY.aHidden;
+    }
+    if (cell.mine) return MS_COPY.aMine;
+    if (cell.n === 0) return MS_COPY.aEmpty;
+    return MS_COPY.aCount.replace('{n}', cell.n);
+  }
+  function cellLabel(r, c) {
+    return MS_COPY.aPos.replace('{r}', r + 1).replace('{c}', c + 1) + ', ' + cellStateText(r, c);
+  }
+  function setCellLabel(r, c) {
+    const el = cellEl(r, c);
+    if (el) el.setAttribute('aria-label', cellLabel(r, c));
+  }
+  function setRoving(idx, doFocus) {
+    if (idx < 0 || idx >= cellEls.length) return;
+    if (cellEls[focusIdx]) cellEls[focusIdx].tabIndex = -1;
+    focusIdx = idx;
+    const el = cellEls[focusIdx];
+    if (el) { el.tabIndex = 0; if (doFocus) el.focus(); }
+  }
 
   function loadBest(d) {
     if (window.MentriaStore) {
@@ -415,15 +463,28 @@ main { max-width: 1100px; }
 
     boardEl.style.gridTemplateColumns = `repeat(${State.cols}, auto)`;
     boardEl.style.setProperty('--ms-cols', State.cols);
+    boardEl.setAttribute('role', 'grid');
+    boardEl.setAttribute('aria-label', MS_COPY.boardLabel);
     boardEl.innerHTML = '';
+    cellEls = [];
     for (let r = 0; r < State.rows; r++) {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'ms-row';
+      rowEl.setAttribute('role', 'row');
       for (let c = 0; c < State.cols; c++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
         cell.dataset.r = r; cell.dataset.c = c;
-        boardEl.appendChild(cell);
+        cell.setAttribute('role', 'gridcell');
+        cell.tabIndex = -1;
+        cell.setAttribute('aria-label', cellLabel(r, c));
+        rowEl.appendChild(cell);
+        cellEls.push(cell);
       }
+      boardEl.appendChild(rowEl);
     }
+    focusIdx = 0;
+    if (cellEls[0]) cellEls[0].tabIndex = 0;
 
     overlay.classList.add('hidden');
     updateHUD();
@@ -474,6 +535,7 @@ main { max-width: 1100px; }
     if (cell.revealed || cell.flag) return;
     cell.revealed = true;
     State.revealedCount++;
+    setCellLabel(r, c);
 
     const el = cellEl(r, c);
     el.classList.add('revealed');
@@ -532,6 +594,8 @@ main { max-width: 1100px; }
     const el = cellEl(r, c);
     el.classList.toggle('flag', cell.flag);
     el.classList.toggle('q', cell.q);
+    setCellLabel(r, c);
+    announce(cell.flag ? MS_COPY.aFlagged : (cell.q ? MS_COPY.aQuestion : MS_COPY.aUnflagged));
     updateHUD();
   }
 
@@ -554,9 +618,12 @@ main { max-width: 1100px; }
         if (won && cell.mine && !cell.flag) {
           cell.flag = true;
           el.classList.add('flag');
+          setCellLabel(r, c);
         }
         if (!won && cell.mine && !cell.flag) {
+          cell.revealed = true;
           el.classList.add('revealed', 'mine');
+          setCellLabel(r, c);
         }
         if (!won && cell.flag && !cell.mine) {
           el.classList.add('wrong');
@@ -568,8 +635,11 @@ main { max-width: 1100px; }
     const best = loadBest(State.diff);
     if (won) saveBest(State.diff, elapsed);
 
+    announce(won ? MS_COPY.aWon : MS_COPY.aLost);
     showOverlay(won, elapsed, best);
     updateHUD();
+    const again = document.getElementById('play-again');
+    if (again) again.focus();
   }
 
   function showOverlay(won, elapsed, prevBest) {
@@ -610,7 +680,7 @@ main { max-width: 1100px; }
     document.getElementById('play-again').onclick = () => build();
   }
 
-  function cellEl(r, c) { return boardEl.children[r * State.cols + c]; }
+  function cellEl(r, c) { return cellEls[r * State.cols + c]; }
 
   function updateHUD() {
     const remaining = Math.max(0, State.mines - State.flagsPlaced);
@@ -632,7 +702,24 @@ main { max-width: 1100px; }
       : {{ ("game.minesweeper.mode_dig"  | t) | dump | safe }};
   }
 
-  // ---------- Input ----------
+  function activate(r, c) {
+    if (State.over) return;
+    if (!State.started) {
+      placeMines(r, c);
+      State.started = true;
+      startTimer();
+    }
+    if (State.flagMode) { flag(r, c); return; }
+    const cell = State.grid[r][c];
+    if (cell.flag) return;
+    if (cell.revealed) {
+      chord(r, c);
+    } else {
+      reveal(r, c);
+    }
+    if (!State.over) announce(cellStateText(r, c));
+  }
+
   boardEl.addEventListener('contextmenu', e => {
     e.preventDefault();
     if (State.over) return;
@@ -648,23 +735,7 @@ main { max-width: 1100px; }
     if (longPressed) { longPressed = false; return; }
     const t = e.target.closest('.cell');
     if (!t) return;
-    const r = +t.dataset.r, c = +t.dataset.c;
-
-    if (!State.started) {
-      placeMines(r, c);
-      State.started = true;
-      startTimer();
-    }
-
-    if (State.flagMode) { flag(r, c); return; }
-
-    const cell = State.grid[r][c];
-    if (cell.flag) return;
-    if (cell.revealed) {
-      chord(r, c);
-    } else {
-      reveal(r, c);
-    }
+    activate(+t.dataset.r, +t.dataset.c);
   });
 
   let longPressed = false;
@@ -694,6 +765,37 @@ main { max-width: 1100px; }
     if (!t) return;
     const id = State.pressTimers.get(t);
     if (id) { clearTimeout(id); State.pressTimers.delete(t); }
+  });
+
+  boardEl.addEventListener('focusin', e => {
+    const t = e.target.closest('.cell');
+    if (!t) return;
+    const idx = (+t.dataset.r) * State.cols + (+t.dataset.c);
+    if (idx !== focusIdx) setRoving(idx, false);
+  });
+
+  boardEl.addEventListener('keydown', e => {
+    const t = e.target.closest('.cell');
+    if (!t) return;
+    const r = +t.dataset.r, c = +t.dataset.c;
+    const idx = r * State.cols + c;
+    switch (e.key) {
+      case 'ArrowUp':    e.preventDefault(); if (r > 0) setRoving(idx - State.cols, true); return;
+      case 'ArrowDown':  e.preventDefault(); if (r < State.rows - 1) setRoving(idx + State.cols, true); return;
+      case 'ArrowLeft':  e.preventDefault(); if (c > 0) setRoving(idx - 1, true); return;
+      case 'ArrowRight': e.preventDefault(); if (c < State.cols - 1) setRoving(idx + 1, true); return;
+      case 'Home':       e.preventDefault(); setRoving(r * State.cols, true); return;
+      case 'End':        e.preventDefault(); setRoving(r * State.cols + State.cols - 1, true); return;
+      case 'Enter':
+      case ' ':
+      case 'Spacebar':   e.preventDefault(); activate(r, c); return;
+      case 'f':
+      case 'F':
+        e.preventDefault(); e.stopPropagation();
+        if (State.over || !State.started) return;
+        flag(r, c);
+        return;
+    }
   });
 
   document.addEventListener('keydown', e => {

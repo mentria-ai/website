@@ -55,6 +55,8 @@ eleventyComputed:
     <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
   </div>
 
+  <div id="sk-live" class="sr-only" role="status" aria-live="polite"></div>
+
   <div class="keypad" id="keypad"></div>
 
   <div class="toolbar">
@@ -98,6 +100,9 @@ eleventyComputed:
   .sudoku-app .sq.peer { background: rgba(255,255,255,0.022); }
   .sudoku-app .sq.samenum { background: var(--cyan-8); }
   .sudoku-app .sq.sel { background: var(--cyan-15) !important; box-shadow: inset 0 0 0 2px var(--syn-cyan); }
+  .sudoku-app .sq:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -2px; }
+  .sudoku-app .sq-row { display: contents; }
+  .sudoku-app .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   .sudoku-app .sq.err { color: var(--syn-pink); animation: sk-shake 0.3s; }
   .sudoku-app .sq.conflict { color: var(--syn-pink); }
   @keyframes sk-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2px)} 75%{transform:translateX(2px)} }
@@ -105,8 +110,8 @@ eleventyComputed:
   .sudoku-app .notes { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); pointer-events: none; padding: 2px; }
   .sudoku-app .note-cell { display: flex; align-items: center; justify-content: center; font-size: clamp(6px, 1.6vw, 9px); color: var(--term-muted); font-weight: 500; line-height: 1; }
 
-  .sudoku-app .keypad { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; padding: 4px 0 14px; }
-  .sudoku-app .key { aspect-ratio: 1; min-height: 40px; background: var(--term-surface-2); border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); color: var(--term-fg); font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; position: relative; transition: all 100ms; -webkit-tap-highlight-color: transparent; cursor: pointer; font-family: var(--font-mono); }
+  .sudoku-app .keypad { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; padding: 4px 0 14px; }
+  .sudoku-app .key { min-width: 0; aspect-ratio: 1; min-height: 40px; background: var(--term-surface-2); border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); color: var(--term-fg); font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; position: relative; transition: all 100ms; -webkit-tap-highlight-color: transparent; cursor: pointer; font-family: var(--font-mono); }
   .sudoku-app .key:hover { border-color: var(--cyan-30); color: var(--syn-cyan); }
   .sudoku-app .key:active { background: var(--term-surface-3); }
   .sudoku-app .key .remain { position: absolute; bottom: 1px; right: 3px; font-size: 8px; color: var(--term-subtle); font-weight: 500; }
@@ -154,6 +159,16 @@ eleventyComputed:
     mMistakes: {{ ("tool.sudoku.mlabel_mistakes" | t) | dump | safe }},
     mBest:     {{ ("tool.sudoku.mlabel_best"     | t) | dump | safe }},
     hintToast: {{ ("tool.sudoku.toast_hint"      | t) | dump | safe }},
+    boardLabel: {{ ("tool.sudoku.board_label" | t) | dump | safe }},
+    aPos:     {{ ("tool.sudoku.a11y_pos"     | t) | dump | safe }},
+    aEmpty:   {{ ("tool.sudoku.a11y_empty"   | t) | dump | safe }},
+    aGiven:   {{ ("tool.sudoku.a11y_given"   | t) | dump | safe }},
+    aNotes:   {{ ("tool.sudoku.a11y_notes"   | t) | dump | safe }},
+    aPlaced:  {{ ("tool.sudoku.a11y_placed"  | t) | dump | safe }},
+    aMistake: {{ ("tool.sudoku.a11y_mistake" | t) | dump | safe }},
+    aErased:  {{ ("tool.sudoku.a11y_erased"  | t) | dump | safe }},
+    aWin:     {{ ("tool.sudoku.a11y_win"     | t) | dump | safe }},
+    aOver:    {{ ("tool.sudoku.a11y_over"    | t) | dump | safe }},
     diff: {
       easy:   {{ ("tool.sudoku.diff_easy"   | t) | dump | safe }},
       medium: {{ ("tool.sudoku.diff_medium" | t) | dump | safe }},
@@ -174,6 +189,12 @@ eleventyComputed:
   const boardEl = document.getElementById('board');
   const keypadEl = document.getElementById('keypad');
   const overlay = document.getElementById('overlay');
+  const liveEl = document.getElementById('sk-live');
+  let cellEls = [];
+
+  function announce(msg){ if (liveEl){ liveEl.textContent = ''; liveEl.textContent = msg; } }
+  function tabbableIdx(){ return State.sel >= 0 ? State.sel : 40; }
+  function focusCell(i){ const el = cellEls[i]; if (el) el.focus(); }
 
   function readBest(diff) {
     const k = 'sudoku_best_' + diff;
@@ -257,23 +278,36 @@ eleventyComputed:
 
   function buildBoard(){
     boardEl.innerHTML = '';
-    for (let i=0;i<81;i++){
-      const sq = document.createElement('div');
-      sq.className = 'sq';
-      sq.dataset.r = Math.floor(i/9); sq.dataset.c = i%9; sq.dataset.i = i;
-      sq.addEventListener('click', () => selectCell(i));
-      boardEl.appendChild(sq);
+    boardEl.setAttribute('role', 'grid');
+    boardEl.setAttribute('aria-label', COPY.boardLabel);
+    cellEls = [];
+    for (let r=0;r<9;r++){
+      const rowEl = document.createElement('div');
+      rowEl.className = 'sq-row';
+      rowEl.setAttribute('role', 'row');
+      for (let c=0;c<9;c++){
+        const i = r*9+c;
+        const sq = document.createElement('div');
+        sq.className = 'sq';
+        sq.dataset.r = r; sq.dataset.c = c; sq.dataset.i = i;
+        sq.setAttribute('role', 'gridcell');
+        sq.tabIndex = -1;
+        sq.addEventListener('click', () => selectCell(i));
+        rowEl.appendChild(sq);
+        cellEls.push(sq);
+      }
+      boardEl.appendChild(rowEl);
     }
   }
-  function selectCell(i){ if (State.over) return; State.sel = i; render(); }
+  function selectCell(i){ if (State.over) return; State.sel = i; render(); focusCell(i); }
 
   function render(){
-    const cells = boardEl.children;
     const selVal = State.sel>=0 ? State.grid[State.sel] : 0;
     const selR = State.sel>=0 ? Math.floor(State.sel/9) : -1;
     const selC = State.sel>=0 ? State.sel%9 : -1;
+    const tab = tabbableIdx();
     for (let i=0;i<81;i++){
-      const cell = cells[i];
+      const cell = cellEls[i];
       const v = State.grid[i];
       const r = Math.floor(i/9), c = i%9;
       cell.className = 'sq';
@@ -292,6 +326,17 @@ eleventyComputed:
         for (let n=1;n<=9;n++){ const nc=document.createElement('div'); nc.className='note-cell'; nc.textContent = State.notes[i].has(n)?n:''; nd.appendChild(nc); }
         cell.appendChild(nd);
       }
+      const pos = COPY.aPos.replace('{r}', r+1).replace('{c}', c+1);
+      let label;
+      if (v!==0){ label = pos + ', ' + v + (State.given[i] ? ', ' + COPY.aGiven : ''); }
+      else if (State.notes[i].size){
+        const list = [];
+        for (let n=1;n<=9;n++) if (State.notes[i].has(n)) list.push(n);
+        label = pos + ', ' + COPY.aNotes.replace('{list}', list.join(' '));
+      } else { label = pos + ', ' + COPY.aEmpty; }
+      cell.setAttribute('aria-label', label);
+      cell.setAttribute('aria-selected', i===State.sel ? 'true' : 'false');
+      cell.tabIndex = i===tab ? 0 : -1;
     }
     updateKeypad();
   }
@@ -311,7 +356,7 @@ eleventyComputed:
       if (State.notes[i].has(n)) State.notes[i].delete(n); else State.notes[i].add(n);
       render(); return;
     }
-    if (n===0){ State.grid[i]=0; State.notes[i].clear(); render(); return; }
+    if (n===0){ State.grid[i]=0; State.notes[i].clear(); render(); announce(COPY.aErased); return; }
     State.notes[i].clear();
     State.grid[i] = n;
     if (n!==0){
@@ -321,9 +366,12 @@ eleventyComputed:
     }
     if (n !== State.solution[i]){
       State.mistakes++; updateHUD();
-      const cell = boardEl.children[i];
+      const cell = cellEls[i];
       cell.classList.add('err'); setTimeout(()=>cell.classList.remove('err'),300);
       if (State.mistakes >= State.maxMistakes){ render(); gameOver(false); return; }
+      announce(COPY.aMistake.replace('{n}', n).replace('{m}', State.mistakes).replace('{max}', State.maxMistakes));
+    } else {
+      announce(COPY.aPlaced.replace('{n}', n));
     }
     render(); checkWin();
   }
@@ -360,7 +408,10 @@ eleventyComputed:
         <button class="btn primary" id="m-new">${COPY.tryAgain}</button>`;
     }
     overlay.classList.add('show');
-    document.getElementById('m-new').onclick = newGame;
+    announce(won ? COPY.aWin : COPY.aOver);
+    const mNew = document.getElementById('m-new');
+    mNew.onclick = newGame;
+    mNew.focus();
   }
 
   function useHint(){
@@ -374,8 +425,11 @@ eleventyComputed:
     State.given[target] = true;
     State.sel = target;
     document.getElementById('hint-count').textContent = State.hints;
-    render(); checkWin();
+    render();
+    announce(COPY.aPlaced.replace('{n}', State.solution[target]));
+    checkWin();
     showToast(COPY.hintToast.replace('{n}', State.hints));
+    focusCell(target);
   }
 
   function buildKeypad(){
@@ -415,7 +469,7 @@ eleventyComputed:
     if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0'){ placeNumber(0); return; }
     if (e.key === 'n' || e.key === 'N'){ toggleNotes(); return; }
     if (e.key === 'h' || e.key === 'H'){ useHint(); return; }
-    if (State.sel<0){ if (e.key.startsWith('Arrow')) { State.sel = 40; render(); } return; }
+    if (State.sel<0){ if (e.key.startsWith('Arrow')) { e.preventDefault(); State.sel = 40; render(); focusCell(40); } return; }
     let r = Math.floor(State.sel/9), c = State.sel%9;
     if (e.key === 'ArrowUp') r=(r+8)%9;
     else if (e.key === 'ArrowDown') r=(r+1)%9;
@@ -423,7 +477,14 @@ eleventyComputed:
     else if (e.key === 'ArrowRight') c=(c+1)%9;
     else return;
     e.preventDefault();
-    State.sel = r*9+c; render();
+    State.sel = r*9+c; render(); focusCell(State.sel);
+  });
+
+  boardEl.addEventListener('focusin', e => {
+    const t = e.target.closest('.sq');
+    if (!t || State.over) return;
+    const i = +t.dataset.i;
+    if (State.sel !== i){ State.sel = i; render(); }
   });
 
   function toggleNotes(){

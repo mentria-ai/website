@@ -79,10 +79,10 @@ eleventyComputed:
         <div class="li"><span class="swatch" style="background:var(--syn-green); box-shadow: var(--glow-green)"></span>{{ "game.breakout.legend_multi" | t }}</div>
         <div class="li"><span class="swatch" style="background:var(--syn-amber); box-shadow: var(--glow-amber)"></span>{{ "game.breakout.legend_life" | t }}</div>
         <div class="li"><span class="swatch" style="background:var(--syn-pink); box-shadow: var(--glow-pink)"></span>{{ "game.breakout.legend_shrink" | t }}</div>
-        <div class="li"><span class="swatch" style="background:#475569"></span>{{ "game.breakout.legend_brick" | t }}</div>
+        <div class="li"><span class="swatch" style="background:var(--term-subtle)"></span>{{ "game.breakout.legend_brick" | t }}</div>
       </div>
 
-      <button class="btn" id="btn-start">$ start_game</button>
+      <button class="m-btn m-btn--primary" id="btn-start">$ start_game</button>
     </div>
   </div>
 </div>
@@ -170,7 +170,7 @@ main { max-width: 1100px; }
   align-items: center;
   gap: 8px;
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-mono);
   font-size: 11px;
   background: var(--purple-8);
@@ -190,10 +190,10 @@ main { max-width: 1100px; }
 .pill > span { position: relative; z-index: 1; }
 .pill.cyan  { background: var(--cyan-8); border-color: var(--cyan-15); color: var(--syn-cyan); }
 .pill.cyan .pill-fill { background: var(--cyan-8); }
-.pill.green { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.20); color: var(--syn-green); }
-.pill.green .pill-fill { background: rgba(74,222,128,0.10); }
-.pill.amber { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.20); color: var(--syn-amber); }
-.pill.amber .pill-fill { background: rgba(251,191,36,0.10); }
+.pill.green { background: var(--green-8); border-color: rgba(74,222,128,0.20); color: var(--syn-green); }
+.pill.green .pill-fill { background: var(--green-8); }
+.pill.amber { background: var(--amber-8); border-color: rgba(251,191,36,0.20); color: var(--syn-amber); }
+.pill.amber .pill-fill { background: var(--amber-8); }
 .tray-empty { color: var(--term-subtle); font-size: 12px; font-family: var(--font-mono); }
 
 /* canvas */
@@ -290,32 +290,6 @@ canvas {
   flex-shrink: 0;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 13px;
-  padding: 10px 20px;
-  border-radius: var(--radius-md);
-  border: 1px solid transparent;
-  cursor: pointer;
-  background: var(--syn-cyan);
-  color: #041016;
-  box-shadow: var(--glow-cyan-soft);
-  transition: all 150ms ease;
-}
-.btn:hover { background: var(--syn-cyan-soft); box-shadow: var(--glow-cyan); }
-.btn.ghost {
-  background: transparent;
-  color: var(--term-muted);
-  border-color: var(--term-border);
-  box-shadow: none;
-}
-.btn.ghost:hover { color: var(--term-fg); border-color: var(--term-border-strong); }
-
 .footer-controls {
   display: flex;
   justify-content: space-between;
@@ -346,7 +320,7 @@ canvas {
   transform: translateX(-50%);
   padding: 8px 16px;
   border-radius: var(--radius-pill);
-  background: rgba(34,211,238,0.15);
+  background: var(--cyan-15);
   border: 1px solid var(--cyan-30);
   color: var(--syn-cyan);
   font-family: var(--font-mono);
@@ -982,9 +956,9 @@ canvas {
         '<p class="eyebrow">&gt; SIGINT — PAUSED</p>' +
         '<h2>{{ "game.breakout.paused" | t }}</h2>' +
         '<p>{{ "game.breakout.pause_desc" | t }}</p>' +
-        '<button class="btn" id="btn-resume">$ resume</button>' +
+        '<button class="m-btn m-btn--primary" id="btn-resume">$ resume</button>' +
         '<div style="height:8px"></div>' +
-        '<button class="btn ghost" id="btn-restart">$ restart</button>';
+        '<button class="m-btn m-btn--ghost" id="btn-restart">$ restart</button>';
       ov.classList.remove('hidden');
       document.getElementById('btn-resume').onclick = () => togglePause();
       document.getElementById('btn-restart').onclick = () => startGame();
@@ -997,7 +971,7 @@ canvas {
         '<p class="eyebrow" style="color:var(--syn-pink)">&gt; PROCESS TERMINATED</p>' +
         '<h2>{{ "game.common.game_over" | t }}</h2>' +
         '<p>' + goDesc + '</p>' +
-        '<button class="btn" id="btn-again">$ play_again</button>';
+        '<button class="m-btn m-btn--primary" id="btn-again">$ play_again</button>';
       ov.classList.remove('hidden');
       document.getElementById('btn-again').onclick = () => startGame();
     }

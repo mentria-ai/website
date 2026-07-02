@@ -629,8 +629,8 @@ eleventyComputed:
   gap: 0.7rem;
   padding: 0.55rem 0.85rem;
   width: 100%;
-  background: rgba(255, 149, 0, 0.05);
-  border: 1px solid rgba(255, 149, 0, 0.2);
+  background: var(--orange-8);
+  border: 1px solid var(--orange-15);
   border-radius: var(--radius-lg);
   font-size: 0.82rem;
   color: var(--term-fg);
@@ -638,11 +638,11 @@ eleventyComputed:
 }
 .ct-notif-bar.is-unsupported { display: none; }
 .ct-notif-bar.is-granted {
-  background: rgba(74, 222, 128, 0.05);
+  background: var(--green-8);
   border-color: rgba(74, 222, 128, 0.22);
 }
 .ct-notif-bar.is-denied {
-  background: rgba(244, 114, 182, 0.05);
+  background: var(--pink-10);
   border-color: rgba(244, 114, 182, 0.22);
 }
 .ct-notif-dot {
@@ -738,7 +738,7 @@ eleventyComputed:
 
 .ct-widget__title {
   font-size: 1rem;
-  color: #ff9500;
+  color: var(--syn-orange);
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -750,10 +750,10 @@ eleventyComputed:
   cursor: text;
 }
 .ct-widget__title:hover {
-  border-bottom-color: rgba(255, 149, 0, 0.35);
+  border-bottom-color: var(--orange-30);
 }
 .ct-widget__title:focus {
-  border-bottom-color: #ff9500;
+  border-bottom-color: var(--syn-orange);
 }
 
 .ct-widget__display-wrap {
@@ -763,14 +763,14 @@ eleventyComputed:
   font-family: 'Courier New', 'Lucida Console', monospace;
   font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 700;
-  color: #ff9500;
+  color: var(--syn-orange);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.1em;
   text-shadow:
     0 0 20px rgba(255, 149, 0, 0.6),
-    0 0 40px rgba(255, 149, 0, 0.3);
+    0 0 40px var(--orange-30);
   padding: 0.15em 0;
   transition: all 0.3s ease;
 }
@@ -785,13 +785,13 @@ eleventyComputed:
   min-width: 2ch;
   text-align: center;
   display: inline-block;
-  background: linear-gradient(180deg, #ff9500 0%, #ff6b00 100%);
+  background: linear-gradient(180deg, var(--syn-orange) 0%, #ff6b00 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .ct-widget__colon {
-  color: #ff9500;
+  color: var(--syn-orange);
   animation: ct-blink 1s step-end infinite;
 }
 @keyframes ct-blink {

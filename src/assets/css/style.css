@@ -71,6 +71,7 @@ i18n-t {
   --syn-pink: #f472b6;
   --syn-green: #4ade80;
   --syn-amber: #fbbf24;
+  --syn-orange: #ff9500;
 
   /* Alpha tints (glows + tinted backgrounds) */
   --cyan-8: rgba(34, 211, 238, 0.08);
@@ -79,6 +80,17 @@ i18n-t {
   --purple-8: rgba(167, 139, 250, 0.08);
   --purple-20: rgba(167, 139, 250, 0.20);
   --pink-10: rgba(244, 114, 182, 0.10);
+  --pink-15: rgba(244, 114, 182, 0.15);
+  --pink-30: rgba(244, 114, 182, 0.30);
+  --green-8: rgba(74, 222, 128, 0.08);
+  --green-15: rgba(74, 222, 128, 0.15);
+  --green-30: rgba(74, 222, 128, 0.30);
+  --amber-8: rgba(251, 191, 36, 0.08);
+  --amber-15: rgba(251, 191, 36, 0.15);
+  --amber-30: rgba(251, 191, 36, 0.30);
+  --orange-8: rgba(255, 149, 0, 0.08);
+  --orange-15: rgba(255, 149, 0, 0.15);
+  --orange-30: rgba(255, 149, 0, 0.30);
 
   /* Gradients */
   --gradient-action: linear-gradient(90deg, var(--syn-cyan), var(--syn-purple));

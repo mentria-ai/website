@@ -192,18 +192,20 @@ eleventyComputed:
   const NS = 'invoice';
   (function migrateLegacy() {
     if (!window.MentriaStore) return;
-    const victims = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.indexOf(LS) === 0) victims.push(k);
-    }
-    victims.forEach(k => {
-      const id = k.slice(LS.length);
-      if (window.MentriaStore.get(NS, id) == null) {
-        window.MentriaStore.set(NS, id, localStorage.getItem(k));
+    try {
+      const victims = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.indexOf(LS) === 0) victims.push(k);
       }
-      localStorage.removeItem(k);
-    });
+      victims.forEach(k => {
+        const id = k.slice(LS.length);
+        if (window.MentriaStore.get(NS, id) == null) {
+          window.MentriaStore.set(NS, id, localStorage.getItem(k));
+        }
+        localStorage.removeItem(k);
+      });
+    } catch (_) {}
   })();
   const restore = (el) => {
     const v = window.MentriaStore ? window.MentriaStore.get(NS, el.id) : localStorage.getItem(LS + el.id);
@@ -572,9 +574,11 @@ eleventyComputed:
   clearBtn.addEventListener('click', async () => {
     if (!(await mentriaConfirm(COPY.confirmClear))) return;
     if (window.MentriaStore) window.MentriaStore.clear(NS);
-    Object.keys(localStorage)
-      .filter(k => k.startsWith(LS))
-      .forEach(k => localStorage.removeItem(k));
+    try {
+      Object.keys(localStorage)
+        .filter(k => k.startsWith(LS))
+        .forEach(k => localStorage.removeItem(k));
+    } catch (_) {}
     location.reload();
   });
 

@@ -392,15 +392,18 @@ canvas {
   };
 
   const LEGACY_HIGH = 'mentria_breakout_high';
+  function readLegacyHigh() {
+    try { return parseInt(localStorage.getItem(LEGACY_HIGH) || '0', 10) || 0; } catch (_) { return 0; }
+  }
   function readHigh() {
     if (window.MentriaStore) {
       const v = window.MentriaStore.get('games', 'breakout_high');
       if (v != null) return v;
-      const legacy = parseInt(localStorage.getItem(LEGACY_HIGH) || '0', 10) || 0;
+      const legacy = readLegacyHigh();
       if (legacy > 0) { window.MentriaStore.set('games', 'breakout_high', legacy); try { localStorage.removeItem(LEGACY_HIGH); } catch(_) {} }
       return legacy;
     }
-    return parseInt(localStorage.getItem(LEGACY_HIGH) || '0', 10) || 0;
+    return readLegacyHigh();
   }
   function writeHigh(v) {
     if (window.MentriaStore) window.MentriaStore.set('games', 'breakout_high', v);

@@ -222,15 +222,18 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
   ];
 
   const LEGACY_BEST = 'mentria_flappy_best';
+  function readLegacyBest() {
+    try { return parseInt(localStorage.getItem(LEGACY_BEST) || '0', 10) || 0; } catch (_) { return 0; }
+  }
   function readBest() {
     if (window.MentriaStore) {
       const v = window.MentriaStore.get('games', 'flappy_best');
       if (v != null) return v;
-      const legacy = parseInt(localStorage.getItem(LEGACY_BEST) || '0', 10) || 0;
+      const legacy = readLegacyBest();
       if (legacy > 0) { window.MentriaStore.set('games', 'flappy_best', legacy); try { localStorage.removeItem(LEGACY_BEST); } catch(_) {} }
       return legacy;
     }
-    return parseInt(localStorage.getItem(LEGACY_BEST) || '0', 10) || 0;
+    return readLegacyBest();
   }
   function writeBest(v) {
     if (window.MentriaStore) window.MentriaStore.set('games', 'flappy_best', v);

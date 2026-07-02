@@ -169,7 +169,8 @@ const peers = new Set();
 const objectUrls = new Set();
 const trackObjectUrl = (blob) => { const u = URL.createObjectURL(blob); objectUrls.add(u); return u; };
 const revokeObjectUrls = () => { objectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch {} }); objectUrls.clear(); };
-let muted = localStorage.getItem('comms.muted') === '1';
+let muted = false;
+try { muted = localStorage.getItem('comms.muted') === '1'; } catch (_) {}
 let audioCtx = null;
 
 const CHAT_TOPIC_PREFIX = 'mentria.chat.v1.';
@@ -769,7 +770,7 @@ els.mute.addEventListener('click', () => {
   muted = !muted;
   els.mute.textContent = muted ? 'sound: off' : 'sound: on';
   els.mute.setAttribute('aria-pressed', String(muted));
-  localStorage.setItem('comms.muted', muted ? '1' : '0');
+  try { localStorage.setItem('comms.muted', muted ? '1' : '0'); } catch (_) {}
   if (!muted) playPing(880);
 });
 if (muted) { els.mute.textContent = 'sound: off'; els.mute.setAttribute('aria-pressed', 'true'); }

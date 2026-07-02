@@ -594,6 +594,41 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 }
 .hero .tldr { display: flex; flex-direction: column; align-items: center; }
 
+html.app-chrome body:has(.terminal-frame) .hero { display: none; }
+html.app-chrome body:has(.terminal-frame) .hero.hero--peek {
+  display: block;
+  position: fixed;
+  z-index: 10000;
+  inset: auto var(--space-4) var(--space-4) var(--space-4);
+  max-height: 70vh;
+  overflow: auto;
+  background: var(--term-bg-raised);
+  border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--elev-3);
+  text-align: left;
+}
+@media (min-width: 720px) {
+  html.app-chrome body:has(.terminal-frame) .hero.hero--peek {
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    width: min(40rem, calc(100vw - var(--space-6)));
+    max-width: 40rem;
+  }
+}
+.terminal-frame__info {
+  margin-left: var(--space-2);
+  height: 24px;
+  padding: 0 var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  line-height: 1;
+  border-radius: var(--radius-sm);
+}
+
 /* iOS Safari auto-zooms when a focused text field has computed
    font-size < 16px. Even with user-scalable=no on the viewport this
    focus-zoom still fires on some iOS versions. Force a 16px floor on

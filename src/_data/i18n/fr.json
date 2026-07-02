@@ -130,7 +130,8 @@
     "heavy_download": "Cela télécharge environ 490 Mo de données du modèle et votre connexion semble lente ou en mode économie de données. Continuer ?",
     "download_postponed": "Téléchargement en pause — rechargez la page pour démarrer.",
     "storage_full": "Échec de l'enregistrement — le stockage du navigateur est plein. Libérez de l'espace pour conserver vos modifications.",
-    "copy_failed": "Échec de copie — utilisez Ctrl+C manuellement."
+    "copy_failed": "Échec de copie — utilisez Ctrl+C manuellement.",
+    "tool_info": "À propos de cet outil"
   },
   "home": {
     "cli": {

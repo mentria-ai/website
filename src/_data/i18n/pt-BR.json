@@ -130,7 +130,8 @@
     "heavy_download": "Isto baixa cerca de 490 MB de dados do modelo e você parece estar em uma conexão lenta ou com economia de dados. Continuar?",
     "download_postponed": "Download pausado — recarregue a página para começar.",
     "storage_full": "Não foi possível salvar — o armazenamento do navegador está cheio. Libere espaço para manter suas alterações.",
-    "copy_failed": "Falha ao copiar — use Ctrl+C manualmente."
+    "copy_failed": "Falha ao copiar — use Ctrl+C manualmente.",
+    "tool_info": "Sobre esta ferramenta"
   },
   "home": {
     "cli": {

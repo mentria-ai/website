@@ -25,7 +25,7 @@ eleventyComputed:
     <span class="rd__status-dot" id="rd-status-dot"></span>
     <span class="rd__status-text" id="rd-status-text" role="status" aria-live="polite">{{ "tool.radio.loading_catalog" | t }}</span>
     <span class="rd__track-count" id="rd-track-count"></span>
-    <button class="rd__retry" id="rd-retry" hidden>{{ "tool.radio.retry" | t }}</button>
+    <button class="rd__retry m-btn m-btn--danger" id="rd-retry" hidden>{{ "tool.radio.retry" | t }}</button>
   </div>
 
   <div class="rd__now">
@@ -47,13 +47,13 @@ eleventyComputed:
   </div>
 
   <div class="rd__controls">
-    <button class="rd__btn rd__btn--play" id="rd-play" aria-label="{{ 'tool.radio.btn_play_aria' | t }}" disabled>
+    <button class="rd__btn rd__btn--play m-btn m-btn--icon" id="rd-play" aria-label="{{ 'tool.radio.btn_play_aria' | t }}" disabled>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
     </button>
-    <button class="rd__btn" id="rd-skip" aria-label="{{ 'tool.radio.btn_skip_aria' | t }}" disabled>
+    <button class="rd__btn m-btn m-btn--icon" id="rd-skip" aria-label="{{ 'tool.radio.btn_skip_aria' | t }}" disabled>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,4 15,12 5,20"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
     </button>
-    <button class="rd__btn rd__btn--like" id="rd-like" aria-label="{{ 'tool.radio.btn_like_aria' | t }}" aria-pressed="false" disabled>
+    <button class="rd__btn rd__btn--like m-btn m-btn--icon" id="rd-like" aria-label="{{ 'tool.radio.btn_like_aria' | t }}" aria-pressed="false" disabled>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     </button>
     <div class="rd__volume-wrap">
@@ -89,14 +89,12 @@ window.RADIO_COPY = {
 <script type="module" src="/assets/radio/radio.js"></script>
 
 <style>
-/* ── Infinite Radio ─────────────────────────────── */
 .rd {
   display: flex;
   flex-direction: column;
   font-family: var(--font-mono);
 }
 
-/* ── Status bar ─────────────────────────────────── */
 .rd__status {
   display: flex;
   align-items: center;
@@ -133,19 +131,11 @@ window.RADIO_COPY = {
 }
 
 .rd__retry {
-  font: inherit;
   font-size: 0.7rem;
   padding: 0.15rem 0.6rem;
-  border-radius: 4px;
-  border: 1px solid var(--syn-pink);
-  background: rgba(244, 114, 182, 0.08);
-  color: var(--syn-pink);
-  cursor: pointer;
 }
 .rd__retry[hidden] { display: none; }
-.rd__retry:hover { background: rgba(244, 114, 182, 0.16); }
 
-/* ── Now playing ────────────────────────────────── */
 .rd__now {
   padding: 1.25rem 0.75rem 0.75rem;
   border-bottom: 1px solid var(--term-border);
@@ -212,7 +202,6 @@ window.RADIO_COPY = {
   opacity: 0.8;
 }
 
-/* ── Progress bar ───────────────────────────────── */
 .rd__progress {
   width: 100%;
   height: 4px;
@@ -237,7 +226,6 @@ window.RADIO_COPY = {
   color: var(--term-muted);
 }
 
-/* ── Controls ───────────────────────────────────── */
 .rd__controls {
   display: flex;
   align-items: center;
@@ -247,17 +235,6 @@ window.RADIO_COPY = {
 }
 
 .rd__btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--term-border);
-  background: none;
-  color: var(--term-fg);
-  cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -266,21 +243,16 @@ window.RADIO_COPY = {
   color: var(--syn-cyan);
 }
 
-.rd__btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
 .rd__btn--play {
   width: 44px;
   height: 44px;
-  background: rgba(34, 211, 238, 0.08);
+  background: var(--cyan-8);
   border-color: rgba(34, 211, 238, 0.25);
   color: var(--syn-cyan);
 }
 
 .rd__btn--play:hover:not(:disabled) {
-  background: rgba(34, 211, 238, 0.15);
+  background: var(--cyan-15);
   border-color: var(--syn-cyan);
   box-shadow: 0 0 12px rgba(34, 211, 238, 0.2);
 }
@@ -296,7 +268,6 @@ window.RADIO_COPY = {
   background: rgba(244, 114, 182, 0.08);
 }
 
-/* ── Volume ─────────────────────────────────────── */
 .rd__volume-wrap {
   display: flex;
   align-items: center;
@@ -311,7 +282,6 @@ window.RADIO_COPY = {
   cursor: pointer;
 }
 
-/* ── Up next ────────────────────────────────────── */
 .rd__next {
   padding: 0.75rem;
   font-size: 0.8rem;
@@ -335,7 +305,6 @@ window.RADIO_COPY = {
   text-overflow: ellipsis;
 }
 
-/* ── Responsive ─────────────────────────────────── */
 @media (max-width: 480px) {
   .rd__title {
     font-size: 0.9rem;

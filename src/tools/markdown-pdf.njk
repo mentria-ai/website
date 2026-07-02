@@ -81,7 +81,7 @@ eleventyComputed:
       <header class="mp__pane-header no-print">
         <span class="mp__pane-label">{{ "tool.markdown-pdf.pane_preview" | t }}</span>
       </header>
-      <article class="mp__preview" id="mp-preview" aria-live="polite"></article>
+      <article class="mp__preview" id="mp-preview" tabindex="0" role="region" aria-label="{{ 'tool.markdown-pdf.preview_region_aria' | t }}" aria-live="polite"></article>
     </section>
   </div>
 </section>
@@ -727,6 +727,7 @@ if ('launchQueue' in window) {
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.1) transparent;
 }
+.mp__preview:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -2px; }
 .mp__preview > :first-child { margin-top: 0; }
 .mp__preview h1, .mp__preview h2, .mp__preview h3,
 .mp__preview h4, .mp__preview h5, .mp__preview h6 {

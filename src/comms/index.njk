@@ -166,6 +166,9 @@ let chatAction = null;
 let metaAction = null;
 let chunkAction = null;
 const peers = new Set();
+const objectUrls = new Set();
+const trackObjectUrl = (blob) => { const u = URL.createObjectURL(blob); objectUrls.add(u); return u; };
+const revokeObjectUrls = () => { objectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch {} }); objectUrls.clear(); };
 let muted = localStorage.getItem('comms.muted') === '1';
 let audioCtx = null;
 
@@ -479,6 +482,7 @@ const joinNew = async (roomName, b64Key = null) => {
     chatTopic = null;
     chatKey = null;
   }
+  revokeObjectUrls();
   els.log.innerHTML = '';
   els.status.textContent = 'connecting…';
   els.peers.hidden = true;
@@ -581,7 +585,7 @@ const joinNew = async (roomName, b64Key = null) => {
         entry.line.what.innerHTML = '';
         entry.line.what.append(label, installBtn);
       } else {
-        const url = URL.createObjectURL(blob);
+        const url = trackObjectUrl(blob);
         entry.line.what.innerHTML = 'received ' + completeHTML(entry.meta.name, entry.meta.size, entry.meta.type, url);
       }
       incoming.delete(key);
@@ -683,7 +687,7 @@ const sendOne = async (file, extra) => {
     sent += slice.byteLength;
     line.what.innerHTML = progressHTML('sending', file.name, file.size, sent);
   }
-  const previewUrl = URL.createObjectURL(file);
+  const previewUrl = trackObjectUrl(file);
   line.what.innerHTML = 'sent ' + completeHTML(file.name, file.size, file.type, previewUrl);
 };
 

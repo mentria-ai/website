@@ -21,10 +21,11 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 <section class="xt">
   <h2 class="xt__heading">{{ "tool.extensions.install_heading" | t }}</h2>
-  <label class="xt__drop" id="xt-drop">
+  <div class="xt__drop" id="xt-drop">
     <input type="file" id="xt-file" accept=".html,text/html" hidden>
-    {{ "tool.extensions.drop_hint" | t }}
-  </label>
+    <span class="xt__drop-hint">{{ "tool.extensions.drop_hint" | t }}</span>
+    <button type="button" class="xt__btn xt__btn--small xt__choose" id="xt-choose">{{ "tool.extensions.choose_file" | t }}</button>
+  </div>
   <details class="xt__paste">
     <summary>{{ "tool.extensions.paste_hint" | t }}</summary>
     <textarea id="xt-paste" rows="6" spellcheck="false"></textarea>
@@ -66,6 +67,7 @@ const { confirmInstall } = await import('/assets/js/mentria-ext-install-ui.js');
 const { MentriaBus } = await import('/assets/js/mentria-bus.js');
 const drop = document.getElementById('xt-drop');
 const fileInput = document.getElementById('xt-file');
+const chooseBtn = document.getElementById('xt-choose');
 const pasteTa = document.getElementById('xt-paste');
 const errEl = document.getElementById('xt-error');
 const listEl = document.getElementById('xt-list');
@@ -167,6 +169,11 @@ drop.addEventListener('drop', (e) => {
   const f = e.dataTransfer.files && e.dataTransfer.files[0];
   if (f) f.text().then(installFlow).catch((e) => showError(e.message));
 });
+chooseBtn.addEventListener('click', () => fileInput.click());
+drop.addEventListener('click', (e) => {
+  if (e.target === fileInput || e.target === chooseBtn || chooseBtn.contains(e.target)) return;
+  fileInput.click();
+});
 fileInput.addEventListener('change', (e) => {
   const f = e.target.files && e.target.files[0];
   if (f) f.text().then(installFlow).catch((e) => showError(e.message));
@@ -188,7 +195,8 @@ render();
 <style>
 .xt { font-family: var(--font-mono); padding: 1rem 0.75rem; }
 .xt__heading { font-size: 0.85rem; text-transform: lowercase; letter-spacing: 0.08em; color: var(--term-muted); margin: 1.2rem 0 0.6rem; }
-.xt__drop { display: block; border: 1px dashed var(--term-border-strong, #2a3138); border-radius: 8px; padding: 1.2rem; text-align: center; color: var(--term-muted); cursor: pointer; font-size: 0.85rem; transition: border-color 0.15s, color 0.15s; }
+.xt__drop { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; border: 1px dashed var(--term-border-strong, #2a3138); border-radius: 8px; padding: 1.2rem; text-align: center; color: var(--term-muted); cursor: pointer; font-size: 0.85rem; transition: border-color 0.15s, color 0.15s; }
+.xt__drop-hint { margin: 0; }
 .xt__drop--hot, .xt__drop:hover { border-color: var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); }
 .xt__paste { margin-top: 0.6rem; font-size: 0.8rem; color: var(--term-muted); }
 .xt__paste textarea { width: 100%; margin: 0.5rem 0; background: var(--term-bg-raised, #0d0f12); border: 1px solid var(--term-border, #2a3138); color: var(--term-fg); border-radius: 6px; font-family: inherit; font-size: 0.75rem; padding: 0.5rem; }

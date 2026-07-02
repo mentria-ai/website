@@ -44,7 +44,7 @@ eleventyComputed:
           <rect x="13" y="13" width="3.5" height="3.5"/>
           <path d="M13 7.5h3.5V11M7.5 13h3.5v3.5"/>
         </svg>
-        <p class="qr__placeholder-text">{{ "tool.qr-scanner.idle_prompt" | t }}</p>
+        <p class="qr__placeholder-text" id="qr-idle-prompt">{{ "tool.qr-scanner.idle_prompt" | t }}</p>
       </div>
       <p class="qr__status" id="qr-status" aria-live="polite">{{ "tool.qr-scanner.scanning" | t }}</p>
     </div>
@@ -56,6 +56,7 @@ eleventyComputed:
     </div>
 
     <p class="qr__note" id="qr-note" hidden></p>
+    <p class="qr__note" id="qr-cap-note" hidden>{{ "tool.qr-scanner.note_qr_only" | t }}</p>
 
     <div class="qr__controls">
       <button type="button" class="qr__btn--start m-btn m-btn--primary m-btn--pill" id="qr-start">{{ "tool.qr-scanner.btn_start_camera" | t }}</button>
@@ -108,6 +109,8 @@ eleventyComputed:
     noteNoCamera:   {{ ("tool.qr-scanner.note_no_camera"  | t) | dump | safe }},
     noteCameraErr:  {{ ("tool.qr-scanner.note_camera_error" | t) | dump | safe }},
     noteNoMatch:    {{ ("tool.qr-scanner.note_no_match"   | t) | dump | safe }},
+    noteNoMatchQrOnly: {{ ("tool.qr-scanner.note_no_match_qr_only" | t) | dump | safe }},
+    idlePromptQr:   {{ ("tool.qr-scanner.idle_prompt_qr" | t) | dump | safe }},
     genTooLong:     {{ ("tool.qr-scanner.gen_too_long"    | t) | dump | safe }}
   };
 
@@ -117,6 +120,8 @@ eleventyComputed:
   const panelUnsup  = $('qr-unsupported');
   const video       = $('qr-video');
   const noteEl      = $('qr-note');
+  const capNote     = $('qr-cap-note');
+  const idlePromptEl = $('qr-idle-prompt');
   const resultValue = $('qr-result-value');
   const resultFmt   = $('qr-result-format');
   const startBtn    = $('qr-start');
@@ -256,6 +261,11 @@ eleventyComputed:
     panelUnsup.hidden = false;
   }
 
+  function applyQrOnlyHints() {
+    capNote.hidden = false;
+    if (idlePromptEl) idlePromptEl.textContent = COPY.idlePromptQr;
+  }
+
   function loadScript(src) {
     return new Promise((res, rej) => {
       const s = document.createElement('script');
@@ -371,7 +381,7 @@ eleventyComputed:
     }
     if (bitmap.close) bitmap.close();
     if (result) showResult(result.rawValue, result.format);
-    else showNote(COPY.noteNoMatch);
+    else showNote((useJsQR && !detector) ? COPY.noteNoMatchQrOnly : COPY.noteNoMatch);
   }
 
   startBtn.addEventListener('click', startCamera);
@@ -400,7 +410,7 @@ eleventyComputed:
     }
     try {
       if (!window.jsQR) await loadScript('/assets/js/jsqr.js?v={{ buildHash }}');
-      if (window.jsQR) { useJsQR = true; return; }
+      if (window.jsQR) { useJsQR = true; applyQrOnlyHints(); return; }
     } catch (_) {}
     showUnsupported();
   })();

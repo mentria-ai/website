@@ -716,7 +716,8 @@
       "btn_ai_generating": "生成中…",
       "ai_unavailable_hint": "AI ChatまたはQuoteを一度開くとAI命名が有効になります",
       "ai_confirm_download": "AI命名には初回約490 MBのモデルダウンロードが必要です。続行しますか?",
-      "btn_ai_loading": "読込中 {pct}%"
+      "btn_ai_loading": "読込中 {pct}%",
+      "preview_region_aria": "レンダリングされたプレビュー"
     },
     "quote": {
       "tldr_heading": "モチベーション名言とは?",
@@ -814,7 +815,8 @@
       "sample_heading": "サンプルを試す",
       "sample_install": "hello-worldをインストール",
       "sample_download": "ファイルをダウンロード",
-      "err_prefix": "インストール失敗:"
+      "err_prefix": "インストール失敗:",
+      "choose_file": "ファイルを選択"
     },
     "search": {
       "ph_input": "検索…",
@@ -893,7 +895,10 @@
       "gen_too_long": "QRコードに収めるには長すぎます。短くしてみてください。",
       "btn_download": "PNGをダウンロード",
       "btn_copy_image": "画像をコピー",
-      "gen_alt": "生成されたQRコード"
+      "gen_alt": "生成されたQRコード",
+      "note_qr_only": "このブラウザーはQRコードのみ読み取れます。その他のバーコード（EAN、UPC、Code 128 など）にはChromeやEdgeなどのChromium系ブラウザーが必要です。",
+      "idle_prompt_qr": "カメラをQRコードに向けるか、画像ファイルをスキャンしてください。",
+      "note_no_match_qr_only": "QRコードが見つかりませんでした。このブラウザーは他のバーコードを読み取れません。ChromeやEdgeなどのChromium系ブラウザーをお試しください。"
     },
     "totp": {
       "locked_title": "ロック中",

@@ -716,7 +716,8 @@
       "btn_ai_generating": "Génération…",
       "ai_unavailable_hint": "Ouvre AI Chat ou Citation Motivante une fois pour activer le nommage IA",
       "ai_confirm_download": "Le nommage IA nécessite un téléchargement unique du modèle (~490 Mo). Continuer ?",
-      "btn_ai_loading": "Chargement {pct}%"
+      "btn_ai_loading": "Chargement {pct}%",
+      "preview_region_aria": "Aperçu du rendu"
     },
     "quote": {
       "tldr_heading": "Qu'est-ce que Citation Motivante ?",
@@ -814,7 +815,8 @@
       "sample_heading": "Essaie l'exemple",
       "sample_install": "installer hello-world",
       "sample_download": "télécharger le fichier",
-      "err_prefix": "échec de l'installation :"
+      "err_prefix": "échec de l'installation :",
+      "choose_file": "Choisir un fichier"
     },
     "search": {
       "ph_input": "Rechercher…",
@@ -893,7 +895,10 @@
       "gen_too_long": "C'est trop long pour un QR code — essayez quelque chose de plus court.",
       "btn_download": "Télécharger le PNG",
       "btn_copy_image": "Copier l'image",
-      "gen_alt": "QR code généré"
+      "gen_alt": "QR code généré",
+      "note_qr_only": "Ce navigateur ne peut lire que les codes QR. Les autres codes-barres (EAN, UPC, Code 128…) nécessitent un navigateur Chromium comme Chrome ou Edge.",
+      "idle_prompt_qr": "Dirigez votre caméra vers un code QR, ou scannez un fichier image.",
+      "note_no_match_qr_only": "Aucun code QR trouvé. Ce navigateur ne peut pas lire les autres types de codes-barres — utilisez un navigateur Chromium comme Chrome ou Edge pour cela."
     },
     "totp": {
       "locked_title": "Verrouillé",

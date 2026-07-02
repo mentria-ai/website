@@ -716,7 +716,8 @@
       "btn_ai_generating": "Generating…",
       "ai_unavailable_hint": "Open AI Chat or Quote once to enable AI naming",
       "ai_confirm_download": "AI naming needs a one-time ~490 MB model download. Continue?",
-      "btn_ai_loading": "Loading {pct}%"
+      "btn_ai_loading": "Loading {pct}%",
+      "preview_region_aria": "Rendered preview"
     },
     "quote": {
       "tldr_heading": "What is Motivational Quote?",
@@ -814,7 +815,8 @@
       "sample_heading": "Try the sample",
       "sample_install": "install hello-world",
       "sample_download": "download the file",
-      "err_prefix": "install failed:"
+      "err_prefix": "install failed:",
+      "choose_file": "Choose file"
     },
     "search": {
       "ph_input": "Search…",
@@ -893,7 +895,10 @@
       "gen_too_long": "That's too much text to fit in a QR code — try something shorter.",
       "btn_download": "Download PNG",
       "btn_copy_image": "Copy image",
-      "gen_alt": "Generated QR code"
+      "gen_alt": "Generated QR code",
+      "note_qr_only": "This browser can only read QR codes. Other barcode types (EAN, UPC, Code 128…) need a Chromium browser like Chrome or Edge.",
+      "idle_prompt_qr": "Point your camera at a QR code — or scan an image file.",
+      "note_no_match_qr_only": "No QR code found. This browser can't read other barcode types — try a Chromium browser like Chrome or Edge for those."
     },
     "totp": {
       "locked_title": "Locked",

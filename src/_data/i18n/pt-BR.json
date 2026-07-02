@@ -716,7 +716,8 @@
       "btn_ai_generating": "Gerando…",
       "ai_unavailable_hint": "Abra AI Chat ou Frase Motivacional uma vez para habilitar a nomeação IA",
       "ai_confirm_download": "A nomeação IA requer um download único do modelo (~490 MB). Continuar?",
-      "btn_ai_loading": "Carregando {pct}%"
+      "btn_ai_loading": "Carregando {pct}%",
+      "preview_region_aria": "Pré-visualização renderizada"
     },
     "quote": {
       "tldr_heading": "O que é Frase Motivacional?",
@@ -814,7 +815,8 @@
       "sample_heading": "Experimente o exemplo",
       "sample_install": "instalar hello-world",
       "sample_download": "baixar o arquivo",
-      "err_prefix": "falha ao instalar:"
+      "err_prefix": "falha ao instalar:",
+      "choose_file": "Escolher arquivo"
     },
     "search": {
       "ph_input": "Buscar…",
@@ -893,7 +895,10 @@
       "gen_too_long": "Texto longo demais para um código QR — tente algo mais curto.",
       "btn_download": "Baixar PNG",
       "btn_copy_image": "Copiar imagem",
-      "gen_alt": "Código QR gerado"
+      "gen_alt": "Código QR gerado",
+      "note_qr_only": "Este navegador só consegue ler códigos QR. Outros tipos de código de barras (EAN, UPC, Code 128…) exigem um navegador Chromium como Chrome ou Edge.",
+      "idle_prompt_qr": "Aponte a câmera para um código QR — ou escaneie um arquivo de imagem.",
+      "note_no_match_qr_only": "Nenhum código QR encontrado. Este navegador não consegue ler outros tipos de código de barras — use um navegador Chromium como Chrome ou Edge para isso."
     },
     "totp": {
       "locked_title": "Bloqueado",

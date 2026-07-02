@@ -35,10 +35,10 @@ eleventyComputed:
 
 <div class="ms-controls">
   <span class="ctrl-label">{{ "game.minesweeper.difficulty" | t }}</span>
-  <div class="seg" id="diff-seg">
-    <button data-d="easy">{{ "game.minesweeper.diff_easy" | t }}</button>
-    <button data-d="medium" class="active">{{ "game.minesweeper.diff_medium" | t }}</button>
-    <button data-d="hard">{{ "game.minesweeper.diff_hard" | t }}</button>
+  <div class="m-seg" id="diff-seg">
+    <button data-d="easy" data-value="easy">{{ "game.minesweeper.diff_easy" | t }}</button>
+    <button data-d="medium" data-value="medium" class="is-active">{{ "game.minesweeper.diff_medium" | t }}</button>
+    <button data-d="hard" data-value="hard">{{ "game.minesweeper.diff_hard" | t }}</button>
   </div>
   <div class="stats-spread">
     <div class="stat-item">
@@ -122,27 +122,6 @@ main { max-width: 1100px; }
   font-weight: 500;
   margin-right: 4px;
 }
-.seg {
-  display: inline-flex;
-  border: 1px solid var(--term-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-.seg button {
-  background: transparent;
-  border: none;
-  color: var(--term-muted);
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 12px;
-  padding: 6px 12px;
-  cursor: pointer;
-  border-right: 1px solid var(--term-border);
-  transition: all 150ms;
-}
-.seg button:last-child { border-right: none; }
-.seg button:hover { color: var(--term-fg); background: rgba(255,255,255,0.03); }
-.seg button.active { color: var(--syn-cyan); background: var(--cyan-8); box-shadow: inset 0 -2px 0 var(--syn-cyan); }
 .stats-spread { margin-left: auto; display: flex; gap: 18px; font-size: 13px; }
 .stat-item { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 .stat-key { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); }
@@ -330,21 +309,6 @@ main { max-width: 1100px; }
 }
 .stats-mini .k { color: var(--term-muted); }
 .stats-mini .v { color: var(--syn-cyan); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
-
-.btn {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 13px;
-  padding: 10px 20px;
-  border-radius: var(--radius-md);
-  border: 1px solid transparent;
-  cursor: pointer;
-  background: var(--syn-cyan);
-  color: #041016;
-  box-shadow: var(--glow-cyan-soft);
-  transition: all 150ms;
-}
-.btn:hover { background: var(--syn-cyan-soft); box-shadow: var(--glow-cyan); }
 
 .footer-hints {
   display: flex;
@@ -624,7 +588,7 @@ main { max-width: 1100px; }
           '<span class="k">{{ "game.minesweeper.stats_time"          | t }}</span><span class="v">' + String(elapsed).padStart(3,'0') + 's</span>' +
           '<span class="k">{{ "game.minesweeper.stats_best"          | t }}</span><span class="v">' + (prevBest !== null && prevBest <= elapsed ? String(prevBest).padStart(3,'0')+'s' : NEW_BEST) + '</span>' +
         '</div>' +
-        '<button class="btn" id="play-again">$ new_game</button>';
+        '<button class="m-btn m-btn--primary" id="play-again">$ new_game</button>';
     } else {
       const lostDesc = {{ ("game.minesweeper.desc_lost" | t) | dump | safe }}
         .replace('{n}', State.revealedCount)
@@ -640,7 +604,7 @@ main { max-width: 1100px; }
           '<span class="k">{{ "game.minesweeper.stats_cells"      | t }}</span><span class="v">' + State.revealedCount + '</span>' +
           '<span class="k">{{ "game.minesweeper.stats_best"       | t }}</span><span class="v">' + (prevBest !== null ? String(prevBest).padStart(3,'0')+'s' : '—') + '</span>' +
         '</div>' +
-        '<button class="btn" id="play-again">$ try_again</button>';
+        '<button class="m-btn m-btn--primary" id="play-again">$ try_again</button>';
     }
     overlay.classList.remove('hidden');
     document.getElementById('play-again').onclick = () => build();
@@ -737,11 +701,8 @@ main { max-width: 1100px; }
     else if (e.key === 'r' || e.key === 'R') build();
   });
 
-  document.getElementById('diff-seg').addEventListener('click', e => {
-    const b = e.target.closest('button[data-d]');
-    if (!b) return;
-    [...e.currentTarget.children].forEach(x => x.classList.toggle('active', x === b));
-    State.diff = b.dataset.d;
+  MentriaUI.segmented(document.getElementById('diff-seg'), (value) => {
+    State.diff = value;
     build();
   });
 

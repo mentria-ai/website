@@ -16,6 +16,14 @@
 {%- endmacro -%}
 {{ toolIconsSvg | safe }}
 <section class="launcher reveal" id="tools-preview" aria-label="{{ 'home.tools_heading' | t }}">
+  <div class="launcher__widgets" id="launcher-widgets" hidden
+       data-label-steps="{{ 'widgets.steps_label' | t }}"
+       data-label-steps-goal="{{ 'widgets.steps_of_goal' | t }}"
+       data-label-notes="{{ 'widgets.notes_label' | t }}"
+       data-label-notes-count="{{ 'widgets.notes_count' | t }}"
+       data-label-untitled="{{ 'widgets.untitled' | t }}"
+       data-label-storage="{{ 'widgets.storage_label' | t }}"
+       data-label-storage-used="{{ 'widgets.storage_used' | t }}"></div>
   <div class="launcher__recents" id="launcher-recents" hidden>
     <h2 class="launcher__label">{{ "home.launcher.recents" | t }}</h2>
     <div class="launcher__grid" id="launcher-recents-row"></div>
@@ -157,3 +165,4 @@
   input.addEventListener('keydown', function (e) { if (e.key === 'Enter') setTimeout(applyFilter, 0); });
 })();
 </script>
+<script src="/assets/js/mentria-widgets.js?v={{ buildHash }}"></script>

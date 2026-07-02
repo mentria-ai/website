@@ -329,6 +329,11 @@
       "title": "Annoter une image",
       "lede": "Importez une image et obtenez instantanément une description IA, un texte alternatif, une transcription ou des étiquettes — avec des prompts testés en un toucher. S'exécute localement dans votre navigateur, rien n'est envoyé.",
       "tldr": "Un compagnon ciblé doté de vision pour AI Chat : dépose une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Bascule entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle de vision Qwen3.5 sur l'appareil qu'AI Chat (cache partagé — si tu as déjà utilisé AI Chat, aucun téléchargement supplémentaire), entièrement dans ton navigateur via WebGPU. Rien n'est envoyé ; l'image ne quitte jamais ton appareil. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis ton gestionnaire de fichiers une fois installé. Copie ou télécharge le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+)."
+    },
+    "files": {
+      "title": "Fichiers",
+      "lede": "Parcourez, exportez et supprimez les données que les outils Mentria stockent sur cet appareil. Tout reste en local.",
+      "tldr": "Un inspecteur du stockage local pour tout ce que les outils Mentria conservent sur cet appareil. Il liste l'espace de noms de chaque application — notes, coffre TOTP, états de jeu, données d'extensions et clés héritées — avec la taille de chaque élément et sa date de modification. Consultez n'importe quelle valeur en JSON formaté, exportez un élément précis ou supprimez-le (les suppressions demandent toujours confirmation). Exportez une sauvegarde chiffrée de l'ensemble avec une phrase secrète (PBKDF2-SHA256 × 600k + AES-GCM). Rien n'est envoyé ; l'outil n'écrit dans le stockage que lorsque vous confirmez une suppression."
     }
   },
   "game": {
@@ -1092,6 +1097,54 @@
       "prompt_ocr": "Lis tout le texte de cette image et transcris-le exactement tel qu'il apparaît, en conservant l'ordre et les sauts de ligne d'origine. Inclus tous les titres, étiquettes, chiffres et le texte en petits caractères. N'ajoute aucun commentaire, note, résumé ni explication — ne renvoie que le texte transcrit, rien d'autre. Seulement si l'image ne contient véritablement aucun texte, réponds : (aucun texte trouvé).",
       "prompt_alt": "En une seule phrase brève d'au plus 20 mots, décris cette image pour un utilisateur de lecteur d'écran. Ne retiens que l'élément le plus important montré — n'énumère pas chaque détail et ne transcris pas le texte. Ne renvoie que cette courte phrase, rien d'autre.",
       "prompt_tags": "Observe attentivement l'image et liste son contenu sous forme d'étiquettes courtes séparées par des virgules : les sujets principaux, objets, personnes, couleurs et le décor. Si l'image est surtout du texte ou un document, étiquette-la ainsi (par exemple : texte, document, capture d'écran). Donne 5 à 12 étiquettes. Produis toujours des étiquettes — ne refuse jamais et n'explique pas. Ne renvoie que les étiquettes séparées par des virgules."
+    },
+    "files": {
+      "export_all": "Tout exporter (chiffré)",
+      "refresh": "Actualiser",
+      "tree_label": "Données stockées",
+      "select_prompt": "Sélectionnez un espace de noms pour voir ses éléments.",
+      "items_caption": "Éléments stockés",
+      "col_key": "Clé",
+      "col_size": "Taille",
+      "col_modified": "Modifié",
+      "col_actions": "Actions",
+      "close": "Fermer",
+      "value_label": "Valeur",
+      "export_modal_title": "Exporter toutes les données (chiffré)",
+      "export_modal_lede": "Chiffrez une sauvegarde complète de tout ce que les outils Mentria stockent sur cet appareil. Gardez bien la phrase secrète : c'est le seul moyen d'ouvrir le fichier.",
+      "passphrase_label": "Phrase secrète",
+      "export_confirm": "Télécharger la sauvegarde",
+      "cancel": "Annuler",
+      "ns_quick_notes": "Notes rapides",
+      "ns_totp": "TOTP",
+      "ns_tools": "Réglages des outils",
+      "ns_games": "Jeux",
+      "ns_identity": "Identité",
+      "ns_ext": "Extensions",
+      "ns_extdata": "Extension : {id}",
+      "ns_ui": "Interface",
+      "ns_legacy": "Clés héritées",
+      "tree_item_label": "{name} — {n} éléments",
+      "view": "Voir",
+      "export": "Exporter",
+      "delete": "Supprimer",
+      "confirm_delete": "Supprimer « {name} » ? Cette action est irréversible.",
+      "confirm_delete_totp": "Supprimer « {name} » ? C'est votre coffre à double facteur : le retirer vous fait perdre tous les codes 2FA qui y sont stockés, et vous pourriez être bloqué sur ces comptes. Cette action est irréversible.",
+      "redaction_notice": "Ceci est un coffre de clés chiffré. Son contenu reste masqué ici volontairement ; exportez-le si vous avez besoin d'une sauvegarde.",
+      "truncated_note": "Valeur tronquée — affichage des 50 premiers KB sur {size}.",
+      "empty_store": "Rien de stocké pour l'instant. Les données que les outils Mentria enregistrent sur cet appareil apparaîtront ici.",
+      "empty_ns": "Cet espace de noms est vide.",
+      "storage_summary": "{used} sur {quota} utilisés",
+      "storage_unknown": "L'utilisation du stockage n'est pas disponible dans ce navigateur.",
+      "status_deleted": "« {name} » supprimé.",
+      "status_exported": "« {name} » exporté.",
+      "status_backup_done": "Sauvegarde chiffrée téléchargée.",
+      "status_pass_short": "Utilisez au moins 8 caractères.",
+      "status_backup_failed": "Échec de la sauvegarde : {msg}",
+      "strength_hint": "Robustesse de la phrase secrète : {label}",
+      "strength_weak": "faible",
+      "strength_medium": "moyenne",
+      "strength_strong": "forte"
     }
   },
   "category": {
@@ -1112,5 +1165,14 @@
     "recents": "Récents",
     "open": "Ouvrir la palette de commandes",
     "app_bar": "Navigation de l'application"
+  },
+  "widgets": {
+    "steps_label": "Pas",
+    "steps_of_goal": "sur {goal}",
+    "notes_label": "Notes",
+    "notes_count": "{n} notes",
+    "untitled": "Sans titre",
+    "storage_label": "Stockage",
+    "storage_used": "{used} / {quota}"
   }
 }

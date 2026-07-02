@@ -329,6 +329,11 @@
       "title": "Anotar imagen",
       "lede": "Sube una imagen y obtén al instante una descripción de IA, texto alternativo, transcripción o etiquetas — con prompts probados de un toque. Se ejecuta localmente en tu navegador, nada se sube.",
       "tldr": "Un complemento enfocado y con visión para AI Chat: suelta una imagen y se ejecuta automáticamente un prompt probado — sin necesidad de escribir uno. Cambia entre Describir, Leer texto (OCR), Texto alternativo y Objetos/etiquetas con un toque. Ejecuta el mismo modelo de visión Qwen3.5 en el dispositivo que AI Chat (caché compartida — si ya has usado AI Chat, no hay descarga extra), enteramente en tu navegador mediante WebGPU. Nada se sube; la imagen nunca sale de tu dispositivo. Arrastra y suelta, pega, elige un archivo o usa «abrir con» desde tu gestor de archivos una vez instalado. Copia o descarga el resultado. Requiere WebGPU (Chrome/Edge reciente o Safari 26+)."
+    },
+    "files": {
+      "title": "Archivos",
+      "lede": "Explora, exporta y elimina los datos que las herramientas de Mentria guardan en este dispositivo. Todo se queda en local.",
+      "tldr": "Un inspector del almacenamiento local para todo lo que las herramientas de Mentria guardan en este dispositivo. Muestra el espacio de nombres de cada aplicación — notas, bóveda TOTP, estado de los juegos, datos de extensiones y claves heredadas — con el tamaño de cada elemento y su fecha de modificación. Consulta cualquier valor como JSON con formato, exporta un elemento concreto o elimínalo (las eliminaciones siempre piden confirmación). Exporta una copia de seguridad cifrada de todo con una contraseña (PBKDF2-SHA256 × 600k + AES-GCM). No se sube nada; la herramienta solo escribe en el almacenamiento cuando confirmas una eliminación."
     }
   },
   "game": {
@@ -1092,6 +1097,54 @@
       "prompt_ocr": "Lee todo el texto de esta imagen y transcríbelo exactamente como aparece, conservando el orden y los saltos de línea originales. Incluye todos los títulos, etiquetas, números y la letra pequeña. No añadas comentarios, notas, resúmenes ni explicaciones — devuelve solo el texto transcrito y nada más. Solo si la imagen realmente no contiene ningún texto, responde: (no se encontró texto).",
       "prompt_alt": "En una sola frase breve de 20 palabras como máximo, describe esta imagen para un usuario de lector de pantalla. Capta solo lo más importante que se muestra — no enumeres cada detalle ni transcribas texto. Devuelve solo esa frase corta y nada más.",
       "prompt_tags": "Observa la imagen con atención y enumera su contenido como etiquetas cortas separadas por comas: los sujetos principales, objetos, personas, colores y el entorno. Si la imagen es principalmente texto o un documento, etiquétala así (por ejemplo: texto, documento, captura de pantalla). Da de 5 a 12 etiquetas. Produce siempre etiquetas — nunca te niegues ni expliques. Devuelve solo las etiquetas separadas por comas."
+    },
+    "files": {
+      "export_all": "Exportar todo (cifrado)",
+      "refresh": "Actualizar",
+      "tree_label": "Datos guardados",
+      "select_prompt": "Selecciona un espacio de nombres para ver sus elementos.",
+      "items_caption": "Elementos guardados",
+      "col_key": "Clave",
+      "col_size": "Tamaño",
+      "col_modified": "Modificado",
+      "col_actions": "Acciones",
+      "close": "Cerrar",
+      "value_label": "Valor",
+      "export_modal_title": "Exportar todos los datos (cifrado)",
+      "export_modal_lede": "Cifra una copia de seguridad completa de todo lo que las herramientas de Mentria guardan en este dispositivo. Guarda bien la contraseña: es la única forma de abrir el archivo.",
+      "passphrase_label": "Contraseña",
+      "export_confirm": "Descargar copia",
+      "cancel": "Cancelar",
+      "ns_quick_notes": "Notas rápidas",
+      "ns_totp": "TOTP",
+      "ns_tools": "Ajustes de herramientas",
+      "ns_games": "Juegos",
+      "ns_identity": "Identidad",
+      "ns_ext": "Extensiones",
+      "ns_extdata": "Extensión: {id}",
+      "ns_ui": "Interfaz",
+      "ns_legacy": "Claves heredadas",
+      "tree_item_label": "{name} — {n} elementos",
+      "view": "Ver",
+      "export": "Exportar",
+      "delete": "Eliminar",
+      "confirm_delete": "¿Eliminar «{name}»? Esta acción no se puede deshacer.",
+      "confirm_delete_totp": "¿Eliminar «{name}»? Es tu bóveda de doble factor: al quitarla perderás todos los códigos 2FA guardados aquí y podrías quedar bloqueado en esas cuentas. Esta acción no se puede deshacer.",
+      "redaction_notice": "Esta es una bóveda de claves cifrada. Su contenido permanece oculto aquí a propósito; expórtalo si necesitas una copia de seguridad.",
+      "truncated_note": "Valor truncado: se muestran los primeros 50 KB de {size}.",
+      "empty_store": "Aún no hay nada guardado. Los datos que las herramientas de Mentria guarden en este dispositivo aparecerán aquí.",
+      "empty_ns": "Este espacio de nombres está vacío.",
+      "storage_summary": "{used} de {quota} usados",
+      "storage_unknown": "El uso de almacenamiento no está disponible en este navegador.",
+      "status_deleted": "«{name}» eliminado.",
+      "status_exported": "«{name}» exportado.",
+      "status_backup_done": "Copia de seguridad cifrada descargada.",
+      "status_pass_short": "Usa al menos 8 caracteres.",
+      "status_backup_failed": "Error en la copia: {msg}",
+      "strength_hint": "Seguridad de la contraseña: {label}",
+      "strength_weak": "débil",
+      "strength_medium": "media",
+      "strength_strong": "fuerte"
     }
   },
   "category": {
@@ -1112,5 +1165,14 @@
     "recents": "Recientes",
     "open": "Abrir paleta de comandos",
     "app_bar": "Navegación de la aplicación"
+  },
+  "widgets": {
+    "steps_label": "Pasos",
+    "steps_of_goal": "de {goal}",
+    "notes_label": "Notas",
+    "notes_count": "{n} notas",
+    "untitled": "Sin título",
+    "storage_label": "Almacenamiento",
+    "storage_used": "{used} / {quota}"
   }
 }

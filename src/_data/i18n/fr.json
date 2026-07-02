@@ -1091,7 +1091,19 @@
       "eyebrow_checkmate": "échec et mat",
       "eyebrow_stalemate": "pat",
       "eyebrow_draw": "nulle",
-      "eyebrow_resigned": "abandon"
+      "eyebrow_resigned": "abandon",
+      "board_label": "échiquier",
+      "a11y_empty": "vide",
+      "a11y_target": "coup légal",
+      "a11y_check": "échec",
+      "a11y_turn": "au tour des {color}",
+      "promo_label": "promotion du pion",
+      "piece_king": "roi",
+      "piece_queen": "dame",
+      "piece_rook": "tour",
+      "piece_bishop": "fou",
+      "piece_knight": "cavalier",
+      "piece_pawn": "pion"
     },
     "annotate-image": {
       "status_idle": "dépose une image pour commencer",

@@ -13,14 +13,32 @@
     peer_offline: 'offline', peer_waiting: 'waiting for opponent', peer_connecting: 'connecting…',
     peer_connected: 'connected', peer_disconnected: 'opponent left', peer_error: 'connection error',
     room_invalid: 'invalid room code', copied: 'copied',
-    play_black: 'play black', play_white: 'play white'
+    play_black: 'play black', play_white: 'play white',
+    board_label: 'chess board', a11y_empty: 'empty', a11y_target: 'legal move',
+    a11y_check: 'check', a11y_turn: '{color} to move', promo_label: 'promote pawn',
+    piece_king: 'king', piece_queen: 'queen', piece_rook: 'rook',
+    piece_bishop: 'bishop', piece_knight: 'knight', piece_pawn: 'pawn'
   }, window.CHESS_I18N || {});
+  const PIECE_NAMES = { K: T.piece_king, Q: T.piece_queen, R: T.piece_rook, B: T.piece_bishop, N: T.piece_knight, P: T.piece_pawn };
+  function squareLabel(idx, pos, opts){
+    opts = opts || {};
+    const p = pos.b[idx];
+    let label = sqName(idx) + ', ';
+    if (p === ' ') label += T.a11y_empty;
+    else label += (isW(p) ? T.color_white : T.color_black) + ' ' + PIECE_NAMES[p.toUpperCase()];
+    if (opts.target) label += ', ' + T.a11y_target;
+    return label;
+  }
+  const liveEl = () => document.getElementById('chess-live');
+  function announce(msg){ const el = liveEl(); if (el){ el.textContent = ''; el.textContent = msg; } }
 
   const State = {
     pos: startPos(), history: [], cursor: -1, flipped: false,
     mode: 'hotseat', humanColor: 'w', skill: 1,
     pendingPromo: null, selected: -1, legalForSel: [], ghostMove: null, over: null,
+    focusSq: 60,
   };
+  let cellEls = [];
   const SKILL_CFG = [
     { depth: 1, label: 'Beginner', random: 0.3 },
     { depth: 2, label: 'Casual', random: 0 },
@@ -127,6 +145,7 @@
     hideHintArrow(); render(); save();
     const status = gameStatus(State.pos, State.history);
     if (status){ State.over = status; showEnd(status); }
+    announceMove(san, status);
     if (State.mode === 'online' && P2P.action && !m.fromPeer){ P2P.send({ kind:'move', move: m }); }
     if (status) return;
     if (State.mode === 'engine' && State.pos.turn !== State.humanColor) engineMove();
@@ -136,14 +155,23 @@
   /* ===== render ===== */
   function buildBoardCells(){
     const board = $('board'); board.innerHTML = '';
+    board.setAttribute('role', 'grid');
+    board.setAttribute('aria-label', T.board_label);
+    cellEls = [];
     for (let r=0;r<8;r++){
+      const rowEl = document.createElement('div');
+      rowEl.className = 'sq-row'; rowEl.setAttribute('role', 'row');
       for (let c=0;c<8;c++){
         const sq = document.createElement('div');
         sq.className = 'sq ' + (((r+c)%2===0)?'light':'dark');
         sq.dataset.sq = State.flipped ? rcSq(7-r, 7-c) : rcSq(r,c);
+        sq.setAttribute('role', 'gridcell');
+        sq.tabIndex = -1;
         sq.addEventListener('pointerdown', onSqDown);
-        board.appendChild(sq);
+        rowEl.appendChild(sq);
+        cellEls.push(sq);
       }
+      board.appendChild(rowEl);
     }
     const ranks = $('coords-ranks'); ranks.innerHTML = '';
     const files = $('coords-files'); files.innerHTML = '';
@@ -153,7 +181,7 @@
     }
   }
   function render(){
-    const cells = $('board').children;
+    const cells = cellEls;
     const viewPos = State.cursor >= 0 ? State.history[State.cursor].prePos : State.pos;
     const last = (State.cursor < 0 ? State.history[State.history.length-1] : State.history[State.cursor-1])?.move;
     const checkColor = inCheck(viewPos, viewPos.turn) ? viewPos.turn : null;
@@ -181,10 +209,24 @@
         }
       }
     }
+    const targets = (State.selected >= 0 && State.cursor < 0) ? new Set(State.legalForSel.map(m=>m.to)) : null;
+    for (let i=0;i<64;i++){
+      const cell = cells[i]; const idx = +cell.dataset.sq;
+      cell.setAttribute('aria-label', squareLabel(idx, viewPos, { target: targets ? targets.has(idx) : false }));
+      cell.setAttribute('aria-selected', (State.selected === idx && State.cursor < 0) ? 'true' : 'false');
+      cell.tabIndex = (idx === State.focusSq) ? 0 : -1;
+    }
     renderCaptured(viewPos);
     renderMoves();
     $('scrub-back').classList.toggle('show', State.cursor >= 0);
     $('btn-undo').disabled = State.history.length === 0 || State.mode === 'online';
+  }
+  function updateTabindex(){
+    for (const cell of cellEls) cell.tabIndex = (+cell.dataset.sq === State.focusSq) ? 0 : -1;
+  }
+  function focusSquare(idx){
+    const cell = cellEls.find(c => +c.dataset.sq === idx);
+    if (cell){ State.focusSq = idx; updateTabindex(); cell.focus(); }
   }
   function renderCaptured(viewPos){
     const startCounts = { P:8, N:2, B:2, R:2, Q:1, p:8, n:2, b:2, r:2, q:1 };
@@ -298,23 +340,76 @@
     doMove(move);
   }
   function selectSq(idx){ State.selected = idx; State.legalForSel = genMoves(State.pos).filter(m => m.from === idx); render(); }
+  function activateSquare(idx){
+    if (State.over || State.cursor >= 0) return;
+    if (State.mode === 'engine' && State.pos.turn !== State.humanColor) return;
+    if (State.mode === 'online' && P2P.color && P2P.color !== State.pos.turn) return;
+    const piece = State.pos.b[idx];
+    if (State.selected >= 0){
+      const move = State.legalForSel.find(m => m.to === idx);
+      if (move){
+        if (move.promo){ openPromo(move, cellEls.find(c => +c.dataset.sq === idx), true); return; }
+        doMove(move); focusSquare(idx); return;
+      }
+      if (piece !== ' ' && colorOf(piece) === State.pos.turn){ selectSq(idx); return; }
+      State.selected = -1; State.legalForSel = []; render(); return;
+    }
+    if (piece !== ' ' && colorOf(piece) === State.pos.turn) selectSq(idx);
+  }
+  function onBoardKey(e){
+    const cell = e.target.closest && e.target.closest('.sq');
+    if (!cell) return;
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar'){
+      e.preventDefault(); e.stopPropagation(); activateSquare(+cell.dataset.sq); return;
+    }
+    const v = cellEls.indexOf(cell);
+    if (v < 0) return;
+    let r = Math.floor(v/8), c = v%8, handled = true;
+    switch (e.key){
+      case 'ArrowUp': r = Math.max(0, r-1); break;
+      case 'ArrowDown': r = Math.min(7, r+1); break;
+      case 'ArrowLeft': c = Math.max(0, c-1); break;
+      case 'ArrowRight': c = Math.min(7, c+1); break;
+      case 'Home': c = 0; break;
+      case 'End': c = 7; break;
+      default: handled = false;
+    }
+    if (!handled) return;
+    e.preventDefault(); e.stopPropagation();
+    const target = cellEls[r*8+c];
+    State.focusSq = +target.dataset.sq; updateTabindex(); target.focus();
+  }
 
   /* ===== promotion ===== */
-  function openPromo(m, cell){
+  function closePromo(){ const pop = $('promo'); pop.style.display = 'none'; pop.onkeydown = null; State.pendingPromo = null; }
+  function openPromo(m, cell, viaKeyboard){
     const pop = $('promo');
     pop.style.display = 'flex';
     pop.className = 'promo-popover ' + (State.pos.turn === 'b' ? 'b' : '');
+    pop.setAttribute('role', 'group');
+    pop.setAttribute('aria-label', T.promo_label);
     pop.innerHTML = '';
+    State.pendingPromo = { move: m, viaKeyboard: !!viaKeyboard };
+    const colorWord = State.pos.turn === 'w' ? T.color_white : T.color_black;
     const pieces = State.pos.turn === 'w' ? ['Q','R','B','N'] : ['q','r','b','n'];
     pieces.forEach((p) => {
       const btn = document.createElement('button'); btn.textContent = PIECE_GLYPH[p];
-      btn.onclick = () => { pop.style.display = 'none'; doMove({ ...m, promo: p.toUpperCase() }); };
+      btn.setAttribute('aria-label', colorWord + ' ' + PIECE_NAMES[p.toUpperCase()]);
+      btn.onclick = () => { closePromo(); doMove({ ...m, promo: p.toUpperCase() }); if (viaKeyboard) focusSquare(m.to); };
       pop.appendChild(btn);
     });
     const shell = $('board-shell');
     const r = cell.getBoundingClientRect(), sr = shell.getBoundingClientRect();
     pop.style.left = Math.min(sr.width - 180, Math.max(4, r.left - sr.left)) + 'px';
     pop.style.top = Math.min(sr.height - 60, r.bottom - sr.top + 4) + 'px';
+    pop.onkeydown = (e) => {
+      const btns = Array.from(pop.querySelectorAll('button'));
+      const i = btns.indexOf(document.activeElement);
+      if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); const from = State.selected; closePromo(); if (viaKeyboard) focusSquare(from >= 0 ? from : m.from); }
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowDown'){ e.preventDefault(); e.stopPropagation(); btns[(i+1+btns.length)%btns.length].focus(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ e.preventDefault(); e.stopPropagation(); btns[(i-1+btns.length)%btns.length].focus(); }
+    };
+    if (viaKeyboard){ const first = pop.querySelector('button'); if (first) first.focus(); }
   }
 
   /* ===== hint arrow ===== */
@@ -348,7 +443,7 @@
     }
     State.pos = posAt();
     State.cursor = -1; State.selected = -1; State.legalForSel = []; State.over = null;
-    $('end-modal').classList.remove('show');
+    closeEndDialog();
     render(); save();
     if (State.mode === 'engine' && State.pos.turn !== State.humanColor) engineMove(); else analyze();
   }
@@ -359,7 +454,7 @@
     State.pos = startPos(); State.history = []; State.cursor = -1;
     State.selected = -1; State.legalForSel = []; State.over = null; State.ghostMove = null;
     if (!keepMode){ State.mode = 'hotseat'; State.humanColor = 'w'; State.flipped = false; }
-    $('end-modal').classList.remove('show'); hideHintArrow();
+    closeEndDialog(); hideHintArrow();
     render(); save();
     if (State.mode === 'online' && P2P.action && P2P.role === 'host'){ P2P.send({ kind:'sync', pos: State.pos, history: [] }); }
     if (State.mode === 'engine' && State.humanColor === 'b') engineMove(); else analyze();
@@ -374,14 +469,45 @@
     if (State.mode === 'online' && P2P.action) P2P.send({ kind:'resign', winner });
     showEnd(State.over);
   }
-  function showEnd(s){
+  function endStrings(s){
     let eyebrow = '', title = '', reason = '';
     if (s.type === 'checkmate'){ eyebrow = T.eyebrow_checkmate; title = s.winner==='w'?T.win_white:T.win_black; reason = T.by_checkmate; }
     else if (s.type === 'stalemate'){ eyebrow = T.eyebrow_stalemate; title = T.draw; reason = T.by_stalemate; }
     else if (s.type === 'draw'){ eyebrow = T.eyebrow_draw; title = T.draw; reason = T['draw_'+s.reason] || T.draw; }
     else if (s.type === 'resigned'){ eyebrow = T.eyebrow_resigned; title = s.winner==='w'?T.win_white:T.win_black; reason = T.by_resignation; }
+    return { eyebrow, title, reason };
+  }
+  function showEnd(s){
+    const { eyebrow, title, reason } = endStrings(s);
     $('end-eyebrow').textContent = eyebrow; $('end-title').textContent = title; $('end-reason').textContent = reason;
-    $('end-modal').classList.add('show');
+    openEndDialog();
+  }
+  let endReturnFocus = null;
+  function openEndDialog(){
+    const bg = $('end-modal');
+    if (!bg.classList.contains('show')) endReturnFocus = document.activeElement;
+    bg.classList.add('show');
+    const btn = $('btn-rematch');
+    setTimeout(() => { try { btn.focus(); } catch(e){} }, 0);
+  }
+  function closeEndDialog(){
+    const bg = $('end-modal');
+    if (!bg.classList.contains('show')) return;
+    bg.classList.remove('show');
+    const ret = endReturnFocus; endReturnFocus = null;
+    if (ret && document.contains(ret) && ret !== document.body){ try { ret.focus(); } catch(e){} }
+    else focusSquare(State.focusSq);
+  }
+  function announceMove(san, status){
+    let msg = san;
+    if (status){
+      const s = endStrings(status);
+      msg += '. ' + s.title + ' ' + s.reason;
+    } else {
+      if (inCheck(State.pos, State.pos.turn)) msg += ', ' + T.a11y_check;
+      msg += '. ' + T.a11y_turn.replace('{color}', State.pos.turn === 'w' ? T.color_white : T.color_black);
+    }
+    announce(msg);
   }
 
   /* ===== modes ===== */
@@ -455,7 +581,7 @@
       if (m.kind === 'move'){ doMove({ ...m.move, fromPeer: true }); }
       else if (m.kind === 'chat'){ appendChat('peer', m.text); }
       else if (m.kind === 'resign'){ State.over = { type:'resigned', winner: m.winner || P2P.color }; showEnd(State.over); }
-      else if (m.kind === 'sync'){ State.pos = m.pos; State.history = m.history || []; State.over = null; $('end-modal').classList.remove('show'); render(); }
+      else if (m.kind === 'sync'){ State.pos = m.pos; State.history = m.history || []; State.over = null; closeEndDialog(); render(); }
     }
   };
   function appendChat(who, text){
@@ -520,11 +646,24 @@
     });
     if (window.matchMedia('(max-width: 1024px)').matches){ document.querySelector('.right-col [data-tab="moves"]').classList.add('show-tab'); }
 
+    const boardEl = $('board');
+    boardEl.addEventListener('keydown', onBoardKey);
+    boardEl.addEventListener('focusin', (e) => {
+      const cell = e.target.closest && e.target.closest('.sq');
+      if (!cell) return;
+      State.focusSq = +cell.dataset.sq; updateTabindex();
+    });
+    $('end-modal').addEventListener('keydown', (e) => {
+      if (!$('end-modal').classList.contains('show')) return;
+      if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); closeEndDialog(); }
+      else if (e.key === 'Tab'){ e.preventDefault(); $('btn-rematch').focus(); }
+    });
+
     document.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === 'ArrowLeft'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur > 0) scrubTo(cur - 1); }
       else if (e.key === 'ArrowRight'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur < State.history.length) scrubTo(cur + 1); }
-      else if (e.key === 'Escape'){ State.selected = -1; State.legalForSel = []; render(); }
+      else if (e.key === 'Escape'){ if (State.pendingPromo) closePromo(); State.selected = -1; State.legalForSel = []; render(); }
       else if (e.key === 'r' || e.key === 'R'){ resign(); }
     });
   }

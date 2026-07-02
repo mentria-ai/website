@@ -1091,7 +1091,19 @@
       "eyebrow_checkmate": "checkmate",
       "eyebrow_stalemate": "stalemate",
       "eyebrow_draw": "draw",
-      "eyebrow_resigned": "resigned"
+      "eyebrow_resigned": "resigned",
+      "board_label": "chess board",
+      "a11y_empty": "empty",
+      "a11y_target": "legal move",
+      "a11y_check": "check",
+      "a11y_turn": "{color} to move",
+      "promo_label": "promote pawn",
+      "piece_king": "king",
+      "piece_queen": "queen",
+      "piece_rook": "rook",
+      "piece_bishop": "bishop",
+      "piece_knight": "knight",
+      "piece_pawn": "pawn"
     },
     "annotate-image": {
       "status_idle": "drop an image to start",

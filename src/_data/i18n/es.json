@@ -1091,7 +1091,19 @@
       "eyebrow_checkmate": "jaque mate",
       "eyebrow_stalemate": "ahogado",
       "eyebrow_draw": "tablas",
-      "eyebrow_resigned": "abandono"
+      "eyebrow_resigned": "abandono",
+      "board_label": "tablero de ajedrez",
+      "a11y_empty": "vacía",
+      "a11y_target": "movimiento legal",
+      "a11y_check": "jaque",
+      "a11y_turn": "turno de {color}",
+      "promo_label": "promover peón",
+      "piece_king": "rey",
+      "piece_queen": "dama",
+      "piece_rook": "torre",
+      "piece_bishop": "alfil",
+      "piece_knight": "caballo",
+      "piece_pawn": "peón"
     },
     "annotate-image": {
       "status_idle": "suelta una imagen para empezar",

@@ -129,13 +129,15 @@ eleventyComputed:
   </div>
 
   <div class="modal-bg" id="end-modal">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="end-title" aria-describedby="end-reason" tabindex="-1">
       <div class="eyebrow" id="end-eyebrow">checkmate</div>
       <h2 id="end-title">White wins</h2>
       <p id="end-reason">by checkmate</p>
       <button class="btn primary" id="btn-rematch">{{ "tool.chess.rematch" | t }}</button>
     </div>
   </div>
+
+  <div id="chess-live" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 </div>
 
 {% include "terminal-frame-close.njk" %}
@@ -184,7 +186,11 @@ eleventyComputed:
   .chess-app .captured.black span { color: #2a1018; text-shadow: 0 0 6px rgba(244,114,182,0.5); }
   .chess-app .board-shell { position: relative; aspect-ratio: 1; width: 100%; max-width: 560px; background: #0a0a0a; border: 1px solid var(--term-border); border-radius: var(--radius-lg); box-shadow: 0 0 60px rgba(34,211,238,0.08); padding: 22px; box-sizing: border-box; }
   .chess-app .board { width: 100%; height: 100%; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); position: relative; container-type: size; }
+  .chess-app .sq-row { display: contents; }
   .chess-app .sq { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none; }
+  .chess-app .sq:focus { outline: none; }
+  .chess-app .sq:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--syn-cyan); z-index: 2; }
+  .chess-app .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   .chess-app .sq.light { background: rgba(255,255,255,0.06); }
   .chess-app .sq.dark { background: rgba(0,0,0,0.35); }
   .chess-app .sq.sel { background: var(--cyan-15) !important; box-shadow: inset 0 0 0 2px var(--syn-cyan); }
@@ -300,7 +306,19 @@ eleventyComputed:
     share_link: {{ ("tool.chess.share_link" | t) | dump | safe }},
     link_copied: {{ ("tool.chess.link_copied" | t) | dump | safe }},
     play_black: {{ ("tool.chess.play_black" | t) | dump | safe }},
-    play_white: {{ ("tool.chess.play_white" | t) | dump | safe }}
+    play_white: {{ ("tool.chess.play_white" | t) | dump | safe }},
+    board_label: {{ ("tool.chess.board_label" | t) | dump | safe }},
+    a11y_empty: {{ ("tool.chess.a11y_empty" | t) | dump | safe }},
+    a11y_target: {{ ("tool.chess.a11y_target" | t) | dump | safe }},
+    a11y_check: {{ ("tool.chess.a11y_check" | t) | dump | safe }},
+    a11y_turn: {{ ("tool.chess.a11y_turn" | t) | dump | safe }},
+    promo_label: {{ ("tool.chess.promo_label" | t) | dump | safe }},
+    piece_king: {{ ("tool.chess.piece_king" | t) | dump | safe }},
+    piece_queen: {{ ("tool.chess.piece_queen" | t) | dump | safe }},
+    piece_rook: {{ ("tool.chess.piece_rook" | t) | dump | safe }},
+    piece_bishop: {{ ("tool.chess.piece_bishop" | t) | dump | safe }},
+    piece_knight: {{ ("tool.chess.piece_knight" | t) | dump | safe }},
+    piece_pawn: {{ ("tool.chess.piece_pawn" | t) | dump | safe }}
   };
 </script>
 <script src="/assets/js/chess-engine.js?v={{ buildHash }}"></script>

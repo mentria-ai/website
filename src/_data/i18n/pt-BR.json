@@ -1091,7 +1091,19 @@
       "eyebrow_checkmate": "xeque-mate",
       "eyebrow_stalemate": "afogamento",
       "eyebrow_draw": "empate",
-      "eyebrow_resigned": "desistência"
+      "eyebrow_resigned": "desistência",
+      "board_label": "tabuleiro de xadrez",
+      "a11y_empty": "vazia",
+      "a11y_target": "lance legal",
+      "a11y_check": "xeque",
+      "a11y_turn": "vez das {color}",
+      "promo_label": "promover peão",
+      "piece_king": "rei",
+      "piece_queen": "dama",
+      "piece_rook": "torre",
+      "piece_bishop": "bispo",
+      "piece_knight": "cavalo",
+      "piece_pawn": "peão"
     },
     "annotate-image": {
       "status_idle": "solte uma imagem para começar",

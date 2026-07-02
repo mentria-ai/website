@@ -3,7 +3,12 @@
 .deck--source .deck__caption em { color: var(--syn-cyan, #22d3ee); font-style: normal; font-weight: 600; }
 .deck--source .deck__caption strong { font-weight: 800; }
 
+.deck--source .deck__slide-img { z-index: auto; }
+.deck--source .deck__slide-overlay { z-index: auto; }
+
 .deck--source .deck__eq {
+  position: relative;
+  z-index: 4;
   margin: 0 0 12px;
   padding: 9px 12px;
   background: rgba(34, 211, 238, 0.06);
@@ -12,11 +17,23 @@
   overflow-x: auto;
   overflow-y: hidden;
   pointer-events: auto;
+  touch-action: pan-x;
   color: #fff;
+}
+.deck--source .deck__eq:focus-visible {
+  outline: 2px solid var(--syn-cyan, #22d3ee);
+  outline-offset: 2px;
 }
 .deck--source .deck__eq math { margin: 0; color: #fff; font-size: 1.15em; }
 .deck--source .deck__eq::-webkit-scrollbar { height: 4px; }
 .deck--source .deck__eq::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 2px; }
+
+@media (min-aspect-ratio: 832 / 1472) {
+  .deck--source .deck__slide {
+    left: calc(50% - var(--stage-w) / 2);
+    transform: none;
+  }
+}
 
 .deck--source .deck__code {
   margin: 0 0 12px;

@@ -81,11 +81,11 @@
   });
 
   function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-  function moreLink(label) {
-    return '<a class="deck__more" data-action="expand" role="button" tabindex="0">' + label + '</a>';
+  function moreLink(label, expanded) {
+    return '<button type="button" class="deck__more" data-action="expand" aria-expanded="' + (expanded ? 'true' : 'false') + '">' + label + '</button>';
   }
-  function collapsedHTML(body) { return esc(body.dataset.truncated) + '… ' + moreLink('more'); }
-  function fullHTML(body) { return body.dataset.full + ' ' + moreLink('less'); }
+  function collapsedHTML(body) { return esc(body.dataset.truncated) + '… ' + moreLink('more', false); }
+  function fullHTML(body) { return body.dataset.full + ' ' + moreLink('less', true); }
 
   function animateBody(body, html, onDone) {
     const startH = body.offsetHeight;
@@ -204,6 +204,10 @@
   document.addEventListener('keydown', (e) => {
     const t = e.target;
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+    if (t && t.closest) {
+      if (t.closest('.deck__eq')) return;
+      if ((e.key === ' ' || e.key === 'Enter') && t.closest('button, a[href], [role="button"]')) return;
+    }
     if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); expandCurrent(); }
@@ -213,6 +217,7 @@
   /* ── Touch swipes (up = expand, down = exit, l/r = nav) ── */
   let tStart = null;
   root.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.deck__eq')) return;
     if (e.target.closest('.deck__body') && isExpanded()) return;
     const t = e.touches[0];
     tStart = { x: t.clientX, y: t.clientY, time: Date.now() };

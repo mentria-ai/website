@@ -57,7 +57,7 @@ eleventyComputed:
       <p class="deck__caption">{{ slide.caption | tloc(pair.locale.code) | safe }}</p>
 
       {% if slide.equation %}
-      <div class="deck__eq">{{ slide.equation | katex | safe }}</div>
+      <div class="deck__eq" tabindex="0">{{ slide.equation | katex | safe }}</div>
       {% endif %}
 
       {% if slide.body %}

@@ -1,0 +1,746 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/files/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.files.title' | t }}"
+  description: "{{ 'tools.files.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">files</span></p>
+  <h1>{{ "tools.files.title" | t }}</h1>
+  <p>{{ "tools.files.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "files.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="files" id="files">
+
+  <div class="files__toolbar">
+    <p class="files__summary" id="files-summary"></p>
+    <div class="files__toolbar-actions">
+      <button type="button" class="m-btn m-btn--ghost" id="files-export-all">{{ "tool.files.export_all" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" id="files-refresh">{{ "tool.files.refresh" | t }}</button>
+    </div>
+  </div>
+
+  <div class="files__body">
+    <nav class="files__tree" id="files-tree" aria-label="{{ 'tool.files.tree_label' | t }}"></nav>
+
+    <div class="files__main">
+      <div class="files__main-head">
+        <h2 class="files__main-title" id="files-main-title">{{ "tool.files.select_prompt" | t }}</h2>
+        <span class="files__main-count" id="files-main-count"></span>
+      </div>
+
+      <p class="files__empty" id="files-empty" hidden></p>
+
+      <div class="files__table-wrap" id="files-table-wrap" hidden>
+        <table class="files-table">
+          <caption class="files-sr">{{ "tool.files.items_caption" | t }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ "tool.files.col_key" | t }}</th>
+              <th scope="col">{{ "tool.files.col_size" | t }}</th>
+              <th scope="col">{{ "tool.files.col_modified" | t }}</th>
+              <th scope="col" class="files-table__actions-h">{{ "tool.files.col_actions" | t }}</th>
+            </tr>
+          </thead>
+          <tbody id="files-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <p class="files__status m-status" id="files-status"></p>
+</section>
+
+<div class="files-modal m-modal" id="files-view-modal" hidden>
+  <div class="files-modal__backdrop" data-close></div>
+  <div class="files-modal__card m-modal__card">
+    <div class="files-modal__head">
+      <h3 class="files-modal__h" id="files-view-title"></h3>
+      <button type="button" class="m-btn m-btn--icon" data-close aria-label="{{ 'tool.files.close' | t }}">✕</button>
+    </div>
+    <p class="files-modal__note" id="files-view-note" hidden></p>
+    <pre class="files-modal__pre" id="files-view-pre" tabindex="0" aria-label="{{ 'tool.files.value_label' | t }}"></pre>
+  </div>
+</div>
+
+<div class="files-modal m-modal" id="files-export-modal" hidden>
+  <div class="files-modal__backdrop" data-close></div>
+  <div class="files-modal__card m-modal__card">
+    <h3 class="files-modal__h">{{ "tool.files.export_modal_title" | t }}</h3>
+    <p class="files-modal__p">{{ "tool.files.export_modal_lede" | t }}</p>
+    <div class="m-field">
+      <label for="files-export-pass">{{ "tool.files.passphrase_label" | t }}</label>
+      <input class="m-input" type="password" id="files-export-pass" autocomplete="new-password" minlength="8" spellcheck="false">
+    </div>
+    <p class="files-modal__strength" id="files-export-strength" aria-live="polite"></p>
+    <div class="files-modal__actions">
+      <button type="button" class="m-btn m-btn--ghost" data-close>{{ "tool.files.cancel" | t }}</button>
+      <button type="button" class="m-btn m-btn--primary" id="files-export-confirm">{{ "tool.files.export_confirm" | t }}</button>
+    </div>
+  </div>
+</div>
+
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(() => {
+  'use strict';
+
+  const COPY = {
+    nsQuickNotes: {{ ("tool.files.ns_quick_notes" | t) | dump | safe }},
+    nsTotp:       {{ ("tool.files.ns_totp"        | t) | dump | safe }},
+    nsTools:      {{ ("tool.files.ns_tools"       | t) | dump | safe }},
+    nsGames:      {{ ("tool.files.ns_games"       | t) | dump | safe }},
+    nsIdentity:   {{ ("tool.files.ns_identity"    | t) | dump | safe }},
+    nsExt:        {{ ("tool.files.ns_ext"         | t) | dump | safe }},
+    nsExtdata:    {{ ("tool.files.ns_extdata"     | t) | dump | safe }},
+    nsUi:         {{ ("tool.files.ns_ui"          | t) | dump | safe }},
+    nsLegacy:     {{ ("tool.files.ns_legacy"      | t) | dump | safe }},
+    treeItemLabel:{{ ("tool.files.tree_item_label"| t) | dump | safe }},
+    view:         {{ ("tool.files.view"           | t) | dump | safe }},
+    exportItem:   {{ ("tool.files.export"         | t) | dump | safe }},
+    del:          {{ ("tool.files.delete"         | t) | dump | safe }},
+    confirmDelete:{{ ("tool.files.confirm_delete" | t) | dump | safe }},
+    confirmDeleteTotp: {{ ("tool.files.confirm_delete_totp" | t) | dump | safe }},
+    redaction:    {{ ("tool.files.redaction_notice" | t) | dump | safe }},
+    truncated:    {{ ("tool.files.truncated_note" | t) | dump | safe }},
+    emptyStore:   {{ ("tool.files.empty_store"    | t) | dump | safe }},
+    emptyNs:      {{ ("tool.files.empty_ns"       | t) | dump | safe }},
+    selectPrompt: {{ ("tool.files.select_prompt"  | t) | dump | safe }},
+    storageSummary: {{ ("tool.files.storage_summary" | t) | dump | safe }},
+    storageUnknown: {{ ("tool.files.storage_unknown" | t) | dump | safe }},
+    statusDeleted:{{ ("tool.files.status_deleted" | t) | dump | safe }},
+    statusExported:{{ ("tool.files.status_exported" | t) | dump | safe }},
+    backupDone:   {{ ("tool.files.status_backup_done" | t) | dump | safe }},
+    passShort:    {{ ("tool.files.status_pass_short" | t) | dump | safe }},
+    backupFailed: {{ ("tool.files.status_backup_failed" | t) | dump | safe }},
+    strengthHint: {{ ("tool.files.strength_hint"  | t) | dump | safe }},
+    strengthWeak: {{ ("tool.files.strength_weak"  | t) | dump | safe }},
+    strengthMedium:{{ ("tool.files.strength_medium"| t) | dump | safe }},
+    strengthStrong:{{ ("tool.files.strength_strong"| t) | dump | safe }}
+  };
+
+  const DASH = '—';
+  const VIEW_LIMIT = 50 * 1024;
+  const LEGACY_ID = '__legacy__';
+  const NS_LABELS = {
+    quick_notes: COPY.nsQuickNotes,
+    totp: COPY.nsTotp,
+    tools: COPY.nsTools,
+    games: COPY.nsGames,
+    identity: COPY.nsIdentity,
+    ext: COPY.nsExt,
+    ui: COPY.nsUi
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const store = window.MentriaStore;
+
+  const treeEl = $('files-tree');
+  const mainTitle = $('files-main-title');
+  const mainCount = $('files-main-count');
+  const emptyEl = $('files-empty');
+  const tableWrap = $('files-table-wrap');
+  const rowsEl = $('files-rows');
+  const summaryEl = $('files-summary');
+  const status = MentriaUI.status($('files-status'));
+
+  const state = { buckets: [], selected: null };
+
+  function fmtBytes(n) {
+    if (n == null || isNaN(n)) return DASH;
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function fmtDate(mtime) {
+    if (mtime == null || isNaN(mtime)) return DASH;
+    const lang = document.documentElement.lang || 'en';
+    try {
+      return new Intl.DateTimeFormat(lang, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(mtime));
+    } catch (_) {
+      try { return new Date(mtime).toLocaleString(); } catch (__) { return DASH; }
+    }
+  }
+
+  function nsLabel(id) {
+    if (id === LEGACY_ID) return COPY.nsLegacy;
+    if (id.indexOf('extdata.') === 0) return COPY.nsExtdata.replace('{id}', id.slice('extdata.'.length));
+    if (Object.prototype.hasOwnProperty.call(NS_LABELS, id)) return NS_LABELS[id];
+    return id;
+  }
+
+  function legacyKeys() {
+    const out = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.indexOf('mentria_') === 0) out.push(k);
+      }
+    } catch (_) {}
+    return out.sort();
+  }
+
+  function bucketCount(bucket) {
+    if (bucket.kind === 'legacy') return legacyKeys().length;
+    return store.list(bucket.id).length;
+  }
+
+  function scan() {
+    const buckets = [];
+    let namespaces = [];
+    try { namespaces = store.listNamespaces(); } catch (_) {}
+    namespaces.forEach((ns) => {
+      buckets.push({ id: ns, kind: 'ns', fileNs: ns });
+    });
+    if (legacyKeys().length) {
+      buckets.push({ id: LEGACY_ID, kind: 'legacy', fileNs: 'legacy' });
+    }
+    state.buckets = buckets;
+    if (state.selected && !buckets.some((b) => b.id === state.selected)) {
+      state.selected = null;
+    }
+  }
+
+  function itemsOf(bucket) {
+    if (bucket.kind === 'legacy') {
+      return legacyKeys().map((k) => ({ key: k, meta: null }));
+    }
+    return store.list(bucket.id).sort().map((k) => {
+      let meta = null;
+      try { meta = store.getMeta(bucket.id, k); } catch (_) {}
+      return { key: k, meta: meta };
+    });
+  }
+
+  function readValue(bucket, key) {
+    if (bucket.kind === 'legacy') {
+      try { return localStorage.getItem(key); } catch (_) { return null; }
+    }
+    try { return store.get(bucket.id, key); } catch (_) { return null; }
+  }
+
+  function prettyOf(v) {
+    if (v == null) return '';
+    if (typeof v === 'string') {
+      try { return JSON.stringify(JSON.parse(v), null, 2); } catch (_) { return v; }
+    }
+    try { return JSON.stringify(v, null, 2); } catch (_) { return String(v); }
+  }
+
+  function exportContent(bucket, key) {
+    const v = readValue(bucket, key);
+    if (bucket.kind === 'legacy') {
+      try { return JSON.stringify(JSON.parse(v), null, 2); } catch (_) { return JSON.stringify(v); }
+    }
+    try { return JSON.stringify(v, null, 2); } catch (_) { return JSON.stringify(String(v)); }
+  }
+
+  function safeName(s) {
+    return String(s).replace(/[\\/]+/g, '_');
+  }
+
+  function renderTree() {
+    treeEl.textContent = '';
+    if (!state.buckets.length) {
+      const p = document.createElement('p');
+      p.className = 'files__tree-empty';
+      p.textContent = COPY.emptyStore;
+      treeEl.appendChild(p);
+      return;
+    }
+    state.buckets.forEach((bucket) => {
+      const n = bucketCount(bucket);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'files__ns';
+      btn.dataset.id = bucket.id;
+      const selected = state.selected === bucket.id;
+      if (selected) btn.classList.add('is-active');
+      btn.setAttribute('aria-current', selected ? 'true' : 'false');
+      const label = nsLabel(bucket.id);
+      btn.setAttribute('aria-label', COPY.treeItemLabel.replace('{name}', label).replace('{n}', n));
+      const name = document.createElement('span');
+      name.className = 'files__ns-name';
+      name.textContent = label;
+      const count = document.createElement('span');
+      count.className = 'files__ns-count';
+      count.textContent = n;
+      btn.appendChild(name);
+      btn.appendChild(count);
+      treeEl.appendChild(btn);
+    });
+  }
+
+  function renderMain() {
+    const bucket = state.selected ? state.buckets.find((b) => b.id === state.selected) : null;
+    if (!bucket) {
+      mainTitle.textContent = COPY.selectPrompt;
+      mainCount.textContent = '';
+      tableWrap.hidden = true;
+      emptyEl.hidden = true;
+      rowsEl.textContent = '';
+      return;
+    }
+    const label = nsLabel(bucket.id);
+    mainTitle.textContent = label;
+    const items = itemsOf(bucket);
+    mainCount.textContent = items.length;
+    rowsEl.textContent = '';
+    if (!items.length) {
+      tableWrap.hidden = true;
+      emptyEl.hidden = false;
+      emptyEl.textContent = COPY.emptyNs;
+      return;
+    }
+    emptyEl.hidden = true;
+    tableWrap.hidden = false;
+    items.forEach((item) => {
+      const tr = document.createElement('tr');
+
+      const keyCell = document.createElement('th');
+      keyCell.scope = 'row';
+      keyCell.className = 'files-table__key';
+      keyCell.textContent = item.key;
+
+      const sizeCell = document.createElement('td');
+      sizeCell.className = 'files-table__num';
+      sizeCell.textContent = item.meta ? fmtBytes(item.meta.size) : DASH;
+
+      const dateCell = document.createElement('td');
+      dateCell.className = 'files-table__date';
+      dateCell.textContent = item.meta ? fmtDate(item.meta.mtime) : DASH;
+
+      const actionCell = document.createElement('td');
+      actionCell.className = 'files-table__actions';
+      actionCell.appendChild(makeAction(COPY.view, 'view', item.key, 'm-btn--ghost'));
+      actionCell.appendChild(makeAction(COPY.exportItem, 'export', item.key, 'm-btn--ghost'));
+      actionCell.appendChild(makeAction(COPY.del, 'delete', item.key, 'm-btn--danger'));
+
+      tr.appendChild(keyCell);
+      tr.appendChild(sizeCell);
+      tr.appendChild(dateCell);
+      tr.appendChild(actionCell);
+      rowsEl.appendChild(tr);
+    });
+  }
+
+  function makeAction(label, action, key, variant) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'm-btn ' + variant + ' files-table__btn';
+    btn.dataset.action = action;
+    btn.dataset.key = key;
+    btn.textContent = label;
+    return btn;
+  }
+
+  async function renderSummary() {
+    let est = null;
+    try { est = await store.estimate(); } catch (_) {}
+    if (!est || est.usage == null || est.quota == null || !est.quota) {
+      summaryEl.textContent = COPY.storageUnknown;
+      return;
+    }
+    summaryEl.textContent = COPY.storageSummary
+      .replace('{used}', fmtBytes(est.usage))
+      .replace('{quota}', fmtBytes(est.quota));
+  }
+
+  function refresh() {
+    scan();
+    renderTree();
+    renderMain();
+    renderSummary();
+  }
+
+  treeEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.files__ns');
+    if (!btn) return;
+    state.selected = btn.dataset.id;
+    status.clear();
+    renderTree();
+    renderMain();
+  });
+
+  const viewModal = MentriaUI.modal($('files-view-modal'));
+  const exportModal = MentriaUI.modal($('files-export-modal'));
+  document.body.appendChild($('files-view-modal'));
+  document.body.appendChild($('files-export-modal'));
+
+  const viewTitle = $('files-view-title');
+  const viewPre = $('files-view-pre');
+  const viewNote = $('files-view-note');
+
+  function openView(bucket, key) {
+    viewTitle.textContent = key;
+    viewNote.hidden = true;
+    viewNote.textContent = '';
+    if (bucket.id === 'identity') {
+      viewPre.textContent = '';
+      viewNote.hidden = false;
+      viewNote.textContent = COPY.redaction;
+      viewModal.open();
+      return;
+    }
+    let pretty = prettyOf(readValue(bucket, key));
+    if (pretty.length > VIEW_LIMIT) {
+      const full = fmtBytes(new Blob([pretty]).size);
+      pretty = pretty.slice(0, VIEW_LIMIT);
+      viewNote.hidden = false;
+      viewNote.textContent = COPY.truncated.replace('{size}', full);
+    }
+    viewPre.textContent = pretty;
+    viewModal.open();
+  }
+
+  async function deleteItem(bucket, key) {
+    const msg = (bucket.id === 'totp')
+      ? COPY.confirmDeleteTotp.replace('{name}', key)
+      : COPY.confirmDelete.replace('{name}', key);
+    const ok = await window.mentriaConfirm(msg);
+    if (!ok) return;
+    if (bucket.kind === 'legacy') {
+      try { localStorage.removeItem(key); } catch (_) {}
+    } else {
+      store.remove(bucket.id, key);
+    }
+    status.set(COPY.statusDeleted.replace('{name}', key), 'ok');
+    refresh();
+  }
+
+  function exportItem(bucket, key) {
+    const content = exportContent(bucket, key);
+    const filename = safeName(bucket.fileNs) + '.' + safeName(key) + '.json';
+    MentriaUI.downloadFile(filename, new Blob([content], { type: 'application/json' }));
+    status.set(COPY.statusExported.replace('{name}', key), 'ok');
+  }
+
+  rowsEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const bucket = state.selected ? state.buckets.find((b) => b.id === state.selected) : null;
+    if (!bucket) return;
+    const key = btn.dataset.key;
+    if (btn.dataset.action === 'view') openView(bucket, key);
+    else if (btn.dataset.action === 'export') exportItem(bucket, key);
+    else if (btn.dataset.action === 'delete') deleteItem(bucket, key);
+  });
+
+  const passInput = $('files-export-pass');
+  const strengthEl = $('files-export-strength');
+
+  function strengthLabel(label) {
+    if (label === 'strong') return COPY.strengthStrong;
+    if (label === 'medium') return COPY.strengthMedium;
+    return COPY.strengthWeak;
+  }
+
+  passInput.addEventListener('input', () => {
+    if (!passInput.value) { strengthEl.textContent = ''; strengthEl.dataset.level = ''; return; }
+    const s = MentriaBackup.scorePassphrase(passInput.value);
+    strengthEl.dataset.level = s.label;
+    strengthEl.textContent = COPY.strengthHint.replace('{label}', strengthLabel(s.label));
+  });
+
+  $('files-export-all').addEventListener('click', () => {
+    passInput.value = '';
+    strengthEl.textContent = '';
+    strengthEl.dataset.level = '';
+    exportModal.open();
+    passInput.focus();
+  });
+
+  $('files-export-confirm').addEventListener('click', async () => {
+    if (!window.MentriaBackup) { status.set(COPY.backupFailed.replace('{msg}', 'MentriaBackup'), 'err'); return; }
+    const pass = passInput.value;
+    if (!pass || pass.length < 8) { status.set(COPY.passShort, 'err'); return; }
+    const btn = $('files-export-confirm');
+    btn.disabled = true;
+    try {
+      const env = await MentriaBackup.encryptBackup(store.exportAll(), pass);
+      MentriaBackup.downloadBackupJson(env, 'mentria-files-backup');
+      passInput.value = '';
+      exportModal.close();
+      status.set(COPY.backupDone, 'ok');
+    } catch (err) {
+      status.set(COPY.backupFailed.replace('{msg}', String(err && err.message || err)), 'err');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.querySelectorAll('.files-modal [data-close]').forEach((el) => {
+    el.addEventListener('click', () => { viewModal.close(); exportModal.close(); });
+  });
+
+  $('files-refresh').addEventListener('click', () => { refresh(); status.set('', ''); status.clear(); });
+
+  window.addEventListener('mentria:write', () => { refresh(); });
+
+  refresh();
+})();
+</script>
+
+<style>
+.files {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+.files__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.files__summary {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--term-muted);
+}
+.files__toolbar-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.files__body {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.files__tree {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+  background: rgba(255, 255, 255, 0.015);
+}
+.files__tree-empty {
+  margin: 0;
+  padding: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--term-muted);
+  line-height: 1.5;
+}
+.files__ns {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+.files__ns:hover { background: rgba(255, 255, 255, 0.04); }
+.files__ns:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.files__ns.is-active {
+  background: var(--cyan-15);
+  border-color: var(--term-border);
+  color: var(--syn-cyan);
+}
+.files__ns-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.files__ns-count {
+  flex-shrink: 0;
+  font-size: var(--text-2xs);
+  color: var(--term-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-pill);
+  padding: 0 var(--space-2);
+  min-width: 1.6em;
+  text-align: center;
+}
+.files__ns.is-active .files__ns-count { color: var(--syn-cyan); }
+
+.files__main {
+  min-width: 0;
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.01);
+}
+.files__main-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.files__main-title {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--accent);
+}
+.files__main-count {
+  font-size: var(--text-xs);
+  color: var(--term-muted);
+}
+.files__empty {
+  margin: 0;
+  padding: var(--space-5);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--term-muted);
+  line-height: 1.5;
+}
+
+.files__table-wrap { overflow-x: auto; }
+.files-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+}
+.files-table th,
+.files-table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--term-border);
+  vertical-align: middle;
+}
+.files-table thead th {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+  font-weight: 500;
+}
+.files-table__key {
+  font-weight: 500;
+  color: var(--term-fg);
+  word-break: break-all;
+  max-width: 22ch;
+}
+.files-table__num,
+.files-table__date {
+  color: var(--term-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.files-table__actions-h { text-align: right; }
+.files-table__actions {
+  display: flex;
+  gap: var(--space-1);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.files-table__btn {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-2xs);
+}
+
+.files__status { margin: 0; }
+.files__status:empty { padding: 0; }
+
+.files-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.files-modal__backdrop { position: absolute; inset: 0; }
+.files-modal__card {
+  position: relative;
+  z-index: 1;
+  max-width: 40rem;
+  width: 100%;
+  max-height: 85vh;
+  overflow: auto;
+  font-family: var(--font-mono);
+}
+.files-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.files-modal__h {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--accent);
+  word-break: break-all;
+}
+.files-modal__p {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--term-muted);
+  line-height: 1.5;
+}
+.files-modal__note {
+  margin: 0;
+  font-size: var(--text-2xs);
+  color: var(--syn-amber);
+  line-height: 1.5;
+}
+.files-modal__pre {
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--term-surface-2);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--term-fg);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  max-height: 60vh;
+}
+.files-modal__pre:empty { display: none; }
+.files-modal__strength {
+  margin: 0;
+  min-height: 1em;
+  font-size: var(--text-2xs);
+  color: var(--term-muted);
+}
+.files-modal__strength[data-level="weak"] { color: var(--syn-pink); }
+.files-modal__strength[data-level="medium"] { color: var(--syn-amber); }
+.files-modal__strength[data-level="strong"] { color: var(--syn-green); }
+.files-modal__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .files__body { grid-template-columns: 1fr; }
+  .files__tree { flex-direction: row; flex-wrap: wrap; }
+  .files__ns { width: auto; flex: 1 1 auto; }
+  .files-table__actions { justify-content: flex-start; }
+  .m-input { font-size: 16px; }
+}
+</style>

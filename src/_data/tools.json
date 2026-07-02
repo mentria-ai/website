@@ -166,5 +166,12 @@
     "summary": "Install private single-file extensions that live only on your device — they get a launcher tile, terminal commands, and local storage, and are never part of the public site.",
     "category": "Utility",
     "group": "Dev"
+  },
+  {
+    "slug": "files",
+    "title": "Files",
+    "summary": "Browse, export, and delete everything Mentria tools store on this device — notes, TOTP vault, game state, extension data, and legacy keys. View any value, export a single item, or download an encrypted backup of it all. Nothing leaves your device.",
+    "category": "Utility",
+    "group": "Dev"
   }
 ]

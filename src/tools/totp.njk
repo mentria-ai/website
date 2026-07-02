@@ -199,6 +199,7 @@ eleventyComputed:
     locked_lede_setup:        {{ ('tool.totp.locked_lede_setup'        | t) | dump | safe }},
     locked_lede_unlock:       {{ ('tool.totp.locked_lede_unlock'       | t) | dump | safe }},
     add_invalid_secret:       {{ ('tool.totp.add_invalid_secret'       | t) | dump | safe }},
+    add_secret_bad_chars:     {{ ('tool.totp.add_secret_bad_chars'     | t) | dump | safe }},
     add_invalid_uri:          {{ ('tool.totp.add_invalid_uri'          | t) | dump | safe }},
     add_missing_fields:       {{ ('tool.totp.add_missing_fields'       | t) | dump | safe }},
     delete_confirm:           {{ ('tool.totp.delete_confirm'           | t) | dump | safe }},
@@ -828,8 +829,13 @@ eleventyComputed:
     } else {
       const issuer = $('totp-issuer').value.trim();
       const account = $('totp-account').value.trim();
-      const secret_b32 = $('totp-secret').value.trim().replace(/\s+/g, '');
+      const secret_b32 = $('totp-secret').value.trim().replace(/[\s-]+/g, '');
       if (!secret_b32 || (!issuer && !account)) { setStatus(COPY.add_missing_fields, 'err'); return; }
+      const badChars = secret_b32.toUpperCase().replace(/=+$/, '').match(/[^A-Z2-7]/g);
+      if (badChars) {
+        setStatus(COPY.add_secret_bad_chars.replace('{chars}', [...new Set(badChars)].join(' ')), 'err');
+        return;
+      }
       parsed = { issuer, account, secret_b32, digits: 6, period: 30, algorithm: 'SHA1' };
     }
     let secretBytes;

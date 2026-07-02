@@ -190,6 +190,18 @@ eleventyComputed:
     else try { localStorage.setItem(LS, JSON.stringify(state)); } catch (_) {}
   }
 
+  function rolloverIfNeeded() {
+    const key = todayKey();
+    if (state.date === key) return false;
+    if (state.steps > 0) state.history[state.date] = state.steps;
+    state.steps = 0;
+    state.date = key;
+    persist();
+    renderCount();
+    renderHistory();
+    return true;
+  }
+
   const state = loadState();
 
   let running = false;
@@ -262,6 +274,7 @@ eleventyComputed:
   }
 
   function updateSession() {
+    rolloverIfNeeded();
     const elapsed = sessionElapsed + (running ? Date.now() - sessionStart : 0);
     sessionEl.textContent = fmtClock(elapsed);
     if (sessionSteps > 0 && elapsed > 10000) {
@@ -271,6 +284,7 @@ eleventyComputed:
   }
 
   function registerStep() {
+    rolloverIfNeeded();
     const wasUnderGoal = state.steps < state.goal;
     state.steps += 1;
     sessionSteps += 1;
@@ -418,7 +432,9 @@ eleventyComputed:
   });
 
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && running && !wakeLock) requestWakeLock();
+    if (document.visibilityState !== 'visible') return;
+    rolloverIfNeeded();
+    if (running && !wakeLock) requestWakeLock();
   });
 
   renderCount();

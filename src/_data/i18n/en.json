@@ -945,7 +945,8 @@
       "scan_no_camera": "No camera available on this device.",
       "scan_secure_required": "Camera access needs HTTPS. Use the live site, not a local URL.",
       "scan_invalid_qr": "That QR code is not an otpauth://totp/ URI. Try again with a TOTP setup QR.",
-      "next_label": "next:"
+      "next_label": "next:",
+      "add_secret_bad_chars": "Secret has invalid characters: {chars}. Base32 uses only A–Z and 2–7 — check for 0/O, 1/I/L, 8/B look-alikes."
     },
     "sudoku": {
       "level": "Level",

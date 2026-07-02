@@ -550,6 +550,21 @@ eleventyComputed:
     reader.readAsText(file);
   });
 
+  const buildPrintMirrors = () => {
+    document.querySelectorAll('.iv__table textarea, .iv__notes-input').forEach(ta => {
+      const mirror = document.createElement('div');
+      mirror.className = 'iv__print-mirror';
+      mirror.setAttribute('aria-hidden', 'true');
+      mirror.textContent = ta.value;
+      ta.insertAdjacentElement('afterend', mirror);
+    });
+  };
+  const clearPrintMirrors = () => {
+    document.querySelectorAll('.iv__print-mirror').forEach(el => el.remove());
+  };
+  window.addEventListener('beforeprint', buildPrintMirrors);
+  window.addEventListener('afterprint', clearPrintMirrors);
+
   document.querySelector('.add-row').addEventListener('click', () => addRow());
   currencyInput.addEventListener('change', changeCurrency);
   printBtn.addEventListener('click', () => window.print());
@@ -861,6 +876,7 @@ td.total .currency {
   opacity: 0.5;
   white-space: pre-wrap;
 }
+.iv__print-mirror { display: none; }
 
 /* Bank */
 .iv__bank .iv__declaration {
@@ -1037,6 +1053,23 @@ td.total .currency {
     height: auto !important;
     min-height: 0 !important;
     resize: none !important;
+  }
+  .iv__table textarea,
+  .iv__notes-input {
+    display: none !important;
+  }
+  .iv__print-mirror {
+    display: block !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    color: #111 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 9pt !important;
+  }
+  .iv__notes .iv__print-mirror {
+    color: #333 !important;
+    font-size: 8.5pt !important;
+    line-height: 1.5 !important;
   }
 
   /* Strip neon colors */

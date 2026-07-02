@@ -2,12 +2,24 @@
   'use strict';
 
   const PREFIX = 'mentria.store.';
+  const META_PREFIX = 'mentria.meta.';
   const LEGACY_PREFIX = 'mentria_';
   const EVENT_NAME = 'mentria:write';
 
   let persistCache = null;
 
   const fullKey = (ns, key) => PREFIX + ns + '.' + key;
+  const metaKey = (ns, key) => META_PREFIX + ns + '.' + key;
+
+  const rawSize = (raw) => {
+    try { return new Blob([raw]).size; } catch (_) { return raw.length * 2; }
+  };
+
+  const writeMeta = (ns, key, raw, mtime) => {
+    try {
+      global.localStorage.setItem(metaKey(ns, key), JSON.stringify({ m: mtime, s: rawSize(raw) }));
+    } catch (_) {}
+  };
 
   const emit = (detail) => {
     try { global.dispatchEvent(new CustomEvent(EVENT_NAME, { detail })); } catch (_) {}
@@ -31,12 +43,27 @@
     } catch (_) { return null; }
   };
 
+  const getMeta = (ns, key) => {
+    if (!lsAvailable) return null;
+    try {
+      const raw = global.localStorage.getItem(metaKey(ns, key));
+      if (raw == null) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return null;
+      if (typeof parsed.m !== 'number' || typeof parsed.s !== 'number') return null;
+      return { mtime: parsed.m, size: parsed.s };
+    } catch (_) { return null; }
+  };
+
   const set = (ns, key, value, opts) => {
     if (!lsAvailable) return false;
     opts = opts || {};
     try {
-      global.localStorage.setItem(fullKey(ns, key), JSON.stringify(value));
-      emit({ ns, key, op: 'set', value, remote: !!opts.remote });
+      const raw = JSON.stringify(value);
+      const mtime = (opts && typeof opts.mtime === 'number') ? opts.mtime : Date.now();
+      global.localStorage.setItem(fullKey(ns, key), raw);
+      writeMeta(ns, key, raw, mtime);
+      emit({ ns, key, op: 'set', value, remote: !!opts.remote, mtime });
       if (persistCache !== true) tryPersist();
       return true;
     } catch (err) {
@@ -50,6 +77,7 @@
     opts = opts || {};
     try {
       global.localStorage.removeItem(fullKey(ns, key));
+      try { global.localStorage.removeItem(metaKey(ns, key)); } catch (_) {}
       emit({ ns, key, op: 'remove', remote: !!opts.remote });
       return true;
     } catch (_) { return false; }
@@ -68,16 +96,38 @@
     return out;
   };
 
-  const clearNs = (ns) => {
-    if (!lsAvailable) return 0;
-    const nsPrefix = PREFIX + ns + '.';
-    const victims = [];
+  const listNamespaces = () => {
+    if (!lsAvailable) return [];
+    const seen = new Set();
     try {
       for (let i = 0; i < global.localStorage.length; i++) {
         const k = global.localStorage.key(i);
-        if (k && k.indexOf(nsPrefix) === 0) victims.push(k);
+        if (!k || k.indexOf(PREFIX) !== 0) continue;
+        const parts = k.slice(PREFIX.length).split('.');
+        if (!parts.length || !parts[0]) continue;
+        let ns = parts[0];
+        if (parts[0] === 'extdata' && parts.length > 1 && parts[1]) ns = parts[0] + '.' + parts[1];
+        seen.add(ns);
+      }
+    } catch (_) {}
+    return Array.from(seen).sort();
+  };
+
+  const clearNs = (ns) => {
+    if (!lsAvailable) return 0;
+    const nsPrefix = PREFIX + ns + '.';
+    const metaNsPrefix = META_PREFIX + ns + '.';
+    const victims = [];
+    const metaVictims = [];
+    try {
+      for (let i = 0; i < global.localStorage.length; i++) {
+        const k = global.localStorage.key(i);
+        if (!k) continue;
+        if (k.indexOf(nsPrefix) === 0) victims.push(k);
+        else if (k.indexOf(metaNsPrefix) === 0) metaVictims.push(k);
       }
       victims.forEach((k) => global.localStorage.removeItem(k));
+      metaVictims.forEach((k) => global.localStorage.removeItem(k));
     } catch (_) {}
     victims.forEach((k) => emit({ ns, key: k.slice(nsPrefix.length), op: 'remove' }));
     return victims.length;
@@ -120,7 +170,7 @@
         for (let i = 0; i < global.localStorage.length; i++) {
           const k = global.localStorage.key(i);
           if (!k) continue;
-          if (k.indexOf(PREFIX) === 0 || k.indexOf(LEGACY_PREFIX) === 0) victims.push(k);
+          if (k.indexOf(PREFIX) === 0 || k.indexOf(LEGACY_PREFIX) === 0 || k.indexOf(META_PREFIX) === 0) victims.push(k);
         }
         victims.forEach((k) => global.localStorage.removeItem(k));
       } catch (_) {}
@@ -141,6 +191,12 @@
     } catch (err) {
       throw new Error('write failed: ' + (err && err.message || err));
     }
+    Object.keys(store).forEach((suffix) => {
+      if (typeof suffix !== 'string') return;
+      try {
+        global.localStorage.setItem(META_PREFIX + suffix, JSON.stringify({ m: Date.now(), s: rawSize(String(store[suffix])) }));
+      } catch (_) {}
+    });
     return { restored };
   };
 
@@ -183,6 +239,7 @@
 
   global.MentriaStore = {
     get, set, remove, list, clear: clearNs,
+    getMeta, listNamespaces,
     exportAll, importAll,
     requestPersist, estimate, persisted,
     EVENT_NAME

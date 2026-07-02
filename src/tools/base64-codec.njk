@@ -20,9 +20,9 @@ eleventyComputed:
 {% set terminalTitle = "base64-codec.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="b64">
-  <div class="b64-mode-tabs">
-    <button class="b64-mode-tab b64-mode-tab--active" data-mode="text">{{ "tool.base64-codec.tab_text" | t }}</button>
-    <button class="b64-mode-tab" data-mode="file">{{ "tool.base64-codec.tab_file" | t }}</button>
+  <div class="m-seg b64-mode-tabs">
+    <button data-mode="text" data-value="text">{{ "tool.base64-codec.tab_text" | t }}</button>
+    <button data-mode="file" data-value="file">{{ "tool.base64-codec.tab_file" | t }}</button>
   </div>
 
   <div class="b64-panel" id="b64-text-panel">
@@ -37,12 +37,12 @@ eleventyComputed:
       </div>
     </div>
     <div class="b64-text-actions">
-      <button class="b64-btn b64-btn--primary"   id="b64-encode-btn">{{ "tool.base64-codec.btn_encode" | t }}</button>
-      <button class="b64-btn b64-btn--primary"   id="b64-decode-btn">{{ "tool.base64-codec.btn_decode" | t }}</button>
-      <button class="b64-btn b64-btn--secondary" id="b64-copy-btn">{{ "tool.base64-codec.btn_copy_output" | t }}</button>
-      <button class="b64-btn b64-btn--ghost"     id="b64-clear-btn">{{ "tool.base64-codec.btn_clear" | t }}</button>
+      <button class="m-btn m-btn--primary" id="b64-encode-btn">{{ "tool.base64-codec.btn_encode" | t }}</button>
+      <button class="m-btn m-btn--primary" id="b64-decode-btn">{{ "tool.base64-codec.btn_decode" | t }}</button>
+      <button class="m-btn m-btn--ghost" id="b64-copy-btn">{{ "tool.base64-codec.btn_copy_output" | t }}</button>
+      <button class="m-btn m-btn--ghost" id="b64-clear-btn">{{ "tool.base64-codec.btn_clear" | t }}</button>
     </div>
-    <div class="b64-status" id="b64-text-status"></div>
+    <div class="b64-status m-status" id="b64-text-status"></div>
   </div>
 
   <div class="b64-panel b64-panel--hidden" id="b64-file-panel">
@@ -74,9 +74,9 @@ eleventyComputed:
           <label class="b64-label">{{ "tool.base64-codec.data_uri_label" | t }}</label>
           <textarea class="b64-textarea b64-textarea--sm" id="b64-file-datauri" readonly spellcheck="false"></textarea>
           <div class="b64-file-actions">
-            <button class="b64-btn b64-btn--secondary" id="b64-copy-datauri">{{ "tool.base64-codec.btn_copy_datauri" | t }}</button>
-            <button class="b64-btn b64-btn--secondary" id="b64-copy-raw">{{ "tool.base64-codec.btn_copy_raw" | t }}</button>
-            <button class="b64-btn b64-btn--ghost" id="b64-file-clear">{{ "tool.base64-codec.btn_clear" | t }}</button>
+            <button class="m-btn m-btn--ghost" id="b64-copy-datauri">{{ "tool.base64-codec.btn_copy_datauri" | t }}</button>
+            <button class="m-btn m-btn--ghost" id="b64-copy-raw">{{ "tool.base64-codec.btn_copy_raw" | t }}</button>
+            <button class="m-btn m-btn--ghost" id="b64-file-clear">{{ "tool.base64-codec.btn_clear" | t }}</button>
           </div>
         </div>
       </div>
@@ -87,11 +87,11 @@ eleventyComputed:
       <label class="b64-label" for="b64-decode-input">{{ "tool.base64-codec.decode_input_label" | t }}</label>
       <textarea class="b64-textarea b64-textarea--sm" id="b64-decode-input" placeholder="{{ 'tool.base64-codec.decode_input_placeholder' | t }}" spellcheck="false"></textarea>
       <div class="b64-file-actions" style="margin-top:0.75rem;">
-        <button class="b64-btn b64-btn--primary"   id="b64-decode-file-btn">{{ "tool.base64-codec.btn_decode_preview" | t }}</button>
-        <button class="b64-btn b64-btn--secondary" id="b64-download-btn" disabled>{{ "tool.base64-codec.btn_download" | t }}</button>
+        <button class="m-btn m-btn--primary" id="b64-decode-file-btn">{{ "tool.base64-codec.btn_decode_preview" | t }}</button>
+        <button class="m-btn m-btn--ghost" id="b64-download-btn" disabled>{{ "tool.base64-codec.btn_download" | t }}</button>
       </div>
       <div class="b64-decode-preview" id="b64-decode-preview"></div>
-      <div class="b64-status" id="b64-file-status"></div>
+      <div class="b64-status m-status" id="b64-file-status"></div>
     </div>
   </div>
 </section>
@@ -123,295 +123,267 @@ eleventyComputed:
     statusDecodeFailedB64:   {{ ("tool.base64-codec.status_decode_failed_b64"    | t) | dump | safe }}
   };
 
-  /* ── DOM refs ─────────────────────────────────────── */
-  const modeTabs      = document.querySelectorAll('.b64-mode-tab');
-  const textPanel     = document.getElementById('b64-text-panel');
-  const filePanel     = document.getElementById('b64-file-panel');
+  document.addEventListener('DOMContentLoaded', () => {
+    const textPanel     = document.getElementById('b64-text-panel');
+    const filePanel     = document.getElementById('b64-file-panel');
 
-  // Text mode
-  const inputEl       = document.getElementById('b64-input');
-  const outputEl      = document.getElementById('b64-output');
-  const encodeBtn     = document.getElementById('b64-encode-btn');
-  const decodeBtn     = document.getElementById('b64-decode-btn');
-  const copyBtn       = document.getElementById('b64-copy-btn');
-  const clearBtn      = document.getElementById('b64-clear-btn');
-  const textStatus    = document.getElementById('b64-text-status');
+    const inputEl       = document.getElementById('b64-input');
+    const outputEl      = document.getElementById('b64-output');
+    const encodeBtn     = document.getElementById('b64-encode-btn');
+    const decodeBtn     = document.getElementById('b64-decode-btn');
+    const copyBtn       = document.getElementById('b64-copy-btn');
+    const clearBtn      = document.getElementById('b64-clear-btn');
+    const textStatus    = MentriaUI.status(document.getElementById('b64-text-status'));
 
-  // File mode — encode
-  const dropzone      = document.getElementById('b64-dropzone');
-  const browseBtn     = document.getElementById('b64-browse-btn');
-  const fileInput     = document.getElementById('b64-file-input');
-  const fileInfoWrap  = document.getElementById('b64-file-info');
-  const fileNameEl    = document.getElementById('b64-file-name');
-  const fileTypeEl    = document.getElementById('b64-file-type');
-  const fileSizeEl    = document.getElementById('b64-file-size');
-  const fileB64SizeEl = document.getElementById('b64-file-b64size');
-  const filePreview   = document.getElementById('b64-file-preview');
-  const fileDataUri   = document.getElementById('b64-file-datauri');
-  const copyDataUri   = document.getElementById('b64-copy-datauri');
-  const copyRaw       = document.getElementById('b64-copy-raw');
-  const fileClearBtn  = document.getElementById('b64-file-clear');
+    const dropzone      = document.getElementById('b64-dropzone');
+    const browseBtn     = document.getElementById('b64-browse-btn');
+    const fileInput     = document.getElementById('b64-file-input');
+    const fileInfoWrap  = document.getElementById('b64-file-info');
+    const fileNameEl    = document.getElementById('b64-file-name');
+    const fileTypeEl    = document.getElementById('b64-file-type');
+    const fileSizeEl    = document.getElementById('b64-file-size');
+    const fileB64SizeEl = document.getElementById('b64-file-b64size');
+    const filePreview   = document.getElementById('b64-file-preview');
+    const fileDataUri   = document.getElementById('b64-file-datauri');
+    const copyDataUri   = document.getElementById('b64-copy-datauri');
+    const copyRaw       = document.getElementById('b64-copy-raw');
+    const fileClearBtn  = document.getElementById('b64-file-clear');
 
-  // File mode — decode
-  const decodeInput   = document.getElementById('b64-decode-input');
-  const decodeFileBtn = document.getElementById('b64-decode-file-btn');
-  const downloadBtn   = document.getElementById('b64-download-btn');
-  const decodePreview = document.getElementById('b64-decode-preview');
-  const fileStatus    = document.getElementById('b64-file-status');
+    const decodeInput   = document.getElementById('b64-decode-input');
+    const decodeFileBtn = document.getElementById('b64-decode-file-btn');
+    const downloadBtn   = document.getElementById('b64-download-btn');
+    const decodePreview = document.getElementById('b64-decode-preview');
+    const fileStatus    = MentriaUI.status(document.getElementById('b64-file-status'));
 
-  let currentDataUri  = '';
-  let currentRawB64   = '';
-  let decodedBlob     = null;
-  let decodedFilename = 'decoded-file';
+    let currentDataUri  = '';
+    let currentRawB64   = '';
+    let decodedBlob     = null;
+    let decodedFilename = 'decoded-file';
 
-  /* ── Helpers ──────────────────────────────────────── */
-  function formatBytes(bytes) {
-    if (bytes === 0) return '0 B';
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-  }
-
-  function showStatus(el, msg, type) {
-    el.textContent = msg;
-    el.className = 'b64-status' + (type === 'error' ? ' b64-status--error' : type === 'success' ? ' b64-status--success' : '');
-    if (type !== 'error') {
-      setTimeout(() => { el.textContent = ''; el.className = 'b64-status'; }, 3000);
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     }
-  }
 
-  async function copyText(text, statusEl) {
-    try {
-      await navigator.clipboard.writeText(text);
-      showStatus(statusEl, COPY.statusCopied, 'success');
-    } catch {
-      showStatus(statusEl, COPY.statusCopyFailed, 'error');
+    function showStatus(status, msg, tone) {
+      status.set(msg, tone);
+      if (tone !== 'err') setTimeout(() => status.clear(), 3000);
     }
-  }
 
-  function isBase64(str) {
-    const s = str.trim();
-    if (s.startsWith('data:')) return true;
-    if (s.length < 4) return false;
-    return /^[A-Za-z0-9+/\n\r]+=*$/.test(s);
-  }
+    async function copyText(text, status) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showStatus(status, COPY.statusCopied, 'ok');
+      } catch {
+        showStatus(status, COPY.statusCopyFailed, 'err');
+      }
+    }
 
-  function isImageMime(mime) {
-    return /^image\//i.test(mime);
-  }
+    function isBase64(str) {
+      const s = str.trim();
+      if (s.startsWith('data:')) return true;
+      if (s.length < 4) return false;
+      return /^[A-Za-z0-9+/\n\r]+=*$/.test(s);
+    }
 
-  function mimeToExt(mime) {
-    const map = {
-      'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif',
-      'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/bmp': 'bmp',
-      'image/tiff': 'tiff', 'image/x-icon': 'ico', 'image/avif': 'avif',
-      'application/pdf': 'pdf', 'application/json': 'json',
-      'text/plain': 'txt', 'text/html': 'html', 'text/css': 'css',
-      'application/javascript': 'js',
-    };
-    return map[mime] || 'bin';
-  }
+    function isImageMime(mime) {
+      return /^image\//i.test(mime);
+    }
 
-  /* ── Mode Switching ───────────────────────────────── */
-  modeTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      modeTabs.forEach(t => t.classList.remove('b64-mode-tab--active'));
-      tab.classList.add('b64-mode-tab--active');
-      const mode = tab.dataset.mode;
+    function mimeToExt(mime) {
+      const map = {
+        'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif',
+        'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/bmp': 'bmp',
+        'image/tiff': 'tiff', 'image/x-icon': 'ico', 'image/avif': 'avif',
+        'application/pdf': 'pdf', 'application/json': 'json',
+        'text/plain': 'txt', 'text/html': 'html', 'text/css': 'css',
+        'application/javascript': 'js',
+      };
+      return map[mime] || 'bin';
+    }
+
+    MentriaUI.segmented(document.querySelector('.b64-mode-tabs'), (mode) => {
       textPanel.classList.toggle('b64-panel--hidden', mode !== 'text');
       filePanel.classList.toggle('b64-panel--hidden', mode !== 'file');
+    }).set('text');
+
+    encodeBtn.addEventListener('click', () => {
+      const raw = inputEl.value;
+      if (!raw) { showStatus(textStatus, COPY.statusNothingEncode, 'err'); return; }
+      try {
+        const encoded = btoa(unescape(encodeURIComponent(raw)));
+        outputEl.value = encoded;
+        showStatus(textStatus, COPY.statusEncoded.replace('{size}', formatBytes(encoded.length)), 'ok');
+      } catch (e) {
+        showStatus(textStatus, COPY.statusEncodeFailed.replace('{reason}', e.message), 'err');
+      }
     });
-  });
 
-  /* ── Text Mode Logic ──────────────────────────────── */
-  encodeBtn.addEventListener('click', () => {
-    const raw = inputEl.value;
-    if (!raw) { showStatus(textStatus, COPY.statusNothingEncode, 'error'); return; }
-    try {
-      const encoded = btoa(unescape(encodeURIComponent(raw)));
-      outputEl.value = encoded;
-      showStatus(textStatus, COPY.statusEncoded.replace('{size}', formatBytes(encoded.length)), 'success');
-    } catch (e) {
-      showStatus(textStatus, COPY.statusEncodeFailed.replace('{reason}', e.message), 'error');
-    }
-  });
+    decodeBtn.addEventListener('click', () => {
+      let raw = inputEl.value.trim();
+      if (!raw) { showStatus(textStatus, COPY.statusNothingDecode, 'err'); return; }
+      const dataUriMatch = raw.match(/^data:[^;]*;base64,(.*)$/s);
+      if (dataUriMatch) raw = dataUriMatch[1];
+      let bytes;
+      try {
+        bytes = Uint8Array.from(atob(raw), c => c.charCodeAt(0));
+      } catch (e) {
+        showStatus(textStatus, COPY.statusDecodeFailedInv, 'err');
+        return;
+      }
+      try {
+        outputEl.value = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        showStatus(textStatus, COPY.statusDecoded.replace('{size}', formatBytes(bytes.length)), 'ok');
+      } catch (e) {
+        outputEl.value = '';
+        showStatus(textStatus, COPY.statusDecodeBinary, 'err');
+      }
+    });
 
-  decodeBtn.addEventListener('click', () => {
-    let raw = inputEl.value.trim();
-    if (!raw) { showStatus(textStatus, COPY.statusNothingDecode, 'error'); return; }
-    const dataUriMatch = raw.match(/^data:[^;]*;base64,(.*)$/s);
-    if (dataUriMatch) raw = dataUriMatch[1];
-    let bytes;
-    try {
-      bytes = Uint8Array.from(atob(raw), c => c.charCodeAt(0));
-    } catch (e) {
-      showStatus(textStatus, COPY.statusDecodeFailedInv, 'error');
-      return;
-    }
-    try {
-      outputEl.value = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-      showStatus(textStatus, COPY.statusDecoded.replace('{size}', formatBytes(bytes.length)), 'success');
-    } catch (e) {
+    copyBtn.addEventListener('click', () => {
+      if (!outputEl.value) { showStatus(textStatus, COPY.statusNothingCopy, 'err'); return; }
+      copyText(outputEl.value, textStatus);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      inputEl.value = '';
       outputEl.value = '';
-      showStatus(textStatus, COPY.statusDecodeBinary, 'error');
+      textStatus.clear();
+    });
+
+    browseBtn.addEventListener('click', () => fileInput.click());
+
+    ['dragenter', 'dragover'].forEach(evt => {
+      dropzone.addEventListener(evt, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add('b64-dropzone--active');
+      });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      dropzone.addEventListener(evt, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove('b64-dropzone--active');
+      });
+    });
+
+    dropzone.addEventListener('drop', e => {
+      const files = e.dataTransfer.files;
+      if (files.length) handleFile(files[0]);
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) handleFile(fileInput.files[0]);
+    });
+
+    function handleFile(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        currentDataUri = reader.result;
+        const commaIdx = currentDataUri.indexOf(',');
+        currentRawB64 = commaIdx !== -1 ? currentDataUri.slice(commaIdx + 1) : currentDataUri;
+
+        fileNameEl.textContent = file.name;
+        fileTypeEl.textContent = file.type || COPY.unknown;
+        fileSizeEl.textContent = formatBytes(file.size);
+        fileB64SizeEl.textContent = formatBytes(currentRawB64.length);
+        fileDataUri.value = currentDataUri;
+
+        filePreview.innerHTML = '';
+        if (isImageMime(file.type)) {
+          const img = document.createElement('img');
+          img.src = currentDataUri;
+          img.alt = 'Preview of ' + file.name;
+          img.className = 'b64-preview-img';
+          filePreview.appendChild(img);
+        } else {
+          filePreview.innerHTML = '<p class="b64-preview-placeholder">' + COPY.noPreview + '</p>';
+        }
+
+        fileInfoWrap.classList.remove('b64-file-info--hidden');
+        showStatus(fileStatus, COPY.statusFileLoaded.replace('{name}', file.name), 'ok');
+      };
+      reader.onerror = () => {
+        showStatus(fileStatus, COPY.statusFileReadFailed, 'err');
+      };
+      reader.readAsDataURL(file);
     }
-  });
 
-  copyBtn.addEventListener('click', () => {
-    if (!outputEl.value) { showStatus(textStatus, COPY.statusNothingCopy, 'error'); return; }
-    copyText(outputEl.value, textStatus);
-  });
-
-  clearBtn.addEventListener('click', () => {
-    inputEl.value = '';
-    outputEl.value = '';
-    textStatus.textContent = '';
-  });
-
-  /* ── File Mode: Encode ────────────────────────────── */
-  browseBtn.addEventListener('click', () => fileInput.click());
-
-  // Drag and drop
-  ['dragenter', 'dragover'].forEach(evt => {
-    dropzone.addEventListener(evt, e => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.classList.add('b64-dropzone--active');
+    copyDataUri.addEventListener('click', () => {
+      if (!currentDataUri) return;
+      copyText(currentDataUri, fileStatus);
     });
-  });
-  ['dragleave', 'drop'].forEach(evt => {
-    dropzone.addEventListener(evt, e => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.classList.remove('b64-dropzone--active');
+
+    copyRaw.addEventListener('click', () => {
+      if (!currentRawB64) return;
+      copyText(currentRawB64, fileStatus);
     });
-  });
 
-  dropzone.addEventListener('drop', e => {
-    const files = e.dataTransfer.files;
-    if (files.length) handleFile(files[0]);
-  });
-
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files.length) handleFile(fileInput.files[0]);
-  });
-
-  function handleFile(file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      currentDataUri = reader.result;
-      // Extract raw base64 after the comma
-      const commaIdx = currentDataUri.indexOf(',');
-      currentRawB64 = commaIdx !== -1 ? currentDataUri.slice(commaIdx + 1) : currentDataUri;
-
-      fileNameEl.textContent = file.name;
-      fileTypeEl.textContent = file.type || COPY.unknown;
-      fileSizeEl.textContent = formatBytes(file.size);
-      fileB64SizeEl.textContent = formatBytes(currentRawB64.length);
-      fileDataUri.value = currentDataUri;
-
-      // Preview if image
+    fileClearBtn.addEventListener('click', () => {
+      currentDataUri = '';
+      currentRawB64 = '';
+      fileInfoWrap.classList.add('b64-file-info--hidden');
       filePreview.innerHTML = '';
-      if (isImageMime(file.type)) {
-        const img = document.createElement('img');
-        img.src = currentDataUri;
-        img.alt = 'Preview of ' + file.name;
-        img.className = 'b64-preview-img';
-        filePreview.appendChild(img);
-      } else {
-        filePreview.innerHTML = '<p class="b64-preview-placeholder">' + COPY.noPreview + '</p>';
+      fileDataUri.value = '';
+      fileInput.value = '';
+      fileStatus.clear();
+    });
+
+    decodeFileBtn.addEventListener('click', () => {
+      const val = decodeInput.value.trim();
+      if (!val) { showStatus(fileStatus, COPY.statusPasteFirst, 'err'); return; }
+
+      let mime = 'application/octet-stream';
+      let b64 = val;
+
+      const dataUriMatch = val.match(/^data:([^;]+);base64,(.*)$/s);
+      if (dataUriMatch) {
+        mime = dataUriMatch[1];
+        b64 = dataUriMatch[2];
+      } else if (!isBase64(val)) {
+        showStatus(fileStatus, COPY.statusInvalidB64, 'err');
+        return;
       }
 
-      fileInfoWrap.classList.remove('b64-file-info--hidden');
-      showStatus(fileStatus, COPY.statusFileLoaded.replace('{name}', file.name), 'success');
-    };
-    reader.onerror = () => {
-      showStatus(fileStatus, COPY.statusFileReadFailed, 'error');
-    };
-    reader.readAsDataURL(file);
-  }
+      try {
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        decodedBlob = new Blob([bytes], { type: mime });
+        decodedFilename = 'decoded-file.' + mimeToExt(mime);
 
-  copyDataUri.addEventListener('click', () => {
-    if (!currentDataUri) return;
-    copyText(currentDataUri, fileStatus);
-  });
+        decodePreview.innerHTML = '';
+        if (isImageMime(mime)) {
+          const img = document.createElement('img');
+          img.src = val.startsWith('data:') ? val : 'data:' + mime + ';base64,' + b64;
+          img.alt = 'Decoded image preview';
+          img.className = 'b64-preview-img';
+          decodePreview.appendChild(img);
+        } else {
+          decodePreview.innerHTML = '<p class="b64-preview-placeholder">' + COPY.decodedPreview.replace('{mime}', mime).replace('{size}', formatBytes(decodedBlob.size)) + '</p>';
+        }
 
-  copyRaw.addEventListener('click', () => {
-    if (!currentRawB64) return;
-    copyText(currentRawB64, fileStatus);
-  });
-
-  fileClearBtn.addEventListener('click', () => {
-    currentDataUri = '';
-    currentRawB64 = '';
-    fileInfoWrap.classList.add('b64-file-info--hidden');
-    filePreview.innerHTML = '';
-    fileDataUri.value = '';
-    fileInput.value = '';
-    fileStatus.textContent = '';
-  });
-
-  /* ── File Mode: Decode ────────────────────────────── */
-  decodeFileBtn.addEventListener('click', () => {
-    const val = decodeInput.value.trim();
-    if (!val) { showStatus(fileStatus, COPY.statusPasteFirst, 'error'); return; }
-
-    let mime = 'application/octet-stream';
-    let b64 = val;
-
-    const dataUriMatch = val.match(/^data:([^;]+);base64,(.*)$/s);
-    if (dataUriMatch) {
-      mime = dataUriMatch[1];
-      b64 = dataUriMatch[2];
-    } else if (!isBase64(val)) {
-      showStatus(fileStatus, COPY.statusInvalidB64, 'error');
-      return;
-    }
-
-    try {
-      const binary = atob(b64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      decodedBlob = new Blob([bytes], { type: mime });
-      decodedFilename = 'decoded-file.' + mimeToExt(mime);
-
-      // Preview
-      decodePreview.innerHTML = '';
-      if (isImageMime(mime)) {
-        const img = document.createElement('img');
-        img.src = val.startsWith('data:') ? val : 'data:' + mime + ';base64,' + b64;
-        img.alt = 'Decoded image preview';
-        img.className = 'b64-preview-img';
-        decodePreview.appendChild(img);
-      } else {
-        decodePreview.innerHTML = '<p class="b64-preview-placeholder">' + COPY.decodedPreview.replace('{mime}', mime).replace('{size}', formatBytes(decodedBlob.size)) + '</p>';
+        downloadBtn.disabled = false;
+        showStatus(fileStatus, COPY.statusFileDecoded.replace('{size}', formatBytes(decodedBlob.size)), 'ok');
+      } catch (e) {
+        showStatus(fileStatus, COPY.statusDecodeFailedB64, 'err');
+        decodedBlob = null;
+        downloadBtn.disabled = true;
       }
+    });
 
-      downloadBtn.disabled = false;
-      showStatus(fileStatus, COPY.statusFileDecoded.replace('{size}', formatBytes(decodedBlob.size)), 'success');
-    } catch (e) {
-      showStatus(fileStatus, COPY.statusDecodeFailedB64, 'error');
-      decodedBlob = null;
-      downloadBtn.disabled = true;
-    }
-  });
-
-  downloadBtn.addEventListener('click', () => {
-    if (!decodedBlob) return;
-    const url = URL.createObjectURL(decodedBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = decodedFilename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadBtn.addEventListener('click', () => {
+      if (!decodedBlob) return;
+      MentriaUI.downloadFile(decodedFilename, decodedBlob);
+    });
   });
 })();
 </script>
 
 <style>
-/* ── Base Container ───────────────────────────────── */
 .b64 {
   display: flex;
   flex-direction: column;
@@ -420,43 +392,18 @@ eleventyComputed:
   margin: 0 auto;
 }
 
-/* ── Mode Tabs ────────────────────────────────────── */
 .b64-mode-tabs {
-  display: flex;
-  border-radius: 999px;
-  overflow: hidden;
-  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
   align-self: center;
 }
-.b64-mode-tab {
-  padding: 0.55rem 1.6rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  border: none;
-  background: transparent;
-  color: var(--term-muted, #64748b);
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-.b64-mode-tab--active {
-  background: rgba(34, 211, 238, 0.12);
-  color: var(--syn-cyan, #22d3ee);
-}
-.b64-mode-tab:hover:not(.b64-mode-tab--active) {
-  color: var(--term-fg, #e2e8f0);
-}
 
-/* ── Panels ───────────────────────────────────────── */
 .b64-panel--hidden {
   display: none !important;
 }
 
-/* ── Labels ───────────────────────────────────────── */
 .b64-label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--syn-cyan, #22d3ee);
+  color: var(--syn-cyan);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
@@ -464,20 +411,18 @@ eleventyComputed:
   display: block;
 }
 
-/* ── Section Titles ───────────────────────────────── */
 .b64-section-title {
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--syn-purple, #a78bfa);
+  color: var(--syn-purple);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   margin: 0 0 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  border-bottom: 1px solid var(--term-border);
 }
 
-/* ── Text Grid ────────────────────────────────────── */
 .b64-text-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -488,7 +433,6 @@ eleventyComputed:
   flex-direction: column;
 }
 
-/* ── Textareas ────────────────────────────────────── */
 .b64-textarea {
   width: 100%;
   min-height: 180px;
@@ -496,9 +440,9 @@ eleventyComputed:
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.85rem;
   line-height: 1.6;
-  color: var(--term-fg, #e2e8f0);
-  background: var(--term-bg, #0a0a0a);
-  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  color: var(--term-fg);
+  background: var(--term-bg);
+  border: 1px solid var(--term-border);
   border-radius: 8px;
   resize: vertical;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
@@ -506,79 +450,25 @@ eleventyComputed:
 }
 .b64-textarea:focus {
   outline: none;
-  border-color: var(--syn-cyan, #22d3ee);
+  border-color: var(--syn-cyan);
   box-shadow: 0 0 12px rgba(34, 211, 238, 0.15);
 }
 .b64-textarea--sm {
   min-height: 100px;
 }
 
-/* ── Buttons ──────────────────────────────────────── */
 .b64-text-actions {
   display: flex;
   gap: 0.6rem;
   flex-wrap: wrap;
   justify-content: center;
 }
-.b64-btn {
-  border: none;
-  border-radius: 999px;
-  padding: 0.55rem 1.4rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  font-family: var(--font-body, 'Inter', sans-serif);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.b64-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-.b64-btn--primary {
-  background: linear-gradient(135deg, var(--syn-cyan, #22d3ee), #06b6d4);
-  color: #000;
-  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
-}
-.b64-btn--primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);
-}
-.b64-btn--secondary {
-  background: rgba(34, 211, 238, 0.1);
-  color: var(--syn-cyan, #22d3ee);
-  border: 1px solid rgba(34, 211, 238, 0.25);
-}
-.b64-btn--secondary:hover:not(:disabled) {
-  background: rgba(34, 211, 238, 0.2);
-  border-color: rgba(34, 211, 238, 0.45);
-}
-.b64-btn--ghost {
-  background: transparent;
-  color: var(--term-fg, #e2e8f0);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-.b64-btn--ghost:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.04);
-}
 
-/* ── Status ───────────────────────────────────────── */
 .b64-status {
   text-align: center;
-  font-size: 0.82rem;
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  color: var(--term-muted, #64748b);
   min-height: 1.4em;
-  transition: color 0.2s ease;
-}
-.b64-status--success {
-  color: var(--syn-green, #4ade80);
-}
-.b64-status--error {
-  color: var(--syn-pink, #f472b6);
 }
 
-/* ── Drop Zone ────────────────────────────────────── */
 .b64-dropzone {
   position: relative;
   border: 2px dashed rgba(34, 211, 238, 0.25);
@@ -634,7 +524,6 @@ eleventyComputed:
   margin: 0;
 }
 
-/* ── Screen-reader only ───────────────────────────── */
 .b64-sr-only {
   position: absolute;
   width: 1px;
@@ -647,7 +536,6 @@ eleventyComputed:
   border: 0;
 }
 
-/* ── File Info ────────────────────────────────────── */
 .b64-file-info--hidden {
   display: none !important;
 }
@@ -663,18 +551,17 @@ eleventyComputed:
   gap: 0.4rem 1.5rem;
   font-size: 0.82rem;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  color: var(--term-fg, #e2e8f0);
+  color: var(--term-fg);
 }
 .b64-file-meta__row {
   display: flex;
   gap: 0.4rem;
 }
 .b64-file-meta__label {
-  color: var(--term-muted, #64748b);
+  color: var(--term-muted);
   font-weight: 600;
 }
 
-/* ── Preview ──────────────────────────────────────── */
 .b64-file-preview {
   display: flex;
   justify-content: center;
@@ -683,18 +570,17 @@ eleventyComputed:
   max-width: 100%;
   max-height: 320px;
   border-radius: 8px;
-  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  border: 1px solid var(--term-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   object-fit: contain;
 }
 .b64-preview-placeholder {
   font-size: 0.82rem;
-  color: var(--term-muted, #64748b);
+  color: var(--term-muted);
   font-style: italic;
   margin: 0;
 }
 
-/* ── File Output ──────────────────────────────────── */
 .b64-file-output {
   display: flex;
   flex-direction: column;
@@ -706,17 +592,15 @@ eleventyComputed:
   flex-wrap: wrap;
 }
 
-/* ── Decode Preview ───────────────────────────────── */
 .b64-decode-preview {
   display: flex;
   justify-content: center;
   margin-top: 0.75rem;
 }
 
-/* ── File Section spacing ─────────────────────────── */
 .b64-file-section {
-  background: var(--term-bg-raised, #111111);
-  border: 1px solid var(--term-border, rgba(255,255,255,0.06));
+  background: var(--term-bg-raised);
+  border: 1px solid var(--term-border);
   border-radius: 12px;
   padding: 1.25rem;
 }
@@ -724,7 +608,6 @@ eleventyComputed:
   margin-top: 1.25rem;
 }
 
-/* ── Responsive ───────────────────────────────────── */
 @media (max-width: 640px) {
   .b64-text-grid {
     grid-template-columns: 1fr;
@@ -741,7 +624,7 @@ eleventyComputed:
   .b64-file-actions {
     flex-direction: column;
   }
-  .b64-file-actions .b64-btn {
+  .b64-file-actions .m-btn {
     width: 100%;
     text-align: center;
   }

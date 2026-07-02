@@ -1103,5 +1103,12 @@
     "Utility": "ユーティリティ",
     "Health": "健康",
     "Security": "セキュリティ"
+  },
+  "palette": {
+    "placeholder": "ツールとページを検索…",
+    "list_label": "検索結果",
+    "no_results": "一致するものがありません",
+    "recents": "最近使ったもの",
+    "open": "コマンドパレットを開く"
   }
 }

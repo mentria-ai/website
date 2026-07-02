@@ -9,6 +9,7 @@
             <a href="{{ toolsHref }}" class="nav-link{% if page.url | startsWith(toolsHref) %} active{% endif %}">{{ "nav.tools" | t }}</a>
 
             {%- set currentLocale = lang | findLocale -%}
+            <button type="button" class="nav-cmdk" data-palette-open aria-label="{{ 'palette.open' | t }}" aria-keyshortcuts="Meta+K Control+K">⌘K</button>
             <details class="lang-switcher">
                 <summary aria-label="{{ 'lang_switcher.current_label' | t }}">
                     <span aria-hidden="true">🌐</span>

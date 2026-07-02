@@ -114,6 +114,7 @@
 
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/mentria-ui.css">
+    <link rel="stylesheet" href="/assets/css/mentria-palette.css">
     <link rel="stylesheet" href="/assets/css/terminal.css">
     <link rel="manifest" href="/manifest.json">
 
@@ -210,6 +211,30 @@
     <script src="/assets/js/mentria-gamepad.js?v={{ buildHash }}" defer></script>
     <script src="/assets/js/mentria-push-db.js?v={{ buildHash }}"></script>
     <script src="/assets/js/mentria-push.js?v={{ buildHash }}"></script>
+    <script>
+      window.MENTRIA_PALETTE_DATA = {
+        locale: {{ (lang | default('en')) | dump | safe }},
+        prefix: {{ localePrefix | dump | safe }},
+        tools: [
+          {%- for tool in tools %}
+          { slug: {{ tool.slug | dump | safe }}, title: {{ (("tools." + tool.slug + ".title") | t) | dump | safe }}, category: {{ (("category." + tool.category) | t) | dump | safe }}, keywords: {{ (("tools." + tool.slug + ".lede") | t) | dump | safe }} }{% if not loop.last %},{% endif %}
+          {%- endfor %}
+        ],
+        nav: [
+          { id: "home", title: {{ ("nav.home" | t) | dump | safe }}, href: "/" },
+          { id: "tools", title: {{ ("nav.tools" | t) | dump | safe }}, href: "/tools/" },
+          { id: "feed", title: {{ ("nav.feed" | t) | dump | safe }}, href: "/feed/" },
+          { id: "about", title: {{ ("about.title" | t) | dump | safe }}, href: "/about/" }
+        ],
+        labels: {
+          placeholder: {{ ("palette.placeholder" | t) | dump | safe }},
+          listLabel: {{ ("palette.list_label" | t) | dump | safe }},
+          noResults: {{ ("palette.no_results" | t) | dump | safe }},
+          recents: {{ ("palette.recents" | t) | dump | safe }}
+        }
+      };
+    </script>
+    <script src="/assets/js/mentria-palette.js?v={{ buildHash }}" defer></script>
     {% include "header.njk" %}
 
     <main id="main-content">

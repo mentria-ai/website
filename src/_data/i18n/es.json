@@ -1103,5 +1103,12 @@
     "Utility": "Utilidad",
     "Health": "Salud",
     "Security": "Seguridad"
+  },
+  "palette": {
+    "placeholder": "Buscar herramientas y páginas…",
+    "list_label": "Resultados de búsqueda",
+    "no_results": "Sin resultados",
+    "recents": "Recientes",
+    "open": "Abrir paleta de comandos"
   }
 }

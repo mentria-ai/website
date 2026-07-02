@@ -1,0 +1,108 @@
+.m-palette {
+  position: fixed;
+  inset: 0;
+  z-index: 10002;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 15vh var(--space-4) var(--space-4);
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.m-palette[hidden] {
+  display: none;
+}
+
+.m-palette .m-palette__card {
+  max-width: 36rem;
+  width: 100%;
+  max-height: 70vh;
+  padding: var(--space-3);
+  gap: var(--space-2);
+  overflow: hidden;
+}
+
+.m-palette .m-palette__input {
+  width: 100%;
+  font-size: var(--text-md);
+}
+
+.m-palette__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+}
+
+.m-palette__group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.m-palette__section {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+  padding: var(--space-3) var(--space-3) var(--space-1);
+}
+
+.m-palette__opt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid transparent;
+  color: var(--term-fg);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.m-palette__opt-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.m-palette__opt-hint {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--term-muted);
+}
+.m-palette__opt[aria-selected="true"] {
+  background: var(--cyan-8);
+  border-left-color: var(--syn-cyan);
+  color: var(--term-fg-strong);
+}
+
+.m-palette__empty {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--term-muted);
+  padding: var(--space-3);
+  text-align: center;
+}
+.m-palette__empty:empty {
+  display: none;
+  padding: 0;
+}
+
+@keyframes m-palette-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .m-palette .m-palette__card {
+    animation: m-palette-in var(--duration-fast) var(--ease-out);
+  }
+}

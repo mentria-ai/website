@@ -261,6 +261,22 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .nav-link.active { color: var(--syn-cyan); border-color: var(--syn-cyan); }
 
 /* ── Language switcher (in site-nav) ─────────────────────────────── */
+.nav-cmdk {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--term-muted);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+}
+.nav-cmdk:hover {
+  color: var(--term-fg);
+  border-color: var(--term-border-strong);
+}
+
 .lang-switcher {
   position: relative;
 }

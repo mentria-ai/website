@@ -21,10 +21,8 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 <section class="dw">
   <div class="dw__stage">
-    <!-- Outer ring decoration -->
     <div class="dw__ring-outer"></div>
 
-    <!-- The wheel -->
     <div class="dw__wheel-wrap">
       <div class="dw__pointer" aria-hidden="true">
         <svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 28L0 0h20z" fill="var(--syn-cyan)"/></svg>
@@ -177,7 +175,6 @@ eleventyComputed:
 </script>
 
 <style>
-/* ── Decision Wheel — Terminal HUD ────────────────── */
 .dw {
   display: flex;
   flex-direction: column;
@@ -187,7 +184,6 @@ eleventyComputed:
   font-family: var(--font-mono);
 }
 
-/* ── Stage ────────────────────────────────────────── */
 .dw__stage {
   position: relative;
   width: min(340px, 80vw);
@@ -212,7 +208,6 @@ eleventyComputed:
   border: 1px dashed rgba(34, 211, 238, 0.06);
 }
 
-/* ── Wheel ────────────────────────────────────────── */
 .dw__wheel-wrap {
   position: relative;
   width: 100%;
@@ -227,7 +222,7 @@ eleventyComputed:
   overflow: hidden;
   background: #0d0d0d;
   box-shadow:
-    0 0 0 2px rgba(255,255,255,0.06),
+    0 0 0 2px var(--term-border),
     0 0 40px rgba(0,0,0,0.6),
     inset 0 0 30px rgba(0,0,0,0.8);
 }
@@ -239,7 +234,6 @@ eleventyComputed:
     inset 0 0 30px rgba(0,0,0,0.8);
 }
 
-/* ── Segments ─────────────────────────────────────── */
 .dw__segment {
   position: absolute;
   width: 50%;
@@ -249,7 +243,6 @@ eleventyComputed:
   transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Active glow — segment passing under pointer */
 .dw__segment--active.dw__segment--0 {
   background: linear-gradient(135deg, rgba(74, 222, 128, 0.3) 0%, rgba(74, 222, 128, 0.08) 100%);
   box-shadow: inset 0 0 30px rgba(74, 222, 128, 0.15);
@@ -259,22 +252,21 @@ eleventyComputed:
   box-shadow: inset 0 0 30px rgba(244, 114, 182, 0.15);
 }
 .dw__segment--active.dw__segment--2 {
-  background: linear-gradient(315deg, rgba(34, 211, 238, 0.3) 0%, rgba(34, 211, 238, 0.08) 100%);
-  box-shadow: inset 0 0 30px rgba(34, 211, 238, 0.15);
+  background: linear-gradient(315deg, var(--cyan-30) 0%, var(--cyan-8) 100%);
+  box-shadow: inset 0 0 30px var(--cyan-15);
 }
 .dw__segment--active.dw__segment--3 {
   background: linear-gradient(45deg, rgba(251, 191, 36, 0.3) 0%, rgba(251, 191, 36, 0.08) 100%);
   box-shadow: inset 0 0 30px rgba(251, 191, 36, 0.15);
 }
 
-/* Winner glow — final result */
 .dw__segment--winner.dw__segment--0 {
   background: linear-gradient(135deg, rgba(74, 222, 128, 0.4) 0%, rgba(74, 222, 128, 0.1) 100%);
   box-shadow: inset 0 0 40px rgba(74, 222, 128, 0.2), 0 0 20px rgba(74, 222, 128, 0.1);
 }
 .dw__segment--winner.dw__segment--1 {
-  background: linear-gradient(225deg, rgba(244, 114, 182, 0.4) 0%, rgba(244, 114, 182, 0.1) 100%);
-  box-shadow: inset 0 0 40px rgba(244, 114, 182, 0.2), 0 0 20px rgba(244, 114, 182, 0.1);
+  background: linear-gradient(225deg, rgba(244, 114, 182, 0.4) 0%, var(--pink-10) 100%);
+  box-shadow: inset 0 0 40px rgba(244, 114, 182, 0.2), 0 0 20px var(--pink-10);
 }
 .dw__segment--winner.dw__segment--2 {
   background: linear-gradient(315deg, rgba(34, 211, 238, 0.4) 0%, rgba(34, 211, 238, 0.1) 100%);
@@ -286,7 +278,6 @@ eleventyComputed:
 }
 
 
-/* Yes — top-right (green) */
 .dw__segment--0 {
   top: 0; left: 50%;
   transform: rotate(0deg) skewY(0deg);
@@ -295,7 +286,6 @@ eleventyComputed:
   border-left: 1px solid rgba(74, 222, 128, 0.08);
 }
 
-/* No — bottom-right (pink) */
 .dw__segment--1 {
   top: 50%; left: 50%;
   background: linear-gradient(225deg, rgba(244, 114, 182, 0.12) 0%, rgba(244, 114, 182, 0.03) 100%);
@@ -303,16 +293,14 @@ eleventyComputed:
   border-left: 1px solid rgba(244, 114, 182, 0.08);
 }
 
-/* Up to you — bottom-left (cyan) */
 .dw__segment--2 {
   top: 50%; left: 0;
   transform-origin: 100% 0%;
   background: linear-gradient(315deg, rgba(34, 211, 238, 0.12) 0%, rgba(34, 211, 238, 0.03) 100%);
-  border-top: 1px solid rgba(34, 211, 238, 0.15);
-  border-right: 1px solid rgba(34, 211, 238, 0.08);
+  border-top: 1px solid var(--cyan-15);
+  border-right: 1px solid var(--cyan-8);
 }
 
-/* Wait — top-left (amber) */
 .dw__segment--3 {
   top: 0; left: 0;
   transform-origin: 100% 100%;
@@ -321,7 +309,6 @@ eleventyComputed:
   border-right: 1px solid rgba(251, 191, 36, 0.08);
 }
 
-/* ── Hub ──────────────────────────────────────────── */
 .dw__hub {
   position: absolute;
   top: 50%; left: 50%;
@@ -329,7 +316,7 @@ eleventyComputed:
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: radial-gradient(circle, #1a1a1a 0%, #0a0a0a 100%);
+  background: radial-gradient(circle, #1a1a1a 0%, var(--term-bg) 100%);
   border: 2px solid rgba(255,255,255,0.08);
   box-shadow:
     0 0 20px rgba(0,0,0,0.8),
@@ -340,10 +327,10 @@ eleventyComputed:
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .dw__hub:hover {
-  border-color: rgba(34, 211, 238, 0.3);
+  border-color: var(--cyan-30);
   box-shadow:
     0 0 20px rgba(0,0,0,0.8),
-    0 0 12px rgba(34, 211, 238, 0.15),
+    0 0 12px var(--cyan-15),
     inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .dw__hub::after {
@@ -355,10 +342,9 @@ eleventyComputed:
   height: 8px;
   border-radius: 50%;
   background: var(--syn-cyan);
-  box-shadow: 0 0 10px var(--syn-cyan), 0 0 20px rgba(34, 211, 238, 0.3);
+  box-shadow: 0 0 10px var(--syn-cyan), 0 0 20px var(--cyan-30);
 }
 
-/* ── Pointer ──────────────────────────────────────── */
 .dw__pointer {
   position: absolute;
   top: -14px;
@@ -374,7 +360,6 @@ eleventyComputed:
   50% { filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.7)); }
 }
 
-/* ── Result ───────────────────────────────────────── */
 .dw__result-wrap {
   text-align: center;
 }
@@ -405,7 +390,6 @@ eleventyComputed:
 .dw__result[data-outcome="upto"] { --result-color: var(--syn-cyan); }
 .dw__result[data-outcome="wait"] { --result-color: var(--syn-amber); }
 
-/* ── Spin Button ──────────────────────────────────── */
 .dw__controls {
   display: flex;
   justify-content: center;
@@ -416,7 +400,7 @@ eleventyComputed:
   align-items: center;
   gap: 0.6rem;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.7rem 2rem;
   font-family: var(--font-mono);
   font-size: 0.9rem;
@@ -426,7 +410,7 @@ eleventyComputed:
   cursor: pointer;
   color: #000;
   background: linear-gradient(135deg, var(--syn-cyan) 0%, #0ea5e9 100%);
-  box-shadow: 0 4px 20px rgba(34, 211, 238, 0.3);
+  box-shadow: 0 4px 20px var(--cyan-30);
   transition: all 0.25s ease;
 }
 
@@ -444,7 +428,6 @@ eleventyComputed:
   font-size: 0.75rem;
 }
 
-/* ── Legend ────────────────────────────────────────── */
 .dw__legend {
   display: flex;
   gap: 1.25rem;
@@ -467,14 +450,13 @@ eleventyComputed:
   box-shadow: 0 0 6px currentColor;
 }
 
-/* ── Cross-hair lines ─────────────────────────────── */
 .dw__wheel::before {
   content: '';
   position: absolute;
   top: 0; left: 50%;
   width: 1px;
   height: 100%;
-  background: rgba(255,255,255,0.04);
+  background: var(--term-divider);
   z-index: 1;
 }
 .dw__wheel::after {
@@ -483,11 +465,10 @@ eleventyComputed:
   top: 50%; left: 0;
   width: 100%;
   height: 1px;
-  background: rgba(255,255,255,0.04);
+  background: var(--term-divider);
   z-index: 1;
 }
 
-/* ── Responsive ───────────────────────────────────── */
 @media (max-width: 480px) {
   .dw__legend {
     gap: 0.75rem;

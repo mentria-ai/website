@@ -173,6 +173,201 @@ const restoreRescue = () => {
   return window.MentriaStore.importAll(JSON.parse(raw), { mode: 'replace' });
 };
 
+const splitSuffix = (suffix) => {
+  const parts = String(suffix).split('.');
+  let ns = parts[0];
+  let rest = parts.slice(1);
+  if (parts[0] === 'extdata' && parts.length > 1 && parts[1]) {
+    ns = parts[0] + '.' + parts[1];
+    rest = parts.slice(2);
+  }
+  return { ns, key: rest.join('.') };
+};
+
+const parseRaw = (raw) => {
+  if (typeof raw !== 'string') return raw;
+  try { return JSON.parse(raw); } catch (_) { return raw; }
+};
+
+const localMtimeOf = (ns, key) => {
+  const m = window.MentriaStore.getMeta(ns, key);
+  return m ? m.mtime : null;
+};
+
+const buildMeta = (store) => {
+  const meta = {};
+  Object.keys(store).forEach((suffix) => {
+    const { ns, key } = splitSuffix(suffix);
+    meta[suffix] = localMtimeOf(ns, key);
+  });
+  return meta;
+};
+
+const mergeNotes = (localArr, incomingArr) => {
+  const byId = new Map();
+  const consider = (note) => {
+    if (!note || typeof note !== 'object') return;
+    const id = note.id;
+    if (id == null) return;
+    const key = String(id);
+    const existing = byId.get(key);
+    if (!existing) { byId.set(key, note); return; }
+    const eu = Number(existing.updatedAt) || 0;
+    const nu = Number(note.updatedAt) || 0;
+    if (nu > eu) byId.set(key, note);
+  };
+  (Array.isArray(localArr) ? localArr : []).forEach(consider);
+  (Array.isArray(incomingArr) ? incomingArr : []).forEach(consider);
+  const arr = Array.from(byId.values());
+  arr.sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0));
+  return arr;
+};
+
+const mergePalette = (localArr, incomingArr) => {
+  const out = [];
+  const seen = new Set();
+  const push = (h) => { if (!seen.has(h)) { seen.add(h); out.push(h); } };
+  (Array.isArray(localArr) ? localArr : []).forEach(push);
+  (Array.isArray(incomingArr) ? incomingArr : []).forEach(push);
+  return out;
+};
+
+const sendBack = async (store, meta, legacy) => {
+  if (!state.action || !state.key) return;
+  try {
+    const payload = await encryptPayload(state.key, {
+      op: 'snapshot-back', v: 2,
+      data: { version: 1, exportedAt: new Date().toISOString(), store, legacy },
+      meta
+    });
+    state.action.send(payload);
+  } catch (err) {
+    emit('error', err);
+  }
+};
+
+const mergeV2 = async (msg, isBack) => {
+  const local = window.MentriaStore.exportAll();
+  const localStore = local.store || {};
+  const localLegacy = local.legacy || {};
+  const incoming = (msg.data && msg.data.store) || {};
+  const incomingLegacy = (msg.data && msg.data.legacy) || {};
+  const meta = (msg.meta && typeof msg.meta === 'object') ? msg.meta : {};
+  const summary = { applied: 0, kept: 0, merged: 0, flagged: [] };
+
+  const additions = [];
+  const unions = [];
+  const lwwReplace = [];
+  const keeps = [];
+
+  Object.keys(incoming).forEach((suffix) => {
+    const rawIn = incoming[suffix];
+    const rawLocal = localStore[suffix];
+    if (rawLocal != null && rawLocal === String(rawIn)) return;
+    const { ns, key } = splitSuffix(suffix);
+    const inMtime = (typeof meta[suffix] === 'number') ? meta[suffix] : null;
+
+    if (rawLocal == null) {
+      additions.push({ ns, key, raw: rawIn, mtime: inMtime });
+      return;
+    }
+
+    const localMtime = localMtimeOf(ns, key);
+
+    if (suffix === 'quick_notes.blob') {
+      unions.push({ suffix, ns, key, value: mergeNotes(parseRaw(rawLocal), parseRaw(rawIn)) });
+      return;
+    }
+    if (suffix === 'tools.color_picker_palette') {
+      unions.push({ suffix, ns, key, value: mergePalette(parseRaw(rawLocal), parseRaw(rawIn)) });
+      return;
+    }
+    if (suffix === 'totp.vault') {
+      if (inMtime != null && localMtime != null && inMtime > localMtime) {
+        lwwReplace.push({ suffix, ns, key, raw: rawIn, mtime: inMtime });
+      } else {
+        keeps.push(suffix); summary.kept++; summary.flagged.push(suffix);
+      }
+      return;
+    }
+
+    const inWins = (inMtime != null) && (localMtime == null || inMtime > localMtime);
+    if (inWins) {
+      lwwReplace.push({ suffix, ns, key, raw: rawIn, mtime: inMtime });
+    } else {
+      keeps.push(suffix); summary.kept++;
+      const tie = (inMtime != null && localMtime != null && inMtime === localMtime) || (inMtime == null && localMtime == null);
+      if (tie) summary.flagged.push(suffix);
+    }
+  });
+
+  if (lwwReplace.length && !state.applyApproved) {
+    const areas = Array.from(new Set(lwwReplace.map((x) => x.suffix.split('.')[0]))).join(', ');
+    const ok = typeof window.mentriaConfirm === 'function'
+      ? await window.mentriaConfirm(confirmReplaceText(areas))
+      : false;
+    if (!ok) {
+      lwwReplace.forEach((x) => { keeps.push(x.suffix); summary.kept++; });
+      lwwReplace.length = 0;
+    } else {
+      state.applyApproved = true;
+      saveRescue();
+    }
+  }
+
+  additions.forEach((a) => {
+    window.MentriaStore.set(a.ns, a.key, parseRaw(a.raw), { mtime: a.mtime != null ? a.mtime : Date.now(), remote: true });
+    summary.applied++;
+  });
+  unions.forEach((u) => {
+    window.MentriaStore.set(u.ns, u.key, u.value, { mtime: Date.now(), remote: true });
+    summary.merged++;
+  });
+  lwwReplace.forEach((l) => {
+    window.MentriaStore.set(l.ns, l.key, parseRaw(l.raw), { mtime: l.mtime != null ? l.mtime : Date.now(), remote: true });
+    summary.applied++;
+  });
+
+  Object.keys(incomingLegacy).forEach((k) => {
+    if (typeof k !== 'string' || k.indexOf('mentria_') !== 0) return;
+    try {
+      if (window.localStorage.getItem(k) != null) return;
+      window.localStorage.setItem(k, String(incomingLegacy[k]));
+      summary.applied++;
+    } catch (_) {}
+  });
+
+  if (!isBack) {
+    const after = window.MentriaStore.exportAll();
+    const afterStore = after.store || {};
+    const replySuffixes = new Set();
+    keeps.forEach((s) => replySuffixes.add(s));
+    unions.forEach((u) => replySuffixes.add(u.suffix));
+    Object.keys(localStore).forEach((s) => { if (!(s in incoming)) replySuffixes.add(s); });
+
+    const replyStore = {};
+    const replyMeta = {};
+    replySuffixes.forEach((suffix) => {
+      if (!(suffix in afterStore)) return;
+      const { ns, key } = splitSuffix(suffix);
+      replyStore[suffix] = afterStore[suffix];
+      replyMeta[suffix] = localMtimeOf(ns, key);
+    });
+
+    const replyLegacy = {};
+    Object.keys(localLegacy).forEach((k) => {
+      if (!(k in incomingLegacy)) replyLegacy[k] = localLegacy[k];
+    });
+
+    if (Object.keys(replyStore).length || Object.keys(replyLegacy).length) {
+      await sendBack(replyStore, replyMeta, replyLegacy);
+    }
+  }
+
+  state.syncedSinceConnect += (summary.applied + summary.merged);
+  emit('synced', { restored: summary.applied + summary.merged, summary });
+};
+
 const handleIncoming = async (payload) => {
   let msg;
   try {
@@ -182,6 +377,16 @@ const handleIncoming = async (payload) => {
     return;
   }
   if (!msg || typeof msg !== 'object') return;
+
+  if ((msg.op === 'snapshot' || msg.op === 'snapshot-back') && msg.v === 2 && msg.data) {
+    try {
+      await mergeV2(msg, msg.op === 'snapshot-back');
+    } catch (err) {
+      emit('error', new Error('merge failed: ' + err.message));
+    }
+    return;
+  }
+
   if (msg.op === 'snapshot' && msg.data) {
     try {
       if (!state.applyApproved) {
@@ -204,8 +409,9 @@ const handleIncoming = async (payload) => {
     }
     return;
   }
+
   if (msg.op === 'set' && typeof msg.ns === 'string' && typeof msg.key === 'string') {
-    window.MentriaStore.set(msg.ns, msg.key, msg.value, { remote: true });
+    window.MentriaStore.set(msg.ns, msg.key, msg.value, { remote: true, mtime: msg.mtime });
     state.syncedSinceConnect++;
     emit('synced', { restored: 1 });
     return;
@@ -225,7 +431,7 @@ const onLocalWrite = async (event) => {
   if (!d.ns || !d.key) return;
   if (d.op !== 'set' && d.op !== 'remove') return;
   try {
-    const payload = await encryptPayload(state.key, { op: d.op, ns: d.ns, key: d.key, value: d.value });
+    const payload = await encryptPayload(state.key, { op: d.op, ns: d.ns, key: d.key, value: d.value, mtime: d.mtime });
     state.action.send(payload);
   } catch (err) {
     emit('error', err);
@@ -236,7 +442,7 @@ const sendSnapshot = async () => {
   if (!state.action || !state.key) return;
   try {
     const snap = window.MentriaStore.exportAll();
-    const payload = await encryptPayload(state.key, { op: 'snapshot', data: snap });
+    const payload = await encryptPayload(state.key, { op: 'snapshot', v: 2, data: snap, meta: buildMeta(snap.store || {}) });
     state.action.send(payload);
   } catch (err) {
     emit('error', err);

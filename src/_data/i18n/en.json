@@ -135,7 +135,10 @@
     "toggle_fullscreen": "Toggle fullscreen",
     "skip_to_content": "Skip to content",
     "gamepad_connected": "🎮 controller connected",
-    "gamepad_disconnected": "🎮 controller disconnected"
+    "gamepad_disconnected": "🎮 controller disconnected",
+    "offline_title": "Offline",
+    "offline_msg": "You're offline and this page isn't cached yet.",
+    "offline_home": "Go to the cached home page"
   },
   "home": {
     "cli": {
@@ -754,7 +757,8 @@
       "ai_confirm_download": "AI naming needs a one-time AI model download (490 MB or more, depending on the model tier). Continue?",
       "btn_ai_loading": "Loading {pct}%",
       "preview_region_aria": "Rendered preview",
-      "tab_hint": "Tab inserts spaces. Press Escape, then Tab, to leave the editor."
+      "tab_hint": "Tab inserts spaces. Press Escape, then Tab, to leave the editor.",
+      "remote_img_blocked": "remote image blocked: {src}"
     },
     "quote": {
       "tldr_heading": "What is Motivational Quote?",

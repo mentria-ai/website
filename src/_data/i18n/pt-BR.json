@@ -135,7 +135,10 @@
     "toggle_fullscreen": "Alternar tela cheia",
     "skip_to_content": "Pular para o conteúdo",
     "gamepad_connected": "🎮 controle conectado",
-    "gamepad_disconnected": "🎮 controle desconectado"
+    "gamepad_disconnected": "🎮 controle desconectado",
+    "offline_title": "Off-line",
+    "offline_msg": "Você está off-line e esta página ainda não está em cache.",
+    "offline_home": "Ir para a página inicial em cache"
   },
   "home": {
     "cli": {
@@ -754,7 +757,8 @@
       "ai_confirm_download": "A nomeação por IA precisa de um download único do modelo (490 MB ou mais, dependendo do nível). Continuar?",
       "btn_ai_loading": "Carregando {pct}%",
       "preview_region_aria": "Pré-visualização renderizada",
-      "tab_hint": "Tab insere espaços. Pressione Escape e depois Tab para sair do editor."
+      "tab_hint": "Tab insere espaços. Pressione Escape e depois Tab para sair do editor.",
+      "remote_img_blocked": "imagem remota bloqueada: {src}"
     },
     "quote": {
       "tldr_heading": "O que é Frase Motivacional?",

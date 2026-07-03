@@ -135,7 +135,10 @@
     "toggle_fullscreen": "Basculer en plein écran",
     "skip_to_content": "Aller au contenu",
     "gamepad_connected": "🎮 manette connectée",
-    "gamepad_disconnected": "🎮 manette déconnectée"
+    "gamepad_disconnected": "🎮 manette déconnectée",
+    "offline_title": "Hors ligne",
+    "offline_msg": "Vous êtes hors ligne et cette page n'est pas encore en cache.",
+    "offline_home": "Aller à la page d'accueil en cache"
   },
   "home": {
     "cli": {
@@ -754,7 +757,8 @@
       "ai_confirm_download": "Le nommage par IA nécessite un téléchargement unique du modèle (490 Mo ou plus selon le niveau). Continuer ?",
       "btn_ai_loading": "Chargement {pct}%",
       "preview_region_aria": "Aperçu du rendu",
-      "tab_hint": "Tab insère des espaces. Appuyez sur Échap puis Tab pour quitter l’éditeur."
+      "tab_hint": "Tab insère des espaces. Appuyez sur Échap puis Tab pour quitter l’éditeur.",
+      "remote_img_blocked": "image distante bloquée : {src}"
     },
     "quote": {
       "tldr_heading": "Qu'est-ce que Citation Motivante ?",

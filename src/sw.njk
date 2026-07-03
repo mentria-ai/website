@@ -35,6 +35,7 @@ const ASSETS = [
   '/tools/ai-chat/',
   '/tools/annotate-image/',
   '/tools/quote/',
+  '/offline/',
   '/tools/radio/',
   '/assets/radio/radio.js',
   '/assets/radio/player.js',
@@ -255,6 +256,8 @@ self.addEventListener('fetch', event => {
           const alt = await caches.match(stripped, { ignoreSearch: true });
           if (alt) return alt;
         }
+        const offline = await precache.match('/offline/', { ignoreSearch: true });
+        if (offline) return offline;
       }
       throw err;
     }

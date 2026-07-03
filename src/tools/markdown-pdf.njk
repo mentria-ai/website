@@ -94,6 +94,7 @@ eleventyComputed:
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 <script type="module">
 const COPY = {
+  remoteImgBlocked: {{ ("tool.markdown-pdf.remote_img_blocked" | t) | dump | safe }},
   saved:              {{ ("tool.markdown-pdf.saved"              | t) | dump | safe }},
   countsFmt:          {{ ("tool.markdown-pdf.counts_format"      | t) | dump | safe }},
   errLoadLib:         {{ ("tool.markdown-pdf.err_load_lib"       | t) | dump | safe }},
@@ -178,6 +179,15 @@ function scheduleRender() {
 function render() {
   const scroll = previewEl.scrollTop;
   previewEl.innerHTML = window.renderMarkdown ? window.renderMarkdown(inputEl.value || '') : '';
+  previewEl.querySelectorAll('img').forEach((img) => {
+    const src = img.getAttribute('src') || '';
+    if (/^https?:\/\//i.test(src) && new URL(src, location.href).origin !== location.origin) {
+      const note = document.createElement('span');
+      note.className = 'mp__img-blocked';
+      note.textContent = COPY.remoteImgBlocked.replace('{src}', src);
+      img.replaceWith(note);
+    }
+  });
   previewEl.scrollTop = scroll;
   updateCounts();
 }

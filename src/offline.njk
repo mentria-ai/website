@@ -1,0 +1,16 @@
+---
+layout: base.njk
+permalink: /offline/index.html
+title: "Offline"
+robots: "noindex, nofollow"
+eleventyExcludeFromCollections: true
+eleventyExcludeFromSitemap: true
+---
+<section class="hero" style="padding-top:3rem;">
+  <div style="font-family: var(--font-mono); text-align: center;">
+    <p style="color: var(--syn-amber); font-size: 0.9rem;">$ ping mentria.ai</p>
+    <h1 style="font-size: clamp(2.4rem, 7vw, 4rem); margin: 1rem 0;">{{ "common.offline_title" | t }}</h1>
+    <p style="color: var(--term-muted);">{{ "common.offline_msg" | t }}<span class="cursor-blink"></span></p>
+    <p style="margin-top: 2rem;"><a href="/">{{ "common.offline_home" | t }}</a></p>
+  </div>
+</section>

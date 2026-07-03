@@ -135,7 +135,10 @@
     "toggle_fullscreen": "全画面表示を切り替え",
     "skip_to_content": "コンテンツへスキップ",
     "gamepad_connected": "🎮 コントローラー接続",
-    "gamepad_disconnected": "🎮 コントローラー切断"
+    "gamepad_disconnected": "🎮 コントローラー切断",
+    "offline_title": "オフライン",
+    "offline_msg": "オフラインです。このページはまだキャッシュされていません。",
+    "offline_home": "キャッシュ済みのホームへ"
   },
   "home": {
     "cli": {
@@ -754,7 +757,8 @@
       "ai_confirm_download": "AI命名には初回のみモデルのダウンロード（ティアにより490 MB以上）が必要です。続行しますか？",
       "btn_ai_loading": "読込中 {pct}%",
       "preview_region_aria": "レンダリングされたプレビュー",
-      "tab_hint": "Tabはスペースを挿入します。エディタから出るには、Escapeを押してからTabを押してください。"
+      "tab_hint": "Tabはスペースを挿入します。エディタから出るには、Escapeを押してからTabを押してください。",
+      "remote_img_blocked": "リモート画像をブロックしました: {src}"
     },
     "quote": {
       "tldr_heading": "モチベーション名言とは?",

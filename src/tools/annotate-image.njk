@@ -126,6 +126,7 @@ eleventyComputed:
     emptyResponse:    {{ ("tool.annotate-image.empty_response"    | t) | dump | safe }},
     copy:             {{ ("tool.annotate-image.copy"              | t) | dump | safe }},
     copied:           {{ ("tool.annotate-image.copied"           | t) | dump | safe }},
+    copyFailed:       {{ ("common.copy_failed"                    | t) | dump | safe }},
     badFile:          {{ ("tool.annotate-image.bad_file"          | t) | dump | safe }},
     sysPrompt:        {{ ("tool.annotate-image.sys_prompt"        | t) | dump | safe }},
     labels: {
@@ -304,8 +305,11 @@ eleventyComputed:
 
   document.getElementById('an-copy').addEventListener('click', () => {
     const txt = resultEl.textContent.trim(); if (!txt) return;
-    navigator.clipboard.writeText(txt).catch(()=>{});
-    const btn = document.getElementById('an-copy'); btn.textContent = COPY.copied; setTimeout(()=>btn.textContent = COPY.copy, 1200);
+    const btn = document.getElementById('an-copy');
+    navigator.clipboard.writeText(txt).then(
+      () => { btn.textContent = COPY.copied; },
+      () => { btn.textContent = COPY.copyFailed; }
+    ).then(() => { setTimeout(() => { btn.textContent = COPY.copy; }, 1200); });
   });
   document.getElementById('an-download').addEventListener('click', () => {
     const txt = resultEl.textContent.trim(); if (!txt) return;

@@ -204,6 +204,7 @@ eleventyComputed:
     add_missing_fields:       {{ ('tool.totp.add_missing_fields'       | t) | dump | safe }},
     delete_confirm:           {{ ('tool.totp.delete_confirm'           | t) | dump | safe }},
     copied:                   {{ ('tool.totp.copied'                   | t) | dump | safe }},
+    copyFailed:               {{ ('common.copy_failed'                  | t) | dump | safe }},
     backup_required:          {{ ('tool.totp.backup_required'          | t) | dump | safe }},
     backup_done:              {{ ('tool.totp.backup_done'              | t) | dump | safe }},
     scan_unsupported:         {{ ('tool.totp.scan_unsupported'         | t) | dump | safe }},
@@ -914,10 +915,11 @@ eleventyComputed:
     if (!row) return;
     if (e.target.matches('[data-copy]')) {
       const code = (e.target.dataset.code || e.target.textContent).replace(/\s/g, '');
-      try { await navigator.clipboard.writeText(code); } catch (_) {}
+      let ok = true;
+      try { await navigator.clipboard.writeText(code); } catch (_) { ok = false; }
       e.target.classList.add('is-copied');
-      e.target.textContent = COPY.copied;
-      setTimeout(() => { e.target.classList.remove('is-copied'); tick(); }, 900);
+      e.target.textContent = ok ? COPY.copied : COPY.copyFailed;
+      setTimeout(() => { e.target.classList.remove('is-copied'); tick(); }, ok ? 900 : 1600);
     } else if (e.target.matches('[data-del]')) {
       const acc = state.accounts.find((a) => a.id === row.dataset.id);
       if (!acc) return;

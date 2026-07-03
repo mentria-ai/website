@@ -17,7 +17,8 @@
     board_label: 'chess board', a11y_empty: 'empty', a11y_target: 'legal move',
     a11y_check: 'check', a11y_turn: '{color} to move', promo_label: 'promote pawn',
     piece_king: 'king', piece_queen: 'queen', piece_rook: 'rook',
-    piece_bishop: 'bishop', piece_knight: 'knight', piece_pawn: 'pawn'
+    piece_bishop: 'bishop', piece_knight: 'knight', piece_pawn: 'pawn',
+    copy_failed: 'copy failed'
   }, window.CHESS_I18N || {});
   const PIECE_NAMES = { K: T.piece_king, Q: T.piece_queen, R: T.piece_rook, B: T.piece_bishop, N: T.piece_knight, P: T.piece_pawn };
   function squareLabel(idx, pos, opts){
@@ -624,13 +625,22 @@
       if (code.length < 6){ P2P.setLed('warn', T.room_invalid); return; }
       try { await P2P.start('guest', code); } catch(e){ P2P.setLed('warn', T.peer_error); }
     };
-    $('btn-copy-code').onclick = () => { navigator.clipboard.writeText($('room-code').value).catch(()=>{}); $('btn-copy-code').textContent = T.copied; setTimeout(()=>$('btn-copy-code').textContent = T.copy, 1200); };
+    $('btn-copy-code').onclick = () => {
+      const b = $('btn-copy-code');
+      navigator.clipboard.writeText($('room-code').value).then(
+        () => { b.textContent = T.copied; },
+        () => { b.textContent = T.copy_failed; }
+      ).then(() => { setTimeout(() => { b.textContent = T.copy; }, 1200); });
+    };
     $('btn-share-link').onclick = async () => {
       const code = $('room-code').value; if (!code) return;
       const url = location.origin + location.pathname + '?room=' + code;
       if (navigator.share){ try { await navigator.share({ title: document.title, url }); return; } catch (e){ if (e && e.name === 'AbortError') return; } }
-      try { await navigator.clipboard.writeText(url); } catch (e){}
-      const b = $('btn-share-link'); b.textContent = T.link_copied; setTimeout(() => b.textContent = T.share_link, 1400);
+      const b = $('btn-share-link');
+      let ok = true;
+      try { await navigator.clipboard.writeText(url); } catch (e){ ok = false; }
+      b.textContent = ok ? T.link_copied : T.copy_failed;
+      setTimeout(() => b.textContent = T.share_link, 1400);
     };
 
     $('btn-send').onclick = sendChat;

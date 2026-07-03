@@ -153,22 +153,9 @@ i18n-t {
   --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* ── Shared utility: aura backlight + frame chrome for game pages ── */
 .game-page {
   position: relative;
   z-index: 1;
-}
-.game-page::before {
-  content: '';
-  position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120%;
-  height: 50%;
-  background: var(--gradient-aura);
-  pointer-events: none;
-  z-index: 0;
 }
 .game-page > * { position: relative; z-index: 1; }
 .game-page .terminal-frame { box-shadow: var(--elev-3); }

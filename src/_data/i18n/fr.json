@@ -334,6 +334,11 @@
       "title": "Fichiers",
       "lede": "Parcourez, exportez et supprimez les données que les outils Mentria stockent sur cet appareil. Tout reste en local.",
       "tldr": "Un inspecteur du stockage local pour tout ce que les outils Mentria conservent sur cet appareil. Il liste l'espace de noms de chaque application — notes, coffre TOTP, états de jeu, données d'extensions et clés héritées — avec la taille de chaque élément et sa date de modification. Consultez n'importe quelle valeur en JSON formaté, exportez un élément précis ou supprimez-le (les suppressions demandent toujours confirmation). Exportez une sauvegarde chiffrée de l'ensemble avec une phrase secrète (PBKDF2-SHA256 × 600k + AES-GCM). Rien n'est envoyé ; l'outil n'écrit dans le stockage que lorsque vous confirmez une suppression."
+    },
+    "extensions-sdk": {
+      "title": "SDK des extensions",
+      "lede": "Créez des extensions monofichier qui s’exécutent localement dans Mentria — sans boutique, sans serveur, sans envoi.",
+      "tldr": "Les extensions sont des fichiers HTML uniques exécutés dans Mentria avec une petite API hôte : stockage propre à l’extension, jetons de thème, notifications, tuiles du lanceur et commandes. L’installation est un import local confirmé par l’utilisateur — rien n’est envoyé, revu à distance ni mis à jour automatiquement. Cette page documente le manifeste et l’API hôte, avec un starter à copier-coller."
     }
   },
   "game": {
@@ -1189,6 +1194,10 @@
       "strength_weak": "faible",
       "strength_medium": "moyenne",
       "strength_strong": "forte"
+    },
+    "extensions-sdk": {
+      "heading_start": "Démarrage rapide",
+      "heading_reference": "Référence"
     }
   },
   "category": {

@@ -334,6 +334,11 @@
       "title": "Arquivos",
       "lede": "Navegue, exporte e exclua os dados que as ferramentas da Mentria guardam neste dispositivo. Tudo fica local.",
       "tldr": "Um inspetor do armazenamento local para tudo o que as ferramentas da Mentria guardam neste dispositivo. Ele lista o espaço de nomes de cada aplicativo — notas, cofre TOTP, estado dos jogos, dados de extensões e chaves antigas — com o tamanho de cada item e a data de modificação. Veja qualquer valor como JSON formatado, exporte um item específico ou exclua-o (as exclusões sempre pedem confirmação). Exporte um backup criptografado de tudo com uma senha (PBKDF2-SHA256 × 600k + AES-GCM). Nada é enviado; a ferramenta só grava no armazenamento quando você confirma uma exclusão."
+    },
+    "extensions-sdk": {
+      "title": "SDK de extensões",
+      "lede": "Crie extensões de arquivo único que rodam localmente no Mentria — sem loja, sem servidor, sem upload.",
+      "tldr": "Extensões são arquivos HTML únicos que rodam dentro do Mentria com uma pequena API: armazenamento próprio da extensão, tokens de tema, avisos, blocos do launcher e comandos. Instalar é uma importação local confirmada pelo usuário — nada é enviado, revisado remotamente ou atualizado sozinho. Esta página documenta o manifesto e a API, com um exemplo pronto para copiar."
     }
   },
   "game": {
@@ -1189,6 +1194,10 @@
       "strength_weak": "fraca",
       "strength_medium": "média",
       "strength_strong": "forte"
+    },
+    "extensions-sdk": {
+      "heading_start": "Início rápido",
+      "heading_reference": "Referência"
     }
   },
   "category": {

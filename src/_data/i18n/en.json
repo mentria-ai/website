@@ -334,6 +334,11 @@
       "title": "Files",
       "lede": "Browse, export, and delete the data Mentria tools store on this device. Everything stays local.",
       "tldr": "A local storage inspector for everything Mentria tools keep on this device. It lists each app's namespace — notes, TOTP vault, game state, extension data, and legacy keys — with item sizes and modified dates. View any value as pretty-printed JSON, export a single item, or delete it (deletes always ask first). Export an encrypted backup of everything with a passphrase (PBKDF2-SHA256 × 600k + AES-GCM). Nothing is uploaded; the tool only writes to storage when you confirm a delete."
+    },
+    "extensions-sdk": {
+      "title": "Extension SDK",
+      "lede": "Build single-file extensions that run locally in Mentria — no store, no server, no upload.",
+      "tldr": "Extensions are single HTML files that run inside Mentria with a small host API: storage scoped to the extension, theme tokens, toasts, launcher tiles and command-line mounts. Installing is a human-confirmed local import — nothing is uploaded, remotely reviewed, or auto-updated. This page documents the manifest and host API and ships a copy-paste starter."
     }
   },
   "game": {
@@ -1189,6 +1194,10 @@
       "strength_weak": "weak",
       "strength_medium": "medium",
       "strength_strong": "strong"
+    },
+    "extensions-sdk": {
+      "heading_start": "Quick start",
+      "heading_reference": "Reference"
     }
   },
   "category": {

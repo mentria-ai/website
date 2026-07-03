@@ -1232,7 +1232,8 @@
     "no_results": "Sin resultados",
     "recents": "Recientes",
     "open": "Abrir paleta de comandos",
-    "app_bar": "Navegación de la aplicación"
+    "app_bar": "Navegación de la aplicación",
+    "extensions": "Extensiones"
   },
   "widgets": {
     "steps_label": "Pasos",
@@ -1241,6 +1242,7 @@
     "notes_count": "{n} notas",
     "untitled": "Sin título",
     "storage_label": "Almacenamiento",
-    "storage_used": "{used} / {quota}"
+    "storage_used": "{used} / {quota}",
+    "notes_count_one": "{n} nota"
   }
 }

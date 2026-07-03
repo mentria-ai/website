@@ -15,7 +15,7 @@
   var prevFocus = null;
 
   var labels = {};
-  var model = { tools: [], nav: [], recents: [] };
+  var model = { tools: [], nav: [], recents: [], extensions: [] };
   var optionEls = [];
   var activeIndex = -1;
   var idSeq = 0;
@@ -41,6 +41,43 @@
   function usageScore(entry) {
     if (!entry) return 0;
     return (entry.count || 0) + 6 / (1 + (Date.now() - (entry.last || 0)) / DAY);
+  }
+
+  function buildExtensions(prefix) {
+    var out = [];
+    try {
+      var S = window.MentriaStore;
+      if (!S || typeof S.get !== 'function') return out;
+      var reg = S.get('ext', 'registry');
+      if (!Array.isArray(reg)) return out;
+      for (var i = 0; i < reg.length; i++) {
+        var e = reg[i];
+        if (!e || !e.enabled || !e.manifest) continue;
+        var m = e.manifest;
+        var id = m.id;
+        var cmds = m.mounts && m.mounts.commands;
+        if (typeof id !== 'string' || !Array.isArray(cmds)) continue;
+        for (var j = 0; j < cmds.length; j++) {
+          var c = cmds[j];
+          if (!c || typeof c.name !== 'string') continue;
+          var name = m.name || id;
+          var desc = typeof c.description === 'string' ? c.description : '';
+          out.push({
+            title: c.name + ' · ' + name,
+            hint: desc.slice(0, 80),
+            href: prefix + '/tools/extensions/run/?id=' + encodeURIComponent(id) + '#cmd=' + encodeURIComponent(c.name),
+            titleN: norm(c.name + ' ' + name),
+            hayN: norm(c.name + ' ' + name + ' ' + desc),
+            usage: 0
+          });
+        }
+      }
+    } catch (_) {}
+    return out;
+  }
+
+  function extLabel() {
+    return labels.extensions || 'Extensions';
   }
 
   function buildModel() {
@@ -92,7 +129,7 @@
       if (bySlug[slugs[i]]) recents.push(bySlug[slugs[i]]);
     }
 
-    return { tools: normTools, nav: normNav, recents: recents };
+    return { tools: normTools, nav: normNav, recents: recents, extensions: buildExtensions(prefix) };
   }
 
   function applyLabels() {
@@ -166,6 +203,11 @@
       for (j = 0; j < arr.length; j++) g.appendChild(makeOption(arr[j]));
       listEl.appendChild(g);
     }
+    if (model.extensions.length) {
+      var eg = makeGroup(extLabel());
+      for (i = 0; i < model.extensions.length; i++) eg.appendChild(makeOption(model.extensions[i]));
+      listEl.appendChild(eg);
+    }
   }
 
   function tierOf(hayTitleIndex, hasFullMatch) {
@@ -189,6 +231,13 @@
       e = model.nav[i];
       idx = e.titleN.indexOf(qN);
       tier = tierOf(idx, false);
+      if (tier < 0) continue;
+      out.push({ e: e, tier: tier });
+    }
+    for (i = 0; i < model.extensions.length; i++) {
+      e = model.extensions[i];
+      idx = e.titleN.indexOf(qN);
+      tier = tierOf(idx, e.hayN.indexOf(qN) !== -1);
       if (tier < 0) continue;
       out.push({ e: e, tier: tier });
     }

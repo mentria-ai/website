@@ -1232,7 +1232,8 @@
     "no_results": "No matches",
     "recents": "Recent",
     "open": "Open command palette",
-    "app_bar": "App navigation"
+    "app_bar": "App navigation",
+    "extensions": "Extensions"
   },
   "widgets": {
     "steps_label": "Steps",
@@ -1241,6 +1242,7 @@
     "notes_count": "{n} notes",
     "untitled": "Untitled",
     "storage_label": "Storage",
-    "storage_used": "{used} / {quota}"
+    "storage_used": "{used} / {quota}",
+    "notes_count_one": "{n} note"
   }
 }

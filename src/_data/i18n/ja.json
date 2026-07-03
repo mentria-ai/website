@@ -1232,7 +1232,8 @@
     "no_results": "一致するものがありません",
     "recents": "最近使ったもの",
     "open": "コマンドパレットを開く",
-    "app_bar": "アプリナビゲーション"
+    "app_bar": "アプリナビゲーション",
+    "extensions": "拡張機能"
   },
   "widgets": {
     "steps_label": "歩数",
@@ -1241,6 +1242,7 @@
     "notes_count": "{n} 件のメモ",
     "untitled": "無題",
     "storage_label": "ストレージ",
-    "storage_used": "{used} / {quota}"
+    "storage_used": "{used} / {quota}",
+    "notes_count_one": "{n} 件のメモ"
   }
 }

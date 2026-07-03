@@ -50,6 +50,12 @@ export function validateManifest(m, sizeBytes) {
         if (typeof c.description !== 'string' || !c.description) fail('each command needs a description');
       }
     }
+    if (m.mounts.widget !== undefined) {
+      const w = m.mounts.widget;
+      if (!w || typeof w !== 'object' || Array.isArray(w)) fail('mounts.widget must be an object');
+      if (typeof w.key !== 'string' || w.key.length < 1 || w.key.length > 64) fail('mounts.widget.key must be a string, 1-64 chars');
+      if (typeof w.label !== 'string' || w.label.length < 1 || w.label.length > 48) fail('mounts.widget.label must be a string, 1-48 chars');
+    }
   }
   if (sizeBytes > REJECT_BYTES) fail('file is ' + Math.round(sizeBytes / 1024) + ' KB — extensions are stored in local storage, keep them under 1536 KB');
   return true;
@@ -67,11 +73,20 @@ export function getSource(id) {
   return store().get(NS, 'src.' + id);
 }
 
+function mountSummary(m) {
+  const mounts = (m && m.mounts) || {};
+  const out = [];
+  if (mounts.tool) out.push('tool');
+  if (Array.isArray(mounts.commands) && mounts.commands.length) out.push('commands');
+  if (mounts.widget) out.push('widget');
+  return out;
+}
+
 export function inspect(html) {
   const size = new Blob([html]).size;
   const manifest = parseManifest(html);
   validateManifest(manifest, size);
-  return { manifest, size, warnLarge: size > WARN_BYTES, existing: getEntry(manifest.id) };
+  return { manifest, size, warnLarge: size > WARN_BYTES, existing: getEntry(manifest.id), mounts: mountSummary(manifest) };
 }
 
 export function install(html, manifest) {

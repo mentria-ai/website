@@ -371,9 +371,13 @@ eleventyComputed:
     row.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(el => {
       dropField(el.id);
     });
+    const nextRow = row.nextElementSibling || row.previousElementSibling;
     row.remove();
     renumberRows();
     calculateGrandTotal();
+    const target = nextRow && (nextRow.querySelector('.remove-row') || nextRow.querySelector('.add-row'));
+    if (target) target.focus();
+    else { const add = table.querySelector('.add-row'); if (add) add.focus(); }
   };
 
   /* ── Import / Export ───────────────────────────────── */

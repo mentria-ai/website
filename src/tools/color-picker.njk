@@ -313,6 +313,9 @@ eleventyComputed:
         saveSaved(arr);
         recordColorDeletion(c);
         renderSaved();
+        const items = savedList.querySelectorAll('.cp__saved-swatch');
+        if (items.length) items[Math.min(i, items.length - 1)].focus();
+        else document.getElementById('cp-save').focus();
       };
       el.querySelector('.cp__saved-remove').addEventListener('click', e => { e.stopPropagation(); removeColor(); });
       el.addEventListener('contextmenu', e => { e.preventDefault(); removeColor(); });
@@ -337,6 +340,14 @@ eleventyComputed:
     if (v.length === 6) setColor('#' + v);
   });
 
+  function commitShortHex() {
+    const v = hexInput.value;
+    if (v.length === 3) {
+      const full = v[0] + v[0] + v[1] + v[1] + v[2] + v[2];
+      setColor('#' + full);
+    }
+  }
+  hexInput.addEventListener('blur', commitShortHex);
   hexInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') hexInput.blur();
   });
@@ -457,7 +468,7 @@ eleventyComputed:
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   font-size: 0.85rem;
   color: var(--term-fg);
-  width: 5.5ch;
+  width: 6.5ch;
   letter-spacing: 0.04em;
 }
 
@@ -495,9 +506,15 @@ eleventyComputed:
   font-size: 0.8rem;
   color: var(--term-fg);
   flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+}
+
+@media (forced-colors: active) {
+  .cp__swatch,
+  .cp__palette-swatch,
+  .cp__saved-swatch {
+    forced-color-adjust: none;
+  }
 }
 
 .cp__copy-btn {

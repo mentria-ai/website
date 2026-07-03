@@ -76,7 +76,7 @@
 
 .m-input {
   background: var(--term-surface-2);
-  border: 1px solid var(--term-border);
+  border: 1px solid var(--field-border, rgba(255, 255, 255, 0.38));
   border-radius: var(--radius-sm);
   padding: var(--space-2) var(--space-3);
   color: var(--term-fg);

@@ -290,22 +290,36 @@
         var okLabel = {{ ("common.dialog.ok" | t) | dump | safe }};
         var confirmLabel = {{ ("common.dialog.confirm" | t) | dump | safe }};
         var resolver = null;
+        var opener = null;
+        function trapKey(e) {
+          if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); settle(false); return; }
+          if (e.key !== 'Tab') return;
+          var focusables = [okBtn, cancelBtn].filter(function (b) { return !b.hidden; });
+          if (!focusables.length) return;
+          var first = focusables[focusables.length - 1];
+          var last = focusables[0];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          else if (!dlg.contains(document.activeElement)) { e.preventDefault(); okBtn.focus(); }
+        }
         function settle(result) {
           var r = resolver; resolver = null;
           if (dlg.matches(':popover-open')) dlg.hidePopover();
+          document.removeEventListener('keydown', trapKey, true);
+          var o = opener; opener = null;
+          if (o && document.contains(o)) { try { o.focus(); } catch (_) {} }
           if (r) r(result);
         }
         okBtn.addEventListener('click', function () { settle(true); });
         cancelBtn.addEventListener('click', function () { settle(false); });
-        dlg.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); settle(false); }
-        });
         function open(message, mode) {
           if (resolver) settle(false);
+          opener = document.activeElement;
           msgEl.textContent = message;
           cancelBtn.hidden = (mode === 'alert');
           okBtn.textContent = (mode === 'alert') ? okLabel : confirmLabel;
           dlg.showPopover();
+          document.addEventListener('keydown', trapKey, true);
           okBtn.focus();
           return new Promise(function (res) { resolver = res; });
         }

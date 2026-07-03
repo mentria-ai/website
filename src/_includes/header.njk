@@ -11,9 +11,9 @@
             {%- set currentLocale = lang | findLocale -%}
             <button type="button" class="nav-cmdk" data-palette-open aria-label="{{ 'palette.open' | t }}" aria-keyshortcuts="Meta+K Control+K">⌘K</button>
             <details class="lang-switcher">
-                <summary aria-label="{{ 'lang_switcher.current_label' | t }}">
+                <summary aria-label="{{ 'lang_switcher.current_label' | t }}: {{ currentLocale.nativeName }}">
                     <span aria-hidden="true">🌐</span>
-                    <span class="lang-switcher__current">{{ currentLocale.nativeName }}</span>
+                    <span class="lang-switcher__current" lang="{{ currentLocale.code }}">{{ currentLocale.nativeName }}</span>
                     <span class="lang-switcher__chevron" aria-hidden="true">▾</span>
                 </summary>
                 <ul class="lang-switcher__menu">
@@ -22,7 +22,7 @@
                         <a hreflang="{{ loc.code }}"
                            href="{{ page.url | switchLocale(loc.code) }}"
                            class="lang-switcher__item{% if loc.code == lang %} is-active{% endif %}">
-                            <span class="lang-switcher__name">{{ loc.nativeName }}</span>
+                            <span class="lang-switcher__name" lang="{{ loc.code }}">{{ loc.nativeName }}</span>
                             <span class="lang-switcher__code">{{ loc.code }}</span>
                         </a>
                     </li>

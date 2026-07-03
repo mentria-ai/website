@@ -59,8 +59,9 @@ i18n-t {
   /* Text */
   --term-fg: #e2e8f0;
   --term-fg-strong: #f8fafc;
-  --term-muted: #64748b;
-  --term-subtle: #475569;
+  --term-muted: #8896a8;
+  --term-subtle: #78859a;
+  --field-border: rgba(255, 255, 255, 0.38);
 
   --accent: #6ef3c5;
 
@@ -198,6 +199,10 @@ a:hover { color: #67e8f9; }
 }
 .skip-link:focus { top: 0; }
 #main-content:focus { outline: none; }
+html:has(.pwa-install-banner--visible) { scroll-padding-bottom: 110px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+}
 
 main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100%; }
 
@@ -589,11 +594,15 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
   transition: color 0.15s ease, background 0.15s ease;
 }
 .tldr__summary::-webkit-details-marker { display: none; }
-.tldr__summary:hover,
+.tldr__summary:hover {
+  color: var(--syn-cyan);
+  background: rgba(34, 211, 238, 0.06);
+}
 .tldr__summary:focus-visible {
   color: var(--syn-cyan);
-  outline: none;
   background: rgba(34, 211, 238, 0.06);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
 .tldr__caret {
   display: inline-block;

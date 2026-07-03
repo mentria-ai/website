@@ -86,14 +86,43 @@
         return c.tagName === 'BUTTON' && c.hasAttribute('data-value');
       });
     }
+    function reflect() {
+      buttons().forEach(function (b) {
+        var on = b.classList.contains('is-active');
+        b.setAttribute('role', 'radio');
+        b.setAttribute('aria-checked', on ? 'true' : 'false');
+        b.tabIndex = on ? 0 : -1;
+      });
+    }
     function activate(btn, fire) {
       buttons().forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+      reflect();
       if (fire && typeof onChange === 'function') onChange(btn.getAttribute('data-value'), btn);
+    }
+    if (!container.getAttribute('role')) container.setAttribute('role', 'radiogroup');
+    reflect();
+    if (!buttons().some(function (b) { return b.tabIndex === 0; })) {
+      var first = buttons()[0];
+      if (first) first.tabIndex = 0;
     }
     container.addEventListener('click', function (e) {
       var btn = e.target.closest ? e.target.closest('[data-value]') : null;
       if (!btn || btn.parentNode !== container) return;
       activate(btn, true);
+    });
+    container.addEventListener('keydown', function (e) {
+      var dir = 0;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') dir = 1;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') dir = -1;
+      else return;
+      var btns = buttons().filter(function (b) { return !b.disabled; });
+      if (btns.length < 2) return;
+      var idx = btns.indexOf(document.activeElement);
+      if (idx === -1) return;
+      e.preventDefault();
+      var next = btns[(idx + dir + btns.length) % btns.length];
+      next.focus();
+      next.click();
     });
     return {
       set: function (value) {

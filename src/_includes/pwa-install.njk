@@ -39,7 +39,7 @@
       <video class="pwa-install-sheet__video" id="pwaInstallSheetVideo"
              width="720" height="720"
              poster="/assets/videos/mentria-install-poster.jpg"
-             muted playsinline loop autoplay preload="metadata" hidden>
+             muted playsinline loop controls preload="metadata" hidden>
         <source src="/assets/videos/mentria-install.mp4" type="video/mp4">
         <source src="/assets/videos/mentria-install.webm" type="video/webm">
       </video>
@@ -151,11 +151,32 @@
     setTimeout(function () { banner.hidden = true; }, 280);
   }
 
+  var sheetOpener = null;
+  function sheetTrapTab(e) {
+    if (e.key !== 'Tab') return;
+    if (!sheet.classList.contains('pwa-install-sheet--open')) return;
+    var focusables = Array.prototype.filter.call(
+      sheet.querySelectorAll('button, video[controls], a[href]'),
+      function (el) { return el.offsetParent; }
+    );
+    if (!focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    else if (!sheet.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+  }
+
   function openSheet() {
+    sheetOpener = document.activeElement;
     sheet.classList.add('pwa-install-sheet--open');
     sheet.setAttribute('aria-hidden', 'false');
     document.body.classList.add('pwa-sheet-open');
-    if (!sheetVideo.hidden) {
+    document.addEventListener('keydown', sheetTrapTab, true);
+    var closeBtn = sheet.querySelector('.pwa-install-sheet__close');
+    if (closeBtn) closeBtn.focus();
+    var noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!sheetVideo.hidden && !noMotion) {
       sheetVideo.play().catch(function () { /* autoplay blocked — ignore */ });
     }
   }
@@ -164,7 +185,10 @@
     sheet.classList.remove('pwa-install-sheet--open');
     sheet.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('pwa-sheet-open');
+    document.removeEventListener('keydown', sheetTrapTab, true);
     try { sheetVideo.pause(); } catch (_) {}
+    if (sheetOpener && document.contains(sheetOpener)) { try { sheetOpener.focus(); } catch (_) {} }
+    sheetOpener = null;
   }
 
   // Inline SVG icons for the iOS step strings — small enough to sit

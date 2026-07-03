@@ -67,7 +67,9 @@ eleventyComputed:
       r.hidden = !(shelf === 'all' || r.getAttribute('data-shelf') === shelf);
     });
     Array.prototype.forEach.call(filters.querySelectorAll('[data-shelf]'), function (b) {
-      b.classList.toggle('is-active', b.getAttribute('data-shelf') === shelf);
+      var on = b.getAttribute('data-shelf') === shelf;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
     var url = new URL(location.href);
     if (shelf !== 'all') url.searchParams.set('shelf', shelf); else url.searchParams.delete('shelf');

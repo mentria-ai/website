@@ -39,7 +39,8 @@
       run: function () {
         var toolsSection = document.getElementById('tools-preview');
         if (toolsSection) {
-          toolsSection.scrollIntoView({ behavior: 'smooth' });
+          var noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          toolsSection.scrollIntoView({ behavior: noMotion ? 'auto' : 'smooth' });
           return { lines: [T.scrollingTools || '> scrolling to tools...'], type: 'result' };
         }
         var dest = localePrefix() + '/tools/';

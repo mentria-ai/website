@@ -88,8 +88,9 @@ eleventyComputed:
   <button class="tc-btn" data-tc="left" aria-label="left">←</button>
   <button class="tc-btn" data-tc="rotate" aria-label="rotate">↻</button>
   <button class="tc-btn" data-tc="right" aria-label="right">→</button>
-  <button class="tc-btn" data-tc="hold" aria-label="{{ 'game.tetris.key_hold_action' | t }}">{{ "game.tetris.tc_hold" | t }}</button>
-  <button class="tc-btn tc-drop" data-tc="drop" aria-label="{{ 'game.tetris.key_hard_drop' | t }}">{{ "game.tetris.tc_drop" | t }}</button>
+  <button class="tc-btn" data-tc="hold">{{ "game.tetris.tc_hold" | t }}</button>
+  <button class="tc-btn tc-drop" data-tc="drop">{{ "game.tetris.tc_drop" | t }}</button>
+  <button class="tc-btn tc-pause" data-tc="pause" aria-label="{{ 'game.tetris.key_pause' | t }}">⏸</button>
 </div>
 
 <div class="footer-hints">
@@ -329,15 +330,25 @@ canvas#game {
     best: readBest(),
     running: false, paused: false, over: false,
     dropAcc: 0, lastTime: 0,
-    softDrop: false,
+    softDropKey: false, softDropPad: false,
     flashRows: null, flashUntil: 0,
   };
 
-  function rand() { return KEYS[Math.floor(Math.random() * KEYS.length)]; }
+  let bag = [];
+  function rand() {
+    if (!bag.length) {
+      bag = KEYS.slice();
+      for (let i = bag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = bag[i]; bag[i] = bag[j]; bag[j] = tmp;
+      }
+    }
+    return bag.pop();
+  }
   function makePiece(kind) {
     const p = PIECES[kind];
     const shape = p.shape.map(r => r.slice());
-    return { kind, shape, x: Math.floor((COLS - shape[0].length) / 2), y: 0, color: p.color };
+    return { kind, shape, rot: 0, x: Math.floor((COLS - shape[0].length) / 2), y: 0, color: p.color };
   }
   function rotate(shape) {
     const N = shape.length;
@@ -393,10 +404,32 @@ canvas#game {
   }
   function dropInterval() { return Math.max(80, 800 - (State.level - 1) * 70); }
 
+  const JLSTZ_KICKS = {
+    '0>1': [[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],
+    '1>0': [[0,0],[1,0],[1,-1],[0,2],[1,2]],
+    '1>2': [[0,0],[1,0],[1,-1],[0,2],[1,2]],
+    '2>1': [[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],
+    '2>3': [[0,0],[1,0],[1,1],[0,-2],[1,-2]],
+    '3>2': [[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],
+    '3>0': [[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],
+    '0>3': [[0,0],[1,0],[1,1],[0,-2],[1,-2]]
+  };
+  const I_KICKS = {
+    '0>1': [[0,0],[-2,0],[1,0],[-2,-1],[1,2]],
+    '1>0': [[0,0],[2,0],[-1,0],[2,1],[-1,-2]],
+    '1>2': [[0,0],[-1,0],[2,0],[-1,2],[2,-1]],
+    '2>1': [[0,0],[1,0],[-2,0],[1,-2],[-2,1]],
+    '2>3': [[0,0],[2,0],[-1,0],[2,1],[-1,-2]],
+    '3>2': [[0,0],[-2,0],[1,0],[-2,-1],[1,2]],
+    '3>0': [[0,0],[1,0],[-2,0],[1,-2],[-2,1]],
+    '0>3': [[0,0],[-1,0],[2,0],[-1,2],[2,-1]]
+  };
+
   function spawn() {
     State.cur = State.next || makePiece(rand());
     State.next = makePiece(rand());
     State.canHold = true;
+    State.dropAcc = 0;
     drawPreview(nextCtx, State.next);
     if (collides(State.cur.shape, State.cur.x, State.cur.y)) {
       gameOver();
@@ -421,18 +454,28 @@ canvas#game {
     State.score += dist * 2;
     lock();
   }
-  function rotateCur() {
+  function tryRotate(dir) {
     if (!State.cur || State.over || State.paused) return;
-    const newShape = rotate(State.cur.shape);
-    const kicks = [0, -1, 1, -2, 2];
-    for (const k of kicks) {
-      if (!collides(newShape, State.cur.x + k, State.cur.y)) {
-        State.cur.shape = newShape;
-        State.cur.x += k;
+    const cur = State.cur;
+    if (cur.kind === 'O') return;
+    let newShape = rotate(cur.shape);
+    if (dir < 0) newShape = rotate(rotate(newShape));
+    const from = cur.rot;
+    const to = (cur.rot + (dir > 0 ? 1 : 3)) % 4;
+    const table = cur.kind === 'I' ? I_KICKS : JLSTZ_KICKS;
+    const offsets = table[from + '>' + to];
+    for (const off of offsets) {
+      const dx = off[0], dy = -off[1];
+      if (!collides(newShape, cur.x + dx, cur.y + dy)) {
+        cur.shape = newShape;
+        cur.x += dx;
+        cur.y += dy;
+        cur.rot = to;
         return;
       }
     }
   }
+  function rotateCur() { tryRotate(1); }
   function holdPiece() {
     if (!State.canHold || State.over || State.paused || !State.cur) return;
     const cur = State.cur;
@@ -591,6 +634,7 @@ canvas#game {
 
   function start() {
     clearTimeout(State.clearTimer);
+    bag.length = 0;
     State.board = emptyBoard();
     State.score = 0; State.level = 1; State.lines = 0; State.combo = 0;
     State.cur = null; State.next = null; State.hold = null; State.canHold = true;
@@ -607,17 +651,18 @@ canvas#game {
   function loop(now) {
     try {
       if (!State.lastTime) State.lastTime = now;
-      const dt = now - State.lastTime;
+      const dt = Math.min(now - State.lastTime, 250);
       State.lastTime = now;
       if (State.running && !State.paused && !State.over && State.cur) {
+        const soft = State.softDropKey || State.softDropPad;
         State.dropAcc += dt;
-        const interval = State.softDrop ? Math.min(60, dropInterval()) : dropInterval();
+        const interval = soft ? Math.min(60, dropInterval()) : dropInterval();
         let safety = 24;
         while (State.dropAcc >= interval && safety-- > 0) {
           State.dropAcc -= interval;
           if (!collides(State.cur.shape, State.cur.x, State.cur.y + 1)) {
             State.cur.y++;
-            if (State.softDrop) { State.score += 1; updateHUD(); }
+            if (soft) { State.score += 1; updateHUD(); }
           } else {
             lock();
             break;
@@ -642,13 +687,13 @@ canvas#game {
       case 'ArrowLeft': case 'a': case 'A': e.preventDefault(); move(-1); break;
       case 'ArrowRight': case 'd': case 'D': e.preventDefault(); move(1); break;
       case 'ArrowUp': case 'w': case 'W': e.preventDefault(); rotateCur(); break;
-      case 'ArrowDown': case 's': case 'S': e.preventDefault(); State.softDrop = true; break;
+      case 'ArrowDown': case 's': case 'S': e.preventDefault(); if (!e.repeat) softTick(); State.softDropKey = true; break;
       case 'c': case 'C': holdPiece(); break;
       case ' ': e.preventDefault(); hardDrop(); break;
     }
   });
   document.addEventListener('keyup', e => {
-    if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') State.softDrop = false;
+    if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') State.softDropKey = false;
   });
 
   document.getElementById('btn-start').addEventListener('click', start);
@@ -672,13 +717,13 @@ canvas#game {
     if (State.over) { start(); return; }
     if (!State.running || State.paused) return;
     if (n === 'a') rotateCur();
-    else if (n === 'b') { const back = rotate(rotate(rotate(State.cur.shape))); const kicks = [0, -1, 1, -2, 2]; for (const k of kicks) { if (!collides(back, State.cur.x + k, State.cur.y)) { State.cur.shape = back; State.cur.x += k; break; } } }
+    else if (n === 'b') tryRotate(-1);
     else if (n === 'x') holdPiece();
     else if (n === 'y') hardDrop();
   });
   function pollSoftDrop() {
     requestAnimationFrame(pollSoftDrop);
-    if (!window.MentriaGamepad || !window.MentriaGamepad.isConnected()) { State.softDrop = State.softDrop && false; return; }
+    if (!window.MentriaGamepad || !window.MentriaGamepad.isConnected()) { State.softDropPad = false; return; }
     const pads = window.MentriaGamepad.getPads();
     let down = false;
     for (let i = 0; i < pads.length; i++) {
@@ -686,14 +731,22 @@ canvas#game {
       if (p.buttons[13] && p.buttons[13].pressed) { down = true; break; }
       if (p.axes.length >= 2 && p.axes[1] > 0.5) { down = true; break; }
     }
-    State.softDrop = down;
+    State.softDropPad = down;
   }
   requestAnimationFrame(pollSoftDrop);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && State.running && !State.over) State.paused = true;
+  });
 
   // ---------- Touch controls (mobile) ----------
   const tcRoot = document.getElementById('touch-controls');
   const repeatTimers = {};
   function trigger(action) {
+    if (action === 'pause') {
+      if (State.running && !State.over) State.paused = !State.paused;
+      return;
+    }
     if (!State.running && !State.over) { start(); return; }
     if (State.over) { start(); return; }
     if (action === 'left') move(-1);

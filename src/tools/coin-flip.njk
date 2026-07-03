@@ -22,7 +22,7 @@ eleventyComputed:
 <section class="cf">
   <!-- Coin stage -->
   <div class="cf__stage">
-    <button class="cf__coin" id="cf-coin" type="button" aria-label="{{ 'tool.coin-flip.aria_flip' | t }}" aria-live="polite">
+    <button class="cf__coin" id="cf-coin" type="button" aria-label="{{ 'tool.coin-flip.aria_flip' | t }}">
       <div class="cf__coin-inner" id="cf-coin-inner">
         <div class="cf__face cf__face--heads">
           <span class="cf__face-letter">H</span>
@@ -38,7 +38,7 @@ eleventyComputed:
 
   <div class="cf__result-wrap">
     <div class="cf__result-label">{{ "tool.coin-flip.result_label" | t }}</div>
-    <div class="cf__result" id="cf-result" data-outcome="">
+    <div class="cf__result" id="cf-result" data-outcome="" role="status" aria-live="polite">
       <span class="cf__result-text" id="cf-result-text">{{ "tool.coin-flip.result_ready" | t }}</span>
     </div>
   </div>
@@ -81,6 +81,11 @@ eleventyComputed:
 <script>
 (() => {
   var coin = document.getElementById("cf-coin");
+  var coinBtn = document.getElementById("cf-coin");
+  var coinBaseLabel = coinBtn.getAttribute("aria-label") || "";
+  function setCoinFace(faceLabel) {
+    coinBtn.setAttribute("aria-label", faceLabel + " \u2014 " + coinBaseLabel);
+  }
   var coinInner = document.getElementById("cf-coin-inner");
   var resultText = document.getElementById("cf-result-text");
   var resultEl = document.getElementById("cf-result");
@@ -166,7 +171,9 @@ eleventyComputed:
     flipping = true;
     flipCount++;
 
-    var isHeads = Math.random() < 0.5;
+    var isHeads;
+    try { isHeads = crypto.getRandomValues(new Uint8Array(1))[0] < 128; }
+    catch (e) { isHeads = Math.random() < 0.5; }
     var outcome = isHeads ? "Heads" : "Tails";
 
     resultText.textContent = "...";
@@ -211,6 +218,7 @@ eleventyComputed:
 
       resultText.textContent = isHeads ? COPY.headsLabel : COPY.tailsLabel;
       resultEl.dataset.outcome = isHeads ? "heads" : "tails";
+      setCoinFace(isHeads ? COPY.headsLabel : COPY.tailsLabel);
       flipping = false;
     }
     coinInner.addEventListener("transitionend", settle);
@@ -224,6 +232,7 @@ eleventyComputed:
     seriesOver = false;
     resultText.textContent = COPY.ready;
     resultEl.dataset.outcome = "";
+    setCoinFace(COPY.headsLabel);
     coinInner.style.transition = "none";
     coinInner.style.transform = "rotateX(0deg)";
     updateScore();

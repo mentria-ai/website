@@ -319,11 +319,11 @@ eleventyComputed:
   .about-data-stat__label { color: var(--term-subtle); letter-spacing: 0.1em; font-size: 10px; }
   .about-data-stat__value { color: var(--term-fg); font-size: 13px; }
   .about-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  .about-data-card { border: 1px solid var(--term-border); border-radius: 8px; padding: 18px; background: var(--term-bg-raised); display: flex; flex-direction: column; gap: 10px; }
+  .about-data-card { border: 1px solid var(--term-border); border-radius: 8px; padding: 18px; background: var(--term-bg-raised); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .about-data-card__h { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--syn-cyan); margin: 0; }
   .about-data-card__p { font-size: 12px; line-height: 1.5; color: var(--term-muted); margin: 0; }
   .about-data-field { display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono); font-size: 11px; color: var(--term-muted); }
-  .about-data-field input[type="password"], .about-data-field input[type="file"] { background: var(--term-bg); border: 1px solid var(--term-border); color: var(--term-fg); padding: 7px 9px; border-radius: 5px; font-family: inherit; font-size: 13px; }
+  .about-data-field input[type="password"], .about-data-field input[type="file"] { background: var(--term-bg); border: 1px solid var(--term-border); color: var(--term-fg); padding: 7px 9px; border-radius: 5px; font-family: inherit; font-size: 13px; width: 100%; min-width: 0; box-sizing: border-box; }
   .about-data-field input[type="password"]:focus { outline: none; border-color: var(--syn-cyan); }
   .about-data-strength { font-family: var(--font-mono); font-size: 10px; min-height: 14px; letter-spacing: 0.1em; }
   .about-data-strength[data-level="weak"]   { color: var(--syn-red, #f25fa8); }
@@ -594,7 +594,7 @@ eleventyComputed:
   if (window.MentriaBackup) aboutBackupPanel();
   else window.addEventListener('DOMContentLoaded', aboutBackupPanel);
 
-  (function () {
+  function initAboutSync() {
     var COPY = {
       statusIdle:      {{ ('about.sync_status_idle'      | t) | dump | safe }},
       statusPairing:   {{ ('about.sync_status_pairing'   | t) | dump | safe }},
@@ -706,11 +706,6 @@ eleventyComputed:
     codeInput.addEventListener('input', function () {
       var formatted = formatSyncCode(codeInput.value);
       if (codeInput.value !== formatted) codeInput.value = formatted;
-    });
-    codeInput.addEventListener('paste', function (e) {
-      e.preventDefault();
-      var pasted = (e.clipboardData || window.clipboardData).getData('text');
-      codeInput.value = formatSyncCode(pasted);
     });
 
     joinBtn.addEventListener('click', function () {
@@ -836,7 +831,11 @@ eleventyComputed:
       scanScanner.rafId = requestAnimationFrame(scanLoop);
     });
     scanCancel.addEventListener('click', function () { stopScan(); });
-  })();
+    document.addEventListener('visibilitychange', function () { if (document.hidden && scanScanner.scanning) stopScan(); });
+    window.addEventListener('pagehide', function () { if (scanScanner.scanning) stopScan(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAboutSync);
+  else initAboutSync();
 
   (function () {
     var COPY = {
@@ -898,16 +897,16 @@ eleventyComputed:
 
     setupBtn.addEventListener('click', async function () {
       var p1 = setupPass.value, p2 = setupPass2.value;
-      if (p1.length < 8) { alert(COPY.tooShort); return; }
-      if (p1 !== p2) { alert(COPY.mismatch); return; }
+      if (p1.length < 8) { window.mentriaAlert(COPY.tooShort); return; }
+      if (p1 !== p2) { window.mentriaAlert(COPY.mismatch); return; }
       setupBtn.disabled = true;
       try {
         await window.MentriaIdentity.setup(p1);
         setupPass.value = ''; setupPass2.value = '';
         refresh();
-        alert(COPY.setupReminder);
+        window.mentriaAlert(COPY.setupReminder);
       } catch (err) {
-        alert(String(err && err.message || err));
+        window.mentriaAlert(String(err && err.message || err));
       } finally { setupBtn.disabled = false; }
     });
 
@@ -920,7 +919,7 @@ eleventyComputed:
         unlockPass.value = '';
         refresh();
       } catch (err) {
-        alert(COPY.unlockFailed);
+        window.mentriaAlert(COPY.unlockFailed);
       } finally { unlockBtn.disabled = false; }
     });
 
@@ -936,7 +935,7 @@ eleventyComputed:
         var secret = window.MentriaIdentity.getSecret();
         await window.MentriaSync.joinWithIdentity(secret);
       } catch (err) {
-        alert(String(err && err.message || err));
+        window.mentriaAlert(String(err && err.message || err));
       } finally { syncBtn.disabled = false; }
     });
   })();

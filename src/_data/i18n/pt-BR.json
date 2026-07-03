@@ -391,6 +391,7 @@
       "diff_easy": "fácil · 9×9 · 10",
       "diff_medium": "médio · 14×14 · 32",
       "diff_hard": "difícil · 18×22 · 70",
+      "diff_extreme": "extremo · 20×30 · 125",
       "mines": "Minas",
       "time": "Tempo",
       "best": "Melhor",

@@ -391,6 +391,7 @@
       "diff_easy": "facile · 9×9 · 10",
       "diff_medium": "moyen · 14×14 · 32",
       "diff_hard": "difficile · 18×22 · 70",
+      "diff_extreme": "extrême · 20×30 · 125",
       "mines": "Mines",
       "time": "Temps",
       "best": "Record",

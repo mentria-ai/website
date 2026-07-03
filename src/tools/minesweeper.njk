@@ -39,6 +39,7 @@ eleventyComputed:
     <button data-d="easy" data-value="easy">{{ "game.minesweeper.diff_easy" | t }}</button>
     <button data-d="medium" data-value="medium" class="is-active">{{ "game.minesweeper.diff_medium" | t }}</button>
     <button data-d="hard" data-value="hard">{{ "game.minesweeper.diff_hard" | t }}</button>
+    <button data-d="extreme" data-value="extreme">{{ "game.minesweeper.diff_extreme" | t }}</button>
   </div>
   <div class="stats-spread">
     <div class="stat-item">
@@ -357,6 +358,7 @@ main { max-width: 1100px; }
     easy:   { rows: 9,  cols: 9,  mines: 10 },
     medium: { rows: 14, cols: 14, mines: 32 },
     hard:   { rows: 18, cols: 22, mines: 70 },
+    extreme: { rows: 20, cols: 30, mines: 125 },
   };
 
   const MS_COPY = {
@@ -534,7 +536,6 @@ main { max-width: 1100px; }
     const cell = State.grid[r][c];
     if (cell.revealed || cell.flag) return;
     cell.revealed = true;
-    State.revealedCount++;
     setCellLabel(r, c);
 
     const el = cellEl(r, c);
@@ -544,6 +545,7 @@ main { max-width: 1100px; }
       gameOver(false);
       return;
     }
+    State.revealedCount++;
     if (cell.n > 0) {
       el.textContent = String(cell.n);
       el.classList.add('n' + cell.n);
@@ -765,7 +767,7 @@ main { max-width: 1100px; }
     if (!t) return;
     const id = State.pressTimers.get(t);
     if (id) { clearTimeout(id); State.pressTimers.delete(t); }
-  });
+  }, { passive: true });
 
   boardEl.addEventListener('focusin', e => {
     const t = e.target.closest('.cell');

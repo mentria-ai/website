@@ -733,7 +733,8 @@
       "ai_unavailable_hint": "Open AI Chat or Quote once to enable AI naming",
       "ai_confirm_download": "AI naming needs a one-time ~490 MB model download. Continue?",
       "btn_ai_loading": "Loading {pct}%",
-      "preview_region_aria": "Rendered preview"
+      "preview_region_aria": "Rendered preview",
+      "tab_hint": "Tab inserts spaces. Press Escape, then Tab, to leave the editor."
     },
     "quote": {
       "tldr_heading": "What is Motivational Quote?",

@@ -733,7 +733,8 @@
       "ai_unavailable_hint": "Ouvre AI Chat ou Citation Motivante une fois pour activer le nommage IA",
       "ai_confirm_download": "Le nommage IA nécessite un téléchargement unique du modèle (~490 Mo). Continuer ?",
       "btn_ai_loading": "Chargement {pct}%",
-      "preview_region_aria": "Aperçu du rendu"
+      "preview_region_aria": "Aperçu du rendu",
+      "tab_hint": "Tab insère des espaces. Appuyez sur Échap puis Tab pour quitter l’éditeur."
     },
     "quote": {
       "tldr_heading": "Qu'est-ce que Citation Motivante ?",

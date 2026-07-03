@@ -733,7 +733,8 @@
       "ai_unavailable_hint": "Abra AI Chat ou Frase Motivacional uma vez para habilitar a nomeação IA",
       "ai_confirm_download": "A nomeação IA requer um download único do modelo (~490 MB). Continuar?",
       "btn_ai_loading": "Carregando {pct}%",
-      "preview_region_aria": "Pré-visualização renderizada"
+      "preview_region_aria": "Pré-visualização renderizada",
+      "tab_hint": "Tab insere espaços. Pressione Escape e depois Tab para sair do editor."
     },
     "quote": {
       "tldr_heading": "O que é Frase Motivacional?",

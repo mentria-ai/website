@@ -66,6 +66,7 @@ eleventyComputed:
       <textarea
         class="mp__input"
         id="mp-input"
+        aria-describedby="mp-tab-hint"
         spellcheck="false"
         autocomplete="off"
         autocapitalize="off"
@@ -74,6 +75,7 @@ eleventyComputed:
       <footer class="mp__pane-status no-print">
         <span id="mp-counts"></span>
         <span id="mp-saved" class="mp__saved" aria-live="polite"></span>
+      <span id="mp-tab-hint" class="sr-only">{{ "tool.markdown-pdf.tab_hint" | t }}</span>
       </footer>
     </section>
 
@@ -81,7 +83,7 @@ eleventyComputed:
       <header class="mp__pane-header no-print">
         <span class="mp__pane-label">{{ "tool.markdown-pdf.pane_preview" | t }}</span>
       </header>
-      <article class="mp__preview" id="mp-preview" tabindex="0" role="region" aria-label="{{ 'tool.markdown-pdf.preview_region_aria' | t }}" aria-live="polite"></article>
+      <article class="mp__preview" id="mp-preview" tabindex="0" role="region" aria-label="{{ 'tool.markdown-pdf.preview_region_aria' | t }}"></article>
     </section>
   </div>
 </section>
@@ -480,8 +482,11 @@ inputEl.addEventListener('input', () => {
 });
 
 // Tab key inserts 2 spaces (instead of leaving the textarea)
+let tabExit = false;
 inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { tabExit = true; return; }
   if (e.key === 'Tab' && !e.shiftKey) {
+    if (tabExit) { tabExit = false; return; }
     e.preventDefault();
     const start = inputEl.selectionStart;
     const end   = inputEl.selectionEnd;
@@ -490,7 +495,9 @@ inputEl.addEventListener('keydown', (e) => {
     inputEl.selectionStart = inputEl.selectionEnd = start + 2;
     scheduleRender();
     saver.schedule();
+    return;
   }
+  tabExit = false;
 });
 
 downloadBtn.addEventListener('click', downloadPDF);
@@ -806,7 +813,6 @@ if ('launchQueue' in window) {
 .mp__preview th, .mp__preview td {
   padding: 0.45em 0.7em;
   border-bottom: 1px solid var(--term-border);
-  text-align: left;
   vertical-align: top;
 }
 .mp__preview th {
@@ -999,7 +1005,6 @@ if ('launchQueue' in window) {
   .mp__preview th, .mp__preview td {
     padding: 4pt 6pt !important;
     border-bottom: 1px solid #ddd !important;
-    text-align: left;
     vertical-align: top;
     color: #111 !important;
   }

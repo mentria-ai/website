@@ -910,6 +910,14 @@ td.total .currency {
 
 /* ─── Print mode (clean A4, single page where possible) ───────────────── */
 @media print {
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none !important;
+  }
+  input[type="date"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+
   /* Page setup */
   @page {
     size: A4;

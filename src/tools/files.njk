@@ -97,6 +97,7 @@ eleventyComputed:
   'use strict';
 
   const COPY = {
+    nsInvoice: {{ ("tools.invoice.title" | t) | dump | safe }},
     nsQuickNotes: {{ ("tool.files.ns_quick_notes" | t) | dump | safe }},
     nsTotp:       {{ ("tool.files.ns_totp"        | t) | dump | safe }},
     nsTools:      {{ ("tool.files.ns_tools"       | t) | dump | safe }},
@@ -134,6 +135,7 @@ eleventyComputed:
   const VIEW_LIMIT = 50 * 1024;
   const LEGACY_ID = '__legacy__';
   const NS_LABELS = {
+    invoice: COPY.nsInvoice,
     quick_notes: COPY.nsQuickNotes,
     totp: COPY.nsTotp,
     tools: COPY.nsTools,
@@ -161,7 +163,23 @@ eleventyComputed:
     if (n == null || isNaN(n)) return DASH;
     if (n < 1024) return n + ' B';
     if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
-    return (n / (1024 * 1024)).toFixed(1) + ' MB';
+    if (n < 1024 * 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + ' MB';
+    return (n / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+  }
+
+  function localFootprint() {
+    let bytes = 0;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (k.indexOf('mentria.store.') === 0 || k.indexOf('mentria.meta.') === 0 || k.indexOf('mentria_') === 0 || k.indexOf('mentria-') === 0) {
+          const v = localStorage.getItem(k) || '';
+          bytes += (k.length + v.length) * 2;
+        }
+      }
+    } catch (_) {}
+    return bytes;
   }
 
   function fmtDate(mtime) {
@@ -349,12 +367,13 @@ eleventyComputed:
   async function renderSummary() {
     let est = null;
     try { est = await store.estimate(); } catch (_) {}
+    const local = localFootprint();
     if (!est || est.usage == null || est.quota == null || !est.quota) {
-      summaryEl.textContent = COPY.storageUnknown;
+      summaryEl.textContent = COPY.storageSummary.replace('{used}', fmtBytes(local)).replace(' / {quota}', '').replace('{quota}', '');
       return;
     }
     summaryEl.textContent = COPY.storageSummary
-      .replace('{used}', fmtBytes(est.usage))
+      .replace('{used}', fmtBytes(est.usage + local))
       .replace('{quota}', fmtBytes(est.quota));
   }
 

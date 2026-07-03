@@ -59,6 +59,7 @@ eleventyComputed:
 </div>
 
 {% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
 
 <style>
   .annotate-app { display: flex; flex-direction: column; gap: 14px; }
@@ -122,6 +123,7 @@ eleventyComputed:
     statusGenerating: {{ ("tool.annotate-image.status_generating" | t) | dump | safe }},
     errNoWebgpu:      {{ ("tool.annotate-image.err_no_webgpu"     | t) | dump | safe }},
     errLoad:          {{ ("tool.annotate-image.err_load"          | t) | dump | safe }},
+    confirmDelete:    {{ ("tool.annotate-image.confirm_delete_model" | t) | dump | safe }},
     downloadPostponed: {{ ("common.download_postponed"            | t) | dump | safe }},
     errDeviceLost:    {{ ("tool.annotate-image.err_device_lost"   | t) | dump | safe }},
     emptyResponse:    {{ ("tool.annotate-image.empty_response"    | t) | dump | safe }},
@@ -337,6 +339,7 @@ eleventyComputed:
     if (loaded) setStatus('ready', COPY.statusReady); else setStatus('idle', COPY.statusIdle);
   });
   deleteBtn.addEventListener('click', async () => {
+    if (!(await window.mentriaConfirm(COPY.confirmDelete))) return;
     try { if (window.caches){ const keys = await caches.keys(); await Promise.all(keys.filter(k => k === 'mentria-models' || k.startsWith('mentria-models-')).map(k => caches.delete(k))); } } catch(_){}
     location.reload();
   });

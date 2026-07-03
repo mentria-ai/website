@@ -127,13 +127,15 @@
       "confirm": "Confirmer"
     },
     "share": "Partager",
-    "heavy_download": "Cela télécharge environ 490 Mo de données du modèle et votre connexion semble lente ou en mode économie de données. Continuer ?",
+    "heavy_download": "Cela télécharge un grand modèle d'IA (490 Mo ou plus selon le modèle) et vous semblez être sur une connexion lente ou en économie de données. Continuer ?",
     "download_postponed": "Téléchargement en pause — rechargez la page pour démarrer.",
     "storage_full": "Échec de l'enregistrement — le stockage du navigateur est plein. Libérez de l'espace pour conserver vos modifications.",
     "copy_failed": "Échec de copie — utilisez Ctrl+C manuellement.",
     "tool_info": "À propos de cet outil",
     "toggle_fullscreen": "Basculer en plein écran",
-    "skip_to_content": "Aller au contenu"
+    "skip_to_content": "Aller au contenu",
+    "gamepad_connected": "🎮 manette connectée",
+    "gamepad_disconnected": "🎮 manette déconnectée"
   },
   "home": {
     "cli": {
@@ -609,7 +611,9 @@
       "status_paste_first": "Collez d'abord un Data URI Base64.",
       "status_invalid_b64": "Chaîne Base64 invalide.",
       "status_file_decoded_template": "Décodé ! Taille : {size}",
-      "status_decode_failed_b64": "Échec de décodage : Base64 invalide."
+      "status_decode_failed_b64": "Échec de décodage : Base64 invalide.",
+      "preview_of": "Aperçu de {name}",
+      "decoded_preview": "Aperçu de l'image décodée"
     },
     "countdown-timer": {
       "status_ready": "Prêt",
@@ -747,7 +751,7 @@
       "btn_ai_generate": "Générer un nom",
       "btn_ai_generating": "Génération…",
       "ai_unavailable_hint": "Ouvre AI Chat ou Citation Motivante une fois pour activer le nommage IA",
-      "ai_confirm_download": "Le nommage IA nécessite un téléchargement unique du modèle (~490 Mo). Continuer ?",
+      "ai_confirm_download": "Le nommage par IA nécessite un téléchargement unique du modèle (490 Mo ou plus selon le niveau). Continuer ?",
       "btn_ai_loading": "Chargement {pct}%",
       "preview_region_aria": "Aperçu du rendu",
       "tab_hint": "Tab insère des espaces. Appuyez sur Échap puis Tab pour quitter l’éditeur."
@@ -827,7 +831,7 @@
       "err_prefix": "Erreur : ",
       "err_delete_prefix": "Échec de la suppression du cache : ",
       "empty_response": "(réponse vide)",
-      "confirm_delete": "Supprimer le modèle en cache (~490 Mo) ? Tu devras le retélécharger la prochaine fois."
+      "confirm_delete": "Supprimer le modèle d'IA téléchargé ? Les autres outils d'IA du site le partagent et il devra être téléchargé à nouveau."
     },
     "extensions": {
       "install_heading": "Installer une extension",
@@ -1179,7 +1183,8 @@
       "prompt_describe": "Décris cette image en détail — le sujet principal, le décor, les couleurs et tout détail notable. Écris 2 à 4 phrases claires. Décris uniquement ce qui est réellement visible.",
       "prompt_ocr": "Lis tout le texte de cette image et transcris-le exactement tel qu'il apparaît, en conservant l'ordre et les sauts de ligne d'origine. Inclus tous les titres, étiquettes, chiffres et le texte en petits caractères. N'ajoute aucun commentaire, note, résumé ni explication — ne renvoie que le texte transcrit, rien d'autre. Seulement si l'image ne contient véritablement aucun texte, réponds : (aucun texte trouvé).",
       "prompt_alt": "En une seule phrase brève d'au plus 20 mots, décris cette image pour un utilisateur de lecteur d'écran. Ne retiens que l'élément le plus important montré — n'énumère pas chaque détail et ne transcris pas le texte. Ne renvoie que cette courte phrase, rien d'autre.",
-      "prompt_tags": "Observe attentivement l'image et liste son contenu sous forme d'étiquettes courtes séparées par des virgules : les sujets principaux, objets, personnes, couleurs et le décor. Si l'image est surtout du texte ou un document, étiquette-la ainsi (par exemple : texte, document, capture d'écran). Donne 5 à 12 étiquettes. Produis toujours des étiquettes — ne refuse jamais et n'explique pas. Ne renvoie que les étiquettes séparées par des virgules."
+      "prompt_tags": "Observe attentivement l'image et liste son contenu sous forme d'étiquettes courtes séparées par des virgules : les sujets principaux, objets, personnes, couleurs et le décor. Si l'image est surtout du texte ou un document, étiquette-la ainsi (par exemple : texte, document, capture d'écran). Donne 5 à 12 étiquettes. Produis toujours des étiquettes — ne refuse jamais et n'explique pas. Ne renvoie que les étiquettes séparées par des virgules.",
+      "confirm_delete_model": "Supprimer le modèle d'IA téléchargé ? Les autres outils d'IA du site le partagent et il devra être téléchargé à nouveau."
     },
     "files": {
       "export_all": "Tout exporter (chiffré)",

@@ -87,7 +87,7 @@ eleventyComputed:
       </label>
       <label class="totp-field">
         <span>{{ "tool.totp.secret_label" | t }}</span>
-        <input type="text" id="totp-secret" autocomplete="off" spellcheck="false" inputmode="latin" lang="en" dir="ltr" autocapitalize="characters">
+        <input type="text" id="totp-secret" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="characters">
       </label>
       <div class="totp-modal__actions">
         <button type="button" class="totp-btn m-btn m-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
@@ -113,6 +113,7 @@ eleventyComputed:
   </div>
 </section>
 {% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
 
 <style>
   .totp { display: flex; flex-direction: column; gap: 18px; padding: var(--space-2) 0; }

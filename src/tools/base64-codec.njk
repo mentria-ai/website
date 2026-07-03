@@ -102,6 +102,8 @@ eleventyComputed:
 <script>
 (() => {
   const COPY = {
+    previewOf:      {{ ("tool.base64-codec.preview_of"      | t) | dump | safe }},
+    decodedPreview: {{ ("tool.base64-codec.decoded_preview" | t) | dump | safe }},
     unknown:                 {{ ("tool.base64-codec.meta_unknown"                | t) | dump | safe }},
     noPreview:               {{ ("tool.base64-codec.preview_no_preview"          | t) | dump | safe }},
     decodedPreview:          {{ ("tool.base64-codec.preview_decoded_template"    | t) | dump | safe }},
@@ -305,7 +307,7 @@ eleventyComputed:
         if (isImageMime(file.type)) {
           const img = document.createElement('img');
           img.src = currentDataUri;
-          img.alt = 'Preview of ' + file.name;
+          img.alt = COPY.previewOf.replace('{name}', file.name);
           img.className = 'b64-preview-img';
           filePreview.appendChild(img);
         } else {
@@ -368,7 +370,7 @@ eleventyComputed:
         if (isImageMime(mime)) {
           const img = document.createElement('img');
           img.src = val.startsWith('data:') ? val : 'data:' + mime + ';base64,' + b64;
-          img.alt = 'Decoded image preview';
+          img.alt = COPY.decodedPreview;
           img.className = 'b64-preview-img';
           decodePreview.appendChild(img);
         } else {

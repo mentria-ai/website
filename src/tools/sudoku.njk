@@ -68,6 +68,7 @@ eleventyComputed:
 </div>
 
 {% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
 </div>
 
 <style>
@@ -500,6 +501,7 @@ eleventyComputed:
   }
 
   document.addEventListener('keydown', e => {
+    if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
     if (e.key >= '1' && e.key <= '9'){ placeNumber(+e.key); return; }
     if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0'){ placeNumber(0); return; }
     if (e.key === 'n' || e.key === 'N'){ toggleNotes(); return; }

@@ -732,6 +732,7 @@ html.app-chrome body:has(.terminal-frame) .hero.hero--peek {
 .is-standalone .pwa-install-banner,
 .is-standalone .pwa-install-sheet { display: none !important; }
 @media all and (display-mode: standalone) {
+  .site-header { padding-top: env(safe-area-inset-top, 0px); }
   .pwa-install-banner,
   .pwa-install-sheet { display: none !important; }
 }

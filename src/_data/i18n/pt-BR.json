@@ -127,13 +127,15 @@
       "confirm": "Confirmar"
     },
     "share": "Compartilhar",
-    "heavy_download": "Isto baixa cerca de 490 MB de dados do modelo e você parece estar em uma conexão lenta ou com economia de dados. Continuar?",
+    "heavy_download": "Isso baixa um modelo de IA grande (490 MB ou mais, dependendo do modelo) e você parece estar em uma conexão lenta ou com economia de dados. Continuar?",
     "download_postponed": "Download pausado — recarregue a página para começar.",
     "storage_full": "Não foi possível salvar — o armazenamento do navegador está cheio. Libere espaço para manter suas alterações.",
     "copy_failed": "Falha ao copiar — use Ctrl+C manualmente.",
     "tool_info": "Sobre esta ferramenta",
     "toggle_fullscreen": "Alternar tela cheia",
-    "skip_to_content": "Pular para o conteúdo"
+    "skip_to_content": "Pular para o conteúdo",
+    "gamepad_connected": "🎮 controle conectado",
+    "gamepad_disconnected": "🎮 controle desconectado"
   },
   "home": {
     "cli": {
@@ -609,7 +611,9 @@
       "status_paste_first": "Cole um Data URI Base64 primeiro.",
       "status_invalid_b64": "String Base64 inválida.",
       "status_file_decoded_template": "Decodificado! Tamanho: {size}",
-      "status_decode_failed_b64": "Falha ao decodificar: Base64 inválido."
+      "status_decode_failed_b64": "Falha ao decodificar: Base64 inválido.",
+      "preview_of": "Pré-visualização de {name}",
+      "decoded_preview": "Pré-visualização da imagem decodificada"
     },
     "countdown-timer": {
       "status_ready": "Pronto",
@@ -747,7 +751,7 @@
       "btn_ai_generate": "Gerar nome",
       "btn_ai_generating": "Gerando…",
       "ai_unavailable_hint": "Abra AI Chat ou Frase Motivacional uma vez para habilitar a nomeação IA",
-      "ai_confirm_download": "A nomeação IA requer um download único do modelo (~490 MB). Continuar?",
+      "ai_confirm_download": "A nomeação por IA precisa de um download único do modelo (490 MB ou mais, dependendo do nível). Continuar?",
       "btn_ai_loading": "Carregando {pct}%",
       "preview_region_aria": "Pré-visualização renderizada",
       "tab_hint": "Tab insere espaços. Pressione Escape e depois Tab para sair do editor."
@@ -827,7 +831,7 @@
       "err_prefix": "Erro: ",
       "err_delete_prefix": "Falha ao excluir cache: ",
       "empty_response": "(resposta vazia)",
-      "confirm_delete": "Excluir o modelo em cache (~490 MB)? Você precisará baixar de novo na próxima vez."
+      "confirm_delete": "Excluir o modelo de IA baixado? Outras ferramentas de IA do site o compartilham e será preciso baixá-lo novamente."
     },
     "extensions": {
       "install_heading": "Instalar uma extensão",
@@ -1179,7 +1183,8 @@
       "prompt_describe": "Descreva esta imagem em detalhes — o assunto principal, o cenário, as cores e quaisquer detalhes notáveis. Escreva de 2 a 4 frases claras. Descreva apenas o que é realmente visível.",
       "prompt_ocr": "Leia todo o texto desta imagem e transcreva-o exatamente como aparece, preservando a ordem e as quebras de linha originais. Inclua todos os títulos, rótulos, números e o texto em letras miúdas. Não adicione comentários, notas, resumos nem explicações — devolva apenas o texto transcrito e nada mais. Apenas se a imagem realmente não contiver texto algum, responda: (nenhum texto encontrado).",
       "prompt_alt": "Em uma única frase curta de no máximo 20 palavras, descreva esta imagem para um usuário de leitor de tela. Capture apenas o mais importante que aparece — não liste cada detalhe nem transcreva texto. Devolva apenas essa frase curta e nada mais.",
-      "prompt_tags": "Observe a imagem com atenção e liste seu conteúdo como tags curtas separadas por vírgulas: os principais assuntos, objetos, pessoas, cores e o cenário. Se a imagem for principalmente texto ou um documento, marque-a assim (por exemplo: texto, documento, captura de tela). Dê de 5 a 12 tags. Sempre produza tags — nunca recuse nem explique. Devolva apenas as tags separadas por vírgulas."
+      "prompt_tags": "Observe a imagem com atenção e liste seu conteúdo como tags curtas separadas por vírgulas: os principais assuntos, objetos, pessoas, cores e o cenário. Se a imagem for principalmente texto ou um documento, marque-a assim (por exemplo: texto, documento, captura de tela). Dê de 5 a 12 tags. Sempre produza tags — nunca recuse nem explique. Devolva apenas as tags separadas por vírgulas.",
+      "confirm_delete_model": "Excluir o modelo de IA baixado? Outras ferramentas de IA do site o compartilham e será preciso baixá-lo novamente."
     },
     "files": {
       "export_all": "Exportar tudo (criptografado)",

@@ -17,7 +17,7 @@ function t(key, vars) {
   let s = DEFAULT_COPY[key];
   try {
     if (window.MentriaI18n && window.MentriaI18n.t) {
-      const v = window.MentriaI18n.t('tool.model.' + key);
+      const v = window.MentriaI18n.t('tools.model.' + key);
       if (v != null) s = v;
     }
   } catch (_) {}

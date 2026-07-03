@@ -227,6 +227,17 @@
   })();
   var pending = null;
 
+  (function primeActiveDict() {
+    if (currentCode === 'en') return;
+    var run = function () {
+      getDict(currentCode).then(function (dict) {
+        if (!activeDict) activeDict = dict;
+      }).catch(function () {});
+    };
+    if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 3000 });
+    else setTimeout(run, 1200);
+  })();
+
   var bc = null;
   try { if ('BroadcastChannel' in window) bc = new BroadcastChannel(CHANNEL); } catch (_) {}
 

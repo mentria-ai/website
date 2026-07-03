@@ -674,6 +674,7 @@
     });
 
     document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === 'ArrowLeft'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur > 0) scrubTo(cur - 1); }
       else if (e.key === 'ArrowRight'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur < State.history.length) scrubTo(cur + 1); }

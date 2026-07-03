@@ -801,6 +801,7 @@ main { max-width: 1100px; }
   });
 
   document.addEventListener('keydown', e => {
+    if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
     if (e.key === 'f' || e.key === 'F') setFlagMode(!State.flagMode);
     else if (e.key === 'r' || e.key === 'R') build();
   });

@@ -198,9 +198,9 @@
 
   on('connect', (info) => {
     if (info.late) return;
-    showToast('🎮 controller connected', 'connect');
+    showToast((window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t('common.gamepad_connected')) || '🎮 controller connected', 'connect');
   });
-  on('disconnect', () => showToast('🎮 controller disconnected', 'disconnect'));
+  on('disconnect', () => showToast((window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t('common.gamepad_disconnected')) || '🎮 controller disconnected', 'disconnect'));
 
   global.MentriaGamepad = {
     on,

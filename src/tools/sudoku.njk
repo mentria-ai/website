@@ -85,7 +85,9 @@ eleventyComputed:
     width: 100%; max-width: 460px; aspect-ratio: 1;
     background: var(--term-surface-2); border: 2px solid var(--term-border-strong);
     border-radius: 6px; overflow: hidden; touch-action: manipulation;
+    transition: opacity 0.15s ease;
   }
+  .board.is-generating { opacity: 0.45; pointer-events: none; }
   .sudoku-app .sq {
     position: relative; display: flex; align-items: center; justify-content: center;
     font-weight: 600; font-size: clamp(15px, 4.4vw, 24px); color: var(--syn-cyan);
@@ -254,8 +256,41 @@ eleventyComputed:
     return { solution: full, puzzle };
   }
 
-  function newGame(){
-    const { solution, puzzle } = generate(DIFF[State.diff]);
+  let genWorker = null;
+  let genEpoch = 0;
+  function generateAsync(givens){
+    if (typeof Worker === 'undefined' || typeof Blob === 'undefined') {
+      return Promise.resolve(generate(givens));
+    }
+    if (!genWorker) {
+      try {
+        const src = [shuffle, solveCount, ok, fillFull, generate].map(f => f.toString()).join('\n') +
+          '\nonmessage = (e) => { postMessage(generate(e.data)); };';
+        genWorker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+      } catch (_) {
+        return Promise.resolve(generate(givens));
+      }
+    }
+    return new Promise((resolve) => {
+      genWorker.onmessage = (e) => resolve(e.data);
+      genWorker.onerror = () => { genWorker = null; resolve(generate(givens)); };
+      genWorker.postMessage(givens);
+    });
+  }
+
+  function setGenerating(on){
+    boardEl.classList.toggle('is-generating', on);
+    boardEl.setAttribute('aria-busy', on ? 'true' : 'false');
+    document.getElementById('btn-new').disabled = on;
+    document.querySelectorAll('#diff-seg button').forEach(b => { b.disabled = on; });
+  }
+
+  async function newGame(){
+    const epoch = ++genEpoch;
+    setGenerating(true);
+    const { solution, puzzle } = await generateAsync(DIFF[State.diff]);
+    if (epoch !== genEpoch) return;
+    setGenerating(false);
     State.solution = solution; State.puzzle = puzzle;
     State.grid = puzzle.slice();
     State.given = puzzle.map(v => v !== 0);

@@ -579,7 +579,10 @@ eleventyComputed:
     State.numPlayers = +value; newGame();
   });
   document.addEventListener('keydown', e => {
-    if ((e.code==='Space'||e.key==='Enter') && !document.getElementById('roll-btn').disabled){ e.preventDefault(); rollDice(); }
+    if (e.code!=='Space' && e.key!=='Enter') return;
+    if (e.target.closest && e.target.closest('button, a, input, select, textarea')) return;
+    if (document.getElementById('roll-btn').disabled) return;
+    e.preventDefault(); rollDice();
   });
 
   const A11Y = {
@@ -639,6 +642,8 @@ eleventyComputed:
         A11Y.choose.hidden = true;
         A11Y.choose.innerHTML = '';
         doMove(m);
+        const st = document.getElementById('status');
+        if (st){ st.tabIndex = -1; st.focus(); }
       });
       A11Y.choose.appendChild(btn);
     }

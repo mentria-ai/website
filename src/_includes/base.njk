@@ -282,7 +282,7 @@
         okBtn.addEventListener('click', function () { settle(true); });
         cancelBtn.addEventListener('click', function () { settle(false); });
         dlg.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape') { e.preventDefault(); settle(false); }
+          if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); settle(false); }
         });
         function open(message, mode) {
           if (resolver) settle(false);
@@ -485,7 +485,9 @@
           if (frame.classList.contains(FS)) exit(); else enter(frame);
         });
         document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && activeFrame()) exit();
+          if (e.key !== 'Escape' || !activeFrame()) return;
+          if (document.querySelector('.m-modal:not([hidden]), .m-palette:not([hidden]), .hero--peek')) return;
+          exit();
         });
         document.addEventListener('DOMContentLoaded', function () {
           var slug = toolSlug();

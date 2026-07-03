@@ -168,11 +168,11 @@
 
     function focusable() {
       return Array.prototype.slice.call(
-        el.querySelectorAll('button, [href], input, select, textarea')
+        el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
       ).filter(function (n) { return !n.disabled && !n.hidden && n.type !== 'hidden'; });
     }
     function onKey(e) {
-      if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); return; }
       if (e.key !== 'Tab') return;
       var f = focusable();
       if (!f.length) return;

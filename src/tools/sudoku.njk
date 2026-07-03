@@ -469,7 +469,10 @@ eleventyComputed:
     if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0'){ placeNumber(0); return; }
     if (e.key === 'n' || e.key === 'N'){ toggleNotes(); return; }
     if (e.key === 'h' || e.key === 'H'){ useHint(); return; }
-    if (State.sel<0){ if (e.key.startsWith('Arrow')) { e.preventDefault(); State.sel = 40; render(); focusCell(40); } return; }
+    if (!e.key.startsWith('Arrow')) return;
+    const ae = document.activeElement;
+    if (ae && ae !== document.body && !boardEl.contains(ae)) return;
+    if (State.sel<0){ e.preventDefault(); State.sel = 40; render(); focusCell(40); return; }
     let r = Math.floor(State.sel/9), c = State.sel%9;
     if (e.key === 'ArrowUp') r=(r+8)%9;
     else if (e.key === 'ArrowDown') r=(r+1)%9;

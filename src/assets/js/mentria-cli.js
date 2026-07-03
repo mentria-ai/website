@@ -15,11 +15,16 @@
     return '';
   }
 
+  var T = window.MENTRIA_CLI_I18N || {};
+  function tfmt(tpl, vars) {
+    return String(tpl).replace(/\{(\w+)\}/g, function (m, k) { return vars[k] != null ? vars[k] : m; });
+  }
+
   const COMMANDS = {
     help: {
-      description: 'list available commands',
+      description: T.descHelp || 'list available commands',
       run: function () {
-        var lines = ['Available commands:', ''];
+        var lines = [T.helpHeading || 'Available commands:', ''];
         var keys = Object.keys(COMMANDS);
         for (var i = 0; i < keys.length; i++) {
           var cmd = COMMANDS[keys[i]];
@@ -30,26 +35,28 @@
       }
     },
     tools: {
-      description: 'browse utility tools',
+      description: T.descTools || 'browse utility tools',
       run: function () {
         var toolsSection = document.getElementById('tools-preview');
         if (toolsSection) {
           toolsSection.scrollIntoView({ behavior: 'smooth' });
-          return { lines: ['> scrolling to tools...'], type: 'result' };
+          return { lines: [T.scrollingTools || '> scrolling to tools...'], type: 'result' };
         }
-        window.location.href = localePrefix() + '/tools/';
-        return { lines: ['> navigating to /tools/...'], type: 'result' };
+        var dest = localePrefix() + '/tools/';
+        window.location.href = dest;
+        return { lines: [tfmt(T.navigatingTo || '> navigating to {dest}...', { dest: dest })], type: 'result' };
       }
     },
     feed: {
-      description: 'view the feed',
+      description: T.descFeed || 'view the feed',
       run: function () {
-        window.location.href = localePrefix() + '/feed/';
-        return { lines: ['> navigating to /feed/...'], type: 'result' };
+        var dest = localePrefix() + '/feed/';
+        window.location.href = dest;
+        return { lines: [tfmt(T.navigatingTo || '> navigating to {dest}...', { dest: dest })], type: 'result' };
       }
     },
     search: {
-      description: 'search the site (e.g. `search base64`)',
+      description: T.descSearch || 'search the site (e.g. `search base64`)',
       usage: 'search <query>',
       argv: true,
       run: function (args) {
@@ -57,20 +64,20 @@
         var dest = localePrefix() + '/tools/search/';
         if (query) dest += '?q=' + encodeURIComponent(query);
         window.location.href = dest;
-        return { lines: ['> navigating to ' + dest + '...'], type: 'result' };
+        return { lines: [tfmt(T.navigatingTo || '> navigating to {dest}...', { dest: dest })], type: 'result' };
       }
     },
     about: {
-      description: 'about mentria',
+      description: T.descAbout || 'about mentria',
       run: function () {
         return {
-          lines: ['> mentria — a creative studio for tools, experiments & visual transmissions. est. 2025.'],
+          lines: [T.aboutLine || '> mentria — a creative studio for tools, experiments & visual transmissions. est. 2025.'],
           type: 'result'
         };
       }
     },
     clear: {
-      description: 'clear the terminal',
+      description: T.descClear || 'clear the terminal',
       run: function () {
         return { lines: [], type: 'clear' };
       }
@@ -113,6 +120,7 @@
   var MAX_HISTORY = 20;
   var history = [];
   var historyIndex = -1;
+  var draft = '';
 
   function initCLI(containerEl) {
     if (!containerEl) return;
@@ -131,6 +139,7 @@
     ];
 
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var typingState = { cancelled: false };
 
     if (reducedMotion) {
       for (var i = 0; i < welcomeLines.length; i++) {
@@ -139,7 +148,7 @@
         wp.dataset.welcomePrefix = welcomeLines[i].prefix;
       }
     } else {
-      typeLines(outputEl, welcomeLines, 0, function () {});
+      typeLines(outputEl, welcomeLines, 0, function () {}, typingState);
     }
 
     document.addEventListener('mentria:localechange', function () {
@@ -180,6 +189,15 @@
       return matches;
     }
 
+    function syncCombobox(expanded) {
+      inputEl.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      if (expanded && suggestState.idx >= 0) {
+        inputEl.setAttribute('aria-activedescendant', 'cli-sug-' + suggestState.idx);
+      } else {
+        inputEl.removeAttribute('aria-activedescendant');
+      }
+    }
+
     function renderSuggestions() {
       if (!suggestEl) return;
       suggestEl.innerHTML = '';
@@ -189,6 +207,8 @@
         var row = document.createElement('div');
         row.className = 'cli__suggestion' + (i === suggestState.idx ? ' is-active' : '');
         row.setAttribute('role', 'option');
+        row.id = 'cli-sug-' + i;
+        row.setAttribute('aria-selected', i === suggestState.idx ? 'true' : 'false');
         row.dataset.name = name;
         var nameSpan = document.createElement('span');
         nameSpan.className = 'cli__suggestion-name';
@@ -226,6 +246,7 @@
       if (!suggestEl.matches(':popover-open')) {
         try { suggestEl.showPopover(); } catch (_) {}
       }
+      syncCombobox(true);
     }
 
     function hideSuggestions() {
@@ -234,6 +255,7 @@
       if (popoverSupported() && suggestEl.matches(':popover-open')) {
         try { suggestEl.hidePopover(); } catch (_) {}
       }
+      syncCombobox(false);
     }
 
     inputEl.addEventListener('input', function () {
@@ -273,6 +295,7 @@
 
       if (e.key === 'Enter') {
         e.preventDefault();
+        typingState.cancelled = true;
 
         // If a suggestion is highlighted, treat Enter as accept-and-run.
         if (sugOpen && suggestState.idx >= 0) {
@@ -309,7 +332,7 @@
             }
           }
         } else {
-          appendLine(outputEl, 'command not found: ' + name + ". type 'help' for available commands.", 'error');
+          appendLine(outputEl, tfmt(T.notFound || "command not found: {name}. type 'help' for available commands.", { name: name }), 'error');
         }
 
         outputEl.scrollTop = outputEl.scrollHeight;
@@ -324,6 +347,7 @@
           suggestState.idx = suggestState.idx <= 0 ? suggestState.items.length - 1 : suggestState.idx - 1;
         }
         renderSuggestions();
+        syncCombobox(true);
         return;
       }
 
@@ -331,6 +355,7 @@
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (historyIndex < history.length - 1) {
+          if (historyIndex === -1) draft = inputEl.value;
           historyIndex++;
           inputEl.value = history[historyIndex];
         }
@@ -340,9 +365,10 @@
         if (historyIndex > 0) {
           historyIndex--;
           inputEl.value = history[historyIndex];
-        } else {
+        } else if (historyIndex === 0) {
           historyIndex = -1;
-          inputEl.value = '';
+          inputEl.value = draft;
+          draft = '';
         }
       }
     });
@@ -357,7 +383,8 @@
     return p;
   }
 
-  function typeLines(outputEl, lines, index, callback) {
+  function typeLines(outputEl, lines, index, callback, state) {
+    if (state && state.cancelled) return;
     if (index >= lines.length) {
       if (callback) callback();
       return;
@@ -371,19 +398,20 @@
 
     typeText(p, line.text, 0, function () {
       setTimeout(function () {
-        typeLines(outputEl, lines, index + 1, callback);
+        typeLines(outputEl, lines, index + 1, callback, state);
       }, 200);
-    });
+    }, state);
   }
 
-  function typeText(el, text, charIndex, callback) {
+  function typeText(el, text, charIndex, callback, state) {
+    if (state && state.cancelled) return;
     if (charIndex >= text.length) {
       if (callback) callback();
       return;
     }
     el.textContent = text.substring(0, charIndex + 1);
     setTimeout(function () {
-      typeText(el, text, charIndex + 1, callback);
+      typeText(el, text, charIndex + 1, callback, state);
     }, 30);
   }
 

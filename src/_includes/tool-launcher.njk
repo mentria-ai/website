@@ -146,7 +146,7 @@
   }
   function applyFilter() {
     var qNorm = normalize(input.value.trim());
-    var tokens = qNorm.split(/[^a-z0-9]+/).filter(Boolean);
+    var tokens = qNorm.split(/\s+/).filter(Boolean);
     var tiles = launcher.querySelectorAll('.launch-tile');
     var anyVisible = false;
     for (var i = 0; i < tiles.length; i++) {

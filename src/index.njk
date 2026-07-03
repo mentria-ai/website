@@ -14,9 +14,9 @@ eleventyComputed:
     <div class="cli__output" role="log" aria-live="polite"></div>
     <div class="cli__prompt-line">
         <span class="cli__prompt">$&nbsp;</span>
-        <input type="text" class="cli__input" aria-label="{{ 'home.cli.placeholder' | t }}" placeholder="{{ 'home.cli.placeholder' | t }}" autocomplete="off" spellcheck="false">
+        <input type="text" class="cli__input" aria-label="{{ 'home.cli.placeholder' | t }}" placeholder="{{ 'home.cli.placeholder' | t }}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cli-suggestions">
     </div>
-    <div class="cli__suggestions" id="cli-suggestions" popover="manual" role="listbox" aria-label="Command suggestions"></div>
+    <div class="cli__suggestions" id="cli-suggestions" popover="manual" role="listbox" aria-label="{{ 'home.cli.suggestions_label' | t }}"></div>
 </section>
 
 {% include "tool-launcher.njk" %}
@@ -29,6 +29,19 @@ eleventyComputed:
     cmd:  {{ ("home.cli.welcomeCmd"  | t) | dump | safe }},
     out1: {{ ("home.cli.welcomeOut1" | t) | dump | safe }},
     out2: {{ ("home.cli.welcomeOut2" | t) | dump | safe }}
+  };
+  window.MENTRIA_CLI_I18N = {
+    helpHeading:    {{ ("home.cli.help_heading"    | t) | dump | safe }},
+    descHelp:       {{ ("home.cli.desc_help"       | t) | dump | safe }},
+    descTools:      {{ ("home.cli.desc_tools"      | t) | dump | safe }},
+    descFeed:       {{ ("home.cli.desc_feed"       | t) | dump | safe }},
+    descSearch:     {{ ("home.cli.desc_search"     | t) | dump | safe }},
+    descAbout:      {{ ("home.cli.desc_about"      | t) | dump | safe }},
+    descClear:      {{ ("home.cli.desc_clear"      | t) | dump | safe }},
+    notFound:       {{ ("home.cli.not_found"       | t) | dump | safe }},
+    scrollingTools: {{ ("home.cli.scrolling_tools" | t) | dump | safe }},
+    navigatingTo:   {{ ("home.cli.navigating_to"   | t) | dump | safe }},
+    aboutLine:      {{ ("home.cli.about_line"      | t) | dump | safe }}
   };
 </script>
 <script src="/assets/js/mentria-cli.js"></script>

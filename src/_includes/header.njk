@@ -5,8 +5,8 @@
         <nav class="site-nav">
             {% set feedHref  = '/feed/'  | localeUrl(lang) %}
             {% set toolsHref = '/tools/' | localeUrl(lang) %}
-            <a href="{{ feedHref }}"  class="nav-link{% if page.url | startsWith(feedHref) %} active{% endif %}">{{ "nav.feed"  | t }}</a>
-            <a href="{{ toolsHref }}" class="nav-link{% if page.url | startsWith(toolsHref) %} active{% endif %}">{{ "nav.tools" | t }}</a>
+            <a href="{{ feedHref }}"  class="nav-link{% if page.url | startsWith(feedHref) %} active{% endif %}"{% if page.url | startsWith(feedHref) %} aria-current="page"{% endif %}>{{ "nav.feed"  | t }}</a>
+            <a href="{{ toolsHref }}" class="nav-link{% if page.url | startsWith(toolsHref) %} active{% endif %}"{% if page.url | startsWith(toolsHref) %} aria-current="page"{% endif %}>{{ "nav.tools" | t }}</a>
 
             {%- set currentLocale = lang | findLocale -%}
             <button type="button" class="nav-cmdk" data-palette-open aria-label="{{ 'palette.open' | t }}" aria-keyshortcuts="Meta+K Control+K">⌘K</button>
@@ -16,11 +16,10 @@
                     <span class="lang-switcher__current">{{ currentLocale.nativeName }}</span>
                     <span class="lang-switcher__chevron" aria-hidden="true">▾</span>
                 </summary>
-                <ul class="lang-switcher__menu" role="menu">
+                <ul class="lang-switcher__menu">
                     {%- for loc in locales %}
-                    <li role="none">
-                        <a role="menuitem"
-                           hreflang="{{ loc.code }}"
+                    <li>
+                        <a hreflang="{{ loc.code }}"
                            href="{{ page.url | switchLocale(loc.code) }}"
                            class="lang-switcher__item{% if loc.code == lang %} is-active{% endif %}">
                             <span class="lang-switcher__name">{{ loc.nativeName }}</span>

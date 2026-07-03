@@ -294,6 +294,24 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     pipes.push({ x, top, scored: false });
   }
 
+  let audioCtx = null;
+  function sfx(freq, dur, type, vol) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const t0 = audioCtx.currentTime;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, t0);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t0);
+      o.stop(t0 + dur);
+    } catch (_) {}
+  }
+
   function flap() {
     if (!State.running) return;
     if (State.over) return;
@@ -301,6 +319,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     if (!State.started) State.started = true;
     plane.vy = FLAP;
     spawnPuff(plane.x - 10, plane.y + 4, 5);
+    sfx(660, 0.07, 'square', 0.025);
   }
 
   function spawnPuff(x, y, n) {
@@ -360,6 +379,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
         if (!p.scored && p.x + pw < plane.x) {
           p.scored = true;
           State.score++;
+          sfx(880, 0.1, 'triangle', 0.04);
           const newTier = tierFor(State.score);
           if (newTier !== State.tier) {
             State.tier = newTier;
@@ -393,6 +413,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     State.dying = true;
     State.running = false;
     spawnHit(plane.x, plane.y);
+    sfx(120, 0.35, 'sawtooth', 0.05);
     if (State.score > State.best) {
       State.best = State.score;
       writeBest(State.best);
@@ -644,12 +665,19 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     }
   });
 
-  function loop() {
-    update();
+  let last = performance.now();
+  let acc = 0;
+  const STEP = 1000 / 60;
+  function loop(now) {
+    acc += now - last;
+    last = now;
+    if (acc > 250) acc = STEP;
+    let steps = 0;
+    while (acc >= STEP && steps < 6) { update(); acc -= STEP; steps++; }
     render();
     requestAnimationFrame(loop);
   }
-  loop();
+  requestAnimationFrame(loop);
   updateHUD();
 })();
 </script>

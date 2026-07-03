@@ -71,7 +71,7 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
 .comms{display:flex;flex-direction:column;gap:.75rem;font-family:var(--font-mono);font-size:.9rem}
 .comms__bar{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
 .comms__room{display:flex;gap:.5rem;align-items:center;flex:1;min-width:14rem}
-.comms__meta{display:flex;gap:.5rem;align-items:center}
+.comms__meta{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
 .comms__lbl{color:var(--muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
 .comms__input{background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.45rem .6rem;border-radius:6px;font-family:inherit;font-size:.9rem;flex:1;min-width:6rem}
 .comms__input:focus{outline:none;border-color:var(--accent,#6ef3c5)}
@@ -301,6 +301,7 @@ const renderLine = (who, what, opts = {}) => {
   const t = document.createElement('span');
   t.className = 'comms__what' + (opts.sys ? ' comms__what--sys' : '');
   if (opts.html) t.innerHTML = opts.html; else t.textContent = what;
+  if (opts.quiet) line.setAttribute('aria-live', 'off');
   line.append(w, t);
   els.log.append(line);
   els.log.scrollTop = els.log.scrollHeight;
@@ -335,7 +336,7 @@ const refreshShareUrl = (roomName, b64Key) => {
 };
 
 const renderRemoteChat = (item, opts = {}) => {
-  renderLine(short(item.senderId), item.text, { peerId: item.senderId });
+  renderLine(short(item.senderId), item.text, { peerId: item.senderId, quiet: !!opts.silent });
   if (!opts.silent) playPing(880);
 };
 
@@ -549,7 +550,7 @@ const joinNew = async (roomName, b64Key = null) => {
   const incoming = new Map();
   metaAction = room.makeAction('fmeta');
   metaAction.onMessage = (meta, ctx) => {
-    const line = renderLine(short(ctx.peerId), '', { peerId: ctx.peerId, html: progressHTML('receiving', meta.name, meta.size, 0) });
+    const line = renderLine(short(ctx.peerId), '', { peerId: ctx.peerId, quiet: true, html: progressHTML('receiving', meta.name, meta.size, 0) });
     incoming.set(ctx.peerId + ':' + meta.id, { meta, chunks: [], received: 0, line });
   };
 
@@ -563,6 +564,7 @@ const joinNew = async (roomName, b64Key = null) => {
     entry.received += (data.byteLength || data.size || 0);
     entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.meta.size, entry.received);
     if (m.done) {
+      entry.line.line.removeAttribute('aria-live');
       const blob = new Blob(entry.chunks, { type: entry.meta.type || 'application/octet-stream' });
       if (entry.meta.kind === 'mentria-ext') {
         const html = await blob.text();
@@ -677,7 +679,7 @@ undragEvents.forEach(ev => els.drop.addEventListener(ev, (e) => { e.preventDefau
 const CHUNK = 32 * 1024;
 const sendOne = async (file, extra) => {
   const id = Math.random().toString(36).slice(2);
-  const line = renderLine('you', '', { me: true, html: progressHTML('sending', file.name, file.size, 0) });
+  const line = renderLine('you', '', { me: true, quiet: true, html: progressHTML('sending', file.name, file.size, 0) });
   await metaAction.send(Object.assign({ id, name: file.name, size: file.size, type: file.type }, extra || {}));
   const buf = await file.arrayBuffer();
   let sent = 0;
@@ -689,6 +691,7 @@ const sendOne = async (file, extra) => {
     line.what.innerHTML = progressHTML('sending', file.name, file.size, sent);
   }
   const previewUrl = trackObjectUrl(file);
+  line.line.removeAttribute('aria-live');
   line.what.innerHTML = 'sent ' + completeHTML(file.name, file.size, file.type, previewUrl);
 };
 
@@ -716,12 +719,27 @@ els.file.addEventListener('change', (e) => { sendFiles(e.target.files); e.target
 const pickerEl = document.getElementById('comms-picker');
 const pickerListEl = document.getElementById('comms-picker-list');
 let pickerResolve = null;
+let pickerOpener = null;
+function pickerTrapTab(e) {
+  if (e.key !== 'Tab') return;
+  const focusables = [...pickerEl.querySelectorAll('button')].filter(b => b.offsetParent);
+  if (!focusables.length) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  else if (!pickerEl.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+}
 function closePicker(value) {
   const r = pickerResolve;
   pickerResolve = null;
   pickerEl.hidden = true;
   pickerListEl.innerHTML = '';
+  document.removeEventListener('keydown', pickerTrapTab, true);
+  const opener = pickerOpener;
+  pickerOpener = null;
   if (r) r(value);
+  if (opener) setTimeout(() => { if (document.contains(opener)) opener.focus(); }, 0);
 }
 pickerEl.querySelectorAll('[data-picker-close]').forEach((el) => el.addEventListener('click', () => closePicker(null)));
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pickerEl.hidden) { e.preventDefault(); closePicker(null); } });
@@ -740,7 +758,9 @@ function pickExtension(list) {
     item.addEventListener('click', () => closePicker(ext));
     pickerListEl.appendChild(item);
   });
+  pickerOpener = (document.activeElement && document.activeElement !== document.body) ? document.activeElement : attachExtBtn;
   pickerEl.hidden = false;
+  document.addEventListener('keydown', pickerTrapTab, true);
   const first = pickerListEl.querySelector('.comms__picker-item');
   if (first) first.focus();
   return new Promise((res) => { pickerResolve = res; });

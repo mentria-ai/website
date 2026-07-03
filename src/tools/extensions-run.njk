@@ -16,7 +16,8 @@ eleventyComputed:
     <span class="xr__title" id="xr-title">…</span>
   </div>
   <p class="xr__error" id="xr-error" hidden></p>
-  <p class="xr__missing" id="xr-missing" hidden>not installed — <a href="{{ locale.pathPrefix }}/tools/extensions/">open the manager</a></p>
+  <p class="xr__missing" id="xr-missing" hidden>{{ "tool.extensions.run_not_installed" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
+  <p class="xr__missing" id="xr-disabled" hidden>{{ "tool.extensions.run_disabled" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
   <iframe class="xr__frame" id="xr-frame" allow="bluetooth; usb; serial; camera; microphone"></iframe>
 </section>
 
@@ -35,7 +36,7 @@ function parseHashArgs() {
 
 const source = entry && entry.enabled ? X.getSource(id) : null;
 if (!source) {
-  document.getElementById('xr-missing').hidden = false;
+  document.getElementById(entry && !entry.enabled ? 'xr-disabled' : 'xr-missing').hidden = false;
   frame.remove();
 } else {
   const m = entry.manifest;
@@ -63,19 +64,16 @@ if (!source) {
     },
     close: () => { location.href = (document.querySelector('.xr').dataset.prefix || '') + '/'; }
   });
-  const bootstrap = '<scr' + 'ipt>window.mentria = window.parent.__mentriaExtHost;</scr' + 'ipt>';
+  window.__mentriaExtReportError = (msg) => {
+    errEl.textContent = m.name + ': ' + msg;
+    errEl.hidden = false;
+  };
+  const bootstrap = '<scr' + 'ipt>' +
+    'window.mentria = window.parent.__mentriaExtHost;' +
+    'window.addEventListener("error", (e) => { window.parent.__mentriaExtReportError(e.message || "runtime error"); });' +
+    'window.addEventListener("unhandledrejection", (e) => { window.parent.__mentriaExtReportError(String(e.reason || "unhandled rejection")); });' +
+    '</scr' + 'ipt>';
   frame.srcdoc = bootstrap + source;
-  frame.addEventListener('load', () => {
-    if (!frame.contentWindow) return;
-    frame.contentWindow.addEventListener('error', (e) => {
-      errEl.textContent = m.name + ': ' + (e.message || 'runtime error');
-      errEl.hidden = false;
-    });
-    frame.contentWindow.addEventListener('unhandledrejection', (e) => {
-      errEl.textContent = m.name + ': ' + String(e.reason || 'unhandled rejection');
-      errEl.hidden = false;
-    });
-  });
 }
 </script>
 

@@ -61,7 +61,8 @@ const COPY = {
   btnRemove:     {{ ("tool.extensions.btn_remove"     | t) | dump | safe }},
   btnShare:      {{ ("tool.extensions.btn_share"      | t) | dump | safe }},
   shareOk:       {{ ("tool.extensions.share_ok"       | t) | dump | safe }},
-  shareOpenComms:{{ ("tool.extensions.share_open_comms"| t) | dump | safe }}
+  shareOpenComms:{{ ("tool.extensions.share_open_comms"| t) | dump | safe }},
+  toggleLabel:   {{ ("tool.extensions.toggle_label"   | t) | dump | safe }}
 };
 
 const X = await import('/assets/js/mentria-extensions.js');
@@ -114,7 +115,9 @@ function row(entry) {
   const actions = document.createElement('div');
   actions.className = 'xt__actions';
   const toggle = document.createElement('input');
-  toggle.type = 'checkbox'; toggle.checked = entry.enabled; toggle.title = 'enabled';
+  toggle.type = 'checkbox'; toggle.checked = entry.enabled;
+  toggle.setAttribute('aria-label', fmt(COPY.toggleLabel, { name: m.name }));
+  toggle.title = fmt(COPY.toggleLabel, { name: m.name });
   const open = btn(COPY.btnOpen, () => { location.href = '/tools/extensions/run/?id=' + encodeURIComponent(m.id); });
   open.disabled = !entry.enabled || !(m.mounts && m.mounts.tool);
   toggle.addEventListener('change', () => {

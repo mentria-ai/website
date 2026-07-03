@@ -99,7 +99,7 @@ export function install(html, manifest) {
   const registry = getRegistry().filter((e) => e.manifest.id !== manifest.id);
   const entry = {
     manifest,
-    enabled: true,
+    enabled: prev ? prev.enabled : true,
     installedAt: prev ? prev.installedAt : new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     size

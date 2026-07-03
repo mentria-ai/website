@@ -221,14 +221,23 @@ eleventyComputed:
       }
     });
 
+    function normalizeB64(str) {
+      let v = str.replace(/\s+/g, '');
+      if (/[-_]/.test(v) && !/[+/]/.test(v)) v = v.replace(/-/g, '+').replace(/_/g, '/');
+      const rem = v.length % 4;
+      if (rem === 2) v += '==';
+      else if (rem === 3) v += '=';
+      return v;
+    }
+
     decodeBtn.addEventListener('click', () => {
       let raw = inputEl.value.trim();
       if (!raw) { showStatus(textStatus, COPY.statusNothingDecode, 'err'); return; }
-      const dataUriMatch = raw.match(/^data:[^;]*;base64,(.*)$/s);
+      const dataUriMatch = raw.match(/^data:[^,]*;base64,(.*)$/s);
       if (dataUriMatch) raw = dataUriMatch[1];
       let bytes;
       try {
-        bytes = Uint8Array.from(atob(raw), c => c.charCodeAt(0));
+        bytes = Uint8Array.from(atob(normalizeB64(raw)), c => c.charCodeAt(0));
       } catch (e) {
         showStatus(textStatus, COPY.statusDecodeFailedInv, 'err');
         return;
@@ -339,7 +348,7 @@ eleventyComputed:
       let mime = 'application/octet-stream';
       let b64 = val;
 
-      const dataUriMatch = val.match(/^data:([^;]+);base64,(.*)$/s);
+      const dataUriMatch = val.match(/^data:([^;,]+)[^,]*;base64,(.*)$/s);
       if (dataUriMatch) {
         mime = dataUriMatch[1];
         b64 = dataUriMatch[2];
@@ -349,7 +358,7 @@ eleventyComputed:
       }
 
       try {
-        const binary = atob(b64);
+        const binary = atob(normalizeB64(b64));
         const bytes = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
         decodedBlob = new Blob([bytes], { type: mime });

@@ -411,8 +411,18 @@ class MentriaRadio {
       this.el.retry.addEventListener("click", () => this.loadCatalogAndInit());
     }
 
+    if (window.MentriaStore) {
+      const saved = window.MentriaStore.get("tools", "radio_volume");
+      if (typeof saved === "number" && saved >= 0 && saved <= 100) {
+        this.el.volume.value = saved;
+      }
+    }
+
     this.el.volume.addEventListener("input", () => {
       this.player.setVolume(this.el.volume.value / 100);
+    });
+    this.el.volume.addEventListener("change", () => {
+      if (window.MentriaStore) window.MentriaStore.set("tools", "radio_volume", Number(this.el.volume.value));
     });
 
     // Ctrl+Shift+E → export JSONL

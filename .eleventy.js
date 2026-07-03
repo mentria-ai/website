@@ -187,6 +187,17 @@ module.exports = function(eleventyConfig) {
     }
   });
 
+  eleventyConfig.addFilter("htmlDecode", function(value) {
+    return String(value ?? "")
+      .replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(Number(n)))
+      .replace(/&#x([0-9a-fA-F]+);/g, (m, n) => String.fromCodePoint(parseInt(n, 16)))
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;|&apos;/g, "'")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&");
+  });
+
   eleventyConfig.addFilter("isoDate", function(dateObj) {
     if (!dateObj) return "";
     try {

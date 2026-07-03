@@ -76,22 +76,33 @@
     </script>
     {% set baseUrl = site.siteUrl | default('/') %}
     {% set pageUrl = baseUrl ~ page.url %}
-    {% set metaTitle = (title and (title ~ " | " ~ site.title)) or ("site.metaTitle" | t) %}
-    {% set metaDescription = description | default(("site.metaDescription" | t)) %}
-    {% set socialImage = site.siteUrl ~ (site.socialImage | default('/assets/img/icon-512x512.png')) %}
+    {% set metaTitle = ((title and (title ~ " | " ~ site.title)) or ("site.metaTitle" | t)) | htmlDecode %}
+    {% set metaDescription = (description | default(("site.metaDescription" | t))) | htmlDecode %}
+    {% set socialImage = socialImageOverride or (site.siteUrl ~ (site.socialImage | default('/assets/img/icon-512x512.png'))) %}
+    {% set isPost = tags and ('post' in tags) %}
+    {% set ogLocales = { 'en': 'en_US', 'es': 'es_ES', 'fr': 'fr_FR', 'ja': 'ja_JP', 'pt-BR': 'pt_BR' } %}
     <title>{{ metaTitle }}</title>
     <meta name="description" content="{{ metaDescription }}">
     <meta name="keywords" content="{{ site.keywords }}">
-    <meta name="robots" content="{{ site.robots | default('index, follow') }}">
+    <meta name="robots" content="{{ robots or (site.robots | default('index, follow')) }}">
     <meta name="author" content="{{ site.author }}">
     <meta name="theme-color" content="#0a0a0a">
 
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{{ 'article' if isPost else 'website' }}">
     <meta property="og:url" content="{{ pageUrl }}">
     <meta property="og:title" content="{{ metaTitle }}">
     <meta property="og:description" content="{{ metaDescription }}">
     <meta property="og:image" content="{{ socialImage }}">
-    <meta property="og:locale" content="{{ lang | default('en') | replace('-', '_') }}">
+    <meta property="og:locale" content="{{ ogLocales[lang | default('en')] or 'en_US' }}">
+    {%- if not isPost %}
+    {%- for loc in locales %}{% if loc.code != (lang | default('en')) %}
+    <meta property="og:locale:alternate" content="{{ ogLocales[loc.code] }}">
+    {%- endif %}{% endfor %}
+    {%- endif %}
+    {%- if isPost %}
+    <meta property="article:published_time" content="{{ page.date | isoDate }}">
+    <meta property="article:author" content="{{ site.author }}">
+    {%- endif %}
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ pageUrl }}">
@@ -99,15 +110,19 @@
     <meta name="twitter:description" content="{{ metaDescription }}">
     <meta name="twitter:image" content="{{ socialImage }}">
 
+    {%- if 'noindex' not in (robots or '') %}
     <link rel="canonical" href="{{ pageUrl }}">
+    {%- endif %}
     <link rel="icon" href="/assets/img/favicon-96x96.png" type="image/png">
     <link rel="apple-touch-icon" href="/assets/img/icon-192x192.png">
 
     {#- Reciprocal hreflang matrix — one alternate per supported locale -#}
+    {%- if not isPost %}
     {%- for loc in locales %}
     <link rel="alternate" hreflang="{{ loc.code }}" href="{{ site.siteUrl }}{{ page.url | switchLocale(loc.code) }}">
     {%- endfor %}
     <link rel="alternate" hreflang="x-default" href="{{ site.siteUrl }}{{ page.url | switchLocale('en') }}">
+    {%- endif %}
 
     <link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/jbm-latin.woff2"   as="font" type="font/woff2" crossorigin>

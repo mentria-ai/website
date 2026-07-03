@@ -9,7 +9,7 @@ layout: null
 
 ## Tools
 {%- for t in tools | default([]) %}
-- [{{ t.title }}]({{ site.siteUrl }}/tools/{{ t.slug }}/): {{ t.summary }}
+- [{{ t.title | htmlDecode | safe }}]({{ site.siteUrl }}/tools/{{ t.slug }}/): {{ t.summary | htmlDecode | safe }}
 {%- endfor %}
 
 ## Feed

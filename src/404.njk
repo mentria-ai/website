@@ -8,11 +8,14 @@ permalink: "{{ locale.pathPrefix }}/404.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "404"
+robots: "noindex, nofollow"
 eleventyExcludeFromCollections: true
+eleventyExcludeFromSitemap: true
 ---
 <section class="hero" style="padding-top:3rem;">
     <div style="font-family: var(--font-mono); text-align: center;">
-        <p style="color: var(--syn-pink); font-size: 0.9rem;">{{ "errors.not_found_cmd_prefix" | t }} {{ page.url | default('/unknown') }}</p>
+        <p style="color: var(--syn-pink); font-size: 0.9rem;">{{ "errors.not_found_cmd_prefix" | t }} <span id="nf-path">{{ page.url | default('/unknown') }}</span></p>
+<script>try { document.getElementById('nf-path').textContent = location.pathname + location.search; } catch (_) {}</script>
         <h1 style="font-size: clamp(3rem, 8vw, 5rem); margin: 1rem 0;">404</h1>
         <p style="color: var(--syn-amber);">{{ "errors.not_found_msg" | t }}<span class="cursor-blink"></span></p>
         <div style="margin-top: 2rem; font-size: 0.9rem; color: var(--term-muted);">

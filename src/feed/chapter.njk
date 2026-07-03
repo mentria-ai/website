@@ -5,6 +5,7 @@ pagination:
   size: 1
   alias: pair
 permalink: "{{ pair.locale.pathPrefix }}/feed/chapter/{{ pair.chapter.id }}/"
+eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ pair.locale.code }}"
   title: "{{ pair.chapter.title }} · Chapter {{ pair.chapter.order }}"

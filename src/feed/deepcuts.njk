@@ -5,10 +5,12 @@ pagination:
   size: 1
   alias: pair
 permalink: "{{ pair.locale.pathPrefix }}/feed/deepcuts/{{ pair.edition.id }}/"
+eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ pair.locale.code }}"
-  title: "{{ pair.edition.title }} · Deep Cuts"
+  title: "{{ pair.edition.subtitle | tloc(pair.locale.code) }} · Deep Cuts"
   description: "{{ pair.edition.subtitle | tloc(pair.locale.code) }}"
+  socialImageOverride: "{{ pair.edition.cover_image }}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 

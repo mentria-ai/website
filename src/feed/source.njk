@@ -5,9 +5,11 @@ pagination:
   size: 1
   alias: pair
 permalink: "{{ pair.locale.pathPrefix }}/feed/source/{{ pair.deck.id }}/"
+eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ pair.locale.code }}"
   title: "{{ pair.deck.subtitle | tloc(pair.locale.code) }} · Source"
+  socialImageOverride: "{{ pair.deck.cover_image }}"
   description: "{{ pair.deck.subtitle | tloc(pair.locale.code) }}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">

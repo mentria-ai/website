@@ -1,0 +1,191 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/extensions/gallery/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tool.ext_gallery.title' | t }}"
+  description: "{{ 'tool.ext_gallery.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/extensions/">extensions</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">gallery</span></p>
+  <h1>{{ "tool.ext_gallery.title" | t }}</h1>
+  <p>{{ "tool.ext_gallery.lede" | t }}</p>
+</section>
+
+<div class="exg" id="exg-grid" data-prefix="{{ locale.pathPrefix }}"></div>
+
+<p class="exg__manage">{{ "tool.ext_gallery.manage_note" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.ext_gallery.manage_link" | t }}</a></p>
+
+<script type="module">
+const COPY = {
+  install:   {{ ("tool.ext_gallery.btn_install" | t) | dump | safe }},
+  installed: {{ ("tool.ext_gallery.installed"   | t) | dump | safe }},
+  open:      {{ ("tool.ext_gallery.btn_open"    | t) | dump | safe }},
+  errLoad:   {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }},
+  trust:     {{ ("tool.extensions.trust_prompt"  | t) | dump | safe }},
+  update:    {{ ("tool.extensions.update_prompt" | t) | dump | safe }}
+};
+const CATALOG = [
+  { id: "unit-converter", desc: {{ ("tool.ext_gallery.desc.unit-converter" | t) | dump | safe }} },
+  { id: "pomodoro-timer", desc: {{ ("tool.ext_gallery.desc.pomodoro-timer" | t) | dump | safe }} },
+  { id: "dice-roller",    desc: {{ ("tool.ext_gallery.desc.dice-roller"    | t) | dump | safe }} }
+];
+
+const grid = document.getElementById("exg-grid");
+const PREFIX = grid.dataset.prefix || "";
+const X = await import("/assets/js/mentria-extensions.js");
+const { confirmInstall } = await import("/assets/js/mentria-ext-install-ui.js");
+const cards = [];
+
+function chip(text, mod) {
+  const s = document.createElement("span");
+  s.className = "exg__chip" + (mod ? " exg__chip--" + mod : "");
+  s.textContent = text;
+  return s;
+}
+
+function showStatus(card, msg) {
+  const el = card._parts.status;
+  el.textContent = msg;
+  el.hidden = false;
+}
+function hideStatus(card) {
+  card._parts.status.hidden = true;
+}
+
+function makeCard(entry) {
+  const card = document.createElement("article");
+  card.className = "exg__card";
+  card.dataset.id = entry.id;
+  const head = document.createElement("div");
+  head.className = "exg__head";
+  const icon = document.createElement("span");
+  icon.className = "exg__icon";
+  icon.setAttribute("aria-hidden", "true");
+  const name = document.createElement("h2");
+  name.className = "exg__name";
+  name.textContent = entry.id;
+  head.append(icon, name);
+  const desc = document.createElement("p");
+  desc.className = "exg__desc";
+  desc.textContent = entry.desc;
+  const badges = document.createElement("div");
+  badges.className = "exg__badges";
+  const status = document.createElement("p");
+  status.className = "exg__status";
+  status.setAttribute("role", "status");
+  status.hidden = true;
+  const actions = document.createElement("div");
+  actions.className = "exg__actions";
+  card.append(head, desc, badges, status, actions);
+  card._parts = { icon, name, badges, status, actions };
+  grid.appendChild(card);
+  return card;
+}
+
+function renderActions(entry, card) {
+  const p = card._parts;
+  p.actions.innerHTML = "";
+  if (X.getEntry(entry.id)) {
+    const done = document.createElement("span");
+    done.className = "exg__done";
+    done.textContent = COPY.installed;
+    const open = document.createElement("a");
+    open.className = "m-btn m-btn--ghost exg__btn";
+    open.textContent = COPY.open;
+    open.href = PREFIX + "/tools/extensions/run/?id=" + encodeURIComponent(entry.id);
+    p.actions.append(done, open);
+  } else {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "m-btn m-btn--primary exg__btn";
+    btn.textContent = COPY.install;
+    btn.addEventListener("click", () => install(entry, card, btn));
+    p.actions.append(btn);
+  }
+}
+
+async function install(entry, card, btn) {
+  hideStatus(card);
+  btn.disabled = true;
+  try {
+    const html = entry.html || await fetch("/assets/extensions/" + entry.id + ".html").then((r) => r.text());
+    const result = await confirmInstall(html, { copy: { trust: COPY.trust, update: COPY.update } });
+    if (!result) { btn.disabled = false; return; }
+    renderActions(entry, card);
+  } catch (e) {
+    btn.disabled = false;
+    showStatus(card, e.message);
+  }
+}
+
+async function loadCard(entry, card) {
+  const p = card._parts;
+  let html;
+  try {
+    html = await fetch("/assets/extensions/" + entry.id + ".html").then((r) => {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.text();
+    });
+  } catch (e) {
+    showStatus(card, COPY.errLoad);
+    return;
+  }
+  entry.html = html;
+  let ins;
+  try {
+    ins = X.inspect(html);
+  } catch (e) {
+    showStatus(card, COPY.errLoad + " " + e.message);
+    return;
+  }
+  entry.ready = true;
+  const m = ins.manifest;
+  p.icon.textContent = m.icon && !/^data:/.test(m.icon) ? m.icon : "🧩";
+  p.name.textContent = m.name;
+  p.badges.innerHTML = "";
+  p.badges.append(chip("v" + m.version));
+  if (m.author) p.badges.append(chip(m.author));
+  (m.permissions || []).forEach((perm) => p.badges.append(chip(perm, "perm")));
+  p.badges.append(chip(Math.max(1, Math.round(ins.size / 1024)) + " KB"));
+  renderActions(entry, card);
+}
+
+function refreshAll() {
+  cards.forEach(({ entry, card }) => { if (entry.ready) renderActions(entry, card); });
+}
+
+CATALOG.forEach((entry) => {
+  const card = makeCard(entry);
+  cards.push({ entry, card });
+  loadCard(entry, card);
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") refreshAll();
+});
+window.addEventListener("pageshow", (e) => { if (e.persisted) refreshAll(); });
+</script>
+
+<style>
+.exg { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: var(--space-4); margin-top: var(--space-5); }
+.exg__card { display: flex; flex-direction: column; gap: var(--space-3); border: 1px solid var(--term-border); border-radius: var(--radius-lg); padding: var(--space-4); background: var(--term-bg-raised); }
+.exg__head { display: flex; align-items: center; gap: var(--space-3); }
+.exg__icon { font-size: 1.6rem; line-height: 1; }
+.exg__name { font-size: var(--text-md); margin: 0; font-family: var(--font-mono); color: var(--term-fg-strong); }
+.exg__desc { margin: 0; font-size: var(--text-sm); color: var(--term-muted); line-height: 1.5; flex: 1; }
+.exg__badges { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.exg__chip { font-family: var(--font-mono); font-size: var(--text-2xs); padding: 2px 8px; border-radius: var(--radius-pill); border: 1px solid var(--term-border); color: var(--term-muted); }
+.exg__chip--perm { border-color: var(--syn-cyan); color: var(--syn-cyan); }
+.exg__actions { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-1); min-height: 2.2rem; }
+.exg__btn { font-size: var(--text-sm); text-decoration: none; }
+.exg__done { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--syn-green); }
+.exg__status { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--syn-pink); margin: 0; }
+.exg__status[hidden] { display: none; }
+.exg__manage { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--term-muted); margin-top: var(--space-6); }
+.exg__manage a { color: var(--accent); }
+</style>

@@ -1198,6 +1198,21 @@
     "extensions-sdk": {
       "heading_start": "Inicio rápido",
       "heading_reference": "Referencia"
+    },
+    "ext_gallery": {
+      "title": "Galería de extensiones",
+      "lede": "Extensiones propias que puedes instalar con un clic. Cada una es un único archivo HTML que se ejecuta solo en este dispositivo: obtiene un icono en tu lanzador y su propio almacenamiento local, y nunca toca el sitio público.",
+      "btn_install": "Instalar",
+      "installed": "Instalada",
+      "btn_open": "Abrir",
+      "manage_note": "Gestiona, actualiza o elimina las extensiones instaladas en el",
+      "manage_link": "gestor de extensiones",
+      "err_load": "No se pudo cargar esta extensión.",
+      "desc": {
+        "unit-converter": "Convierte longitud, peso y temperatura. Recuerda tus últimas unidades entre sesiones.",
+        "pomodoro-timer": "Un temporizador de concentración con fases de trabajo y descanso. La cuenta atrás sigue corriendo aunque recargues.",
+        "dice-roller": "Tira dados con notación estándar como 2d6+1, o elige una opción al azar de tu propia lista."
+      }
     }
   },
   "category": {

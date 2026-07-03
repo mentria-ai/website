@@ -1,0 +1,131 @@
+<script type="application/json" id="mentria-ext">
+{
+  "id": "dice-roller",
+  "name": "Dice Roller",
+  "version": "1.0.0",
+  "icon": "🎲",
+  "author": "Mentria",
+  "description": "Roll dice with standard notation and pick randomly from a list.",
+  "permissions": ["storage"],
+  "mounts": {
+    "tool": {},
+    "commands": [
+      { "name": "roll", "usage": "roll <NdM>", "description": "roll dice, e.g. roll 2d6+1" }
+    ]
+  }
+}
+</script>
+<style>
+  :root {
+    --ext-accent: #6ef3c5;
+    --ext-bg: #0b0e11;
+    --ext-fg: #e6edf3;
+    --ext-muted: #8b98a5;
+    --ext-font: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 1.5rem 1.25rem; font-family: var(--ext-font); background: var(--ext-bg); color: var(--ext-fg); }
+  .wrap { max-width: 30rem; margin: 0 auto; }
+  h1 { font-size: 1.05rem; margin: 0 0 1rem; font-weight: 600; }
+  h2 { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ext-muted); margin: 1.4rem 0 0.5rem; font-weight: 600; }
+  .quick { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.7rem; }
+  .quick button { padding: 0.35rem 0.7rem; font-size: 0.78rem; }
+  .roll-row { display: flex; gap: 0.5rem; }
+  input, textarea { background: #10141a; border: 1px solid #2a3138; border-radius: 6px; padding: 0.5rem 0.6rem; color: var(--ext-fg); font-family: inherit; font-size: 0.95rem; }
+  #notation { flex: 1; }
+  textarea { width: 100%; resize: vertical; min-height: 4.5rem; margin-bottom: 0.5rem; }
+  input:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--ext-accent); outline-offset: 1px; }
+  button { background: transparent; border: 1px solid #2a3138; color: var(--ext-fg); border-radius: 6px; padding: 0.5rem 1rem; font-family: inherit; font-size: 0.9rem; cursor: pointer; }
+  button.primary { border-color: var(--ext-accent); color: var(--ext-accent); }
+  button:hover { border-color: var(--ext-accent); }
+  .out { margin-top: 0.9rem; padding: 0.9rem 1rem; border: 1px solid #2a3138; border-radius: 8px; background: #10141a; min-height: 2.4rem; }
+  .out b { color: var(--ext-accent); font-size: 1.6rem; }
+  .out small { display: block; color: var(--ext-muted); margin-top: 0.3rem; font-size: 0.72rem; word-break: break-word; }
+</style>
+<div class="wrap">
+  <h1>🎲 Dice Roller</h1>
+  <div class="quick" id="quick"></div>
+  <div class="roll-row">
+    <input id="notation" type="text" value="2d6" spellcheck="false" aria-label="Dice notation" placeholder="2d6+1">
+    <button class="primary" id="roll" type="button">Roll</button>
+  </div>
+  <div class="out" aria-live="polite">
+    <b id="total">—</b>
+    <small id="breakdown"></small>
+  </div>
+
+  <h2>Random picker</h2>
+  <textarea id="items" spellcheck="false" placeholder="one option per line" aria-label="Options to pick from"></textarea>
+  <button id="pick" type="button">Pick one</button>
+  <div class="out" aria-live="polite">
+    <b id="picked">—</b>
+  </div>
+</div>
+<script>
+  (function () {
+    var m = window.mentria || {};
+    var storage = m.storage || { get: function () { return null; }, set: function () {} };
+    if (m.theme) {
+      var r = document.documentElement;
+      var map = { accent: '--ext-accent', bg: '--ext-bg', fg: '--ext-fg', muted: '--ext-muted', fontMono: '--ext-font' };
+      Object.keys(map).forEach(function (k) { if (m.theme[k]) r.style.setProperty(map[k], m.theme[k]); });
+    }
+
+    function rnd(n) {
+      if (window.crypto && crypto.getRandomValues) {
+        var a = new Uint32Array(1); crypto.getRandomValues(a);
+        return a[0] % n;
+      }
+      return Math.floor(Math.random() * n);
+    }
+
+    var notationEl = document.getElementById('notation');
+    var totalEl = document.getElementById('total');
+    var breakdownEl = document.getElementById('breakdown');
+    var itemsEl = document.getElementById('items');
+    var pickedEl = document.getElementById('picked');
+
+    var saved = storage.get('state') || {};
+    if (saved.notation) notationEl.value = saved.notation;
+    if (saved.items) itemsEl.value = saved.items;
+
+    function roll() {
+      var mch = notationEl.value.trim().match(/^(\d*)d(\d+)([+-]\d+)?$/i);
+      if (!mch) { totalEl.textContent = '—'; breakdownEl.textContent = 'try e.g. 2d6 or 1d20+3'; return; }
+      var count = Math.min(100, parseInt(mch[1] || '1', 10) || 1);
+      var sides = Math.min(1000, parseInt(mch[2], 10));
+      var mod = parseInt(mch[3] || '0', 10);
+      var rolls = [], sum = 0;
+      for (var i = 0; i < count; i++) { var v = rnd(sides) + 1; rolls.push(v); sum += v; }
+      var total = sum + mod;
+      totalEl.textContent = String(total);
+      breakdownEl.textContent = '[' + rolls.join(', ') + ']' + (mod ? (mod > 0 ? ' +' + mod : ' ' + mod) : '');
+      storage.set('state', { notation: notationEl.value, items: itemsEl.value });
+    }
+
+    function pick() {
+      var opts = itemsEl.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+      if (!opts.length) { pickedEl.textContent = '—'; return; }
+      pickedEl.textContent = opts[rnd(opts.length)];
+      storage.set('state', { notation: notationEl.value, items: itemsEl.value });
+    }
+
+    var quick = document.getElementById('quick');
+    ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'].forEach(function (d) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = d;
+      b.addEventListener('click', function () { notationEl.value = '1' + d; roll(); });
+      quick.appendChild(b);
+    });
+
+    document.getElementById('roll').addEventListener('click', roll);
+    notationEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') roll(); });
+    document.getElementById('pick').addEventListener('click', pick);
+    itemsEl.addEventListener('change', function () { storage.set('state', { notation: notationEl.value, items: itemsEl.value }); });
+
+    if (m.args && m.args.cmd === 'roll' && m.args.args) {
+      notationEl.value = String(m.args.args).trim();
+    }
+    roll();
+  })();
+</script>

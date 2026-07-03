@@ -1198,6 +1198,21 @@
     "extensions-sdk": {
       "heading_start": "Démarrage rapide",
       "heading_reference": "Référence"
+    },
+    "ext_gallery": {
+      "title": "Galerie d'extensions",
+      "lede": "Des extensions maison que vous pouvez installer en un clic. Chacune est un seul fichier HTML qui s'exécute uniquement sur cet appareil : elle obtient une tuile dans votre lanceur et son propre stockage local, et ne touche jamais au site public.",
+      "btn_install": "Installer",
+      "installed": "Installée",
+      "btn_open": "Ouvrir",
+      "manage_note": "Gérez, mettez à jour ou supprimez les extensions installées dans le",
+      "manage_link": "gestionnaire d'extensions",
+      "err_load": "Impossible de charger cette extension.",
+      "desc": {
+        "unit-converter": "Convertissez longueur, poids et température. Mémorise vos dernières unités d'une session à l'autre.",
+        "pomodoro-timer": "Une minuterie de concentration avec des phases de travail et de pause. Le compte à rebours continue même si vous rechargez.",
+        "dice-roller": "Lancez des dés en notation standard comme 2d6+1, ou tirez au sort une option dans votre propre liste."
+      }
     }
   },
   "category": {

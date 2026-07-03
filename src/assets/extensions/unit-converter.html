@@ -1,0 +1,165 @@
+<script type="application/json" id="mentria-ext">
+{
+  "id": "unit-converter",
+  "name": "Unit Converter",
+  "version": "1.0.0",
+  "icon": "📐",
+  "author": "Mentria",
+  "description": "Convert length, weight, and temperature. Remembers your last units.",
+  "permissions": ["storage"],
+  "mounts": {
+    "tool": {},
+    "commands": [
+      { "name": "convert", "usage": "convert <value> <from> <to>", "description": "convert a value between units, e.g. convert 10 km mi" }
+    ]
+  }
+}
+</script>
+<style>
+  :root {
+    --ext-accent: #6ef3c5;
+    --ext-bg: #0b0e11;
+    --ext-fg: #e6edf3;
+    --ext-muted: #8b98a5;
+    --ext-font: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 1.5rem 1.25rem; font-family: var(--ext-font); background: var(--ext-bg); color: var(--ext-fg); }
+  .wrap { max-width: 30rem; margin: 0 auto; }
+  h1 { font-size: 1.05rem; margin: 0 0 1rem; font-weight: 600; }
+  .seg { display: flex; border: 1px solid #2a3138; border-radius: 8px; overflow: hidden; margin-bottom: 1.1rem; }
+  .seg button { flex: 1; background: transparent; border: 0; padding: 0.5rem; color: var(--ext-muted); font-family: inherit; font-size: 0.8rem; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: color-mix(in srgb, var(--ext-accent) 16%, transparent); color: var(--ext-accent); }
+  .row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.6rem; align-items: end; }
+  label { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ext-muted); margin-bottom: 0.3rem; }
+  input, select { width: 100%; background: #10141a; border: 1px solid #2a3138; border-radius: 6px; padding: 0.5rem 0.6rem; color: var(--ext-fg); font-family: inherit; font-size: 0.95rem; }
+  input:focus, select:focus, button:focus-visible { outline: 2px solid var(--ext-accent); outline-offset: 1px; }
+  .swap { align-self: end; margin-bottom: 0.15rem; background: transparent; border: 1px solid #2a3138; border-radius: 6px; color: var(--ext-accent); font-family: inherit; font-size: 1rem; padding: 0.45rem 0.55rem; cursor: pointer; }
+  .swap:hover { border-color: var(--ext-accent); }
+  .out { margin-top: 1.2rem; padding: 0.9rem 1rem; border: 1px solid #2a3138; border-radius: 8px; background: #10141a; }
+  .out b { color: var(--ext-accent); font-size: 1.35rem; }
+  .out small { display: block; color: var(--ext-muted); margin-top: 0.25rem; font-size: 0.7rem; }
+</style>
+<div class="wrap">
+  <h1>📐 Unit Converter</h1>
+  <div class="seg" id="cats" role="group" aria-label="Category"></div>
+  <div class="row">
+    <div>
+      <label for="val">Value</label>
+      <input id="val" type="number" inputmode="decimal" value="1" step="any">
+    </div>
+    <button class="swap" id="swap" type="button" title="Swap units" aria-label="Swap units">⇄</button>
+    <div>
+      <label for="to">To</label>
+      <select id="to"></select>
+    </div>
+  </div>
+  <div class="row" style="margin-top:0.7rem;">
+    <div>
+      <label for="from">From</label>
+      <select id="from"></select>
+    </div>
+    <span></span>
+    <span></span>
+  </div>
+  <div class="out" aria-live="polite">
+    <b id="result">—</b>
+    <small id="detail"></small>
+  </div>
+</div>
+<script>
+  (function () {
+    var m = window.mentria || {};
+    var storage = m.storage || { get: function () { return null; }, set: function () {} };
+    if (m.theme) {
+      var r = document.documentElement;
+      var map = { accent: '--ext-accent', bg: '--ext-bg', fg: '--ext-fg', muted: '--ext-muted', fontMono: '--ext-font' };
+      Object.keys(map).forEach(function (k) { if (m.theme[k]) r.style.setProperty(map[k], m.theme[k]); });
+    }
+
+    var CATS = {
+      length: { label: 'Length', base: 'm', units: { km: 1000, m: 1, cm: 0.01, mm: 0.001, mi: 1609.344, yd: 0.9144, ft: 0.3048, in: 0.0254 } },
+      weight: { label: 'Weight', base: 'g', units: { kg: 1000, g: 1, mg: 0.001, lb: 453.59237, oz: 28.349523 } },
+      temp:   { label: 'Temp', units: { '°C': 1, '°F': 1, K: 1 } }
+    };
+    var ORDER = ['length', 'weight', 'temp'];
+
+    function toBase(cat, u, v) {
+      if (cat !== 'temp') return v * CATS[cat].units[u];
+      if (u === '°C') return v; if (u === '°F') return (v - 32) * 5 / 9; return v - 273.15;
+    }
+    function fromBase(cat, u, c) {
+      if (cat !== 'temp') return c / CATS[cat].units[u];
+      if (u === '°C') return c; if (u === '°F') return c * 9 / 5 + 32; return c + 273.15;
+    }
+    function fmt(n) {
+      if (!isFinite(n)) return '—';
+      return (Math.round(n * 1e6) / 1e6).toString();
+    }
+
+    var catsEl = document.getElementById('cats');
+    var valEl = document.getElementById('val');
+    var fromEl = document.getElementById('from');
+    var toEl = document.getElementById('to');
+    var resultEl = document.getElementById('result');
+    var detailEl = document.getElementById('detail');
+
+    var saved = storage.get('last') || {};
+    var cat = CATS[saved.cat] ? saved.cat : 'length';
+
+    ORDER.forEach(function (key) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = CATS[key].label; b.dataset.cat = key;
+      b.addEventListener('click', function () { cat = key; buildUnits(); compute(); persist(); });
+      catsEl.appendChild(b);
+    });
+
+    function buildUnits() {
+      Array.prototype.forEach.call(catsEl.children, function (b) {
+        b.setAttribute('aria-pressed', b.dataset.cat === cat ? 'true' : 'false');
+      });
+      var units = Object.keys(CATS[cat].units);
+      [fromEl, toEl].forEach(function (sel) {
+        sel.innerHTML = '';
+        units.forEach(function (u) {
+          var o = document.createElement('option'); o.value = u; o.textContent = u; sel.appendChild(o);
+        });
+      });
+      fromEl.value = units.indexOf(saved.from) >= 0 && saved.cat === cat ? saved.from : units[0];
+      toEl.value = units.indexOf(saved.to) >= 0 && saved.cat === cat ? saved.to : (units[1] || units[0]);
+      saved = {};
+    }
+
+    function compute() {
+      var v = parseFloat(valEl.value);
+      if (isNaN(v)) { resultEl.textContent = '—'; detailEl.textContent = ''; return; }
+      var out = fromBase(cat, toEl.value, toBase(cat, fromEl.value, v));
+      resultEl.textContent = fmt(out) + ' ' + toEl.value;
+      detailEl.textContent = fmt(v) + ' ' + fromEl.value + ' = ' + fmt(out) + ' ' + toEl.value;
+    }
+
+    function persist() {
+      storage.set('last', { cat: cat, from: fromEl.value, to: toEl.value });
+    }
+
+    document.getElementById('swap').addEventListener('click', function () {
+      var f = fromEl.value; fromEl.value = toEl.value; toEl.value = f; compute(); persist();
+    });
+    valEl.addEventListener('input', compute);
+    [fromEl, toEl].forEach(function (el) { el.addEventListener('change', function () { compute(); persist(); }); });
+
+    buildUnits();
+
+    if (m.args && m.args.cmd === 'convert' && m.args.args) {
+      var parts = String(m.args.args).trim().split(/\s+/);
+      var num = parseFloat(parts[0]);
+      var fu = parts[1], tu = parts[2];
+      var found = ORDER.filter(function (k) { return CATS[k].units[fu] != null && CATS[k].units[tu] != null; })[0];
+      if (found && !isNaN(num)) {
+        cat = found; buildUnits(); valEl.value = num; fromEl.value = fu; toEl.value = tu; persist();
+      }
+    }
+
+    compute();
+  })();
+</script>

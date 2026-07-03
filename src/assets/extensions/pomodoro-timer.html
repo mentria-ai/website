@@ -1,0 +1,153 @@
+<script type="application/json" id="mentria-ext">
+{
+  "id": "pomodoro-timer",
+  "name": "Pomodoro Timer",
+  "version": "1.0.0",
+  "icon": "🍅",
+  "author": "Mentria",
+  "description": "In-page focus timer with work and break phases. State survives reloads.",
+  "permissions": ["storage"],
+  "mounts": {
+    "tool": {},
+    "commands": [
+      { "name": "pomodoro", "usage": "pomodoro [minutes]", "description": "start a focus session, optionally set the work length" }
+    ]
+  }
+}
+</script>
+<style>
+  :root {
+    --ext-accent: #6ef3c5;
+    --ext-bg: #0b0e11;
+    --ext-fg: #e6edf3;
+    --ext-muted: #8b98a5;
+    --ext-font: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 1.5rem 1.25rem; font-family: var(--ext-font); background: var(--ext-bg); color: var(--ext-fg); }
+  .wrap { max-width: 24rem; margin: 0 auto; text-align: center; }
+  .phase { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ext-muted); }
+  .phase[data-p="break"] { color: var(--ext-accent); }
+  .clock { font-size: 4rem; font-weight: 600; margin: 0.4rem 0 0.2rem; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+  .done { font-size: 0.72rem; color: var(--ext-muted); margin-bottom: 1.1rem; }
+  .controls { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.4rem; }
+  button { background: transparent; border: 1px solid #2a3138; color: var(--ext-fg); border-radius: 8px; padding: 0.55rem 1.1rem; font-family: inherit; font-size: 0.9rem; cursor: pointer; }
+  button.primary { border-color: var(--ext-accent); color: var(--ext-accent); }
+  button:hover { border-color: var(--ext-accent); }
+  button:focus-visible { outline: 2px solid var(--ext-accent); outline-offset: 1px; }
+  .settings { display: flex; gap: 1rem; justify-content: center; }
+  .settings label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ext-muted); }
+  .settings input { width: 5rem; background: #10141a; border: 1px solid #2a3138; border-radius: 6px; padding: 0.4rem; color: var(--ext-fg); font-family: inherit; font-size: 0.95rem; text-align: center; }
+</style>
+<div class="wrap">
+  <div class="phase" id="phase" data-p="work">Focus</div>
+  <div class="clock" id="clock" aria-live="polite">25:00</div>
+  <div class="done" id="done">0 sessions completed</div>
+  <div class="controls">
+    <button class="primary" id="toggle" type="button">Start</button>
+    <button id="reset" type="button">Reset</button>
+    <button id="skip" type="button">Skip</button>
+  </div>
+  <div class="settings">
+    <label>Focus min<input id="work" type="number" min="1" max="180" value="25"></label>
+    <label>Break min<input id="break" type="number" min="1" max="60" value="5"></label>
+  </div>
+</div>
+<script>
+  (function () {
+    var m = window.mentria || {};
+    var storage = m.storage || { get: function () { return null; }, set: function () {} };
+    var notify = m.notify || function () {};
+    if (m.theme) {
+      var r = document.documentElement;
+      var map = { accent: '--ext-accent', bg: '--ext-bg', fg: '--ext-fg', muted: '--ext-muted', fontMono: '--ext-font' };
+      Object.keys(map).forEach(function (k) { if (m.theme[k]) r.style.setProperty(map[k], m.theme[k]); });
+    }
+
+    var phaseEl = document.getElementById('phase');
+    var clockEl = document.getElementById('clock');
+    var doneEl = document.getElementById('done');
+    var toggleEl = document.getElementById('toggle');
+    var workEl = document.getElementById('work');
+    var breakEl = document.getElementById('break');
+
+    var s = storage.get('state') || { phase: 'work', running: false, endsAt: 0, remaining: 25 * 60, work: 25, brk: 5, done: 0 };
+    if (typeof s.work !== 'number') s.work = 25;
+    if (typeof s.brk !== 'number') s.brk = 5;
+    workEl.value = s.work;
+    breakEl.value = s.brk;
+
+    function total() { return (s.phase === 'work' ? s.work : s.brk) * 60; }
+    function save() { storage.set('state', s); }
+    function left() {
+      if (s.running) return Math.max(0, Math.round((s.endsAt - Date.now()) / 1000));
+      return s.remaining;
+    }
+    function render() {
+      var sec = left();
+      var mm = String(Math.floor(sec / 60)).padStart(2, '0');
+      var ss = String(sec % 60).padStart(2, '0');
+      clockEl.textContent = mm + ':' + ss;
+      phaseEl.textContent = s.phase === 'work' ? 'Focus' : 'Break';
+      phaseEl.dataset.p = s.phase;
+      doneEl.textContent = s.done + (s.done === 1 ? ' session completed' : ' sessions completed');
+      toggleEl.textContent = s.running ? 'Pause' : 'Start';
+    }
+
+    function advance() {
+      if (s.phase === 'work') { s.done += 1; s.phase = 'break'; } else { s.phase = 'work'; }
+      s.remaining = total();
+      s.running = false;
+      s.endsAt = 0;
+      save();
+      render();
+      notify(s.phase === 'break' ? 'Break time 🍵' : 'Back to focus 🍅');
+    }
+
+    function tick() {
+      if (!s.running) return;
+      if (left() <= 0) { advance(); return; }
+      render();
+    }
+
+    function start() {
+      if (s.remaining <= 0) s.remaining = total();
+      s.endsAt = Date.now() + s.remaining * 1000;
+      s.running = true;
+      save();
+      render();
+    }
+    function pause() {
+      s.remaining = left();
+      s.running = false;
+      s.endsAt = 0;
+      save();
+      render();
+    }
+
+    toggleEl.addEventListener('click', function () { s.running ? pause() : start(); });
+    document.getElementById('reset').addEventListener('click', function () {
+      s.running = false; s.endsAt = 0; s.remaining = total(); save(); render();
+    });
+    document.getElementById('skip').addEventListener('click', advance);
+
+    function onSetting() {
+      s.work = Math.min(180, Math.max(1, parseInt(workEl.value, 10) || 25));
+      s.brk = Math.min(60, Math.max(1, parseInt(breakEl.value, 10) || 5));
+      if (!s.running) s.remaining = total();
+      save(); render();
+    }
+    workEl.addEventListener('change', onSetting);
+    breakEl.addEventListener('change', onSetting);
+
+    if (m.args && m.args.cmd === 'pomodoro') {
+      var mins = parseInt(String(m.args.args || '').trim(), 10);
+      if (mins > 0) { s.work = Math.min(180, mins); workEl.value = s.work; }
+      s.phase = 'work'; s.remaining = total(); start();
+    }
+
+    if (s.running && left() <= 0) advance();
+    render();
+    setInterval(tick, 250);
+  })();
+</script>

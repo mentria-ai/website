@@ -1198,6 +1198,21 @@
     "extensions-sdk": {
       "heading_start": "Quick start",
       "heading_reference": "Reference"
+    },
+    "ext_gallery": {
+      "title": "Extension Gallery",
+      "lede": "First-party extensions you can install in one click. Each is a single HTML file that runs only on this device — it gets a launcher tile and its own local storage, and never touches the public site.",
+      "btn_install": "Install",
+      "installed": "Installed",
+      "btn_open": "Open",
+      "manage_note": "Manage, update, or remove installed extensions in the",
+      "manage_link": "extension manager",
+      "err_load": "Couldn't load this extension.",
+      "desc": {
+        "unit-converter": "Convert length, weight, and temperature. Remembers your last units between sessions.",
+        "pomodoro-timer": "A focus timer with work and break phases. The countdown keeps running even if you reload.",
+        "dice-roller": "Roll dice with standard notation like 2d6+1, or pick a random option from your own list."
+      }
     }
   },
   "category": {

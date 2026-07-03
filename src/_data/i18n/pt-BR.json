@@ -1198,6 +1198,21 @@
     "extensions-sdk": {
       "heading_start": "Início rápido",
       "heading_reference": "Referência"
+    },
+    "ext_gallery": {
+      "title": "Galeria de extensões",
+      "lede": "Extensões próprias que você pode instalar com um clique. Cada uma é um único arquivo HTML que roda apenas neste dispositivo: ganha um atalho no seu lançador e seu próprio armazenamento local, e nunca toca no site público.",
+      "btn_install": "Instalar",
+      "installed": "Instalada",
+      "btn_open": "Abrir",
+      "manage_note": "Gerencie, atualize ou remova as extensões instaladas no",
+      "manage_link": "gerenciador de extensões",
+      "err_load": "Não foi possível carregar esta extensão.",
+      "desc": {
+        "unit-converter": "Converta comprimento, peso e temperatura. Lembra as últimas unidades usadas entre sessões.",
+        "pomodoro-timer": "Um cronômetro de foco com fases de trabalho e pausa. A contagem regressiva continua mesmo se você recarregar.",
+        "dice-roller": "Role dados com notação padrão como 2d6+1, ou sorteie uma opção da sua própria lista."
+      }
     }
   },
   "category": {

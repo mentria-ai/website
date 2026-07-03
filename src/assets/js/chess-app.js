@@ -87,8 +87,8 @@
     const nps = d.time ? Math.round((d.nodes||0)/(d.time/1000)) : 0;
     $('stat-nps').textContent = nps.toLocaleString();
     const ev = d.eval || 0;
-    setEval(State.pos.turn === 'w' ? ev : -ev);
-    renderLines(d.lines || [], State.pos.turn);
+    setEval(State.pos.turn === 'w' ? ev : -ev, d.depth);
+    renderLines(d.lines || [], State.pos.turn, d.depth);
     if (pendingHint && d.move){ drawHintArrow(d.move.from, d.move.to); pendingHint = false; }
     if (pendingEngineCallback){ const cb = pendingEngineCallback; pendingEngineCallback = null; cb(d.move); }
     pendingAnalyze = false;
@@ -110,22 +110,26 @@
   function analyze(){ if (pendingAnalyze) return; pendingAnalyze = true; askEngine(); }
 
   /* ===== eval bar ===== */
-  function setEval(cp){
+  function mateMoves(cp, depth){
+    const plies = Math.max(1, (depth || 0) - (Math.abs(cp) - 29000));
+    return Math.max(1, Math.ceil(plies / 2));
+  }
+  function setEval(cp, depth){
     const clamped = Math.max(-1000, Math.min(1000, cp));
     const pct = 50 + (clamped/2000)*100;
     $('evalWhite').style.height = Math.max(2, Math.min(98, pct)) + '%';
     let label;
-    if (Math.abs(cp) > 28000){ const mateInt = Math.max(1, Math.round((29000 - Math.abs(cp)))); label = (cp>0?'+M':'-M') + Math.max(1, Math.ceil(mateInt)); }
+    if (Math.abs(cp) > 28000){ label = (cp>0?'+M':'-M') + mateMoves(cp, depth); }
     else label = (cp>=0?'+':'') + (cp/100).toFixed(2);
     $('evalLabel').textContent = label;
   }
-  function renderLines(lines, turn){
+  function renderLines(lines, turn, depth){
     const c = $('cand-lines'); c.innerHTML = '';
     lines.forEach((ln, i) => {
       const btn = document.createElement('button'); btn.className = 'line';
       const cp = ln.score; const orient = turn === 'w' ? cp : -cp;
       let evStr;
-      if (Math.abs(cp) > 28000) evStr = (orient>0?'+M':'-M') + Math.max(1, Math.ceil((29000-Math.abs(cp))/2));
+      if (Math.abs(cp) > 28000) evStr = (orient>0?'+M':'-M') + mateMoves(cp, depth);
       else evStr = (orient>=0?'+':'') + (orient/100).toFixed(2);
       btn.innerHTML = `<span class="rank">${i+1}.</span><span class="ev">${evStr}</span><span class="pv">${ln.pv}</span>`;
       btn.onmouseenter = () => { State.ghostMove = ln.move; render(); };

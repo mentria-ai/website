@@ -22,7 +22,7 @@ eleventyComputed:
 <section class="ac">
   <div class="ac__status" id="ac-status">
     <span class="ac__status-dot" id="ac-status-dot"></span>
-    <span class="ac__status-text" id="ac-status-text">{{ "tool.ai-chat.status_checking_webgpu" | t }}</span>
+    <span class="ac__status-text" id="ac-status-text" role="status" aria-live="polite">{{ "tool.ai-chat.status_checking_webgpu" | t }}</span>
     <select class="ac__tier" id="ac-tier" aria-label="{{ 'tool.ai-chat.tier_label' | t }}" hidden></select>
     <button class="ac__delete-btn" id="ac-delete-model" title="{{ 'tool.ai-chat.btn_delete_model_title' | t }}" style="display:none;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -84,6 +84,7 @@ const COPY = {
   errUnsupportedSub:   {{ ("tool.ai-chat.err_unsupported_sub"   | t) | dump | safe }},
   errLoadRuntime:      {{ ("tool.ai-chat.err_load_runtime"      | t) | dump | safe }},
   errDeviceLost:       {{ ("tool.ai-chat.err_device_lost"       | t) | dump | safe }},
+  errBadImage:         {{ ("tool.ai-chat.err_bad_image"         | t) | dump | safe }},
   errLoadPrefix:       {{ ("tool.ai-chat.err_load_prefix"       | t) | dump | safe }},
   errPrefix:           {{ ("tool.ai-chat.err_prefix"            | t) | dump | safe }},
   errDeletePrefix:     {{ ("tool.ai-chat.err_delete_prefix"     | t) | dump | safe }},
@@ -482,21 +483,22 @@ function runApp(MentriaEngine, Tiers) {
   /* ── Image handling ──────────────────────────────── */
   async function attachFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
+    removeImage();
+    const url = URL.createObjectURL(file);
+    imgThumb.src = url;
+    imgPreview.style.display = '';
+    attachedDataUrl = url;
     try {
-      const url = URL.createObjectURL(file);
-      imgThumb.src = url;
-      imgPreview.style.display = '';
-      attachedDataUrl = url;
       attachedImage = await fileToEngineImage(file, IMG_MAX);
     } catch (err) {
       console.error('Image attach error:', err);
-      attachedImage = null;
-      attachedDataUrl = null;
-      imgPreview.style.display = 'none';
+      removeImage();
+      setStatus('error', COPY.errBadImage);
     }
   }
 
   function removeImage() {
+    if (attachedDataUrl) { try { URL.revokeObjectURL(attachedDataUrl); } catch (_) {} }
     attachedImage = null;
     attachedDataUrl = null;
     imgPreview.style.display = 'none';
@@ -508,6 +510,7 @@ function runApp(MentriaEngine, Tiers) {
   sendBtn.addEventListener('click', generate);
 
   inputEl.addEventListener('keydown', e => {
+    if (e.isComposing || e.keyCode === 229) return;
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       generate();

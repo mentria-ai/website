@@ -252,6 +252,7 @@
 
     // Input handling
     inputEl.addEventListener('keydown', function (e) {
+      if (e.isComposing || e.keyCode === 229) return;
       var sugOpen = suggestEl && suggestEl.matches(':popover-open') && suggestState.items.length > 0;
 
       // Tab or Right-arrow at end-of-input: complete to highlighted (or first) suggestion.

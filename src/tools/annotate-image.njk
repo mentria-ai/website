@@ -23,7 +23,7 @@ eleventyComputed:
 <div class="annotate-app">
   <div class="an-statusbar">
     <span class="an-status-dot" id="an-status-dot"></span>
-    <span id="an-status-text">{{ "tool.annotate-image.status_idle" | t }}</span>
+    <span id="an-status-text" role="status" aria-live="polite">{{ "tool.annotate-image.status_idle" | t }}</span>
     <button type="button" class="an-mini-btn" id="an-delete" style="display:none">{{ "tool.annotate-image.delete_model" | t }}</button>
   </div>
   <div class="an-progress" id="an-progress" style="display:none"><div class="an-progress__bar" id="an-progress-bar"></div><span class="an-progress__label" id="an-progress-label"></span></div>

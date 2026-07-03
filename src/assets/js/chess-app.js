@@ -644,7 +644,7 @@
     };
 
     $('btn-send').onclick = sendChat;
-    $('chat-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
+    $('chat-input').addEventListener('keydown', (e) => { if (e.isComposing || e.keyCode === 229) return; if (e.key === 'Enter') sendChat(); });
 
     document.querySelectorAll('#mobile-tabs button').forEach(b => {
       b.onclick = () => {

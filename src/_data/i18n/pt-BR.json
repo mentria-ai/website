@@ -806,6 +806,7 @@
       "err_unsupported_sub": "Tente a versão mais recente de Chrome, Edge ou Brave no desktop, ou Safari 26+ no macOS / iOS 26+.",
       "err_load_runtime": "Falha ao carregar runtime — verifique rede/bloqueador",
       "err_device_lost": "GPU perdida — recarregue para recuperar",
+      "err_bad_image": "Não foi possível ler essa imagem — tente JPEG ou PNG.",
       "err_load_prefix": "Falha ao carregar: ",
       "err_prefix": "Erro: ",
       "err_delete_prefix": "Falha ao excluir cache: ",

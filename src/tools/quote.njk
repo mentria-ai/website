@@ -22,7 +22,7 @@ eleventyComputed:
 <section class="mq">
   <div class="mq__status">
     <span class="mq__status-dot" id="mq-status-dot"></span>
-    <span class="mq__status-text" id="mq-status-text">{{ "tool.quote.status_initializing" | t }}</span>
+    <span class="mq__status-text" id="mq-status-text" role="status" aria-live="polite">{{ "tool.quote.status_initializing" | t }}</span>
   </div>
 
   <div class="mq__progress-wrap" id="mq-progress-wrap" style="display:none;">

@@ -266,6 +266,27 @@ eleventyComputed:
     else localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
   }
 
+  function recordColorDeletion(hex) {
+    if (!window.MentriaStore) return;
+    let del = window.MentriaStore.get('tools', 'color_picker_deleted');
+    if (!del || typeof del !== 'object') del = {};
+    del[hex] = Date.now();
+    const keys = Object.keys(del);
+    if (keys.length > 200) {
+      keys.sort((a, b) => (Number(del[a]) || 0) - (Number(del[b]) || 0));
+      keys.slice(0, keys.length - 200).forEach(k => { delete del[k]; });
+    }
+    window.MentriaStore.set('tools', 'color_picker_deleted', del);
+  }
+
+  function clearColorDeletion(hex) {
+    if (!window.MentriaStore) return;
+    const del = window.MentriaStore.get('tools', 'color_picker_deleted');
+    if (!del || typeof del !== 'object' || !(hex in del)) return;
+    delete del[hex];
+    window.MentriaStore.set('tools', 'color_picker_deleted', del);
+  }
+
   function renderSaved() {
     const saved = loadSaved();
     savedList.innerHTML = '';
@@ -290,6 +311,7 @@ eleventyComputed:
         const arr = loadSaved();
         arr.splice(i, 1);
         saveSaved(arr);
+        recordColorDeletion(c);
         renderSaved();
       };
       el.querySelector('.cp__saved-remove').addEventListener('click', e => { e.stopPropagation(); removeColor(); });
@@ -340,6 +362,7 @@ eleventyComputed:
     if (!saved.includes(currentHex)) {
       saved.push(currentHex);
       saveSaved(saved);
+      clearColorDeletion(currentHex);
       renderSaved();
       MentriaUI.toast(COPY.toastSaved.replace('{color}', currentHex));
     } else {

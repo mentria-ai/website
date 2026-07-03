@@ -55,6 +55,24 @@
     } catch (_) { return null; }
   };
 
+  const TOMB_KEY = 'mentria-sync-tombstones';
+  const TOMB_CAP = 500;
+
+  const tombWrite = (fn) => {
+    try {
+      const raw = global.localStorage.getItem(TOMB_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      const tombs = (parsed && typeof parsed === 'object') ? parsed : {};
+      if (!fn(tombs)) return;
+      const keys = Object.keys(tombs);
+      if (keys.length > TOMB_CAP) {
+        keys.sort((a, b) => (Number(tombs[a]) || 0) - (Number(tombs[b]) || 0));
+        keys.slice(0, keys.length - TOMB_CAP).forEach((k) => { delete tombs[k]; });
+      }
+      global.localStorage.setItem(TOMB_KEY, JSON.stringify(tombs));
+    } catch (_) {}
+  };
+
   const set = (ns, key, value, opts) => {
     if (!lsAvailable) return false;
     opts = opts || {};
@@ -63,6 +81,12 @@
       const mtime = (opts && typeof opts.mtime === 'number') ? opts.mtime : Date.now();
       global.localStorage.setItem(fullKey(ns, key), raw);
       writeMeta(ns, key, raw, mtime);
+      tombWrite((tombs) => {
+        const suffix = ns + '.' + key;
+        if (!(suffix in tombs)) return false;
+        delete tombs[suffix];
+        return true;
+      });
       emit({ ns, key, op: 'set', value, remote: !!opts.remote, mtime });
       if (persistCache !== true) tryPersist();
       return true;
@@ -78,6 +102,15 @@
     try {
       global.localStorage.removeItem(fullKey(ns, key));
       try { global.localStorage.removeItem(metaKey(ns, key)); } catch (_) {}
+      if (!opts.remote) {
+        tombWrite((tombs) => {
+          const suffix = ns + '.' + key;
+          const m = Date.now();
+          if ((suffix in tombs) && tombs[suffix] >= m) return false;
+          tombs[suffix] = m;
+          return true;
+        });
+      }
       emit({ ns, key, op: 'remove', remote: !!opts.remote });
       return true;
     } catch (_) { return false; }

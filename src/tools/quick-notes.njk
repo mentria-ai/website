@@ -261,10 +261,24 @@ eleventyComputed:
     titleInput.focus();
   }
 
+  function recordNoteDeletion(id) {
+    if (!window.MentriaStore) return;
+    let del = window.MentriaStore.get('quick_notes', 'deleted');
+    if (!del || typeof del !== 'object') del = {};
+    del[String(id)] = Date.now();
+    const keys = Object.keys(del);
+    if (keys.length > 200) {
+      keys.sort((a, b) => (Number(del[a]) || 0) - (Number(del[b]) || 0));
+      keys.slice(0, keys.length - 200).forEach(k => { delete del[k]; });
+    }
+    window.MentriaStore.set('quick_notes', 'deleted', del);
+  }
+
   function deleteNote(id) {
     const idx = notes.findIndex(n => n.id === id);
     if (idx === -1) return;
     notes.splice(idx, 1);
+    recordNoteDeletion(id);
     if (notes.length === 0) {
       createNote();
       return;

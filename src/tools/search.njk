@@ -22,7 +22,7 @@ eleventyComputed:
 <section class="sx">
   <div class="sx__bar">
     <svg class="sx__bar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="search" id="sx-input" class="sx__input" placeholder="{{ 'tool.search.ph_input' | t }}" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <input type="search" id="sx-input" class="sx__input" aria-label="{{ 'tools.search.title' | t }}" placeholder="{{ 'tool.search.ph_input' | t }}" autocomplete="off" autocapitalize="off" spellcheck="false">
   </div>
 
   <div class="sx__filters" id="sx-filters">
@@ -76,10 +76,39 @@ eleventyComputed:
   let lastResults = [];
   let aiEngine = null;
   let modelCacheChecked = false;
+  let aiEpoch = 0;
 
   function normalize(s) {
     return (s || '').toString().toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function foldWithMap(text) {
+    const raw = String(text ?? '');
+    let folded = '';
+    const map = [];
+    for (let i = 0; i < raw.length; i++) {
+      const f = normalize(raw[i]);
+      for (let j = 0; j < f.length; j++) {
+        folded += f[j];
+        map.push(i);
+      }
+    }
+    return { raw, folded, map };
+  }
+
+  function matchRanges(text, qNorm) {
+    const { raw, folded, map } = foldWithMap(text);
+    const ranges = [];
+    let from = 0;
+    while (true) {
+      const idx = folded.indexOf(qNorm, from);
+      if (idx < 0) break;
+      const end = idx + qNorm.length;
+      ranges.push([map[idx], end < folded.length ? map[end] : raw.length]);
+      from = end;
+    }
+    return ranges;
   }
 
   let wordSegmenter = null;
@@ -120,11 +149,10 @@ eleventyComputed:
 
   function snippet(text, qNorm) {
     if (!text) return '';
-    const norm = normalize(text);
-    const idx = norm.indexOf(qNorm);
-    if (idx < 0 || qNorm.length < 2) return text.slice(0, 140) + (text.length > 140 ? '…' : '');
-    const start = Math.max(0, idx - 40);
-    const end   = Math.min(text.length, idx + qNorm.length + 80);
+    const ranges = qNorm.length >= 2 ? matchRanges(text, qNorm) : [];
+    if (!ranges.length) return text.slice(0, 140) + (text.length > 140 ? '…' : '');
+    const start = Math.max(0, ranges[0][0] - 40);
+    const end   = Math.min(text.length, ranges[0][1] + 80);
     return (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
   }
 
@@ -133,10 +161,53 @@ eleventyComputed:
   }
 
   function highlight(text, qNorm) {
-    if (!qNorm || qNorm.length < 2) return escape(text);
-    const out = escape(text);
-    const re = new RegExp(qNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    return out.replace(re, m => '<mark>' + m + '</mark>');
+    const raw = String(text ?? '');
+    if (!qNorm || qNorm.length < 2) return escape(raw);
+    const ranges = matchRanges(raw, qNorm);
+    if (!ranges.length) return escape(raw);
+    let out = '';
+    let pos = 0;
+    for (const [a, b] of ranges) {
+      out += escape(raw.slice(pos, a)) + '<mark>' + escape(raw.slice(a, b)) + '</mark>';
+      pos = b;
+    }
+    return out + escape(raw.slice(pos));
+  }
+
+  function editDistanceAtMost(a, b, limit) {
+    if (Math.abs(a.length - b.length) > limit) return false;
+    let prev = [];
+    for (let j = 0; j <= b.length; j++) prev.push(j);
+    for (let i = 1; i <= a.length; i++) {
+      const cur = [i];
+      let rowMin = i;
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        const v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+        cur.push(v);
+        if (v < rowMin) rowMin = v;
+      }
+      if (rowMin > limit) return false;
+      prev = cur;
+    }
+    return prev[b.length] <= limit;
+  }
+
+  function fuzzyScoreEntry(entry, qTokens) {
+    let score = 0;
+    const fields = [
+      [tokenize(entry.title), 30],
+      [tokenize(entry.slug), 20],
+      [tokenize(entry.description), 10]
+    ];
+    for (const qt of qTokens) {
+      if (qt.length < 4) continue;
+      const limit = qt.length >= 8 ? 2 : 1;
+      for (const [tokens, weight] of fields) {
+        if (tokens.some(t => editDistanceAtMost(qt, t, limit))) { score += weight; break; }
+      }
+    }
+    return score;
   }
 
   function search(query) {
@@ -144,12 +215,20 @@ eleventyComputed:
     if (!qNorm) return [];
     const qTokens = tokenize(query);
 
+    const pool = [];
     const scored = [];
     for (const entry of INDEX) {
       if (entry.lang !== LANG) continue;
       if (activeType !== 'all' && entry.type !== activeType) continue;
+      pool.push(entry);
       const score = scoreEntry(entry, qTokens, qNorm);
       if (score > 0) scored.push({ entry, score });
+    }
+    if (!scored.length && qTokens.some(t => t.length >= 4)) {
+      for (const entry of pool) {
+        const score = fuzzyScoreEntry(entry, qTokens);
+        if (score > 0) scored.push({ entry, score });
+      }
     }
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, 30).map(s => s.entry);
@@ -192,10 +271,9 @@ eleventyComputed:
     modelCacheChecked = true;
     if (!('caches' in window) || !navigator.gpu) return;
     try {
-      const keys = await caches.keys();
-      const hit = keys.some(k => k.startsWith('mentria-models'));
-      if (!hit) return;
-      // Found cached weights — flag UI; defer engine init until user clicks.
+      const Tiers = await import('/assets/js/mentria-tiers.js');
+      const tier = await Tiers.effectiveTier({ cachedOnly: true });
+      if (!tier) return;
       aiEngine = { cached: true };
       if (lastResults.length) $ai.hidden = false;
     } catch (_) { /* ignore */ }
@@ -207,6 +285,7 @@ eleventyComputed:
   // before the generate() call below.
   async function runAISummary() {
     if (!lastResults.length) return;
+    const epoch = ++aiEpoch;
     $aiBtn.disabled = true;
     $aiBody.textContent = COPY.aiThinking;
 
@@ -241,6 +320,7 @@ eleventyComputed:
         temperature: 0.2, topP: 0.9, topK: 30,
         repetitionPenalty: 1.1, enableThinking: false
       }, (event) => {
+        if (epoch !== aiEpoch) return;
         if (typeof event.token === 'string' && event.token.length > 0) {
           if (/^<\|[^|]*\|>$/.test(event.token)) return;
           buffer += event.token;
@@ -249,25 +329,36 @@ eleventyComputed:
       });
     } catch (err) {
       console.warn('AI summary failed:', err);
-      $aiBody.textContent = COPY.aiUnavailable;
+      if (epoch === aiEpoch) $aiBody.textContent = COPY.aiUnavailable;
     } finally {
       $aiBtn.disabled = false;
     }
   }
 
   // ── Boot ────────────────────────────────────────────────────────
+  const feedIndexP = fetch('/search-index-feed.json')
+    .then(r => (r.ok ? r.json() : []))
+    .catch(() => []);
+
   fetch('/search-index.json').then(r => r.json()).then(idx => {
     INDEX = idx;
     const params = new URLSearchParams(location.search);
     const initial = params.get('q') || '';
     if (initial) { $input.value = initial; runQuery(initial); }
     $input.focus();
+    feedIndexP.then(extra => {
+      if (!Array.isArray(extra) || !extra.length) return;
+      INDEX = INDEX.concat(extra);
+      if ($input.value.trim()) runQuery($input.value);
+    });
   }).catch(err => {
     console.error('search index load failed:', err);
     $hint.textContent = COPY.noResults;
   });
 
   function runQuery(q) {
+    aiEpoch++;
+    $aiBody.textContent = '';
     const results = search(q);
     const qNorm = normalize(q.trim());
     render(results, qNorm);

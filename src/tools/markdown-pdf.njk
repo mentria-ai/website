@@ -280,16 +280,13 @@ function contentHash(s) {
 }
 
 // Mirror the cache probe used by /tools/search/. A positive hit on any
-// mentria/huggingface cache key is a weak signal that the user has
-// touched an AI tool before — actual model load happens on click and
-// will download on demand if the weights aren't truly cached yet.
 const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
 
 async function detectCachedSignal() {
   if (!('caches' in window) || !navigator.gpu) return false;
   try {
-    const keys = await caches.keys();
-    return keys.some(k => k.startsWith('mentria-models'));
+    const Tiers = await import('/assets/js/mentria-tiers.js');
+    return (await Tiers.effectiveTier({ cachedOnly: true })) !== null;
   } catch (_) {
     return false;
   }

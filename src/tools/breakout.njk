@@ -654,21 +654,25 @@ canvas {
       updateHUD();
       return;
     }
+    const existing = activeEffects.findIndex(e => e.kind.id === kind.id);
     if (kind.id === 'wide') {
+      const other = activeEffects.findIndex(e => e.kind.id === 'shrink');
+      if (other >= 0) activeEffects.splice(other, 1);
       paddle.w = paddle.baseW * 1.6;
       paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x - (paddle.baseW * 0.3)));
     }
     if (kind.id === 'shrink') {
+      const other = activeEffects.findIndex(e => e.kind.id === 'wide');
+      if (other >= 0) activeEffects.splice(other, 1);
       paddle.w = paddle.baseW * 0.6;
     }
-    if (kind.id === 'slow') {
+    if (kind.id === 'slow' && existing < 0) {
       for (const b of balls) {
         b.speed *= 0.65;
         const m = Math.hypot(b.vx, b.vy);
         if (m > 0) { b.vx = b.vx / m * b.speed; b.vy = b.vy / m * b.speed; }
       }
     }
-    const existing = activeEffects.findIndex(e => e.kind.id === kind.id);
     const eff = { kind, until: now + kind.dur, total: kind.dur };
     if (existing >= 0) activeEffects[existing] = eff;
     else activeEffects.push(eff);

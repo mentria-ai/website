@@ -11,7 +11,7 @@
     "home": "ホーム"
   },
   "footer": {
-    "copyright": "© 2026 Mentria. All rights reserved."
+    "copyright": "© 2026 Mentria. 無断転載を禁じます。"
   },
   "about": {
     "title": "概要",
@@ -132,7 +132,8 @@
     "storage_full": "保存できませんでした。ブラウザのストレージがいっぱいです。空き容量を増やすと変更を保持できます。",
     "copy_failed": "コピー失敗 — 手動でCtrl+Cを使用してください。",
     "tool_info": "このツールについて",
-    "toggle_fullscreen": "全画面表示を切り替え"
+    "toggle_fullscreen": "全画面表示を切り替え",
+    "skip_to_content": "コンテンツへスキップ"
   },
   "home": {
     "cli": {

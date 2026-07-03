@@ -46,7 +46,7 @@ eleventyComputed:
             {% endif %}
             <h2 class="feed-card__title">{{ item.title }}</h2>
             {% if item.date %}
-            <time class="feed-card__date" datetime="{{ item.date }}">{{ item.date | date }}</time>
+            <time class="feed-card__date" datetime="{{ item.date | isoDate }}">{{ item.date | date(lang) }}</time>
             {% endif %}
         </div>
 

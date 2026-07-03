@@ -174,14 +174,23 @@ module.exports = function(eleventyConfig) {
     return array.slice(0, n);
   });
 
-  eleventyConfig.addFilter("date", function(dateObj) {
+  eleventyConfig.addFilter("date", function(dateObj, locale) {
     if (!dateObj) return "";
     try {
-      return new Intl.DateTimeFormat("en-US", {
+      return new Intl.DateTimeFormat(locale || "en-US", {
         month: "short",
         day: "2-digit",
         year: "numeric"
       }).format(new Date(dateObj));
+    } catch (err) {
+      return "";
+    }
+  });
+
+  eleventyConfig.addFilter("isoDate", function(dateObj) {
+    if (!dateObj) return "";
+    try {
+      return new Date(dateObj).toISOString().slice(0, 10);
     } catch (err) {
       return "";
     }

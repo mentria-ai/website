@@ -132,7 +132,8 @@
     "storage_full": "Couldn't save — your browser storage is full. Free up space to keep your changes.",
     "copy_failed": "Copy failed — use Ctrl+C manually.",
     "tool_info": "About this tool",
-    "toggle_fullscreen": "Toggle fullscreen"
+    "toggle_fullscreen": "Toggle fullscreen",
+    "skip_to_content": "Skip to content"
   },
   "home": {
     "cli": {

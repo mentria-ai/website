@@ -6,7 +6,7 @@ layout: base.njk
         <p class="eyebrow eyebrow--crumbs eyebrow--start"><a class="eyebrow__link" href="/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">feed</span></p>
         <h1>{{ title }}</h1>
         {% if date %}
-        <time datetime="{{ date | date }}" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--syn-amber);">{{ date | date }}</time>
+        <time datetime="{{ date | isoDate }}" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--syn-amber);">{{ date | date(lang) }}</time>
         {% endif %}
     </header>
     <div style="margin-top: 2rem; line-height: 1.8; color: var(--term-fg);">

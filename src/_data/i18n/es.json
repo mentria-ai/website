@@ -132,7 +132,8 @@
     "storage_full": "No se pudo guardar — el almacenamiento del navegador está lleno. Libera espacio para conservar tus cambios.",
     "copy_failed": "Copia fallida — usa Ctrl+C manualmente.",
     "tool_info": "Acerca de esta herramienta",
-    "toggle_fullscreen": "Alternar pantalla completa"
+    "toggle_fullscreen": "Alternar pantalla completa",
+    "skip_to_content": "Saltar al contenido"
   },
   "home": {
     "cli": {

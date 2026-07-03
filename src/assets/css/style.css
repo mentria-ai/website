@@ -197,6 +197,7 @@ a:hover { color: #67e8f9; }
   font-weight: 700; font-size: 0.85rem; z-index: 1000; border-radius: 0 0 6px 6px;
 }
 .skip-link:focus { top: 0; }
+#main-content:focus { outline: none; }
 
 main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100%; }
 

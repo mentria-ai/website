@@ -132,7 +132,8 @@
     "storage_full": "Échec de l'enregistrement — le stockage du navigateur est plein. Libérez de l'espace pour conserver vos modifications.",
     "copy_failed": "Échec de copie — utilisez Ctrl+C manuellement.",
     "tool_info": "À propos de cet outil",
-    "toggle_fullscreen": "Basculer en plein écran"
+    "toggle_fullscreen": "Basculer en plein écran",
+    "skip_to_content": "Aller au contenu"
   },
   "home": {
     "cli": {

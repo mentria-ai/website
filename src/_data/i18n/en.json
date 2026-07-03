@@ -468,7 +468,14 @@
       "outcome_yes": "Yes",
       "outcome_no": "No",
       "outcome_upto": "Up to you",
-      "outcome_wait": "Wait & try again"
+      "outcome_wait": "Wait & try again",
+      "options_label": "Wheel options",
+      "add_placeholder": "Add an option…",
+      "btn_add": "Add",
+      "btn_reset": "Reset",
+      "btn_remove": "Remove {name}",
+      "err_min": "Keep at least 2 options",
+      "err_max": "Up to 8 options"
     },
     "coin-flip": {
       "aria_flip": "Flip the coin",

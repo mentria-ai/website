@@ -468,7 +468,14 @@
       "outcome_yes": "はい",
       "outcome_no": "いいえ",
       "outcome_upto": "あなた次第",
-      "outcome_wait": "待ってもう一度"
+      "outcome_wait": "待ってもう一度",
+      "options_label": "ルーレットの選択肢",
+      "add_placeholder": "選択肢を追加…",
+      "btn_add": "追加",
+      "btn_reset": "リセット",
+      "btn_remove": "{name} を削除",
+      "err_min": "選択肢は2つ以上必要です",
+      "err_max": "選択肢は最大8つです"
     },
     "coin-flip": {
       "aria_flip": "コインを投げる",

@@ -27,11 +27,8 @@ eleventyComputed:
       <div class="dw__pointer" aria-hidden="true">
         <svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 28L0 0h20z" fill="var(--syn-cyan)"/></svg>
       </div>
-      <div class="dw__wheel" id="dw-wheel" role="img" aria-label="{{ 'tool.decision-wheel.aria_wheel' | t }}" aria-live="polite">
-        <div class="dw__segment dw__segment--0"></div>
-        <div class="dw__segment dw__segment--1"></div>
-        <div class="dw__segment dw__segment--2"></div>
-        <div class="dw__segment dw__segment--3"></div>
+      <div class="dw__wheel" id="dw-wheel" role="img" aria-label="{{ 'tool.decision-wheel.aria_wheel' | t }}">
+        <div class="dw__segments" id="dw-segments"></div>
         <button class="dw__hub" id="dw-hub" type="button" aria-label="{{ 'tool.decision-wheel.aria_spin' | t }}"></button>
       </div>
     </div>
@@ -39,7 +36,7 @@ eleventyComputed:
 
   <div class="dw__result-wrap">
     <div class="dw__result-label">{{ "tool.decision-wheel.result_label" | t }}</div>
-    <div class="dw__result" id="dw-result" data-outcome="">
+    <div class="dw__result" id="dw-result" data-outcome="" role="status" aria-live="polite">
       <span class="dw__result-text">{{ "tool.decision-wheel.result_ready" | t }}</span>
     </div>
   </div>
@@ -51,11 +48,14 @@ eleventyComputed:
     </button>
   </div>
 
-  <div class="dw__legend">
-    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-green)"></span>{{ "tool.decision-wheel.outcome_yes"   | t }}</div>
-    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-pink)"></span>{{ "tool.decision-wheel.outcome_no"    | t }}</div>
-    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-cyan)"></span>{{ "tool.decision-wheel.outcome_upto"  | t }}</div>
-    <div class="dw__legend-item"><span class="dw__legend-dot" style="background:var(--syn-amber)"></span>{{ "tool.decision-wheel.outcome_wait"  | t }}</div>
+  <div class="dw__options">
+    <div class="dw__options-label" id="dw-options-label">{{ "tool.decision-wheel.options_label" | t }}</div>
+    <ul class="dw__option-list" id="dw-option-list" aria-labelledby="dw-options-label"></ul>
+    <form class="dw__option-form" id="dw-option-form">
+      <input class="m-input dw__option-input" id="dw-option-input" maxlength="24" autocomplete="off" placeholder="{{ 'tool.decision-wheel.add_placeholder' | t }}" aria-label="{{ 'tool.decision-wheel.add_placeholder' | t }}">
+      <button type="submit" class="m-btn m-btn--ghost" id="dw-option-add">{{ "tool.decision-wheel.btn_add" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" id="dw-option-reset">{{ "tool.decision-wheel.btn_reset" | t }}</button>
+    </form>
   </div>
 </section>
 {% include "terminal-frame-close.njk" %}
@@ -64,19 +64,164 @@ eleventyComputed:
 
 <script>
 (() => {
-  const outcomes = [
-    { label: {{ ("tool.decision-wheel.outcome_yes"  | t) | dump | safe }}, cls: "yes",  color: "var(--syn-green)" },
-    { label: {{ ("tool.decision-wheel.outcome_no"   | t) | dump | safe }}, cls: "no",   color: "var(--syn-pink)" },
-    { label: {{ ("tool.decision-wheel.outcome_upto" | t) | dump | safe }}, cls: "upto", color: "var(--syn-cyan)" },
-    { label: {{ ("tool.decision-wheel.outcome_wait" | t) | dump | safe }}, cls: "wait", color: "var(--syn-amber)" }
+  const COPY = {
+    yes:  {{ ("tool.decision-wheel.outcome_yes"  | t) | dump | safe }},
+    no:   {{ ("tool.decision-wheel.outcome_no"   | t) | dump | safe }},
+    upto: {{ ("tool.decision-wheel.outcome_upto" | t) | dump | safe }},
+    wait: {{ ("tool.decision-wheel.outcome_wait" | t) | dump | safe }},
+    errMin: {{ ("tool.decision-wheel.err_min" | t) | dump | safe }},
+    errMax: {{ ("tool.decision-wheel.err_max" | t) | dump | safe }},
+    btnRemove: {{ ("tool.decision-wheel.btn_remove" | t) | dump | safe }}
+  };
+  const DEFAULTS = [COPY.yes, COPY.no, COPY.upto, COPY.wait];
+  const PALETTE = [
+    { dot: "var(--syn-green)",  hi: "var(--green-30)",  glow: "var(--green-15)",  soft: "var(--green-8)" },
+    { dot: "var(--syn-pink)",   hi: "var(--pink-30)",   glow: "var(--pink-15)",   soft: "var(--pink-10)" },
+    { dot: "var(--syn-cyan)",   hi: "var(--cyan-30)",   glow: "var(--cyan-15)",   soft: "var(--cyan-8)" },
+    { dot: "var(--syn-amber)",  hi: "var(--amber-30)",  glow: "var(--amber-15)",  soft: "var(--amber-8)" },
+    { dot: "var(--syn-purple)", hi: "var(--purple-20)", glow: "var(--purple-20)", soft: "var(--purple-8)" },
+    { dot: "var(--syn-orange)", hi: "var(--orange-30)", glow: "var(--orange-15)", soft: "var(--orange-8)" }
   ];
+  const MINN = 2, MAXN = 8;
+  const NS = "tools", KEY = "decision_wheel_options";
 
   const wheel = document.getElementById("dw-wheel");
+  const segWrap = document.getElementById("dw-segments");
   const resultEl = document.getElementById("dw-result");
   const resultText = resultEl.querySelector(".dw__result-text");
   const spinBtn = document.getElementById("dw-spin");
-  const segments = wheel.querySelectorAll(".dw__segment");
-  const segmentAngle = 360 / outcomes.length;
+  const hubBtn = document.getElementById("dw-hub");
+  const listEl = document.getElementById("dw-option-list");
+  const formEl = document.getElementById("dw-option-form");
+  const inputEl = document.getElementById("dw-option-input");
+  const resetBtn = document.getElementById("dw-option-reset");
+  const readyLabel = resultText.textContent;
+  const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function loadOptions() {
+    try {
+      const v = window.MentriaStore && window.MentriaStore.get(NS, KEY);
+      if (Array.isArray(v)) {
+        const clean = v.filter((x) => typeof x === "string" && x.trim()).map((x) => x.trim().slice(0, 24));
+        if (clean.length >= MINN && clean.length <= MAXN) return clean;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  let options = loadOptions() || DEFAULTS.slice();
+  let customized = !!loadOptions();
+  let segments = [];
+
+  function persist() {
+    if (!window.MentriaStore) return;
+    if (customized) window.MentriaStore.set(NS, KEY, options);
+    else window.MentriaStore.remove(NS, KEY);
+  }
+
+  function colorIdx(i, n) {
+    let c = i % PALETTE.length;
+    if (i === n - 1 && n > PALETTE.length && c === 0) c = 1;
+    return c;
+  }
+
+  function wedgeClip(a0, a1) {
+    const pts = ["50% 50%"];
+    const step = Math.min(22.5, a1 - a0);
+    for (let a = a0; a < a1 + 0.01; a += step) {
+      const ang = Math.min(a, a1) * Math.PI / 180;
+      const x = 50 + 150 * Math.sin(ang);
+      const y = 50 - 150 * Math.cos(ang);
+      pts.push(x.toFixed(2) + "% " + y.toFixed(2) + "%");
+    }
+    return "polygon(" + pts.join(", ") + ")";
+  }
+
+  function buildWheel() {
+    segWrap.innerHTML = "";
+    segments = [];
+    const angle = 360 / options.length;
+    options.forEach((label, i) => {
+      const pal = PALETTE[colorIdx(i, options.length)];
+      const d = document.createElement("div");
+      d.className = "dw__segment";
+      d.style.clipPath = wedgeClip(i * angle, (i + 1) * angle);
+      d.style.setProperty("--seg-angle", (i * angle + angle / 2) + "deg");
+      d.style.setProperty("--seg-hi", pal.hi);
+      d.style.setProperty("--seg-glow", pal.glow);
+      d.style.setProperty("--seg-soft", pal.soft);
+      segWrap.appendChild(d);
+      segments.push(d);
+    });
+  }
+
+  function renderOptions() {
+    listEl.innerHTML = "";
+    options.forEach((label, i) => {
+      const pal = PALETTE[colorIdx(i, options.length)];
+      const li = document.createElement("li");
+      li.className = "dw__option-row";
+      const dot = document.createElement("span");
+      dot.className = "dw__option-dot";
+      dot.style.background = pal.dot;
+      const text = document.createElement("span");
+      text.className = "dw__option-text";
+      text.textContent = label;
+      const rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "dw__option-remove m-btn m-btn--ghost m-btn--icon";
+      rm.textContent = "\u00d7";
+      rm.setAttribute("aria-label", COPY.btnRemove.replace("{name}", label));
+      rm.disabled = options.length <= MINN;
+      rm.addEventListener("click", () => {
+        if (options.length <= MINN) return;
+        options.splice(i, 1);
+        customized = true;
+        applyChange();
+      });
+      li.append(dot, text, rm);
+      listEl.appendChild(li);
+    });
+  }
+
+  function resetResult() {
+    resultText.textContent = readyLabel;
+    resultEl.dataset.outcome = "";
+    resultEl.style.removeProperty("--result-color");
+  }
+
+  function applyChange() {
+    persist();
+    buildWheel();
+    renderOptions();
+    resetResult();
+  }
+
+  formEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = inputEl.value.trim().slice(0, 24);
+    if (!v) return;
+    if (options.length >= MAXN) {
+      if (window.MentriaUI) MentriaUI.toast(COPY.errMax);
+      return;
+    }
+    options.push(v);
+    customized = true;
+    inputEl.value = "";
+    applyChange();
+    inputEl.focus();
+  });
+
+  resetBtn.addEventListener("click", () => {
+    options = DEFAULTS.slice();
+    customized = false;
+    applyChange();
+  });
+
+  function rand() {
+    try { return crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296; }
+    catch (_) { return Math.random(); }
+  }
 
   let rotation = 0;
   let velocity = 0;
@@ -84,84 +229,63 @@ eleventyComputed:
   let lastActiveIndex = -1;
   const FRICTION = 0.985;
   const STOP_THRESHOLD = 0.3;
-  const SPIN_BOOST = 15 + Math.random() * 10;
 
   function getSegmentAtPointer() {
+    const angle = 360 / options.length;
     const norm = ((rotation % 360) + 360) % 360;
     const pointerAngle = (360 - norm) % 360;
-    return Math.floor(pointerAngle / segmentAngle) % outcomes.length;
+    return Math.floor(pointerAngle / angle) % options.length;
   }
 
   function highlightSegment(index) {
     if (index === lastActiveIndex) return;
-    segments.forEach(function(s) { s.classList.remove("dw__segment--active"); });
-    if (index >= 0 && index < segments.length) {
-      segments[index].classList.add("dw__segment--active");
-    }
+    segments.forEach((s2) => s2.classList.remove("dw__segment--active"));
+    if (index >= 0 && index < segments.length) segments[index].classList.add("dw__segment--active");
     lastActiveIndex = index;
   }
 
-  function clearHighlights() {
-    segments.forEach(function(s) {
-      s.classList.remove("dw__segment--active");
-      s.classList.remove("dw__segment--winner");
-    });
+  function settle(finalIndex) {
+    const pal = PALETTE[colorIdx(finalIndex, options.length)];
+    resultText.textContent = options[finalIndex];
+    resultEl.style.setProperty("--result-color", pal.dot);
+    segments.forEach((s2) => s2.classList.remove("dw__segment--active"));
+    segments[finalIndex].classList.add("dw__segment--winner");
     lastActiveIndex = -1;
-  }
-
-  function setWinner(index) {
-    segments.forEach(function(s) { s.classList.remove("dw__segment--active"); });
-    if (index >= 0 && index < segments.length) {
-      segments[index].classList.add("dw__segment--winner");
-    }
+    if (navigator.vibrate) { try { navigator.vibrate(30); } catch (_) {} }
   }
 
   function tick() {
     if (!animating) return;
-
     velocity *= FRICTION;
     rotation += velocity;
-
     wheel.style.transform = "rotate(" + rotation + "deg)";
-
-    var idx = getSegmentAtPointer();
-    highlightSegment(idx);
-
+    highlightSegment(getSegmentAtPointer());
     if (velocity < STOP_THRESHOLD) {
-      // Stopped
       animating = false;
       velocity = 0;
       wheel.classList.remove("dw__wheel--spinning");
-
-      var finalIndex = getSegmentAtPointer();
-      var outcome = outcomes[finalIndex];
-      resultText.textContent = outcome.label;
-      resultEl.dataset.outcome = outcome.cls;
-      resultEl.style.setProperty("--result-color", outcome.color);
-
-      clearHighlights();
-      setWinner(finalIndex);
-      if (navigator.vibrate) navigator.vibrate(30);
+      settle(getSegmentAtPointer());
       return;
     }
-
     requestAnimationFrame(tick);
   }
 
   function spin() {
-    // Clear previous winner
-    segments.forEach(function(s) { s.classList.remove("dw__segment--winner"); });
-
-    // Add velocity — stacks on repeated clicks
-    velocity += SPIN_BOOST + Math.random() * 8;
-
-    // Cap max velocity
-    if (velocity > 80) velocity = 80;
-
+    segments.forEach((s2) => s2.classList.remove("dw__segment--winner"));
     resultText.textContent = "...";
     resultEl.dataset.outcome = "";
+    if (reducedMotion) {
+      const n = options.length;
+      const angle = 360 / n;
+      const finalIndex = Math.floor(rand() * n);
+      rotation = (360 - (finalIndex * angle + angle / 2)) % 360;
+      wheel.style.transform = "rotate(" + rotation + "deg)";
+      settle(finalIndex);
+      return;
+    }
+    velocity += 15 + rand() * 10 + rand() * 8;
+    if (velocity > 80) velocity = 80;
     wheel.classList.add("dw__wheel--spinning");
-
     if (!animating) {
       animating = true;
       requestAnimationFrame(tick);
@@ -169,8 +293,10 @@ eleventyComputed:
   }
 
   if (spinBtn) spinBtn.addEventListener("click", spin);
-  var hubBtn = document.getElementById("dw-hub");
   if (hubBtn) hubBtn.addEventListener("click", spin);
+
+  buildWheel();
+  renderOptions();
 })();
 </script>
 
@@ -234,80 +360,81 @@ eleventyComputed:
     inset 0 0 30px rgba(0,0,0,0.8);
 }
 
+.dw__segments { position: absolute; inset: 0; }
+
 .dw__segment {
   position: absolute;
-  width: 50%;
-  height: 50%;
-  transform-origin: 100% 100%;
-  overflow: hidden;
+  inset: 0;
+  background: linear-gradient(var(--seg-angle), var(--seg-glow) 0%, var(--seg-soft) 100%);
   transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
-.dw__segment--active.dw__segment--0 {
-  background: linear-gradient(135deg, var(--green-30) 0%, var(--green-8) 100%);
-  box-shadow: inset 0 0 30px var(--green-15);
-}
-.dw__segment--active.dw__segment--1 {
-  background: linear-gradient(225deg, var(--pink-30) 0%, var(--pink-10) 100%);
-  box-shadow: inset 0 0 30px var(--pink-15);
-}
-.dw__segment--active.dw__segment--2 {
-  background: linear-gradient(315deg, var(--cyan-30) 0%, var(--cyan-8) 100%);
-  box-shadow: inset 0 0 30px var(--cyan-15);
-}
-.dw__segment--active.dw__segment--3 {
-  background: linear-gradient(45deg, var(--amber-30) 0%, var(--amber-8) 100%);
-  box-shadow: inset 0 0 30px var(--amber-15);
+.dw__segment--active {
+  background: linear-gradient(var(--seg-angle), var(--seg-hi) 0%, var(--seg-soft) 100%);
+  box-shadow: inset 0 0 30px var(--seg-glow);
 }
 
-.dw__segment--winner.dw__segment--0 {
-  background: linear-gradient(135deg, rgba(74, 222, 128, 0.4) 0%, var(--green-8) 100%);
-  box-shadow: inset 0 0 40px var(--green-15), 0 0 20px var(--green-8);
-}
-.dw__segment--winner.dw__segment--1 {
-  background: linear-gradient(225deg, rgba(244, 114, 182, 0.4) 0%, var(--pink-10) 100%);
-  box-shadow: inset 0 0 40px var(--pink-15), 0 0 20px var(--pink-10);
-}
-.dw__segment--winner.dw__segment--2 {
-  background: linear-gradient(315deg, rgba(34, 211, 238, 0.4) 0%, rgba(34, 211, 238, 0.1) 100%);
-  box-shadow: inset 0 0 40px rgba(34, 211, 238, 0.2), 0 0 20px rgba(34, 211, 238, 0.1);
-}
-.dw__segment--winner.dw__segment--3 {
-  background: linear-gradient(45deg, rgba(251, 191, 36, 0.4) 0%, var(--amber-8) 100%);
-  box-shadow: inset 0 0 40px var(--amber-15), 0 0 20px var(--amber-8);
+.dw__segment--winner {
+  background: linear-gradient(var(--seg-angle), var(--seg-hi) 0%, var(--seg-soft) 100%);
+  box-shadow: inset 0 0 40px var(--seg-glow), 0 0 20px var(--seg-soft);
 }
 
-
-.dw__segment--0 {
-  top: 0; left: 50%;
-  transform: rotate(0deg) skewY(0deg);
-  background: linear-gradient(135deg, var(--green-15) 0%, var(--green-8) 100%);
-  border-bottom: 1px solid var(--green-15);
-  border-left: 1px solid var(--green-8);
+.dw__options {
+  width: 100%;
+  max-width: 24rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
-
-.dw__segment--1 {
-  top: 50%; left: 50%;
-  background: linear-gradient(225deg, var(--pink-10) 0%, rgba(244, 114, 182, 0.03) 100%);
-  border-top: 1px solid var(--pink-15);
-  border-left: 1px solid var(--pink-10);
+.dw__options-label {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
 }
-
-.dw__segment--2 {
-  top: 50%; left: 0;
-  transform-origin: 100% 0%;
-  background: linear-gradient(315deg, rgba(34, 211, 238, 0.12) 0%, rgba(34, 211, 238, 0.03) 100%);
-  border-top: 1px solid var(--cyan-15);
-  border-right: 1px solid var(--cyan-8);
+.dw__option-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
-
-.dw__segment--3 {
-  top: 0; left: 0;
-  transform-origin: 100% 100%;
-  background: linear-gradient(45deg, var(--amber-15) 0%, var(--amber-8) 100%);
-  border-bottom: 1px solid var(--amber-15);
-  border-right: 1px solid var(--amber-8);
+.dw__option-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--term-fg);
 }
+.dw__option-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dw__option-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dw__option-remove {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: var(--text-sm);
+  line-height: 1;
+}
+.dw__option-form {
+  display: flex;
+  gap: var(--space-2);
+}
+.dw__option-input { flex: 1; min-width: 0; }
 
 .dw__hub {
   position: absolute;

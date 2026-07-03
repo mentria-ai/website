@@ -468,7 +468,14 @@
       "outcome_yes": "Oui",
       "outcome_no": "Non",
       "outcome_upto": "À vous de choisir",
-      "outcome_wait": "Attendez et réessayez"
+      "outcome_wait": "Attendez et réessayez",
+      "options_label": "Options de la roue",
+      "add_placeholder": "Ajouter une option…",
+      "btn_add": "Ajouter",
+      "btn_reset": "Réinitialiser",
+      "btn_remove": "Supprimer {name}",
+      "err_min": "Gardez au moins 2 options",
+      "err_max": "8 options maximum"
     },
     "coin-flip": {
       "aria_flip": "Lancer la pièce",

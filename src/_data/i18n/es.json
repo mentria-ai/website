@@ -468,7 +468,14 @@
       "outcome_yes": "Sí",
       "outcome_no": "No",
       "outcome_upto": "Tú decides",
-      "outcome_wait": "Espera y prueba de nuevo"
+      "outcome_wait": "Espera y prueba de nuevo",
+      "options_label": "Opciones de la ruleta",
+      "add_placeholder": "Añade una opción…",
+      "btn_add": "Añadir",
+      "btn_reset": "Restablecer",
+      "btn_remove": "Eliminar {name}",
+      "err_min": "Mantén al menos 2 opciones",
+      "err_max": "Máximo 8 opciones"
     },
     "coin-flip": {
       "aria_flip": "Lanzar la moneda",

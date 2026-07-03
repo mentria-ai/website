@@ -520,7 +520,8 @@
       "lock_failed": "ノートをロックできませんでした — デバイスのパスキーを利用できませんでした。",
       "unlock_failed": "ノートのロックを解除できませんでした — パスキーが一致しないか、利用できませんでした。",
       "prf_unsupported": "このブラウザまたはデバイスは暗号化にパスキーを使用できません。最新のChrome、Edge、Safariをお試しください。",
-      "count_summary": "{words} 語 · {chars} 文字"
+      "count_summary": "{words} 語 · {chars} 文字",
+      "empty_preview": "空"
     },
     "color-picker": {
       "title_pick_color": "クリックして色を選択",

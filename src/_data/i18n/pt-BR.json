@@ -520,7 +520,8 @@
       "lock_failed": "Não foi possível bloquear a nota — a chave de acesso do dispositivo não estava disponível.",
       "unlock_failed": "Não foi possível desbloquear a nota — a chave de acesso não correspondeu ou não estava disponível.",
       "prf_unsupported": "Este navegador ou dispositivo não pode usar uma chave de acesso para criptografia. Tente uma versão recente do Chrome, Edge ou Safari.",
-      "count_summary": "{words} palavras · {chars} caracteres"
+      "count_summary": "{words} palavras · {chars} caracteres",
+      "empty_preview": "Vazia"
     },
     "color-picker": {
       "title_pick_color": "Clique para escolher uma cor",

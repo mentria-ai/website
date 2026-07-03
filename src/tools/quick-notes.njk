@@ -81,6 +81,7 @@ eleventyComputed:
   const COPY = {
     untitled:          {{ ("tool.quick-notes.untitled"           | t) | dump | safe }},
     savedPrefix:       {{ ("tool.quick-notes.saved_prefix"       | t) | dump | safe }},
+    emptyPreview:      {{ ("tool.quick-notes.empty_preview"      | t) | dump | safe }},
     confirmDelete:     {{ ("tool.quick-notes.confirm_delete"     | t) | dump | safe }},
     lockBtn:           {{ ("tool.quick-notes.lock_btn"           | t) | dump | safe }},
     removeLockBtn:     {{ ("tool.quick-notes.remove_lock_btn"    | t) | dump | safe }},
@@ -355,7 +356,7 @@ eleventyComputed:
       const title = note.title || COPY.untitled;
       let preview;
       if (note.enc) preview = '🔒 ' + COPY.lockedTag;
-      else preview = note.body ? note.body.slice(0, 50).replace(/\n/g, ' ') : 'Empty';
+      else preview = note.body ? note.body.slice(0, 50).replace(/\n/g, ' ') : COPY.emptyPreview;
       btn.innerHTML =
         '<span class="qn-note-tab__title">' + escHtml(title) + '</span>' +
         '<span class="qn-note-tab__preview">' + escHtml(preview) + '</span>';
@@ -412,16 +413,25 @@ eleventyComputed:
     const text = textarea.value;
     const chars = text.length;
     const words = countWords(text);
-    countsEl.textContent = COPY.countSummary.replace('{words}', words).replace('{chars}', chars);
+    const lang = document.documentElement.lang || 'en';
+    countsEl.textContent = COPY.countSummary.replace('{words}', words.toLocaleString(lang)).replace('{chars}', chars.toLocaleString(lang));
   }
 
   function updateSavedLabel(ts) {
     if (!ts) { savedEl.textContent = ''; return; }
     const d = new Date(ts);
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    const ss = String(d.getSeconds()).padStart(2, '0');
-    savedEl.textContent = COPY.savedPrefix + ' ' + hh + ':' + mm + ':' + ss;
+    const now = new Date();
+    const lang = document.documentElement.lang || 'en';
+    const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+    let stamp;
+    try {
+      stamp = sameDay
+        ? new Intl.DateTimeFormat(lang, { timeStyle: 'medium' }).format(d)
+        : new Intl.DateTimeFormat(lang, { dateStyle: 'medium', timeStyle: 'short' }).format(d);
+    } catch (_) {
+      stamp = d.toLocaleString();
+    }
+    savedEl.textContent = COPY.savedPrefix + ' ' + stamp;
   }
 
   function exportNote() {

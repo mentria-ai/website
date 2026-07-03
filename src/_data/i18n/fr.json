@@ -520,7 +520,8 @@
       "lock_failed": "Impossible de verrouiller la note — la clé d'accès de l'appareil n'était pas disponible.",
       "unlock_failed": "Impossible de déverrouiller la note — la clé d'accès ne correspondait pas ou n'était pas disponible.",
       "prf_unsupported": "Ce navigateur ou cet appareil ne peut pas utiliser de clé d'accès pour le chiffrement. Essaie une version récente de Chrome, Edge ou Safari.",
-      "count_summary": "{words} mots · {chars} caractères"
+      "count_summary": "{words} mots · {chars} caractères",
+      "empty_preview": "Vide"
     },
     "color-picker": {
       "title_pick_color": "Cliquez pour choisir une couleur",

@@ -520,7 +520,8 @@
       "lock_failed": "No se pudo bloquear la nota: la llave de acceso del dispositivo no estaba disponible.",
       "unlock_failed": "No se pudo desbloquear la nota: la llave de acceso no coincidió o no estaba disponible.",
       "prf_unsupported": "Este navegador o dispositivo no puede usar una llave de acceso para cifrar. Prueba una versión reciente de Chrome, Edge o Safari.",
-      "count_summary": "{words} palabras · {chars} caracteres"
+      "count_summary": "{words} palabras · {chars} caracteres",
+      "empty_preview": "Vacía"
     },
     "color-picker": {
       "title_pick_color": "Haz clic para elegir un color",

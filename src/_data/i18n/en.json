@@ -883,7 +883,8 @@
       "goal_reached": "Daily goal reached",
       "confirm_reset": "Reset today's step count to zero?",
       "insecure_title": "Secure connection needed",
-      "insecure_body": "Motion sensors only work over HTTPS. Open this tool on the live site (https://mentria.ai). A local dev server reached by LAN IP over plain HTTP cannot expose the sensor."
+      "insecure_body": "Motion sensors only work over HTTPS. Open this tool on the live site (https://mentria.ai). A local dev server reached by LAN IP over plain HTTP cannot expose the sensor.",
+      "back_to_stats": "Back to stats"
     },
     "qr-scanner": {
       "aria_video": "Live camera preview",

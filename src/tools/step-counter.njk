@@ -68,21 +68,25 @@ eleventyComputed:
     <h2 class="sc__panel-title">{{ "tool.step-counter.perm_title" | t }}</h2>
     <p class="sc__panel-body">{{ "tool.step-counter.perm_body" | t }}</p>
     <button class="sc__btn m-btn m-btn--primary m-btn--pill" id="sc-perm-btn">{{ "tool.step-counter.perm_btn" | t }}</button>
+      <button type="button" class="sc__btn m-btn m-btn--ghost m-btn--pill" data-sc-back>{{ "tool.step-counter.back_to_stats" | t }}</button>
   </div>
 
   <div class="sc__panel" id="sc-denied" hidden>
     <h2 class="sc__panel-title sc__panel-title--warn">{{ "tool.step-counter.denied_title" | t }}</h2>
     <p class="sc__panel-body">{{ "tool.step-counter.denied_body" | t }}</p>
+      <button type="button" class="sc__btn m-btn m-btn--ghost m-btn--pill" data-sc-back>{{ "tool.step-counter.back_to_stats" | t }}</button>
   </div>
 
   <div class="sc__panel" id="sc-unsupported" hidden>
     <h2 class="sc__panel-title sc__panel-title--warn">{{ "tool.step-counter.unsupported_title" | t }}</h2>
     <p class="sc__panel-body">{{ "tool.step-counter.unsupported_body" | t }}</p>
+      <button type="button" class="sc__btn m-btn m-btn--ghost m-btn--pill" data-sc-back>{{ "tool.step-counter.back_to_stats" | t }}</button>
   </div>
 
   <div class="sc__panel" id="sc-insecure" hidden>
     <h2 class="sc__panel-title sc__panel-title--warn">{{ "tool.step-counter.insecure_title" | t }}</h2>
     <p class="sc__panel-body">{{ "tool.step-counter.insecure_body" | t }}</p>
+      <button type="button" class="sc__btn m-btn m-btn--ghost m-btn--pill" data-sc-back>{{ "tool.step-counter.back_to_stats" | t }}</button>
   </div>
 
   <div id="sc-settings" popover class="sc__settings">
@@ -111,6 +115,7 @@ eleventyComputed:
 
 <script>
 (() => {
+  const LANG = document.documentElement.lang || undefined;
   const COPY = {
     btnStart:    {{ ("tool.step-counter.btn_start"    | t) | dump | safe }},
     btnPause:    {{ ("tool.step-counter.btn_pause"    | t) | dump | safe }},
@@ -221,8 +226,8 @@ eleventyComputed:
 
   function fmtDistance(steps) {
     const m = steps * (state.stride / 100);
-    if (m < 1000) return Math.round(m) + ' m';
-    return (m / 1000).toFixed(2) + ' km';
+    if (m < 1000) return Math.round(m).toLocaleString(LANG) + ' m';
+    return (m / 1000).toLocaleString(LANG, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' km';
   }
 
   function fmtClock(ms) {
@@ -233,8 +238,8 @@ eleventyComputed:
   }
 
   function renderCount() {
-    countEl.textContent = state.steps.toLocaleString();
-    goalTextEl.textContent = COPY.goalOf.replace('{goal}', state.goal.toLocaleString());
+    countEl.textContent = state.steps.toLocaleString(LANG);
+    goalTextEl.textContent = COPY.goalOf.replace('{goal}', state.goal.toLocaleString(LANG));
     const pct = Math.max(0, Math.min(1, state.steps / state.goal));
     ringEl.style.strokeDashoffset = RING_CIRC * (1 - pct);
     ringEl.classList.toggle('is-complete', pct >= 1);
@@ -250,7 +255,7 @@ eleventyComputed:
       d.setDate(now.getDate() - i);
       const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       const steps = key === state.date ? state.steps : (state.history[key] || 0);
-      days.push({ key, steps, label: d.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 2) });
+      days.push({ key, steps, label: d.toLocaleDateString(LANG, { weekday: 'short' }).slice(0, 2) });
     }
     const max = Math.max(state.goal, ...days.map(d => d.steps), 1);
     barsEl.innerHTML = '';
@@ -262,7 +267,7 @@ eleventyComputed:
         '<div class="sc__bar-track"><div class="sc__bar-fill' +
         (d.steps >= state.goal ? ' is-goal' : '') + '" style="height:' + h + '%"></div></div>' +
         '<span class="sc__bar-label">' + d.label + '</span>';
-      col.title = d.steps.toLocaleString();
+      col.title = d.steps.toLocaleString(LANG);
       barsEl.appendChild(col);
     }
   }
@@ -389,6 +394,14 @@ eleventyComputed:
     if (running) stopTracking(false);
     else if (sessionElapsed > 0) beginTracking();
     else start();
+  });
+
+  document.querySelectorAll('[data-sc-back]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      showPanel(null);
+      toggleBtn.textContent = sessionElapsed > 0 ? COPY.btnResume : COPY.btnStart;
+      hintEl.hidden = true;
+    });
   });
 
   permBtn.addEventListener('click', async () => {

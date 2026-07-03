@@ -883,7 +883,8 @@
       "goal_reached": "Meta diaria alcanzada",
       "confirm_reset": "¿Reiniciar el conteo de pasos de hoy a cero?",
       "insecure_title": "Se necesita conexión segura",
-      "insecure_body": "Los sensores de movimiento solo funcionan con HTTPS. Abre esta herramienta en el sitio publicado (https://mentria.ai). Un servidor de desarrollo local accedido por IP de LAN sobre HTTP no puede exponer el sensor."
+      "insecure_body": "Los sensores de movimiento solo funcionan con HTTPS. Abre esta herramienta en el sitio publicado (https://mentria.ai). Un servidor de desarrollo local accedido por IP de LAN sobre HTTP no puede exponer el sensor.",
+      "back_to_stats": "Volver a las estadísticas"
     },
     "qr-scanner": {
       "aria_video": "Vista previa de la cámara en vivo",

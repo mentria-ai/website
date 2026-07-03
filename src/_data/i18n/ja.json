@@ -883,7 +883,8 @@
       "goal_reached": "1日の目標達成",
       "confirm_reset": "今日の歩数をゼロにリセットしますか?",
       "insecure_title": "セキュア接続が必要",
-      "insecure_body": "モーションセンサーはHTTPSでのみ動作します。公開サイト(https://mentria.ai)でこのツールを開いてください。LAN IP経由のHTTPローカル開発サーバーではセンサーを利用できません。"
+      "insecure_body": "モーションセンサーはHTTPSでのみ動作します。公開サイト(https://mentria.ai)でこのツールを開いてください。LAN IP経由のHTTPローカル開発サーバーではセンサーを利用できません。",
+      "back_to_stats": "統計に戻る"
     },
     "qr-scanner": {
       "aria_video": "ライブカメラプレビュー",

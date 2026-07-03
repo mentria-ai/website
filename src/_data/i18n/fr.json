@@ -883,7 +883,8 @@
       "goal_reached": "Objectif quotidien atteint",
       "confirm_reset": "Réinitialiser le compteur de pas d'aujourd'hui à zéro ?",
       "insecure_title": "Connexion sécurisée requise",
-      "insecure_body": "Les capteurs de mouvement ne fonctionnent qu en HTTPS. Ouvre cet outil sur le site en ligne (https://mentria.ai). Un serveur de dev local atteint par IP LAN en HTTP ne peut pas exposer le capteur."
+      "insecure_body": "Les capteurs de mouvement ne fonctionnent qu en HTTPS. Ouvre cet outil sur le site en ligne (https://mentria.ai). Un serveur de dev local atteint par IP LAN en HTTP ne peut pas exposer le capteur.",
+      "back_to_stats": "Retour aux statistiques"
     },
     "qr-scanner": {
       "aria_video": "Aperçu de la caméra en direct",

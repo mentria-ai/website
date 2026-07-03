@@ -215,6 +215,7 @@ eleventyComputed:
       } catch (err){
         progressWrap.style.display = 'none';
         if (err && err.message === 'download-postponed') setStatus('idle', COPY.downloadPostponed);
+        else if (err && (err.message === 'no-webgpu' || err.name === 'NoWebGpuError' || err.name === 'WebGPUUnsupportedError')) setStatus('error', COPY.errNoWebgpu);
         else setStatus('error', COPY.errLoad + (err && err.message || err));
         console.error('annotate model load error:', err);
         loadingPromise = null;

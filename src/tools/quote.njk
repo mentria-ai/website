@@ -187,6 +187,7 @@ function runApp(MentriaEngine) {
       progressWrap.style.display = 'none';
       console.error('Model load error:', err);
       if (err && err.message === 'download-postponed') setStatus('idle', COPY.downloadPostponed);
+      else if (err && (err.message === 'no-webgpu' || err.name === 'NoWebGpuError' || err.name === 'WebGPUUnsupportedError')) showUnsupportedError(COPY.errNoWebGpu);
       else setStatus('error', COPY.errLoadPrefix + (err.message || err));
     }
   }

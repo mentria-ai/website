@@ -639,7 +639,10 @@
       "preset_5min": "5分",
       "preset_10min": "10分",
       "preset_25min": "25分",
-      "preset_1hr": "1時間"
+      "preset_1hr": "1時間",
+      "preset_save_aria": "現在の時間をプリセットとして保存",
+      "preset_remove_aria": "プリセット {label} を削除",
+      "preset_save_invalid": "先に時間を設定してから保存してください"
     },
     "invoice": {
       "btn_print": "印刷 / PDF保存",

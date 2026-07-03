@@ -639,7 +639,10 @@
       "preset_5min": "5 min",
       "preset_10min": "10 min",
       "preset_25min": "25 min",
-      "preset_1hr": "1 h"
+      "preset_1hr": "1 h",
+      "preset_save_aria": "Enregistrer la durée actuelle comme préréglage",
+      "preset_remove_aria": "Supprimer le préréglage {label}",
+      "preset_save_invalid": "Définissez d’abord une durée, puis enregistrez-la"
     },
     "invoice": {
       "btn_print": "Imprimer / Enregistrer en PDF",

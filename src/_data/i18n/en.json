@@ -639,7 +639,10 @@
       "preset_5min": "5 min",
       "preset_10min": "10 min",
       "preset_25min": "25 min",
-      "preset_1hr": "1 hr"
+      "preset_1hr": "1 hr",
+      "preset_save_aria": "Save the current duration as a preset",
+      "preset_remove_aria": "Remove preset {label}",
+      "preset_save_invalid": "Set a duration first, then save it"
     },
     "invoice": {
       "btn_print": "Print / Save PDF",

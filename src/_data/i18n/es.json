@@ -639,7 +639,10 @@
       "preset_5min": "5 min",
       "preset_10min": "10 min",
       "preset_25min": "25 min",
-      "preset_1hr": "1 h"
+      "preset_1hr": "1 h",
+      "preset_save_aria": "Guardar la duración actual como preajuste",
+      "preset_remove_aria": "Eliminar preajuste {label}",
+      "preset_save_invalid": "Define una duración primero y luego guárdala"
     },
     "invoice": {
       "btn_print": "Imprimir / Guardar PDF",

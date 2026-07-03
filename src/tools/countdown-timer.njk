@@ -89,11 +89,12 @@ eleventyComputed:
       <button class="ct-preset m-btn m-btn--ghost m-btn--pill" data-seconds="600">{{ "tool.countdown-timer.preset_10min" | t }}</button>
       <button class="ct-preset m-btn m-btn--ghost m-btn--pill" data-seconds="1500">{{ "tool.countdown-timer.preset_25min" | t }}</button>
       <button class="ct-preset m-btn m-btn--ghost m-btn--pill" data-seconds="3600">{{ "tool.countdown-timer.preset_1hr" | t }}</button>
+      <span class="ct-custom-presets"></span>
+      <button class="ct-preset-save m-btn m-btn--ghost m-btn--pill" data-save-preset aria-label="{{ 'tool.countdown-timer.preset_save_aria' | t }}" title="{{ 'tool.countdown-timer.preset_save_aria' | t }}">+</button>
     </div>
 
     <div class="ct-widget__controls">
       <button class="m-btn m-btn--primary" data-action="start">{{ "tool.countdown-timer.btn_start" | t }}</button>
-      <button class="m-btn m-btn--ghost" data-action="pause" disabled>{{ "tool.countdown-timer.btn_pause" | t }}</button>
       <button class="m-btn m-btn--ghost" data-action="reset" disabled>{{ "tool.countdown-timer.btn_reset" | t }}</button>
     </div>
   </div>
@@ -118,6 +119,8 @@ eleventyComputed:
     errMax99Brief:  {{ ("tool.countdown-timer.err_max_99_brief" | t) | dump | safe }},
     timerDefault:   {{ ("tool.countdown-timer.timer_default"    | t) | dump | safe }},
     titleAlarm:     {{ ("tool.countdown-timer.title_alarm"      | t) | dump | safe }},
+    presetRemoveAria: {{ ("tool.countdown-timer.preset_remove_aria" | t) | dump | safe }},
+    presetSaveInvalid: {{ ("tool.countdown-timer.preset_save_invalid" | t) | dump | safe }},
     titleRunFmt:    {{ ("tool.countdown-timer.title_running_format" | t) | dump | safe }},
     notifUnsup:     {{ ("tool.countdown-timer.notif_unsupported" | t) | dump | safe }},
     notifDefault:   {{ ("tool.countdown-timer.notif_default"    | t) | dump | safe }},
@@ -298,6 +301,9 @@ eleventyComputed:
 
   function updatePageTitle() {
     for (const [, s] of widgets) {
+      if (s.isAlarming) { document.title = COPY.titleAlarm; return; }
+    }
+    for (const [, s] of widgets) {
       if (s.countdown && s.totalSeconds > 0) {
         const h = Math.floor(s.totalSeconds / 3600);
         const m = Math.floor((s.totalSeconds % 3600) / 60);
@@ -306,10 +312,67 @@ eleventyComputed:
         return;
       }
     }
-    for (const [, s] of widgets) {
-      if (s.isAlarming) { document.title = COPY.titleAlarm; return; }
-    }
     document.title = originalTitle;
+  }
+
+  let wakeLock = null;
+  function anyRunning() {
+    for (const [, s2] of widgets) { if (s2.countdown) return true; }
+    return false;
+  }
+  async function syncWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    if (anyRunning()) {
+      if (wakeLock) return;
+      try { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); }
+      catch (_) { wakeLock = null; }
+    } else if (wakeLock) {
+      try { wakeLock.release(); } catch (_) {}
+      wakeLock = null;
+    }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncWakeLock();
+  });
+
+  const PRESETS_KEY = 'countdown_presets';
+  function loadCustomPresets() {
+    try {
+      const v = window.MentriaStore && window.MentriaStore.get('tools', PRESETS_KEY);
+      if (Array.isArray(v)) return v.filter((n) => Number.isFinite(n) && n > 0 && n <= MAX_SECONDS).slice(0, 6);
+    } catch (_) {}
+    return [];
+  }
+  let customPresets = loadCustomPresets();
+  function persistCustomPresets() {
+    if (!window.MentriaStore) return;
+    if (customPresets.length) window.MentriaStore.set('tools', PRESETS_KEY, customPresets);
+    else window.MentriaStore.remove('tools', PRESETS_KEY);
+  }
+  function fmtPreset(secs) {
+    const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), sc = secs % 60;
+    if (h) return h + ':' + pad(m) + ':' + pad(sc);
+    return m + ':' + pad(sc);
+  }
+  function renderCustomPresets(root) {
+    const holders = root ? [root] : [...document.querySelectorAll('.ct-custom-presets')];
+    holders.forEach((holder) => {
+      holder.innerHTML = '';
+      customPresets.forEach((secs) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'ct-preset ct-preset--custom m-btn m-btn--ghost m-btn--pill';
+        b.dataset.seconds = String(secs);
+        b.textContent = fmtPreset(secs);
+        const x = document.createElement('button');
+        x.type = 'button';
+        x.className = 'ct-preset-remove m-btn m-btn--ghost m-btn--icon';
+        x.dataset.removePreset = String(secs);
+        x.textContent = '\u00d7';
+        x.setAttribute('aria-label', COPY.presetRemoveAria.replace('{label}', fmtPreset(secs)));
+        holder.append(b, x);
+      });
+    });
   }
 
   function refreshAddBtn() {
@@ -341,8 +404,15 @@ eleventyComputed:
     const inputS = $('[data-input="secs"]');
     const inputDT = $('[data-input="datetime"]');
     const dtError = $('[data-role="dt-error"]');
+    [inputH, inputM, inputS, inputDT].forEach((inp) => {
+      const grp = inp.closest('.ct-input-grp');
+      const label = grp && grp.querySelector('label');
+      if (!label) return;
+      const fid = 'ct' + id + '-' + inp.dataset.input;
+      inp.id = fid;
+      label.htmlFor = fid;
+    });
     const btnStart = $('[data-action="start"]');
-    const btnPause = $('[data-action="pause"]');
     const btnReset = $('[data-action="reset"]');
     const btnClose = $('.ct-widget__close');
     const modeToggle = $('.ct-widget__mode-toggle');
@@ -378,9 +448,9 @@ eleventyComputed:
         clearInterval(state.countdown);
         state.countdown = null;
         statusEl.textContent = COPY.statusTimesUp;
+        syncWakeLock();
         displayWrap.classList.add('ct-widget__display--finished');
         startAlarmFor(state);
-        btnPause.disabled = true;
         btnStart.textContent = COPY.btnStart;
         btnStart.disabled = true;
         btnReset.disabled = false;
@@ -398,7 +468,7 @@ eleventyComputed:
         fireAt: Date.now() + state.totalSeconds * 1000,
         title: COPY.notifFinishFmt.replace('{label}', label),
         body: COPY.notifBodyOpen,
-        url: '/tools/countdown-timer/',
+        url: location.pathname,
         tag: NOTIF_TAG_PREFIX + state.id
       };
     }
@@ -430,8 +500,8 @@ eleventyComputed:
         state.countdown = null;
         state.isPaused = true;
         disarmServerPush(state);
+        syncWakeLock();
         btnStart.textContent = COPY.btnResume;
-        btnPause.disabled = true;
         statusEl.textContent = COPY.statusPaused;
         return;
       }
@@ -441,8 +511,8 @@ eleventyComputed:
         state.endAt = Date.now() + state.totalSeconds * 1000;
         state.countdown = setInterval(tick, 1000);
         armServerPush(state);
+        syncWakeLock();
         btnStart.textContent = COPY.btnPause;
-        btnPause.disabled = false;
         statusEl.textContent = COPY.statusRunning;
         return;
       }
@@ -475,8 +545,8 @@ eleventyComputed:
       state.endAt = Date.now() + state.totalSeconds * 1000;
       state.countdown = setInterval(tick, 1000);
       armServerPush(state);
+      syncWakeLock();
       btnStart.textContent = COPY.btnPause;
-      btnPause.disabled = false;
       btnReset.disabled = false;
       presetButtons.forEach(b => b.disabled = true);
       panelDuration.classList.add('ct-widget__inputs--hidden');
@@ -487,6 +557,7 @@ eleventyComputed:
       stopAlarmFor(state);
       if (state.countdown) { clearInterval(state.countdown); state.countdown = null; }
       disarmServerPush(state);
+      syncWakeLock();
       state.isPaused = false;
       state.totalSeconds = 0;
       updateDisplay();
@@ -494,7 +565,6 @@ eleventyComputed:
       displayWrap.classList.remove('ct-widget__display--finished');
       btnStart.textContent = COPY.btnStart;
       btnStart.disabled = false;
-      btnPause.disabled = true;
       btnReset.disabled = true;
       presetButtons.forEach(b => b.disabled = false);
       dtError.textContent = '';
@@ -525,16 +595,6 @@ eleventyComputed:
     }
 
     btnStart.addEventListener('click', startTimer);
-    btnPause.addEventListener('click', () => {
-      if (state.countdown) {
-        clearInterval(state.countdown);
-        state.countdown = null;
-        state.isPaused = true;
-        disarmServerPush(state);
-        btnStart.textContent = COPY.btnResume;
-        statusEl.textContent = COPY.statusPaused;
-      }
-    });
     btnReset.addEventListener('click', resetTimer);
 
     btnClose.addEventListener('click', () => removeWidget(id));
@@ -565,17 +625,56 @@ eleventyComputed:
       }
     });
 
-    presetButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
+    const presetsRow = $('.ct-widget__presets');
+    renderCustomPresets($('.ct-custom-presets'));
+    presetsRow.addEventListener('click', (e) => {
+      const rm = e.target.closest('[data-remove-preset]');
+      if (rm) {
+        customPresets = customPresets.filter((n) => n !== parseInt(rm.dataset.removePreset));
+        persistCustomPresets();
+        renderCustomPresets();
+        return;
+      }
+      const save = e.target.closest('[data-save-preset]');
+      if (save) {
         if (state.countdown || state.isPaused) return;
-        setPreset(parseInt(btn.dataset.seconds));
-      });
+        const secs = (parseInt(inputH.value) || 0) * 3600 + (parseInt(inputM.value) || 0) * 60 + (parseInt(inputS.value) || 0);
+        if (secs <= 0 || secs > MAX_SECONDS) {
+          if (window.MentriaUI) MentriaUI.toast(COPY.presetSaveInvalid);
+          return;
+        }
+        if (customPresets.indexOf(secs) === -1 && customPresets.length < 6) {
+          customPresets.push(secs);
+          persistCustomPresets();
+          renderCustomPresets();
+        }
+        return;
+      }
+      const btn = e.target.closest('.ct-preset[data-seconds]');
+      if (!btn) return;
+      if (state.countdown || state.isPaused) return;
+      setPreset(parseInt(btn.dataset.seconds));
     });
 
     titleEl.addEventListener('focus', () => {
       if (titleEl.dataset.isDefault === '1') titleEl.textContent = '';
     });
     titleEl.addEventListener('input', () => { titleEl.dataset.isDefault = ''; });
+    titleEl.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text/plain').replace(/\s+/g, ' ').trim().slice(0, 60);
+      const sel = window.getSelection();
+      if (!sel.rangeCount) { titleEl.textContent = text; return; }
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(document.createTextNode(text));
+      sel.collapseToEnd();
+      titleEl.dataset.isDefault = '';
+    });
+    titleEl.addEventListener('drop', (e) => { e.preventDefault(); });
+    titleEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
+    });
     titleEl.addEventListener('blur', () => {
       if (!titleEl.textContent.trim()) {
         titleEl.textContent = fmtTimer(id);
@@ -862,6 +961,20 @@ eleventyComputed:
   font-size: 0.8rem;
   color: var(--term-muted);
 }
+.ct-preset-remove {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: var(--text-2xs);
+  margin-left: -4px;
+}
+.ct-preset-save {
+  min-width: 28px;
+}
+.ct-custom-presets {
+  display: contents;
+}
+
 .ct-preset {
   font-size: var(--text-xs);
   padding: var(--space-1) var(--space-3);

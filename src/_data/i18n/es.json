@@ -184,7 +184,9 @@
     "lede": "Transmisiones visuales del estudio Mentria.",
     "empty_cmd": "$ feed --list",
     "empty_msg": "> no hay transmisiones todavía. vuelve pronto.",
-    "chapter_badge": "CAPÍTULO · APRENDE"
+    "chapter_badge": "CAPÍTULO · APRENDE",
+    "mute_toggle": "Activar/desactivar sonido",
+    "video_progress": "Progreso del vídeo"
   },
   "errors": {
     "not_found_cmd_prefix": "$ navigate",
@@ -1276,5 +1278,15 @@
     "storage_label": "Almacenamiento",
     "storage_used": "{used} / {quota}",
     "notes_count_one": "{n} nota"
+  },
+  "feed_deck": {
+    "hint_tap": "toca →",
+    "hint_depth": "desliza ↑ para más",
+    "hint_exit": "desliza ↓ para salir",
+    "exit": "Salir",
+    "prev_slide": "Diapositiva anterior",
+    "next_slide": "Siguiente diapositiva",
+    "progress_label": "Progreso del deck",
+    "slide_of": "Diapositiva {n} de {total}"
   }
 }

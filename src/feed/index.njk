@@ -12,14 +12,15 @@ eleventyComputed:
 ---
 {% set entries = (feed | default([])) | interleaveFeed %}
 {% if entries.length %}
+<h1 class="sr-only">{{ "feed_page.title" | t }}</h1>
 <div class="feed-scroll" id="feed-scroll">
     {% for item in entries %}
-    <section class="feed-card{% if item.link %} feed-card--linked{% endif %}"{% if not item.link %} tabindex="0"{% endif %} data-index="{{ loop.index0 }}"{% if item.src %} style="--feed-card-bg: url('{{ item.src }}')"{% endif %}>
-        {% if item.link %}<a class="feed-card__link" href="{{ item.link }}" aria-label="{{ (item.caption | tloc(locale.code)) if item.caption else item.title }}"></a>{% endif %}
+    <section class="feed-card{% if item.link %} feed-card--linked{% endif %}"{% if not item.link %} tabindex="0"{% endif %} data-index="{{ loop.index0 }}"{% if item.src %} data-feed-bg="{{ item.src }}"{% endif %}>
+        {% if item.link %}<a class="feed-card__link" href="{{ locale.pathPrefix }}{{ item.link }}" aria-label="{{ (item.caption | tloc(locale.code)) if item.caption else item.title }}"></a>{% endif %}
         {% if item.type == "video" and item.src %}
         <video class="feed-card__media" src="{{ item.src }}" {% if item.poster %}poster="{{ item.poster }}"{% endif %} muted loop playsinline preload="metadata"></video>
         {% elif (item.type == "image" or item.type == "chapter") and item.src %}
-        <img class="feed-card__media" src="{{ item.src }}" alt="{{ (item.caption | tloc(locale.code)) if item.caption else item.title }}" loading="lazy">
+        <img class="feed-card__media" src="{{ item.src }}" alt="{{ (item.caption | tloc(locale.code)) if item.caption else item.title }}" loading="{{ 'eager' if loop.first else 'lazy' }}"{% if loop.first %} fetchpriority="high"{% endif %} onerror="this.classList.add('is-broken')">
         {% elif item.color %}
         <div class="feed-card__color-bg" style="background: {{ item.color }};"></div>
         {% endif %}
@@ -42,17 +43,19 @@ eleventyComputed:
 
         <div class="feed-card__info">
             {% if item.caption %}
-            <p class="feed-card__caption">{{ item.caption | tloc(locale.code) }}</p>
-            {% endif %}
+            <p class="feed-card__caption">{{ item.title }}</p>
+            <h2 class="feed-card__title">{{ item.caption | tloc(locale.code) }}</h2>
+            {% else %}
             <h2 class="feed-card__title">{{ item.title }}</h2>
+            {% endif %}
             {% if item.date %}
             <time class="feed-card__date" datetime="{{ item.date | isoDate }}">{{ item.date | date(lang) }}</time>
             {% endif %}
         </div>
 
         {% if item.type == "video" and item.src %}
-        <button class="feed-card__mute-btn" aria-label="Toggle mute">🔇</button>
-        <div class="feed-card__progress" role="progressbar" aria-valuenow="0" aria-valuemax="100" style="width: 0%;"></div>
+        <button class="feed-card__mute-btn" aria-label="{{ 'feed_page.mute_toggle' | t }}">🔇</button>
+        <div class="feed-card__progress" role="progressbar" aria-label="{{ 'feed_page.video_progress' | t }}" aria-valuenow="0" aria-valuemax="100" style="width: 0%;"></div>
         {% endif %}
 
         {% if loop.first %}
@@ -84,6 +87,19 @@ eleventyComputed:
     });
   }, { threshold: [0.55] });
   for (var ci = 0; ci < cards.length; ci++) currentObserver.observe(cards[ci]);
+
+  var bgObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      var src = el.getAttribute('data-feed-bg');
+      if (src) el.style.setProperty('--feed-card-bg', "url('" + src + "')");
+      bgObserver.unobserve(el);
+    });
+  }, { rootMargin: '150% 0px' });
+  for (var bi = 0; bi < cards.length; bi++) {
+    if (cards[bi].hasAttribute('data-feed-bg')) bgObserver.observe(cards[bi]);
+  }
 
   // Video autoplay/pause with Intersection Observer
   var videos = feedScroll.querySelectorAll('video');

@@ -13,6 +13,17 @@
 
   const closeBtn = document.getElementById('deckClose');
   const hint = document.getElementById('deckHint');
+  const progressBar = root.querySelector('.deck__progress');
+  const liveEl = document.getElementById('deckLive');
+  const localePrefix = (function () {
+    const locs = window.MENTRIA_LOCALES || [];
+    const path = location.pathname || '/';
+    for (let i = 0; i < locs.length; i++) {
+      const p = locs[i].prefix;
+      if (p && (path === p || path.indexOf(p + '/') === 0)) return p;
+    }
+    return '';
+  })();
 
   let current = 0;
   let hintFaded = false;
@@ -23,10 +34,19 @@
     hint.classList.add('is-fading');
   }
 
+  function announceSlide(i) {
+    if (progressBar) progressBar.setAttribute('aria-valuenow', String(i + 1));
+    if (liveEl && progressBar) {
+      const tpl = progressBar.getAttribute('data-announce') || 'Slide {n} of {total}';
+      liveEl.textContent = tpl.replace('{n}', String(i + 1)).replace('{total}', String(slides.length));
+    }
+  }
+
   function go(i) {
     if (i < 0 || i >= slideCount) return;
     current = i;
     slides.forEach((el, idx) => el.classList.toggle('is-active', idx === i));
+    announceSlide(i);
     segs.forEach((el, idx) => {
       el.classList.toggle('is-done', idx < i);
       el.classList.toggle('is-active', idx === i);
@@ -142,9 +162,9 @@
   function exit() {
     const back = document.referrer && document.referrer.indexOf(location.origin) === 0
       ? -1
-      : '/feed/';
+      : localePrefix + '/feed/';
     if (back === -1) history.back();
-    else location.href = '/feed/';
+    else location.href = localePrefix + '/feed/';
   }
 
   /* ── Tap zones ─────────────────────────────────────────── */
@@ -175,7 +195,7 @@
 
   async function shareChapter() {
     const title = root.dataset.chapterTitle || 'Mentria chapter';
-    const url = location.origin + '/feed/chapter/' + chapterId + '/';
+    const url = location.origin + localePrefix + '/feed/chapter/' + chapterId + '/';
     const data = { title, text: 'Just finished: ' + title, url };
     try {
       if (navigator.share) await navigator.share(data);

@@ -65,7 +65,7 @@ module.exports = function () {
         type: "chapter",
         lang: loc.code,
         slug: ch.id,
-        url: `/feed/chapter/${ch.id}/`,
+        url: `${loc.pathPrefix}/feed/chapter/${ch.id}/`,
         title: ch.title,
         description: ch.subtitle || "",
         tldr: (ch.concept_tags || []).join(" "),

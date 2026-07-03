@@ -945,3 +945,5 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
 }
+
+.feed-card__media.is-broken { visibility: hidden; }

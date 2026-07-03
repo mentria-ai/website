@@ -184,7 +184,9 @@
     "lede": "Visual transmissions from the Mentria studio.",
     "empty_cmd": "$ feed --list",
     "empty_msg": "> no transmissions yet. check back soon.",
-    "chapter_badge": "CHAPTER · LEARN"
+    "chapter_badge": "CHAPTER · LEARN",
+    "mute_toggle": "Toggle sound",
+    "video_progress": "Video progress"
   },
   "errors": {
     "not_found_cmd_prefix": "$ navigate",
@@ -1276,5 +1278,15 @@
     "storage_label": "Storage",
     "storage_used": "{used} / {quota}",
     "notes_count_one": "{n} note"
+  },
+  "feed_deck": {
+    "hint_tap": "tap →",
+    "hint_depth": "swipe ↑ for depth",
+    "hint_exit": "swipe ↓ to exit",
+    "exit": "Exit",
+    "prev_slide": "Previous slide",
+    "next_slide": "Next slide",
+    "progress_label": "Deck progress",
+    "slide_of": "Slide {n} of {total}"
   }
 }

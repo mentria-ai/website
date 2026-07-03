@@ -122,6 +122,7 @@ eleventyComputed:
     statusGenerating: {{ ("tool.annotate-image.status_generating" | t) | dump | safe }},
     errNoWebgpu:      {{ ("tool.annotate-image.err_no_webgpu"     | t) | dump | safe }},
     errLoad:          {{ ("tool.annotate-image.err_load"          | t) | dump | safe }},
+    downloadPostponed: {{ ("common.download_postponed"            | t) | dump | safe }},
     errDeviceLost:    {{ ("tool.annotate-image.err_device_lost"   | t) | dump | safe }},
     emptyResponse:    {{ ("tool.annotate-image.empty_response"    | t) | dump | safe }},
     copy:             {{ ("tool.annotate-image.copy"              | t) | dump | safe }},
@@ -213,7 +214,8 @@ eleventyComputed:
         return true;
       } catch (err){
         progressWrap.style.display = 'none';
-        setStatus('error', COPY.errLoad + (err && err.message || err));
+        if (err && err.message === 'download-postponed') setStatus('idle', COPY.downloadPostponed);
+        else setStatus('error', COPY.errLoad + (err && err.message || err));
         console.error('annotate model load error:', err);
         loadingPromise = null;
         return false;
@@ -276,18 +278,31 @@ eleventyComputed:
     modesEl.querySelectorAll('.an-mode').forEach(b => { b.classList.toggle('active', b.dataset.mode === active); b.disabled = !!disabled; });
   }
 
+  let curUrl = null;
+
+  function resetDropzone(){
+    if (curUrl){ try { URL.revokeObjectURL(curUrl); } catch(_){} curUrl = null; }
+    curImage = null; preview.hidden = true; preview.removeAttribute('src'); dropInner.style.display = '';
+    drop.classList.remove('has-image'); modesEl.hidden = true; resultWrap.hidden = true; resultEl.innerHTML = '';
+  }
+
   async function loadImage(file){
     if (!file || !file.type || !file.type.startsWith('image/')){ setStatus('error', COPY.badFile); return; }
     curName = (file.name || 'image').replace(/\.[^.]+$/, '');
     try {
-      const url = URL.createObjectURL(file);
-      preview.src = url; preview.hidden = false; dropInner.style.display = 'none';
+      if (curUrl){ try { URL.revokeObjectURL(curUrl); } catch(_){} }
+      curUrl = URL.createObjectURL(file);
+      preview.src = curUrl; preview.hidden = false; dropInner.style.display = 'none';
       drop.classList.add('has-image');
       curImage = await fileToEngineImage(file, IMG_MAX);
       modesEl.hidden = false;
       curMode = 'describe';
       run('describe');
-    } catch (err){ setStatus('error', COPY.badFile); console.error(err); }
+    } catch (err){
+      resetDropzone();
+      setStatus('error', COPY.badFile);
+      console.error(err);
+    }
   }
 
   // upload interactions
@@ -314,12 +329,10 @@ eleventyComputed:
   document.getElementById('an-download').addEventListener('click', () => {
     const txt = resultEl.textContent.trim(); if (!txt) return;
     const blob = new Blob([txt], { type: 'text/plain' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = curName + '-' + curMode + '.txt';
-    document.body.appendChild(a); a.click(); a.remove();
+    MentriaUI.downloadFile(curName + '-' + curMode + '.txt', blob);
   });
   document.getElementById('an-new').addEventListener('click', () => {
-    curImage = null; preview.hidden = true; preview.removeAttribute('src'); dropInner.style.display = '';
-    drop.classList.remove('has-image'); modesEl.hidden = true; resultWrap.hidden = true; resultEl.innerHTML = '';
+    resetDropzone();
     if (loaded) setStatus('ready', COPY.statusReady); else setStatus('idle', COPY.statusIdle);
   });
   deleteBtn.addEventListener('click', async () => {

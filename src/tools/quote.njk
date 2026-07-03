@@ -186,7 +186,8 @@ function runApp(MentriaEngine) {
     } catch (err) {
       progressWrap.style.display = 'none';
       console.error('Model load error:', err);
-      setStatus('error', COPY.errLoadPrefix + (err.message || err));
+      if (err && err.message === 'download-postponed') setStatus('idle', COPY.downloadPostponed);
+      else setStatus('error', COPY.errLoadPrefix + (err.message || err));
     }
   }
 

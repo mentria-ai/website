@@ -22,11 +22,11 @@ eleventyComputed:
 <section class="qr qr--idle" id="qr" data-mode="scan">
 
   <div class="qr__modes" role="tablist" aria-label="{{ 'tools.qr-scanner.title' | t }}">
-    <button type="button" class="qr__mode is-active" id="qr-mode-scan" role="tab" aria-selected="true">{{ "tool.qr-scanner.mode_scan" | t }}</button>
-    <button type="button" class="qr__mode" id="qr-mode-gen" role="tab" aria-selected="false">{{ "tool.qr-scanner.mode_generate" | t }}</button>
+    <button type="button" class="qr__mode is-active" id="qr-mode-scan" role="tab" aria-selected="true" aria-controls="qr-view-scan" tabindex="0">{{ "tool.qr-scanner.mode_scan" | t }}</button>
+    <button type="button" class="qr__mode" id="qr-mode-gen" role="tab" aria-selected="false" aria-controls="qr-view-gen" tabindex="-1">{{ "tool.qr-scanner.mode_generate" | t }}</button>
   </div>
 
-  <div class="qr__view" id="qr-view-scan">
+  <div class="qr__view" id="qr-view-scan" role="tabpanel" aria-labelledby="qr-mode-scan">
   <div class="qr__main" id="qr-main">
     <div class="qr__stage">
       <video class="qr__video" id="qr-video" playsinline muted aria-label="{{ 'tool.qr-scanner.aria_video' | t }}"></video>
@@ -51,7 +51,7 @@ eleventyComputed:
 
     <div class="qr__result" id="qr-result">
       <span class="qr__result-label">{{ "tool.qr-scanner.result_label" | t }}</span>
-      <p class="qr__result-value" id="qr-result-value"></p>
+      <p class="qr__result-value" id="qr-result-value" role="status" aria-live="polite"></p>
       <span class="qr__result-format" id="qr-result-format"></span>
     </div>
 
@@ -77,7 +77,7 @@ eleventyComputed:
   </div>
   </div>
 
-  <div class="qr__view" id="qr-view-gen" hidden>
+  <div class="qr__view" id="qr-view-gen" hidden role="tabpanel" aria-labelledby="qr-mode-gen">
     <div class="qrg">
       <input type="text" class="qrg__input m-input" id="qrg-input" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false"
              placeholder="{{ 'tool.qr-scanner.gen_prompt' | t }}" aria-label="{{ 'tool.qr-scanner.gen_input_label' | t }}">
@@ -156,6 +156,24 @@ eleventyComputed:
   }
   modeScanBtn.addEventListener('click', () => setMode('scan'));
   modeGenBtn.addEventListener('click', () => { setMode('generate'); genRender(); genInput.focus(); });
+  function syncTabIndex(activeBtn, otherBtn) {
+    activeBtn.tabIndex = 0;
+    otherBtn.tabIndex = -1;
+  }
+  [modeScanBtn, modeGenBtn].forEach((btn) => {
+    btn.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Home' && e.key !== 'End') return;
+      e.preventDefault();
+      const other = btn === modeScanBtn ? modeGenBtn : modeScanBtn;
+      const target = (e.key === 'Home') ? modeScanBtn : (e.key === 'End') ? modeGenBtn : other;
+      syncTabIndex(target, target === modeScanBtn ? modeGenBtn : modeScanBtn);
+      target.click();
+      target.focus();
+    });
+    btn.addEventListener('click', () => {
+      syncTabIndex(btn, btn === modeScanBtn ? modeGenBtn : modeScanBtn);
+    });
+  });
 
   let genText = '';
   let genTimer = 0;
@@ -381,7 +399,14 @@ eleventyComputed:
     }
     if (bitmap.close) bitmap.close();
     if (result) showResult(result.rawValue, result.format);
-    else showNote((useJsQR && !detector) ? COPY.noteNoMatchQrOnly : COPY.noteNoMatch);
+    else {
+      lastValue = '';
+      resultValue.textContent = '';
+      resultFmt.textContent = '';
+      openBtn.hidden = true;
+      setState('idle');
+      showNote((useJsQR && !detector) ? COPY.noteNoMatchQrOnly : COPY.noteNoMatch);
+    }
   }
 
   startBtn.addEventListener('click', startCamera);

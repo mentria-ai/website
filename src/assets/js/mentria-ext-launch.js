@@ -3,6 +3,9 @@
   var pages = document.querySelector('.launcher__pages');
   if (!pages || !window.MentriaStore) return;
 
+  var palette = window.MENTRIA_PALETTE_DATA || {};
+  var prefix = (typeof palette.prefix === 'string') ? palette.prefix : '';
+
   import('/assets/js/mentria-extensions.js').then(function (X) {
     var entries = X.getRegistry().filter(function (e) { return e.enabled; });
     if (!entries.length) return;
@@ -27,7 +30,7 @@
         a.setAttribute('data-slug', m.id);
         a.setAttribute('data-group', 'Extensions');
         a.setAttribute('data-search', m.name + ' ' + (m.description || '') + ' extension');
-        a.href = '/tools/extensions/run/?id=' + encodeURIComponent(m.id);
+        a.href = prefix + '/tools/extensions/run/?id=' + encodeURIComponent(m.id);
         var icon = document.createElement('span');
         icon.className = 'launch-tile__icon launch-tile__icon--ext';
         icon.setAttribute('aria-hidden', 'true');
@@ -61,7 +64,7 @@
             usage: c.usage,
             argv: true,
             run: function (args) {
-              var dest = '/tools/extensions/run/?id=' + encodeURIComponent(m.id) +
+              var dest = prefix + '/tools/extensions/run/?id=' + encodeURIComponent(m.id) +
                 '#cmd=' + encodeURIComponent(c.name) + '&args=' + encodeURIComponent(args || '');
               setTimeout(function () { window.location.href = dest; }, 0);
               return { lines: ['> opening ' + m.name + '...'], type: 'result' };

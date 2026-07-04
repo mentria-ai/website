@@ -27,7 +27,10 @@ const COPY = {
   open:      {{ ("tool.ext_gallery.btn_open"    | t) | dump | safe }},
   errLoad:   {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }},
   trust:     {{ ("tool.extensions.trust_prompt"  | t) | dump | safe }},
-  update:    {{ ("tool.extensions.update_prompt" | t) | dump | safe }}
+  update:    {{ ("tool.extensions.update_prompt" | t) | dump | safe }},
+  downgrade: {{ ("tool.extensions.downgrade_prompt" | t) | dump | safe }},
+  permsAdded:   {{ ("tool.extensions.update_perms_added" | t) | dump | safe }},
+  permsRemoved: {{ ("tool.extensions.update_perms_removed" | t) | dump | safe }}
 };
 const CATALOG = [
   { id: "unit-converter", desc: {{ ("tool.ext_gallery.desc.unit-converter" | t) | dump | safe }} },
@@ -114,7 +117,7 @@ async function install(entry, card, btn) {
   btn.disabled = true;
   try {
     const html = entry.html || await fetch("/assets/extensions/" + entry.id + ".html").then((r) => r.text());
-    const result = await confirmInstall(html, { copy: { trust: COPY.trust, update: COPY.update } });
+    const result = await confirmInstall(html, { copy: { trust: COPY.trust, update: COPY.update, downgrade: COPY.downgrade, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
     if (!result) { btn.disabled = false; return; }
     renderActions(entry, card);
   } catch (e) {

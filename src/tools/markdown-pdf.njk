@@ -182,7 +182,9 @@ function render() {
   previewEl.innerHTML = window.renderMarkdown ? window.renderMarkdown(inputEl.value || '') : '';
   previewEl.querySelectorAll('img').forEach((img) => {
     const src = img.getAttribute('src') || '';
-    if (/^https?:\/\//i.test(src) && new URL(src, location.href).origin !== location.origin) {
+    let resolved;
+    try { resolved = new URL(src, location.href); } catch (_) { return; }
+    if ((resolved.protocol === 'http:' || resolved.protocol === 'https:') && resolved.origin !== location.origin) {
       const note = document.createElement('span');
       note.className = 'mp__img-blocked';
       note.textContent = COPY.remoteImgBlocked.replace('{src}', src);

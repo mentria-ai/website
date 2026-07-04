@@ -1286,7 +1286,7 @@
     "list_label": "Search results",
     "no_results": "No matches",
     "recents": "Recent",
-    "open": "Open command palette",
+    "open": "Open command palette (⌘K)",
     "app_bar": "App navigation",
     "extensions": "Extensions",
     "actions": "Actions",

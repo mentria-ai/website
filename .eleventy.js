@@ -198,6 +198,16 @@ module.exports = function(eleventyConfig) {
       .replace(/&amp;/g, "&");
   });
 
+  eleventyConfig.addFilter("isNew", function(dateStr, days) {
+    if (!dateStr) return false;
+    try {
+      const age = Date.now() - new Date(dateStr).getTime();
+      return age >= 0 && age < (days || 21) * 86400000;
+    } catch (err) {
+      return false;
+    }
+  });
+
   eleventyConfig.addFilter("isoDate", function(dateObj) {
     if (!dateObj) return "";
     try {

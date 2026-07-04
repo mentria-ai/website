@@ -170,7 +170,11 @@
       "games": "Games",
       "create": "Create",
       "dev": "Dev",
-      "everyday": "Everyday"
+      "everyday": "Everyday",
+      "pinned": "Pinned",
+      "new_badge": "NEW",
+      "pin_action": "Pin {name}",
+      "unpin_action": "Unpin {name}"
     },
     "value_prop": "Free tools that run entirely in your browser — no account, no tracking, works offline.",
     "try_label": "try:"

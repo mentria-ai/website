@@ -170,7 +170,11 @@
       "games": "Jeux",
       "create": "Créer",
       "dev": "Dev",
-      "everyday": "Quotidien"
+      "everyday": "Quotidien",
+      "pinned": "Épinglés",
+      "new_badge": "NOUVEAU",
+      "pin_action": "Épingler {name}",
+      "unpin_action": "Désépingler {name}"
     },
     "value_prop": "Des outils gratuits qui tournent entièrement dans votre navigateur — sans compte, sans pistage, fonctionne hors ligne.",
     "try_label": "essayez :"

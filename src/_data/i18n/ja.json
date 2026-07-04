@@ -170,7 +170,11 @@
       "games": "ゲーム",
       "create": "作成",
       "dev": "開発",
-      "everyday": "毎日"
+      "everyday": "毎日",
+      "pinned": "ピン留め",
+      "new_badge": "NEW",
+      "pin_action": "{name}をピン留め",
+      "unpin_action": "{name}のピン留めを外す"
     },
     "value_prop": "ブラウザだけで完結する無料ツール — アカウント不要、トラッキングなし、オフラインでも動作。",
     "try_label": "おすすめ:"

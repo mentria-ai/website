@@ -170,7 +170,11 @@
       "games": "Juegos",
       "create": "Crear",
       "dev": "Dev",
-      "everyday": "Cotidiano"
+      "everyday": "Cotidiano",
+      "pinned": "Fijadas",
+      "new_badge": "NUEVO",
+      "pin_action": "Fijar {name}",
+      "unpin_action": "Desfijar {name}"
     },
     "value_prop": "Herramientas gratuitas que funcionan por completo en tu navegador — sin cuenta, sin rastreo, funciona sin conexión.",
     "try_label": "prueba:"

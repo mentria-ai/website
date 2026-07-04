@@ -110,6 +110,7 @@ eleventyComputed:
         <tr><td><code>mounts</code></td><td>object</td><td>no</td><td>Where the extension appears (below).</td></tr>
         <tr><td><code>mounts.tool</code></td><td>object</td><td>no</td><td>Present (usually <code>{}</code>) → a launcher tile plus the manager's <em>open</em> button.</td></tr>
         <tr><td><code>mounts.commands</code></td><td>object[]</td><td>no</td><td>Each <code>{ name, description, usage? }</code> registers a terminal/palette command. <code>name</code> kebab-case 2–16 chars; <code>description</code> required; <code>usage</code> is an optional hint. Colliding names are skipped.</td></tr>
+        <tr><td><code>mounts.widget</code></td><td>object</td><td>no</td><td><code>{ key, label }</code> → a live status tile on the home launcher (see <em>Widgets</em>). <code>key</code> (1–64 chars) is the storage key the tile watches; <code>label</code> (1–48 chars) names the tile.</td></tr>
       </tbody>
     </table>
   </div>
@@ -143,9 +144,23 @@ eleventyComputed:
     <li>The whole <code>.html</code> is stored too: over 512 KB warns at install, over 1536 KB is rejected outright.</li>
   </ul>
 
+  <h3 class="sdk__h3">Widgets</h3>
+  <p>Declare <code>mounts.widget</code> and the home launcher shows a live status tile for your extension, named by <code>label</code> and linking to your run page. The tile renders the snapshot object stored under <code>key</code> in your own storage — e.g. <code>storage.set('note', { text: 'bought milk', progress: 0.4 })</code> — and refreshes on every write.</p>
+  <div class="sdk__tablewrap">
+    <table class="sdk__table">
+      <thead><tr><th>Snapshot field</th><th>Type</th><th>Req</th><th>Rules</th></tr></thead>
+      <tbody>
+        <tr><td><code>text</code></td><td>string</td><td>yes</td><td>The tile's value line. Trimmed, capped at 80 chars; must be non-empty.</td></tr>
+        <tr><td><code>detail</code></td><td>string</td><td>no</td><td>A secondary line below the value. Trimmed, capped at 120 chars.</td></tr>
+        <tr><td><code>progress</code></td><td>number</td><td>no</td><td>Drawn as a progress bar; clamped to 0–1.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="sdk__note">Anything else under that key — a plain string, an array, an empty <code>text</code> — is ignored silently: the tile simply stays hidden until the key holds a valid snapshot object.</p>
+
   <h3 class="sdk__h3">Install &amp; share</h3>
   <ul class="sdk__list">
-    <li><strong>Manager</strong> (<a href="{{ locale.pathPrefix }}/tools/extensions/">/tools/extensions/</a>): drop an <code>.html</code> file, choose a file, or paste the source. Every install shows a human trust prompt naming the extension, its version and its declared permissions.</li>
+    <li><strong>Manager</strong> (<a href="{{ locale.pathPrefix }}/tools/extensions/">/tools/extensions/</a>): drop an <code>.html</code> file, choose a file, or paste the source. Every install shows a human trust prompt naming the extension, its version and its declared permissions; updates call out permissions the new version adds or drops, and installing an older version is labeled as a replacement, not an update.</li>
     <li><strong>Share over comms</strong>: from an installed row, <em>share</em> hands the file to an open <a href="{{ locale.pathPrefix }}/comms/">comms</a> session; the peer gets the same trust prompt, attributed <em>from you</em>, before anything installs. If comms is closed it points you there.</li>
     <li><strong>Export</strong>: <em>export</em> downloads the stored source back out as <code>&lt;id&gt;.html</code>, so an extension is always portable.</li>
   </ul>

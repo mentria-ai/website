@@ -53,6 +53,9 @@ eleventyComputed:
 const COPY = {
   trustPrompt:   {{ ("tool.extensions.trust_prompt"   | t) | dump | safe }},
   updatePrompt:  {{ ("tool.extensions.update_prompt"  | t) | dump | safe }},
+  downgradePrompt: {{ ("tool.extensions.downgrade_prompt" | t) | dump | safe }},
+  permsAdded:    {{ ("tool.extensions.update_perms_added" | t) | dump | safe }},
+  permsRemoved:  {{ ("tool.extensions.update_perms_removed" | t) | dump | safe }},
   confirmRemove: {{ ("tool.extensions.confirm_remove" | t) | dump | safe }},
   installedOk:   {{ ("tool.extensions.installed_ok"   | t) | dump | safe }},
   errPrefix:     {{ ("tool.extensions.err_prefix"     | t) | dump | safe }},
@@ -65,6 +68,7 @@ const COPY = {
   toggleLabel:   {{ ("tool.extensions.toggle_label"   | t) | dump | safe }}
 };
 
+const PREFIX = {{ locale.pathPrefix | dump | safe }};
 const X = await import('/assets/js/mentria-extensions.js');
 const { confirmInstall } = await import('/assets/js/mentria-ext-install-ui.js');
 const { MentriaBus } = await import('/assets/js/mentria-bus.js');
@@ -87,7 +91,7 @@ function fmt(tpl, vars) {
 async function installFlow(html) {
   clearError();
   try {
-    const entry = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt } });
+    const entry = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
     if (!entry) return;
     showOk(entry.manifest.name + ' ' + COPY.installedOk);
     render();
@@ -118,7 +122,7 @@ function row(entry) {
   toggle.type = 'checkbox'; toggle.checked = entry.enabled;
   toggle.setAttribute('aria-label', fmt(COPY.toggleLabel, { name: m.name }));
   toggle.title = fmt(COPY.toggleLabel, { name: m.name });
-  const open = btn(COPY.btnOpen, () => { location.href = '/tools/extensions/run/?id=' + encodeURIComponent(m.id); });
+  const open = btn(COPY.btnOpen, () => { location.href = PREFIX + '/tools/extensions/run/?id=' + encodeURIComponent(m.id); });
   open.disabled = !entry.enabled || !(m.mounts && m.mounts.tool);
   toggle.addEventListener('change', () => {
     X.setEnabled(m.id, toggle.checked);

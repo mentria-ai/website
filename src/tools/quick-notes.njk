@@ -47,6 +47,7 @@ eleventyComputed:
       <div class="qn-editor__actions">
         <button class="qn-action-btn m-btn m-btn--ghost" id="qn-export-btn" title="{{ 'tool.quick-notes.export_title' | t }}">{{ "tool.quick-notes.export_btn" | t }}</button>
         <button class="qn-action-btn m-btn m-btn--ghost" id="qn-share-btn" title="{{ 'common.share' | t }}">{{ "common.share" | t }}</button>
+        <button class="qn-action-btn m-btn m-btn--ghost" id="qn-mdpdf-btn" title="{{ 'tool.quick-notes.to_mdpdf_title' | t }}">{{ "tool.quick-notes.to_mdpdf_btn" | t }}</button>
         <button class="qn-action-btn m-btn m-btn--ghost" id="qn-lock-btn" title="{{ 'tool.quick-notes.lock_title' | t }}">{{ "tool.quick-notes.lock_btn" | t }}</button>
         <button class="qn-action-btn m-btn m-btn--danger" id="qn-delete-btn" title="{{ 'tool.quick-notes.delete_title' | t }}">{{ "tool.quick-notes.delete_btn" | t }}</button>
       </div>
@@ -105,6 +106,8 @@ eleventyComputed:
   const savedEl     = document.getElementById('qn-saved');
   const exportBtn   = document.getElementById('qn-export-btn');
   const shareBtn    = document.getElementById('qn-share-btn');
+  const MDPDF_URL = {{ ("/tools/markdown-pdf/" | localeUrl(lang)) | dump | safe }};
+  const mdpdfBtn    = document.getElementById('qn-mdpdf-btn');
   const lockBtn     = document.getElementById('qn-lock-btn');
   const deleteBtn   = document.getElementById('qn-delete-btn');
   const lockedPanel = document.getElementById('qn-locked');
@@ -531,6 +534,14 @@ eleventyComputed:
   exportBtn.addEventListener('click', exportNote);
   if (navigator.share) shareBtn.addEventListener('click', shareNote);
   else shareBtn.hidden = true;
+  mdpdfBtn.addEventListener('click', () => {
+    const body = textarea.value;
+    const title = titleInput.value.trim();
+    const text = title ? '# ' + title + '\n\n' + body : body;
+    if (!text.trim()) return;
+    if (window.MentriaStore) window.MentriaStore.set('handoff', 'md', { text, ts: Date.now() });
+    location.href = MDPDF_URL;
+  });
   lockBtn.addEventListener('click', handleLockClick);
   unlockBtn.addEventListener('click', unlockNote);
   deleteBtn.addEventListener('click', confirmDelete);

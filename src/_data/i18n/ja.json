@@ -551,7 +551,9 @@
       "unlock_failed": "ノートのロックを解除できませんでした — パスキーが一致しないか、利用できませんでした。",
       "prf_unsupported": "このブラウザまたはデバイスは暗号化にパスキーを使用できません。最新のChrome、Edge、Safariをお試しください。",
       "count_summary": "{words} 語 · {chars} 文字",
-      "empty_preview": "空"
+      "empty_preview": "空",
+      "to_mdpdf_btn": "→ PDF",
+      "to_mdpdf_title": "このメモをMarkdown → PDFで開く"
     },
     "color-picker": {
       "title_pick_color": "クリックして色を選択",
@@ -767,7 +769,8 @@
       "btn_ai_loading": "読込中 {pct}%",
       "preview_region_aria": "レンダリングされたプレビュー",
       "tab_hint": "Tabはスペースを挿入します。エディタから出るには、Escapeを押してからTabを押してください。",
-      "remote_img_blocked": "リモート画像をブロックしました: {src}"
+      "remote_img_blocked": "リモート画像をブロックしました: {src}",
+      "import_note_confirm": "現在のMarkdown下書きをクイックメモのノートで置き換えますか？"
     },
     "quote": {
       "tldr_heading": "モチベーション名言とは?",

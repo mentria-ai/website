@@ -551,7 +551,9 @@
       "unlock_failed": "No se pudo desbloquear la nota: la llave de acceso no coincidió o no estaba disponible.",
       "prf_unsupported": "Este navegador o dispositivo no puede usar una llave de acceso para cifrar. Prueba una versión reciente de Chrome, Edge o Safari.",
       "count_summary": "{words} palabras · {chars} caracteres",
-      "empty_preview": "Vacía"
+      "empty_preview": "Vacía",
+      "to_mdpdf_btn": "→ PDF",
+      "to_mdpdf_title": "Abrir esta nota en Markdown → PDF"
     },
     "color-picker": {
       "title_pick_color": "Haz clic para elegir un color",
@@ -767,7 +769,8 @@
       "btn_ai_loading": "Cargando {pct}%",
       "preview_region_aria": "Vista previa renderizada",
       "tab_hint": "Tab inserta espacios. Pulsa Escape y luego Tab para salir del editor.",
-      "remote_img_blocked": "imagen remota bloqueada: {src}"
+      "remote_img_blocked": "imagen remota bloqueada: {src}",
+      "import_note_confirm": "¿Reemplazar tu borrador de Markdown actual con la nota de Notas Rápidas?"
     },
     "quote": {
       "tldr_heading": "¿Qué es Frase Motivacional?",

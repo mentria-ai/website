@@ -551,7 +551,9 @@
       "unlock_failed": "Impossible de déverrouiller la note — la clé d'accès ne correspondait pas ou n'était pas disponible.",
       "prf_unsupported": "Ce navigateur ou cet appareil ne peut pas utiliser de clé d'accès pour le chiffrement. Essaie une version récente de Chrome, Edge ou Safari.",
       "count_summary": "{words} mots · {chars} caractères",
-      "empty_preview": "Vide"
+      "empty_preview": "Vide",
+      "to_mdpdf_btn": "→ PDF",
+      "to_mdpdf_title": "Ouvrir cette note dans Markdown → PDF"
     },
     "color-picker": {
       "title_pick_color": "Cliquez pour choisir une couleur",
@@ -767,7 +769,8 @@
       "btn_ai_loading": "Chargement {pct}%",
       "preview_region_aria": "Aperçu du rendu",
       "tab_hint": "Tab insère des espaces. Appuyez sur Échap puis Tab pour quitter l’éditeur.",
-      "remote_img_blocked": "image distante bloquée : {src}"
+      "remote_img_blocked": "image distante bloquée : {src}",
+      "import_note_confirm": "Remplacer votre brouillon Markdown actuel par la note de Notes Rapides ?"
     },
     "quote": {
       "tldr_heading": "Qu'est-ce que Citation Motivante ?",

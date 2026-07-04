@@ -95,6 +95,7 @@ eleventyComputed:
 <script type="module">
 const COPY = {
   remoteImgBlocked: {{ ("tool.markdown-pdf.remote_img_blocked" | t) | dump | safe }},
+  importNoteConfirm: {{ ("tool.markdown-pdf.import_note_confirm" | t) | dump | safe }},
   saved:              {{ ("tool.markdown-pdf.saved"              | t) | dump | safe }},
   countsFmt:          {{ ("tool.markdown-pdf.counts_format"      | t) | dump | safe }},
   errLoadLib:         {{ ("tool.markdown-pdf.err_load_lib"       | t) | dump | safe }},
@@ -533,6 +534,19 @@ tabPreview.addEventListener('click', () => setTab('preview'));
 /* ── Init ───────────────────────────────────────────────────────── */
 loadInitial();
 render();
+
+(async function importHandoff() {
+  if (!window.MentriaStore) return;
+  const h = window.MentriaStore.get('handoff', 'md');
+  if (!h || typeof h.text !== 'string' || !h.text.trim()) return;
+  window.MentriaStore.remove('handoff', 'md');
+  const current = inputEl.value || '';
+  if (current.trim() && current.trim() !== h.text.trim() && current !== SAMPLE) {
+    if (!(await window.mentriaConfirm(COPY.importNoteConfirm))) return;
+  }
+  inputEl.value = h.text;
+  inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+})();
 // Both panes visible on desktop; tabs are no-ops there. On mobile (≤720px)
 // the CSS hides the inactive pane via `hidden`. Force a default tab state.
 setTab('edit');

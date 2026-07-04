@@ -1285,7 +1285,15 @@
     "recents": "Recent",
     "open": "Open command palette",
     "app_bar": "App navigation",
-    "extensions": "Extensions"
+    "extensions": "Extensions",
+    "actions": "Actions",
+    "act_note": "Save note: “{text}”",
+    "act_note_done": "Note saved",
+    "act_note_fail": "Couldn't save the note",
+    "act_timer": "Start a {dur} timer",
+    "act_flip": "Flip a coin",
+    "act_heads": "Heads",
+    "act_tails": "Tails"
   },
   "widgets": {
     "steps_label": "Steps",

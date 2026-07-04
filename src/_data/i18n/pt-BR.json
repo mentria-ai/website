@@ -1285,7 +1285,15 @@
     "recents": "Recentes",
     "open": "Abrir paleta de comandos",
     "app_bar": "Navegação do aplicativo",
-    "extensions": "Extensões"
+    "extensions": "Extensões",
+    "actions": "Ações",
+    "act_note": "Salvar nota: “{text}”",
+    "act_note_done": "Nota salva",
+    "act_note_fail": "Não foi possível salvar a nota",
+    "act_timer": "Iniciar um timer de {dur}",
+    "act_flip": "Jogar uma moeda",
+    "act_heads": "Cara",
+    "act_tails": "Coroa"
   },
   "widgets": {
     "steps_label": "Passos",

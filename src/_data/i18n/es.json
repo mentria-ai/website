@@ -1285,7 +1285,15 @@
     "recents": "Recientes",
     "open": "Abrir paleta de comandos",
     "app_bar": "Navegación de la aplicación",
-    "extensions": "Extensiones"
+    "extensions": "Extensiones",
+    "actions": "Acciones",
+    "act_note": "Guardar nota: «{text}»",
+    "act_note_done": "Nota guardada",
+    "act_note_fail": "No se pudo guardar la nota",
+    "act_timer": "Iniciar un temporizador de {dur}",
+    "act_flip": "Lanzar una moneda",
+    "act_heads": "Cara",
+    "act_tails": "Cruz"
   },
   "widgets": {
     "steps_label": "Pasos",

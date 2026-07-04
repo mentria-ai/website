@@ -148,13 +148,19 @@
     while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
   }
 
+  var currentActions = [];
+
   function makeOption(entry) {
     var el = document.createElement('div');
     el.className = 'm-palette__opt';
     el.setAttribute('role', 'option');
     el.id = 'm-palette-opt-' + (idSeq++);
     el.setAttribute('aria-selected', 'false');
-    el.setAttribute('data-href', entry.href);
+    if (entry.href) el.setAttribute('data-href', entry.href);
+    if (entry.action) {
+      currentActions.push(entry);
+      el.setAttribute('data-action-idx', String(currentActions.length - 1));
+    }
     var title = document.createElement('span');
     title.className = 'm-palette__opt-title';
     title.textContent = entry.title;
@@ -255,7 +261,14 @@
 
   function render(query) {
     clearList();
+    currentActions = [];
     var qN = norm(query).trim();
+    var acts = buildActions(query);
+    if (acts.length) {
+      var ag = makeGroup(labels.actions || 'Actions');
+      for (var ai = 0; ai < acts.length; ai++) ag.appendChild(makeOption(acts[ai]));
+      listEl.appendChild(ag);
+    }
     if (qN) renderResults(qN); else renderEmptyState();
     if (optionEls.length) {
       input.setAttribute('aria-expanded', 'true');
@@ -292,7 +305,94 @@
     setActive(next);
   }
 
+  function fmtLabel(tpl, vars) {
+    return String(tpl || '').replace(/\{(\w+)\}/g, function (m, k) { return vars[k] != null ? vars[k] : m; });
+  }
+
+  function toast(msg) {
+    if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast(msg);
+    else setStatus(msg);
+  }
+
+  function saveQuickNote(text) {
+    try {
+      var S = window.MentriaStore;
+      if (!S) return false;
+      var notes = S.get('quick_notes', 'blob');
+      if (notes == null) notes = [];
+      if (!Array.isArray(notes)) return false;
+      var now = Date.now();
+      notes.unshift({
+        id: now.toString(36) + Math.random().toString(36).slice(2, 7),
+        title: '',
+        body: text,
+        createdAt: now,
+        updatedAt: now
+      });
+      return S.set('quick_notes', 'blob', notes);
+    } catch (_) { return false; }
+  }
+
+  function parseDuration(raw) {
+    var m = String(raw || '').trim().match(/^(\d+(?:\.\d+)?)\s*(h|hr|m|min|s|sec)?$/i);
+    if (!m) return null;
+    var n = parseFloat(m[1]);
+    if (!isFinite(n) || n <= 0) return null;
+    var unit = (m[2] || 'm').toLowerCase();
+    var secs = unit[0] === 'h' ? n * 3600 : unit[0] === 's' ? n : n * 60;
+    secs = Math.round(secs);
+    if (secs < 1 || secs > 99 * 3600) return null;
+    return { secs: secs, label: m[1] + (m[2] || 'm') };
+  }
+
+  function buildActions(rawQuery) {
+    var out = [];
+    var q = String(rawQuery || '').trim();
+    var noteMatch = q.match(/^note[:\s]\s*(.+)$/i);
+    if (noteMatch && noteMatch[1].trim()) {
+      var text = noteMatch[1].trim();
+      out.push({
+        title: fmtLabel(labels.actNote || 'Save note: \u201c{text}\u201d', { text: text.length > 40 ? text.slice(0, 40) + '\u2026' : text }),
+        hint: '',
+        action: function () {
+          if (saveQuickNote(text)) { toast(labels.actNoteDone || 'Note saved'); close(); }
+          else toast(labels.actNoteFail || "Couldn't save the note");
+        }
+      });
+    }
+    var timerMatch = q.match(/^timer\s+(.+)$/i);
+    if (timerMatch) {
+      var dur = parseDuration(timerMatch[1]);
+      if (dur) {
+        out.push({
+          title: fmtLabel(labels.actTimer || 'Start a {dur} timer', { dur: dur.label }),
+          hint: '',
+          href: ((data() && data().prefix) || '') + '/tools/countdown-timer/?start=' + dur.secs
+        });
+      }
+    }
+    if (/^flip$/i.test(q)) {
+      out.push({
+        title: labels.actFlip || 'Flip a coin',
+        hint: '',
+        action: function () {
+          var b = new Uint8Array(1);
+          try { crypto.getRandomValues(b); } catch (_) { b[0] = Math.random() * 256; }
+          var result = b[0] < 128 ? (labels.actHeads || 'Heads') : (labels.actTails || 'Tails');
+          toast('\uD83E\uDE99 ' + result);
+          setStatus(result);
+        }
+      });
+    }
+    return out;
+  }
+
   function navigate(el) {
+    var idx = el.getAttribute('data-action-idx');
+    if (idx != null && currentActions[+idx]) {
+      var a = currentActions[+idx];
+      if (a.action) { a.action(); return; }
+    }
     var href = el.getAttribute('data-href');
     if (href) window.location.href = href;
   }

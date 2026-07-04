@@ -1285,7 +1285,15 @@
     "recents": "Récents",
     "open": "Ouvrir la palette de commandes",
     "app_bar": "Navigation de l'application",
-    "extensions": "Extensions"
+    "extensions": "Extensions",
+    "actions": "Actions",
+    "act_note": "Enregistrer la note : « {text} »",
+    "act_note_done": "Note enregistrée",
+    "act_note_fail": "Impossible d'enregistrer la note",
+    "act_timer": "Lancer un minuteur de {dur}",
+    "act_flip": "Lancer une pièce",
+    "act_heads": "Pile",
+    "act_tails": "Face"
   },
   "widgets": {
     "steps_label": "Pas",

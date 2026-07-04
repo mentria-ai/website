@@ -1285,7 +1285,15 @@
     "recents": "最近使ったもの",
     "open": "コマンドパレットを開く",
     "app_bar": "アプリナビゲーション",
-    "extensions": "拡張機能"
+    "extensions": "拡張機能",
+    "actions": "アクション",
+    "act_note": "メモを保存: 「{text}」",
+    "act_note_done": "メモを保存しました",
+    "act_note_fail": "メモを保存できませんでした",
+    "act_timer": "{dur}のタイマーを開始",
+    "act_flip": "コインを投げる",
+    "act_heads": "表",
+    "act_tails": "裏"
   },
   "widgets": {
     "steps_label": "歩数",

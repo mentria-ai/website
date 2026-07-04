@@ -711,6 +711,24 @@ eleventyComputed:
 
   addBtn.addEventListener('click', addWidget);
   addWidget();
+
+  (function autoStart() {
+    const p = new URLSearchParams(location.search);
+    const secs = parseInt(p.get('start'), 10);
+    if (!secs || secs <= 0 || secs > MAX_SECONDS) return;
+    const w = document.querySelector('.ct-widget');
+    if (!w) return;
+    const setInput = (name, v) => {
+      const el = w.querySelector('[data-input="' + name + '"]');
+      if (el) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
+    };
+    setInput('hours', Math.floor(secs / 3600));
+    setInput('mins', Math.floor((secs % 3600) / 60));
+    setInput('secs', secs % 60);
+    const btn = w.querySelector('[data-action="start"]');
+    if (btn) btn.click();
+    history.replaceState(null, '', location.pathname);
+  })();
 })();
 </script>
 

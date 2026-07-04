@@ -54,6 +54,7 @@
   // Skip entirely if already installed (detected pre-paint in base.njk).
   if (document.documentElement.classList.contains('is-standalone')) return;
   if (document.documentElement.classList.contains('feed-layout')) return;
+  if (!document.documentElement.classList.contains('app-chrome')) return;
 
   var DISMISS_KEY   = 'mentria_pwa_install_dismissed_at';
   var INSTALLED_KEY = 'mentria_pwa_installed_at';

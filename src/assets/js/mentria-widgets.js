@@ -153,7 +153,7 @@
     nav.storage.estimate().then(function (est) {
       var usage = est && typeof est.usage === 'number' ? est.usage : null;
       var quota = est && typeof est.quota === 'number' ? est.quota : null;
-      if (usage == null || quota == null || quota <= 0) { removeKind('storage'); updateVisibility(); return; }
+      if (usage == null || quota == null || quota <= 0 || usage < 1024 * 1024) { removeKind('storage'); updateVisibility(); return; }
       var pct = Math.max(0, Math.min(100, Math.round((usage / quota) * 100)));
       var usedStr = T.storageUsed.replace('{used}', fmtBytes(usage)).replace('{quota}', fmtBytes(quota));
       var html =

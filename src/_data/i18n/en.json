@@ -171,7 +171,9 @@
       "create": "Create",
       "dev": "Dev",
       "everyday": "Everyday"
-    }
+    },
+    "value_prop": "Free tools that run entirely in your browser — no account, no tracking, works offline.",
+    "try_label": "try:"
   },
   "tools_page": {
     "title": "Utility Tools",

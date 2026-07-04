@@ -947,3 +947,37 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
 }
 
 .feed-card__media.is-broken { visibility: hidden; }
+
+.cli__value-prop {
+  margin: 1.1rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--term-muted);
+}
+.cli__try {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+.cli__try-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--term-subtle);
+}
+.cli__try-chip {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--syn-cyan);
+  text-decoration: none;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  border-radius: 999px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.cli__try-chip:hover,
+.cli__try-chip:focus-visible {
+  background: var(--cyan-8, rgba(34, 211, 238, 0.08));
+  border-color: var(--syn-cyan);
+}

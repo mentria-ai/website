@@ -171,7 +171,9 @@
       "create": "Criar",
       "dev": "Dev",
       "everyday": "Cotidiano"
-    }
+    },
+    "value_prop": "Ferramentas gratuitas que rodam totalmente no seu navegador — sem conta, sem rastreamento, funciona off-line.",
+    "try_label": "experimente:"
   },
   "tools_page": {
     "title": "Ferramentas Úteis",

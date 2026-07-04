@@ -171,7 +171,9 @@
       "create": "Crear",
       "dev": "Dev",
       "everyday": "Cotidiano"
-    }
+    },
+    "value_prop": "Herramientas gratuitas que funcionan por completo en tu navegador — sin cuenta, sin rastreo, funciona sin conexión.",
+    "try_label": "prueba:"
   },
   "tools_page": {
     "title": "Herramientas Útiles",

@@ -171,7 +171,9 @@
       "create": "Créer",
       "dev": "Dev",
       "everyday": "Quotidien"
-    }
+    },
+    "value_prop": "Des outils gratuits qui tournent entièrement dans votre navigateur — sans compte, sans pistage, fonctionne hors ligne.",
+    "try_label": "essayez :"
   },
   "tools_page": {
     "title": "Outils Utilitaires",

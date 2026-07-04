@@ -17,6 +17,13 @@ eleventyComputed:
         <input type="text" class="cli__input" aria-label="{{ 'home.cli.placeholder' | t }}" placeholder="{{ 'home.cli.placeholder' | t }}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cli-suggestions">
     </div>
     <div class="cli__suggestions" id="cli-suggestions" popover="manual" role="listbox" aria-label="{{ 'home.cli.suggestions_label' | t }}"></div>
+    <p class="cli__value-prop">{{ "home.value_prop" | t }}</p>
+    <nav class="cli__try" aria-label="{{ 'home.try_label' | t }}">
+        <span class="cli__try-label" aria-hidden="true">{{ "home.try_label" | t }}</span>
+        <a class="cli__try-chip" href="{{ locale.pathPrefix }}/tools/qr-scanner/">{{ "tools.qr-scanner.title" | t }}</a>
+        <a class="cli__try-chip" href="{{ locale.pathPrefix }}/tools/quick-notes/">{{ "tools.quick-notes.title" | t }}</a>
+        <a class="cli__try-chip" href="{{ locale.pathPrefix }}/tools/countdown-timer/">{{ "tools.countdown-timer.title" | t }}</a>
+    </nav>
 </section>
 
 {% include "tool-launcher.njk" %}

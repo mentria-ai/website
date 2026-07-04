@@ -290,7 +290,10 @@
       "degrade": "{from} no es compatible con este dispositivo — usando {to}",
       "failed": "No se pudo ejecutar ningún modelo en este dispositivo.",
       "chooseTitle": "Elige tu modelo de IA",
-      "chooseHint": "Tu dispositivo puede ejecutar hasta {name}. Los modelos más grandes son más inteligentes pero descargan más."
+      "chooseHint": "Tu dispositivo puede ejecutar hasta {name}. Los modelos más grandes son más inteligentes pero descargan más.",
+      "choosePitch": "Funciona por completo en tu dispositivo — privado, gratis y sin conexión tras la descarga única.",
+      "chooseSample": "Pregunta cosas como «explícame la computación cuántica en simple» y la respuesta se genera en tu propio hardware.",
+      "chooseNotNow": "Ahora no"
     },
     "quote": {
       "title": "Cita Motivadora",

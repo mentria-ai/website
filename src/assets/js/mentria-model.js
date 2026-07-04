@@ -10,7 +10,10 @@ const DEFAULT_COPY = {
   degrade: '{from} isn’t supported on this device — using {to}',
   failed: 'Couldn’t run an on-device model on this device.',
   chooseTitle: 'Choose your AI model',
-  chooseHint: 'Your device can run up to {name}. Bigger models are smarter but download more.'
+  chooseHint: 'Your device can run up to {name}. Bigger models are smarter but download more.',
+  choosePitch: 'Runs fully on your device — private, free, and works offline after the one-time download.',
+  chooseSample: 'Ask things like “explain quantum computing simply” and the answer is generated on your own hardware.',
+  chooseNotNow: 'Not now'
 };
 
 function t(key, vars) {
@@ -35,7 +38,7 @@ function ensureOverlayStyle() {
   if (document.getElementById('mm-gate-style')) return;
   const st = document.createElement('style');
   st.id = 'mm-gate-style';
-  st.textContent = '.mm-gate{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);font-family:var(--font-mono,monospace)}.mm-gate[hidden]{display:none}.mm-gate__card{background:#0d1014;border:1px solid #2a3138;border-radius:10px;padding:1.2rem 1.4rem;width:100%;max-width:22rem;display:flex;flex-direction:column;gap:.7rem}.mm-gate__title{font-size:.9rem;color:var(--accent,#6ef3c5)}.mm-gate__bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}.mm-gate__fill{height:100%;width:0;background:var(--accent,#6ef3c5);transition:width .3s}.mm-gate__detail{font-size:.75rem;color:var(--muted,#9ba6b1);min-height:1em}.mm-gate__actions{display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem}.mm-gate__actions[hidden]{display:none}.mm-gate__btn{font:inherit;text-align:left;background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.6rem .8rem;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;gap:1rem}.mm-gate__btn:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}.mm-gate__btn-size{color:var(--muted,#9ba6b1);font-size:.78rem}';
+  st.textContent = '.mm-gate{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);font-family:var(--font-mono,monospace)}.mm-gate[hidden]{display:none}.mm-gate__card{background:#0d1014;border:1px solid #2a3138;border-radius:10px;padding:1.2rem 1.4rem;width:100%;max-width:22rem;display:flex;flex-direction:column;gap:.7rem}.mm-gate__title{font-size:.9rem;color:var(--accent,#6ef3c5)}.mm-gate__bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}.mm-gate__fill{height:100%;width:0;background:var(--accent,#6ef3c5);transition:width .3s}.mm-gate__detail{font-size:.75rem;color:var(--muted,#9ba6b1);min-height:1em}.mm-gate__actions{display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem}.mm-gate__actions[hidden]{display:none}.mm-gate__btn{font:inherit;text-align:left;background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.6rem .8rem;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;gap:1rem}.mm-gate__btn:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}.mm-gate__btn-size{color:var(--muted,#9ba6b1);font-size:.78rem}.mm-gate__detail{display:flex;flex-direction:column;gap:.45rem}.mm-gate__pitch{color:#e6edf3}.mm-gate__sample{color:var(--muted,#9ba6b1);font-style:italic}.mm-gate__hint{color:var(--muted,#9ba6b1)}.mm-gate__btn--ghost{justify-content:center;color:var(--muted,#9ba6b1);border-style:dashed}';
   document.head.appendChild(st);
 }
 
@@ -90,7 +93,18 @@ function show(title, detail) {
 function offerChoice(choices) {
   const el = overlay();
   el.querySelector('.mm-gate__title').textContent = t('chooseTitle');
-  el.querySelector('.mm-gate__detail').textContent = t('chooseHint', { name: tierName(choices[0]) });
+  const detail = el.querySelector('.mm-gate__detail');
+  detail.textContent = '';
+  const pitch = document.createElement('span');
+  pitch.className = 'mm-gate__pitch';
+  pitch.textContent = t('choosePitch');
+  const sample = document.createElement('span');
+  sample.className = 'mm-gate__sample';
+  sample.textContent = t('chooseSample');
+  const hint = document.createElement('span');
+  hint.className = 'mm-gate__hint';
+  hint.textContent = t('chooseHint', { name: tierName(choices[0]) });
+  detail.append(pitch, sample, hint);
   el.querySelector('.mm-gate__bar').style.display = 'none';
   const actions = el.querySelector('.mm-gate__actions');
   actions.innerHTML = '';
@@ -112,7 +126,7 @@ function offerChoice(choices) {
       resolve(id);
     };
     const onKey = (e) => {
-      if (e.key === 'Escape') { e.preventDefault(); finish(null); return; }
+      if (e.key === 'Escape') { e.preventDefault(); finish('postpone'); return; }
       if (e.key === 'Tab') {
         const btns = Array.prototype.slice.call(actions.querySelectorAll('button'));
         if (!btns.length) return;
@@ -122,7 +136,7 @@ function offerChoice(choices) {
         else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
       }
     };
-    const onBackdrop = (e) => { if (e.target === el) finish(null); };
+    const onBackdrop = (e) => { if (e.target === el) finish('postpone'); };
     document.addEventListener('keydown', onKey);
     el.addEventListener('click', onBackdrop);
     choices.forEach((id) => {
@@ -138,6 +152,12 @@ function offerChoice(choices) {
       b.addEventListener('click', () => finish(id));
       actions.appendChild(b);
     });
+    const notNow = document.createElement('button');
+    notNow.type = 'button';
+    notNow.className = 'mm-gate__btn mm-gate__btn--ghost';
+    notNow.textContent = t('chooseNotNow');
+    notNow.addEventListener('click', () => finish('postpone'));
+    actions.appendChild(notNow);
     const firstBtn = actions.querySelector('button');
     if (firstBtn) firstBtn.focus();
   });
@@ -213,6 +233,7 @@ export async function ensureModel(engineFactory, opts) {
     const choices = await tierChoices();
     if (choices.length > 1) {
       const pick = await offerChoice(choices);
+      if (pick === 'postpone') { hide(); throw new Error('download-postponed'); }
       if (pick) Tiers.setUserTier(pick);
     }
   }

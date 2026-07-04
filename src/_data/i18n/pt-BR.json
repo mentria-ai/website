@@ -290,7 +290,10 @@
       "degrade": "{from} não é compatível com este dispositivo — usando {to}",
       "failed": "Não foi possível executar um modelo neste dispositivo.",
       "chooseTitle": "Escolha seu modelo de IA",
-      "chooseHint": "Seu dispositivo pode executar até {name}. Modelos maiores são mais inteligentes, mas baixam mais."
+      "chooseHint": "Seu dispositivo pode executar até {name}. Modelos maiores são mais inteligentes, mas baixam mais.",
+      "choosePitch": "Roda totalmente no seu dispositivo — privado, grátis e funciona off-line após o download único.",
+      "chooseSample": "Pergunte coisas como “explique computação quântica de forma simples” e a resposta é gerada no seu próprio hardware.",
+      "chooseNotNow": "Agora não"
     },
     "quote": {
       "title": "Frase Motivacional",

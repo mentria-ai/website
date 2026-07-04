@@ -290,7 +290,10 @@
       "degrade": "{from} isn’t supported on this device — using {to}",
       "failed": "Couldn’t run an on-device model on this device.",
       "chooseTitle": "Choose your AI model",
-      "chooseHint": "Your device can run up to {name}. Bigger models are smarter but download more."
+      "chooseHint": "Your device can run up to {name}. Bigger models are smarter but download more.",
+      "choosePitch": "Runs fully on your device — private, free, and works offline after the one-time download.",
+      "chooseSample": "Ask things like “explain quantum computing simply” and the answer is generated on your own hardware.",
+      "chooseNotNow": "Not now"
     },
     "quote": {
       "title": "Motivational Quote",

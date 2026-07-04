@@ -981,3 +981,22 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
   background: var(--cyan-8, rgba(34, 211, 238, 0.08));
   border-color: var(--syn-cyan);
 }
+
+.feed-card.is-seen .feed-card__title { color: var(--term-muted); }
+.feed-card.is-seen::after {
+  content: '\2713';
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--syn-cyan);
+  background: rgba(10, 13, 16, 0.75);
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  border-radius: 50%;
+}

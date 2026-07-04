@@ -88,6 +88,34 @@ eleventyComputed:
   }, { threshold: [0.55] });
   for (var ci = 0; ci < cards.length; ci++) currentObserver.observe(cards[ci]);
 
+  var SCROLL_KEY = 'feed_scroll_' + (document.documentElement.lang || 'en');
+  try {
+    var savedScroll = parseInt(sessionStorage.getItem(SCROLL_KEY), 10);
+    if (savedScroll > 0) feedScroll.scrollTop = savedScroll;
+  } catch (_) {}
+  var scrollSaveTimer = null;
+  feedScroll.addEventListener('scroll', function () {
+    if (scrollSaveTimer) return;
+    scrollSaveTimer = setTimeout(function () {
+      scrollSaveTimer = null;
+      try { sessionStorage.setItem(SCROLL_KEY, String(Math.round(feedScroll.scrollTop))); } catch (_) {}
+    }, 300);
+  }, { passive: true });
+
+  function applySeen() {
+    var seen = (window.MentriaStore && window.MentriaStore.get('feed', 'seen')) || {};
+    if (!seen || typeof seen !== 'object') return;
+    for (var si = 0; si < cards.length; si++) {
+      var link = cards[si].querySelector('.feed-card__link');
+      var href = link && link.getAttribute('href');
+      if (!href) continue;
+      var idMatch = href.match(/\/(deepcuts|source|chapter)\/([a-z0-9-]+)\/?$/);
+      if (idMatch && seen[idMatch[2]]) cards[si].classList.add('is-seen');
+    }
+  }
+  applySeen();
+  window.addEventListener('pageshow', function (e) { if (e.persisted) applySeen(); });
+
   var bgObserver = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (!entry.isIntersecting) return;

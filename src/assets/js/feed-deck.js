@@ -15,6 +15,22 @@
   const hint = document.getElementById('deckHint');
   const progressBar = root.querySelector('.deck__progress');
   const liveEl = document.getElementById('deckLive');
+  (function markSeen() {
+    try {
+      const id = root.dataset.chapterId;
+      if (!id || !window.MentriaStore) return;
+      const seen = window.MentriaStore.get('feed', 'seen') || {};
+      if (seen[id]) return;
+      seen[id] = Date.now();
+      const keys = Object.keys(seen);
+      if (keys.length > 400) {
+        keys.sort((a, b) => seen[a] - seen[b]);
+        keys.slice(0, keys.length - 400).forEach((k) => { delete seen[k]; });
+      }
+      window.MentriaStore.set('feed', 'seen', seen);
+    } catch (_) {}
+  })();
+
   const localePrefix = (function () {
     const locs = window.MENTRIA_LOCALES || [];
     const path = location.pathname || '/';

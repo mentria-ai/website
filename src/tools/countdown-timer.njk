@@ -375,6 +375,18 @@ eleventyComputed:
     });
   }
 
+  function persistActive() {
+    if (!window.MentriaStore) return;
+    const entries = [];
+    widgets.forEach((st) => {
+      if (!st.getSnapshot) return;
+      const snap = st.getSnapshot();
+      if (snap) entries.push(snap);
+    });
+    if (entries.length) window.MentriaStore.set('tools', 'countdown_active', entries);
+    else window.MentriaStore.remove('tools', 'countdown_active');
+  }
+
   function refreshAddBtn() {
     addBtn.style.display = widgets.size >= MAX_WIDGETS ? 'none' : '';
   }
@@ -458,6 +470,7 @@ eleventyComputed:
         const label = (titleEl.textContent || '').trim() || fmtTimer(state.id);
         notifyTimerFinished(state, label);
         disarmServerPush(state);
+        persistActive();
       }
     }
 
@@ -503,6 +516,7 @@ eleventyComputed:
         syncWakeLock();
         btnStart.textContent = COPY.btnResume;
         statusEl.textContent = COPY.statusPaused;
+        persistActive();
         return;
       }
 
@@ -514,6 +528,7 @@ eleventyComputed:
         syncWakeLock();
         btnStart.textContent = COPY.btnPause;
         statusEl.textContent = COPY.statusRunning;
+        persistActive();
         return;
       }
 
@@ -551,6 +566,7 @@ eleventyComputed:
       presetButtons.forEach(b => b.disabled = true);
       panelDuration.classList.add('ct-widget__inputs--hidden');
       panelDatetime.classList.add('ct-widget__inputs--hidden');
+      persistActive();
     }
 
     function resetTimer() {
@@ -574,6 +590,7 @@ eleventyComputed:
         panelDatetime.classList.remove('ct-widget__inputs--hidden');
       }
       updatePageTitle();
+      persistActive();
     }
 
     function setPreset(seconds) {
@@ -593,6 +610,51 @@ eleventyComputed:
       state.totalSeconds = seconds;
       updateDisplay();
     }
+
+    state.getSnapshot = () => {
+      const title = titleEl.dataset.isDefault === '1' ? '' : (titleEl.textContent || '').trim().slice(0, 60);
+      if (state.countdown) return { mode: 'run', endAt: state.endAt, title };
+      if (state.isPaused && state.totalSeconds > 0) return { mode: 'pause', remaining: state.totalSeconds, title };
+      return null;
+    };
+
+    state.applyRestore = (entry) => {
+      if (entry.title) {
+        titleEl.textContent = entry.title.slice(0, 60);
+        titleEl.dataset.isDefault = '';
+      }
+      btnReset.disabled = false;
+      presetButtons.forEach(b => b.disabled = true);
+      panelDuration.classList.add('ct-widget__inputs--hidden');
+      panelDatetime.classList.add('ct-widget__inputs--hidden');
+      if (entry.mode === 'run') {
+        const remaining = Math.round((entry.endAt - Date.now()) / 1000);
+        if (remaining <= 0) {
+          state.totalSeconds = 0;
+          updateDisplay();
+          statusEl.textContent = COPY.statusTimesUp;
+          displayWrap.classList.add('ct-widget__display--finished');
+          btnStart.textContent = COPY.btnStart;
+          btnStart.disabled = true;
+          return;
+        }
+        state.totalSeconds = remaining;
+        state.endAt = entry.endAt;
+        updateDisplay();
+        statusEl.textContent = COPY.statusRunning;
+        state.countdown = setInterval(tick, 1000);
+        armServerPush(state);
+        syncWakeLock();
+        btnStart.textContent = COPY.btnPause;
+        return;
+      }
+      state.totalSeconds = Math.max(0, Math.floor(entry.remaining) || 0);
+      if (!state.totalSeconds) return;
+      state.isPaused = true;
+      updateDisplay();
+      statusEl.textContent = COPY.statusPaused;
+      btnStart.textContent = COPY.btnResume;
+    };
 
     btnStart.addEventListener('click', startTimer);
     btnReset.addEventListener('click', resetTimer);
@@ -681,6 +743,7 @@ eleventyComputed:
         titleEl.textContent = fmtTimer(id);
         titleEl.dataset.isDefault = '1';
       }
+      persistActive();
     });
     titleEl.addEventListener('keydown', e => {
       if (e.isComposing || e.keyCode === 229) return;
@@ -707,16 +770,46 @@ eleventyComputed:
     if (el) el.remove();
     refreshAddBtn();
     updatePageTitle();
+    persistActive();
   }
 
   addBtn.addEventListener('click', addWidget);
   addWidget();
 
+  let restoredActive = 0;
+  (function restoreActive() {
+    const saved = window.MentriaStore && window.MentriaStore.get('tools', 'countdown_active');
+    if (!Array.isArray(saved) || !saved.length) return;
+    saved.slice(0, MAX_WIDGETS).forEach((entry) => {
+      if (!entry || (entry.mode !== 'run' && entry.mode !== 'pause')) return;
+      const states = [...widgets.values()];
+      let target = states[restoredActive];
+      if (!target) {
+        addWidget();
+        const after = [...widgets.values()];
+        if (after.length === states.length) return;
+        target = after[after.length - 1];
+      }
+      if (target && target.applyRestore) {
+        target.applyRestore(entry);
+        restoredActive++;
+      }
+    });
+    persistActive();
+  })();
+
   (function autoStart() {
     const p = new URLSearchParams(location.search);
     const secs = parseInt(p.get('start'), 10);
     if (!secs || secs <= 0 || secs > MAX_SECONDS) return;
-    const w = document.querySelector('.ct-widget');
+    let w = document.querySelector('.ct-widget');
+    if (restoredActive > 0) {
+      const before = widgets.size;
+      addWidget();
+      if (widgets.size === before) return;
+      const all = document.querySelectorAll('.ct-widget');
+      w = all[all.length - 1];
+    }
     if (!w) return;
     const setInput = (name, v) => {
       const el = w.querySelector('[data-input="' + name + '"]');

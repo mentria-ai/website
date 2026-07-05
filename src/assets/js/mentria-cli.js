@@ -118,6 +118,95 @@
     }
   };
 
+  (function registerLaunchers() {
+    var pdata = window.MENTRIA_PALETTE_DATA || {};
+    var labels = pdata.labels || {};
+    var prefix = typeof pdata.prefix === 'string' ? pdata.prefix : '';
+
+    (pdata.tools || []).forEach(function (tool) {
+      if (!tool || !tool.slug || !tool.title || COMMANDS[tool.slug]) return;
+      COMMANDS[tool.slug] = {
+        description: String(tool.title),
+        run: function () {
+          var dest = prefix + '/tools/' + tool.slug + '/';
+          window.location.href = dest;
+          return { lines: [tfmt(T.navigatingTo || '> navigating to {dest}...', { dest: dest })], type: 'result' };
+        }
+      };
+    });
+
+    function saveQuickNote(text) {
+      try {
+        var S = window.MentriaStore;
+        if (!S) return false;
+        var inbox = S.get('quick_notes', 'inbox');
+        if (!Array.isArray(inbox)) inbox = [];
+        var now = Date.now();
+        inbox.push({
+          id: now.toString(36) + Math.random().toString(36).slice(2, 7),
+          title: '',
+          body: text,
+          createdAt: now,
+          updatedAt: now
+        });
+        return S.set('quick_notes', 'inbox', inbox);
+      } catch (_) { return false; }
+    }
+
+    function parseDuration(raw) {
+      var m = String(raw || '').trim().match(/^(\d+(?:\.\d+)?)\s*(h|hr|m|min|s|sec)?$/i);
+      if (!m) return null;
+      var n = parseFloat(m[1]);
+      if (!isFinite(n) || n <= 0) return null;
+      var unit = (m[2] || 'm').toLowerCase();
+      var secs = unit[0] === 'h' ? n * 3600 : unit[0] === 's' ? n : n * 60;
+      secs = Math.round(secs);
+      if (secs < 1 || secs > 99 * 3600) return null;
+      return secs;
+    }
+
+    if (!COMMANDS.note) {
+      COMMANDS.note = {
+        description: String(labels.actNote || 'Save note: {text}'),
+        usage: 'note <text>',
+        argv: true,
+        run: function (args) {
+          var text = String(args || '').replace(/^:\s*/, '').trim();
+          if (!text) return { lines: ['note <text>'], type: 'error' };
+          if (saveQuickNote(text)) return { lines: [String(labels.actNoteDone || 'Note saved')], type: 'result' };
+          return { lines: [String(labels.actNoteFail || 'Could not save the note')], type: 'error' };
+        }
+      };
+    }
+
+    if (!COMMANDS.timer) {
+      COMMANDS.timer = {
+        description: String(labels.actTimer || 'Start a {dur} timer'),
+        usage: 'timer <5m | 1h | 30s>',
+        argv: true,
+        run: function (args) {
+          var secs = parseDuration(args);
+          if (!secs) return { lines: ['timer <5m | 1h | 30s>'], type: 'error' };
+          var dest = prefix + '/tools/countdown-timer/?start=' + secs;
+          window.location.href = dest;
+          return { lines: [tfmt(T.navigatingTo || '> navigating to {dest}...', { dest: dest })], type: 'result' };
+        }
+      };
+    }
+
+    if (!COMMANDS.flip) {
+      COMMANDS.flip = {
+        description: String(labels.actFlip || 'Flip a coin'),
+        run: function () {
+          var b = new Uint8Array(1);
+          try { crypto.getRandomValues(b); } catch (_) { b[0] = Math.random() * 256; }
+          var result = b[0] < 128 ? String(labels.actHeads || 'Heads') : String(labels.actTails || 'Tails');
+          return { lines: ['\uD83E\uDE99 ' + result], type: 'result' };
+        }
+      };
+    }
+  })();
+
   var MAX_HISTORY = 20;
   var history = [];
   var historyIndex = -1;
@@ -316,6 +405,15 @@
         var name = (spaceIdx === -1 ? raw : raw.slice(0, spaceIdx)).toLowerCase();
         var args = (spaceIdx === -1 ? '' : raw.slice(spaceIdx + 1)).trim();
 
+        var colonIdx = name.indexOf(':');
+        if (!COMMANDS[name] && colonIdx > 0) {
+          var colonBase = name.slice(0, colonIdx);
+          if (COMMANDS[colonBase] && COMMANDS[colonBase].argv) {
+            args = (name.slice(colonIdx + 1) + (args ? ' ' + args : '')).replace(/^\s+/, '');
+            name = colonBase;
+          }
+        }
+
         // Add to history
         history.unshift(raw);
         if (history.length > MAX_HISTORY) history.pop();
@@ -333,7 +431,24 @@
             }
           }
         } else {
-          appendLine(outputEl, tfmt(T.notFound || "command not found: {name}. type 'help' for available commands.", { name: name }), 'error');
+          var loose = Object.keys(COMMANDS).filter(function (k) {
+            if (k.indexOf(name) === 0) return true;
+            if (name.length < 3) return false;
+            return (COMMANDS[k].description || '').toLowerCase().indexOf(name) !== -1;
+          });
+          if (loose.length === 1) {
+            var looseCmd = COMMANDS[loose[0]];
+            var looseRes = looseCmd.argv ? looseCmd.run(args) : looseCmd.run();
+            if (looseRes.type === 'clear') {
+              outputEl.innerHTML = '';
+            } else {
+              for (var k2 = 0; k2 < looseRes.lines.length; k2++) {
+                appendLine(outputEl, looseRes.lines[k2], looseRes.type);
+              }
+            }
+          } else {
+            appendLine(outputEl, tfmt(T.notFound || "command not found: {name}. type 'help' for available commands.", { name: name }), 'error');
+          }
         }
 
         outputEl.scrollTop = outputEl.scrollHeight;

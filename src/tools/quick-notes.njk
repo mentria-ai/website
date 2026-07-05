@@ -132,9 +132,44 @@ eleventyComputed:
     }
   }
 
+  let persistingSelf = false;
+
   function persist() {
-    if (window.MentriaStore) return window.MentriaStore.set('quick_notes', 'blob', notes);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); return true; } catch (_) { return false; }
+    persistingSelf = true;
+    try {
+      if (window.MentriaStore) return window.MentriaStore.set('quick_notes', 'blob', notes);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); return true; } catch (_) { return false; }
+    } finally {
+      persistingSelf = false;
+    }
+  }
+
+  function reconcileExternal() {
+    const S = window.MentriaStore;
+    if (!S) return;
+    const ext = S.get('quick_notes', 'blob');
+    if (!Array.isArray(ext)) return;
+    const del = S.get('quick_notes', 'deleted');
+    const deleted = (del && typeof del === 'object') ? del : {};
+    const byId = new Map(notes.map(n => [n.id, n]));
+    let changed = false;
+    for (const e of ext) {
+      if (!e || !e.id || typeof e.body !== 'string') continue;
+      if (deleted[String(e.id)] && e.id !== activeId) continue;
+      const l = byId.get(e.id);
+      if (!l) { byId.set(e.id, e); changed = true; }
+      else if ((e.updatedAt || 0) > (l.updatedAt || 0) && e.id !== activeId) { byId.set(e.id, e); changed = true; }
+    }
+    for (const n of [...byId.values()]) {
+      if (deleted[String(n.id)] && n.id !== activeId) { byId.delete(n.id); changed = true; }
+    }
+    if (!changed) return;
+    notes = [...byId.values()].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    if (activeId && !notes.some(n => n.id === activeId)) {
+      if (notes.length) selectNote(notes[0].id);
+      else createNote();
+    }
+    renderList();
   }
 
   function b64enc(buf) {
@@ -591,10 +626,13 @@ eleventyComputed:
 
   window.addEventListener('mentria:write', (e) => {
     const d = e.detail || {};
-    if (d.ns === 'quick_notes' && d.key === 'inbox' && d.op === 'set') drainInbox();
+    if (d.ns !== 'quick_notes') return;
+    if (d.key === 'inbox' && d.op === 'set') drainInbox();
+    if (d.key === 'blob' && d.op === 'set' && !persistingSelf) reconcileExternal();
   });
   window.addEventListener('storage', (e) => {
     if (e.key === 'mentria.store.quick_notes.inbox' && e.newValue) drainInbox();
+    if (e.key === 'mentria.store.quick_notes.blob' && e.newValue) reconcileExternal();
   });
 
   load();

@@ -939,6 +939,19 @@ eleventyComputed:
     state.vault = loadVault();
     showLocked();
   }
+
+  function acceptExternalDelete() {
+    state.vault = null;
+    lock();
+  }
+  window.addEventListener('mentria:write', (e) => {
+    const d = e.detail || {};
+    if (d.ns === NS && d.key === VAULT_KEY && d.op === 'remove') acceptExternalDelete();
+  });
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'mentria.store.totp.vault' && !e.newValue) acceptExternalDelete();
+  });
+
   init();
 })();
 </script>

@@ -172,6 +172,12 @@ eleventyComputed:
     renderList();
   }
 
+  function acceptExternalDelete() {
+    notes = [];
+    activeId = null;
+    createNote();
+  }
+
   function b64enc(buf) {
     const bytes = new Uint8Array(buf);
     let s = '';
@@ -629,10 +635,12 @@ eleventyComputed:
     if (d.ns !== 'quick_notes') return;
     if (d.key === 'inbox' && d.op === 'set') drainInbox();
     if (d.key === 'blob' && d.op === 'set' && !persistingSelf) reconcileExternal();
+    if (d.key === 'blob' && d.op === 'remove' && !persistingSelf) acceptExternalDelete();
   });
   window.addEventListener('storage', (e) => {
     if (e.key === 'mentria.store.quick_notes.inbox' && e.newValue) drainInbox();
     if (e.key === 'mentria.store.quick_notes.blob' && e.newValue) reconcileExternal();
+    if (e.key === 'mentria.store.quick_notes.blob' && !e.newValue) acceptExternalDelete();
   });
 
   load();

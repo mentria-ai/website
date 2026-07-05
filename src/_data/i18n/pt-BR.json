@@ -825,6 +825,7 @@
       "tier_best": "máxima",
       "tier_confirm": "Trocar de modelo? Serão baixados {size} uma única vez e mantidos neste dispositivo.",
       "tier_fallback": "Esse modelo não coube na memória — mudamos para o modelo {tier}.",
+      "btn_new_chat": "Novo chat",
       "btn_delete_model": "Excluir modelo",
       "btn_delete_model_title": "Excluir modelo em cache",
       "btn_attach_image": "Anexar imagem",

@@ -825,6 +825,7 @@
       "tier_best": "最高品質",
       "tier_confirm": "モデルを切り替えますか？{size}を一度だけダウンロードし、この端末に保存します。",
       "tier_fallback": "そのモデルはメモリに収まらなかったため、{tier}モデルに切り替えました。",
+      "btn_new_chat": "新しいチャット",
       "btn_delete_model": "モデルを削除",
       "btn_delete_model_title": "キャッシュ済みモデルを削除",
       "btn_attach_image": "画像を添付",

@@ -338,6 +338,7 @@ eleventyComputed:
 
   function applyEditorMode(mode) {
     const locked = mode === 'locked';
+    if (!locked) drainInbox();
     textarea.hidden = locked;
     lockedPanel.hidden = !locked;
     exportBtn.hidden = locked;
@@ -568,7 +569,36 @@ eleventyComputed:
     return true;
   }
 
+  function drainInbox() {
+    const S = window.MentriaStore;
+    if (!S) return;
+    if (lockedPanel && !lockedPanel.hidden) return;
+    const inbox = S.get('quick_notes', 'inbox');
+    if (!Array.isArray(inbox) || !inbox.length) return;
+    let added = false;
+    for (const n of inbox) {
+      if (n && n.id && typeof n.body === 'string' && !notes.some(x => x.id === n.id)) {
+        notes.unshift(n);
+        added = true;
+      }
+    }
+    S.remove('quick_notes', 'inbox');
+    if (added) {
+      persist();
+      renderList();
+    }
+  }
+
+  window.addEventListener('mentria:write', (e) => {
+    const d = e.detail || {};
+    if (d.ns === 'quick_notes' && d.key === 'inbox' && d.op === 'set') drainInbox();
+  });
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'mentria.store.quick_notes.inbox' && e.newValue) drainInbox();
+  });
+
   load();
+  drainInbox();
   if (ingestSharedContent()) {
     selectNote(activeId);
   } else if (activeId === null && notes.length > 0) {

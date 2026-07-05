@@ -318,18 +318,17 @@
     try {
       var S = window.MentriaStore;
       if (!S) return false;
-      var notes = S.get('quick_notes', 'blob');
-      if (notes == null) notes = [];
-      if (!Array.isArray(notes)) return false;
+      var inbox = S.get('quick_notes', 'inbox');
+      if (!Array.isArray(inbox)) inbox = [];
       var now = Date.now();
-      notes.unshift({
+      inbox.push({
         id: now.toString(36) + Math.random().toString(36).slice(2, 7),
         title: '',
         body: text,
         createdAt: now,
         updatedAt: now
       });
-      return S.set('quick_notes', 'blob', notes);
+      return S.set('quick_notes', 'inbox', inbox);
     } catch (_) { return false; }
   }
 

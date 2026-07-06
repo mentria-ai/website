@@ -119,8 +119,33 @@
     global.addEventListener('pagehide', onHidden);
   }
 
+  async function ringRegister(token) {
+    if (!supported() || Notification.permission !== 'granted') return null;
+    try {
+      var sub = await getSubscription();
+      var r = await fetch(BASE + '/ring-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: subJson(sub), token: token })
+      });
+      return r.ok ? token : null;
+    } catch (_) { return null; }
+  }
+
+  async function ring(token) {
+    if (!token) return false;
+    try {
+      var r = await fetch(BASE + '/ring', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token })
+      });
+      return r.ok;
+    } catch (_) { return false; }
+  }
+
   global.MentriaPush = {
     isSupported: supported, permission: permission, requestPermission: requestPermission,
-    schedule: schedule, cancel: cancel
+    schedule: schedule, cancel: cancel, ringRegister: ringRegister, ring: ring
   };
 })(typeof window !== 'undefined' ? window : self);

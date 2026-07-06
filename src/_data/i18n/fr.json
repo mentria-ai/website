@@ -368,6 +368,10 @@
       "title": "SDK des extensions",
       "lede": "Créez des extensions monofichier qui s’exécutent localement dans Mentria — sans boutique, sans serveur, sans envoi.",
       "tldr": "Les extensions sont des fichiers HTML uniques exécutés dans Mentria avec une petite API hôte : stockage propre à l’extension, jetons de thème, notifications, tuiles du lanceur et commandes. L’installation est un import local confirmé par l’utilisateur — rien n’est envoyé, revu à distance ni mis à jour automatiquement. Cette page documente le manifeste et l’API hôte, avec un starter à copier-coller."
+    },
+    "comms": {
+      "title": "Comms",
+      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte et sans serveur au milieu."
     }
   },
   "game": {
@@ -1283,7 +1287,8 @@
     "Timer": "Minuteur",
     "Utility": "Utilitaire",
     "Health": "Santé",
-    "Security": "Sécurité"
+    "Security": "Sécurité",
+    "Social": "Social"
   },
   "palette": {
     "placeholder": "Rechercher outils et pages…",

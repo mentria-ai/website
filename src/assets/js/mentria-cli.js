@@ -128,7 +128,7 @@
       COMMANDS[tool.slug] = {
         description: String(tool.title),
         run: function () {
-          var dest = prefix + '/tools/' + tool.slug + '/';
+          var dest = tool.url ? tool.url : prefix + '/tools/' + tool.slug + '/';
           window.location.href = dest;
           return { lines: [tfmt(T.navigatingTo || '> navigating to {dest}...', { dest: dest })], type: 'result' };
         }

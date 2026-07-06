@@ -2,13 +2,13 @@
 layout: base.njk
 permalink: /comms/index.html
 eleventyExcludeFromCollections: true
-title: comms (experimental)
-description: Peer-to-peer chat and file drop — experimental, hidden by default.
+title: comms
+description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no accounts, no server in the middle.
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">comms</span></p>
   <h1>comms</h1>
-  <p>Peer-to-peer chat and file drop. No accounts, no server in the middle. Share the URL to invite someone into the same room.</p>
+  <p>Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted, no accounts, no server in the middle. Share a room URL, or trade contact codes and message people directly.</p>
 </section>
 
 {% set terminalTitle = "comms.js" %}
@@ -255,6 +255,9 @@ const pendingStreams = new Map();
 let myId = null;
 let myFp = null;
 let ringToken = null;
+let currentDmContact = null;
+let lastRingSentAt = 0;
+let unreadCount = 0;
 let myProfile = { name: '' };
 const peerProfiles = new Map();
 const peers = new Set();
@@ -604,6 +607,7 @@ const joinNew = async (roomName, b64Key = null) => {
     chatKey = null;
   }
   revokeObjectUrls();
+  currentDmContact = null;
   els.log.innerHTML = '';
   els.status.textContent = 'connecting…';
   els.peers.hidden = true;
@@ -709,6 +713,7 @@ const joinNew = async (roomName, b64Key = null) => {
     }
     renderLine(displayName(ctx.peerId), text, { peerId: ctx.peerId });
     playPing(880);
+    bumpUnread();
   };
 
   const incoming = new Map();
@@ -834,6 +839,7 @@ els.send.addEventListener('submit', async (e) => {
   publishChat(text, cmid);
   renderLine('you', text, { me: true });
   els.msg.value = '';
+  maybeRingContact();
 });
 
 els.copy.addEventListener('click', async () => {
@@ -1121,6 +1127,45 @@ const refreshIdUI = () => {
   if (state !== 'unlocked') { els.idCard.hidden = true; els.contacts.hidden = true; }
 };
 
+const initRingToken = async () => {
+  if (!window.MentriaPush || !MentriaPush.isSupported() || MentriaPush.permission() !== 'granted') return;
+  let token = window.MentriaStore && MentriaStore.get('comms', 'ring_token');
+  if (!token || !/^[A-Za-z0-9_-]{20,64}$/.test(token)) {
+    const bytes = crypto.getRandomValues(new Uint8Array(18));
+    token = btoa(String.fromCharCode(...bytes)).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+  }
+  const ok = await MentriaPush.ringRegister(token);
+  if (ok) {
+    ringToken = token;
+    if (window.MentriaStore) MentriaStore.set('comms', 'ring_token', token);
+    refreshMyCode();
+    broadcastProfile();
+  }
+};
+
+const maybeRingContact = () => {
+  if (!currentDmContact || !currentDmContact.ring || peers.size > 0) return;
+  if (Date.now() - lastRingSentAt < 30000) return;
+  lastRingSentAt = Date.now();
+  if (window.MentriaPush && MentriaPush.ring) {
+    MentriaPush.ring(currentDmContact.ring).then((ok) => {
+      if (ok) sys(`${currentDmContact.name || 'they'} seem${currentDmContact.name ? 's' : ''} offline — sent a wake-up ping to their device.`);
+    });
+  }
+};
+
+const bumpUnread = () => {
+  if (!document.hidden) return;
+  unreadCount++;
+  if (navigator.setAppBadge) { try { navigator.setAppBadge(unreadCount); } catch {} }
+};
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && unreadCount) {
+    unreadCount = 0;
+    if (navigator.clearAppBadge) { try { navigator.clearAppBadge(); } catch {} }
+  }
+});
+
 const initIdentity = async () => {
   try {
     myId = await CID.ensureKeypair();
@@ -1131,6 +1176,7 @@ const initIdentity = async () => {
     refreshIdUI();
     renderContacts();
     broadcastProfile();
+    initRingToken();
   } catch (err) {
     sys('identity error: ' + err.message);
   }
@@ -1231,6 +1277,7 @@ const renderContacts = () => {
         els.room.value = roomName;
         els.contacts.hidden = true;
         await joinNew(roomName, b64Key);
+        currentDmContact = c;
         sys(`private room with ${c.name || c.fp} — only your two identities can derive it.`);
       } catch (err) {
         sys('could not derive DM room: ' + err.message);

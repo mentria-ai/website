@@ -174,5 +174,14 @@
     "category": "Utility",
     "group": "Dev",
     "added": "2026-07-02"
+  },
+  {
+    "slug": "comms",
+    "title": "Comms",
+    "summary": "Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted rooms, contact codes, and private DMs derived from your identity. No accounts, no server in the middle.",
+    "category": "Social",
+    "group": "Everyday",
+    "url": "/comms/",
+    "added": "2026-07-06"
   }
 ]

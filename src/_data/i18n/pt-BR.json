@@ -368,6 +368,10 @@
       "title": "SDK de extensões",
       "lede": "Crie extensões de arquivo único que rodam localmente no Mentria — sem loja, sem servidor, sem upload.",
       "tldr": "Extensões são arquivos HTML únicos que rodam dentro do Mentria com uma pequena API: armazenamento próprio da extensão, tokens de tema, avisos, blocos do launcher e comandos. Instalar é uma importação local confirmada pelo usuário — nada é enviado, revisado remotamente ou atualizado sozinho. Esta página documenta o manifesto e a API, com um exemplo pronto para copiar."
+    },
+    "comms": {
+      "title": "Comms",
+      "lede": "Chat ponto a ponto, chamadas de voz e vídeo, e envio de arquivos. Criptografia de ponta a ponta, sem contas e sem servidor no meio."
     }
   },
   "game": {
@@ -1283,7 +1287,8 @@
     "Timer": "Cronômetro",
     "Utility": "Utilitário",
     "Health": "Saúde",
-    "Security": "Segurança"
+    "Security": "Segurança",
+    "Social": "Social"
   },
   "palette": {
     "placeholder": "Buscar ferramentas e páginas…",

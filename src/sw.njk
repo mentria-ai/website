@@ -131,6 +131,18 @@ self.addEventListener('push', event => {
   event.waitUntil((async () => {
     let data = {};
     try { data = event.data ? event.data.json() : {}; } catch (_) {}
+    if (data.kind === 'comms-ring') {
+      try { if (self.navigator && self.navigator.setAppBadge) self.navigator.setAppBadge(1); } catch (_) {}
+      await self.registration.showNotification('comms', {
+        body: 'Someone is trying to reach you.',
+        tag: 'comms-ring',
+        icon: '/assets/img/icon-192x192.png',
+        badge: '/assets/img/badge.svg',
+        data: { url: '/comms/' },
+        renotify: true
+      });
+      return;
+    }
     const scheduleId = data.scheduleId;
     const fallback = data.fallbackTitle || 'Mentria';
     let spec = null;

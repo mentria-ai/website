@@ -34,7 +34,7 @@ eleventyComputed:
     {% set shelf = "games" if tool.category == "Game" else ("ai" if tool.category == "AI" else "tools") %}
     <div class="tools-listing__row" data-shelf="{{ shelf }}">
         <span class="tools-listing__category">{{ ("category." + tool.category) | t }}</span>
-        <span class="tools-listing__name"><a href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">{{ ("tools." + tool.slug + ".title") | t }}</a></span>
+        <span class="tools-listing__name"><a href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">{{ ("tools." + tool.slug + ".title") | t }}</a></span>
         <span class="tools-listing__summary">{{ ("tools." + tool.slug + ".lede") | t }}</span>
     </div>
     {% endfor %}

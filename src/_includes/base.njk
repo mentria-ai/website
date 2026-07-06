@@ -242,7 +242,7 @@
         prefix: {{ localePrefix | dump | safe }},
         tools: [
           {%- for tool in tools %}
-          { slug: {{ tool.slug | dump | safe }}, title: {{ (("tools." + tool.slug + ".title") | t) | dump | safe }}, category: {{ (("category." + tool.category) | t) | dump | safe }}, keywords: {{ (("tools." + tool.slug + ".lede") | t) | dump | safe }} }{% if not loop.last %},{% endif %}
+          { slug: {{ tool.slug | dump | safe }}, title: {{ (("tools." + tool.slug + ".title") | t) | dump | safe }}, category: {{ (("category." + tool.category) | t) | dump | safe }}, keywords: {{ (("tools." + tool.slug + ".lede") | t) | dump | safe }}{% if tool.url %}, url: {{ tool.url | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
           {%- endfor %}
         ],
         nav: [

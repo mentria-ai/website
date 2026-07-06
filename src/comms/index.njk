@@ -27,6 +27,10 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
       <span class="comms__badge comms__badge--eph" id="comms-eph" title="messages aren't saved (room starts with !)" hidden>ephemeral</span>
       <span class="comms__badge comms__badge--enc" id="comms-enc" title="end-to-end encrypted; the key is in the URL after the colon" hidden>encrypted</span>
       <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">sound: on</button>
+      <button class="comms__btn" id="comms-call-start" type="button" hidden>call</button>
+      <button class="comms__btn comms__btn--ghost" id="comms-call-cam" type="button" hidden aria-pressed="false">camera: off</button>
+      <button class="comms__btn comms__btn--ghost" id="comms-call-mic" type="button" hidden aria-pressed="false">mic: on</button>
+      <button class="comms__btn comms__btn--danger" id="comms-call-hangup" type="button" hidden>hang up</button>
     </div>
   </div>
 
@@ -63,6 +67,14 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
     </div>
     <div class="comms__contacts-list" id="comms-contacts-list"></div>
   </div>
+
+  <div class="comms__ring" id="comms-ring" hidden>
+    <span class="comms__ring-text" id="comms-ring-text">incoming call</span>
+    <button class="comms__btn" id="comms-ring-accept" type="button">accept</button>
+    <button class="comms__btn comms__btn--ghost" id="comms-ring-decline" type="button">decline</button>
+  </div>
+
+  <div class="comms__media" id="comms-media" hidden></div>
 
   <div class="comms__share" id="comms-share" hidden>
     <span class="comms__lbl">share</span>
@@ -167,6 +179,15 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
 .comms__contact-fp{color:#5a636d;font-size:.7rem}
 .comms__contact-spacer{flex:1}
 .comms__chip-add{margin-left:.3rem;border:none;background:none;color:inherit;cursor:pointer;font-size:.75rem;padding:0}
+.comms__btn--danger{border-color:#e5534b;color:#e5534b}
+.comms__btn--danger:hover:not(:disabled){background:#e5534b;color:#0a0d10}
+.comms__ring{display:flex;gap:.6rem;align-items:center;background:#141a12;border:1px solid var(--accent,#6ef3c5);border-radius:6px;padding:.55rem .75rem}
+.comms__ring-text{color:var(--accent,#6ef3c5);flex:1;font-size:.85rem}
+.comms__media{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.5rem;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.5rem}
+.comms__tile{position:relative;background:#0d1115;border:1px solid #2a3138;border-radius:6px;overflow:hidden;min-height:72px;display:flex;align-items:center;justify-content:center}
+.comms__tile video{width:100%;height:100%;max-height:200px;object-fit:cover;display:block}
+.comms__tile-label{position:absolute;left:.4rem;bottom:.3rem;background:rgba(0,0,0,.55);color:#e6edf3;font-size:.68rem;padding:.1rem .4rem;border-radius:3px;letter-spacing:.05em}
+.comms__tile-voice{color:var(--accent,#6ef3c5);font-size:1.3rem}
 </style>
 
 <script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
@@ -213,7 +234,10 @@ const els = {
   idPass: $('comms-id-pass'), idUnlock: $('comms-id-unlock'), idErr: $('comms-id-err'),
   idName: $('comms-id-name'), idFp: $('comms-id-fp'), idShare: $('comms-id-share'), idContacts: $('comms-id-contacts'),
   idCard: $('comms-id-card'), idQr: $('comms-id-qr'), idCode: $('comms-id-code'), idCopy: $('comms-id-copy'),
-  contacts: $('comms-contacts'), contactIn: $('comms-contact-in'), contactAdd: $('comms-contact-add'), contactList: $('comms-contacts-list')
+  contacts: $('comms-contacts'), contactIn: $('comms-contact-in'), contactAdd: $('comms-contact-add'), contactList: $('comms-contacts-list'),
+  callStart: $('comms-call-start'), callCam: $('comms-call-cam'), callMic: $('comms-call-mic'), callHangup: $('comms-call-hangup'),
+  ring: $('comms-ring'), ringText: $('comms-ring-text'), ringAccept: $('comms-ring-accept'), ringDecline: $('comms-ring-decline'),
+  media: $('comms-media')
 };
 
 const MAX_FILE = 50 * 1024 * 1024;
@@ -224,6 +248,10 @@ let chatAction = null;
 let metaAction = null;
 let chunkAction = null;
 let profAction = null;
+let callAction = null;
+const call = { active: false, local: null, videoOn: false, micOff: false, ringTimer: null, ringDeadline: 0 };
+const callTiles = new Map();
+const pendingStreams = new Map();
 let myId = null;
 let myFp = null;
 let ringToken = null;
@@ -560,11 +588,12 @@ const joinNew = async (roomName, b64Key = null) => {
   MentriaBus.unprovide('comms.peers');
   MentriaBus.unprovide('comms.share');
   MentriaBus.unprovide('extensions.requestInstall');
+  endCall(true);
   if (room) {
     closeChatSub();
     try { await room.leave(); } catch {}
     room = null;
-    chatAction = metaAction = chunkAction = profAction = null;
+    chatAction = metaAction = chunkAction = profAction = callAction = null;
     peers.clear();
     peerProfiles.clear();
     if (historyTimer) { clearTimeout(historyTimer); historyTimer = null; }
@@ -614,8 +643,38 @@ const joinNew = async (roomName, b64Key = null) => {
   els.msg.disabled = false;
   els.go.disabled = false;
   updatePeers();
+  updateCallUI();
   sys(`you are ${myProfile.name ? myProfile.name + ' (' + short(selfId) + ')' : short(selfId)} — alone in "${roomName}". share the URL to invite someone.`);
   if (chatKey) sys('end-to-end encrypted. anyone with the full URL (including the key after the colon) can decrypt.');
+
+  callAction = room.makeAction('call');
+  callAction.onMessage = (data, ctx) => {
+    const kind = data && data.kind;
+    if (kind === 'ring') {
+      if (call.active) return;
+      els.ringText.textContent = `${displayName(ctx.peerId)} is calling`;
+      els.ring.hidden = false;
+      call.ringDeadline = Date.now() + 30000;
+      if (call.ringTimer) clearInterval(call.ringTimer);
+      call.ringTimer = setInterval(() => {
+        if (Date.now() > call.ringDeadline) { stopRinging(); return; }
+        playPing(660);
+      }, 1400);
+      playPing(660);
+    } else if (kind === 'decline') {
+      sys(`${displayName(ctx.peerId)} declined the call.`);
+    } else if (kind === 'leave') {
+      removeTile(ctx.peerId);
+      sys(`${displayName(ctx.peerId)} left the call.`);
+    } else if (kind === 'join') {
+      sys(`${displayName(ctx.peerId)} joined the call.`);
+    }
+  };
+
+  room.onPeerStream = (stream, peerId) => {
+    if (call.active) addTile(peerId, stream, { label: displayName(peerId) });
+    else pendingStreams.set(peerId, stream);
+  };
 
   profAction = room.makeAction('prof');
   profAction.onMessage = async (data, ctx) => {
@@ -711,6 +770,8 @@ const joinNew = async (roomName, b64Key = null) => {
   room.onPeerLeave = (peerId) => {
     peers.delete(peerId);
     peerProfiles.delete(peerId);
+    removeTile(peerId);
+    pendingStreams.delete(peerId);
     updatePeers();
     renderPeerList();
     sys(`${displayName(peerId)} left`);
@@ -901,6 +962,147 @@ els.mute.addEventListener('click', () => {
   if (!muted) playPing(880);
 });
 if (muted) { els.mute.textContent = 'sound: off'; els.mute.setAttribute('aria-pressed', 'true'); }
+
+const updateCallUI = () => {
+  const inRoom = !!room;
+  els.callStart.hidden = !inRoom || call.active;
+  els.callCam.hidden = !call.active;
+  els.callMic.hidden = !call.active;
+  els.callHangup.hidden = !call.active;
+  els.media.hidden = callTiles.size === 0;
+};
+
+const addTile = (key, stream, opts = {}) => {
+  removeTile(key);
+  const tile = document.createElement('div');
+  tile.className = 'comms__tile';
+  const hasVideo = stream.getVideoTracks().some((t) => t.readyState === 'live');
+  let mediaEl;
+  if (hasVideo) {
+    mediaEl = document.createElement('video');
+    mediaEl.autoplay = true;
+    mediaEl.playsInline = true;
+    if (opts.local) mediaEl.muted = true;
+  } else {
+    mediaEl = document.createElement('audio');
+    mediaEl.autoplay = true;
+    if (opts.local) mediaEl.muted = true;
+    mediaEl.style.display = 'none';
+    const voice = document.createElement('span');
+    voice.className = 'comms__tile-voice';
+    voice.textContent = '\u{1F399}';
+    tile.append(voice);
+  }
+  mediaEl.srcObject = stream;
+  tile.append(mediaEl);
+  const label = document.createElement('span');
+  label.className = 'comms__tile-label';
+  label.textContent = opts.label || 'peer';
+  tile.append(label);
+  els.media.append(tile);
+  callTiles.set(key, { tile, stream });
+  updateCallUI();
+};
+
+const removeTile = (key) => {
+  const t = callTiles.get(key);
+  if (!t) return;
+  t.tile.remove();
+  callTiles.delete(key);
+  updateCallUI();
+};
+
+const stopRinging = () => {
+  if (call.ringTimer) { clearInterval(call.ringTimer); call.ringTimer = null; }
+  els.ring.hidden = true;
+};
+
+const getLocalMedia = (video) => navigator.mediaDevices.getUserMedia({
+  audio: { echoCancellation: true, noiseSuppression: true },
+  video: video ? { width: { ideal: 640 }, height: { ideal: 480 } } : false
+});
+
+const startCall = async (answering) => {
+  if (call.active || !room) return;
+  if (!peers.size) { sys('no peers to call.'); return; }
+  if (peers.size > 4) { sys('calls support up to 5 people in a room (peer-to-peer mesh).'); return; }
+  let local;
+  try { local = await getLocalMedia(false); }
+  catch (err) { sys('microphone unavailable: ' + err.message); return; }
+  call.active = true;
+  call.local = local;
+  call.videoOn = false;
+  call.micOff = false;
+  els.callCam.textContent = 'camera: off';
+  els.callCam.setAttribute('aria-pressed', 'false');
+  els.callMic.textContent = 'mic: on';
+  els.callMic.setAttribute('aria-pressed', 'false');
+  room.addStream(local);
+  addTile('you', local, { local: true, label: myProfile.name || 'you' });
+  pendingStreams.forEach((stream, peerId) => addTile(peerId, stream, { label: displayName(peerId) }));
+  pendingStreams.clear();
+  if (!answering) {
+    callAction.send({ kind: 'ring' });
+    sys('calling the room… they need to accept.');
+  } else {
+    callAction.send({ kind: 'join' });
+  }
+  updateCallUI();
+};
+
+const endCall = (silent) => {
+  stopRinging();
+  if (!call.active) { pendingStreams.clear(); return; }
+  try { if (callAction && !silent) callAction.send({ kind: 'leave' }); } catch {}
+  try { if (room && call.local) room.removeStream(call.local); } catch {}
+  if (call.local) call.local.getTracks().forEach((t) => t.stop());
+  call.local = null;
+  call.active = false;
+  callTiles.forEach((t) => t.tile.remove());
+  callTiles.clear();
+  pendingStreams.clear();
+  updateCallUI();
+  if (!silent) sys('call ended.');
+};
+
+els.callStart.addEventListener('click', () => startCall(false));
+els.callHangup.addEventListener('click', () => endCall(false));
+
+els.callMic.addEventListener('click', () => {
+  if (!call.local) return;
+  call.micOff = !call.micOff;
+  call.local.getAudioTracks().forEach((t) => { t.enabled = !call.micOff; });
+  els.callMic.textContent = call.micOff ? 'mic: off' : 'mic: on';
+  els.callMic.setAttribute('aria-pressed', String(call.micOff));
+});
+
+els.callCam.addEventListener('click', async () => {
+  if (!call.active || !room) return;
+  els.callCam.disabled = true;
+  try {
+    const next = await getLocalMedia(!call.videoOn);
+    try { room.removeStream(call.local); } catch {}
+    call.local.getTracks().forEach((t) => t.stop());
+    call.local = next;
+    call.videoOn = !call.videoOn;
+    if (call.micOff) next.getAudioTracks().forEach((t) => { t.enabled = false; });
+    room.addStream(next);
+    addTile('you', next, { local: true, label: myProfile.name || 'you' });
+    els.callCam.textContent = call.videoOn ? 'camera: on' : 'camera: off';
+    els.callCam.setAttribute('aria-pressed', String(call.videoOn));
+  } catch (err) {
+    sys('camera unavailable: ' + err.message);
+  } finally {
+    els.callCam.disabled = false;
+  }
+});
+
+els.ringAccept.addEventListener('click', () => { stopRinging(); startCall(true); });
+els.ringDecline.addEventListener('click', () => {
+  stopRinging();
+  try { if (callAction) callAction.send({ kind: 'decline' }); } catch {}
+  pendingStreams.clear();
+});
 
 const sendProfileTo = (peerId) => {
   if (!profAction || !myId) return;

@@ -30,6 +30,40 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
     </div>
   </div>
 
+  <div class="comms__id-row" id="comms-id-none" hidden>
+    <span class="comms__lbl">identity</span>
+    <span class="comms__id-note">set up your identity vault to use names, contacts and DMs</span>
+    <a class="comms__btn comms__btn--ghost" href="/about/">set up on the about page</a>
+  </div>
+  <div class="comms__id-row" id="comms-id-locked" hidden>
+    <span class="comms__lbl">identity</span>
+    <input class="comms__input comms__input--short" id="comms-id-pass" type="password" placeholder="identity passphrase" autocomplete="current-password">
+    <button class="comms__btn" id="comms-id-unlock" type="button">unlock</button>
+    <span class="comms__id-note" id="comms-id-err"></span>
+  </div>
+  <div class="comms__id-row" id="comms-id-on" hidden>
+    <span class="comms__lbl">you</span>
+    <input class="comms__input comms__input--short" id="comms-id-name" type="text" maxlength="32" placeholder="display name" autocomplete="nickname">
+    <span class="comms__badge" id="comms-id-fp" title="your identity fingerprint"></span>
+    <button class="comms__btn comms__btn--ghost" id="comms-id-share" type="button" aria-expanded="false">my code</button>
+    <button class="comms__btn comms__btn--ghost" id="comms-id-contacts" type="button" aria-expanded="false">contacts</button>
+  </div>
+  <div class="comms__id-card" id="comms-id-card" hidden>
+    <canvas class="comms__id-qr" id="comms-id-qr" width="0" height="0"></canvas>
+    <div class="comms__id-card-side">
+      <p class="comms__id-note">scan or paste this code on another person's device to become contacts. it contains your public key, never your secrets.</p>
+      <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
+      <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">copy code</button>
+    </div>
+  </div>
+  <div class="comms__contacts" id="comms-contacts" hidden>
+    <div class="comms__contacts-add">
+      <input class="comms__input" id="comms-contact-in" type="text" placeholder="paste a contact code (MC1.…)" spellcheck="false" autocapitalize="off">
+      <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">add</button>
+    </div>
+    <div class="comms__contacts-list" id="comms-contacts-list"></div>
+  </div>
+
   <div class="comms__share" id="comms-share" hidden>
     <span class="comms__lbl">share</span>
     <code class="comms__url" id="comms-url"></code>
@@ -117,12 +151,31 @@ description: Peer-to-peer chat and file drop — experimental, hidden by default
 .comms__picker-item:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
 .comms__picker-ver{color:var(--muted);font-size:.75rem;flex:none}
 .comms__picker-actions{display:flex;justify-content:flex-end}
+.comms__id-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.5rem .75rem}
+.comms__id-note{color:#7a838d;font-size:.78rem}
+.comms__input--short{max-width:13rem;flex:0 1 auto}
+.comms__id-card{display:flex;gap:1rem;align-items:flex-start;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;flex-wrap:wrap}
+.comms__id-qr{border-radius:4px;flex:none}
+.comms__id-card-side{display:flex;flex-direction:column;gap:.5rem;flex:1;min-width:12rem}
+.comms__url--wrap{white-space:normal;word-break:break-all;font-size:.7rem;max-height:5.5rem;overflow:auto}
+.comms__contacts{display:flex;flex-direction:column;gap:.5rem;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.6rem .75rem}
+.comms__contacts-add{display:flex;gap:.5rem;align-items:center}
+.comms__contacts-list{display:flex;flex-direction:column;gap:.3rem}
+.comms__contact{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px solid #14181d}
+.comms__contact:last-child{border-bottom:none}
+.comms__contact-name{color:#e6edf3;font-size:.85rem}
+.comms__contact-fp{color:#5a636d;font-size:.7rem}
+.comms__contact-spacer{flex:1}
+.comms__chip-add{margin-left:.3rem;border:none;background:none;color:inherit;cursor:pointer;font-size:.75rem;padding:0}
 </style>
 
+<script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
+<script src="/assets/js/qrcode.js?v={{ buildHash }}"></script>
 <script type="module">
 import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/assets/vendor/trystero-nostr.js';
 import { MentriaBus } from '/assets/js/mentria-bus.js';
 import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
+import * as CID from '/assets/js/mentria-comms-id.js';
 
 const RELAY = 'wss://relay.mentria.ai';
 const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';
@@ -155,7 +208,12 @@ const els = {
   share: $('comms-share'), url: $('comms-url'), copy: $('comms-copy'), genkey: $('comms-genkey'),
   peerlist: $('comms-peerlist'),
   log: $('comms-log'), drop: $('comms-drop'), file: $('comms-file'),
-  send: $('comms-send'), msg: $('comms-msg'), go: $('comms-go')
+  send: $('comms-send'), msg: $('comms-msg'), go: $('comms-go'),
+  idNone: $('comms-id-none'), idLocked: $('comms-id-locked'), idOn: $('comms-id-on'),
+  idPass: $('comms-id-pass'), idUnlock: $('comms-id-unlock'), idErr: $('comms-id-err'),
+  idName: $('comms-id-name'), idFp: $('comms-id-fp'), idShare: $('comms-id-share'), idContacts: $('comms-id-contacts'),
+  idCard: $('comms-id-card'), idQr: $('comms-id-qr'), idCode: $('comms-id-code'), idCopy: $('comms-id-copy'),
+  contacts: $('comms-contacts'), contactIn: $('comms-contact-in'), contactAdd: $('comms-contact-add'), contactList: $('comms-contacts-list')
 };
 
 const MAX_FILE = 50 * 1024 * 1024;
@@ -165,6 +223,12 @@ let room = null;
 let chatAction = null;
 let metaAction = null;
 let chunkAction = null;
+let profAction = null;
+let myId = null;
+let myFp = null;
+let ringToken = null;
+let myProfile = { name: '' };
+const peerProfiles = new Map();
 const peers = new Set();
 const objectUrls = new Set();
 const trackObjectUrl = (blob) => { const u = URL.createObjectURL(blob); objectUrls.add(u); return u; };
@@ -240,6 +304,16 @@ const decryptText = async (key, payload) => {
 
 const short = (id) => id ? id.slice(0, 6) : 'unknown';
 
+const displayName = (peerId) => {
+  const prof = peerProfiles.get(peerId);
+  if (prof && prof.fp) {
+    const contact = CID.getContacts().find((c) => c.fp === prof.fp);
+    if (contact && contact.name) return contact.name;
+  }
+  if (prof && prof.name) return prof.name;
+  return short(peerId);
+};
+
 const peerColor = (id) => {
   let h = 0;
   for (let i = 0; i < (id || '').length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
@@ -279,8 +353,23 @@ const renderPeerList = () => {
     const chip = document.createElement('span');
     chip.className = 'comms__chip';
     chip.style.color = peerColor(p);
-    chip.textContent = short(p);
-    chip.title = p;
+    chip.textContent = displayName(p);
+    const prof = peerProfiles.get(p);
+    chip.title = prof && prof.fp ? 'fingerprint ' + prof.fp : p;
+    if (prof && prof.pub && prof.fp && !CID.getContacts().some((c) => c.fp === prof.fp)) {
+      const add = document.createElement('button');
+      add.type = 'button';
+      add.className = 'comms__chip-add';
+      add.textContent = '+';
+      add.title = 'add ' + (prof.name || short(p)) + ' as a contact';
+      add.addEventListener('click', async () => {
+        await CID.addContact({ name: prof.name, pub: prof.pub, ring: prof.ring });
+        sys(`${displayName(p)} added to contacts.`);
+        renderPeerList();
+        renderContacts();
+      });
+      chip.append(add);
+    }
     els.peerlist.append(chip);
   });
 };
@@ -336,7 +425,7 @@ const refreshShareUrl = (roomName, b64Key) => {
 };
 
 const renderRemoteChat = (item, opts = {}) => {
-  renderLine(short(item.senderId), item.text, { peerId: item.senderId, quiet: !!opts.silent });
+  renderLine(displayName(item.senderId), item.text, { peerId: item.senderId, quiet: !!opts.silent });
   if (!opts.silent) playPing(880);
 };
 
@@ -475,8 +564,9 @@ const joinNew = async (roomName, b64Key = null) => {
     closeChatSub();
     try { await room.leave(); } catch {}
     room = null;
-    chatAction = metaAction = chunkAction = null;
+    chatAction = metaAction = chunkAction = profAction = null;
     peers.clear();
+    peerProfiles.clear();
     if (historyTimer) { clearTimeout(historyTimer); historyTimer = null; }
     historyBuffered = false;
     historyBuffer = [];
@@ -524,8 +614,23 @@ const joinNew = async (roomName, b64Key = null) => {
   els.msg.disabled = false;
   els.go.disabled = false;
   updatePeers();
-  sys(`you are ${short(selfId)} — alone in "${roomName}". share the URL to invite someone.`);
+  sys(`you are ${myProfile.name ? myProfile.name + ' (' + short(selfId) + ')' : short(selfId)} — alone in "${roomName}". share the URL to invite someone.`);
   if (chatKey) sys('end-to-end encrypted. anyone with the full URL (including the key after the colon) can decrypt.');
+
+  profAction = room.makeAction('prof');
+  profAction.onMessage = async (data, ctx) => {
+    if (!data || typeof data !== 'object') return;
+    const prof = { name: String(data.name || '').slice(0, 32) };
+    if (data.pub && typeof data.pub.x === 'string' && typeof data.pub.y === 'string') {
+      prof.pub = { x: data.pub.x, y: data.pub.y };
+      try { prof.fp = await CID.fingerprint(prof.pub); } catch {}
+    }
+    if (typeof data.ring === 'string') prof.ring = data.ring.slice(0, 64);
+    const known = peerProfiles.get(ctx.peerId);
+    peerProfiles.set(ctx.peerId, prof);
+    renderPeerList();
+    if (!known && prof.name) sys(`${short(ctx.peerId)} is ${prof.name}${prof.fp ? ' (' + prof.fp + ')' : ''}`);
+  };
 
   chatAction = room.makeAction('chat');
   chatAction.onMessage = async (data, ctx) => {
@@ -543,14 +648,14 @@ const joinNew = async (roomName, b64Key = null) => {
       historyBuffer.push({ senderId: ctx.peerId, text, ts: Date.now() });
       return;
     }
-    renderLine(short(ctx.peerId), text, { peerId: ctx.peerId });
+    renderLine(displayName(ctx.peerId), text, { peerId: ctx.peerId });
     playPing(880);
   };
 
   const incoming = new Map();
   metaAction = room.makeAction('fmeta');
   metaAction.onMessage = (meta, ctx) => {
-    const line = renderLine(short(ctx.peerId), '', { peerId: ctx.peerId, quiet: true, html: progressHTML('receiving', meta.name, meta.size, 0) });
+    const line = renderLine(displayName(ctx.peerId), '', { peerId: ctx.peerId, quiet: true, html: progressHTML('receiving', meta.name, meta.size, 0) });
     incoming.set(ctx.peerId + ':' + meta.id, { meta, chunks: [], received: 0, line });
   };
 
@@ -601,12 +706,14 @@ const joinNew = async (roomName, b64Key = null) => {
     updatePeers();
     renderPeerList();
     sys(`${short(peerId)} joined`);
+    sendProfileTo(peerId);
   };
   room.onPeerLeave = (peerId) => {
     peers.delete(peerId);
+    peerProfiles.delete(peerId);
     updatePeers();
     renderPeerList();
-    sys(`${short(peerId)} left`);
+    sys(`${displayName(peerId)} left`);
   };
 
   setupChatPersistence(roomName);
@@ -794,6 +901,170 @@ els.mute.addEventListener('click', () => {
   if (!muted) playPing(880);
 });
 if (muted) { els.mute.textContent = 'sound: off'; els.mute.setAttribute('aria-pressed', 'true'); }
+
+const sendProfileTo = (peerId) => {
+  if (!profAction || !myId) return;
+  const payload = { name: myProfile.name, pub: { x: myId.publicJwk.x, y: myId.publicJwk.y } };
+  if (ringToken) payload.ring = ringToken;
+  try { profAction.send(payload, peerId || undefined); } catch {}
+};
+
+const broadcastProfile = () => sendProfileTo(null);
+
+const refreshIdUI = () => {
+  const state = CID.idState();
+  els.idNone.hidden = state !== 'none' && state !== 'unavailable';
+  els.idLocked.hidden = state !== 'locked';
+  els.idOn.hidden = state !== 'unlocked';
+  if (state !== 'unlocked') { els.idCard.hidden = true; els.contacts.hidden = true; }
+};
+
+const initIdentity = async () => {
+  try {
+    myId = await CID.ensureKeypair();
+    myFp = await CID.fingerprint(myId.publicJwk);
+    myProfile = CID.getProfile();
+    els.idName.value = myProfile.name;
+    els.idFp.textContent = myFp;
+    refreshIdUI();
+    renderContacts();
+    broadcastProfile();
+  } catch (err) {
+    sys('identity error: ' + err.message);
+  }
+};
+
+els.idUnlock.addEventListener('click', async () => {
+  els.idErr.textContent = '';
+  els.idUnlock.disabled = true;
+  try {
+    await window.MentriaIdentity.unlock(els.idPass.value);
+    els.idPass.value = '';
+    await initIdentity();
+  } catch {
+    els.idErr.textContent = 'wrong passphrase';
+  } finally {
+    els.idUnlock.disabled = false;
+  }
+});
+els.idPass.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.idUnlock.click(); } });
+
+els.idName.addEventListener('change', () => {
+  myProfile = CID.setProfile({ name: els.idName.value });
+  els.idName.value = myProfile.name;
+  broadcastProfile();
+  refreshMyCode();
+});
+
+const refreshMyCode = () => {
+  if (els.idCard.hidden || !myId) return;
+  const code = CID.encodeContactCode(myProfile, myId.publicJwk, ringToken);
+  els.idCode.textContent = code;
+  try {
+    const qr = qrcodegen.QrCode.encodeText(code, qrcodegen.QrCode.Ecc.LOW);
+    const border = 2, px = 4, dim = qr.size + border * 2;
+    els.idQr.width = dim * px; els.idQr.height = dim * px;
+    const ctx = els.idQr.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, els.idQr.width, els.idQr.height);
+    ctx.fillStyle = '#000000';
+    for (let y = 0; y < qr.size; y++) {
+      for (let x = 0; x < qr.size; x++) {
+        if (qr.getModule(x, y)) ctx.fillRect((x + border) * px, (y + border) * px, px, px);
+      }
+    }
+  } catch {}
+};
+
+els.idShare.addEventListener('click', () => {
+  els.idCard.hidden = !els.idCard.hidden;
+  els.idShare.setAttribute('aria-expanded', String(!els.idCard.hidden));
+  refreshMyCode();
+});
+
+els.idCopy.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(els.idCode.textContent);
+    els.idCopy.textContent = 'copied';
+    setTimeout(() => { els.idCopy.textContent = 'copy code'; }, 1200);
+  } catch {}
+});
+
+els.idContacts.addEventListener('click', () => {
+  els.contacts.hidden = !els.contacts.hidden;
+  els.idContacts.setAttribute('aria-expanded', String(!els.contacts.hidden));
+  renderContacts();
+});
+
+const renderContacts = () => {
+  if (!els.contactList) return;
+  els.contactList.innerHTML = '';
+  const contacts = CID.getContacts();
+  if (!contacts.length) {
+    const empty = document.createElement('div');
+    empty.className = 'comms__id-note';
+    empty.textContent = 'no contacts yet. trade codes with someone, or press + on a peer in a room.';
+    els.contactList.append(empty);
+    return;
+  }
+  contacts.forEach((c) => {
+    const row = document.createElement('div');
+    row.className = 'comms__contact';
+    const name = document.createElement('span');
+    name.className = 'comms__contact-name';
+    name.textContent = c.name || '(unnamed)';
+    const fp = document.createElement('span');
+    fp.className = 'comms__contact-fp';
+    fp.textContent = c.fp;
+    const spacer = document.createElement('span');
+    spacer.className = 'comms__contact-spacer';
+    const dm = document.createElement('button');
+    dm.type = 'button';
+    dm.className = 'comms__btn comms__btn--ghost';
+    dm.textContent = 'message';
+    dm.addEventListener('click', async () => {
+      if (!myId) return;
+      try {
+        const { roomName, b64Key } = await CID.deriveDm(myId.privateKey, c.pub);
+        els.room.value = roomName;
+        els.contacts.hidden = true;
+        await joinNew(roomName, b64Key);
+        sys(`private room with ${c.name || c.fp} — only your two identities can derive it.`);
+      } catch (err) {
+        sys('could not derive DM room: ' + err.message);
+      }
+    });
+    const rm = document.createElement('button');
+    rm.type = 'button';
+    rm.className = 'comms__btn comms__btn--ghost';
+    rm.textContent = 'remove';
+    rm.addEventListener('click', async () => {
+      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm('Remove ' + (c.name || c.fp) + ' from contacts?') : Promise.resolve(true));
+      if (!ok) return;
+      CID.removeContact(c.fp);
+      renderContacts();
+      renderPeerList();
+    });
+    row.append(name, fp, spacer, dm, rm);
+    els.contactList.append(row);
+  });
+};
+
+els.contactAdd.addEventListener('click', async () => {
+  try {
+    const payload = CID.decodeContactCode(els.contactIn.value);
+    const saved = await CID.addContact(payload);
+    els.contactIn.value = '';
+    sys(`contact added: ${saved.name || saved.fp}`);
+    renderContacts();
+  } catch (err) {
+    sys('could not add contact: ' + err.message);
+  }
+});
+els.contactIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.contactAdd.click(); } });
+
+refreshIdUI();
+if (CID.idState() === 'unlocked') initIdentity();
 
 function randomRoomSlug() {
   const bytes = crypto.getRandomValues(new Uint8Array(5));

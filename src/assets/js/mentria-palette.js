@@ -494,8 +494,16 @@
     prevFocus = null;
   }
 
+  function blockingOverlayOpen() {
+    var dlg = document.getElementById('m-dialog');
+    try { if (dlg && dlg.matches(':popover-open')) return true; } catch (_) {}
+    if (root && root.closest && root.closest('[inert]')) return true;
+    return false;
+  }
+
   function open() {
     if (!data()) return;
+    if (blockingOverlayOpen()) return;
     build();
     model = buildModel();
     applyLabels();

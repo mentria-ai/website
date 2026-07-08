@@ -1,6 +1,510 @@
 [
   {
     "type": "chapter",
+    "id": "source96",
+    "src": "https://cdn.mentria.ai/source96/00_cover.webp",
+    "color": "linear-gradient(165deg, #120a14, #b06fd4, #120a14)",
+    "title": "Source",
+    "caption": {
+      "en": "The million-knot tapestry that was secretly a few patterns. 7 cards.",
+      "es": "El tapiz de un millón de nudos que en secreto era unos pocos patrones. 7 tarjetas.",
+      "fr": "La tapisserie au million de nœuds qui cachait quelques motifs à peine. 7 cartes.",
+      "ja": "百万の結び目のタペストリーは、ひそかに数枚の模様だった。カード7枚。",
+      "pt-BR": "A tapeçaria de um milhão de nós que no fundo era uns poucos padrões. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source96/"
+  },
+  {
+    "type": "chapter",
+    "id": "source95",
+    "src": "https://cdn.mentria.ai/source95/00_cover.webp",
+    "color": "linear-gradient(165deg, #131007, #d9b23f, #131007)",
+    "title": "Source",
+    "caption": {
+      "en": "No single fold makes a crane. 7 cards.",
+      "es": "Ningún pliegue, por sí solo, hace una grulla. 7 tarjetas.",
+      "fr": "Aucun pli, à lui seul, ne fait une grue. 7 cartes.",
+      "ja": "ひと折りだけでは、鶴にならない。カード7枚。",
+      "pt-BR": "Nenhuma dobra sozinha faz um tsuru. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source95/"
+  },
+  {
+    "type": "chapter",
+    "id": "source94",
+    "src": "https://cdn.mentria.ai/source94/00_cover.webp",
+    "color": "linear-gradient(165deg, #0b0f1a, #7d8fc9, #0b0f1a)",
+    "title": "Source",
+    "caption": {
+      "en": "The librarian who abandoned the alphabet. 7 cards.",
+      "es": "La bibliotecaria que abandonó el alfabeto. 7 tarjetas.",
+      "fr": "La bibliothécaire qui a abandonné l'alphabet. 7 cartes.",
+      "ja": "アルファベットを捨てた司書。カード7枚。",
+      "pt-BR": "A bibliotecária que abandonou o alfabeto. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source94/"
+  },
+  {
+    "type": "chapter",
+    "id": "source93",
+    "src": "https://cdn.mentria.ai/source93/00_cover.webp",
+    "color": "linear-gradient(165deg, #140a08, #b8503f, #140a08)",
+    "title": "Source",
+    "caption": {
+      "en": "One salty plate, and the blame walks backward. 7 cards.",
+      "es": "Un plato salado, y la culpa camina hacia atrás. 7 tarjetas.",
+      "fr": "Une assiette trop salée, et la faute remonte la chaîne. 7 cartes.",
+      "ja": "塩辛い一皿、責めは後ろへ歩いていく。カード7枚。",
+      "pt-BR": "Um prato salgado, e a culpa anda para trás. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source93/"
+  },
+  {
+    "type": "chapter",
+    "id": "source92",
+    "src": "https://cdn.mentria.ai/source92/00_cover.webp",
+    "color": "linear-gradient(165deg, #071512, #2fa896, #071512)",
+    "title": "Source",
+    "caption": {
+      "en": "The old man who turns four whispers into one yes. 7 cards.",
+      "es": "El viejo que convierte cuatro susurros en un solo sí. 7 tarjetas.",
+      "fr": "Le vieil homme qui change quatre murmures en un seul oui. 7 cartes.",
+      "ja": "四つのささやきを一つの「はい」に変える老人。カード7枚。",
+      "pt-BR": "O velho que transforma quatro sussurros em um único sim. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source92/"
+  },
+  {
+    "type": "chapter",
+    "id": "source91",
+    "src": "https://cdn.mentria.ai/source91/00_cover.webp",
+    "color": "linear-gradient(165deg, #0d0716, #9d6fe0, #0d0716)",
+    "title": "Source",
+    "caption": {
+      "en": "The lake, the net, and thirty years of big fish. 7 cards.",
+      "es": "El lago, la red y treinta años de peces grandes. 7 tarjetas.",
+      "fr": "Le lac, le filet et trente ans de gros poissons. 7 cartes.",
+      "ja": "湖と網と、三十年の大きな魚。カード7枚。",
+      "pt-BR": "O lago, a rede e trinta anos de peixes grandes. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source91/"
+  },
+  {
+    "type": "chapter",
+    "id": "source90",
+    "src": "https://cdn.mentria.ai/source90/00_cover.webp",
+    "color": "linear-gradient(165deg, #140d08, #c27f52, #140d08)",
+    "title": "Source",
+    "caption": {
+      "en": "A clue never points. It weighs. 7 cards.",
+      "es": "Una pista nunca señala. Pesa. 7 tarjetas.",
+      "fr": "Un indice ne désigne jamais. Il pèse. 7 cartes.",
+      "ja": "手がかりは指ささない。重さを変える。カード7枚。",
+      "pt-BR": "Uma pista nunca aponta. Ela pesa. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source90/"
+  },
+  {
+    "type": "chapter",
+    "id": "source89",
+    "src": "https://cdn.mentria.ai/source89/00_cover.webp",
+    "color": "linear-gradient(165deg, #081018, #5aa0d8, #081018)",
+    "title": "Source",
+    "caption": {
+      "en": "One ticket, a thousand imagined throws. 7 cards.",
+      "es": "Un boleto, mil lanzamientos imaginados. 7 tarjetas.",
+      "fr": "Un ticket, mille lancers imaginés. 7 cartes.",
+      "ja": "一枚のチケット、千回の想像の投げ。カード7枚。",
+      "pt-BR": "Um tíquete, mil arremessos imaginados. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source89/"
+  },
+  {
+    "type": "chapter",
+    "id": "source88",
+    "src": "https://cdn.mentria.ai/source88/00_cover.webp",
+    "color": "linear-gradient(165deg, #0f1207, #c2d13f, #0f1207)",
+    "title": "Source",
+    "caption": {
+      "en": "A whisper at the pedal, multiplied all the way to the road. 7 cards.",
+      "es": "Un susurro en el pedal, multiplicado hasta la carretera. 7 tarjetas.",
+      "fr": "Un souffle sur la pédale, multiplié jusqu'à la route. 7 cartes.",
+      "ja": "ペダルのささやきが、路面まで掛け算されていく。カード7枚。",
+      "pt-BR": "Um sussurro no pedal, multiplicado até a estrada. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source88/"
+  },
+  {
+    "type": "chapter",
+    "id": "source87",
+    "src": "https://cdn.mentria.ai/source87/00_cover.webp",
+    "color": "linear-gradient(165deg, #150910, #c9527a, #150910)",
+    "title": "Source",
+    "caption": {
+      "en": "The threads the dough can stretch but never turn. 7 cards.",
+      "es": "Los hilos que la masa estira pero nunca gira. 7 tarjetas.",
+      "fr": "Les fils que la pâte étire mais ne tourne jamais. 7 cartes.",
+      "ja": "生地が伸ばせても、回せない糸。カード7枚。",
+      "pt-BR": "Os fios que a massa estica mas nunca gira. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source87/"
+  },
+  {
+    "type": "chapter",
+    "id": "source86",
+    "src": "https://cdn.mentria.ai/source86/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a140e, #46c98f, #0a140e)",
+    "title": "Source",
+    "caption": {
+      "en": "Two rowers, one boat — and where the strength goes. 7 cards.",
+      "es": "Dos remeros, un bote — y adónde va la fuerza. 7 tarjetas.",
+      "fr": "Deux rameurs, un bateau — et où va la force. 7 cartes.",
+      "ja": "二人の漕ぎ手、一艘の舟——力はどこへ消えるのか。カード7枚。",
+      "pt-BR": "Dois remadores, um barco — e para onde vai a força. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source86/"
+  },
+  {
+    "type": "chapter",
+    "id": "source85",
+    "src": "https://cdn.mentria.ai/source85/00_cover.webp",
+    "color": "linear-gradient(165deg, #0b0b14, #8f9bb3, #0b0b14)",
+    "title": "Source",
+    "caption": {
+      "en": "Why a good guesser and a good compressor are the same keeper. 7 cards.",
+      "es": "Por qué un buen adivino y un buen compresor son el mismo farero. 7 tarjetas.",
+      "fr": "Pourquoi un bon devineur et un bon compresseur sont le même gardien. 7 cartes.",
+      "ja": "よく当てる者とよく縮める者が、同じ灯台守である理由。カード7枚。",
+      "pt-BR": "Por que um bom adivinho e um bom compressor são o mesmo faroleiro. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source85/"
+  },
+  {
+    "type": "chapter",
+    "id": "source84",
+    "src": "https://cdn.mentria.ai/source84/00_cover.webp",
+    "color": "linear-gradient(165deg, #07101a, #3fa8e0, #07101a)",
+    "title": "Source",
+    "caption": {
+      "en": "Why rare news costs more — and why some messages can't shrink. 7 cards.",
+      "es": "Por qué las noticias raras cuestan más — y por qué algunos mensajes no encogen. 7 tarjetas.",
+      "fr": "Pourquoi les nouvelles rares coûtent plus cher — et pourquoi certains messages ne rétrécissent pas. 7 cartes.",
+      "ja": "珍しい知らせほど高くつく理由——そして縮められない知らせがある理由。カード7枚。",
+      "pt-BR": "Por que notícias raras custam mais — e por que algumas mensagens não encolhem. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source84/"
+  },
+  {
+    "type": "chapter",
+    "id": "source83",
+    "src": "https://cdn.mentria.ai/source83/00_cover.webp",
+    "color": "linear-gradient(165deg, #121407, #a3b829, #121407)",
+    "title": "Source",
+    "caption": {
+      "en": "A number, a direction, a nudge — that's all training is. 7 cards.",
+      "es": "Un número, una dirección, un empujoncito: eso es entrenar. 7 tarjetas.",
+      "fr": "Un nombre, une direction, un petit pas — c'est tout l'entraînement. 7 cartes.",
+      "ja": "ひとつの数、ひとつの向き、小さなひと押し——訓練とはそれだけ。カード7枚。",
+      "pt-BR": "Um número, uma direção, um empurrãozinho — treinar é só isso. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source83/"
+  },
+  {
+    "type": "chapter",
+    "id": "source82",
+    "src": "https://cdn.mentria.ai/source82/00_cover.webp",
+    "color": "linear-gradient(165deg, #0f0c1c, #e05fa8, #0f0c1c)",
+    "title": "Source",
+    "caption": {
+      "en": "How raw scores become slices of one shared pot. 7 cards.",
+      "es": "Cómo las puntuaciones crudas se vuelven porciones de un bote común. 7 tarjetas.",
+      "fr": "Comment des scores bruts deviennent des parts d'un pot commun. 7 cartes.",
+      "ja": "生のスコアが、ひとつの賞金の分け前に変わる仕組み。カード7枚。",
+      "pt-BR": "Como pontuações cruas viram fatias de um pote comum. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source82/"
+  },
+  {
+    "type": "chapter",
+    "id": "source81",
+    "src": "https://cdn.mentria.ai/source81/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a1608, #6fbf3f, #0a1608)",
+    "title": "Source",
+    "caption": {
+      "en": "The coach who only ever says one number. 7 cards.",
+      "es": "El entrenador que solo dice un número. 7 tarjetas.",
+      "fr": "Le coach qui ne dit jamais qu'un seul nombre. 7 cartes.",
+      "ja": "ひとつの数しか言わないコーチ。カード7枚。",
+      "pt-BR": "O treinador que só diz um número. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source81/"
+  },
+  {
+    "type": "chapter",
+    "id": "source80",
+    "src": "https://cdn.mentria.ai/source80/00_cover.webp",
+    "color": "linear-gradient(165deg, #180a0a, #e0564f, #180a0a)",
+    "title": "Source",
+    "caption": {
+      "en": "How heaps of buttons reveal what a deep tin hides. 7 cards.",
+      "es": "Cómo los montones de botones revelan lo que esconde una lata honda. 7 tarjetas.",
+      "fr": "Comment des tas de boutons révèlent ce que cache une boîte profonde. 7 cartes.",
+      "ja": "ボタンの山が、深い缶の中身を明かすまで。カード7枚。",
+      "pt-BR": "Como montes de botões revelam o que uma lata funda esconde. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source80/"
+  },
+  {
+    "type": "chapter",
+    "id": "source79",
+    "src": "https://cdn.mentria.ai/source79/00_cover.webp",
+    "color": "linear-gradient(165deg, #0d0a18, #7a5cff, #0d0a18)",
+    "title": "Source",
+    "caption": {
+      "en": "How to walk down a mountain you cannot see. 7 cards.",
+      "es": "Cómo bajar una montaña que no puedes ver. 7 tarjetas.",
+      "fr": "Comment descendre une montagne qu'on ne voit pas. 7 cartes.",
+      "ja": "見えない山を下りる方法。カード7枚。",
+      "pt-BR": "Como descer uma montanha que você não consegue ver. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-08",
+    "link": "/feed/source/source79/"
+  },
+  {
+    "type": "chapter",
+    "id": "source78",
+    "src": "https://cdn.mentria.ai/source78/00_cover.webp",
+    "color": "linear-gradient(165deg, #071414, #2bbfb3, #071414)",
+    "title": "Source",
+    "caption": {
+      "en": "A touchy shower handle teaches the art of the tiny wiggle. 7 cards.",
+      "es": "Un mando de ducha delicado enseña el arte del giro diminuto. 7 tarjetas.",
+      "fr": "Une poignée de douche capricieuse enseigne l'art de l'infime geste. 7 cartes.",
+      "ja": "気難しいシャワーの取っ手が教える、微小な揺らしの技。カード7枚。",
+      "pt-BR": "Um registro de chuveiro temperamental ensina a arte do giro minúsculo. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-07",
+    "link": "/feed/source/source78/"
+  },
+  {
+    "type": "chapter",
+    "id": "source77",
+    "src": "https://cdn.mentria.ai/source77/00_cover.webp",
+    "color": "linear-gradient(165deg, #141008, #d98a2b, #141008)",
+    "title": "Source",
+    "caption": {
+      "en": "Two machines in a row are secretly one machine. 7 cards.",
+      "es": "Dos máquinas en fila son, en secreto, una sola máquina. 7 tarjetas.",
+      "fr": "Deux machines à la file sont en secret une seule machine. 7 cartes.",
+      "ja": "並んだ二台の機械は、ひそかに一台の機械だ。カード7枚。",
+      "pt-BR": "Duas máquinas em fila são, em segredo, uma só máquina. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-07",
+    "link": "/feed/source/source77/"
+  },
+  {
+    "type": "chapter",
+    "id": "source76",
+    "src": "https://cdn.mentria.ai/source76/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a1220, #4f8ef7, #0a1220)",
+    "title": "Source",
+    "caption": {
+      "en": "In a city with no street names, direction is meaning. 7 cards.",
+      "es": "En una ciudad sin nombres de calles, la dirección es significado. 7 tarjetas.",
+      "fr": "Dans une ville sans noms de rues, la direction est du sens. 7 cartes.",
+      "ja": "通りに名前のない街では、方向が意味になる。カード7枚。",
+      "pt-BR": "Numa cidade sem nomes de ruas, a direção é significado. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-07",
+    "link": "/feed/source/source76/"
+  },
+  {
+    "type": "chapter",
+    "id": "source58",
+    "src": "https://cdn.mentria.ai/source58/00_cover.webp",
+    "color": "linear-gradient(165deg, #0c1416, #5e8389, #0c1416)",
+    "title": "Source",
+    "caption": {
+      "en": "Why the model we keep is one we never trained. 8 cards.",
+      "es": "Por qué el modelo que conservamos es uno que nunca entrenamos. 8 tarjetas.",
+      "fr": "Pourquoi le modèle que l'on garde est un modèle jamais entraîné. 8 cartes.",
+      "ja": "なぜ、私たちが残すモデルは一度も直接学習していないものなのか。カード8枚。",
+      "pt-BR": "Por que o modelo que guardamos é um que nunca treinamos. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-07",
+    "link": "/feed/source/source58/"
+  },
+  {
+    "type": "chapter",
+    "id": "source57",
+    "src": "https://cdn.mentria.ai/source57/00_cover.webp",
+    "color": "linear-gradient(165deg, #14101f, #a78bce, #14101f)",
+    "title": "Source",
+    "caption": {
+      "en": "Why we teach it to never be perfectly sure. 8 cards.",
+      "es": "Por qué le enseñamos a no estar nunca perfectamente seguro. 8 tarjetas.",
+      "fr": "Pourquoi on lui apprend à n'être jamais parfaitement sûr. 8 cartes.",
+      "ja": "なぜ完全に確信させないように教えるのか。カード8枚。",
+      "pt-BR": "Por que o ensinamos a nunca ter certeza absoluta. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-07",
+    "link": "/feed/source/source57/"
+  },
+  {
+    "type": "chapter",
+    "id": "source56",
+    "src": "https://cdn.mentria.ai/source56/00_cover.webp",
+    "color": "linear-gradient(165deg, #1c0811, #e85d8a, #1c0811)",
+    "title": "Source",
+    "caption": {
+      "en": "How a model simplifies itself — without warping how it learns. 8 cards.",
+      "es": "Cómo un modelo se simplifica solo, sin deformar cómo aprende. 8 tarjetas.",
+      "fr": "Comment un modèle se simplifie — sans fausser sa façon d'apprendre. 8 cartes.",
+      "ja": "モデルが学び方をゆがめずに、自分を簡素に保つ仕組み。8枚。",
+      "pt-BR": "Como um modelo se simplifica sem distorcer a forma como aprende. 8 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-07",
+    "link": "/feed/source/source56/"
+  },
+  {
+    "type": "chapter",
     "id": "source55",
     "src": "https://cdn.mentria.ai/source55/00_cover.webp",
     "color": "linear-gradient(165deg, #161009, #b5946a, #161009)",

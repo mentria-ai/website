@@ -160,7 +160,6 @@
       "suggestions_label": "Command suggestions"
     },
     "tools_heading": "Tools",
-    "feed_heading": "Latest from the Feed",
     "launch_tool": "Launch tool →",
     "launcher": {
       "recents": "Recents",
@@ -177,7 +176,12 @@
       "unpin_action": "Unpin {name}"
     },
     "value_prop": "Free tools that run entirely in your browser — no account, no tracking, works offline.",
-    "try_label": "try:"
+    "try_label": "try:",
+    "feed": {
+      "heading": "FEED_",
+      "view_all": "view all →",
+      "open": "open feed"
+    }
   },
   "tools_page": {
     "title": "Utility Tools",

@@ -160,7 +160,6 @@
       "suggestions_label": "コマンド候補"
     },
     "tools_heading": "ツール",
-    "feed_heading": "フィードの最新",
     "launch_tool": "ツールを開く →",
     "launcher": {
       "recents": "最近",
@@ -177,7 +176,12 @@
       "unpin_action": "{name}のピン留めを外す"
     },
     "value_prop": "ブラウザだけで完結する無料ツール — アカウント不要、トラッキングなし、オフラインでも動作。",
-    "try_label": "おすすめ:"
+    "try_label": "おすすめ:",
+    "feed": {
+      "heading": "フィード_",
+      "view_all": "すべて見る →",
+      "open": "フィードを開く"
+    }
   },
   "tools_page": {
     "title": "ユーティリティツール",

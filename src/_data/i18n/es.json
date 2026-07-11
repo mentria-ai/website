@@ -160,7 +160,6 @@
       "suggestions_label": "Sugerencias de comandos"
     },
     "tools_heading": "Herramientas",
-    "feed_heading": "Últimas del Feed",
     "launch_tool": "Abrir herramienta →",
     "launcher": {
       "recents": "Recientes",
@@ -177,7 +176,12 @@
       "unpin_action": "Desfijar {name}"
     },
     "value_prop": "Herramientas gratuitas que funcionan por completo en tu navegador — sin cuenta, sin rastreo, funciona sin conexión.",
-    "try_label": "prueba:"
+    "try_label": "prueba:",
+    "feed": {
+      "heading": "FEED_",
+      "view_all": "ver todo →",
+      "open": "abrir feed"
+    }
   },
   "tools_page": {
     "title": "Herramientas Útiles",

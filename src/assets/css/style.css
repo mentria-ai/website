@@ -1064,6 +1064,10 @@ body.pwa-sheet-open { overflow: hidden; }
 .app-bar {
   display: none;
 }
+html.is-standalone {
+  --app-bar-pad: max(0px, calc(env(safe-area-inset-bottom, 0px) - 20px));
+  --app-bar-h: calc(52px + var(--app-bar-pad));
+}
 html.is-standalone .app-bar {
   display: flex;
   position: fixed;
@@ -1071,13 +1075,15 @@ html.is-standalone .app-bar {
   right: 0;
   bottom: 0;
   z-index: 9999;
-  height: 56px;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: var(--app-bar-h);
+  padding-bottom: var(--app-bar-pad);
   background: var(--term-bg-raised);
   border-top: 1px solid var(--term-border);
 }
 html.is-standalone .app-bar__item {
   flex: 1;
+  min-width: 0;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1093,7 +1099,7 @@ html.is-standalone .app-bar__item[aria-current="page"] {
   color: var(--syn-cyan);
 }
 html.is-standalone body {
-  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: var(--app-bar-h);
 }
 body.is-fullscreen-tool .app-bar {
   display: none !important;

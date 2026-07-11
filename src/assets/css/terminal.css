@@ -747,6 +747,10 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
   width: 100%;
 }
 
+html.is-standalone .feed-card__info {
+  padding-bottom: calc(var(--app-bar-h) + 1.5rem);
+}
+
 .feed-card__caption {
   font-size: 1.05rem;
   line-height: 1.35;
@@ -774,12 +778,16 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
 
 .feed-card__tags {
   position: absolute;
-  top: 5rem;
+  top: calc(78px + env(safe-area-inset-top));
   right: 1.5rem;
   z-index: 2;
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.feed-card.is-seen .feed-card__tags {
+  right: 2.75rem;
 }
 
 .feed-card__tag {
@@ -930,7 +938,7 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
 
 .feed-card__chapter-badge {
   position: absolute;
-  top: calc(20px + env(safe-area-inset-top));
+  top: calc(78px + env(safe-area-inset-top));
   left: 16px;
   z-index: 3;
   font-family: var(--font-mono);
@@ -986,7 +994,7 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
 .feed-card.is-seen::after {
   content: '\2713';
   position: absolute;
-  top: 14px;
+  top: calc(78px + env(safe-area-inset-top));
   right: 14px;
   z-index: 3;
   width: 22px;

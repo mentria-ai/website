@@ -94,6 +94,9 @@
     <meta name="robots" content="{{ robots or (site.robots | default('index, follow')) }}">
     <meta name="author" content="{{ site.author }}">
     <meta name="theme-color" content="#0a0a0a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <meta property="og:type" content="{{ 'article' if isPost else 'website' }}">
     <meta property="og:url" content="{{ pageUrl }}">
@@ -279,11 +282,13 @@
     {% include "footer.njk" %}
     {% endif %}
 
+    {% if not deckLayout %}
     <nav class="app-bar" aria-label="{{ 'palette.app_bar' | t }}">
       <a class="app-bar__item" href="{{ localePrefix }}/"{% if isHomePage %} aria-current="page"{% endif %}>{{ 'nav.home' | t }}</a>
       <button type="button" class="app-bar__item" data-palette-open aria-label="{{ 'palette.open' | t }}">⌘K</button>
       <a class="app-bar__item" href="{{ localePrefix }}/feed/"{% if inFeed %} aria-current="page"{% endif %}>{{ 'nav.feed' | t }}</a>
     </nav>
+    {% endif %}
 
     {% include "pwa-install.njk" %}
 

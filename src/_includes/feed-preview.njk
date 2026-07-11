@@ -1,0 +1,24 @@
+{% set previewDecks = (feed | default([])) | head(6) %}
+{% if previewDecks.length %}
+<section class="feed-preview reveal" aria-label="{{ 'home.feed.heading' | t }}">
+  <div class="feed-preview__head">
+    <h2 class="feed-preview__heading">{{ 'home.feed.heading' | t }}</h2>
+    <a class="feed-preview__all" href="{{ locale.pathPrefix }}/feed/">{{ 'home.feed.view_all' | t }}</a>
+  </div>
+  <div class="feed-preview__strip">
+    {% for item in previewDecks %}
+    <a class="feed-preview__card" href="{{ locale.pathPrefix }}{{ item.link }}" style="{% if item.color %}background: {{ item.color }}; {% endif %}view-transition-name: deck-{{ item.id }}">
+      {% if item.src %}
+      <img class="feed-preview__img" src="{{ item.src }}" alt="" loading="lazy" decoding="async" onerror="this.classList.add('is-broken')">
+      {% endif %}
+      <span class="feed-preview__grad" aria-hidden="true"></span>
+      {% if item.badge %}<span class="feed-preview__badge" aria-hidden="true">{{ item.badge }}</span>{% endif %}
+      <span class="feed-preview__caption">{{ item.caption | tloc(locale.code) }}</span>
+    </a>
+    {% endfor %}
+    <a class="feed-preview__more" href="{{ locale.pathPrefix }}/feed/">
+      <span aria-hidden="true">→</span><span>{{ 'home.feed.open' | t }}</span>
+    </a>
+  </div>
+</section>
+{% endif %}

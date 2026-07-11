@@ -16,6 +16,7 @@ eleventyComputed:
 
 <div class="deck"
      id="deckRoot"
+     style="view-transition-name: deck-{{ pair.edition.id }}"
      data-chapter-id="{{ pair.edition.id }}"
      data-chapter-title="{{ pair.edition.title }}"
      data-slide-count="{{ pair.edition.slides.length }}">

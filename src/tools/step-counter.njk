@@ -62,6 +62,17 @@ eleventyComputed:
       <span class="sc__history-label">{{ "tool.step-counter.history_label" | t }}</span>
       <div class="sc__bars" id="sc-bars"></div>
     </div>
+
+    <div class="sc__streaks">
+      <div class="sc__stat">
+        <span class="sc__stat-label">{{ "tool.step-counter.streak_current" | t }}</span>
+        <span class="sc__stat-value" id="sc-streak-cur">—</span>
+      </div>
+      <div class="sc__stat">
+        <span class="sc__stat-label">{{ "tool.step-counter.streak_best" | t }}</span>
+        <span class="sc__stat-value" id="sc-streak-best">—</span>
+      </div>
+    </div>
   </div>
 
   <div class="sc__panel" id="sc-perm" hidden>
@@ -123,7 +134,9 @@ eleventyComputed:
     goalOf:      {{ ("tool.step-counter.goal_of"      | t) | dump | safe }},
     paceUnit:    {{ ("tool.step-counter.pace_unit"    | t) | dump | safe }},
     goalReached: {{ ("tool.step-counter.goal_reached" | t) | dump | safe }},
-    confirmReset:{{ ("tool.step-counter.confirm_reset"| t) | dump | safe }}
+    confirmReset:{{ ("tool.step-counter.confirm_reset"| t) | dump | safe }},
+    streakDay:   {{ ("tool.step-counter.streak_day"   | t) | dump | safe }},
+    streakDays:  {{ ("tool.step-counter.streak_days"  | t) | dump | safe }}
   };
 
   const LS = 'mentria-step-counter';
@@ -147,6 +160,8 @@ eleventyComputed:
   const hintEl      = $('sc-hint');
   const toggleBtn   = $('sc-toggle');
   const barsEl      = $('sc-bars');
+  const streakCurEl = $('sc-streak-cur');
+  const streakBestEl = $('sc-streak-best');
   const goalInput   = $('sc-goal');
   const strideInput = $('sc-stride');
   const sensSeg     = $('sc-sens');
@@ -270,6 +285,46 @@ eleventyComputed:
       col.title = d.steps.toLocaleString(LANG);
       barsEl.appendChild(col);
     }
+    renderStreaks();
+  }
+
+  function keyDaysAgo(offset) {
+    const d = new Date();
+    d.setDate(d.getDate() - offset);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function nextDayKey(key) {
+    const parts = key.split('-');
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10) + 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function computeStreaks() {
+    const met = key => (key === state.date ? state.steps : (state.history[key] || 0)) >= state.goal;
+    let current = 0;
+    const startOff = met(todayKey()) ? 0 : 1;
+    while (current < 4000 && met(keyDaysAgo(startOff + current))) current++;
+    let best = current;
+    const metDays = Object.keys(state.history).filter(k => (state.history[k] || 0) >= state.goal).sort();
+    let run = 0, prev = null;
+    for (const k of metDays) {
+      run = prev !== null && nextDayKey(prev) === k ? run + 1 : 1;
+      if (run > best) best = run;
+      prev = k;
+    }
+    return { current, best };
+  }
+
+  function fmtStreak(n) {
+    const tpl = n === 1 ? COPY.streakDay : COPY.streakDays;
+    return tpl.replace('{n}', n.toLocaleString(LANG));
+  }
+
+  function renderStreaks() {
+    const s = computeStreaks();
+    streakCurEl.textContent = (s.current >= 2 ? '🔥 ' : '') + fmtStreak(s.current);
+    streakBestEl.textContent = fmtStreak(s.best);
   }
 
   function renderSettings() {
@@ -609,6 +664,13 @@ eleventyComputed:
 .sc__bar-label {
   font-size: 0.6rem;
   color: var(--term-muted);
+}
+
+.sc__streaks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  width: 100%;
 }
 
 .sc__panel {

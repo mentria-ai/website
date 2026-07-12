@@ -6,6 +6,11 @@ importScripts('/assets/js/mentria-push-db.js?v={{ buildHash }}');
 const CACHE_NAME = 'mentria-cache-{{ buildHash }}';
 const MODELS_CACHE = 'mentria-models';
 const MODELS_MARKER = 'mentria-models-{{ modelsVersion }}';
+const DECKS_CACHE = 'mentria-decks-{{ buildHash }}';
+const ART_CACHE = 'mentria-deck-art';
+const DECKS_LIMIT = 40;
+const ART_LIMIT = 200;
+const FEED_PAGE = /^\/((es|fr|ja|pt-br)\/)?feed\//;
 const ASSETS = [
   '/',
   '/assets/css/style.css',
@@ -24,6 +29,9 @@ const ASSETS = [
   '/assets/i18n/pt-BR.json',
   '/manifest.json',
   '/feed/',
+  '/assets/css/feed-deck.css',
+  '/assets/css/source-deck.css',
+  '/assets/js/feed-deck.js',
   '/tools/',
   '/about/',
   '/tools/decision-wheel/',
@@ -56,11 +64,13 @@ const ASSETS = [
   '/tools/search/',
   '/tools/step-counter/',
   '/tools/qr-scanner/',
+  '/assets/js/jsqr.js',
   '/tools/totp/',
   '/tools/files/',
   '/search-index.json',
   '/assets/img/badge.svg',
   '/assets/img/icon-192x192.png',
+  '/assets/img/favicon-96x96.png',
   '/assets/img/shortcuts/ai-chat.png',
   '/assets/img/shortcuts/qr-scanner.png',
   '/assets/img/shortcuts/quick-notes.png',
@@ -115,8 +125,8 @@ self.addEventListener('activate', event => {
     const keys = await caches.keys();
     const hadOldModels = keys.some(k => k.startsWith('mentria-models-') && k !== MODELS_MARKER);
     await Promise.all(keys.map(key => {
-      if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER) return;
-      if (key.startsWith('mentria-cache-') || key.startsWith('mentria-models-')) return caches.delete(key);
+      if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER || key === DECKS_CACHE || key === ART_CACHE) return;
+      if (key.startsWith('mentria-cache-') || key.startsWith('mentria-models-') || key.startsWith('mentria-decks-')) return caches.delete(key);
       if (key.startsWith('mentria-locale-') && !key.endsWith('-{{ buildHash }}')) return caches.delete(key);
     }));
     if (!keys.includes(MODELS_MARKER)) {
@@ -219,6 +229,14 @@ async function wtRelay(request) {
   }), response);
 }
 
+async function stashCapped(cacheName, key, response, limit) {
+  const cache = await caches.open(cacheName);
+  await cache.delete(key);
+  await cache.put(key, response);
+  const keys = await cache.keys();
+  if (keys.length > limit) await Promise.all(keys.slice(0, keys.length - limit).map(k => cache.delete(k)));
+}
+
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
@@ -232,6 +250,19 @@ self.addEventListener('fetch', event => {
         if (resp && resp.ok) cache.put(event.request, resp.clone());
         return resp;
       }).catch(() => cached || Response.error());
+      return cached || network;
+    })());
+    return;
+  }
+
+  if (url.origin === 'https://cdn.mentria.ai' && event.request.destination === 'image') {
+    event.respondWith((async () => {
+      const cache = await caches.open(ART_CACHE);
+      const cached = await cache.match(event.request.url, { ignoreVary: true });
+      const network = fetch(event.request.url, { mode: 'cors' }).then(resp => {
+        if (resp && resp.ok) stashCapped(ART_CACHE, event.request.url, resp.clone(), ART_LIMIT);
+        return resp;
+      }).catch(() => cached || fetch(event.request));
       return cached || network;
     })());
     return;
@@ -259,7 +290,11 @@ self.addEventListener('fetch', event => {
     const cached = await precache.match(event.request, { ignoreSearch: true });
     if (cached) return cached;
     try {
-      return await fetch(event.request);
+      const resp = await fetch(event.request);
+      if (resp && resp.ok && event.request.mode === 'navigate' && FEED_PAGE.test(url.pathname)) {
+        stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT);
+      }
+      return resp;
     } catch (err) {
       if (event.request.mode === 'navigate') {
         const localized = await caches.match(event.request, { ignoreSearch: true });

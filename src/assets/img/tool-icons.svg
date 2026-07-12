@@ -117,9 +117,8 @@
 <rect x="16.4" y="38" width="9" height="1.6" rx=".8" fill="#fff" opacity=".4"></rect>
 </g></symbol>
 <symbol id="tool-flappy" viewBox="0 0 48 48"><defs>
-<linearGradient id="amflappy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
-<linearGradient id="amflappyD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0A810"></stop><stop offset="1" stop-color="#D98A08"></stop></linearGradient>
-<linearGradient id="orflappy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"></stop><stop offset="1" stop-color="#EA6E1E"></stop></linearGradient>
+<linearGradient id="cyflappy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A5F3FC"></stop><stop offset="1" stop-color="#67E8F9"></stop></linearGradient>
+<linearGradient id="cyflappyD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22D3EE"></stop><stop offset="1" stop-color="#0E9CBE"></stop></linearGradient>
 <linearGradient id="gnflappy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
 <filter id="shflappy" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
 </defs><g filter="url(#shflappy)">
@@ -127,20 +126,13 @@
 <rect x="34" y="19.5" width="11.5" height="7" rx="2.5" fill="url(#gnflappy)"></rect>
 <rect x="36.7" y="7.5" width="1.8" height="32" rx="1" fill="#fff" opacity=".25"></rect>
 
-<path d="M9 24c-3 0-5.5 1-6.6 2.4C3.8 27.2 6 27.6 9 27Z" fill="url(#amflappyD)"></path>
-<path d="M9 24c-3 0-5.5-1-6.6-2.4C3.8 20.8 6 20.4 9 21Z" fill="url(#amflappyD)"></path>
+<rect x="3" y="21" width="7" height="2" rx="1" fill="#67E8F9" opacity=".4"></rect>
+<rect x="5" y="26.5" width="5" height="2" rx="1" fill="#67E8F9" opacity=".25"></rect>
 
-<circle cx="16" cy="24" r="9.6" fill="url(#amflappy)"></circle>
-<ellipse cx="12.6" cy="20" rx="3.8" ry="2.5" transform="rotate(-26 12.6 20)" fill="#fff" opacity=".4"></ellipse>
-
-<path d="M8.5 25.5c2.4 2.3 5.6 2.5 8.6.9-.5 2.9-3 4.5-5.9 4.1C8.4 30.1 7.9 27.9 8.5 25.5Z" fill="url(#amflappyD)"></path>
-
-<path d="M24.5 21.6l6.6 2.4-6.6 2.4Z" fill="url(#orflappy)"></path>
-<path d="M24.5 24h6.6" stroke="#c95812" stroke-width="0.9" opacity=".5"></path>
-
-<circle cx="19.5" cy="20.2" r="3.6" fill="#fff"></circle>
-<circle cx="20.5" cy="20.4" r="1.8" fill="#15233a"></circle>
-<circle cx="19.8" cy="19.6" r=".6" fill="#fff"></circle>
+<path d="M31 23.5 L13 17.5 L17.5 23.5 Z" fill="url(#cyflappy)"></path>
+<path d="M31 23.5 L13 30.5 L17.5 23.5 Z" fill="url(#cyflappyD)"></path>
+<path d="M17.5 23.5 L22 25 L18.5 29.5 Z" fill="#0E7490"></path>
+<path d="M31 23.5 L17.5 23.5" stroke="#083344" stroke-width="0.9" opacity=".6"></path>
 </g></symbol>
 <symbol id="tool-minesweeper" viewBox="0 0 48 48"><defs>
 <linearGradient id="cyminesweeper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>

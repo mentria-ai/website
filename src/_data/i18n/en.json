@@ -970,6 +970,7 @@
       "note_qr_only": "This browser can only read QR codes. Other barcode types (EAN, UPC, Code 128…) need a Chromium browser like Chrome or Edge.",
       "idle_prompt_qr": "Point your camera at a QR code — or scan an image file.",
       "note_no_match_qr_only": "No QR code found. This browser can't read other barcode types — try a Chromium browser like Chrome or Edge for those.",
+      "zoom_label": "Zoom",
       "btn_torch": "Flashlight",
       "parsed_wifi": "WiFi network",
       "parsed_contact": "Contact",

@@ -970,6 +970,7 @@
       "note_qr_only": "Este navegador solo puede leer códigos QR. Otros tipos de código de barras (EAN, UPC, Code 128…) requieren un navegador Chromium como Chrome o Edge.",
       "idle_prompt_qr": "Apunta la cámara a un código QR, o escanea un archivo de imagen.",
       "note_no_match_qr_only": "No se encontró ningún código QR. Este navegador no puede leer otros tipos de código de barras; usa un navegador Chromium como Chrome o Edge para ellos.",
+      "zoom_label": "Zoom",
       "btn_torch": "Linterna",
       "parsed_wifi": "Red WiFi",
       "parsed_contact": "Contacto",

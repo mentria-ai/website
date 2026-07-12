@@ -47,6 +47,9 @@ eleventyComputed:
         <p class="qr__placeholder-text" id="qr-idle-prompt">{{ "tool.qr-scanner.idle_prompt" | t }}</p>
       </div>
       <p class="qr__status" id="qr-status" aria-live="polite">{{ "tool.qr-scanner.scanning" | t }}</p>
+      <label class="qr__zoom" id="qr-zoom-wrap" hidden>
+        <input type="range" class="qr__zoom-range" id="qr-zoom" min="1" max="3" step="0.1" value="1" aria-label="{{ 'tool.qr-scanner.zoom_label' | t }}">
+      </label>
     </div>
 
     <div class="qr__result" id="qr-result">
@@ -163,6 +166,8 @@ eleventyComputed:
   const copyBtn     = $('qr-copy');
   const openBtn     = $('qr-open');
   const torchBtn    = $('qr-torch');
+  const zoomWrap    = $('qr-zoom-wrap');
+  const zoomSlider  = $('qr-zoom');
   const parsedBox   = $('qr-parsed');
   const parsedType  = $('qr-parsed-type');
   const parsedFields = $('qr-parsed-fields');
@@ -315,6 +320,12 @@ eleventyComputed:
   let zoomSteps = null;
   let zoomIdx = 0;
   let missCount = 0;
+  let focusCaps = null;
+  let focusNudges = 0;
+  let focusBusy = false;
+  let userZoomed = false;
+  let cropIdx = 0;
+  const CROP_STEPS = [0.85, 0.65, 0.5];
 
   function showUnsupported() {
     main.hidden = true;
@@ -378,6 +389,12 @@ eleventyComputed:
     zoomSteps = null;
     zoomIdx = 0;
     missCount = 0;
+    focusCaps = null;
+    focusNudges = 0;
+    focusBusy = false;
+    userZoomed = false;
+    cropIdx = 0;
+    zoomWrap.hidden = true;
     torchOn = false;
     torchBtn.hidden = true;
     torchBtn.setAttribute('aria-pressed', 'false');
@@ -389,15 +406,84 @@ eleventyComputed:
     if (!camTrack || !camTrack.getCapabilities) return;
     let caps;
     try { caps = camTrack.getCapabilities(); } catch (_) { return; }
-    if (caps.focusMode && caps.focusMode.indexOf && caps.focusMode.indexOf('continuous') >= 0) {
+    const modes = caps.focusMode && caps.focusMode.indexOf ? caps.focusMode : [];
+    focusCaps = {
+      continuous: modes.indexOf('continuous') >= 0,
+      singleShot: modes.indexOf('single-shot') >= 0,
+      manualNear: null
+    };
+    if (modes.indexOf('manual') >= 0 && caps.focusDistance &&
+        typeof caps.focusDistance.min === 'number' && caps.focusDistance.max > caps.focusDistance.min) {
+      focusCaps.manualNear = caps.focusDistance.min + (caps.focusDistance.max - caps.focusDistance.min) * 0.08;
+    }
+    if (!focusCaps.continuous && !focusCaps.singleShot && focusCaps.manualNear === null) focusCaps = null;
+    if (focusCaps && focusCaps.continuous) {
       camTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
     }
     if (caps.torch) torchBtn.hidden = false;
     if (caps.zoom && typeof caps.zoom.min === 'number' && caps.zoom.max > caps.zoom.min) {
-      const span = caps.zoom.max - caps.zoom.min;
-      zoomSteps = [caps.zoom.min, caps.zoom.min + span * 0.15, caps.zoom.min + span * 0.3];
+      const zmin = caps.zoom.min, zmax = caps.zoom.max;
+      const ladder = [zmin, zmin * 1.5, zmin * 2, zmin * 3].map(z => Math.min(z, zmax));
+      zoomSteps = ladder.filter((z, i) => i === 0 || z > ladder[i - 1] + 0.001);
       zoomIdx = 0;
+      const settings = camTrack.getSettings ? camTrack.getSettings() : {};
+      zoomSlider.min = zmin;
+      zoomSlider.max = Math.min(zmax, zmin * 5);
+      zoomSlider.step = 0.1;
+      zoomSlider.value = typeof settings.zoom === 'number' ? settings.zoom : zmin;
+      zoomWrap.hidden = false;
     }
+  }
+
+  function applyZoom(z) {
+    if (!camTrack) return;
+    camTrack.applyConstraints({ advanced: [{ zoom: z }] }).catch(() => {});
+  }
+
+  function restoreFocus() {
+    focusBusy = false;
+    if (camTrack && focusCaps && focusCaps.continuous) {
+      camTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+    }
+  }
+
+  function nudgeFocus() {
+    if (!camTrack || !focusCaps || focusBusy) return;
+    focusNudges++;
+    if (focusCaps.manualNear !== null && (focusNudges % 2 === 0 || !focusCaps.singleShot)) {
+      focusBusy = true;
+      camTrack.applyConstraints({ advanced: [{ focusMode: 'manual', focusDistance: focusCaps.manualNear }] })
+        .then(() => { setTimeout(restoreFocus, 900); })
+        .catch(() => { focusBusy = false; });
+    } else if (focusCaps.singleShot) {
+      focusBusy = true;
+      camTrack.applyConstraints({ advanced: [{ focusMode: 'single-shot' }] })
+        .then(() => { setTimeout(restoreFocus, 900); })
+        .catch(() => { focusBusy = false; });
+    } else if (focusCaps.continuous) {
+      camTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+    }
+  }
+
+  async function tryCropDecode() {
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (!vw || !vh) return null;
+    const side = Math.round(Math.min(vw, vh) * CROP_STEPS[cropIdx]);
+    const sx = Math.round((vw - side) / 2), sy = Math.round((vh - side) / 2);
+    if (detector) {
+      let dim = side;
+      if (dim > 1024) dim = 1024;
+      if (!scanCanvas) { scanCanvas = document.createElement('canvas'); scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true }); }
+      scanCanvas.width = dim; scanCanvas.height = dim;
+      scanCtx.drawImage(video, sx, sy, side, side, 0, 0, dim, dim);
+      try {
+        const codes = await detector.detect(scanCanvas);
+        if (codes && codes.length) return codes[0];
+      } catch (_) {}
+      return null;
+    }
+    if (useJsQR) return jsqrDecode(video, sx, sy, side, side, false, 800);
+    return null;
   }
 
   function safeDecode(v) {
@@ -694,11 +780,20 @@ eleventyComputed:
     }
     if (code) { onCode(code); return; }
     missCount++;
-    if (missCount >= 24 && zoomSteps && camTrack) {
-      missCount = 0;
-      zoomIdx = (zoomIdx + 1) % zoomSteps.length;
-      camTrack.applyConstraints({ advanced: [{ zoom: zoomSteps[zoomIdx] }] }).catch(() => {});
+    if (missCount % 2 === 1) {
+      code = await tryCropDecode();
+      if (code) { onCode(code); return; }
     }
+    if (missCount % 24 === 0) {
+      if (zoomSteps && camTrack && !userZoomed) {
+        zoomIdx = (zoomIdx + 1) % zoomSteps.length;
+        applyZoom(zoomSteps[zoomIdx]);
+        zoomSlider.value = zoomSteps[zoomIdx];
+      } else if (!zoomSteps) {
+        cropIdx = (cropIdx + 1) % CROP_STEPS.length;
+      }
+    }
+    if (missCount % 12 === 0) nudgeFocus();
   }
 
   async function startCamera() {
@@ -768,6 +863,10 @@ eleventyComputed:
     torchBtn.setAttribute('aria-pressed', String(torchOn));
     torchBtn.classList.toggle('is-on', torchOn);
     if (camTrack) camTrack.applyConstraints({ advanced: [{ torch: torchOn }] }).catch(() => {});
+  });
+  zoomSlider.addEventListener('input', () => {
+    userZoomed = true;
+    applyZoom(parseFloat(zoomSlider.value));
   });
   againBtn.addEventListener('click', () => { hideNote(); setState('idle'); });
   fileInput.addEventListener('change', e => {
@@ -891,6 +990,20 @@ eleventyComputed:
 @keyframes qr-scan {
   0%, 100% { top: 0; }
   50% { top: 100%; }
+}
+
+.qr__zoom {
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  bottom: 2.2rem;
+  display: none;
+}
+.qr--scanning .qr__zoom:not([hidden]) { display: block; }
+.qr__zoom-range {
+  width: 100%;
+  accent-color: var(--syn-cyan);
+  cursor: pointer;
 }
 
 .qr__status {

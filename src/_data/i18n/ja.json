@@ -970,6 +970,7 @@
       "note_qr_only": "このブラウザーはQRコードのみ読み取れます。その他のバーコード（EAN、UPC、Code 128 など）にはChromeやEdgeなどのChromium系ブラウザーが必要です。",
       "idle_prompt_qr": "カメラをQRコードに向けるか、画像ファイルをスキャンしてください。",
       "note_no_match_qr_only": "QRコードが見つかりませんでした。このブラウザーは他のバーコードを読み取れません。ChromeやEdgeなどのChromium系ブラウザーをお試しください。",
+      "zoom_label": "ズーム",
       "btn_torch": "ライト",
       "parsed_wifi": "WiFiネットワーク",
       "parsed_contact": "連絡先",

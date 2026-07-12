@@ -53,6 +53,11 @@ eleventyComputed:
       <span class="qr__result-label">{{ "tool.qr-scanner.result_label" | t }}</span>
       <p class="qr__result-value" id="qr-result-value" role="status" aria-live="polite"></p>
       <span class="qr__result-format" id="qr-result-format"></span>
+      <div class="qr__parsed" id="qr-parsed" hidden>
+        <span class="qr__parsed-type" id="qr-parsed-type"></span>
+        <dl class="qr__parsed-fields" id="qr-parsed-fields"></dl>
+        <div class="qr__parsed-actions" id="qr-parsed-actions"></div>
+      </div>
     </div>
 
     <p class="qr__note" id="qr-note" hidden></p>
@@ -61,6 +66,7 @@ eleventyComputed:
     <div class="qr__controls">
       <button type="button" class="qr__btn--start m-btn m-btn--primary m-btn--pill" id="qr-start">{{ "tool.qr-scanner.btn_start_camera" | t }}</button>
       <button type="button" class="qr__btn--stop m-btn m-btn--primary m-btn--pill" id="qr-stop">{{ "tool.qr-scanner.btn_stop" | t }}</button>
+      <button type="button" class="qr__btn--torch m-btn m-btn--ghost m-btn--pill" id="qr-torch" hidden aria-pressed="false">{{ "tool.qr-scanner.btn_torch" | t }}</button>
       <button type="button" class="qr__btn--again m-btn m-btn--primary m-btn--pill" id="qr-again">{{ "tool.qr-scanner.btn_scan_again" | t }}</button>
       <label class="qr__file-label m-btn m-btn--ghost m-btn--pill" for="qr-file">
         {{ "tool.qr-scanner.btn_scan_image" | t }}
@@ -111,7 +117,33 @@ eleventyComputed:
     noteNoMatch:    {{ ("tool.qr-scanner.note_no_match"   | t) | dump | safe }},
     noteNoMatchQrOnly: {{ ("tool.qr-scanner.note_no_match_qr_only" | t) | dump | safe }},
     idlePromptQr:   {{ ("tool.qr-scanner.idle_prompt_qr" | t) | dump | safe }},
-    genTooLong:     {{ ("tool.qr-scanner.gen_too_long"    | t) | dump | safe }}
+    genTooLong:     {{ ("tool.qr-scanner.gen_too_long"    | t) | dump | safe }},
+    parsedWifi:     {{ ("tool.qr-scanner.parsed_wifi"     | t) | dump | safe }},
+    parsedContact:  {{ ("tool.qr-scanner.parsed_contact"  | t) | dump | safe }},
+    parsedPhone:    {{ ("tool.qr-scanner.parsed_phone"    | t) | dump | safe }},
+    parsedEmail:    {{ ("tool.qr-scanner.parsed_email"    | t) | dump | safe }},
+    parsedSms:      {{ ("tool.qr-scanner.parsed_sms"      | t) | dump | safe }},
+    parsedGeo:      {{ ("tool.qr-scanner.parsed_geo"      | t) | dump | safe }},
+    parsedEvent:    {{ ("tool.qr-scanner.parsed_event"    | t) | dump | safe }},
+    fieldNetwork:   {{ ("tool.qr-scanner.field_network"   | t) | dump | safe }},
+    fieldSecurity:  {{ ("tool.qr-scanner.field_security"  | t) | dump | safe }},
+    fieldPassword:  {{ ("tool.qr-scanner.field_password"  | t) | dump | safe }},
+    fieldName:      {{ ("tool.qr-scanner.field_name"      | t) | dump | safe }},
+    fieldPhone:     {{ ("tool.qr-scanner.field_phone"     | t) | dump | safe }},
+    fieldEmail:     {{ ("tool.qr-scanner.field_email"     | t) | dump | safe }},
+    fieldOrg:       {{ ("tool.qr-scanner.field_org"       | t) | dump | safe }},
+    fieldTitle:     {{ ("tool.qr-scanner.field_title"     | t) | dump | safe }},
+    fieldWhen:      {{ ("tool.qr-scanner.field_when"      | t) | dump | safe }},
+    fieldWhere:     {{ ("tool.qr-scanner.field_where"     | t) | dump | safe }},
+    fieldCoords:    {{ ("tool.qr-scanner.field_coords"    | t) | dump | safe }},
+    wifiOpen:       {{ ("tool.qr-scanner.wifi_open"       | t) | dump | safe }},
+    btnCopyPassword: {{ ("tool.qr-scanner.btn_copy_password" | t) | dump | safe }},
+    btnSaveContact: {{ ("tool.qr-scanner.btn_save_contact" | t) | dump | safe }},
+    btnCall:        {{ ("tool.qr-scanner.btn_call"        | t) | dump | safe }},
+    btnSendEmail:   {{ ("tool.qr-scanner.btn_send_email"  | t) | dump | safe }},
+    btnSendSms:     {{ ("tool.qr-scanner.btn_send_sms"    | t) | dump | safe }},
+    btnOpenMaps:    {{ ("tool.qr-scanner.btn_open_maps"   | t) | dump | safe }},
+    btnSaveEvent:   {{ ("tool.qr-scanner.btn_save_event"  | t) | dump | safe }}
   };
 
   const $ = id => document.getElementById(id);
@@ -130,6 +162,11 @@ eleventyComputed:
   const fileInput   = $('qr-file');
   const copyBtn     = $('qr-copy');
   const openBtn     = $('qr-open');
+  const torchBtn    = $('qr-torch');
+  const parsedBox   = $('qr-parsed');
+  const parsedType  = $('qr-parsed-type');
+  const parsedFields = $('qr-parsed-fields');
+  const parsedActions = $('qr-parsed-actions');
 
   const modeScanBtn = $('qr-mode-scan');
   const modeGenBtn  = $('qr-mode-gen');
@@ -273,6 +310,11 @@ eleventyComputed:
   let scanning = false;
   let lastValue = '';
   let scanCanvas = null, scanCtx = null;
+  let camTrack = null;
+  let torchOn = false;
+  let zoomSteps = null;
+  let zoomIdx = 0;
+  let missCount = 0;
 
   function showUnsupported() {
     main.hidden = true;
@@ -292,14 +334,21 @@ eleventyComputed:
     });
   }
 
-  function jsqrDecode(source, sw, sh, both) {
+  const JSQR_SRC = '/assets/js/jsqr.js?v={{ buildHash }}';
+  async function ensureJsQR() {
+    if (window.jsQR) return true;
+    try { await loadScript(JSQR_SRC); } catch (_) {}
+    return !!window.jsQR;
+  }
+
+  function jsqrDecode(source, sx, sy, sw, sh, both, maxDim) {
     if (!window.jsQR || !sw || !sh) return null;
     let w = sw, h = sh;
-    const maxDim = 640;
-    if (Math.max(w, h) > maxDim) { const s = maxDim / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
+    const cap = maxDim || 640;
+    if (Math.max(w, h) > cap) { const s = cap / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
     if (!scanCanvas) { scanCanvas = document.createElement('canvas'); scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true }); }
     scanCanvas.width = w; scanCanvas.height = h;
-    scanCtx.drawImage(source, 0, 0, w, h);
+    scanCtx.drawImage(source, sx, sy, sw, sh, 0, 0, w, h);
     let img;
     try { img = scanCtx.getImageData(0, 0, w, h); } catch (_) { return null; }
     const r = window.jsQR(img.data, w, h, { inversionAttempts: both ? 'attemptBoth' : 'dontInvert' });
@@ -325,6 +374,290 @@ eleventyComputed:
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
     video.srcObject = null;
+    camTrack = null;
+    zoomSteps = null;
+    zoomIdx = 0;
+    missCount = 0;
+    torchOn = false;
+    torchBtn.hidden = true;
+    torchBtn.setAttribute('aria-pressed', 'false');
+    torchBtn.classList.remove('is-on');
+  }
+
+  function setupTrack() {
+    camTrack = stream && stream.getVideoTracks ? stream.getVideoTracks()[0] : null;
+    if (!camTrack || !camTrack.getCapabilities) return;
+    let caps;
+    try { caps = camTrack.getCapabilities(); } catch (_) { return; }
+    if (caps.focusMode && caps.focusMode.indexOf && caps.focusMode.indexOf('continuous') >= 0) {
+      camTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+    }
+    if (caps.torch) torchBtn.hidden = false;
+    if (caps.zoom && typeof caps.zoom.min === 'number' && caps.zoom.max > caps.zoom.min) {
+      const span = caps.zoom.max - caps.zoom.min;
+      zoomSteps = [caps.zoom.min, caps.zoom.min + span * 0.15, caps.zoom.min + span * 0.3];
+      zoomIdx = 0;
+    }
+  }
+
+  function safeDecode(v) {
+    try { return decodeURIComponent(v); } catch (_) { return v; }
+  }
+
+  function splitEscaped(body) {
+    const parts = [];
+    let cur = '';
+    for (let i = 0; i < body.length; i++) {
+      const c = body[i];
+      if (c === '\\' && i + 1 < body.length) { cur += body[i + 1]; i += 1; continue; }
+      if (c === ';') { parts.push(cur); cur = ''; continue; }
+      cur += c;
+    }
+    if (cur) parts.push(cur);
+    return parts;
+  }
+
+  function segMap(body) {
+    const map = {};
+    splitEscaped(body).forEach(part => {
+      const i = part.indexOf(':');
+      if (i < 1) return;
+      const k = part.slice(0, i).toUpperCase();
+      if (!(k in map)) map[k] = part.slice(i + 1);
+    });
+    return map;
+  }
+
+  function parseWifi(raw) {
+    const m = segMap(raw.slice(5));
+    const ssid = m.S || '';
+    if (!ssid) return null;
+    const sec = (m.T || '').toUpperCase();
+    const pass = m.P || '';
+    const fields = [
+      { label: COPY.fieldNetwork, value: ssid },
+      { label: COPY.fieldSecurity, value: (!sec || sec === 'NOPASS') ? COPY.wifiOpen : sec }
+    ];
+    const actions = [];
+    if (pass) {
+      fields.push({ label: COPY.fieldPassword, value: pass });
+      actions.push({ kind: 'copy', label: COPY.btnCopyPassword, value: pass });
+    }
+    return { typeLabel: COPY.parsedWifi, fields: fields, actions: actions };
+  }
+
+  function foldedLines(raw) {
+    return raw.replace(/\r\n?/g, '\n').replace(/\n[ \t]/g, '').split('\n');
+  }
+
+  function unescapeText(v) {
+    return v.replace(/\\n/gi, ' ').replace(/\\(.)/g, '$1').trim();
+  }
+
+  function parseVcard(raw) {
+    let name = '', nFallback = '', org = '';
+    const phones = [], emails = [];
+    foldedLines(raw).forEach(line => {
+      const m = line.match(/^([A-Za-z][A-Za-z0-9-]*)(?:;[^:]*)?:(.*)$/);
+      if (!m) return;
+      const prop = m[1].toUpperCase();
+      if (prop === 'N' && !nFallback) {
+        const p = splitEscaped(m[2]).map(x => x.trim());
+        nFallback = [p[1], p[0]].filter(Boolean).join(' ');
+        return;
+      }
+      if (prop === 'ORG' && !org) {
+        org = splitEscaped(m[2]).map(x => x.trim()).filter(Boolean).join(' ');
+        return;
+      }
+      const val = unescapeText(m[2]);
+      if (!val) return;
+      if (prop === 'FN' && !name) name = val;
+      else if (prop === 'TEL') phones.push(val);
+      else if (prop === 'EMAIL') emails.push(val);
+    });
+    name = name || nFallback;
+    if (!name && !phones.length && !emails.length) return null;
+    const fields = [];
+    if (name) fields.push({ label: COPY.fieldName, value: name });
+    phones.slice(0, 3).forEach(v => fields.push({ label: COPY.fieldPhone, value: v }));
+    emails.slice(0, 3).forEach(v => fields.push({ label: COPY.fieldEmail, value: v }));
+    if (org) fields.push({ label: COPY.fieldOrg, value: org });
+    return {
+      typeLabel: COPY.parsedContact,
+      fields: fields,
+      actions: [{ kind: 'download', label: COPY.btnSaveContact, filename: 'contact.vcf', mime: 'text/vcard', content: raw }]
+    };
+  }
+
+  function parseMecard(raw) {
+    const m = segMap(raw.slice(7));
+    const nameParts = (m.N || '').split(',').map(x => x.trim()).filter(Boolean);
+    const name = nameParts.length > 1 ? nameParts[1] + ' ' + nameParts[0] : (nameParts[0] || '');
+    const fields = [];
+    if (name) fields.push({ label: COPY.fieldName, value: name });
+    if (m.TEL) fields.push({ label: COPY.fieldPhone, value: m.TEL });
+    if (m.EMAIL) fields.push({ label: COPY.fieldEmail, value: m.EMAIL });
+    if (!fields.length) return null;
+    const vcf = ['BEGIN:VCARD', 'VERSION:3.0',
+      'N:' + (nameParts[0] || '') + ';' + (nameParts[1] || '') + ';;;',
+      'FN:' + (name || m.TEL || m.EMAIL)]
+      .concat(m.TEL ? ['TEL:' + m.TEL] : [])
+      .concat(m.EMAIL ? ['EMAIL:' + m.EMAIL] : [])
+      .concat(['END:VCARD']).join('\r\n');
+    return {
+      typeLabel: COPY.parsedContact,
+      fields: fields,
+      actions: [{ kind: 'download', label: COPY.btnSaveContact, filename: 'contact.vcf', mime: 'text/vcard', content: vcf }]
+    };
+  }
+
+  function parseTel(raw) {
+    const num = raw.slice(4).split(/[?;]/)[0].trim();
+    if (!num) return null;
+    return {
+      typeLabel: COPY.parsedPhone,
+      fields: [{ label: COPY.fieldPhone, value: safeDecode(num) }],
+      actions: [{ kind: 'link', label: COPY.btnCall, href: 'tel:' + num }]
+    };
+  }
+
+  function parseMailto(raw) {
+    const body = raw.slice(7);
+    const qi = body.indexOf('?');
+    const addr = safeDecode(qi === -1 ? body : body.slice(0, qi)).trim();
+    if (!addr) return null;
+    const fields = [{ label: COPY.fieldEmail, value: addr }];
+    if (qi !== -1) {
+      const sm = body.slice(qi + 1).match(/(?:^|&)subject=([^&]*)/i);
+      if (sm && sm[1]) fields.push({ label: COPY.fieldTitle, value: safeDecode(sm[1].replace(/\+/g, ' ')) });
+    }
+    return { typeLabel: COPY.parsedEmail, fields: fields, actions: [{ kind: 'link', label: COPY.btnSendEmail, href: raw }] };
+  }
+
+  function parseSms(raw) {
+    let rest = raw.replace(/^sms(to)?:/i, '');
+    let msgBody = '';
+    const qi = rest.indexOf('?');
+    if (qi !== -1) {
+      const bm = rest.slice(qi + 1).match(/(?:^|&)body=([^&]*)/i);
+      if (bm && bm[1]) msgBody = safeDecode(bm[1].replace(/\+/g, ' '));
+      rest = rest.slice(0, qi);
+    }
+    const ci = rest.indexOf(':');
+    if (ci !== -1) {
+      if (!msgBody) msgBody = safeDecode(rest.slice(ci + 1));
+      rest = rest.slice(0, ci);
+    }
+    const num = rest.trim();
+    if (!num) return null;
+    return {
+      typeLabel: COPY.parsedSms,
+      fields: [{ label: COPY.fieldPhone, value: safeDecode(num) }],
+      actions: [{ kind: 'link', label: COPY.btnSendSms, href: 'sms:' + num + (msgBody ? '?body=' + encodeURIComponent(msgBody) : '') }]
+    };
+  }
+
+  function parseGeo(raw) {
+    const m = raw.match(/^geo:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/i);
+    if (!m) return null;
+    return {
+      typeLabel: COPY.parsedGeo,
+      fields: [{ label: COPY.fieldCoords, value: m[1] + ', ' + m[2] }],
+      actions: [{ kind: 'link', label: COPY.btnOpenMaps, href: 'https://www.openstreetmap.org/?mlat=' + m[1] + '&mlon=' + m[2] + '#map=17/' + m[1] + '/' + m[2], external: true }]
+    };
+  }
+
+  function formatIcsDate(v) {
+    const m = v.match(/^(\d{4})(\d\d)(\d\d)(?:T(\d\d)(\d\d)(?:\d\d)?(Z)?)?/);
+    if (!m) return v;
+    let out = m[1] + '-' + m[2] + '-' + m[3];
+    if (m[4]) out += ' ' + m[4] + ':' + m[5] + (m[6] ? ' UTC' : '');
+    return out;
+  }
+
+  function parseEvent(raw) {
+    const seg = raw.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/i);
+    if (!seg) return null;
+    let summary = '', start = '', end = '', loc = '';
+    foldedLines(seg[0]).forEach(line => {
+      const m = line.match(/^([A-Za-z][A-Za-z0-9-]*)(?:;[^:]*)?:(.*)$/);
+      if (!m) return;
+      const prop = m[1].toUpperCase();
+      const val = unescapeText(m[2]);
+      if (!val) return;
+      if (prop === 'SUMMARY' && !summary) summary = val;
+      else if (prop === 'DTSTART' && !start) start = formatIcsDate(val);
+      else if (prop === 'DTEND' && !end) end = formatIcsDate(val);
+      else if (prop === 'LOCATION' && !loc) loc = val;
+    });
+    if (!summary && !start) return null;
+    const fields = [];
+    if (summary) fields.push({ label: COPY.fieldTitle, value: summary });
+    if (start) fields.push({ label: COPY.fieldWhen, value: end ? start + ' → ' + end : start });
+    if (loc) fields.push({ label: COPY.fieldWhere, value: loc });
+    const ics = /BEGIN:VCALENDAR/i.test(raw) ? raw : 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\n' + seg[0] + '\r\nEND:VCALENDAR\r\n';
+    return {
+      typeLabel: COPY.parsedEvent,
+      fields: fields,
+      actions: [{ kind: 'download', label: COPY.btnSaveEvent, filename: 'event.ics', mime: 'text/calendar', content: ics }]
+    };
+  }
+
+  function parsePayload(raw) {
+    const v = raw.trim();
+    try {
+      if (/^WIFI:/i.test(v)) return parseWifi(v);
+      if (/^BEGIN:VCARD/i.test(v)) return parseVcard(v);
+      if (/^MECARD:/i.test(v)) return parseMecard(v);
+      if (/^tel:/i.test(v)) return parseTel(v);
+      if (/^mailto:/i.test(v)) return parseMailto(v);
+      if (/^sms(to)?:/i.test(v)) return parseSms(v);
+      if (/^geo:/i.test(v)) return parseGeo(v);
+      if (/BEGIN:VEVENT/i.test(v)) return parseEvent(v);
+    } catch (_) {}
+    return null;
+  }
+
+  function renderParsed(raw) {
+    parsedBox.hidden = true;
+    parsedType.textContent = '';
+    parsedFields.textContent = '';
+    parsedActions.textContent = '';
+    const p = parsePayload(raw);
+    if (!p || !p.fields.length) return;
+    parsedType.textContent = p.typeLabel;
+    p.fields.forEach(f => {
+      const dt = document.createElement('dt');
+      dt.textContent = f.label;
+      const dd = document.createElement('dd');
+      dd.textContent = f.value;
+      parsedFields.appendChild(dt);
+      parsedFields.appendChild(dd);
+    });
+    p.actions.forEach(a => {
+      let el;
+      if (a.kind === 'link') {
+        el = document.createElement('a');
+        el.textContent = a.label;
+        el.href = a.href;
+        if (a.external) { el.target = '_blank'; el.rel = 'noopener'; }
+      } else {
+        el = document.createElement('button');
+        el.type = 'button';
+        el.textContent = a.label;
+        if (a.kind === 'copy') {
+          MentriaUI.copyButton(el, () => a.value, { copiedText: COPY.btnCopied, failedText: COPY.btnCopyFailed, restoreMs: 1500 });
+        } else {
+          el.addEventListener('click', () => {
+            MentriaUI.downloadFile(a.filename, new Blob([a.content], { type: a.mime }));
+          });
+        }
+      }
+      el.className = 'm-btn m-btn--ghost m-btn--pill';
+      parsedActions.appendChild(el);
+    });
+    parsedBox.hidden = false;
   }
 
   function showResult(value, format) {
@@ -333,6 +666,7 @@ eleventyComputed:
     resultFmt.textContent = format ? format.replace(/_/g, ' ') : '';
     setState('result');
     openBtn.hidden = !/^https?:\/\/\S+$/i.test(lastValue.trim());
+    renderParsed(lastValue);
     if (navigator.vibrate) navigator.vibrate(40);
   }
 
@@ -347,14 +681,23 @@ eleventyComputed:
     if (ts - lastDetect < 220) return;
     lastDetect = ts;
     if (video.readyState < 2) return;
+    let code = null;
     if (detector) {
       let codes;
       try { codes = await detector.detect(video); }
       catch (_) { return; }
-      if (codes && codes.length) onCode(codes[0]);
+      if (codes && codes.length) code = codes[0];
     } else if (useJsQR) {
-      const code = jsqrDecode(video, video.videoWidth, video.videoHeight, false);
-      if (code) onCode(code);
+      code = jsqrDecode(video, 0, 0, video.videoWidth, video.videoHeight, false, 800);
+    } else {
+      return;
+    }
+    if (code) { onCode(code); return; }
+    missCount++;
+    if (missCount >= 24 && zoomSteps && camTrack) {
+      missCount = 0;
+      zoomIdx = (zoomIdx + 1) % zoomSteps.length;
+      camTrack.applyConstraints({ advanced: [{ zoom: zoomSteps[zoomIdx] }] }).catch(() => {});
     }
   }
 
@@ -367,7 +710,9 @@ eleventyComputed:
       return;
     }
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+      });
     } catch (err) {
       const name = err && err.name;
       if (name === 'NotAllowedError' || name === 'SecurityError') showNote(COPY.noteDenied);
@@ -376,6 +721,8 @@ eleventyComputed:
       return;
     }
     video.srcObject = stream;
+    setupTrack();
+    missCount = 0;
     scanning = true;
     setState('scanning');
     try { await video.play(); } catch (_) {}
@@ -389,13 +736,17 @@ eleventyComputed:
     let bitmap;
     try { bitmap = await createImageBitmap(file); }
     catch (_) { showNote(COPY.noteNoMatch); return; }
+    const bw = bitmap.width, bh = bitmap.height;
     let result = null;
     if (detector) {
       let codes;
       try { codes = await detector.detect(bitmap); } catch (_) { codes = []; }
       if (codes && codes.length) result = { rawValue: codes[0].rawValue, format: codes[0].format };
-    } else if (useJsQR) {
-      result = jsqrDecode(bitmap, bitmap.width, bitmap.height, true);
+    }
+    if (!result && await ensureJsQR()) {
+      result = jsqrDecode(bitmap, 0, 0, bw, bh, true, 1600)
+        || (Math.max(bw, bh) > 640 ? jsqrDecode(bitmap, 0, 0, bw, bh, true, 640) : null)
+        || jsqrDecode(bitmap, Math.round(bw * 0.25), Math.round(bh * 0.25), Math.round(bw * 0.5), Math.round(bh * 0.5), true, 1600);
     }
     if (bitmap.close) bitmap.close();
     if (result) showResult(result.rawValue, result.format);
@@ -404,6 +755,7 @@ eleventyComputed:
       resultValue.textContent = '';
       resultFmt.textContent = '';
       openBtn.hidden = true;
+      parsedBox.hidden = true;
       setState('idle');
       showNote((useJsQR && !detector) ? COPY.noteNoMatchQrOnly : COPY.noteNoMatch);
     }
@@ -411,6 +763,12 @@ eleventyComputed:
 
   startBtn.addEventListener('click', startCamera);
   stopBtn.addEventListener('click', () => { stopCamera(); setState('idle'); });
+  torchBtn.addEventListener('click', () => {
+    torchOn = !torchOn;
+    torchBtn.setAttribute('aria-pressed', String(torchOn));
+    torchBtn.classList.toggle('is-on', torchOn);
+    if (camTrack) camTrack.applyConstraints({ advanced: [{ torch: torchOn }] }).catch(() => {});
+  });
   againBtn.addEventListener('click', () => { hideNote(); setState('idle'); });
   fileInput.addEventListener('change', e => {
     const f = e.target.files && e.target.files[0];
@@ -434,7 +792,7 @@ eleventyComputed:
       } catch (_) {}
     }
     try {
-      if (!window.jsQR) await loadScript('/assets/js/jsqr.js?v={{ buildHash }}');
+      if (!window.jsQR) await loadScript(JSQR_SRC);
       if (window.jsQR) { useJsQR = true; applyQrOnlyHints(); return; }
     } catch (_) {}
     showUnsupported();
@@ -709,5 +1067,55 @@ eleventyComputed:
   color: var(--term-muted);
   line-height: 1.5;
   max-width: 24ch;
+}
+
+.qr__parsed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.45rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--term-border);
+}
+.qr__parsed[hidden] { display: none; }
+.qr__parsed-type {
+  font-size: 0.65rem;
+  color: var(--syn-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.qr__parsed-fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.9rem;
+  margin: 0;
+}
+.qr__parsed-fields dt {
+  font-size: 0.7rem;
+  color: var(--term-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-top: 0.15em;
+}
+.qr__parsed-fields dd {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--term-fg);
+  word-break: break-word;
+}
+.qr__parsed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.qr__parsed-actions a.m-btn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.qr__btn--torch.is-on {
+  border-color: var(--syn-cyan);
+  color: var(--syn-cyan);
+  background: var(--cyan-8);
 }
 </style>

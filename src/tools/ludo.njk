@@ -218,6 +218,41 @@ eleventyComputed:
   function curPlayer(){ return State.active[State.turnIdx]; }
   function isHuman(p){ return State.mode === 'hotseat' ? true : p === 0; }
 
+  function save(){
+    if (State.over) return;
+    const data = {
+      mode: State.mode, numPlayers: State.numPlayers, active: State.active,
+      tokens: State.tokens, turnIdx: State.turnIdx, sixStreak: State.sixStreak,
+      finishers: State.finishers
+    };
+    try {
+      if (window.MentriaStore) window.MentriaStore.set('games', 'ludo', data);
+      else localStorage.setItem('mentria_ludo_v1', JSON.stringify(data));
+    } catch(e){}
+  }
+  function clearSave(){
+    try {
+      if (window.MentriaStore) window.MentriaStore.remove('games', 'ludo');
+      else localStorage.removeItem('mentria_ludo_v1');
+    } catch(e){}
+  }
+  function load(){
+    try {
+      let d = window.MentriaStore ? window.MentriaStore.get('games', 'ludo') : null;
+      if (!d){ const raw = localStorage.getItem('mentria_ludo_v1'); if (raw) d = JSON.parse(raw); }
+      if (!d || !Array.isArray(d.tokens) || d.tokens.length !== 4 || !Array.isArray(d.active) || !d.active.length) return false;
+      if (!d.tokens.every(t => Array.isArray(t) && t.length === 4)) return false;
+      State.mode = d.mode === 'hotseat' ? 'hotseat' : 'ai';
+      State.numPlayers = [2,3,4].includes(d.numPlayers) ? d.numPlayers : 4;
+      State.active = d.active;
+      State.tokens = d.tokens;
+      State.turnIdx = (d.turnIdx >= 0 && d.turnIdx < d.active.length) ? d.turnIdx : 0;
+      State.sixStreak = d.sixStreak || 0;
+      State.finishers = Array.isArray(d.finishers) ? d.finishers : [];
+      return true;
+    } catch(e){ return false; }
+  }
+
   let gen = 0;
   let diceInterval = null;
   function gtimeout(fn, ms){ const g = gen; return setTimeout(() => { if (g === gen) fn(); }, ms); }
@@ -235,6 +270,14 @@ eleventyComputed:
     State.dice = 0; State.rolled = false; State.rolling = false; State.sixStreak = 0;
     State.movable = []; State.over = false; State.winner = -1; State.finishers = [];
     State.animating = false;
+    document.getElementById('overlay').classList.remove('show');
+    renderPlayers(); draw(); updateDie(0); setStatus(); updateRollBtn();
+    save();
+    maybeAITurn();
+  }
+  function resume(){
+    modeSeg.set(State.mode);
+    countSeg.set(State.numPlayers);
     document.getElementById('overlay').classList.remove('show');
     renderPlayers(); draw(); updateDie(0); setStatus(); updateRollBtn();
     maybeAITurn();
@@ -482,6 +525,7 @@ eleventyComputed:
     if (extra && State.sixStreak < 3){
       State.rolled = false; State.movable = [];
       setStatus(); updateDie(0); updateRollBtn();
+      save();
       if (!isHuman(p)) gtimeout(()=>aiRoll(p), 600);
     } else {
       endTurn();
@@ -494,6 +538,7 @@ eleventyComputed:
     do { State.turnIdx = (State.turnIdx + 1) % State.active.length; }
     while (State.tokens[curPlayer()].every(x => x === 56) && State.finishers.length < State.active.length);
     updateDie(0); draw(); renderPlayers(); setStatus(); updateRollBtn();
+    save();
     maybeAITurn();
   }
   function maybeAITurn(){
@@ -547,6 +592,7 @@ eleventyComputed:
 
   function finishGame(p){
     State.over = true;
+    clearSave();
     const who = isHuman(p) ? (State.mode==='hotseat'?COPY.wonHuman:COPY.wonYou) : COPY.wonBot;
     const m = document.getElementById('modal');
     m.innerHTML = `<p class="eyebrow">${COPY.winEyebrow}</p>
@@ -573,10 +619,10 @@ eleventyComputed:
     document.getElementById('overlay').classList.add('show');
     document.getElementById('m-close').onclick = () => document.getElementById('overlay').classList.remove('show');
   };
-  MentriaUI.segmented(document.getElementById('mode-seg'), (value) => {
+  const modeSeg = MentriaUI.segmented(document.getElementById('mode-seg'), (value) => {
     State.mode = value; newGame();
   });
-  MentriaUI.segmented(document.getElementById('count-seg'), (value) => {
+  const countSeg = MentriaUI.segmented(document.getElementById('count-seg'), (value) => {
     State.numPlayers = +value; newGame();
   });
   document.addEventListener('keydown', e => {
@@ -671,6 +717,6 @@ eleventyComputed:
     announce(COPY.winTitle.replace('{name}', PNAMES[p]) + '. ' + who);
   };
 
-  newGame();
+  if (load()) resume(); else newGame();
 })();
 </script>

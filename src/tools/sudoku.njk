@@ -214,6 +214,43 @@ eleventyComputed:
     else try { localStorage.setItem('mentria_sudoku_best_' + diff, String(s)); } catch (_) {}
   }
 
+  function save(){
+    if (State.over || !State.solution.length) return;
+    const data = {
+      diff: State.diff, solution: State.solution, puzzle: State.puzzle,
+      grid: State.grid, given: State.given, notes: State.notes.map(s => Array.from(s)),
+      mistakes: State.mistakes, hints: State.hints, elapsed: State.elapsed, notesMode: State.notesMode
+    };
+    try {
+      if (window.MentriaStore) window.MentriaStore.set('games', 'sudoku', data);
+      else localStorage.setItem('mentria_sudoku_v1', JSON.stringify(data));
+    } catch(e){}
+  }
+  function clearSave(){
+    try {
+      if (window.MentriaStore) window.MentriaStore.remove('games', 'sudoku');
+      else localStorage.removeItem('mentria_sudoku_v1');
+    } catch(e){}
+  }
+  function load(){
+    try {
+      let d = window.MentriaStore ? window.MentriaStore.get('games', 'sudoku') : null;
+      if (!d){ const raw = localStorage.getItem('mentria_sudoku_v1'); if (raw) d = JSON.parse(raw); }
+      if (!d || !Array.isArray(d.grid) || d.grid.length !== 81 || !Array.isArray(d.solution) || d.solution.length !== 81) return false;
+      State.diff = DIFF[d.diff] ? d.diff : State.diff;
+      State.solution = d.solution;
+      State.puzzle = Array.isArray(d.puzzle) && d.puzzle.length === 81 ? d.puzzle : d.grid.slice();
+      State.grid = d.grid;
+      State.given = Array.isArray(d.given) && d.given.length === 81 ? d.given : State.puzzle.map(v => v !== 0);
+      State.notes = Array.from({length:81}, (_, i) => new Set(Array.isArray(d.notes && d.notes[i]) ? d.notes[i] : []));
+      State.mistakes = d.mistakes || 0;
+      State.hints = typeof d.hints === 'number' ? d.hints : 3;
+      State.elapsed = d.elapsed || 0;
+      State.notesMode = !!d.notesMode;
+      return true;
+    } catch(e){ return false; }
+  }
+
   function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
   function solveCount(g, limit){
     const idx = g.indexOf(0);
@@ -303,6 +340,19 @@ eleventyComputed:
     State.timer = setInterval(tick, 1000);
     overlay.classList.remove('show');
     document.getElementById('hint-count').textContent = State.hints;
+    buildBoard(); render(); updateHUD(); save();
+  }
+  function resume(){
+    if (State.timer) clearInterval(State.timer);
+    State.started = performance.now() - State.elapsed*1000;
+    State.timer = setInterval(tick, 1000);
+    overlay.classList.remove('show');
+    document.getElementById('hint-count').textContent = State.hints;
+    if (State.notesMode){
+      document.getElementById('btn-notes').classList.add('active');
+      document.getElementById('notes-state').textContent = COPY.notesOn;
+    }
+    diffSeg.set(State.diff);
     buildBoard(); render(); updateHUD();
   }
   function tick(){
@@ -390,9 +440,9 @@ eleventyComputed:
     if (State.given[i]) return;
     if (State.notesMode && n!==0){
       if (State.notes[i].has(n)) State.notes[i].delete(n); else State.notes[i].add(n);
-      render(); return;
+      render(); save(); return;
     }
-    if (n===0){ State.grid[i]=0; State.notes[i].clear(); render(); announce(COPY.aErased); return; }
+    if (n===0){ State.grid[i]=0; State.notes[i].clear(); render(); announce(COPY.aErased); save(); return; }
     State.notes[i].clear();
     State.grid[i] = n;
     if (n!==0){
@@ -409,7 +459,7 @@ eleventyComputed:
     } else {
       announce(COPY.aPlaced.replace('{n}', n));
     }
-    render(); checkWin();
+    render(); checkWin(); save();
   }
 
   function checkWin(){
@@ -420,6 +470,7 @@ eleventyComputed:
   function gameOver(won){
     State.over = true; State.won = won;
     if (State.timer) clearInterval(State.timer);
+    clearSave();
     if (won) writeBest(State.diff, State.elapsed);
     const m = document.getElementById('modal');
     const best = readBest(State.diff);
@@ -463,7 +514,7 @@ eleventyComputed:
     document.getElementById('hint-count').textContent = State.hints;
     render();
     announce(COPY.aPlaced.replace('{n}', State.solution[target]));
-    checkWin();
+    checkWin(); save();
     showToast(COPY.hintToast.replace('{n}', State.hints));
     focusCell(target);
   }
@@ -531,18 +582,19 @@ eleventyComputed:
     State.notesMode = !State.notesMode;
     document.getElementById('btn-notes').classList.toggle('active', State.notesMode);
     document.getElementById('notes-state').textContent = State.notesMode ? COPY.notesOn : COPY.notesOff;
+    save();
   }
 
   document.getElementById('btn-notes').onclick = toggleNotes;
   document.getElementById('btn-erase').onclick = () => placeNumber(0);
   document.getElementById('btn-hint').onclick = useHint;
   document.getElementById('btn-new').onclick = newGame;
-  MentriaUI.segmented(document.getElementById('diff-seg'), (value) => {
+  const diffSeg = MentriaUI.segmented(document.getElementById('diff-seg'), (value) => {
     State.diff = value;
     newGame();
   });
 
   buildKeypad();
-  newGame();
+  if (load()) resume(); else newGame();
 })();
 </script>

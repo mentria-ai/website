@@ -313,6 +313,11 @@
       "lede": "Two-factor authentication codes that live in your browser, encrypted at rest. Nothing on a server.",
       "tldr": "Standards-compliant TOTP (RFC 6238) running entirely in your browser. Secrets are encrypted at rest with AES-GCM-256; a master key is wrapped by both a passphrase (PBKDF2-SHA256 × 600k) and optionally a WebAuthn PRF-derived key for Touch ID / Windows Hello unlock. Mandatory encrypted JSON backup before the first secret saves — losing your only authenticator means lockout otherwise. Works offline. No accounts, no sync server."
     },
+    "exif": {
+      "title": "EXIF Inspector",
+      "lede": "See what a photo secretly carries — camera details, timestamps, GPS location — and download a clean copy with it all removed. Nothing is uploaded.",
+      "tldr": "Reads EXIF, XMP, IPTC and other embedded metadata from JPEG, PNG and WebP images entirely in your browser: camera model, capture time, and the GPS position many phones embed silently. One tap produces a stripped copy with the metadata removed at byte level — pixels untouched, color profile kept — and the copy is re-parsed to verify it is clean before download. Nothing ever leaves your device."
+    },
     "radio": {
       "title": "Infinite Radio",
       "lede": "AI-generated epic cinematic music, streaming infinitely. Learns your taste locally — no data leaves your device.",
@@ -331,7 +336,7 @@
     "step-counter": {
       "title": "Step Counter",
       "lede": "Count your steps on a walk, right in the browser. Uses your phone's motion sensor — nothing is uploaded.",
-      "tldr": "A session-based pedometer that reads your phone's accelerometer through the DeviceMotion API and counts steps with on-device peak detection. Start a session and walk with the screen on — it tracks steps, distance, pace, and a daily goal ring. All processing stays in the browser: no account, no upload, no background tracking. Desktops and devices without a motion sensor show a disabled state."
+      "tldr": "A session-based pedometer that reads your phone's accelerometer through the DeviceMotion API and counts steps with on-device peak detection. Start a session and walk with the screen on — it tracks steps, distance, pace, and a daily goal ring. All processing stays in the browser: no account, no upload, no background tracking. Desktops and devices without a motion sensor show a disabled state. Daily totals persist on this device, with a 7-day chart and goal streaks."
     },
     "qr-scanner": {
       "title": "QR & Barcode Scanner + Generator",
@@ -937,7 +942,11 @@
       "confirm_reset": "Reset today's step count to zero?",
       "insecure_title": "Secure connection needed",
       "insecure_body": "Motion sensors only work over HTTPS. Open this tool on the live site (https://mentria.ai). A local dev server reached by LAN IP over plain HTTP cannot expose the sensor.",
-      "back_to_stats": "Back to stats"
+      "back_to_stats": "Back to stats",
+      "streak_current": "Current streak",
+      "streak_best": "Best streak",
+      "streak_day": "{n} day",
+      "streak_days": "{n} days"
     },
     "qr-scanner": {
       "aria_video": "Live camera preview",
@@ -1051,6 +1060,47 @@
       "scan_invalid_qr": "That QR code is not an otpauth://totp/ URI. Try again with a TOTP setup QR.",
       "next_label": "next:",
       "add_secret_bad_chars": "Secret has invalid characters: {chars}. Base32 uses only A–Z and 2–7 — check for 0/O, 1/I/L, 8/B look-alikes."
+    },
+    "exif": {
+      "aria_drop": "Image dropzone",
+      "drop_prompt": "Drop a photo here, paste one, or browse — it never leaves your device.",
+      "btn_browse": "Choose image",
+      "field_type": "Type",
+      "field_dimensions": "Dimensions",
+      "field_size": "Size",
+      "sec_camera": "Camera",
+      "sec_photo": "Photo",
+      "sec_gps": "Location",
+      "sec_other": "Other embedded data",
+      "field_make": "Make",
+      "field_model": "Model",
+      "field_lens": "Lens",
+      "field_software": "Software",
+      "field_taken": "Taken",
+      "field_exposure": "Exposure",
+      "field_aperture": "Aperture",
+      "field_iso": "ISO",
+      "field_focal": "Focal length",
+      "field_coords": "Coordinates",
+      "field_altitude": "Altitude",
+      "gps_warning": "This photo reveals where it was taken.",
+      "clean_already": "No embedded metadata — this image is already clean.",
+      "btn_strip": "Download clean copy",
+      "btn_copy_coords": "Copy coordinates",
+      "btn_another": "Inspect another",
+      "btn_copied": "Copied!",
+      "removed_label": "Removed",
+      "verified_clean": "verified — the copy contains no metadata",
+      "icc_kept": "Color profile kept so colors stay identical.",
+      "strip_unsupported": "Stripping supports JPEG, PNG and WebP — this format is view-only.",
+      "err_read": "Couldn't read that file — is it an image?",
+      "seg_exif": "EXIF data",
+      "seg_xmp": "XMP data",
+      "seg_iptc": "IPTC data",
+      "seg_icc": "Color profile",
+      "seg_comment": "Comment",
+      "seg_text": "Text chunks",
+      "seg_time": "Timestamp chunk"
     },
     "sudoku": {
       "level": "Level",

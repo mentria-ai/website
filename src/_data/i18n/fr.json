@@ -326,7 +326,7 @@
     "step-counter": {
       "title": "Compteur de Pas",
       "lede": "Compte tes pas en marchant, directement dans le navigateur. Utilise le capteur de mouvement de ton téléphone — rien n'est envoyé.",
-      "tldr": "Un podomètre par session qui lit l'accéléromètre de ton téléphone via l'API DeviceMotion et compte les pas par détection de pics sur l'appareil. Lance une session et marche avec l'écran allumé — il suit les pas, la distance, le rythme et un anneau d'objectif quotidien. Tout le traitement reste dans le navigateur : pas de compte, pas d'envoi, pas de suivi en arrière-plan. Les appareils sans capteur de mouvement affichent un état désactivé."
+      "tldr": "Un podomètre par session qui lit l'accéléromètre de ton téléphone via l'API DeviceMotion et compte les pas par détection de pics sur l'appareil. Lance une session et marche avec l'écran allumé — il suit les pas, la distance, le rythme et un anneau d'objectif quotidien. Tout le traitement reste dans le navigateur : pas de compte, pas d'envoi, pas de suivi en arrière-plan. Les appareils sans capteur de mouvement affichent un état désactivé. Les totaux quotidiens restent sur cet appareil, avec un graphique sur 7 jours et des séries d'objectifs."
     },
     "qr-scanner": {
       "title": "Scanner et générateur de QR codes et codes-barres",
@@ -342,6 +342,11 @@
       "title": "TOTP",
       "lede": "Codes de double authentification qui restent dans votre navigateur, chiffrés au repos. Rien sur un serveur.",
       "tldr": "TOTP conforme au standard (RFC 6238) entièrement dans votre navigateur. Les secrets sont chiffrés au repos avec AES-GCM-256 ; une clé maître est protégée par une phrase secrète (PBKDF2-SHA256 × 600k) et optionnellement par une clé dérivée de WebAuthn PRF pour un déverrouillage Touch ID / Windows Hello. Sauvegarde chiffrée JSON obligatoire avant le premier enregistrement — perdre votre unique authentificateur signifie verrouillage sinon. Fonctionne hors ligne. Sans compte, sans serveur de sync."
+    },
+    "exif": {
+      "title": "Inspecteur EXIF",
+      "lede": "Découvrez ce qu'une photo transporte en secret — détails de l'appareil, horodatages, position GPS — et téléchargez une copie propre, tout retiré. Rien n'est envoyé.",
+      "tldr": "Lit les métadonnées EXIF, XMP, IPTC et autres intégrées aux images JPEG, PNG et WebP, entièrement dans votre navigateur : modèle d'appareil, date de prise de vue et la position GPS que beaucoup de téléphones ajoutent silencieusement. Un appui produit une copie nettoyée au niveau des octets — pixels intacts, profil colorimétrique conservé — et la copie est réanalysée pour vérifier qu'elle est propre avant le téléchargement. Rien ne quitte votre appareil."
     },
     "sudoku": {
       "title": "Sudoku",
@@ -937,7 +942,11 @@
       "confirm_reset": "Réinitialiser le compteur de pas d'aujourd'hui à zéro ?",
       "insecure_title": "Connexion sécurisée requise",
       "insecure_body": "Les capteurs de mouvement ne fonctionnent qu en HTTPS. Ouvre cet outil sur le site en ligne (https://mentria.ai). Un serveur de dev local atteint par IP LAN en HTTP ne peut pas exposer le capteur.",
-      "back_to_stats": "Retour aux statistiques"
+      "back_to_stats": "Retour aux statistiques",
+      "streak_current": "Série en cours",
+      "streak_best": "Meilleure série",
+      "streak_day": "{n} jour",
+      "streak_days": "{n} jours"
     },
     "qr-scanner": {
       "aria_video": "Aperçu de la caméra en direct",
@@ -1051,6 +1060,47 @@
       "scan_invalid_qr": "Ce QR n'est pas une URI otpauth://totp/. Réessayez avec un QR de configuration TOTP.",
       "next_label": "suivant :",
       "add_secret_bad_chars": "Le secret contient des caractères non valides : {chars}. Le Base32 n'utilise que A–Z et 2–7 — attention aux confusions 0/O, 1/I/L, 8/B."
+    },
+    "exif": {
+      "aria_drop": "Zone de dépôt d’image",
+      "drop_prompt": "Déposez une photo ici, collez-la ou parcourez — elle ne quitte jamais votre appareil.",
+      "btn_browse": "Choisir une image",
+      "field_type": "Type",
+      "field_dimensions": "Dimensions",
+      "field_size": "Taille",
+      "sec_camera": "Appareil",
+      "sec_photo": "Photo",
+      "sec_gps": "Localisation",
+      "sec_other": "Autres données intégrées",
+      "field_make": "Marque",
+      "field_model": "Modèle",
+      "field_lens": "Objectif",
+      "field_software": "Logiciel",
+      "field_taken": "Prise le",
+      "field_exposure": "Exposition",
+      "field_aperture": "Ouverture",
+      "field_iso": "ISO",
+      "field_focal": "Focale",
+      "field_coords": "Coordonnées",
+      "field_altitude": "Altitude",
+      "gps_warning": "Cette photo révèle où elle a été prise.",
+      "clean_already": "Aucune métadonnée intégrée — cette image est déjà propre.",
+      "btn_strip": "Télécharger une copie propre",
+      "btn_copy_coords": "Copier les coordonnées",
+      "btn_another": "Inspecter une autre",
+      "btn_copied": "Copié !",
+      "removed_label": "Supprimé",
+      "verified_clean": "vérifié — la copie ne contient aucune métadonnée",
+      "icc_kept": "Le profil colorimétrique est conservé pour préserver les couleurs.",
+      "strip_unsupported": "Le nettoyage prend en charge JPEG, PNG et WebP — ce format est en lecture seule.",
+      "err_read": "Impossible de lire ce fichier — est-ce une image ?",
+      "seg_exif": "Données EXIF",
+      "seg_xmp": "Données XMP",
+      "seg_iptc": "Données IPTC",
+      "seg_icc": "Profil colorimétrique",
+      "seg_comment": "Commentaire",
+      "seg_text": "Blocs de texte",
+      "seg_time": "Horodatage"
     },
     "sudoku": {
       "level": "Niveau",

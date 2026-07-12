@@ -513,4 +513,18 @@
    <circle cx="19.5" cy="27.5" r="2" fill="#0d3a22"></circle>
    <circle cx="25" cy="27.5" r="2" fill="#0d3a22"></circle>
  </g></symbol>
+<symbol id="tool-exif" viewBox="0 0 48 48"><defs>
+<linearGradient id="frexif" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="mtexif" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
+<linearGradient id="pnexif" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBA6D2"></stop><stop offset="1" stop-color="#F25FA8"></stop></linearGradient>
+<filter id="shexif" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.1" flood-color="#000" flood-opacity="0.3"></feDropShadow></filter>
+</defs>
+<g filter="url(#shexif)">
+  <rect x="5" y="9" width="29" height="25" rx="4" fill="#12121a" stroke="url(#frexif)" stroke-width="2.4"></rect>
+  <circle cx="13.5" cy="17" r="2.6" fill="#FCD661"></circle>
+  <path d="M7.5 29.5 L16 21 L21 26 L26.5 20.5 L32.5 26.5 V29.5 A2.6 2.6 0 0 1 29.9 32.1 H10.1 A2.6 2.6 0 0 1 7.5 29.5 Z" fill="url(#mtexif)" opacity=".92"></path>
+  <path d="M36 17.5 c-4.2 0-7.2 3.1-7.2 7.1 0 5 5.8 10.8 7.2 12.1 1.4-1.3 7.2-7.1 7.2-12.1 0-4-3-7.1-7.2-7.1Z" fill="url(#pnexif)"></path>
+  <circle cx="36" cy="24.8" r="2.7" fill="#12121a"></circle>
+  <path d="M28.2 35.8 L43.8 20.2" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round"></path>
+</g></symbol>
 </svg>

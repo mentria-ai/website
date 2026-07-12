@@ -9,7 +9,7 @@
   {
     "slug": "step-counter",
     "title": "Step Counter",
-    "summary": "Session pedometer that counts steps from your phone's motion sensor — distance, pace, and a daily goal ring, all on-device.",
+    "summary": "Session pedometer that counts steps from your phone's motion sensor — distance, pace, a daily goal ring, 7-day history, and goal streaks, all on-device.",
     "category": "Health",
     "group": "Everyday"
   },
@@ -59,6 +59,13 @@
     "slug": "totp",
     "title": "TOTP",
     "summary": "Two-factor codes that live in your browser, not on a server. Encrypted at rest, unlocked with a passphrase or Touch ID. Mandatory encrypted backup before your first secret saves.",
+    "category": "Security",
+    "group": "Everyday"
+  },
+  {
+    "slug": "exif",
+    "title": "EXIF Inspector",
+    "summary": "See the metadata hiding in a photo — camera, timestamps, GPS position — and download a byte-identical clean copy with it all stripped. Nothing is uploaded.",
     "category": "Security",
     "group": "Everyday"
   },

@@ -1,0 +1,757 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/exif/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.exif.title' | t }}"
+  description: "{{ 'tools.exif.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">exif</span></p>
+  <h1>{{ "tools.exif.title" | t }}</h1>
+  <p>{{ "tools.exif.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "exif.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="ex" id="ex">
+
+  <div class="ex__drop" id="ex-drop" role="button" tabindex="0" aria-label="{{ 'tool.exif.aria_drop' | t }}">
+    <svg class="ex__drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <circle cx="9" cy="9" r="2"/>
+      <path d="M21 15l-5-5-8 8"/>
+    </svg>
+    <p class="ex__drop-text">{{ "tool.exif.drop_prompt" | t }}</p>
+    <label class="m-btn m-btn--primary m-btn--pill" for="ex-file">
+      {{ "tool.exif.btn_browse" | t }}
+      <input type="file" id="ex-file" accept="image/*" hidden>
+    </label>
+  </div>
+
+  <div class="ex__report" id="ex-report" hidden>
+    <div class="ex__head">
+      <img class="ex__thumb" id="ex-thumb" alt="">
+      <dl class="ex__facts" id="ex-facts"></dl>
+    </div>
+
+    <p class="ex__clean" id="ex-clean" hidden>{{ "tool.exif.clean_already" | t }}</p>
+
+    <div class="ex__sec ex__sec--gps" id="ex-gps" hidden>
+      <span class="ex__sec-title">{{ "tool.exif.sec_gps" | t }}</span>
+      <p class="ex__gps-warn">{{ "tool.exif.gps_warning" | t }}</p>
+      <dl class="ex__fields" id="ex-gps-fields"></dl>
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="ex-copy-coords">{{ "tool.exif.btn_copy_coords" | t }}</button>
+    </div>
+
+    <div class="ex__sec" id="ex-camera" hidden>
+      <span class="ex__sec-title">{{ "tool.exif.sec_camera" | t }}</span>
+      <dl class="ex__fields" id="ex-camera-fields"></dl>
+    </div>
+
+    <div class="ex__sec" id="ex-photo" hidden>
+      <span class="ex__sec-title">{{ "tool.exif.sec_photo" | t }}</span>
+      <dl class="ex__fields" id="ex-photo-fields"></dl>
+    </div>
+
+    <div class="ex__sec" id="ex-other" hidden>
+      <span class="ex__sec-title">{{ "tool.exif.sec_other" | t }}</span>
+      <div class="ex__badges" id="ex-badges"></div>
+      <p class="ex__note" id="ex-icc-note" hidden>{{ "tool.exif.icc_kept" | t }}</p>
+    </div>
+
+    <p class="ex__note" id="ex-note" hidden></p>
+
+    <div class="ex__controls">
+      <button type="button" class="m-btn m-btn--primary m-btn--pill" id="ex-strip" hidden>{{ "tool.exif.btn_strip" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="ex-again">{{ "tool.exif.btn_another" | t }}</button>
+    </div>
+
+    <p class="ex__result" id="ex-result" hidden></p>
+  </div>
+
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(() => {
+  const COPY = {
+    fieldType:     {{ ("tool.exif.field_type"      | t) | dump | safe }},
+    fieldDims:     {{ ("tool.exif.field_dimensions"| t) | dump | safe }},
+    fieldSize:     {{ ("tool.exif.field_size"      | t) | dump | safe }},
+    fieldMake:     {{ ("tool.exif.field_make"      | t) | dump | safe }},
+    fieldModel:    {{ ("tool.exif.field_model"     | t) | dump | safe }},
+    fieldLens:     {{ ("tool.exif.field_lens"      | t) | dump | safe }},
+    fieldSoftware: {{ ("tool.exif.field_software"  | t) | dump | safe }},
+    fieldTaken:    {{ ("tool.exif.field_taken"     | t) | dump | safe }},
+    fieldExposure: {{ ("tool.exif.field_exposure"  | t) | dump | safe }},
+    fieldAperture: {{ ("tool.exif.field_aperture"  | t) | dump | safe }},
+    fieldIso:      {{ ("tool.exif.field_iso"       | t) | dump | safe }},
+    fieldFocal:    {{ ("tool.exif.field_focal"     | t) | dump | safe }},
+    fieldCoords:   {{ ("tool.exif.field_coords"    | t) | dump | safe }},
+    fieldAltitude: {{ ("tool.exif.field_altitude"  | t) | dump | safe }},
+    segExif:       {{ ("tool.exif.seg_exif"        | t) | dump | safe }},
+    segXmp:        {{ ("tool.exif.seg_xmp"         | t) | dump | safe }},
+    segIptc:       {{ ("tool.exif.seg_iptc"        | t) | dump | safe }},
+    segIcc:        {{ ("tool.exif.seg_icc"         | t) | dump | safe }},
+    segComment:    {{ ("tool.exif.seg_comment"     | t) | dump | safe }},
+    segText:       {{ ("tool.exif.seg_text"        | t) | dump | safe }},
+    segTime:       {{ ("tool.exif.seg_time"        | t) | dump | safe }},
+    removedLabel:  {{ ("tool.exif.removed_label"   | t) | dump | safe }},
+    verifiedClean: {{ ("tool.exif.verified_clean"  | t) | dump | safe }},
+    stripUnsupported: {{ ("tool.exif.strip_unsupported" | t) | dump | safe }},
+    errRead:       {{ ("tool.exif.err_read"        | t) | dump | safe }},
+    btnCopied:     {{ ("tool.exif.btn_copied"      | t) | dump | safe }},
+    copyFailed:    {{ ("common.copy_failed"        | t) | dump | safe }}
+  };
+
+  const $ = id => document.getElementById(id);
+  const dropEl    = $('ex-drop');
+  const fileInput = $('ex-file');
+  const reportEl  = $('ex-report');
+  const thumbEl   = $('ex-thumb');
+  const factsEl   = $('ex-facts');
+  const cleanEl   = $('ex-clean');
+  const gpsSec    = $('ex-gps');
+  const gpsFields = $('ex-gps-fields');
+  const copyCoordsBtn = $('ex-copy-coords');
+  const cameraSec = $('ex-camera');
+  const cameraFields = $('ex-camera-fields');
+  const photoSec  = $('ex-photo');
+  const photoFields = $('ex-photo-fields');
+  const otherSec  = $('ex-other');
+  const badgesEl  = $('ex-badges');
+  const iccNote   = $('ex-icc-note');
+  const noteEl    = $('ex-note');
+  const stripBtn  = $('ex-strip');
+  const againBtn  = $('ex-again');
+  const resultEl  = $('ex-result');
+
+  let origBuf = null;
+  let origName = '';
+  let origKind = '';
+  let objUrl = null;
+  let coordsText = '';
+
+  const TYPE_SIZE = { 1: 1, 2: 1, 3: 2, 4: 4, 5: 8, 7: 1, 9: 4, 10: 8 };
+
+  function readEntryValue(dv, base, entryOff, le) {
+    const type = dv.getUint16(entryOff + 2, le);
+    const count = dv.getUint32(entryOff + 4, le);
+    const unit = TYPE_SIZE[type];
+    if (!unit || count > 65536) return null;
+    const byteLen = unit * count;
+    let off = byteLen <= 4 ? entryOff + 8 : base + dv.getUint32(entryOff + 8, le);
+    if (off + byteLen > dv.byteLength) return null;
+    if (type === 2) {
+      let s = '';
+      for (let i = 0; i < count; i++) {
+        const c = dv.getUint8(off + i);
+        if (c === 0) break;
+        s += String.fromCharCode(c);
+      }
+      return s.trim();
+    }
+    const vals = [];
+    for (let i = 0; i < count; i++) {
+      if (type === 1 || type === 7) vals.push(dv.getUint8(off + i));
+      else if (type === 3) vals.push(dv.getUint16(off + i * 2, le));
+      else if (type === 4) vals.push(dv.getUint32(off + i * 4, le));
+      else if (type === 9) vals.push(dv.getInt32(off + i * 4, le));
+      else if (type === 5) vals.push([dv.getUint32(off + i * 8, le), dv.getUint32(off + i * 8 + 4, le)]);
+      else if (type === 10) vals.push([dv.getInt32(off + i * 8, le), dv.getInt32(off + i * 8 + 4, le)]);
+    }
+    return count === 1 ? vals[0] : vals;
+  }
+
+  function readIFD(dv, base, ifdOff, le, out) {
+    if (base + ifdOff + 2 > dv.byteLength) return;
+    const n = dv.getUint16(base + ifdOff, le);
+    if (n > 512) return;
+    for (let i = 0; i < n; i++) {
+      const entryOff = base + ifdOff + 2 + i * 12;
+      if (entryOff + 12 > dv.byteLength) return;
+      const tag = dv.getUint16(entryOff, le);
+      try { out[tag] = readEntryValue(dv, base, entryOff, le); } catch (_) {}
+    }
+  }
+
+  function parseTiff(dv, base) {
+    try {
+      const b0 = dv.getUint16(base, false);
+      let le;
+      if (b0 === 0x4949) le = true;
+      else if (b0 === 0x4D4D) le = false;
+      else return null;
+      if (dv.getUint16(base + 2, le) !== 42) return null;
+      const ifd0 = {}, exif = {}, gps = {};
+      readIFD(dv, base, dv.getUint32(base + 4, le), le, ifd0);
+      if (typeof ifd0[0x8769] === 'number') readIFD(dv, base, ifd0[0x8769], le, exif);
+      if (typeof ifd0[0x8825] === 'number') readIFD(dv, base, ifd0[0x8825], le, gps);
+      return { ifd0, exif, gps };
+    } catch (_) { return null; }
+  }
+
+  function rat(v) {
+    if (Array.isArray(v) && v.length === 2 && typeof v[0] === 'number') {
+      return v[1] ? v[0] / v[1] : 0;
+    }
+    return typeof v === 'number' ? v : null;
+  }
+
+  function dmsToDeg(v, ref) {
+    if (!Array.isArray(v) || v.length < 3) return null;
+    const d = rat(v[0]), m = rat(v[1]), s = rat(v[2]);
+    if (d === null || m === null || s === null) return null;
+    let deg = d + m / 60 + s / 3600;
+    if (ref === 'S' || ref === 'W') deg = -deg;
+    return deg;
+  }
+
+  function extractExifSummary(tiff) {
+    if (!tiff) return null;
+    const out = {};
+    const i0 = tiff.ifd0, ex = tiff.exif, gp = tiff.gps;
+    if (typeof i0[0x010F] === 'string' && i0[0x010F]) out.make = i0[0x010F];
+    if (typeof i0[0x0110] === 'string' && i0[0x0110]) out.model = i0[0x0110];
+    if (typeof i0[0x0131] === 'string' && i0[0x0131]) out.software = i0[0x0131];
+    if (typeof ex[0xA434] === 'string' && ex[0xA434]) out.lens = ex[0xA434];
+    const dt = ex[0x9003] || i0[0x0132];
+    if (typeof dt === 'string' && dt.length >= 10) {
+      out.taken = dt.slice(0, 10).split(':').join('-') + dt.slice(10);
+    }
+    const expo = rat(ex[0x829A]);
+    if (expo) out.exposure = expo >= 1 ? expo.toFixed(1) + ' s' : '1/' + Math.round(1 / expo) + ' s';
+    const fn = rat(ex[0x829D]);
+    if (fn) out.aperture = 'f/' + fn.toFixed(1);
+    const iso = ex[0x8827];
+    if (typeof iso === 'number') out.iso = 'ISO ' + iso;
+    else if (Array.isArray(iso) && typeof iso[0] === 'number') out.iso = 'ISO ' + iso[0];
+    const fl = rat(ex[0x920A]);
+    if (fl) out.focal = (Math.round(fl * 10) / 10) + ' mm';
+    const lat = dmsToDeg(gp[0x0002], gp[0x0001]);
+    const lon = dmsToDeg(gp[0x0004], gp[0x0003]);
+    if (lat !== null && lon !== null && (lat || lon)) {
+      out.lat = lat;
+      out.lon = lon;
+      const alt = rat(gp[0x0006]);
+      if (alt !== null && alt !== 0) out.altitude = (gp[0x0005] === 1 ? -alt : alt).toFixed(1) + ' m';
+    }
+    return out;
+  }
+
+  function matchBytes(u8, off, str) {
+    if (off + str.length > u8.length) return false;
+    for (let i = 0; i < str.length; i++) {
+      if (u8[off + i] !== str.charCodeAt(i)) return false;
+    }
+    return true;
+  }
+
+  function parseJpeg(buf) {
+    const u8 = new Uint8Array(buf);
+    const dv = new DataView(buf);
+    if (u8.length < 4 || u8[0] !== 0xFF || u8[1] !== 0xD8) return null;
+    const meta = { segments: [] };
+    let exifParsed = null;
+    let p = 2;
+    while (p + 4 <= u8.length) {
+      if (u8[p] !== 0xFF) break;
+      const marker = u8[p + 1];
+      if (marker === 0xD8 || marker === 0x01 || (marker >= 0xD0 && marker <= 0xD7)) { p += 2; continue; }
+      if (marker === 0xDA || marker === 0xD9) break;
+      const len = dv.getUint16(p + 2, false);
+      if (len < 2 || p + 2 + len > u8.length) break;
+      const dataOff = p + 4;
+      if (marker === 0xE1 && matchBytes(u8, dataOff, 'Exif')) {
+        meta.segments.push({ kind: 'exif', bytes: len + 2 });
+        if (!exifParsed) exifParsed = parseTiff(dv, dataOff + 6);
+      } else if (marker === 0xE1 && matchBytes(u8, dataOff, 'http://ns.adobe.com/xap/1.0/')) {
+        meta.segments.push({ kind: 'xmp', bytes: len + 2 });
+      } else if (marker === 0xED && matchBytes(u8, dataOff, 'Photoshop 3.0')) {
+        meta.segments.push({ kind: 'iptc', bytes: len + 2 });
+      } else if (marker === 0xE2 && matchBytes(u8, dataOff, 'ICC_PROFILE')) {
+        meta.segments.push({ kind: 'icc', bytes: len + 2 });
+      } else if (marker === 0xFE) {
+        meta.segments.push({ kind: 'comment', bytes: len + 2 });
+      }
+      p += 2 + len;
+    }
+    meta.exif = extractExifSummary(exifParsed);
+    return meta;
+  }
+
+  function stripJpeg(buf) {
+    const u8 = new Uint8Array(buf);
+    const dv = new DataView(buf);
+    const parts = [u8.subarray(0, 2)];
+    const removed = new Set();
+    let p = 2;
+    while (p + 4 <= u8.length) {
+      if (u8[p] !== 0xFF) break;
+      const marker = u8[p + 1];
+      if (marker === 0x01 || (marker >= 0xD0 && marker <= 0xD7)) { parts.push(u8.subarray(p, p + 2)); p += 2; continue; }
+      if (marker === 0xDA || marker === 0xD9) break;
+      const len = dv.getUint16(p + 2, false);
+      if (len < 2 || p + 2 + len > u8.length) break;
+      const dataOff = p + 4;
+      let drop = null;
+      if (marker === 0xE1 && matchBytes(u8, dataOff, 'Exif')) drop = 'exif';
+      else if (marker === 0xE1 && matchBytes(u8, dataOff, 'http://ns.adobe.com/xap/1.0/')) drop = 'xmp';
+      else if (marker === 0xED && matchBytes(u8, dataOff, 'Photoshop 3.0')) drop = 'iptc';
+      else if (marker === 0xFE) drop = 'comment';
+      if (drop) removed.add(drop);
+      else parts.push(u8.subarray(p, p + 2 + len));
+      p += 2 + len;
+    }
+    parts.push(u8.subarray(p));
+    return { blob: new Blob(parts, { type: 'image/jpeg' }), removed: Array.from(removed) };
+  }
+
+  function parsePng(buf) {
+    const u8 = new Uint8Array(buf);
+    const dv = new DataView(buf);
+    if (u8.length < 8 || u8[0] !== 0x89 || u8[1] !== 0x50) return null;
+    const meta = { segments: [] };
+    let exifParsed = null;
+    let textBytes = 0;
+    let p = 8;
+    while (p + 8 <= u8.length) {
+      const len = dv.getUint32(p, false);
+      const type = String.fromCharCode(u8[p + 4], u8[p + 5], u8[p + 6], u8[p + 7]);
+      if (p + 12 + len > u8.length) break;
+      if (type === 'tEXt' || type === 'zTXt' || type === 'iTXt') textBytes += len + 12;
+      else if (type === 'eXIf') {
+        meta.segments.push({ kind: 'exif', bytes: len + 12 });
+        if (!exifParsed) exifParsed = parseTiff(dv, p + 8);
+      } else if (type === 'tIME') meta.segments.push({ kind: 'time', bytes: len + 12 });
+      else if (type === 'iCCP') meta.segments.push({ kind: 'icc', bytes: len + 12 });
+      if (type === 'IEND') break;
+      p += 12 + len;
+    }
+    if (textBytes) meta.segments.push({ kind: 'text', bytes: textBytes });
+    meta.exif = extractExifSummary(exifParsed);
+    return meta;
+  }
+
+  function stripPng(buf) {
+    const u8 = new Uint8Array(buf);
+    const dv = new DataView(buf);
+    const parts = [u8.subarray(0, 8)];
+    const removed = new Set();
+    const DROP = { tEXt: 'text', zTXt: 'text', iTXt: 'text', eXIf: 'exif', tIME: 'time' };
+    let p = 8;
+    while (p + 8 <= u8.length) {
+      const len = dv.getUint32(p, false);
+      const type = String.fromCharCode(u8[p + 4], u8[p + 5], u8[p + 6], u8[p + 7]);
+      if (p + 12 + len > u8.length) break;
+      if (DROP[type]) removed.add(DROP[type]);
+      else parts.push(u8.subarray(p, p + 12 + len));
+      if (type === 'IEND') { p += 12 + len; break; }
+      p += 12 + len;
+    }
+    return { blob: new Blob(parts, { type: 'image/png' }), removed: Array.from(removed) };
+  }
+
+  function parseWebp(buf) {
+    const u8 = new Uint8Array(buf);
+    const dv = new DataView(buf);
+    if (u8.length < 12 || !matchBytes(u8, 0, 'RIFF') || !matchBytes(u8, 8, 'WEBP')) return null;
+    const meta = { segments: [] };
+    let exifParsed = null;
+    let p = 12;
+    while (p + 8 <= u8.length) {
+      const fourcc = String.fromCharCode(u8[p], u8[p + 1], u8[p + 2], u8[p + 3]);
+      const len = dv.getUint32(p + 4, true);
+      if (p + 8 + len > u8.length) break;
+      if (fourcc === 'EXIF') {
+        meta.segments.push({ kind: 'exif', bytes: len + 8 });
+        const base = matchBytes(u8, p + 8, 'Exif') ? p + 14 : p + 8;
+        if (!exifParsed) exifParsed = parseTiff(dv, base);
+      } else if (fourcc === 'XMP ') {
+        meta.segments.push({ kind: 'xmp', bytes: len + 8 });
+      } else if (fourcc === 'ICCP') {
+        meta.segments.push({ kind: 'icc', bytes: len + 8 });
+      }
+      p += 8 + len + (len % 2);
+    }
+    meta.exif = extractExifSummary(exifParsed);
+    return meta;
+  }
+
+  function stripWebp(buf) {
+    const u8 = new Uint8Array(buf);
+    const dv = new DataView(buf);
+    const parts = [];
+    const removed = new Set();
+    let p = 12;
+    while (p + 8 <= u8.length) {
+      const fourcc = String.fromCharCode(u8[p], u8[p + 1], u8[p + 2], u8[p + 3]);
+      const len = dv.getUint32(p + 4, true);
+      if (p + 8 + len > u8.length) break;
+      const total = 8 + len + (len % 2);
+      if (fourcc === 'EXIF') removed.add('exif');
+      else if (fourcc === 'XMP ') removed.add('xmp');
+      else {
+        const chunk = new Uint8Array(u8.subarray(p, p + total));
+        if (fourcc === 'VP8X' && chunk.length >= 9) chunk[8] = chunk[8] & 0xF3;
+        parts.push(chunk);
+      }
+      p += total;
+    }
+    let bodyLen = 4;
+    for (const c of parts) bodyLen += c.length;
+    const header = new Uint8Array(12);
+    header.set([0x52, 0x49, 0x46, 0x46], 0);
+    new DataView(header.buffer).setUint32(4, bodyLen, true);
+    header.set([0x57, 0x45, 0x42, 0x50], 8);
+    return { blob: new Blob([header, ...parts], { type: 'image/webp' }), removed: Array.from(removed) };
+  }
+
+  const KINDS = {
+    jpeg: { parse: parseJpeg, strip: stripJpeg, ext: 'jpg' },
+    png:  { parse: parsePng,  strip: stripPng,  ext: 'png' },
+    webp: { parse: parseWebp, strip: stripWebp, ext: 'webp' }
+  };
+
+  function sniffKind(u8) {
+    if (u8.length > 3 && u8[0] === 0xFF && u8[1] === 0xD8) return 'jpeg';
+    if (u8.length > 8 && u8[0] === 0x89 && u8[1] === 0x50) return 'png';
+    if (u8.length > 12 && matchBytes(u8, 0, 'RIFF') && matchBytes(u8, 8, 'WEBP')) return 'webp';
+    if (u8.length > 4 && ((u8[0] === 0x49 && u8[1] === 0x49) || (u8[0] === 0x4D && u8[1] === 0x4D))) return 'tiff';
+    return null;
+  }
+
+  function fmtBytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1048576).toFixed(2) + ' MB';
+  }
+
+  function addRow(dl, label, value) {
+    const dt = document.createElement('dt');
+    dt.textContent = label;
+    const dd = document.createElement('dd');
+    dd.textContent = value;
+    dl.appendChild(dt);
+    dl.appendChild(dd);
+  }
+
+  const SEG_LABELS = { exif: 'segExif', xmp: 'segXmp', iptc: 'segIptc', icc: 'segIcc', comment: 'segComment', text: 'segText', time: 'segTime' };
+
+  function renderReport(meta, file) {
+    factsEl.innerHTML = '';
+    addRow(factsEl, COPY.fieldType, (file.type || origKind).split('/').pop().toUpperCase());
+    addRow(factsEl, COPY.fieldSize, fmtBytes(file.size));
+
+    const ex = meta && meta.exif;
+    coordsText = '';
+    gpsFields.innerHTML = '';
+    if (ex && typeof ex.lat === 'number') {
+      coordsText = ex.lat.toFixed(6) + ', ' + ex.lon.toFixed(6);
+      addRow(gpsFields, COPY.fieldCoords, coordsText);
+      if (ex.altitude) addRow(gpsFields, COPY.fieldAltitude, ex.altitude);
+      gpsSec.hidden = false;
+    } else {
+      gpsSec.hidden = true;
+    }
+
+    cameraFields.innerHTML = '';
+    let camRows = 0;
+    if (ex && ex.make) { addRow(cameraFields, COPY.fieldMake, ex.make); camRows++; }
+    if (ex && ex.model) { addRow(cameraFields, COPY.fieldModel, ex.model); camRows++; }
+    if (ex && ex.lens) { addRow(cameraFields, COPY.fieldLens, ex.lens); camRows++; }
+    if (ex && ex.software) { addRow(cameraFields, COPY.fieldSoftware, ex.software); camRows++; }
+    cameraSec.hidden = camRows === 0;
+
+    photoFields.innerHTML = '';
+    let photoRows = 0;
+    if (ex && ex.taken) { addRow(photoFields, COPY.fieldTaken, ex.taken); photoRows++; }
+    if (ex && ex.exposure) { addRow(photoFields, COPY.fieldExposure, ex.exposure); photoRows++; }
+    if (ex && ex.aperture) { addRow(photoFields, COPY.fieldAperture, ex.aperture); photoRows++; }
+    if (ex && ex.iso) { addRow(photoFields, COPY.fieldIso, ex.iso); photoRows++; }
+    if (ex && ex.focal) { addRow(photoFields, COPY.fieldFocal, ex.focal); photoRows++; }
+    photoSec.hidden = photoRows === 0;
+
+    badgesEl.innerHTML = '';
+    const segs = (meta && meta.segments) || [];
+    let hasIcc = false;
+    for (const s of segs) {
+      const b = document.createElement('span');
+      b.className = 'ex__badge' + (s.kind === 'icc' ? ' ex__badge--kept' : '');
+      b.textContent = COPY[SEG_LABELS[s.kind]] + ' · ' + fmtBytes(s.bytes);
+      badgesEl.appendChild(b);
+      if (s.kind === 'icc') hasIcc = true;
+    }
+    otherSec.hidden = segs.length === 0;
+    iccNote.hidden = !hasIcc;
+
+    const removable = segs.some(s => s.kind !== 'icc');
+    const canStrip = !!KINDS[origKind];
+    cleanEl.hidden = removable || !canStrip;
+    stripBtn.hidden = !(canStrip && removable);
+    noteEl.hidden = canStrip;
+    if (!canStrip) { noteEl.textContent = COPY.stripUnsupported; noteEl.hidden = false; }
+    resultEl.hidden = true;
+  }
+
+  async function inspect(file) {
+    let buf;
+    try { buf = await file.arrayBuffer(); }
+    catch (_) { showError(); return; }
+    const kind = sniffKind(new Uint8Array(buf));
+    let meta = null;
+    if (kind === 'tiff') {
+      meta = { segments: [], exif: extractExifSummary(parseTiff(new DataView(buf), 0)) };
+      if (meta.exif && Object.keys(meta.exif).length) meta.segments.push({ kind: 'exif', bytes: buf.byteLength });
+    } else if (kind && KINDS[kind]) {
+      meta = KINDS[kind].parse(buf);
+    }
+    if (!meta) { showError(); return; }
+    origBuf = buf;
+    origName = file.name || 'image';
+    origKind = kind;
+    if (objUrl) URL.revokeObjectURL(objUrl);
+    objUrl = URL.createObjectURL(file);
+    thumbEl.src = objUrl;
+    thumbEl.onload = () => {
+      if (thumbEl.naturalWidth) {
+        const dims = thumbEl.naturalWidth + ' × ' + thumbEl.naturalHeight;
+        const rows = factsEl.querySelectorAll('dt');
+        for (const dt of rows) { if (dt.textContent === COPY.fieldDims) return; }
+        addRow(factsEl, COPY.fieldDims, dims);
+      }
+    };
+    renderReport(meta, file);
+    dropEl.hidden = true;
+    reportEl.hidden = false;
+  }
+
+  function showError() {
+    noteEl.textContent = COPY.errRead;
+    noteEl.hidden = false;
+    setTimeout(() => { noteEl.hidden = true; }, 4000);
+  }
+
+  function reset() {
+    dropEl.hidden = false;
+    reportEl.hidden = true;
+    resultEl.hidden = true;
+    if (objUrl) { URL.revokeObjectURL(objUrl); objUrl = null; }
+    thumbEl.src = '';
+    origBuf = null;
+    fileInput.value = '';
+  }
+
+  stripBtn.addEventListener('click', () => {
+    if (!origBuf || !KINDS[origKind]) return;
+    const { blob, removed } = KINDS[origKind].strip(origBuf);
+    const dot = origName.lastIndexOf('.');
+    const base = dot > 0 ? origName.slice(0, dot) : origName;
+    MentriaUI.downloadFile(base + '-clean.' + KINDS[origKind].ext, blob);
+    blob.arrayBuffer().then(cleanBuf => {
+      const recheck = KINDS[origKind].parse(cleanBuf);
+      const leftover = recheck && recheck.segments.some(s => s.kind !== 'icc');
+      const names = removed.map(k => COPY[SEG_LABELS[k]]).join(', ');
+      let line = COPY.removedLabel + ': ' + names + ' · ' + fmtBytes(origBuf.byteLength) + ' → ' + fmtBytes(blob.size);
+      if (!leftover) line += ' · ' + COPY.verifiedClean;
+      resultEl.textContent = line;
+      resultEl.hidden = false;
+    });
+  });
+
+  againBtn.addEventListener('click', reset);
+  MentriaUI.copyButton(copyCoordsBtn, () => coordsText, { copiedText: COPY.btnCopied, failedText: COPY.copyFailed, restoreMs: 1500 });
+
+  fileInput.addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    if (f) inspect(f);
+  });
+  dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('is-over'); });
+  dropEl.addEventListener('dragleave', () => dropEl.classList.remove('is-over'));
+  dropEl.addEventListener('drop', e => {
+    e.preventDefault();
+    dropEl.classList.remove('is-over');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) inspect(f);
+  });
+  dropEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+  document.addEventListener('paste', e => {
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (const it of items) {
+      if (it.kind === 'file' && it.type.indexOf('image/') === 0) {
+        const f = it.getAsFile();
+        if (f) { inspect(f); e.preventDefault(); return; }
+      }
+    }
+  });
+})();
+</script>
+
+<style>
+.ex {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+.ex__drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-6) var(--space-4);
+  border: 1.5px dashed var(--term-border-strong, var(--term-border));
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.015);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.ex__drop.is-over, .ex__drop:hover { border-color: var(--syn-cyan); background: rgba(34,211,238,0.04); }
+.ex__drop[hidden] { display: none; }
+.ex__drop-icon { width: 48px; height: 48px; color: var(--term-muted); }
+.ex__drop-text {
+  font-size: 0.82rem;
+  color: var(--term-muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 34ch;
+}
+
+.ex__report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+.ex__report[hidden] { display: none; }
+
+.ex__head {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  width: 100%;
+}
+.ex__thumb {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--term-border);
+  background: #060606;
+  flex-shrink: 0;
+}
+
+.ex__facts, .ex__fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.9rem;
+  margin: 0;
+  min-width: 0;
+}
+.ex__facts dt, .ex__fields dt {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--term-muted);
+  align-self: baseline;
+}
+.ex__facts dd, .ex__fields dd {
+  font-size: 0.8rem;
+  color: var(--term-fg);
+  margin: 0;
+  word-break: break-word;
+  font-variant-numeric: tabular-nums;
+}
+
+.ex__sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--term-border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.015);
+}
+.ex__sec[hidden] { display: none; }
+.ex__sec-title {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--term-muted);
+}
+.ex__sec--gps { border-color: rgba(244,114,182,0.45); }
+.ex__sec--gps .ex__sec-title { color: var(--syn-pink, #f472b6); }
+.ex__gps-warn {
+  font-size: 0.78rem;
+  color: var(--syn-pink, #f472b6);
+  margin: 0;
+}
+.ex__sec--gps .m-btn { align-self: flex-start; }
+
+.ex__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.ex__badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--term-border-strong, var(--term-border));
+  border-radius: 999px;
+  color: var(--term-fg);
+}
+.ex__badge--kept { color: var(--term-muted); border-style: dashed; }
+
+.ex__clean {
+  font-size: 0.82rem;
+  color: var(--syn-green);
+  margin: 0;
+  text-align: center;
+}
+.ex__clean[hidden] { display: none; }
+
+.ex__note {
+  font-size: 0.75rem;
+  color: var(--term-muted);
+  margin: 0;
+}
+.ex__note[hidden] { display: none; }
+
+.ex__controls {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ex__result {
+  font-size: 0.78rem;
+  color: var(--syn-green);
+  margin: 0;
+  text-align: center;
+  line-height: 1.5;
+}
+.ex__result[hidden] { display: none; }
+
+@media (max-width: 480px) {
+  .ex__thumb { width: 72px; height: 72px; }
+}
+</style>

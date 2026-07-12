@@ -1,6 +1,930 @@
 [
   {
     "type": "chapter",
+    "id": "source140",
+    "src": "https://cdn.mentria.ai/source140/00_cover.webp",
+    "color": "linear-gradient(165deg, #0e0a15, #ab84e8, #0e0a15)",
+    "title": "Source",
+    "caption": {
+      "en": "The innkeeper counts a tidy dozen; the bard's numbers refuse to. 7 cards.",
+      "es": "El posadero cuenta una docena prolija; los números del bardo se niegan. 7 tarjetas.",
+      "fr": "L'aubergiste compte une douzaine bien nette ; les nombres du barde refusent. 7 cartes.",
+      "ja": "宿の主人はきちんと十二を数える。吟遊詩人の数は、そうはならない。カード7枚。",
+      "pt-BR": "O estalajadeiro conta uma dúzia certinha; os números do bardo recusam. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source140/"
+  },
+  {
+    "type": "chapter",
+    "id": "source139",
+    "src": "https://cdn.mentria.ai/source139/00_cover.webp",
+    "color": "linear-gradient(165deg, #150a0c, #d05a70, #150a0c)",
+    "title": "Source",
+    "caption": {
+      "en": "His tallest pupils read best — so he nearly prescribed stretching. 7 cards.",
+      "es": "Sus alumnos más altos leían mejor — y casi les receta estiramientos. 7 tarjetas.",
+      "fr": "Ses plus grands élèves lisaient le mieux — il a failli prescrire des étirements. 7 cartes.",
+      "ja": "背の高い生徒ほどよく読めた——彼はあやうくストレッチを処方しかけた。カード7枚。",
+      "pt-BR": "Seus alunos mais altos liam melhor — quase receitou alongamentos. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source139/"
+  },
+  {
+    "type": "chapter",
+    "id": "source138",
+    "src": "https://cdn.mentria.ai/source138/00_cover.webp",
+    "color": "linear-gradient(165deg, #121007, #d8c24f, #121007)",
+    "title": "Source",
+    "caption": {
+      "en": "The shepherd who never searches for lost sheep. 6 cards.",
+      "es": "La pastora que nunca busca a las ovejas perdidas. 6 tarjetas.",
+      "fr": "La bergère qui ne cherche jamais les brebis perdues. 6 cartes.",
+      "ja": "迷った羊を決して探さない羊飼い。カード6枚。",
+      "pt-BR": "A pastora que nunca procura as ovelhas perdidas. 6 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source138/"
+  },
+  {
+    "type": "chapter",
+    "id": "source137",
+    "src": "https://cdn.mentria.ai/source137/00_cover.webp",
+    "color": "linear-gradient(165deg, #0c1017, #86a8e0, #0c1017)",
+    "title": "Source",
+    "caption": {
+      "en": "The horse hauls hard, but the boat barely moves. 6 cards.",
+      "es": "El caballo tira con fuerza, y el barco apenas avanza. 6 tarjetas.",
+      "fr": "Le cheval tire fort, et la péniche avance à peine. 6 cartes.",
+      "ja": "馬は力いっぱい引くのに、舟はほとんど動かない。カード6枚。",
+      "pt-BR": "O cavalo puxa com força, e o barco mal se move. 6 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source137/"
+  },
+  {
+    "type": "chapter",
+    "id": "source136",
+    "src": "https://cdn.mentria.ai/source136/00_cover.webp",
+    "color": "linear-gradient(165deg, #0b1309, #7cc94f, #0b1309)",
+    "title": "Source",
+    "caption": {
+      "en": "The greenhouse where every fix breaks something else. 6 cards.",
+      "es": "El invernadero donde cada arreglo rompe otra cosa. 6 tarjetas.",
+      "fr": "La serre où chaque réparation en casse une autre. 6 cartes.",
+      "ja": "ひとつ直すと別のものが壊れる温室。カード6枚。",
+      "pt-BR": "A estufa onde cada conserto quebra outra coisa. 6 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source136/"
+  },
+  {
+    "type": "chapter",
+    "id": "source135",
+    "src": "https://cdn.mentria.ai/source135/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a0c12, #a8bcd8, #0a0c12)",
+    "title": "Source",
+    "caption": {
+      "en": "A question's journey through the city that answers one word at a time. 7 cards.",
+      "es": "El viaje de una pregunta por la ciudad que responde palabra a palabra. 7 tarjetas.",
+      "fr": "Le voyage d'une question dans la ville qui répond un mot à la fois. 7 cartes.",
+      "ja": "一語ずつ答える都市を旅する、ひとつの問い。カード7枚。",
+      "pt-BR": "A viagem de uma pergunta pela cidade que responde uma palavra por vez. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source135/"
+  },
+  {
+    "type": "chapter",
+    "id": "source134",
+    "src": "https://cdn.mentria.ai/source134/00_cover.webp",
+    "color": "linear-gradient(165deg, #140a09, #d86a54, #140a09)",
+    "title": "Source",
+    "caption": {
+      "en": "The dancer who learned a foreign style without relearning herself. 7 cards.",
+      "es": "La bailarina que aprendió un estilo extranjero sin reaprenderse. 7 tarjetas.",
+      "fr": "La danseuse qui a appris un style étranger sans se réapprendre. 7 cartes.",
+      "ja": "自分を学び直さずに異国の型を身につけた踊り手。カード7枚。",
+      "pt-BR": "A dançarina que aprendeu um estilo estrangeiro sem reaprender a si mesma. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source134/"
+  },
+  {
+    "type": "chapter",
+    "id": "source133",
+    "src": "https://cdn.mentria.ai/source133/00_cover.webp",
+    "color": "linear-gradient(165deg, #0f0a16, #c2a0f0, #0f0a16)",
+    "title": "Source",
+    "caption": {
+      "en": "The translator who never reads a page twice. 7 cards.",
+      "es": "La traductora que nunca lee una página dos veces. 7 tarjetas.",
+      "fr": "La traductrice qui ne relit jamais une page. 7 cartes.",
+      "ja": "同じ頁を二度と読まない翻訳者。カード7枚。",
+      "pt-BR": "A tradutora que nunca lê uma página duas vezes. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source133/"
+  },
+  {
+    "type": "chapter",
+    "id": "source132",
+    "src": "https://cdn.mentria.ai/source132/00_cover.webp",
+    "color": "linear-gradient(165deg, #081209, #4fb763, #081209)",
+    "title": "Source",
+    "caption": {
+      "en": "The score was perfect — until she published it. 7 cards.",
+      "es": "La puntuación era perfecta — hasta que la publicó. 7 tarjetas.",
+      "fr": "Le score était parfait — jusqu'à ce qu'elle le publie. 7 cartes.",
+      "ja": "完璧な採点法だった——公開するまでは。カード7枚。",
+      "pt-BR": "A pontuação era perfeita — até ela publicá-la. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source132/"
+  },
+  {
+    "type": "chapter",
+    "id": "source131",
+    "src": "https://cdn.mentria.ai/source131/00_cover.webp",
+    "color": "linear-gradient(165deg, #150e06, #e0b356, #150e06)",
+    "title": "Source",
+    "caption": {
+      "en": "The apprentice who watched the colors that lost. 7 cards.",
+      "es": "La aprendiz que miraba los colores que perdían. 7 tarjetas.",
+      "fr": "L'apprentie qui regardait les couleurs perdantes. 7 cartes.",
+      "ja": "選ばれなかった色を見ていた弟子。カード7枚。",
+      "pt-BR": "A aprendiz que observava as cores que perdiam. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source131/"
+  },
+  {
+    "type": "chapter",
+    "id": "source130",
+    "src": "https://cdn.mentria.ai/source130/00_cover.webp",
+    "color": "linear-gradient(165deg, #0c0918, #8a70f0, #0c0918)",
+    "title": "Source",
+    "caption": {
+      "en": "The mountain again — this winter, with a heavy sled. 7 cards.",
+      "es": "La montaña otra vez — este invierno, con un trineo pesado. 7 tarjetas.",
+      "fr": "La montagne encore — cet hiver, avec une luge lourde. 7 cartes.",
+      "ja": "ふたたびの山——この冬は、重いそりと。カード7枚。",
+      "pt-BR": "A montanha outra vez — neste inverno, com um trenó pesado. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source130/"
+  },
+  {
+    "type": "chapter",
+    "id": "source129",
+    "src": "https://cdn.mentria.ai/source129/00_cover.webp",
+    "color": "linear-gradient(165deg, #0e0e0e, #969696, #0e0e0e)",
+    "title": "Source",
+    "caption": {
+      "en": "The chess teacher who covers every move yet to come. 7 cards.",
+      "es": "La maestra de ajedrez que cubre cada jugada por venir. 7 tarjetas.",
+      "fr": "La professeure d'échecs qui couvre chaque coup à venir. 7 cartes.",
+      "ja": "まだ指されていない手をすべて覆うチェスの先生。カード7枚。",
+      "pt-BR": "A professora de xadrez que cobre cada lance por vir. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source129/"
+  },
+  {
+    "type": "chapter",
+    "id": "source128",
+    "src": "https://cdn.mentria.ai/source128/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a0f16, #6f9fe0, #0a0f16)",
+    "title": "Source",
+    "caption": {
+      "en": "The council where everyone must hear everyone. 7 cards.",
+      "es": "El consejo donde todos deben escuchar a todos. 7 tarjetas.",
+      "fr": "Le conseil où chacun doit écouter tous les autres. 7 cartes.",
+      "ja": "全員が全員に耳を傾ける評議会。カード7枚。",
+      "pt-BR": "O conselho onde todos precisam ouvir todos. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source128/"
+  },
+  {
+    "type": "chapter",
+    "id": "source127",
+    "src": "https://cdn.mentria.ai/source127/00_cover.webp",
+    "color": "linear-gradient(165deg, #101207, #b5c952, #101207)",
+    "title": "Source",
+    "caption": {
+      "en": "Forty cooks, one pot, and a rule against starting over. 7 cards.",
+      "es": "Cuarenta cocineros, una olla y una regla contra empezar de cero. 7 tarjetas.",
+      "fr": "Quarante cuisiniers, une marmite, et l'interdiction de tout refaire. 7 cartes.",
+      "ja": "四十人の料理人、ひとつの鍋、作り直し禁止の掟。カード7枚。",
+      "pt-BR": "Quarenta cozinheiros, uma panela e uma regra contra recomeçar. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source127/"
+  },
+  {
+    "type": "chapter",
+    "id": "source126",
+    "src": "https://cdn.mentria.ai/source126/00_cover.webp",
+    "color": "linear-gradient(165deg, #120a0e, #e8739e, #120a0e)",
+    "title": "Source",
+    "caption": {
+      "en": "Four thousand shades, and a mule that carries sixteen. 7 cards.",
+      "es": "Cuatro mil tonos, y una mula que carga dieciséis. 7 tarjetas.",
+      "fr": "Quatre mille nuances, et une mule qui en porte seize. 7 cartes.",
+      "ja": "四千の色と、十六しか運べないラバ。カード7枚。",
+      "pt-BR": "Quatro mil tons, e uma mula que carrega dezesseis. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source126/"
+  },
+  {
+    "type": "chapter",
+    "id": "source125",
+    "src": "https://cdn.mentria.ai/source125/00_cover.webp",
+    "color": "linear-gradient(165deg, #081217, #5fc0d8, #081217)",
+    "title": "Source",
+    "caption": {
+      "en": "The valley that chose a thousand dumb wheels. 7 cards.",
+      "es": "El valle que eligió mil ruedas tontas. 7 tarjetas.",
+      "fr": "La vallée qui a choisi mille roues stupides. 7 cartes.",
+      "ja": "千の愚直な水車を選んだ谷。カード7枚。",
+      "pt-BR": "O vale que escolheu mil rodas bobas. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source125/"
+  },
+  {
+    "type": "chapter",
+    "id": "source124",
+    "src": "https://cdn.mentria.ai/source124/00_cover.webp",
+    "color": "linear-gradient(165deg, #120a12, #d874c9, #120a12)",
+    "title": "Source",
+    "caption": {
+      "en": "The musician retuned by the crowd's vote. 7 cards.",
+      "es": "La música reafinada por el voto del público. 7 tarjetas.",
+      "fr": "La musicienne réaccordée par le vote du public. 7 cartes.",
+      "ja": "聴衆の投票に調律し直された音楽家。カード7枚。",
+      "pt-BR": "A musicista reafinada pelo voto da plateia. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source124/"
+  },
+  {
+    "type": "chapter",
+    "id": "source123",
+    "src": "https://cdn.mentria.ai/source123/00_cover.webp",
+    "color": "linear-gradient(165deg, #14120a, #d9c26b, #14120a)",
+    "title": "Source",
+    "caption": {
+      "en": "Fifteen years, then one season at the forge. 7 cards.",
+      "es": "Quince años, y luego una sola temporada en la fragua. 7 tarjetas.",
+      "fr": "Quinze ans, puis une seule saison à la forge. 7 cartes.",
+      "ja": "十五年、そして鍛冶場でのひと季節。カード7枚。",
+      "pt-BR": "Quinze anos, e depois uma única estação na forja. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source123/"
+  },
+  {
+    "type": "chapter",
+    "id": "source122",
+    "src": "https://cdn.mentria.ai/source122/00_cover.webp",
+    "color": "linear-gradient(165deg, #0c130f, #58c9a2, #0c130f)",
+    "title": "Source",
+    "caption": {
+      "en": "The coach who kept a second clock. 7 cards.",
+      "es": "La entrenadora que guardaba un segundo reloj. 7 tarjetas.",
+      "fr": "La coach qui gardait un second chrono. 7 cartes.",
+      "ja": "第二の時計を持つコーチ。カード7枚。",
+      "pt-BR": "A treinadora que guardava um segundo relógio. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source122/"
+  },
+  {
+    "type": "chapter",
+    "id": "source121",
+    "src": "https://cdn.mentria.ai/source121/00_cover.webp",
+    "color": "linear-gradient(165deg, #140808, #c04a3a, #140808)",
+    "title": "Source",
+    "caption": {
+      "en": "The bridge master who taxes every beam. 7 cards.",
+      "es": "La maestra de puentes que cobra por cada viga. 7 tarjetas.",
+      "fr": "La maîtresse des ponts qui taxe chaque poutre. 7 cartes.",
+      "ja": "梁一本ごとに税を課す橋の親方。カード7枚。",
+      "pt-BR": "A mestra de pontes que taxa cada viga. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source121/"
+  },
+  {
+    "type": "chapter",
+    "id": "source120",
+    "src": "https://cdn.mentria.ai/source120/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a1015, #86b8d8, #0a1015)",
+    "title": "Source",
+    "caption": {
+      "en": "The mapmaker who never left blank space. 7 cards.",
+      "es": "El cartógrafo que nunca dejaba espacios en blanco. 7 tarjetas.",
+      "fr": "Le cartographe qui ne laissait jamais de blanc. 7 cartes.",
+      "ja": "余白を残さない地図職人。カード7枚。",
+      "pt-BR": "O cartógrafo que nunca deixava espaço em branco. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source120/"
+  },
+  {
+    "type": "chapter",
+    "id": "source119",
+    "src": "https://cdn.mentria.ai/source119/00_cover.webp",
+    "color": "linear-gradient(165deg, #12100b, #cdb27a, #12100b)",
+    "title": "Source",
+    "caption": {
+      "en": "The coat that fit too perfectly. 7 cards.",
+      "es": "El abrigo que quedaba demasiado perfecto. 7 tarjetas.",
+      "fr": "Le manteau qui allait trop parfaitement. 7 cartes.",
+      "ja": "完璧すぎた上着。カード7枚。",
+      "pt-BR": "O casaco que servia perfeitamente demais. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source119/"
+  },
+  {
+    "type": "chapter",
+    "id": "source118",
+    "src": "https://cdn.mentria.ai/source118/00_cover.webp",
+    "color": "linear-gradient(165deg, #0d0b16, #b39ce8, #0d0b16)",
+    "title": "Source",
+    "caption": {
+      "en": "The translator with a desk instead of a memory. 7 cards.",
+      "es": "La traductora con un escritorio en vez de memoria. 7 tarjetas.",
+      "fr": "La traductrice au bureau en guise de mémoire. 7 cartes.",
+      "ja": "記憶の代わりに机を持つ翻訳者。カード7枚。",
+      "pt-BR": "A tradutora com uma escrivaninha no lugar da memória. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source118/"
+  },
+  {
+    "type": "chapter",
+    "id": "source117",
+    "src": "https://cdn.mentria.ai/source117/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a120c, #6fcf7e, #0a120c)",
+    "title": "Source",
+    "caption": {
+      "en": "The cook who never teaches a recipe. 7 cards.",
+      "es": "La cocinera que nunca enseña una receta. 7 tarjetas.",
+      "fr": "La cuisinière qui n'enseigne jamais une recette. 7 cartes.",
+      "ja": "レシピをひとつも教えない料理人。カード7枚。",
+      "pt-BR": "A cozinheira que nunca ensina uma receita. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source117/"
+  },
+  {
+    "type": "chapter",
+    "id": "source116",
+    "src": "https://cdn.mentria.ai/source116/00_cover.webp",
+    "color": "linear-gradient(165deg, #170b06, #e86a2e, #170b06)",
+    "title": "Source",
+    "caption": {
+      "en": "The storyteller who can ruin a tale two ways. 7 cards.",
+      "es": "La cuentista que puede arruinar un cuento de dos maneras. 7 tarjetas.",
+      "fr": "La conteuse qui sait gâcher un conte de deux façons. 7 cartes.",
+      "ja": "物語を二通りに壊せる語り部。カード7枚。",
+      "pt-BR": "A contadora que sabe estragar um conto de dois jeitos. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source116/"
+  },
+  {
+    "type": "chapter",
+    "id": "source115",
+    "src": "https://cdn.mentria.ai/source115/00_cover.webp",
+    "color": "linear-gradient(165deg, #0d0d0d, #d4cfc0, #0d0d0d)",
+    "title": "Source",
+    "caption": {
+      "en": "The musician trained by one guessing game. 7 cards.",
+      "es": "La intérprete que se formó con un solo juego: adivinar. 7 tarjetas.",
+      "fr": "La musicienne formée par un seul jeu : deviner. 7 cartes.",
+      "ja": "ひとつの当てっこ遊びで育った音楽家。カード7枚。",
+      "pt-BR": "A musicista formada por um único jogo: adivinhar. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source115/"
+  },
+  {
+    "type": "chapter",
+    "id": "source114",
+    "src": "https://cdn.mentria.ai/source114/00_cover.webp",
+    "color": "linear-gradient(165deg, #120c07, #b8722e, #120c07)",
+    "title": "Source",
+    "caption": {
+      "en": "A hundred machines in a row couldn't bend one sheet of metal. 7 cards.",
+      "es": "Cien máquinas en fila no podían curvar ni una plancha. 7 tarjetas.",
+      "fr": "Cent machines à la file ne pouvaient courber une seule tôle. 7 cartes.",
+      "ja": "百台つないだ機械でも、一枚の板を曲げられなかった。カード7枚。",
+      "pt-BR": "Cem máquinas em fila não conseguiam curvar uma única chapa. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source114/"
+  },
+  {
+    "type": "chapter",
+    "id": "source113",
+    "src": "https://cdn.mentria.ai/source113/00_cover.webp",
+    "color": "linear-gradient(165deg, #061018, #4a90c2, #061018)",
+    "title": "Source",
+    "caption": {
+      "en": "The guild hall that turns raw tar into perfume, floor by floor. 7 cards.",
+      "es": "La sede del gremio que convierte alquitrán crudo en perfume, piso a piso. 7 tarjetas.",
+      "fr": "La halle de la guilde qui change le goudron brut en parfum, étage par étage. 7 cartes.",
+      "ja": "生のタールを階ごとに香水へ変えるギルドの館。カード7枚。",
+      "pt-BR": "O salão da guilda que faz do alcatrão bruto um perfume, andar a andar. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source113/"
+  },
+  {
+    "type": "chapter",
+    "id": "source112",
+    "src": "https://cdn.mentria.ai/source112/00_cover.webp",
+    "color": "linear-gradient(165deg, #141006, #d9a557, #141006)",
+    "title": "Source",
+    "caption": {
+      "en": "The taster who seasons soup for five hundred by the spoonful. 7 cards.",
+      "es": "La catadora que sazona sopa para quinientos a cucharadas. 7 tarjetas.",
+      "fr": "La goûteuse qui assaisonne une soupe pour cinq cents à la cuillère. 7 cartes.",
+      "ja": "ひと匙で五百人分のスープを味付けする味見役。カード7枚。",
+      "pt-BR": "A provadora que tempera sopa para quinhentos às colheradas. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source112/"
+  },
+  {
+    "type": "chapter",
+    "id": "source111",
+    "src": "https://cdn.mentria.ai/source111/00_cover.webp",
+    "color": "linear-gradient(165deg, #071211, #52b89e, #071211)",
+    "title": "Source",
+    "caption": {
+      "en": "The teacher who locks the recital piece away. 7 cards.",
+      "es": "La maestra que guarda bajo llave la pieza del recital. 7 tarjetas.",
+      "fr": "La professeure qui garde le morceau du récital sous clé. 7 cartes.",
+      "ja": "発表会の曲に鍵をかける先生。カード7枚。",
+      "pt-BR": "A professora que tranca a peça do recital. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source111/"
+  },
+  {
+    "type": "chapter",
+    "id": "source110",
+    "src": "https://cdn.mentria.ai/source110/00_cover.webp",
+    "color": "linear-gradient(165deg, #0f0a12, #c77bd8, #0f0a12)",
+    "title": "Source",
+    "caption": {
+      "en": "The wall of loaves that draws the same hill every night. 7 cards.",
+      "es": "La pared de panes que dibuja la misma colina cada noche. 7 tarjetas.",
+      "fr": "Le mur de pains qui dessine la même colline chaque soir. 7 cartes.",
+      "ja": "毎晩おなじ丘を描くパンの棚。カード7枚。",
+      "pt-BR": "A parede de pães que desenha a mesma colina toda noite. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source110/"
+  },
+  {
+    "type": "chapter",
+    "id": "source109",
+    "src": "https://cdn.mentria.ai/source109/00_cover.webp",
+    "color": "linear-gradient(165deg, #14100a, #c59a63, #14100a)",
+    "title": "Source",
+    "caption": {
+      "en": "Three suspects, one line of prints in the snow. 7 cards.",
+      "es": "Tres sospechosos, una línea de huellas en la nieve. 7 tarjetas.",
+      "fr": "Trois suspects, une ligne d'empreintes dans la neige. 7 cartes.",
+      "ja": "雪にのこる一筋の足跡、容疑者は三匹。カード7枚。",
+      "pt-BR": "Três suspeitos, uma linha de pegadas na neve. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source109/"
+  },
+  {
+    "type": "chapter",
+    "id": "source108",
+    "src": "https://cdn.mentria.ai/source108/00_cover.webp",
+    "color": "linear-gradient(165deg, #0c0d15, #96a5f0, #0c0d15)",
+    "title": "Source",
+    "caption": {
+      "en": "Two touches, one invisible line. 7 cards.",
+      "es": "Dos toques, una línea invisible. 7 tarjetas.",
+      "fr": "Deux touchers, une ligne invisible. 7 cartes.",
+      "ja": "ふたつの手ざわり、一本の見えない線。カード7枚。",
+      "pt-BR": "Dois toques, uma linha invisível. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source108/"
+  },
+  {
+    "type": "chapter",
+    "id": "source107",
+    "src": "https://cdn.mentria.ai/source107/00_cover.webp",
+    "color": "linear-gradient(165deg, #0b1409, #5db54a, #0b1409)",
+    "title": "Source",
+    "caption": {
+      "en": "One taut rope through eleven stubborn years. 7 cards.",
+      "es": "Una cuerda tensa a través de once años tercos. 7 tarjetas.",
+      "fr": "Une corde tendue à travers onze années têtues. 7 cartes.",
+      "ja": "強情な十一年をつらぬく一本の張り縄。カード7枚。",
+      "pt-BR": "Uma corda esticada através de onze anos teimosos. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source107/"
+  },
+  {
+    "type": "chapter",
+    "id": "source106",
+    "src": "https://cdn.mentria.ai/source106/00_cover.webp",
+    "color": "linear-gradient(165deg, #120809, #a83a4e, #120809)",
+    "title": "Source",
+    "caption": {
+      "en": "The correction that faded to a whisper. 7 cards.",
+      "es": "La corrección que se apagó hasta ser un susurro. 7 tarjetas.",
+      "fr": "La correction qui s'est éteinte en murmure. 7 cartes.",
+      "ja": "囁きへと痩せていった訂正。カード7枚。",
+      "pt-BR": "A correção que definhou até virar sussurro. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source106/"
+  },
+  {
+    "type": "chapter",
+    "id": "source105",
+    "src": "https://cdn.mentria.ai/source105/00_cover.webp",
+    "color": "linear-gradient(165deg, #101010, #b5b5b5, #101010)",
+    "title": "Source",
+    "caption": {
+      "en": "The valley where every pattern needed its own loom. 7 cards.",
+      "es": "El valle donde cada patrón exigía su propio telar. 7 tarjetas.",
+      "fr": "La vallée où chaque motif exigeait son propre métier. 7 cartes.",
+      "ja": "模様ごとに織機がひとつ要る谷。カード7枚。",
+      "pt-BR": "O vale onde cada padrão exigia seu próprio tear. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source105/"
+  },
+  {
+    "type": "chapter",
+    "id": "source104",
+    "src": "https://cdn.mentria.ai/source104/00_cover.webp",
+    "color": "linear-gradient(165deg, #130f16, #a98fdb, #130f16)",
+    "title": "Source",
+    "caption": {
+      "en": "The perfumer who never corks a vial. 7 cards.",
+      "es": "La perfumista que nunca tapa un frasco. 7 tarjetas.",
+      "fr": "La parfumeuse qui ne rebouche jamais un flacon. 7 cartes.",
+      "ja": "小瓶に栓をしない調香師。カード7枚。",
+      "pt-BR": "A perfumista que nunca tampa um frasco. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-12",
+    "link": "/feed/source/source104/"
+  },
+  {
+    "type": "chapter",
+    "id": "source103",
+    "src": "https://cdn.mentria.ai/source103/00_cover.webp",
+    "color": "linear-gradient(165deg, #0c1116, #74aacf, #0c1116)",
+    "title": "Source",
+    "caption": {
+      "en": "The traveler who packed for the wrong sky. 7 cards.",
+      "es": "La viajera que empacaba para el cielo equivocado. 7 tarjetas.",
+      "fr": "La voyageuse qui faisait son sac pour le mauvais ciel. 7 cartes.",
+      "ja": "ちがう空のために荷造りしていた旅人。カード7枚。",
+      "pt-BR": "A viajante que fazia as malas para o céu errado. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-11",
+    "link": "/feed/source/source103/"
+  },
+  {
+    "type": "chapter",
+    "id": "source102",
+    "src": "https://cdn.mentria.ai/source102/00_cover.webp",
+    "color": "linear-gradient(165deg, #150908, #cc6b5a, #150908)",
+    "title": "Source",
+    "caption": {
+      "en": "The judge who let a pie beat a pumpkin. 7 cards.",
+      "es": "La jueza que dejó a un pastel vencer a una calabaza. 7 tarjetas.",
+      "fr": "La juge qui laissa une tarte battre une citrouille. 7 cartes.",
+      "ja": "パイがカボチャに勝つのを許した審査員。カード7枚。",
+      "pt-BR": "A juíza que deixou uma torta vencer uma abóbora. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-11",
+    "link": "/feed/source/source102/"
+  },
+  {
+    "type": "chapter",
+    "id": "source101",
+    "src": "https://cdn.mentria.ai/source101/00_cover.webp",
+    "color": "linear-gradient(165deg, #10130a, #8fa84f, #10130a)",
+    "title": "Source",
+    "caption": {
+      "en": "A whole night, tied into one short cord. 7 cards.",
+      "es": "Una noche entera, atada en una cuerda corta. 7 tarjetas.",
+      "fr": "Une nuit entière, nouée dans une courte cordelette. 7 cartes.",
+      "ja": "ひと晩まるごと、短い紐ひとつに。カード7枚。",
+      "pt-BR": "Uma noite inteira, atada numa corda curta. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-11",
+    "link": "/feed/source/source101/"
+  },
+  {
+    "type": "chapter",
+    "id": "source100",
+    "src": "https://cdn.mentria.ai/source100/00_cover.webp",
+    "color": "linear-gradient(165deg, #0a0e18, #6b7fe8, #0a0e18)",
+    "title": "Source",
+    "caption": {
+      "en": "Two captains, one average, two different bets. 7 cards.",
+      "es": "Dos capitanes, un promedio, dos apuestas distintas. 7 tarjetas.",
+      "fr": "Deux capitaines, une moyenne, deux paris différents. 7 cartes.",
+      "ja": "平均は同じ、賭けはまるで別。カード7枚。",
+      "pt-BR": "Dois capitães, uma média, duas apostas diferentes. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-11",
+    "link": "/feed/source/source100/"
+  },
+  {
+    "type": "chapter",
+    "id": "source99",
+    "src": "https://cdn.mentria.ai/source99/00_cover.webp",
+    "color": "linear-gradient(165deg, #160d07, #e07a3f, #160d07)",
+    "title": "Source",
+    "caption": {
+      "en": "The pinch that vanished into the sack. 7 cards.",
+      "es": "La pizca que desapareció en el saco. 7 tarjetas.",
+      "fr": "La pincée disparue dans le sac. 7 cartes.",
+      "ja": "袋に消えたひとつまみ。カード7枚。",
+      "pt-BR": "A pitada que sumiu no saco. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-11",
+    "link": "/feed/source/source99/"
+  },
+  {
+    "type": "chapter",
+    "id": "source98",
+    "src": "https://cdn.mentria.ai/source98/00_cover.webp",
+    "color": "linear-gradient(165deg, #071310, #4adbb0, #071310)",
+    "title": "Source",
+    "caption": {
+      "en": "Finding one sheep on a mountain in ten shouts. 7 cards.",
+      "es": "Encontrar una oveja en la montaña con diez gritos. 7 tarjetas.",
+      "fr": "Retrouver une brebis sur la montagne en dix cris. 7 cartes.",
+      "ja": "十回の叫びで山の迷い羊を見つける。カード7枚。",
+      "pt-BR": "Achar uma ovelha na montanha com dez gritos. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-11",
+    "link": "/feed/source/source98/"
+  },
+  {
+    "type": "chapter",
+    "id": "source97",
+    "src": "https://cdn.mentria.ai/source97/00_cover.webp",
+    "color": "linear-gradient(165deg, #131106, #b99427, #131106)",
+    "title": "Source",
+    "caption": {
+      "en": "The kitchen where busy pairs earn their own jar. 7 cards.",
+      "es": "La cocina donde las parejas frecuentes se ganan su frasco. 7 tarjetas.",
+      "fr": "La cuisine où les paires fréquentes gagnent leur bocal. 7 cartes.",
+      "ja": "よく出会う組み合わせが自分の瓶を勝ち取る厨房。カード7枚。",
+      "pt-BR": "A cozinha onde os pares frequentes ganham seu próprio pote. 7 cartões."
+    },
+    "badge": "SOURCE",
+    "tags": [
+      "ai",
+      "explained"
+    ],
+    "date": "2026-07-11",
+    "link": "/feed/source/source97/"
+  },
+  {
+    "type": "chapter",
     "id": "source96",
     "src": "https://cdn.mentria.ai/source96/00_cover.webp",
     "color": "linear-gradient(165deg, #120a14, #b06fd4, #120a14)",

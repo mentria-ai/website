@@ -11,7 +11,8 @@
     "title": "Step Counter",
     "summary": "Session pedometer using your phone's motion sensor — goal ring, 7-day history, streaks, a black-screen pocket mode that keeps counting in your pocket, and honest estimates for locked-screen gaps. All on-device.",
     "category": "Health",
-    "group": "Everyday"
+    "group": "Everyday",
+    "requires": "motion"
   },
   {
     "slug": "qr-scanner",

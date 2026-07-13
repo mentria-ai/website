@@ -1156,3 +1156,5 @@ body.is-fullscreen-tool .app-bar {
   main { max-width: none !important; }
   a { color: #0a4ea3 !important; }
 }
+
+html.mentria-no-motion [data-requires="motion"] { display: none !important; }

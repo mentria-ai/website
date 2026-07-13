@@ -94,6 +94,7 @@
     for (i = 0; i < tools.length; i++) {
       var t = tools[i];
       if (!t || !t.slug) continue;
+      if (t.requires === 'motion' && window.MentriaCaps && window.MentriaCaps.motion === false) continue;
       var title = t.title || t.slug;
       var cat = t.category || '';
       var entry = {

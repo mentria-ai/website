@@ -220,6 +220,7 @@ eleventyComputed:
     for (const entry of INDEX) {
       if (entry.lang !== LANG) continue;
       if (activeType !== 'all' && entry.type !== activeType) continue;
+      if (entry.requires === 'motion' && window.MentriaCaps && window.MentriaCaps.motion === false) continue;
       pool.push(entry);
       const score = scoreEntry(entry, qTokens, qNorm);
       if (score > 0) scored.push({ entry, score });

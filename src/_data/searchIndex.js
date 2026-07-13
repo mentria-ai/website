@@ -57,7 +57,8 @@ module.exports = function () {
         title: t(`tools.${tool.slug}.title`) || tool.title,
         description: t(`tools.${tool.slug}.lede`) || tool.summary,
         tldr: t(`tools.${tool.slug}.tldr`) || "",
-        category: tool.category
+        category: tool.category,
+        requires: tool.requires
       });
     }
     for (const ch of chapters) {

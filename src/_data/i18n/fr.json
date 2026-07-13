@@ -326,7 +326,7 @@
     "step-counter": {
       "title": "Compteur de Pas",
       "lede": "Compte tes pas en marchant, directement dans le navigateur. Utilise le capteur de mouvement de ton téléphone — rien n'est envoyé.",
-      "tldr": "Un podomètre par session qui lit l'accéléromètre de ton téléphone via l'API DeviceMotion et compte les pas par détection de pics sur l'appareil. Lance une session et marche avec l'écran allumé — il suit les pas, la distance, le rythme et un anneau d'objectif quotidien. Tout le traitement reste dans le navigateur : pas de compte, pas d'envoi, pas de suivi en arrière-plan. Les appareils sans capteur de mouvement affichent un état désactivé. Les totaux quotidiens restent sur cet appareil, avec un graphique sur 7 jours et des séries d'objectifs."
+      "tldr": "Un podomètre par session qui lit l'accéléromètre de ton téléphone via l'API DeviceMotion et compte les pas par détection de pics sur l'appareil. Lance une session et marche avec l'écran allumé — il suit les pas, la distance, le rythme et un anneau d'objectif quotidien. Tout le traitement reste dans le navigateur : pas de compte, pas d'envoi, pas de suivi en arrière-plan. Les appareils sans capteur de mouvement affichent un état désactivé. Les totaux quotidiens restent sur cet appareil, avec un graphique sur 7 jours et des séries d'objectifs. Le mode poche garde l'écran allumé mais tout noir (idéal sur OLED) pour continuer à compter dans la poche ; les courtes interruptions écran verrouillé sont comblées d'après votre cadence et marquées comme estimations."
     },
     "qr-scanner": {
       "title": "Scanner et générateur de QR codes et codes-barres",
@@ -946,7 +946,12 @@
       "streak_current": "Série en cours",
       "streak_best": "Meilleure série",
       "streak_day": "{n} jour",
-      "streak_days": "{n} jours"
+      "streak_days": "{n} jours",
+      "btn_pocket": "Mode poche",
+      "pocket_note": "Le mode poche garde l'écran allumé mais tout noir : les pas continuent d'être comptés dans la poche. Idéal sur écran OLED. Maintenez le doigt puis glissez à droite pour quitter.",
+      "pocket_exit": "Maintenez, puis glissez à droite pour quitter",
+      "est_label": "est.",
+      "est_explain": "Estimation d'après votre cadence de marche pendant que l'écran était verrouillé"
     },
     "qr-scanner": {
       "aria_video": "Aperçu de la caméra en direct",

@@ -336,7 +336,7 @@
     "step-counter": {
       "title": "Step Counter",
       "lede": "Count your steps on a walk, right in the browser. Uses your phone's motion sensor — nothing is uploaded.",
-      "tldr": "A session-based pedometer that reads your phone's accelerometer through the DeviceMotion API and counts steps with on-device peak detection. Start a session and walk with the screen on — it tracks steps, distance, pace, and a daily goal ring. All processing stays in the browser: no account, no upload, no background tracking. Desktops and devices without a motion sensor show a disabled state. Daily totals persist on this device, with a 7-day chart and goal streaks."
+      "tldr": "A session-based pedometer that reads your phone's accelerometer through the DeviceMotion API and counts steps with on-device peak detection. Start a session and walk with the screen on — it tracks steps, distance, pace, and a daily goal ring. All processing stays in the browser: no account, no upload, no background tracking. Desktops and devices without a motion sensor show a disabled state. Daily totals persist on this device, with a 7-day chart and goal streaks. Pocket mode keeps the screen on but pure black (best on OLED) so steps keep counting in your pocket; short locked-screen gaps are filled from your walking pace and labeled as estimates."
     },
     "qr-scanner": {
       "title": "QR & Barcode Scanner + Generator",
@@ -946,7 +946,12 @@
       "streak_current": "Current streak",
       "streak_best": "Best streak",
       "streak_day": "{n} day",
-      "streak_days": "{n} days"
+      "streak_days": "{n} days",
+      "btn_pocket": "Pocket mode",
+      "pocket_note": "Pocket mode keeps the screen on but pure black, so steps keep counting in your pocket. Best on OLED screens. Hold a finger down, then slide right to exit.",
+      "pocket_exit": "Hold, then slide right to exit",
+      "est_label": "est.",
+      "est_explain": "Estimated from your walking pace while the screen was locked"
     },
     "qr-scanner": {
       "aria_video": "Live camera preview",

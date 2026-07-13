@@ -326,7 +326,7 @@
     "step-counter": {
       "title": "Contador de Pasos",
       "lede": "Cuenta tus pasos al caminar, directamente en el navegador. Usa el sensor de movimiento de tu teléfono — nada se sube.",
-      "tldr": "Un podómetro por sesión que lee el acelerómetro de tu teléfono mediante la API DeviceMotion y cuenta pasos con detección de picos en el dispositivo. Inicia una sesión y camina con la pantalla encendida — registra pasos, distancia, ritmo y un anillo de meta diaria. Todo el procesamiento ocurre en el navegador: sin cuenta, sin subida, sin seguimiento en segundo plano. Los equipos sin sensor de movimiento muestran un estado desactivado. Los totales diarios se guardan en este dispositivo, con un gráfico de 7 días y rachas de objetivo."
+      "tldr": "Un podómetro por sesión que lee el acelerómetro de tu teléfono mediante la API DeviceMotion y cuenta pasos con detección de picos en el dispositivo. Inicia una sesión y camina con la pantalla encendida — registra pasos, distancia, ritmo y un anillo de meta diaria. Todo el procesamiento ocurre en el navegador: sin cuenta, sin subida, sin seguimiento en segundo plano. Los equipos sin sensor de movimiento muestran un estado desactivado. Los totales diarios se guardan en este dispositivo, con un gráfico de 7 días y rachas de objetivo. El modo bolsillo mantiene la pantalla encendida pero en negro puro (ideal en OLED) para seguir contando en el bolsillo; los huecos cortos con pantalla bloqueada se rellenan según tu ritmo y se marcan como estimaciones."
     },
     "qr-scanner": {
       "title": "Escáner y generador de QR y códigos de barras",
@@ -946,7 +946,12 @@
       "streak_current": "Racha actual",
       "streak_best": "Mejor racha",
       "streak_day": "{n} día",
-      "streak_days": "{n} días"
+      "streak_days": "{n} días",
+      "btn_pocket": "Modo bolsillo",
+      "pocket_note": "El modo bolsillo mantiene la pantalla encendida pero en negro puro, y los pasos se siguen contando en el bolsillo. Ideal en pantallas OLED. Mantén pulsado y desliza a la derecha para salir.",
+      "pocket_exit": "Mantén pulsado y desliza a la derecha para salir",
+      "est_label": "est.",
+      "est_explain": "Estimación según tu ritmo de marcha mientras la pantalla estaba bloqueada"
     },
     "qr-scanner": {
       "aria_video": "Vista previa de la cámara en vivo",

@@ -9,7 +9,7 @@
   {
     "slug": "step-counter",
     "title": "Step Counter",
-    "summary": "Session pedometer that counts steps from your phone's motion sensor — distance, pace, a daily goal ring, 7-day history, and goal streaks, all on-device.",
+    "summary": "Session pedometer using your phone's motion sensor — goal ring, 7-day history, streaks, a black-screen pocket mode that keeps counting in your pocket, and honest estimates for locked-screen gaps. All on-device.",
     "category": "Health",
     "group": "Everyday"
   },

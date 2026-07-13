@@ -326,7 +326,7 @@
     "step-counter": {
       "title": "Contador de Passos",
       "lede": "Conte seus passos durante uma caminhada, direto no navegador. Usa o sensor de movimento do seu telefone — nada é enviado.",
-      "tldr": "Um pedômetro por sessão que lê o acelerômetro do seu telefone pela API DeviceMotion e conta passos com detecção de picos no dispositivo. Inicie uma sessão e caminhe com a tela ligada — ele acompanha passos, distância, ritmo e um anel de meta diária. Todo o processamento fica no navegador: sem conta, sem upload, sem rastreamento em segundo plano. Dispositivos sem sensor de movimento mostram um estado desativado. Os totais diários ficam neste dispositivo, com gráfico de 7 dias e sequências de meta."
+      "tldr": "Um pedômetro por sessão que lê o acelerômetro do seu telefone pela API DeviceMotion e conta passos com detecção de picos no dispositivo. Inicie uma sessão e caminhe com a tela ligada — ele acompanha passos, distância, ritmo e um anel de meta diária. Todo o processamento fica no navegador: sem conta, sem upload, sem rastreamento em segundo plano. Dispositivos sem sensor de movimento mostram um estado desativado. Os totais diários ficam neste dispositivo, com gráfico de 7 dias e sequências de meta. O modo bolso mantém a tela acesa, mas em preto puro (ideal em OLED), para continuar contando no bolso; lacunas curtas com a tela bloqueada são preenchidas pelo seu ritmo e marcadas como estimativas."
     },
     "qr-scanner": {
       "title": "Scanner e gerador de QR e códigos de barras",
@@ -946,7 +946,12 @@
       "streak_current": "Sequência atual",
       "streak_best": "Melhor sequência",
       "streak_day": "{n} dia",
-      "streak_days": "{n} dias"
+      "streak_days": "{n} dias",
+      "btn_pocket": "Modo bolso",
+      "pocket_note": "O modo bolso mantém a tela acesa, mas em preto puro — os passos continuam sendo contados no bolso. Ideal em telas OLED. Segure o dedo e deslize para a direita para sair.",
+      "pocket_exit": "Segure e deslize para a direita para sair",
+      "est_label": "est.",
+      "est_explain": "Estimativa com base no seu ritmo de caminhada enquanto a tela estava bloqueada"
     },
     "qr-scanner": {
       "aria_video": "Pré-visualização da câmera ao vivo",

@@ -25,10 +25,12 @@ eleventyComputed:
     <div class="sc__ring-wrap">
       <svg class="sc__ring" viewBox="0 0 200 200" aria-hidden="true">
         <circle class="sc__ring-track" cx="100" cy="100" r="86"></circle>
+        <circle class="sc__ring-est" id="sc-ring-est" cx="100" cy="100" r="86"></circle>
         <circle class="sc__ring-fill" id="sc-ring" cx="100" cy="100" r="86"></circle>
       </svg>
       <div class="sc__ring-center">
         <span class="sc__count" id="sc-count">0</span>
+        <span class="sc__est" id="sc-est" title="{{ 'tool.step-counter.est_explain' | t }}"></span>
         <span class="sc__count-label" id="sc-count-label">{{ "tool.step-counter.steps_today" | t }}</span>
         <span class="sc__goal" id="sc-goal-text"></span>
       </div>
@@ -55,8 +57,10 @@ eleventyComputed:
 
     <div class="sc__controls">
       <button class="sc__btn m-btn m-btn--primary m-btn--pill" id="sc-toggle">{{ "tool.step-counter.btn_start" | t }}</button>
+      <button class="sc__btn m-btn m-btn--ghost m-btn--pill" id="sc-pocket-btn" title="{{ 'tool.step-counter.pocket_note' | t }}" hidden>{{ "tool.step-counter.btn_pocket" | t }}</button>
       <button class="sc__btn m-btn m-btn--ghost m-btn--pill" id="sc-settings-btn" popovertarget="sc-settings">{{ "tool.step-counter.settings" | t }}</button>
     </div>
+    <p class="sc__pocket-note" id="sc-pocket-note" hidden>{{ "tool.step-counter.pocket_note" | t }}</p>
 
     <div class="sc__history">
       <span class="sc__history-label">{{ "tool.step-counter.history_label" | t }}</span>
@@ -100,6 +104,14 @@ eleventyComputed:
       <button type="button" class="sc__btn m-btn m-btn--ghost m-btn--pill" data-sc-back>{{ "tool.step-counter.back_to_stats" | t }}</button>
   </div>
 
+  <div class="sc__pocket" id="sc-pocket" hidden>
+    <span class="sc__pocket-count" id="sc-pocket-count">0</span>
+    <p class="sc__pocket-hint" id="sc-pocket-hint">{{ "tool.step-counter.pocket_exit" | t }}</p>
+    <div class="sc__pocket-track" id="sc-pocket-track" hidden aria-hidden="true">
+      <div class="sc__pocket-thumb" id="sc-pocket-thumb"></div>
+    </div>
+  </div>
+
   <div id="sc-settings" popover class="sc__settings">
     <div class="m-field">
       <label for="sc-goal">{{ "tool.step-counter.goal_label" | t }}</label>
@@ -136,7 +148,8 @@ eleventyComputed:
     goalReached: {{ ("tool.step-counter.goal_reached" | t) | dump | safe }},
     confirmReset:{{ ("tool.step-counter.confirm_reset"| t) | dump | safe }},
     streakDay:   {{ ("tool.step-counter.streak_day"   | t) | dump | safe }},
-    streakDays:  {{ ("tool.step-counter.streak_days"  | t) | dump | safe }}
+    streakDays:  {{ ("tool.step-counter.streak_days"  | t) | dump | safe }},
+    estLabel:    {{ ("tool.step-counter.est_label"    | t) | dump | safe }}
   };
 
   const LS = 'mentria-step-counter';
@@ -167,8 +180,18 @@ eleventyComputed:
   const sensSeg     = $('sc-sens');
   const resetBtn    = $('sc-reset');
   const permBtn     = $('sc-perm-btn');
+  const ringEstEl   = $('sc-ring-est');
+  const estEl       = $('sc-est');
+  const pocketBtn   = $('sc-pocket-btn');
+  const pocketNote  = $('sc-pocket-note');
+  const pocketEl    = $('sc-pocket');
+  const pocketCount = $('sc-pocket-count');
+  const pocketHint  = $('sc-pocket-hint');
+  const pocketTrack = $('sc-pocket-track');
+  const pocketThumb = $('sc-pocket-thumb');
 
   ringEl.style.strokeDasharray = RING_CIRC;
+  ringEstEl.style.strokeDasharray = RING_CIRC;
 
   function todayKey() {
     const d = new Date();
@@ -193,15 +216,19 @@ eleventyComputed:
       try { s = JSON.parse(localStorage.getItem(LS)) || {}; } catch (_) {}
     }
     s.history = s.history || {};
+    s.estHistory = s.estHistory || {};
     s.goal = s.goal || 10000;
     s.stride = s.stride || 75;
     s.sensitivity = SENS[s.sensitivity] ? s.sensitivity : 'med';
     if (s.date && s.date !== todayKey()) {
       if (s.steps > 0) s.history[s.date] = s.steps;
+      if (s.estSteps > 0) s.estHistory[s.date] = s.estSteps;
       s.steps = 0;
+      s.estSteps = 0;
     }
     s.date = todayKey();
     s.steps = s.steps || 0;
+    s.estSteps = s.estSteps || 0;
     return s;
   }
 
@@ -214,7 +241,9 @@ eleventyComputed:
     const key = todayKey();
     if (state.date === key) return false;
     if (state.steps > 0) state.history[state.date] = state.steps;
+    if (state.estSteps > 0) state.estHistory[state.date] = state.estSteps;
     state.steps = 0;
+    state.estSteps = 0;
     state.date = key;
     persist();
     renderCount();
@@ -239,6 +268,21 @@ eleventyComputed:
   let peaked = false;
   let lastPeakAt = 0;
 
+  let stepTimes = [];
+  let gapMark = null;
+  let gapConfirmTimer = null;
+  let pocketOn = false;
+
+  function cadencePerMin(windowMs, now) {
+    const cutoff = now - windowMs;
+    let n = 0;
+    for (let i = stepTimes.length - 1; i >= 0; i--) {
+      if (stepTimes[i] < cutoff) break;
+      n++;
+    }
+    return n / (windowMs / 60000);
+  }
+
   function fmtDistance(steps) {
     const m = steps * (state.stride / 100);
     if (m < 1000) return Math.round(m).toLocaleString(LANG) + ' m';
@@ -254,12 +298,16 @@ eleventyComputed:
 
   function renderCount() {
     countEl.textContent = state.steps.toLocaleString(LANG);
+    estEl.textContent = state.estSteps > 0 ? '+' + state.estSteps.toLocaleString(LANG) + ' ' + COPY.estLabel : '';
     goalTextEl.textContent = COPY.goalOf.replace('{goal}', state.goal.toLocaleString(LANG));
+    const total = state.steps + state.estSteps;
     const pct = Math.max(0, Math.min(1, state.steps / state.goal));
+    const pctTotal = Math.max(0, Math.min(1, total / state.goal));
     ringEl.style.strokeDashoffset = RING_CIRC * (1 - pct);
-    ringEl.classList.toggle('is-complete', pct >= 1);
-    if (goalReachedEl) goalReachedEl.textContent = pct >= 1 ? COPY.goalReached : '';
-    distEl.textContent = fmtDistance(state.steps);
+    ringEstEl.style.strokeDashoffset = RING_CIRC * (1 - pctTotal);
+    ringEl.classList.toggle('is-complete', pctTotal >= 1);
+    if (goalReachedEl) goalReachedEl.textContent = pctTotal >= 1 ? COPY.goalReached : '';
+    distEl.textContent = fmtDistance(total);
   }
 
   function renderHistory() {
@@ -270,19 +318,24 @@ eleventyComputed:
       d.setDate(now.getDate() - i);
       const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       const steps = key === state.date ? state.steps : (state.history[key] || 0);
-      days.push({ key, steps, label: d.toLocaleDateString(LANG, { weekday: 'short' }).slice(0, 2) });
+      const est = key === state.date ? state.estSteps : (state.estHistory[key] || 0);
+      days.push({ key, steps, est, label: d.toLocaleDateString(LANG, { weekday: 'short' }).slice(0, 2) });
     }
-    const max = Math.max(state.goal, ...days.map(d => d.steps), 1);
+    const max = Math.max(state.goal, ...days.map(d => d.steps + d.est), 1);
     barsEl.innerHTML = '';
     for (const d of days) {
       const col = document.createElement('div');
       col.className = 'sc__bar-col';
+      const total = d.steps + d.est;
       const h = Math.max(2, Math.round((d.steps / max) * 100));
+      const he = d.est > 0 ? Math.round((d.est / max) * 100) : 0;
       col.innerHTML =
-        '<div class="sc__bar-track"><div class="sc__bar-fill' +
-        (d.steps >= state.goal ? ' is-goal' : '') + '" style="height:' + h + '%"></div></div>' +
+        '<div class="sc__bar-track">' +
+        (he > 0 ? '<div class="sc__bar-est" style="height:' + he + '%"></div>' : '') +
+        '<div class="sc__bar-fill' +
+        (total >= state.goal ? ' is-goal' : '') + '" style="height:' + h + '%"></div></div>' +
         '<span class="sc__bar-label">' + d.label + '</span>';
-      col.title = d.steps.toLocaleString(LANG);
+      col.title = total.toLocaleString(LANG) + (d.est > 0 ? ' (+' + d.est.toLocaleString(LANG) + ' ' + COPY.estLabel + ')' : '');
       barsEl.appendChild(col);
     }
     renderStreaks();
@@ -301,12 +354,15 @@ eleventyComputed:
   }
 
   function computeStreaks() {
-    const met = key => (key === state.date ? state.steps : (state.history[key] || 0)) >= state.goal;
+    const met = key => key === state.date
+      ? state.steps + state.estSteps >= state.goal
+      : (state.history[key] || 0) + (state.estHistory[key] || 0) >= state.goal;
     let current = 0;
     const startOff = met(todayKey()) ? 0 : 1;
     while (current < 4000 && met(keyDaysAgo(startOff + current))) current++;
     let best = current;
-    const metDays = Object.keys(state.history).filter(k => (state.history[k] || 0) >= state.goal).sort();
+    const metDays = Object.keys(state.history)
+      .filter(k => (state.history[k] || 0) + (state.estHistory[k] || 0) >= state.goal).sort();
     let run = 0, prev = null;
     for (const k of metDays) {
       run = prev !== null && nextDayKey(prev) === k ? run + 1 : 1;
@@ -345,13 +401,17 @@ eleventyComputed:
 
   function registerStep() {
     rolloverIfNeeded();
-    const wasUnderGoal = state.steps < state.goal;
+    const wasUnderGoal = state.steps + state.estSteps < state.goal;
     state.steps += 1;
     sessionSteps += 1;
+    const now = Date.now();
+    stepTimes.push(now);
+    if (stepTimes.length > 240) stepTimes.shift();
     renderCount();
     renderHistory();
     persist();
-    if (wasUnderGoal && state.steps >= state.goal && navigator.vibrate) {
+    if (pocketOn) renderPocket();
+    if (wasUnderGoal && state.steps + state.estSteps >= state.goal && navigator.vibrate) {
       navigator.vibrate([120, 60, 120, 60, 200]);
     }
   }
@@ -404,6 +464,8 @@ eleventyComputed:
     lastPeakAt = 0;
     toggleBtn.textContent = COPY.btnPause;
     hintEl.hidden = false;
+    pocketBtn.hidden = false;
+    pocketNote.hidden = false;
     window.addEventListener('devicemotion', onMotion);
     requestWakeLock();
     tickTimer = setInterval(updateSession, 1000);
@@ -427,6 +489,11 @@ eleventyComputed:
       toggleBtn.textContent = COPY.btnResume;
       hintEl.hidden = true;
     }
+    pocketBtn.hidden = true;
+    pocketNote.hidden = true;
+    exitPocket();
+    gapMark = null;
+    if (gapConfirmTimer) { clearTimeout(gapConfirmTimer); gapConfirmTimer = null; }
   }
 
   async function start() {
@@ -489,6 +556,8 @@ eleventyComputed:
   resetBtn.addEventListener('click', async () => {
     if (!(await mentriaConfirm(COPY.confirmReset))) return;
     state.steps = 0;
+    state.estSteps = 0;
+    stepTimes = [];
     sessionSteps = 0;
     sessionElapsed = 0;
     sessionStart = running ? Date.now() : 0;
@@ -499,11 +568,123 @@ eleventyComputed:
     updateSession();
   });
 
+  const GAP_MIN_MS = 15000;
+  const GAP_MAX_MS = 300000;
+  const CONFIRM_MS = 20000;
+  const MIN_CADENCE = 40;
+
+  function markGapStart() {
+    if (!running) return;
+    const now = Date.now();
+    const cadence = cadencePerMin(20000, now);
+    const walking = stepTimes.length > 0 && now - stepTimes[stepTimes.length - 1] < 8000;
+    gapMark = walking && cadence >= MIN_CADENCE ? { at: now, cadence } : null;
+  }
+
+  function settleGap() {
+    if (!gapMark) return;
+    const mark = gapMark;
+    gapMark = null;
+    const gapMs = Date.now() - mark.at;
+    if (gapMs < GAP_MIN_MS || gapMs > GAP_MAX_MS) return;
+    if (gapConfirmTimer) clearTimeout(gapConfirmTimer);
+    gapConfirmTimer = setTimeout(() => {
+      gapConfirmTimer = null;
+      if (!running) return;
+      const cadenceAfter = cadencePerMin(CONFIRM_MS, Date.now());
+      if (cadenceAfter < MIN_CADENCE) return;
+      const ratio = Math.abs(mark.cadence - cadenceAfter) / Math.max(mark.cadence, cadenceAfter);
+      if (ratio > 0.15) return;
+      const est = Math.round(Math.min(mark.cadence, cadenceAfter) * (gapMs / 60000));
+      if (est < 1) return;
+      state.estSteps += est;
+      persist();
+      renderCount();
+      renderHistory();
+    }, CONFIRM_MS);
+  }
+
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState !== 'visible') return;
+    if (document.visibilityState !== 'visible') {
+      markGapStart();
+      return;
+    }
     rolloverIfNeeded();
     if (running && !wakeLock) requestWakeLock();
+    settleGap();
   });
+
+  function renderPocket() {
+    pocketCount.textContent = (state.steps + state.estSteps).toLocaleString(LANG);
+  }
+
+  function enterPocket() {
+    if (pocketOn) return;
+    pocketOn = true;
+    pocketEl.hidden = false;
+    pocketHint.style.opacity = '1';
+    setTimeout(() => { pocketHint.style.opacity = '0'; }, 5000);
+    renderPocket();
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+    }
+  }
+
+  function exitPocket() {
+    if (!pocketOn) return;
+    pocketOn = false;
+    pocketEl.hidden = true;
+    disarmPocket();
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  let pocketHold = null;
+  let pocketArmed = false;
+  let pocketX0 = 0;
+  let pocketY0 = 0;
+
+  function disarmPocket() {
+    pocketArmed = false;
+    pocketTrack.hidden = true;
+    pocketThumb.style.transform = 'translateX(0)';
+    if (pocketHold) { clearTimeout(pocketHold); pocketHold = null; }
+  }
+
+  pocketBtn.addEventListener('click', enterPocket);
+
+  pocketEl.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (pocketArmed) return;
+    pocketX0 = e.clientX;
+    pocketY0 = e.clientY;
+    if (pocketHold) clearTimeout(pocketHold);
+    pocketHold = setTimeout(() => {
+      pocketHold = null;
+      pocketArmed = true;
+      pocketTrack.hidden = false;
+      pocketHint.style.opacity = '1';
+      if (navigator.vibrate) navigator.vibrate(30);
+    }, 1200);
+  });
+  pocketEl.addEventListener('pointermove', e => {
+    e.preventDefault();
+    if (!pocketArmed) {
+      if (pocketHold && (Math.abs(e.clientX - pocketX0) > 24 || Math.abs(e.clientY - pocketY0) > 24)) {
+        clearTimeout(pocketHold);
+        pocketHold = null;
+      }
+      return;
+    }
+    const dx = Math.max(0, e.clientX - pocketX0);
+    pocketThumb.style.transform = 'translateX(' + Math.min(dx, window.innerWidth * 0.6) + 'px)';
+    if (dx > window.innerWidth * 0.45) exitPocket();
+  });
+  pocketEl.addEventListener('pointerup', e => { e.preventDefault(); disarmPocket(); });
+  pocketEl.addEventListener('pointercancel', disarmPocket);
+  pocketEl.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+  pocketEl.addEventListener('contextmenu', e => e.preventDefault());
 
   renderCount();
   renderHistory();
@@ -648,10 +829,17 @@ eleventyComputed:
   flex: 1;
   width: 100%;
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
   background: rgba(255,255,255,0.03);
   border-radius: var(--radius-sm);
   overflow: hidden;
+}
+.sc__bar-est {
+  width: 100%;
+  background: var(--syn-cyan);
+  opacity: 0.22;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 .sc__bar-fill {
   width: 100%;
@@ -671,6 +859,79 @@ eleventyComputed:
   grid-template-columns: 1fr 1fr;
   gap: var(--space-2);
   width: 100%;
+}
+
+.sc__est {
+  font-size: 0.7rem;
+  color: rgba(110, 243, 197, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+.sc__est:empty { display: none; }
+
+.sc__ring-est {
+  fill: none;
+  stroke: var(--syn-cyan);
+  stroke-width: 14;
+  stroke-linecap: round;
+  opacity: 0.28;
+  transition: stroke-dashoffset 0.4s ease;
+}
+
+.sc__pocket-note {
+  font-size: 0.72rem;
+  color: var(--term-muted);
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 40ch;
+}
+.sc__pocket-note[hidden] { display: none; }
+
+.sc__pocket {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+.sc__pocket[hidden] { display: none; }
+.sc__pocket-count {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #17241f;
+  font-variant-numeric: tabular-nums;
+}
+.sc__pocket-hint {
+  position: absolute;
+  bottom: 14%;
+  margin: 0;
+  font-size: 0.72rem;
+  color: #182420;
+  transition: opacity 1.2s ease;
+  text-align: center;
+  padding: 0 2rem;
+}
+.sc__pocket-track {
+  position: absolute;
+  bottom: 22%;
+  left: 15%;
+  right: 15%;
+  height: 46px;
+  border: 1px solid #14312a;
+  border-radius: 999px;
+  padding: 2px;
+}
+.sc__pocket-track[hidden] { display: none; }
+.sc__pocket-thumb {
+  width: 40px;
+  height: 40px;
+  background: #0f5140;
+  border-radius: 50%;
 }
 
 .sc__panel {

@@ -644,49 +644,49 @@ eleventyComputed:
     }
   }
 
-  let pocketHold = null;
-  let pocketArmed = false;
-  let pocketX0 = 0;
-  let pocketY0 = 0;
+  let slideActive = false;
+  let slideId = null;
+  let slideX0 = 0;
+  let slideMax = 0;
 
   function disarmPocket() {
-    pocketArmed = false;
+    slideActive = false;
+    slideId = null;
     pocketEl.classList.remove('is-armed');
+    pocketThumb.style.transition = 'transform 0.18s ease';
     pocketThumb.style.transform = 'translateX(0)';
-    if (pocketHold) { clearTimeout(pocketHold); pocketHold = null; }
   }
 
   pocketBtn.addEventListener('click', enterPocket);
 
   pocketEl.addEventListener('pointerdown', e => {
     e.preventDefault();
-    if (pocketArmed) return;
-    pocketX0 = e.clientX;
-    pocketY0 = e.clientY;
-    if (pocketHold) clearTimeout(pocketHold);
-    pocketHold = setTimeout(() => {
-      pocketHold = null;
-      pocketArmed = true;
-      pocketEl.classList.add('is-armed');
-      pocketHint.style.opacity = '1';
-      if (navigator.vibrate) navigator.vibrate(30);
-    }, 1200);
+    if (slideActive) { disarmPocket(); return; }
+    const tr = pocketTrack.getBoundingClientRect();
+    const th = pocketThumb.getBoundingClientRect();
+    if (e.clientY < tr.top - 12 || e.clientY > tr.bottom + 12) return;
+    if (e.clientX < tr.left - 8 || e.clientX > th.right + 20) return;
+    slideActive = true;
+    slideId = e.pointerId;
+    slideX0 = e.clientX;
+    slideMax = tr.width - th.width - 6;
+    pocketEl.classList.add('is-armed');
+    pocketHint.style.opacity = '1';
+    pocketThumb.style.transition = 'none';
+    if (navigator.vibrate) navigator.vibrate(15);
   });
   pocketEl.addEventListener('pointermove', e => {
     e.preventDefault();
-    if (!pocketArmed) {
-      if (pocketHold && (Math.abs(e.clientX - pocketX0) > 24 || Math.abs(e.clientY - pocketY0) > 24)) {
-        clearTimeout(pocketHold);
-        pocketHold = null;
-      }
-      return;
+    if (!slideActive || e.pointerId !== slideId) return;
+    const dx = Math.max(0, Math.min(e.clientX - slideX0, slideMax));
+    pocketThumb.style.transform = 'translateX(' + dx + 'px)';
+    if (dx >= slideMax * 0.92) {
+      disarmPocket();
+      exitPocket();
     }
-    const dx = Math.max(0, e.clientX - pocketX0);
-    pocketThumb.style.transform = 'translateX(' + Math.min(dx, window.innerWidth * 0.6) + 'px)';
-    if (dx > window.innerWidth * 0.45) exitPocket();
   });
-  pocketEl.addEventListener('pointerup', e => { e.preventDefault(); disarmPocket(); });
-  pocketEl.addEventListener('pointercancel', disarmPocket);
+  pocketEl.addEventListener('pointerup', e => { e.preventDefault(); if (slideActive) disarmPocket(); });
+  pocketEl.addEventListener('pointercancel', () => { if (slideActive) disarmPocket(); });
   pocketEl.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
   pocketEl.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
   pocketEl.addEventListener('contextmenu', e => e.preventDefault());

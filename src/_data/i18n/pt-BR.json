@@ -948,8 +948,8 @@
       "streak_day": "{n} dia",
       "streak_days": "{n} dias",
       "btn_pocket": "Modo bolso",
-      "pocket_note": "O modo bolso mantém a tela acesa, mas em preto puro — os passos continuam sendo contados no bolso. Ideal em telas OLED. Segure o dedo e deslize para a direita para sair.",
-      "pocket_exit": "Segure e deslize para a direita para sair",
+      "pocket_note": "O modo bolso mantém a tela acesa, mas em preto puro — os passos continuam sendo contados no bolso. Ideal em telas OLED. Deslize o ponto na parte de baixo para sair.",
+      "pocket_exit": "Deslize para sair",
       "est_label": "est.",
       "est_explain": "Estimativa com base no seu ritmo de caminhada enquanto a tela estava bloqueada"
     },

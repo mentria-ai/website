@@ -948,8 +948,8 @@
       "streak_day": "{n} day",
       "streak_days": "{n} days",
       "btn_pocket": "Pocket mode",
-      "pocket_note": "Pocket mode keeps the screen on but pure black, so steps keep counting in your pocket. Best on OLED screens. Hold a finger down, then slide right to exit.",
-      "pocket_exit": "Hold, then slide right to exit",
+      "pocket_note": "Pocket mode keeps the screen on but pure black, so steps keep counting in your pocket. Best on OLED screens. Slide the dot at the bottom to exit.",
+      "pocket_exit": "Slide to exit",
       "est_label": "est.",
       "est_explain": "Estimated from your walking pace while the screen was locked"
     },

@@ -948,8 +948,8 @@
       "streak_day": "{n} jour",
       "streak_days": "{n} jours",
       "btn_pocket": "Mode poche",
-      "pocket_note": "Le mode poche garde l'écran allumé mais tout noir : les pas continuent d'être comptés dans la poche. Idéal sur écran OLED. Maintenez le doigt puis glissez à droite pour quitter.",
-      "pocket_exit": "Maintenez, puis glissez à droite pour quitter",
+      "pocket_note": "Le mode poche garde l'écran allumé mais tout noir : les pas continuent d'être comptés dans la poche. Idéal sur écran OLED. Faites glisser le point en bas pour quitter.",
+      "pocket_exit": "Glissez pour quitter",
       "est_label": "est.",
       "est_explain": "Estimation d'après votre cadence de marche pendant que l'écran était verrouillé"
     },

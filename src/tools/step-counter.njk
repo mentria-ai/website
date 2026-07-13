@@ -618,10 +618,13 @@ eleventyComputed:
     pocketCount.textContent = (state.steps + state.estSteps).toLocaleString(LANG);
   }
 
+  if (pocketEl.parentElement !== document.body) document.body.appendChild(pocketEl);
+
   function enterPocket() {
     if (pocketOn) return;
     pocketOn = true;
     pocketEl.hidden = false;
+    document.documentElement.classList.add('sc-pocket-on');
     pocketHint.style.opacity = '1';
     setTimeout(() => { pocketHint.style.opacity = '0'; }, 5000);
     renderPocket();
@@ -634,6 +637,7 @@ eleventyComputed:
     if (!pocketOn) return;
     pocketOn = false;
     pocketEl.hidden = true;
+    document.documentElement.classList.remove('sc-pocket-on');
     disarmPocket();
     if (document.fullscreenElement && document.exitFullscreen) {
       document.exitFullscreen().catch(() => {});
@@ -903,7 +907,7 @@ eleventyComputed:
 .sc__pocket-count {
   font-size: 2.4rem;
   font-weight: 700;
-  color: #17241f;
+  color: rgba(126, 231, 189, 0.55);
   font-variant-numeric: tabular-nums;
 }
 .sc__pocket-hint {
@@ -911,7 +915,7 @@ eleventyComputed:
   bottom: 14%;
   margin: 0;
   font-size: 0.72rem;
-  color: #182420;
+  color: rgba(126, 231, 189, 0.38);
   transition: opacity 1.2s ease;
   text-align: center;
   padding: 0 2rem;
@@ -922,7 +926,7 @@ eleventyComputed:
   left: 15%;
   right: 15%;
   height: 46px;
-  border: 1px solid #14312a;
+  border: 1px solid rgba(110, 243, 197, 0.35);
   border-radius: 999px;
   padding: 2px;
 }
@@ -930,9 +934,12 @@ eleventyComputed:
 .sc__pocket-thumb {
   width: 40px;
   height: 40px;
-  background: #0f5140;
+  background: rgba(31, 170, 128, 0.85);
   border-radius: 50%;
 }
+
+html.sc-pocket-on .app-bar { display: none !important; }
+html.sc-pocket-on { overscroll-behavior: none; }
 
 .sc__panel {
   display: flex;

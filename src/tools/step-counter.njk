@@ -107,7 +107,7 @@ eleventyComputed:
   <div class="sc__pocket" id="sc-pocket" hidden>
     <span class="sc__pocket-count" id="sc-pocket-count">0</span>
     <p class="sc__pocket-hint" id="sc-pocket-hint">{{ "tool.step-counter.pocket_exit" | t }}</p>
-    <div class="sc__pocket-track" id="sc-pocket-track" hidden aria-hidden="true">
+    <div class="sc__pocket-track" id="sc-pocket-track" aria-hidden="true">
       <div class="sc__pocket-thumb" id="sc-pocket-thumb"></div>
     </div>
   </div>
@@ -651,7 +651,7 @@ eleventyComputed:
 
   function disarmPocket() {
     pocketArmed = false;
-    pocketTrack.hidden = true;
+    pocketEl.classList.remove('is-armed');
     pocketThumb.style.transform = 'translateX(0)';
     if (pocketHold) { clearTimeout(pocketHold); pocketHold = null; }
   }
@@ -667,7 +667,7 @@ eleventyComputed:
     pocketHold = setTimeout(() => {
       pocketHold = null;
       pocketArmed = true;
-      pocketTrack.hidden = false;
+      pocketEl.classList.add('is-armed');
       pocketHint.style.opacity = '1';
       if (navigator.vibrate) navigator.vibrate(30);
     }, 1200);
@@ -688,7 +688,9 @@ eleventyComputed:
   pocketEl.addEventListener('pointerup', e => { e.preventDefault(); disarmPocket(); });
   pocketEl.addEventListener('pointercancel', disarmPocket);
   pocketEl.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+  pocketEl.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
   pocketEl.addEventListener('contextmenu', e => e.preventDefault());
+  pocketEl.addEventListener('selectstart', e => e.preventDefault());
 
   renderCount();
   renderHistory();
@@ -902,6 +904,10 @@ eleventyComputed:
   justify-content: center;
   touch-action: none;
   overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .sc__pocket[hidden] { display: none; }
 .sc__pocket-count {
@@ -929,8 +935,10 @@ eleventyComputed:
   border: 1px solid rgba(110, 243, 197, 0.35);
   border-radius: 999px;
   padding: 2px;
+  opacity: 0.35;
+  transition: opacity 0.3s ease;
 }
-.sc__pocket-track[hidden] { display: none; }
+.sc__pocket.is-armed .sc__pocket-track { opacity: 1; }
 .sc__pocket-thumb {
   width: 40px;
   height: 40px;

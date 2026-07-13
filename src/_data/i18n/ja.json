@@ -1387,7 +1387,8 @@
     "act_timer": "{dur}のタイマーを開始",
     "act_flip": "コインを投げる",
     "act_heads": "表",
-    "act_tails": "裏"
+    "act_tails": "裏",
+    "search_site": "サイト内で「{q}」を検索"
   },
   "widgets": {
     "steps_label": "歩数",
@@ -1407,6 +1408,7 @@
     "prev_slide": "前のスライド",
     "next_slide": "次のスライド",
     "progress_label": "デッキの進行状況",
-    "slide_of": "スライド {n} / {total}"
+    "slide_of": "スライド {n} / {total}",
+    "share_slide": "このカードを画像として共有"
   }
 }

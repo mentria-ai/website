@@ -269,7 +269,18 @@
       for (var ai = 0; ai < acts.length; ai++) ag.appendChild(makeOption(acts[ai]));
       listEl.appendChild(ag);
     }
-    if (qN) renderResults(qN); else renderEmptyState();
+    if (qN) {
+      renderResults(qN);
+      var sq = String(query || '').trim();
+      var shown = sq.length > 40 ? sq.slice(0, 40) + '…' : sq;
+      listEl.appendChild(makeOption({
+        title: fmtLabel(labels.searchSite || 'Search the site for “{q}”', { q: shown }),
+        hint: '',
+        href: ((data() && data().prefix) || '') + '/tools/search/?q=' + encodeURIComponent(sq)
+      }));
+    } else {
+      renderEmptyState();
+    }
     if (optionEls.length) {
       input.setAttribute('aria-expanded', 'true');
       setStatus('');

@@ -1387,7 +1387,8 @@
     "act_timer": "Start a {dur} timer",
     "act_flip": "Flip a coin",
     "act_heads": "Heads",
-    "act_tails": "Tails"
+    "act_tails": "Tails",
+    "search_site": "Search the site for “{q}”"
   },
   "widgets": {
     "steps_label": "Steps",
@@ -1407,6 +1408,7 @@
     "prev_slide": "Previous slide",
     "next_slide": "Next slide",
     "progress_label": "Deck progress",
-    "slide_of": "Slide {n} of {total}"
+    "slide_of": "Slide {n} of {total}",
+    "share_slide": "Share this card as an image"
   }
 }

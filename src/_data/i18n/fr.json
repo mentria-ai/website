@@ -1387,7 +1387,8 @@
     "act_timer": "Lancer un minuteur de {dur}",
     "act_flip": "Lancer une pièce",
     "act_heads": "Pile",
-    "act_tails": "Face"
+    "act_tails": "Face",
+    "search_site": "Rechercher « {q} » sur le site"
   },
   "widgets": {
     "steps_label": "Pas",
@@ -1407,6 +1408,7 @@
     "prev_slide": "Diapositive précédente",
     "next_slide": "Diapositive suivante",
     "progress_label": "Progression du deck",
-    "slide_of": "Diapositive {n} sur {total}"
+    "slide_of": "Diapositive {n} sur {total}",
+    "share_slide": "Partager cette carte en image"
   }
 }

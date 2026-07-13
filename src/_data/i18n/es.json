@@ -1387,7 +1387,8 @@
     "act_timer": "Iniciar un temporizador de {dur}",
     "act_flip": "Lanzar una moneda",
     "act_heads": "Cara",
-    "act_tails": "Cruz"
+    "act_tails": "Cruz",
+    "search_site": "Buscar “{q}” en el sitio"
   },
   "widgets": {
     "steps_label": "Pasos",
@@ -1407,6 +1408,7 @@
     "prev_slide": "Diapositiva anterior",
     "next_slide": "Siguiente diapositiva",
     "progress_label": "Progreso del deck",
-    "slide_of": "Diapositiva {n} de {total}"
+    "slide_of": "Diapositiva {n} de {total}",
+    "share_slide": "Compartir esta tarjeta como imagen"
   }
 }

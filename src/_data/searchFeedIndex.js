@@ -8,6 +8,20 @@ function locText(value, code) {
   return value[code] || value.en || "";
 }
 
+function strongTerms(deck, code) {
+  const seen = new Set();
+  const re = /<strong>([^<]*)<\/strong>/g;
+  for (const slide of deck.slides || []) {
+    const body = locText(slide.body, code);
+    let m;
+    while ((m = re.exec(body)) !== null) {
+      const term = m[1].trim();
+      if (term) seen.add(term);
+    }
+  }
+  return Array.from(seen).join(" ").slice(0, 280);
+}
+
 function deckItem(deck, kind, loc) {
   const captions = (deck.slides || [])
     .map(slide => locText(slide.caption, loc.code))
@@ -21,7 +35,7 @@ function deckItem(deck, kind, loc) {
     url: `${loc.pathPrefix}/feed/${kind}/${deck.id}/`,
     title: locText(deck.subtitle, loc.code) || deck.title,
     description: captions,
-    tldr: "",
+    tldr: strongTerms(deck, loc.code),
     category: kind
   };
 }

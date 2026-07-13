@@ -303,6 +303,171 @@
     }
   }
 
+  /* ── Share the current slide as an image card ─────── */
+  const shareBtn = document.getElementById('deckShare');
+
+  function slideImageUrl(el) {
+    const img = el.querySelector('img.deck__slide-img');
+    if (img && (img.currentSrc || img.src)) return img.currentSrc || img.src;
+    const bg = el.style.getPropertyValue('--slide-bg');
+    const m = bg && bg.match(/url\((['"]?)([^'")]+)\1\)/);
+    return m ? m[2] : '';
+  }
+
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const im = new Image();
+      im.crossOrigin = 'anonymous';
+      im.onload = () => resolve(im);
+      im.onerror = reject;
+      im.src = url;
+    });
+  }
+
+  function wrapLines(ctx, text, maxWidth, maxLines) {
+    const words = text.split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = '';
+    for (const w of words) {
+      const probe = line ? line + ' ' + w : w;
+      if (ctx.measureText(probe).width <= maxWidth || !line) {
+        line = probe;
+      } else {
+        lines.push(line);
+        line = w;
+        if (lines.length === maxLines - 1) break;
+      }
+    }
+    if (line && lines.length < maxLines) lines.push(line);
+    const used = lines.join(' ');
+    if (used.length < text.length && lines.length) {
+      lines[lines.length - 1] = lines[lines.length - 1].replace(/\s*\S*$/, '') + '…';
+    }
+    return lines;
+  }
+
+  async function renderShareCard() {
+    const el = slides[current];
+    const capEl = el.querySelector('.deck__caption');
+    const caption = capEl ? capEl.textContent.trim() : '';
+    const subtitle = (shareBtn.getAttribute('data-share-title') || '').trim();
+    const tagEl = root.querySelector('.deck__chapter-num');
+    const tag = tagEl ? tagEl.textContent.trim() : '';
+    const W = 1080, H = 1350;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#0a0a12';
+    ctx.fillRect(0, 0, W, H);
+    const url = slideImageUrl(el);
+    if (url) {
+      try {
+        const im = await loadImage(url);
+        const scale = Math.max(W / im.naturalWidth, H / im.naturalHeight);
+        const dw = im.naturalWidth * scale, dh = im.naturalHeight * scale;
+        ctx.drawImage(im, (W - dw) / 2, (H - dh) / 2, dw, dh);
+      } catch (_) {}
+    }
+
+    const scrim = ctx.createLinearGradient(0, H * 0.42, 0, H);
+    scrim.addColorStop(0, 'rgba(6,6,12,0)');
+    scrim.addColorStop(0.45, 'rgba(6,6,12,0.72)');
+    scrim.addColorStop(1, 'rgba(6,6,12,0.94)');
+    ctx.fillStyle = scrim;
+    ctx.fillRect(0, 0, W, H);
+
+    try { await document.fonts.ready; } catch (_) {}
+    const MONO = "'JetBrains Mono', 'Fira Code', 'Courier New', monospace";
+    const PAD = 72;
+    let baseline = H - PAD;
+
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = '500 30px ' + MONO;
+    ctx.fillStyle = '#6ef3c5';
+    ctx.fillText('mentria.ai', PAD, baseline);
+    if (tag) {
+      ctx.fillStyle = 'rgba(255,255,255,0.45)';
+      ctx.textAlign = 'right';
+      ctx.fillText(tag, W - PAD, baseline);
+      ctx.textAlign = 'left';
+    }
+    baseline -= 54;
+    ctx.strokeStyle = 'rgba(110,243,197,0.55)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(PAD, baseline);
+    ctx.lineTo(PAD + 64, baseline);
+    ctx.stroke();
+    baseline -= 44;
+
+    if (subtitle && subtitle !== caption) {
+      ctx.font = '400 30px ' + MONO;
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      const subLines = wrapLines(ctx, subtitle, W - PAD * 2, 2).reverse();
+      for (const line of subLines) {
+        ctx.fillText(line, PAD, baseline);
+        baseline -= 42;
+      }
+      baseline -= 18;
+    }
+
+    ctx.font = '600 52px ' + MONO;
+    ctx.fillStyle = '#ffffff';
+    const capLines = wrapLines(ctx, caption, W - PAD * 2, 6).reverse();
+    for (const line of capLines) {
+      ctx.fillText(line, PAD, baseline);
+      baseline -= 68;
+    }
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/png');
+    });
+  }
+
+  async function shareCurrentSlide() {
+    if (!shareBtn || shareBtn.classList.contains('is-busy')) return;
+    shareBtn.classList.add('is-busy');
+    try {
+      const blob = await renderShareCard();
+      const name = chapterId + '-s' + (current + 1) + '.png';
+      const pageUrl = location.origin + location.pathname;
+      const file = new File([blob], name, { type: 'image/png' });
+      const payload = {
+        files: [file],
+        title: document.title,
+        text: (shareBtn.getAttribute('data-share-title') || document.title) + ' — ' + pageUrl
+      };
+      if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+        try {
+          await navigator.share(payload);
+        } catch (err) {
+          if (!err || err.name !== 'AbortError') downloadBlob(name, blob);
+        }
+      } else {
+        downloadBlob(name, blob);
+      }
+    } catch (_) {
+    } finally {
+      shareBtn.classList.remove('is-busy');
+    }
+  }
+
+  function downloadBlob(name, blob) {
+    if (window.MentriaUI && window.MentriaUI.downloadFile) {
+      window.MentriaUI.downloadFile(name, blob);
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+
+  if (shareBtn) shareBtn.addEventListener('click', shareCurrentSlide);
+
   /* ── Style: fadeOut keyframe (toast) ───────────────────── */
   const style = document.createElement('style');
   style.textContent = '@keyframes fadeOut { 0%,70%{opacity:1} 100%{opacity:0;transform:translateX(-50%) translateY(8px)} }';

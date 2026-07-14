@@ -990,13 +990,10 @@ eleventyComputed:
   }
 
   .qn-editor__actions {
-    width: calc(100% + 2rem);
-    margin: 0 -1rem;
+    width: 100%;
     justify-content: flex-start;
-    overflow-x: auto;
-    scrollbar-width: none;
+    flex-wrap: wrap;
   }
-  .qn-editor__actions::-webkit-scrollbar { display: none; }
 
   .qn-action-btn {
     flex-shrink: 0;

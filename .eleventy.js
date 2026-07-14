@@ -140,6 +140,20 @@ module.exports = function(eleventyConfig) {
 
   // {{ "/tools/" | localeUrl(lang) }} — prefixes path with the locale's
   // pathPrefix, returns it unchanged for the default locale.
+  eleventyConfig.addTransform("hoistBodyStyles", function (content) {
+    if (!this.page.outputPath || !this.page.outputPath.endsWith(".html")) return content;
+    const headEnd = content.indexOf("</head>");
+    if (headEnd === -1) return content;
+    const bodyPart = content.slice(headEnd);
+    const styles = [];
+    const cleanedBody = bodyPart.replace(/<style>[\s\S]*?<\/style>/g, m => {
+      styles.push(m);
+      return "";
+    });
+    if (!styles.length) return content;
+    return content.slice(0, headEnd) + styles.join("\n") + cleanedBody;
+  });
+
   eleventyConfig.addFilter("chapterExists", function (chapterId) {
     return chapterCatalog.some(ch => ch.id === chapterId);
   });

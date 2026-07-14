@@ -697,6 +697,16 @@ eleventyComputed:
   border: none;
   cursor: pointer;
   padding: 0.25rem;
+  position: relative;
+}
+.qn-sidebar__toggle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
 }
 
 .qn-sidebar__toggle-icon {

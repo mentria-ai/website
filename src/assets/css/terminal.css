@@ -96,6 +96,15 @@ button.terminal-frame__dot--green {
   position: relative;
   transition: filter 0.15s ease, transform 0.15s ease;
 }
+button.terminal-frame__dot--green::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+}
 button.terminal-frame__dot--green:hover { filter: brightness(1.25); transform: scale(1.15); }
 button.terminal-frame__dot--green:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: 2px; }
 button.terminal-frame__dot--green::after {

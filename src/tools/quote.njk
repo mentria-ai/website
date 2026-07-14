@@ -212,7 +212,7 @@ function runApp(MentriaEngine) {
     let pendingPaint = false;
 
     function paintToken() {
-      const display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      const display = stripWrapQuotes(fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim());
       // Markdown-rendered output (escapes html first → safe). Falls back to text.
       if (window.renderMarkdown) quoteEl.innerHTML = renderMarkdown(display) || '<p>…</p>';
       else quoteEl.textContent = display || '…';
@@ -242,10 +242,10 @@ function runApp(MentriaEngine) {
         }
       });
 
-      const display = fullText
+      const display = stripWrapQuotes(fullText
         .replace(/<think>[\s\S]*?<\/think>/g, '')
         .replace(/<\|[^|]*\|>/g, '')
-        .trim();
+        .trim());
       const escNoQuote = COPY.errNoQuote.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       if (window.renderMarkdown) quoteEl.innerHTML = renderMarkdown(display) || `<p>${escNoQuote}</p>`;
       else quoteEl.textContent = display || COPY.errNoQuote;
@@ -261,6 +261,12 @@ function runApp(MentriaEngine) {
     generating = false;
     newBtn.disabled = false;
     setStatus('ready', COPY.statusReady);
+  }
+
+  function stripWrapQuotes(text) {
+    return text
+      .replace(/^[\s"'\u201C\u201D\u2018\u2019]+/, '')
+      .replace(/[\s"'\u201C\u201D\u2018\u2019]+$/, '');
   }
 
   /* Copy to clipboard */

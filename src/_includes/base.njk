@@ -109,7 +109,7 @@
     <meta property="og:image:alt" content="Mentria — tools, games and AI that run entirely in your browser">
     {%- endif %}
     <meta property="og:locale" content="{{ ogLocales[lang | default('en')] or 'en_US' }}">
-    {%- if not isPost %}
+    {%- if not isPost and not englishOnly %}
     {%- for loc in locales %}{% if loc.code != (lang | default('en')) %}
     <meta property="og:locale:alternate" content="{{ ogLocales[loc.code] }}">
     {%- endif %}{% endfor %}
@@ -132,7 +132,7 @@
     <link rel="apple-touch-icon" href="/assets/img/icon-192x192.png">
 
     {#- Reciprocal hreflang matrix — one alternate per supported locale -#}
-    {%- if not isPost %}
+    {%- if not isPost and not englishOnly %}
     {%- for loc in locales %}
     <link rel="alternate" hreflang="{{ loc.code }}" href="{{ site.siteUrl }}{{ page.url | switchLocale(loc.code) }}">
     {%- endfor %}

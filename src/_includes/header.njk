@@ -20,7 +20,7 @@
                     {%- for loc in locales %}
                     <li>
                         <a hreflang="{{ loc.code }}"
-                           href="{{ page.url | switchLocale(loc.code) }}"
+                           href="{% if englishOnly %}{{ '/' | switchLocale(loc.code) }}{% else %}{{ page.url | switchLocale(loc.code) }}{% endif %}"
                            class="lang-switcher__item{% if loc.code == lang %} is-active{% endif %}">
                             <span class="lang-switcher__name" lang="{{ loc.code }}">{{ loc.nativeName }}</span>
                             <span class="lang-switcher__code">{{ loc.code }}</span>

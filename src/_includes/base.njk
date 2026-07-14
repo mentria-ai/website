@@ -103,6 +103,11 @@
     <meta property="og:title" content="{{ metaTitle }}">
     <meta property="og:description" content="{{ metaDescription }}">
     <meta property="og:image" content="{{ socialImage }}">
+    {%- if not socialImageOverride %}
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Mentria — tools, games and AI that run entirely in your browser">
+    {%- endif %}
     <meta property="og:locale" content="{{ ogLocales[lang | default('en')] or 'en_US' }}">
     {%- if not isPost %}
     {%- for loc in locales %}{% if loc.code != (lang | default('en')) %}

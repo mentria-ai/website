@@ -14,7 +14,7 @@ eleventyComputed:
     <div class="cli__output" role="log" aria-live="polite"></div>
     <div class="cli__prompt-line">
         <span class="cli__prompt">$&nbsp;</span>
-        <input type="text" class="cli__input" aria-label="{{ 'home.cli.placeholder' | t }}" placeholder="{{ 'home.cli.placeholder' | t }}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cli-suggestions">
+        <input type="text" class="cli__input" enterkeyhint="go" aria-label="{{ 'home.cli.placeholder' | t }}" placeholder="{{ 'home.cli.placeholder' | t }}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cli-suggestions">
     </div>
     <div class="cli__suggestions" id="cli-suggestions" popover="manual" role="listbox" aria-label="{{ 'home.cli.suggestions_label' | t }}"></div>
     <p class="cli__value-prop">{{ "home.value_prop" | t }}</p>

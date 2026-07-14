@@ -113,14 +113,14 @@ eleventyComputed:
           </div>
           <div id="guest-panel" style="display:none; flex-direction:column; gap:8px;">
             <div class="conn-hint">{{ "tool.chess.enter_code" | t }}</div>
-            <input class="text-input" id="join-code" placeholder="ABCD2345" maxlength="8" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="characters">
+            <input class="text-input" id="join-code" enterkeyhint="go" placeholder="ABCD2345" maxlength="8" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="characters">
             <button class="btn primary" id="btn-join">{{ "tool.chess.join" | t }}</button>
           </div>
         </div>
         <div class="conn-section">
           <div class="chat-list" id="chat-list"></div>
           <div class="chat-input-row">
-            <input class="text-input" id="chat-input" placeholder="{{ 'tool.chess.message_ph' | t }}" maxlength="200" />
+            <input class="text-input" id="chat-input" enterkeyhint="send" placeholder="{{ 'tool.chess.message_ph' | t }}" maxlength="200" />
             <button class="btn" id="btn-send">{{ "tool.chess.send" | t }}</button>
           </div>
         </div>

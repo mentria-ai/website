@@ -19,7 +19,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
   <div class="comms__bar">
     <div class="comms__room">
       <label class="comms__lbl" for="comms-room">room</label>
-      <input class="comms__input" id="comms-room" type="text" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="off" placeholder="!ephemeral">
+      <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="off" placeholder="!ephemeral">
       <button class="comms__btn" id="comms-join" type="button">join</button>
     </div>
     <div class="comms__meta">
@@ -63,7 +63,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
   </div>
   <div class="comms__contacts" id="comms-contacts" hidden>
     <div class="comms__contacts-add">
-      <input class="comms__input" id="comms-contact-in" type="text" placeholder="paste a contact code (MC1.…)" spellcheck="false" autocapitalize="off">
+      <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="paste a contact code (MC1.…)" spellcheck="false" autocapitalize="off">
       <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">add</button>
     </div>
     <div class="comms__contacts-list" id="comms-contacts-list"></div>
@@ -107,7 +107,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
   </div>
 
   <form class="comms__send" id="comms-send" autocomplete="off">
-    <input class="comms__input comms__input--msg" id="comms-msg" type="text" placeholder="message…" disabled>
+    <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="message…" disabled>
     <button class="comms__btn" id="comms-go" type="submit" disabled>send</button>
   </form>
 </section>

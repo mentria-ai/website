@@ -1416,6 +1416,7 @@
     "next_slide": "Siguiente diapositiva",
     "progress_label": "Progreso del deck",
     "slide_of": "Diapositiva {n} de {total}",
-    "share_slide": "Compartir esta tarjeta como imagen"
+    "share_slide": "Compartir esta tarjeta como imagen",
+    "coming_soon": "Capítulo 2 — próximamente"
   }
 }

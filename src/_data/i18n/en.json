@@ -1416,6 +1416,7 @@
     "next_slide": "Next slide",
     "progress_label": "Deck progress",
     "slide_of": "Slide {n} of {total}",
-    "share_slide": "Share this card as an image"
+    "share_slide": "Share this card as an image",
+    "coming_soon": "Chapter 2 — coming soon"
   }
 }

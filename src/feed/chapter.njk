@@ -74,9 +74,13 @@ eleventyComputed:
             {{ action.label }} →
           </a>
           {% elif action.type == "goto_chapter" %}
+          {%- if action.to | chapterExists %}
           <a class="deck__action deck__action--next" href="/feed/chapter/{{ action.to }}/">
             {{ action.label }}
           </a>
+          {%- else %}
+          <span class="deck__action deck__action--soon">{{ "feed_deck.coming_soon" | t }}</span>
+          {%- endif %}
           {% elif action.type == "goto_slide" %}
           <button class="deck__action" data-action="goto_slide" data-target="{{ action.to }}">
             {{ action.label }}

@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const toolsCatalog = require("./src/_data/tools.json");
+const chapterCatalog = require("./src/_data/chapter_list.json");
 
 module.exports = function(eleventyConfig) {
   // Inject short git commit hash as a global data value for cache busting
@@ -139,6 +140,10 @@ module.exports = function(eleventyConfig) {
 
   // {{ "/tools/" | localeUrl(lang) }} — prefixes path with the locale's
   // pathPrefix, returns it unchanged for the default locale.
+  eleventyConfig.addFilter("chapterExists", function (chapterId) {
+    return chapterCatalog.some(ch => ch.id === chapterId);
+  });
+
   eleventyConfig.addFilter("relatedTools", function (pageUrl) {
     if (!pageUrl) return [];
     const current = toolsCatalog.find(t =>

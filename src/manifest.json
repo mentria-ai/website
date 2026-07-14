@@ -6,22 +6,86 @@
   "start_url": "/",
   "display": "standalone",
   "related_applications": [
-    { "platform": "webapp", "url": "https://mentria.ai/manifest.json" }
+    {
+      "platform": "webapp",
+      "url": "https://mentria.ai/manifest.json"
+    }
   ],
   "prefer_related_applications": false,
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
   "icons": [
-    { "src": "/assets/img/favicon-96x96.png", "sizes": "96x96", "type": "image/png" },
-    { "src": "/assets/img/icon-192x192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/assets/img/icon-512x512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/assets/img/icon-maskable-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/assets/img/icon-maskable-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/assets/img/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/img/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/img/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/img/icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/img/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "AI Chat", "short_name": "AI Chat", "description": "Chat with a local AI model in your browser", "url": "/tools/ai-chat/", "icons": [{ "src": "/assets/img/shortcuts/ai-chat.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }] },
-    { "name": "QR Scanner", "short_name": "QR Scan", "description": "Scan or generate QR codes and barcodes", "url": "/tools/qr-scanner/", "icons": [{ "src": "/assets/img/shortcuts/qr-scanner.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }] },
-    { "name": "Quick Notes", "short_name": "Notes", "description": "A minimal scratchpad saved in your browser", "url": "/tools/quick-notes/", "icons": [{ "src": "/assets/img/shortcuts/quick-notes.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }] }
+    {
+      "name": "AI Chat",
+      "short_name": "AI Chat",
+      "description": "Chat with a local AI model in your browser",
+      "url": "/tools/ai-chat/",
+      "icons": [
+        {
+          "src": "/assets/img/shortcuts/ai-chat.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any maskable"
+        }
+      ]
+    },
+    {
+      "name": "QR Scanner",
+      "short_name": "QR Scan",
+      "description": "Scan or generate QR codes and barcodes",
+      "url": "/tools/qr-scanner/",
+      "icons": [
+        {
+          "src": "/assets/img/shortcuts/qr-scanner.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any maskable"
+        }
+      ]
+    },
+    {
+      "name": "Quick Notes",
+      "short_name": "Notes",
+      "description": "A minimal scratchpad saved in your browser",
+      "url": "/tools/quick-notes/",
+      "icons": [
+        {
+          "src": "/assets/img/shortcuts/quick-notes.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any maskable"
+        }
+      ]
+    }
   ],
   "share_target": {
     "action": "/tools/quick-notes/",
@@ -37,17 +101,45 @@
     {
       "action": "/tools/markdown-pdf/",
       "accept": {
-        "text/markdown": [".md", ".markdown"]
+        "text/markdown": [
+          ".md",
+          ".markdown"
+        ]
       }
     },
     {
       "action": "/tools/annotate-image/",
       "accept": {
-        "image/png": [".png"],
-        "image/jpeg": [".jpg", ".jpeg"],
-        "image/webp": [".webp"],
-        "image/gif": [".gif"]
+        "image/png": [
+          ".png"
+        ],
+        "image/jpeg": [
+          ".jpg",
+          ".jpeg"
+        ],
+        "image/webp": [
+          ".webp"
+        ],
+        "image/gif": [
+          ".gif"
+        ]
       }
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/img/screenshot-narrow.png",
+      "sizes": "500x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "The Mentria launcher: tools, games and AI that run in your browser"
+    },
+    {
+      "src": "/assets/img/screenshot-wide.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Mentria on desktop: the full tool launcher and feed"
     }
   ]
 }

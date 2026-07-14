@@ -101,6 +101,7 @@
   color: var(--term-muted);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
+  white-space: nowrap;
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out);
@@ -109,6 +110,15 @@
   background: var(--cyan-15);
   color: var(--syn-cyan);
 }
+
+@media (max-width: 420px) {
+  .m-seg > button {
+    padding-left: var(--space-1);
+    padding-right: var(--space-1);
+    font-size: calc(var(--text-xs) - 1px);
+  }
+}
+
 
 .m-status {
   font-family: var(--font-mono);

@@ -1,0 +1,19 @@
+{%- set relatedList = page.url | relatedTools -%}
+{%- if relatedList.length -%}
+<nav class="related-tools" aria-label="{{ 'tools_page.related_heading' | t }}">
+  <span class="related-tools__label">{{ "tools_page.related_heading" | t }}</span>
+  <ul class="related-tools__list">
+    {%- for tool in relatedList %}
+    <li{% if tool.requires %} data-requires="{{ tool.requires }}"{% endif %}>
+      <a class="related-tools__chip" href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
+        <span class="related-tools__name">{{ ("tools." + tool.slug + ".title") | t }}</span>
+        <span class="related-tools__cat">{{ ("category." + tool.category) | t }}</span>
+      </a>
+    </li>
+    {%- endfor %}
+    <li>
+      <a class="related-tools__chip related-tools__chip--all" href="{{ '/tools/' | localeUrl(lang) }}">{{ "tools_page.related_all" | t }} →</a>
+    </li>
+  </ul>
+</nav>
+{%- endif -%}

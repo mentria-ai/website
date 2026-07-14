@@ -1158,3 +1158,50 @@ body.is-fullscreen-tool .app-bar {
 }
 
 html.mentria-no-motion [data-requires="motion"] { display: none !important; }
+
+.related-tools {
+  max-width: 900px;
+  margin: 2.2rem auto 0;
+  padding: 0 1rem;
+  font-family: var(--font-mono);
+}
+.related-tools__label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--term-muted);
+  margin-bottom: 0.7rem;
+}
+.related-tools__list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+}
+.related-tools__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--term-border);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.015);
+  color: var(--term-fg);
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.related-tools__chip:hover {
+  border-color: var(--accent, #6ef3c5);
+  background: rgba(110,243,197,0.06);
+}
+.related-tools__cat {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--term-muted);
+}
+.related-tools__chip--all { color: var(--accent, #6ef3c5); }

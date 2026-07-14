@@ -192,7 +192,9 @@
       "summary": "resumen"
     },
     "empty_cmd": "$ ls -la tools/",
-    "empty_msg": "> no se encontraron herramientas."
+    "empty_msg": "> no se encontraron herramientas.",
+    "related_heading": "Más herramientas",
+    "related_all": "Todas las herramientas"
   },
   "feed_page": {
     "title": "Feed",

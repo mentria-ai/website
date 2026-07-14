@@ -192,7 +192,9 @@
       "summary": "概要"
     },
     "empty_cmd": "$ ls -la tools/",
-    "empty_msg": "> ツールが見つかりません。"
+    "empty_msg": "> ツールが見つかりません。",
+    "related_heading": "その他のツール",
+    "related_all": "すべてのツール"
   },
   "feed_page": {
     "title": "フィード",

@@ -2,6 +2,7 @@ const { execSync } = require("child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const toolsCatalog = require("./src/_data/tools.json");
 
 module.exports = function(eleventyConfig) {
   // Inject short git commit hash as a global data value for cache busting
@@ -138,6 +139,18 @@ module.exports = function(eleventyConfig) {
 
   // {{ "/tools/" | localeUrl(lang) }} — prefixes path with the locale's
   // pathPrefix, returns it unchanged for the default locale.
+  eleventyConfig.addFilter("relatedTools", function (pageUrl) {
+    if (!pageUrl) return [];
+    const current = toolsCatalog.find(t =>
+      t.url ? pageUrl.includes(t.url) : pageUrl.includes("/tools/" + t.slug + "/"));
+    if (!current) return [];
+    const same = toolsCatalog.filter(t => t.slug !== current.slug && t.category === current.category);
+    const rest = toolsCatalog.filter(t => t.slug !== current.slug && t.category !== current.category);
+    const seed = current.slug.length + current.slug.charCodeAt(0);
+    const rot = arr => arr.length ? arr.slice(seed % arr.length).concat(arr.slice(0, seed % arr.length)) : arr;
+    return rot(same).slice(0, 3).concat(rot(rest)).slice(0, 4);
+  });
+
   eleventyConfig.addFilter("localeUrl", function (urlPath, lang) {
     const useLang = lang || (this.ctx && this.ctx.lang) || DEFAULT_LANG;
     const loc = findLocale(useLang);

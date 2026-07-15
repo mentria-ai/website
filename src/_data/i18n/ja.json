@@ -1066,7 +1066,9 @@
       "scan_secure_required": "カメラアクセスにはHTTPSが必要です。ローカルURLではなく公開サイトをご利用ください。",
       "scan_invalid_qr": "このQRコードは otpauth://totp/ URI ではありません。TOTP設定用のQRで再試行してください。",
       "next_label": "次:",
-      "add_secret_bad_chars": "シークレットに無効な文字があります: {chars}。Base32 は A–Z と 2–7 のみです。0とO、1とI/L、8とB の取り違えに注意してください。"
+      "add_secret_bad_chars": "シークレットに無効な文字があります: {chars}。Base32 は A–Z と 2–7 のみです。0とO、1とI/L、8とB の取り違えに注意してください。",
+      "autolock_label": "自動ロック",
+      "autolock_off": "オフ"
     },
     "exif": {
       "aria_drop": "画像のドロップゾーン",

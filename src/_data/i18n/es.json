@@ -1066,7 +1066,9 @@
       "scan_secure_required": "El acceso a la cámara requiere HTTPS. Usa el sitio en vivo, no una URL local.",
       "scan_invalid_qr": "Ese QR no es una URI otpauth://totp/. Inténtalo con un QR de configuración TOTP.",
       "next_label": "siguiente:",
-      "add_secret_bad_chars": "El secreto tiene caracteres no válidos: {chars}. Base32 solo usa A–Z y 2–7; revisa confusiones como 0/O, 1/I/L, 8/B."
+      "add_secret_bad_chars": "El secreto tiene caracteres no válidos: {chars}. Base32 solo usa A–Z y 2–7; revisa confusiones como 0/O, 1/I/L, 8/B.",
+      "autolock_label": "bloqueo auto",
+      "autolock_off": "no"
     },
     "exif": {
       "aria_drop": "Zona para soltar imágenes",

@@ -56,6 +56,14 @@ eleventyComputed:
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-prf-enroll-btn" hidden>{{ "tool.totp.enroll_prf" | t }}</button>
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-backup-btn">{{ "tool.totp.backup_button" | t }}</button>
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-lock-btn">{{ "tool.totp.lock_button" | t }}</button>
+      <span class="totp-autolock">
+        <span class="totp-autolock__label">{{ "tool.totp.autolock_label" | t }}</span>
+        <div class="m-seg totp-autolock__seg" id="totp-autolock-seg">
+          <button type="button" data-value="5">5m</button>
+          <button type="button" data-value="15">15m</button>
+          <button type="button" data-value="0">{{ "tool.totp.autolock_off" | t }}</button>
+        </div>
+      </span>
     </div>
 
     <ul class="totp-list" id="totp-list"></ul>
@@ -118,6 +126,10 @@ eleventyComputed:
 <style>
   .totp { display: flex; flex-direction: column; gap: 18px; padding: var(--space-2) 0; }
 
+  .totp-autolock { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+  .totp-autolock__label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--term-muted); }
+  .totp-autolock__seg { font-size: 11px; }
+  .totp-autolock__seg > button { padding: 4px 9px; }
   .totp-locked { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
   .totp-locked__h { font-family: var(--font-mono); font-size: var(--text-base); margin: 0; color: var(--accent, #6ef3c5); }
   .totp-locked__p { font-size: 13px; color: var(--term-muted); margin: 0; }
@@ -383,8 +395,25 @@ eleventyComputed:
     vault: null,
     masterKey: null,
     accounts: [],
-    timer: null
+    timer: null,
+    hiddenAt: null,
+    lastActivity: Date.now()
   };
+
+  const AUTOLOCK_KEY = 'autolock_min';
+  function autolockMinutes() {
+    const v = window.MentriaStore ? window.MentriaStore.get(NS, AUTOLOCK_KEY) : null;
+    if (v === 0) return 0;
+    return (v === 5 || v === 15) ? v : 5;
+  }
+  function maybeAutoLock() {
+    const mins = autolockMinutes();
+    if (!mins || !state.masterKey) return false;
+    const now = Date.now();
+    if (state.hiddenAt && now - state.hiddenAt > mins * 60000) { lock(); return true; }
+    if (!document.hidden && now - state.lastActivity > mins * 3 * 60000) { lock(); return true; }
+    return false;
+  }
 
   function loadVault() { return window.MentriaStore.get(NS, VAULT_KEY); }
   function saveVault(v) { window.MentriaStore.set(NS, VAULT_KEY, v); }
@@ -488,6 +517,7 @@ eleventyComputed:
   }
 
   async function tick() {
+    if (maybeAutoLock()) return;
     const rows = $('totp-list').querySelectorAll('.totp-row');
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -725,7 +755,16 @@ eleventyComputed:
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && scanner.scanning) stopScanner();
+    if (document.hidden) {
+      state.hiddenAt = Date.now();
+    } else {
+      maybeAutoLock();
+      state.hiddenAt = null;
+      state.lastActivity = Date.now();
+    }
   });
+  document.addEventListener('pointerdown', () => { state.lastActivity = Date.now(); }, { passive: true });
+  document.addEventListener('keydown', () => { state.lastActivity = Date.now(); }, { passive: true });
   window.addEventListener('pagehide', () => { stopScanner(); });
 
   $('totp-setup-pass').addEventListener('input', () => {
@@ -797,6 +836,17 @@ eleventyComputed:
   });
 
   $('totp-lock-btn').addEventListener('click', () => { lock(); });
+
+  (function initAutolockSeg() {
+    const seg = $('totp-autolock-seg');
+    if (!seg || !window.MentriaUI || !window.MentriaUI.segmented) return;
+    const ctl = window.MentriaUI.segmented(seg, (value) => {
+      const mins = parseInt(value, 10);
+      if (window.MentriaStore) window.MentriaStore.set(NS, AUTOLOCK_KEY, mins);
+      state.lastActivity = Date.now();
+    });
+    ctl.set(String(autolockMinutes()));
+  })();
 
   document.body.appendChild($('totp-add-modal'));
   document.body.appendChild($('totp-backup-modal'));

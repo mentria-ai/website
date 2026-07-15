@@ -187,6 +187,48 @@
     return fallback;
   }
 
+  // ── Back-dismiss ───────────────────────────────────────────────
+  // Let the system Back button/gesture (Android, installed PWA) close the
+  // topmost overlay instead of navigating away. Overlays call
+  // backDismiss(closeFn) when they open and .release() on their own close.
+  // Prefers the CloseWatcher API; falls back to a guarded history-entry stack
+  // (contentless sentinel entries, so pushes and pops always balance).
+  var HAS_CLOSE_WATCHER = typeof window.CloseWatcher === 'function';
+  var backStack = [];
+  var backGuard = false;
+
+  if (!HAS_CLOSE_WATCHER) {
+    window.addEventListener('popstate', function () {
+      if (backGuard) { backGuard = false; return; }
+      var fn = backStack.pop();
+      if (fn) { try { fn(); } catch (e) {} }
+    });
+  }
+
+  function backDismiss(closeFn) {
+    if (typeof closeFn !== 'function') return { release: function () {} };
+    if (HAS_CLOSE_WATCHER) {
+      var w = null;
+      try { w = new window.CloseWatcher(); } catch (e) { w = null; }
+      if (w) {
+        var fired = false;
+        w.addEventListener('close', function () { fired = true; try { closeFn(); } catch (e) {} });
+        return { release: function () { if (fired) return; try { w.destroy(); } catch (e) {} } };
+      }
+    }
+    try { history.pushState({ mOverlay: backStack.length + 1 }, ''); } catch (e) {}
+    backStack.push(closeFn);
+    return {
+      release: function () {
+        var i = backStack.lastIndexOf(closeFn);
+        if (i === -1) return;
+        backStack.splice(i, 1);
+        backGuard = true;
+        try { history.back(); } catch (e) { backGuard = false; }
+      }
+    };
+  }
+
   function modal(el) {
     var card = el.querySelector('.m-modal__card') || el;
     if (!card.getAttribute('role')) card.setAttribute('role', 'dialog');
@@ -194,6 +236,7 @@
     var isOpen = false;
     var prevFocus = null;
     var inerted = [];
+    var backHandle = null;
 
     function focusable() {
       return Array.prototype.slice.call(
@@ -220,12 +263,14 @@
       });
       inerted.forEach(function (c) { c.setAttribute('inert', ''); });
       document.addEventListener('keydown', onKey);
+      backHandle = backDismiss(close);
       var f = focusable();
       if (f.length) f[0].focus();
     }
     function close() {
       if (!isOpen) return;
       isOpen = false;
+      if (backHandle) { backHandle.release(); backHandle = null; }
       el.hidden = true;
       document.removeEventListener('keydown', onKey);
       inerted.forEach(function (c) { c.removeAttribute('inert'); });
@@ -244,6 +289,7 @@
     debouncedSaver: debouncedSaver,
     downloadFile: downloadFile,
     migrateStore: migrateStore,
-    modal: modal
+    modal: modal,
+    backDismiss: backDismiss
   };
 })();

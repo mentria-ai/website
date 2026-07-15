@@ -169,12 +169,15 @@
     else if (!sheet.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
   }
 
+  var sheetBackHandle = null;
   function openSheet() {
     sheetOpener = document.activeElement;
     sheet.classList.add('pwa-install-sheet--open');
     sheet.setAttribute('aria-hidden', 'false');
     document.body.classList.add('pwa-sheet-open');
     document.addEventListener('keydown', sheetTrapTab, true);
+    sheetBackHandle = (window.MentriaUI && window.MentriaUI.backDismiss)
+      ? window.MentriaUI.backDismiss(closeSheet) : null;
     var closeBtn = sheet.querySelector('.pwa-install-sheet__close');
     if (closeBtn) closeBtn.focus();
     var noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -184,6 +187,7 @@
   }
 
   function closeSheet() {
+    if (sheetBackHandle) { sheetBackHandle.release(); sheetBackHandle = null; }
     sheet.classList.remove('pwa-install-sheet--open');
     sheet.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('pwa-sheet-open');

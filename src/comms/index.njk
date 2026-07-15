@@ -129,6 +129,12 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__btn--ghost:hover{background:#3a4148;color:#e6edf3}
 .comms__badge{background:#1a1f24;border:1px solid #2a3138;color:#9ba6b1;padding:.3rem .55rem;border-radius:4px;font-size:.75rem;text-transform:lowercase;letter-spacing:.05em}
 .comms__badge--peers{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
+.comms__badge--offline{border-color:#e05c5c;color:#e05c5c}
+.comms__send--offline{opacity:.55}
+.comms__line--pending .comms__what{color:#9ba6b1}
+.comms__pending-note{color:#d9a84e;font-style:italic;font-size:.75rem;margin-left:.45rem}
+.comms__resend{margin-left:.5rem;background:none;border:1px solid #2a3138;color:var(--accent,#6ef3c5);border-radius:4px;padding:.1rem .5rem;font:inherit;font-size:.72rem;cursor:pointer;text-transform:lowercase}
+.comms__resend:hover{border-color:var(--accent,#6ef3c5)}
 .comms__share{display:flex;gap:.5rem;align-items:center;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.5rem .75rem;flex-wrap:wrap}
 .comms__url{color:#e6edf3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}
 .comms__log{min-height:14rem;max-height:24rem;overflow-y:auto;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.75rem;display:flex;flex-direction:column;gap:.4rem}
@@ -449,6 +455,46 @@ const updatePeers = () => {
   els.peers.hidden = false;
 };
 
+let currentRoomName = null;
+let pendingResends = 0;
+const setConnUI = () => {
+  const offline = !navigator.onLine;
+  els.send.classList.toggle('comms__send--offline', offline);
+  els.status.classList.toggle('comms__badge--offline', offline);
+  if (currentRoomName) {
+    els.status.textContent = offline ? 'reconnecting…' : `room: ${currentRoomName}`;
+  }
+};
+window.addEventListener('offline', setConnUI);
+window.addEventListener('online', () => {
+  setConnUI();
+  if (pendingResends > 0) sys(`back online — ${pendingResends} message${pendingResends === 1 ? '' : 's'} awaiting resend.`);
+});
+
+const renderPendingLine = (text, payload, cmid) => {
+  const line = renderLine('you', text, { me: true, quiet: true });
+  line.line.classList.add('comms__line--pending');
+  const note = document.createElement('span');
+  note.className = 'comms__pending-note';
+  note.textContent = 'not delivered — no connection';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'comms__resend';
+  btn.textContent = 'resend';
+  btn.addEventListener('click', () => {
+    if (!navigator.onLine) { sys('still offline — try again when the connection returns.'); return; }
+    if (!chatAction) { sys('not connected to a room — rejoin to send.'); return; }
+    chatAction.send(payload);
+    publishChat(text, cmid);
+    line.line.classList.remove('comms__line--pending');
+    note.remove();
+    btn.remove();
+    pendingResends = Math.max(0, pendingResends - 1);
+  });
+  line.what.append(note, btn);
+  pendingResends++;
+};
+
 const refreshShareUrl = (roomName, b64Key) => {
   const u = new URL(window.location.href);
   u.hash = formatHash(roomName, b64Key);
@@ -642,7 +688,9 @@ const joinNew = async (roomName, b64Key = null) => {
     return;
   }
 
+  currentRoomName = roomName;
   els.status.textContent = `room: ${roomName}`;
+  setConnUI();
   els.eph.hidden = !isEphemeralRoom(roomName);
   els.enc.hidden = !chatKey;
   els.msg.disabled = false;
@@ -774,6 +822,14 @@ const joinNew = async (roomName, b64Key = null) => {
     sendProfileTo(peerId);
   };
   room.onPeerLeave = (peerId) => {
+    const who = displayName(peerId);
+    for (const [key, entry] of incoming) {
+      if (key.startsWith(peerId + ':')) {
+        entry.line.line.removeAttribute('aria-live');
+        entry.line.what.innerHTML = `transfer interrupted — <strong>${escapeHtml(entry.meta.name)}</strong> (${escapeHtml(who)} left before finishing)`;
+        incoming.delete(key);
+      }
+    }
     peers.delete(peerId);
     peerProfiles.delete(peerId);
     removeTile(peerId);
@@ -836,6 +892,11 @@ els.send.addEventListener('submit', async (e) => {
   } else {
     livePayload = { text, cmid };
   }
+  if (!navigator.onLine) {
+    renderPendingLine(text, livePayload, cmid);
+    els.msg.value = '';
+    return;
+  }
   chatAction.send(livePayload);
   publishChat(text, cmid);
   renderLine('you', text, { me: true });
@@ -859,6 +920,11 @@ const sendOne = async (file, extra) => {
   const buf = await file.arrayBuffer();
   let sent = 0;
   for (let offset = 0; offset < buf.byteLength; offset += CHUNK) {
+    if (peers.size === 0) {
+      line.line.removeAttribute('aria-live');
+      line.what.innerHTML = `send interrupted — <strong>${escapeHtml(file.name)}</strong>: everyone left the room`;
+      throw new Error('all peers left during send');
+    }
     const slice = buf.slice(offset, Math.min(offset + CHUNK, buf.byteLength));
     const done = offset + CHUNK >= buf.byteLength;
     await chunkAction.send(slice, { metadata: { id, done } });
@@ -866,8 +932,11 @@ const sendOne = async (file, extra) => {
     line.what.innerHTML = progressHTML('sending', file.name, file.size, sent);
   }
   const previewUrl = trackObjectUrl(file);
+  const n = peers.size;
   line.line.removeAttribute('aria-live');
-  line.what.innerHTML = 'sent ' + completeHTML(file.name, file.size, file.type, previewUrl);
+  line.what.innerHTML = (n > 0
+    ? `sent to ${n} peer${n === 1 ? '' : 's'} `
+    : 'delivery uncertain — no peers connected ') + completeHTML(file.name, file.size, file.type, previewUrl);
 };
 
 const sendFiles = async (fileList) => {

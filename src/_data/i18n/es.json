@@ -839,6 +839,7 @@
       "tier_fast": "rápido",
       "tier_better": "mejor",
       "tier_best": "superior",
+      "tier_max": "máximo",
       "tier_confirm": "¿Cambiar de modelo? Se descargan {size} una sola vez y se guardan en este dispositivo.",
       "tier_fallback": "Ese modelo no cupo en memoria — se cambió al modelo {tier}.",
       "btn_new_chat": "Nuevo chat",

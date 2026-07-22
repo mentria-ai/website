@@ -49,6 +49,7 @@ module.exports = function(eleventyConfig) {
       };
       walk(path.join(__dirname, "src", "assets", "mentria", "models"));
       walk(path.join(__dirname, "src", "assets", "mentria", "loras"));
+      walk(path.join(__dirname, "src", "assets", "mentria", "dist"));
       parts.sort();
       return crypto.createHash("sha1").update(parts.join("|")).digest("hex").slice(0, 12);
     } catch {

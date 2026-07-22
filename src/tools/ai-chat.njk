@@ -100,6 +100,7 @@ const COPY = {
   tierFast:            {{ ("tool.ai-chat.tier_fast"             | t) | dump | safe }},
   tierBetter:          {{ ("tool.ai-chat.tier_better"           | t) | dump | safe }},
   tierBest:            {{ ("tool.ai-chat.tier_best"             | t) | dump | safe }},
+  tierMax:             {{ ("tool.ai-chat.tier_max"              | t) | dump | safe }},
   tierConfirm:         {{ ("tool.ai-chat.tier_confirm"          | t) | dump | safe }},
   tierFallback:        {{ ("tool.ai-chat.tier_fallback"         | t) | dump | safe }},
   btnSend:             {{ ("tool.ai-chat.btn_send"              | t) | dump | safe }},
@@ -421,10 +422,11 @@ function runApp(MentriaEngine, Tiers) {
   /* ── Tier selection ──────────────────────────────── */
   let tierDecision = null;
   let currentTier = null;
+  let contextTokens = 2048;
 
   function tierOptionLabel(id) {
     const t = Tiers.TIERS[id];
-    const quality = id === '0.8b' ? COPY.tierFast : id === '2b' ? COPY.tierBetter : COPY.tierBest;
+    const quality = id === '0.8b' ? COPY.tierFast : id === '2b' ? COPY.tierBetter : id === '4b' ? COPY.tierBest : COPY.tierMax;
     return id === '0.8b' ? (t.name + ' · ' + quality) : (t.name + ' · ' + quality + ' · ' + t.sizeLabel);
   }
 
@@ -481,6 +483,7 @@ function runApp(MentriaEngine, Tiers) {
       });
       engine = res.engine;
       currentTier = res.tier;
+      contextTokens = res.maxSeq || 2048;
       try { await navigator.storage?.persist?.(); } catch (_) {}
       syncTierSelector();
       progressWrap.style.display = 'none';
@@ -609,12 +612,13 @@ function runApp(MentriaEngine, Tiers) {
       if (stick) scrollToBottom();
     }
 
-    // The engine's context is 2048 tokens for prompt + response combined, so
-    // send only a trailing window of the conversation (~4 chars/token with
-    // margin for template overhead and dense tokenization). The engine matches
-    // image placeholders to tensors by order across the whole chat-template
-    // render, so images ride along only while their placeholder turn is kept.
-    const HISTORY_CHAR_BUDGET = 3400;
+    // The engine's context (contextTokens: 2048, or 1024 for the 27B model on
+    // discrete GPUs) covers prompt + response combined, so send only a trailing
+    // window of the conversation (~4 chars/token with margin for template
+    // overhead and dense tokenization). The engine matches image placeholders
+    // to tensors by order across the whole chat-template render, so images
+    // ride along only while their placeholder turn is kept.
+    const HISTORY_CHAR_BUDGET = contextTokens >= 2048 ? 3400 : 1200;
     const turnText = (m) => Array.isArray(m.content)
       ? m.content.filter(p => p && p.type === 'text').map(p => p.text).join(' ')
       : String(m.content || '');
@@ -637,7 +641,7 @@ function runApp(MentriaEngine, Tiers) {
     try {
       const params = {
         messages: [messages[0], ...kept],
-        maxTokens: (imagesForRequest && IS_IOS) ? 256 : MAX_TOKENS,
+        maxTokens: (imagesForRequest && IS_IOS) ? 256 : (contextTokens >= 2048 ? MAX_TOKENS : 320),
         // Greedy decoding (matches transformers.js do_sample:false)
         temperature: 0, topK: 1, topP: 1.0,
         repetitionPenalty: 1.15,   // bumped 1.10 → 1.15 to break list-cycle pattern (S+1 test)

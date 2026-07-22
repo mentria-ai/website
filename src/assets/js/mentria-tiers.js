@@ -4,7 +4,7 @@ const LS_CAP = 'mentria-tier-cap';
 const LS_VALID = 'mentria-tier-validated';
 const GiB = 1073741824;
 
-export const TIER_CHAIN = ['4b', '2b', '0.8b'];
+export const TIER_CHAIN = ['27b', '4b', '2b', '0.8b'];
 
 export const TIERS = {
   '0.8b': {
@@ -87,6 +87,22 @@ export const TIERS = {
       eps: 1e-6,
       prefix: 'visual'
     }
+  },
+  '27b': {
+    id: '27b',
+    name: '27B',
+    order: 3,
+    sizeLabel: '3.8 GB',
+    base: 'https://huggingface.co/mentriaai/Bonsai-27B-mentria/resolve/main/',
+    shards: [
+      'bonsai-27b-q1g128-00001-of-00002.safetensors',
+      'bonsai-27b-q1g128-00002-of-00002.safetensors'
+    ],
+    visionShards: ['bonsai-27b-vl-q4.safetensors'],
+    configExport: 'QWEN35_27B_BONSAI_CONFIG',
+    visionConfigExport: 'QWEN35_VL_27B_VISION_CONFIG',
+    streamingLoad: true,
+    discreteMaxSeq: 1024
   }
 };
 
@@ -121,6 +137,13 @@ async function detectCaps() {
     })();
   }
   return capsPromise;
+}
+
+function likelyIntegratedGpu(caps) {
+  const v = ((caps.vendor && caps.vendor.vendor) || '').toLowerCase();
+  const a = ((caps.vendor && caps.vendor.architecture) || '').toLowerCase();
+  return (v === 'intel' && !/arc|xe-hpg|battlemage|alchemist/.test(a)) ||
+    (v === 'amd' && /^gcn-/.test(a));
 }
 
 export function getUserTier() {
@@ -203,7 +226,9 @@ export async function effectiveTier(opts) {
 export async function isTierCached(id) {
   try {
     const t = TIERS[id];
-    return !!(await caches.match(t.base + t.shards[0]));
+    const u = t.base + t.shards[0];
+    const meta = u + (u.includes('?') ? '&' : '?') + 'mentria_seg=meta';
+    return !!((await caches.match(meta)) || (await caches.match(u)));
   } catch (_) { return false; }
 }
 
@@ -235,22 +260,27 @@ export async function decideTier() {
 
   const { canRunLargeModel } = await import(MENTRIA_DIST);
 
-  const hard4 = IS_DESKTOP && canRunLargeModel(caps);
+  const big = canRunLargeModel(caps);
+  const igpu = likelyIntegratedGpu(caps);
+  const hard4 = IS_DESKTOP && big.capable === true;
+  const hard27 = hard4 && !igpu;
   const dmOk2 = dm !== undefined ? dm >= 8 : IS_DESKTOP;
   const hard2 = caps.limits.maxBufferSize >= GiB && dmOk2;
 
   const offer4 = hard4 && quotaFree > 6e9 && !saveData && capAllows('4b');
   const offer2 = hard2 && quotaFree > 3e9 && capAllows('2b');
+  const offer27 = hard27 && quotaFree > 9e9 && !saveData && capAllows('27b');
 
   const eligible = [];
   if (offer2) eligible.push('2b');
   if (offer4) eligible.push('4b');
+  if (offer27) eligible.push('27b');
 
   let tier = '0.8b';
   let why = 'default 0.8b';
   const pref = getUserTier();
   if (pref) {
-    const prefHard = pref === '0.8b' || (pref === '2b' && hard2) || (pref === '4b' && hard4);
+    const prefHard = pref === '0.8b' || (pref === '2b' && hard2) || (pref === '4b' && hard4) || (pref === '27b' && hard27);
     if (prefHard && capAllows(pref)) {
       tier = pref;
       why = 'user-pref ' + pref;
@@ -266,6 +296,7 @@ export async function decideTier() {
     ' platform=' + (IS_DESKTOP ? 'desktop' : IS_ANDROID ? 'android' : 'other') +
     ' quotaFree=' + Math.round(quotaFree / 1e9) + 'GB' +
     ' saveData=' + saveData +
+    ' igpu=' + igpu +
     (getTierCap() ? ' tier-cap=' + getTierCap() : '')
   );
 
@@ -285,17 +316,26 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
   const t = TIERS[id];
   if (!t) throw new Error('unknown tier: ' + id);
   const mod = await import(MENTRIA_DIST);
+  let config = mod[t.configExport];
+  if (t.discreteMaxSeq) {
+    const caps = await detectCaps();
+    const vendor = ((caps && caps.vendor.vendor) || '').toLowerCase();
+    if (vendor !== 'apple') {
+      config = { ...config, attention: { ...config.attention, maxSeq: t.discreteMaxSeq } };
+    }
+  }
   const opts = {
     modelUrl: t.base,
     shards: t.shards.slice(),
-    config: mod[t.configExport],
+    config,
     allowTiedEmbed: true,
     tokenizerUrl: t.base
   };
+  if (t.streamingLoad) opts.streamingLoad = true;
   if (vision) {
     opts.visionModelUrl = t.base;
     opts.visionShards = t.visionShards.slice();
-    opts.visionConfig = t.visionConfig;
+    opts.visionConfig = t.visionConfigExport ? mod[t.visionConfigExport] : t.visionConfig;
   }
   return opts;
 }
@@ -308,9 +348,13 @@ export async function loadWithFallback(createEngine, startTier, { vision = true,
     const engine = createEngine();
     try {
       await engine.init();
-      await engine.loadModel(await loadOptionsFor(id, { vision }));
+      const opts = await loadOptionsFor(id, { vision });
+      const loadRes = await engine.loadModel(opts);
+      try {
+        if (loadRes && loadRes.decodeRoute) console.info('[mentria-tiers] ' + id + ' loaded', 'decodeRoute', loadRes.decodeRoute, 'adapter', loadRes.adapter);
+      } catch (_) {}
       if (validate) await validate(engine, id);
-      return { engine, tier: id };
+      return { engine, tier: id, maxSeq: (opts.config.attention && opts.config.attention.maxSeq) || 2048 };
     } catch (err) {
       lastErr = err;
       try { engine.terminate(); } catch (_) {}

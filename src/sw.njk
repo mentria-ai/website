@@ -132,7 +132,12 @@ self.addEventListener('activate', event => {
       if (key.startsWith('mentria-locale-') && !key.endsWith('-{{ buildHash }}')) return caches.delete(key);
     }));
     if (!keys.includes(MODELS_MARKER)) {
-      if (hadOldModels) await caches.delete(MODELS_CACHE);
+      if (hadOldModels) {
+        const mc = await caches.open(MODELS_CACHE);
+        for (const req of await mc.keys()) {
+          try { if (new URL(req.url).pathname.startsWith('/assets/mentria/dist/')) await mc.delete(req); } catch (_) {}
+        }
+      }
       await caches.open(MODELS_MARKER);
     }
     await self.clients.claim();

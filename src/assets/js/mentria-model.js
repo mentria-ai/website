@@ -226,7 +226,7 @@ export async function ensureModel(engineFactory, opts) {
     const c = await Tiers.effectiveTier({ cachedOnly: true });
     if (!c) throw new Error('model-not-cached');
     const res = await Tiers.loadWithFallback(makeEngine, c, { vision });
-    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier };
+    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
   }
 
   if (offerUpgrade && !Tiers.getUserTier()) {
@@ -249,7 +249,7 @@ export async function ensureModel(engineFactory, opts) {
     hide();
     const res = await Tiers.loadWithFallback(makeEngine, candidate, { vision });
     if (res.tier !== candidate) Tiers.clearValidatedTier();
-    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier };
+    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
   }
 
   show(t('checking'), t('testing', { name: tierName(candidate) }));
@@ -267,7 +267,7 @@ export async function ensureModel(engineFactory, opts) {
     show(t('checking'), t('ready', { name: tierName(res.tier) }));
     await new Promise((r) => setTimeout(r, READY_LINGER));
     hide();
-    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier };
+    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
   } catch (e) {
     hide();
     throw e;

@@ -839,6 +839,7 @@
       "tier_fast": "高速",
       "tier_better": "高品質",
       "tier_best": "最高品質",
+      "tier_max": "最大",
       "tier_confirm": "モデルを切り替えますか？{size}を一度だけダウンロードし、この端末に保存します。",
       "tier_fallback": "そのモデルはメモリに収まらなかったため、{tier}モデルに切り替えました。",
       "btn_new_chat": "新しいチャット",

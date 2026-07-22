@@ -1,93 +1,11 @@
-import { a as w, d as l, f as b, o as P, p as m, t as M } from "./capabilities-DjEhHCqr.mjs";
-var g = {
-  numLayers: 24,
-  hiddenSize: 1024,
-  intermediateSize: 3584,
-  vocabSize: 248320,
-  eps: 1e-6,
-  deltanet: {
-    numHeads: 16,
-    keyHeadDim: 128,
-    valueHeadDim: 128,
-    convKernelSize: 4
-  },
-  attention: {
-    numQHeads: 8,
-    numKVHeads: 2,
-    headDim: 256,
-    maxSeq: 2048
-  },
-  attnLayerIndices: [
-    3,
-    7,
-    11,
-    15,
-    19,
-    23
-  ]
-}, S = {
-  numLayers: 24,
-  hiddenSize: 2048,
-  intermediateSize: 6144,
-  vocabSize: 248320,
-  eps: 1e-6,
-  deltanet: {
-    numHeads: 16,
-    keyHeadDim: 128,
-    valueHeadDim: 128,
-    convKernelSize: 4
-  },
-  attention: {
-    numQHeads: 8,
-    numKVHeads: 2,
-    headDim: 256,
-    maxSeq: 2048
-  },
-  attnLayerIndices: [
-    3,
-    7,
-    11,
-    15,
-    19,
-    23
-  ]
-}, R = {
-  numLayers: 32,
-  hiddenSize: 2560,
-  intermediateSize: 9216,
-  vocabSize: 248320,
-  eps: 1e-6,
-  deltanet: {
-    numKeyHeads: 16,
-    numValueHeads: 32,
-    keyHeadDim: 128,
-    valueHeadDim: 128,
-    convKernelSize: 4
-  },
-  attention: {
-    numQHeads: 16,
-    numKVHeads: 4,
-    headDim: 256,
-    maxSeq: 2048
-  },
-  fullAttentionInterval: 4,
-  attnLayerIndices: [
-    3,
-    7,
-    11,
-    15,
-    19,
-    23,
-    27,
-    31
-  ]
-}, U = 1, I = class E {
+import { a as N, b, c as g, i as I, l as m, m as P, p as _, s as W, t as R, u as D, x as w, y as l } from "./capabilities-CyA_QRlM.mjs";
+var O = 1, U = class L {
   #r = null;
   #e = /* @__PURE__ */ new Map();
   #s = null;
   #l = null;
   #u = null;
-  #a = !1;
+  #o = !1;
   #h = "direct";
   #n;
   #i = null;
@@ -100,15 +18,15 @@ var g = {
     else throw new TypeError("MentriaEngine: constructor requires a worker URL or an options object with { workerUrl }");
     if (!t) throw new TypeError("MentriaEngine: workerUrl is required");
     if (r !== "direct" && r !== "blob") throw new TypeError(`MentriaEngine: spawnMode must be 'direct' or 'blob' (got ${r})`);
-    this.#h = r, r === "direct" ? (this.#r = new Worker(t, { type: "module" }), this.#d(), this.#n = Promise.resolve()) : this.#n = fetch(t).then((o) => {
-      if (!o.ok) throw new b(l.NO_WEBGPU, `MentriaEngine: failed to fetch worker from ${t} (HTTP ${o.status}).`);
-      return o.text();
-    }).then((o) => {
-      const s = new Blob([o], { type: "application/javascript" });
-      this.#i = URL.createObjectURL(s), this.#r = new Worker(this.#i, { type: "module" }), this.#d();
+    this.#h = r, r === "direct" ? (this.#r = new Worker(t, { type: "module" }), this.#c(), this.#n = Promise.resolve()) : this.#n = fetch(t).then((a) => {
+      if (!a.ok) throw new b(l.NO_WEBGPU, `MentriaEngine: failed to fetch worker from ${t} (HTTP ${a.status}).`);
+      return a.text();
+    }).then((a) => {
+      const s = new Blob([a], { type: "application/javascript" });
+      this.#i = URL.createObjectURL(s), this.#r = new Worker(this.#i, { type: "module" }), this.#c();
     });
   }
-  #d() {
+  #c() {
     this.#r.onmessage = (e) => this.#p(e.data), this.#r.onerror = (e) => {
       for (const [t, r] of this.#e)
         r.cleanup?.(), r.reject(/* @__PURE__ */ new Error(`Worker error: ${e.message}`));
@@ -177,9 +95,9 @@ var g = {
       return;
     }
     if (e.type === "device-lost") {
-      this.#a = !0;
+      this.#o = !0;
       const r = new b(l.NO_DEVICE, e.error || "WebGPU device lost.");
-      for (const [o, s] of this.#e)
+      for (const [a, s] of this.#e)
         s.cleanup?.(), s.reject(r);
       this.#e.clear(), this.#l?.({
         code: l.NO_DEVICE,
@@ -193,37 +111,37 @@ var g = {
   }
   #f(e) {
     const t = e.code;
-    return t === l.NO_WEBGPU || t === l.NO_ADAPTER || t === l.NO_DEVICE ? new b(t, e.error || "WebGPU unavailable") : t === w.VISION_NOT_LOADED ? new P(t, e.error || "Vision tower not loaded") : new Error(e.error);
+    return t === l.NO_WEBGPU || t === l.NO_ADAPTER || t === l.NO_DEVICE ? new b(t, e.error || "WebGPU unavailable") : t === _.VISION_NOT_LOADED ? new P(t, e.error || "Vision tower not loaded") : new Error(e.error);
   }
-  #t(e, t, { onToken: r = null, onLayerNorms: o = null, onL23Residuals: s = null, onL23Mlp: u = null, onL23Attention: h = null, onDeltaState: d = null, signal: i = null, timeoutMs: f = 0 } = {}) {
-    const a = crypto.randomUUID();
-    return new Promise((L, p) => {
-      if (this.#a) {
+  #t(e, t, { onToken: r = null, onLayerNorms: a = null, onL23Residuals: s = null, onL23Mlp: u = null, onL23Attention: h = null, onDeltaState: c = null, signal: i = null, timeoutMs: f = 0 } = {}) {
+    const o = crypto.randomUUID();
+    return new Promise((E, p) => {
+      if (this.#o) {
         p(new b(l.NO_DEVICE, "WebGPU device was lost; construct a new MentriaEngine to recover."));
         return;
       }
       if (i?.aborted) {
-        p(this.#o(i));
+        p(this.#a(i));
         return;
       }
       let y = null, n = null;
       const v = () => {
         y !== null && (clearTimeout(y), y = null), n && (i?.removeEventListener("abort", n), n = null);
       };
-      this.#e.set(a, {
-        resolve: L,
+      this.#e.set(o, {
+        resolve: E,
         reject: p,
         onToken: r,
-        onLayerNorms: o,
+        onLayerNorms: a,
         onL23Residuals: s,
         onL23Mlp: u,
         onL23Attention: h,
-        onDeltaState: d,
+        onDeltaState: c,
         cleanup: v
       }), i && (n = () => {
-        const c = this.#e.get(a);
-        if (c) {
-          this.#e.delete(a), c.cleanup();
+        const d = this.#e.get(o);
+        if (d) {
+          this.#e.delete(o), d.cleanup();
           try {
             this.#r.postMessage({
               type: "interrupt",
@@ -231,12 +149,12 @@ var g = {
             });
           } catch {
           }
-          c.reject(this.#o(i));
+          d.reject(this.#a(i));
         }
       }, i.addEventListener("abort", n, { once: !0 })), f > 0 && (y = setTimeout(() => {
-        const c = this.#e.get(a);
-        if (c) {
-          this.#e.delete(a), c.cleanup();
+        const d = this.#e.get(o);
+        if (d) {
+          this.#e.delete(o), d.cleanup();
           try {
             this.#r.postMessage({
               type: "interrupt",
@@ -244,32 +162,32 @@ var g = {
             });
           } catch {
           }
-          c.reject(m("TimeoutError", `Generation timed out after ${f}ms`));
+          d.reject(w("TimeoutError", `Generation timed out after ${f}ms`));
         }
       }, f)), this.#n.then(() => {
-        if (this.#e.has(a))
+        if (this.#e.has(o))
           try {
             this.#r.postMessage({
               type: e,
-              id: a,
+              id: o,
               data: t
             });
-          } catch (c) {
-            this.#e.has(a) && (this.#e.delete(a), v()), p(c);
+          } catch (d) {
+            this.#e.has(o) && (this.#e.delete(o), v()), p(d);
           }
-      }, (c) => {
-        this.#e.has(a) && (this.#e.delete(a), v()), p(c);
+      }, (d) => {
+        this.#e.has(o) && (this.#e.delete(o), v()), p(d);
       });
     });
   }
-  #o(e) {
-    return e?.reason !== void 0 ? e.reason instanceof Error ? e.reason : m("AbortError", String(e.reason)) : m("AbortError", "Generation aborted");
+  #a(e) {
+    return e?.reason !== void 0 ? e.reason instanceof Error ? e.reason : w("AbortError", String(e.reason)) : w("AbortError", "Generation aborted");
   }
   static isWebGPUAvailable() {
     return typeof navigator < "u" && !!navigator.gpu;
   }
   static async probeWebGPU() {
-    if (!E.isWebGPUAvailable()) return {
+    if (!L.isWebGPUAvailable()) return {
       available: !1,
       code: l.NO_WEBGPU
     };
@@ -297,13 +215,13 @@ var g = {
     this.#l = e;
   }
   get isDeviceLost() {
-    return this.#a;
+    return this.#o;
   }
   set onFallback(e) {
     this.#u = e;
   }
   async init(e) {
-    if (!E.isWebGPUAvailable()) throw new b(l.NO_WEBGPU, "WebGPU is not available. Use Chrome 113+, Edge 113+, or Safari 18.2+.");
+    if (!L.isWebGPUAvailable()) throw new b(l.NO_WEBGPU, "WebGPU is not available. Use Chrome 113+, Edge 113+, or Safari 18.2+.");
     const t = await this.#t("init", e);
     if (t && t.protocolVersion !== void 0 && t.protocolVersion !== 1) throw new Error(`MentriaEngine: protocol version mismatch (main=1, worker=${t.protocolVersion}). The main-thread bundle and worker bundle are from incompatible releases — force-reload the page (Ctrl+Shift+R) to clear cached chunks, or pin matching versions.`);
     return t;
@@ -312,44 +230,44 @@ var g = {
     return this.#t("load", e);
   }
   async generate(e, t) {
-    const { signal: r, timeoutMs: o, onLayerNorms: s, onL23Residuals: u, onL23Mlp: h, onL23Attention: d, onDeltaState: i, ...f } = e || {};
+    const { signal: r, timeoutMs: a, onLayerNorms: s, onL23Residuals: u, onL23Mlp: h, onL23Attention: c, onDeltaState: i, ...f } = e || {};
     return this.#t("generate", f, {
       onToken: t || null,
       onLayerNorms: s || null,
       onL23Residuals: u || null,
       onL23Mlp: h || null,
-      onL23Attention: d || null,
+      onL23Attention: c || null,
       onDeltaState: i || null,
       signal: r || null,
-      timeoutMs: o || 0
+      timeoutMs: a || 0
     });
   }
   stream(e) {
-    const { signal: t, timeoutMs: r, ...o } = e || {};
-    if (this.#a) return this.#c(new b(l.NO_DEVICE, "WebGPU device was lost; construct a new MentriaEngine to recover."));
-    if (t?.aborted) return this.#c(this.#o(t));
+    const { signal: t, timeoutMs: r, ...a } = e || {};
+    if (this.#o) return this.#d(new b(l.NO_DEVICE, "WebGPU device was lost; construct a new MentriaEngine to recover."));
+    if (t?.aborted) return this.#d(this.#a(t));
     const s = [], u = [];
-    let h = !1, d = null, i = !1;
+    let h = !1, c = null, i = !1;
     const f = (n) => {
       i || (u.length ? u.shift().resolve({
         value: n,
         done: !1
       }) : s.push(n));
-    }, a = () => {
-      if (!(h || d))
+    }, o = () => {
+      if (!(h || c))
         for (h = !0; u.length; ) u.shift().resolve({
           value: void 0,
           done: !0
         });
-    }, L = (n) => {
-      if (!(h || d))
-        for (d = n; u.length; ) u.shift().reject(n);
-    }, p = this.#t("generate", o, {
+    }, E = (n) => {
+      if (!(h || c))
+        for (c = n; u.length; ) u.shift().reject(n);
+    }, p = this.#t("generate", a, {
       onToken: f,
       signal: t || null,
       timeoutMs: r || 0
     });
-    p.then(a, L);
+    p.then(o, E);
     const y = this;
     return {
       [Symbol.asyncIterator]() {
@@ -359,7 +277,7 @@ var g = {
         return s.length ? Promise.resolve({
           value: s.shift(),
           done: !1
-        }) : d ? Promise.reject(d) : h ? Promise.resolve({
+        }) : c ? Promise.reject(c) : h ? Promise.resolve({
           value: void 0,
           done: !0
         }) : new Promise((n, v) => u.push({
@@ -368,7 +286,7 @@ var g = {
         }));
       },
       return(n) {
-        if (!h && !d && !i) {
+        if (!h && !c && !i) {
           i = !0;
           try {
             y.#r?.postMessage({
@@ -378,14 +296,14 @@ var g = {
           } catch {
           }
         }
-        return a(), p.catch(() => {
+        return o(), p.catch(() => {
         }), Promise.resolve({
           value: n,
           done: !0
         });
       },
       throw(n) {
-        if (!h && !d && !i) {
+        if (!h && !c && !i) {
           i = !0;
           try {
             y.#r?.postMessage({
@@ -395,12 +313,12 @@ var g = {
           } catch {
           }
         }
-        return L(n), p.catch(() => {
+        return E(n), p.catch(() => {
         }), Promise.reject(n);
       }
     };
   }
-  #c(e) {
+  #d(e) {
     return {
       [Symbol.asyncIterator]() {
         return this;
@@ -504,16 +422,19 @@ var g = {
   }
 };
 export {
-  w as MULTIMODAL_ERROR_CODES,
-  I as MentriaEngine,
+  _ as MULTIMODAL_ERROR_CODES,
+  U as MentriaEngine,
   P as MultimodalUnavailableError,
-  U as PROTOCOL_VERSION,
-  g as QWEN35_08B_CONFIG,
-  S as QWEN35_2B_CONFIG,
-  R as QWEN35_4B_CONFIG,
+  O as PROTOCOL_VERSION,
+  W as QWEN35_08B_CONFIG,
+  g as QWEN35_27B_BONSAI_CONFIG,
+  m as QWEN35_2B_CONFIG,
+  D as QWEN35_4B_CONFIG,
+  I as QWEN35_VL_08B_VISION_CONFIG,
+  N as QWEN35_VL_27B_VISION_CONFIG,
   l as WEBGPU_ERROR_CODES,
   b as WebGPUUnsupportedError,
-  M as canRunLargeModel
+  R as canRunLargeModel
 };
 
 //# sourceMappingURL=mentria.mjs.map

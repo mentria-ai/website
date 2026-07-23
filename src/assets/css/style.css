@@ -704,14 +704,11 @@ html.app-chrome body:has(.terminal-frame) .hero { display: none; }
    transform-centered, and a transform makes it the containing block for
    position:fixed descendants — a pseudo on the peek would be clipped to
    the box instead of covering the viewport. */
-html.app-chrome body:has(.hero.hero--peek)::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.55);
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
+html.app-chrome body:has(.hero.hero--peek) > .site-header,
+html.app-chrome body:has(.hero.hero--peek) > .site-footer,
+html.app-chrome body:has(.hero.hero--peek) main > :not(.hero):not(:has(.hero.hero--peek)),
+html.app-chrome body:has(.hero.hero--peek) main :has(> .hero.hero--peek) > :not(.hero) {
+  filter: blur(3px) brightness(0.45);
 }
 html.app-chrome body:has(.terminal-frame) .hero.hero--peek {
   display: block;
@@ -946,10 +943,12 @@ html.app-chrome body:has(.terminal-frame) .hero.hero--peek {
   opacity: 0;
   transition: opacity 0.24s ease;
   cursor: pointer;
+}
+.pwa-install-sheet--open .pwa-install-sheet__backdrop {
+  opacity: 1;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }
-.pwa-install-sheet--open .pwa-install-sheet__backdrop { opacity: 1; }
 
 .pwa-install-sheet__panel {
   position: absolute;

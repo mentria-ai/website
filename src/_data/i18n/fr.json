@@ -866,6 +866,7 @@
       "err_unsupported_sub": "Essaie la dernière version de Chrome, Edge ou Brave sur ordinateur, ou Safari 26+ sur macOS / iOS 26+.",
       "err_load_runtime": "Échec du chargement du runtime — vérifie le réseau/bloqueur",
       "err_device_lost": "GPU perdu — recharge pour récupérer",
+      "err_context_full": "Conversation trop longue pour le contexte du modèle — démarre un nouveau chat",
       "err_bad_image": "Impossible de lire cette image — essayez un JPEG ou un PNG.",
       "err_load_prefix": "Échec du chargement : ",
       "err_prefix": "Erreur : ",

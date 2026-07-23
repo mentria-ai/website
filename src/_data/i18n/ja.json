@@ -866,6 +866,7 @@
       "err_unsupported_sub": "デスクトップでは最新のChrome、Edge、Braveを、macOS / iOS 26+ではSafari 26+をお試しください。",
       "err_load_runtime": "ランタイム読込失敗 — ネットワーク/広告ブロッカーを確認",
       "err_device_lost": "GPUデバイス喪失 — 再読込で復旧",
+      "err_context_full": "会話がモデルのコンテキスト上限を超えました — 新しいチャットを開始してください",
       "err_bad_image": "画像を読み込めませんでした — JPEGまたはPNGをお試しください。",
       "err_load_prefix": "読込失敗: ",
       "err_prefix": "エラー: ",

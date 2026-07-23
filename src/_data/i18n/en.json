@@ -866,6 +866,7 @@
       "err_unsupported_sub": "Try the latest Chrome, Edge, or Brave on desktop, or Safari 26+ on macOS / iOS 26+.",
       "err_load_runtime": "Failed to load runtime — check network/ad-blocker",
       "err_device_lost": "GPU device lost — reload to recover",
+      "err_context_full": "Conversation too long for the model's context — start a new chat",
       "err_bad_image": "Couldn't read that image — try a JPEG or PNG.",
       "err_load_prefix": "Failed to load: ",
       "err_prefix": "Error: ",

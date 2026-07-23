@@ -146,7 +146,11 @@ function row(entry) {
       } catch (e) { showError(e.message); }
     } else {
       showOk(COPY.shareOpenComms);
-      window.open('/comms/', '_blank');
+      if (document.documentElement.classList.contains('is-standalone')) {
+        setTimeout(() => { location.href = '/comms/'; }, 700);
+      } else {
+        window.open('/comms/', '_blank');
+      }
     }
   });
   const rem = btn(COPY.btnRemove, async () => {

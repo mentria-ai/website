@@ -857,7 +857,7 @@
       "input_placeholder": "Message…",
       "progress_label": "Téléchargement du modèle…",
       "empty_msg": "Envoie un message ou joins une image pour commencer.",
-      "empty_sub": "Téléchargement du modèle ~550 Mo à la première utilisation, ensuite en cache.",
+      "empty_sub": "Téléchargement du modèle de ~{size} à la première utilisation, ensuite en cache.",
       "img_alt_attached": "Image jointe",
       "img_alt_attached_short": "Jointe",
       "label_you": "toi",

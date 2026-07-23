@@ -857,7 +857,7 @@
       "input_placeholder": "Mensaje…",
       "progress_label": "Descargando modelo…",
       "empty_msg": "Envía un mensaje o adjunta una imagen para empezar.",
-      "empty_sub": "Descarga del modelo ~550 MB en el primer uso, luego en caché.",
+      "empty_sub": "Descarga del modelo de ~{size} en el primer uso, luego en caché.",
       "img_alt_attached": "Imagen adjunta",
       "img_alt_attached_short": "Adjunta",
       "label_you": "tú",

@@ -101,6 +101,7 @@ const COPY = {
   tierBetter:          {{ ("tool.ai-chat.tier_better"           | t) | dump | safe }},
   tierBest:            {{ ("tool.ai-chat.tier_best"             | t) | dump | safe }},
   tierMax:             {{ ("tool.ai-chat.tier_max"              | t) | dump | safe }},
+  emptySub:            {{ ("tool.ai-chat.empty_sub"             | t) | dump | safe }},
   tierConfirm:         {{ ("tool.ai-chat.tier_confirm"          | t) | dump | safe }},
   tierFallback:        {{ ("tool.ai-chat.tier_fallback"         | t) | dump | safe }},
   btnSend:             {{ ("tool.ai-chat.btn_send"              | t) | dump | safe }},
@@ -424,6 +425,18 @@ function runApp(MentriaEngine, Tiers) {
   let currentTier = null;
   let contextTokens = 2048;
 
+  const emptySubEl = document.querySelector('.ac__empty-sub');
+  function updateEmptySub(id) {
+    if (!emptySubEl) return;
+    const tier = Tiers.TIERS[id || currentTier || (tierDecision && tierDecision.tier) || '0.8b'];
+    if (!tier) return;
+    let raw = null;
+    try { raw = window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t('tool.ai-chat.empty_sub'); } catch (_) {}
+    emptySubEl.textContent = (raw || COPY.emptySub).replace('{size}', tier.sizeLabel);
+  }
+  document.addEventListener('mentria:localechange', function () { updateEmptySub(); });
+  updateEmptySub(Tiers.getUserTier() || '0.8b');
+
   function tierOptionLabel(id) {
     const t = Tiers.TIERS[id];
     const quality = id === '0.8b' ? COPY.tierFast : id === '2b' ? COPY.tierBetter : id === '4b' ? COPY.tierBest : COPY.tierMax;
@@ -454,6 +467,7 @@ function runApp(MentriaEngine, Tiers) {
     }
     Tiers.setUserTier(id);
     tierDecision = await Tiers.decideTier();
+    updateEmptySub(id);
     try { engine?.terminate(); } catch (_) {}
     engine = null;
     inputEl.disabled = true; sendBtn.disabled = true;
@@ -486,6 +500,7 @@ function runApp(MentriaEngine, Tiers) {
       contextTokens = res.maxSeq || 2048;
       try { await navigator.storage?.persist?.(); } catch (_) {}
       syncTierSelector();
+      updateEmptySub();
       progressWrap.style.display = 'none';
       setStatus('ready', COPY.statusReady);
       deleteBtn.style.display = '';
@@ -798,6 +813,7 @@ function runApp(MentriaEngine, Tiers) {
       return;
     }
     syncTierSelector();
+    updateEmptySub();
     loadModel();
   })();
 }

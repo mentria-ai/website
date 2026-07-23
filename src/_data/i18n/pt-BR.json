@@ -803,7 +803,6 @@
       "err_load_runtime": "Falha ao carregar runtime — verifique rede/bloqueador",
       "err_device_lost": "GPU perdida — recarregue para recuperar",
       "err_load_prefix": "Falha ao carregar: ",
-      "err_context_full": "A conversa é longa demais para a memória do modelo. Inicie um novo chat para continuar.",
       "err_no_quote": "Não foi possível gerar uma frase. Tente novamente.",
       "err_generation": "Erro ao gerar a frase. Tente novamente."
     },
@@ -866,7 +865,7 @@
       "err_unsupported_sub": "Tente a versão mais recente de Chrome, Edge ou Brave no desktop, ou Safari 26+ no macOS / iOS 26+.",
       "err_load_runtime": "Falha ao carregar runtime — verifique rede/bloqueador",
       "err_device_lost": "GPU perdida — recarregue para recuperar",
-      "err_context_full": "Conversa longa demais para o contexto do modelo — inicie um novo chat",
+      "err_context_full": "A conversa é longa demais para a memória do modelo. Inicie um novo chat para continuar.",
       "err_bad_image": "Não foi possível ler essa imagem — tente JPEG ou PNG.",
       "err_load_prefix": "Falha ao carregar: ",
       "err_prefix": "Erro: ",

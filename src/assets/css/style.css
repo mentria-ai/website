@@ -398,7 +398,7 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .feed-preview__img.is-broken { display: none; }
 .feed-preview__grad { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 30%, transparent 45%, rgba(0, 0, 0, 0.88)); }
 .feed-preview__badge { position: absolute; top: 8px; left: 8px; font-family: var(--font-mono); font-size: 0.55rem; letter-spacing: 0.12em; color: var(--accent); background: rgba(10, 10, 10, 0.75); padding: 3px 6px; border-radius: 4px; }
-.feed-preview__caption { position: absolute; left: 9px; right: 9px; bottom: 9px; color: #fff; font-size: 0.72rem; line-height: 1.3; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.feed-preview__caption { position: absolute; left: 9px; right: 9px; bottom: 9px; color: #fff; font-size: 0.72rem; line-height: 1.3; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-clamp: 3; overflow: hidden; }
 .feed-preview__more { flex: 0 0 110px; border-radius: 10px; border: 1px dashed var(--term-border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--accent); font-family: var(--font-mono); font-size: 0.72rem; text-decoration: none; scroll-snap-align: start; }
 .feed-preview__more:hover, .feed-preview__more:focus-visible { border-color: var(--accent); }
 @media (min-width: 720px) { .feed-preview__card { flex-basis: 180px; } }
@@ -467,7 +467,7 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .launch-tile__icon { position: relative; display: grid; place-items: center; width: 84px; height: 84px; border: 1px solid var(--term-border-strong); border-radius: 22px; background: var(--term-bg-raised); transition: border-color 0.15s ease, box-shadow 0.15s ease; }
 .launch-tile:hover .launch-tile__icon, .launch-tile:focus-visible .launch-tile__icon, .launch-tile:focus .launch-tile__icon { border-color: var(--cat); box-shadow: 0 0 16px -3px var(--cat); }
 .launch-tile__icon svg { width: 60px; height: 60px; color: var(--cat); }
-.launch-tile__label { font-family: var(--font-mono); font-size: 0.7rem; color: var(--term-muted); text-align: center; line-height: 1.25; min-height: 2.3em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.launch-tile__label { font-family: var(--font-mono); font-size: 0.7rem; color: var(--term-muted); text-align: center; line-height: 1.25; min-height: 2.3em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2; overflow: hidden; }
 .launch-tile:hover .launch-tile__label, .launch-tile:focus-visible .launch-tile__label, .launch-tile:focus .launch-tile__label { color: var(--term-fg); }
 @media (max-width: 640px) {
   .launcher { max-width: none; }

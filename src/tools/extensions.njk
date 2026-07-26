@@ -212,6 +212,19 @@ render();
 .xt__drop-hint { margin: 0; }
 .xt__drop--hot, .xt__drop:hover { border-color: var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); }
 .xt__paste { margin-top: 0.6rem; font-size: 0.8rem; color: var(--term-muted); }
+@media (prefers-reduced-motion: no-preference) {
+  .xt__paste::details-content {
+    opacity: 0;
+    block-size: 0;
+    overflow-y: clip;
+    interpolate-size: allow-keywords;
+    transition: content-visibility 0.22s allow-discrete, opacity 0.22s ease, block-size 0.22s ease;
+  }
+  .xt__paste[open]::details-content {
+    opacity: 1;
+    block-size: auto;
+  }
+}
 .xt__paste textarea { width: 100%; margin: 0.5rem 0; background: var(--term-bg-raised, #0d0f12); border: 1px solid var(--term-border, #2a3138); color: var(--term-fg); border-radius: 6px; font-family: inherit; font-size: 0.75rem; padding: 0.5rem; }
 .xt__btn { background: transparent; border: 1px solid var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); border-radius: 6px; padding: 0.35rem 0.9rem; font-family: inherit; font-size: 0.8rem; cursor: pointer; }
 .xt__btn--small { padding: 0.2rem 0.6rem; font-size: 0.7rem; }

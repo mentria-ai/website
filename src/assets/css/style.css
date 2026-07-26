@@ -696,6 +696,19 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .tldr__cta-less { display: none; }
 .tldr[open] .tldr__cta-more { display: none; }
 .tldr[open] .tldr__cta-less { display: inline; }
+@media (prefers-reduced-motion: no-preference) {
+  .tldr::details-content {
+    opacity: 0;
+    block-size: 0;
+    overflow-y: clip;
+    interpolate-size: allow-keywords;
+    transition: content-visibility 0.22s allow-discrete, opacity 0.22s ease, block-size 0.22s ease;
+  }
+  .tldr[open]::details-content {
+    opacity: 1;
+    block-size: auto;
+  }
+}
 .tldr__panel {
   margin-top: 0.5rem;
   padding: 0.85rem 1rem;
@@ -721,7 +734,7 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
   font-size: 0.85rem;
   color: var(--term-fg);
 }
-.hero .tldr { display: flex; flex-direction: column; align-items: center; }
+.hero .tldr__summary { display: flex; width: fit-content; }
 
 html.app-chrome body:has(.terminal-frame) .hero { display: none; }
 

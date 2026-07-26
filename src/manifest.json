@@ -5,6 +5,9 @@
   "description": "A creative studio for tools, experiments, and visual transmissions.",
   "start_url": "/",
   "display": "standalone",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "related_applications": [
     {
       "platform": "webapp",

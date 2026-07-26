@@ -548,6 +548,33 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
+@media (prefers-reduced-motion: no-preference) {
+  .m-dialog {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+    transition: opacity 0.16s ease, transform 0.16s ease, overlay 0.16s allow-discrete, display 0.16s allow-discrete;
+  }
+  .m-dialog:popover-open {
+    opacity: 1;
+    transform: none;
+  }
+  .m-dialog::backdrop {
+    opacity: 0;
+    transition: opacity 0.16s ease, overlay 0.16s allow-discrete, display 0.16s allow-discrete;
+  }
+  .m-dialog:popover-open::backdrop {
+    opacity: 1;
+  }
+  @starting-style {
+    .m-dialog:popover-open {
+      opacity: 0;
+      transform: translateY(6px) scale(0.97);
+    }
+    .m-dialog:popover-open::backdrop {
+      opacity: 0;
+    }
+  }
+}
 .m-dialog__msg {
   margin: 0;
   font-size: 0.9rem;

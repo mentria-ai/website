@@ -440,7 +440,10 @@ eleventyComputed:
 
   async function requestWakeLock() {
     if (!('wakeLock' in navigator)) return;
-    try { wakeLock = await navigator.wakeLock.request('screen'); }
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    }
     catch (_) { wakeLock = null; }
   }
   function releaseWakeLock() {

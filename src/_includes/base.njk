@@ -2,6 +2,7 @@
 <html lang="{{ lang | default('en') }}"{% if feedLayout %} class="feed-layout"{% endif %}>
 <head>
     <meta charset="UTF-8">
+    <style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
     {# Disable user pinch-to-zoom + iOS focus auto-zoom. The site has
        multi-tap interactions (CLI input, game touch controls, install
        sheet, language switcher) that iOS otherwise hijacks for zoom

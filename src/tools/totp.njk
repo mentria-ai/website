@@ -913,6 +913,7 @@ eleventyComputed:
     }
     state.accounts.push(account);
     await reEncryptSecrets();
+    window.MentriaStore.requestPersist();
     addModal.close();
     renderList();
     tick();
@@ -942,6 +943,7 @@ eleventyComputed:
       if (pendingAdd) {
         state.accounts = next;
         await reEncryptSecrets();
+        window.MentriaStore.requestPersist();
         pendingAdd = null;
         renderList();
         tick();

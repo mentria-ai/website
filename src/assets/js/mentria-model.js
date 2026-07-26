@@ -193,6 +193,13 @@ async function validateRun(engine) {
   try { await Promise.race([run, timeout]); } finally { clearTimeout(timer); }
 }
 
+function requestPersistentStorage() {
+  try {
+    if (window.MentriaStore && window.MentriaStore.requestPersist) { window.MentriaStore.requestPersist(); return; }
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  } catch (_) {}
+}
+
 export async function ensureModel(engineFactory, opts) {
   opts = opts || {};
   const vision = !!opts.vision;
@@ -247,6 +254,7 @@ export async function ensureModel(engineFactory, opts) {
 
   if (proven && cached) {
     hide();
+    requestPersistentStorage();
     const res = await Tiers.loadWithFallback(makeEngine, candidate, { vision });
     if (res.tier !== candidate) Tiers.clearValidatedTier();
     return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
@@ -257,6 +265,7 @@ export async function ensureModel(engineFactory, opts) {
     const ok = await window.mentriaConfirmHeavyDownload();
     if (!ok) { hide(); throw new Error('download-postponed'); }
   }
+  requestPersistentStorage();
   try {
     const res = await Tiers.loadWithFallback(makeEngine, candidate, {
       vision,

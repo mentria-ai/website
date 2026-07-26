@@ -165,6 +165,23 @@
     }, 100);
   }
 
+  function canShareFile(filename, type) {
+    if (!navigator.canShare) return false;
+    try {
+      return navigator.canShare({ files: [new File([new Blob()], filename, { type: type })] });
+    } catch (_) { return false; }
+  }
+
+  async function shareFile(filename, blob) {
+    var file = new File([blob], filename, { type: blob.type });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file] }); return true; }
+      catch (e) { if (e && e.name === 'AbortError') return true; }
+    }
+    downloadFile(filename, blob);
+    return false;
+  }
+
   function migrateStore(ns, key, legacyKey, fallback) {
     if (window.MentriaStore) {
       var v = window.MentriaStore.get(ns, key);
@@ -288,6 +305,8 @@
     segmented: segmented,
     debouncedSaver: debouncedSaver,
     downloadFile: downloadFile,
+    canShareFile: canShareFile,
+    shareFile: shareFile,
     migrateStore: migrateStore,
     modal: modal,
     backDismiss: backDismiss

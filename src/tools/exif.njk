@@ -69,6 +69,7 @@ eleventyComputed:
 
     <div class="ex__controls">
       <button type="button" class="m-btn m-btn--primary m-btn--pill" id="ex-strip" hidden>{{ "tool.exif.btn_strip" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="ex-share" hidden>{{ "common.share" | t }}</button>
       <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="ex-again">{{ "tool.exif.btn_another" | t }}</button>
     </div>
 
@@ -130,6 +131,8 @@ eleventyComputed:
   const iccNote   = $('ex-icc-note');
   const noteEl    = $('ex-note');
   const stripBtn  = $('ex-strip');
+  const shareBtn  = $('ex-share');
+  const canShareClean = window.MentriaUI && MentriaUI.canShareFile && MentriaUI.canShareFile('img-clean.jpg', 'image/jpeg');
   const againBtn  = $('ex-again');
   const resultEl  = $('ex-result');
 
@@ -496,6 +499,7 @@ eleventyComputed:
     const canStrip = !!KINDS[origKind];
     cleanEl.hidden = removable || !canStrip;
     stripBtn.hidden = !(canStrip && removable);
+    shareBtn.hidden = !(canStrip && removable && canShareClean);
     noteEl.hidden = canStrip;
     if (!canStrip) { noteEl.textContent = COPY.stripUnsupported; noteEl.hidden = false; }
     resultEl.hidden = true;
@@ -549,12 +553,10 @@ eleventyComputed:
     fileInput.value = '';
   }
 
-  stripBtn.addEventListener('click', () => {
-    if (!origBuf || !KINDS[origKind]) return;
+  function stripCleanCopy() {
     const { blob, removed } = KINDS[origKind].strip(origBuf);
     const dot = origName.lastIndexOf('.');
     const base = dot > 0 ? origName.slice(0, dot) : origName;
-    MentriaUI.downloadFile(base + '-clean.' + KINDS[origKind].ext, blob);
     blob.arrayBuffer().then(cleanBuf => {
       const recheck = KINDS[origKind].parse(cleanBuf);
       const leftover = recheck && recheck.segments.some(s => s.kind !== 'icc');
@@ -564,6 +566,19 @@ eleventyComputed:
       resultEl.textContent = line;
       resultEl.hidden = false;
     });
+    return { blob, name: base + '-clean.' + KINDS[origKind].ext };
+  }
+
+  stripBtn.addEventListener('click', () => {
+    if (!origBuf || !KINDS[origKind]) return;
+    const out = stripCleanCopy();
+    MentriaUI.downloadFile(out.name, out.blob);
+  });
+
+  shareBtn.addEventListener('click', () => {
+    if (!origBuf || !KINDS[origKind]) return;
+    const out = stripCleanCopy();
+    MentriaUI.shareFile(out.name, out.blob);
   });
 
   againBtn.addEventListener('click', reset);

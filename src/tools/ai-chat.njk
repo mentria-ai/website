@@ -270,7 +270,9 @@ function runApp(MentriaEngine, Tiers) {
   setTimeout(restoreConversation, 0);
 
   function scrollToBottom() { messagesEl.scrollTop = messagesEl.scrollHeight; }
+  const nativeFieldSizing = CSS.supports('field-sizing', 'content');
   function autoResize() {
+    if (nativeFieldSizing) return;
     inputEl.style.height = 'auto';
     inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
   }
@@ -1177,6 +1179,9 @@ function runApp(MentriaEngine, Tiers) {
   overflow-y: auto;
   max-height: 120px;
   transition: border-color 0.2s ease;
+}
+@supports (field-sizing: content) {
+  .ac__input { field-sizing: content; }
 }
 .ac__input:focus {
   outline: none;

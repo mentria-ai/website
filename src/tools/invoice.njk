@@ -242,7 +242,9 @@ eleventyComputed:
   };
 
   /* ── Layout / dates ────────────────────────────────── */
+  const nativeFieldSizing = CSS.supports('field-sizing', 'content');
   const autoResizeTextarea = (ta) => {
+    if (nativeFieldSizing) return;
     ta.style.height = 'auto';
     ta.style.height = Math.max(ta.scrollHeight, 38.4) + 'px';
   };
@@ -812,6 +814,10 @@ eleventyComputed:
   min-height: 38.4px;
   line-height: 1.4;
   overflow: hidden;
+}
+@supports (field-sizing: content) {
+  .iv__table textarea,
+  .iv__notes-input { field-sizing: content; }
 }
 
 .line-total, .grand-total { font-variant-numeric: tabular-nums; }

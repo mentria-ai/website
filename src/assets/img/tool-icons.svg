@@ -519,4 +519,119 @@
   <circle cx="36" cy="24.8" r="2.7" fill="#12121a"></circle>
   <path d="M28.2 35.8 L43.8 20.2" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round"></path>
 </g></symbol>
+<symbol id="tool-bubble-level" viewBox="0 0 48 48"><defs>
+<linearGradient id="ambl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="amEbl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C2790F"></stop><stop offset="1" stop-color="#9A5B08"></stop></linearGradient>
+<linearGradient id="gnbl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
+<linearGradient id="cybl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="glossbl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<filter id="shbl" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shbl)">
+   <rect x="3" y="14.5" width="42" height="19" rx="5.5" fill="url(#ambl)"></rect>
+   <rect x="3" y="14.5" width="42" height="10" rx="5" fill="url(#glossbl)" opacity=".45"></rect>
+   <rect x="5.6" y="17.1" width="36.8" height="13.8" rx="4" fill="none" stroke="url(#amEbl)" stroke-opacity=".35" stroke-width="1"></rect>
+   <circle cx="9" cy="24" r="2.1" fill="url(#amEbl)" opacity=".5"></circle>
+   <circle cx="39" cy="24" r="2.1" fill="url(#amEbl)" opacity=".5"></circle>
+   <rect x="13" y="18.6" width="22" height="10.8" rx="5.4" fill="#0d2b33"></rect>
+   <rect x="13" y="18.6" width="22" height="10.8" rx="5.4" fill="url(#cybl)" opacity=".18"></rect>
+   <path d="M20 20.4 V27.6" stroke="#fff" stroke-opacity=".4" stroke-width="1.1" stroke-linecap="round"></path>
+   <path d="M28 20.4 V27.6" stroke="#fff" stroke-opacity=".4" stroke-width="1.1" stroke-linecap="round"></path>
+   <circle cx="25.4" cy="24" r="3.7" fill="url(#gnbl)"></circle>
+   <ellipse cx="24.1" cy="22.6" rx="1.6" ry="1.05" transform="rotate(-38 24.1 22.6)" fill="#fff" opacity=".55"></ellipse>
+ </g></symbol>
+<symbol id="tool-decibel-meter" viewBox="0 0 48 48"><defs>
+<linearGradient id="gndbm" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#34C46A"></stop><stop offset="1" stop-color="#86EFAC"></stop></linearGradient>
+<linearGradient id="amdbm" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#F7B015"></stop><stop offset="1" stop-color="#FCD661"></stop></linearGradient>
+<linearGradient id="rddbm" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#DC3F3F"></stop><stop offset="1" stop-color="#FCA5A5"></stop></linearGradient>
+<linearGradient id="cydbm" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="glossdbm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<radialGradient id="dkdbm" cx="34%" cy="24%" r="86%"><stop offset="0" stop-color="#332F45"></stop><stop offset="1" stop-color="#14131D"></stop></radialGradient>
+<filter id="shdbm" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.3" stdDeviation="1.2" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shdbm)">
+  <rect x="5" y="6" width="38" height="36" rx="9" fill="url(#dkdbm)"></rect>
+  <path d="M14 6h20a9 9 0 0 1 9 9v3.5a9 9 0 0 0-9-9H14a9 9 0 0 0-9 9V15a9 9 0 0 1 9-9Z" fill="url(#glossdbm)" opacity=".5"></path>
+  <rect x="9.5" y="27" width="5.6" height="10" rx="2.8" fill="url(#gndbm)"></rect>
+  <rect x="17.3" y="21" width="5.6" height="16" rx="2.8" fill="url(#gndbm)"></rect>
+  <rect x="25.1" y="16" width="5.6" height="21" rx="2.8" fill="url(#amdbm)"></rect>
+  <rect x="32.9" y="11" width="5.6" height="26" rx="2.8" fill="url(#rddbm)"></rect>
+  <rect x="32" y="9.4" width="7.4" height="2.2" rx="1.1" fill="#F8FAFC"></rect>
+  <rect x="9.5" y="38.4" width="29" height="1.8" rx=".9" fill="url(#cydbm)" opacity=".6"></rect>
+</g></symbol>
+<symbol id="tool-compass" viewBox="0 0 48 48"><defs>
+<linearGradient id="cycmp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="pkcmp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBA6D2"></stop><stop offset="1" stop-color="#F25FA8"></stop></linearGradient>
+<linearGradient id="gncmp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
+<linearGradient id="glosscmp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<radialGradient id="dialcmp" cx="36%" cy="30%" r="82%"><stop offset="0" stop-color="#3a3550"></stop><stop offset="1" stop-color="#171522"></stop></radialGradient>
+<filter id="shcmp" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shcmp)">
+   <circle cx="24" cy="24" r="19" fill="url(#gncmp)"></circle>
+   <circle cx="24" cy="24" r="19" fill="url(#glosscmp)" opacity=".5"></circle>
+   <circle cx="24" cy="24" r="15.6" fill="url(#dialcmp)"></circle>
+   <g stroke="#fff" stroke-linecap="round" opacity=".45">
+     <path d="M24 9 V10.8" stroke-width="1.8"></path>
+     <path d="M39 24 H37.2" stroke-width="1.2"></path>
+     <path d="M24 39 V37.2" stroke-width="1.2"></path>
+     <path d="M9 24 H10.8" stroke-width="1.2"></path>
+   </g>
+   <path d="M24 11.6 L28.6 24 L24 24 Z" fill="url(#pkcmp)"></path>
+   <path d="M24 11.6 L19.4 24 L24 24 Z" fill="#F25FA8" opacity=".7"></path>
+   <path d="M24 36.4 L19.4 24 L24 24 Z" fill="url(#cycmp)"></path>
+   <path d="M24 36.4 L28.6 24 L24 24 Z" fill="#1FBFDB" opacity=".7"></path>
+   <circle cx="24" cy="24" r="2.4" fill="#fff" opacity=".92"></circle>
+   <circle cx="24" cy="24" r="1" fill="#171522" opacity=".5"></circle>
+   <ellipse cx="18.8" cy="15.6" rx="4.4" ry="2.6" transform="rotate(-38 18.8 15.6)" fill="#fff" opacity=".26"></ellipse>
+ </g></symbol>
+<symbol id="tool-speedometer" viewBox="0 0 48 48"><defs>
+<linearGradient id="cyspdo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="puspdo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4B5FD"></stop><stop offset="1" stop-color="#9B7DF7"></stop></linearGradient>
+<linearGradient id="pkspdo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBA6D2"></stop><stop offset="1" stop-color="#F25FA8"></stop></linearGradient>
+<linearGradient id="amspdo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="gnspdo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
+<linearGradient id="amEspdo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C2790F"></stop><stop offset="1" stop-color="#9A5B08"></stop></linearGradient>
+<linearGradient id="puEspdo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7C5BE0"></stop><stop offset="1" stop-color="#5B36C4"></stop></linearGradient>
+<linearGradient id="arcspdo" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#34C46A"></stop><stop offset="0.5" stop-color="#6EF3C5"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="glossspdo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<radialGradient id="orbspdo" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#FDE08A"></stop><stop offset="55%" stop-color="#FBBF24"></stop><stop offset="1" stop-color="#E89A0C"></stop></radialGradient>
+<radialGradient id="dkspdo" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#3a3550"></stop><stop offset="1" stop-color="#171522"></stop></radialGradient>
+<filter id="shspdo" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+<filter id="softspdo" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.1"></feGaussianBlur></filter>
+</defs><g filter="url(#shspdo)">
+   <circle cx="24" cy="24" r="19" fill="url(#puspdo)"></circle>
+   <circle cx="24" cy="24" r="19" fill="url(#glossspdo)" opacity=".45"></circle>
+   <circle cx="24" cy="24" r="15.2" fill="url(#dkspdo)"></circle>
+   <path d="M12.74 30.5A13 13 0 1 1 35.26 30.5" fill="none" stroke="url(#arcspdo)" stroke-width="3.4" stroke-linecap="round"></path>
+   <circle cx="15.77" cy="19.25" r="1" fill="#fff" opacity=".45"></circle>
+   <circle cx="24" cy="14.5" r="1" fill="#fff" opacity=".45"></circle>
+   <circle cx="32.23" cy="19.25" r="1" fill="#fff" opacity=".45"></circle>
+   <path d="M24 24L28.9 15.5" fill="none" stroke="url(#amspdo)" stroke-width="2.8" stroke-linecap="round"></path>
+   <circle cx="24" cy="24" r="3.2" fill="url(#cyspdo)"></circle>
+   <circle cx="24" cy="24" r="1.3" fill="#0d2b33" opacity=".45"></circle>
+   <ellipse cx="18.4" cy="11.4" rx="6.2" ry="3.1" transform="rotate(-26 18.4 11.4)" fill="#fff" opacity=".36"></ellipse>
+ </g></symbol>
+<symbol id="tool-ruler" viewBox="0 0 48 48"><defs>
+<linearGradient id="cyrlr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="amrlr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="amErlr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C2790F"></stop><stop offset="1" stop-color="#9A5B08"></stop></linearGradient>
+<linearGradient id="gnrlr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
+<linearGradient id="glossrlr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<filter id="shrlr" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shrlr)">
+   <rect x="3" y="11" width="42" height="19" rx="4.5" fill="url(#amrlr)"></rect>
+   <rect x="4.4" y="12.4" width="39.2" height="5.6" rx="2.4" fill="url(#glossrlr)" opacity=".6"></rect>
+   <g fill="url(#amErlr)">
+     <rect x="8" y="11" width="1.8" height="9" rx=".9"></rect>
+     <rect x="13" y="11" width="1.8" height="6" rx=".9"></rect>
+     <rect x="18" y="11" width="1.8" height="9" rx=".9"></rect>
+     <rect x="23" y="11" width="1.8" height="6" rx=".9"></rect>
+     <rect x="28" y="11" width="1.8" height="9" rx=".9"></rect>
+     <rect x="33" y="11" width="1.8" height="6" rx=".9"></rect>
+     <rect x="38" y="11" width="1.8" height="9" rx=".9"></rect>
+   </g>
+   <rect x="3" y="34" width="42" height="3" rx="1.5" fill="url(#cyrlr)" opacity=".55"></rect>
+   <circle cx="11" cy="35.5" r="3.2" fill="url(#gnrlr)"></circle>
+   <circle cx="33" cy="35.5" r="3.2" fill="url(#gnrlr)"></circle>
+   <ellipse cx="10" cy="34.4" rx="1.3" ry=".9" transform="rotate(-30 10 34.4)" fill="#fff" opacity=".55"></ellipse>
+   <ellipse cx="32" cy="34.4" rx="1.3" ry=".9" transform="rotate(-30 32 34.4)" fill="#fff" opacity=".55"></ellipse>
+ </g></symbol>
 </svg>

@@ -191,5 +191,47 @@
     "group": "Everyday",
     "url": "/comms/",
     "added": "2026-07-06"
+  },
+  {
+    "slug": "bubble-level",
+    "title": "Bubble Level",
+    "summary": "Spirit level for your phone — a bubble level online with no app needed. Circular two-axis bubble when the phone lies flat, single-vial carpenter's level on edge, 0.1° readouts, tap-to-freeze and one-tap calibration. Works offline, all on-device.",
+    "category": "Utility",
+    "group": "Everyday",
+    "requires": "motion",
+    "added": "2026-07-28"
+  },
+  {
+    "slug": "decibel-meter",
+    "title": "Decibel Meter",
+    "summary": "Sound level meter online — measure noise in decibels with your phone or laptop mic, no app to install. Live dB reading with color ramp, peak-hold meter, session min/average/peak, adjustable calibration offset, and a ladder of everyday sounds for context. Honest estimates, not a calibrated instrument. Audio is analysed on-device and never recorded or uploaded.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-07-28"
+  },
+  {
+    "slug": "compass",
+    "title": "Compass",
+    "summary": "Compass online with no app to install — works right in the browser and reads your magnetic heading from your phone's magnetometer. Rotating rose, tap-to-lock bearing, calibration hint. All on-device.",
+    "category": "Utility",
+    "group": "Everyday",
+    "requires": "motion",
+    "added": "2026-07-28"
+  },
+  {
+    "slug": "speedometer",
+    "title": "GPS Speedometer",
+    "summary": "GPS speedometer online without an app — live speed in km/h, mph or knots on a big auto-ranging dial, plus trip distance, moving time, average and top speed. Reads your device GPS in the browser; the position never leaves the device.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-07-28"
+  },
+  {
+    "slug": "ruler",
+    "title": "Online Ruler",
+    "summary": "Online ruler at actual size — centimetres, millimetres and inches down to 1/16 on screen. Calibrate once with a bank card (or a length you already know) so the marks are true to size, then drag two markers to measure anything you lay on the glass. Works offline; calibration stays on your device.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-07-28"
   }
 ]

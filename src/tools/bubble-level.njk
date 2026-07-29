@@ -1,0 +1,863 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/bubble-level/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.bubble-level.title' | t }}"
+  description: "{{ 'tools.bubble-level.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">bubble-level</span></p>
+  <h1>{{ "tools.bubble-level.title" | t }}</h1>
+  <p>{{ "tools.bubble-level.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "bubble-level.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="bl is-waiting" id="bl">
+
+  <div class="bl__live" id="bl-live">
+    <div class="bl__bar">
+      <span class="bl__chip" id="bl-chip-flat">{{ "tool.bubble-level.mode_flat" | t }}</span>
+      <span class="bl__chip" id="bl-chip-edge" hidden>{{ "tool.bubble-level.mode_edge" | t }}</span>
+      <span class="bl__badge" id="bl-badge-cal" hidden>{{ "tool.bubble-level.badge_calibrated" | t }}</span>
+      <span class="bl__badge bl__badge--frozen" id="bl-badge-frozen" hidden>{{ "tool.bubble-level.badge_frozen" | t }}</span>
+    </div>
+
+    <div class="bl__main">
+      <button type="button" class="bl__stage" id="bl-stage" aria-pressed="false" aria-label="{{ 'tool.bubble-level.aria_freeze' | t }}">
+        <div class="bl__view" id="bl-view-flat">
+          <svg class="bl__dial" viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="bl__dial-face" cx="100" cy="100" r="88"></circle>
+            <circle class="bl__dial-ring" cx="100" cy="100" r="68"></circle>
+            <circle class="bl__dial-ring" cx="100" cy="100" r="45"></circle>
+            <circle class="bl__dial-target" id="bl-target" cx="100" cy="100" r="23"></circle>
+            <line class="bl__dial-tick" x1="100" y1="12" x2="100" y2="26"></line>
+            <line class="bl__dial-tick" x1="100" y1="174" x2="100" y2="188"></line>
+            <line class="bl__dial-tick" x1="12" y1="100" x2="26" y2="100"></line>
+            <line class="bl__dial-tick" x1="174" y1="100" x2="188" y2="100"></line>
+            <g id="bl-bubble">
+              <circle class="bl__bubble" cx="100" cy="100" r="18"></circle>
+              <ellipse class="bl__bubble-gloss" cx="94" cy="94" rx="6" ry="4" transform="rotate(-38 94 94)"></ellipse>
+            </g>
+          </svg>
+        </div>
+
+        <div class="bl__view" id="bl-view-edge" hidden>
+          <svg class="bl__vial" viewBox="0 0 300 96" aria-hidden="true">
+            <rect class="bl__vial-tube" x="8" y="22" width="284" height="52" rx="26"></rect>
+            <line class="bl__vial-tick" x1="91" y1="34" x2="91" y2="62"></line>
+            <line class="bl__vial-tick" x1="209" y1="34" x2="209" y2="62"></line>
+            <line class="bl__vial-mark" x1="132" y1="26" x2="132" y2="70"></line>
+            <line class="bl__vial-mark" x1="168" y1="26" x2="168" y2="70"></line>
+            <g id="bl-vial-bubble">
+              <circle class="bl__bubble" cx="150" cy="48" r="16"></circle>
+              <ellipse class="bl__bubble-gloss" cx="145" cy="43" rx="5" ry="3.4" transform="rotate(-38 145 43)"></ellipse>
+            </g>
+          </svg>
+        </div>
+      </button>
+
+      <div class="bl__axes" id="bl-axes">
+        <div class="bl__axis">
+          <span class="bl__axis-label">{{ "tool.bubble-level.axis_pitch" | t }}</span>
+          <span class="bl__axis-value" id="bl-pitch">0.0&#176;</span>
+        </div>
+        <div class="bl__axis">
+          <span class="bl__axis-label">{{ "tool.bubble-level.axis_roll" | t }}</span>
+          <span class="bl__axis-value" id="bl-roll">0.0&#176;</span>
+        </div>
+      </div>
+
+      <div class="bl__single" id="bl-single" hidden>
+        <span class="bl__single-label">{{ "tool.bubble-level.off_level" | t }}</span>
+        <span class="bl__single-value" id="bl-dev">0.0&#176;</span>
+      </div>
+    </div>
+
+    <p class="bl__status" id="bl-status">
+      <span id="bl-status-level" hidden>{{ "tool.bubble-level.status_level" | t }}</span>
+      <span id="bl-status-left" hidden>{{ "tool.bubble-level.status_left_low" | t }}</span>
+      <span id="bl-status-right" hidden>{{ "tool.bubble-level.status_right_low" | t }}</span>
+    </p>
+
+    <p class="bl__hint" id="bl-hint-flat">{{ "tool.bubble-level.hint_flat" | t }}</p>
+    <p class="bl__hint" id="bl-hint-edge" hidden>{{ "tool.bubble-level.hint_edge" | t }}</p>
+    <p class="bl__hint bl__hint--dim">{{ "tool.bubble-level.hint_tap" | t }}</p>
+
+    <div class="bl__controls">
+      <button type="button" class="m-btn m-btn--primary m-btn--pill" id="bl-cal">{{ "tool.bubble-level.btn_calibrate" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="bl-cal-reset">{{ "tool.bubble-level.btn_reset" | t }}</button>
+    </div>
+    <p class="bl__hint bl__hint--dim bl__hint--wide">{{ "tool.bubble-level.cal_hint" | t }}</p>
+  </div>
+
+  <div class="bl__panel" id="bl-perm" hidden>
+    <h2 class="bl__panel-title">{{ "tool.bubble-level.perm_title" | t }}</h2>
+    <p class="bl__panel-body">{{ "tool.bubble-level.perm_body" | t }}</p>
+    <button type="button" class="m-btn m-btn--primary m-btn--pill" id="bl-perm-btn">{{ "tool.bubble-level.perm_btn" | t }}</button>
+  </div>
+
+  <div class="bl__panel" id="bl-denied" hidden>
+    <h2 class="bl__panel-title bl__panel-title--warn">{{ "tool.bubble-level.denied_title" | t }}</h2>
+    <p class="bl__panel-body">{{ "tool.bubble-level.denied_body" | t }}</p>
+  </div>
+
+  <div class="bl__panel" id="bl-unsupported" hidden>
+    <h2 class="bl__panel-title bl__panel-title--warn">{{ "tool.bubble-level.unsupported_title" | t }}</h2>
+    <p class="bl__panel-body">{{ "tool.bubble-level.unsupported_body" | t }}</p>
+    <canvas class="bl__qr" id="bl-qr" width="180" height="180"></canvas>
+    <p class="bl__panel-body bl__panel-body--tight">{{ "tool.bubble-level.unsupported_qr" | t }}</p>
+    <p class="bl__qr-url">mentria.ai/tools/bubble-level/</p>
+  </div>
+
+  <div class="bl__panel" id="bl-insecure" hidden>
+    <h2 class="bl__panel-title bl__panel-title--warn">{{ "tool.bubble-level.insecure_title" | t }}</h2>
+    <p class="bl__panel-body">{{ "tool.bubble-level.insecure_body" | t }}</p>
+  </div>
+
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script src="/assets/js/qrcode.js?v={{ buildHash }}"></script>
+<script>
+(function () {
+  'use strict';
+
+  var COPY = {
+    ariaFreeze:   {{ ("tool.bubble-level.aria_freeze"   | t) | dump | safe }},
+    ariaUnfreeze: {{ ("tool.bubble-level.aria_unfreeze" | t) | dump | safe }}
+  };
+
+  var LANG = document.documentElement.lang || undefined;
+  var CAL_KEY = 'bubble_level_cal';
+  var PAGE_URL = 'https://mentria.ai/tools/bubble-level/';
+  var TO_DEG = 180 / Math.PI;
+  var TO_RAD = Math.PI / 180;
+  var SMOOTH = 0.15;
+  var LEVEL_TOL = 0.3;
+  var FLAT_FULL = 6;
+  var EDGE_FULL = 5;
+  var DIAL_MAX = 68;
+  var VIAL_MAX = 118;
+  var TO_EDGE = 55;
+  var TO_FLAT = 35;
+  var SENSOR_TIMEOUT = 1500;
+
+  function el(id) { return document.getElementById(id); }
+
+  var root = el('bl');
+  var liveEl = el('bl-live');
+  var panelPerm = el('bl-perm');
+  var panelDenied = el('bl-denied');
+  var panelUnsup = el('bl-unsupported');
+  var panelInsec = el('bl-insecure');
+  var permBtn = el('bl-perm-btn');
+  var stage = el('bl-stage');
+  var viewFlat = el('bl-view-flat');
+  var viewEdge = el('bl-view-edge');
+  var bubble = el('bl-bubble');
+  var vialBubble = el('bl-vial-bubble');
+  var chipFlat = el('bl-chip-flat');
+  var chipEdge = el('bl-chip-edge');
+  var badgeCal = el('bl-badge-cal');
+  var badgeFrozen = el('bl-badge-frozen');
+  var axesEl = el('bl-axes');
+  var singleEl = el('bl-single');
+  var pitchEl = el('bl-pitch');
+  var rollEl = el('bl-roll');
+  var devEl = el('bl-dev');
+  var stLevel = el('bl-status-level');
+  var stLeft = el('bl-status-left');
+  var stRight = el('bl-status-right');
+  var hintFlat = el('bl-hint-flat');
+  var hintEdge = el('bl-hint-edge');
+  var calBtn = el('bl-cal');
+  var calResetBtn = el('bl-cal-reset');
+  var qrCanvas = el('bl-qr');
+
+  var gx = 0, gy = 0, gz = 9.81;
+  var hasSample = false;
+  var mode = 'flat';
+  var frozen = false;
+  var isLevel = false;
+  var statusKind = '';
+  var active = false;
+  var rafId = 0;
+  var watchdog = 0;
+  var qrDrawn = false;
+  var wakeLock = null;
+  var cal = loadCal();
+
+  function loadCal() {
+    var c = { pitch: 0, roll: 0, edge: 0 };
+    try {
+      if (window.MentriaStore && typeof window.MentriaStore.get === 'function') {
+        var s = window.MentriaStore.get('tools', CAL_KEY);
+        if (s && typeof s === 'object') {
+          if (typeof s.pitch === 'number' && isFinite(s.pitch)) c.pitch = s.pitch;
+          if (typeof s.roll === 'number' && isFinite(s.roll)) c.roll = s.roll;
+          if (typeof s.edge === 'number' && isFinite(s.edge)) c.edge = s.edge;
+        }
+      }
+    } catch (_) {}
+    return c;
+  }
+
+  function saveCal() {
+    try {
+      if (window.MentriaStore && typeof window.MentriaStore.set === 'function') {
+        window.MentriaStore.set('tools', CAL_KEY, { pitch: cal.pitch, roll: cal.roll, edge: cal.edge });
+      }
+    } catch (_) {}
+  }
+
+  function updateCalBadge() {
+    var on = cal.pitch !== 0 || cal.roll !== 0 || cal.edge !== 0;
+    badgeCal.hidden = !on;
+    calResetBtn.disabled = !on;
+  }
+
+  function screenAngle() {
+    try {
+      if (window.screen && window.screen.orientation && typeof window.screen.orientation.angle === 'number') {
+        return window.screen.orientation.angle;
+      }
+    } catch (_) {}
+    return 0;
+  }
+
+  function fmt(v) {
+    var r = Math.round(v * 10) / 10;
+    if (Object.is(r, -0)) r = 0;
+    var s;
+    try { s = r.toLocaleString(LANG, { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+    catch (_) { s = r.toFixed(1); }
+    return s + '°';
+  }
+
+  function deviceAngles() {
+    var sgn = gz >= 0 ? 1 : -1;
+    var fx = gx * sgn, fy = gy * sgn, fz = gz * sgn;
+    return {
+      roll: Math.atan2(-fx, Math.hypot(fy, fz)) * TO_DEG,
+      pitch: Math.atan2(-fy, Math.hypot(fx, fz)) * TO_DEG
+    };
+  }
+
+  function edgeAngle() {
+    var phi = Math.atan2(gx, gy) * TO_DEG;
+    return phi - 90 * Math.round(phi / 90);
+  }
+
+  function setMode(next) {
+    if (next === mode) return;
+    mode = next;
+    var flat = mode === 'flat';
+    chipFlat.hidden = !flat;
+    chipEdge.hidden = flat;
+    viewFlat.hidden = !flat;
+    viewEdge.hidden = flat;
+    axesEl.hidden = !flat;
+    singleEl.hidden = flat;
+    hintFlat.hidden = !flat;
+    hintEdge.hidden = flat;
+  }
+
+  function setLevel(on) {
+    if (on === isLevel) return;
+    isLevel = on;
+    root.classList.toggle('is-level', on);
+  }
+
+  function setStatus(kind) {
+    if (kind === statusKind) return;
+    statusKind = kind;
+    stLevel.hidden = kind !== 'level';
+    stLeft.hidden = kind !== 'left';
+    stRight.hidden = kind !== 'right';
+  }
+
+  function place(node, x, y) {
+    node.setAttribute('transform', 'translate(' + x.toFixed(2) + ',' + y.toFixed(2) + ')');
+  }
+
+  function render() {
+    rafId = requestAnimationFrame(render);
+    if (!hasSample || frozen) return;
+
+    var flatness = Math.atan2(Math.hypot(gx, gy), Math.abs(gz)) * TO_DEG;
+    if (mode === 'flat' && flatness > TO_EDGE) setMode('edge');
+    else if (mode === 'edge' && flatness < TO_FLAT) setMode('flat');
+
+    if (mode === 'flat') {
+      var a = deviceAngles();
+      var rollDev = a.roll - cal.roll;
+      var pitchDev = a.pitch - cal.pitch;
+      var th = screenAngle() * TO_RAD;
+      var cs = Math.cos(th), sn = Math.sin(th);
+      var roll = rollDev * cs - pitchDev * sn;
+      var pitch = rollDev * sn + pitchDev * cs;
+      var off = Math.hypot(roll, pitch);
+      var r = Math.min(1, off / FLAT_FULL) * DIAL_MAX;
+      var bx = 0, by = 0;
+      if (off > 0.0005) {
+        bx = (-roll / off) * r;
+        by = (pitch / off) * r;
+      }
+      place(bubble, bx, by);
+      pitchEl.textContent = fmt(pitch);
+      rollEl.textContent = fmt(roll);
+      var flatLevel = off <= LEVEL_TOL;
+      setLevel(flatLevel);
+      setStatus(flatLevel ? 'level' : 'none');
+    } else {
+      var dev = edgeAngle() - cal.edge;
+      var vx = Math.max(-1, Math.min(1, dev / EDGE_FULL)) * VIAL_MAX;
+      place(vialBubble, vx, 0);
+      devEl.textContent = fmt(Math.abs(dev));
+      var edgeLevel = Math.abs(dev) <= LEVEL_TOL;
+      setLevel(edgeLevel);
+      setStatus(edgeLevel ? 'level' : (dev < 0 ? 'right' : 'left'));
+    }
+  }
+
+  function onMotion(e) {
+    var a = e.accelerationIncludingGravity;
+    if (!a || a.x == null || a.y == null || a.z == null) return;
+    if (a.x === 0 && a.y === 0 && a.z === 0) return;
+    if (!hasSample) {
+      gx = a.x; gy = a.y; gz = a.z;
+      hasSample = true;
+      root.classList.remove('is-waiting');
+      if (watchdog) { clearTimeout(watchdog); watchdog = 0; }
+      setMode(Math.atan2(Math.hypot(gx, gy), Math.abs(gz)) * TO_DEG > 45 ? 'edge' : 'flat');
+      return;
+    }
+    gx += (a.x - gx) * SMOOTH;
+    gy += (a.y - gy) * SMOOTH;
+    gz += (a.z - gz) * SMOOTH;
+  }
+
+  function syncWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    if (active && document.visibilityState === 'visible') {
+      if (wakeLock) return;
+      navigator.wakeLock.request('screen').then(function (lock) {
+        wakeLock = lock;
+        wakeLock.addEventListener('release', function () { wakeLock = null; });
+      }).catch(function () { wakeLock = null; });
+    } else if (wakeLock) {
+      try { wakeLock.release(); } catch (_) {}
+      wakeLock = null;
+    }
+  }
+
+  function startLoop() {
+    if (rafId) return;
+    rafId = requestAnimationFrame(render);
+  }
+
+  function stopLoop() {
+    if (!rafId) return;
+    cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  function drawQR() {
+    if (qrDrawn || !qrCanvas || typeof qrcodegen === 'undefined') return;
+    var code;
+    try { code = qrcodegen.QrCode.encodeText(PAGE_URL, qrcodegen.QrCode.Ecc.MEDIUM); }
+    catch (_) { return; }
+    var border = 3;
+    var px = 6;
+    var dim = code.size + border * 2;
+    qrCanvas.width = dim * px;
+    qrCanvas.height = dim * px;
+    var ctx = qrCanvas.getContext('2d');
+    if (!ctx) return;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+    ctx.fillStyle = '#000000';
+    for (var y = 0; y < code.size; y++) {
+      for (var x = 0; x < code.size; x++) {
+        if (code.getModule(x, y)) ctx.fillRect((x + border) * px, (y + border) * px, px, px);
+      }
+    }
+    qrDrawn = true;
+  }
+
+  function showPanel(name) {
+    liveEl.hidden = name !== null;
+    panelPerm.hidden = name !== 'perm';
+    panelDenied.hidden = name !== 'denied';
+    panelUnsup.hidden = name !== 'unsupported';
+    panelInsec.hidden = name !== 'insecure';
+    if (name === 'unsupported') drawQR();
+  }
+
+  function stopSensor() {
+    active = false;
+    window.removeEventListener('devicemotion', onMotion);
+    if (watchdog) { clearTimeout(watchdog); watchdog = 0; }
+    stopLoop();
+    syncWakeLock();
+  }
+
+  function startSensor() {
+    if (active) return;
+    active = true;
+    showPanel(null);
+    window.addEventListener('devicemotion', onMotion);
+    startLoop();
+    syncWakeLock();
+    watchdog = setTimeout(function () {
+      watchdog = 0;
+      if (hasSample) return;
+      stopSensor();
+      showPanel('unsupported');
+    }, SENSOR_TIMEOUT);
+  }
+
+  function boot() {
+    updateCalBadge();
+    if (!window.isSecureContext) { showPanel('insecure'); return; }
+    if (typeof DeviceMotionEvent === 'undefined') { showPanel('unsupported'); return; }
+    if (typeof DeviceMotionEvent.requestPermission === 'function') { showPanel('perm'); return; }
+    startSensor();
+  }
+
+  permBtn.addEventListener('click', function () {
+    DeviceMotionEvent.requestPermission().then(function (res) {
+      if (res === 'granted') startSensor();
+      else showPanel('denied');
+    }).catch(function () {
+      showPanel('denied');
+    });
+  });
+
+  stage.addEventListener('click', function () {
+    frozen = !frozen;
+    stage.setAttribute('aria-pressed', frozen ? 'true' : 'false');
+    stage.setAttribute('aria-label', frozen ? COPY.ariaUnfreeze : COPY.ariaFreeze);
+    badgeFrozen.hidden = !frozen;
+    root.classList.toggle('is-frozen', frozen);
+  });
+
+  calBtn.addEventListener('click', function () {
+    if (!hasSample) return;
+    if (mode === 'flat') {
+      var a = deviceAngles();
+      cal.roll = a.roll;
+      cal.pitch = a.pitch;
+    } else {
+      cal.edge = edgeAngle();
+    }
+    saveCal();
+    updateCalBadge();
+    if (navigator.vibrate) navigator.vibrate(20);
+  });
+
+  calResetBtn.addEventListener('click', function () {
+    cal.pitch = 0;
+    cal.roll = 0;
+    cal.edge = 0;
+    saveCal();
+    updateCalBadge();
+  });
+
+  var lastVp = 0;
+  function measureViewport() {
+    var h = window.innerHeight || 0;
+    var vv = window.visualViewport;
+    if (vv && vv.height) h = Math.min(h || vv.height, vv.height);
+    if (!h || Math.abs(h - lastVp) < 4) return;
+    lastVp = h;
+    root.style.setProperty('--bl-h-js', h + 'px');
+  }
+
+  window.addEventListener('resize', measureViewport);
+  window.addEventListener('orientationchange', measureViewport);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', measureViewport);
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      measureViewport();
+      if (active) startLoop();
+      syncWakeLock();
+    } else {
+      stopLoop();
+      syncWakeLock();
+    }
+  });
+
+  window.addEventListener('pagehide', stopSensor);
+
+  measureViewport();
+  boot();
+})();
+</script>
+
+<style>
+.bl {
+  --bl-h-js: 100vh;
+  --bl-vp: min(100vh, var(--bl-h-js));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+@supports (height: 1svh) {
+  .bl { --bl-vp: min(100svh, var(--bl-h-js)); }
+}
+
+.bl__main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.bl__live {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+.bl__live[hidden] { display: none; }
+
+.bl__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.6rem;
+}
+
+.bl__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--term-border-strong);
+  border-radius: 999px;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--term-fg);
+  background: var(--term-bg-raised);
+}
+.bl__chip[hidden] { display: none; }
+
+.bl__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(110, 243, 197, 0.1);
+  border: 1px solid rgba(110, 243, 197, 0.28);
+}
+.bl__badge--frozen {
+  color: var(--syn-amber);
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+.bl__badge[hidden] { display: none; }
+
+.bl__stage {
+  display: block;
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.bl__stage:focus-visible {
+  outline: 2px solid var(--syn-cyan);
+  outline-offset: 6px;
+  border-radius: var(--radius-lg);
+}
+
+.bl__view { width: 100%; }
+.bl__view[hidden] { display: none; }
+
+.bl__dial {
+  display: block;
+  width: min(100%, 320px, calc(var(--bl-vp) * 0.46));
+  height: auto;
+  margin: 0 auto;
+}
+
+.bl__dial-face {
+  fill: rgba(255, 255, 255, 0.02);
+  stroke: var(--term-border-strong);
+  stroke-width: 2;
+}
+.bl__dial-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 1.5;
+}
+.bl__dial-target {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+  transition: stroke 0.25s ease;
+}
+.bl__dial-tick {
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.bl__vial {
+  display: block;
+  width: min(100%, 360px, calc(var(--bl-vp) * 0.86));
+  height: auto;
+  margin: 0 auto;
+}
+.bl__vial-tube {
+  fill: rgba(255, 255, 255, 0.02);
+  stroke: var(--term-border-strong);
+  stroke-width: 2;
+}
+.bl__vial-tick {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.bl__vial-mark {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.bl__bubble {
+  fill: var(--syn-cyan);
+  fill-opacity: 0.7;
+  stroke: var(--syn-cyan-soft);
+  stroke-width: 1.5;
+}
+.bl__bubble-gloss {
+  fill: #ffffff;
+  opacity: 0.4;
+}
+
+.bl.is-level .bl__bubble {
+  fill: var(--accent);
+  fill-opacity: 0.85;
+  stroke: var(--accent);
+}
+.bl.is-level .bl__dial-target,
+.bl.is-level .bl__vial-mark {
+  stroke: var(--accent);
+}
+.bl.is-level .bl__dial,
+.bl.is-level .bl__vial {
+  filter: drop-shadow(0 0 10px rgba(110, 243, 197, 0.45));
+}
+
+.bl.is-waiting .bl__stage { opacity: 0.4; }
+.bl.is-frozen .bl__stage { opacity: 0.82; }
+
+.bl__axes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  width: 100%;
+}
+.bl__axes[hidden] { display: none; }
+
+.bl__axis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.7rem 0.5rem;
+  border: 1px solid var(--term-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.015);
+}
+.bl__axis-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+  text-align: center;
+}
+.bl__axis-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--term-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.bl__single {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  padding: 0.8rem 0.5rem;
+  border: 1px solid var(--term-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.015);
+}
+.bl__single[hidden] { display: none; }
+.bl__single-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+}
+.bl__single-value {
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--term-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.bl.is-level .bl__axis-value,
+.bl.is-level .bl__single-value { color: var(--accent); }
+
+.bl__status {
+  margin: 0;
+  min-height: 1.2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--term-muted);
+  text-align: center;
+}
+.bl.is-level .bl__status { color: var(--accent); }
+.bl__status span[hidden] { display: none; }
+
+.bl__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: var(--term-muted);
+  text-align: center;
+  max-width: 36ch;
+}
+.bl__hint[hidden] { display: none; }
+.bl__hint--dim { opacity: 0.7; font-size: 0.7rem; }
+.bl__hint--wide { max-width: 44ch; }
+
+.bl__controls {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bl__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+  padding: var(--space-6) var(--space-5);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.015);
+  width: 100%;
+}
+.bl__panel[hidden] { display: none; }
+.bl__panel-title {
+  font-size: 1rem;
+  color: var(--syn-cyan);
+  margin: 0;
+}
+.bl__panel-title--warn { color: var(--syn-amber); }
+.bl__panel-body {
+  font-size: 0.85rem;
+  color: var(--term-muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 36ch;
+}
+.bl__panel-body--tight { font-size: 0.75rem; }
+
+.bl__qr {
+  width: min(100%, 200px, calc(var(--bl-vp) * 0.34));
+  height: auto;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 6px;
+}
+
+.bl__qr-url {
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--term-fg);
+  letter-spacing: 0.02em;
+  word-break: break-all;
+}
+
+@media (max-width: 480px) {
+  .bl__single-value { font-size: 2.2rem; }
+  .bl__axis-value { font-size: 1.3rem; }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .bl { gap: var(--space-2); padding: 0 0 var(--space-2); }
+  .bl__live { gap: var(--space-2); }
+  .bl__main {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .bl__main .bl__stage {
+    flex: 1 1 62%;
+    width: auto;
+    min-width: 0;
+  }
+  .bl__main .bl__axes {
+    flex: 0 0 auto;
+    width: auto;
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+  .bl__main .bl__single {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 0.5rem 0.9rem;
+  }
+  .bl__dial { width: min(100%, 320px, calc(var(--bl-vp) * 0.66)); }
+  .bl__vial { width: min(100%, 360px, calc(var(--bl-vp) * 0.92)); }
+  .bl__single-value { font-size: 1.8rem; }
+  .bl__axis-value { font-size: 1.05rem; }
+  .bl__axis { padding: 0.4rem 0.6rem; }
+  .bl__hint { font-size: 0.68rem; max-width: 60ch; }
+  .bl__hint--wide { font-size: 0.64rem; max-width: 70ch; }
+  .bl__panel { padding: var(--space-4) var(--space-4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bl.is-level .bl__dial,
+  .bl.is-level .bl__vial { filter: none; }
+}
+</style>

@@ -1,0 +1,788 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/speedometer/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.speedometer.title' | t }}"
+  description: "{{ 'tools.speedometer.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">speedometer</span></p>
+  <h1>{{ "tools.speedometer.title" | t }}</h1>
+  <p>{{ "tools.speedometer.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "speedometer.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="spd" id="spd">
+
+  <div class="spd__panel" id="spd-start">
+    <h2 class="spd__panel-title">{{ "tool.speedometer.start_title" | t }}</h2>
+    <p class="spd__panel-body">{{ "tool.speedometer.start_body" | t }}</p>
+    <p class="spd__panel-note">{{ "tool.speedometer.start_privacy" | t }}</p>
+    <button class="m-btn m-btn--primary m-btn--pill" id="spd-start-btn" type="button">{{ "tool.speedometer.start_btn" | t }}</button>
+    <p class="spd__panel-note">{{ "tool.speedometer.desktop_note" | t }}</p>
+  </div>
+
+  <div class="spd__live" id="spd-live" hidden>
+    <div class="spd__chip" id="spd-chip" data-q="wait" title="{{ 'tool.speedometer.acc_label' | t }}">
+      <span class="spd__chip-dot" aria-hidden="true"></span>
+      <span class="spd__chip-text" id="spd-chip-text">{{ "tool.speedometer.waiting" | t }}</span>
+    </div>
+
+    <div class="spd__gauge-wrap">
+      <svg class="spd__gauge" id="spd-gauge" viewBox="0 0 200 166" role="img">
+        <defs>
+          <linearGradient id="spdArcGrad" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stop-color="#22d3ee"></stop>
+            <stop offset="0.6" stop-color="#6ef3c5"></stop>
+            <stop offset="1" stop-color="#fbbf24"></stop>
+          </linearGradient>
+        </defs>
+        <path class="spd__arc-track" d="M27.25 142 A84 84 0 1 1 172.75 142"></path>
+        <path class="spd__arc-fill" id="spd-arc" d="M27.25 142 A84 84 0 1 1 172.75 142"></path>
+        <text class="spd__value" id="spd-value" x="100" y="104" text-anchor="middle">0</text>
+        <text class="spd__unit" id="spd-unit" x="100" y="127" text-anchor="middle"></text>
+        <text class="spd__tick" x="22" y="160" text-anchor="middle">0</text>
+        <text class="spd__tick" id="spd-tick-max" x="178" y="160" text-anchor="middle"></text>
+      </svg>
+    </div>
+
+    <div class="spd__units">
+      <span class="spd__units-label">{{ "tool.speedometer.units_label" | t }}</span>
+      <div class="m-seg" id="spd-units">
+        <button type="button" data-value="kmh">{{ "tool.speedometer.unit_kmh" | t }}</button>
+        <button type="button" data-value="mph">{{ "tool.speedometer.unit_mph" | t }}</button>
+        <button type="button" data-value="kn">{{ "tool.speedometer.unit_kn" | t }}</button>
+      </div>
+    </div>
+
+    <div class="spd__trip">
+      <span class="spd__trip-label">{{ "tool.speedometer.trip_label" | t }}</span>
+      <div class="spd__stats">
+        <div class="spd__stat">
+          <span class="spd__stat-label">{{ "tool.speedometer.stat_distance" | t }}</span>
+          <span class="spd__stat-value" id="spd-distance">—</span>
+        </div>
+        <div class="spd__stat">
+          <span class="spd__stat-label">{{ "tool.speedometer.stat_moving" | t }}</span>
+          <span class="spd__stat-value" id="spd-moving">0:00</span>
+        </div>
+        <div class="spd__stat">
+          <span class="spd__stat-label">{{ "tool.speedometer.stat_avg" | t }}</span>
+          <span class="spd__stat-value" id="spd-avg">—</span>
+        </div>
+        <div class="spd__stat">
+          <span class="spd__stat-label">{{ "tool.speedometer.stat_max" | t }}</span>
+          <span class="spd__stat-value" id="spd-max">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spd__controls">
+      <button class="m-btn m-btn--primary m-btn--pill" id="spd-toggle" type="button">{{ "tool.speedometer.start_btn" | t }}</button>
+      <button class="m-btn m-btn--ghost m-btn--pill spd__reset" id="spd-reset" type="button">{{ "tool.speedometer.btn_reset" | t }}</button>
+    </div>
+
+    <p class="spd__hint" id="spd-hint" hidden></p>
+    <p class="spd__note">{{ "tool.speedometer.desktop_note" | t }}</p>
+    <p class="spd__note">{{ "tool.speedometer.start_privacy" | t }}</p>
+  </div>
+
+  <div class="spd__panel" id="spd-denied" hidden>
+    <h2 class="spd__panel-title spd__panel-title--warn">{{ "tool.speedometer.denied_title" | t }}</h2>
+    <p class="spd__panel-body">{{ "tool.speedometer.denied_body" | t }}</p>
+    <button type="button" class="m-btn m-btn--ghost m-btn--pill" data-spd-back>{{ "tool.speedometer.back" | t }}</button>
+  </div>
+
+  <div class="spd__panel" id="spd-unsupported" hidden>
+    <h2 class="spd__panel-title spd__panel-title--warn">{{ "tool.speedometer.unsupported_title" | t }}</h2>
+    <p class="spd__panel-body">{{ "tool.speedometer.unsupported_body" | t }}</p>
+    <button type="button" class="m-btn m-btn--ghost m-btn--pill" data-spd-back>{{ "tool.speedometer.back" | t }}</button>
+  </div>
+
+  <div class="spd__panel" id="spd-insecure" hidden>
+    <h2 class="spd__panel-title spd__panel-title--warn">{{ "tool.speedometer.insecure_title" | t }}</h2>
+    <p class="spd__panel-body">{{ "tool.speedometer.insecure_body" | t }}</p>
+    <button type="button" class="m-btn m-btn--ghost m-btn--pill" data-spd-back>{{ "tool.speedometer.back" | t }}</button>
+  </div>
+
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(function () {
+  'use strict';
+
+  var COPY = {
+    startBtn:    {{ ("tool.speedometer.start_btn"        | t) | dump | safe }},
+    btnStop:     {{ ("tool.speedometer.btn_stop"         | t) | dump | safe }},
+    btnReset:    {{ ("tool.speedometer.btn_reset"        | t) | dump | safe }},
+    btnResetOk:  {{ ("tool.speedometer.btn_reset_confirm"| t) | dump | safe }},
+    unitKmh:     {{ ("tool.speedometer.unit_kmh"         | t) | dump | safe }},
+    unitMph:     {{ ("tool.speedometer.unit_mph"         | t) | dump | safe }},
+    unitKn:      {{ ("tool.speedometer.unit_kn"          | t) | dump | safe }},
+    waiting:     {{ ("tool.speedometer.waiting"          | t) | dump | safe }},
+    accFmt:      {{ ("tool.speedometer.acc_fmt"          | t) | dump | safe }},
+    distM:       {{ ("tool.speedometer.dist_m"           | t) | dump | safe }},
+    distKm:      {{ ("tool.speedometer.dist_km"          | t) | dump | safe }},
+    distFt:      {{ ("tool.speedometer.dist_ft"          | t) | dump | safe }},
+    distMi:      {{ ("tool.speedometer.dist_mi"          | t) | dump | safe }},
+    distNm:      {{ ("tool.speedometer.dist_nm"          | t) | dump | safe }},
+    screenHint:  {{ ("tool.speedometer.screen_hint"      | t) | dump | safe }},
+    signalLost:  {{ ("tool.speedometer.signal_lost"      | t) | dump | safe }},
+    speedLabel:  {{ ("tool.speedometer.speed_label"      | t) | dump | safe }}
+  };
+
+  var LANG = document.documentElement.lang || undefined;
+  var DASH = '—';
+
+  var GEO_OPTS = { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 };
+  var ACC_MAX = 25;
+  var ACC_GOOD = 10;
+  var DT_MIN = 0.5;
+  var DT_MAX = 10;
+  var STILL_KMH = 0.5;
+  var MOVING_KMH = 1;
+  var MAX_PLAUSIBLE_MS = 111.11;
+  var STALE_MS = 6000;
+  var PERSIST_MS = 5000;
+  var EARTH_R = 6371008.8;
+  var ARC_LEN = 84 * (4 * Math.PI / 3);
+
+  var FACTOR = { kmh: 1, mph: 0.621371, kn: 0.539957 };
+  var RANGES = { kmh: [60, 160, 300], mph: [40, 100, 200], kn: [35, 90, 170] };
+  var UNIT_LABEL = { kmh: COPY.unitKmh, mph: COPY.unitMph, kn: COPY.unitKn };
+
+  function $(id) { return document.getElementById(id); }
+
+  var startPanel = $('spd-start');
+  var liveEl     = $('spd-live');
+  var deniedEl   = $('spd-denied');
+  var unsupEl    = $('spd-unsupported');
+  var insecEl    = $('spd-insecure');
+  var startBtn   = $('spd-start-btn');
+  var toggleBtn  = $('spd-toggle');
+  var resetBtn   = $('spd-reset');
+  var chipEl     = $('spd-chip');
+  var chipText   = $('spd-chip-text');
+  var gaugeEl    = $('spd-gauge');
+  var arcEl      = $('spd-arc');
+  var valueEl    = $('spd-value');
+  var unitEl     = $('spd-unit');
+  var tickMaxEl  = $('spd-tick-max');
+  var unitsSeg   = $('spd-units');
+  var distEl     = $('spd-distance');
+  var movingEl   = $('spd-moving');
+  var avgEl      = $('spd-avg');
+  var maxEl      = $('spd-max');
+  var hintEl     = $('spd-hint');
+
+  arcEl.style.strokeDasharray = String(ARC_LEN);
+  arcEl.style.strokeDashoffset = String(ARC_LEN);
+
+  function storeGet(key) {
+    try {
+      if (!window.MentriaStore) return null;
+      return window.MentriaStore.get('tools', key);
+    } catch (_) { return null; }
+  }
+  function storeSet(key, value) {
+    try {
+      if (!window.MentriaStore) return;
+      window.MentriaStore.set('tools', key, value);
+    } catch (_) {}
+  }
+
+  function loadUnit() {
+    var v = storeGet('speedometer_unit');
+    if (v === 'kmh' || v === 'mph' || v === 'kn') return v;
+    return 'kmh';
+  }
+
+  function safeNumber(v) {
+    return (typeof v === 'number' && isFinite(v) && v >= 0) ? v : 0;
+  }
+
+  function loadTrip() {
+    var raw = storeGet('speedometer_trip');
+    var t = { distance: 0, movingMs: 0, maxKmh: 0 };
+    if (raw && typeof raw === 'object') {
+      t.distance = safeNumber(raw.distance);
+      t.movingMs = safeNumber(raw.movingMs);
+      t.maxKmh = safeNumber(raw.maxKmh);
+    }
+    return t;
+  }
+
+  var unit = loadUnit();
+  var trip = loadTrip();
+  var tracking = false;
+  var watchId = null;
+  var tickTimer = null;
+  var wakeLock = null;
+  var currentKmh = 0;
+  var lastFix = null;
+  var lastFixAt = 0;
+  var dirty = false;
+  var lastPersistAt = 0;
+  var armTimer = null;
+
+  function haversine(lat1, lon1, lat2, lon2) {
+    var toRad = Math.PI / 180;
+    var dLat = (lat2 - lat1) * toRad;
+    var dLon = (lon2 - lon1) * toRad;
+    var sLat = Math.sin(dLat / 2);
+    var sLon = Math.sin(dLon / 2);
+    var a = sLat * sLat + Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * sLon * sLon;
+    return 2 * EARTH_R * Math.asin(Math.min(1, Math.sqrt(a)));
+  }
+
+  function num(v, d) {
+    var x = (typeof v === 'number' && isFinite(v)) ? v : 0;
+    try { return x.toLocaleString(LANG, { minimumFractionDigits: d, maximumFractionDigits: d }); }
+    catch (_) { return x.toFixed(d); }
+  }
+
+  function pad2(n) { return n < 10 ? '0' + n : String(n); }
+
+  function fmtClock(ms) {
+    var total = Math.floor(ms / 1000);
+    var h = Math.floor(total / 3600);
+    var m = Math.floor((total % 3600) / 60);
+    var s = total % 60;
+    if (h > 0) return h + ':' + pad2(m) + ':' + pad2(s);
+    return m + ':' + pad2(s);
+  }
+
+  function fmtSpeed(kmh) {
+    var v = kmh * FACTOR[unit];
+    return num(v, v < 20 ? 1 : 0) + ' ' + UNIT_LABEL[unit];
+  }
+
+  function fmtDistance(m) {
+    if (unit === 'mph') {
+      var mi = m / 1609.344;
+      if (mi < 0.1) return num(m * 3.28084, 0) + ' ' + COPY.distFt;
+      return num(mi, 2) + ' ' + COPY.distMi;
+    }
+    if (unit === 'kn') return num(m / 1852, 2) + ' ' + COPY.distNm;
+    if (m < 1000) return num(m, 0) + ' ' + COPY.distM;
+    return num(m / 1000, 2) + ' ' + COPY.distKm;
+  }
+
+  function rangeMax() {
+    var ref = Math.max(currentKmh, trip.maxKmh);
+    var tier = ref > 160 ? 2 : (ref > 60 ? 1 : 0);
+    return RANGES[unit][tier];
+  }
+
+  function setChip(quality, accuracy) {
+    chipEl.setAttribute('data-q', quality);
+    if (quality === 'wait') {
+      chipText.textContent = COPY.waiting;
+      return;
+    }
+    chipText.textContent = COPY.accFmt.split('{n}').join(num(accuracy, 0));
+  }
+
+  function render() {
+    var shown = currentKmh * FACTOR[unit];
+    var max = rangeMax();
+    var frac = max > 0 ? Math.max(0, Math.min(1, shown / max)) : 0;
+    arcEl.style.strokeDashoffset = String(ARC_LEN * (1 - frac));
+
+    var valText = num(shown, shown < 20 ? 1 : 0);
+    valueEl.textContent = valText;
+    unitEl.textContent = UNIT_LABEL[unit];
+    tickMaxEl.textContent = num(max, 0);
+    gaugeEl.setAttribute('aria-label', COPY.speedLabel + ': ' + valText + ' ' + UNIT_LABEL[unit]);
+
+    distEl.textContent = trip.distance > 0 ? fmtDistance(trip.distance) : fmtDistance(0);
+    movingEl.textContent = fmtClock(trip.movingMs);
+    if (trip.movingMs >= 1000 && trip.distance > 0) {
+      avgEl.textContent = fmtSpeed((trip.distance / (trip.movingMs / 1000)) * 3.6);
+    } else {
+      avgEl.textContent = DASH;
+    }
+    maxEl.textContent = trip.maxKmh > 0 ? fmtSpeed(trip.maxKmh) : DASH;
+  }
+
+  function persistTrip() {
+    lastPersistAt = Date.now();
+    dirty = false;
+    storeSet('speedometer_trip', { distance: trip.distance, movingMs: trip.movingMs, maxKmh: trip.maxKmh, updatedAt: Date.now() });
+  }
+
+  function maybePersist() {
+    if (!dirty) return;
+    if (Date.now() - lastPersistAt < PERSIST_MS) return;
+    persistTrip();
+  }
+
+  function onPosition(pos) {
+    var c = pos && pos.coords;
+    if (!c) return;
+    var tMs = (typeof pos.timestamp === 'number' && isFinite(pos.timestamp)) ? pos.timestamp : Date.now();
+    var acc = (typeof c.accuracy === 'number' && isFinite(c.accuracy)) ? c.accuracy : null;
+    var fine = acc !== null && acc <= ACC_MAX;
+
+    var segOk = false;
+    var segDt = 0;
+    var segDist = 0;
+    if (lastFix !== null) {
+      var dt = (tMs - lastFix.t) / 1000;
+      if (dt >= DT_MIN && dt <= DT_MAX && fine && lastFix.fine) {
+        var d = haversine(lastFix.lat, lastFix.lon, c.latitude, c.longitude);
+        if (d / dt <= MAX_PLAUSIBLE_MS) {
+          segOk = true;
+          segDt = dt;
+          segDist = d;
+        }
+      }
+    }
+
+    var mps = null;
+    if (typeof c.speed === 'number' && isFinite(c.speed) && c.speed >= 0) mps = c.speed;
+    else if (segOk) mps = segDist / segDt;
+
+    if (mps !== null) {
+      var kmh = mps * 3.6;
+      currentKmh = kmh < STILL_KMH ? 0 : kmh;
+      lastFixAt = Date.now();
+    }
+
+    if (segOk) {
+      trip.distance += segDist;
+      if (currentKmh >= MOVING_KMH) trip.movingMs += segDt * 1000;
+      dirty = true;
+    }
+    if (fine && currentKmh > trip.maxKmh) {
+      trip.maxKmh = currentKmh;
+      dirty = true;
+    }
+
+    lastFix = { t: tMs, lat: c.latitude, lon: c.longitude, fine: fine };
+
+    if (acc === null) setChip('wait');
+    else setChip(acc <= ACC_GOOD ? 'good' : (acc <= ACC_MAX ? 'ok' : 'poor'), acc);
+
+    if (tracking) {
+      hintEl.textContent = COPY.screenHint;
+      hintEl.hidden = false;
+    }
+
+    render();
+    maybePersist();
+  }
+
+  function onGeoError(err) {
+    if (err && err.code === 1) {
+      stopTracking();
+      showView('denied');
+      return;
+    }
+    setChip('wait');
+    hintEl.textContent = COPY.signalLost;
+    hintEl.hidden = false;
+  }
+
+  async function syncWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    if (tracking) {
+      if (wakeLock) return;
+      try { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); }
+      catch (_) { wakeLock = null; }
+    } else if (wakeLock) {
+      try { wakeLock.release(); } catch (_) {}
+      wakeLock = null;
+    }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncWakeLock();
+    else if (dirty) persistTrip();
+  });
+
+  function showView(name) {
+    startPanel.hidden = name !== 'start';
+    liveEl.hidden = name !== 'live';
+    deniedEl.hidden = name !== 'denied';
+    unsupEl.hidden = name !== 'unsupported';
+    insecEl.hidden = name !== 'insecure';
+  }
+
+  function hasTrip() {
+    return trip.distance > 0 || trip.movingMs > 0 || trip.maxKmh > 0;
+  }
+
+  function tick() {
+    if (!tracking) return;
+    if (lastFixAt > 0 && Date.now() - lastFixAt > STALE_MS) {
+      if (currentKmh !== 0) {
+        currentKmh = 0;
+        render();
+      }
+      setChip('wait');
+    }
+    maybePersist();
+  }
+
+  function beginTracking() {
+    showView('live');
+    tracking = true;
+    lastFix = null;
+    lastFixAt = 0;
+    currentKmh = 0;
+    setChip('wait');
+    hintEl.textContent = COPY.screenHint;
+    hintEl.hidden = false;
+    toggleBtn.textContent = COPY.btnStop;
+    render();
+    try {
+      watchId = navigator.geolocation.watchPosition(onPosition, onGeoError, GEO_OPTS);
+    } catch (_) {
+      tracking = false;
+      toggleBtn.textContent = COPY.startBtn;
+      showView('unsupported');
+      return;
+    }
+    if (!tickTimer) tickTimer = setInterval(tick, 1000);
+    syncWakeLock();
+  }
+
+  function stopTracking() {
+    tracking = false;
+    if (watchId !== null) {
+      try { navigator.geolocation.clearWatch(watchId); } catch (_) {}
+      watchId = null;
+    }
+    if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
+    syncWakeLock();
+    persistTrip();
+    lastFix = null;
+    lastFixAt = 0;
+    currentKmh = 0;
+    toggleBtn.textContent = COPY.startBtn;
+    setChip('wait');
+    hintEl.hidden = true;
+    hintEl.textContent = '';
+    render();
+  }
+
+  function tryStart() {
+    if (!window.isSecureContext) { showView('insecure'); return; }
+    if (!navigator.geolocation) { showView('unsupported'); return; }
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then(function (status) {
+        if (status && status.state === 'denied') showView('denied');
+        else beginTracking();
+      }).catch(function () { beginTracking(); });
+      return;
+    }
+    beginTracking();
+  }
+
+  function disarmReset() {
+    if (armTimer) { clearTimeout(armTimer); armTimer = null; }
+    resetBtn.classList.remove('is-armed');
+    resetBtn.textContent = COPY.btnReset;
+  }
+
+  function resetTrip() {
+    trip.distance = 0;
+    trip.movingMs = 0;
+    trip.maxKmh = 0;
+    persistTrip();
+    render();
+  }
+
+  startBtn.addEventListener('click', tryStart);
+
+  toggleBtn.addEventListener('click', function () {
+    if (tracking) stopTracking();
+    else tryStart();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    if (armTimer) {
+      disarmReset();
+      resetTrip();
+      return;
+    }
+    resetBtn.classList.add('is-armed');
+    resetBtn.textContent = COPY.btnResetOk;
+    armTimer = setTimeout(function () {
+      armTimer = null;
+      resetBtn.classList.remove('is-armed');
+      resetBtn.textContent = COPY.btnReset;
+    }, 4000);
+  });
+
+  var backBtns = document.querySelectorAll('[data-spd-back]');
+  for (var i = 0; i < backBtns.length; i++) {
+    backBtns[i].addEventListener('click', function () {
+      showView(hasTrip() ? 'live' : 'start');
+    });
+  }
+
+  var unitsCtl = window.MentriaUI && window.MentriaUI.segmented
+    ? window.MentriaUI.segmented(unitsSeg, function (value) {
+        if (value !== 'kmh' && value !== 'mph' && value !== 'kn') return;
+        unit = value;
+        storeSet('speedometer_unit', unit);
+        render();
+      })
+    : null;
+  if (unitsCtl) unitsCtl.set(unit);
+
+  window.addEventListener('pagehide', function () {
+    if (dirty) persistTrip();
+  });
+
+  render();
+  showView(hasTrip() ? 'live' : 'start');
+})();
+</script>
+
+<style>
+.spd {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  font-family: var(--font-mono);
+  max-width: 460px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+.spd__live {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+.spd__live[hidden] { display: none; }
+
+.spd__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-pill);
+  background: var(--term-bg-raised);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--term-muted);
+  font-variant-numeric: tabular-nums;
+}
+.spd__chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.9;
+}
+.spd__chip[data-q="wait"] { color: var(--term-muted); }
+.spd__chip[data-q="good"] { color: var(--syn-green); border-color: rgba(74, 222, 128, 0.35); }
+.spd__chip[data-q="ok"]   { color: var(--syn-amber); border-color: rgba(251, 191, 36, 0.35); }
+.spd__chip[data-q="poor"] { color: #f87171; border-color: rgba(248, 113, 113, 0.35); }
+.spd__chip[data-q="wait"] .spd__chip-dot { animation: spd-pulse 1.4s ease-in-out infinite; }
+
+@keyframes spd-pulse {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+
+.spd__gauge-wrap {
+  width: min(330px, 84vw);
+}
+
+.spd__gauge {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.spd__arc-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 13;
+  stroke-linecap: round;
+}
+
+.spd__arc-fill {
+  fill: none;
+  stroke: url(#spdArcGrad);
+  stroke-width: 13;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.35s ease;
+  filter: drop-shadow(0 0 7px rgba(110, 243, 197, 0.35));
+}
+
+.spd__value {
+  fill: var(--term-fg-strong);
+  font-family: var(--font-mono);
+  font-size: 46px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.spd__unit {
+  fill: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.spd__tick {
+  fill: var(--term-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.spd__units {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 320px;
+}
+.spd__units-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+  white-space: nowrap;
+}
+.spd__units .m-seg { flex: 1; }
+
+.spd__trip { width: 100%; }
+.spd__trip-label {
+  display: block;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+  margin-bottom: var(--space-2);
+}
+
+.spd__stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.spd__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.7rem 0.5rem;
+  border: 1px solid var(--term-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.015);
+}
+.spd__stat-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--term-muted);
+  text-align: center;
+}
+.spd__stat-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--term-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.spd__controls {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.spd__reset.is-armed {
+  border-color: var(--syn-amber);
+  color: var(--syn-amber);
+}
+
+.spd__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--term-muted);
+  text-align: center;
+  max-width: 40ch;
+}
+.spd__hint[hidden] { display: none; }
+
+.spd__note {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: var(--term-subtle);
+  text-align: center;
+  max-width: 42ch;
+}
+
+.spd__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+  padding: var(--space-6) var(--space-5);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.015);
+  width: 100%;
+}
+.spd__panel[hidden] { display: none; }
+.spd__panel-title {
+  font-size: 1rem;
+  color: var(--syn-cyan);
+  margin: 0;
+}
+.spd__panel-title--warn { color: var(--syn-amber); }
+.spd__panel-body {
+  font-size: 0.85rem;
+  color: var(--term-muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 38ch;
+}
+.spd__panel-note {
+  font-size: 0.72rem;
+  color: var(--term-subtle);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 40ch;
+}
+
+@media (max-width: 480px) {
+  .spd__units { flex-direction: column; align-items: stretch; gap: var(--space-2); }
+  .spd__units-label { text-align: center; }
+  .spd__stat-value { font-size: 0.92rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spd__arc-fill { transition: none; }
+  .spd__chip[data-q="wait"] .spd__chip-dot { animation: none; }
+}
+</style>

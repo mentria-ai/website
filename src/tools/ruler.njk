@@ -1,0 +1,1646 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/ruler/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.ruler.title' | t }}"
+  description: "{{ 'tools.ruler.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">ruler</span></p>
+  <h1>{{ "tools.ruler.title" | t }}</h1>
+  <p>{{ "tools.ruler.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "ruler.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="rl" id="rl">
+
+  <div class="rl__bar">
+    <span class="rl__bar-label">{{ "tool.ruler.status_label" | t }}</span>
+    <span class="rl__chip" id="rl-chip" data-state="uncal" role="status" aria-live="polite">{{ "tool.ruler.state_uncalibrated" | t }}</span>
+    <span class="rl__nerd" id="rl-nerd"></span>
+  </div>
+
+  <p class="rl__stale" id="rl-stale" hidden>{{ "tool.ruler.stale_note" | t }}</p>
+  <p class="rl__zoom" id="rl-zoom" hidden>{{ "tool.ruler.zoom_warn" | t }}</p>
+  <p class="rl__detected" id="rl-detected" hidden>{{ "tool.ruler.detected_hint" | t }}</p>
+
+  <div class="rl__intro">
+    <div class="rl__preview" aria-hidden="true">
+      <svg viewBox="0 0 96 168" width="96" height="168">
+        <rect x="0" y="0" width="52" height="168" rx="3" fill="rgba(255,255,255,0.03)"></rect>
+        <rect x="0" y="0" width="96" height="3" fill="#e2e8f0"></rect>
+        <g fill="#6ef3c5">
+          <rect x="0" y="14" width="9" height="1.5"></rect>
+          <rect x="0" y="26" width="9" height="1.5"></rect>
+          <rect x="0" y="38" width="15" height="1.5"></rect>
+          <rect x="0" y="50" width="9" height="1.5"></rect>
+          <rect x="0" y="62" width="9" height="1.5"></rect>
+          <rect x="0" y="74" width="24" height="2"></rect>
+          <rect x="0" y="86" width="9" height="1.5"></rect>
+          <rect x="0" y="98" width="9" height="1.5"></rect>
+          <rect x="0" y="110" width="15" height="1.5"></rect>
+          <rect x="0" y="122" width="9" height="1.5"></rect>
+          <rect x="0" y="134" width="9" height="1.5"></rect>
+          <rect x="0" y="146" width="24" height="2"></rect>
+        </g>
+        <g fill="#22d3ee" opacity="0.85">
+          <rect x="30" y="20" width="7" height="1.5"></rect>
+          <rect x="30" y="44" width="11" height="1.5"></rect>
+          <rect x="30" y="68" width="7" height="1.5"></rect>
+          <rect x="30" y="92" width="18" height="2"></rect>
+          <rect x="30" y="116" width="7" height="1.5"></rect>
+          <rect x="30" y="140" width="11" height="1.5"></rect>
+        </g>
+        <rect x="0" y="112" width="96" height="2" fill="#f472b6"></rect>
+        <rect x="60" y="104" width="30" height="18" rx="9" fill="#111" stroke="#f472b6"></rect>
+      </svg>
+    </div>
+    <div class="rl__intro-body">
+      <p class="rl__explainer">{{ "tool.ruler.page_explainer" | t }}</p>
+      <div class="rl__controls">
+        <button class="m-btn m-btn--primary m-btn--pill rl__open" id="rl-open" type="button">{{ "tool.ruler.btn_open" | t }}</button>
+        <button class="m-btn m-btn--ghost m-btn--pill" id="rl-cal-btn" type="button">{{ "tool.ruler.btn_calibrate" | t }}</button>
+        <button class="m-btn m-btn--ghost m-btn--pill" id="rl-clear-btn" type="button" hidden>{{ "tool.ruler.btn_clear" | t }}</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="rl__honesty">{{ "tool.ruler.honesty" | t }}</p>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<div class="rl-ov" id="rl-ov" hidden role="dialog" aria-modal="true" aria-label="{{ 'tool.ruler.overlay_label' | t }}">
+  <canvas class="rl-ov__canvas" id="rl-ov-canvas" role="img" aria-label="{{ 'tool.ruler.canvas_label' | t }}"></canvas>
+
+  <div class="rl-ov__surface" id="rl-ov-surface" role="group" aria-label="{{ 'tool.ruler.measure_label' | t }}">
+    <div class="rl-ov__line rl-ov__line--a" id="rl-line-a" role="slider" tabindex="0" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-label="{{ 'tool.ruler.handle_a' | t }}">
+      <span class="rl-ov__rule" aria-hidden="true"></span>
+      <span class="rl-ov__tab" id="rl-tab-a" aria-hidden="true">A</span>
+    </div>
+    <div class="rl-ov__line rl-ov__line--b" id="rl-line-b" role="slider" tabindex="0" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-label="{{ 'tool.ruler.handle_b' | t }}" hidden>
+      <span class="rl-ov__rule" aria-hidden="true"></span>
+      <span class="rl-ov__tab" id="rl-tab-b" aria-hidden="true">B</span>
+    </div>
+  </div>
+
+  <div class="rl-ov__chrome">
+    <p class="rl-ov__zero-cap">{{ "tool.ruler.zero_caption" | t }}</p>
+
+    <button class="rl-ov__close" id="rl-close" type="button" aria-label="{{ 'tool.ruler.btn_close' | t }}">&#x2715;</button>
+
+    <div class="rl-ov__readout" id="rl-readout">
+      <span class="rl-ov__readout-label">{{ "tool.ruler.readout_label" | t }}</span>
+      <span class="rl-ov__readout-main" id="rl-out-1">—</span>
+      <span class="rl-ov__readout-alt" id="rl-out-2"></span>
+    </div>
+
+    <p class="rl-ov__hint">{{ "tool.ruler.pan_hint" | t }}</p>
+
+    <div class="rl-ov__stack">
+      <p class="rl-ov__flag rl-ov__flag--zoom" id="rl-ov-zoom" hidden>{{ "tool.ruler.zoom_warn" | t }}</p>
+      <p class="rl-ov__flag rl-ov__flag--ok" id="rl-ov-detected" hidden>{{ "tool.ruler.detected_hint" | t }}</p>
+      <div class="rl-ov__warn" id="rl-warn" hidden>
+        <p class="rl-ov__warn-text">{{ "tool.ruler.warn_uncalibrated" | t }}</p>
+        <button class="m-btn m-btn--primary m-btn--pill" id="rl-warn-btn" type="button">{{ "tool.ruler.warn_action" | t }}</button>
+      </div>
+      <div class="rl-ov__tools">
+        <button class="m-btn m-btn--ghost m-btn--pill rl-ov__tool" id="rl-units-btn" type="button"></button>
+        <button class="m-btn m-btn--ghost m-btn--pill rl-ov__tool" id="rl-ab-btn" type="button" aria-pressed="false">{{ "tool.ruler.measure_ab" | t }}</button>
+        <button class="m-btn m-btn--ghost m-btn--pill rl-ov__tool" id="rl-ov-cal-btn" type="button">{{ "tool.ruler.btn_calibrate" | t }}</button>
+        <button class="m-btn m-btn--ghost m-btn--pill rl-ov__tool" id="rl-reset-btn" type="button">{{ "tool.ruler.reset_markers" | t }}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rl-ov__cal" id="rl-cal" hidden>
+    <h2 class="rl-ov__cal-title">{{ "tool.ruler.cal_title" | t }}</h2>
+
+    <div class="m-seg rl-ov__modes" id="rl-modes">
+      <button type="button" data-value="card">{{ "tool.ruler.mode_card" | t }}</button>
+      <button type="button" data-value="known">{{ "tool.ruler.mode_known" | t }}</button>
+      <button type="button" data-value="diagonal" id="rl-mode-diagonal">{{ "tool.ruler.mode_diagonal" | t }}</button>
+    </div>
+
+    <div class="rl-ov__pane" id="rl-pane-card">
+      <p class="rl-ov__note">{{ "tool.ruler.card_intro" | t }}</p>
+      <div class="rl-ov__card-wrap">
+        <div class="rl-ov__card" id="rl-card">
+          <span class="rl-ov__card-chip" aria-hidden="true"></span>
+          <span class="rl-ov__card-spec">{{ "tool.ruler.card_spec" | t }}</span>
+          <div class="rl-ov__card-grip" id="rl-card-grip" role="slider" tabindex="0" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="1400" aria-valuenow="324" aria-label="{{ 'tool.ruler.card_resize' | t }}"><span class="rl-ov__card-grip-dot" aria-hidden="true"></span></div>
+        </div>
+      </div>
+      <div class="rl-ov__card-row">
+        <button class="m-btn m-btn--ghost m-btn--pill rl-ov__step" type="button" data-step="-10">&minus;10</button>
+        <button class="m-btn m-btn--ghost m-btn--pill rl-ov__step" type="button" data-step="-1">&minus;1</button>
+        <span class="rl-ov__card-size" id="rl-card-size"></span>
+        <button class="m-btn m-btn--ghost m-btn--pill rl-ov__step" type="button" data-step="1">+1</button>
+        <button class="m-btn m-btn--ghost m-btn--pill rl-ov__step" type="button" data-step="10">+10</button>
+      </div>
+    </div>
+
+    <div class="rl-ov__pane" id="rl-pane-known" hidden>
+      <p class="rl-ov__note">{{ "tool.ruler.known_intro" | t }}</p>
+      <p class="rl-ov__gap" id="rl-gap"></p>
+      <div class="m-field rl-ov__known-field">
+        <label for="rl-known">{{ "tool.ruler.known_label" | t }}</label>
+        <input class="m-input" id="rl-known" type="number" min="1" max="2000" step="0.1" inputmode="decimal">
+      </div>
+    </div>
+
+    <div class="rl-ov__pane" id="rl-pane-diagonal" hidden>
+      <p class="rl-ov__note">{{ "tool.ruler.diagonal_intro" | t }}</p>
+      <div class="rl-ov__chips" id="rl-diag-chips" role="group" aria-label="{{ 'tool.ruler.diagonal_label' | t }}"></div>
+      <div class="m-field rl-ov__known-field">
+        <label for="rl-diag">{{ "tool.ruler.diagonal_label" | t }}</label>
+        <input class="m-input" id="rl-diag" type="number" min="3" max="120" step="0.1" inputmode="decimal">
+      </div>
+      <p class="rl-ov__gap rl-ov__gap--diag" id="rl-diag-result"></p>
+    </div>
+
+    <p class="m-status rl-ov__err" id="rl-err" data-tone="err" hidden></p>
+
+    <div class="rl-ov__cal-actions">
+      <button class="m-btn m-btn--primary m-btn--pill" id="rl-apply" type="button">{{ "tool.ruler.btn_apply" | t }}</button>
+      <button class="m-btn m-btn--ghost m-btn--pill" id="rl-cancel" type="button">{{ "tool.ruler.btn_cancel" | t }}</button>
+    </div>
+  </div>
+</div>
+
+{% include "tool-schema.njk" %}
+
+<style>
+.rl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  padding: var(--space-2) 0 var(--space-4);
+  max-width: 100%;
+}
+
+.rl__bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+.rl__bar-label {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--term-muted);
+}
+.rl__chip {
+  font-size: var(--text-2xs);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--term-border-strong);
+  color: var(--term-muted);
+}
+.rl__chip[data-state="cal"] {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--green-8);
+}
+.rl__chip[data-state="stale"] {
+  border-color: var(--syn-amber);
+  color: var(--syn-amber);
+  background: var(--amber-8);
+}
+.rl__chip[data-state="detected"],
+.rl__chip[data-state="diagonal"] {
+  border-color: var(--syn-cyan);
+  color: var(--syn-cyan);
+  background: var(--cyan-8);
+}
+.rl__nerd {
+  font-size: var(--text-2xs);
+  color: var(--term-subtle);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+}
+
+.rl__stale {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  color: var(--syn-amber);
+  background: var(--amber-8);
+  border: 1px solid var(--amber-30);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+.rl__stale[hidden] { display: none; }
+
+.rl__zoom {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  color: var(--syn-pink);
+  background: var(--pink-10);
+  border: 1px solid var(--pink-30);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+.rl__zoom[hidden] { display: none; }
+
+.rl__detected {
+  margin: 0;
+  font-size: var(--text-2xs);
+  line-height: 1.55;
+  color: var(--term-subtle);
+}
+.rl__detected[hidden] { display: none; }
+
+.rl__intro {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.015);
+}
+.rl__preview {
+  flex: none;
+  line-height: 0;
+  opacity: 0.85;
+}
+.rl__intro-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.rl__explainer {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--term-fg);
+  max-width: 56ch;
+}
+.rl__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.rl__controls button[hidden] { display: none; }
+.rl__open {
+  font-size: var(--text-base);
+  padding: var(--space-3) var(--space-6);
+  font-weight: 700;
+  min-height: 48px;
+}
+
+.rl__honesty {
+  margin: 0;
+  font-size: var(--text-2xs);
+  line-height: 1.65;
+  color: var(--term-subtle);
+  max-width: 72ch;
+}
+
+.rl-ov {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  background: #07090b;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.rl-ov[hidden] { display: none; }
+
+.rl-ov__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.rl-ov__surface {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: ns-resize;
+}
+
+.rl-ov__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 0;
+  will-change: transform;
+}
+.rl-ov__line[hidden] { display: none; }
+.rl-ov__rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: var(--syn-pink);
+  box-shadow: 0 0 8px rgba(244, 114, 182, 0.55);
+}
+.rl-ov__line--b .rl-ov__rule {
+  background: var(--syn-amber);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+}
+.rl-ov__tab {
+  position: absolute;
+  left: 132px;
+  top: -22px;
+  width: 52px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--syn-pink);
+  background: rgba(12, 14, 17, 0.92);
+  color: var(--syn-pink);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  box-shadow: var(--elev-2);
+}
+.rl-ov__line--b .rl-ov__tab {
+  left: 192px;
+  border-color: var(--syn-amber);
+  color: var(--syn-amber);
+}
+.rl-ov__line:focus { outline: none; }
+.rl-ov__line:focus-visible .rl-ov__tab {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.rl-ov__chrome {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 10px) calc(env(safe-area-inset-left, 0px) + 10px);
+}
+
+.rl-ov__zero-cap {
+  position: absolute;
+  top: 0;
+  left: 126px;
+  margin: 0;
+  font-size: var(--text-2xs);
+  color: var(--term-subtle);
+  max-width: 190px;
+  line-height: 1.4;
+}
+
+.rl-ov__close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--term-border-strong);
+  background: rgba(12, 14, 17, 0.9);
+  color: var(--term-fg);
+  font-size: 1rem;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.rl-ov__close:hover { border-color: var(--accent); color: var(--accent); }
+
+.rl-ov__readout {
+  position: absolute;
+  top: 54px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+.rl-ov__readout-label {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--term-muted);
+}
+.rl-ov__readout-main {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--term-fg-strong);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.rl-ov__readout-alt {
+  font-size: var(--text-sm);
+  color: var(--term-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rl-ov__hint {
+  position: absolute;
+  top: 138px;
+  right: 0;
+  margin: 0;
+  max-width: 230px;
+  text-align: right;
+  font-size: var(--text-2xs);
+  line-height: 1.5;
+  color: var(--term-subtle);
+}
+
+.rl-ov__stack {
+  position: absolute;
+  left: 126px;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.rl-ov__warn {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--amber-30);
+  border-radius: var(--radius-md);
+  background: rgba(38, 28, 6, 0.94);
+  pointer-events: auto;
+}
+.rl-ov__warn[hidden] { display: none; }
+
+.rl-ov__flag {
+  width: 100%;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-2xs);
+  line-height: 1.5;
+  pointer-events: auto;
+}
+.rl-ov__flag[hidden] { display: none; }
+.rl-ov__flag--zoom {
+  color: var(--syn-pink);
+  border: 1px solid var(--pink-30);
+  background: rgba(40, 10, 24, 0.94);
+}
+.rl-ov__flag--ok {
+  color: var(--term-subtle);
+  border: 1px solid var(--term-border-strong);
+  background: rgba(12, 14, 17, 0.9);
+}
+.rl-ov__warn-text {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--syn-amber);
+}
+.rl-ov__warn .m-btn { min-height: 44px; }
+
+.rl-ov__tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.rl-ov__tool {
+  pointer-events: auto;
+  min-height: 40px;
+  background: rgba(12, 14, 17, 0.9);
+}
+.rl-ov__tool[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--green-8);
+}
+
+.rl-ov__close,
+.rl-ov__stack,
+.rl-ov__hint,
+.rl-ov__zero-cap {
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+.rl-ov.is-dragging .rl-ov__close,
+.rl-ov.is-dragging .rl-ov__stack,
+.rl-ov.is-dragging .rl-ov__hint,
+.rl-ov.is-dragging .rl-ov__zero-cap {
+  opacity: 0.1;
+}
+
+.rl-ov__cal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 94%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: #0b0e11;
+  border-top: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: var(--space-4) calc(env(safe-area-inset-right, 0px) + var(--space-4)) calc(env(safe-area-inset-bottom, 0px) + var(--space-4)) calc(env(safe-area-inset-left, 0px) + var(--space-4));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-shadow: var(--elev-3);
+}
+.rl-ov__cal[hidden] { display: none; }
+.rl-ov__cal.is-full {
+  top: 0;
+  max-height: none;
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--space-4));
+  border-radius: 0;
+}
+.rl-ov__cal-title {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--accent);
+}
+.rl-ov__modes { max-width: 320px; }
+
+.rl-ov__pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.rl-ov__pane[hidden] { display: none; }
+
+.rl-ov__note {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--term-muted);
+  max-width: 62ch;
+}
+
+.rl-ov__card-wrap {
+  overflow: auto;
+  margin-left: calc(-1 * (env(safe-area-inset-left, 0px) + var(--space-4)));
+  margin-right: calc(-1 * (env(safe-area-inset-right, 0px) + var(--space-4)));
+  padding: var(--space-2) var(--space-2) var(--space-6) var(--space-2);
+}
+
+.rl-ov__card {
+  position: relative;
+  width: 204px;
+  height: 324px;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  background: linear-gradient(160deg, rgba(110, 243, 197, 0.07), rgba(34, 211, 238, 0.04));
+  box-shadow: var(--elev-2);
+}
+.rl-ov__card-chip {
+  position: absolute;
+  left: 14%;
+  top: 12%;
+  width: 22%;
+  height: 11%;
+  border-radius: 4px;
+  background: linear-gradient(140deg, #fcd661, #c2790f);
+  opacity: 0.9;
+}
+.rl-ov__card-spec {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8%;
+  text-align: center;
+  font-size: var(--text-2xs);
+  color: var(--term-muted);
+  letter-spacing: 0.04em;
+}
+.rl-ov__card-grip {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+.rl-ov__card-grip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -6px;
+  border-radius: var(--radius-sm);
+}
+.rl-ov__card-grip-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  box-shadow: var(--elev-1);
+}
+.rl-ov__card-grip.is-dragging .rl-ov__card-grip-dot {
+  box-shadow: 0 0 12px rgba(110, 243, 197, 0.6);
+}
+
+.rl-ov__card-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.rl-ov__step {
+  min-width: 52px;
+  min-height: 44px;
+  font-variant-numeric: tabular-nums;
+}
+.rl-ov__card-size {
+  font-size: var(--text-2xs);
+  color: var(--term-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.rl-ov__gap {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--syn-pink);
+  font-variant-numeric: tabular-nums;
+}
+.rl-ov__gap--diag { color: var(--syn-cyan); }
+.rl-ov__gap:empty { display: none; }
+.rl-ov__known-field { max-width: 220px; }
+.rl-ov__err[hidden] { display: none; }
+
+.rl-ov__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.rl-ov__chip-btn {
+  min-width: 60px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--term-border-strong);
+  background: var(--term-surface-2);
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.rl-ov__chip-btn:hover { border-color: var(--syn-cyan); color: var(--syn-cyan); }
+.rl-ov__chip-btn[aria-pressed="true"] {
+  border-color: var(--syn-cyan);
+  color: var(--syn-cyan);
+  background: var(--cyan-15);
+}
+
+.rl-ov__cal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.rl-ov__cal-actions .m-btn { min-height: 44px; }
+
+html.rl-ov-on { overflow: hidden; }
+html.rl-ov-on .app-bar { display: none !important; }
+
+@media (max-width: 560px) {
+  .rl__intro { flex-direction: column; align-items: flex-start; }
+  .rl__nerd { margin-left: 0; width: 100%; }
+  .rl__open { width: 100%; }
+  .m-input { font-size: 16px; }
+  .rl-ov__hint { display: none; }
+  .rl-ov__readout-main { font-size: var(--text-lg); }
+}
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  var COPY = {
+    stateUncal:    {{ ("tool.ruler.state_uncalibrated" | t) | dump | safe }},
+    stateCal:      {{ ("tool.ruler.state_calibrated"   | t) | dump | safe }},
+    stateStale:    {{ ("tool.ruler.state_stale"        | t) | dump | safe }},
+    stateDetected: {{ ("tool.ruler.state_detected"     | t) | dump | safe }},
+    stateDiagonal: {{ ("tool.ruler.state_diagonal"     | t) | dump | safe }},
+    srcCalibrated: {{ ("tool.ruler.src_calibrated"     | t) | dump | safe }},
+    srcDetected:   {{ ("tool.ruler.src_detected"       | t) | dump | safe }},
+    srcDiagonal:   {{ ("tool.ruler.src_diagonal"       | t) | dump | safe }},
+    srcEstimate:   {{ ("tool.ruler.src_estimate"       | t) | dump | safe }},
+    diagResult:    {{ ("tool.ruler.diagonal_result"    | t) | dump | safe }},
+    nerdLine:      {{ ("tool.ruler.nerd_line"          | t) | dump | safe }},
+    confirmClear:  {{ ("tool.ruler.confirm_clear"      | t) | dump | safe }},
+    cleared:       {{ ("tool.ruler.cleared"            | t) | dump | safe }},
+    applied:       {{ ("tool.ruler.applied"            | t) | dump | safe }},
+    errRange:      {{ ("tool.ruler.err_range"          | t) | dump | safe }},
+    cardSize:      {{ ("tool.ruler.card_size"          | t) | dump | safe }},
+    cardWider:     {{ ("tool.ruler.card_wider"         | t) | dump | safe }},
+    cardNarrower:  {{ ("tool.ruler.card_narrower"      | t) | dump | safe }},
+    knownGap:      {{ ("tool.ruler.known_gap"          | t) | dump | safe }},
+    unitsLabel:    {{ ("tool.ruler.units_label"        | t) | dump | safe }},
+    unitsMetric:   {{ ("tool.ruler.units_metric"       | t) | dump | safe }},
+    unitsImperial: {{ ("tool.ruler.units_imperial"     | t) | dump | safe }},
+    unitMm:        {{ ("tool.ruler.unit_mm"            | t) | dump | safe }},
+    unitCm:        {{ ("tool.ruler.unit_cm"            | t) | dump | safe }},
+    unitIn:        {{ ("tool.ruler.unit_in"            | t) | dump | safe }}
+  };
+
+  var LANG = document.documentElement.lang || undefined;
+  var CSS_PPM = 96 / 25.4;
+  var CARD_LONG_MM = 85.6;
+  var CARD_SHORT_MM = 53.98;
+  var MIN_PPM = 1;
+  var MAX_PPM = 40;
+  var CARD_MIN_PX = 200;
+  var CARD_CAP_PX = 1400;
+  var PLATE_W = 116;
+  var CM_NUM_X = 30;
+  var IN_TICK_X = 62;
+  var IN_NUM_X = 92;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var root = $('rl');
+  var ov = $('rl-ov');
+  if (!root || !ov) return;
+
+  var chipEl = $('rl-chip');
+  var nerdEl = $('rl-nerd');
+  var staleEl = $('rl-stale');
+  var openBtn = $('rl-open');
+  var pageCalBtn = $('rl-cal-btn');
+  var clearBtn = $('rl-clear-btn');
+
+  var ovCanvas = $('rl-ov-canvas');
+  var surface = $('rl-ov-surface');
+  var lineA = $('rl-line-a');
+  var lineB = $('rl-line-b');
+  var tabA = $('rl-tab-a');
+  var tabB = $('rl-tab-b');
+  var closeBtn = $('rl-close');
+  var out1 = $('rl-out-1');
+  var out2 = $('rl-out-2');
+  var warnEl = $('rl-warn');
+  var warnBtn = $('rl-warn-btn');
+  var unitsBtn = $('rl-units-btn');
+  var abBtn = $('rl-ab-btn');
+  var ovCalBtn = $('rl-ov-cal-btn');
+  var resetBtn = $('rl-reset-btn');
+
+  var pageZoomEl = $('rl-zoom');
+  var pageDetectedEl = $('rl-detected');
+  var ovZoomEl = $('rl-ov-zoom');
+  var ovDetectedEl = $('rl-ov-detected');
+
+  var calPanel = $('rl-cal');
+  var modesSeg = $('rl-modes');
+  var modeDiagBtn = $('rl-mode-diagonal');
+  var paneCard = $('rl-pane-card');
+  var paneKnown = $('rl-pane-known');
+  var paneDiag = $('rl-pane-diagonal');
+  var diagChips = $('rl-diag-chips');
+  var diagInput = $('rl-diag');
+  var diagResultEl = $('rl-diag-result');
+  var cardEl = $('rl-card');
+  var cardGrip = $('rl-card-grip');
+  var cardSizeEl = $('rl-card-size');
+  var gapEl = $('rl-gap');
+  var knownInput = $('rl-known');
+  var errEl = $('rl-err');
+  var applyBtn = $('rl-apply');
+  var cancelBtn = $('rl-cancel');
+
+  if (ov.parentElement !== document.body) document.body.appendChild(ov);
+
+  function cssVar(name, fallback) {
+    try {
+      var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+      v = v ? v.trim() : '';
+      return v || fallback;
+    } catch (e) { return fallback; }
+  }
+
+  var C = {
+    plate: 'rgba(255,255,255,0.028)',
+    label: cssVar('--term-fg', '#e2e8f0'),
+    muted: cssVar('--term-subtle', '#78859a'),
+    metric: cssVar('--accent', '#6ef3c5'),
+    imperial: cssVar('--syn-cyan', '#22d3ee'),
+    mono: cssVar('--font-mono', 'monospace')
+  };
+
+  var state = {
+    ppm: CSS_PPM,
+    source: 'estimate',
+    label: '',
+    stale: false,
+    zoomed: false,
+    units: 'metric',
+    abMode: false,
+    dpr: window.devicePixelRatio || 1
+  };
+
+  var stored = null;
+  var detected = null;
+  var lines = { a: 0, b: 0 };
+  var linesReady = false;
+  var viewH = 0;
+  var calMode = 'card';
+  var cardLong = Math.round(CSS_PPM * CARD_LONG_MM);
+
+  var APPLE_PPI = {
+    '320x568x2': 326, '375x667x2': 326, '414x736x3': 401, '375x812x3': 458,
+    '414x896x2': 326, '414x896x3': 458, '360x780x3': 476, '390x844x3': 460,
+    '428x926x3': 458, '393x852x3': 460, '430x932x3': 460, '402x874x3': 460,
+    '440x956x3': 460, '744x1133x2': 326
+  };
+
+  var ANDROID_PPI = {
+    'SM-G991': 425, 'SM-G996': 393, 'SM-G998': 516,
+    'SM-S901': 423, 'SM-S906': 390, 'SM-S908': 501,
+    'SM-S911': 423, 'SM-S916': 390, 'SM-S918': 501,
+    'SM-S921': 416, 'SM-S926': 513, 'SM-S928': 505,
+    'SM-G980': 566, 'SM-G981': 566, 'SM-G780': 405, 'SM-G973': 551,
+    'SM-A515': 405, 'SM-A525': 405, 'SM-A526': 405, 'SM-A536': 405,
+    'SM-A546': 403, 'SM-A556': 390, 'SM-A346': 390, 'SM-A336': 411,
+    'SM-A145': 400, 'SM-A146': 400, 'SM-A155': 396, 'SM-A156': 396,
+    'SM-A125': 270, 'SM-A057': 393,
+    'Pixel 4a': 444, 'Pixel 5': 430, 'Pixel 6': 411, 'Pixel 6 Pro': 513,
+    'Pixel 6a': 431, 'Pixel 7': 418, 'Pixel 7 Pro': 513, 'Pixel 7a': 431,
+    'Pixel 8': 425, 'Pixel 8 Pro': 490, 'Pixel 8a': 431, 'Pixel 9': 421,
+    'Redmi Note 8': 409, 'Redmi Note 9': 395, 'Redmi Note 10 Pro': 395,
+    'Redmi Note 11': 409, 'Redmi Note 12': 395,
+    'POCO F3': 395, 'POCO X3 Pro': 395,
+    'moto g power (2022)': 270, 'moto g54 5G': 405
+  };
+
+  var DIAGONALS = [11.6, 13.3, 14, 15.6, 16, 21.5, 24, 27, 32];
+
+  function isAppleMobile() {
+    var ua = navigator.userAgent || '';
+    if (ua.indexOf('iPhone') !== -1 || ua.indexOf('iPad') !== -1 || ua.indexOf('iPod') !== -1) return true;
+    var plat = navigator.platform || '';
+    return plat.indexOf('Mac') !== -1 && (navigator.maxTouchPoints || 0) > 1;
+  }
+
+  function detectApple() {
+    if (!isAppleMobile() || !window.screen) return null;
+    var dpr = Math.round(window.devicePixelRatio || 1);
+    var a = Math.round(window.screen.width || 0);
+    var b = Math.round(window.screen.height || 0);
+    if (!a || !b || !dpr) return null;
+    var w = Math.min(a, b);
+    var h = Math.max(a, b);
+    var phone = w <= 500;
+    var ppi = APPLE_PPI[w + 'x' + h + 'x' + dpr];
+    if (!ppi) {
+      if (phone) ppi = dpr === 3 ? 460 : (dpr === 2 ? 326 : 0);
+      else ppi = 264;
+    }
+    if (!ppi) return null;
+    return { ppm: ppi / dpr / 25.4, label: phone ? 'iPhone' : 'iPad' };
+  }
+
+  function androidModelFromUA(ua) {
+    var start = ua.indexOf('Android');
+    if (start === -1) return '';
+    var close = ua.indexOf(')', start);
+    if (close === -1) return '';
+    var parts = ua.slice(start, close).split(';');
+    if (parts.length < 2) return '';
+    var last = parts[parts.length - 1].trim();
+    var b = last.indexOf(' Build/');
+    if (b !== -1) last = last.slice(0, b).trim();
+    return last;
+  }
+
+  function androidPpi(model) {
+    if (!model) return 0;
+    var m = String(model).trim();
+    if (Object.prototype.hasOwnProperty.call(ANDROID_PPI, m)) return ANDROID_PPI[m];
+    var lower = m.toLowerCase();
+    for (var key in ANDROID_PPI) {
+      if (!Object.prototype.hasOwnProperty.call(ANDROID_PPI, key)) continue;
+      var k = key.toLowerCase();
+      if (lower === k) return ANDROID_PPI[key];
+      if (k.indexOf('sm-') === 0 && lower.indexOf(k) === 0) return ANDROID_PPI[key];
+    }
+    return 0;
+  }
+
+  function applyAndroidModel(model) {
+    var ppi = androidPpi(model);
+    var dpr = window.devicePixelRatio || 0;
+    if (!ppi || !dpr) return;
+    detected = { ppm: ppi / dpr / 25.4, label: String(model).trim() };
+    resolve();
+    renderStatus();
+    if (isOpen()) renderAll();
+  }
+
+  function detectAndroid() {
+    var ua = navigator.userAgent || '';
+    if (ua.indexOf('Android') === -1) return;
+    var uad = navigator.userAgentData;
+    if (uad && typeof uad.getHighEntropyValues === 'function') {
+      try {
+        uad.getHighEntropyValues(['model']).then(function (v) {
+          applyAndroidModel((v && v.model) || androidModelFromUA(ua));
+        }, function () {
+          applyAndroidModel(androidModelFromUA(ua));
+        });
+        return;
+      } catch (e) {}
+    }
+    applyAndroidModel(androidModelFromUA(ua));
+  }
+
+  function zoomActive() {
+    try {
+      var vv = window.visualViewport;
+      if (vv && typeof vv.scale === 'number' && (vv.scale < 0.99 || vv.scale > 1.01)) return true;
+    } catch (e) {}
+    try {
+      if (window.outerWidth > 0 && window.innerWidth > 0) {
+        var pct = Math.round(window.outerWidth / window.innerWidth * 100);
+        if (pct < 98 || pct > 102) return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  function diagonalPpm(inches) {
+    if (!window.screen || !inches || inches <= 0) return 0;
+    var w = window.screen.width || 0;
+    var h = window.screen.height || 0;
+    if (!w || !h) return 0;
+    return Math.sqrt(w * w + h * h) / inches / 25.4;
+  }
+
+  function storeGet(key) {
+    if (!window.MentriaStore) return null;
+    try { return window.MentriaStore.get('tools', key) || null; }
+    catch (e) { return null; }
+  }
+  function storeSet(key, value) {
+    if (!window.MentriaStore) return;
+    try { window.MentriaStore.set('tools', key, value); } catch (e) {}
+  }
+  function storeRemove(key) {
+    if (!window.MentriaStore) return;
+    try { window.MentriaStore.remove('tools', key); } catch (e) {}
+  }
+
+  function toast(msg) {
+    if (window.MentriaUI && typeof window.MentriaUI.toast === 'function') window.MentriaUI.toast(msg);
+  }
+
+  function num(value, digits) {
+    try { return value.toLocaleString(LANG, { minimumFractionDigits: digits, maximumFractionDigits: digits }); }
+    catch (e) { return value.toFixed(digits); }
+  }
+
+  function dpiValue() {
+    return state.ppm * 25.4 * state.dpr;
+  }
+
+  function isOpen() { return !ov.hidden; }
+
+  function resolve() {
+    state.dpr = window.devicePixelRatio || 1;
+    var srcDpr = null;
+    if (stored && (stored.source === 'card' || stored.source === 'known')) {
+      state.ppm = stored.ppm;
+      state.source = 'calibrated';
+      state.label = '';
+      srcDpr = stored.dpr;
+    } else if (detected) {
+      state.ppm = detected.ppm;
+      state.source = 'detected';
+      state.label = detected.label;
+    } else if (stored && stored.source === 'diagonal') {
+      state.ppm = stored.ppm;
+      state.source = 'diagonal';
+      state.label = '';
+      srcDpr = stored.dpr;
+    } else {
+      state.ppm = CSS_PPM;
+      state.source = 'estimate';
+      state.label = '';
+    }
+    state.stale = !!(typeof srcDpr === 'number' && Math.abs(srcDpr - state.dpr) > 0.01);
+    state.zoomed = zoomActive();
+  }
+
+  function loadState() {
+    var cal = storeGet('ruler_calibration');
+    if (cal && typeof cal.ppm === 'number' && cal.ppm >= MIN_PPM && cal.ppm <= MAX_PPM) {
+      stored = {
+        ppm: cal.ppm,
+        dpr: typeof cal.dpr === 'number' ? cal.dpr : null,
+        source: cal.source === 'known' || cal.source === 'diagonal' ? cal.source : 'card',
+        value: typeof cal.value === 'number' ? cal.value : null
+      };
+    }
+    var units = storeGet('ruler_units');
+    if (units && units.order === 'imperial') state.units = 'imperial';
+    detected = detectApple();
+    resolve();
+  }
+
+  function commitCalibration(ppm, source, value) {
+    if (!isFinite(ppm) || ppm < MIN_PPM || ppm > MAX_PPM) return false;
+    var rec = { ppm: ppm, dpr: window.devicePixelRatio || 1, at: Date.now(), source: source };
+    if (typeof value === 'number' && isFinite(value)) rec.value = value;
+    stored = { ppm: ppm, dpr: rec.dpr, source: source, value: rec.value || null };
+    storeSet('ruler_calibration', rec);
+    resolve();
+    return true;
+  }
+
+  function clearCalibration() {
+    stored = null;
+    storeRemove('ruler_calibration');
+    resolve();
+  }
+
+  function layoutOverlay() {
+    state.dpr = window.devicePixelRatio || 1;
+    var w = ovCanvas.clientWidth;
+    var h = ovCanvas.clientHeight;
+    if (!w || !h) return;
+    viewH = h;
+    var bw = Math.max(1, Math.round(w * state.dpr));
+    var bh = Math.max(1, Math.round(h * state.dpr));
+    if (ovCanvas.width !== bw) ovCanvas.width = bw;
+    if (ovCanvas.height !== bh) ovCanvas.height = bh;
+    if (!linesReady) {
+      resetLines();
+      linesReady = true;
+    }
+    clampLines();
+  }
+
+  function clampLines() {
+    lines.a = Math.min(viewH, Math.max(0, lines.a));
+    lines.b = Math.min(viewH, Math.max(0, lines.b));
+  }
+
+  function resetLines() {
+    lines.a = Math.round(viewH * 0.4);
+    lines.b = Math.round(viewH * 0.66);
+  }
+
+  function setLine(which, y) {
+    lines[which] = Math.min(viewH, Math.max(0, y));
+    renderLines();
+    renderReadout();
+    if (calMode === 'known') renderKnown();
+  }
+
+  function renderLines() {
+    lineB.hidden = !state.abMode;
+    var items = [[lineA, tabA, lines.a], [lineB, tabB, lines.b]];
+    for (var i = 0; i < items.length; i++) {
+      var el = items[i][0];
+      var tab = items[i][1];
+      var y = items[i][2];
+      el.style.transform = 'translateY(' + y + 'px)';
+      tab.style.top = Math.min(Math.max(-22, -y), Math.max(-22, viewH - 44 - y)) + 'px';
+      el.setAttribute('aria-valuemax', String(Math.round(viewH)));
+      el.setAttribute('aria-valuenow', String(Math.round(y)));
+    }
+  }
+
+  function measuredPx() {
+    return state.abMode ? Math.abs(lines.b - lines.a) : lines.a;
+  }
+
+  function fracInches(inches) {
+    var total = Math.round(inches * 16);
+    var whole = Math.floor(total / 16);
+    var rem = total - whole * 16;
+    var den = 16;
+    while (rem > 0 && rem % 2 === 0) { rem = rem / 2; den = den / 2; }
+    if (rem === 0) return String(whole) + ' ' + COPY.unitIn;
+    if (whole === 0) return rem + '/' + den + ' ' + COPY.unitIn;
+    return whole + ' ' + rem + '/' + den + ' ' + COPY.unitIn;
+  }
+
+  function fmtMetric(mm) {
+    return num(mm, 1) + ' ' + COPY.unitMm + '  ·  ' + num(mm / 10, 2) + ' ' + COPY.unitCm;
+  }
+
+  function fmtImperial(mm) {
+    var inches = mm / 25.4;
+    return num(inches, 2) + ' ' + COPY.unitIn + '  ·  ' + fracInches(inches);
+  }
+
+  function renderReadout() {
+    var mm = measuredPx() / state.ppm;
+    var metric = fmtMetric(mm);
+    var imperial = fmtImperial(mm);
+    var metricFirst = state.units === 'metric';
+    var main = metricFirst ? metric : imperial;
+    out1.textContent = main;
+    out2.textContent = metricFirst ? imperial : metric;
+    lineA.setAttribute('aria-valuetext', main);
+    lineB.setAttribute('aria-valuetext', main);
+  }
+
+  function renderStatus() {
+    var label = COPY.stateUncal;
+    var tone = 'uncal';
+    var srcName = COPY.srcEstimate;
+    if (state.source === 'calibrated') { label = COPY.stateCal; tone = 'cal'; srcName = COPY.srcCalibrated; }
+    else if (state.source === 'detected') { label = COPY.stateDetected.replace('{device}', state.label); tone = 'detected'; srcName = COPY.srcDetected; }
+    else if (state.source === 'diagonal') { label = COPY.stateDiagonal; tone = 'diagonal'; srcName = COPY.srcDiagonal; }
+    if (state.stale) { label = COPY.stateStale; tone = 'stale'; }
+    chipEl.textContent = label;
+    chipEl.dataset.state = tone;
+    nerdEl.textContent = COPY.nerdLine
+      .replace('{ppm}', num(state.ppm, 3))
+      .replace('{dpi}', String(Math.round(dpiValue())))
+      .replace('{source}', srcName)
+      .replace('{dpr}', num(state.dpr, 2));
+    staleEl.hidden = !state.stale;
+    clearBtn.hidden = !stored;
+    var isDetected = state.source === 'detected' && !state.stale;
+    warnEl.hidden = state.source !== 'estimate';
+    pageDetectedEl.hidden = !isDetected;
+    ovDetectedEl.hidden = !isDetected;
+    pageZoomEl.hidden = !state.zoomed;
+    ovZoomEl.hidden = !state.zoomed;
+    modeDiagBtn.hidden = !!detected;
+    modeDiagBtn.disabled = !!detected;
+  }
+
+  function numFlex(value) {
+    try { return value.toLocaleString(LANG, { maximumFractionDigits: 1 }); }
+    catch (e) { return String(value); }
+  }
+
+  function parseDecimal(raw) {
+    return parseFloat(String(raw == null ? '' : raw).trim().split(',').join('.'));
+  }
+
+  function buildDiagChips() {
+    if (diagChips.firstChild) return;
+    for (var i = 0; i < DIAGONALS.length; i++) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'rl-ov__chip-btn';
+      b.setAttribute('data-diag', String(DIAGONALS[i]));
+      b.setAttribute('aria-pressed', 'false');
+      b.textContent = numFlex(DIAGONALS[i]);
+      diagChips.appendChild(b);
+    }
+    diagChips.addEventListener('click', function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest('[data-diag]') : null;
+      if (!btn) return;
+      diagInput.value = btn.getAttribute('data-diag');
+      showError(false);
+      renderDiag();
+    });
+  }
+
+  function renderDiag() {
+    var v = parseDecimal(diagInput.value);
+    var chips = diagChips.querySelectorAll('[data-diag]');
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].setAttribute('aria-pressed', parseDecimal(chips[i].getAttribute('data-diag')) === v ? 'true' : 'false');
+    }
+    var ppm = diagonalPpm(v);
+    if (!ppm) { diagResultEl.textContent = ''; return; }
+    diagResultEl.textContent = COPY.diagResult
+      .replace('{ppi}', String(Math.round(ppm * 25.4 * (window.devicePixelRatio || 1))))
+      .replace('{ppm}', num(ppm, 3));
+  }
+
+  function renderUnitsBtn() {
+    var label = state.units === 'metric' ? COPY.unitsMetric : COPY.unitsImperial;
+    unitsBtn.textContent = label;
+    unitsBtn.setAttribute('aria-label', COPY.unitsLabel + ': ' + label);
+  }
+
+  function cardMaxLong() {
+    var w = Math.max(CARD_MIN_PX, (ov.clientWidth || 360) - 24);
+    var h = (ov.clientHeight || 640) - 110;
+    var byWidth = w * (CARD_LONG_MM / CARD_SHORT_MM);
+    return Math.max(CARD_MIN_PX + 40, Math.min(CARD_CAP_PX, Math.min(byWidth, h)));
+  }
+
+  function setCardLong(px) {
+    cardLong = Math.min(cardMaxLong(), Math.max(CARD_MIN_PX, Math.round(px)));
+    renderCard();
+  }
+
+  function renderCard() {
+    var shortPx = Math.round(cardLong * (CARD_SHORT_MM / CARD_LONG_MM));
+    cardEl.style.width = shortPx + 'px';
+    cardEl.style.height = Math.round(cardLong) + 'px';
+    cardGrip.setAttribute('aria-valuenow', String(Math.round(cardLong)));
+    cardGrip.setAttribute('aria-valuemax', String(Math.round(cardMaxLong())));
+    var previewPpm = cardLong / CARD_LONG_MM;
+    cardSizeEl.textContent = COPY.cardSize
+      .replace('{w}', String(shortPx))
+      .replace('{h}', String(Math.round(cardLong)))
+      .replace('{dpi}', String(Math.round(previewPpm * 25.4 * (window.devicePixelRatio || 1))));
+  }
+
+  function renderKnown() {
+    gapEl.textContent = COPY.knownGap.replace('{n}', String(Math.round(measuredPx())));
+  }
+
+  function showError(show) {
+    errEl.hidden = !show;
+    errEl.textContent = show ? COPY.errRange : '';
+  }
+
+  function renderAll() {
+    renderStatus();
+    renderUnitsBtn();
+    renderLines();
+    renderReadout();
+    renderCard();
+    renderKnown();
+    draw();
+  }
+
+  function draw() {
+    if (!isOpen() || !ovCanvas.width || !ovCanvas.height) return;
+    var ctx = ovCanvas.getContext('2d');
+    if (!ctx) return;
+    var dpr = state.dpr;
+    var W = ovCanvas.width;
+    var H = ovCanvas.height;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    var ppmDev = state.ppm * dpr;
+    var thin = Math.max(1, Math.round(dpr * 0.6));
+    var midT = Math.max(1, Math.round(dpr * 0.9));
+    var bigT = Math.max(2, Math.round(dpr * 1.4));
+    var fs = Math.max(10, Math.round(12 * dpr));
+
+    ctx.fillStyle = C.plate;
+    ctx.fillRect(0, 0, Math.round(PLATE_W * dpr), H);
+
+    ctx.font = fs + 'px ' + C.mono;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+
+    var lenSm = Math.round(10 * dpr);
+    var lenMd = Math.round(17 * dpr);
+    var lenLg = Math.round(26 * dpr);
+    var showMm = ppmDev >= 3;
+    var show5 = ppmDev * 5 >= 3;
+    var maxMm = Math.floor(H / ppmDev) + 1;
+
+    for (var i = 0; i <= maxMm; i++) {
+      var y = Math.round(i * ppmDev);
+      if (y > H) break;
+      var isCm = i % 10 === 0;
+      var isHalf = i % 5 === 0;
+      if (!isCm && !isHalf && !showMm) continue;
+      if (!isCm && isHalf && !show5) continue;
+      ctx.fillStyle = C.metric;
+      ctx.globalAlpha = isCm ? 1 : (isHalf ? 0.75 : 0.42);
+      ctx.fillRect(0, y, isCm ? lenLg : (isHalf ? lenMd : lenSm), isCm ? bigT : (isHalf ? midT : thin));
+      ctx.globalAlpha = 1;
+      if (isCm && i > 0) {
+        ctx.fillStyle = C.label;
+        ctx.fillText(String(i / 10), Math.round(CM_NUM_X * dpr), y + Math.round(dpr));
+      }
+    }
+
+    var sixteenth = ppmDev * 25.4 / 16;
+    var inX = Math.round(IN_TICK_X * dpr);
+    var show16 = sixteenth >= 3;
+    var show8 = sixteenth * 2 >= 3;
+    var show4 = sixteenth * 4 >= 3;
+    var maxK = Math.floor(H / sixteenth) + 1;
+    var inLen = [Math.round(26 * dpr), Math.round(20 * dpr), Math.round(15 * dpr), Math.round(11 * dpr), Math.round(8 * dpr)];
+    var inThick = [bigT, midT, midT, thin, thin];
+    var inAlpha = [1, 0.8, 0.68, 0.52, 0.38];
+
+    for (var k = 0; k <= maxK; k++) {
+      var ky = Math.round(k * sixteenth);
+      if (ky > H) break;
+      var lvl;
+      if (k % 16 === 0) lvl = 0;
+      else if (k % 8 === 0) lvl = 1;
+      else if (k % 4 === 0) lvl = 2;
+      else if (k % 2 === 0) lvl = 3;
+      else lvl = 4;
+      if (lvl === 4 && !show16) continue;
+      if (lvl === 3 && !show8) continue;
+      if (lvl === 2 && !show4) continue;
+      ctx.fillStyle = C.imperial;
+      ctx.globalAlpha = inAlpha[lvl];
+      ctx.fillRect(inX, ky, inLen[lvl], inThick[lvl]);
+      ctx.globalAlpha = 1;
+      if (lvl === 0 && k > 0) {
+        ctx.fillStyle = C.label;
+        ctx.fillText(String(k / 16), Math.round(IN_NUM_X * dpr), ky + Math.round(dpr));
+      }
+    }
+
+    ctx.textBaseline = 'bottom';
+    ctx.fillStyle = C.muted;
+    ctx.fillText(COPY.unitCm, Math.round(4 * dpr), H - Math.round(10 * dpr));
+    ctx.fillText(COPY.unitIn, inX, H - Math.round(10 * dpr));
+
+    var zeroT = Math.max(2, Math.round(3 * dpr));
+    ctx.fillStyle = C.label;
+    ctx.fillRect(0, 0, W, zeroT);
+    ctx.textBaseline = 'top';
+    ctx.font = (fs + Math.round(2 * dpr)) + 'px ' + C.mono;
+    ctx.fillText('0', Math.round(4 * dpr), zeroT + Math.round(4 * dpr));
+  }
+
+  var dragging = false;
+  var dragPointer = null;
+  var dragWhich = 'a';
+  var grabDy = 0;
+
+  function nearestLine(y) {
+    if (!state.abMode) return 'a';
+    return Math.abs(y - lines.a) <= Math.abs(y - lines.b) ? 'a' : 'b';
+  }
+
+  function surfaceY(clientY) {
+    return clientY - surface.getBoundingClientRect().top;
+  }
+
+  surface.addEventListener('pointerdown', function (e) {
+    var y = surfaceY(e.clientY);
+    var grabbed = e.target && e.target.closest ? e.target.closest('.rl-ov__line') : null;
+    if (grabbed === lineB && state.abMode) dragWhich = 'b';
+    else if (grabbed === lineA) dragWhich = 'a';
+    else { dragWhich = nearestLine(y); grabbed = null; }
+    grabDy = grabbed ? y - lines[dragWhich] : 0;
+    dragging = true;
+    dragPointer = e.pointerId;
+    ov.classList.add('is-dragging');
+    try { surface.setPointerCapture(e.pointerId); } catch (err) {}
+    setLine(dragWhich, y - grabDy);
+  });
+  surface.addEventListener('pointermove', function (e) {
+    if (!dragging || e.pointerId !== dragPointer) return;
+    setLine(dragWhich, surfaceY(e.clientY) - grabDy);
+  });
+  function endDrag(e) {
+    if (!dragging || (e && e.pointerId !== dragPointer)) return;
+    dragging = false;
+    dragPointer = null;
+    ov.classList.remove('is-dragging');
+  }
+  surface.addEventListener('pointerup', endDrag);
+  surface.addEventListener('pointercancel', endDrag);
+
+  function bindLineKeys(el, which) {
+    el.addEventListener('keydown', function (e) {
+      var step = e.shiftKey ? 10 : 1;
+      if (e.key === 'ArrowUp') { setLine(which, lines[which] - step); e.preventDefault(); }
+      else if (e.key === 'ArrowDown') { setLine(which, lines[which] + step); e.preventDefault(); }
+      else if (e.key === 'Home') { setLine(which, 0); e.preventDefault(); }
+      else if (e.key === 'End') { setLine(which, viewH); e.preventDefault(); }
+    });
+  }
+  bindLineKeys(lineA, 'a');
+  bindLineKeys(lineB, 'b');
+
+  var gripActive = false;
+  var gripPid = null;
+  var gripStartY = 0;
+  var gripStartLong = 0;
+  cardGrip.addEventListener('pointerdown', function (e) {
+    gripActive = true;
+    gripPid = e.pointerId;
+    gripStartY = e.clientY;
+    gripStartLong = cardLong;
+    cardGrip.classList.add('is-dragging');
+    try { cardGrip.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  cardGrip.addEventListener('pointermove', function (e) {
+    if (!gripActive || e.pointerId !== gripPid) return;
+    setCardLong(gripStartLong + (e.clientY - gripStartY));
+    showError(false);
+  });
+  function gripDone(e) {
+    if (!gripActive || (e && e.pointerId !== gripPid)) return;
+    gripActive = false;
+    gripPid = null;
+    cardGrip.classList.remove('is-dragging');
+  }
+  cardGrip.addEventListener('pointerup', gripDone);
+  cardGrip.addEventListener('pointercancel', gripDone);
+  cardGrip.addEventListener('keydown', function (e) {
+    var step = e.shiftKey ? 10 : 1;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { setCardLong(cardLong - step); e.preventDefault(); }
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { setCardLong(cardLong + step); e.preventDefault(); }
+  });
+
+  var stepBtns = calPanel.querySelectorAll('.rl-ov__step');
+  for (var s = 0; s < stepBtns.length; s++) {
+    (function (btn) {
+      var delta = parseInt(btn.getAttribute('data-step'), 10) || 0;
+      var tpl = delta < 0 ? COPY.cardNarrower : COPY.cardWider;
+      btn.setAttribute('aria-label', tpl.replace('{n}', String(Math.abs(delta))));
+      btn.addEventListener('click', function () {
+        setCardLong(cardLong + delta);
+        showError(false);
+      });
+    })(stepBtns[s]);
+  }
+
+  function setCalMode(mode) {
+    if (mode === 'known') calMode = 'known';
+    else if (mode === 'diagonal') calMode = 'diagonal';
+    else calMode = 'card';
+    paneCard.hidden = calMode !== 'card';
+    paneKnown.hidden = calMode !== 'known';
+    paneDiag.hidden = calMode !== 'diagonal';
+    calPanel.classList.toggle('is-full', calMode === 'card');
+    showError(false);
+    if (calMode === 'known') renderKnown();
+    else if (calMode === 'diagonal') renderDiag();
+    else renderCard();
+  }
+
+  var modesCtl = window.MentriaUI && window.MentriaUI.segmented
+    ? window.MentriaUI.segmented(modesSeg, setCalMode)
+    : null;
+
+  function openCal(open) {
+    calPanel.hidden = !open;
+    if (!open) return;
+    calPanel.classList.toggle('is-full', calMode === 'card');
+    buildDiagChips();
+    setCardLong(state.ppm * CARD_LONG_MM);
+    knownInput.value = '';
+    diagInput.value = stored && stored.source === 'diagonal' && stored.value ? String(stored.value) : '';
+    showError(false);
+    renderKnown();
+    renderDiag();
+  }
+
+  function startCardCalibration() {
+    setCalMode('card');
+    if (modesCtl) modesCtl.set('card');
+    openCal(true);
+  }
+
+  function openOverlay(withCalibration) {
+    ov.hidden = false;
+    document.documentElement.classList.add('rl-ov-on');
+    resolve();
+    layoutOverlay();
+    renderAll();
+    if (withCalibration) startCardCalibration();
+    else openCal(false);
+    closeBtn.focus();
+  }
+
+  function closeOverlay() {
+    openCal(false);
+    ov.hidden = true;
+    document.documentElement.classList.remove('rl-ov-on');
+    renderStatus();
+    openBtn.focus();
+  }
+
+  openBtn.addEventListener('click', function () { openOverlay(false); });
+  pageCalBtn.addEventListener('click', function () { openOverlay(true); });
+  closeBtn.addEventListener('click', closeOverlay);
+  ovCalBtn.addEventListener('click', startCardCalibration);
+  warnBtn.addEventListener('click', startCardCalibration);
+  cancelBtn.addEventListener('click', function () { openCal(false); });
+
+  unitsBtn.addEventListener('click', function () {
+    state.units = state.units === 'metric' ? 'imperial' : 'metric';
+    storeSet('ruler_units', { order: state.units });
+    renderUnitsBtn();
+    renderReadout();
+  });
+
+  abBtn.addEventListener('click', function () {
+    state.abMode = !state.abMode;
+    abBtn.setAttribute('aria-pressed', state.abMode ? 'true' : 'false');
+    if (state.abMode && Math.abs(lines.b - lines.a) < 8) {
+      lines.b = Math.min(viewH, lines.a + Math.round(viewH * 0.25));
+    }
+    renderLines();
+    renderReadout();
+    if (calMode === 'known') renderKnown();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    resetLines();
+    renderLines();
+    renderReadout();
+    renderKnown();
+  });
+
+  applyBtn.addEventListener('click', function () {
+    var ppm;
+    var value = null;
+    if (calMode === 'known') {
+      var mm = parseDecimal(knownInput.value);
+      var gap = measuredPx();
+      if (!isFinite(mm) || mm <= 0 || gap < 8) { showError(true); return; }
+      ppm = gap / mm;
+      value = mm;
+    } else if (calMode === 'diagonal') {
+      var inches = parseDecimal(diagInput.value);
+      ppm = diagonalPpm(inches);
+      if (!ppm) { showError(true); return; }
+      value = inches;
+    } else {
+      ppm = cardLong / CARD_LONG_MM;
+    }
+    if (!commitCalibration(ppm, calMode, value)) { showError(true); return; }
+    showError(false);
+    openCal(false);
+    layoutOverlay();
+    renderAll();
+    toast(COPY.applied);
+  });
+
+  clearBtn.addEventListener('click', function () {
+    var ask = window.mentriaConfirm ? window.mentriaConfirm(COPY.confirmClear) : Promise.resolve(true);
+    Promise.resolve(ask).then(function (ok) {
+      if (!ok) return;
+      clearCalibration();
+      renderStatus();
+      if (isOpen()) { layoutOverlay(); renderAll(); }
+      toast(COPY.cleared);
+    });
+  });
+
+  knownInput.addEventListener('input', function () { showError(false); });
+  diagInput.addEventListener('input', function () { showError(false); renderDiag(); });
+
+  document.addEventListener('keydown', function (e) {
+    if (!isOpen() || e.key !== 'Escape') return;
+    if (!calPanel.hidden) { openCal(false); return; }
+    closeOverlay();
+  });
+
+  var pending = 0;
+  function schedule() {
+    if (pending) return;
+    pending = requestAnimationFrame(function () {
+      pending = 0;
+      resolve();
+      renderStatus();
+      if (!isOpen()) return;
+      layoutOverlay();
+      renderAll();
+    });
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('orientationchange', schedule);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule);
+  if (window.ResizeObserver) {
+    try { new ResizeObserver(schedule).observe(ov); } catch (e) {}
+  }
+
+  var dprQuery = null;
+  function onDprChange() {
+    watchDpr();
+    schedule();
+  }
+  function watchDpr() {
+    if (!window.matchMedia) return;
+    if (dprQuery && dprQuery.removeEventListener) dprQuery.removeEventListener('change', onDprChange);
+    try {
+      dprQuery = window.matchMedia('(resolution: ' + (window.devicePixelRatio || 1) + 'dppx)');
+      if (dprQuery.addEventListener) dprQuery.addEventListener('change', onDprChange);
+    } catch (e) { dprQuery = null; }
+  }
+
+  loadState();
+  if (modesCtl) modesCtl.set('card');
+  renderStatus();
+  renderUnitsBtn();
+  watchDpr();
+  detectAndroid();
+})();
+</script>

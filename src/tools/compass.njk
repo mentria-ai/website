@@ -1,0 +1,786 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/compass/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.compass.title' | t }}"
+  description: "{{ 'tools.compass.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">compass</span></p>
+  <h1>{{ "tools.compass.title" | t }}</h1>
+  <p>{{ "tools.compass.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "compass.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="cps" id="cps">
+
+  <div class="cps__stage" id="cps-stage">
+    <button class="cps__dial" id="cps-dial" type="button" aria-pressed="false" aria-label="{{ 'tool.compass.aria_dial' | t }}">
+      <span class="cps__rose" id="cps-rose" aria-hidden="true">
+        <svg class="cps__rose-svg" viewBox="0 0 200 200"><g id="cps-rose-g"></g></svg>
+      </span>
+      <span class="cps__ring" aria-hidden="true"></span>
+      <span class="cps__lubber" aria-hidden="true"></span>
+      <span class="cps__lubber-line" aria-hidden="true"></span>
+      <span class="cps__center" aria-hidden="true">
+        <span class="cps__deg" id="cps-deg">—</span>
+        <span class="cps__card" id="cps-card"></span>
+      </span>
+      <span class="cps__lock" id="cps-lock" hidden>{{ "tool.compass.locked_badge" | t }}</span>
+    </button>
+
+    <p class="cps__status" id="cps-status" role="status" aria-live="polite"></p>
+    <p class="cps__accuracy" id="cps-accuracy"></p>
+
+    <p class="cps__calib" id="cps-calib" hidden>
+      <span class="cps__calib-glyph" aria-hidden="true">&#8734;</span>
+      <span>{{ "tool.compass.calib_hint" | t }}</span>
+    </p>
+
+    <div class="cps__controls">
+      <button class="m-btn m-btn--primary m-btn--pill" id="cps-toggle" type="button">{{ "tool.compass.btn_start" | t }}</button>
+    </div>
+
+    <p class="cps__note">{{ "tool.compass.magnetic_note" | t }}</p>
+  </div>
+
+  <div class="cps__panel" id="cps-perm" hidden>
+    <h2 class="cps__panel-title">{{ "tool.compass.perm_title" | t }}</h2>
+    <p class="cps__panel-body">{{ "tool.compass.perm_body" | t }}</p>
+    <button class="m-btn m-btn--primary m-btn--pill" id="cps-perm-btn" type="button">{{ "tool.compass.perm_btn" | t }}</button>
+    <button class="m-btn m-btn--ghost m-btn--pill" type="button" data-cps-back>{{ "tool.compass.btn_back" | t }}</button>
+  </div>
+
+  <div class="cps__panel" id="cps-denied" hidden>
+    <h2 class="cps__panel-title cps__panel-title--warn">{{ "tool.compass.denied_title" | t }}</h2>
+    <p class="cps__panel-body">{{ "tool.compass.denied_body" | t }}</p>
+    <button class="m-btn m-btn--ghost m-btn--pill" type="button" data-cps-back>{{ "tool.compass.btn_back" | t }}</button>
+  </div>
+
+  <div class="cps__panel" id="cps-insecure" hidden>
+    <h2 class="cps__panel-title cps__panel-title--warn">{{ "tool.compass.insecure_title" | t }}</h2>
+    <p class="cps__panel-body">{{ "tool.compass.insecure_body" | t }}</p>
+    <button class="m-btn m-btn--ghost m-btn--pill" type="button" data-cps-back>{{ "tool.compass.btn_back" | t }}</button>
+  </div>
+
+  <div class="cps__panel" id="cps-noabs" hidden>
+    <h2 class="cps__panel-title cps__panel-title--warn">{{ "tool.compass.noabs_title" | t }}</h2>
+    <p class="cps__panel-body">{{ "tool.compass.noabs_body" | t }}</p>
+    <button class="m-btn m-btn--ghost m-btn--pill" type="button" data-cps-back>{{ "tool.compass.btn_retry" | t }}</button>
+  </div>
+
+  <div class="cps__panel" id="cps-unsupported" hidden>
+    <h2 class="cps__panel-title cps__panel-title--warn">{{ "tool.compass.unsupported_title" | t }}</h2>
+    <p class="cps__panel-body">{{ "tool.compass.unsupported_body" | t }}</p>
+    <canvas class="cps__qr" id="cps-qr" role="img" aria-label="{{ 'tool.compass.qr_caption' | t }}" hidden></canvas>
+    <p class="cps__qr-caption">{{ "tool.compass.qr_caption" | t }}</p>
+    <a class="cps__qr-link" href="https://mentria.ai/tools/compass/">mentria.ai/tools/compass/</a>
+  </div>
+
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script src="/assets/js/qrcode.js?v={{ buildHash }}"></script>
+<script>
+(function () {
+  'use strict';
+
+  var COPY = {
+    btnStart:     {{ ("tool.compass.btn_start"     | t) | dump | safe }},
+    btnStop:      {{ ("tool.compass.btn_stop"      | t) | dump | safe }},
+    waiting:      {{ ("tool.compass.waiting"       | t) | dump | safe }},
+    lockHint:     {{ ("tool.compass.lock_hint"     | t) | dump | safe }},
+    lockedStatus: {{ ("tool.compass.locked_status" | t) | dump | safe }},
+    accuracyFmt:  {{ ("tool.compass.accuracy_fmt"  | t) | dump | safe }},
+    dirN:         {{ ("tool.compass.dir_n"         | t) | dump | safe }},
+    dirNE:        {{ ("tool.compass.dir_ne"        | t) | dump | safe }},
+    dirE:         {{ ("tool.compass.dir_e"         | t) | dump | safe }},
+    dirSE:        {{ ("tool.compass.dir_se"        | t) | dump | safe }},
+    dirS:         {{ ("tool.compass.dir_s"         | t) | dump | safe }},
+    dirSW:        {{ ("tool.compass.dir_sw"        | t) | dump | safe }},
+    dirW:         {{ ("tool.compass.dir_w"         | t) | dump | safe }},
+    dirNW:        {{ ("tool.compass.dir_nw"        | t) | dump | safe }}
+  };
+
+  var CARDINALS = [COPY.dirN, COPY.dirNE, COPY.dirE, COPY.dirSE, COPY.dirS, COPY.dirSW, COPY.dirW, COPY.dirNW];
+  var QR_URL = 'https://mentria.ai/tools/compass/';
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  var SMOOTHING = 0.18;
+  var SETTLE_MS = 2200;
+  var CALIB_HOLD_MS = 4000;
+  var ACCURACY_LIMIT = 15;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var stage    = $('cps-stage');
+  var dialEl   = $('cps-dial');
+  var roseEl   = $('cps-rose');
+  var roseG    = $('cps-rose-g');
+  var degEl    = $('cps-deg');
+  var cardEl   = $('cps-card');
+  var lockEl   = $('cps-lock');
+  var statusEl = $('cps-status');
+  var accEl    = $('cps-accuracy');
+  var calibEl  = $('cps-calib');
+  var toggleBtn = $('cps-toggle');
+  var permBtn  = $('cps-perm-btn');
+  var qrCanvas = $('cps-qr');
+  var panels = {
+    perm: $('cps-perm'),
+    denied: $('cps-denied'),
+    insecure: $('cps-insecure'),
+    noabs: $('cps-noabs'),
+    unsupported: $('cps-unsupported')
+  };
+
+  var running = false;
+  var locked = false;
+  var haveSample = false;
+  var sawAbsoluteEvent = false;
+  var rawHeading = 0;
+  var display = 0;
+  var shownDeg = -1;
+  var accuracy = null;
+  var deltas = [];
+  var calibUntil = 0;
+  var rafId = 0;
+  var settleTimer = 0;
+  var wakeLock = null;
+
+  function setStatus(text) {
+    if (statusEl.textContent !== text) statusEl.textContent = text;
+  }
+
+  function norm360(deg) {
+    return ((deg % 360) + 360) % 360;
+  }
+
+  function shortestDelta(target, from) {
+    return (((target - from) % 360) + 540) % 360 - 180;
+  }
+
+  function screenAngle() {
+    var a = 0;
+    try {
+      if (window.screen && window.screen.orientation && typeof window.screen.orientation.angle === 'number') {
+        a = window.screen.orientation.angle;
+      } else if (typeof window.orientation === 'number') {
+        a = window.orientation;
+      }
+    } catch (_) {
+      a = 0;
+    }
+    return norm360(a);
+  }
+
+  function polar(radius, deg) {
+    var rad = deg * Math.PI / 180;
+    return { x: 100 + radius * Math.sin(rad), y: 100 - radius * Math.cos(rad) };
+  }
+
+  function buildRose() {
+    var frag = document.createDocumentFragment();
+    var d, cls, len, outer, inner, p1, p2, line;
+    for (d = 0; d < 360; d += 5) {
+      if (d === 0) { cls = 'cps__tick cps__tick--n'; len = 15; }
+      else if (d % 45 === 0) { cls = 'cps__tick cps__tick--major'; len = 14; }
+      else if (d % 15 === 0) { cls = 'cps__tick cps__tick--mid'; len = 9; }
+      else { cls = 'cps__tick'; len = 5; }
+      outer = 92;
+      inner = 92 - len;
+      p1 = polar(outer, d);
+      p2 = polar(inner, d);
+      line = document.createElementNS(SVG_NS, 'line');
+      line.setAttribute('x1', p1.x.toFixed(2));
+      line.setAttribute('y1', p1.y.toFixed(2));
+      line.setAttribute('x2', p2.x.toFixed(2));
+      line.setAttribute('y2', p2.y.toFixed(2));
+      line.setAttribute('class', cls);
+      frag.appendChild(line);
+    }
+
+    var numbers = [30, 60, 120, 150, 210, 240, 300, 330];
+    var i, pos, node;
+    for (i = 0; i < numbers.length; i++) {
+      pos = polar(70, numbers[i]);
+      node = document.createElementNS(SVG_NS, 'text');
+      node.setAttribute('x', pos.x.toFixed(2));
+      node.setAttribute('y', pos.y.toFixed(2));
+      node.setAttribute('dy', '0.35em');
+      node.setAttribute('class', 'cps__degnum');
+      node.textContent = String(numbers[i]);
+      frag.appendChild(node);
+    }
+
+    for (i = 0; i < 8; i++) {
+      pos = polar(52, i * 45);
+      node = document.createElementNS(SVG_NS, 'text');
+      node.setAttribute('x', pos.x.toFixed(2));
+      node.setAttribute('y', pos.y.toFixed(2));
+      node.setAttribute('dy', '0.35em');
+      if (i === 0) node.setAttribute('class', 'cps__label cps__label--n');
+      else if (i % 2 === 0) node.setAttribute('class', 'cps__label cps__label--card');
+      else node.setAttribute('class', 'cps__label');
+      node.textContent = CARDINALS[i];
+      frag.appendChild(node);
+    }
+
+    roseG.appendChild(frag);
+  }
+
+  function render() {
+    roseEl.style.transform = 'rotate(' + (-display).toFixed(2) + 'deg)';
+    var deg = Math.round(norm360(display)) % 360;
+    if (deg === shownDeg) return;
+    shownDeg = deg;
+    degEl.textContent = deg + '°';
+    cardEl.textContent = CARDINALS[Math.round(deg / 45) % 8];
+  }
+
+  function renderAccuracy() {
+    if (accuracy === null || accuracy < 0) {
+      if (accEl.textContent !== '') accEl.textContent = '';
+      return;
+    }
+    var text = COPY.accuracyFmt.split('{deg}').join(String(Math.round(accuracy)));
+    if (accEl.textContent !== text) accEl.textContent = text;
+  }
+
+  function isJittery() {
+    if (deltas.length < 12) return false;
+    var path = 0;
+    var net = 0;
+    for (var i = 0; i < deltas.length; i++) {
+      path += Math.abs(deltas[i]);
+      net += deltas[i];
+    }
+    return path > 45 && Math.abs(net) < path * 0.35;
+  }
+
+  function noteCalibration() {
+    var bad = (accuracy !== null && (accuracy < 0 || accuracy > ACCURACY_LIMIT)) || isJittery();
+    if (bad) calibUntil = Date.now() + CALIB_HOLD_MS;
+  }
+
+  function syncCalibration() {
+    var show = running && Date.now() < calibUntil;
+    if (calibEl.hidden === show) calibEl.hidden = !show;
+  }
+
+  function frame() {
+    rafId = 0;
+    if (!running) return;
+    if (haveSample && !locked) {
+      display += shortestDelta(rawHeading, display) * SMOOTHING;
+      if (display > 3600 || display < -3600) display = norm360(display);
+      render();
+    }
+    syncCalibration();
+    startLoop();
+  }
+
+  function startLoop() {
+    if (rafId || !running) return;
+    if (document.visibilityState === 'hidden') return;
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function stopLoop() {
+    if (!rafId) return;
+    cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  function onHeading(heading) {
+    if (!haveSample) {
+      haveSample = true;
+      display = heading;
+      shownDeg = -1;
+      stage.classList.add('is-live');
+      if (settleTimer) { clearTimeout(settleTimer); settleTimer = 0; }
+      setStatus(COPY.lockHint);
+      render();
+    } else {
+      deltas.push(shortestDelta(heading, rawHeading));
+      if (deltas.length > 24) deltas.shift();
+    }
+    rawHeading = heading;
+    noteCalibration();
+    renderAccuracy();
+    startLoop();
+  }
+
+  function handleOrientation(e, fromAbsoluteEvent) {
+    var heading;
+    var webkitHeading = e.webkitCompassHeading;
+    if (typeof webkitHeading === 'number' && isFinite(webkitHeading) && webkitHeading >= 0) {
+      heading = webkitHeading;
+      var webkitAccuracy = e.webkitCompassAccuracy;
+      accuracy = (typeof webkitAccuracy === 'number' && isFinite(webkitAccuracy)) ? webkitAccuracy : null;
+    } else if (fromAbsoluteEvent || e.absolute === true) {
+      if (e.alpha === null || e.alpha === undefined) return;
+      heading = 360 - e.alpha + screenAngle();
+      accuracy = null;
+    } else {
+      return;
+    }
+    onHeading(norm360(heading));
+  }
+
+  function onAbsolute(e) {
+    if (e.alpha !== null && e.alpha !== undefined) sawAbsoluteEvent = true;
+    handleOrientation(e, true);
+  }
+
+  function onRelative(e) {
+    if (sawAbsoluteEvent && typeof e.webkitCompassHeading !== 'number') return;
+    handleOrientation(e, false);
+  }
+
+  function showPanel(name) {
+    stage.hidden = name !== null;
+    for (var key in panels) {
+      if (Object.prototype.hasOwnProperty.call(panels, key)) panels[key].hidden = key !== name;
+    }
+  }
+
+  function applyLock() {
+    dialEl.setAttribute('aria-pressed', locked ? 'true' : 'false');
+    dialEl.classList.toggle('is-locked', locked);
+    lockEl.hidden = !locked;
+  }
+
+  function requestWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      navigator.wakeLock.request('screen').then(function (sentinel) {
+        wakeLock = sentinel;
+        sentinel.addEventListener('release', function () { wakeLock = null; });
+      }).catch(function () { wakeLock = null; });
+    } catch (_) {
+      wakeLock = null;
+    }
+  }
+
+  function releaseWakeLock() {
+    if (!wakeLock) return;
+    try { wakeLock.release(); } catch (_) {}
+    wakeLock = null;
+  }
+
+  function begin() {
+    if (running) return;
+    running = true;
+    haveSample = false;
+    sawAbsoluteEvent = false;
+    locked = false;
+    accuracy = null;
+    deltas = [];
+    calibUntil = 0;
+    applyLock();
+    syncCalibration();
+    renderAccuracy();
+    toggleBtn.textContent = COPY.btnStop;
+    setStatus(COPY.waiting);
+    window.addEventListener('deviceorientationabsolute', onAbsolute);
+    window.addEventListener('deviceorientation', onRelative);
+    requestWakeLock();
+    settleTimer = setTimeout(function () {
+      settleTimer = 0;
+      if (haveSample) return;
+      stop();
+      showPanel('noabs');
+    }, SETTLE_MS);
+    startLoop();
+  }
+
+  function stop() {
+    running = false;
+    window.removeEventListener('deviceorientationabsolute', onAbsolute);
+    window.removeEventListener('deviceorientation', onRelative);
+    if (settleTimer) { clearTimeout(settleTimer); settleTimer = 0; }
+    stopLoop();
+    releaseWakeLock();
+    locked = false;
+    applyLock();
+    stage.classList.remove('is-live');
+    calibEl.hidden = true;
+    accEl.textContent = '';
+    toggleBtn.textContent = COPY.btnStart;
+    setStatus('');
+  }
+
+  function start() {
+    if (typeof DeviceOrientationEvent === 'undefined') { showPanel('unsupported'); renderQR(); return; }
+    if (!window.isSecureContext) { showPanel('insecure'); return; }
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') { showPanel('perm'); return; }
+    begin();
+  }
+
+  function drawQR(code) {
+    var border = 4;
+    var px = 8;
+    var dim = code.size + border * 2;
+    qrCanvas.width = dim * px;
+    qrCanvas.height = dim * px;
+    var ctx = qrCanvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+    ctx.fillStyle = '#000000';
+    for (var y = 0; y < code.size; y++) {
+      for (var x = 0; x < code.size; x++) {
+        if (code.getModule(x, y)) ctx.fillRect((x + border) * px, (y + border) * px, px, px);
+      }
+    }
+  }
+
+  function renderQR() {
+    if (typeof qrcodegen === 'undefined') return;
+    var code;
+    try {
+      code = qrcodegen.QrCode.encodeText(QR_URL, qrcodegen.QrCode.Ecc.MEDIUM);
+    } catch (_) {
+      return;
+    }
+    drawQR(code);
+    qrCanvas.hidden = false;
+  }
+
+  function likelyDesktop() {
+    var noTouch = (navigator.maxTouchPoints || 0) === 0;
+    var finePointer = window.matchMedia ? window.matchMedia('(pointer: fine)').matches : false;
+    return noTouch && finePointer;
+  }
+
+  toggleBtn.addEventListener('click', function () {
+    if (running) stop();
+    else start();
+  });
+
+  dialEl.addEventListener('click', function () {
+    if (!running || !haveSample) return;
+    locked = !locked;
+    applyLock();
+    if (locked) setStatus(COPY.lockedStatus.split('{deg}').join(String(shownDeg)));
+    else setStatus(COPY.lockHint);
+    startLoop();
+  });
+
+  if (permBtn) {
+    permBtn.addEventListener('click', function () {
+      var ask;
+      try {
+        ask = DeviceOrientationEvent.requestPermission();
+      } catch (_) {
+        showPanel('denied');
+        return;
+      }
+      ask.then(function (res) {
+        if (res === 'granted') {
+          showPanel(null);
+          begin();
+        } else {
+          showPanel('denied');
+        }
+      }).catch(function () {
+        showPanel('denied');
+      });
+    });
+  }
+
+  var backBtns = document.querySelectorAll('[data-cps-back]');
+  for (var b = 0; b < backBtns.length; b++) {
+    backBtns[b].addEventListener('click', function () {
+      showPanel(null);
+      toggleBtn.textContent = COPY.btnStart;
+      setStatus('');
+    });
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') stopLoop();
+    else startLoop();
+  });
+
+  buildRose();
+  render();
+  degEl.textContent = '—';
+  cardEl.textContent = '';
+  shownDeg = -1;
+
+  if (typeof DeviceOrientationEvent === 'undefined' || likelyDesktop()) {
+    showPanel('unsupported');
+    renderQR();
+  } else if (!window.isSecureContext) {
+    showPanel('insecure');
+  } else {
+    showPanel(null);
+  }
+})();
+</script>
+
+<style>
+.cps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  font-family: var(--font-mono);
+  max-width: 460px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+.cps__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+.cps__stage[hidden] { display: none; }
+
+.cps__dial {
+  position: relative;
+  display: block;
+  width: min(300px, 78vw);
+  aspect-ratio: 1;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.cps__dial:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+}
+
+.cps__rose {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform: rotate(0deg);
+  will-change: transform;
+}
+.cps__rose-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.cps__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--term-border);
+  background:
+    radial-gradient(circle at 50% 34%, rgba(110, 243, 197, 0.07), rgba(255, 255, 255, 0.012) 58%, transparent 74%);
+  box-shadow: inset 0 0 44px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.cps__lubber {
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 17px solid var(--accent);
+  filter: drop-shadow(0 0 6px rgba(110, 243, 197, 0.55));
+  pointer-events: none;
+}
+.cps__lubber-line {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  width: 1px;
+  height: 26%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(110, 243, 197, 0.5), rgba(110, 243, 197, 0));
+  pointer-events: none;
+}
+
+.cps__tick { stroke: rgba(255, 255, 255, 0.16); stroke-width: 1.4; }
+.cps__tick--mid { stroke: rgba(255, 255, 255, 0.3); stroke-width: 2; }
+.cps__tick--major { stroke: rgba(110, 243, 197, 0.55); stroke-width: 2.6; }
+.cps__tick--n { stroke: var(--syn-pink); stroke-width: 3.4; }
+
+.cps__label {
+  fill: var(--term-muted);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-anchor: middle;
+}
+.cps__label--card { fill: var(--term-fg); font-size: 17px; }
+.cps__label--n { fill: var(--syn-pink); font-size: 19px; font-weight: 700; }
+
+.cps__degnum {
+  fill: rgba(255, 255, 255, 0.26);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-anchor: middle;
+}
+
+.cps__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  pointer-events: none;
+}
+.cps__deg {
+  font-size: clamp(2rem, 10vw, 2.7rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--term-fg);
+  font-variant-numeric: tabular-nums;
+}
+.cps__card {
+  font-size: 0.85rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--accent);
+  min-height: 1em;
+}
+.cps__stage:not(.is-live) .cps__center { opacity: 0.4; }
+
+.cps__lock {
+  position: absolute;
+  left: 50%;
+  bottom: 17%;
+  transform: translateX(-50%);
+  padding: 0.16rem 0.55rem;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: #041016;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cps__lock[hidden] { display: none; }
+.cps__dial.is-locked .cps__ring { border-color: rgba(110, 243, 197, 0.45); }
+
+.cps__status {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--term-muted);
+  text-align: center;
+  max-width: 34ch;
+}
+
+.cps__accuracy {
+  margin: 0;
+  font-size: 0.7rem;
+  color: rgba(110, 243, 197, 0.6);
+  font-variant-numeric: tabular-nums;
+}
+.cps__accuracy:empty { display: none; }
+
+.cps__calib {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: var(--radius-md);
+  background: rgba(251, 191, 36, 0.06);
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--syn-amber);
+  max-width: 36ch;
+}
+.cps__calib[hidden] { display: none; }
+.cps__calib-glyph { font-size: 1.15rem; line-height: 1; }
+
+.cps__controls {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.cps__note {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: var(--term-muted);
+  text-align: center;
+  max-width: 40ch;
+}
+
+.cps__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-6) var(--space-5);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.015);
+  text-align: center;
+}
+.cps__panel[hidden] { display: none; }
+.cps__panel-title {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--accent);
+}
+.cps__panel-title--warn { color: var(--syn-amber); }
+.cps__panel-body {
+  margin: 0;
+  max-width: 38ch;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--term-muted);
+}
+
+.cps__qr {
+  width: 200px;
+  max-width: 100%;
+  height: auto;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  background: #fff;
+}
+.cps__qr[hidden] { display: none; }
+.cps__qr-caption {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--term-muted);
+}
+.cps__qr-link {
+  font-size: 0.78rem;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+@media (max-width: 480px) {
+  .cps { gap: var(--space-4); }
+  .cps__dial { width: min(280px, 82vw); }
+}
+</style>

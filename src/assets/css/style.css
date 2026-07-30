@@ -1204,6 +1204,8 @@ body.is-fullscreen-tool .app-bar {
   }
   body::before, body::after { display: none !important; }
   .site-header, .site-footer, .skip-link, .no-print { display: none !important; }
+  .app-bar, .related-tools, .pwa-install-banner, .pwa-install-sheet { display: none !important; }
+  html.is-standalone body { padding-bottom: 0 !important; }
   main { max-width: none !important; }
   a { color: #0a4ea3 !important; }
 }

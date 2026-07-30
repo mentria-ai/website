@@ -1,0 +1,272 @@
+---
+layout: base.njk
+permalink: /tools/phosphor/index.html
+lang: en
+title: "PHOSPHOR"
+description: "Browser FPS feel prototype — sprint, slide, mantle and a full-auto carbine in a dusk-lit training yard."
+robots: "noindex, nofollow"
+eleventyExcludeFromCollections: true
+eleventyExcludeFromSitemap: true
+englishOnly: true
+---
+<style>
+.ph-wrap { margin: 1.25rem 0 2rem; }
+.ph-stage {
+  position: relative; width: 100%; aspect-ratio: 16 / 9;
+  max-height: 76vh; max-height: 76svh;
+  overflow: hidden; background: #04060a;
+  border: 1px solid var(--term-border-strong); border-radius: var(--radius-lg);
+  font-family: var(--font-mono); touch-action: none;
+  -webkit-user-select: none; user-select: none;
+}
+.ph-stage.is-playing { cursor: none; }
+.ph-stage:fullscreen { aspect-ratio: auto; width: 100vw; height: 100vh; height: 100svh; max-height: none; border: 0; border-radius: 0; }
+.ph-stage:-webkit-full-screen { aspect-ratio: auto; width: 100vw; height: 100vh; max-height: none; border: 0; border-radius: 0; }
+.ph-canvas { display: block; width: 100%; height: 100%; }
+
+.ph-hud {
+  position: absolute; inset: 0; z-index: 10; pointer-events: none;
+  font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em;
+}
+.ph-hud[hidden] { display: none; }
+.ph-hud__tl { position: absolute; top: 0.6rem; left: 0.75rem; display: flex; gap: 1.2rem; }
+.ph-hud__tr { position: absolute; top: 0.6rem; right: 0.75rem; display: flex; gap: 0.4rem; align-items: center; pointer-events: auto; }
+.ph-hud__bl { position: absolute; bottom: 0.8rem; left: 0.75rem; }
+.ph-hud__br { position: absolute; bottom: 0.8rem; right: 0.75rem; text-align: right; }
+.ph-stat { display: flex; flex-direction: column; gap: 0.1rem; }
+.ph-stat--row { flex-direction: row; align-items: baseline; gap: 0.35rem; }
+.ph-stat__k { color: var(--term-muted); font-size: var(--text-2xs); }
+.ph-stat__v {
+  font-variant-numeric: tabular-nums; font-size: var(--text-md);
+  color: var(--accent); text-shadow: 0 0 10px rgba(110, 243, 197, 0.35);
+}
+.ph-stat--big .ph-stat__v { font-size: var(--text-2xl); }
+
+.ph-cross { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+.ph-cross[hidden] { display: none; }
+.ph-cross__l {
+  position: absolute; left: 0; top: 0; border-radius: 1px;
+  background: var(--accent); box-shadow: 0 0 6px rgba(110, 243, 197, 0.6);
+}
+.ph-cross__l--t, .ph-cross__l--b { width: 2px; height: 8px; }
+.ph-cross__l--l, .ph-cross__l--r { width: 8px; height: 2px; }
+
+.ph-hit { position: absolute; left: 50%; top: 50%; width: 0; height: 0; opacity: 0; transition: opacity 60ms linear; }
+.ph-hit.is-on { opacity: 1; }
+.ph-hit i { position: absolute; width: 2px; height: 10px; background: #ffffff; box-shadow: 0 0 6px rgba(255, 255, 255, 0.8); }
+.ph-hit i:nth-child(1) { transform: translate(-50%, -50%) translate(-9px, -9px) rotate(45deg); }
+.ph-hit i:nth-child(2) { transform: translate(-50%, -50%) translate(9px, -9px) rotate(-45deg); }
+.ph-hit i:nth-child(3) { transform: translate(-50%, -50%) translate(-9px, 9px) rotate(-45deg); }
+.ph-hit i:nth-child(4) { transform: translate(-50%, -50%) translate(9px, 9px) rotate(45deg); }
+.ph-kill {
+  position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+  border: 2px solid var(--syn-amber); border-radius: 50%; opacity: 0; transform: scale(0.6);
+  transition: opacity 120ms ease, transform 220ms ease;
+}
+.ph-kill.is-on { opacity: 0.95; transform: scale(1); }
+
+.ph-ov {
+  position: absolute; inset: 0; z-index: 30;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.7rem; padding: 1.5rem; text-align: center;
+  background: rgba(4, 6, 10, 0.74); font-family: var(--font-mono);
+}
+.ph-ov[hidden] { display: none; }
+.ph-ov__title {
+  margin: 0; font-size: clamp(2.2rem, 9vw, 4.5rem); letter-spacing: 0.22em;
+  color: var(--accent); text-shadow: 0 0 24px rgba(110, 243, 197, 0.4);
+}
+.ph-ov__title--sm { font-size: clamp(1.3rem, 4vw, 2rem); letter-spacing: 0.16em; }
+.ph-ov__sub { color: var(--term-fg); font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; }
+.ph-ov__cta { color: var(--syn-amber); font-size: var(--text-sm); }
+.ph-ov__cta[hidden] { display: none; }
+.ph-ov__hint { color: var(--term-muted); font-size: var(--text-xs); max-width: 52ch; line-height: 1.8; }
+.ph-ov__note { color: var(--term-subtle); font-size: var(--text-2xs); }
+.ph-ov__row { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+.ph-ov__time { font-size: var(--text-xl); color: var(--accent); font-variant-numeric: tabular-nums; }
+.ph-ov__code { display: block; max-width: 60ch; color: var(--syn-pink); font-size: var(--text-2xs); word-break: break-word; }
+.ph-ov--fail .ph-ov__title--sm { color: var(--syn-amber); }
+
+.ph-btn {
+  pointer-events: auto; cursor: pointer;
+  font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--term-fg); background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--term-border-strong); border-radius: var(--radius-pill);
+  padding: 0.6rem 1.1rem; min-height: 44px;
+}
+.ph-btn:hover { border-color: var(--accent); color: var(--accent); }
+.ph-btn[hidden] { display: none; }
+.ph-btn--primary { background: var(--accent); color: #04120c; border-color: var(--accent); min-height: 56px; padding: 0.9rem 2rem; font-size: var(--text-sm); }
+.ph-btn--primary:hover, .ph-btn--primary:active { background: #9df8dc; border-color: #9df8dc; color: #04120c; }
+.ph-btn--icon { min-width: 44px; min-height: 44px; padding: 0.35rem 0.55rem; border-radius: var(--radius-md); }
+.ph-chip {
+  background: rgba(0, 0, 0, 0.45); border: 1px solid var(--term-border); border-radius: var(--radius-pill);
+  padding: 0.25rem 0.6rem; color: var(--term-muted); font-size: var(--text-2xs);
+}
+.ph-gyro { position: absolute; left: 50%; bottom: 1.1rem; transform: translateX(-50%); z-index: 40; min-height: 56px; }
+
+.ph-dev {
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(360px, 88%); z-index: 60;
+  display: flex; flex-direction: column;
+  background: rgba(6, 8, 12, 0.95); border-left: 1px solid var(--term-border-strong);
+  font-family: var(--font-mono); color: var(--term-fg);
+}
+.ph-dev[hidden] { display: none; }
+.ph-dev__head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--term-border);
+  font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent);
+}
+.ph-dev__x { background: none; border: 0; color: var(--term-muted); font-family: inherit; font-size: var(--text-sm); cursor: pointer; min-width: 32px; min-height: 32px; }
+.ph-dev__body { flex: 1; overflow-y: auto; padding: 0.4rem 0.7rem 1rem; }
+.ph-dev__sec { margin: 0.9rem 0 0.35rem; color: var(--syn-cyan); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.14em; }
+.ph-dev__row { display: grid; grid-template-columns: 8rem 1fr 4.4rem; align-items: center; gap: 0.4rem; margin-bottom: 0.3rem; }
+.ph-dev__k { font-size: var(--text-2xs); color: var(--term-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-dev__range { width: 100%; accent-color: var(--accent); }
+.ph-dev__num {
+  width: 100%; background: #0b0e14; border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-sm); color: var(--term-fg);
+  font-family: inherit; font-size: var(--text-2xs); padding: 0.2rem 0.3rem;
+}
+.ph-dev__foot { display: flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.7rem; border-top: 1px solid var(--term-border); }
+.ph-dev__btn {
+  font-family: inherit; font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-sm); color: var(--term-fg); padding: 0.4rem 0.6rem; cursor: pointer; min-height: 34px;
+}
+.ph-dev__status { font-size: var(--text-2xs); color: var(--accent); }
+.ph-devchip {
+  position: absolute; right: 0.75rem; top: 3.1rem; z-index: 50; cursor: pointer;
+  font-family: var(--font-mono); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.12em;
+  background: rgba(0, 0, 0, 0.5); border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-pill); color: var(--term-muted); padding: 0.3rem 0.6rem;
+}
+
+@media (max-width: 720px) {
+  .ph-stage { aspect-ratio: auto; height: 70vh; height: 70svh; max-height: none; }
+  .ph-hud__tl { gap: 0.8rem; }
+  .ph-stat--big .ph-stat__v { font-size: var(--text-xl); }
+}
+</style>
+
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">phosphor</span></p>
+  <h1>PHOSPHOR</h1>
+  <p>{{ "tool.phosphor.lede" | t }}</p>
+</section>
+
+<div class="ph-wrap">
+  <div class="ph-stage" id="ph-stage">
+    <canvas class="ph-canvas" id="ph-canvas"></canvas>
+
+    <div class="ph-hud" id="ph-hud" hidden>
+      <div class="ph-hud__tl">
+        <div class="ph-stat">
+          <span class="ph-stat__k">{{ "tool.phosphor.hud_time" | t }}</span>
+          <span class="ph-stat__v" id="ph-time">0:00.000</span>
+        </div>
+        <div class="ph-stat">
+          <span class="ph-stat__k">{{ "tool.phosphor.hud_targets" | t }}</span>
+          <span class="ph-stat__v" id="ph-targets">8/8</span>
+        </div>
+      </div>
+
+      <div class="ph-hud__tr">
+        <span class="ph-chip" id="ph-method"></span>
+        <span class="ph-chip"><span class="ph-stat__k">{{ "tool.phosphor.hud_fps" | t }}</span> <span id="ph-fps">--</span></span>
+        <button type="button" class="ph-btn ph-btn--icon" id="ph-fs" aria-label="{{ 'tool.phosphor.fullscreen' | t }}" title="{{ 'tool.phosphor.fullscreen' | t }}">⛶</button>
+        <button type="button" class="ph-btn ph-btn--icon" id="ph-pausebtn" aria-label="{{ 'tool.phosphor.hud_pause' | t }}" title="{{ 'tool.phosphor.hud_pause' | t }}">‖</button>
+      </div>
+
+      <div class="ph-hud__bl">
+        <div class="ph-stat">
+          <span class="ph-stat__k">{{ "tool.phosphor.hud_speed" | t }}</span>
+          <span class="ph-stat--row ph-stat">
+            <span class="ph-stat__v" id="ph-speed">0.0</span>
+            <span class="ph-stat__k">{{ "tool.phosphor.speed_unit" | t }}</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="ph-hud__br">
+        <div class="ph-stat ph-stat--big">
+          <span class="ph-stat__v" id="ph-ammo">30/30</span>
+          <span class="ph-stat__k">{{ "tool.phosphor.hud_ammo" | t }}</span>
+        </div>
+      </div>
+
+      <div class="ph-cross" id="ph-cross" aria-hidden="true" hidden>
+        <i class="ph-cross__l ph-cross__l--t" id="ph-cross-t"></i>
+        <i class="ph-cross__l ph-cross__l--r" id="ph-cross-r"></i>
+        <i class="ph-cross__l ph-cross__l--b" id="ph-cross-b"></i>
+        <i class="ph-cross__l ph-cross__l--l" id="ph-cross-l"></i>
+      </div>
+      <div class="ph-hit" id="ph-hit" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="ph-kill" id="ph-kill" aria-hidden="true"></div>
+    </div>
+
+    <button type="button" class="ph-btn ph-gyro" id="ph-gyro" hidden>{{ "tool.phosphor.gyro_ask" | t }}</button>
+
+    <div class="ph-ov" id="ph-boot">
+      <p class="ph-ov__note">{{ "tool.phosphor.boot_status" | t }}</p>
+    </div>
+
+    <div class="ph-ov" id="ph-ready" hidden>
+      <p class="ph-ov__title">PHOSPHOR</p>
+      <p class="ph-ov__sub">{{ "tool.phosphor.ready_sub" | t }}</p>
+      <p class="ph-ov__cta" id="ph-ready-click">{{ "tool.phosphor.ready_click" | t }}</p>
+      <button type="button" class="ph-btn ph-btn--primary" id="ph-ready-start" hidden>{{ "tool.phosphor.ready_touch_start" | t }}</button>
+      <p class="ph-ov__hint">{{ "tool.phosphor.hint_controls" | t }}</p>
+      <p class="ph-ov__note">{{ "tool.phosphor.ready_note" | t }}</p>
+    </div>
+
+    <div class="ph-ov" id="ph-pause" hidden>
+      <p class="ph-ov__title ph-ov__title--sm">{{ "tool.phosphor.paused_title" | t }}</p>
+      <p class="ph-ov__hint" id="ph-pause-note">{{ "tool.phosphor.paused_hint" | t }}</p>
+      <div class="ph-ov__row">
+        <button type="button" class="ph-btn ph-btn--primary" id="ph-resume">{{ "tool.phosphor.paused_resume" | t }}</button>
+        <button type="button" class="ph-btn" id="ph-pause-restart">{{ "tool.phosphor.paused_restart" | t }}</button>
+      </div>
+    </div>
+
+    <div class="ph-ov" id="ph-complete" hidden>
+      <p class="ph-ov__title ph-ov__title--sm">{{ "tool.phosphor.complete_title" | t }}</p>
+      <p class="ph-ov__time"><span class="ph-stat__k">{{ "tool.phosphor.complete_time" | t }}</span> <span id="ph-complete-time">0:00.000</span></p>
+      <button type="button" class="ph-btn ph-btn--primary" id="ph-complete-restart">{{ "tool.phosphor.complete_restart" | t }}</button>
+    </div>
+
+    <div class="ph-ov ph-ov--fail" id="ph-unsup" hidden>
+      <p class="ph-ov__title ph-ov__title--sm">{{ "tool.phosphor.unsupported_title" | t }}</p>
+      <p class="ph-ov__hint">{{ "tool.phosphor.unsupported_body" | t }}</p>
+      <code class="ph-ov__code" id="ph-unsup-detail"></code>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.PHOSPHOR_COPY = {
+    methodMnk:   {{ ("tool.phosphor.method_mnk"   | t) | dump | safe }},
+    methodPad:   {{ ("tool.phosphor.method_pad"   | t) | dump | safe }},
+    methodTouch: {{ ("tool.phosphor.method_touch" | t) | dump | safe }},
+    gyroAsk:     {{ ("tool.phosphor.gyro_ask"     | t) | dump | safe }},
+    gyroOn:      {{ ("tool.phosphor.gyro_on"      | t) | dump | safe }},
+    gyroDenied:  {{ ("tool.phosphor.gyro_denied"  | t) | dump | safe }},
+    contextLost: {{ ("tool.phosphor.context_lost" | t) | dump | safe }}
+  };
+</script>
+<script type="module" id="ph-mod" src="/assets/phosphor/game.js?v={{ buildHash }}"></script>
+<script>
+  (function () {
+    var s = document.getElementById('ph-mod');
+    if (!s) return;
+    s.addEventListener('error', function () {
+      var boot = document.getElementById('ph-boot');
+      var panel = document.getElementById('ph-unsup');
+      var detail = document.getElementById('ph-unsup-detail');
+      if (detail) detail.textContent = 'game.js failed to load';
+      if (boot) boot.hidden = true;
+      if (panel) panel.hidden = false;
+      try { console.error('[phosphor] module script failed to load'); } catch (e) {}
+    });
+  })();
+</script>

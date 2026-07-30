@@ -545,6 +545,7 @@
   });
 
   window.addEventListener('mentria:gamepad:button', function (e) {
+    if (window.mentriaPadCapture) return;
     var d = e && e.detail;
     if (!d || d.pressed === false) return;
     if ((d.name === 'start' || d.button === 'start') && data()) toggle();

@@ -460,7 +460,11 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
 }
 
 .game-help {
-  margin: 0;
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: fit-content;
+  height: fit-content;
   padding: 1rem 1.1rem;
   border: 1px solid var(--term-border);
   border-radius: 10px;
@@ -470,7 +474,9 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
   font-size: 0.85rem;
   color: var(--term-fg);
   max-width: min(360px, calc(100vw - 1.5rem));
-  inset: unset;
+  max-height: min(78vh, 660px);
+  max-height: min(78svh, 660px);
+  overflow-y: auto;
 }
 .game-help::backdrop {
   background: rgba(0, 0, 0, 0.4);

@@ -20,7 +20,61 @@ eleventyComputed:
 </section>
 
 {% set terminalTitle = "chess.js" %}
+{% set terminalHelpId = "chess-help" %}
 {% include "terminal-frame-open.njk" %}
+
+<div id="chess-help" popover class="game-help chess-help">
+  <div class="chess-help__bar">
+    <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
+    <button type="button" class="chess-help__x" id="chess-help-close" aria-label="{{ 'tool.chess.help_close' | t }}">✕</button>
+  </div>
+  <div class="chess-help__methods">
+    <section class="chess-help__method" data-method="pointer">
+      <h3 class="chess-help__method-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 10.4V5.2a1.7 1.7 0 0 1 3.4 0v5.2"/><path d="M12.4 10.4V4a1.7 1.7 0 0 1 3.4 0v6.4"/><path d="M15.8 10.8V7.4a1.7 1.7 0 0 1 3.4 0v7.4c0 3.4-2.5 6.2-6 6.2-2 0-3.7-.8-4.9-2.4L5 14.4a1.7 1.7 0 0 1 2.6-2.2l1.4 1.5v-3.3"/></svg>
+        <span>{{ "tool.chess.help_touch" | t }}</span>
+        <span class="chess-help__badge">{{ "tool.chess.help_active" | t }}</span>
+      </h3>
+      <ul class="game-help-list">
+        <li><span class="game-help-label">{{ "tool.chess.help_tap_move" | t }}</span></li>
+        <li><span class="game-help-label">{{ "tool.chess.help_drag_move" | t }}</span></li>
+        <li><span class="game-help-label">{{ "tool.chess.help_tap_history" | t }}</span></li>
+      </ul>
+    </section>
+    <section class="chess-help__method" data-method="keyboard">
+      <h3 class="chess-help__method-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 9.6h.01M9.6 9.6h.01M13.2 9.6h.01M16.8 9.6h.01M6 13.2h.01M9.6 13.2h.01M13.2 13.2h.01M16.8 13.2h.01M8.5 15.9h7"/></svg>
+        <span>{{ "tool.chess.help_keyboard" | t }}</span>
+        <span class="chess-help__badge">{{ "tool.chess.help_active" | t }}</span>
+      </h3>
+      <ul class="game-help-list">
+        <li><span class="chess-help__keys"><span class="kbd">←</span><span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd">→</span></span><span class="game-help-label">{{ "tool.chess.help_move_cursor" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">⏎</span><span class="kbd">SPACE</span></span><span class="game-help-label">{{ "tool.chess.help_select" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">ESC</span></span><span class="game-help-label">{{ "tool.chess.help_cancel" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">⇧</span><span class="kbd">←</span><span class="kbd">→</span></span><span class="game-help-label">{{ "tool.chess.help_scrub" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">F</span></span><span class="game-help-label">{{ "tool.chess.help_flip" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">H</span></span><span class="game-help-label">{{ "tool.chess.help_hint" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">R</span></span><span class="game-help-label">{{ "tool.chess.help_resign" | t }}</span></li>
+      </ul>
+    </section>
+    <section class="chess-help__method" data-method="gamepad">
+      <h3 class="chess-help__method-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.6 7.8h8.8a5 5 0 0 1 4.9 4.1l.5 3.1a2.9 2.9 0 0 1-5.3 2.1l-1.4-2H8.9l-1.4 2a2.9 2.9 0 0 1-5.3-2.1l.5-3.1a5 5 0 0 1 4.9-4.1Z"/><path d="M7.2 11v2.6M5.9 12.3h2.6M15.7 11.4h.01M17.9 13.1h.01"/></svg>
+        <span>{{ "tool.chess.help_gamepad" | t }}</span>
+        <span class="chess-help__badge">{{ "tool.chess.help_active" | t }}</span>
+      </h3>
+      <ul class="game-help-list">
+        <li><span class="chess-help__keys"><span class="kbd">D-PAD</span></span><span class="game-help-label">{{ "tool.chess.help_move_cursor" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">A</span></span><span class="game-help-label">{{ "tool.chess.help_select" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">B</span></span><span class="game-help-label">{{ "tool.chess.help_cancel" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">X</span></span><span class="game-help-label">{{ "tool.chess.help_flip" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">Y</span></span><span class="game-help-label">{{ "tool.chess.help_hint" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">LB</span><span class="kbd">RB</span></span><span class="game-help-label">{{ "tool.chess.help_scrub" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">START</span></span><span class="game-help-label">{{ "tool.chess.help_menu" | t }}</span></li>
+      </ul>
+    </section>
+  </div>
+</div>
 
 <div class="chess-app">
   <div class="layout">
@@ -70,6 +124,7 @@ eleventyComputed:
         <div class="toolbar">
           <button class="btn primary" id="btn-newgame">{{ "tool.chess.new_game" | t }}</button>
           <button class="btn" id="btn-flip">{{ "tool.chess.flip" | t }}</button>
+          <button class="btn on" id="btn-coords" aria-pressed="true">{{ "tool.chess.coords" | t }}</button>
           <button class="btn" id="btn-undo">{{ "tool.chess.undo" | t }}</button>
           <button class="btn" id="btn-resign">{{ "tool.chess.resign" | t }}</button>
           <button class="btn" id="btn-swap" style="display:none">{{ "tool.chess.play_black" | t }}</button>
@@ -172,6 +227,7 @@ eleventyComputed:
   .chess-app .btn:hover { border-color: var(--cyan-30); color: var(--syn-cyan); box-shadow: var(--glow-cyan); }
   .chess-app .btn.primary { border-color: var(--syn-cyan); color: var(--syn-cyan); background: var(--cyan-8); }
   .chess-app .btn.primary::before { content: "$ "; }
+  .chess-app .btn.on { border-color: var(--cyan-30); color: var(--syn-cyan); }
   .chess-app .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .chess-app .lines { display: flex; flex-direction: column; gap: 4px; }
@@ -198,6 +254,7 @@ eleventyComputed:
   .chess-app .sq.last { box-shadow: inset 0 0 0 2px rgba(251,191,36,0.45); }
   .chess-app .sq.last.sel { box-shadow: inset 0 0 0 2px var(--syn-cyan); }
   .chess-app .sq.check { background: rgba(244,114,182,0.22) !important; box-shadow: inset 0 0 0 2px var(--syn-pink); }
+  .chess-app .sq.cursor::before { content: ""; position: absolute; inset: 3%; border: 2px dashed var(--syn-cyan); border-radius: 4px; box-shadow: 0 0 10px rgba(34,211,238,0.35), inset 0 0 10px rgba(34,211,238,0.15); pointer-events: none; z-index: 3; }
   .chess-app .sq.dot::after { content: ""; position: absolute; width: 22%; height: 22%; border-radius: 50%; background: var(--syn-cyan); box-shadow: 0 0 8px rgba(34,211,238,0.5); pointer-events: none; }
   .chess-app .sq.ring::after { content: ""; position: absolute; inset: 6%; border: 3px solid var(--syn-cyan); border-radius: 50%; box-shadow: 0 0 10px rgba(34,211,238,0.4); pointer-events: none; }
   .chess-app .pc { font-family: var(--font-mono); font-size: clamp(20px, 6vw, 52px); font-size: clamp(18px, 10cqmin, 52px); line-height: 1; pointer-events: none; transition: transform 120ms ease-out; }
@@ -207,6 +264,7 @@ eleventyComputed:
   .chess-app .coords-files, .chess-app .coords-ranks { position: absolute; color: var(--term-subtle); font-size: 9px; font-weight: 600; letter-spacing: 0.12em; pointer-events: none; text-transform: uppercase; }
   .chess-app .coords-files { bottom: 4px; left: 22px; right: 22px; display: flex; justify-content: space-around; }
   .chess-app .coords-ranks { top: 22px; bottom: 22px; left: 4px; display: flex; flex-direction: column; justify-content: space-around; }
+  .chess-app .board-shell.no-coords .coords-files, .chess-app .board-shell.no-coords .coords-ranks { display: none; }
   .chess-app .hint-arrow { position: absolute; inset: 22px; pointer-events: none; z-index: 5; }
 
   .chess-app .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 10px 14px; border-bottom: 1px solid var(--term-divider); }
@@ -258,9 +316,30 @@ eleventyComputed:
   .chess-app .toolbar { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px; justify-content: center; }
   .chess-app .toolbar .btn { font-size: 11px; padding: 5px 9px; }
 
+  .terminal-frame .terminal-frame__help { display: inline-flex; }
+  .chess-help { inset: 0; margin: auto; max-width: min(660px, calc(100vw - 1.5rem)); max-height: min(80vh, 720px); overflow-y: auto; padding: 1rem 1.1rem 1.2rem; }
+  .chess-help--fallback { display: none; position: fixed; z-index: 300; }
+  .chess-help--fallback.is-open { display: block; }
+  .chess-help__bar { display: flex; align-items: center; gap: 10px; margin-bottom: 0.7rem; }
+  .chess-help__bar .game-help-title { margin: 0; flex: 1; }
+  .chess-help__x { width: 24px; height: 24px; padding: 0; background: transparent; border: 1px solid var(--term-border); border-radius: 6px; color: var(--term-muted); font-family: var(--font-mono); font-size: 11px; line-height: 1; cursor: pointer; }
+  .chess-help__x:hover, .chess-help__x:focus-visible { color: var(--syn-cyan); border-color: var(--syn-cyan); outline: none; }
+  .chess-help__methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: start; }
+  .chess-help__method { border: 1px solid var(--term-divider); border-radius: 8px; padding: 10px 12px; }
+  .chess-help__method.is-active { border-color: var(--cyan-30); background: var(--cyan-8); }
+  .chess-help__method-h { display: flex; align-items: center; gap: 7px; margin: 0 0 9px; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--term-fg-strong); }
+  .chess-help__method-h svg { width: 17px; height: 17px; flex-shrink: 0; color: var(--syn-cyan); }
+  .chess-help__badge { display: none; margin-left: auto; padding: 1px 6px; border: 1px solid var(--syn-cyan); border-radius: 999px; color: var(--syn-cyan); font-size: 9px; letter-spacing: 0.08em; }
+  .chess-help__method.is-active .chess-help__badge { display: inline-block; }
+  .chess-help .game-help-list { gap: 0.45rem; }
+  .chess-help .game-help-list li { align-items: center; gap: 0.55rem; font-size: 11px; }
+  .chess-help__keys { flex-shrink: 0; white-space: nowrap; }
+  .chess-help .kbd { font-size: 0.7rem; }
+  @media (max-width: 700px) { .chess-help__methods { grid-template-columns: 1fr; } }
+
   .chess-app .mobile-tabs { display: none; }
   @media (max-width: 1024px) {
-    .chess-app .layout { display: flex; flex-direction: column; gap: 12px; }
+    .chess-app .layout { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
     .chess-app .left-col, .chess-app .right-col { width: 100%; }
     .chess-app .right-col { order: 2; } .chess-app .center-col { order: 1; }
     .chess-app .left-col { order: 3; display: none; }

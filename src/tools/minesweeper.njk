@@ -23,50 +23,114 @@ eleventyComputed:
 {% set terminalHelpId = "minesweeper-help" %}
 {% include "terminal-frame-open.njk" %}
 
-<div id="minesweeper-help" popover class="game-help">
+<div id="minesweeper-help" popover class="game-help ms-help">
+  <button type="button" class="ms-help__close" popovertarget="minesweeper-help" popovertargetaction="hide" aria-label="{{ 'tool.minesweeper.help_close' | t }}">×</button>
   <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
-  <ul class="game-help-list">
-    <li><span><span class="kbd">click</span></span><span class="game-help-label">{{ "game.minesweeper.footer_dig" | t }}</span></li>
-    <li><span><span class="kbd">right-click</span></span><span class="game-help-label">{{ "game.minesweeper.footer_flag" | t }}</span></li>
-    <li><span><span class="kbd">F</span></span><span class="game-help-label">{{ "game.minesweeper.footer_toggle_flag" | t }}</span></li>
-    <li><span><span class="kbd">R</span></span><span class="game-help-label">{{ "game.minesweeper.footer_restart" | t }}</span></li>
-  </ul>
+
+  <p class="ms-help__badge">
+    <span class="ms-help__badge-k">{{ "tool.minesweeper.method_label" | t }}</span>
+    <span class="ms-help__badge-v" id="ms-method">—</span>
+  </p>
+
+  <div class="ms-help__methods">
+    <section class="ms-help__method">
+      <p class="ms-help__head">
+        <svg class="ms-help__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M9.4 11.6V5.9a1.8 1.8 0 0 1 3.6 0v5.1" />
+          <path d="M13 10.6a1.6 1.6 0 0 1 3.2 0v1.2" />
+          <path d="M16.2 11.4a1.6 1.6 0 0 1 3.2 0v3.2a6 6 0 0 1-6 6h-1.5a5 5 0 0 1-3.9-1.9l-3-3.8a1.7 1.7 0 0 1 2.6-2.1l1.8 2" />
+        </svg>
+        <span>{{ "tool.minesweeper.help_touch" | t }}</span>
+      </p>
+      <ul class="ms-help__rows">
+        <li><span class="kbd">{{ "tool.minesweeper.key_tap" | t }}</span><span class="game-help-label">{{ "tool.minesweeper.help_reveal" | t }}</span></li>
+        <li><span class="kbd">{{ "tool.minesweeper.key_hold" | t }}</span><span class="game-help-label">{{ "tool.minesweeper.help_flag" | t }}</span></li>
+        <li><span class="kbd">{{ "tool.minesweeper.key_tap" | t }}</span><span class="game-help-label">{{ "tool.minesweeper.help_chord" | t }}</span></li>
+        <li><span class="kbd">⚑</span><span class="game-help-label">{{ "tool.minesweeper.help_flag_button" | t }}</span></li>
+      </ul>
+    </section>
+
+    <section class="ms-help__method">
+      <p class="ms-help__head">
+        <svg class="ms-help__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <rect x="2.4" y="6" width="19.2" height="12" rx="2.2" />
+          <path d="M6.4 9.6h.01M9.6 9.6h.01M12.8 9.6h.01M16 9.6h.01M18.6 9.6h.01" />
+          <path d="M6.4 12.6h.01M9.6 12.6h.01M12.8 12.6h.01M16 12.6h.01M18.6 12.6h.01" />
+          <path d="M8.2 15.4h7.6" />
+        </svg>
+        <span>{{ "tool.minesweeper.help_keyboard" | t }}</span>
+      </p>
+      <ul class="ms-help__rows">
+        <li><span><span class="kbd">←</span><span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd">→</span></span><span class="game-help-label">{{ "tool.minesweeper.help_move" | t }}</span></li>
+        <li><span><span class="kbd">ENTER</span><span class="kbd">SPACE</span></span><span class="game-help-label">{{ "tool.minesweeper.help_reveal" | t }}</span></li>
+        <li><span class="kbd">F</span><span class="game-help-label">{{ "tool.minesweeper.help_flag" | t }}</span></li>
+        <li><span class="kbd">C</span><span class="game-help-label">{{ "tool.minesweeper.help_chord" | t }}</span></li>
+        <li><span class="kbd">P</span><span class="game-help-label">{{ "tool.minesweeper.help_pause" | t }}</span></li>
+        <li><span class="kbd">R</span><span class="game-help-label">{{ "tool.minesweeper.help_restart" | t }}</span></li>
+      </ul>
+    </section>
+
+    <section class="ms-help__method">
+      <p class="ms-help__head">
+        <svg class="ms-help__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M8.6 6.6h6.8a4.6 4.6 0 0 1 4.5 3.8l.9 4.9a3 3 0 0 1-5.2 2.5l-.9-1a2 2 0 0 0-1.5-.6h-2.4a2 2 0 0 0-1.5.6l-.9 1a3 3 0 0 1-5.2-2.5l.9-4.9a4.6 4.6 0 0 1 4.5-3.8Z" />
+          <path d="M7 11.2h3M8.5 9.7v3" />
+          <path d="M15.4 10.9h.01M17.7 13.1h.01" />
+        </svg>
+        <span>{{ "tool.minesweeper.help_controller" | t }}</span>
+      </p>
+      <ul class="ms-help__rows">
+        <li><span class="kbd">D-PAD</span><span class="game-help-label">{{ "tool.minesweeper.help_move" | t }}</span></li>
+        <li><span class="kbd">A</span><span class="game-help-label">{{ "tool.minesweeper.help_reveal" | t }}</span></li>
+        <li><span class="kbd">B</span><span class="game-help-label">{{ "tool.minesweeper.help_flag" | t }}</span></li>
+        <li><span class="kbd">X</span><span class="game-help-label">{{ "tool.minesweeper.help_chord" | t }}</span></li>
+        <li><span class="kbd">Y</span><span class="game-help-label">{{ "tool.minesweeper.help_flag_mode" | t }}</span></li>
+        <li><span class="kbd">START</span><span class="game-help-label">{{ "tool.minesweeper.help_pause" | t }}</span></li>
+      </ul>
+    </section>
+  </div>
+
+  <p class="ms-help__note">{{ "tool.minesweeper.help_note" | t }}</p>
 </div>
 
 <div class="ms-controls">
-  <span class="ctrl-label">{{ "game.minesweeper.difficulty" | t }}</span>
+  <span class="ctrl-label">{{ "tool.minesweeper.difficulty" | t }}</span>
   <div class="m-seg" id="diff-seg">
-    <button data-d="easy" data-value="easy">{{ "game.minesweeper.diff_easy" | t }}</button>
-    <button data-d="medium" data-value="medium" class="is-active">{{ "game.minesweeper.diff_medium" | t }}</button>
-    <button data-d="hard" data-value="hard">{{ "game.minesweeper.diff_hard" | t }}</button>
-    <button data-d="extreme" data-value="extreme">{{ "game.minesweeper.diff_extreme" | t }}</button>
+    <button data-d="easy" data-value="easy">{{ "tool.minesweeper.diff_easy" | t }}</button>
+    <button data-d="medium" data-value="medium" class="is-active">{{ "tool.minesweeper.diff_medium" | t }}</button>
+    <button data-d="hard" data-value="hard">{{ "tool.minesweeper.diff_hard" | t }}</button>
+    <button data-d="extreme" data-value="extreme">{{ "tool.minesweeper.diff_extreme" | t }}</button>
   </div>
   <div class="stats-spread">
     <div class="stat-item">
-      <span class="stat-key">{{ "game.minesweeper.mines" | t }}</span>
+      <span class="stat-key">{{ "tool.minesweeper.mines" | t }}</span>
       <span class="stat-val pink"><span id="stat-mines">32</span></span>
     </div>
     <div class="stat-item">
-      <span class="stat-key">{{ "game.minesweeper.time" | t }}</span>
+      <span class="stat-key">{{ "tool.minesweeper.time" | t }}</span>
       <span class="stat-val cyan" id="stat-time">000</span>
     </div>
     <div class="stat-item">
-      <span class="stat-key">{{ "game.minesweeper.best" | t }}</span>
+      <span class="stat-key">{{ "tool.minesweeper.best" | t }}</span>
       <span class="stat-val amber" id="stat-best">—</span>
     </div>
   </div>
 </div>
 
 <div class="ms-toolbar">
-  <button class="mode-toggle" id="flag-toggle">
+  <button type="button" class="mode-toggle" id="flag-toggle" aria-pressed="false">
     <span class="indicator"></span>
-    <span id="flag-mode-label">{{ "game.minesweeper.mode_dig" | t }}</span>
+    <span id="flag-mode-label">{{ "tool.minesweeper.mode_dig" | t }}</span>
   </button>
-  <button class="mode-toggle" id="restart-btn" style="background: transparent;">
+  <button type="button" class="mode-toggle" id="pause-btn">
+    <span style="color: var(--syn-amber)">⏸</span>
+    <span>{{ "tool.minesweeper.pause" | t }}</span>
+  </button>
+  <button type="button" class="mode-toggle" id="restart-btn">
     <span style="color: var(--syn-cyan)">↻</span>
-    <span>{{ "game.minesweeper.restart" | t }}</span>
+    <span>{{ "tool.minesweeper.restart" | t }}</span>
   </button>
-  <span class="hint">{{ "game.minesweeper.hint" | t }}</span>
+  <span class="hint">{{ "tool.minesweeper.hint" | t }}</span>
 </div>
 
 <div class="board-wrap">
@@ -81,10 +145,12 @@ eleventyComputed:
 
 <div class="footer-hints">
   <div class="keys">
-    <span><span class="kbd">click</span> {{ "game.minesweeper.footer_dig" | t }}</span>
-    <span><span class="kbd">right-click</span> {{ "game.minesweeper.footer_flag" | t }}</span>
-    <span><span class="kbd">F</span> {{ "game.minesweeper.footer_toggle_flag" | t }}</span>
-    <span><span class="kbd">R</span> {{ "game.minesweeper.footer_restart" | t }}</span>
+    <span><span class="kbd">{{ "tool.minesweeper.key_click" | t }}</span> {{ "tool.minesweeper.footer_dig" | t }}</span>
+    <span><span class="kbd">{{ "tool.minesweeper.key_right_click" | t }}</span> {{ "tool.minesweeper.footer_flag" | t }}</span>
+    <span><span class="kbd">F</span> {{ "tool.minesweeper.footer_toggle_flag" | t }}</span>
+    <span><span class="kbd">C</span> {{ "tool.minesweeper.footer_chord" | t }}</span>
+    <span><span class="kbd">P</span> {{ "tool.minesweeper.footer_pause" | t }}</span>
+    <span><span class="kbd">R</span> {{ "tool.minesweeper.footer_restart" | t }}</span>
   </div>
   <div>
     <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--syn-green); box-shadow:var(--glow-green); margin-right:6px"></span>
@@ -131,6 +197,9 @@ main { max-width: 1100px; }
 .stat-val.pink  { color: var(--syn-pink); }
 .stat-val.cyan  { color: var(--syn-cyan); }
 .stat-val.amber { color: var(--syn-amber); }
+#stat-mines { transition: color 150ms ease; }
+#stat-mines.is-clear { color: var(--syn-green); }
+#stat-mines.is-over  { color: var(--syn-amber); }
 
 .ms-toolbar {
   display: flex;
@@ -177,6 +246,12 @@ main { max-width: 1100px; }
   font-family: var(--font-mono);
 }
 
+@media (pointer: coarse) {
+  .ms-toolbar { gap: 10px; }
+  .mode-toggle { min-height: 44px; padding: 0 16px; font-size: 12px; }
+  .hint { flex-basis: 100%; margin-left: 0; }
+}
+
 .board-wrap {
   position: relative;
   padding: 24px;
@@ -191,31 +266,47 @@ main { max-width: 1100px; }
   min-height: 400px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+@supports (justify-content: safe center) {
+  .board-wrap { justify-content: safe center; }
 }
 .board {
+  --ms-cell: 32px;
   display: grid;
   gap: 2px;
   user-select: none;
   touch-action: manipulation;
+  transition: filter 220ms ease;
+}
+.board-wrap.is-veiled .board {
+  filter: blur(3px) brightness(0.55) saturate(0.7);
+  pointer-events: none;
 }
 .cell {
   background: var(--term-surface-2);
   border: 1px solid var(--term-border);
   border-radius: 3px;
-  width: 32px; height: 32px;
+  width: var(--ms-cell); height: var(--ms-cell);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 15px;
+  font-size: calc(var(--ms-cell) * 0.47);
   cursor: pointer;
-  transition: all 100ms;
+  transition: background 100ms, border-color 100ms, box-shadow 100ms;
   position: relative;
   color: transparent;
 }
 .ms-row { display: contents; }
-.cell:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -2px; z-index: 1; }
+.cell:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -2px; z-index: 2; }
+.board.is-cursor-on .cell.is-cursor {
+  outline: 2px solid var(--syn-cyan);
+  outline-offset: -1px;
+  box-shadow: 0 0 10px rgba(34,211,238,0.45);
+  z-index: 2;
+}
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .cell:hover:not(.revealed):not(.exploded) {
   background: var(--term-surface-3);
@@ -233,9 +324,9 @@ main { max-width: 1100px; }
   border-color: rgba(244,114,182,0.3);
   box-shadow: 0 0 6px rgba(244,114,182,0.25);
 }
-.cell.flag::after { content: "⚑"; font-size: 16px; }
+.cell.flag::after { content: "⚑"; font-size: calc(var(--ms-cell) * 0.52); }
 .cell.q { color: var(--syn-amber); }
-.cell.q::after { content: "?"; font-size: 16px; }
+.cell.q::after { content: "?"; font-size: calc(var(--ms-cell) * 0.52); }
 
 .cell.mine.exploded {
   background: var(--syn-pink);
@@ -251,7 +342,7 @@ main { max-width: 1100px; }
 .cell.mine.exploded::after,
 .cell.mine.revealed:not(.exploded)::after {
   content: "✱";
-  font-size: 16px;
+  font-size: calc(var(--ms-cell) * 0.52);
 }
 .cell.flag.wrong {
   background: rgba(244,114,182,0.05);
@@ -274,14 +365,23 @@ main { max-width: 1100px; }
   0%   { box-shadow: 0 0 0 0 rgba(34,211,238,0.5); }
   100% { box-shadow: 0 0 0 8px rgba(34,211,238,0); }
 }
+.cell.nudge { animation: ms-nudge 300ms ease; }
+@keyframes ms-nudge {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-2px); }
+  75%      { transform: translateX(2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse-cyan, .cell.nudge { animation: none; }
+  .board { transition: none; }
+}
 
 .overlay {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(5,5,7,0.7);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(5,5,7,0.55);
   z-index: 5;
+  padding: 12px;
 }
 .overlay.hidden { display: none; }
 .modal {
@@ -294,11 +394,13 @@ main { max-width: 1100px; }
   box-shadow: var(--elev-3);
   font-family: var(--font-mono);
 }
-.modal.win  { box-shadow: var(--elev-3), var(--glow-cyan-soft); }
-.modal.lose { box-shadow: var(--elev-3), var(--glow-pink); }
+.modal.win   { box-shadow: var(--elev-3), var(--glow-cyan-soft); }
+.modal.lose  { box-shadow: var(--elev-3), var(--glow-pink); }
+.modal.pause { box-shadow: var(--elev-3), var(--glow-amber); }
 .modal .eyebrow { font-size: var(--text-xs); letter-spacing: 0.15em; margin: 0 0 8px; }
-.modal.win  .eyebrow { color: var(--syn-cyan); }
-.modal.lose .eyebrow { color: var(--syn-pink); }
+.modal.win   .eyebrow { color: var(--syn-cyan); }
+.modal.lose  .eyebrow { color: var(--syn-pink); }
+.modal.pause .eyebrow { color: var(--syn-amber); }
 .modal h2 { font-size: 24px; margin: 0 0 12px; color: var(--term-fg-strong); }
 .modal p  { color: var(--term-muted); font-size: 13px; line-height: 1.6; margin: 0 0 20px; }
 .modal .stats-mini {
@@ -313,6 +415,54 @@ main { max-width: 1100px; }
 }
 .stats-mini .k { color: var(--term-muted); }
 .stats-mini .v { color: var(--syn-cyan); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.ms-modal__actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.ms-modal__btn { min-height: 44px; padding-inline: 20px; }
+
+.ms-help { max-width: min(430px, calc(100vw - 1.5rem)); position: relative; }
+.ms-help__close {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: 1px solid var(--term-border);
+  border-radius: 50%;
+  color: var(--term-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.ms-help__close:hover { color: var(--syn-cyan); border-color: var(--cyan-30); }
+.ms-help__badge {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 14px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+.ms-help__badge-k { text-transform: uppercase; letter-spacing: 0.14em; color: var(--term-subtle); }
+.ms-help__badge-v {
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--cyan-30);
+  background: var(--cyan-8);
+  color: var(--syn-cyan);
+  font-size: 11px;
+  font-weight: 600;
+}
+.ms-help__methods { display: flex; flex-direction: column; gap: 14px; }
+.ms-help__head {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 7px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--term-fg-strong);
+}
+.ms-help__icon { width: 16px; height: 16px; color: var(--syn-cyan); flex: none; }
+.ms-help__rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.ms-help__rows li { display: flex; align-items: baseline; gap: 10px; font-size: 12px; }
+.ms-help__rows .kbd { flex: none; }
+.ms-help__note { margin: 14px 0 0; font-size: 11px; color: var(--term-subtle); line-height: 1.55; }
 
 .footer-hints {
   display: flex;
@@ -342,10 +492,10 @@ main { max-width: 1100px; }
   .game-page .hero { margin-bottom: 18px; }
   .game-page .hero h1 { font-size: 1.6rem; }
   .game-page .hero p  { font-size: 12px; }
-  .cell { width: 30px; height: 30px; font-size: 13px; }
-  .cell.flag::after, .cell.q::after, .cell.mine.exploded::after, .cell.mine.revealed:not(.exploded)::after { font-size: 14px; }
+  .board { --ms-cell: 30px; }
+  .board[data-size="big"] { --ms-cell: 25px; }
   .stats-spread { width: 100%; justify-content: space-between; margin-left: 0; }
-  .board-wrap { padding: 14px 12px; min-height: 320px; justify-content: flex-start; }
+  .board-wrap { padding: 14px 12px; min-height: 320px; }
   .modal { padding: 20px 18px; max-width: 92vw; }
   .modal h2 { font-size: 20px; }
   .footer-hints { font-size: 10px; padding: 10px 12px; }
@@ -354,26 +504,75 @@ main { max-width: 1100px; }
 
 <script>
 (() => {
+  'use strict';
+
   const DIFFS = {
-    easy:   { rows: 9,  cols: 9,  mines: 10 },
-    medium: { rows: 14, cols: 14, mines: 32 },
-    hard:   { rows: 18, cols: 22, mines: 70 },
-    extreme: { rows: 20, cols: 30, mines: 125 },
+    easy:    { rows: 9,  cols: 9,  mines: 10 },
+    medium:  { rows: 14, cols: 14, mines: 32 },
+    hard:    { rows: 18, cols: 22, mines: 70 },
+    extreme: { rows: 20, cols: 30, mines: 125 }
   };
 
-  const MS_COPY = {
-    boardLabel: {{ ("game.minesweeper.board_label" | t) | dump | safe }},
-    aPos:       {{ ("game.minesweeper.a11y_pos"      | t) | dump | safe }},
-    aHidden:    {{ ("game.minesweeper.a11y_hidden"   | t) | dump | safe }},
-    aFlagged:   {{ ("game.minesweeper.a11y_flagged"  | t) | dump | safe }},
-    aUnflagged: {{ ("game.minesweeper.a11y_unflagged"| t) | dump | safe }},
-    aQuestion:  {{ ("game.minesweeper.a11y_question" | t) | dump | safe }},
-    aMine:      {{ ("game.minesweeper.a11y_mine"     | t) | dump | safe }},
-    aEmpty:     {{ ("game.minesweeper.a11y_empty"    | t) | dump | safe }},
-    aCount:     {{ ("game.minesweeper.a11y_count"    | t) | dump | safe }},
-    aLost:      {{ ("game.minesweeper.a11y_lost"     | t) | dump | safe }},
-    aWon:       {{ ("game.minesweeper.a11y_won"      | t) | dump | safe }},
+  const COPY = {
+    boardLabel:    {{ ("tool.minesweeper.board_label"        | t) | dump | safe }},
+    aPos:          {{ ("tool.minesweeper.a11y_pos"           | t) | dump | safe }},
+    aHidden:       {{ ("tool.minesweeper.a11y_hidden"        | t) | dump | safe }},
+    aFlagged:      {{ ("tool.minesweeper.a11y_flagged"       | t) | dump | safe }},
+    aUnflagged:    {{ ("tool.minesweeper.a11y_unflagged"     | t) | dump | safe }},
+    aQuestion:     {{ ("tool.minesweeper.a11y_question"      | t) | dump | safe }},
+    aMine:         {{ ("tool.minesweeper.a11y_mine"          | t) | dump | safe }},
+    aEmpty:        {{ ("tool.minesweeper.a11y_empty"         | t) | dump | safe }},
+    aCount:        {{ ("tool.minesweeper.a11y_count"         | t) | dump | safe }},
+    aLost:         {{ ("tool.minesweeper.a11y_lost"          | t) | dump | safe }},
+    aWon:          {{ ("tool.minesweeper.a11y_won"           | t) | dump | safe }},
+    aPaused:       {{ ("tool.minesweeper.a11y_paused"        | t) | dump | safe }},
+    aResumed:      {{ ("tool.minesweeper.a11y_resumed"       | t) | dump | safe }},
+    aChordBlocked: {{ ("tool.minesweeper.a11y_chord_blocked" | t) | dump | safe }},
+    modeDig:       {{ ("tool.minesweeper.mode_dig"           | t) | dump | safe }},
+    modeFlag:      {{ ("tool.minesweeper.mode_flag"          | t) | dump | safe }},
+    eyebrowWon:    {{ ("tool.minesweeper.eyebrow_won"        | t) | dump | safe }},
+    eyebrowLost:   {{ ("tool.minesweeper.eyebrow_lost"       | t) | dump | safe }},
+    eyebrowPaused: {{ ("tool.minesweeper.eyebrow_paused"     | t) | dump | safe }},
+    titleWon:      {{ ("tool.minesweeper.title_won"          | t) | dump | safe }},
+    titleLost:     {{ ("tool.minesweeper.title_lost"         | t) | dump | safe }},
+    titlePaused:   {{ ("tool.minesweeper.title_paused"       | t) | dump | safe }},
+    descWon:       {{ ("tool.minesweeper.desc_won"           | t) | dump | safe }},
+    descLost:      {{ ("tool.minesweeper.desc_lost"          | t) | dump | safe }},
+    descPaused:    {{ ("tool.minesweeper.desc_paused"        | t) | dump | safe }},
+    statsDiff:     {{ ("tool.minesweeper.stats_difficulty"   | t) | dump | safe }},
+    statsGrid:     {{ ("tool.minesweeper.stats_grid"         | t) | dump | safe }},
+    statsAvoided:  {{ ("tool.minesweeper.stats_mines_avoided"| t) | dump | safe }},
+    statsTime:     {{ ("tool.minesweeper.stats_time"         | t) | dump | safe }},
+    statsBest:     {{ ("tool.minesweeper.stats_best"         | t) | dump | safe }},
+    statsCells:    {{ ("tool.minesweeper.stats_cells"        | t) | dump | safe }},
+    newBest:       {{ ("tool.minesweeper.new_best"           | t) | dump | safe }},
+    btnNewGame:    {{ ("tool.minesweeper.btn_new_game"       | t) | dump | safe }},
+    btnTryAgain:   {{ ("tool.minesweeper.btn_try_again"      | t) | dump | safe }},
+    btnResume:     {{ ("tool.minesweeper.btn_resume"         | t) | dump | safe }},
+    btnRestart:    {{ ("tool.minesweeper.btn_restart"        | t) | dump | safe }},
+    methodTouch:   {{ ("tool.minesweeper.method_touch"       | t) | dump | safe }},
+    methodMouse:   {{ ("tool.minesweeper.method_mouse"       | t) | dump | safe }},
+    methodKeyboard:{{ ("tool.minesweeper.method_keyboard"    | t) | dump | safe }},
+    methodGamepad: {{ ("tool.minesweeper.method_gamepad"     | t) | dump | safe }},
+    names: {
+      easy:    {{ ("tool.minesweeper.name_easy"    | t) | dump | safe }},
+      medium:  {{ ("tool.minesweeper.name_medium"  | t) | dump | safe }},
+      hard:    {{ ("tool.minesweeper.name_hard"    | t) | dump | safe }},
+      extreme: {{ ("tool.minesweeper.name_extreme" | t) | dump | safe }}
+    }
   };
+
+  const METHOD_LABELS = {
+    touch: COPY.methodTouch,
+    mouse: COPY.methodMouse,
+    keyboard: COPY.methodKeyboard,
+    gamepad: COPY.methodGamepad
+  };
+
+  const LONG_PRESS_MS = 350;
+  const HELP_NS = 'tools';
+  const HELP_KEY = 'minesweeper_help_seen';
+  const METHOD_KEY = 'minesweeper_last_method';
 
   const State = {
     diff: 'medium',
@@ -382,47 +581,62 @@ main { max-width: 1100px; }
     started: false,
     over: false,
     won: false,
+    paused: false,
     startedAt: 0,
+    pausedAt: 0,
+    endedAt: 0,
     timer: null,
     flagsPlaced: 0,
     revealedCount: 0,
     flagMode: false,
-    pressTimers: new Map(),
+    method: '',
+    pressTimers: new Map()
   };
 
   const boardEl = document.getElementById('board');
+  const boardWrap = document.querySelector('.board-wrap');
   const overlay = document.getElementById('overlay');
   const modal = document.getElementById('modal');
   const liveEl = document.getElementById('ms-live');
+  const helpEl = document.getElementById('minesweeper-help');
+  const methodEl = document.getElementById('ms-method');
+  const minesEl = document.getElementById('stat-mines');
+  const timeEl = document.getElementById('stat-time');
+  const bestEl = document.getElementById('stat-best');
+  const flagBtn = document.getElementById('flag-toggle');
+  const flagLabel = document.getElementById('flag-mode-label');
+
   let cellEls = [];
-  let focusIdx = 0;
+  let cursorIdx = 0;
+  let longPressed = false;
 
-  function announce(msg){ if (liveEl){ liveEl.textContent = ''; liveEl.textContent = msg; } }
+  function announce(msg) {
+    if (!liveEl) return;
+    liveEl.textContent = '';
+    liveEl.textContent = msg;
+  }
 
-  function cellStateText(r, c) {
-    const cell = State.grid[r][c];
-    if (!cell.revealed) {
-      if (cell.flag) return MS_COPY.aFlagged;
-      if (cell.q) return MS_COPY.aQuestion;
-      return MS_COPY.aHidden;
-    }
-    if (cell.mine) return MS_COPY.aMine;
-    if (cell.n === 0) return MS_COPY.aEmpty;
-    return MS_COPY.aCount.replace('{n}', cell.n);
+  function make(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
   }
-  function cellLabel(r, c) {
-    return MS_COPY.aPos.replace('{r}', r + 1).replace('{c}', c + 1) + ', ' + cellStateText(r, c);
+
+  function fill(tpl, token, value) {
+    return String(tpl).split('{' + token + '}').join(String(value));
   }
-  function setCellLabel(r, c) {
-    const el = cellEl(r, c);
-    if (el) el.setAttribute('aria-label', cellLabel(r, c));
+
+  function storeGet(ns, key) {
+    if (window.MentriaStore) return window.MentriaStore.get(ns, key);
+    try {
+      const raw = localStorage.getItem('mentria_' + ns + '_' + key);
+      return raw == null ? null : JSON.parse(raw);
+    } catch (_) { return null; }
   }
-  function setRoving(idx, doFocus) {
-    if (idx < 0 || idx >= cellEls.length) return;
-    if (cellEls[focusIdx]) cellEls[focusIdx].tabIndex = -1;
-    focusIdx = idx;
-    const el = cellEls[focusIdx];
-    if (el) { el.tabIndex = 0; if (doFocus) el.focus(); }
+  function storeSet(ns, key, value) {
+    if (window.MentriaStore) { window.MentriaStore.set(ns, key, value); return; }
+    try { localStorage.setItem('mentria_' + ns + '_' + key, JSON.stringify(value)); } catch (_) {}
   }
 
   function loadBest(d) {
@@ -433,7 +647,11 @@ main { max-width: 1100px; }
       if (v != null) return v;
       if (legacy != null) {
         const n = parseInt(legacy, 10);
-        if (!isNaN(n)) { window.MentriaStore.set('games', 'msw_best_' + d, n); try { localStorage.removeItem('mentria_msw_best_' + d); } catch(_) {} return n; }
+        if (!isNaN(n)) {
+          window.MentriaStore.set('games', 'msw_best_' + d, n);
+          try { localStorage.removeItem('mentria_msw_best_' + d); } catch (_) {}
+          return n;
+        }
       }
       return null;
     }
@@ -443,17 +661,87 @@ main { max-width: 1100px; }
     const cur = loadBest(d);
     if (cur === null || t < cur) {
       if (window.MentriaStore) window.MentriaStore.set('games', 'msw_best_' + d, t);
-      else try { localStorage.setItem('mentria_msw_best_' + d, String(t)); } catch(_) {}
+      else try { localStorage.setItem('mentria_msw_best_' + d, String(t)); } catch (_) {}
     }
   }
 
+  function cellEl(r, c) { return cellEls[r * State.cols + c]; }
+
+  function forEachNeighbor(r, c, fn) {
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const rr = r + dr, cc = c + dc;
+        if (rr < 0 || rr >= State.rows || cc < 0 || cc >= State.cols) continue;
+        fn(rr, cc);
+      }
+    }
+  }
+
+  function cellStateText(r, c) {
+    const cell = State.grid[r][c];
+    if (!cell.revealed) {
+      if (cell.flag) return COPY.aFlagged;
+      if (cell.q) return COPY.aQuestion;
+      return COPY.aHidden;
+    }
+    if (cell.mine) return COPY.aMine;
+    if (cell.n === 0) return COPY.aEmpty;
+    return fill(COPY.aCount, 'n', cell.n);
+  }
+  function cellLabel(r, c) {
+    return fill(fill(COPY.aPos, 'r', r + 1), 'c', c + 1) + ', ' + cellStateText(r, c);
+  }
+  function setCellLabel(r, c) {
+    const el = cellEl(r, c);
+    if (el) el.setAttribute('aria-label', cellLabel(r, c));
+  }
+
+  function setCursor(idx, doFocus) {
+    if (idx < 0 || idx >= cellEls.length) return;
+    const prev = cellEls[cursorIdx];
+    if (prev) { prev.tabIndex = -1; prev.classList.remove('is-cursor'); }
+    cursorIdx = idx;
+    const el = cellEls[cursorIdx];
+    if (!el) return;
+    el.tabIndex = 0;
+    el.classList.add('is-cursor');
+    if (doFocus) el.focus();
+  }
+  function cursorRow() { return Math.floor(cursorIdx / State.cols); }
+  function cursorCol() { return cursorIdx % State.cols; }
+
+  function paintMethod(m) {
+    if (methodEl) methodEl.textContent = METHOD_LABELS[m] || '—';
+    boardEl.classList.toggle('is-cursor-on', m === 'keyboard' || m === 'gamepad');
+  }
+  function setMethod(m) {
+    if (!m || State.method === m) return;
+    State.method = m;
+    paintMethod(m);
+    storeSet(HELP_NS, METHOD_KEY, m);
+  }
+
+  function isHelpOpen() {
+    if (!helpEl) return false;
+    try { return helpEl.matches(':popover-open'); } catch (_) { return false; }
+  }
+  function openHelp() {
+    if (!helpEl || typeof helpEl.showPopover !== 'function') return;
+    try { if (!isHelpOpen()) helpEl.showPopover(); } catch (_) {}
+  }
+
   function build() {
-    const cfg = DIFFS[State.diff];
+    const cfg = DIFFS[State.diff] || DIFFS.medium;
     State.rows = cfg.rows; State.cols = cfg.cols; State.mines = cfg.mines;
     State.grid = [];
-    State.started = false; State.over = false; State.won = false;
+    State.started = false; State.over = false; State.won = false; State.paused = false;
     State.flagsPlaced = 0; State.revealedCount = 0;
-    if (State.timer) { clearInterval(State.timer); State.timer = null; }
+    State.startedAt = 0; State.pausedAt = 0; State.endedAt = 0;
+    stopTimer();
+    State.pressTimers.forEach((id) => clearTimeout(id));
+    State.pressTimers.clear();
+    longPressed = false;
 
     for (let r = 0; r < State.rows; r++) {
       const row = [];
@@ -463,19 +751,18 @@ main { max-width: 1100px; }
       State.grid.push(row);
     }
 
-    boardEl.style.gridTemplateColumns = `repeat(${State.cols}, auto)`;
+    boardEl.style.gridTemplateColumns = 'repeat(' + State.cols + ', auto)';
     boardEl.style.setProperty('--ms-cols', State.cols);
+    boardEl.dataset.size = State.cols >= 20 ? 'big' : 'std';
     boardEl.setAttribute('role', 'grid');
-    boardEl.setAttribute('aria-label', MS_COPY.boardLabel);
-    boardEl.innerHTML = '';
+    boardEl.setAttribute('aria-label', COPY.boardLabel);
+    boardEl.textContent = '';
     cellEls = [];
     for (let r = 0; r < State.rows; r++) {
-      const rowEl = document.createElement('div');
-      rowEl.className = 'ms-row';
+      const rowEl = make('div', 'ms-row');
       rowEl.setAttribute('role', 'row');
       for (let c = 0; c < State.cols; c++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
+        const cell = make('div', 'cell');
         cell.dataset.r = r; cell.dataset.c = c;
         cell.setAttribute('role', 'gridcell');
         cell.tabIndex = -1;
@@ -485,21 +772,31 @@ main { max-width: 1100px; }
       }
       boardEl.appendChild(rowEl);
     }
-    focusIdx = 0;
-    if (cellEls[0]) cellEls[0].tabIndex = 0;
+    cursorIdx = 0;
+    if (cellEls[0]) { cellEls[0].tabIndex = 0; cellEls[0].classList.add('is-cursor'); }
 
-    overlay.classList.add('hidden');
+    hideOverlay(false);
     updateHUD();
+    paintTime();
+    centerBoard();
+  }
+
+  function centerBoard() {
+    if (!boardWrap) return;
+    const extra = boardWrap.scrollWidth - boardWrap.clientWidth;
+    if (extra > 0) boardWrap.scrollLeft = Math.round(extra / 2);
   }
 
   function placeMines(safeR, safeC) {
-    let placed = 0;
     const safeSet = new Set();
-    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-      const r = safeR + dr, c = safeC + dc;
-      if (r >= 0 && r < State.rows && c >= 0 && c < State.cols) safeSet.add(r * State.cols + c);
-    }
-    while (placed < State.mines) {
+    safeSet.add(safeR * State.cols + safeC);
+    forEachNeighbor(safeR, safeC, (rr, cc) => safeSet.add(rr * State.cols + cc));
+    const capacity = State.rows * State.cols - safeSet.size;
+    const target = Math.min(State.mines, capacity);
+    let placed = 0;
+    let guard = 0;
+    while (placed < target && guard < 500000) {
+      guard++;
       const r = Math.floor(Math.random() * State.rows);
       const c = Math.floor(Math.random() * State.cols);
       if (State.grid[r][c].mine) continue;
@@ -511,27 +808,33 @@ main { max-width: 1100px; }
       for (let c = 0; c < State.cols; c++) {
         if (State.grid[r][c].mine) continue;
         let n = 0;
-        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-          if (dr === 0 && dc === 0) continue;
-          const rr = r + dr, cc = c + dc;
-          if (rr < 0 || rr >= State.rows || cc < 0 || cc >= State.cols) continue;
-          if (State.grid[rr][cc].mine) n++;
-        }
+        forEachNeighbor(r, c, (rr, cc) => { if (State.grid[rr][cc].mine) n++; });
         State.grid[r][c].n = n;
       }
     }
   }
 
+  function elapsedSec() {
+    if (!State.started) return 0;
+    const end = State.over ? State.endedAt : (State.paused ? State.pausedAt : performance.now());
+    return Math.max(0, Math.floor((end - State.startedAt) / 1000));
+  }
+  function fmtTime(sec) { return String(Math.min(sec, 999)).padStart(3, '0'); }
+  function paintTime() { if (timeEl) timeEl.textContent = fmtTime(elapsedSec()); }
   function startTimer() {
     State.startedAt = performance.now();
+    stopTimer();
     State.timer = setInterval(() => {
-      if (State.over) return;
-      const sec = Math.floor((performance.now() - State.startedAt) / 1000);
-      document.getElementById('stat-time').textContent = String(Math.min(sec, 999)).padStart(3, '0');
+      if (State.over || State.paused) return;
+      paintTime();
     }, 250);
+  }
+  function stopTimer() {
+    if (State.timer) { clearInterval(State.timer); State.timer = null; }
   }
 
   function reveal(r, c) {
+    if (State.over) return;
     if (r < 0 || r >= State.rows || c < 0 || c >= State.cols) return;
     const cell = State.grid[r][c];
     if (cell.revealed || cell.flag) return;
@@ -552,36 +855,49 @@ main { max-width: 1100px; }
     } else {
       el.classList.add('empty', 'pulse-cyan');
       setTimeout(() => el.classList.remove('pulse-cyan'), 600);
-      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-        if (dr === 0 && dc === 0) continue;
-        reveal(r + dr, c + dc);
-      }
+      forEachNeighbor(r, c, (rr, cc) => reveal(rr, cc));
     }
     checkWin();
   }
 
-  function chord(r, c) {
+  function nudge(r, c) {
+    forEachNeighbor(r, c, (rr, cc) => {
+      const nb = State.grid[rr][cc];
+      if (nb.revealed || nb.flag) return;
+      const el = cellEl(rr, cc);
+      if (!el) return;
+      el.classList.remove('nudge');
+      void el.offsetWidth;
+      el.classList.add('nudge');
+      setTimeout(() => el.classList.remove('nudge'), 320);
+    });
+  }
+
+  function chordAt(r, c) {
+    if (State.over || State.paused || !State.started) return;
     const cell = State.grid[r][c];
     if (!cell.revealed || cell.n === 0) return;
     let flags = 0;
-    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-      if (dr === 0 && dc === 0) continue;
-      const rr = r + dr, cc = c + dc;
-      if (rr < 0 || rr >= State.rows || cc < 0 || cc >= State.cols) continue;
-      if (State.grid[rr][cc].flag) flags++;
+    forEachNeighbor(r, c, (rr, cc) => { if (State.grid[rr][cc].flag) flags++; });
+    if (flags !== cell.n) {
+      nudge(r, c);
+      announce(COPY.aChordBlocked);
+      return;
     }
-    if (flags === cell.n) {
-      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-        if (dr === 0 && dc === 0) continue;
-        const rr = r + dr, cc = c + dc;
-        if (rr < 0 || rr >= State.rows || cc < 0 || cc >= State.cols) continue;
-        const nb = State.grid[rr][cc];
-        if (!nb.flag && !nb.revealed) reveal(rr, cc);
-      }
+    const targets = [];
+    forEachNeighbor(r, c, (rr, cc) => {
+      const nb = State.grid[rr][cc];
+      if (!nb.flag && !nb.revealed) targets.push([rr, cc]);
+    });
+    for (let i = 0; i < targets.length; i++) {
+      if (State.over) break;
+      reveal(targets[i][0], targets[i][1]);
     }
+    if (!State.over) announce(cellStateText(r, c));
   }
 
   function flag(r, c) {
+    if (State.over || State.paused) return;
     const cell = State.grid[r][c];
     if (cell.revealed) return;
     if (cell.flag) {
@@ -597,21 +913,23 @@ main { max-width: 1100px; }
     el.classList.toggle('flag', cell.flag);
     el.classList.toggle('q', cell.q);
     setCellLabel(r, c);
-    announce(cell.flag ? MS_COPY.aFlagged : (cell.q ? MS_COPY.aQuestion : MS_COPY.aUnflagged));
+    announce(cell.flag ? COPY.aFlagged : (cell.q ? COPY.aQuestion : COPY.aUnflagged));
     updateHUD();
   }
 
   function checkWin() {
+    if (State.over) return;
     const total = State.rows * State.cols;
-    if (State.revealedCount === total - State.mines) {
-      gameOver(true);
-    }
+    if (State.revealedCount >= total - State.mines) gameOver(true);
   }
 
   function gameOver(won) {
+    if (State.over) return;
+    State.endedAt = performance.now();
     State.over = true;
     State.won = won;
-    if (State.timer) { clearInterval(State.timer); State.timer = null; }
+    State.paused = false;
+    stopTimer();
 
     for (let r = 0; r < State.rows; r++) {
       for (let c = 0; c < State.cols; c++) {
@@ -622,198 +940,359 @@ main { max-width: 1100px; }
           el.classList.add('flag');
           setCellLabel(r, c);
         }
+        if (won && cell.q) {
+          cell.q = false;
+          el.classList.remove('q');
+        }
         if (!won && cell.mine && !cell.flag) {
           cell.revealed = true;
           el.classList.add('revealed', 'mine');
           setCellLabel(r, c);
         }
-        if (!won && cell.flag && !cell.mine) {
-          el.classList.add('wrong');
-        }
+        if (!won && cell.flag && !cell.mine) el.classList.add('wrong');
       }
     }
 
-    const elapsed = Math.floor((performance.now() - State.startedAt) / 1000);
-    const best = loadBest(State.diff);
+    if (won) State.flagsPlaced = State.mines;
+
+    const elapsed = elapsedSec();
+    const prevBest = loadBest(State.diff);
     if (won) saveBest(State.diff, elapsed);
 
-    announce(won ? MS_COPY.aWon : MS_COPY.aLost);
-    showOverlay(won, elapsed, best);
+    announce(won ? COPY.aWon : COPY.aLost);
+    paintTime();
+    showResult(won, elapsed, prevBest);
     updateHUD();
-    const again = document.getElementById('play-again');
-    if (again) again.focus();
   }
 
-  function showOverlay(won, elapsed, prevBest) {
-    const cfg = DIFFS[State.diff];
-    const NEW_BEST = {{ ("game.minesweeper.new_best" | t) | dump | safe }};
-    if (won) {
-      modal.className = 'modal win';
-      modal.innerHTML =
-        '<p class="eyebrow">&gt; FIELD CLEARED</p>' +
-        '<h2>{{ "game.minesweeper.title_won" | t }}</h2>' +
-        '<p>{{ "game.minesweeper.desc_won" | t }}</p>' +
-        '<div class="stats-mini">' +
-          '<span class="k">{{ "game.minesweeper.stats_difficulty"    | t }}</span><span class="v">' + State.diff + '</span>' +
-          '<span class="k">{{ "game.minesweeper.stats_grid"          | t }}</span><span class="v">' + cfg.rows + ' × ' + cfg.cols + '</span>' +
-          '<span class="k">{{ "game.minesweeper.stats_mines_avoided" | t }}</span><span class="v">' + cfg.mines + '</span>' +
-          '<span class="k">{{ "game.minesweeper.stats_time"          | t }}</span><span class="v">' + String(elapsed).padStart(3,'0') + 's</span>' +
-          '<span class="k">{{ "game.minesweeper.stats_best"          | t }}</span><span class="v">' + (prevBest !== null && prevBest <= elapsed ? String(prevBest).padStart(3,'0')+'s' : NEW_BEST) + '</span>' +
-        '</div>' +
-        '<button class="m-btn m-btn--primary" id="play-again">$ new_game</button>';
-    } else {
-      const lostDesc = {{ ("game.minesweeper.desc_lost" | t) | dump | safe }}
-        .replace('{n}', State.revealedCount)
-        .replace('{total}', cfg.rows * cfg.cols - cfg.mines);
-      modal.className = 'modal lose';
-      modal.innerHTML =
-        '<p class="eyebrow">&gt; SEGFAULT — MINE DETONATED</p>' +
-        '<h2>{{ "game.common.game_over" | t }}</h2>' +
-        '<p>' + lostDesc + '</p>' +
-        '<div class="stats-mini">' +
-          '<span class="k">{{ "game.minesweeper.stats_difficulty" | t }}</span><span class="v">' + State.diff + '</span>' +
-          '<span class="k">{{ "game.minesweeper.stats_time"       | t }}</span><span class="v">' + String(elapsed).padStart(3,'0') + 's</span>' +
-          '<span class="k">{{ "game.minesweeper.stats_cells"      | t }}</span><span class="v">' + State.revealedCount + '</span>' +
-          '<span class="k">{{ "game.minesweeper.stats_best"       | t }}</span><span class="v">' + (prevBest !== null ? String(prevBest).padStart(3,'0')+'s' : '—') + '</span>' +
-        '</div>' +
-        '<button class="m-btn m-btn--primary" id="play-again">$ try_again</button>';
+  function renderModal(kind, opts) {
+    modal.className = 'modal ' + kind;
+    modal.textContent = '';
+    modal.appendChild(make('p', 'eyebrow', '> ' + opts.eyebrow));
+    modal.appendChild(make('h2', null, opts.title));
+    if (opts.desc) modal.appendChild(make('p', null, opts.desc));
+    if (opts.rows && opts.rows.length) {
+      const box = make('div', 'stats-mini');
+      opts.rows.forEach((row) => {
+        box.appendChild(make('span', 'k', row[0]));
+        box.appendChild(make('span', 'v', row[1]));
+      });
+      modal.appendChild(box);
     }
+    const actions = make('div', 'ms-modal__actions');
+    opts.buttons.forEach((spec) => {
+      const btn = make('button', 'm-btn ms-modal__btn ' + (spec.primary ? 'm-btn--primary' : 'm-btn--ghost'), spec.label);
+      btn.type = 'button';
+      if (spec.id) btn.id = spec.id;
+      btn.addEventListener('click', spec.onClick);
+      actions.appendChild(btn);
+    });
+    modal.appendChild(actions);
     overlay.classList.remove('hidden');
-    document.getElementById('play-again').onclick = () => build();
+    if (boardWrap) boardWrap.classList.add('is-veiled');
+    const first = actions.querySelector('button');
+    if (first) first.focus();
   }
 
-  function cellEl(r, c) { return cellEls[r * State.cols + c]; }
+  function hideOverlay(refocus) {
+    overlay.classList.add('hidden');
+    if (boardWrap) boardWrap.classList.remove('is-veiled');
+    if (refocus && (State.method === 'keyboard' || State.method === 'gamepad')) {
+      const el = cellEls[cursorIdx];
+      if (el) el.focus();
+    }
+  }
+
+  function showResult(won, elapsed, prevBest) {
+    const cfg = DIFFS[State.diff];
+    const name = COPY.names[State.diff] || State.diff;
+    const bestCell = won
+      ? ((prevBest !== null && prevBest <= elapsed) ? fmtTime(prevBest) + 's' : COPY.newBest)
+      : (prevBest !== null ? fmtTime(prevBest) + 's' : '—');
+    const rows = won
+      ? [
+          [COPY.statsDiff, name],
+          [COPY.statsGrid, cfg.rows + ' × ' + cfg.cols],
+          [COPY.statsAvoided, String(cfg.mines)],
+          [COPY.statsTime, fmtTime(elapsed) + 's'],
+          [COPY.statsBest, bestCell]
+        ]
+      : [
+          [COPY.statsDiff, name],
+          [COPY.statsTime, fmtTime(elapsed) + 's'],
+          [COPY.statsCells, String(State.revealedCount)],
+          [COPY.statsBest, bestCell]
+        ];
+    renderModal(won ? 'win' : 'lose', {
+      eyebrow: won ? COPY.eyebrowWon : COPY.eyebrowLost,
+      title: won ? COPY.titleWon : COPY.titleLost,
+      desc: won ? COPY.descWon : fill(fill(COPY.descLost, 'n', State.revealedCount), 'total', cfg.rows * cfg.cols - cfg.mines),
+      rows: rows,
+      buttons: [
+        { label: won ? COPY.btnNewGame : COPY.btnTryAgain, primary: true, id: 'play-again', onClick: () => build() }
+      ]
+    });
+  }
+
+  function showPauseMenu() {
+    renderModal('pause', {
+      eyebrow: COPY.eyebrowPaused,
+      title: COPY.titlePaused,
+      desc: COPY.descPaused,
+      rows: [
+        [COPY.statsDiff, COPY.names[State.diff] || State.diff],
+        [COPY.statsTime, fmtTime(elapsedSec()) + 's']
+      ],
+      buttons: [
+        { label: COPY.btnResume, primary: true, onClick: () => setPaused(false) },
+        { label: COPY.btnRestart, onClick: () => build() }
+      ]
+    });
+  }
+
+  function setPaused(on) {
+    if (!State.started || State.over) return;
+    if (on === State.paused) return;
+    if (on) {
+      State.paused = true;
+      State.pausedAt = performance.now();
+      showPauseMenu();
+      announce(COPY.aPaused);
+    } else {
+      State.startedAt += performance.now() - State.pausedAt;
+      State.paused = false;
+      hideOverlay(true);
+      announce(COPY.aResumed);
+    }
+    paintTime();
+  }
+
+  function togglePause() {
+    if (State.over) { build(); return; }
+    if (!State.started) { openHelp(); return; }
+    setPaused(!State.paused);
+  }
 
   function updateHUD() {
-    const remaining = Math.max(0, State.mines - State.flagsPlaced);
-    document.getElementById('stat-mines').textContent = String(remaining).padStart(2, '0');
-    const best = loadBest(State.diff);
-    document.getElementById('stat-best').textContent = best === null ? '—' : String(best).padStart(3,'0') + 's';
-    if (!State.started) {
-      document.getElementById('stat-time').textContent = '000';
+    const remaining = State.mines - State.flagsPlaced;
+    const width = Math.max(2, String(State.mines).length);
+    if (minesEl) {
+      minesEl.textContent = (remaining < 0 ? '-' : '') + String(Math.abs(remaining)).padStart(width, '0');
+      minesEl.classList.toggle('is-clear', remaining === 0);
+      minesEl.classList.toggle('is-over', remaining < 0);
     }
+    const best = loadBest(State.diff);
+    if (bestEl) bestEl.textContent = best === null ? '—' : fmtTime(best) + 's';
   }
 
   function setFlagMode(on) {
     State.flagMode = on;
-    const btn = document.getElementById('flag-toggle');
-    const lbl = document.getElementById('flag-mode-label');
-    btn.classList.toggle('flag-mode', on);
-    lbl.textContent = on
-      ? {{ ("game.minesweeper.mode_flag" | t) | dump | safe }}
-      : {{ ("game.minesweeper.mode_dig"  | t) | dump | safe }};
+    if (flagBtn) {
+      flagBtn.classList.toggle('flag-mode', on);
+      flagBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    if (flagLabel) flagLabel.textContent = on ? COPY.modeFlag : COPY.modeDig;
   }
 
   function activate(r, c) {
-    if (State.over) return;
+    if (State.over || State.paused) return;
+    if (State.flagMode) { flag(r, c); return; }
+    const cell = State.grid[r][c];
+    if (cell.flag) return;
     if (!State.started) {
       placeMines(r, c);
       State.started = true;
       startTimer();
     }
-    if (State.flagMode) { flag(r, c); return; }
-    const cell = State.grid[r][c];
-    if (cell.flag) return;
-    if (cell.revealed) {
-      chord(r, c);
-    } else {
-      reveal(r, c);
-    }
+    if (cell.revealed) { chordAt(r, c); return; }
+    reveal(r, c);
     if (!State.over) announce(cellStateText(r, c));
   }
 
-  boardEl.addEventListener('contextmenu', e => {
+  boardEl.addEventListener('pointerdown', (e) => {
+    setMethod(e.pointerType === 'touch' || e.pointerType === 'pen' ? 'touch' : 'mouse');
+  }, { passive: true });
+
+  boardEl.addEventListener('contextmenu', (e) => {
     e.preventDefault();
-    if (State.over) return;
+    if (State.over || State.paused) return;
     const t = e.target.closest('.cell');
     if (!t) return;
-    const r = +t.dataset.r, c = +t.dataset.c;
-    if (!State.started) return;
-    flag(r, c);
+    flag(+t.dataset.r, +t.dataset.c);
   });
 
-  boardEl.addEventListener('click', e => {
-    if (State.over) return;
+  boardEl.addEventListener('click', (e) => {
+    if (State.over || State.paused) return;
     if (longPressed) { longPressed = false; return; }
     const t = e.target.closest('.cell');
     if (!t) return;
+    const idx = (+t.dataset.r) * State.cols + (+t.dataset.c);
+    setCursor(idx, false);
     activate(+t.dataset.r, +t.dataset.c);
   });
 
-  let longPressed = false;
-  boardEl.addEventListener('touchstart', e => {
+  boardEl.addEventListener('touchstart', (e) => {
+    if (State.over || State.paused) return;
     const t = e.target.closest('.cell');
-    if (!t || State.over) return;
+    if (!t) return;
     longPressed = false;
     const r = +t.dataset.r, c = +t.dataset.c;
     const id = setTimeout(() => {
-      if (!State.started) return;
+      State.pressTimers.delete(t);
+      if (State.over || State.paused) return;
       flag(r, c);
       longPressed = true;
-      if (navigator.vibrate) navigator.vibrate(20);
-      State.pressTimers.delete(t);
-    }, 350);
+      try { if (navigator.vibrate) navigator.vibrate(18); } catch (_) {}
+    }, LONG_PRESS_MS);
     State.pressTimers.set(t, id);
   }, { passive: true });
-  boardEl.addEventListener('touchend', e => {
-    const t = e.target.closest('.cell');
-    if (!t) return;
+
+  function clearPress(t) {
     const id = State.pressTimers.get(t);
     if (id) { clearTimeout(id); State.pressTimers.delete(t); }
+  }
+  boardEl.addEventListener('touchend', (e) => {
+    const t = e.target.closest('.cell');
+    if (!t) return;
+    clearPress(t);
     if (longPressed) { e.preventDefault(); longPressed = false; }
   });
-  boardEl.addEventListener('touchmove', e => {
+  boardEl.addEventListener('touchmove', (e) => {
     const t = e.target.closest('.cell');
     if (!t) return;
-    const id = State.pressTimers.get(t);
-    if (id) { clearTimeout(id); State.pressTimers.delete(t); }
+    clearPress(t);
+  }, { passive: true });
+  boardEl.addEventListener('touchcancel', (e) => {
+    const t = e.target && e.target.closest ? e.target.closest('.cell') : null;
+    if (t) clearPress(t);
+    longPressed = false;
   }, { passive: true });
 
-  boardEl.addEventListener('focusin', e => {
+  boardEl.addEventListener('focusin', (e) => {
     const t = e.target.closest('.cell');
     if (!t) return;
     const idx = (+t.dataset.r) * State.cols + (+t.dataset.c);
-    if (idx !== focusIdx) setRoving(idx, false);
+    if (idx !== cursorIdx) setCursor(idx, false);
   });
 
-  boardEl.addEventListener('keydown', e => {
+  boardEl.addEventListener('keydown', (e) => {
     const t = e.target.closest('.cell');
     if (!t) return;
+    setMethod('keyboard');
     const r = +t.dataset.r, c = +t.dataset.c;
     const idx = r * State.cols + c;
-    switch (e.key) {
-      case 'ArrowUp':    e.preventDefault(); if (r > 0) setRoving(idx - State.cols, true); return;
-      case 'ArrowDown':  e.preventDefault(); if (r < State.rows - 1) setRoving(idx + State.cols, true); return;
-      case 'ArrowLeft':  e.preventDefault(); if (c > 0) setRoving(idx - 1, true); return;
-      case 'ArrowRight': e.preventDefault(); if (c < State.cols - 1) setRoving(idx + 1, true); return;
-      case 'Home':       e.preventDefault(); setRoving(r * State.cols, true); return;
-      case 'End':        e.preventDefault(); setRoving(r * State.cols + State.cols - 1, true); return;
-      case 'Enter':
-      case ' ':
-      case 'Spacebar':   e.preventDefault(); activate(r, c); return;
-      case 'f':
-      case 'F':
-        e.preventDefault(); e.stopPropagation();
-        if (State.over || !State.started) return;
-        flag(r, c);
-        return;
+    const k = e.key;
+    if (k === 'ArrowUp') { e.preventDefault(); if (r > 0) setCursor(idx - State.cols, true); return; }
+    if (k === 'ArrowDown') { e.preventDefault(); if (r < State.rows - 1) setCursor(idx + State.cols, true); return; }
+    if (k === 'ArrowLeft') { e.preventDefault(); if (c > 0) setCursor(idx - 1, true); return; }
+    if (k === 'ArrowRight') { e.preventDefault(); if (c < State.cols - 1) setCursor(idx + 1, true); return; }
+    if (k === 'Home') { e.preventDefault(); setCursor(r * State.cols, true); return; }
+    if (k === 'End') { e.preventDefault(); setCursor(r * State.cols + State.cols - 1, true); return; }
+    if (k === 'Enter' || k === ' ' || k === 'Spacebar') { e.preventDefault(); activate(r, c); return; }
+    if (k === 'f' || k === 'F') { e.preventDefault(); e.stopPropagation(); flag(r, c); return; }
+    if (k === 'c' || k === 'C') { e.preventDefault(); e.stopPropagation(); chordAt(r, c); }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    const k = e.key;
+    if (k === 'Escape') {
+      if (isHelpOpen()) return;
+      if (State.paused) setPaused(false);
+      return;
+    }
+    if (isHelpOpen()) return;
+    if (k === '?') { openHelp(); return; }
+    if (k === 'f' || k === 'F') { setMethod('keyboard'); setFlagMode(!State.flagMode); return; }
+    if (k === 'r' || k === 'R') { setMethod('keyboard'); build(); return; }
+    if (k === 'p' || k === 'P') { setMethod('keyboard'); togglePause(); return; }
+    if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'ArrowLeft' || k === 'ArrowRight') {
+      if (document.activeElement && document.activeElement !== document.body) return;
+      if (State.over || State.paused) return;
+      e.preventDefault();
+      setMethod('keyboard');
+      const el = cellEls[cursorIdx];
+      if (el) el.focus();
     }
   });
 
-  document.addEventListener('keydown', e => {
-    if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
-    if (e.key === 'f' || e.key === 'F') setFlagMode(!State.flagMode);
-    else if (e.key === 'r' || e.key === 'R') build();
+  window.addEventListener('mentria:gamepad:direction', (e) => {
+    if (!e.detail) return;
+    setMethod('gamepad');
+    if (State.over || State.paused) return;
+    const d = e.detail.direction;
+    const r = cursorRow(), c = cursorCol();
+    if (d === 'up' && r > 0) setCursor(cursorIdx - State.cols, true);
+    else if (d === 'down' && r < State.rows - 1) setCursor(cursorIdx + State.cols, true);
+    else if (d === 'left' && c > 0) setCursor(cursorIdx - 1, true);
+    else if (d === 'right' && c < State.cols - 1) setCursor(cursorIdx + 1, true);
   });
 
-  MentriaUI.segmented(document.getElementById('diff-seg'), (value) => {
-    State.diff = value;
-    build();
+  window.addEventListener('mentria:gamepad:button', (e) => {
+    if (!e.detail || !e.detail.pressed) return;
+    setMethod('gamepad');
+    const n = e.detail.name;
+    if (n === 'start') { togglePause(); return; }
+    if (State.over) { if (n === 'a' || n === 'b') build(); return; }
+    if (State.paused) { if (n === 'a' || n === 'b') setPaused(false); return; }
+    const r = cursorRow(), c = cursorCol();
+    if (n === 'a') activate(r, c);
+    else if (n === 'b') flag(r, c);
+    else if (n === 'x') chordAt(r, c);
+    else if (n === 'y') setFlagMode(!State.flagMode);
   });
 
-  document.getElementById('flag-toggle').addEventListener('click', () => setFlagMode(!State.flagMode));
-  document.getElementById('restart-btn').addEventListener('click', () => build());
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && State.started && !State.over && !State.paused) setPaused(true);
+  });
 
+  if (window.MentriaUI && typeof window.MentriaUI.segmented === 'function') {
+    window.MentriaUI.segmented(document.getElementById('diff-seg'), (value) => {
+      if (!DIFFS[value]) return;
+      State.diff = value;
+      storeSet('games', 'msw_diff', value);
+      build();
+    });
+  }
+
+  if (flagBtn) flagBtn.addEventListener('click', () => setFlagMode(!State.flagMode));
+  const pauseBtn = document.getElementById('pause-btn');
+  if (pauseBtn) pauseBtn.addEventListener('click', () => togglePause());
+  const restartBtn = document.getElementById('restart-btn');
+  if (restartBtn) restartBtn.addEventListener('click', () => build());
+
+  if (helpEl) {
+    helpEl.addEventListener('toggle', (e) => {
+      if (e.newState === 'open' && methodEl) {
+        methodEl.textContent = METHOD_LABELS[State.method] || METHOD_LABELS[storeGet(HELP_NS, METHOD_KEY)] || '—';
+      }
+    });
+  }
+
+  window.addEventListener('resize', centerBoard);
+
+  const savedDiff = storeGet('games', 'msw_diff');
+  if (savedDiff && DIFFS[savedDiff]) {
+    State.diff = savedDiff;
+    const seg = document.getElementById('diff-seg');
+    if (seg) {
+      Array.prototype.forEach.call(seg.querySelectorAll('button'), (b) => {
+        b.classList.toggle('is-active', b.getAttribute('data-value') === savedDiff);
+      });
+    }
+  }
+
+  const lastMethod = storeGet(HELP_NS, METHOD_KEY);
+  if (methodEl && METHOD_LABELS[lastMethod]) methodEl.textContent = METHOD_LABELS[lastMethod];
+
+  setFlagMode(false);
   build();
+
+  if (!storeGet(HELP_NS, HELP_KEY)) {
+    setTimeout(() => {
+      openHelp();
+      storeSet(HELP_NS, HELP_KEY, true);
+    }, 700);
+  }
 })();
 </script>

@@ -23,28 +23,85 @@ eleventyComputed:
 {% set terminalHelpId = "sudoku-help" %}
 {% include "terminal-frame-open.njk" %}
 
-<div id="sudoku-help" popover class="game-help">
+<div id="sudoku-help" popover class="game-help sk-help">
   <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
-  <ul class="game-help-list">
-    <li><span><span class="kbd">1</span>–<span class="kbd">9</span></span><span class="game-help-label">{{ "tool.sudoku.key_place" | t }}</span></li>
-    <li><span><span class="kbd">⌫</span></span><span class="game-help-label">{{ "tool.sudoku.key_erase" | t }}</span></li>
-    <li><span><span class="kbd">N</span></span><span class="game-help-label">{{ "tool.sudoku.key_notes" | t }}</span></li>
-    <li><span><span class="kbd">H</span></span><span class="game-help-label">{{ "tool.sudoku.key_hint" | t }}</span></li>
-    <li><span><span class="kbd">↑↓←→</span></span><span class="game-help-label">{{ "tool.sudoku.key_move" | t }}</span></li>
-  </ul>
+  <div class="sk-help__grid">
+
+    <section class="sk-help__method" data-method="touch">
+      <h3 class="sk-help__head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 10.5V5a1.5 1.5 0 0 1 3 0v5"/><path d="M13 10V8.5a1.5 1.5 0 0 1 3 0V11"/><path d="M16 11v-.5a1.5 1.5 0 0 1 3 0V15a5 5 0 0 1-5 5h-1.4a4 4 0 0 1-3.3-1.8L6.1 14.3a1.5 1.5 0 0 1 2.3-1.9L10 14.2"/></svg>
+        <span>{{ "tool.sudoku.ctrl_touch" | t }}</span>
+        <span class="sk-help__badge" hidden>{{ "tool.sudoku.ctrl_last_used" | t }}</span>
+      </h3>
+      <ul class="game-help-list">
+        <li><span class="sk-help__keys"><span class="kbd">{{ "tool.sudoku.touch_tap" | t }}</span></span><span class="game-help-label">{{ "tool.sudoku.touch_select" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">{{ "tool.sudoku.touch_hold" | t }}</span></span><span class="game-help-label">{{ "tool.sudoku.touch_note" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">⌫</span></span><span class="game-help-label">{{ "tool.sudoku.touch_erase" | t }}</span></li>
+      </ul>
+    </section>
+
+    <section class="sk-help__method" data-method="keyboard">
+      <h3 class="sk-help__head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>
+        <span>{{ "tool.sudoku.ctrl_keyboard" | t }}</span>
+        <span class="sk-help__badge" hidden>{{ "tool.sudoku.ctrl_last_used" | t }}</span>
+      </h3>
+      <ul class="game-help-list">
+        <li><span class="sk-help__keys"><span class="kbd">↑↓←→</span></span><span class="game-help-label">{{ "tool.sudoku.key_move" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">1</span>–<span class="kbd">9</span></span><span class="game-help-label">{{ "tool.sudoku.key_place" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">0</span><span class="kbd">⌫</span></span><span class="game-help-label">{{ "tool.sudoku.key_erase" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">N</span></span><span class="game-help-label">{{ "tool.sudoku.key_notes" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">H</span></span><span class="game-help-label">{{ "tool.sudoku.key_hint" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">U</span></span><span class="game-help-label">{{ "tool.sudoku.key_undo" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">C</span></span><span class="game-help-label">{{ "tool.sudoku.key_check" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">P</span></span><span class="game-help-label">{{ "tool.sudoku.key_pause" | t }}</span></li>
+      </ul>
+    </section>
+
+    <section class="sk-help__method" data-method="controller">
+      <h3 class="sk-help__head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8h10a5 5 0 0 1 5 5v1a3 3 0 0 1-5.3 1.9L15.2 14H8.8l-1.5 1.9A3 3 0 0 1 2 14v-1a5 5 0 0 1 5-5Z"/><path d="M7 10.5v3M5.5 12h3"/><path d="M16.4 11.4h.01M18.4 13.2h.01"/></svg>
+        <span>{{ "tool.sudoku.ctrl_controller" | t }}</span>
+        <span class="sk-help__badge" hidden>{{ "tool.sudoku.ctrl_last_used" | t }}</span>
+      </h3>
+      <ul class="game-help-list">
+        <li><span class="sk-help__keys"><span class="kbd">{{ "tool.sudoku.pad_dpad" | t }}</span></span><span class="game-help-label">{{ "tool.sudoku.key_move" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">A</span></span><span class="game-help-label">{{ "tool.sudoku.pad_a" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">B</span></span><span class="game-help-label">{{ "tool.sudoku.pad_b" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">X</span></span><span class="game-help-label">{{ "tool.sudoku.key_notes" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">Y</span></span><span class="game-help-label">{{ "tool.sudoku.key_hint" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">LB</span></span><span class="game-help-label">{{ "tool.sudoku.key_undo" | t }}</span></li>
+        <li><span class="sk-help__keys"><span class="kbd">{{ "tool.sudoku.pad_start_key" | t }}</span></span><span class="game-help-label">{{ "tool.sudoku.key_pause" | t }}</span></li>
+      </ul>
+    </section>
+
+  </div>
+  <div class="sk-help__foot">
+    <button type="button" class="sk-help__close" popovertarget="sudoku-help" popovertargetaction="hide">{{ "tool.sudoku.help_close" | t }}</button>
+  </div>
 </div>
 
-<div class="sudoku-app">
+<div class="sudoku-app" id="sk-app">
   <div class="controls">
-    <span class="ctrl-label">{{ "tool.sudoku.level" | t }}</span>
-    <div class="m-seg" id="diff-seg">
-      <button data-d="easy" data-value="easy">{{ "tool.sudoku.diff_easy" | t }}</button>
-      <button data-d="medium" data-value="medium" class="is-active">{{ "tool.sudoku.diff_medium" | t }}</button>
-      <button data-d="hard" data-value="hard">{{ "tool.sudoku.diff_hard" | t }}</button>
-      <button data-d="expert" data-value="expert">{{ "tool.sudoku.diff_expert" | t }}</button>
+    <div class="ctrl-group">
+      <span class="ctrl-label" id="sk-diff-label">{{ "tool.sudoku.level" | t }}</span>
+      <div class="m-seg" id="diff-seg" aria-labelledby="sk-diff-label">
+        <button type="button" data-d="easy" data-value="easy">{{ "tool.sudoku.diff_easy" | t }}</button>
+        <button type="button" data-d="medium" data-value="medium" class="is-active">{{ "tool.sudoku.diff_medium" | t }}</button>
+        <button type="button" data-d="hard" data-value="hard">{{ "tool.sudoku.diff_hard" | t }}</button>
+        <button type="button" data-d="expert" data-value="expert">{{ "tool.sudoku.diff_expert" | t }}</button>
+      </div>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label" id="sk-err-label">{{ "tool.sudoku.errors_label" | t }}</span>
+      <div class="m-seg" id="sk-err-seg" aria-labelledby="sk-err-label">
+        <button type="button" data-value="off">{{ "tool.sudoku.err_off" | t }}</button>
+        <button type="button" data-value="check">{{ "tool.sudoku.err_check" | t }}</button>
+        <button type="button" data-value="live" class="is-active">{{ "tool.sudoku.err_live" | t }}</button>
+      </div>
     </div>
     <div class="stats-spread">
-      <div class="stat-item"><span class="stat-key">{{ "tool.sudoku.stat_mistakes" | t }}</span><span class="stat-val pink" id="stat-mistakes">0/3</span></div>
+      <div class="stat-item" id="sk-stat-mistakes"><span class="stat-key">{{ "tool.sudoku.stat_mistakes" | t }}</span><span class="stat-val pink" id="stat-mistakes">0/3</span></div>
       <div class="stat-item"><span class="stat-key">{{ "tool.sudoku.stat_time" | t }}</span><span class="stat-val cyan" id="stat-time">0:00</span></div>
       <div class="stat-item"><span class="stat-key">{{ "tool.sudoku.stat_best" | t }}</span><span class="stat-val amber" id="stat-best">—</span></div>
     </div>
@@ -57,13 +114,16 @@ eleventyComputed:
 
   <div id="sk-live" class="sr-only" role="status" aria-live="polite"></div>
 
-  <div class="keypad" id="keypad"></div>
+  <div class="keypad" id="keypad" role="group" aria-label="{{ 'tool.sudoku.keypad_label' | t }}"></div>
 
   <div class="toolbar">
-    <button class="btn" id="btn-notes">✎ {{ "tool.sudoku.btn_notes" | t }} <span class="badge" id="notes-state">{{ "tool.sudoku.off" | t }}</span></button>
-    <button class="btn" id="btn-erase">⌫ {{ "tool.sudoku.btn_erase" | t }}</button>
-    <button class="btn" id="btn-hint">◇ {{ "tool.sudoku.btn_hint" | t }} <span class="badge" id="hint-count">3</span></button>
-    <button class="btn primary" id="btn-new">{{ "tool.sudoku.btn_new" | t }}</button>
+    <button type="button" class="btn" id="sk-undo" disabled>↺ {{ "tool.sudoku.btn_undo" | t }}</button>
+    <button type="button" class="btn" id="btn-notes">✎ {{ "tool.sudoku.btn_notes" | t }} <span class="badge" id="notes-state">{{ "tool.sudoku.off" | t }}</span></button>
+    <button type="button" class="btn" id="btn-erase">⌫ {{ "tool.sudoku.btn_erase" | t }}</button>
+    <button type="button" class="btn" id="btn-hint">◇ {{ "tool.sudoku.btn_hint" | t }} <span class="badge" id="hint-count">3</span></button>
+    <button type="button" class="btn" id="sk-check" hidden>✓ {{ "tool.sudoku.btn_check" | t }}</button>
+    <button type="button" class="btn" id="sk-pause"><span aria-hidden="true">⏸</span> <span id="sk-pause-label">{{ "tool.sudoku.btn_pause" | t }}</span></button>
+    <button type="button" class="btn primary" id="btn-new">{{ "tool.sudoku.btn_new" | t }}</button>
   </div>
 </div>
 
@@ -73,12 +133,14 @@ eleventyComputed:
 
 <style>
   .sudoku-app .controls { display: flex; align-items: center; gap: 14px; padding: 12px 4px 16px; flex-wrap: wrap; }
+  .sudoku-app .ctrl-group { display: flex; align-items: center; gap: 8px; }
   .sudoku-app .ctrl-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
   .sudoku-app .stats-spread { margin-left: auto; display: flex; gap: 16px; font-size: 13px; }
   .sudoku-app .stat-item { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
   .sudoku-app .stat-key { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); }
   .sudoku-app .stat-val { font-weight: 700; font-variant-numeric: tabular-nums; }
   .sudoku-app .stat-val.cyan { color: var(--syn-cyan); } .sudoku-app .stat-val.pink { color: var(--syn-pink); } .sudoku-app .stat-val.amber { color: var(--syn-amber); }
+  .sudoku-app .stat-item.is-muted .stat-val { color: var(--term-subtle); }
 
   .sudoku-app .board-wrap { position: relative; display: flex; justify-content: center; padding: 8px 0 16px; }
   .sudoku-app .board {
@@ -89,6 +151,8 @@ eleventyComputed:
     transition: opacity 0.15s ease;
   }
   .board.is-generating { opacity: 0.45; pointer-events: none; }
+  .sudoku-app .board.is-paused { visibility: hidden; }
+  .sudoku-app.is-paused .keypad { opacity: 0.3; pointer-events: none; }
   .sudoku-app .sq {
     position: relative; display: flex; align-items: center; justify-content: center;
     font-weight: 600; font-size: clamp(15px, 4.4vw, 24px); color: var(--syn-cyan);
@@ -101,7 +165,7 @@ eleventyComputed:
   .sudoku-app .sq[data-r="8"] { border-bottom: none; }
   .sudoku-app .sq.given { color: var(--term-fg-strong); font-weight: 700; }
   .sudoku-app .sq.peer { background: rgba(255,255,255,0.022); }
-  .sudoku-app .sq.samenum { background: var(--cyan-8); }
+  .sudoku-app .sq.samenum { background: var(--cyan-8); box-shadow: inset 0 0 0 1px var(--cyan-15); }
   .sudoku-app .sq.sel { background: var(--cyan-15) !important; box-shadow: inset 0 0 0 2px var(--syn-cyan); }
   .sudoku-app .sq:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -2px; }
   .sudoku-app .sq-row { display: contents; }
@@ -112,23 +176,29 @@ eleventyComputed:
 
   .sudoku-app .notes { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); pointer-events: none; padding: 2px; }
   .sudoku-app .note-cell { display: flex; align-items: center; justify-content: center; font-size: clamp(6px, 1.6vw, 9px); color: var(--term-muted); font-weight: 500; line-height: 1; }
+  .sudoku-app .note-cell.is-hot { color: var(--syn-cyan); }
 
-  .sudoku-app .keypad { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; padding: 4px 0 14px; }
-  .sudoku-app .key { min-width: 0; aspect-ratio: 1; min-height: 40px; background: var(--term-surface-2); border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); color: var(--term-fg); font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; position: relative; transition: all 100ms; -webkit-tap-highlight-color: transparent; cursor: pointer; font-family: var(--font-mono); }
+  .sudoku-app .keypad { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px; padding: 4px 0 14px; width: 100%; max-width: 620px; margin: 0 auto; }
+  .sudoku-app .key { min-width: 0; aspect-ratio: 1; min-height: 46px; max-height: 62px; background: var(--term-surface-2); border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); color: var(--term-fg); font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; position: relative; transition: border-color 120ms, color 120ms, background 120ms; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; touch-action: manipulation; cursor: pointer; font-family: var(--font-mono); }
   .sudoku-app .key:hover { border-color: var(--cyan-30); color: var(--syn-cyan); }
   .sudoku-app .key:active { background: var(--term-surface-3); }
-  .sudoku-app .key .remain { position: absolute; bottom: 1px; right: 3px; font-size: 8px; color: var(--term-subtle); font-weight: 500; }
-  .sudoku-app .key.done { opacity: 0.3; }
+  .sudoku-app .key:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: 2px; }
+  .sudoku-app .key .remain { position: absolute; bottom: 2px; right: 4px; font-size: 9px; color: var(--term-subtle); font-weight: 500; }
+  .sudoku-app .key.done { opacity: 0.32; }
+  .sudoku-app .key.is-padsel { border-color: var(--syn-cyan); color: var(--syn-cyan); background: var(--cyan-8); box-shadow: 0 0 0 2px var(--cyan-30); }
+  .sudoku-app .key--erase { color: var(--term-muted); font-size: 16px; }
 
   .sudoku-app .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
-  .sudoku-app .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-weight: 600; font-size: 12px; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--term-border); background: transparent; color: var(--term-muted); transition: all 120ms; font-family: var(--font-mono); cursor: pointer; }
+  .sudoku-app .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-weight: 600; font-size: 12px; padding: 10px 12px; min-height: 44px; border-radius: var(--radius-md); border: 1px solid var(--term-border); background: transparent; color: var(--term-muted); transition: all 120ms; font-family: var(--font-mono); cursor: pointer; }
   .sudoku-app .btn:hover { border-color: var(--term-border-strong); color: var(--term-fg); }
   .sudoku-app .btn.active { border-color: var(--syn-cyan); color: var(--syn-cyan); background: var(--cyan-8); }
   .sudoku-app .btn.primary { border-color: var(--syn-cyan); color: var(--syn-cyan); background: var(--cyan-8); }
   .sudoku-app .btn.primary::before { content: "$ "; }
   .sudoku-app .btn .badge { font-size: 9px; padding: 1px 5px; border-radius: 999px; background: var(--term-surface-3); color: var(--term-muted); }
+  .sudoku-app .btn:disabled { opacity: 0.35; cursor: default; }
+  .sudoku-app .btn[hidden] { display: none; }
 
-  .sudoku-app .overlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5,5,7,0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 5; padding: 16px; }
+  .sudoku-app .overlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5,5,7,0.92); z-index: 5; padding: 16px; }
   .sudoku-app .overlay.show { display: flex; }
   .sudoku-app .modal { background: var(--term-surface-2); border: 1px solid var(--syn-cyan); border-radius: var(--radius-lg); padding: 24px 28px; text-align: center; max-width: 340px; box-shadow: var(--elev-3), var(--glow-cyan); }
   .sudoku-app .modal .eyebrow { font-size: 11px; letter-spacing: 0.15em; margin: 0 0 8px; color: var(--syn-cyan); }
@@ -136,10 +206,25 @@ eleventyComputed:
   .sudoku-app .modal .stats-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--term-border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 18px; font-size: 12px; text-align: left; }
   .sudoku-app .stats-mini .k { color: var(--term-muted); } .sudoku-app .stats-mini .v { color: var(--syn-cyan); font-weight: 600; text-align: right; }
 
-  @media (max-width: 560px) {
+  .sk-help { position: fixed; inset: 0; margin: auto; height: fit-content; width: fit-content; max-width: min(680px, calc(100vw - 1.5rem)); max-height: min(88vh, 760px); overflow: auto; }
+  .sk-help__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(186px, 1fr)); gap: 12px; }
+  .sk-help__method { border: 1px solid var(--term-border); border-radius: 8px; padding: 10px 12px 12px; background: rgba(255,255,255,0.02); }
+  .sk-help__method.is-last { border-color: var(--cyan-30); background: var(--cyan-8); }
+  .sk-help__head { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--term-fg-strong); font-weight: 700; }
+  .sk-help__head svg { width: 16px; height: 16px; flex: none; color: var(--syn-cyan); }
+  .sk-help__badge { margin-left: auto; font-size: 8px; padding: 2px 6px; border-radius: 999px; background: var(--cyan-15); color: var(--syn-cyan); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+  .sk-help__badge[hidden] { display: none; }
+  .sk-help .game-help-list li { align-items: center; gap: 0.5rem; }
+  .sk-help__keys { display: flex; align-items: center; gap: 2px; flex: none; min-width: 64px; }
+  .sk-help__keys .kbd { margin-right: 0; }
+  .sk-help__foot { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .sk-help__close { font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 8px 14px; min-height: 44px; border-radius: var(--radius-md); border: 1px solid var(--syn-cyan); background: var(--cyan-8); color: var(--syn-cyan); cursor: pointer; }
+
+  @media (max-width: 620px) {
     .sudoku-app .stats-spread { width: 100%; justify-content: space-between; margin-left: 0; }
-    .sudoku-app .keypad { gap: 4px; }
-    .sudoku-app .key { min-height: 36px; font-size: 16px; }
+    .sudoku-app .keypad { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; max-width: 420px; }
+    .sudoku-app .key { aspect-ratio: auto; height: 54px; max-height: none; font-size: 20px; }
+    .sudoku-app .btn { flex: 1 1 auto; }
   }
 </style>
 
@@ -147,6 +232,9 @@ eleventyComputed:
 (() => {
   'use strict';
   const DIFF = { easy: 40, medium: 32, hard: 28, expert: 24 };
+  const UNDO_CAP = 60;
+  const HOLD_MS = 420;
+  const PAD_SLOTS = 10;
 
   const COPY = {
     notesOn:  {{ ("tool.sudoku.on"  | t) | dump | safe }},
@@ -163,6 +251,16 @@ eleventyComputed:
     mBest:     {{ ("tool.sudoku.mlabel_best"     | t) | dump | safe }},
     hintToast: {{ ("tool.sudoku.toast_hint"      | t) | dump | safe }},
     boardLabel: {{ ("tool.sudoku.board_label" | t) | dump | safe }},
+    btnErase:  {{ ("tool.sudoku.btn_erase"  | t) | dump | safe }},
+    btnPause:  {{ ("tool.sudoku.btn_pause"  | t) | dump | safe }},
+    btnResume: {{ ("tool.sudoku.btn_resume" | t) | dump | safe }},
+    pausedEyebrow: {{ ("tool.sudoku.paused_eyebrow" | t) | dump | safe }},
+    pausedTitle:   {{ ("tool.sudoku.paused_title"   | t) | dump | safe }},
+    checkClean: {{ ("tool.sudoku.toast_check_clean" | t) | dump | safe }},
+    checkFound: {{ ("tool.sudoku.toast_check_found" | t) | dump | safe }},
+    undoEmpty:  {{ ("tool.sudoku.toast_undo_empty"  | t) | dump | safe }},
+    padKeyAria: {{ ("tool.sudoku.pad_key_aria"  | t) | dump | safe }},
+    padKeyDone: {{ ("tool.sudoku.pad_key_done"  | t) | dump | safe }},
     aPos:     {{ ("tool.sudoku.a11y_pos"     | t) | dump | safe }},
     aEmpty:   {{ ("tool.sudoku.a11y_empty"   | t) | dump | safe }},
     aGiven:   {{ ("tool.sudoku.a11y_given"   | t) | dump | safe }},
@@ -172,6 +270,13 @@ eleventyComputed:
     aErased:  {{ ("tool.sudoku.a11y_erased"  | t) | dump | safe }},
     aWin:     {{ ("tool.sudoku.a11y_win"     | t) | dump | safe }},
     aOver:    {{ ("tool.sudoku.a11y_over"    | t) | dump | safe }},
+    aUndo:    {{ ("tool.sudoku.a11y_undo"    | t) | dump | safe }},
+    aPaused:  {{ ("tool.sudoku.a11y_paused"  | t) | dump | safe }},
+    aResumed: {{ ("tool.sudoku.a11y_resumed" | t) | dump | safe }},
+    aPadOpen: {{ ("tool.sudoku.a11y_pad_open" | t) | dump | safe }},
+    aPadShut: {{ ("tool.sudoku.a11y_pad_closed" | t) | dump | safe }},
+    aNoteOn:  {{ ("tool.sudoku.a11y_note_on"  | t) | dump | safe }},
+    aNoteOff: {{ ("tool.sudoku.a11y_note_off" | t) | dump | safe }},
     diff: {
       easy:   {{ ("tool.sudoku.diff_easy"   | t) | dump | safe }},
       medium: {{ ("tool.sudoku.diff_medium" | t) | dump | safe }},
@@ -182,22 +287,53 @@ eleventyComputed:
 
   const State = {
     diff: 'medium',
-    solution: [], puzzle: [], grid: [], notes: [], given: [],
-    sel: -1, notesMode: false,
+    solution: [], puzzle: [], grid: [], notes: [], given: [], flag: [],
+    sel: -1, notesMode: false, errMode: 'live',
     mistakes: 0, maxMistakes: 3, hints: 3,
     started: 0, timer: null, elapsed: 0,
-    over: false, won: false,
+    over: false, won: false, paused: false,
+    padOpen: false, padIdx: 0,
+    undo: [], lastInput: ''
   };
 
+  const appEl = document.getElementById('sk-app');
   const boardEl = document.getElementById('board');
   const keypadEl = document.getElementById('keypad');
   const overlay = document.getElementById('overlay');
   const liveEl = document.getElementById('sk-live');
+  const helpEl = document.getElementById('sudoku-help');
+  const undoBtn = document.getElementById('sk-undo');
+  const checkBtn = document.getElementById('sk-check');
+  const pauseBtn = document.getElementById('sk-pause');
+  const pauseLabel = document.getElementById('sk-pause-label');
+  const notesBtn = document.getElementById('btn-notes');
+  const notesStateEl = document.getElementById('notes-state');
+  const hintCountEl = document.getElementById('hint-count');
+  const mistakeItem = document.getElementById('sk-stat-mistakes');
   let cellEls = [];
+  let helpOpen = false;
 
   function announce(msg){ if (liveEl){ liveEl.textContent = ''; liveEl.textContent = msg; } }
   function tabbableIdx(){ return State.sel >= 0 ? State.sel : 40; }
   function focusCell(i){ const el = cellEls[i]; if (el) el.focus(); }
+
+  function prefGet(ns, key, fallback){
+    try {
+      if (window.MentriaStore){
+        const v = window.MentriaStore.get(ns, key);
+        return (v === null || v === undefined) ? fallback : v;
+      }
+      const raw = localStorage.getItem('mentria_' + key);
+      if (raw === null) return fallback;
+      return JSON.parse(raw);
+    } catch (e){ return fallback; }
+  }
+  function prefSet(ns, key, val){
+    try {
+      if (window.MentriaStore) window.MentriaStore.set(ns, key, val);
+      else localStorage.setItem('mentria_' + key, JSON.stringify(val));
+    } catch (e){}
+  }
 
   function readBest(diff) {
     const k = 'sudoku_best_' + diff;
@@ -219,6 +355,7 @@ eleventyComputed:
     const data = {
       diff: State.diff, solution: State.solution, puzzle: State.puzzle,
       grid: State.grid, given: State.given, notes: State.notes.map(s => Array.from(s)),
+      flag: State.flag, errMode: State.errMode,
       mistakes: State.mistakes, hints: State.hints, elapsed: State.elapsed, notesMode: State.notesMode
     };
     try {
@@ -243,6 +380,8 @@ eleventyComputed:
       State.grid = d.grid;
       State.given = Array.isArray(d.given) && d.given.length === 81 ? d.given : State.puzzle.map(v => v !== 0);
       State.notes = Array.from({length:81}, (_, i) => new Set(Array.isArray(d.notes && d.notes[i]) ? d.notes[i] : []));
+      State.flag = Array.isArray(d.flag) && d.flag.length === 81 ? d.flag : new Array(81).fill(false);
+      State.errMode = validErrMode(d.errMode) ? d.errMode : State.errMode;
       State.mistakes = d.mistakes || 0;
       State.hints = typeof d.hints === 'number' ? d.hints : 3;
       State.elapsed = d.elapsed || 0;
@@ -250,6 +389,7 @@ eleventyComputed:
       return true;
     } catch(e){ return false; }
   }
+  function validErrMode(m){ return m === 'off' || m === 'check' || m === 'live'; }
 
   function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
   function solveCount(g, limit){
@@ -333,13 +473,19 @@ eleventyComputed:
     State.grid = puzzle.slice();
     State.given = puzzle.map(v => v !== 0);
     State.notes = Array.from({length:81}, () => new Set());
+    State.flag = new Array(81).fill(false);
+    State.undo = [];
     State.sel = -1; State.mistakes = 0; State.hints = 3;
     State.over = false; State.won = false; State.elapsed = 0;
+    State.paused = false; State.padOpen = false; State.padIdx = 0;
     if (State.timer) clearInterval(State.timer);
     State.started = performance.now();
     State.timer = setInterval(tick, 1000);
     overlay.classList.remove('show');
-    document.getElementById('hint-count').textContent = State.hints;
+    boardEl.classList.remove('is-paused');
+    appEl.classList.remove('is-paused');
+    hintCountEl.textContent = State.hints;
+    syncPauseBtn(); syncUndoBtn(); syncErrUI();
     buildBoard(); render(); updateHUD(); save();
   }
   function resume(){
@@ -347,16 +493,18 @@ eleventyComputed:
     State.started = performance.now() - State.elapsed*1000;
     State.timer = setInterval(tick, 1000);
     overlay.classList.remove('show');
-    document.getElementById('hint-count').textContent = State.hints;
+    hintCountEl.textContent = State.hints;
     if (State.notesMode){
-      document.getElementById('btn-notes').classList.add('active');
-      document.getElementById('notes-state').textContent = COPY.notesOn;
+      notesBtn.classList.add('active');
+      notesStateEl.textContent = COPY.notesOn;
     }
     diffSeg.set(State.diff);
+    errSeg.set(State.errMode);
+    syncPauseBtn(); syncUndoBtn(); syncErrUI();
     buildBoard(); render(); updateHUD();
   }
   function tick(){
-    if (State.over) return;
+    if (State.over || State.paused) return;
     State.elapsed = Math.floor((performance.now() - State.started)/1000);
     document.getElementById('stat-time').textContent = fmt(State.elapsed);
   }
@@ -385,13 +533,30 @@ eleventyComputed:
       boardEl.appendChild(rowEl);
     }
   }
-  function selectCell(i){ if (State.over) return; State.sel = i; render(); focusCell(i); }
+  function selectCell(i){ if (State.over || State.paused) return; State.sel = i; render(); focusCell(i); }
+  function moveSel(dr, dc){
+    if (State.over || State.paused) return;
+    if (State.sel < 0){ State.sel = 40; render(); focusCell(40); return; }
+    let r = Math.floor(State.sel/9), c = State.sel%9;
+    r = (r + dr + 9) % 9;
+    c = (c + dc + 9) % 9;
+    State.sel = r*9+c;
+    render(); focusCell(State.sel);
+  }
+  function moveSelDir(d){
+    if (d === 'up') moveSel(-1, 0);
+    else if (d === 'down') moveSel(1, 0);
+    else if (d === 'left') moveSel(0, -1);
+    else if (d === 'right') moveSel(0, 1);
+  }
 
   function render(){
     const selVal = State.sel>=0 ? State.grid[State.sel] : 0;
     const selR = State.sel>=0 ? Math.floor(State.sel/9) : -1;
     const selC = State.sel>=0 ? State.sel%9 : -1;
     const tab = tabbableIdx();
+    const live = State.errMode === 'live';
+    const checkMode = State.errMode === 'check';
     for (let i=0;i<81;i++){
       const cell = cellEls[i];
       const v = State.grid[i];
@@ -401,15 +566,25 @@ eleventyComputed:
       if (State.sel>=0 && i!==State.sel){
         const sameBox = Math.floor(r/3)===Math.floor(selR/3) && Math.floor(c/3)===Math.floor(selC/3);
         if (r===selR || c===selC || sameBox) cell.classList.add('peer');
-        if (v!==0 && v===selVal) cell.classList.add('samenum');
+        if (v!==0 && selVal!==0 && v===selVal) cell.classList.add('samenum');
       }
       if (i===State.sel) cell.classList.add('sel');
-      if (v!==0 && !State.given[i] && hasConflict(i, v)) cell.classList.add('conflict');
+      if (v!==0 && !State.given[i]){
+        if (live && hasConflict(i, v)) cell.classList.add('conflict');
+        else if (checkMode && State.flag[i]) cell.classList.add('conflict');
+      }
       cell.innerHTML = '';
       if (v!==0){ cell.textContent = v; }
       else if (State.notes[i].size){
         const nd = document.createElement('div'); nd.className = 'notes';
-        for (let n=1;n<=9;n++){ const nc=document.createElement('div'); nc.className='note-cell'; nc.textContent = State.notes[i].has(n)?n:''; nd.appendChild(nc); }
+        for (let n=1;n<=9;n++){
+          const nc = document.createElement('div');
+          nc.className = 'note-cell';
+          const has = State.notes[i].has(n);
+          if (has && selVal!==0 && n===selVal) nc.classList.add('is-hot');
+          nc.textContent = has ? n : '';
+          nd.appendChild(nc);
+        }
         cell.appendChild(nd);
       }
       const pos = COPY.aPos.replace('{r}', r+1).replace('{c}', c+1);
@@ -434,32 +609,91 @@ eleventyComputed:
     return false;
   }
 
+  function snapshot(){
+    State.undo.push({
+      grid: State.grid.slice(),
+      notes: State.notes.map(s => Array.from(s)),
+      given: State.given.slice(),
+      flag: State.flag.slice(),
+      mistakes: State.mistakes,
+      hints: State.hints,
+      sel: State.sel
+    });
+    if (State.undo.length > UNDO_CAP) State.undo.shift();
+    syncUndoBtn();
+  }
+  function undoMove(){
+    if (State.over || State.paused) return;
+    const s = State.undo.pop();
+    if (!s){ showToast(COPY.undoEmpty); return; }
+    State.grid = s.grid;
+    State.notes = s.notes.map(a => new Set(a));
+    State.given = s.given;
+    State.flag = s.flag;
+    State.mistakes = s.mistakes;
+    State.hints = s.hints;
+    State.sel = s.sel;
+    hintCountEl.textContent = State.hints;
+    syncUndoBtn(); render(); updateHUD(); save();
+    announce(COPY.aUndo);
+    if (State.sel >= 0) focusCell(State.sel);
+  }
+  function syncUndoBtn(){ undoBtn.disabled = State.undo.length === 0 || State.over || State.paused; }
+
+  function toggleNote(i, n){
+    snapshot();
+    if (State.notes[i].has(n)){ State.notes[i].delete(n); announce(COPY.aNoteOff.replace('{n}', n)); }
+    else { State.notes[i].add(n); announce(COPY.aNoteOn.replace('{n}', n)); }
+    render(); save();
+  }
+
   function placeNumber(n){
-    if (State.over || State.sel<0) return;
+    if (State.over || State.paused || State.sel<0) return;
     const i = State.sel;
     if (State.given[i]) return;
     if (State.notesMode && n!==0){
-      if (State.notes[i].has(n)) State.notes[i].delete(n); else State.notes[i].add(n);
-      render(); save(); return;
+      if (State.grid[i] !== 0) return;
+      toggleNote(i, n);
+      return;
     }
-    if (n===0){ State.grid[i]=0; State.notes[i].clear(); render(); announce(COPY.aErased); save(); return; }
+    snapshot();
+    if (n===0){
+      State.grid[i]=0; State.notes[i].clear(); State.flag[i] = false;
+      render(); announce(COPY.aErased); save(); return;
+    }
     State.notes[i].clear();
     State.grid[i] = n;
-    if (n!==0){
-      const r=Math.floor(i/9), c=i%9, br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
-      for (let k=0;k<9;k++){ State.notes[r*9+k].delete(n); State.notes[k*9+c].delete(n); }
-      for (let a=0;a<3;a++) for (let b=0;b<3;b++) State.notes[(br+a)*9+(bc+b)].delete(n);
-    }
-    if (n !== State.solution[i]){
+    State.flag[i] = false;
+    const r=Math.floor(i/9), c=i%9, br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
+    for (let k=0;k<9;k++){ State.notes[r*9+k].delete(n); State.notes[k*9+c].delete(n); }
+    for (let a=0;a<3;a++) for (let b=0;b<3;b++) State.notes[(br+a)*9+(bc+b)].delete(n);
+    let wrong = false;
+    if (n !== State.solution[i] && State.errMode === 'live'){
+      wrong = true;
       State.mistakes++; updateHUD();
-      const cell = cellEls[i];
-      cell.classList.add('err'); setTimeout(()=>cell.classList.remove('err'),300);
-      if (State.mistakes >= State.maxMistakes){ render(); gameOver(false); return; }
+      if (State.mistakes >= State.maxMistakes){ render(); flashCell(i); gameOver(false); return; }
       announce(COPY.aMistake.replace('{n}', n).replace('{m}', State.mistakes).replace('{max}', State.maxMistakes));
     } else {
       announce(COPY.aPlaced.replace('{n}', n));
     }
-    render(); checkWin(); save();
+    render();
+    if (wrong) flashCell(i);
+    checkWin(); save();
+  }
+
+  function flashCell(i){
+    const cell = cellEls[i];
+    if (!cell) return;
+    cell.classList.add('err');
+    setTimeout(() => { const c = cellEls[i]; if (c) c.classList.remove('err'); }, 300);
+  }
+
+  function noteFromPad(n){
+    if (State.over || State.paused || State.sel<0) return;
+    const i = State.sel;
+    if (State.given[i] || State.grid[i] !== 0) return;
+    toggleNote(i, n);
+    try { if (navigator.vibrate) navigator.vibrate(12); } catch (_) {}
   }
 
   function checkWin(){
@@ -467,32 +701,64 @@ eleventyComputed:
     gameOver(true);
   }
 
+  function runCheck(){
+    if (State.over || State.paused || State.errMode !== 'check') return;
+    const flag = new Array(81).fill(false);
+    let n = 0;
+    for (let i=0;i<81;i++){
+      if (!State.given[i] && State.grid[i] !== 0 && State.grid[i] !== State.solution[i]){ flag[i] = true; n++; }
+    }
+    State.flag = flag;
+    render(); save();
+    const msg = n === 0 ? COPY.checkClean : COPY.checkFound.replace('{n}', n);
+    showToast(msg); announce(msg);
+  }
+
+  function setErrMode(mode){
+    if (!validErrMode(mode)) return;
+    State.errMode = mode;
+    if (mode !== 'check') State.flag = new Array(81).fill(false);
+    prefSet('games', 'sudoku_err_mode', mode);
+    syncErrUI();
+    if (cellEls.length) render();
+    updateHUD(); save();
+  }
+  function syncErrUI(){
+    checkBtn.hidden = State.errMode !== 'check';
+    mistakeItem.classList.toggle('is-muted', State.errMode !== 'live');
+  }
+
   function gameOver(won){
-    State.over = true; State.won = won;
+    State.over = true; State.won = won; State.paused = false; State.padOpen = false;
     if (State.timer) clearInterval(State.timer);
+    State.timer = null;
+    boardEl.classList.remove('is-paused');
+    appEl.classList.remove('is-paused');
+    syncUndoBtn(); syncPauseBtn();
     clearSave();
     if (won) writeBest(State.diff, State.elapsed);
     const m = document.getElementById('modal');
     const best = readBest(State.diff);
+    const missCount = State.errMode === 'live' ? (State.mistakes + '/' + State.maxMistakes) : '—';
     if (won){
       m.style.borderColor = 'var(--syn-cyan)';
       m.innerHTML = `<p class="eyebrow">${COPY.solvedEyebrow}</p><h2>${COPY.solvedTitle}</h2>
         <div class="stats-mini">
           <span class="k">${COPY.mLevel}</span><span class="v">${COPY.diff[State.diff]}</span>
           <span class="k">${COPY.mTime}</span><span class="v">${fmt(State.elapsed)}</span>
-          <span class="k">${COPY.mMistakes}</span><span class="v">${State.mistakes}/${State.maxMistakes}</span>
+          <span class="k">${COPY.mMistakes}</span><span class="v">${missCount}</span>
           <span class="k">${COPY.mBest}</span><span class="v">${best!==null?fmt(best):'—'}</span>
         </div>
-        <button class="btn primary" id="m-new">${COPY.newGame}</button>`;
+        <button type="button" class="btn primary" id="m-new">${COPY.newGame}</button>`;
     } else {
       m.style.borderColor = 'var(--syn-pink)';
       m.innerHTML = `<p class="eyebrow" style="color:var(--syn-pink)">${COPY.overEyebrow}</p><h2>${COPY.overTitle}</h2>
         <div class="stats-mini">
           <span class="k">${COPY.mLevel}</span><span class="v">${COPY.diff[State.diff]}</span>
           <span class="k">${COPY.mTime}</span><span class="v">${fmt(State.elapsed)}</span>
-          <span class="k">${COPY.mMistakes}</span><span class="v">${State.mistakes}/${State.maxMistakes}</span>
+          <span class="k">${COPY.mMistakes}</span><span class="v">${missCount}</span>
         </div>
-        <button class="btn primary" id="m-new">${COPY.tryAgain}</button>`;
+        <button type="button" class="btn primary" id="m-new">${COPY.tryAgain}</button>`;
     }
     overlay.classList.add('show');
     announce(won ? COPY.aWin : COPY.aOver);
@@ -501,17 +767,57 @@ eleventyComputed:
     mNew.focus();
   }
 
+  function setPaused(on){
+    if (State.over || !State.solution.length) return;
+    if (on === State.paused) return;
+    State.paused = on;
+    if (on){
+      if (State.timer) clearInterval(State.timer);
+      State.timer = null;
+      closePad(true);
+      boardEl.classList.add('is-paused');
+      appEl.classList.add('is-paused');
+      const m = document.getElementById('modal');
+      m.style.borderColor = 'var(--syn-amber)';
+      m.innerHTML = `<p class="eyebrow" style="color:var(--syn-amber)">${COPY.pausedEyebrow}</p><h2>${COPY.pausedTitle}</h2>
+        <button type="button" class="btn primary" id="sk-resume">${COPY.btnResume}</button>`;
+      overlay.classList.add('show');
+      const rb = document.getElementById('sk-resume');
+      rb.onclick = () => setPaused(false);
+      rb.focus();
+      announce(COPY.aPaused);
+    } else {
+      overlay.classList.remove('show');
+      boardEl.classList.remove('is-paused');
+      appEl.classList.remove('is-paused');
+      State.started = performance.now() - State.elapsed*1000;
+      if (State.timer) clearInterval(State.timer);
+      State.timer = setInterval(tick, 1000);
+      announce(COPY.aResumed);
+      if (State.sel >= 0) focusCell(State.sel);
+    }
+    syncPauseBtn(); syncUndoBtn();
+  }
+  function syncPauseBtn(){
+    pauseLabel.textContent = State.paused ? COPY.btnResume : COPY.btnPause;
+    pauseBtn.classList.toggle('active', State.paused);
+    pauseBtn.setAttribute('aria-pressed', State.paused ? 'true' : 'false');
+    pauseBtn.disabled = State.over;
+  }
+
   function useHint(){
-    if (State.over || State.hints<=0) return;
+    if (State.over || State.paused || State.hints<=0) return;
     let target = (State.sel>=0 && !State.given[State.sel] && State.grid[State.sel]!==State.solution[State.sel]) ? State.sel : -1;
     if (target<0){ for (let i=0;i<81;i++){ if (State.grid[i]!==State.solution[i]){ target=i; break; } } }
     if (target<0) return;
+    snapshot();
     State.hints--;
     State.grid[target] = State.solution[target];
     State.notes[target].clear();
+    State.flag[target] = false;
     State.given[target] = true;
     State.sel = target;
-    document.getElementById('hint-count').textContent = State.hints;
+    hintCountEl.textContent = State.hints;
     render();
     announce(COPY.aPlaced.replace('{n}', State.solution[target]));
     checkWin(); save();
@@ -523,78 +829,248 @@ eleventyComputed:
     keypadEl.innerHTML = '';
     for (let n=1;n<=9;n++){
       const k = document.createElement('button');
-      k.className = 'key'; k.dataset.n = n;
-      k.innerHTML = n + '<span class="remain"></span>';
-      k.addEventListener('click', () => placeNumber(n));
+      k.type = 'button';
+      k.className = 'key';
+      k.dataset.n = n;
+      k.dataset.p = n-1;
+      const g = document.createElement('span');
+      g.className = 'glyph';
+      g.textContent = n;
+      const rem = document.createElement('span');
+      rem.className = 'remain';
+      k.appendChild(g); k.appendChild(rem);
       keypadEl.appendChild(k);
     }
+    const e = document.createElement('button');
+    e.type = 'button';
+    e.className = 'key key--erase';
+    e.dataset.n = 0;
+    e.dataset.p = 9;
+    e.textContent = '⌫';
+    e.setAttribute('aria-label', COPY.btnErase);
+    keypadEl.appendChild(e);
   }
   function updateKeypad(){
     const counts = new Array(10).fill(0);
     for (let i=0;i<81;i++) if (State.grid[i]) counts[State.grid[i]]++;
-    for (const k of keypadEl.children){
+    const kids = keypadEl.children;
+    for (let x=0;x<kids.length;x++){
+      const k = kids[x];
       const n = +k.dataset.n;
+      const p = +k.dataset.p;
+      k.classList.toggle('is-padsel', State.padOpen && p === State.padIdx);
+      if (n === 0) continue;
       const left = 9 - counts[n];
-      k.querySelector('.remain').textContent = left>0 ? left : '';
+      const rem = k.querySelector('.remain');
+      if (rem) rem.textContent = left>0 ? left : '';
       k.classList.toggle('done', left<=0);
+      k.setAttribute('aria-label', left>0
+        ? COPY.padKeyAria.replace('{n}', n).replace('{left}', left)
+        : COPY.padKeyDone.replace('{n}', n));
     }
   }
 
+  function padCols(){
+    let n = PAD_SLOTS;
+    try {
+      const t = getComputedStyle(keypadEl).gridTemplateColumns;
+      if (t){
+        const parts = t.split(' ').filter(s => s.length > 0);
+        if (parts.length > 1) n = parts.length;
+      }
+    } catch (_) {}
+    return n;
+  }
+  function openPad(){
+    if (State.over || State.paused) return;
+    if (State.sel < 0){ State.sel = 40; }
+    State.padOpen = true;
+    render(); focusCell(State.sel);
+    announce(COPY.aPadOpen);
+  }
+  function closePad(silent){
+    if (!State.padOpen) return;
+    State.padOpen = false;
+    if (cellEls.length) render();
+    if (!silent) announce(COPY.aPadShut);
+  }
+  function movePadDir(d){
+    const cols = padCols();
+    let i = State.padIdx;
+    if (d === 'left') i = (i + PAD_SLOTS - 1) % PAD_SLOTS;
+    else if (d === 'right') i = (i + 1) % PAD_SLOTS;
+    else if (d === 'up') i = ((i - cols) % PAD_SLOTS + PAD_SLOTS) % PAD_SLOTS;
+    else i = (i + cols) % PAD_SLOTS;
+    State.padIdx = i;
+    updateKeypad();
+  }
+  function confirmPad(){
+    placeNumber(State.padIdx < 9 ? State.padIdx + 1 : 0);
+  }
+
   function updateHUD(){
-    document.getElementById('stat-mistakes').textContent = State.mistakes + '/' + State.maxMistakes;
+    document.getElementById('stat-mistakes').textContent = State.errMode === 'live'
+      ? (State.mistakes + '/' + State.maxMistakes)
+      : '—';
     const best = readBest(State.diff);
     document.getElementById('stat-best').textContent = best!==null ? fmt(best) : '—';
     document.getElementById('stat-time').textContent = fmt(State.elapsed);
   }
 
   function showToast(msg){
-    MentriaUI.toast(msg, { duration: 1500 });
+    MentriaUI.toast(msg, { duration: 1600 });
+  }
+
+  function markInput(m){
+    if (State.lastInput === m) return;
+    State.lastInput = m;
+    prefSet('games', 'sudoku_last_input', m);
+    updateHelpBadge();
+  }
+  function updateHelpBadge(){
+    if (!helpEl) return;
+    const secs = helpEl.querySelectorAll('.sk-help__method');
+    for (let i=0;i<secs.length;i++){
+      const on = secs[i].dataset.method === State.lastInput;
+      secs[i].classList.toggle('is-last', on);
+      const b = secs[i].querySelector('.sk-help__badge');
+      if (b) b.hidden = !on;
+    }
+  }
+  function maybeAutoHelp(){
+    if (!helpEl || typeof helpEl.showPopover !== 'function') return;
+    if (prefGet('tools', 'sudoku_help_seen', false)) return;
+    prefSet('tools', 'sudoku_help_seen', true);
+    try { helpEl.showPopover(); } catch (_) {}
   }
 
   document.addEventListener('keydown', e => {
     if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
-    if (e.key >= '1' && e.key <= '9'){ placeNumber(+e.key); return; }
-    if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0'){ placeNumber(0); return; }
-    if (e.key === 'n' || e.key === 'N'){ toggleNotes(); return; }
-    if (e.key === 'h' || e.key === 'H'){ useHint(); return; }
-    if (!e.key.startsWith('Arrow')) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key;
+    if (helpOpen) return;
+    if (k === 'Escape'){ if (State.padOpen){ e.preventDefault(); closePad(); } return; }
+    if (k >= '1' && k <= '9'){ e.preventDefault(); markInput('keyboard'); placeNumber(+k); return; }
+    if (k === 'Backspace' || k === 'Delete' || k === '0'){ e.preventDefault(); markInput('keyboard'); placeNumber(0); return; }
+    if (k === 'n' || k === 'N'){ e.preventDefault(); markInput('keyboard'); toggleNotes(); return; }
+    if (k === 'h' || k === 'H'){ e.preventDefault(); markInput('keyboard'); useHint(); return; }
+    if (k === 'u' || k === 'U'){ e.preventDefault(); markInput('keyboard'); undoMove(); return; }
+    if (k === 'c' || k === 'C'){ e.preventDefault(); markInput('keyboard'); runCheck(); return; }
+    if (k === 'p' || k === 'P'){ e.preventDefault(); markInput('keyboard'); setPaused(!State.paused); return; }
+    if (k !== 'ArrowUp' && k !== 'ArrowDown' && k !== 'ArrowLeft' && k !== 'ArrowRight') return;
     const ae = document.activeElement;
-    if (ae && ae !== document.body && !boardEl.contains(ae)) return;
-    if (State.sel<0){ e.preventDefault(); State.sel = 40; render(); focusCell(40); return; }
-    let r = Math.floor(State.sel/9), c = State.sel%9;
-    if (e.key === 'ArrowUp') r=(r+8)%9;
-    else if (e.key === 'ArrowDown') r=(r+1)%9;
-    else if (e.key === 'ArrowLeft') c=(c+8)%9;
-    else if (e.key === 'ArrowRight') c=(c+1)%9;
-    else return;
+    if (ae && ae.closest && ae.closest('[role="radiogroup"]')) return;
+    if (ae && ae !== document.body && !appEl.contains(ae)) return;
     e.preventDefault();
-    State.sel = r*9+c; render(); focusCell(State.sel);
+    markInput('keyboard');
+    if (State.padOpen){
+      if (k === 'ArrowUp') movePadDir('up');
+      else if (k === 'ArrowDown') movePadDir('down');
+      else if (k === 'ArrowLeft') movePadDir('left');
+      else movePadDir('right');
+      return;
+    }
+    if (k === 'ArrowUp') moveSel(-1, 0);
+    else if (k === 'ArrowDown') moveSel(1, 0);
+    else if (k === 'ArrowLeft') moveSel(0, -1);
+    else moveSel(0, 1);
   });
 
   boardEl.addEventListener('focusin', e => {
     const t = e.target.closest('.sq');
-    if (!t || State.over) return;
+    if (!t || State.over || State.paused) return;
     const i = +t.dataset.i;
     if (State.sel !== i){ State.sel = i; render(); }
+  });
+  boardEl.addEventListener('pointerdown', () => markInput('touch'));
+
+  let holdTimer = 0;
+  let holdFired = false;
+  function endHold(){ if (holdTimer){ clearTimeout(holdTimer); holdTimer = 0; } }
+  keypadEl.addEventListener('pointerdown', e => {
+    const k = e.target.closest('.key');
+    if (!k) return;
+    markInput('touch');
+    holdFired = false;
+    endHold();
+    const n = +k.dataset.n;
+    if (n === 0) return;
+    holdTimer = setTimeout(() => { holdTimer = 0; holdFired = true; noteFromPad(n); }, HOLD_MS);
+  });
+  keypadEl.addEventListener('pointerup', endHold);
+  keypadEl.addEventListener('pointerleave', endHold);
+  keypadEl.addEventListener('pointercancel', () => { endHold(); holdFired = false; });
+  keypadEl.addEventListener('contextmenu', e => { e.preventDefault(); });
+  keypadEl.addEventListener('click', e => {
+    const k = e.target.closest('.key');
+    if (!k) return;
+    if (holdFired){ holdFired = false; return; }
+    placeNumber(+k.dataset.n);
+  });
+
+  window.addEventListener('mentria:gamepad:direction', e => {
+    markInput('controller');
+    if (State.over || State.paused) return;
+    if (State.padOpen) movePadDir(e.detail.direction);
+    else moveSelDir(e.detail.direction);
+  });
+  window.addEventListener('mentria:gamepad:button', e => {
+    if (!e.detail.pressed) return;
+    markInput('controller');
+    const n = e.detail.name;
+    if (n === 'start'){ setPaused(!State.paused); return; }
+    if (State.paused){ if (n === 'a' || n === 'b') setPaused(false); return; }
+    if (State.over){ if (n === 'a') newGame(); return; }
+    if (n === 'a'){ if (State.padOpen) confirmPad(); else openPad(); return; }
+    if (n === 'b'){ if (State.padOpen) closePad(); else placeNumber(0); return; }
+    if (n === 'x'){ toggleNotes(); return; }
+    if (n === 'y'){ useHint(); return; }
+    if (n === 'lb' || n === 'back'){ undoMove(); return; }
   });
 
   function toggleNotes(){
     State.notesMode = !State.notesMode;
-    document.getElementById('btn-notes').classList.toggle('active', State.notesMode);
-    document.getElementById('notes-state').textContent = State.notesMode ? COPY.notesOn : COPY.notesOff;
+    notesBtn.classList.toggle('active', State.notesMode);
+    notesBtn.setAttribute('aria-pressed', State.notesMode ? 'true' : 'false');
+    notesStateEl.textContent = State.notesMode ? COPY.notesOn : COPY.notesOff;
     save();
   }
 
-  document.getElementById('btn-notes').onclick = toggleNotes;
+  if (helpEl){
+    helpEl.addEventListener('toggle', e => {
+      helpOpen = e.newState === 'open';
+      if (helpOpen) updateHelpBadge();
+    });
+  }
+
+  notesBtn.onclick = toggleNotes;
   document.getElementById('btn-erase').onclick = () => placeNumber(0);
   document.getElementById('btn-hint').onclick = useHint;
   document.getElementById('btn-new').onclick = newGame;
+  undoBtn.onclick = undoMove;
+  checkBtn.onclick = runCheck;
+  pauseBtn.onclick = () => setPaused(!State.paused);
+  appEl.addEventListener('pointerdown', e => {
+    if (e.target.closest('.btn') || e.target.closest('.m-seg')) markInput('touch');
+  });
+
   const diffSeg = MentriaUI.segmented(document.getElementById('diff-seg'), (value) => {
     State.diff = value;
     newGame();
   });
+  const errSeg = MentriaUI.segmented(document.getElementById('sk-err-seg'), (value) => {
+    setErrMode(value);
+  });
 
+  State.errMode = validErrMode(prefGet('games', 'sudoku_err_mode', 'live')) ? prefGet('games', 'sudoku_err_mode', 'live') : 'live';
+  State.lastInput = prefGet('games', 'sudoku_last_input', '') || '';
+  errSeg.set(State.errMode);
+  updateHelpBadge();
+  syncErrUI();
+  syncPauseBtn();
   buildKeypad();
   if (load()) resume(); else newGame();
+  errSeg.set(State.errMode);
+  maybeAutoHelp();
 })();
 </script>

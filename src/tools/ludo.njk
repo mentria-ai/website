@@ -35,6 +35,22 @@ eleventyComputed:
       <button data-n="3" data-value="3">3</button>
       <button data-n="4" data-value="4" class="is-active">4</button>
     </div>
+    <button type="button" class="ludo-help__chip" id="ludo-help-chip" aria-haspopup="dialog" aria-expanded="false" aria-label="{{ 'tool.ludo.help_open' | t }}" title="{{ 'tool.ludo.help_open' | t }}">
+      <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <circle cx="10" cy="10" r="8.4"></circle>
+        <path d="M7.7 7.7a2.4 2.4 0 1 1 3.1 2.4c-.7.3-.9.8-.9 1.4v.4"></path>
+        <circle cx="10" cy="14.4" r="0.95" fill="currentColor" stroke="none"></circle>
+      </svg>
+      <span class="ludo-help__badge" id="ludo-method-badge" hidden></span>
+    </button>
+  </div>
+
+  <div class="ludo-turn" id="ludo-turn" aria-hidden="true">
+    <span class="ludo-turn__dot" id="ludo-turn-dot"></span>
+    <span class="ludo-turn__name" id="ludo-turn-name"></span>
+    <span class="ludo-turn__tag" id="ludo-turn-tag"></span>
+    <span class="ludo-turn__act" id="ludo-turn-act"></span>
+    <span class="ludo-turn__die" id="ludo-turn-die" hidden></span>
   </div>
 
   <div class="layout">
@@ -51,10 +67,18 @@ eleventyComputed:
       <div class="side-sec">
         <div class="side-label">{{ "tool.ludo.dice" | t }}</div>
         <div class="dice-area">
-          <div class="die" id="die"></div>
-          <button class="roll-btn" id="roll-btn">{{ "tool.ludo.roll" | t }}</button>
+          <button class="die" id="die" type="button" aria-label="{{ 'tool.ludo.die_label' | t }}"></button>
+          <button class="roll-btn" id="roll-btn" aria-keyshortcuts="Enter Space">{{ "tool.ludo.roll" | t }}</button>
           <div class="status-line" id="status" role="status" aria-live="polite"></div>
         </div>
+      </div>
+      <div class="side-sec">
+        <div class="side-label">{{ "tool.ludo.settings" | t }}</div>
+        <label class="ludo-opt" for="ludo-auto">
+          <input type="checkbox" id="ludo-auto" checked>
+          <span class="ludo-opt__txt">{{ "tool.ludo.auto_move" | t }}</span>
+        </label>
+        <p class="ludo-opt__hint">{{ "tool.ludo.auto_move_hint" | t }}</p>
       </div>
     </div>
   </div>
@@ -66,6 +90,65 @@ eleventyComputed:
   <div class="toolbar">
     <button class="btn primary" id="btn-new">{{ "tool.ludo.new_game" | t }}</button>
     <button class="btn" id="btn-rules">{{ "tool.ludo.rules" | t }}</button>
+  </div>
+
+  <div class="ludo-help" id="ludo-help" hidden>
+    <div class="ludo-help__panel" id="ludo-help-panel" role="dialog" aria-modal="true" aria-labelledby="ludo-help-title">
+      <p class="ludo-help__eyebrow">{{ "tool.ludo.help_eyebrow" | t }}</p>
+      <h2 class="ludo-help__title" id="ludo-help-title">{{ "tool.ludo.help_title" | t }}</h2>
+      <div class="ludo-help__grid">
+        <section class="ludo-help__method">
+          <span class="ludo-help__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="2.8" width="16" height="18.4" rx="3"></rect>
+              <circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"></circle>
+              <path d="M8.9 8.9a4.4 4.4 0 0 0 0 6.2"></path>
+              <path d="M15.1 8.9a4.4 4.4 0 0 1 0 6.2"></path>
+            </svg>
+          </span>
+          <h3 class="ludo-help__name">{{ "tool.ludo.help_touch" | t }}</h3>
+          <ul class="ludo-help__list">
+            <li>{{ "tool.ludo.help_touch_1" | t }}</li>
+            <li>{{ "tool.ludo.help_touch_2" | t }}</li>
+            <li>{{ "tool.ludo.help_touch_3" | t }}</li>
+          </ul>
+        </section>
+        <section class="ludo-help__method">
+          <span class="ludo-help__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2.4" y="6" width="19.2" height="12" rx="2.6"></rect>
+              <path d="M6 9.6h1M9 9.6h1M12 9.6h1M15 9.6h1M18 9.6h1"></path>
+              <path d="M6 12.6h1M9 12.6h1M12 12.6h1M15 12.6h1M18 12.6h1"></path>
+              <path d="M8.2 15.4h7.6"></path>
+            </svg>
+          </span>
+          <h3 class="ludo-help__name">{{ "tool.ludo.help_keyboard" | t }}</h3>
+          <ul class="ludo-help__list">
+            <li>{{ "tool.ludo.help_kb_1" | t }}</li>
+            <li>{{ "tool.ludo.help_kb_2" | t }}</li>
+            <li>{{ "tool.ludo.help_kb_3" | t }}</li>
+          </ul>
+        </section>
+        <section class="ludo-help__method">
+          <span class="ludo-help__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8.6 7.8h6.8a5.5 5.5 0 0 1 5.4 4.5l.5 3a3 3 0 0 1-5.4 2.3l-1-1.3H9.1l-1 1.3a3 3 0 0 1-5.4-2.3l.5-3a5.5 5.5 0 0 1 5.4-4.5Z"></path>
+              <path d="M6.7 12.6h2.6M8 11.3v2.6"></path>
+              <circle cx="15.4" cy="11.9" r="0.95" fill="currentColor" stroke="none"></circle>
+              <circle cx="17.5" cy="13.7" r="0.95" fill="currentColor" stroke="none"></circle>
+            </svg>
+          </span>
+          <h3 class="ludo-help__name">{{ "tool.ludo.help_gamepad" | t }}</h3>
+          <ul class="ludo-help__list">
+            <li>{{ "tool.ludo.help_pad_1" | t }}</li>
+            <li>{{ "tool.ludo.help_pad_2" | t }}</li>
+            <li>{{ "tool.ludo.help_pad_3" | t }}</li>
+            <li>{{ "tool.ludo.help_pad_4" | t }}</li>
+          </ul>
+        </section>
+      </div>
+      <button class="btn primary ludo-help__close" id="ludo-help-close" type="button">{{ "tool.ludo.got_it" | t }}</button>
+    </div>
   </div>
 </div>
 
@@ -98,17 +181,33 @@ eleventyComputed:
   .ludo-app .prow.done .pname { text-decoration: line-through; opacity: 0.6; }
 
   .ludo-app .dice-area { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .ludo-app .die { width: 72px; height: 72px; border-radius: 14px; background: linear-gradient(155deg, var(--term-surface-3), var(--term-surface-2)); border: 1px solid var(--term-border-strong); display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); padding: 11px; box-sizing: border-box; gap: 2px; box-shadow: var(--elev-2); will-change: transform; }
+  .ludo-app .die { width: 72px; height: 72px; border-radius: 14px; background: linear-gradient(155deg, var(--term-surface-3), var(--term-surface-2)); border: 1px solid var(--term-border-strong); display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); padding: 11px; box-sizing: border-box; gap: 2px; box-shadow: var(--elev-2); will-change: transform; appearance: none; -webkit-appearance: none; cursor: pointer; font: inherit; color: inherit; transition: border-color 140ms, box-shadow 140ms, opacity 140ms; }
+  .ludo-app .die.is-live { border-color: var(--syn-cyan); box-shadow: var(--elev-2), var(--glow-cyan); }
+  .ludo-app .die:disabled { cursor: default; opacity: 0.62; }
   .ludo-app .die.rolling { animation: ld-roll 0.5s ease-in-out; }
   @keyframes ld-roll { 0%,100%{transform:scale(1)} 25%{transform:scale(0.9)} 50%{transform:scale(1)} 75%{transform:scale(0.9)} }
   .ludo-app .pip { border-radius: 50%; background: transparent; align-self: center; justify-self: center; width: 11px; height: 11px; }
   .ludo-app .pip.on { background: var(--die-color, var(--syn-cyan)); box-shadow: 0 0 6px var(--die-color, var(--syn-cyan)); }
-  .ludo-app .roll-btn { width: 100%; padding: 11px; border-radius: var(--radius-md); border: 1px solid var(--syn-cyan); background: var(--cyan-8); color: var(--syn-cyan); font-weight: 700; font-size: 14px; letter-spacing: 0.04em; font-family: var(--font-mono); cursor: pointer; transition: all 120ms; }
+  .ludo-app .roll-btn { width: 100%; min-height: 44px; padding: 11px; border-radius: var(--radius-md); border: 1px solid var(--syn-cyan); background: var(--cyan-8); color: var(--syn-cyan); font-weight: 700; font-size: 14px; letter-spacing: 0.04em; font-family: var(--font-mono); cursor: pointer; transition: all 120ms; }
   .ludo-app .roll-btn::before { content: "$ "; }
   .ludo-app .roll-btn:hover:not(:disabled) { background: var(--syn-cyan); color: #041016; box-shadow: var(--glow-cyan); }
   .ludo-app .roll-btn:disabled { opacity: 0.35; cursor: default; }
   .ludo-app .status-line { font-size: 11px; color: var(--term-muted); text-align: center; min-height: 16px; line-height: 1.4; }
   .ludo-app .status-line b { color: var(--syn-cyan); }
+
+  .ludo-app .ludo-turn { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; min-height: 44px; padding: 8px 12px; margin-bottom: 11px; border: 1px solid var(--term-border); border-radius: var(--radius-md); background: var(--term-surface-2); font-size: 12px; }
+  .ludo-app .ludo-turn.is-live { border-color: var(--cyan-30); box-shadow: var(--glow-cyan); }
+  .ludo-app .ludo-turn__dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 8px currentColor; }
+  .ludo-app .ludo-turn.is-live .ludo-turn__dot { animation: ld-pulse 1.6s ease-in-out infinite; }
+  @keyframes ld-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.42;transform:scale(0.8)} }
+  .ludo-app .ludo-turn__name { font-weight: 700; color: var(--term-fg-strong); }
+  .ludo-app .ludo-turn__tag { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--term-subtle); }
+  .ludo-app .ludo-turn__act { color: var(--term-muted); }
+  .ludo-app .ludo-turn__die { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--syn-cyan); font-weight: 700; letter-spacing: 0.04em; }
+
+  .ludo-app .ludo-opt { display: flex; align-items: center; gap: 9px; min-height: 44px; cursor: pointer; font-size: 12px; color: var(--term-fg); }
+  .ludo-app .ludo-opt input { width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--syn-cyan); cursor: pointer; }
+  .ludo-app .ludo-opt__hint { margin: 0; font-size: 10px; line-height: 1.5; color: var(--term-subtle); }
 
   .ludo-app .toolbar { display: flex; gap: 8px; padding: 14px 4px 4px; }
   .ludo-app .btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-weight: 600; font-size: 12px; padding: 8px 10px; border-radius: var(--radius-md); border: 1px solid var(--term-border); background: transparent; color: var(--term-muted); transition: all 120ms; font-family: var(--font-mono); cursor: pointer; }
@@ -130,7 +229,34 @@ eleventyComputed:
   .ludo-app .ludo-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
   .ludo-app .ludo-choose { flex-wrap: wrap; gap: 8px; padding: 12px 4px 0; }
   .ludo-app .ludo-choose:not([hidden]) { display: flex; }
-  .ludo-app .ludo-choose__btn { font-size: 12px; padding: 6px 12px; }
+  .ludo-app .ludo-choose__btn { font-size: 12px; padding: 6px 12px; min-height: 44px; }
+  .ludo-app .ludo-choose__btn.is-cursor { border-color: var(--syn-cyan); color: var(--syn-cyan); }
+
+  .ludo-app .ludo-help__chip { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--term-border); background: transparent; color: var(--term-muted); cursor: pointer; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; transition: all 120ms; }
+  .ludo-app .ludo-help__chip:hover { border-color: var(--syn-cyan); color: var(--syn-cyan); }
+  .ludo-app .ludo-help__badge { font-size: 9px; line-height: 1.4; padding: 1px 7px; border-radius: 999px; background: var(--cyan-8); border: 1px solid var(--cyan-30); color: var(--syn-cyan); }
+  .ludo-app .ludo-help__badge[hidden] { display: none; }
+
+  .ludo-app .ludo-help { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(4,4,6,0.9); }
+  .ludo-app .ludo-help[hidden] { display: none; }
+  .ludo-app .ludo-help__panel { width: 100%; max-width: 660px; max-height: 88vh; overflow-y: auto; background: var(--term-surface-2); border: 1px solid var(--syn-cyan); border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--elev-3), var(--glow-cyan); }
+  .ludo-app .ludo-help__eyebrow { font-size: 11px; letter-spacing: 0.15em; margin: 0 0 6px; color: var(--syn-cyan); }
+  .ludo-app .ludo-help__title { font-size: 20px; margin: 0; color: var(--term-fg-strong); }
+  .ludo-app .ludo-help__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0 18px; }
+  @media (max-width: 640px) { .ludo-app .ludo-help__grid { grid-template-columns: 1fr; } }
+  .ludo-app .ludo-help__method { border: 1px solid var(--term-border); border-radius: var(--radius-md); padding: 13px; background: rgba(255,255,255,0.015); }
+  .ludo-app .ludo-help__icon { display: inline-flex; color: var(--syn-cyan); }
+  .ludo-app .ludo-help__icon svg { width: 22px; height: 22px; }
+  .ludo-app .ludo-help__name { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--term-fg-strong); margin: 9px 0 9px; }
+  .ludo-app .ludo-help__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  .ludo-app .ludo-help__list li { font-size: 12px; line-height: 1.5; color: var(--term-muted); padding-left: 13px; position: relative; }
+  .ludo-app .ludo-help__list li::before { content: "\203A"; position: absolute; left: 0; color: var(--syn-cyan); }
+  .ludo-app .ludo-help__close { width: 100%; min-height: 44px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ludo-app .ludo-turn.is-live .ludo-turn__dot { animation: none; }
+    .ludo-app .die.rolling { animation: none; }
+  }
 </style>
 
 <script>
@@ -170,7 +296,19 @@ eleventyComputed:
     a11yRolled:        {{ ("tool.ludo.a11y_rolled"         | t) | dump | safe }},
     a11yMoved:         {{ ("tool.ludo.a11y_moved"          | t) | dump | safe }},
     a11yMoveToken:     {{ ("tool.ludo.a11y_move_token"     | t) | dump | safe }},
-    a11ySummaryPlayer: {{ ("tool.ludo.a11y_summary_player" | t) | dump | safe }}
+    a11ySummaryPlayer: {{ ("tool.ludo.a11y_summary_player" | t) | dump | safe }},
+    actRoll:     {{ ("tool.ludo.act_roll"     | t) | dump | safe }},
+    actMove:     {{ ("tool.ludo.act_move"     | t) | dump | safe }},
+    actThinking: {{ ("tool.ludo.act_thinking" | t) | dump | safe }},
+    actNone:     {{ ("tool.ludo.act_none"     | t) | dump | safe }},
+    actOver:     {{ ("tool.ludo.act_over"     | t) | dump | safe }},
+    turnRolled:  {{ ("tool.ludo.turn_rolled"  | t) | dump | safe }},
+    selToken:    {{ ("tool.ludo.sel_token"    | t) | dump | safe }},
+    methodTouch:    {{ ("tool.ludo.method_touch"    | t) | dump | safe }},
+    methodKeyboard: {{ ("tool.ludo.method_keyboard" | t) | dump | safe }},
+    methodGamepad:  {{ ("tool.ludo.method_gamepad"  | t) | dump | safe }},
+    methodLabel:    {{ ("tool.ludo.method_label"    | t) | dump | safe }},
+    helpOpen:  {{ ("tool.ludo.help_open"  | t) | dump | safe }}
   };
 
   const N = 15;
@@ -199,6 +337,10 @@ eleventyComputed:
     [[1.5,10.5],[4.5,10.5],[1.5,13.5],[4.5,13.5]]
   ];
   const BASE_ORIGIN = [[0,0],[9,0],[9,9],[0,9]];
+  const ROLL_LOCK_MS = 280;
+
+  let REDUCE = false;
+  try { REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch(e){}
 
   const canvas = document.getElementById('board');
   const ctx = canvas.getContext('2d');
@@ -213,10 +355,29 @@ eleventyComputed:
     dice: 0, rolled: false, rolling: false, sixStreak: 0,
     movable: [], over: false, winner: -1,
     animating: false, finishers: [],
+    cursor: 0, autoMove: true, method: null, helpOpen: false, modal: null, forfeit: false,
   };
 
   function curPlayer(){ return State.active[State.turnIdx]; }
   function isHuman(p){ return State.mode === 'hotseat' ? true : p === 0; }
+
+  function prefGet(key){
+    try {
+      if (window.MentriaStore){
+        const v = window.MentriaStore.get('tools', key);
+        if (v !== null && v !== undefined) return v;
+      }
+      const raw = localStorage.getItem('mentria_' + key);
+      if (raw === null || raw === undefined) return null;
+      return JSON.parse(raw);
+    } catch(e){ return null; }
+  }
+  function prefSet(key, val){
+    try {
+      if (window.MentriaStore) window.MentriaStore.set('tools', key, val);
+      else localStorage.setItem('mentria_' + key, JSON.stringify(val));
+    } catch(e){}
+  }
 
   function save(){
     if (State.over) return;
@@ -255,6 +416,8 @@ eleventyComputed:
 
   let gen = 0;
   let diceInterval = null;
+  let rollLockUntil = 0;
+  function now(){ return (window.performance && window.performance.now) ? window.performance.now() : Date.now(); }
   function gtimeout(fn, ms){ const g = gen; return setTimeout(() => { if (g === gen) fn(); }, ms); }
 
   function newGame(){
@@ -269,7 +432,9 @@ eleventyComputed:
     State.turnIdx = 0;
     State.dice = 0; State.rolled = false; State.rolling = false; State.sixStreak = 0;
     State.movable = []; State.over = false; State.winner = -1; State.finishers = [];
-    State.animating = false;
+    State.animating = false; State.cursor = 0; State.modal = null; State.forfeit = false;
+    fx.length = 0;
+    rollLockUntil = 0;
     document.getElementById('overlay').classList.remove('show');
     renderPlayers(); draw(); updateDie(0); setStatus(); updateRollBtn();
     save();
@@ -278,6 +443,7 @@ eleventyComputed:
   function resume(){
     modeSeg.set(State.mode);
     countSeg.set(State.numPlayers);
+    State.cursor = 0; State.modal = null; State.forfeit = false;
     document.getElementById('overlay').classList.remove('show');
     renderPlayers(); draw(); updateDie(0); setStatus(); updateRollBtn();
     maybeAITurn();
@@ -288,6 +454,38 @@ eleventyComputed:
     if (pos <= 50) return PATH[(STARTS[p]+pos)%52];
     if (pos <= 55) return HOME[p][pos-51];
     return CENTER;
+  }
+  function tokenXY(p, pos, t){
+    if (pos < 0){ const slot = BASE_SLOTS[p][t]; return [slot[0]*CELL, slot[1]*CELL]; }
+    const rc = tokenCell(p, pos);
+    return [(rc[1]+0.5)*CELL, (rc[0]+0.5)*CELL];
+  }
+
+  const fx = [];
+  let fxRaf = 0;
+  function addFx(x, y, color){
+    if (REDUCE) return;
+    fx.push({ x, y, color, t0: now() });
+    if (!fxRaf) fxRaf = requestAnimationFrame(fxTick);
+  }
+  function fxTick(){
+    fxRaf = 0;
+    draw();
+    if (fx.length && !fxRaf) fxRaf = requestAnimationFrame(fxTick);
+  }
+  function drawFx(){
+    if (!fx.length) return;
+    const t = now();
+    for (let i = fx.length - 1; i >= 0; i--){
+      const f = fx[i];
+      const k = (t - f.t0) / 460;
+      if (k >= 1){ fx.splice(i,1); continue; }
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, CELL*(0.3 + k*0.62), 0, 7);
+      ctx.strokeStyle = hexA(f.color, 0.8*(1-k));
+      ctx.lineWidth = 1 + 3*(1-k);
+      ctx.stroke();
+    }
   }
 
   function draw(){
@@ -316,7 +514,30 @@ eleventyComputed:
     for (const idx of SAFE){ const [r,c] = PATH[idx]; drawStar((c+0.5)*CELL,(r+0.5)*CELL,CELL*0.2); }
     for (let p=0;p<4;p++){ if (!State.active.includes(p)) continue; for (const rc of HOME[p]) drawCell(rc, hexA(COLORS[p],0.28), hexA(COLORS[p],0.6)); }
     drawCenter();
+    syncCursorKey();
+    drawTargets();
     drawTokens();
+    drawFx();
+  }
+  function syncCursorKey(){
+    cursorKey = '';
+    if (!awaitingChoice()) return;
+    const m = State.movable[State.cursor] || State.movable[0];
+    if (m) cursorKey = m.p + '-' + m.t;
+  }
+  function drawTargets(){
+    if (!awaitingChoice()) return;
+    const m = State.movable[State.cursor] || State.movable[0];
+    if (!m) return;
+    const p = m.p;
+    const rc = m.to === 56 ? CENTER : tokenCell(p, m.to);
+    if (!rc) return;
+    const x = (rc[1]+0.5)*CELL, y = (rc[0]+0.5)*CELL;
+    ctx.beginPath(); ctx.arc(x, y, CELL*0.4, 0, 7);
+    ctx.fillStyle = hexA(COLORS[p], 0.2); ctx.fill();
+    ctx.setLineDash([4,4]);
+    ctx.strokeStyle = hexA(m.cap ? '#F87171' : '#F8FAFC', 0.85); ctx.lineWidth = 2; ctx.stroke();
+    ctx.setLineDash([]);
   }
   function drawCell(rc, fill, stroke){
     const x=(rc[1])*CELL, y=(rc[0])*CELL;
@@ -339,9 +560,7 @@ eleventyComputed:
     for (const p of State.active){
       for (let t=0;t<4;t++){
         const pos = State.tokens[p][t];
-        let xy;
-        if (pos < 0){ const slot = BASE_SLOTS[p][t]; xy = [slot[0]*CELL, slot[1]*CELL]; }
-        else { const rc = tokenCell(p,pos); xy = [(rc[1]+0.5)*CELL,(rc[0]+0.5)*CELL]; }
+        const xy = tokenXY(p, pos, t);
         const key = pos<0 ? ('b'+p+t) : (Math.round(xy[0])+','+Math.round(xy[1]));
         list.push({p,t,pos,xy,key});
       }
@@ -358,9 +577,12 @@ eleventyComputed:
     }
   }
   let highlightSet = new Set();
+  let cursorKey = '';
   function drawToken(x,y,p,t){
     const r = CELL*0.34;
-    const hi = highlightSet.has(p+'-'+t);
+    const id = p+'-'+t;
+    const hi = highlightSet.has(id);
+    const sel = cursorKey === id;
     ctx.beginPath(); ctx.ellipse(x, y+r*0.5, r*0.85, r*0.4, 0,0,7); ctx.fillStyle='rgba(0,0,0,0.4)'; ctx.fill();
     ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fillStyle = COLORS[p]; ctx.fill();
     ctx.lineWidth = 2; ctx.strokeStyle = COLORS_D[p]; ctx.stroke();
@@ -369,6 +591,10 @@ eleventyComputed:
     if (hi){
       ctx.beginPath(); ctx.arc(x,y,r+3,0,7); ctx.strokeStyle='#F8FAFC'; ctx.lineWidth=2.5; ctx.stroke();
       ctx.beginPath(); ctx.arc(x,y,r+6,0,7); ctx.strokeStyle=hexA('#F8FAFC',0.4); ctx.lineWidth=2; ctx.stroke();
+    }
+    if (sel){
+      ctx.beginPath(); ctx.arc(x,y,r+9,0,7); ctx.strokeStyle='#6EF3C5'; ctx.lineWidth=3; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x,y,r+12.5,0,7); ctx.strokeStyle=hexA('#6EF3C5',0.35); ctx.lineWidth=2; ctx.stroke();
     }
   }
   function drawStar(x,y,r){
@@ -412,14 +638,30 @@ eleventyComputed:
     return null;
   }
 
+  function rollLocked(){ return now() < rollLockUntil; }
+  function canRollNow(){
+    return !State.over && !State.animating && !State.rolled && !State.rolling
+      && !rollLocked() && isHuman(curPlayer());
+  }
+  function awaitingChoice(){
+    return State.rolled && !State.rolling && !State.animating && !State.over
+      && isHuman(curPlayer()) && State.movable.length > 0;
+  }
+
   function updateRollBtn(){
     const btn = document.getElementById('roll-btn');
+    const die = document.getElementById('die');
     const human = isHuman(curPlayer());
-    btn.disabled = State.over || State.animating || State.rolled || State.rolling || !human;
+    const blocked = State.over || State.animating || State.rolled || State.rolling || !human || rollLocked();
+    btn.disabled = blocked;
+    if (die){
+      die.disabled = blocked;
+      die.classList.toggle('is-live', !blocked);
+    }
   }
   function setStatus(msg){
     const el = document.getElementById('status');
-    if (msg){ el.innerHTML = msg; return; }
+    if (msg){ el.innerHTML = msg; updateTurn(); return; }
     const p = curPlayer();
     const name = `<b>${PNAMES[p]}</b>`;
     if (!isHuman(p)){
@@ -429,29 +671,68 @@ eleventyComputed:
     } else {
       el.innerHTML = State.rolled ? COPY.stYouMove : COPY.stYouRoll;
     }
+    updateTurn();
+  }
+  function updateTurn(){
+    const bar = document.getElementById('ludo-turn');
+    if (!bar) return;
+    const dot = document.getElementById('ludo-turn-dot');
+    const nameEl = document.getElementById('ludo-turn-name');
+    const tagEl = document.getElementById('ludo-turn-tag');
+    const actEl = document.getElementById('ludo-turn-act');
+    const dieEl = document.getElementById('ludo-turn-die');
+    const p = State.over && State.winner >= 0 ? State.winner : curPlayer();
+    if (p === undefined || p === null) return;
+    const human = isHuman(p);
+    dot.style.background = COLORS[p];
+    dot.style.color = COLORS[p];
+    nameEl.textContent = PNAMES[p];
+    tagEl.textContent = human ? (State.mode === 'hotseat' ? COPY.tagHuman : COPY.tagYou) : COPY.tagBot;
+    let act;
+    if (State.over) act = COPY.actOver;
+    else if (State.forfeit) act = COPY.tripleSix;
+    else if (!human) act = COPY.actThinking;
+    else if (!State.rolled) act = COPY.actRoll;
+    else if (State.movable.length === 0) act = COPY.actNone;
+    else act = COPY.actMove;
+    actEl.textContent = act;
+    const showDie = !State.over && State.rolled && State.dice > 0;
+    dieEl.hidden = !showDie;
+    dieEl.textContent = showDie ? COPY.turnRolled.split('{n}').join(State.dice) : '';
+    bar.classList.toggle('is-live', !State.over && human && !State.animating && !State.rolling);
   }
 
   function rollDice(){
-    if (State.over || State.animating || State.rolled || State.rolling) return;
+    if (State.over || State.animating || State.rolled || State.rolling || rollLocked()) return;
     const p = curPlayer();
     const d = 1 + Math.floor(Math.random()*6);
-    State.rolling = true; updateRollBtn();
+    State.rolling = true;
+    updateRollBtn(); updateTurn();
     const die = document.getElementById('die');
     die.style.setProperty('--die-color', COLORS[p]);
-    die.classList.remove('rolling'); void die.offsetWidth; die.classList.add('rolling');
-    diceInterval = setInterval(()=>{ updateDie(1 + Math.floor(Math.random()*6), p); }, 80);
+    die.classList.remove('rolling'); void die.offsetWidth;
+    if (!REDUCE) die.classList.add('rolling');
+    const spin = REDUCE ? 160 : 500;
+    if (!REDUCE) diceInterval = setInterval(()=>{ updateDie(1 + Math.floor(Math.random()*6), p); }, 80);
     gtimeout(() => {
-      clearInterval(diceInterval); diceInterval = null;
+      if (diceInterval){ clearInterval(diceInterval); diceInterval = null; }
       die.classList.remove('rolling');
       updateDie(d, p);
       State.rolling = false;
+      rollLockUntil = now() + ROLL_LOCK_MS;
+      gtimeout(updateRollBtn, ROLL_LOCK_MS + 20);
       finishRoll(p, d);
-    }, 500);
+    }, spin);
   }
   function finishRoll(p, d){
-    State.dice = d; State.rolled = true;
+    State.dice = d; State.rolled = true; State.cursor = 0;
     if (d === 6) State.sixStreak++; else State.sixStreak = 0;
-    if (State.sixStreak >= 3){ showToast(COPY.tripleSix); gtimeout(endTurn, 800); return; }
+    if (State.sixStreak >= 3){
+      State.forfeit = true;
+      showToast(COPY.tripleSix); setStatus(COPY.tripleSix); updateRollBtn();
+      gtimeout(endTurn, 800);
+      return;
+    }
     const moves = getMoves(p, d);
     State.movable = moves;
     if (moves.length === 0){
@@ -462,7 +743,7 @@ eleventyComputed:
     }
     if (isHuman(p)){
       highlightSet = new Set(moves.map(m => m.p+'-'+m.t));
-      if (moves.length === 1){ gtimeout(()=>doMove(moves[0]), 350); }
+      if (moves.length === 1 && State.autoMove){ gtimeout(()=>doMove(moves[0]), 350); }
       draw(); setStatus(); updateRollBtn();
     } else {
       gtimeout(()=>{ const m = aiChoose(p, moves); doMove(m); }, 600);
@@ -488,8 +769,10 @@ eleventyComputed:
   function doMove(m){
     if (State.animating) return;
     highlightSet = new Set();
+    cursorKey = '';
     State.animating = true;
-    updateRollBtn();
+    State.cursor = 0;
+    updateRollBtn(); updateTurn();
     const p = m.p, t = m.t;
     const steps = [];
     if (m.from === -1){ steps.push(0); }
@@ -507,12 +790,15 @@ eleventyComputed:
     const p = m.p, t = m.t;
     let captured = false;
     if (m.cap){
+      const cxy = tokenXY(m.cap.op, State.tokens[m.cap.op][m.cap.t], m.cap.t);
       State.tokens[m.cap.op][m.cap.t] = -1;
       captured = true;
+      addFx(cxy[0], cxy[1], COLORS[m.cap.op]);
       showToast(COPY.capture.replace('{p}', PNAMES[p]).replace('{o}', PNAMES[m.cap.op]));
     }
-    draw(); renderPlayers();
     const reachedHome = (State.tokens[p][t] === 56);
+    if (reachedHome) addFx((CENTER[1]+0.5)*CELL, (CENTER[0]+0.5)*CELL, COLORS[p]);
+    draw(); renderPlayers();
     if (State.tokens[p].every(x => x === 56)){
       if (!State.finishers.includes(p)) State.finishers.push(p);
       if (State.winner === -1) State.winner = p;
@@ -523,8 +809,10 @@ eleventyComputed:
     State.animating = false;
     const extra = (State.dice === 6) || captured || reachedHome;
     if (extra && State.sixStreak < 3){
-      State.rolled = false; State.movable = [];
+      State.rolled = false; State.movable = []; State.cursor = 0;
+      rollLockUntil = now() + ROLL_LOCK_MS;
       setStatus(); updateDie(0); updateRollBtn();
+      gtimeout(updateRollBtn, ROLL_LOCK_MS + 20);
       save();
       if (!isHuman(p)) gtimeout(()=>aiRoll(p), 600);
     } else {
@@ -533,11 +821,15 @@ eleventyComputed:
   }
 
   function endTurn(){
-    State.rolled = false; State.movable = []; State.sixStreak = 0; State.dice = 0;
+    State.rolled = false; State.movable = []; State.sixStreak = 0; State.dice = 0; State.cursor = 0;
+    State.forfeit = false;
     highlightSet = new Set();
+    cursorKey = '';
     do { State.turnIdx = (State.turnIdx + 1) % State.active.length; }
     while (State.tokens[curPlayer()].every(x => x === 56) && State.finishers.length < State.active.length);
+    rollLockUntil = now() + ROLL_LOCK_MS;
     updateDie(0); draw(); renderPlayers(); setStatus(); updateRollBtn();
+    gtimeout(updateRollBtn, ROLL_LOCK_MS + 20);
     save();
     maybeAITurn();
   }
@@ -545,7 +837,7 @@ eleventyComputed:
     const p = curPlayer();
     if (!State.over && !isHuman(p)) gtimeout(()=>aiRoll(p), 700);
   }
-  function aiRoll(p){ if (State.over) return; if (curPlayer() !== p) return; rollDice(); }
+  function aiRoll(p){ if (State.over) return; if (curPlayer() !== p) return; rollLockUntil = 0; rollDice(); }
 
   const PIP_MAP = { 1:[4], 2:[0,8], 3:[0,4,8], 4:[0,2,6,8], 5:[0,2,4,6,8], 6:[0,2,3,5,6,8] };
   function updateDie(v, p){
@@ -557,22 +849,21 @@ eleventyComputed:
   }
 
   canvas.addEventListener('click', e => {
-    if (State.over || State.animating || !State.rolled) return;
+    if (!awaitingChoice()) return;
     const p = curPlayer();
-    if (!isHuman(p)) return;
     const rect = canvas.getBoundingClientRect();
-    const mx = (e.clientX-rect.left)*(600/rect.width);
-    const my = (e.clientY-rect.top)*(600/rect.height);
-    let hit = null, bestD = CELL*0.55;
-    for (const m of State.movable){
-      const pos = m.from;
-      let xy;
-      if (pos < 0){ const slot = BASE_SLOTS[p][m.t]; xy=[slot[0]*CELL,slot[1]*CELL]; }
-      else { const rc = tokenCell(p,pos); xy=[(rc[1]+0.5)*CELL,(rc[0]+0.5)*CELL]; }
+    const scale = rect.width > 0 ? (600 / rect.width) : 1;
+    const mx = (e.clientX-rect.left)*scale;
+    const my = (e.clientY-rect.top)*scale;
+    let hit = null, hitIdx = -1;
+    let bestD = Math.max(CELL*0.55, 22*scale);
+    for (let i=0;i<State.movable.length;i++){
+      const m = State.movable[i];
+      const xy = tokenXY(p, m.from, m.t);
       const d = Math.hypot(mx-xy[0],my-xy[1]);
-      if (d < bestD){ bestD = d; hit = m; }
+      if (d < bestD){ bestD = d; hit = m; hitIdx = i; }
     }
-    if (hit) doMove(hit);
+    if (hit){ State.cursor = hitIdx; confirmCursor(); }
   });
 
   function renderPlayers(){
@@ -592,6 +883,7 @@ eleventyComputed:
 
   function finishGame(p){
     State.over = true;
+    State.modal = 'win';
     clearSave();
     const who = isHuman(p) ? (State.mode==='hotseat'?COPY.wonHuman:COPY.wonYou) : COPY.wonBot;
     const m = document.getElementById('modal');
@@ -603,33 +895,189 @@ eleventyComputed:
     document.getElementById('overlay').classList.add('show');
     document.getElementById('m-new').onclick = newGame;
     renderPlayers();
+    updateTurn();
+    updateRollBtn();
   }
 
   function showToast(msg){
     MentriaUI.toast(msg, { duration: 1400 });
   }
 
+  function setCursor(i){
+    const n = State.movable.length;
+    if (!n){ State.cursor = 0; return; }
+    State.cursor = ((i % n) + n) % n;
+    draw();
+    focusCursorBtn();
+    const m = State.movable[State.cursor];
+    if (m) announce(COPY.selToken.split('{t}').join(String(m.t + 1)));
+  }
+  function cycleCursor(delta){
+    if (!awaitingChoice()) return;
+    if (State.movable.length < 2){ setCursor(0); return; }
+    setCursor(State.cursor + delta);
+  }
+  function confirmCursor(){
+    if (!awaitingChoice()) return false;
+    const m = State.movable[State.cursor] || State.movable[0];
+    if (!m) return false;
+    chooserSig = null;
+    if (A11Y.choose){ A11Y.choose.hidden = true; A11Y.choose.innerHTML = ''; chooserBtns = []; }
+    doMove(m);
+    return true;
+  }
+
+  const METHOD_LABEL = {
+    touch: COPY.methodTouch,
+    keyboard: COPY.methodKeyboard,
+    gamepad: COPY.methodGamepad
+  };
+  function applyMethodBadge(){
+    const badge = document.getElementById('ludo-method-badge');
+    const chip = document.getElementById('ludo-help-chip');
+    const label = METHOD_LABEL[State.method];
+    if (badge){
+      badge.hidden = !label;
+      badge.textContent = label || '';
+    }
+    if (chip) chip.title = label ? COPY.methodLabel.split('{m}').join(label) : COPY.helpOpen;
+  }
+  function markMethod(m){
+    if (!METHOD_LABEL[m] || State.method === m) return;
+    State.method = m;
+    applyMethodBadge();
+    prefSet('ludo_last_input', m);
+  }
+
+  const helpEl = document.getElementById('ludo-help');
+  const helpPanel = document.getElementById('ludo-help-panel');
+  const helpChip = document.getElementById('ludo-help-chip');
+  function helpFocusables(){
+    if (!helpPanel) return [];
+    return Array.prototype.slice.call(helpPanel.querySelectorAll('button, [href], input, select, textarea, [tabindex]'))
+      .filter(el => !el.disabled && el.getAttribute('tabindex') !== '-1');
+  }
+  function openHelp(){
+    if (!helpEl || State.helpOpen) return;
+    State.helpOpen = true;
+    helpEl.hidden = false;
+    if (helpChip) helpChip.setAttribute('aria-expanded', 'true');
+    const f = helpFocusables();
+    if (f.length) f[f.length - 1].focus();
+  }
+  function closeHelp(){
+    if (!helpEl || !State.helpOpen) return;
+    State.helpOpen = false;
+    helpEl.hidden = true;
+    if (helpChip){ helpChip.setAttribute('aria-expanded', 'false'); helpChip.focus(); }
+    prefSet('ludo_help_seen', true);
+  }
+  function toggleHelp(){ if (State.helpOpen) closeHelp(); else openHelp(); }
+
+  if (helpChip) helpChip.addEventListener('click', () => { toggleHelp(); });
+  const helpCloseBtn = document.getElementById('ludo-help-close');
+  if (helpCloseBtn) helpCloseBtn.addEventListener('click', closeHelp);
+  if (helpEl) helpEl.addEventListener('click', e => { if (e.target === helpEl) closeHelp(); });
+  if (helpPanel) helpPanel.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const f = helpFocusables();
+    if (!f.length){ e.preventDefault(); return; }
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  });
+
+  const autoBox = document.getElementById('ludo-auto');
+  if (autoBox) autoBox.addEventListener('change', () => {
+    State.autoMove = !!autoBox.checked;
+    prefSet('ludo_auto_move', State.autoMove);
+    chooserSig = null;
+    draw();
+  });
+
   document.getElementById('roll-btn').onclick = rollDice;
+  const dieBtn = document.getElementById('die');
+  if (dieBtn) dieBtn.addEventListener('click', rollDice);
   document.getElementById('btn-new').onclick = newGame;
   document.getElementById('btn-rules').onclick = () => {
     const m = document.getElementById('modal');
+    State.modal = 'rules';
     m.innerHTML = `<p class="eyebrow">${COPY.rulesEyebrow}</p><h2>${COPY.rulesTitle}</h2>
       <div style="text-align:left;font-size:12px;color:var(--term-muted);line-height:1.7;margin-bottom:18px">${COPY.rulesBody}</div>
       <button class="btn primary" id="m-close">${COPY.gotIt}</button>`;
     document.getElementById('overlay').classList.add('show');
-    document.getElementById('m-close').onclick = () => document.getElementById('overlay').classList.remove('show');
+    document.getElementById('m-close').onclick = closeBoardModal;
+    document.getElementById('m-close').focus();
   };
+  function closeBoardModal(){
+    if (State.modal !== 'rules') return;
+    State.modal = null;
+    document.getElementById('overlay').classList.remove('show');
+    const rb = document.getElementById('btn-rules');
+    if (rb) rb.focus();
+  }
+
   const modeSeg = MentriaUI.segmented(document.getElementById('mode-seg'), (value) => {
     State.mode = value; newGame();
   });
   const countSeg = MentriaUI.segmented(document.getElementById('count-seg'), (value) => {
     State.numPlayers = +value; newGame();
   });
+
+  const app = document.querySelector('.ludo-app');
+  if (app) app.addEventListener('pointerdown', () => { markMethod('touch'); }, true);
+
   document.addEventListener('keydown', e => {
-    if (e.code!=='Space' && e.key!=='Enter') return;
-    if (e.target.closest && e.target.closest('button, a, input, select, textarea')) return;
-    if (document.getElementById('roll-btn').disabled) return;
-    e.preventDefault(); rollDice();
+    const el = e.target;
+    const closest = (sel) => (el && el.closest) ? el.closest(sel) : null;
+    if (State.helpOpen){
+      if (e.key === 'Escape'){ e.preventDefault(); markMethod('keyboard'); closeHelp(); }
+      return;
+    }
+    if (closest('input, select, textarea')) return;
+    if (e.key === 'Escape'){ if (State.modal === 'rules'){ e.preventDefault(); closeBoardModal(); } return; }
+    if (closest('.m-seg')) return;
+
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp'){
+      if (!awaitingChoice()) return;
+      e.preventDefault(); markMethod('keyboard'); cycleCursor(-1); return;
+    }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown'){
+      if (!awaitingChoice()) return;
+      e.preventDefault(); markMethod('keyboard'); cycleCursor(1); return;
+    }
+    if (e.key === 'Tab'){
+      if (!awaitingChoice() || State.movable.length < 2) return;
+      const inChooser = !!(A11Y.choose && el && A11Y.choose.contains(el));
+      if (!inChooser && closest('button, a, [tabindex]')) return;
+      e.preventDefault(); markMethod('keyboard'); cycleCursor(e.shiftKey ? -1 : 1); return;
+    }
+    if (e.code !== 'Space' && e.key !== 'Enter') return;
+    if (e.repeat) return;
+    if (closest('button, a')) return;
+    if (canRollNow()){ e.preventDefault(); markMethod('keyboard'); rollDice(); return; }
+    if (awaitingChoice()){ e.preventDefault(); markMethod('keyboard'); confirmCursor(); }
+  });
+
+  window.addEventListener('mentria:gamepad:direction', e => {
+    if (State.helpOpen) return;
+    if (!awaitingChoice()) return;
+    markMethod('gamepad');
+    const d = e.detail && e.detail.direction;
+    cycleCursor((d === 'left' || d === 'up') ? -1 : 1);
+  });
+  window.addEventListener('mentria:gamepad:button', e => {
+    if (!e.detail || !e.detail.pressed) return;
+    const n = e.detail.name;
+    if (n === 'start'){ markMethod('gamepad'); toggleHelp(); return; }
+    if (State.helpOpen){ if (n === 'a' || n === 'b'){ markMethod('gamepad'); closeHelp(); } return; }
+    if (n === 'b'){ if (State.modal === 'rules'){ markMethod('gamepad'); closeBoardModal(); } return; }
+    if (n !== 'a') return;
+    markMethod('gamepad');
+    if (State.modal === 'rules'){ closeBoardModal(); return; }
+    if (State.over){ newGame(); return; }
+    if (canRollNow()){ rollDice(); return; }
+    confirmCursor();
   });
 
   const A11Y = {
@@ -665,17 +1113,27 @@ eleventyComputed:
     A11Y.summary.textContent = parts.join('. ');
   }
   function chooserVisible(){
-    return State.rolled && !State.rolling && !State.animating && !State.over
-      && isHuman(curPlayer()) && State.movable.length >= 2;
+    if (!awaitingChoice()) return false;
+    return State.movable.length >= 2 || !State.autoMove;
   }
   let chooserSig = null;
+  let chooserBtns = [];
+  function markCursorBtn(){
+    for (let i=0;i<chooserBtns.length;i++) chooserBtns[i].classList.toggle('is-cursor', i === State.cursor);
+  }
+  function focusCursorBtn(){
+    markCursorBtn();
+    const btn = chooserBtns[State.cursor];
+    if (btn && document.activeElement !== btn && A11Y.choose && !A11Y.choose.hidden) btn.focus();
+  }
   function syncChooser(){
     if (!A11Y.choose) return;
     const show = chooserVisible();
     const sig = show ? State.movable.map(m => m.t + ':' + m.from + '>' + m.to).join('|') : '';
-    if (sig === chooserSig) return;
+    if (sig === chooserSig){ if (show) markCursorBtn(); return; }
     chooserSig = sig;
     A11Y.choose.innerHTML = '';
+    chooserBtns = [];
     if (!show){ A11Y.choose.hidden = true; return; }
     A11Y.choose.hidden = false;
     for (const m of State.movable){
@@ -684,18 +1142,17 @@ eleventyComputed:
       btn.className = 'm-btn m-btn--ghost ludo-choose__btn';
       btn.textContent = COPY.a11yMoveToken.replace('{t}', m.t + 1);
       btn.addEventListener('click', () => {
-        if (!chooserVisible()) return;
-        chooserSig = null;
-        A11Y.choose.hidden = true;
-        A11Y.choose.innerHTML = '';
-        doMove(m);
+        if (!awaitingChoice()) return;
+        const idx = chooserBtns.indexOf(btn);
+        if (idx >= 0) State.cursor = idx;
+        confirmCursor();
         const st = document.getElementById('status');
         if (st){ st.tabIndex = -1; st.focus(); }
       });
       A11Y.choose.appendChild(btn);
+      chooserBtns.push(btn);
     }
-    const first = A11Y.choose.querySelector('button');
-    if (first) first.focus();
+    focusCursorBtn();
   }
 
   const _draw = draw;
@@ -717,6 +1174,15 @@ eleventyComputed:
     announce(COPY.winTitle.replace('{name}', PNAMES[p]) + '. ' + who);
   };
 
+  const storedAuto = prefGet('ludo_auto_move');
+  State.autoMove = storedAuto === null ? true : !!storedAuto;
+  if (autoBox) autoBox.checked = State.autoMove;
+  const storedMethod = prefGet('ludo_last_input');
+  if (METHOD_LABEL[storedMethod]) State.method = storedMethod;
+  applyMethodBadge();
+
   if (load()) resume(); else newGame();
+
+  if (!prefGet('ludo_help_seen')) openHelp();
 })();
 </script>

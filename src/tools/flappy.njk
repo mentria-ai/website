@@ -24,26 +24,53 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 
 <div id="flappy-help" popover class="game-help">
-  <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
-  <ul class="game-help-list">
-    <li><span><span class="kbd">SPACE</span></span><span class="game-help-label">{{ "game.flappy.footer_flap" | t }}</span></li>
-    <li><span><span class="kbd">click</span></span><span class="game-help-label">{{ "game.flappy.footer_flap" | t }}</span></li>
-    <li><span><span class="kbd">P</span></span><span class="game-help-label">{{ "game.flappy.footer_pause" | t }}</span></li>
-    <li><span><span class="kbd">R</span></span><span class="game-help-label">{{ "game.flappy.footer_restart" | t }}</span></li>
+  <p class="game-help-title">{{ "tool.flappy.controls" | t }}</p>
+  <ul class="flappy__ctl-list">
+    <li class="flappy__ctl" data-method="touch">
+      <span class="flappy__ctl-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="14.5" r="3"></circle><path d="M6.8 9.6a7 7 0 0 1 10.4 0"></path><path d="M4 6.6a11 11 0 0 1 16 0"></path></svg>
+      </span>
+      <span class="flappy__ctl-text">
+        <span class="flappy__ctl-title">{{ "tool.flappy.ctl_touch_title" | t }}</span>
+        <span class="flappy__ctl-body">{{ "tool.flappy.ctl_touch_body" | t }}</span>
+      </span>
+      <span class="flappy__ctl-badge">{{ "tool.flappy.last_used" | t }}</span>
+    </li>
+    <li class="flappy__ctl" data-method="keyboard">
+      <span class="flappy__ctl-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="11" rx="2"></rect><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M8 13.8h8"></path></svg>
+      </span>
+      <span class="flappy__ctl-text">
+        <span class="flappy__ctl-title">{{ "tool.flappy.ctl_keys_title" | t }}</span>
+        <span class="flappy__ctl-body">{{ "tool.flappy.ctl_keys_body" | t }}</span>
+      </span>
+      <span class="flappy__ctl-badge">{{ "tool.flappy.last_used" | t }}</span>
+    </li>
+    <li class="flappy__ctl" data-method="gamepad">
+      <span class="flappy__ctl-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="7.5" width="19" height="9" rx="4.5"></rect><path d="M6.5 10.2v3.6M4.7 12h3.6M16.2 10.8h.01M18.6 13.2h.01"></path></svg>
+      </span>
+      <span class="flappy__ctl-text">
+        <span class="flappy__ctl-title">{{ "tool.flappy.ctl_pad_title" | t }}</span>
+        <span class="flappy__ctl-body">{{ "tool.flappy.ctl_pad_body" | t }}</span>
+      </span>
+      <span class="flappy__ctl-badge">{{ "tool.flappy.last_used" | t }}</span>
+    </li>
   </ul>
+  <p class="flappy__ctl-note">{{ "tool.flappy.ctl_any_start" | t }}</p>
 </div>
 
 <div class="stats">
   <div class="stat">
-    <span class="stat-label">{{ "game.flappy.score" | t }}</span>
+    <span class="stat-label">{{ "tool.flappy.score" | t }}</span>
     <span class="stat-value v-cyan" id="stat-score">0</span>
   </div>
   <div class="stat">
-    <span class="stat-label">{{ "game.flappy.tier" | t }}</span>
-    <span class="stat-value v-purple" id="stat-tier">{{ "game.flappy.tier_novice" | t }}</span>
+    <span class="stat-label">{{ "tool.flappy.tier" | t }}</span>
+    <span class="stat-value v-purple" id="stat-tier">{{ "tool.flappy.tier_novice" | t }}</span>
   </div>
   <div class="stat">
-    <span class="stat-label">{{ "game.flappy.best" | t }}</span>
+    <span class="stat-label">{{ "tool.flappy.best" | t }}</span>
     <span class="stat-value v-amber" id="stat-best">0</span>
   </div>
 </div>
@@ -55,23 +82,32 @@ eleventyComputed:
 
   <div class="overlay" id="overlay">
     <div class="modal" id="modal">
-      <p class="eyebrow" style="color: var(--syn-cyan)">&gt; READY</p>
+      <p class="eyebrow" style="color: var(--syn-cyan)">&gt; {{ "tool.flappy.ready" | t }}</p>
       <h2>flappy.js</h2>
-      <p>{{ "game.flappy.modal_intro" | t | safe }}</p>
+      <p>{{ "tool.flappy.intro" | t | safe }}</p>
       <p style="font-size: 11px; color: var(--term-subtle); margin-bottom: 18px">
-        <span class="kbd">SPACE</span> / <span class="kbd">click</span> / <span class="kbd">tap</span> {{ "game.flappy.input_hint_prefix" | t }}
+        <span class="kbd">SPACE</span> / <span class="kbd">click</span> / <span class="kbd">tap</span> {{ "tool.flappy.hint_flap" | t }}
       </p>
-      <button class="m-btn m-btn--primary" id="btn-start">$ start</button>
+      <button class="m-btn m-btn--primary" data-act="start">{{ "tool.flappy.btn_start" | t }}</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="pause-overlay">
+    <div class="modal">
+      <p class="eyebrow" style="color: var(--syn-amber)">&gt; SIGINT</p>
+      <h2>{{ "tool.flappy.paused" | t }}</h2>
+      <p>{{ "tool.flappy.pause_hint" | t }}</p>
+      <button class="m-btn m-btn--primary" data-act="resume">{{ "tool.flappy.btn_resume" | t }}</button>
     </div>
   </div>
 </div>
 
 <div class="footer-hints">
   <div class="keys">
-    <span><span class="kbd">SPACE</span> {{ "game.flappy.footer_flap" | t }}</span>
-    <span><span class="kbd">click</span> {{ "game.flappy.footer_flap" | t }}</span>
-    <span><span class="kbd">P</span> {{ "game.flappy.footer_pause" | t }}</span>
-    <span><span class="kbd">R</span> {{ "game.flappy.footer_restart" | t }}</span>
+    <span><span class="kbd">SPACE</span><span class="kbd">↑</span><span class="kbd">W</span> {{ "tool.flappy.footer_flap" | t }}</span>
+    <span><span class="kbd">tap</span> {{ "tool.flappy.footer_flap" | t }}</span>
+    <span><span class="kbd">P</span> {{ "tool.flappy.footer_pause" | t }}</span>
+    <span><span class="kbd">R</span> {{ "tool.flappy.footer_restart" | t }}</span>
   </div>
   <div>
     <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--syn-green); box-shadow:var(--glow-green); margin-right:6px"></span>
@@ -89,7 +125,6 @@ eleventyComputed:
 html, body { overscroll-behavior: none; }
 main { max-width: 1100px; }
 
-/* Center the smaller flappy frame */
 .game-page .terminal-frame { max-width: 720px; margin-left: auto; margin-right: auto; }
 
 .game-page .hero { text-align: center; padding: 0; margin-bottom: 28px; position: relative; z-index: 1; }
@@ -117,6 +152,8 @@ main { max-width: 1100px; }
     linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
   background-size: 40px 40px;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
 }
 canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-action: none; }
 
@@ -145,11 +182,40 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
 .stats-mini {
   display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px;
   background: rgba(0,0,0,0.3); border: 1px solid var(--term-border);
-  border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 18px;
+  border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 14px;
   font-size: 12px; text-align: left; font-family: var(--font-mono);
 }
 .stats-mini .k { color: var(--term-muted); }
 .stats-mini .v { color: var(--syn-cyan); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+.flappy__medals {
+  display: flex; justify-content: space-between; gap: 6px;
+  margin: 0 0 10px;
+}
+.flappy__medal {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  flex: 1; opacity: 0.3; filter: grayscale(1);
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--term-muted);
+}
+.flappy__medal.is-earned { opacity: 1; filter: none; color: var(--term-fg); }
+.flappy__next { margin: 0 0 16px; font-size: 11px; color: var(--term-muted); font-family: var(--font-mono); }
+.flappy__best-tag { color: var(--syn-amber); font-weight: 700; letter-spacing: 0.08em; }
+
+.flappy__ctl-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.65rem; }
+.flappy__ctl { display: flex; align-items: flex-start; gap: 0.6rem; }
+.flappy__ctl-icon { color: var(--syn-cyan); flex: 0 0 auto; display: inline-flex; margin-top: 1px; }
+.flappy__ctl-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.flappy__ctl-title { color: var(--term-fg); font-size: 0.78rem; }
+.flappy__ctl-body { color: var(--term-muted); font-size: 0.72rem; line-height: 1.45; }
+.flappy__ctl-badge {
+  display: none; align-self: center; white-space: nowrap;
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 2px 6px; border-radius: var(--radius-pill);
+  border: 1px solid var(--cyan-30); background: var(--cyan-15); color: var(--syn-cyan);
+}
+.flappy__ctl.is-last .flappy__ctl-badge { display: inline-block; }
+.flappy__ctl-note { margin: 0.85rem 0 0; font-size: 0.7rem; color: var(--term-muted); }
 
 .footer-hints {
   display: flex; justify-content: space-between; align-items: center;
@@ -190,6 +256,8 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
 
 <script>
 (() => {
+  'use strict';
+
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
@@ -198,27 +266,45 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
   canvas.style.aspectRatio = `${W} / ${H}`;
   ctx.scale(dpr, dpr);
 
+  const COPY = {
+    score:      {{ ("tool.flappy.score"        | t) | dump | safe }},
+    tier:       {{ ("tool.flappy.tier"         | t) | dump | safe }},
+    best:       {{ ("tool.flappy.best"         | t) | dump | safe }},
+    distance:   {{ ("tool.flappy.distance"     | t) | dump | safe }},
+    unitM:      {{ ("tool.flappy.unit_m"       | t) | dump | safe }},
+    gameOver:   {{ ("game.common.game_over"    | t) | dump | safe }},
+    crashAt:    {{ ("tool.flappy.crash_at"     | t) | dump | safe }},
+    btnRetry:   {{ ("tool.flappy.btn_retry"    | t) | dump | safe }},
+    newBest:    {{ ("tool.flappy.new_best"     | t) | dump | safe }},
+    startHint:  {{ ("tool.flappy.start_hint"   | t) | dump | safe }},
+    toastTier:  {{ ("tool.flappy.toast_tier_up"| t) | dump | safe }},
+    medalLabel: {{ ("tool.flappy.medal_label"  | t) | dump | safe }},
+    medalNext:  {{ ("tool.flappy.medal_next"   | t) | dump | safe }},
+    medalNone:  {{ ("tool.flappy.medal_none"   | t) | dump | safe }}
+  };
+
   const C = {
     plane: '#22D3EE',
-    pipe: '#A78BFA',
     pipeFill: 'rgba(167,139,250,0.10)',
     pipeBorder: 'rgba(167,139,250,0.55)',
-    pipeStrong: '#A78BFA',
-    ground: '#171717',
-    line: 'rgba(244,114,182,0.5)',
     pink: '#F472B6',
     cyan: '#22D3EE',
-    star: 'rgba(255,255,255,0.6)',
-    amber: '#FBBF24',
   };
 
   const TIERS = [
-    { score: 0,  name: {{ ("game.flappy.tier_novice"     | t) | dump | safe }} },
-    { score: 5,  name: {{ ("game.flappy.tier_apprentice" | t) | dump | safe }} },
-    { score: 10, name: {{ ("game.flappy.tier_engineer"   | t) | dump | safe }} },
-    { score: 20, name: {{ ("game.flappy.tier_sysadmin"   | t) | dump | safe }} },
-    { score: 35, name: {{ ("game.flappy.tier_wizard"     | t) | dump | safe }} },
-    { score: 60, name: {{ ("game.flappy.tier_kernel_dev" | t) | dump | safe }} },
+    { score: 0,  name: {{ ("tool.flappy.tier_novice"     | t) | dump | safe }} },
+    { score: 5,  name: {{ ("tool.flappy.tier_apprentice" | t) | dump | safe }} },
+    { score: 10, name: {{ ("tool.flappy.tier_engineer"   | t) | dump | safe }} },
+    { score: 20, name: {{ ("tool.flappy.tier_sysadmin"   | t) | dump | safe }} },
+    { score: 35, name: {{ ("tool.flappy.tier_wizard"     | t) | dump | safe }} },
+    { score: 60, name: {{ ("tool.flappy.tier_kernel_dev" | t) | dump | safe }} },
+  ];
+
+  const MEDALS = [
+    { score: 5,  color: '#C87941', name: {{ ("tool.flappy.medal_bronze"   | t) | dump | safe }} },
+    { score: 12, color: '#CBD5E1', name: {{ ("tool.flappy.medal_silver"   | t) | dump | safe }} },
+    { score: 25, color: '#FBBF24', name: {{ ("tool.flappy.medal_gold"     | t) | dump | safe }} },
+    { score: 40, color: '#67E8F9', name: {{ ("tool.flappy.medal_platinum" | t) | dump | safe }} },
   ];
 
   const LEGACY_BEST = 'mentria_flappy_best';
@@ -244,27 +330,54 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     running: false,
     paused: false,
     over: false,
+    dying: false,
     score: 0,
     tier: 0,
     best: readBest(),
     started: false,
     distance: 0,
+    newBest: false,
   };
 
-  const plane = { x: 160, y: H/2, vy: 0, r: 12, rot: 0 };
   const GRAV = 0.45;
   const FLAP = -7.6;
-  let pipeSpeed = 2.6;
-  let pipeGap = 180;
-  let gameOverTimer = null;
+  const SPEED = 2.6;
+  const SPACING = 240;
+  const PIPE_W = 64;
+  const GROUND_H = 60;
+  const GAP_START = 190;
+  const GAP_FLOOR = 132;
+  const GAP_STEP = 2.6;
+  const HIT_W = 13;
+  const HIT_H = 9;
+  const DEATH_MS = 700;
+  const RESTART_LOCK_MS = 500;
 
+  const plane = { x: 160, y: H/2, vy: 0, rot: 0 };
   const pipes = [];
   const stars = [];
   const particles = [];
   const groundOffset = { x: 0 };
+  const midOffset = { x: 0 };
+  const farOffset = { x: 0 };
+
+  let gameOverTimer = null;
+  let restartAt = 0;
+  let flash = 0;
 
   for (let i = 0; i < 60; i++) {
     stars.push({ x: Math.random() * W, y: Math.random() * (H - 80), s: Math.random() * 1.4 + 0.3, a: Math.random() * 0.6 + 0.2 });
+  }
+
+  const wrap = document.getElementById('wrap');
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
+  const pauseOverlay = document.getElementById('pause-overlay');
+  const helpEl = document.getElementById('flappy-help');
+  const ctlRows = Array.prototype.slice.call(document.querySelectorAll('.flappy__ctl'));
+
+  function gapForScore(s) {
+    return Math.max(GAP_FLOOR, GAP_START - s * GAP_STEP);
   }
 
   function reset() {
@@ -272,26 +385,33 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     State.dying = false;
     State.running = true; State.paused = false; State.over = false;
     State.score = 0; State.tier = 0; State.distance = 0;
+    State.newBest = false;
     pipes.length = 0; particles.length = 0;
-    pipeSpeed = 2.6;
-    pipeGap = 180;
+    flash = 0;
     plane.x = 160; plane.y = H/2; plane.vy = 0; plane.rot = 0;
     State.started = false;
     spawnInitialPipes();
     hideOverlay();
+    pauseOverlay.classList.add('hidden');
     updateHUD();
   }
 
   function spawnInitialPipes() {
     const startX = W + 100;
-    for (let i = 0; i < 4; i++) addPipe(startX + i * 240);
+    for (let i = 0; i < 4; i++) addPipe(startX + i * SPACING);
   }
 
   function addPipe(x) {
-    const minTop = 70;
-    const maxTop = H - 80 - pipeGap - minTop;
-    const top = minTop + Math.random() * Math.max(40, maxTop - minTop);
-    pipes.push({ x, top, scored: false });
+    const gap = gapForScore(State.score);
+    const lo = 70;
+    const hi = Math.max(lo + 40, H - GROUND_H - 70 - gap);
+    let top = lo + Math.random() * (hi - lo);
+    if (pipes.length) {
+      const prev = pipes[pipes.length - 1].top;
+      top = Math.max(prev - 170, Math.min(prev + 170, top));
+      top = Math.max(lo, Math.min(hi, top));
+    }
+    pipes.push({ x, top, gap, scored: false });
   }
 
   let audioCtx = null;
@@ -312,10 +432,12 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     } catch (_) {}
   }
 
+  function buzz(ms) {
+    try { if (navigator.vibrate) navigator.vibrate(ms); } catch (_) {}
+  }
+
   function flap() {
-    if (!State.running) return;
-    if (State.over) return;
-    if (State.paused) return;
+    if (!State.running || State.over || State.paused) return;
     if (!State.started) State.started = true;
     plane.vy = FLAP;
     spawnPuff(plane.x - 10, plane.y + 4, 5);
@@ -350,54 +472,13 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     return t;
   }
 
-  function update() {
-    if (!State.running || State.paused || State.over) return;
+  function medalFor(score) {
+    let m = null;
+    for (let i = 0; i < MEDALS.length; i++) if (score >= MEDALS[i].score) m = MEDALS[i];
+    return m;
+  }
 
-    groundOffset.x = (groundOffset.x - pipeSpeed) % 32;
-
-    if (State.started) {
-      plane.vy += GRAV;
-      plane.y += plane.vy;
-      plane.rot = Math.max(-0.5, Math.min(1.2, plane.vy / 12));
-
-      for (const p of pipes) p.x -= pipeSpeed;
-      while (pipes.length && pipes[0].x < -80) pipes.shift();
-      while (pipes.length < 5) addPipe(pipes[pipes.length - 1].x + 240);
-
-      if (plane.y + plane.r > H - 60) { plane.y = H - 60 - plane.r; die(); }
-      if (plane.y - plane.r < 0) { plane.y = plane.r; plane.vy = 0; }
-
-      const pw = 64;
-      for (const p of pipes) {
-        const inX = plane.x + plane.r > p.x && plane.x - plane.r < p.x + pw;
-        if (inX) {
-          if (plane.y - plane.r < p.top || plane.y + plane.r > p.top + pipeGap) {
-            die();
-            break;
-          }
-        }
-        if (!p.scored && p.x + pw < plane.x) {
-          p.scored = true;
-          State.score++;
-          sfx(880, 0.1, 'triangle', 0.04);
-          const newTier = tierFor(State.score);
-          if (newTier !== State.tier) {
-            State.tier = newTier;
-            showToast({{ ("game.flappy.toast_tier_up" | t) | dump | safe }}.replace('{name}', TIERS[newTier].name));
-            pipeSpeed = 2.6 + newTier * 0.45;
-            pipeGap = Math.max(125, 180 - newTier * 11);
-          }
-          updateHUD();
-        }
-      }
-      State.distance += pipeSpeed;
-    }
-
-    for (const s of stars) {
-      s.x -= 0.2 + s.s * 0.15;
-      if (s.x < 0) { s.x = W; s.y = Math.random() * (H - 80); }
-    }
-
+  function stepParticles() {
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
       p.x += p.vx; p.y += p.vy;
@@ -407,18 +488,86 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     }
   }
 
+  function stepStars() {
+    for (const s of stars) {
+      s.x -= 0.2 + s.s * 0.15;
+      if (s.x < 0) { s.x = W; s.y = Math.random() * (H - 80); }
+    }
+  }
+
+  function updateDeath() {
+    if (flash > 0) flash -= 0.14;
+    plane.vy = Math.min(plane.vy + GRAV * 1.15, 15);
+    plane.y = Math.min(plane.y + plane.vy, H - GROUND_H - HIT_H);
+    plane.rot = Math.min(plane.rot + 0.09, 1.7);
+    stepParticles();
+  }
+
+  function update() {
+    if (State.paused) return;
+    if (State.over) { updateDeath(); return; }
+    if (!State.running) { stepStars(); stepParticles(); return; }
+
+    groundOffset.x = (groundOffset.x - SPEED) % 32;
+    midOffset.x = (midOffset.x - SPEED * 0.55) % 24;
+    farOffset.x = (farOffset.x - SPEED * 0.32) % (W + 180);
+
+    if (State.started) {
+      plane.vy += GRAV;
+      plane.y += plane.vy;
+      plane.rot = Math.max(-0.5, Math.min(1.2, plane.vy / 12));
+
+      for (const p of pipes) p.x -= SPEED;
+      while (pipes.length && pipes[0].x < -80) pipes.shift();
+      while (pipes.length < 5) addPipe(pipes[pipes.length - 1].x + SPACING);
+
+      if (plane.y + HIT_H > H - GROUND_H) { plane.y = H - GROUND_H - HIT_H; die(); }
+      if (plane.y < 12) { plane.y = 12; plane.vy = 0; }
+
+      for (const p of pipes) {
+        const inX = plane.x + HIT_W > p.x && plane.x - HIT_W < p.x + PIPE_W;
+        if (inX) {
+          if (plane.y - HIT_H < p.top || plane.y + HIT_H > p.top + p.gap) {
+            die();
+            break;
+          }
+        }
+        if (!p.scored && p.x + PIPE_W < plane.x) {
+          p.scored = true;
+          State.score++;
+          sfx(880, 0.1, 'triangle', 0.04);
+          const newTier = tierFor(State.score);
+          if (newTier !== State.tier) {
+            State.tier = newTier;
+            showToast(COPY.toastTier.split('{name}').join(TIERS[newTier].name));
+          }
+          updateHUD();
+        }
+      }
+      State.distance += SPEED;
+    }
+
+    stepStars();
+    stepParticles();
+  }
+
   function die() {
     if (State.over) return;
     State.over = true;
     State.dying = true;
     State.running = false;
+    flash = 1;
+    restartAt = performance.now() + RESTART_LOCK_MS;
     spawnHit(plane.x, plane.y);
     sfx(120, 0.35, 'sawtooth', 0.05);
-    if (State.score > State.best) {
+    buzz(35);
+    State.newBest = State.score > 0 && State.score > State.best;
+    if (State.newBest) {
       State.best = State.score;
       writeBest(State.best);
     }
-    gameOverTimer = setTimeout(() => showGameOver(), 600);
+    clearTimeout(gameOverTimer);
+    gameOverTimer = setTimeout(showGameOver, DEATH_MS);
     updateHUD();
   }
 
@@ -433,6 +582,8 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     }
     ctx.globalAlpha = 1;
 
+    drawFar();
+
     ctx.strokeStyle = 'rgba(244,114,182,0.18)';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(0, 80); ctx.lineTo(W, 80); ctx.stroke();
@@ -440,15 +591,21 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     drawPipes();
 
     ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(0, H - 60, W, 60);
+    ctx.fillRect(0, H - GROUND_H, W, GROUND_H);
     ctx.strokeStyle = 'rgba(255,255,255,0.08)';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0, H - 60); ctx.lineTo(W, H - 60); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, H - GROUND_H); ctx.lineTo(W, H - GROUND_H); ctx.stroke();
+
+    ctx.fillStyle = 'rgba(226,232,240,0.07)';
+    for (let x = midOffset.x; x < W + 12; x += 24) {
+      ctx.fillRect(x, H - 48, 10, 2);
+    }
+
     ctx.fillStyle = 'rgba(167,139,250,0.18)';
     ctx.font = '600 12px JetBrains Mono, monospace';
     ctx.textBaseline = 'middle';
     for (let x = groundOffset.x; x < W + 16; x += 32) {
-      ctx.fillText('//', x, H - 30);
+      ctx.fillText('//', x, H - 24);
     }
 
     drawPlane(plane.x, plane.y, plane.rot);
@@ -463,35 +620,46 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     if (State.paused && !State.over) {
       ctx.fillStyle = 'rgba(5,5,7,0.6)';
       ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = C.cyan;
-      ctx.font = '600 14px JetBrains Mono, monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('> ' + {{ ("game.flappy.pause_text" | t) | dump | safe }}, W/2, H/2);
-      ctx.textAlign = 'start';
     }
 
     if (State.running && !State.started && !State.over) {
       ctx.fillStyle = 'rgba(34,211,238,0.85)';
       ctx.font = '600 13px JetBrains Mono, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText({{ ("game.flappy.start_hint" | t) | dump | safe }}, W/2, H/2 - 60);
+      ctx.fillText(COPY.startHint, W/2, H/2 - 60);
       ctx.textAlign = 'start';
+    }
+
+    if (flash > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (Math.max(0, flash) * 0.5) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  function drawFar() {
+    const span = W + 180;
+    const base = H - GROUND_H;
+    ctx.fillStyle = 'rgba(167,139,250,0.06)';
+    for (let i = 0; i < 14; i++) {
+      let x = (i * 92 + farOffset.x) % span;
+      if (x < 0) x += span;
+      x -= 90;
+      const h = 26 + ((i * 37) % 74);
+      ctx.fillRect(x, base - h, 46, h);
     }
   }
 
   function drawPipes() {
-    const pw = 64;
-    ctx.font = '700 14px JetBrains Mono, monospace';
     ctx.textBaseline = 'top';
 
     for (const p of pipes) {
       ctx.fillStyle = C.pipeFill;
       ctx.strokeStyle = C.pipeBorder;
       ctx.lineWidth = 1.5;
-      roundRect(ctx, p.x, 0, pw, p.top, 6, true);
+      roundRect(ctx, p.x, 0, PIPE_W, p.top, 6, true);
       ctx.stroke();
-      const by = p.top + pipeGap;
-      roundRect(ctx, p.x, by, pw, H - 60 - by, 6, true);
+      const by = p.top + p.gap;
+      roundRect(ctx, p.x, by, PIPE_W, H - GROUND_H - by, 6, true);
       ctx.stroke();
 
       ctx.fillStyle = '#FF5F57'; ctx.beginPath(); ctx.arc(p.x + 12, 14, 3, 0, 6.3); ctx.fill();
@@ -516,16 +684,16 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
       ctx.beginPath();
       ctx.moveTo(gx - 6, p.top); ctx.lineTo(gx, p.top); ctx.lineTo(gx, p.top + 6); ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(gx + pw + 6, p.top); ctx.lineTo(gx + pw, p.top); ctx.lineTo(gx + pw, p.top + 6); ctx.stroke();
+      ctx.moveTo(gx + PIPE_W + 6, p.top); ctx.lineTo(gx + PIPE_W, p.top); ctx.lineTo(gx + PIPE_W, p.top + 6); ctx.stroke();
       ctx.beginPath();
       ctx.moveTo(gx - 6, by); ctx.lineTo(gx, by); ctx.lineTo(gx, by - 6); ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(gx + pw + 6, by); ctx.lineTo(gx + pw, by); ctx.lineTo(gx + pw, by - 6); ctx.stroke();
+      ctx.moveTo(gx + PIPE_W + 6, by); ctx.lineTo(gx + PIPE_W, by); ctx.lineTo(gx + PIPE_W, by - 6); ctx.stroke();
 
       ctx.fillStyle = 'rgba(226,232,240,0.35)';
       ctx.font = '500 11px JetBrains Mono, monospace';
       const linesY = by + 14;
-      const lineCount = Math.max(0, Math.floor((H - 60 - linesY) / 16));
+      const lineCount = Math.max(0, Math.floor((H - GROUND_H - linesY) / 16));
       const seedH = (p.top | 0);
       for (let i = 0; i < lineCount; i++) {
         const len = 4 + ((seedH + i * 7) % 20);
@@ -577,21 +745,21 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     ctx.restore();
   }
 
-  function roundRect(ctx, x, y, w, h, r, fill) {
+  function roundRect(c, x, y, w, h, r, fill) {
     if (h <= 0) return;
     r = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-    if (fill) ctx.fill();
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.lineTo(x + w - r, y);
+    c.quadraticCurveTo(x + w, y, x + w, y + r);
+    c.lineTo(x + w, y + h - r);
+    c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    c.lineTo(x + r, y + h);
+    c.quadraticCurveTo(x, y + h, x, y + h - r);
+    c.lineTo(x, y + r);
+    c.quadraticCurveTo(x, y, x + r, y);
+    c.closePath();
+    if (fill) c.fill();
   }
 
   function updateHUD() {
@@ -600,24 +768,46 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     document.getElementById('stat-best').textContent = State.best;
   }
 
-  function hideOverlay() { document.getElementById('overlay').classList.add('hidden'); }
+  function hideOverlay() { overlay.classList.add('hidden'); }
+
+  function medalSvg(color) {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">' +
+      '<path d="M8 2 L12 9.5 L16 2" stroke="' + color + '" stroke-width="2" stroke-linecap="round"></path>' +
+      '<circle cx="12" cy="15" r="6" stroke="' + color + '" stroke-width="2"></circle>' +
+      '<circle cx="12" cy="15" r="2.4" fill="' + color + '"></circle></svg>';
+  }
+
+  function medalsMarkup(score) {
+    const cells = MEDALS.map(m =>
+      '<span class="flappy__medal' + (score >= m.score ? ' is-earned' : '') + '">' +
+      medalSvg(m.color) + '<span>' + m.name + '</span></span>').join('');
+    const next = MEDALS.find(m => score < m.score);
+    const hint = next
+      ? '<p class="flappy__next">' + COPY.medalNext.split('{n}').join(next.score - score).split('{medal}').join(next.name) + '</p>'
+      : '<p class="flappy__next">' + COPY.medalLabel + ': ' + MEDALS[MEDALS.length - 1].name + '</p>';
+    return '<div class="flappy__medals">' + cells + '</div>' + hint;
+  }
+
   function showGameOver() {
-    const ov = document.getElementById('overlay');
-    const m = document.getElementById('modal');
-    m.className = 'modal lose';
-    m.innerHTML =
-      '<p class="eyebrow">&gt; SIGSEGV — CRASH AT 0x' + (State.distance|0).toString(16).padStart(6,'0').toUpperCase() + '</p>' +
-      '<h2>{{ "game.common.game_over" | t }}</h2>' +
+    const earned = medalFor(State.score);
+    const bestVal = State.newBest
+      ? State.best + ' <span class="flappy__best-tag">' + COPY.newBest + '</span>'
+      : String(State.best);
+    modal.className = 'modal lose';
+    modal.innerHTML =
+      '<p class="eyebrow">&gt; SIGSEGV — ' + COPY.crashAt + ' 0x' + (State.distance|0).toString(16).padStart(6,'0').toUpperCase() + '</p>' +
+      '<h2>' + COPY.gameOver + '</h2>' +
       '<div class="stats-mini">' +
-        '<span class="k">{{ "game.flappy.score"         | t }}</span><span class="v">' + State.score + '</span>' +
-        '<span class="k">{{ "game.flappy.tier"          | t }}</span><span class="v">' + TIERS[State.tier].name + '</span>' +
-        '<span class="k">{{ "game.flappy.best"          | t }}</span><span class="v">' + State.best + '</span>' +
-        '<span class="k">{{ "game.flappy.stats_distance"| t }}</span><span class="v">' + (State.distance/100).toFixed(1) + 'm</span>' +
+        '<span class="k">' + COPY.score + '</span><span class="v">' + State.score + '</span>' +
+        '<span class="k">' + COPY.tier + '</span><span class="v">' + TIERS[State.tier].name + '</span>' +
+        '<span class="k">' + COPY.best + '</span><span class="v">' + bestVal + '</span>' +
+        '<span class="k">' + COPY.distance + '</span><span class="v">' + (State.distance/100).toFixed(1) + COPY.unitM + '</span>' +
+        '<span class="k">' + COPY.medalLabel + '</span><span class="v">' + (earned ? earned.name : COPY.medalNone) + '</span>' +
       '</div>' +
-      '<button class="m-btn m-btn--primary" id="btn-again">$ retry</button>';
+      medalsMarkup(State.score) +
+      '<button class="m-btn m-btn--primary" data-act="retry">' + COPY.btnRetry + '</button>';
     State.dying = false;
-    ov.classList.remove('hidden');
-    document.getElementById('btn-again').onclick = () => reset();
+    overlay.classList.remove('hidden');
   }
 
   let toastTimer = null;
@@ -629,50 +819,102 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     toastTimer = setTimeout(() => t.classList.remove('show'), 1500);
   }
 
+  let lastMethod = null;
+  function noteMethod(m) {
+    if (lastMethod === m) return;
+    lastMethod = m;
+    for (const row of ctlRows) row.classList.toggle('is-last', row.getAttribute('data-method') === m);
+  }
+
+  function canRestart() {
+    return !State.dying && performance.now() >= restartAt;
+  }
+
+  function setPaused(v) {
+    if (!State.running || State.over || !State.started) return;
+    if (State.paused === v) return;
+    State.paused = v;
+    pauseOverlay.classList.toggle('hidden', !v);
+  }
+
+  function togglePause() { setPaused(!State.paused); }
+
+  function primaryAction() {
+    if (State.paused) { setPaused(false); return; }
+    if (State.over || !State.running) {
+      if (canRestart()) reset();
+      return;
+    }
+    flap();
+  }
+
+  function helpSeen() {
+    return !!(window.MentriaStore && window.MentriaStore.get('tools', 'flappy_help_seen'));
+  }
+  function markHelpSeen() {
+    if (window.MentriaStore) window.MentriaStore.set('tools', 'flappy_help_seen', 1);
+  }
+  function helpOpen() {
+    return !!(helpEl && helpEl.matches && helpEl.matches(':popover-open'));
+  }
+
+  wrap.addEventListener('pointerdown', e => {
+    if (e.target && e.target.closest && e.target.closest('button')) return;
+    e.preventDefault();
+    noteMethod('touch');
+    primaryAction();
+  });
+  wrap.addEventListener('contextmenu', e => e.preventDefault());
+
+  wrap.addEventListener('click', e => {
+    const btn = e.target && e.target.closest ? e.target.closest('button[data-act]') : null;
+    if (!btn) return;
+    noteMethod('touch');
+    const act = btn.getAttribute('data-act');
+    if (act === 'resume') setPaused(false);
+    else if (canRestart()) reset();
+  });
+
   document.addEventListener('keydown', e => {
     if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
-    if (e.code === 'Space') {
+    const code = e.code;
+    if (code === 'Space' || code === 'ArrowUp' || code === 'KeyW') {
       e.preventDefault();
-      if (State.dying) return;
-      if (!State.running && !State.over) reset();
-      else if (State.over) reset();
-      else flap();
-    } else if (e.key === 'p' || e.key === 'P') {
-      if (State.running && !State.over) State.paused = !State.paused;
-    } else if (e.key === 'r' || e.key === 'R') {
-      reset();
+      noteMethod('keyboard');
+      primaryAction();
+    } else if (code === 'KeyP') {
+      noteMethod('keyboard');
+      togglePause();
+    } else if (code === 'Escape') {
+      if (helpOpen() || document.fullscreenElement) return;
+      noteMethod('keyboard');
+      setPaused(true);
+    } else if (code === 'KeyR') {
+      noteMethod('keyboard');
+      if (canRestart()) reset();
     }
   });
-  canvas.addEventListener('mousedown', e => {
-    e.preventDefault();
-    if (State.dying) return;
-    if (State.over) reset();
-    else if (!State.running) reset();
-    else flap();
-  });
-  canvas.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if (State.dying) return;
-    if (State.over) reset();
-    else if (!State.running) reset();
-    else flap();
-  }, { passive: false });
-  canvas.style.touchAction = 'none';
-
-  document.getElementById('btn-start').onclick = () => reset();
 
   window.addEventListener('mentria:gamepad:button', e => {
-    if (!e.detail.pressed) return;
+    if (!e.detail || !e.detail.pressed) return;
     const n = e.detail.name;
+    noteMethod('gamepad');
     if (n === 'a' || n === 'b' || n === 'x' || n === 'y') {
-      if (State.dying) return;
-      if (!State.running && !State.over) reset();
-      else if (State.over) reset();
-      else flap();
+      primaryAction();
     } else if (n === 'start') {
-      reset();
+      if (!State.running || State.over || !State.started) primaryAction();
+      else togglePause();
     }
   });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') setPaused(true);
+  });
+
+  if (!helpSeen() && helpEl && typeof helpEl.showPopover === 'function') {
+    try { helpEl.showPopover(); markHelpSeen(); } catch (_) {}
+  }
+  if (window.MentriaGamepad && window.MentriaGamepad.isConnected()) noteMethod('gamepad');
 
   let last = performance.now();
   let acc = 0;

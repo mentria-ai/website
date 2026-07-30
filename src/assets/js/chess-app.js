@@ -1,5 +1,6 @@
 /* chess-app.js — UI, game state, engine driver, Trystero P2P. Depends on chess-engine.js globals + window.CHESS_I18N. */
 (() => {
+  'use strict';
   const $ = (id) => document.getElementById(id);
   const T = Object.assign({
     win_white: 'White wins', win_black: 'Black wins', draw: 'Draw',
@@ -37,7 +38,7 @@
     pos: startPos(), history: [], cursor: -1, flipped: false,
     mode: 'hotseat', humanColor: 'w', skill: 1,
     pendingPromo: null, selected: -1, legalForSel: [], ghostMove: null, over: null,
-    focusSq: 60,
+    focusSq: 60, inputMethod: 'pointer', coords: true,
   };
   let cellEls = [];
   const SKILL_CFG = [
@@ -66,6 +67,90 @@
       State.humanColor = d.humanColor || 'w'; State.flipped = !!d.flipped; State.skill = d.skill ?? 1;
       return true;
     } catch(e){ return false; }
+  }
+  function prefGet(key){
+    try { if (window.MentriaStore) return window.MentriaStore.get('tools', key); } catch(e){}
+    return null;
+  }
+  function prefSet(key, value){
+    try { if (window.MentriaStore) window.MentriaStore.set('tools', key, value); } catch(e){}
+  }
+
+  function cursorVisible(){ return State.inputMethod === 'keyboard' || State.inputMethod === 'gamepad'; }
+  function focusIsVisible(el){
+    try { return el.matches(':focus-visible'); } catch(e){ return false; }
+  }
+  function setInputMethod(m){
+    if (State.inputMethod === m) return;
+    State.inputMethod = m;
+    updateHelpBadge();
+    paintCursor();
+  }
+  function paintCursor(){
+    const show = cursorVisible();
+    for (let i=0;i<cellEls.length;i++){
+      cellEls[i].classList.toggle('cursor', show && +cellEls[i].dataset.sq === State.focusSq);
+    }
+  }
+  function playerColor(){
+    if (State.mode === 'online') return P2P.color || 'w';
+    if (State.mode === 'engine') return State.humanColor;
+    return State.pos.turn;
+  }
+  function homeSquare(){ return playerColor() === 'b' ? 4 : 60; }
+  function viewIndexOf(sq){
+    for (let i=0;i<cellEls.length;i++) if (+cellEls[i].dataset.sq === sq) return i;
+    return -1;
+  }
+  function moveCursor(dir){
+    const v = viewIndexOf(State.focusSq);
+    let r = v < 0 ? 7 : Math.floor(v/8);
+    let c = v < 0 ? 4 : v%8;
+    if (dir === 'up') r = Math.max(0, r-1);
+    else if (dir === 'down') r = Math.min(7, r+1);
+    else if (dir === 'left') c = Math.max(0, c-1);
+    else if (dir === 'right') c = Math.min(7, c+1);
+    const target = cellEls[r*8+c];
+    if (!target) return;
+    focusSquare(+target.dataset.sq);
+  }
+
+  let helpShown = false;
+  const HELP_NATIVE = (function(){
+    try { return typeof document.createElement('div').showPopover === 'function'; } catch(e){ return false; }
+  })();
+  function updateHelpBadge(){
+    const m = cursorVisible() ? State.inputMethod : 'pointer';
+    document.querySelectorAll('.chess-help__method').forEach((el) => {
+      el.classList.toggle('is-active', el.dataset.method === m);
+    });
+  }
+  function popoverIsOpen(el){
+    try { return el.matches(':popover-open'); } catch(e){ return helpShown; }
+  }
+  function openHelp(){
+    const el = $('chess-help'); if (!el) return;
+    if (HELP_NATIVE){ if (!helpShown){ try { el.showPopover(); helpShown = true; } catch(e){} } }
+    else { el.classList.add('is-open'); helpShown = true; }
+    updateHelpBadge();
+    prefSet('chess_help_seen', 1);
+  }
+  function closeHelp(){
+    const el = $('chess-help'); if (!el) return;
+    if (HELP_NATIVE){ try { el.hidePopover(); } catch(e){} helpShown = false; }
+    else { el.classList.remove('is-open'); helpShown = false; }
+  }
+  function toggleHelp(){ if (helpShown) closeHelp(); else openHelp(); }
+  function syncHelpState(){
+    if (helpShown && HELP_NATIVE){ const el = $('chess-help'); if (el && !popoverIsOpen(el)) helpShown = false; }
+  }
+
+  function setCoords(on){
+    State.coords = !!on;
+    $('board-shell').classList.toggle('no-coords', !State.coords);
+    const b = $('btn-coords');
+    if (b){ b.classList.toggle('on', State.coords); b.setAttribute('aria-pressed', State.coords ? 'true' : 'false'); }
+    prefSet('chess_coords', State.coords ? 1 : 0);
   }
 
   /* ===== engine worker ===== */
@@ -221,6 +306,7 @@
       cell.setAttribute('aria-selected', (State.selected === idx && State.cursor < 0) ? 'true' : 'false');
       cell.tabIndex = (idx === State.focusSq) ? 0 : -1;
     }
+    paintCursor();
     renderCaptured(viewPos);
     renderMoves();
     $('scrub-back').classList.toggle('show', State.cursor >= 0);
@@ -231,7 +317,7 @@
   }
   function focusSquare(idx){
     const cell = cellEls.find(c => +c.dataset.sq === idx);
-    if (cell){ State.focusSq = idx; updateTabindex(); cell.focus(); }
+    if (cell){ State.focusSq = idx; updateTabindex(); paintCursor(); cell.focus(); }
   }
   function renderCaptured(viewPos){
     const startCounts = { P:8, N:2, B:2, R:2, Q:1, p:8, n:2, b:2, r:2, q:1 };
@@ -279,12 +365,20 @@
       t.appendChild(row);
     }
     t.querySelectorAll('.m[data-step]').forEach(el => { el.onclick = () => scrubTo(+el.dataset.step); });
-    t.scrollTop = t.scrollHeight;
+    scrollMovesToCurrent(t);
+  }
+  function scrollMovesToCurrent(t){
+    const cur = t.querySelector('.m.cur');
+    if (!cur){ t.scrollTop = t.scrollHeight; return; }
+    const cr = cur.getBoundingClientRect(), tr = t.getBoundingClientRect();
+    if (!tr.height){ t.scrollTop = t.scrollHeight; return; }
+    t.scrollTop = t.scrollTop + (cr.top - tr.top) - (tr.height / 2) + (cr.height / 2);
   }
 
   /* ===== interaction ===== */
   let dragInfo = null;
   function onSqDown(e){
+    setInputMethod('pointer');
     if (State.over || State.cursor >= 0) return;
     if (State.mode === 'engine' && State.pos.turn !== State.humanColor) return;
     if (State.mode === 'online' && P2P.color && P2P.color !== State.pos.turn) return;
@@ -365,8 +459,11 @@
     const cell = e.target.closest && e.target.closest('.sq');
     if (!cell) return;
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar'){
-      e.preventDefault(); e.stopPropagation(); activateSquare(+cell.dataset.sq); return;
+      e.preventDefault(); e.stopPropagation();
+      setInputMethod('keyboard');
+      activateSquare(+cell.dataset.sq); return;
     }
+    if (e.shiftKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
     const v = cellEls.indexOf(cell);
     if (v < 0) return;
     let r = Math.floor(v/8), c = v%8, handled = true;
@@ -381,8 +478,9 @@
     }
     if (!handled) return;
     e.preventDefault(); e.stopPropagation();
+    setInputMethod('keyboard');
     const target = cellEls[r*8+c];
-    State.focusSq = +target.dataset.sq; updateTabindex(); target.focus();
+    focusSquare(+target.dataset.sq);
   }
 
   /* ===== promotion ===== */
@@ -415,6 +513,24 @@
       else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ e.preventDefault(); e.stopPropagation(); btns[(i-1+btns.length)%btns.length].focus(); }
     };
     if (viaKeyboard){ const first = pop.querySelector('button'); if (first) first.focus(); }
+  }
+  function promoButtons(){ return Array.from($('promo').querySelectorAll('button')); }
+  function promoNav(dir){
+    const btns = promoButtons(); if (!btns.length) return;
+    let i = btns.indexOf(document.activeElement);
+    if (i < 0) i = 0;
+    const step = (dir === 'right' || dir === 'down') ? 1 : -1;
+    btns[(i + step + btns.length) % btns.length].focus();
+  }
+  function promoPick(){
+    const btns = promoButtons(); if (!btns.length) return;
+    const i = btns.indexOf(document.activeElement);
+    btns[i >= 0 ? i : 0].click();
+  }
+  function promoCancel(){
+    const from = State.selected >= 0 ? State.selected : State.focusSq;
+    closePromo();
+    focusSquare(from);
   }
 
   /* ===== hint arrow ===== */
@@ -459,6 +575,7 @@
     State.pos = startPos(); State.history = []; State.cursor = -1;
     State.selected = -1; State.legalForSel = []; State.over = null; State.ghostMove = null;
     if (!keepMode){ State.mode = 'hotseat'; State.humanColor = 'w'; State.flipped = false; }
+    State.focusSq = homeSquare();
     closeEndDialog(); hideHintArrow();
     render(); save();
     if (State.mode === 'online' && P2P.action && P2P.role === 'host'){ P2P.send({ kind:'sync', pos: State.pos, history: [] }); }
@@ -577,6 +694,7 @@
       $('btn-swap').style.display = 'none';
       if (role === 'guest'){ State.flipped = true; buildBoardCells(); }
       else { State.flipped = false; buildBoardCells(); }
+      State.focusSq = homeSquare();
       render();
       this.setLed('warn', role === 'host' ? T.peer_waiting : T.peer_connecting);
     },
@@ -606,6 +724,7 @@
   function wire(){
     $('btn-newgame').onclick = () => newGame(true);
     $('btn-flip').onclick = flip;
+    $('btn-coords').onclick = () => setCoords(!State.coords);
     $('btn-undo').onclick = undo;
     $('btn-resign').onclick = resign;
     $('btn-swap').onclick = swapHumanColor;
@@ -666,6 +785,8 @@
       const cell = e.target.closest && e.target.closest('.sq');
       if (!cell) return;
       State.focusSq = +cell.dataset.sq; updateTabindex();
+      if (focusIsVisible(cell)) setInputMethod('keyboard');
+      paintCursor();
     });
     $('end-modal').addEventListener('keydown', (e) => {
       if (!$('end-modal').classList.contains('show')) return;
@@ -673,13 +794,105 @@
       else if (e.key === 'Tab'){ e.preventDefault(); $('btn-rematch').focus(); }
     });
 
+    const helpEl = $('chess-help');
+    if (helpEl){
+      helpEl.addEventListener('toggle', (e) => {
+        helpShown = e.newState === 'open' || (e.newState === undefined && popoverIsOpen(helpEl));
+        if (helpShown){ updateHelpBadge(); prefSet('chess_help_seen', 1); }
+      });
+      if (!HELP_NATIVE){
+        helpEl.classList.add('chess-help--fallback');
+        const chip = document.querySelector('.terminal-frame__help');
+        if (chip) chip.addEventListener('click', (e) => { e.preventDefault(); toggleHelp(); });
+      }
+      const closeBtn = $('chess-help-close');
+      if (closeBtn) closeBtn.onclick = closeHelp;
+    }
+
+    document.addEventListener('pointerdown', () => setInputMethod('pointer'), true);
+
     document.addEventListener('keydown', (e) => {
       if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.key === 'ArrowLeft'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur > 0) scrubTo(cur - 1); }
-      else if (e.key === 'ArrowRight'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur < State.history.length) scrubTo(cur + 1); }
-      else if (e.key === 'Escape'){ if (State.pendingPromo) closePromo(); State.selected = -1; State.legalForSel = []; render(); }
-      else if (e.key === 'r' || e.key === 'R'){ resign(); }
+      const k = e.key;
+      syncHelpState();
+      if (helpShown){ if (k === 'Escape'){ closeHelp(); } return; }
+      if (k === 'Escape'){
+        if (State.pendingPromo) closePromo();
+        State.selected = -1; State.legalForSel = []; render();
+        return;
+      }
+      if (State.pendingPromo) return;
+      if (k === 'ArrowLeft' || k === 'ArrowRight' || k === 'ArrowUp' || k === 'ArrowDown'){
+        if (e.shiftKey){
+          if (k === 'ArrowLeft'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur > 0) scrubTo(cur - 1); }
+          else if (k === 'ArrowRight'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur < State.history.length) scrubTo(cur + 1); }
+          e.preventDefault();
+          return;
+        }
+        e.preventDefault();
+        setInputMethod('keyboard');
+        moveCursor(k === 'ArrowUp' ? 'up' : k === 'ArrowDown' ? 'down' : k === 'ArrowLeft' ? 'left' : 'right');
+        return;
+      }
+      if (k === 'Enter' || k === ' ' || k === 'Spacebar'){
+        if (e.target && e.target.closest && e.target.closest('button, a, [role="button"]')) return;
+        e.preventDefault();
+        const wasVisible = cursorVisible();
+        setInputMethod('keyboard');
+        if (!wasVisible){ focusSquare(State.focusSq); return; }
+        activateSquare(State.focusSq);
+        if (!State.pendingPromo) focusSquare(State.focusSq);
+        return;
+      }
+      if (k === 'r' || k === 'R'){ resign(); }
+      else if (k === 'f' || k === 'F'){ flip(); }
+      else if (k === 'h' || k === 'H'){ pendingHint = true; askEngine(); }
+      else if (k === '?'){ toggleHelp(); }
+    });
+
+    wirePad();
+  }
+
+  function padBusy(){
+    const ae = document.activeElement;
+    return !!(ae && ae.closest && ae.closest('input, textarea, select, [contenteditable="true"]'));
+  }
+  function endModalOpen(){ return $('end-modal').classList.contains('show'); }
+  function wirePad(){
+    window.addEventListener('mentria:gamepad:connect', () => setInputMethod('gamepad'));
+    window.addEventListener('mentria:gamepad:direction', (e) => {
+      const d = e.detail && e.detail.direction;
+      if (!d || padBusy()) return;
+      setInputMethod('gamepad');
+      syncHelpState();
+      if (helpShown || endModalOpen()) return;
+      if (State.pendingPromo){ promoNav(d); return; }
+      moveCursor(d);
+    });
+    window.addEventListener('mentria:gamepad:button', (e) => {
+      const det = e.detail;
+      if (!det || !det.pressed || padBusy()) return;
+      setInputMethod('gamepad');
+      syncHelpState();
+      const n = det.name;
+      if (helpShown){ if (n === 'a' || n === 'b' || n === 'start') closeHelp(); return; }
+      if (n === 'start'){ toggleHelp(); return; }
+      if (State.pendingPromo){
+        if (n === 'a') promoPick();
+        else if (n === 'b') promoCancel();
+        return;
+      }
+      if (endModalOpen()){
+        if (n === 'a') $('btn-rematch').click();
+        return;
+      }
+      if (n === 'a'){ activateSquare(State.focusSq); if (!State.pendingPromo) focusSquare(State.focusSq); }
+      else if (n === 'b'){ State.selected = -1; State.legalForSel = []; render(); }
+      else if (n === 'x'){ flip(); }
+      else if (n === 'y'){ pendingHint = true; askEngine(); }
+      else if (n === 'lb'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur > 0) scrubTo(cur - 1); }
+      else if (n === 'rb'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur < State.history.length) scrubTo(cur + 1); }
     });
   }
 
@@ -689,7 +902,14 @@
     document.querySelectorAll('#skill-pills button').forEach(b => b.classList.toggle('active', +b.dataset.skill === State.skill));
     document.querySelectorAll('.modes button').forEach(b => b.classList.toggle('active', b.dataset.mode === State.mode));
     $('btn-swap').style.display = State.mode === 'engine' ? '' : 'none';
-    buildBoardCells(); bootWorker(); render(); wire();
+    $('btn-swap').textContent = State.humanColor === 'w' ? T.play_black : T.play_white;
+    buildBoardCells(); bootWorker();
+    const savedCoords = prefGet('chess_coords');
+    setCoords(savedCoords === null || savedCoords === undefined ? true : !!savedCoords);
+    State.focusSq = homeSquare();
+    if (window.MentriaGamepad && window.MentriaGamepad.isConnected()) State.inputMethod = 'gamepad';
+    updateHelpBadge();
+    render(); wire();
     const status = gameStatus(State.pos, State.history);
     if (status){ State.over = status; showEnd(status); }
     else if (State.mode === 'engine' && State.pos.turn !== State.humanColor) engineMove();
@@ -702,6 +922,7 @@
       setMode('online');
       P2P.start('guest', roomParam).catch(() => P2P.setLed('warn', T.peer_error));
     }
+    if (roomParam.length < 6 && !prefGet('chess_help_seen')) setTimeout(openHelp, 600);
   }
   boot();
 })();

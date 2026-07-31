@@ -408,6 +408,11 @@
       "title": "Online Ruler",
       "lede": "An online ruler in actual size — measure in cm, mm and inches right on the screen, and calibrate it with a bank card so the millimetres are real.",
       "tldr": "A ruler drawn straight onto your screen, with centimetres and millimetres along one edge and inches down to 1/16 along the other. No browser can know how big your display really is, so you calibrate once by matching an outline to a bank card — or by typing a length you already know — and from then on the marks are true to size. Drag the two markers to measure anything you can lay on the glass; it works offline and remembers the calibration on this device."
+    },
+    "phosphor": {
+      "title": "PHOSPHOR",
+      "lede": "Combat time trials in the browser — sprint, slide, mantle and a full-auto carbine across five dusk-lit courses. Medals, ghost racing, offline play.",
+      "tldr": "Browser FPS time trials with medals and ghost racing."
     }
   },
   "game": {

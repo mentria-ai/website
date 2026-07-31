@@ -408,6 +408,11 @@
       "title": "Règle en ligne",
       "lede": "Une règle en ligne à taille réelle : mesurez en cm, mm et pouces directement à l'écran, et calibrez-la avec une carte bancaire pour que les millimètres soient justes.",
       "tldr": "Une règle dessinée directement sur votre écran, avec les centimètres et les millimètres sur un bord et les pouces jusqu'au 1/16 sur l'autre. Aucun navigateur ne peut connaître la taille réelle de votre écran : vous calibrez donc une fois en ajustant un contour sur une carte bancaire, ou en saisissant une longueur que vous connaissez déjà, et les graduations deviennent fidèles. Faites glisser les deux repères pour mesurer ce que vous posez sur la vitre ; tout fonctionne hors ligne et le calibrage reste sur cet appareil."
+    },
+    "phosphor": {
+      "title": "PHOSPHOR",
+      "lede": "Contre-la-montre de combat dans le navigateur : sprint, glissade, escalade et carabine automatique sur cinq parcours au crépuscule. Médailles, course aux fantômes, jeu hors ligne.",
+      "tldr": "FPS contre-la-montre dans le navigateur, médailles et fantômes."
     }
   },
   "game": {

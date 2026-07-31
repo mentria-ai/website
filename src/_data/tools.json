@@ -169,6 +169,14 @@
     "group": "Games"
   },
   {
+    "slug": "phosphor",
+    "title": "PHOSPHOR",
+    "summary": "Combat time trials in the browser — sprint, slide, mantle and a full-auto carbine across five dusk-lit courses. Medals, ghost racing, offline play.",
+    "category": "Game",
+    "group": "Games",
+    "added": "2026-07-31"
+  },
+  {
     "slug": "extensions",
     "title": "Extensions",
     "summary": "Install private single-file extensions that live only on your device — they get a launcher tile, terminal commands, and local storage, and are never part of the public site.",

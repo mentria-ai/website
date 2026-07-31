@@ -1,13 +1,14 @@
 ---
 layout: base.njk
-permalink: /tools/phosphor/index.html
-lang: en
-title: "PHOSPHOR"
-description: "Browser FPS combat time trials — five courses, medals and ghost racing with a full-auto carbine."
-robots: "noindex, nofollow"
-eleventyExcludeFromCollections: true
-eleventyExcludeFromSitemap: true
-englishOnly: true
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/phosphor/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.phosphor.title' | t }}"
+  description: "{{ 'tools.phosphor.lede' | t }}"
 ---
 <style>
 .ph-wrap { margin: 1.25rem 0 2rem; }

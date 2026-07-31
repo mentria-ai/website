@@ -408,6 +408,11 @@
       "title": "Regla Online",
       "lede": "Una regla online a tamaño real: mide en cm, mm y pulgadas en la propia pantalla y calíbrala con una tarjeta bancaria para que los milímetros sean de verdad.",
       "tldr": "Una regla dibujada directamente sobre tu pantalla, con centímetros y milímetros en un borde y pulgadas hasta 1/16 en el otro. Ningún navegador puede saber cuánto mide tu pantalla, así que la calibras una vez ajustando un contorno a una tarjeta bancaria (o escribiendo una medida que ya conozcas) y a partir de ahí las marcas son fieles. Arrastra los dos marcadores para medir lo que apoyes sobre el cristal: funciona sin conexión y guarda la calibración en este dispositivo."
+    },
+    "phosphor": {
+      "title": "PHOSPHOR",
+      "lede": "Contrarreloj de combate en el navegador: esprinta, deslízate, escala y dispara una carabina automática en cinco recorridos al atardecer. Medallas, fantasmas rivales y juego sin conexión.",
+      "tldr": "FPS de contrarreloj en el navegador con medallas y fantasmas."
     }
   },
   "game": {

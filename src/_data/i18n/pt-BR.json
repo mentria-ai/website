@@ -408,6 +408,11 @@
       "title": "Régua Online",
       "lede": "Uma régua online em tamanho real: meça em cm, mm e polegadas direto na tela e calibre com um cartão de banco para que os milímetros sejam de verdade.",
       "tldr": "Uma régua desenhada direto na sua tela, com centímetros e milímetros de um lado e polegadas até 1/16 do outro. Nenhum navegador consegue saber o tamanho real do seu monitor, então você calibra uma vez ajustando um contorno a um cartão de banco — ou digitando uma medida que já conhece — e daí em diante as marcações ficam fiéis. Arraste os dois marcadores para medir o que apoiar sobre o vidro; funciona offline e a calibração fica salva neste dispositivo."
+    },
+    "phosphor": {
+      "title": "PHOSPHOR",
+      "lede": "Contrarrelógio de combate no navegador: corra, deslize, escale e atire com uma carabina automática em cinco percursos ao anoitecer. Medalhas, corrida contra fantasmas e jogo offline.",
+      "tldr": "FPS de contrarrelógio no navegador com medalhas e fantasmas."
     }
   },
   "game": {

@@ -544,18 +544,26 @@
           if (!skipPersist) persist(true);
           window.dispatchEvent(new Event('resize'));
         }
+        function withTransition(fn) {
+          if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.startViewTransition(fn);
+          } else {
+            fn();
+          }
+        }
         document.addEventListener('click', function (e) {
           var btn = e.target.closest && e.target.closest('[data-action="toggle-fullscreen"]');
           if (!btn) return;
           var frame = btn.closest('.terminal-frame');
           if (!frame) return;
           e.preventDefault();
-          if (frame.classList.contains(FS)) exit(); else enter(frame);
+          if (frame.classList.contains(FS)) withTransition(function () { exit(); });
+          else withTransition(function () { enter(frame); });
         });
         document.addEventListener('keydown', function (e) {
           if (e.key !== 'Escape' || !activeFrame()) return;
           if (document.querySelector('.m-modal:not([hidden]), .m-palette:not([hidden]), .hero--peek')) return;
-          exit();
+          withTransition(function () { exit(); });
         });
         document.addEventListener('DOMContentLoaded', function () {
           var slug = toolSlug();

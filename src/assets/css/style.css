@@ -47,6 +47,8 @@ i18n-t {
 :root {
   color-scheme: dark;
 
+  --wide: clamp(960px, 96vw, 1100px);
+
   /* Surface */
   --term-bg: #0a0a0a;
   --term-bg-raised: #111111;
@@ -205,6 +207,8 @@ html:has(.pwa-install-banner--visible) { scroll-padding-bottom: 110px; }
 }
 
 main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100%; }
+main:has(.terminal-frame) { max-width: var(--wide); }
+main:has(.terminal-frame) .hero { max-width: 912px; margin-inline: auto; }
 
 .site-header { background: var(--term-bg-raised); border-bottom: 1px solid var(--term-border); }
 .site-header__inner {
@@ -657,6 +661,10 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .card h3 a::after { content: ''; position: absolute; inset: 0; }
 
 .hero { text-align: center; padding: 3rem 0 2rem; }
+@media (max-width: 720px) {
+  .hero { padding: 1.6rem 0 1.2rem; }
+  main { padding-left: 0.75rem; padding-right: 0.75rem; }
+}
 .hero p { color: var(--term-muted); margin: 0.75rem auto 0; max-width: 640px; }
 
 .tool-shell {
@@ -752,6 +760,8 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .hero .tldr__summary { display: flex; width: fit-content; }
 
 html.app-chrome body:has(.terminal-frame) .hero { display: none; }
+html.app-chrome body:has(.terminal-frame) main { padding-top: 0.75rem; }
+html.app-chrome body:has(.terminal-frame) .terminal-frame { margin-top: 0; }
 
 /* Dimmed backdrop behind the tool-info peek — matches the ⌘K palette
    and m-dialog scrim so the popup reads as a modal on every screen size.

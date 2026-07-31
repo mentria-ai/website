@@ -64,6 +64,18 @@
   border-radius: 10px;
   overflow: hidden;
   margin-top: 2rem;
+  view-transition-name: tool-frame;
+}
+::view-transition-group(tool-frame) {
+  animation-duration: 0.32s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+::view-transition-old(tool-frame),
+::view-transition-new(tool-frame) {
+  height: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .terminal-frame { view-transition-name: none; }
 }
 
 .terminal-frame__titlebar {
@@ -73,6 +85,9 @@
   padding: 0.6rem 1rem;
   background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid var(--term-border);
+}
+@media (max-width: 720px) {
+  .terminal-frame__titlebar { padding: 0.4rem 0.75rem; }
 }
 
 .terminal-frame__dots {
@@ -519,6 +534,9 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
 .terminal-frame__body {
   padding: 1.5rem;
   position: relative;
+}
+@media (max-width: 720px) {
+  .terminal-frame__body { padding: 0.85rem; }
 }
 
 /* ── CLI ──────────────────────────────────────────── */

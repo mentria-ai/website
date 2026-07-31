@@ -303,7 +303,8 @@
       "chooseHint": "Seu dispositivo pode executar até {name}. Modelos maiores são mais inteligentes, mas baixam mais.",
       "choosePitch": "Roda totalmente no seu dispositivo — privado, grátis e funciona off-line após o download único.",
       "chooseSample": "Pergunte coisas como “explique computação quântica de forma simples” e a resposta é gerada no seu próprio hardware.",
-      "chooseNotNow": "Agora não"
+      "chooseNotNow": "Agora não",
+      "still": "Ainda em andamento: a primeira execução compila os shaders e pode levar um ou dois minutos no celular."
     },
     "quote": {
       "title": "Frase Motivacional",

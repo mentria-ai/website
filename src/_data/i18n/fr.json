@@ -303,7 +303,8 @@
       "chooseHint": "Votre appareil peut exécuter jusqu’à {name}. Les modèles plus grands sont plus intelligents mais se téléchargent davantage.",
       "choosePitch": "Fonctionne entièrement sur votre appareil — privé, gratuit, et hors ligne après le téléchargement unique.",
       "chooseSample": "Demandez par exemple « explique-moi l'informatique quantique simplement » — la réponse est générée sur votre propre matériel.",
-      "chooseNotNow": "Plus tard"
+      "chooseNotNow": "Plus tard",
+      "still": "Toujours en cours : le premier lancement compile les shaders et peut prendre une à deux minutes sur téléphone."
     },
     "quote": {
       "title": "Citation Motivante",

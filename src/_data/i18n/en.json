@@ -303,7 +303,8 @@
       "chooseHint": "Your device can run up to {name}. Bigger models are smarter but download more.",
       "choosePitch": "Runs fully on your device — private, free, and works offline after the one-time download.",
       "chooseSample": "Ask things like “explain quantum computing simply” and the answer is generated on your own hardware.",
-      "chooseNotNow": "Not now"
+      "chooseNotNow": "Not now",
+      "still": "Still working — the first run compiles shaders and can take a minute or two on phones."
     },
     "quote": {
       "title": "Motivational Quote",

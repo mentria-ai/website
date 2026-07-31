@@ -1,11 +1,14 @@
 import * as Tiers from '/assets/js/mentria-tiers.js';
 
-const PROBE_TIMEOUT = 15000;
+const IS_MOBILE = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const PROBE_TIMEOUT = IS_MOBILE ? 90000 : 30000;
+const PROBE_STILL_MS = 20000;
 const READY_LINGER = 600;
 
 const DEFAULT_COPY = {
   checking: 'Checking your device…',
   testing: 'Testing the {name} model…',
+  still: 'Still working — the first run compiles shaders and can take a minute or two on phones.',
   ready: '✓ {name} ready',
   degrade: '{from} isn’t supported on this device — using {to}',
   failed: 'Couldn’t run an on-device model on this device.',
@@ -188,9 +191,19 @@ function hide() {
 
 async function validateRun(engine) {
   let timer;
+  let stillTimer;
+  let firstToken;
+  const alive = new Promise((res) => { firstToken = res; });
+  const run = engine.generate({ messages: [{ role: 'user', content: 'hi' }], maxTokens: 2, temperature: 0, enableThinking: false }, () => { firstToken(); });
   const timeout = new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('validation timeout')), PROBE_TIMEOUT); });
-  const run = engine.generate({ messages: [{ role: 'user', content: 'hi' }], maxTokens: 2, temperature: 0, enableThinking: false }, () => {});
-  try { await Promise.race([run, timeout]); } finally { clearTimeout(timer); }
+  stillTimer = setTimeout(() => {
+    const el = document.getElementById('mm-gate');
+    if (el && !el.hidden) {
+      const detail = el.querySelector('.mm-gate__detail');
+      if (detail) detail.textContent = t('still');
+    }
+  }, PROBE_STILL_MS);
+  try { await Promise.race([run, alive, timeout]); } finally { clearTimeout(timer); clearTimeout(stillTimer); }
 }
 
 function requestPersistentStorage() {

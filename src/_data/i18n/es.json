@@ -303,7 +303,8 @@
       "chooseHint": "Tu dispositivo puede ejecutar hasta {name}. Los modelos más grandes son más inteligentes pero descargan más.",
       "choosePitch": "Funciona por completo en tu dispositivo — privado, gratis y sin conexión tras la descarga única.",
       "chooseSample": "Pregunta cosas como «explícame la computación cuántica en simple» y la respuesta se genera en tu propio hardware.",
-      "chooseNotNow": "Ahora no"
+      "chooseNotNow": "Ahora no",
+      "still": "Sigue en marcha: la primera ejecución compila los sombreadores y puede tardar uno o dos minutos en el móvil."
     },
     "quote": {
       "title": "Cita Motivadora",

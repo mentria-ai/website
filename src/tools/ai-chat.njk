@@ -591,6 +591,7 @@ function runApp(MentriaEngine, Tiers) {
     }
 
     const bodyEl = addMessage('assistant', '');
+    bodyEl.classList.add('ac__streaming');
     let fullText = '';
     let pendingPaint = false;
 
@@ -608,6 +609,7 @@ function runApp(MentriaEngine, Tiers) {
     }
 
     function finalize(wasStopped) {
+      bodyEl.classList.remove('ac__streaming');
       const stick = isNearBottom();
       const display = fullText
         .replace(/<think>[\s\S]*?<\/think>/g, '')
@@ -1243,4 +1245,12 @@ function runApp(MentriaEngine, Tiers) {
     height: 30px;
   }
 }
+.ac__streaming > :last-child::after,
+.ac__streaming:not(:has(*))::after {
+  content: '▋';
+  color: var(--accent);
+  margin-left: 2px;
+  animation: ac-caret 1s steps(1) infinite;
+}
+@keyframes ac-caret { 50% { opacity: 0; } }
 </style>

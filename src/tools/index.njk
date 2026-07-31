@@ -32,7 +32,7 @@ eleventyComputed:
     </div>
     {% for tool in toolList %}
     {% set shelf = "games" if tool.category == "Game" else ("ai" if tool.category == "AI" else "tools") %}
-    <div class="tools-listing__row" data-shelf="{{ shelf }}"{% if tool.requires %} data-requires="{{ tool.requires }}"{% endif %}>
+    <div class="tools-listing__row" data-shelf="{{ shelf }}" style="--i: {{ loop.index0 }}"{% if tool.requires %} data-requires="{{ tool.requires }}"{% endif %}>
         <span class="tools-listing__category">{{ ("category." + tool.category) | t }}</span>
         <span class="tools-listing__name"><a href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">{{ ("tools." + tool.slug + ".title") | t }}</a></span>
         <span class="tools-listing__summary">{{ ("tools." + tool.slug + ".lede") | t }}</span>

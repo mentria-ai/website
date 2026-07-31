@@ -3,11 +3,11 @@
   ["Games", "home.launcher.games"], ["Create", "home.launcher.create"],
   ["Dev", "home.launcher.dev"]
 ] -%}
-{%- macro tile(tool, lang) -%}
+{%- macro tile(tool, lang, i) -%}
   <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}"
      {%- if tool.requires %} data-requires="{{ tool.requires }}"{% endif %}
      data-search="{{ tool.summary }} {{ tool.category }} {{ tool.group }} {{ tool.slug }}"
-     style="view-transition-name: tool-{{ tool.slug }}"
+     style="view-transition-name: tool-{{ tool.slug }}; --i: {{ i or 0 }}"
      href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
     <span class="launch-tile__icon" aria-hidden="true">
       <svg viewBox="0 0 48 48"><use href="#tool-{{ tool.slug }}"></use></svg>
@@ -42,7 +42,7 @@
     <section class="launcher__cat launcher__cat--{{ g[0] | lower }}" data-group="{{ g[0] }}">
       <h2 class="launcher__label">{{ g[1] | t }}</h2>
       <div class="launcher__grid">
-        {%- for tool in tools %}{% if tool.group == g[0] %}{{ tile(tool, lang) }}{% endif %}{%- endfor %}
+        {%- for tool in (tools | groupby("group"))[g[0]] %}{{ tile(tool, lang, loop.index0) }}{%- endfor %}
       </div>
     </section>
     {%- endfor %}
@@ -171,6 +171,7 @@
     if (noMatch) noMatch.hidden = !(qNorm && !anyVisible);
   }
   input.addEventListener('input', applyFilter);
+  setTimeout(function () { launcher.classList.add('stag-done'); }, 900);
   input.addEventListener('keydown', function (e) { if (e.key === 'Enter') setTimeout(applyFilter, 0); });
 })();
 </script>

@@ -11,8 +11,14 @@
   transition: background var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out),
-    box-shadow var(--duration-fast) var(--ease-out);
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--dur-4, 320ms) var(--spring-settle, var(--ease-out));
 }
+.m-btn:active {
+  transform: translateY(1px) scale(0.98);
+  transition-duration: var(--dur-1, 90ms);
+}
+.m-btn--primary:active { box-shadow: var(--glow-cyan); }
 
 .m-btn--primary {
   background: var(--syn-cyan);

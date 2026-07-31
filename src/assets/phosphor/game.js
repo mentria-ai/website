@@ -2,6 +2,8 @@ import * as rendererMod from './renderer.js';
 import * as simMod from './sim.js';
 import * as audioMod from './audio.js';
 import * as inputMod from './input.js';
+import * as coursesMod from './courses.js';
+import * as ghostMod from './ghost.js';
 
 const FIXED = 1 / 120;
 const MAX_FRAME = 0.25;
@@ -34,6 +36,19 @@ const FOV_MAX_RAD = 2.09;
 const CROSS_BASE_PX = 4;
 const CROSS_ADS_SHRINK = 0.45;
 
+const AQ_LOW_FPS = 45;
+const AQ_HIGH_FPS = 55;
+const AQ_LOW_MS = 3000;
+const AQ_HIGH_MS = 30000;
+const AQ_STEP = 0.1;
+const AQ_FLOOR = 0.5;
+
+const COURSE_KEY = 'phosphor_course';
+const FALLBACK_COURSE_IDS = ['c01', 'c02', 'c03', 'c04', 'c05'];
+const MEDALS = ['bronze', 'silver', 'gold', 'signal'];
+const MENU_DEAD = 0.55;
+const GHOST_MSG_MS = 4000;
+
 const FALLBACK_CONSTANTS = {
   walk: 4.5, sprint: 6.7, slideBurst: 9.0, slideDecay: 0.9, jumpVel: 4.6,
   gravity: 20, accelGround: 45, accelAir: 12, friction: 8, capsuleR: 0.35,
@@ -42,73 +57,8 @@ const FALLBACK_CONSTANTS = {
   recoilV: 0.011, recoilH: 0.004, magSize: 30, reloadTime: 1.8, staminaMax: 6
 };
 
-const WORLD = {
-  prims: [
-    { type: 'box', min: [-30, -0.6, -75], max: [30, 0, 15], mat: 'concrete' },
-    { type: 'box', min: [-4, 0, -2], max: [4, 0.3, 6], mat: 'concrete' },
-    { type: 'box', min: [-9, 0, -62], max: [-8.4, 3.6, 6], mat: 'concrete' },
-    { type: 'box', min: [8.4, 0, -62], max: [9, 3.6, 6], mat: 'concrete' },
-    { type: 'box', min: [-9, 0, 6], max: [9, 3.6, 6.6], mat: 'concrete' },
-    { type: 'box', min: [-9, 0, -62.6], max: [9, 4.6, -62], mat: 'metal' },
-    { type: 'box', min: [-7.2, 0, -8], max: [-5.2, 1.2, -6], mat: 'concrete' },
-    { type: 'box', min: [5.2, 0, -14], max: [7.2, 1.4, -12], mat: 'concrete' },
-    { type: 'box', min: [-7.6, 0, -22], max: [-5, 1, -19], mat: 'metal' },
-    { type: 'box', min: [4.8, 0, -30], max: [7.6, 1.6, -27], mat: 'concrete' },
-    { type: 'box', min: [-6.8, 0, -38], max: [-4.4, 1.2, -35.5], mat: 'metal' },
-    { type: 'box', min: [5, 0, -46], max: [7.4, 1.1, -43.5], mat: 'concrete' },
-    { type: 'box', min: [-1.2, 0, -10.6], max: [1.2, 1.05, -9.4], mat: 'concrete' },
-    { type: 'box', min: [-1.2, 0, -13.6], max: [1.2, 1.1, -12.4], mat: 'concrete' },
-    { type: 'box', min: [-1.2, 0, -16.6], max: [1.2, 1, -15.4], mat: 'concrete' },
-    { type: 'box', min: [-4, 1.1, -26.4], max: [4, 1.5, -25.6], mat: 'metal' },
-    { type: 'box', min: [-4.4, 0, -26.4], max: [-4, 3, -25.6], mat: 'metal' },
-    { type: 'box', min: [4, 0, -26.4], max: [4.4, 3, -25.6], mat: 'metal' },
-    { type: 'box', min: [4, 2.8, -55], max: [7.6, 3, -20], mat: 'metal' },
-    { type: 'box', min: [7.4, 3, -55], max: [7.6, 3.9, -20], mat: 'metal' },
-    { type: 'ramp', min: [4, 0, -20], max: [7.6, 3, -16], dir: '-z', mat: 'metal' },
-    { type: 'ramp', min: [4, 0, -59], max: [7.6, 3, -55], dir: '+z', mat: 'metal' },
-    { type: 'box', min: [-8.4, 0, -42.6], max: [-2, 1.3, -42], mat: 'concrete' },
-    { type: 'box', min: [2, 0, -40], max: [3.8, 2.4, -36], mat: 'metal' },
-    { type: 'box', min: [4.2, 0, -25.4], max: [4.6, 2.8, -25], mat: 'metal' },
-    { type: 'box', min: [4.2, 0, -35.4], max: [4.6, 2.8, -35], mat: 'metal' },
-    { type: 'box', min: [4.2, 0, -45.4], max: [4.6, 2.8, -45], mat: 'metal' },
-    { type: 'box', min: [-4, 3.2, -2], max: [4, 3.4, 6], mat: 'metal' },
-    { type: 'box', min: [-4, 0, -2], max: [-3.7, 3.2, -1.7], mat: 'metal' },
-    { type: 'box', min: [3.7, 0, -2], max: [4, 3.2, -1.7], mat: 'metal' },
-    { type: 'box', min: [1, 0, -38.4], max: [2, 1.1, -36.4], mat: 'concrete' },
-    { type: 'box', min: [-8.4, 0, -62], max: [-2.4, 1.6, -56], mat: 'concrete' },
-    { type: 'box', min: [-7, 0, -54], max: [-4.6, 0.6, -52.4], mat: 'concrete' },
-    { type: 'box', min: [-4.4, 0, -56], max: [-2.4, 1.2, -54.2], mat: 'concrete' },
-    { type: 'box', min: [-1, 0, -31], max: [1, 2.6, -30.4], mat: 'concrete' },
-    { type: 'box', min: [-8.4, 0, -20], max: [-6.6, 0.6, -18], mat: 'concrete' },
-    { type: 'box', min: [-8.4, 3.4, -48.2], max: [3.8, 3.7, -47.8], mat: 'metal' },
-    { type: 'box', min: [-2, 0, -60], max: [-0.2, 1.2, -58.4], mat: 'metal' },
-    { type: 'box', min: [-1.8, 1.2, -59.8], max: [-0.6, 2.1, -58.8], mat: 'metal' },
-    { type: 'box', min: [-8.4, 1.6, -59], max: [-4, 3.4, -58.6], mat: 'concrete' }
-  ],
-  sun: { dir: [-0.281, -0.301, -0.912], color: [1, 0.72, 0.44], intensity: 3.2 },
-  ambient: [0.09, 0.12, 0.17],
-  fog: { color: [0.16, 0.19, 0.26], density: 0.012, heightFalloff: 0.12, heightRef: 0 },
-  lights: [
-    { pos: [0, 3, -8], color: [0.42, 0.95, 0.78], intensity: 6, radius: 12 },
-    { pos: [5.8, 3.6, -26], color: [0.35, 0.7, 1], intensity: 7, radius: 14 },
-    { pos: [-6, 2.6, -40], color: [0.4, 0.75, 1], intensity: 6, radius: 13 },
-    { pos: [0.5, 3.2, -56], color: [0.45, 0.9, 0.85], intensity: 8, radius: 16 }
-  ],
-  exposure: 1.15,
-  targets: [
-    { id: 't1', pos: [3.2, 1.5, -12], radius: 0.45, hp: 1 },
-    { id: 't2', pos: [-3.4, 1.6, -18], radius: 0.45, hp: 1 },
-    { id: 't3', pos: [6.2, 1.4, -24], radius: 0.4, hp: 1 },
-    { id: 't4', pos: [5.8, 4.1, -34], radius: 0.45, hp: 2 },
-    { id: 't5', pos: [-5.6, 2.2, -33], radius: 0.4, hp: 1 },
-    { id: 't6', pos: [0, 1.8, -50], radius: 0.5, hp: 2 },
-    { id: 't7', pos: [-3, 3.4, -57], radius: 0.42, hp: 1 },
-    { id: 't8', pos: [6.6, 3.8, -60], radius: 0.38, hp: 1 }
-  ],
-  spawn: { pos: [0, 0.3, 4], yaw: 0 }
-};
-
 const COPY = (typeof window !== 'undefined' && window.PHOSPHOR_COPY) || {};
+const COURSE_NAMES = (COPY && COPY.courseNames) || {};
 
 const scene = {
   camera: { pos: [0, 1.62, 4], yaw: 0, pitch: 0, fovY: 1.2 },
@@ -118,7 +68,8 @@ const scene = {
   sparks: [],
   targetsDown: {},
   glitch: 0,
-  quality: { scale: 1 }
+  quality: { scale: 1 },
+  ghost: { active: false, pos: [0, 0, 0], yaw: 0, flags: 0 }
 };
 const vm = scene.viewmodel;
 
@@ -131,6 +82,8 @@ const localIntents = {
   fireHeld: false, adsHeld: false, reloadPressed: false, restartPressed: false,
   pausePressed: false, lookDx: 0, lookDy: 0
 };
+
+const completeEv = { t: 'run_complete', medal: null };
 
 const tracerPool = [];
 const sparkPool = [];
@@ -146,7 +99,10 @@ const mFrom = [0, 0, 0];
 const mTo = [0, 0, 0];
 
 const dom = {};
-const hudCache = { time: '', ammo: '', speed: '', targets: '', fps: '', method: '', gap: -1, hit: false, kill: false };
+const hudCache = { time: '', ammo: '', speed: '', targets: '', fps: '', method: '', gap: -1, hit: false, kill: false, crossOp: -1 };
+
+const bests = {};
+const rowEls = {};
 
 let constants = FALLBACK_CONSTANTS;
 let renderer = null;
@@ -155,6 +111,8 @@ let audio = null;
 let input = null;
 let devPanel = null;
 let devStatus = null;
+let devCourseSel = null;
+let devAutoEl = null;
 let padDebugEl = null;
 let padDebugLast = '';
 
@@ -177,6 +135,30 @@ let devOpen = false;
 let touchDevice = false;
 let touchUiOn = false;
 let contextLost = false;
+let autoQuality = true;
+let qualityCap = 1;
+let qualityLowSince = 0;
+let qualityHighSince = 0;
+
+let courseIds = FALLBACK_COURSE_IDS;
+let course = null;
+let courseId = '';
+let world = null;
+let targetTotal = 0;
+let worldReady = false;
+let loading = false;
+let loadSeq = 0;
+let pendingId = '';
+let selIndex = 0;
+let menuAxis = 0;
+
+let recorder = null;
+let ghostPlayer = null;
+let ghostData = null;
+let ghostBytes = null;
+let ghostCutMs = 0;
+let raceGhost = true;
+let ghostMsgUntil = 0;
 
 function $(id) {
   return document.getElementById(id);
@@ -190,6 +172,7 @@ function grabDom() {
   dom.ammo = $('ph-ammo');
   dom.speed = $('ph-speed');
   dom.targets = $('ph-targets');
+  dom.par = $('ph-hud-par');
   dom.fps = $('ph-fps');
   dom.method = $('ph-method');
   dom.cross = $('ph-cross');
@@ -203,13 +186,30 @@ function grabDom() {
   dom.ready = $('ph-ready');
   dom.readyClick = $('ph-ready-click');
   dom.readyStart = $('ph-ready-start');
+  dom.sel = $('ph-sel');
+  dom.courseHint = $('ph-course-hint');
+  dom.courseErr = $('ph-course-err');
   dom.pause = $('ph-pause');
   dom.pauseNote = $('ph-pause-note');
   dom.resume = $('ph-resume');
   dom.pauseRestart = $('ph-pause-restart');
+  dom.pauseCourses = $('ph-pause-courses');
   dom.complete = $('ph-complete');
+  dom.completeCourse = $('ph-complete-course');
   dom.completeTime = $('ph-complete-time');
+  dom.completeMedal = $('ph-complete-medal');
+  dom.completeBest = $('ph-complete-best');
+  dom.completeNew = $('ph-complete-new');
+  dom.parTable = $('ph-par-table');
+  dom.ghostLine = $('ph-ghost-line');
+  dom.ghostMsg = $('ph-ghost-msg');
   dom.completeRestart = $('ph-complete-restart');
+  dom.completeNext = $('ph-complete-next');
+  dom.completeCourses = $('ph-complete-courses');
+  dom.raceBtn = $('ph-race');
+  dom.shareBtn = $('ph-share');
+  dom.importBtn = $('ph-import');
+  dom.ghostFile = $('ph-ghost-file');
   dom.unsup = $('ph-unsup');
   dom.unsupDetail = $('ph-unsup-detail');
   dom.gyro = $('ph-gyro');
@@ -245,19 +245,35 @@ function isFn(v) {
 
 const errSeen = {};
 
+function logOnce(name, err) {
+  if (errSeen[name]) return;
+  errSeen[name] = true;
+  try {
+    console.error('[phosphor] ' + name + ' failed', err);
+  } catch (_) {}
+}
+
 function call(obj, name, a, b, c) {
   if (!obj || !isFn(obj[name])) return undefined;
   try {
     return obj[name](a, b, c);
   } catch (err) {
-    if (!errSeen[name]) {
-      errSeen[name] = true;
-      try {
-        console.error('[phosphor] ' + name + ' failed', err);
-      } catch (_) {}
-    }
+    logOnce(name, err);
     return undefined;
   }
+}
+
+function promiseCall(obj, name, a, b) {
+  if (!obj || !isFn(obj[name])) return null;
+  let r = null;
+  try {
+    r = obj[name](a, b);
+  } catch (err) {
+    logOnce(name, err);
+    return null;
+  }
+  if (r && isFn(r.then)) return r;
+  return Promise.resolve(r);
 }
 
 function basis(yaw, pitch) {
@@ -299,6 +315,15 @@ function fmtTime(ms) {
   const sPad = s < 10 ? '0' + s : '' + s;
   const fPad = frac < 10 ? '00' + frac : frac < 100 ? '0' + frac : '' + frac;
   return m + ':' + sPad + '.' + fPad;
+}
+
+function fmtGap(ms) {
+  return (Math.abs(num(ms, 0)) / 1000).toFixed(3);
+}
+
+function fmtDelta(ms) {
+  const v = num(ms, 0);
+  return (v < 0 ? '-' : '+') + fmtGap(v);
 }
 
 function copyIntents(src) {
@@ -520,6 +545,29 @@ function assembleScene(st, dt) {
   scene.quality.scale = clamp(settings.quality, 0.5, 1);
 }
 
+function updateGhost() {
+  const g = scene.ghost;
+  if (state !== 'playing' || !raceGhost || !ghostPlayer) {
+    g.active = false;
+    return;
+  }
+  if (ghostCutMs > 0 && runMs > ghostCutMs) {
+    g.active = false;
+    return;
+  }
+  const f = call(ghostPlayer, 'at', runMs);
+  if (!f || !f.pos || f.pos.length < 3) {
+    g.active = false;
+    return;
+  }
+  g.pos[0] = num(f.pos[0], 0);
+  g.pos[1] = num(f.pos[1], 0);
+  g.pos[2] = num(f.pos[2], 0);
+  g.yaw = num(f.yaw, 0);
+  g.flags = num(f.flags, 0) | 0;
+  g.active = true;
+}
+
 function updateHud(st, now) {
   if (dom.time) {
     const s = fmtTime(runMs);
@@ -544,8 +592,7 @@ function updateHud(st, now) {
     }
   }
   if (dom.targets) {
-    const total = WORLD.targets.length;
-    const s = Math.max(0, total - downCount) + '/' + total;
+    const s = Math.max(0, targetTotal - downCount) + '/' + targetTotal;
     if (s !== hudCache.targets) {
       hudCache.targets = s;
       dom.targets.textContent = s;
@@ -601,6 +648,11 @@ function updateHud(st, now) {
       dom.kill.classList.toggle('is-on', on);
     }
   }
+  if (dom.ghostMsg && ghostMsgUntil > 0 && now > ghostMsgUntil) {
+    ghostMsgUntil = 0;
+    dom.ghostMsg.hidden = true;
+    dom.ghostMsg.textContent = '';
+  }
 }
 
 function showOverlays() {
@@ -620,13 +672,239 @@ function setState(next) {
   showOverlays();
 }
 
+function courseName(def, id) {
+  const key = def && typeof def.nameKey === 'string' && def.nameKey ? def.nameKey : 'tool.phosphor.' + id + '_name';
+  const byKey = COURSE_NAMES[key];
+  if (typeof byKey === 'string' && byKey) return byKey;
+  const fallback = COURSE_NAMES['tool.phosphor.' + id + '_name'];
+  return typeof fallback === 'string' && fallback ? fallback : id;
+}
+
+function medalName(m) {
+  if (m === 'signal') return COPY.medalSignal || 'signal';
+  if (m === 'gold') return COPY.medalGold || 'gold';
+  if (m === 'silver') return COPY.medalSilver || 'silver';
+  if (m === 'bronze') return COPY.medalBronze || 'bronze';
+  return COPY.medalNone || '';
+}
+
+function localMedal(ms) {
+  const par = course && course.par;
+  if (!par) return null;
+  const s = num(ms, 0) / 1000;
+  for (let i = MEDALS.length - 1; i >= 0; i--) {
+    const key = MEDALS[i];
+    const p = num(par[key], 0);
+    if (p > 0 && s <= p) return key;
+  }
+  return null;
+}
+
+function medalForTime(ms) {
+  const m = call(coursesMod, 'medalFor', course, ms);
+  if (typeof m === 'string' && MEDALS.indexOf(m) >= 0) return m;
+  return localMedal(ms);
+}
+
+function resolveCourseIds() {
+  const ids = coursesMod.COURSE_IDS;
+  if (Array.isArray(ids) && ids.length) {
+    const out = [];
+    for (let i = 0; i < ids.length; i++) {
+      if (typeof ids[i] === 'string' && ids[i]) out.push(ids[i]);
+    }
+    if (out.length) return out;
+  }
+  return FALLBACK_COURSE_IDS;
+}
+
+function loadCoursePref() {
+  try {
+    const v = localStorage.getItem(COURSE_KEY);
+    if (typeof v === 'string' && courseIds.indexOf(v) >= 0) return v;
+  } catch (_) {}
+  return courseIds[0];
+}
+
+function saveCoursePref(id) {
+  try {
+    localStorage.setItem(COURSE_KEY, id);
+  } catch (_) {}
+}
+
+function markSel() {
+  for (let i = 0; i < courseIds.length; i++) {
+    const r = rowEls[courseIds[i]];
+    if (!r) continue;
+    const on = i === selIndex;
+    r.row.classList.toggle('is-sel', on);
+    if (on) r.row.setAttribute('aria-current', 'true');
+    else r.row.removeAttribute('aria-current');
+  }
+}
+
+function updateRow(id) {
+  const r = rowEls[id];
+  if (!r) return;
+  const b = bests[id];
+  const t = b ? num(b.timeMs, 0) : 0;
+  r.best.textContent = t > 0 ? fmtTime(t) : COPY.selectNone || '';
+  let m = b && typeof b.medal === 'string' ? b.medal : '';
+  if (!m && t > 0 && id === courseId) m = localMedal(t) || '';
+  if (m && MEDALS.indexOf(m) >= 0) {
+    r.medal.hidden = false;
+    r.medal.className = 'ph-medal ph-medal--' + m;
+    r.medal.textContent = medalName(m);
+  } else {
+    r.medal.hidden = true;
+    r.medal.className = 'ph-medal';
+    r.medal.textContent = '';
+  }
+}
+
+function onRowPick(id) {
+  const i = courseIds.indexOf(id);
+  if (i >= 0) {
+    selIndex = i;
+    markSel();
+  }
+  if (id === courseId && worldReady) {
+    firstGesture();
+    return;
+  }
+  pickCourse(id);
+}
+
+function buildSelect() {
+  if (!dom.sel) return;
+  dom.sel.textContent = '';
+  for (let i = 0; i < courseIds.length; i++) {
+    const id = courseIds[i];
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'ph-sel__row';
+    const idx = document.createElement('span');
+    idx.className = 'ph-sel__n';
+    idx.textContent = i < 9 ? '0' + (i + 1) : '' + (i + 1);
+    const name = document.createElement('span');
+    name.className = 'ph-sel__name';
+    name.textContent = courseName(null, id);
+    const bestWrap = document.createElement('span');
+    bestWrap.className = 'ph-sel__best';
+    const bestK = document.createElement('span');
+    bestK.className = 'ph-sel__k';
+    bestK.textContent = COPY.selectBest || '';
+    const bestV = document.createElement('span');
+    bestV.className = 'ph-sel__bv';
+    bestV.textContent = COPY.selectNone || '';
+    bestWrap.appendChild(bestK);
+    bestWrap.appendChild(bestV);
+    const medal = document.createElement('span');
+    medal.className = 'ph-medal';
+    medal.hidden = true;
+    row.appendChild(idx);
+    row.appendChild(name);
+    row.appendChild(bestWrap);
+    row.appendChild(medal);
+    row.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onRowPick(id);
+    });
+    dom.sel.appendChild(row);
+    rowEls[id] = { row: row, name: name, best: bestV, medal: medal };
+  }
+  markSel();
+}
+
+function moveSel(delta) {
+  if (!courseIds.length) return;
+  let i = selIndex + delta;
+  while (i < 0) i += courseIds.length;
+  while (i >= courseIds.length) i -= courseIds.length;
+  if (i === selIndex) return;
+  selIndex = i;
+  markSel();
+  pickCourse(courseIds[i]);
+}
+
+function menuNav(it) {
+  const ax = it.forward > MENU_DEAD ? 1 : it.forward < -MENU_DEAD ? -1 : 0;
+  if (ax === menuAxis) return;
+  menuAxis = ax;
+  if (ax === 1) moveSel(-1);
+  else if (ax === -1) moveSel(1);
+}
+
+function setCourseError(on) {
+  if (dom.courseErr) dom.courseErr.hidden = !on;
+}
+
+function setHint(text) {
+  if (dom.courseHint) dom.courseHint.textContent = text;
+}
+
+function applyCourseUi() {
+  const name = courseName(course, courseId);
+  const goldMs = course && course.par ? num(course.par.gold, 0) * 1000 : 0;
+  setHint(goldMs > 0 ? name + ' · ' + medalName('gold') + ' ' + fmtTime(goldMs) : name);
+  if (dom.par) dom.par.textContent = goldMs > 0 ? fmtTime(goldMs) : COPY.selectNone || '';
+  if (dom.completeCourse) dom.completeCourse.textContent = name;
+  if (dom.completeNext) dom.completeNext.hidden = courseIds.indexOf(courseId) >= courseIds.length - 1;
+}
+
+function updateRaceBtn() {
+  if (dom.raceBtn) {
+    dom.raceBtn.textContent = raceGhost ? COPY.ghostRaceOn || '' : COPY.ghostRaceOff || '';
+    dom.raceBtn.setAttribute('aria-pressed', raceGhost ? 'true' : 'false');
+  }
+  if (dom.shareBtn) dom.shareBtn.disabled = !ghostData;
+}
+
+function setGhostMsg(text) {
+  if (!dom.ghostMsg) return;
+  const s = text || '';
+  dom.ghostMsg.textContent = s;
+  dom.ghostMsg.hidden = !s;
+  ghostMsgUntil = s ? performance.now() + GHOST_MSG_MS : 0;
+}
+
+function newRun() {
+  recorder = null;
+  ghostPlayer = null;
+  ghostCutMs = 0;
+  scene.ghost.active = false;
+  if (!courseId) return;
+  if (isFn(ghostMod.createRecorder)) {
+    try {
+      recorder = ghostMod.createRecorder(courseId);
+    } catch (err) {
+      recorder = null;
+      logOnce('createRecorder', err);
+    }
+    if (recorder && !isFn(recorder.sample)) recorder = null;
+  }
+  if (raceGhost && ghostData && isFn(ghostMod.createPlayer)) {
+    try {
+      ghostPlayer = ghostMod.createPlayer(ghostData);
+    } catch (err) {
+      ghostPlayer = null;
+      logOnce('createPlayer', err);
+    }
+    if (ghostPlayer && !isFn(ghostPlayer.at)) ghostPlayer = null;
+    if (ghostPlayer) {
+      const d = num(ghostPlayer.duration, 0);
+      ghostCutMs = d > 1000 ? d : 0;
+    }
+  }
+}
+
 function startRunTimerIfMoving() {
   if (runActive || runDone) return;
   const it = localIntents;
   if (it.forward !== 0 || it.strafe !== 0 || it.jumpPressed || it.fireHeld || it.crouchHeld) runActive = true;
 }
 
-function resetRun() {
+function resetRunCore() {
   call(sim, 'reset');
   acc = 0;
   runMs = 0;
@@ -638,11 +916,28 @@ function resetRun() {
   hudCache.time = '';
   hudCache.targets = '';
   hudCache.ammo = '';
+  newRun();
+}
+
+function resetRun() {
+  if (!worldReady) return;
+  resetRunCore();
   if (state !== 'playing') {
     setState('playing');
     if (!touchDevice) call(input, 'requestPointerLock');
     call(audio, 'startAmbient');
   }
+}
+
+function backToSelect() {
+  if (state !== 'paused' && state !== 'complete') return;
+  call(audio, 'stopAmbient');
+  if (touchUiOn) {
+    call(input, 'enableTouchUI', false);
+    touchUiOn = false;
+  }
+  resetRunCore();
+  setState('ready');
 }
 
 function pauseGame(note) {
@@ -671,6 +966,7 @@ function resumeGame() {
 
 function firstGesture() {
   if (state !== 'ready') return;
+  if (!worldReady || loading) return;
   call(audio, 'unlock');
   call(audio, 'setLevels', levels);
   call(audio, 'startAmbient');
@@ -680,15 +976,393 @@ function firstGesture() {
   } else {
     call(input, 'requestPointerLock');
   }
+  resetRunCore();
   setState('playing');
+}
+
+function buildParTable(finalMs) {
+  if (!dom.parTable) return;
+  dom.parTable.textContent = '';
+  const par = course && course.par;
+  if (!par) return;
+  for (let i = MEDALS.length - 1; i >= 0; i--) {
+    const key = MEDALS[i];
+    const secs = num(par[key], 0);
+    if (!(secs > 0)) continue;
+    const row = document.createElement('div');
+    row.className = 'ph-par__row';
+    const chip = document.createElement('span');
+    chip.className = 'ph-medal ph-medal--' + key;
+    chip.textContent = medalName(key);
+    const t = document.createElement('span');
+    t.className = 'ph-par__t';
+    t.textContent = fmtTime(secs * 1000);
+    const d = document.createElement('span');
+    const delta = finalMs - secs * 1000;
+    d.className = delta <= 0 ? 'ph-par__d is-good' : 'ph-par__d';
+    d.textContent = fmtDelta(delta);
+    row.appendChild(chip);
+    row.appendChild(t);
+    row.appendChild(d);
+    dom.parTable.appendChild(row);
+  }
+}
+
+function showGhostCompare(finalMs) {
+  if (!dom.ghostLine) return;
+  const gd = ghostData ? num(ghostData.durationMs, ghostCutMs) : 0;
+  if (!raceGhost || !ghostPlayer || !(gd > 0)) {
+    dom.ghostLine.hidden = true;
+    dom.ghostLine.textContent = '';
+    return;
+  }
+  const diff = finalMs - gd;
+  const word = diff <= 0 ? COPY.ghostAhead || '' : COPY.ghostBehind || '';
+  dom.ghostLine.textContent = (COPY.ghostTime || '') + ' ' + fmtTime(gd) + ' · ' + word + ' ' + fmtGap(diff);
+  dom.ghostLine.hidden = false;
+}
+
+function persistRun(finalMs, medal) {
+  const prev = bests[courseId];
+  const prevMs = prev ? num(prev.timeMs, 0) : 0;
+  const improved = !(prevMs > 0) || finalMs < prevMs;
+  if (improved) {
+    bests[courseId] = { timeMs: finalMs, medal: medal };
+    updateRow(courseId);
+  }
+  if (dom.completeNew) dom.completeNew.hidden = !improved;
+  if (dom.completeBest) {
+    const shown = improved ? finalMs : prevMs;
+    dom.completeBest.textContent = shown > 0 ? (COPY.completeBest || '') + ' ' + fmtTime(shown) : '';
+  }
+  const id = courseId;
+  const p = promiseCall(coursesMod, 'saveBest', id, finalMs);
+  if (p) {
+    p.then((res) => {
+      if (!res || typeof res !== 'object') return;
+      const b = bests[id];
+      if (b && typeof res.medal === 'string' && MEDALS.indexOf(res.medal) >= 0) {
+        b.medal = res.medal;
+        updateRow(id);
+      }
+    }).catch(() => {});
+  }
+  return improved;
+}
+
+function storeGhost(data, improved) {
+  if (!data || !improved || !isFn(ghostMod.serialize)) return;
+  let bytes = null;
+  try {
+    bytes = ghostMod.serialize(data);
+  } catch (err) {
+    bytes = null;
+    logOnce('serialize', err);
+  }
+  if (!bytes) return;
+  ghostData = data;
+  ghostBytes = bytes;
+  updateRaceBtn();
+  promiseCall(coursesMod, 'saveGhostBytes', courseId, bytes);
 }
 
 function completeRun() {
   runDone = true;
   runActive = false;
-  if (dom.completeTime) dom.completeTime.textContent = fmtTime(runMs);
+  const finalMs = runMs;
+  scene.ghost.active = false;
+  const medal = medalForTime(finalMs);
+
+  completeEv.medal = medal;
+  if (audio) call(audio, 'event', completeEv);
+
+  if (dom.completeTime) dom.completeTime.textContent = fmtTime(finalMs);
+  if (dom.completeMedal) {
+    if (medal) {
+      dom.completeMedal.className = 'ph-medal ph-medal--lg ph-medal--' + medal;
+      dom.completeMedal.textContent = medalName(medal);
+    } else {
+      dom.completeMedal.className = 'ph-medal ph-medal--lg ph-medal--none';
+      dom.completeMedal.textContent = COPY.medalNone || '';
+    }
+  }
+  buildParTable(finalMs);
+  showGhostCompare(finalMs);
+  setGhostMsg('');
+
+  let data = null;
+  if (recorder) data = call(recorder, 'finish', finalMs);
+  const improved = persistRun(finalMs, medal);
+  storeGhost(data, improved);
+  updateRaceBtn();
+
   setState('complete');
   call(input, 'exitPointerLock');
+}
+
+function failCourse() {
+  worldReady = false;
+  loading = false;
+  setCourseError(true);
+  setHint('');
+  if (dom.boot) dom.boot.hidden = true;
+  if (state !== 'failed') setState('ready');
+  showOverlays();
+  drainPending();
+}
+
+function drainPending() {
+  if (!pendingId) return;
+  const next = pendingId;
+  pendingId = '';
+  if (next !== courseId) loadCourseById(next, true);
+}
+
+function loadGhostFor(id) {
+  const p = promiseCall(coursesMod, 'getGhostBytes', id);
+  if (!p) return;
+  p.then((bytes) => {
+    if (id !== courseId || !bytes || !isFn(ghostMod.parse)) return;
+    if (ghostData) return;
+    let d = null;
+    try {
+      d = ghostMod.parse(bytes);
+    } catch (err) {
+      d = null;
+      logOnce('parse', err);
+    }
+    if (!d) return;
+    ghostData = d;
+    ghostBytes = bytes;
+    updateRaceBtn();
+  }).catch(() => {});
+}
+
+function loadBestFor(id) {
+  const p = promiseCall(coursesMod, 'getBest', id);
+  if (!p) return;
+  p.then((b) => {
+    bests[id] = b && typeof b === 'object' ? b : null;
+    updateRow(id);
+  }).catch(() => {});
+}
+
+function applyCourse(id, def) {
+  loading = false;
+  const wd = def && def.worldDef;
+  if (!wd || !wd.prims || !wd.targets || !wd.spawn) {
+    logOnce('course:' + id, 'worldDef missing');
+    failCourse();
+    return;
+  }
+  const issues = call(coursesMod, 'validateCourse', def);
+  if (issues && issues.length) logOnce('validate:' + id, issues.join(' | '));
+
+  call(renderer, 'compileWorld', wd);
+
+  let nextSim = null;
+  try {
+    nextSim = simMod.createSim(wd, constants);
+  } catch (err) {
+    nextSim = null;
+    logOnce('createSim', err);
+  }
+  if (!nextSim || !isFn(nextSim.tick) || !isFn(nextSim.getState)) {
+    failCourse();
+    return;
+  }
+
+  sim = nextSim;
+  course = def;
+  courseId = id;
+  world = wd;
+  targetTotal = wd.targets.length;
+  worldReady = true;
+  ghostData = null;
+  ghostBytes = null;
+  setCourseError(false);
+  saveCoursePref(id);
+
+  const i = courseIds.indexOf(id);
+  if (i >= 0 && !pendingId) {
+    selIndex = i;
+    markSel();
+  }
+  applyCourseUi();
+  updateRow(id);
+  updateRaceBtn();
+  loadBestFor(id);
+  loadGhostFor(id);
+  resetRunCore();
+  if (dom.boot) dom.boot.hidden = true;
+  if (state !== 'failed') setState('ready');
+  showOverlays();
+  onResize();
+  drainPending();
+}
+
+function loadCourseById(id, remember) {
+  if (!id) return;
+  loading = true;
+  setCourseError(false);
+  setHint(COPY.selectLoading || '');
+  const seq = ++loadSeq;
+  const p = promiseCall(coursesMod, 'loadCourse', id);
+  if (!p) {
+    failCourse();
+    return;
+  }
+  if (remember) saveCoursePref(id);
+  p.then((def) => {
+    if (seq !== loadSeq) return;
+    applyCourse(id, def);
+  }).catch((err) => {
+    if (seq !== loadSeq) return;
+    logOnce('loadCourse', err);
+    failCourse();
+  });
+}
+
+function pickCourse(id) {
+  if (!id) return;
+  if (loading) {
+    pendingId = id;
+    return;
+  }
+  if (id === courseId && worldReady) {
+    applyCourseUi();
+    return;
+  }
+  loadCourseById(id, true);
+}
+
+function nextCourse() {
+  const i = courseIds.indexOf(courseId);
+  if (i < 0 || i + 1 >= courseIds.length) return;
+  const id = courseIds[i + 1];
+  selIndex = i + 1;
+  markSel();
+  pickCourse(id);
+}
+
+function toggleRace() {
+  raceGhost = !raceGhost;
+  updateRaceBtn();
+  if (!raceGhost) scene.ghost.active = false;
+  if (raceGhost && !ghostData) setGhostMsg(COPY.ghostNone || '');
+}
+
+function downloadBlob(name, blob) {
+  let url = '';
+  try {
+    url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      if (a.parentNode) a.parentNode.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 120);
+  } catch (err) {
+    logOnce('download', err);
+  }
+}
+
+function shareGhost() {
+  if (!ghostData) {
+    setGhostMsg(COPY.ghostNone || '');
+    return;
+  }
+  let bytes = ghostBytes;
+  if (!bytes && isFn(ghostMod.serialize)) {
+    try {
+      bytes = ghostMod.serialize(ghostData);
+    } catch (err) {
+      bytes = null;
+      logOnce('serialize', err);
+    }
+  }
+  if (!bytes) {
+    setGhostMsg(COPY.ghostBadFile || '');
+    return;
+  }
+  ghostBytes = bytes;
+  let blob = null;
+  try {
+    blob = new Blob([bytes], { type: 'application/octet-stream' });
+  } catch (err) {
+    blob = null;
+    logOnce('blob', err);
+  }
+  if (!blob) return;
+  const ms = Math.round(num(ghostData.durationMs, runMs));
+  const name = 'phosphor-' + (courseId || 'course') + '-' + ms + 'ms.pghost';
+  const ui = window.MentriaUI;
+  if (ui && isFn(ui.shareFile)) {
+    let p = null;
+    try {
+      p = ui.shareFile(name, blob);
+    } catch (err) {
+      p = null;
+      logOnce('shareFile', err);
+    }
+    if (p && isFn(p.catch)) {
+      p.catch(() => downloadBlob(name, blob));
+      return;
+    }
+    if (p) return;
+  }
+  downloadBlob(name, blob);
+}
+
+function readGhostFile(file) {
+  if (!file || !isFn(ghostMod.parse)) {
+    setGhostMsg(COPY.ghostBadFile || '');
+    return;
+  }
+  let reader = null;
+  try {
+    reader = new FileReader();
+  } catch (_) {
+    reader = null;
+  }
+  if (!reader) {
+    setGhostMsg(COPY.ghostBadFile || '');
+    return;
+  }
+  reader.onload = () => {
+    let bytes = null;
+    let d = null;
+    try {
+      bytes = new Uint8Array(reader.result);
+      d = ghostMod.parse(bytes);
+    } catch (err) {
+      d = null;
+      logOnce('parse', err);
+    }
+    if (!d) {
+      setGhostMsg(COPY.ghostBadFile || '');
+      return;
+    }
+    if (typeof d.courseId === 'string' && d.courseId && d.courseId !== courseId) {
+      setGhostMsg(COPY.ghostWrongCourse || '');
+      return;
+    }
+    ghostData = d;
+    ghostBytes = bytes;
+    raceGhost = true;
+    updateRaceBtn();
+    setGhostMsg(COPY.ghostImported || '');
+  };
+  reader.onerror = () => setGhostMsg(COPY.ghostBadFile || '');
+  try {
+    reader.readAsArrayBuffer(file);
+  } catch (err) {
+    logOnce('readGhost', err);
+    setGhostMsg(COPY.ghostBadFile || '');
+  }
 }
 
 function onResize() {
@@ -703,9 +1377,57 @@ function onResize() {
   call(renderer, 'resize');
 }
 
+function fullscreenSupported() {
+  const el = dom.stage;
+  if (!el) return false;
+  return isFn(el.requestFullscreen) || isFn(el.webkitRequestFullscreen);
+}
+
+function setAutoNote(text) {
+  if (devAutoEl) devAutoEl.textContent = text || '';
+}
+
+function applyQuality(v) {
+  const q = clamp(Math.round(v * 100) / 100, AQ_FLOOR, 1);
+  if (q === settings.quality) return false;
+  settings.quality = q;
+  scene.quality.scale = q;
+  onResize();
+  setAutoNote('auto quality ' + q.toFixed(1));
+  return true;
+}
+
+function adaptQuality(now) {
+  if (!autoQuality || state !== 'playing' || !(fpsValue > 0)) {
+    qualityLowSince = 0;
+    qualityHighSince = 0;
+    return;
+  }
+  if (fpsValue < AQ_LOW_FPS) {
+    qualityHighSince = 0;
+    if (!qualityLowSince) qualityLowSince = now;
+    else if (now - qualityLowSince >= AQ_LOW_MS) {
+      qualityLowSince = now;
+      if (settings.quality > AQ_FLOOR) applyQuality(settings.quality - AQ_STEP);
+    }
+    return;
+  }
+  if (fpsValue >= AQ_HIGH_FPS) {
+    qualityLowSince = 0;
+    if (!qualityHighSince) qualityHighSince = now;
+    else if (now - qualityHighSince >= AQ_HIGH_MS) {
+      qualityHighSince = now;
+      if (settings.quality < qualityCap) applyQuality(Math.min(qualityCap, settings.quality + AQ_STEP));
+    }
+    return;
+  }
+  qualityLowSince = 0;
+  qualityHighSince = 0;
+}
+
 function toggleFullscreen() {
   const el = dom.stage;
-  if (!el) return;
+  if (!el || !fullscreenSupported()) return;
   const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
   if (fsEl) {
     if (isFn(document.exitFullscreen)) document.exitFullscreen().catch(() => {});
@@ -807,6 +1529,7 @@ function copyConstants() {
     for (let i = 0; i < keys.length; i++) out[keys[i]] = constants[keys[i]];
     out.fov = settings.fov;
     out.quality = settings.quality;
+    out.course = courseId;
     out.sensitivity = { mnk: sens.mnk, pad: sens.pad, touch: sens.touch, gyro: sens.gyro, adsMul: sens.adsMul };
     out.audio = { master: levels.master, sfx: levels.sfx, ambient: levels.ambient };
     text = JSON.stringify(out, null, 2);
@@ -845,6 +1568,9 @@ function legacyCopy(text) {
 
 const PADMAP_KEY = 'phosphor_padmap_v1';
 const padMap = { fireB: -1, fireA: -1, adsB: -1, adsA: -1, pauseB: -1, sprintB: -1, ryAxis: -1 };
+const GYRO_SMOOTH_MAX = 0.95;
+const TOUCH_SMOOTH_MAX = 0.5;
+const look = { gyroSmooth: 0.5, touchSmooth: 0.35, gyroPolarity: 1 };
 
 function loadPadMap() {
   try {
@@ -854,13 +1580,24 @@ function loadPadMap() {
     for (const k in padMap) {
       if (typeof o[k] === 'number' && isFinite(o[k])) padMap[k] = Math.round(o[k]);
     }
+    const lk = o.look;
+    if (lk && typeof lk === 'object') {
+      if (typeof lk.gyroSmooth === 'number' && isFinite(lk.gyroSmooth)) look.gyroSmooth = clamp(lk.gyroSmooth, 0, GYRO_SMOOTH_MAX);
+      if (typeof lk.touchSmooth === 'number' && isFinite(lk.touchSmooth)) look.touchSmooth = clamp(lk.touchSmooth, 0, TOUCH_SMOOTH_MAX);
+      if (typeof lk.gyroPolarity === 'number' && isFinite(lk.gyroPolarity)) look.gyroPolarity = lk.gyroPolarity < 0 ? -1 : 1;
+    }
     call(input, 'setPadOverrides', padMap);
+    pushSens();
   } catch (_) {}
 }
 
 function savePadMap() {
   call(input, 'setPadOverrides', padMap);
-  try { localStorage.setItem(PADMAP_KEY, JSON.stringify(padMap)); } catch (_) {}
+  try {
+    const out = Object.assign({}, padMap);
+    out.look = { gyroSmooth: look.gyroSmooth, touchSmooth: look.touchSmooth, gyroPolarity: look.gyroPolarity };
+    localStorage.setItem(PADMAP_KEY, JSON.stringify(out));
+  } catch (_) {}
 }
 
 function bindPadControl(which, done) {
@@ -892,7 +1629,10 @@ function pushSens() {
     pad: base.pad * sens.pad,
     touch: base.touch * sens.touch,
     gyro: base.gyro * sens.gyro,
-    adsMul: sens.adsMul
+    adsMul: sens.adsMul,
+    touchSmooth: look.touchSmooth,
+    gyroSmooth: look.gyroSmooth,
+    gyroPolarity: look.gyroPolarity
   });
 }
 
@@ -922,6 +1662,34 @@ function buildDevPanel() {
   const body = document.createElement('div');
   body.className = 'ph-dev__body';
   panel.appendChild(body);
+
+  devSection(body, 'course');
+  const courseRow = document.createElement('label');
+  courseRow.className = 'ph-dev__row ph-dev__row--wide';
+  const courseK = document.createElement('span');
+  courseK.className = 'ph-dev__k';
+  courseK.textContent = 'load';
+  devCourseSel = document.createElement('select');
+  devCourseSel.className = 'ph-dev__num ph-dev__sel';
+  for (let i = 0; i < courseIds.length; i++) {
+    const opt = document.createElement('option');
+    opt.value = courseIds[i];
+    opt.textContent = courseIds[i] + ' · ' + courseName(null, courseIds[i]);
+    devCourseSel.appendChild(opt);
+  }
+  devCourseSel.addEventListener('change', () => {
+    const id = devCourseSel.value;
+    const i = courseIds.indexOf(id);
+    if (i >= 0) {
+      selIndex = i;
+      markSel();
+    }
+    pickCourse(id);
+    if (devStatus) devStatus.textContent = 'loading ' + id;
+  });
+  courseRow.appendChild(courseK);
+  courseRow.appendChild(devCourseSel);
+  body.appendChild(courseRow);
 
   devSection(body, 'sim constants');
   const keys = Object.keys(constants).sort();
@@ -960,6 +1728,30 @@ function buildDevPanel() {
     sens.adsMul = v;
     pushSens();
   });
+  devRow(body, 'gyro smooth', 0, GYRO_SMOOTH_MAX, 0.01, () => look.gyroSmooth, (v) => {
+    look.gyroSmooth = clamp(v, 0, GYRO_SMOOTH_MAX);
+    pushSens();
+  });
+  devRow(body, 'touch smooth', 0, TOUCH_SMOOTH_MAX, 0.01, () => look.touchSmooth, (v) => {
+    look.touchSmooth = clamp(v, 0, TOUCH_SMOOTH_MAX);
+    pushSens();
+  });
+
+  const polRow = document.createElement('div');
+  polRow.className = 'ph-dev__foot';
+  const polBtn = document.createElement('button');
+  polBtn.type = 'button';
+  const polLabel = () => 'gyro polarity: ' + (look.gyroPolarity < 0 ? 'inverted' : 'normal');
+  polBtn.textContent = polLabel();
+  polBtn.addEventListener('click', () => {
+    look.gyroPolarity = look.gyroPolarity < 0 ? 1 : -1;
+    pushSens();
+    savePadMap();
+    polBtn.textContent = polLabel();
+    if (devStatus) devStatus.textContent = polLabel();
+  });
+  polRow.appendChild(polBtn);
+  body.appendChild(polRow);
 
   devSection(body, 'gamepad');
   padDebugEl = document.createElement('div');
@@ -1007,10 +1799,18 @@ function buildDevPanel() {
 
   devSection(body, 'render');
   devRow(body, 'quality scale', 0.5, 1, 0.05, () => settings.quality, (v) => {
-    settings.quality = clamp(v, 0.5, 1);
+    settings.quality = clamp(v, AQ_FLOOR, 1);
     scene.quality.scale = settings.quality;
+    qualityCap = settings.quality;
+    autoQuality = false;
+    qualityLowSince = 0;
+    qualityHighSince = 0;
+    setAutoNote('auto quality off · manual ' + settings.quality.toFixed(2));
     onResize();
   });
+  devAutoEl = document.createElement('div');
+  devAutoEl.className = 'ph-dev__k';
+  body.appendChild(devAutoEl);
   devRow(body, 'glitch test', 0, 1, 0.01, () => settings.glitchTest, (v) => {
     settings.glitchTest = clamp(v, 0, 1);
   });
@@ -1064,6 +1864,7 @@ function toggleDev(open) {
   if (devPanel) devPanel.hidden = !devOpen;
   if (devOpen) {
     if (devStatus) devStatus.textContent = '';
+    if (devCourseSel && courseId) devCourseSel.value = courseId;
     if (state === 'playing') pauseGame(null);
   }
 }
@@ -1094,6 +1895,10 @@ function onKeyDown(e) {
     toggleFullscreen();
     return;
   }
+  if (state === 'ready' && (e.code === 'ArrowUp' || e.code === 'ArrowDown')) {
+    e.preventDefault();
+    return;
+  }
   if (e.code === 'Enter' || e.code === 'Space') {
     if (state === 'ready') {
       e.preventDefault();
@@ -1118,6 +1923,7 @@ function frame(now) {
     fpsFrames = 0;
     fpsWindowStart = now;
   }
+  adaptQuality(now);
 
   const polled = input ? call(input, 'poll', dt) : null;
   const it = copyIntents(polled);
@@ -1127,6 +1933,9 @@ function frame(now) {
     firstGesture();
     startedNow = state === 'playing';
   }
+  if (state === 'ready' && !startedNow) menuNav(it);
+  else if (state !== 'ready') menuAxis = 0;
+
   if (it.restartPressed && (state === 'playing' || state === 'paused' || state === 'complete')) resetRun();
   if (it.pausePressed && !startedNow) {
     if (state === 'playing') pauseGame(null);
@@ -1157,7 +1966,10 @@ function frame(now) {
   }
 
   const st = sim ? call(sim, 'getState') : null;
+  if (st && st.pos && num(st.pos[1], 0) < -8 && state === 'playing') resetRun();
+  if (recorder && st && state === 'playing' && runActive && !runDone) call(recorder, 'sample', st, runMs);
   assembleScene(st, dt);
+  updateGhost();
   collectFx();
   updateHud(st, now);
   if (devOpen && padDebugEl) {
@@ -1176,22 +1988,18 @@ function frame(now) {
     call(audio, 'setListener', scene.camera.pos, scene.camera.yaw, sp);
   }
 
-  call(renderer, 'render', scene, dt);
+  if (worldReady) call(renderer, 'render', scene, dt);
 
-  if (state === 'playing' && !runDone && downCount >= WORLD.targets.length) completeRun();
+  if (state === 'playing' && !runDone && targetTotal > 0 && downCount >= targetTotal) completeRun();
 }
 
 function wireUi() {
   if (dom.ready) {
     dom.ready.addEventListener('pointerdown', (e) => {
-      if (e.target && e.target === dom.gyro) return;
+      const t = e.target;
+      if (t && t === dom.gyro) return;
+      if (dom.sel && t && dom.sel.contains(t)) return;
       firstGesture();
-    });
-  }
-  if (dom.canvas) {
-    dom.canvas.addEventListener('pointerdown', () => {
-      if (state !== 'playing' || touchDevice || !input) return;
-      if (!call(input, 'isLocked')) call(input, 'requestPointerLock');
     });
   }
   if (dom.readyStart) {
@@ -1200,26 +2008,49 @@ function wireUi() {
       firstGesture();
     });
   }
+  if (dom.canvas) {
+    dom.canvas.addEventListener('pointerdown', () => {
+      if (state === 'ready') firstGesture();
+      else if (state === 'playing' && !touchDevice && input && !call(input, 'isLocked')) call(input, 'requestPointerLock');
+    });
+  }
   if (dom.resume) dom.resume.addEventListener('click', resumeGame);
   if (dom.pauseRestart) dom.pauseRestart.addEventListener('click', resetRun);
   if (dom.completeRestart) dom.completeRestart.addEventListener('click', resetRun);
+  if (dom.completeNext) dom.completeNext.addEventListener('click', nextCourse);
+  if (dom.pauseCourses) dom.pauseCourses.addEventListener('click', backToSelect);
+  if (dom.completeCourses) dom.completeCourses.addEventListener('click', backToSelect);
+  if (dom.raceBtn) dom.raceBtn.addEventListener('click', toggleRace);
+  if (dom.shareBtn) dom.shareBtn.addEventListener('click', shareGhost);
+  if (dom.importBtn && dom.ghostFile) {
+    dom.importBtn.addEventListener('click', () => {
+      try { dom.ghostFile.click(); } catch (_) {}
+    });
+    dom.ghostFile.addEventListener('change', () => {
+      const files = dom.ghostFile.files;
+      const f = files && files.length ? files[0] : null;
+      readGhostFile(f);
+      try { dom.ghostFile.value = ''; } catch (_) {}
+    });
+  }
   if (dom.pauseBtn) {
     dom.pauseBtn.addEventListener('click', () => {
       if (state === 'playing') pauseGame(null);
       else if (state === 'paused') resumeGame();
     });
   }
-  if (dom.fs) dom.fs.addEventListener('click', toggleFullscreen);
+  if (dom.fs) {
+    if (fullscreenSupported()) {
+      dom.fs.hidden = false;
+      dom.fs.addEventListener('click', toggleFullscreen);
+    } else {
+      dom.fs.hidden = true;
+    }
+  }
   if (dom.gyro) {
     dom.gyro.addEventListener('click', (e) => {
       e.stopPropagation();
       askGyro();
-    });
-  }
-  if (dom.canvas) {
-    dom.canvas.addEventListener('pointerdown', () => {
-      if (state === 'ready') firstGesture();
-      else if (state === 'playing' && !touchDevice && input && !call(input, 'isLocked')) call(input, 'requestPointerLock');
     });
   }
   window.addEventListener('keydown', onKeyDown);
@@ -1228,7 +2059,11 @@ function wireUi() {
   document.addEventListener('fullscreenchange', onResize);
   document.addEventListener('webkitfullscreenchange', onResize);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && state === 'playing') pauseGame(null);
+    if (document.hidden) {
+      if (state === 'playing') pauseGame(null);
+      return;
+    }
+    if (state === 'playing' || state === 'paused') call(audio, 'unlock');
   });
 }
 
@@ -1246,6 +2081,7 @@ function boot() {
   }
   settings.quality = touchDevice ? 0.8 : 1;
   scene.quality.scale = settings.quality;
+  qualityCap = settings.quality;
   if (dom.readyClick) dom.readyClick.hidden = touchDevice;
   if (dom.readyStart) dom.readyStart.hidden = !touchDevice;
 
@@ -1271,32 +2107,15 @@ function boot() {
 
   constants = simMod.CONSTANTS && typeof simMod.CONSTANTS === 'object' ? simMod.CONSTANTS : FALLBACK_CONSTANTS;
 
-  call(renderer, 'compileWorld', WORLD);
-
-  try {
-    sim = simMod.createSim(WORLD, constants);
-  } catch (err) {
-    fail('sim.js: ' + (err && err.message ? err.message : String(err)));
-    return;
-  }
-  if (!sim || !isFn(sim.tick) || !isFn(sim.getState)) {
-    fail('sim.js: createSim did not return tick/getState');
-    return;
-  }
-
   if (isFn(audioMod.createAudio)) {
     try {
       audio = audioMod.createAudio();
     } catch (err) {
       audio = null;
-      try {
-        console.error('[phosphor] audio init failed', err);
-      } catch (_) {}
+      logOnce('createAudio', err);
     }
   } else {
-    try {
-      console.error('[phosphor] audio.js: createAudio export missing');
-    } catch (_) {}
+    logOnce('audio.createAudio', 'export missing');
   }
 
   if (isFn(inputMod.createInput)) {
@@ -1304,15 +2123,16 @@ function boot() {
       input = inputMod.createInput(dom.stage, dom.canvas);
     } catch (err) {
       input = null;
-      try {
-        console.error('[phosphor] input init failed', err);
-      } catch (_) {}
+      logOnce('createInput', err);
     }
   }
   if (!input || !isFn(input.poll)) {
     fail('input.js: createInput did not return poll()');
     return;
   }
+
+  if (!isFn(coursesMod.loadCourse)) logOnce('courses.loadCourse', 'export missing');
+  if (!isFn(ghostMod.createRecorder)) logOnce('ghost.createRecorder', 'export missing');
 
   pushSens();
   loadPadMap();
@@ -1331,17 +2151,24 @@ function boot() {
       contextLost = false;
       hudCache.gap = -1;
       onResize();
+      if (world) call(renderer, 'compileWorld', world);
     });
   }
 
-  buildDevPanel();
-  wireUi();
-  onResize();
+  courseIds = resolveCourseIds();
+  const startId = loadCoursePref();
+  selIndex = Math.max(0, courseIds.indexOf(startId));
 
-  const st = call(sim, 'getState');
-  assembleScene(st, 0);
-  setState('ready');
+  buildSelect();
+  for (let i = 0; i < courseIds.length; i++) loadBestFor(courseIds[i]);
+  buildDevPanel();
+  if (devCourseSel) devCourseSel.value = startId;
+  wireUi();
+  updateRaceBtn();
+  onResize();
   showOverlays();
+
+  loadCourseById(startId, false);
 
   lastNow = performance.now();
   fpsWindowStart = lastNow;

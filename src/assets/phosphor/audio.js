@@ -296,6 +296,73 @@ export function createAudio() {
     osc.stop(t0 + dur + 0.06);
   }
 
+  function swellEnv(param, t0, level, attack, hold, release) {
+    const l = Math.max(0.0004, num(level, 0.06));
+    const a = Math.max(0.004, num(attack, 0.04));
+    const h = Math.max(0.005, num(hold, 0.2));
+    const r = Math.max(0.02, num(release, 0.4));
+    param.cancelScheduledValues(t0);
+    param.setValueAtTime(0.0002, t0);
+    param.linearRampToValueAtTime(l, t0 + a);
+    param.setValueAtTime(l, t0 + a + h);
+    param.exponentialRampToValueAtTime(0.0003, t0 + a + h + r);
+    param.setValueAtTime(0, t0 + a + h + r + 0.004);
+    return t0 + a + h + r + 0.02;
+  }
+
+  function endAt(node, chain, when) {
+    node.onended = function () {
+      try {
+        node.disconnect();
+        for (let i = 0; i < chain.length; i++) chain[i].disconnect();
+      } catch (_) {}
+    };
+    node.stop(when);
+  }
+
+  function padTone(t0, o) {
+    const osc = S.ctx.createOscillator();
+    osc.type = o.type || 'sine';
+    osc.frequency.setValueAtTime(Math.max(20, num(o.f, 440)), t0);
+    const g = gain(0.0002);
+    const end = swellEnv(g.gain, t0, o.level, o.attack, o.hold, o.release);
+    osc.connect(g);
+    g.connect(S.sfxBus);
+    const chain = [g];
+    if (o.wet) {
+      const w = gain(o.wet);
+      g.connect(w);
+      w.connect(S.convIn);
+      chain.push(w);
+    }
+    osc.start(t0);
+    endAt(osc, chain, end);
+  }
+
+  function padNoise(t0, o) {
+    const s = src(S.nzS, true);
+    const f0 = Math.max(30, num(o.f, 900));
+    const f = filt('bandpass', f0, o.q === undefined ? 0.9 : o.q);
+    if (o.sweepTo) {
+      f.frequency.setValueAtTime(f0, t0);
+      f.frequency.exponentialRampToValueAtTime(Math.max(30, o.sweepTo), t0 + (o.sweepTime || 0.35));
+    }
+    const g = gain(0.0002);
+    const end = swellEnv(g.gain, t0, o.level, o.attack, o.hold, o.release);
+    s.connect(f);
+    f.connect(g);
+    g.connect(S.sfxBus);
+    const chain = [f, g];
+    if (o.wet) {
+      const w = gain(o.wet);
+      g.connect(w);
+      w.connect(S.convIn);
+      chain.push(w);
+    }
+    s.start(t0, rnd() * 2);
+    endAt(s, chain, end);
+  }
+
   function pickVoice(t0) {
     let oldest = S.voices[0];
     for (let i = 0; i < S.voices.length; i++) {
@@ -523,6 +590,92 @@ export function createAudio() {
     toneHit(t0 + 0.06, { type: 'square', f: 74, fTo: 34, fTime: 0.7, level: 0.12, dur: 0.8, attack: 0.02, lp: 300 });
   }
 
+  function completeSoft(t0) {
+    toneHit(t0, { type: 'sine', f: 880, level: 0.11, dur: 0.34, attack: 0.03, wet: 0.2 });
+    toneHit(t0 + 0.006, { type: 'sine', f: 440, level: 0.05, dur: 0.32, attack: 0.028, wet: 0.12 });
+  }
+
+  function completeBronze(t0) {
+    toneHit(t0, { type: 'sine', f: 440, level: 0.12, dur: 0.19, attack: 0.006, wet: 0.18 });
+    toneHit(t0 + 0.14, { type: 'sine', f: 659.25, level: 0.14, dur: 0.42, attack: 0.008, wet: 0.26 });
+    toneHit(t0 + 0.142, { type: 'triangle', f: 329.63, level: 0.045, dur: 0.3, attack: 0.012, wet: 0.1 });
+  }
+
+  function completeSilver(t0) {
+    toneHit(t0, { type: 'sine', f: 440, level: 0.115, dur: 0.17, attack: 0.006, wet: 0.16 });
+    toneHit(t0 + 0.125, { type: 'sine', f: 659.25, level: 0.12, dur: 0.17, attack: 0.006, wet: 0.2 });
+    toneHit(t0 + 0.25, { type: 'sine', f: 880, level: 0.135, dur: 0.46, attack: 0.008, wet: 0.28 });
+    toneHit(t0 + 0.252, { type: 'triangle', f: 220, level: 0.05, dur: 0.34, attack: 0.012, wet: 0.1 });
+    padTone(t0 + 0.24, { type: 'sine', f: 1760, level: 0.03, attack: 0.14, hold: 0.1, release: 0.42, wet: 0.34 });
+    padNoise(t0 + 0.24, {
+      f: 3600,
+      sweepTo: 7000,
+      sweepTime: 0.4,
+      q: 1.1,
+      level: 0.016,
+      attack: 0.17,
+      hold: 0.05,
+      release: 0.36,
+      wet: 0.4
+    });
+  }
+
+  function completeGold(t0) {
+    toneHit(t0, { type: 'sine', f: 440, level: 0.115, dur: 0.15, attack: 0.006, wet: 0.2 });
+    toneHit(t0 + 0.105, { type: 'sine', f: 554.37, level: 0.115, dur: 0.15, attack: 0.006, wet: 0.22 });
+    toneHit(t0 + 0.21, { type: 'sine', f: 659.25, level: 0.12, dur: 0.16, attack: 0.006, wet: 0.26 });
+    toneHit(t0 + 0.315, { type: 'sine', f: 880, level: 0.14, dur: 0.5, attack: 0.008, wet: 0.36 });
+    toneHit(t0 + 0.317, { type: 'triangle', f: 220, level: 0.055, dur: 0.36, attack: 0.012, wet: 0.12 });
+    toneHit(t0 + 0.44, { type: 'sine', f: 1760, level: 0.058, dur: 0.34, attack: 0.004, wet: 0.42 });
+    noiseHit(t0 + 0.44, { f: 6400, q: 3, level: 0.02, dur: 0.022, attack: 0.0008, wet: 0.3 });
+    padTone(t0 + 0.33, { type: 'sine', f: 1318.51, level: 0.026, attack: 0.16, hold: 0.12, release: 0.45, wet: 0.4 });
+  }
+
+  function completeSignal(t0) {
+    padNoise(t0, {
+      f: 620,
+      sweepTo: 6200,
+      sweepTime: 0.34,
+      q: 0.85,
+      level: 0.07,
+      attack: 0.26,
+      hold: 0.02,
+      release: 0.3,
+      wet: 0.42
+    });
+    noiseHit(t0 + 0.278, { f: 3200, q: 1.6, level: 0.035, dur: 0.05, attack: 0.0025, wet: 0.35 });
+    padTone(t0 + 0.28, { type: 'sine', f: 440, level: 0.095, attack: 0.055, hold: 0.5, release: 0.66, wet: 0.38 });
+    padTone(t0 + 0.29, { type: 'sine', f: 441.75, level: 0.046, attack: 0.07, hold: 0.48, release: 0.64, wet: 0.3 });
+    padTone(t0 + 0.285, { type: 'sine', f: 659.25, level: 0.078, attack: 0.06, hold: 0.48, release: 0.62, wet: 0.4 });
+    padTone(t0 + 0.3, { type: 'sine', f: 661.2, level: 0.04, attack: 0.08, hold: 0.46, release: 0.6, wet: 0.3 });
+    padTone(t0 + 0.28, { type: 'triangle', f: 220, level: 0.055, attack: 0.05, hold: 0.36, release: 0.5, wet: 0.12 });
+    padTone(t0 + 0.5, { type: 'sine', f: 1318.51, level: 0.03, attack: 0.19, hold: 0.14, release: 0.52, wet: 0.55 });
+    padTone(t0 + 0.62, { type: 'sine', f: 880, level: 0.026, attack: 0.2, hold: 0.12, release: 0.46, wet: 0.5 });
+    padNoise(t0 + 0.46, {
+      f: 5400,
+      sweepTo: 2400,
+      sweepTime: 0.6,
+      q: 1.2,
+      level: 0.014,
+      attack: 0.3,
+      hold: 0.06,
+      release: 0.5,
+      wet: 0.6
+    });
+  }
+
+  function runComplete(t0, medal) {
+    if (medal === 'bronze') completeBronze(t0);
+    else if (medal === 'silver') completeSilver(t0);
+    else if (medal === 'gold') completeGold(t0);
+    else if (medal === 'signal') completeSignal(t0);
+    else completeSoft(t0);
+  }
+
+  function countdown(t0) {
+    toneHit(t0, { type: 'sine', f: 1318.51, level: 0.17, dur: 0.05, attack: 0.0016 });
+  }
+
   function unlock() {
     try {
       if (!S.ctx) {
@@ -584,6 +737,10 @@ export function createAudio() {
         targetDown(t);
       } else if (k === 'death' || k === 'signal_lost') {
         signalLost(t);
+      } else if (k === 'run_complete') {
+        runComplete(t, e.medal);
+      } else if (k === 'countdown') {
+        countdown(t);
       }
     } catch (_) {}
   }

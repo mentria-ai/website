@@ -158,7 +158,7 @@ export function createSim(worldDef, constants) {
   let yawBase = 0, pitchBase = 0, yaw = 0, pitch = 0;
   let recP = 0, recPv = 0, recY = 0, recYv = 0;
   let grounded = false, coyoteT = 0;
-  let capH = 1.8, eyeH = 1.62;
+  let capH = 1.8, eyeH = 1.62, crouchLock = false;
   let moveState = 'idle';
   let sliding = false, slideSpeed = 0, slideHead = 0, slideHead0 = 0, slideCd = 0;
   let mantleT = 0, mFx = 0, mFy = 0, mFz = 0, mTx = 0, mTy = 0, mTz = 0;
@@ -327,22 +327,25 @@ export function createSim(worldDef, constants) {
   function moveV(dt, R, H, wasG) {
     const pyStart = py;
     const ceil = ceilingAt(px, pz, py, R);
+    const top = probeSupport(px, pz, -Infinity, pyStart + k.stepUp + 0.02);
+    const hasSup = top > -Infinity;
+    const sMat = supMat, sNx = supNx, sNy = supNy, sNz = supNz;
     py += vy * dt;
-    if (ceil < Infinity && py + H > ceil) {
-      py = ceil - H;
-      if (vy > 0) vy = 0;
+    if (ceil < Infinity) {
+      let lim = ceil - H;
+      if (hasSup && lim < top) lim = top;
+      if (py > lim) {
+        py = lim;
+        if (vy > 0) vy = 0;
+      }
     }
     contactGround = false;
-    if (probeSupport(px, pz, -Infinity, pyStart + k.stepUp + 0.02) > -Infinity) {
-      const top = supTop;
-      if ((ceil === Infinity || top + H <= ceil + 1e-4) &&
-          (py <= top + 1e-4 || (wasG && vy <= 0.01 && py <= top + SNAP_DOWN))) {
-        py = top;
-        if (vy < 0) vy = 0;
-        contactGround = true;
-        gMat = supMat;
-        gndNx = supNx; gndNy = supNy; gndNz = supNz;
-      }
+    if (hasSup && (py <= top + 1e-4 || (wasG && vy <= 0.01 && py <= top + SNAP_DOWN))) {
+      py = top;
+      if (vy < 0) vy = 0;
+      contactGround = true;
+      gMat = sMat;
+      gndNx = sNx; gndNy = sNy; gndNz = sNz;
     }
   }
 
@@ -695,11 +698,12 @@ export function createSim(worldDef, constants) {
           } else landClampT = 0;
         }
 
-        const targetH = (crouchHeld || sliding) ? k.crouchH : k.height;
-        if (targetH > capH) {
-          const nh = Math.min(targetH, capH + HEIGHT_RATE * d);
-          if (ceilingAt(px, pz, py, R) >= py + nh) capH = nh;
-        } else if (targetH < capH) capH = Math.max(targetH, capH - HEIGHT_RATE * d);
+        let targetH = (crouchHeld || sliding) ? k.crouchH : k.height;
+        const headCeil = ceilingAt(px, pz, py, R);
+        crouchLock = headCeil < Infinity && headCeil - py < targetH;
+        if (crouchLock) targetH = k.crouchH;
+        if (targetH > capH) capH = Math.min(targetH, capH + HEIGHT_RATE * d);
+        else if (targetH < capH) capH = Math.max(targetH, capH - HEIGHT_RATE * d);
         eyeH = k.crouchEye + (k.eye - k.crouchEye) *
           clampN((capH - k.crouchH) / Math.max(0.01, k.height - k.crouchH), 0, 1);
 
@@ -731,7 +735,7 @@ export function createSim(worldDef, constants) {
 
         if (sliding) moveState = 'slide';
         else if (!grounded) moveState = 'air';
-        else if (crouchHeld) moveState = 'crouch';
+        else if (crouchHeld || crouchLock) moveState = 'crouch';
         else if (wantSprint && speedH > k.walk * 0.6) moveState = 'sprint';
         else if (speedH > 0.4) moveState = 'walk';
         else moveState = 'idle';
@@ -819,6 +823,7 @@ export function createSim(worldDef, constants) {
     coyoteT = 0;
     capH = k.height;
     eyeH = k.eye;
+    crouchLock = false;
     moveState = 'idle';
     sliding = false; slideSpeed = 0; slideHead = 0; slideHead0 = 0; slideCd = 0;
     mantleT = 0;

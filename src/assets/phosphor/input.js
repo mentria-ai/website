@@ -25,6 +25,10 @@ const TOUCH_SPRINT = 0.8;
 const GYRO_MAX_STEP = 20;
 const DEG2RAD = Math.PI / 180;
 
+const GYRO_SMOOTH_MAX = 0.95;
+const TOUCH_SMOOTH_MAX = 0.6;
+const LOOK_DEFAULTS = { touchSmooth: 0.35, gyroSmooth: 0.5, gyroPolarity: 1 };
+
 const STYLE_ID = 'ph-touch-style';
 const STYLE_TEXT = [
   '.ph-touch{position:absolute;inset:0;z-index:6;pointer-events:none;touch-action:none;',
@@ -41,8 +45,9 @@ const STYLE_TEXT = [
   '.ph-touch__knob{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;',
   'border-radius:50%;background:rgba(110,243,197,.42);border:1px solid rgba(110,243,197,.65);',
   'box-shadow:0 0 14px rgba(110,243,197,.35);will-change:transform}',
-  '.ph-touch__btns{position:absolute;display:flex;flex-direction:column-reverse;gap:10px;',
-  'right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));',
+  '.ph-touch__btns{position:absolute;display:grid;grid-template-columns:auto auto;',
+  "grid-template-areas:'reload ads' 'jump fire';gap:12px;align-items:end;justify-items:center;",
+  'right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));',
   'pointer-events:none}',
   '.ph-touch__btn{pointer-events:auto;touch-action:none;-webkit-appearance:none;appearance:none;',
   'min-width:60px;min-height:60px;width:60px;height:60px;border-radius:50%;',
@@ -50,8 +55,11 @@ const STYLE_TEXT = [
   'font:inherit;font-size:10px;letter-spacing:.06em;font-weight:600;',
   'color:rgba(226,232,240,.86);background:rgba(10,10,10,.38);',
   'border:1px solid rgba(255,255,255,.16);backdrop-filter:none;cursor:pointer}',
-  '.ph-touch__btn--fire{width:78px;height:78px;min-width:78px;min-height:78px;font-size:11px;',
+  '.ph-touch__btn--fire{grid-area:fire;width:76px;height:76px;min-width:76px;min-height:76px;font-size:11px;',
   'color:#0a0a0a;background:rgba(110,243,197,.62);border-color:rgba(110,243,197,.85)}',
+  '.ph-touch__btn--ads{grid-area:ads}',
+  '.ph-touch__btn--jump{grid-area:jump}',
+  '.ph-touch__btn--reload{grid-area:reload}',
   '.ph-touch__btn.is-down{background:rgba(110,243,197,.34);border-color:rgba(110,243,197,.75);color:#e2e8f0}',
   '.ph-touch__btn--fire.is-down{background:rgba(110,243,197,.92);color:#0a0a0a}',
   '.ph-touch__btn.is-on{background:rgba(110,243,197,.20);border-color:rgba(110,243,197,.70);color:#6ef3c5}'
@@ -102,6 +110,7 @@ export function createInput(stageEl, canvas, opts) {
   const lockTarget = canvas || stageEl || null;
 
   const sensitivity = Object.assign({}, SENS_DEFAULTS);
+  const lookTune = Object.assign({}, LOOK_DEFAULTS);
 
   const intents = {
     forward: 0,
@@ -164,6 +173,8 @@ export function createInput(stageEl, canvas, opts) {
   const look = { id: -1, lx: 0, ly: 0 };
   let touchDx = 0;
   let touchDy = 0;
+  let touchPrevX = 0;
+  let touchPrevY = 0;
   let touchFire = false;
   let touchAdsOn = false;
   let crouchUntil = 0;
@@ -173,16 +184,24 @@ export function createInput(stageEl, canvas, opts) {
   const gyro = { has: false, yaw: 0, pitch: 0 };
   let gyroDx = 0;
   let gyroDy = 0;
+  let gyroLpX = 0;
+  let gyroLpY = 0;
 
   function setMethod(m) {
     lastMethod = m;
   }
 
-  function isLocked() {
+  function lockedElement() {
     try {
-      return !!document.pointerLockElement && (!lockTarget || document.pointerLockElement === lockTarget);
+      const el = document.pointerLockElement || document.webkitPointerLockElement;
+      return el || null;
     } catch (_) {}
-    return false;
+    return null;
+  }
+
+  function isLocked() {
+    const el = lockedElement();
+    return !!el && (!lockTarget || el === lockTarget);
   }
 
   function mergeSens(src) {
@@ -191,6 +210,29 @@ export function createInput(stageEl, canvas, opts) {
     for (let i = 0; i < k.length; i++) {
       const v = src[k[i]];
       if (isNum(v) && v >= 0) sensitivity[k[i]] = v;
+    }
+  }
+
+  function mergeLook(src) {
+    if (!src || typeof src !== 'object') return;
+    if (isNum(src.touchSmooth)) {
+      const v = Math.max(0, Math.min(TOUCH_SMOOTH_MAX, src.touchSmooth));
+      if (v !== lookTune.touchSmooth) {
+        lookTune.touchSmooth = v;
+        touchPrevX = 0;
+        touchPrevY = 0;
+      }
+    }
+    if (isNum(src.gyroSmooth)) {
+      const v = Math.max(0, Math.min(GYRO_SMOOTH_MAX, src.gyroSmooth));
+      if (v !== lookTune.gyroSmooth) {
+        lookTune.gyroSmooth = v;
+        gyroLpX = 0;
+        gyroLpY = 0;
+      }
+    }
+    if (isNum(src.gyroPolarity)) {
+      lookTune.gyroPolarity = src.gyroPolarity < 0 ? -1 : 1;
     }
   }
 
@@ -203,6 +245,8 @@ export function createInput(stageEl, canvas, opts) {
     gyro.has = false;
     gyroDx = 0;
     gyroDy = 0;
+    gyroLpX = 0;
+    gyroLpY = 0;
     resetTouchState();
   }
 
@@ -269,18 +313,20 @@ export function createInput(stageEl, canvas, opts) {
 
   function onLockChange() {
     const locked = isLocked();
-    if (wasLocked && !locked) {
-      if (!expectedExit) pendingPause = true;
-      mouseFire = false;
-      mouseAds = false;
-      mouseDx = 0;
-      mouseDy = 0;
-      if (!expectedExit && lockLostCb) {
-        try { lockLostCb(); } catch (_) {}
-      }
-    }
-    expectedExit = false;
+    if (locked === wasLocked) return;
     wasLocked = locked;
+    const expected = expectedExit;
+    expectedExit = false;
+    if (locked) return;
+    mouseFire = false;
+    mouseAds = false;
+    mouseDx = 0;
+    mouseDy = 0;
+    if (expected) return;
+    pendingPause = true;
+    if (lockLostCb) {
+      try { lockLostCb(); } catch (_) {}
+    }
   }
 
   function onBlur() {
@@ -542,6 +588,8 @@ export function createInput(stageEl, canvas, opts) {
     look.id = -1;
     touchDx = 0;
     touchDy = 0;
+    touchPrevX = 0;
+    touchPrevY = 0;
     touchFire = false;
     crouchUntil = 0;
     ptrKind.clear();
@@ -708,9 +756,9 @@ export function createInput(stageEl, canvas, opts) {
     const btns = document.createElement('div');
     btns.className = 'ph-touch__btns';
     const bFire = mkBtn('fire', labels.fire, 'ph-touch__btn--fire');
-    const bAds = mkBtn('ads', labels.ads, null);
-    const bJump = mkBtn('jump', labels.jump, null);
-    const bReload = mkBtn('reload', labels.reload, null);
+    const bAds = mkBtn('ads', labels.ads, 'ph-touch__btn--ads');
+    const bJump = mkBtn('jump', labels.jump, 'ph-touch__btn--jump');
+    const bReload = mkBtn('reload', labels.reload, 'ph-touch__btn--reload');
     btns.appendChild(bFire);
     btns.appendChild(bAds);
     btns.appendChild(bJump);
@@ -781,8 +829,11 @@ export function createInput(stageEl, canvas, opts) {
     gyro.yaw = yaw;
     gyro.pitch = pit;
     if (Math.abs(dyaw) > GYRO_MAX_STEP || Math.abs(dpit) > GYRO_MAX_STEP) return;
-    gyroDx += dyaw * DEG2RAD;
-    gyroDy += dpit * DEG2RAD;
+    const a = lookTune.gyroSmooth;
+    gyroLpX = gyroLpX * a + dyaw * (1 - a);
+    gyroLpY = gyroLpY * a + dpit * (1 - a);
+    gyroDx += gyroLpX * DEG2RAD;
+    gyroDy += gyroLpY * DEG2RAD;
   }
 
   function startGyro() {
@@ -796,6 +847,8 @@ export function createInput(stageEl, canvas, opts) {
     gyro.has = false;
     gyroDx = 0;
     gyroDy = 0;
+    gyroLpX = 0;
+    gyroLpY = 0;
     return true;
   }
 
@@ -808,6 +861,8 @@ export function createInput(stageEl, canvas, opts) {
     gyro.has = false;
     gyroDx = 0;
     gyroDy = 0;
+    gyroLpX = 0;
+    gyroLpY = 0;
   }
 
   function gyroEnabled() {
@@ -846,30 +901,47 @@ export function createInput(stageEl, canvas, opts) {
     return gyroPending;
   }
 
+  function pointerLockSupported() {
+    const el = lockTarget;
+    if (!el) return false;
+    return typeof el.requestPointerLock === 'function' || typeof el.webkitRequestPointerLock === 'function';
+  }
+
   function requestPointerLock() {
     const el = lockTarget;
-    if (!el || typeof el.requestPointerLock !== 'function') return false;
+    if (!el) return false;
+    const std = typeof el.requestPointerLock === 'function';
+    if (!std && typeof el.webkitRequestPointerLock !== 'function') return false;
+    const plainLock = function () {
+      try {
+        const q = std ? el.requestPointerLock() : el.webkitRequestPointerLock();
+        if (q && typeof q.catch === 'function') q.catch(function () {});
+        return true;
+      } catch (_) {}
+      return false;
+    };
+    if (!std) return plainLock();
     try {
       const p = el.requestPointerLock({ unadjustedMovement: true });
       if (p && typeof p.catch === 'function') {
-        p.catch(function () {
-          try { el.requestPointerLock(); } catch (_) {}
-        });
+        p.catch(function () { plainLock(); });
       }
       return true;
     } catch (_) {}
-    try {
-      el.requestPointerLock();
-      return true;
-    } catch (_) {}
-    return false;
+    return plainLock();
   }
 
   function exitPointerLock() {
     try {
-      if (document.pointerLockElement && typeof document.exitPointerLock === 'function') {
+      if (!lockedElement()) return false;
+      if (typeof document.exitPointerLock === 'function') {
         expectedExit = true;
         document.exitPointerLock();
+        return true;
+      }
+      if (typeof document.webkitExitPointerLock === 'function') {
+        expectedExit = true;
+        document.webkitExitPointerLock();
         return true;
       }
     } catch (_) {}
@@ -918,15 +990,22 @@ export function createInput(stageEl, canvas, opts) {
       lookDx += padLookX * s;
       lookDy -= padLookY * s;
     }
-    if (touchDx !== 0 || touchDy !== 0) {
-      const s = sensitivity.touch * adsF;
-      lookDx += touchDx * s;
-      lookDy -= touchDy * s;
+    if (touchDx !== 0 || touchDy !== 0 || touchPrevX !== 0 || touchPrevY !== 0) {
+      const k = lookTune.touchSmooth;
+      const outX = touchDx * (1 - k) + touchPrevX * k;
+      const outY = touchDy * (1 - k) + touchPrevY * k;
+      touchPrevX = touchDx;
+      touchPrevY = touchDy;
       touchDx = 0;
       touchDy = 0;
+      if (outX !== 0 || outY !== 0) {
+        const s = sensitivity.touch * adsF;
+        lookDx += outX * s;
+        lookDy -= outY * s;
+      }
     }
     if (gyroDx !== 0 || gyroDy !== 0) {
-      const s = sensitivity.gyro;
+      const s = sensitivity.gyro * lookTune.gyroPolarity;
       lookDx += gyroDx * s;
       lookDy += gyroDy * s;
       gyroDx = 0;
@@ -962,7 +1041,12 @@ export function createInput(stageEl, canvas, opts) {
 
   function setSensitivity(next) {
     mergeSens(next);
+    mergeLook(next);
     return sensitivity;
+  }
+
+  function lookTuning() {
+    return Object.assign({}, lookTune);
   }
 
   function onPointerLockLost(cb) {
@@ -1018,6 +1102,7 @@ export function createInput(stageEl, canvas, opts) {
       document.removeEventListener('contextmenu', onContextMenu);
       document.removeEventListener('pointerlockchange', onLockChange);
       document.removeEventListener('mozpointerlockchange', onLockChange);
+      document.removeEventListener('webkitpointerlockchange', onLockChange);
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('blur', onBlur);
       window.removeEventListener('deviceorientation', onOrient);
@@ -1035,11 +1120,13 @@ export function createInput(stageEl, canvas, opts) {
     document.addEventListener('contextmenu', onContextMenu);
     document.addEventListener('pointerlockchange', onLockChange);
     document.addEventListener('mozpointerlockchange', onLockChange);
+    document.addEventListener('webkitpointerlockchange', onLockChange);
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('blur', onBlur);
   } catch (_) {}
 
   mergeSens(options.sensitivity);
+  mergeLook(options.sensitivity);
   wasLocked = isLocked();
 
   return {
@@ -1048,11 +1135,13 @@ export function createInput(stageEl, canvas, opts) {
     requestPointerLock: requestPointerLock,
     exitPointerLock: exitPointerLock,
     isLocked: isLocked,
+    pointerLockSupported: pointerLockSupported,
     enableTouchUI: enableTouchUI,
     enableGyro: enableGyro,
     disableGyro: disableGyro,
     gyroEnabled: gyroEnabled,
     setSensitivity: setSensitivity,
+    lookTuning: lookTuning,
     onPointerLockLost: onPointerLockLost,
     setPadOverrides: setPadOverrides,
     capturePadButton: capturePadButton,
@@ -1060,6 +1149,7 @@ export function createInput(stageEl, canvas, opts) {
     destroy: destroy,
     sensitivity: sensitivity,
     defaults: Object.assign({}, SENS_DEFAULTS),
+    lookDefaults: Object.assign({}, LOOK_DEFAULTS),
     labels: labels
   };
 }

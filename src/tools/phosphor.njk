@@ -3,7 +3,7 @@ layout: base.njk
 permalink: /tools/phosphor/index.html
 lang: en
 title: "PHOSPHOR"
-description: "Browser FPS feel prototype — sprint, slide, mantle and a full-auto carbine in a dusk-lit training yard."
+description: "Browser FPS combat time trials — five courses, medals and ghost racing with a full-auto carbine."
 robots: "noindex, nofollow"
 eleventyExcludeFromCollections: true
 eleventyExcludeFromSitemap: true
@@ -41,6 +41,7 @@ englishOnly: true
   color: var(--accent); text-shadow: 0 0 10px rgba(110, 243, 197, 0.35);
 }
 .ph-stat--big .ph-stat__v { font-size: var(--text-2xl); }
+.ph-stat__v--sub { font-size: var(--text-sm); color: var(--term-muted); text-shadow: none; }
 
 .ph-cross { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
 .ph-cross[hidden] { display: none; }
@@ -72,6 +73,7 @@ englishOnly: true
   background: rgba(4, 6, 10, 0.74); font-family: var(--font-mono);
 }
 .ph-ov[hidden] { display: none; }
+.ph-ov p { margin: 0; }
 .ph-ov__title {
   margin: 0; font-size: clamp(2.2rem, 9vw, 4.5rem); letter-spacing: 0.22em;
   color: var(--accent); text-shadow: 0 0 24px rgba(110, 243, 197, 0.4);
@@ -86,6 +88,56 @@ englishOnly: true
 .ph-ov__time { font-size: var(--text-xl); color: var(--accent); font-variant-numeric: tabular-nums; }
 .ph-ov__code { display: block; max-width: 60ch; color: var(--syn-pink); font-size: var(--text-2xs); word-break: break-word; }
 .ph-ov--fail .ph-ov__title--sm { color: var(--syn-amber); }
+.ph-ov--ready, .ph-ov--complete { justify-content: flex-start; overflow-y: auto; gap: 0.4rem; padding: 0.9rem 1rem 1.4rem; }
+.ph-ov--ready .ph-ov__title { font-size: clamp(1.1rem, 3.4vw, 1.7rem); }
+.ph-ov--ready .ph-ov__hint { font-size: var(--text-2xs); line-height: 1.6; max-width: 62ch; }
+
+.ph-sel__wrap { width: min(540px, 100%); display: flex; flex-direction: column; gap: 0.3rem; }
+.ph-sel__title { margin: 0; color: var(--term-muted); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.16em; }
+.ph-sel { display: flex; flex-direction: column; gap: 0.25rem; }
+.ph-sel__row {
+  display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto auto; align-items: center; gap: 0.5rem;
+  pointer-events: auto; cursor: pointer; text-align: left; min-height: 42px;
+  font-family: var(--font-mono); font-size: var(--text-xs); color: var(--term-fg);
+  background: rgba(6, 9, 14, 0.66); border: 1px solid var(--term-border);
+  border-radius: var(--radius-md); padding: 0.3rem 0.65rem;
+}
+.ph-sel__row:hover { border-color: var(--term-border-strong); background: rgba(12, 18, 24, 0.8); }
+.ph-sel__row.is-sel { border-color: var(--accent); background: rgba(14, 42, 34, 0.82); }
+.ph-sel__n { color: var(--term-subtle); font-size: var(--text-2xs); font-variant-numeric: tabular-nums; }
+.ph-sel__name { text-transform: uppercase; letter-spacing: 0.1em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-sel__best { display: flex; gap: 0.35rem; align-items: baseline; }
+.ph-sel__k { color: var(--term-subtle); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.1em; }
+.ph-sel__bv { color: var(--accent); font-size: var(--text-2xs); font-variant-numeric: tabular-nums; }
+.ph-sel__err { display: flex; flex-direction: column; gap: 0.2rem; }
+.ph-sel__err[hidden] { display: none; }
+
+.ph-medal {
+  display: inline-block; margin: 0; border-radius: var(--radius-pill);
+  border: 1px solid currentColor; padding: 0.12rem 0.5rem;
+  font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap;
+}
+.ph-medal[hidden] { display: none; }
+.ph-medal--bronze { color: #d08a4e; background: rgba(205, 127, 50, 0.12); }
+.ph-medal--silver { color: #c0c0c8; background: rgba(192, 192, 200, 0.12); }
+.ph-medal--gold { color: #e8c547; background: rgba(232, 197, 71, 0.12); }
+.ph-medal--signal {
+  color: var(--accent); background: rgba(110, 243, 197, 0.14);
+  box-shadow: 0 0 16px rgba(110, 243, 197, 0.4); text-shadow: 0 0 10px rgba(110, 243, 197, 0.6);
+}
+.ph-medal--none { color: var(--term-subtle); background: none; }
+.ph-medal--lg { font-size: var(--text-sm); padding: 0.3rem 0.9rem; letter-spacing: 0.2em; }
+
+.ph-par { width: min(320px, 100%); display: flex; flex-direction: column; gap: 0.25rem; }
+.ph-par__title { margin: 0; color: var(--term-muted); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.16em; }
+.ph-par__body { display: flex; flex-direction: column; gap: 0.2rem; }
+.ph-par__row { display: grid; grid-template-columns: 5.8rem minmax(0, 1fr) 5rem; align-items: center; gap: 0.5rem; font-size: var(--text-2xs); }
+.ph-par__t { color: var(--term-fg); font-variant-numeric: tabular-nums; text-align: right; }
+.ph-par__d { color: var(--syn-amber); font-variant-numeric: tabular-nums; text-align: right; }
+.ph-par__d.is-good { color: var(--accent); }
+.ph-best { margin: 0; color: var(--term-muted); font-size: var(--text-xs); }
+.ph-flair { color: var(--accent); text-transform: uppercase; letter-spacing: 0.14em; text-shadow: 0 0 12px rgba(110, 243, 197, 0.5); }
+.ph-flair[hidden] { display: none; }
 
 .ph-btn {
   pointer-events: auto; cursor: pointer;
@@ -99,6 +151,9 @@ englishOnly: true
 .ph-btn--primary { background: var(--accent); color: #04120c; border-color: var(--accent); min-height: 56px; padding: 0.9rem 2rem; font-size: var(--text-sm); }
 .ph-btn--primary:hover, .ph-btn--primary:active { background: #9df8dc; border-color: #9df8dc; color: #04120c; }
 .ph-btn--icon { min-width: 44px; min-height: 44px; padding: 0.35rem 0.55rem; border-radius: var(--radius-md); }
+.ph-btn--sm { min-height: 38px; padding: 0.4rem 0.8rem; font-size: var(--text-2xs); }
+.ph-btn:disabled { opacity: 0.4; cursor: default; }
+.ph-btn:disabled:hover { border-color: var(--term-border-strong); color: var(--term-fg); }
 .ph-chip {
   background: rgba(0, 0, 0, 0.45); border: 1px solid var(--term-border); border-radius: var(--radius-pill);
   padding: 0.25rem 0.6rem; color: var(--term-muted); font-size: var(--text-2xs);
@@ -121,6 +176,8 @@ englishOnly: true
 .ph-dev__body { flex: 1; overflow-y: auto; padding: 0.4rem 0.7rem 1rem; }
 .ph-dev__sec { margin: 0.9rem 0 0.35rem; color: var(--syn-cyan); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.14em; }
 .ph-dev__row { display: grid; grid-template-columns: 8rem 1fr 4.4rem; align-items: center; gap: 0.4rem; margin-bottom: 0.3rem; }
+.ph-dev__row--wide { grid-template-columns: 4rem 1fr; }
+.ph-dev__sel { min-height: 30px; }
 .ph-dev__k { font-size: var(--text-2xs); color: var(--term-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ph-dev__range { width: 100%; accent-color: var(--accent); }
 .ph-dev__num {
@@ -167,14 +224,18 @@ englishOnly: true
         </div>
         <div class="ph-stat">
           <span class="ph-stat__k">{{ "tool.phosphor.hud_targets" | t }}</span>
-          <span class="ph-stat__v" id="ph-targets">8/8</span>
+          <span class="ph-stat__v" id="ph-targets">0/0</span>
+        </div>
+        <div class="ph-stat">
+          <span class="ph-stat__k">{{ "tool.phosphor.hud_par" | t }}</span>
+          <span class="ph-stat__v ph-stat__v--sub" id="ph-hud-par">—</span>
         </div>
       </div>
 
       <div class="ph-hud__tr">
         <span class="ph-chip" id="ph-method"></span>
         <span class="ph-chip"><span class="ph-stat__k">{{ "tool.phosphor.hud_fps" | t }}</span> <span id="ph-fps">--</span></span>
-        <button type="button" class="ph-btn ph-btn--icon" id="ph-fs" aria-label="{{ 'tool.phosphor.fullscreen' | t }}" title="{{ 'tool.phosphor.fullscreen' | t }}">⛶</button>
+        <button type="button" class="ph-btn ph-btn--icon" id="ph-fs" aria-label="{{ 'tool.phosphor.fullscreen' | t }}" title="{{ 'tool.phosphor.fullscreen' | t }}" hidden>⛶</button>
         <button type="button" class="ph-btn ph-btn--icon" id="ph-pausebtn" aria-label="{{ 'tool.phosphor.hud_pause' | t }}" title="{{ 'tool.phosphor.hud_pause' | t }}">‖</button>
       </div>
 
@@ -211,11 +272,23 @@ englishOnly: true
       <p class="ph-ov__note">{{ "tool.phosphor.boot_status" | t }}</p>
     </div>
 
-    <div class="ph-ov" id="ph-ready" hidden>
+    <div class="ph-ov ph-ov--ready" id="ph-ready" hidden>
       <p class="ph-ov__title">PHOSPHOR</p>
-      <p class="ph-ov__sub">{{ "tool.phosphor.ready_sub" | t }}</p>
+      <p class="ph-ov__sub">{{ "tool.phosphor.ready_tagline" | t }}</p>
+
+      <div class="ph-sel__wrap">
+        <p class="ph-sel__title">{{ "tool.phosphor.select_title" | t }}</p>
+        <div class="ph-sel" id="ph-sel"></div>
+        <p class="ph-ov__note" id="ph-course-hint"></p>
+        <div class="ph-sel__err" id="ph-course-err" hidden>
+          <p class="ph-ov__cta">{{ "tool.phosphor.course_error" | t }}</p>
+          <p class="ph-ov__note">{{ "tool.phosphor.course_error_hint" | t }}</p>
+        </div>
+      </div>
+
       <p class="ph-ov__cta" id="ph-ready-click">{{ "tool.phosphor.ready_click" | t }}</p>
       <button type="button" class="ph-btn ph-btn--primary" id="ph-ready-start" hidden>{{ "tool.phosphor.ready_touch_start" | t }}</button>
+      <p class="ph-ov__note">{{ "tool.phosphor.select_hint" | t }}</p>
       <p class="ph-ov__hint">{{ "tool.phosphor.hint_controls" | t }}</p>
       <p class="ph-ov__note">{{ "tool.phosphor.ready_note" | t }}</p>
     </div>
@@ -226,13 +299,36 @@ englishOnly: true
       <div class="ph-ov__row">
         <button type="button" class="ph-btn ph-btn--primary" id="ph-resume">{{ "tool.phosphor.paused_resume" | t }}</button>
         <button type="button" class="ph-btn" id="ph-pause-restart">{{ "tool.phosphor.paused_restart" | t }}</button>
+        <button type="button" class="ph-btn" id="ph-pause-courses">{{ "tool.phosphor.back_to_courses" | t }}</button>
       </div>
     </div>
 
-    <div class="ph-ov" id="ph-complete" hidden>
+    <div class="ph-ov ph-ov--complete" id="ph-complete" hidden>
       <p class="ph-ov__title ph-ov__title--sm">{{ "tool.phosphor.complete_title" | t }}</p>
+      <p class="ph-ov__sub" id="ph-complete-course"></p>
       <p class="ph-ov__time"><span class="ph-stat__k">{{ "tool.phosphor.complete_time" | t }}</span> <span id="ph-complete-time">0:00.000</span></p>
-      <button type="button" class="ph-btn ph-btn--primary" id="ph-complete-restart">{{ "tool.phosphor.complete_restart" | t }}</button>
+      <p class="ph-medal ph-medal--lg ph-medal--none" id="ph-complete-medal"></p>
+      <p class="ph-best"><span id="ph-complete-best"></span> <span class="ph-flair" id="ph-complete-new" hidden>{{ "tool.phosphor.complete_new_best" | t }}</span></p>
+
+      <div class="ph-par">
+        <p class="ph-par__title">{{ "tool.phosphor.par_title" | t }}</p>
+        <div class="ph-par__body" id="ph-par-table"></div>
+      </div>
+
+      <p class="ph-ov__note" id="ph-ghost-line" hidden></p>
+
+      <div class="ph-ov__row">
+        <button type="button" class="ph-btn ph-btn--primary" id="ph-complete-restart">{{ "tool.phosphor.complete_restart" | t }}</button>
+        <button type="button" class="ph-btn" id="ph-complete-next" hidden>{{ "tool.phosphor.next_course" | t }}</button>
+        <button type="button" class="ph-btn" id="ph-complete-courses">{{ "tool.phosphor.back_to_courses" | t }}</button>
+      </div>
+      <div class="ph-ov__row">
+        <button type="button" class="ph-btn ph-btn--sm" id="ph-race" aria-pressed="true">{{ "tool.phosphor.ghost_race_on" | t }}</button>
+        <button type="button" class="ph-btn ph-btn--sm" id="ph-share">{{ "tool.phosphor.ghost_share" | t }}</button>
+        <button type="button" class="ph-btn ph-btn--sm" id="ph-import">{{ "tool.phosphor.ghost_import" | t }}</button>
+      </div>
+      <input type="file" id="ph-ghost-file" accept=".pghost" hidden>
+      <p class="ph-ov__cta" id="ph-ghost-msg" hidden></p>
     </div>
 
     <div class="ph-ov ph-ov--fail" id="ph-unsup" hidden>
@@ -251,7 +347,37 @@ englishOnly: true
     gyroAsk:     {{ ("tool.phosphor.gyro_ask"     | t) | dump | safe }},
     gyroOn:      {{ ("tool.phosphor.gyro_on"      | t) | dump | safe }},
     gyroDenied:  {{ ("tool.phosphor.gyro_denied"  | t) | dump | safe }},
-    contextLost: {{ ("tool.phosphor.context_lost" | t) | dump | safe }}
+    contextLost: {{ ("tool.phosphor.context_lost" | t) | dump | safe }},
+
+    selectBest:   {{ ("tool.phosphor.select_best"    | t) | dump | safe }},
+    selectNone:   {{ ("tool.phosphor.select_none"    | t) | dump | safe }},
+    selectLoading:{{ ("tool.phosphor.select_loading" | t) | dump | safe }},
+
+    medalBronze: {{ ("tool.phosphor.medal_bronze" | t) | dump | safe }},
+    medalSilver: {{ ("tool.phosphor.medal_silver" | t) | dump | safe }},
+    medalGold:   {{ ("tool.phosphor.medal_gold"   | t) | dump | safe }},
+    medalSignal: {{ ("tool.phosphor.medal_signal" | t) | dump | safe }},
+    medalNone:   {{ ("tool.phosphor.medal_none"   | t) | dump | safe }},
+
+    completeBest: {{ ("tool.phosphor.complete_best" | t) | dump | safe }},
+
+    ghostRaceOn:     {{ ("tool.phosphor.ghost_race_on"     | t) | dump | safe }},
+    ghostRaceOff:    {{ ("tool.phosphor.ghost_race_off"    | t) | dump | safe }},
+    ghostNone:       {{ ("tool.phosphor.ghost_none"        | t) | dump | safe }},
+    ghostImported:   {{ ("tool.phosphor.ghost_imported"    | t) | dump | safe }},
+    ghostBadFile:    {{ ("tool.phosphor.ghost_bad_file"    | t) | dump | safe }},
+    ghostWrongCourse:{{ ("tool.phosphor.ghost_wrong_course"| t) | dump | safe }},
+    ghostTime:       {{ ("tool.phosphor.ghost_time"        | t) | dump | safe }},
+    ghostAhead:      {{ ("tool.phosphor.ghost_ahead"       | t) | dump | safe }},
+    ghostBehind:     {{ ("tool.phosphor.ghost_behind"      | t) | dump | safe }},
+
+    courseNames: {
+      "tool.phosphor.c01_name": {{ ("tool.phosphor.c01_name" | t) | dump | safe }},
+      "tool.phosphor.c02_name": {{ ("tool.phosphor.c02_name" | t) | dump | safe }},
+      "tool.phosphor.c03_name": {{ ("tool.phosphor.c03_name" | t) | dump | safe }},
+      "tool.phosphor.c04_name": {{ ("tool.phosphor.c04_name" | t) | dump | safe }},
+      "tool.phosphor.c05_name": {{ ("tool.phosphor.c05_name" | t) | dump | safe }}
+    }
   };
 </script>
 <script type="module" id="ph-mod" src="/assets/phosphor/game.js?v={{ buildHash }}"></script>

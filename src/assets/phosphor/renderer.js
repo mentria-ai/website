@@ -9,6 +9,16 @@ const TESS_TARGET = 1.5;
 const TESS_MAX = 24;
 const MINT = [0.431, 0.953, 0.773];
 const AMBER = [0.969, 0.690, 0.082];
+const VSTRIDE = 12;
+const VBYTES = 48;
+const STRIP_MAX = 40;
+const STRIP_WIDTH = 0.06;
+const PROP_MAX = 12;
+const TRAIL_MAX = 26;
+const TRAIL_LIFE = 0.7;
+const TRAIL_STEP = 0.028;
+const SPEC_HEADROOM = 0.32;
+const LDR_SCALE = 0.58;
 
 const GLSL_NOISE = `
 float h21(vec2 p){ vec3 q = fract(vec3(p.x, p.y, p.x) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
@@ -37,7 +47,7 @@ vec3 applyFog(vec3 col, vec3 wpos, vec3 campos){
   float hb = exp(-clamp((wpos.y - uFogParam.z) * hf, -12.0, 12.0));
   float optical = (abs(dy) > 0.001 && hf > 0.0001) ? dist * (ha - hb) / (dy * hf) : dist * ha;
   float f = 1.0 - exp(-uFogParam.x * max(optical, 0.0));
-  vec3 fc = mix(uFogColor, uSunColor * 0.85, pow(max(dot(rd, -uSunDir), 0.0), 6.0) * 0.4);
+  vec3 fc = mix(uFogColor, uSunColor * 0.85, pow(max(dot(rd, -uSunDir), 0.0), 9.0) * 0.30);
   return mix(col, fc, clamp(f, 0.0, 1.0));
 }
 `;
@@ -47,18 +57,21 @@ layout(location=0) in vec3 aPos;
 layout(location=1) in vec3 aNormal;
 layout(location=2) in float aAO;
 layout(location=3) in vec3 aTint;
+layout(location=4) in vec2 aDetail;
 uniform mat4 uViewProj;
 uniform mat4 uShadowMat;
 out vec3 vPos;
 out vec3 vNormal;
 out float vAO;
 out vec3 vTint;
+out vec2 vDetail;
 out vec4 vShadow;
 void main(){
   vPos = aPos;
   vNormal = aNormal;
   vAO = aAO;
   vTint = aTint;
+  vDetail = aDetail;
   vShadow = uShadowMat * vec4(aPos + aNormal * 0.04, 1.0);
   gl_Position = uViewProj * vec4(aPos, 1.0);
 }`;
@@ -70,6 +83,7 @@ in vec3 vPos;
 in vec3 vNormal;
 in float vAO;
 in vec3 vTint;
+in vec2 vDetail;
 in vec4 vShadow;
 uniform vec3 uCamPos;
 uniform vec3 uAmbient;
@@ -83,6 +97,7 @@ uniform float uLightRadius[8];
 uniform vec4 uMuzzle;
 uniform vec3 uMuzzleColor;
 uniform float uPreExpose;
+uniform float uSpecCap;
 out vec4 oColor;
 ${GLSL_NOISE}
 ${GLSL_FOG}
@@ -102,44 +117,69 @@ float shadowAt(){
 void main(){
   vec3 n = normalize(vNormal);
   if (uMat == 3){
-    vec3 e = vTint * 2.4;
+    float core = clamp(vDetail.y, 0.0, 1.0);
+    vec3 e = vTint * (1.95 + 0.66 * core * (2.0 - core));
     oColor = vec4(applyFog(e, vPos, uCamPos) * uPreExpose, 1.0);
     return;
   }
+  vec3 vd = uCamPos - vPos;
+  float dcam = length(vd);
+  vec3 v = dcam > 0.0001 ? vd / dcam : vec3(0.0, 0.0, 1.0);
+  float dNear = 1.0 - smoothstep(16.0, 42.0, dcam);
   vec3 w = abs(n);
   w = w / max(w.x + w.y + w.z, 0.0001);
   float nA = triNoise(vPos, w, 1.7);
   float nB = triNoise(vPos, w, 7.9);
-  float nC = triNoise(vPos, w, 0.29);
+  float nC = triNoise(vPos, w, 0.155);
+  vec2 puv = w.y > 0.5 ? vPos.xz : (w.x > w.z ? vPos.zy : vPos.xy);
   vec3 albedo;
   float specK;
   float gloss;
+  float aniso = 1.0;
   if (uMat == 1){
     float streak = n2(vec2(vPos.y * 26.0, (vPos.x + vPos.z) * 1.3));
-    float g = 0.185 + (nB - 0.5) * 0.05 + (streak - 0.5) * 0.055 + (nC - 0.5) * 0.045;
-    albedo = vec3(g * 0.96, g * 0.99, g * 1.07);
-    specK = 0.30 + (nA - 0.5) * 0.14;
+    float g = 0.185 + (nB - 0.5) * 0.05 + (streak - 0.5) * 0.055 + (nC - 0.5) * 0.05;
+    float seam = 0.0;
+    if (dNear > 0.0){
+      float pl = n2(puv * 0.55);
+      seam = (smoothstep(0.468, 0.497, pl) - smoothstep(0.503, 0.532, pl)) * dNear;
+    }
+    g *= 1.0 - seam * 0.44;
+    vec3 temp = mix(vec3(0.92, 0.97, 1.10), vec3(1.09, 1.00, 0.90), smoothstep(0.36, 0.72, nC));
+    albedo = vec3(g) * temp;
+    specK = (0.30 + (nA - 0.5) * 0.14) * (1.0 - seam * 0.6);
     gloss = 54.0;
+    vec3 bt = normalize(cross(n, vec3(0.0, 1.0, 0.0)) + vec3(0.0001, 0.0, 0.0));
+    vec3 shv = normalize(-uSunDir + v);
+    aniso = 0.55 + 1.10 * pow(1.0 - abs(dot(shv, bt)), 3.0);
   } else if (uMat == 2){
-    float g = 0.355 + (nC - 0.5) * 0.055;
-    float wear = smoothstep(0.60, 0.97, nB);
-    albedo = mix(vec3(g, g * 0.99, g * 0.96), vec3(0.24, 0.24, 0.235), wear * 0.55);
-    specK = 0.10;
+    float g = 0.355 + (nC - 0.5) * 0.034;
+    albedo = vec3(g, g * 0.99, g * 0.96);
+    float chip = clamp(smoothstep(0.66, 0.30, vAO) * smoothstep(0.52, 0.82, nB) * (1.0 - vDetail.y * 0.7), 0.0, 1.0);
+    albedo = mix(albedo, vec3(0.166, 0.162, 0.157), chip * 0.78);
+    specK = 0.10 - chip * 0.05;
     gloss = 26.0;
   } else {
-    float g = 0.295 + (nA - 0.5) * 0.055 + (nB - 0.5) * 0.028 + (nC - 0.5) * 0.07;
+    float g = 0.300 + (nC - 0.5) * 0.105 + (nA - 0.5) * 0.045 + (nB - 0.5) * 0.026;
+    if (dNear > 0.0){
+      float vert = clamp(1.0 - abs(n.y) * 1.6, 0.0, 1.0);
+      float grain = n2(puv * 31.0);
+      float sk = n2(vec2(puv.x * 4.2, puv.y * 0.20));
+      float run = smoothstep(0.52, 0.94, sk) * exp(-max(vDetail.x, 0.0) * 0.85) * vert;
+      g += ((grain - 0.5) * 0.055 - run * 0.115) * dNear;
+    }
     albedo = vec3(g, g * 0.995, g * 0.965);
     specK = 0.035;
     gloss = 13.0;
   }
   albedo *= vTint;
-  vec3 v = normalize(uCamPos - vPos);
   float sh = shadowAt();
   float ndl = max(dot(n, -uSunDir), 0.0);
   vec3 hv = normalize(-uSunDir + v);
-  float spec = pow(max(dot(n, hv), 0.0), gloss) * specK * ndl * sh;
+  float spec = pow(max(dot(n, hv), 0.0), gloss) * specK * ndl * sh * aniso;
+  spec = spec * uSpecCap / (uSpecCap + spec);
   float sky = 0.62 + 0.38 * n.y;
-  vec3 col = albedo * (uAmbient * sky * vAO + uSunColor * ndl * sh) + uSunColor * spec;
+  vec3 col = albedo * (uAmbient * sky * vAO * (0.55 + 0.45 * vAO) + uSunColor * ndl * sh) + uSunColor * spec;
   for (int i = 0; i < 8; i++){
     if (i >= uLightCount) break;
     vec3 ld = uLightPos[i] - vPos;
@@ -209,12 +249,23 @@ ${GLSL_FOG}
 void main(){
   vec3 rd = normalize(vRay);
   float up = clamp(rd.y, 0.0, 1.0);
-  vec3 col = mix(uFogColor, uZenith, pow(up, 0.55));
-  col = mix(col, uGround, clamp(-rd.y * 3.2, 0.0, 1.0));
   float sd = max(dot(rd, -uSunDir), 0.0);
-  col += uSunColor * (pow(sd, 2400.0) * 4.5 + pow(sd, 26.0) * 0.30 + pow(sd, 4.0) * 0.07);
+  float sunUp = clamp(-uSunDir.y, -1.0, 1.0);
+  float day = smoothstep(-0.09, 0.06, sunUp);
+  vec3 col = mix(uFogColor, uZenith, pow(up, 0.55));
+  col = mix(col, uZenith * 0.34 + vec3(0.003, 0.006, 0.018), pow(up, 2.6) * 0.5);
+  float hazeA = exp(-abs(rd.y) * 17.0);
+  float hazeB = exp(-abs(rd.y) * 4.4);
+  float hazeC = exp(-abs(rd.y) * 1.5);
+  vec3 warm = mix(uFogColor, uSunColor, 0.55);
+  float lowSun = mix(0.62, 1.0, smoothstep(0.04, 0.34, sunUp));
+  float toward = 0.24 + 0.76 * pow(sd * 0.5 + 0.5, 4.5);
+  col += warm * (hazeA * 0.42 + hazeB * 0.15 + hazeC * 0.05) * toward * day * lowSun;
   float band = n2(rd.xz * 3.0 + rd.y * 2.0) - 0.5;
   col *= 1.0 + band * 0.05;
+  col = mix(col, uGround, clamp(-rd.y * 3.2, 0.0, 1.0));
+  float disc = smoothstep(0.99988, 0.99997, sd);
+  col += uSunColor * (disc * 5.5 + pow(sd, 260.0) * 0.85 + (pow(sd, 34.0) * 0.26 + pow(sd, 7.0) * 0.045) * lowSun) * day;
   oColor = vec4(col * uPreExpose, 1.0);
 }`;
 
@@ -242,6 +293,9 @@ uniform vec3 uAmbient;
 uniform vec3 uMint;
 uniform vec3 uAmberC;
 uniform float uDown;
+uniform float uDownAge;
+uniform float uSeed;
+uniform float uTime;
 uniform float uPreExpose;
 out vec4 oColor;
 ${GLSL_NOISE}
@@ -253,13 +307,21 @@ void main(){
   float grain = triNoise(vPos * 3.0, w, 4.0);
   vec3 plate = vec3(0.085, 0.090, 0.098) * (0.86 + grain * 0.28);
   plate *= mix(0.55, 1.0, smoothstep(0.995, 0.90, sq));
+  plate *= 1.0 - 0.28 * (smoothstep(0.62, 0.665, rd) - smoothstep(0.695, 0.735, rd));
   vec3 col = plate * (uAmbient * 3.2 + vec3(0.10));
-  float ring = smoothstep(0.70, 0.745, rd) * (1.0 - smoothstep(0.855, 0.90, rd));
-  float core = 1.0 - smoothstep(0.24, 0.30, rd);
-  float halo = pow(max(0.0, 1.0 - rd * 0.85), 3.0) * 0.22;
-  vec3 emis = uMint * (ring * 2.6 + halo) + uAmberC * core * 2.2;
-  col += emis * (1.0 - uDown * 0.94);
-  col *= mix(1.0, 0.35, uDown);
+  float ring = smoothstep(0.735, 0.756, rd) * (1.0 - smoothstep(0.844, 0.866, rd));
+  float ang = atan(vUv.y, vUv.x);
+  float tk = abs(fract(ang * 1.9098593 + 0.5) - 0.5) * 2.0;
+  float tick = (1.0 - smoothstep(0.16, 0.30, tk)) * smoothstep(0.560, 0.578, rd) * (1.0 - smoothstep(0.668, 0.688, rd));
+  float pulse = 0.86 + 0.14 * sin(uTime * 3.1415927 + uSeed);
+  float core = (1.0 - smoothstep(0.215, 0.268, rd)) * pulse;
+  float coreRing = smoothstep(0.300, 0.316, rd) * (1.0 - smoothstep(0.336, 0.354, rd));
+  float halo = pow(max(0.0, 1.0 - rd * 0.80), 3.6) * 0.26;
+  vec3 emis = uMint * (ring * 3.0 + tick * 2.1 + coreRing * 1.1 + halo) + uAmberC * core * 2.5;
+  float flick = step(0.58, h11(floor(uTime * 21.0) + uSeed * 13.0)) * max(0.0, 1.0 - uDownAge) * uDown;
+  col += emis * (1.0 - uDown * 0.96);
+  col += uMint * (ring + tick * 0.7 + core * 0.5) * flick * 0.85;
+  col *= mix(1.0, 0.30, uDown);
   oColor = vec4(applyFog(col, vPos, uCamPos) * uPreExpose, 1.0);
 }`;
 
@@ -382,6 +444,7 @@ uniform vec3 uAmbient;
 uniform float uFlash;
 uniform vec3 uFlashPos;
 uniform float uPreExpose;
+uniform float uSpecCap;
 out vec4 oColor;
 ${GLSL_NOISE}
 void main(){
@@ -395,6 +458,7 @@ void main(){
   float fill = max(dot(n, normalize(vec3(0.45, 0.55, 0.70))), 0.0);
   vec3 hv = normalize(-uSunCam + v);
   float spec = pow(max(dot(n, hv), 0.0), gloss) * specK;
+  spec = spec * uSpecCap / (uSpecCap + spec);
   vec3 col = albedo * (uAmbient * 1.7 * vAO + uSunColor * key * 0.85 + vec3(0.20, 0.24, 0.31) * fill * 0.6) + uSunColor * spec;
   vec3 fd = vView - uFlashPos;
   float fl = uFlash / (1.0 + dot(fd, fd) * 14.0);
@@ -402,6 +466,79 @@ void main(){
   float rim = pow(1.0 - max(dot(n, v), 0.0), 3.0);
   col += vec3(0.30, 0.40, 0.50) * rim * 0.14;
   oColor = vec4(col * uPreExpose, 1.0);
+}`;
+
+const VS_GHOST = `#version 300 es
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec3 aNormal;
+uniform mat4 uViewProj;
+uniform mat4 uModel;
+uniform vec3 uPart;
+out vec3 vNormal;
+out vec3 vPos;
+out float vLocalY;
+void main(){
+  vec3 lp = vec3(aPos.x * uPart.z, aPos.y * uPart.x + uPart.y, aPos.z * uPart.z);
+  vNormal = mat3(uModel) * aNormal;
+  vec4 wp = uModel * vec4(lp, 1.0);
+  vPos = wp.xyz;
+  vLocalY = lp.y;
+  gl_Position = uViewProj * wp;
+}`;
+
+const FS_GHOST = `#version 300 es
+precision highp float;
+in vec3 vNormal;
+in vec3 vPos;
+in float vLocalY;
+uniform vec3 uCamPos;
+uniform vec3 uMint;
+uniform float uTime;
+uniform float uAlpha;
+uniform float uPreExpose;
+out vec4 oColor;
+void main(){
+  vec3 n = normalize(vNormal);
+  vec3 v = normalize(uCamPos - vPos);
+  float f = 1.0 - abs(dot(n, v));
+  float rim = pow(f, 2.4);
+  float edge = smoothstep(0.62, 0.98, f);
+  float scan = 0.5 + 0.5 * sin(vLocalY * 52.0 - uTime * 6.0);
+  float band = 0.72 + 0.28 * scan;
+  float body = (0.22 + 0.70 * rim) * band + edge * 0.68;
+  oColor = vec4(uMint * body * uAlpha * uPreExpose, 1.0);
+}`;
+
+const VS_TRAIL = `#version 300 es
+layout(location=0) in vec2 aCorner;
+layout(location=1) in vec3 aIPos;
+layout(location=2) in float aIAge;
+uniform mat4 uViewProj;
+uniform vec3 uRight;
+uniform vec3 uUp;
+out vec2 vUv;
+out float vAge;
+void main(){
+  vUv = aCorner;
+  vAge = aIAge;
+  float s = mix(0.155, 0.045, aIAge);
+  vec3 p = aIPos + uRight * (aCorner.x * s) + uUp * (aCorner.y * s);
+  gl_Position = uViewProj * vec4(p, 1.0);
+}`;
+
+const FS_TRAIL = `#version 300 es
+precision highp float;
+in vec2 vUv;
+in float vAge;
+uniform vec3 uMint;
+uniform float uAlpha;
+uniform float uPreExpose;
+out vec4 oColor;
+void main(){
+  float r = length(vUv);
+  float a = max(0.0, 1.0 - r);
+  float f = 1.0 - vAge;
+  oColor = vec4(uMint * pow(a, 2.2) * f * f * 0.95 * uAlpha * uPreExpose, 1.0);
 }`;
 
 const FS_BRIGHT = `#version 300 es
@@ -608,6 +745,17 @@ const PROBE_DIRS = new Float32Array([
 const PROBE_DIST = [0.22, 0.60];
 const PROBE_WEIGHT = [0.68, 0.32];
 
+function numOr(v, d){ return typeof v === 'number' && isFinite(v) ? v : d; }
+
+function rgbOr(c, dr, dg, db){
+  if (!c || c.length < 3) return [dr, dg, db];
+  return [
+    Math.max(0, numOr(c[0], dr)),
+    Math.max(0, numOr(c[1], dg)),
+    Math.max(0, numOr(c[2], db))
+  ];
+}
+
 function primNormalized(p){
   const mn = p && p.min, mx = p && p.max;
   if (!mn || !mx || mn.length < 3 || mx.length < 3) return null;
@@ -618,7 +766,8 @@ function primNormalized(p){
     mat: typeof p.mat === 'string' && MAT_ID[p.mat] !== undefined ? p.mat : 'concrete',
     axis: 0,
     sign: 1,
-    emissive: p.emissive && p.emissive.length >= 3 ? p.emissive : null
+    emissive: p.emissive && p.emissive.length >= 3 ? p.emissive : null,
+    tint: rgbOr(p.tint, 1, 1, 1)
   };
   const d = typeof p.dir === 'string' ? p.dir : '+x';
   o.axis = d.indexOf('z') >= 0 ? 2 : 0;
@@ -697,8 +846,8 @@ function aoValue(nbrs, x, y, z, nx, ny, nz, borderDist){
 
 function newMesh(){ return { v: [], i: [] }; }
 
-function pushVert(m, x, y, z, nx, ny, nz, ao, tr, tg, tb){
-  m.v.push(x, y, z, nx, ny, nz, ao, tr, tg, tb);
+function pushVert(m, x, y, z, nx, ny, nz, ao, tr, tg, tb, td, bd){
+  m.v.push(x, y, z, nx, ny, nz, ao, tr, tg, tb, td, bd);
 }
 
 function pushQuadGrid(m, ax, ay, az, e1x, e1y, e1z, e2x, e2y, e2z, nx, ny, nz, tr, tg, tb, nbrs){
@@ -712,7 +861,8 @@ function pushQuadGrid(m, ax, ay, az, e1x, e1y, e1z, e2x, e2y, e2z, nx, ny, nz, t
   const h = Math.sqrt(e2x * e2x + e2y * e2y + e2z * e2z);
   const nu = clamp(Math.round(w / TESS_TARGET), 1, TESS_MAX);
   const nv = clamp(Math.round(h / TESS_TARGET), 1, TESS_MAX);
-  const base = m.v.length / 10;
+  const topY = ay + Math.max(0, e1y) + Math.max(0, e2y);
+  const base = m.v.length / VSTRIDE;
   for (let j = 0; j <= nv; j++){
     const fv = j / nv;
     for (let i = 0; i <= nu; i++){
@@ -721,7 +871,8 @@ function pushQuadGrid(m, ax, ay, az, e1x, e1y, e1z, e2x, e2y, e2z, nx, ny, nz, t
       const y = ay + e1y * fu + e2y * fv;
       const z = az + e1z * fu + e2z * fv;
       const bd = Math.min(fu * w, (1 - fu) * w, fv * h, (1 - fv) * h);
-      pushVert(m, x, y, z, nx, ny, nz, aoValue(nbrs, x, y, z, nx, ny, nz, bd), tr, tg, tb);
+      pushVert(m, x, y, z, nx, ny, nz, aoValue(nbrs, x, y, z, nx, ny, nz, bd), tr, tg, tb,
+        clamp(topY - y, 0, 8), clamp(bd / 0.35, 0, 1));
     }
   }
   const row = nu + 1;
@@ -745,11 +896,89 @@ function pushTri(m, ax, ay, az, bx, by, bz, cx, cy, cz, nx, ny, nz, tr, tg, tb, 
     p1x = cx; p1y = cy; p1z = cz;
     p2x = bx; p2y = by; p2z = bz;
   }
-  const base = m.v.length / 10;
-  pushVert(m, ax, ay, az, nx, ny, nz, aoValue(nbrs, ax, ay, az, nx, ny, nz, 0.02), tr, tg, tb);
-  pushVert(m, p1x, p1y, p1z, nx, ny, nz, aoValue(nbrs, p1x, p1y, p1z, nx, ny, nz, 0.02), tr, tg, tb);
-  pushVert(m, p2x, p2y, p2z, nx, ny, nz, aoValue(nbrs, p2x, p2y, p2z, nx, ny, nz, 0.02), tr, tg, tb);
+  const topY = Math.max(ay, Math.max(p1y, p2y));
+  const base = m.v.length / VSTRIDE;
+  pushVert(m, ax, ay, az, nx, ny, nz, aoValue(nbrs, ax, ay, az, nx, ny, nz, 0.02), tr, tg, tb, clamp(topY - ay, 0, 8), 1);
+  pushVert(m, p1x, p1y, p1z, nx, ny, nz, aoValue(nbrs, p1x, p1y, p1z, nx, ny, nz, 0.02), tr, tg, tb, clamp(topY - p1y, 0, 8), 1);
+  pushVert(m, p2x, p2y, p2z, nx, ny, nz, aoValue(nbrs, p2x, p2y, p2z, nx, ny, nz, 0.02), tr, tg, tb, clamp(topY - p2y, 0, 8), 1);
   m.i.push(base, base + 1, base + 2);
+}
+
+function pushFlatQuad(m, ax, ay, az, e1x, e1y, e1z, e2x, e2y, e2z, nx, ny, nz, ao, tr, tg, tb){
+  let cx = e1y * e2z - e1z * e2y, cy = e1z * e2x - e1x * e2z, cz = e1x * e2y - e1y * e2x;
+  if (cx * nx + cy * ny + cz * nz < 0){
+    const sx = e1x, sy = e1y, sz = e1z;
+    e1x = e2x; e1y = e2y; e1z = e2z;
+    e2x = sx; e2y = sy; e2z = sz;
+  }
+  const base = m.v.length / VSTRIDE;
+  pushVert(m, ax, ay, az, nx, ny, nz, ao, tr, tg, tb, 0, 1);
+  pushVert(m, ax + e1x, ay + e1y, az + e1z, nx, ny, nz, ao, tr, tg, tb, 0, 1);
+  pushVert(m, ax + e2x, ay + e2y, az + e2z, nx, ny, nz, ao, tr, tg, tb, 0, 1);
+  pushVert(m, ax + e1x + e2x, ay + e1y + e2y, az + e1z + e2z, nx, ny, nz, ao, tr, tg, tb, 0, 1);
+  m.i.push(base, base + 1, base + 3, base, base + 3, base + 2);
+}
+
+function pushPlainBox(m, x0, y0, z0, x1, y1, z1, tr, tg, tb){
+  const w = x1 - x0, h = y1 - y0, d = z1 - z0;
+  pushFlatQuad(m, x1, y0, z0, 0, h, 0, 0, 0, d, 1, 0, 0, 0.74, tr, tg, tb);
+  pushFlatQuad(m, x0, y0, z0, 0, h, 0, 0, 0, d, -1, 0, 0, 0.70, tr, tg, tb);
+  pushFlatQuad(m, x0, y1, z0, w, 0, 0, 0, 0, d, 0, 1, 0, 0.94, tr, tg, tb);
+  pushFlatQuad(m, x0, y0, z0, w, 0, 0, 0, 0, d, 0, -1, 0, 0.46, tr, tg, tb);
+  pushFlatQuad(m, x0, y0, z1, w, 0, 0, 0, h, 0, 0, 0, 1, 0.74, tr, tg, tb);
+  pushFlatQuad(m, x0, y0, z0, w, 0, 0, 0, h, 0, 0, 0, -1, 0.70, tr, tg, tb);
+}
+
+function stripNormalized(s){
+  const a = s && s.from, b = s && s.to;
+  if (!a || !b || a.length < 3 || b.length < 3) return null;
+  const ax = numOr(a[0], 0), ay = numOr(a[1], 0), az = numOr(a[2], 0);
+  const bx = numOr(b[0], 0), by = numOr(b[1], 0), bz = numOr(b[2], 0);
+  const dx = bx - ax, dy = by - ay, dz = bz - az;
+  const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  if (len < 1e-4) return null;
+  const c = rgbOr(s.color, MINT[0], MINT[1], MINT[2]);
+  const wid = typeof s.width === 'number' && s.width > 0.004 && isFinite(s.width) ? Math.min(s.width, 1.5) : STRIP_WIDTH;
+  return { ax: ax, ay: ay, az: az, dx: dx, dy: dy, dz: dz, len: len, r: c[0], g: c[1], b: c[2], w: wid };
+}
+
+function emitStrip(m, s){
+  const ux = s.dx / s.len, uy = s.dy / s.len, uz = s.dz / s.len;
+  let sx, sy, sz, nx, ny, nz;
+  if (Math.abs(uy) < 0.7){
+    nx = 0; ny = 1; nz = 0;
+    sx = ny * uz - nz * uy; sy = nz * ux - nx * uz; sz = nx * uy - ny * ux;
+  } else {
+    const rx = Math.abs(uz) < 0.9 ? 0 : 1;
+    const rz = Math.abs(uz) < 0.9 ? 1 : 0;
+    sx = uy * rz - uz * 0; sy = uz * rx - ux * rz; sz = ux * 0 - uy * rx;
+    nx = sy * uz - sz * uy; ny = sz * ux - sx * uz; nz = sx * uy - sy * ux;
+  }
+  let sl = Math.sqrt(sx * sx + sy * sy + sz * sz);
+  if (sl < 1e-5) return;
+  sl = 1 / sl;
+  sx *= sl; sy *= sl; sz *= sl;
+  let nl = Math.sqrt(nx * nx + ny * ny + nz * nz);
+  if (nl < 1e-5) return;
+  nl = 1 / nl;
+  nx *= nl; ny *= nl; nz *= nl;
+  const hw = s.w * 0.5;
+  const ox = s.ax - sx * hw, oy = s.ay - sy * hw, oz = s.az - sz * hw;
+  const tr = s.r * 1.35, tg = s.g * 1.35, tb = s.b * 1.35;
+  pushFlatQuad(m, ox, oy, oz, s.dx, s.dy, s.dz, sx * s.w, sy * s.w, sz * s.w, nx, ny, nz, 1, tr, tg, tb);
+  pushFlatQuad(m, ox, oy, oz, s.dx, s.dy, s.dz, sx * s.w, sy * s.w, sz * s.w, -nx, -ny, -nz, 1, tr, tg, tb);
+}
+
+function emitLampLens(m, x, y, z, cr, cg, cb){
+  pushPlainBox(m, x - 0.105, y - 0.030, z - 0.050, x + 0.105, y + 0.030, z + 0.050, cr * 1.25, cg * 1.25, cb * 1.25);
+}
+
+function emitLampBody(m, x, y, z){
+  const g = 0.82;
+  pushPlainBox(m, x - 0.128, y + 0.030, z - 0.064, x + 0.128, y + 0.076, z + 0.064, g, g, g);
+  pushPlainBox(m, x - 0.018, y + 0.076, z - 0.018, x + 0.018, y + 0.146, z + 0.018, g * 0.9, g * 0.9, g * 0.9);
+  pushPlainBox(m, x - 0.128, y - 0.040, z - 0.064, x - 0.110, y + 0.030, z + 0.064, g * 0.8, g * 0.8, g * 0.8);
+  pushPlainBox(m, x + 0.110, y - 0.040, z - 0.064, x + 0.128, y + 0.030, z + 0.064, g * 0.8, g * 0.8, g * 0.8);
 }
 
 function emitBoxFace(m, p, face, tr, tg, tb, nbrs){
@@ -816,13 +1045,13 @@ function vmQuad(m, ax, ay, az, e1x, e1y, e1z, e2x, e2y, e2z, nx, ny, nz, tr, tg,
     e1x = e2x; e1y = e2y; e1z = e2z;
     e2x = sx; e2y = sy; e2z = sz;
   }
-  const base = m.v.length / 10;
+  const base = m.v.length / VSTRIDE;
   for (let j = 0; j < 2; j++){
     for (let i = 0; i < 2; i++){
       const x = ax + e1x * i + e2x * j;
       const y = ay + e1y * i + e2y * j;
       const z = az + e1z * i + e2z * j;
-      pushVert(m, x, y, z, nx, ny, nz, vmAO(ny, y, lo, hi), tr, tg, tb);
+      pushVert(m, x, y, z, nx, ny, nz, vmAO(ny, y, lo, hi), tr, tg, tb, 0, 1);
     }
   }
   m.i.push(base, base + 1, base + 3, base, base + 3, base + 2);
@@ -839,13 +1068,13 @@ function vmBox(m, x0, y0, z0, x1, y1, z1, tr, tg, tb){
 }
 
 function vmCyl(m, cx, cy, za, zb, r, segs, tr, tg, tb){
-  const base = m.v.length / 10;
+  const base = m.v.length / VSTRIDE;
   for (let i = 0; i <= segs; i++){
     const a = (i / segs) * Math.PI * 2;
     const nx = Math.cos(a), ny = Math.sin(a);
     const px = cx + nx * r, py = cy + ny * r;
-    pushVert(m, px, py, za, nx, ny, 0, vmAO(ny, py, cy - r, cy + r), tr, tg, tb);
-    pushVert(m, px, py, zb, nx, ny, 0, vmAO(ny, py, cy - r, cy + r), tr, tg, tb);
+    pushVert(m, px, py, za, nx, ny, 0, vmAO(ny, py, cy - r, cy + r), tr, tg, tb, 0, 1);
+    pushVert(m, px, py, zb, nx, ny, 0, vmAO(ny, py, cy - r, cy + r), tr, tg, tb, 0, 1);
   }
   for (let i = 0; i < segs; i++){
     const a0 = base + i * 2, a1 = a0 + 1, b0 = a0 + 2, b1 = a0 + 3;
@@ -854,11 +1083,11 @@ function vmCyl(m, cx, cy, za, zb, r, segs, tr, tg, tb){
   for (let s = 0; s < 2; s++){
     const z = s === 0 ? zb : za;
     const nz = s === 0 ? 1 : -1;
-    const c = m.v.length / 10;
-    pushVert(m, cx, cy, z, 0, 0, nz, 0.72, tr, tg, tb);
+    const c = m.v.length / VSTRIDE;
+    pushVert(m, cx, cy, z, 0, 0, nz, 0.72, tr, tg, tb, 0, 1);
     for (let i = 0; i <= segs; i++){
       const a = (i / segs) * Math.PI * 2;
-      pushVert(m, cx + Math.cos(a) * r, cy + Math.sin(a) * r, z, 0, 0, nz, 0.66, tr, tg, tb);
+      pushVert(m, cx + Math.cos(a) * r, cy + Math.sin(a) * r, z, 0, 0, nz, 0.66, tr, tg, tb, 0, 1);
     }
     for (let i = 0; i < segs; i++){
       if (nz > 0) m.i.push(c, c + 1 + i, c + 2 + i);
@@ -869,8 +1098,8 @@ function vmCyl(m, cx, cy, za, zb, r, segs, tr, tg, tb){
 
 function rotateRangeX(m, fromVert, angle, pivotY, pivotZ){
   const c = Math.cos(angle), s = Math.sin(angle);
-  for (let i = fromVert; i < m.v.length / 10; i++){
-    const o = i * 10;
+  for (let i = fromVert; i < m.v.length / VSTRIDE; i++){
+    const o = i * VSTRIDE;
     const y = m.v[o + 1] - pivotY, z = m.v[o + 2] - pivotZ;
     m.v[o + 1] = pivotY + y * c - z * s;
     m.v[o + 2] = pivotZ + y * s + z * c;
@@ -911,7 +1140,7 @@ function buildViewmodel(){
   end(s, 1, false);
 
   s = begin();
-  let v0 = m.v.length / 10;
+  let v0 = m.v.length / VSTRIDE;
   vmBox(m, -0.021, -0.150, 0.010, 0.021, -0.026, 0.098, polymer[0] * 0.9, polymer[1] * 0.9, polymer[2] * 0.9);
   rotateRangeX(m, v0, -0.30, -0.026, 0.055);
   end(s, 2, false);
@@ -922,7 +1151,7 @@ function buildViewmodel(){
   end(s, 2, false);
 
   s = begin();
-  v0 = m.v.length / 10;
+  v0 = m.v.length / VSTRIDE;
   vmBox(m, -0.020, -0.168, -0.108, 0.020, -0.028, -0.010, dark[0] * 1.15, dark[1] * 1.15, dark[2] * 1.15);
   rotateRangeX(m, v0, 0.14, -0.028, -0.060);
   end(s, 2, true);
@@ -933,6 +1162,48 @@ function buildViewmodel(){
     parts: parts,
     muzzle: [0, 0.004, -0.678]
   };
+}
+
+function ghostCapsule(m, cx, cz, y0, y1, r, segs, rings){
+  const base = m.v.length / 6;
+  for (let j = 0; j <= rings; j++){
+    const a = -Math.PI * 0.5 + (j / rings) * Math.PI;
+    const ca = Math.cos(a), sa = Math.sin(a);
+    const cy = j * 2 < rings ? y0 : y1;
+    for (let i = 0; i <= segs; i++){
+      const t = (i / segs) * Math.PI * 2;
+      const nx = Math.cos(t) * ca, nz = Math.sin(t) * ca;
+      m.v.push(cx + nx * r, cy + sa * r, cz + nz * r, nx, sa, nz);
+    }
+  }
+  const row = segs + 1;
+  for (let j = 0; j < rings; j++){
+    for (let i = 0; i < segs; i++){
+      const v00 = base + j * row + i;
+      const v10 = v00 + 1;
+      const v01 = v00 + row;
+      const v11 = v01 + 1;
+      m.i.push(v00, v01, v11, v00, v11, v10);
+    }
+  }
+}
+
+function buildGhost(){
+  const m = { v: [], i: [] };
+  const parts = [];
+  let s = m.i.length;
+  ghostCapsule(m, -0.095, 0, 0.20, 0.62, 0.098, 9, 6);
+  ghostCapsule(m, 0.095, 0, 0.20, 0.62, 0.098, 9, 6);
+  parts.push({ start: s, count: m.i.length - s, tuck: 1 });
+  s = m.i.length;
+  ghostCapsule(m, 0, 0, 0.95, 1.36, 0.195, 11, 7);
+  ghostCapsule(m, -0.245, 0, 1.03, 1.30, 0.058, 7, 5);
+  ghostCapsule(m, 0.245, 0, 1.03, 1.30, 0.058, 7, 5);
+  parts.push({ start: s, count: m.i.length - s, tuck: 0 });
+  s = m.i.length;
+  ghostCapsule(m, 0, 0, 1.655, 1.665, 0.118, 11, 8);
+  parts.push({ start: s, count: m.i.length - s, tuck: 0 });
+  return { verts: new Float32Array(m.v), idx: new Uint32Array(m.i), parts: parts };
 }
 
 function makeProgram(gl, vsSrc, fsSrc){
@@ -987,6 +1258,7 @@ export function createRenderer(canvas){
   let worldDef = null;
   let world = null;
   let vm = buildViewmodel();
+  let gm = buildGhost();
 
   const P = {};
   const GLB = {
@@ -994,6 +1266,8 @@ export function createRenderer(canvas){
     vmVAO: null, vmVBO: null, vmIBO: null,
     quadVBO: null, quadVAO: null, sparkVAO: null, sparkVBO: null,
     tracerVAO: null, tracerVBO: null, tracerIBO: null,
+    ghostVAO: null, ghostVBO: null, ghostIBO: null,
+    trailVAO: null, trailVBO: null,
     emptyVAO: null,
     shadowFB: null, shadowTex: null,
     scene: null, bloomA: null, bloomB: null,
@@ -1020,8 +1294,13 @@ export function createRenderer(canvas){
   const sunCam = new Float32Array(3);
   const tracerData = new Float32Array(MAX_TRACERS * 4 * 5);
   const sparkData = new Float32Array(MAX_SPARKS * 4);
+  const trailData = new Float32Array(TRAIL_MAX * 4);
+  const trailHist = new Float32Array(TRAIL_MAX * 4);
+  const mGhost = new Float32Array(16);
   const QUAD = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
 
+  let trailHead = -1;
+  let trailCount = 0;
   let time = 0;
   let qScale = 1;
   let drawW = 1;
@@ -1045,13 +1324,15 @@ export function createRenderer(canvas){
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
     gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 40, 0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, VBYTES, 0);
     gl.enableVertexAttribArray(1);
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 40, 12);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, VBYTES, 12);
     gl.enableVertexAttribArray(2);
-    gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 40, 24);
+    gl.vertexAttribPointer(2, 1, gl.FLOAT, false, VBYTES, 24);
     gl.enableVertexAttribArray(3);
-    gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 40, 28);
+    gl.vertexAttribPointer(3, 3, gl.FLOAT, false, VBYTES, 28);
+    gl.enableVertexAttribArray(4);
+    gl.vertexAttribPointer(4, 2, gl.FLOAT, false, VBYTES, 40);
     gl.bindVertexArray(null);
     return vao;
   }
@@ -1096,6 +1377,8 @@ export function createRenderer(canvas){
     P.spark = makeProgram(gl, VS_SPARK, FS_SPARK);
     P.flash = makeProgram(gl, VS_FLASH, FS_FLASH);
     P.viewmodel = makeProgram(gl, VS_VIEWMODEL, FS_VIEWMODEL);
+    P.ghost = makeProgram(gl, VS_GHOST, FS_GHOST);
+    P.trail = makeProgram(gl, VS_TRAIL, FS_TRAIL);
     P.bright = makeProgram(gl, VS_FULL, FS_BRIGHT);
     P.blur = makeProgram(gl, VS_FULL, FS_BLUR);
     P.composite = makeProgram(gl, VS_FULL, FS_COMPOSITE);
@@ -1112,6 +1395,7 @@ export function createRenderer(canvas){
     gl.bindBuffer(gl.ARRAY_BUFFER, GLB.quadVBO);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 8, 0);
+    gl.bindVertexArray(null);
 
     GLB.sparkVBO = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, GLB.sparkVBO);
@@ -1128,6 +1412,7 @@ export function createRenderer(canvas){
     gl.enableVertexAttribArray(2);
     gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 16, 12);
     gl.vertexAttribDivisor(2, 1);
+    gl.bindVertexArray(null);
 
     GLB.tracerVBO = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, GLB.tracerVBO);
@@ -1151,6 +1436,40 @@ export function createRenderer(canvas){
     gl.vertexAttribPointer(1, 1, gl.FLOAT, false, 20, 12);
     gl.enableVertexAttribArray(2);
     gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 20, 16);
+    gl.bindVertexArray(null);
+
+    GLB.trailVBO = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, GLB.trailVBO);
+    gl.bufferData(gl.ARRAY_BUFFER, trailData.byteLength, gl.DYNAMIC_DRAW);
+    GLB.trailVAO = gl.createVertexArray();
+    gl.bindVertexArray(GLB.trailVAO);
+    gl.bindBuffer(gl.ARRAY_BUFFER, GLB.quadVBO);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 8, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, GLB.trailVBO);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 16, 0);
+    gl.vertexAttribDivisor(1, 1);
+    gl.enableVertexAttribArray(2);
+    gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 16, 12);
+    gl.vertexAttribDivisor(2, 1);
+    gl.bindVertexArray(null);
+
+    GLB.ghostVBO = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, GLB.ghostVBO);
+    gl.bufferData(gl.ARRAY_BUFFER, gm.verts, gl.STATIC_DRAW);
+    GLB.ghostIBO = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GLB.ghostIBO);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, gm.idx, gl.STATIC_DRAW);
+    GLB.ghostVAO = gl.createVertexArray();
+    gl.bindVertexArray(GLB.ghostVAO);
+    gl.bindBuffer(gl.ARRAY_BUFFER, GLB.ghostVBO);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GLB.ghostIBO);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 24, 0);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 24, 12);
+    gl.bindVertexArray(null);
 
     GLB.vmVBO = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, GLB.vmVBO);
@@ -1221,10 +1540,43 @@ export function createRenderer(canvas){
     return x - Math.floor(x);
   }
 
+  function releaseStatic(){
+    if (GLB.staticVAO){ gl.deleteVertexArray(GLB.staticVAO); GLB.staticVAO = null; }
+    if (GLB.staticVBO){ gl.deleteBuffer(GLB.staticVBO); GLB.staticVBO = null; }
+    if (GLB.staticIBO){ gl.deleteBuffer(GLB.staticIBO); GLB.staticIBO = null; }
+  }
+
+  function chunkLights(lights, mnx, mny, mnz, mxx, mxy, mxz){
+    const sel = [];
+    for (let li = 0; li < lights.length; li++){
+      const l = lights[li];
+      const qx = l.x < mnx ? mnx : (l.x > mxx ? mxx : l.x);
+      const qy = l.y < mny ? mny : (l.y > mxy ? mxy : l.y);
+      const qz = l.z < mnz ? mnz : (l.z > mxz ? mxz : l.z);
+      const dx = l.x - qx, dy = l.y - qy, dz = l.z - qz;
+      const d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 < l.radius * l.radius) sel.push({ i: li, d: d2 });
+    }
+    sel.sort(function(a, b){ return a.d - b.d; });
+    const n = Math.min(sel.length, CHUNK_LIGHTS);
+    const lp = new Float32Array(n * 3);
+    const lc = new Float32Array(n * 3);
+    const lr = new Float32Array(n);
+    for (let k = 0; k < n; k++){
+      const l = lights[sel[k].i];
+      lp[k * 3] = l.x; lp[k * 3 + 1] = l.y; lp[k * 3 + 2] = l.z;
+      lc[k * 3] = l.r; lc[k * 3 + 1] = l.g; lc[k * 3 + 2] = l.b;
+      lr[k] = l.radius;
+    }
+    return { lightCount: n, lp: lp, lc: lc, lr: lr };
+  }
+
   function compileWorld(def){
     worldDef = def || null;
+    trailCount = 0;
+    trailHead = -1;
     if (contextLost) return;
-    if (!def){ world = null; return; }
+    if (!def){ releaseStatic(); world = null; return; }
     const rawPrims = Array.isArray(def.prims) ? def.prims : [];
     const prims = [];
     for (let i = 0; i < rawPrims.length; i++){
@@ -1275,6 +1627,7 @@ export function createRenderer(canvas){
           const j = 0.955 + hash01(idx + 1) * 0.09;
           tr = j; tg = j; tb = j;
         }
+        tr *= p.tint[0]; tg *= p.tint[1]; tb *= p.tint[2];
         emitPrim(mesh, p, tr, tg, tb, nbrs[idx]);
         if (p.min[0] < mnx) mnx = p.min[0];
         if (p.min[1] < mny) mny = p.min[1];
@@ -1285,38 +1638,87 @@ export function createRenderer(canvas){
       }
       const count = mesh.i.length - start;
       if (count === 0) return;
-      const sel = [];
-      for (let li = 0; li < lights.length; li++){
-        const l = lights[li];
-        const qx = l.x < mnx ? mnx : (l.x > mxx ? mxx : l.x);
-        const qy = l.y < mny ? mny : (l.y > mxy ? mxy : l.y);
-        const qz = l.z < mnz ? mnz : (l.z > mxz ? mxz : l.z);
-        const dx = l.x - qx, dy = l.y - qy, dz = l.z - qz;
-        const d2 = dx * dx + dy * dy + dz * dz;
-        if (d2 < l.radius * l.radius) sel.push({ i: li, d: d2 });
-      }
-      sel.sort(function(a, b){ return a.d - b.d; });
-      const n = Math.min(sel.length, CHUNK_LIGHTS);
-      const lp = new Float32Array(n * 3);
-      const lc = new Float32Array(n * 3);
-      const lr = new Float32Array(n);
-      for (let k = 0; k < n; k++){
-        const l = lights[sel[k].i];
-        lp[k * 3] = l.x; lp[k * 3 + 1] = l.y; lp[k * 3 + 2] = l.z;
-        lc[k * 3] = l.r; lc[k * 3 + 1] = l.g; lc[k * 3 + 2] = l.b;
-        lr[k] = l.radius;
-      }
+      const cl = chunkLights(lights, mnx, mny, mnz, mxx, mxy, mxz);
       chunks.push({
         mat: g.mat, start: start * 4, count: count,
         mnx: mnx - 0.02, mny: mny - 0.02, mnz: mnz - 0.02,
         mxx: mxx + 0.02, mxy: mxy + 0.02, mxz: mxz + 0.02,
-        lightCount: n, lp: lp, lc: lc, lr: lr
+        lightCount: cl.lightCount, lp: cl.lp, lc: cl.lc, lr: cl.lr
       });
     });
 
-    if (GLB.staticVAO) gl.deleteVertexArray(GLB.staticVAO);
-    if (GLB.staticVBO) gl.deleteBuffer(GLB.staticVBO);
-    if (GLB.staticIBO) gl.deleteBuffer(GLB.staticIBO);
+    const shadowCount = mesh.i.length;
+
+    const rawStrips = Array.isArray(def.strips) ? def.strips : [];
+    const rawProps = Array.isArray(def.props) ? def.props : [];
+    const props = [];
+    for (let i = 0; i < rawProps.length && props.length < PROP_MAX; i++){
+      const pr = rawProps[i];
+      if (!pr || !pr.pos || pr.pos.length < 3) continue;
+      if (pr.type !== undefined && pr.type !== 'lamp') continue;
+      const c = rgbOr(pr.color, 1, 0.86, 0.62);
+      props.push({
+        x: numOr(pr.pos[0], 0), y: numOr(pr.pos[1], 0), z: numOr(pr.pos[2], 0),
+        r: c[0], g: c[1], b: c[2]
+      });
+    }
+
+    let gstart = mesh.i.length;
+    let gmnx = Infinity, gmny = Infinity, gmnz = Infinity;
+    let gmxx = -Infinity, gmxy = -Infinity, gmxz = -Infinity;
+    function growGlow(x, y, z, pad){
+      if (x - pad < gmnx) gmnx = x - pad;
+      if (y - pad < gmny) gmny = y - pad;
+      if (z - pad < gmnz) gmnz = z - pad;
+      if (x + pad > gmxx) gmxx = x + pad;
+      if (y + pad > gmxy) gmxy = y + pad;
+      if (z + pad > gmxz) gmxz = z + pad;
+    }
+    let stripCount = 0;
+    for (let i = 0; i < rawStrips.length && stripCount < STRIP_MAX; i++){
+      const st = stripNormalized(rawStrips[i]);
+      if (!st) continue;
+      emitStrip(mesh, st);
+      growGlow(st.ax, st.ay, st.az, st.w);
+      growGlow(st.ax + st.dx, st.ay + st.dy, st.az + st.dz, st.w);
+      stripCount++;
+    }
+    for (let i = 0; i < props.length; i++){
+      const pr = props[i];
+      emitLampLens(mesh, pr.x, pr.y, pr.z, pr.r, pr.g, pr.b);
+      growGlow(pr.x, pr.y, pr.z, 0.16);
+    }
+    if (mesh.i.length > gstart){
+      chunks.push({
+        mat: 3, start: gstart * 4, count: mesh.i.length - gstart,
+        mnx: gmnx, mny: gmny, mnz: gmnz, mxx: gmxx, mxy: gmxy, mxz: gmxz,
+        lightCount: 0, lp: null, lc: null, lr: null
+      });
+    }
+
+    gstart = mesh.i.length;
+    let pmnx = Infinity, pmny = Infinity, pmnz = Infinity;
+    let pmxx = -Infinity, pmxy = -Infinity, pmxz = -Infinity;
+    for (let i = 0; i < props.length; i++){
+      const pr = props[i];
+      emitLampBody(mesh, pr.x, pr.y, pr.z);
+      if (pr.x - 0.14 < pmnx) pmnx = pr.x - 0.14;
+      if (pr.y - 0.06 < pmny) pmny = pr.y - 0.06;
+      if (pr.z - 0.08 < pmnz) pmnz = pr.z - 0.08;
+      if (pr.x + 0.14 > pmxx) pmxx = pr.x + 0.14;
+      if (pr.y + 0.16 > pmxy) pmxy = pr.y + 0.16;
+      if (pr.z + 0.08 > pmxz) pmxz = pr.z + 0.08;
+    }
+    if (mesh.i.length > gstart){
+      const cl = chunkLights(lights, pmnx, pmny, pmnz, pmxx, pmxy, pmxz);
+      chunks.push({
+        mat: 1, start: gstart * 4, count: mesh.i.length - gstart,
+        mnx: pmnx, mny: pmny, mnz: pmnz, mxx: pmxx, mxy: pmxy, mxz: pmxz,
+        lightCount: cl.lightCount, lp: cl.lp, lc: cl.lc, lr: cl.lr
+      });
+    }
+
+    releaseStatic();
     GLB.staticVBO = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, GLB.staticVBO);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mesh.v), gl.STATIC_DRAW);
@@ -1337,7 +1739,9 @@ export function createRenderer(canvas){
         x: t.pos[0], y: t.pos[1], z: t.pos[2],
         radius: typeof t.radius === 'number' && t.radius > 0.02 ? t.radius : 0.5,
         phase: hash01(i + 7) * Math.PI * 2,
-        bobRate: 0.9 + hash01(i + 19) * 0.5
+        bobRate: 0.9 + hash01(i + 19) * 0.5,
+        seed: hash01(i + 31) * 6.283,
+        downAt: -1
       });
     }
 
@@ -1350,6 +1754,7 @@ export function createRenderer(canvas){
     sx /= sl; sy /= sl; sz /= sl;
     const sunI = sun && typeof sun.intensity === 'number' ? sun.intensity : 1;
     const sunC = sun && sun.color && sun.color.length >= 3 ? sun.color : [1, 0.86, 0.68];
+    const sunR = sunC[0] * sunI, sunG = sunC[1] * sunI, sunB = sunC[2] * sunI;
     const amb = def.ambient && def.ambient.length >= 3 ? def.ambient : [0.10, 0.125, 0.17];
     const fog = def.fog || null;
     const fogC = fog && fog.color && fog.color.length >= 3 ? fog.color : [0.055, 0.068, 0.088];
@@ -1357,9 +1762,10 @@ export function createRenderer(canvas){
     world = {
       chunks: chunks,
       indexCount: mesh.i.length,
+      shadowCount: shadowCount,
       targets: targets,
       sunX: sx, sunY: sy, sunZ: sz,
-      sunR: sunC[0] * sunI, sunG: sunC[1] * sunI, sunB: sunC[2] * sunI,
+      sunR: sunR, sunG: sunG, sunB: sunB,
       ambR: amb[0], ambG: amb[1], ambB: amb[2],
       fogR: fogC[0], fogG: fogC[1], fogB: fogC[2],
       fogDensity: fog && typeof fog.density === 'number' ? fog.density : 0.014,
@@ -1367,7 +1773,8 @@ export function createRenderer(canvas){
       fogRef: fog && typeof fog.heightRef === 'number' ? fog.heightRef : 0,
       zenR: fogC[0] * 0.18 + 0.006, zenG: fogC[1] * 0.18 + 0.012, zenB: fogC[2] * 0.20 + 0.032,
       grdR: fogC[0] * 0.45, grdG: fogC[1] * 0.45, grdB: fogC[2] * 0.45,
-      exposure: typeof def.exposure === 'number' && def.exposure > 0 ? def.exposure : 1.05
+      exposure: typeof def.exposure === 'number' && def.exposure > 0 ? def.exposure : 1.05,
+      specCap: SPEC_HEADROOM / Math.max(0.2126 * sunR + 0.7152 * sunG + 0.0722 * sunB, 0.001)
     };
 
     let amnx = Infinity, amny = Infinity, amnz = Infinity;
@@ -1415,7 +1822,7 @@ export function createRenderer(canvas){
     gl.useProgram(P.shadow.p);
     sm4(P.shadow, 'uLightMat', mLightVP);
     gl.bindVertexArray(GLB.staticVAO);
-    gl.drawElements(gl.TRIANGLES, world.indexCount, gl.UNSIGNED_INT, 0);
+    gl.drawElements(gl.TRIANGLES, world.shadowCount, gl.UNSIGNED_INT, 0);
     gl.bindVertexArray(null);
     gl.disable(gl.POLYGON_OFFSET_FILL);
     gl.polygonOffset(0, 0);
@@ -1494,8 +1901,8 @@ export function createRenderer(canvas){
 
     const muzzle = clamp(fnum(scene.muzzle, 0), 0, 1);
     const glitch = clamp(fnum(scene.glitch, 0), 0, 1);
-    const preExpose = hdr ? 1 : world.exposure;
-    const postExpose = hdr ? world.exposure : 1;
+    const preExpose = hdr ? 1 : world.exposure * LDR_SCALE;
+    const postExpose = hdr ? world.exposure : 1 / LDR_SCALE;
     const mzx = px + fx * 0.5 + rx * 0.12;
     const mzy = py + fy * 0.5 + ry * 0.12 - 0.06;
     const mzz = pz + fz * 0.5 + rz * 0.12;
@@ -1547,6 +1954,7 @@ export function createRenderer(canvas){
     s4f(P.world, 'uMuzzle', mzx, mzy, mzz, muzzle);
     s3f(P.world, 'uMuzzleColor', 1.0, 0.76, 0.42);
     s1f(P.world, 'uPreExpose', preExpose);
+    s1f(P.world, 'uSpecCap', world.specCap);
     gl.bindVertexArray(GLB.staticVAO);
     const chunks = world.chunks;
     for (let i = 0; i < chunks.length; i++){
@@ -1578,18 +1986,27 @@ export function createRenderer(canvas){
       s3f(P.target, 'uSunDir', world.sunX, world.sunY, world.sunZ);
       s3f(P.target, 'uSunColor', world.sunR, world.sunG, world.sunB);
       s1f(P.target, 'uPreExpose', preExpose);
+      s1f(P.target, 'uTime', time);
+      s3f(P.target, 'uRight', rx, ry, rz);
+      s3f(P.target, 'uUp', ux, uy, uz);
       for (let i = 0; i < targets.length; i++){
         const t = targets[i];
+        const isDown = down && down[t.id] ? 1 : 0;
+        if (isDown){
+          if (t.downAt < 0) t.downAt = time;
+        } else if (t.downAt >= 0) t.downAt = -1;
         const by = t.y + Math.sin(time * t.bobRate + t.phase) * 0.055;
         if (!sphereVisible(planes, t.x, by, t.z, t.radius * 1.5)) continue;
         s3f(P.target, 'uCenter', t.x, by, t.z);
-        s3f(P.target, 'uRight', rx, ry, rz);
-        s3f(P.target, 'uUp', ux, uy, uz);
         s1f(P.target, 'uRadius', t.radius);
-        s1f(P.target, 'uDown', down && down[t.id] ? 1 : 0);
+        s1f(P.target, 'uDown', isDown);
+        s1f(P.target, 'uDownAge', isDown ? time - t.downAt : 0);
+        s1f(P.target, 'uSeed', t.seed);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       }
     }
+
+    drawGhost(scene, px, py, pz, rx, ry, rz, ux, uy, uz, preExpose);
 
     let tc = 0;
     const tracers = scene.tracers;
@@ -1679,6 +2096,102 @@ export function createRenderer(canvas){
 
   function seg(v, a, b){ return b > a ? sstep((v - a) / (b - a)) : (v >= b ? 1 : 0); }
 
+  function trailPush(gx, gy, gz){
+    if (trailCount === 0){
+      trailHead = 0;
+      trailCount = 1;
+      trailHist[0] = gx; trailHist[1] = gy; trailHist[2] = gz; trailHist[3] = time;
+      return;
+    }
+    const o = trailHead * 4;
+    const dx = gx - trailHist[o], dy = gy - trailHist[o + 1], dz = gz - trailHist[o + 2];
+    if (dx * dx + dy * dy + dz * dz > 25){
+      trailHead = 0;
+      trailCount = 1;
+      trailHist[0] = gx; trailHist[1] = gy; trailHist[2] = gz; trailHist[3] = time;
+      return;
+    }
+    if (time - trailHist[o + 3] < TRAIL_STEP) return;
+    trailHead = trailHead + 1 >= TRAIL_MAX ? 0 : trailHead + 1;
+    const n = trailHead * 4;
+    trailHist[n] = gx; trailHist[n + 1] = gy; trailHist[n + 2] = gz; trailHist[n + 3] = time;
+    if (trailCount < TRAIL_MAX) trailCount++;
+  }
+
+  function drawGhost(scene, px, py, pz, rx, ry, rz, ux, uy, uz, preExpose){
+    const g = scene.ghost;
+    if (!g || !g.active || !g.pos || g.pos.length < 3){
+      trailCount = 0;
+      trailHead = -1;
+      return;
+    }
+    const gx = fnum(g.pos[0], 0), gy = fnum(g.pos[1], 0), gz = fnum(g.pos[2], 0);
+    trailPush(gx, gy, gz);
+    if (!sphereVisible(planes, gx, gy + 0.9, gz, 8)) return;
+    const flags = fnum(g.flags, 0) | 0;
+    const slide = (flags & 2) !== 0;
+    const crouch = (flags & 1) !== 0;
+    const air = (flags & 4) !== 0;
+    let squash = 1;
+    let tilt = 0;
+    if (slide){ squash = 0.52; tilt = -0.58; }
+    else if (crouch){ squash = 0.68; tilt = -0.09; }
+    const dxc = gx - px, dyc = gy + 0.9 - py, dzc = gz - pz;
+    const dist = Math.sqrt(dxc * dxc + dyc * dyc + dzc * dzc);
+    const alpha = clamp(dist * 0.45, 0.12, 1);
+    m4TR(mGhost, gx, gy, gz, tilt, fnum(g.yaw, 0), 0);
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthMask(false);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.disable(gl.CULL_FACE);
+    gl.useProgram(P.ghost.p);
+    gl.bindVertexArray(GLB.ghostVAO);
+    sm4(P.ghost, 'uViewProj', mVP);
+    sm4(P.ghost, 'uModel', mGhost);
+    s3f(P.ghost, 'uCamPos', px, py, pz);
+    s3f(P.ghost, 'uMint', MINT[0], MINT[1], MINT[2]);
+    s1f(P.ghost, 'uTime', time);
+    s1f(P.ghost, 'uAlpha', alpha);
+    s1f(P.ghost, 'uPreExpose', preExpose);
+    const parts = gm.parts;
+    for (let i = 0; i < parts.length; i++){
+      const pt = parts[i];
+      const tuck = pt.tuck && air;
+      s3f(P.ghost, 'uPart', squash * (tuck ? 0.58 : 1), squash * (tuck ? 0.19 : 0), tuck ? 1.1 : 1);
+      gl.drawElements(gl.TRIANGLES, pt.count, gl.UNSIGNED_INT, pt.start * 4);
+    }
+
+    let n = 0;
+    for (let i = 0; i < trailCount; i++){
+      const o = i * 4;
+      const age = (time - trailHist[o + 3]) / TRAIL_LIFE;
+      if (age < 0 || age >= 1) continue;
+      const d = n * 4;
+      trailData[d] = trailHist[o];
+      trailData[d + 1] = trailHist[o + 1] + 0.95;
+      trailData[d + 2] = trailHist[o + 2];
+      trailData[d + 3] = age;
+      n++;
+    }
+    if (n > 0){
+      gl.bindVertexArray(GLB.trailVAO);
+      gl.bindBuffer(gl.ARRAY_BUFFER, GLB.trailVBO);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, trailData, 0, n * 4);
+      gl.useProgram(P.trail.p);
+      sm4(P.trail, 'uViewProj', mVP);
+      s3f(P.trail, 'uRight', rx, ry, rz);
+      s3f(P.trail, 'uUp', ux, uy, uz);
+      s3f(P.trail, 'uMint', MINT[0], MINT[1], MINT[2]);
+      s1f(P.trail, 'uAlpha', alpha);
+      s1f(P.trail, 'uPreExpose', preExpose);
+      gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n);
+    }
+    gl.disable(gl.BLEND);
+    gl.depthMask(true);
+  }
+
   function drawViewmodel(scene, aspect, muzzle, preExpose){
     const vs = scene.viewmodel || null;
     const ads = clamp(vs ? fnum(vs.adsBlend, 0) : 0, 0, 1);
@@ -1758,6 +2271,7 @@ export function createRenderer(canvas){
     s1f(P.viewmodel, 'uFlash', muzzle);
     s3v(P.viewmodel, 'uFlashPos', tmp3);
     s1f(P.viewmodel, 'uPreExpose', preExpose);
+    s1f(P.viewmodel, 'uSpecCap', world.specCap);
     const parts = vm.parts;
     let boundMag = -1;
     for (let i = 0; i < parts.length; i++){
@@ -1800,8 +2314,8 @@ export function createRenderer(canvas){
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, GLB.scene.tex);
     s1i(P.bright, 'uScene', 1);
-    s1f(P.bright, 'uThreshold', hdr ? 1.02 : 0.70);
-    s1f(P.bright, 'uKnee', 0.55);
+    s1f(P.bright, 'uThreshold', hdr ? 1.20 : 0.80);
+    s1f(P.bright, 'uKnee', hdr ? 0.55 : 0.16);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     gl.useProgram(P.blur.p);
@@ -1829,7 +2343,7 @@ export function createRenderer(canvas){
     s1i(prog, 'uScene', 1);
     s1i(prog, 'uBloom', 2);
     s1f(prog, 'uExposure', exposure);
-    s1f(prog, 'uBloomStrength', 0.52);
+    s1f(prog, 'uBloomStrength', hdr ? 0.52 : 0.52 / LDR_SCALE);
     s1f(prog, 'uGrain', 0.024);
     s1f(prog, 'uTime', time);
     s2f(prog, 'uRes', drawW, drawH);

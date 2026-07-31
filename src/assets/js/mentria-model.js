@@ -1,7 +1,7 @@
 import * as Tiers from '/assets/js/mentria-tiers.js';
 
 const IS_MOBILE = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const PROBE_TIMEOUT = IS_MOBILE ? 90000 : 30000;
+const PROBE_TIMEOUT = IS_MOBILE ? 120000 : 60000;
 const PROBE_STILL_MS = 20000;
 const READY_LINGER = 600;
 
@@ -189,7 +189,7 @@ function hide() {
   if (el) el.hidden = true;
 }
 
-async function validateRun(engine) {
+async function probeOnce(engine) {
   let timer;
   let stillTimer;
   let firstToken;
@@ -204,6 +204,15 @@ async function validateRun(engine) {
     }
   }, PROBE_STILL_MS);
   try { await Promise.race([run, alive, timeout]); } finally { clearTimeout(timer); clearTimeout(stillTimer); }
+}
+
+async function validateRun(engine) {
+  try {
+    await probeOnce(engine);
+  } catch (e) {
+    if (!e || e.message !== 'validation timeout') throw e;
+    await probeOnce(engine);
+  }
 }
 
 function requestPersistentStorage() {

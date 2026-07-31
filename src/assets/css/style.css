@@ -221,9 +221,13 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
   overflow: hidden;
   white-space: nowrap;
   width: 0;
-  transition: width 0.42s steps(2, jump-end);
 }
-.brand--ai .brand__ai-text { width: 1.34em; }
+.brand--ai .brand__ai-text { width: 1.296em; animation: brand-type 0.36s steps(1, jump-end) both; }
+@keyframes brand-type {
+  0% { width: 0; }
+  50% { width: 0.996em; }
+  100% { width: 1.296em; }
+}
 .brand__star {
   position: absolute;
   right: -0.11em;
@@ -241,10 +245,10 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 .brand__spark { transform-box: fill-box; transform-origin: center; }
 .brand--ai .brand__spark { animation: brand-spark-spin 3.5s linear infinite; }
 @keyframes brand-spark-spin { to { transform: rotate(360deg); } }
-.brand--ai .brand__cursor { animation: brand-caret 1.05s steps(1) infinite; }
+.brand--ai .brand__cursor { animation: brand-caret 1.05s steps(1) 0.4s infinite; }
 @keyframes brand-caret { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .brand__ai-text { transition-duration: 0.25s; }
+  .brand--ai .brand__ai-text { animation: none; }
   .brand--ai .brand__spark { animation: none; }
   .brand--ai .brand__cursor { animation: none; }
 }

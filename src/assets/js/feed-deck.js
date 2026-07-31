@@ -184,8 +184,8 @@
   }
 
   /* ── Tap zones ─────────────────────────────────────────── */
-  root.querySelector('.deck__tap--prev').addEventListener('click', prev);
-  root.querySelector('.deck__tap--next').addEventListener('click', next);
+  root.querySelector('.deck__tap--prev').addEventListener('click', (e) => { e.currentTarget.blur(); prev(); });
+  root.querySelector('.deck__tap--next').addEventListener('click', (e) => { e.currentTarget.blur(); next(); });
 
   /* ── Close ─────────────────────────────────────────────── */
   if (closeBtn) closeBtn.addEventListener('click', exit);

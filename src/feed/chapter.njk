@@ -42,8 +42,8 @@ eleventyComputed:
     <span class="deck__chapter-title">{{ pair.chapter.title }}</span>
   </div>
 
-  <button class="deck__tap deck__tap--prev" aria-label="{{ 'feed_deck.prev_slide' | t }}"></button>
-  <button class="deck__tap deck__tap--next" aria-label="{{ 'feed_deck.next_slide' | t }}"></button>
+  <button class="deck__tap deck__tap--prev" tabindex="-1" aria-label="{{ 'feed_deck.prev_slide' | t }}"></button>
+  <button class="deck__tap deck__tap--next" tabindex="-1" aria-label="{{ 'feed_deck.next_slide' | t }}"></button>
 
   {% for slide in pair.chapter.slides %}
   <article class="deck__slide{% if loop.first %} is-active{% endif %}"

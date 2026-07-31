@@ -325,3 +325,5 @@ body:has(.deck) .site-footer { display: none !important; }
   font-size: 0.8rem;
   cursor: default;
 }
+
+.deck__tap:focus-visible { outline: none; }

@@ -222,11 +222,21 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
   white-space: nowrap;
   width: 0;
 }
-.brand--ai .brand__ai-text { width: 1.296em; animation: brand-type 0.36s steps(1, jump-end) both; }
+.brand--ai .brand__ai-text { width: 1.34em; animation: brand-type 0.36s steps(1, jump-end) both; }
 @keyframes brand-type {
   0% { width: 0; }
-  50% { width: 0.996em; }
-  100% { width: 1.296em; }
+  50% { width: 1.02em; }
+  100% { width: 1.34em; }
+}
+.brand--ai .brand__ai-a { animation: brand-ch-a 0.36s steps(1, jump-end) both; }
+.brand--ai .brand__ai-i { animation: brand-ch-i 0.36s steps(1, jump-end) both; }
+@keyframes brand-ch-a {
+  0% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+@keyframes brand-ch-i {
+  0%, 50% { opacity: 0; }
+  100% { opacity: 1; }
 }
 .brand__star {
   position: absolute;
@@ -249,6 +259,7 @@ main { padding: 2.5rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; width: 100
 @keyframes brand-caret { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
   .brand--ai .brand__ai-text { animation: none; }
+  .brand--ai .brand__ai-a, .brand--ai .brand__ai-i { animation: none; }
   .brand--ai .brand__spark { animation: none; }
   .brand--ai .brand__cursor { animation: none; }
 }

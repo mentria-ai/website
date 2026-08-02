@@ -1318,3 +1318,10 @@ html.mentria-no-motion [data-requires="motion"] { display: none !important; }
   color: var(--term-muted);
 }
 .related-tools__chip--all { color: var(--accent, #6ef3c5); }
+
+@media (max-width: 720px) {
+  .feed-preview__strip { margin-left: -0.75rem; margin-right: -0.75rem; padding-left: 0.75rem; padding-right: 0.75rem; }
+}
+@media (max-width: 640px) {
+  .launcher__widgets, .launcher__grid { margin-left: -0.75rem; margin-right: -0.75rem; padding-left: 0.75rem; padding-right: 0.75rem; }
+}

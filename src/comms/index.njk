@@ -15,6 +15,20 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 {% set terminalTitle = "comms.js" %}
 {% include "terminal-frame-open.njk" %}
 
+<svg class="comms__sprite" aria-hidden="true" focusable="false"><defs>
+  <symbol id="ci-lock" viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="4" y="10" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="15" r="1.6" fill="currentColor"/></symbol>
+  <symbol id="ci-phone" viewBox="0 0 24 24"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="ci-hangup" viewBox="0 0 24 24"><path d="M2.5 13.5c5-4.5 14-4.5 19 0l-2.5 2.5-3.2-1.6v-2.2a12 12 0 0 0-7.6 0v2.2L5 16z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 20 20 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="ci-cam" viewBox="0 0 24 24"><rect x="3" y="7" width="12" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m15 11 6-3v8l-6-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="ci-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="ci-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 19a6 6 0 0 1 12 0M16.5 5.5a3.2 3.2 0 0 1 0 6M18 19a5.5 5.5 0 0 0-2.5-4.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="ci-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.8a2 2 0 0 1 2 2v.5a1.4 1.4 0 0 0 2.1 1.2l.4-.2a2 2 0 1 1 2 3.5l-.4.2a1.4 1.4 0 0 0 0 2.4l.4.2a2 2 0 1 1-2 3.5l-.4-.2a1.4 1.4 0 0 0-2.1 1.2v.5a2 2 0 0 1-4 0v-.5a1.4 1.4 0 0 0-2.1-1.2l-.4.2a2 2 0 1 1-2-3.5l.4-.2a1.4 1.4 0 0 0 0-2.4l-.4-.2a2 2 0 1 1 2-3.5l.4.2A1.4 1.4 0 0 0 10 4.3v-.5a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="ci-exit" viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 8 6 12l4 4M6 12h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ci-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 14h3v3h-3zM19 19h2v2h-2z" fill="currentColor"/></symbol>
+  <symbol id="ci-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="ci-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+</defs></svg>
+
 <section class="comms">
   <div class="comms__onboard" id="comms-onboard" hidden>
     <div class="comms__onboard-step" id="comms-onboard-insecure" hidden>
@@ -69,15 +83,16 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
         <span class="comms__badge" id="comms-id-fp" title="your identity fingerprint"></span>
       </div>
       <div class="comms__meta">
-        <span class="comms__badge" id="comms-status">disconnected</span>
-        <span class="comms__badge comms__badge--peers" id="comms-peers" hidden>peers: 0</span>
-        <span class="comms__badge comms__badge--eph" id="comms-eph" title="messages aren't saved (room starts with !)" hidden>ephemeral</span>
-        <span class="comms__badge comms__badge--enc" id="comms-enc" title="end-to-end encrypted; the key is in the URL after the colon" hidden>encrypted</span>
-        <button class="comms__btn" id="comms-call-start" type="button" hidden>call</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-call-cam" type="button" hidden aria-pressed="false">camera: off</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-call-mic" type="button" hidden aria-pressed="false">mic: on</button>
-        <button class="comms__btn comms__btn--danger" id="comms-call-hangup" type="button" hidden>hang up</button>
-        <button class="comms__btn comms__btn--ghost comms__btn--gear" id="comms-adv-toggle" type="button" aria-expanded="false" title="settings and rooms">⚙</button>
+        <span class="comms__badge" id="comms-status">not in a chat</span>
+        <span class="comms__badge comms__badge--peers" id="comms-peers" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg><span id="comms-peers-n">0</span></span>
+        <span class="comms__badge comms__badge--eph" id="comms-eph" title="messages aren't saved (room starts with !)" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clock"></use></svg>ephemeral</span>
+        <span class="comms__badge comms__badge--enc" id="comms-enc" title="end-to-end encrypted — only you and the other person can read these messages" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>encrypted</span>
+        <button class="comms__btn comms__btn--icon" id="comms-call-start" type="button" hidden title="start a call" aria-label="start a call"><svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg><span class="comms__btn-t">call</span></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-cam" type="button" hidden aria-pressed="false" title="camera" aria-label="camera"><svg class="comms__i" aria-hidden="true"><use href="#ci-cam"></use></svg></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-mic" type="button" hidden aria-pressed="true" title="microphone" aria-label="microphone"><svg class="comms__i" aria-hidden="true"><use href="#ci-mic"></use></svg></button>
+        <button class="comms__btn comms__btn--danger comms__btn--icon" id="comms-call-hangup" type="button" hidden title="hang up" aria-label="hang up"><svg class="comms__i" aria-hidden="true"><use href="#ci-hangup"></use></svg></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-leave" type="button" hidden title="leave this chat" aria-label="leave this chat"><svg class="comms__i" aria-hidden="true"><use href="#ci-exit"></use></svg><span class="comms__btn-t">leave</span></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-adv-toggle" type="button" aria-expanded="false" title="settings and rooms" aria-label="settings and rooms"><svg class="comms__i" aria-hidden="true"><use href="#ci-gear"></use></svg></button>
       </div>
     </div>
 
@@ -89,13 +104,22 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
     <div class="comms__contacts" id="comms-contacts" hidden>
       <div class="comms__contacts-head">
         <span class="comms__lbl">people</span>
-        <button class="comms__btn comms__btn--ghost" id="comms-id-share" type="button" aria-expanded="false">my code</button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share" type="button" aria-pressed="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span class="comms__btn-t" id="comms-id-share-t">my code</span></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-add-toggle" type="button" aria-expanded="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus"></use></svg><span class="comms__btn-t" id="comms-add-toggle-t">add someone</span></button>
         <button class="comms__btn comms__btn--ghost" id="comms-id-contacts" type="button" aria-expanded="false" hidden>contacts</button>
       </div>
       <div class="comms__contacts-list" id="comms-contacts-list"></div>
-      <div class="comms__contacts-add">
-        <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="paste a contact code (MC1.…)" spellcheck="false" autocapitalize="off">
-        <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">add</button>
+      <div class="comms__add" id="comms-add" hidden>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-scan" type="button"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span class="comms__btn-t">scan their code</span></button>
+        <div class="comms__scan" id="comms-scan-wrap" hidden>
+          <video class="comms__scan-video" id="comms-scan-video" playsinline muted></video>
+          <p class="comms__id-note" id="comms-scan-note">point the camera at their “my code” screen</p>
+          <button class="comms__btn comms__btn--ghost" id="comms-scan-stop" type="button">stop camera</button>
+        </div>
+        <div class="comms__contacts-add">
+          <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="…or paste a contact code (MC1.…)" spellcheck="false" autocapitalize="off">
+          <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">add</button>
+        </div>
       </div>
     </div>
 
@@ -274,6 +298,21 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__contact{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px solid #14181d}
 .comms__contact--req{background:rgba(110,243,197,.05);border-left:2px solid var(--accent,#6ef3c5);padding-left:.5rem;border-radius:4px}
 .comms__unread{display:inline-block;min-width:1.15rem;padding:0 .3rem;border-radius:999px;background:var(--accent,#6ef3c5);color:#0a0d10;font-size:.68rem;text-align:center;line-height:1.15rem;font-weight:700}
+.comms__sprite{position:absolute;width:0;height:0;overflow:hidden}
+.comms__i{width:1em;height:1em;flex:none;vertical-align:-0.12em}
+.comms__btn--icon{display:inline-flex;align-items:center;gap:.4rem}
+.comms__btn--icon .comms__btn-t{line-height:1}
+.comms__btn.is-on{background:var(--accent,#6ef3c5);color:#0a0d10}
+.comms__badge{display:inline-flex;align-items:center;gap:.3rem}
+.comms__add{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;padding-top:.6rem;border-top:1px solid #14181d}
+.comms__add[hidden]{display:none}
+.comms__scan{display:flex;flex-direction:column;gap:.5rem;align-items:flex-start}
+.comms__scan[hidden]{display:none}
+.comms__scan-video{width:100%;max-width:18rem;border-radius:8px;border:1px solid #2a3138;background:#000;aspect-ratio:1;object-fit:cover}
+@media (max-width:640px){
+  .comms__btn--icon .comms__btn-t{display:none}
+  .comms__contacts-head .comms__btn--icon .comms__btn-t{display:inline}
+}
 .comms__contact:last-child{border-bottom:none}
 .comms__contact-name{color:#e6edf3;font-size:.85rem}
 .comms__contact-fp{color:#5a636d;font-size:.7rem}
@@ -343,7 +382,11 @@ const els = {
   obStart: $('comms-onboard-start'), obName: $('comms-onboard-name'), obCreate: $('comms-onboard-create'),
   obErr: $('comms-onboard-err'), obHint: $('comms-onboard-hint'), obMethod: $('comms-onboard-method'),
   obCode: $('comms-onboard-code'), obCopy: $('comms-onboard-copy'), obContinue: $('comms-onboard-continue'),
-  setupHere: $('comms-id-setup-here'), lockAlt: $('comms-lock-alt')
+  setupHere: $('comms-id-setup-here'), lockAlt: $('comms-lock-alt'),
+  leave: $('comms-leave'), peersN: $('comms-peers-n'), shareT: $('comms-id-share-t'),
+  addToggle: $('comms-add-toggle'), addToggleT: $('comms-add-toggle-t'), addBox: $('comms-add'),
+  scan: $('comms-scan'), scanWrap: $('comms-scan-wrap'), scanVideo: $('comms-scan-video'),
+  scanNote: $('comms-scan-note'), scanStop: $('comms-scan-stop')
 };
 
 const MAX_FILE = 50 * 1024 * 1024;
@@ -551,7 +594,7 @@ const completeHTML = (name, size, type, url) => {
 };
 
 const updatePeers = () => {
-  els.peers.textContent = `peers: ${peers.size}`;
+  if (els.peersN) els.peersN.textContent = String(peers.size);
   els.peers.hidden = false;
 };
 
@@ -761,6 +804,22 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   els.peers.hidden = true;
   els.enc.hidden = true;
 
+  if (opts.leave || !roomName) {
+    currentRoomName = null;
+    els.room.value = '';
+    els.status.textContent = 'not in a chat';
+    els.share.hidden = true;
+    els.eph.hidden = true;
+    els.leave.hidden = true;
+    els.callStart.hidden = true;
+    els.msg.disabled = true;
+    els.go.disabled = true;
+    if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    renderContacts();
+    sys('left the chat — pick someone below to start another.');
+    return;
+  }
+
   chatKey = b64Key ? await deriveKey(b64Key) : null;
   if (b64Key && !chatKey) sys('encryption key in URL is invalid — chat will appear unreadable.');
 
@@ -795,6 +854,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
 
   currentRoomName = roomName;
   els.status.textContent = `room: ${roomName}`;
+  els.leave.hidden = false;
   setConnUI();
   els.eph.hidden = !isEphemeralRoom(roomName);
   els.enc.hidden = !chatKey;
@@ -802,7 +862,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   els.go.disabled = false;
   updatePeers();
   updateCallUI();
-  sys(`you are ${myProfile.name ? myProfile.name + ' (' + short(selfId) + ')' : short(selfId)} — alone in "${roomName}". share the URL to invite someone.`);
+  if (isDmRoom(roomName)) sys('private chat — only your two identities can open this room.');
+  else sys(`you are ${myProfile.name ? myProfile.name + ' (' + short(selfId) + ')' : short(selfId)} — alone in "${roomName}". share the URL to invite someone.`);
   if (chatKey) sys('end-to-end encrypted. anyone with the full URL (including the key after the colon) can decrypt.');
 
   callAction = room.makeAction('call');
@@ -1560,10 +1621,115 @@ const refreshMyCode = () => {
 };
 
 els.idShare.addEventListener('click', () => {
-  els.idCard.hidden = !els.idCard.hidden;
-  els.idShare.setAttribute('aria-expanded', String(!els.idCard.hidden));
-  refreshMyCode();
+  const open = els.idCard.hidden;
+  els.idCard.hidden = !open;
+  els.idShare.setAttribute('aria-pressed', String(open));
+  els.idShare.classList.toggle('is-on', open);
+  els.shareT.textContent = open ? 'hide my code' : 'my code';
+  if (open) refreshMyCode();
 });
+
+els.addToggle.addEventListener('click', () => {
+  const open = els.addBox.hidden;
+  els.addBox.hidden = !open;
+  els.addToggle.setAttribute('aria-expanded', String(open));
+  els.addToggle.classList.toggle('is-on', open);
+  els.addToggleT.textContent = open ? 'close' : 'add someone';
+  if (open) els.contactIn.focus();
+  else stopScan();
+});
+
+let scanStream = null;
+let scanRaf = null;
+let scanDetector = null;
+let scanCanvas = null;
+let scanCtx = null;
+
+const loadJsQR = () => new Promise((resolve) => {
+  if (window.jsQR) { resolve(true); return; }
+  const s = document.createElement('script');
+  s.src = '/assets/js/jsqr.js?v={{ buildHash }}';
+  s.onload = () => resolve(!!window.jsQR);
+  s.onerror = () => resolve(false);
+  document.head.appendChild(s);
+});
+
+const stopScan = () => {
+  if (scanRaf) { cancelAnimationFrame(scanRaf); scanRaf = null; }
+  if (scanStream) { scanStream.getTracks().forEach((t) => { try { t.stop(); } catch (_) {} }); scanStream = null; }
+  try { els.scanVideo.srcObject = null; } catch (_) {}
+  els.scanWrap.hidden = true;
+};
+
+const handleScanned = async (value) => {
+  const raw = String(value || '').trim();
+  const idx = raw.indexOf('MC1.');
+  if (idx === -1) { els.scanNote.textContent = 'that code isn\'t a mentria contact code — keep pointing at their screen'; return false; }
+  stopScan();
+  els.contactIn.value = raw.slice(idx);
+  els.contactAdd.click();
+  return true;
+};
+
+const scanTick = async () => {
+  if (!scanStream) return;
+  const v = els.scanVideo;
+  if (v.readyState >= 2 && v.videoWidth) {
+    try {
+      if (scanDetector) {
+        const found = await scanDetector.detect(v);
+        if (found && found.length && await handleScanned(found[0].rawValue)) return;
+      } else if (window.jsQR) {
+        if (!scanCanvas) { scanCanvas = document.createElement('canvas'); scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true }); }
+        const w = Math.min(560, v.videoWidth), h = Math.round(v.videoHeight * (w / v.videoWidth));
+        scanCanvas.width = w; scanCanvas.height = h;
+        scanCtx.drawImage(v, 0, 0, w, h);
+        const img = scanCtx.getImageData(0, 0, w, h);
+        const r = window.jsQR(img.data, w, h, { inversionAttempts: 'dontInvert' });
+        if (r && r.data && await handleScanned(r.data)) return;
+      }
+    } catch (_) {}
+  }
+  scanRaf = requestAnimationFrame(scanTick);
+};
+
+els.scan.addEventListener('click', async () => {
+  if (scanStream) { stopScan(); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    els.scanWrap.hidden = false;
+    els.scanNote.textContent = 'this browser can\'t open the camera — paste their code instead';
+    return;
+  }
+  els.scanWrap.hidden = false;
+  els.scanNote.textContent = 'starting camera…';
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+  } catch (_) {
+    els.scanNote.textContent = 'camera permission denied — paste their code instead';
+    return;
+  }
+  els.scanVideo.srcObject = scanStream;
+  try { await els.scanVideo.play(); } catch (_) {}
+  scanDetector = null;
+  if ('BarcodeDetector' in window) {
+    try {
+      const formats = await BarcodeDetector.getSupportedFormats();
+      if (formats.includes('qr_code')) scanDetector = new BarcodeDetector({ formats: ['qr_code'] });
+    } catch (_) {}
+  }
+  if (!scanDetector) await loadJsQR();
+  els.scanNote.textContent = 'point the camera at their “my code” screen';
+  scanTick();
+});
+
+els.scanStop.addEventListener('click', stopScan);
+
+const leaveRoom = async () => {
+  stopScan();
+  await joinNew(null, null, { leave: true });
+};
+
+els.leave.addEventListener('click', leaveRoom);
 
 els.idCopy.addEventListener('click', async () => {
   try {
@@ -1624,7 +1790,7 @@ const renderContacts = () => {
   if (!contacts.length && !requests.length) {
     const empty = document.createElement('div');
     empty.className = 'comms__id-note';
-    empty.textContent = 'no one here yet — tap “my code” to share yours, or paste someone else\'s code below.';
+    empty.textContent = 'no one here yet — share “my code” with someone, or use “add someone” to scan or paste theirs.';
     els.contactList.append(empty);
     return;
   }

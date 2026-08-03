@@ -74,6 +74,15 @@
 
   const state = { secret: null };
 
+  function cryptoReady() {
+    try {
+      return !!(global.crypto && global.crypto.subtle && typeof global.crypto.subtle.importKey === 'function');
+    } catch (_) { return false; }
+  }
+  function requireCrypto() {
+    if (!cryptoReady()) throw new Error('insecure-context');
+  }
+
   function loadVault() {
     if (!global.MentriaStore) return null;
     return global.MentriaStore.get(NS, KEY);
@@ -95,6 +104,7 @@
   }
 
   async function setup(passphrase) {
+    requireCrypto();
     if (isSetUp()) throw new Error('already-set-up');
     if (!passphrase || passphrase.length < 8) throw new Error('passphrase-too-short');
     const secret = crypto.getRandomValues(new Uint8Array(SECRET_BYTES));
@@ -113,6 +123,7 @@
   }
 
   async function unlock(passphrase) {
+    requireCrypto();
     const vault = loadVault();
     if (!vault || !vault.pass) throw new Error('no-vault');
     const wrapKey = await pbkdf2(passphrase, b64uDec(vault.pass.salt), vault.pass.iter);
@@ -144,6 +155,7 @@
 
   async function passkeySupport() {
     try {
+      if (!cryptoReady()) return 'no';
       if (!global.PublicKeyCredential) return 'no';
       if (typeof PublicKeyCredential.getClientCapabilities === 'function') {
         const caps = await PublicKeyCredential.getClientCapabilities();
@@ -184,6 +196,7 @@
   }
 
   async function enrollPasskey() {
+    requireCrypto();
     if (!state.secret) throw new Error('locked');
     const vault = loadVault();
     if (!vault) throw new Error('no-vault');
@@ -227,6 +240,7 @@
   }
 
   async function unlockWithPasskey() {
+    requireCrypto();
     const vault = loadVault();
     if (!vault || !vault.prf) throw new Error('no-passkey');
     const prf = await assertPrf(b64uDec(vault.prf.credId), b64uDec(vault.prf.prfSalt));
@@ -322,6 +336,7 @@
   }
 
   global.MentriaIdentity = {
+    cryptoReady,
     setup, unlock, lock, isSetUp, isUnlocked, getSecret, clearVault,
     passkeySupport, hasPasskey, enrollPasskey, unlockWithPasskey, removePasskey,
     hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock

@@ -17,6 +17,11 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 
 <section class="comms">
   <div class="comms__onboard" id="comms-onboard" hidden>
+    <div class="comms__onboard-step" id="comms-onboard-insecure" hidden>
+      <h2 class="comms__onboard-h">This page needs a secure connection</h2>
+      <p class="comms__onboard-p">Your browser only allows the encryption comms depends on over <strong>https</strong>. You're on a plain http address, so keys can't be created here.</p>
+      <p class="comms__onboard-p">Open <a class="comms__url" href="https://mentria.ai/comms/">https://mentria.ai/comms/</a> instead — or use an https address if you're testing locally.</p>
+    </div>
     <div class="comms__onboard-step" id="comms-onboard-intro">
       <h2 class="comms__onboard-h">Private chat that runs on your devices</h2>
       <p class="comms__onboard-p">Messages, calls and files go straight to the other person — encrypted end to end. No account, no phone number, and no server that can read them.</p>
@@ -334,7 +339,7 @@ const els = {
   ring: $('comms-ring'), ringText: $('comms-ring-text'), ringAccept: $('comms-ring-accept'), ringDecline: $('comms-ring-decline'),
   media: $('comms-media'),
   app: $('comms-app'), adv: $('comms-adv'), advToggle: $('comms-adv-toggle'), newRoom: $('comms-newroom'),
-  onboard: $('comms-onboard'), obPasskey: $('comms-onboard-passkey'), obIntro: $('comms-onboard-intro'), obForm: $('comms-onboard-form'), obDone: $('comms-onboard-done'),
+  onboard: $('comms-onboard'), obPasskey: $('comms-onboard-passkey'), obIntro: $('comms-onboard-intro'), obInsecure: $('comms-onboard-insecure'), obForm: $('comms-onboard-form'), obDone: $('comms-onboard-done'),
   obStart: $('comms-onboard-start'), obName: $('comms-onboard-name'), obCreate: $('comms-onboard-create'),
   obErr: $('comms-onboard-err'), obHint: $('comms-onboard-hint'), obMethod: $('comms-onboard-method'),
   obCode: $('comms-onboard-code'), obCopy: $('comms-onboard-copy'), obContinue: $('comms-onboard-continue'),
@@ -1430,6 +1435,7 @@ const refreshIdUI = () => {
   const guest = hasRoomHash();
   if ((state === 'none' || state === 'unavailable') && !guest && !onboardDone) onboardActive = true;
   els.onboard.hidden = !onboardActive;
+  if (onboardActive && !cryptoOk()) showOnboardStep('insecure');
   els.idLocked.hidden = state !== 'locked' || onboardActive;
   els.app.hidden = onboardActive || (state === 'locked' && !guest);
   els.idOn.hidden = state !== 'unlocked';
@@ -1703,10 +1709,14 @@ const makeRecoveryCode = () => {
   return out;
 };
 
+const cryptoOk = () => !!(window.MentriaIdentity && MentriaIdentity.cryptoReady && MentriaIdentity.cryptoReady());
+
 const showOnboardStep = (which) => {
-  els.obIntro.hidden = which !== 'intro';
-  els.obForm.hidden = which !== 'form';
-  els.obDone.hidden = which !== 'done';
+  const step = cryptoOk() ? which : 'insecure';
+  els.obInsecure.hidden = step !== 'insecure';
+  els.obIntro.hidden = step !== 'intro';
+  els.obForm.hidden = step !== 'form';
+  els.obDone.hidden = step !== 'done';
 };
 
 els.obStart.addEventListener('click', () => {
@@ -1741,8 +1751,12 @@ els.obCreate.addEventListener('click', async () => {
     showOnboardStep('done');
     await initIdentity();
   } catch (err) {
+    const code = err && err.message;
     els.obErr.hidden = false;
-    els.obErr.textContent = 'could not set up: ' + (err && err.message ? err.message : err);
+    els.obErr.textContent = code === 'insecure-context'
+      ? 'this page needs an https address before it can create keys — open https://mentria.ai/comms/'
+      : 'could not set up: ' + (code || err);
+    if (code === 'insecure-context') showOnboardStep('insecure');
   } finally {
     els.obCreate.disabled = false;
     els.obCreate.textContent = prevLabel;

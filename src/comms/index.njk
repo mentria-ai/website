@@ -16,84 +16,136 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 {% include "terminal-frame-open.njk" %}
 
 <section class="comms">
-  <div class="comms__bar">
-    <div class="comms__room">
-      <label class="comms__lbl" for="comms-room">room</label>
-      <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="off" placeholder="!ephemeral">
-      <button class="comms__btn" id="comms-join" type="button">join</button>
+  <div class="comms__onboard" id="comms-onboard" hidden>
+    <div class="comms__onboard-step" id="comms-onboard-intro">
+      <h2 class="comms__onboard-h">Private chat that runs on your devices</h2>
+      <p class="comms__onboard-p">Messages, calls and files go straight to the other person — encrypted end to end. No account, no phone number, and no server that can read them.</p>
+      <button class="comms__btn comms__btn--big" id="comms-onboard-start" type="button">get started</button>
+      <p class="comms__onboard-fine">Takes about ten seconds. Everything stays on your device.</p>
     </div>
-    <div class="comms__meta">
-      <span class="comms__badge" id="comms-status">disconnected</span>
-      <span class="comms__badge comms__badge--peers" id="comms-peers" hidden>peers: 0</span>
-      <span class="comms__badge comms__badge--eph" id="comms-eph" title="messages aren't saved (room starts with !)" hidden>ephemeral</span>
-      <span class="comms__badge comms__badge--enc" id="comms-enc" title="end-to-end encrypted; the key is in the URL after the colon" hidden>encrypted</span>
-      <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">sound: on</button>
-      <button class="comms__btn" id="comms-call-start" type="button" hidden>call</button>
-      <button class="comms__btn comms__btn--ghost" id="comms-call-cam" type="button" hidden aria-pressed="false">camera: off</button>
-      <button class="comms__btn comms__btn--ghost" id="comms-call-mic" type="button" hidden aria-pressed="false">mic: on</button>
-      <button class="comms__btn comms__btn--danger" id="comms-call-hangup" type="button" hidden>hang up</button>
+    <div class="comms__onboard-step" id="comms-onboard-form" hidden>
+      <h2 class="comms__onboard-h">What should people call you?</h2>
+      <input class="comms__input comms__input--big" id="comms-onboard-name" type="text" maxlength="32" placeholder="your name" autocomplete="nickname" enterkeyhint="done">
+      <button class="comms__btn comms__btn--big" id="comms-onboard-create" type="button">create my identity</button>
+      <p class="comms__onboard-fine" id="comms-onboard-hint">Your device will ask for Face&nbsp;ID, Touch&nbsp;ID or your screen lock to protect it.</p>
+      <p class="comms__onboard-err" id="comms-onboard-err" hidden></p>
+    </div>
+    <div class="comms__onboard-step" id="comms-onboard-done" hidden>
+      <h2 class="comms__onboard-h">You're set up</h2>
+      <p class="comms__onboard-p" id="comms-onboard-method"></p>
+      <p class="comms__onboard-p">Save this recovery code somewhere safe. It's the only way back in if you lose your devices — you won't need it day to day.</p>
+      <code class="comms__recovery" id="comms-onboard-code"></code>
+      <div class="comms__onboard-actions">
+        <button class="comms__btn comms__btn--ghost" id="comms-onboard-copy" type="button">copy code</button>
+        <button class="comms__btn" id="comms-onboard-passkey" type="button" hidden>protect with face id / touch id</button>
+        <button class="comms__btn comms__btn--big" id="comms-onboard-continue" type="button">start chatting</button>
+      </div>
     </div>
   </div>
 
-  <div class="comms__id-row" id="comms-id-none" hidden>
-    <span class="comms__lbl">identity</span>
-    <span class="comms__id-note">set up your identity vault to use names, contacts and DMs</span>
-    <a class="comms__btn comms__btn--ghost" href="/about/">set up on the about page</a>
-  </div>
-  <div class="comms__id-row" id="comms-id-locked" hidden>
-    <span class="comms__lbl">identity</span>
-    <input class="comms__input comms__input--short" id="comms-id-pass" type="password" placeholder="identity passphrase" autocomplete="current-password">
-    <button class="comms__btn" id="comms-id-unlock" type="button">unlock</button>
+  <div class="comms__lock" id="comms-id-locked" hidden>
+    <p class="comms__lock-h">Welcome back</p>
+    <button class="comms__btn comms__btn--big" id="comms-id-passkey" type="button" hidden>unlock</button>
+    <details class="comms__lock-alt" id="comms-lock-alt">
+      <summary>use my recovery code instead</summary>
+      <div class="comms__lock-row">
+        <input class="comms__input" id="comms-id-pass" type="password" placeholder="recovery code or passphrase" autocomplete="current-password">
+        <button class="comms__btn" id="comms-id-unlock" type="button">unlock</button>
+      </div>
+    </details>
     <span class="comms__id-note" id="comms-id-err"></span>
   </div>
-  <div class="comms__id-row" id="comms-id-on" hidden>
-    <span class="comms__lbl">you</span>
-    <input class="comms__input comms__input--short" id="comms-id-name" type="text" maxlength="32" placeholder="display name" autocomplete="nickname">
-    <span class="comms__badge" id="comms-id-fp" title="your identity fingerprint"></span>
-    <button class="comms__btn comms__btn--ghost" id="comms-id-share" type="button" aria-expanded="false">my code</button>
-    <button class="comms__btn comms__btn--ghost" id="comms-id-contacts" type="button" aria-expanded="false">contacts</button>
-  </div>
-  <div class="comms__id-card" id="comms-id-card" hidden>
-    <canvas class="comms__id-qr" id="comms-id-qr" width="0" height="0"></canvas>
-    <div class="comms__id-card-side">
-      <p class="comms__id-note">scan or paste this code on another person's device to become contacts. it contains your public key, never your secrets.</p>
-      <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
-      <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">copy code</button>
+
+  <div class="comms__app" id="comms-app" hidden>
+    <div class="comms__topline">
+      <div class="comms__id-row comms__id-row--you" id="comms-id-on" hidden>
+        <span class="comms__lbl">you</span>
+        <input class="comms__input comms__input--short" id="comms-id-name" type="text" maxlength="32" placeholder="display name" autocomplete="nickname">
+        <span class="comms__badge" id="comms-id-fp" title="your identity fingerprint"></span>
+      </div>
+      <div class="comms__meta">
+        <span class="comms__badge" id="comms-status">disconnected</span>
+        <span class="comms__badge comms__badge--peers" id="comms-peers" hidden>peers: 0</span>
+        <span class="comms__badge comms__badge--eph" id="comms-eph" title="messages aren't saved (room starts with !)" hidden>ephemeral</span>
+        <span class="comms__badge comms__badge--enc" id="comms-enc" title="end-to-end encrypted; the key is in the URL after the colon" hidden>encrypted</span>
+        <button class="comms__btn" id="comms-call-start" type="button" hidden>call</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-call-cam" type="button" hidden aria-pressed="false">camera: off</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-call-mic" type="button" hidden aria-pressed="false">mic: on</button>
+        <button class="comms__btn comms__btn--danger" id="comms-call-hangup" type="button" hidden>hang up</button>
+        <button class="comms__btn comms__btn--ghost comms__btn--gear" id="comms-adv-toggle" type="button" aria-expanded="false" title="settings and rooms">⚙</button>
+      </div>
+    </div>
+
+    <div class="comms__id-row" id="comms-id-none" hidden>
+      <span class="comms__id-note">you're in a shared room as a guest. set up an identity to use your name, contacts and direct messages.</span>
+      <button class="comms__btn comms__btn--ghost" id="comms-id-setup-here" type="button">set up</button>
+    </div>
+
+    <div class="comms__contacts" id="comms-contacts" hidden>
+      <div class="comms__contacts-head">
+        <span class="comms__lbl">people</span>
+        <button class="comms__btn comms__btn--ghost" id="comms-id-share" type="button" aria-expanded="false">my code</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-id-contacts" type="button" aria-expanded="false" hidden>contacts</button>
+      </div>
+      <div class="comms__contacts-list" id="comms-contacts-list"></div>
+      <div class="comms__contacts-add">
+        <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="paste a contact code (MC1.…)" spellcheck="false" autocapitalize="off">
+        <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">add</button>
+      </div>
+    </div>
+
+    <div class="comms__id-card" id="comms-id-card" hidden>
+      <canvas class="comms__id-qr" id="comms-id-qr" width="0" height="0"></canvas>
+      <div class="comms__id-card-side">
+        <p class="comms__id-note">scan or paste this code on another person's device to become contacts. it contains your public key, never your secrets.</p>
+        <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
+        <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">copy code</button>
+      </div>
+    </div>
+
+    <div class="comms__ring" id="comms-ring" hidden>
+      <span class="comms__ring-text" id="comms-ring-text">incoming call</span>
+      <button class="comms__btn" id="comms-ring-accept" type="button">accept</button>
+      <button class="comms__btn comms__btn--ghost" id="comms-ring-decline" type="button">decline</button>
+    </div>
+
+    <div class="comms__media" id="comms-media" hidden></div>
+    <div class="comms__peerlist" id="comms-peerlist" hidden></div>
+    <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
+
+    <label class="comms__drop" id="comms-drop">
+      <input type="file" id="comms-file" multiple hidden>
+      drop files here, or tap to pick — they go straight to the other person
+    </label>
+
+    <form class="comms__send" id="comms-send" autocomplete="off">
+      <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="message…" disabled>
+      <button class="comms__btn" id="comms-go" type="submit" disabled>send</button>
+    </form>
+
+    <div class="comms__adv" id="comms-adv" hidden>
+      <div class="comms__adv-sec">
+        <span class="comms__lbl">room</span>
+        <div class="comms__room">
+          <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="off" placeholder="!ephemeral">
+          <button class="comms__btn" id="comms-join" type="button">join</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-newroom" type="button">new room link</button>
+        </div>
+      </div>
+      <div class="comms__share" id="comms-share" hidden>
+        <span class="comms__lbl">share</span>
+        <code class="comms__url" id="comms-url"></code>
+        <button class="comms__btn comms__btn--ghost" id="comms-copy" type="button">copy</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-genkey" type="button" title="generate a fresh encryption key and append it to the URL">+ key</button>
+      </div>
+      <div class="comms__adv-sec">
+        <span class="comms__lbl">this device</span>
+        <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">sound: on</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">attach extension</button>
+        <a class="comms__btn comms__btn--ghost" href="/about/">identity settings</a>
+      </div>
     </div>
   </div>
-  <div class="comms__contacts" id="comms-contacts" hidden>
-    <div class="comms__contacts-add">
-      <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="paste a contact code (MC1.…)" spellcheck="false" autocapitalize="off">
-      <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">add</button>
-    </div>
-    <div class="comms__contacts-list" id="comms-contacts-list"></div>
-  </div>
-
-  <div class="comms__ring" id="comms-ring" hidden>
-    <span class="comms__ring-text" id="comms-ring-text">incoming call</span>
-    <button class="comms__btn" id="comms-ring-accept" type="button">accept</button>
-    <button class="comms__btn comms__btn--ghost" id="comms-ring-decline" type="button">decline</button>
-  </div>
-
-  <div class="comms__media" id="comms-media" hidden></div>
-
-  <div class="comms__share" id="comms-share" hidden>
-    <span class="comms__lbl">share</span>
-    <code class="comms__url" id="comms-url"></code>
-    <button class="comms__btn comms__btn--ghost" id="comms-copy" type="button">copy</button>
-    <button class="comms__btn comms__btn--ghost" id="comms-genkey" type="button" title="generate a fresh encryption key and append it to the URL">+ key</button>
-  </div>
-
-  <div class="comms__peerlist" id="comms-peerlist" hidden></div>
-
-  <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
-
-  <label class="comms__drop" id="comms-drop">
-    <input type="file" id="comms-file" multiple hidden>
-    drop files here, or click to choose — sent to everyone in the room
-  </label>
-
-  <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">attach extension</button>
 
   <div class="comms__picker" id="comms-picker" hidden>
     <div class="comms__picker-backdrop" data-picker-close></div>
@@ -105,17 +157,51 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
       </div>
     </div>
   </div>
-
-  <form class="comms__send" id="comms-send" autocomplete="off">
-    <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="message…" disabled>
-    <button class="comms__btn" id="comms-go" type="submit" disabled>send</button>
-  </form>
 </section>
 
 {% include "terminal-frame-close.njk" %}
 
 <style>
 .comms{display:flex;flex-direction:column;gap:.75rem;font-family:var(--font-mono);font-size:.9rem}
+.comms [hidden]{display:none !important}
+.comms__onboard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;padding:2.5rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px}
+.comms__onboard[hidden]{display:none}
+.comms__onboard-step{display:flex;flex-direction:column;align-items:center;gap:.9rem;width:100%;max-width:30rem}
+.comms__onboard-step[hidden]{display:none}
+.comms__onboard-h{margin:0;font-size:1.05rem;color:var(--accent,#6ef3c5);letter-spacing:.02em;line-height:1.4;text-transform:none}
+.comms__onboard-p{margin:0;color:#c3ccd6;font-size:.85rem;line-height:1.65;max-width:26rem}
+.comms__onboard-fine{margin:0;color:#7a838d;font-size:.75rem;line-height:1.5}
+.comms__onboard-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
+.comms__onboard-err[hidden]{display:none}
+.comms__onboard-actions{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
+.comms__btn--big{padding:.7rem 1.6rem;font-size:.92rem;min-height:44px}
+.comms__input--big{max-width:18rem;text-align:center;padding:.6rem .8rem;font-size:.95rem;flex:none;width:100%}
+.comms__recovery{display:block;width:100%;max-width:24rem;background:#0a0d10;border:1px dashed var(--accent,#6ef3c5);border-radius:6px;padding:.7rem;color:var(--accent,#6ef3c5);font-size:.95rem;letter-spacing:.12em;word-break:break-all;line-height:1.6}
+.comms__lock{display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:2rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px;text-align:center}
+.comms__lock[hidden]{display:none}
+.comms__lock-h{margin:0;color:#c3ccd6;font-size:.95rem}
+.comms__lock-alt{width:100%;max-width:24rem;color:#7a838d;font-size:.78rem}
+.comms__lock-alt summary{cursor:pointer;list-style:none;padding:.3rem}
+.comms__lock-alt summary::-webkit-details-marker{display:none}
+.comms__lock-alt summary:hover{color:#9ba6b1}
+.comms__lock-row{display:none;gap:.5rem;margin-top:.6rem}
+.comms__lock-alt[open] .comms__lock-row{display:flex}
+.comms__app{display:flex;flex-direction:column;gap:.75rem}
+.comms__app[hidden]{display:none}
+.comms__topline{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.comms__id-row--you{flex:1;min-width:13rem}
+.comms__btn--gear{min-width:2.4rem;padding:.4rem .6rem;font-size:1rem;line-height:1}
+.comms__contacts-head{display:flex;gap:.5rem;align-items:center}
+.comms__contacts-head .comms__lbl{flex:1}
+.comms__adv{display:flex;flex-direction:column;gap:.75rem;background:#0a0d10;border:1px dashed #2a3138;border-radius:8px;padding:.85rem}
+.comms__adv[hidden]{display:none}
+.comms__adv-sec{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.comms__contact{cursor:pointer}
+@media (max-width:640px){
+  .comms__onboard{padding:1.75rem 1rem}
+  .comms__onboard-h{font-size:1rem}
+  .comms__topline{gap:.5rem}
+}
 .comms__bar{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
 .comms__room{display:flex;gap:.5rem;align-items:center;flex:1;min-width:14rem}
 .comms__meta{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
@@ -181,6 +267,8 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__contacts-add{display:flex;gap:.5rem;align-items:center}
 .comms__contacts-list{display:flex;flex-direction:column;gap:.3rem}
 .comms__contact{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px solid #14181d}
+.comms__contact--req{background:rgba(110,243,197,.05);border-left:2px solid var(--accent,#6ef3c5);padding-left:.5rem;border-radius:4px}
+.comms__unread{display:inline-block;min-width:1.15rem;padding:0 .3rem;border-radius:999px;background:var(--accent,#6ef3c5);color:#0a0d10;font-size:.68rem;text-align:center;line-height:1.15rem;font-weight:700}
 .comms__contact:last-child{border-bottom:none}
 .comms__contact-name{color:#e6edf3;font-size:.85rem}
 .comms__contact-fp{color:#5a636d;font-size:.7rem}
@@ -238,13 +326,19 @@ const els = {
   log: $('comms-log'), drop: $('comms-drop'), file: $('comms-file'),
   send: $('comms-send'), msg: $('comms-msg'), go: $('comms-go'),
   idNone: $('comms-id-none'), idLocked: $('comms-id-locked'), idOn: $('comms-id-on'),
-  idPass: $('comms-id-pass'), idUnlock: $('comms-id-unlock'), idErr: $('comms-id-err'),
+  idPass: $('comms-id-pass'), idUnlock: $('comms-id-unlock'), idErr: $('comms-id-err'), idPasskey: $('comms-id-passkey'),
   idName: $('comms-id-name'), idFp: $('comms-id-fp'), idShare: $('comms-id-share'), idContacts: $('comms-id-contacts'),
   idCard: $('comms-id-card'), idQr: $('comms-id-qr'), idCode: $('comms-id-code'), idCopy: $('comms-id-copy'),
   contacts: $('comms-contacts'), contactIn: $('comms-contact-in'), contactAdd: $('comms-contact-add'), contactList: $('comms-contacts-list'),
   callStart: $('comms-call-start'), callCam: $('comms-call-cam'), callMic: $('comms-call-mic'), callHangup: $('comms-call-hangup'),
   ring: $('comms-ring'), ringText: $('comms-ring-text'), ringAccept: $('comms-ring-accept'), ringDecline: $('comms-ring-decline'),
-  media: $('comms-media')
+  media: $('comms-media'),
+  app: $('comms-app'), adv: $('comms-adv'), advToggle: $('comms-adv-toggle'), newRoom: $('comms-newroom'),
+  onboard: $('comms-onboard'), obPasskey: $('comms-onboard-passkey'), obIntro: $('comms-onboard-intro'), obForm: $('comms-onboard-form'), obDone: $('comms-onboard-done'),
+  obStart: $('comms-onboard-start'), obName: $('comms-onboard-name'), obCreate: $('comms-onboard-create'),
+  obErr: $('comms-onboard-err'), obHint: $('comms-onboard-hint'), obMethod: $('comms-onboard-method'),
+  obCode: $('comms-onboard-code'), obCopy: $('comms-onboard-copy'), obContinue: $('comms-onboard-continue'),
+  setupHere: $('comms-id-setup-here'), lockAlt: $('comms-lock-alt')
 };
 
 const MAX_FILE = 50 * 1024 * 1024;
@@ -292,6 +386,7 @@ let seenCmids = new Set();
 const socketListenersAttached = new WeakSet();
 
 const isEphemeralRoom = (name) => typeof name === 'string' && name.startsWith(EPHEMERAL_PREFIX);
+const isDmRoom = (name) => typeof name === 'string' && (name.startsWith('!dm-') || name.startsWith('dm-'));
 const newCmid = () => selfId + ':' + Math.random().toString(36).slice(2);
 
 let chatKey = null;
@@ -496,6 +591,7 @@ const renderPendingLine = (text, payload, cmid) => {
 };
 
 const refreshShareUrl = (roomName, b64Key) => {
+  if (isDmRoom(roomName)) { els.share.hidden = true; els.url.textContent = ''; return; }
   const u = new URL(window.location.href);
   u.hash = formatHash(roomName, b64Key);
   els.url.textContent = u.toString();
@@ -634,7 +730,7 @@ const publishChat = async (text, cmid) => {
   }
 };
 
-const joinNew = async (roomName, b64Key = null) => {
+const joinNew = async (roomName, b64Key = null, opts = {}) => {
   MentriaBus.unprovide('comms.peers');
   MentriaBus.unprovide('comms.share');
   MentriaBus.unprovide('extensions.requestInstall');
@@ -663,7 +759,11 @@ const joinNew = async (roomName, b64Key = null) => {
   chatKey = b64Key ? await deriveKey(b64Key) : null;
   if (b64Key && !chatKey) sys('encryption key in URL is invalid — chat will appear unreadable.');
 
-  window.location.hash = formatHash(roomName, b64Key);
+  if (opts.share === false || isDmRoom(roomName)) {
+    if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  } else {
+    window.location.hash = formatHash(roomName, b64Key);
+  }
   refreshShareUrl(roomName, b64Key);
 
   let iceServers;
@@ -1189,12 +1289,155 @@ const sendProfileTo = (peerId) => {
 
 const broadcastProfile = () => sendProfileTo(null);
 
+let onboardDone = false;
+let onboardActive = false;
+
+const INBOX_KIND = 3839;
+const INBOX_LOOKBACK_SEC = 14 * 24 * 60 * 60;
+let sideWs = null;
+let sideOpen = null;
+let inboxSubId = null;
+let unreadSubId = null;
+let myInboxTopic = null;
+const topicToFp = new Map();
+const seenInboxIds = new Set();
+let unreadMap = {};
+
+const ensureSideSocket = () => {
+  if (sideWs && sideWs.readyState === 1) return Promise.resolve(sideWs);
+  if (sideOpen) return sideOpen;
+  sideOpen = new Promise((resolve) => {
+    let ws;
+    try { ws = new WebSocket(RELAY); } catch (_) { sideOpen = null; resolve(null); return; }
+    const done = (val) => { sideOpen = null; resolve(val); };
+    ws.addEventListener('open', () => { sideWs = ws; done(ws); });
+    ws.addEventListener('error', () => { done(null); });
+    ws.addEventListener('close', () => { if (sideWs === ws) sideWs = null; });
+    ws.addEventListener('message', handleSideMsg);
+  });
+  return sideOpen;
+};
+
+const sideSend = async (str) => {
+  const ws = await ensureSideSocket();
+  if (!ws || ws.readyState !== 1) return false;
+  try { ws.send(str); return true; } catch (_) { return false; }
+};
+
+const publishToInbox = async (theirPub, payload) => {
+  try {
+    const env = await CID.sealToInbox(theirPub, payload);
+    const topic = await CID.inboxTopic(theirPub);
+    const evt = await createPersistentEvent(INBOX_KIND, topic, JSON.stringify(env));
+    let sent = await sideSend(evt);
+    const sockets = getRelaySockets() || {};
+    for (const ws of Object.values(sockets)) {
+      if (ws && ws.readyState === 1) { try { ws.send(evt); sent = true; } catch (_) {} }
+    }
+    return sent;
+  } catch (_) { return false; }
+};
+
+const announceToContact = async (contact) => {
+  if (!myId || !contact || !contact.pub) return;
+  const payload = { v: 1, name: (myProfile && myProfile.name) || '', pub: { x: myId.publicJwk.x, y: myId.publicJwk.y } };
+  if (ringToken) payload.ring = ringToken;
+  await publishToInbox(contact.pub, payload);
+};
+
+const subscribeInbox = async () => {
+  if (!myId) return;
+  myInboxTopic = await CID.inboxTopic(myId.publicJwk);
+  inboxSubId = 'mi-' + Math.random().toString(36).slice(2);
+  const since = Math.floor(Date.now() / 1000) - INBOX_LOOKBACK_SEC;
+  await sideSend(JSON.stringify(['REQ', inboxSubId, { kinds: [INBOX_KIND], '#x': [myInboxTopic], since, limit: 50 }]));
+};
+
+const subscribeUnread = async () => {
+  if (!myId) return;
+  const contacts = CID.getContacts();
+  topicToFp.clear();
+  const topics = [];
+  for (const c of contacts) {
+    try {
+      const { roomName } = await CID.deriveDm(myId.privateKey, c.pub);
+      const topic = CHAT_TOPIC_PREFIX + roomName;
+      topicToFp.set(topic, c.fp);
+      topics.push(topic);
+    } catch (_) {}
+  }
+  if (unreadSubId) await sideSend(JSON.stringify(['CLOSE', unreadSubId]));
+  if (!topics.length) { unreadSubId = null; return; }
+  unreadSubId = 'mu-' + Math.random().toString(36).slice(2);
+  const since = Math.floor(Date.now() / 1000) - HISTORY_LOOKBACK_SEC;
+  await sideSend(JSON.stringify(['REQ', unreadSubId, { kinds: [CHAT_KIND], '#x': topics, since, limit: 300 }]));
+};
+
+const handleSideMsg = async (msgEvent) => {
+  let msg;
+  try { msg = JSON.parse(msgEvent.data); } catch { return; }
+  if (!Array.isArray(msg) || msg[0] !== 'EVENT' || !msg[2]) return;
+  const ev = msg[2];
+  if (seenInboxIds.has(ev.id)) return;
+  seenInboxIds.add(ev.id);
+
+  if (msg[1] === inboxSubId) {
+    if (!myId) return;
+    let envelope;
+    try { envelope = JSON.parse(ev.content); } catch { return; }
+    const payload = await CID.openInboxEnvelope(myId.privateKey, envelope);
+    if (!payload) return;
+    const saved = await CID.saveRequest(payload);
+    if (saved) {
+      renderContacts();
+      sys(`${saved.name || 'someone'} wants to connect — accept them in your people list.`);
+      playPing(660);
+    }
+    return;
+  }
+
+  if (msg[1] === unreadSubId) {
+    const tag = (ev.tags || []).find((t) => t && t[0] === 'x');
+    const fp = tag && topicToFp.get(tag[1]);
+    if (!fp) return;
+    if (currentDmContact && currentDmContact.fp === fp) return;
+    let content;
+    try { content = JSON.parse(ev.content); } catch { return; }
+    if (content && typeof content.cmid === 'string' && content.cmid.startsWith(selfId + ':')) return;
+    const ts = (content && typeof content.ts === 'number') ? content.ts : (ev.created_at || 0) * 1000;
+    const entry = unreadMap[fp] || { n: 0, lastTs: 0 };
+    if (ts <= entry.lastTs) return;
+    entry.n = (entry.n || 0) + 1;
+    unreadMap[fp] = entry;
+    try { CID.setUnread(unreadMap); } catch (_) {}
+    renderContacts();
+    bumpUnread();
+  }
+};
+
+const clearUnreadFor = (fp) => {
+  unreadMap[fp] = { n: 0, lastTs: Date.now() };
+  try { CID.setUnread(unreadMap); } catch (_) {}
+};
+
+const hasRoomHash = () => {
+  const h = window.location.hash;
+  return !!(h && h !== '#' && h.length > 2);
+};
+
 const refreshIdUI = () => {
   const state = CID.idState();
-  els.idNone.hidden = state !== 'none' && state !== 'unavailable';
-  els.idLocked.hidden = state !== 'locked';
+  const guest = hasRoomHash();
+  if ((state === 'none' || state === 'unavailable') && !guest && !onboardDone) onboardActive = true;
+  els.onboard.hidden = !onboardActive;
+  els.idLocked.hidden = state !== 'locked' || onboardActive;
+  els.app.hidden = onboardActive || (state === 'locked' && !guest);
   els.idOn.hidden = state !== 'unlocked';
-  if (state !== 'unlocked') { els.idCard.hidden = true; els.contacts.hidden = true; }
+  els.idNone.hidden = state === 'unlocked' || !guest;
+  els.idPasskey.hidden = state !== 'locked' || !(window.MentriaIdentity && MentriaIdentity.hasPasskey());
+  els.lockAlt.open = state === 'locked' && !(window.MentriaIdentity && MentriaIdentity.hasPasskey());
+  els.contacts.hidden = state !== 'unlocked';
+  if (state !== 'unlocked') els.idCard.hidden = true;
 };
 
 const initRingToken = async () => {
@@ -1244,9 +1487,12 @@ const initIdentity = async () => {
     els.idName.value = myProfile.name;
     els.idFp.textContent = myFp;
     refreshIdUI();
+    try { unreadMap = CID.getUnread(); } catch (_) { unreadMap = {}; }
     renderContacts();
     broadcastProfile();
     initRingToken();
+    subscribeInbox();
+    subscribeUnread();
   } catch (err) {
     sys('identity error: ' + err.message);
   }
@@ -1266,6 +1512,19 @@ els.idUnlock.addEventListener('click', async () => {
   }
 });
 els.idPass.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.idUnlock.click(); } });
+
+els.idPasskey.addEventListener('click', async () => {
+  els.idErr.textContent = '';
+  els.idPasskey.disabled = true;
+  try {
+    await window.MentriaIdentity.unlockWithPasskey();
+    await initIdentity();
+  } catch {
+    els.idErr.textContent = 'passkey unlock failed — use your passphrase';
+  } finally {
+    els.idPasskey.disabled = false;
+  }
+});
 
 els.idName.addEventListener('change', () => {
   myProfile = CID.setProfile({ name: els.idName.value });
@@ -1317,11 +1576,49 @@ els.idContacts.addEventListener('click', () => {
 const renderContacts = () => {
   if (!els.contactList) return;
   els.contactList.innerHTML = '';
+
+  const requests = CID.getRequests();
+  requests.forEach((r) => {
+    const row = document.createElement('div');
+    row.className = 'comms__contact comms__contact--req';
+    const name = document.createElement('span');
+    name.className = 'comms__contact-name';
+    name.textContent = (r.name || '(unnamed)') + ' wants to connect';
+    const fp = document.createElement('span');
+    fp.className = 'comms__contact-fp';
+    fp.textContent = r.fp;
+    const spacer = document.createElement('span');
+    spacer.className = 'comms__contact-spacer';
+    const ok = document.createElement('button');
+    ok.type = 'button';
+    ok.className = 'comms__btn';
+    ok.textContent = 'accept';
+    ok.addEventListener('click', async () => {
+      try {
+        const added = await CID.addContact(r);
+        CID.dropRequest(r.fp);
+        renderContacts();
+        subscribeUnread();
+        if (added) announceToContact(added);
+        sys(`${added && added.name ? added.name : 'contact'} added — you can message each other now.`);
+      } catch (err) {
+        sys('could not accept: ' + err.message);
+      }
+    });
+    const no = document.createElement('button');
+    no.type = 'button';
+    no.className = 'comms__btn comms__btn--ghost';
+    no.textContent = 'ignore';
+    no.addEventListener('click', () => { CID.dropRequest(r.fp); renderContacts(); });
+    row.append(name, fp, spacer, ok, no);
+    els.contactList.append(row);
+  });
+
   const contacts = CID.getContacts();
-  if (!contacts.length) {
+  if (!contacts.length && !requests.length) {
     const empty = document.createElement('div');
     empty.className = 'comms__id-note';
-    empty.textContent = 'no contacts yet. trade codes with someone, or press + on a peer in a room.';
+    empty.textContent = 'no one here yet — tap “my code” to share yours, or paste someone else\'s code below.';
     els.contactList.append(empty);
     return;
   }
@@ -1331,6 +1628,14 @@ const renderContacts = () => {
     const name = document.createElement('span');
     name.className = 'comms__contact-name';
     name.textContent = c.name || '(unnamed)';
+    const unread = (unreadMap[c.fp] && unreadMap[c.fp].n) || 0;
+    if (unread > 0) {
+      const badge = document.createElement('span');
+      badge.className = 'comms__unread';
+      badge.textContent = unread > 99 ? '99+' : String(unread);
+      badge.title = unread + ' unread';
+      name.append(' ', badge);
+    }
     const fp = document.createElement('span');
     fp.className = 'comms__contact-fp';
     fp.textContent = c.fp;
@@ -1345,8 +1650,9 @@ const renderContacts = () => {
       try {
         const { roomName, b64Key } = await CID.deriveDm(myId.privateKey, c.pub);
         els.room.value = roomName;
-        els.contacts.hidden = true;
-        await joinNew(roomName, b64Key);
+        clearUnreadFor(c.fp);
+        renderContacts();
+        await joinNew(roomName, b64Key, { share: false });
         currentDmContact = c;
         sys(`private room with ${c.name || c.fp} — only your two identities can derive it.`);
       } catch (err) {
@@ -1374,16 +1680,138 @@ els.contactAdd.addEventListener('click', async () => {
     const payload = CID.decodeContactCode(els.contactIn.value);
     const saved = await CID.addContact(payload);
     els.contactIn.value = '';
-    sys(`contact added: ${saved.name || saved.fp}`);
     renderContacts();
+    subscribeUnread();
+    const reached = await announceToContact(saved);
+    sys(reached
+      ? `contact added: ${saved.name || saved.fp} — they'll see your request next time they open comms.`
+      : `contact added: ${saved.name || saved.fp}`);
   } catch (err) {
     sys('could not add contact: ' + err.message);
   }
 });
 els.contactIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.contactAdd.click(); } });
 
+const RECOVERY_ALPHA = 'abcdefghjkmnpqrstuvwxyz23456789';
+const makeRecoveryCode = () => {
+  const bytes = crypto.getRandomValues(new Uint8Array(20));
+  let out = '';
+  for (let i = 0; i < 20; i++) {
+    if (i && i % 5 === 0) out += '-';
+    out += RECOVERY_ALPHA[bytes[i] % RECOVERY_ALPHA.length];
+  }
+  return out;
+};
+
+const showOnboardStep = (which) => {
+  els.obIntro.hidden = which !== 'intro';
+  els.obForm.hidden = which !== 'form';
+  els.obDone.hidden = which !== 'done';
+};
+
+els.obStart.addEventListener('click', () => {
+  showOnboardStep('form');
+  els.obName.focus();
+});
+
+els.obName.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.obCreate.click(); } });
+
+const setOnboardMethod = (ok) => {
+  els.obMethod.textContent = ok
+    ? 'Your device lock now unlocks comms — no password to remember.'
+    : 'This device can\'t use a passkey for encryption yet, so your recovery code is how you unlock.';
+  els.obPasskey.hidden = ok;
+};
+
+els.obCreate.addEventListener('click', async () => {
+  const name = (els.obName.value || '').trim().slice(0, 32);
+  if (!name) { els.obErr.hidden = false; els.obErr.textContent = 'pick a name first — it\'s only shared with people you add.'; els.obName.focus(); return; }
+  els.obErr.hidden = true;
+  els.obCreate.disabled = true;
+  const prevLabel = els.obCreate.textContent;
+  els.obCreate.textContent = 'setting up…';
+  try {
+    const code = makeRecoveryCode();
+    await window.MentriaIdentity.setup(code);
+    CID.setProfile({ name });
+    let passkeyOk = false;
+    try { await window.MentriaIdentity.enrollPasskey(); passkeyOk = true; } catch (_) { passkeyOk = false; }
+    els.obCode.textContent = code;
+    setOnboardMethod(passkeyOk);
+    showOnboardStep('done');
+    await initIdentity();
+  } catch (err) {
+    els.obErr.hidden = false;
+    els.obErr.textContent = 'could not set up: ' + (err && err.message ? err.message : err);
+  } finally {
+    els.obCreate.disabled = false;
+    els.obCreate.textContent = prevLabel;
+  }
+});
+
+els.obPasskey.addEventListener('click', async () => {
+  els.obPasskey.disabled = true;
+  try {
+    await window.MentriaIdentity.enrollPasskey();
+    setOnboardMethod(true);
+  } catch (err) {
+    const code = err && err.message;
+    els.obMethod.textContent = code === 'prf-unsupported'
+      ? 'This device can\'t use a passkey for encryption yet, so your recovery code is how you unlock.'
+      : 'That didn\'t work — your recovery code still unlocks everything. You can try again in identity settings.';
+    els.obPasskey.hidden = true;
+  } finally {
+    els.obPasskey.disabled = false;
+  }
+});
+
+els.obCopy.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(els.obCode.textContent || '');
+    els.obCopy.textContent = 'copied';
+    setTimeout(() => { els.obCopy.textContent = 'copy code'; }, 1600);
+  } catch (_) {}
+});
+
+els.obContinue.addEventListener('click', () => {
+  onboardDone = true;
+  onboardActive = false;
+  refreshIdUI();
+  if (!hasRoomHash()) els.contactIn.focus();
+});
+
+els.setupHere.addEventListener('click', () => {
+  onboardDone = false;
+  onboardActive = true;
+  refreshIdUI();
+  showOnboardStep('intro');
+  els.onboard.scrollIntoView({ block: 'center', behavior: 'smooth' });
+});
+
+els.advToggle.addEventListener('click', () => {
+  const open = els.adv.hidden;
+  els.adv.hidden = !open;
+  els.advToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) els.adv.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+});
+
+els.newRoom.addEventListener('click', async () => {
+  const name = EPHEMERAL_PREFIX + randomRoomSlug();
+  const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
+  els.room.value = name;
+  await joinNew(name, key);
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    els.newRoom.textContent = 'link copied';
+    setTimeout(() => { els.newRoom.textContent = 'new room link'; }, 2000);
+  } catch (_) {}
+});
+
 refreshIdUI();
 if (CID.idState() === 'unlocked') initIdentity();
+else if (CID.idState() === 'locked' && window.MentriaIdentity && MentriaIdentity.tryDeviceUnlock) {
+  MentriaIdentity.tryDeviceUnlock().then((ok) => { if (ok) initIdentity(); else refreshIdUI(); });
+}
 
 function randomRoomSlug() {
   const bytes = crypto.getRandomValues(new Uint8Array(5));
@@ -1396,27 +1824,34 @@ function randomRoomSlug() {
   return out;
 }
 
-let initialRoom, initialKey;
-const hasHash = window.location.hash && window.location.hash !== '#';
-if (hasHash) {
-  const parsed = parseHash(window.location.hash);
-  initialRoom = parsed.room;
-  initialKey = parsed.b64Key;
-} else {
-  initialRoom = EPHEMERAL_PREFIX + randomRoomSlug();
-  initialKey = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
-  window.history.replaceState(null, '', formatHash(initialRoom, initialKey));
+const bootHash = window.location.hash && window.location.hash !== '#' ? parseHash(window.location.hash) : null;
+if (bootHash && isDmRoom(bootHash.room)) {
+  window.history.replaceState(null, '', window.location.pathname + window.location.search);
 }
-els.room.value = initialRoom;
-refreshShareUrl(initialRoom, initialKey);
-window.addEventListener('load', () => joinNew(initialRoom, initialKey));
+const hasHash = !!bootHash && !isDmRoom(bootHash.room);
+if (hasHash) {
+  const parsed = bootHash;
+  els.room.value = parsed.room;
+  refreshShareUrl(parsed.room, parsed.b64Key);
+  window.addEventListener('load', () => joinNew(parsed.room, parsed.b64Key));
+} else {
+  window.addEventListener('load', () => {
+    if (CID.idState() === 'unlocked') sys('pick someone below to start a private chat — or open ⚙ for a shareable room link.');
+  });
+}
 window.addEventListener('hashchange', () => {
   const next = parseHash(window.location.hash);
+  if (isDmRoom(next.room)) {
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    refreshIdUI();
+    return;
+  }
   const sameRoom = next.room === (els.room.value || '').trim();
   const sameKey = next.b64Key === (chatKey ? next.b64Key : null);
   if (!sameRoom || !sameKey) {
     els.room.value = next.room;
     joinNew(next.room, next.b64Key);
   }
+  refreshIdUI();
 });
 </script>

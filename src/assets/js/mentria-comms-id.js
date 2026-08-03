@@ -74,9 +74,97 @@ export const deriveDm = async (privateKey, theirPubJwk) => {
   const nameHash = new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode('mentria-dm-room-v1|' + b64uEnc(bits))));
   const keyHash = new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode('mentria-dm-key-v1|' + b64uEnc(bits))));
   return {
-    roomName: '!dm-' + b64uEnc(nameHash.slice(0, 9)),
+    roomName: 'dm-' + b64uEnc(nameHash.slice(0, 9)),
     b64Key: b64uEnc(keyHash)
   };
+};
+
+export const inboxTopic = async (pubJwk) => {
+  const digest = await crypto.subtle.digest('SHA-256', te.encode('mentria-inbox-v1|' + pubJwk.x + '|' + pubJwk.y));
+  return 'mentria-inbox-v1|' + b64uEnc(new Uint8Array(digest).slice(0, 12));
+};
+
+const importPub = (pub) => crypto.subtle.importKey(
+  'jwk',
+  { kty: 'EC', crv: 'P-256', x: pub.x, y: pub.y },
+  { name: 'ECDH', namedCurve: 'P-256' },
+  false,
+  []
+);
+
+const sealKey = async (bits, epkX) => {
+  const base = await crypto.subtle.importKey('raw', bits, 'HKDF', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'HKDF', hash: 'SHA-256', salt: te.encode(epkX), info: te.encode('mentria-inbox-seal-v1') },
+    base,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+};
+
+export const sealToInbox = async (theirPubJwk, payload) => {
+  const eph = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+  const epk = await crypto.subtle.exportKey('jwk', eph.publicKey);
+  const theirKey = await importPub(theirPubJwk);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: theirKey }, eph.privateKey, 256));
+  const key = await sealKey(bits, epk.x);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(payload)));
+  return { v: 1, epk: { x: epk.x, y: epk.y }, iv: b64uEnc(iv), ct: b64uEnc(new Uint8Array(ct)) };
+};
+
+export const openInboxEnvelope = async (myPrivateKey, envelope) => {
+  if (!envelope || envelope.v !== 1 || !envelope.epk || !envelope.iv || !envelope.ct) return null;
+  try {
+    const ephKey = await importPub(envelope.epk);
+    const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: ephKey }, myPrivateKey, 256));
+    const key = await sealKey(bits, envelope.epk.x);
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64uDec(envelope.iv) }, key, b64uDec(envelope.ct));
+    const payload = JSON.parse(new TextDecoder().decode(pt));
+    if (!payload || payload.v !== 1 || !payload.pub || !payload.pub.x || !payload.pub.y) return null;
+    return payload;
+  } catch (_) {
+    return null;
+  }
+};
+
+export const getRequests = () => {
+  const r = store() && store().get(NS, 'requests');
+  return Array.isArray(r) ? r : [];
+};
+
+export const saveRequest = async (payload) => {
+  const fp = await fingerprint(payload.pub);
+  if (getContacts().some((c) => c.fp === fp)) return null;
+  const list = getRequests();
+  if (list.some((r) => r.fp === fp)) return null;
+  const entry = {
+    fp,
+    name: String(payload.name || '').slice(0, 32),
+    pub: { x: payload.pub.x, y: payload.pub.y },
+    ring: payload.ring ? String(payload.ring).slice(0, 64) : undefined,
+    note: payload.note ? String(payload.note).slice(0, 140) : undefined,
+    ts: Date.now()
+  };
+  list.push(entry);
+  store().set(NS, 'requests', list.slice(-20));
+  return entry;
+};
+
+export const dropRequest = (fp) => {
+  const list = getRequests().filter((r) => r.fp !== fp);
+  if (list.length) store().set(NS, 'requests', list);
+  else store().remove(NS, 'requests');
+};
+
+export const getUnread = () => {
+  const u = store() && store().get(NS, 'unread');
+  return (u && typeof u === 'object') ? u : {};
+};
+
+export const setUnread = (map) => {
+  store().set(NS, 'unread', map || {});
 };
 
 export const getProfile = () => {

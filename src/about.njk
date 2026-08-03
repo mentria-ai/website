@@ -157,11 +157,16 @@ eleventyComputed:
           <input type="password" id="about-identity-unlock-pass" autocomplete="current-password">
         </label>
         <button type="button" class="about-data-btn" id="about-identity-unlock-btn">{{ "about.identity_unlock_button" | t }}</button>
+        <button type="button" class="about-data-btn" id="about-identity-passkey-unlock" hidden>{{ "about.identity_passkey_unlock" | t }}</button>
       </div>
 
       <div class="about-identity-actions about-identity-actions--unlocked" id="about-identity-unlocked" hidden>
         <button type="button" class="about-data-btn" id="about-identity-sync-btn">{{ "about.identity_sync_button" | t }}</button>
         <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-lock-btn">{{ "about.identity_lock_button" | t }}</button>
+        <button type="button" class="about-data-btn" id="about-identity-passkey-add" hidden>{{ "about.identity_passkey_add" | t }}</button>
+        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-passkey-remove" hidden>{{ "about.identity_passkey_remove" | t }}</button>
+        <label class="about-identity-device"><input type="checkbox" id="about-identity-device"> {{ "about.identity_device_label" | t }}</label>
+        <p class="about-data-card__p about-identity-note" id="about-identity-passkey-note">{{ "about.identity_device_note" | t }}</p>
       </div>
     </div>
 
@@ -848,7 +853,12 @@ eleventyComputed:
       mismatch:       {{ ('about.identity_mismatch'       | t) | dump | safe }},
       tooShort:       {{ ('about.identity_too_short'      | t) | dump | safe }},
       unlockFailed:   {{ ('about.identity_unlock_failed'  | t) | dump | safe }},
-      setupReminder:  {{ ('about.identity_setup_reminder' | t) | dump | safe }}
+      setupReminder:  {{ ('about.identity_setup_reminder' | t) | dump | safe }},
+      passkeyAdded:   {{ ('about.identity_passkey_added'  | t) | dump | safe }},
+      passkeyFailed:  {{ ('about.identity_passkey_failed' | t) | dump | safe }},
+      passkeyUnsupported: {{ ('about.identity_passkey_unsupported' | t) | dump | safe }},
+      passkeyMismatch:    {{ ('about.identity_passkey_mismatch'    | t) | dump | safe }},
+      passkeyRemoveConfirm: {{ ('about.identity_passkey_remove_confirm' | t) | dump | safe }}
     };
     var statusEl = document.getElementById('about-identity-status');
     var ledeEl   = document.getElementById('about-identity-lede');
@@ -926,6 +936,66 @@ eleventyComputed:
     lockBtn.addEventListener('click', function () {
       window.MentriaIdentity.lock();
       refresh();
+    });
+
+    var pkUnlockBtn = document.getElementById('about-identity-passkey-unlock');
+    var pkAddBtn = document.getElementById('about-identity-passkey-add');
+    var pkRemoveBtn = document.getElementById('about-identity-passkey-remove');
+    var deviceToggle = document.getElementById('about-identity-device');
+
+    function refreshPasskeyUI() {
+      var I = window.MentriaIdentity;
+      if (!I) return;
+      var hasPk = I.hasPasskey();
+      pkUnlockBtn.hidden = !hasPk;
+      pkAddBtn.hidden = hasPk || !I.isUnlocked();
+      pkRemoveBtn.hidden = !hasPk || !I.isUnlocked();
+      deviceToggle.checked = I.hasDeviceUnlock();
+    }
+
+    var origRefresh = refresh;
+    refresh = function () { origRefresh(); refreshPasskeyUI(); };
+
+    pkUnlockBtn.addEventListener('click', async function () {
+      pkUnlockBtn.disabled = true;
+      try {
+        await window.MentriaIdentity.unlockWithPasskey();
+        refresh();
+      } catch (err) {
+        window.mentriaAlert(COPY.passkeyFailed);
+      } finally { pkUnlockBtn.disabled = false; }
+    });
+
+    pkAddBtn.addEventListener('click', async function () {
+      pkAddBtn.disabled = true;
+      try {
+        await window.MentriaIdentity.enrollPasskey();
+        refresh();
+        window.mentriaAlert(COPY.passkeyAdded);
+      } catch (err) {
+        var m = String(err && err.message || err);
+        window.mentriaAlert(m === 'prf-unsupported' ? COPY.passkeyUnsupported : m === 'prf-mismatch' ? COPY.passkeyMismatch : COPY.passkeyFailed);
+      } finally { pkAddBtn.disabled = false; }
+    });
+
+    pkRemoveBtn.addEventListener('click', async function () {
+      var ok = await window.mentriaConfirm(COPY.passkeyRemoveConfirm);
+      if (!ok) return;
+      window.MentriaIdentity.removePasskey();
+      refresh();
+    });
+
+    deviceToggle.addEventListener('change', async function () {
+      try {
+        await window.MentriaIdentity.setDeviceUnlock(deviceToggle.checked);
+      } catch (err) {
+        window.mentriaAlert(String(err && err.message || err));
+      }
+      refresh();
+    });
+
+    waitFor('MentriaIdentity', function () {
+      window.MentriaIdentity.tryDeviceUnlock().then(function () { refresh(); });
     });
 
     syncBtn.addEventListener('click', async function () {

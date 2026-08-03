@@ -113,7 +113,17 @@
     "identity_too_short": "A senha deve ter pelo menos 8 caracteres.",
     "identity_unlock_failed": "Falha ao desbloquear — senha incorreta ou cofre corrompido.",
     "identity_setup_reminder": "Identidade criada. Agora vá em \"Seus dados\" acima e baixe um backup criptografado — restaurá-lo em outro dispositivo dá a ele a mesma identidade.",
-    "sync_confirm_replace": "Este dispositivo já tem dados de: {areas}. O pareamento vai substituí-los pela cópia do outro dispositivo — uma cópia de resgate fica salva neste dispositivo. Continuar?"
+    "sync_confirm_replace": "Este dispositivo já tem dados de: {areas}. O pareamento vai substituí-los pela cópia do outro dispositivo — uma cópia de resgate fica salva neste dispositivo. Continuar?",
+    "identity_passkey_unlock": "Desbloquear com chave de acesso",
+    "identity_passkey_add": "Adicionar uma chave de acesso",
+    "identity_passkey_remove": "Remover chave de acesso",
+    "identity_passkey_added": "Chave de acesso adicionada. Ela sincroniza com o Chaveiro do iCloud ou sua conta Google, então seus outros aparelhos também podem desbloquear. Guarde sua frase-senha — ela é sua chave de recuperação.",
+    "identity_passkey_failed": "O desbloqueio com a chave de acesso não funcionou. Você sempre pode usar sua frase-senha.",
+    "identity_passkey_unsupported": "Este navegador ou gerenciador de senhas ainda não consegue derivar chaves de criptografia de uma chave de acesso. Sua frase-senha continua funcionando em todo lugar.",
+    "identity_passkey_mismatch": "A chave de acesso retornou chaves inconsistentes e não foi salva. Seu cofre está intacto — tente de novo diretamente neste aparelho.",
+    "identity_passkey_remove_confirm": "Remover o desbloqueio por chave de acesso? A chave continua no seu gerenciador, mas não vai mais desbloquear este cofre.",
+    "identity_device_label": "Lembrar deste aparelho",
+    "identity_device_note": "Lembrar deste aparelho desbloqueia automaticamente neste navegador — conveniente, mas qualquer pessoa usando este perfil pode abrir. A chave de acesso e a frase-senha continuam disponíveis."
   },
   "common": {
     "tldr": {

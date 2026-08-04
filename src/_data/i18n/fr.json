@@ -8,7 +8,9 @@
   "nav": {
     "feed": "Fil",
     "tools": "Outils",
-    "home": "Accueil"
+    "home": "Accueil",
+    "comms": "Comms",
+    "search": "Recherche"
   },
   "footer": {
     "copyright": "© 2026 Mentria. Tous droits réservés."

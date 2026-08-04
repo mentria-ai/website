@@ -8,7 +8,9 @@
   "nav": {
     "feed": "フィード",
     "tools": "ツール",
-    "home": "ホーム"
+    "home": "ホーム",
+    "comms": "コムズ",
+    "search": "検索"
   },
   "footer": {
     "copyright": "© 2026 Mentria. 無断転載を禁じます。"

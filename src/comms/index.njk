@@ -715,7 +715,16 @@ const renderLine = (who, what, opts = {}) => {
   if (opts.html) t.innerHTML = opts.html; else t.textContent = what;
   if (opts.quiet) line.setAttribute('aria-live', 'off');
   line.append(w, t);
-  els.log.append(line);
+  const ts = (typeof opts.ts === 'number' && opts.ts > 0) ? opts.ts : Date.now();
+  line.dataset.ts = String(ts);
+  const kids = els.log.children;
+  let ref = null;
+  for (let i = kids.length - 1; i >= 0; i--) {
+    if (Number(kids[i].dataset.ts || 0) <= ts) break;
+    ref = kids[i];
+  }
+  if (ref) els.log.insertBefore(line, ref);
+  else els.log.append(line);
   els.log.scrollTop = els.log.scrollHeight;
   return { line, what: t };
 };
@@ -741,6 +750,7 @@ const updatePeers = () => {
 };
 
 let currentRoomName = null;
+let roomJoinedAt = 0;
 let pendingResends = 0;
 const setConnUI = () => {
   const offline = !navigator.onLine;
@@ -812,12 +822,6 @@ const flushHistory = () => {
   if (!historyBuffered) return;
   historyBuffered = false;
   if (historyTimer) { clearTimeout(historyTimer); historyTimer = null; }
-  historyBuffer.sort((a, b) => a.ts - b.ts);
-  if (historyBuffer.length) {
-    sys(`— recent history (${historyBuffer.length}) —`);
-    historyBuffer.forEach(item => renderRemoteChat(item, { silent: true }));
-    sys('— live —');
-  }
   historyBuffer = [];
 };
 
@@ -845,10 +849,11 @@ const handleNostrMsg = async (msgEvent) => {
     }
     seenCmids.add(content.cmid);
     const senderId = (content.cmid.split(':')[0]) || ev.pubkey;
-    const ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : ((ev.created_at || 0) * 1000);
+    const evTs = (ev.created_at || 0) * 1000;
+    let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
+    if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
     const item = { senderId, text, ts, sfp };
-    if (historyBuffered) historyBuffer.push(item);
-    else renderRemoteChat(item);
+    renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   } else if (msg[0] === 'EOSE' && msg[1] === chatSubId) {
     flushHistory();
   }
@@ -980,6 +985,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   revokeObjectUrls();
   currentDmContact = null;
   els.log.innerHTML = '';
+  roomJoinedAt = Date.now();
   els.status.textContent = 'connecting…';
   els.peers.hidden = true;
   els.enc.hidden = true;
@@ -1121,10 +1127,6 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
       text = String(data && data.text || '');
     }
     if (cmid) seenCmids.add(cmid);
-    if (historyBuffered) {
-      historyBuffer.push({ senderId: ctx.peerId, text, ts: Date.now(), sfp });
-      return;
-    }
     renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp });
     playPing(880);
     bumpUnread();
@@ -1771,6 +1773,14 @@ const initRingToken = async () => {
     if (window.MentriaStore) MentriaStore.set('comms', 'ring_token', token);
     refreshMyCode();
     broadcastProfile();
+    try {
+      const announced = MentriaStore.get('comms', 'ring_announced');
+      if (announced !== token) {
+        const contacts = CID.getContacts();
+        await Promise.all(contacts.map((c) => announceToContact(c).catch(() => {})));
+        MentriaStore.set('comms', 'ring_announced', token);
+      }
+    } catch (_) {}
   }
 };
 
@@ -1784,6 +1794,7 @@ const maybeRingContact = () => {
 const syncOsBadge = async () => {
   let total = 0;
   for (const fp of Object.keys(unreadMap)) total += (unreadMap[fp] && unreadMap[fp].n) || 0;
+  try { window.dispatchEvent(new CustomEvent('mentria:comms:unread', { detail: { total } })); } catch (_) {}
   try {
     if (total > 0) {
       if (navigator.setAppBadge) await navigator.setAppBadge(total);

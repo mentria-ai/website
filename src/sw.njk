@@ -129,6 +129,7 @@ const ASSETS = [
   '/assets/js/mentria-gamepad.js',
   '/assets/js/mentria-push-db.js',
   '/assets/js/mentria-push.js',
+  '/assets/js/mentria-comms-nav.js',
   '/comms/',
   '/assets/vendor/trystero-nostr.js'
 ];
@@ -186,6 +187,10 @@ self.addEventListener('push', event => {
         await self.MentriaPushDB.kvSet('comms-msg-count', n);
       } catch (_) {}
       try { if (self.navigator && self.navigator.setAppBadge) self.navigator.setAppBadge(n); } catch (_) {}
+      try {
+        const cs = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        cs.forEach((c) => { try { c.postMessage({ type: 'comms-unread', n }); } catch (_) {} });
+      } catch (_) {}
       await self.registration.showNotification('comms', {
         body: n > 1 ? n + ' new encrypted messages' : 'New encrypted message',
         tag: 'comms-msg',

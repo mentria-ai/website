@@ -110,6 +110,12 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
       <button class="comms__btn comms__btn--danger comms__btn--icon" id="comms-call-hangup" type="button" hidden title="hang up" aria-label="hang up"><svg class="comms__i" aria-hidden="true"><use href="#ci-hangup"></use></svg></button>
     </div>
 
+    <div class="comms__notif" id="comms-notif" hidden>
+      <span class="comms__notif-text">get a notification when a message arrives — even with comms closed</span>
+      <button class="comms__btn" id="comms-notif-enable" type="button">enable</button>
+      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-notif-dismiss" type="button" title="not now" aria-label="not now"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus" style="transform:rotate(45deg);transform-origin:center"></use></svg></button>
+    </div>
+
     <div class="comms__id-row" id="comms-id-none" hidden>
       <span class="comms__id-note">you're in a shared room as a guest. set up an identity to use your name, contacts and direct messages.</span>
       <button class="comms__btn comms__btn--ghost" id="comms-id-setup-here" type="button">set up</button>
@@ -409,6 +415,10 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 @media (hover:none){.comms__rowbtn{opacity:.55}}
 .comms__chev{color:#3a4148;flex:none;display:flex;align-items:center}
 .comms__contacts-empty{padding:.65rem .3rem}
+.comms__notif{display:flex;align-items:center;gap:.6rem;background:rgba(110,243,197,.05);border:1px solid rgba(110,243,197,.25);border-radius:10px;padding:.55rem .75rem}
+.comms__notif[hidden]{display:none}
+.comms__notif-text{flex:1;color:#c3ccd6;font-size:.78rem;line-height:1.45}
+.comms__app--chat .comms__notif{display:none}
 .comms__addopt{display:flex;align-items:center;gap:.65rem;width:100%;background:#0a0d10;border:1px solid #2a3138;border-radius:12px;padding:.75rem .85rem;color:#e6edf3;font:inherit;font-size:.88rem;cursor:pointer;min-height:48px;transition:border-color .15s}
 .comms__addopt:hover{border-color:var(--accent,#6ef3c5)}
 .comms__addopt .comms__i{color:var(--accent,#6ef3c5);width:1.25em;height:1.25em}
@@ -489,7 +499,8 @@ const els = {
   scan: $('comms-scan'), scanWrap: $('comms-scan-wrap'), scanVideo: $('comms-scan-video'),
   scanNote: $('comms-scan-note'), scanStop: $('comms-scan-stop'),
   scanZoom: $('comms-scan-zoom'), scanZoomWrap: $('comms-scan-zoom-wrap'), scanTorch: $('comms-scan-torch'),
-  chatTitle: $('comms-chat-title'), chatAvatar: $('comms-chat-avatar'), profAvatar: $('comms-prof-avatar')
+  chatTitle: $('comms-chat-title'), chatAvatar: $('comms-chat-avatar'), profAvatar: $('comms-prof-avatar'),
+  notif: $('comms-notif'), notifEnable: $('comms-notif-enable'), notifDismiss: $('comms-notif-dismiss')
 };
 
 const setView = (v) => {
@@ -677,6 +688,11 @@ const renderPeerList = () => {
   });
 };
 
+const hhmmOf = (ts) => {
+  const d = ts ? new Date(ts) : new Date();
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+};
+
 const renderLine = (who, what, opts = {}) => {
   const line = document.createElement('div');
   line.className = 'comms__line' + (opts.sys ? ' comms__line--sys' : opts.me ? ' comms__line--me' : ' comms__line--peer');
@@ -685,13 +701,13 @@ const renderLine = (who, what, opts = {}) => {
   if (opts.sys) {
     w.hidden = true;
   } else if (opts.me) {
-    w.textContent = nowHHMM();
+    w.textContent = hhmmOf(opts.ts);
   } else {
     w.textContent = who;
     if (opts.peerId) w.style.color = peerColor(opts.peerId);
     const time = document.createElement('span');
     time.className = 'comms__time';
-    time.textContent = nowHHMM();
+    time.textContent = hhmmOf(opts.ts);
     w.append(time);
   }
   const t = document.createElement('span');
@@ -773,8 +789,23 @@ const refreshShareUrl = (roomName, b64Key) => {
 };
 
 const renderRemoteChat = (item, opts = {}) => {
-  renderLine(displayName(item.senderId), item.text, { peerId: item.senderId, quiet: !!opts.silent });
+  if (item.sfp && myFp && item.sfp === myFp) {
+    renderLine('you', item.text, { me: true, quiet: true, ts: item.ts });
+    return;
+  }
+  let who = displayName(item.senderId);
+  if (currentDmContact && item.sfp && currentDmContact.fp === item.sfp) who = currentDmContact.name || who;
+  renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
   if (!opts.silent) playPing(880);
+};
+
+const packChatPlain = (text) => JSON.stringify({ v: 2, t: text, sfp: myFp || undefined });
+const unpackChatPlain = (raw) => {
+  try {
+    const o = JSON.parse(raw);
+    if (o && o.v === 2 && typeof o.t === 'string') return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null };
+  } catch (_) {}
+  return { text: raw, sfp: null };
 };
 
 const flushHistory = () => {
@@ -799,10 +830,14 @@ const handleNostrMsg = async (msgEvent) => {
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
     if (!content || !content.cmid || seenCmids.has(content.cmid)) return;
-    let text;
+    let text, sfp = null;
     if (content.enc) {
       if (!chatKey) return;
-      try { text = await decryptText(chatKey, content.enc); } catch { return; }
+      try {
+        const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
+        text = unpacked.text;
+        sfp = unpacked.sfp;
+      } catch { return; }
     } else if (typeof content.text === 'string') {
       text = content.text;
     } else {
@@ -811,7 +846,7 @@ const handleNostrMsg = async (msgEvent) => {
     seenCmids.add(content.cmid);
     const senderId = (content.cmid.split(':')[0]) || ev.pubkey;
     const ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : ((ev.created_at || 0) * 1000);
-    const item = { senderId, text, ts };
+    const item = { senderId, text, ts, sfp };
     if (historyBuffered) historyBuffer.push(item);
     else renderRemoteChat(item);
   } else if (msg[0] === 'EOSE' && msg[1] === chatSubId) {
@@ -882,12 +917,31 @@ const setupChatPersistence = async (roomName) => {
   historyTimer = setTimeout(flushHistory, HISTORY_FLUSH_TIMEOUT_MS);
 };
 
+const rememberSentCmid = (cmid) => {
+  if (!currentDmContact || !cmid) return;
+  try {
+    const log = MentriaStore.get('comms', 'sentlog') || {};
+    const arr = Array.isArray(log[currentDmContact.fp]) ? log[currentDmContact.fp] : [];
+    arr.push(cmid);
+    log[currentDmContact.fp] = arr.slice(-300);
+    MentriaStore.set('comms', 'sentlog', log);
+  } catch (_) {}
+};
+
+const sentCmidsFor = (fp) => {
+  try {
+    const log = MentriaStore.get('comms', 'sentlog') || {};
+    return Array.isArray(log[fp]) ? log[fp] : [];
+  } catch (_) { return []; }
+};
+
 const publishChat = async (text, cmid) => {
   if (!chatTopic || !chatPersist) return;
+  rememberSentCmid(cmid);
   try {
     let payload;
     if (chatKey) {
-      const enc = await encryptText(chatKey, text);
+      const enc = await encryptText(chatKey, packChatPlain(text));
       payload = { cmid, ts: Date.now(), enc };
     } else {
       payload = { text, cmid, ts: Date.now() };
@@ -931,6 +985,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   els.enc.hidden = true;
 
   if (opts.leave || !roomName) {
+    if (currentDmContact) clearUnreadFor(currentDmContact.fp);
     currentRoomName = null;
     currentDmContact = null;
     els.room.value = '';
@@ -1037,6 +1092,15 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     if (typeof data.ring === 'string') prof.ring = data.ring.slice(0, 64);
     const known = peerProfiles.get(ctx.peerId);
     peerProfiles.set(ctx.peerId, prof);
+    if (prof.fp && prof.ring && prof.pub) {
+      const existing = CID.getContacts().find((c) => c.fp === prof.fp);
+      if (existing && existing.ring !== prof.ring) {
+        try {
+          await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring });
+          if (currentDmContact && currentDmContact.fp === prof.fp) currentDmContact.ring = prof.ring;
+        } catch (_) {}
+      }
+    }
     renderPeerList();
     if (!known && prof.name) sys(`${short(ctx.peerId)} is ${prof.name}${prof.fp ? ' (' + prof.fp + ')' : ''}`);
   };
@@ -1045,19 +1109,23 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   chatAction.onMessage = async (data, ctx) => {
     const cmid = data && data.cmid;
     if (cmid && seenCmids.has(cmid)) return;
-    let text;
+    let text, sfp = null;
     if (data && data.enc) {
       if (!chatKey) return;
-      try { text = await decryptText(chatKey, data.enc); } catch { return; }
+      try {
+        const unpacked = unpackChatPlain(await decryptText(chatKey, data.enc));
+        text = unpacked.text;
+        sfp = unpacked.sfp;
+      } catch { return; }
     } else {
       text = String(data && data.text || '');
     }
     if (cmid) seenCmids.add(cmid);
     if (historyBuffered) {
-      historyBuffer.push({ senderId: ctx.peerId, text, ts: Date.now() });
+      historyBuffer.push({ senderId: ctx.peerId, text, ts: Date.now(), sfp });
       return;
     }
-    renderLine(displayName(ctx.peerId), text, { peerId: ctx.peerId });
+    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp });
     playPing(880);
     bumpUnread();
   };
@@ -1180,7 +1248,7 @@ els.send.addEventListener('submit', async (e) => {
   let livePayload;
   if (chatKey) {
     try {
-      const enc = await encryptText(chatKey, text);
+      const enc = await encryptText(chatKey, packChatPlain(text));
       livePayload = { cmid, enc };
     } catch (err) {
       sys('encryption failed: ' + err.message);
@@ -1589,6 +1657,12 @@ const handleSideMsg = async (msgEvent) => {
     try { envelope = JSON.parse(ev.content); } catch { return; }
     const payload = await CID.openInboxEnvelope(myId.privateKey, envelope);
     if (!payload) return;
+    let existingFp = null;
+    try { existingFp = await CID.fingerprint(payload.pub); } catch (_) {}
+    if (existingFp && CID.getContacts().some((c) => c.fp === existingFp)) {
+      try { await CID.addContact(payload); renderContacts(); } catch (_) {}
+      return;
+    }
     const saved = await CID.saveRequest(payload);
     if (saved) {
       renderContacts();
@@ -1602,11 +1676,21 @@ const handleSideMsg = async (msgEvent) => {
     const tag = (ev.tags || []).find((t) => t && t[0] === 'x');
     const fp = tag && topicToFp.get(tag[1]);
     if (!fp) return;
-    if (currentDmContact && currentDmContact.fp === fp) return;
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
-    if (content && typeof content.cmid === 'string' && content.cmid.startsWith(selfId + ':')) return;
     const ts = (content && typeof content.ts === 'number') ? content.ts : (ev.created_at || 0) * 1000;
+    if (currentDmContact && currentDmContact.fp === fp) {
+      const seen = unreadMap[fp] || { n: 0, lastTs: 0 };
+      seen.n = 0;
+      seen.lastTs = Math.max(seen.lastTs || 0, ts, Date.now());
+      unreadMap[fp] = seen;
+      try { CID.setUnread(unreadMap); } catch (_) {}
+      return;
+    }
+    if (content && typeof content.cmid === 'string') {
+      if (content.cmid.startsWith(selfId + ':')) return;
+      if (sentCmidsFor(fp).includes(content.cmid)) return;
+    }
     const entry = unreadMap[fp] || { n: 0, lastTs: 0 };
     if (ts <= entry.lastTs) return;
     entry.n = (entry.n || 0) + 1;
@@ -1643,6 +1727,36 @@ const refreshIdUI = () => {
   els.contacts.hidden = state !== 'unlocked';
   if (state !== 'unlocked') els.idCard.hidden = true;
 };
+
+const refreshNotifBanner = () => {
+  const dismissed = !!(window.MentriaStore && MentriaStore.get('comms', 'notif_dismissed'));
+  const show = !!(window.MentriaPush && MentriaPush.isSupported() && MentriaPush.permission() === 'default'
+    && CID.idState() === 'unlocked' && !dismissed);
+  els.notif.hidden = !show;
+};
+
+els.notifDismiss.addEventListener('click', () => {
+  try { MentriaStore.set('comms', 'notif_dismissed', true); } catch (_) {}
+  els.notif.hidden = true;
+});
+
+els.notifEnable.addEventListener('click', async () => {
+  els.notifEnable.disabled = true;
+  try {
+    const ok = await MentriaPush.requestPermission();
+    if (ok) {
+      await initRingToken();
+      const contacts = CID.getContacts();
+      for (const c of contacts) { try { await announceToContact(c); } catch (_) {} }
+      sys('notifications on — your contacts can now reach you when comms is closed.');
+    } else {
+      sys('notifications stayed off. you can enable them from your browser settings later.');
+    }
+  } finally {
+    els.notifEnable.disabled = false;
+    refreshNotifBanner();
+  }
+});
 
 const initRingToken = async () => {
   if (!window.MentriaPush || !MentriaPush.isSupported() || MentriaPush.permission() !== 'granted') return;
@@ -1712,7 +1826,8 @@ const initIdentity = async () => {
     renderContacts();
     syncOsBadge();
     broadcastProfile();
-    initRingToken();
+    await initRingToken();
+    refreshNotifBanner();
     subscribeInbox();
     subscribeUnread();
   } catch (err) {

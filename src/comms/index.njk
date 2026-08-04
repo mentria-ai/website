@@ -70,6 +70,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 
   <div class="comms__lock" id="comms-id-locked" hidden>
     <p class="comms__lock-h">Welcome back</p>
+    <p class="comms__lock-waiting" id="comms-lock-waiting" hidden></p>
     <button class="comms__btn comms__btn--big" id="comms-id-passkey" type="button" hidden>unlock</button>
     <details class="comms__lock-alt" id="comms-lock-alt">
       <summary>use my recovery code instead</summary>
@@ -192,6 +193,10 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
         <button class="comms__btn comms__btn--ghost" id="comms-genkey" type="button" title="generate a fresh encryption key and append it to the URL">+ key</button>
       </div>
       <div class="comms__adv-sec">
+        <span class="comms__lbl">notifications</span>
+        <span class="comms__id-note" id="comms-push-status">…</span>
+      </div>
+      <div class="comms__adv-sec">
         <span class="comms__lbl">this device</span>
         <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">sound: on</button>
         <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">attach extension</button>
@@ -233,6 +238,8 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__lock{display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:2rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px;text-align:center}
 .comms__lock[hidden]{display:none}
 .comms__lock-h{margin:0;color:#c3ccd6;font-size:.95rem}
+.comms__lock-waiting{margin:0;color:var(--accent,#6ef3c5);font-size:.8rem}
+.comms__lock-waiting[hidden]{display:none}
 .comms__lock-alt{width:100%;max-width:24rem;color:#7a838d;font-size:.78rem}
 .comms__lock-alt summary{cursor:pointer;list-style:none;padding:.3rem}
 .comms__lock-alt summary::-webkit-details-marker{display:none}
@@ -500,7 +507,39 @@ const els = {
   scanNote: $('comms-scan-note'), scanStop: $('comms-scan-stop'),
   scanZoom: $('comms-scan-zoom'), scanZoomWrap: $('comms-scan-zoom-wrap'), scanTorch: $('comms-scan-torch'),
   chatTitle: $('comms-chat-title'), chatAvatar: $('comms-chat-avatar'), profAvatar: $('comms-prof-avatar'),
-  notif: $('comms-notif'), notifEnable: $('comms-notif-enable'), notifDismiss: $('comms-notif-dismiss')
+  notif: $('comms-notif'), notifEnable: $('comms-notif-enable'), notifDismiss: $('comms-notif-dismiss'),
+  lockWaiting: $('comms-lock-waiting'), pushStatus: $('comms-push-status')
+};
+
+const updatePushStatus = () => {
+  if (!els.pushStatus) return;
+  const bits = [];
+  if (!window.MentriaPush || !MentriaPush.isSupported()) bits.push('not supported in this browser');
+  else if (MentriaPush.permission() !== 'granted') bits.push('yours: off — use the enable banner in your people list');
+  else bits.push(ringToken ? 'yours: on' : 'yours: registering…');
+  CID.getContacts().forEach((c) => {
+    bits.push(`${c.name || c.fp}: ${c.ring ? 'reachable' : 'no token yet — they need to enable notifications once'}`);
+  });
+  els.pushStatus.textContent = bits.join(' · ');
+};
+
+const updateLockWaiting = async () => {
+  if (!els.lockWaiting) return;
+  let total = 0;
+  try {
+    const map = MentriaStore.get('comms', 'unread') || {};
+    for (const fp of Object.keys(map)) total += (map[fp] && map[fp].n) || 0;
+  } catch (_) {}
+  try {
+    if (window.MentriaPushDB && MentriaPushDB.kvGet) {
+      const n = await MentriaPushDB.kvGet('comms-msg-count');
+      if (typeof n === 'number') total = Math.max(total, n);
+    }
+  } catch (_) {}
+  els.lockWaiting.textContent = total > 0
+    ? (total > 1 ? total + ' messages waiting — unlock to read' : '1 message waiting — unlock to read')
+    : '';
+  els.lockWaiting.hidden = total === 0;
 };
 
 const setView = (v) => {
@@ -1662,7 +1701,15 @@ const handleSideMsg = async (msgEvent) => {
     let existingFp = null;
     try { existingFp = await CID.fingerprint(payload.pub); } catch (_) {}
     if (existingFp && CID.getContacts().some((c) => c.fp === existingFp)) {
-      try { await CID.addContact(payload); renderContacts(); } catch (_) {}
+      try {
+        await CID.addContact(payload);
+        if (currentDmContact && currentDmContact.fp === existingFp) {
+          const fresh = freshContact(existingFp);
+          if (fresh) currentDmContact = fresh;
+        }
+        renderContacts();
+        updatePushStatus();
+      } catch (_) {}
       return;
     }
     const saved = await CID.saveRequest(payload);
@@ -1721,6 +1768,7 @@ const refreshIdUI = () => {
   els.onboard.hidden = !onboardActive;
   if (onboardActive && !cryptoOk()) showOnboardStep('insecure');
   els.idLocked.hidden = state !== 'locked' || onboardActive;
+  if (state === 'locked' && !onboardActive) updateLockWaiting();
   els.app.hidden = onboardActive || (state === 'locked' && !guest);
   els.idOn.hidden = state !== 'unlocked';
   els.idNone.hidden = state === 'unlocked' || !guest;
@@ -1782,13 +1830,20 @@ const initRingToken = async () => {
       }
     } catch (_) {}
   }
+  updatePushStatus();
 };
 
+const freshContact = (fp) => CID.getContacts().find((x) => x.fp === fp) || null;
+
 const maybeRingContact = () => {
-  if (!currentDmContact || !currentDmContact.ring || peers.size > 0) return;
+  if (!currentDmContact || peers.size > 0) return;
+  const fresh = freshContact(currentDmContact.fp);
+  const ring = (fresh && fresh.ring) || currentDmContact.ring;
+  if (fresh) currentDmContact = fresh;
+  if (!ring) return;
   if (Date.now() - lastRingSentAt < 30000) return;
   lastRingSentAt = Date.now();
-  if (window.MentriaPush && MentriaPush.ring) MentriaPush.ring(currentDmContact.ring, 'comms-msg');
+  if (window.MentriaPush && MentriaPush.ring) MentriaPush.ring(ring, 'comms-msg');
 };
 
 const syncOsBadge = async () => {
@@ -2357,6 +2412,7 @@ els.setupHere.addEventListener('click', () => {
 
 els.advToggle.addEventListener('click', () => {
   const open = els.adv.hidden;
+  if (open) updatePushStatus();
   els.adv.hidden = !open;
   els.advToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   if (open) els.adv.scrollIntoView({ block: 'nearest', behavior: 'smooth' });

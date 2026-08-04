@@ -572,14 +572,21 @@ els.pushTest.addEventListener('click', async () => {
       pushTestLog('2. permission: granted');
     }
     let sub = null;
+    let subErr = null;
     try {
       const reg = await navigator.serviceWorker.ready;
       sub = await reg.pushManager.getSubscription();
-    } catch (_) {}
-    if (!sub) {
-      try { await MentriaPush.requestPermission(); const reg = await navigator.serviceWorker.ready; sub = await reg.pushManager.getSubscription(); } catch (_) {}
-    }
-    if (!sub) { pushTestLog('3. subscription: FAILED to create'); return; }
+      if (!sub) {
+        const r = await fetch('https://relay.mentria.ai/push/vapid-public', { cache: 'no-store' });
+        const { publicKey } = await r.json();
+        const pad = '='.repeat((4 - publicKey.length % 4) % 4);
+        const b64 = (publicKey + pad).replace(/-/g, '+').replace(/_/g, '/');
+        const raw = atob(b64), key = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) key[i] = raw.charCodeAt(i);
+        sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+      }
+    } catch (e) { subErr = (e && e.name ? e.name + ': ' : '') + String(e && e.message || e).slice(0, 120); }
+    if (!sub) { pushTestLog('3. subscription: FAILED — ' + (subErr || 'unknown error')); return; }
     let host = 'unknown';
     try { host = new URL(sub.toJSON().endpoint).host; } catch (_) {}
     pushTestLog('3. subscription: ' + host);

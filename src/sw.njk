@@ -181,6 +181,7 @@ self.addEventListener('push', event => {
     }
     if (data.kind === 'comms-msg') {
       let n = 1;
+      try { await self.MentriaPushDB.kvSet('last-push-at', Date.now()); } catch (_) {}
       try {
         const prev = await self.MentriaPushDB.kvGet('comms-msg-count');
         n = (typeof prev === 'number' && prev >= 0 ? prev : 0) + 1;

@@ -192,9 +192,13 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
         <button class="comms__btn comms__btn--ghost" id="comms-copy" type="button">copy</button>
         <button class="comms__btn comms__btn--ghost" id="comms-genkey" type="button" title="generate a fresh encryption key and append it to the URL">+ key</button>
       </div>
-      <div class="comms__adv-sec">
-        <span class="comms__lbl">notifications</span>
+      <div class="comms__adv-sec comms__adv-sec--col">
+        <div class="comms__adv-row">
+          <span class="comms__lbl">notifications</span>
+          <button class="comms__btn comms__btn--ghost" id="comms-push-test" type="button">test my notifications</button>
+        </div>
         <span class="comms__id-note" id="comms-push-status">…</span>
+        <span class="comms__id-note comms__push-log" id="comms-push-test-log" hidden></span>
       </div>
       <div class="comms__adv-sec">
         <span class="comms__lbl">this device</span>
@@ -256,6 +260,9 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__adv{display:flex;flex-direction:column;gap:.75rem;background:#0a0d10;border:1px dashed #2a3138;border-radius:8px;padding:.85rem}
 .comms__adv[hidden]{display:none}
 .comms__adv-sec{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.comms__adv-sec--col{flex-direction:column;align-items:stretch}
+.comms__adv-row{display:flex;gap:.5rem;align-items:center;justify-content:space-between}
+.comms__push-log{white-space:pre-line;background:#0a0d10;border:1px solid #1a1f24;border-radius:8px;padding:.5rem .6rem;line-height:1.6}
 .comms__contact{cursor:pointer}
 @media (max-width:640px){
   .comms__onboard{padding:1.75rem 1rem}
@@ -508,7 +515,8 @@ const els = {
   scanZoom: $('comms-scan-zoom'), scanZoomWrap: $('comms-scan-zoom-wrap'), scanTorch: $('comms-scan-torch'),
   chatTitle: $('comms-chat-title'), chatAvatar: $('comms-chat-avatar'), profAvatar: $('comms-prof-avatar'),
   notif: $('comms-notif'), notifEnable: $('comms-notif-enable'), notifDismiss: $('comms-notif-dismiss'),
-  lockWaiting: $('comms-lock-waiting'), pushStatus: $('comms-push-status')
+  lockWaiting: $('comms-lock-waiting'), pushStatus: $('comms-push-status'),
+  pushTest: $('comms-push-test'), pushTestLog: $('comms-push-test-log')
 };
 
 const updatePushStatus = () => {
@@ -520,8 +528,85 @@ const updatePushStatus = () => {
   CID.getContacts().forEach((c) => {
     bits.push(`${c.name || c.fp}: ${c.ring ? 'reachable' : 'no token yet — they need to enable notifications once'}`);
   });
+  try {
+    const lk = MentriaStore.get('comms', 'last_knock');
+    if (lk && lk.t) bits.push(`last knock sent: ${hhmmOf(lk.t)} ${lk.ok ? '✓' : '✗ failed'}`);
+  } catch (_) {}
   els.pushStatus.textContent = bits.join(' · ');
+  if (window.MentriaPushDB && MentriaPushDB.kvGet) {
+    MentriaPushDB.kvGet('last-push-at').then((t) => {
+      if (typeof t === 'number' && t > 0) els.pushStatus.textContent += ` · last push received: ${hhmmOf(t)}`;
+    }).catch(() => {});
+  }
 };
+
+const pushTestLog = (line, replace) => {
+  els.pushTestLog.hidden = false;
+  if (replace) {
+    const parts = els.pushTestLog.textContent.split('\n');
+    parts[parts.length - 1] = line;
+    els.pushTestLog.textContent = parts.join('\n');
+  } else {
+    els.pushTestLog.textContent += (els.pushTestLog.textContent ? '\n' : '') + line;
+  }
+};
+
+els.pushTest.addEventListener('click', async () => {
+  els.pushTest.disabled = true;
+  els.pushTestLog.textContent = '';
+  try {
+    if (!window.MentriaPush || !MentriaPush.isSupported()) {
+      const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      pushTestLog(isIos && !navigator.standalone
+        ? '1. push not available in the iPhone browser — install comms to your home screen first (share → add to home screen), then test from the installed app'
+        : '1. push not supported in this browser');
+      return;
+    }
+    pushTestLog('1. support: yes');
+    if (MentriaPush.permission() !== 'granted') {
+      pushTestLog('2. permission: asking…');
+      const ok = await MentriaPush.requestPermission();
+      pushTestLog('2. permission: ' + (ok ? 'granted' : 'NOT granted — the browser blocked or you declined; check site settings'), true);
+      if (!ok) return;
+    } else {
+      pushTestLog('2. permission: granted');
+    }
+    let sub = null;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      sub = await reg.pushManager.getSubscription();
+    } catch (_) {}
+    if (!sub) {
+      try { await MentriaPush.requestPermission(); const reg = await navigator.serviceWorker.ready; sub = await reg.pushManager.getSubscription(); } catch (_) {}
+    }
+    if (!sub) { pushTestLog('3. subscription: FAILED to create'); return; }
+    let host = 'unknown';
+    try { host = new URL(sub.toJSON().endpoint).host; } catch (_) {}
+    pushTestLog('3. subscription: ' + host);
+    const testToken = 'selftest' + Math.random().toString(36).slice(2, 14) + 'xx';
+    const reg2 = await MentriaPush.ringRegister(testToken);
+    pushTestLog('4. register with relay: ' + (reg2 ? 'ok' : 'FAILED'));
+    if (!reg2) return;
+    const rung = await MentriaPush.ring(testToken, 'comms-msg');
+    pushTestLog('5. self-knock: ' + (rung ? 'sent' : 'FAILED'));
+    if (!rung) return;
+    pushTestLog('6. waiting for the notification…');
+    const reg = await navigator.serviceWorker.ready;
+    const t0 = Date.now();
+    let seen = false;
+    while (Date.now() - t0 < 15000) {
+      await new Promise((r) => setTimeout(r, 600));
+      const notes = await reg.getNotifications({ tag: 'comms-msg' });
+      if (notes.length) { seen = true; break; }
+    }
+    pushTestLog(seen
+      ? '6. notification arrived ✓ — push works on this device'
+      : '6. relay accepted but NO notification in 15s ✗ — the push service (' + host + ') did not deliver; tell mihir this line', true);
+  } finally {
+    els.pushTest.disabled = false;
+    updatePushStatus();
+  }
+});
 
 const updateLockWaiting = async () => {
   if (!els.lockWaiting) return;
@@ -1780,8 +1865,17 @@ const refreshIdUI = () => {
 
 const refreshNotifBanner = () => {
   const dismissed = !!(window.MentriaStore && MentriaStore.get('comms', 'notif_dismissed'));
-  const show = !!(window.MentriaPush && MentriaPush.isSupported() && MentriaPush.permission() === 'default'
-    && CID.idState() === 'unlocked' && !dismissed);
+  const unlocked = CID.idState() === 'unlocked';
+  const supported = !!(window.MentriaPush && MentriaPush.isSupported());
+  const isIosBrowser = /iPhone|iPad|iPod/.test(navigator.userAgent) && !navigator.standalone;
+  if (unlocked && !dismissed && !supported && isIosBrowser) {
+    els.notif.querySelector('.comms__notif-text').textContent = 'to get message notifications on iPhone, install comms: share button → add to home screen';
+    els.notifEnable.hidden = true;
+    els.notif.hidden = false;
+    return;
+  }
+  els.notifEnable.hidden = false;
+  const show = supported && MentriaPush.permission() === 'default' && unlocked && !dismissed;
   els.notif.hidden = !show;
 };
 
@@ -1840,10 +1934,21 @@ const maybeRingContact = () => {
   const fresh = freshContact(currentDmContact.fp);
   const ring = (fresh && fresh.ring) || currentDmContact.ring;
   if (fresh) currentDmContact = fresh;
-  if (!ring) return;
+  if (!ring) { noticeNoToken(); return; }
   if (Date.now() - lastRingSentAt < 30000) return;
   lastRingSentAt = Date.now();
-  if (window.MentriaPush && MentriaPush.ring) MentriaPush.ring(ring, 'comms-msg');
+  if (window.MentriaPush && MentriaPush.ring) {
+    MentriaPush.ring(ring, 'comms-msg').then((ok) => {
+      try { MentriaStore.set('comms', 'last_knock', { t: Date.now(), ok: !!ok }); } catch (_) {}
+    });
+  }
+};
+
+let noTokenNoticeShown = false;
+const noticeNoToken = () => {
+  if (noTokenNoticeShown || !currentDmContact) return;
+  noTokenNoticeShown = true;
+  sys(`${currentDmContact.name || 'they'} can't be notified yet — they haven't enabled notifications on their device.`);
 };
 
 const syncOsBadge = async () => {

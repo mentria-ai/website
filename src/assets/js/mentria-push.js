@@ -132,13 +132,13 @@
     } catch (_) { return null; }
   }
 
-  async function ring(token) {
+  async function ring(token, kind) {
     if (!token) return false;
     try {
       var r = await fetch(BASE + '/ring', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: token })
+        body: JSON.stringify(kind ? { token: token, kind: kind } : { token: token })
       });
       return r.ok;
     } catch (_) { return false; }

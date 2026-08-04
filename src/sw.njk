@@ -178,6 +178,24 @@ self.addEventListener('push', event => {
       });
       return;
     }
+    if (data.kind === 'comms-msg') {
+      let n = 1;
+      try {
+        const prev = await self.MentriaPushDB.kvGet('comms-msg-count');
+        n = (typeof prev === 'number' && prev >= 0 ? prev : 0) + 1;
+        await self.MentriaPushDB.kvSet('comms-msg-count', n);
+      } catch (_) {}
+      try { if (self.navigator && self.navigator.setAppBadge) self.navigator.setAppBadge(n); } catch (_) {}
+      await self.registration.showNotification('comms', {
+        body: n > 1 ? n + ' new encrypted messages' : 'New encrypted message',
+        tag: 'comms-msg',
+        icon: '/assets/img/icon-192x192.png',
+        badge: '/assets/img/badge.svg',
+        data: { url: '/comms/' },
+        renotify: true
+      });
+      return;
+    }
     const scheduleId = data.scheduleId;
     const fallback = data.fallbackTitle || 'Mentria';
     let spec = null;

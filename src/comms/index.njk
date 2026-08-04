@@ -321,6 +321,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__btn--icon{display:inline-flex;align-items:center;gap:.4rem}
 .comms__btn--icon .comms__btn-t{line-height:1}
 .comms__btn.is-on{background:var(--accent,#6ef3c5);color:#0a0d10}
+.comms__btn.is-off{opacity:.45;text-decoration:line-through}
 .comms__badge{display:inline-flex;align-items:center;gap:.3rem}
 .comms__add{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;padding-top:.6rem;border-top:1px solid #14181d}
 .comms__add[hidden]{display:none}
@@ -1405,9 +1406,11 @@ const startCall = async (answering) => {
   call.local = local;
   call.videoOn = false;
   call.micOff = false;
-  els.callCam.textContent = 'camera: off';
   els.callCam.setAttribute('aria-pressed', 'false');
-  els.callMic.textContent = 'mic: on';
+  els.callCam.title = 'camera off — tap to turn on';
+  els.callCam.setAttribute('aria-pressed', 'false');
+  els.callMic.setAttribute('aria-pressed', 'true');
+  els.callMic.title = 'mic on — tap to mute';
   els.callMic.setAttribute('aria-pressed', 'false');
   room.addStream(local);
   addTile('you', local, { local: true, label: myProfile.name || 'you' });
@@ -1444,8 +1447,9 @@ els.callMic.addEventListener('click', () => {
   if (!call.local) return;
   call.micOff = !call.micOff;
   call.local.getAudioTracks().forEach((t) => { t.enabled = !call.micOff; });
-  els.callMic.textContent = call.micOff ? 'mic: off' : 'mic: on';
-  els.callMic.setAttribute('aria-pressed', String(call.micOff));
+  els.callMic.title = call.micOff ? 'mic off — tap to unmute' : 'mic on — tap to mute';
+  els.callMic.classList.toggle('is-off', call.micOff);
+  els.callMic.setAttribute('aria-pressed', String(!call.micOff));
 });
 
 els.callCam.addEventListener('click', async () => {
@@ -1460,7 +1464,9 @@ els.callCam.addEventListener('click', async () => {
     if (call.micOff) next.getAudioTracks().forEach((t) => { t.enabled = false; });
     room.addStream(next);
     addTile('you', next, { local: true, label: myProfile.name || 'you' });
-    els.callCam.textContent = call.videoOn ? 'camera: on' : 'camera: off';
+    els.callCam.title = call.videoOn ? 'camera on — tap to turn off' : 'camera off — tap to turn on';
+    els.callCam.classList.toggle('is-off', !call.videoOn);
+    els.callCam.setAttribute('aria-pressed', String(call.videoOn));
     els.callCam.setAttribute('aria-pressed', String(call.videoOn));
   } catch (err) {
     sys('camera unavailable: ' + err.message);
@@ -1607,13 +1613,14 @@ const handleSideMsg = async (msgEvent) => {
     unreadMap[fp] = entry;
     try { CID.setUnread(unreadMap); } catch (_) {}
     renderContacts();
-    bumpUnread();
+    syncOsBadge();
   }
 };
 
 const clearUnreadFor = (fp) => {
   unreadMap[fp] = { n: 0, lastTs: Date.now() };
   try { CID.setUnread(unreadMap); } catch (_) {}
+  syncOsBadge();
 };
 
 const hasRoomHash = () => {
@@ -1657,11 +1664,27 @@ const maybeRingContact = () => {
   if (!currentDmContact || !currentDmContact.ring || peers.size > 0) return;
   if (Date.now() - lastRingSentAt < 30000) return;
   lastRingSentAt = Date.now();
-  if (window.MentriaPush && MentriaPush.ring) {
-    MentriaPush.ring(currentDmContact.ring).then((ok) => {
-      if (ok) sys(`${currentDmContact.name || 'they'} seem${currentDmContact.name ? 's' : ''} offline — sent a wake-up ping to their device.`);
-    });
-  }
+  if (window.MentriaPush && MentriaPush.ring) MentriaPush.ring(currentDmContact.ring, 'comms-msg');
+};
+
+const syncOsBadge = async () => {
+  let total = 0;
+  for (const fp of Object.keys(unreadMap)) total += (unreadMap[fp] && unreadMap[fp].n) || 0;
+  try {
+    if (total > 0) {
+      if (navigator.setAppBadge) await navigator.setAppBadge(total);
+      return;
+    }
+    if (navigator.clearAppBadge) await navigator.clearAppBadge();
+    if (window.MentriaPushDB) MentriaPushDB.kvSet('comms-msg-count', 0).catch(() => {});
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      const notes = await reg.getNotifications();
+      notes.forEach((note) => {
+        if (note.tag === 'comms-msg' || note.tag === 'comms-ring') note.close();
+      });
+    }
+  } catch (_) {}
 };
 
 const bumpUnread = () => {
@@ -1670,9 +1693,9 @@ const bumpUnread = () => {
   if (navigator.setAppBadge) { try { navigator.setAppBadge(unreadCount); } catch {} }
 };
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && unreadCount) {
+  if (!document.hidden) {
     unreadCount = 0;
-    if (navigator.clearAppBadge) { try { navigator.clearAppBadge(); } catch {} }
+    syncOsBadge();
   }
 });
 
@@ -1687,6 +1710,7 @@ const initIdentity = async () => {
     refreshIdUI();
     try { unreadMap = CID.getUnread(); } catch (_) { unreadMap = {}; }
     renderContacts();
+    syncOsBadge();
     broadcastProfile();
     initRingToken();
     subscribeInbox();

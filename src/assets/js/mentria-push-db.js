@@ -25,6 +25,14 @@
     putPending: function (spec) { return tx('readwrite', function (s) { s.put(spec); }); },
     getPending: function (id) { return tx('readonly', function (s) { return s.get(id); }); },
     deletePending: function (id) { return tx('readwrite', function (s) { s.delete(id); }); },
-    allPending: function () { return tx('readonly', function (s) { return s.getAll(); }); }
+    allPending: function () { return tx('readonly', function (s) { return s.getAll(); }); },
+    kvGet: function (key) {
+      return tx('readonly', function (s) { return s.get('kv-' + key); }).then(function (row) {
+        return row ? row.value : undefined;
+      });
+    },
+    kvSet: function (key, value) {
+      return tx('readwrite', function (s) { s.put({ scheduleId: 'kv-' + key, value: value }); });
+    }
   };
 })(typeof self !== 'undefined' ? self : this);

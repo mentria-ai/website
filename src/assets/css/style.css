@@ -279,7 +279,9 @@ main:has(.terminal-frame) .hero { max-width: 912px; margin-inline: auto; }
 }
 .site-nav { display: flex; align-items: center; gap: 1.25rem; }
 .nav-link { font-family: var(--font-mono); font-size: 0.85rem; color: var(--term-muted); font-weight: 500; padding-bottom: 0.15rem; border-bottom: 2px solid transparent; }
-.nav-link:hover { color: var(--term-fg); }
+@media (hover: hover) and (pointer: fine) {
+  .nav-link:hover { color: var(--term-fg); }
+}
 .nav-link.active { color: var(--syn-cyan); border-color: var(--syn-cyan); }
 
 /* ── Language switcher (in site-nav) ─────────────────────────────── */

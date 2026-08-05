@@ -289,6 +289,7 @@ eleventyComputed:
     wonHuman:   {{ ("tool.ludo.won_human"   | t) | dump | safe }},
     wonBot:     {{ ("tool.ludo.won_bot"     | t) | dump | safe }},
     newGame:    {{ ("tool.ludo.new_game"    | t) | dump | safe }},
+    confirmRestart: {{ ("tool.ludo.confirm_restart" | t) | dump | safe }},
     rulesEyebrow: {{ ("tool.ludo.rules_eyebrow" | t) | dump | safe }},
     rulesTitle:   {{ ("tool.ludo.rules_title"   | t) | dump | safe }},
     rulesBody:    {{ ("tool.ludo.rules_body"    | t) | dump | safe }},
@@ -1016,7 +1017,9 @@ eleventyComputed:
   document.getElementById('roll-btn').onclick = rollDice;
   const dieBtn = document.getElementById('die');
   if (dieBtn) dieBtn.addEventListener('click', rollDice);
-  document.getElementById('btn-new').onclick = newGame;
+  document.getElementById('btn-new').onclick = () => {
+    confirmRestart().then((ok) => { if (ok) newGame(); });
+  };
   document.getElementById('btn-rules').onclick = () => {
     const m = document.getElementById('modal');
     State.modal = 'rules';
@@ -1035,11 +1038,35 @@ eleventyComputed:
     if (rb) rb.focus({ preventScroll: true });
   }
 
+  function gameInProgress(){
+    if (State.over) return false;
+    if (State.finishers && State.finishers.length) return true;
+    for (const p of State.active){
+      for (let t=0;t<4;t++) if (State.tokens[p] && State.tokens[p][t] !== -1) return true;
+    }
+    return false;
+  }
+  async function confirmRestart(){
+    if (!gameInProgress()) return true;
+    if (typeof window.mentriaConfirm !== 'function') return true;
+    return await window.mentriaConfirm(COPY.confirmRestart);
+  }
+
   const modeSeg = MentriaUI.segmented(document.getElementById('mode-seg'), (value) => {
-    State.mode = value; newGame();
+    if (value === State.mode) return;
+    const prev = State.mode;
+    confirmRestart().then((ok) => {
+      if (!ok){ modeSeg.set(prev); return; }
+      State.mode = value; newGame();
+    });
   });
   const countSeg = MentriaUI.segmented(document.getElementById('count-seg'), (value) => {
-    State.numPlayers = +value; newGame();
+    if (+value === State.numPlayers) return;
+    const prev = String(State.numPlayers);
+    confirmRestart().then((ok) => {
+      if (!ok){ countSeg.set(prev); return; }
+      State.numPlayers = +value; newGame();
+    });
   });
 
   const app = document.querySelector('.ludo-app');

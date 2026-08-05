@@ -1201,7 +1201,8 @@
       "help_pad_1": "A — roll the die.",
       "help_pad_2": "D-pad or stick — cycle the movable tokens.",
       "help_pad_3": "A — confirm the selected token.",
-      "help_pad_4": "Start — open or close this panel."
+      "help_pad_4": "Start — open or close this panel.",
+      "confirm_restart": "Start a new game? The game in progress will be lost."
     },
     "chess": {
       "engine": "engine",

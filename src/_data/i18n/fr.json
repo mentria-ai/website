@@ -1201,7 +1201,8 @@
       "help_pad_1": "A — lance le dé.",
       "help_pad_2": "Croix directionnelle ou stick — parcourt les pions jouables.",
       "help_pad_3": "A — confirme le pion sélectionné.",
-      "help_pad_4": "Start — ouvre ou ferme ce panneau."
+      "help_pad_4": "Start — ouvre ou ferme ce panneau.",
+      "confirm_restart": "Commencer une nouvelle partie ? La partie en cours sera perdue."
     },
     "chess": {
       "engine": "moteur",

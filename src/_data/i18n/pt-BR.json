@@ -1201,7 +1201,8 @@
       "help_pad_1": "A — rola o dado.",
       "help_pad_2": "Direcional ou analógico — percorre os peões que podem mover.",
       "help_pad_3": "A — confirma o peão selecionado.",
-      "help_pad_4": "Start — abre ou fecha este painel."
+      "help_pad_4": "Start — abre ou fecha este painel.",
+      "confirm_restart": "Começar um novo jogo? O jogo em andamento será perdido."
     },
     "chess": {
       "engine": "motor",

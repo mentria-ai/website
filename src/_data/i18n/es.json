@@ -1201,7 +1201,8 @@
       "help_pad_1": "A — tira el dado.",
       "help_pad_2": "Cruceta o stick — recorre las fichas que pueden moverse.",
       "help_pad_3": "A — confirma la ficha seleccionada.",
-      "help_pad_4": "Start — abre o cierra este panel."
+      "help_pad_4": "Start — abre o cierra este panel.",
+      "confirm_restart": "¿Empezar una partida nueva? Se perderá la partida en curso."
     },
     "chess": {
       "engine": "motor",

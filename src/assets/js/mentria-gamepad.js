@@ -151,12 +151,14 @@
   }
 
   global.addEventListener('gamepadconnected', (e) => {
-    const pad = e.gamepad;
+    const pad = e && e.gamepad;
+    if (!pad) { startPolling(); return; }
     emit('connect', { padIndex: pad.index, id: pad.id, mapping: pad.mapping });
     startPolling();
   });
   global.addEventListener('gamepaddisconnected', (e) => {
-    const pad = e.gamepad;
+    const pad = e && e.gamepad;
+    if (!pad) { if (!hasConnected()) stopPolling(); return; }
     emit('disconnect', { padIndex: pad.index, id: pad.id });
     delete state.pads[pad.index];
     if (!hasConnected()) stopPolling();

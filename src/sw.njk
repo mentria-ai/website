@@ -130,6 +130,7 @@ const ASSETS = [
   '/assets/js/mentria-push-db.js',
   '/assets/js/mentria-push.js',
   '/assets/js/mentria-comms-nav.js',
+  '/assets/img/shortcuts/comms.png',
   '/comms/',
   '/assets/vendor/trystero-nostr.js'
 ];
@@ -163,14 +164,32 @@ self.addEventListener('activate', event => {
   })());
 });
 
+const NOTIF_STRINGS = {
+  en:      { one: 'New message',  many: (n) => n + ' new messages',     ring: 'Someone is trying to reach you.' },
+  es:      { one: 'Nuevo mensaje', many: (n) => n + ' mensajes nuevos', ring: 'Alguien intenta comunicarse contigo.' },
+  fr:      { one: 'Nouveau message', many: (n) => n + ' nouveaux messages', ring: 'Quelqu\'un essaie de vous joindre.' },
+  ja:      { one: '新着メッセージ', many: (n) => '新着メッセージ ' + n + ' 件', ring: '誰かがあなたに連絡しようとしています。' },
+  'pt-BR': { one: 'Nova mensagem', many: (n) => n + ' novas mensagens', ring: 'Alguém está tentando falar com você.' }
+};
+
+async function notifStrings() {
+  let loc = 'en';
+  try {
+    const stored = await self.MentriaPushDB.kvGet('locale');
+    if (typeof stored === 'string' && NOTIF_STRINGS[stored]) loc = stored;
+  } catch (_) {}
+  return NOTIF_STRINGS[loc] || NOTIF_STRINGS.en;
+}
+
 self.addEventListener('push', event => {
   event.waitUntil((async () => {
     let data = {};
     try { data = event.data ? event.data.json() : {}; } catch (_) {}
     if (data.kind === 'comms-ring') {
+      const S = await notifStrings();
       try { if (self.navigator && self.navigator.setAppBadge) self.navigator.setAppBadge(1); } catch (_) {}
       await self.registration.showNotification('comms', {
-        body: 'Someone is trying to reach you.',
+        body: S.ring,
         tag: 'comms-ring',
         icon: '/assets/img/icon-192x192.png',
         badge: '/assets/img/badge.svg',
@@ -192,8 +211,9 @@ self.addEventListener('push', event => {
         const cs = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
         cs.forEach((c) => { try { c.postMessage({ type: 'comms-unread', n }); } catch (_) {} });
       } catch (_) {}
+      const S = await notifStrings();
       await self.registration.showNotification('comms', {
-        body: n > 1 ? n + ' new encrypted messages' : 'New encrypted message',
+        body: n > 1 ? S.many(n) : S.one,
         tag: 'comms-msg',
         icon: '/assets/img/icon-192x192.png',
         badge: '/assets/img/badge.svg',

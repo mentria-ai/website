@@ -38,7 +38,16 @@
     }
   }
 
+  function syncLocale() {
+    if (!global.MentriaPushDB || !global.MentriaPushDB.kvSet) return;
+    var loc = null;
+    try { loc = global.localStorage.getItem('mentria_lang'); } catch (_) {}
+    if (!loc) loc = document.documentElement.getAttribute('lang') || 'en';
+    global.MentriaPushDB.kvSet('locale', loc).catch(function () {});
+  }
+
   function refresh() {
+    syncLocale();
     return readPushCount().then(function (n) { pushCount = n; paint(); });
   }
 

@@ -22,8 +22,9 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
   <symbol id="ci-cam" viewBox="0 0 24 24"><rect x="3" y="7" width="12" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m15 11 6-3v8l-6-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
   <symbol id="ci-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="ci-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 19a6 6 0 0 1 12 0M16.5 5.5a3.2 3.2 0 0 1 0 6M18 19a5.5 5.5 0 0 0-2.5-4.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-  <symbol id="ci-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.8a2 2 0 0 1 2 2v.5a1.4 1.4 0 0 0 2.1 1.2l.4-.2a2 2 0 1 1 2 3.5l-.4.2a1.4 1.4 0 0 0 0 2.4l.4.2a2 2 0 1 1-2 3.5l-.4-.2a1.4 1.4 0 0 0-2.1 1.2v.5a2 2 0 0 1-4 0v-.5a1.4 1.4 0 0 0-2.1-1.2l-.4.2a2 2 0 1 1-2-3.5l.4-.2a1.4 1.4 0 0 0 0-2.4l-.4-.2a2 2 0 1 1 2-3.5l.4.2A1.4 1.4 0 0 0 10 4.3v-.5a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="ci-gear" viewBox="0 0 24 24"><path d="M10.0 4.77 10.32 2.45 13.68 2.45 14.0 4.77 15.69 5.47 17.56 4.05 19.95 6.44 18.53 8.31 19.23 10.0 21.55 10.32 21.55 13.68 19.23 14.0 18.53 15.69 19.95 17.56 17.56 19.95 15.69 18.53 14.0 19.23 13.68 21.55 10.32 21.55 10.0 19.23 8.31 18.53 6.44 19.95 4.05 17.56 5.47 15.69 4.77 14.0 2.45 13.68 2.45 10.32 4.77 10.0 5.47 8.31 4.05 6.44 6.44 4.05 8.31 5.47Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
   <symbol id="ci-exit" viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 8 6 12l4 4M6 12h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ci-share" viewBox="0 0 24 24"><path d="M12 3.4v11.4M8.4 6.9 12 3.4l3.6 3.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10.4H5.6a1.4 1.4 0 0 0-1.4 1.4v7.4a1.4 1.4 0 0 0 1.4 1.4h12.8a1.4 1.4 0 0 0 1.4-1.4v-7.4a1.4 1.4 0 0 0-1.4-1.4H17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 14h3v3h-3zM19 19h2v2h-2z" fill="currentColor"/></symbol>
   <symbol id="ci-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="ci-back" viewBox="0 0 24 24"><path d="M14.5 5 8 12l6.5 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -134,7 +135,10 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
         <div class="comms__id-card-side">
           <p class="comms__id-note">scan or paste this code on another person's device to become contacts. it contains your public key, never your secrets.</p>
           <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
+          <div class="comms__id-card-actions">
           <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">copy code</button>
+          <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share-out" type="button" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg><span class="comms__btn-t">share</span></button>
+        </div>
         </div>
       </div>
       <div class="comms__add" id="comms-add" hidden>
@@ -224,7 +228,8 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 {% include "terminal-frame-close.njk" %}
 
 <style>
-.comms{display:flex;flex-direction:column;gap:.75rem;font-family:var(--font-mono);font-size:.9rem}
+.comms{display:flex;flex-direction:column;gap:.75rem;font-family:var(--font-mono);font-size:.9rem;min-height:clamp(21rem,56vh,31rem)}
+.comms__onboard,.comms__lock{margin-top:auto;margin-bottom:auto}
 .comms [hidden]{display:none !important}
 .comms__onboard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;padding:2.5rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px}
 .comms__onboard[hidden]{display:none}
@@ -247,7 +252,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__lock-alt{width:100%;max-width:24rem;color:#7a838d;font-size:.78rem}
 .comms__lock-alt summary{cursor:pointer;list-style:none;padding:.3rem}
 .comms__lock-alt summary::-webkit-details-marker{display:none}
-.comms__lock-alt summary:hover{color:#9ba6b1}
+
 .comms__lock-row{display:none;gap:.5rem;margin-top:.6rem}
 .comms__lock-alt[open] .comms__lock-row{display:flex}
 .comms__app{display:flex;flex-direction:column;gap:.75rem}
@@ -276,10 +281,10 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__input{background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.45rem .6rem;border-radius:6px;font-family:inherit;font-size:.9rem;flex:1;min-width:6rem}
 .comms__input:focus{outline:none;border-color:var(--accent,#6ef3c5)}
 .comms__btn{background:transparent;border:1px solid var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);padding:.4rem .8rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer;text-transform:lowercase;letter-spacing:.05em}
-.comms__btn:hover:not(:disabled){background:var(--accent,#6ef3c5);color:#0a0d10}
+
 .comms__btn:disabled{opacity:.4;cursor:not-allowed}
 .comms__btn--ghost{border-color:#3a4148;color:#9ba6b1}
-.comms__btn--ghost:hover{background:#3a4148;color:#e6edf3}
+
 .comms__badge{background:#1a1f24;border:1px solid #2a3138;color:#9ba6b1;padding:.3rem .55rem;border-radius:4px;font-size:.75rem;text-transform:lowercase;letter-spacing:.05em}
 .comms__badge--peers{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
 .comms__badge--offline{border-color:#e05c5c;color:#e05c5c}
@@ -287,7 +292,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__line--pending .comms__what{color:#9ba6b1}
 .comms__pending-note{color:#d9a84e;font-style:italic;font-size:.75rem;margin-left:.45rem}
 .comms__resend{margin-left:.5rem;background:none;border:1px solid #2a3138;color:var(--accent,#6ef3c5);border-radius:4px;padding:.1rem .5rem;font:inherit;font-size:.72rem;cursor:pointer;text-transform:lowercase}
-.comms__resend:hover{border-color:var(--accent,#6ef3c5)}
+
 .comms__share{display:flex;gap:.5rem;align-items:center;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.5rem .75rem;flex-wrap:wrap}
 .comms__url{color:#e6edf3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}
 .comms__log{min-height:14rem;max-height:24rem;overflow-y:auto;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.75rem;display:flex;flex-direction:column;gap:.4rem}
@@ -299,7 +304,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__what--sys{color:#7a838d;font-style:italic}
 .comms__what a{color:var(--accent,#6ef3c5);text-decoration:underline}
 .comms__drop{display:block;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;text-align:center;color:#7a838d;font-size:.82rem;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
-.comms__drop:hover{border-color:#3a424a;color:#9ba6b1}
+
 .comms__drop--hot{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);background:rgba(110,243,197,.04)}
 .comms__prog{display:inline-block;width:96px;height:6px;background:#1a1f24;border-radius:3px;overflow:hidden;margin:0 .4rem;vertical-align:middle}
 .comms__prog-fill{display:block;height:100%;background:var(--accent,#6ef3c5);width:0%;transition:width .12s linear}
@@ -320,7 +325,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__picker-h{margin:0;font-size:.9rem;color:var(--accent,#6ef3c5);text-transform:lowercase;letter-spacing:.05em}
 .comms__picker-list{display:flex;flex-direction:column;gap:.4rem}
 .comms__picker-item{display:flex;justify-content:space-between;align-items:center;gap:.7rem;width:100%;text-align:left;background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.5rem .7rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer}
-.comms__picker-item:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
+
 .comms__picker-ver{color:var(--muted);font-size:.75rem;flex:none}
 .comms__picker-actions{display:flex;justify-content:flex-end}
 .comms__id-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.5rem .75rem}
@@ -329,6 +334,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__id-card{display:flex;gap:1rem;align-items:flex-start;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;flex-wrap:wrap}
 .comms__id-qr{border-radius:4px;flex:none}
 .comms__id-card-side{display:flex;flex-direction:column;gap:.5rem;flex:1;min-width:12rem}
+.comms__id-card-actions{display:flex;gap:.5rem;flex-wrap:wrap}
 .comms__url--wrap{white-space:normal;word-break:break-all;font-size:.7rem;max-height:5.5rem;overflow:auto}
 .comms__contacts{display:flex;flex-direction:column;gap:.5rem;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.6rem .75rem}
 .comms__contacts-add{display:flex;gap:.5rem;align-items:center}
@@ -342,6 +348,23 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__btn--icon .comms__btn-t{line-height:1}
 .comms__btn.is-on{background:var(--accent,#6ef3c5);color:#0a0d10}
 .comms__btn.is-off{opacity:.45;text-decoration:line-through}
+.comms__btn:focus{outline:none}
+.comms__btn:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:2px}
+@media (hover: hover) and (pointer: fine){
+.comms__btn:hover:not(:disabled){background:var(--accent,#6ef3c5);color:#0a0d10}
+.comms__btn--ghost:hover{background:#3a4148;color:#e6edf3}
+.comms__btn--danger:hover:not(:disabled){background:#e5534b;color:#0a0d10}
+.comms__drop:hover{border-color:#3a424a;color:#9ba6b1}
+.comms__contact:hover{background:#10151a}
+.comms__contact:hover .comms__rowbtn{opacity:1}
+.comms__rowbtn:hover{color:#e5534b}
+.comms__addopt:hover{border-color:var(--accent,#6ef3c5)}
+.comms__picker-item:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
+.comms__resend:hover{border-color:var(--accent,#6ef3c5)}
+.comms__lock-alt summary:hover{color:#9ba6b1}
+.comms__attach:hover{color:var(--accent,#6ef3c5);border-color:var(--accent,#6ef3c5)}
+}
+
 .comms__badge{display:inline-flex;align-items:center;gap:.3rem}
 .comms__add{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;padding-top:.6rem;border-top:1px solid #14181d}
 .comms__add[hidden]{display:none}
@@ -358,7 +381,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__contact-spacer{flex:1}
 .comms__chip-add{margin-left:.3rem;border:none;background:none;color:inherit;cursor:pointer;font-size:.75rem;padding:0}
 .comms__btn--danger{border-color:#e5534b;color:#e5534b}
-.comms__btn--danger:hover:not(:disabled){background:#e5534b;color:#0a0d10}
+
 .comms__ring{display:flex;gap:.6rem;align-items:center;background:#141a12;border:1px solid var(--accent,#6ef3c5);border-radius:6px;padding:.55rem .75rem}
 .comms__ring-text{color:var(--accent,#6ef3c5);flex:1;font-size:.85rem}
 .comms__media{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.5rem;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.5rem}
@@ -407,7 +430,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__what--sys{color:#6a737d}
 .comms__send{align-items:center;padding-top:.4rem}
 .comms__attach{width:2.6rem;height:2.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#9ba6b1;cursor:pointer;border:1px solid #2a3138;flex:none;transition:color .15s,border-color .15s}
-.comms__attach:hover{color:var(--accent,#6ef3c5);border-color:var(--accent,#6ef3c5)}
+
 .comms__attach .comms__i{width:1.2em;height:1.2em}
 .comms__input--msg{border-radius:999px;padding:.6rem 1rem;background:#10151a}
 .comms__btn--send{width:2.6rem;height:2.6rem;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;flex:none}
@@ -415,7 +438,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__contacts{border:0;background:transparent;padding:0;gap:.4rem}
 .comms__contacts-head{padding:0 .1rem}
 .comms__contact{gap:.65rem;padding:.55rem .45rem;border-bottom:1px solid #12161b;cursor:pointer;border-radius:10px;flex-wrap:nowrap;min-height:52px}
-.comms__contact:hover{background:#10151a}
+
 .comms__contact:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:-2px}
 .comms__contact--req{cursor:default}
 .comms__contact--req:hover{background:rgba(110,243,197,.05)}
@@ -423,8 +446,8 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__contact-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.9rem}
 .comms__contact-fp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .comms__rowbtn{opacity:0;border:0;background:transparent;color:#7a838d;cursor:pointer;padding:.45rem;border-radius:8px;flex:none;display:flex;align-items:center;transition:opacity .15s,color .15s}
-.comms__contact:hover .comms__rowbtn{opacity:1}
-.comms__rowbtn:hover{color:#e5534b}
+
+
 .comms__rowbtn:focus-visible{opacity:1;outline:2px solid var(--accent,#6ef3c5)}
 @media (hover:none){.comms__rowbtn{opacity:.55}}
 .comms__chev{color:#3a4148;flex:none;display:flex;align-items:center}
@@ -434,7 +457,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__notif-text{flex:1;color:#c3ccd6;font-size:.78rem;line-height:1.45}
 .comms__app--chat .comms__notif{display:none}
 .comms__addopt{display:flex;align-items:center;gap:.65rem;width:100%;background:#0a0d10;border:1px solid #2a3138;border-radius:12px;padding:.75rem .85rem;color:#e6edf3;font:inherit;font-size:.88rem;cursor:pointer;min-height:48px;transition:border-color .15s}
-.comms__addopt:hover{border-color:var(--accent,#6ef3c5)}
+
 .comms__addopt .comms__i{color:var(--accent,#6ef3c5);width:1.25em;height:1.25em}
 #comms-add-toggle .comms__i{transition:transform .18s ease}
 #comms-add-toggle.is-on .comms__i{transform:rotate(45deg)}
@@ -498,6 +521,7 @@ const els = {
   idPass: $('comms-id-pass'), idUnlock: $('comms-id-unlock'), idErr: $('comms-id-err'), idPasskey: $('comms-id-passkey'),
   idName: $('comms-id-name'), idFp: $('comms-id-fp'), idShare: $('comms-id-share'), idContacts: $('comms-id-contacts'),
   idCard: $('comms-id-card'), idQr: $('comms-id-qr'), idCode: $('comms-id-code'), idCopy: $('comms-id-copy'),
+  idShareOut: $('comms-id-share-out'),
   contacts: $('comms-contacts'), contactIn: $('comms-contact-in'), contactAdd: $('comms-contact-add'), contactList: $('comms-contacts-list'),
   callStart: $('comms-call-start'), callCam: $('comms-call-cam'), callMic: $('comms-call-mic'), callHangup: $('comms-call-hangup'),
   ring: $('comms-ring'), ringText: $('comms-ring-text'), ringAccept: $('comms-ring-accept'), ringDecline: $('comms-ring-decline'),
@@ -1428,7 +1452,17 @@ const sendOne = async (file, extra) => {
 };
 
 const sendFiles = async (fileList) => {
-  if (!metaAction || !chunkAction || peers.size === 0) { sys('no peers to send to.'); return; }
+  if (!metaAction || !chunkAction || peers.size === 0) {
+    if (currentDmContact) {
+      sys(`files go straight device-to-device, so ${whoNow()} has to be online too. they're not connected right now.`);
+      knockNow('comms-msg').then((ok) => {
+        if (ok) sys(`pinged their device — try again once they open comms.`);
+      });
+    } else {
+      sys('nobody is connected to this room yet — files send directly, so someone has to be here.');
+    }
+    return;
+  }
   const all = Array.from(fileList || []);
   if (!all.length) return;
   const tooBig = all.filter(f => f.size > MAX_FILE);
@@ -1503,7 +1537,12 @@ attachExtBtn.addEventListener('click', async () => {
   if (attachExtBtn.disabled) return;
   attachExtBtn.disabled = true;
   try {
-    if (peers.size === 0) { sys('no peers to send to.'); return; }
+    if (peers.size === 0) {
+      sys(currentDmContact
+        ? `extensions go device-to-device — ${whoNow()} isn't connected right now.`
+        : 'nobody is connected to this room yet.');
+      return;
+    }
     let list;
     try { list = await MentriaBus.invoke('extensions.list'); } catch (e) { sys('extensions unavailable: ' + e.message); return; }
     if (!list.length) { sys('no installed extensions to share.'); return; }
@@ -1588,7 +1627,18 @@ const getLocalMedia = (video) => navigator.mediaDevices.getUserMedia({
 
 const startCall = async (answering) => {
   if (call.active || !room) return;
-  if (!peers.size) { sys('no peers to call.'); return; }
+  if (!peers.size) {
+    if (currentDmContact) {
+      sys(`${whoNow()} isn't connected — ringing their device…`);
+      const ok = await knockNow('comms-ring');
+      sys(ok
+        ? `notification sent. start the call again once they appear.`
+        : `couldn't reach their device — they'll need to open comms first.`);
+    } else {
+      sys('nobody is here to call yet.');
+    }
+    return;
+  }
   if (peers.size > 4) { sys('calls support up to 5 people in a room (peer-to-peer mesh).'); return; }
   let local;
   try { local = await getLocalMedia(false); }
@@ -1944,7 +1994,7 @@ const maybeRingContact = () => {
   const ring = (fresh && fresh.ring) || currentDmContact.ring;
   if (fresh) currentDmContact = fresh;
   if (!ring) { noticeNoToken(); return; }
-  if (Date.now() - lastRingSentAt < 30000) return;
+  if (Date.now() - lastRingSentAt < 8000) return;
   lastRingSentAt = Date.now();
   if (window.MentriaPush && MentriaPush.ring) {
     MentriaPush.ring(ring, 'comms-msg').then((res) => {
@@ -1956,6 +2006,19 @@ const maybeRingContact = () => {
     });
   }
 };
+
+const knockNow = async (kind) => {
+  if (!currentDmContact) return false;
+  const fresh = freshContact(currentDmContact.fp);
+  if (fresh) currentDmContact = fresh;
+  const ring = currentDmContact.ring;
+  if (!ring || !window.MentriaPush || !MentriaPush.ring) return false;
+  lastRingSentAt = Date.now();
+  const res = await MentriaPush.ring(ring, kind);
+  return !!(res && res.ok);
+};
+
+const whoNow = () => (currentDmContact && (currentDmContact.name || currentDmContact.fp)) || 'they';
 
 let noTokenNoticeShown = false;
 const noticeNoToken = () => {
@@ -2282,6 +2345,28 @@ const leaveRoom = async () => {
 };
 
 els.leave.addEventListener('click', leaveRoom);
+
+if (navigator.share) els.idShareOut.hidden = false;
+
+els.idShareOut.addEventListener('click', async () => {
+  const code = els.idCode.textContent || '';
+  if (!code) return;
+  const text = `add me on mentria comms:\n${code}`;
+  try {
+    const blob = await new Promise((resolve) => {
+      try { els.idQr.toBlob(resolve, 'image/png'); } catch (_) { resolve(null); }
+    });
+    const file = blob ? new File([blob], 'mentria-contact-code.png', { type: 'image/png' }) : null;
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], text });
+      return;
+    }
+    await navigator.share({ text });
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;
+    try { await navigator.clipboard.writeText(code); sys('code copied — share it however you like.'); } catch (_) {}
+  }
+});
 
 els.idCopy.addEventListener('click', async () => {
   try {

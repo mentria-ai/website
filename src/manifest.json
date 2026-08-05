@@ -48,6 +48,20 @@
   ],
   "shortcuts": [
     {
+      "name": "Comms",
+      "short_name": "Comms",
+      "description": "Private peer-to-peer chat, calls and file drop",
+      "url": "/comms/",
+      "icons": [
+        {
+          "src": "/assets/img/shortcuts/comms.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any maskable"
+        }
+      ]
+    },
+    {
       "name": "AI Chat",
       "short_name": "AI Chat",
       "description": "Chat with a local AI model in your browser",

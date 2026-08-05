@@ -8,7 +8,9 @@
   "nav": {
     "feed": "Feed",
     "tools": "Tools",
-    "home": "Home"
+    "home": "Home",
+    "comms": "Comms",
+    "search": "Search"
   },
   "footer": {
     "copyright": "© 2026 Mentria. All rights reserved."
@@ -113,7 +115,17 @@
     "identity_too_short": "Passphrase must be at least 8 characters.",
     "identity_unlock_failed": "Unlock failed — wrong passphrase or corrupt vault.",
     "identity_setup_reminder": "Identity created. Now go to \"Your data\" above and download an encrypted backup — restoring it on another device gives that device the same identity.",
-    "sync_confirm_replace": "This device already has data for: {areas}. Pairing will replace it with the other device’s copy — a rescue copy is saved on this device. Continue?"
+    "sync_confirm_replace": "This device already has data for: {areas}. Pairing will replace it with the other device’s copy — a rescue copy is saved on this device. Continue?",
+    "identity_passkey_unlock": "Unlock with passkey",
+    "identity_passkey_add": "Add a passkey",
+    "identity_passkey_remove": "Remove passkey",
+    "identity_passkey_added": "Passkey added. It syncs with your iCloud Keychain or Google account, so your other devices can unlock with it too. Keep your passphrase — it's your recovery key.",
+    "identity_passkey_failed": "Passkey unlock didn't work. You can always use your passphrase.",
+    "identity_passkey_unsupported": "This browser or password manager can't derive encryption keys from a passkey yet. Your passphrase still works everywhere.",
+    "identity_passkey_mismatch": "The passkey returned inconsistent keys, so it wasn't saved. Your vault is untouched — try again on this device directly.",
+    "identity_passkey_remove_confirm": "Remove the passkey unlock? The passkey itself stays in your password manager, but it will no longer unlock this vault.",
+    "identity_device_label": "Remember this device",
+    "identity_device_note": "Remember this device unlocks automatically on this browser — convenient, but anyone using this device profile could open it. Passkey and passphrase stay available."
   },
   "common": {
     "tldr": {

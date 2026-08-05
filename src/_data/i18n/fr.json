@@ -8,7 +8,9 @@
   "nav": {
     "feed": "Fil",
     "tools": "Outils",
-    "home": "Accueil"
+    "home": "Accueil",
+    "comms": "Comms",
+    "search": "Recherche"
   },
   "footer": {
     "copyright": "© 2026 Mentria. Tous droits réservés."
@@ -113,7 +115,17 @@
     "identity_too_short": "La phrase secrète doit comporter au moins 8 caractères.",
     "identity_unlock_failed": "Échec du déverrouillage — phrase secrète erronée ou coffre corrompu.",
     "identity_setup_reminder": "Identité créée. Allez maintenant dans « Vos données » ci-dessus et téléchargez une sauvegarde chiffrée — la restaurer sur un autre appareil lui donne la même identité.",
-    "sync_confirm_replace": "Cet appareil contient déjà des données pour : {areas}. Le jumelage les remplacera par la copie de l'autre appareil — une copie de secours est conservée sur cet appareil. Continuer ?"
+    "sync_confirm_replace": "Cet appareil contient déjà des données pour : {areas}. Le jumelage les remplacera par la copie de l'autre appareil — une copie de secours est conservée sur cet appareil. Continuer ?",
+    "identity_passkey_unlock": "Déverrouiller avec une clé d'accès",
+    "identity_passkey_add": "Ajouter une clé d'accès",
+    "identity_passkey_remove": "Retirer la clé d'accès",
+    "identity_passkey_added": "Clé d'accès ajoutée. Elle se synchronise avec votre trousseau iCloud ou votre compte Google, vos autres appareils peuvent donc aussi déverrouiller. Gardez votre phrase secrète : c'est votre clé de secours.",
+    "identity_passkey_failed": "Le déverrouillage par clé d'accès n'a pas fonctionné. Votre phrase secrète reste toujours utilisable.",
+    "identity_passkey_unsupported": "Ce navigateur ou gestionnaire de mots de passe ne sait pas encore dériver des clés de chiffrement depuis une clé d'accès. Votre phrase secrète fonctionne partout.",
+    "identity_passkey_mismatch": "La clé d'accès a renvoyé des clés incohérentes, elle n'a donc pas été enregistrée. Votre coffre est intact — réessayez directement sur cet appareil.",
+    "identity_passkey_remove_confirm": "Retirer le déverrouillage par clé d'accès ? La clé reste dans votre gestionnaire, mais elle ne déverrouillera plus ce coffre.",
+    "identity_device_label": "Se souvenir de cet appareil",
+    "identity_device_note": "Se souvenir de cet appareil déverrouille automatiquement sur ce navigateur : pratique, mais quiconque utilise ce profil pourrait l'ouvrir. La clé d'accès et la phrase restent disponibles."
   },
   "common": {
     "tldr": {

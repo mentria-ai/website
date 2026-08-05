@@ -5,8 +5,19 @@
         <nav class="site-nav">
             {% set feedHref  = '/feed/'  | localeUrl(lang) %}
             {% set toolsHref = '/tools/' | localeUrl(lang) %}
-            <a href="{{ feedHref }}"  class="nav-link{% if page.url | startsWith(feedHref) %} active{% endif %}"{% if page.url | startsWith(feedHref) %} aria-current="page"{% endif %}>{{ "nav.feed"  | t }}</a>
-            <a href="{{ toolsHref }}" class="nav-link{% if page.url | startsWith(toolsHref) %} active{% endif %}"{% if page.url | startsWith(toolsHref) %} aria-current="page"{% endif %}>{{ "nav.tools" | t }}</a>
+            <a href="{{ feedHref }}"  class="nav-link{% if page.url | startsWith(feedHref) %} active{% endif %}"{% if page.url | startsWith(feedHref) %} aria-current="page"{% endif %} title="{{ 'nav.feed' | t }}">
+                <svg class="nav-link__i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="6" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="13.5" width="17" height="6" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+                <span class="nav-link__t">{{ "nav.feed"  | t }}</span>
+            </a>
+            <a href="{{ toolsHref }}" class="nav-link{% if page.url | startsWith(toolsHref) %} active{% endif %}"{% if page.url | startsWith(toolsHref) %} aria-current="page"{% endif %} title="{{ 'nav.tools' | t }}">
+                <svg class="nav-link__i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.8 3.6a5.2 5.2 0 0 0-5.8 7l-5.4 5.4a1.6 1.6 0 0 0 0 2.3l1.1 1.1a1.6 1.6 0 0 0 2.3 0l5.4-5.4a5.2 5.2 0 0 0 7-5.8l-3 3-2.6-.7-.7-2.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                <span class="nav-link__t">{{ "nav.tools" | t }}</span>
+            </a>
+            <a href="/comms/" class="nav-link nav-link--comms{% if page.url | startsWith('/comms/') %} active{% endif %}"{% if page.url | startsWith('/comms/') %} aria-current="page"{% endif %} title="{{ 'nav.comms' | t }}" data-comms-link>
+                <svg class="nav-link__i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 4.8h14.8a1.4 1.4 0 0 1 1.4 1.4v8.6a1.4 1.4 0 0 1-1.4 1.4H9.4l-5.2 3.8V6.2a1.4 1.4 0 0 1 1.4-1.4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                <span class="nav-link__t">{{ "nav.comms" | t }}</span>
+                <span class="nav-badge" data-comms-badge hidden>0</span>
+            </a>
 
             {%- set currentLocale = lang | findLocale -%}
             <button type="button" class="nav-cmdk" data-palette-open aria-label="{{ 'palette.open' | t }}" aria-keyshortcuts="Meta+K Control+K">⌘K</button>

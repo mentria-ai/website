@@ -8,7 +8,9 @@
   "nav": {
     "feed": "Feed",
     "tools": "Herramientas",
-    "home": "Inicio"
+    "home": "Inicio",
+    "comms": "Comms",
+    "search": "Buscar"
   },
   "footer": {
     "copyright": "© 2026 Mentria. Todos los derechos reservados."
@@ -113,7 +115,17 @@
     "identity_too_short": "La contraseña debe tener al menos 8 caracteres.",
     "identity_unlock_failed": "Desbloqueo fallido: contraseña incorrecta o bóveda dañada.",
     "identity_setup_reminder": "Identidad creada. Ahora ve a «Tus datos» arriba y descarga una copia cifrada — restaurarla en otro dispositivo le da la misma identidad.",
-    "sync_confirm_replace": "Este dispositivo ya tiene datos de: {areas}. La vinculación los reemplazará con la copia del otro dispositivo — se guarda una copia de rescate en este dispositivo. ¿Continuar?"
+    "sync_confirm_replace": "Este dispositivo ya tiene datos de: {areas}. La vinculación los reemplazará con la copia del otro dispositivo — se guarda una copia de rescate en este dispositivo. ¿Continuar?",
+    "identity_passkey_unlock": "Desbloquear con llave de acceso",
+    "identity_passkey_add": "Añadir una llave de acceso",
+    "identity_passkey_remove": "Quitar la llave de acceso",
+    "identity_passkey_added": "Llave de acceso añadida. Se sincroniza con tu Llavero de iCloud o tu cuenta de Google, así tus otros dispositivos también pueden desbloquear. Conserva tu frase de contraseña: es tu clave de recuperación.",
+    "identity_passkey_failed": "El desbloqueo con la llave de acceso no funcionó. Siempre puedes usar tu frase de contraseña.",
+    "identity_passkey_unsupported": "Este navegador o gestor de contraseñas todavía no puede derivar claves de cifrado desde una llave de acceso. Tu frase de contraseña sigue funcionando en todas partes.",
+    "identity_passkey_mismatch": "La llave de acceso devolvió claves inconsistentes, así que no se guardó. Tu bóveda está intacta; inténtalo de nuevo directamente en este dispositivo.",
+    "identity_passkey_remove_confirm": "¿Quitar el desbloqueo con llave de acceso? La llave seguirá en tu gestor de contraseñas, pero ya no desbloqueará esta bóveda.",
+    "identity_device_label": "Recordar este dispositivo",
+    "identity_device_note": "Recordar este dispositivo desbloquea automáticamente en este navegador: cómodo, pero cualquiera que use este perfil podría abrirlo. La llave de acceso y la frase siguen disponibles."
   },
   "common": {
     "tldr": {

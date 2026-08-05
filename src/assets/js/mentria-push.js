@@ -133,15 +133,18 @@
   }
 
   async function ring(token, kind) {
-    if (!token) return false;
+    if (!token) return { ok: false, reason: 'no-token' };
     try {
       var r = await fetch(BASE + '/ring', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(kind ? { token: token, kind: kind } : { token: token })
       });
-      return r.ok;
-    } catch (_) { return false; }
+      if (!r.ok) return { ok: false, reason: 'http-' + r.status };
+      var body = await r.json().catch(function () { return null; });
+      if (!body || typeof body.ok !== 'boolean') return { ok: false, reason: 'bad-response' };
+      return body;
+    } catch (_) { return { ok: false, reason: 'network' }; }
   }
 
   global.MentriaPush = {

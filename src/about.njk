@@ -986,10 +986,13 @@ eleventyComputed:
     });
 
     deviceToggle.addEventListener('change', async function () {
+      deviceToggle.disabled = true;
       try {
         await window.MentriaIdentity.setDeviceUnlock(deviceToggle.checked);
       } catch (err) {
         window.mentriaAlert(String(err && err.message || err));
+      } finally {
+        deviceToggle.disabled = false;
       }
       refresh();
     });

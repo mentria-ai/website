@@ -241,6 +241,8 @@ self.addEventListener('pushsubscriptionchange', event => {
       const raw = atob(b64), key = new Uint8Array(raw.length);
       for (let i = 0; i < raw.length; i++) key[i] = raw.charCodeAt(i);
       await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+      const cs = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      cs.forEach((c) => { try { c.postMessage({ type: 'push-resubscribed' }); } catch (_) {} });
     } catch (_) {}
   })());
 });

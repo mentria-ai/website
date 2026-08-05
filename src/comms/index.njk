@@ -530,7 +530,7 @@ const updatePushStatus = () => {
   });
   try {
     const lk = MentriaStore.get('comms', 'last_knock');
-    if (lk && lk.t) bits.push(`last knock sent: ${hhmmOf(lk.t)} ${lk.ok ? '✓' : '✗ failed'}`);
+    if (lk && lk.t) bits.push(`last knock sent: ${hhmmOf(lk.t)} ${lk.ok ? '✓' : '✗ ' + (lk.reason || 'failed')}`);
   } catch (_) {}
   els.pushStatus.textContent = bits.join(' · ');
   if (window.MentriaPushDB && MentriaPushDB.kvGet) {
@@ -590,13 +590,19 @@ els.pushTest.addEventListener('click', async () => {
     let host = 'unknown';
     try { host = new URL(sub.toJSON().endpoint).host; } catch (_) {}
     pushTestLog('3. subscription: ' + host);
-    const testToken = 'selftest' + Math.random().toString(36).slice(2, 14) + 'xx';
+    let testToken = MentriaStore.get('comms', 'selftest_token');
+    if (!testToken || !/^[A-Za-z0-9_-]{20,64}$/.test(testToken)) {
+      const b = crypto.getRandomValues(new Uint8Array(18));
+      testToken = 'st' + btoa(String.fromCharCode(...b)).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+      MentriaStore.set('comms', 'selftest_token', testToken);
+    }
     const reg2 = await MentriaPush.ringRegister(testToken);
     pushTestLog('4. register with relay: ' + (reg2 ? 'ok' : 'FAILED'));
     if (!reg2) return;
     const rung = await MentriaPush.ring(testToken, 'comms-msg');
-    pushTestLog('5. self-knock: ' + (rung ? 'sent' : 'FAILED'));
-    if (!rung) return;
+    if (rung && rung.throttled) { pushTestLog('5. self-knock: throttled — you just tested; wait ~25s and try again'); return; }
+    pushTestLog('5. self-knock: ' + (rung && rung.ok ? 'sent' : 'FAILED — ' + ((rung && rung.reason) || 'unknown')));
+    if (!rung || !rung.ok) return;
     pushTestLog('6. waiting for the notification…');
     const reg = await navigator.serviceWorker.ready;
     const t0 = Date.now();
@@ -670,7 +676,6 @@ let myFp = null;
 let ringToken = null;
 let currentDmContact = null;
 let lastRingSentAt = 0;
-let unreadCount = 0;
 let myProfile = { name: '' };
 const peerProfiles = new Map();
 const peers = new Set();
@@ -686,14 +691,10 @@ const CHAT_KIND = 3838;
 const EPHEMERAL_PREFIX = '!';
 const HISTORY_LOOKBACK_SEC = 7 * 24 * 60 * 60;
 const HISTORY_LIMIT = 100;
-const HISTORY_FLUSH_TIMEOUT_MS = 4000;
 
 let chatSubId = null;
 let chatTopic = null;
 let chatPersist = true;
-let historyBuffered = false;
-let historyBuffer = [];
-let historyTimer = null;
 let seenCmids = new Set();
 const socketListenersAttached = new WeakSet();
 
@@ -949,13 +950,6 @@ const unpackChatPlain = (raw) => {
   return { text: raw, sfp: null };
 };
 
-const flushHistory = () => {
-  if (!historyBuffered) return;
-  historyBuffered = false;
-  if (historyTimer) { clearTimeout(historyTimer); historyTimer = null; }
-  historyBuffer = [];
-};
-
 const handleNostrMsg = async (msgEvent) => {
   let msg;
   try { msg = JSON.parse(msgEvent.data); } catch { return; }
@@ -985,8 +979,6 @@ const handleNostrMsg = async (msgEvent) => {
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
     const item = { senderId, text, ts, sfp };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
-  } else if (msg[0] === 'EOSE' && msg[1] === chatSubId) {
-    flushHistory();
   }
 };
 
@@ -1005,16 +997,12 @@ const setupChatPersistence = async (roomName) => {
   seenCmids = new Set();
 
   if (!chatPersist) {
-    historyBuffered = false;
-    historyBuffer = [];
     chatSubId = null;
     sys('ephemeral room — messages aren\'t saved. drop the leading ! to persist.');
     return;
   }
 
   chatSubId = 'mc-' + Math.random().toString(36).slice(2);
-  historyBuffered = true;
-  historyBuffer = [];
 
   const deadline = Date.now() + 8000;
   let openSockets = [];
@@ -1026,7 +1014,6 @@ const setupChatPersistence = async (roomName) => {
   }
   if (!openSockets.length) {
     sys('relay unreachable — history disabled this session.');
-    historyBuffered = false;
     return;
   }
 
@@ -1050,7 +1037,6 @@ const setupChatPersistence = async (roomName) => {
     }
   }
 
-  historyTimer = setTimeout(flushHistory, HISTORY_FLUSH_TIMEOUT_MS);
 };
 
 const rememberSentCmid = (cmid) => {
@@ -1094,7 +1080,12 @@ const publishChat = async (text, cmid) => {
   }
 };
 
+let joinSeq = 0;
+
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
+  const seq = ++joinSeq;
+  const leavingDm = currentDmContact;
+  stopScan();
   MentriaBus.unprovide('comms.peers');
   MentriaBus.unprovide('comms.share');
   MentriaBus.unprovide('extensions.requestInstall');
@@ -1102,19 +1093,18 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   if (room) {
     closeChatSub();
     try { await room.leave(); } catch {}
+    if (seq !== joinSeq) return;
     room = null;
     chatAction = metaAction = chunkAction = profAction = callAction = null;
     peers.clear();
     peerProfiles.clear();
-    if (historyTimer) { clearTimeout(historyTimer); historyTimer = null; }
-    historyBuffered = false;
-    historyBuffer = [];
     chatSubId = null;
     chatTopic = null;
     chatKey = null;
   }
   revokeObjectUrls();
   currentDmContact = null;
+  if (leavingDm) clearUnreadFor(leavingDm.fp);
   els.log.innerHTML = '';
   roomJoinedAt = Date.now();
   els.status.textContent = 'connecting…';
@@ -1122,7 +1112,6 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   els.enc.hidden = true;
 
   if (opts.leave || !roomName) {
-    if (currentDmContact) clearUnreadFor(currentDmContact.fp);
     currentRoomName = null;
     currentDmContact = null;
     els.room.value = '';
@@ -1140,6 +1129,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   }
 
   chatKey = b64Key ? await deriveKey(b64Key) : null;
+  if (seq !== joinSeq) return;
   if (b64Key && !chatKey) sys('encryption key in URL is invalid — chat will appear unreadable.');
 
   if (opts.share === false || isDmRoom(roomName)) {
@@ -1155,6 +1145,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   } catch {
     iceServers = FALLBACK_ICE;
   }
+  if (seq !== joinSeq) return;
 
   try {
     room = joinRoom(
@@ -1260,7 +1251,6 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     if (cmid) seenCmids.add(cmid);
     renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp });
     playPing(880);
-    bumpUnread();
   };
 
   const incoming = new Map();
@@ -1706,6 +1696,8 @@ const topicToFp = new Map();
 const seenInboxIds = new Set();
 let unreadMap = {};
 
+let sideOpens = 0;
+
 const ensureSideSocket = () => {
   if (sideWs && sideWs.readyState === 1) return Promise.resolve(sideWs);
   if (sideOpen) return sideOpen;
@@ -1713,9 +1705,19 @@ const ensureSideSocket = () => {
     let ws;
     try { ws = new WebSocket(RELAY); } catch (_) { sideOpen = null; resolve(null); return; }
     const done = (val) => { sideOpen = null; resolve(val); };
-    ws.addEventListener('open', () => { sideWs = ws; done(ws); });
+    ws.addEventListener('open', () => {
+      sideWs = ws;
+      const isReconnect = sideOpens++ > 0;
+      done(ws);
+      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); }
+    });
     ws.addEventListener('error', () => { done(null); });
-    ws.addEventListener('close', () => { if (sideWs === ws) sideWs = null; });
+    ws.addEventListener('close', () => {
+      if (sideWs === ws) {
+        sideWs = null;
+        setTimeout(() => { if (myId && !document.hidden && !sideWs) ensureSideSocket(); }, 4000 + Math.random() * 4000);
+      }
+    });
     ws.addEventListener('message', handleSideMsg);
   });
   return sideOpen;
@@ -1945,8 +1947,12 @@ const maybeRingContact = () => {
   if (Date.now() - lastRingSentAt < 30000) return;
   lastRingSentAt = Date.now();
   if (window.MentriaPush && MentriaPush.ring) {
-    MentriaPush.ring(ring, 'comms-msg').then((ok) => {
-      try { MentriaStore.set('comms', 'last_knock', { t: Date.now(), ok: !!ok }); } catch (_) {}
+    MentriaPush.ring(ring, 'comms-msg').then((res) => {
+      const ok = !!(res && res.ok);
+      try { MentriaStore.set('comms', 'last_knock', { t: Date.now(), ok, reason: (res && res.reason) || null }); } catch (_) {}
+      if (!ok && res && res.reason === 'unknown-token' && currentDmContact) {
+        sys(`${currentDmContact.name || 'they'} can't be reached by notification — their device needs to reopen comms once.`);
+      }
     });
   }
 };
@@ -1963,12 +1969,12 @@ const syncOsBadge = async () => {
   for (const fp of Object.keys(unreadMap)) total += (unreadMap[fp] && unreadMap[fp].n) || 0;
   try { window.dispatchEvent(new CustomEvent('mentria:comms:unread', { detail: { total } })); } catch (_) {}
   try {
+    if (window.MentriaPushDB) MentriaPushDB.kvSet('comms-msg-count', total).catch(() => {});
     if (total > 0) {
       if (navigator.setAppBadge) await navigator.setAppBadge(total);
       return;
     }
     if (navigator.clearAppBadge) await navigator.clearAppBadge();
-    if (window.MentriaPushDB) MentriaPushDB.kvSet('comms-msg-count', 0).catch(() => {});
     if ('serviceWorker' in navigator) {
       const reg = await navigator.serviceWorker.ready;
       const notes = await reg.getNotifications();
@@ -1979,17 +1985,26 @@ const syncOsBadge = async () => {
   } catch (_) {}
 };
 
-const bumpUnread = () => {
-  if (!document.hidden) return;
-  unreadCount++;
-  if (navigator.setAppBadge) { try { navigator.setAppBadge(unreadCount); } catch {} }
-};
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
-    unreadCount = 0;
     syncOsBadge();
+    if (myId && !sideWs) ensureSideSocket();
   }
 });
+
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    const d = e && e.data;
+    if (!d || !d.type) return;
+    if (d.type === 'comms-unread') {
+      updateLockWaiting();
+      if (window.MentriaCommsNav) MentriaCommsNav.refresh();
+    } else if (d.type === 'push-resubscribed') {
+      MentriaStore.remove('comms', 'ring_announced');
+      initRingToken();
+    }
+  });
+}
 
 const initIdentity = async () => {
   try {
@@ -2282,8 +2297,14 @@ els.idContacts.addEventListener('click', () => {
   renderContacts();
 });
 
+let dmOpening = false;
 const openDmWith = async (c) => {
-  if (!myId) return;
+  if (!myId || dmOpening) return;
+  dmOpening = true;
+  els.chatTitle.textContent = c.name || c.fp;
+  paintAvatar(els.chatAvatar, c.name || c.fp, c.fp);
+  els.status.textContent = 'connecting…';
+  setView('chat');
   try {
     const { roomName, b64Key } = await CID.deriveDm(myId.privateKey, c.pub);
     els.room.value = roomName;
@@ -2292,6 +2313,8 @@ const openDmWith = async (c) => {
     await joinNew(roomName, b64Key, { share: false, contact: c });
   } catch (err) {
     sys('could not open the chat: ' + err.message);
+  } finally {
+    dmOpening = false;
   }
 };
 

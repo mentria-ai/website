@@ -43,7 +43,7 @@
   }
 
   global.addEventListener('mentria:comms:unread', function (e) {
-    if (e && e.detail && e.detail.total === 0) pushCount = 0;
+    if (e && e.detail && typeof e.detail.total === 'number') pushCount = e.detail.total;
     paint();
   });
   global.addEventListener('storage', refresh);

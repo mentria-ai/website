@@ -225,7 +225,9 @@
     const hkdfSalt = crypto.getRandomValues(new Uint8Array(32));
     const wrapKey = await hkdfKey(k2bytes, hkdfSalt);
     const enc = await encryptWith(wrapKey, state.secret);
-    vault.prf = {
+    const fresh = loadVault();
+    if (!fresh) throw new Error('no-vault');
+    fresh.prf = {
       credId: b64uEnc(credId),
       prfSalt: b64uEnc(prfSalt),
       hkdfSalt: b64uEnc(hkdfSalt),
@@ -233,9 +235,9 @@
       ct: enc.ct,
       created: new Date().toISOString()
     };
-    if (!vault.kcv) vault.kcv = await kcvOf(state.secret);
-    vault.v = 2;
-    saveVault(vault);
+    if (!fresh.kcv) fresh.kcv = await kcvOf(state.secret);
+    fresh.v = 2;
+    saveVault(fresh);
     return true;
   }
 
@@ -311,10 +313,12 @@
     const db = await idbOpen();
     await idbSet(db, IDB_DEVICE_KEY, key);
     db.close();
-    vault.device = { iv: enc.iv, ct: enc.ct, created: new Date().toISOString() };
-    if (!vault.kcv) vault.kcv = await kcvOf(state.secret);
-    vault.v = 2;
-    saveVault(vault);
+    const fresh = loadVault();
+    if (!fresh) throw new Error('no-vault');
+    fresh.device = { iv: enc.iv, ct: enc.ct, created: new Date().toISOString() };
+    if (!fresh.kcv) fresh.kcv = await kcvOf(state.secret);
+    fresh.v = 2;
+    saveVault(fresh);
     return true;
   }
 

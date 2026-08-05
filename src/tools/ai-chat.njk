@@ -196,13 +196,20 @@ function runApp(MentriaEngine, Tiers) {
   // {type:'image'} placeholder needs its corresponding rgbHwc on every call —
   // not just the turn the image was first attached on.
   let conversationImages = [];
-  let messages = [
-    { role: 'system', content:
-      "You are the Mentria AI assistant. You run Qwen3.5 locally in the user's browser via WebGPU. Your weights were fine-tuned and shipped by mentria.ai.\n\n" +
-      "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running Qwen3.5 in their browser. When asked about Mentria itself: it is a small privacy-first creative studio at mentria.ai, building tools, games, and AI experiences that run entirely client-side with no servers, no accounts, and no telemetry. Notable parts of the site: TOTP, quick notes, QR scanner, color picker, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, a P2P chat and file drop at /comms/, and a daily image-fact feed called Deep Cuts.\n\n" +
+  function modelFamilyFor(tier) {
+    return tier === '27b' ? 'Bonsai 27B' : 'Qwen3.5';
+  }
+
+  function systemPromptFor(tier) {
+    const family = modelFamilyFor(tier);
+    return "You are the Mentria AI assistant. You run " + family + " locally in the user's browser via WebGPU. Your weights were fine-tuned and shipped by mentria.ai.\n\n" +
+      "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running " + family + " in their browser. When asked about Mentria itself: it is a small privacy-first creative studio at mentria.ai, building tools, games, and AI experiences that run entirely client-side with no servers, no accounts, and no telemetry. Notable parts of the site: TOTP, quick notes, QR scanner, color picker, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, a P2P chat and file drop at /comms/, and a daily image-fact feed called Deep Cuts.\n\n" +
       "Be helpful, accurate, and brief. Don't over-apologize. When the user shares an image, describe what you see directly. You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly.\n\n" +
-      "Formatting: use markdown sparingly. For tables, output strict GitHub-flavored markdown: one header row, one divider row made only of pipes and dashes, then data rows. Never put prose, notes, parentheticals, or extra characters between the divider and the data rows. Each cell is one short phrase, never a sentence. Any explanation goes outside the table."
-    },
+      "Formatting: use markdown sparingly. For tables, output strict GitHub-flavored markdown: one header row, one divider row made only of pipes and dashes, then data rows. Never put prose, notes, parentheticals, or extra characters between the divider and the data rows. Each cell is one short phrase, never a sentence. Any explanation goes outside the table.";
+  }
+
+  let messages = [
+    { role: 'system', content: systemPromptFor(null) },
   ];
 
   const systemMessage = messages[0];
@@ -288,7 +295,7 @@ function runApp(MentriaEngine, Tiers) {
     bubble.className = 'ac__msg ac__msg--' + role;
     const label = document.createElement('div');
     label.className = 'ac__msg-label';
-    label.textContent = role === 'user' ? COPY.labelYou : 'qwen-' + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B');
+    label.textContent = role === 'user' ? COPY.labelYou : (currentTier === '27b' ? 'bonsai-' : 'qwen-') + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B');
     bubble.appendChild(label);
     if (imageUrl) {
       const img = document.createElement('img');
@@ -500,6 +507,7 @@ function runApp(MentriaEngine, Tiers) {
       engine = res.engine;
       currentTier = res.tier;
       contextTokens = res.maxSeq || 2048;
+      systemMessage.content = systemPromptFor(currentTier);
       try { await navigator.storage?.persist?.(); } catch (_) {}
       syncTierSelector();
       updateEmptySub();
@@ -661,9 +669,8 @@ function runApp(MentriaEngine, Tiers) {
       const params = {
         messages: [messages[0], ...kept],
         maxTokens: (imagesForRequest && IS_IOS) ? 256 : (contextTokens >= 2048 ? MAX_TOKENS : 320),
-        // Greedy decoding (matches transformers.js do_sample:false)
         temperature: 0, topK: 1, topP: 1.0,
-        repetitionPenalty: 1.15,   // bumped 1.10 → 1.15 to break list-cycle pattern (S+1 test)
+        repetitionPenalty: currentTier === '27b' ? 1.0 : 1.15,
         enableThinking: false,
         signal: abortCtrl.signal,
       };

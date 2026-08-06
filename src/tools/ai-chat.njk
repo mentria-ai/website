@@ -762,7 +762,9 @@ function runApp(MentriaEngine, Tiers) {
         maxTokens: (imagesForRequest && IS_IOS) ? 256
           : deepThink ? (bigContext ? 2600 : 1200)
           : (bigContext ? 768 : contextTokens >= 2048 ? MAX_TOKENS : 320),
-        temperature: 0, topK: 1, topP: 1.0,
+        temperature: deepThink ? 0.7 : 0,
+        topK: deepThink ? 20 : 1,
+        topP: deepThink ? 0.95 : 1.0,
         repetitionPenalty: currentTier === '27b' ? 1.0 : 1.15,
         enableThinking: deepThink,
         signal: abortCtrl.signal,

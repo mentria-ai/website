@@ -727,13 +727,16 @@ function runApp(MentriaEngine, Tiers) {
       if (stick) scrollToBottom();
     }
 
-    // The engine's context (contextTokens: 2048, or 1024 for the 27B model on
-    // discrete GPUs) covers prompt + response combined, so send only a trailing
-    // window of the conversation (~4 chars/token with margin for template
-    // overhead and dense tokenization). The engine matches image placeholders
-    // to tensors by order across the whole chat-template render, so images
-    // ride along only while their placeholder turn is kept.
-    const HISTORY_CHAR_BUDGET = deepThink ? 800 : (contextTokens >= 2048 ? 3400 : 1200);
+    // The engine's context (contextTokens: 4096 for the 27B on Apple, 1024 on
+    // discrete GPUs, else 2048) covers prompt + response combined, so send only
+    // a trailing window of the conversation (~4 chars/token with margin for
+    // template overhead and dense tokenization). The engine matches image
+    // placeholders to tensors by order across the whole chat-template render,
+    // so images ride along only while their placeholder turn is kept.
+    const bigContext = contextTokens >= 4096;
+    const HISTORY_CHAR_BUDGET = deepThink
+      ? (bigContext ? 3400 : 800)
+      : (bigContext ? 7000 : contextTokens >= 2048 ? 3400 : 1200);
     const turnText = (m) => Array.isArray(m.content)
       ? m.content.filter(p => p && p.type === 'text').map(p => p.text).join(' ')
       : String(m.content || '');
@@ -756,7 +759,9 @@ function runApp(MentriaEngine, Tiers) {
     try {
       const params = {
         messages: [messages[0], ...kept],
-        maxTokens: (imagesForRequest && IS_IOS) ? 256 : deepThink ? 1200 : (contextTokens >= 2048 ? MAX_TOKENS : 320),
+        maxTokens: (imagesForRequest && IS_IOS) ? 256
+          : deepThink ? (bigContext ? 2600 : 1200)
+          : (bigContext ? 768 : contextTokens >= 2048 ? MAX_TOKENS : 320),
         temperature: 0, topK: 1, topP: 1.0,
         repetitionPenalty: currentTier === '27b' ? 1.0 : 1.15,
         enableThinking: deepThink,

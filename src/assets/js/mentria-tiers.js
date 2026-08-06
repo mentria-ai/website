@@ -102,6 +102,7 @@ export const TIERS = {
     configExport: 'QWEN35_27B_BONSAI_CONFIG',
     visionConfigExport: 'QWEN35_VL_27B_VISION_CONFIG',
     streamingLoad: true,
+    appleMaxSeq: 4096,
     discreteMaxSeq: 1024
   }
 };
@@ -317,11 +318,12 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
   if (!t) throw new Error('unknown tier: ' + id);
   const mod = await import(MENTRIA_DIST);
   let config = mod[t.configExport];
-  if (t.discreteMaxSeq) {
+  if (t.appleMaxSeq || t.discreteMaxSeq) {
     const caps = await detectCaps();
     const vendor = ((caps && caps.vendor.vendor) || '').toLowerCase();
-    if (vendor !== 'apple') {
-      config = { ...config, attention: { ...config.attention, maxSeq: t.discreteMaxSeq } };
+    const seq = vendor === 'apple' ? t.appleMaxSeq : t.discreteMaxSeq;
+    if (seq && seq !== config.attention.maxSeq) {
+      config = { ...config, attention: { ...config.attention, maxSeq: seq } };
     }
   }
   const opts = {

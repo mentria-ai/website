@@ -763,13 +763,13 @@ function runApp(MentriaEngine, Tiers) {
 
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
     const estPromptTokens = Math.ceil((systemMessage.content.length + keptChars) / 3.5) + windowImages.length * 300 + 80;
-    const thinkBudget = Math.max(1200, Math.min(3400, contextTokens - estPromptTokens - 120));
+    const thinkBudget = Math.max(512, Math.min(3400, contextTokens - estPromptTokens - 120));
 
     try {
       const params = {
         messages: [messages[0], ...kept],
         maxTokens: (imagesForRequest && IS_IOS) ? 256
-          : deepThink ? (bigContext ? thinkBudget : 1200)
+          : deepThink ? thinkBudget
           : (bigContext ? 768 : contextTokens >= 2048 ? MAX_TOKENS : 320),
         temperature: deepThink ? 0.7 : 0,
         topK: deepThink ? 20 : 1,

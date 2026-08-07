@@ -103,6 +103,7 @@ export const TIERS = {
     visionConfigExport: 'QWEN35_VL_27B_VISION_CONFIG',
     streamingLoad: true,
     appleMaxSeq: 4096,
+    nvidiaMaxSeq: 2048,
     discreteMaxSeq: 1024
   }
 };
@@ -318,10 +319,13 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
   if (!t) throw new Error('unknown tier: ' + id);
   const mod = await import(MENTRIA_DIST);
   let config = mod[t.configExport];
-  if (t.appleMaxSeq || t.discreteMaxSeq) {
+  let vendor = '';
+  if (t.appleMaxSeq || t.nvidiaMaxSeq || t.discreteMaxSeq) {
     const caps = await detectCaps();
-    const vendor = ((caps && caps.vendor.vendor) || '').toLowerCase();
-    const seq = vendor === 'apple' ? t.appleMaxSeq : t.discreteMaxSeq;
+    vendor = ((caps && caps.vendor.vendor) || '').toLowerCase();
+    const seq = vendor === 'apple' ? t.appleMaxSeq
+      : vendor === 'nvidia' ? (t.nvidiaMaxSeq || t.discreteMaxSeq)
+      : t.discreteMaxSeq;
     if (seq && seq !== config.attention.maxSeq) {
       config = { ...config, attention: { ...config.attention, maxSeq: seq } };
     }
@@ -333,6 +337,7 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
     allowTiedEmbed: true,
     tokenizerUrl: t.base
   };
+  if (vendor === 'nvidia' && t.nvidiaMaxSeq) opts.residualFusion = true;
   if (t.streamingLoad) opts.streamingLoad = true;
   if (vision) {
     opts.visionModelUrl = t.base;

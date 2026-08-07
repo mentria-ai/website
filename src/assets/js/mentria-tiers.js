@@ -102,7 +102,7 @@ export const TIERS = {
     configExport: 'QWEN35_27B_BONSAI_CONFIG',
     visionConfigExport: 'QWEN35_VL_27B_VISION_CONFIG',
     streamingLoad: true,
-    appleMaxSeq: 8192,
+    appleMaxSeq: 4096,
     nvidiaMaxSeq: 2048,
     discreteMaxSeq: 1024
   }
@@ -338,7 +338,6 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
     tokenizerUrl: t.base
   };
   if (vendor === 'nvidia' && t.nvidiaMaxSeq) opts.residualFusion = true;
-  if (vendor === 'apple' && t.appleMaxSeq) opts.kvF16 = true;
   if (t.streamingLoad) opts.streamingLoad = true;
   if (vision) {
     opts.visionModelUrl = t.base;

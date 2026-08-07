@@ -771,6 +771,7 @@
       "tier_best": "best",
       "tier_max": "max",
       "think_toggle": "Deep think — slower, more careful answers",
+      "think_needs_ctx": "Deep think needs a larger-memory GPU",
       "thinking": "Thinking…",
       "thought_for": "Thought for {s}s",
       "think_cut": "The answer ran out of room while thinking — try a shorter question or a new chat.",

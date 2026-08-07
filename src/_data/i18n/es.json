@@ -771,6 +771,7 @@
       "tier_best": "superior",
       "tier_max": "máximo",
       "think_toggle": "Pensamiento profundo: respuestas más lentas y cuidadosas",
+      "think_needs_ctx": "El pensamiento profundo requiere una GPU con más memoria",
       "thinking": "Pensando…",
       "thought_for": "Pensó durante {s}s",
       "think_cut": "La respuesta se quedó sin espacio mientras pensaba; prueba una pregunta más corta o un chat nuevo.",

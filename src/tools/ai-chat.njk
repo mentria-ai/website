@@ -115,6 +115,7 @@ const COPY = {
   btnRegenerate:       {{ ("tool.ai-chat.btn_regenerate"        | t) | dump | safe }},
   stopped:             {{ ("tool.ai-chat.stopped"               | t) | dump | safe }},
   thinkToggle:         {{ ("tool.ai-chat.think_toggle"          | t) | dump | safe }},
+  thinkNeedsCtx:       {{ ("tool.ai-chat.think_needs_ctx"       | t) | dump | safe }},
   thinking:            {{ ("tool.ai-chat.thinking"              | t) | dump | safe }},
   thoughtFor:          {{ ("tool.ai-chat.thought_for"           | t) | dump | safe }},
   thinkCut:            {{ ("tool.ai-chat.think_cut"             | t) | dump | safe }}
@@ -449,9 +450,13 @@ function runApp(MentriaEngine, Tiers) {
   });
 
   function syncThinkToggle() {
-    const available = currentTier === '27b' && contextTokens >= 2048;
-    thinkToggle.hidden = !available;
-    if (!available && deepThinkOn) {
+    const onTier = currentTier === '27b';
+    const fits = contextTokens >= 2048;
+    thinkToggle.hidden = !onTier;
+    thinkToggle.disabled = !fits;
+    thinkToggle.title = fits ? COPY.thinkToggle : COPY.thinkNeedsCtx;
+    thinkToggle.setAttribute('aria-label', fits ? COPY.thinkToggle : COPY.thinkNeedsCtx);
+    if ((!onTier || !fits) && deepThinkOn) {
       deepThinkOn = false;
       thinkToggle.setAttribute('aria-pressed', 'false');
     }
@@ -1348,13 +1353,17 @@ function runApp(MentriaEngine, Tiers) {
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
-.ac__think-btn:hover {
+.ac__think-btn:hover:not(:disabled) {
   color: var(--syn-cyan);
   background: rgba(34, 211, 238, 0.08);
 }
 .ac__think-btn[aria-pressed="true"] {
   color: var(--accent);
   background: rgba(110, 243, 197, 0.12);
+}
+.ac__think-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .ac__think {

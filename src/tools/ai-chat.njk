@@ -739,9 +739,10 @@ function runApp(MentriaEngine, Tiers) {
     // placeholders to tensors by order across the whole chat-template render,
     // so images ride along only while their placeholder turn is kept.
     const bigContext = contextTokens >= 4096;
+    const hugeContext = contextTokens >= 8192;
     const HISTORY_CHAR_BUDGET = deepThink
-      ? (bigContext ? 3400 : 800)
-      : (bigContext ? 7000 : contextTokens >= 2048 ? 3400 : 1200);
+      ? (hugeContext ? 7000 : bigContext ? 3400 : 800)
+      : (hugeContext ? 14000 : bigContext ? 7000 : contextTokens >= 2048 ? 3400 : 1200);
     const turnText = (m) => Array.isArray(m.content)
       ? m.content.filter(p => p && p.type === 'text').map(p => p.text).join(' ')
       : String(m.content || '');
@@ -763,7 +764,7 @@ function runApp(MentriaEngine, Tiers) {
 
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
     const estPromptTokens = Math.ceil((systemMessage.content.length + keptChars) / 3.5) + windowImages.length * 300 + 80;
-    const thinkBudget = Math.max(512, Math.min(3400, contextTokens - estPromptTokens - 120));
+    const thinkBudget = Math.max(512, Math.min(hugeContext ? 6000 : 3400, contextTokens - estPromptTokens - 120));
 
     try {
       const params = {

@@ -741,8 +741,8 @@ function runApp(MentriaEngine, Tiers) {
     const bigContext = contextTokens >= 4096;
     const hugeContext = contextTokens >= 8192;
     const HISTORY_CHAR_BUDGET = deepThink
-      ? (hugeContext ? 7000 : bigContext ? 3400 : 800)
-      : (hugeContext ? 14000 : bigContext ? 7000 : contextTokens >= 2048 ? 3400 : 1200);
+      ? (hugeContext ? 7000 : bigContext ? 5000 : 800)
+      : (hugeContext ? 14000 : bigContext ? 9500 : contextTokens >= 2048 ? 3400 : 1200);
     const turnText = (m) => Array.isArray(m.content)
       ? m.content.filter(p => p && p.type === 'text').map(p => p.text).join(' ')
       : String(m.content || '');

@@ -128,6 +128,20 @@ button.terminal-frame__dot--green::after {
   inset: -8px;
 }
 
+a.terminal-frame__dot--back {
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+a.terminal-frame__dot--back::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+a.terminal-frame__dot--back:hover { filter: brightness(1.25); transform: scale(1.15); }
+a.terminal-frame__dot--back:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: 2px; }
+
 body.is-fullscreen-tool .terminal-frame--fullscreen {
   position: fixed;
   inset: 0;
@@ -161,6 +175,7 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .mp,
 body.is-fullscreen-tool .terminal-frame--fullscreen .rd,
 body.is-fullscreen-tool .terminal-frame--fullscreen .countdown-tool,
 body.is-fullscreen-tool .terminal-frame--fullscreen .qn-tool,
+body.is-fullscreen-tool .terminal-frame--fullscreen .xr,
 body.is-fullscreen-tool .terminal-frame--fullscreen .b64 {
   flex: 1;
   height: auto !important;

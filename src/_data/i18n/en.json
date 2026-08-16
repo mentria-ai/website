@@ -145,6 +145,7 @@
     "copy_failed": "Copy failed — use Ctrl+C manually.",
     "tool_info": "About this tool",
     "toggle_fullscreen": "Toggle fullscreen",
+    "back": "Back",
     "skip_to_content": "Skip to content",
     "gamepad_connected": "🎮 controller connected",
     "gamepad_disconnected": "🎮 controller disconnected",

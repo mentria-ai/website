@@ -145,6 +145,7 @@
     "copy_failed": "Échec de copie — utilisez Ctrl+C manuellement.",
     "tool_info": "À propos de cet outil",
     "toggle_fullscreen": "Basculer en plein écran",
+    "back": "Retour",
     "skip_to_content": "Aller au contenu",
     "gamepad_connected": "🎮 manette connectée",
     "gamepad_disconnected": "🎮 manette déconnectée",

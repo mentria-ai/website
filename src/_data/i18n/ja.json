@@ -145,6 +145,7 @@
     "copy_failed": "コピー失敗 — 手動でCtrl+Cを使用してください。",
     "tool_info": "このツールについて",
     "toggle_fullscreen": "全画面表示を切り替え",
+    "back": "戻る",
     "skip_to_content": "コンテンツへスキップ",
     "gamepad_connected": "🎮 コントローラー接続",
     "gamepad_disconnected": "🎮 コントローラー切断",

@@ -10,16 +10,16 @@ eleventyComputed:
   title: "{{ 'tools.extensions.title' | t }}"
   description: "{{ 'tools.extensions.lede' | t }}"
 ---
+{% set terminalTitle = "…" %}
+{% set terminalBackHref = locale.pathPrefix + "/tools/extensions/" %}
+{% include "terminal-frame-open.njk" %}
 <section class="xr" data-prefix="{{ locale.pathPrefix }}">
-  <div class="xr__bar">
-    <a class="xr__back" href="{{ locale.pathPrefix }}/tools/extensions/">←</a>
-    <span class="xr__title" id="xr-title">…</span>
-  </div>
   <p class="xr__error" id="xr-error" hidden></p>
   <p class="xr__missing" id="xr-missing" hidden>{{ "tool.extensions.run_not_installed" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
   <p class="xr__missing" id="xr-disabled" hidden>{{ "tool.extensions.run_disabled" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
   <iframe class="xr__frame" id="xr-frame" allow="bluetooth; usb; serial; camera; microphone"></iframe>
 </section>
+{% include "terminal-frame-close.njk" %}
 
 <script type="module">
 const X = await import('/assets/js/mentria-extensions.js');
@@ -40,7 +40,8 @@ if (!source) {
   frame.remove();
 } else {
   const m = entry.manifest;
-  document.getElementById('xr-title').textContent = m.icon && !/^data:/.test(m.icon) ? m.icon + ' ' + m.name : m.name;
+  const filename = document.querySelector('.terminal-frame__filename');
+  if (filename) filename.textContent = m.icon && !/^data:/.test(m.icon) ? m.icon + ' ' + m.name : m.name;
   document.title = m.name + ' · Mentria';
   const cs = getComputedStyle(document.documentElement);
   const theme = Object.freeze({
@@ -78,11 +79,11 @@ if (!source) {
 </script>
 
 <style>
-.xr { display: flex; flex-direction: column; min-height: 80vh; }
-.xr__bar { display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--term-border, #2a3138); font-family: var(--font-mono); }
-.xr__back { color: var(--term-muted); text-decoration: none; font-size: 1.1rem; }
-.xr__title { font-size: 0.9rem; color: var(--term-fg); }
-.xr__frame { flex: 1; width: 100%; border: 0; min-height: 70vh; background: transparent; }
+.xr { display: flex; flex-direction: column; height: min(820px, 78vh); }
+.xr__frame { flex: 1; width: 100%; border: 0; min-height: 0; background: transparent; }
+@media (max-width: 480px) {
+  .xr { height: min(600px, 70vh); }
+}
 .xr__error, .xr__missing { font-family: var(--font-mono); font-size: 0.8rem; color: var(--syn-pink, #f472b6); padding: 0.6rem 0.8rem; margin: 0; }
 .xr__missing a { color: var(--accent, #6ef3c5); }
 .xr__error[hidden], .xr__missing[hidden] { display: none; }

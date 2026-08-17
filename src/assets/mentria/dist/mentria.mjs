@@ -1,4 +1,4 @@
-import { a as N, b, c as g, i as I, l as m, m as P, p as _, s as W, t as R, u as D, x as w, y as l } from "./capabilities-CyA_QRlM.mjs";
+import { C as w, S as b, a as N, d as g, f as I, g as P, h as _, l as W, o as m, t as R, u as D, x as l } from "./capabilities-C3V5F_03.mjs";
 var O = 1, U = class L {
   #r = null;
   #e = /* @__PURE__ */ new Map();
@@ -427,11 +427,11 @@ export {
   P as MultimodalUnavailableError,
   O as PROTOCOL_VERSION,
   W as QWEN35_08B_CONFIG,
-  g as QWEN35_27B_BONSAI_CONFIG,
-  m as QWEN35_2B_CONFIG,
-  D as QWEN35_4B_CONFIG,
-  I as QWEN35_VL_08B_VISION_CONFIG,
-  N as QWEN35_VL_27B_VISION_CONFIG,
+  D as QWEN35_27B_BONSAI_CONFIG,
+  g as QWEN35_2B_CONFIG,
+  I as QWEN35_4B_CONFIG,
+  N as QWEN35_VL_08B_VISION_CONFIG,
+  m as QWEN35_VL_27B_VISION_CONFIG,
   l as WEBGPU_ERROR_CODES,
   b as WebGPUUnsupportedError,
   R as canRunLargeModel

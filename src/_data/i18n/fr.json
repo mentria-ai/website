@@ -773,6 +773,7 @@
       "tier_max": "maximal",
       "think_toggle": "Réflexion approfondie — réponses plus lentes et plus soignées",
       "think_needs_ctx": "La réflexion approfondie nécessite un GPU avec plus de mémoire",
+      "think_toggle_slow": "Réflexion approfondie — prend plusieurs minutes sur ce GPU",
       "thinking": "Réflexion…",
       "thought_for": "A réfléchi pendant {s}s",
       "think_cut": "La réponse a manqué d'espace pendant la réflexion — essayez une question plus courte ou une nouvelle discussion.",

@@ -116,6 +116,7 @@ const COPY = {
   stopped:             {{ ("tool.ai-chat.stopped"               | t) | dump | safe }},
   thinkToggle:         {{ ("tool.ai-chat.think_toggle"          | t) | dump | safe }},
   thinkNeedsCtx:       {{ ("tool.ai-chat.think_needs_ctx"       | t) | dump | safe }},
+  thinkToggleSlow:     {{ ("tool.ai-chat.think_toggle_slow"     | t) | dump | safe }},
   thinking:            {{ ("tool.ai-chat.thinking"              | t) | dump | safe }},
   thoughtFor:          {{ ("tool.ai-chat.thought_for"           | t) | dump | safe }},
   thinkCut:            {{ ("tool.ai-chat.think_cut"             | t) | dump | safe }}
@@ -452,10 +453,12 @@ function runApp(MentriaEngine, Tiers) {
   function syncThinkToggle() {
     const onTier = currentTier === '27b';
     const fits = contextTokens >= 2048;
+    const slowTier = fits && contextTokens < 4096;
+    const label = !fits ? COPY.thinkNeedsCtx : slowTier ? COPY.thinkToggleSlow : COPY.thinkToggle;
     thinkToggle.hidden = !onTier;
     thinkToggle.disabled = !fits;
-    thinkToggle.title = fits ? COPY.thinkToggle : COPY.thinkNeedsCtx;
-    thinkToggle.setAttribute('aria-label', fits ? COPY.thinkToggle : COPY.thinkNeedsCtx);
+    thinkToggle.title = label;
+    thinkToggle.setAttribute('aria-label', label);
     if ((!onTier || !fits) && deepThinkOn) {
       deepThinkOn = false;
       thinkToggle.setAttribute('aria-pressed', 'false');

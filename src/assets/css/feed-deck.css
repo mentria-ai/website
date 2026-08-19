@@ -3,7 +3,6 @@
 html.feed-layout body { overflow: hidden; }
 
 body:has(.deck) .site-header,
-body:has(.deck) .site-footer { display: none !important; }
 
 .deck {
   position: fixed;

@@ -291,10 +291,6 @@
         {{ content | safe }}
     </main>
 
-    {% if not feedLayout %}
-    {% include "footer.njk" %}
-    {% endif %}
-
     {% if not deckLayout %}
     <nav class="app-bar" aria-label="{{ 'palette.app_bar' | t }}">
       <a class="app-bar__item" href="{{ localePrefix }}/"{% if isHomePage %} aria-current="page"{% endif %}>

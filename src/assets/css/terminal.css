@@ -228,7 +228,6 @@ body.is-fullscreen-tool {
   height: 100dvh;
 }
 body.is-fullscreen-tool .site-header,
-body.is-fullscreen-tool .site-footer,
 body.is-fullscreen-tool .pwa-install,
 body.is-fullscreen-tool .lang-switcher { display: none !important; }
 
@@ -706,9 +705,6 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
   max-width: none;
 }
 
-.feed-layout .site-footer {
-  display: none;
-}
 
 .feed-scroll {
   overflow-y: scroll;

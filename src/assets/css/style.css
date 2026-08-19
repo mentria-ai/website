@@ -401,18 +401,6 @@ main:has(.terminal-frame) .hero { max-width: 912px; margin-inline: auto; }
   .site-nav { gap: 0.6rem; flex-wrap: wrap; justify-content: flex-end; }
 }
 
-.site-footer {
-  text-align: center; padding: 2rem 1rem; background: var(--term-bg-raised);
-  color: var(--term-muted); border-top: 1px solid var(--term-border);
-  margin-top: auto; font-family: var(--font-mono); font-size: 0.8rem;
-}
-.site-footer a {
-  color: inherit; text-decoration: none;
-  border-bottom: 1px solid var(--term-border-strong);
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-.site-footer a:hover { color: var(--syn-cyan); border-bottom-color: var(--syn-cyan); }
-
 .section-heading { margin: 3rem 0 1rem; font-size: 1.5rem; color: var(--syn-cyan); }
 .section-heading::before { content: '> '; color: var(--syn-pink); }
 
@@ -807,7 +795,6 @@ html.app-chrome body:has(.terminal-frame) .terminal-frame { margin-top: 0; }
    position:fixed descendants — a pseudo on the peek would be clipped to
    the box instead of covering the viewport. */
 html.app-chrome body:has(.hero.hero--peek) > .site-header,
-html.app-chrome body:has(.hero.hero--peek) > .site-footer,
 html.app-chrome body:has(.hero.hero--peek) main > :not(.hero):not(:has(.hero.hero--peek)),
 html.app-chrome body:has(.hero.hero--peek) main :has(> .hero.hero--peek) > :not(.hero) {
   filter: blur(3px) brightness(0.45);
@@ -1283,7 +1270,7 @@ body.is-fullscreen-tool .app-bar {
     color: #111 !important;
   }
   body::before, body::after { display: none !important; }
-  .site-header, .site-footer, .skip-link, .no-print { display: none !important; }
+  .site-header, .skip-link, .no-print { display: none !important; }
   .app-bar, .related-tools, .pwa-install-banner, .pwa-install-sheet { display: none !important; }
   html.is-standalone body { padding-bottom: 0 !important; }
   main { max-width: none !important; }

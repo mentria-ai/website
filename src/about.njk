@@ -230,7 +230,7 @@ eleventyComputed:
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2H21.5l-7.46 8.53L23 22h-6.84l-5.36-7-6.13 7H1.41l7.98-9.12L1 2h7.02l4.85 6.42L18.244 2zm-2.4 18h1.9L7.27 4h-2L15.844 20z"/></svg>
         </a>
       </div>
-      <span class="about-build">© <span id="about-year">2026</span></span>
+      <span class="about-build about-copyright" id="about-copyright">{{ "about.copyright" | t }}</span>
     </div>
   </div>
 
@@ -386,8 +386,8 @@ eleventyComputed:
 
 <script>
   (function () {
-    var y = document.getElementById('about-year');
-    if (y) y.textContent = String(new Date().getFullYear());
+    var c = document.getElementById('about-copyright');
+    if (c) c.textContent = c.textContent.replace(/\b20\d\d\b/, String(new Date().getFullYear()));
   })();
   (function () {
     var btn = document.getElementById('about-refresh');

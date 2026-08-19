@@ -10,15 +10,15 @@
     "tools": "Outils",
     "home": "Accueil",
     "comms": "Comms",
-    "search": "Recherche"
+    "search": "Recherche",
+    "about": "À propos"
   },
-  "footer": {
-    "copyright": "© 2026 Mentria. Tous droits réservés."
-  },
+  
   "about": {
     "title": "À propos",
     "meta_description": "Mentria est un petit studio créatif. Des outils, des jeux et une IA respectueux de la vie privée qui s'exécutent entièrement dans votre navigateur — sans serveurs, sans comptes, sans pistage.",
     "tagline": "studio créatif. outils & transmissions.",
+    "copyright": "© 2026 Mentria. Tous droits réservés.",
     "s1_label": "ce que c'est",
     "s1_p1": "Mentria est un petit studio créatif qui fabrique des logiciels de façon artisanale : faits main, publiés quand ils sont prêts, et qui ne rendent de comptes qu'aux personnes qui les utilisent. Le site que vous lisez est une application web progressive. Tout ce qu'il contient, des outils et des jeux à l'IA, s'exécute sur l'appareil devant vous. Aucun backend n'envoie vos prompts vers une ferme de serveurs. Aucun traqueur ne mesure le temps passé à regarder la page d'accueil.",
     "s1_p2": "Nous créons des <strong>outils qui vous respectent</strong> : des notes, des minuteurs, un scanner QR, un authentificateur, un générateur de factures, une étagère de jeux, un chat IA qui s'exécute entièrement dans votre navigateur, une radio infinie et un fil quotidien d'explications visuelles. Pas de comptes, pas de capture d'e-mail, pas de bandeau cookies. Si quelque chose ici vous est utile, ça le reste quand votre wifi coupe, et ça le reste dans cinq ans, quand la startup à laquelle vous vous êtes inscrit aura pivoté, périclité ou disparu.",

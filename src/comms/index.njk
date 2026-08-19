@@ -93,6 +93,15 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
       <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-adv-toggle" type="button" aria-expanded="false" title="settings and rooms" aria-label="settings and rooms"><svg class="comms__i" aria-hidden="true"><use href="#ci-gear"></use></svg></button>
     </div>
 
+    <div class="comms__upgrade" id="comms-pk-upgrade" hidden>
+      <span class="comms__upgrade-text">Unlock with Face ID / Touch ID next time instead of typing your code?</span>
+      <div class="comms__upgrade-actions">
+        <button class="comms__btn" id="comms-pk-enroll" type="button">add face id / touch id</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-pk-later" type="button">not now</button>
+      </div>
+      <span class="comms__id-note" id="comms-pk-err" hidden></span>
+    </div>
+
     <div class="comms__chathead" id="comms-chathead">
       <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-leave" type="button" hidden title="back to your people" aria-label="back to your people"><svg class="comms__i" aria-hidden="true"><use href="#ci-back"></use></svg></button>
       <span class="comms__avatar" id="comms-chat-avatar" aria-hidden="true"></span>
@@ -207,6 +216,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
         <span class="comms__lbl">this device</span>
         <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">sound: on</button>
         <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">attach extension</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>add face id / touch id</button>
         <a class="comms__btn comms__btn--ghost" href="/about/">identity settings</a>
       </div>
     </div>
@@ -391,6 +401,11 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__tile-label{position:absolute;left:.4rem;bottom:.3rem;background:rgba(0,0,0,.55);color:#e6edf3;font-size:.68rem;padding:.1rem .4rem;border-radius:3px;letter-spacing:.05em}
 .comms__tile-voice{color:var(--accent,#6ef3c5);font-size:1.3rem}
 
+.comms__upgrade{display:flex;align-items:center;gap:.6rem .9rem;flex-wrap:wrap;padding:.6rem .8rem;margin-bottom:.6rem;border:1px solid rgba(110,243,197,.35);border-radius:8px;background:rgba(110,243,197,.06)}
+.comms__upgrade[hidden]{display:none}
+.comms__upgrade-text{flex:1 1 14rem;color:#c3ccd6;font-size:.82rem}
+.comms__upgrade-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.comms__app--chat .comms__upgrade{display:none}
 .comms__profile{display:flex;align-items:center;gap:.6rem}
 .comms__profile-spacer{flex:1}
 .comms__id-row--you{border:0;background:transparent;padding:0;flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,16rem);grid-template-areas:"av input" "av fp";column-gap:.65rem;row-gap:.15rem;align-items:center}
@@ -528,6 +543,7 @@ const els = {
   ring: $('comms-ring'), ringText: $('comms-ring-text'), ringAccept: $('comms-ring-accept'), ringDecline: $('comms-ring-decline'),
   media: $('comms-media'),
   app: $('comms-app'), adv: $('comms-adv'), advToggle: $('comms-adv-toggle'), newRoom: $('comms-newroom'),
+  pkUpgrade: $('comms-pk-upgrade'), pkEnroll: $('comms-pk-enroll'), pkLater: $('comms-pk-later'), pkErr: $('comms-pk-err'), pkSettings: $('comms-pk-settings'),
   onboard: $('comms-onboard'), obPasskey: $('comms-onboard-passkey'), obIntro: $('comms-onboard-intro'), obInsecure: $('comms-onboard-insecure'), obForm: $('comms-onboard-form'), obDone: $('comms-onboard-done'),
   obStart: $('comms-onboard-start'), obName: $('comms-onboard-name'), obCreate: $('comms-onboard-create'),
   obErr: $('comms-onboard-err'), obHint: $('comms-onboard-hint'), obMethod: $('comms-onboard-method'),
@@ -2115,6 +2131,53 @@ if (navigator.serviceWorker) {
   });
 }
 
+const PK_LATER_KEY = 'passkey_offer_dismissed';
+let pkSupportCache = null;
+const passkeyPossible = async () => {
+  if (pkSupportCache !== null) return pkSupportCache;
+  try {
+    const I = window.MentriaIdentity;
+    const sup = I && I.passkeySupport ? await I.passkeySupport() : 'no';
+    pkSupportCache = sup !== 'no' && !!window.isSecureContext;
+  } catch { pkSupportCache = false; }
+  return pkSupportCache;
+};
+const refreshPasskeyOffer = async (justUnlockedByCode) => {
+  const I = window.MentriaIdentity;
+  const unlocked = I && I.isUnlocked && I.isUnlocked();
+  const has = !!(I && I.hasPasskey && I.hasPasskey());
+  const possible = unlocked && !has && await passkeyPossible();
+  els.pkSettings.hidden = !possible;
+  const dismissed = !!(window.MentriaStore && MentriaStore.get('comms', PK_LATER_KEY));
+  els.pkUpgrade.hidden = !(possible && justUnlockedByCode && !dismissed);
+  if (!els.pkUpgrade.hidden) { els.pkErr.hidden = true; els.pkErr.textContent = ''; }
+};
+const enrollPasskeyFromComms = async (btn) => {
+  btn.disabled = true;
+  els.pkErr.hidden = true;
+  try {
+    await window.MentriaIdentity.enrollPasskey();
+    els.pkUpgrade.hidden = true;
+    els.pkSettings.hidden = true;
+    sys('face id / touch id added — your device lock unlocks comms from now on.');
+  } catch (err) {
+    const msg = err && err.message;
+    els.pkErr.textContent = msg === 'prf-unsupported'
+      ? 'this device can\'t use a passkey for encryption yet — your code still unlocks everything.'
+      : 'that didn\'t work — your code still unlocks everything. try again from ⚙ settings.';
+    els.pkErr.hidden = false;
+    if (msg === 'prf-unsupported') { pkSupportCache = false; els.pkSettings.hidden = true; }
+  } finally {
+    btn.disabled = false;
+  }
+};
+els.pkEnroll.addEventListener('click', () => enrollPasskeyFromComms(els.pkEnroll));
+els.pkSettings.addEventListener('click', () => { els.adv.hidden = true; els.advToggle.setAttribute('aria-expanded', 'false'); els.pkUpgrade.hidden = false; enrollPasskeyFromComms(els.pkEnroll); });
+els.pkLater.addEventListener('click', () => {
+  if (window.MentriaStore) MentriaStore.set('comms', PK_LATER_KEY, true);
+  els.pkUpgrade.hidden = true;
+});
+
 const initIdentity = async () => {
   try {
     myId = await CID.ensureKeypair();
@@ -2132,6 +2195,7 @@ const initIdentity = async () => {
     refreshNotifBanner();
     subscribeInbox();
     subscribeUnread();
+    refreshPasskeyOffer(false);
   } catch (err) {
     sys('identity error: ' + err.message);
   }
@@ -2144,6 +2208,7 @@ els.idUnlock.addEventListener('click', async () => {
     await window.MentriaIdentity.unlock(els.idPass.value);
     els.idPass.value = '';
     await initIdentity();
+    refreshPasskeyOffer(true);
   } catch {
     els.idErr.textContent = 'wrong passphrase';
   } finally {
@@ -2151,7 +2216,6 @@ els.idUnlock.addEventListener('click', async () => {
   }
 });
 els.idPass.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.idUnlock.click(); } });
-
 els.idPasskey.addEventListener('click', async () => {
   els.idErr.textContent = '';
   els.idPasskey.disabled = true;

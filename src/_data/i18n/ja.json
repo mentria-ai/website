@@ -49,6 +49,8 @@
     "cache_clearing": "消去中…",
     "cache_cleared": "完了 — 再読み込み中…",
     "data_section_title": "あなたのデータ",
+    "advanced_title": "詳細設定",
+    "advanced_sub": "バックアップ、ID、デバイス同期",
     "data_section_lede": "ここで作るものはすべて端末に残ります。ブラウザを消してもデータが消えないよう、バックアップしておきましょう。",
     "data_storage_usage": "{quota} のうち {used} を使用",
     "data_storage_unknown": "ストレージ情報を取得できません",

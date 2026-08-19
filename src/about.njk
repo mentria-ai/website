@@ -107,6 +107,14 @@ eleventyComputed:
     </div>
   </section>
 
+  <details class="about-advanced reveal" id="about-advanced">
+    <summary class="about-advanced__summary">
+      <span class="about-advanced__chev" aria-hidden="true">▸</span>
+      <span class="about-advanced__title">{{ "about.advanced_title" | t }}</span>
+      <span class="about-advanced__sub">{{ "about.advanced_sub" | t }}</span>
+      <span class="about-advanced__badge" id="about-advanced-badge" hidden></span>
+    </summary>
+    <div class="about-advanced__body">
   <section class="reveal about-data">
     <h2 class="about-section-h">{{ "about.data_section_title" | t }}</h2>
     <p class="about-tagline" style="margin-bottom: 20px;">{{ "about.data_section_lede" | t }}</p>
@@ -126,32 +134,38 @@ eleventyComputed:
       <div class="about-data-card">
         <h3 class="about-data-card__h">{{ "about.data_export_title" | t }}</h3>
         <p class="about-data-card__p">{{ "about.data_export_lede" | t }}</p>
-        <label class="about-data-field">
-          <span>{{ "about.data_pass_label" | t }}</span>
-          <input type="password" id="about-data-pass" autocomplete="new-password" spellcheck="false">
-        </label>
-        <div class="about-data-strength" id="about-data-strength" aria-live="polite"></div>
-        <label class="about-data-field">
-          <span>{{ "about.data_pass_confirm" | t }}</span>
-          <input type="password" id="about-data-pass2" autocomplete="new-password" spellcheck="false">
-        </label>
-        <button type="button" class="about-data-btn" id="about-data-export-btn">{{ "about.data_export_button" | t }}</button>
-        <div class="about-data-status" id="about-data-export-status" aria-live="polite"></div>
+        <button type="button" class="about-data-btn about-data-btn--ghost about-reveal-btn" data-reveal="about-export-form">{{ "about.data_export_button" | t }}…</button>
+        <div class="about-fold" id="about-export-form" hidden>
+          <label class="about-data-field">
+            <span>{{ "about.data_pass_label" | t }}</span>
+            <input type="password" id="about-data-pass" autocomplete="new-password" spellcheck="false">
+          </label>
+          <div class="about-data-strength" id="about-data-strength" aria-live="polite"></div>
+          <label class="about-data-field">
+            <span>{{ "about.data_pass_confirm" | t }}</span>
+            <input type="password" id="about-data-pass2" autocomplete="new-password" spellcheck="false">
+          </label>
+          <button type="button" class="about-data-btn" id="about-data-export-btn">{{ "about.data_export_button" | t }}</button>
+          <div class="about-data-status" id="about-data-export-status" aria-live="polite"></div>
+        </div>
       </div>
 
       <div class="about-data-card">
         <h3 class="about-data-card__h">{{ "about.data_import_title" | t }}</h3>
         <p class="about-data-card__p">{{ "about.data_import_lede" | t }}</p>
-        <label class="about-data-field">
-          <span>{{ "about.data_import_choose" | t }}</span>
-          <input type="file" id="about-data-import-file" accept="application/json,.json">
-        </label>
-        <label class="about-data-field">
-          <span>{{ "about.data_pass_label" | t }}</span>
-          <input type="password" id="about-data-import-pass" autocomplete="current-password" spellcheck="false">
-        </label>
-        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-data-import-btn">{{ "about.data_import_button" | t }}</button>
-        <div class="about-data-status" id="about-data-import-status" aria-live="polite"></div>
+        <button type="button" class="about-data-btn about-data-btn--ghost about-reveal-btn" data-reveal="about-import-form">{{ "about.data_import_button" | t }}…</button>
+        <div class="about-fold" id="about-import-form" hidden>
+          <label class="about-data-field">
+            <span>{{ "about.data_import_choose" | t }}</span>
+            <input type="file" id="about-data-import-file" accept="application/json,.json">
+          </label>
+          <label class="about-data-field">
+            <span>{{ "about.data_pass_label" | t }}</span>
+            <input type="password" id="about-data-import-pass" autocomplete="current-password" spellcheck="false">
+          </label>
+          <button type="button" class="about-data-btn about-data-btn--ghost" id="about-data-import-btn">{{ "about.data_import_button" | t }}</button>
+          <div class="about-data-status" id="about-data-import-status" aria-live="polite"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -168,15 +182,18 @@ eleventyComputed:
       <p class="about-data-card__p" id="about-identity-lede">{{ "about.identity_lede_none" | t }}</p>
 
       <div class="about-identity-actions" id="about-identity-setup" hidden>
-        <label class="about-data-field">
-          <span>{{ "about.identity_pass_label" | t }}</span>
-          <input type="password" id="about-identity-setup-pass" autocomplete="new-password" minlength="8">
-        </label>
-        <label class="about-data-field">
-          <span>{{ "about.identity_pass_confirm" | t }}</span>
-          <input type="password" id="about-identity-setup-pass2" autocomplete="new-password" minlength="8">
-        </label>
-        <button type="button" class="about-data-btn" id="about-identity-setup-btn">{{ "about.identity_setup_button" | t }}</button>
+        <button type="button" class="about-data-btn about-reveal-btn" data-reveal="about-identity-setup-form">{{ "about.identity_setup_button" | t }}…</button>
+        <div class="about-fold" id="about-identity-setup-form" hidden>
+          <label class="about-data-field">
+            <span>{{ "about.identity_pass_label" | t }}</span>
+            <input type="password" id="about-identity-setup-pass" autocomplete="new-password" minlength="8">
+          </label>
+          <label class="about-data-field">
+            <span>{{ "about.identity_pass_confirm" | t }}</span>
+            <input type="password" id="about-identity-setup-pass2" autocomplete="new-password" minlength="8">
+          </label>
+          <button type="button" class="about-data-btn" id="about-identity-setup-btn">{{ "about.identity_setup_button" | t }}</button>
+        </div>
       </div>
 
       <div class="about-identity-actions" id="about-identity-unlock" hidden>
@@ -213,17 +230,20 @@ eleventyComputed:
       <div class="about-data-card">
         <h3 class="about-data-card__h">{{ "about.sync_join_title" | t }}</h3>
         <p class="about-data-card__p">{{ "about.sync_join_lede" | t }}</p>
-        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-scan-btn">{{ "about.sync_scan_button" | t }}</button>
-        <div class="about-sync-scanner" id="about-sync-scanner" hidden>
-          <video class="about-sync-scanner__video" id="about-sync-scanner-video" playsinline muted></video>
-          <p class="about-sync-scanner__note" id="about-sync-scanner-note" hidden></p>
-          <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-scan-cancel-btn">{{ "about.sync_scan_cancel" | t }}</button>
+        <button type="button" class="about-data-btn about-data-btn--ghost about-reveal-btn" data-reveal="about-join-form">{{ "about.sync_join_button" | t }}…</button>
+        <div class="about-fold" id="about-join-form" hidden>
+          <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-scan-btn" hidden>{{ "about.sync_scan_button" | t }}</button>
+          <div class="about-sync-scanner" id="about-sync-scanner" hidden>
+            <video class="about-sync-scanner__video" id="about-sync-scanner-video" playsinline muted hidden></video>
+            <p class="about-sync-scanner__note" id="about-sync-scanner-note" hidden></p>
+            <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-scan-cancel-btn">{{ "about.sync_scan_cancel" | t }}</button>
+          </div>
+          <label class="about-data-field">
+            <span>{{ "about.sync_join_label" | t }}</span>
+            <input type="text" id="about-sync-code-input" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="characters" placeholder="XXXX-XXXX-XXXX-XXXX">
+          </label>
+          <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-join-btn">{{ "about.sync_join_button" | t }}</button>
         </div>
-        <label class="about-data-field">
-          <span>{{ "about.sync_join_label" | t }}</span>
-          <input type="text" id="about-sync-code-input" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="characters" placeholder="XXXX-XXXX-XXXX-XXXX">
-        </label>
-        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-join-btn">{{ "about.sync_join_button" | t }}</button>
       </div>
     </div>
 
@@ -232,6 +252,9 @@ eleventyComputed:
       <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-disconnect-btn" hidden>{{ "about.sync_disconnect" | t }}</button>
     </div>
   </section>
+
+    </div>
+  </details>
 
   <div class="about-end reveal">
     <span class="about-build about-copyright" id="about-copyright">{{ "about.copyright" | t }}</span>
@@ -325,6 +348,23 @@ eleventyComputed:
   .about-contact-link:hover { border-color: var(--syn-cyan); box-shadow: var(--glow-cyan-soft); }
   .about-contact-link::before { content: "$ "; color: var(--syn-cyan); }
 
+  .about-advanced { margin-top: 60px; border: 1px solid var(--term-border); border-radius: 10px; background: var(--term-bg-raised); }
+  .about-advanced__summary { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 20px; cursor: pointer; list-style: none; font-family: var(--font-mono); }
+  .about-advanced__summary::-webkit-details-marker { display: none; }
+  .about-advanced__summary:hover .about-advanced__title { color: var(--syn-cyan); }
+  .about-advanced__chev { color: var(--syn-cyan); transition: transform 150ms; font-size: 13px; }
+  .about-advanced[open] .about-advanced__chev { transform: rotate(90deg); }
+  .about-advanced__title { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--term-fg); }
+  .about-advanced__sub { font-size: 12px; color: var(--term-muted); }
+  .about-advanced__badge { margin-left: auto; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--syn-green, #34c46a); border: 1px solid var(--syn-green, #34c46a); padding: 2px 8px; border-radius: 4px; }
+  .about-advanced__body { padding: 4px 20px 24px; border-top: 1px solid var(--term-border); }
+  .about-advanced__body > section { margin-top: 0; padding: 28px 0; }
+  .about-advanced__body > section:first-child { border-top: none; padding-top: 20px; }
+  .about-advanced__body > section:last-child { padding-bottom: 4px; }
+  .about-advanced__body .about-section-h { font-size: 17px; }
+  .about-fold { display: flex; flex-direction: column; gap: 10px; }
+  .about-page [hidden] { display: none !important; }
+  .about-reveal-btn { align-self: flex-start; }
   .about-data-stats { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; font-family: var(--font-mono); font-size: 12px; }
   .about-data-stat { display: flex; flex-direction: column; gap: 4px; }
   .about-data-stat__label { color: var(--term-subtle); letter-spacing: 0.1em; font-size: 10px; }
@@ -386,6 +426,8 @@ eleventyComputed:
     .about-stack-row { font-size: 13px; }
     .about-principle { flex-direction: column; gap: 4px; padding: 10px 0; }
     .about-principle .num { min-width: 0; }
+    .about-advanced__summary { padding: 14px; }
+    .about-advanced__body { padding: 4px 14px 18px; }
     .about-actions { padding: 14px; gap: 12px; }
     .about-actions__group { width: 100%; justify-content: space-between; }
     .about-end { padding: 18px 0; }
@@ -633,6 +675,7 @@ eleventyComputed:
 
     function setStatus(text, tone) {
       statusLabel.textContent = text;
+      if (tone === 'connected' || tone === 'pairing' || tone === 'connecting') { var adv = document.getElementById('about-advanced'); if (adv) adv.open = true; }
       if (tone) statusLabel.dataset.tone = tone; else delete statusLabel.dataset.tone;
     }
 
@@ -746,12 +789,35 @@ eleventyComputed:
       });
     });
 
+    if (/^#(advanced|sync|data|backup|identity)$/.test(location.hash)) {
+      var advEl = document.getElementById('about-advanced');
+      if (advEl) { advEl.open = true; advEl.scrollIntoView({ block: 'start' }); }
+    }
+    document.querySelectorAll('.about-reveal-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var box = document.getElementById(b.getAttribute('data-reveal'));
+        if (!box) return;
+        box.hidden = false;
+        b.hidden = true;
+        var f = box.querySelector('input, button');
+        if (f) { try { f.focus({ preventScroll: true }); } catch (_) {} }
+      });
+    });
+
     var scanBtn = document.getElementById('about-sync-scan-btn');
     var scanCancel = document.getElementById('about-sync-scan-cancel-btn');
     var scanPanel = document.getElementById('about-sync-scanner');
     var scanVideo = document.getElementById('about-sync-scanner-video');
     var scanNote = document.getElementById('about-sync-scanner-note');
     var scanScanner = { detector: null, useJsQR: false, stream: null, rafId: 0, scanning: false, lastDetect: 0, canvas: null, ctx: null };
+
+    (function probeCamera() {
+      if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+      navigator.mediaDevices.enumerateDevices().then(function (list) {
+        var hasCam = list.some(function (d) { return d.kind === 'videoinput'; });
+        if (hasCam) scanBtn.hidden = false;
+      }).catch(function () {});
+    })();
 
     function showScanNote(msg) {
       if (!msg) { scanNote.hidden = true; return; }
@@ -799,6 +865,7 @@ eleventyComputed:
       if (scanScanner.stream) { scanScanner.stream.getTracks().forEach(function (t) { t.stop(); }); scanScanner.stream = null; }
       scanVideo.srcObject = null;
       scanPanel.hidden = true;
+      scanVideo.hidden = true;
     }
     async function scanLoop(ts) {
       if (!scanScanner.scanning) return;
@@ -838,6 +905,7 @@ eleventyComputed:
         return;
       }
       scanVideo.srcObject = scanScanner.stream;
+      scanVideo.hidden = false;
       try { await scanVideo.play(); } catch (_) {}
       scanScanner.scanning = true;
       scanScanner.lastDetect = 0;
@@ -897,6 +965,14 @@ eleventyComputed:
       setupBox.hidden = setUp;
       unlockBox.hidden = !setUp || unlocked;
       unlockedBox.hidden = !unlocked;
+      var adv = document.getElementById('about-advanced');
+      var badge = document.getElementById('about-advanced-badge');
+      if (adv && setUp && !adv.dataset.autoOpened) { adv.open = true; adv.dataset.autoOpened = '1'; }
+      if (badge) {
+        badge.hidden = !setUp;
+        badge.textContent = unlocked ? COPY.statusUnlocked : COPY.statusLocked;
+        badge.style.color = badge.style.borderColor = unlocked ? '' : 'var(--syn-amber, #f7b015)';
+      }
       if (!setUp) {
         statusEl.textContent = COPY.statusNone;
         delete statusEl.dataset.tone;

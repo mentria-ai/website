@@ -49,6 +49,8 @@
     "cache_clearing": "Vaciando…",
     "cache_cleared": "Listo — recargando…",
     "data_section_title": "Tus datos",
+    "advanced_title": "Ajustes avanzados",
+    "advanced_sub": "Copias de seguridad, identidad y sincronización de dispositivos",
     "data_section_lede": "Todo lo que creas aquí vive en tu dispositivo. Haz una copia para que un borrado del navegador no se lo lleve.",
     "data_storage_usage": "{used} de {quota} usado",
     "data_storage_unknown": "Estimación de almacenamiento no disponible",

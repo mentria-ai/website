@@ -49,6 +49,8 @@
     "cache_clearing": "Vidage…",
     "cache_cleared": "Vidé — rechargement…",
     "data_section_title": "Vos données",
+    "advanced_title": "Paramètres avancés",
+    "advanced_sub": "Sauvegardes, identité et synchronisation des appareils",
     "data_section_lede": "Tout ce que vous créez ici vit sur votre appareil. Sauvegardez pour qu'un effacement navigateur ne l'emporte pas.",
     "data_storage_usage": "{used} sur {quota} utilisé",
     "data_storage_unknown": "Estimation indisponible",

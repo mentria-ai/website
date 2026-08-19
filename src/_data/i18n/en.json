@@ -49,6 +49,8 @@
     "cache_clearing": "Clearing…",
     "cache_cleared": "Cleared — reloading…",
     "data_section_title": "Your data",
+    "advanced_title": "Advanced settings",
+    "advanced_sub": "Backups, identity and device sync",
     "data_section_lede": "Everything you create here lives on your device. Back it up so a browser wipe doesn't take it with it.",
     "data_storage_usage": "{used} of {quota} used",
     "data_storage_unknown": "Storage estimate unavailable",

@@ -1,0 +1,295 @@
+<script type="application/json" id="mentria-ext">
+{
+  "id": "image-gen",
+  "name": "Image Generator",
+  "version": "1.0.0",
+  "icon": "🎨",
+  "author": "Mentria",
+  "description": "Text-to-image on Mentria's shared z-image-turbo render node. Type a prompt, wait your turn, get an image.",
+  "permissions": ["network"],
+  "mounts": {
+    "tool": {},
+    "commands": [
+      { "name": "imagine", "usage": "imagine <prompt>", "description": "generate an image from a prompt" }
+    ]
+  }
+}
+</script>
+<style>
+  :root {
+    --ext-accent: #6ef3c5;
+    --ext-bg: #0b0e11;
+    --ext-fg: #e6edf3;
+    --ext-muted: #8b98a5;
+    --ext-font: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 1.25rem; font-family: var(--ext-font); background: var(--ext-bg); color: var(--ext-fg); }
+  .wrap { max-width: 44rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.9rem; }
+  .head { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; font-size: 0.72rem; color: var(--ext-muted); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #566; margin-right: 6px; vertical-align: 1px; }
+  .dot.on { background: var(--ext-accent); box-shadow: 0 0 6px var(--ext-accent); }
+  .dot.off { background: #f472b6; }
+  textarea { width: 100%; min-height: 4.4rem; background: #10141a; border: 1px solid #2a3138; border-radius: 8px; padding: 0.65rem 0.75rem; color: var(--ext-fg); font-family: inherit; font-size: 0.9rem; resize: vertical; }
+  textarea:focus { outline: none; border-color: var(--ext-accent); }
+  textarea:disabled { opacity: 0.5; }
+  .row { display: flex; gap: 0.6rem; align-items: center; }
+  .qinfo { font-size: 0.75rem; color: var(--ext-muted); }
+  button.go { background: transparent; border: 1px solid var(--ext-accent); color: var(--ext-accent); border-radius: 8px; padding: 0.55rem 1.4rem; font-family: inherit; font-size: 0.9rem; cursor: pointer; margin-left: auto; }
+  button.go:hover:not(:disabled) { background: var(--ext-accent); color: #0b0e11; }
+  button.go:disabled { opacity: 0.45; cursor: not-allowed; }
+  .status { font-size: 0.78rem; color: var(--ext-muted); min-height: 1.1em; }
+  .status.err { color: #f472b6; }
+  .stage { position: relative; border: 1px dashed #2a3138; border-radius: 10px; min-height: 15rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; overflow: hidden; padding: 0.5rem; }
+  .stage img { max-width: 100%; max-height: 36rem; display: block; border-radius: 8px; }
+  .hint { color: var(--ext-muted); font-size: 0.8rem; text-align: center; max-width: 26rem; line-height: 1.6; }
+  .big { font-size: 2rem; line-height: 1; }
+  .spin { width: 26px; height: 26px; border: 3px solid #2a3138; border-top-color: var(--ext-accent); border-radius: 50%; animation: r 0.8s linear infinite; }
+  @keyframes r { to { transform: rotate(360deg); } }
+  .eta { font-size: 1.4rem; color: var(--ext-fg); font-variant-numeric: tabular-nums; }
+  .pos { font-size: 0.78rem; color: var(--ext-muted); }
+  .bar { width: 60%; max-width: 18rem; height: 4px; background: #2a3138; border-radius: 2px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0%; background: var(--ext-accent); border-radius: 2px; transition: width 0.4s; }
+  .actions { display: flex; gap: 0.5rem; }
+  .actions[hidden] { display: none; }
+  .actions a, .actions button { background: transparent; border: 1px solid #2a3138; color: var(--ext-fg); border-radius: 6px; padding: 0.4rem 0.9rem; font-family: inherit; font-size: 0.78rem; cursor: pointer; text-decoration: none; }
+  .actions a:hover, .actions button:hover { border-color: var(--ext-accent); color: var(--ext-accent); }
+  .retry { background: transparent; border: 1px solid #2a3138; color: var(--ext-fg); border-radius: 6px; padding: 0.45rem 1rem; font-family: inherit; font-size: 0.8rem; cursor: pointer; }
+  .retry:hover { border-color: var(--ext-accent); color: var(--ext-accent); }
+</style>
+<div class="wrap">
+  <div class="head">
+    <span><span class="dot" id="dot"></span><span id="svc">connecting…</span></span>
+    <span class="qinfo" id="qinfo"></span>
+  </div>
+  <textarea id="prompt" maxlength="800" placeholder="Describe the image… (settings are fixed server-side — just describe the scene)" disabled></textarea>
+  <div class="row">
+    <span class="status" id="status"></span>
+    <button class="go" id="go" type="button" disabled>Generate</button>
+  </div>
+  <div class="stage" id="stage">
+    <span class="hint" id="hint">Connecting to the render node…</span>
+  </div>
+  <div class="actions" id="actions" hidden>
+    <a id="dl" download="mentria-image.webp">Download</a>
+    <button id="again" type="button">Generate another</button>
+  </div>
+</div>
+<script type="module">
+import { SimplePool, generateSecretKey, getPublicKey, finalizeEvent } from '/assets/vendor/nostr-tools.js';
+
+const KIND = 20808;
+const RELAY = 'wss://relay.mentria.ai';
+const SERVICE = 'mentria-imagegen-v1';
+const m = window.mentria || {};
+const notify = m.notify || (() => {});
+
+const root = document.documentElement, th = m.theme || {};
+for (const [k, v] of Object.entries({ accent: th.accent, bg: th.bg, fg: th.fg, muted: th.muted, fontMono: th.fontMono }))
+  if (v) root.style.setProperty('--ext-' + (k === 'fontMono' ? 'font' : k), v);
+
+const te = new TextEncoder(), td = new TextDecoder();
+const toB64 = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+const fromB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const hx = (u8) => [...u8].map((b) => b.toString(16).padStart(2, '0')).join('');
+
+async function deriveKey(secret) {
+  const raw = await crypto.subtle.digest('SHA-256', te.encode('mentria-imagegen:key:' + secret));
+  return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt', 'decrypt']);
+}
+async function deriveChannel(secret) {
+  return hx(new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode('mentria-imagegen:chan:' + secret))));
+}
+async function seal(key, obj) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const enc = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(obj))));
+  const ct = enc.subarray(0, enc.length - 16), tag = enc.subarray(enc.length - 16);
+  const out = new Uint8Array(28 + ct.length);
+  out.set(iv, 0); out.set(tag, 12); out.set(ct, 28);
+  return toB64(out);
+}
+async function open(key, b64) {
+  const buf = fromB64(b64);
+  const iv = buf.subarray(0, 12), tag = buf.subarray(12, 28), ct = buf.subarray(28);
+  const cw = new Uint8Array(ct.length + 16);
+  cw.set(ct, 0); cw.set(tag, ct.length);
+  return JSON.parse(td.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cw)));
+}
+
+class Room {
+  constructor(relay, secret) { this.relays = [relay]; this.secret = secret; this.pool = new SimplePool(); this.sk = generateSecretKey(); this.pk = getPublicKey(this.sk); this.pending = new Map(); this.onPush = null; }
+  async start() {
+    this.key = await deriveKey(this.secret);
+    this.channel = await deriveChannel(this.secret);
+    this.sub = this.pool.subscribeMany(this.relays, { kinds: [KIND], '#t': [this.channel], since: Math.floor(Date.now() / 1000) - 5 }, { onevent: (ev) => this._ev(ev) });
+  }
+  async _ev(ev) {
+    if (ev.pubkey === this.pk) return;
+    let msg; try { msg = await open(this.key, ev.content); } catch { return; }
+    const role = ev.tags.find((t) => t[0] === 'role')?.[1];
+    if (role !== 'res') return;
+    if (msg.id && this.pending.has(msg.id)) {
+      const p = this.pending.get(msg.id); clearTimeout(p.to); this.pending.delete(msg.id);
+      msg.ok ? p.resolve(msg.data) : p.reject(new Error(msg.error?.message || 'request failed'));
+    } else if (msg.event && this.onPush) { this.onPush(msg.event, msg.data); }
+  }
+  request(op, params = {}, timeoutMs = 20000) {
+    const id = hx(crypto.getRandomValues(new Uint8Array(8)));
+    return new Promise((resolve, reject) => {
+      const to = setTimeout(() => { this.pending.delete(id); reject(new Error('timeout: ' + op)); }, timeoutMs);
+      this.pending.set(id, { resolve, reject, to });
+      this._send('req', { id, op, params });
+    });
+  }
+  async _send(role, obj) {
+    const ev = finalizeEvent({ kind: KIND, created_at: Math.floor(Date.now() / 1000), tags: [['t', this.channel], ['role', role], ['expiration', String(Math.floor(Date.now() / 1000) + 600)]], content: await seal(this.key, obj) }, this.sk);
+    for (const p of this.pool.publish(this.relays, ev)) Promise.resolve(p).catch(() => {});
+  }
+}
+
+const $ = (id) => document.getElementById(id);
+const els = { dot: $('dot'), svc: $('svc'), qinfo: $('qinfo'), prompt: $('prompt'), go: $('go'), status: $('status'), stage: $('stage'), actions: $('actions'), dl: $('dl'), again: $('again') };
+
+const room = new Room(RELAY, SERVICE);
+let online = false;
+let myJob = null;
+let chunks = null;
+let etaTimer = 0;
+let lastBlobUrl = null;
+
+const fmtEta = (ms) => {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return s >= 60 ? Math.floor(s / 60) + 'm ' + String(s % 60).padStart(2, '0') + 's' : s + 's';
+};
+function setStatus(msg, err) { els.status.textContent = msg || ''; els.status.className = err ? 'status err' : 'status'; }
+function stage(html) { els.stage.innerHTML = html; }
+function setOnline(on, info) {
+  online = on;
+  els.dot.className = 'dot ' + (on ? 'on' : 'off');
+  els.svc.textContent = on ? (info.model || 'ready') + ' · ' + (info.dims ? info.dims.join('×') : '') : 'render node offline';
+  els.prompt.disabled = !on;
+  els.go.disabled = !on || !!myJob;
+  if (on) paintQueue(info.queue, info.avgMs);
+  else {
+    els.qinfo.textContent = '';
+    stage('<span class="big">📴</span><span class="hint">The render node is offline right now — the service runs on a real machine that isn\'t always awake. Try again later.</span><button class="retry" id="retry" type="button">Check again</button>');
+    $('retry').addEventListener('click', () => { stage('<span class="hint">Connecting to the render node…</span>'); hello(); });
+  }
+}
+function paintQueue(q, avgMs) {
+  els.qinfo.textContent = q > 0 ? q + ' in queue · ~' + fmtEta(q * (avgMs || 40000)) + ' wait' : 'queue is empty';
+}
+function countdown(ms) {
+  clearInterval(etaTimer);
+  let left = ms;
+  const el = () => els.stage.querySelector('.eta');
+  if (el()) el().textContent = fmtEta(left);
+  etaTimer = setInterval(() => {
+    left -= 1000;
+    const e = el();
+    if (e) e.textContent = left > 0 ? fmtEta(left) : 'any moment now…';
+  }, 1000);
+}
+
+async function hello() {
+  try {
+    const info = await room.request('hello', {}, 8000);
+    setOnline(!!info.ready, info);
+    if (!info.ready) setOnline(false, {});
+    else stageIdle();
+  } catch (_) {
+    setOnline(false, {});
+  }
+}
+function stageIdle() {
+  if (lastBlobUrl) return;
+  stage('<span class="big">🎨</span><span class="hint">Describe a scene and hit Generate. One image per turn — everyone shares the same render node, so you may briefly queue.</span>');
+}
+
+room.onPush = (event, data) => {
+  if (!myJob || !data || data.job !== myJob) {
+    if (event === 'job:pos' && data && typeof data.queue === 'number') paintQueue(data.queue, null);
+    return;
+  }
+  if (event === 'job:pos') {
+    stage('<span class="pos">position ' + data.pos + ' in queue</span><span class="eta"></span><span class="hint">estimated wait</span>');
+    countdown(data.etaMs);
+  } else if (event === 'job:start') {
+    stage('<div class="spin"></div><span class="eta"></span><span class="hint">rendering your image…</span>');
+    countdown(data.etaMs || 40000);
+    setStatus('rendering…');
+  } else if (event === 'job:done') {
+    chunks = { mime: data.mime, total: data.chunks, got: 0, parts: new Array(data.chunks) };
+    stage('<div class="bar"><i id="rxbar"></i></div><span class="hint">receiving image…</span>');
+    clearInterval(etaTimer);
+  } else if (event === 'job:chunk' && chunks) {
+    if (!chunks.parts[data.i]) { chunks.parts[data.i] = fromB64(data.b64); chunks.got++; }
+    const bar = $('rxbar');
+    if (bar) bar.style.width = Math.round((chunks.got / chunks.total) * 100) + '%';
+    if (chunks.got === chunks.total) finishImage();
+  } else if (event === 'job:error') {
+    clearInterval(etaTimer);
+    myJob = null; chunks = null;
+    els.go.disabled = !online;
+    setStatus(data.message || 'generation failed', true);
+    stageIdle();
+    refreshQueueInfo();
+  }
+};
+
+function finishImage() {
+  const blob = new Blob(chunks.parts, { type: chunks.mime });
+  if (lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
+  lastBlobUrl = URL.createObjectURL(blob);
+  stage('');
+  const img = document.createElement('img');
+  img.src = lastBlobUrl;
+  img.alt = els.prompt.value;
+  els.stage.appendChild(img);
+  els.dl.href = lastBlobUrl;
+  els.dl.download = 'mentria-' + (els.prompt.value || 'image').slice(0, 24).replace(/[^a-z0-9]+/gi, '-').toLowerCase() + (chunks.mime === 'image/png' ? '.png' : '.webp');
+  els.actions.hidden = false;
+  setStatus('done');
+  notify('image ready');
+  myJob = null; chunks = null;
+  els.go.disabled = !online;
+  clearInterval(etaTimer);
+  refreshQueueInfo();
+}
+
+function refreshQueueInfo() {
+  room.request('status', {}, 8000).then((s) => paintQueue(s.queue, s.avgMs)).catch(() => {});
+}
+
+async function generate() {
+  const prompt = els.prompt.value.trim();
+  if (!prompt || myJob) return;
+  els.go.disabled = true;
+  els.actions.hidden = true;
+  setStatus('submitting…');
+  try {
+    const r = await room.request('generate', { prompt }, 15000);
+    myJob = r.job;
+    setStatus('');
+    paintQueue(r.queue, null);
+    stage('<span class="pos">position ' + r.pos + ' in queue</span><span class="eta"></span><span class="hint">estimated wait</span>');
+    countdown(r.etaMs);
+  } catch (e) {
+    setStatus(String(e.message || e), true);
+    els.go.disabled = false;
+    if (/timeout/.test(String(e.message))) setOnline(false, {});
+  }
+}
+
+els.go.addEventListener('click', generate);
+els.again.addEventListener('click', () => { els.actions.hidden = true; if (lastBlobUrl) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null; } stageIdle(); els.prompt.focus(); });
+els.prompt.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); generate(); } });
+
+await room.start();
+await hello();
+setInterval(() => { if (!online && !myJob) hello(); }, 30000);
+
+if (m.args && m.args.cmd === 'imagine' && m.args.args) {
+  els.prompt.value = m.args.args;
+}
+</script>

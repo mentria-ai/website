@@ -13,7 +13,6 @@
     "search": "Buscar",
     "about": "Sobre"
   },
-  
   "about": {
     "title": "Sobre",
     "meta_description": "A Mentria é um pequeno estúdio criativo. Ferramentas, jogos e IA com foco em privacidade que rodam inteiramente no seu navegador — sem servidores, sem contas, sem rastreamento.",
@@ -1415,7 +1414,8 @@
       "desc": {
         "unit-converter": "Converta comprimento, peso e temperatura. Lembra as últimas unidades usadas entre sessões.",
         "pomodoro-timer": "Um cronômetro de foco com fases de trabalho e pausa. A contagem regressiva continua mesmo se você recarregar.",
-        "dice-roller": "Role dados com notação padrão como 2d6+1, ou sorteie uma opção da sua própria lista."
+        "dice-roller": "Role dados com notação padrão como 2d6+1, ou sorteie uma opção da sua própria lista.",
+        "image-gen": "Gere imagens a partir de um texto no nó de render compartilhado da Mentria. Grátis e sem configuração: descreva a cena e aguarde sua vez."
       }
     },
     "bubble-level": {

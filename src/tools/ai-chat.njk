@@ -594,7 +594,7 @@ function runApp(MentriaEngine, Tiers) {
     } finally { clearTimeout(t); }
   }
 
-  const SEARCH_TOOL_PROMPT = "\n\n# Tool: web search\nYou can search the web. To search, reply with only this, and nothing else:\n<tool_call>{\"name\": \"web_search\", \"arguments\": {\"query\": \"your search terms\"}}</tool_call>\nSearch when the question needs current events, prices, weather, news, or facts you are unsure of. After results arrive in a <tool_response> block, answer the user's question using them, briefly, and mention the source domains. Do not search more than twice per question.";
+  const SEARCH_TOOL_PROMPT = "\\n\\n# Tool: web search\\nYou can search the web with the web_search tool. The client runs your search and sends you the results in a <tool_response> message — you never need to imagine results or wait; just emit the call and stop.\\nHow to call: end your reply (after any thinking) with exactly this on its own, then stop:\\n<tool_call>{\\\"name\\\": \\\"web_search\\\", \\\"arguments\\\": {\\\"query\\\": \\\"your search terms\\\"}}</tool_call>\\nThe call must appear in your final reply, not only inside your thinking.\\nWhen to call: ALWAYS when the user asks you to search, look something up online, check a manual or documentation, or verify something on the web. Also when the answer needs current or uncertain facts: news, prices, weather, versions, schedules, results.\\nAfter a <tool_response> arrives, answer the question using those results, briefly, and mention the source domains. At most 2 searches per question.";
 
   function parseToolCall(text) {
     const m = text.match(/<tool_call>\s*([\s\S]*?)\s*<\/tool_call>/);

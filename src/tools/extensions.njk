@@ -16,12 +16,15 @@ eleventyComputed:
   <p>{{ "tools.extensions.lede" | t }}</p>
   {% include "tldr.njk" %}
   <p style="margin-top:0.85rem;font-family:var(--font-mono);font-size:0.85rem;"><a href="{{ locale.pathPrefix }}/tools/extensions/sdk/">{{ "tools.extensions-sdk.title" | t }} →</a></p>
-  <p style="margin-top:0.5rem;"><a class="xt__link" href="{{ locale.pathPrefix }}/tools/extensions/gallery/">{{ "tool.ext_gallery.title" | t }} →</a></p>
 </section>
 
 {% set terminalTitle = "extensions.js" %}
 {% include "terminal-frame-open.njk" %}
 <section class="xt">
+  <h2 class="xt__heading">{{ "tool.ext_gallery.title" | t }}</h2>
+  <p class="xt__lede">{{ "tool.ext_gallery.lede" | t }}</p>
+  <div class="exg" id="exg-grid"></div>
+
   <h2 class="xt__heading">{{ "tool.extensions.install_heading" | t }}</h2>
   <div class="xt__drop" id="xt-drop">
     <input type="file" id="xt-file" accept=".html,text/html" hidden>
@@ -65,8 +68,18 @@ const COPY = {
   btnShare:      {{ ("tool.extensions.btn_share"      | t) | dump | safe }},
   shareOk:       {{ ("tool.extensions.share_ok"       | t) | dump | safe }},
   shareOpenComms:{{ ("tool.extensions.share_open_comms"| t) | dump | safe }},
-  toggleLabel:   {{ ("tool.extensions.toggle_label"   | t) | dump | safe }}
+  toggleLabel:   {{ ("tool.extensions.toggle_label"   | t) | dump | safe }},
+  galInstall:    {{ ("tool.ext_gallery.btn_install" | t) | dump | safe }},
+  galInstalled:  {{ ("tool.ext_gallery.installed"   | t) | dump | safe }},
+  galOpen:       {{ ("tool.ext_gallery.btn_open"    | t) | dump | safe }},
+  galErrLoad:    {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }}
 };
+const CATALOG = [
+  { id: "unit-converter", desc: {{ ("tool.ext_gallery.desc.unit-converter" | t) | dump | safe }} },
+  { id: "pomodoro-timer", desc: {{ ("tool.ext_gallery.desc.pomodoro-timer" | t) | dump | safe }} },
+  { id: "dice-roller",    desc: {{ ("tool.ext_gallery.desc.dice-roller"    | t) | dump | safe }} },
+  { id: "image-gen",      desc: {{ ("tool.ext_gallery.desc.image-gen"      | t) | dump | safe }} }
+];
 
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
 const X = await import('/assets/js/mentria-extensions.js');
@@ -172,11 +185,14 @@ function btn(label, fn) {
   return b;
 }
 
+let refreshGallery = () => {};
+
 function render() {
   const reg = X.getRegistry();
   listEl.innerHTML = '';
   reg.forEach((e) => listEl.appendChild(row(e)));
   emptyEl.hidden = reg.length > 0;
+  refreshGallery();
 }
 
 ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('xt__drop--hot'); }));
@@ -204,6 +220,134 @@ document.getElementById('xt-sample-install').addEventListener('click', async () 
     installFlow(html);
   } catch (e) { showError(e.message); }
 });
+
+const galGrid = document.getElementById('exg-grid');
+const galCards = [];
+
+function galChip(text, mod) {
+  const c = document.createElement('span');
+  c.className = 'exg__chip' + (mod ? ' exg__chip--' + mod : '');
+  c.textContent = text;
+  return c;
+}
+
+function galStatus(card, msg) {
+  card._parts.status.textContent = msg || '';
+  card._parts.status.hidden = !msg;
+}
+
+function galMakeCard(entry) {
+  const card = document.createElement('article');
+  card.className = 'exg__card';
+  card.dataset.id = entry.id;
+  const head = document.createElement('div');
+  head.className = 'exg__head';
+  const icon = document.createElement('span');
+  icon.className = 'exg__icon';
+  icon.setAttribute('aria-hidden', 'true');
+  const name = document.createElement('h3');
+  name.className = 'exg__name';
+  name.textContent = entry.id;
+  head.append(icon, name);
+  const desc = document.createElement('p');
+  desc.className = 'exg__desc';
+  desc.textContent = entry.desc;
+  const badges = document.createElement('div');
+  badges.className = 'exg__badges';
+  const status = document.createElement('p');
+  status.className = 'exg__status';
+  status.setAttribute('role', 'status');
+  status.hidden = true;
+  const actions = document.createElement('div');
+  actions.className = 'exg__actions';
+  card.append(head, desc, badges, status, actions);
+  card._parts = { icon, name, badges, status, actions };
+  galGrid.appendChild(card);
+  return card;
+}
+
+function galActions(entry, card) {
+  const p = card._parts;
+  p.actions.innerHTML = '';
+  if (X.getEntry(entry.id)) {
+    const done = document.createElement('span');
+    done.className = 'exg__done';
+    done.textContent = COPY.galInstalled;
+    const open = document.createElement('a');
+    open.className = 'xt__btn xt__btn--small exg__btn';
+    open.textContent = COPY.galOpen;
+    open.href = PREFIX + '/tools/extensions/run/?id=' + encodeURIComponent(entry.id);
+    p.actions.append(done, open);
+  } else {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'xt__btn xt__btn--small exg__btn';
+    b.textContent = COPY.galInstall;
+    b.addEventListener('click', () => galInstall(entry, card, b));
+    p.actions.append(b);
+  }
+}
+
+async function galInstall(entry, card, b) {
+  galStatus(card, '');
+  b.disabled = true;
+  try {
+    const html = entry.html || await fetch('/assets/extensions/' + entry.id + '.html').then((r) => r.text());
+    const result = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
+    if (!result) { b.disabled = false; return; }
+    render();
+  } catch (e) {
+    b.disabled = false;
+    galStatus(card, e.message);
+  }
+}
+
+async function galLoad(entry, card) {
+  const p = card._parts;
+  let html;
+  try {
+    html = await fetch('/assets/extensions/' + entry.id + '.html').then((r) => {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.text();
+    });
+  } catch (e) {
+    galStatus(card, COPY.galErrLoad);
+    return;
+  }
+  entry.html = html;
+  let ins;
+  try {
+    ins = X.inspect(html);
+  } catch (e) {
+    galStatus(card, COPY.galErrLoad + ' ' + e.message);
+    return;
+  }
+  entry.ready = true;
+  const m = ins.manifest;
+  p.icon.textContent = m.icon && !/^data:/.test(m.icon) ? m.icon : '🧩';
+  p.name.textContent = m.name;
+  p.badges.innerHTML = '';
+  p.badges.append(galChip('v' + m.version));
+  if (m.author) p.badges.append(galChip(m.author));
+  (m.permissions || []).forEach((perm) => p.badges.append(galChip(perm, 'perm')));
+  p.badges.append(galChip(Math.max(1, Math.round(ins.size / 1024)) + ' KB'));
+  galActions(entry, card);
+}
+
+refreshGallery = () => {
+  galCards.forEach(({ entry, card }) => { if (entry.ready) galActions(entry, card); });
+};
+
+CATALOG.forEach((entry) => {
+  const card = galMakeCard(entry);
+  galCards.push({ entry, card });
+  galLoad(entry, card);
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') { render(); }
+});
+window.addEventListener('pageshow', (e) => { if (e.persisted) render(); });
 
 render();
 </script>
@@ -257,4 +401,19 @@ render();
 .xt__error[hidden] { display: none; }
 .xt__sample { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem 1rem; }
 .xt__link { color: var(--term-muted); font-size: 0.8rem; }
+.xt__lede { font-size: 0.8rem; color: var(--term-muted); margin: 0 0 0.8rem; }
+.exg { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.8rem; margin-bottom: 0.5rem; }
+.exg__card { display: flex; flex-direction: column; gap: 0.55rem; border: 1px solid var(--term-border, #2a3138); border-radius: 8px; padding: 0.8rem; }
+.exg__head { display: flex; align-items: center; gap: 0.55rem; }
+.exg__icon { font-size: 1.4rem; line-height: 1; }
+.exg__name { font-size: 0.85rem; margin: 0; color: var(--term-fg); overflow-wrap: anywhere; }
+.exg__desc { margin: 0; font-size: 0.75rem; color: var(--term-muted); line-height: 1.5; flex: 1; }
+.exg__badges { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.exg__chip { font-size: 0.62rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--term-border, #2a3138); color: var(--term-muted); }
+.exg__chip--perm { border-color: var(--syn-cyan, #7dd3fc); color: var(--syn-cyan, #7dd3fc); }
+.exg__actions { display: flex; align-items: center; gap: 0.6rem; min-height: 1.8rem; }
+.exg__btn { text-decoration: none; }
+.exg__done { font-size: 0.7rem; color: var(--accent, #6ef3c5); }
+.exg__status { font-size: 0.7rem; color: var(--syn-pink, #f472b6); margin: 0; }
+.exg__status[hidden] { display: none; }
 </style>

@@ -45,6 +45,20 @@ eleventyComputed:
     <div class="ac__progress-detail" id="ac-progress-detail"></div>
   </div>
 
+  <div class="ac__search-cfg" id="ac-search-cfg" hidden>
+    <div class="ac__search-cfg-title">{{ "tool.ai-chat.search_panel_title" | t }}</div>
+    <label class="ac__search-cfg-field">
+      <span>{{ "tool.ai-chat.search_url_label" | t }}</span>
+      <input type="url" id="ac-search-url" placeholder="http://localhost:8888" spellcheck="false" autocomplete="off">
+    </label>
+    <div class="ac__search-cfg-row">
+      <button type="button" class="ac__search-cfg-btn" id="ac-search-test">{{ "tool.ai-chat.search_test" | t }}</button>
+      <button type="button" class="ac__search-cfg-btn ac__search-cfg-btn--primary" id="ac-search-save">{{ "tool.ai-chat.search_save" | t }}</button>
+      <button type="button" class="ac__search-cfg-btn ac__search-cfg-btn--ghost" id="ac-search-remove" hidden>{{ "tool.ai-chat.search_remove" | t }}</button>
+    </div>
+    <div class="ac__search-cfg-status" id="ac-search-status" aria-live="polite"></div>
+  </div>
+
   <div class="ac__messages" id="ac-messages">
     <div class="ac__empty" id="ac-empty">
       <div class="ac__empty-icon">&#9670;</div>
@@ -65,6 +79,9 @@ eleventyComputed:
     </label>
     <button class="ac__think-btn" id="ac-think-toggle" title="{{ 'tool.ai-chat.think_toggle' | t }}" aria-label="{{ 'tool.ai-chat.think_toggle' | t }}" aria-pressed="false" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4.9 12A6.5 6.5 0 0 1 9 17h6a6.5 6.5 0 0 1 1.9-3A7 7 0 0 0 12 2z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
+    </button>
+    <button class="ac__think-btn" id="ac-search-toggle" title="{{ 'tool.ai-chat.search_toggle' | t }}" aria-label="{{ 'tool.ai-chat.search_toggle' | t }}" aria-pressed="false" hidden>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14.5 14.5 0 0 1 0 18M12 3a14.5 14.5 0 0 0 0 18"/></svg>
     </button>
     <textarea class="ac__input" id="ac-input" rows="1" enterkeyhint="send" placeholder="{{ 'tool.ai-chat.input_placeholder' | t }}" disabled></textarea>
     <button class="ac__send-btn" id="ac-send" title="{{ 'tool.ai-chat.btn_send' | t }}" disabled>
@@ -117,6 +134,14 @@ const COPY = {
   thinkToggle:         {{ ("tool.ai-chat.think_toggle"          | t) | dump | safe }},
   thinkNeedsCtx:       {{ ("tool.ai-chat.think_needs_ctx"       | t) | dump | safe }},
   thinkToggleSlow:     {{ ("tool.ai-chat.think_toggle_slow"     | t) | dump | safe }},
+  searchToggle:        {{ ("tool.ai-chat.search_toggle"         | t) | dump | safe }},
+  searchConfigure:     {{ ("tool.ai-chat.search_configure"      | t) | dump | safe }},
+  searchTestOk:        {{ ("tool.ai-chat.search_test_ok"        | t) | dump | safe }},
+  searchTestFail:      {{ ("tool.ai-chat.search_test_fail"      | t) | dump | safe }},
+  searchLocalOnly:     {{ ("tool.ai-chat.search_local_only"     | t) | dump | safe }},
+  searching:           {{ ("tool.ai-chat.searching"             | t) | dump | safe }},
+  searchSources:       {{ ("tool.ai-chat.search_sources"        | t) | dump | safe }},
+  searchFailedNote:    {{ ("tool.ai-chat.search_failed_note"    | t) | dump | safe }},
   thinking:            {{ ("tool.ai-chat.thinking"              | t) | dump | safe }},
   thoughtFor:          {{ ("tool.ai-chat.thought_for"           | t) | dump | safe }},
   thinkCut:            {{ ("tool.ai-chat.think_cut"             | t) | dump | safe }}
@@ -193,6 +218,13 @@ function runApp(MentriaEngine, Tiers) {
   const inputEl       = document.getElementById('ac-input');
   const sendBtn       = document.getElementById('ac-send');
   const thinkToggle   = document.getElementById('ac-think-toggle');
+  const searchToggle  = document.getElementById('ac-search-toggle');
+  const searchCfg     = document.getElementById('ac-search-cfg');
+  const searchUrlEl   = document.getElementById('ac-search-url');
+  const searchTestBtn = document.getElementById('ac-search-test');
+  const searchSaveBtn = document.getElementById('ac-search-save');
+  const searchRemBtn  = document.getElementById('ac-search-remove');
+  const searchStatus  = document.getElementById('ac-search-status');
 
   /* ── State ───────────────────────────────────────── */
   let engine = null;
@@ -229,6 +261,7 @@ function runApp(MentriaEngine, Tiers) {
     const turns = [];
     for (let i = 1; i < messages.length; i++) {
       const m = messages[i];
+      if (m.ephemeral) continue;
       if (Array.isArray(m.content)) {
         const txt = m.content.filter(p => p && p.type === 'text').map(p => p.text).join(' ');
         turns.push({ role: m.role, text: txt, img: m.content.some(p => p && p.type === 'image') || undefined });
@@ -339,6 +372,40 @@ function runApp(MentriaEngine, Tiers) {
 
   function isNearBottom() {
     return messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < 80;
+  }
+
+  function attachSources(bodyEl, queries, sources, errored) {
+    const det = document.createElement('details');
+    det.className = 'ac__think ac__sources';
+    const sum = document.createElement('summary');
+    sum.textContent = sources.length ? COPY.searchSources + ' (' + sources.length + ')' : COPY.searchFailedNote;
+    det.appendChild(sum);
+    const box = document.createElement('div');
+    box.className = 'ac__think-text';
+    for (const q of queries) {
+      const qEl = document.createElement('div');
+      qEl.className = 'ac__sources-q';
+      qEl.textContent = COPY.searching.replace('{q}', q);
+      box.appendChild(qEl);
+    }
+    for (const r of sources) {
+      const line = document.createElement('div');
+      const a = document.createElement('a');
+      a.href = r.url; a.target = '_blank'; a.rel = 'noopener nofollow';
+      let host = r.url;
+      try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch (_) {}
+      a.textContent = host + ' — ' + (r.title || r.url);
+      line.appendChild(a);
+      box.appendChild(line);
+    }
+    if (errored) {
+      const e = document.createElement('div');
+      e.className = 'ac__sources-q';
+      e.textContent = COPY.searchFailedNote;
+      box.appendChild(e);
+    }
+    det.appendChild(box);
+    bodyEl.parentNode.insertBefore(det, bodyEl.nextSibling);
   }
 
   function addAssistantActions(bodyEl, getText) {
@@ -465,6 +532,146 @@ function runApp(MentriaEngine, Tiers) {
     }
   }
 
+  const LOCAL_URL_RE = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i;
+  let webSearchOn = false;
+
+  function getSearchCfg() {
+    try { return (window.MentriaStore && MentriaStore.get('ai_chat', 'web_search')) || null; } catch (_) { return null; }
+  }
+
+  function setSearchCfg(cfg) {
+    try {
+      if (cfg) MentriaStore.set('ai_chat', 'web_search', cfg);
+      else MentriaStore.remove('ai_chat', 'web_search');
+    } catch (_) {}
+  }
+
+  function searchUrlFor(base, query) {
+    const q = encodeURIComponent(query);
+    if (base.includes('{query}')) return base.replace('{query}', q);
+    return base.replace(/\/+$/, '') + '/search?q=' + q + '&format=json&safesearch=1';
+  }
+
+  function mapSearchResults(data) {
+    const out = [];
+    for (const a of (data && data.answers) || []) {
+      const text = typeof a === 'string' ? a : (a && a.answer);
+      if (text) out.push({ title: 'Direct answer', url: (a && a.url) || '', snippet: String(text).slice(0, 300), answer: true });
+      if (out.length >= 2) break;
+    }
+    for (const ib of (data && data.infoboxes) || []) {
+      if (ib && ib.content) out.push({ title: String(ib.infobox || 'Info').slice(0, 120), url: (ib.id || ''), snippet: String(ib.content).slice(0, 300), answer: true });
+      break;
+    }
+    const list = (data && (data.results || data.organic_results || data.items)) || [];
+    for (const r of list) {
+      if (out.length >= 8) break;
+      const url = String(r.url || r.link || '');
+      if (!url) continue;
+      const item = {
+        title: String(r.title || r.name || '').slice(0, 120),
+        url,
+        snippet: String(r.content || r.snippet || r.description || '').slice(0, 300)
+      };
+      const d = r.publishedDate || r.published_date || r.date;
+      if (d) item.date = String(d).slice(0, 10);
+      out.push(item);
+    }
+    return out;
+  }
+
+  async function runWebSearch(query, opts) {
+    const cfg = getSearchCfg();
+    if (!cfg || !cfg.url) throw new Error('not configured');
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 12000);
+    try {
+      const res = await fetch(searchUrlFor(cfg.url, query), { signal: ctrl.signal, headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const results = mapSearchResults(await res.json());
+      if (!results.length && !(opts && opts.allowEmpty)) throw new Error('no results');
+      return results;
+    } finally { clearTimeout(t); }
+  }
+
+  const SEARCH_TOOL_PROMPT = "\n\n# Tool: web search\nYou can search the web. To search, reply with only this, and nothing else:\n<tool_call>{\"name\": \"web_search\", \"arguments\": {\"query\": \"your search terms\"}}</tool_call>\nSearch when the question needs current events, prices, weather, news, or facts you are unsure of. After results arrive in a <tool_response> block, answer the user's question using them, briefly, and mention the source domains. Do not search more than twice per question.";
+
+  function parseToolCall(text) {
+    const m = text.match(/<tool_call>\s*([\s\S]*?)\s*<\/tool_call>/);
+    if (!m) return null;
+    try {
+      const call = JSON.parse(m[1]);
+      const q = call && call.arguments && call.arguments.query;
+      if (call && call.name === 'web_search' && typeof q === 'string' && q.trim()) return q.trim().slice(0, 200);
+    } catch (_) {}
+    return null;
+  }
+
+  function syncSearchToggle() {
+    const cfg = getSearchCfg();
+    if (!cfg || !cfg.url) { webSearchOn = false; }
+    searchToggle.hidden = false;
+    searchToggle.title = cfg && cfg.url ? COPY.searchToggle : COPY.searchConfigure;
+    searchToggle.setAttribute('aria-label', searchToggle.title);
+    searchToggle.setAttribute('aria-pressed', String(webSearchOn));
+  }
+
+  function openSearchCfg() {
+    const cfg = getSearchCfg();
+    searchUrlEl.value = (cfg && cfg.url) || '';
+    searchRemBtn.hidden = !(cfg && cfg.url);
+    searchStatus.textContent = '';
+    searchCfg.hidden = false;
+    try { searchUrlEl.focus({ preventScroll: true }); } catch (_) {}
+  }
+
+  searchToggle.addEventListener('click', () => {
+    const cfg = getSearchCfg();
+    if (!cfg || !cfg.url) { openSearchCfg(); return; }
+    if (!searchCfg.hidden) { searchCfg.hidden = true; }
+    webSearchOn = !webSearchOn;
+    syncSearchToggle();
+  });
+
+  searchToggle.addEventListener('contextmenu', (e) => { e.preventDefault(); openSearchCfg(); });
+
+  async function testSearchUrl(url) {
+    const prev = getSearchCfg();
+    setSearchCfg({ url });
+    try { return await runWebSearch('wikipedia', { allowEmpty: true }); }
+    finally { setSearchCfg(prev); }
+  }
+
+  searchTestBtn.addEventListener('click', async () => {
+    const url = searchUrlEl.value.trim();
+    if (!LOCAL_URL_RE.test(url)) { searchStatus.textContent = COPY.searchLocalOnly; return; }
+    searchTestBtn.disabled = true;
+    searchStatus.textContent = '…';
+    try {
+      const results = await testSearchUrl(url);
+      searchStatus.textContent = COPY.searchTestOk.replace('{n}', String(results.length));
+    } catch (err) {
+      searchStatus.textContent = COPY.searchTestFail.replace('{err}', String(err && err.message || err));
+    } finally { searchTestBtn.disabled = false; }
+  });
+
+  searchSaveBtn.addEventListener('click', () => {
+    const url = searchUrlEl.value.trim();
+    if (!LOCAL_URL_RE.test(url)) { searchStatus.textContent = COPY.searchLocalOnly; return; }
+    setSearchCfg({ url });
+    webSearchOn = true;
+    searchCfg.hidden = true;
+    syncSearchToggle();
+  });
+
+  searchRemBtn.addEventListener('click', () => {
+    setSearchCfg(null);
+    webSearchOn = false;
+    searchCfg.hidden = true;
+    syncSearchToggle();
+  });
+
+
   const emptySubEl = document.querySelector('.ac__empty-sub');
   function updateEmptySub(id) {
     if (!emptySubEl) return;
@@ -540,6 +747,7 @@ function runApp(MentriaEngine, Tiers) {
       contextTokens = res.maxSeq || 2048;
       systemMessage.content = systemPromptFor(currentTier);
       syncThinkToggle();
+      syncSearchToggle();
       try { await navigator.storage?.persist?.(); } catch (_) {}
       syncTierSelector();
       updateEmptySub();
@@ -601,6 +809,7 @@ function runApp(MentriaEngine, Tiers) {
     const last = messages[messages.length - 1];
     if (last && last.role === 'assistant') {
       messages.pop();
+      while (messages.length > 1 && messages[messages.length - 1].ephemeral) messages.pop();
       persistConversation();
       if (lastBubble) lastBubble.remove();
     } else if (lastBubble && lastBubble.classList.contains('ac__msg--ghost')) {
@@ -701,11 +910,12 @@ function runApp(MentriaEngine, Tiers) {
         if (thinkDoneSecs === null) {
           thinkSummaryEl.textContent = COPY.thoughtFor.replace('{s}', String(Math.round((performance.now() - genStart) / 1000)));
         }
-        display = parts.answer.replace(/<\|[^|]*\|>/g, '').trim();
+        display = parts.answer.replace(/<\|[^|]*\|>/g, '').replace(/<tool_call>[\s\S]*?(<\/tool_call>|$)/g, '').trim();
         thinkTruncated = !wasStopped && !parts.closed;
       } else {
         display = fullText
           .replace(/<think>[\s\S]*?<\/think>/g, '')
+          .replace(/<tool_call>[\s\S]*?(<\/tool_call>|$)/g, '')
           .replace(/<\|[^|]*\|>/g, '')   // belt-and-suspenders strip if a multi-piece special leaks through
           .trim();
       }
@@ -766,38 +976,80 @@ function runApp(MentriaEngine, Tiers) {
     const imagesForRequest = windowImages.length ? windowImages : undefined;
 
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
-    const estPromptTokens = Math.ceil((systemMessage.content.length + keptChars) / 3.5) + windowImages.length * 300 + 80;
-    const thinkBudget = Math.max(512, Math.min(hugeContext ? 6000 : 3400, contextTokens - estPromptTokens - 120));
+    const searchActive = webSearchOn && !!(getSearchCfg() || {}).url;
+    const systemContent = searchActive ? systemMessage.content + SEARCH_TOOL_PROMPT : systemMessage.content;
+    const toolTurns = [];
+    const searchesDone = [];
+    let searchSources = [];
+    let searchErrored = false;
 
     try {
-      const params = {
-        messages: [messages[0], ...kept],
-        maxTokens: (imagesForRequest && IS_IOS) ? 256
-          : deepThink ? thinkBudget
-          : (bigContext ? 768 : contextTokens >= 2048 ? MAX_TOKENS : 320),
-        temperature: deepThink ? 0.7 : 0,
-        topK: deepThink ? 20 : 1,
-        topP: deepThink ? 0.95 : 1.0,
-        repetitionPenalty: currentTier === '27b' ? 1.0 : 1.15,
-        enableThinking: deepThink,
-        signal: abortCtrl.signal,
-      };
-      if (imagesForRequest) params.images = imagesForRequest;
+      for (let round = 0; round < 3; round++) {
+        const toolChars = toolTurns.reduce((a, m) => a + m.content.length, 0);
+        const estPromptTokens = Math.ceil((systemContent.length + keptChars + toolChars) / 3.5) + windowImages.length * 300 + 80;
+        const thinkBudget = Math.max(512, Math.min(hugeContext ? 6000 : 3400, contextTokens - estPromptTokens - 120));
+        const params = {
+          messages: [{ role: 'system', content: systemContent }, ...kept, ...toolTurns],
+          maxTokens: (imagesForRequest && IS_IOS) ? 256
+            : deepThink ? thinkBudget
+            : (bigContext ? 768 : contextTokens >= 2048 ? MAX_TOKENS : 320),
+          temperature: deepThink ? 0.7 : 0,
+          topK: deepThink ? 20 : 1,
+          topP: deepThink ? 0.95 : 1.0,
+          repetitionPenalty: currentTier === '27b' ? 1.0 : 1.15,
+          enableThinking: deepThink,
+          signal: abortCtrl.signal,
+        };
+        if (imagesForRequest) params.images = imagesForRequest;
 
-      await engine.generate(params, (event) => {
-        if (typeof event.token === 'string' && event.token.length > 0) {
-          // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
-          if (/^<\|[^|]*\|>$/.test(event.token)) return;
-          fullText += event.token;
-          if (!pendingPaint) {
-            pendingPaint = true;
-            requestAnimationFrame(paintToken);
+        await engine.generate(params, (event) => {
+          if (typeof event.token === 'string' && event.token.length > 0) {
+            // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
+            if (/^<\|[^|]*\|>$/.test(event.token)) return;
+            fullText += event.token;
+            if (!pendingPaint) {
+              pendingPaint = true;
+              requestAnimationFrame(paintToken);
+            }
           }
+        });
+
+        if (!searchActive || round >= 2 || epoch !== genEpoch) break;
+        const answerPart = deepThink ? splitThink().answer : fullText.replace(/<think>[\s\S]*?<\/think>/g, '');
+        const query = parseToolCall(answerPart);
+        if (!query) break;
+
+        searchesDone.push(query);
+        const stick = isNearBottom();
+        bodyEl.textContent = COPY.searching.replace('{q}', query);
+        if (stick) scrollToBottom();
+        let resultJson;
+        try {
+          const results = await runWebSearch(query);
+          const nMax = contextTokens >= 4096 ? 5 : 3;
+          const slim = results.slice(0, nMax).map((r) => {
+            const o = { title: r.title, url: r.url, snippet: r.snippet.slice(0, contextTokens >= 4096 ? 300 : 160) };
+            if (r.date) o.date = r.date;
+            return o;
+          });
+          resultJson = JSON.stringify(slim);
+          searchSources = searchSources.concat(slim);
+        } catch (err) {
+          resultJson = JSON.stringify({ error: String(err && err.message || err) });
+          searchErrored = true;
         }
-      });
+        toolTurns.push({ role: 'assistant', content: fullText, ephemeral: true });
+        toolTurns.push({ role: 'user', content: '<tool_response>\n' + resultJson + '\n</tool_response>', ephemeral: true });
+        fullText = '';
+        if (thinkDetails) { thinkDoneSecs = null; thinkDetails.open = true; }
+      }
 
       generating = false;
-      if (epoch === genEpoch) finalize(false);
+      if (epoch === genEpoch) {
+        for (const t of toolTurns) messages.push(t);
+        finalize(false);
+        if (searchesDone.length) attachSources(bodyEl, searchesDone, searchSources, searchErrored);
+      }
     } catch (err) {
       generating = false;
       const aborted = err && err.name === 'AbortError';
@@ -1342,6 +1594,49 @@ function runApp(MentriaEngine, Tiers) {
   background: #f9a8d4;
   box-shadow: 0 0 12px rgba(244, 114, 182, 0.3);
 }
+
+.ac__search-cfg {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+}
+.ac__search-cfg[hidden] { display: none; }
+.ac__search-cfg-title { font-size: 0.78rem; color: var(--syn-cyan); }
+.ac__search-cfg-field { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.7rem; color: var(--term-muted); }
+.ac__search-cfg-field input {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--term-border);
+  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+.ac__search-cfg-field input:focus { outline: none; border-color: rgba(34, 211, 238, 0.3); }
+.ac__search-cfg-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.ac__search-cfg-btn {
+  background: transparent;
+  border: 1px solid var(--term-border);
+  color: var(--term-fg);
+  border-radius: 6px;
+  padding: 0.35rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.ac__search-cfg-btn:hover:not(:disabled) { border-color: var(--syn-cyan); color: var(--syn-cyan); }
+.ac__search-cfg-btn--primary { border-color: var(--syn-cyan); color: var(--syn-cyan); }
+.ac__search-cfg-btn--ghost { color: var(--term-muted); border-style: dashed; }
+.ac__search-cfg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ac__search-cfg-status { font-size: 0.7rem; color: var(--term-muted); min-height: 1em; }
+
+.ac__sources { margin-top: 0.45rem; }
+.ac__sources-q { color: var(--term-subtle, #6b7280); }
+.ac__sources a { color: var(--syn-cyan); text-decoration: none; }
+.ac__sources a:hover { text-decoration: underline; }
 
 .ac__think-btn {
   display: flex;

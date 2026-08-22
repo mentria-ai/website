@@ -1069,7 +1069,20 @@
       "seg_icc": "Perfil de color",
       "seg_comment": "Comentario",
       "seg_text": "Bloques de texto",
-      "seg_time": "Marca de tiempo"
+      "seg_time": "Marca de tiempo",
+      "emb_exif": "Etiquetas EXIF",
+      "emb_xmp": "Propiedades XMP",
+      "emb_iptc": "Campos IPTC",
+      "emb_icc": "Perfil ICC",
+      "emb_comment": "Comentario",
+      "emb_text": "Bloques de texto PNG",
+      "emb_time": "Hora de modificación",
+      "emb_thumb": "Miniatura incrustada",
+      "emb_thumb_note": "Las miniaturas incrustadas pueden revelar la imagen original, sin recortar ni editar.",
+      "emb_raw": "XML en bruto",
+      "emb_makernote": "MakerNote (propietario, no decodificado)",
+      "emb_values": "{n} valores",
+      "emb_compressed": "comprimido"
     },
     "sudoku": {
       "level": "Nivel",

@@ -1069,7 +1069,20 @@
       "seg_icc": "Perfil de cores",
       "seg_comment": "Comentário",
       "seg_text": "Blocos de texto",
-      "seg_time": "Carimbo de data"
+      "seg_time": "Carimbo de data",
+      "emb_exif": "Tags EXIF",
+      "emb_xmp": "Propriedades XMP",
+      "emb_iptc": "Campos IPTC",
+      "emb_icc": "Perfil ICC",
+      "emb_comment": "Comentário",
+      "emb_text": "Blocos de texto PNG",
+      "emb_time": "Hora de modificação",
+      "emb_thumb": "Miniatura incorporada",
+      "emb_thumb_note": "Miniaturas incorporadas podem revelar a imagem original, sem corte ou edição.",
+      "emb_raw": "XML bruto",
+      "emb_makernote": "MakerNote (proprietário, não decodificado)",
+      "emb_values": "{n} valores",
+      "emb_compressed": "comprimido"
     },
     "sudoku": {
       "level": "Nível",

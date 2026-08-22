@@ -1069,7 +1069,20 @@
       "seg_icc": "Color profile",
       "seg_comment": "Comment",
       "seg_text": "Text chunks",
-      "seg_time": "Timestamp chunk"
+      "seg_time": "Timestamp chunk",
+      "emb_exif": "EXIF tags",
+      "emb_xmp": "XMP properties",
+      "emb_iptc": "IPTC fields",
+      "emb_icc": "ICC profile",
+      "emb_comment": "Comment",
+      "emb_text": "PNG text chunks",
+      "emb_time": "Modification time",
+      "emb_thumb": "Embedded thumbnail",
+      "emb_thumb_note": "Embedded thumbnails can reveal the original, uncropped or unedited picture.",
+      "emb_raw": "Raw XML",
+      "emb_makernote": "MakerNote (proprietary, not decoded)",
+      "emb_values": "{n} values",
+      "emb_compressed": "compressed"
     },
     "sudoku": {
       "level": "Level",

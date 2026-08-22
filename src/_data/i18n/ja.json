@@ -1069,7 +1069,20 @@
       "seg_icc": "カラープロファイル",
       "seg_comment": "コメント",
       "seg_text": "テキストチャンク",
-      "seg_time": "タイムスタンプ"
+      "seg_time": "タイムスタンプ",
+      "emb_exif": "EXIFタグ",
+      "emb_xmp": "XMPプロパティ",
+      "emb_iptc": "IPTCフィールド",
+      "emb_icc": "ICCプロファイル",
+      "emb_comment": "コメント",
+      "emb_text": "PNGテキストチャンク",
+      "emb_time": "更新日時",
+      "emb_thumb": "埋め込みサムネイル",
+      "emb_thumb_note": "埋め込みサムネイルには、トリミングや編集前の元の画像が残っていることがあります。",
+      "emb_raw": "生のXML",
+      "emb_makernote": "MakerNote（独自形式、未デコード）",
+      "emb_values": "{n}件の値",
+      "emb_compressed": "圧縮"
     },
     "sudoku": {
       "level": "難易度",

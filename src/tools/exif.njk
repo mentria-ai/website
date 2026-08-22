@@ -63,6 +63,7 @@ eleventyComputed:
       <span class="ex__sec-title">{{ "tool.exif.sec_other" | t }}</span>
       <div class="ex__badges" id="ex-badges"></div>
       <p class="ex__note" id="ex-icc-note" hidden>{{ "tool.exif.icc_kept" | t }}</p>
+      <div class="ex__embedded" id="ex-embedded"></div>
     </div>
 
     <p class="ex__note" id="ex-note" hidden></p>
@@ -104,6 +105,19 @@ eleventyComputed:
     segComment:    {{ ("tool.exif.seg_comment"     | t) | dump | safe }},
     segText:       {{ ("tool.exif.seg_text"        | t) | dump | safe }},
     segTime:       {{ ("tool.exif.seg_time"        | t) | dump | safe }},
+    embExif:       {{ ("tool.exif.emb_exif"        | t) | dump | safe }},
+    embXmp:        {{ ("tool.exif.emb_xmp"         | t) | dump | safe }},
+    embIptc:       {{ ("tool.exif.emb_iptc"        | t) | dump | safe }},
+    embIcc:        {{ ("tool.exif.emb_icc"         | t) | dump | safe }},
+    embComment:    {{ ("tool.exif.emb_comment"     | t) | dump | safe }},
+    embText:       {{ ("tool.exif.emb_text"        | t) | dump | safe }},
+    embTime:       {{ ("tool.exif.emb_time"        | t) | dump | safe }},
+    embThumb:      {{ ("tool.exif.emb_thumb"       | t) | dump | safe }},
+    embThumbNote:  {{ ("tool.exif.emb_thumb_note"  | t) | dump | safe }},
+    embRaw:        {{ ("tool.exif.emb_raw"         | t) | dump | safe }},
+    embMakernote:  {{ ("tool.exif.emb_makernote"   | t) | dump | safe }},
+    embValues:     {{ ("tool.exif.emb_values"      | t) | dump | safe }},
+    embCompressed: {{ ("tool.exif.emb_compressed"  | t) | dump | safe }},
     removedLabel:  {{ ("tool.exif.removed_label"   | t) | dump | safe }},
     verifiedClean: {{ ("tool.exif.verified_clean"  | t) | dump | safe }},
     stripUnsupported: {{ ("tool.exif.strip_unsupported" | t) | dump | safe }},
@@ -129,6 +143,7 @@ eleventyComputed:
   const otherSec  = $('ex-other');
   const badgesEl  = $('ex-badges');
   const iccNote   = $('ex-icc-note');
+  const embeddedEl = $('ex-embedded');
   const noteEl    = $('ex-note');
   const stripBtn  = $('ex-strip');
   const shareBtn  = $('ex-share');
@@ -193,11 +208,19 @@ eleventyComputed:
       else if (b0 === 0x4D4D) le = false;
       else return null;
       if (dv.getUint16(base + 2, le) !== 42) return null;
-      const ifd0 = {}, exif = {}, gps = {};
-      readIFD(dv, base, dv.getUint32(base + 4, le), le, ifd0);
+      const ifd0 = {}, exif = {}, gps = {}, interop = {}, ifd1 = {};
+      const ifd0Off = dv.getUint32(base + 4, le);
+      readIFD(dv, base, ifd0Off, le, ifd0);
       if (typeof ifd0[0x8769] === 'number') readIFD(dv, base, ifd0[0x8769], le, exif);
       if (typeof ifd0[0x8825] === 'number') readIFD(dv, base, ifd0[0x8825], le, gps);
-      return { ifd0, exif, gps };
+      if (typeof exif[0xA005] === 'number') readIFD(dv, base, exif[0xA005], le, interop);
+      const n0 = base + ifd0Off + 2 > dv.byteLength ? 0 : dv.getUint16(base + ifd0Off, le);
+      const nextOff = base + ifd0Off + 2 + n0 * 12;
+      if (n0 && n0 <= 512 && nextOff + 4 <= dv.byteLength) {
+        const ifd1Off = dv.getUint32(nextOff, le);
+        if (ifd1Off && base + ifd1Off < dv.byteLength) readIFD(dv, base, ifd1Off, le, ifd1);
+      }
+      return { ifd0, exif, gps, interop, ifd1, dv, base, le };
     } catch (_) { return null; }
   }
 
@@ -272,20 +295,25 @@ eleventyComputed:
       const len = dv.getUint16(p + 2, false);
       if (len < 2 || p + 2 + len > u8.length) break;
       const dataOff = p + 4;
+      const dataEnd = p + 2 + len;
       if (marker === 0xE1 && matchBytes(u8, dataOff, 'Exif')) {
         meta.segments.push({ kind: 'exif', bytes: len + 2 });
         if (!exifParsed) exifParsed = parseTiff(dv, dataOff + 6);
       } else if (marker === 0xE1 && matchBytes(u8, dataOff, 'http://ns.adobe.com/xap/1.0/')) {
-        meta.segments.push({ kind: 'xmp', bytes: len + 2 });
+        meta.segments.push({ kind: 'xmp', bytes: len + 2, raw: u8.subarray(dataOff + 29, dataEnd) });
       } else if (marker === 0xED && matchBytes(u8, dataOff, 'Photoshop 3.0')) {
-        meta.segments.push({ kind: 'iptc', bytes: len + 2 });
+        meta.segments.push({ kind: 'iptc', bytes: len + 2, raw: u8.subarray(dataOff + 14, dataEnd) });
       } else if (marker === 0xE2 && matchBytes(u8, dataOff, 'ICC_PROFILE')) {
-        meta.segments.push({ kind: 'icc', bytes: len + 2 });
+        const seg = meta.segments.find(x => x.kind === 'icc');
+        const chunk = u8.subarray(dataOff + 14, dataEnd);
+        if (seg) { seg.bytes += len + 2; seg.rawParts.push(chunk); }
+        else meta.segments.push({ kind: 'icc', bytes: len + 2, rawParts: [chunk] });
       } else if (marker === 0xFE) {
-        meta.segments.push({ kind: 'comment', bytes: len + 2 });
+        meta.segments.push({ kind: 'comment', bytes: len + 2, raw: u8.subarray(dataOff, dataEnd) });
       }
       p += 2 + len;
     }
+    meta.tiff = exifParsed;
     meta.exif = extractExifSummary(exifParsed);
     return meta;
   }
@@ -324,21 +352,24 @@ eleventyComputed:
     const meta = { segments: [] };
     let exifParsed = null;
     let textBytes = 0;
+    const textChunks = [];
     let p = 8;
     while (p + 8 <= u8.length) {
       const len = dv.getUint32(p, false);
       const type = String.fromCharCode(u8[p + 4], u8[p + 5], u8[p + 6], u8[p + 7]);
       if (p + 12 + len > u8.length) break;
-      if (type === 'tEXt' || type === 'zTXt' || type === 'iTXt') textBytes += len + 12;
+      const data = u8.subarray(p + 8, p + 8 + len);
+      if (type === 'tEXt' || type === 'zTXt' || type === 'iTXt') { textBytes += len + 12; textChunks.push({ type, data }); }
       else if (type === 'eXIf') {
         meta.segments.push({ kind: 'exif', bytes: len + 12 });
         if (!exifParsed) exifParsed = parseTiff(dv, p + 8);
-      } else if (type === 'tIME') meta.segments.push({ kind: 'time', bytes: len + 12 });
-      else if (type === 'iCCP') meta.segments.push({ kind: 'icc', bytes: len + 12 });
+      } else if (type === 'tIME') meta.segments.push({ kind: 'time', bytes: len + 12, raw: data });
+      else if (type === 'iCCP') meta.segments.push({ kind: 'icc', bytes: len + 12, pngIcc: data });
       if (type === 'IEND') break;
       p += 12 + len;
     }
-    if (textBytes) meta.segments.push({ kind: 'text', bytes: textBytes });
+    if (textBytes) meta.segments.push({ kind: 'text', bytes: textBytes, chunks: textChunks });
+    meta.tiff = exifParsed;
     meta.exif = extractExifSummary(exifParsed);
     return meta;
   }
@@ -378,12 +409,13 @@ eleventyComputed:
         const base = matchBytes(u8, p + 8, 'Exif') ? p + 14 : p + 8;
         if (!exifParsed) exifParsed = parseTiff(dv, base);
       } else if (fourcc === 'XMP ') {
-        meta.segments.push({ kind: 'xmp', bytes: len + 8 });
+        meta.segments.push({ kind: 'xmp', bytes: len + 8, raw: u8.subarray(p + 8, p + 8 + len) });
       } else if (fourcc === 'ICCP') {
-        meta.segments.push({ kind: 'icc', bytes: len + 8 });
+        meta.segments.push({ kind: 'icc', bytes: len + 8, rawParts: [u8.subarray(p + 8, p + 8 + len)] });
       }
       p += 8 + len + (len % 2);
     }
+    meta.tiff = exifParsed;
     meta.exif = extractExifSummary(exifParsed);
     return meta;
   }
@@ -446,6 +478,335 @@ eleventyComputed:
     dl.appendChild(dd);
   }
 
+  const TAGS = {
+    ifd0: { 0x0100: 'ImageWidth', 0x0101: 'ImageLength', 0x0102: 'BitsPerSample', 0x0103: 'Compression', 0x0106: 'PhotometricInterpretation', 0x010E: 'ImageDescription', 0x010F: 'Make', 0x0110: 'Model', 0x0111: 'StripOffsets', 0x0112: 'Orientation', 0x0115: 'SamplesPerPixel', 0x0116: 'RowsPerStrip', 0x0117: 'StripByteCounts', 0x011A: 'XResolution', 0x011B: 'YResolution', 0x011C: 'PlanarConfiguration', 0x0128: 'ResolutionUnit', 0x0131: 'Software', 0x0132: 'DateTime', 0x013B: 'Artist', 0x013E: 'WhitePoint', 0x013F: 'PrimaryChromaticities', 0x0201: 'JPEGInterchangeFormat', 0x0202: 'JPEGInterchangeFormatLength', 0x0211: 'YCbCrCoefficients', 0x0212: 'YCbCrSubSampling', 0x0213: 'YCbCrPositioning', 0x0214: 'ReferenceBlackWhite', 0x4746: 'Rating', 0x4749: 'RatingPercent', 0x8298: 'Copyright', 0x8769: 'ExifIFDPointer', 0x8825: 'GPSInfoIFDPointer', 0x9C9B: 'XPTitle', 0x9C9C: 'XPComment', 0x9C9D: 'XPAuthor', 0x9C9E: 'XPKeywords', 0x9C9F: 'XPSubject', 0xC4A5: 'PrintImageMatching', 0xC612: 'DNGVersion', 0xC614: 'UniqueCameraModel' },
+    exif: { 0x829A: 'ExposureTime', 0x829D: 'FNumber', 0x8822: 'ExposureProgram', 0x8824: 'SpectralSensitivity', 0x8827: 'ISOSpeedRatings', 0x8830: 'SensitivityType', 0x8832: 'RecommendedExposureIndex', 0x9000: 'ExifVersion', 0x9003: 'DateTimeOriginal', 0x9004: 'DateTimeDigitized', 0x9010: 'OffsetTime', 0x9011: 'OffsetTimeOriginal', 0x9012: 'OffsetTimeDigitized', 0x9101: 'ComponentsConfiguration', 0x9102: 'CompressedBitsPerPixel', 0x9201: 'ShutterSpeedValue', 0x9202: 'ApertureValue', 0x9203: 'BrightnessValue', 0x9204: 'ExposureBiasValue', 0x9205: 'MaxApertureValue', 0x9206: 'SubjectDistance', 0x9207: 'MeteringMode', 0x9208: 'LightSource', 0x9209: 'Flash', 0x920A: 'FocalLength', 0x9214: 'SubjectArea', 0x927C: 'MakerNote', 0x9286: 'UserComment', 0x9290: 'SubSecTime', 0x9291: 'SubSecTimeOriginal', 0x9292: 'SubSecTimeDigitized', 0xA000: 'FlashpixVersion', 0xA001: 'ColorSpace', 0xA002: 'PixelXDimension', 0xA003: 'PixelYDimension', 0xA004: 'RelatedSoundFile', 0xA005: 'InteropIFDPointer', 0xA20E: 'FocalPlaneXResolution', 0xA20F: 'FocalPlaneYResolution', 0xA210: 'FocalPlaneResolutionUnit', 0xA215: 'ExposureIndex', 0xA217: 'SensingMethod', 0xA300: 'FileSource', 0xA301: 'SceneType', 0xA302: 'CFAPattern', 0xA401: 'CustomRendered', 0xA402: 'ExposureMode', 0xA403: 'WhiteBalance', 0xA404: 'DigitalZoomRatio', 0xA405: 'FocalLengthIn35mmFilm', 0xA406: 'SceneCaptureType', 0xA407: 'GainControl', 0xA408: 'Contrast', 0xA409: 'Saturation', 0xA40A: 'Sharpness', 0xA40C: 'SubjectDistanceRange', 0xA420: 'ImageUniqueID', 0xA430: 'CameraOwnerName', 0xA431: 'BodySerialNumber', 0xA432: 'LensSpecification', 0xA433: 'LensMake', 0xA434: 'LensModel', 0xA435: 'LensSerialNumber', 0xA460: 'CompositeImage', 0xA500: 'Gamma' },
+    gps: { 0x0000: 'GPSVersionID', 0x0001: 'GPSLatitudeRef', 0x0002: 'GPSLatitude', 0x0003: 'GPSLongitudeRef', 0x0004: 'GPSLongitude', 0x0005: 'GPSAltitudeRef', 0x0006: 'GPSAltitude', 0x0007: 'GPSTimeStamp', 0x0008: 'GPSSatellites', 0x0009: 'GPSStatus', 0x000A: 'GPSMeasureMode', 0x000B: 'GPSDOP', 0x000C: 'GPSSpeedRef', 0x000D: 'GPSSpeed', 0x000E: 'GPSTrackRef', 0x000F: 'GPSTrack', 0x0010: 'GPSImgDirectionRef', 0x0011: 'GPSImgDirection', 0x0012: 'GPSMapDatum', 0x0013: 'GPSDestLatitudeRef', 0x0014: 'GPSDestLatitude', 0x0015: 'GPSDestLongitudeRef', 0x0016: 'GPSDestLongitude', 0x0018: 'GPSDestBearing', 0x001B: 'GPSProcessingMethod', 0x001D: 'GPSDateStamp', 0x001E: 'GPSDifferential', 0x001F: 'GPSHPositioningError' },
+    interop: { 0x0001: 'InteroperabilityIndex', 0x0002: 'InteroperabilityVersion' }
+  };
+  const IPTC_NAMES = { '1:90': 'CodedCharacterSet', '2:0': 'RecordVersion', '2:5': 'ObjectName', '2:7': 'EditStatus', '2:10': 'Urgency', '2:15': 'Category', '2:20': 'SupplementalCategories', '2:25': 'Keywords', '2:40': 'SpecialInstructions', '2:55': 'DateCreated', '2:60': 'TimeCreated', '2:62': 'DigitalCreationDate', '2:63': 'DigitalCreationTime', '2:65': 'OriginatingProgram', '2:70': 'ProgramVersion', '2:80': 'By-line', '2:85': 'By-lineTitle', '2:90': 'City', '2:92': 'Sub-location', '2:95': 'Province-State', '2:100': 'Country-PrimaryLocationCode', '2:101': 'Country-PrimaryLocationName', '2:103': 'OriginalTransmissionReference', '2:105': 'Headline', '2:110': 'Credit', '2:115': 'Source', '2:116': 'CopyrightNotice', '2:118': 'Contact', '2:120': 'Caption-Abstract', '2:122': 'Writer-Editor', '2:135': 'LanguageIdentifier' };
+  const ICC_CLASS = { scnr: 'Input (scanner/camera)', mntr: 'Display', prtr: 'Output (printer)', link: 'Device link', spac: 'Color space', abst: 'Abstract', nmcl: 'Named color' };
+
+  const utf8 = new TextDecoder('utf-8');
+  const latin1 = new TextDecoder('latin1');
+  const utf16le = new TextDecoder('utf-16le');
+  const utf16be = new TextDecoder('utf-16be');
+
+  async function inflate(bytes) {
+    try {
+      const ds = new DecompressionStream('deflate');
+      const ab = await new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer();
+      return new Uint8Array(ab);
+    } catch (_) { return null; }
+  }
+
+  function ratText(v) {
+    if (!Array.isArray(v) || v.length !== 2 || typeof v[0] !== 'number') return null;
+    if (!v[1]) return v[0] + '/0';
+    const d = v[0] / v[1];
+    return (Number.isInteger(d) ? d : +d.toFixed(4)) + ' (' + v[0] + '/' + v[1] + ')';
+  }
+
+  function fmtTagValue(tag, v, group) {
+    if (v === null || v === undefined) return '';
+    if (group === 'exif' && tag === 0x927C) return Array.isArray(v) ? v.length + ' B' : String(v);
+    if (typeof v === 'string') return v.length > 300 ? v.slice(0, 300) + '…' : v;
+    if (typeof v === 'number') return String(v);
+    if (Array.isArray(v)) {
+      if (ratText(v) !== null) return ratText(v);
+      if (group === 'ifd0' && tag >= 0x9C9B && tag <= 0x9C9F) return utf16le.decode(new Uint8Array(v)).replace(/\0+$/, '');
+      if (group === 'exif' && tag === 0x9286 && v.length > 8) {
+        const cs = latin1.decode(new Uint8Array(v.slice(0, 8))).replace(/\0/g, '').trim().toUpperCase();
+        const body = new Uint8Array(v.slice(8));
+        return (cs === 'UNICODE' ? utf16be.decode(body) : utf8.decode(body)).replace(/\0+$/, '').trim();
+      }
+      if (v.length && Array.isArray(v[0])) return v.map(ratText).join(' · ');
+      if (v.length <= 4 && v.every(x => x >= 32 && x < 127) && (tag === 0x9000 || tag === 0xA000 || tag === 0x0002)) return String.fromCharCode(...v);
+      if (v.length > 16) return COPY.embValues.replace('{n}', v.length) + ' · ' + v.slice(0, 8).join(' ') + '…';
+      return v.join(' ');
+    }
+    return String(v);
+  }
+
+  function tagRows(tiff) {
+    const rows = [];
+    for (const group of ['ifd0', 'exif', 'gps', 'interop', 'ifd1']) {
+      const ifd = tiff[group];
+      if (!ifd) continue;
+      const names = TAGS[group === 'ifd1' ? 'ifd0' : group];
+      for (const k of Object.keys(ifd)) {
+        const tag = +k;
+        if (tag === 0x8769 || tag === 0x8825 || tag === 0xA005) continue;
+        const name = (names && names[tag]) || '0x' + tag.toString(16).toUpperCase().padStart(4, '0');
+        const val = fmtTagValue(tag, ifd[k], group);
+        if (val === '') continue;
+        rows.push([(group === 'ifd1' ? 'thumb.' : group === 'gps' ? '' : '') + name, val]);
+      }
+    }
+    return rows;
+  }
+
+  function thumbnailBlob(tiff) {
+    const i1 = tiff.ifd1 || {};
+    const off = i1[0x0201], len = i1[0x0202];
+    if (typeof off !== 'number' || typeof len !== 'number' || !len) return null;
+    const start = tiff.base + off;
+    if (start + len > tiff.dv.byteLength) return null;
+    const bytes = new Uint8Array(tiff.dv.buffer, tiff.dv.byteOffset + start, len);
+    if (bytes[0] !== 0xFF || bytes[1] !== 0xD8) return null;
+    return new Blob([bytes], { type: 'image/jpeg' });
+  }
+
+  function decodeXmp(raw) {
+    const text = utf8.decode(raw).replace(/\0+$/, '');
+    const rows = [];
+    try {
+      const doc = new DOMParser().parseFromString(text, 'application/xml');
+      if (doc.querySelector('parsererror')) return { rows, text };
+      const descs = doc.getElementsByTagNameNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'Description');
+      const seen = new Set();
+      const push = (k, v) => { v = (v || '').trim(); if (!v || seen.has(k + '=' + v)) return; seen.add(k + '=' + v); rows.push([k, v.length > 300 ? v.slice(0, 300) + '…' : v]); };
+      const qname = (el) => (el.prefix ? el.prefix + ':' : '') + el.localName;
+      for (const d of descs) {
+        for (const a of d.attributes) {
+          if (a.name.startsWith('xmlns') || a.name.startsWith('rdf:')) continue;
+          push(a.name, a.value);
+        }
+        for (const el of d.children) {
+          const name = qname(el);
+          const lis = el.getElementsByTagNameNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'li');
+          if (lis.length) { push(name, Array.from(lis).map(li => li.textContent.trim()).filter(Boolean).join(', ')); }
+          else if (el.children.length === 0) push(name, el.textContent);
+          else {
+            const inner = Array.from(el.querySelectorAll('*')).filter(x => x.children.length === 0 && x.textContent.trim());
+            inner.slice(0, 40).forEach(x => push(name + '/' + qname(x), x.textContent));
+          }
+        }
+      }
+    } catch (_) {}
+    return { rows, text };
+  }
+
+  function decodeIptc(raw) {
+    const rows = [];
+    let p = 0;
+    let iptc = null;
+    while (p + 12 <= raw.length) {
+      if (!matchBytes(raw, p, '8BIM')) break;
+      const id = (raw[p + 4] << 8) | raw[p + 5];
+      const nameLen = raw[p + 6];
+      let q = p + 7 + nameLen;
+      if ((nameLen + 1) % 2) q++;
+      if (q + 4 > raw.length) break;
+      const size = ((raw[q] << 24) | (raw[q + 1] << 16) | (raw[q + 2] << 8) | raw[q + 3]) >>> 0;
+      const data = raw.subarray(q + 4, q + 4 + size);
+      if (id === 0x0404) iptc = data;
+      p = q + 4 + size + (size % 2);
+    }
+    if (!iptc) return rows;
+    let utf = false;
+    p = 0;
+    while (p + 5 <= iptc.length) {
+      if (iptc[p] !== 0x1C) { p++; continue; }
+      const rec = iptc[p + 1], ds = iptc[p + 2];
+      let size = (iptc[p + 3] << 8) | iptc[p + 4];
+      let q = p + 5;
+      if (size & 0x8000) {
+        const n = size & 0x7FFF;
+        size = 0;
+        for (let i = 0; i < n; i++) size = (size << 8) | iptc[q + i];
+        q += n;
+      }
+      const data = iptc.subarray(q, q + size);
+      const key = rec + ':' + ds;
+      if (key === '1:90') { utf = true; }
+      else if (rec === 2 && ds !== 0) {
+        const name = IPTC_NAMES[key] || key;
+        const val = (utf ? utf8 : latin1).decode(data).trim();
+        const prev = rows.find(r => r[0] === name);
+        if (prev && ds === 25) prev[1] += ', ' + val;
+        else if (val) rows.push([name, val]);
+      }
+      p = q + size;
+    }
+    return rows;
+  }
+
+  function iccString(buf, off, size) {
+    const dv = new DataView(buf.buffer, buf.byteOffset + off, size);
+    const type = latin1.decode(buf.subarray(off, off + 4));
+    if (type === 'desc') {
+      const n = dv.getUint32(8, false);
+      return latin1.decode(buf.subarray(off + 12, off + 12 + Math.max(0, n - 1)));
+    }
+    if (type === 'text') return latin1.decode(buf.subarray(off + 8, off + size)).replace(/\0+$/, '');
+    if (type === 'mluc') {
+      const count = dv.getUint32(8, false);
+      if (!count) return '';
+      const len = dv.getUint32(20, false), o = dv.getUint32(24, false);
+      return utf16be.decode(buf.subarray(off + o, off + o + len));
+    }
+    return '';
+  }
+
+  function decodeIcc(bytes) {
+    const rows = [];
+    if (!bytes || bytes.length < 132) return rows;
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const sig = (o) => latin1.decode(bytes.subarray(o, o + 4)).trim();
+    const tags = {};
+    const count = dv.getUint32(128, false);
+    for (let i = 0; i < Math.min(count, 64); i++) {
+      const e = 132 + i * 12;
+      if (e + 12 > bytes.length) break;
+      const off = dv.getUint32(e + 4, false), size = dv.getUint32(e + 8, false);
+      if (off + size <= bytes.length) tags[sig(e)] = { off, size };
+    }
+    if (tags.desc) { try { const d = iccString(bytes, tags.desc.off, tags.desc.size); if (d) rows.push(['Description', d]); } catch (_) {} }
+    if (tags.cprt) { try { const c = iccString(bytes, tags.cprt.off, tags.cprt.size); if (c) rows.push(['Copyright', c]); } catch (_) {} }
+    rows.push(['Version', bytes[8] + '.' + (bytes[9] >> 4)]);
+    const cls = sig(12);
+    rows.push(['Device class', (ICC_CLASS[cls] || cls)]);
+    rows.push(['Color space', sig(16)]);
+    rows.push(['PCS', sig(20)]);
+    const y = dv.getUint16(24, false), mo = dv.getUint16(26, false), d = dv.getUint16(28, false);
+    if (y) rows.push(['Created', y + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0')]);
+    const cmm = sig(4);
+    if (cmm) rows.push(['CMM', cmm]);
+    rows.push(['Size', fmtBytes(dv.getUint32(0, false))]);
+    return rows;
+  }
+
+  async function decodePngText(chunks) {
+    const rows = [];
+    for (const c of chunks) {
+      const d = c.data;
+      let z = d.indexOf(0);
+      if (z < 0) continue;
+      const keyword = latin1.decode(d.subarray(0, z));
+      let val = '';
+      if (c.type === 'tEXt') val = latin1.decode(d.subarray(z + 1));
+      else if (c.type === 'zTXt') {
+        const inf = await inflate(d.subarray(z + 2));
+        val = inf ? latin1.decode(inf) : COPY.embCompressed + ' · ' + fmtBytes(d.length - z - 2);
+      } else if (c.type === 'iTXt') {
+        const compFlag = d[z + 1];
+        let q = z + 3;
+        const l2 = d.indexOf(0, q); if (l2 < 0) continue;
+        const l3 = d.indexOf(0, l2 + 1); if (l3 < 0) continue;
+        const body = d.subarray(l3 + 1);
+        if (compFlag) { const inf = await inflate(body); val = inf ? utf8.decode(inf) : COPY.embCompressed + ' · ' + fmtBytes(body.length); }
+        else val = utf8.decode(body);
+      }
+      val = val.trim();
+      rows.push([keyword, val.length > 2000 ? val.slice(0, 2000) + '…' : val]);
+    }
+    return rows;
+  }
+
+  function decodePngTime(raw) {
+    if (!raw || raw.length < 7) return '';
+    const y = (raw[0] << 8) | raw[1];
+    const pad = n => String(n).padStart(2, '0');
+    return y + '-' + pad(raw[2]) + '-' + pad(raw[3]) + ' ' + pad(raw[4]) + ':' + pad(raw[5]) + ':' + pad(raw[6]) + ' UTC';
+  }
+
+  function detailBlock(title, count, open) {
+    const det = document.createElement('details');
+    det.className = 'ex__detail';
+    if (open) det.open = true;
+    const sum = document.createElement('summary');
+    sum.textContent = title + (count != null ? ' · ' + count : '');
+    det.appendChild(sum);
+    return det;
+  }
+
+  function rowsToDl(rows) {
+    const dl = document.createElement('dl');
+    dl.className = 'ex__fields ex__fields--emb';
+    for (const [k, v] of rows) addRow(dl, k, v);
+    return dl;
+  }
+
+  let embToken = 0;
+  async function renderEmbedded(meta) {
+    const token = ++embToken;
+    embeddedEl.innerHTML = '';
+    if (!meta) return;
+    const blocks = [];
+    const tiff = meta.tiff;
+    if (tiff) {
+      const rows = tagRows(tiff);
+      if (rows.length) {
+        const det = detailBlock(COPY.embExif, rows.length);
+        det.appendChild(rowsToDl(rows));
+        if (Array.isArray(tiff.exif[0x927C]) && tiff.exif[0x927C].length) {
+          const p = document.createElement('p');
+          p.className = 'ex__emb-note';
+          p.textContent = COPY.embMakernote + ' · ' + fmtBytes(tiff.exif[0x927C].length);
+          det.appendChild(p);
+        }
+        blocks.push(det);
+      }
+      const tb = thumbnailBlob(tiff);
+      if (tb) {
+        const det = detailBlock(COPY.embThumb, fmtBytes(tb.size), true);
+        const note = document.createElement('p');
+        note.className = 'ex__emb-note';
+        note.textContent = COPY.embThumbNote;
+        const img = document.createElement('img');
+        img.className = 'ex__emb-thumb';
+        img.alt = '';
+        img.src = URL.createObjectURL(tb);
+        img.onload = () => { if (img.naturalWidth) det.querySelector('summary').textContent = COPY.embThumb + ' · ' + img.naturalWidth + ' × ' + img.naturalHeight + ' · ' + fmtBytes(tb.size); };
+        det.append(note, img);
+        blocks.push(det);
+      }
+    }
+    for (const seg of meta.segments || []) {
+      if (seg.kind === 'xmp' && seg.raw) {
+        const { rows, text } = decodeXmp(seg.raw);
+        const det = detailBlock(COPY.embXmp, rows.length);
+        if (rows.length) det.appendChild(rowsToDl(rows));
+        const rawDet = detailBlock(COPY.embRaw, fmtBytes(seg.raw.length));
+        rawDet.className = 'ex__detail ex__detail--raw';
+        const pre = document.createElement('pre');
+        pre.className = 'ex__emb-pre';
+        pre.textContent = text.length > 20000 ? text.slice(0, 20000) + '…' : text;
+        rawDet.appendChild(pre);
+        det.appendChild(rawDet);
+        blocks.push(det);
+      } else if (seg.kind === 'iptc' && seg.raw) {
+        const rows = decodeIptc(seg.raw);
+        if (rows.length) { const det = detailBlock(COPY.embIptc, rows.length); det.appendChild(rowsToDl(rows)); blocks.push(det); }
+      } else if (seg.kind === 'icc') {
+        let bytes = null;
+        if (seg.rawParts) {
+          const total = seg.rawParts.reduce((n, p) => n + p.length, 0);
+          bytes = new Uint8Array(total);
+          let o = 0;
+          for (const p of seg.rawParts) { bytes.set(p, o); o += p.length; }
+        } else if (seg.pngIcc) {
+          const z = seg.pngIcc.indexOf(0);
+          if (z >= 0) bytes = await inflate(seg.pngIcc.subarray(z + 2));
+        }
+        const rows = decodeIcc(bytes);
+        if (rows.length) { const det = detailBlock(COPY.embIcc, rows[0][0] === 'Description' ? rows[0][1] : null); det.appendChild(rowsToDl(rows)); blocks.push(det); }
+      } else if (seg.kind === 'comment' && seg.raw) {
+        const text = utf8.decode(seg.raw).replace(/\0+$/, '').trim();
+        if (text) { const det = detailBlock(COPY.embComment, fmtBytes(seg.raw.length)); const pre = document.createElement('pre'); pre.className = 'ex__emb-pre'; pre.textContent = text.slice(0, 5000); det.appendChild(pre); blocks.push(det); }
+      } else if (seg.kind === 'text' && seg.chunks) {
+        const rows = await decodePngText(seg.chunks);
+        if (rows.length) { const det = detailBlock(COPY.embText, rows.length); det.appendChild(rowsToDl(rows)); blocks.push(det); }
+      } else if (seg.kind === 'time' && seg.raw) {
+        const t = decodePngTime(seg.raw);
+        if (t) { const det = detailBlock(COPY.embTime, null); det.appendChild(rowsToDl([[COPY.segTime, t]])); blocks.push(det); }
+      }
+    }
+    if (token !== embToken) return;
+    blocks.forEach(b => embeddedEl.appendChild(b));
+  }
+
   const SEG_LABELS = { exif: 'segExif', xmp: 'segXmp', iptc: 'segIptc', icc: 'segIcc', comment: 'segComment', text: 'segText', time: 'segTime' };
 
   function renderReport(meta, file) {
@@ -494,6 +855,7 @@ eleventyComputed:
     }
     otherSec.hidden = segs.length === 0;
     iccNote.hidden = !hasIcc;
+    renderEmbedded(meta);
 
     const removable = segs.some(s => s.kind !== 'icc');
     const canStrip = !!KINDS[origKind];
@@ -512,7 +874,8 @@ eleventyComputed:
     const kind = sniffKind(new Uint8Array(buf));
     let meta = null;
     if (kind === 'tiff') {
-      meta = { segments: [], exif: extractExifSummary(parseTiff(new DataView(buf), 0)) };
+      const tiffParsed = parseTiff(new DataView(buf), 0);
+      meta = { segments: [], tiff: tiffParsed, exif: extractExifSummary(tiffParsed) };
       if (meta.exif && Object.keys(meta.exif).length) meta.segments.push({ kind: 'exif', bytes: buf.byteLength });
     } else if (kind && KINDS[kind]) {
       meta = KINDS[kind].parse(buf);
@@ -734,6 +1097,20 @@ eleventyComputed:
   color: var(--term-fg);
 }
 .ex__badge--kept { color: var(--term-muted); border-style: dashed; }
+.ex__embedded { display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.35rem; }
+.ex__embedded:empty { display: none; }
+.ex__detail { border: 1px solid var(--term-border, #2a3138); border-radius: 8px; padding: 0.45rem 0.7rem; font-family: var(--font-mono); }
+.ex__detail > summary { cursor: pointer; font-size: 0.78rem; color: var(--term-fg); list-style: none; display: flex; align-items: center; gap: 0.5rem; }
+.ex__detail > summary::before { content: "▸"; color: var(--term-muted); font-size: 0.7rem; transition: transform 0.15s; }
+.ex__detail[open] > summary::before { transform: rotate(90deg); }
+.ex__detail > summary::-webkit-details-marker { display: none; }
+.ex__detail--raw { margin-top: 0.5rem; border-style: dashed; }
+.ex__fields--emb { margin-top: 0.5rem; max-height: 24rem; overflow: auto; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); }
+.ex__fields--emb dt { overflow-wrap: anywhere; min-width: 0; }
+.ex__fields--emb dd { overflow-wrap: anywhere; white-space: pre-wrap; }
+.ex__emb-pre { margin: 0.5rem 0 0; font-size: 0.68rem; line-height: 1.45; color: var(--term-muted); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 20rem; overflow: auto; }
+.ex__emb-note { margin: 0.5rem 0 0; font-size: 0.72rem; color: var(--term-muted); }
+.ex__emb-thumb { display: block; margin-top: 0.5rem; max-width: 100%; max-height: 14rem; border-radius: 6px; border: 1px solid var(--term-border, #2a3138); }
 
 .ex__clean {
   font-size: 0.82rem;

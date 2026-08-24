@@ -7295,20 +7295,5 @@
     ],
     "date": "2026-05-02",
     "link": "/feed/chapter/chapter01/"
-  },
-  {
-    "type": "chapter",
-    "id": "story-pipeline-check",
-    "src": "https://cdn.mentria.ai/stories/story-pipeline-check/00_cover.webp",
-    "color": "linear-gradient(160deg, #0e1a15 0%, #14352a 50%, #0a0f0d 100%)",
-    "title": "Pipeline Check",
-    "caption": "A brief systems test — ignore me 2 cards.",
-    "badge": "STORY",
-    "tags": [
-      "story",
-      "community"
-    ],
-    "date": "2026-08-24",
-    "link": "/feed/story/story-pipeline-check/"
   }
 ]

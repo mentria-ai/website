@@ -1428,7 +1428,8 @@
         "unit-converter": "Convierte longitud, peso y temperatura. Recuerda tus últimas unidades entre sesiones.",
         "pomodoro-timer": "Un temporizador de concentración con fases de trabajo y descanso. La cuenta atrás sigue corriendo aunque recargues.",
         "dice-roller": "Tira dados con notación estándar como 2d6+1, o elige una opción al azar de tu propia lista.",
-        "image-gen": "Genera imágenes desde un texto en el nodo de render compartido de Mentria. Gratis y sin configuración: describe la escena y espera tu turno."
+        "image-gen": "Genera imágenes desde un texto en el nodo de render compartido de Mentria. Gratis y sin configuración: describe la escena y espera tu turno.",
+        "story-studio": "Crea tus propios decks de historias: genera imágenes en el nodo de render de Mentria o importa las tuyas, escribe subtítulos y une las diapositivas en una historia deslizable."
       }
     },
     "bubble-level": {

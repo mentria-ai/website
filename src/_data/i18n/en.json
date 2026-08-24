@@ -1428,7 +1428,8 @@
         "unit-converter": "Convert length, weight, and temperature. Remembers your last units between sessions.",
         "pomodoro-timer": "A focus timer with work and break phases. The countdown keeps running even if you reload.",
         "dice-roller": "Roll dice with standard notation like 2d6+1, or pick a random option from your own list.",
-        "image-gen": "Generate images from a text prompt on Mentria's shared render node. Free, no setup — describe the scene and wait your turn."
+        "image-gen": "Generate images from a text prompt on Mentria's shared render node. Free, no setup — describe the scene and wait your turn.",
+        "story-studio": "Build your own story decks: generate images on Mentria's render node or import your own, write captions, and stitch slides into a swipeable story."
       }
     },
     "bubble-level": {

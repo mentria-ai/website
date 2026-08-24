@@ -1,6 +1,7 @@
 const locales = require("./locales.js");
 const deepcuts = require("./deepcuts.json");
 const source = require("./source.json");
+const stories = require("./stories.json");
 
 function locText(value, code) {
   if (value == null) return "";
@@ -45,6 +46,7 @@ module.exports = function () {
   for (const loc of locales) {
     for (const deck of deepcuts) items.push(deckItem(deck, "deepcuts", loc));
     for (const deck of source) items.push(deckItem(deck, "source", loc));
+    for (const deck of stories) items.push(deckItem(deck, "story", loc));
   }
   return items;
 };

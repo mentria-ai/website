@@ -1,0 +1,85 @@
+name: Publish approved story submission
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: story-submission
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.label.name == 'story-approved' && contains(github.event.issue.labels.*.name, 'story-submission')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install image encoder
+        run: npm install --no-save --no-audit --no-fund sharp@0.33.5
+      - name: Build the story from the issue
+        id: publish
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/publish-submission.mjs
+      - name: Upload images to the CDN
+        env:
+          CDN_DEPLOY_KEY: ${{ secrets.CDN_DEPLOY_KEY }}
+          CDN_KNOWN_HOSTS: ${{ secrets.CDN_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$CDN_DEPLOY_KEY" > ~/.ssh/cdn_deploy
+          printf '%s\n' "$CDN_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/cdn_deploy ~/.ssh/known_hosts
+          rsync -az -e "ssh -i ~/.ssh/cdn_deploy -o IdentitiesOnly=yes" "out/${{ steps.publish.outputs.story_id }}/" "cdnpub@91.99.55.13:${{ steps.publish.outputs.story_id }}/"
+          for f in $(ls out/${{ steps.publish.outputs.story_id }}); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://cdn.mentria.ai/stories/${{ steps.publish.outputs.story_id }}/$f")
+            [ "$code" = "200" ] || { echo "CDN verify failed for $f ($code)"; exit 1; }
+          done
+      - name: Commit
+        run: |
+          git config user.name "mentria-bot"
+          git config user.email "agent@mentria.ai"
+          git add src/_data/stories.json src/_data/feed.json
+          git commit -m "stories: ${{ steps.publish.outputs.title }} (#${{ github.event.issue.number }})"
+          git push origin main
+      - name: Deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run static.yml --ref main
+      - name: Close the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "Published: https://mentria.ai/feed/story/${{ steps.publish.outputs.story_id }}/ (live once the deploy finishes, a few minutes)."
+          gh issue edit ${{ github.event.issue.number }} --add-label story-published
+          gh issue close ${{ github.event.issue.number }}
+      - name: Report failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "Publishing failed — see the workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Fix the issue body (image count must match the slides, story data must be valid JSON) and re-add the story-approved label."
+          gh issue edit ${{ github.event.issue.number }} --remove-label story-approved
+
+  rejected:
+    if: github.event.label.name == 'story-rejected' && contains(github.event.issue.labels.*.name, 'story-submission')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "Thanks for submitting — this one won't be published."
+          gh issue close ${{ github.event.issue.number }} --reason "not planned"

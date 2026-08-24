@@ -34,6 +34,10 @@
   textarea:focus { outline: none; border-color: var(--ext-accent); }
   textarea:disabled { opacity: 0.5; }
   .row { display: flex; gap: 0.6rem; align-items: center; }
+  .stylerow { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; font-size: 0.72rem; color: var(--ext-muted); }
+  .stylerow[hidden] { display: none; }
+  .stylerow select { background: #10141a; border: 1px solid #2a3138; border-radius: 7px; padding: 0.35rem 0.5rem; color: var(--ext-fg); font-family: inherit; font-size: 0.78rem; }
+  .stylehint { font-size: 0.68rem; color: var(--ext-muted); }
   .qinfo { font-size: 0.75rem; color: var(--ext-muted); }
   button.go { background: transparent; border: 1px solid var(--ext-accent); color: var(--ext-accent); border-radius: 8px; padding: 0.55rem 1.4rem; font-family: inherit; font-size: 0.9rem; cursor: pointer; margin-left: auto; }
   button.go:hover:not(:disabled) { background: var(--ext-accent); color: #0b0e11; }
@@ -63,6 +67,11 @@
     <span class="qinfo" id="qinfo"></span>
   </div>
   <textarea id="prompt" maxlength="800" placeholder="Describe the image… (settings are fixed server-side — just describe the scene)" disabled></textarea>
+  <div class="stylerow" id="stylerow" hidden>
+    <label for="lora">style</label>
+    <select id="lora"><option value="">Default (photoreal)</option></select>
+    <span class="stylehint" id="lorahint"></span>
+  </div>
   <div class="row">
     <span class="status" id="status"></span>
     <button class="go" id="go" type="button" disabled>Generate</button>
@@ -148,7 +157,22 @@ class Room {
 }
 
 const $ = (id) => document.getElementById(id);
-const els = { dot: $('dot'), svc: $('svc'), qinfo: $('qinfo'), prompt: $('prompt'), go: $('go'), status: $('status'), stage: $('stage'), actions: $('actions'), dl: $('dl'), again: $('again') };
+const els = { dot: $('dot'), svc: $('svc'), qinfo: $('qinfo'), prompt: $('prompt'), go: $('go'), status: $('status'), stage: $('stage'), actions: $('actions'), dl: $('dl'), again: $('again'), stylerow: $('stylerow'), lora: $('lora'), lorahint: $('lorahint') };
+let LORAS = [];
+function paintLoras(list) {
+  LORAS = Array.isArray(list) ? list : [];
+  const keep = els.lora.value;
+  els.lora.innerHTML = '<option value="">Default (photoreal)</option>';
+  for (const l of LORAS) { const o = document.createElement('option'); o.value = l.id; o.textContent = l.label; els.lora.appendChild(o); }
+  if (LORAS.some((l) => l.id === keep)) els.lora.value = keep;
+  els.stylerow.hidden = LORAS.length === 0;
+  paintLoraHint();
+}
+function paintLoraHint() {
+  const l = LORAS.find((x) => x.id === els.lora.value);
+  els.lorahint.textContent = l ? (l.trigger ? 'adds “' + l.trigger + '” to your prompt automatically' : 'style applied automatically') : '';
+}
+els.lora.addEventListener('change', paintLoraHint);
 
 const room = new Room(RELAY, SERVICE);
 let online = false;
@@ -169,7 +193,7 @@ function setOnline(on, info) {
   els.svc.textContent = on ? (info.model || 'ready') + ' · ' + (info.dims ? info.dims.join('×') : '') : 'render node offline';
   els.prompt.disabled = !on;
   els.go.disabled = !on || !!myJob;
-  if (on) paintQueue(info.queue, info.avgMs);
+  if (on) { paintQueue(info.queue, info.avgMs); paintLoras(info.loras); }
   else {
     els.qinfo.textContent = '';
     stage('<span class="big">📴</span><span class="hint">The render node is offline right now — the service runs on a real machine that isn\'t always awake. Try again later.</span><button class="retry" id="retry" type="button">Check again</button>');
@@ -268,7 +292,7 @@ async function generate() {
   els.actions.hidden = true;
   setStatus('submitting…');
   try {
-    const r = await room.request('generate', { prompt }, 15000);
+    const r = await room.request('generate', els.lora.value ? { prompt, lora: els.lora.value } : { prompt }, 15000);
     myJob = r.job;
     setStatus('');
     paintQueue(r.queue, null);

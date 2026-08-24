@@ -1428,7 +1428,8 @@
         "unit-converter": "Convertissez longueur, poids et température. Mémorise vos dernières unités d'une session à l'autre.",
         "pomodoro-timer": "Une minuterie de concentration avec des phases de travail et de pause. Le compte à rebours continue même si vous rechargez.",
         "dice-roller": "Lancez des dés en notation standard comme 2d6+1, ou tirez au sort une option dans votre propre liste.",
-        "image-gen": "Générez des images à partir d'un texte sur le nœud de rendu partagé de Mentria. Gratuit, sans configuration : décrivez la scène et attendez votre tour."
+        "image-gen": "Générez des images à partir d'un texte sur le nœud de rendu partagé de Mentria. Gratuit, sans configuration : décrivez la scène et attendez votre tour.",
+        "story-studio": "Créez vos propres decks d'histoires : générez des images sur le nœud de rendu de Mentria ou importez les vôtres, écrivez des légendes et assemblez les diapositives en une histoire à faire défiler."
       }
     },
     "bubble-level": {

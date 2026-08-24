@@ -1,0 +1,943 @@
+<script type="application/json" id="mentria-ext">
+{
+  "id": "story-studio",
+  "name": "Story Studio",
+  "version": "1.0.0",
+  "icon": "📖",
+  "author": "Mentria",
+  "description": "Build swipeable story decks: generate images on Mentria's render node or import your own, write captions, arrange slides, export the finished deck.",
+  "permissions": ["network", "storage"],
+  "mounts": { "tool": {} }
+}
+</script>
+<style>
+  :root {
+    --ext-accent: #6ef3c5;
+    --ext-bg: #0b0e11;
+    --ext-fg: #e6edf3;
+    --ext-muted: #8b98a5;
+    --ext-font: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 1.1rem; font-family: var(--ext-font); background: var(--ext-bg); color: var(--ext-fg); }
+  .view { max-width: 60rem; margin: 0 auto; }
+  .view[hidden] { display: none; }
+  h1 { font-size: 1rem; margin: 0; color: var(--ext-fg); letter-spacing: 0.04em; }
+  .topbar { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .topbar .grow { flex: 1; }
+  .svc { font-size: 0.68rem; color: var(--ext-muted); }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #566; margin-right: 5px; vertical-align: 1px; }
+  .dot.on { background: var(--ext-accent); box-shadow: 0 0 5px var(--ext-accent); }
+  .dot.off { background: #f472b6; }
+  button, .btn { background: transparent; border: 1px solid #2a3138; color: var(--ext-fg); border-radius: 7px; padding: 0.42rem 0.9rem; font-family: inherit; font-size: 0.78rem; cursor: pointer; }
+  button:hover:not(:disabled), .btn:hover { border-color: var(--ext-accent); color: var(--ext-accent); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn--primary { border-color: var(--ext-accent); color: var(--ext-accent); }
+  .btn--primary:hover:not(:disabled) { background: var(--ext-accent); color: #0b0e11; }
+  .btn--danger:hover { border-color: #f472b6; color: #f472b6; }
+  .decklist { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.8rem; }
+  .deckcard { border: 1px solid #2a3138; border-radius: 10px; padding: 0.9rem; cursor: pointer; display: flex; flex-direction: column; gap: 0.35rem; }
+  .deckcard:hover { border-color: var(--ext-accent); }
+  .deckcard__title { font-size: 0.9rem; color: var(--ext-fg); overflow-wrap: anywhere; }
+  .deckcard__sub { font-size: 0.72rem; color: var(--ext-muted); }
+  .empty { color: var(--ext-muted); font-size: 0.8rem; padding: 1.5rem 0; }
+  .field { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.7rem; }
+  .field label { font-size: 0.68rem; color: var(--ext-muted); letter-spacing: 0.05em; }
+  input[type="text"], textarea { width: 100%; background: #10141a; border: 1px solid #2a3138; border-radius: 7px; padding: 0.5rem 0.65rem; color: var(--ext-fg); font-family: inherit; font-size: 0.85rem; }
+  input:focus, textarea:focus { outline: none; border-color: var(--ext-accent); }
+  textarea { resize: vertical; }
+  .slides { display: flex; flex-direction: column; gap: 0.7rem; margin: 0.9rem 0; }
+  .slide { display: flex; gap: 0.8rem; border: 1px solid #2a3138; border-radius: 10px; padding: 0.7rem; align-items: flex-start; }
+  .slide.is-cover { border-color: var(--ext-accent); }
+  .thumb { width: 74px; height: 131px; flex: none; border-radius: 7px; background: #10141a center/cover no-repeat; border: 1px dashed #2a3138; display: flex; align-items: center; justify-content: center; color: var(--ext-muted); font-size: 1.2rem; position: relative; overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .slide__main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.45rem; }
+  .slide__row { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+  .slide__row .spacer { flex: 1; }
+  .mini { padding: 0.25rem 0.55rem; font-size: 0.68rem; }
+  .coverflag { font-size: 0.62rem; color: var(--ext-accent); }
+  .genrow { display: flex; gap: 0.4rem; align-items: center; }
+  .stylerow { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; font-size: 0.7rem; color: var(--ext-muted); margin-bottom: 0.7rem; }
+  .stylerow[hidden] { display: none; }
+  .stylerow select { background: #10141a; border: 1px solid #2a3138; border-radius: 7px; padding: 0.35rem 0.5rem; color: var(--ext-fg); font-family: inherit; font-size: 0.78rem; }
+  .stylehint { font-size: 0.66rem; color: var(--ext-muted); }
+  .status a { color: var(--ext-accent); }
+  .tstate { font-size: 0.72rem; color: var(--ext-muted); margin: 0 0 0.6rem; }
+  .tstate[hidden] { display: none; }
+  .tstate.err { color: #f472b6; }
+  .tr { border: 1px dashed #2a3138; border-radius: 8px; padding: 0.45rem 0.7rem; margin-bottom: 0.7rem; font-size: 0.72rem; color: var(--ext-muted); }
+  .tr[hidden] { display: none; }
+  .tr > summary { cursor: pointer; }
+  .tr__rows { display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.5rem; }
+  .tr__row { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.4rem; align-items: start; }
+  .tr__lang { font-size: 0.66rem; color: var(--ext-accent); padding-top: 0.45rem; }
+  .tr__row textarea { font-size: 0.74rem; min-height: 2.2rem; }
+  .slide .tr { margin: 0; }
+  .genrow input { flex: 1; }
+  .genstate { font-size: 0.68rem; color: var(--ext-muted); min-height: 1em; }
+  .genstate.err { color: #f472b6; }
+  .caption-in { font-size: 0.8rem; }
+  .status { font-size: 0.72rem; color: var(--ext-muted); min-height: 1.05em; margin-top: 0.6rem; }
+  .status.err { color: #f472b6; }
+  .status.ok { color: var(--ext-accent); }
+  .confirmwrap { display: inline-flex; gap: 0.3rem; }
+  .preview { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 50; }
+  .preview[hidden] { display: none; }
+  .pv__stage { position: relative; height: 100%; max-height: 100dvh; aspect-ratio: 832 / 1472; max-width: 100vw; background: #0b0e11; overflow: hidden; }
+  .pv__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pv__overlay { position: absolute; left: 0; right: 0; bottom: 0; padding: 1.2rem 1rem 1.6rem; background: linear-gradient(transparent, rgba(0,0,0,0.82)); }
+  .pv__caption { margin: 0; font-size: 1rem; line-height: 1.45; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.7); }
+  .pv__long { margin: 0.55rem 0 0; font-size: 0.78rem; line-height: 1.5; color: #d6dde4; display: none; }
+  .pv__stage.show-long .pv__long { display: block; }
+  .pv__close { position: absolute; top: 0.7rem; right: 0.7rem; z-index: 2; background: rgba(0,0,0,0.45); border: none; color: #fff; border-radius: 50%; width: 34px; height: 34px; font-size: 1rem; }
+  .pv__nav { position: absolute; top: 0; bottom: 0; width: 40%; z-index: 1; background: none; border: none; }
+  .pv__nav--prev { left: 0; }
+  .pv__nav--next { right: 0; width: 60%; }
+  .pv__count { position: absolute; top: 0.9rem; left: 0.9rem; font-size: 0.7rem; color: #fff; background: rgba(0,0,0,0.45); padding: 0.2rem 0.55rem; border-radius: 999px; }
+  @media (max-width: 560px) { .slide { flex-direction: column; } .thumb { width: 100%; height: 150px; } }
+</style>
+
+<div class="view" id="v-list">
+  <div class="topbar">
+    <h1>📖 Story Studio</h1>
+    <span class="grow"></span>
+    <span class="svc"><span class="dot" id="dot"></span><span id="svc">checking render node…</span></span>
+    <button class="btn--primary" id="new-deck" type="button">New story</button>
+  </div>
+  <div class="decklist" id="decklist"></div>
+  <p class="empty" id="list-empty">No stories yet. Hit "New story" — describe scenes, generate or import images, caption each slide, then export the finished deck.</p>
+</div>
+
+<div class="view" id="v-edit" hidden>
+  <div class="topbar">
+    <button id="back" type="button">← Stories</button>
+    <span class="grow"></span>
+    <span class="svc"><span class="dot" id="dot2"></span><span id="svc2"></span></span>
+    <button id="pv-open" type="button">Preview</button>
+    <button id="translate" type="button">Translate</button>
+    <button id="submit" type="button">Submit to Mentria</button>
+    <button class="btn--primary" id="export" type="button">Export deck</button>
+  </div>
+  <div class="field"><label>title</label><input type="text" id="d-title" maxlength="60" placeholder="My Story"></div>
+  <div class="field"><label>one-line subtitle (shown on the feed card)</label><input type="text" id="d-sub" maxlength="140" placeholder="What this story is about"></div>
+  <div class="field"><label>credit (optional — shown if you submit the story)</label><input type="text" id="d-credit" maxlength="60" placeholder="your name or handle"></div>
+  <div class="stylerow" id="stylerow" hidden>
+    <label for="lora">image style for new generations</label>
+    <select id="lora"><option value="">Default (photoreal)</option></select>
+    <span class="stylehint" id="lorahint"></span>
+  </div>
+  <p class="tstate" id="tstate" hidden></p>
+  <details class="tr" id="deck-tr" hidden>
+    <summary>translations · title &amp; subtitle</summary>
+    <div class="tr__rows" id="deck-tr-rows"></div>
+  </details>
+  <div class="slides" id="slides"></div>
+  <button id="add-slide" type="button">+ Add slide</button>
+  <p class="status" id="status"></p>
+</div>
+
+<div class="preview" id="preview" hidden>
+  <div class="pv__stage" id="pv-stage">
+    <img class="pv__img" id="pv-img" alt="">
+    <span class="pv__count" id="pv-count"></span>
+    <button class="pv__close" id="pv-close" type="button">✕</button>
+    <button class="pv__nav pv__nav--prev" id="pv-prev" type="button" aria-label="previous"></button>
+    <button class="pv__nav pv__nav--next" id="pv-next" type="button" aria-label="next"></button>
+    <div class="pv__overlay">
+      <p class="pv__caption" id="pv-caption"></p>
+      <p class="pv__long" id="pv-long"></p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { SimplePool, generateSecretKey, getPublicKey, finalizeEvent } from '/assets/vendor/nostr-tools.js';
+
+const KIND = 20808;
+const RELAY = 'wss://relay.mentria.ai';
+const SERVICE = 'mentria-imagegen-v1';
+const ISSUE_URL = 'https://github.com/mentria-ai/website/issues/new';
+const URL_BODY_BUDGET = 5200;
+const m = window.mentria || {};
+const store = m.storage;
+
+const te = new TextEncoder(), td = new TextDecoder();
+const toB64 = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+const fromB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const hx = (u8) => [...u8].map((b) => b.toString(16).padStart(2, '0')).join('');
+
+async function deriveKey(secret) {
+  const raw = await crypto.subtle.digest('SHA-256', te.encode('mentria-imagegen:key:' + secret));
+  return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt', 'decrypt']);
+}
+async function deriveChannel(secret) {
+  return hx(new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode('mentria-imagegen:chan:' + secret))));
+}
+async function seal(key, obj) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const enc = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(obj))));
+  const ct = enc.subarray(0, enc.length - 16), tag = enc.subarray(enc.length - 16);
+  const out = new Uint8Array(28 + ct.length);
+  out.set(iv, 0); out.set(tag, 12); out.set(ct, 28);
+  return toB64(out);
+}
+async function open(key, b64) {
+  const buf = fromB64(b64);
+  const iv = buf.subarray(0, 12), tag = buf.subarray(12, 28), ct = buf.subarray(28);
+  const cw = new Uint8Array(ct.length + 16);
+  cw.set(ct, 0); cw.set(tag, ct.length);
+  return JSON.parse(td.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cw)));
+}
+
+class Room {
+  constructor(relay, secret) { this.relays = [relay]; this.secret = secret; this.pool = new SimplePool(); this.sk = generateSecretKey(); this.pk = getPublicKey(this.sk); this.pending = new Map(); this.onPush = null; }
+  async start() {
+    this.key = await deriveKey(this.secret);
+    this.channel = await deriveChannel(this.secret);
+    this.sub = this.pool.subscribeMany(this.relays, { kinds: [KIND], '#t': [this.channel], since: Math.floor(Date.now() / 1000) - 5 }, { onevent: (ev) => this._ev(ev) });
+  }
+  async _ev(ev) {
+    if (ev.pubkey === this.pk) return;
+    let msg; try { msg = await open(this.key, ev.content); } catch { return; }
+    const role = ev.tags.find((t) => t[0] === 'role')?.[1];
+    if (role !== 'res') return;
+    if (msg.id && this.pending.has(msg.id)) {
+      const p = this.pending.get(msg.id); clearTimeout(p.to); this.pending.delete(msg.id);
+      msg.ok ? p.resolve(msg.data) : p.reject(new Error(msg.error?.message || 'request failed'));
+    } else if (msg.event && this.onPush) { this.onPush(msg.event, msg.data); }
+  }
+  request(op, params = {}, timeoutMs = 20000) {
+    const id = hx(crypto.getRandomValues(new Uint8Array(8)));
+    return new Promise((resolve, reject) => {
+      const to = setTimeout(() => { this.pending.delete(id); reject(new Error('timeout: ' + op)); }, timeoutMs);
+      this.pending.set(id, { resolve, reject, to });
+      this._send('req', { id, op, params });
+    });
+  }
+  async _send(role, obj) {
+    const ev = finalizeEvent({ kind: KIND, created_at: Math.floor(Date.now() / 1000), tags: [['t', this.channel], ['role', role], ['expiration', String(Math.floor(Date.now() / 1000) + 600)]], content: await seal(this.key, obj) }, this.sk);
+    for (const p of this.pool.publish(this.relays, ev)) Promise.resolve(p).catch(() => {});
+  }
+}
+
+const idb = await new Promise((resolve, reject) => {
+  const req = indexedDB.open('mentria-ext-story-studio', 1);
+  req.onupgradeneeded = () => req.result.createObjectStore('images');
+  req.onsuccess = () => resolve(req.result);
+  req.onerror = () => reject(req.error);
+});
+const idbPut = (k, blob) => new Promise((res, rej) => { const t = idb.transaction('images', 'readwrite'); t.objectStore('images').put(blob, k); t.oncomplete = res; t.onerror = () => rej(t.error); });
+const idbGet = (k) => new Promise((res, rej) => { const r = idb.transaction('images').objectStore('images').get(k); r.onsuccess = () => res(r.result || null); r.onerror = () => rej(r.error); });
+const idbDel = (k) => new Promise((res) => { const t = idb.transaction('images', 'readwrite'); t.objectStore('images').delete(k); t.oncomplete = res; t.onerror = res; });
+
+const $ = (id) => document.getElementById(id);
+const uid = () => hx(crypto.getRandomValues(new Uint8Array(5)));
+
+let decks = store.get('decks') || [];
+const saveDecks = () => store.set('decks', decks);
+let cur = null;
+let online = false;
+let genBusy = false;
+const urls = new Map();
+
+async function thumbUrl(key) {
+  if (urls.has(key)) return urls.get(key);
+  const blob = await idbGet(key);
+  if (!blob) return null;
+  const u = URL.createObjectURL(blob);
+  urls.set(key, u);
+  return u;
+}
+function dropUrl(key) {
+  if (urls.has(key)) { URL.revokeObjectURL(urls.get(key)); urls.delete(key); }
+}
+
+const room = new Room(RELAY, SERVICE);
+let myJob = null;
+let chunks = null;
+let genSlide = null;
+
+let LORAS = [];
+function paintLoras(list) {
+  LORAS = Array.isArray(list) ? list : [];
+  const sel = $('lora');
+  const keep = sel.value;
+  sel.innerHTML = '<option value="">Default (photoreal)</option>';
+  for (const l of LORAS) { const o = document.createElement('option'); o.value = l.id; o.textContent = l.label; sel.appendChild(o); }
+  if (LORAS.some((l) => l.id === keep)) sel.value = keep;
+  $('stylerow').hidden = LORAS.length === 0;
+  paintLoraHint();
+}
+function paintLoraHint() {
+  const l = LORAS.find((x) => x.id === $('lora').value);
+  $('lorahint').textContent = l ? (l.trigger ? 'adds “' + l.trigger + '” to the prompt automatically' : 'style applied automatically') : '';
+}
+$('lora').addEventListener('change', () => { paintLoraHint(); if (cur) { cur.lora = $('lora').value; touch(); } });
+
+function setOnline(on, info) {
+  online = on;
+  if (on) paintLoras(info.loras);
+  for (const [d, s] of [[$('dot'), $('svc')], [$('dot2'), $('svc2')]]) {
+    d.className = 'dot ' + (on ? 'on' : 'off');
+    s.textContent = on ? 'render node: ' + (info.model || 'ready') + (info.queue ? ' · ' + info.queue + ' in queue' : '') : 'render node offline — import still works';
+  }
+  document.querySelectorAll('.gen-btn').forEach((b) => { b.disabled = !on || genBusy; });
+}
+async function hello() {
+  try {
+    const info = await room.request('hello', {}, 8000);
+    setOnline(!!info.ready, info);
+  } catch { setOnline(false, {}); }
+}
+
+room.onPush = (event, data) => {
+  if (!myJob || !data || data.job !== myJob) return;
+  const slide = genSlide;
+  if (!slide) return;
+  const st = document.querySelector('[data-genstate="' + slide.id + '"]');
+  if (event === 'job:pos') {
+    if (st) st.textContent = 'queue position ' + data.pos + ' · ~' + Math.round(data.etaMs / 1000) + 's';
+  } else if (event === 'job:start') {
+    if (st) st.textContent = 'rendering… ~' + Math.round((data.etaMs || 40000) / 1000) + 's';
+  } else if (event === 'job:done') {
+    chunks = { mime: data.mime, total: data.chunks, got: 0, parts: new Array(data.chunks) };
+    if (st) st.textContent = 'receiving image…';
+  } else if (event === 'job:chunk' && chunks) {
+    if (!chunks.parts[data.i]) { chunks.parts[data.i] = fromB64(data.b64); chunks.got++; }
+    if (st) st.textContent = 'receiving ' + Math.round((chunks.got / chunks.total) * 100) + '%';
+    if (chunks.got === chunks.total) finishGen(slide);
+  } else if (event === 'job:error') {
+    if (st) { st.textContent = data.message || 'generation failed'; st.className = 'genstate err'; }
+    myJob = null; chunks = null; genSlide = null; genBusy = false;
+    setOnline(online, {});
+  }
+};
+
+async function finishGen(slide) {
+  const blob = new Blob(chunks.parts, { type: chunks.mime });
+  const key = cur.id + '/' + slide.id;
+  dropUrl(key);
+  await idbPut(key, blob);
+  slide.hasImage = true;
+  slide.source = 'generated';
+  touch();
+  myJob = null; chunks = null; genSlide = null; genBusy = false;
+  renderSlides();
+  setOnline(online, {});
+}
+
+async function generateFor(slide, prompt, stateEl) {
+  if (genBusy || !prompt.trim()) return;
+  genBusy = true;
+  document.querySelectorAll('.gen-btn').forEach((b) => { b.disabled = true; });
+  stateEl.className = 'genstate';
+  stateEl.textContent = 'submitting…';
+  try {
+    const r = await room.request('generate', $('lora').value ? { prompt: prompt.trim(), lora: $('lora').value } : { prompt: prompt.trim() }, 15000);
+    myJob = r.job;
+    genSlide = slide;
+    stateEl.textContent = 'queue position ' + r.pos + ' · ~' + Math.round(r.etaMs / 1000) + 's';
+  } catch (e) {
+    stateEl.className = 'genstate err';
+    stateEl.textContent = String(e.message || e);
+    genBusy = false;
+    setOnline(online, {});
+    if (/timeout/.test(String(e.message))) setOnline(false, {});
+  }
+}
+
+function touch() {
+  cur.updated = Date.now();
+  saveDecks();
+}
+
+function confirmBtn(label, fn) {
+  const wrap = document.createElement('span');
+  wrap.className = 'confirmwrap';
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'mini btn--danger'; b.textContent = label;
+  b.addEventListener('click', () => {
+    if (b.dataset.armed) { fn(); return; }
+    b.dataset.armed = '1';
+    b.textContent = 'sure?';
+    setTimeout(() => { delete b.dataset.armed; b.textContent = label; }, 2500);
+  });
+  wrap.appendChild(b);
+  return wrap;
+}
+
+function renderList() {
+  const list = $('decklist');
+  list.innerHTML = '';
+  decks.sort((a, b) => (b.updated || 0) - (a.updated || 0));
+  decks.forEach((d) => {
+    const c = document.createElement('div');
+    c.className = 'deckcard';
+    const t = document.createElement('div');
+    t.className = 'deckcard__title';
+    t.textContent = d.title || 'Untitled story';
+    const s = document.createElement('div');
+    s.className = 'deckcard__sub';
+    const withImg = d.slides.filter((x) => x.hasImage).length;
+    s.textContent = d.slides.length + ' slides · ' + withImg + ' with images';
+    c.append(t, s);
+    c.addEventListener('click', () => openDeck(d.id));
+    list.appendChild(c);
+  });
+  $('list-empty').hidden = decks.length > 0;
+}
+
+function openDeck(id) {
+  cur = decks.find((d) => d.id === id);
+  if (!cur) return;
+  $('v-list').hidden = true;
+  $('v-edit').hidden = false;
+  $('d-title').value = cur.title || '';
+  $('d-sub').value = cur.subtitle || '';
+  $('d-credit').value = cur.credit || '';
+  $('lora').value = cur.lora && LORAS.some((l) => l.id === cur.lora) ? cur.lora : '';
+  tstate('');
+  paintLoraHint();
+  setStatus('');
+  renderSlides();
+}
+
+function closeDeck() {
+  cur = null;
+  $('v-edit').hidden = true;
+  $('v-list').hidden = false;
+  renderList();
+}
+
+function setStatus(msg, cls) {
+  $('status').textContent = msg || '';
+  $('status').className = 'status' + (cls ? ' ' + cls : '');
+}
+
+function renderSlides() {
+  const wrap = $('slides');
+  wrap.innerHTML = '';
+  cur.slides.forEach((slide, i) => {
+    const el = document.createElement('div');
+    el.className = 'slide' + (cur.cover === slide.id ? ' is-cover' : '');
+    const th = document.createElement('div');
+    th.className = 'thumb';
+    th.textContent = '·';
+    if (slide.hasImage) {
+      thumbUrl(cur.id + '/' + slide.id).then((u) => {
+        if (u) { th.textContent = ''; const img = document.createElement('img'); img.src = u; img.alt = ''; th.appendChild(img); }
+      });
+    }
+    const main = document.createElement('div');
+    main.className = 'slide__main';
+
+    const genrow = document.createElement('div');
+    genrow.className = 'genrow';
+    const gp = document.createElement('input');
+    gp.type = 'text';
+    gp.placeholder = 'describe the image to generate…';
+    gp.value = slide.prompt || '';
+    gp.maxLength = 800;
+    gp.addEventListener('change', () => { slide.prompt = gp.value; touch(); });
+    const gb = document.createElement('button');
+    gb.type = 'button';
+    gb.className = 'mini gen-btn';
+    gb.textContent = slide.hasImage ? 'Re-generate' : 'Generate';
+    gb.disabled = !online || genBusy;
+    const imp = document.createElement('button');
+    imp.type = 'button';
+    imp.className = 'mini';
+    imp.textContent = 'Import';
+    const fi = document.createElement('input');
+    fi.type = 'file';
+    fi.accept = 'image/*';
+    fi.hidden = true;
+    genrow.append(gp, gb, imp, fi);
+
+    const gs = document.createElement('p');
+    gs.className = 'genstate';
+    gs.dataset.genstate = slide.id;
+
+    gb.addEventListener('click', () => { slide.prompt = gp.value; touch(); generateFor(slide, gp.value, gs); });
+    imp.addEventListener('click', () => fi.click());
+    fi.addEventListener('change', async () => {
+      const f = fi.files && fi.files[0];
+      if (!f) return;
+      const key = cur.id + '/' + slide.id;
+      dropUrl(key);
+      await idbPut(key, f);
+      slide.hasImage = true;
+      slide.source = 'imported';
+      touch();
+      renderSlides();
+    });
+
+    const cap = document.createElement('textarea');
+    cap.rows = 2;
+    cap.className = 'caption-in';
+    cap.placeholder = 'caption — the line shown on the slide';
+    cap.value = slide.caption || '';
+    cap.maxLength = 200;
+    cap.addEventListener('change', () => { slide.caption = cap.value; touch(); });
+
+    const long = document.createElement('textarea');
+    long.rows = 2;
+    long.className = 'caption-in';
+    long.placeholder = 'long-press text (optional) — deeper detail revealed on hold';
+    long.value = slide.long || '';
+    long.maxLength = 600;
+    long.addEventListener('change', () => { slide.long = long.value; touch(); });
+
+    const row = document.createElement('div');
+    row.className = 'slide__row';
+    const num = document.createElement('span');
+    num.className = 'coverflag';
+    num.textContent = (i + 1) + '/' + cur.slides.length + (cur.cover === slide.id ? ' · cover' : '');
+    const up = document.createElement('button');
+    up.type = 'button'; up.className = 'mini'; up.textContent = '↑'; up.disabled = i === 0;
+    up.addEventListener('click', () => { cur.slides.splice(i, 1); cur.slides.splice(i - 1, 0, slide); touch(); renderSlides(); });
+    const down = document.createElement('button');
+    down.type = 'button'; down.className = 'mini'; down.textContent = '↓'; down.disabled = i === cur.slides.length - 1;
+    down.addEventListener('click', () => { cur.slides.splice(i, 1); cur.slides.splice(i + 1, 0, slide); touch(); renderSlides(); });
+    const cov = document.createElement('button');
+    cov.type = 'button'; cov.className = 'mini'; cov.textContent = 'Set cover';
+    cov.disabled = !slide.hasImage;
+    cov.addEventListener('click', () => { cur.cover = slide.id; touch(); renderSlides(); });
+    const spacer = document.createElement('span');
+    spacer.className = 'spacer';
+    const del = confirmBtn('Delete', async () => {
+      await idbDel(cur.id + '/' + slide.id);
+      dropUrl(cur.id + '/' + slide.id);
+      cur.slides = cur.slides.filter((x) => x.id !== slide.id);
+      if (cur.cover === slide.id) delete cur.cover;
+      touch();
+      renderSlides();
+    });
+    row.append(num, up, down, cov, spacer, del);
+
+    const tr = document.createElement('details');
+    tr.className = 'tr';
+    tr.dataset.slideTr = slide.id;
+    tr.hidden = true;
+    const sum = document.createElement('summary');
+    sum.textContent = 'translations';
+    const rows = document.createElement('div');
+    rows.className = 'tr__rows';
+    tr.append(sum, rows);
+    main.append(genrow, gs, cap, long, row, tr);
+    el.append(th, main);
+    wrap.appendChild(el);
+  });
+  renderTranslations();
+}
+
+$('new-deck').addEventListener('click', () => {
+  const d = { id: uid(), title: '', subtitle: '', slides: [{ id: uid() }], updated: Date.now() };
+  decks.push(d);
+  saveDecks();
+  openDeck(d.id);
+});
+$('back').addEventListener('click', closeDeck);
+$('add-slide').addEventListener('click', () => { cur.slides.push({ id: uid() }); touch(); renderSlides(); });
+$('d-title').addEventListener('change', () => { cur.title = $('d-title').value; touch(); });
+$('d-sub').addEventListener('change', () => { cur.subtitle = $('d-sub').value; touch(); });
+$('d-credit').addEventListener('change', () => { cur.credit = $('d-credit').value; touch(); });
+
+const blobToDataUrl = (blob) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(blob); });
+
+async function buildBundle() {
+  const title = (cur.title || '').trim();
+  if (!title) { setStatus('give the story a title first', 'err'); return null; }
+  const ready = cur.slides.filter((s) => s.hasImage && (s.caption || '').trim());
+  if (!ready.length) { setStatus('need at least one slide with an image and a caption', 'err'); return null; }
+  setStatus('packing…');
+  const images = {};
+  for (const s of ready) {
+    const blob = await idbGet(cur.id + '/' + s.id);
+    images[s.id] = await blobToDataUrl(blob);
+  }
+  return {
+    missing: cur.slides.length - ready.length,
+    ready,
+    bundle: {
+      format: 'mentria-story-1',
+      exported: new Date().toISOString(),
+      deck: {
+        title,
+        subtitle: localized((cur.subtitle || '').trim(), 'subtitle'),
+        credit: (cur.credit || '').trim(),
+        cover: cur.cover && ready.some((s) => s.id === cur.cover) ? cur.cover : ready[0].id,
+        slides: ready.map((s) => ({ id: s.id, caption: localized(s.caption.trim(), s.id + '.caption'), long_press: localized((s.long || '').trim(), s.id + '.long'), source: s.source || 'imported' }))
+      },
+      images
+    }
+  };
+}
+
+const LANGS = [['es', 'Español'], ['fr', 'Français'], ['ja', '日本語'], ['pt-BR', 'Português (Brasil)']];
+const LANG_NAMES = { es: 'Spanish', fr: 'French', ja: 'Japanese', 'pt-BR': 'Brazilian Portuguese' };
+let engine = null;
+let engineTier = '';
+let engineCtx = 2048;
+let translating = false;
+
+function tstate(msg, err) {
+  const el = $('tstate');
+  el.hidden = !msg;
+  el.textContent = msg || '';
+  el.className = 'tstate' + (err ? ' err' : '');
+}
+
+const NOT_SUPPORTED = 'translation is not supported on this device — it needs the 27B on-device model';
+
+async function loadTranslator() {
+  if (engine) return engine;
+  if (!navigator.gpu) throw new Error(NOT_SUPPORTED);
+  const Tiers = await import('/assets/js/mentria-tiers.js');
+  const candidate = await Tiers.effectiveTier();
+  if (candidate !== '27b') throw new Error(NOT_SUPPORTED);
+  tstate('loading the on-device model…');
+  const { MentriaEngine } = await import('/assets/mentria/dist/mentria.mjs');
+  const { ensureModel } = await import('/assets/js/mentria-model.js');
+  const res = await ensureModel(() => {
+    const e = new MentriaEngine('/assets/mentria/dist/worker.mjs');
+    if (window.mentriaWrapEngine) window.mentriaWrapEngine(e);
+    return e;
+  }, {
+    vision: false,
+    offerUpgrade: false,
+    onProgress: (p) => {
+      if (!p) return;
+      const pct = p.loaded != null && p.total > 0 ? ' ' + Math.round(Math.min(1, p.loaded / p.total) * 100) + '%' : '';
+      tstate((p.message || 'loading the on-device model…') + pct + (p.total >= 1048576 ? ' · ' + (p.loaded / 1048576 / 1024).toFixed(2) + ' / ' + (p.total / 1048576 / 1024).toFixed(2) + ' GB' : ''));
+    },
+    onDeviceLost: () => { engine = null; tstate('the GPU device was lost — reload and try again', true); }
+  });
+  if (res.tier !== '27b') {
+    try { res.engine.dispose && res.engine.dispose(); } catch (_) {}
+    throw new Error(NOT_SUPPORTED);
+  }
+  engine = res.engine;
+  engineTier = res.tier;
+  engineCtx = res.maxSeq || 2048;
+  return engine;
+}
+
+function systemPromptFor(langName) {
+  return 'You are a professional literary translator. The user gives you a JSON object whose values are short English texts from a picture story: a subtitle, slide captions, and longer "long" notes. Translate every value into ' + langName + '.\n'
+    + 'Rules:\n'
+    + '- Keep exactly the same keys. Translate only the values.\n'
+    + '- Preserve meaning, tone, and register. Captions must read naturally in ' + langName + ' and stay about as short as the English.\n'
+    + '- Keep names of people, places, and brands. Keep numbers, punctuation style, and line breaks.\n'
+    + '- Do not add notes, explanations, quotes, or markdown.\n'
+    + 'Respond with only the translated JSON object.';
+}
+
+function extractJson(text, keys) {
+  const t = text.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/```(?:json)?/g, '').replace(/[\u201c\u201d]/g, '"');
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a >= 0 && b > a) {
+    let raw = t.slice(a, b + 1);
+    try { return JSON.parse(raw); } catch (_) {}
+    raw = raw.replace(/,\s*}/g, '}').replace(/"\s*\n\s*"/g, '", "');
+    raw = raw.replace(/"((?:[^"\\]|\\.)*)"/g, (m) => m.replace(/\n/g, '\\n'));
+    try { return JSON.parse(raw); } catch (_) {}
+  }
+  const out = {};
+  for (const k of keys) {
+    const re = new RegExp('"' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"\s*:\s*"((?:[^"\\]|\\.)*)"');
+    const m = re.exec(t);
+    if (m) out[k] = m[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
+  }
+  if (Object.keys(out).length) return out;
+  throw new Error('no JSON in reply');
+}
+
+async function translateBatch(fields, lang) {
+  const input = JSON.stringify(fields);
+  const cjk = lang === 'ja';
+  const maxTokens = Math.min(engineCtx >= 4096 ? 1800 : 1000, Math.ceil(input.length / (cjk ? 1 : 2)) + 200);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let out = '';
+    await engine.generate({
+      messages: [
+        { role: 'system', content: systemPromptFor(LANG_NAMES[lang]) + (attempt ? '\nThe previous reply was not valid JSON. Return only the JSON object.' : '') },
+        { role: 'user', content: input }
+      ],
+      maxTokens,
+      temperature: 0,
+      topK: 1,
+      topP: 1.0,
+      repetitionPenalty: 1.0,
+      enableThinking: false
+    }, (ev) => { if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) out += ev.token; });
+    window.mentriaTranslateDebug = { lang, raw: out };
+    try {
+      const obj = extractJson(out, Object.keys(fields));
+      const res = {};
+      for (const k of Object.keys(fields)) {
+        if (typeof obj[k] !== 'string' || !obj[k].trim()) continue;
+        const v = obj[k].trim();
+        if (lang === 'ja') {
+          const jaChars = (v.match(/[\u3040-\u30FF\u4E00-\u9FFF\uFF01-\uFF60]/g) || []).length;
+          const latin = (v.match(/[a-zA-Z\u00C0-\u024F]/g) || []).length;
+          if (!jaChars || latin > jaChars) continue;
+        }
+        res[k] = v;
+      }
+      if (Object.keys(res).length === Object.keys(fields).length) return res;
+      if (attempt && Object.keys(res).length) return res;
+    } catch (_) {}
+  }
+  throw new Error('the model did not return usable JSON for ' + LANG_NAMES[lang]);
+}
+
+function deckFields() {
+  const f = {};
+  if ((cur.subtitle || '').trim()) f.subtitle = cur.subtitle.trim();
+  for (const sl of cur.slides) {
+    if ((sl.caption || '').trim()) f[sl.id + '.caption'] = sl.caption.trim();
+    if ((sl.long || '').trim()) f[sl.id + '.long'] = sl.long.trim();
+  }
+  return f;
+}
+
+function batches(fields) {
+  const out = [];
+  let curBatch = {}, size = 0;
+  const limit = engineCtx >= 4096 ? 1400 : 650;
+  for (const [k, v] of Object.entries(fields)) {
+    if (size && size + v.length > limit) { out.push(curBatch); curBatch = {}; size = 0; }
+    curBatch[k] = v; size += v.length;
+  }
+  if (Object.keys(curBatch).length) out.push(curBatch);
+  return out;
+}
+
+async function translateDeck() {
+  if (translating) return;
+  const fields = deckFields();
+  if (!Object.keys(fields).length) { tstate('nothing to translate yet — add a subtitle or captions', true); return; }
+  translating = true;
+  $('translate').disabled = true;
+  try {
+    await loadTranslator();
+    cur.i18n = cur.i18n || {};
+    const parts = batches(fields);
+    let done = 0, total = LANGS.length * parts.length;
+    const failed = [];
+    for (const [lang, label] of LANGS) {
+      cur.i18n[lang] = cur.i18n[lang] || {};
+      for (const part of parts) {
+        tstate('translating to ' + label + '… (' + (done + 1) + '/' + total + ')');
+        try {
+          const res = await translateBatch(part, lang);
+          for (const k of Object.keys(part)) delete cur.i18n[lang][k];
+          Object.assign(cur.i18n[lang], res);
+        } catch (e) {
+          if (!failed.includes(label)) failed.push(label);
+        }
+        done++;
+        touch();
+        renderTranslations();
+      }
+    }
+    const ok = LANGS.filter((l) => !failed.includes(l[1])).map((l) => l[1]);
+    tstate((ok.length ? 'translated into ' + ok.join(', ') + ' — review and edit below' : 'translation failed') + (failed.length ? ' · could not translate: ' + failed.join(', ') + ' (try again)' : ''), !ok.length);
+  } catch (e) {
+    tstate(String(e.message || e), true);
+  }
+  translating = false;
+  $('translate').disabled = false;
+}
+
+function trValue(lang, key) { return cur.i18n && cur.i18n[lang] && cur.i18n[lang][key] || ''; }
+function setTr(lang, key, v) { cur.i18n = cur.i18n || {}; cur.i18n[lang] = cur.i18n[lang] || {}; if (v.trim()) cur.i18n[lang][key] = v.trim(); else delete cur.i18n[lang][key]; touch(); }
+function hasTranslations() { return !!(cur.i18n && LANGS.some(([l]) => cur.i18n[l] && Object.keys(cur.i18n[l]).length)); }
+
+function trRows(container, keys) {
+  container.innerHTML = '';
+  for (const [lang, label] of LANGS) {
+    for (const [key, ph] of keys) {
+      const row = document.createElement('div');
+      row.className = 'tr__row';
+      const l = document.createElement('span');
+      l.className = 'tr__lang';
+      l.textContent = label + ' · ' + ph;
+      const ta = document.createElement('textarea');
+      ta.rows = 1;
+      ta.value = trValue(lang, key);
+      ta.placeholder = ph;
+      ta.addEventListener('change', () => setTr(lang, key, ta.value));
+      row.append(l, ta);
+      container.appendChild(row);
+    }
+  }
+}
+
+function renderTranslations() {
+  const show = hasTranslations();
+  $('deck-tr').hidden = !show;
+  if (show) trRows($('deck-tr-rows'), [['subtitle', 'subtitle']]);
+  document.querySelectorAll('[data-slide-tr]').forEach((det) => {
+    det.hidden = !show;
+    if (show) trRows(det.querySelector('.tr__rows'), [[det.dataset.slideTr + '.caption', 'caption'], [det.dataset.slideTr + '.long', 'long press']]);
+  });
+}
+
+function localized(en, key) {
+  const v = { en };
+  let any = false;
+  for (const [lang] of LANGS) { const t = trValue(lang, key); if (t) { v[lang] = t; any = true; } }
+  return any ? v : en;
+}
+
+$('translate').addEventListener('click', translateDeck);
+
+const crcTable = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = crcTable[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zipStore(files) {
+  const enc = new TextEncoder();
+  const parts = [], central = [];
+  let offset = 0;
+  const now = new Date();
+  const dosTime = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)) & 0xFFFF;
+  const dosDate = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xFFFF;
+  for (const f of files) {
+    const name = enc.encode(f.name);
+    const data = f.data;
+    const crc = crc32(data);
+    const head = new DataView(new ArrayBuffer(30));
+    head.setUint32(0, 0x04034b50, true); head.setUint16(4, 20, true); head.setUint16(6, 0x0800, true); head.setUint16(8, 0, true);
+    head.setUint16(10, dosTime, true); head.setUint16(12, dosDate, true); head.setUint32(14, crc, true);
+    head.setUint32(18, data.length, true); head.setUint32(22, data.length, true); head.setUint16(26, name.length, true); head.setUint16(28, 0, true);
+    parts.push(new Uint8Array(head.buffer), name, data);
+    const cd = new DataView(new ArrayBuffer(46));
+    cd.setUint32(0, 0x02014b50, true); cd.setUint16(4, 20, true); cd.setUint16(6, 20, true); cd.setUint16(8, 0x0800, true); cd.setUint16(10, 0, true);
+    cd.setUint16(12, dosTime, true); cd.setUint16(14, dosDate, true); cd.setUint32(16, crc, true);
+    cd.setUint32(20, data.length, true); cd.setUint32(24, data.length, true); cd.setUint16(28, name.length, true);
+    cd.setUint16(30, 0, true); cd.setUint16(32, 0, true); cd.setUint16(34, 0, true); cd.setUint16(36, 0, true); cd.setUint32(38, 0, true); cd.setUint32(42, offset, true);
+    central.push(new Uint8Array(cd.buffer), name);
+    offset += 30 + name.length + data.length;
+  }
+  const cdSize = central.reduce((n, p) => n + p.length, 0);
+  const eocd = new DataView(new ArrayBuffer(22));
+  eocd.setUint32(0, 0x06054b50, true); eocd.setUint16(8, files.length, true); eocd.setUint16(10, files.length, true);
+  eocd.setUint32(12, cdSize, true); eocd.setUint32(16, offset, true); eocd.setUint16(20, 0, true);
+  return new Blob([...parts, ...central, new Uint8Array(eocd.buffer)], { type: 'application/zip' });
+}
+
+function submissionJson(bundle) {
+  const d = bundle.deck;
+  return {
+    format: 'mentria-story-submission-2',
+    title: d.title,
+    subtitle: d.subtitle,
+    credit: d.credit,
+    cover: Math.max(0, d.slides.findIndex((s) => s.id === d.cover)) + 1,
+    slides: d.slides.map((s) => ({ caption: s.caption, long_press: s.long_press }))
+  };
+}
+
+function issueBody(sub, withJson) {
+  const n = sub.slides.length;
+  const lines = [
+    '<!-- Story submission for mentria.ai — please keep the structure below -->',
+    '**' + sub.title + '**' + (sub.subtitle ? ' — ' + sub.subtitle : ''),
+    sub.credit ? 'Credit: ' + sub.credit : '',
+    '',
+    '### Images',
+    'Unzip the download and drag all ' + n + ' image files into the box below **in order** (01, 02, …). GitHub uploads them as you drop them.',
+    '',
+    '<!-- drop images here -->',
+    '',
+    '### Story data',
+    withJson ? '```json\n' + JSON.stringify(sub) + '\n```' : 'Open `story.json` from the download, copy everything, and paste it here between the fences:\n```json\n\n```'
+  ];
+  return lines.filter((l) => l !== null).join('\n');
+}
+
+$('submit').addEventListener('click', async () => {
+  const popup = window.open('about:blank', '_blank');
+  const b = await buildBundle();
+  if (!b) { if (popup) popup.close(); return; }
+  const { bundle, ready } = b;
+  const sub = submissionJson(bundle);
+  const files = [];
+  for (let i = 0; i < ready.length; i++) {
+    const blob = await idbGet(cur.id + '/' + ready[i].id);
+    const ext = blob.type === 'image/png' ? 'png' : blob.type === 'image/jpeg' ? 'jpg' : 'webp';
+    files.push({ name: String(i + 1).padStart(2, '0') + '.' + ext, data: new Uint8Array(await blob.arrayBuffer()) });
+  }
+  const jsonText = JSON.stringify(sub, null, 2);
+  files.push({ name: 'story.json', data: new TextEncoder().encode(jsonText) });
+  const zip = zipStore(files);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(zip);
+  a.download = 'story-' + bundle.deck.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '-submission.zip';
+  document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+  let body = issueBody(sub, true);
+  let fits = encodeURIComponent(body).length <= URL_BODY_BUDGET;
+  if (!fits) body = issueBody(sub, false);
+  try { await navigator.clipboard.writeText(jsonText); } catch (_) {}
+  const url = ISSUE_URL + '?labels=story-submission&title=' + encodeURIComponent('Story submission: ' + bundle.deck.title) + '&body=' + encodeURIComponent(body);
+  if (popup) popup.location = url; else window.open(url, '_blank');
+  $('status').innerHTML = '';
+  const steps = document.createElement('span');
+  steps.textContent = 'GitHub opened with the issue pre-filled. Unzip the download, drag the ' + ready.length + ' images into the issue in order' + (fits ? '' : ', paste story.json into the data block (it is also on your clipboard)') + ', then click “Submit new issue”. It goes live on mentria.ai once approved.';
+  $('status').append(steps);
+  $('status').className = 'status ok';
+});
+
+$('export').addEventListener('click', async () => {
+  const b = await buildBundle();
+  if (!b) return;
+  const { bundle, ready, missing } = b;
+  const title = bundle.deck.title;
+  const blob = new Blob([JSON.stringify(bundle)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'story-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  URL.revokeObjectURL(a.href);
+  a.remove();
+  setStatus('exported ' + ready.length + ' slides' + (missing ? ' (' + missing + ' skipped: missing image or caption)' : '') + ' — saved to your downloads', 'ok');
+});
+
+let pvIdx = 0;
+let pvSlides = [];
+async function pvShow(i) {
+  pvIdx = Math.max(0, Math.min(pvSlides.length - 1, i));
+  const s = pvSlides[pvIdx];
+  const u = await thumbUrl(cur.id + '/' + s.id);
+  $('pv-img').src = u || '';
+  $('pv-caption').textContent = s.caption || '';
+  $('pv-long').textContent = s.long || '';
+  $('pv-count').textContent = (pvIdx + 1) + ' / ' + pvSlides.length;
+  $('pv-stage').classList.remove('show-long');
+}
+$('pv-open').addEventListener('click', () => {
+  pvSlides = cur.slides.filter((s) => s.hasImage);
+  if (!pvSlides.length) { setStatus('no slides with images to preview yet', 'err'); return; }
+  $('preview').hidden = false;
+  pvShow(0);
+});
+$('pv-close').addEventListener('click', () => { $('preview').hidden = true; });
+$('pv-prev').addEventListener('click', () => pvShow(pvIdx - 1));
+$('pv-next').addEventListener('click', () => pvShow(pvIdx + 1));
+let pressTimer = 0;
+$('pv-stage').addEventListener('pointerdown', () => { pressTimer = setTimeout(() => $('pv-stage').classList.add('show-long'), 380); });
+$('pv-stage').addEventListener('pointerup', () => clearTimeout(pressTimer));
+document.addEventListener('keydown', (e) => {
+  if ($('preview').hidden) return;
+  if (e.key === 'Escape') $('preview').hidden = true;
+  if (e.key === 'ArrowLeft') pvShow(pvIdx - 1);
+  if (e.key === 'ArrowRight') pvShow(pvIdx + 1);
+});
+
+renderList();
+await room.start();
+hello();
+setInterval(hello, 30000);
+</script>

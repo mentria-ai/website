@@ -273,30 +273,12 @@ module.exports = function(eleventyConfig) {
     }
   });
 
-  eleventyConfig.addFilter("interleaveFeed", function(feed) {
+  eleventyConfig.addFilter("chronoFeed", function(feed) {
     if (!Array.isArray(feed)) return feed;
-    const groups = new Map();
-    const rest = [];
-    for (const card of feed) {
-      const badge = card && card.badge;
-      if (badge) {
-        if (!groups.has(badge)) groups.set(badge, []);
-        groups.get(badge).push(card);
-      } else {
-        rest.push(card);
-      }
-    }
-    if (groups.size <= 1) return feed;
-    const queues = [...groups.values()];
-    const out = [];
-    let any = true;
-    while (any) {
-      any = false;
-      for (const q of queues) {
-        if (q.length) { out.push(q.shift()); any = true; }
-      }
-    }
-    return out.concat(rest);
+    return feed
+      .map((card, i) => ({ card, i, key: String((card && card.date) || "") }))
+      .sort((a, b) => (a.key < b.key ? 1 : a.key > b.key ? -1 : a.i - b.i))
+      .map((x) => x.card);
   });
 
   // Passthrough copy for assets

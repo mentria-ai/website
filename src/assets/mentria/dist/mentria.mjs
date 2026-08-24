@@ -1,4 +1,4 @@
-import { C as g, S as v, a as k, d as I, f as S, g as _, h as M, l as W, o as m, t as A, u as R, x as c } from "./capabilities-C3V5F_03.mjs";
+import { C as g, S as v, a as A, d as k, f as I, g as _, h as M, l as S, o as W, t as m, u as R, x as c } from "./capabilities-C3V5F_03.mjs";
 var D = 1, O = class P {
   #r = null;
   #e = /* @__PURE__ */ new Map();
@@ -415,6 +415,12 @@ var D = 1, O = class P {
   async unloadBf16LmHead() {
     return this.#t("unloadBf16LmHead", {});
   }
+  async setAblation(e) {
+    return this.#t("setAblation", { ablation: e });
+  }
+  async clearAblation() {
+    return this.#t("clearAblation", {});
+  }
   async enableDecayClamp(e) {
     return this.#t("enableDecayClamp", { gCeiling: e });
   }
@@ -471,15 +477,15 @@ export {
   O as MentriaEngine,
   _ as MultimodalUnavailableError,
   D as PROTOCOL_VERSION,
-  W as QWEN35_08B_CONFIG,
+  S as QWEN35_08B_CONFIG,
   R as QWEN35_27B_BONSAI_CONFIG,
-  I as QWEN35_2B_CONFIG,
-  S as QWEN35_4B_CONFIG,
-  k as QWEN35_VL_08B_VISION_CONFIG,
-  m as QWEN35_VL_27B_VISION_CONFIG,
+  k as QWEN35_2B_CONFIG,
+  I as QWEN35_4B_CONFIG,
+  A as QWEN35_VL_08B_VISION_CONFIG,
+  W as QWEN35_VL_27B_VISION_CONFIG,
   c as WEBGPU_ERROR_CODES,
   v as WebGPUUnsupportedError,
-  A as canRunLargeModel
+  m as canRunLargeModel
 };
 
 //# sourceMappingURL=mentria.mjs.map

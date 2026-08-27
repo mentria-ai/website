@@ -164,10 +164,16 @@ export function setUserTier(id) {
   } catch (_) {}
 }
 
+const CAP_TTL_MS = 24 * 3600 * 1000;
+
 export function getTierCap() {
   try {
-    const v = localStorage.getItem(LS_CAP);
-    return v && TIERS[v] ? v : null;
+    const raw = localStorage.getItem(LS_CAP);
+    if (!raw) return null;
+    const [id, ts] = raw.split('|');
+    const age = Date.now() - Number(ts || 0);
+    if (!TIERS[id] || !ts || !(age < CAP_TTL_MS)) { localStorage.removeItem(LS_CAP); return null; }
+    return id;
   } catch (_) { return null; }
 }
 
@@ -179,7 +185,7 @@ function capAllows(id) {
 export function setTierCap(id) {
   try {
     if (!id || !TIERS[id]) return;
-    localStorage.setItem(LS_CAP, id);
+    localStorage.setItem(LS_CAP, id + '|' + Date.now());
   } catch (_) {}
 }
 
@@ -269,9 +275,10 @@ export async function decideTier() {
   const dmOk2 = dm !== undefined ? dm >= 8 : IS_DESKTOP;
   const hard2 = caps.limits.maxBufferSize >= GiB && dmOk2;
 
-  const offer4 = hard4 && quotaFree > 6e9 && !saveData && capAllows('4b');
-  const offer2 = hard2 && quotaFree > 3e9 && capAllows('2b');
-  const offer27 = hard27 && quotaFree > 9e9 && !saveData && capAllows('27b');
+  const [cached2, cached4, cached27] = await Promise.all([isTierCached('2b'), isTierCached('4b'), isTierCached('27b')]);
+  const offer4 = hard4 && (quotaFree > 6e9 || cached4) && !saveData;
+  const offer2 = hard2 && (quotaFree > 3e9 || cached2);
+  const offer27 = hard27 && (quotaFree > 9e9 || cached27) && !saveData;
 
   const eligible = [];
   if (offer2) eligible.push('2b');
@@ -291,6 +298,8 @@ export async function decideTier() {
     }
   }
   reasons.push(why);
+  const capNow = getTierCap();
+  if (capNow) reasons.push('tier-cap ' + capNow + ' (auto-selection only, expires in 24h)');
   reasons.push(
     'maxBuf=' + (caps.limits.maxBufferSize / GiB).toFixed(1) + 'GiB' +
     ' maxBind=' + (caps.limits.maxStorageBufferBindingSize / GiB).toFixed(1) + 'GiB' +

@@ -680,8 +680,7 @@ async function translateBatch(fields, lang) {
         const v = obj[k].trim();
         if (lang === 'ja') {
           const jaChars = (v.match(/[\u3040-\u30FF\u4E00-\u9FFF\uFF01-\uFF60]/g) || []).length;
-          const latin = (v.match(/[a-zA-Z\u00C0-\u024F]/g) || []).length;
-          if (!jaChars || latin > jaChars) continue;
+          if (!jaChars || /[A-Za-z]{3,}/.test(v)) continue;
         }
         res[k] = v;
       }
@@ -690,6 +689,36 @@ async function translateBatch(fields, lang) {
     } catch (_) {}
   }
   throw new Error('the model did not return usable JSON for ' + LANG_NAMES[lang]);
+}
+
+async function askJson(system, user, maxTokens) {
+  let out = '';
+  await engine.generate({ messages: [{ role: 'system', content: system }, { role: 'user', content: user }], maxTokens, temperature: 0, topK: 1, topP: 1.0, repetitionPenalty: 1.0, enableThinking: false }, (ev) => { if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) out += ev.token; });
+  return out;
+}
+async function verifyTranslations(fields, draft, lang) {
+  const keys = Object.keys(draft);
+  if (!keys.length) return draft;
+  const name = LANG_NAMES[lang];
+  const okJa = (v) => lang !== 'ja' || (/[\u3040-\u30FF\u4E00-\u9FFF]/.test(v) && !/[A-Za-z]{3,}/.test(v));
+  let current = Object.assign({}, draft);
+  for (let round = 0; round < 2; round++) {
+    let backObj;
+    try { backObj = extractJson(await askJson('Translate every value of the JSON object from ' + name + ' into plain, literal English. Keep the keys. Reply with only the JSON object.', JSON.stringify(current), Math.min(1400, JSON.stringify(current).length + 200)), Object.keys(current)); } catch (_) { return current; }
+    const pairs = {};
+    for (const k of Object.keys(current)) if (typeof backObj[k] === 'string') pairs[k] = { original: fields[k], translation_read_back: backObj[k] };
+    let verdict;
+    try { verdict = extractJson(await askJson('You compare an original English sentence with a literal read-back of its translation. For each key answer "same" if they mean the same thing (small wording differences are fine), or "different: <the specific change in meaning>" if the meaning changed, a word is wrong, or the read-back is broken. Reply with only a JSON object mapping each key to that answer.', JSON.stringify(pairs), Math.min(1200, Object.keys(pairs).length * 60 + 120)), Object.keys(pairs)); } catch (_) { return current; }
+    const bad = Object.keys(pairs).filter((k) => typeof verdict[k] === 'string' && /^different/i.test(verdict[k].trim()));
+    for (const k of Object.keys(current)) if (!okJa(current[k]) && !bad.includes(k)) bad.push(k);
+    if (!bad.length) return current;
+    if (round === 1) { for (const k of bad) delete current[k]; return current; }
+    const redo = {};
+    for (const k of bad) redo[k] = fields[k];
+    const notes = bad.map((k) => k + ': ' + String(verdict[k] || 'contains English words').replace(/^different:\s*/i, '')).join('\n');
+    try { const fixed = extractJson(await askJson('You are a careful literary translator (English → ' + name + '). A previous translation of these lines changed their meaning. Faithfulness is the only priority: keep every negation, every adjective, every object exactly. Known problems:\n' + notes + '\nReply with only the JSON object mapping each key to the corrected ' + name + ' text.', JSON.stringify(redo), Math.min(1200, JSON.stringify(redo).length * 2 + 200)), bad); for (const k of bad) if (typeof fixed[k] === 'string' && fixed[k].trim()) current[k] = fixed[k].trim(); else delete current[k]; } catch (_) { for (const k of bad) delete current[k]; }
+  }
+  return current;
 }
 
 function deckFields() {
@@ -731,7 +760,7 @@ async function translateDeck() {
       for (const part of parts) {
         tstate('translating to ' + label + '… (' + (done + 1) + '/' + total + ')');
         try {
-          const res = await translateBatch(part, lang);
+          const res = await verifyTranslations(part, await translateBatch(part, lang), lang);
           for (const k of Object.keys(part)) delete cur.i18n[lang][k];
           Object.assign(cur.i18n[lang], res);
         } catch (e) {

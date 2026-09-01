@@ -245,6 +245,14 @@ eleventyComputed:
       });
       if (res.tier !== '27b') { try { res.engine.unload && res.engine.unload(); } catch (_) {} throw new Error(COPY.notSupported); }
       engine = res.engine; engineCtx = res.maxSeq || 2048;
+      try {
+        const base = Tiers.TIERS['27b'].base;
+        await engine.swapAdapter({
+          name: 'toolcall-console',
+          configUrl: base + 'loras/toolcall-console/adapter_config.json',
+          weightsUrl: base + 'loras/toolcall-console/adapter_model.safetensors',
+        });
+      } catch (err) { console.warn('toolcall adapter load failed, using base model:', err); }
       const back = loaded();
       frame.src = parkedRoute && parkedRoute !== 'about:blank' ? parkedRoute : routeFor('');
       await back;
@@ -275,7 +283,7 @@ eleventyComputed:
   function bigrams(t) { const out = new Set(); for (let i = 0; i < t.length - 1; i++) out.add(t.slice(i, i + 2)); return out; }
   function dice(a, b) { if (a.length < 2 || b.length < 2) return a === b ? 1 : 0; const A = bigrams(a), B = bigrams(b); let hit = 0; for (const g of A) if (B.has(g)) hit++; return (2 * hit) / (A.size + B.size); }
   function evidenceOnScreen(evidence, screenText) {
-    const norm = (t) => String(t || '').toLowerCase().replace(/[“”"'`]/g, '').replace(/\s+/g, ' ').trim();
+    const norm = (t) => String(t || '').toLowerCase().replace(/[“”"'`]/g, '').replace(/\s*:\s*/g, ':').replace(/\s+/g, ' ').trim();
     const ev = norm(evidence);
     if (!ev) return false;
     const screen = norm(screenText);

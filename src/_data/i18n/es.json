@@ -1965,7 +1965,7 @@
       "state_seeding": "compartiendo — mantén esta pestaña abierta",
       "peers": "pares",
       "uploaded": "compartido",
-      "note": "El modelo se descarga una vez — desde pares si hay disponibles, o desde la fuente oficial — y esta pestaña lo sirve a otros visitantes. Cierra la pestaña para parar.",
+      "note": "El modelo se descarga una vez — desde pares si hay disponibles, o desde la fuente oficial — y esta pestaña lo sirve a otros visitantes. Cierra la pestaña para parar. Los pares pueden ver las direcciones IP de los demás, como en cualquier red P2P; cada bloque se verifica con hash antes de usarse.",
       "err_prefix": "error: "
     },
     "console": {

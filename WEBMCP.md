@@ -75,6 +75,13 @@ itself is unchanged. Measured in testing: a fresh visitor pulled the shard
 from the webseed and a mirror tab simultaneously, with the mirror serving
 34 MB of real blocks before the download finished.
 
+Security: the torrent file is served same-origin over HTTPS, every 512 KB
+piece is hash-verified by the torrent layer before acceptance, and the fully
+assembled file must additionally match a pinned SHA-256 before it is handed
+to the engine — a mismatch discards the download and falls back to direct
+HTTPS. Peers see each other's IP addresses (disclosed on the mirror page),
+and the tracker only ever sees the swarm id, never file contents.
+
 ## How it works
 
 `src/assets/js/mentria-bus.js` is the site's capability registry: tool pages

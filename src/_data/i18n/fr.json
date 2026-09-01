@@ -1965,7 +1965,7 @@
       "state_seeding": "partage en cours — gardez cet onglet ouvert",
       "peers": "pairs",
       "uploaded": "partagé",
-      "note": "Le modèle se télécharge une fois — depuis des pairs si disponibles, sinon depuis la source officielle — puis cet onglet le sert aux autres visiteurs. Fermez l'onglet pour arrêter.",
+      "note": "Le modèle se télécharge une fois — depuis des pairs si disponibles, sinon depuis la source officielle — puis cet onglet le sert aux autres visiteurs. Fermez l'onglet pour arrêter. Les pairs voient les adresses IP des autres, comme dans tout réseau P2P ; chaque bloc est vérifié par empreinte avant usage.",
       "err_prefix": "erreur : "
     },
     "console": {

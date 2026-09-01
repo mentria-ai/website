@@ -1,6 +1,14 @@
 const TORRENTS = {
-  'qwen3.5-0.8b-q4-tied.safetensors': '/assets/torrents/qwen3.5-0.8b.torrent'
+  'qwen3.5-0.8b-q4-tied.safetensors': {
+    torrent: '/assets/torrents/qwen3.5-0.8b.torrent',
+    sha256: '71b434498b4e5ce7a61d6bcbc79751013ae9750e7e0463fa98236154895cc162'
+  }
 };
+
+export async function sha256Hex(buf) {
+  const d = await crypto.subtle.digest('SHA-256', buf);
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 const CACHE = 'mentria-models';
 
 let client = null;
@@ -17,7 +25,11 @@ async function getClient() {
 
 export function torrentFor(shardUrl) {
   const name = shardUrl.split('/').pop().split('?')[0];
-  return TORRENTS[name] || null;
+  return TORRENTS[name] ? TORRENTS[name].torrent : null;
+}
+
+function entryFor(shardUrl) {
+  return TORRENTS[shardUrl.split('/').pop().split('?')[0]] || null;
 }
 
 export async function shardCached(shardUrl) {
@@ -53,8 +65,14 @@ export function ensureShardViaP2P(shardUrl, onStatus) {
     }, 1000);
     try { await finished; } finally { clearInterval(iv); }
     const blob = await torrent.files[0].blob();
+    const entry = entryFor(shardUrl);
+    const digest = await sha256Hex(await blob.arrayBuffer());
+    if (entry.sha256 && digest !== entry.sha256) {
+      try { torrent.destroy(); } catch (_) {}
+      throw new Error('p2p integrity check failed: sha256 mismatch');
+    }
     const c = await caches.open(CACHE);
-    await c.put(new Request(shardUrl), new Response(blob, { headers: { 'content-type': 'application/octet-stream', 'content-length': String(blob.size) } }));
+    await c.put(new Request(shardUrl), new Response(blob, { headers: { 'content-type': 'application/octet-stream', 'content-length': String(blob.size), 'x-mentria-sha256': digest } }));
     if (onStatus) onStatus({ progress: 1, peers: torrent.numPeers, upBytes: torrent.uploaded, done: true });
     return { p2p: true, bytes: blob.size, seeding: true, torrent };
   })();
@@ -64,7 +82,7 @@ export function ensureShardViaP2P(shardUrl, onStatus) {
 }
 
 export async function seedShard(name, onStatus) {
-  const path = TORRENTS[name];
+  const path = TORRENTS[name] && TORRENTS[name].torrent;
   if (!path) throw new Error('unknown shard: ' + name);
   const cl = await getClient();
   const tbuf = new Uint8Array(await (await fetch(path)).arrayBuffer());

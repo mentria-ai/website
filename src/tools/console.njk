@@ -34,11 +34,11 @@ eleventyComputed:
   </div>
   <div class="cs__device">
     <div class="cs__bar">
-      <button type="button" class="cs__iconbtn" id="cs-back" aria-label="{{ 'tool.console.btn_back' | t }}">←</button>
+      <button type="button" class="cs__iconbtn" id="cs-back" aria-label="{{ 'tool.console.btn_back' | t }}"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12.8 8H3.6M7.4 3.8 3.2 8l4.2 4.2"></path></svg></button>
       <select id="cs-app" aria-label="{{ 'tool.console.app_label' | t }}"></select>
-      <button type="button" class="cs__iconbtn" id="cs-reload" aria-label="{{ 'tool.console.btn_reload' | t }}">↻</button>
-      <button type="button" class="cs__iconbtn" id="cs-screen" aria-label="{{ 'tool.console.btn_screen' | t }}" aria-pressed="false">⌗</button>
-      <button type="button" class="cs__iconbtn" id="cs-adapter" aria-label="{{ 'tool.console.btn_adapter' | t }}" aria-pressed="true" hidden>◈</button>
+      <button type="button" class="cs__iconbtn" id="cs-reload" aria-label="{{ 'tool.console.btn_reload' | t }}"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8a5 5 0 1 1-1.47-3.54M13 3.2v3h-3"></path></svg></button>
+      <button type="button" class="cs__iconbtn" id="cs-screen" aria-label="{{ 'tool.console.btn_screen' | t }}" aria-pressed="false"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.2 3v10M9.8 3v10M3 6.2h10M3 9.8h10"></path></svg></button>
+      <button type="button" class="cs__iconbtn" id="cs-adapter" aria-label="{{ 'tool.console.btn_adapter' | t }}" aria-pressed="true" hidden><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.7 13.3 8 8 13.3 2.7 8Z"></path><path d="M8 6.2 9.8 8 8 9.8 6.2 8Z" fill="currentColor" stroke="none"></path></svg></button>
     </div>
     <div class="cs__phone">
       <iframe id="cs-frame" title="{{ 'tool.console.frame_title' | t }}" src="{{ locale.pathPrefix }}/"></iframe>

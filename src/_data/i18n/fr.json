@@ -428,6 +428,11 @@
       "title": "PHOSPHOR",
       "lede": "Contre-la-montre de combat dans le navigateur : sprint, glissade, escalade et carabine automatique sur cinq parcours au crépuscule. Médailles, course aux fantômes, jeu hors ligne.",
       "tldr": "FPS contre-la-montre dans le navigateur, médailles et fantômes."
+    },
+    "console": {
+      "title": "Console",
+      "lede": "Discutez avec le modèle local pendant qu'il utilise les apps Mentria sur un écran de téléphone partagé — ou laissez-le jouer un utilisateur test et rapporter ce qu'il trouve.",
+      "tldr": "La Console place un écran Mentria au format téléphone à côté d'un chat. Demandez au modèle 27B local de faire quelque chose (« lance un minuteur de 5 minutes ») : il ouvre l'app et la manipule sous vos yeux — chaque action est visible et il doit citer l'écran pour déclarer la tâche terminée. Lancez une session test : il explore une app comme une personne fictive, puis rédige un rapport de bugs à transformer en issues. Rien ne quitte votre appareil."
     }
   },
   "game": {
@@ -1947,6 +1952,36 @@
       "ghost_behind": "retard de",
       "course_error": "Ce parcours n'a pas pu être chargé.",
       "course_error_hint": "Choisissez un autre parcours ou rechargez la page."
+    },
+    "console": {
+      "status_idle": "modèle inactif",
+      "status_loading": "chargement du modèle local…",
+      "status_ready": "prêt",
+      "status_working": "en cours…",
+      "not_supported": "la Console nécessite le modèle 27B local — non pris en charge sur cet appareil",
+      "no_webgpu": "WebGPU n'est pas disponible dans ce navigateur",
+      "you": "vous",
+      "model": "mentria",
+      "step": "étape",
+      "rejected": "Action invalide. Réponds avec exactement une action JSON.",
+      "evidence_missing": "Pas encore terminé : ta preuve n'est pas à l'écran. Continue, ou cite un texte réellement visible.",
+      "evidence_label": "preuve :",
+      "too_many_steps": "Plus d'étapes disponibles avant la fin — vous pouvez reprendre la main.",
+      "session_start": "Session test :",
+      "session_done": "session terminée",
+      "verdict_title": "Rapport",
+      "btn_file_issue": "Signaler",
+      "stopped": "arrêté",
+      "app_home": "Accueil",
+      "input_placeholder": "Demandez quelque chose, ex. « lance un minuteur de 5 minutes » ou « encode bonjour en base64 »",
+      "btn_session": "Session test",
+      "btn_stop": "Arrêter",
+      "btn_send": "Envoyer",
+      "btn_back": "Retour",
+      "app_label": "App",
+      "btn_reload": "Recharger",
+      "btn_screen": "Afficher ce que voit le modèle",
+      "frame_title": "Écran d'app partagé"
     }
   },
   "category": {

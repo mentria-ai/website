@@ -304,6 +304,7 @@ eleventyComputed:
     selectNote(note.id);
     renderList();
     titleInput.focus();
+    return note;
   }
 
   function recordNoteDeletion(id) {
@@ -573,6 +574,19 @@ eleventyComputed:
   });
 
   newBtn.addEventListener('click', createNote);
+  import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
+    MentriaBus.provide('notes.create', (args) => {
+      const o = args || {};
+      const note = createNote();
+      titleInput.value = String(o.title || '').slice(0, 200);
+      textarea.value = String(o.body || o.text || '');
+      titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      if (saver && saver.flush) saver.flush();
+      return { ok: true, id: note.id };
+    }, { description: 'Create a new note with an optional title and body text.', ai: true, parameters: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } } });
+    MentriaBus.provide('notes.count', () => ({ count: notes.length }), { description: 'How many notes exist.', ai: true });
+  }).catch(() => {});
   exportBtn.addEventListener('click', exportNote);
   if (navigator.share) shareBtn.addEventListener('click', shareNote);
   else shareBtn.hidden = true;

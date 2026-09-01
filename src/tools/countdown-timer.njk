@@ -145,6 +145,7 @@ eleventyComputed:
 
   let nextId = 1;
   const widgets = new Map();
+  const widgetApi = new Map();
 
   const NOTIF_ICON  = '/assets/img/icon-192x192.png';
   const NOTIF_BADGE = '/assets/img/badge.svg';
@@ -657,6 +658,16 @@ eleventyComputed:
     };
 
     btnStart.addEventListener('click', startTimer);
+    widgetApi.set(id, {
+      setDuration(h, m, sec) {
+        inputH.value = String(h || 0); inputM.value = String(m || 0); inputS.value = String(sec || 0);
+        [inputH, inputM, inputS].forEach((inp) => inp.dispatchEvent(new Event('input', { bubbles: true })));
+      },
+      start: () => { if (!state.countdown) startTimer(); },
+      reset: resetTimer,
+      running: () => !!state.countdown,
+      remaining: () => state.totalSeconds
+    });
     btnReset.addEventListener('click', resetTimer);
 
     btnClose.addEventListener('click', () => removeWidget(id));
@@ -774,6 +785,20 @@ eleventyComputed:
   }
 
   addBtn.addEventListener('click', addWidget);
+  import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
+    MentriaBus.provide('timer.start', (args) => {
+      const o = args || {};
+      const h = Math.max(0, Math.floor(Number(o.hours) || 0)), m = Math.max(0, Math.floor(Number(o.minutes) || 0)), sec = Math.max(0, Math.floor(Number(o.seconds) || 0));
+      if (h + m + sec <= 0) throw new Error('duration must be positive');
+      let api = [...widgetApi.values()].find((w) => !w.running());
+      if (!api) { addWidget(); api = [...widgetApi.values()].pop(); }
+      api.reset();
+      api.setDuration(h, m, sec);
+      api.start();
+      return { ok: true, seconds: h * 3600 + m * 60 + sec };
+    }, { description: 'Start a countdown timer for the given duration.', ai: true, parameters: { type: 'object', properties: { hours: { type: 'number' }, minutes: { type: 'number' }, seconds: { type: 'number' } } } });
+    MentriaBus.provide('timer.status', () => [...widgetApi.values()].map((w) => ({ running: w.running(), remainingSeconds: w.remaining() })), { description: 'List the countdown timers and how many seconds remain.', ai: true });
+  }).catch(() => {});
   addWidget();
 
   let restoredActive = 0;

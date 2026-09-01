@@ -92,6 +92,13 @@
     "group": "AI"
   },
   {
+    "slug": "console",
+    "title": "Console",
+    "summary": "A shared screen for you and the on-device model: chat, and let it open apps and use them like a person would — or watch it test the site and report what it finds.",
+    "category": "AI",
+    "group": "AI"
+  },
+  {
     "slug": "quote",
     "title": "Motivational Quote",
     "summary": "AI-generated original motivational quotes. Runs locally in your browser.",

@@ -232,6 +232,21 @@ eleventyComputed:
       return v;
     }
 
+    import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
+      MentriaBus.provide('base64.encode', (args) => {
+        const text = String((args || {}).text || '');
+        inputEl.value = text;
+        encodeBtn.click();
+        return { ok: !!outputEl.value, result: outputEl.value };
+      }, { description: 'Encode text to Base64 (shown in the tool).', ai: true, parameters: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'] } });
+      MentriaBus.provide('base64.decode', (args) => {
+        const text = String((args || {}).text || '');
+        inputEl.value = text;
+        decodeBtn.click();
+        return { ok: !!outputEl.value, result: outputEl.value };
+      }, { description: 'Decode a Base64 string to text (shown in the tool).', ai: true, parameters: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'] } });
+    }).catch(() => {});
+
     decodeBtn.addEventListener('click', () => {
       let raw = inputEl.value.trim();
       if (!raw) { showStatus(textStatus, COPY.statusNothingDecode, 'err'); return; }

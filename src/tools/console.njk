@@ -1,0 +1,447 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/console/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.console.title' | t }}"
+  description: "{{ 'tools.console.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">console</span></p>
+  <h1>{{ "tools.console.title" | t }}</h1>
+  <p>{{ "tools.console.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "console.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="cs" id="cs">
+  <div class="cs__chat">
+    <div class="cs__status" id="cs-status"><span class="cs__dot" id="cs-dot"></span><span id="cs-status-text">{{ "tool.console.status_idle" | t }}</span></div>
+    <div class="cs__log" id="cs-log" role="log" aria-live="polite"></div>
+    <form class="cs__form" id="cs-form">
+      <textarea id="cs-input" rows="2" placeholder="{{ 'tool.console.input_placeholder' | t }}" aria-label="{{ 'tool.console.input_placeholder' | t }}"></textarea>
+      <div class="cs__actions">
+        <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="cs-session">{{ "tool.console.btn_session" | t }}</button>
+        <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="cs-stop" hidden>{{ "tool.console.btn_stop" | t }}</button>
+        <button type="submit" class="m-btn m-btn--primary m-btn--pill" id="cs-send">{{ "tool.console.btn_send" | t }}</button>
+      </div>
+    </form>
+  </div>
+  <div class="cs__device">
+    <div class="cs__bar">
+      <button type="button" class="cs__iconbtn" id="cs-back" aria-label="{{ 'tool.console.btn_back' | t }}">←</button>
+      <select id="cs-app" aria-label="{{ 'tool.console.app_label' | t }}"></select>
+      <button type="button" class="cs__iconbtn" id="cs-reload" aria-label="{{ 'tool.console.btn_reload' | t }}">↻</button>
+      <button type="button" class="cs__iconbtn" id="cs-screen" aria-label="{{ 'tool.console.btn_screen' | t }}" aria-pressed="false">⌗</button>
+    </div>
+    <div class="cs__phone">
+      <iframe id="cs-frame" title="{{ 'tool.console.frame_title' | t }}" src="{{ locale.pathPrefix }}/"></iframe>
+    </div>
+    <pre class="cs__screen" id="cs-screentext" hidden></pre>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(() => {
+  const COPY = {
+    statusIdle:    {{ ("tool.console.status_idle"    | t) | dump | safe }},
+    statusLoading: {{ ("tool.console.status_loading" | t) | dump | safe }},
+    statusReady:   {{ ("tool.console.status_ready"   | t) | dump | safe }},
+    statusWorking: {{ ("tool.console.status_working" | t) | dump | safe }},
+    notSupported:  {{ ("tool.console.not_supported"  | t) | dump | safe }},
+    noWebgpu:      {{ ("tool.console.no_webgpu"      | t) | dump | safe }},
+    youLabel:      {{ ("tool.console.you"            | t) | dump | safe }},
+    modelLabel:    {{ ("tool.console.model"          | t) | dump | safe }},
+    stepLabel:     {{ ("tool.console.step"           | t) | dump | safe }},
+    rejected:      {{ ("tool.console.rejected"       | t) | dump | safe }},
+    evidenceMissing: {{ ("tool.console.evidence_missing" | t) | dump | safe }},
+    evidenceLabel: {{ ("tool.console.evidence_label" | t) | dump | safe }},
+    tooManySteps:  {{ ("tool.console.too_many_steps" | t) | dump | safe }},
+    sessionStart:  {{ ("tool.console.session_start"  | t) | dump | safe }},
+    sessionDone:   {{ ("tool.console.session_done"   | t) | dump | safe }},
+    verdictTitle:  {{ ("tool.console.verdict_title"  | t) | dump | safe }},
+    btnFile:       {{ ("tool.console.btn_file_issue" | t) | dump | safe }},
+    stopped:       {{ ("tool.console.stopped"        | t) | dump | safe }},
+    appHome:       {{ ("tool.console.app_home"       | t) | dump | safe }}
+  };
+  const PREFIX = {{ locale.pathPrefix | dump | safe }};
+  const APPS = {{ tools | dump | safe }}.filter((t) => t.slug !== 'console').map((t) => ({ slug: t.slug, title: t.title, summary: t.summary }));
+  const PERSONAS = [
+    'a curious newcomer who has never used this site and taps around to see what things do',
+    'a busy person who wants to get one small task done fast and gets annoyed by friction',
+    'a careful, detail-oriented user who reads labels, checks results, and notices anything inconsistent',
+    'a keyboard-first power user who expects shortcuts, sensible defaults, and quick recovery from mistakes'
+  ];
+  const MAX_STEPS = 12;
+
+  const $ = (id) => document.getElementById(id);
+  const frame = $('cs-frame'), logEl = $('cs-log'), inputEl = $('cs-input'), formEl = $('cs-form');
+  const appSel = $('cs-app'), screenBtn = $('cs-screen'), screenText = $('cs-screentext');
+  const sendBtn = $('cs-send'), sessionBtn = $('cs-session'), stopBtn = $('cs-stop');
+
+  function setStatus(state, text) { $('cs-dot').className = 'cs__dot cs__dot--' + state; $('cs-status-text').textContent = text; }
+  function addMsg(role, text) {
+    const div = document.createElement('div');
+    div.className = 'cs__msg cs__msg--' + role;
+    const who = document.createElement('span');
+    who.className = 'cs__who';
+    who.textContent = role === 'user' ? COPY.youLabel : role === 'model' ? COPY.modelLabel : '';
+    const body = document.createElement('div');
+    body.className = 'cs__body';
+    body.textContent = text;
+    if (who.textContent) div.appendChild(who);
+    div.appendChild(body);
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+    return body;
+  }
+
+  const home = { slug: '', title: COPY.appHome };
+  [home].concat(APPS).forEach((a) => { const o = document.createElement('option'); o.value = a.slug; o.textContent = a.title; appSel.appendChild(o); });
+  function routeFor(slug) { return PREFIX + (slug ? '/tools/' + slug + '/' : '/'); }
+  function currentSlug() { try { const m = frame.contentWindow.location.pathname.match(/\/tools\/([^/]+)\//); return m ? m[1] : ''; } catch (_) { return ''; } }
+  appSel.addEventListener('change', () => { frame.src = routeFor(appSel.value); });
+  $('cs-back').addEventListener('click', () => { try { frame.contentWindow.history.back(); } catch (_) {} });
+  $('cs-reload').addEventListener('click', () => { try { frame.contentWindow.location.reload(); } catch (_) {} });
+  frame.addEventListener('load', () => { appSel.value = currentSlug(); injectCursor(); if (!screenText.hidden) screenText.textContent = snapshot().text; });
+  screenBtn.addEventListener('click', () => { const on = screenText.hidden; screenText.hidden = !on; screenBtn.setAttribute('aria-pressed', String(on)); if (on) screenText.textContent = snapshot().text; });
+
+  let cursorEl = null;
+  function injectCursor() {
+    try {
+      const d = frame.contentDocument;
+      cursorEl = d.createElement('div');
+      cursorEl.setAttribute('aria-hidden', 'true');
+      cursorEl.style.cssText = 'position:fixed;left:0;top:0;width:22px;height:22px;border-radius:50%;border:2px solid #6ef3c5;background:rgba(110,243,197,0.25);box-shadow:0 0 10px rgba(110,243,197,0.6);pointer-events:none;z-index:2147483647;opacity:0;transform:translate(-50%,-50%);transition:left .35s ease,top .35s ease,opacity .2s';
+      d.body.appendChild(cursorEl);
+    } catch (_) { cursorEl = null; }
+  }
+  async function pointAt(el) {
+    if (!cursorEl) return;
+    const r = el.getBoundingClientRect();
+    cursorEl.style.opacity = '1';
+    cursorEl.style.left = (r.left + r.width / 2) + 'px';
+    cursorEl.style.top = (r.top + r.height / 2) + 'px';
+    await new Promise((res) => setTimeout(res, 380));
+    cursorEl.style.transform = 'translate(-50%,-50%) scale(0.7)';
+    await new Promise((res) => setTimeout(res, 120));
+    cursorEl.style.transform = 'translate(-50%,-50%)';
+  }
+
+  const SEL = 'button,input,select,textarea,a[href],[role="button"],[role="tab"],[role="checkbox"],[role="switch"],[role="option"],[contenteditable="true"]';
+  function snapshot() {
+    const d = frame.contentDocument, w = frame.contentWindow;
+    const refs = [], lines = [];
+    const vh = w.innerHeight;
+    for (const e of d.querySelectorAll(SEL)) {
+      if (e === cursorEl || e.closest('header, footer, .cs-ignore, .skip-link, .terminal-frame__titlebar, .terminal-frame__help, .terminal-frame__expand, [class*="pwa-install"], #m-dialog')) continue;
+      const r = e.getBoundingClientRect();
+      if (!(r.width > 0 && r.height > 0)) continue;
+      const cs = w.getComputedStyle(e);
+      if (cs.visibility === 'hidden' || cs.display === 'none' || cs.opacity === '0') continue;
+      const onscreen = r.bottom > 0 && r.top < vh;
+      const name = (e.getAttribute('aria-label') || (e.tagName === 'SELECT' ? '' : e.textContent) || e.placeholder || e.title || (e.tagName === 'A' ? e.getAttribute('href') : '') || '').trim().replace(/\s+/g, ' ').slice(0, 40);
+      const val = (e.tagName === 'INPUT' || e.tagName === 'TEXTAREA' || e.tagName === 'SELECT') ? String(e.value || '').slice(0, 30) : '';
+      const kind = e.tagName === 'INPUT' ? (e.type || 'text') : e.tagName === 'A' ? 'link' : e.tagName.toLowerCase();
+      const id = refs.push(e) - 1;
+      lines.push(id + ': ' + kind + ' "' + name + '"' + (val ? ' value="' + val + '"' : '') + (e.disabled ? ' (disabled)' : '') + (e.checked ? ' (checked)' : '') + (onscreen ? '' : ' (below)'));
+      if (lines.length >= 70) break;
+    }
+    const main = d.querySelector('main') || d.body;
+    const vis = (main.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 360);
+    const route = w.location.pathname.replace(PREFIX, '') || '/';
+    let caps = [];
+    try { caps = (w.MentriaBus && w.MentriaBus.listTools({ ai: true })) || []; } catch (_) {}
+    const capText = caps.length ? '\nCAPABILITIES (call these directly instead of tapping): ' + caps.map((c) => c.name + '(' + Object.keys((c.parameters && c.parameters.properties) || {}).join(', ') + ') — ' + c.description).join('; ') : '';
+    return { text: 'APP: ' + route + '\nVISIBLE TEXT: ' + vis + capText + '\nCONTROLS:\n' + lines.join('\n'), refs, vis };
+  }
+
+  const VERB = { call: 'call', invoke: 'call', use: 'call', tap: 'tap', click: 'tap', press: 'tap', select: 'tap', choose: 'tap', toggle: 'tap', open: 'open', go: 'open', navigate: 'open', launch: 'open', type: 'type', fill: 'type', enter: 'type', input: 'type', write: 'type', set: 'type', scroll: 'scroll', back: 'back', wait: 'wait', done: 'done', finish: 'done', complete: 'done', finished: 'done', stop: 'done', answer: 'done', say: 'say', reply: 'say' };
+  function parseAction(text) {
+    const m = text.match(/\{[\s\S]*\}/);
+    if (!m) return null;
+    let a = null;
+    try { a = JSON.parse(m[0]); } catch (_) { try { a = JSON.parse(m[0].replace(/,\s*}/g, '}')); } catch (_) { return null; } }
+    if (!a || typeof a !== 'object') return null;
+    a.do = VERB[String(a.do || a.action || '').toLowerCase()] || null;
+    if (a.id == null && a.target != null) a.id = a.target;
+    return a;
+  }
+  function findApp(q) {
+    q = String(q || '').toLowerCase().trim();
+    if (!q || q === 'home' || q === '/') return home;
+    return APPS.find((a) => a.slug === q) || APPS.find((a) => a.title.toLowerCase() === q) || APPS.find((a) => a.slug.includes(q) || a.title.toLowerCase().includes(q)) || APPS.find((a) => q.includes(a.slug) || q.includes(a.title.toLowerCase())) || null;
+  }
+  function loaded() { return new Promise((res) => { const t = setTimeout(res, 4000); frame.addEventListener('load', () => { clearTimeout(t); setTimeout(res, 500); }, { once: true }); }); }
+  async function execute(a, refs) {
+    const d = frame.contentDocument, w = frame.contentWindow;
+    if (a.do === 'open') { const app = findApp(a.app || a.name || a.text || a.id); if (!app) return 'error: no app called "' + (a.app || a.name || a.text || a.id) + '"'; const p = loaded(); frame.src = routeFor(app.slug); await p; return 'opened ' + app.title; }
+    if (a.do === 'back') { const p = loaded(); w.history.back(); await p; return 'went back'; }
+    if (a.do === 'scroll') { const dir = /up/i.test(String(a.direction || a.text || '')) ? -1 : 1; w.scrollBy({ top: dir * w.innerHeight * 0.8, behavior: 'smooth' }); await new Promise((r) => setTimeout(r, 500)); return 'scrolled ' + (dir < 0 ? 'up' : 'down'); }
+    if (a.do === 'call') {
+      try {
+        const bus = w.MentriaBus;
+        if (!bus) return 'error: this app has no capabilities';
+        const r = await bus.invoke(String(a.name || ''), a.args || {});
+        await new Promise((res) => setTimeout(res, 500));
+        return 'called ' + a.name + ' → ' + JSON.stringify(r).slice(0, 160);
+      } catch (e) { return 'error: ' + String(e && e.message || e).slice(0, 120); }
+    }
+    if (a.do === 'wait') { await new Promise((r) => setTimeout(r, Math.min(5000, Number(a.ms) || 1500))); return 'waited'; }
+    const el = refs[Number(a.id)];
+    if (!el) return 'error: no control with id ' + a.id;
+    const label = (el.getAttribute('aria-label') || el.textContent || el.value || el.tagName).trim().replace(/\s+/g, ' ').slice(0, 30);
+    if (el.disabled || el.getAttribute('aria-disabled') === 'true') return 'error: "' + label + '" is disabled right now and cannot be tapped. Find an enabled control that changes the state first (for example Reset), or use a capability.';
+    await pointAt(el);
+    if (a.do === 'tap') {
+      const isNav = el.tagName === 'A' && el.getAttribute('href') && !el.getAttribute('href').startsWith('#');
+      const p = isNav ? loaded() : null;
+      el.focus(); el.click();
+      if (p) await p; else await new Promise((r) => setTimeout(r, 650));
+      return 'tapped "' + label + '"';
+    }
+    if (a.do === 'type') {
+      const text = String(a.text == null ? a.value : a.text);
+      el.focus();
+      if (el.isContentEditable) el.textContent = text;
+      else { const proto = el.tagName === 'TEXTAREA' ? w.HTMLTextAreaElement.prototype : el.tagName === 'SELECT' ? w.HTMLSelectElement.prototype : w.HTMLInputElement.prototype; const setter = Object.getOwnPropertyDescriptor(proto, 'value'); if (setter && setter.set) setter.set.call(el, text); else el.value = text; }
+      el.dispatchEvent(new w.Event('input', { bubbles: true }));
+      el.dispatchEvent(new w.Event('change', { bubbles: true }));
+      if (a.enter) el.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await new Promise((r) => setTimeout(r, 500));
+      return 'typed "' + text.slice(0, 40) + '" into "' + label + '"';
+    }
+    return 'error: unknown action';
+  }
+
+  let engine = null, engineCtx = 2048, loading = null, stopFlag = false, busy = false;
+  const raws = [];
+  const MENTRIA_DIST_BASE = '/assets/mentria/dist/';
+  async function loadModel() {
+    if (engine) return engine;
+    if (loading) return loading;
+    loading = (async () => {
+      if (!navigator.gpu) throw new Error(COPY.noWebgpu);
+      const Tiers = await import('/assets/js/mentria-tiers.js');
+      if ((await Tiers.effectiveTier()) !== '27b') throw new Error(COPY.notSupported);
+      setStatus('loading', COPY.statusLoading);
+      const parked = frame.src;
+      const parkedRoute = (() => { try { return frame.contentWindow.location.href; } catch (_) { return parked; } })();
+      frame.src = 'about:blank';
+      await new Promise((r) => setTimeout(r, 300));
+      const { MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs');
+      const { ensureModel } = await import('/assets/js/mentria-model.js');
+      const res = await ensureModel(() => { const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs'); if (window.mentriaWrapEngine) window.mentriaWrapEngine(e); return e; }, {
+        vision: false, offerUpgrade: false,
+        onProgress: (p) => { if (!p) return; const pct = p.loaded != null && p.total > 0 ? ' ' + Math.round(Math.min(1, p.loaded / p.total) * 100) + '%' : ''; setStatus('loading', (p.message || COPY.statusLoading) + pct); },
+        onDeviceLost: () => { engine = null; setStatus('error', COPY.notSupported); }
+      });
+      if (res.tier !== '27b') { try { res.engine.unload && res.engine.unload(); } catch (_) {} throw new Error(COPY.notSupported); }
+      engine = res.engine; engineCtx = res.maxSeq || 2048;
+      const back = loaded();
+      frame.src = parkedRoute && parkedRoute !== 'about:blank' ? parkedRoute : routeFor('');
+      await back;
+      setStatus('ready', COPY.statusReady);
+      return engine;
+    })();
+    try { return await loading; } finally { loading = null; }
+  }
+  async function ask(messages, maxTokens, onToken) {
+    let out = '';
+    await engine.generate({ messages, maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false }, (ev) => { if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) { out += ev.token; if (onToken) onToken(out); } });
+    return out;
+  }
+
+  const SYSTEM = 'You are Mentria, operating a small web app shown on a phone screen on behalf of the person chatting with you. Each turn you get the SCREEN: the app route, its visible text, and a numbered list of controls (id: kind "label" value). Available apps: ' + APPS.map((a) => a.slug).join(', ') + '.\n' +
+    'Reply with exactly ONE line of JSON and nothing else. Allowed actions:\n' +
+    '{"do":"open","app":"<slug>"} — open an app\n' +
+    '{"do":"tap","id":N} — tap a control\n' +
+    '{"do":"type","id":N,"text":"..."} — replace a field\'s content\n' +
+    '{"do":"scroll","direction":"down"|"up"}\n' +
+    '{"do":"back"}\n' +
+    '{"do":"call","name":"<capability>","args":{...}} — when the SCREEN lists CAPABILITIES, prefer calling one over tapping\n' +
+    '{"do":"done","result":"one plain sentence for the person","evidence":"a short exact quote from the SCREEN that proves it — text that would not be there if the task had failed, such as a result value, a running countdown or a confirmation; never a button label or an idle 00:00"}\n' +
+    '{"do":"say","text":"a plain answer when no action is needed"}\n' +
+    'Rules: use ids only from the latest SCREEN; prefer opening the right app first; use done only when the SCREEN proves the task is complete, quoting evidence; if you cannot proceed, use say to explain.';
+
+  function trimHistory(msgs) { while (msgs.length > 7) msgs.splice(2, 2); }
+  function bigrams(t) { const out = new Set(); for (let i = 0; i < t.length - 1; i++) out.add(t.slice(i, i + 2)); return out; }
+  function dice(a, b) { if (a.length < 2 || b.length < 2) return a === b ? 1 : 0; const A = bigrams(a), B = bigrams(b); let hit = 0; for (const g of A) if (B.has(g)) hit++; return (2 * hit) / (A.size + B.size); }
+  function evidenceOnScreen(evidence, screenText) {
+    const norm = (t) => String(t || '').toLowerCase().replace(/[“”"'`]/g, '').replace(/\s+/g, ' ').trim();
+    const ev = norm(evidence);
+    if (!ev) return false;
+    const screen = norm(screenText);
+    if (screen.includes(ev.slice(0, 80))) return true;
+    const tokens = ev.split(' ').filter((t) => t.length >= 3);
+    if (!tokens.length) return false;
+    const words = screen.split(' ');
+    let ok = 0;
+    for (const t of tokens) {
+      if (screen.includes(t)) { ok++; continue; }
+      if (t.length >= 6 && words.some((w) => Math.abs(w.length - t.length) <= 3 && dice(w, t) >= 0.6)) ok++;
+    }
+    return ok / tokens.length >= 0.7;
+  }
+
+  async function runTask(task, opts) {
+    const o = opts || {};
+    await loadModel();
+    busy = true; stopFlag = false; stopBtn.hidden = false; sendBtn.disabled = true; sessionBtn.disabled = true;
+    setStatus('working', COPY.statusWorking);
+    const stepLog = [];
+    const doneTries = [];
+    const recent = [];
+    const msgs = [{ role: 'system', content: (o.system || SYSTEM) }, { role: 'user', content: 'TASK: ' + task + '\n\nSCREEN:\n' + snapshot().text }];
+    let refs = snapshot().refs;
+    let final = null;
+    try {
+      for (let step = 0; step < (o.maxSteps || MAX_STEPS); step++) {
+        if (stopFlag) { final = COPY.stopped; break; }
+        const raw = await ask(msgs, 96);
+        raws.push(raw); if (raws.length > 40) raws.shift();
+        const a = parseAction(raw);
+        if (!a || !a.do) { addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ✗ ' + raw.replace(/\s+/g, ' ').slice(0, 90)); msgs.push({ role: 'assistant', content: raw }); msgs.push({ role: 'user', content: COPY.rejected + '\n\nSCREEN:\n' + snapshot().text }); trimHistory(msgs); continue; }
+        if (a.do === 'say') { final = String(a.text || a.result || a.message || ''); break; }
+        if (a.do === 'done') {
+          const evRaw = String(a.evidence || '').trim();
+          const resultText = String(a.result || a.text || a.message || '').trim();
+          const grounded = evidenceOnScreen(evRaw, snapshot().text);
+          doneTries.push(resultText);
+          const insisted = doneTries.length >= 3 && doneTries.slice(-3).every((r) => r && r === resultText);
+          if (grounded || insisted) { final = (resultText || ('Done — the screen shows “' + evRaw.slice(0, 80) + '”.')) + (grounded ? '' : ' (unverified)'); if (evRaw) addMsg('step', COPY.evidenceLabel + ' “' + evRaw.slice(0, 80) + '”'); break; }
+          addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ✗ ' + COPY.evidenceMissing.split('.')[0] + ' (“' + evRaw.slice(0, 40) + '”)');
+          msgs.push({ role: 'assistant', content: raw }); msgs.push({ role: 'user', content: COPY.evidenceMissing + '\n\nSCREEN:\n' + snapshot().text }); trimHistory(msgs); continue;
+        }
+        const result = await execute(a, refs);
+        stepLog.push(result);
+        addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ' + result);
+        const snap = snapshot(); refs = snap.refs;
+        const sig = JSON.stringify([a.do, a.id, a.text, a.app]);
+        recent.push(sig); if (recent.length > 6) recent.shift();
+        const looping = recent.length >= 4 && new Set(recent.slice(-4)).size <= 2;
+        const left = (o.maxSteps || MAX_STEPS) - step - 1;
+        const nudge = (looping ? '\nYou are repeating the same actions. Do something different, or finish with done.' : '') + (left <= 3 ? '\nOnly ' + left + ' step(s) left — finish with done now if the task is complete.' : '');
+        msgs.push({ role: 'assistant', content: JSON.stringify(a) });
+        msgs.push({ role: 'user', content: 'RESULT: ' + result + nudge + '\n\nSCREEN:\n' + snap.text });
+        trimHistory(msgs);
+        if (step === (o.maxSteps || MAX_STEPS) - 1) final = COPY.tooManySteps;
+      }
+    } finally {
+      busy = false; stopBtn.hidden = true; sendBtn.disabled = false; sessionBtn.disabled = false;
+      setStatus('ready', COPY.statusReady);
+    }
+    return { final: final || '', steps: stepLog };
+  }
+
+  formEl.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = inputEl.value.trim();
+    if (!text || busy) return;
+    inputEl.value = '';
+    addMsg('user', text);
+    try {
+      const r = await runTask(text);
+      addMsg('model', r.final || (r.steps.length ? r.steps[r.steps.length - 1] : COPY.tooManySteps));
+    } catch (err) { setStatus('error', String(err && err.message || err)); addMsg('model', String(err && err.message || err)); }
+  });
+  inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); formEl.requestSubmit(); } });
+  stopBtn.addEventListener('click', () => { stopFlag = true; });
+
+  const VERDICT_SYSTEM = 'You just used a web app as a test user. Write an honest, specific report as JSON only:\n{"summary":"2 sentences","worked":["..."],"friction":["..."],"bugs":[{"title":"short title","steps":"how to reproduce","expected":"...","actual":"...","severity":"minor|major|critical"}]}\nOnly report bugs you actually observed on the SCREEN. Empty arrays are fine.';
+  const SESSION_TASKS = [
+    'Explore this app as a real person would: try its main feature with realistic input, check the result, then try two different secondary controls. Do not repeat an action you already did. When you have tried three different things, finish with done.',
+    'Complete the most obvious task this app is for, then undo or change what you did once. Do not repeat yourself. Finish with done after at most eight actions.',
+    'Test the edges: an empty input, then a very long input, then switch between the app\'s modes if it has any. One try each, then finish with done.'
+  ];
+  async function runSession() {
+    if (busy) return;
+    const persona = PERSONAS[Math.floor(Math.random() * PERSONAS.length)];
+    const slug = appSel.value || APPS[Math.floor(Math.random() * APPS.length)].slug;
+    const app = APPS.find((a) => a.slug === slug) || home;
+    if (currentSlug() !== slug) { const p = loaded(); frame.src = routeFor(slug); await p; }
+    const task = SESSION_TASKS[Math.floor(Math.random() * SESSION_TASKS.length)];
+    addMsg('step', COPY.sessionStart + ' ' + app.title + ' — ' + persona);
+    const system = SYSTEM + '\nYou are role-playing ' + persona + '. Think like that person, not like an engineer.';
+    let r;
+    try { r = await runTask(task, { system, maxSteps: MAX_STEPS }); } catch (err) { addMsg('model', String(err && err.message || err)); return; }
+    addMsg('model', r.final);
+    busy = true; setStatus('working', COPY.statusWorking);
+    try {
+      const raw = await ask([{ role: 'system', content: VERDICT_SYSTEM }, { role: 'user', content: 'App: ' + app.title + ' (' + app.summary + ')\nPersona: ' + persona + '\nWhat you did:\n' + r.steps.map((s, i) => (i + 1) + '. ' + s).join('\n') + '\nFinal screen:\n' + snapshot().text }], 700);
+      let v = null; try { v = JSON.parse(raw.match(/\{[\s\S]*\}/)[0]); } catch (_) {}
+      renderVerdict(app, persona, v, raw, r.steps);
+    } finally { busy = false; setStatus('ready', COPY.statusReady); }
+  }
+  function renderVerdict(app, persona, v, raw, steps) {
+    const body = addMsg('model', '');
+    body.textContent = '';
+    const h = document.createElement('div'); h.className = 'cs__vtitle'; h.textContent = COPY.verdictTitle + ' · ' + app.title; body.appendChild(h);
+    if (!v) { const p = document.createElement('p'); p.textContent = raw.slice(0, 600); body.appendChild(p); return; }
+    const p = document.createElement('p'); p.textContent = v.summary || ''; body.appendChild(p);
+    const mk = (title, arr, cls) => { if (!arr || !arr.length) return; const t = document.createElement('div'); t.className = 'cs__vsub'; t.textContent = title; body.appendChild(t); const ul = document.createElement('ul'); ul.className = cls || ''; arr.forEach((x) => { const li = document.createElement('li'); li.textContent = typeof x === 'string' ? x : (x.title + ' — ' + (x.actual || '') + ' [' + (x.severity || 'minor') + ']'); ul.appendChild(li); }); body.appendChild(ul); };
+    mk('✓', v.worked); mk('~', v.friction); mk('✗', v.bugs, 'cs__bugs');
+    (v.bugs || []).forEach((b) => {
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'm-btn m-btn--ghost m-btn--pill cs__file'; btn.textContent = COPY.btnFile + ': ' + String(b.title || '').slice(0, 40);
+      btn.addEventListener('click', () => {
+        const title = String(b.title || 'Issue in ' + app.title).slice(0, 100);
+        const bodyText = '## Problem\n' + (b.actual || '') + '\n\n## Steps\n' + (b.steps || steps.join('\n')) + '\n\n## Expected\n' + (b.expected || '') + '\n\n## Actual\n' + (b.actual || '') + '\n\n## Impact\n' + (v.summary || '') + '\n\n_Found on `/tools/' + app.slug + '/` at ' + new Date().toISOString().slice(0, 10) + '_';
+        const sev = ['critical', 'major', 'minor'].includes(b.severity) ? b.severity : 'minor';
+        window.open('https://github.com/mentria-ai/website/issues/new?labels=' + encodeURIComponent('bug,auto-generated,severity:' + sev) + '&title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(bodyText.slice(0, 5000)), '_blank', 'noopener');
+      });
+      body.appendChild(btn);
+    });
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  sessionBtn.addEventListener('click', runSession);
+  window.__console = { snapshot, execute, runTask, runSession, parseAction, raws };
+})();
+</script>
+
+<style>
+.cs { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 1rem; padding: 0.9rem 0.75rem; font-family: var(--font-mono); min-height: 640px; }
+.cs__chat { display: flex; flex-direction: column; min-height: 0; }
+.cs__status { font-size: 0.72rem; color: var(--term-muted); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+.cs__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--term-border, #2a3138); flex: none; }
+.cs__dot--ready { background: var(--accent, #6ef3c5); box-shadow: 0 0 6px var(--accent, #6ef3c5); }
+.cs__dot--loading, .cs__dot--working { background: var(--syn-cyan, #22d3ee); animation: cs-pulse 1s infinite alternate; }
+.cs__dot--error { background: var(--syn-pink, #f472b6); }
+@keyframes cs-pulse { from { opacity: 0.4; } to { opacity: 1; } }
+.cs__log { flex: 1; min-height: 320px; max-height: 560px; overflow: auto; border: 1px solid var(--term-border, #2a3138); border-radius: 8px; padding: 0.7rem; display: flex; flex-direction: column; gap: 0.55rem; }
+.cs__msg { font-size: 0.82rem; line-height: 1.45; }
+.cs__msg--user .cs__body { color: var(--term-fg); }
+.cs__msg--model .cs__body { color: var(--term-fg); border-left: 2px solid var(--accent, #6ef3c5); padding-left: 0.6rem; }
+.cs__msg--step .cs__body { color: var(--term-muted); font-size: 0.72rem; }
+.cs__who { display: block; font-size: 0.62rem; color: var(--term-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.15rem; }
+.cs__vtitle { color: var(--accent, #6ef3c5); font-size: 0.78rem; margin-bottom: 0.3rem; }
+.cs__vsub { color: var(--term-muted); font-size: 0.7rem; margin-top: 0.4rem; }
+.cs__body ul { margin: 0.2rem 0 0 1rem; padding: 0; font-size: 0.76rem; }
+.cs__bugs li { color: var(--syn-pink, #f472b6); }
+.cs__file { margin: 0.4rem 0.3rem 0 0; font-size: 0.7rem; }
+.cs__form { margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.cs__form textarea { width: 100%; background: var(--term-bg-raised, #0d0f12); border: 1px solid var(--term-border, #2a3138); color: var(--term-fg); border-radius: 8px; padding: 0.55rem 0.7rem; font-family: inherit; font-size: 0.85rem; resize: vertical; }
+.cs__form textarea:focus { outline: none; border-color: var(--accent, #6ef3c5); }
+.cs__actions { display: flex; gap: 0.45rem; justify-content: flex-end; flex-wrap: wrap; }
+.cs__device { display: flex; flex-direction: column; gap: 0.5rem; align-items: center; }
+.cs__bar { display: flex; gap: 0.4rem; align-items: center; width: 100%; }
+.cs__bar select { flex: 1; min-width: 0; background: var(--term-bg-raised, #0d0f12); border: 1px solid var(--term-border, #2a3138); color: var(--term-fg); border-radius: 7px; padding: 0.35rem 0.5rem; font-family: inherit; font-size: 0.78rem; }
+.cs__iconbtn { background: transparent; border: 1px solid var(--term-border, #2a3138); color: var(--term-fg); border-radius: 7px; width: 2.1rem; height: 2.1rem; font-family: inherit; font-size: 0.95rem; cursor: pointer; flex: none; }
+.cs__iconbtn:hover, .cs__iconbtn[aria-pressed="true"] { border-color: var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); }
+.cs__phone { width: 390px; max-width: 100%; height: 780px; max-height: 78vh; border: 6px solid #1a2026; border-radius: 28px; overflow: hidden; background: #000; box-shadow: 0 0 0 1px var(--term-border, #2a3138), 0 18px 50px rgba(0, 0, 0, 0.6); }
+.cs__phone iframe { width: 100%; height: 100%; border: 0; display: block; background: var(--term-bg, #0b0e11); }
+.cs__screen { width: 100%; max-height: 220px; overflow: auto; font-size: 0.62rem; line-height: 1.4; color: var(--term-muted); background: var(--term-bg-raised, #0d0f12); border: 1px dashed var(--term-border, #2a3138); border-radius: 8px; padding: 0.5rem; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cs__screen[hidden] { display: none; }
+@media (max-width: 980px) {
+  .cs { grid-template-columns: 1fr; }
+  .cs__device { order: -1; }
+  .cs__phone { height: 70vh; }
+  .cs__log { min-height: 200px; max-height: 320px; }
+}
+</style>

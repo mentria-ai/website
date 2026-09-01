@@ -428,6 +428,11 @@
       "title": "PHOSPHOR",
       "lede": "Combat time trials in the browser — sprint, slide, mantle and a full-auto carbine across five dusk-lit courses. Medals, ghost racing, offline play.",
       "tldr": "Browser FPS time trials with medals and ghost racing."
+    },
+    "console": {
+      "title": "Console",
+      "lede": "Chat with the on-device model while it uses Mentria apps on a shared phone screen — or let it play a test user and report what it finds.",
+      "tldr": "The Console puts a phone-sized Mentria screen next to a chat. Ask the 27B on-device model to do something (\"set a 5 minute timer\") and it opens the app and taps through it in front of you — every action is shown, and it must quote the screen to claim success. Start a test session and it explores an app as a made-up person, then writes a report with bugs you can file as issues. Nothing leaves your device."
     }
   },
   "game": {
@@ -1947,6 +1952,36 @@
       "ghost_behind": "behind by",
       "course_error": "That course didn't load.",
       "course_error_hint": "Pick another course, or reload the page."
+    },
+    "console": {
+      "status_idle": "model idle",
+      "status_loading": "loading the on-device model…",
+      "status_ready": "ready",
+      "status_working": "working…",
+      "not_supported": "the Console needs the 27B on-device model — not supported on this device",
+      "no_webgpu": "WebGPU is not available in this browser",
+      "you": "you",
+      "model": "mentria",
+      "step": "step",
+      "rejected": "That was not a valid action. Reply with exactly one JSON action.",
+      "evidence_missing": "Not done yet: your evidence is not on the screen. Continue, or quote text that is actually visible.",
+      "evidence_label": "evidence:",
+      "too_many_steps": "I ran out of steps before finishing — you can take over from here.",
+      "session_start": "Test session:",
+      "session_done": "session finished",
+      "verdict_title": "Report",
+      "btn_file_issue": "File",
+      "stopped": "stopped",
+      "app_home": "Home",
+      "input_placeholder": "Ask for something, e.g. \"set a 5 minute timer\" or \"encode hello in base64\"",
+      "btn_session": "Test session",
+      "btn_stop": "Stop",
+      "btn_send": "Send",
+      "btn_back": "Back",
+      "app_label": "App",
+      "btn_reload": "Reload",
+      "btn_screen": "Show what the model sees",
+      "frame_title": "Shared app screen"
     }
   },
   "category": {

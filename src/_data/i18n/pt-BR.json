@@ -428,6 +428,11 @@
       "title": "PHOSPHOR",
       "lede": "Contrarrelógio de combate no navegador: corra, deslize, escale e atire com uma carabina automática em cinco percursos ao anoitecer. Medalhas, corrida contra fantasmas e jogo offline.",
       "tldr": "FPS de contrarrelógio no navegador com medalhas e fantasmas."
+    },
+    "console": {
+      "title": "Console",
+      "lede": "Converse com o modelo local enquanto ele usa os apps da Mentria em uma tela de celular compartilhada — ou deixe que ele atue como usuário de teste e relate o que encontrar.",
+      "tldr": "O Console coloca uma tela da Mentria do tamanho de um celular ao lado de um chat. Peça ao modelo 27B local para fazer algo (\"crie um timer de 5 minutos\") e ele abre o app e o usa na sua frente — cada ação é exibida e ele precisa citar a tela para dizer que concluiu. Inicie uma sessão de teste e ele explora um app como uma pessoa fictícia, depois escreve um relatório com bugs que você pode registrar como issues. Nada sai do seu dispositivo."
     }
   },
   "game": {
@@ -1947,6 +1952,36 @@
       "ghost_behind": "desvantagem de",
       "course_error": "Não foi possível carregar esse percurso.",
       "course_error_hint": "Escolha outro percurso ou recarregue a página."
+    },
+    "console": {
+      "status_idle": "modelo ocioso",
+      "status_loading": "carregando o modelo local…",
+      "status_ready": "pronto",
+      "status_working": "trabalhando…",
+      "not_supported": "o Console precisa do modelo 27B local — não compatível com este dispositivo",
+      "no_webgpu": "WebGPU não está disponível neste navegador",
+      "you": "você",
+      "model": "mentria",
+      "step": "passo",
+      "rejected": "Essa não é uma ação válida. Responda com exatamente uma ação JSON.",
+      "evidence_missing": "Ainda não: sua evidência não está na tela. Continue, ou cite um texto realmente visível.",
+      "evidence_label": "evidência:",
+      "too_many_steps": "Acabaram os passos antes de terminar — você pode assumir daqui.",
+      "session_start": "Sessão de teste:",
+      "session_done": "sessão concluída",
+      "verdict_title": "Relatório",
+      "btn_file_issue": "Registrar",
+      "stopped": "parado",
+      "app_home": "Início",
+      "input_placeholder": "Peça algo, ex. \"crie um timer de 5 minutos\" ou \"codifique olá em base64\"",
+      "btn_session": "Sessão de teste",
+      "btn_stop": "Parar",
+      "btn_send": "Enviar",
+      "btn_back": "Voltar",
+      "app_label": "App",
+      "btn_reload": "Recarregar",
+      "btn_screen": "Mostrar o que o modelo vê",
+      "frame_title": "Tela de app compartilhada"
     }
   },
   "category": {

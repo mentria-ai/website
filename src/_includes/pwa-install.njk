@@ -51,6 +51,7 @@
 
 <script>
 (function () {
+  if (window.self !== window.top) return;
   // Skip entirely if already installed (detected pre-paint in base.njk).
   if (document.documentElement.classList.contains('is-standalone')) return;
   if (document.documentElement.classList.contains('feed-layout')) return;

@@ -46,6 +46,23 @@ agent calls the tool, the on-device model reads and summarizes the notes
 locally, and only the summary crosses back. The agent uses private data it
 can never see. On devices without WebGPU these tools simply don't register.
 
+## Measured: a LoRA that teaches "call the tool"
+
+The on-device 27B agent at /tools/console/ ships with a tool-call LoRA
+(trained in ~15 minutes on our own pipeline, hot-swappable at runtime — the ◈
+button toggles it live). Same task, same session, adapter hot-swapped:
+
+| arm | "Set a 5 minute countdown timer and start it" |
+|---|---|
+| base 27B | taps the "5 min" preset, taps "Start" — never uses the declared capability |
+| + toolcall LoRA | emits `{"do":"call","name":"timer__start","args":{"minutes":5}}` |
+
+On the 150-row held-out suite: composite 0.709 → 0.998, exact tool-name
+0.303 → 1.000, argument accuracy 0.242 → 0.990, IFEval unchanged, and it
+generalizes to unseen tool schemas (0.353 → 0.971). Adapters:
+huggingface.co/mentriaai — `loras/toolcall-console` (27B) and
+`loras/toolcall-web` (0.8B).
+
 ## How it works
 
 `src/assets/js/mentria-bus.js` is the site's capability registry: tool pages

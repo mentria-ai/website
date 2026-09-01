@@ -38,6 +38,7 @@ eleventyComputed:
       <select id="cs-app" aria-label="{{ 'tool.console.app_label' | t }}"></select>
       <button type="button" class="cs__iconbtn" id="cs-reload" aria-label="{{ 'tool.console.btn_reload' | t }}">↻</button>
       <button type="button" class="cs__iconbtn" id="cs-screen" aria-label="{{ 'tool.console.btn_screen' | t }}" aria-pressed="false">⌗</button>
+      <button type="button" class="cs__iconbtn" id="cs-adapter" aria-label="{{ 'tool.console.btn_adapter' | t }}" aria-pressed="true" hidden>◈</button>
     </div>
     <div class="cs__phone">
       <iframe id="cs-frame" title="{{ 'tool.console.frame_title' | t }}" src="{{ locale.pathPrefix }}/"></iframe>
@@ -54,6 +55,8 @@ eleventyComputed:
     statusIdle:    {{ ("tool.console.status_idle"    | t) | dump | safe }},
     statusLoading: {{ ("tool.console.status_loading" | t) | dump | safe }},
     statusReady:   {{ ("tool.console.status_ready"   | t) | dump | safe }},
+    adapterOn: {{ ("tool.console.adapter_on" | t) | dump | safe }},
+    adapterOff: {{ ("tool.console.adapter_off" | t) | dump | safe }},
     statusWorking: {{ ("tool.console.status_working" | t) | dump | safe }},
     notSupported:  {{ ("tool.console.not_supported"  | t) | dump | safe }},
     noWebgpu:      {{ ("tool.console.no_webgpu"      | t) | dump | safe }},
@@ -83,7 +86,7 @@ eleventyComputed:
 
   const $ = (id) => document.getElementById(id);
   const frame = $('cs-frame'), logEl = $('cs-log'), inputEl = $('cs-input'), formEl = $('cs-form');
-  const appSel = $('cs-app'), screenBtn = $('cs-screen'), screenText = $('cs-screentext');
+  const appSel = $('cs-app'), screenBtn = $('cs-screen'), screenText = $('cs-screentext'), adapterBtn = $('cs-adapter');
   const sendBtn = $('cs-send'), sessionBtn = $('cs-session'), stopBtn = $('cs-stop');
 
   function setStatus(state, text) { $('cs-dot').className = 'cs__dot cs__dot--' + state; $('cs-status-text').textContent = text; }
@@ -111,6 +114,7 @@ eleventyComputed:
   $('cs-back').addEventListener('click', () => { try { frame.contentWindow.history.back(); } catch (_) {} });
   $('cs-reload').addEventListener('click', () => { try { frame.contentWindow.location.reload(); } catch (_) {} });
   frame.addEventListener('load', () => { appSel.value = currentSlug(); injectCursor(); if (!screenText.hidden) screenText.textContent = snapshot().text; });
+  adapterBtn.addEventListener('click', () => { if (!busy) setAdapter(!adapterOn); });
   screenBtn.addEventListener('click', () => { const on = screenText.hidden; screenText.hidden = !on; screenBtn.setAttribute('aria-pressed', String(on)); if (on) screenText.textContent = snapshot().text; });
 
   let cursorEl = null;
@@ -222,6 +226,23 @@ eleventyComputed:
   }
 
   let engine = null, engineCtx = 2048, loading = null, stopFlag = false, busy = false;
+  let adapterCfg = null, adapterOn = false, adapterBusy = false;
+  function renderAdapterBtn() {
+    adapterBtn.setAttribute('aria-pressed', adapterOn ? 'true' : 'false');
+    adapterBtn.title = adapterOn ? COPY.adapterOn : COPY.adapterOff;
+    adapterBtn.style.opacity = adapterOn ? '' : '0.4';
+  }
+  async function setAdapter(on) {
+    if (!engine || !adapterCfg || adapterBusy || on === adapterOn) return adapterOn;
+    adapterBusy = true;
+    try {
+      await engine.swapAdapter(on ? adapterCfg : { name: null });
+      adapterOn = on;
+      renderAdapterBtn();
+      addMsg('step', on ? COPY.adapterOn : COPY.adapterOff);
+    } finally { adapterBusy = false; }
+    return adapterOn;
+  }
   const raws = [];
   const MENTRIA_DIST_BASE = '/assets/mentria/dist/';
   async function loadModel() {
@@ -247,11 +268,15 @@ eleventyComputed:
       engine = res.engine; engineCtx = res.maxSeq || 2048;
       try {
         const base = Tiers.TIERS['27b'].base;
-        await engine.swapAdapter({
+        adapterCfg = {
           name: 'toolcall-console',
           configUrl: base + 'loras/toolcall-console/adapter_config.json',
           weightsUrl: base + 'loras/toolcall-console/adapter_model.safetensors',
-        });
+        };
+        await engine.swapAdapter(adapterCfg);
+        adapterOn = true;
+        adapterBtn.hidden = false;
+        renderAdapterBtn();
       } catch (err) { console.warn('toolcall adapter load failed, using base model:', err); }
       const back = loaded();
       frame.src = parkedRoute && parkedRoute !== 'about:blank' ? parkedRoute : routeFor('');
@@ -409,7 +434,7 @@ eleventyComputed:
     logEl.scrollTop = logEl.scrollHeight;
   }
   sessionBtn.addEventListener('click', runSession);
-  window.__console = { snapshot, execute, runTask, runSession, parseAction, raws };
+  window.__console = { snapshot, execute, runTask, runSession, parseAction, raws, setAdapter, adapterState: () => adapterOn };
 })();
 </script>
 

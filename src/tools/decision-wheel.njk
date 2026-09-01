@@ -306,12 +306,16 @@ eleventyComputed:
       }
       if (animating) throw new Error('the wheel is already spinning');
       spin();
-      for (let i = 0; i < 100; i++) {
-        await new Promise((r) => setTimeout(r, 150));
-        if (!animating && i > 2) break;
+      await new Promise((r) => setTimeout(r, 900));
+      for (let i = 0; i < 40 && animating; i++) await new Promise((r) => setTimeout(r, 150));
+      if (animating) {
+        animating = false;
+        velocity = 0;
+        wheel.classList.remove("dw__wheel--spinning");
+        settle(getSegmentAtPointer());
       }
       const winner = resultText.textContent.trim();
-      if (!winner) throw new Error('the spin did not settle');
+      if (!winner || winner === '...') throw new Error('the spin did not settle');
       return { winner, options: options.slice() };
     }, { description: 'Spin the decision wheel and return the winning option. Optionally replace the options (2-8 short strings) first.', parameters: { type: 'object', properties: { options: { type: 'array', items: { type: 'string' } } } }, ai: true });
   });

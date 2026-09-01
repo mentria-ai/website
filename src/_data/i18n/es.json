@@ -429,6 +429,11 @@
       "lede": "Contrarreloj de combate en el navegador: esprinta, deslízate, escala y dispara una carabina automática en cinco recorridos al atardecer. Medallas, fantasmas rivales y juego sin conexión.",
       "tldr": "FPS de contrarreloj en el navegador con medallas y fantasmas."
     },
+    "model-mirror": {
+      "title": "Espejo de Modelos",
+      "lede": "Ayuda a distribuir los modelos locales de Mentria entre pares. Mantén esta pestaña abierta y tu navegador se convierte en un espejo.",
+      "tldr": "Tu navegador comparte el modelo 0.8B con otros visitantes por P2P, con la descarga oficial como respaldo automático. Sin cuenta y sin instalación."
+    },
     "console": {
       "title": "Consola",
       "lede": "Chatea con el modelo local mientras usa las apps de Mentria en una pantalla de móvil compartida, o deja que actúe como usuario de prueba y te cuente lo que encuentra.",
@@ -1952,6 +1957,16 @@
       "ghost_behind": "desventaja de",
       "course_error": "Ese recorrido no se pudo cargar.",
       "course_error_hint": "Elige otro recorrido o recarga la página."
+    },
+    "model-mirror": {
+      "btn_start": "Empezar a compartir (450 MB)",
+      "state_idle": "inactivo",
+      "state_fetching": "obteniendo el modelo…",
+      "state_seeding": "compartiendo — mantén esta pestaña abierta",
+      "peers": "pares",
+      "uploaded": "compartido",
+      "note": "El modelo se descarga una vez — desde pares si hay disponibles, o desde la fuente oficial — y esta pestaña lo sirve a otros visitantes. Cierra la pestaña para parar.",
+      "err_prefix": "error: "
     },
     "console": {
       "status_idle": "modelo inactivo",

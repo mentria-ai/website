@@ -99,6 +99,13 @@
     "group": "AI"
   },
   {
+    "slug": "model-mirror",
+    "title": "Model Mirror",
+    "summary": "Keep a tab open and your browser helps deliver Mentria's on-device models peer-to-peer to other visitors — official download as fallback.",
+    "category": "AI",
+    "group": "AI"
+  },
+  {
     "slug": "quote",
     "title": "Motivational Quote",
     "summary": "AI-generated original motivational quotes. Runs locally in your browser.",

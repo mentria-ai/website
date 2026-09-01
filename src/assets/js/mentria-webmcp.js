@@ -82,6 +82,14 @@ function loadLocalModel() {
         if (window.mentriaWrapEngine) window.mentriaWrapEngine(e);
         return e;
       };
+      try {
+        const P2P = await import('/assets/js/mentria-p2p-models.js');
+        const t08 = Tiers.TIERS['0.8b'];
+        await Promise.race([
+          P2P.ensureShardViaP2P(t08.base + t08.shards[0]),
+          new Promise((r) => setTimeout(r, 480000))
+        ]);
+      } catch (_) {}
       const res = await Tiers.loadWithFallback(make, '0.8b', { vision: false });
       return { engine: res.engine, maxSeq: res.maxSeq || 2048 };
     })();

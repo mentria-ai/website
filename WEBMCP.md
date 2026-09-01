@@ -63,6 +63,18 @@ generalizes to unseen tool schemas (0.353 → 0.971). Adapters:
 huggingface.co/mentriaai — `loras/toolcall-console` (27B) and
 `loras/toolcall-web` (0.8B).
 
+## P2P model delivery
+
+The 0.8B model the `local_ai` tools use is delivered over browser peer-to-peer
+(WebRTC swarm via our own tracker) with the official host as an automatic
+webseed fallback — so delivery is never slower than plain HTTP, and gets
+faster as visitors join. Any visitor can keep /tools/model-mirror/ open to
+become a mirror; completed downloads keep seeding while the tab lives.
+Assembled bytes are injected into the inference engine's cache, so the engine
+itself is unchanged. Measured in testing: a fresh visitor pulled the shard
+from the webseed and a mirror tab simultaneously, with the mirror serving
+34 MB of real blocks before the download finished.
+
 ## How it works
 
 `src/assets/js/mentria-bus.js` is the site's capability registry: tool pages

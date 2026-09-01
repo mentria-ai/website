@@ -429,6 +429,11 @@
       "lede": "Combat time trials in the browser — sprint, slide, mantle and a full-auto carbine across five dusk-lit courses. Medals, ghost racing, offline play.",
       "tldr": "Browser FPS time trials with medals and ghost racing."
     },
+    "model-mirror": {
+      "title": "Model Mirror",
+      "lede": "Help deliver Mentria's on-device models peer-to-peer. Keep this tab open and your browser becomes a mirror.",
+      "tldr": "Your browser seeds the 0.8B model to other visitors over peer-to-peer, with the official download as automatic fallback. No account, no install."
+    },
     "console": {
       "title": "Console",
       "lede": "Chat with the on-device model while it uses Mentria apps on a shared phone screen — or let it play a test user and report what it finds.",
@@ -1952,6 +1957,16 @@
       "ghost_behind": "behind by",
       "course_error": "That course didn't load.",
       "course_error_hint": "Pick another course, or reload the page."
+    },
+    "model-mirror": {
+      "btn_start": "Start mirroring (450 MB)",
+      "state_idle": "idle",
+      "state_fetching": "fetching the model…",
+      "state_seeding": "seeding — keep this tab open",
+      "peers": "peers",
+      "uploaded": "shared",
+      "note": "The model downloads once — from peers when available, otherwise from the official source — then this tab serves it to other visitors. Close the tab to stop.",
+      "err_prefix": "error: "
     },
     "console": {
       "status_idle": "model idle",

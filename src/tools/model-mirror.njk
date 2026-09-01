@@ -1,0 +1,94 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/model-mirror/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.model-mirror.title' | t }}"
+  description: "{{ 'tools.model-mirror.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">model-mirror</span></p>
+  <h1>{{ "tools.model-mirror.title" | t }}</h1>
+  <p>{{ "tools.model-mirror.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "model-mirror.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="mm">
+  <div class="mm__card">
+    <div class="mm__row">
+      <span class="mm__name">qwen3.5-0.8b · 450 MB</span>
+      <span class="mm__state" id="mm-state" data-state="idle">{{ "tool.model-mirror.state_idle" | t }}</span>
+    </div>
+    <div class="mm__bar"><div class="mm__fill" id="mm-fill"></div></div>
+    <div class="mm__stats">
+      <span><b id="mm-peers">0</b> {{ "tool.model-mirror.peers" | t }}</span>
+      <span>↓ <b id="mm-down">0</b> MB/s</span>
+      <span>↑ <b id="mm-up">0</b> MB/s</span>
+      <span>{{ "tool.model-mirror.uploaded" | t }} <b id="mm-shared">0</b> MB</span>
+    </div>
+    <button class="mm__btn" id="mm-start" type="button">{{ "tool.model-mirror.btn_start" | t }}</button>
+    <p class="mm__note">{{ "tool.model-mirror.note" | t }}</p>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<style>
+  .mm { display: flex; justify-content: center; padding: 1.5rem 1rem 2rem; }
+  .mm__card { width: 100%; max-width: 540px; background: var(--panel, #11161b); border: 1px solid var(--line, #22303a); border-radius: 12px; padding: 1.2rem 1.4rem; }
+  .mm__row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+  .mm__name { font-family: var(--mono, monospace); font-size: .95rem; }
+  .mm__state { font-family: var(--mono, monospace); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted, #8b97a3); }
+  .mm__state[data-state="seeding"] { color: var(--accent, #6ef3c5); }
+  .mm__bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.07); margin: .9rem 0 .7rem; overflow: hidden; }
+  .mm__fill { height: 100%; width: 0%; border-radius: 4px; background: linear-gradient(90deg, #6ef3c5, #2fb894); transition: width .5s; }
+  .mm__stats { display: flex; gap: 1.1rem; flex-wrap: wrap; font-size: .82rem; color: var(--muted, #8b97a3); }
+  .mm__stats b { color: var(--text, #e6edf0); font-family: var(--mono, monospace); font-weight: 600; }
+  .mm__btn { margin-top: 1rem; width: 100%; padding: .65rem 1rem; border-radius: 8px; border: 1px solid var(--accent, #6ef3c5); background: transparent; color: var(--accent, #6ef3c5); font-family: var(--mono, monospace); font-size: .9rem; cursor: pointer; }
+  .mm__btn:hover { background: rgba(110,243,197,.08); }
+  .mm__btn[disabled] { opacity: .45; cursor: default; }
+  .mm__note { margin: .9rem 0 0; font-size: .8rem; color: var(--muted, #8b97a3); }
+</style>
+
+<script>
+(function () {
+  const COPY = {
+    stateIdle: {{ ("tool.model-mirror.state_idle" | t) | dump | safe }},
+    stateFetching: {{ ("tool.model-mirror.state_fetching" | t) | dump | safe }},
+    stateSeeding: {{ ("tool.model-mirror.state_seeding" | t) | dump | safe }},
+    errPrefix: {{ ("tool.model-mirror.err_prefix" | t) | dump | safe }}
+  };
+  const stateEl = document.getElementById('mm-state');
+  const fill = document.getElementById('mm-fill');
+  const peersEl = document.getElementById('mm-peers');
+  const downEl = document.getElementById('mm-down');
+  const upEl = document.getElementById('mm-up');
+  const sharedEl = document.getElementById('mm-shared');
+  const btn = document.getElementById('mm-start');
+  const mb = (n) => (n / 1048576).toFixed(1);
+  function setState(key, label) { stateEl.dataset.state = key; stateEl.textContent = label; }
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    setState('fetching', COPY.stateFetching);
+    try {
+      const P2P = await import('/assets/js/mentria-p2p-models.js');
+      await P2P.seedShard('qwen3.5-0.8b-q4-tied.safetensors', (st) => {
+        fill.style.width = Math.round(st.progress * 100) + '%';
+        peersEl.textContent = String(st.peers);
+        downEl.textContent = mb(st.downSpeed || 0);
+        upEl.textContent = mb(st.upSpeed || 0);
+        sharedEl.textContent = mb(st.upBytes || 0);
+        if (st.done) setState('seeding', COPY.stateSeeding);
+      });
+    } catch (err) {
+      setState('idle', COPY.errPrefix + (err.message || err));
+      btn.disabled = false;
+    }
+  });
+})();
+</script>

@@ -429,6 +429,11 @@
       "lede": "Contre-la-montre de combat dans le navigateur : sprint, glissade, escalade et carabine automatique sur cinq parcours au crépuscule. Médailles, course aux fantômes, jeu hors ligne.",
       "tldr": "FPS contre-la-montre dans le navigateur, médailles et fantômes."
     },
+    "model-mirror": {
+      "title": "Miroir de Modèles",
+      "lede": "Aidez à distribuer les modèles locaux de Mentria en pair-à-pair. Gardez cet onglet ouvert et votre navigateur devient un miroir.",
+      "tldr": "Votre navigateur partage le modèle 0.8B avec les autres visiteurs en P2P, avec le téléchargement officiel en secours automatique. Sans compte ni installation."
+    },
     "console": {
       "title": "Console",
       "lede": "Discutez avec le modèle local pendant qu'il utilise les apps Mentria sur un écran de téléphone partagé — ou laissez-le jouer un utilisateur test et rapporter ce qu'il trouve.",
@@ -1952,6 +1957,16 @@
       "ghost_behind": "retard de",
       "course_error": "Ce parcours n'a pas pu être chargé.",
       "course_error_hint": "Choisissez un autre parcours ou rechargez la page."
+    },
+    "model-mirror": {
+      "btn_start": "Commencer à partager (450 Mo)",
+      "state_idle": "inactif",
+      "state_fetching": "récupération du modèle…",
+      "state_seeding": "partage en cours — gardez cet onglet ouvert",
+      "peers": "pairs",
+      "uploaded": "partagé",
+      "note": "Le modèle se télécharge une fois — depuis des pairs si disponibles, sinon depuis la source officielle — puis cet onglet le sert aux autres visiteurs. Fermez l'onglet pour arrêter.",
+      "err_prefix": "erreur : "
     },
     "console": {
       "status_idle": "modèle inactif",

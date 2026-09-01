@@ -585,7 +585,8 @@ eleventyComputed:
       if (saver && saver.flush) saver.flush();
       return { ok: true, id: note.id };
     }, { description: 'Create a new note with an optional title and body text.', ai: true, parameters: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } } });
-    MentriaBus.provide('notes.count', () => ({ count: notes.length }), { description: 'How many notes exist.', ai: true });
+    MentriaBus.provide('notes.count', () => ({ count: notes.length }), { description: 'How many notes exist.', ai: true, readonly: true });
+    MentriaBus.provide('notes.list', () => notes.map((n) => ({ title: n.title || '', preview: String(n.body || n.text || '').replace(/\s+/g, ' ').slice(0, 80), updatedAt: n.updatedAt || 0 })), { description: 'List saved notes: title, a short preview, and last-updated time.', parameters: { type: 'object', properties: {} }, ai: true, readonly: true });
   }).catch(() => {});
   exportBtn.addEventListener('click', exportNote);
   if (navigator.share) shareBtn.addEventListener('click', shareNote);

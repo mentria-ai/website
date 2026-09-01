@@ -59,6 +59,7 @@ function checkArgs(name, descriptor, payload) {
 
 function provide(name, handler, descriptor) {
   providers.set(name, { handler, descriptor: descriptor || null });
+  try { window.dispatchEvent(new CustomEvent('mentria:bus:provide', { detail: { name } })); } catch (_) {}
   channel();
   return () => { if ((providers.get(name) || {}).handler === handler) providers.delete(name); };
 }
@@ -75,7 +76,7 @@ function describe(name) {
 function listTools(opts) {
   const ai = opts && opts.ai;
   const out = [];
-  const add = (n, d) => { if (!d) return; if (ai && !(d.ai === true || d.ai === 'confirm')) return; out.push({ name: toolName(n), description: d.description, parameters: d.parameters || { type: 'object', properties: {} } }); };
+  const add = (n, d) => { if (!d) return; if (ai && !(d.ai === true || d.ai === 'confirm')) return; out.push({ name: toolName(n), description: d.description, parameters: d.parameters || { type: 'object', properties: {} }, readonly: d.readonly === true }); };
   for (const [n, e] of providers) add(n, e.descriptor);
   for (const [n, e] of lazy) if (!providers.has(n)) add(n, e.descriptor);
   return out;

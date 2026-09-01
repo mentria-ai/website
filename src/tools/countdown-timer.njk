@@ -797,7 +797,7 @@ eleventyComputed:
       api.start();
       return { ok: true, seconds: h * 3600 + m * 60 + sec };
     }, { description: 'Start a countdown timer for the given duration.', ai: true, parameters: { type: 'object', properties: { hours: { type: 'number' }, minutes: { type: 'number' }, seconds: { type: 'number' } } } });
-    MentriaBus.provide('timer.status', () => [...widgetApi.values()].map((w) => ({ running: w.running(), remainingSeconds: w.remaining() })), { description: 'List the countdown timers and how many seconds remain.', ai: true });
+    MentriaBus.provide('timer.status', () => [...widgetApi.values()].map((w) => ({ running: w.running(), remainingSeconds: w.remaining() })), { description: 'List the countdown timers and how many seconds remain.', ai: true, readonly: true });
   }).catch(() => {});
   addWidget();
 

@@ -187,6 +187,17 @@ eleventyComputed:
     if (currentHarmony) generatePalette(currentHarmony);
   }
 
+  import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
+    MentriaBus.provide('color.set', (p) => {
+      let hex = String((p || {}).color || '').trim().toLowerCase();
+      if (hex[0] !== '#') hex = '#' + hex;
+      if (/^#[0-9a-f]{3}$/.test(hex)) hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+      if (!/^#[0-9a-f]{6}$/.test(hex)) throw new Error('color must be a hex value like #6ef3c5');
+      setColor(hex);
+      return { hex: valHex.textContent, rgb: valRgb.textContent, hsl: valHsl.textContent };
+    }, { description: 'Set the color from a hex value and get its RGB and HSL equivalents (shown in the tool).', parameters: { type: 'object', properties: { color: { type: 'string' } }, required: ['color'] }, ai: true });
+  });
+
   /* ── Palette generation ────────────────────────────── */
   function getHarmonyColors(hex, type) {
     const { r, g, b } = hexToRgb(hex);

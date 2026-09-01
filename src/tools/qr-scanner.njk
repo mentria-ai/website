@@ -274,6 +274,18 @@ eleventyComputed:
     return new Promise(res => genCanvas.toBlob(res, 'image/png'));
   }
 
+  import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
+    MentriaBus.provide('qr.generate', (p) => {
+      const text = String((p || {}).text || '').trim();
+      if (!text) throw new Error('text is required');
+      if (text.length > 1000) throw new Error('text is too long (max 1000 chars)');
+      setMode('generate');
+      genInput.value = text;
+      genInput.dispatchEvent(new Event('input', { bubbles: true }));
+      return { ok: true, rendered: 'the QR code is displayed in the tool', chars: text.length };
+    }, { description: 'Generate a QR code from text or a URL; it renders in the tool for the person to scan or download.', parameters: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'] }, ai: true });
+  });
+
   genInput.addEventListener('input', () => {
     clearTimeout(genTimer);
     genTimer = setTimeout(genRender, 120);

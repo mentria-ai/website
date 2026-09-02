@@ -235,6 +235,32 @@ const uid = () => hx(crypto.getRandomValues(new Uint8Array(5)));
 
 let decks = store.get('decks') || [];
 const saveDecks = () => store.set('decks', decks);
+
+import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
+  MentriaBus.provide('studio.createDeck', (p) => {
+    const o = p || {};
+    const title = String(o.title || '').trim().slice(0, 60);
+    if (!title) throw new Error('title is required');
+    const rawSlides = Array.isArray(o.slides) ? o.slides : [];
+    if (!rawSlides.length || rawSlides.length > 12) throw new Error('need 1-12 slides, each with a caption');
+    const slides = rawSlides.map((sl) => {
+      const caption = String((sl && sl.caption) || '').trim().slice(0, 200);
+      if (!caption) throw new Error('every slide needs a caption');
+      const out = { id: uid(), caption };
+      const prompt = String((sl && sl.prompt) || '').trim().slice(0, 300);
+      if (prompt) out.prompt = prompt;
+      const lp = String((sl && sl.long_press) || '').trim().slice(0, 600);
+      if (lp) out.long_press = lp;
+      return out;
+    });
+    const d = { id: uid(), title, subtitle: String(o.subtitle || '').trim().slice(0, 140), slides, updated: Date.now() };
+    decks.unshift(d);
+    saveDecks();
+    try { renderList(); openDeck(d.id); } catch (_) {}
+    return { ok: true, id: d.id, title: d.title, slides: slides.length, note: 'draft created in Story Studio; images can be generated there' };
+  }, { description: 'Create a new story deck draft in Story Studio from a title and slide captions. Each slide: caption (required, the on-screen text), prompt (optional image description), long_press (optional deeper note). Images are generated afterwards in the studio.', parameters: { type: 'object', properties: { title: { type: 'string' }, subtitle: { type: 'string' }, slides: { type: 'array', items: { type: 'object', properties: { caption: { type: 'string' }, prompt: { type: 'string' }, long_press: { type: 'string' } }, required: ['caption'] } } }, required: ['title', 'slides'] }, ai: true });
+  MentriaBus.provide('studio.listDecks', () => decks.map((d) => ({ id: d.id, title: d.title, slides: d.slides.length, updated: d.updated })), { description: 'List the story decks saved in Story Studio.', parameters: { type: 'object', properties: {} }, ai: true, readonly: true });
+}).catch(() => {});
 let cur = null;
 let online = false;
 let genBusy = false;

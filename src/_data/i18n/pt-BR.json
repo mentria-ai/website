@@ -1988,6 +1988,8 @@
       "rejected": "Essa não é uma ação válida. Responda com exatamente uma ação JSON.",
       "evidence_missing": "Ainda não: sua evidência não está na tela. Continue, ou cite um texto realmente visível.",
       "evidence_label": "evidência:",
+      "notes_locked": "suas notas estão bloqueadas ou vazias — abra o Notas Rápidas e desbloqueie primeiro",
+      "no_such_note": "a nota @notes.{n} não existe — confira o número no Notas Rápidas",
       "adapter_on": "adaptador: ajustado para ferramentas",
       "adapter_off": "adaptador: desligado (modelo base)",
       "btn_adapter": "Alternar o adaptador de ferramentas",

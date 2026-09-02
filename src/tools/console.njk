@@ -66,6 +66,8 @@ eleventyComputed:
     rejected:      {{ ("tool.console.rejected"       | t) | dump | safe }},
     evidenceMissing: {{ ("tool.console.evidence_missing" | t) | dump | safe }},
     evidenceLabel: {{ ("tool.console.evidence_label" | t) | dump | safe }},
+    notesLocked: {{ ("tool.console.notes_locked" | t) | dump | safe }},
+    noSuchNote: {{ ("tool.console.no_such_note" | t) | dump | safe }},
     tooManySteps:  {{ ("tool.console.too_many_steps" | t) | dump | safe }},
     sessionStart:  {{ ("tool.console.session_start"  | t) | dump | safe }},
     sessionDone:   {{ ("tool.console.session_done"   | t) | dump | safe }},
@@ -93,6 +95,7 @@ eleventyComputed:
 
   const $ = (id) => document.getElementById(id);
   const frame = $('cs-frame'), logEl = $('cs-log'), inputEl = $('cs-input'), formEl = $('cs-form');
+  import('/assets/js/mentria-bus.js').catch(() => {});
   const appSel = $('cs-app'), screenBtn = $('cs-screen'), screenText = $('cs-screentext'), adapterBtn = $('cs-adapter');
   const sendBtn = $('cs-send'), sessionBtn = $('cs-session'), stopBtn = $('cs-stop');
 
@@ -169,7 +172,16 @@ eleventyComputed:
     const vis = (main.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 360);
     const route = w.location.pathname.replace(PREFIX, '') || '/';
     let caps = [];
-    try { caps = ((w.MentriaBus && w.MentriaBus.listTools({ ai: true })) || []).filter((c) => c.name.indexOf('console') !== 0); } catch (_) {}
+    try {
+      const frameCaps = (w.MentriaBus && w.MentriaBus.listTools({ ai: true })) || [];
+      const topCaps = (window.MentriaBus && window.MentriaBus.listTools({ ai: true })) || [];
+      const seen = new Set();
+      caps = frameCaps.concat(topCaps).filter((c) => {
+        if (c.name.indexOf('console') === 0 || seen.has(c.name)) return false;
+        seen.add(c.name);
+        return true;
+      });
+    } catch (_) {}
     const capText = caps.length ? '\nCAPABILITIES (call these directly instead of tapping): ' + caps.map((c) => c.name + '(' + Object.keys((c.parameters && c.parameters.properties) || {}).join(', ') + ') — ' + c.description).join('; ') : '';
     return { text: 'APP: ' + route + '\nVISIBLE TEXT: ' + vis + capText + '\nCONTROLS:\n' + lines.join('\n'), refs, vis };
   }
@@ -200,7 +212,7 @@ eleventyComputed:
       const capName = String(a.name || '');
       if (capName.indexOf('console') === 0) return 'error: that capability cannot be used from inside a task';
       try {
-        const bus = w.MentriaBus;
+        const bus = (w.MentriaBus && w.MentriaBus.describe(capName)) ? w.MentriaBus : window.MentriaBus;
         if (!bus) return 'error: this app has no capabilities';
         const r = await bus.invoke(capName, a.args || {});
         await new Promise((res) => setTimeout(res, 500));
@@ -336,8 +348,25 @@ eleventyComputed:
     return ok / tokens.length >= 0.7;
   }
 
+  function resolveMentions(text) {
+    const found = [...String(text).matchAll(/@notes\.(\d+)/g)];
+    if (!found.length) return { task: text, attachments: [] };
+    let notes = null;
+    try { notes = window.MentriaStore ? window.MentriaStore.get('quick_notes', 'blob') : null; } catch (_) {}
+    if (!Array.isArray(notes)) throw new Error(COPY.notesLocked);
+    const sorted = notes.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    const attachments = [];
+    for (const m of found) {
+      const n = sorted[Number(m[1]) - 1];
+      if (!n) throw new Error(COPY.noSuchNote.replace('{n}', m[1]));
+      attachments.push('@notes.' + m[1] + ' — ' + (n.title || 'untitled') + ':\n' + String(n.body || '').replace(/\s+/g, ' ').slice(0, 700));
+    }
+    return { task: text, attachments };
+  }
+
   async function runTask(task, opts) {
     const o = opts || {};
+    const mentions = resolveMentions(task);
     await loadModel();
     busy = true; stopFlag = false; stopBtn.hidden = false; sendBtn.disabled = true; sessionBtn.disabled = true;
     setStatus('working', COPY.statusWorking);
@@ -349,7 +378,8 @@ eleventyComputed:
     const actions = {};
     const observed = [];
     const stats = { invalid: 0, evidenceRejects: 0, errors: 0, turns: 0 };
-    const msgs = [{ role: 'system', content: (o.system || SYSTEM) }, { role: 'user', content: 'TASK: ' + task + '\n\nSCREEN:\n' + snapshot().text }];
+    const attachText = mentions.attachments.length ? '\n\nATTACHED CONTENT:\n' + mentions.attachments.join('\n\n') : '';
+    const msgs = [{ role: 'system', content: (o.system || SYSTEM) }, { role: 'user', content: 'TASK: ' + task + attachText + '\n\nSCREEN:\n' + snapshot().text }];
     let refs = snapshot().refs;
     let final = null, outcome = 'out-of-steps', verified = false;
     try {
@@ -590,7 +620,7 @@ eleventyComputed:
       ai: true
     });
   }).catch(() => {});
-  window.__console = { snapshot, execute, runTask, runSession, testSession, parseAction, raws, setAdapter, adapterState: () => adapterOn };
+  window.__console = { snapshot, execute, runTask, runSession, testSession, resolveMentions, parseAction, raws, setAdapter, adapterState: () => adapterOn };
 })();
 </script>
 

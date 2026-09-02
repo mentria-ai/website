@@ -136,4 +136,11 @@ if (typeof window !== 'undefined') {
   window.MentriaBus = MentriaBus;
   const ch = channel();
   if (ch) ch.postMessage({ t: 'who' });
+  window.addEventListener('pagehide', () => {
+    const c = channel();
+    if (!c) return;
+    for (const [n, e] of providers) {
+      if (e.descriptor && (e.descriptor.ai === true || e.descriptor.ai === 'confirm')) c.postMessage({ t: 'retract', name: n });
+    }
+  });
 }

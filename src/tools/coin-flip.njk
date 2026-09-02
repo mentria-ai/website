@@ -83,8 +83,19 @@ eleventyComputed:
   var coin = document.getElementById("cf-coin");
   var coinBtn = document.getElementById("cf-coin");
   var coinBaseLabel = coinBtn.getAttribute("aria-label") || "";
+  var faceHeadsEl = document.querySelector(".cf__face--heads");
+  var faceTailsEl = document.querySelector(".cf__face--tails");
+  function showBothFaces() {
+    if (faceHeadsEl) faceHeadsEl.style.visibility = "";
+    if (faceTailsEl) faceTailsEl.style.visibility = "";
+  }
   function setCoinFace(faceLabel) {
     coinBtn.setAttribute("aria-label", faceLabel + " \u2014 " + coinBaseLabel);
+    if (!faceHeadsEl || !faceTailsEl) return;
+    var headsLabel = faceHeadsEl.querySelector(".cf__face-label");
+    var headsUp = !!headsLabel && faceLabel === headsLabel.textContent;
+    faceHeadsEl.style.visibility = headsUp ? "" : "hidden";
+    faceTailsEl.style.visibility = headsUp ? "hidden" : "";
   }
   var coinInner = document.getElementById("cf-coin-inner");
   var resultText = document.getElementById("cf-result-text");
@@ -163,6 +174,7 @@ eleventyComputed:
   }
 
   function doFlip() {
+    showBothFaces();
     if (flipping) return;
     if (seriesOver) {
       resetSeries();

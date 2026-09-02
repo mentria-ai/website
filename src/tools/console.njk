@@ -131,6 +131,7 @@ eleventyComputed:
 
   let cursorEl = null;
   let uiOnlyMode = false;
+  let currentTask = '';
   const disabledRejects = new Map();
   function injectCursor() {
     try {
@@ -180,14 +181,30 @@ eleventyComputed:
       const frameCaps = (w.MentriaBus && w.MentriaBus.listTools({ ai: true })) || [];
       const topCaps = (window.MentriaBus && window.MentriaBus.listTools({ ai: true })) || [];
       const seen = new Set();
+      const localNames = new Set(frameCaps.map((c) => c.name));
       caps = frameCaps.concat(topCaps).filter((c) => {
         if (c.name.indexOf('console') === 0 || seen.has(c.name)) return false;
+        if (!localNames.has(c.name) && !capRelevant(c.name, currentTask)) return false;
         seen.add(c.name);
         return true;
       });
     } catch (_) {}
     const capText = (caps.length && !uiOnlyMode) ? '\nCAPABILITIES (call these directly instead of tapping): ' + caps.map((c) => c.name + '(' + Object.keys((c.parameters && c.parameters.properties) || {}).join(', ') + ') — ' + c.description).join('; ') : '';
     return { text: 'APP: ' + route + '\nVISIBLE TEXT: ' + vis + capText + '\nCONTROLS:\n' + lines.join('\n'), refs, vis, caps };
+  }
+
+  function capTokens(name) {
+    return String(name || '').split('__').join('.').split('.').join(' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length >= 3);
+  }
+  function capRelevant(name, task) {
+    if (!task) return true;
+    const hay = ' ' + String(task).toLowerCase() + ' ';
+    for (const tok of capTokens(name)) {
+      if (hay.indexOf(tok) > -1) return true;
+      const stem = tok.replace(/s$/, '');
+      if (stem.length >= 3 && hay.indexOf(stem) > -1) return true;
+    }
+    return false;
   }
 
   const VERB = { call: 'call', invoke: 'call', use: 'call', tap: 'tap', click: 'tap', press: 'tap', select: 'tap', choose: 'tap', toggle: 'tap', open: 'open', go: 'open', navigate: 'open', launch: 'open', type: 'type', fill: 'type', enter: 'type', input: 'type', write: 'type', set: 'type', scroll: 'scroll', back: 'back', wait: 'wait', done: 'done', finish: 'done', complete: 'done', finished: 'done', stop: 'done', answer: 'done', say: 'say', reply: 'say' };
@@ -453,6 +470,7 @@ eleventyComputed:
     const o = opts || {};
     const mentions = resolveMentions(task);
     uiOnlyMode = o.uiOnly === true || (o.uiOnly !== false && UI_ONLY_RE.test(task));
+    currentTask = task;
     disabledRejects.clear();
     await loadModel();
     await refreshCapabilities();
@@ -506,7 +524,7 @@ eleventyComputed:
         if (a.do === 'call' && result.indexOf('called ') === 0 && result.indexOf('"ok":false') < 0) {
           const cn = String(a.name || '').split('__').join('.').toLowerCase();
           if (roNames.has(cn)) roResults.push(result);
-          else effects.push({ name: String(a.name || ''), result: result.slice(0, 200) });
+          else if (capRelevant(cn, task)) effects.push({ name: String(a.name || ''), result: result.slice(0, 200) });
         }
         stepLog.push(result);
         addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ' + result);
@@ -529,6 +547,7 @@ eleventyComputed:
     const quantity = quantityCheck(task, snapshot().vis, roResults, (Date.now() - t0) / 1000);
     const wasUiOnly = uiOnlyMode;
     uiOnlyMode = false;
+    currentTask = '';
     return { final: final || '', steps: stepLog, outcome, verified, actions, stats, effects, quantity, uiOnly: wasUiOnly, seconds: Math.round((Date.now() - t0) / 100) / 10 };
   }
 

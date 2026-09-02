@@ -89,6 +89,7 @@ eleventyComputed:
   ];
   const PERSONA_KEYS = { newcomer: 0, curious: 0, busy: 1, impatient: 1, careful: 2, detailed: 2, power: 3, keyboard: 3 };
   const MAX_STEPS = 12;
+  const TURN_TOKENS = 96;
   const TEST_BUDGET_MS = 300000;
   const VERDICT_RESERVE_MS = 120000;
   const VERDICT_TOKENS = 700;
@@ -327,6 +328,19 @@ eleventyComputed:
     'Never substitute. These are small offline tools: there are no accounts, payments, orders, messages, e-mail or encryption keys. If the task asks for something no app here can do, do not do a similar-looking action instead — use say to explain what is not possible.';
 
   function trimHistory(msgs) { while (msgs.length > 7) msgs.splice(2, 2); }
+  function looksTruncated(text) {
+    const at = String(text || '').indexOf('{');
+    if (at < 0) return false;
+    let depth = 0, inStr = false, esc = false;
+    for (let i = at; i < text.length; i++) {
+      const c = text[i];
+      if (inStr) { if (esc) esc = false; else if (c === '\\') esc = true; else if (c === '"') inStr = false; continue; }
+      if (c === '"') inStr = true;
+      else if (c === '{' || c === '[') depth++;
+      else if (c === '}' || c === ']') { depth--; if (depth === 0) return false; }
+    }
+    return true;
+  }
   const CLOCK = /^\d{1,2}:\d{2}(:\d{2})?$/;
   function clockSeconds(t) { const p = t.split(':').map(Number); return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1]; }
   function bigrams(t) { const out = new Set(); for (let i = 0; i < t.length - 1; i++) out.add(t.slice(i, i + 2)); return out; }
@@ -401,7 +415,8 @@ eleventyComputed:
       for (let step = 0; step < maxSteps; step++) {
         if (stopFlag) { final = COPY.stopped; outcome = 'stopped'; break; }
         if (o.deadline && Date.now() > o.deadline) { final = COPY.testTimeout; outcome = 'timeout'; break; }
-        const raw = await ask(msgs, 96);
+        let raw = await ask(msgs, TURN_TOKENS);
+        if (looksTruncated(raw)) raw = await ask(msgs, TURN_TOKENS * 4);
         stats.turns++;
         raws.push(raw); if (raws.length > 40) raws.shift();
         const a = parseAction(raw);

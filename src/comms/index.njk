@@ -198,6 +198,15 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
           <button class="comms__btn comms__btn--ghost" id="comms-newroom" type="button">new room link</button>
         </div>
       </div>
+      <div class="comms__adv-sec">
+        <span class="comms__lbl">privacy</span>
+        <button class="comms__relay" id="comms-relay" type="button" role="switch" aria-checked="false">
+          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6v5c0 4.4 3 7.9 7 9 4-1.1 7-4.6 7-9V6Z"></path><path d="M9.4 11.8l1.9 1.9 3.3-3.4"></path></svg>
+          <span class="comms__relay-lbl">hide my ip</span>
+          <span class="comms__relay-track" aria-hidden="true"><span class="comms__relay-thumb"></span></span>
+        </button>
+        <p class="comms__relay-note" id="comms-relay-note" hidden>traffic routes through the mentria relay — peers only see the relay's address, not yours. slightly slower. applies when you next join.</p>
+      </div>
       <div class="comms__share" id="comms-share" hidden>
         <span class="comms__lbl">share</span>
         <code class="comms__url" id="comms-url"></code>
@@ -273,6 +282,15 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__contacts-head .comms__lbl{flex:1}
 .comms__adv{display:flex;flex-direction:column;gap:.75rem;background:#0a0d10;border:1px dashed #2a3138;border-radius:8px;padding:.85rem}
 .comms__adv[hidden]{display:none}
+.comms__relay{display:flex;align-items:center;gap:.55rem;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
+.comms__relay svg{color:#8b97a3;transition:color .25s}
+.comms__relay[aria-checked="true"] svg{color:var(--accent,#6ef3c5)}
+.comms__relay-lbl{font-size:.85rem}
+.comms__relay-track{width:34px;height:20px;border-radius:10px;background:rgba(255,255,255,.12);position:relative;transition:background .25s}
+.comms__relay-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#8b97a3;transition:transform .25s,background .25s}
+.comms__relay[aria-checked="true"] .comms__relay-track{background:rgba(110,243,197,.25)}
+.comms__relay[aria-checked="true"] .comms__relay-thumb{transform:translateX(14px);background:var(--accent,#6ef3c5)}
+.comms__relay-note{margin:.35rem 0 0;font-size:.75rem;color:#8b97a3;max-width:46ch}
 .comms__adv-sec{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .comms__adv-sec--col{flex-direction:column;align-items:stretch}
 .comms__adv-row{display:flex;gap:.5rem;align-items:center;justify-content:space-between}
@@ -725,6 +743,27 @@ const trackObjectUrl = (blob) => { const u = URL.createObjectURL(blob); objectUr
 const revokeObjectUrls = () => { objectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch {} }); objectUrls.clear(); };
 let muted = false;
 try { muted = localStorage.getItem('comms.muted') === '1'; } catch (_) {}
+let relayOnly = false;
+try { relayOnly = localStorage.getItem('comms.relayOnly') === '1'; } catch (_) {}
+function hasTurn(list) {
+  return (list || []).some((s2) => {
+    const u = s2 && s2.urls;
+    return (Array.isArray(u) ? u : [u]).some((x) => String(x || '').startsWith('turn'));
+  });
+}
+function renderRelayToggle() {
+  const btn = document.getElementById('comms-relay');
+  const note = document.getElementById('comms-relay-note');
+  if (!btn) return;
+  btn.setAttribute('aria-checked', relayOnly ? 'true' : 'false');
+  if (note) note.hidden = !relayOnly;
+}
+document.getElementById('comms-relay').addEventListener('click', () => {
+  relayOnly = !relayOnly;
+  try { localStorage.setItem('comms.relayOnly', relayOnly ? '1' : '0'); } catch (_) {}
+  renderRelayToggle();
+});
+renderRelayToggle();
 let audioCtx = null;
 
 const CHAT_TOPIC_PREFIX = 'mentria.chat.v1.';
@@ -1188,12 +1227,15 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   }
   if (seq !== joinSeq) return;
 
+  const rtcConfig = { iceServers };
+  if (relayOnly && hasTurn(iceServers)) rtcConfig.iceTransportPolicy = 'relay';
+  else if (relayOnly) console.warn('hide-my-ip requested but no relay server available — connecting normally');
   try {
     room = joinRoom(
       {
         appId: 'mentria',
         relayConfig: { urls: [RELAY] },
-        rtcConfig: { iceServers }
+        rtcConfig
       },
       roomName
     );

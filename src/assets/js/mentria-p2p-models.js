@@ -135,13 +135,17 @@ export function ensureShardViaP2P(url, onStatus) {
   return run;
 }
 
-export async function prefetchTier(Tiers, tierId, onStatus) {
+export async function prefetchTier(Tiers, tierId, opts) {
+  const o = typeof opts === 'function' ? { onStatus: opts } : (opts || {});
   const t = Tiers.TIERS[tierId];
   if (!t) return { skipped: 'unknown-tier' };
+  if (!peersEnabled()) return { skipped: 'private-mode' };
   const base = await Tiers.resolveBase(t);
+  const files = t.shards.slice();
+  if (o.vision && t.visionShards) files.push(...t.visionShards);
   const out = [];
-  for (const shard of t.shards) {
-    out.push(await ensureShardViaP2P(base + shard, onStatus));
+  for (const shard of files) {
+    out.push(await ensureShardViaP2P(base + shard, o.onStatus));
   }
   return { base, results: out };
 }

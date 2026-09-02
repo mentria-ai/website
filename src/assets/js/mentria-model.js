@@ -289,6 +289,13 @@ export async function ensureModel(engineFactory, opts) {
   }
   requestPersistentStorage();
   try {
+    const P2P = await import('/assets/js/mentria-p2p-models.js');
+    await Promise.race([
+      P2P.prefetchTier(Tiers, candidate, { vision, onStatus: (st) => setProgress({ progress: st.progress || 0 }) }),
+      new Promise((r) => setTimeout(r, 480000))
+    ]);
+  } catch (_) {}
+  try {
     const res = await Tiers.loadWithFallback(makeEngine, candidate, {
       vision,
       validate: validateRun,

@@ -1971,7 +1971,9 @@
       "err_prefix": "error: ",
       "peer_boost": "Peer boost",
       "peer_boost_desc": "Off: downloads come only from official mirrors. On: other visitors help too — usually faster.",
-      "peer_boost_ip": "While this is on, peers can see your IP address."
+      "peer_boost_ip": "While this is on, peers can see your IP address.",
+      "on_device": "on this device",
+      "seed_title": "share {name} with other visitors"
     },
     "console": {
       "status_idle": "model idle",

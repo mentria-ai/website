@@ -21,26 +21,7 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 <section class="mm">
   <div class="mm__card">
-    <div class="mm__row">
-      <span class="mm__name">qwen3.5-0.8b · 450 MB</span>
-      <span class="mm__state" id="mm-state" data-state="idle">
-        <svg class="mm__stateicon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-          <circle class="mm__ring" cx="12" cy="12" r="9" stroke-dasharray="3.5 4.2"></circle>
-          <path class="mm__arrow mm__arrow--down" d="M12 8v7M8.8 11.8 12 15l3.2-3.2"></path>
-          <path class="mm__arrow mm__arrow--up" d="M12 16V9M8.8 12.2 12 9l3.2 3.2"></path>
-        </svg>
-        <span class="mm__statetext" id="mm-state-text">{{ "tool.model-mirror.state_idle" | t }}</span>
-      </span>
-    </div>
-    <div class="mm__bar"><div class="mm__fill" id="mm-fill"></div></div>
-    <div class="mm__stats">
-      <span><b id="mm-peers">0</b> {{ "tool.model-mirror.peers" | t }}</span>
-      <span>↓ <b id="mm-down">0</b> MB/s</span>
-      <span>↑ <b id="mm-up">0</b> MB/s</span>
-      <span>{{ "tool.model-mirror.uploaded" | t }} <b id="mm-shared">0</b> MB</span>
-    </div>
-    <button class="mm__btn" id="mm-start" type="button">{{ "tool.model-mirror.btn_start" | t }}</button>
-    <p class="mm__note">{{ "tool.model-mirror.note" | t }}</p>
+    <div class="mm__list" id="mm-list" aria-busy="true"></div>
   </div>
   <div class="mm__card mm__card--boost">
     <button type="button" class="mm__switch" id="mm-boost" role="switch" aria-checked="false" aria-label="{{ 'tool.model-mirror.peer_boost' | t }}">
@@ -57,6 +38,7 @@ eleventyComputed:
     <p class="mm__boostdesc">{{ "tool.model-mirror.peer_boost_desc" | t }}</p>
     <p class="mm__boostip" id="mm-boost-ip" hidden>{{ "tool.model-mirror.peer_boost_ip" | t }}</p>
   </div>
+  <p class="mm__note">{{ "tool.model-mirror.note" | t }}</p>
 </section>
 {% include "terminal-frame-close.njk" %}
 
@@ -65,8 +47,8 @@ eleventyComputed:
   .mm__card { width: 100%; max-width: 540px; background: var(--panel, #11161b); border: 1px solid var(--line, #22303a); border-radius: 12px; padding: 1.2rem 1.4rem; }
   .mm__row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
   .mm__name { font-family: var(--mono, monospace); font-size: .95rem; }
-  .mm__state { font-family: var(--mono, monospace); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted, #8b97a3); }
-  .mm__state[data-state="seeding"] { color: var(--accent, #6ef3c5); }
+  .mm__state-unused { font-family: var(--mono, monospace); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted, #8b97a3); }
+  .mm__row2[data-state="seeding"] { color: var(--accent, #6ef3c5); }
   .mm__bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.07); margin: .9rem 0 .7rem; overflow: hidden; }
   .mm__fill { height: 100%; width: 0%; border-radius: 4px; background: linear-gradient(90deg, #6ef3c5, #2fb894); transition: width .5s; }
   .mm__stats { display: flex; gap: 1.1rem; flex-wrap: wrap; font-size: .82rem; color: var(--muted, #8b97a3); }
@@ -77,14 +59,14 @@ eleventyComputed:
   .mm__note { margin: .9rem 0 0; font-size: .8rem; color: var(--muted, #8b97a3); }
   .mm { flex-direction: column; align-items: center; gap: .9rem; }
   .mm__card--boost { padding: .9rem 1.4rem; }
-  .mm__state { display: inline-flex; align-items: center; gap: .45rem; }
+  .mm__state-unused { display: inline-flex; align-items: center; gap: .45rem; }
   .mm__stateicon { color: var(--muted, #8b97a3); }
-  .mm__state[data-state="seeding"] .mm__stateicon { color: var(--accent, #6ef3c5); }
+  .mm__row2[data-state="seeding"] .mm__stateicon { color: var(--accent, #6ef3c5); }
   .mm__arrow { opacity: 0; transition: opacity .3s; }
-  .mm__state[data-state="fetching"] .mm__arrow--down { opacity: 1; }
-  .mm__state[data-state="seeding"] .mm__arrow--up { opacity: 1; }
-  .mm__state[data-state="fetching"] .mm__ring { animation: mm-spin 1.6s linear infinite; transform-origin: 12px 12px; }
-  .mm__state[data-state="seeding"] .mm__ring { animation: mm-pulse 2.2s ease-in-out infinite; transform-origin: 12px 12px; }
+  .mm__row2[data-state="fetching"] .mm__arrow--down { opacity: 1; }
+  .mm__row2[data-state="seeding"] .mm__arrow--up { opacity: 1; }
+  .mm__row2[data-state="fetching"] .mm__ring { animation: mm-spin 1.6s linear infinite; transform-origin: 12px 12px; }
+  .mm__row2[data-state="seeding"] .mm__ring { animation: mm-pulse 2.2s ease-in-out infinite; transform-origin: 12px 12px; }
   @keyframes mm-spin { to { transform: rotate(360deg); } }
   @keyframes mm-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.18); opacity: .45; } }
   .mm__switch { display: flex; align-items: center; gap: .6rem; width: 100%; background: none; border: 0; padding: 0; color: var(--text, #e6edf0); font: inherit; cursor: pointer; }
@@ -99,6 +81,25 @@ eleventyComputed:
   .mm__switch[aria-checked="true"] .mm__thumb { transform: translateX(16px); background: var(--accent, #6ef3c5); }
   .mm__boostdesc { margin: .55rem 0 0; font-size: .78rem; color: var(--muted, #8b97a3); }
   .mm__boostip { margin: .45rem 0 0; font-size: .78rem; color: var(--accent, #6ef3c5); }
+  .mm__list { display: flex; flex-direction: column; }
+  .mm__item { border-top: 1px solid rgba(255,255,255,.06); padding: .7rem 0; }
+  .mm__item:first-child { border-top: 0; }
+  .mm__row2 { display: flex; align-items: center; gap: .6rem; }
+  .mm__mname { flex: 1 1 auto; min-width: 0; font-family: var(--mono, monospace); font-size: .84rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mm__msize { font-family: var(--mono, monospace); font-size: .75rem; color: var(--muted, #8b97a3); }
+  .mm__have { color: var(--accent, #6ef3c5); opacity: 0; transition: opacity .3s; }
+  .mm__have.is-on { opacity: 1; }
+  .mm__seed { background: none; border: 0; padding: .2rem; color: var(--muted, #8b97a3); cursor: pointer; display: inline-flex; }
+  .mm__seed[aria-pressed="true"] { color: var(--accent, #6ef3c5); }
+  .mm__seed:hover { color: var(--text, #e6edf0); }
+  .mm__seed[aria-pressed="true"]:hover { color: var(--accent, #6ef3c5); }
+  .mm__rowbar { height: 4px; border-radius: 2px; background: rgba(255,255,255,.06); margin-top: .5rem; overflow: hidden; display: none; }
+  .mm__item.is-active .mm__rowbar { display: block; }
+  .mm__rowfill { height: 100%; width: 0%; background: linear-gradient(90deg, #6ef3c5, #2fb894); transition: width .5s; }
+  .mm__rowstats { display: none; gap: 1rem; font-size: .72rem; color: var(--muted, #8b97a3); font-family: var(--mono, monospace); margin-top: .4rem; }
+  .mm__item.is-active .mm__rowstats { display: flex; }
+  .mm__rowstats b { color: var(--text, #e6edf0); font-weight: 600; }
+  .mm__stateicon--row { flex: 0 0 auto; }
   @media (prefers-reduced-motion: reduce) { .mm__ring, .mm__thumb, .mm__boosticon { animation: none !important; transition: none !important; } }
 </style>
 
@@ -108,20 +109,107 @@ eleventyComputed:
     stateIdle: {{ ("tool.model-mirror.state_idle" | t) | dump | safe }},
     stateFetching: {{ ("tool.model-mirror.state_fetching" | t) | dump | safe }},
     stateSeeding: {{ ("tool.model-mirror.state_seeding" | t) | dump | safe }},
+    onDevice: {{ ("tool.model-mirror.on_device" | t) | dump | safe }},
+    seedTitle: {{ ("tool.model-mirror.seed_title" | t) | dump | safe }},
     errPrefix: {{ ("tool.model-mirror.err_prefix" | t) | dump | safe }}
   };
-  const stateEl = document.getElementById('mm-state');
-  const stateText = document.getElementById('mm-state-text');
+  const listEl = document.getElementById('mm-list');
   const boostBtn = document.getElementById('mm-boost');
   const boostIp = document.getElementById('mm-boost-ip');
-  const fill = document.getElementById('mm-fill');
-  const peersEl = document.getElementById('mm-peers');
-  const downEl = document.getElementById('mm-down');
-  const upEl = document.getElementById('mm-up');
-  const sharedEl = document.getElementById('mm-shared');
-  const btn = document.getElementById('mm-start');
   const mb = (n) => (n / 1048576).toFixed(1);
-  function setState(key, label) { stateEl.dataset.state = key; stateText.textContent = label; }
+  const gb = (n) => n >= 1e9 ? (n / 1073741824).toFixed(1) + ' GB' : Math.round(n / 1048576) + ' MB';
+  const seeds = new Map();
+
+  const STATE_ICON = '<svg class="mm__stateicon mm__stateicon--row" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle class="mm__ring" cx="12" cy="12" r="9" stroke-dasharray="3.5 4.2"></circle><path class="mm__arrow mm__arrow--down" d="M12 8v7M8.8 11.8 12 15l3.2-3.2"></path><path class="mm__arrow mm__arrow--up" d="M12 16V9M8.8 12.2 12 9l3.2 3.2"></path></svg>';
+  const HAVE_ICON = '<svg class="mm__have" viewBox="0 0 24 24" width="15" height="15" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l4.6 4.6L19.5 6.7"></path></svg>';
+  const SEED_ICON = '<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="5.5" r="2.2"></circle><circle cx="5.5" cy="17.5" r="2.2"></circle><circle cx="18.5" cy="17.5" r="2.2"></circle><path d="M10.9 7.5 6.8 15.5M13.1 7.5l4.1 8M7.7 17.5h8.6"></path></svg>';
+
+  async function build() {
+    const P2P = await import('/assets/js/mentria-p2p-models.js');
+    const man = await (await fetch('/assets/models-manifest.json')).json();
+    listEl.textContent = '';
+    listEl.setAttribute('aria-busy', 'false');
+    for (const name of Object.keys(man)) {
+      const entry = man[name];
+      const item = document.createElement('div');
+      item.className = 'mm__item';
+      const row = document.createElement('div');
+      row.className = 'mm__row2';
+      row.innerHTML = STATE_ICON;
+      row.querySelector('.mm__stateicon').parentElement.setAttribute('data-state', 'idle');
+      item.dataset.state = 'idle';
+      const nm = document.createElement('span');
+      nm.className = 'mm__mname';
+      nm.textContent = name.replace(/\.safetensors$/, '');
+      nm.title = name;
+      const sz = document.createElement('span');
+      sz.className = 'mm__msize';
+      sz.textContent = gb(entry.bytes);
+      row.appendChild(nm);
+      row.appendChild(sz);
+      row.insertAdjacentHTML('beforeend', HAVE_ICON);
+      const have = row.querySelector('.mm__have');
+      have.setAttribute('role', 'img');
+      have.setAttribute('aria-label', COPY.onDevice);
+      P2P.findCachedUrl(name).then((u) => { if (u) have.classList.add('is-on'); });
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'mm__seed';
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-label', COPY.seedTitle.replace('{name}', name));
+      btn.title = COPY.seedTitle.replace('{name}', name);
+      btn.innerHTML = SEED_ICON;
+      row.appendChild(btn);
+      const bar = document.createElement('div');
+      bar.className = 'mm__rowbar';
+      bar.innerHTML = '<div class="mm__rowfill"></div>';
+      const stats = document.createElement('div');
+      stats.className = 'mm__rowstats';
+      stats.innerHTML = '<span><b class="mm-peers">0</b> ⇄</span><span>↓ <b class="mm-down">0</b> MB/s</span><span>↑ <b class="mm-up">0</b> MB</span>';
+      item.appendChild(row);
+      item.appendChild(bar);
+      item.appendChild(stats);
+      listEl.appendChild(item);
+
+      btn.addEventListener('click', async () => {
+        const active = seeds.get(name);
+        if (active) {
+          active.stop();
+          seeds.delete(name);
+          btn.setAttribute('aria-pressed', 'false');
+          item.classList.remove('is-active');
+          item.dataset.state = 'idle';
+          setRowState(item, 'idle');
+          return;
+        }
+        btn.setAttribute('aria-pressed', 'true');
+        item.classList.add('is-active');
+        setRowState(item, 'fetching');
+        try {
+          const P2P2 = await import('/assets/js/mentria-p2p-models.js');
+          const seed = await P2P2.seedShard(name, (st) => {
+            bar.querySelector('.mm__rowfill').style.width = Math.round((st.progress || 0) * 100) + '%';
+            stats.querySelector('.mm-peers').textContent = st.peers;
+            stats.querySelector('.mm-down').textContent = mb(st.downSpeed || 0);
+            stats.querySelector('.mm-up').textContent = mb(st.upBytes || 0);
+            if (st.done) { setRowState(item, 'seeding'); have.classList.add('is-on'); }
+          });
+          seeds.set(name, seed);
+        } catch (err) {
+          btn.setAttribute('aria-pressed', 'false');
+          item.classList.remove('is-active');
+          setRowState(item, 'idle');
+          nm.textContent = COPY.errPrefix + (err.message || err);
+        }
+      });
+    }
+  }
+  function setRowState(item, state) {
+    item.dataset.state = state;
+    const wrap = item.querySelector('.mm__row2');
+    wrap.setAttribute('data-state', state);
+  }
+
   async function renderBoost() {
     const P2P = await import('/assets/js/mentria-p2p-models.js');
     const on = P2P.peersEnabled();
@@ -134,23 +222,6 @@ eleventyComputed:
     renderBoost();
   });
   renderBoost();
-  btn.addEventListener('click', async () => {
-    btn.disabled = true;
-    setState('fetching', COPY.stateFetching);
-    try {
-      const P2P = await import('/assets/js/mentria-p2p-models.js');
-      await P2P.seedShard('qwen3.5-0.8b-q4-tied.safetensors', (st) => {
-        fill.style.width = Math.round(st.progress * 100) + '%';
-        peersEl.textContent = String(st.peers);
-        downEl.textContent = mb(st.downSpeed || 0);
-        upEl.textContent = mb(st.upSpeed || 0);
-        sharedEl.textContent = mb(st.upBytes || 0);
-        if (st.done) setState('seeding', COPY.stateSeeding);
-      });
-    } catch (err) {
-      setState('idle', COPY.errPrefix + (err.message || err));
-      btn.disabled = false;
-    }
-  });
+  build();
 })();
 </script>

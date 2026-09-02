@@ -1971,7 +1971,9 @@
       "err_prefix": "エラー: ",
       "peer_boost": "ピアブースト",
       "peer_boost_desc": "オフ：公式ミラーからのみダウンロードします。オン：他の訪問者も協力し、通常はより高速です。",
-      "peer_boost_ip": "オンの間、ピアはあなたの IP アドレスを確認できます。"
+      "peer_boost_ip": "オンの間、ピアはあなたの IP アドレスを確認できます。",
+      "on_device": "この端末にあります",
+      "seed_title": "{name} を他の訪問者と共有"
     },
     "console": {
       "status_idle": "モデル待機中",

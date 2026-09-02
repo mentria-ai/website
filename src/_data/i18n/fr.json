@@ -1971,7 +1971,9 @@
       "err_prefix": "erreur : ",
       "peer_boost": "Boost par les pairs",
       "peer_boost_desc": "Désactivé : les téléchargements viennent uniquement des miroirs officiels. Activé : les autres visiteurs aident aussi — souvent plus rapide.",
-      "peer_boost_ip": "Tant que c'est activé, les pairs peuvent voir votre adresse IP."
+      "peer_boost_ip": "Tant que c'est activé, les pairs peuvent voir votre adresse IP.",
+      "on_device": "sur cet appareil",
+      "seed_title": "partager {name} avec les autres visiteurs"
     },
     "console": {
       "status_idle": "modèle inactif",

@@ -1971,7 +1971,9 @@
       "err_prefix": "error: ",
       "peer_boost": "Impulso entre pares",
       "peer_boost_desc": "Apagado: las descargas vienen solo de espejos oficiales. Encendido: otros visitantes también ayudan — suele ser más rápido.",
-      "peer_boost_ip": "Mientras esté activado, los pares pueden ver tu dirección IP."
+      "peer_boost_ip": "Mientras esté activado, los pares pueden ver tu dirección IP.",
+      "on_device": "en este dispositivo",
+      "seed_title": "compartir {name} con otros visitantes"
     },
     "console": {
       "status_idle": "modelo inactivo",

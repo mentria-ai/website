@@ -150,13 +150,93 @@ export async function prefetchTier(Tiers, tierId, opts) {
   return { base, results: out };
 }
 
+const HF_BASE = 'https://huggingface.co/mentriaai/';
+const CDN_BASE = 'https://cdn.mentria.ai/models/';
+
+export async function findCachedUrl(name) {
+  const man = await loadManifest();
+  const entry = man[name];
+  if (!entry) return null;
+  const candidates = [CDN_BASE + entry.repo + '/' + name, HF_BASE + entry.repo + '/resolve/main/' + name];
+  try {
+    const c = await caches.open(CACHE);
+    for (const u of candidates) {
+      const sep = u.includes('?') ? '&' : '?';
+      if (await c.match(u + sep + 'mentria_seg=meta')) return u;
+    }
+  } catch (_) {}
+  return null;
+}
+
+async function segmentBlobs(url) {
+  const c = await caches.open(CACHE);
+  const sep = url.includes('?') ? '&' : '?';
+  const meta = await (await c.match(url + sep + 'mentria_seg=meta')).json();
+  const blobs = [];
+  for (let k = 0; k < meta.segments; k++) {
+    const res = await c.match(url + sep + 'mentria_seg=' + k);
+    if (!res) throw new Error('missing segment ' + k);
+    blobs.push(await res.blob());
+  }
+  return { blobs, totalBytes: meta.totalBytes };
+}
+
+function makeCacheStore(blobs, totalBytes) {
+  return class CacheBackedStore {
+    constructor(chunkLength) {
+      this.chunkLength = chunkLength;
+      this.length = totalBytes;
+      this.overlay = new Map();
+    }
+    get(index, opts, cb) {
+      if (typeof opts === 'function') { cb = opts; opts = null; }
+      const start = index * this.chunkLength + ((opts && opts.offset) || 0);
+      const wanted = (opts && opts.length) || Math.min(this.chunkLength, this.length - index * this.chunkLength) - ((opts && opts.offset) || 0);
+      if (this.overlay.has(index)) {
+        const buf = this.overlay.get(index);
+        cb(null, buf.subarray(((opts && opts.offset) || 0), ((opts && opts.offset) || 0) + wanted));
+        return;
+      }
+      const seg = Math.floor(start / SEGMENT_BYTES);
+      const off = start - seg * SEGMENT_BYTES;
+      const blob = blobs[seg];
+      if (!blob) { cb(new Error('segment out of range')); return; }
+      blob.slice(off, off + wanted).arrayBuffer().then(
+        (ab) => cb(null, new Uint8Array(ab)),
+        (err) => cb(err)
+      );
+    }
+    put(index, buf, cb) { this.overlay.set(index, buf); if (cb) cb(null); }
+    close(cb) { if (cb) cb(null); }
+    destroy(cb) { this.overlay.clear(); if (cb) cb(null); }
+  };
+}
+
 export async function seedShard(name, onStatus) {
   const man = await loadManifest();
   const entry = man[name];
   if (!entry) throw new Error('unknown shard: ' + name);
-  const torrent = await addTorrent(entry.torrent, true);
+  const cl = await getClient();
+  const existing = cl.torrents.find((t) => t.mentriaPath === entry.torrent);
+  let torrent = existing;
+  if (!torrent) {
+    const cachedUrl = await findCachedUrl(name);
+    const tbuf = new Uint8Array(await (await fetch(entry.torrent)).arrayBuffer());
+    const opts = { announce: [TRACKER] };
+    if (cachedUrl) {
+      const { blobs, totalBytes } = await segmentBlobs(cachedUrl);
+      opts.store = makeCacheStore(blobs, totalBytes);
+      opts.skipVerify = true;
+    }
+    torrent = await new Promise((resolve, reject) => {
+      const t = cl.add(tbuf, opts);
+      t.on('ready', () => resolve(t));
+      t.on('error', reject);
+    });
+    torrent.mentriaPath = entry.torrent;
+  }
   const iv = setInterval(() => {
-    if (onStatus) onStatus({ progress: torrent.progress, peers: torrent.numPeers, downSpeed: torrent.downloadSpeed, upSpeed: torrent.uploadSpeed, upBytes: torrent.uploaded, done: torrent.done });
+    if (onStatus) onStatus({ progress: torrent.progress, peers: torrent.numPeers, downSpeed: torrent.downloadSpeed, upSpeed: torrent.uploadSpeed, upBytes: torrent.uploaded, done: torrent.done, fromCache: !!torrent.mentriaFromCache });
   }, 1000);
   return { torrent, stop: () => { clearInterval(iv); try { torrent.destroy(); } catch (_) {} } };
 }

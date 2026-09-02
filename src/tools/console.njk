@@ -524,7 +524,7 @@ eleventyComputed:
         if (a.do === 'call' && result.indexOf('called ') === 0 && result.indexOf('"ok":false') < 0) {
           const cn = String(a.name || '').split('__').join('.').toLowerCase();
           if (roNames.has(cn)) roResults.push(result);
-          else if (capRelevant(cn, task)) effects.push({ name: String(a.name || ''), result: result.slice(0, 200) });
+          else if (capRelevant(String(a.name || ''), task)) effects.push({ name: String(a.name || ''), result: result.slice(0, 200) });
         }
         stepLog.push(result);
         addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ' + result);

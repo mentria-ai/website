@@ -575,7 +575,7 @@ eleventyComputed:
         const tokens = left > 100000 ? cap : Math.max(140, Math.min(cap, Math.round(left / 170)));
         if (left > 8000) {
           let restore = false;
-          if (o.verdictBase && adapterOn) { try { await setAdapter(false); restore = true; } catch (_) {} }
+          if (o.verdictBase !== false && adapterOn) { try { await setAdapter(false); restore = true; } catch (_) {} }
           raw = await ask([{ role: 'system', content: VERDICT_SYSTEM }, { role: 'user', content: verdictPrompt(app, persona, task, r) }], tokens);
           if (restore) { try { await setAdapter(true); } catch (_) {} }
           v = parseVerdict(raw);

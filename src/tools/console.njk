@@ -309,7 +309,7 @@ eleventyComputed:
     '{"do":"scroll","direction":"down"|"up"}\n' +
     '{"do":"back"}\n' +
     '{"do":"call","name":"<capability>","args":{...}} — when the SCREEN lists CAPABILITIES, prefer calling one over tapping\n' +
-    '{"do":"done","result":"one plain sentence for the person","evidence":"a short exact quote from the SCREEN that proves it — text that would not be there if the task had failed, such as a result value, a running countdown or a confirmation; never a button label or an idle 00:00"}\n' +
+    '{"do":"done","result":"one plain sentence for the person","evidence":"a short exact quote that proves it, copied from the SCREEN or from the RESULT of a capability you called — text that would not be there if the task had failed, such as a result value, a running countdown or a confirmation; never a button label or an idle 00:00"}\n' +
     '{"do":"say","text":"a plain answer when no action is needed"}\n' +
     'Rules: use ids only from the latest SCREEN; prefer opening the right app first; use done only when the SCREEN proves the task is complete, quoting evidence; if you cannot proceed, use say to explain.\n' +
     'Never substitute. These are small offline tools: there are no accounts, payments, orders, messages, e-mail or encryption keys. If the task asks for something no app here can do, do not do a similar-looking action instead — use say to explain what is not possible.';
@@ -323,6 +323,8 @@ eleventyComputed:
     if (!ev) return false;
     const screen = norm(screenText);
     if (screen.includes(ev.slice(0, 80))) return true;
+    const squash = (t) => t.split(' ').join('');
+    if (squash(screen).includes(squash(ev).slice(0, 60))) return true;
     const tokens = ev.split(' ').filter((t) => t.length >= 3);
     if (!tokens.length) return false;
     const words = screen.split(' ');
@@ -345,6 +347,7 @@ eleventyComputed:
     const doneTries = [];
     const recent = [];
     const actions = {};
+    const observed = [];
     const stats = { invalid: 0, evidenceRejects: 0, errors: 0, turns: 0 };
     const msgs = [{ role: 'system', content: (o.system || SYSTEM) }, { role: 'user', content: 'TASK: ' + task + '\n\nSCREEN:\n' + snapshot().text }];
     let refs = snapshot().refs;
@@ -363,7 +366,7 @@ eleventyComputed:
         if (a.do === 'done') {
           const evRaw = String(a.evidence || '').trim();
           const resultText = String(a.result || a.text || a.message || '').trim();
-          const grounded = evidenceOnScreen(evRaw, snapshot().text);
+          const grounded = evidenceOnScreen(evRaw, snapshot().text + '\n' + observed.slice(-4).join('\n'));
           doneTries.push(resultText);
           const insisted = doneTries.length >= 3 && doneTries.slice(-3).every((r) => r && r === resultText);
           if (grounded || insisted) { verified = grounded; outcome = grounded ? 'done' : 'done-unverified'; final = (resultText || ('Done — the screen shows “' + evRaw.slice(0, 80) + '”.')) + (grounded ? '' : ' (unverified)'); if (evRaw) addMsg('step', COPY.evidenceLabel + ' “' + evRaw.slice(0, 80) + '”'); break; }
@@ -373,6 +376,7 @@ eleventyComputed:
         }
         const result = await execute(a, refs);
         if (result.indexOf('error:') === 0) stats.errors++;
+        else observed.push(result);
         stepLog.push(result);
         addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ' + result);
         const snap = snapshot(); refs = snap.refs;

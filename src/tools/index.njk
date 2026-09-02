@@ -24,6 +24,7 @@ eleventyComputed:
     <button class="tools-filter" type="button" data-shelf="games">{{ "about.shelf_games" | t }}</button>
     <button class="tools-filter" type="button" data-shelf="ai">{{ "about.shelf_ai" | t }}</button>
 </div>
+{{ toolIconsSvg | safe }}
 <div class="tools-listing">
     <div class="tools-listing__header">
         <span>{{ "tools_page.header.category" | t }}</span>
@@ -34,7 +35,7 @@ eleventyComputed:
     {% set shelf = "games" if tool.category == "Game" else ("ai" if tool.category == "AI" else "tools") %}
     <div class="tools-listing__row" data-shelf="{{ shelf }}" style="--i: {{ loop.index0 }}"{% if tool.requires %} data-requires="{{ tool.requires }}"{% endif %}>
         <span class="tools-listing__category">{{ ("category." + tool.category) | t }}</span>
-        <span class="tools-listing__name"><a href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">{{ ("tools." + tool.slug + ".title") | t }}</a></span>
+        <span class="tools-listing__name"><svg class="tools-listing__icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#tool-{{ tool.slug }}"></use></svg><a href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">{{ ("tools." + tool.slug + ".title") | t }}</a></span>
         <span class="tools-listing__summary">{{ ("tools." + tool.slug + ".lede") | t }}</span>
     </div>
     {% endfor %}

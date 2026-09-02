@@ -11,6 +11,7 @@ function canonical(name) { return name.indexOf('.') === -1 ? name.replace(/__/g,
 function rid() { try { return crypto.randomUUID(); } catch (e) { return 'r' + Date.now() + '-' + (performance.now() | 0); } }
 
 const providers = new Map();
+const remote = new Map();
 const pending = new Map();
 let bc = null;
 
@@ -37,6 +38,21 @@ function channel() {
     if (d.t === 'res') { const w = pending.get(d.id); if (w) { pending.delete(d.id); clearTimeout(w.timer); d.ok ? w.resolve(d.value) : w.reject(Object.assign(new Error(d.error && d.error.message || 'remote error'), { name: d.error && d.error.name || 'Error' })); } return; }
     if (d.t === 'pong') { const w = pending.get(d.id); if (w) { pending.delete(d.id); clearTimeout(w.timer); w.resolve(true); } return; }
     if (d.t === 'ping') { if (providers.has(canonical(d.name))) bc.postMessage({ t: 'pong', id: d.id }); return; }
+    if (d.t === 'announce') {
+      const n = canonical(d.name);
+      if (!providers.has(n)) {
+        remote.set(n, d.descriptor || null);
+        try { window.dispatchEvent(new CustomEvent('mentria:bus:provide', { detail: { name: d.name, remote: true } })); } catch (_) {}
+      }
+      return;
+    }
+    if (d.t === 'retract') { remote.delete(canonical(d.name)); return; }
+    if (d.t === 'who') {
+      for (const [n, e] of providers) {
+        if (e.descriptor && (e.descriptor.ai === true || e.descriptor.ai === 'confirm')) bc.postMessage({ t: 'announce', name: n, descriptor: e.descriptor });
+      }
+      return;
+    }
     if (d.t === 'req') {
       const name = canonical(d.name);
       const local = providers.get(name);
@@ -60,16 +76,18 @@ function checkArgs(name, descriptor, payload) {
 function provide(name, handler, descriptor) {
   providers.set(name, { handler, descriptor: descriptor || null });
   try { window.dispatchEvent(new CustomEvent('mentria:bus:provide', { detail: { name } })); } catch (_) {}
-  channel();
+  const ch = channel();
+  if (ch && descriptor && (descriptor.ai === true || descriptor.ai === 'confirm')) ch.postMessage({ t: 'announce', name, descriptor });
   return () => { if ((providers.get(name) || {}).handler === handler) providers.delete(name); };
 }
 
-function unprovide(name) { providers.delete(name); }
+function unprovide(name) { providers.delete(name); const ch = channel(); if (ch) ch.postMessage({ t: 'retract', name }); }
 
 function describe(name) {
   const n = canonical(name);
   if (providers.has(n)) return providers.get(n).descriptor;
   if (lazy.has(n)) return lazy.get(n).descriptor;
+  if (remote.has(n)) return remote.get(n);
   return null;
 }
 
@@ -79,6 +97,7 @@ function listTools(opts) {
   const add = (n, d) => { if (!d) return; if (ai && !(d.ai === true || d.ai === 'confirm')) return; out.push({ name: toolName(n), description: d.description, parameters: d.parameters || { type: 'object', properties: {} }, readonly: d.readonly === true }); };
   for (const [n, e] of providers) add(n, e.descriptor);
   for (const [n, e] of lazy) if (!providers.has(n)) add(n, e.descriptor);
+  for (const [n, d] of remote) if (!providers.has(n) && !lazy.has(n)) add(n, d);
   return out;
 }
 
@@ -112,4 +131,8 @@ async function invoke(name, payload, opts) {
 
 export const MentriaBus = { provide, unprovide, invoke, has, describe, listTools, NoProviderError, BadArgsError, TimeoutError };
 export default MentriaBus;
-if (typeof window !== 'undefined') window.MentriaBus = MentriaBus;
+if (typeof window !== 'undefined') {
+  window.MentriaBus = MentriaBus;
+  const ch = channel();
+  if (ch) ch.postMessage({ t: 'who' });
+}

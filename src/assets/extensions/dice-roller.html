@@ -118,6 +118,16 @@
       quick.appendChild(b);
     });
 
+    import('/assets/js/mentria-bus.js').then(function (mod) {
+      mod.MentriaBus.provide('dice.roll', function (p) {
+        var notation = String((p || {}).notation || '').trim();
+        if (!/^\d*d\d+([+-]\d+)?$/i.test(notation)) throw new Error('use dice notation like 2d6 or 1d20+3');
+        notationEl.value = notation;
+        roll();
+        return { total: totalEl.textContent, breakdown: breakdownEl.textContent };
+      }, { description: 'Roll dice with standard notation (for example 2d6 or 1d20+3); the roll is shown in the tool.', parameters: { type: 'object', properties: { notation: { type: 'string' } }, required: ['notation'] }, ai: true });
+    }).catch(function () {});
+
     document.getElementById('roll').addEventListener('click', roll);
     notationEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') roll(); });
     document.getElementById('pick').addEventListener('click', pick);

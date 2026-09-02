@@ -142,6 +142,27 @@
       storage.set('last', { cat: cat, from: fromEl.value, to: toEl.value });
     }
 
+    import('/assets/js/mentria-bus.js').then(function (mod) {
+      mod.MentriaBus.provide('unit.convert', function (p) {
+        p = p || {};
+        var val = Number(p.value);
+        if (!isFinite(val)) throw new Error('value must be a number');
+        var from = String(p.from || ''), to = String(p.to || '');
+        var found = null;
+        ORDER.forEach(function (key) {
+          var u = Object.keys(CATS[key].units);
+          if (u.indexOf(from) !== -1 && u.indexOf(to) !== -1) found = key;
+        });
+        if (!found) throw new Error('unsupported unit pair — supported: ' + ORDER.map(function (k) { return Object.keys(CATS[k].units).join('/'); }).join(' · '));
+        if (cat !== found) { cat = found; buildUnits(); }
+        valEl.value = String(val);
+        fromEl.value = from;
+        toEl.value = to;
+        compute();
+        return { result: resultEl.textContent, detail: detailEl.textContent };
+      }, { description: 'Convert a value between units (length, weight or temperature); the result is shown in the tool.', parameters: { type: 'object', properties: { value: { type: 'number' }, from: { type: 'string' }, to: { type: 'string' } }, required: ['value', 'from', 'to'] }, ai: true });
+    }).catch(function () {});
+
     document.getElementById('swap').addEventListener('click', function () {
       var f = fromEl.value; fromEl.value = toEl.value; toEl.value = f; compute(); persist();
     });

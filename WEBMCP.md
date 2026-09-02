@@ -25,6 +25,13 @@ Tool pages add their own capabilities:
 | /tools/color-picker/ | `color__set` (hex in, RGB/HSL out) |
 | /tools/qr-scanner/ | `qr__generate` (renders a scannable QR in the tool) |
 
+User-installed **extensions** join the same surface: a single-file HTML
+extension that registers a capability on the in-page bus (about 15 lines) is
+automatically announced across contexts and exposed to agents — the bundled
+Unit Converter and Dice Roller extensions ship with `unit__convert` and
+`dice__roll` as working examples. Anyone can author an agent tool without
+touching this repo.
+
 Every call operates the real UI — the person watches the agent work in their
 tab, and can take over at any point. The same capabilities also power the
 site's own on-device agent at /tools/console/, where a 27B model running on

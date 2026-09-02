@@ -1363,3 +1363,5 @@ html.mentria-no-motion [data-requires="motion"] { display: none !important; }
   .nav-link__t { display: none; }
   .nav-link { gap: 0; }
 }
+.tools-listing__icon { width: 22px; height: 22px; flex: 0 0 auto; }
+.tools-listing__name { display: inline-flex; align-items: center; gap: 0.55rem; }

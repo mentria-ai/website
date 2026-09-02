@@ -327,6 +327,8 @@ eleventyComputed:
     'Never substitute. These are small offline tools: there are no accounts, payments, orders, messages, e-mail or encryption keys. If the task asks for something no app here can do, do not do a similar-looking action instead — use say to explain what is not possible.';
 
   function trimHistory(msgs) { while (msgs.length > 7) msgs.splice(2, 2); }
+  const CLOCK = /^\d{1,2}:\d{2}(:\d{2})?$/;
+  function clockSeconds(t) { const p = t.split(':').map(Number); return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1]; }
   function bigrams(t) { const out = new Set(); for (let i = 0; i < t.length - 1; i++) out.add(t.slice(i, i + 2)); return out; }
   function dice(a, b) { if (a.length < 2 || b.length < 2) return a === b ? 1 : 0; const A = bigrams(a), B = bigrams(b); let hit = 0; for (const g of A) if (B.has(g)) hit++; return (2 * hit) / (A.size + B.size); }
   function evidenceOnScreen(evidence, screenText) {
@@ -343,7 +345,7 @@ eleventyComputed:
     let ok = 0;
     for (const t of tokens) {
       if (screen.includes(t)) { ok++; continue; }
-      if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(t)) continue;
+      if (CLOCK.test(t)) { if (words.some((w) => CLOCK.test(w) && Math.abs(clockSeconds(w) - clockSeconds(t)) <= 120 && (clockSeconds(w) > 0) === (clockSeconds(t) > 0))) ok++; continue; }
       if (t.length >= 6 && words.some((w) => Math.abs(w.length - t.length) <= 3 && dice(w, t) >= 0.6)) ok++;
     }
     return ok / tokens.length >= 0.7;
@@ -365,10 +367,22 @@ eleventyComputed:
     return { task: text, attachments };
   }
 
+  async function refreshCapabilities() {
+    try {
+      const { MentriaBus } = await import('/assets/js/mentria-bus.js');
+      const ch = new BroadcastChannel('mentria-bus');
+      for (const t of MentriaBus.listTools({ ai: true })) ch.postMessage({ t: 'retract', name: t.name });
+      ch.postMessage({ t: 'who' });
+      await new Promise((r) => setTimeout(r, 600));
+      ch.close();
+    } catch (_) {}
+  }
+
   async function runTask(task, opts) {
     const o = opts || {};
     const mentions = resolveMentions(task);
     await loadModel();
+    await refreshCapabilities();
     busy = true; stopFlag = false; stopBtn.hidden = false; sendBtn.disabled = true; sessionBtn.disabled = true;
     setStatus('working', COPY.statusWorking);
     const t0 = Date.now();
@@ -557,9 +571,13 @@ eleventyComputed:
       let v = null, raw = '';
       try {
         const left = deadline - Date.now();
-        const tokens = left > 100000 ? VERDICT_TOKENS : Math.max(140, Math.round(left / 170));
+        const cap = Number(o.verdictTokens) || VERDICT_TOKENS;
+        const tokens = left > 100000 ? cap : Math.max(140, Math.min(cap, Math.round(left / 170)));
         if (left > 8000) {
+          let restore = false;
+          if (o.verdictBase && adapterOn) { try { await setAdapter(false); restore = true; } catch (_) {} }
           raw = await ask([{ role: 'system', content: VERDICT_SYSTEM }, { role: 'user', content: verdictPrompt(app, persona, task, r) }], tokens);
+          if (restore) { try { await setAdapter(true); } catch (_) {} }
           v = parseVerdict(raw);
         }
       } finally { busy = false; setStatus('ready', COPY.statusReady); }

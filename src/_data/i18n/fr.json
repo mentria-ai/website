@@ -1988,6 +1988,7 @@
       "rejected": "Action invalide. Réponds avec exactement une action JSON.",
       "evidence_missing": "Pas encore terminé : ta preuve n'est pas à l'écran. Continue, ou cite un texte réellement visible.",
       "evidence_label": "preuve :",
+      "qty_mismatch": "L’application a utilisé une valeur différente de celle demandée par la tâche",
       "notes_locked": "vos notes sont verrouillées ou vides — ouvrez Notes Rapides et déverrouillez-les d'abord",
       "no_such_note": "la note @notes.{n} n'existe pas — vérifiez le numéro dans Notes Rapides",
       "adapter_on": "adaptateur : réglé pour les outils",

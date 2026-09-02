@@ -1988,6 +1988,7 @@
       "rejected": "That was not a valid action. Reply with exactly one JSON action.",
       "evidence_missing": "Not done yet: your evidence is not on the screen. Continue, or quote text that is actually visible.",
       "evidence_label": "evidence:",
+      "qty_mismatch": "The app used a different amount than the task asked for",
       "notes_locked": "your notes are locked or empty — open Quick Notes and unlock them first",
       "no_such_note": "there is no note @notes.{n} — check the number in Quick Notes",
       "adapter_on": "adapter: tuned for tool calls",

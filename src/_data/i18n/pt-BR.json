@@ -1988,6 +1988,7 @@
       "rejected": "Essa não é uma ação válida. Responda com exatamente uma ação JSON.",
       "evidence_missing": "Ainda não: sua evidência não está na tela. Continue, ou cite um texto realmente visível.",
       "evidence_label": "evidência:",
+      "qty_mismatch": "O app usou um valor diferente do que a tarefa pedia",
       "notes_locked": "suas notas estão bloqueadas ou vazias — abra o Notas Rápidas e desbloqueie primeiro",
       "no_such_note": "a nota @notes.{n} não existe — confira o número no Notas Rápidas",
       "adapter_on": "adaptador: ajustado para ferramentas",

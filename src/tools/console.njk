@@ -66,6 +66,7 @@ eleventyComputed:
     rejected:      {{ ("tool.console.rejected"       | t) | dump | safe }},
     evidenceMissing: {{ ("tool.console.evidence_missing" | t) | dump | safe }},
     evidenceLabel: {{ ("tool.console.evidence_label" | t) | dump | safe }},
+    qtyMismatch:   {{ ("tool.console.qty_mismatch"   | t) | dump | safe }},
     notesLocked: {{ ("tool.console.notes_locked" | t) | dump | safe }},
     noSuchNote: {{ ("tool.console.no_such_note" | t) | dump | safe }},
     tooManySteps:  {{ ("tool.console.too_many_steps" | t) | dump | safe }},
@@ -129,6 +130,8 @@ eleventyComputed:
   screenBtn.addEventListener('click', () => { const on = screenText.hidden; screenText.hidden = !on; screenBtn.setAttribute('aria-pressed', String(on)); if (on) screenText.textContent = snapshot().text; });
 
   let cursorEl = null;
+  let uiOnlyMode = false;
+  const disabledRejects = new Map();
   function injectCursor() {
     try {
       const d = frame.contentDocument;
@@ -183,8 +186,8 @@ eleventyComputed:
         return true;
       });
     } catch (_) {}
-    const capText = caps.length ? '\nCAPABILITIES (call these directly instead of tapping): ' + caps.map((c) => c.name + '(' + Object.keys((c.parameters && c.parameters.properties) || {}).join(', ') + ') — ' + c.description).join('; ') : '';
-    return { text: 'APP: ' + route + '\nVISIBLE TEXT: ' + vis + capText + '\nCONTROLS:\n' + lines.join('\n'), refs, vis };
+    const capText = (caps.length && !uiOnlyMode) ? '\nCAPABILITIES (call these directly instead of tapping): ' + caps.map((c) => c.name + '(' + Object.keys((c.parameters && c.parameters.properties) || {}).join(', ') + ') — ' + c.description).join('; ') : '';
+    return { text: 'APP: ' + route + '\nVISIBLE TEXT: ' + vis + capText + '\nCONTROLS:\n' + lines.join('\n'), refs, vis, caps };
   }
 
   const VERB = { call: 'call', invoke: 'call', use: 'call', tap: 'tap', click: 'tap', press: 'tap', select: 'tap', choose: 'tap', toggle: 'tap', open: 'open', go: 'open', navigate: 'open', launch: 'open', type: 'type', fill: 'type', enter: 'type', input: 'type', write: 'type', set: 'type', scroll: 'scroll', back: 'back', wait: 'wait', done: 'done', finish: 'done', complete: 'done', finished: 'done', stop: 'done', answer: 'done', say: 'say', reply: 'say' };
@@ -212,6 +215,7 @@ eleventyComputed:
     if (a.do === 'call') {
       const capName = String(a.name || '');
       if (capName.indexOf('console') === 0) return 'error: that capability cannot be used from inside a task';
+      if (uiOnlyMode) return 'error: this task must be done with the on-screen controls, not by calling a capability. Tap and type instead.';
       try {
         const bus = (w.MentriaBus && w.MentriaBus.describe(capName)) ? w.MentriaBus : window.MentriaBus;
         if (!bus) return 'error: this app has no capabilities';
@@ -224,7 +228,12 @@ eleventyComputed:
     const el = refs[Number(a.id)];
     if (!el) return 'error: no control with id ' + a.id;
     const label = (el.getAttribute('aria-label') || el.textContent || el.value || el.tagName).trim().replace(/\s+/g, ' ').slice(0, 30);
-    if (el.disabled || el.getAttribute('aria-disabled') === 'true') return 'error: "' + label + '" is disabled right now and cannot be tapped. Find an enabled control that changes the state first (for example Reset), or use a capability.';
+    if (el.disabled || el.getAttribute('aria-disabled') === 'true') {
+      const n = (disabledRejects.get(label) || 0) + 1;
+      disabledRejects.set(label, n);
+      if (n >= 2) return 'error: "' + label + '" is still disabled after you tried to recover it. Stop trying it. If nothing on this screen can complete the task, say what is blocking you and finish with say.';
+      return 'error: "' + label + '" is disabled right now and cannot be tapped. Find an enabled control that changes the state first (for example Reset), or use a capability.';
+    }
     await pointAt(el);
     if (a.do === 'tap') {
       const isNav = el.tagName === 'A' && el.getAttribute('href') && !el.getAttribute('href').startsWith('#');
@@ -365,6 +374,54 @@ eleventyComputed:
     return ok / tokens.length >= 0.7;
   }
 
+  const DUR_SECS = { hour: 3600, hours: 3600, hr: 3600, hrs: 3600, h: 3600, minute: 60, minutes: 60, min: 60, mins: 60, m: 60, second: 1, seconds: 1, sec: 1, secs: 1, s: 1 };
+  const DUR_RE = /(\d+(?:\.\d+)?)\s*(hours?|hrs?|h|minutes?|mins?|m|seconds?|secs?|s)(?![a-z])/gi;
+  const CLOCK_RE = /\d{1,2}:\d{2}(?::\d{2})?/g;
+  const DUR_KEY_RE = /"[a-z_]*(?:second|remaining|duration)[a-z_]*"\s*:\s*(\d+)/gi;
+  const UI_ONLY_RE = /\b(?:using|with|through|via)\s+(?:the\s+)?(?:on-?screen\s+)?(?:buttons?|controls?|ui|interface|screen)\b|\bon\s+screen\b|\bby\s+hand\b|\bwithout\s+(?:using\s+)?(?:a\s+)?(?:capabilit|tool\s*call)/i;
+  const QTY_SLACK = 20;
+
+  function taskDurations(text) {
+    const s = String(text || '');
+    const out = [];
+    let end = -1;
+    for (const m of s.matchAll(DUR_RE)) {
+      const secs = Math.round(parseFloat(m[1]) * DUR_SECS[m[2].toLowerCase()]);
+      if (out.length && end >= 0 && /^[\s,]*(and\s+)?$/i.test(s.slice(end, m.index))) out[out.length - 1] += secs;
+      else out.push(secs);
+      end = m.index + m[0].length;
+    }
+    return out.filter((n) => n > 0);
+  }
+  function clockList(text) {
+    const out = [];
+    for (const m of String(text || '').replace(/\s*:\s*/g, ':').match(CLOCK_RE) || []) {
+      const p = m.split(':').map(Number);
+      if (p.some((n) => Number.isNaN(n))) continue;
+      out.push(p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1]);
+    }
+    return out;
+  }
+  function resultDurations(list) {
+    const out = [];
+    for (const s of list || []) for (const m of String(s).matchAll(DUR_KEY_RE)) out.push(Number(m[1]));
+    return out;
+  }
+  function fmtClock(n) {
+    const s = Math.max(0, Math.round(n));
+    return String(Math.floor(s / 3600)).padStart(2, '0') + ':' + String(Math.floor(s / 60) % 60).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  }
+  function quantityCheck(task, vis, roResults, elapsedSec) {
+    const asked = taskDurations(task);
+    if (!asked.length) return null;
+    const seen = clockList(vis).concat(resultDurations(roResults)).filter((n) => n > 0);
+    if (!seen.length) return null;
+    for (const want of asked) if (seen.some((c) => c <= want + QTY_SLACK && c >= Math.max(0, want - elapsedSec - QTY_SLACK))) return null;
+    const want = asked[asked.length - 1];
+    const near = seen.reduce((a, b) => (Math.abs(b - want) < Math.abs(a - want) ? b : a));
+    return { kind: 'duration', askedSeconds: want, observedSeconds: near, expected: fmtClock(want), actual: fmtClock(near), over: near > want };
+  }
+
   function resolveMentions(text) {
     const found = [...String(text).matchAll(/@notes\.(\d+)/g)];
     if (!found.length) return { task: text, attachments: [] };
@@ -395,6 +452,8 @@ eleventyComputed:
   async function runTask(task, opts) {
     const o = opts || {};
     const mentions = resolveMentions(task);
+    uiOnlyMode = o.uiOnly === true || (o.uiOnly !== false && UI_ONLY_RE.test(task));
+    disabledRejects.clear();
     await loadModel();
     await refreshCapabilities();
     busy = true; stopFlag = false; stopBtn.hidden = false; sendBtn.disabled = true; sessionBtn.disabled = true;
@@ -406,10 +465,17 @@ eleventyComputed:
     const recent = [];
     const actions = {};
     const observed = [];
+    const effects = [];
+    const roResults = [];
+    const roNames = new Set();
+    const noteCaps = (caps) => { for (const c of caps || []) if (c.readonly === true) roNames.add(String(c.name || '').split('__').join('.').toLowerCase()); };
     const stats = { invalid: 0, evidenceRejects: 0, errors: 0, turns: 0 };
     const attachText = mentions.attachments.length ? '\n\nATTACHED CONTENT:\n' + mentions.attachments.join('\n\n') : '';
-    const msgs = [{ role: 'system', content: (o.system || SYSTEM) }, { role: 'user', content: 'TASK: ' + task + attachText + '\n\nSCREEN:\n' + snapshot().text }];
-    let refs = snapshot().refs;
+    const first = snapshot();
+    noteCaps(first.caps);
+    const system = (o.system || SYSTEM) + (uiOnlyMode ? '\nFor this task do not use call. Drive the on-screen controls with tap and type so the interface itself is exercised.' : '');
+    const msgs = [{ role: 'system', content: system }, { role: 'user', content: 'TASK: ' + task + attachText + '\n\nSCREEN:\n' + first.text }];
+    let refs = first.refs;
     let final = null, outcome = 'out-of-steps', verified = false;
     try {
       for (let step = 0; step < maxSteps; step++) {
@@ -437,9 +503,14 @@ eleventyComputed:
         const result = await execute(a, refs);
         if (result.indexOf('error:') === 0) stats.errors++;
         else observed.push(result);
+        if (a.do === 'call' && result.indexOf('called ') === 0 && result.indexOf('"ok":false') < 0) {
+          const cn = String(a.name || '').split('__').join('.').toLowerCase();
+          if (roNames.has(cn)) roResults.push(result);
+          else effects.push({ name: String(a.name || ''), result: result.slice(0, 200) });
+        }
         stepLog.push(result);
         addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ' + result);
-        const snap = snapshot(); refs = snap.refs;
+        const snap = snapshot(); refs = snap.refs; noteCaps(snap.caps);
         const sig = JSON.stringify([a.do, a.id, a.text, a.app]);
         recent.push(sig); if (recent.length > 6) recent.shift();
         const looping = recent.length >= 4 && new Set(recent.slice(-4)).size <= 2;
@@ -455,7 +526,10 @@ eleventyComputed:
       setStatus('ready', COPY.statusReady);
     }
     if (!stepLog.length && (outcome === 'done' || outcome === 'done-unverified')) outcome = 'say';
-    return { final: final || '', steps: stepLog, outcome, verified, actions, stats, seconds: Math.round((Date.now() - t0) / 100) / 10 };
+    const quantity = quantityCheck(task, snapshot().vis, roResults, (Date.now() - t0) / 1000);
+    const wasUiOnly = uiOnlyMode;
+    uiOnlyMode = false;
+    return { final: final || '', steps: stepLog, outcome, verified, actions, stats, effects, quantity, uiOnly: wasUiOnly, seconds: Math.round((Date.now() - t0) / 100) / 10 };
   }
 
   formEl.addEventListener('submit', async (e) => {
@@ -596,13 +670,22 @@ eleventyComputed:
           v = parseVerdict(raw);
         }
       } finally { busy = false; setStatus('ready', COPY.statusReady); }
-      renderVerdict(app, persona, v, raw, r.steps);
       const accomplished = v && typeof v.accomplished === 'boolean' ? v.accomplished : null;
+      const stateChanged = r.effects.length > 0;
+      const qtyFail = !!(r.quantity && (r.quantity.kind === 'duration' || o.strictQuantities === true));
+      const reached = (r.outcome === 'done' && r.verified === true) || (r.outcome === 'say' && stateChanged);
+      if (qtyFail) {
+        const hb = { title: COPY.qtyMismatch, steps: r.steps.join('; ').slice(0, 400), expected: r.quantity.expected, actual: r.quantity.actual, severity: 'major' };
+        if (!v) v = { summary: '', worked: [], friction: [], bugs: [] };
+        v.bugs = [hb].concat(Array.isArray(v.bugs) ? v.bugs : []);
+      }
+      renderVerdict(app, persona, v, raw, r.steps);
       return {
         task: task, persona: persona || null, app: app.slug || 'home',
         adapter: adapterOn ? 'on' : 'off',
-        success: r.outcome === 'done' && r.verified === true && accomplished !== false,
+        success: reached && accomplished !== false && !qtyFail,
         accomplished: accomplished,
+        stateChanged: stateChanged, effects: r.effects, quantity: r.quantity || null, uiOnly: r.uiOnly,
         outcome: r.outcome, verified: r.verified, final: r.final,
         steps: r.steps, stepCount: r.steps.length, actions: r.actions, rejects: r.stats,
         seconds: Math.round((Date.now() - started) / 100) / 10, runSeconds: r.seconds,
@@ -614,7 +697,9 @@ eleventyComputed:
     } finally { testing = false; }
   }
   function verdictPrompt(app, persona, task, r) {
-    return 'App: ' + app.title + ' (' + app.summary + ')\n' + (persona ? 'Persona: ' + persona + '\n' : '') + 'TASK: ' + task + '\nWhat you did:\n' + (r.steps.length ? r.steps.map((s, i) => (i + 1) + '. ' + s).join('\n') : '(nothing — no action was taken)') + '\nWhat you told the person: ' + (r.final || '(nothing)') + '\nFinal screen:\n' + snapshot().text;
+    const effectLine = (r.effects && r.effects.length) ? 'Confirmed by the harness — these calls really ran and returned: ' + r.effects.map((e) => e.result).join('; ') + '\n' : '';
+    const qtyLine = r.quantity ? 'Measured by the harness: the task asked for ' + r.quantity.expected + ' but the app is showing ' + r.quantity.actual + '. Treat that as a real defect.\n' : '';
+    return 'App: ' + app.title + ' (' + app.summary + ')\n' + (persona ? 'Persona: ' + persona + '\n' : '') + 'TASK: ' + task + '\nWhat you did:\n' + (r.steps.length ? r.steps.map((s, i) => (i + 1) + '. ' + s).join('\n') : '(nothing — no action was taken)') + '\n' + effectLine + qtyLine + 'What you told the person: ' + (r.final || '(nothing)') + '\nFinal screen:\n' + snapshot().text;
   }
   async function runSession() {
     if (busy || testing) return;
@@ -644,17 +729,18 @@ eleventyComputed:
   }
   sessionBtn.addEventListener('click', runSession);
   import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
-    MentriaBus.provide('console.test', (args) => testSession({ task: (args || {}).task, persona: (args || {}).persona }), {
+    MentriaBus.provide('console.test', (args) => testSession({ task: (args || {}).task, persona: (args || {}).persona, uiOnly: (args || {}).uiOnly === true ? true : undefined }), {
       description: 'Commission a QA test of a Mentria app. The 27B model running on this device opens the app and tries to carry out the task the way a person would, then reports what worked, what was awkward, and any bugs, with steps to reproduce. Takes one to five minutes and needs the 27B tier.',
       parameters: { type: 'object', properties: {
         task: { type: 'string', description: 'What the test user should try to do, in plain language, naming the app — for example "Set a 5 minute countdown timer and start it".' },
-        persona: { type: 'string', description: 'Optional test user: newcomer, busy, careful, power, random, or a sentence describing one.' }
+        persona: { type: 'string', description: 'Optional test user: newcomer, busy, careful, power, random, or a sentence describing one.' },
+        uiOnly: { type: 'boolean', description: 'Optional. Force the test user to drive the on-screen controls instead of calling a capability, so the interface itself is exercised.' }
       }, required: ['task'] },
       timeoutMs: 320000,
       ai: true
     });
   }).catch(() => {});
-  window.__console = { snapshot, execute, runTask, runSession, testSession, resolveMentions, parseAction, raws, setAdapter, adapterState: () => adapterOn };
+  window.__console = { snapshot, execute, runTask, runSession, testSession, resolveMentions, parseAction, raws, setAdapter, adapterState: () => adapterOn, quantityCheck, taskDurations, clockList, evidenceOnScreen, uiOnlyRe: UI_ONLY_RE };
 })();
 </script>
 

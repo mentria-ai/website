@@ -243,9 +243,10 @@ import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
     if (!title) throw new Error('title is required');
     const rawSlides = Array.isArray(o.slides) ? o.slides : [];
     if (!rawSlides.length || rawSlides.length > 12) throw new Error('need 1-12 slides, each with a caption');
-    const slides = rawSlides.map((sl) => {
+    const slides = rawSlides.map((slRaw) => {
+      const sl = typeof slRaw === 'string' ? { caption: slRaw } : slRaw;
       const caption = String((sl && sl.caption) || '').trim().slice(0, 200);
-      if (!caption) throw new Error('every slide needs a caption');
+      if (!caption) throw new Error('every slide needs a caption — send slides as [{"caption":"..."}] or plain strings');
       const out = { id: uid(), caption };
       const prompt = String((sl && sl.prompt) || '').trim().slice(0, 300);
       if (prompt) out.prompt = prompt;

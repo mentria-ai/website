@@ -653,7 +653,7 @@ eleventyComputed:
       if (Date.now() > deadline - 30000) throw new Error(COPY.testNoTime);
       const system = SYSTEM + (persona ? '\nYou are role-playing ' + persona + '. Think like that person, not like an engineer.' : '');
       const runDeadline = Math.max(Date.now() + 20000, deadline - VERDICT_RESERVE_MS);
-      const r = await runTask(task, { system, maxSteps: o.maxSteps || MAX_STEPS, deadline: runDeadline });
+      const r = await runTask(task, { system, maxSteps: o.maxSteps || MAX_STEPS, deadline: runDeadline, uiOnly: o.uiOnly });
       addMsg('model', r.final);
       const app = APPS.find((a) => a.slug === currentSlug()) || home;
       busy = true; setStatus('working', COPY.statusWorking);
@@ -673,7 +673,7 @@ eleventyComputed:
       const accomplished = v && typeof v.accomplished === 'boolean' ? v.accomplished : null;
       const stateChanged = r.effects.length > 0;
       const qtyFail = !!(r.quantity && (r.quantity.kind === 'duration' || o.strictQuantities === true));
-      const reached = (r.outcome === 'done' && r.verified === true) || (r.outcome === 'say' && stateChanged);
+      const reached = (r.outcome === 'done' && r.verified === true && accomplished !== false) || (r.outcome === 'say' && stateChanged && accomplished === true);
       if (qtyFail) {
         const hb = { title: COPY.qtyMismatch, steps: r.steps.join('; ').slice(0, 400), expected: r.quantity.expected, actual: r.quantity.actual, severity: 'major' };
         if (!v) v = { summary: '', worked: [], friction: [], bugs: [] };
@@ -683,7 +683,7 @@ eleventyComputed:
       return {
         task: task, persona: persona || null, app: app.slug || 'home',
         adapter: adapterOn ? 'on' : 'off',
-        success: reached && accomplished !== false && !qtyFail,
+        success: reached && !qtyFail,
         accomplished: accomplished,
         stateChanged: stateChanged, effects: r.effects, quantity: r.quantity || null, uiOnly: r.uiOnly,
         outcome: r.outcome, verified: r.verified, final: r.final,

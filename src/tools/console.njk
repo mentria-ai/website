@@ -412,7 +412,80 @@ eleventyComputed:
   inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); formEl.requestSubmit(); } });
   stopBtn.addEventListener('click', () => { stopFlag = true; });
 
-  const VERDICT_SYSTEM = 'You just used a web app as a test user. Write an honest, specific report as JSON only:\n{"accomplished":true|false,"summary":"2 sentences","worked":["..."],"friction":["..."],"bugs":[{"title":"short title","steps":"how to reproduce","expected":"...","actual":"...","severity":"minor|major|critical"}]}\naccomplished is true only if the TASK you were given was actually carried out. It is false if you only did something similar, or if this app cannot do what was asked — say so in the summary.\nOnly report bugs you actually observed on the SCREEN. Empty arrays are fine.';
+  function repairJson(text) {
+    const at = text.indexOf('{');
+    if (at < 0) return null;
+    const body = text.slice(at);
+    const stack = [];
+    let inStr = false, esc = false, safe = -1;
+    for (let i = 0; i < body.length; i++) {
+      const c = body[i];
+      if (inStr) {
+        if (esc) esc = false;
+        else if (c === '\\') esc = true;
+        else if (c === '"') { inStr = false; safe = i + 1; }
+        continue;
+      }
+      if (c === '"') { inStr = true; continue; }
+      if (c === '{' || c === '[') { stack.push(c === '{' ? '}' : ']'); continue; }
+      if (c === '}' || c === ']') { stack.pop(); safe = i + 1; continue; }
+      if (c === ',' || c === ':' || c <= ' ') continue;
+      safe = i + 1;
+    }
+    const close = (str, open) => {
+      let out = str.replace(/[\n\r\t]/g, ' ').replace(/[,\s]+$/, '');
+      if (/[{\[,:]$/.test(out)) return null;
+      for (let i = open.length - 1; i >= 0; i--) out += open[i];
+      try { return JSON.parse(out); } catch (_) { return null; }
+    };
+    const tries = [];
+    if (inStr) {
+      let tail = body;
+      if (esc) tail = tail.slice(0, -1);
+      tries.push([tail + '"', stack]);
+    }
+    if (safe > 0) {
+      let cut = body.slice(0, safe);
+      for (let n = 0; n < 4 && cut.length > 1; n++) {
+        const st = [];
+        let q = false, e2 = false;
+        for (const c of cut) {
+          if (q) { if (e2) e2 = false; else if (c === '\\') e2 = true; else if (c === '"') q = false; continue; }
+          if (c === '"') q = true;
+          else if (c === '{' || c === '[') st.push(c === '{' ? '}' : ']');
+          else if (c === '}' || c === ']') st.pop();
+        }
+        tries.push([cut, st]);
+        const back = Math.max(cut.lastIndexOf(','), cut.lastIndexOf('{'), cut.lastIndexOf('['));
+        if (back < 1) break;
+        cut = cut.slice(0, back);
+      }
+    }
+    for (const [cand, open] of tries) {
+      const v = close(cand, open);
+      if (v && typeof v === 'object') return v;
+    }
+    return null;
+  }
+  function parseVerdict(raw) {
+    const m = String(raw || '').match(/\{[\s\S]*\}/);
+    if (m) { try { return JSON.parse(m[0]); } catch (_) {} }
+    return repairJson(String(raw || ''));
+  }
+  function cleanList(arr, cap) {
+    const seen = new Set(), out = [];
+    for (const x of (Array.isArray(arr) ? arr : [])) {
+      const t = typeof x === 'string' ? x.trim() : x;
+      if (!t) continue;
+      const key = (typeof t === 'string' ? t : JSON.stringify(t)).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      out.push(t);
+      if (out.length >= cap) break;
+    }
+    return out;
+  }
+  const VERDICT_SYSTEM = 'You just used a web app as a test user. Write an honest, specific report as JSON only:\n{"accomplished":true|false,"summary":"2 sentences","worked":["..."],"friction":["..."],"bugs":[{"title":"short title","steps":"how to reproduce","expected":"...","actual":"...","severity":"minor|major|critical"}]}\naccomplished is true only if the TASK you were given was actually carried out. It is false if you only did something similar, or if this app cannot do what was asked — say so in the summary.\nOnly report bugs you actually observed on the SCREEN. Empty arrays are fine, and are the right answer for a short run.\nAt most three items in each list, one short sentence each. Never repeat an item.';
   const SESSION_TASKS = [
     'Explore this app as a real person would: try its main feature with realistic input, check the result, then try two different secondary controls. Do not repeat an action you already did. When you have tried three different things, finish with done.',
     'Complete the most obvious task this app is for, then undo or change what you did once. Do not repeat yourself. Finish with done after at most eight actions.',
@@ -456,7 +529,7 @@ eleventyComputed:
         const tokens = left > 100000 ? VERDICT_TOKENS : Math.max(140, Math.round(left / 170));
         if (left > 8000) {
           raw = await ask([{ role: 'system', content: VERDICT_SYSTEM }, { role: 'user', content: verdictPrompt(app, persona, task, r) }], tokens);
-          try { v = JSON.parse(raw.match(/\{[\s\S]*\}/)[0]); } catch (_) {}
+          v = parseVerdict(raw);
         }
       } finally { busy = false; setStatus('ready', COPY.statusReady); }
       renderVerdict(app, persona, v, raw, r.steps);
@@ -471,8 +544,8 @@ eleventyComputed:
         seconds: Math.round((Date.now() - started) / 100) / 10, runSeconds: r.seconds,
         verdictParsed: !!v,
         summary: (v && v.summary) || raw.replace(/\s+/g, ' ').trim().slice(0, 400) || r.final,
-        worked: (v && v.worked) || [], friction: (v && v.friction) || [],
-        bugs: ((v && v.bugs) || []).map((b) => ({ title: String(b.title || ''), steps: String(b.steps || ''), expected: String(b.expected || ''), actual: String(b.actual || ''), severity: ['critical', 'major', 'minor'].includes(b.severity) ? b.severity : 'minor' }))
+        worked: cleanList(v && v.worked, 5), friction: cleanList(v && v.friction, 5),
+        bugs: cleanList((v && v.bugs) || [], 4).map((b) => ({ title: String(b.title || ''), steps: String(b.steps || ''), expected: String(b.expected || ''), actual: String(b.actual || ''), severity: ['critical', 'major', 'minor'].includes(b.severity) ? b.severity : 'minor' }))
       };
     } finally { testing = false; }
   }
@@ -492,7 +565,7 @@ eleventyComputed:
     if (!v) { const p = document.createElement('p'); p.textContent = raw.slice(0, 600); body.appendChild(p); return; }
     const p = document.createElement('p'); p.textContent = v.summary || ''; body.appendChild(p);
     const mk = (title, arr, cls) => { if (!arr || !arr.length) return; const t = document.createElement('div'); t.className = 'cs__vsub'; t.textContent = title; body.appendChild(t); const ul = document.createElement('ul'); ul.className = cls || ''; arr.forEach((x) => { const li = document.createElement('li'); li.textContent = typeof x === 'string' ? x : (x.title + ' — ' + (x.actual || '') + ' [' + (x.severity || 'minor') + ']'); ul.appendChild(li); }); body.appendChild(ul); };
-    mk('✓', v.worked); mk('~', v.friction); mk('✗', v.bugs, 'cs__bugs');
+    mk('✓', cleanList(v.worked, 5)); mk('~', cleanList(v.friction, 5)); mk('✗', cleanList(v.bugs, 4), 'cs__bugs');
     (v.bugs || []).forEach((b) => {
       const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'm-btn m-btn--ghost m-btn--pill cs__file'; btn.textContent = COPY.btnFile + ': ' + String(b.title || '').slice(0, 40);
       btn.addEventListener('click', () => {

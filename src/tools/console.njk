@@ -72,6 +72,9 @@ eleventyComputed:
     verdictTitle:  {{ ("tool.console.verdict_title"  | t) | dump | safe }},
     btnFile:       {{ ("tool.console.btn_file_issue" | t) | dump | safe }},
     stopped:       {{ ("tool.console.stopped"        | t) | dump | safe }},
+    testBusy:      {{ ("tool.console.test_busy"      | t) | dump | safe }},
+    testTimeout:   {{ ("tool.console.test_timeout"   | t) | dump | safe }},
+    testNoTime:    {{ ("tool.console.test_no_time"   | t) | dump | safe }},
     appHome:       {{ ("tool.console.app_home"       | t) | dump | safe }}
   };
   const PREFIX = {{ locale.pathPrefix | dump | safe }};
@@ -82,7 +85,11 @@ eleventyComputed:
     'a careful, detail-oriented user who reads labels, checks results, and notices anything inconsistent',
     'a keyboard-first power user who expects shortcuts, sensible defaults, and quick recovery from mistakes'
   ];
+  const PERSONA_KEYS = { newcomer: 0, curious: 0, busy: 1, impatient: 1, careful: 2, detailed: 2, power: 3, keyboard: 3 };
   const MAX_STEPS = 12;
+  const TEST_BUDGET_MS = 300000;
+  const VERDICT_RESERVE_MS = 120000;
+  const VERDICT_TOKENS = 700;
 
   const $ = (id) => document.getElementById(id);
   const frame = $('cs-frame'), logEl = $('cs-log'), inputEl = $('cs-input'), formEl = $('cs-form');
@@ -162,7 +169,7 @@ eleventyComputed:
     const vis = (main.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 360);
     const route = w.location.pathname.replace(PREFIX, '') || '/';
     let caps = [];
-    try { caps = (w.MentriaBus && w.MentriaBus.listTools({ ai: true })) || []; } catch (_) {}
+    try { caps = ((w.MentriaBus && w.MentriaBus.listTools({ ai: true })) || []).filter((c) => c.name.indexOf('console') !== 0); } catch (_) {}
     const capText = caps.length ? '\nCAPABILITIES (call these directly instead of tapping): ' + caps.map((c) => c.name + '(' + Object.keys((c.parameters && c.parameters.properties) || {}).join(', ') + ') — ' + c.description).join('; ') : '';
     return { text: 'APP: ' + route + '\nVISIBLE TEXT: ' + vis + capText + '\nCONTROLS:\n' + lines.join('\n'), refs, vis };
   }
@@ -190,10 +197,12 @@ eleventyComputed:
     if (a.do === 'back') { const p = loaded(); w.history.back(); await p; return 'went back'; }
     if (a.do === 'scroll') { const dir = /up/i.test(String(a.direction || a.text || '')) ? -1 : 1; w.scrollBy({ top: dir * w.innerHeight * 0.8, behavior: 'smooth' }); await new Promise((r) => setTimeout(r, 500)); return 'scrolled ' + (dir < 0 ? 'up' : 'down'); }
     if (a.do === 'call') {
+      const capName = String(a.name || '');
+      if (capName.indexOf('console') === 0) return 'error: that capability cannot be used from inside a task';
       try {
         const bus = w.MentriaBus;
         if (!bus) return 'error: this app has no capabilities';
-        const r = await bus.invoke(String(a.name || ''), a.args || {});
+        const r = await bus.invoke(capName, a.args || {});
         await new Promise((res) => setTimeout(res, 500));
         return 'called ' + a.name + ' → ' + JSON.stringify(r).slice(0, 160);
       } catch (e) { return 'error: ' + String(e && e.message || e).slice(0, 120); }
@@ -329,49 +338,58 @@ eleventyComputed:
     await loadModel();
     busy = true; stopFlag = false; stopBtn.hidden = false; sendBtn.disabled = true; sessionBtn.disabled = true;
     setStatus('working', COPY.statusWorking);
+    const t0 = Date.now();
+    const maxSteps = o.maxSteps || MAX_STEPS;
     const stepLog = [];
     const doneTries = [];
     const recent = [];
+    const actions = {};
+    const stats = { invalid: 0, evidenceRejects: 0, errors: 0, turns: 0 };
     const msgs = [{ role: 'system', content: (o.system || SYSTEM) }, { role: 'user', content: 'TASK: ' + task + '\n\nSCREEN:\n' + snapshot().text }];
     let refs = snapshot().refs;
-    let final = null;
+    let final = null, outcome = 'out-of-steps', verified = false;
     try {
-      for (let step = 0; step < (o.maxSteps || MAX_STEPS); step++) {
-        if (stopFlag) { final = COPY.stopped; break; }
+      for (let step = 0; step < maxSteps; step++) {
+        if (stopFlag) { final = COPY.stopped; outcome = 'stopped'; break; }
+        if (o.deadline && Date.now() > o.deadline) { final = COPY.testTimeout; outcome = 'timeout'; break; }
         const raw = await ask(msgs, 96);
+        stats.turns++;
         raws.push(raw); if (raws.length > 40) raws.shift();
         const a = parseAction(raw);
-        if (!a || !a.do) { addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ✗ ' + raw.replace(/\s+/g, ' ').slice(0, 90)); msgs.push({ role: 'assistant', content: raw }); msgs.push({ role: 'user', content: COPY.rejected + '\n\nSCREEN:\n' + snapshot().text }); trimHistory(msgs); continue; }
-        if (a.do === 'say') { final = String(a.text || a.result || a.message || ''); break; }
+        if (!a || !a.do) { stats.invalid++; addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ✗ ' + raw.replace(/\s+/g, ' ').slice(0, 90)); msgs.push({ role: 'assistant', content: raw }); msgs.push({ role: 'user', content: COPY.rejected + '\n\nSCREEN:\n' + snapshot().text }); trimHistory(msgs); continue; }
+        actions[a.do] = (actions[a.do] || 0) + 1;
+        if (a.do === 'say') { final = String(a.text || a.result || a.message || ''); outcome = 'say'; break; }
         if (a.do === 'done') {
           const evRaw = String(a.evidence || '').trim();
           const resultText = String(a.result || a.text || a.message || '').trim();
           const grounded = evidenceOnScreen(evRaw, snapshot().text);
           doneTries.push(resultText);
           const insisted = doneTries.length >= 3 && doneTries.slice(-3).every((r) => r && r === resultText);
-          if (grounded || insisted) { final = (resultText || ('Done — the screen shows “' + evRaw.slice(0, 80) + '”.')) + (grounded ? '' : ' (unverified)'); if (evRaw) addMsg('step', COPY.evidenceLabel + ' “' + evRaw.slice(0, 80) + '”'); break; }
+          if (grounded || insisted) { verified = grounded; outcome = grounded ? 'done' : 'done-unverified'; final = (resultText || ('Done — the screen shows “' + evRaw.slice(0, 80) + '”.')) + (grounded ? '' : ' (unverified)'); if (evRaw) addMsg('step', COPY.evidenceLabel + ' “' + evRaw.slice(0, 80) + '”'); break; }
+          stats.evidenceRejects++;
           addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ✗ ' + COPY.evidenceMissing.split('.')[0] + ' (“' + evRaw.slice(0, 40) + '”)');
           msgs.push({ role: 'assistant', content: raw }); msgs.push({ role: 'user', content: COPY.evidenceMissing + '\n\nSCREEN:\n' + snapshot().text }); trimHistory(msgs); continue;
         }
         const result = await execute(a, refs);
+        if (result.indexOf('error:') === 0) stats.errors++;
         stepLog.push(result);
         addMsg('step', COPY.stepLabel + ' ' + (step + 1) + ': ' + result);
         const snap = snapshot(); refs = snap.refs;
         const sig = JSON.stringify([a.do, a.id, a.text, a.app]);
         recent.push(sig); if (recent.length > 6) recent.shift();
         const looping = recent.length >= 4 && new Set(recent.slice(-4)).size <= 2;
-        const left = (o.maxSteps || MAX_STEPS) - step - 1;
+        const left = maxSteps - step - 1;
         const nudge = (looping ? '\nYou are repeating the same actions. Do something different, or finish with done.' : '') + (left <= 3 ? '\nOnly ' + left + ' step(s) left — finish with done now if the task is complete.' : '');
         msgs.push({ role: 'assistant', content: JSON.stringify(a) });
         msgs.push({ role: 'user', content: 'RESULT: ' + result + nudge + '\n\nSCREEN:\n' + snap.text });
         trimHistory(msgs);
-        if (step === (o.maxSteps || MAX_STEPS) - 1) final = COPY.tooManySteps;
+        if (step === maxSteps - 1) final = COPY.tooManySteps;
       }
     } finally {
       busy = false; stopBtn.hidden = true; sendBtn.disabled = false; sessionBtn.disabled = false;
       setStatus('ready', COPY.statusReady);
     }
-    return { final: final || '', steps: stepLog };
+    return { final: final || '', steps: stepLog, outcome, verified, actions, stats, seconds: Math.round((Date.now() - t0) / 100) / 10 };
   }
 
   formEl.addEventListener('submit', async (e) => {
@@ -394,24 +412,69 @@ eleventyComputed:
     'Complete the most obvious task this app is for, then undo or change what you did once. Do not repeat yourself. Finish with done after at most eight actions.',
     'Test the edges: an empty input, then a very long input, then switch between the app\'s modes if it has any. One try each, then finish with done.'
   ];
-  async function runSession() {
-    if (busy) return;
-    const persona = PERSONAS[Math.floor(Math.random() * PERSONAS.length)];
-    const slug = appSel.value || APPS[Math.floor(Math.random() * APPS.length)].slug;
-    const app = APPS.find((a) => a.slug === slug) || home;
-    if (currentSlug() !== slug) { const p = loaded(); frame.src = routeFor(slug); await p; }
-    const task = SESSION_TASKS[Math.floor(Math.random() * SESSION_TASKS.length)];
-    addMsg('step', COPY.sessionStart + ' ' + app.title + ' — ' + persona);
-    const system = SYSTEM + '\nYou are role-playing ' + persona + '. Think like that person, not like an engineer.';
-    let r;
-    try { r = await runTask(task, { system, maxSteps: MAX_STEPS }); } catch (err) { addMsg('model', String(err && err.message || err)); return; }
-    addMsg('model', r.final);
-    busy = true; setStatus('working', COPY.statusWorking);
+  function resolvePersona(p) {
+    const s = String(p == null ? '' : p).trim();
+    if (!s) return null;
+    const k = s.toLowerCase();
+    if (k === 'random') return PERSONAS[Math.floor(Math.random() * PERSONAS.length)];
+    if (Object.prototype.hasOwnProperty.call(PERSONA_KEYS, k)) return PERSONAS[PERSONA_KEYS[k]];
+    return s;
+  }
+  let testing = false;
+  async function testSession(opts) {
+    const o = opts || {};
+    const task = String(o.task || '').trim();
+    if (!task) throw new Error('task is required');
+    if (testing || busy) throw new Error(COPY.testBusy);
+    testing = true;
+    const started = Date.now();
     try {
-      const raw = await ask([{ role: 'system', content: VERDICT_SYSTEM }, { role: 'user', content: 'App: ' + app.title + ' (' + app.summary + ')\nPersona: ' + persona + '\nWhat you did:\n' + r.steps.map((s, i) => (i + 1) + '. ' + s).join('\n') + '\nFinal screen:\n' + snapshot().text }], 700);
-      let v = null; try { v = JSON.parse(raw.match(/\{[\s\S]*\}/)[0]); } catch (_) {}
+      if (!navigator.gpu) throw new Error(COPY.noWebgpu);
+      const Tiers = await import('/assets/js/mentria-tiers.js');
+      if ((await Tiers.effectiveTier()) !== '27b') throw new Error(COPY.notSupported);
+      const deadline = started + (Number(o.budgetMs) || TEST_BUDGET_MS);
+      const persona = resolvePersona(o.persona);
+      if (o.app) { const target = findApp(o.app); if (target && currentSlug() !== target.slug) { const p = loaded(); frame.src = routeFor(target.slug); await p; } }
+      addMsg('step', COPY.sessionStart + ' ' + task + (persona ? ' — ' + persona : ''));
+      await loadModel();
+      if (Date.now() > deadline - 30000) throw new Error(COPY.testNoTime);
+      const system = SYSTEM + (persona ? '\nYou are role-playing ' + persona + '. Think like that person, not like an engineer.' : '');
+      const runDeadline = Math.max(Date.now() + 20000, deadline - VERDICT_RESERVE_MS);
+      const r = await runTask(task, { system, maxSteps: o.maxSteps || MAX_STEPS, deadline: runDeadline });
+      addMsg('model', r.final);
+      const app = APPS.find((a) => a.slug === currentSlug()) || home;
+      busy = true; setStatus('working', COPY.statusWorking);
+      let v = null, raw = '';
+      try {
+        const left = deadline - Date.now();
+        const tokens = left > 100000 ? VERDICT_TOKENS : Math.max(140, Math.round(left / 170));
+        if (left > 8000) {
+          raw = await ask([{ role: 'system', content: VERDICT_SYSTEM }, { role: 'user', content: verdictPrompt(app, persona, task, r) }], tokens);
+          try { v = JSON.parse(raw.match(/\{[\s\S]*\}/)[0]); } catch (_) {}
+        }
+      } finally { busy = false; setStatus('ready', COPY.statusReady); }
       renderVerdict(app, persona, v, raw, r.steps);
-    } finally { busy = false; setStatus('ready', COPY.statusReady); }
+      return {
+        task: task, persona: persona || null, app: app.slug || 'home',
+        adapter: adapterOn ? 'on' : 'off',
+        outcome: r.outcome, verified: r.verified, final: r.final,
+        steps: r.steps, stepCount: r.steps.length, actions: r.actions, rejects: r.stats,
+        seconds: Math.round((Date.now() - started) / 100) / 10, runSeconds: r.seconds,
+        verdictParsed: !!v,
+        summary: (v && v.summary) || raw.replace(/\s+/g, ' ').trim().slice(0, 400) || r.final,
+        worked: (v && v.worked) || [], friction: (v && v.friction) || [],
+        bugs: ((v && v.bugs) || []).map((b) => ({ title: String(b.title || ''), steps: String(b.steps || ''), expected: String(b.expected || ''), actual: String(b.actual || ''), severity: ['critical', 'major', 'minor'].includes(b.severity) ? b.severity : 'minor' }))
+      };
+    } finally { testing = false; }
+  }
+  function verdictPrompt(app, persona, task, r) {
+    return 'App: ' + app.title + ' (' + app.summary + ')\n' + (persona ? 'Persona: ' + persona + '\n' : '') + 'What you did:\n' + (r.steps.length ? r.steps.map((s, i) => (i + 1) + '. ' + s).join('\n') : '(nothing)') + '\nFinal screen:\n' + snapshot().text;
+  }
+  async function runSession() {
+    if (busy || testing) return;
+    const slug = appSel.value || APPS[Math.floor(Math.random() * APPS.length)].slug;
+    const task = SESSION_TASKS[Math.floor(Math.random() * SESSION_TASKS.length)];
+    try { await testSession({ task, persona: 'random', app: slug }); } catch (err) { addMsg('model', String(err && err.message || err)); }
   }
   function renderVerdict(app, persona, v, raw, steps) {
     const body = addMsg('model', '');
@@ -434,7 +497,17 @@ eleventyComputed:
     logEl.scrollTop = logEl.scrollHeight;
   }
   sessionBtn.addEventListener('click', runSession);
-  window.__console = { snapshot, execute, runTask, runSession, parseAction, raws, setAdapter, adapterState: () => adapterOn };
+  import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
+    MentriaBus.provide('console.test', (args) => testSession({ task: (args || {}).task, persona: (args || {}).persona }), {
+      description: 'Commission a QA test of a Mentria app. The 27B model running on this device opens the app and tries to carry out the task the way a person would, then reports what worked, what was awkward, and any bugs, with steps to reproduce. Takes one to five minutes and needs the 27B tier.',
+      parameters: { type: 'object', properties: {
+        task: { type: 'string', description: 'What the test user should try to do, in plain language, naming the app — for example "Set a 5 minute countdown timer and start it".' },
+        persona: { type: 'string', description: 'Optional test user: newcomer, busy, careful, power, random, or a sentence describing one.' }
+      }, required: ['task'] },
+      ai: true
+    });
+  }).catch(() => {});
+  window.__console = { snapshot, execute, runTask, runSession, testSession, parseAction, raws, setAdapter, adapterState: () => adapterOn };
 })();
 </script>
 

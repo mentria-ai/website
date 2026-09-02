@@ -1,0 +1,62 @@
+{
+  "qwen3.5-0.8b-q4-tied.safetensors": {
+    "repo": "Qwen3.5-0.8B-mentria",
+    "bytes": 471955288,
+    "sha256": "71b434498b4e5ce7a61d6bcbc79751013ae9750e7e0463fa98236154895cc162",
+    "torrent": "/assets/torrents/qwen3.5-0.8b-q4-tied.71b43449.torrent"
+  },
+  "qwen3.5-0.8b-vl-q4.safetensors": {
+    "repo": "Qwen3.5-0.8B-mentria",
+    "bytes": 63312264,
+    "sha256": "96c4274aa5f72c750bc1de9a388890f66ad683a86afb315c923c502bf61ee580",
+    "torrent": "/assets/torrents/qwen3.5-0.8b-vl-q4.96c4274a.torrent"
+  },
+  "qwen3.5-2b-q4-tied.safetensors": {
+    "repo": "Qwen3.5-2B-mentria",
+    "bytes": 1178019792,
+    "sha256": "65bae83762903a2b03fad449a4f780a70359a4b18146a4fa7b7fc738f5fb9af6",
+    "torrent": "/assets/torrents/qwen3.5-2b-q4-tied.65bae837.torrent"
+  },
+  "qwen3.5-2b-vl-q4.safetensors": {
+    "repo": "Qwen3.5-2B-mentria",
+    "bytes": 208275800,
+    "sha256": "37fd5f9959b5146256201b2515b7fc32f5dd698c3691d029025afd6f0b8e08bb",
+    "torrent": "/assets/torrents/qwen3.5-2b-vl-q4.37fd5f99.torrent"
+  },
+  "qwen3.5-4b-q4-tied-00001-of-00002.safetensors": {
+    "repo": "Qwen3.5-4B-mentria",
+    "bytes": 1894137880,
+    "sha256": "013827163ad46ad3e0a549c419cd033776f543375f16d3bb9638677b45b52a5e",
+    "torrent": "/assets/torrents/qwen3.5-4b-q4-tied-00001-of-00002.01382716.torrent"
+  },
+  "qwen3.5-4b-q4-tied-00002-of-00002.safetensors": {
+    "repo": "Qwen3.5-4B-mentria",
+    "bytes": 737738616,
+    "sha256": "0f45893ebeadc04fcae8b94209321d6f477f18021f0f5afbae6daf4ba6738eb0",
+    "torrent": "/assets/torrents/qwen3.5-4b-q4-tied-00002-of-00002.0f45893e.torrent"
+  },
+  "qwen3.5-4b-vl-q4.safetensors": {
+    "repo": "Qwen3.5-4B-mentria",
+    "bytes": 209588568,
+    "sha256": "a3b7ecddd7bf7e7211befe9f3fbcd1d684d624d419b56598d466918c3cf1553f",
+    "torrent": "/assets/torrents/qwen3.5-4b-vl-q4.a3b7ecdd.torrent"
+  },
+  "bonsai-27b-q1g128-00001-of-00002.safetensors": {
+    "repo": "Bonsai-27B-mentria",
+    "bytes": 1898027320,
+    "sha256": "8af3241c29d9f8b41475d724f2c573f49d39cf3402b9e03880cb14b7da3655d6",
+    "torrent": "/assets/torrents/bonsai-27b-q1g128-00001-of-00002.8af3241c.torrent"
+  },
+  "bonsai-27b-q1g128-00002-of-00002.safetensors": {
+    "repo": "Bonsai-27B-mentria",
+    "bytes": 1894506792,
+    "sha256": "0bb1f67c579cfafd18bed04f22a77f6946b7d8ee766f9b89ecdc704ffa2ea7af",
+    "torrent": "/assets/torrents/bonsai-27b-q1g128-00002-of-00002.0bb1f67c.torrent"
+  },
+  "bonsai-27b-vl-q4.safetensors": {
+    "repo": "Bonsai-27B-mentria",
+    "bytes": 741189552,
+    "sha256": "4adf57bc123d682ef6a975be178a8e1229bcc95a98263bf6332d0c43901698e2",
+    "torrent": "/assets/torrents/bonsai-27b-vl-q4.4adf57bc.torrent"
+  }
+}

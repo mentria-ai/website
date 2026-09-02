@@ -1968,7 +1968,10 @@
       "peers": "pares",
       "uploaded": "compartido",
       "note": "El modelo se descarga una vez — desde pares si hay disponibles, o desde la fuente oficial — y esta pestaña lo sirve a otros visitantes. Cierra la pestaña para parar. Los pares pueden ver las direcciones IP de los demás, como en cualquier red P2P; cada bloque se verifica con hash antes de usarse.",
-      "err_prefix": "error: "
+      "err_prefix": "error: ",
+      "peer_boost": "Impulso entre pares",
+      "peer_boost_desc": "Apagado: las descargas vienen solo de espejos oficiales. Encendido: otros visitantes también ayudan — suele ser más rápido.",
+      "peer_boost_ip": "Mientras esté activado, los pares pueden ver tu dirección IP."
     },
     "console": {
       "status_idle": "modelo inactivo",

@@ -82,11 +82,15 @@ function loadLocalModel() {
         if (window.mentriaWrapEngine) window.mentriaWrapEngine(e);
         return e;
       };
+      const cached = await Tiers.isTierCached('0.8b');
+      if (!cached && typeof window.mentriaConfirmHeavyDownload === 'function') {
+        const okDl = await window.mentriaConfirmHeavyDownload();
+        if (!okDl) throw new Error('download-postponed');
+      }
       try {
         const P2P = await import('/assets/js/mentria-p2p-models.js');
-        const t08 = Tiers.TIERS['0.8b'];
         await Promise.race([
-          P2P.ensureShardViaP2P(t08.base + t08.shards[0]),
+          P2P.prefetchTier(Tiers, '0.8b'),
           new Promise((r) => setTimeout(r, 480000))
         ]);
       } catch (_) {}

@@ -1968,7 +1968,10 @@
       "peers": "pares",
       "uploaded": "compartilhado",
       "note": "O modelo é baixado uma vez — de pares quando disponíveis, senão da fonte oficial — e esta aba o serve a outros visitantes. Feche a aba para parar. Os pares podem ver os endereços IP uns dos outros, como em qualquer rede P2P; cada bloco é verificado por hash antes do uso.",
-      "err_prefix": "erro: "
+      "err_prefix": "erro: ",
+      "peer_boost": "Impulso entre pares",
+      "peer_boost_desc": "Desligado: os downloads vêm só de espelhos oficiais. Ligado: outros visitantes também ajudam — geralmente mais rápido.",
+      "peer_boost_ip": "Enquanto estiver ligado, os pares podem ver seu endereço IP."
     },
     "console": {
       "status_idle": "modelo ocioso",

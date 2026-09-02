@@ -1968,7 +1968,10 @@
       "peers": "pairs",
       "uploaded": "partagé",
       "note": "Le modèle se télécharge une fois — depuis des pairs si disponibles, sinon depuis la source officielle — puis cet onglet le sert aux autres visiteurs. Fermez l'onglet pour arrêter. Les pairs voient les adresses IP des autres, comme dans tout réseau P2P ; chaque bloc est vérifié par empreinte avant usage.",
-      "err_prefix": "erreur : "
+      "err_prefix": "erreur : ",
+      "peer_boost": "Boost par les pairs",
+      "peer_boost_desc": "Désactivé : les téléchargements viennent uniquement des miroirs officiels. Activé : les autres visiteurs aident aussi — souvent plus rapide.",
+      "peer_boost_ip": "Tant que c'est activé, les pairs peuvent voir votre adresse IP."
     },
     "console": {
       "status_idle": "modèle inactif",

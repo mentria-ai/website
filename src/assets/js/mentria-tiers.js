@@ -339,22 +339,67 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
       config = { ...config, attention: { ...config.attention, maxSeq: seq } };
     }
   }
+  const shardBase = await resolveBase(t);
   const opts = {
-    modelUrl: t.base,
+    modelUrl: shardBase,
     shards: t.shards.slice(),
     config,
     allowTiedEmbed: true,
-    tokenizerUrl: t.base
+    tokenizerUrl: shardBase
   };
   if (vendor === 'nvidia' && t.nvidiaMaxSeq) opts.residualFusion = true;
   if (vendor === 'apple' && t.appleMaxSeq) opts.kvF16 = true;
   if (t.streamingLoad) opts.streamingLoad = true;
   if (vision) {
-    opts.visionModelUrl = t.base;
+    opts.visionModelUrl = shardBase;
     opts.visionShards = t.visionShards.slice();
     opts.visionConfig = t.visionConfigExport ? mod[t.visionConfigExport] : t.visionConfig;
   }
   return opts;
+}
+
+const CDN_MODELS = 'https://cdn.mentria.ai/models/';
+let basePicks = null;
+
+function cdnBaseFor(t) {
+  const m = (t.base || '').match(/huggingface\.co\/mentriaai\/([^/]+)\//);
+  return m ? CDN_MODELS + m[1] + '/' : null;
+}
+
+async function cachedBaseFor(t, cdn) {
+  try {
+    const c = await caches.open('mentria-models');
+    for (const b of [cdn, t.base]) {
+      if (!b) continue;
+      const u = b + t.shards[0];
+      const sep = u.includes('?') ? '&' : '?';
+      if (await c.match(u + sep + 'mentria_seg=meta') || await c.match(u)) return b;
+    }
+  } catch (_) {}
+  return null;
+}
+
+export async function resolveBase(t) {
+  const cdn = cdnBaseFor(t);
+  if (!cdn) return t.base;
+  const cached = await cachedBaseFor(t, cdn);
+  if (cached) return cached;
+  if (basePicks === null) {
+    try { basePicks = JSON.parse(sessionStorage.getItem('mentria-model-base') || '{}'); } catch (_) { basePicks = {}; }
+  }
+  const hit = basePicks[cdn];
+  if (hit && Date.now() - hit.t < 3600000) return hit.ok ? cdn : t.base;
+  let ok = false;
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 2500);
+    const res = await fetch(cdn + t.shards[0], { method: 'HEAD', signal: ctl.signal });
+    clearTimeout(timer);
+    ok = res.ok;
+  } catch (_) {}
+  basePicks[cdn] = { ok, t: Date.now() };
+  try { sessionStorage.setItem('mentria-model-base', JSON.stringify(basePicks)); } catch (_) {}
+  return ok ? cdn : t.base;
 }
 
 export async function loadWithFallback(createEngine, startTier, { vision = true, onFallback = null, validate = null } = {}) {

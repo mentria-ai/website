@@ -1968,7 +1968,10 @@
       "peers": "peers",
       "uploaded": "shared",
       "note": "The model downloads once — from peers when available, otherwise from the official source — then this tab serves it to other visitors. Close the tab to stop. Peers can see each other's IP addresses, as in any peer-to-peer network; every block is hash-verified before use.",
-      "err_prefix": "error: "
+      "err_prefix": "error: ",
+      "peer_boost": "Peer boost",
+      "peer_boost_desc": "Off: downloads come only from official mirrors. On: other visitors help too — usually faster.",
+      "peer_boost_ip": "While this is on, peers can see your IP address."
     },
     "console": {
       "status_idle": "model idle",

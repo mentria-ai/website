@@ -122,7 +122,8 @@ async function invoke(name, payload, opts) {
   const ch = channel();
   if (!ch || !(await has(n))) throw new NoProviderError(n);
   const id = rid();
-  const timeout = (opts && opts.timeout) || INVOKE_TIMEOUT;
+  const d = describe(n);
+  const timeout = (opts && opts.timeout) || (d && d.timeoutMs) || INVOKE_TIMEOUT;
   return new Promise((resolve, reject) => {
     pending.set(id, { resolve, reject, timer: setTimeout(() => { pending.delete(id); reject(new TimeoutError(n)); }, timeout) });
     ch.postMessage({ t: 'req', id, name: n, payload });

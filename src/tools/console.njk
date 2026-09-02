@@ -586,6 +586,7 @@ eleventyComputed:
         task: { type: 'string', description: 'What the test user should try to do, in plain language, naming the app — for example "Set a 5 minute countdown timer and start it".' },
         persona: { type: 'string', description: 'Optional test user: newcomer, busy, careful, power, random, or a sentence describing one.' }
       }, required: ['task'] },
+      timeoutMs: 320000,
       ai: true
     });
   }).catch(() => {});

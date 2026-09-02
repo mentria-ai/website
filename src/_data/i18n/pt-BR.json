@@ -1377,6 +1377,8 @@
       "export_all": "Exportar tudo (criptografado)",
       "refresh": "Atualizar",
       "tree_label": "Dados armazenados",
+      "caches_group": "Caches do navegador",
+      "caches_share": "caches {n}",
       "select_prompt": "Selecione um espaço de nomes para ver seus itens.",
       "items_caption": "Itens armazenados",
       "col_key": "Chave",

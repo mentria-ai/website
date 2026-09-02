@@ -1377,6 +1377,8 @@
       "export_all": "Tout exporter (chiffré)",
       "refresh": "Actualiser",
       "tree_label": "Données stockées",
+      "caches_group": "Caches du navigateur",
+      "caches_share": "caches {n}",
       "select_prompt": "Sélectionnez un espace de noms pour voir ses éléments.",
       "items_caption": "Éléments stockés",
       "col_key": "Clé",

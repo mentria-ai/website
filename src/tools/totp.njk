@@ -498,7 +498,7 @@ eleventyComputed:
           <span class="totp-row__code" data-copy>—</span>
           <span class="totp-row__next"><span class="totp-row__next-label">${COPY.next_label}</span><span class="totp-row__next-value">—</span></span>
         </div>
-        <button type="button" class="totp-row__del" data-del title="${COPY.delete_confirm.replace(/{name}/g, '')}">×</button>
+        <button type="button" class="totp-row__del" data-del title="${COPY.delete_confirm.replace(/{name}/g, '')}"><svg viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6"></path></svg></button>
       `;
       li.querySelector('.totp-row__issuer').textContent = acc.issuer || '—';
       li.querySelector('.totp-row__account').textContent = acc.account || '';

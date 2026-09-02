@@ -1377,6 +1377,8 @@
       "export_all": "Export all (encrypted)",
       "refresh": "Refresh",
       "tree_label": "Stored data",
+      "caches_group": "Browser caches",
+      "caches_share": "caches {n}",
       "select_prompt": "Select a namespace to view its items.",
       "items_caption": "Stored items",
       "col_key": "Key",

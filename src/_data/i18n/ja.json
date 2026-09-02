@@ -1377,6 +1377,8 @@
       "export_all": "すべてエクスポート（暗号化）",
       "refresh": "更新",
       "tree_label": "保存済みデータ",
+      "caches_group": "ブラウザキャッシュ",
+      "caches_share": "キャッシュ {n}",
       "select_prompt": "項目を表示する名前空間を選択してください。",
       "items_caption": "保存済みの項目",
       "col_key": "キー",

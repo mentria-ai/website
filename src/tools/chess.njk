@@ -26,7 +26,7 @@ eleventyComputed:
 <div id="chess-help" popover class="game-help chess-help">
   <div class="chess-help__bar">
     <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
-    <button type="button" class="chess-help__x" id="chess-help-close" aria-label="{{ 'tool.chess.help_close' | t }}">✕</button>
+    <button type="button" class="chess-help__x" id="chess-help-close" aria-label="{{ 'tool.chess.help_close' | t }}">{% include "icon-x.njk" %}</button>
   </div>
   <div class="chess-help__methods">
     <section class="chess-help__method" data-method="pointer" data-input="pointer">

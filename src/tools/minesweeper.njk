@@ -24,7 +24,7 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 
 <div id="minesweeper-help" popover class="game-help ms-help">
-  <button type="button" class="ms-help__close" popovertarget="minesweeper-help" popovertargetaction="hide" aria-label="{{ 'tool.minesweeper.help_close' | t }}">×</button>
+  <button type="button" class="ms-help__close" popovertarget="minesweeper-help" popovertargetaction="hide" aria-label="{{ 'tool.minesweeper.help_close' | t }}">{% include "icon-x.njk" %}</button>
   <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
 
   <p class="ms-help__badge">

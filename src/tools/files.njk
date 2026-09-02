@@ -65,7 +65,7 @@ eleventyComputed:
   <div class="files-modal__card m-modal__card">
     <div class="files-modal__head">
       <h3 class="files-modal__h" id="files-view-title"></h3>
-      <button type="button" class="m-btn m-btn--icon" data-close aria-label="{{ 'tool.files.close' | t }}">✕</button>
+      <button type="button" class="m-btn m-btn--icon" data-close aria-label="{{ 'tool.files.close' | t }}">{% include "icon-x.njk" %}</button>
     </div>
     <p class="files-modal__note" id="files-view-note" hidden></p>
     <pre class="files-modal__pre" id="files-view-pre" tabindex="0" aria-label="{{ 'tool.files.value_label' | t }}"></pre>
@@ -113,6 +113,8 @@ eleventyComputed:
     del:          {{ ("tool.files.delete"         | t) | dump | safe }},
     confirmDelete:{{ ("tool.files.confirm_delete" | t) | dump | safe }},
     confirmDeleteTotp: {{ ("tool.files.confirm_delete_totp" | t) | dump | safe }},
+    cachesGroup: {{ ("tool.files.caches_group" | t) | dump | safe }},
+    cachesShare: {{ ("tool.files.caches_share" | t) | dump | safe }},
     redaction:    {{ ("tool.files.redaction_notice" | t) | dump | safe }},
     truncated:    {{ ("tool.files.truncated_note" | t) | dump | safe }},
     emptyStore:   {{ ("tool.files.empty_store"    | t) | dump | safe }},
@@ -157,7 +159,8 @@ eleventyComputed:
   const summaryEl = $('files-summary');
   const status = MentriaUI.status($('files-status'));
 
-  const state = { buckets: [], selected: null };
+  const state = { buckets: [], cacheBuckets: [], selected: null, cacheView: null };
+  function allBuckets() { return state.buckets.concat(state.cacheBuckets); }
 
   function fmtBytes(n) {
     if (n == null || isNaN(n)) return DASH;
@@ -299,10 +302,35 @@ eleventyComputed:
       btn.appendChild(count);
       treeEl.appendChild(btn);
     });
+    if (state.cacheBuckets.length) {
+      const h = document.createElement('p');
+      h.className = 'files__tree-group';
+      h.textContent = COPY.cachesGroup;
+      treeEl.appendChild(h);
+      state.cacheBuckets.forEach((bucket) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'files__ns';
+        btn.dataset.id = bucket.id;
+        const selected = state.selected === bucket.id;
+        if (selected) btn.classList.add('is-active');
+        btn.setAttribute('aria-current', selected ? 'true' : 'false');
+        btn.setAttribute('aria-label', COPY.treeItemLabel.replace('{name}', bucket.name).replace('{n}', bucket.count));
+        const name = document.createElement('span');
+        name.className = 'files__ns-name';
+        name.textContent = bucket.name;
+        const count = document.createElement('span');
+        count.className = 'files__ns-count';
+        count.textContent = bucket.count;
+        btn.appendChild(name);
+        btn.appendChild(count);
+        treeEl.appendChild(btn);
+      });
+    }
   }
 
   function renderMain() {
-    const bucket = state.selected ? state.buckets.find((b) => b.id === state.selected) : null;
+    const bucket = state.selected ? allBuckets().find((b) => b.id === state.selected) : null;
     if (!bucket) {
       mainTitle.textContent = COPY.selectPrompt;
       mainCount.textContent = '';
@@ -311,6 +339,7 @@ eleventyComputed:
       rowsEl.textContent = '';
       return;
     }
+    if (bucket.kind === 'cache') { renderCacheMain(bucket); return; }
     const label = nsLabel(bucket.id);
     mainTitle.textContent = label;
     const items = itemsOf(bucket);
@@ -364,6 +393,102 @@ eleventyComputed:
     return btn;
   }
 
+  async function scanCaches() {
+    if (typeof caches === 'undefined') return;
+    try {
+      const names = await caches.keys();
+      const out = [];
+      for (const nm of names) {
+        const c = await caches.open(nm);
+        const reqs = await c.keys();
+        out.push({ id: 'cache:' + nm, kind: 'cache', name: nm, count: reqs.length });
+      }
+      out.sort((a, b) => a.name.localeCompare(b.name));
+      state.cacheBuckets = out;
+      renderTree();
+    } catch (_) {}
+  }
+
+  async function renderCacheMain(bucket) {
+    mainTitle.textContent = bucket.name;
+    mainCount.textContent = bucket.count;
+    rowsEl.textContent = '';
+    emptyEl.hidden = true;
+    tableWrap.hidden = false;
+    const token = bucket.id + ':' + Date.now();
+    state.cacheView = { token, name: bucket.name, entries: [] };
+    const c = await caches.open(bucket.name);
+    const reqs = await c.keys();
+    if (!state.cacheView || state.cacheView.token !== token) return;
+    if (!reqs.length) { tableWrap.hidden = true; emptyEl.hidden = false; emptyEl.textContent = COPY.emptyNs; return; }
+    const sizeCells = [];
+    reqs.forEach((req, i) => {
+      const u = new URL(req.url);
+      const tail = decodeURIComponent(u.pathname.split('/').pop() || u.hostname) + (u.search || '');
+      state.cacheView.entries.push({ req, tail });
+      const tr = document.createElement('tr');
+      const keyCell = document.createElement('th');
+      keyCell.scope = 'row';
+      keyCell.className = 'files-table__key';
+      keyCell.textContent = tail.length > 46 ? tail.slice(0, 26) + '…' + tail.slice(-17) : tail;
+      keyCell.title = req.url;
+      const sizeCell = document.createElement('td');
+      sizeCell.className = 'files-table__num';
+      sizeCell.textContent = DASH;
+      sizeCells.push(sizeCell);
+      const dateCell = document.createElement('td');
+      dateCell.className = 'files-table__date';
+      dateCell.textContent = u.hostname === location.hostname ? '' : u.hostname;
+      const actionCell = document.createElement('td');
+      actionCell.className = 'files-table__actions';
+      actionCell.appendChild(makeAction(COPY.view, 'cview', String(i), 'm-btn--ghost'));
+      actionCell.appendChild(makeAction(COPY.del, 'cdelete', String(i), 'm-btn--danger'));
+      tr.appendChild(keyCell);
+      tr.appendChild(sizeCell);
+      tr.appendChild(dateCell);
+      tr.appendChild(actionCell);
+      rowsEl.appendChild(tr);
+    });
+    if (reqs.length > 40) return;
+    let total = 0;
+    for (let i = 0; i < reqs.length; i++) {
+      if (!state.cacheView || state.cacheView.token !== token) return;
+      let size = null;
+      try {
+        const res = await c.match(reqs[i]);
+        if (res) {
+          const cl = parseInt(res.headers.get('content-length') || '', 10);
+          size = Number.isFinite(cl) && cl > 0 ? cl : (await res.blob()).size;
+        }
+      } catch (_) {}
+      if (!state.cacheView || state.cacheView.token !== token) return;
+      if (size != null) { sizeCells[i].textContent = fmtBytes(size); state.cacheView.entries[i].size = size; total += size; }
+    }
+    mainCount.textContent = bucket.count + ' · ' + fmtBytes(total);
+  }
+
+  async function cacheAction(action, idx) {
+    const cv = state.cacheView;
+    if (!cv || !cv.entries[idx]) return;
+    const en = cv.entries[idx];
+    if (action === 'cview') {
+      viewTitle.textContent = en.tail.slice(0, 60);
+      viewNote.hidden = true;
+      viewPre.textContent = JSON.stringify({ url: en.req.url, size: en.size != null ? fmtBytes(en.size) : null, cache: cv.name }, null, 2);
+      viewModal.open();
+      return;
+    }
+    if (action === 'cdelete') {
+      const ok = await window.mentriaConfirm(COPY.confirmDelete.replace('{name}', en.tail.slice(0, 40)));
+      if (!ok) return;
+      try {
+        const c = await caches.open(cv.name);
+        await c.delete(en.req);
+      } catch (_) {}
+      refresh();
+    }
+  }
+
   async function renderSummary() {
     let est = null;
     try { est = await store.estimate(); } catch (_) {}
@@ -372,9 +497,15 @@ eleventyComputed:
       summaryEl.textContent = COPY.storageSummary.replace('{used}', fmtBytes(local)).replace(' / {quota}', '').replace('{quota}', '');
       return;
     }
-    summaryEl.textContent = COPY.storageSummary
+    let text = COPY.storageSummary
       .replace('{used}', fmtBytes(est.usage + local))
       .replace('{quota}', fmtBytes(est.quota));
+    let ud = est.usageDetails;
+    if (!ud && navigator.storage && navigator.storage.estimate) {
+      try { ud = (await navigator.storage.estimate()).usageDetails; } catch (_) {}
+    }
+    if (ud && ud.caches > 0) text += ' · ' + COPY.cachesShare.replace('{n}', fmtBytes(ud.caches));
+    summaryEl.textContent = text;
   }
 
   function refresh() {
@@ -382,6 +513,7 @@ eleventyComputed:
     renderTree();
     renderMain();
     renderSummary();
+    scanCaches();
   }
 
   treeEl.addEventListener('click', (e) => {
@@ -449,7 +581,8 @@ eleventyComputed:
   rowsEl.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
-    const bucket = state.selected ? state.buckets.find((b) => b.id === state.selected) : null;
+    if (btn.dataset.action === 'cview' || btn.dataset.action === 'cdelete') { cacheAction(btn.dataset.action, Number(btn.dataset.key)); return; }
+    const bucket = state.selected ? allBuckets().find((b) => b.id === state.selected) : null;
     if (!bucket) return;
     const key = btn.dataset.key;
     if (btn.dataset.action === 'view') openView(bucket, key);
@@ -554,6 +687,14 @@ eleventyComputed:
   border-radius: var(--radius-md);
   padding: var(--space-2);
   background: rgba(255, 255, 255, 0.015);
+}
+.files__tree-group {
+  margin: var(--space-2) 0 0;
+  padding: 0 var(--space-1);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--term-muted);
 }
 .files__tree-empty {
   margin: 0;
@@ -758,8 +899,10 @@ eleventyComputed:
 
 @media (max-width: 640px) {
   .files__body { grid-template-columns: 1fr; }
-  .files__tree { flex-direction: row; flex-wrap: wrap; }
-  .files__ns { width: auto; flex: 1 1 auto; }
+  .files__tree { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .files__ns { width: 100%; min-width: 0; }
+  .files__ns-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .files__tree-group { grid-column: 1 / -1; }
   .files-table__actions { justify-content: flex-start; }
   .m-input { font-size: 16px; }
 }

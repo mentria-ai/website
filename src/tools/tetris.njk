@@ -27,7 +27,7 @@ eleventyComputed:
   <div class="help-head">
     <p class="game-help-title">{{ "tool.tetris.controls_title" | t }}</p>
     <span class="help-badge" id="input-badge" hidden></span>
-    <button type="button" class="help-close" popovertarget="tetris-help" popovertargetaction="hide" aria-label="{{ 'tool.tetris.close' | t }}">✕</button>
+    <button type="button" class="help-close" popovertarget="tetris-help" popovertargetaction="hide" aria-label="{{ 'tool.tetris.close' | t }}">{% include "icon-x.njk" %}</button>
   </div>
 
   <section class="help-sec" id="help-kb" data-input="keyboard">

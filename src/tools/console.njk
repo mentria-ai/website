@@ -288,11 +288,11 @@ eleventyComputed:
       if (res.tier !== '27b') { try { res.engine.unload && res.engine.unload(); } catch (_) {} throw new Error(COPY.notSupported); }
       engine = res.engine; engineCtx = res.maxSeq || 2048;
       try {
-        const base = Tiers.TIERS['27b'].base;
+        const base = 'https://cdn.mentria.ai/models/Bonsai-27B-mentria/loras/qa-routing/v1/';
         adapterCfg = {
-          name: 'toolcall-console',
-          configUrl: base + 'loras/toolcall-console/adapter_config.json',
-          weightsUrl: base + 'loras/toolcall-console/adapter_model.safetensors',
+          name: 'qa-routing',
+          configUrl: base + 'adapter_config.json',
+          weightsUrl: base + 'adapter_model.safetensors',
         };
         await engine.swapAdapter(adapterCfg);
         adapterOn = true;
@@ -343,6 +343,7 @@ eleventyComputed:
     let ok = 0;
     for (const t of tokens) {
       if (screen.includes(t)) { ok++; continue; }
+      if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(t)) continue;
       if (t.length >= 6 && words.some((w) => Math.abs(w.length - t.length) <= 3 && dice(w, t) >= 0.6)) ok++;
     }
     return ok / tokens.length >= 0.7;

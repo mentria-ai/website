@@ -63,24 +63,26 @@ generalizes to unseen tool schemas (0.353 → 0.971). Adapters:
 huggingface.co/mentriaai — `loras/toolcall-console` (27B) and
 `loras/toolcall-web` (0.8B).
 
-## P2P model delivery
+## Multi-source model delivery
 
-The 0.8B model the `local_ai` tools use is delivered over browser peer-to-peer
-(WebRTC swarm via our own tracker) with the official host as an automatic
-webseed fallback — so delivery is never slower than plain HTTP, and gets
-faster as visitors join. Any visitor can keep /tools/model-mirror/ open to
-become a mirror; completed downloads keep seeding while the tab lives.
-Assembled bytes are injected into the inference engine's cache, so the engine
-itself is unchanged. Measured in testing: a fresh visitor pulled the shard
-from the webseed and a mirror tab simultaneously, with the mirror serving
-34 MB of real blocks before the download finished.
+Every model tier ships from three possible sources. The default is **private**:
+a single fast stream from our own mirror (measured ~100× faster than the
+throttled upstream), chosen by a cache-stable base picker with the official
+host as automatic fallback — no peers, no tracker, IP exposure identical to
+any normal download. Flip **Peer boost** on /tools/model-mirror/ and downloads
+also join a WebRTC swarm: other visitors' mirror tabs serve verified pieces
+alongside two HTTP webseeds. Measured: a fresh browser pulled a shard 3.6×
+faster with three peers than webseed-only, and a mirror tab served 33 MB of
+real blocks while downloading nothing — it seeds any already-downloaded model
+**directly from the engine's cache storage** with near-zero memory cost.
 
-Security: the torrent file is served same-origin over HTTPS, every 512 KB
-piece is hash-verified by the torrent layer before acceptance, and the fully
-assembled file must additionally match a pinned SHA-256 before it is handed
-to the engine — a mismatch discards the download and falls back to direct
-HTTPS. Peers see each other's IP addresses (disclosed on the mirror page),
-and the tracker only ever sees the swarm id, never file contents.
+Security: torrent files are served same-origin over HTTPS and contain **no
+tracker** — the client only announces when the person opted into sharing;
+every 4 MB piece is hash-verified before acceptance, and the assembled file
+must match a pinned SHA-256 before the engine may touch it — a mismatch
+discards the download and falls back to direct HTTPS. With Peer boost on,
+peers see each other's IP addresses (disclosed inline, in five languages);
+the tracker only ever sees swarm ids, never file contents.
 
 ## How it works
 

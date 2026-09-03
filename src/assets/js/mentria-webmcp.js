@@ -1,5 +1,5 @@
 import { MentriaBus } from '/assets/js/mentria-bus.js';
-import { askLocal } from '/assets/js/mentria-local-ask.js';
+import { askLocal, modelInfo } from '/assets/js/mentria-local-ask.js';
 
 const mc = document.modelContext;
 const registered = new Set();
@@ -164,20 +164,19 @@ async function registerLocalAi() {
     inputSchema: { type: 'object', properties: {} },
     annotations: { readOnlyHint: true },
     execute: async () => {
-      const Tiers = await import('/assets/js/mentria-tiers.js');
-      const cached = await Tiers.isTierCached('0.8b');
-      return { webgpu: true, tier: '0.8b', sizeMB: 490, downloaded: cached, note: cached ? 'ready to run locally' : 'first call downloads the model to this device' };
+      const info = await modelInfo();
+      return { webgpu: true, tier: info.tier, size: info.sizeLabel, downloaded: info.cached, note: info.cached ? 'ready to run locally' : 'first call downloads the model to this device' };
     }
   });
   await mc.registerTool({
     name: 'local_ai__ask',
     title: 'Ask the on-device model',
-    description: 'Run a prompt on the language model that executes on this device\u2019s GPU. Nothing is sent to any server. First use may download the model (490 MB).',
+    description: 'Run a prompt on the language model that executes on this device\u2019s GPU. Nothing is sent to any server. First use may download the model to this device.',
     inputSchema: { type: 'object', properties: { prompt: { type: 'string' } }, required: ['prompt'] },
     execute: async (args) => {
       const prompt = String((args || {}).prompt || '').slice(0, 4000);
       if (!prompt.trim()) throw new Error('prompt is required');
-      const answer = await askLocal('You are the on-device assistant of mentria.ai, a privacy-first site where everything runs locally in the browser: 30+ tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a small language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. Answer briefly and plainly.', prompt, { maxTokens: 220, source: 'agent', onToken: panelStream });
+      const answer = await askLocal('You are the on-device assistant of mentria.ai, a privacy-first site where everything runs locally in the browser: 30+ tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. Answer briefly and plainly.', prompt, { maxTokens: 220, source: 'agent', onToken: panelStream });
       return { answer, ranOn: 'this device' };
     }
   });

@@ -103,10 +103,10 @@
     import('/assets/js/mentria-local-ask.js').then(function (M) {
       return M.isModelCached().catch(function () { return true; }).then(function (cached) {
         if (!cached) {
-          appendLine(out, T.askDownload || '> first use downloads the small model (~490 MB) — a prompt will ask you to confirm.', 'muted');
+          appendLine(out, T.askDownload || '> first use may download the model, it stays on your device.', 'muted');
           out.scrollTop = out.scrollHeight;
         }
-        return M.askLocal('You are the on-device assistant of mentria.ai, a privacy-first site where everything runs locally in the browser: 30+ tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a small language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. Answer briefly and plainly.', q, {
+        return M.askLocal('You are the on-device assistant of mentria.ai, a privacy-first site where everything runs locally in the browser: 30+ tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. Answer briefly and plainly.', q, {
           maxTokens: 220,
           source: 'cli',
           onToken: function (_t, full) {

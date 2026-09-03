@@ -333,6 +333,14 @@ eleventyComputed:
       if (res.tier !== '27b') { try { res.engine.unload && res.engine.unload(); } catch (_) {} throw new Error(COPY.notSupported); }
       engine = res.engine; engineCtx = res.maxSeq || 2048;
       try {
+        const LocalAsk = await import('/assets/js/mentria-local-ask.js');
+        LocalAsk.hostWith(async (system, user, maxTokens, onToken) => {
+          let out = '';
+          await engine.generate({ messages: [{ role: 'system', content: system }, { role: 'user', content: user }], maxTokens: maxTokens || 220, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false }, (ev) => { if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) { out += ev.token; if (onToken) onToken(ev.token, out); } });
+          return out.trim();
+        }, () => busy || adapterBusy);
+      } catch (_) {}
+      try {
         const base = 'https://cdn.mentria.ai/models/Bonsai-27B-mentria/loras/qa-routing/v1/';
         adapterCfg = {
           name: 'qa-routing',

@@ -181,7 +181,7 @@
       "suggestions_label": "Command suggestions",
       "desc_ask": "ask the AI running on this device",
       "ask_thinking": "> asking the model running on this device…",
-      "ask_download": "> first use may download the small model (~490 MB) — it stays on your device.",
+      "ask_download": "> first use may download the model, it stays on your device.",
       "ask_postponed": "model download postponed — run the command again whenever you like.",
       "ask_error": "the local model could not answer: ",
       "ask_unsupported": "the on-device model needs a WebGPU browser (Chrome or Edge on desktop, recent Android)."

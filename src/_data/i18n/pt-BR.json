@@ -181,7 +181,7 @@
       "suggestions_label": "Sugestões de comandos",
       "desc_ask": "pergunte à IA que roda neste dispositivo",
       "ask_thinking": "> perguntando ao modelo que roda neste dispositivo…",
-      "ask_download": "> o primeiro uso pode baixar o modelo pequeno (~490 MB) — ele fica no seu dispositivo.",
+      "ask_download": "> o primeiro uso pode baixar o modelo; ele fica no seu dispositivo.",
       "ask_postponed": "download do modelo adiado — execute o comando de novo quando quiser.",
       "ask_error": "o modelo local não conseguiu responder: ",
       "ask_unsupported": "o modelo no dispositivo precisa de um navegador com WebGPU (Chrome ou Edge no desktop, Android recente)."

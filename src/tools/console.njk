@@ -257,6 +257,14 @@ eleventyComputed:
       const p = isNav ? loaded() : null;
       el.focus(); el.click();
       if (p) await p; else await new Promise((r) => setTimeout(r, 650));
+      if (!p) {
+        try {
+          const t0 = Date.now();
+          while (Date.now() - t0 < 2500 && w.document.getAnimations({ subtree: true }).some((an) => an.playState === 'running' && an.effect && an.effect.getComputedTiming().iterations !== Infinity)) {
+            await new Promise((r) => setTimeout(r, 200));
+          }
+        } catch (_) {}
+      }
       return 'tapped "' + label + '"';
     }
     if (a.do === 'type') {

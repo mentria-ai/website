@@ -4,7 +4,8 @@
     "panel_close": "Cerrar",
     "panel_privacy": "Respondido por el modelo de este dispositivo — no se envió nada a ningún sitio.",
     "panel_error": "El modelo local no pudo responder: ",
-    "panel_summarize": "Resumiendo tus notas guardadas de forma privada"
+    "panel_summarize": "Resumiendo tus notas guardadas de forma privada",
+    "offer_27b": "La IA de este sitio funciona mejor con el modelo 27B en el dispositivo: unos 3,8 GB, descargados una vez y guardados en este dispositivo (probado en Apple Silicon con 16 GB+ de memoria y GPUs NVIDIA con 6 GB+). ¿Descargarlo ahora? Si no, se usará un modelo más pequeño."
   },
   "site": {
     "tagline": "estudio creativo. herramientas y transmisiones.",

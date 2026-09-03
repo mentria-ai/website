@@ -122,10 +122,7 @@ function showPanel(prompt) {
   const a = document.createElement('div');
   a.className = 'lap-a';
   a.textContent = '…';
-  const priv = document.createElement('p');
-  priv.className = 'lap-priv';
-  priv.textContent = tr('webmcp.panel_privacy', 'Answered by the model on this device — nothing was sent anywhere.');
-  el.appendChild(head); el.appendChild(q); el.appendChild(a); el.appendChild(priv);
+  el.appendChild(head); el.appendChild(q); el.appendChild(a);
   document.body.appendChild(el);
   return el;
 }
@@ -143,6 +140,11 @@ window.addEventListener('mentria:localask', (ev) => {
   if (d.phase === 'start') { showPanel(d.prompt); return; }
   const el = document.getElementById(PANEL_ID);
   if (!el) return;
+  if (d.phase === 'progress') {
+    const pa = el.querySelector('.lap-a');
+    if (pa) pa.textContent = d.message;
+    return;
+  }
   const dot = el.querySelector('.lap-dot');
   if (dot) dot.classList.add('is-done');
   const a = el.querySelector('.lap-a');
@@ -176,7 +178,7 @@ async function registerLocalAi() {
     execute: async (args) => {
       const prompt = String((args || {}).prompt || '').slice(0, 4000);
       if (!prompt.trim()) throw new Error('prompt is required');
-      const answer = await askLocal('You are the on-device assistant of mentria.ai, a privacy-first site where everything runs locally in the browser: 30+ tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. Answer briefly and plainly.', prompt, { maxTokens: 220, source: 'agent', onToken: panelStream });
+      const answer = await askLocal('You are the on-device assistant of mentria.ai, a privacy-first site where everything runs locally in the browser: 30+ tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. If asked about the person\'s notes, say that the notes__summarize_private tool reads and summarizes them on this device. Answer briefly and plainly.', prompt, { maxTokens: 220, source: 'agent', onToken: panelStream });
       return { answer, ranOn: 'this device' };
     }
   });

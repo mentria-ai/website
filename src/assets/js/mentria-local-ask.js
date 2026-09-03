@@ -8,6 +8,36 @@ let hostBusy = () => false;
 const pending = new Map();
 let channel = null;
 try { channel = new BroadcastChannel(CHANNEL_NAME); } catch (_) {}
+let currentReq = null;
+
+function tr(key, fallback) {
+  try {
+    const I = window.MentriaI18n;
+    if (I && I.hasKey && I.hasKey(key)) return I.t(key);
+  } catch (_) {}
+  return fallback;
+}
+
+function progress(p) {
+  if (!p) return;
+  const pct = p.loaded != null && p.total > 0 ? Math.round(Math.min(1, p.loaded / p.total) * 100) : null;
+  const message = (p.message || '') + (pct != null ? ' ' + pct + '%' : '');
+  const req = currentReq || {};
+  emit('progress', { source: req.source || '', prompt: req.prompt || '', message: message, pct: pct });
+  if (req.onProgress) { try { req.onProgress(message, pct); } catch (_) {} }
+}
+
+async function chooseTier(Tiers) {
+  const current = (await Tiers.effectiveTier()) || '0.8b';
+  if (current === '27b' || typeof window.mentriaConfirm !== 'function') return current;
+  const decision = await Tiers.decideTier();
+  const eligible = new Set([decision.tier].concat(decision.eligible || []));
+  if (!eligible.has('27b')) return current;
+  const ok = await window.mentriaConfirm(tr('webmcp.offer_27b', "This site's AI runs best on the 27B on-device model: about 3.8 GB, downloaded once and kept on this device (tested on Apple Silicon with 16 GB+ memory and NVIDIA GPUs with 6 GB+). Download it now? Otherwise a smaller model is used."));
+  if (!ok) return current;
+  Tiers.setUserTier('27b');
+  return (await Tiers.effectiveTier()) === '27b' ? '27b' : current;
+}
 
 export function localAskSupported() {
   return !!navigator.gpu;
@@ -125,11 +155,12 @@ function loadLocalModel() {
         import(DIST + 'mentria.mjs'),
         tiers()
       ]);
-      const tier = (await Tiers.effectiveTier()) || '0.8b';
+      const tier = await chooseTier(Tiers);
       if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast('Loading the on-device model for a private AI task…');
       const make = () => {
         const e = new MentriaEngine(DIST + 'worker.mjs');
         if (window.mentriaWrapEngine) window.mentriaWrapEngine(e);
+        e.onProgress = progress;
         return e;
       };
       const cached = await Tiers.isTierCached(tier);
@@ -189,6 +220,7 @@ export function askLocal(system, user, opts) {
   const maxTokens = o.maxTokens || 220;
   const run = queue.then(async () => {
     emit('start', { source: o.source || '', prompt: shown });
+    currentReq = { source: o.source || '', prompt: shown, onProgress: o.onProgress || null };
     try {
       let answer = null;
       if (!hostGen && !enginePromise) answer = await viaHost(system, user, maxTokens, o.onToken);
@@ -198,6 +230,8 @@ export function askLocal(system, user, opts) {
     } catch (e) {
       emit('error', { source: o.source || '', prompt: shown, message: (e && e.message) || String(e) });
       throw e;
+    } finally {
+      currentReq = null;
     }
   });
   queue = run.catch(() => {});

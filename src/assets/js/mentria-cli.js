@@ -100,6 +100,7 @@
     if (!ctx || !ctx.outputEl) return { lines: [], type: 'result' };
     var out = ctx.outputEl;
     var ansEl = null;
+    var progEl = null;
     import('/assets/js/mentria-local-ask.js').then(function (M) {
       return M.isModelCached().catch(function () { return true; }).then(function (cached) {
         if (!cached) {
@@ -109,6 +110,11 @@
         return M.askLocal('You are the on-device assistant of mentria.ai, a privacy-first site where everything runs locally in the browser: 30+ tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. Answer briefly and plainly.', q, {
           maxTokens: 220,
           source: 'cli',
+          onProgress: function (message) {
+            if (!progEl) progEl = appendLine(out, '', 'muted');
+            progEl.textContent = '> ' + message;
+            out.scrollTop = out.scrollHeight;
+          },
           onToken: function (_t, full) {
             if (!ansEl) ansEl = appendLine(out, '', 'result');
             ansEl.textContent = '> ' + full;

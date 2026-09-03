@@ -28,6 +28,7 @@ function progress(p) {
 }
 
 async function chooseTier(Tiers) {
+  if (await Tiers.isTierCached('27b')) { try { Tiers.setUserTier('27b'); localStorage.removeItem('mentria-tier-cap'); } catch (_) {} return '27b'; }
   const current = (await Tiers.effectiveTier()) || '0.8b';
   if (current === '27b' || typeof window.mentriaConfirm !== 'function') return current;
   const decision = await Tiers.decideTier();
@@ -49,7 +50,7 @@ async function tiers() {
 
 export async function modelInfo() {
   const Tiers = await tiers();
-  const id = (await Tiers.effectiveTier()) || '0.8b';
+  const id = (await Tiers.isTierCached('27b')) ? '27b' : ((await Tiers.effectiveTier()) || '0.8b');
   const t = Tiers.TIERS[id];
   return { tier: id, sizeLabel: t ? t.sizeLabel : '', cached: await Tiers.isTierCached(id) };
 }

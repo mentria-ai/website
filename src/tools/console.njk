@@ -309,7 +309,7 @@ eleventyComputed:
     loading = (async () => {
       if (!navigator.gpu) throw new Error(COPY.noWebgpu);
       const Tiers = await import('/assets/js/mentria-tiers.js');
-      if ((await Tiers.effectiveTier()) !== '27b') {
+      if ((await Tiers.effectiveTier()) !== '27b' && !(await Tiers.isTierCached('27b'))) {
         const decision = await Tiers.decideTier();
         const eligible = new Set([decision.tier].concat(decision.eligible || []));
         if (!eligible.has('27b') || typeof window.mentriaConfirm !== 'function') throw new Error(COPY.notSupported);
@@ -325,6 +325,7 @@ eleventyComputed:
       await new Promise((r) => setTimeout(r, 300));
       const { MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs');
       const { ensureModel } = await import('/assets/js/mentria-model.js');
+      if (await Tiers.isTierCached('27b')) { try { Tiers.setUserTier('27b'); localStorage.removeItem('mentria-tier-cap'); } catch (_) {} }
       const res = await ensureModel(() => { const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs'); if (window.mentriaWrapEngine) window.mentriaWrapEngine(e); return e; }, {
         vision: false, offerUpgrade: false,
         onProgress: (p) => { if (!p) return; const pct = p.loaded != null && p.total > 0 ? ' ' + Math.round(Math.min(1, p.loaded / p.total) * 100) + '%' : ''; setStatus('loading', (p.message || COPY.statusLoading) + pct); },

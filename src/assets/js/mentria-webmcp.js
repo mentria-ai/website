@@ -203,8 +203,8 @@ function registerSummarize() {
         text += chunk + '\n';
       }
       const summary = await askLocal(
-        'You summarize private notes. Reply with a summary of three sentences at most. Mention only what is in the notes.',
-        'NOTES:\n' + text + '\nSummarize these notes.',
+        'You turn personal notes into a short plain summary.',
+        'NOTES:\n' + text + '\nWrite a two or three sentence summary of these notes:',
         { maxTokens: 160, source: 'agent', display: tr('webmcp.panel_summarize', 'Summarizing your saved notes privately'), onToken: panelStream });
       return { summary, notesSeen: notes.length, privacy: 'note contents never left this device' };
     }

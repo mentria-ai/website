@@ -33,7 +33,8 @@ Unit Converter and Dice Roller extensions ship with `unit__convert` and
 touching this repo.
 
 Every call operates the real UI — the person watches the agent work in their
-tab, and can take over at any point. The same capabilities also power the
+tab, and can take over at any point. An on-page activity panel lists each call
+an agent makes with its arguments and result, so nothing happens out of sight. The same capabilities also power the
 site's own on-device agent at /tools/console/, where a 27B model running on
 the visitor's GPU drives these tools locally.
 
@@ -44,13 +45,15 @@ On WebGPU-capable devices three more tools appear:
 | tool | what it does |
 |---|---|
 | `local_ai__status` | is the on-device model available / downloaded (read-only) |
-| `local_ai__ask` | run a prompt on a 0.8B model executing on this device's GPU |
+| `local_ai__ask` | run a prompt on the model executing on this device's GPU (the 27B once it is on the device, a smaller model otherwise) |
 | `notes__summarize_private` | summarize the visitor's saved notes **without exposing them** |
 
 `notes__summarize_private` is the point: the raw note contents are readable
 only by an internal capability that is never registered with WebMCP. A cloud
 agent calls the tool, the on-device model reads and summarizes the notes
-locally, and only the summary crosses back. The agent uses private data it
+locally, and only the summary crosses back. Tabs share one model instance: a
+tab that already holds the model answers for the others over a broadcast
+channel, so a second copy is never loaded. The agent uses private data it
 can never see. On devices without WebGPU these tools simply don't register.
 
 ## Measured: a LoRA that teaches "call the tool"

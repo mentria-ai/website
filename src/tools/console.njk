@@ -241,7 +241,17 @@ eleventyComputed:
         const r = await bus.invoke(capName, a.args || {});
         await new Promise((res) => setTimeout(res, 500));
         return 'called ' + a.name + ' → ' + JSON.stringify(r).slice(0, 160);
-      } catch (e) { return 'error: ' + String(e && e.message || e).slice(0, 120); }
+      } catch (e) {
+        if (e && e.name === 'NoProviderError') {
+          const names = [];
+          for (const b of [w.MentriaBus, window.MentriaBus]) {
+            if (!b || !b.listTools) continue;
+            for (const t of b.listTools({ ai: true })) if (t.name.indexOf('console') !== 0 && names.indexOf(t.name) < 0) names.push(t.name);
+          }
+          return 'error: no capability named "' + capName + '". ' + (names.length ? 'Available: ' + names.slice(0, 8).join(', ') + '. Use one of these names exactly, or use the on-screen controls.' : 'This screen has no capabilities; use the on-screen controls.');
+        }
+        return 'error: ' + String(e && e.message || e).slice(0, 120);
+      }
     }
     if (a.do === 'wait') { await new Promise((r) => setTimeout(r, Math.min(5000, Number(a.ms) || 1500))); return 'waited'; }
     const el = refs[Number(a.id)];

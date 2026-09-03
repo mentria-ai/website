@@ -1994,6 +1994,8 @@
       "status_ready": "prêt",
       "status_working": "en cours…",
       "not_supported": "la Console nécessite le modèle 27B local — non pris en charge sur cet appareil",
+      "offer_27b": "La Console fonctionne avec le modèle 27B sur l'appareil — environ 3,8 Go, téléchargé une fois et conservé sur cet appareil (testé sur Apple Silicon avec 16 Go+ de mémoire et GPU NVIDIA avec 6 Go+). Le télécharger maintenant ?",
+      "postponed_27b": "le téléchargement du 27B a été reporté — recharge la Console quand tu veux réessayer.",
       "no_webgpu": "WebGPU n'est pas disponible dans ce navigateur",
       "you": "vous",
       "model": "mentria",

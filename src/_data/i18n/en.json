@@ -1994,6 +1994,8 @@
       "status_ready": "ready",
       "status_working": "working…",
       "not_supported": "the Console needs the 27B on-device model — not supported on this device",
+      "offer_27b": "The Console runs on the 27B on-device model — about 3.8 GB, downloaded once and kept on this device (tested on Apple Silicon with 16 GB+ memory and NVIDIA GPUs with 6 GB+). Download it now?",
+      "postponed_27b": "the 27B download was postponed — reload the Console whenever you want to try again.",
       "no_webgpu": "WebGPU is not available in this browser",
       "you": "you",
       "model": "mentria",

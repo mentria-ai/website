@@ -59,6 +59,8 @@ eleventyComputed:
     adapterOff: {{ ("tool.console.adapter_off" | t) | dump | safe }},
     statusWorking: {{ ("tool.console.status_working" | t) | dump | safe }},
     notSupported:  {{ ("tool.console.not_supported"  | t) | dump | safe }},
+    offer27b:      {{ ("tool.console.offer_27b"      | t) | dump | safe }},
+    postponed27b:  {{ ("tool.console.postponed_27b"  | t) | dump | safe }},
     noWebgpu:      {{ ("tool.console.no_webgpu"      | t) | dump | safe }},
     youLabel:      {{ ("tool.console.you"            | t) | dump | safe }},
     modelLabel:    {{ ("tool.console.model"          | t) | dump | safe }},
@@ -307,7 +309,15 @@ eleventyComputed:
     loading = (async () => {
       if (!navigator.gpu) throw new Error(COPY.noWebgpu);
       const Tiers = await import('/assets/js/mentria-tiers.js');
-      if ((await Tiers.effectiveTier()) !== '27b') throw new Error(COPY.notSupported);
+      if ((await Tiers.effectiveTier()) !== '27b') {
+        const decision = await Tiers.decideTier();
+        const eligible = new Set([decision.tier].concat(decision.eligible || []));
+        if (!eligible.has('27b') || typeof window.mentriaConfirm !== 'function') throw new Error(COPY.notSupported);
+        const okDl = await window.mentriaConfirm(COPY.offer27b);
+        if (!okDl) throw new Error(COPY.postponed27b);
+        Tiers.setUserTier('27b');
+        if ((await Tiers.effectiveTier()) !== '27b') throw new Error(COPY.notSupported);
+      }
       setStatus('loading', COPY.statusLoading);
       const parked = frame.src;
       const parkedRoute = (() => { try { return frame.contentWindow.location.href; } catch (_) { return parked; } })();

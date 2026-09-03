@@ -1994,6 +1994,8 @@
       "status_ready": "pronto",
       "status_working": "trabalhando…",
       "not_supported": "o Console precisa do modelo 27B local — não compatível com este dispositivo",
+      "offer_27b": "O Console roda com o modelo 27B no dispositivo — cerca de 3,8 GB, baixado uma vez e mantido neste dispositivo (testado em Apple Silicon com 16 GB+ de memória e GPUs NVIDIA com 6 GB+). Baixar agora?",
+      "postponed_27b": "o download do 27B foi adiado — recarregue o Console quando quiser tentar de novo.",
       "no_webgpu": "WebGPU não está disponível neste navegador",
       "you": "você",
       "model": "mentria",

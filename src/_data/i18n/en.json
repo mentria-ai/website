@@ -5,7 +5,8 @@
     "panel_privacy": "Answered by the model on this device — nothing was sent anywhere.",
     "panel_error": "The local model could not answer: ",
     "panel_summarize": "Summarizing your saved notes privately",
-    "offer_27b": "This site's AI runs best on the 27B on-device model: about 3.8 GB, downloaded once and kept on this device (tested on Apple Silicon with 16 GB+ memory and NVIDIA GPUs with 6 GB+). Download it now? Otherwise a smaller model is used."
+    "offer_27b": "This site's AI runs best on the 27B on-device model: about 3.8 GB, downloaded once and kept on this device (tested on Apple Silicon with 16 GB+ memory and NVIDIA GPUs with 6 GB+). Download it now? Otherwise a smaller model is used.",
+    "activity_title": "Agent activity · WebMCP"
   },
   "site": {
     "tagline": "creative studio. tools & transmissions.",

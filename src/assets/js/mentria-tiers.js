@@ -234,9 +234,15 @@ export async function effectiveTier(opts) {
 export async function isTierCached(id) {
   try {
     const t = TIERS[id];
-    const u = t.base + t.shards[0];
-    const meta = u + (u.includes('?') ? '&' : '?') + 'mentria_seg=meta';
-    return !!((await caches.match(meta)) || (await caches.match(u)));
+    const bases = [t.base];
+    const cdn = cdnBaseFor(t);
+    if (cdn) bases.push(cdn);
+    for (const b of bases) {
+      const u = b + t.shards[0];
+      const meta = u + (u.includes('?') ? '&' : '?') + 'mentria_seg=meta';
+      if ((await caches.match(meta)) || (await caches.match(u))) return true;
+    }
+    return false;
   } catch (_) { return false; }
 }
 

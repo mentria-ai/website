@@ -284,21 +284,25 @@ eleventyComputed:
   }
 
   let engine = null, engineCtx = 2048, loading = null, stopFlag = false, busy = false;
-  let adapterCfg = null, adapterOn = false, adapterBusy = false;
+  let adapterCfg = null, adapterOn = false, adapterBusy = false, hosting = false;
   function renderAdapterBtn() {
     adapterBtn.setAttribute('aria-pressed', adapterOn ? 'true' : 'false');
     adapterBtn.title = adapterOn ? COPY.adapterOn : COPY.adapterOff;
-    adapterBtn.style.opacity = adapterOn ? '' : '0.4';
+    adapterBtn.style.opacity = adapterBusy ? '0.7' : (adapterOn ? '' : '0.4');
+    adapterBtn.disabled = adapterBusy;
   }
   async function setAdapter(on) {
     if (!engine || !adapterCfg || adapterBusy || on === adapterOn) return adapterOn;
     adapterBusy = true;
+    renderAdapterBtn();
     try {
+      for (let i = 0; i < 120 && hosting; i++) await new Promise((r) => setTimeout(r, 250));
       await engine.swapAdapter(on ? adapterCfg : { name: null });
       adapterOn = on;
-      renderAdapterBtn();
       addMsg('step', on ? COPY.adapterOn : COPY.adapterOff);
-    } finally { adapterBusy = false; }
+    } catch (e) {
+      addMsg('step', (on ? COPY.adapterOn : COPY.adapterOff) + ': ' + ((e && e.message) || e));
+    } finally { adapterBusy = false; renderAdapterBtn(); }
     return adapterOn;
   }
   const raws = [];
@@ -337,7 +341,10 @@ eleventyComputed:
         const LocalAsk = await import('/assets/js/mentria-local-ask.js');
         LocalAsk.hostWith(async (system, user, maxTokens, onToken) => {
           let out = '';
+          hosting = true;
+          try {
           await engine.generate({ messages: [{ role: 'system', content: system }, { role: 'user', content: user }], maxTokens: maxTokens || 220, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false }, (ev) => { if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) { out += ev.token; if (onToken) onToken(ev.token, out); } });
+          } finally { hosting = false; }
           return out.trim();
         }, () => busy || adapterBusy);
       } catch (_) {}

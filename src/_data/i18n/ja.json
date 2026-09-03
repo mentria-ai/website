@@ -1,4 +1,11 @@
 {
+  "webmcp": {
+    "panel_title": "端末上のAI",
+    "panel_close": "閉じる",
+    "panel_privacy": "この端末上のモデルが回答しました — どこにも送信されていません。",
+    "panel_error": "ローカルモデルが応答できませんでした: ",
+    "panel_summarize": "保存メモを非公開のまま要約しています"
+  },
   "site": {
     "tagline": "クリエイティブスタジオ。ツール & トランスミッション。",
     "description": "ツール、実験、ビジュアル・トランスミッションのクリエイティブスタジオ。",
@@ -158,7 +165,7 @@
     "cli": {
       "welcomeCmd": "$ welcome --to mentria",
       "welcomeOut1": "クリエイティブスタジオ。ツール & トランスミッション。",
-      "welcomeOut2": "コマンド一覧は 'help' と入力してください。",
+      "welcomeOut2": "'help' でコマンド一覧、または質問をそのまま入力してください。",
       "placeholder": "コマンドを入力...",
       "help_heading": "利用可能なコマンド:",
       "desc_help": "利用可能なコマンドを一覧表示",
@@ -171,7 +178,13 @@
       "scrolling_tools": "> ツールへスクロール中...",
       "navigating_to": "> {dest} へ移動中...",
       "about_line": "> mentria — ツール・実験・ビジュアル発信のクリエイティブスタジオ。est. 2025。",
-      "suggestions_label": "コマンド候補"
+      "suggestions_label": "コマンド候補",
+      "desc_ask": "この端末で動くAIに質問",
+      "ask_thinking": "> この端末上のモデルに質問しています…",
+      "ask_download": "> 初回は小型モデル（約490MB）をダウンロードすることがあります — 端末に保存されます。",
+      "ask_postponed": "モデルのダウンロードを保留しました — いつでもコマンドを再実行できます。",
+      "ask_error": "ローカルモデルが応答できませんでした: ",
+      "ask_unsupported": "端末上のモデルにはWebGPU対応ブラウザが必要です（デスクトップのChrome/Edge、最近のAndroid）。"
     },
     "tools_heading": "ツール",
     "launch_tool": "ツールを開く →",

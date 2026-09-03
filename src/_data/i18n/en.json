@@ -1,4 +1,11 @@
 {
+  "webmcp": {
+    "panel_title": "On-device AI",
+    "panel_close": "Dismiss",
+    "panel_privacy": "Answered by the model on this device — nothing was sent anywhere.",
+    "panel_error": "The local model could not answer: ",
+    "panel_summarize": "Summarizing your saved notes privately"
+  },
   "site": {
     "tagline": "creative studio. tools & transmissions.",
     "description": "A creative studio for tools, experiments, and visual transmissions.",
@@ -158,7 +165,7 @@
     "cli": {
       "welcomeCmd": "$ welcome --to mentria",
       "welcomeOut1": "creative studio. tools & transmissions.",
-      "welcomeOut2": "type 'help' for commands.",
+      "welcomeOut2": "type 'help' for commands, or just ask a question.",
       "placeholder": "type a command...",
       "help_heading": "Available commands:",
       "desc_help": "list available commands",
@@ -171,7 +178,13 @@
       "scrolling_tools": "> scrolling to tools...",
       "navigating_to": "> navigating to {dest}...",
       "about_line": "> mentria — a creative studio for tools, experiments & visual transmissions. est. 2025.",
-      "suggestions_label": "Command suggestions"
+      "suggestions_label": "Command suggestions",
+      "desc_ask": "ask the AI running on this device",
+      "ask_thinking": "> asking the model running on this device…",
+      "ask_download": "> first use may download the small model (~490 MB) — it stays on your device.",
+      "ask_postponed": "model download postponed — run the command again whenever you like.",
+      "ask_error": "the local model could not answer: ",
+      "ask_unsupported": "the on-device model needs a WebGPU browser (Chrome or Edge on desktop, recent Android)."
     },
     "tools_heading": "Tools",
     "launch_tool": "Launch tool →",

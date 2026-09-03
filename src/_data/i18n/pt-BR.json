@@ -1,4 +1,11 @@
 {
+  "webmcp": {
+    "panel_title": "IA no dispositivo",
+    "panel_close": "Fechar",
+    "panel_privacy": "Respondido pelo modelo deste dispositivo — nada foi enviado a lugar algum.",
+    "panel_error": "O modelo local não conseguiu responder: ",
+    "panel_summarize": "Resumindo suas notas salvas de forma privada"
+  },
   "site": {
     "tagline": "estúdio criativo. ferramentas e transmissões.",
     "description": "Um estúdio criativo para ferramentas, experimentos e transmissões visuais.",
@@ -158,7 +165,7 @@
     "cli": {
       "welcomeCmd": "$ welcome --to mentria",
       "welcomeOut1": "estúdio criativo. ferramentas e transmissões.",
-      "welcomeOut2": "digite 'help' para ver os comandos.",
+      "welcomeOut2": "digite 'help' para comandos, ou simplesmente faça uma pergunta.",
       "placeholder": "digite um comando...",
       "help_heading": "Comandos disponíveis:",
       "desc_help": "lista os comandos disponíveis",
@@ -171,7 +178,13 @@
       "scrolling_tools": "> rolando até as ferramentas...",
       "navigating_to": "> navegando para {dest}...",
       "about_line": "> mentria — um estúdio criativo de ferramentas, experimentos e transmissões visuais. est. 2025.",
-      "suggestions_label": "Sugestões de comandos"
+      "suggestions_label": "Sugestões de comandos",
+      "desc_ask": "pergunte à IA que roda neste dispositivo",
+      "ask_thinking": "> perguntando ao modelo que roda neste dispositivo…",
+      "ask_download": "> o primeiro uso pode baixar o modelo pequeno (~490 MB) — ele fica no seu dispositivo.",
+      "ask_postponed": "download do modelo adiado — execute o comando de novo quando quiser.",
+      "ask_error": "o modelo local não conseguiu responder: ",
+      "ask_unsupported": "o modelo no dispositivo precisa de um navegador com WebGPU (Chrome ou Edge no desktop, Android recente)."
     },
     "tools_heading": "Ferramentas",
     "launch_tool": "Abrir ferramenta →",

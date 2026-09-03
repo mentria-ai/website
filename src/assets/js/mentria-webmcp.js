@@ -1,4 +1,5 @@
 import { MentriaBus } from '/assets/js/mentria-bus.js';
+import { askLocal } from '/assets/js/mentria-local-ask.js';
 
 const mc = document.modelContext;
 const registered = new Set();
@@ -65,57 +66,94 @@ async function start() {
   sync();
 }
 
-const DIST = '/assets/mentria/dist/';
-let enginePromise = null;
-let queue = Promise.resolve();
+const PANEL_ID = 'mentria-localask-panel';
+let panelTimer = 0;
 
-function loadLocalModel() {
-  if (!enginePromise) {
-    enginePromise = (async () => {
-      const [{ MentriaEngine }, Tiers] = await Promise.all([
-        import(DIST + 'mentria.mjs'),
-        import('/assets/js/mentria-tiers.js')
-      ]);
-      if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast('Loading the on-device model for a private AI task…');
-      const make = () => {
-        const e = new MentriaEngine(DIST + 'worker.mjs');
-        if (window.mentriaWrapEngine) window.mentriaWrapEngine(e);
-        return e;
-      };
-      const cached = await Tiers.isTierCached('0.8b');
-      if (!cached && typeof window.mentriaConfirmHeavyDownload === 'function') {
-        const okDl = await window.mentriaConfirmHeavyDownload();
-        if (!okDl) throw new Error('download-postponed');
-      }
-      try {
-        const P2P = await import('/assets/js/mentria-p2p-models.js');
-        await Promise.race([
-          P2P.prefetchTier(Tiers, '0.8b'),
-          new Promise((r) => setTimeout(r, 480000))
-        ]);
-      } catch (_) {}
-      const res = await Tiers.loadWithFallback(make, '0.8b', { vision: false });
-      return { engine: res.engine, maxSeq: res.maxSeq || 2048 };
-    })();
-    enginePromise.catch(() => { enginePromise = null; });
-  }
-  return enginePromise;
+function tr(key, fallback) {
+  try {
+    const I = window.MentriaI18n;
+    if (I && I.hasKey && I.hasKey(key)) return I.t(key);
+  } catch (_) {}
+  return fallback;
 }
 
-function askLocal(system, user, maxTokens) {
-  const run = queue.then(async () => {
-    const { engine } = await loadLocalModel();
-    let out = '';
-    await engine.generate({
-      messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
-      maxTokens: maxTokens || 220,
-      temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false
-    }, (ev) => { if (typeof ev.token === 'string') out += ev.token; });
-    return out.replace(/<\|[a-z_]+\|>/gi, '').trim();
-  });
-  queue = run.catch(() => {});
-  return run;
+function ensurePanelStyles() {
+  if (document.getElementById(PANEL_ID + '-css')) return;
+  const st = document.createElement('style');
+  st.id = PANEL_ID + '-css';
+  st.textContent = '#' + PANEL_ID + '{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:1200;width:min(340px,calc(100vw - 32px));background:var(--term-bg-raised,#10151b);border:1px solid var(--term-border,#26303a);border-left:3px solid var(--accent,#6ef3c5);border-radius:var(--radius-lg,12px);padding:12px 14px;color:var(--term-fg,#dbe5ee);font-family:var(--font-mono,monospace);box-shadow:0 12px 32px rgba(0,0,0,.45)}' +
+    '#' + PANEL_ID + ' .lap-head{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#6ef3c5)}' +
+    '#' + PANEL_ID + ' .lap-dot{width:7px;height:7px;border-radius:50%;background:var(--accent,#6ef3c5);animation:lap-pulse 1.2s ease-in-out infinite}' +
+    '#' + PANEL_ID + ' .lap-dot.is-done{animation:none}' +
+    '@keyframes lap-pulse{50%{opacity:.2}}' +
+    '@media (prefers-reduced-motion: reduce){#' + PANEL_ID + ' .lap-dot{animation:none}}' +
+    '#' + PANEL_ID + ' .lap-close{margin-left:auto;background:none;border:0;color:var(--term-muted,#77828d);cursor:pointer;font:inherit;font-size:14px;line-height:1;padding:2px 4px}' +
+    '#' + PANEL_ID + ' .lap-q{margin:8px 0 6px;font-size:12px;color:var(--term-muted,#77828d);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}' +
+    '#' + PANEL_ID + ' .lap-a{font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;max-height:180px;overflow:auto}' +
+    '#' + PANEL_ID + ' .lap-priv{margin-top:8px;font-size:10.5px;color:var(--term-muted,#77828d)}';
+  document.head.appendChild(st);
 }
+
+function showPanel(prompt) {
+  ensurePanelStyles();
+  const old = document.getElementById(PANEL_ID);
+  if (old) old.remove();
+  clearTimeout(panelTimer);
+  const el = document.createElement('aside');
+  el.id = PANEL_ID;
+  el.setAttribute('role', 'status');
+  el.setAttribute('aria-live', 'polite');
+  const head = document.createElement('div');
+  head.className = 'lap-head';
+  const dot = document.createElement('span');
+  dot.className = 'lap-dot';
+  const title = document.createElement('span');
+  title.textContent = tr('webmcp.panel_title', 'On-device AI');
+  const close = document.createElement('button');
+  close.className = 'lap-close';
+  close.type = 'button';
+  close.textContent = '×';
+  close.setAttribute('aria-label', tr('webmcp.panel_close', 'Dismiss'));
+  close.addEventListener('click', () => { clearTimeout(panelTimer); el.remove(); });
+  head.appendChild(dot); head.appendChild(title); head.appendChild(close);
+  const q = document.createElement('p');
+  q.className = 'lap-q';
+  q.textContent = prompt;
+  const a = document.createElement('div');
+  a.className = 'lap-a';
+  a.textContent = '…';
+  const priv = document.createElement('p');
+  priv.className = 'lap-priv';
+  priv.textContent = tr('webmcp.panel_privacy', 'Answered by the model on this device — nothing was sent anywhere.');
+  el.appendChild(head); el.appendChild(q); el.appendChild(a); el.appendChild(priv);
+  document.body.appendChild(el);
+  return el;
+}
+
+function panelStream(_t, full) {
+  const el = document.getElementById(PANEL_ID);
+  if (!el) return;
+  const a = el.querySelector('.lap-a');
+  if (a) { a.textContent = full; a.scrollTop = a.scrollHeight; }
+}
+
+window.addEventListener('mentria:localask', (ev) => {
+  const d = ev.detail || {};
+  if (d.source !== 'agent') return;
+  if (d.phase === 'start') { showPanel(d.prompt); return; }
+  const el = document.getElementById(PANEL_ID);
+  if (!el) return;
+  const dot = el.querySelector('.lap-dot');
+  if (dot) dot.classList.add('is-done');
+  const a = el.querySelector('.lap-a');
+  if (d.phase === 'answer' && a) a.textContent = d.answer;
+  if (d.phase === 'error' && a) a.textContent = tr('webmcp.panel_error', 'The local model could not answer: ') + (d.message || '');
+  clearTimeout(panelTimer);
+  panelTimer = setTimeout(() => {
+    const p = document.getElementById(PANEL_ID);
+    if (p) p.remove();
+  }, d.phase === 'answer' ? 14000 : 9000);
+});
 
 async function registerLocalAi() {
   if (!navigator.gpu) return;
@@ -139,7 +177,7 @@ async function registerLocalAi() {
     execute: async (args) => {
       const prompt = String((args || {}).prompt || '').slice(0, 4000);
       if (!prompt.trim()) throw new Error('prompt is required');
-      const answer = await askLocal('You are Mentria, a small language model running locally in the browser. Answer briefly and plainly.', prompt, 220);
+      const answer = await askLocal('You are the on-device assistant of mentria.ai, a privacy-first site where everything runs locally in the browser: 30+ tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a small language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. Answer briefly and plainly.', prompt, { maxTokens: 220, source: 'agent', onToken: panelStream });
       return { answer, ranOn: 'this device' };
     }
   });
@@ -166,7 +204,8 @@ function registerSummarize() {
       }
       const summary = await askLocal(
         'You summarize private notes. Reply with a summary of three sentences at most. Mention only what is in the notes.',
-        'NOTES:\n' + text + '\nSummarize these notes.', 160);
+        'NOTES:\n' + text + '\nSummarize these notes.',
+        { maxTokens: 160, source: 'agent', display: tr('webmcp.panel_summarize', 'Summarizing your saved notes privately'), onToken: panelStream });
       return { summary, notesSeen: notes.length, privacy: 'note contents never left this device' };
     }
   }).catch(() => { registered.delete('notes__summarize_private'); });

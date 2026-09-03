@@ -68,6 +68,12 @@
         return { lines: [tfmt(T.navigatingTo || '> navigating to {dest}...', { dest: dest })], type: 'result' };
       }
     },
+    ask: {
+      description: T.descAsk || 'ask the AI running on this device',
+      usage: 'ask <question>',
+      argv: true,
+      run: function (args, ctx) { return runAsk(args, ctx); }
+    },
     about: {
       description: T.descAbout || 'about mentria',
       run: function () {
@@ -86,6 +92,43 @@
   };
 
   var BUILTIN_COMMANDS = Object.keys(COMMANDS);
+
+  function runAsk(args, ctx) {
+    var q = String(args || '').trim();
+    if (!q) return { lines: ['ask <question>'], type: 'error' };
+    if (!navigator.gpu) return { lines: [T.askUnsupported || 'the on-device model needs a WebGPU browser (Chrome or Edge on desktop, recent Android).'], type: 'error' };
+    if (!ctx || !ctx.outputEl) return { lines: [], type: 'result' };
+    var out = ctx.outputEl;
+    var ansEl = null;
+    import('/assets/js/mentria-local-ask.js').then(function (M) {
+      return M.isModelCached().catch(function () { return true; }).then(function (cached) {
+        if (!cached) {
+          appendLine(out, T.askDownload || '> first use downloads the small model (~490 MB) — a prompt will ask you to confirm.', 'muted');
+          out.scrollTop = out.scrollHeight;
+        }
+        return M.askLocal('You are the on-device assistant of mentria.ai, a privacy-first site where everything runs locally in the browser: 30+ tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a small language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. Answer briefly and plainly.', q, {
+          maxTokens: 220,
+          source: 'cli',
+          onToken: function (_t, full) {
+            if (!ansEl) ansEl = appendLine(out, '', 'result');
+            ansEl.textContent = '> ' + full;
+            out.scrollTop = out.scrollHeight;
+          }
+        });
+      });
+    }).then(function (answer) {
+      if (!ansEl) ansEl = appendLine(out, '', 'result');
+      ansEl.textContent = '> ' + answer;
+      out.scrollTop = out.scrollHeight;
+    }).catch(function (e) {
+      var msg = (e && e.message === 'download-postponed')
+        ? (T.askPostponed || 'model download postponed — run the command again whenever you like.')
+        : (T.askError || 'the local model could not answer: ') + ((e && e.message) || e);
+      appendLine(out, msg, 'error');
+      out.scrollTop = out.scrollHeight;
+    });
+    return { lines: [T.askThinking || '> asking the model running on this device…'], type: 'muted' };
+  }
 
   window.MentriaCLI = {
     register: function (name, def) {
@@ -420,9 +463,10 @@
         historyIndex = -1;
 
         appendLine(outputEl, '$ ' + raw, 'command');
+        var ctx = { outputEl: outputEl };
 
         if (COMMANDS[name]) {
-          var result = COMMANDS[name].argv ? COMMANDS[name].run(args) : COMMANDS[name].run();
+          var result = COMMANDS[name].argv ? COMMANDS[name].run(args, ctx) : COMMANDS[name].run(ctx);
           if (result.type === 'clear') {
             outputEl.innerHTML = '';
           } else {
@@ -438,13 +482,18 @@
           });
           if (loose.length === 1) {
             var looseCmd = COMMANDS[loose[0]];
-            var looseRes = looseCmd.argv ? looseCmd.run(args) : looseCmd.run();
+            var looseRes = looseCmd.argv ? looseCmd.run(args, ctx) : looseCmd.run(ctx);
             if (looseRes.type === 'clear') {
               outputEl.innerHTML = '';
             } else {
               for (var k2 = 0; k2 < looseRes.lines.length; k2++) {
                 appendLine(outputEl, looseRes.lines[k2], looseRes.type);
               }
+            }
+          } else if (raw.indexOf(' ') !== -1 && navigator.gpu) {
+            var askRes = runAsk(raw, ctx);
+            for (var k3 = 0; k3 < askRes.lines.length; k3++) {
+              appendLine(outputEl, askRes.lines[k3], askRes.type);
             }
           } else {
             appendLine(outputEl, tfmt(T.notFound || "command not found: {name}. type 'help' for available commands.", { name: name }), 'error');

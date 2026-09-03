@@ -93,7 +93,7 @@ eleventyComputed:
     coinBtn.setAttribute("aria-label", faceLabel + " \u2014 " + coinBaseLabel);
     if (!faceHeadsEl || !faceTailsEl) return;
     var headsLabel = faceHeadsEl.querySelector(".cf__face-label");
-    var headsUp = !!headsLabel && faceLabel === headsLabel.textContent;
+    var headsUp = !!headsLabel && faceLabel.trim().toLowerCase() === headsLabel.textContent.trim().toLowerCase();
     faceHeadsEl.style.visibility = headsUp ? "" : "hidden";
     faceTailsEl.style.visibility = headsUp ? "hidden" : "";
   }

@@ -103,16 +103,30 @@ Browsers without WebMCP never load the bridge.
 
 ## Try it
 
-1. Chrome 149+: enable `chrome://flags/#enable-webmcp-testing` and relaunch
-   (or rely on the origin-trial token served by the site).
-2. Open https://mentria.ai/tools/decision-wheel/ with a WebMCP-capable agent
-   and ask it to "spin the wheel between chai and coffee".
-3. Or ask the on-device agent the same thing at https://mentria.ai/tools/console/
-   — no cloud involved.
+1. Chrome 149+: the origin-trial token served by the site enables the API on
+   its own; `chrome://flags/#enable-webmcp-testing` + relaunch also works.
+2. Open the submission build at https://webmcp.mentria.ai/tools/decision-wheel/
+   (or the live site, https://mentria.ai) with a WebMCP-capable agent and ask
+   it to "spin the wheel between chai and coffee".
+3. Or ask the on-device agent the same thing at /tools/console/ — no cloud
+   involved.
 
 ## Challenge provenance
 
 The site predates the WebMCP Challenge; all WebMCP work landed during the
-submission window. See commits from 2026-09-01 onward: the bridge
-(`mentria-webmcp.js`), the base-page loader, the `readonly`/event additions to
-the bus, and the wheel/color/qr/notes capabilities.
+submission window (commits from 2026-09-01 onward):
+
+- the bridge (`mentria-webmcp.js`), the base-page loader, and the
+  `readonly`/event additions to the capability bus
+- the wheel/color/qr/notes/timer capabilities and cross-context announces, so
+  tools registered in one tab are callable from another
+- the privacy membrane: `local_ai__ask` / `notes__summarize_private` on a
+  shared on-device module (`mentria-local-ask.js`), with a visible on-page
+  answer panel when an agent uses the visitor's local model
+- the homepage prompt wired to the same on-device model (`ask`, plus a
+  natural-language fallback)
+- the on-device 27B console agent: @-mention note attachments, Story Studio
+  deck capabilities (`studio__createDeck`), and a `console__test` capability
+  that lets an agent commission an app QA run on the local model
+- multi-source model delivery (mirror + optional peer swarm, hash-pinned) and
+  a tool-call LoRA served versioned from the mirror

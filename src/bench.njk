@@ -27,8 +27,9 @@ eleventyComputed:
       <label class="bench__opt"><input type="checkbox" id="bench-profile"> profile run: per-pass GPU timings on the first prompt (slower while profiling; use when asked)</label>
       <label class="bench__opt"><input type="checkbox" id="bench-quick"> quick (short prompt only)</label>
       <label class="bench__opt">runs per prompt <input type="number" id="bench-runs" min="1" max="5" value="1" style="width:4rem"></label>
-      <label class="bench__opt">init options JSON <input type="text" id="bench-init" placeholder='{"narrowSubgroups":false}' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
-      <label class="bench__opt">generate options JSON <input type="text" id="bench-gen" placeholder='{"m1VecmatRoute":true}' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
+      <label class="bench__opt">init/load options JSON (applied to init and loadModel) <input type="text" id="bench-init" placeholder='{"mobileMatvec":"ksplit"}' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
+      <label class="bench__opt">generate options JSON, one object or a list (each entry runs the prompts once on the same load, in order) <input type="text" id="bench-gen" placeholder='[{"mobilePrefill":"off","m1VecmatRoute":false},{"mobilePrefill":"mrow"}]' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
+      <label class="bench__opt">max tokens per prompt (blank = prompt default) <input type="number" id="bench-maxtok" min="4" max="512" style="width:5rem"></label>
       <div class="bench__actions">
         <button class="bench__btn" id="bench-run" type="button">Run selected</button>
         <button class="bench__btn bench__btn--ghost" id="bench-copy" type="button" disabled>Copy markdown</button>
@@ -95,6 +96,8 @@ const setStatus = (t) => { statusEl.textContent = t; };
 const log = (t) => { logEl.textContent += t + '\n'; logEl.scrollTop = logEl.scrollHeight; };
 const compact = (o, depth) => { if (depth > 3 || o == null || typeof o !== 'object') return o; if (Array.isArray(o)) return o.slice(0, 40).map((x) => compact(x, depth + 1)); const out = {}; let n = 0; for (const k of Object.keys(o)) { if (n++ > 60) break; const v = o[k]; if (typeof v === 'function') continue; if (ArrayBuffer.isView(v)) { out[k] = '[typed array ' + v.length + ']'; continue; } out[k] = compact(v, depth + 1); } return out; };
 const parseJson = (txt) => { const t = String(txt || '').trim(); if (!t) return null; try { const v = JSON.parse(t); return v && typeof v === 'object' ? v : null; } catch (e) { log('options JSON ignored: ' + e.message); return null; } };
+const genConfigs = () => { const v = parseJson($('#bench-gen').value); if (!v) return [null]; return Array.isArray(v) ? v.filter((x) => x && typeof x === 'object') : [v]; };
+const maxTokOverride = () => { const n = +$('#bench-maxtok').value; return n >= 4 ? Math.min(512, n) : null; };
 const percentile = (arr, p) => { if (!arr.length) return null; const a = arr.slice().sort((x, y) => x - y); return a[Math.min(a.length - 1, Math.floor(p * (a.length - 1)))]; };
 
 const device = { ua: navigator.userAgent, deviceMemory: navigator.deviceMemory || null, cores: navigator.hardwareConcurrency || null, webgpu: !!navigator.gpu };
@@ -161,13 +164,13 @@ async function runTier(id, vision, runs, force, profile, quick) {
   try {
     const tInit = performance.now();
     run.initOptions = parseJson($('#bench-init').value);
-    run.genOptions = parseJson($('#bench-gen').value);
+    run.genOptions = genConfigs();
     const initRes = run.initOptions ? await engine.init(run.initOptions) : await engine.init();
     run.initResult = compact(initRes, 0);
     run.initS = +((performance.now() - tInit) / 1000).toFixed(2);
     const opts = await Tiers.loadOptionsFor(id, { vision });
     run.maxSeq = opts && opts.config && opts.config.attention ? opts.config.attention.maxSeq : null;
-    const loadRes = await engine.loadModel(opts);
+    const loadRes = await engine.loadModel(run.initOptions ? Object.assign({}, opts, run.initOptions) : opts);
     run.loadResult = compact(loadRes, 0);
   } catch (e) {
     run.loadError = String(e && e.message || e);
@@ -182,16 +185,19 @@ async function runTier(id, vision, runs, force, profile, quick) {
   log(id + ': loaded in ' + loadS + ' s (cached before run: ' + cached + ', vision: ' + vision + ', route: ' + JSON.stringify(run.loadResult && (run.loadResult.decodeRoute || run.loadResult.route || '')) + ')');
   let prompts = quick ? PROMPTS.slice(0, 1) : PROMPTS.slice();
   if (vision) prompts.push({ id: 'image', system: 'You describe images precisely.', user: 'Read all the text in this image and name the two shapes.', maxTokens: 80, image: true });
-  for (const p of prompts) {
+  let gi = 0;
+  for (const g of run.genOptions) for (const p of prompts) {
+    const gLabel = g ? ' ' + JSON.stringify(g) : '';
+    const userText = run.genOptions.length > 1 ? 'Variant ' + (run.genOptions.indexOf(g) + 1) + ': ' + p.user : p.user;
     for (let r = 0; r < runs; r++) {
-      setStatus(id + ': ' + p.id + ' run ' + (r + 1) + '/' + runs);
+      setStatus(id + ': ' + p.id + gLabel + ' run ' + (r + 1) + '/' + runs);
       let tokens = 0, tFirst = 0, text = '', tPrev = 0;
       const gaps = [];
-      const params = Object.assign({}, run.genOptions || {}, {
+      const params = Object.assign({}, g || {}, {
         messages: p.image
-          ? [{ role: 'system', content: p.system }, { role: 'user', content: [{ type: 'image' }, { type: 'text', text: p.user }] }]
-          : [{ role: 'system', content: p.system }, { role: 'user', content: p.user }],
-        maxTokens: p.maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: p.image ? 1.15 : 1.0, enableThinking: false
+          ? [{ role: 'system', content: p.system }, { role: 'user', content: [{ type: 'image' }, { type: 'text', text: userText }] }]
+          : [{ role: 'system', content: p.system }, { role: 'user', content: userText }],
+        maxTokens: maxTokOverride() || p.maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: p.image ? 1.15 : 1.0, enableThinking: false
       });
       const profiles = [];
       if (profile && r === 0 && (device.features || []).includes('timestamp-query')) { params.tsAll2 = 2; params.onProfile = (pr) => { profiles.push(compact(pr, 0)); }; }
@@ -221,13 +227,13 @@ async function runTier(id, vision, runs, force, profile, quick) {
       const ttft = tFirst ? Math.round(tFirst - tStart) : null;
       const decode = tFirst && tokens > 1 ? +(((tokens - 1) / ((tEnd - tFirst) / 1000))).toFixed(2) : null;
       const statsAfter = await stats(engine);
-      const row = { tier: id, vision: vision, cached: cached, loadS: loadS, prompt: p.id, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens: tokens, totalS: +((tEnd - tStart) / 1000).toFixed(2), sample: text.replace(/\s+/g, ' ').slice(0, 90) };
+      const row = { tier: id, vision: vision, cached: cached, loadS: loadS, prompt: p.id + gLabel, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens: tokens, totalS: +((tEnd - tStart) / 1000).toFixed(2), sample: text.replace(/\s+/g, ' ').slice(0, 90) };
       results.push(row);
       addRow(row);
       const promptTokens = finalEvent && typeof finalEvent.committedTokens === 'number' && typeof finalEvent.numTokens === 'number' ? finalEvent.committedTokens - finalEvent.numTokens : null;
       const prefillTps = promptTokens && ttft ? +((promptTokens / (ttft / 1000))).toFixed(1) : null;
-      run.prompts.push({ id: p.id, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens, totalS: row.totalS, promptTokens, prefillTps, engineTps: finalEvent ? finalEvent.tokensPerSecond : null, gapMs: { min: Math.round(percentile(gaps, 0)), median: Math.round(percentile(gaps, 0.5)), p90: Math.round(percentile(gaps, 0.9)), max: Math.round(percentile(gaps, 1)) }, promptChars: p.user.length + p.system.length, image: !!p.image, profileFlags: !!params.tsAll2, profiles, statsBefore, statsAfter, finalEvent, sample: row.sample });
-      log(id + ' ' + p.id + ': ttft ' + ttft + ' ms, ' + decode + ' tok/s, ' + tokens + ' tokens, gap median ' + Math.round(percentile(gaps, 0.5)) + ' ms (p90 ' + Math.round(percentile(gaps, 0.9)) + ') · "' + row.sample + '"');
+      run.prompts.push({ id: p.id + gLabel, gen: g || null, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens, totalS: row.totalS, promptTokens, prefillTps, engineTps: finalEvent ? finalEvent.tokensPerSecond : null, gapMs: { min: Math.round(percentile(gaps, 0)), median: Math.round(percentile(gaps, 0.5)), p90: Math.round(percentile(gaps, 0.9)), max: Math.round(percentile(gaps, 1)) }, promptChars: p.user.length + p.system.length, image: !!p.image, profileFlags: !!params.tsAll2, profiles, statsBefore, statsAfter, finalEvent, sample: row.sample });
+      log(id + ' ' + p.id + gLabel + ': ttft ' + ttft + ' ms, ' + decode + ' tok/s, ' + tokens + ' tokens, gap median ' + Math.round(percentile(gaps, 0.5)) + ' ms (p90 ' + Math.round(percentile(gaps, 0.9)) + ') · "' + row.sample + '"');
     }
   }
   run.consoleLines = consoleLines.slice(run.consoleStart);
@@ -261,13 +267,15 @@ function summary() {
     const bp = lr.bindingPlan;
     const ge = run.statsAfterLoad && run.statsAfterLoad.gpuErrors;
     const lpf = lr.loadPlan && lr.loadPlan.fallbackEvents ? lr.loadPlan.fallbackEvents.length : 0;
-    lines.push(run.tier + (run.vision ? '+vl' : '') + (run.initOptions ? ' init' + JSON.stringify(run.initOptions) : '') + (run.genOptions ? ' gen' + JSON.stringify(run.genOptions) : '') + ': load ' + run.loadS + ' s' + (run.loadError ? ' LOAD ERROR ' + run.loadError : '') + ' · decodeRoute ' + JSON.stringify(lr.decodeRoute == null ? '?' : lr.decodeRoute) + ' · narrow ' + (ns == null ? 'n/a' : (ns.published ? 'PUBLISHED@' + ns.width : 'NOT published@' + ns.width + ' (' + String(ns.reason || '').slice(0, 80) + ')')) + ' · windows ' + (bp ? bp.windowCount + (bp.overLimit && bp.overLimit.length ? ' overLimit ' + bp.overLimit.map((o) => o.name).join(',') : '') : '?') + ' · gpuErrors ' + (ge ? ge.count : '?') + ' · loadFallbacks ' + lpf + (run.fallbacks.length ? ' · hostFallbacks ' + run.fallbacks.length : ''));
+    lines.push(run.tier + (run.vision ? '+vl' : '') + (run.initOptions ? ' init' + JSON.stringify(run.initOptions) : '') + ': load ' + run.loadS + ' s' + (run.loadError ? ' LOAD ERROR ' + run.loadError : '') + ' · decodeRoute ' + JSON.stringify(lr.decodeRoute == null ? '?' : lr.decodeRoute) + ' · narrow ' + (ns == null ? 'n/a' : (ns.published ? 'PUBLISHED@' + ns.width : 'NOT published@' + ns.width + ' (' + String(ns.reason || '').slice(0, 80) + ')')) + ' · windows ' + (bp ? bp.windowCount + (bp.overLimit && bp.overLimit.length ? ' overLimit ' + bp.overLimit.map((o) => o.name).join(',') : '') : '?') + ' · gpuErrors ' + (ge ? ge.count : '?') + ' · loadFallbacks ' + lpf + (run.fallbacks.length ? ' · hostFallbacks ' + run.fallbacks.length : ''));
     if (lr.kernelVariants) lines.push('  variants ' + JSON.stringify(lr.kernelVariants).slice(0, 220));
+    if (lr.mobileMatvec) lines.push('  mobileMatvec ' + JSON.stringify(lr.mobileMatvec).slice(0, 200)); else if (lr.kernelVariants && lr.kernelVariants.mobileMatvecReason) lines.push('  mobileMatvec declined: ' + lr.kernelVariants.mobileMatvecReason);
+    if (ns && (ns.probeCached != null || ns.cacheStatus)) lines.push('  probe cache ' + (ns.cacheStatus || '') + ' cached=' + ns.probeCached);
     for (const p of run.prompts) {
       const fe = p.finalEvent || {};
       const c = fe.counters && fe.counters.perDecodeToken ? fe.counters.perDecodeToken : null;
       const cp = fe.counters && fe.counters.perPrefillToken ? fe.counters.perPrefillToken : null;
-      lines.push('  ' + p.id + ': ttft ' + p.ttftMs + ' ms' + (p.promptTokens ? ' (' + p.promptTokens + ' prompt tok, prefill ' + p.prefillTps + ' tok/s)' : '') + ' · ' + p.decodeTps + ' tok/s' + (fe.decodeTokensPerSecond ? ' (engine ' + (+fe.decodeTokensPerSecond).toFixed(1) + ')' : '') + ' · ' + p.tokens + ' tok · gap med ' + (p.gapMs ? p.gapMs.median : '?') + ' p90 ' + (p.gapMs ? p.gapMs.p90 : '?') + ' max ' + (p.gapMs ? p.gapMs.max : '?') + (c ? ' · disp/tok ' + (+c.dispatches).toFixed(0) + ' map/tok ' + (+c.mapAsync).toFixed(2) + ' cmd/tok ' + (+c.cmdBufs).toFixed(0) : '') + (cp ? ' · disp/prompt-tok ' + (+cp.dispatches).toFixed(1) : '') + (fe.decodeRoute ? ' · ' + fe.decodeRoute : '') + (fe.kernelVariants && fe.kernelVariants.prefillRoute ? ' · prefill ' + fe.kernelVariants.prefillRoute : '') + (fe.fallbacks && fe.fallbacks.length ? ' · fallbacks ' + fe.fallbacks.length : '') + (p.profiles && p.profiles.length ? ' · profile ' + p.profiles.length + ' msg' : '') + (p.error ? ' ERROR ' + p.error : ''));
+      lines.push('  ' + p.id + ': ttft ' + p.ttftMs + ' ms' + (p.promptTokens ? ' (' + p.promptTokens + ' prompt tok, prefill ' + p.prefillTps + ' tok/s)' : '') + ' · ' + p.decodeTps + ' tok/s' + (fe.decodeTokensPerSecond ? ' (engine ' + (+fe.decodeTokensPerSecond).toFixed(1) + ')' : '') + ' · ' + p.tokens + ' tok · gap med ' + (p.gapMs ? p.gapMs.median : '?') + ' p90 ' + (p.gapMs ? p.gapMs.p90 : '?') + ' max ' + (p.gapMs ? p.gapMs.max : '?') + (c ? ' · disp/tok ' + (+c.dispatches).toFixed(0) + ' map/tok ' + (+c.mapAsync).toFixed(2) + ' cmd/tok ' + (+c.cmdBufs).toFixed(0) : '') + (cp ? ' · disp/prompt-tok ' + (+cp.dispatches).toFixed(1) : '') + (fe.decodeRoute ? ' · ' + fe.decodeRoute : '') + (fe.kernelVariants && fe.kernelVariants.prefillRoute ? ' · prefill ' + fe.kernelVariants.prefillRoute + (fe.kernelVariants.mobilePrefill ? '(' + (typeof fe.kernelVariants.mobilePrefill === 'object' ? (fe.kernelVariants.mobilePrefill.reason || JSON.stringify(fe.kernelVariants.mobilePrefill).slice(0, 60)) : String(fe.kernelVariants.mobilePrefill)) + ')' : '') : '') + (fe.prefillReused ? ' · prefillReused ' + fe.prefillReused : '') + (fe.kernelVariants && fe.kernelVariants.m1VecmatRoute != null ? ' · m1 ' + fe.kernelVariants.m1VecmatRoute + (fe.kernelVariants.m1VecmatRouteReason ? '(' + String(fe.kernelVariants.m1VecmatRouteReason).slice(0, 40) + ')' : '') : '') + (fe.fallbacks && fe.fallbacks.length ? ' · fallbacks ' + fe.fallbacks.length : '') + (p.profiles && p.profiles.length ? ' · profile ' + p.profiles.length + ' msg' : '') + (p.error ? ' ERROR ' + p.error : ''));
       if (p.profiles && p.profiles.length && p.profiles[0].decode && p.profiles[0].decode.byLabel) { const n = Math.max(1, p.tokens || 1); lines.push('    decode passes (ms per token): ' + p.profiles[0].decode.byLabel.slice(0, 8).map((b) => (b.label || b.name) + ' ' + (b.sumUs != null ? (b.sumUs / 1000 / n).toFixed(2) : '?') + ' ×' + (b.count != null ? Math.round(b.count / n) : '?')).join(', ') + (p.profiles[0].decode.totalUs ? ' · gpu total ' + (p.profiles[0].decode.totalUs / 1000 / n).toFixed(1) + ' ms/tok' : '')); if (p.profiles[0].prefill && p.profiles[0].prefill.byLabel) lines.push('    prefill passes (ms total): ' + p.profiles[0].prefill.byLabel.slice(0, 6).map((b) => (b.label || b.name) + ' ' + (b.sumUs != null ? (b.sumUs / 1000).toFixed(1) : '?')).join(', ') + (p.profiles[0].prefill.totalUs ? ' · gpu total ' + (p.profiles[0].prefill.totalUs / 1000).toFixed(1) + ' ms' : '')); }
     }
   }

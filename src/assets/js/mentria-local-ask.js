@@ -1,14 +1,16 @@
 const DIST = '/assets/mentria/dist/';
 const CHANNEL_NAME = 'mentria-local-ask';
 const TAB = Math.random().toString(36).slice(2);
+const IMAGE_MAX_SIDE = 448;
 let enginePromise = null;
+let engineVision = false;
 let queue = Promise.resolve();
 let hostGen = null;
 let hostBusy = () => false;
 let hostTier = '';
+let hostVision = false;
 const pending = new Map();
-let channel = null;
-try { channel = new BroadcastChannel(CHANNEL_NAME); } catch (_) {}
+const channels = [];
 let currentReq = null;
 
 function tr(key, fallback) {
@@ -64,7 +66,7 @@ export async function isModelCached() {
 }
 
 export function debugState() {
-  return { tab: TAB, hosting: !!hostGen, loaded: !!enginePromise, pending: pending.size };
+  return { tab: TAB, hosting: !!hostGen, hostVision: hostVision, loaded: !!enginePromise, vision: engineVision, pending: pending.size, channels: channels.length };
 }
 
 function emit(phase, detail) {
@@ -74,38 +76,52 @@ function emit(phase, detail) {
 }
 
 function post(m) {
-  if (!channel) return;
-  try { channel.postMessage(m); } catch (_) {}
+  for (const ch of channels) {
+    try { ch.postMessage(m); } catch (_) {}
+  }
 }
 
-export function hostWith(generate, isBusy, tier) {
+export function addChannel(ch) {
+  if (!ch || typeof ch.postMessage !== 'function' || typeof ch.addEventListener !== 'function') return () => {};
+  channels.push(ch);
+  ch.addEventListener('message', onMessage);
+  if (hostGen) { try { ch.postMessage({ t: 'host', tab: TAB, tier: hostTier, vision: hostVision }); } catch (_) {} }
+  return () => {
+    const i = channels.indexOf(ch);
+    if (i !== -1) channels.splice(i, 1);
+    try { ch.removeEventListener('message', onMessage); } catch (_) {}
+  };
+}
+
+export function hostWith(generate, isBusy, tier, vision) {
   hostGen = generate;
   hostBusy = typeof isBusy === 'function' ? isBusy : () => false;
   hostTier = tier || hostTier || '';
-  post({ t: 'host', tab: TAB, tier: hostTier });
+  hostVision = !!vision;
+  post({ t: 'host', tab: TAB, tier: hostTier, vision: hostVision });
 }
 
 const TIER_RANK = { '0.8b': 0, '2b': 1, '4b': 2, '27b': 3 };
 
-function findHost(timeoutMs) {
-  if (!channel) return Promise.resolve(null);
+function findHost(timeoutMs, needVision) {
+  if (!channels.length) return Promise.resolve(null);
   return new Promise((resolve) => {
     const hosts = [];
     const onMsg = (ev) => {
       const m = ev.data || {};
-      if (m.t === 'host' && m.tab !== TAB && (!m.to || m.to === TAB)) hosts.push({ tab: m.tab, rank: TIER_RANK[m.tier] || 0 });
+      if (m.t === 'host' && m.tab !== TAB && (!m.to || m.to === TAB) && (!needVision || m.vision)) hosts.push({ tab: m.tab, rank: TIER_RANK[m.tier] || 0 });
     };
-    channel.addEventListener('message', onMsg);
+    for (const ch of channels) ch.addEventListener('message', onMsg);
     post({ t: 'who', tab: TAB });
     setTimeout(() => {
-      channel.removeEventListener('message', onMsg);
+      for (const ch of channels) { try { ch.removeEventListener('message', onMsg); } catch (_) {} }
       hosts.sort((a, b) => b.rank - a.rank);
       resolve(hosts.length ? hosts[0].tab : null);
     }, timeoutMs);
   });
 }
 
-function askRemote(host, system, user, maxTokens, onToken) {
+function askRemote(host, system, user, maxTokens, onToken, image) {
   return new Promise((resolve, reject) => {
     const reqId = TAB + '-' + Math.random().toString(36).slice(2);
     let timer = 0;
@@ -123,47 +139,76 @@ function askRemote(host, system, user, maxTokens, onToken) {
       busy: () => fail('host-busy')
     });
     arm(4000, 'host-gone');
-    post({ t: 'ask', to: host, from: TAB, reqId: reqId, system: system, user: user, maxTokens: maxTokens });
+    post({ t: 'ask', to: host, from: TAB, reqId: reqId, system: system, user: user, maxTokens: maxTokens, image: image || null });
   });
 }
 
-if (channel) {
-  channel.addEventListener('message', async (ev) => {
-    const m = ev.data || {};
-    if (m.t === 'who') {
-      if (hostGen && m.tab !== TAB) post({ t: 'host', tab: TAB, to: m.tab, tier: hostTier });
-      return;
-    }
-    if (m.t === 'gone') {
-      for (const [id, p] of pending) if (p.host === m.tab) p.error({ message: 'host-gone' });
-      return;
-    }
-    if (m.t === 'ask') {
-      if (m.to !== TAB) return;
-      if (!hostGen) { post({ t: 'error', reqId: m.reqId, message: 'no-host' }); return; }
-      if (hostBusy()) { post({ t: 'busy', reqId: m.reqId }); return; }
-      post({ t: 'ack', reqId: m.reqId });
-      const run = queue.then(async () => {
-        try {
-          const answer = await hostGen(m.system, m.user, m.maxTokens, (token, full) => post({ t: 'token', reqId: m.reqId, token: token, full: full }));
-          post({ t: 'done', reqId: m.reqId, answer: answer });
-        } catch (e) {
-          post({ t: 'error', reqId: m.reqId, message: (e && e.message) || String(e) });
-        }
-      });
-      queue = run.catch(() => {});
-      return;
-    }
-    const p = pending.get(m.reqId);
-    if (p && typeof p[m.t] === 'function') p[m.t](m);
-  });
-  window.addEventListener('pagehide', () => {
-    if (hostGen) post({ t: 'gone', tab: TAB });
-  });
+async function onMessage(ev) {
+  const m = ev.data || {};
+  if (m.t === 'who') {
+    if (hostGen && m.tab !== TAB) post({ t: 'host', tab: TAB, to: m.tab, tier: hostTier, vision: hostVision });
+    return;
+  }
+  if (m.t === 'gone') {
+    for (const [id, p] of pending) if (p.host === m.tab) p.error({ message: 'host-gone' });
+    return;
+  }
+  if (m.t === 'ask') {
+    if (m.to !== TAB) return;
+    if (!hostGen) { post({ t: 'error', reqId: m.reqId, message: 'no-host' }); return; }
+    if (m.image && !hostVision) { post({ t: 'error', reqId: m.reqId, message: 'no-vision' }); return; }
+    if (hostBusy()) { post({ t: 'busy', reqId: m.reqId }); return; }
+    post({ t: 'ack', reqId: m.reqId });
+    const run = queue.then(async () => {
+      try {
+        const answer = await hostGen(m.system, m.user, m.maxTokens, (token, full) => post({ t: 'token', reqId: m.reqId, token: token, full: full }), m.image || null);
+        post({ t: 'done', reqId: m.reqId, answer: answer });
+      } catch (e) {
+        post({ t: 'error', reqId: m.reqId, message: (e && e.message) || String(e) });
+      }
+    });
+    queue = run.catch(() => {});
+    return;
+  }
+  const p = pending.get(m.reqId);
+  if (p && typeof p[m.t] === 'function') p[m.t](m);
 }
 
-function loadLocalModel() {
+try {
+  addChannel(new BroadcastChannel(CHANNEL_NAME));
+} catch (_) {}
+window.addEventListener('pagehide', () => {
+  if (hostGen) post({ t: 'gone', tab: TAB });
+});
+
+export async function imageToRgb(source, maxSide) {
+  if (source && source.rgbHwc && source.w && source.h) return { rgbHwc: source.rgbHwc, h: source.h, w: source.w };
+  const limit = maxSide || IMAGE_MAX_SIDE;
+  let bitmap = source;
+  if (typeof Blob !== 'undefined' && source instanceof Blob) bitmap = await createImageBitmap(source);
+  const sw = bitmap.videoWidth || bitmap.naturalWidth || bitmap.width;
+  const sh = bitmap.videoHeight || bitmap.naturalHeight || bitmap.height;
+  if (!sw || !sh) throw new Error('image-empty');
+  const scale = Math.min(1, limit / Math.max(sw, sh));
+  const w = Math.max(1, Math.round(sw * scale));
+  const h = Math.max(1, Math.round(sh * scale));
+  const canvas = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : Object.assign(document.createElement('canvas'), { width: w, height: h });
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  const data = ctx.getImageData(0, 0, w, h).data;
+  const rgbHwc = new Uint8Array(w * h * 3);
+  for (let i = 0, j = 0; i < data.length; i += 4, j += 3) { rgbHwc[j] = data[i]; rgbHwc[j + 1] = data[i + 1]; rgbHwc[j + 2] = data[i + 2]; }
+  return { rgbHwc: rgbHwc, h: h, w: w };
+}
+
+function loadLocalModel(needVision) {
+  if (enginePromise && needVision && !engineVision) {
+    const old = enginePromise;
+    enginePromise = null;
+    old.then((r) => { try { r.engine.terminate(); } catch (_) {} }).catch(() => {});
+  }
   if (!enginePromise) {
+    engineVision = !!needVision;
     enginePromise = (async () => {
       const [{ MentriaEngine }, Tiers] = await Promise.all([
         import(DIST + 'mentria.mjs'),
@@ -189,39 +234,49 @@ function loadLocalModel() {
           new Promise((r) => setTimeout(r, 480000))
         ]);
       } catch (_) {}
-      const res = await Tiers.loadWithFallback(make, tier, { vision: false });
-      hostWith(localGenerate, () => false, res.tier || tier);
-      return { engine: res.engine, maxSeq: res.maxSeq || 2048, tier: res.tier || tier };
+      const res = await Tiers.loadWithFallback(make, tier, { vision: !!needVision });
+      hostWith(localGenerate, () => false, res.tier || tier, !!needVision);
+      return { engine: res.engine, maxSeq: res.maxSeq || 2048, tier: res.tier || tier, vision: !!needVision };
     })();
     enginePromise.catch(() => { enginePromise = null; });
   }
   return enginePromise;
 }
 
-async function localGenerate(system, user, maxTokens, onToken) {
-  const { engine } = await loadLocalModel();
+export function warmLocalModel(opts) {
+  const o = opts || {};
+  return loadLocalModel(!!o.vision).then((r) => ({ tier: r.tier, vision: r.vision, maxSeq: r.maxSeq }));
+}
+
+async function localGenerate(system, user, maxTokens, onToken, image) {
+  const { engine } = await loadLocalModel(!!image);
   let out = '';
-  await engine.generate({
-    messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+  const params = {
+    messages: image
+      ? [{ role: 'system', content: system }, { role: 'user', content: [{ type: 'image' }, { type: 'text', text: user }] }]
+      : [{ role: 'system', content: system }, { role: 'user', content: user }],
     maxTokens: maxTokens || 220,
-    temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false
-  }, (ev) => {
+    temperature: 0, topK: 1, topP: 1, repetitionPenalty: image ? 1.15 : 1.0, enableThinking: false
+  };
+  if (image) params.images = [image];
+  await engine.generate(params, (ev) => {
     if (typeof ev.token === 'string') {
+      if (/^<\|[^|]*\|>$/.test(ev.token)) return;
       out += ev.token;
       if (onToken) { try { onToken(ev.token, out); } catch (_) {} }
     }
   });
-  return out.replace(/<\|[a-z_]+\|>/gi, '').trim();
+  return out.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<\|[a-z_]+\|>/gi, '').trim();
 }
 
-async function viaHost(system, user, maxTokens, onToken) {
+async function viaHost(system, user, maxTokens, onToken, image) {
   for (let attempt = 0; attempt < 40; attempt++) {
-    const host = await findHost(350);
+    const host = await findHost(350, !!image);
     if (!host) return null;
     try {
-      return await askRemote(host, system, user, maxTokens, onToken);
+      return await askRemote(host, system, user, maxTokens, onToken, image);
     } catch (e) {
-      if (e.message === 'host-gone') return null;
+      if (e.message === 'host-gone' || e.message === 'no-vision' || e.message === 'no-host') return null;
       if (e.message !== 'host-busy') throw e;
       await new Promise((r) => setTimeout(r, 3000));
     }
@@ -242,14 +297,15 @@ export function askLocal(system, user, opts) {
     emit('start', { source: o.source || '', prompt: shown });
     currentReq = { source: o.source || '', prompt: shown, onProgress: o.onProgress || null };
     try {
+      const image = o.image ? await imageToRgb(o.image, o.imageMaxSide) : null;
       let answer = null;
-      if (hostGen && !enginePromise) {
+      if (hostGen && !enginePromise && (!image || hostVision)) {
         await waitHostIdle();
-        answer = await hostGen(system, user, maxTokens, o.onToken);
-      } else if (!enginePromise) {
-        answer = await viaHost(system, user, maxTokens, o.onToken);
+        answer = await hostGen(system, user, maxTokens, o.onToken, image);
+      } else if (!enginePromise || (image && !engineVision)) {
+        answer = await viaHost(system, user, maxTokens, o.onToken, image);
       }
-      if (answer == null) answer = await localGenerate(system, user, maxTokens, o.onToken);
+      if (answer == null) answer = await localGenerate(system, user, maxTokens, o.onToken, image);
       emit('answer', { source: o.source || '', prompt: shown, answer: answer });
       return answer;
     } catch (e) {

@@ -1,0 +1,225 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/bench/index.html"
+robots: "noindex, nofollow"
+title: "Model benchmark"
+description: "Measures load time, time to first token and decode speed of the on-device model tiers on this device."
+eleventyComputed:
+  lang: "{{ locale.code }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">bench</span></p>
+  <h1>Model benchmark</h1>
+  <p class="lede">Loads a tier in this tab, runs fixed prompts, and reports load time, time to first token and decode speed. Close other model tabs first: one engine per device.</p>
+</section>
+
+<section class="bench" id="bench">
+  <div class="bench__grid">
+    <fieldset class="bench__box">
+      <legend>Tiers</legend>
+      <div id="bench-tiers" class="bench__tiers"></div>
+      <label class="bench__opt"><input type="checkbox" id="bench-vision"> load the vision model too and run one image prompt</label>
+      <label class="bench__opt"><input type="checkbox" id="bench-force"> ignore eligibility (may crash the tab on small devices)</label>
+      <label class="bench__opt">runs per prompt <input type="number" id="bench-runs" min="1" max="5" value="1" style="width:4rem"></label>
+      <div class="bench__actions">
+        <button class="bench__btn" id="bench-run" type="button">Run selected</button>
+        <button class="bench__btn bench__btn--ghost" id="bench-copy" type="button" disabled>Copy markdown</button>
+        <button class="bench__btn bench__btn--ghost" id="bench-json" type="button" disabled>Copy JSON</button>
+      </div>
+      <p class="bench__status" id="bench-status" aria-live="polite">idle</p>
+    </fieldset>
+    <fieldset class="bench__box">
+      <legend>This device</legend>
+      <pre class="bench__pre" id="bench-device">reading…</pre>
+    </fieldset>
+  </div>
+  <div class="bench__tablewrap">
+    <table class="bench__table" id="bench-table" hidden>
+      <thead><tr><th>tier</th><th>vision</th><th>cached</th><th>load s</th><th>prompt</th><th>TTFT ms</th><th>decode tok/s</th><th>tokens</th><th>total s</th></tr></thead>
+      <tbody id="bench-rows"></tbody>
+    </table>
+  </div>
+  <pre class="bench__pre bench__log" id="bench-log"></pre>
+</section>
+
+<style>
+.bench { max-width: var(--wide, 1100px); margin: 0 auto; padding: 0 1rem 3rem; }
+.bench__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .bench__grid { grid-template-columns: 1fr; } }
+.bench__box { border: 1px solid var(--border, rgba(255,255,255,.12)); border-radius: 12px; padding: 1rem; min-width: 0; }
+.bench__box legend { font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted, #8896a8); padding: 0 .4rem; }
+.bench__tiers { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+.bench__tiers label { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--border, rgba(255,255,255,.14)); border-radius: 999px; padding: .35rem .8rem; font-family: var(--font-mono); font-size: .9rem; }
+.bench__tiers label.is-off { opacity: .55; }
+.bench__opt { display: block; font-size: .9rem; margin: .35rem 0; }
+.bench__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .8rem; }
+.bench__btn { background: var(--accent, #6ef3c5); color: #0a0a0a; border: 0; border-radius: 8px; padding: .55rem 1rem; font-family: var(--font-mono); font-weight: 600; cursor: pointer; }
+.bench__btn--ghost { background: transparent; color: var(--fg, #e2e8f0); border: 1px solid var(--border, rgba(255,255,255,.2)); }
+.bench__btn:disabled { opacity: .45; cursor: default; }
+.bench__status { font-family: var(--font-mono); font-size: .85rem; color: var(--accent, #6ef3c5); margin: .8rem 0 0; min-height: 1.2em; overflow-wrap: anywhere; }
+.bench__pre { font-family: var(--font-mono); font-size: .78rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; color: var(--muted, #c9d4df); }
+.bench__log { margin-top: 1rem; max-height: 14rem; overflow: auto; border-top: 1px solid var(--border, rgba(255,255,255,.1)); padding-top: .75rem; }
+.bench__tablewrap { overflow-x: auto; margin-top: 1rem; }
+.bench__table { border-collapse: collapse; width: 100%; font-family: var(--font-mono); font-size: .82rem; }
+.bench__table th, .bench__table td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--border, rgba(255,255,255,.1)); white-space: nowrap; }
+.bench__table th { color: var(--muted, #8896a8); font-weight: 500; }
+</style>
+
+<script type="module">
+const $ = (s) => document.querySelector(s);
+const statusEl = $('#bench-status');
+const logEl = $('#bench-log');
+const rowsEl = $('#bench-rows');
+const tableEl = $('#bench-table');
+const results = [];
+const PROMPTS = [
+  { id: 'short', system: 'You answer in one short sentence.', user: 'What is a countdown timer for?', maxTokens: 40 },
+  { id: 'medium', system: 'You are a concise assistant.', user: 'Explain in three sentences how a web page can run a language model on the GPU.', maxTokens: 120 },
+  { id: 'long', system: 'You are a helpful writer.', user: 'Write a 150 word note about why keeping data on the device matters, in plain language.', maxTokens: 220 }
+];
+const setStatus = (t) => { statusEl.textContent = t; };
+const log = (t) => { logEl.textContent += t + '\n'; logEl.scrollTop = logEl.scrollHeight; };
+
+const device = { ua: navigator.userAgent, deviceMemory: navigator.deviceMemory || null, cores: navigator.hardwareConcurrency || null, webgpu: !!navigator.gpu };
+async function readDevice() {
+  try {
+    const est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null;
+    if (est) device.storage = { usageGB: +((est.usage || 0) / 1e9).toFixed(2), quotaGB: +((est.quota || 0) / 1e9).toFixed(1) };
+    if (navigator.gpu) {
+      const adapter = await navigator.gpu.requestAdapter();
+      if (adapter) {
+        const info = adapter.info || (adapter.requestAdapterInfo ? await adapter.requestAdapterInfo() : {});
+        device.gpu = { vendor: info.vendor || '', architecture: info.architecture || '', device: info.device || '', description: info.description || '' };
+        device.features = [...adapter.features].filter((f) => /f16|subgroups|timestamp|bgra|float32-filterable/.test(f));
+        const L = adapter.limits;
+        device.limits = { maxBufferSize: L.maxBufferSize, maxStorageBufferBindingSize: L.maxStorageBufferBindingSize, maxComputeWorkgroupStorageSize: L.maxComputeWorkgroupStorageSize, maxComputeInvocationsPerWorkgroup: L.maxComputeInvocationsPerWorkgroup, maxComputeWorkgroupSizeX: L.maxComputeWorkgroupSizeX, maxComputeWorkgroupsPerDimension: L.maxComputeWorkgroupsPerDimension };
+      }
+    }
+  } catch (e) { device.error = String(e && e.message || e); }
+  $('#bench-device').textContent = JSON.stringify(device, null, 1);
+}
+
+const Tiers = await import('/assets/js/mentria-tiers.js');
+const chain = Tiers.TIER_CHAIN || ['0.8b', '2b', '4b', '27b'];
+const decision = await Tiers.decideTier().catch(() => ({ tier: '0.8b', eligible: [] }));
+const eligible = new Set([decision.tier, chain[chain.length - 1]].concat(decision.eligible || []));
+const tiersEl = $('#bench-tiers');
+for (const id of chain) {
+  const t = Tiers.TIERS[id];
+  if (!t) continue;
+  const cached = await Tiers.isTierCached(id).catch(() => false);
+  const lab = document.createElement('label');
+  lab.className = eligible.has(id) ? '' : 'is-off';
+  lab.innerHTML = '<input type="checkbox" value="' + id + '"' + (id === decision.tier ? ' checked' : '') + '> ' + id + ' · ' + (t.sizeLabel || '') + (cached ? ' · cached' : '') + (eligible.has(id) ? '' : ' · not eligible');
+  tiersEl.appendChild(lab);
+}
+log('decision: tier=' + decision.tier + ' eligible=' + [...eligible].join(',') + (decision.reason ? ' reason=' + decision.reason : ''));
+readDevice();
+
+function makeTestImage() {
+  const c = document.createElement('canvas'); c.width = 448; c.height = 448;
+  const x = c.getContext('2d');
+  x.fillStyle = '#f4f1ea'; x.fillRect(0, 0, 448, 448);
+  x.fillStyle = '#1b1f24'; x.font = 'bold 40px sans-serif'; x.fillText('GATE 12', 40, 90);
+  x.font = '28px sans-serif'; x.fillText('Boarding 14:35', 40, 150); x.fillText('Seat 21A', 40, 200);
+  x.fillStyle = '#d33'; x.fillRect(40, 260, 160, 120);
+  x.fillStyle = '#2a7'; x.beginPath(); x.arc(330, 320, 70, 0, Math.PI * 2); x.fill();
+  return c;
+}
+
+async function runTier(id, vision, runs, force) {
+  if (!eligible.has(id) && !force) { log(id + ': skipped (not eligible; tick "ignore eligibility" to force)'); return; }
+  const { MentriaEngine } = await import('/assets/mentria/dist/mentria.mjs');
+  const engine = new MentriaEngine('/assets/mentria/dist/worker.mjs');
+  if (window.mentriaWrapEngine) window.mentriaWrapEngine(engine);
+  engine.onProgress = (p) => { const pct = p && p.total ? Math.round(100 * p.loaded / p.total) : null; setStatus(id + ': ' + ((p && p.message) || 'loading') + (pct != null ? ' ' + pct + '%' : '')); };
+  const cached = await Tiers.isTierCached(id).catch(() => false);
+  const t0 = performance.now();
+  try {
+    await engine.init();
+    const opts = await Tiers.loadOptionsFor(id, { vision });
+    await engine.loadModel(opts);
+  } catch (e) {
+    log(id + ': load failed: ' + (e && e.message || e));
+    try { engine.terminate(); } catch (_) {}
+    return;
+  }
+  const loadS = +((performance.now() - t0) / 1000).toFixed(1);
+  log(id + ': loaded in ' + loadS + ' s (cached before run: ' + cached + ', vision: ' + vision + ')');
+  const prompts = PROMPTS.slice();
+  if (vision) prompts.push({ id: 'image', system: 'You describe images precisely.', user: 'Read all the text in this image and name the two shapes.', maxTokens: 80, image: true });
+  for (const p of prompts) {
+    for (let r = 0; r < runs; r++) {
+      setStatus(id + ': ' + p.id + ' run ' + (r + 1) + '/' + runs);
+      let tokens = 0, tFirst = 0, text = '';
+      const params = {
+        messages: p.image
+          ? [{ role: 'system', content: p.system }, { role: 'user', content: [{ type: 'image' }, { type: 'text', text: p.user }] }]
+          : [{ role: 'system', content: p.system }, { role: 'user', content: p.user }],
+        maxTokens: p.maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: p.image ? 1.15 : 1.0, enableThinking: false
+      };
+      if (p.image) {
+        const c = makeTestImage();
+        const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+        const rgb = new Uint8Array(c.width * c.height * 3);
+        for (let i = 0, j = 0; i < d.length; i += 4, j += 3) { rgb[j] = d[i]; rgb[j + 1] = d[i + 1]; rgb[j + 2] = d[i + 2]; }
+        params.images = [{ rgbHwc: rgb, h: c.height, w: c.width }];
+      }
+      const tStart = performance.now();
+      try {
+        await engine.generate(params, (ev) => {
+          if (typeof ev.token === 'string' && ev.token.length) {
+            if (/^<\|[^|]*\|>$/.test(ev.token)) return;
+            tokens++; text += ev.token;
+            if (!tFirst) tFirst = performance.now();
+          }
+        });
+      } catch (e) { log(id + ' ' + p.id + ': generate failed: ' + (e && e.message || e)); continue; }
+      const tEnd = performance.now();
+      const ttft = tFirst ? Math.round(tFirst - tStart) : null;
+      const decode = tFirst && tokens > 1 ? +(((tokens - 1) / ((tEnd - tFirst) / 1000))).toFixed(2) : null;
+      const row = { tier: id, vision: vision, cached: cached, loadS: loadS, prompt: p.id, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens: tokens, totalS: +((tEnd - tStart) / 1000).toFixed(2), sample: text.replace(/\s+/g, ' ').slice(0, 90) };
+      results.push(row);
+      addRow(row);
+      log(id + ' ' + p.id + ': ttft ' + ttft + ' ms, ' + decode + ' tok/s, ' + tokens + ' tokens · "' + row.sample + '"');
+    }
+  }
+  try { engine.terminate(); } catch (_) {}
+  setStatus(id + ': done, engine released');
+}
+
+function addRow(r) {
+  tableEl.hidden = false;
+  const tr = document.createElement('tr');
+  tr.innerHTML = [r.tier, r.vision ? 'yes' : 'no', r.cached ? 'yes' : 'no', r.loadS, r.prompt + (r.run > 1 ? ' #' + r.run : ''), r.ttftMs == null ? '' : r.ttftMs, r.decodeTps == null ? '' : r.decodeTps, r.tokens, r.totalS].map((v) => '<td>' + v + '</td>').join('');
+  rowsEl.appendChild(tr);
+  $('#bench-copy').disabled = false; $('#bench-json').disabled = false;
+}
+
+function markdown() {
+  const head = '| tier | vision | cached | load s | prompt | TTFT ms | decode tok/s | tokens | total s |\n|---|---|---|---|---|---|---|---|---|\n';
+  const body = results.map((r) => '| ' + [r.tier, r.vision ? 'yes' : 'no', r.cached ? 'yes' : 'no', r.loadS, r.prompt + (r.run > 1 ? ' #' + r.run : ''), r.ttftMs == null ? '' : r.ttftMs, r.decodeTps == null ? '' : r.decodeTps, r.tokens, r.totalS].join(' | ') + ' |').join('\n');
+  const dev = device.gpu ? (device.gpu.description || device.gpu.architecture || device.gpu.vendor) : 'no webgpu';
+  return '### ' + dev + ' · ' + (device.deviceMemory || '?') + ' GB device memory · ' + new Date().toISOString().slice(0, 16).replace('T', ' ') + '\n\n' + head + body + '\n\nfeatures: ' + (device.features || []).join(', ') + '\nlimits: ' + JSON.stringify(device.limits || {}) + '\n';
+}
+
+$('#bench-run').addEventListener('click', async () => {
+  const ids = [...tiersEl.querySelectorAll('input:checked')].map((i) => i.value);
+  if (!ids.length) { setStatus('pick at least one tier'); return; }
+  const vision = $('#bench-vision').checked;
+  const force = $('#bench-force').checked;
+  const runs = Math.max(1, Math.min(5, +$('#bench-runs').value || 1));
+  $('#bench-run').disabled = true;
+  try {
+    for (const id of ids) await runTier(id, vision, runs, force);
+  } finally {
+    $('#bench-run').disabled = false;
+  }
+});
+$('#bench-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(markdown()); setStatus('markdown copied'); } catch (_) { setStatus('clipboard blocked; select the table'); } });
+$('#bench-json').addEventListener('click', async () => { try { await navigator.clipboard.writeText(JSON.stringify({ device, results }, null, 1)); setStatus('json copied'); } catch (_) { setStatus('clipboard blocked'); } });
+</script>

@@ -239,7 +239,7 @@ window.addEventListener('mentria:localask', (ev) => {
   if (dot) dot.classList.add('is-done');
   const a = el.querySelector('.lap-a');
   if (d.phase === 'answer' && a) a.textContent = d.answer;
-  if (d.phase === 'error' && a) a.textContent = tr('webmcp.panel_error', 'The local model could not answer: ') + (d.message || '');
+  if (d.phase === 'error' && a) a.textContent = d.message === 'host-busy' ? tr('webmcp.panel_busy', 'The on-device model is busy in another tab. Try again in a moment.') : tr('webmcp.panel_error', 'The local model could not answer: ') + (d.message || '');
   clearTimeout(panelTimer);
   panelTimer = setTimeout(() => {
     const p = document.getElementById(PANEL_ID);

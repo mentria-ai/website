@@ -129,7 +129,9 @@
     }).catch(function (e) {
       var msg = (e && e.message === 'download-postponed')
         ? (T.askPostponed || 'model download postponed — run the command again whenever you like.')
-        : (T.askError || 'the local model could not answer: ') + ((e && e.message) || e);
+        : (e && e.message === 'host-busy')
+          ? (T.askBusy || 'the on-device model is busy in another tab — try again in a moment.')
+          : (T.askError || 'the local model could not answer: ') + ((e && e.message) || e);
       appendLine(out, msg, 'error');
       out.scrollTop = out.scrollHeight;
     });

@@ -4,6 +4,7 @@
     "panel_close": "Dismiss",
     "panel_privacy": "Answered by the model on this device — nothing was sent anywhere.",
     "panel_error": "The local model could not answer: ",
+    "panel_busy": "The on-device model is busy in another tab. Try again in a moment.",
     "panel_summarize": "Summarizing your saved notes privately",
     "offer_27b": "This site's AI runs best on the 27B on-device model: about 3.8 GB, downloaded once and kept on this device (tested on Apple Silicon with 16 GB+ memory and NVIDIA GPUs with 6 GB+). Download it now? Otherwise a smaller model is used.",
     "activity_title": "Agent activity · WebMCP",
@@ -186,6 +187,7 @@
       "ask_thinking": "> asking the model running on this device…",
       "ask_download": "> first use may download the model, it stays on your device.",
       "ask_postponed": "model download postponed — run the command again whenever you like.",
+      "ask_busy": "the on-device model is busy in another tab — try again in a moment.",
       "ask_error": "the local model could not answer: ",
       "ask_unsupported": "the on-device model needs a WebGPU browser (Chrome or Edge on desktop, recent Android)."
     },

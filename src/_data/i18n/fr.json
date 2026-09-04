@@ -4,6 +4,7 @@
     "panel_close": "Fermer",
     "panel_privacy": "Réponse générée par le modèle de cet appareil — rien n'a été envoyé nulle part.",
     "panel_error": "Le modèle local n'a pas pu répondre : ",
+    "panel_busy": "Le modèle sur l'appareil est occupé dans un autre onglet. Réessayez dans un instant.",
     "panel_summarize": "Résumé privé de tes notes en cours",
     "offer_27b": "L'IA de ce site fonctionne mieux avec le modèle 27B sur l'appareil : environ 3,8 Go, téléchargé une fois et conservé sur cet appareil (testé sur Apple Silicon avec 16 Go+ de mémoire et GPU NVIDIA avec 6 Go+). Le télécharger maintenant ? Sinon, un modèle plus petit sera utilisé.",
     "activity_title": "Activité de l'agent · WebMCP",
@@ -186,6 +187,7 @@
       "ask_thinking": "> question envoyée au modèle qui tourne sur cet appareil…",
       "ask_download": "> la première utilisation peut télécharger le modèle ; il reste sur ton appareil.",
       "ask_postponed": "téléchargement du modèle reporté — relance la commande quand tu veux.",
+      "ask_busy": "le modèle sur l'appareil est occupé dans un autre onglet — réessayez dans un instant.",
       "ask_error": "le modèle local n'a pas pu répondre : ",
       "ask_unsupported": "le modèle sur l'appareil nécessite un navigateur WebGPU (Chrome ou Edge sur ordinateur, Android récent)."
     },

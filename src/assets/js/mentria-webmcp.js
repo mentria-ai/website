@@ -127,8 +127,12 @@ async function searchSite(query) {
   return scored.slice(0, 8).map((s) => s.item);
 }
 
+async function safeRegister(tool) {
+  try { await mc.registerTool(tool); } catch (e) { console.warn('[webmcp] could not register ' + tool.name, e); }
+}
+
 async function start() {
-  await mc.registerTool({
+  await safeRegister({
     name: 'site__search',
     title: 'Search mentria.ai',
     description: 'Search this site for tools, games and feed posts by keyword. Returns titles, URLs and descriptions.',
@@ -136,7 +140,7 @@ async function start() {
     annotations: { readOnlyHint: true },
     execute: (args) => tracked('site__search', args, () => searchSite((args || {}).query))
   });
-  await mc.registerTool({
+  await safeRegister({
     name: 'site__open',
     title: 'Open a mentria.ai page',
     description: 'Navigate this tab to a site page by path, e.g. /tools/countdown-timer/ or /feed/. New tools become available after the page loads.',
@@ -148,7 +152,7 @@ async function start() {
       return { ok: true, navigating: p };
     })
   });
-  await registerLocalAi();
+  try { await registerLocalAi(); } catch (e) { console.warn('[webmcp] local AI tools not registered', e); }
   sync();
 }
 
@@ -158,7 +162,7 @@ let panelTimer = 0;
 function tr(key, fallback) {
   try {
     const I = window.MentriaI18n;
-    if (I && I.hasKey && I.hasKey(key)) return I.t(key);
+    if (I && I.t) { const v = I.t(key); if (v != null && v !== key) return v; }
   } catch (_) {}
   return fallback;
 }
@@ -245,7 +249,7 @@ window.addEventListener('mentria:localask', (ev) => {
 
 async function registerLocalAi() {
   if (!navigator.gpu) return;
-  await mc.registerTool({
+  await safeRegister({
     name: 'local_ai__status',
     title: 'On-device AI status',
     description: 'Report whether this device can run the local model and whether it is already downloaded.',
@@ -256,7 +260,7 @@ async function registerLocalAi() {
       return { webgpu: true, tier: info.tier, size: info.sizeLabel, downloaded: info.cached, note: info.cached ? 'ready to run locally' : 'first call downloads the model to this device' };
     })
   });
-  await mc.registerTool({
+  await safeRegister({
     name: 'local_ai__ask',
     title: 'Ask the on-device model',
     description: 'Run a prompt on the language model that executes on this device\u2019s GPU. Nothing is sent to any server. First use may download the model to this device.',
@@ -300,4 +304,4 @@ function registerSummarize() {
 
 window.addEventListener('mentria:bus:provide', sync);
 document.addEventListener('DOMContentLoaded', sync);
-start();
+start().catch((e) => { console.warn('[webmcp] bridge failed to start', e); try { sync(); } catch (_) {} });

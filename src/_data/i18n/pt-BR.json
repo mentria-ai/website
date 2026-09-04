@@ -6,7 +6,8 @@
     "panel_error": "O modelo local não conseguiu responder: ",
     "panel_summarize": "Resumindo suas notas salvas de forma privada",
     "offer_27b": "A IA deste site funciona melhor com o modelo 27B no dispositivo: cerca de 3,8 GB, baixado uma vez e mantido neste dispositivo (testado em Apple Silicon com 16 GB+ de memória e GPUs NVIDIA com 6 GB+). Baixar agora? Caso contrário, um modelo menor será usado.",
-    "activity_title": "Atividade do agente · WebMCP"
+    "activity_title": "Atividade do agente · WebMCP",
+    "loading_model": "Carregando o modelo no dispositivo para uma tarefa de IA privada…"
   },
   "site": {
     "tagline": "estúdio criativo. ferramentas e transmissões.",

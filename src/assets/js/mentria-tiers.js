@@ -238,9 +238,13 @@ export async function isTierCached(id) {
     const cdn = cdnBaseFor(t);
     if (cdn) bases.push(cdn);
     for (const b of bases) {
-      const u = b + t.shards[0];
-      const meta = u + (u.includes('?') ? '&' : '?') + 'mentria_seg=meta';
-      if ((await caches.match(meta)) || (await caches.match(u))) return true;
+      let all = true;
+      for (const shard of t.shards) {
+        const u = b + shard;
+        const meta = u + (u.includes('?') ? '&' : '?') + 'mentria_seg=meta';
+        if (!((await caches.match(meta)) || (await caches.match(u)))) { all = false; break; }
+      }
+      if (all) return true;
     }
     return false;
   } catch (_) { return false; }
@@ -430,7 +434,7 @@ export async function loadWithFallback(createEngine, startTier, { vision = true,
       console.warn('[mentria-tiers] load failed for ' + id +
         (next ? ' — falling back to ' + next : ' — no tier left'), err);
       if (next) {
-        try { localStorage.setItem(LS_CAP, next); } catch (_) {}
+        setTierCap(next);
         if (onFallback) { try { onFallback(id, next, err); } catch (_) {} }
       }
     }

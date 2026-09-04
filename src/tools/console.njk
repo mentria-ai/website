@@ -306,7 +306,8 @@ eleventyComputed:
     adapterBusy = true;
     renderAdapterBtn();
     try {
-      for (let i = 0; i < 120 && hosting; i++) await new Promise((r) => setTimeout(r, 250));
+      for (let i = 0; i < 240 && hosting; i++) await new Promise((r) => setTimeout(r, 250));
+      if (hosting) throw new Error(COPY.testBusy);
       await engine.swapAdapter(on ? adapterCfg : { name: null });
       adapterOn = on;
       addMsg('step', on ? COPY.adapterOn : COPY.adapterOff);
@@ -337,15 +338,18 @@ eleventyComputed:
       const parkedRoute = (() => { try { return frame.contentWindow.location.href; } catch (_) { return parked; } })();
       frame.src = 'about:blank';
       await new Promise((r) => setTimeout(r, 300));
+      let res;
+      try {
       const { MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs');
       const { ensureModel } = await import('/assets/js/mentria-model.js');
-      if (await Tiers.isTierCached('27b')) { try { Tiers.setUserTier('27b'); localStorage.removeItem('mentria-tier-cap'); } catch (_) {} }
-      const res = await ensureModel(() => { const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs'); if (window.mentriaWrapEngine) window.mentriaWrapEngine(e); return e; }, {
+      if (await Tiers.isTierCached('27b')) { try { Tiers.setUserTier('27b'); } catch (_) {} }
+      res = await ensureModel(() => { const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs'); if (window.mentriaWrapEngine) window.mentriaWrapEngine(e); return e; }, {
         vision: false, offerUpgrade: false,
         onProgress: (p) => { if (!p) return; const pct = p.loaded != null && p.total > 0 ? ' ' + Math.round(Math.min(1, p.loaded / p.total) * 100) + '%' : ''; setStatus('loading', (p.message || COPY.statusLoading) + pct); },
         onDeviceLost: () => { engine = null; setStatus('error', COPY.notSupported); }
       });
-      if (res.tier !== '27b') { try { res.engine.unload && res.engine.unload(); } catch (_) {} throw new Error(COPY.notSupported); }
+      if (res.tier !== '27b') { try { if (res.engine.terminate) res.engine.terminate(); else if (res.engine.unload) res.engine.unload(); } catch (_) {} throw new Error(COPY.notSupported); }
+      } catch (err) { try { frame.src = parkedRoute; } catch (_) {} throw err; }
       engine = res.engine; engineCtx = res.maxSeq || 2048;
       try {
         const LocalAsk = await import('/assets/js/mentria-local-ask.js');
@@ -356,7 +360,7 @@ eleventyComputed:
           await engine.generate({ messages: [{ role: 'system', content: system }, { role: 'user', content: user }], maxTokens: maxTokens || 220, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false }, (ev) => { if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) { out += ev.token; if (onToken) onToken(ev.token, out); } });
           } finally { hosting = false; }
           return out.trim();
-        }, () => busy || adapterBusy);
+        }, () => busy || adapterBusy || hosting, '27b');
       } catch (_) {}
       try {
         const base = 'https://cdn.mentria.ai/models/Bonsai-27B-mentria/loras/qa-routing/v1/';
@@ -710,7 +714,7 @@ eleventyComputed:
       if ((await Tiers.effectiveTier()) !== '27b') throw new Error(COPY.notSupported);
       const deadline = started + (Number(o.budgetMs) || TEST_BUDGET_MS);
       const persona = resolvePersona(o.persona);
-      if (o.app) { const target = findApp(o.app); if (target && currentSlug() !== target.slug) { const p = loaded(); frame.src = routeFor(target.slug); await p; } }
+      { const target = (o.app ? findApp(o.app) : findApp(task)) || home; if (target && currentSlug() !== target.slug) { const p = loaded(); frame.src = routeFor(target.slug); await p; } }
       addMsg('step', COPY.sessionStart + ' ' + task + (persona ? ' — ' + persona : ''));
       await loadModel();
       if (Date.now() > deadline - 30000) throw new Error(COPY.testNoTime);
@@ -792,11 +796,12 @@ eleventyComputed:
   }
   sessionBtn.addEventListener('click', runSession);
   import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
-    MentriaBus.provide('console.test', (args) => testSession({ task: (args || {}).task, persona: (args || {}).persona, uiOnly: (args || {}).uiOnly === true ? true : undefined }), {
+    MentriaBus.provide('console.test', (args) => testSession({ task: (args || {}).task, persona: (args || {}).persona, app: (args || {}).app, uiOnly: (args || {}).uiOnly === true ? true : undefined }), {
       description: 'Commission a QA test of a Mentria app. The 27B model running on this device opens the app and tries to carry out the task the way a person would, then reports what worked, what was awkward, and any bugs, with steps to reproduce. Takes one to five minutes and needs the 27B tier.',
       parameters: { type: 'object', properties: {
         task: { type: 'string', description: 'What the test user should try to do, in plain language, naming the app — for example "Set a 5 minute countdown timer and start it".' },
         persona: { type: 'string', description: 'Optional test user: newcomer, busy, careful, power, random, or a sentence describing one.' },
+        app: { type: 'string', description: 'Optional app to open first, by slug or title (for example "decision-wheel"). Without it the test starts from the home screen.' },
         uiOnly: { type: 'boolean', description: 'Optional. Force the test user to drive the on-screen controls instead of calling a capability, so the interface itself is exercised.' }
       }, required: ['task'] },
       timeoutMs: 320000,

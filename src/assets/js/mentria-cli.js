@@ -481,7 +481,7 @@
             }
           }
         } else {
-          var loose = Object.keys(COMMANDS).filter(function (k) {
+          var loose = raw.indexOf(' ') !== -1 ? [] : Object.keys(COMMANDS).filter(function (k) {
             if (k.indexOf(name) === 0) return true;
             if (name.length < 3) return false;
             return (COMMANDS[k].description || '').toLowerCase().indexOf(name) !== -1;

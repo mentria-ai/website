@@ -24,7 +24,7 @@ eleventyComputed:
       <div id="bench-tiers" class="bench__tiers"></div>
       <label class="bench__opt"><input type="checkbox" id="bench-vision"> load the vision model too and run one image prompt</label>
       <label class="bench__opt"><input type="checkbox" id="bench-force"> ignore eligibility (may crash the tab on small devices)</label>
-      <label class="bench__opt"><input type="checkbox" id="bench-profile"> profile run: engine timestamp profiler on the first prompt (experimental, can stall the 27B path; leave off unless asked)</label>
+      <label class="bench__opt"><input type="checkbox" id="bench-profile"> profile run: per-pass GPU timings on the first prompt (slower while profiling; use when asked)</label>
       <label class="bench__opt"><input type="checkbox" id="bench-quick"> quick (short prompt only)</label>
       <label class="bench__opt">runs per prompt <input type="number" id="bench-runs" min="1" max="5" value="1" style="width:4rem"></label>
       <div class="bench__actions">
@@ -187,7 +187,8 @@ async function runTier(id, vision, runs, force, profile, quick) {
           : [{ role: 'system', content: p.system }, { role: 'user', content: p.user }],
         maxTokens: p.maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: p.image ? 1.15 : 1.0, enableThinking: false
       };
-      if (profile && r === 0 && (device.features || []).includes('timestamp-query')) { params.tsProfile = true; params.tsProfileStep = 2; }
+      const profiles = [];
+      if (profile && r === 0 && (device.features || []).includes('timestamp-query')) { params.tsAll2 = 2; params.onProfile = (pr) => { profiles.push(compact(pr, 0)); }; }
       if (p.image) {
         const c = makeTestImage();
         const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
@@ -219,7 +220,7 @@ async function runTier(id, vision, runs, force, profile, quick) {
       addRow(row);
       const promptTokens = finalEvent && typeof finalEvent.committedTokens === 'number' && typeof finalEvent.numTokens === 'number' ? finalEvent.committedTokens - finalEvent.numTokens : null;
       const prefillTps = promptTokens && ttft ? +((promptTokens / (ttft / 1000))).toFixed(1) : null;
-      run.prompts.push({ id: p.id, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens, totalS: row.totalS, promptTokens, prefillTps, engineTps: finalEvent ? finalEvent.tokensPerSecond : null, gapMs: { min: Math.round(percentile(gaps, 0)), median: Math.round(percentile(gaps, 0.5)), p90: Math.round(percentile(gaps, 0.9)), max: Math.round(percentile(gaps, 1)) }, promptChars: p.user.length + p.system.length, image: !!p.image, profileFlags: !!params.tsProfile, statsBefore, statsAfter, finalEvent, sample: row.sample });
+      run.prompts.push({ id: p.id, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens, totalS: row.totalS, promptTokens, prefillTps, engineTps: finalEvent ? finalEvent.tokensPerSecond : null, gapMs: { min: Math.round(percentile(gaps, 0)), median: Math.round(percentile(gaps, 0.5)), p90: Math.round(percentile(gaps, 0.9)), max: Math.round(percentile(gaps, 1)) }, promptChars: p.user.length + p.system.length, image: !!p.image, profileFlags: !!params.tsAll2, profiles, statsBefore, statsAfter, finalEvent, sample: row.sample });
       log(id + ' ' + p.id + ': ttft ' + ttft + ' ms, ' + decode + ' tok/s, ' + tokens + ' tokens, gap median ' + Math.round(percentile(gaps, 0.5)) + ' ms (p90 ' + Math.round(percentile(gaps, 0.9)) + ') · "' + row.sample + '"');
     }
   }
@@ -249,8 +250,20 @@ function summary() {
   const dev = device.gpu ? [device.gpu.vendor, device.gpu.architecture, device.gpu.description].filter(Boolean).join(' ') : 'no webgpu';
   const lines = ['bench ' + new Date().toISOString().slice(0, 16).replace('T', ' ') + ' · ' + dev + ' · mem ' + (device.deviceMemory || '?') + ' GB · f16 ' + ((device.features || []).includes('shader-f16') ? 'y' : 'n') + ' subgroups ' + ((device.features || []).includes('subgroups') ? 'y' : 'n') + ' · bind ' + Math.round(((device.limits || {}).maxStorageBufferBindingSize || 0) / 1048576) + ' MiB · wg ' + ((device.limits || {}).maxComputeInvocationsPerWorkgroup || '?')];
   for (const run of diagnostics.runs) {
-    lines.push(run.tier + (run.vision ? '+vl' : '') + ': load ' + run.loadS + ' s' + (run.loadError ? ' LOAD ERROR ' + run.loadError : '') + ' · route ' + JSON.stringify(run.loadResult && (run.loadResult.decodeRoute || run.loadResult.route || '?')) + (run.fallbacks.length ? ' · fallbacks ' + run.fallbacks.length : ''));
-    for (const p of run.prompts) lines.push('  ' + p.id + ': ttft ' + p.ttftMs + ' ms' + (p.promptTokens ? ' (' + p.promptTokens + ' prompt tok, prefill ' + p.prefillTps + ' tok/s)' : '') + ' · ' + p.decodeTps + ' tok/s · ' + p.tokens + ' tok · gap med ' + (p.gapMs ? p.gapMs.median : '?') + ' p90 ' + (p.gapMs ? p.gapMs.p90 : '?') + ' max ' + (p.gapMs ? p.gapMs.max : '?') + (p.error ? ' ERROR ' + p.error : ''));
+    const lr = run.loadResult || {};
+    const ns = lr.narrowSubgroup;
+    const bp = lr.bindingPlan;
+    const ge = run.statsAfterLoad && run.statsAfterLoad.gpuErrors;
+    const lpf = lr.loadPlan && lr.loadPlan.fallbackEvents ? lr.loadPlan.fallbackEvents.length : 0;
+    lines.push(run.tier + (run.vision ? '+vl' : '') + ': load ' + run.loadS + ' s' + (run.loadError ? ' LOAD ERROR ' + run.loadError : '') + ' · decodeRoute ' + JSON.stringify(lr.decodeRoute == null ? '?' : lr.decodeRoute) + ' · narrow ' + (ns == null ? 'n/a' : (ns.published ? 'PUBLISHED@' + ns.width : 'NOT published@' + ns.width + ' (' + String(ns.reason || '').slice(0, 80) + ')')) + ' · windows ' + (bp ? bp.windowCount + (bp.overLimit && bp.overLimit.length ? ' overLimit ' + bp.overLimit.map((o) => o.name).join(',') : '') : '?') + ' · gpuErrors ' + (ge ? ge.count : '?') + ' · loadFallbacks ' + lpf + (run.fallbacks.length ? ' · hostFallbacks ' + run.fallbacks.length : ''));
+    if (lr.kernelVariants) lines.push('  variants ' + JSON.stringify(lr.kernelVariants).slice(0, 220));
+    for (const p of run.prompts) {
+      const fe = p.finalEvent || {};
+      const c = fe.counters && fe.counters.perDecodeToken ? fe.counters.perDecodeToken : null;
+      const cp = fe.counters && fe.counters.perPrefillToken ? fe.counters.perPrefillToken : null;
+      lines.push('  ' + p.id + ': ttft ' + p.ttftMs + ' ms' + (p.promptTokens ? ' (' + p.promptTokens + ' prompt tok, prefill ' + p.prefillTps + ' tok/s)' : '') + ' · ' + p.decodeTps + ' tok/s' + (fe.decodeTokensPerSecond ? ' (engine ' + (+fe.decodeTokensPerSecond).toFixed(1) + ')' : '') + ' · ' + p.tokens + ' tok · gap med ' + (p.gapMs ? p.gapMs.median : '?') + ' p90 ' + (p.gapMs ? p.gapMs.p90 : '?') + ' max ' + (p.gapMs ? p.gapMs.max : '?') + (c ? ' · disp/tok ' + (+c.dispatches).toFixed(0) + ' map/tok ' + (+c.mapAsync).toFixed(2) + ' cmd/tok ' + (+c.cmdBufs).toFixed(0) : '') + (cp ? ' · disp/prompt-tok ' + (+cp.dispatches).toFixed(1) : '') + (fe.decodeRoute ? ' · ' + fe.decodeRoute : '') + (fe.kernelVariants && fe.kernelVariants.prefillRoute ? ' · prefill ' + fe.kernelVariants.prefillRoute : '') + (fe.fallbacks && fe.fallbacks.length ? ' · fallbacks ' + fe.fallbacks.length : '') + (p.profiles && p.profiles.length ? ' · profile ' + p.profiles.length + ' msg' : '') + (p.error ? ' ERROR ' + p.error : ''));
+      if (p.profiles && p.profiles.length && p.profiles[0].decode && p.profiles[0].decode.byLabel) { const n = Math.max(1, p.tokens || 1); lines.push('    decode passes (ms per token): ' + p.profiles[0].decode.byLabel.slice(0, 8).map((b) => (b.label || b.name) + ' ' + (b.sumUs != null ? (b.sumUs / 1000 / n).toFixed(2) : '?') + ' ×' + (b.count != null ? Math.round(b.count / n) : '?')).join(', ') + (p.profiles[0].decode.totalUs ? ' · gpu total ' + (p.profiles[0].decode.totalUs / 1000 / n).toFixed(1) + ' ms/tok' : '')); if (p.profiles[0].prefill && p.profiles[0].prefill.byLabel) lines.push('    prefill passes (ms total): ' + p.profiles[0].prefill.byLabel.slice(0, 6).map((b) => (b.label || b.name) + ' ' + (b.sumUs != null ? (b.sumUs / 1000).toFixed(1) : '?')).join(', ') + (p.profiles[0].prefill.totalUs ? ' · gpu total ' + (p.profiles[0].prefill.totalUs / 1000).toFixed(1) + ' ms' : '')); }
+    }
   }
   return lines.join('\n');
 }

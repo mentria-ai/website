@@ -24,11 +24,14 @@ eleventyComputed:
       <div id="bench-tiers" class="bench__tiers"></div>
       <label class="bench__opt"><input type="checkbox" id="bench-vision"> load the vision model too and run one image prompt</label>
       <label class="bench__opt"><input type="checkbox" id="bench-force"> ignore eligibility (may crash the tab on small devices)</label>
+      <label class="bench__opt"><input type="checkbox" id="bench-profile"> profile run: engine timestamp profiler on the first prompt (experimental, can stall the 27B path; leave off unless asked)</label>
+      <label class="bench__opt"><input type="checkbox" id="bench-quick"> quick (short prompt only)</label>
       <label class="bench__opt">runs per prompt <input type="number" id="bench-runs" min="1" max="5" value="1" style="width:4rem"></label>
       <div class="bench__actions">
         <button class="bench__btn" id="bench-run" type="button">Run selected</button>
         <button class="bench__btn bench__btn--ghost" id="bench-copy" type="button" disabled>Copy markdown</button>
-        <button class="bench__btn bench__btn--ghost" id="bench-json" type="button" disabled>Copy JSON</button>
+        <button class="bench__btn bench__btn--ghost" id="bench-summary" type="button" disabled>Copy summary</button>
+        <button class="bench__btn bench__btn--ghost" id="bench-json" type="button" disabled>Copy diagnostics JSON</button>
       </div>
       <p class="bench__status" id="bench-status" aria-live="polite">idle</p>
     </fieldset>
@@ -76,6 +79,11 @@ const logEl = $('#bench-log');
 const rowsEl = $('#bench-rows');
 const tableEl = $('#bench-table');
 const results = [];
+const consoleLines = [];
+for (const level of ['log', 'info', 'warn', 'error']) {
+  const orig = console[level].bind(console);
+  console[level] = (...args) => { try { consoleLines.push(level + ': ' + args.map((a) => typeof a === 'string' ? a : JSON.stringify(a)).join(' ').slice(0, 300)); if (consoleLines.length > 200) consoleLines.shift(); } catch (_) {} orig(...args); };
+}
 const PROMPTS = [
   { id: 'short', system: 'You answer in one short sentence.', user: 'What is a countdown timer for?', maxTokens: 40 },
   { id: 'medium', system: 'You are a concise assistant.', user: 'Explain in three sentences how a web page can run a language model on the GPU.', maxTokens: 120 },
@@ -83,6 +91,8 @@ const PROMPTS = [
 ];
 const setStatus = (t) => { statusEl.textContent = t; };
 const log = (t) => { logEl.textContent += t + '\n'; logEl.scrollTop = logEl.scrollHeight; };
+const compact = (o, depth) => { if (depth > 3 || o == null || typeof o !== 'object') return o; if (Array.isArray(o)) return o.slice(0, 40).map((x) => compact(x, depth + 1)); const out = {}; let n = 0; for (const k of Object.keys(o)) { if (n++ > 60) break; const v = o[k]; if (typeof v === 'function') continue; if (ArrayBuffer.isView(v)) { out[k] = '[typed array ' + v.length + ']'; continue; } out[k] = compact(v, depth + 1); } return out; };
+const percentile = (arr, p) => { if (!arr.length) return null; const a = arr.slice().sort((x, y) => x - y); return a[Math.min(a.length - 1, Math.floor(p * (a.length - 1)))]; };
 
 const device = { ua: navigator.userAgent, deviceMemory: navigator.deviceMemory || null, cores: navigator.hardwareConcurrency || null, webgpu: !!navigator.gpu };
 async function readDevice() {
@@ -94,9 +104,9 @@ async function readDevice() {
       if (adapter) {
         const info = adapter.info || (adapter.requestAdapterInfo ? await adapter.requestAdapterInfo() : {});
         device.gpu = { vendor: info.vendor || '', architecture: info.architecture || '', device: info.device || '', description: info.description || '' };
-        device.features = [...adapter.features].filter((f) => /f16|subgroups|timestamp|bgra|float32-filterable/.test(f));
+        device.features = [...adapter.features];
         const L = adapter.limits;
-        device.limits = { maxBufferSize: L.maxBufferSize, maxStorageBufferBindingSize: L.maxStorageBufferBindingSize, maxComputeWorkgroupStorageSize: L.maxComputeWorkgroupStorageSize, maxComputeInvocationsPerWorkgroup: L.maxComputeInvocationsPerWorkgroup, maxComputeWorkgroupSizeX: L.maxComputeWorkgroupSizeX, maxComputeWorkgroupsPerDimension: L.maxComputeWorkgroupsPerDimension };
+        device.limits = { maxBufferSize: L.maxBufferSize, maxStorageBufferBindingSize: L.maxStorageBufferBindingSize, maxUniformBufferBindingSize: L.maxUniformBufferBindingSize, maxComputeWorkgroupStorageSize: L.maxComputeWorkgroupStorageSize, maxComputeInvocationsPerWorkgroup: L.maxComputeInvocationsPerWorkgroup, maxComputeWorkgroupSizeX: L.maxComputeWorkgroupSizeX, maxComputeWorkgroupSizeY: L.maxComputeWorkgroupSizeY, maxComputeWorkgroupsPerDimension: L.maxComputeWorkgroupsPerDimension, maxBindGroups: L.maxBindGroups, maxStorageBuffersPerShaderStage: L.maxStorageBuffersPerShaderStage };
       }
     }
   } catch (e) { device.error = String(e && e.message || e); }
@@ -119,6 +129,7 @@ for (const id of chain) {
 }
 log('decision: tier=' + decision.tier + ' eligible=' + [...eligible].join(',') + (decision.reason ? ' reason=' + decision.reason : ''));
 readDevice();
+const diagnostics = { version: 2, device, decision: compact(decision, 0), runs: [] };
 
 function makeTestImage() {
   const c = document.createElement('canvas'); c.width = 448; c.height = 448;
@@ -131,37 +142,52 @@ function makeTestImage() {
   return c;
 }
 
-async function runTier(id, vision, runs, force) {
+async function stats(engine) { try { const r = await Promise.race([engine.getStats(), new Promise((_, rej) => setTimeout(() => rej(new Error('getStats timeout 5 s')), 5000))]); return compact(r, 0); } catch (e) { return { error: String(e && e.message || e) }; } }
+
+async function runTier(id, vision, runs, force, profile, quick) {
   if (!eligible.has(id) && !force) { log(id + ': skipped (not eligible; tick "ignore eligibility" to force)'); return; }
   const { MentriaEngine } = await import('/assets/mentria/dist/mentria.mjs');
   const engine = new MentriaEngine('/assets/mentria/dist/worker.mjs');
   if (window.mentriaWrapEngine) window.mentriaWrapEngine(engine);
+  const run = { tier: id, vision, profile, fallbacks: [], prompts: [], consoleStart: consoleLines.length };
   engine.onProgress = (p) => { const pct = p && p.total ? Math.round(100 * p.loaded / p.total) : null; setStatus(id + ': ' + ((p && p.message) || 'loading') + (pct != null ? ' ' + pct + '%' : '')); };
+  try { engine.onFallback = (e) => { run.fallbacks.push(compact(e, 0)); log(id + ': fallback event ' + JSON.stringify(compact(e, 0)).slice(0, 200)); }; } catch (_) {}
   const cached = await Tiers.isTierCached(id).catch(() => false);
+  run.cached = cached;
   const t0 = performance.now();
   try {
+    const tInit = performance.now();
     await engine.init();
+    run.initS = +((performance.now() - tInit) / 1000).toFixed(2);
     const opts = await Tiers.loadOptionsFor(id, { vision });
-    await engine.loadModel(opts);
+    run.maxSeq = opts && opts.config && opts.config.attention ? opts.config.attention.maxSeq : null;
+    const loadRes = await engine.loadModel(opts);
+    run.loadResult = compact(loadRes, 0);
   } catch (e) {
-    log(id + ': load failed: ' + (e && e.message || e));
+    run.loadError = String(e && e.message || e);
+    log(id + ': load failed: ' + run.loadError);
+    diagnostics.runs.push(run);
     try { engine.terminate(); } catch (_) {}
     return;
   }
   const loadS = +((performance.now() - t0) / 1000).toFixed(1);
-  log(id + ': loaded in ' + loadS + ' s (cached before run: ' + cached + ', vision: ' + vision + ')');
-  const prompts = PROMPTS.slice();
+  run.loadS = loadS;
+  run.statsAfterLoad = await stats(engine);
+  log(id + ': loaded in ' + loadS + ' s (cached before run: ' + cached + ', vision: ' + vision + ', route: ' + JSON.stringify(run.loadResult && (run.loadResult.decodeRoute || run.loadResult.route || '')) + ')');
+  let prompts = quick ? PROMPTS.slice(0, 1) : PROMPTS.slice();
   if (vision) prompts.push({ id: 'image', system: 'You describe images precisely.', user: 'Read all the text in this image and name the two shapes.', maxTokens: 80, image: true });
   for (const p of prompts) {
     for (let r = 0; r < runs; r++) {
       setStatus(id + ': ' + p.id + ' run ' + (r + 1) + '/' + runs);
-      let tokens = 0, tFirst = 0, text = '';
+      let tokens = 0, tFirst = 0, text = '', tPrev = 0;
+      const gaps = [];
       const params = {
         messages: p.image
           ? [{ role: 'system', content: p.system }, { role: 'user', content: [{ type: 'image' }, { type: 'text', text: p.user }] }]
           : [{ role: 'system', content: p.system }, { role: 'user', content: p.user }],
         maxTokens: p.maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: p.image ? 1.15 : 1.0, enableThinking: false
       };
+      if (profile && r === 0 && (device.features || []).includes('timestamp-query')) { params.tsProfile = true; params.tsProfileStep = 2; }
       if (p.image) {
         const c = makeTestImage();
         const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
@@ -169,25 +195,37 @@ async function runTier(id, vision, runs, force) {
         for (let i = 0, j = 0; i < d.length; i += 4, j += 3) { rgb[j] = d[i]; rgb[j + 1] = d[i + 1]; rgb[j + 2] = d[i + 2]; }
         params.images = [{ rgbHwc: rgb, h: c.height, w: c.width }];
       }
+      const statsBefore = await stats(engine);
       const tStart = performance.now();
+      let finalEvent = null;
       try {
         await engine.generate(params, (ev) => {
+          if (ev && ev.finished) finalEvent = compact(ev, 0);
           if (typeof ev.token === 'string' && ev.token.length) {
             if (/^<\|[^|]*\|>$/.test(ev.token)) return;
+            const now = performance.now();
             tokens++; text += ev.token;
-            if (!tFirst) tFirst = performance.now();
+            if (!tFirst) tFirst = now; else gaps.push(now - tPrev);
+            tPrev = now;
           }
         });
-      } catch (e) { log(id + ' ' + p.id + ': generate failed: ' + (e && e.message || e)); continue; }
+      } catch (e) { log(id + ' ' + p.id + ': generate failed: ' + (e && e.message || e)); run.prompts.push({ id: p.id, error: String(e && e.message || e) }); continue; }
       const tEnd = performance.now();
       const ttft = tFirst ? Math.round(tFirst - tStart) : null;
       const decode = tFirst && tokens > 1 ? +(((tokens - 1) / ((tEnd - tFirst) / 1000))).toFixed(2) : null;
+      const statsAfter = await stats(engine);
       const row = { tier: id, vision: vision, cached: cached, loadS: loadS, prompt: p.id, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens: tokens, totalS: +((tEnd - tStart) / 1000).toFixed(2), sample: text.replace(/\s+/g, ' ').slice(0, 90) };
       results.push(row);
       addRow(row);
-      log(id + ' ' + p.id + ': ttft ' + ttft + ' ms, ' + decode + ' tok/s, ' + tokens + ' tokens · "' + row.sample + '"');
+      const promptTokens = finalEvent && typeof finalEvent.committedTokens === 'number' && typeof finalEvent.numTokens === 'number' ? finalEvent.committedTokens - finalEvent.numTokens : null;
+      const prefillTps = promptTokens && ttft ? +((promptTokens / (ttft / 1000))).toFixed(1) : null;
+      run.prompts.push({ id: p.id, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens, totalS: row.totalS, promptTokens, prefillTps, engineTps: finalEvent ? finalEvent.tokensPerSecond : null, gapMs: { min: Math.round(percentile(gaps, 0)), median: Math.round(percentile(gaps, 0.5)), p90: Math.round(percentile(gaps, 0.9)), max: Math.round(percentile(gaps, 1)) }, promptChars: p.user.length + p.system.length, image: !!p.image, profileFlags: !!params.tsProfile, statsBefore, statsAfter, finalEvent, sample: row.sample });
+      log(id + ' ' + p.id + ': ttft ' + ttft + ' ms, ' + decode + ' tok/s, ' + tokens + ' tokens, gap median ' + Math.round(percentile(gaps, 0.5)) + ' ms (p90 ' + Math.round(percentile(gaps, 0.9)) + ') · "' + row.sample + '"');
     }
   }
+  run.consoleLines = consoleLines.slice(run.consoleStart);
+  delete run.consoleStart;
+  diagnostics.runs.push(run);
   try { engine.terminate(); } catch (_) {}
   setStatus(id + ': done, engine released');
 }
@@ -197,7 +235,7 @@ function addRow(r) {
   const tr = document.createElement('tr');
   tr.innerHTML = [r.tier, r.vision ? 'yes' : 'no', r.cached ? 'yes' : 'no', r.loadS, r.prompt + (r.run > 1 ? ' #' + r.run : ''), r.ttftMs == null ? '' : r.ttftMs, r.decodeTps == null ? '' : r.decodeTps, r.tokens, r.totalS].map((v) => '<td>' + v + '</td>').join('');
   rowsEl.appendChild(tr);
-  $('#bench-copy').disabled = false; $('#bench-json').disabled = false;
+  for (const b of ['#bench-copy', '#bench-json', '#bench-summary']) $(b).disabled = false;
 }
 
 function markdown() {
@@ -207,19 +245,33 @@ function markdown() {
   return '### ' + dev + ' · ' + (device.deviceMemory || '?') + ' GB device memory · ' + new Date().toISOString().slice(0, 16).replace('T', ' ') + '\n\n' + head + body + '\n\nfeatures: ' + (device.features || []).join(', ') + '\nlimits: ' + JSON.stringify(device.limits || {}) + '\n';
 }
 
+function summary() {
+  const dev = device.gpu ? [device.gpu.vendor, device.gpu.architecture, device.gpu.description].filter(Boolean).join(' ') : 'no webgpu';
+  const lines = ['bench ' + new Date().toISOString().slice(0, 16).replace('T', ' ') + ' · ' + dev + ' · mem ' + (device.deviceMemory || '?') + ' GB · f16 ' + ((device.features || []).includes('shader-f16') ? 'y' : 'n') + ' subgroups ' + ((device.features || []).includes('subgroups') ? 'y' : 'n') + ' · bind ' + Math.round(((device.limits || {}).maxStorageBufferBindingSize || 0) / 1048576) + ' MiB · wg ' + ((device.limits || {}).maxComputeInvocationsPerWorkgroup || '?')];
+  for (const run of diagnostics.runs) {
+    lines.push(run.tier + (run.vision ? '+vl' : '') + ': load ' + run.loadS + ' s' + (run.loadError ? ' LOAD ERROR ' + run.loadError : '') + ' · route ' + JSON.stringify(run.loadResult && (run.loadResult.decodeRoute || run.loadResult.route || '?')) + (run.fallbacks.length ? ' · fallbacks ' + run.fallbacks.length : ''));
+    for (const p of run.prompts) lines.push('  ' + p.id + ': ttft ' + p.ttftMs + ' ms' + (p.promptTokens ? ' (' + p.promptTokens + ' prompt tok, prefill ' + p.prefillTps + ' tok/s)' : '') + ' · ' + p.decodeTps + ' tok/s · ' + p.tokens + ' tok · gap med ' + (p.gapMs ? p.gapMs.median : '?') + ' p90 ' + (p.gapMs ? p.gapMs.p90 : '?') + ' max ' + (p.gapMs ? p.gapMs.max : '?') + (p.error ? ' ERROR ' + p.error : ''));
+  }
+  return lines.join('\n');
+}
+
 $('#bench-run').addEventListener('click', async () => {
   const ids = [...tiersEl.querySelectorAll('input:checked')].map((i) => i.value);
   if (!ids.length) { setStatus('pick at least one tier'); return; }
   const vision = $('#bench-vision').checked;
   const force = $('#bench-force').checked;
+  const profile = $('#bench-profile').checked;
+  const quick = $('#bench-quick').checked;
   const runs = Math.max(1, Math.min(5, +$('#bench-runs').value || 1));
   $('#bench-run').disabled = true;
   try {
-    for (const id of ids) await runTier(id, vision, runs, force);
+    for (const id of ids) await runTier(id, vision, runs, force, profile, quick);
   } finally {
     $('#bench-run').disabled = false;
   }
 });
-$('#bench-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(markdown()); setStatus('markdown copied'); } catch (_) { setStatus('clipboard blocked; select the table'); } });
-$('#bench-json').addEventListener('click', async () => { try { await navigator.clipboard.writeText(JSON.stringify({ device, results }, null, 1)); setStatus('json copied'); } catch (_) { setStatus('clipboard blocked'); } });
+const copyText = async (text, okMsg) => { try { await navigator.clipboard.writeText(text); setStatus(okMsg); } catch (_) { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;left:0;top:0;width:90vw;height:40vh;z-index:9'; document.body.appendChild(ta); ta.select(); setStatus('clipboard blocked; text shown below, select and copy'); } };
+$('#bench-copy').addEventListener('click', () => copyText(markdown(), 'markdown copied'));
+$('#bench-json').addEventListener('click', () => copyText(JSON.stringify(diagnostics), 'diagnostics json copied'));
+$('#bench-summary').addEventListener('click', () => copyText(summary(), 'summary copied'));
 </script>

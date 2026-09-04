@@ -27,6 +27,8 @@ eleventyComputed:
       <label class="bench__opt"><input type="checkbox" id="bench-profile"> profile run: per-pass GPU timings on the first prompt (slower while profiling; use when asked)</label>
       <label class="bench__opt"><input type="checkbox" id="bench-quick"> quick (short prompt only)</label>
       <label class="bench__opt">runs per prompt <input type="number" id="bench-runs" min="1" max="5" value="1" style="width:4rem"></label>
+      <label class="bench__opt">init options JSON <input type="text" id="bench-init" placeholder='{"narrowSubgroups":false}' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
+      <label class="bench__opt">generate options JSON <input type="text" id="bench-gen" placeholder='{"m1VecmatRoute":true}' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
       <div class="bench__actions">
         <button class="bench__btn" id="bench-run" type="button">Run selected</button>
         <button class="bench__btn bench__btn--ghost" id="bench-copy" type="button" disabled>Copy markdown</button>
@@ -92,6 +94,7 @@ const PROMPTS = [
 const setStatus = (t) => { statusEl.textContent = t; };
 const log = (t) => { logEl.textContent += t + '\n'; logEl.scrollTop = logEl.scrollHeight; };
 const compact = (o, depth) => { if (depth > 3 || o == null || typeof o !== 'object') return o; if (Array.isArray(o)) return o.slice(0, 40).map((x) => compact(x, depth + 1)); const out = {}; let n = 0; for (const k of Object.keys(o)) { if (n++ > 60) break; const v = o[k]; if (typeof v === 'function') continue; if (ArrayBuffer.isView(v)) { out[k] = '[typed array ' + v.length + ']'; continue; } out[k] = compact(v, depth + 1); } return out; };
+const parseJson = (txt) => { const t = String(txt || '').trim(); if (!t) return null; try { const v = JSON.parse(t); return v && typeof v === 'object' ? v : null; } catch (e) { log('options JSON ignored: ' + e.message); return null; } };
 const percentile = (arr, p) => { if (!arr.length) return null; const a = arr.slice().sort((x, y) => x - y); return a[Math.min(a.length - 1, Math.floor(p * (a.length - 1)))]; };
 
 const device = { ua: navigator.userAgent, deviceMemory: navigator.deviceMemory || null, cores: navigator.hardwareConcurrency || null, webgpu: !!navigator.gpu };
@@ -157,7 +160,10 @@ async function runTier(id, vision, runs, force, profile, quick) {
   const t0 = performance.now();
   try {
     const tInit = performance.now();
-    await engine.init();
+    run.initOptions = parseJson($('#bench-init').value);
+    run.genOptions = parseJson($('#bench-gen').value);
+    const initRes = run.initOptions ? await engine.init(run.initOptions) : await engine.init();
+    run.initResult = compact(initRes, 0);
     run.initS = +((performance.now() - tInit) / 1000).toFixed(2);
     const opts = await Tiers.loadOptionsFor(id, { vision });
     run.maxSeq = opts && opts.config && opts.config.attention ? opts.config.attention.maxSeq : null;
@@ -181,12 +187,12 @@ async function runTier(id, vision, runs, force, profile, quick) {
       setStatus(id + ': ' + p.id + ' run ' + (r + 1) + '/' + runs);
       let tokens = 0, tFirst = 0, text = '', tPrev = 0;
       const gaps = [];
-      const params = {
+      const params = Object.assign({}, run.genOptions || {}, {
         messages: p.image
           ? [{ role: 'system', content: p.system }, { role: 'user', content: [{ type: 'image' }, { type: 'text', text: p.user }] }]
           : [{ role: 'system', content: p.system }, { role: 'user', content: p.user }],
         maxTokens: p.maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: p.image ? 1.15 : 1.0, enableThinking: false
-      };
+      });
       const profiles = [];
       if (profile && r === 0 && (device.features || []).includes('timestamp-query')) { params.tsAll2 = 2; params.onProfile = (pr) => { profiles.push(compact(pr, 0)); }; }
       if (p.image) {
@@ -255,7 +261,7 @@ function summary() {
     const bp = lr.bindingPlan;
     const ge = run.statsAfterLoad && run.statsAfterLoad.gpuErrors;
     const lpf = lr.loadPlan && lr.loadPlan.fallbackEvents ? lr.loadPlan.fallbackEvents.length : 0;
-    lines.push(run.tier + (run.vision ? '+vl' : '') + ': load ' + run.loadS + ' s' + (run.loadError ? ' LOAD ERROR ' + run.loadError : '') + ' · decodeRoute ' + JSON.stringify(lr.decodeRoute == null ? '?' : lr.decodeRoute) + ' · narrow ' + (ns == null ? 'n/a' : (ns.published ? 'PUBLISHED@' + ns.width : 'NOT published@' + ns.width + ' (' + String(ns.reason || '').slice(0, 80) + ')')) + ' · windows ' + (bp ? bp.windowCount + (bp.overLimit && bp.overLimit.length ? ' overLimit ' + bp.overLimit.map((o) => o.name).join(',') : '') : '?') + ' · gpuErrors ' + (ge ? ge.count : '?') + ' · loadFallbacks ' + lpf + (run.fallbacks.length ? ' · hostFallbacks ' + run.fallbacks.length : ''));
+    lines.push(run.tier + (run.vision ? '+vl' : '') + (run.initOptions ? ' init' + JSON.stringify(run.initOptions) : '') + (run.genOptions ? ' gen' + JSON.stringify(run.genOptions) : '') + ': load ' + run.loadS + ' s' + (run.loadError ? ' LOAD ERROR ' + run.loadError : '') + ' · decodeRoute ' + JSON.stringify(lr.decodeRoute == null ? '?' : lr.decodeRoute) + ' · narrow ' + (ns == null ? 'n/a' : (ns.published ? 'PUBLISHED@' + ns.width : 'NOT published@' + ns.width + ' (' + String(ns.reason || '').slice(0, 80) + ')')) + ' · windows ' + (bp ? bp.windowCount + (bp.overLimit && bp.overLimit.length ? ' overLimit ' + bp.overLimit.map((o) => o.name).join(',') : '') : '?') + ' · gpuErrors ' + (ge ? ge.count : '?') + ' · loadFallbacks ' + lpf + (run.fallbacks.length ? ' · hostFallbacks ' + run.fallbacks.length : ''));
     if (lr.kernelVariants) lines.push('  variants ' + JSON.stringify(lr.kernelVariants).slice(0, 220));
     for (const p of run.prompts) {
       const fe = p.finalEvent || {};

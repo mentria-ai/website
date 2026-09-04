@@ -24,11 +24,25 @@ function loadManifest() {
   return manifestPromise;
 }
 
+const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';
+const FALLBACK_ICE = [{ urls: 'stun:turn.mentria.ai:3478' }];
+
+async function iceServers() {
+  try {
+    const r = await fetch(TURN_CRED_URL, { cache: 'no-store' });
+    if (!r.ok) throw new Error('status ' + r.status);
+    const data = await r.json();
+    return data.iceServers || FALLBACK_ICE;
+  } catch (_) {
+    return FALLBACK_ICE;
+  }
+}
+
 async function getClient() {
   if (!client) {
-    const mod = await import('/assets/js/webtorrent.min.js');
+    const [mod, ice] = await Promise.all([import('/assets/js/webtorrent.min.js'), iceServers()]);
     const WT = mod.default || window.WebTorrent;
-    client = new WT();
+    client = new WT({ tracker: { rtcConfig: { iceServers: ice } } });
   }
   return client;
 }

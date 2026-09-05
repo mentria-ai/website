@@ -235,6 +235,7 @@ function loadLocalModel(needVision) {
         ]);
       } catch (_) {}
       const res = await Tiers.loadWithFallback(make, tier, { vision: !!needVision });
+      try { if (Tiers.setValidatedTier) Tiers.setValidatedTier(res.tier || tier); } catch (_) {}
       hostWith(localGenerate, () => false, res.tier || tier, !!needVision);
       return { engine: res.engine, maxSeq: res.maxSeq || 2048, tier: res.tier || tier, vision: !!needVision };
     })();

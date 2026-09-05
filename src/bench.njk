@@ -244,6 +244,7 @@ async function runTier(id, vision, runs, force, profile, quick, label) {
   }
   run.consoleLines = consoleLines.slice(run.consoleStart);
   delete run.consoleStart;
+  if (run.prompts.some((p) => p.tokens > 0 && !p.error)) { try { Tiers.setValidatedTier(id); } catch (_) {} }
   diagnostics.runs.push(run);
   try { engine.terminate(); } catch (_) {}
   setStatus(id + ': done, engine released');

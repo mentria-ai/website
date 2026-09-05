@@ -280,8 +280,11 @@ export async function decideTier() {
 
   const big = canRunLargeModel(caps);
   const igpu = likelyIntegratedGpu(caps);
-  const hard4 = IS_DESKTOP && big.capable === true;
-  const hard27 = hard4 && !igpu;
+  const arch = String((caps.vendor && caps.vendor.architecture) || '');
+  const androidFlagship = IS_ANDROID && /^adreno-8/.test(arch) && caps.limits.maxBufferSize >= 2 * GiB && caps.limits.maxStorageBufferBindingSize >= GiB;
+  if (androidFlagship) reasons.push('android flagship gpu ' + arch + ': 4b allowed');
+  const hard4 = (IS_DESKTOP && big.capable === true) || androidFlagship;
+  const hard27 = IS_DESKTOP && hard4 && !igpu;
   const dmOk2 = dm !== undefined ? dm >= 8 : IS_DESKTOP;
   const hard2 = caps.limits.maxBufferSize >= GiB && dmOk2;
 

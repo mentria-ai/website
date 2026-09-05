@@ -247,7 +247,13 @@ function loadLocalModel(needVision) {
 let activeAdapter = null;
 let remoteAdapter = null;
 export function activeAdapterName() { return activeAdapter != null ? activeAdapter : remoteAdapter; }
-async function ensureAdapter(engine, tier, adapter) {
+let adapterOp = Promise.resolve();
+function ensureAdapter(engine, tier, adapter) {
+  const run = adapterOp.then(() => applyAdapter(engine, tier, adapter));
+  adapterOp = run.catch(() => {});
+  return run;
+}
+async function applyAdapter(engine, tier, adapter) {
   if (adapter === undefined) return activeAdapter;
   if (adapter === null) {
     if (activeAdapter) { try { await engine.unloadAdapter(activeAdapter); } catch (_) {} activeAdapter = null; }
@@ -259,7 +265,14 @@ async function ensureAdapter(engine, tier, adapter) {
   const base = adapter.base || (Tiers.TIERS[tier] && Tiers.TIERS[tier].base) || '';
   const path = adapter.path ? String(adapter.path).replace(/\/?$/, '/') : '';
   const spec = { name: name, configUrl: adapter.configUrl || (base + path + 'adapter_config.json'), weightsUrl: adapter.weightsUrl || (base + path + 'adapter_model.safetensors') };
-  await engine.swapAdapter(spec);
+  if (activeAdapter && activeAdapter !== name) { try { await engine.unloadAdapter(activeAdapter); } catch (_) {} activeAdapter = null; }
+  try {
+    await engine.swapAdapter(spec);
+  } catch (e) {
+    if (!/already loaded/i.test(String(e && e.message || e))) throw e;
+    try { await engine.unloadAdapter(name); } catch (_) {}
+    await engine.swapAdapter(spec);
+  }
   activeAdapter = name;
   return activeAdapter;
 }

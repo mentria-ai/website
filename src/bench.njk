@@ -32,6 +32,8 @@ eleventyComputed:
       <label class="bench__opt">max tokens per prompt (blank = prompt default) <input type="number" id="bench-maxtok" min="4" max="512" style="width:5rem"></label>
       <div class="bench__actions">
         <button class="bench__btn" id="bench-run" type="button">Run selected</button>
+        <button class="bench__btn" id="bench-protocol" type="button">Phone protocol (3 runs, one file)</button>
+        <button class="bench__btn bench__btn--ghost" id="bench-download" type="button" disabled>Download results file</button>
         <button class="bench__btn bench__btn--ghost" id="bench-copy" type="button" disabled>Copy markdown</button>
         <button class="bench__btn bench__btn--ghost" id="bench-summary" type="button" disabled>Copy summary</button>
         <button class="bench__btn bench__btn--ghost" id="bench-json" type="button" disabled>Copy diagnostics JSON</button>
@@ -150,12 +152,13 @@ function makeTestImage() {
 
 async function stats(engine) { try { const r = await Promise.race([engine.getStats(), new Promise((_, rej) => setTimeout(() => rej(new Error('getStats timeout 5 s')), 5000))]); return compact(r, 0); } catch (e) { return { error: String(e && e.message || e) }; } }
 
-async function runTier(id, vision, runs, force, profile, quick) {
+async function runTier(id, vision, runs, force, profile, quick, label) {
   if (!eligible.has(id) && !force) { log(id + ': skipped (not eligible; tick "ignore eligibility" to force)'); return; }
+  if (label) log('--- ' + label + ' ---');
   const { MentriaEngine } = await import('/assets/mentria/dist/mentria.mjs');
   const engine = new MentriaEngine('/assets/mentria/dist/worker.mjs');
   if (window.mentriaWrapEngine) window.mentriaWrapEngine(engine);
-  const run = { tier: id, vision, profile, fallbacks: [], prompts: [], consoleStart: consoleLines.length };
+  const run = { tier: id, label: label || null, vision, profile, fallbacks: [], prompts: [], consoleStart: consoleLines.length };
   engine.onProgress = (p) => { const pct = p && p.total ? Math.round(100 * p.loaded / p.total) : null; setStatus(id + ': ' + ((p && p.message) || 'loading') + (pct != null ? ' ' + pct + '%' : '')); };
   try { engine.onFallback = (e) => { run.fallbacks.push(compact(e, 0)); log(id + ': fallback event ' + JSON.stringify(compact(e, 0)).slice(0, 200)); }; } catch (_) {}
   const cached = await Tiers.isTierCached(id).catch(() => false);
@@ -249,8 +252,9 @@ function addRow(r) {
   const tr = document.createElement('tr');
   tr.innerHTML = [r.tier, r.vision ? 'yes' : 'no', r.cached ? 'yes' : 'no', r.loadS, r.prompt + (r.run > 1 ? ' #' + r.run : ''), r.ttftMs == null ? '' : r.ttftMs, r.decodeTps == null ? '' : r.decodeTps, r.tokens, r.totalS].map((v) => '<td>' + v + '</td>').join('');
   rowsEl.appendChild(tr);
-  for (const b of ['#bench-copy', '#bench-json', '#bench-summary']) $(b).disabled = false;
+  enableExports();
 }
+function enableExports() { for (const b of ['#bench-copy', '#bench-json', '#bench-summary', '#bench-download']) $(b).disabled = false; }
 
 function markdown() {
   const head = '| tier | vision | cached | load s | prompt | TTFT ms | decode tok/s | tokens | total s |\n|---|---|---|---|---|---|---|---|---|\n';
@@ -268,7 +272,7 @@ function summary() {
     const bp = lr.bindingPlan;
     const ge = run.statsAfterLoad && run.statsAfterLoad.gpuErrors;
     const lpf = lr.loadPlan && lr.loadPlan.fallbackEvents ? lr.loadPlan.fallbackEvents.length : 0;
-    lines.push(run.tier + (run.vision ? '+vl' : '') + (run.initOptions ? ' init' + JSON.stringify(run.initOptions) : '') + ': load ' + run.loadS + ' s' + (run.loadError ? ' LOAD ERROR ' + run.loadError : '') + ' · decodeRoute ' + JSON.stringify(lr.decodeRoute == null ? '?' : lr.decodeRoute) + ' · narrow ' + (ns == null ? 'n/a' : (ns.published ? 'PUBLISHED@' + ns.width : 'NOT published@' + ns.width + ' (' + String(ns.reason || '').slice(0, 80) + ')')) + ' · windows ' + (bp ? bp.windowCount + (bp.overLimit && bp.overLimit.length ? ' overLimit ' + bp.overLimit.map((o) => o.name).join(',') : '') : '?') + ' · gpuErrors ' + (ge ? ge.count : '?') + ' · loadFallbacks ' + lpf + (run.fallbacks.length ? ' · hostFallbacks ' + run.fallbacks.length : ''));
+    lines.push((run.label ? '[' + run.label + '] ' : '') + run.tier + (run.vision ? '+vl' : '') + (run.initOptions ? ' init' + JSON.stringify(run.initOptions) : '') + ': load ' + run.loadS + ' s' + (run.loadError ? ' LOAD ERROR ' + run.loadError : '') + ' · decodeRoute ' + JSON.stringify(lr.decodeRoute == null ? '?' : lr.decodeRoute) + ' · narrow ' + (ns == null ? 'n/a' : (ns.published ? 'PUBLISHED@' + ns.width : 'NOT published@' + ns.width + ' (' + String(ns.reason || '').slice(0, 80) + ')')) + ' · windows ' + (bp ? bp.windowCount + (bp.overLimit && bp.overLimit.length ? ' overLimit ' + bp.overLimit.map((o) => o.name).join(',') : '') : '?') + ' · gpuErrors ' + (ge ? ge.count : '?') + ' · loadFallbacks ' + lpf + (run.fallbacks.length ? ' · hostFallbacks ' + run.fallbacks.length : ''));
     if (lr.kernelVariants) lines.push('  variants ' + JSON.stringify(lr.kernelVariants).slice(0, 220));
     if (lr.mobileProfile) lines.push('  mobileProfile applied=' + lr.mobileProfile.applied + ' matvec=' + lr.mobileProfile.mobileMatvec + ' prefill=' + lr.mobileProfile.mobilePrefill + ' width=' + lr.mobileProfile.width + (lr.mobileProfile.defaulted && lr.mobileProfile.defaulted.length ? ' defaulted=' + lr.mobileProfile.defaulted.join('+') : '') + (lr.mobileProfile.hostPinned && lr.mobileProfile.hostPinned.length ? ' hostPinned=' + lr.mobileProfile.hostPinned.join('+') : '') + ' · ' + String(lr.mobileProfile.reason || '').slice(0, 110));
     if (lr.mobileMatvec) lines.push('  mobileMatvec ' + JSON.stringify(lr.mobileMatvec).slice(0, 200)); else if (lr.kernelVariants && lr.kernelVariants.mobileMatvecReason) lines.push('  mobileMatvec declined: ' + lr.kernelVariants.mobileMatvecReason);
@@ -298,6 +302,46 @@ $('#bench-run').addEventListener('click', async () => {
   } finally {
     $('#bench-run').disabled = false;
   }
+});
+const PROTOCOL = [
+  { label: 'A defaults + prefill ksplit sweep', init: '', gen: '[{"mobilePrefillKsplit":8},{"mobilePrefillKsplit":4},{"mobilePrefillKsplit":2},{"mobilePrefillKsplit":1}]', profile: false },
+  { label: 'B profiled generate, defaults', init: '', gen: '', profile: true },
+  { label: 'C control, mobile routes off', init: '{"mobileMatvec":"off","mobilePrefill":"off"}', gen: '', profile: false }
+];
+const REST_S = 20;
+const rest = async (secs, why) => { for (let i = secs; i > 0; i--) { setStatus(why + ' · next run in ' + i + ' s'); await new Promise((r) => setTimeout(r, 1000)); } };
+$('#bench-protocol').addEventListener('click', async () => {
+  const checked = [...tiersEl.querySelectorAll('input:checked')].map((i) => i.value);
+  const id = checked.length ? checked[checked.length - 1] : (chain.includes('4b') ? '4b' : chain[chain.length - 1]);
+  const saved = { init: $('#bench-init').value, gen: $('#bench-gen').value, maxtok: $('#bench-maxtok').value, profile: $('#bench-profile').checked, quick: $('#bench-quick').checked };
+  $('#bench-run').disabled = true; $('#bench-protocol').disabled = true;
+  try {
+    for (let i = 0; i < PROTOCOL.length; i++) {
+      const step = PROTOCOL[i];
+      $('#bench-init').value = step.init; $('#bench-gen').value = step.gen; $('#bench-maxtok').value = '16'; $('#bench-profile').checked = step.profile; $('#bench-quick').checked = true;
+      await runTier(id, false, 1, true, step.profile, true, step.label);
+      if (i < PROTOCOL.length - 1) await rest(REST_S, 'letting the phone cool');
+    }
+    setStatus('protocol done (' + id + '): download the results file');
+  } catch (e) {
+    log('protocol stopped: ' + String(e && e.message || e));
+  } finally {
+    $('#bench-init').value = saved.init; $('#bench-gen').value = saved.gen; $('#bench-maxtok').value = saved.maxtok; $('#bench-profile').checked = saved.profile; $('#bench-quick').checked = saved.quick;
+    $('#bench-run').disabled = false; $('#bench-protocol').disabled = false;
+    if (diagnostics.runs.length) enableExports();
+  }
+});
+$('#bench-download').addEventListener('click', () => {
+  const arch = device.gpu ? (device.gpu.architecture || device.gpu.vendor || 'gpu') : 'nogpu';
+  const stamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');
+  const name = 'mentria-bench-' + String(arch).replace(/[^a-z0-9]+/gi, '-') + '-' + stamp + '.json';
+  const payload = Object.assign({}, diagnostics, { summaryText: summary(), markdown: markdown(), savedAt: new Date().toISOString() });
+  const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  setStatus('saved ' + name + ' (' + Math.round(blob.size / 1024) + ' KB) to Downloads');
 });
 const copyText = async (text, okMsg) => { try { await navigator.clipboard.writeText(text); setStatus(okMsg); } catch (_) { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;left:0;top:0;width:90vw;height:40vh;z-index:9'; document.body.appendChild(ta); ta.select(); setStatus('clipboard blocked; text shown below, select and copy'); } };
 $('#bench-copy').addEventListener('click', () => copyText(markdown(), 'markdown copied'));

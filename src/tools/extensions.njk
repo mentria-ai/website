@@ -212,8 +212,19 @@ fileInput.addEventListener('change', (e) => {
   if (f) f.text().then(installFlow).catch((e) => showError(e.message));
   e.target.value = '';
 });
-document.getElementById('xt-paste-install').addEventListener('click', () => {
-  if (pasteTa.value.trim()) installFlow(pasteTa.value);
+document.getElementById('xt-paste-install').addEventListener('click', async () => {
+  const pasted = pasteTa.value.trim();
+  if (!pasted) return;
+  if (/^https?:\/\/\S+$/.test(pasted)) {
+    clearError();
+    try {
+      const res = await fetch(pasted, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      installFlow(await res.text());
+    } catch (e) { showError(pasted + ' · ' + e.message); }
+    return;
+  }
+  installFlow(pasted);
 });
 document.getElementById('xt-sample-install').addEventListener('click', async () => {
   try {

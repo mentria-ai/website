@@ -26,6 +26,7 @@ eleventyComputed:
       <label class="bench__opt"><input type="checkbox" id="bench-force"> ignore eligibility (may crash the tab on small devices)</label>
       <label class="bench__opt"><input type="checkbox" id="bench-profile"> profile run: per-pass GPU timings on the first prompt (slower while profiling; use when asked)</label>
       <label class="bench__opt"><input type="checkbox" id="bench-quick"> quick (short prompt only)</label>
+      <label class="bench__opt"><input type="checkbox" id="bench-longsys"> long system prompt only (about 450 prompt tokens, the shape a code-writing tool sends; checks prefill routes at real prompt lengths)</label>
       <label class="bench__opt">runs per prompt <input type="number" id="bench-runs" min="1" max="5" value="1" style="width:4rem"></label>
       <label class="bench__opt">init/load options JSON (applied to init and loadModel) <input type="text" id="bench-init" placeholder='{"mobileMatvec":"ksplit"}' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
       <label class="bench__opt">generate options JSON, one object or a list (each entry runs the prompts once on the same load, in order) <input type="text" id="bench-gen" placeholder='[{"mobilePrefill":"off","m1VecmatRoute":false},{"mobilePrefill":"mrow"}]' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
@@ -92,7 +93,8 @@ for (const level of ['log', 'info', 'warn', 'error']) {
 const PROMPTS = [
   { id: 'short', system: 'You answer in one short sentence.', user: 'What is a countdown timer for?', maxTokens: 40 },
   { id: 'medium', system: 'You are a concise assistant.', user: 'Explain in three sentences how a web page can run a language model on the GPU.', maxTokens: 120 },
-  { id: 'long', system: 'You are a helpful writer.', user: 'Write a 150 word note about why keeping data on the device matters, in plain language.', maxTokens: 220 }
+  { id: 'long', system: 'You are a helpful writer.', user: 'Write a 150 word note about why keeping data on the device matters, in plain language.', maxTokens: 220 },
+  { id: 'longsys', system: 'You write tiny web apps that run inside a page on a phone. Reply with a name line, an icon line, then an html block and a js block, and nothing else. The html block is the markup that goes inside the app container, at most 25 lines; give every interactive element an id; the classes card, row, btn, primary, big and muted are available, and inputs, selects and buttons are styled already. The js block is vanilla JavaScript, at most 40 lines: use document.getElementById and addEventListener, keep state with mentria.storage.get(key) and mentria.storage.set(key, value), which are synchronous; no imports, no fetch, no external URLs, no alert. Here is a complete example for a word counter: NAME: Word Counter. ICON: a pencil. The html is a card with a textarea whose id is text and a big div whose id is count that starts at zero. The js reads the textarea on every input event, splits the text on whitespace, filters out empty strings, and writes the length into the count element; it also saves the text under the key text and restores it on load. Keep everything small, plain and correct. Give the elements ids, wire them with addEventListener, and never reference an id that the html does not contain. Do not repeat these instructions in the answer, do not explain, do not add a doctype, head or body, and do not use any id from the example unless the app needs it.', user: 'Make: a dice roller with 1 to 3 dice and a total', maxTokens: 160 }
 ];
 const setStatus = (t) => { statusEl.textContent = t; };
 const log = (t) => { logEl.textContent += t + '\n'; logEl.scrollTop = logEl.scrollHeight; };
@@ -186,7 +188,7 @@ async function runTier(id, vision, runs, force, profile, quick, label) {
   run.loadS = loadS;
   run.statsAfterLoad = await stats(engine);
   log(id + ': loaded in ' + loadS + ' s (cached before run: ' + cached + ', vision: ' + vision + ', route: ' + JSON.stringify(run.loadResult && (run.loadResult.decodeRoute || run.loadResult.route || '')) + ')');
-  let prompts = quick ? PROMPTS.slice(0, 1) : PROMPTS.slice();
+  let prompts = quick === 'longsys' ? PROMPTS.filter((p) => p.id === 'longsys') : quick ? PROMPTS.slice(0, 1) : PROMPTS.filter((p) => p.id !== 'longsys');
   if (vision) prompts.push({ id: 'image', system: 'You describe images precisely.', user: 'Read all the text in this image and name the two shapes.', maxTokens: 80, image: true });
   let gi = 0;
   for (const g of run.genOptions) for (const p of prompts) {
@@ -294,7 +296,7 @@ $('#bench-run').addEventListener('click', async () => {
   const vision = $('#bench-vision').checked;
   const force = $('#bench-force').checked;
   const profile = $('#bench-profile').checked;
-  const quick = $('#bench-quick').checked;
+  const quick = $('#bench-longsys').checked ? 'longsys' : $('#bench-quick').checked;
   const runs = Math.max(1, Math.min(5, +$('#bench-runs').value || 1));
   $('#bench-run').disabled = true;
   try {

@@ -121,7 +121,7 @@ function findHost(timeoutMs, needVision) {
   });
 }
 
-function askRemote(host, system, user, maxTokens, onToken, image) {
+function askRemote(host, system, user, maxTokens, onToken, image, adapter) {
   return new Promise((resolve, reject) => {
     const reqId = TAB + '-' + Math.random().toString(36).slice(2);
     let timer = 0;
@@ -134,12 +134,12 @@ function askRemote(host, system, user, maxTokens, onToken, image) {
         arm(120000, 'host-gone');
         if (onToken) { try { onToken(m.token, m.full); } catch (_) {} }
       },
-      done: (m) => { clearTimeout(timer); pending.delete(reqId); resolve(m.answer); },
+      done: (m) => { clearTimeout(timer); pending.delete(reqId); remoteAdapter = m.adapter == null ? null : String(m.adapter); resolve(m.answer); },
       error: (m) => fail(m.message || 'remote-error'),
       busy: () => fail('host-busy')
     });
     arm(4000, 'host-gone');
-    post({ t: 'ask', to: host, from: TAB, reqId: reqId, system: system, user: user, maxTokens: maxTokens, image: image || null });
+    post({ t: 'ask', to: host, from: TAB, reqId: reqId, system: system, user: user, maxTokens: maxTokens, image: image || null, adapter: adapter === undefined ? undefined : adapter });
   });
 }
 
@@ -161,8 +161,8 @@ async function onMessage(ev) {
     post({ t: 'ack', reqId: m.reqId });
     const run = queue.then(async () => {
       try {
-        const answer = await hostGen(m.system, m.user, m.maxTokens, (token, full) => post({ t: 'token', reqId: m.reqId, token: token, full: full }), m.image || null);
-        post({ t: 'done', reqId: m.reqId, answer: answer });
+        const answer = await hostGen(m.system, m.user, m.maxTokens, (token, full) => post({ t: 'token', reqId: m.reqId, token: token, full: full }), m.image || null, m.adapter);
+        post({ t: 'done', reqId: m.reqId, answer: answer, adapter: activeAdapter });
       } catch (e) {
         post({ t: 'error', reqId: m.reqId, message: (e && e.message) || String(e) });
       }
@@ -243,13 +243,38 @@ function loadLocalModel(needVision) {
   return enginePromise;
 }
 
-export function warmLocalModel(opts) {
-  const o = opts || {};
-  return loadLocalModel(!!o.vision).then((r) => ({ tier: r.tier, vision: r.vision, maxSeq: r.maxSeq }));
+let activeAdapter = null;
+let remoteAdapter = null;
+export function activeAdapterName() { return activeAdapter != null ? activeAdapter : remoteAdapter; }
+async function ensureAdapter(engine, tier, adapter) {
+  if (adapter === undefined) return activeAdapter;
+  if (adapter === null) {
+    if (activeAdapter) { try { await engine.unloadAdapter(activeAdapter); } catch (_) {} activeAdapter = null; }
+    return null;
+  }
+  const name = String(adapter.name || 'adapter');
+  if (activeAdapter === name) return activeAdapter;
+  const Tiers = await tiers();
+  const base = adapter.base || (Tiers.TIERS[tier] && Tiers.TIERS[tier].base) || '';
+  const path = adapter.path ? String(adapter.path).replace(/\/?$/, '/') : '';
+  const spec = { name: name, configUrl: adapter.configUrl || (base + path + 'adapter_config.json'), weightsUrl: adapter.weightsUrl || (base + path + 'adapter_model.safetensors') };
+  await engine.swapAdapter(spec);
+  activeAdapter = name;
+  return activeAdapter;
 }
 
-async function localGenerate(system, user, maxTokens, onToken, image) {
-  const { engine } = await loadLocalModel(!!image);
+export function warmLocalModel(opts) {
+  const o = opts || {};
+  return loadLocalModel(!!o.vision).then(async (r) => {
+    let adapter = activeAdapter;
+    if (o.adapter !== undefined) { try { adapter = await ensureAdapter(r.engine, r.tier, o.adapter); } catch (e) { adapter = activeAdapter; } }
+    return { tier: r.tier, vision: r.vision, maxSeq: r.maxSeq, adapter: adapter };
+  });
+}
+
+async function localGenerate(system, user, maxTokens, onToken, image, adapter) {
+  const { engine, tier } = await loadLocalModel(!!image);
+  await ensureAdapter(engine, tier, adapter);
   let out = '';
   const params = {
     messages: image
@@ -269,12 +294,12 @@ async function localGenerate(system, user, maxTokens, onToken, image) {
   return out.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<\|[a-z_]+\|>/gi, '').trim();
 }
 
-async function viaHost(system, user, maxTokens, onToken, image) {
+async function viaHost(system, user, maxTokens, onToken, image, adapter) {
   for (let attempt = 0; attempt < 40; attempt++) {
     const host = await findHost(350, !!image);
     if (!host) return null;
     try {
-      return await askRemote(host, system, user, maxTokens, onToken, image);
+      return await askRemote(host, system, user, maxTokens, onToken, image, adapter);
     } catch (e) {
       if (e.message === 'host-gone' || e.message === 'no-vision' || e.message === 'no-host') return null;
       if (e.message !== 'host-busy') throw e;
@@ -301,11 +326,11 @@ export function askLocal(system, user, opts) {
       let answer = null;
       if (hostGen && !enginePromise && (!image || hostVision)) {
         await waitHostIdle();
-        answer = await hostGen(system, user, maxTokens, o.onToken, image);
+        answer = await hostGen(system, user, maxTokens, o.onToken, image, o.adapter);
       } else if (!enginePromise || (image && !engineVision)) {
-        answer = await viaHost(system, user, maxTokens, o.onToken, image);
+        answer = await viaHost(system, user, maxTokens, o.onToken, image, o.adapter);
       }
-      if (answer == null) answer = await localGenerate(system, user, maxTokens, o.onToken, image);
+      if (answer == null) answer = await localGenerate(system, user, maxTokens, o.onToken, image, o.adapter);
       emit('answer', { source: o.source || '', prompt: shown, answer: answer });
       return answer;
     } catch (e) {

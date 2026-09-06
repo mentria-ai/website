@@ -363,6 +363,11 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
   if (vendor === 'nvidia' && t.nvidiaMaxSeq) opts.residualFusion = true;
   if (vendor === 'apple' && t.appleMaxSeq) opts.kvF16 = true;
   if (t.streamingLoad) opts.streamingLoad = true;
+  if (IS_ANDROID) {
+    const caps = await detectCaps();
+    const arch = String((caps && caps.vendor && caps.vendor.architecture) || '').toLowerCase();
+    if (/^adreno-8/.test(arch)) opts.prefillChunk = 64;
+  }
   if (vision) {
     opts.visionModelUrl = shardBase;
     opts.visionShards = t.visionShards.slice();

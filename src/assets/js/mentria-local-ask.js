@@ -286,6 +286,10 @@ export function warmLocalModel(opts) {
   });
 }
 
+function chatPrompt(system, user) {
+  return '<|im_start|>system\n' + String(system).trim() + '<|im_end|>\n<|im_start|>user\n' + String(user).trim() + '<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n';
+}
+
 async function localGenerate(system, user, maxTokens, onToken, image, adapter, sampling) {
   const { engine, tier } = await loadLocalModel(!!image);
   await ensureAdapter(engine, tier, adapter);
@@ -299,6 +303,8 @@ async function localGenerate(system, user, maxTokens, onToken, image, adapter, s
     temperature: t, topK: t > 0 ? (sampling.topK || 40) : 1, topP: t > 0 ? (sampling.topP || 0.95) : 1, repetitionPenalty: image ? 1.15 : 1.0, enableThinking: false
   };
   if (image) params.images = [image];
+  const prefix = !image && sampling && typeof sampling.prefix === 'string' ? sampling.prefix : '';
+  if (prefix) { params.prompt = chatPrompt(system, user) + prefix; delete params.messages; }
   await engine.generate(params, (ev) => {
     if (typeof ev.token === 'string') {
       if (/^<\|[^|]*\|>$/.test(ev.token)) return;

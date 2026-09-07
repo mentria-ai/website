@@ -32,6 +32,7 @@ eleventyComputed:
       <label class="bench__opt">generate options JSON, one object or a list (each entry runs the prompts once on the same load, in order) <input type="text" id="bench-gen" placeholder='[{"mobilePrefill":"off","m1VecmatRoute":false},{"mobilePrefill":"mrow"}]' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
       <label class="bench__opt">max tokens per prompt (blank = prompt default) <input type="number" id="bench-maxtok" min="4" max="512" style="width:5rem"></label>
       <label class="bench__opt">resident adapters to reach in the residency protocol (measured after 1, 2, 4, 6, 8) <input type="number" id="bench-adapters-n" min="1" max="8" value="6" style="width:4rem"></label>
+      <label class="bench__opt">repetitions per residency measurement (arms from the generate options list are interleaved) <input type="number" id="bench-adapters-reps" min="1" max="5" value="1" style="width:4rem"></label>
       <div class="bench__actions">
         <button class="bench__btn" id="bench-run" type="button">Run selected</button>
         <button class="bench__btn" id="bench-protocol" type="button">Phone protocol (3 runs, one file)</button>
@@ -315,7 +316,9 @@ const ADAPTER_SETS = {
   '4b': [{ name: 'forge', path: 'loras/forge/v1/' }]
 };
 const RESIDENCY_STEPS = [1, 2, 4, 6, 8];
-async function runAdapterResidency(id, maxResident) {
+async function runAdapterResidency(id, maxResident, reps, arms) {
+  reps = Math.max(1, Math.min(5, reps | 0 || 1));
+  arms = Array.isArray(arms) && arms.length ? arms : [null];
   const sets = ADAPTER_SETS[id];
   if (!sets) { log(id + ': no adapter set for this tier (27b or 4b)'); return; }
   log('--- adapter residency on ' + id + ', up to ' + maxResident + ' resident ---');
@@ -344,11 +347,12 @@ async function runAdapterResidency(id, maxResident) {
   log(id + ': loaded in ' + run.loadS + ' s, route ' + JSON.stringify(run.loadResult && run.loadResult.decodeRoute || ''));
   const base = Tiers.TIERS[id].base;
   const p = PROMPTS[1];
-  const measure = async (label, active) => {
+  const measure = async (label, active, arm) => {
+    if (arm) label += ' ' + JSON.stringify(arm);
     setStatus(id + ': ' + label);
     let tokens = 0, tFirst = 0, tPrev = 0, text = '', finalEvent = null;
     const gaps = [];
-    const params = { messages: [{ role: 'system', content: p.system }, { role: 'user', content: p.user }], maxTokens: 96, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false };
+    const params = Object.assign({}, arm || {}, { messages: [{ role: 'system', content: p.system }, { role: 'user', content: p.user }], maxTokens: 96, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false });
     const tStart = performance.now();
     try {
       await engine.generate(params, (ev) => {
@@ -368,7 +372,7 @@ async function runAdapterResidency(id, maxResident) {
     const statsAfter = await stats(engine);
     const fe = finalEvent || {};
     const promptTokens = typeof fe.committedTokens === 'number' && typeof fe.numTokens === 'number' ? fe.committedTokens - fe.numTokens : null;
-    const row = { id: label, residentCount: run.residentAdapters.length, activeAdapter: active, ttftMs: ttft, decodeTps: decode, tokens, promptTokens, prefillTps: promptTokens && ttft ? +((promptTokens / (ttft / 1000))).toFixed(1) : null, engineTps: fe.tokensPerSecond || null, gapMs: { median: Math.round(percentile(gaps, 0.5)), p90: Math.round(percentile(gaps, 0.9)), max: Math.round(Math.max(0, ...gaps)) }, counters: fe.counters || null, decodeRoute: fe.decodeRoute || null, kernelVariants: fe.kernelVariants || null, gpuErrors: statsAfter && statsAfter.gpuErrors || null, sample: text.replace(/\s+/g, ' ').slice(0, 120) };
+    const row = { id: label, arm: arm || null, residentCount: run.residentAdapters.length, activeAdapter: active, ttftMs: ttft, decodeTps: decode, tokens, promptTokens, prefillTps: promptTokens && ttft ? +((promptTokens / (ttft / 1000))).toFixed(1) : null, engineTps: fe.tokensPerSecond || null, gapMs: { median: Math.round(percentile(gaps, 0.5)), p90: Math.round(percentile(gaps, 0.9)), max: Math.round(Math.max(0, ...gaps)) }, counters: fe.counters || null, decodeRoute: fe.decodeRoute || null, decodeRouteInfo: fe.decodeRouteInfo || null, decodeRouteReasons: fe.decodeRouteReasons || null, kernelVariants: fe.kernelVariants || null, gpuErrors: statsAfter && statsAfter.gpuErrors || null, sample: text.replace(/\s+/g, ' ').slice(0, 120) };
     run.prompts.push(row);
     const tr = { tier: id, vision: true, cached: run.cached, loadS: run.loadS, prompt: label, run: 1, ttftMs: ttft, decodeTps: decode, tokens, totalS: +((tEnd - tStart) / 1000).toFixed(2), sample: row.sample };
     results.push(tr); addRow(tr);
@@ -376,7 +380,7 @@ async function runAdapterResidency(id, maxResident) {
     return true;
   };
   try {
-    if (!(await measure('0 resident, base', null))) throw new Error('base generate failed');
+    if (!(await measure('0 resident, base', null, arms[0]))) throw new Error('base generate failed');
     let loaded = 0;
     for (const target of RESIDENCY_STEPS) {
       if (target > maxResident) break;
@@ -404,13 +408,15 @@ async function runAdapterResidency(id, maxResident) {
         }
       }
       if (failed) break;
-      await engine.swapAdapter({ name: null });
-      await measure(loaded + ' resident, 0 active', null);
       const first = run.residentAdapters[0].name;
-      const tA = performance.now();
-      await engine.swapAdapter({ name: first });
-      run.prompts.push({ id: loaded + ' resident, activate ' + first, activateMs: Math.round(performance.now() - tA) });
-      await measure(loaded + ' resident, 1 active', first);
+      for (let rep = 0; rep < reps; rep++) for (const arm of arms) {
+        await engine.swapAdapter({ name: null });
+        await measure(loaded + ' resident, 0 active' + (reps > 1 ? ' rep ' + (rep + 1) : ''), null, arm);
+        const tA = performance.now();
+        await engine.swapAdapter({ name: first });
+        if (rep === 0 && arm === arms[0]) run.prompts.push({ id: loaded + ' resident, activate ' + first, activateMs: Math.round(performance.now() - tA) });
+        await measure(loaded + ' resident, 1 active' + (reps > 1 ? ' rep ' + (rep + 1) : ''), first, arm);
+      }
       await engine.swapAdapter({ name: null });
     }
   } catch (e) {
@@ -427,8 +433,10 @@ $('#bench-adapters').addEventListener('click', async () => {
   const checked = [...tiersEl.querySelectorAll('input:checked')].map((i) => i.value);
   const id = checked.includes('27b') ? '27b' : checked.includes('4b') ? '4b' : (chain.includes('27b') ? '27b' : '4b');
   const n = Math.max(1, Math.min(8, +$('#bench-adapters-n').value || 6));
+  const reps = Math.max(1, Math.min(5, +$('#bench-adapters-reps').value || 1));
+  const arms = genConfigs();
   $('#bench-run').disabled = true; $('#bench-protocol').disabled = true; $('#bench-adapters').disabled = true;
-  try { await runAdapterResidency(id, n); }
+  try { await runAdapterResidency(id, n, reps, arms); }
   finally { $('#bench-run').disabled = false; $('#bench-protocol').disabled = false; $('#bench-adapters').disabled = false; if (diagnostics.runs.length) enableExports(); }
 });
 const PROTOCOL = [

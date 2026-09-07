@@ -10,9 +10,9 @@
   --line:#D5DBE4; --line-2:#E6EAF0;
   --trace:#E0731F; --trace-soft:#FBE7D6; --signal:#2A9DB8; --signal-soft:#DCF0F5;
   --bad:#C93838; --bad-soft:#F8DEDE; --ok:#3B9A5E; --ok-soft:#DDF0E3;
-  --grid:#E3E8EF; --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --display:'Bricolage Grotesque','IBM Plex Sans',system-ui,sans-serif;
+  --grid:#E3E8EF; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --display:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -117,7 +117,7 @@ footer{padding-top:28px;color:var(--ink-3);font-size:13px;font-family:var(--mono
 
 <div class="wrap">
 <header class="hero">
-  <div class="eyebrow">mentria-engine · 247 things to poke at</div>
+  <div class="eyebrow">mentria-engine · 257 things to poke at</div>
   <h1>Inside the One-Bit Engine</h1>
   <p class="lede">A browser engine that runs a 27-billion-parameter model where every weight is a single bit. Each station below is one surprising fact. Move the control, watch what changes. Words with a dotted underline explain themselves — hover, or tap on a phone. On a phone, diagrams swipe sideways.</p>
   <nav class="rail">
@@ -383,6 +383,18 @@ footer{padding-top:28px;color:var(--ink-3);font-size:13px;font-family:var(--mono
       <a href="#s245">245 · one dispatch, zero barriers, lost</a>
       <a href="#s246">246 · the scatter kernel that no longer exists</a>
       <a href="#s247">247 · the shader that looked untouched</a>
+    </div>
+    <div class="part"><span class="part-title">Part IX · Experiments &amp; evaluation</span>
+      <a href="#s248">248 · an arm that ran flat</a>
+      <a href="#s249">249 · 804 GPU jobs, one word</a>
+      <a href="#s250">250 · busy 55 of 82 ms</a>
+      <a href="#s251">251 · same bytes, 272 vs 80 groups</a>
+      <a href="#s252">252 · six resident, one on the clock</a>
+      <a href="#s253">253 · net −3, churn 13</a>
+      <a href="#s254">254 · 61% of the test was in training</a>
+      <a href="#s255">255 · three rates, three denominators</a>
+      <a href="#s256">256 · one token routes the turn</a>
+      <a href="#s257">257 · eleven kernels timed zero</a>
     </div>
   </nav>
 </header>
@@ -7495,6 +7507,289 @@ model.enablePrescaled(operators.prescaledQ4, undefined, <b>undefined</b>);</pre>
       <svg id="s247_svg" viewBox="0 0 640 352" width="100%" height="352" role="img" aria-label="one commit in the git log versus three measured refutations in the tracker"></svg>
     </div>
     <div class="readout"><span>history entries <b class="trace" id="s247_n">—</b></span><span>measured refutations <b id="s247_ref">—</b></span><span>gain if rebuilt <b id="s247_gain">—</b></span><span id="s247_verdict"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 248 ───────────── -->
+<section class="station" id="s248">
+  <div class="words">
+    <div class="eyebrow">station 248 · experiments &amp; evaluation</div>
+    <h2>Two rewrites halved the time per GPU job and doubled the jobs. The token cost the same.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>arm</b> — one setting of the thing under test. An A/B has two or more arms: same model, same prompts, same device, same everything, one flag different.</li><li><b>median</b> — the middle value of a set of measurements. Less easily fooled by one bad reading than an average.</li><li><b>ran flat</b> — the arms differ by less than the spread you get from repeating the <em>same</em> arm. The change did nothing you can see.</li></ul></div>
+    <p>The question was whether the 1-bit matrix kernel is starved of parallel work. Two rewrites (<code>ksplit</code>, <code>nsplit</code>) cut each job into pieces so the GPU gets more of them at once. Both arms armed and ran, on the same four prompts, on the same laptop, in the same session.</p>
+    <p>Each piece really did get faster: <b>219 µs → 87–89 µs</b> per job. The pieces needed were exactly proportionally more numerous. GPU time per word: <b>76.8 → 75.5 ms</b> — and the same prompt run twice inside one arm already varies by ~2 ms. Flat. Verdict: this axis is closed, stop spending on it.</p>
+    <p>Flip the clock to see why we score arms on GPU time. The same laptop, a different A/B, three repeats of an <em>identical</em> arm: 11.87, 3.47 and 6.45 tokens/second. Wall-clock throughput on a shared machine can be off by 3×; the GPU's own stopwatch is not.</p>
+    <pre class="code">arm      passes/token   µs per job   GPU ms per word
+off             804      219             76.8
+ksplit         1028       87             75.5
+nsplit          804       89             75.5
+…-q1matvec-{off,ksplit,nsplit}.json</pre>
+    <div class="src">docs/handoff/2026-09-08-bench-laptop-3060-q1matvec-off.json / -ksplit.json / -nsplit.json (commit edb6d5b4; medians recomputed here per prompt from <code>profiles[0].perToken</code> and <code>decode.byLabel</code>) · verdict: docs/research/2026-09-08-q1g128-band16.md §0(b) · the repeated wall-clock arm: docs/handoff/2026-09-07-bench-laptop-3060-adapter-arms-4701fd3e.json (<code>log</code>, "1 resident, 0 active {}" ×3)</div>
+    <div class="sowhat"><b>So what:</b> an arm that "ran flat" is a result, not a failure — it retires a whole idea for the price of ten minutes of bench time.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which arm"><button id="s248_off" aria-pressed="true">arm: off (shipped)</button><button id="s248_k" aria-pressed="false">arm: ksplit</button><button id="s248_n" aria-pressed="false">arm: nsplit</button></div>
+      <div class="seg" role="group" aria-label="which clock"><button id="s248_gpu" aria-pressed="true">GPU clock, per token</button><button id="s248_wall" aria-pressed="false">wall clock, repeated</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s248_svg" viewBox="0 0 640 360" width="100%" height="360" role="img" aria-label="per-prompt GPU milliseconds per token for three arms, and the scatter of a repeated wall-clock arm"></svg>
+    </div>
+    <div class="readout"><span>arm median <b class="trace" id="s248_med">—</b></span><span>spread within the arm <b id="s248_spread">—</b></span><span>vs shipped <b id="s248_delta">—</b></span><span id="s248_verdict"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 249 ───────────── -->
+<section class="station" id="s249">
+  <div class="words">
+    <div class="eyebrow">station 249 · experiments &amp; evaluation</div>
+    <h2>One word from the 27B is 804 separate GPU jobs, and 401 of them are 91% of the clock.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>pass (or dispatch)</b> — one job handed to the GPU: run this one small program, this many times, over these buffers. Nothing else runs inside it.</li><li><b>kernel</b> — the small program itself. The engine has about a dozen different ones in the decode path; the same kernel is launched hundreds of times per word with different weights.</li><li><b>µs</b> — a microsecond, a millionth of a second. 1,000 µs = 1 ms.</li></ul></div>
+    <p>Station 10 counted the envelopes handed to the GPU. This counts what is inside them. On the RTX 3060 laptop the profiler timestamps every pass of a decode step: <b>804 passes</b>, <b>14 distinct kernels</b>, <b>77.0 ms</b> of GPU time — for one word.</p>
+    <p>The census is lopsided. <b>401</b> of those passes are the 1-bit matrix-by-vector kernel at 218–227 µs each, and they own <b>91%</b> of the time. The other 403 passes — norms, gates, softmax, the argmax that picks the word — together cost about 4.5 ms, because most of them take 2–3 µs.</p>
+    <p>Now flip to the <code>ksplit</code> arm. It adds 224 extra passes per word, each of them a 3 µs job that adds up partial results. Passes go <b>804 → 1028</b> and the word gets no slower: <b>77.0 → 75.5 ms</b>. Pass count on its own says nothing; pass count × time per pass is the only quantity that matters.</p>
+    <pre class="code">count/token  median   ms/token   kernel
+        273   218 µs    48.8      vecmatQ2G128           (1-bit matrix x vector)
+        128   227 µs    21.4      ...dispatchWithResidual (same, + the skip add)
+        129    12 µs     1.7      rmsnorm
+         64     3 µs     0.2      siluMul
+        804              77.0     14 kernels, one decoded word</pre>
+    <div class="src">docs/handoff/2026-09-08-bench-laptop-3060-profile-unquantized-4701fd3e.json (prompt <code>medium</code>, <code>tsAll2</code>; counts divided by the 2.488 tokens the 2,000-pass budget covered) · the 401 = 273 + 128 shape model: docs/research/2026-09-07-q1g128-ksplit-ampere.md §1.1 · ksplit arm: docs/handoff/2026-09-08-bench-laptop-3060-q1matvec-ksplit.json · label rule <code>opName + '.' + methodName</code>: src/core/pass_profiler.js : 231–254</div>
+    <div class="sowhat"><b>So what:</b> "we removed 224 GPU jobs" is not a result. The result is what the clock did.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s249_tok">words in the reply</label><input type="range" id="s249_tok" min="1" max="64" step="1" value="12"><span id="s249_tokV" class="readout"></span></div>
+      <div class="seg" role="group" aria-label="which arm"><button id="s249_ship" aria-pressed="true">shipped · 804 passes</button><button id="s249_ks" aria-pressed="false">ksplit · 1028 passes</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s249_svg" viewBox="0 0 640 430" width="100%" height="430" role="img" aria-label="the census of GPU passes in one decoded word, and the total for a whole reply"></svg>
+    </div>
+    <div class="readout"><span>passes <b class="trace" id="s249_p">—</b></span><span>per word <b id="s249_pt">—</b></span><span>GPU time <b id="s249_ms">—</b></span><span>in the matrix kernel <b class="ok" id="s249_share">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 250 ───────────── -->
+<section class="station" id="s250">
+  <div class="words">
+    <div class="eyebrow">station 250 · experiments &amp; evaluation</div>
+    <h2>The phone's word took 82 ms with the GPU asleep for 27 of them. The laptop wasted 8.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>wall time</b> — a stopwatch on the whole thing, the number a user feels.</li><li><b>GPU-busy time</b> — how long the GPU was actually computing, added up from its own timestamps. Always less than wall time.</li><li><b>bubble</b> — a gap where the GPU has nothing to do: it is waiting for the CPU to write the next batch of jobs, or for an answer to be copied back.</li></ul></div>
+    <p>Every word costs two clocks. The GPU's own timestamps say how long it computed; the wall clock says how long you waited. The difference is where an engine either has a problem worth fixing or does not.</p>
+    <p>On the borrowed Adreno phone (4B model), a word was <b>82 ms</b> of wall time and about <b>55 ms</b> of GPU work — <b>27 ms</b> per word spent outside the GPU's timeline entirely: copying the chosen token back to the CPU, sampling, and re-recording 443 jobs into 177 envelopes. On the laptop (27B model) the same measurement is <b>85 ms</b> wall against <b>77 ms</b> busy. Almost no gap: "the timeline is full, not bubbles".</p>
+    <p>The same number was first read as <b>15.5 ms</b> of GPU work on the phone — a 3.5× error, because the sums were divided by the 16 tokens asked for instead of the 4.5 tokens the profiler's 2,000-pass budget actually covered. The wrong reading pointed the whole next session at the wrong lever.</p>
+    <pre class="code">phone  (Adreno, 4B):  443 passes · 177 command buffers · 2 submits · 1 mapAsync
+                      wall 82 ms  |  GPU busy ~55 ms  |  outside the GPU ~27 ms
+laptop (3060, 27B):   804 passes · one submit per token
+                      wall 85 ms  |  GPU busy  77 ms  |  outside the GPU  ~8 ms</pre>
+    <div class="src">phone: docs/handoff/2026-09-05-website-loaner-s1905-results.md §3 (443 passes, 177 command buffers, 82 ms wall), corrected in docs/research/2026-09-05-mobile-pass-fusion.md §0 (sum of pass durations 54.9 ms/token; ~27 ms outside the timeline; the 16-vs-4.5 divisor) · laptop: docs/research/2026-09-07-q1g128-ksplit-ampere.md §1 (85 ms wall, 77 ms over 804 passes) and docs/handoff/2026-09-08-bench-laptop-3060-profile-unquantized-4701fd3e.json</div>
+    <div class="sowhat"><b>So what:</b> the same 80-ish millisecond word has two completely different diseases on two devices — and only the second clock tells you which one you have.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which device"><button id="s250_ph" aria-pressed="true">phone · Adreno · 4B</button><button id="s250_lap" aria-pressed="false">laptop · RTX 3060 · 27B</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s250_svg" viewBox="0 0 640 372" width="100%" height="372" role="img" aria-label="one token's wall time split into GPU-busy time and time spent outside the GPU, on two devices"></svg>
+    </div>
+    <div class="readout"><span>wall <b id="s250_wall">—</b></span><span>GPU busy <b class="ok" id="s250_busy">—</b></span><span>idle <b class="bad" id="s250_idle">—</b></span><span>busy share <b class="trace" id="s250_pct">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 251 ───────────── -->
+<section class="station" id="s251">
+  <div class="words">
+    <div class="eyebrow">station 251 · experiments &amp; evaluation</div>
+    <h2>Two jobs, same bytes, 272 workgroups against 80. They cost the same.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>workgroup</b> — one squad of GPU threads. A job (a pass) launches many of them; the GPU hands squads out to its cores.</li><li><b>SM</b> — one core of the GPU. This laptop's RTX 3060 has 30. Fewer workgroups than cores means idle cores.</li><li><b>occupancy-bound</b> — slowed by not having enough squads to keep the cores busy. <b>bytes-bound</b> — slowed by how much data has to be moved, no matter how the work is arranged.</li></ul></div>
+    <p>Two sessions were built on the belief that the 27B's decode was occupancy-bound: several of its matrix jobs launch only 80 workgroups on a 30-core part, some as few as 16. The fix was to cut the work into more pieces.</p>
+    <p>Then the profile was re-run with the GPU timer unblurred (station 257) and the belief died in one table. The low-occupancy jobs (all at 80 workgroups) moved bytes at <b>50.9 GB/s</b>. The high-occupancy jobs (192 and up) moved them at <b>50.0 GB/s</b>. And the model's own control pair — <code>gate_proj</code> and <code>down_proj</code>, identical weight bytes, identical iteration count, <b>272 versus 80 workgroups</b> — cost the same.</p>
+    <p>What does move the number is bytes. Each 8-row band re-reads the whole input vector, so the engine reads <b>3.6×</b> more activation bytes than weight bytes. Doubling the band to 16 rows halves that: <b>16.41 → 10.01 GB</b> issued per word, −39%. Slide the band and watch the workgroups fall while the bytes fall faster.</p>
+    <pre class="code">population              dispatches  bytes/token  workgroups   measured
+dispatchWithResidual        128       1085 MB    100% at 80   21.3 ms -&gt; 50.9 GB/s
+vecmatQ2G128                273       2518 MB    98.9% at 192+ 50.3 ms -&gt; 50.0 GB/s
+control pair: gate_proj 272 WGs vs down_proj 80 WGs, same bytes -&gt; same cost</pre>
+    <div class="src">docs/research/2026-09-07-q1g128-ksplit-ampere.md §1.1 (the two populations, the control pair, the 30-SM shape table) and §3.1b (the 3.6× activation re-read) · docs/research/2026-09-08-q1g128-band16.md §0, §1 and §3 (the per-projection traffic table and the 16.41 / 10.01 / 6.81 GB totals) · docs/research/2026-09-05-mobile-matvec-variants.md §2–3 (the design reference these variants came from)</div>
+    <div class="sowhat"><b>So what:</b> before building the fix, find the pair of things that differ only in the way you think matters. If they cost the same, the theory is finished.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s251_proj">which matrix job</label><input type="range" id="s251_proj" min="0" max="10" step="1" value="7"><span id="s251_projV" class="readout"></span></div>
+      <div class="seg" role="group" aria-label="band width"><button id="s251_b8" aria-pressed="true">8 rows (shipped)</button><button id="s251_b16" aria-pressed="false">16 rows</button><button id="s251_b32" aria-pressed="false">32 rows</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s251_svg" viewBox="0 0 640 400" width="100%" height="400" role="img" aria-label="workgroups per core and bytes moved for each matrix job, at three band widths"></svg>
+    </div>
+    <div class="readout"><span>workgroups <b class="trace" id="s251_wg">—</b></span><span>per core <b id="s251_persm">—</b></span><span>input re-read <b id="s251_ratio">—</b></span><span>bytes for the whole word <b class="ok" id="s251_tot">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 252 ───────────── -->
+<section class="station" id="s252">
+  <div class="words">
+    <div class="eyebrow">station 252 · experiments &amp; evaluation</div>
+    <h2>Six adapters sitting in GPU memory cost nothing. Switching one on costs 20 ms a word.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>adapter (LoRA)</b> — a small trained patch, a few tens of megabytes, that shifts the model's behaviour for one task. Station 206 is the mechanism: it is never merged into the weights, it runs as extra GPU jobs alongside them.</li><li><b>resident</b> — loaded and sitting in GPU memory. <b>active</b> — the one the engine is currently applying.</li><li><b>rank</b> — how wide the patch is. Ours are rank 8: about 117 MB for the 27B.</li></ul></div>
+    <p>The bench loaded up to six adapters onto the laptop and measured with none active and with one active. Six resident, none active: <b>10.06 tok/s</b>. One resident, none active: <b>10.15</b>. Base model, nothing loaded: <b>9.73</b>. Residency is free — the numbers do not even order themselves.</p>
+    <p>Switching one on costs a fixed <b>~20 ms per word</b>, at every residency count: 10.15 → 8.46, 10.08 → 8.45, 10.13 → 8.31, 10.06 → 8.40. It is fixed because the price is extra GPU jobs, not extra bytes: on the Mac an active rank-16 adapter takes the 27B from <b>838–885 to 1,904 dispatches</b> per word.</p>
+    <p>So the percentage is not a property of the adapter. On the laptop, where a word already costs 99 ms, +20 ms is −17%. On the Mac, where a word costs 34 ms, the same kind of cost is −34%. Quote the milliseconds; the percentage belongs to the device.</p>
+    <pre class="code">activate(name) { … this.activeAdapterName = name; }   src/lora/adapter_manager.js:366
+// and in the worker, when it is already resident:
+adapterManager.activate(data.name);
+return { active: data.name, fromCache: true, bytes: 0 };  // no bytes moved at all</pre>
+    <div class="src">docs/handoff/2026-09-07-bench-laptop-3060-adapter-residency.json (<code>log</code>: 0/1/2/4/6 resident × 0/1 active on the 27B) · dispatch census: docs/research/2026-09-04-android-instrumentation.md §3 (838–885 → 1904, 29.4 → 19.5 tok/s) · why it is dispatches: docs/research/2026-08-29-lora-decode-hoist.md (LoRA passes 592 → 256 command buffers, 592 → 1184 dispatches) · adapter size 116,763,104 B: docs/research/2026-09-07-aichat-toolcall-adapter.md §6 · src/worker/inference_worker.js : 4994–4996</div>
+    <div class="sowhat"><b>So what:</b> a menu of task adapters can sit in memory for free; only the one you switch on is on the clock.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s252_res">adapters resident</label><input type="range" id="s252_res" min="0" max="4" step="1" value="4"><span id="s252_resV" class="readout"></span></div>
+      <div class="seg" role="group" aria-label="active adapter"><button id="s252_off" aria-pressed="true">none active</button><button id="s252_on" aria-pressed="false">one active</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s252_svg" viewBox="0 0 640 360" width="100%" height="360" role="img" aria-label="speed, memory and GPU jobs as adapters are made resident and one is activated"></svg>
+    </div>
+    <div class="readout"><span>speed <b class="trace" id="s252_tps">—</b></span><span>per word <b id="s252_ms">—</b></span><span>cost of being active <b class="bad" id="s252_cost">—</b></span><span>GPU memory <b id="s252_mem">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 253 ───────────── -->
+<section class="station" id="s253">
+  <div class="words">
+    <div class="eyebrow">station 253 · experiments &amp; evaluation</div>
+    <h2>The score moved by 3 instructions. Thirteen instructions changed to produce it.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>IFEval</b> — a benchmark of checkable instructions ("answer in exactly three bullet points", "no commas"). A program checks the answer, so it cannot be talked into a good mark. Station 176 is the fuller introduction.</li><li><b>IFEval-40</b> — our subset: 40 prompts carrying <b>67</b> instructions, picked to keep the instruction types in proportion. Only runs with the same limit are comparable to each other.</li><li><b>churn</b> — how many individual instructions changed answer between two runs, in either direction. The net is what you report; the churn is what tells you whether the net means anything.</li></ul></div>
+    <p>A tool-call adapter was tested for collateral damage: does the patch that teaches it to call a search tool break its ability to follow ordinary instructions? IFEval-40 said base <b>58/67</b>, adapter <b>55/67</b>. Net <b>−3</b>. The gate allowed ±2 points, which on 67 instructions is ±1.34 of them — so as written, the adapter fails.</p>
+    <p>Then the runs were paired instruction by instruction. <b>Five</b> instructions the base got wrong the adapter now gets right; <b>eight</b> the base got right the adapter now gets wrong. Thirteen things moved to produce a net of three, and none of it is sampling noise — the prompts are fixed and the decoding is greedy. It is real behaviour change that happens to nearly cancel.</p>
+    <p>Which is the whole lesson: this instrument cannot adjudicate a residue this small. Resolving it means the full 541-prompt IFEval, roughly eight times the instructions and <b>3.3–4.2 hours per arm</b>, or purpose-built sets of 30–50 instructions for the types that actually moved. The honest sentence is "−3 with churn 13, unresolved" — not "safe" and not "harmful".</p>
+    <pre class="code">                     base            adapter
+inst_level_strict    0.8657 (58/67)  0.8209 (55/67)    net -3
+prompt_level_strict  0.800  (32/40)  0.725  (29/40)
+gained 5 · lost 8 · churn 13 · gate +/-2 points = +/-1.34 instructions</pre>
+    <div class="src">docs/research/2026-09-07-aichat-toolcall-adapter.md §5.7 (the table, the 13 paired moves, the FAIL-as-written verdict) · docs/runbooks/bonsai_lora_runbook.md "Trap 17 — IFEval-40 cannot resolve a residue of ≤ 2 instructions" (churn 5–8× the effect across three earlier sweeps; the 541-prompt and per-behaviour alternatives; pair by (key, position) because key 1837 carries the same instruction type twice)</div>
+    <div class="sowhat"><b>So what:</b> a benchmark has a resolution, like a ruler. Below it, the number it prints is still precise and no longer means anything.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which run"><button id="s253_base" aria-pressed="true">base 27B</button><button id="s253_ad" aria-pressed="false">+ tool-call adapter</button><button id="s253_ch" aria-pressed="false">show what moved</button></div>
+      <div class="ctl"><label for="s253_n">prompts in the run</label><input type="range" id="s253_n" min="40" max="541" step="1" value="40"><span id="s253_nV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s253_svg" viewBox="0 0 640 420" width="100%" height="420" role="img" aria-label="67 instruction outcomes for two runs, and what a bigger run would cost"></svg>
+    </div>
+    <div class="readout"><span>obeyed <b class="trace" id="s253_pass">—</b></span><span>score <b id="s253_score">—</b></span><span>net <b id="s253_net">—</b></span><span>churn <b class="bad" id="s253_churn">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 254 ───────────── -->
+<section class="station" id="s254">
+  <div class="words">
+    <div class="eyebrow">station 254 · experiments &amp; evaluation</div>
+    <h2>A perfect 1.000 — on a test set sharing 61% of its questions with the training set.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>train / test split</b> — the rows you learn from, and a separate set of rows you are scored on. The point is to measure what was <em>learned</em>, not what was memorised.</li><li><b>holdout</b> — a test set built to share nothing with training: new topics, new wording, new facts. The strictest version of the same idea.</li><li><b>upper bound</b> — a number the truth cannot be above. "Somewhere at or below this" is a different claim from "this".</li></ul></div>
+    <p>The tool-call adapter scored 1.0000 on every gate metric. The splits were built to be disjoint by prompt hash — different system-prompt variant, different conversation prefix — which sounds like a clean separation. It is not one, because they were <b>not</b> disjoint by content: both halves draw questions from the same lists.</p>
+    <p>Measured, not assumed: <b>61.2%</b> of the test split's 103 distinct user turns also appear in training, and the adapter reproduces the reference answer <b>byte-for-byte on 64.7%</b> of test rows (89.5% of one family, 8.1% of another). The base model does that on 6.7%. So the 1.0000 says the adapter reliably learned this data's wire, policy and phrasing. It does not say how it behaves on a question it has never seen.</p>
+    <p>The zero-overlap version exists: a <b>120-row holdout</b> from lexicons sharing nothing with training — new search topics, new claims, new result sets — verified at <b>0 of 69</b> distinct user turns in common. It was built and not run: two arms, about 22 minutes of a shared GPU. Until it runs, the honest label is "learned this data", not "generalises".</p>
+    <pre class="code">test split (150 rows)   61.2% of user turns also in train   score 1.0000  = upper bound
+holdout    (120 rows)    0 of 69 user turns in train        score  ——     not run
+verbatim reproduction of the reference answer: adapter 64.7% · base 6.7%</pre>
+    <div class="src">docs/research/2026-09-07-aichat-toolcall-adapter.md §5.3 (61.2%, 64.7% / 89.5% / 76.8% / 8.1%, base 6.7%, "an upper bound, not a generalisation estimate") and §5.4 (the 120-row holdout: 16 new search topics, 6 doc topics, 6 claims, 18 chat prompts, 5 result sets; 0 of 69 turns shared; built, not scored)</div>
+    <div class="sowhat"><b>So what:</b> the question a score answers is decided by how the test set was built, not by how high the score is.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s254_ov">questions shared with training</label><input type="range" id="s254_ov" min="0" max="100" step="1" value="61"><span id="s254_ovV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s254_svg" viewBox="0 0 640 400" width="100%" height="400" role="img" aria-label="a test set's rows split into seen-before and new, and what the score can prove"></svg>
+    </div>
+    <div class="readout"><span>seen before <b class="bad" id="s254_seen">—</b></span><span>genuinely new <b class="ok" id="s254_new">—</b></span><span>what a 1.000 proves <b id="s254_claim">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 255 ───────────── -->
+<section class="station" id="s255">
+  <div class="words">
+    <div class="eyebrow">station 255 · experiments &amp; evaluation</div>
+    <h2>Three numbers, three different denominators, and they are never added together.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>tool call</b> — instead of answering, the model emits a small structured request ("search the web for X"); the page runs it and hands back results for the model to use.</li><li><b>denominator</b> — the set of turns a rate is measured over. "2% of what?" is the whole question: these three rates are measured over three different subsets of the same 150 rows.</li><li><b>grounded</b> — every URL, domain and number in the answer appears in what the model was actually given. An answer that invents a plausible fact is not grounded.</li></ul></div>
+    <p>A tool-calling model has exactly three ways to fail, and they cost different things. It can <b>call when nothing was needed</b> — a spinner and a network request the user did not ask for. It can <b>fail to call when a call was needed</b> — a stale or invented answer. And having called, it can <b>invent facts that are not in the results</b>.</p>
+    <p>Base 27B against the adapter, each rate over its own denominator: false calls <b>0.0213 → 0.0000</b> (of 94 no-call turns), missed calls <b>0.1786 → 0.0000</b> (of 56 call turns), groundedness <b>0.7368 → 1.0000</b> (of 57 turns with results). They are never pooled into one headline, because a missed call is a worse answer and a false call is a visible malfunction.</p>
+    <p>The base's failures are not formatting. Every tag it emitted was valid JSON with nothing after it. Asked to <em>verify</em> a claim it answered from memory 5 times in 7 — confidently, and sometimes wrongly. And when a search came back as an error, it invented an answer 59% of the time.</p>
+    <pre class="code">metric               over                     base      adapter
+false_call_rate      94 non-call rows        0.0213     0.0000
+missed_call_rate     56 call rows            0.1786     0.0000
+groundedness_rate    57 rows with results    0.7368     1.0000
+a tag the page cannot parse counts as a MISSED call, not as a call</pre>
+    <div class="src">docs/research/2026-09-07-aichat-toolcall-adapter.md §3 (the three definitions and their denominators; the two design calls) and §5.1–5.2 (the values, the per-sub-kind tables, the invented Debian / ISS / British Library answers) · docs/research/2026-09-01-toolcall-adapter-a.md §3 and §5.3 (the earlier adapter's five gate metrics, and its 27B base emitting <code>type</code> 64 times instead of calling)</div>
+    <div class="sowhat"><b>So what:</b> one number can only be a summary of what you already understand. These three exist because they trade against each other.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which turn"><button id="s255_t0" aria-pressed="true">"search the web for X"</button><button id="s255_t1">"is it true that X?"</button><button id="s255_t2">"what is X right now?"</button><button id="s255_t3">ordinary chat turn</button><button id="s255_t4">the search came back failed</button></div>
+      <div class="seg" role="group" aria-label="what the model does"><button id="s255_call" aria-pressed="true">call the tool</button><button id="s255_ans">answer without it</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s255_svg" viewBox="0 0 640 396" width="100%" height="396" role="img" aria-label="which of the three counters moves for each kind of turn and each choice"></svg>
+    </div>
+    <div class="readout"><span id="s255_verdict">—</span><span>counter <b class="trace" id="s255_ctr">—</b></span><span>base on this kind of turn <b id="s255_rate">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 256 ───────────── -->
+<section class="station" id="s256">
+  <div class="words">
+    <div class="eyebrow">station 256 · experiments &amp; evaluation</div>
+    <h2>One token, chosen from four, decides whether the adapter is switched on.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>constrained decode</b> — telling the engine "whatever you pick, pick it from this list of allowed tokens". Not a prompt instruction: the disallowed words are removed before the choice is made, so the model cannot answer anything else.</li><li><b>vocabulary</b> — the 248,320 tokens this model can emit. Normally the engine scans all of them to find the highest-scoring one.</li><li><b>router</b> — a cheap first step that decides which specialist handles a turn. Here it is the base model itself, asked one question.</li></ul></div>
+    <p>Station 252 priced an active adapter: about 20 ms a word, because it is 2.27× the GPU jobs. So the plan is to keep the base model plain for ordinary chat and switch an adapter on only for the turns that need it. That only works if the deciding step is <b>deterministic</b> — "answer with one word and I'll parse it" is not, because the model can answer anything.</p>
+    <p>So the engine takes an explicit list: <code>generate({ messages, maxTokens: 1, allowedTokenIds })</code>. Every sampled token comes from the set, on every route, greedy or not; ids are validated and sorted, and ties go to the lowest id so the GPU and CPU paths cannot disagree. The kernel scans <code>input[allowed[i]]</code> — a <b>4-element scan instead of 248,320</b> — so no scores are ever copied back to the CPU and the fast decode loop stays intact.</p>
+    <p>It is cheap: the label turn is one short prompt and one token, and the measurement says the mask costs nothing you can detect (both routes are dominated by reading the prompt). It has one real cost, and it is not speed: a wrong label means the adapter never switches on, which shows up as a missed call in station 255's table.</p>
+    <pre class="code">engine.generate({
+  messages, maxTokens: 1,
+  allowedTokenIds: [tokA, tokB, tokC, tokNone],   // the router's label set
+});
+// shaders/argmax_masked.wgsl scans input[allowed[i]] for i &lt; n, not input[i] for i &lt; V</pre>
+    <div class="src">docs/research/2026-09-07-router-api-allowed-tokens-prefix.md §0 (why: an active adapter is 2.27× dispatches, so the label turn must be deterministic), §1.1–1.3 (the contract, the masked-argmax kernel, the tie rule), §3.2 (48/48 both routes agree on both tiers; 27B constrained one-token generate median 607.5 ms resident vs 570.5 ms readback — prefill-dominated, "the mask costs nothing measurable") · adapter activation is a string assignment: src/lora/adapter_manager.js : 366</div>
+    <div class="sowhat"><b>So what:</b> the cheapest way to make a model's decision reliable is to make the wrong answers unrepresentable, not to ask more nicely.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s256_in">the user's turn</label><input type="text" id="s256_in" value="what is the ISS deorbit date right now?" spellcheck="false" autocomplete="off" style="font-family:var(--mono);font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);width:330px;max-width:100%"></div>
+      <div class="seg" role="group" aria-label="examples"><button id="s256_e0">a search question</button><button id="s256_e1">plain chat</button><button id="s256_e2">a policy question</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s256_svg" viewBox="0 0 640 392" width="100%" height="392" role="img" aria-label="the four allowed label tokens, which one is chosen, and which route the turn takes"></svg>
+    </div>
+    <div class="readout"><span>label <b class="trace" id="s256_lab">—</b></span><span>route <b id="s256_route">—</b></span><span>decode cost <b id="s256_cost">—</b></span><span>scanned <b class="ok" id="s256_scan">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 257 ───────────── -->
+<section class="station" id="s257">
+  <div class="words">
+    <div class="eyebrow">station 257 · experiments &amp; evaluation</div>
+    <h2>Eleven of the fourteen kernels timed exactly zero, for privacy reasons.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>GPU timestamp</b> — the GPU writing down its own clock before and after a job. Subtracting gives the job's duration.</li><li><b>quantized</b> — rounded onto a coarse grid before you are allowed to see it. Browsers do this to clocks so that pages cannot use timing to spy.</li><li><b>µs</b> — a microsecond. The grid here is 65.536 µs, and most of our GPU jobs are smaller than that.</li></ul></div>
+    <p>Browsers must blur GPU timers: the WebGPU spec says their precision "must be reduced". Chrome's engine does it by clearing the bottom 16 bits of a nanosecond count — <code>0xFFFF0000</code> — which is a grid of <b>65.536 µs</b>. A duration needs two timestamps, each rounded down on its own, so anything under about half a millisecond is unmeasurable by default. Nearly every kernel in our decode path is under that.</p>
+    <p>Here is what that did to a real profile. Eleven of the 27B's fourteen decode kernels — norms, gates, softmax, the argmax — reported a median of <b>exactly 0 µs</b>. The two big matrix kernels both reported <b>196.61 µs</b>, which is 3 × 65.536, so they looked identical when they are in fact 216 and 226. A whole session's theory was built on that flat reading.</p>
+    <p>The escape hatch already existed and was not being used: one Chrome flag, <code>chrome://flags/#enable-webgpu-developer-features</code>. Two things survived the blur, because the rounding is a truncation with no jitter: the <b>totals</b> (195.1 vs 194.6 ms over 2,000 passes, 0.3% apart) and therefore every aggregate figure ever derived from them.</p>
+    <pre class="code">kTimestampQuantizationMask = 0xFFFF0000   // "granularity of ~0.1ms"
+                                          // 2^16 ns = 65.536 µs — the comment is 1.53x out
+kernel medians:  quantized      real        the grid: 0 · 65.5 · 131.1 · 196.6 µs
+  vecmatQ2G128     196.61      216.06
+  ...withResidual  196.61      226.30
+  rmsnorm            0.00       13.31</pre>
+    <div class="src">docs/research/2026-09-08-wgsl-webgpu-upstream-opportunities.md §C6 (the mask, Dawn's <code>Constants.h:110</code> and its off-by-1.53× comment, the spec's "must be reduced", the developer flag, "any single dispatch under roughly 0.5 ms is not measurable by default") · the two profiles: docs/handoff/2026-09-07-bench-laptop-3060-profile-4701fd3e.json (quantized) and docs/handoff/2026-09-08-bench-laptop-3060-profile-unquantized-4701fd3e.json (flag on), prompt <code>short</code>, same 2,000-pass budget</div>
+    <div class="sowhat"><b>So what:</b> an instrument that rounds silently does not report "unknown" — it reports zero, and zero looks like a measurement.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="quantization"><button id="s257_q" aria-pressed="true">timer quantized (default)</button><button id="s257_r" aria-pressed="false">developer flag on</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s257_svg" viewBox="0 0 640 412" width="100%" height="412" role="img" aria-label="median duration of each decode kernel, as reported by the quantized timer and by the unquantized one"></svg>
+    </div>
+    <div class="readout"><span>kernels reading 0 µs <b class="bad" id="s257_zero">—</b></span><span>the two matrix kernels <b class="trace" id="s257_two">—</b></span><span>total over 2,000 passes <b class="ok" id="s257_tot">—</b></span></div>
   </div>
 </section>
 
@@ -29470,6 +29765,928 @@ if ($('#s242')) {
     }
     render();
   }
+}
+
+/* ── Station 248 ── */
+/* ── Station 248: what an experiment arm is ───────────── */
+if ($('#s248')) {
+  const svg = $('#s248_svg');
+  // Every value below is read out of the three bench JSONs (commit edb6d5b4):
+  // profiles[0].perToken[].us for the tokens the profile captured whole.
+  const ARMS = {
+    off:    { label: 'off (shipped)', passes: 804,  us: 219,
+      p: { short: [78.94, 78.93], medium: [76.78, 77.12], long: [77.32, 77.45], image: [78.58, 78.95] } },
+    ksplit: { label: 'ksplit', passes: 1028, us: 87,
+      p: { short: [77.22], medium: [75.49], long: [75.63], image: [77.63] } },
+    nsplit: { label: 'nsplit', passes: 804,  us: 89,
+      p: { short: [77.49, 76.60], medium: [75.51, 75.77], long: [76.21, 75.49], image: [76.67, 77.94] } },
+  };
+  const ORDER = ['off', 'ksplit', 'nsplit'];
+  const PROMPTS = ['short', 'medium', 'long', 'image'];
+  // A DIFFERENT A/B on the same laptop: one identical arm, three repeats, wall clock.
+  // docs/handoff/2026-09-07-bench-laptop-3060-adapter-arms-4701fd3e.json (log)
+  const WALL = [
+    { arm: '{} (no flags)',        v: [11.87, 3.47, 6.45] },
+    { arm: 'cycleDetector: off',   v: [7.49, 6.99, 3.51] },
+    { arm: 'gpuSampleBatch: 1',    v: [3.49, 7.57, 3.51] },
+  ];
+  const med = (a) => { const s = [...a].sort((x, y) => x - y); const m = s.length >> 1;
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+  const all = (k) => PROMPTS.flatMap((p) => ARMS[k].p[p]);
+
+  let arm = 'off', gpu = true;
+  const B = { off: $('#s248_off'), ksplit: $('#s248_k'), nsplit: $('#s248_n') };
+  for (const k of ORDER) B[k].addEventListener('click', () => { arm = k; render(); });
+  $('#s248_gpu').addEventListener('click', () => { gpu = true; render(); });
+  $('#s248_wall').addEventListener('click', () => { gpu = false; render(); });
+
+  function render() {
+    for (const k of ORDER) B[k].setAttribute('aria-pressed', String(k === arm));
+    $('#s248_gpu').setAttribute('aria-pressed', String(gpu));
+    $('#s248_wall').setAttribute('aria-pressed', String(!gpu));
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), grid = css('--grid'), card = css('--card');
+    let g = '';
+
+    if (gpu) {
+      const LO = 74, HI = 80, X0 = 96, X1 = 616;
+      const px = (v) => X0 + (X1 - X0) * (v - LO) / (HI - LO);
+      g += `<text x="14" y="18" font-size="12" fill="${ink3}">GPU milliseconds per token — every token the profiler captured whole, 4 prompts per arm</text>`;
+      for (let t = LO; t <= HI; t += 1) {
+        g += `<line x1="${px(t)}" y1="30" x2="${px(t)}" y2="238" stroke="${grid}"/>`;
+        g += `<text x="${px(t)}" y="254" text-anchor="middle" font-size="11" fill="${ink3}">${t}</text>`;
+      }
+      g += `<text x="${X1}" y="272" text-anchor="end" font-size="11" fill="${ink3}">ms of GPU time for one token →</text>`;
+      ORDER.forEach((k, i) => {
+        const y = 56 + i * 62, on = k === arm, vals = all(k), m = med(vals);
+        const lo = Math.min(...vals), hi = Math.max(...vals);
+        g += `<text x="14" y="${y + 4}" font-size="12" fill="${on ? ink : ink3}">${ARMS[k].label}</text>`;
+        g += `<text x="14" y="${y + 20}" font-size="11" fill="${ink3}">${ARMS[k].passes} passes</text>`;
+        g += `<rect x="${px(lo)}" y="${y - 14}" width="${Math.max(px(hi) - px(lo), 2)}" height="28" rx="4" fill="${on ? trace : ink3}" opacity="${on ? 0.18 : 0.08}"/>`;
+        vals.forEach((v) => {
+          g += `<circle cx="${px(v).toFixed(1)}" cy="${y}" r="${on ? 5 : 3.5}" fill="${on ? trace : ink3}" opacity="${on ? 0.9 : 0.5}"/>`;
+        });
+        g += `<line x1="${px(m)}" y1="${y - 18}" x2="${px(m)}" y2="${y + 18}" stroke="${on ? ink : ink3}" stroke-width="${on ? 2 : 1}"/>`;
+        g += `<text x="${px(m)}" y="${y - 22}" text-anchor="middle" font-size="11" fill="${on ? ink : ink3}">${m.toFixed(2)}</text>`;
+      });
+      const spreadOff = Math.max(...all('off')) - Math.min(...all('off'));
+      g += `<rect x="14" y="284" width="608" height="62" rx="8" fill="${card}" stroke="${line}"/>`;
+      g += `<text x="26" y="304" font-size="12" fill="${ink2}">The gap between arms (~1.3 ms) is about the size of the gap between</text>`;
+      g += `<text x="26" y="321" font-size="12" fill="${ink2}">two runs of the SAME arm (${spreadOff.toFixed(2)} ms here). That is "ran flat".</text>`;
+      g += `<text x="26" y="338" font-size="11" fill="${ink3}">Samples were text-identical in all three arms — the arms compute the same words.</text>`;
+    } else {
+      const X0 = 176, X1 = 616, HI = 13;
+      const px = (v) => X0 + (X1 - X0) * v / HI;
+      g += `<text x="14" y="18" font-size="12" fill="${ink3}">a different A/B on the same laptop, scored on wall-clock speed — three repeats of each arm</text>`;
+      for (let t = 0; t <= HI; t += 2) {
+        g += `<line x1="${px(t)}" y1="30" x2="${px(t)}" y2="212" stroke="${grid}"/>`;
+        g += `<text x="${px(t)}" y="228" text-anchor="middle" font-size="11" fill="${ink3}">${t}</text>`;
+      }
+      g += `<text x="${X1}" y="246" text-anchor="end" font-size="11" fill="${ink3}">tokens per second, wall clock →</text>`;
+      WALL.forEach((w, i) => {
+        const y = 60 + i * 56;
+        g += `<text x="14" y="${y + 4}" font-size="12" fill="${ink2}">${w.arm}</text>`;
+        const lo = Math.min(...w.v), hi = Math.max(...w.v);
+        g += `<rect x="${px(lo)}" y="${y - 14}" width="${Math.max(px(hi) - px(lo), 2)}" height="28" rx="4" fill="${bad}" opacity="0.14"/>`;
+        w.v.forEach((v, j) => {
+          g += `<circle cx="${px(v).toFixed(1)}" cy="${y}" r="5" fill="${bad}" opacity="0.85"/>`;
+          g += `<text x="${px(v).toFixed(1)}" y="${y - 20}" text-anchor="middle" font-size="10" fill="${ink3}">${v}</text>`;
+        });
+      });
+      g += `<rect x="14" y="264" width="608" height="82" rx="8" fill="${card}" stroke="${bad}"/>`;
+      g += `<text x="26" y="286" font-size="12.5" fill="${bad}">Every band above is ONE arm measured three times.</text>`;
+      g += `<text x="26" y="306" font-size="12" fill="${ink2}">The bands overlap completely: on wall-clock speed this machine cannot tell these</text>`;
+      g += `<text x="26" y="323" font-size="12" fill="${ink2}">three settings apart at all. 3.47 and 11.87 tok/s are the same configuration.</text>`;
+      g += `<text x="26" y="340" font-size="11" fill="${ink3}">This is why arms are interleaved (A, B, C, A, B, C…) and scored on the GPU's own clock.</text>`;
+    }
+    svg.innerHTML = g;
+
+    const vals = all(arm), m = med(vals), mOff = med(all('off'));
+    $('#s248_med').textContent = gpu ? m.toFixed(2) + ' ms/token' : 'wall clock: unusable here';
+    $('#s248_spread').textContent = gpu
+      ? '±' + ((Math.max(...vals) - Math.min(...vals)) / 2).toFixed(2) + ' ms'
+      : '3.47 – 11.87 tok/s for one arm';
+    $('#s248_delta').textContent = gpu
+      ? (m - mOff >= 0 ? '+' : '') + (m - mOff).toFixed(2) + ' ms  (' + ((m - mOff) / mOff * 100).toFixed(1) + '%)'
+      : '—';
+    $('#s248_verdict').innerHTML = gpu
+      ? (arm === 'off' ? '<span class="ok">the shipped kernel</span>'
+        : '<span class="bad">FLAT — inside the spread, so the arm buys nothing</span>')
+      : '<span class="bad">repeats first, then arms</span>';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 249 ── */
+/* ── Station 249: a pass is one GPU job ───────────────── */
+if ($('#s249')) {
+  const svg = $('#s249_svg'), sl = $('#s249_tok');
+  const bShip = $('#s249_ship'), bKs = $('#s249_ks');
+  // Per decoded token, prompt "medium", from the unquantized 3060 tsAll2 profile.
+  // count = byLabel.count / 2.488 captured tokens, rounded to the shape model's integers.
+  const SHIP = { passes: 804, ms: 77.04, rows: [
+    ['vecmatQ2G128 · 1-bit matrix', 273, 218.11, 48.82, 'big'],
+    ['…WithResidual · + the skip add', 128, 227.33, 21.43, 'big'],
+    ['megashaderA · DeltaNet state', 48, 53.25, 2.54, 'mid'],
+    ['rmsnorm', 129, 12.29, 1.74, 'mid'],
+    ['megashaderB.dispatchPacked', 48, 28.67, 1.34, 'mid'],
+    ['gqaScore · attention scores', 16, 32.77, 0.51, 'mid'],
+    ['gqaValueAgg', 16, 15.36, 0.25, 'small'],
+    ['siluMul', 64, 3.07, 0.19, 'small'],
+    ['fusedNormMRoPE', 32, 3.07, 0.10, 'small'],
+    ['softmax', 16, 3.07, 0.05, 'small'],
+    ['qgateDeinterleave', 16, 2.05, 0.04, 'small'],
+    ['sigmoidGate', 16, 2.05, 0.04, 'small'],
+    ['argmax · picks the word', 1, 11.26, 0.01, 'small'],
+    ['embeddingQ2G128', 1, 2.82, 0.00, 'small'],
+  ] };
+  const KS = { passes: 1028, ms: 75.49, rows: [
+    ['vecmatQ2G128 · not split', 177, 226.30, 41.90, 'big'],
+    ['…Q1Ksplit · K cut across groups', 224, 87.04, 24.22, 'big'],
+    ['…Q1KsplitReduce · adds the pieces', 224, 3.07, 0.78, 'small'],
+    ['megashaderA · DeltaNet state', 48, 53.25, 2.57, 'mid'],
+    ['rmsnorm', 129, 12.29, 1.91, 'mid'],
+    ['megashaderB.dispatchPacked', 48, 28.67, 1.41, 'mid'],
+    ['the other 9 kernels', 178, 3.07, 0.90, 'small'],
+  ] };
+  let ship = true;
+  bShip.addEventListener('click', () => { ship = true; render(); });
+  bKs.addEventListener('click', () => { ship = false; render(); });
+  sl.addEventListener('input', render);
+
+  function render() {
+    const n = parseInt(sl.value, 10), A = ship ? SHIP : KS;
+    bShip.setAttribute('aria-pressed', String(ship));
+    bKs.setAttribute('aria-pressed', String(!ship));
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok');
+    const line = css('--line'), grid = css('--grid'), card = css('--card');
+    const colFor = (k) => k === 'big' ? trace : (k === 'mid' ? signal : ink3);
+    let g = '';
+
+    // ── the pile: one square = 200 passes ─────────────────
+    const total = n * A.passes;
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">GPU jobs in this reply · one square = 200 passes</text>`;
+    const sq = Math.max(1, Math.ceil(total / 200)), PER = 44, P = 14.1;
+    for (let i = 0; i < Math.min(sq, 132); i++) {
+      const x = 14 + (i % PER) * P, y = 26 + Math.floor(i / PER) * 15;
+      g += `<rect x="${x.toFixed(1)}" y="${y}" width="11" height="9" rx="2" fill="${trace}" opacity="${i === sq - 1 ? 0.5 : 0.85}"/>`;
+    }
+    g += `<text x="14" y="84" font-size="12" fill="${ink}">${total.toLocaleString()} passes · ${n} word${n === 1 ? '' : 's'} · ${(n * A.ms / 1000).toFixed(2)} s of GPU time</text>`;
+
+    // ── the census of ONE word ────────────────────────────
+    const X0 = 268, X1 = 486, Y0 = 112, RH = 15;
+    g += `<text x="14" y="${Y0 - 6}" font-size="11" fill="${ink3}">one word, kernel by kernel — bar = share of the 77 ms; right column = how many passes</text>`;
+    const maxMs = A.rows[0][3];
+    A.rows.forEach((r, i) => {
+      const y = Y0 + 8 + i * RH;
+      g += `<text x="14" y="${y + 9}" font-size="11" fill="${r[4] === 'big' ? ink : ink2}">${r[0]}</text>`;
+      const w = Math.max((X1 - X0) * r[3] / maxMs, 1.2);
+      g += `<rect x="${X0}" y="${y}" width="${w.toFixed(1)}" height="11" rx="2" fill="${colFor(r[4])}" opacity="0.9"/>`;
+      g += `<text x="${X1 + 8}" y="${y + 9}" font-size="10.5" fill="${ink3}">${r[3].toFixed(2)} ms</text>`;
+      g += `<text x="636" y="${y + 9}" text-anchor="end" font-size="10.5" fill="${ink2}">×${r[1]}</text>`;
+    });
+    const rowsBottom = Y0 + 8 + A.rows.length * RH;
+
+    // ── the two totals, side by side, always both shown ───
+    const BY = Math.max(rowsBottom + 22, 300), BX = 250, BW = 300;
+    const bar = (y, ms, passes, lab, on) => {
+      const w = BW * ms / 80;
+      return `<text x="14" y="${y + 12}" font-size="11.5" fill="${on ? ink : ink3}">${lab}</text>`
+        + `<rect x="${BX}" y="${y}" width="${w.toFixed(1)}" height="16" rx="3" fill="${on ? trace : ink3}" opacity="${on ? 0.9 : 0.35}"/>`
+        + `<text x="${(BX + w + 8).toFixed(1)}" y="${y + 12}" font-size="11" fill="${on ? ink : ink3}">${ms.toFixed(1)} ms · ${passes} passes</text>`;
+    };
+    g += `<text x="14" y="${BY - 6}" font-size="11" fill="${ink3}">GPU time for one word — the two arms, both measured</text>`;
+    g += bar(BY, SHIP.ms, SHIP.passes, 'shipped', ship);
+    g += bar(BY + 24, KS.ms, KS.passes, 'ksplit (+224 passes)', !ship);
+    g += `<text x="14" y="${BY + 62}" font-size="11" fill="${ink3}">28% more passes, 2% less time. The passes it added are 3 µs each.</text>`;
+    svg.innerHTML = g;
+
+    const big = A.rows.filter((r) => r[4] === 'big').reduce((a, r) => a + r[3], 0);
+    $('#s249_tokV').textContent = n + (n === 1 ? ' word' : ' words');
+    $('#s249_p').textContent = total.toLocaleString();
+    $('#s249_pt').textContent = A.passes + ' passes, ' + A.rows.length + ' kernel kinds';
+    $('#s249_ms').textContent = (n * A.ms / 1000).toFixed(2) + ' s  (' + A.ms.toFixed(1) + ' ms/word)';
+    $('#s249_share').textContent = (100 * big / A.ms).toFixed(0) + '% of the clock';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 250 ── */
+/* ── Station 250: GPU busy vs bubbles ─────────────────── */
+if ($('#s250')) {
+  const svg = $('#s250_svg');
+  const bPh = $('#s250_ph'), bLap = $('#s250_lap');
+  const DEV = {
+    phone: {
+      name: 'iQOO loaner · Adreno 8xx · Bonsai-4B Q4',
+      wall: 82, busy: 54.9, passes: 443, note: 'the 443 pass durations sum to 54.9 ms and the GPU timeline spans 55–59 ms —',
+      note2: 'so the gaps INSIDE the timeline are small. The missing time is outside it.',
+      facts: [
+        ['443 passes / token', 'each one a separate GPU job'],
+        ['177 command buffers', 'each boundary is a chance to go idle'],
+        ['2 submits, 1 mapAsync', 'one copy of the chosen word back to the CPU, every word'],
+        ['4 matvec kernels = 47.8 ms', '87% of the GPU work — 2.63 GB of weights at ~55 GB/s'],
+      ],
+      wrong: { busy: 15.5, label: 'the first reading: "15.5 ms of kernels in an 82 ms word"',
+        why: 'the sums were divided by the 16 tokens ASKED FOR, not the 4.5 the budget covered' },
+    },
+    laptop: {
+      name: 'laptop · RTX 3060 · Bonsai-27B 1-bit',
+      wall: 85, busy: 77.0, passes: 804, note: 'the research note\'s own four words: "the timeline is full, not bubbles".',
+      note2: 'There is no idle time here to reclaim.',
+      facts: [
+        ['804 passes / token', '401 of them the 1-bit matrix kernel'],
+        ['77 ms of GPU work', '91% of it in that one kernel'],
+        ['~8 ms outside the GPU', 'under a tenth of the word'],
+        ['3.60 GB of weights / word', 'measured 77 ms = 13% of what the memory bus allows'],
+      ],
+      wrong: null,
+    },
+  };
+  let dev = 'phone';
+  bPh.addEventListener('click', () => { dev = 'phone'; render(); });
+  bLap.addEventListener('click', () => { dev = 'laptop'; render(); });
+
+  function render() {
+    const d = DEV[dev];
+    bPh.setAttribute('aria-pressed', String(dev === 'phone'));
+    bLap.setAttribute('aria-pressed', String(dev === 'laptop'));
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const ok = css('--ok'), bad = css('--bad'), trace = css('--trace');
+    const line = css('--line'), grid = css('--grid'), card = css('--card');
+    const X0 = 22, X1 = 616, MAX = 90;
+    const px = (ms) => X0 + (X1 - X0) * ms / MAX;
+    let g = '';
+
+    g += `<text x="14" y="17" font-size="12.5" fill="${ink}">${d.name}</text>`;
+    g += `<text x="14" y="34" font-size="11" fill="${ink3}">one decoded word, left to right, in milliseconds</text>`;
+    for (let t = 0; t <= MAX; t += 10) {
+      g += `<line x1="${px(t)}" y1="42" x2="${px(t)}" y2="150" stroke="${grid}"/>`;
+      g += `<text x="${px(t)}" y="166" text-anchor="middle" font-size="11" fill="${ink3}">${t}</text>`;
+    }
+    // measured bar
+    const Y = 60, H = 42, idle = d.wall - d.busy;
+    g += `<rect x="${px(0)}" y="${Y}" width="${px(d.busy) - px(0)}" height="${H}" rx="3" fill="${ok}" opacity="0.85"/>`;
+    g += `<rect x="${px(d.busy)}" y="${Y}" width="${px(d.wall) - px(d.busy)}" height="${H}" rx="3" fill="${bad}" opacity="0.7"/>`;
+    g += `<text x="${px(d.busy / 2)}" y="${Y + 26}" text-anchor="middle" font-size="12.5" fill="${css('--paper')}">GPU busy ${d.busy} ms</text>`;
+    const idleMid = px(d.busy + idle / 2);
+    g += idle > 14
+      ? `<text x="${idleMid}" y="${Y + 26}" text-anchor="middle" font-size="12" fill="${css('--paper')}">idle ${idle.toFixed(1)} ms</text>`
+      : `<text x="${px(d.wall) + 8}" y="${Y + 26}" font-size="12" fill="${bad}">idle ${idle.toFixed(1)} ms</text>`;
+    g += `<text x="${X0}" y="${Y - 8}" font-size="11" fill="${ink3}">wall time: ${d.wall} ms for one word</text>`;
+    g += `<text x="${X0}" y="${Y + H + 20}" font-size="11" fill="${ink3}">${d.note}</text>`;
+    g += `<text x="${X0}" y="${Y + H + 35}" font-size="11" fill="${ink3}">${d.note2}</text>`;
+
+    // the mis-read, when there is one
+    let y = 190;
+    if (d.wrong) {
+      g += `<rect x="${px(0)}" y="${y}" width="${px(d.wrong.busy) - px(0)}" height="24" rx="3" fill="${ok}" opacity="0.35"/>`;
+      g += `<rect x="${px(d.wrong.busy)}" y="${y}" width="${px(d.wall) - px(d.wrong.busy)}" height="24" rx="3" fill="${bad}" opacity="0.28"/>`;
+      g += `<text x="${X0}" y="${y - 8}" font-size="11.5" fill="${bad}">${d.wrong.label}</text>`;
+      g += `<text x="${X0}" y="${y + 40}" font-size="11" fill="${ink3}">${d.wrong.why}</text>`;
+      g += `<text x="${X0}" y="${y + 56}" font-size="11" fill="${ink2}">A 3.5× error, and it aimed the next session at bubbles that were not there.</text>`;
+      y += 76;
+    } else {
+      g += `<text x="${X0}" y="${y}" font-size="11.5" fill="${ok}">Nothing to correct here: the GPU is busy 91% of the word.</text>`;
+      g += `<text x="${X0}" y="${y + 18}" font-size="11" fill="${ink3}">So no amount of CPU-side tidying can help this device. The kernel itself is the target.</text>`;
+      y += 40;
+    }
+
+    // facts
+    g += `<rect x="14" y="${y}" width="608" height="${d.facts.length * 22 + 16}" rx="8" fill="${card}" stroke="${line}"/>`;
+    d.facts.forEach((f, i) => {
+      const fy = y + 24 + i * 22;
+      g += `<text x="28" y="${fy}" font-size="11.5" fill="${ink}">${f[0]}</text>`;
+      g += `<text x="230" y="${fy}" font-size="11" fill="${ink3}">${f[1]}</text>`;
+    });
+    svg.innerHTML = g;
+
+    $('#s250_wall').textContent = d.wall + ' ms/word';
+    $('#s250_busy').textContent = d.busy + ' ms';
+    $('#s250_idle').textContent = (d.wall - d.busy).toFixed(1) + ' ms';
+    $('#s250_pct').textContent = (100 * d.busy / d.wall).toFixed(0) + '%';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 251 ── */
+/* ── Station 251: occupancy-bound vs bytes-bound ──────── */
+if ($('#s251')) {
+  const svg = $('#s251_svg'), sl = $('#s251_proj');
+  const BB = { 8: $('#s251_b8'), 16: $('#s251_b16'), 32: $('#s251_b32') };
+  const SMS = 30;                       // RTX 3060 laptop: 30 SMs
+  // docs/research/2026-09-08-q1g128-band16.md §3 — per decoded token.
+  // name, N, K, dispatches, weight MB, activation MB at band 8, workgroups at band 8
+  const P = [
+    ['attn q_proj',      12288,  5120, 16, 135,  480,  192],
+    ['attn k_proj',       1024,  5120, 16,  11,   40,   16],
+    ['attn v_proj',       1024,  5120, 16,  11,   40,   16],
+    ['attn o_proj',       5120,  6144, 16,  68,  240,   80],
+    ['dn in_proj_qkvz',  16384,  5120, 48, 540, 1920,  256],
+    ['dn in_proj_ba',       96,  5120, 48,   3,   11,    2],
+    ['dn out_proj',       5120,  6144, 48, 203,  720,   80],
+    ['mlp gate_proj',    17408,  5120, 64, 765, 2720,  272],
+    ['mlp up_proj',      17408,  5120, 64, 765, 2720,  272],
+    ['mlp down_proj',     5120, 17408, 64, 765, 2720,   80],
+    ['lm_head',         248320,  5120,  1, 171,  606, 3880],
+  ];
+  const TOTAL = { 8: 16.41, 16: 10.01, 32: 6.81 };   // GB issued per token
+  let band = 8;
+  for (const k of [8, 16, 32]) BB[k].addEventListener('click', () => { band = k; render(); });
+  sl.addEventListener('input', render);
+
+  function render() {
+    const i = parseInt(sl.value, 10), p = P[i], mul = band / 8;
+    for (const k of [8, 16, 32]) BB[k].setAttribute('aria-pressed', String(k === band));
+    const wg = Math.max(1, Math.round(p[6] / mul));
+    const aMB = p[5] / mul, wMB = p[4];
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), grid = css('--grid'), card = css('--card');
+    let g = '';
+
+    g += `<text x="14" y="17" font-size="12.5" fill="${ink}">${p[0]}  ·  ${p[1]} × ${p[2]}  ·  ${p[3]} of these per word</text>`;
+
+    // ── the 30 cores ───────────────────────────────────────
+    g += `<text x="14" y="42" font-size="11" fill="${ink3}">the GPU's 30 cores — shaded = gets at least one squad of threads</text>`;
+    for (let s = 0; s < SMS; s++) {
+      const x = 14 + (s % 15) * 20, y = 52 + Math.floor(s / 15) * 20;
+      const fed = s < Math.min(wg, SMS);
+      g += `<rect x="${x}" y="${y}" width="16" height="16" rx="3" fill="${fed ? trace : card}" stroke="${fed ? trace : line}" opacity="${fed ? 0.85 : 1}"/>`;
+    }
+    const perSM = wg / SMS;
+    g += `<text x="330" y="66" font-size="12" fill="${ink}">${wg} workgroups</text>`;
+    g += `<text x="330" y="84" font-size="11.5" fill="${perSM < 1 ? bad : ink2}">${perSM.toFixed(1)} per core${perSM < 1 ? '  —  ' + (SMS - wg) + ' cores get nothing' : ''}</text>`;
+    g += `<text x="330" y="101" font-size="11" fill="${ink3}">and the speed does not care (see below)</text>`;
+
+    // ── bytes ──────────────────────────────────────────────
+    const BX = 196, BW = 380, MAXB = 3400;
+    const by = 132;
+    g += `<text x="14" y="${by - 8}" font-size="11" fill="${ink3}">megabytes this job reads per word, at a band of ${band} rows</text>`;
+    const bar = (y, mb, col, lab) =>
+      `<text x="14" y="${y + 12}" font-size="11.5" fill="${ink2}">${lab}</text>`
+      + `<rect x="${BX}" y="${y}" width="${Math.max(BW * mb / MAXB, 1.5).toFixed(1)}" height="16" rx="3" fill="${col}" opacity="0.85"/>`
+      + `<text x="${(BX + Math.max(BW * mb / MAXB, 1.5) + 8).toFixed(1)}" y="${y + 12}" font-size="11" fill="${ink2}">${mb.toFixed(0)} MB</text>`;
+    g += bar(by, wMB, signal, '1-bit weights');
+    g += bar(by + 26, aMB, trace, 'input vector, re-read');
+    g += `<text x="14" y="${by + 66}" font-size="11.5" fill="${ink}">re-read ratio ${(aMB / wMB).toFixed(1)}× the weight bytes here — the formula says ${(4 / mul).toFixed(1)}× on every shape at this band</text>`;
+    g += `<text x="14" y="${by + 83}" font-size="11" fill="${ink3}">A cost that is a fixed multiple of the weights, whatever the launch looks like.</text>`;
+
+    // ── the measurement that closed the occupancy idea ─────
+    const my = 250;
+    g += `<rect x="14" y="${my}" width="608" height="72" rx="8" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="${my + 20}" font-size="11.5" fill="${ink3}">measured, same profile, split by launch size:</text>`;
+    g += `<text x="26" y="${my + 40}" font-size="12" fill="${ink}">128 jobs at 80 workgroups → <tspan fill="${ok}">50.9 GB/s</tspan>    ·    273 jobs at 192+ → <tspan fill="${ok}">50.0 GB/s</tspan></text>`;
+    g += `<text x="26" y="${my + 60}" font-size="11.5" fill="${(i === 7 || i === 9) ? trace : ink3}">control pair: gate_proj (272 WGs) and down_proj (80 WGs) — same bytes, same cost.</text>`;
+
+    // ── the whole word ─────────────────────────────────────
+    const ty = 334, TX = 196, TW = 380;
+    g += `<text x="14" y="${ty + 12}" font-size="11.5" fill="${ink2}">whole word, all 401 jobs</text>`;
+    g += `<rect x="${TX}" y="${ty}" width="${(TW * TOTAL[band] / TOTAL[8]).toFixed(1)}" height="16" rx="3" fill="${ok}" opacity="0.8"/>`;
+    g += `<text x="${(TX + TW * TOTAL[band] / TOTAL[8] + 8).toFixed(1)}" y="${ty + 12}" font-size="11.5" fill="${ink}">${TOTAL[band]} GB issued${band === 8 ? '' : '  (' + ((TOTAL[band] / TOTAL[8] - 1) * 100).toFixed(0) + '%)'}</text>`;
+    g += `<text x="14" y="${ty + 36}" font-size="11" fill="${ink3}">Bytes are the axis that moves. Bands 16 and 32 are built and flag-gated; the win is</text>`;
+    g += `<text x="14" y="${ty + 51}" font-size="11" fill="${ink3}">bracketed between 0% and −39%, and had not been measured when this station was written.</text>`;
+    svg.innerHTML = g;
+
+    $('#s251_projV').textContent = p[0];
+    $('#s251_wg').textContent = wg + (band === 8 ? ' (shipped)' : '');
+    $('#s251_persm').textContent = perSM.toFixed(1) + ' of 30 cores';
+    $('#s251_ratio').textContent = (aMB / wMB).toFixed(1) + '× the weight bytes';
+    $('#s251_tot').textContent = TOTAL[band] + ' GB';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 252 ── */
+/* ── Station 252: resident vs active adapter ──────────── */
+if ($('#s252')) {
+  const svg = $('#s252_svg'), sl = $('#s252_res');
+  const bOff = $('#s252_off'), bOn = $('#s252_on');
+  // docs/handoff/2026-09-07-bench-laptop-3060-adapter-residency.json — the `log`.
+  // 27B on the RTX 3060 laptop, same prompts, one session.
+  const ROWS = [
+    { n: 0, off: 9.73, on: null },     // base: nothing loaded at all
+    { n: 1, off: 10.15, on: 8.46 },
+    { n: 2, off: 10.08, on: 8.45 },
+    { n: 4, off: 10.13, on: 8.31 },
+    { n: 6, off: 10.06, on: 8.40 },
+  ];
+  const MODEL_GB = 3.79, ADAPTER_GB = 116763104 / 1e9;   // 0.117 GB, rank 8, f16
+  let active = false;
+  bOff.addEventListener('click', () => { active = false; render(); });
+  bOn.addEventListener('click', () => { active = true; render(); });
+  sl.addEventListener('input', render);
+
+  function render() {
+    const i = parseInt(sl.value, 10), r = ROWS[i];
+    const on = active && r.on !== null;
+    bOff.setAttribute('aria-pressed', String(!active));
+    bOn.setAttribute('aria-pressed', String(active));
+    const tps = on ? r.on : r.off, ms = 1000 / tps;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), ok = css('--ok'), bad = css('--bad'), signal = css('--signal');
+    const line = css('--line'), grid = css('--grid'), card = css('--card');
+    let g = '';
+
+    // ── memory ─────────────────────────────────────────────
+    const MX = 150, MW = 400, MMAX = 4.6;
+    g += `<text x="14" y="17" font-size="11" fill="${ink3}">what is in GPU memory</text>`;
+    g += `<rect x="${MX}" y="26" width="${(MW * MODEL_GB / MMAX).toFixed(1)}" height="20" rx="3" fill="${signal}" opacity="0.8"/>`;
+    for (let k = 0; k < r.n; k++) {
+      const x = MX + MW * (MODEL_GB + k * ADAPTER_GB) / MMAX;
+      const isActive = on && k === 0;
+      g += `<rect x="${x.toFixed(1)}" y="26" width="${(MW * ADAPTER_GB / MMAX - 1.5).toFixed(1)}" height="20" rx="2" fill="${isActive ? trace : ink3}" opacity="${isActive ? 0.95 : 0.45}"/>`;
+    }
+    g += `<text x="14" y="41" font-size="11.5" fill="${ink2}">27B weights + ${r.n}</text>`;
+    g += `<text x="${(MX + MW * (MODEL_GB + r.n * ADAPTER_GB) / MMAX + 8).toFixed(1)}" y="41" font-size="11" fill="${ink2}">${(MODEL_GB + r.n * ADAPTER_GB).toFixed(2)} GB</text>`;
+    g += `<text x="14" y="66" font-size="11" fill="${ink3}">one rank-8 adapter for the 27B = 117 MB. Six of them = 0.70 GB beside 3.79 GB of weights.</text>`;
+
+    // ── speed, all five measured rows ──────────────────────
+    const SY = 96, SX = 150, SW = 400, SMAX = 11;
+    g += `<text x="14" y="${SY - 8}" font-size="11" fill="${ink3}">measured decode speed — every row is a bench line, not a model</text>`;
+    ROWS.forEach((row, k) => {
+      const y = SY + k * 30, sel = k === i;
+      const lab = row.n === 0 ? 'base, none loaded' : row.n + ' resident';
+      g += `<text x="14" y="${y + 12}" font-size="11.5" fill="${sel ? ink : ink3}">${lab}</text>`;
+      const wOff = SW * row.off / SMAX;
+      g += `<rect x="${SX}" y="${y}" width="${wOff.toFixed(1)}" height="15" rx="3" fill="${ok}" opacity="${sel && !on ? 0.9 : 0.3}"/>`;
+      g += `<text x="${(SX + wOff + 6).toFixed(1)}" y="${y + 12}" font-size="10.5" fill="${sel && !on ? ink : ink3}">${row.off.toFixed(2)}</text>`;
+      if (row.on !== null) {
+        const wOn = SW * row.on / SMAX;
+        g += `<rect x="${SX}" y="${y + 16}" width="${wOn.toFixed(1)}" height="9" rx="2" fill="${bad}" opacity="${sel && on ? 0.9 : 0.3}"/>`;
+        g += `<text x="${(SX + wOn + 6).toFixed(1)}" y="${y + 25}" font-size="10.5" fill="${sel && on ? ink : ink3}">${row.on.toFixed(2)} active</text>`;
+      }
+    });
+
+    // ── why: the dispatch census ───────────────────────────
+    const DY = 258;
+    g += `<rect x="14" y="${DY}" width="608" height="88" rx="8" fill="${card}" stroke="${on ? bad : line}"/>`;
+    g += `<text x="26" y="${DY + 20}" font-size="11.5" fill="${ink3}">why it costs anything at all — GPU jobs per word, measured on the Mac:</text>`;
+    const jx = 300, jw = 300, JMAX = 2000;
+    g += `<text x="26" y="${DY + 42}" font-size="11.5" fill="${ink2}">base 27B</text>`;
+    g += `<rect x="${jx}" y="${DY + 31}" width="${(jw * 860 / JMAX).toFixed(1)}" height="14" rx="3" fill="${ok}" opacity="0.8"/>`;
+    g += `<text x="${(jx + jw * 860 / JMAX + 8).toFixed(1)}" y="${DY + 42}" font-size="11" fill="${ink2}">838–885</text>`;
+    g += `<text x="26" y="${DY + 64}" font-size="11.5" fill="${on ? bad : ink2}">+ one rank-16 adapter active</text>`;
+    g += `<rect x="${jx}" y="${DY + 53}" width="${(jw * 1904 / JMAX).toFixed(1)}" height="14" rx="3" fill="${bad}" opacity="${on ? 0.9 : 0.45}"/>`;
+    g += `<text x="${(jx + jw * 1904 / JMAX + 8).toFixed(1)}" y="${DY + 64}" font-size="11" fill="${on ? bad : ink2}">1904</text>`;
+    g += `<text x="26" y="${DY + 82}" font-size="11" fill="${ink3}">2.27× the jobs. The adapter is never merged into the weights — it runs beside them.</text>`;
+    svg.innerHTML = g;
+
+    $('#s252_resV').textContent = r.n === 0 ? 'none loaded' : r.n + ' resident';
+    $('#s252_tps').textContent = tps.toFixed(2) + ' tok/s';
+    $('#s252_ms').textContent = ms.toFixed(0) + ' ms';
+    $('#s252_cost').textContent = r.on === null
+      ? 'no adapter loaded'
+      : (on ? '+' + (1000 / r.on - 1000 / r.off).toFixed(0) + ' ms/word  (−' + ((1 - r.on / r.off) * 100).toFixed(0) + '%)'
+            : 'nothing — it is only resident');
+    $('#s252_mem').textContent = (MODEL_GB + r.n * ADAPTER_GB).toFixed(2) + ' GB';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 253 ── */
+/* ── Station 253: IFEval-40 and its resolution floor ──── */
+if ($('#s253')) {
+  const svg = $('#s253_svg'), sl = $('#s253_n');
+  const B = { base: $('#s253_base'), ad: $('#s253_ad'), ch: $('#s253_ch') };
+  // docs/research/2026-09-07-aichat-toolcall-adapter.md §5.7
+  const N = 67, BASE_PASS = 58, AD_PASS = 55, GAINED = 5, LOST = 8;
+  const BOTH_FAIL = N - BASE_PASS - GAINED;          // 4
+  const BOTH_PASS = BASE_PASS - LOST;                // 50
+  // the 13 that moved, verbatim from the paired table
+  const MOVED = [
+    ['gained', 'number_sentences', '1837·0'],
+    ['gained', 'number_words', '1880·1'],
+    ['gained', 'number_words', '2243·0'],
+    ['gained', 'english_capital', '2422·0'],
+    ['gained', 'frequency', '3327·2'],
+    ['lost', 'two_responses', '1332·0'],
+    ['lost', 'number_highlighted_sections', '1379·0'],
+    ['lost', 'english_capital', '1645·0'],
+    ['lost', 'number_sentences', '1837·1'],
+    ['lost', 'letter_frequency', '1880·0'],
+    ['lost', 'number_placeholders', '3126·0'],
+    ['lost', 'frequency', '3327·1'],
+    ['lost', 'forbidden_words', '3709·1'],
+  ];
+  // cell kinds, in a fixed order: 5 gained, 8 lost, 4 fail-both, 50 pass-both
+  const KIND = [];
+  for (let k = 0; k < GAINED; k++) KIND.push('gained');
+  for (let k = 0; k < LOST; k++) KIND.push('lost');
+  for (let k = 0; k < BOTH_FAIL; k++) KIND.push('bothfail');
+  for (let k = 0; k < BOTH_PASS; k++) KIND.push('bothpass');
+  let mode = 'base';
+  for (const k of Object.keys(B)) B[k].addEventListener('click', () => { mode = k; render(); });
+  sl.addEventListener('input', render);
+
+  function render() {
+    for (const k of Object.keys(B)) B[k].setAttribute('aria-pressed', String(k === mode));
+    const nPrompts = parseInt(sl.value, 10);
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const ok = css('--ok'), bad = css('--bad'), trace = css('--trace');
+    const line = css('--line'), card = css('--card'), grid = css('--grid');
+    let g = '';
+    const passing = (k) => mode === 'ad' ? (k === 'gained' || k === 'bothpass')
+      : (k === 'lost' || k === 'bothpass');
+
+    g += `<text x="14" y="17" font-size="12" fill="${ink3}">the 67 checkable instructions in the 40-prompt subset · one square = one instruction</text>`;
+    const CW = 26, PER = 17, GX = 14, GY = 28;
+    KIND.forEach((k, idx) => {
+      const x = GX + (idx % PER) * (CW + 2), y = GY + Math.floor(idx / PER) * (CW + 2);
+      let fill = card, stroke = line, mark = '';
+      if (mode === 'ch') {
+        if (k === 'gained') { fill = ok; stroke = ok; mark = '+'; }
+        else if (k === 'lost') { fill = bad; stroke = bad; mark = '−'; }
+        else { fill = card; stroke = line; }
+      } else if (passing(k)) { fill = ok; stroke = ok; }
+      else { fill = card; stroke = bad; }
+      g += `<rect x="${x}" y="${y}" width="${CW}" height="${CW}" rx="4" fill="${fill}" fill-opacity="${fill === card ? 1 : 0.75}" stroke="${stroke}"/>`;
+      if (mark) g += `<text x="${x + CW / 2}" y="${y + CW / 2 + 5}" text-anchor="middle" font-size="13" fill="${css('--paper')}">${mark}</text>`;
+    });
+    const gridBottom = GY + Math.ceil(N / PER) * (CW + 2);
+    g += `<text x="14" y="${gridBottom + 16}" font-size="11" fill="${ink3}">${mode === 'ch'
+      ? 'green + = the adapter fixed it · red − = the adapter broke it · pale = same answer in both runs'
+      : 'green = the instruction was obeyed · outlined = it was not'}</text>`;
+
+    // ── the moved list, or the scoreboard ──────────────────
+    let y = gridBottom + 32;
+    if (mode === 'ch') {
+      g += `<rect x="14" y="${y}" width="608" height="122" rx="8" fill="${card}" stroke="${line}"/>`;
+      g += `<text x="26" y="${y + 18}" font-size="11.5" fill="${ink3}">paired by (prompt key, position in that prompt) — 13 moves, net −3</text>`;
+      MOVED.forEach((m, k) => {
+        const cx = 26 + (k % 2) * 302, cy = y + 36 + Math.floor(k / 2) * 14;
+        g += `<text x="${cx}" y="${cy}" font-size="10" fill="${m[0] === 'gained' ? ok : bad}">${m[0] === 'gained' ? '+' : '−'} ${m[2]}  ${m[1]}</text>`;
+      });
+      y += 132;
+    } else {
+      const p = mode === 'ad' ? AD_PASS : BASE_PASS;
+      g += `<text x="14" y="${y + 14}" font-size="13" fill="${ink}">${mode === 'ad' ? '+ tool-call adapter' : 'base 27B'}: ${p} of 67 obeyed  ·  ${(p / N).toFixed(4)}</text>`;
+      g += `<text x="14" y="${y + 34}" font-size="11.5" fill="${ink2}">prompt-level: ${mode === 'ad' ? '29 of 40 prompts fully obeyed (0.725)' : '32 of 40 prompts fully obeyed (0.800)'}</text>`;
+      g += `<text x="14" y="${y + 52}" font-size="11.5" fill="${ink3}">the gate allowed ±2 points = ±1.34 instructions. The measured move is 3.</text>`;
+      y += 74;
+    }
+
+    // ── what a bigger run costs ────────────────────────────
+    const inst = Math.round(nPrompts * N / 40), hrsLo = nPrompts * 22 / 3600, hrsHi = nPrompts * 28 / 3600;
+    g += `<rect x="14" y="${y}" width="608" height="${420 - y - 8}" rx="8" fill="${card}" stroke="${nPrompts >= 541 ? ok : line}"/>`;
+    g += `<text x="26" y="${y + 20}" font-size="11.5" fill="${ink3}">if you ran it on more prompts (derived: 1.675 instructions per prompt, 22–28 s each)</text>`;
+    const BX = 190, BW = 380;
+    g += `<text x="26" y="${y + 44}" font-size="12" fill="${ink}">${nPrompts} prompts</text>`;
+    g += `<rect x="${BX}" y="${y + 33}" width="${(BW * nPrompts / 541).toFixed(1)}" height="14" rx="3" fill="${trace}" opacity="0.85"/>`;
+    g += `<text x="${(BX + BW * nPrompts / 541 + 8).toFixed(1)}" y="${y + 44}" font-size="11" fill="${ink2}">${inst} instructions</text>`;
+    g += `<text x="26" y="${y + 66}" font-size="11.5" fill="${ink2}">one arm takes ${hrsLo.toFixed(1)}–${hrsHi.toFixed(1)} h${nPrompts <= 45 ? '  (≈22 min — one GPU hold)' : '  — and you need two arms'}</text>`;
+    g += `<text x="26" y="${y + 84}" font-size="11" fill="${ink3}">The runbook's rule: below about five instructions of expected effect, IFEval-40 cannot rank arms.</text>`;
+    svg.innerHTML = g;
+
+    const p = mode === 'ad' ? AD_PASS : BASE_PASS;
+    $('#s253_nV').textContent = nPrompts + ' prompts · ' + inst + ' instructions';
+    $('#s253_pass').textContent = (mode === 'ch' ? '13 moved' : p + ' of 67');
+    $('#s253_score').textContent = (mode === 'ch' ? '0.8657 → 0.8209' : (p / N).toFixed(4));
+    $('#s253_net').textContent = '−3 instructions';
+    $('#s253_churn').textContent = '13 instructions (4.3× the net)';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 254 ── */
+/* ── Station 254: holdout vs test/train overlap ───────── */
+if ($('#s254')) {
+  const svg = $('#s254_svg'), sl = $('#s254_ov');
+  const TURNS = 103;                                  // distinct user turns in the test split
+  const MEASURED = 61.2;                              // % of them that also appear in train
+  const VERBATIM = [                                  // adapter reproduces the reference byte-for-byte
+    ['family (c) — search results came back', 89.5],
+    ['family (a) — a search is needed', 76.8],
+    ['family (b) — no search needed', 8.1],
+    ['all test rows', 64.7],
+    ['the same, base model', 6.7],
+  ];
+  sl.addEventListener('input', render);
+
+  function render() {
+    const ov = parseInt(sl.value, 10);
+    const seen = Math.round(TURNS * ov / 100), fresh = TURNS - seen;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const ok = css('--ok'), bad = css('--bad'), trace = css('--trace');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    // ── the questions ──────────────────────────────────────
+    g += `<text x="14" y="17" font-size="11.5" fill="${ink3}">the 103 distinct user turns in the test split · shaded = the model also trained on this question</text>`;
+    const CW = 14, PER = 26, GX = 14, GY = 28;
+    for (let i = 0; i < TURNS; i++) {
+      const x = GX + (i % PER) * (CW + 3), y = GY + Math.floor(i / PER) * (CW + 3);
+      const isSeen = i < seen;
+      g += `<rect x="${x}" y="${y}" width="${CW}" height="${CW}" rx="3" fill="${isSeen ? bad : ok}" fill-opacity="${isSeen ? 0.7 : 0.75}" stroke="${isSeen ? bad : ok}"/>`;
+    }
+    const gb = GY + Math.ceil(TURNS / PER) * (CW + 3);
+    g += `<text x="14" y="${gb + 16}" font-size="12" fill="${ink}">${seen} seen before · ${fresh} genuinely new</text>`;
+
+    // ── the two real test sets, marked on the same axis ────
+    const AY = gb + 36, AX = 14, AW = 594;
+    g += `<line x1="${AX}" y1="${AY + 18}" x2="${AX + AW}" y2="${AY + 18}" stroke="${line}"/>`;
+    const mark = (pct, lab, sub, col) => {
+      const x = AX + AW * pct / 100;
+      return `<line x1="${x}" y1="${AY + 8}" x2="${x}" y2="${AY + 28}" stroke="${col}" stroke-width="2"/>`
+        + `<text x="${Math.min(x, AX + AW - 150)}" y="${AY + 44}" font-size="11" fill="${col}">${lab}</text>`
+        + `<text x="${Math.min(x, AX + AW - 150)}" y="${AY + 58}" font-size="10.5" fill="${ink3}">${sub}</text>`;
+    };
+    g += mark(0, 'holdout · 120 rows', '0 of 69 turns shared — built, NOT RUN', ok);
+    g += mark(MEASURED, 'the test split · 150 rows', 'measured 61.2% — scored 1.0000', bad);
+    const px = AX + AW * ov / 100;
+    g += `<polygon points="${px - 6},${AY + 2} ${px + 6},${AY + 2} ${px},${AY + 10}" fill="${trace}"/>`;
+
+    // ── memorisation, measured ─────────────────────────────
+    const VY = AY + 76;
+    g += `<text x="14" y="${VY}" font-size="11.5" fill="${ink3}">how often the answer is the training reference, word for word</text>`;
+    const BX = 280, BW = 250;
+    VERBATIM.forEach((v, i) => {
+      const y = VY + 14 + i * 20;
+      const last = i === VERBATIM.length - 1;
+      g += `<text x="14" y="${y + 10}" font-size="11" fill="${last ? ink3 : ink2}">${v[0]}</text>`;
+      g += `<rect x="${BX}" y="${y}" width="${(BW * v[1] / 100).toFixed(1)}" height="13" rx="3" fill="${last ? ink3 : trace}" opacity="0.8"/>`;
+      g += `<text x="${(BX + BW * v[1] / 100 + 8).toFixed(1)}" y="${y + 10}" font-size="10.5" fill="${ink2}">${v[1]}%</text>`;
+    });
+
+    // ── the verdict ────────────────────────────────────────
+    const y2 = VY + 120;
+    const strong = ov <= 5, weak = ov >= 40;
+    const col = strong ? ok : (weak ? bad : trace);
+    g += `<rect x="14" y="${y2}" width="608" height="${400 - y2 - 8}" rx="8" fill="${card}" stroke="${col}" stroke-width="1.5"/>`;
+    const l1 = strong ? 'A score here would be a generalisation estimate.'
+      : weak ? 'A score here is an UPPER BOUND, not a generalisation estimate.'
+      : 'A score here is partly recall, partly generalisation — and you cannot tell which.';
+    const l2 = strong ? 'New topics, new claims, new result sets: nothing to recall. Built, not yet run.'
+      : weak ? 'It says the adapter learned this data\'s wire and phrasing — nothing about an unseen question.'
+      : 'Report the overlap next to the score, always.';
+    g += `<text x="26" y="${y2 + 22}" font-size="12.5" fill="${col}">${l1}</text>`;
+    g += `<text x="26" y="${y2 + 42}" font-size="11" fill="${ink3}">${l2}</text>`;
+    svg.innerHTML = g;
+
+    $('#s254_ovV').textContent = ov + '%' + (Math.abs(ov - 61) <= 1 ? '  — the real test split' : (ov === 0 ? '  — the holdout' : ''));
+    $('#s254_seen').textContent = seen + ' of 103 turns';
+    $('#s254_new').textContent = fresh + ' of 103 turns';
+    $('#s254_claim').innerHTML = strong ? '<span class="ok">how it behaves on new questions</span>'
+      : weak ? '<span class="bad">that it learned THIS data</span>'
+      : '<span class="trace">a mixture, unattributable</span>';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 255 ── */
+/* ── Station 255: false call, missed call, groundedness ─ */
+if ($('#s255')) {
+  const svg = $('#s255_svg');
+  const TB = [$('#s255_t0'), $('#s255_t1'), $('#s255_t2'), $('#s255_t3'), $('#s255_t4')];
+  const bCall = $('#s255_call'), bAns = $('#s255_ans');
+  // docs/research/2026-09-07-aichat-toolcall-adapter.md §5.1 and §5.2
+  const METRICS = [
+    { key: 'false',  name: 'false_call_rate',   over: '94 turns needing no call', base: 0.0213, ad: 0.0 },
+    { key: 'missed', name: 'missed_call_rate',  over: '56 turns needing a call',  base: 0.1786, ad: 0.0 },
+    { key: 'ground', name: 'groundedness_rate', over: '57 turns with results',    base: 0.7368, ad: 1.0 },
+  ];
+  const TURNS = [
+    { t: '"search the web for the 2025 Nobel prize in physics"', kind: 'a call is needed · sub-kind "explicit", 19 rows',
+      ok: 'call', rate: 'base missed 0.0000 of these — told to search, it searches',
+      call: ['ok', 'Right. Nothing moves.'],
+      ans:  ['missed', 'A missed call: the user gets a stale answer and no search.'] },
+    { t: '"is it true that Debian 12 is the current stable release?"', kind: 'a call is needed · sub-kind "verify", 7 rows',
+      ok: 'call', rate: 'base missed 0.7143 of these — 5 in 7 answered from memory',
+      call: ['ok', 'Right. Nothing moves.'],
+      ans:  ['missed', 'A missed call — and the base\'s answers here were confidently wrong.'] },
+    { t: '"what is the ISS deorbit date right now?"', kind: 'a call is needed · sub-kind "current_fact", 18 rows',
+      ok: 'call', rate: 'base missed 0.2778 of these',
+      call: ['ok', 'Right. Nothing moves.'],
+      ans:  ['missed', 'A missed call. The base offered "April 2030" from memory.'] },
+    { t: '"write me a haiku about rain"', kind: 'no call is needed · 94 rows',
+      ok: 'ans', rate: 'base false-called 0.0213 of these',
+      call: ['false', 'A false call: a spinner and a network request the user never asked for.'],
+      ans:  ['ok', 'Right. Nothing moves.'] },
+    { t: 'the search returned {"error": "The operation was aborted."}', kind: 'results came back · sub-kind "error", 22 rows',
+      ok: 'ans', rate: 'base was grounded on only 0.4091 of these — it invented an answer 59% of the time',
+      call: ['false', 'Both of the base\'s false calls are here — it searches again, and the page ignores it.'],
+      ans:  ['ground', 'Invent opening hours → groundedness falls. Saying the search failed does not.'] },
+  ];
+  let ti = 0, call = true;
+  TB.forEach((b, i) => b.addEventListener('click', () => { ti = i; render(); }));
+  bCall.addEventListener('click', () => { call = true; render(); });
+  bAns.addEventListener('click', () => { call = false; render(); });
+
+  function render() {
+    TB.forEach((b, i) => b.setAttribute('aria-pressed', String(i === ti)));
+    bCall.setAttribute('aria-pressed', String(call));
+    bAns.setAttribute('aria-pressed', String(!call));
+    const T = TURNS[ti], out = call ? T.call : T.ans;
+    const moved = out[0];
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const ok = css('--ok'), bad = css('--bad'), trace = css('--trace');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    // ── the turn ───────────────────────────────────────────
+    g += `<rect x="14" y="14" width="608" height="62" rx="8" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="38" font-size="12.5" fill="${ink}">${T.t}</text>`;
+    g += `<text x="26" y="58" font-size="11" fill="${ink3}">${T.kind}</text>`;
+    g += `<text x="26" y="72" font-size="11" fill="${ink3}">${T.rate}</text>`;
+
+    // ── the choice and its consequence ─────────────────────
+    const cy = 92;
+    g += `<rect x="14" y="${cy}" width="608" height="52" rx="8" fill="${card}" stroke="${moved === 'ok' ? ok : bad}" stroke-width="1.5"/>`;
+    g += `<text x="26" y="${cy + 22}" font-size="12" fill="${moved === 'ok' ? ok : bad}">${call ? 'the model calls the tool' : 'the model answers without it'} → ${moved === 'ok' ? 'correct' : 'this counter moves'}</text>`;
+    g += `<text x="26" y="${cy + 42}" font-size="11.5" fill="${ink2}">${out[1]}</text>`;
+
+    // ── the three counters ─────────────────────────────────
+    const MY = 164, BX = 250, BW = 258;
+    g += `<text x="14" y="${MY - 8}" font-size="11" fill="${ink3}">the three rates, each over its own set of turns — base ▸ adapter</text>`;
+    METRICS.forEach((m, i) => {
+      const y = MY + i * 62, hot = m.key === moved;
+      g += `<rect x="14" y="${y}" width="608" height="54" rx="8" fill="${card}" stroke="${hot ? bad : line}" stroke-width="${hot ? 2 : 1}"/>`;
+      g += `<text x="26" y="${y + 20}" font-size="12" fill="${hot ? bad : ink}">${m.name}</text>`;
+      g += `<text x="26" y="${y + 38}" font-size="11" fill="${ink3}">over ${m.over}</text>`;
+      const good = m.key === 'ground';                      // higher is better only here
+      const wBase = BW * (good ? m.base : m.base / 0.25), wAd = BW * (good ? m.ad : m.ad / 0.25);
+      g += `<rect x="${BX}" y="${y + 12}" width="${Math.max(wBase, 2).toFixed(1)}" height="12" rx="2" fill="${good ? trace : bad}" opacity="0.75"/>`;
+      g += `<text x="${(BX + Math.max(wBase, 2) + 8).toFixed(1)}" y="${y + 22}" font-size="11" fill="${ink2}">base ${m.base.toFixed(4)}</text>`;
+      g += `<rect x="${BX}" y="${y + 30}" width="${Math.max(wAd, 2).toFixed(1)}" height="12" rx="2" fill="${ok}" opacity="0.85"/>`;
+      g += `<text x="${(BX + Math.max(wAd, 2) + 8).toFixed(1)}" y="${y + 40}" font-size="11" fill="${ink2}">adapter ${m.ad.toFixed(4)}</text>`;
+      if (hot) g += `<text x="170" y="${y + 20}" font-size="11" fill="${bad}">← this one</text>`;
+    });
+    g += `<text x="14" y="${MY + 3 * 62 + 6}" font-size="11" fill="${ink3}">Never added up: the three failures cost different things, and the denominators differ.</text>`;
+    svg.innerHTML = g;
+
+    const m = METRICS.find((x) => x.key === moved);
+    $('#s255_verdict').innerHTML = moved === 'ok'
+      ? '<span class="ok">nothing moves — this is the right behaviour</span>'
+      : '<span class="bad">a failure of the ' + (moved === 'ground' ? 'grounding' : moved + '-call') + ' kind</span>';
+    $('#s255_ctr').textContent = m ? m.name : '—';
+    $('#s255_rate').textContent = T.rate.replace('base ', '');
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 256 ── */
+/* ── Station 256: the label router ────────────────────── */
+if ($('#s256')) {
+  const svg = $('#s256_svg'), inp = $('#s256_in');
+  const EX = [
+    ['a search question', 'is it true that Debian 13 is the current stable release?'],
+    ['plain chat', 'write me a haiku about rain'],
+    ['a policy question', 'how should I phrase a refusal politely?'],
+  ];
+  [$('#s256_e0'), $('#s256_e1'), $('#s256_e2')].forEach((b, i) => {
+    b.addEventListener('click', () => { inp.value = EX[i][1]; render(); });
+  });
+  inp.addEventListener('input', render);
+  // The four labels the router chooses between. The engine sees token ids;
+  // the words here are the human names for them.
+  const LABELS = [
+    { k: 'tools',  word: 'A', desc: 'tool-call adapter', route: 'adapter', ms: 119 },
+    { k: 'policy', word: 'C', desc: 'policy adapter',    route: 'adapter', ms: 119 },
+    { k: 'chat',   word: '-', desc: 'plain base model',  route: 'base',    ms: 99 },
+    { k: 'none',   word: '?', desc: 'no label matched',  route: 'base',    ms: 99 },
+  ];
+  const SEARCHY = ['search', 'look up', 'latest', 'right now', 'current', 'today', 'is it true',
+    'who won', 'price', 'weather', 'news', 'documentation', 'docs', 'verify', 'deorbit'];
+  const POLICY = ['refus', 'policy', 'safe', 'allowed', 'should i say', 'politely', 'decline'];
+
+  function classify(text) {
+    const t = text.toLowerCase();
+    if (!t.trim()) return 3;
+    if (POLICY.some((w) => t.includes(w))) return 1;
+    if (SEARCHY.some((w) => t.includes(w))) return 0;
+    return 2;
+  }
+
+  function render() {
+    const idx = classify(inp.value), L = LABELS[idx];
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const ok = css('--ok'), bad = css('--bad'), trace = css('--trace'), signal = css('--signal');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    g += `<text x="14" y="16" font-size="11" fill="${bad}">SIMULATION — a keyword rule stands in for the model here. The real router is the 27B</text>`;
+    g += `<text x="14" y="30" font-size="11" fill="${bad}">answering one token; everything else on this panel is the real mechanism.</text>`;
+
+    // ── the allowed set ────────────────────────────────────
+    g += `<text x="14" y="52" font-size="11.5" fill="${ink3}">allowedTokenIds — the only four tokens the engine will let it emit</text>`;
+    LABELS.forEach((l, i) => {
+      const x = 14 + i * 152, on = i === idx;
+      g += `<rect x="${x}" y="60" width="142" height="52" rx="8" fill="${on ? trace : card}" fill-opacity="${on ? 0.18 : 1}" stroke="${on ? trace : line}" stroke-width="${on ? 2 : 1}"/>`;
+      g += `<text x="${x + 12}" y="${82}" font-size="15" fill="${on ? trace : ink2}">"${l.word}"</text>`;
+      g += `<text x="${x + 12}" y="${101}" font-size="10.5" fill="${ink3}">${l.desc}</text>`;
+    });
+
+    // ── the scan ───────────────────────────────────────────
+    const SY = 132;
+    g += `<text x="14" y="${SY}" font-size="11.5" fill="${ink3}">how many scores the GPU compares to choose that token</text>`;
+    g += `<rect x="14" y="${SY + 10}" width="592" height="14" rx="3" fill="${ink3}" opacity="0.35"/>`;
+    g += `<text x="14" y="${SY + 40}" font-size="11" fill="${ink3}">unconstrained: all 248,320 tokens, then ~1 MB of scores copied to the CPU</text>`;
+    g += `<rect x="14" y="${SY + 50}" width="6" height="14" rx="2" fill="${ok}"/>`;
+    g += `<text x="30" y="${SY + 61}" font-size="11" fill="${ok}">constrained: 4 — and nothing is copied back, so the fast loop stays on the GPU</text>`;
+
+    // ── the route ──────────────────────────────────────────
+    const RY = 218;
+    const isAdapter = L.route === 'adapter';
+    g += `<rect x="14" y="${RY}" width="608" height="66" rx="8" fill="${card}" stroke="${isAdapter ? trace : ok}" stroke-width="1.5"/>`;
+    g += `<text x="26" y="${RY + 24}" font-size="12.5" fill="${isAdapter ? trace : ok}">${isAdapter ? 'switch the ' + L.desc + ' on for this turn' : 'keep the base model — no adapter'}</text>`;
+    g += `<text x="26" y="${RY + 44}" font-size="11.5" fill="${ink2}">${L.ms} ms per word${isAdapter ? '  (+20 ms — 2.27× the GPU jobs, station 252)' : '  (nothing added)'}</text>`;
+    g += `<text x="26" y="${RY + 60}" font-size="11" fill="${ink3}">activating is a string assignment; the adapter was already resident, so no bytes move.</text>`;
+
+    // ── what it costs when the label is wrong ──────────────
+    const WY = 296;
+    g += `<rect x="14" y="${WY}" width="608" height="80" rx="8" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="${WY + 20}" font-size="11.5" fill="${ink3}">the price of the router being wrong — it is not speed:</text>`;
+    g += `<text x="26" y="${WY + 40}" font-size="12" fill="${bad}">a mislabel = the adapter never switches on = a missed call (station 255).</text>`;
+    g += `<text x="26" y="${WY + 58}" font-size="11" fill="${ink3}">The label turn itself is one short prompt and one token — measured 607.5 ms median on the 27B,</text>`;
+    g += `<text x="26" y="${WY + 73}" font-size="11" fill="${ink3}">and nearly all of that is reading the prompt, not choosing the token.</text>`;
+    svg.innerHTML = g;
+
+    $('#s256_lab').textContent = '"' + L.word + '" · ' + L.desc;
+    $('#s256_route').textContent = isAdapter ? 'adapter on' : 'base model';
+    $('#s256_cost').textContent = L.ms + ' ms/word' + (isAdapter ? ' (+20)' : '');
+    $('#s256_scan').textContent = '4 of 248,320 scores';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 257 ── */
+/* ── Station 257: timestamp quantization ──────────────── */
+if ($('#s257')) {
+  const svg = $('#s257_svg');
+  const bQ = $('#s257_q'), bR = $('#s257_r');
+  // Same 27B decode, same prompt ("short"), same 2,000-pass budget, two profiles:
+  // 2026-09-07 (quantized, default) and 2026-09-08 (chrome://flags developer features).
+  // label, count, quantized median µs, unquantized median µs
+  const K = [
+    ['vecmatQ2G128', 680, 196.61, 216.06],
+    ['…dispatchWithResidual', 318, 196.61, 226.30],
+    ['megashaderA', 120, 65.54, 52.22],
+    ['gqaScore', 39, 0, 32.77],
+    ['megashaderB.dispatchPacked', 120, 0, 28.67],
+    ['rmsnorm', 321, 0, 13.31],
+    ['gqaValueAgg', 39, 0, 12.29],
+    ['argmax', 3, 0, 11.26],
+    ['siluMul', 159, 0, 3.07],
+    ['fusedNormMRoPE', 80, 0, 3.07],
+    ['softmax', 39, 0, 3.07],
+    ['embeddingQ2G128', 3, 0, 2.69],
+    ['qgateDeinterleave', 40, 0, 2.05],
+    ['sigmoidGate', 39, 0, 2.05],
+  ];
+  const GRID = 65.536;
+  let quant = true;
+  bQ.addEventListener('click', () => { quant = true; render(); });
+  bR.addEventListener('click', () => { quant = false; render(); });
+
+  function render() {
+    bQ.setAttribute('aria-pressed', String(quant));
+    bR.setAttribute('aria-pressed', String(!quant));
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const ok = css('--ok'), bad = css('--bad'), trace = css('--trace');
+    const line = css('--line'), gridc = css('--grid'), card = css('--card');
+    const X0 = 250, X1 = 600, MAX = 240;
+    const px = (v) => X0 + (X1 - X0) * Math.min(v, MAX) / MAX;
+    let g = '';
+
+    g += `<text x="14" y="17" font-size="12" fill="${ink3}">median µs per pass, one decoded word — ${quant ? 'as the browser reports it by default' : 'with the developer flag on'}</text>`;
+    // the 65.536 grid
+    for (let t = 0; t * GRID <= MAX; t++) {
+      const x = px(t * GRID);
+      g += `<line x1="${x}" y1="28" x2="${x}" y2="332" stroke="${quant ? trace : gridc}" stroke-opacity="${quant ? 0.5 : 1}" stroke-dasharray="${quant ? '3 3' : '0'}"/>`;
+      g += `<text x="${x}" y="348" text-anchor="middle" font-size="10.5" fill="${quant ? trace : ink3}">${(t * GRID).toFixed(1)}</text>`;
+    }
+    g += `<text x="${X1}" y="364" text-anchor="end" font-size="11" fill="${ink3}">µs per pass · ticks are 65.536 µs apart →</text>`;
+
+    K.forEach((k, i) => {
+      const y = 34 + i * 21, v = quant ? k[2] : k[3];
+      const zero = v === 0;
+      g += `<text x="14" y="${y + 11}" font-size="11" fill="${zero && quant ? bad : ink2}">${k[0]}</text>`;
+      g += `<text x="228" y="${y + 11}" text-anchor="end" font-size="10" fill="${ink3}">×${k[1]}</text>`;
+      const w = px(v) - X0;
+      if (zero) {
+        g += `<rect x="${X0}" y="${y}" width="3" height="14" rx="1" fill="${bad}"/>`;
+        g += `<text x="${X0 + 10}" y="${y + 11}" font-size="10.5" fill="${bad}">0.00 µs — under the grid, so it reads as nothing</text>`;
+      } else {
+        g += `<rect x="${X0}" y="${y}" width="${Math.max(w, 2).toFixed(1)}" height="14" rx="2" fill="${quant ? trace : ok}" opacity="0.85"/>`;
+        g += `<text x="${(X0 + Math.max(w, 2) + 6).toFixed(1)}" y="${y + 11}" font-size="10.5" fill="${ink2}">${v.toFixed(2)}</text>`;
+      }
+    });
+
+    const NY = 384;
+    g += `<text x="14" y="${NY}" font-size="11.5" fill="${quant ? bad : ok}">${quant
+      ? 'Two kernels 5% apart report the same 196.61 = 3 × 65.536. Eleven report nothing at all.'
+      : 'Same run, same passes. Every kernel now has a size, and the two big ones differ by 10 µs.'}</text>`;
+    g += `<text x="14" y="${NY + 16}" font-size="11" fill="${ink3}">The totals agree either way — 194.6 vs 195.1 ms over 2,000 passes — the rounding adds no jitter.</text>`;
+    svg.innerHTML = g;
+
+    const zeros = K.filter((k) => (quant ? k[2] : k[3]) === 0).length;
+    $('#s257_zero').textContent = zeros + ' of 14';
+    $('#s257_two').textContent = quant ? '196.61 and 196.61' : '216.06 and 226.30';
+    $('#s257_tot').textContent = quant ? '194.6 ms' : '195.1 ms';
+  }
+  render(); window.addEventListener('resize', render);
 }
 })();
 </script>

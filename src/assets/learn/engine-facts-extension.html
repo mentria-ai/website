@@ -1,0 +1,52 @@
+<script type="application/json" id="mentria-ext">
+{
+  "id": "engine-facts",
+  "name": "Inside the One-Bit Engine",
+  "version": "1.0.0",
+  "icon": "🧭",
+  "author": "mentria engine",
+  "description": "The engine's interactive learning sheet: 247 stations explaining how the on-device model runs, opened from the site with a station anchor.",
+  "permissions": [],
+  "mounts": { "tool": {} }
+}
+</script>
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0e11; color: #e6edf3; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .bar { display: flex; gap: .5rem; align-items: center; padding: .45rem .6rem; border-bottom: 1px solid #22303a; font-size: .85rem; }
+  .bar input { width: 6rem; padding: .25rem .4rem; background: #10151a; color: #e6edf3; border: 1px solid #22303a; border-radius: 4px; font: inherit; }
+  .bar button { padding: .25rem .6rem; background: #6ef3c5; color: #0b0e11; border: 0; border-radius: 4px; font: inherit; cursor: pointer; }
+  .bar a { color: #6ef3c5; margin-left: auto; }
+  iframe { display: block; width: 100%; height: calc(100% - 2.4rem); border: 0; background: #fff; }
+</style>
+<div class="bar">
+  <label for="station">station</label>
+  <input id="station" type="text" inputmode="numeric" placeholder="12">
+  <button id="go" type="button">open</button>
+  <a id="full" href="/assets/learn/engine-facts.html" target="_blank" rel="noopener">open full page</a>
+</div>
+<iframe id="sheet" title="Inside the One-Bit Engine"></iframe>
+<script>
+(function () {
+  var base = '/assets/learn/engine-facts.html';
+  var frame = document.getElementById('sheet');
+  var input = document.getElementById('station');
+  var full = document.getElementById('full');
+  function station() {
+    var raw = '';
+    try { raw = window.parent && window.parent !== window ? window.parent.location.hash : ''; } catch (e) { raw = ''; }
+    var h = new URLSearchParams(String(raw || '').replace(/^#/, ''));
+    var arg = h.get('args') || '';
+    var m = String(arg).match(/s?(\d{1,3})/);
+    return m ? m[1] : '';
+  }
+  function open(n) {
+    var anchor = n ? '#s' + n : '';
+    frame.src = base + anchor;
+    full.href = base + anchor;
+    input.value = n || '';
+  }
+  document.getElementById('go').addEventListener('click', function () { open(String(input.value).replace(/\D/g, '')); });
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') open(String(input.value).replace(/\D/g, '')); });
+  open(station());
+})();
+</script>

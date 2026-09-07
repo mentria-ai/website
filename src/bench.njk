@@ -31,9 +31,11 @@ eleventyComputed:
       <label class="bench__opt">init/load options JSON (applied to init and loadModel) <input type="text" id="bench-init" placeholder='{"mobileMatvec":"ksplit"}' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
       <label class="bench__opt">generate options JSON, one object or a list (each entry runs the prompts once on the same load, in order) <input type="text" id="bench-gen" placeholder='[{"mobilePrefill":"off","m1VecmatRoute":false},{"mobilePrefill":"mrow"}]' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
       <label class="bench__opt">max tokens per prompt (blank = prompt default) <input type="number" id="bench-maxtok" min="4" max="512" style="width:5rem"></label>
+      <label class="bench__opt">resident adapters to reach in the residency protocol (measured after 1, 2, 4, 6, 8) <input type="number" id="bench-adapters-n" min="1" max="8" value="6" style="width:4rem"></label>
       <div class="bench__actions">
         <button class="bench__btn" id="bench-run" type="button">Run selected</button>
         <button class="bench__btn" id="bench-protocol" type="button">Phone protocol (3 runs, one file)</button>
+        <button class="bench__btn" id="bench-adapters" type="button">Adapter residency (N resident, decode at 0 and 1 active)</button>
         <button class="bench__btn bench__btn--ghost" id="bench-download" type="button" disabled>Download results file</button>
         <button class="bench__btn bench__btn--ghost" id="bench-copy" type="button" disabled>Copy markdown</button>
         <button class="bench__btn bench__btn--ghost" id="bench-summary" type="button" disabled>Copy summary</button>
@@ -140,6 +142,7 @@ for (const id of chain) {
 log('decision: tier=' + decision.tier + ' eligible=' + [...eligible].join(',') + (decision.reason ? ' reason=' + decision.reason : ''));
 readDevice();
 const diagnostics = { version: 2, device, decision: compact(decision, 0), runs: [] };
+window.__benchDiagnostics = diagnostics;
 
 function makeTestImage() {
   const c = document.createElement('canvas'); c.width = 448; c.height = 448;
@@ -306,6 +309,127 @@ $('#bench-run').addEventListener('click', async () => {
   } finally {
     $('#bench-run').disabled = false;
   }
+});
+const ADAPTER_SETS = {
+  '27b': [{ name: 'toolcall', path: 'loras/toolcall-console/' }, { name: 'qa-routing', path: 'loras/qa-routing/v1/' }],
+  '4b': [{ name: 'forge', path: 'loras/forge/v1/' }]
+};
+const RESIDENCY_STEPS = [1, 2, 4, 6, 8];
+async function runAdapterResidency(id, maxResident) {
+  const sets = ADAPTER_SETS[id];
+  if (!sets) { log(id + ': no adapter set for this tier (27b or 4b)'); return; }
+  log('--- adapter residency on ' + id + ', up to ' + maxResident + ' resident ---');
+  const { MentriaEngine } = await import('/assets/mentria/dist/mentria.mjs');
+  const engine = new MentriaEngine('/assets/mentria/dist/worker.mjs');
+  if (window.mentriaWrapEngine) window.mentriaWrapEngine(engine);
+  const run = { tier: id, label: 'adapter residency', protocol: 'adapter-residency', vision: true, fallbacks: [], prompts: [], residentAdapters: [], consoleStart: consoleLines.length };
+  engine.onProgress = (p) => { const pct = p && p.total ? Math.round(100 * p.loaded / p.total) : null; setStatus(id + ': ' + ((p && p.message) || 'loading') + (pct != null ? ' ' + pct + '%' : '')); };
+  try { engine.onFallback = (e) => { run.fallbacks.push(compact(e, 0)); }; } catch (_) {}
+  run.cached = await Tiers.isTierCached(id).catch(() => false);
+  const t0 = performance.now();
+  try {
+    run.initResult = compact(await engine.init(), 0);
+    const opts = await Tiers.loadOptionsFor(id, { vision: true });
+    run.maxSeq = opts && opts.config && opts.config.attention ? opts.config.attention.maxSeq : null;
+    run.loadResult = compact(await engine.loadModel(opts), 0);
+  } catch (e) {
+    run.loadError = String(e && e.message || e);
+    log(id + ': load failed: ' + run.loadError);
+    diagnostics.runs.push(run);
+    try { engine.terminate(); } catch (_) {}
+    return;
+  }
+  run.loadS = +((performance.now() - t0) / 1000).toFixed(1);
+  run.statsAfterLoad = await stats(engine);
+  log(id + ': loaded in ' + run.loadS + ' s, route ' + JSON.stringify(run.loadResult && run.loadResult.decodeRoute || ''));
+  const base = Tiers.TIERS[id].base;
+  const p = PROMPTS[1];
+  const measure = async (label, active) => {
+    setStatus(id + ': ' + label);
+    let tokens = 0, tFirst = 0, tPrev = 0, text = '', finalEvent = null;
+    const gaps = [];
+    const params = { messages: [{ role: 'system', content: p.system }, { role: 'user', content: p.user }], maxTokens: 96, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false };
+    const tStart = performance.now();
+    try {
+      await engine.generate(params, (ev) => {
+        if (ev && ev.finished) finalEvent = compact(ev, 0);
+        if (typeof ev.token === 'string' && ev.token.length) {
+          if (/^<\|[^|]*\|>$/.test(ev.token)) return;
+          const now = performance.now();
+          tokens++; text += ev.token;
+          if (!tFirst) tFirst = now; else gaps.push(now - tPrev);
+          tPrev = now;
+        }
+      });
+    } catch (e) { log(id + ' ' + label + ': generate failed: ' + (e && e.message || e)); run.prompts.push({ id: label, residentCount: run.residentAdapters.length, activeAdapter: active, error: String(e && e.message || e) }); return false; }
+    const tEnd = performance.now();
+    const ttft = tFirst ? Math.round(tFirst - tStart) : null;
+    const decode = tFirst && tokens > 1 ? +(((tokens - 1) / ((tEnd - tFirst) / 1000))).toFixed(2) : null;
+    const statsAfter = await stats(engine);
+    const fe = finalEvent || {};
+    const promptTokens = typeof fe.committedTokens === 'number' && typeof fe.numTokens === 'number' ? fe.committedTokens - fe.numTokens : null;
+    const row = { id: label, residentCount: run.residentAdapters.length, activeAdapter: active, ttftMs: ttft, decodeTps: decode, tokens, promptTokens, prefillTps: promptTokens && ttft ? +((promptTokens / (ttft / 1000))).toFixed(1) : null, engineTps: fe.tokensPerSecond || null, gapMs: { median: Math.round(percentile(gaps, 0.5)), p90: Math.round(percentile(gaps, 0.9)), max: Math.round(Math.max(0, ...gaps)) }, counters: fe.counters || null, decodeRoute: fe.decodeRoute || null, kernelVariants: fe.kernelVariants || null, gpuErrors: statsAfter && statsAfter.gpuErrors || null, sample: text.replace(/\s+/g, ' ').slice(0, 120) };
+    run.prompts.push(row);
+    const tr = { tier: id, vision: true, cached: run.cached, loadS: run.loadS, prompt: label, run: 1, ttftMs: ttft, decodeTps: decode, tokens, totalS: +((tEnd - tStart) / 1000).toFixed(2), sample: row.sample };
+    results.push(tr); addRow(tr);
+    log(id + ' ' + label + ': ' + decode + ' tok/s, ttft ' + ttft + ' ms' + (row.counters && row.counters.dispatches != null ? ', disp/tok ' + (+row.counters.dispatches).toFixed(0) : '') + (row.gpuErrors && row.gpuErrors.count ? ', gpuErrors ' + row.gpuErrors.count : ''));
+    return true;
+  };
+  try {
+    if (!(await measure('0 resident, base', null))) throw new Error('base generate failed');
+    let loaded = 0;
+    for (const target of RESIDENCY_STEPS) {
+      if (target > maxResident) break;
+      let failed = false;
+      while (loaded < target) {
+        const k = loaded;
+        const src = sets[k % sets.length];
+        const copy = Math.floor(k / sets.length);
+        const suffix = copy > 0 ? '?r=' + copy : '';
+        const name = src.name + (copy > 0 ? '-' + copy : '');
+        const spec = { name, configUrl: base + src.path + 'adapter_config.json' + suffix, weightsUrl: base + src.path + 'adapter_model.safetensors' + suffix };
+        setStatus(id + ': loading adapter ' + (k + 1) + ' of ' + target + ' (' + name + ')');
+        const tS = performance.now();
+        try {
+          const r = await engine.swapAdapter(spec);
+          run.residentAdapters.push({ name, url: spec.weightsUrl, bytes: r && r.bytes != null ? r.bytes : null, fromCache: r && r.fromCache != null ? r.fromCache : null, swapMs: Math.round(performance.now() - tS) });
+          loaded++;
+          log(id + ': adapter ' + name + ' resident (' + Math.round(performance.now() - tS) + ' ms, cache ' + (r && r.fromCache) + ')');
+        } catch (e) {
+          run.residentAdapters.push({ name, url: spec.weightsUrl, error: String(e && e.message || e), swapMs: Math.round(performance.now() - tS) });
+          run.residencyStop = { at: loaded, error: String(e && e.message || e), gpuErrors: (await stats(engine)).gpuErrors || null };
+          log(id + ': adapter ' + name + ' failed: ' + (e && e.message || e));
+          failed = true;
+          break;
+        }
+      }
+      if (failed) break;
+      await engine.swapAdapter({ name: null });
+      await measure(loaded + ' resident, 0 active', null);
+      const first = run.residentAdapters[0].name;
+      const tA = performance.now();
+      await engine.swapAdapter({ name: first });
+      run.prompts.push({ id: loaded + ' resident, activate ' + first, activateMs: Math.round(performance.now() - tA) });
+      await measure(loaded + ' resident, 1 active', first);
+      await engine.swapAdapter({ name: null });
+    }
+  } catch (e) {
+    run.protocolError = String(e && e.message || e);
+    log(id + ': residency protocol stopped: ' + run.protocolError);
+  }
+  run.consoleLines = consoleLines.slice(run.consoleStart);
+  delete run.consoleStart;
+  diagnostics.runs.push(run);
+  try { engine.terminate(); } catch (_) {}
+  setStatus(id + ': residency protocol done, engine released');
+}
+$('#bench-adapters').addEventListener('click', async () => {
+  const checked = [...tiersEl.querySelectorAll('input:checked')].map((i) => i.value);
+  const id = checked.includes('27b') ? '27b' : checked.includes('4b') ? '4b' : (chain.includes('27b') ? '27b' : '4b');
+  const n = Math.max(1, Math.min(8, +$('#bench-adapters-n').value || 6));
+  $('#bench-run').disabled = true; $('#bench-protocol').disabled = true; $('#bench-adapters').disabled = true;
+  try { await runAdapterResidency(id, n); }
+  finally { $('#bench-run').disabled = false; $('#bench-protocol').disabled = false; $('#bench-adapters').disabled = false; if (diagnostics.runs.length) enableExports(); }
 });
 const PROTOCOL = [
   { label: 'A defaults + prefill ksplit sweep', init: '', gen: '[{"mobilePrefillKsplit":8},{"mobilePrefillKsplit":4},{"mobilePrefillKsplit":2},{"mobilePrefillKsplit":1}]', profile: false },

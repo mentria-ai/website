@@ -804,6 +804,8 @@
       "think_needs_ctx": "La réflexion approfondie nécessite un GPU avec plus de mémoire",
       "think_toggle_slow": "Réflexion approfondie — prend plusieurs minutes sur ce GPU",
       "search_toggle": "Recherche web — via votre propre serveur local",
+      "route_tool": "recherche web",
+      "route_chat": "discussion",
       "search_configure": "Configurer la recherche web",
       "search_panel_title": "Recherche web (serveur local)",
       "search_url_label": "Endpoint de recherche (URL de base SearXNG ou modèle avec {query})",

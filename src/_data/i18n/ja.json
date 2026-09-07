@@ -804,6 +804,8 @@
       "think_needs_ctx": "じっくり思考にはより大容量メモリのGPUが必要です",
       "think_toggle_slow": "じっくり思考 — このGPUでは数分かかります",
       "search_toggle": "ウェブ検索 — 自分のローカル検索サーバー経由",
+      "route_tool": "ウェブ検索",
+      "route_chat": "チャット",
       "search_configure": "ウェブ検索を設定",
       "search_panel_title": "ウェブ検索（ローカルサーバー）",
       "search_url_label": "検索エンドポイント（SearXNGのベースURL、または{query}付きテンプレート）",

@@ -98,6 +98,8 @@ eleventyComputed:
 <script type="module">
 const COPY = {
   statusLoadingModel:  {{ ("tool.ai-chat.status_loading_model"  | t) | dump | safe }},
+  routeTool:           {{ ("tool.ai-chat.route_tool"            | t) | dump | safe }},
+  routeChat:           {{ ("tool.ai-chat.route_chat"            | t) | dump | safe }},
   statusGenerating:    {{ ("tool.ai-chat.status_generating"     | t) | dump | safe }},
   statusReady:         {{ ("tool.ai-chat.status_ready"          | t) | dump | safe }},
   statusModelDeleted:  {{ ("tool.ai-chat.status_model_deleted"  | t) | dump | safe }},
@@ -596,6 +598,82 @@ function runApp(MentriaEngine, Tiers) {
 
   const SEARCH_TOOL_PROMPT = "\\n\\n# Tool: web search\\nYou can search the web with the web_search tool. The client runs your search and sends you the results in a <tool_response> message — you never need to imagine results or wait; just emit the call and stop.\\nHow to call: end your reply (after any thinking) with exactly this on its own, then stop:\\n<tool_call>{\\\"name\\\": \\\"web_search\\\", \\\"arguments\\\": {\\\"query\\\": \\\"your search terms\\\"}}</tool_call>\\nThe call must appear in your final reply, not only inside your thinking.\\nWhen to call: ALWAYS when the user asks you to search, look something up online, check a manual or documentation, or verify something on the web. Also when the answer needs current or uncertain facts: news, prices, weather, versions, schedules, results.\\nAfter a <tool_response> arrives, answer the question using those results, briefly, and mention the source domains. At most 2 searches per question.";
 
+  const ROUTER_SYSTEM = 'You route messages for a chat assistant that has one tool, web search. Answer with exactly one word: tool if answering well needs a web search or the user asked to look something up, otherwise chat.';
+  const ROUTER_LABELS = ['tool', 'chat'];
+  const SEARCH_ADAPTER = { name: 'aichat-search', path: 'loras/aichat-search/v1/' };
+  let routerIds = null;
+  let searchAdapterSpecState = null;
+  let searchAdapterLoaded = false;
+  let searchAdapterActive = false;
+
+  async function routerLabelIds() {
+    if (routerIds && routerIds.tier === currentTier) return routerIds;
+    if (!engine || typeof engine.encodeChat !== 'function') return null;
+    const messages = [{ role: 'system', content: ROUTER_SYSTEM }, { role: 'user', content: 'probe' }];
+    const base = await engine.encodeChat(messages, { enableThinking: false });
+    const ids = {};
+    for (const label of ROUTER_LABELS) {
+      const enc = await engine.encodeChat(messages, { enableThinking: false, assistantPrefix: label });
+      const first = enc.ids[base.ids.length];
+      if (enc.assistantPrefix && enc.assistantPrefix.boundaryMerged) return null;
+      if (!Number.isInteger(first) || Object.values(ids).includes(first)) return null;
+      ids[label] = first;
+    }
+    routerIds = { tier: currentTier, ids };
+    return routerIds;
+  }
+
+  async function routeTurn(userText) {
+    let r = null;
+    try { r = await routerLabelIds(); } catch (_) { return null; }
+    if (!r) return null;
+    const allowed = ROUTER_LABELS.map((l) => r.ids[l]).sort((a, b) => a - b);
+    let picked = null;
+    try {
+      await engine.generate({
+        messages: [{ role: 'system', content: ROUTER_SYSTEM }, { role: 'user', content: String(userText || '').slice(0, 2000) }],
+        maxTokens: 1, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false, allowedTokenIds: allowed
+      }, (ev) => { if (picked == null && typeof ev.tokenId === 'number') picked = ev.tokenId; });
+    } catch (_) { return null; }
+    return ROUTER_LABELS.find((l) => r.ids[l] === picked) || null;
+  }
+
+  async function searchAdapterSpec() {
+    if (searchAdapterSpecState !== null) return searchAdapterSpecState;
+    try {
+      const base = (Tiers.TIERS[currentTier] && Tiers.TIERS[currentTier].base) || '';
+      const spec = { name: SEARCH_ADAPTER.name, configUrl: base + SEARCH_ADAPTER.path + 'adapter_config.json', weightsUrl: base + SEARCH_ADAPTER.path + 'adapter_model.safetensors' };
+      const head = await fetch(spec.configUrl, { method: 'HEAD' });
+      searchAdapterSpecState = head.ok ? spec : false;
+    } catch (_) { searchAdapterSpecState = false; }
+    return searchAdapterSpecState;
+  }
+
+  async function setSearchAdapter(on) {
+    if (!engine || typeof engine.swapAdapter !== 'function' || currentTier !== '27b') return;
+    try {
+      if (!on) {
+        if (searchAdapterActive) { await engine.swapAdapter({ name: null }); searchAdapterActive = false; }
+        return;
+      }
+      const spec = await searchAdapterSpec();
+      if (!spec) return;
+      await engine.swapAdapter(searchAdapterLoaded ? { name: spec.name } : spec);
+      searchAdapterLoaded = true;
+      searchAdapterActive = true;
+    } catch (err) {
+      console.warn('search adapter unavailable, base model answers:', err);
+      searchAdapterActive = false;
+    }
+  }
+
+  function markRoute(bodyEl, route) {
+    if (!route) return;
+    const bubble = bodyEl && bodyEl.closest ? bodyEl.closest('.ac__msg') : null;
+    const label = bubble ? bubble.querySelector('.ac__msg-label') : null;
+    if (label) label.textContent = label.textContent + ' · ' + (route === 'tool' ? COPY.routeTool : COPY.routeChat);
+  }
+
   function parseToolCall(text) {
     const m = text.match(/<tool_call>\s*([\s\S]*?)\s*<\/tool_call>/);
     if (!m) return null;
@@ -745,6 +823,7 @@ function runApp(MentriaEngine, Tiers) {
       engine = res.engine;
       currentTier = res.tier;
       contextTokens = res.maxSeq || 2048;
+      routerIds = null; searchAdapterSpecState = null; searchAdapterLoaded = false; searchAdapterActive = false;
       systemMessage.content = systemPromptFor(currentTier);
       syncThinkToggle();
       syncSearchToggle();
@@ -977,7 +1056,12 @@ function runApp(MentriaEngine, Tiers) {
 
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
     const searchActive = webSearchOn && !!(getSearchCfg() || {}).url;
-    const systemContent = searchActive ? systemMessage.content + SEARCH_TOOL_PROMPT : systemMessage.content;
+    const route = (searchActive && currentTier === '27b' && !imagesForRequest && rest.length) ? await routeTurn(turnText(rest[rest.length - 1])) : null;
+    if (epoch !== genEpoch) return;
+    const useTool = route ? route === 'tool' : searchActive;
+    markRoute(bodyEl, route);
+    await setSearchAdapter(useTool);
+    const systemContent = useTool ? systemMessage.content + SEARCH_TOOL_PROMPT : systemMessage.content;
     const toolTurns = [];
     const searchesDone = [];
     let searchSources = [];
@@ -1014,7 +1098,7 @@ function runApp(MentriaEngine, Tiers) {
           }
         });
 
-        if (!searchActive || round >= 2 || epoch !== genEpoch) break;
+        if (!useTool || round >= 2 || epoch !== genEpoch) break;
         const answerPart = deepThink ? splitThink().answer : fullText.replace(/<think>[\s\S]*?<\/think>/g, '');
         const query = parseToolCall(answerPart);
         if (!query) break;

@@ -804,6 +804,8 @@
       "think_needs_ctx": "O pensamento profundo requer uma GPU com mais memória",
       "think_toggle_slow": "Pensamento profundo — leva alguns minutos nesta GPU",
       "search_toggle": "Busca na web — pelo seu próprio servidor local",
+      "route_tool": "busca na web",
+      "route_chat": "chat",
       "search_configure": "Configurar busca na web",
       "search_panel_title": "Busca na web (servidor local)",
       "search_url_label": "Endpoint de busca (URL base do SearXNG ou modelo com {query})",

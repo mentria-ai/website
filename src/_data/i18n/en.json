@@ -804,6 +804,8 @@
       "think_needs_ctx": "Deep think needs a larger-memory GPU",
       "think_toggle_slow": "Deep think — takes a few minutes on this GPU",
       "search_toggle": "Web search — via your own local search server",
+      "route_tool": "web search",
+      "route_chat": "chat",
       "search_configure": "Set up web search",
       "search_panel_title": "Web search (local server)",
       "search_url_label": "Search endpoint (SearXNG base URL or template with {query})",

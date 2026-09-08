@@ -328,6 +328,16 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__who--sys{color:#7a838d}
 .comms__who--me{color:#a8b6c5}
 .comms__what{color:#e6edf3;word-break:break-word;flex:1}
+.comms__what p { margin: 0; }
+.comms__what p + p, .comms__what ul, .comms__what ol, .comms__what pre, .comms__what table, .comms__what blockquote { margin-top: .35em; }
+.comms__what ul, .comms__what ol { padding-left: 1.2em; margin-bottom: 0; }
+.comms__what h1, .comms__what h2, .comms__what h3, .comms__what h4 { font-size: 1em; margin: .35em 0 .1em; }
+.comms__what code { font-family: var(--font-mono, ui-monospace, monospace); font-size: .88em; }
+.comms__what pre { overflow-x: auto; padding: .4em .6em; border-radius: 6px; background: rgba(127,127,127,.12); }
+.comms__what table { border-collapse: collapse; display: block; overflow-x: auto; }
+.comms__what th, .comms__what td { border: 1px solid rgba(127,127,127,.35); padding: .15em .5em; }
+.comms__what a { color: var(--accent, #6ef3c5); }
+.comms__what blockquote { margin: .35em 0 0; padding-left: .7em; border-left: 2px solid rgba(127,127,127,.4); }
 .comms__what--sys{color:#7a838d;font-style:italic}
 .comms__what a{color:var(--accent,#6ef3c5);text-decoration:underline}
 .comms__drop{display:block;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;text-align:center;color:#7a838d;font-size:.82rem;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
@@ -513,6 +523,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 
 <script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
 <script src="/assets/js/qrcode.js?v={{ buildHash }}"></script>
+<script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 <script type="module">
 import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/assets/vendor/trystero-nostr.js';
 import { MentriaBus } from '/assets/js/mentria-bus.js';
@@ -924,7 +935,11 @@ const renderLine = (who, what, opts = {}) => {
   }
   const t = document.createElement('span');
   t.className = 'comms__what' + (opts.sys ? ' comms__what--sys' : '');
-  if (opts.html) t.innerHTML = opts.html; else t.textContent = what;
+  if (opts.html) t.innerHTML = opts.html;
+  else if (!opts.sys && window.renderMarkdown && /[*_`#>\[\]|\n-]/.test(String(what || ''))) {
+    t.innerHTML = renderMarkdown(String(what)) || '';
+    t.querySelectorAll('a[href]').forEach((a) => { a.target = '_blank'; a.rel = 'noopener'; });
+  } else t.textContent = what;
   if (opts.quiet) line.setAttribute('aria-live', 'off');
   line.append(w, t);
   const ts = (typeof opts.ts === 'number' && opts.ts > 0) ? opts.ts : Date.now();

@@ -360,7 +360,7 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
     allowTiedEmbed: true,
     tokenizerUrl: shardBase
   };
-  if (vendor === 'nvidia' && t.nvidiaMaxSeq) { opts.residualFusion = true; opts.q1Band = 16; }
+  if (vendor === 'nvidia' && t.nvidiaMaxSeq) { opts.residualFusion = true; opts.q1Decode = 'lut'; opts.q1Concat = 'all'; opts.bindGroupCache = true; opts.q1LutSkew = true; }
   if (vendor === 'apple' && t.appleMaxSeq) opts.kvF16 = true;
   if (t.streamingLoad) opts.streamingLoad = true;
   if (vision) {

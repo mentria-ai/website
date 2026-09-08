@@ -44,6 +44,7 @@ module.exports = function(eleventyConfig) {
         for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
           const p = path.join(dir, ent.name);
           if (ent.isDirectory()) walk(p);
+          else if (p.includes(path.join("mentria", "dist") + path.sep)) parts.push(path.relative(__dirname, p) + ":" + crypto.createHash("sha1").update(fs.readFileSync(p)).digest("hex").slice(0, 12));
           else parts.push(path.relative(__dirname, p) + ":" + fs.statSync(p).size);
         }
       };

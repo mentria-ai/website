@@ -48286,13 +48286,13 @@ var zl = class {
   }
 }, Fl = 248045, $l = 248046;
 function Vl(e, t = null) {
-  const n = e.temperature ?? 0.7, r = e.topK ?? 50, a = n === 0 || r === 1;
-  let s = e.cycleDetector;
-  s == null || s === "auto" ? s = a ? "dry" : "off" : typeof s == "object" && (s.mode === "auto" || s.mode === void 0) && (s = {
-    ...s,
-    mode: a ? "dry" : "off"
+  const n = e.temperature ?? 0.7, r = e.topK ?? 50;
+  let a = e.cycleDetector;
+  a == null || a === "auto" ? a = "off" : typeof a == "object" && (a.mode === "auto" || a.mode === void 0) && (a = {
+    ...a,
+    mode: "off"
   });
-  const i = typeof s == "string" ? s : s.mode, o = {
+  const s = typeof a == "string" ? a : a.mode, i = {
     temperature: n,
     topK: r,
     topP: e.topP ?? 0.9,
@@ -48300,20 +48300,20 @@ function Vl(e, t = null) {
     repetitionPenalty: e.repetitionPenalty ?? 1,
     detector: null
   };
-  if (i === "off") return {
+  if (s === "off") return {
     detector: null,
-    samplerArgs: o
+    samplerArgs: i
   };
-  const u = /* @__PURE__ */ new Set();
-  if (t?.eosTokenIds) for (const d of t.eosTokenIds) u.add(d);
-  u.add(Fl), u.add($l);
-  const l = new zl({
-    ...typeof s == "string" ? { mode: s } : s,
-    sequenceBreakerIds: u
+  const o = /* @__PURE__ */ new Set();
+  if (t?.eosTokenIds) for (const l of t.eosTokenIds) o.add(l);
+  o.add(Fl), o.add($l);
+  const u = new zl({
+    ...typeof a == "string" ? { mode: a } : a,
+    sequenceBreakerIds: o
   });
-  return o.detector = l, {
-    detector: l,
-    samplerArgs: o
+  return i.detector = u, {
+    detector: u,
+    samplerArgs: i
   };
 }
 var Hl = 4096;

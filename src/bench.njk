@@ -184,6 +184,7 @@ async function runTier(id, vision, runs, force, profile, quick, label) {
   } catch (e) {
     run.loadError = String(e && e.message || e);
     log(id + ': load failed: ' + run.loadError);
+    setStatus(id + ': load failed — ' + run.loadError.slice(0, 120));
     diagnostics.runs.push(run);
     try { engine.terminate(); } catch (_) {}
     return;
@@ -349,6 +350,7 @@ async function runAdapterResidency(id, maxResident, reps, arms) {
   } catch (e) {
     run.loadError = String(e && e.message || e);
     log(id + ': load failed: ' + run.loadError);
+    setStatus(id + ': load failed — ' + run.loadError.slice(0, 120));
     diagnostics.runs.push(run);
     try { engine.terminate(); } catch (_) {}
     return;

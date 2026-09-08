@@ -28,6 +28,7 @@ eleventyComputed:
       <label class="bench__opt"><input type="checkbox" id="bench-quick"> quick (short prompt only)</label>
       <label class="bench__opt"><input type="checkbox" id="bench-longsys"> long system prompt only (about 450 prompt tokens, the shape a code-writing tool sends; checks prefill routes at real prompt lengths)</label>
       <label class="bench__opt"><input type="checkbox" id="bench-xlong"> extra-long prompt only (about 1500 prompt tokens of plain prose; identity reads at long context)</label>
+      <label class="bench__opt"><input type="checkbox" id="bench-prefillset"> prompt-stage set: short, long system prompt and extra-long (30 / ~340 / ~1500 prompt tokens) on one load</label>
       <label class="bench__opt">runs per prompt <input type="number" id="bench-runs" min="1" max="5" value="1" style="width:4rem"></label>
       <label class="bench__opt">init/load options JSON (applied to init and loadModel) <input type="text" id="bench-init" placeholder='{"mobileMatvec":"ksplit"}' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
       <label class="bench__opt">generate options JSON, one object or a list (each entry runs the prompts once on the same load, in order) <input type="text" id="bench-gen" placeholder='[{"mobilePrefill":"off","m1VecmatRoute":false},{"mobilePrefill":"mrow"}]' style="width:100%;font-family:var(--font-mono);font-size:.8rem"></label>
@@ -195,7 +196,7 @@ async function runTier(id, vision, runs, force, profile, quick, label) {
   run.loadS = loadS;
   run.statsAfterLoad = await stats(engine);
   log(id + ': loaded in ' + loadS + ' s (cached before run: ' + cached + ', vision: ' + vision + ', route: ' + JSON.stringify(run.loadResult && (run.loadResult.decodeRoute || run.loadResult.route || '')) + ')');
-  let prompts = quick === 'xlong' ? PROMPTS.filter((p) => p.id === 'xlong') : quick === 'longsys' ? PROMPTS.filter((p) => p.id === 'longsys') : quick ? PROMPTS.slice(0, 1) : PROMPTS.filter((p) => p.id !== 'longsys' && p.id !== 'xlong');
+  let prompts = quick === 'prefillset' ? PROMPTS.filter((p) => p.id === 'short' || p.id === 'longsys' || p.id === 'xlong') : quick === 'xlong' ? PROMPTS.filter((p) => p.id === 'xlong') : quick === 'longsys' ? PROMPTS.filter((p) => p.id === 'longsys') : quick ? PROMPTS.slice(0, 1) : PROMPTS.filter((p) => p.id !== 'longsys' && p.id !== 'xlong');
   if (vision) prompts.push({ id: 'image', system: 'You describe images precisely.', user: 'Read all the text in this image and name the two shapes.', maxTokens: 80, image: true });
   let gi = 0;
   for (const g of run.genOptions) for (const p of prompts) {
@@ -316,7 +317,7 @@ $('#bench-run').addEventListener('click', async () => {
   const vision = $('#bench-vision').checked;
   const force = $('#bench-force').checked;
   const profile = $('#bench-profile').checked;
-  const quick = $('#bench-xlong').checked ? 'xlong' : $('#bench-longsys').checked ? 'longsys' : $('#bench-quick').checked;
+  const quick = $('#bench-prefillset').checked ? 'prefillset' : $('#bench-xlong').checked ? 'xlong' : $('#bench-longsys').checked ? 'longsys' : $('#bench-quick').checked;
   const runs = Math.max(1, Math.min(5, +$('#bench-runs').value || 1));
   $('#bench-run').disabled = true;
   try {

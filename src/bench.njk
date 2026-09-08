@@ -248,6 +248,17 @@ async function runTier(id, vision, runs, force, profile, quick, label) {
   }
   run.consoleLines = consoleLines.slice(run.consoleStart);
   delete run.consoleStart;
+  if (runs > 1) {
+    run.medians = {};
+    const byId = new Map();
+    for (const p of run.prompts) { if (!p.error) { if (!byId.has(p.id)) byId.set(p.id, []); byId.get(p.id).push(p); } }
+    for (const [pid, rows] of byId) {
+      const med = (f) => { const v = rows.map(f).filter((x) => typeof x === 'number' && isFinite(x)); return v.length ? +percentile(v, 0.5).toFixed(2) : null; };
+      const tps = med((r) => r.decodeTps);
+      run.medians[pid] = { runs: rows.length, decodeTps: tps, msPerToken: tps ? +(1000 / tps).toFixed(1) : null, ttftMs: med((r) => r.ttftMs), gapMedianMs: med((r) => r.gapMs && r.gapMs.median), spreadTps: rows.length > 1 ? +(Math.max(...rows.map((r) => r.decodeTps || 0)) - Math.min(...rows.map((r) => r.decodeTps || 0))).toFixed(2) : 0 };
+      log(id + ' ' + pid + ': median of ' + rows.length + ' runs ' + tps + ' tok/s (' + run.medians[pid].msPerToken + ' ms/token, spread ' + run.medians[pid].spreadTps + '), ttft ' + run.medians[pid].ttftMs + ' ms');
+    }
+  }
   if (run.prompts.some((p) => p.tokens > 0 && !p.error)) { try { Tiers.setValidatedTier(id); } catch (_) {} }
   diagnostics.runs.push(run);
   try { engine.terminate(); } catch (_) {}

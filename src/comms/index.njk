@@ -417,6 +417,11 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__contact:last-child{border-bottom:none}
 .comms__contact-name{color:#e6edf3;font-size:.85rem}
 .comms__contact-fp{color:#5a636d;font-size:.7rem}
+.comms__rooms-head{color:#5a636d;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 0 .15rem}
+.comms__avatar--room{display:inline-flex;align-items:center;justify-content:center;color:#9b6fd4}
+.comms__roomrow--current .comms__contact-name{color:var(--accent,#6ef3c5)}
+.comms__room-rename{max-width:12rem;padding:.15rem .4rem;font-size:.85rem}
+.comms__rowbtn--text{font-size:.72rem;letter-spacing:.04em;padding:.15rem .4rem;opacity:.7}
 .comms__contact-spacer{flex:1}
 .comms__chip-add{margin-left:.3rem;border:none;background:none;color:inherit;cursor:pointer;font-size:.75rem;padding:0}
 .comms__btn--danger{border-color:#e5534b;color:#e5534b}
@@ -1145,6 +1150,22 @@ const rememberSentCmid = (cmid) => {
   } catch (_) {}
 };
 
+const savedRooms = () => { try { const v = MentriaStore.get('comms', 'rooms'); return Array.isArray(v) ? v : []; } catch (_) { return []; } };
+const setSavedRooms = (list) => { try { MentriaStore.set('comms', 'rooms', list); } catch (_) {} };
+const roomUnreadKey = (roomName) => 'room:' + roomName;
+const rememberRoom = (roomName, b64Key) => {
+  if (!roomName || !b64Key || isDmRoom(roomName) || isEphemeralRoom(roomName)) return;
+  const list = savedRooms();
+  const i = list.findIndex((r) => r.room === roomName);
+  const prev = i >= 0 ? list[i] : null;
+  const entry = { room: roomName, key: b64Key, label: (prev && prev.label) || roomName, joinedAt: (prev && prev.joinedAt) || Date.now(), lastSeen: Date.now() };
+  if (i >= 0) list[i] = entry; else list.unshift(entry);
+  setSavedRooms(list.slice(0, 50));
+};
+const forgetRoom = (roomName) => setSavedRooms(savedRooms().filter((r) => r.room !== roomName));
+const touchRoom = (roomName) => { const list = savedRooms(); const r = list.find((x) => x.room === roomName); if (r) { r.lastSeen = Date.now(); setSavedRooms(list); } };
+const renameRoom = (roomName, label) => { const list = savedRooms(); const r = list.find((x) => x.room === roomName); if (r) { r.label = String(label || '').trim().slice(0, 40) || r.room; setSavedRooms(list); } };
+
 const sentCmidsFor = (fp) => {
   try {
     const log = MentriaStore.get('comms', 'sentlog') || {};
@@ -1198,6 +1219,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     chatKey = null;
   }
   revokeObjectUrls();
+  if (currentRoomName && !currentDmContact && !isDmRoom(currentRoomName)) { touchRoom(currentRoomName); clearUnreadFor(roomUnreadKey(currentRoomName)); }
   currentDmContact = null;
   if (leavingDm) clearUnreadFor(leavingDm.fp);
   els.log.innerHTML = '';
@@ -1226,6 +1248,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   chatKey = b64Key ? await deriveKey(b64Key) : null;
   if (seq !== joinSeq) return;
   if (b64Key && !chatKey) sys('encryption key in URL is invalid — chat will appear unreadable.');
+  if (chatKey && b64Key) { rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
 
   if (opts.share === false || isDmRoom(roomName)) {
     if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -1261,6 +1284,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   }
 
   currentRoomName = roomName;
+  if (chatKey && b64Key) { renderContacts(); subscribeUnread(); }
   if (opts.contact) currentDmContact = opts.contact;
   els.chatTitle.textContent = opts.contact ? (opts.contact.name || opts.contact.fp) : roomName;
   paintAvatar(els.chatAvatar, opts.contact ? (opts.contact.name || opts.contact.fp) : '#', opts.contact ? opts.contact.fp : roomName);
@@ -1822,6 +1846,7 @@ let inboxSubId = null;
 let unreadSubId = null;
 let myInboxTopic = null;
 const topicToFp = new Map();
+const topicToRoom = new Map();
 const seenInboxIds = new Set();
 let unreadMap = {};
 
@@ -1900,6 +1925,8 @@ const subscribeUnread = async () => {
       topics.push(topic);
     } catch (_) {}
   }
+  topicToRoom.clear();
+  for (const r of savedRooms()) { const topic = CHAT_TOPIC_PREFIX + r.room; topicToRoom.set(topic, r); topics.push(topic); }
   if (unreadSubId) await sideSend(JSON.stringify(['CLOSE', unreadSubId]));
   if (!topics.length) { unreadSubId = null; return; }
   unreadSubId = 'mu-' + Math.random().toString(36).slice(2);
@@ -1960,10 +1987,29 @@ const handleSideMsg = async (msgEvent) => {
   if (msg[1] === unreadSubId) {
     const tag = (ev.tags || []).find((t) => t && t[0] === 'x');
     const fp = tag && topicToFp.get(tag[1]);
-    if (!fp) return;
+    const savedRoom = !fp && tag ? topicToRoom.get(tag[1]) : null;
+    if (!fp && !savedRoom) return;
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
     const ts = (content && typeof content.ts === 'number') ? content.ts : (ev.created_at || 0) * 1000;
+    if (savedRoom) {
+      const k = roomUnreadKey(savedRoom.room);
+      if (currentRoomName === savedRoom.room) {
+        unreadMap[k] = { n: 0, lastTs: Math.max(ts, Date.now()) };
+        try { CID.setUnread(unreadMap); } catch (_) {}
+        return;
+      }
+      if (content && typeof content.cmid === 'string' && content.cmid.startsWith(selfId + ':')) return;
+      const entry = unreadMap[k] || { n: 0, lastTs: savedRoom.lastSeen || 0 };
+      if (ts <= entry.lastTs) return;
+      entry.n = (entry.n || 0) + 1;
+      entry.lastTs = ts;
+      unreadMap[k] = entry;
+      try { CID.setUnread(unreadMap); } catch (_) {}
+      renderContacts();
+      syncOsBadge();
+      return;
+    }
     if (currentDmContact && currentDmContact.fp === fp) {
       const seen = unreadMap[fp] || { n: 0, lastTs: 0 };
       seen.n = 0;
@@ -2012,6 +2058,7 @@ const refreshIdUI = () => {
   els.lockAlt.open = state === 'locked' && !(window.MentriaIdentity && MentriaIdentity.hasPasskey());
   els.contacts.hidden = state !== 'unlocked';
   if (state !== 'unlocked') els.idCard.hidden = true;
+  if (state === 'unlocked' && els.contactList && !els.contactList.children.length && savedRooms().length) renderContacts();
 };
 
 const refreshNotifBanner = () => {
@@ -2573,6 +2620,91 @@ const openDmWith = async (c) => {
 
 const renderContacts = () => {
   if (!els.contactList) return;
+  renderContactsBase();
+  renderRoomsSection();
+};
+
+const renderRoomsSection = () => {
+  const list = savedRooms();
+  if (!list.length) return;
+  const head = document.createElement('div');
+  head.className = 'comms__rooms-head';
+  head.textContent = 'rooms';
+  els.contactList.append(head);
+  for (const r of list) {
+    const row = document.createElement('div');
+    row.className = 'comms__contact comms__roomrow' + (currentRoomName === r.room ? ' comms__roomrow--current' : '');
+    row.tabIndex = 0;
+    row.setAttribute('role', 'button');
+    const av = document.createElement('span');
+    av.className = 'comms__avatar comms__avatar--room';
+    av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
+    const mid = document.createElement('span');
+    mid.className = 'comms__contact-mid';
+    const name = document.createElement('span');
+    name.className = 'comms__contact-name';
+    name.textContent = r.label || r.room;
+    const sub = document.createElement('span');
+    sub.className = 'comms__contact-fp';
+    sub.textContent = 'encrypted room · ' + short(r.room);
+    mid.append(name, sub);
+    row.append(av, mid);
+    const unread = (unreadMap[roomUnreadKey(r.room)] || {}).n || 0;
+    if (unread > 0 && currentRoomName !== r.room) {
+      const badge = document.createElement('span');
+      badge.className = 'comms__unread';
+      badge.textContent = unread > 99 ? '99+' : String(unread);
+      badge.title = unread + ' unread';
+      row.append(badge);
+    }
+    const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
+    row.addEventListener('click', open);
+    row.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    const ren = document.createElement('button');
+    ren.type = 'button';
+    ren.className = 'comms__rowbtn';
+    ren.title = 'rename';
+    ren.setAttribute('aria-label', 'rename room');
+    ren.textContent = 'rename';
+    ren.className = 'comms__rowbtn comms__rowbtn--text';
+    ren.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const input = document.createElement('input');
+      input.className = 'comms__input comms__room-rename';
+      input.type = 'text';
+      input.maxLength = 40;
+      input.value = r.label || r.room;
+      input.setAttribute('aria-label', 'room name');
+      const done = (save) => { if (save) renameRoom(r.room, input.value); renderContacts(); };
+      input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') done(false); });
+      input.addEventListener('blur', () => done(true));
+      input.addEventListener('click', (ev) => ev.stopPropagation());
+      name.replaceWith(input);
+      input.focus();
+      input.select();
+    });
+    const rm = document.createElement('button');
+    rm.type = 'button';
+    rm.className = 'comms__rowbtn';
+    rm.title = 'forget this room';
+    rm.setAttribute('aria-label', 'forget this room');
+    rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
+    rm.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm('Forget this room on this device? You will need its link to come back.') : Promise.resolve(true));
+      if (!ok) return;
+      forgetRoom(r.room);
+      delete unreadMap[roomUnreadKey(r.room)];
+      try { CID.setUnread(unreadMap); } catch (_) {}
+      renderContacts();
+      subscribeUnread();
+    });
+    row.append(ren, rm);
+    els.contactList.append(row);
+  }
+};
+
+const renderContactsBase = () => {
   els.contactList.innerHTML = '';
 
   const requests = CID.getRequests();

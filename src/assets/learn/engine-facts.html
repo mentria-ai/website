@@ -117,7 +117,7 @@ footer{padding-top:28px;color:var(--ink-3);font-size:13px;font-family:var(--mono
 
 <div class="wrap">
 <header class="hero">
-  <div class="eyebrow">mentria-engine · 257 things to poke at</div>
+  <div class="eyebrow">mentria-engine · 264 things to poke at</div>
   <h1>Inside the One-Bit Engine</h1>
   <p class="lede">A browser engine that runs a 27-billion-parameter model where every weight is a single bit. Each station below is one surprising fact. Move the control, watch what changes. Words with a dotted underline explain themselves — hover, or tap on a phone. On a phone, diagrams swipe sideways.</p>
   <nav class="rail">
@@ -395,6 +395,15 @@ footer{padding-top:28px;color:var(--ink-3);font-size:13px;font-family:var(--mono
       <a href="#s255">255 · three rates, three denominators</a>
       <a href="#s256">256 · one token routes the turn</a>
       <a href="#s257">257 · eleven kernels timed zero</a>
+    </div>
+    <div class="part"><span class="part-title">Part X · Rebuilding decode for the laptop</span>
+      <a href="#s258">258 · The kernel written for phones with no GPU tr…</a>
+      <a href="#s259">259 · Sixteen threads were queuing at one counter…</a>
+      <a href="#s260">260 · Same numbers, same order, and 40% of the row…</a>
+      <a href="#s261">261 · The strictest test in the repo scored 192 ou…</a>
+      <a href="#s262">262 · Ask for two decode kernels at once and the e…</a>
+      <a href="#s263">263 · One comment deleted 23 MB of the download, a…</a>
+      <a href="#s264">264 · Promising the same answer every time caps th…</a>
     </div>
   </nav>
 </header>
@@ -7790,6 +7799,219 @@ kernel medians:  quantized      real        the grid: 0 · 65.5 · 131.1 · 196.
       <svg id="s257_svg" viewBox="0 0 640 412" width="100%" height="412" role="img" aria-label="median duration of each decode kernel, as reported by the quantized timer and by the unquantized one"></svg>
     </div>
     <div class="readout"><span>kernels reading 0 µs <b class="bad" id="s257_zero">—</b></span><span>the two matrix kernels <b class="trace" id="s257_two">—</b></span><span>total over 2,000 passes <b class="ok" id="s257_tot">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 258 ───────────── -->
+<section class="station" id="s258">
+  <div class="words">
+    <div class="eyebrow">station 258 · rebuilding decode</div>
+    <h2>The kernel written for phones with no GPU tricks is the fastest one on a gaming laptop.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>subgroup</b> — a GPU trick where 32 threads add their numbers together in one instruction. Fast, and Safari and most phones do not have it. The engine keeps a whole second set of kernels for them: the <b>fallback ladder</b>.</li><li><b>ALU op</b> — one piece of arithmetic: an add, a multiply, a compare. Counting them per byte of weight is how you compare two kernels without a stopwatch.</li><li><b>decode</b> — writing the reply, one word at a time. Every weight in the model is read once per word.</li></ul></div>
+    <p>Station 33 built a table for phones: four 1-bit weights have only 16 possible answers, so compute all 16 once and let each row <em>read</em> its answer. Station 13 said the opposite is what matters here — one bit buys bytes, not multiplies. On an RTX 3060 that belief just broke.</p>
+    <p>A probe forced the whole no-subgroups fallback ladder on the laptop, expecting the slow path. The table kernel ran at <b>88.1 µs</b> a pass against the shipped kernel's <b>148.5</b>, and GPU time per word fell <b>59.4 → 36.7 ms</b> — while paying that ladder's 128 extra jobs and a slow prefill. So the engine took the kernel and left the ladder: decode uses the table, everything else is untouched, and the job count stays at <b>804</b>.</p>
+    <p>Two things move. Arithmetic: <b>39.75 → 8.31</b> ALU ops per weight byte, because a 4-bit sign pattern is now an address instead of four multiply-adds. Memory: the input vector is re-read <b>4.00× → 0.50×</b> the weight bytes, <b>15.29 → 4.85 GiB</b> a word. What it pays instead is scratch memory — and the Mac says that bill is too high there.</p>
+    <pre class="code">one byte of weights, the shipped kernel:
+  4 AND + 4 CMP + 4 SEL
+  + (4 MUL + 3 ADD) x 2 + 1.75       = <b>39.75 ops</b>
+one byte of weights, the table kernel:
+  2 shift + 2 mask + 2 reads + 2 ADD
+  + (2 MUL + 1 SUB + 1 ADD + unpk)/16 = <b>8.31 ops</b></pre>
+    <div class="src">docs/research/2026-09-08-q1g128-lut-decode-ampere.md §0 (the 88.1 / 148.5 µs probe and 59.4 → 36.7 ms), §1.1 (the 4.00× / 0.50× re-read and 15.29 / 4.85 GiB), §1.2 (the op table), §4.2 (the f64 distance), §4.4 (804 passes), §4.5 (the Metal loss) · laptop medians, medium prompt: docs/handoff/2026-09-08-bench-laptop-3060-lut-{1,5,9}-ctl.json (12.09 / 15.30 / 15.23) and -lut-{2,6,10}-lut.json (19.20 / 25.78 / 25.59) · station 33 = the same table; station 13 = the belief this changes</div>
+    <div class="sowhat"><b>So what:</b> the code kept for the weakest devices was never re-measured on the strongest one. Nobody had run the fallback on purpose.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which device"><button id="s258_mac" aria-pressed="false">M4 Pro (Mac)</button><button id="s258_pc" aria-pressed="true">RTX 3060 (laptop)</button></div>
+      <div class="seg" role="group" aria-label="which kernel"><button id="s258_v14" aria-pressed="false">shipped kernel</button><button id="s258_lut" aria-pressed="true">the table kernel</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s258_svg" viewBox="0 0 640 438" width="100%" height="438" role="img" aria-label="arithmetic per weight byte, input bytes re-read, and the measured words per second on each device for each kernel"></svg>
+    </div>
+    <div class="readout"><span>ALU ops per weight byte <b class="trace" id="s258_ops">—</b></span><span>input re-read <b id="s258_re">—</b></span><span>measured <b class="ok" id="s258_tps">—</b></span><span>distance from exact <b id="s258_err">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 259 ───────────── -->
+<section class="station" id="s259">
+  <div class="words">
+    <div class="eyebrow">station 259 · rebuilding decode</div>
+    <h2>Sixteen threads were queuing at one counter. Adding one wasted slot per row emptied the queue.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>scratch (workgroup memory)</b> — a few kilobytes of fast on-chip memory shared by a squad of GPU threads. Station 33's table lives here.</li><li><b>bank</b> — the scratch is physically 32 separate counters, and which one you queue at is decided by your address: <code>address ÷ 4 bytes, remainder 32</code>. Two threads at the same counter in the same cycle take two cycles.</li><li><b>warp</b> — the 32 threads that actually move together. A bank clash only costs anything inside one warp.</li></ul></div>
+    <p>Station 258 put the table kernel on the laptop. This is where the 26.5 ms it spends per word actually goes — and it is not reading the model. 3.60 GB of weights in 26.5 ms is 136 GB/s on a ~360 GB/s part, <b>38% of roofline</b>. The wall is the scratch.</p>
+    <p>The table stored entry (nibble <code>n</code>, pattern <code>p</code>) at <code>n*16 + p</code>. Sixteen is a multiple of 16, and the counters cycle every 32, so during the build <b>16 of every 32 threads land on one counter</b>, at 16 different addresses — a 16-way queue, on each of the 16 stores. During the read, all four lanes' 16-entry windows land on the same 16 counters.</p>
+    <p>The fix changes the address and nothing else: <code>n*17 + (n&gt;&gt;5)*8 + p</code>. Seventeen shares no factor with 32, so consecutive threads land on 17 different counters — the build goes from a 16-way queue to <b>none</b>. The <code>(n&gt;&gt;5)*8</code> pushes the four lanes' windows to counters 0/8/16/24 so they overlap twice instead of four times. Same values, same order, same threads: <b>0 ULP</b>, so it inherits every test the old kernel already passed.</p>
+    <pre class="code">lut[n * 16u + p]              // 16 lanes, 1 bank
+lut[n * 17u + (n&gt;&gt;5u)*8u + p] // 32 lanes, 32 banks
+
+threads at one bank:  build  row pass  totals
+  as shipped             16      3.31       4
+  <b>skewed                  1      2.00       1</b></pre>
+    <div class="src">docs/research/2026-09-08-q1g128-lut-ampere-tuning.md §0.2 (the 32×4 B bank rule and the three clash sites), §1.1 (the skew map, its injectivity, max index 2198 → 8,800 B), §0 (26.5 of 33.2 ms; 136 GB/s = 38% of roofline), the model table (bank degrees and modelled ms), §3.3 (0 ULP on 9 shapes), §3.5 (Metal 42.00 → 34.38 ms, −18.1%), §4 (the 3060 prediction) · the table itself: station 33 · the 16 KiB scratch guarantee: station 35</div>
+    <div class="sowhat"><b>So what:</b> a kernel can be memory-bound on memory that is not the model. Nobody had priced the scratch, so the cost hid for two sessions.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which layout"><button id="s259_plain" aria-pressed="true">as shipped · n×16</button><button id="s259_skew" aria-pressed="false">skewed · n×17 + …</button></div>
+      <div class="ctl"><label for="s259_step">which access</label><input type="range" id="s259_step" min="0" max="2" step="1" value="0"><span id="s259_stepV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s259_svg" viewBox="0 0 640 400" width="100%" height="400" role="img" aria-label="the 32 scratch memory banks, and how many of a warp's threads queue at each one under the two layouts"></svg>
+    </div>
+    <div class="readout"><span>busiest bank <b class="bad" id="s259_worst">—</b></span><span>cycles for this access <b class="trace" id="s259_cyc">—</b></span><span>banks used <b id="s259_used">—</b></span><span>modelled scratch time <b class="ok" id="s259_ms">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 260 ───────────── -->
+<section class="station" id="s260">
+  <div class="words">
+    <div class="eyebrow">station 260 · rebuilding decode</div>
+    <h2>Same numbers, same order, and 40% of the rows come out with a different last bit.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>FMA</b> — one instruction that multiplies and adds in a single step, keeping full precision in the middle. Doing it as two instructions rounds once more, so it can give a different last bit.</li><li><b>contraction</b> — the compiler deciding, on its own, which multiply-then-add pairs to fuse into one FMA. Nothing in the source says which.</li><li><b>ULP</b> — the gap between two neighbouring numbers a computer can represent. "0 ULP" means bit-for-bit identical.</li></ul></div>
+    <p>Station 225 showed that adding the same numbers in a different order gives a different answer. This is the harder version: the <b>order is the same</b>. Giving one squad of threads 128 rows instead of 64 does not re-order a single addition — the four partial sums and their closing order are preserved on purpose — yet 40–43% of rows come out different.</p>
+    <p>The reason is below the source. At 128 rows each thread carries <b>two</b> accumulators instead of one, and the backend, seeing a different register shape, fuses a different set of multiply-adds. Nothing in the WGSL says which pairs to fuse. The differences are <b>2.0e-7 … 6.8e-7</b> of the row size — the f32 rounding floor, i.e. the last bit and nothing more.</p>
+    <p>So it is correct and not bit-identical, and this repo treats those as different things. Bit-identical buys you the old kernel's test history for free. Correct-but-different owes the whole ladder: certificates against llama.cpp, a teacher-forced golden, a wide greedy A/B, and a distribution measurement. All of it was run, and all of it passed.</p>
+    <pre class="code">gate                        result
+  cert vs llama.cpp x3      BYTE-IDENTICAL 12/12 x3
+  teacher-forced golden     192/192, 0 decisive
+  greedy A/B, 16 x 128 tok  2048/2048 identical
+  KL distance, 2048 pos     mean 2.3e-09 (gate 5e-3)
+  top-1 agreement           100.0000%</pre>
+    <div class="src">docs/research/2026-09-08-q1g128-lut-decode-ampere.md §4.2 (57–60% of rows exact, the rest 2.0e-7…6.8e-7 of the output RMS; "the backend contracts the FMA differently under two accumulators per lane"), §2.2 (the four-partial order contract and the two-accumulator fix), §8 (the laptop medians and +17.6%), §8.2 (cert 12/12 at plen 1500/2900/3900), §8.1 (golden 192/192), §8.3 (16/16 prompts, 2048 tokens; Metal +14.1% decode), §8.4 (KL 2.279e-09, top-1 100.0000%, p99 1.821e-07) · laptop medians: docs/handoff/2026-09-08-bench-laptop-3060-lut-{3,7,11}-lutconcat.json (26.47 / 26.44 / 26.04) and -lut-{4,8,12}-lutrows128.json (31.04 / 31.09 / 31.00) · order in a different arrangement: station 225 · the same ladder on a different vendor: station 218</div>
+    <div class="sowhat"><b>So what:</b> "the source order is identical" is not a proof of identical output. The compiler gets a vote, and only a measurement settles it.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="rows per squad"><button id="s260_r64" aria-pressed="true">64 rows per squad</button><button id="s260_r128" aria-pressed="false">128 rows per squad</button></div>
+      <div class="ctl"><label for="s260_row">which output row</label><input type="range" id="s260_row" min="0" max="23" step="1" value="0"><span id="s260_rowV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s260_svg" viewBox="0 0 640 302" width="100%" height="302" role="img" aria-label="the four partial sums under two thread geometries, the identical closing order, and the last-bit difference that survives"></svg>
+    </div>
+    <div class="readout"><span>lanes per row <b id="s260_lanes">—</b></span><span>accumulators each <b id="s260_acc">—</b></span><span>this row <b id="s260_same">—</b></span><span>rows bit-identical <b class="trace" id="s260_pct">—</b></span><span>laptop decode <b class="ok" id="s260_tps">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 261 ───────────── -->
+<section class="station" id="s261">
+  <div class="words">
+    <div class="eyebrow">station 261 · rebuilding decode</div>
+    <h2>The strictest test in the repo scored 192 out of 192, and could not see the kernel under test.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>prefill</b> — reading the prompt. All its words go through the GPU at once, in a wide kernel.</li><li><b>decode</b> — writing the reply, one word at a time, through a narrow kernel built for a single word. Stations 258–260 are all about that narrow kernel.</li><li><b>teacher-forced</b> — at every position, feed the model the <em>reference</em> text so far and ask only "what is your next word?". No mistake can compound; every position is judged on its own.</li></ul></div>
+    <p>The teacher-forced golden is the repo's hardest gate: it compares the engine's next-word choice against llama.cpp's, position by position, on identical context. It reported <b>192/192, 0 decisive disagreements</b> with the new decode kernel on. That result is real. It also does not test the new decode kernel.</p>
+    <p>Look at what one position does. The harness calls <code>generate(context, maxTokens: 1)</code> and the context is the previous call's plus one word. The session ledger <em>already covers</em> that text — the previous call committed its own generated word — so the engine classifies it <code>no-new-tokens</code>, resets, and re-reads the whole prompt. The compared number therefore comes out of <b>prefill</b>. The decode kernel does run, on the word after; its answer is thrown away.</p>
+    <p>So 192/192 proves something worth having — the route installs, dispatches, and corrupts nothing that prefill later reads — and it does not certify the arithmetic. The gates that score real decode words are the certificate ladder against llama.cpp, the greedy A/B, and the decode-mode distribution measurement (station 260).</p>
+    <pre class="code">const ctx = c.promptIds.concat(c.refIds.slice(0, j));
+const ids = await rpc('generate',
+    { tokenIds: ctx, maxTokens: 1, … });
+preds.push(ids[0]);   // &lt;- came from PREFILL
+
+// session_manifest.js:451
+promptLen === residentLen  =&gt;  'no-new-tokens'</pre>
+    <div class="src">tests/run_bonsai_golden_forced.mjs : 234–240 (the per-position <code>maxTokens: 1</code> loop) · src/session/session_manifest.js : 445–451 (the <code>no-new-tokens</code> classification that forces the full re-prefill) · docs/research/2026-09-08-q1g128-lut-decode-ampere.md §8.1 limit 2 ("a teacher-forced position is a PREFILL position… 192/192 says the route installs, dispatches, and corrupts nothing that prefill later reads") and §8.6 (why the 27B cannot run this harness at all) · gates that DO score decode: §8.2, §8.3, §8.4 · related: station 140, station 71, station 72</div>
+    <div class="sowhat"><b>So what:</b> a green test says exactly what its protocol lets it say. This one was believed to cover decode for two sessions before anyone traced one position.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s261_pos">position being scored</label><input type="range" id="s261_pos" min="0" max="7" step="1" value="3"><span id="s261_posV" class="readout"></span></div>
+      <div class="seg" role="group" aria-label="which gate"><button id="s261_gold" aria-pressed="true">the golden</button><button id="s261_cert" aria-pressed="false">the certificate ladder</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s261_svg" viewBox="0 0 640 428" width="100%" height="428" role="img" aria-label="one scored position, showing which pass produces the number that is compared and where the decode kernel runs"></svg>
+    </div>
+    <div class="readout"><span>context length <b id="s261_ctx">—</b></span><span>session verdict <b class="bad" id="s261_reason">—</b></span><span>the compared number came from <b class="trace" id="s261_from">—</b></span><span>decode words scored <b class="ok" id="s261_scored">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 262 ───────────── -->
+<section class="station" id="s262">
+  <div class="words">
+    <div class="eyebrow">station 262 · rebuilding decode</div>
+    <h2>Ask for two decode kernels at once and the engine refuses to start at all.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>flag</b> — a switch set when the model is loaded, e.g. <code>{"q1Decode":"lut"}</code>. Each one turns on a different experimental kernel.</li><li><b>A/B</b> — running the same work twice, once with a switch and once without, and comparing. It only means anything if you can say what changed.</li><li><b>attributable</b> — you can point at the one thing responsible for a number. An unattributable measurement is not a weak result; it is not a result.</li></ul></div>
+    <p>Three of these switches — the wide band, the K-split and the table kernel of station 258 — all re-route the <em>same</em> line inside the engine. Turn two on and the split one quietly falls through for the shapes it declines, so some of the word runs on one kernel and some on another. The bench would print a number, and nobody could say what produced it.</p>
+    <p>So the engine throws at load instead. Not a warning, not a silent fallback to one of them: the model does not load, with the reason in the message. That is why every laptop bench arm for the table kernel carries <code>"q1Band": 8</code> — 8 is the shipped band, so it changes nothing, and it is the only value the guard accepts alongside <code>q1Decode</code>.</p>
+    <p>One switch does compose: <code>q1Concat</code> stacks gate and up (and q, k, v) into one taller matrix. It changes <em>which tensors</em> are dispatched, not <em>which kernel</em> runs, so there is no mixing to be unattributable about — and the jobs per word fall 804 → 708. The choice for a device is therefore real: band 16 is bit-exact and worth −23% of GPU time but only 0.6% of the wall; the table stack doubles the wall and is not bit-identical. One or the other.</p>
+    <pre class="code">// src/layers/q1_lut_decode.js:197-201
+if (mode !== 'off'
+    &amp;&amp; Number(opts.bandRows) !== ROWS_PER_BAND) {
+  throw new Error(`q1Decode='${mode}' and
+    q1Band=${opts.bandRows} are mutually exclusive
+    — both re-route the same v14b decode
+    dispatch; run them as separate arms`);
+}</pre>
+    <div class="src">src/layers/q1_lut_decode.js : 145 (<code>ROWS_PER_BAND = 8</code>), 188–201 (both refusals and the comment naming the s1875 void-an-A/B failure mode) · docs/research/2026-09-08-q1g128-lut-decode-ampere.md §3 (the flag contract, "a value that cannot make a legal pipeline throws at load"; why <code>q1Concat</code> composes) and §7.3 (804 → 708 passes with the stack on) · docs/research/2026-09-08-q1g128-pass-fold.md : 3–5 (band 16 = −23% of GPU time, +0.6% of wall on the 3060) · docs/research/2026-09-08-q1g128-band16.md §0 (band 16 and 32 are bit-identical, 0 ULP) · the arms as actually run: docs/handoff/2026-09-08-bench-laptop-3060-lut-*.json <code>initOptions</code></div>
+    <div class="sowhat"><b>So what:</b> the engine treats "I cannot attribute this number" as a load error, not a footnote. Failing loudly at the start is cheaper than a bench result nobody can read.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="decode kernel"><button id="s262_dOff" aria-pressed="true">q1Decode off</button><button id="s262_dLut" aria-pressed="false">q1Decode: lut</button></div>
+      <div class="seg" role="group" aria-label="band width"><button id="s262_b8" aria-pressed="true">q1Band 8</button><button id="s262_b16" aria-pressed="false">q1Band 16</button><button id="s262_b32" aria-pressed="false">q1Band 32</button></div>
+      <div class="seg" role="group" aria-label="concat"><button id="s262_cOff" aria-pressed="true">q1Concat off</button><button id="s262_cAll" aria-pressed="false">q1Concat: all</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s262_svg" viewBox="0 0 640 362" width="100%" height="362" role="img" aria-label="which kernel a combination of flags selects, whether the engine accepts it, and what the laptop measured"></svg>
+    </div>
+    <div class="readout"><span>load <b id="s262_load">—</b></span><span>decode kernel <b class="trace" id="s262_kern">—</b></span><span>jobs per word <b id="s262_pass">—</b></span><span>bit-identical to default <b id="s262_bit">—</b></span><span>laptop decode <b class="ok" id="s262_tps">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 263 ───────────── -->
+<section class="station" id="s263">
+  <div class="words">
+    <div class="eyebrow">station 263 · rebuilding decode</div>
+    <h2>One comment deleted 23 MB of the download, and that was the smaller half of the bug.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>bundler</b> — the tool that flattens hundreds of source files into the one file a browser downloads. It has to resolve every file reference at build time.</li><li><b>untracked file</b> — a file sitting in your project folder that git is not watching: scratch notes, a lock file, yesterday's log. It is not part of the commit.</li><li><b>sha</b> — a short fingerprint of a file's exact bytes. Two identical files have the same sha; one changed byte changes it completely.</li></ul></div>
+    <p>Station 58 found it: one URL built from a variable, <code>new URL(`../../${url}`)</code>, made the bundler inline <em>every file at the repository root</em> as base64 — 18 of them, of which a 16.7 MB session ledger was nearly all. The fix is a comment telling the bundler not to look: <code>/* @vite-ignore */</code>, placed in the exact span it scans.</p>
+    <p>The size result is the headline: worker.mjs <b>25,491,919 → 2,390,889 bytes</b> raw, <b>8.1 MB → 516 KB</b> gzipped, with no code removed. Every visitor's first load of the engine drops about tenfold.</p>
+    <p>The other consequence is the one worth keeping. Because the inlined set included <b>untracked</b> files, building the same commit in your working folder and in a clean checkout produced <b>different bytes</b>. A bundle fingerprint could not identify a build — the one thing a fingerprint is for. After the fix the two builds are byte-identical, either is canonical, and the served worker has a sha the website can be checked against.</p>
+    <pre class="code">18 root files, base64'd    23,098,888 B  derived
+worker.mjs before − after  23,101,030 B  measured
+                            ----------
+              unexplained        2,142 B
+
+budget gz: 9.5 MB -> 0.75 MB   actual 0.516 MB</pre>
+    <div class="src">commit 164d4711 (the <code>@vite-ignore</code> fix; 25,491,919 → 2,390,889 B raw, 8.1 MB → 0.5 MB gz; "the same commit built in-tree and in a clean git worktree produced DIFFERENT bytes … a bundle sha could not identify a build") · tests/test_packaging_build.mjs §9, added in that commit — four standing checks, "verified to FAIL on the pre-fix bundle (18 leaked root files) and pass after" · docs/handoff/2026-09-08-website-bundle-budget-rebaseline.md (516 KB gz; the 0.75 MB gz / 3.5 MB raw budget; served worker sha256 <code>247a4f700b63140e</code>) · the 18-file derivation: <code>git ls-tree -l 164d4711</code>, 17 tracked non-dot root files + the untracked <code>deno.lock</code> · the diagnosis: station 58</div>
+    <div class="sowhat"><b>So what:</b> the bug that shipped 23 MB to every visitor was survivable. The bug that made two builds of one commit disagree would have wasted a week, silently.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which build"><button id="s263_before" aria-pressed="true">before the fix</button><button id="s263_after" aria-pressed="false">after the fix</button></div>
+      <div class="seg" role="group" aria-label="where it was built"><button id="s263_tree" aria-pressed="true">built in the working folder</button><button id="s263_clean" aria-pressed="false">built in a clean checkout</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s263_svg" viewBox="0 0 640 396" width="100%" height="396" role="img" aria-label="the bundle's size before and after the fix, whether two builds of the same commit agree, and the four standing checks"></svg>
+    </div>
+    <div class="readout"><span>raw <b class="trace" id="s263_raw">—</b></span><span>gzipped <b id="s263_gz">—</b></span><span>inlined root files <b id="s263_files">—</b></span><span>same commit, two builds <b id="s263_repro">—</b></span><span>guard <b id="s263_guard">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 264 ───────────── -->
+<section class="station" id="s264">
+  <div class="words">
+    <div class="eyebrow">station 264 · rebuilding decode</div>
+    <h2>Promising the same answer every time caps this GPU at 44% busy, and no arrangement of threads escapes it.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>occupancy</b> — how much of the GPU is doing work. An RTX 3060 has 30 cores, each able to hold 6 squads of 256 threads: 46,080 threads resident at once.</li><li><b>partial sum</b> — a piece of a row's total, computed by one thread. Splitting a row across more threads finishes it sooner, but only if you then add the pieces back.</li><li><b>bit-identical</b> — the same answer down to the last bit, every time, on every machine. Station 200 explains why a fixed adding order is what buys that.</li></ul></div>
+    <p>Station 200 showed the rule: partial answers are combined in a <b>fixed order</b>, so the result cannot depend on which thread finished first. The table kernel keeps the same promise — four partial sums per row, always closed as <code>((p0+p1)+p2)+p3</code> — and station 260 showed how carefully that survives a change of geometry.</p>
+    <p>Here is what the promise costs. Four partials means <b>four threads per output row</b>, so a projection with N rows launches exactly <b>4N threads, however you pack them</b>. Almost a third of the 27B's decode weight traffic goes through N=5120 shapes. 4 × 5120 = 20,480 threads, against 46,080 the 3060 could hold: <b>44%</b>.</p>
+    <p>And repacking does not help. Thirty-two rows a squad instead of sixty-four gives 160 smaller squads instead of 80 — same threads, same 44%. The only way up is more threads per row, which changes the number of partials, which changes the adding order, which costs bit-identity. That is a decision, not a plan, and it is written down as one.</p>
+    <pre class="code">N=5120 (o_proj, dn_out, down_proj) — 29% of traffic
+ rows/squad  squads  threads each   total   busy
+     16        320        64        20,480   44%
+     32        160       128        20,480   44%
+     64         80       256        20,480   44%</pre>
+    <div class="src">docs/research/2026-09-08-q1g128-lut-ampere-tuning.md §2.7, in full: "all 128 residual sites are N=5120, which launches only <b>80 workgroups = 2.67 per SM</b> against a capacity of 6 (1536 threads / 256), i.e. <b>44% occupancy on 29% of the token's weight traffic</b>"; 32 rows/WG "buys nothing: total threads are <code>4 lanes × N</code> regardless of how they are packed"; "<b>the four-partial order contract caps decode parallelism at 4N threads</b> … Raising it needs more K-lanes per row, which changes the number of partials and therefore the summation order — i.e. it costs bit-identity. That is the next session's fork, not this one's." · §0.1 (which projections the residual sites are) · the 256-thread default limit: docs/research/2026-09-08-q1g128-lut-decode-ampere.md §2.2 · the fixed-order rule itself: station 200 · what breaking it costs: station 260</div>
+    <div class="sowhat"><b>So what:</b> the guarantee is not free and its price is now a number. Whether to pay it is the owner's call, and nobody has made it.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s264_rows">rows per squad</label><input type="range" id="s264_rows" min="0" max="3" step="1" value="1"><span id="s264_rowsV" class="readout"></span></div>
+      <div class="seg" role="group" aria-label="how many partials per row"><button id="s264_p4" aria-pressed="true">4 partials · the promise kept</button><button id="s264_p8" aria-pressed="false">8 partials · the promise broken</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s264_svg" viewBox="0 0 640 372" width="100%" height="372" role="img" aria-label="the 30 cores of an RTX 3060 and how full they get under each thread arrangement"></svg>
+    </div>
+    <div class="readout"><span>squads <b id="s264_wg">—</b></span><span>threads each <b id="s264_tw">—</b></span><span>total threads <b class="trace" id="s264_tot">—</b></span><span>GPU busy <b id="s264_occ">—</b></span><span>still bit-identical <b id="s264_bit">—</b></span></div>
   </div>
 </section>
 
@@ -30685,6 +30907,668 @@ if ($('#s257')) {
     $('#s257_zero').textContent = zeros + ' of 14';
     $('#s257_two').textContent = quant ? '196.61 and 196.61' : '216.06 and 226.30';
     $('#s257_tot').textContent = quant ? '194.6 ms' : '195.1 ms';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 258 ── */
+/* ── Station 258: the fallback kernel wins on the laptop ── */
+if ($('#s258')) {
+  const svg = $('#s258_svg');
+  const bMac = $('#s258_mac'), bPc = $('#s258_pc');
+  const bV14 = $('#s258_v14'), bLut = $('#s258_lut');
+  // ops per weight byte: lut-decode-ampere.md §1.2 · re-read: §1.1
+  const K = {
+    v14: { name: 'v14b · the shipped subgroup kernel', ops: 39.75, gib: 15.29, ratio: 4.00,
+      err: '1.1e-3 … 2.2e-3', parts: [['sign expansion (AND/CMP/SEL)', 12], ['the dot (MUL + ADD)', 26], ['the rest', 1.75]] },
+    lut: { name: 'the table kernel · one read per 4 weights', ops: 8.31, gib: 4.85, ratio: 0.50,
+      err: '3.3e-7 … 6.6e-7', parts: [['shifts + masks', 4], ['table reads', 2], ['adds', 2], ['the one scale, /16', 0.31]] },
+  };
+  // measured decode tok/s, medium prompt.
+  // Mac: lut-decode-ampere.md §4.5 (medians of 3). Laptop: the six bench exports.
+  const M = {
+    mac: { v14: 25.21, lut: 15.85, label: 'M4 Pro · flags absent vs q1Decode:lut',
+      note: 'the Mac is at 79-89% of its memory roofline: nothing to buy, the scratch bill paid in full' },
+    pc: { v14: 15.23, lut: 25.59, label: 'RTX 3060 · q1Band:16 (its best) vs q1Decode:lut',
+      note: 'the laptop runs the same shapes at ~14% of ITS roofline, so the arithmetic really was the wall' },
+  };
+  let dev = 'pc', ker = 'lut';
+  bMac.addEventListener('click', () => { dev = 'mac'; render(); });
+  bPc.addEventListener('click', () => { dev = 'pc'; render(); });
+  bV14.addEventListener('click', () => { ker = 'v14'; render(); });
+  bLut.addEventListener('click', () => { ker = 'lut'; render(); });
+
+  function render() {
+    bMac.setAttribute('aria-pressed', String(dev === 'mac'));
+    bPc.setAttribute('aria-pressed', String(dev === 'pc'));
+    bV14.setAttribute('aria-pressed', String(ker === 'v14'));
+    bLut.setAttribute('aria-pressed', String(ker === 'lut'));
+    const k = K[ker], m = M[dev];
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    // ── 1. arithmetic per weight byte ──────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">arithmetic for one byte of weights (8 weights) — ${k.name}</text>`;
+    const AX = 14, AW = 612, MAXOPS = 40;
+    let x = AX;
+    const cols = [trace, signal, ok, ink3];
+    k.parts.forEach((p, i) => {
+      const w = AW * p[1] / MAXOPS;
+      g += `<rect x="${x.toFixed(1)}" y="26" width="${Math.max(w, 1).toFixed(1)}" height="22" rx="3" fill="${cols[i % 4]}" opacity="0.85"/>`;
+      if (w > 86) g += `<text x="${(x + 6).toFixed(1)}" y="41" font-size="10.5" fill="${css('--paper')}">${p[0]}</text>`;
+      x += w + 2;
+    });
+    g += `<text x="${AX}" y="64" font-size="12" fill="${ink}">${k.ops} ops</text>`;
+    k.parts.forEach((p, i) => {
+      g += `<text x="${100 + (i % 2) * 264}" y="${64 + Math.floor(i / 2) * 15}" font-size="10.5" fill="${ink2}">`
+        + `<tspan fill="${cols[i % 4]}">■</tspan> ${p[0]} — ${p[1]}</text>`;
+    });
+    const other = K[ker === 'lut' ? 'v14' : 'lut'];
+    g += `<text x="${AX}" y="${64 + Math.ceil(k.parts.length / 2) * 15 + 4}" font-size="11" fill="${ink3}">the other kernel needs ${other.ops} ops for the same byte — ${(Math.max(k.ops, other.ops) / Math.min(k.ops, other.ops)).toFixed(1)}× ${k.ops < other.ops ? 'more' : 'less'}</text>`;
+
+    // ── 2. bytes re-read ───────────────────────────────────
+    const BY = 148, BX = 210, BW = 340, MAXG = 16;
+    g += `<text x="14" y="${BY - 8}" font-size="11" fill="${ink3}">gigabytes the GPU reads for one word — weights are the same either way</text>`;
+    const rowB = (y, gb, col, lab) =>
+      `<text x="14" y="${y + 12}" font-size="11.5" fill="${ink2}">${lab}</text>`
+      + `<rect x="${BX}" y="${y}" width="${Math.max(BW * gb / MAXG, 1.5).toFixed(1)}" height="16" rx="3" fill="${col}" opacity="0.85"/>`
+      + `<text x="${(BX + Math.max(BW * gb / MAXG, 1.5) + 8).toFixed(1)}" y="${y + 12}" font-size="11" fill="${ink}">${gb.toFixed(2)} GiB</text>`;
+    g += rowB(BY, 3.36, signal, '1-bit weights (fixed)');
+    g += rowB(BY + 24, k.gib - 3.36, trace, 'the input vector, re-read');
+    g += `<text x="14" y="${BY + 62}" font-size="11.5" fill="${ink}">${k.ratio.toFixed(2)}× the weight bytes on every shape — the formula does not depend on N or K</text>`;
+    g += `<text x="14" y="${BY + 79}" font-size="11" fill="${ink3}">over the whole 27B word: ${k.gib} GiB issued (${((k.gib - 3.36) / 3.36).toFixed(2)}× overall — tiny shapes round up)</text>`;
+
+    // ── 3. the 2x2 of measured words per second ────────────
+    const TY = 258;
+    g += `<text x="14" y="${TY - 8}" font-size="11" fill="${ink3}">measured words per second, 27B, the "medium" bench prompt</text>`;
+    const cell = (cx, cy, dk, kk, on) => {
+      const v = M[dk][kk];
+      return `<rect x="${cx}" y="${cy}" width="290" height="42" rx="6" fill="${on ? trace : card}" stroke="${on ? trace : line}" opacity="${on ? 0.16 : 1}"/>`
+        + `<text x="${cx + 12}" y="${cy + 18}" font-size="11" fill="${ink3}">${dk === 'mac' ? 'M4 Pro' : 'RTX 3060'} · ${kk === 'lut' ? 'table kernel' : 'shipped kernel'}</text>`
+        + `<text x="${cx + 12}" y="${cy + 35}" font-size="15" fill="${on ? ink : ink2}">${v.toFixed(2)} <tspan font-size="11" fill="${ink3}">words/s</tspan></text>`;
+    };
+    g += cell(14, TY, 'mac', 'v14', dev === 'mac' && ker === 'v14');
+    g += cell(318, TY, 'mac', 'lut', dev === 'mac' && ker === 'lut');
+    g += cell(14, TY + 50, 'pc', 'v14', dev === 'pc' && ker === 'v14');
+    g += cell(318, TY + 50, 'pc', 'lut', dev === 'pc' && ker === 'lut');
+    g += `<text x="14" y="${TY + 118}" font-size="12" fill="${ink}">the same change, opposite signs: `
+      + `<tspan fill="${bad}">−37% on the Mac</tspan>, <tspan fill="${ok}">+68% on the laptop</tspan></text>`;
+    g += `<text x="14" y="${TY + 136}" font-size="11" fill="${ink3}">${m.note}</text>`;
+    g += `<text x="14" y="${TY + 154}" font-size="11" fill="${ink3}">${m.label}</text>`;
+    svg.innerHTML = g;
+
+    $('#s258_ops').textContent = k.ops + ' ops';
+    $('#s258_re').textContent = k.ratio.toFixed(2) + '× the weight bytes per shape · ' + k.gib + ' GiB/word';
+    $('#s258_tps').textContent = M[dev][ker].toFixed(2) + ' words/s on the ' + (dev === 'mac' ? 'M4 Pro' : '3060');
+    $('#s258_err').textContent = k.err + ' of the row size';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 259 ── */
+/* ── Station 259: shared-memory bank conflicts and the skew ── */
+if ($('#s259')) {
+  const svg = $('#s259_svg'), sl = $('#s259_step');
+  const bP = $('#s259_plain'), bS = $('#s259_skew');
+  // One illustrative warp's 4-bit sign patterns for the row pass. Fixed, not
+  // random, so the picture is the same on every load; the doc's 3.31 average is
+  // over all patterns, this is one draw.
+  const PAT = [11, 4, 14, 1, 7, 9, 2, 13];
+  // addr(n, p) for the two layouts. Skew: n*17 + (n>>5)*8 + p (tuning doc §1.1).
+  const addr = (n, p, sk) => sk ? n * 17 + (n >> 5) * 8 + p : n * 16 + p;
+
+  // Each step returns the 32 addresses one warp issues in one cycle.
+  function warp(step, sk) {
+    const out = [];
+    if (step === 0) {                       // the build: thread t stores lut[t*16 + k]
+      for (let t = 0; t < 32; t++) out.push({ a: addr(t, 3, sk), lab: 't' + t });
+    } else if (step === 1) {                // the row pass: 4 K-lanes x 8 rows
+      for (let g = 0; g < 4; g++) for (let r = 0; r < 8; r++) {
+        const n = 32 * g + 8 * 1 + 2;       // one (word, nibble) inside the tile
+        out.push({ a: addr(n, PAT[r], sk), lab: 'g' + g + 'r' + r });
+      }
+    } else {                                // the per-tile totals: 4 lanes, pattern 15
+      for (let t = 0; t < 4; t++) out.push({ a: addr(32 * t, 15, sk), lab: 'lane ' + t });
+    }
+    return out;
+  }
+  const STEPS = [
+    { name: 'building the table (16 stores)', deg: [16, 1],
+      note: ['thread t writes lut[t*16 + k] — every even thread lands on the bank every other even thread wants',
+        'the stride is 17 now, which shares no factor with 32, so the 32 threads land on 32 different banks'] },
+    { name: 'reading it, one row pass', deg: [3.31, 2.00],
+      note: ['the nibble stride is 32*16, a multiple of 32, so all four K-lanes queue at the same 16 banks',
+        'the (n>>5)*8 term moves each K-lane\'s window to a different quarter, so the overlap is 2, the floor'] },
+    { name: 'the per-tile group totals', deg: [4, 1],
+      note: ['four lanes read nibbles 32 apart at pattern 15 — one bank, four addresses',
+        'the same four reads now land on banks 15, 23, 31 and 7 — one address each'] },
+  ];
+  const MODEL = { plain: 30.66, skew: 9.31 };   // modelled ms/word of scratch service
+  let sk = false;
+  bP.addEventListener('click', () => { sk = false; render(); });
+  bS.addEventListener('click', () => { sk = true; render(); });
+  sl.addEventListener('input', render);
+
+  function render() {
+    bP.setAttribute('aria-pressed', String(!sk));
+    bS.setAttribute('aria-pressed', String(sk));
+    const step = parseInt(sl.value, 10), S = STEPS[step];
+    const reqs = warp(step, sk);
+    const banks = [];
+    for (let i = 0; i < 32; i++) banks.push(new Set());
+    for (const r of reqs) banks[(r.a % 32 + 32) % 32].add(r.a);
+    const cyc = Math.max(...banks.map((b) => b.size));
+    const used = banks.filter((b) => b.size > 0).length;
+
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    g += `<text x="14" y="16" font-size="12" fill="${ink}">${S.name} — ${reqs.length} threads, ${sk ? 'skewed' : 'shipped'} layout</text>`;
+    g += `<text x="14" y="33" font-size="11" fill="${ink3}">${S.note[sk ? 1 : 0]}</text>`;
+
+    // ── the 32 banks ───────────────────────────────────────
+    const BX = 14, BW = 15, GAP = 4.4, BASE = 250, UNIT = 11;
+    g += `<text x="${BX}" y="52" font-size="11" fill="${ink3}">the 32 banks — column height is how many separate addresses queue at that bank</text>`;
+    for (let i = 0; i < 32; i++) {
+      const x = BX + i * (BW + GAP), n = banks[i].size;
+      g += `<line x1="${x.toFixed(1)}" y1="${BASE + 6}" x2="${(x + BW).toFixed(1)}" y2="${BASE + 6}" stroke="${line}" stroke-width="1.5"/>`;
+      for (let k = 0; k < n; k++) {
+        const y = BASE - (k + 1) * UNIT + 2;
+        const col = n > 1 ? (n >= 8 ? bad : trace) : ok;
+        g += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${BW}" height="${UNIT - 2.5}" rx="2" fill="${col}" opacity="${0.55 + 0.4 * (k === 0 ? 1 : 0)}"/>`;
+      }
+      if (i % 4 === 0) g += `<text x="${(x + BW / 2).toFixed(1)}" y="${BASE + 20}" text-anchor="middle" font-size="9.5" fill="${ink3}">${i}</text>`;
+    }
+    // the one-cycle line
+    g += `<line x1="${BX}" y1="${BASE - UNIT + 2}" x2="626" y2="${BASE - UNIT + 2}" stroke="${ink3}" stroke-dasharray="3 3" stroke-width="1"/>`;
+    g += `<text x="626" y="${BASE - UNIT - 5}" text-anchor="end" font-size="10" fill="${ink3}">1 cycle</text>`;
+    g += `<text x="${BX}" y="${BASE + 34}" font-size="10.5" fill="${ink3}">bank number · everything stacked above the dashed line is a thread waiting its turn</text>`;
+
+    // ── the verdict for this access ────────────────────────
+    const VY = BASE + 46;
+    g += `<rect x="14" y="${VY}" width="612" height="46" rx="8" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="${VY + 19}" font-size="12" fill="${ink}">this access takes <tspan fill="${cyc > 1 ? bad : ok}" font-size="14">${cyc}</tspan> cycle${cyc === 1 ? '' : 's'} instead of 1 — ${used} of 32 banks doing any work</text>`;
+    g += `<text x="26" y="${VY + 37}" font-size="11" fill="${ink3}">the model's average over all sign patterns: ${STEPS[step].deg[0]} → ${STEPS[step].deg[1]} after the skew</text>`;
+
+    // ── the whole word ─────────────────────────────────────
+    const WY = VY + 68, WX = 250, WW = 300;
+    g += `<text x="14" y="${WY + 12}" font-size="11.5" fill="${ink2}">modelled scratch time, one word</text>`;
+    for (const [k, lab] of [['plain', 'as shipped'], ['skew', 'skewed']]) {
+      const on = (k === 'skew') === sk, y = WY + (k === 'plain' ? 0 : 22);
+      const w = WW * MODEL[k] / MODEL.plain;
+      g += `<rect x="${WX}" y="${y - 12}" width="${w.toFixed(1)}" height="16" rx="3" fill="${on ? trace : ink3}" opacity="${on ? 0.9 : 0.3}"/>`;
+      g += `<text x="${(WX + w + 8).toFixed(1)}" y="${y}" font-size="11" fill="${on ? ink : ink3}">${MODEL[k]} ms  ${lab}</text>`;
+    }
+    svg.innerHTML = g;
+
+    $('#s259_stepV').textContent = S.name;
+    $('#s259_worst').textContent = cyc + (cyc === 1 ? ' address (no queue)' : ' addresses on one bank');
+    $('#s259_cyc').textContent = cyc + '× the ideal';
+    $('#s259_used').textContent = used + ' of 32';
+    $('#s259_ms').textContent = (sk ? MODEL.skew : MODEL.plain) + ' ms per word';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 260 ── */
+/* ── Station 260: same order, different last bit ───────── */
+if ($('#s260')) {
+  const svg = $('#s260_svg'), sl = $('#s260_row');
+  const b64 = $('#s260_r64'), b128 = $('#s260_r128');
+  // 24 illustrative rows: 14 of 24 = 58.3% bit-identical, inside the measured
+  // 57-60% band (lut-decode-ampere.md §4.2). The pattern is fixed, not random.
+  const EXACT = [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0].map(Boolean);
+  const ULPS = [0, 0, 2, 0, 0, 0, 1, 0, 3, 0, 0, 1, 0, 0, 0, 2, 0, 1, 0, 0, 4, 0, 0, 2];
+  const buf = new ArrayBuffer(4), dv = new DataView(buf);
+  const bitsOf = (x) => { dv.setFloat32(0, x); let s = ''; for (let i = 0; i < 4; i++) s += dv.getUint8(i).toString(2).padStart(8, '0'); return s; };
+  const bump = (x, n) => { dv.setFloat32(0, x); dv.setUint32(0, dv.getUint32(0) + n); return dv.getFloat32(0); };
+  const TPS = { 64: 26.44, 128: 31.04 };     // laptop medians, medium prompt
+  let rows = 64;
+  b64.addEventListener('click', () => { rows = 64; render(); });
+  b128.addEventListener('click', () => { rows = 128; render(); });
+  sl.addEventListener('input', render);
+
+  function render() {
+    b64.setAttribute('aria-pressed', String(rows === 64));
+    b128.setAttribute('aria-pressed', String(rows === 128));
+    const i = parseInt(sl.value, 10);
+    const lanes = rows === 64 ? 4 : 2, accs = rows === 64 ? 1 : 2;
+    const base = Math.fround(0.5 + i * 0.0137) * 7;
+    const a = Math.fround(base);
+    const b = (rows === 64 || EXACT[i]) ? a : bump(a, ULPS[i]);
+    const ba = bitsOf(a), bb = bitsOf(b);
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), paper = css('--paper');
+    let g = '';
+
+    // ── 1. the four partials and who holds them ────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">one output row is always four partial sums, closed in one fixed order — both geometries</text>`;
+    const PW = 128, PX = 14, PY = 26;
+    for (let p = 0; p < 4; p++) {
+      const x = PX + p * (PW + 20);
+      g += `<rect x="${x}" y="${PY}" width="${PW}" height="34" rx="5" fill="${card}" stroke="${signal}"/>`;
+      g += `<text x="${x + PW / 2}" y="${PY + 15}" text-anchor="middle" font-size="11" fill="${ink2}">partial ${p}</text>`;
+      g += `<text x="${x + PW / 2}" y="${PY + 29}" text-anchor="middle" font-size="10.5" fill="${ink3}">group ${p} of the row</text>`;
+    }
+    // lane brackets
+    const LY = PY + 44;
+    for (let l = 0; l < lanes; l++) {
+      const span = 4 / lanes, x0 = PX + l * span * (PW + 20), w = span * (PW + 20) - 20;
+      g += `<path d="M${x0} ${LY} L${x0} ${LY + 8} L${x0 + w} ${LY + 8} L${x0 + w} ${LY}" fill="none" stroke="${trace}" stroke-width="1.5"/>`;
+      g += `<text x="${x0 + w / 2}" y="${LY + 24}" text-anchor="middle" font-size="11" fill="${trace}">lane ${l} · ${accs} acc</text>`;
+    }
+    g += `<text x="14" y="${LY + 46}" font-size="11.5" fill="${ink}">the close, character for character in both: <tspan font-family="monospace">((p0 + p1) + p2) + p3</tspan></text>`;
+    g += `<text x="14" y="${LY + 63}" font-size="11" fill="${ink3}">${rows} rows per squad · ${lanes} lanes per row · the same 20,480 threads on a 5120-row projection, packed differently</text>`;
+
+    // ── 2. the 24 rows ─────────────────────────────────────
+    const RY = LY + 84;
+    g += `<text x="14" y="${RY - 8}" font-size="11" fill="${ink3}">24 output rows — filled = bit-identical to the 64-row kernel</text>`;
+    for (let r = 0; r < 24; r++) {
+      const x = 14 + r * 25.4, same = rows === 64 || EXACT[r];
+      g += `<rect x="${x.toFixed(1)}" y="${RY}" width="21" height="18" rx="3" fill="${same ? ok : card}" stroke="${r === i ? ink : (same ? ok : bad)}" stroke-width="${r === i ? 2 : 1}" opacity="${same ? 0.75 : 1}"/>`;
+    }
+    const nSame = rows === 64 ? 24 : EXACT.filter(Boolean).length;
+    g += `<text x="14" y="${RY + 34}" font-size="11.5" fill="${ink}">${nSame} of 24 identical (${(100 * nSame / 24).toFixed(1)}%) — measured on the real kernel: 57–60%</text>`;
+
+    // ── 3. the bits of the selected row ────────────────────
+    const BY = RY + 56;
+    g += `<text x="14" y="${BY - 6}" font-size="11" fill="${ink3}">row ${i}, all 32 bits of the answer — sign, exponent, then the 23 fraction bits</text>`;
+    const bw = 16.6;
+    const drawBits = (y, bits, other, lab) => {
+      let s = `<text x="14" y="${y + 12}" font-size="10.5" fill="${ink2}">${lab}</text>`;
+      for (let k = 0; k < 32; k++) {
+        const x = 96 + k * bw, diff = bits[k] !== other[k];
+        s += `<rect x="${x.toFixed(1)}" y="${y}" width="${(bw - 2.4).toFixed(1)}" height="16" rx="2" fill="${diff ? bad : (bits[k] === '1' ? ink3 : card)}" stroke="${diff ? bad : line}"/>`;
+        s += `<text x="${(x + (bw - 2.4) / 2).toFixed(1)}" y="${y + 12}" text-anchor="middle" font-size="9" fill="${diff ? paper : (bits[k] === '1' ? paper : ink3)}">${bits[k]}</text>`;
+      }
+      return s;
+    };
+    g += drawBits(BY, ba, bb, '64-row');
+    g += drawBits(BY + 22, bb, ba, rows === 64 ? '64-row' : '128-row');
+    const nd = [...ba].filter((c, k) => c !== bb[k]).length;
+    g += `<text x="14" y="${BY + 58}" font-size="11.5" fill="${nd ? bad : ok}">${nd
+      ? nd + ' bit' + (nd === 1 ? '' : 's') + ' differ, all at the tail: ' + ULPS[i] + ' ULP = ' + (Math.abs(b - a) / Math.abs(a)).toExponential(1) + ' of this value'
+      : 'every bit identical — this row landed on the same number'}</text>`;
+    g += `<text x="14" y="${BY + 75}" font-size="11" fill="${ink3}">measured across nine real shapes, the differences were 2.0e-7 … 6.8e-7 of the row size. Nothing larger.</text>`;
+    svg.innerHTML = g;
+
+    $('#s260_rowV').textContent = 'row ' + i;
+    $('#s260_lanes').textContent = lanes;
+    $('#s260_acc').textContent = accs;
+    $('#s260_same').textContent = (rows === 64 || EXACT[i]) ? 'identical' : ULPS[i] + ' ULP apart';
+    $('#s260_pct').textContent = (100 * nSame / 24).toFixed(1) + '% (real: 57–60%)';
+    $('#s260_tps').textContent = TPS[rows].toFixed(2) + ' words/s';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 261 ── */
+/* ── Station 261: the golden scores prefill, not decode ── */
+if ($('#s261')) {
+  const svg = $('#s261_svg'), sl = $('#s261_pos');
+  const bG = $('#s261_gold'), bC = $('#s261_cert');
+  const PROMPT = 5;                       // drawn prompt tokens (the real one is 30-200)
+  let gate = 'gold';
+  bG.addEventListener('click', () => { gate = 'gold'; render(); });
+  bC.addEventListener('click', () => { gate = 'cert'; render(); });
+  sl.addEventListener('input', render);
+
+  function render() {
+    bG.setAttribute('aria-pressed', String(gate === 'gold'));
+    bC.setAttribute('aria-pressed', String(gate === 'cert'));
+    const j = parseInt(sl.value, 10), gold = gate === 'gold';
+    const ctx = PROMPT + j;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), paper = css('--paper');
+    let g = '';
+
+    // ── the context handed to this call ────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">${gold
+      ? 'the golden, position ' + j + ': the context is the prompt plus the reference words so far'
+      : 'the certificate ladder: one long prompt, then twelve words generated for real'}</text>`;
+    const TW = 26, TY = 26;
+    const nDraw = gold ? ctx : PROMPT + 3;
+    for (let t = 0; t < nDraw; t++) {
+      const x = 14 + t * (TW + 4);
+      const isPrompt = t < PROMPT;
+      g += `<rect x="${x}" y="${TY}" width="${TW}" height="20" rx="3" fill="${isPrompt ? card : signal}" stroke="${isPrompt ? line : signal}" opacity="${isPrompt ? 1 : 0.5}"/>`;
+    }
+    if (!gold) g += `<text x="${14 + PROMPT * 30 + 6}" y="${TY + 15}" font-size="10.5" fill="${ink3}">… 1,500 to 3,900 words of prompt …</text>`;
+    g += `<text x="14" y="${TY + 36}" font-size="11" fill="${ink2}">${gold
+      ? ctx + ' words in, ' + j + ' of them the reference continuation — every call re-sends all of them'
+      : 'one prompt, sent once'}</text>`;
+
+    // ── the passes inside one call, stacked ────────────────
+    const PY = 96;
+    const stage = (k, title, sub, verdict, col, dashed) => {
+      const y = PY + k * 48;
+      return `<rect x="14" y="${y}" width="612" height="40" rx="7" fill="${col}" fill-opacity="0.13" stroke="${col}" ${dashed ? 'stroke-dasharray="4 3"' : ''}/>`
+        + `<text x="26" y="${y + 17}" font-size="12" fill="${ink}">${k + 1} · ${title}</text>`
+        + `<text x="26" y="${y + 33}" font-size="10.5" fill="${ink3}">${sub}</text>`
+        + `<text x="614" y="${y + 25}" text-anchor="end" font-size="11.5" fill="${col}">${verdict}</text>`;
+    };
+    g += `<text x="14" y="${PY - 8}" font-size="11" fill="${ink3}">${gold
+      ? 'what happens inside one generate(context, maxTokens: 1) call'
+      : 'what happens inside one certificate rung'}</text>`;
+    if (gold) {
+      g += stage(0, 'session check', 'the ledger already covers this exact context', 'no-new-tokens → full reset', bad, false);
+      g += stage(1, 'PREFILL, all ' + ctx + ' words', 'the wide kernel — this flag does not touch it', 'the number compared ✓', trace, false);
+      g += stage(2, 'DECODE, one word', 'the kernel under test — it really does run', 'its answer is discarded ✗', ink3, true);
+    } else {
+      g += stage(0, 'PREFILL the whole rung', 'once, up to 3,900 words of prompt', 'not compared', ink3, true);
+      g += stage(1, 'DECODE, twelve words', 'the kernel under test, twelve times over', 'all twelve compared ✓', trace, false);
+      g += stage(2, 'compare to llama.cpp', 'the same twelve ids from a different engine', 'byte for byte', ok, false);
+    }
+
+    // ── the scoreboard ─────────────────────────────────────
+    const SY = PY + 3 * 48 + 18;
+    g += `<line x1="14" y1="${SY - 12}" x2="626" y2="${SY - 12}" stroke="${line}"/>`;
+    g += `<text x="14" y="${SY + 6}" font-size="11" fill="${ink3}">what each gate actually scored, with the new decode kernel on</text>`;
+    const ROWS = [
+      ['teacher-forced golden, 8B', '192 / 192 positions', 0, 192, '§8.1'],
+      ['certificate ladder, 3 depths, 27B', '36 / 36 ids byte-identical', 36, 36, '§8.2'],
+      ['greedy A/B, 16 prompts', '2048 / 2048 words identical', 2048, 2048, '§8.3'],
+      ['distribution distance, decode mode', '2048 positions, KL 2.3e-09', 2048, 2048, '§8.4'],
+    ];
+    ROWS.forEach((r, k) => {
+      const y = SY + 22 + k * 34, on = (gold && k === 0) || (!gold && k === 1);
+      g += `<rect x="14" y="${y}" width="612" height="28" rx="5" fill="${on ? trace : card}" fill-opacity="${on ? 0.14 : 1}" stroke="${on ? trace : line}"/>`;
+      g += `<text x="26" y="${y + 18}" font-size="11.5" fill="${ink}">${r[0]}</text>`;
+      g += `<text x="252" y="${y + 18}" font-size="11" fill="${ink2}">${r[1]}</text>`;
+      g += `<text x="442" y="${y + 18}" font-size="11" fill="${r[2] ? ok : bad}">${r[2]} decode words</text>`;
+      g += `<text x="618" y="${y + 18}" text-anchor="end" font-size="10" fill="${ink3}">${r[4]}</text>`;
+    });
+    g += `<text x="14" y="${SY + 22 + 4 * 34 + 16}" font-size="11" fill="${ink3}">The strictest protocol here is the only one that scores nothing the flag changed.</text>`;
+    svg.innerHTML = g;
+
+    $('#s261_posV').textContent = gold ? 'position ' + j + ' of 64' : 'not used by this gate';
+    $('#s261_ctx').textContent = gold ? ctx + ' words (' + PROMPT + ' prompt + ' + j + ' reference)' : 'up to 3,900 words';
+    $('#s261_reason').textContent = gold ? 'no-new-tokens → re-prefill' : 'a fresh session, then real decode';
+    $('#s261_from').textContent = gold ? 'the PREFILL pass' : 'the DECODE kernel';
+    $('#s261_scored').textContent = gold ? '0 of 192' : '36 of 36';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 262 ── */
+/* ── Station 262: one decode kernel per device ─────────── */
+if ($('#s262')) {
+  const svg = $('#s262_svg');
+  const D = { off: $('#s262_dOff'), lut: $('#s262_dLut') };
+  const B = { 8: $('#s262_b8'), 16: $('#s262_b16'), 32: $('#s262_b32') };
+  const C = { off: $('#s262_cOff'), all: $('#s262_cAll') };
+  // The four arms the laptop actually ran, all with bindGroupCache on,
+  // medium prompt, medians of three (docs/handoff/…-lut-*.json).
+  const ARMS = [
+    ['{q1Band:16, bindGroupCache}', 15.2, 'off', 16, 'off'],
+    ['{q1Decode:lut, q1Band:8, bindGroupCache}', 25.6, 'lut', 8, 'off'],
+    ['  + q1Concat:all', 26.4, 'lut', 8, 'all'],
+    ['  + q1DecodeRows:128  (the laptop best)', 31.0, null, null, null],
+  ];
+  let dec = 'off', band = 8, con = 'off';
+  D.off.addEventListener('click', () => { dec = 'off'; render(); });
+  D.lut.addEventListener('click', () => { dec = 'lut'; render(); });
+  for (const k of [8, 16, 32]) B[k].addEventListener('click', () => { band = k; render(); });
+  C.off.addEventListener('click', () => { con = 'off'; render(); });
+  C.all.addEventListener('click', () => { con = 'all'; render(); });
+
+  function render() {
+    D.off.setAttribute('aria-pressed', String(dec === 'off'));
+    D.lut.setAttribute('aria-pressed', String(dec === 'lut'));
+    for (const k of [8, 16, 32]) B[k].setAttribute('aria-pressed', String(band === k));
+    C.off.setAttribute('aria-pressed', String(con === 'off'));
+    C.all.setAttribute('aria-pressed', String(con === 'all'));
+    const refused = dec === 'lut' && band !== 8;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    // ── what you typed ─────────────────────────────────────
+    const json = '{ ' + [dec === 'lut' ? '"q1Decode": "lut"' : null,
+      band !== 8 ? '"q1Band": ' + band : '"q1Band": 8',
+      con === 'all' ? '"q1Concat": "all"' : null,
+      '"bindGroupCache": true'].filter(Boolean).join(', ') + ' }';
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">what you paste into the bench</text>`;
+    g += `<rect x="14" y="24" width="612" height="26" rx="5" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="41" font-size="11.5" font-family="monospace" fill="${ink2}">${json}</text>`;
+
+    // ── the three flags aiming at one line ─────────────────
+    const FY = 70;
+    const FL = [['q1Band ' + band, band !== 8, 'the wide band'], ['q1Matvec', false, 'the K-split'], ['q1Decode ' + dec, dec === 'lut', 'the table kernel']];
+    g += `<text x="14" y="${FY}" font-size="11" fill="${ink3}">three switches re-route the same line of the engine — at most one may be on</text>`;
+    FL.forEach((f, i) => {
+      const x = 14 + i * 150;
+      g += `<rect x="${x}" y="${FY + 8}" width="136" height="34" rx="6" fill="${f[1] ? trace : card}" fill-opacity="${f[1] ? 0.18 : 1}" stroke="${f[1] ? trace : line}"/>`;
+      g += `<text x="${x + 68}" y="${FY + 23}" text-anchor="middle" font-size="11.5" fill="${f[1] ? ink : ink3}">${f[0]}</text>`;
+      g += `<text x="${x + 68}" y="${FY + 37}" text-anchor="middle" font-size="10" fill="${ink3}">${f[2]}</text>`;
+      g += `<path d="M${x + 68} ${FY + 44} L${x + 68} ${FY + 54} L448 ${FY + 54} L448 ${FY + 27} L460 ${FY + 27}" fill="none" stroke="${f[1] ? trace : line}" stroke-width="${f[1] ? 1.8 : 1}"/>`;
+    });
+    g += `<rect x="464" y="${FY + 8}" width="162" height="34" rx="6" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="545" y="${FY + 29}" text-anchor="middle" font-size="11.5" font-family="monospace" fill="${ink2}">_encodeV14</text>`;
+    g += `<text x="545" y="${FY + 54}" text-anchor="middle" font-size="10" fill="${ink3}">one line, one kernel</text>`;
+    const nOn = FL.filter((f) => f[1]).length;
+    g += `<text x="14" y="${FY + 74}" font-size="11" fill="${nOn > 1 ? bad : ink3}">${nOn} of the three are on${nOn > 1 ? ' — a word would run part on one kernel and part on the other' : ''}</text>`;
+    g += `<text x="14" y="${FY + 91}" font-size="11" fill="${ink3}">q1Concat is not on this list: it changes which tensors are dispatched, not which kernel runs</text>`;
+
+    // ── the verdict ────────────────────────────────────────
+    const VY = 190;
+    g += `<rect x="14" y="${VY}" width="612" height="${refused ? 44 : 44}" rx="8" fill="${refused ? bad : ok}" fill-opacity="0.14" stroke="${refused ? bad : ok}"/>`;
+    if (refused) {
+      g += `<text x="26" y="${VY + 19}" font-size="12.5" fill="${bad}">LOAD REFUSED — the model does not start</text>`;
+      g += `<text x="26" y="${VY + 35}" font-size="10.5" font-family="monospace" fill="${ink2}">q1Decode='lut' and q1Band=${band} are mutually exclusive — run them as separate arms</text>`;
+    } else {
+      const kern = dec === 'lut' ? 'the table kernel (station 258)' : (band === 8 ? 'v14b, the shipped 8-row band' : 'v14b, the ' + band + '-row band');
+      g += `<text x="26" y="${VY + 19}" font-size="12.5" fill="${ok}">LOADS — decode runs on ${kern}</text>`;
+      g += `<text x="26" y="${VY + 35}" font-size="10.5" fill="${ink3}">${con === 'all' ? '708' : '804'} GPU jobs per word · ${dec === 'lut' ? 'not bit-identical to the default (it owes, and passed, the full ladder — station 260)' : 'bit-identical to the default, 0 ULP'}</text>`;
+    }
+
+    // ── what the laptop measured ───────────────────────────
+    const MY = VY + 60;
+    g += `<text x="14" y="${MY}" font-size="11" fill="${ink3}">measured on the RTX 3060, medium prompt, medians of three</text>`;
+    ARMS.forEach((a, i) => {
+      const y = MY + 12 + i * 18;
+      const on = !refused && a[2] === dec && a[3] === band && a[4] === con;
+      g += `<text x="14" y="${y + 10}" font-size="10.5" font-family="monospace" fill="${on ? ink : ink3}">${a[0]}</text>`;
+      const w = 150 * a[1] / 31.0;
+      g += `<rect x="380" y="${y}" width="${w.toFixed(1)}" height="12" rx="2" fill="${on ? trace : ink3}" opacity="${on ? 0.9 : 0.3}"/>`;
+      g += `<text x="${(380 + w + 8).toFixed(1)}" y="${y + 10}" font-size="10.5" fill="${on ? ink : ink3}">${a[1].toFixed(1)} words/s</text>`;
+    });
+    g += `<text x="14" y="${MY + 12 + 4 * 18 + 16}" font-size="10.5" fill="${ink3}">Bands 8 / 16 / 32 alone, one run each: 11.79 / 11.86 / 11.94 — −23% of GPU time, +0.6% of wall.</text>`;
+    svg.innerHTML = g;
+
+    $('#s262_load').textContent = refused ? 'REFUSED at load' : 'loads';
+    $('#s262_kern').textContent = refused ? '—' : (dec === 'lut' ? 'the table kernel' : 'v14b, ' + band + '-row band');
+    $('#s262_pass').textContent = refused ? '—' : (con === 'all' ? '708' : '804');
+    $('#s262_bit').textContent = refused ? '—' : (dec === 'lut' ? 'no — gated instead' : 'yes, 0 ULP');
+    const hit = ARMS.find((a) => !refused && a[2] === dec && a[3] === band && a[4] === con);
+    $('#s262_tps').textContent = hit ? hit[1].toFixed(1) + ' words/s' : 'not measured on this arm';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 263 ── */
+/* ── Station 263: the fix, the size, and the fingerprint ─ */
+if ($('#s263')) {
+  const svg = $('#s263_svg');
+  const bB = $('#s263_before'), bA = $('#s263_after');
+  const bT = $('#s263_tree'), bC = $('#s263_clean');
+  const RAW = { before: 25491919, after: 2390889 };   // commit 164d4711
+  const GZ = { before: 8.1e6, after: 516e3 };
+  const BUDGET = { gzOld: 9.5e6, gzNew: 0.75e6, rawOld: 28e6, rawNew: 3.5e6 };
+  const CHECKS = [
+    ['no static "../../…" path in the bundle', 'found 18'],
+    ['no repo-root filename keyed into it', 'found 18'],
+    ['no leftover import.meta.glob(…)', 'clean'],
+    ['no long inline base64 data: URL', 'found a 22 MB run'],
+  ];
+  let fixed = false, clean = false;
+  bB.addEventListener('click', () => { fixed = false; render(); });
+  bA.addEventListener('click', () => { fixed = true; render(); });
+  bT.addEventListener('click', () => { clean = false; render(); });
+  bC.addEventListener('click', () => { clean = true; render(); });
+
+  function render() {
+    bB.setAttribute('aria-pressed', String(!fixed));
+    bA.setAttribute('aria-pressed', String(fixed));
+    bT.setAttribute('aria-pressed', String(!clean));
+    bC.setAttribute('aria-pressed', String(clean));
+    const k = fixed ? 'after' : 'before';
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    // ── the two size bars ──────────────────────────────────
+    const BX = 130, BW = 396, MAXR = 28e6, MAXG = 9.5e6;
+    const mb = (n) => (n / 1e6).toFixed(n < 1e6 ? 3 : 2) + ' MB';
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">what a visitor downloads before one model weight moves</text>`;
+    const sizeBar = (y, val, max, budget, lab) => {
+      const w = Math.max(BW * val / max, 2), bx = BX + BW * budget / max;
+      return `<text x="14" y="${y + 13}" font-size="11.5" fill="${ink2}">${lab}</text>`
+        + `<rect x="${BX}" y="${y}" width="${w.toFixed(1)}" height="18" rx="3" fill="${val > budget ? bad : ok}" opacity="0.85"/>`
+        + `<line x1="${bx.toFixed(1)}" y1="${y - 5}" x2="${bx.toFixed(1)}" y2="${y + 23}" stroke="${ink3}" stroke-dasharray="3 2"/>`
+        + `<text x="${BX + BW + 12}" y="${y + 13}" font-size="11.5" fill="${ink}">${mb(val)}</text>`;
+    };
+    g += sizeBar(28, RAW[k], MAXR, BUDGET.rawNew, 'raw');
+    g += sizeBar(58, GZ[k], MAXG, BUDGET.gzNew, 'gzipped');
+    g += `<text x="14" y="98" font-size="10.5" fill="${ink3}">dashed line = the new budget. The old one, 28 MB / 9.5 MB, was fitted to this bundle.</text>`;
+
+    // ── the inlined pile ───────────────────────────────────
+    const PY = 118;
+    g += `<text x="14" y="${PY}" font-size="11" fill="${ink3}">files from the repository root pasted into the worker as base64</text>`;
+    if (!fixed) {
+      const FILES = [['ENGINE_TRACKER.md · the session ledger', 22354120], ['ralph_engine_log.txt', 504584],
+        ['package-lock.json', 60540], ['the other 14, plus the untracked deno.lock', 179644]];
+      let x = 14;
+      FILES.forEach((f, i) => {
+        const w = 612 * f[1] / 23098888;
+        g += `<rect x="${x.toFixed(1)}" y="${PY + 8}" width="${Math.max(w, 2).toFixed(1)}" height="20" rx="3" fill="${i === 0 ? bad : (i === 3 ? signal : trace)}" opacity="0.8"/>`;
+        x += w;
+      });
+      g += `<text x="14" y="${PY + 44}" font-size="11" fill="${ink}">18 files · 23,098,888 bytes encoded — and none of them can ever be read back</text>`;
+      g += `<text x="14" y="${PY + 60}" font-size="10.5" fill="${ink3}">the ledger alone is 22,354,120 of them, 88% of the whole download</text>`;
+    } else {
+      g += `<rect x="14" y="${PY + 8}" width="612" height="20" rx="3" fill="${card}" stroke="${line}" stroke-dasharray="4 3"/>`;
+      g += `<text x="320" y="${PY + 22}" text-anchor="middle" font-size="11" fill="${ink3}">none</text>`;
+      g += `<text x="14" y="${PY + 44}" font-size="11" fill="${ink}">0 files · the resolver only ever ran unbundled, so ignoring it costs nothing</text>`;
+      g += `<text x="14" y="${PY + 60}" font-size="10.5" fill="${ink3}">bundled builds reach shaders through the inlined getShader table instead</text>`;
+    }
+
+    // ── reproducibility ────────────────────────────────────
+    const RY = 210;
+    g += `<text x="14" y="${RY}" font-size="11" fill="${ink3}">the same commit, built twice — does the fingerprint identify the build?</text>`;
+    const sha = fixed ? '247a4f700b63140e (the served worker)' : (clean ? 'one sha' : 'a different sha');
+    const agree = fixed;
+    g += `<rect x="14" y="${RY + 8}" width="612" height="46" rx="7" fill="${agree ? ok : bad}" fill-opacity="0.13" stroke="${agree ? ok : bad}"/>`;
+    g += `<text x="26" y="${RY + 27}" font-size="12" fill="${ink}">${clean ? 'clean checkout' : 'working folder'} → sha256 <tspan font-family="monospace">${sha}</tspan></text>`;
+    g += `<text x="26" y="${RY + 44}" font-size="11" fill="${agree ? ok : bad}">${agree
+      ? 'both builds produce the same bytes — either one is canonical'
+      : 'the two builds differ — the map inlined untracked files, so your scratch notes ship'}</text>`;
+
+    // ── the standing guard ─────────────────────────────────
+    const GY = 278;
+    g += `<text x="14" y="${GY}" font-size="11" fill="${ink3}">the four checks added with the fix, run on every packaging test</text>`;
+    CHECKS.forEach((c, i) => {
+      const y = GY + 10 + i * 22, pass = fixed || i === 2;
+      g += `<circle cx="24" cy="${y + 7}" r="5.5" fill="${pass ? ok : bad}"/>`;
+      g += `<text x="38" y="${y + 11}" font-size="11" fill="${ink2}">${c[0]}</text>`;
+      g += `<text x="618" y="${y + 11}" text-anchor="end" font-size="11" fill="${pass ? ok : bad}">${pass ? 'pass' : c[1]}</text>`;
+    });
+    g += `<text x="14" y="${GY + 10 + 4 * 22 + 12}" font-size="10.5" fill="${ink3}">The base64 check walks the string by hand: a regex over 22 MB of it crashes V8.</text>`;
+    svg.innerHTML = g;
+
+    $('#s263_raw').textContent = RAW[k].toLocaleString() + ' B';
+    $('#s263_gz').textContent = mb(GZ[k]);
+    $('#s263_files').textContent = fixed ? '0' : '18 (one is untracked)';
+    $('#s263_repro').textContent = fixed ? 'byte-identical' : 'different bytes';
+    $('#s263_guard').textContent = fixed ? '4 of 4 pass' : '3 of 4 fail';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 264 ── */
+/* ── Station 264: the order contract caps parallelism ──── */
+if ($('#s264')) {
+  const svg = $('#s264_svg'), sl = $('#s264_rows');
+  const b4 = $('#s264_p4'), b8 = $('#s264_p8');
+  const N = 5120, SMS = 30, PER_SM = 6, WG_MAX = 256;   // 3060: 1536 threads / SM
+  const CAP = SMS * PER_SM * WG_MAX;                    // 46,080 resident threads
+  const ROWS = [16, 32, 64, 128];
+  // measured only where the engine actually has an arm (station 260's pair)
+  const MEASURED = { 64: '26.4 words/s measured', 128: '31.0 words/s measured — the laptop best' };
+  let partials = 4;
+  b4.addEventListener('click', () => { partials = 4; render(); });
+  b8.addEventListener('click', () => { partials = 8; render(); });
+  sl.addEventListener('input', render);
+
+  function geom(rows, p) {
+    const phys = Math.min(p, Math.max(1, Math.floor(WG_MAX / rows)));
+    const tpw = rows * phys, wg = Math.ceil(N / rows);
+    return { phys, accs: p / phys, tpw, wg, total: wg * tpw, occ: (wg * tpw) / CAP };
+  }
+
+  function render() {
+    b4.setAttribute('aria-pressed', String(partials === 4));
+    b8.setAttribute('aria-pressed', String(partials === 8));
+    const rows = ROWS[parseInt(sl.value, 10)], G = geom(rows, partials);
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    g += `<text x="14" y="16" font-size="12" fill="${ink}">one 5120-row projection · ${rows} rows a squad · ${G.phys} lane${G.phys === 1 ? '' : 's'} per row${G.accs > 1 ? ', ' + G.accs + ' partial sums each' : ''}</text>`;
+    g += `<text x="14" y="33" font-size="11" fill="${ink3}">${G.wg} squads × ${G.tpw} threads = ${G.total.toLocaleString()} threads, against ${CAP.toLocaleString()} the GPU can hold at once</text>`;
+
+    // ── the 30 cores, 6 slots each ─────────────────────────
+    const CY = 48, CW = 58, CH = 40, GAPX = 10, GAPY = 8, COLS = 9;
+    const slotsUsed = G.total / WG_MAX;                 // squads of 256-thread capacity
+    const perSM = slotsUsed / SMS;
+    g += `<text x="14" y="${CY + 8}" font-size="11" fill="${ink3}">the 3060's 30 cores — each holds 6 squads' worth of threads</text>`;
+    for (let s = 0; s < SMS; s++) {
+      const x = 14 + (s % COLS) * (CW + GAPX), y = CY + 16 + Math.floor(s / COLS) * (CH + GAPY);
+      g += `<rect x="${x}" y="${y}" width="${CW}" height="${CH}" rx="4" fill="${card}" stroke="${line}"/>`;
+      for (let k = 0; k < PER_SM; k++) {
+        const fill = Math.max(0, Math.min(1, perSM - k));
+        const sy = y + CH - 4 - (k + 1) * 5.6;
+        g += `<rect x="${x + 4}" y="${sy.toFixed(1)}" width="${(CW - 8) * fill}" height="4.4" rx="1.5" fill="${fill > 0 ? (partials === 4 ? trace : signal) : line}" opacity="0.9"/>`;
+      }
+    }
+    const gridBottom = CY + 16 + 4 * (CH + GAPY);
+
+    // ── the occupancy bar ──────────────────────────────────
+    const OY = gridBottom + 8, OX = 150, OW = 400;
+    g += `<text x="14" y="${OY + 13}" font-size="11.5" fill="${ink2}">GPU busy</text>`;
+    g += `<rect x="${OX}" y="${OY}" width="${OW}" height="18" rx="3" fill="${card}" stroke="${line}"/>`;
+    g += `<rect x="${OX}" y="${OY}" width="${(OW * Math.min(G.occ, 1)).toFixed(1)}" height="18" rx="3" fill="${G.occ >= 0.85 ? ok : (G.occ >= 0.4 ? trace : bad)}" opacity="0.85"/>`;
+    g += `<text x="${OX + OW + 8}" y="${OY + 13}" font-size="12" fill="${ink}">${(100 * G.occ).toFixed(0)}%</text>`;
+
+    // ── the verdict ────────────────────────────────────────
+    const VY = OY + 34;
+    const keeps = partials === 4;
+    g += `<rect x="14" y="${VY}" width="612" height="62" rx="8" fill="${keeps ? ok : bad}" fill-opacity="0.12" stroke="${keeps ? ok : bad}"/>`;
+    g += `<text x="26" y="${VY + 20}" font-size="12" fill="${ink}">${keeps
+      ? 'four partial sums, closed as ((p0+p1)+p2)+p3 — bit-identical everywhere'
+      : 'eight partial sums — a different closing order, so a different last bit'}</text>`;
+    g += `<text x="26" y="${VY + 38}" font-size="11" fill="${ink3}">${keeps
+      ? 'the thread count is pinned at 4 × 5120 = 20,480 whatever shape the squads are'
+      : 'this is what would lift the ceiling, and it costs the guarantee above'}</text>`;
+    g += `<text x="26" y="${VY + 55}" font-size="11" fill="${MEASURED[rows] && keeps ? trace : ink3}">${
+      (keeps && MEASURED[rows]) ? MEASURED[rows] : 'not built — derived from the doc\'s own rule, threads = lanes × N'}</text>`;
+    svg.innerHTML = g;
+
+    $('#s264_rowsV').textContent = rows + ' rows';
+    $('#s264_wg').textContent = G.wg;
+    $('#s264_tw').textContent = G.tpw + ' (limit 256)';
+    $('#s264_tot').textContent = G.total.toLocaleString();
+    $('#s264_occ').textContent = (100 * G.occ).toFixed(0) + '% of ' + CAP.toLocaleString();
+    $('#s264_bit').textContent = keeps ? 'yes' : 'no — the order changed';
   }
   render(); window.addEventListener('resize', render);
 }

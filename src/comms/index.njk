@@ -30,6 +30,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
   <symbol id="ci-send" viewBox="0 0 24 24"><path d="M3.5 11.2 20.2 4l-3.4 16-5.3-6.2zM11.5 13.8l8.7-9.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
   <symbol id="ci-clip" viewBox="0 0 24 24"><g transform="translate(0.9 1)"><path d="m17.5 11.5-6.1 6.1a4.3 4.3 0 0 1-6-6l7.4-7.4a3 3 0 0 1 4.2 4.2l-7.3 7.3a1.6 1.6 0 0 1-2.3-2.3l6.1-6.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g></symbol>
   <symbol id="ci-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15M9.5 3.5h5M7 6.5l.8 13a1.6 1.6 0 0 0 1.6 1.5h5.2a1.6 1.6 0 0 0 1.6-1.5l.8-13M10 10.5v6M14 10.5v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="ci-bell" viewBox="0 0 24 24"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.6 2.2H4.9zM10 20.6a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-chev" viewBox="0 0 24 24"><path d="m9.5 5 6.5 7-6.5 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-flash" viewBox="0 0 24 24"><path d="M13 2.5 5.5 13.5H11L10 21.5l7.7-11H12.3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
   <symbol id="ci-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
@@ -499,6 +500,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 
 .comms__rowbtn:focus-visible{opacity:1;outline:2px solid var(--accent,#6ef3c5)}
 @media (hover:none){.comms__rowbtn{opacity:.55}}
+.comms__rowbtn.comms__rowbtn--on{opacity:1;color:var(--accent,#6ef3c5)}
 .comms__chev{color:#3a4148;flex:none;display:flex;align-items:center}
 .comms__contacts-empty{padding:.65rem .3rem}
 .comms__notif{display:flex;align-items:center;gap:.6rem;background:rgba(110,243,197,.05);border:1px solid rgba(110,243,197,.25);border-radius:10px;padding:.55rem .75rem}
@@ -1038,16 +1040,22 @@ const renderRemoteChat = (item, opts = {}) => {
   let who = displayName(item.senderId);
   if (currentDmContact && item.sfp && currentDmContact.fp === item.sfp) who = currentDmContact.name || who;
   renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
-  if (!opts.silent) playPing(880);
+  if (!opts.silent) {
+    playPing(880);
+    const target = notifTargetNow();
+    notifyLocal({ tag: target.tag, title: who, body: item.text, url: target.url });
+  }
 };
 
-const packChatPlain = (text) => JSON.stringify({ v: 2, t: text, sfp: myFp || undefined });
+const packChatPlain = (text, extra) => JSON.stringify(Object.assign({ v: 2, t: text, sfp: myFp || undefined }, extra || {}));
 const unpackChatPlain = (raw) => {
   try {
     const o = JSON.parse(raw);
-    if (o && o.v === 2 && typeof o.t === 'string') return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null };
+    if (o && o.v === 2 && typeof o.t === 'string') {
+      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null };
+    }
   } catch (_) {}
-  return { text: raw, sfp: null };
+  return { text: raw, sfp: null, ctl: null };
 };
 
 const handleNostrMsg = async (msgEvent) => {
@@ -1066,6 +1074,7 @@ const handleNostrMsg = async (msgEvent) => {
         const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
         text = unpacked.text;
         sfp = unpacked.sfp;
+        if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
       } catch { return; }
     } else if (typeof content.text === 'string') {
       text = content.text;
@@ -1158,13 +1167,161 @@ const rememberRoom = (roomName, b64Key) => {
   const list = savedRooms();
   const i = list.findIndex((r) => r.room === roomName);
   const prev = i >= 0 ? list[i] : null;
-  const entry = { room: roomName, key: b64Key, label: (prev && prev.label) || roomName, joinedAt: (prev && prev.joinedAt) || Date.now(), lastSeen: Date.now() };
+  const entry = Object.assign({}, prev || {}, { room: roomName, key: b64Key, label: (prev && prev.label) || roomName, joinedAt: (prev && prev.joinedAt) || Date.now(), lastSeen: Date.now() });
   if (i >= 0) list[i] = entry; else list.unshift(entry);
   setSavedRooms(list.slice(0, 50));
 };
 const forgetRoom = (roomName) => setSavedRooms(savedRooms().filter((r) => r.room !== roomName));
 const touchRoom = (roomName) => { const list = savedRooms(); const r = list.find((x) => x.room === roomName); if (r) { r.lastSeen = Date.now(); setSavedRooms(list); } };
 const renameRoom = (roomName, label) => { const list = savedRooms(); const r = list.find((x) => x.room === roomName); if (r) { r.label = String(label || '').trim().slice(0, 40) || r.room; setSavedRooms(list); } };
+const roomNotifyEntry = (roomName) => savedRooms().find((r) => r.room === roomName) || null;
+const roomRings = (entry) => (entry && entry.rings && typeof entry.rings === 'object') ? entry.rings : {};
+const RING_TOKEN_RE = /^[A-Za-z0-9_-]{20,64}$/;
+
+const roomKeyCache = new Map();
+const roomCryptoKey = (entry) => {
+  if (!entry || !entry.key) return Promise.resolve(null);
+  if (!roomKeyCache.has(entry.key)) roomKeyCache.set(entry.key, deriveKey(entry.key).catch(() => null));
+  return roomKeyCache.get(entry.key);
+};
+
+const notifAllowed = () => 'Notification' in window && Notification.permission === 'granted' && !!navigator.serviceWorker;
+const pageAway = () => document.hidden || !document.hasFocus();
+const notifyLocal = async (spec) => {
+  if (!spec || !pageAway() || !notifAllowed()) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    await reg.showNotification(spec.title || 'comms', {
+      body: spec.body || 'new message',
+      tag: spec.tag || 'comms-msg',
+      icon: '/assets/img/icon-192x192.png',
+      badge: '/assets/img/badge.svg',
+      data: { url: spec.url || '/comms/' },
+      renotify: true
+    });
+  } catch (_) {}
+};
+const closeLocalNotif = async (tag) => {
+  if (!navigator.serviceWorker) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    (await reg.getNotifications({ tag })).forEach((note) => note.close());
+  } catch (_) {}
+};
+const notifTargetNow = () => {
+  if (currentDmContact) return { tag: 'comms-dm:' + currentDmContact.fp, url: '/comms/' };
+  if (currentRoomName && !isDmRoom(currentRoomName)) {
+    const entry = roomNotifyEntry(currentRoomName);
+    return { tag: 'comms-room:' + currentRoomName, url: entry ? '/comms/' + formatHash(entry.room, entry.key) : '/comms/' };
+  }
+  return { tag: 'comms-msg', url: '/comms/' };
+};
+
+const handleRoomCtl = (ctl, sfp) => {
+  if (!ctl || ctl.k !== 'ring' || !currentRoomName || isDmRoom(currentRoomName)) return;
+  const token = (typeof ctl.token === 'string' && RING_TOKEN_RE.test(ctl.token)) ? ctl.token : null;
+  if (!token || (ringToken && token === ringToken)) return;
+  const list = savedRooms();
+  const entry = list.find((r) => r.room === currentRoomName);
+  if (!entry) return;
+  const rings = roomRings(entry);
+  if (ctl.off) delete rings[token];
+  else rings[token] = { name: String(ctl.name || '').slice(0, 32), sfp: sfp || null, ts: Date.now() };
+  const keys = Object.keys(rings);
+  if (keys.length > 20) keys.sort((a, b) => (rings[a].ts || 0) - (rings[b].ts || 0)).slice(0, keys.length - 20).forEach((k) => { delete rings[k]; });
+  entry.rings = rings;
+  setSavedRooms(list);
+};
+
+const publishRoomCtl = async (ctl) => {
+  if (!chatKey || !currentRoomName || isDmRoom(currentRoomName) || !chatTopic || !chatPersist) return false;
+  const cmid = newCmid();
+  seenCmids.add(cmid);
+  try {
+    const enc = await encryptText(chatKey, packChatPlain('', { ctl }));
+    if (chatAction) { try { chatAction.send({ cmid, enc }); } catch (_) {} }
+    rememberSentCmid(cmid);
+    const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }));
+    let sent = false;
+    const sockets = getRelaySockets() || {};
+    for (const ws of Object.values(sockets)) {
+      if (ws && ws.readyState === 1) { try { ws.send(eventStr); sent = true; } catch (_) {} }
+    }
+    return sent;
+  } catch (_) { return false; }
+};
+
+const announceRoomRing = async () => {
+  if (!currentRoomName || !chatKey || isDmRoom(currentRoomName)) return;
+  const list = savedRooms();
+  const entry = list.find((r) => r.room === currentRoomName);
+  if (!entry) return;
+  const stale = (Date.now() - (entry.announcedAt || 0)) > 7 * 86400000;
+  if (entry.notify && ringToken && (entry.announced !== ringToken || stale)) {
+    const sent = await publishRoomCtl({ k: 'ring', token: ringToken, name: (myProfile && myProfile.name) || '' });
+    if (sent) {
+      const fresh = entry.announced !== ringToken;
+      entry.announced = ringToken;
+      entry.announcedAt = Date.now();
+      setSavedRooms(list);
+      if (fresh) sys('alerts on — this device gets pinged for messages in this room.');
+    }
+  } else if (!entry.notify && entry.announced) {
+    const sent = await publishRoomCtl({ k: 'ring', token: entry.announced, off: true });
+    if (sent) { entry.announced = null; setSavedRooms(list); sys('alerts off for this room.'); }
+  }
+};
+
+const setRoomNotify = async (roomName, on) => {
+  const entry = roomNotifyEntry(roomName);
+  if (!entry) return;
+  if (on) {
+    if (!window.MentriaPush || !MentriaPush.isSupported()) {
+      const iosTab = /iPhone|iPad|iPod/.test(navigator.userAgent) && !navigator.standalone;
+      sys(iosTab ? 'alerts need comms installed on your home screen first (share button → add to home screen).' : 'alerts are not available in this browser.');
+      return;
+    }
+    if (MentriaPush.permission() !== 'granted') {
+      const ok = await MentriaPush.requestPermission();
+      if (!ok) { sys('alerts stay off — notifications were not allowed.'); return; }
+    }
+    if (!ringToken) await initRingToken();
+    if (!ringToken) { sys('could not register this device for alerts — try again in a moment.'); return; }
+  }
+  const list = savedRooms();
+  const fresh = list.find((r) => r.room === roomName);
+  if (!fresh) return;
+  fresh.notify = !!on;
+  setSavedRooms(list);
+  renderContacts();
+  if (currentRoomName === roomName) { await announceRoomRing(); return; }
+  if (on) { window.location.hash = formatHash(fresh.room, fresh.key); setView('chat'); }
+};
+
+if (new URLSearchParams(window.location.search).has('debug')) {
+  window.__commsDebug = { setRoomNotify, announceRoomRing, publishRoomCtl, savedRooms, setSavedRooms, setRingToken: (t) => { ringToken = t; }, ringToken: () => ringToken };
+}
+
+let lastRoomRingAt = 0;
+const ringRoomMembers = () => {
+  if (!currentRoomName || currentDmContact || isDmRoom(currentRoomName)) return;
+  if (!window.MentriaPush || !MentriaPush.ring) return;
+  const entry = roomNotifyEntry(currentRoomName);
+  const rings = roomRings(entry);
+  const connected = new Set();
+  for (const p of peerProfiles.values()) if (p && p.ring) connected.add(p.ring);
+  const targets = Object.keys(rings).filter((tk) => tk !== ringToken && !connected.has(tk));
+  if (!targets.length || Date.now() - lastRoomRingAt < 8000) return;
+  lastRoomRingAt = Date.now();
+  targets.forEach((tk) => {
+    MentriaPush.ring(tk, 'comms-msg').then((res) => {
+      if (!(res && res.reason === 'unknown-token')) return;
+      const list = savedRooms();
+      const e = list.find((r) => r.room === entry.room);
+      if (e && e.rings && e.rings[tk]) { delete e.rings[tk]; setSavedRooms(list); }
+    }).catch(() => {});
+  });
+};
 
 const sentCmidsFor = (fp) => {
   try {
@@ -1191,6 +1348,7 @@ const publishChat = async (text, cmid) => {
         try { ws.send(eventStr); } catch {}
       }
     }
+    ringRoomMembers();
   } catch (err) {
     console.warn('chat publish failed:', err);
   }
@@ -1284,7 +1442,12 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   }
 
   currentRoomName = roomName;
-  if (chatKey && b64Key) { renderContacts(); subscribeUnread(); }
+  if (chatKey && b64Key) {
+    renderContacts();
+    subscribeUnread();
+    closeLocalNotif('comms-room:' + roomName);
+    setTimeout(() => { if (seq === joinSeq) announceRoomRing(); }, 3000);
+  }
   if (opts.contact) currentDmContact = opts.contact;
   els.chatTitle.textContent = opts.contact ? (opts.contact.name || opts.contact.fp) : roomName;
   paintAvatar(els.chatAvatar, opts.contact ? (opts.contact.name || opts.contact.fp) : '#', opts.contact ? opts.contact.fp : roomName);
@@ -1369,6 +1532,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
         const unpacked = unpackChatPlain(await decryptText(chatKey, data.enc));
         text = unpacked.text;
         sfp = unpacked.sfp;
+        if (unpacked.ctl) { if (cmid) seenCmids.add(cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
       } catch { return; }
     } else {
       text = String(data && data.text || '');
@@ -2002,12 +2166,23 @@ const handleSideMsg = async (msgEvent) => {
       if (content && typeof content.cmid === 'string' && content.cmid.startsWith(selfId + ':')) return;
       const entry = unreadMap[k] || { n: 0, lastTs: savedRoom.lastSeen || 0 };
       if (ts <= entry.lastTs) return;
+      let preview = null;
+      if (content && content.enc) {
+        try {
+          const key = await roomCryptoKey(savedRoom);
+          const unpacked = key ? unpackChatPlain(await decryptText(key, content.enc)) : null;
+          if (unpacked && unpacked.ctl) return;
+          if (unpacked && unpacked.sfp && myFp && unpacked.sfp === myFp) return;
+          preview = unpacked ? unpacked.text : null;
+        } catch (_) {}
+      }
       entry.n = (entry.n || 0) + 1;
       entry.lastTs = ts;
       unreadMap[k] = entry;
       try { CID.setUnread(unreadMap); } catch (_) {}
       renderContacts();
       syncOsBadge();
+      notifyLocal({ tag: 'comms-room:' + savedRoom.room, title: savedRoom.label || savedRoom.room, body: preview, url: '/comms/' + formatHash(savedRoom.room, savedRoom.key) });
       return;
     }
     if (currentDmContact && currentDmContact.fp === fp) {
@@ -2113,6 +2288,7 @@ const initRingToken = async () => {
     if (window.MentriaStore) MentriaStore.set('comms', 'ring_token', token);
     refreshMyCode();
     broadcastProfile();
+    announceRoomRing();
     try {
       const announced = MentriaStore.get('comms', 'ring_announced');
       if (announced !== token) {
@@ -2208,7 +2384,7 @@ const syncOsBadge = async () => {
       const reg = await navigator.serviceWorker.ready;
       const notes = await reg.getNotifications();
       notes.forEach((note) => {
-        if (note.tag === 'comms-msg' || note.tag === 'comms-ring') note.close();
+        if (note.tag && String(note.tag).startsWith('comms-')) note.close();
       });
     }
   } catch (_) {}
@@ -2660,6 +2836,15 @@ const renderRoomsSection = () => {
     const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
     row.addEventListener('click', open);
     row.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    const bell = document.createElement('button');
+    bell.type = 'button';
+    const alertsOn = !!r.notify;
+    bell.className = 'comms__rowbtn comms__rowbtn--bell' + (alertsOn ? ' comms__rowbtn--on' : '');
+    bell.title = alertsOn ? 'alerts on — tap to stop pinging this device' : 'ping this device for messages here';
+    bell.setAttribute('aria-label', bell.title);
+    bell.setAttribute('aria-pressed', String(alertsOn));
+    bell.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-bell"></use></svg>';
+    bell.addEventListener('click', (e) => { e.stopPropagation(); setRoomNotify(r.room, !alertsOn); });
     const ren = document.createElement('button');
     ren.type = 'button';
     ren.className = 'comms__rowbtn';
@@ -2699,7 +2884,7 @@ const renderRoomsSection = () => {
       renderContacts();
       subscribeUnread();
     });
-    row.append(ren, rm);
+    row.append(bell, ren, rm);
     els.contactList.append(row);
   }
 };

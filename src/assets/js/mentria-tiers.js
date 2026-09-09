@@ -103,7 +103,7 @@ export const TIERS = {
     visionConfigExport: 'QWEN35_VL_27B_VISION_CONFIG',
     streamingLoad: true,
     appleMaxSeq: 8192,
-    nvidiaMaxSeq: 2048,
+    nvidiaMaxSeq: 3072,
     discreteMaxSeq: 1024
   }
 };
@@ -360,7 +360,7 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
     allowTiedEmbed: true,
     tokenizerUrl: shardBase
   };
-  if (vendor === 'nvidia' && t.nvidiaMaxSeq) { opts.residualFusion = true; opts.q1Decode = 'lut'; opts.q1Concat = 'all'; opts.bindGroupCache = true; opts.q1LutSkew = true; }
+  if (vendor === 'nvidia' && t.nvidiaMaxSeq) { opts.residualFusion = true; opts.q1Decode = 'lut'; opts.q1Concat = 'all'; opts.bindGroupCache = true; opts.q1LutSkew = true; opts.prefillTile = 'arow'; }
   if (vendor === 'apple' && t.appleMaxSeq) opts.kvF16 = true;
   if (t.streamingLoad) opts.streamingLoad = true;
   if (vision) {

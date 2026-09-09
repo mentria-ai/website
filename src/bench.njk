@@ -181,8 +181,10 @@ async function runTier(id, vision, runs, force, profile, quick, label) {
     run.initResult = compact(initRes, 0);
     run.initS = +((performance.now() - tInit) / 1000).toFixed(2);
     const opts = await Tiers.loadOptionsFor(id, { vision });
-    run.maxSeq = opts && opts.config && opts.config.attention ? opts.config.attention.maxSeq : null;
-    const loadRes = await engine.loadModel(run.initOptions ? Object.assign({}, opts, run.initOptions) : opts);
+    run.maxSeq = merged && merged.config && merged.config.attention ? merged.config.attention.maxSeq : null;
+    const merged = run.initOptions ? Object.assign({}, opts, run.initOptions) : opts;
+    if (run.initOptions && run.initOptions.maxSeq && merged.config && merged.config.attention) merged.config = Object.assign({}, merged.config, { attention: Object.assign({}, merged.config.attention, { maxSeq: run.initOptions.maxSeq }) });
+    const loadRes = await engine.loadModel(merged);
     run.loadResult = compact(loadRes, 0);
   } catch (e) {
     run.loadError = String(e && e.message || e);

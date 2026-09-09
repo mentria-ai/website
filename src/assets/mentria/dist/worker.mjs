@@ -36724,7 +36724,21 @@ function Dn(e, t, n, r, a = 1, s = 1, i = null, o = null) {
 var Hi = class {
   constructor(e, t = {}) {
     if (!e) throw new Error("SpecStateManager: device required");
-    this.device = e, this.numSlots = t.numSlots ?? 2, this.poolBuf = null, this.bundleSize = 0, this.layout = [], this.slotInUse = [], this.initialized = !1;
+    this.device = e, this.numSlots = t.numSlots ?? 2, this.poolBuf = null, this.bundleSize = 0, this.layout = [], this.slotInUse = [], this.initialized = !1, this._lazyModel = null;
+  }
+  deferInitialize(e) {
+    if (!e || !Array.isArray(e.blocks)) throw new Error("SpecStateManager.deferInitialize: model.blocks required");
+    if (this.poolBuf) {
+      try {
+        this.poolBuf.destroy();
+      } catch {
+      }
+      this.poolBuf = null;
+    }
+    this.layout = [], this.slotInUse = [], this.initialized = !1, this.bundleSize = 0, this._lazyModel = e;
+  }
+  _ensureInitialized() {
+    !this.initialized && this._lazyModel && this.initialize(this._lazyModel);
   }
   initialize(e) {
     if (!e || !Array.isArray(e.blocks)) throw new Error("SpecStateManager.initialize: model.blocks required");
@@ -36777,16 +36791,17 @@ var Hi = class {
     }), this.slotInUse = new Array(this.numSlots).fill(!1), this.initialized = !0;
   }
   _acquireSlot() {
+    this._ensureInitialized();
     for (let e = 0; e < this.numSlots; e++) if (!this.slotInUse[e])
       return this.slotInUse[e] = !0, e;
     throw new Error(`SpecStateManager: all ${this.numSlots} snapshot slots in use (caller forgot to release?)`);
   }
   _releaseSlot(e) {
-    if (e < 0 || e >= this.numSlots) throw new Error(`SpecStateManager: invalid slot ${e}`);
+    if (this._ensureInitialized(), e < 0 || e >= this.numSlots) throw new Error(`SpecStateManager: invalid slot ${e}`);
     this.slotInUse[e] = !1;
   }
   snapshot(e = 0) {
-    if (!this.initialized) throw new Error("SpecStateManager.snapshot: not initialized — call initialize(model) first");
+    if (this._ensureInitialized(), !this.initialized) throw new Error("SpecStateManager.snapshot: not initialized — call initialize(model) first");
     if (this.layout.length === 0) return {
       slot: this._acquireSlot(),
       preSeqLen: e,
@@ -36809,7 +36824,7 @@ var Hi = class {
     };
   }
   restore(e) {
-    if (!this.initialized) throw new Error("SpecStateManager.restore: not initialized");
+    if (this._ensureInitialized(), !this.initialized) throw new Error("SpecStateManager.restore: not initialized");
     if (!e || typeof e.slot != "number") throw new Error("SpecStateManager.restore: invalid snapshot handle");
     if (!this.slotInUse[e.slot]) throw new Error(`SpecStateManager.restore: slot ${e.slot} is not in use (double-restore or dropped snapshot?)`);
     if (this.layout.length === 0) {
@@ -36822,7 +36837,7 @@ var Hi = class {
     this.device.queue.submit([n.finish()]), this._releaseSlot(e.slot);
   }
   drop(e) {
-    !e || typeof e.slot != "number" || this.slotInUse[e.slot] && this._releaseSlot(e.slot);
+    this._ensureInitialized(), !(!e || typeof e.slot != "number") && this.slotInUse[e.slot] && this._releaseSlot(e.slot);
   }
   destroy() {
     if (this.poolBuf) {
@@ -36832,7 +36847,7 @@ var Hi = class {
       }
       this.poolBuf = null;
     }
-    this.layout = [], this.slotInUse = [], this.initialized = !1, this.bundleSize = 0;
+    this.layout = [], this.slotInUse = [], this.initialized = !1, this.bundleSize = 0, this._lazyModel = null;
   }
 }, Qi = "kivi-rollover", ji = "chunked-decode-state";
 function Yi(e) {
@@ -38624,7 +38639,7 @@ var an = class Lt {
     return this._residentTrimReleases = (this._residentTrimReleases || 0) + t, t;
   }
   _ensureSpecState() {
-    this.specStateManager && !this.specStateManager.initialized && this.specStateManager.initialize(this);
+    this.specStateManager && this.specStateManager._ensureInitialized();
   }
   _allocateScratch() {
     const t = this.device, n = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST, r = this.hiddenSize * 4;
@@ -38989,7 +39004,7 @@ var an = class Lt {
     const n = t && Number.isInteger(t.maxSeq) && t.maxSeq > 0 ? { maxSeq: t.maxSeq } : void 0;
     n && (this.maxSeq = n.maxSeq);
     for (const r of this.blocks) r.layerType === "attention" ? r.layer.initCache(n) : r.layer.initState(n);
-    this.specStateManager && (this.residentTrim && this.residentTrim.spec ? this.specStateManager.destroy() : this.specStateManager.initialize(this));
+    this.specStateManager && (this.residentTrim && this.residentTrim.spec ? this.specStateManager.deferInitialize(this) : this.specStateManager.initialize(this));
   }
   captureAttentionCursors() {
     const t = [];

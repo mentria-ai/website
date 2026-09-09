@@ -103,7 +103,7 @@ export const TIERS = {
     visionConfigExport: 'QWEN35_VL_27B_VISION_CONFIG',
     streamingLoad: true,
     appleMaxSeq: 8192,
-    nvidiaMaxSeq: 3072,
+    nvidiaMaxSeq: 2048,
     discreteMaxSeq: 1024
   }
 };

@@ -793,6 +793,7 @@
       "status_checking_webgpu": "Verificando WebGPU…",
       "status_loading_model": "Carregando modelo…",
       "status_generating": "Gerando…",
+      "counter": "{n} tokens · {tps} tok/s",
       "status_ready": "Pronto",
       "status_model_deleted": "Modelo excluído. Recarregue para baixar novamente.",
       "tier_label": "Qualidade do modelo",

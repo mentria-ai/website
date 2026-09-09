@@ -793,6 +793,7 @@
       "status_checking_webgpu": "Vérification WebGPU…",
       "status_loading_model": "Chargement du modèle…",
       "status_generating": "Génération…",
+      "counter": "{n} jetons · {tps} tok/s",
       "status_ready": "Prêt",
       "status_model_deleted": "Modèle supprimé. Recharge pour le retélécharger.",
       "tier_label": "Qualité du modèle",

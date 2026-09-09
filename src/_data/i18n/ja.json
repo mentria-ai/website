@@ -793,6 +793,7 @@
       "status_checking_webgpu": "WebGPUを確認中…",
       "status_loading_model": "モデル読込中…",
       "status_generating": "生成中…",
+      "counter": "{n} トークン · {tps} tok/s",
       "status_ready": "準備完了",
       "status_model_deleted": "モデル削除済み。再読込して再ダウンロード。",
       "tier_label": "モデル品質",

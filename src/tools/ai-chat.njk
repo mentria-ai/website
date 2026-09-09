@@ -23,6 +23,7 @@ eleventyComputed:
   <div class="ac__status" id="ac-status">
     <span class="ac__status-dot" id="ac-status-dot"></span>
     <span class="ac__status-text" id="ac-status-text" role="status" aria-live="polite">{{ "tool.ai-chat.status_checking_webgpu" | t }}</span>
+    <span class="ac__counter" id="ac-counter" hidden></span>
     <select class="ac__tier" id="ac-tier" aria-label="{{ 'tool.ai-chat.tier_label' | t }}" hidden></select>
     <button class="ac__delete-btn" id="ac-clear-chat" title="{{ 'tool.ai-chat.btn_new_chat' | t }}" style="display:none;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -101,6 +102,7 @@ const COPY = {
   routeTool:           {{ ("tool.ai-chat.route_tool"            | t) | dump | safe }},
   routeChat:           {{ ("tool.ai-chat.route_chat"            | t) | dump | safe }},
   statusGenerating:    {{ ("tool.ai-chat.status_generating"     | t) | dump | safe }},
+  counter:             {{ ("tool.ai-chat.counter"               | t) | dump | safe }},
   statusReady:         {{ ("tool.ai-chat.status_ready"          | t) | dump | safe }},
   statusModelDeleted:  {{ ("tool.ai-chat.status_model_deleted"  | t) | dump | safe }},
   imgAltAttachedShort: {{ ("tool.ai-chat.img_alt_attached_short" | t) | dump | safe }},
@@ -159,6 +161,19 @@ const MAX_TOKENS = 512;
 /* ── Status helpers ────────────────────────────────────────────────────── */
 const statusDot  = document.getElementById('ac-status-dot');
 const statusText = document.getElementById('ac-status-text');
+const counterEl = document.getElementById('ac-counter');
+let counterN = 0, counterFirst = 0, counterLast = 0;
+function counterReset() { counterN = 0; counterFirst = 0; counterLast = 0; counterEl.hidden = true; counterEl.textContent = ''; }
+function counterTick() {
+  const now = performance.now();
+  counterN++;
+  if (!counterFirst) counterFirst = now;
+  counterLast = now;
+  const secs = (counterLast - counterFirst) / 1000;
+  const tps = counterN > 1 && secs > 0.05 ? ((counterN - 1) / secs).toFixed(1) : '';
+  counterEl.textContent = COPY.counter.replace('{n}', String(counterN)).replace('{tps}', tps || '…');
+  counterEl.hidden = false;
+}
 function setStatus(state, text) {
   statusDot.className = 'ac__status-dot ac__status-dot--' + state;
   statusText.textContent = text;
@@ -908,6 +923,7 @@ function runApp(MentriaEngine, Tiers) {
     generating = true;
     setSendMode(true);
     setStatus('generating', deepThink ? COPY.thinking : COPY.statusGenerating);
+    counterReset();
     abortCtrl = new AbortController();
 
     if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
@@ -1090,6 +1106,7 @@ function runApp(MentriaEngine, Tiers) {
           if (typeof event.token === 'string' && event.token.length > 0) {
             // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
             if (/^<\|[^|]*\|>$/.test(event.token)) return;
+            counterTick();
             fullText += event.token;
             if (!pendingPaint) {
               pendingPaint = true;
@@ -1293,6 +1310,14 @@ function runApp(MentriaEngine, Tiers) {
   font-size: 0.75rem;
   color: var(--term-muted);
   flex-shrink: 0;
+}
+
+.ac__counter {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--term-muted);
+  white-space: nowrap;
 }
 
 .ac__status-dot {

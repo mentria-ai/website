@@ -206,6 +206,7 @@ async function runTier(id, vision, runs, force, profile, quick, label) {
     const userText = run.genOptions.length > 1 ? 'Variant ' + (run.genOptions.indexOf(g) + 1) + ': ' + p.user : p.user;
     for (let r = 0; r < runs; r++) {
       setStatus(id + ': ' + p.id + gLabel + ' run ' + (r + 1) + '/' + runs);
+      const visibility = { start: document.visibilityState, focusStart: document.hasFocus() };
       let tokens = 0, tFirst = 0, text = '', tPrev = 0;
       const gaps = [];
       const params = Object.assign({}, g || {}, {
@@ -248,7 +249,7 @@ async function runTier(id, vision, runs, force, profile, quick, label) {
       addRow(row);
       const promptTokens = finalEvent && typeof finalEvent.committedTokens === 'number' && typeof finalEvent.numTokens === 'number' ? finalEvent.committedTokens - finalEvent.numTokens : null;
       const prefillTps = promptTokens && ttft ? +((promptTokens / (ttft / 1000))).toFixed(1) : null;
-      run.prompts.push({ id: p.id + gLabel, gen: g || null, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens, totalS: row.totalS, promptTokens, prefillTps, engineTps: finalEvent ? finalEvent.tokensPerSecond : null, gapMs: { min: Math.round(percentile(gaps, 0)), median: Math.round(percentile(gaps, 0.5)), p90: Math.round(percentile(gaps, 0.9)), max: Math.round(percentile(gaps, 1)) }, promptChars: p.user.length + p.system.length, image: !!p.image, profileFlags: !!params.tsAll2, profiles, statsBefore, statsAfter, finalEvent, sample: row.sample, answer: text.slice(0, 1500) });
+      run.prompts.push({ id: p.id + gLabel, gen: g || null, run: r + 1, ttftMs: ttft, decodeTps: decode, tokens, totalS: row.totalS, promptTokens, prefillTps, engineTps: finalEvent ? finalEvent.tokensPerSecond : null, gapMs: { min: Math.round(percentile(gaps, 0)), median: Math.round(percentile(gaps, 0.5)), p90: Math.round(percentile(gaps, 0.9)), max: Math.round(percentile(gaps, 1)) }, promptChars: p.user.length + p.system.length, image: !!p.image, profileFlags: !!params.tsAll2, profiles, statsBefore, statsAfter, finalEvent, visibility: Object.assign(visibility, { end: document.visibilityState, focusEnd: document.hasFocus() }), sample: row.sample, answer: text.slice(0, 1500) });
       log(id + ' ' + p.id + gLabel + ': ttft ' + ttft + ' ms, ' + decode + ' tok/s, ' + tokens + ' tokens, gap median ' + Math.round(percentile(gaps, 0.5)) + ' ms (p90 ' + Math.round(percentile(gaps, 0.9)) + ') · "' + row.sample + '"');
     }
   }

@@ -364,8 +364,8 @@ class MentriaRadio {
       const artUrl = artFile ? ART_BASE + artFile : "";
       navigator.mediaSession.metadata = new MediaMetadata({
         title: this.currentTrack.title || COPY.untitled,
-        artist: "Mentria Infinite Radio",
-        album: (this.currentTrack.mood || "").replace(/_/g, " "),
+        artist: this.currentTrack.artist || "Mentria Infinite Radio",
+        album: this.currentTrack.album_title || (this.currentTrack.mood || "").replace(/_/g, " "),
         artwork: artUrl ? [
           { src: artUrl, sizes: "512x512", type: "image/jpeg" },
         ] : [],

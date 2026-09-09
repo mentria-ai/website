@@ -1,8 +1,10 @@
 export function selectNextTrack(catalog, history, preferences, currentMood, currentEnergy) {
   const recentIds = history.slice(-20).map((t) => t.id);
+  const current = history[history.length - 1] || null;
+  const pool = albumPool(catalog, history, current);
 
-  const candidates = catalog.filter((t) => !recentIds.includes(t.id));
-  if (candidates.length === 0) return catalog[Math.floor(Math.random() * catalog.length)];
+  const candidates = pool.filter((t) => !recentIds.includes(t.id));
+  if (candidates.length === 0) return pool[Math.floor(Math.random() * pool.length)];
 
   const scored = candidates.map((track) => {
     let score = 1.0;
@@ -65,4 +67,29 @@ function moodAffinity(preferences, catalog, mood) {
   }
   if (count === 0) return 1.0;
   return Math.max(0.2, 1 + (signal / count) * 0.3);
+}
+
+const ALBUM_RUN = 3;
+
+function albumPool(catalog, history, current) {
+  const albums = {};
+  for (const t of catalog) {
+    if (!t.album) return catalog;
+    (albums[t.album] = albums[t.album] || []).push(t);
+  }
+  const ids = Object.keys(albums);
+  if (ids.length < 2) return catalog;
+  const sourceOf = (id) => albums[id][0].source || "mentria";
+  let run = 0;
+  for (let i = history.length - 1; i >= 0 && history[i].album === (current && current.album); i--) run++;
+  if (current && run < ALBUM_RUN && run < albums[current.album].length) return albums[current.album];
+  const playedIds = new Set(history.map((t) => t.id));
+  const wantSource = current && sourceOf(current.album) === "mentria" ? "external" : "mentria";
+  const pick = ids.filter((id) => id !== (current && current.album) && (wantSource === "mentria" ? sourceOf(id) === "mentria" : sourceOf(id) !== "mentria"));
+  const fallback = ids.filter((id) => id !== (current && current.album));
+  const choices = pick.length ? pick : fallback;
+  choices.sort((a, b) => albums[a].filter((t) => playedIds.has(t.id)).length / albums[a].length - albums[b].filter((t) => playedIds.has(t.id)).length / albums[b].length);
+  const least = choices[0];
+  const tie = choices.filter((id) => albums[id].filter((t) => playedIds.has(t.id)).length / albums[id].length === albums[least].filter((t) => playedIds.has(t.id)).length / albums[least].length);
+  return albums[tie[Math.floor(Math.random() * tie.length)]];
 }

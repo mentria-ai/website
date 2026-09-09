@@ -117,7 +117,7 @@ footer{padding-top:28px;color:var(--ink-3);font-size:13px;font-family:var(--mono
 
 <div class="wrap">
 <header class="hero">
-  <div class="eyebrow">mentria-engine · 274 things to poke at</div>
+  <div class="eyebrow">mentria-engine · 284 things to poke at</div>
   <h1>Inside the One-Bit Engine</h1>
   <p class="lede">A browser engine that runs a 27-billion-parameter model where every weight is a single bit. Each station below is one surprising fact. Move the control, watch what changes. Words with a dotted underline explain themselves — hover, or tap on a phone. On a phone, diagrams swipe sideways.</p>
   <nav class="rail">
@@ -416,6 +416,18 @@ footer{padding-top:28px;color:var(--ink-3);font-size:13px;font-family:var(--mono
       <a href="#s272">272 · One two-line swap: 8% slower in one tile, 4%…</a>
       <a href="#s273">273 · Each extra word of context costs 128 KiB, an…</a>
       <a href="#s274">274 · A 30-word prompt cannot beat 1.5 seconds her…</a>
+    </div>
+    <div class="part"><span class="part-title">Part XII · Where the memory went, and what it took to get it back</span>
+      <a href="#s275">275 · 128 MiB tipped the card into a 190 ms stall…</a>
+      <a href="#s276">276 · The driver keeps every small buffer forever…</a>
+      <a href="#s277">277 · The same fix returns 366 MiB on a long promp…</a>
+      <a href="#s278">278 · The engine reserves two rewind slots and can…</a>
+      <a href="#s279">279 · A 2.4 GB shadow of weights the engine threw…</a>
+      <a href="#s280">280 · Two fields added up to 5,304 MiB. Neither on…</a>
+      <a href="#s281">281 · The card idles at 210 MHz, and pinning it at…</a>
+      <a href="#s282">282 · The probe ran on the wrong thread, and the b…</a>
+      <a href="#s283">283 · A 299 MiB saving that existed at load and no…</a>
+      <a href="#s284">284 · Eight arms, one process counter, and only on…</a>
     </div>
   </nav>
 </header>
@@ -8309,6 +8321,290 @@ TTFT = 0.63 s + 322 us x jobs + GPU time
       <svg id="s274_svg" viewBox="0 0 640 428" width="100%" height="428" role="img" aria-label="the three terms of the wait before the first word, stacked, as the prompt length changes"></svg>
     </div>
     <div class="readout"><span>GPU jobs <b class="trace" id="s274_disp">—</b></span><span>predicted wait <b id="s274_pred">—</b></span><span>measured <b class="ok" id="s274_meas">—</b></span><span>never touches the GPU <b class="bad" id="s274_share">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 275 ───────────── -->
+<section class="station" id="s275">
+  <div class="words">
+    <div class="eyebrow">station 275 · the residency cliff</div>
+    <h2>128 MiB tipped the card into a 190 ms stall on every handover.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>a handover</b> — the engine records a pile of GPU work and hands it over in one go. Windows charges for the handover, not for the work inside it, so the cost is per hand-over.</li><li><b>the residency list</b> — Windows gives each program a share of the card and keeps a list of everything that must be inside it. If the list no longer fits the share, the driver stops each handover and shuffles memory first.</li><li><b>the readback batch</b> — how many words the GPU produces before it copies an answer back to the browser. The engine calls it <code>gpuSampleBatch</code> and ships <b>4</b>.</li></ul></div>
+    <p>Station 273 said the card was 446 MiB from the edge. This is what the far side looks like. Widening the window from 2,048 to 3,072 words adds <b>131 MiB</b> of cache, and the same laptop that decoded at 31–32 words a second starts reading 10–13 instead — no error, no warning.</p>
+    <p>The measurement that named the cause changed nothing but the readback batch. At <b>1 word per handover</b> the gap between words was <b>37 ms</b> in the good state and <b>226 ms</b> in the bad one. At the shipped <b>4</b> the gap per batch was <b>124 ms</b> good and <b>307 ms</b> bad. Both differences are the same ~<b>190 ms</b>. The penalty is charged once per handover — not once per word.</p>
+    <p>So it is not the work that got slower; the queue got a toll booth. Batch 16 words per handover and the toll is split 16 ways: the same stalled laptop reads <b>22.9</b> words a second instead of 4.4. Nothing looks idle while it happens — the card reports itself 50–100% busy, median 77%, because shuffling memory counts as busy.</p>
+    <pre class="code">gpuSampleBatch = words per handover (shipped: 4)
+      B=1   gap per word    37 ms fits   226 ms at the edge
+      B=4   gap per batch  124 ms fits   307 ms at the edge
+            difference, both cases   <b>~190 ms, once a handover</b>
+      B=16  words a second  31.2 fits    22.9 at the edge</pre>
+    <div class="src">docs/handoff/2026-09-09-bench-laptop-3060-iso-batch1.json (<code>initOptions {"gpuSampleBatch":1}</code>, maxSeq 3072 — six generations: <code>gapMs.median</code> 37 / 36 on the two fast ones, 226 / 170 / 225 / 226 on the four stalled; <code>decodeTps</code> 24.81 / 26.77 against 4.17 / 5.79 / 4.40 / 4.38) · …-iso-ctl.json (same run, shipped batch of 4: <code>gapMs.p90</code> 124 fast, 304–312 stalled; medians 10.03 / 16.32 / 12.69 tok/s) · …-iso-batch16.json (medians 11.96 / 20.61 / 22.93) · the window pair: …-iso-win2048.json 5 fast of 6 against …-iso-policy.json (3072) 2 of 6 · the default: src/worker/inference_worker.js : 932 (<code>GPU_SAMPLE_BATCH_DEFAULT = 4</code>), src/model/generate.js : 726 · the 131 MiB: docs/research/2026-09-09-27b-resident-footprint-nvidia.md §1.3(c) (128.0 KV + 3.0 scratch) and its header (Dawn's residency manager blocking ~190 ms per <code>ExecuteCommandLists</code>) · busy-ness: docs/handoff/2026-09-09-laptop-gpu-iso.csv, 236 samples with the model resident, GPU utilisation median 77% · how close the edge was: station 273 · what happens when memory really runs out instead: station 59</div>
+    <div class="sowhat"><b>So what:</b> a cliff, not a slope. 131 MiB either side of one line is the difference between 32 words a second and 10, and the engine's own numbers say nothing about it.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s275_b">words per handover</label><input type="range" id="s275_b" min="0" max="5" step="1" value="2"><span id="s275_bV" class="readout"></span></div>
+      <div class="seg" role="group" aria-label="how wide the context window is"><button id="s275_w2" aria-pressed="false">window 2,048 — it fits</button><button id="s275_w3" aria-pressed="true">window 3,072 — at the edge</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s275_svg" viewBox="0 0 640 430" width="100%" height="430" role="img" aria-label="one second of decoding drawn to scale, and words per second against the readback batch size in both memory states"></svg>
+    </div>
+    <div class="readout"><span>per word <b class="trace" id="s275_ms">—</b></span><span>words a second <b id="s275_tps">—</b></span><span>of that second, stalled <b class="bad" id="s275_share">—</b></span><span id="s275_meas"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 276 ───────────── -->
+<section class="station" id="s276">
+  <div class="words">
+    <div class="eyebrow">station 276 · the driver's own allocator</div>
+    <h2>The driver keeps every small buffer forever; only the big ones come back.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>a slab</b> — the graphics driver does not ask Windows for memory every time the engine asks it. It buys memory in fixed 4 MiB slabs and cuts small requests out of a slab it already owns.</li><li><b>its own block</b> — a request too big to cut out of a slab gets a block of its own straight from Windows. Handing that back really hands it back.</li><li><b>the dedicated counter</b> — what Windows says the program is using on the card. It moves only when the driver asks Windows for memory or returns it, never when the driver reshuffles what it already has.</li></ul></div>
+    <p>Station 275 said the laptop was over a line. This is why "free some memory" turned out to be a harder instruction than it sounds. The rule is one line of Dawn's source: round the size up to 64 KiB, and if it is <b>bigger than 4 MiB</b> give it its own block; otherwise cut it out of a slab.</p>
+    <p>Freed slabs are pushed onto a list that is never trimmed. The only code that empties it runs when the whole GPU device is destroyed, and Chrome never calls the shrink path on a page's device at all. So a small buffer you free is returned to the driver and <em>not</em> to Windows — the counter does not move, this year or next.</p>
+    <p>The laptop's own probe agrees with the source line for line. One 64 MiB buffer: <b>+54 on allocate, −64 on free</b>. Sixteen 4 MiB buffers: <b>+0 and +0</b> — free, because the slabs were already bought. Sort the engine's live buffers by that rule and <b>3,220 of them are slab-sized and will never come back</b> — 879.76 MiB — while 246 are big enough to return exactly.</p>
+    <pre class="code">Align(size, 64 KiB) &gt; 4 MiB  ?  own block  :  cut from a slab
+  1 x 64 MiB   allocate +54   free -64   <b>own block</b>
+ 32 x  2 MiB   allocate +64   free  +0   <b>slab — kept for ever</b>
+ 16 x  4 MiB   allocate  +0   free  +0   slab, already bought
+  4 x 64 MiB   allocate +256  free -256  own block</pre>
+    <div class="src">Dawn <code>main</code> @ 94c3c9cc and the 225a7ba1 that Chrome Stable 153 pins — every constant identical: <code>BuddyMemoryAllocator.cpp</code> : 88–93 and <code>ResourceAllocatorManagerD3D12.h</code> : 118–119 (the slab is <b>4 MiB, always</b>, <code>kMinHeapSize</code>); <code>BuddyMemoryAllocator.cpp</code> : 67–79 (the test above); <code>PooledResourceMemoryAllocator.cpp</code> : 70–73 (freed slabs go onto an uncapped, never-trimmed deque); <code>ResourceAllocatorManagerD3D12.cpp</code> : 338 (the only drain, <code>FreeRecycledAllocations()</code>, called only from the destructor) and : 418, 433–435 (own blocks really are destroyed); <code>Device.cpp</code> : 2513–2515 (D3D12 never overrides <code>ReduceMemoryUsageImpl</code>; Vulkan does, at <code>vulkan/DeviceVk.cpp</code> : 1239–1240) and chromium 153.0.8010.37 <code>graphite_cache_controller.cc</code> : 144–150 (the one caller, on Skia's device, never the page's) · the seven-step device probe and the classified census: docs/research/2026-09-09-27b-resident-footprint-nvidia.md §3A.1, §3A.2 (pooled 3,220 buffers / 879.76 MiB, the 4–8 MiB band <b>empty</b>, committed 246 / 3,922.27 MiB; 304.82 MiB of that pooled total is rounding slack) · note <code>kMaxSizeForSubAllocation</code> does not exist in Dawn — the threshold is the buddy allocator's block size · the buffers that pile up: station 61 · why it matters here: station 275</div>
+    <div class="sowhat"><b>So what:</b> "how much memory does this free" has two answers — one for the engine's own books and one for Windows — and only the second one changes anything.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s276_step">step through the laptop's probe</label><input type="range" id="s276_step" min="0" max="6" step="1" value="1"><span id="s276_stepV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s276_svg" viewBox="0 0 640 452" width="100%" height="452" role="img" aria-label="the four-megabyte rule, the seven allocate-and-free steps the laptop measured, and the engine's own live buffers split by the same rule"></svg>
+    </div>
+    <div class="readout"><span>asked for <b class="trace" id="s276_ask">—</b></span><span>Windows gave <b id="s276_got">—</b></span><span>took back on free <b id="s276_back">—</b></span><span>kept for ever <b class="bad" id="s276_kept">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 277 ───────────── -->
+<section class="station" id="s277">
+  <div class="words">
+    <div class="eyebrow">station 277 · the prompt-stage pools</div>
+    <h2>The same fix returns 366 MiB on a long prompt and nothing on a short one.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the prompt stage</b> — before the model writes a word it must read your whole prompt. That reading needs working room, and the room is sized by how many words it reads at once.</li><li><b>M</b> — that number of words. Every workspace here is a straight multiple of it.</li><li><b>a scratch pool</b> — the engine does not throw the workspace away. It files it under M and keeps the last three sizes, so the next prompt of the same shape is free. Nothing ever releases it.</li></ul></div>
+    <p>Two workspaces dominate. The MLP one is <b>M × 69,632 bytes</b>; the DeltaNet one is <b>3,145,728 × ⌈M ÷ 32⌉</b>. Both are held for the life of the tab. At the prompt lengths the bench uses — 30 to 44 words — they are a couple of megabytes each. At M = 512 they are <b>34 MiB and 48 MiB</b>.</p>
+    <p>Station 276 is why that matters. Under 4 MiB an entry is cut out of a slab and releasing it returns nothing to Windows; over 4 MiB it has its own block and releasing it returns all of it. The MLP entry crosses at <b>M ≥ 61</b>, the DeltaNet entry at <b>M ≥ 33</b>. So the release flag is worth <b>~366 MiB</b> at M = 512 and <b>about nothing</b> at 30 words.</p>
+    <p>The engine's own ledger shows the same shape from the other side. Three short prompts — 30, 38 and 44 words — grew it by 32.9, 46.7 and 29.2 MiB. One 1,489-word prompt grew it by <b>755.6 MiB</b>, and a second identical prompt grew it by <b>zero</b>, because the pool was already the right size.</p>
+    <pre class="code">MLP workspace       M x 69,632 B         &gt; 4 MiB at M &gt;= 61
+DeltaNet workspace  3,145,728 x ceil(M/32) &gt; 4 MiB at M &gt;= 33
+  M =  30   2.0 MiB + 3.0 MiB   both cut from slabs
+  M = 512  34   MiB + 48  MiB   both their own blocks
+ledger after one 1,489-word prompt  4,546 -&gt; <b>5,302 MiB</b></pre>
+    <div class="src">docs/research/2026-09-09-27b-resident-footprint-nvidia.md §3A.3 (both formulas, the M ≥ 61 / M ≥ 33 crossings, "worth ~366 MiB … at M=512 and approximately nothing at the prompt lengths the bench uses") · §1.3(e) (the two device-shared pools, LRU cap 3, <b>386.85 MiB</b> of prompt-only workspace held for the life of the process: DeltaNet <code>__dnPrefillScratchPools</code> 240.85 + MLP <code>__mlpScratchPools</code> 146.00) · §1.2 (<code>mlp.js</code> : 427–430 and <code>deltanet.js</code> : 2192, the sites) · the short-prompt ledger: docs/handoff/2026-09-09-bench-laptop-3060-phys-sslots3072.json (<code>statsBefore/After.residentBytes</code> 4,396.55 → 4,429.44 → 4,476.10 → 4,505.29 MiB across prompts of 30, 38 and 44 words) · the long-prompt ledger: …-phys-ctl3072.json (4,546.17 → 5,301.74 on the first 1,489-word prompt, unchanged on the second) and …-phys-ctl2048.json (4,415.17 → 5,170.74) · the 4 MiB rule this hangs on: station 276 · why the laptop cared: station 275</div>
+    <div class="sowhat"><b>So what:</b> a memory fix whose worth is a function of the input length cannot be judged by one benchmark. This one measured zero on the bench and 366 MiB in real use.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s277_m">how many words the prompt stage reads at once (M)</label><input type="range" id="s277_m" min="8" max="1024" step="8" value="512"><span id="s277_mV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s277_svg" viewBox="0 0 640 584" width="100%" height="584" role="img" aria-label="the two prompt-stage workspace sizes against the four-megabyte threshold as the prompt grows, and the measured ledger after short and long prompts"></svg>
+    </div>
+    <div class="readout"><span>MLP workspace <b class="trace" id="s277_mlp">—</b></span><span>DeltaNet workspace <b class="trace" id="s277_dn">—</b></span><span>releasing them returns <b id="s277_ret">—</b></span><span id="s277_note"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 278 ───────────── -->
+<section class="station" id="s278">
+  <div class="words">
+    <div class="eyebrow">station 278 · the snapshot pool</div>
+    <h2>The engine reserves two rewind slots and can never hold more than one.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>a snapshot</b> — before the engine writes a batch of words it photographs what the 48 DeltaNet layers remember, so it can rewind if it has to. On the 27B that photograph is <b>149.6 MiB</b>.</li><li><b>a slot</b> — a numbered place inside one big buffer where a photograph can live. The engine reserves <b>two</b>.</li><li><b>guessing ahead</b> — the off-by-default trick where the model drafts several words and checks them. It is the only thing that would ever want a second photograph, and stations 29 and 208 are why it is off.</li></ul></div>
+    <p>The pool is <code>bundleSize × numSlots</code>, and <code>numSlots</code> is 2. So every load allocates <b>299.25 MiB</b> — one block, in one piece — whether the session ever guesses ahead or not.</p>
+    <p>How many does the browser ever hold at once? <b>One.</b> The generate loop takes a single snapshot and keeps it for the whole answer. The guessing-ahead paths do take a second one, but they release before they acquire, so the two never overlap. With guessing off — which is the shipped route — slot 1 is allocated, never written, never read, and never freed.</p>
+    <p>Capping the pool at one slot removes <b>149.63 MiB</b>. It is one allocation far above 4 MiB, so unlike station 277's pools it genuinely goes back to Windows. On the laptop, at a 3,072-word window, that alone moved decode on the same 1,489-word prompt from <b>22.3 and 11.2</b> words a second to <b>23.8 and 23.7</b>.</p>
+    <pre class="code">this.numSlots = opts.numSlots ?? 2;   // spec_state_manager.js:54
+  bundleSize  156,893,184 B  = 149.625 MiB   one photograph
+  x numSlots 2               = 299.25  MiB   allocated every load
+  ever held at once                      <b>1</b>
+comment at qwen_model.js:1999: "<b>≈ 36 MiB</b>"  (the 0.8B figure)</pre>
+    <div class="src">src/spec/spec_state_manager.js : 54 (<code>numSlots = opts.numSlots ?? 2</code>, "2 slots reserved for nested spec") and : 81–107 — the flag's own reasoning, in the source: <code>bundleSize</code> 149.63 MiB on the 27B, the shipped two slots a "299.25 MiB committed D3D12 resource that exists for the life of the process", "the concurrent demand is 1 with speculative decoding off, and 2 with it on", and <code>_acquireSlot()</code> throwing by name under the cap rather than corrupting a rewind · src/model/generate.js : 1272 (<code>sessSnap = …snapshot(model.seqLen)</code>) and : 1524 (the matching <code>_releaseSlot</code>) · src/model/qwen_model.js : 5052 (<code>let cp = this.specSnapshot()</code>) and the release-before-acquire the comment cites · the stale comment still in the tree: src/model/qwen_model.js : 1999, "<code>≈ 36 MiB</code>" · docs/research/2026-09-09-27b-resident-footprint-nvidia.md §1.3(i) (299.25 MiB, allocated by <em>every</em> <code>initState()</code>), §3A.4 (−149.63 MiB, "permanently, immune to the rebuild"), §3A.5 (steady 4,823.83 → 4,674.21 MiB) · the laptop: docs/handoff/2026-09-09-bench-laptop-3060-phys-ctl3072.json (<code>residentBytes</code> 4,546.17 MiB, decode 22.33 / 11.20) against …-phys-slots3072.json (<code>specSlots:1</code>, 4,396.55 MiB, decode 23.82 / 23.73) · why big blocks come back and small ones do not: station 276 · why guessing ahead is off: station 29, station 208</div>
+    <div class="sowhat"><b>So what:</b> the cheapest 150 MiB in this engine was a spare nobody had counted the demand for. The counting took one paragraph.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s278_t">walk through one answer</label><input type="range" id="s278_t" min="0" max="5" step="1" value="2"><span id="s278_tV" class="readout"></span></div>
+      <div class="seg" role="group" aria-label="whether the model guesses ahead"><button id="s278_off" aria-pressed="true">guessing off — the shipped route</button><button id="s278_on" aria-pressed="false">guessing on</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s278_svg" viewBox="0 0 640 458" width="100%" height="458" role="img" aria-label="the two reserved snapshot slots and which of them is occupied at each step of one answer, with the measured saving"></svg>
+    </div>
+    <div class="readout"><span>slots in use <b class="trace" id="s278_use">—</b></span><span>most ever held at once <b id="s278_hw">—</b></span><span>allocated <b>299.25 MiB</b></span><span>wasted <b class="bad" id="s278_waste">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 279 ───────────── -->
+<section class="station" id="s279">
+  <div class="words">
+    <div class="eyebrow">station 279 · the shadow in main memory</div>
+    <h2>A 2.4 GB shadow of weights the engine threw away minutes earlier.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>main memory</b> — the computer's own RAM, not the card's. Everything in this station is main memory; the card's own footprint does not change by a single byte.</li><li><b>mapped at creation</b> — the quick way to fill a GPU buffer: ask for it already open, write the bytes straight in, close it. To let the page do that, Chrome must keep a matching region of ordinary RAM open on its side.</li><li><b>retired</b> — once a weight has been repacked into its compressed shape the original is destroyed. Station 12 is the few seconds when both exist.</li></ul></div>
+    <p>A memory dump taken while the 27B was quietly decoding shows the graphics process holding <b>2,378.9 MiB</b> of transfer memory in main RAM, spread over <b>228 regions</b> — and the page's own process holding <b>2,374.0 MiB</b> more of the same thing.</p>
+    <p>The sizes give it away. Two regions of 172 MiB are the word table and the output head, which the engine creates at 170.5 MiB each. A hundred and twenty-six regions of 12 MiB are the MLP weights, created at 11.953 MiB, 192 of them. Those buffers were retired minutes earlier. Nothing failed to close them — <code>unmap()</code> ran on all 1,277. The wire simply kept the RAM.</p>
+    <p>Uploading the weights through the ordinary queue in 64 MiB chunks instead leaves the card's contents identical <b>to the byte</b> — 4,415.17 MiB either way — and takes the shadow to <b>444.9 MiB in 59 regions</b>. The two biggest are now 64 MiB each: the chunk size.</p>
+    <pre class="code">gpu/transfer_memory, steady decode      2,378.9 MiB / 228
+   2 x 172 MiB   embed_tokens + lm_head  (170.508 each)
+ 126 x  12 MiB   MLP gate/up/down        (11.953 each)
+  33 x 6, 24 x 4, 18 x 8, 8 x 10 MiB     the rest
+with weightUpload:'writeBuffer'          <b>444.9 MiB /  59</b></pre>
+    <div class="src">docs/handoff/2026-09-09-laptop-gpu-memdump.json — Chrome memory-infra, steady 27B decode, window 2048, flags absent: <code>byPid.800.allocators['gpu/transfer_memory']</code> = 2,494,431,232 B (2,378.9 MiB) over 228 <code>client_*/buffer_*</code> leaves, sizes 2×172, 126×12, 8×10, 18×8, 33×6, 24×4 MiB; the renderer's <code>gpu/mapped_memory</code> = 2,374.0 MiB · docs/handoff/2026-09-09-laptop-gpu-memdump-writebuffer.json — same dump with the flag: 444.9 MiB over 59 leaves, 2×64, 1×44, 7×12, 13×8, 19×4 MiB; renderer 438.0 MiB · docs/research/2026-09-09-27b-resident-footprint-nvidia.md §3B.1 (the creation census: 1,277 buffers / 4,025.17 MiB created <code>mappedAtCreation</code>, <code>unmap()</code> called on all 1,277; the 192 × 11.953 and 2 × 170.508 families; the weight share ≈ 3,619 MiB against <code>totalBytes</code> 3,617) and §3B.2 (bytes identical, live GPU 4,415.17 MiB on <b>both</b> arms, host RSS 2,528.02 → 1,855.97 MiB) · who charges twice: Dawn's <code>Buffer.cpp</code> : 674–698, a second full-size <code>Dawn_MappedAtCreationStaging</code> buffer per mapped creation, plus Chrome's wire region · §3B.3 (the Mac has no wire, so it can prove the cause and not the shadow — this pair of dumps is the laptop's own confirmation) · what else the browser keeps a whole copy of: station 211 · the one-block limit that shapes all of this on phones: station 15 · the seconds when both copies are live: station 12</div>
+    <div class="sowhat"><b>So what:</b> a 2.4 GB per-tab shadow in ordinary RAM, for weights that no longer exist, invisible to every counter the engine keeps. On a phone that is the whole budget.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="how the weights are uploaded"><button id="s279_ship" aria-pressed="true">as shipped — mapped at creation</button><button id="s279_wb" aria-pressed="false">uploaded through the queue</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s279_svg" viewBox="0 0 640 452" width="100%" height="452" role="img" aria-label="the main-memory regions Chrome holds during decode, by size, with the two families matched to the tensors that made them"></svg>
+    </div>
+    <div class="readout"><span>main memory held <b class="bad" id="s279_tot">—</b></span><span>separate regions <b id="s279_n">—</b></span><span>biggest region <b id="s279_big">—</b></span><span>on the card <b class="ok">4,415.17 MiB either way</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 280 ───────────── -->
+<section class="station" id="s280">
+  <div class="words">
+    <div class="eyebrow">station 280 · the byte table</div>
+    <h2>Two fields added up to 5,304 MiB. Neither one measures what is resident.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>resident</b> — what is actually sitting on the card right now. Not what was downloaded, not what was read, not what was ever allocated.</li><li><b>totalBytes</b> — how many bytes the loader read out of the model files. Most of those tensors are destroyed a minute later, once their compressed form exists.</li><li><b>arenaBytes</b> — the size of one merged block that one of the kernel routes builds. It covers 80 weight groups and nothing else.</li></ul></div>
+    <p>The website had no field for "what is on the card", so it added the two it had: <b>3,617 + 1,687 = 5,304 MiB</b>, against a card counter that read 5,405. Close enough to look like an answer. It is a coincidence: the two fields overlap, and together they describe neither half of the truth.</p>
+    <p>A census that wraps every allocation says what is really there. The repacked weights are <b>3,437.2 MiB</b> — and <code>arenaBytes</code> is only the merged 1,687.5 of them, 49%; the other 1,749.7 are repacked one tensor at a time. Add the caches, the state, the pools and the snapshot slots and the whole resident set is <b>4,802.0 MiB</b>.</p>
+    <p>The leftover is the honest part. On the laptop the card's own counter sat at a median <b>5,279.8 MiB</b> while the engine's books said 4,933.0 — a gap of <b>346.8 MiB</b>, and at the peak only 178.3. That gap is the driver's own bookkeeping, and it is far too small to be hiding an engine allocation. Nothing at the 100 MiB scale is unexplained.</p>
+    <pre class="code">totalBytes 3,617 + arenaBytes 1,687 = 5,304 MiB  <b>a coincidence</b>
+  totalBytes = bytes READ; most are then destroyed
+  arenaBytes = 1,687.5 of 3,437.2 MiB of repacks (49%)
+what a census finds, steady decode, window 2048:
+  repacks 3,437.2  state 436.9  rewind 299.3  cache 266.9
+  originals kept 182.5  MLP 173.3  the rest 6.0 = <b>4,802.0</b></pre>
+    <div class="src">docs/research/2026-09-09-27b-resident-footprint-nvidia.md §1.3(a) — the correction in its own words: "it is a coincidence, not a finding, that <code>totalBytes</code> (3,792,459,776 = 3,617 MiB) + <code>arenaBytes</code> (1,769,472,000 = 1,687 MiB) = 5,304 MiB lands near the observed 5,405 MiB dedicated … <code>totalBytes</code> is source bytes read from the shards for tensors that are then mostly destroyed, and <code>arenaBytes</code> is one route's arena, 49% of the repack bytes"; the clean partition (concat arenas 1,687.50 MiB over 160 buffers = 80 groups × {codes, scales} covering gate|up ×64 and q|k|v ×16; per-tensor repacks 1,749.72 MiB over 450 buffers covering everything else) · §1.1, the byte table itself, every row · §2.1 (laptop <code>pid_800</code> dedicated median 5,279.8 MiB against engine bytes 4,933.0 at window 3072, residual <b>346.8</b>; max 5,405.3 against the prefill peak 5,227.0, residual <b>178.3</b>; "5,405.3 MiB is the budget, not the footprint") · §3.4 (the field the site should read instead: <code>residentBytes</code> on the load report, 4,629,644,220 B = 4,415.17 MiB at load) · the two fields as the exports carry them: docs/handoff/2026-09-09-bench-laptop-3060-phys-ctl2048.json, <code>loadResult.totalBytes</code> and <code>kernelVariants.q1Concat.arenaBytes</code> · where the five kinds of memory live: station 9 · the seconds when the originals and the repacks are both resident: station 12</div>
+    <div class="sowhat"><b>So what:</b> two wrong numbers can land on the right one. The only cure is a field that means what it says — which is why this session added one.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which account to read"><button id="s280_guess" aria-pressed="true">the two fields the site added</button><button id="s280_real" aria-pressed="false">what the census finds</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s280_svg" viewBox="0 0 640 462" width="100%" height="462" role="img" aria-label="the guessed total and the measured resident set drawn on one scale against the card's budget, with the parts of each named"></svg>
+    </div>
+    <div class="readout"><span>this account totals <b class="trace" id="s280_sum">—</b></span><span>the card's counter <b>5,405.3 MiB</b></span><span>what it is <b id="s280_what">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 281 ───────────── -->
+<section class="station" id="s281">
+  <div class="words">
+    <div class="eyebrow">station 281 · clocks and power</div>
+    <h2>The card idles at 210 MHz, and pinning it at 2,100 fixed nothing.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the shader clock</b> — how fast the card's arithmetic units are ticking, in millions of ticks a second. It is not fixed: the card raises and lowers it constantly.</li><li><b>P8</b> — the lowest of the card's power states. On this laptop it means 210 MHz and about 14 watts: the card is awake but doing nothing.</li><li><b>a power cap</b> — a ceiling in watts the laptop enforces. This one is 80 W, and the card reaches 79.8 while answering, so the ceiling is real.</li></ul></div>
+    <p>Sampled once a second through a whole benchmark session, the card's own counters show a very clean rhythm. Between runs it drops to <b>210 MHz and 14 W</b> — 106 of 436 samples. While answering it runs <b>1,380 to 2,077 MHz</b>, median 2,002, drawing up to <b>79.8 W</b> against an 80 W cap.</p>
+    <p>So the obvious theory writes itself: every answer begins on a ramp from a tenth of full speed, and pinning the clock high should help. It was tried. With the shader clock locked to 1,800–2,100 MHz the bench read <b>12.9, 10.3 and 10.5</b> words a second. The unlocked control on the same machine read <b>12.9, 26.0 and 10.2</b> — one of its three runs beat everything the locked run produced.</p>
+    <p>The arithmetic says why. While answering, the clock varies by a factor of <b>1.5</b>. The word rate on this machine, same flags and same prompts, varies by a factor of <b>3.2</b> — 10.0 to 32.4. A 1.5× cause cannot produce a 3.2× effect. The thing that does is station 275's 190 ms toll, and no clock setting touches it.</p>
+    <pre class="code">idle            210 MHz    14 W   106 of 436 samples
+answering  1,380-2,077 MHz  up to 79.8 W  (cap 80 W)
+  clock spread while answering            1.5x
+  word-rate spread, same machine          <b>3.2x</b>
+clock locked 1800-2100: 12.9 / 10.3 / 10.5 words a second
+unlocked control:       12.9 / <b>26.0</b> / 10.2</pre>
+    <div class="src">docs/handoff/2026-09-09-laptop-gpu-iso.csv — <code>nvidia-smi</code>, 436 samples at 1 Hz, 12:13:29 → 12:20:47 IST: 106 samples in pstate <b>P8</b> (minimum <code>clocks.current.sm</code> <b>210 MHz</b>, median <code>power.draw</code> 14.0 W); of the 236 samples with the model resident (<code>memory.used</code> &gt; 4,000 MiB) the clock runs <b>1,380 / 2,002 / 2,077 MHz</b> (min / median / max) and, on the 204 that are ≥ 50% busy, power runs 36.36 / 59.36 / <b>79.80 W</b> · the lock arm: docs/handoff/2026-09-09-bench-laptop-3060-quick-locked.json, three short prompts, <code>decodeTps</code> 12.92 / 10.32 / 10.51, against …-quick-check.json 12.87 / 26.02 / 10.20 <em>(the export cannot record a driver-level clock lock; that <code>nvidia-smi -lgc 1800,2100</code> was applied for the first of those two runs is relayed from the machine's operator, not read from the file)</em> · the 3.2× word-rate spread: …-trim2-all3072.json 9.96 tok/s against …-trim2-spec2048.json 32.45, same laptop, same session · what actually decides it: station 275 · the phone, where the sleeping-GPU story <em>is</em> true: station 250</div>
+    <div class="sowhat"><b>So what:</b> the tidiest explanation on the table was ruled out by comparing the size of the cause with the size of the effect, before anyone had to argue about it.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s281_t">scrub through the recorded session</label><input type="range" id="s281_t" min="0" max="145" step="1" value="95"><span id="s281_tV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s281_svg" viewBox="0 0 640 492" width="100%" height="492" role="img" aria-label="the card's own clock, power and busy-ness sampled once a second through a benchmark session, and what happened when the clock was pinned"></svg>
+    </div>
+    <div class="readout"><span>clock <b class="trace" id="s281_mhz">—</b></span><span>power <b id="s281_w">—</b></span><span>busy <b id="s281_u">—</b></span><span>on the card <b id="s281_m">—</b></span><span id="s281_state"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 282 ───────────── -->
+<section class="station" id="s282">
+  <div class="words">
+    <div class="eyebrow">station 282 · where you measure</div>
+    <h2>The probe ran on the wrong thread, and the ballast tab was in front.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the main thread</b> — the one that draws the page. When a tab is hidden or covered, Chrome deliberately starves it, because nobody is looking.</li><li><b>a worker</b> — a second thread with no page to draw. The engine's entire decode loop lives in one, which is why station 23's rule does not automatically apply to it.</li><li><b>a readback</b> — copying a few bytes back from the card to ask "what word was that?". It is the smallest possible piece of GPU work, so it makes a clean probe.</li></ul></div>
+    <p>To test whether hiding the window was slowing the laptop down, someone wrote the smallest possible probe: copy 4 KB back from the card and time it. Idle, it read <b>3.1 ms visible and 3.5 ms hidden</b> — no effect. Put one piece of real GPU work in the same handover and it read <b>24.7 ms visible and 131 ms hidden</b>, with 58 of 60 samples over 100 ms. A five-fold penalty for being hidden.</p>
+    <p>But that probe was running on the page's main thread, and the engine's decode is not. The controlled test on the thread that matters is flat: <b>24 generations, 12 with the window covered and 12 with it visible, every one of them fast</b> — medians 30.7 and 31.2 words a second. The 5× belongs to the probe, not to the product.</p>
+    <p>The other test in the same sitting was worse. To check whether memory pressure was the cause, a tab holding 400 MB was opened — <em>in front of</em> the bench tab, changing the one variable the covered-versus-visible pair had just been built to control. Its readings, 8.9 to 17.6, sit inside the control's own 10.0-to-31.1 range. It proves nothing either way.</p>
+    <pre class="code">the 4 KB probe            visible   hidden   penalty
+  idle                      3.1 ms   3.5 ms    1.1x
+  with GPU work queued     24.7 ms   131 ms    <b>5.3x</b>
+the engine's decode, in a worker  (words a second)
+  12 covered / 12 visible    30.71    31.24    <b>1.02x</b></pre>
+    <div class="src">the worker-thread pair, all four exports of one sitting: docs/handoff/2026-09-09-bench-laptop-3060-iso-covered.json and …-iso-covered2.json (12 generations with the window covered, <code>decodeTps</code> 24.05 – 32.57, median 30.71) against …-iso-visible.json and …-iso-visible2.json (12 visible, 24.85 – 31.99, median 31.24) — <b>24 of 24 fast</b>, and every one has <code>gapMs.p90</code> in the 120–130 ms band rather than the 300+ of station 275 · the ballast arm: …-iso-ballast400.json, <code>decodeTps</code> 8.86 / 8.93 / 11.26 / 10.95 / 17.58 / 11.04, against its own control …-iso-ctl.json 10.03 – 31.12, same window (3072), same flags · docs/research/2026-09-09-27b-resident-footprint-nvidia.md, opening section: "the site's controlled covered-vs-visible pair confirmed residency (not tab occlusion) as the mechanism" · <em>the 4 KB probe's own timings (3.1 / 3.5 ms idle, 24.7 / 131 ms p50 under load, 58 of 60 over 100 ms) and the fact that the ballast tab was opened in front of the bench tab are relayed from the machine's operator; neither is in a file in this repo</em> · the rule the probe rediscovered, and where it does apply: station 23 · other ways an instrument lies: station 271, station 257</div>
+    <div class="sowhat"><b>So what:</b> a real 5× effect, measured correctly, on a thread the product does not use. The question a probe answers is always "what happens here", and "here" has to be the same place.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which measurement"><button id="s282_i" aria-pressed="false">the probe, idle</button><button id="s282_l" aria-pressed="true">the probe, under GPU load</button><button id="s282_w" aria-pressed="false">the engine's decode, in a worker</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s282_svg" viewBox="0 0 640 448" width="100%" height="448" role="img" aria-label="hidden against visible for three measurements, and the twenty-four real generations that settled it"></svg>
+    </div>
+    <div class="readout"><span>visible <b class="ok" id="s282_v">—</b></span><span>hidden or covered <b id="s282_h">—</b></span><span>penalty for being hidden <b class="trace" id="s282_r">—</b></span><span id="s282_note"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 283 ───────────── -->
+<section class="station" id="s283">
+  <div class="words">
+    <div class="eyebrow">station 283 · a saving that was not there</div>
+    <h2>A 299 MiB saving that existed at load and nowhere else.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>residentBytes</b> — the field the load report carries: the engine's live GPU byte total the moment loading finishes. Read once, and only then.</li><li><b>a session-tracked ask</b> — the browser's ordinary way of asking a question. The engine keeps a snapshot so it can reuse the conversation, and <em>every</em> browser generation does this.</li><li><b>deferring</b> — not allocating something until the first time it is needed. It saves nothing at all if the first time arrives a second later.</li></ul></div>
+    <p>The flag <code>residentTrim:'spec'</code> skips station 278's 299.25 MiB rewind pool at load and builds it when something first asks. The load report shows exactly that: at a 3,072-word window, <b>4,546.17 → 4,246.92 MiB</b>. Minus 299.25, precisely as designed.</p>
+    <p>The first thing a browser generation does is ask for a snapshot. The pool comes straight back — and <code>residentBytes</code> is a load-time field, so no report ever shows it returning. Decode at that window read <b>25.5, 10.5, 12.4, 12.2, 12.3, 12.5</b> words a second with the flag on. The control read <b>19.6, 16.7, 12.5, 31.4, 12.7, 12.6</b>. Nothing moved.</p>
+    <p>The gates could not have caught it, and the reason is worth keeping. Every native test driver in this repo passes <code>sessionReuse: false</code>, so <b>no gate has ever taken a session snapshot</b>. The flag went through a byte-identical certification ladder, twelve rungs of it, and broke on the laptop's first real generation: <em>SpecStateManager.snapshot: not initialized</em>.</p>
+    <pre class="code">residentBytes — read once, when load returns
+  absent 4,546.17 MiB    spec 4,246.92 MiB   <b>-299.25</b>
+first session-tracked ask -&gt; the pool is rebuilt
+decode, spec:     25.5  10.5  12.4  12.2  12.3  12.5
+decode, control:  19.6  16.7  12.5  <b>31.4</b>  12.7  12.6</pre>
+    <div class="src">docs/handoff/2026-09-09-bench-laptop-3060-trim-spec3072.json (<code>decodeRoute.residentTrim: "spec"</code>, <code>loadResult.residentBytes</code> 4,453,221,308 B = 4,246.92 MiB; the six <code>decodeTps</code> above) against …-trim-absent3072.json (4,767,007,676 B = 4,546.17 MiB; its six) and …-trim2-spec3072.json, which repeats the same six-slow pattern · docs/research/2026-09-09-27b-resident-footprint-nvidia.md §3A.3 ("every session-tracked ask rebuilds the pool at its first <code>snapshot()</code>, so the deferral shows up at load and nowhere else. <code>residentBytes</code> is a <b>load-time</b> field") · §3.5, the whole failure: the deferral was hooked to <code>QwenModel.specSnapshot()</code>, which the browser never calls — <code>generate.js</code> reaches <code>model.specStateManager.snapshot()</code> directly, and <code>sessionTracking</code> is on for every generate that does not pass <code>sessionReuse:false</code> (<code>src/worker/inference_worker.js</code> : 4972), "so no gate in the s1916 set ever took a session snapshot and the deferral looked correct all the way through a byte-identical cert ladder" · the fix, which moved the hook inside <code>SpecStateManager</code> so any caller materialises the pool: src/spec/spec_state_manager.js, <code>deferInitialize()</code> + <code>_ensureInitialized()</code> guarding <code>snapshot</code>, <code>restore</code>, <code>drop</code>, <code>_acquireSlot</code>, <code>_releaseSlot</code> · §3A.5 (steady-state ledger after two session-tracked asks: absent 4,823.83 MiB) and §5 (the new gate reproduces the laptop's exact failure on the old source — 6 passed, 4 failed — and reports 4,115.92 MiB against the laptop's 4,116, to the megabyte) · the flag that <em>is</em> physical: station 278 · other gates that could not see what they were testing: station 261, station 266</div>
+    <div class="sowhat"><b>So what:</b> the saving was real and it was measured correctly. It was measured at the only moment of the program's life when it existed.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s283_t">walk the session forward</label><input type="range" id="s283_t" min="0" max="2" step="1" value="0"><span id="s283_tV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s283_svg" viewBox="0 0 640 462" width="100%" height="462" role="img" aria-label="the ledger with and without the deferral at three moments, the measured decode rates, and why no gate could see it"></svg>
+    </div>
+    <div class="readout"><span>with the flag <b class="trace" id="s283_a">—</b></span><span>without it <b id="s283_b">—</b></span><span>saved right now <b id="s283_d">—</b></span><span id="s283_note"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 284 ───────────── -->
+<section class="station" id="s284">
+  <div class="words">
+    <div class="eyebrow">station 284 · which counter to trust</div>
+    <h2>Eight arms, one process counter, and only one of them was slow.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the ledger</b> — the engine's own tally of every GPU buffer it asked for and has not destroyed. It knows nothing about the driver.</li><li><b>the process counter</b> — what Windows reports the whole browser process is using on the card. It includes memory the driver is holding but nobody is using (station 276).</li><li><b>an arm</b> — one run of the same benchmark with one setting changed, so that everything else can be held still.</li></ul></div>
+    <p>Eight runs, the same 1,489-word prompt, two window sizes and three flags. Seven of them decoded at <b>23.7 to 24.3</b> words a second. One — the 3,072-word window with nothing switched on — read <b>22.3 and then 11.2</b>.</p>
+    <p>The engine's own ledger names the difference precisely. The slow arm was holding <b>5,301.74 MiB</b> after the prompt; the arm one flag away from it, which was fast on both generations, was holding <b>5,152.11</b>. A gap of <b>149.6 MiB</b> — one buffer — decides it, exactly as station 275 said a cliff would.</p>
+    <p>The card's process counter, sampled through the same runs, sat at a median of roughly <b>5,028 to 5,070 MiB on every arm</b>, fast and slow alike. It is not lying; it counts something else — including heaps the driver keeps that nothing is using. Earlier the same day the mismatch ran the other way: a <b>318 MiB</b> fall in the ledger moved that counter by <b>35</b>.</p>
+    <pre class="code">window 3072, nothing on   ledger 5,301.74   22.3 then <b>11.2</b>
+window 3072, one flag     ledger 5,152.11   23.8 then 23.7
+window 3072, all three    ledger 4,377.64   23.7 then 23.8
+window 2048, nothing on   ledger 5,170.74   24.3 then 24.1
+process counter, every arm alike        ~5,028-5,070 MiB</pre>
+    <div class="src">the eight arms, all measured, all one sitting: docs/handoff/2026-09-09-bench-laptop-3060-phys-ctl2048.json (<code>statsAfter.residentBytes</code> 5,170.74 MiB, <code>decodeTps</code> 24.31 / 24.12), …-phys-slots2048.json (5,021.11 · 24.03 / 23.94), …-phys-slotsWB2048.json (5,021.11 · 23.86 / 23.95), …-phys-full2048.json (4,246.64 · 23.79 / 23.86), …-phys-ctl3072.json (<b>5,301.74 · 22.33 / 11.20</b>), …-phys-slots3072.json (5,152.11 · 23.82 / 23.73), …-phys-slotsWB3072.json (5,152.11 · 23.80 / 23.80), …-phys-full3072.json (4,377.64 · 23.74 / 23.84); each file's <code>decodeRoute</code> carries which of <code>specSlots</code>, <code>residentTrim</code> and <code>weightUpload</code> was armed · docs/research/2026-09-09-27b-resident-footprint-nvidia.md §3A.4 (the 149.63 MiB is one committed resource, "permanently, immune to the rebuild") and §3A.1 (why the process total keeps memory the driver is no longer using) · §2.1 (the process counter is a budget, not a footprint) · <em>the process-counter medians for these eight arms (~5,028–5,070 MiB) and the earlier −318 ledger / −35 counter pair are relayed from the machine's operator; the ledgers and the word rates above are read from the files</em> · the cliff itself: station 275 · why small buffers never leave the counter: station 276</div>
+    <div class="sowhat"><b>So what:</b> when two instruments disagree, the question is which one is measuring the thing that decides. Here it was the ledger, and the process counter never moved at all.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s284_a">pick an arm</label><input type="range" id="s284_a" min="0" max="7" step="1" value="4"><span id="s284_aV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s284_svg" viewBox="0 0 640 486" width="100%" height="486" role="img" aria-label="the engine's ledger and the card's process counter for each of eight arms, against whether that arm decoded fast"></svg>
+    </div>
+    <div class="readout"><span>the engine's ledger <b class="trace" id="s284_led">—</b></span><span>the process counter <b id="s284_os">~5,028–5,070 MiB</b></span><span>decode <b id="s284_dec">—</b></span><span id="s284_v"></span></div>
   </div>
 </section>
 
@@ -32811,6 +33107,1016 @@ if ($('#s274')) {
     $('#s274_pred').textContent = pred.toFixed(2) + ' s';
     $('#s274_meas').textContent = R.meas === null ? 'no export' : R.meas.toFixed(2) + ' s';
     $('#s274_share').textContent = Math.round(100 * nonGpu / pred) + '% of the wait';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 275 ── */
+/* ── Station 275: the residency cliff, and why batching hides it ── */
+if ($('#s275')) {
+  const svg = $('#s275_svg'), sl = $('#s275_b');
+  const b2 = $('#s275_w2'), b3 = $('#s275_w3');
+  const BATCHES = [1, 2, 4, 8, 16, 32];
+  // All three constants are read off ONE file, docs/handoff/…-iso-batch1.json:
+  //   fast gap per word 37 ms, stalled gap per word 226 ms, and the shipped
+  //   batch of 4 reads 124 ms per batch fast = 31 ms per word of pure compute.
+  const COMPUTE = 31;          // ms of GPU work per word (124 / 4, fast state)
+  const SUBMIT_FAST = 6;       // ms per handover when the list fits (37 − 31)
+  const SUBMIT_EDGE = 195;     // ms per handover at the edge (226 − 31)
+  // the readings the bench actually produced, both windows
+  const MEASURED = {
+    2048: { 4: 31.2 },
+    3072: { 1: 4.17, 4: 12.69, 16: 22.93 },
+  };
+  let win = 3072;
+  b2.addEventListener('click', () => { win = 2048; render(); });
+  b3.addEventListener('click', () => { win = 3072; render(); });
+  sl.addEventListener('input', render);
+
+  const perWord = (B, w) => COMPUTE + (w === 2048 ? SUBMIT_FAST : SUBMIT_EDGE) / B;
+
+  function render() {
+    b2.setAttribute('aria-pressed', String(win === 2048));
+    b3.setAttribute('aria-pressed', String(win === 3072));
+    const B = BATCHES[parseInt(sl.value, 10)];
+    const submit = win === 2048 ? SUBMIT_FAST : SUBMIT_EDGE;
+    const ms = perWord(B, win), tps = 1000 / ms;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), paper = css('--paper');
+    let g = '';
+
+    // ── 1. one second of decoding, to scale ────────────────
+    const X0 = 14, W = 612, PX = W / 1000;   // px per millisecond
+    g += `<text x="${X0}" y="16" font-size="11" fill="${ink3}">one second of decoding, drawn to scale — orange is real work, red is the driver shuffling memory</text>`;
+    const TY = 26, TH = 30;
+    g += `<rect x="${X0}" y="${TY}" width="${W}" height="${TH}" rx="4" fill="${card}" stroke="${line}"/>`;
+    let t = 0, words = 0, stalled = 0, guard = 0;
+    while (t < 1000 && guard++ < 400) {
+      for (let k = 0; k < B && t < 1000; k++) {
+        const w = Math.min(COMPUTE, 1000 - t) * PX;
+        g += `<rect x="${(X0 + t * PX).toFixed(2)}" y="${TY + 2}" width="${Math.max(w - 0.6, 0.6).toFixed(2)}" height="${TH - 4}" fill="${trace}" opacity="0.9"/>`;
+        t += COMPUTE; words++;
+      }
+      if (t >= 1000) break;
+      const sw = Math.min(submit, 1000 - t);
+      g += `<rect x="${(X0 + t * PX).toFixed(2)}" y="${TY + 2}" width="${Math.max(sw * PX - 0.6, 0.6).toFixed(2)}" height="${TH - 4}" fill="${bad}" opacity="0.85"/>`;
+      t += submit; stalled += sw;
+    }
+    // fractional last word
+    const fullWords = Math.min(words, 1000 / ms);
+    [0, 250, 500, 750, 1000].forEach((mk) => {
+      const x = X0 + mk * PX;
+      g += `<line x1="${x.toFixed(1)}" y1="${TY + TH}" x2="${x.toFixed(1)}" y2="${TY + TH + 5}" stroke="${ink3}"/>`;
+      g += `<text x="${x.toFixed(1)}" y="${TY + TH + 17}" text-anchor="${mk === 0 ? 'start' : mk === 1000 ? 'end' : 'middle'}" font-size="10" fill="${ink3}">${mk} ms</text>`;
+    });
+    g += `<text x="${X0}" y="${TY + TH + 34}" font-size="11.5" fill="${ink}">`
+      + `<tspan fill="${trace}">${Math.floor(fullWords)} words</tspan> came out, and <tspan fill="${bad}">${Math.round(stalled)} ms</tspan> of the second went to `
+      + `${Math.ceil(fullWords / B)} handover${Math.ceil(fullWords / B) === 1 ? '' : 's'} at ${submit} ms each</text>`;
+
+    // ── 2. words a second against the batch size ───────────
+    const CY = 118;
+    g += `<text x="${X0}" y="${CY}" font-size="11" fill="${ink3}">words a second as the batch grows — a bigger batch splits the toll</text>`;
+    [[X0, ok, 'window 2,048 — the list fits', 2048], [216, bad, 'window 3,072 — at the edge', 3072]].forEach(([lx, col, lab, w]) => {
+      g += `<rect x="${lx}" y="${CY + 5}" width="9" height="9" rx="2" fill="${col}" opacity="${w === win ? 1 : 0.4}"/>`;
+      g += `<text x="${lx + 13}" y="${CY + 14}" font-size="10.5" fill="${w === win ? ink : ink3}">${lab}</text>`;
+    });
+    const BX = 60, BW = 540, BY = CY + 26, BH = 138, MAXT = 36;
+    g += `<line x1="${BX}" y1="${BY}" x2="${BX}" y2="${BY + BH}" stroke="${ink3}"/>`;
+    g += `<line x1="${BX}" y1="${BY + BH}" x2="${BX + BW}" y2="${BY + BH}" stroke="${ink3}"/>`;
+    [0, 10, 20, 30].forEach((v) => {
+      const y = BY + BH - BH * v / MAXT;
+      g += `<line x1="${BX}" y1="${y.toFixed(1)}" x2="${BX + BW}" y2="${y.toFixed(1)}" stroke="${css('--grid')}"/>`;
+      g += `<text x="${BX - 6}" y="${(y + 3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="${ink3}">${v}</text>`;
+    });
+    g += `<text x="${BX - 46}" y="${BY - 2}" font-size="10" fill="${ink3}">words/s</text>`;
+    const px = (i) => BX + 44 + i * ((BW - 70) / (BATCHES.length - 1));
+    [[2048, ok], [3072, bad]].forEach(([w, col]) => {
+      let d = '';
+      BATCHES.forEach((bb, i) => {
+        const y = BY + BH - BH * Math.min(1000 / perWord(bb, w), MAXT) / MAXT;
+        d += (i ? 'L' : 'M') + px(i).toFixed(1) + ' ' + y.toFixed(1) + ' ';
+      });
+      g += `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w === win ? 2.4 : 1.2}" opacity="${w === win ? 1 : 0.4}"/>`;
+      BATCHES.forEach((bb, i) => {
+        const y = BY + BH - BH * Math.min(1000 / perWord(bb, w), MAXT) / MAXT;
+        const on = (w === win && bb === B);
+        g += `<circle cx="${px(i).toFixed(1)}" cy="${y.toFixed(1)}" r="${on ? 5 : 2.6}" fill="${col}" opacity="${w === win ? 1 : 0.4}"/>`;
+        const mv = MEASURED[w][bb];
+        if (mv !== undefined) {
+          const my = BY + BH - BH * Math.min(mv, MAXT) / MAXT;
+          g += `<circle cx="${px(i).toFixed(1)}" cy="${my.toFixed(1)}" r="4.5" fill="none" stroke="${ink}" stroke-width="1.5"/>`;
+          g += `<text x="${px(i).toFixed(1)}" y="${(my - 9).toFixed(1)}" text-anchor="middle" font-size="10" fill="${ink}">${mv}</text>`;
+        }
+      });
+    });
+    BATCHES.forEach((bb, i) => {
+      g += `<text x="${px(i).toFixed(1)}" y="${BY + BH + 15}" text-anchor="middle" font-size="10.5" fill="${bb === B ? ink : ink3}">${bb}</text>`;
+    });
+    g += `<text x="${BX + BW / 2}" y="${BY + BH + 30}" text-anchor="middle" font-size="10" fill="${ink3}">words per handover  ·  ringed numbers are what the laptop actually read; the lines are 31 ms + toll ÷ batch</text>`;
+
+    // ── 3. where the 190 ms came from ──────────────────────
+    const AY = 340;
+    g += `<line x1="${X0}" y1="${AY - 12}" x2="626" y2="${AY - 12}" stroke="${line}"/>`;
+    g += `<text x="${X0}" y="${AY + 2}" font-size="11" fill="${ink3}">the toll, measured twice, at two different batch sizes</text>`;
+    [['1 word per handover', '226 ms', '37 ms', '189 ms'],
+      ['4 words per handover', '307 ms', '124 ms', '183 ms']].forEach((r, i) => {
+      const y = AY + 12 + i * 24;
+      g += `<rect x="${X0}" y="${y}" width="612" height="20" rx="4" fill="${card}" stroke="${line}"/>`;
+      g += `<text x="26" y="${y + 14}" font-size="10.5" fill="${ink2}">${r[0]}</text>`;
+      g += `<text x="196" y="${y + 14}" font-size="10.5" fill="${bad}">at the edge ${r[1]}</text>`;
+      g += `<text x="352" y="${y + 14}" font-size="10.5" fill="${ok}">when it fits ${r[2]}</text>`;
+      g += `<text x="510" y="${y + 14}" font-size="10.5" fill="${ink}">difference ${r[3]}</text>`;
+    });
+    g += `<text x="${X0}" y="${AY + 74}" font-size="10.5" fill="${ink3}">Same difference at both batch sizes — so the penalty is charged per handover, not per word. That is the whole finding.</text>`;
+    svg.innerHTML = g;
+
+    $('#s275_bV').textContent = B + (B === 4 ? ' (the shipped setting)' : B === 1 ? ' word' : '');
+    $('#s275_ms').textContent = ms.toFixed(0) + ' ms';
+    $('#s275_tps').innerHTML = win === 2048 || tps > 20
+      ? '<b class="ok">' + tps.toFixed(1) + '</b>' : '<b class="bad">' + tps.toFixed(1) + '</b>';
+    $('#s275_share').textContent = Math.round(100 * (submit / B) / ms) + '%';
+    const mv = MEASURED[win][B];
+    $('#s275_meas').innerHTML = mv !== undefined
+      ? 'the laptop read <b>' + mv + '</b> here' : '<span style="opacity:.7">no reading at this batch — the line is the model</span>';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 276 ── */
+/* ── Station 276: the 4 MiB rule, and the memory that never comes back ── */
+if ($('#s276')) {
+  const svg = $('#s276_svg'), sl = $('#s276_step');
+  // The seven steps of the laptop's allocate-then-free probe, in the order it
+  // ran them (research §3A.1, "From the device"): deltas on the Windows
+  // dedicated counter, in MiB.
+  const STEPS = [
+    { n: 1, size: 64, alloc: 54, free: -64 },
+    { n: 32, size: 2, alloc: 64, free: 0 },
+    { n: 1, size: 16, alloc: 16, free: -16 },
+    { n: 1, size: 8, alloc: 8, free: -8 },
+    { n: 16, size: 4, alloc: 0, free: 0 },
+    { n: 64, size: 1, alloc: 0, free: 0 },
+    { n: 4, size: 64, alloc: 256, free: -256 },
+  ];
+  // the engine's own live set under the same rule (research §3A.2)
+  const POOLED = { bufs: 3220, mib: 879.76 }, COMMITTED = { bufs: 246, mib: 3922.27 };
+  sl.addEventListener('input', render);
+
+  function render() {
+    const i = parseInt(sl.value, 10), S = STEPS[i];
+    const own = S.size > 4;                       // Align(size,64KiB) > 4 MiB
+    const asked = S.n * S.size, kept = S.alloc + S.free;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), paper = css('--paper');
+    let g = '';
+
+    // ── 1. the rule, and where this buffer lands ───────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">one rule decides everything — round the size up to 64 KiB, then compare it with 4 MiB</text>`;
+    const RY = 26, RH = 74;
+    [[14, false, 'cut out of a shared 4 MiB slab', 'the slab never goes back to Windows', bad],
+      [326, true, 'a block of its own from Windows', 'destroyed for real — the counter drops', ok]].forEach(([x, isOwn, t1, t2, col]) => {
+      const on = isOwn === own;
+      g += `<rect x="${x}" y="${RY}" width="300" height="${RH}" rx="8" fill="${on ? col : card}" fill-opacity="${on ? 0.15 : 1}" stroke="${on ? col : line}" stroke-width="${on ? 2 : 1}"/>`;
+      g += `<text x="${x + 14}" y="${RY + 18}" font-size="11" fill="${ink3}">${isOwn ? 'bigger than 4 MiB' : '4 MiB or smaller'}</text>`;
+      g += `<text x="${x + 14}" y="${RY + 38}" font-size="12.5" fill="${ink}">${t1}</text>`;
+      g += `<text x="${x + 14}" y="${RY + 58}" font-size="10.5" fill="${on ? col : ink3}">${t2}</text>`;
+    });
+    // the chip: this step's buffer, drawn in whichever box takes it
+    const cw = Math.max(16, Math.min(S.size, 20) * 5.5);
+    const cx = (own ? 326 : 14) + 300 - cw - 14;
+    g += `<rect x="${cx.toFixed(1)}" y="${RY + 8}" width="${cw.toFixed(1)}" height="13" rx="3" fill="${own ? ok : bad}"/>`;
+    g += `<text x="${(cx - 6).toFixed(1)}" y="${RY + 19}" text-anchor="end" font-size="10" fill="${ink}">this step: ${S.size} MiB</text>`;
+
+    // ── 2. the probe, step by step ─────────────────────────
+    const PY = 124;
+    g += `<text x="14" y="${PY}" font-size="11" fill="${ink3}">what the Windows counter did, one allocate-then-free step at a time</text>`;
+    const HY = PY + 14;
+    g += `<text x="20" y="${HY}" font-size="9.5" fill="${ink3}">the step</text>`;
+    g += `<text x="150" y="${HY}" font-size="9.5" fill="${ink3}">asked for</text>`;
+    g += `<text x="238" y="${HY}" font-size="9.5" fill="${ink3}">on allocate</text>`;
+    g += `<text x="340" y="${HY}" font-size="9.5" fill="${ink3}">on free</text>`;
+    g += `<text x="440" y="${HY}" font-size="9.5" fill="${ink3}">still held afterwards</text>`;
+    STEPS.forEach((s, k) => {
+      const y = HY + 8 + k * 24, on = k === i, isOwn = s.size > 4, kp = s.alloc + s.free;
+      g += `<rect x="14" y="${y}" width="612" height="21" rx="4" fill="${on ? trace : card}" fill-opacity="${on ? 0.14 : 1}" stroke="${on ? trace : line}"/>`;
+      g += `<text x="24" y="${y + 15}" font-size="11" fill="${on ? ink : ink2}">${s.n} × ${s.size} MiB</text>`;
+      g += `<text x="150" y="${y + 15}" font-size="11" fill="${ink3}">${s.n * s.size} MiB</text>`;
+      g += `<text x="238" y="${y + 15}" font-size="11" fill="${s.alloc ? ink : ink3}">${s.alloc >= 0 ? '+' : ''}${s.alloc}</text>`;
+      g += `<text x="340" y="${y + 15}" font-size="11" fill="${s.free ? ok : ink3}">${s.free > 0 ? '+' : ''}${s.free}</text>`;
+      if (kp > 0) {
+        g += `<rect x="440" y="${y + 4}" width="${(kp * 0.55).toFixed(1)}" height="13" rx="3" fill="${bad}" opacity="0.85"/>`;
+        g += `<text x="${(440 + kp * 0.55 + 7).toFixed(1)}" y="${y + 15}" font-size="11" fill="${bad}">${kp} MiB, for ever</text>`;
+      } else {
+        g += `<text x="440" y="${y + 15}" font-size="11" fill="${isOwn ? ok : ink3}">${isOwn ? 'nothing — it all came back' : 'nothing new was bought'}</text>`;
+      }
+    });
+    g += `<text x="14" y="${HY + 8 + 7 * 24 + 14}" font-size="10.5" fill="${ink3}">Steps 5 and 6 are free because step 2 already bought the slabs — and step 2's 64 MiB is still there.</text>`;
+
+    // ── 3. the engine's own live set, sorted by the rule ───
+    const EY = 372;
+    g += `<line x1="14" y1="${EY - 14}" x2="626" y2="${EY - 14}" stroke="${line}"/>`;
+    g += `<text x="14" y="${EY}" font-size="11" fill="${ink3}">the 27B's own live buffers while it decodes, sorted by that one rule</text>`;
+    const TOT = POOLED.mib + COMMITTED.mib, BW = 612;
+    const pw = BW * POOLED.mib / TOT;
+    g += `<rect x="14" y="${EY + 8}" width="${pw.toFixed(1)}" height="24" fill="${bad}" opacity="0.85"/>`;
+    g += `<rect x="${(14 + pw).toFixed(1)}" y="${EY + 8}" width="${(BW - pw).toFixed(1)}" height="24" fill="${ok}" opacity="0.85"/>`;
+    [[14, bad, POOLED.bufs.toLocaleString() + ' small buffers — ' + POOLED.mib + ' MiB, never returns'],
+      [330, ok, COMMITTED.bufs + ' big buffers — ' + COMMITTED.mib.toLocaleString() + ' MiB, returns exactly']].forEach(([lx, col, lab]) => {
+      g += `<rect x="${lx}" y="${EY + 40}" width="9" height="9" rx="2" fill="${col}"/>`;
+      g += `<text x="${lx + 13}" y="${EY + 49}" font-size="10" fill="${ink2}">${lab}</text>`;
+    });
+    g += `<text x="14" y="${EY + 68}" font-size="10.5" fill="${ink3}">Not one buffer sits in the ambiguous 4–8 MiB band, so the split is exact rather than estimated.</text>`;
+    svg.innerHTML = g;
+
+    $('#s276_stepV').textContent = 'step ' + (i + 1) + ' of 7 · ' + S.n + ' × ' + S.size + ' MiB';
+    $('#s276_ask').textContent = asked + ' MiB';
+    $('#s276_got').textContent = (S.alloc >= 0 ? '+' : '') + S.alloc + ' MiB';
+    $('#s276_back').innerHTML = S.free < 0
+      ? '<b class="ok">' + S.free + ' MiB</b>' : '<b class="bad">nothing</b>';
+    $('#s276_kept').textContent = kept > 0 ? kept + ' MiB' : (own ? 'none' : 'none — nothing new was bought');
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 277 ── */
+/* ── Station 277: the prompt-stage pools, and the 4 MiB line they cross ── */
+if ($('#s277')) {
+  const svg = $('#s277_svg'), sl = $('#s277_m');
+  const MiB = 1048576;
+  const mlpBytes = (M) => M * 69632;                              // mlp.js:427-430, M · I · 4
+  const dnBytes = (M) => 3145728 * Math.ceil(M / 32);             // deltanet.js:2192
+  const LIMIT = 4 * MiB;                                          // Dawn's slab line (station 276)
+  // measured ledgers, docs/handoff/…-phys-sslots3072.json and …-phys-ctl3072.json
+  const SHORT = [['after load', 4396.55], ['a 30-word prompt', 4429.44], ['a 38-word prompt', 4476.10], ['a 44-word prompt', 4505.29]];
+  const LONG = [['after load', 4546.17], ['a 1,489-word prompt', 5301.74], ['the same prompt again', 5301.74]];
+  sl.addEventListener('input', render);
+
+  function render() {
+    const M = parseInt(sl.value, 10);
+    const a = mlpBytes(M), b = dnBytes(M);
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), paper = css('--paper');
+    let g = '';
+
+    // ── 1. the two workspaces on one size ruler ────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">the two workspaces the prompt stage keeps, drawn against the 4 MiB line from station 276</text>`;
+    const BX = 150, BW = 440, SC = BW / 100;      // px per MiB, ruler 0–100 MiB
+    const LX = BX + 4 * SC;
+    g += `<line x1="${LX.toFixed(1)}" y1="34" x2="${LX.toFixed(1)}" y2="114" stroke="${ink}" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    g += `<text x="${LX.toFixed(1)}" y="30" text-anchor="middle" font-size="9.5" fill="${ink}">4 MiB</text>`;
+    [[42, 'MLP workspace', a, 'M × 69,632 B'], [78, 'DeltaNet workspace', b, '3,145,728×⌈M÷32⌉']].forEach(([y, lab, by, formula]) => {
+      const big = by > LIMIT, w = Math.max(2, Math.min(by / MiB, 100) * SC);
+      g += `<text x="14" y="${y + 13}" font-size="11" fill="${ink2}">${lab}</text>`;
+      g += `<text x="14" y="${y + 25}" font-size="9" fill="${ink3}">${formula}</text>`;
+      g += `<rect x="${BX}" y="${y}" width="${w.toFixed(1)}" height="19" rx="3" fill="${big ? ok : bad}" opacity="0.85"/>`;
+      const txt = `${(by / MiB).toFixed(1)} MiB — ${big ? 'its own block' : 'cut from slabs'}`;
+      const inside = BX + w + 12 + txt.length * 6.4 > 626;
+      g += inside
+        ? `<text x="${(BX + w - 8).toFixed(1)}" y="${y + 14}" text-anchor="end" font-size="11" fill="${paper}">${txt}</text>`
+        : `<text x="${(BX + w + 10).toFixed(1)}" y="${y + 14}" font-size="11" fill="${ink}">${txt}</text>`;
+    });
+    [0, 25, 50, 75, 100].forEach((v) => {
+      const x = BX + v * SC;
+      g += `<line x1="${x.toFixed(1)}" y1="114" x2="${x.toFixed(1)}" y2="118" stroke="${ink3}"/>`;
+      g += `<text x="${x.toFixed(1)}" y="130" text-anchor="middle" font-size="10" fill="${ink3}">${v}</text>`;
+    });
+    g += `<text x="14" y="130" font-size="10" fill="${ink3}">MiB per entry →</text>`;
+    g += `<text x="14" y="146" font-size="10.5" fill="${ink3}">green = a block of its own, comes back in full  ·  red = cut from a slab, returns nothing</text>`;
+
+    // ── 2. the two lengths where each one crosses ──────────
+    const CY = 176;
+    g += `<text x="14" y="${CY}" font-size="11" fill="${ink3}">below these prompt lengths, releasing the workspace returns nothing at all to Windows</text>`;
+    const SX = 14, SW = 612, MAXM = 1024, mx = (m) => SX + SW * Math.min(m, MAXM) / MAXM;
+    const TY = CY + 28;
+    g += `<rect x="${SX}" y="${TY}" width="${SW}" height="26" rx="5" fill="${bad}" fill-opacity="0.14" stroke="${line}"/>`;
+    g += `<rect x="${mx(61).toFixed(1)}" y="${TY}" width="${(SX + SW - mx(61)).toFixed(1)}" height="26" fill="${ok}" fill-opacity="0.16"/>`;
+    [[33, 'the DeltaNet workspace crosses at 33 words', signal, 0], [61, 'the MLP workspace crosses at 61 words', trace, 14]].forEach(([m, lab, col, dy]) => {
+      g += `<line x1="${mx(m).toFixed(1)}" y1="${TY - 4}" x2="${mx(m).toFixed(1)}" y2="${TY + 30}" stroke="${col}" stroke-width="2"/>`;
+      g += `<text x="${(mx(m) + 8).toFixed(1)}" y="${TY + 62 + dy}" font-size="10.5" fill="${col}">${lab}</text>`;
+    });
+    g += `<line x1="${mx(M).toFixed(1)}" y1="${TY - 12}" x2="${mx(M).toFixed(1)}" y2="${TY + 30}" stroke="${ink}" stroke-width="2"/>`;
+    g += `<text x="${Math.max(SX + 26, Math.min(mx(M), SX + SW - 30)).toFixed(1)}" y="${TY - 16}" text-anchor="middle" font-size="10.5" fill="${ink}">M = ${M}</text>`;
+    [0, 256, 512, 768, 1024].forEach((v) => {
+      g += `<text x="${mx(v).toFixed(1)}" y="${TY + 44}" text-anchor="${v === 0 ? 'start' : v === 1024 ? 'end' : 'middle'}" font-size="9.5" fill="${ink3}">${v}</text>`;
+    });
+    g += `<text x="${SX + SW}" y="${TY + 96}" text-anchor="end" font-size="10.5" fill="${ink3}">the bench's own prompts are 30 to 44 words — the far left of this strip</text>`;
+
+    // ── 3. the ledger, measured at both lengths ────────────
+    const EY = 334;
+    g += `<line x1="14" y1="${EY - 12}" x2="626" y2="${EY - 12}" stroke="${line}"/>`;
+    g += `<text x="14" y="${EY}" font-size="11" fill="${ink3}">what the engine's own ledger did, on the laptop, at each prompt length</text>`;
+    const gx = (v) => 162 + 348 * (v - 4300) / 1100;
+    const strip = (y0, title, rows, col) => {
+      let o = `<text x="14" y="${y0}" font-size="10.5" fill="${ink2}">${title}</text>`;
+      rows.forEach((r, k) => {
+        const y = y0 + 8 + k * 22, d = k ? r[1] - rows[k - 1][1] : 0;
+        o += `<text x="18" y="${y + 13}" font-size="10" fill="${ink3}">${r[0]}</text>`;
+        o += `<rect x="162" y="${y + 3}" width="${(gx(r[1]) - 162).toFixed(1)}" height="14" rx="3" fill="${col}" opacity="${k ? 0.85 : 0.35}"/>`;
+        o += `<text x="${(gx(r[1]) + 8).toFixed(1)}" y="${y + 14}" font-size="10.5" fill="${ink}">${r[1].toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})} MiB`
+          + (k ? `<tspan fill="${d > 0 ? bad : ink3}">  ${d > 0 ? '+' + d.toFixed(1) : 'no change'}</tspan>` : '') + `</text>`;
+      });
+      return o;
+    };
+    g += strip(EY + 20, 'three short prompts in one session — every workspace stays under the line', SHORT, signal);
+    g += strip(EY + 132, 'one long prompt, and then the same prompt again', LONG, trace);
+    g += `<text x="14" y="${EY + 224}" font-size="10.5" fill="${ink3}">Of the long prompt's 755.6 MiB, about 366 comes back if you release it. Of the short prompts' 108.7, about none does.</text>`;
+    svg.innerHTML = g;
+
+    $('#s277_mV').textContent = M.toLocaleString() + ' words';
+    $('#s277_mlp').textContent = (a / MiB).toFixed(1) + ' MiB';
+    $('#s277_dn').textContent = (b / MiB).toFixed(1) + ' MiB';
+    const both = a > LIMIT && b > LIMIT;
+    $('#s277_ret').innerHTML = both ? '<b class="ok">all of it</b>'
+      : (b > LIMIT ? '<b class="bad">only the DeltaNet half</b>' : '<b class="bad">nothing</b>');
+    $('#s277_note').innerHTML = M >= 496 && M <= 528
+      ? 'this is the size the byte table was measured at' : '';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 278 ── */
+/* ── Station 278: two reserved snapshot slots, one ever used ── */
+if ($('#s278')) {
+  const svg = $('#s278_svg'), sl = $('#s278_t');
+  const b0 = $('#s278_off'), b1 = $('#s278_on');
+  const BUNDLE = 149.625;                 // MiB, spec_state_manager.js — one photograph
+  // Two walks of the same generation. `slots` is which slots are occupied
+  // after the step. Source: generate.js:1272/:1524 and qwen_model.js:5052.
+  const OFF = [
+    { t: 'the page loads the model', d: 'initState() allocates the pool: 2 slots, 299.25 MiB, one block', slots: [] },
+    { t: 'you ask something', d: 'the prompt is read; nothing is photographed yet', slots: [] },
+    { t: 'the answer starts', d: 'generate.js takes ONE snapshot and keeps it — slot 0', slots: [0] },
+    { t: 'word after word', d: 'slot 0 stays held for the whole answer; nothing else asks', slots: [0] },
+    { t: 'the answer ends', d: 'slot 0 is released', slots: [] },
+    { t: 'you ask again', d: 'one snapshot again — slot 0', slots: [0] },
+  ];
+  const ON = [
+    { t: 'the page loads the model', d: 'initState() allocates the pool: 2 slots, 299.25 MiB, one block', slots: [] },
+    { t: 'you ask something', d: 'the prompt is read; nothing is photographed yet', slots: [] },
+    { t: 'the answer starts', d: 'the session snapshot is taken and held — slot 0', slots: [0] },
+    { t: 'it drafts a few words', d: 'a second photograph for the draft — slot 1', slots: [0, 1] },
+    { t: 'the draft is checked', d: 'specRestore() releases slot 1 BEFORE the next one is taken', slots: [0] },
+    { t: 'it drafts again', d: 'slot 1 again — released before re-acquired, so never three', slots: [0, 1] },
+  ];
+  let guess = false;
+  b0.addEventListener('click', () => { guess = false; render(); });
+  b1.addEventListener('click', () => { guess = true; render(); });
+  sl.addEventListener('input', render);
+
+  function render() {
+    b0.setAttribute('aria-pressed', String(!guess));
+    b1.setAttribute('aria-pressed', String(guess));
+    const WALK = guess ? ON : OFF;
+    const i = parseInt(sl.value, 10), step = WALK[i];
+    const hw = Math.max(...WALK.slice(0, i + 1).map((s) => s.slots.length), 0);
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), paper = css('--paper');
+    let g = '';
+
+    // ── 1. the two slots ───────────────────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">the snapshot pool: one buffer, cut into two equal slots, allocated at every load</text>`;
+    const SY = 26, SH = 72;
+    [0, 1].forEach((k) => {
+      const on = step.slots.includes(k);
+      const used = WALK.some((s) => s.slots.includes(k));
+      const x = 14 + k * 306;
+      g += `<rect x="${x}" y="${SY}" width="300" height="${SH}" rx="8" fill="${on ? trace : card}" fill-opacity="${on ? 0.16 : 1}" stroke="${on ? trace : (used ? line : bad)}" stroke-width="${on ? 2 : 1}" stroke-dasharray="${used ? '' : '5 4'}"/>`;
+      g += `<text x="${x + 14}" y="${SY + 20}" font-size="11" fill="${ink3}">slot ${k}</text>`;
+      g += `<text x="${x + 14}" y="${SY + 42}" font-size="13" fill="${ink}">${BUNDLE} MiB</text>`;
+      g += `<text x="${x + 14}" y="${SY + 62}" font-size="10.5" fill="${on ? trace : (used ? ink3 : bad)}">${on
+        ? 'holding a photograph now'
+        : (used ? 'free at this step' : 'never written, never read, never freed')}</text>`;
+      if (on) g += `<rect x="${x + 200}" y="${SY + 26}" width="86" height="30" rx="4" fill="${trace}" opacity="0.85"/>`
+        + `<text x="${x + 243}" y="${SY + 46}" text-anchor="middle" font-size="10.5" fill="${paper}">in use</text>`;
+    });
+
+    // ── 2. the walk ────────────────────────────────────────
+    const WY = 122;
+    g += `<text x="14" y="${WY}" font-size="11" fill="${ink3}">one answer, step by step — ${guess ? 'with guessing ahead switched on' : 'exactly as the product runs it'}</text>`;
+    WALK.forEach((s, k) => {
+      const y = WY + 10 + k * 30, on = k === i;
+      g += `<rect x="14" y="${y}" width="612" height="27" rx="5" fill="${on ? signal : card}" fill-opacity="${on ? 0.14 : 1}" stroke="${on ? signal : line}"/>`;
+      g += `<text x="26" y="${y + 12}" font-size="11" fill="${on ? ink : ink2}">${s.t}</text>`;
+      g += `<text x="26" y="${y + 23}" font-size="9.5" fill="${ink3}">${s.d}</text>`;
+      // the two occupancy pips
+      [0, 1].forEach((q) => {
+        const held = s.slots.includes(q);
+        g += `<circle cx="${586 + q * 20}" cy="${y + 14}" r="6" fill="${held ? trace : 'none'}" stroke="${held ? trace : ink3}" opacity="${held ? 0.9 : 0.45}"/>`;
+      });
+    });
+    g += `<text x="500" y="${WY + 10 + WALK.length * 30 + 13}" font-size="9.5" fill="${ink3}">slot 0 · slot 1 →</text>`;
+
+    // ── 3. what capping it did on the laptop ───────────────
+    const MY = 336;
+    g += `<line x1="14" y1="${MY - 12}" x2="626" y2="${MY - 12}" stroke="${line}"/>`;
+    g += `<text x="14" y="${MY}" font-size="11" fill="${ink3}">what capping the pool at one slot did, laptop, 3,072-word window, the same 1,489-word prompt</text>`;
+    [['two slots — as shipped', 4546.17, [22.33, 11.20], bad],
+      ['one slot — specSlots:1', 4396.55, [23.82, 23.73], ok]].forEach((r, k) => {
+      const y = MY + 12 + k * 38;
+      g += `<rect x="14" y="${y}" width="612" height="34" rx="6" fill="${card}" stroke="${line}"/>`;
+      g += `<text x="26" y="${y + 21}" font-size="11.5" fill="${ink}">${r[0]}</text>`;
+      g += `<text x="210" y="${y + 21}" font-size="11" fill="${ink2}">ledger <tspan fill="${ink}">${r[1].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MiB</tspan></text>`;
+      g += `<text x="380" y="${y + 21}" font-size="11" fill="${ink2}">decode <tspan fill="${r[3]}">${r[2][0]}</tspan> then <tspan fill="${r[3]}">${r[2][1].toFixed(2)}</tspan> words/s</text>`;
+    });
+    g += `<text x="14" y="${MY + 104}" font-size="10.5" fill="${ink3}">−149.62 MiB on the ledger, and the second answer stopped falling off the cliff of station 275.</text>`;
+    svg.innerHTML = g;
+
+    $('#s278_tV').textContent = 'step ' + (i + 1) + ' of 6 · ' + step.t;
+    $('#s278_use').textContent = step.slots.length ? step.slots.map((s) => 'slot ' + s).join(' + ') : 'none';
+    $('#s278_hw').innerHTML = hw + ' of 2' + (guess ? '' : ' — <b class="bad">slot 1 is never touched</b>');
+    $('#s278_waste').textContent = guess ? 'nothing here' : BUNDLE + ' MiB';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 279 ── */
+/* ── Station 279: the main-memory shadow of retired weights ── */
+if ($('#s279')) {
+  const svg = $('#s279_svg');
+  const bS = $('#s279_ship'), bW = $('#s279_wb');
+  // Region histograms read straight out of the two Chrome memory-infra dumps,
+  // docs/handoff/2026-09-09-laptop-gpu-memdump{,-writebuffer}.json, pid 800.
+  const ARMS = {
+    ship: {
+      total: 2378.9, n: 228, renderer: 2374.0,
+      fams: [
+        { mib: 172, n: 2, who: 'the word table and the output head — created at 170.508 MiB each', match: true },
+        { mib: 12, n: 126, who: 'the MLP weights — 192 created at 11.953 MiB each', match: true },
+        { mib: 10, n: 8, who: '', match: false },
+        { mib: 8, n: 18, who: '', match: false },
+        { mib: 6, n: 33, who: '', match: false },
+        { mib: 4, n: 24, who: '', match: false },
+        { mib: 1, n: 17, label: '17 more', tot: 5, who: 'seventeen regions of under 2 MiB each', match: false },
+      ],
+    },
+    wb: {
+      total: 444.9, n: 59, renderer: 438.0,
+      fams: [
+        { mib: 64, n: 2, who: 'exactly the size the flag chunks uploads at — nothing bigger is mapped', match: true },
+        { mib: 44, n: 1, who: '', match: false },
+        { mib: 12, n: 7, who: '', match: false },
+        { mib: 8, n: 13, who: '', match: false },
+        { mib: 6, n: 1, who: '', match: false },
+        { mib: 4, n: 19, who: '', match: false },
+        { mib: 1, n: 16, label: '16 more', tot: 3, who: 'sixteen regions of under 2 MiB each', match: false },
+      ],
+    },
+  };
+  let arm = 'ship';
+  bS.addEventListener('click', () => { arm = 'ship'; render(); });
+  bW.addEventListener('click', () => { arm = 'wb'; render(); });
+
+  function render() {
+    bS.setAttribute('aria-pressed', String(arm === 'ship'));
+    bW.setAttribute('aria-pressed', String(arm === 'wb'));
+    const A = ARMS[arm], other = ARMS[arm === 'ship' ? 'wb' : 'ship'];
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    const col = arm === 'ship' ? bad : ok;
+    let g = '';
+
+    // ── 1. the two headline numbers ────────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">what Chrome is holding in ordinary RAM while the model quietly writes words</text>`;
+    const TW = 300, TY = 26;
+    [[14, A.total.toLocaleString() + ' MiB', 'in the graphics process', other.total.toLocaleString() + ' on the other arm'],
+      [326, A.n + ' regions', 'separate blocks of RAM', other.n + ' on the other arm']].forEach(([x, big, sub, cmp]) => {
+      g += `<rect x="${x}" y="${TY}" width="${TW}" height="62" rx="8" fill="${col}" fill-opacity="0.13" stroke="${col}"/>`;
+      g += `<text x="${x + 14}" y="${TY + 28}" font-size="20" fill="${ink}">${big}</text>`;
+      g += `<text x="${x + 14}" y="${TY + 45}" font-size="10.5" fill="${ink2}">${sub}</text>`;
+      g += `<text x="${x + 14}" y="${TY + 57}" font-size="10" fill="${ink3}">${cmp}</text>`;
+    });
+    g += `<text x="14" y="${TY + 78}" font-size="10.5" fill="${ink3}">and the page's own process holds ${A.renderer.toLocaleString()} MiB more of the same thing — none of it on the card.</text>`;
+
+    // ── 2. the histogram, by region size ───────────────────
+    const HY = 140;
+    g += `<text x="14" y="${HY}" font-size="11" fill="${ink3}">every region, grouped by size — the bar is how much RAM that group holds</text>`;
+    const MAX = 1600, BX = 108, BW = 400;
+    A.fams.forEach((f, k) => {
+      const y = HY + 12 + k * 32, tot = f.tot !== undefined ? f.tot : f.mib * f.n;
+      const w = Math.max(2, BW * tot / MAX);
+      g += `<text x="14" y="${y + 14}" font-size="11" fill="${f.match ? ink : ink2}">${f.label || (f.n + ' × ' + f.mib + ' MiB')}</text>`;
+      g += `<rect x="${BX}" y="${y + 2}" width="${w.toFixed(1)}" height="15" rx="3" fill="${f.match ? trace : col}" opacity="${f.match ? 0.9 : 0.5}"/>`;
+      g += `<text x="${(BX + w + 8).toFixed(1)}" y="${y + 14}" font-size="10.5" fill="${ink3}">${tot.toLocaleString()} MiB</text>`;
+      if (f.who) g += `<text x="14" y="${y + 27}" font-size="9.5" fill="${f.match ? trace : ink3}">${f.who}</text>`;
+    });
+
+    // ── 3. what these regions actually are ─────────────────
+    const NY = 388;
+    g += `<line x1="14" y1="${NY - 14}" x2="626" y2="${NY - 14}" stroke="${line}"/>`;
+    g += `<rect x="14" y="${NY - 6}" width="612" height="52" rx="8" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="${NY + 13}" font-size="11.5" fill="${ink}">${arm === 'ship'
+      ? 'Every one of the 1,277 buffers was closed properly. The regions outlived them anyway.'
+      : 'Nothing large is mapped any more — what is left is the buffers created empty on purpose.'}</text>`;
+    g += `<text x="26" y="${NY + 33}" font-size="10.5" fill="${ink3}">${arm === 'ship'
+      ? 'Repacked and destroyed minutes earlier — 2,374 MiB is 59% of everything ever created this way.'
+      : 'Same bytes on the card, same order, same answers — only the road the bytes travelled changed.'}</text>`;
+    svg.innerHTML = g;
+
+    $('#s279_tot').innerHTML = `<b class="${arm === 'ship' ? 'bad' : 'ok'}">${A.total.toLocaleString()} MiB</b>`;
+    $('#s279_n').textContent = A.n;
+    $('#s279_big').textContent = A.fams[0].n + ' × ' + A.fams[0].mib + ' MiB';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 280 ── */
+/* ── Station 280: the byte table, and the sum that was a coincidence ── */
+if ($('#s280')) {
+  const svg = $('#s280_svg');
+  const bG = $('#s280_guess'), bR = $('#s280_real');
+  // The two accounts. Guess: the load report's own two fields (§1.3(a)).
+  const GUESS = [
+    { n: 'totalBytes — bytes READ from the model files', v: 3617, k: 'trace' },
+    { n: 'arenaBytes — one route\'s merged block', v: 1687, k: 'signal' },
+  ];
+  // Real: the census, steady decode, window 2048 (§1.1).
+  const REAL = [
+    { n: 'the repacked weights', v: 3437.23, k: 'trace' },
+    { n: 'DeltaNet state and its prompt pool', v: 436.85, k: 'signal' },
+    { n: 'the rewind pool — two slots', v: 299.25, k: 'bad' },
+    { n: 'the key-and-value cache and scratch', v: 266.88, k: 'ok' },
+    { n: 'originals still kept (the word table)', v: 182.47, k: 'ink-3' },
+    { n: 'the MLP workspaces', v: 173.32, k: 'signal' },
+    { n: 'everything else', v: 6.04, k: 'ink-3' },
+  ];
+  const BUDGET = 5405.3;
+  let real = false;
+  bG.addEventListener('click', () => { real = false; render(); });
+  bR.addEventListener('click', () => { real = true; render(); });
+
+  function render() {
+    bG.setAttribute('aria-pressed', String(!real));
+    bR.setAttribute('aria-pressed', String(real));
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), paper = css('--paper');
+    const C = { trace, signal, ok, bad, 'ink-3': ink3 };
+    const SC = 590 / 6000, X0 = 22;                 // px per MiB
+    let g = '';
+
+    // ── 1. both accounts on one scale ──────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">both accounts drawn on the same scale, against what the card said the process was using</text>`;
+    const BL = X0 + BUDGET * SC;
+    g += `<line x1="${BL.toFixed(1)}" y1="32" x2="${BL.toFixed(1)}" y2="70" stroke="${ink}" stroke-width="2"/>`
+      + `<line x1="${BL.toFixed(1)}" y1="102" x2="${BL.toFixed(1)}" y2="142" stroke="${ink}" stroke-width="2"/>`;
+    g += `<text x="${(BL - 6).toFixed(1)}" y="160" text-anchor="end" font-size="10" fill="${ink}">5,405.3 MiB — what the card said the process was using →</text>`;
+    const bar = (y, rows, label, live) => {
+      const sum = rows.reduce((s2, r) => s2 + r.v, 0);
+      let x = X0, o = `<text x="14" y="${y - 5}" font-size="10.5" fill="${live ? ink : ink3}">${label}</text>`
+        + `<text x="626" y="${y - 5}" text-anchor="end" font-size="11.5" fill="${live ? ink : ink3}">totals ${sum.toLocaleString(undefined, { maximumFractionDigits: 0 })} MiB</text>`;
+      rows.forEach((r) => {
+        const w = r.v * SC;
+        o += `<rect x="${x.toFixed(1)}" y="${y}" width="${Math.max(w, 1).toFixed(1)}" height="34" fill="${C[r.k]}" opacity="${live ? 0.85 : 0.3}"/>`;
+        if (w > 46) o += `<text x="${(x + w / 2).toFixed(1)}" y="${y + 22}" text-anchor="middle" font-size="10.5" fill="${live ? paper : ink3}">${Math.round(r.v).toLocaleString()}</text>`;
+        x += w;
+      });
+      return o;
+    };
+    g += bar(34, GUESS, 'the two fields the site was adding together', !real);
+    g += bar(104, REAL, 'what a census of every allocation finds, steady decode, window 2048', real);
+    if (real) {
+      const x = X0 + 4802.03 * SC, w = 350 * SC;
+      g += `<rect x="${x.toFixed(1)}" y="104" width="${w.toFixed(1)}" height="34" fill="none" stroke="${ink3}" stroke-dasharray="4 3"/>`;
+      g += `<text x="${(x + 4).toFixed(1)}" y="152" font-size="9.5" fill="${ink3}">+180 to 350 MiB of driver bookkeeping</text>`;
+    }
+
+    // ── 2. the parts of the chosen account ─────────────────
+    const PY = 178;
+    g += `<text x="14" y="${PY}" font-size="11" fill="${ink3}">${real
+      ? 'what is actually on the card, biggest first'
+      : 'what those two fields are really counting'}</text>`;
+    if (real) {
+      REAL.forEach((r, k) => {
+        const y = PY + 10 + k * 24;
+        g += `<rect x="14" y="${y}" width="11" height="11" rx="2" fill="${C[r.k]}" opacity="0.85"/>`;
+        g += `<text x="32" y="${y + 10}" font-size="11" fill="${ink2}">${r.n}</text>`;
+        g += `<text x="360" y="${y + 10}" text-anchor="end" font-size="11" fill="${ink}">${r.v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MiB</text>`;
+        const w = 240 * r.v / REAL[0].v;
+        g += `<rect x="376" y="${y + 1}" width="${w.toFixed(1)}" height="9" rx="2" fill="${C[r.k]}" opacity="0.6"/>`;
+      });
+      g += `<text x="32" y="${PY + 10 + 7 * 24 + 4}" font-size="11" fill="${ink}">total resident, by measurement</text>`;
+      g += `<text x="360" y="${PY + 10 + 7 * 24 + 4}" text-anchor="end" font-size="11.5" fill="${trace}">4,802.02 MiB</text>`;
+    } else {
+      [['totalBytes = 3,617 MiB', 'the bytes the loader READ out of the files. Most of those tensors are destroyed a minute later,', 'once their repacked form exists — so this counts things that are no longer there.'],
+        ['arenaBytes = 1,687 MiB', 'one kernel route\'s merged block: 80 weight groups, 160 buffers. The repacks total 3,437.2 MiB,', 'so this is 49% of them — and it is already inside the number above, not beside it.']].forEach((r, k) => {
+        const y = PY + 12 + k * 66;
+        g += `<rect x="14" y="${y}" width="612" height="56" rx="8" fill="${card}" stroke="${line}"/>`;
+        g += `<text x="26" y="${y + 19}" font-size="12" fill="${ink}">${r[0]}</text>`;
+        g += `<text x="26" y="${y + 36}" font-size="10.5" fill="${ink3}">${r[1]}</text>`;
+        g += `<text x="26" y="${y + 50}" font-size="10.5" fill="${ink3}">${r[2]}</text>`;
+      });
+    }
+
+    // ── 3. the gap that is left over ───────────────────────
+    const RY = 380;
+    g += `<line x1="14" y1="${RY - 14}" x2="626" y2="${RY - 14}" stroke="${line}"/>`;
+    g += `<text x="14" y="${RY}" font-size="11" fill="${ink3}">the leftover, at the window the laptop was actually running (3,072 words)</text>`;
+    [['the card\'s counter, median', '5,279.8', 'the engine\'s books, decoding', '4,933.0', '346.8'],
+      ['the card\'s counter, highest', '5,405.3', 'the engine\'s books, at the peak', '5,227.0', '178.3']].forEach((r, k) => {
+      const y = RY + 10 + k * 26;
+      g += `<rect x="14" y="${y}" width="612" height="22" rx="4" fill="${card}" stroke="${line}"/>`;
+      g += `<text x="24" y="${y + 15}" font-size="10.5" fill="${ink3}">${r[0]}</text>`;
+      g += `<text x="300" y="${y + 15}" text-anchor="end" font-size="10.5" fill="${ink}">${r[1]}</text>`;
+      g += `<text x="316" y="${y + 15}" font-size="10.5" fill="${ink3}">${r[2]}</text>`;
+      g += `<text x="570" y="${y + 15}" text-anchor="end" font-size="10.5" fill="${ink}">${r[3]}</text>`;
+      g += `<text x="620" y="${y + 15}" text-anchor="end" font-size="10.5" fill="${trace}">${r[4]}</text>`;
+    });
+    g += `<text x="14" y="${RY + 76}" font-size="10.5" fill="${ink3}">180 to 350 MiB of driver bookkeeping — heaps, descriptors, compiled shaders. Too small to hide an engine allocation.</text>`;
+    svg.innerHTML = g;
+
+    const rows = real ? REAL : GUESS;
+    $('#s280_sum').textContent = rows.reduce((s, r) => s + r.v, 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' MiB';
+    $('#s280_what').innerHTML = real
+      ? '<b class="ok">a measurement of what is resident</b>'
+      : '<b class="bad">two overlapping fields, neither of them resident bytes</b>';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 281 ── */
+/* ── Station 281: the clock trace, and the lock that helped nothing ── */
+if ($('#s281')) {
+  const svg = $('#s281_svg'), sl = $('#s281_t');
+  // Every third sample of docs/handoff/2026-09-09-laptop-gpu-iso.csv (436 rows
+  // at 1 Hz, 12:13:29 → 12:20:47 IST). Nothing smoothed, nothing invented.
+  const CLK = '210,1425,210,210,1425,210,1425,210,210,210,1425,375,210,1747,2070,2070,2055,2047,1942,1597,2047,1612,1777,1627,1777,1620,2032,2032,1425,210,210,1425,210,1425,210,210,210,210,472,210,2070,2055,1762,2032,1575,1575,1770,1657,1965,2032,1657,2040,307,210,210,1425,210,1425,210,210,210,1425,360,375,2055,2055,2040,2010,2032,2032,1995,2032,2032,2025,1972,2025,1560,1575,540,1425,210,210,1425,210,1425,210,210,210,1425,300,210,2055,2055,1837,1965,1605,1740,1702,1785,2017,1965,1762,2002,1582,1777,1995,2017,1590,1965,2017,1957,1972,2017,1950,2010,2017,1597,1957,1995,2025,1425,262,210,210,1425,210,1425,210,210,210,1425,270,210,2047,2047,1807,1755,1732,2025,1725,2017,1717,1560,2032,1590,2032'.split(',').map(Number);
+  const PWR = '13,23.4,13,12.9,23.4,13.8,23.5,13.9,13.1,13.3,15.1,15.1,13.4,24.1,50.2,43,63.5,57,54.3,59.7,57.5,78.7,63.4,74.8,57.1,57.7,60,56.1,23.5,14.1,13.9,18.1,18.4,15.3,17.2,13.8,14.1,14.1,18,13.9,36.4,48.7,63,69.1,79.1,79.3,65.3,79.7,66.5,58.7,62.9,43.8,21.3,14,14,23.5,14.6,23.4,14.3,13.9,14.1,16.9,15.6,15,53.3,45.5,69.4,64.7,73.5,73.1,60.6,58.6,58.9,59.3,63.4,59.3,59.1,72.8,44.6,24.1,14.1,14.1,23.5,14.2,23.5,14.5,14.1,14.2,21.8,14.7,14.1,34.2,49.2,49.3,67.7,53.2,67.4,79,61.5,55.1,55,53.7,52.9,74.6,53.4,53.2,52.2,53.2,53.1,53,50.9,74.4,52.9,53.3,52.9,52.4,53.6,53.2,53.2,43.9,15.2,22,14,13.8,23.4,14.6,23.4,14.2,13.8,14,22.5,14.1,13.8,48.8,49.4,59.2,64.4,55.1,71.3,57.7,74.7,58.6,71,54.9,77.2,49.3'.split(',').map(Number);
+  const UTL = '38,0,0,0,0,0,0,0,0,0,87,0,0,1,33,48,53,68,93,95,63,93,100,60,100,85,82,0,0,0,0,0,0,1,0,0,0,0,0,0,60,49,100,54,93,93,100,93,100,76,66,0,0,0,0,0,0,0,5,0,0,27,8,73,53,77,69,78,68,50,77,71,54,71,78,71,85,94,1,0,0,0,0,0,0,0,0,0,27,0,9,35,42,92,100,72,100,79,64,81,72,64,76,100,82,76,70,82,81,72,82,82,95,82,70,75,91,79,80,0,16,0,0,0,0,0,0,0,0,0,26,0,0,68,27,100,100,100,72,100,75,100,100,75,62,0'.split(',').map(Number);
+  const MEM = '434,401,403,403,440,402,446,427,404,424,1517,2175,2194,4088,5595,5486,5665,5490,5317,5620,5661,5657,5603,5657,5514,5410,5538,1226,463,406,406,447,399,440,399,404,424,594,2194,2194,5710,5485,5653,5461,5662,5654,5611,5652,5326,5496,5508,453,406,406,406,445,407,453,432,406,425,1260,2196,2635,5622,5584,5666,5469,5657,5654,5324,5498,5128,5504,5337,5524,5641,5641,459,406,406,406,445,407,445,432,404,424,2182,2194,2194,5707,5428,5651,5555,5283,5143,5641,5355,5650,5650,5351,5355,5574,5342,5513,5642,5513,5318,5618,5645,5366,5628,5328,5328,5628,5499,5628,5628,345,459,406,406,406,446,408,455,434,424,424,2194,2194,2215,5643,5592,5376,5412,5511,5518,5350,5368,5354,5528,5664,5651,357'.split(',').map(Number);
+  const N = CLK.length;
+  sl.addEventListener('input', render);
+
+  function render() {
+    const i = parseInt(sl.value, 10);
+    const resident = MEM[i] > 4000;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), grid = css('--grid');
+    let g = '';
+
+    // ── 1. the trace ───────────────────────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">the card's own counters, once a second, through one benchmark session (7 minutes)</text>`;
+    const PX = 52, PW = 562, PY = 30, PH = 150;
+    const x = (k) => PX + PW * k / (N - 1);
+    const yC = (v) => PY + PH - PH * v / 2200;
+    const yP = (v) => PY + PH - PH * v / 90;
+    // the resident band
+    let run = null;
+    for (let k = 0; k <= N; k++) {
+      const on = k < N && MEM[k] > 4000;
+      if (on && run === null) run = k;
+      if (!on && run !== null) {
+        g += `<rect x="${x(run).toFixed(1)}" y="${PY}" width="${(x(k - 1) - x(run)).toFixed(1)}" height="${PH}" fill="${signal}" opacity="0.09"/>`;
+        run = null;
+      }
+    }
+    // gridlines
+    [0, 550, 1100, 1650, 2200].forEach((v) => {
+      g += `<line x1="${PX}" y1="${yC(v).toFixed(1)}" x2="${PX + PW}" y2="${yC(v).toFixed(1)}" stroke="${grid}"/>`;
+      g += `<text x="${PX - 6}" y="${(yC(v) + 3.5).toFixed(1)}" text-anchor="end" font-size="9.5" fill="${ink3}">${v}${v === 2200 ? ' MHz' : ''}</text>`;
+    });
+    // the 210 floor and the 80 W cap
+    g += `<line x1="${PX}" y1="${yC(210).toFixed(1)}" x2="${PX + PW}" y2="${yC(210).toFixed(1)}" stroke="${trace}" stroke-dasharray="4 3"/>`;
+
+    g += `<line x1="${PX}" y1="${yP(80).toFixed(1)}" x2="${PX + PW}" y2="${yP(80).toFixed(1)}" stroke="${bad}" stroke-dasharray="4 3"/>`;
+
+    const path = (arr, fy) => arr.map((v, k) => (k ? 'L' : 'M') + x(k).toFixed(1) + ' ' + fy(v).toFixed(1)).join(' ');
+    g += `<path d="${path(PWR, yP)}" fill="none" stroke="${signal}" stroke-width="1.2" opacity="0.75"/>`;
+    g += `<path d="${path(CLK, yC)}" fill="none" stroke="${trace}" stroke-width="1.6"/>`;
+    // the scrub marker
+    g += `<line x1="${x(i).toFixed(1)}" y1="${PY - 2}" x2="${x(i).toFixed(1)}" y2="${PY + PH + 4}" stroke="${ink}" stroke-width="1.5"/>`;
+    g += `<circle cx="${x(i).toFixed(1)}" cy="${yC(CLK[i]).toFixed(1)}" r="4" fill="${trace}"/>`;
+    g += `<circle cx="${x(i).toFixed(1)}" cy="${yP(PWR[i]).toFixed(1)}" r="3.5" fill="${signal}"/>`;
+    [0, 2, 4, 6].forEach((m) => {
+      const k = Math.min(N - 1, Math.round(m * 60 / 3));
+      g += `<text x="${x(k).toFixed(1)}" y="${PY + PH + 16}" text-anchor="middle" font-size="9.5" fill="${ink3}">${m} min</text>`;
+    });
+    g += `<text x="14" y="${PY + PH + 32}" font-size="10" fill="${ink3}"><tspan fill="${trace}">orange</tspan> = the shader clock, left scale  ·  <tspan fill="${signal}">blue</tspan> = watts drawn, 0 to 90</text>`;
+    g += `<text x="14" y="${PY + PH + 46}" font-size="10" fill="${ink3}">dashed: the 210 MHz idle floor and the 80 W cap  ·  <tspan fill="${signal}">shaded</tspan>: the model is on the card</text>`;
+
+    // ── 2. the lock experiment ─────────────────────────────
+    const LY = 254;
+    g += `<text x="14" y="${LY}" font-size="11" fill="${ink3}">three short prompts, with the shader clock pinned and without it</text>`;
+    const LX = 204, LW = 360, MAXT = 34;
+    [['clock pinned 1,800–2,100 MHz', [12.92, 10.32, 10.51], bad],
+      ['left alone — the control', [12.87, 26.02, 10.20], ok]].forEach((r, k) => {
+      const y0 = LY + 12 + k * 62;
+      g += `<text x="14" y="${y0 + 12}" font-size="11" fill="${ink2}">${r[0]}</text>`;
+      r[1].forEach((v, q) => {
+        const y = y0 + q * 16, w = LW * v / MAXT;
+        g += `<rect x="${LX}" y="${y}" width="${w.toFixed(1)}" height="12" rx="2" fill="${r[2]}" opacity="${v > 20 ? 0.9 : 0.45}"/>`;
+        g += `<text x="${(LX + w + 7).toFixed(1)}" y="${y + 10}" font-size="10" fill="${v > 20 ? ink : ink3}">${v.toFixed(2)} words/s</text>`;
+      });
+    });
+
+    // ── 3. cause against effect ────────────────────────────
+    const AY = 398;
+    g += `<line x1="14" y1="${AY - 14}" x2="626" y2="${AY - 14}" stroke="${line}"/>`;
+    g += `<text x="14" y="${AY}" font-size="11" fill="${ink3}">how big the cause can be, against how big the effect is</text>`;
+    [['the clock, while answering', '1,380 → 2,077 MHz', '1.5×', signal],
+      ['the word rate, same laptop', '10.0 → 32.4 words/s', '3.2×', trace]].forEach((r, k) => {
+      const y = AY + 10 + k * 26;
+      g += `<rect x="14" y="${y}" width="612" height="22" rx="4" fill="${card}" stroke="${line}"/>`;
+      g += `<text x="24" y="${y + 15}" font-size="10.5" fill="${ink3}">${r[0]}</text>`;
+      g += `<text x="240" y="${y + 15}" font-size="10.5" fill="${ink}">${r[1]}</text>`;
+      g += `<rect x="400" y="${y + 6}" width="${(parseFloat(r[2]) * 45).toFixed(1)}" height="10" rx="2" fill="${r[3]}" opacity="0.75"/>`;
+      g += `<text x="620" y="${y + 15}" text-anchor="end" font-size="11" fill="${r[3]}">${r[2]}</text>`;
+    });
+    g += `<text x="14" y="${AY + 76}" font-size="10.5" fill="${ink3}">A 1.5× cause cannot make a 3.2× effect. The 190 ms toll of station 275 can, and no clock setting touches it.</text>`;
+    svg.innerHTML = g;
+
+    $('#s281_tV').textContent = Math.floor(i * 3 / 60) + 'm ' + String(i * 3 % 60).padStart(2, '0') + 's into the session';
+    $('#s281_mhz').textContent = CLK[i].toLocaleString() + ' MHz';
+    $('#s281_w').textContent = PWR[i].toFixed(1) + ' W';
+    $('#s281_u').textContent = UTL[i] + '%';
+    $('#s281_m').textContent = MEM[i].toLocaleString() + ' MiB';
+    $('#s281_state').innerHTML = resident
+      ? '<b class="ok">the model is loaded</b>' : (CLK[i] <= 400 ? '<b>idling at the floor</b>' : '<b>between runs</b>');
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 282 ── */
+/* ── Station 282: the same question asked from two different threads ── */
+if ($('#s282')) {
+  const svg = $('#s282_svg');
+  const B = { i: $('#s282_i'), l: $('#s282_l'), w: $('#s282_w') };
+  // The two probe rows are relayed from the machine, not from a repo file, and
+  // the widget says so. The worker row is the four iso exports of one sitting.
+  const COVERED = [26.11, 26.31, 31.97, 32.13, 32.57, 30.03, 24.05, 25.83, 31.39, 31.50, 32.20, 26.11];
+  const VISIBLE = [25.35, 25.86, 31.40, 31.31, 29.38, 31.99, 24.85, 25.23, 31.30, 31.18, 31.57, 31.57];
+  const CASES = {
+    i: { name: 'the 4 KB probe, nothing else running', thread: 'the page’s main thread', unit: 'ms', vis: 3.1, hid: 3.5, lowerBetter: true, relayed: true },
+    l: { name: 'the 4 KB probe, with GPU work in the same handover', thread: 'the page’s main thread', unit: 'ms', vis: 24.7, hid: 131, lowerBetter: true, relayed: true },
+    w: { name: 'the engine writing words, 24 generations', thread: 'a worker — where decode actually runs', unit: 'words/s', vis: 31.24, hid: 30.71, lowerBetter: false, relayed: false },
+  };
+  let cur = 'l';
+  for (const k of Object.keys(B)) B[k].addEventListener('click', () => { cur = k; render(); });
+  const med = (a) => { const s = [...a].sort((x, y) => x - y); return (s[5] + s[6]) / 2; };
+
+  function render() {
+    for (const k of Object.keys(B)) B[k].setAttribute('aria-pressed', String(cur === k));
+    const C = CASES[cur];
+    const ratio = C.lowerBetter ? C.hid / C.vis : C.vis / C.hid;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), paper = css('--paper');
+    let g = '';
+
+    // ── 1. visible against hidden ──────────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">${C.name} — on ${C.thread}</text>`;
+    const BX = 150, BW = 380, MAX = Math.max(C.vis, C.hid) * 1.12;
+    [['window visible', C.vis, ok], [cur === 'w' ? 'window covered' : 'tab hidden', C.hid, ratio > 1.5 ? bad : ok]].forEach((r, k) => {
+      const y = 30 + k * 40, w = BW * r[1] / MAX;
+      g += `<text x="14" y="${y + 18}" font-size="11.5" fill="${ink2}">${r[0]}</text>`;
+      g += `<rect x="${BX}" y="${y}" width="${w.toFixed(1)}" height="26" rx="4" fill="${r[2]}" opacity="0.85"/>`;
+      g += `<text x="${(BX + w + 10).toFixed(1)}" y="${y + 18}" font-size="12" fill="${ink}">${r[1]} ${C.unit}</text>`;
+    });
+    const bigBad = ratio > 1.5;
+    g += `<rect x="14" y="118" width="612" height="40" rx="8" fill="${bigBad ? bad : ok}" fill-opacity="0.13" stroke="${bigBad ? bad : ok}"/>`;
+    g += `<text x="26" y="${143}" font-size="12.5" fill="${ink}">${bigBad
+      ? `hiding the window costs ${ratio.toFixed(1)}× — on a thread the product never uses`
+      : `${ratio.toFixed(2)}× — being hidden costs nothing here`}</text>`;
+    if (C.relayed) g += `<text x="14" y="174" font-size="10" fill="${ink3}">These two numbers are relayed from the machine, not read from a file in this repository. The row below is.</text>`;
+    else g += `<text x="14" y="174" font-size="10" fill="${ink3}">Medians of the twelve-and-twelve generations drawn below — every one of them from a saved export.</text>`;
+
+    // ── 2. the 24 real generations ─────────────────────────
+    const DY = 200;
+    g += `<text x="14" y="${DY}" font-size="11" fill="${ink3}">the 24 generations that settled it, worker thread, one sitting, same flags</text>`;
+    const AX = 130, AW = 388, LO = 0, HI = 36, gx = (v) => AX + AW * (v - LO) / (HI - LO);
+    [10, 20, 30].forEach((v) => {
+      g += `<line x1="${gx(v).toFixed(1)}" y1="${DY + 12}" x2="${gx(v).toFixed(1)}" y2="${DY + 74}" stroke="${css('--grid')}"/>`;
+      g += `<text x="${gx(v).toFixed(1)}" y="${DY + 88}" text-anchor="middle" font-size="9.5" fill="${ink3}">${v}</text>`;
+    });
+    g += `<text x="626" y="${DY + 88}" text-anchor="end" font-size="9.5" fill="${ink3}">words a second →</text>`;
+    // the slow band, for scale
+    g += `<rect x="${gx(0).toFixed(1)}" y="${DY + 12}" width="${(gx(20) - gx(0)).toFixed(1)}" height="62" fill="${bad}" opacity="0.07"/>`;
+    g += `<text x="${(gx(0) + 6).toFixed(1)}" y="${DY + 24}" font-size="9.5" fill="${bad}">where a stalled run would land</text>`;
+    [['covered', COVERED, signal], ['visible', VISIBLE, trace]].forEach((r, k) => {
+      const y = DY + 34 + k * 24;
+      g += `<text x="14" y="${y + 4}" font-size="10.5" fill="${ink2}">${r[0]} · 12 runs</text>`;
+      r[1].forEach((v) => {
+        g += `<circle cx="${gx(v).toFixed(1)}" cy="${y}" r="4" fill="${r[2]}" opacity="0.65"/>`;
+      });
+      const m = med(r[1]);
+      g += `<line x1="${gx(m).toFixed(1)}" y1="${y - 9}" x2="${gx(m).toFixed(1)}" y2="${y + 9}" stroke="${ink}" stroke-width="1.5"/>`;
+      g += `<text x="${(AX + AW + 12).toFixed(1)}" y="${y + 4}" font-size="10" fill="${ink}">median ${m.toFixed(2)}</text>`;
+    });
+
+    // ── 3. the ballast tab ─────────────────────────────────
+    const NY = 320;
+    g += `<line x1="14" y1="${NY - 8}" x2="626" y2="${NY - 8}" stroke="${line}"/>`;
+    g += `<text x="14" y="${NY + 8}" font-size="11" fill="${ink3}">and the other test that day: a 400 MB tab, opened in front of the bench</text>`;
+    [['the ballast arm', 8.86, 17.58, bad], ['its own control, same window', 10.03, 31.12, ink3]].forEach((r, k) => {
+      const y = NY + 20 + k * 30;
+      g += `<text x="14" y="${y + 14}" font-size="10.5" fill="${ink2}">${r[0]}</text>`;
+      g += `<rect x="${gx(r[1]).toFixed(1)}" y="${y + 4}" width="${(gx(r[2]) - gx(r[1])).toFixed(1)}" height="13" rx="3" fill="${r[3]}" opacity="0.55"/>`;
+      g += `<text x="${(gx(r[2]) + 8).toFixed(1)}" y="${y + 14}" font-size="10.5" fill="${ink3}">${r[1]} to ${r[2]} words/s</text>`;
+    });
+    g += `<text x="14" y="${NY + 96}" font-size="10.5" fill="${ink3}">The ballast readings sit inside the control's own range, and the test changed a second variable while it ran.</text>`;
+    g += `<text x="14" y="${NY + 112}" font-size="10.5" fill="${ink3}">It is not a negative result. It is no result.</text>`;
+    svg.innerHTML = g;
+
+    $('#s282_v').textContent = C.vis + ' ' + C.unit;
+    $('#s282_h').innerHTML = `<b class="${bigBad ? 'bad' : 'ok'}">${C.hid} ${C.unit}</b>`;
+    $('#s282_r').textContent = ratio.toFixed(2) + '×';
+    $('#s282_note').innerHTML = C.relayed ? '<span style="opacity:.7">relayed, not from a repo file</span>' : '<b class="ok">24 of 24 fast</b>';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 283 ── */
+/* ── Station 283: a deferral that lasts until the first question ── */
+if ($('#s283')) {
+  const svg = $('#s283_svg'), sl = $('#s283_t');
+  const POOL = 299.25;
+  const BASE = 4546.17;            // MiB, load ledger, window 3072, flags absent
+  // Only the first row of each arm is a measured ledger; the later two follow
+  // from §3A.3's "the pool is rebuilt at its first snapshot()", and the widget
+  // labels them as such rather than dressing them up as readings.
+  const STEPS = [
+    { t: 'the model finishes loading', d: 'the load report is written — this is the only moment residentBytes is read', measured: true },
+    { t: 'you ask the first question', d: 'the generate loop takes a session snapshot, so the pool is built right here', measured: false },
+    { t: 'it settles into decoding', d: 'from here on the two arms hold exactly the same bytes', measured: false },
+  ];
+  const SPEC = [4246.92, BASE, BASE], ABSENT = [BASE, BASE, BASE];
+  const DEC = { spec: [25.47, 10.49, 12.40, 12.20, 12.34, 12.53], ctl: [19.59, 16.69, 12.52, 31.35, 12.69, 12.56] };
+  sl.addEventListener('input', render);
+
+  function render() {
+    const i = parseInt(sl.value, 10), S = STEPS[i];
+    const saved = ABSENT[i] - SPEC[i];
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), paper = css('--paper');
+    let g = '';
+
+    // ── 1. the three moments ───────────────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">one session, three moments — and what the engine's ledger holds at each</text>`;
+    const TX = 14, TW = 612, SY = 26;
+    STEPS.forEach((s, k) => {
+      const x = TX + k * (TW / 3), w = TW / 3 - 8, on = k === i;
+      g += `<rect x="${x}" y="${SY}" width="${w}" height="46" rx="6" fill="${on ? signal : card}" fill-opacity="${on ? 0.14 : 1}" stroke="${on ? signal : line}"/>`;
+      g += `<text x="${x + 10}" y="${SY + 18}" font-size="11" fill="${on ? ink : ink2}">${s.t}</text>`;
+      g += `<text x="${x + 10}" y="${SY + 33}" font-size="9" fill="${ink3}">${k === 0 ? 'measured' : 'follows from the rebuild'}</text>`;
+      if (k) g += `<text x="${x - 4}" y="${SY + 28}" text-anchor="middle" font-size="13" fill="${ink3}">→</text>`;
+    });
+
+    // ── 2. the two ledgers ─────────────────────────────────
+    const LY = 94;
+    g += `<text x="14" y="${LY}" font-size="11" fill="${ink3}">${S.d}</text>`;
+    const BX = 176, BW = 400, LO = 4100, HI = 4700, gx = (v) => BX + BW * (v - LO) / (HI - LO);
+    [['residentTrim: "spec"', SPEC[i], trace], ['no flag at all', ABSENT[i], ink3]].forEach((r, k) => {
+      const y = LY + 12 + k * 34;
+      g += `<text x="14" y="${y + 18}" font-size="11" fill="${ink2}">${r[0]}</text>`;
+      g += `<rect x="${BX}" y="${y}" width="${(gx(r[1]) - BX).toFixed(1)}" height="26" rx="4" fill="${r[2]}" opacity="0.8"/>`;
+      g += `<text x="${(gx(r[1]) + 8).toFixed(1)}" y="${y + 18}" font-size="11.5" fill="${ink}">${r[1].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MiB</text>`;
+    });
+    const dy = LY + 84;
+    g += `<rect x="14" y="${dy}" width="612" height="34" rx="7" fill="${saved > 1 ? ok : bad}" fill-opacity="0.13" stroke="${saved > 1 ? ok : bad}"/>`;
+    g += `<text x="26" y="${dy + 22}" font-size="12.5" fill="${ink}">${saved > 1
+      ? `holding ${saved.toFixed(2)} MiB less — and the load report is written at this instant`
+      : 'the pool is back. Nothing was saved, and no report is ever read again to notice.'}</text>`;
+
+    // ── 3. what decode actually did ────────────────────────
+    const DY = 232;
+    g += `<text x="14" y="${DY}" font-size="11" fill="${ink3}">six generations each, laptop, 3,072-word window — the outcome the ledger was supposed to change</text>`;
+    const AX = 130, AW = 400, dx = (v) => AX + AW * v / 36;
+    [10, 20, 30].forEach((v) => {
+      g += `<line x1="${dx(v).toFixed(1)}" y1="${DY + 12}" x2="${dx(v).toFixed(1)}" y2="${DY + 66}" stroke="${css('--grid')}"/>`;
+      g += `<text x="${dx(v).toFixed(1)}" y="${DY + 80}" text-anchor="middle" font-size="9.5" fill="${ink3}">${v}</text>`;
+    });
+    g += `<text x="626" y="${DY + 80}" text-anchor="end" font-size="9.5" fill="${ink3}">words a second →</text>`;
+    [['with the flag', DEC.spec, trace], ['without it', DEC.ctl, ink3]].forEach((r, k) => {
+      const y = DY + 30 + k * 26;
+      g += `<text x="14" y="${y + 4}" font-size="10.5" fill="${ink2}">${r[0]}</text>`;
+      r[1].forEach((v) => {
+        g += `<circle cx="${dx(v).toFixed(1)}" cy="${y}" r="4.5" fill="${v > 20 ? ok : bad}" opacity="0.7"/>`;
+      });
+      const fast = r[1].filter((v) => v > 20).length;
+      g += `<text x="${(AX + AW + 12).toFixed(1)}" y="${y + 4}" font-size="10" fill="${ink3}">${fast} of 6 fast</text>`;
+    });
+
+    // ── 4. why no gate saw it ──────────────────────────────
+    const GY = 352;
+    g += `<line x1="14" y1="${GY - 12}" x2="626" y2="${GY - 12}" stroke="${line}"/>`;
+    g += `<text x="14" y="${GY}" font-size="11" fill="${ink3}">and why twelve rungs of a byte-identical certification ladder said nothing</text>`;
+    [['every native test driver', 'passes sessionReuse: false', 'so it never takes a session snapshot', ok],
+      ['every browser generation', 'leaves the field alone', 'so it takes one on the very first ask', bad]].forEach((r, k) => {
+      const y = GY + 10 + k * 34;
+      g += `<rect x="14" y="${y}" width="612" height="30" rx="6" fill="${card}" stroke="${line}"/>`;
+      g += `<text x="26" y="${y + 19}" font-size="11" fill="${ink}">${r[0]}</text>`;
+      g += `<text x="196" y="${y + 19}" font-size="11" fill="${r[3]}">${r[1]}</text>`;
+      g += `<text x="374" y="${y + 19}" font-size="10.5" fill="${ink3}">${r[2]}</text>`;
+    });
+    g += `<text x="14" y="${GY + 96}" font-size="10.5" fill="${ink3}">The flag shipped, and the laptop hit "SpecStateManager.snapshot: not initialized" on its first generation.</text>`;
+    svg.innerHTML = g;
+
+    $('#s283_tV').textContent = S.t;
+    const f2 = (v) => v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    $('#s283_a').textContent = f2(SPEC[i]) + ' MiB';
+    $('#s283_b').textContent = f2(ABSENT[i]) + ' MiB';
+    $('#s283_d').innerHTML = saved > 1 ? `<b class="ok">${saved.toFixed(2)} MiB</b>` : '<b class="bad">nothing</b>';
+    $('#s283_note').innerHTML = i === 0 ? 'the load report is written here' : '<span style="opacity:.7">and nothing reads it again</span>';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 284 ── */
+/* ── Station 284: the ledger decides, the process counter does not ── */
+if ($('#s284')) {
+  const svg = $('#s284_svg'), sl = $('#s284_a');
+  // Eight arms, one sitting, one 1,489-word prompt run twice each. Ledgers and
+  // word rates from docs/handoff/2026-09-09-bench-laptop-3060-phys-*.json.
+  const ARMS = [
+    { w: 2048, flags: 'nothing switched on', led: 5170.74, dec: [24.31, 24.12] },
+    { w: 2048, flags: 'one slot instead of two', led: 5021.11, dec: [24.03, 23.94] },
+    { w: 2048, flags: 'one slot + queue upload', led: 5021.11, dec: [23.86, 23.95] },
+    { w: 2048, flags: 'all three', led: 4246.64, dec: [23.79, 23.86] },
+    { w: 3072, flags: 'nothing switched on', led: 5301.74, dec: [22.33, 11.20] },
+    { w: 3072, flags: 'one slot instead of two', led: 5152.11, dec: [23.82, 23.73] },
+    { w: 3072, flags: 'one slot + queue upload', led: 5152.11, dec: [23.80, 23.80] },
+    { w: 3072, flags: 'all three', led: 4377.64, dec: [23.74, 23.84] },
+  ];
+  const OS_LO = 5028, OS_HI = 5070;      // relayed medians, every arm alike
+  sl.addEventListener('input', render);
+
+  function render() {
+    const i = parseInt(sl.value, 10), A = ARMS[i];
+    const slow = Math.min(...A.dec) < 20;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), grid = css('--grid');
+    let g = '';
+
+    // ── 1. the two gauges ──────────────────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">two counters, one arm at a time — both in MiB, drawn on the same scale</text>`;
+    const GX = 194, GW = 396, LO = 4000, HI = 5500, gx = (v) => GX + GW * (v - LO) / (HI - LO);
+    // the engine's ledger
+    g += `<text x="14" y="${44}" font-size="11" fill="${ink2}">the engine's ledger</text>`;
+    g += `<text x="14" y="${56}" font-size="9" fill="${ink3}">after the prompt</text>`;
+    g += `<rect x="${GX}" y="30" width="${(gx(A.led) - GX).toFixed(1)}" height="26" rx="4" fill="${slow ? bad : ok}" opacity="0.85"/>`;
+    g += `<text x="${(gx(A.led) + 8).toFixed(1)}" y="48" font-size="11.5" fill="${ink}">${A.led.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</text>`;
+    ARMS.forEach((r, k) => {
+      if (k === i) return;
+      g += `<line x1="${gx(r.led).toFixed(1)}" y1="30" x2="${gx(r.led).toFixed(1)}" y2="56" stroke="${ink3}" opacity="0.4"/>`;
+    });
+    // the process counter
+    g += `<text x="14" y="${80}" font-size="11" fill="${ink2}">the card's process counter</text>`;
+    g += `<text x="14" y="${92}" font-size="9" fill="${ink3}">relayed, not from a file</text>`;
+    g += `<rect x="${GX}" y="66" width="${(gx(OS_LO) - GX).toFixed(1)}" height="26" rx="4" fill="${ink3}" opacity="0.5"/>`;
+    g += `<rect x="${gx(OS_LO).toFixed(1)}" y="66" width="${(gx(OS_HI) - gx(OS_LO)).toFixed(1)}" height="26" fill="${ink3}" opacity="0.85"/>`;
+    g += `<text x="${(gx(OS_HI) + 8).toFixed(1)}" y="84" font-size="11.5" fill="${ink}">5,028–5,070 — the same on every arm</text>`;
+    [4000, 4500, 5000, 5500].forEach((v) => {
+      g += `<line x1="${gx(v).toFixed(1)}" y1="94" x2="${gx(v).toFixed(1)}" y2="98" stroke="${ink3}"/>`;
+      g += `<text x="${gx(v).toFixed(1)}" y="110" text-anchor="middle" font-size="9.5" fill="${ink3}">${v.toLocaleString()}</text>`;
+    });
+
+    // ── 2. the verdict for this arm ────────────────────────
+    g += `<rect x="14" y="124" width="612" height="42" rx="8" fill="${slow ? bad : ok}" fill-opacity="0.13" stroke="${slow ? bad : ok}"/>`;
+    g += `<text x="26" y="${142}" font-size="12.5" fill="${ink}">window ${A.w.toLocaleString()}, ${A.flags} — decoded at ${A.dec[0].toFixed(2)} then ${A.dec[1].toFixed(2)} words a second</text>`;
+    g += `<text x="26" y="${159}" font-size="10.5" fill="${slow ? bad : ok}">${slow
+      ? 'the second generation fell off the cliff — and the process counter said nothing was different'
+      : 'both generations stayed fast — and the process counter said nothing was different here either'}</text>`;
+
+    // ── 3. all eight arms ──────────────────────────────────
+    const TY = 190;
+    g += `<text x="14" y="${TY}" font-size="11" fill="${ink3}">all eight arms, same prompt, same laptop, same sitting</text>`;
+    g += `<text x="24" y="${TY + 16}" font-size="9.5" fill="${ink3}">window</text>`;
+    g += `<text x="86" y="${TY + 16}" font-size="9.5" fill="${ink3}">what was switched on</text>`;
+    g += `<text x="308" y="${TY + 16}" text-anchor="end" font-size="9.5" fill="${ink3}">the ledger</text>`;
+    g += `<text x="322" y="${TY + 16}" font-size="9.5" fill="${ink3}">the two generations</text>`;
+    ARMS.forEach((r, k) => {
+      const y = TY + 22 + k * 24, on = k === i, isSlow = Math.min(...r.dec) < 20;
+      g += `<rect x="14" y="${y}" width="612" height="21" rx="4" fill="${on ? signal : card}" fill-opacity="${on ? 0.14 : 1}" stroke="${on ? signal : line}"/>`;
+      g += `<text x="24" y="${y + 15}" font-size="10.5" fill="${ink3}">${r.w.toLocaleString()}</text>`;
+      g += `<text x="86" y="${y + 15}" font-size="10.5" fill="${on ? ink : ink2}">${r.flags}</text>`;
+      g += `<text x="308" y="${y + 15}" text-anchor="end" font-size="10.5" fill="${ink}">${r.led.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</text>`;
+      r.dec.forEach((v, q) => {
+        const w = 78 * v / 26;
+        g += `<rect x="${322 + q * 142}" y="${y + 5}" width="${w.toFixed(1)}" height="11" rx="2" fill="${v < 20 ? bad : ok}" opacity="0.75"/>`;
+        g += `<text x="${322 + q * 142 + w + 5}" y="${y + 15}" font-size="9.5" fill="${v < 20 ? bad : ink3}">${v.toFixed(2)}</text>`;
+      });
+      if (isSlow) g += `<text x="620" y="${y + 15}" text-anchor="end" font-size="10" fill="${bad}">slow</text>`;
+    });
+
+    // ── 4. the reading ─────────────────────────────────────
+    const NY = 416;
+    g += `<line x1="14" y1="${NY - 12}" x2="626" y2="${NY - 12}" stroke="${line}"/>`;
+    g += `<text x="14" y="${NY + 2}" font-size="11.5" fill="${ink}">One buffer — 149.6 MiB — separates the slow arm from its neighbour. The process counter cannot see it.</text>`;
+    g += `<text x="14" y="${NY + 22}" font-size="10.5" fill="${ink3}">Earlier the same day the mismatch ran the other way: a 318 MiB fall in the ledger moved that counter by 35.</text>`;
+    g += `<text x="14" y="${NY + 38}" font-size="10.5" fill="${ink3}">Neither counter is wrong. They count different things, and only one of them predicts what a person waits for.</text>`;
+    svg.innerHTML = g;
+
+    $('#s284_aV').textContent = 'window ' + A.w.toLocaleString() + ' · ' + A.flags;
+    $('#s284_led').textContent = A.led.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' MiB';
+    $('#s284_dec').innerHTML = `<b class="${slow ? 'bad' : 'ok'}">${A.dec[0].toFixed(2)} then ${A.dec[1].toFixed(2)}</b>`;
+    $('#s284_v').innerHTML = slow ? '<b class="bad">this is the one that stalled</b>' : '';
   }
   render(); window.addEventListener('resize', render);
 }

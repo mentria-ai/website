@@ -71,16 +71,44 @@ const COPY = {
   toggleLabel:   {{ ("tool.extensions.toggle_label"   | t) | dump | safe }},
   galInstall:    {{ ("tool.ext_gallery.btn_install" | t) | dump | safe }},
   galInstalled:  {{ ("tool.ext_gallery.installed"   | t) | dump | safe }},
+  galUpdate:    {{ ("tool.ext_gallery.btn_update" | t) | dump | safe }},
   galOpen:       {{ ("tool.ext_gallery.btn_open"    | t) | dump | safe }},
   galErrLoad:    {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }}
 };
 const CATALOG = [
+  { id: "forge",          desc: {{ ("tool.ext_gallery.desc.forge"          | t) | dump | safe }} },
   { id: "unit-converter", desc: {{ ("tool.ext_gallery.desc.unit-converter" | t) | dump | safe }} },
   { id: "pomodoro-timer", desc: {{ ("tool.ext_gallery.desc.pomodoro-timer" | t) | dump | safe }} },
   { id: "dice-roller",    desc: {{ ("tool.ext_gallery.desc.dice-roller"    | t) | dump | safe }} },
   { id: "image-gen",      desc: {{ ("tool.ext_gallery.desc.image-gen"      | t) | dump | safe }} },
   { id: "story-studio",   desc: {{ ("tool.ext_gallery.desc.story-studio"   | t) | dump | safe }} }
 ];
+const CATALOG_URL = 'https://mentria-ai.github.io/extensions/catalog.json';
+let remoteCatalog = null;
+async function loadRemoteCatalog() {
+  try {
+    const res = await fetch(CATALOG_URL, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const c = await res.json();
+    if (!c || !Array.isArray(c.extensions)) return null;
+    for (const e of c.extensions) if (!CATALOG.some((k) => k.id === e.id)) CATALOG.push({ id: e.id, desc: e.summary || '' });
+    return c;
+  } catch (_) { return null; }
+}
+function sourceUrls(id) {
+  const urls = [];
+  const r = remoteCatalog && remoteCatalog.extensions.find((e) => e.id === id);
+  if (r) urls.push((remoteCatalog.base || 'https://mentria-ai.github.io/extensions/') + r.file);
+  urls.push('/assets/extensions/' + id + '.html');
+  return urls;
+}
+async function fetchSource(id) {
+  let lastErr = null;
+  for (const u of sourceUrls(id)) {
+    try { const r = await fetch(u, { cache: 'no-store' }); if (!r.ok) throw new Error(String(r.status)); return await r.text(); } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('unavailable');
+}
 
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
 const X = await import('/assets/js/mentria-extensions.js');
@@ -281,7 +309,19 @@ function galMakeCard(entry) {
 function galActions(entry, card) {
   const p = card._parts;
   p.actions.innerHTML = '';
-  if (X.getEntry(entry.id)) {
+  const installed = X.getEntry(entry.id);
+  if (installed && entry.version && X.compareVersions(entry.version, installed.manifest.version) > 0) {
+    const up = document.createElement('button');
+    up.type = 'button';
+    up.className = 'xt__btn xt__btn--small exg__btn';
+    up.textContent = COPY.galUpdate.replace('{v}', entry.version);
+    up.addEventListener('click', () => galInstall(entry, card, up));
+    const open = document.createElement('a');
+    open.className = 'xt__btn xt__btn--small exg__btn';
+    open.textContent = COPY.galOpen;
+    open.href = PREFIX + '/tools/extensions/run/?id=' + encodeURIComponent(entry.id);
+    p.actions.append(up, open);
+  } else if (installed) {
     const done = document.createElement('span');
     done.className = 'exg__done';
     done.textContent = COPY.galInstalled;
@@ -304,7 +344,7 @@ async function galInstall(entry, card, b) {
   galStatus(card, '');
   b.disabled = true;
   try {
-    const html = entry.html || await fetch('/assets/extensions/' + entry.id + '.html').then((r) => r.text());
+    const html = entry.html || await fetchSource(entry.id);
     const result = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
     if (!result) { b.disabled = false; return; }
     render();
@@ -318,10 +358,7 @@ async function galLoad(entry, card) {
   const p = card._parts;
   let html;
   try {
-    html = await fetch('/assets/extensions/' + entry.id + '.html').then((r) => {
-      if (!r.ok) throw new Error(String(r.status));
-      return r.text();
-    });
+    html = await fetchSource(entry.id);
   } catch (e) {
     galStatus(card, COPY.galErrLoad);
     return;
@@ -336,6 +373,8 @@ async function galLoad(entry, card) {
   }
   entry.ready = true;
   const m = ins.manifest;
+  entry.version = m.version;
+  entry.name = m.name;
   p.icon.textContent = m.icon && !/^data:/.test(m.icon) ? m.icon : '🧩';
   p.name.textContent = m.name;
   p.badges.innerHTML = '';
@@ -350,6 +389,7 @@ refreshGallery = () => {
   galCards.forEach(({ entry, card }) => { if (entry.ready) galActions(entry, card); });
 };
 
+remoteCatalog = await loadRemoteCatalog();
 CATALOG.forEach((entry) => {
   const card = galMakeCard(entry);
   galCards.push({ entry, card });

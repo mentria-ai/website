@@ -1,0 +1,642 @@
+<script type="application/json" id="mentria-ext">
+{
+  "id": "forge",
+  "name": "Forge",
+  "version": "0.9.3",
+  "icon": "⚒️",
+  "author": "Mihir Dave",
+  "description": "Describe a small app; the model on this phone writes it, checks it, repairs it and installs it.",
+  "permissions": ["storage", "ai"],
+  "mounts": {
+    "tool": {},
+    "commands": [
+      { "name": "forge", "usage": "forge <what to build>", "description": "make a small app from a description, on this device" }
+    ]
+  }
+}
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --ext-accent: #6ef3c5;
+    --ext-bg: #0b0e11;
+    --ext-fg: #e6edf3;
+    --ext-muted: #8b98a5;
+    --ext-font: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --line: #232b33;
+    --line-soft: #1b222a;
+    --card: #10141a;
+    --warn: #ffc9ac;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    padding: 1rem max(0.9rem, env(safe-area-inset-right, 0px)) calc(2.5rem + env(safe-area-inset-bottom, 0px)) max(0.9rem, env(safe-area-inset-left, 0px));
+    font-family: var(--ext-font);
+    line-height: 1.5;
+    background: var(--ext-bg);
+    color: var(--ext-fg);
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 34rem; margin: 0 auto; }
+  .head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; }
+  h1 { flex: 1 1 auto; margin: 0; font-size: 1.3rem; font-weight: 600; }
+  #tier { flex: 0 1 auto; min-width: 0; max-width: 62%; min-height: 44px; padding: 0.35rem 0.5rem; font-family: inherit; font-size: 1rem; text-overflow: ellipsis; color: var(--ext-fg); background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+  #tier option { color: var(--ext-fg); background: var(--card); }
+  #model { flex: 1 1 100%; font-size: 0.78rem; font-weight: 400; color: var(--ext-muted); overflow-wrap: anywhere; }
+  .lead { margin: 0.5rem 0 0.8rem; font-size: 0.85rem; line-height: 1.45; color: var(--ext-muted); }
+  textarea { display: block; width: 100%; min-height: 5.5rem; padding: 0.75rem 0.8rem; resize: vertical; font-family: inherit; font-size: 1rem; line-height: 1.45; color: var(--ext-fg); background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+  textarea::placeholder { color: #5d6873; }
+  textarea:focus, select:focus, button:focus-visible, input:focus-visible { outline: 2px solid var(--ext-accent); outline-offset: 2px; }
+  button { min-height: 44px; padding: 0.6rem 1rem; font-family: inherit; font-size: 0.95rem; color: var(--ext-fg); background: transparent; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  button.primary { font-weight: 600; color: var(--ext-bg); background: var(--ext-accent); border-color: var(--ext-accent); }
+  button:disabled { font-weight: 400; color: var(--ext-muted); background: transparent; border-color: var(--line-soft); cursor: default; }
+  .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .make-row { margin-top: 0.6rem; }
+  #make, .big-btn { flex: 1 1 11rem; min-height: 54px; font-size: 1.05rem; }
+  #stop { flex: 0 1 auto; min-height: 54px; }
+  .ghost { margin-top: 0.5rem; }
+  .ghost button { flex: 1 1 0; font-size: 0.85rem; color: var(--ext-muted); border-color: var(--line-soft); }
+  .ghost button[aria-expanded="true"] { color: var(--ext-fg); background: var(--card); border-color: var(--line); }
+  .chips { display: grid; gap: 0.4rem; margin: 0.55rem 0 0; }
+  .chips button { width: 100%; padding: 0.6rem 0.75rem; font-size: 0.85rem; line-height: 1.35; text-align: left; background: var(--card); }
+  #more-panel { margin-top: 0.55rem; padding: 0.75rem 0.8rem; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+  #more-panel label { display: flex; gap: 0.6rem; align-items: center; min-height: 44px; margin: 0 0 0.6rem; font-size: 0.85rem; line-height: 1.4; color: var(--ext-muted); }
+  #adapter { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; margin: 0; accent-color: var(--ext-accent); }
+  #adapter-state { color: var(--ext-accent); }
+  #more-panel .row button { flex: 1 1 0; font-size: 0.88rem; }
+  .status { position: relative; min-height: 2.6rem; margin: 1rem 0 0.3rem; padding-left: 1.2rem; font-size: 1rem; line-height: 1.5; color: var(--ext-fg); overflow-wrap: anywhere; }
+  .status::before { content: ""; position: absolute; left: 0.1rem; top: 0.6em; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #39424b; }
+  .status.working::before { background: var(--ext-accent); animation: forge-pulse 1.2s ease-in-out infinite; }
+  .status b { font-weight: 600; color: var(--ext-accent); }
+  @keyframes forge-pulse { 0%, 100% { opacity: 0.3; transform: scale(0.75); } 50% { opacity: 1; transform: scale(1.2); } }
+  @media (prefers-reduced-motion: reduce) { .status.working::before { animation: none; opacity: 1; } }
+  #result-actions button { flex: 1 1 0; min-height: 48px; font-size: 1rem; }
+  .hint { margin: 0.4rem 0 0; font-size: 0.75rem; line-height: 1.4; color: var(--ext-muted); }
+  #result-actions:has(#install:not(:disabled)) ~ .hint { display: none; }
+  .panel { margin-top: 0.8rem; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .panel h2 { display: flex; flex-wrap: wrap; gap: 0.2rem 0.6rem; justify-content: space-between; margin: 0; padding: 0.6rem 0.8rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ext-muted); border-bottom: 1px solid var(--line-soft); }
+  .wait { display: none; font-weight: 400; text-transform: none; letter-spacing: 0; }
+  #preview-panel:has(#preview[srcdoc=""]):has(#verdict:empty) .wait { display: block; }
+  #verdict { padding: 0.65rem 0.8rem; font-size: 0.95rem; font-weight: 600; line-height: 1.4; color: var(--ext-fg); background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--line-soft); overflow-wrap: anywhere; }
+  #verdict:empty { display: none; }
+  #verdict:has(.ok) { background: rgba(110, 243, 197, 0.07); }
+  .ok { color: var(--ext-accent); }
+  iframe { display: block; width: 100%; height: clamp(18rem, 55vh, 34rem); background: var(--ext-bg); border: 0; }
+  #preview[srcdoc=""], #preview:not([srcdoc]) { height: 0; }
+  .err { padding: 0.6rem 0.8rem; font-size: 0.82rem; line-height: 1.45; color: var(--warn); background: rgba(255, 201, 172, 0.05); border-top: 1px solid var(--line-soft); overflow-wrap: anywhere; }
+  .err:empty { display: none; }
+  pre { margin: 0; padding: 0.7rem 0.8rem; max-height: clamp(12rem, 40vh, 24rem); overflow: auto; font-family: inherit; font-size: 0.74rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; color: #c9d4de; }
+  pre:empty::before { content: "the model's output appears here"; color: #4b5661; }
+  #eval-out { max-height: 14rem; }
+  .eval-row { padding: 0.6rem 0.8rem 0; }
+  .eval-row button { flex: 1 1 9rem; font-size: 0.85rem; }
+  details.panel > summary { list-style: none; }
+  details.panel > summary::-webkit-details-marker { display: none; }
+  .panel-summary { display: flex; align-items: center; gap: 0.5rem; margin: 0; padding: 0.55rem 0.8rem; min-height: 46px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ext-muted); cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+  .panel-summary::before { content: "\25b8"; flex: 0 0 auto; font-size: 0.8rem; }
+  details[open] > .panel-summary::before { content: "\25be"; }
+  details[open] > .panel-summary { border-bottom: 1px solid var(--line-soft); }
+  .panel-summary > span:first-of-type { flex: 1 1 auto; }
+  #tokens { flex: 0 0 auto; font-size: 0.72rem; letter-spacing: 0; text-transform: none; white-space: nowrap; color: var(--ext-accent); font-variant-numeric: tabular-nums; }
+  #download-log { flex: 0 0 auto; min-height: 40px; padding: 0.3rem 0.7rem; font-size: 0.72rem; letter-spacing: 0; text-transform: none; }
+  .log { margin: 0; padding: 0; list-style: none; font-size: 0.82rem; }
+  .log li { padding: 0.55rem 0.8rem; line-height: 1.45; color: var(--ext-muted); border-top: 1px solid var(--line-soft); overflow-wrap: anywhere; }
+  .log li:first-child { border-top: 0; }
+  .log li b { font-weight: 600; color: var(--ext-fg); }
+  .hidden { display: none !important; }
+  #preview-panel.idle { display: none; }
+</style>
+<div class="wrap">
+  <header class="head">
+    <h1>⚒️ Forge</h1>
+    <select id="tier" class="hidden" aria-label="Model size"></select>
+    <small id="model">model: checking…</small>
+  </header>
+  <p class="lead">Describe a small app. The model on this phone writes it, Forge checks it, repairs it, and installs it with your other tools.</p>
+  <textarea id="prompt" rows="3" placeholder="a tip calculator with 15 / 18 / 20 percent buttons and a split-between-people field" aria-label="What to build"></textarea>
+  <div class="row make-row">
+    <button class="primary big-btn" id="make" type="button" disabled>Make it</button>
+    <button id="stop" type="button" disabled>Stop</button>
+  </div>
+  <div class="row ghost">
+    <button id="examples" type="button" aria-expanded="false">Examples</button>
+    <button id="more" type="button" aria-expanded="false">More</button>
+  </div>
+  <div class="chips hidden" id="chips"></div>
+  <div class="hidden" id="more-panel">
+    <label><input type="checkbox" id="adapter"> <span>use the Forge adapter (the LoRA trained at the event: more first-try apps, slow on phones) <span id="adapter-state"></span></span></label>
+    <label><span>Prompt style</span> <select id="prompt-style" aria-label="Prompt style"><option value="full">full, Saturday's prompt with an example</option><option value="lean">lean, tuned overnight for first-try success</option></select></label>
+    <div class="row">
+      <button id="save" type="button" disabled>Save file</button>
+      <button id="update" type="button" title="fetch the latest forge.html from GitHub and reinstall">Update Forge</button>
+    </div>
+  </div>
+  <p class="status" id="status">idle</p>
+  <div class="row" id="result-actions">
+    <button class="primary" id="install" type="button" disabled>Install</button>
+    <button id="open" type="button" disabled>Open</button>
+  </div>
+  <p class="hint">Install lights up once the app runs in the preview.</p>
+  <div class="panel" id="preview-panel">
+    <h2><span>Preview</span><span class="wait">the app appears here when it runs</span></h2>
+    <div id="verdict"></div>
+    <iframe id="preview" sandbox="allow-scripts" title="App preview"></iframe>
+    <div class="err" id="preview-err"></div>
+  </div>
+  <details class="panel" id="code-panel" open>
+    <summary class="panel-summary"><span>The model is writing</span><span id="tokens"></span></summary>
+    <pre id="code"></pre>
+  </details>
+  <details class="panel">
+    <summary class="panel-summary"><span>Eval: held-out prompts, base vs adapter</span></summary>
+    <div class="row eval-row"><button id="eval-base" type="button">Run: base model</button><button id="eval-adapter" type="button">Run: with adapter</button></div>
+    <pre id="eval-out"></pre>
+  </details>
+  <details class="panel">
+    <summary class="panel-summary"><span>Makes on this phone</span><button id="download-log" type="button">Download log</button></summary>
+    <ul class="log" id="log"></ul>
+  </details>
+</div>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var host = window.mentria || {};
+  var storage = host.storage || { get: function () { return null; }, set: function () {}, remove: function () {}, list: function () { return []; } };
+  var notify = host.notify || function (m) { $('status').textContent = m; };
+  if (host.theme) {
+    var r = document.documentElement;
+    if (host.theme.accent) r.style.setProperty('--ext-accent', host.theme.accent);
+    if (host.theme.bg) r.style.setProperty('--ext-bg', host.theme.bg);
+    if (host.theme.fg) r.style.setProperty('--ext-fg', host.theme.fg);
+    if (host.theme.fontMono) r.style.setProperty('--ext-font', host.theme.fontMono);
+  }
+
+  var EXAMPLES = ['a tip calculator: bill amount, tip percent, show the tip and the total', 'a word and character counter for a text box', 'a dice roller with one die and a roll button', 'a coin flip with a running heads and tails score', 'a converter from kilometres to miles', 'a water intake tracker with a goal of 8 glasses', 'a packing checklist that remembers what I ticked', 'a big countdown timer for a 4 minute pitch with start, pause and reset'];
+  var SYSTEM_ADAPTER = [
+    'You write tiny web apps that run inside a page on a phone. Answer with exactly four things and nothing else: a line "NAME: <two to four words>", a line "ICON: <one emoji>", one fenced html block, one fenced js block.',
+    'The html block is the markup that goes inside the app container: at most 25 lines, no doctype, no head, no body, no style, no script. Give every interactive element an id. The classes card, row, btn, primary, big and muted exist already; inputs, selects and buttons are styled already.',
+    'The js block is plain JavaScript, at most 40 lines, and it runs after the markup exists: use document.getElementById and addEventListener; keep state with mentria.storage.get(key) and mentria.storage.set(key, value), both synchronous; no imports, no fetch, no external URLs, no alert. Never reference an id that the html does not contain. Close every bracket.',
+    'Example. User: Make: a word counter for a text box. Answer:',
+    'NAME: Word Counter',
+    'ICON: ✏️',
+    '```html',
+    '<div class="card"><textarea id="text" rows="5" placeholder="type here"></textarea><div class="big" id="words">0</div><div class="muted">words</div></div>',
+    '```',
+    '```js',
+    'var box = document.getElementById("text");',
+    'var out = document.getElementById("words");',
+    'function update() { var n = box.value.split(/\\s+/).filter(Boolean).length; out.textContent = n; mentria.storage.set("text", box.value); }',
+    'box.value = mentria.storage.get("text") || "";',
+    'box.addEventListener("input", update);',
+    'update();',
+    '```',
+    'Do not copy the example unless the request is a word counter. Do not repeat these instructions, do not explain, do not add anything after the js block.'
+  ].join('\n');
+  var SYSTEM = [
+    'You write tiny web apps that run inside a page on a phone.',
+    'The markup goes inside an app container that already exists: start with <div class="card">, put the inputs and buttons first, then one output element such as <div class="big" id="out">0</div>. Give every input, button and output an id. No doctype, no head, no body, no style block, no script tag. The classes card, row, btn, primary, big and muted already exist, and inputs, selects and buttons are styled already.',
+    'The JavaScript is plain ES5 and runs after the markup exists. Get each element once with document.getElementById, wire every button with addEventListener("click", ...), read inputs with .value, and write the answer into the output element with textContent. Keep state with mentria.storage.get(key) and mentria.storage.set(key, value), both synchronous. No fetch, no import, no alert. Every id the JavaScript uses must exist in the html. Keep it under 30 lines and close every bracket.',
+    'Answer with two fenced blocks and nothing else: first the html block, then the js block. Both blocks are required.',
+    'The page, its head, its body and all the CSS already exist. Never write a complete HTML document, a doctype or a style block: the html block is only the markup that goes inside the card.',
+    'Never call alert, prompt or confirm. When you need to tell the user something, write it into the output element with textContent.',
+    'Write no explanation before, between or after the blocks.'
+  ].join('\n');
+  var SYSTEM_RETRY = [
+    'You write tiny web apps that run inside a page on a phone.',
+    'The markup goes inside an app container that already exists: start with <div class="card">, put the inputs and buttons first, then one output element such as <div class="big" id="out">0</div>. Give every input, button and output an id. No doctype, no head, no body, no style block, no script tag. The classes card, row, btn, primary, big and muted already exist, and inputs, selects and buttons are styled already.',
+    'The JavaScript is plain ES5 and runs after the markup exists. Get each element once with document.getElementById, wire every button with addEventListener("click", ...), read inputs with .value, and write the answer into the output element with textContent. Keep state with mentria.storage.get(key) and mentria.storage.set(key, value), both synchronous. No fetch, no import, no alert. Every id the JavaScript uses must exist in the html. Keep it under 30 lines and close every bracket.',
+    'Answer with two fenced blocks and nothing else: first the html block, then the js block. Both blocks are required.',
+    'The page, its head, its body and all the CSS already exist. Never write a complete HTML document, a doctype or a style block: the html block is only the markup that goes inside the card.',
+    'Never call alert, prompt or confirm. When you need to tell the user something, write it into the output element with textContent.'
+  ].join('\n');
+  var TEMPLATE_CSS = ':root{--ext-accent:#6ef3c5;--ext-bg:#0b0e11;--ext-fg:#e6edf3;--ext-muted:#8b98a5;--ext-font:ui-monospace,SFMono-Regular,Menlo,monospace}*{box-sizing:border-box}body{margin:0;padding:1.2rem 1rem;font-family:var(--ext-font);background:var(--ext-bg);color:var(--ext-fg)}#app{max-width:30rem;margin:0 auto}.card{border:1px solid #2a3138;border-radius:10px;background:#10141a;padding:1rem;margin-bottom:.8rem}.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.5rem 0}.big{font-size:2.6rem;font-weight:600;color:var(--ext-accent);text-align:center;margin:.4rem 0}.muted{color:var(--ext-muted);font-size:.8rem}h1,h2,h3{margin:0 0 .6rem;font-size:1.05rem;font-weight:600}p{margin:.4rem 0}label{display:block;font-size:.78rem;color:var(--ext-muted);margin:.5rem 0 .2rem}input,select,textarea{width:100%;background:#0b0e11;border:1px solid #2a3138;border-radius:6px;padding:.55rem .6rem;color:var(--ext-fg);font-family:inherit;font-size:1rem}input[type=checkbox],input[type=radio]{width:auto}button,.btn{background:transparent;border:1px solid #2a3138;color:var(--ext-fg);border-radius:6px;padding:.55rem .95rem;font-family:inherit;font-size:.95rem;cursor:pointer}.btn.primary,button.primary{border-color:var(--ext-accent);color:var(--ext-accent)}button:focus-visible,input:focus,select:focus,textarea:focus{outline:2px solid var(--ext-accent);outline-offset:1px}ul,ol{padding-left:1.2rem}li{margin:.25rem 0}';
+  var RESERVED = ['extensions', 'run', 'tools', 'feed', 'search', 'about', 'comms', 'forge'];
+
+  var M = null;
+  var current = null;
+  var stopped = false;
+  var runId = 0;
+
+  function slug(name) {
+    var s = String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+    if (s.length < 3) s = (s || 'app') + '-app';
+    if (RESERVED.indexOf(s) >= 0) s += '-app';
+    return s;
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function innerMarkup(html) {
+    var m = html.match(/<div[^>]*id=["']app["'][^>]*>([\s\S]*)<\/div>\s*$/i);
+    if (m) return m[1].trim();
+    m = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    if (m) html = m[1];
+    return html.replace(/<!doctype[^>]*>/gi, '').replace(/<\/?(html|head|body)[^>]*>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<title[\s\S]*?<\/title>/gi, '').replace(/<meta[^>]*>/gi, '').trim();
+  }
+  function parseReply(text, fallbackName) {
+    var name = (text.match(/^\s*NAME:\s*(.+)$/mi) || [])[1];
+    var icon = (text.match(/^\s*ICON:\s*(\S+)/mi) || [])[1];
+    var blocks = [];
+    var re = /```([a-zA-Z]*)\s*\n([\s\S]*?)```/g;
+    var m;
+    var end = 0;
+    while ((m = re.exec(text))) { end = re.lastIndex; blocks.push({ lang: m[1].toLowerCase(), body: m[2].replace(/\s+$/, '') }); }
+    var tail = text.slice(end).match(/```([a-zA-Z]*)\s*\n([\s\S]+)$/);
+    if (tail && tail[2].trim()) blocks.push({ lang: tail[1].toLowerCase(), body: tail[2].replace(/\s+$/, ''), truncated: true });
+    var html = null, js = null;
+    blocks.forEach(function (b) {
+      if (!html && (b.lang === 'html' || (!b.lang && /<[a-z]/i.test(b.body) && !/^\s*(var|let|const|document|function)/.test(b.body)))) html = b.body;
+      else if (!js && (b.lang === 'js' || b.lang === 'javascript' || (!b.lang && /(getElementById|addEventListener|mentria\.)/.test(b.body)))) js = b.body;
+    });
+    var css = [];
+    blocks.forEach(function (b) { if (b.lang === 'css') css.push(b.body); });
+    if (html) html = html.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, function (m0, c) { css.push(c); return ''; });
+    var inline = null;
+    if (html) { var sm = html.match(/<script[^>]*>([\s\S]*?)<\/script>/i); if (sm && sm[1].trim()) inline = sm[1].trim(); }
+    var jsFrom = js ? 'block' : null;
+    if (inline && (!js || /addEventListener|getElementById|querySelector|function\s+[A-Za-z_$]/.test(inline))) { js = inline; jsFrom = 'inline'; }
+    if (html) html = innerMarkup(html);
+    if (js) js = js.replace(/^\s*<script[^>]*>/i, '').replace(/<\/script>\s*$/i, '').trim();
+    var cleanName = (name || '').trim().replace(/["`*<>]/g, '');
+    if (!cleanName || /two to four words|<|>/.test(cleanName) || cleanName.length > 40) cleanName = fallbackName || 'Forged app';
+    var cleanIcon = icon && icon.length <= 8 && !/[a-z0-9]/i.test(icon) ? icon : iconFrom(cleanName + ' ' + (fallbackName || ''));
+    return { name: cleanName.slice(0, 40), icon: cleanIcon, html: html || null, js: js || null, css: cleanCss(css.join('\n')), jsFrom: jsFrom };
+  }
+  function cleanCss(css) {
+    return String(css || '').replace(/<\/style/gi, '').replace(/(^|[}\s])(html|body)(\s*,\s*(html|body))?\s*\{[^{}]*\}/gi, '$1').trim();
+  }
+  function assemble(parts, description) {
+    var id = slug(parts.name);
+    var manifest = { id: id, name: parts.name, version: '0.1.0', icon: parts.icon, author: 'Forge on this device', description: String(description || '').replace(/<\/script/gi, '</ script').slice(0, 200), permissions: ['storage'], mounts: { tool: {} } };
+    var safeJs = String(parts.js).replace(/<\/script/gi, '<\\/script');
+    var declared = []; var fre = /^\s*(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/gm; var fm;
+    while ((fm = fre.exec(safeJs))) if (declared.indexOf(fm[1]) < 0) declared.push(fm[1]);
+    var vre = /^\s*(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/gm;
+    while ((fm = vre.exec(safeJs))) if (declared.indexOf(fm[1]) < 0) declared.push(fm[1]);
+    var expose = declared.length ? '\n' + declared.map(function (n) { return 'try{window.' + n + '=' + n + '}catch(e){}'; }).join('') : '';
+    var script = '(function(){var mentria=window.mentria||{storage:(function(){var m={};return{get:function(k){return k in m?m[k]:null},set:function(k,v){m[k]=v;return true},remove:function(k){delete m[k];return true},list:function(){return Object.keys(m)}}})(),notify:function(){},close:function(){}};var localStorage={getItem:function(k){var v=mentria.storage.get(k);return v==null?null:String(v)},setItem:function(k,v){mentria.storage.set(k,String(v))},removeItem:function(k){mentria.storage.remove(k)},clear:function(){}};var sessionStorage=localStorage;\n' + safeJs + expose + '\n})();';
+    var html = '<script type="application/json" id="mentria-ext">\n' + JSON.stringify(manifest, null, 2) + '\n</scr' + 'ipt>\n<style>' + TEMPLATE_CSS + (parts.css ? '\n' + parts.css : '') + '</style>\n<div id="app">\n' + parts.html + '\n</div>\n<script>\n' + script + '\n</scr' + 'ipt>\n';
+    return { id: id, manifest: manifest, html: html, script: script };
+  }
+  function staticCheck(parts) {
+    if (!parts.html) return 'no ```html block in the reply';
+    if (!parts.js) return 'no ```js block in the reply';
+    var bare = parts.js.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[=(,:\[!&|?{};\n]\s*)\/(?![*\/])(?:\\.|\[(?:\\.|[^\]\\\n])*\]|[^\/\\\n\[])+\/[gimsuy]*/g, '$1""').replace(/\/\/[^\n]*/g, '').replace(/'(\\.|[^'\\\n])*'|"(\\.|[^"\\\n])*"|`(\\.|[^`\\])*`/g, '""');
+    var opens = (bare.match(/[{(\[]/g) || []).length, closes = (bare.match(/[})\]]/g) || []).length;
+    if (opens !== closes) return 'the JavaScript has unbalanced brackets (' + opens + ' opening, ' + closes + ' closing)';
+    if (/\balert\(|\bprompt\(|\bconfirm\(|\bfetch\(|\bimport\s*[({]|\bimport\s+[a-z*{]|https?:\/\//i.test(bare)) return 'the JavaScript must not use alert, prompt, confirm, fetch, import or external URLs';
+    var ids = {};
+    var re = /\sid=["']?([^"'\s>]+)["']?/g; var m;
+    while ((m = re.exec(parts.html))) ids[m[1]] = true;
+    var used = /getElementById\(\s*["']([^"']+)["']\s*\)/g; var missing = [];
+    while ((m = used.exec(parts.js))) if (!ids[m[1]] && missing.indexOf(m[1]) < 0) missing.push(m[1]);
+    if (missing.length) {
+      var healed = missing.map(function (id) {
+        var safe = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        var reads = new RegExp('getElementById\\(\\s*["\']' + safe + '["\']\\s*\\)\\s*\\.\\s*(value|checked)').test(parts.js);
+        return reads ? '<input id="' + id + '" placeholder="' + id + '">' : '<div class="big" id="' + id + '"></div>';
+      });
+      parts.html = parts.html + '\n' + healed.join('\n');
+      parts.healed = (parts.healed || []).concat(missing);
+    }
+    return null;
+  }
+  function previewRun(built) {
+    return new Promise(function (resolve) {
+      var frame = $('preview');
+      var done = false;
+      var token = 'forge-' + Date.now();
+      var finish = function (err) { if (done) return; done = true; window.removeEventListener('message', onMsg); resolve(err); };
+      var onMsg = function (e) { var d = e.data || {}; if (d.forge !== token) return; if (d.type === 'error') finish(String(d.message || 'runtime error').replace(/^Uncaught\s+/, '')); };
+      window.addEventListener('message', onMsg);
+      var shim = '<scr' + 'ipt>window.addEventListener("error",function(e){parent.postMessage({forge:"' + token + '",type:"error",message:String(e.message||"runtime error")},"*")});window.addEventListener("unhandledrejection",function(e){parent.postMessage({forge:"' + token + '",type:"error",message:String(e.reason&&e.reason.message||e.reason||"unhandled rejection")},"*")});window.addEventListener("load",function(){setTimeout(function(){var bs=document.querySelectorAll("button");for(var i=0;i<Math.min(3,bs.length);i++){try{bs[i].click()}catch(e){parent.postMessage({forge:"' + token + '",type:"error",message:"a button threw: "+String(e&&e.message||e)},"*")}}},250)});</scr' + 'ipt>';
+      frame.srcdoc = shim + built.html;
+      setTimeout(function () { finish(null); }, 2200);
+    });
+  }
+  function renderLog() {
+    var items = storage.get('log') || [];
+    $('log').innerHTML = items.slice(-12).reverse().map(function (it) {
+      return '<li><b>' + esc(it.icon || '') + ' ' + esc(it.name || '?') + '</b> · ' + (it.ok ? '<span class="ok">ok</span>' : 'failed') + ' · ' + esc(it.attempts + ' attempt' + (it.attempts === 1 ? '' : 's')) + ' · ' + Math.round(it.ms / 1000) + ' s · ' + esc(String(it.prompt).slice(0, 60)) + '</li>';
+    }).join('');
+  }
+  var lastEntry = null;
+  function saveLog(entry) {
+    var items = storage.get('log') || [];
+    items.push(entry);
+    while (items.length > 25) items.shift();
+    lastEntry = entry;
+    if (storage.set('log', items) === false) notify('storage is full, the log stopped recording');
+    renderLog();
+  }
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type || 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 30000);
+  }
+  function setStatus(html) { $('status').innerHTML = html; }
+  function setWorking(on) { $('status').classList.toggle('working', !!on); }
+
+  var ADAPTER = { name: 'forge-v1', path: 'loras/forge/v1/' };
+  function adapterWanted() { return $('adapter').checked ? ADAPTER : null; }
+  function adapterAvailableFor(tier) { return tier === '4b'; }
+  function promptStyle() { var v = storage.get('promptStyle'); return v === 'full' ? 'full' : 'lean'; }
+  function showAdapter() { var a = M && M.activeAdapterName ? M.activeAdapterName() : null; $('adapter-state').textContent = a ? '· active: ' + a : ($('adapter').checked ? '· not loaded' : ''); }
+  async function ask(system, user, onToken, label, sampling, prefix) {
+    prefix = prefix || '';
+    var s = prefix ? Object.assign({}, sampling || {}, { prefix: prefix }) : (sampling || null);
+    var out = await M.askLocal(system, user, { source: 'forge', display: label, maxTokens: 1200, adapter: adapterWanted(), sampling: s, onToken: onToken ? function (tok, full) { onToken(tok, prefix + full); } : undefined, onProgress: function (msg, pct) { setStatus(esc(msg) + (pct != null ? ' ' + Math.round(pct) + '%' : '')); } });
+    showAdapter();
+    return prefix + out;
+  }
+
+  if (/[?&]debug=1/.test(location.search)) { window.__forgeParse = parseReply; window.__forgeAssemble = assemble; window.__forgeCheck = staticCheck; }
+  var EVAL_PROMPTS = ["a body water estimate from weight", "a character frequency table for a text", "a dice roller with one die and a roll button", "a focus session counter with a total for today"];
+  var maxAttempts = 3;
+  var evalRunning = false;
+  async function runEval(withAdapter) {
+    if ($('make').disabled || evalRunning) { setStatus('wait for the current run to finish'); return; }
+    if (withAdapter && !adapterAvailableFor(tierNow)) { setStatus('the adapter is for the 4B model'); return; }
+    var results = storage.get('eval') || [];
+    var prevChecked = $('adapter').checked;
+    evalRunning = true;
+    $('eval-base').disabled = true; $('eval-adapter').disabled = true;
+    $('adapter').checked = !!withAdapter;
+    setStatus(withAdapter ? 'loading the Forge adapter…' : 'unloading the adapter…');
+    setWorking(true);
+    try { await M.warmLocalModel({ adapter: adapterWanted() }); } catch (_) {}
+    if (withAdapter && M.activeAdapterName && M.activeAdapterName() !== ADAPTER.name) { $('adapter').checked = prevChecked; evalRunning = false; $('eval-base').disabled = false; $('eval-adapter').disabled = false; setStatus('the adapter did not load (offline?), eval cancelled'); setWorking(false); return; }
+    showAdapter();
+    var cond = withAdapter ? 'adapter' : 'base';
+    var run = { ts: new Date().toISOString(), condition: cond, tier: tierLabel(), adapter: M.activeAdapterName ? M.activeAdapterName() : null, items: [] };
+    maxAttempts = 2;
+    try {
+      for (var i = 0; i < EVAL_PROMPTS.length; i++) {
+        if (stopped) break;
+        $('prompt').value = EVAL_PROMPTS[i];
+        var t0 = performance.now();
+        lastEntry = null;
+        var built = await make(EVAL_PROMPTS[i]);
+        var last = (lastEntry && lastEntry.prompt === EVAL_PROMPTS[i]) ? lastEntry : {};
+        run.items.push({ prompt: EVAL_PROMPTS[i], ok: !!built, attempts: last.attempts || null, ms: Math.round(performance.now() - t0), firstTryOk: !!(last.tries && last.tries[0] && !last.tries[0].error) });
+        renderEval(run);
+      }
+    } finally {
+      maxAttempts = 3; setWorking(false); evalRunning = false;
+      $('eval-base').disabled = false; $('eval-adapter').disabled = false;
+      if ($('adapter').checked !== prevChecked) { $('adapter').checked = prevChecked; try { await M.warmLocalModel({ adapter: adapterWanted() }); } catch (_) {} showAdapter(); }
+    }
+    results.push(run);
+    while (results.length > 6) results.shift();
+    storage.set('eval', results);
+    renderEval(run);
+  }
+  function renderEval(run) {
+    var runs = (storage.get('eval') || []).slice();
+    if (run && runs.indexOf(run) < 0) runs.push(run);
+    $('eval-out').textContent = runs.slice(-4).map(function (r) {
+      var ok = r.items.filter(function (x) { return x.ok; }).length, first = r.items.filter(function (x) { return x.firstTryOk; }).length;
+      var ms = r.items.length ? Math.round(r.items.reduce(function (a, x) { return a + x.ms; }, 0) / r.items.length / 1000) : 0;
+      return r.condition + (r.adapter ? ' (' + r.adapter + ')' : '') + ' · ' + (r.tier || '?') + ' · ' + ok + '/' + r.items.length + ' apps run · ' + first + ' on the first try · ' + ms + ' s per app\n' + r.items.map(function (x) { return '  ' + (x.ok ? '✓' : '✗') + ' ' + x.prompt.slice(0, 44) + (x.attempts ? ' (' + x.attempts + ')' : ''); }).join('\n');
+    }).join('\n\n');
+  }
+  $('eval-base').addEventListener('click', function () { if (!M) return; runEval(false); });
+  $('eval-adapter').addEventListener('click', function () { if (!M) return; runEval(true); });
+  async function make(description) {
+    var my = ++runId;
+    stopped = false;
+    current = null;
+    $('install').disabled = true; $('open').disabled = true; $('save').disabled = true; $('make').disabled = true; $('adapter').disabled = true; $('stop').disabled = false; setWorking(true);
+    $('code').textContent = ''; $('tokens').textContent = ''; $('verdict').textContent = ''; $('preview-err').textContent = ''; $('preview').srcdoc = '';
+    var t0 = performance.now();
+    var attempts = [];
+    var usingAdapterNow = !!adapterWanted();
+    var leanStyle = !usingAdapterNow && promptStyle() === 'lean';
+    var user = leanStyle ? 'Make: ' + description + '\nAnswer with a ```html block and a ```js block. Nothing else.' : 'Make: ' + description;
+    var lastParts = null, lastError = null;
+    try {
+      if (!M) M = await import('/assets/js/mentria-local-ask.js');
+      for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+        if (stopped || my !== runId) return;
+        var usingAdapter = !!adapterWanted();
+        var repairable = lastParts && lastParts.html && lastParts.js && !/no ```/.test(lastError || '');
+        var repairNow = usingAdapter ? (attempt > 1 && repairable) : (attempt === 3 && repairable);
+        setStatus(attempt === 1 ? 'the model is writing…' : repairNow ? '<b>repair</b>: ' + esc(lastError) : '<b>attempt ' + attempt + '</b>: asking again, a different way');
+        var system = usingAdapter ? SYSTEM_ADAPTER : attempt === 1 ? (leanStyle ? SYSTEM : SYSTEM_ADAPTER) : SYSTEM_RETRY;
+        var sampling = null;
+        var prefix = usingAdapter ? '' : '```html\n';
+        var prompt = !repairNow ? user : 'Make: ' + description + '\n\nThis version has a bug: ' + lastError + '\n' + rawOf(lastParts) + '\n\nRewrite the whole app with the bug fixed. Output only the html block and the js block. No explanation.';
+        var tStart = performance.now();
+        var count = 0;
+        $('code-panel').open = true;
+        $('preview-panel').classList.remove('idle');
+        var onTok = function (tok, full) { if (my !== runId || stopped) return; count++; $('code').textContent = full; $('tokens').textContent = count + ' tokens · ' + (count / Math.max(0.001, (performance.now() - tStart) / 1000)).toFixed(1) + ' tok/s'; $('code').scrollTop = $('code').scrollHeight; };
+        var raw = await ask(system, prompt, onTok, 'Forge: ' + description.slice(0, 40), sampling, prefix);
+        if (stopped || my !== runId) return;
+        var parts = parseReply(raw, nameFrom(description));
+        var continued = false;
+        if (prefix && parts.html && !parts.js) {
+          setStatus('the model stopped after the markup, asking for the script…');
+          var sofar = String(raw).replace(/\s+$/, '');
+          if (!/```$/.test(sofar)) sofar += '\n```';
+          raw = await ask(system, prompt, onTok, 'Forge: ' + description.slice(0, 40), sampling, sofar + '\n\n```js\n');
+          if (stopped || my !== runId) return;
+          parts = parseReply(raw, nameFrom(description));
+          continued = true;
+        }
+        lastParts = parts;
+        var err = staticCheck(parts);
+        var built = err ? null : assemble(parts, description);
+        if (!err) { setStatus('checking the app in a sandbox…'); err = await previewRun(built); }
+        if (stopped || my !== runId) return;
+        attempts.push({ attempt: attempt, ms: Math.round(performance.now() - tStart), tokens: count, raw: String(raw).slice(0, 1600), error: err, healed: parts.healed || null, jsFrom: parts.jsFrom || null, css: !!parts.css, system: usingAdapter ? 'adapter' : system === SYSTEM_ADAPTER ? 'full' : system === SYSTEM ? 'lean' : 'retry', repair: !!repairNow, prefix: !!prefix, continued: continued, sampling: sampling, adapter: M && M.activeAdapterName ? M.activeAdapterName() : null });
+        if (!err) {
+          current = built;
+          $('verdict').innerHTML = '<span class="ok">runs</span>' + (parts.healed && parts.healed.length ? ' · Forge added ' + esc(parts.healed.join(', ')) : '');
+          $('code-panel').open = false;
+          $('install').disabled = false; $('save').disabled = false;
+          setStatus('<b>' + esc(parts.icon + ' ' + parts.name) + '</b> is ready · ' + attempt + ' attempt' + (attempt === 1 ? '' : 's') + ' · ' + Math.round((performance.now() - t0) / 1000) + ' s');
+          saveLog({ ts: new Date().toISOString(), prompt: description, name: parts.name, icon: parts.icon, ok: true, attempts: attempt, ms: Math.round(performance.now() - t0), tier: tierLabel(), tries: attempts });
+          return built;
+        }
+        lastError = err;
+        $('verdict').textContent = 'attempt ' + attempt + ' failed';
+        $('preview-err').textContent = err;
+      }
+      setStatus('gave up after ' + attempts.length + ' attempts: ' + esc(lastError));
+      saveLog({ ts: new Date().toISOString(), prompt: description, name: lastParts && lastParts.name, icon: lastParts && lastParts.icon, ok: false, attempts: attempts.length, ms: Math.round(performance.now() - t0), tier: tierLabel(), tries: attempts });
+      return null;
+    } catch (e) {
+      var msg = String(e && e.message || e).slice(0, 160);
+      setStatus(/device|lost|gpu|webgpu/i.test(msg) ? 'the GPU reset (' + esc(msg) + '). Reload Forge; the model loads again in a few seconds.' : 'error: ' + esc(msg));
+      saveLog({ ts: new Date().toISOString(), prompt: description, name: lastParts && lastParts.name, icon: lastParts && lastParts.icon, ok: false, attempts: attempts.length, ms: Math.round(performance.now() - t0), tier: tierLabel(), tries: attempts, error: msg });
+      return null;
+    } finally {
+      if (my === runId) { $('make').disabled = false; $('stop').disabled = true; $('adapter').disabled = !adapterAvailableFor(tierNow); setWorking(false); if (stopped) setStatus('stopped'); }
+    }
+  }
+  var ICONS = [[/tip|bill|split|money|price|cost|budget|rupee|dollar|pay|invoice|tax|loan|emi/i, '💸'], [/timer|countdown|stopwatch|pomodoro|clock|alarm|minute/i, '⏱️'], [/dice|die|roll/i, '🎲'], [/coin|flip|heads/i, '🪙'], [/water|drink|glass|hydrat/i, '💧'], [/check|list|todo|to-do|pack|shopping|grocery/i, '✅'], [/convert|unit|km|mile|kg|pound|celsius|fahrenheit|currency/i, '🔁'], [/word|character|text|count|note|letter/i, '📝'], [/quiz|question|trivia|flash/i, '❓'], [/game|score|play|guess|puzzle/i, '🎮'], [/habit|streak|track|log|diary|journal/i, '📈'], [/random|pick|choose|spin|wheel|lucky/i, '🎯'], [/calc|percent|bmi|age|average|sum/i, '🧮'], [/color|colour|paint|gradient/i, '🎨'], [/workout|rep|exercise|step|run|pace/i, '🏃'], [/food|calorie|recipe|cook|tea|coffee/i, '🍽️']];
+  function iconFrom(text) { for (var i = 0; i < ICONS.length; i++) if (ICONS[i][0].test(text)) return ICONS[i][1]; return '✨'; }
+  function nameFrom(description) {
+    var head = String(description || '').split(/\s+(?:that|which|with|for|to|using|where|so)\s+|[,.;:]/)[0].replace(/^\s*(?:a|an|the|my|make|build|create)\s+/i, '');
+    var words = head.split(/\s+/).filter(Boolean).slice(0, 4).map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); });
+    return words.join(' ') || 'Forged App';
+  }
+  function rawOf(parts) { if (!parts) return ''; return 'NAME: ' + parts.name + '\nICON: ' + parts.icon + '\n```html\n' + (parts.html || '') + '\n```\n```js\n' + (parts.js || '') + '\n```'; }
+  var tierNow = null;
+  function tierLabel() { return tierNow; }
+
+  var installing = false;
+  async function installCurrent() {
+    if (!current || installing) return;
+    installing = true; $('install').disabled = true;
+    try {
+      if (!window.MentriaStore && window.parent && window.parent !== window) { try { window.MentriaStore = window.parent.MentriaStore; } catch (_) {} }
+      var X = await import('/assets/js/mentria-extensions.js');
+      var info = X.inspect(current.html);
+      var replaced = info.existing ? info.existing.manifest.name : null;
+      var entry = X.install(current.html, info.manifest);
+      if (entry && entry.enabled === false && X.setEnabled) { try { X.setEnabled(current.id, true); } catch (_) {} }
+      $('open').disabled = false;
+      notify(current.manifest.name + ' installed');
+      setStatus('<b>' + esc(current.manifest.icon + ' ' + current.manifest.name) + '</b> installed · it is in your tools now' + (replaced ? ' (replaced the earlier ' + esc(replaced) + ')' : ''));
+    } catch (e) {
+      setStatus('install failed: ' + esc(e && e.message || e));
+      $('install').disabled = false;
+    } finally { installing = false; }
+  }
+  function openCurrent() {
+    if (!current) return;
+    var path = '/';
+    try { path = window.top.location.pathname; } catch (_) {}
+    var prefix = (path.match(/^\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?/) || ['/'])[0];
+    var href = prefix + 'tools/extensions/run/?id=' + encodeURIComponent(current.id);
+    try { window.top.location.href = href; } catch (_) { setStatus('open it from your tools list: ' + esc(current.manifest.name)); }
+  }
+
+  $('chips').innerHTML = EXAMPLES.map(function (e) { return '<button type="button">' + esc(e) + '</button>'; }).join('');
+  $('chips').addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON') { $('prompt').value = e.target.textContent; $('chips').classList.add('hidden'); $('examples').setAttribute('aria-expanded', 'false'); } });
+  $('prompt-style').value = promptStyle();
+  $('prompt-style').addEventListener('change', function () { storage.set('promptStyle', $('prompt-style').value); setStatus($('prompt-style').value === 'lean' ? 'lean prompt: shorter apps, tuned for first-try success' : 'full prompt: richer apps, Saturday\'s wording'); });
+  $('examples').addEventListener('click', function () { var open = $('chips').classList.toggle('hidden'); $('examples').setAttribute('aria-expanded', String(!open)); });
+  $('more').addEventListener('click', function () { var open = $('more-panel').classList.toggle('hidden'); $('more').setAttribute('aria-expanded', String(!open)); });
+  $('preview-panel').classList.add('idle');
+  $('make').addEventListener('click', function () { var d = $('prompt').value.trim(); if (!d) { $('prompt').focus(); return; } make(d); });
+  $('stop').addEventListener('click', function () { stopped = true; $('stop').disabled = true; setWorking(false); setStatus('stopping, the model finishes this answer first…'); });
+  $('install').addEventListener('click', installCurrent);
+  $('open').addEventListener('click', openCurrent);
+  $('save').addEventListener('click', function () { if (current) download(current.id + '.html', current.html, 'text/html'); });
+  $('adapter').addEventListener('change', async function () {
+    if (!M || !M.warmLocalModel) { storage.set('adapterOn', $('adapter').checked); return; }
+    $('make').disabled = true; $('adapter').disabled = true;
+    setStatus($('adapter').checked ? 'loading the Forge adapter…' : 'unloading the adapter…');
+    setWorking(true);
+    try { await M.warmLocalModel({ adapter: adapterWanted() }); } catch (_) {}
+    if ($('adapter').checked && (!M.activeAdapterName || M.activeAdapterName() !== ADAPTER.name)) { $('adapter').checked = false; setStatus('the adapter did not load (offline?), using the base model'); }
+    else setStatus('ready');
+    storage.set('adapterOn', $('adapter').checked);
+    $('make').disabled = false; $('adapter').disabled = false; setWorking(false);
+    showAdapter();
+  });
+  var UPDATE_URLS = ['https://mentria-ai.github.io/extensions/extensions/forge.html', 'https://raw.githubusercontent.com/mentria-ai/extensions/main/extensions/forge.html'];
+  $('update').addEventListener('click', async function () {
+    setStatus('fetching the latest Forge from GitHub…');
+    setWorking(true);
+    try {
+      var html = null, lastErr = null;
+      for (var u = 0; u < UPDATE_URLS.length && html == null; u++) {
+        try { var res = await fetch(UPDATE_URLS[u] + '?t=' + Date.now(), { cache: 'no-store' }); if (!res.ok) throw new Error('GitHub answered ' + res.status); html = await res.text(); } catch (e) { lastErr = e; }
+      }
+      if (html == null) throw lastErr || new Error('no source reachable');
+      var m = html.match(/"version":\s*"([^"]+)"/);
+      if (!window.MentriaStore && window.parent && window.parent !== window) { try { window.MentriaStore = window.parent.MentriaStore; } catch (_) {} }
+      var X = await import('/assets/js/mentria-extensions.js');
+      var info = X.inspect(html);
+      if (info.manifest.id !== 'forge') throw new Error('that file is not Forge');
+      X.install(html, info.manifest);
+      setStatus('updated to ' + esc(m ? m[1] : info.manifest.version) + ', reloading…');
+      setTimeout(function () { location.reload(); }, 600);
+    } catch (e) {
+      setStatus('update failed: ' + esc(e && e.message || e));
+      setWorking(false);
+    }
+  });
+  $('download-log').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); download('forge-log-' + new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-') + '.json', JSON.stringify({ device: navigator.userAgent, tier: tierLabel(), items: storage.get('log') || [], evals: storage.get('eval') || [] }, null, 1), 'application/json'); });
+  renderEval(null);
+  renderLog();
+
+  async function pickTier() {
+    try {
+      try { localStorage.removeItem('mentria-tier-cap'); } catch (_) {}
+      var Tiers = await import('/assets/js/mentria-tiers.js');
+      var d = await Tiers.decideTier();
+      var chain = (Tiers.TIER_CHAIN || []).slice().reverse();
+      var eligible = {}; [d.tier].concat(d.eligible || []).forEach(function (t) { if (t) eligible[t] = true; });
+      var pref = Tiers.getUserTier ? Tiers.getUserTier() : null;
+      var cached = {};
+      for (var i = 0; i < chain.length; i++) { try { cached[chain[i]] = await Tiers.isTierCached(chain[i]); } catch (_) { cached[chain[i]] = false; } }
+      var best = null;
+      chain.forEach(function (t) { if (eligible[t] && cached[t] && Tiers.TIERS[t]) best = t; });
+      if (best && pref && Tiers.TIERS[best] && Tiers.TIERS[pref] && Tiers.TIERS[best].order > Tiers.TIERS[pref].order) { Tiers.setUserTier(best); pref = best; }
+      if (best && !pref) { Tiers.setUserTier(best); pref = best; }
+      var sel = $('tier');
+      sel.innerHTML = chain.filter(function (t) { return eligible[t] || cached[t] || t === pref; }).map(function (t) { return '<option value="' + t + '"' + (t === pref ? ' selected' : '') + '>' + Tiers.TIERS[t].name + (cached[t] ? ' · on device' : ' · ' + Tiers.TIERS[t].sizeLabel) + '</option>'; }).join('');
+      sel.classList.remove('hidden');
+      sel.addEventListener('change', function () { Tiers.setUserTier(sel.value); setStatus('switching to the ' + sel.value + ' model…'); setWorking(true); setTimeout(function () { location.reload(); }, 300); });
+    } catch (_) {}
+  }
+  var NO_MODEL = /[?&]nomodel=1/.test(location.search) || /[?&]nomodel=1/.test((window.parent && window.parent !== window ? '' : '') + location.hash);
+  (async function () {
+    if (NO_MODEL) { $('model').textContent = 'model: (not loaded, layout preview)'; $('make').disabled = false; setStatus('layout preview, no model'); return; }
+    try {
+      setWorking(true);
+      await pickTier();
+      M = await import('/assets/js/mentria-local-ask.js');
+      var info = null;
+      try { info = M.modelInfo ? await M.modelInfo() : null; } catch (_) {}
+      tierNow = info ? info.tier : null;
+      $('model').textContent = info ? 'model: ' + info.tier + (info.cached ? ' (cached)' : ' (' + info.sizeLabel + ' download)') : 'model: on-device';
+      var pref = storage.get('adapterOn');
+      var wantAdapter = adapterAvailableFor(tierNow) && pref === true;
+      $('adapter').checked = wantAdapter;
+      if (!adapterAvailableFor(tierNow)) { $('adapter').disabled = true; $('adapter-state').textContent = '· 4B only'; }
+      if (M.warmLocalModel) {
+        setStatus(wantAdapter ? 'warming the model and the Forge adapter…' : 'warming the model…');
+        try {
+          await M.warmLocalModel({ adapter: wantAdapter ? ADAPTER : null });
+          setStatus('ready');
+        } catch (e) {
+          setStatus('error: ' + esc(String(e && e.message || e).slice(0, 160)));
+        }
+        if (wantAdapter && (!M.activeAdapterName || M.activeAdapterName() !== ADAPTER.name)) { $('adapter').checked = false; storage.set('adapterOn', false); setStatus('the adapter did not load (offline?), using the base model'); }
+        showAdapter();
+      }
+      $('make').disabled = false;
+      setWorking(false);
+    } catch (e) {
+      $('model').textContent = 'model: unavailable';
+      setStatus('on-device model unavailable here: ' + esc(String(e && e.message || e).slice(0, 160)));
+      $('make').disabled = false;
+      setWorking(false);
+    }
+    if (host.args && host.args.cmd === 'forge' && host.args.args) { $('prompt').value = host.args.args; make(host.args.args); }
+  })();
+
+  import('/assets/js/mentria-bus.js').then(function (mod) {
+    var bus = mod.MentriaBus || (mod.default && mod.default.MentriaBus);
+    if (!bus || !bus.provide) return;
+    bus.provide('forge.create', async function (p) {
+      var d = p && (p.description || p.text || p.prompt);
+      if (!d) throw new Error('description is required');
+      if ($('make').disabled || evalRunning) throw new Error('a make is already running');
+      $('prompt').value = d;
+      var built = await make(String(d));
+      if (!built) throw new Error('the model could not produce a working app for that description');
+      return { id: built.id, name: built.manifest.name, icon: built.manifest.icon, installed: false };
+    }, { description: 'Make a small app on this device from a one-line description; returns its id, then call forge.install to install it.', parameters: { type: 'object', properties: { description: { type: 'string' } }, required: ['description'] }, ai: true });
+    bus.provide('forge.install', async function () { if (!current) throw new Error('nothing has been made yet'); await installCurrent(); return { id: current.id, name: current.manifest.name, installed: true }; }, { description: 'Install the app Forge just made.', parameters: { type: 'object', properties: {} }, ai: true });
+  }).catch(function () {});
+})();
+</script>

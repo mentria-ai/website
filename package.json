@@ -4,7 +4,8 @@
   "description": "Mentria Website - Blog & Tools",
   "scripts": {
     "start": "eleventy --serve",
-    "build": "eleventy"
+    "build": "eleventy",
+    "ext:sync": "node tools/sync-extensions.mjs"
   },
   "keywords": [],
   "author": "",

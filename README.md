@@ -14,7 +14,12 @@
 
 <p align="center">
   <b>A creative studio shipping browser-native AI tools, games, and utilities.</b><br>
-  <sub>A from-scratch WebGPU engine runs <b>Qwen3.5 (0.8B · 2B · 4B)</b> locally in your browser — no server, no API key, no account, nothing leaves your device.</sub>
+  <sub>A from-scratch WebGPU engine runs <b>Qwen3.5 (0.8B · 2B · 4B)</b> and a <b>1-bit 27B</b> locally in your browser — no server, no API key, no account, nothing leaves your device.</sub>
+</p>
+
+<p align="center">
+  <a href="https://github.com/mentria-ai/website/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/mentria-ai/website?style=flat&logo=github&label=star%20the%20repo"></a>
+  &nbsp;<sub>If mentria is useful to you, a star helps other people find it.</sub>
 </p>
 
 <table align="center">
@@ -29,7 +34,7 @@
 
 ## ✦ The engine
 
-Mentria's inference stack is **its own runtime**, written from scratch against raw WebGPU — not a wrapper around an existing browser-LLM library:
+Mentria's inference stack is **its own runtime**, written from scratch against raw WebGPU — not a wrapper around an existing browser-LLM library. The code that ships is in this repo (`src/assets/mentria/dist/`), the numbers and how they are measured are in [`benchmarks/`](benchmarks/), and the write-ups behind every kernel change are on the [engine facts page](https://mentria.ai/assets/learn/engine-facts.html).
 
 - **WGSL compute shaders** for matmul, with a **fused base + LoRA** path so a 2–8 MB adapter can re-skin the model at the matmul boundary in under a second.
 - Qwen3.5's hybrid stack: the **Gated DeltaNet** recurrent state update (Mamba-style linear-attention layers) alongside **grouped-query attention with partial RoPE**.

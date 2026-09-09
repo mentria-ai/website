@@ -1,0 +1,6318 @@
+{
+ "diagnostics": {
+  "version": 2,
+  "device": {
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+   "deviceMemory": 16,
+   "cores": 16,
+   "webgpu": true,
+   "storage": {
+    "usageGB": 5.24,
+    "quotaGB": 16
+   },
+   "gpu": {
+    "vendor": "nvidia",
+    "architecture": "ampere",
+    "device": "0x2520",
+    "description": "NVIDIA GeForce RTX 3060 Laptop GPU"
+   },
+   "features": [
+    "depth32float-stencil8",
+    "rg11b10ufloat-renderable",
+    "bgra8unorm-storage",
+    "texture-formats-tier1",
+    "texture-compression-bc",
+    "dual-source-blending",
+    "core-features-and-limits",
+    "float32-filterable",
+    "indirect-first-instance",
+    "float32-blendable",
+    "subgroup-size-control",
+    "depth-clip-control",
+    "texture-compression-bc-sliced-3d",
+    "texture-formats-tier2",
+    "timestamp-query",
+    "shader-f16",
+    "clip-distances",
+    "primitive-index",
+    "texture-component-swizzle",
+    "subgroups"
+   ],
+   "limits": {
+    "maxBufferSize": 2147483648,
+    "maxStorageBufferBindingSize": 2147483644,
+    "maxUniformBufferBindingSize": 65536,
+    "maxComputeWorkgroupStorageSize": 32768,
+    "maxComputeInvocationsPerWorkgroup": 1024,
+    "maxComputeWorkgroupSizeX": 1024,
+    "maxComputeWorkgroupSizeY": 1024,
+    "maxComputeWorkgroupsPerDimension": 65535,
+    "maxBindGroups": 4,
+    "maxStorageBuffersPerShaderStage": 16
+   }
+  },
+  "decision": {
+   "tier": "27b",
+   "eligible": [
+    "2b",
+    "4b",
+    "27b"
+   ],
+   "reasons": [
+    "user-pref 27b",
+    "maxBuf=2.0GiB maxBind=2.0GiB deviceMemory=16GB platform=desktop quotaFree=11GB saveData=false igpu=false"
+   ],
+   "signals": {
+    "caps": {
+     "limits": {
+      "maxBufferSize": 2147483648,
+      "maxStorageBufferBindingSize": 2147483644
+     },
+     "vendor": {
+      "vendor": "nvidia",
+      "architecture": "ampere",
+      "description": "NVIDIA GeForce RTX 3060 Laptop GPU"
+     }
+    },
+    "dm": 16,
+    "quotaFree": 10737418240,
+    "saveData": false
+   }
+  },
+  "runs": [
+   {
+    "tier": "27b",
+    "label": null,
+    "vision": false,
+    "profile": false,
+    "fallbacks": [],
+    "prompts": [
+     {
+      "id": "xlong",
+      "gen": null,
+      "run": 1,
+      "ttftMs": 24500,
+      "decodeTps": 23.86,
+      "tokens": 83,
+      "totalS": 27.94,
+      "promptTokens": 1489,
+      "prefillTps": 60.8,
+      "engineTps": 3.010828228665155,
+      "gapMs": {
+       "min": 0,
+       "median": 0,
+       "p90": 163,
+       "max": 183
+      },
+      "promptChars": 7458,
+      "image": false,
+      "profileFlags": false,
+      "profiles": [],
+      "statsBefore": {
+       "modelLoaded": true,
+       "activeAdapter": null,
+       "loadedAdapters": [],
+       "adapterManagerReady": true,
+       "adapterManagerInitError": null,
+       "seqLen": 0,
+       "visionLoaded": false,
+       "residentBytes": 4472751036,
+       "residentPeakBytes": 8075838400,
+       "residentBuffers": 3347,
+       "specSnapshotPool": {
+        "slots": 1,
+        "bundleSize": 156893184,
+        "bytes": 156893184,
+        "initialized": true
+       },
+       "spec": null,
+       "counters": {
+        "installed": true,
+        "installError": null,
+        "promptTokens": 0,
+        "decodeTokens": 0,
+        "prefill": {
+         "dispatches": 0,
+         "passes": 0,
+         "submits": 0,
+         "cmdBufs": 0,
+         "mapAsync": 0,
+         "workDone": 0,
+         "bindGroupsCreated": 0,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 0,
+         "encodersCreated": 0,
+         "setPipelines": 0,
+         "setBindGroups": 0,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 0,
+         "hostMs": 0
+        },
+        "decode": {
+         "dispatches": 0,
+         "passes": 0,
+         "submits": 0,
+         "cmdBufs": 0,
+         "mapAsync": 0,
+         "workDone": 0,
+         "bindGroupsCreated": 0,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 0,
+         "encodersCreated": 0,
+         "setPipelines": 0,
+         "setBindGroups": 0,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 0,
+         "hostMs": 0
+        },
+        "other": {
+         "dispatches": 2970,
+         "passes": 2568,
+         "submits": 231,
+         "cmdBufs": 1879,
+         "mapAsync": 0,
+         "workDone": 7,
+         "bindGroupsCreated": 2873,
+         "bindGroupLayoutGets": 5,
+         "buffersCreated": 4523,
+         "encodersCreated": 1879,
+         "setPipelines": 2970,
+         "setBindGroups": 2969,
+         "uniformWrites": 827,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 22.9,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0.4,
+         "syncMs": 2865.6,
+         "hostMs": 2.3
+        },
+        "perPrefillToken": null,
+        "prefillChunks": [
+         {
+          "m": 2,
+          "seqLen0": 0,
+          "wallMs": 2891.2,
+          "encodeMs": 22.9,
+          "submitMs": 0.4,
+          "syncMs": 2865.6,
+          "hostMs": 2.3,
+          "dispatches": 0,
+          "passes": 0,
+          "submits": 0,
+          "cmdBufs": 0,
+          "workDone": 0
+         }
+        ],
+        "perDecodeToken": null,
+        "ms": {
+         "prefill": 0,
+         "decode": 0,
+         "other": 0
+        },
+        "prefillTokensPerSecond": null,
+        "decodeTokensPerSecond": null,
+        "generation": 0,
+        "overlappedGenerations": 0,
+        "staleEnds": 0,
+        "lifetime": {
+         "dispatches": 2970,
+         "passes": 2568,
+         "submits": 231,
+         "cmdBufs": 1879,
+         "mapAsync": 0,
+         "workDone": 7,
+         "bindGroupsCreated": 2873,
+         "bindGroupLayoutGets": 5,
+         "buffersCreated": 4523,
+         "encodersCreated": 1879,
+         "setPipelines": 2970,
+         "setBindGroups": 2969,
+         "uniformWrites": 827,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 22.9,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0.4,
+         "syncMs": 2865.6,
+         "hostMs": 2.3
+        },
+        "gpuBytes": {
+         "live": 4472751036,
+         "peak": 8075838400,
+         "created": 8093293664,
+         "destroyed": 3620542628,
+         "liveBuffers": 3347,
+         "createdBuffers": 4523,
+         "destroyedBuffers": 1176,
+         "liveMiB": 4265.55,
+         "peakMiB": 7701.72
+        }
+       },
+       "countersInstalled": true,
+       "countersInstallError": null,
+       "uniformCache": {
+        "hits": 2087,
+        "misses": 49,
+        "cacheSize": 49,
+        "poolIdx": 0
+       },
+       "bindGroupCache": {
+        "enabled": true,
+        "destroyPatch": true,
+        "hits": 0,
+        "misses": 0,
+        "oneShot": 0,
+        "clears": 0,
+        "invalidations": 0,
+        "created": 0,
+        "caches": 0,
+        "entries": 0,
+        "byOperator": {},
+        "hitRate": null
+       },
+       "decodeMerge": {
+        "created": 628,
+        "realEncoders": 1,
+        "passes": 707,
+        "replayed": 628,
+        "passthrough": 0,
+        "nested": 0,
+        "internalSubmits": 0,
+        "dropped": 0,
+        "recordMs": 9.6,
+        "replayMs": 1.2,
+        "totalMs": 10.8
+       },
+       "decodeProbe": null,
+       "lastGeneration": null,
+       "kernelVariants": {
+        "weightFormat": "q1g128/q2g128",
+        "f16": true,
+        "subgroups": true,
+        "subgroupSize": 32,
+        "narrowSubgroup": false,
+        "narrowSubgroupWidth": null,
+        "narrowSubgroupProbeCached": false,
+        "m1VecmatRoute": false,
+        "m1VecmatRouteFlag": false,
+        "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+        "mobileMatvec": null,
+        "mobileMatvecFlag": "off",
+        "mobileMatvecReason": null,
+        "mobileFusionFlag": null,
+        "mobileProfile": {
+         "applied": false,
+         "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+         "mobileMatvec": "off",
+         "mobilePrefill": "off",
+         "eligible": false,
+         "width": null,
+         "defaulted": [],
+         "hostPinned": []
+        },
+        "subgroupMatrix": false,
+        "dp4a": true,
+        "sg": true,
+        "smallN": true,
+        "wideN": true,
+        "v14": true,
+        "lut": false,
+        "residualFusionKernel": true,
+        "q1Matvec": null,
+        "q1Band": null,
+        "q1Decode": {
+         "enabled": true,
+         "mode": "lut",
+         "rows": 64,
+         "bands": 8,
+         "lanes": 4,
+         "skew": true,
+         "totals": "tile",
+         "variant": "lut64-skew",
+         "passLabel": "vecmatQ2G128.dispatchLutSkew",
+         "barriersPerTile": 3,
+         "wgBytes": 9840,
+         "ldsBankDegree": {
+          "build": 1,
+          "row": 1.997,
+          "totals": 1,
+          "cyclesPerTile": 607.1
+         },
+         "dispatches": {
+          "lut": 178,
+          "residual": 128
+         },
+         "opsPerWeightByte": 8.31,
+         "ldsReadsPerWeightByte": 2,
+         "pipelines": 2,
+         "shapes": {
+          "248320x5120": {
+           "workgroups": 3880,
+           "was": 3880,
+           "actMB": 75.78,
+           "wasActMB": 606.25,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "16384x5120": {
+           "workgroups": 256,
+           "was": 256,
+           "actMB": 5,
+           "wasActMB": 40,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "96x5120": {
+           "workgroups": 2,
+           "was": 2,
+           "actMB": 0.04,
+           "wasActMB": 0.23,
+           "actPerCode": 0.67,
+           "wasActPerCode": 4
+          },
+          "5120x6144": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 1.88,
+           "wasActMB": 15,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "34816x5120": {
+           "workgroups": 544,
+           "was": 544,
+           "actMB": 10.63,
+           "wasActMB": 85,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "5120x17408": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 5.31,
+           "wasActMB": 42.5,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "14336x5120": {
+           "workgroups": 224,
+           "was": 224,
+           "actMB": 4.38,
+           "wasActMB": 35,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          }
+         }
+        },
+        "q1Concat": {
+         "enabled": true,
+         "mode": "all",
+         "gateup": true,
+         "qkv": true,
+         "dispatches": {
+          "total": 80,
+          "gateup": 64,
+          "qkv": 16
+         },
+         "arenas": 160,
+         "arenaBytes": 1769472000,
+         "extraBytes": 0,
+         "groups": [
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          }
+         ],
+         "groupCount": 80,
+         "declined": []
+        },
+        "q4Wide": true,
+        "q4Ksplit": true,
+        "q4KsplitWide": true,
+        "q4BlockLayout": null,
+        "megashaderA": true,
+        "megashaderB": true,
+        "chunkedDecodeState": false,
+        "statePrecision": "f32",
+        "flashDecode": false,
+        "flashAttnPrefill": true,
+        "kivi": false,
+        "kvF16": false,
+        "prefillReady": true,
+        "prefillRoute": "gemm-v2+arow",
+        "mobilePrefill": {
+         "route": "off",
+         "requested": false,
+         "reason": "flag unset",
+         "flag": "__mentriaMobilePrefill",
+         "ksplit": "auto",
+         "ksplitFlag": "__mentriaMobilePrefillKsplit",
+         "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+        },
+        "prefillTile": "arow",
+        "prefillTileFlag": "arow",
+        "prefillTileReason": null,
+        "prefillTileSharedBytes": 16384,
+        "prefillTileMinM": null,
+        "prefillTileDispatches": {
+         "armed": 400,
+         "control": 0
+        },
+        "prefillChunk": 512,
+        "decodeLoop": null,
+        "decodeLoopReasons": null,
+        "gpuSampleBatch": 4,
+        "bindGroupCache": {
+         "enabled": true,
+         "destroyPatch": true,
+         "hits": 0,
+         "misses": 0,
+         "oneShot": 0,
+         "clears": 0,
+         "invalidations": 0,
+         "created": 0,
+         "caches": 0,
+         "entries": 0,
+         "byOperator": {},
+         "hitRate": null
+        },
+        "residentDecode": {
+         "argmax": true,
+         "forwardFromBuffer": true,
+         "detectorRewind": {
+          "ok": true,
+          "why": null
+         }
+        },
+        "maxSeq": 2048,
+        "numLayers": 64
+       },
+       "capabilities": {
+        "vendor": "nvidia",
+        "architecture": "ampere",
+        "subgroupMinSize": 32,
+        "subgroupMaxSize": 32,
+        "likelyIntegratedGpu": false,
+        "features": [
+         "core-features-and-limits",
+         "shader-f16",
+         "subgroups",
+         "timestamp-query"
+        ],
+        "limits": {
+         "maxBufferSize": 2147483648,
+         "maxStorageBufferBindingSize": 2147483644,
+         "maxUniformBufferBindingSize": 65536,
+         "maxComputeWorkgroupStorageSize": 32768,
+         "maxComputeInvocationsPerWorkgroup": 256,
+         "maxComputeWorkgroupSizeX": 256,
+         "maxComputeWorkgroupsPerDimension": 65535,
+         "maxStorageBuffersPerShaderStage": 16,
+         "maxBindGroups": 4
+        },
+        "subgroupsListed": true,
+        "subgroupsUsable": true,
+        "f16": true,
+        "dp4a": true,
+        "subgroupMatrix": false,
+        "timestampQuery": true
+       },
+       "fallbacks": [],
+       "gpuErrors": {
+        "count": 0,
+        "samples": []
+       }
+      },
+      "statsAfter": {
+       "modelLoaded": true,
+       "activeAdapter": null,
+       "loadedAdapters": [],
+       "adapterManagerReady": true,
+       "adapterManagerInitError": null,
+       "seqLen": 1573,
+       "visionLoaded": false,
+       "residentBytes": 5265017660,
+       "residentPeakBytes": 8075838400,
+       "residentBuffers": 3799,
+       "specSnapshotPool": {
+        "slots": 1,
+        "bundleSize": 156893184,
+        "bytes": 156893184,
+        "initialized": true
+       },
+       "spec": null,
+       "counters": {
+        "installed": true,
+        "installError": null,
+        "promptTokens": 1492,
+        "decodeTokens": 84,
+        "prefill": {
+         "dispatches": 8601,
+         "passes": 8601,
+         "submits": 207,
+         "cmdBufs": 9279,
+         "mapAsync": 0,
+         "workDone": 66,
+         "bindGroupsCreated": 6201,
+         "bindGroupLayoutGets": 1,
+         "buffersCreated": 4546,
+         "encodersCreated": 9279,
+         "setPipelines": 8601,
+         "setBindGroups": 8601,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 90.2,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 4,
+         "syncMs": 24008.3,
+         "hostMs": 8.2
+        },
+        "decode": {
+         "dispatches": 60265,
+         "passes": 60180,
+         "submits": 108,
+         "cmdBufs": 108,
+         "mapAsync": 22,
+         "workDone": 0,
+         "bindGroupsCreated": 8056,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 343,
+         "encodersCreated": 108,
+         "setPipelines": 60265,
+         "setBindGroups": 60180,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 52124,
+         "bindGroupCacheMisses": 8056,
+         "encodeMs": 224.2,
+         "recordMs": 163.1,
+         "replayMs": 60.8,
+         "submitMs": 1.3,
+         "syncMs": 3552,
+         "hostMs": 0
+        },
+        "other": {
+         "dispatches": 0,
+         "passes": 0,
+         "submits": 0,
+         "cmdBufs": 0,
+         "mapAsync": 0,
+         "workDone": 0,
+         "bindGroupsCreated": 0,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 0,
+         "encodersCreated": 0,
+         "setPipelines": 0,
+         "setBindGroups": 0,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 0,
+         "hostMs": 0
+        },
+        "perPrefillToken": {
+         "dispatches": 5.76,
+         "passes": 5.76,
+         "submits": 0.14,
+         "cmdBufs": 6.22,
+         "mapAsync": 0,
+         "workDone": 0.04,
+         "bindGroupsCreated": 4.16,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 3.05,
+         "encodersCreated": 6.22,
+         "setPipelines": 5.76,
+         "setBindGroups": 5.76,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0.06,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 16.09,
+         "hostMs": 0.01
+        },
+        "prefillChunks": [
+         {
+          "m": 512,
+          "seqLen0": 0,
+          "wallMs": 8545.9,
+          "encodeMs": 32.5,
+          "submitMs": 2.1,
+          "syncMs": 8507,
+          "hostMs": 4.3,
+          "dispatches": 2899,
+          "passes": 2899,
+          "submits": 69,
+          "cmdBufs": 3109,
+          "workDone": 22
+         },
+         {
+          "m": 512,
+          "seqLen0": 512,
+          "wallMs": 7754.6,
+          "encodeMs": 27.7,
+          "submitMs": 0.9,
+          "syncMs": 7723.9,
+          "hostMs": 2.1,
+          "dispatches": 2899,
+          "passes": 2899,
+          "submits": 69,
+          "cmdBufs": 3109,
+          "workDone": 22
+         },
+         {
+          "m": 468,
+          "seqLen0": 1024,
+          "wallMs": 7810.2,
+          "encodeMs": 30,
+          "submitMs": 1,
+          "syncMs": 7777.4,
+          "hostMs": 1.8,
+          "dispatches": 2803,
+          "passes": 2803,
+          "submits": 69,
+          "cmdBufs": 3061,
+          "workDone": 22
+         }
+        ],
+        "perDecodeToken": {
+         "dispatches": 717.44,
+         "passes": 716.43,
+         "submits": 1.29,
+         "cmdBufs": 1.29,
+         "mapAsync": 0.26,
+         "workDone": 0,
+         "bindGroupsCreated": 95.9,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 4.08,
+         "encodersCreated": 1.29,
+         "setPipelines": 717.44,
+         "setBindGroups": 716.43,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 620.52,
+         "bindGroupCacheMisses": 95.9,
+         "encodeMs": 2.67,
+         "recordMs": 1.94,
+         "replayMs": 0.72,
+         "submitMs": 0.02,
+         "syncMs": 42.29,
+         "hostMs": 0
+        },
+        "ms": {
+         "prefill": 24111.4,
+         "decode": 3788.7,
+         "other": 0.4
+        },
+        "prefillTokensPerSecond": 61.88,
+        "decodeTokensPerSecond": 22.17,
+        "generation": 1,
+        "overlappedGenerations": 0,
+        "staleEnds": 0,
+        "lifetime": {
+         "dispatches": 71836,
+         "passes": 71349,
+         "submits": 546,
+         "cmdBufs": 11266,
+         "mapAsync": 22,
+         "workDone": 73,
+         "bindGroupsCreated": 17130,
+         "bindGroupLayoutGets": 6,
+         "buffersCreated": 9541,
+         "encodersCreated": 11266,
+         "setPipelines": 71836,
+         "setBindGroups": 71750,
+         "uniformWrites": 827,
+         "bindGroupCacheHits": 52124,
+         "bindGroupCacheMisses": 8056,
+         "encodeMs": 337.3,
+         "recordMs": 163.1,
+         "replayMs": 60.8,
+         "submitMs": 5.7,
+         "syncMs": 30425.9,
+         "hostMs": 10.5
+        },
+        "gpuBytes": {
+         "live": 5265017660,
+         "peak": 8075838400,
+         "created": 22466556980,
+         "destroyed": 17201539320,
+         "liveBuffers": 3799,
+         "createdBuffers": 9541,
+         "destroyedBuffers": 5742,
+         "liveMiB": 5021.11,
+         "peakMiB": 7701.72
+        }
+       },
+       "countersInstalled": true,
+       "countersInstallError": null,
+       "uniformCache": {
+        "hits": 64963,
+        "misses": 434,
+        "cacheSize": 434,
+        "poolIdx": 0
+       },
+       "bindGroupCache": {
+        "enabled": true,
+        "destroyPatch": true,
+        "hits": 52124,
+        "misses": 8056,
+        "oneShot": 7428,
+        "clears": 0,
+        "invalidations": 1,
+        "created": 8056,
+        "caches": 13,
+        "entries": 626,
+        "byOperator": {
+         "ic": 0,
+         "yu": 0,
+         "Wi": 129,
+         "Ue": 305,
+         "$d": 48,
+         "Mn": 48,
+         "ec": 64,
+         "cc": 16,
+         "uc": 0,
+         "Ba": 0,
+         "ds": 0,
+         "Ea": 0,
+         "Qd": 16
+        },
+        "hitRate": 0.8661
+       },
+       "decodeMerge": {
+        "created": 631,
+        "realEncoders": 1,
+        "passes": 708,
+        "replayed": 631,
+        "passthrough": 0,
+        "nested": 1,
+        "internalSubmits": 0,
+        "dropped": 0,
+        "recordMs": 1.2,
+        "replayMs": 0.8,
+        "totalMs": 2
+       },
+       "decodeProbe": null,
+       "lastGeneration": {
+        "promptTokens": 1492,
+        "prefillTokens": 1492,
+        "decodeTokens": 84,
+        "ttftMs": 24464.2,
+        "prefillMs": 24111.4,
+        "decodeMs": 3787.5,
+        "decodeTokensPerSecond": 24.16,
+        "prefillTokensPerSecond": 61.88,
+        "decodeRoute": "gpu-argmax",
+        "decodeRouteReasons": [],
+        "decodeRouteInfo": {
+         "loop": "gpu-argmax",
+         "reasons": [],
+         "gpuSampleBatch": 4,
+         "detector": "off",
+         "detectorBridged": false,
+         "detectorRewinds": 0,
+         "switchedAtStep": null,
+         "allowedTokenIds": 0
+        },
+        "kernelVariants": {
+         "weightFormat": "q1g128/q2g128",
+         "f16": true,
+         "subgroups": true,
+         "subgroupSize": 32,
+         "narrowSubgroup": false,
+         "narrowSubgroupWidth": null,
+         "narrowSubgroupProbeCached": false,
+         "m1VecmatRoute": false,
+         "m1VecmatRouteFlag": false,
+         "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+         "mobileMatvec": null,
+         "mobileMatvecFlag": "off",
+         "mobileMatvecReason": null,
+         "mobileFusionFlag": null,
+         "mobileProfile": {
+          "applied": false,
+          "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+          "mobileMatvec": "off",
+          "mobilePrefill": "off",
+          "eligible": false,
+          "width": null,
+          "defaulted": [],
+          "hostPinned": []
+         },
+         "subgroupMatrix": false,
+         "dp4a": true,
+         "sg": true,
+         "smallN": true,
+         "wideN": true,
+         "v14": true,
+         "lut": false,
+         "residualFusionKernel": true,
+         "q1Matvec": null,
+         "q1Band": null,
+         "q1Decode": {
+          "enabled": true,
+          "mode": "lut",
+          "rows": 64,
+          "bands": 8,
+          "lanes": 4,
+          "skew": true,
+          "totals": "tile",
+          "variant": "lut64-skew",
+          "passLabel": "vecmatQ2G128.dispatchLutSkew",
+          "barriersPerTile": 3,
+          "wgBytes": 9840,
+          "ldsBankDegree": {
+           "build": 1,
+           "row": 1.997,
+           "totals": 1,
+           "cyclesPerTile": 607.1
+          },
+          "dispatches": {
+           "lut": 15226,
+           "residual": 11008
+          },
+          "opsPerWeightByte": 8.31,
+          "ldsReadsPerWeightByte": 2,
+          "pipelines": 2,
+          "shapes": {
+           "248320x5120": {
+            "workgroups": 3880,
+            "was": 3880,
+            "actMB": 75.78,
+            "wasActMB": 606.25,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "16384x5120": {
+            "workgroups": 256,
+            "was": 256,
+            "actMB": 5,
+            "wasActMB": 40,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "96x5120": {
+            "workgroups": 2,
+            "was": 2,
+            "actMB": 0.04,
+            "wasActMB": 0.23,
+            "actPerCode": 0.67,
+            "wasActPerCode": 4
+           },
+           "5120x6144": {
+            "workgroups": 80,
+            "was": 80,
+            "actMB": 1.88,
+            "wasActMB": 15,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "34816x5120": {
+            "workgroups": 544,
+            "was": 544,
+            "actMB": 10.63,
+            "wasActMB": 85,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "5120x17408": {
+            "workgroups": 80,
+            "was": 80,
+            "actMB": 5.31,
+            "wasActMB": 42.5,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "14336x5120": {
+            "workgroups": 224,
+            "was": 224,
+            "actMB": 4.38,
+            "wasActMB": 35,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           }
+          }
+         },
+         "q1Concat": {
+          "enabled": true,
+          "mode": "all",
+          "gateup": true,
+          "qkv": true,
+          "dispatches": {
+           "total": 6880,
+           "gateup": 5504,
+           "qkv": 1376
+          },
+          "arenas": 160,
+          "arenaBytes": 1769472000,
+          "extraBytes": 0,
+          "groups": [
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           },
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           },
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           },
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           }
+          ],
+          "groupCount": 80,
+          "declined": []
+         },
+         "q4Wide": true,
+         "q4Ksplit": true,
+         "q4KsplitWide": true,
+         "q4BlockLayout": null,
+         "megashaderA": true,
+         "megashaderB": true,
+         "chunkedDecodeState": false,
+         "statePrecision": "f32",
+         "flashDecode": false,
+         "flashAttnPrefill": true,
+         "kivi": false,
+         "kvF16": false,
+         "prefillReady": true,
+         "prefillRoute": "gemm-v2+arow",
+         "mobilePrefill": {
+          "route": "off",
+          "requested": false,
+          "reason": "flag unset",
+          "flag": "__mentriaMobilePrefill",
+          "ksplit": "auto",
+          "ksplitFlag": "__mentriaMobilePrefillKsplit",
+          "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+         },
+         "prefillTile": "arow",
+         "prefillTileFlag": "arow",
+         "prefillTileReason": null,
+         "prefillTileSharedBytes": 16384,
+         "prefillTileMinM": null,
+         "prefillTileDispatches": {
+          "armed": 1600,
+          "control": 0
+         },
+         "prefillChunk": 512,
+         "decodeLoop": "gpu-argmax",
+         "decodeLoopReasons": [],
+         "gpuSampleBatch": 4,
+         "bindGroupCache": {
+          "enabled": true,
+          "destroyPatch": true,
+          "hits": 52124,
+          "misses": 8056,
+          "oneShot": 7428,
+          "clears": 0,
+          "invalidations": 0,
+          "created": 8056,
+          "caches": 13,
+          "entries": 628,
+          "byOperator": {
+           "ic": 1,
+           "yu": 1,
+           "Wi": 129,
+           "Ue": 305,
+           "$d": 48,
+           "Mn": 48,
+           "ec": 64,
+           "cc": 16,
+           "uc": 0,
+           "Ba": 0,
+           "ds": 0,
+           "Ea": 0,
+           "Qd": 16
+          },
+          "hitRate": 0.8661
+         },
+         "residentDecode": {
+          "argmax": true,
+          "forwardFromBuffer": true,
+          "detectorRewind": {
+           "ok": true,
+           "why": null
+          }
+         },
+         "maxSeq": 2048,
+         "numLayers": 64
+        },
+        "counters": {
+         "installed": true,
+         "installError": null,
+         "promptTokens": 1492,
+         "decodeTokens": 84,
+         "prefill": {
+          "dispatches": 8601,
+          "passes": 8601,
+          "submits": 207,
+          "cmdBufs": 9279,
+          "mapAsync": 0,
+          "workDone": 66,
+          "bindGroupsCreated": 6201,
+          "bindGroupLayoutGets": 1,
+          "buffersCreated": 4546,
+          "encodersCreated": 9279,
+          "setPipelines": 8601,
+          "setBindGroups": 8601,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 0,
+          "bindGroupCacheMisses": 0,
+          "encodeMs": 90.2,
+          "recordMs": 0,
+          "replayMs": 0,
+          "submitMs": 4,
+          "syncMs": 24008.3,
+          "hostMs": 8.2
+         },
+         "decode": {
+          "dispatches": 60265,
+          "passes": 60180,
+          "submits": 108,
+          "cmdBufs": 108,
+          "mapAsync": 22,
+          "workDone": 0,
+          "bindGroupsCreated": 8056,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 343,
+          "encodersCreated": 108,
+          "setPipelines": 60265,
+          "setBindGroups": 60180,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 52124,
+          "bindGroupCacheMisses": 8056,
+          "encodeMs": 224.2,
+          "recordMs": 163.1,
+          "replayMs": 60.8,
+          "submitMs": 1.3,
+          "syncMs": 3552,
+          "hostMs": 0
+         },
+         "other": {
+          "dispatches": 0,
+          "passes": 0,
+          "submits": 0,
+          "cmdBufs": 0,
+          "mapAsync": 0,
+          "workDone": 0,
+          "bindGroupsCreated": 0,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 0,
+          "encodersCreated": 0,
+          "setPipelines": 0,
+          "setBindGroups": 0,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 0,
+          "bindGroupCacheMisses": 0,
+          "encodeMs": 0,
+          "recordMs": 0,
+          "replayMs": 0,
+          "submitMs": 0,
+          "syncMs": 0,
+          "hostMs": 0
+         },
+         "perPrefillToken": {
+          "dispatches": 5.76,
+          "passes": 5.76,
+          "submits": 0.14,
+          "cmdBufs": 6.22,
+          "mapAsync": 0,
+          "workDone": 0.04,
+          "bindGroupsCreated": 4.16,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 3.05,
+          "encodersCreated": 6.22,
+          "setPipelines": 5.76,
+          "setBindGroups": 5.76,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 0,
+          "bindGroupCacheMisses": 0,
+          "encodeMs": 0.06,
+          "recordMs": 0,
+          "replayMs": 0,
+          "submitMs": 0,
+          "syncMs": 16.09,
+          "hostMs": 0.01
+         },
+         "prefillChunks": [
+          {
+           "m": 512,
+           "seqLen0": 0,
+           "wallMs": 8545.9,
+           "encodeMs": 32.5,
+           "submitMs": 2.1,
+           "syncMs": 8507,
+           "hostMs": 4.3,
+           "dispatches": 2899,
+           "passes": 2899,
+           "submits": 69,
+           "cmdBufs": 3109,
+           "workDone": 22
+          },
+          {
+           "m": 512,
+           "seqLen0": 512,
+           "wallMs": 7754.6,
+           "encodeMs": 27.7,
+           "submitMs": 0.9,
+           "syncMs": 7723.9,
+           "hostMs": 2.1,
+           "dispatches": 2899,
+           "passes": 2899,
+           "submits": 69,
+           "cmdBufs": 3109,
+           "workDone": 22
+          },
+          {
+           "m": 468,
+           "seqLen0": 1024,
+           "wallMs": 7810.2,
+           "encodeMs": 30,
+           "submitMs": 1,
+           "syncMs": 7777.4,
+           "hostMs": 1.8,
+           "dispatches": 2803,
+           "passes": 2803,
+           "submits": 69,
+           "cmdBufs": 3061,
+           "workDone": 22
+          }
+         ],
+         "perDecodeToken": {
+          "dispatches": 717.44,
+          "passes": 716.43,
+          "submits": 1.29,
+          "cmdBufs": 1.29,
+          "mapAsync": 0.26,
+          "workDone": 0,
+          "bindGroupsCreated": 95.9,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 4.08,
+          "encodersCreated": 1.29,
+          "setPipelines": 717.44,
+          "setBindGroups": 716.43,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 620.52,
+          "bindGroupCacheMisses": 95.9,
+          "encodeMs": 2.67,
+          "recordMs": 1.94,
+          "replayMs": 0.72,
+          "submitMs": 0.02,
+          "syncMs": 42.29,
+          "hostMs": 0
+         },
+         "ms": {
+          "prefill": 24111.4,
+          "decode": 3787.5,
+          "other": 0.4
+         },
+         "prefillTokensPerSecond": 61.88,
+         "decodeTokensPerSecond": 22.18,
+         "generation": 1,
+         "overlappedGenerations": 0,
+         "staleEnds": 0,
+         "lifetime": {
+          "dispatches": 71836,
+          "passes": 71349,
+          "submits": 546,
+          "cmdBufs": 11266,
+          "mapAsync": 22,
+          "workDone": 73,
+          "bindGroupsCreated": 17130,
+          "bindGroupLayoutGets": 6,
+          "buffersCreated": 9541,
+          "encodersCreated": 11266,
+          "setPipelines": 71836,
+          "setBindGroups": 71750,
+          "uniformWrites": 827,
+          "bindGroupCacheHits": 52124,
+          "bindGroupCacheMisses": 8056,
+          "encodeMs": 337.3,
+          "recordMs": 163.1,
+          "replayMs": 60.8,
+          "submitMs": 5.7,
+          "syncMs": 30425.9,
+          "hostMs": 10.5
+         },
+         "gpuBytes": {
+          "live": 5265018064,
+          "peak": 8075838400,
+          "created": 22466556980,
+          "destroyed": 17201538916,
+          "liveBuffers": 3802,
+          "createdBuffers": 9541,
+          "destroyedBuffers": 5739,
+          "liveMiB": 5021.11,
+          "peakMiB": 7701.72
+         }
+        },
+        "uniformCache": {
+         "hits": 64963,
+         "misses": 434,
+         "cacheSize": 434,
+         "poolIdx": 0
+        },
+        "bindGroupCache": {
+         "enabled": true,
+         "destroyPatch": true,
+         "hits": 52124,
+         "misses": 8056,
+         "oneShot": 7428,
+         "clears": 0,
+         "invalidations": 0,
+         "created": 8056,
+         "caches": 13,
+         "entries": 628,
+         "byOperator": {
+          "ic": 1,
+          "yu": 1,
+          "Wi": 129,
+          "Ue": 305,
+          "$d": 48,
+          "Mn": 48,
+          "ec": 64,
+          "cc": 16,
+          "uc": 0,
+          "Ba": 0,
+          "ds": 0,
+          "Ea": 0,
+          "Qd": 16
+         },
+         "hitRate": 0.8661
+        },
+        "decodeMerge": {
+         "created": 631,
+         "realEncoders": 1,
+         "passes": 708,
+         "replayed": 631,
+         "passthrough": 0,
+         "nested": 1,
+         "internalSubmits": 0,
+         "dropped": 0,
+         "recordMs": 1.2,
+         "replayMs": 0.8,
+         "totalMs": 2
+        },
+        "decodeProbe": null,
+        "fallbacks": []
+       },
+       "kernelVariants": {
+        "weightFormat": "q1g128/q2g128",
+        "f16": true,
+        "subgroups": true,
+        "subgroupSize": 32,
+        "narrowSubgroup": false,
+        "narrowSubgroupWidth": null,
+        "narrowSubgroupProbeCached": false,
+        "m1VecmatRoute": false,
+        "m1VecmatRouteFlag": false,
+        "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+        "mobileMatvec": null,
+        "mobileMatvecFlag": "off",
+        "mobileMatvecReason": null,
+        "mobileFusionFlag": null,
+        "mobileProfile": {
+         "applied": false,
+         "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+         "mobileMatvec": "off",
+         "mobilePrefill": "off",
+         "eligible": false,
+         "width": null,
+         "defaulted": [],
+         "hostPinned": []
+        },
+        "subgroupMatrix": false,
+        "dp4a": true,
+        "sg": true,
+        "smallN": true,
+        "wideN": true,
+        "v14": true,
+        "lut": false,
+        "residualFusionKernel": true,
+        "q1Matvec": null,
+        "q1Band": null,
+        "q1Decode": {
+         "enabled": true,
+         "mode": "lut",
+         "rows": 64,
+         "bands": 8,
+         "lanes": 4,
+         "skew": true,
+         "totals": "tile",
+         "variant": "lut64-skew",
+         "passLabel": "vecmatQ2G128.dispatchLutSkew",
+         "barriersPerTile": 3,
+         "wgBytes": 9840,
+         "ldsBankDegree": {
+          "build": 1,
+          "row": 1.997,
+          "totals": 1,
+          "cyclesPerTile": 607.1
+         },
+         "dispatches": {
+          "lut": 15226,
+          "residual": 11008
+         },
+         "opsPerWeightByte": 8.31,
+         "ldsReadsPerWeightByte": 2,
+         "pipelines": 2,
+         "shapes": {
+          "248320x5120": {
+           "workgroups": 3880,
+           "was": 3880,
+           "actMB": 75.78,
+           "wasActMB": 606.25,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "16384x5120": {
+           "workgroups": 256,
+           "was": 256,
+           "actMB": 5,
+           "wasActMB": 40,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "96x5120": {
+           "workgroups": 2,
+           "was": 2,
+           "actMB": 0.04,
+           "wasActMB": 0.23,
+           "actPerCode": 0.67,
+           "wasActPerCode": 4
+          },
+          "5120x6144": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 1.88,
+           "wasActMB": 15,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "34816x5120": {
+           "workgroups": 544,
+           "was": 544,
+           "actMB": 10.63,
+           "wasActMB": 85,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "5120x17408": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 5.31,
+           "wasActMB": 42.5,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "14336x5120": {
+           "workgroups": 224,
+           "was": 224,
+           "actMB": 4.38,
+           "wasActMB": 35,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          }
+         }
+        },
+        "q1Concat": {
+         "enabled": true,
+         "mode": "all",
+         "gateup": true,
+         "qkv": true,
+         "dispatches": {
+          "total": 6880,
+          "gateup": 5504,
+          "qkv": 1376
+         },
+         "arenas": 160,
+         "arenaBytes": 1769472000,
+         "extraBytes": 0,
+         "groups": [
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          }
+         ],
+         "groupCount": 80,
+         "declined": []
+        },
+        "q4Wide": true,
+        "q4Ksplit": true,
+        "q4KsplitWide": true,
+        "q4BlockLayout": null,
+        "megashaderA": true,
+        "megashaderB": true,
+        "chunkedDecodeState": false,
+        "statePrecision": "f32",
+        "flashDecode": false,
+        "flashAttnPrefill": true,
+        "kivi": false,
+        "kvF16": false,
+        "prefillReady": true,
+        "prefillRoute": "gemm-v2+arow",
+        "mobilePrefill": {
+         "route": "off",
+         "requested": false,
+         "reason": "flag unset",
+         "flag": "__mentriaMobilePrefill",
+         "ksplit": "auto",
+         "ksplitFlag": "__mentriaMobilePrefillKsplit",
+         "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+        },
+        "prefillTile": "arow",
+        "prefillTileFlag": "arow",
+        "prefillTileReason": null,
+        "prefillTileSharedBytes": 16384,
+        "prefillTileMinM": null,
+        "prefillTileDispatches": {
+         "armed": 1600,
+         "control": 0
+        },
+        "prefillChunk": 512,
+        "decodeLoop": "gpu-argmax",
+        "decodeLoopReasons": [],
+        "gpuSampleBatch": 4,
+        "bindGroupCache": {
+         "enabled": true,
+         "destroyPatch": true,
+         "hits": 52124,
+         "misses": 8056,
+         "oneShot": 7428,
+         "clears": 0,
+         "invalidations": 1,
+         "created": 8056,
+         "caches": 13,
+         "entries": 626,
+         "byOperator": {
+          "ic": 0,
+          "yu": 0,
+          "Wi": 129,
+          "Ue": 305,
+          "$d": 48,
+          "Mn": 48,
+          "ec": 64,
+          "cc": 16,
+          "uc": 0,
+          "Ba": 0,
+          "ds": 0,
+          "Ea": 0,
+          "Qd": 16
+         },
+         "hitRate": 0.8661
+        },
+        "residentDecode": {
+         "argmax": true,
+         "forwardFromBuffer": true,
+         "detectorRewind": {
+          "ok": true,
+          "why": null
+         }
+        },
+        "maxSeq": 2048,
+        "numLayers": 64
+       },
+       "capabilities": {
+        "vendor": "nvidia",
+        "architecture": "ampere",
+        "subgroupMinSize": 32,
+        "subgroupMaxSize": 32,
+        "likelyIntegratedGpu": false,
+        "features": [
+         "core-features-and-limits",
+         "shader-f16",
+         "subgroups",
+         "timestamp-query"
+        ],
+        "limits": {
+         "maxBufferSize": 2147483648,
+         "maxStorageBufferBindingSize": 2147483644,
+         "maxUniformBufferBindingSize": 65536,
+         "maxComputeWorkgroupStorageSize": 32768,
+         "maxComputeInvocationsPerWorkgroup": 256,
+         "maxComputeWorkgroupSizeX": 256,
+         "maxComputeWorkgroupsPerDimension": 65535,
+         "maxStorageBuffersPerShaderStage": 16,
+         "maxBindGroups": 4
+        },
+        "subgroupsListed": true,
+        "subgroupsUsable": true,
+        "f16": true,
+        "dp4a": true,
+        "subgroupMatrix": false,
+        "timestampQuery": true
+       },
+       "fallbacks": [],
+       "gpuErrors": {
+        "count": 0,
+        "samples": []
+       }
+      },
+      "finalEvent": {
+       "token": "<|im_end|>",
+       "tokenId": 248046,
+       "numTokens": 84,
+       "tokensPerSecond": 3.010828228665155,
+       "finished": true,
+       "finishReason": "eos",
+       "cycleDetected": false,
+       "cyclePeriod": null,
+       "stopReason": null,
+       "prefillReused": 0,
+       "committedTokens": 1573,
+       "promptTokens": 1492,
+       "prefillTokens": 1492,
+       "decodeTokens": 84,
+       "ttftMs": 24464.2,
+       "prefillMs": 24111.4,
+       "decodeMs": 3787.5,
+       "decodeTokensPerSecond": 24.16,
+       "prefillTokensPerSecond": 61.88,
+       "decodeRoute": "gpu-argmax",
+       "decodeRouteReasons": [],
+       "decodeRouteInfo": {
+        "loop": "gpu-argmax",
+        "reasons": [],
+        "gpuSampleBatch": 4,
+        "detector": "off",
+        "detectorBridged": false,
+        "detectorRewinds": 0,
+        "switchedAtStep": null,
+        "allowedTokenIds": 0
+       },
+       "kernelVariants": {
+        "weightFormat": "q1g128/q2g128",
+        "f16": true,
+        "subgroups": true,
+        "subgroupSize": 32,
+        "narrowSubgroup": false,
+        "narrowSubgroupWidth": null,
+        "narrowSubgroupProbeCached": false,
+        "m1VecmatRoute": false,
+        "m1VecmatRouteFlag": false,
+        "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+        "mobileMatvec": null,
+        "mobileMatvecFlag": "off",
+        "mobileMatvecReason": null,
+        "mobileFusionFlag": null,
+        "mobileProfile": {
+         "applied": false,
+         "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+         "mobileMatvec": "off",
+         "mobilePrefill": "off",
+         "eligible": false,
+         "width": null,
+         "defaulted": [],
+         "hostPinned": []
+        },
+        "subgroupMatrix": false,
+        "dp4a": true,
+        "sg": true,
+        "smallN": true,
+        "wideN": true,
+        "v14": true,
+        "lut": false,
+        "residualFusionKernel": true,
+        "q1Matvec": null,
+        "q1Band": null,
+        "q1Decode": {
+         "enabled": true,
+         "mode": "lut",
+         "rows": 64,
+         "bands": 8,
+         "lanes": 4,
+         "skew": true,
+         "totals": "tile",
+         "variant": "lut64-skew",
+         "passLabel": "vecmatQ2G128.dispatchLutSkew",
+         "barriersPerTile": 3,
+         "wgBytes": 9840,
+         "ldsBankDegree": {
+          "build": 1,
+          "row": 1.997,
+          "totals": 1,
+          "cyclesPerTile": 607.1
+         },
+         "dispatches": {
+          "lut": 15226,
+          "residual": 11008
+         },
+         "opsPerWeightByte": 8.31,
+         "ldsReadsPerWeightByte": 2,
+         "pipelines": 2,
+         "shapes": {
+          "248320x5120": {
+           "workgroups": 3880,
+           "was": 3880,
+           "actMB": 75.78,
+           "wasActMB": 606.25,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "16384x5120": {
+           "workgroups": 256,
+           "was": 256,
+           "actMB": 5,
+           "wasActMB": 40,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "96x5120": {
+           "workgroups": 2,
+           "was": 2,
+           "actMB": 0.04,
+           "wasActMB": 0.23,
+           "actPerCode": 0.67,
+           "wasActPerCode": 4
+          },
+          "5120x6144": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 1.88,
+           "wasActMB": 15,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "34816x5120": {
+           "workgroups": 544,
+           "was": 544,
+           "actMB": 10.63,
+           "wasActMB": 85,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "5120x17408": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 5.31,
+           "wasActMB": 42.5,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "14336x5120": {
+           "workgroups": 224,
+           "was": 224,
+           "actMB": 4.38,
+           "wasActMB": 35,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          }
+         }
+        },
+        "q1Concat": {
+         "enabled": true,
+         "mode": "all",
+         "gateup": true,
+         "qkv": true,
+         "dispatches": {
+          "total": 6880,
+          "gateup": 5504,
+          "qkv": 1376
+         },
+         "arenas": 160,
+         "arenaBytes": 1769472000,
+         "extraBytes": 0,
+         "groups": [
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          }
+         ],
+         "groupCount": 80,
+         "declined": []
+        },
+        "q4Wide": true,
+        "q4Ksplit": true,
+        "q4KsplitWide": true,
+        "q4BlockLayout": null,
+        "megashaderA": true,
+        "megashaderB": true,
+        "chunkedDecodeState": false,
+        "statePrecision": "f32",
+        "flashDecode": false,
+        "flashAttnPrefill": true,
+        "kivi": false,
+        "kvF16": false,
+        "prefillReady": true,
+        "prefillRoute": "gemm-v2+arow",
+        "mobilePrefill": {
+         "route": "off",
+         "requested": false,
+         "reason": "flag unset",
+         "flag": "__mentriaMobilePrefill",
+         "ksplit": "auto",
+         "ksplitFlag": "__mentriaMobilePrefillKsplit",
+         "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+        },
+        "prefillTile": "arow",
+        "prefillTileFlag": "arow",
+        "prefillTileReason": null,
+        "prefillTileSharedBytes": 16384,
+        "prefillTileMinM": null,
+        "prefillTileDispatches": {
+         "armed": 1600,
+         "control": 0
+        },
+        "prefillChunk": 512,
+        "decodeLoop": "gpu-argmax",
+        "decodeLoopReasons": [],
+        "gpuSampleBatch": 4,
+        "bindGroupCache": {
+         "enabled": true,
+         "destroyPatch": true,
+         "hits": 52124,
+         "misses": 8056,
+         "oneShot": 7428,
+         "clears": 0,
+         "invalidations": 0,
+         "created": 8056,
+         "caches": 13,
+         "entries": 628,
+         "byOperator": {
+          "ic": 1,
+          "yu": 1,
+          "Wi": 129,
+          "Ue": 305,
+          "$d": 48,
+          "Mn": 48,
+          "ec": 64,
+          "cc": 16,
+          "uc": 0,
+          "Ba": 0,
+          "ds": 0,
+          "Ea": 0,
+          "Qd": 16
+         },
+         "hitRate": 0.8661
+        },
+        "residentDecode": {
+         "argmax": true,
+         "forwardFromBuffer": true,
+         "detectorRewind": {
+          "ok": true,
+          "why": null
+         }
+        },
+        "maxSeq": 2048,
+        "numLayers": 64
+       },
+       "counters": {
+        "installed": true,
+        "installError": null,
+        "promptTokens": 1492,
+        "decodeTokens": 84,
+        "prefill": {
+         "dispatches": 8601,
+         "passes": 8601,
+         "submits": 207,
+         "cmdBufs": 9279,
+         "mapAsync": 0,
+         "workDone": 66,
+         "bindGroupsCreated": 6201,
+         "bindGroupLayoutGets": 1,
+         "buffersCreated": 4546,
+         "encodersCreated": 9279,
+         "setPipelines": 8601,
+         "setBindGroups": 8601,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 90.2,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 4,
+         "syncMs": 24008.3,
+         "hostMs": 8.2
+        },
+        "decode": {
+         "dispatches": 60265,
+         "passes": 60180,
+         "submits": 108,
+         "cmdBufs": 108,
+         "mapAsync": 22,
+         "workDone": 0,
+         "bindGroupsCreated": 8056,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 343,
+         "encodersCreated": 108,
+         "setPipelines": 60265,
+         "setBindGroups": 60180,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 52124,
+         "bindGroupCacheMisses": 8056,
+         "encodeMs": 224.2,
+         "recordMs": 163.1,
+         "replayMs": 60.8,
+         "submitMs": 1.3,
+         "syncMs": 3552,
+         "hostMs": 0
+        },
+        "other": {
+         "dispatches": 0,
+         "passes": 0,
+         "submits": 0,
+         "cmdBufs": 0,
+         "mapAsync": 0,
+         "workDone": 0,
+         "bindGroupsCreated": 0,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 0,
+         "encodersCreated": 0,
+         "setPipelines": 0,
+         "setBindGroups": 0,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 0,
+         "hostMs": 0
+        },
+        "perPrefillToken": {
+         "dispatches": 5.76,
+         "passes": 5.76,
+         "submits": 0.14,
+         "cmdBufs": 6.22,
+         "mapAsync": 0,
+         "workDone": 0.04,
+         "bindGroupsCreated": 4.16,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 3.05,
+         "encodersCreated": 6.22,
+         "setPipelines": 5.76,
+         "setBindGroups": 5.76,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0.06,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 16.09,
+         "hostMs": 0.01
+        },
+        "prefillChunks": [
+         {
+          "m": 512,
+          "seqLen0": 0,
+          "wallMs": 8545.9,
+          "encodeMs": 32.5,
+          "submitMs": 2.1,
+          "syncMs": 8507,
+          "hostMs": 4.3,
+          "dispatches": 2899,
+          "passes": 2899,
+          "submits": 69,
+          "cmdBufs": 3109,
+          "workDone": 22
+         },
+         {
+          "m": 512,
+          "seqLen0": 512,
+          "wallMs": 7754.6,
+          "encodeMs": 27.7,
+          "submitMs": 0.9,
+          "syncMs": 7723.9,
+          "hostMs": 2.1,
+          "dispatches": 2899,
+          "passes": 2899,
+          "submits": 69,
+          "cmdBufs": 3109,
+          "workDone": 22
+         },
+         {
+          "m": 468,
+          "seqLen0": 1024,
+          "wallMs": 7810.2,
+          "encodeMs": 30,
+          "submitMs": 1,
+          "syncMs": 7777.4,
+          "hostMs": 1.8,
+          "dispatches": 2803,
+          "passes": 2803,
+          "submits": 69,
+          "cmdBufs": 3061,
+          "workDone": 22
+         }
+        ],
+        "perDecodeToken": {
+         "dispatches": 717.44,
+         "passes": 716.43,
+         "submits": 1.29,
+         "cmdBufs": 1.29,
+         "mapAsync": 0.26,
+         "workDone": 0,
+         "bindGroupsCreated": 95.9,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 4.08,
+         "encodersCreated": 1.29,
+         "setPipelines": 717.44,
+         "setBindGroups": 716.43,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 620.52,
+         "bindGroupCacheMisses": 95.9,
+         "encodeMs": 2.67,
+         "recordMs": 1.94,
+         "replayMs": 0.72,
+         "submitMs": 0.02,
+         "syncMs": 42.29,
+         "hostMs": 0
+        },
+        "ms": {
+         "prefill": 24111.4,
+         "decode": 3787.5,
+         "other": 0.4
+        },
+        "prefillTokensPerSecond": 61.88,
+        "decodeTokensPerSecond": 22.18,
+        "generation": 1,
+        "overlappedGenerations": 0,
+        "staleEnds": 0,
+        "lifetime": {
+         "dispatches": 71836,
+         "passes": 71349,
+         "submits": 546,
+         "cmdBufs": 11266,
+         "mapAsync": 22,
+         "workDone": 73,
+         "bindGroupsCreated": 17130,
+         "bindGroupLayoutGets": 6,
+         "buffersCreated": 9541,
+         "encodersCreated": 11266,
+         "setPipelines": 71836,
+         "setBindGroups": 71750,
+         "uniformWrites": 827,
+         "bindGroupCacheHits": 52124,
+         "bindGroupCacheMisses": 8056,
+         "encodeMs": 337.3,
+         "recordMs": 163.1,
+         "replayMs": 60.8,
+         "submitMs": 5.7,
+         "syncMs": 30425.9,
+         "hostMs": 10.5
+        },
+        "gpuBytes": {
+         "live": 5265018064,
+         "peak": 8075838400,
+         "created": 22466556980,
+         "destroyed": 17201538916,
+         "liveBuffers": 3802,
+         "createdBuffers": 9541,
+         "destroyedBuffers": 5739,
+         "liveMiB": 5021.11,
+         "peakMiB": 7701.72
+        }
+       },
+       "uniformCache": {
+        "hits": 64963,
+        "misses": 434,
+        "cacheSize": 434,
+        "poolIdx": 0
+       },
+       "bindGroupCache": {
+        "enabled": true,
+        "destroyPatch": true,
+        "hits": 52124,
+        "misses": 8056,
+        "oneShot": 7428,
+        "clears": 0,
+        "invalidations": 0,
+        "created": 8056,
+        "caches": 13,
+        "entries": 628,
+        "byOperator": {
+         "ic": 1,
+         "yu": 1,
+         "Wi": 129,
+         "Ue": 305,
+         "$d": 48,
+         "Mn": 48,
+         "ec": 64,
+         "cc": 16,
+         "uc": 0,
+         "Ba": 0,
+         "ds": 0,
+         "Ea": 0,
+         "Qd": 16
+        },
+        "hitRate": 0.8661
+       },
+       "decodeMerge": {
+        "created": 631,
+        "realEncoders": 1,
+        "passes": 708,
+        "replayed": 631,
+        "passthrough": 0,
+        "nested": 1,
+        "internalSubmits": 0,
+        "dropped": 0,
+        "recordMs": 1.2,
+        "replayMs": 0.8,
+        "totalMs": 2
+       },
+       "decodeProbe": null,
+       "fallbacks": []
+      },
+      "visibility": {
+       "start": "visible",
+       "focusStart": true,
+       "end": "visible",
+       "focusEnd": true
+      },
+      "sample": "The text states that the built engine bundles exactly two third-party runtime libraries. T",
+      "answer": "The text states that the built engine bundles exactly two third-party runtime libraries.\nThe text states that the first library is @huggingface/tokenizers version 0.1.3.\nThe text states that the license for the library is the Apache License Version 2.0.\nThe text states that attribution below satisfies the notice-preservation terms.\nThe text states that bundling strips source comments."
+     },
+     {
+      "id": "xlong",
+      "gen": null,
+      "run": 2,
+      "ttftMs": 24280,
+      "decodeTps": 23.95,
+      "tokens": 83,
+      "totalS": 27.7,
+      "promptTokens": 1489,
+      "prefillTps": 61.3,
+      "engineTps": 3.0349342611561747,
+      "gapMs": {
+       "min": 0,
+       "median": 0,
+       "p90": 163,
+       "max": 172
+      },
+      "promptChars": 7458,
+      "image": false,
+      "profileFlags": false,
+      "profiles": [],
+      "statsBefore": {
+       "modelLoaded": true,
+       "activeAdapter": null,
+       "loadedAdapters": [],
+       "adapterManagerReady": true,
+       "adapterManagerInitError": null,
+       "seqLen": 1573,
+       "visionLoaded": false,
+       "residentBytes": 5265017660,
+       "residentPeakBytes": 8075838400,
+       "residentBuffers": 3799,
+       "specSnapshotPool": {
+        "slots": 1,
+        "bundleSize": 156893184,
+        "bytes": 156893184,
+        "initialized": true
+       },
+       "spec": null,
+       "counters": {
+        "installed": true,
+        "installError": null,
+        "promptTokens": 1492,
+        "decodeTokens": 84,
+        "prefill": {
+         "dispatches": 8601,
+         "passes": 8601,
+         "submits": 207,
+         "cmdBufs": 9279,
+         "mapAsync": 0,
+         "workDone": 66,
+         "bindGroupsCreated": 6201,
+         "bindGroupLayoutGets": 1,
+         "buffersCreated": 4546,
+         "encodersCreated": 9279,
+         "setPipelines": 8601,
+         "setBindGroups": 8601,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 90.2,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 4,
+         "syncMs": 24008.3,
+         "hostMs": 8.2
+        },
+        "decode": {
+         "dispatches": 60265,
+         "passes": 60180,
+         "submits": 108,
+         "cmdBufs": 108,
+         "mapAsync": 22,
+         "workDone": 0,
+         "bindGroupsCreated": 8056,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 343,
+         "encodersCreated": 108,
+         "setPipelines": 60265,
+         "setBindGroups": 60180,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 52124,
+         "bindGroupCacheMisses": 8056,
+         "encodeMs": 224.2,
+         "recordMs": 163.1,
+         "replayMs": 60.8,
+         "submitMs": 1.3,
+         "syncMs": 3552,
+         "hostMs": 0
+        },
+        "other": {
+         "dispatches": 0,
+         "passes": 0,
+         "submits": 0,
+         "cmdBufs": 0,
+         "mapAsync": 0,
+         "workDone": 0,
+         "bindGroupsCreated": 0,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 0,
+         "encodersCreated": 0,
+         "setPipelines": 0,
+         "setBindGroups": 0,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 0,
+         "hostMs": 0
+        },
+        "perPrefillToken": {
+         "dispatches": 5.76,
+         "passes": 5.76,
+         "submits": 0.14,
+         "cmdBufs": 6.22,
+         "mapAsync": 0,
+         "workDone": 0.04,
+         "bindGroupsCreated": 4.16,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 3.05,
+         "encodersCreated": 6.22,
+         "setPipelines": 5.76,
+         "setBindGroups": 5.76,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0.06,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 16.09,
+         "hostMs": 0.01
+        },
+        "prefillChunks": [
+         {
+          "m": 512,
+          "seqLen0": 0,
+          "wallMs": 8545.9,
+          "encodeMs": 32.5,
+          "submitMs": 2.1,
+          "syncMs": 8507,
+          "hostMs": 4.3,
+          "dispatches": 2899,
+          "passes": 2899,
+          "submits": 69,
+          "cmdBufs": 3109,
+          "workDone": 22
+         },
+         {
+          "m": 512,
+          "seqLen0": 512,
+          "wallMs": 7754.6,
+          "encodeMs": 27.7,
+          "submitMs": 0.9,
+          "syncMs": 7723.9,
+          "hostMs": 2.1,
+          "dispatches": 2899,
+          "passes": 2899,
+          "submits": 69,
+          "cmdBufs": 3109,
+          "workDone": 22
+         },
+         {
+          "m": 468,
+          "seqLen0": 1024,
+          "wallMs": 7810.2,
+          "encodeMs": 30,
+          "submitMs": 1,
+          "syncMs": 7777.4,
+          "hostMs": 1.8,
+          "dispatches": 2803,
+          "passes": 2803,
+          "submits": 69,
+          "cmdBufs": 3061,
+          "workDone": 22
+         }
+        ],
+        "perDecodeToken": {
+         "dispatches": 717.44,
+         "passes": 716.43,
+         "submits": 1.29,
+         "cmdBufs": 1.29,
+         "mapAsync": 0.26,
+         "workDone": 0,
+         "bindGroupsCreated": 95.9,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 4.08,
+         "encodersCreated": 1.29,
+         "setPipelines": 717.44,
+         "setBindGroups": 716.43,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 620.52,
+         "bindGroupCacheMisses": 95.9,
+         "encodeMs": 2.67,
+         "recordMs": 1.94,
+         "replayMs": 0.72,
+         "submitMs": 0.02,
+         "syncMs": 42.29,
+         "hostMs": 0
+        },
+        "ms": {
+         "prefill": 24111.4,
+         "decode": 3788.7,
+         "other": 0.4
+        },
+        "prefillTokensPerSecond": 61.88,
+        "decodeTokensPerSecond": 22.17,
+        "generation": 1,
+        "overlappedGenerations": 0,
+        "staleEnds": 0,
+        "lifetime": {
+         "dispatches": 71836,
+         "passes": 71349,
+         "submits": 546,
+         "cmdBufs": 11266,
+         "mapAsync": 22,
+         "workDone": 73,
+         "bindGroupsCreated": 17130,
+         "bindGroupLayoutGets": 6,
+         "buffersCreated": 9541,
+         "encodersCreated": 11266,
+         "setPipelines": 71836,
+         "setBindGroups": 71750,
+         "uniformWrites": 827,
+         "bindGroupCacheHits": 52124,
+         "bindGroupCacheMisses": 8056,
+         "encodeMs": 337.3,
+         "recordMs": 163.1,
+         "replayMs": 60.8,
+         "submitMs": 5.7,
+         "syncMs": 30425.9,
+         "hostMs": 10.5
+        },
+        "gpuBytes": {
+         "live": 5265017660,
+         "peak": 8075838400,
+         "created": 22466556980,
+         "destroyed": 17201539320,
+         "liveBuffers": 3799,
+         "createdBuffers": 9541,
+         "destroyedBuffers": 5742,
+         "liveMiB": 5021.11,
+         "peakMiB": 7701.72
+        }
+       },
+       "countersInstalled": true,
+       "countersInstallError": null,
+       "uniformCache": {
+        "hits": 64963,
+        "misses": 434,
+        "cacheSize": 434,
+        "poolIdx": 0
+       },
+       "bindGroupCache": {
+        "enabled": true,
+        "destroyPatch": true,
+        "hits": 52124,
+        "misses": 8056,
+        "oneShot": 7428,
+        "clears": 0,
+        "invalidations": 1,
+        "created": 8056,
+        "caches": 13,
+        "entries": 626,
+        "byOperator": {
+         "ic": 0,
+         "yu": 0,
+         "Wi": 129,
+         "Ue": 305,
+         "$d": 48,
+         "Mn": 48,
+         "ec": 64,
+         "cc": 16,
+         "uc": 0,
+         "Ba": 0,
+         "ds": 0,
+         "Ea": 0,
+         "Qd": 16
+        },
+        "hitRate": 0.8661
+       },
+       "decodeMerge": {
+        "created": 631,
+        "realEncoders": 1,
+        "passes": 708,
+        "replayed": 631,
+        "passthrough": 0,
+        "nested": 1,
+        "internalSubmits": 0,
+        "dropped": 0,
+        "recordMs": 1.2,
+        "replayMs": 0.8,
+        "totalMs": 2
+       },
+       "decodeProbe": null,
+       "lastGeneration": {
+        "promptTokens": 1492,
+        "prefillTokens": 1492,
+        "decodeTokens": 84,
+        "ttftMs": 24464.2,
+        "prefillMs": 24111.4,
+        "decodeMs": 3787.5,
+        "decodeTokensPerSecond": 24.16,
+        "prefillTokensPerSecond": 61.88,
+        "decodeRoute": "gpu-argmax",
+        "decodeRouteReasons": [],
+        "decodeRouteInfo": {
+         "loop": "gpu-argmax",
+         "reasons": [],
+         "gpuSampleBatch": 4,
+         "detector": "off",
+         "detectorBridged": false,
+         "detectorRewinds": 0,
+         "switchedAtStep": null,
+         "allowedTokenIds": 0
+        },
+        "kernelVariants": {
+         "weightFormat": "q1g128/q2g128",
+         "f16": true,
+         "subgroups": true,
+         "subgroupSize": 32,
+         "narrowSubgroup": false,
+         "narrowSubgroupWidth": null,
+         "narrowSubgroupProbeCached": false,
+         "m1VecmatRoute": false,
+         "m1VecmatRouteFlag": false,
+         "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+         "mobileMatvec": null,
+         "mobileMatvecFlag": "off",
+         "mobileMatvecReason": null,
+         "mobileFusionFlag": null,
+         "mobileProfile": {
+          "applied": false,
+          "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+          "mobileMatvec": "off",
+          "mobilePrefill": "off",
+          "eligible": false,
+          "width": null,
+          "defaulted": [],
+          "hostPinned": []
+         },
+         "subgroupMatrix": false,
+         "dp4a": true,
+         "sg": true,
+         "smallN": true,
+         "wideN": true,
+         "v14": true,
+         "lut": false,
+         "residualFusionKernel": true,
+         "q1Matvec": null,
+         "q1Band": null,
+         "q1Decode": {
+          "enabled": true,
+          "mode": "lut",
+          "rows": 64,
+          "bands": 8,
+          "lanes": 4,
+          "skew": true,
+          "totals": "tile",
+          "variant": "lut64-skew",
+          "passLabel": "vecmatQ2G128.dispatchLutSkew",
+          "barriersPerTile": 3,
+          "wgBytes": 9840,
+          "ldsBankDegree": {
+           "build": 1,
+           "row": 1.997,
+           "totals": 1,
+           "cyclesPerTile": 607.1
+          },
+          "dispatches": {
+           "lut": 15226,
+           "residual": 11008
+          },
+          "opsPerWeightByte": 8.31,
+          "ldsReadsPerWeightByte": 2,
+          "pipelines": 2,
+          "shapes": {
+           "248320x5120": {
+            "workgroups": 3880,
+            "was": 3880,
+            "actMB": 75.78,
+            "wasActMB": 606.25,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "16384x5120": {
+            "workgroups": 256,
+            "was": 256,
+            "actMB": 5,
+            "wasActMB": 40,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "96x5120": {
+            "workgroups": 2,
+            "was": 2,
+            "actMB": 0.04,
+            "wasActMB": 0.23,
+            "actPerCode": 0.67,
+            "wasActPerCode": 4
+           },
+           "5120x6144": {
+            "workgroups": 80,
+            "was": 80,
+            "actMB": 1.88,
+            "wasActMB": 15,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "34816x5120": {
+            "workgroups": 544,
+            "was": 544,
+            "actMB": 10.63,
+            "wasActMB": 85,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "5120x17408": {
+            "workgroups": 80,
+            "was": 80,
+            "actMB": 5.31,
+            "wasActMB": 42.5,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "14336x5120": {
+            "workgroups": 224,
+            "was": 224,
+            "actMB": 4.38,
+            "wasActMB": 35,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           }
+          }
+         },
+         "q1Concat": {
+          "enabled": true,
+          "mode": "all",
+          "gateup": true,
+          "qkv": true,
+          "dispatches": {
+           "total": 6880,
+           "gateup": 5504,
+           "qkv": 1376
+          },
+          "arenas": 160,
+          "arenaBytes": 1769472000,
+          "extraBytes": 0,
+          "groups": [
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           },
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           },
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           },
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           }
+          ],
+          "groupCount": 80,
+          "declined": []
+         },
+         "q4Wide": true,
+         "q4Ksplit": true,
+         "q4KsplitWide": true,
+         "q4BlockLayout": null,
+         "megashaderA": true,
+         "megashaderB": true,
+         "chunkedDecodeState": false,
+         "statePrecision": "f32",
+         "flashDecode": false,
+         "flashAttnPrefill": true,
+         "kivi": false,
+         "kvF16": false,
+         "prefillReady": true,
+         "prefillRoute": "gemm-v2+arow",
+         "mobilePrefill": {
+          "route": "off",
+          "requested": false,
+          "reason": "flag unset",
+          "flag": "__mentriaMobilePrefill",
+          "ksplit": "auto",
+          "ksplitFlag": "__mentriaMobilePrefillKsplit",
+          "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+         },
+         "prefillTile": "arow",
+         "prefillTileFlag": "arow",
+         "prefillTileReason": null,
+         "prefillTileSharedBytes": 16384,
+         "prefillTileMinM": null,
+         "prefillTileDispatches": {
+          "armed": 1600,
+          "control": 0
+         },
+         "prefillChunk": 512,
+         "decodeLoop": "gpu-argmax",
+         "decodeLoopReasons": [],
+         "gpuSampleBatch": 4,
+         "bindGroupCache": {
+          "enabled": true,
+          "destroyPatch": true,
+          "hits": 52124,
+          "misses": 8056,
+          "oneShot": 7428,
+          "clears": 0,
+          "invalidations": 0,
+          "created": 8056,
+          "caches": 13,
+          "entries": 628,
+          "byOperator": {
+           "ic": 1,
+           "yu": 1,
+           "Wi": 129,
+           "Ue": 305,
+           "$d": 48,
+           "Mn": 48,
+           "ec": 64,
+           "cc": 16,
+           "uc": 0,
+           "Ba": 0,
+           "ds": 0,
+           "Ea": 0,
+           "Qd": 16
+          },
+          "hitRate": 0.8661
+         },
+         "residentDecode": {
+          "argmax": true,
+          "forwardFromBuffer": true,
+          "detectorRewind": {
+           "ok": true,
+           "why": null
+          }
+         },
+         "maxSeq": 2048,
+         "numLayers": 64
+        },
+        "counters": {
+         "installed": true,
+         "installError": null,
+         "promptTokens": 1492,
+         "decodeTokens": 84,
+         "prefill": {
+          "dispatches": 8601,
+          "passes": 8601,
+          "submits": 207,
+          "cmdBufs": 9279,
+          "mapAsync": 0,
+          "workDone": 66,
+          "bindGroupsCreated": 6201,
+          "bindGroupLayoutGets": 1,
+          "buffersCreated": 4546,
+          "encodersCreated": 9279,
+          "setPipelines": 8601,
+          "setBindGroups": 8601,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 0,
+          "bindGroupCacheMisses": 0,
+          "encodeMs": 90.2,
+          "recordMs": 0,
+          "replayMs": 0,
+          "submitMs": 4,
+          "syncMs": 24008.3,
+          "hostMs": 8.2
+         },
+         "decode": {
+          "dispatches": 60265,
+          "passes": 60180,
+          "submits": 108,
+          "cmdBufs": 108,
+          "mapAsync": 22,
+          "workDone": 0,
+          "bindGroupsCreated": 8056,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 343,
+          "encodersCreated": 108,
+          "setPipelines": 60265,
+          "setBindGroups": 60180,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 52124,
+          "bindGroupCacheMisses": 8056,
+          "encodeMs": 224.2,
+          "recordMs": 163.1,
+          "replayMs": 60.8,
+          "submitMs": 1.3,
+          "syncMs": 3552,
+          "hostMs": 0
+         },
+         "other": {
+          "dispatches": 0,
+          "passes": 0,
+          "submits": 0,
+          "cmdBufs": 0,
+          "mapAsync": 0,
+          "workDone": 0,
+          "bindGroupsCreated": 0,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 0,
+          "encodersCreated": 0,
+          "setPipelines": 0,
+          "setBindGroups": 0,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 0,
+          "bindGroupCacheMisses": 0,
+          "encodeMs": 0,
+          "recordMs": 0,
+          "replayMs": 0,
+          "submitMs": 0,
+          "syncMs": 0,
+          "hostMs": 0
+         },
+         "perPrefillToken": {
+          "dispatches": 5.76,
+          "passes": 5.76,
+          "submits": 0.14,
+          "cmdBufs": 6.22,
+          "mapAsync": 0,
+          "workDone": 0.04,
+          "bindGroupsCreated": 4.16,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 3.05,
+          "encodersCreated": 6.22,
+          "setPipelines": 5.76,
+          "setBindGroups": 5.76,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 0,
+          "bindGroupCacheMisses": 0,
+          "encodeMs": 0.06,
+          "recordMs": 0,
+          "replayMs": 0,
+          "submitMs": 0,
+          "syncMs": 16.09,
+          "hostMs": 0.01
+         },
+         "prefillChunks": [
+          {
+           "m": 512,
+           "seqLen0": 0,
+           "wallMs": 8545.9,
+           "encodeMs": 32.5,
+           "submitMs": 2.1,
+           "syncMs": 8507,
+           "hostMs": 4.3,
+           "dispatches": 2899,
+           "passes": 2899,
+           "submits": 69,
+           "cmdBufs": 3109,
+           "workDone": 22
+          },
+          {
+           "m": 512,
+           "seqLen0": 512,
+           "wallMs": 7754.6,
+           "encodeMs": 27.7,
+           "submitMs": 0.9,
+           "syncMs": 7723.9,
+           "hostMs": 2.1,
+           "dispatches": 2899,
+           "passes": 2899,
+           "submits": 69,
+           "cmdBufs": 3109,
+           "workDone": 22
+          },
+          {
+           "m": 468,
+           "seqLen0": 1024,
+           "wallMs": 7810.2,
+           "encodeMs": 30,
+           "submitMs": 1,
+           "syncMs": 7777.4,
+           "hostMs": 1.8,
+           "dispatches": 2803,
+           "passes": 2803,
+           "submits": 69,
+           "cmdBufs": 3061,
+           "workDone": 22
+          }
+         ],
+         "perDecodeToken": {
+          "dispatches": 717.44,
+          "passes": 716.43,
+          "submits": 1.29,
+          "cmdBufs": 1.29,
+          "mapAsync": 0.26,
+          "workDone": 0,
+          "bindGroupsCreated": 95.9,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 4.08,
+          "encodersCreated": 1.29,
+          "setPipelines": 717.44,
+          "setBindGroups": 716.43,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 620.52,
+          "bindGroupCacheMisses": 95.9,
+          "encodeMs": 2.67,
+          "recordMs": 1.94,
+          "replayMs": 0.72,
+          "submitMs": 0.02,
+          "syncMs": 42.29,
+          "hostMs": 0
+         },
+         "ms": {
+          "prefill": 24111.4,
+          "decode": 3787.5,
+          "other": 0.4
+         },
+         "prefillTokensPerSecond": 61.88,
+         "decodeTokensPerSecond": 22.18,
+         "generation": 1,
+         "overlappedGenerations": 0,
+         "staleEnds": 0,
+         "lifetime": {
+          "dispatches": 71836,
+          "passes": 71349,
+          "submits": 546,
+          "cmdBufs": 11266,
+          "mapAsync": 22,
+          "workDone": 73,
+          "bindGroupsCreated": 17130,
+          "bindGroupLayoutGets": 6,
+          "buffersCreated": 9541,
+          "encodersCreated": 11266,
+          "setPipelines": 71836,
+          "setBindGroups": 71750,
+          "uniformWrites": 827,
+          "bindGroupCacheHits": 52124,
+          "bindGroupCacheMisses": 8056,
+          "encodeMs": 337.3,
+          "recordMs": 163.1,
+          "replayMs": 60.8,
+          "submitMs": 5.7,
+          "syncMs": 30425.9,
+          "hostMs": 10.5
+         },
+         "gpuBytes": {
+          "live": 5265018064,
+          "peak": 8075838400,
+          "created": 22466556980,
+          "destroyed": 17201538916,
+          "liveBuffers": 3802,
+          "createdBuffers": 9541,
+          "destroyedBuffers": 5739,
+          "liveMiB": 5021.11,
+          "peakMiB": 7701.72
+         }
+        },
+        "uniformCache": {
+         "hits": 64963,
+         "misses": 434,
+         "cacheSize": 434,
+         "poolIdx": 0
+        },
+        "bindGroupCache": {
+         "enabled": true,
+         "destroyPatch": true,
+         "hits": 52124,
+         "misses": 8056,
+         "oneShot": 7428,
+         "clears": 0,
+         "invalidations": 0,
+         "created": 8056,
+         "caches": 13,
+         "entries": 628,
+         "byOperator": {
+          "ic": 1,
+          "yu": 1,
+          "Wi": 129,
+          "Ue": 305,
+          "$d": 48,
+          "Mn": 48,
+          "ec": 64,
+          "cc": 16,
+          "uc": 0,
+          "Ba": 0,
+          "ds": 0,
+          "Ea": 0,
+          "Qd": 16
+         },
+         "hitRate": 0.8661
+        },
+        "decodeMerge": {
+         "created": 631,
+         "realEncoders": 1,
+         "passes": 708,
+         "replayed": 631,
+         "passthrough": 0,
+         "nested": 1,
+         "internalSubmits": 0,
+         "dropped": 0,
+         "recordMs": 1.2,
+         "replayMs": 0.8,
+         "totalMs": 2
+        },
+        "decodeProbe": null,
+        "fallbacks": []
+       },
+       "kernelVariants": {
+        "weightFormat": "q1g128/q2g128",
+        "f16": true,
+        "subgroups": true,
+        "subgroupSize": 32,
+        "narrowSubgroup": false,
+        "narrowSubgroupWidth": null,
+        "narrowSubgroupProbeCached": false,
+        "m1VecmatRoute": false,
+        "m1VecmatRouteFlag": false,
+        "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+        "mobileMatvec": null,
+        "mobileMatvecFlag": "off",
+        "mobileMatvecReason": null,
+        "mobileFusionFlag": null,
+        "mobileProfile": {
+         "applied": false,
+         "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+         "mobileMatvec": "off",
+         "mobilePrefill": "off",
+         "eligible": false,
+         "width": null,
+         "defaulted": [],
+         "hostPinned": []
+        },
+        "subgroupMatrix": false,
+        "dp4a": true,
+        "sg": true,
+        "smallN": true,
+        "wideN": true,
+        "v14": true,
+        "lut": false,
+        "residualFusionKernel": true,
+        "q1Matvec": null,
+        "q1Band": null,
+        "q1Decode": {
+         "enabled": true,
+         "mode": "lut",
+         "rows": 64,
+         "bands": 8,
+         "lanes": 4,
+         "skew": true,
+         "totals": "tile",
+         "variant": "lut64-skew",
+         "passLabel": "vecmatQ2G128.dispatchLutSkew",
+         "barriersPerTile": 3,
+         "wgBytes": 9840,
+         "ldsBankDegree": {
+          "build": 1,
+          "row": 1.997,
+          "totals": 1,
+          "cyclesPerTile": 607.1
+         },
+         "dispatches": {
+          "lut": 15226,
+          "residual": 11008
+         },
+         "opsPerWeightByte": 8.31,
+         "ldsReadsPerWeightByte": 2,
+         "pipelines": 2,
+         "shapes": {
+          "248320x5120": {
+           "workgroups": 3880,
+           "was": 3880,
+           "actMB": 75.78,
+           "wasActMB": 606.25,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "16384x5120": {
+           "workgroups": 256,
+           "was": 256,
+           "actMB": 5,
+           "wasActMB": 40,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "96x5120": {
+           "workgroups": 2,
+           "was": 2,
+           "actMB": 0.04,
+           "wasActMB": 0.23,
+           "actPerCode": 0.67,
+           "wasActPerCode": 4
+          },
+          "5120x6144": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 1.88,
+           "wasActMB": 15,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "34816x5120": {
+           "workgroups": 544,
+           "was": 544,
+           "actMB": 10.63,
+           "wasActMB": 85,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "5120x17408": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 5.31,
+           "wasActMB": 42.5,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "14336x5120": {
+           "workgroups": 224,
+           "was": 224,
+           "actMB": 4.38,
+           "wasActMB": 35,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          }
+         }
+        },
+        "q1Concat": {
+         "enabled": true,
+         "mode": "all",
+         "gateup": true,
+         "qkv": true,
+         "dispatches": {
+          "total": 6880,
+          "gateup": 5504,
+          "qkv": 1376
+         },
+         "arenas": 160,
+         "arenaBytes": 1769472000,
+         "extraBytes": 0,
+         "groups": [
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          }
+         ],
+         "groupCount": 80,
+         "declined": []
+        },
+        "q4Wide": true,
+        "q4Ksplit": true,
+        "q4KsplitWide": true,
+        "q4BlockLayout": null,
+        "megashaderA": true,
+        "megashaderB": true,
+        "chunkedDecodeState": false,
+        "statePrecision": "f32",
+        "flashDecode": false,
+        "flashAttnPrefill": true,
+        "kivi": false,
+        "kvF16": false,
+        "prefillReady": true,
+        "prefillRoute": "gemm-v2+arow",
+        "mobilePrefill": {
+         "route": "off",
+         "requested": false,
+         "reason": "flag unset",
+         "flag": "__mentriaMobilePrefill",
+         "ksplit": "auto",
+         "ksplitFlag": "__mentriaMobilePrefillKsplit",
+         "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+        },
+        "prefillTile": "arow",
+        "prefillTileFlag": "arow",
+        "prefillTileReason": null,
+        "prefillTileSharedBytes": 16384,
+        "prefillTileMinM": null,
+        "prefillTileDispatches": {
+         "armed": 1600,
+         "control": 0
+        },
+        "prefillChunk": 512,
+        "decodeLoop": "gpu-argmax",
+        "decodeLoopReasons": [],
+        "gpuSampleBatch": 4,
+        "bindGroupCache": {
+         "enabled": true,
+         "destroyPatch": true,
+         "hits": 52124,
+         "misses": 8056,
+         "oneShot": 7428,
+         "clears": 0,
+         "invalidations": 1,
+         "created": 8056,
+         "caches": 13,
+         "entries": 626,
+         "byOperator": {
+          "ic": 0,
+          "yu": 0,
+          "Wi": 129,
+          "Ue": 305,
+          "$d": 48,
+          "Mn": 48,
+          "ec": 64,
+          "cc": 16,
+          "uc": 0,
+          "Ba": 0,
+          "ds": 0,
+          "Ea": 0,
+          "Qd": 16
+         },
+         "hitRate": 0.8661
+        },
+        "residentDecode": {
+         "argmax": true,
+         "forwardFromBuffer": true,
+         "detectorRewind": {
+          "ok": true,
+          "why": null
+         }
+        },
+        "maxSeq": 2048,
+        "numLayers": 64
+       },
+       "capabilities": {
+        "vendor": "nvidia",
+        "architecture": "ampere",
+        "subgroupMinSize": 32,
+        "subgroupMaxSize": 32,
+        "likelyIntegratedGpu": false,
+        "features": [
+         "core-features-and-limits",
+         "shader-f16",
+         "subgroups",
+         "timestamp-query"
+        ],
+        "limits": {
+         "maxBufferSize": 2147483648,
+         "maxStorageBufferBindingSize": 2147483644,
+         "maxUniformBufferBindingSize": 65536,
+         "maxComputeWorkgroupStorageSize": 32768,
+         "maxComputeInvocationsPerWorkgroup": 256,
+         "maxComputeWorkgroupSizeX": 256,
+         "maxComputeWorkgroupsPerDimension": 65535,
+         "maxStorageBuffersPerShaderStage": 16,
+         "maxBindGroups": 4
+        },
+        "subgroupsListed": true,
+        "subgroupsUsable": true,
+        "f16": true,
+        "dp4a": true,
+        "subgroupMatrix": false,
+        "timestampQuery": true
+       },
+       "fallbacks": [],
+       "gpuErrors": {
+        "count": 0,
+        "samples": []
+       }
+      },
+      "statsAfter": {
+       "modelLoaded": true,
+       "activeAdapter": null,
+       "loadedAdapters": [],
+       "adapterManagerReady": true,
+       "adapterManagerInitError": null,
+       "seqLen": 1573,
+       "visionLoaded": false,
+       "residentBytes": 5265017660,
+       "residentPeakBytes": 8075838400,
+       "residentBuffers": 3799,
+       "specSnapshotPool": {
+        "slots": 1,
+        "bundleSize": 156893184,
+        "bytes": 156893184,
+        "initialized": true
+       },
+       "spec": null,
+       "counters": {
+        "installed": true,
+        "installError": null,
+        "promptTokens": 1492,
+        "decodeTokens": 84,
+        "prefill": {
+         "dispatches": 8601,
+         "passes": 8601,
+         "submits": 207,
+         "cmdBufs": 9279,
+         "mapAsync": 0,
+         "workDone": 66,
+         "bindGroupsCreated": 6201,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 4434,
+         "encodersCreated": 9279,
+         "setPipelines": 8601,
+         "setBindGroups": 8601,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 85.9,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 3.6,
+         "syncMs": 23794.1,
+         "hostMs": 5.1
+        },
+        "decode": {
+         "dispatches": 60265,
+         "passes": 60180,
+         "submits": 108,
+         "cmdBufs": 108,
+         "mapAsync": 22,
+         "workDone": 0,
+         "bindGroupsCreated": 6996,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 3,
+         "encodersCreated": 108,
+         "setPipelines": 60265,
+         "setBindGroups": 60180,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 53184,
+         "bindGroupCacheMisses": 6996,
+         "encodeMs": 169.7,
+         "recordMs": 116.1,
+         "replayMs": 53.2,
+         "submitMs": 1.3,
+         "syncMs": 3612.2,
+         "hostMs": 0
+        },
+        "other": {
+         "dispatches": 0,
+         "passes": 0,
+         "submits": 0,
+         "cmdBufs": 0,
+         "mapAsync": 0,
+         "workDone": 0,
+         "bindGroupsCreated": 0,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 0,
+         "encodersCreated": 0,
+         "setPipelines": 0,
+         "setBindGroups": 0,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 0,
+         "hostMs": 0
+        },
+        "perPrefillToken": {
+         "dispatches": 5.76,
+         "passes": 5.76,
+         "submits": 0.14,
+         "cmdBufs": 6.22,
+         "mapAsync": 0,
+         "workDone": 0.04,
+         "bindGroupsCreated": 4.16,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 2.97,
+         "encodersCreated": 6.22,
+         "setPipelines": 5.76,
+         "setBindGroups": 5.76,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0.06,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 15.95,
+         "hostMs": 0
+        },
+        "prefillChunks": [
+         {
+          "m": 512,
+          "seqLen0": 0,
+          "wallMs": 8209.5,
+          "encodeMs": 30.5,
+          "submitMs": 1.4,
+          "syncMs": 8176.3,
+          "hostMs": 1.3,
+          "dispatches": 2899,
+          "passes": 2899,
+          "submits": 69,
+          "cmdBufs": 3109,
+          "workDone": 22
+         },
+         {
+          "m": 512,
+          "seqLen0": 512,
+          "wallMs": 7877,
+          "encodeMs": 29.3,
+          "submitMs": 1.2,
+          "syncMs": 7844.6,
+          "hostMs": 1.9,
+          "dispatches": 2899,
+          "passes": 2899,
+          "submits": 69,
+          "cmdBufs": 3109,
+          "workDone": 22
+         },
+         {
+          "m": 468,
+          "seqLen0": 1024,
+          "wallMs": 7802.2,
+          "encodeMs": 26.1,
+          "submitMs": 1,
+          "syncMs": 7773.2,
+          "hostMs": 1.9,
+          "dispatches": 2803,
+          "passes": 2803,
+          "submits": 69,
+          "cmdBufs": 3061,
+          "workDone": 22
+         }
+        ],
+        "perDecodeToken": {
+         "dispatches": 717.44,
+         "passes": 716.43,
+         "submits": 1.29,
+         "cmdBufs": 1.29,
+         "mapAsync": 0.26,
+         "workDone": 0,
+         "bindGroupsCreated": 83.29,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 0.04,
+         "encodersCreated": 1.29,
+         "setPipelines": 717.44,
+         "setBindGroups": 716.43,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 633.14,
+         "bindGroupCacheMisses": 83.29,
+         "encodeMs": 2.02,
+         "recordMs": 1.38,
+         "replayMs": 0.63,
+         "submitMs": 0.02,
+         "syncMs": 43,
+         "hostMs": 0
+        },
+        "ms": {
+         "prefill": 23889.1,
+         "decode": 3788.9,
+         "other": 0.1
+        },
+        "prefillTokensPerSecond": 62.46,
+        "decodeTokensPerSecond": 22.17,
+        "generation": 2,
+        "overlappedGenerations": 0,
+        "staleEnds": 0,
+        "lifetime": {
+         "dispatches": 140702,
+         "passes": 140130,
+         "submits": 861,
+         "cmdBufs": 20653,
+         "mapAsync": 44,
+         "workDone": 139,
+         "bindGroupsCreated": 30327,
+         "bindGroupLayoutGets": 6,
+         "buffersCreated": 14107,
+         "encodersCreated": 20653,
+         "setPipelines": 140702,
+         "setBindGroups": 140531,
+         "uniformWrites": 827,
+         "bindGroupCacheHits": 105308,
+         "bindGroupCacheMisses": 15052,
+         "encodeMs": 592.9,
+         "recordMs": 279.2,
+         "replayMs": 114,
+         "submitMs": 10.6,
+         "syncMs": 57832.2,
+         "hostMs": 15.6
+        },
+        "gpuBytes": {
+         "live": 5265017660,
+         "peak": 8075838400,
+         "created": 36047553672,
+         "destroyed": 30782536012,
+         "liveBuffers": 3799,
+         "createdBuffers": 14107,
+         "destroyedBuffers": 10308,
+         "liveMiB": 5021.11,
+         "peakMiB": 7701.72
+        }
+       },
+       "countersInstalled": true,
+       "countersInstallError": null,
+       "uniformCache": {
+        "hits": 128224,
+        "misses": 434,
+        "cacheSize": 434,
+        "poolIdx": 0
+       },
+       "bindGroupCache": {
+        "enabled": true,
+        "destroyPatch": true,
+        "hits": 105308,
+        "misses": 15052,
+        "oneShot": 12966,
+        "clears": 0,
+        "invalidations": 98,
+        "created": 15052,
+        "caches": 13,
+        "entries": 1986,
+        "byOperator": {
+         "ic": 0,
+         "yu": 0,
+         "Wi": 129,
+         "Ue": 305,
+         "$d": 48,
+         "Mn": 48,
+         "ec": 64,
+         "cc": 16,
+         "uc": 0,
+         "Ba": 0,
+         "ds": 1360,
+         "Ea": 0,
+         "Qd": 16
+        },
+        "hitRate": 0.8749
+       },
+       "decodeMerge": {
+        "created": 631,
+        "realEncoders": 1,
+        "passes": 708,
+        "replayed": 631,
+        "passthrough": 0,
+        "nested": 1,
+        "internalSubmits": 0,
+        "dropped": 0,
+        "recordMs": 0.9,
+        "replayMs": 0.7,
+        "totalMs": 1.6
+       },
+       "decodeProbe": null,
+       "lastGeneration": {
+        "promptTokens": 1492,
+        "prefillTokens": 1492,
+        "decodeTokens": 84,
+        "ttftMs": 24254.4,
+        "prefillMs": 23889.1,
+        "decodeMs": 3788.5,
+        "decodeTokensPerSecond": 24.25,
+        "prefillTokensPerSecond": 62.46,
+        "decodeRoute": "gpu-argmax",
+        "decodeRouteReasons": [],
+        "decodeRouteInfo": {
+         "loop": "gpu-argmax",
+         "reasons": [],
+         "gpuSampleBatch": 4,
+         "detector": "off",
+         "detectorBridged": false,
+         "detectorRewinds": 0,
+         "switchedAtStep": null,
+         "allowedTokenIds": 0
+        },
+        "kernelVariants": {
+         "weightFormat": "q1g128/q2g128",
+         "f16": true,
+         "subgroups": true,
+         "subgroupSize": 32,
+         "narrowSubgroup": false,
+         "narrowSubgroupWidth": null,
+         "narrowSubgroupProbeCached": false,
+         "m1VecmatRoute": false,
+         "m1VecmatRouteFlag": false,
+         "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+         "mobileMatvec": null,
+         "mobileMatvecFlag": "off",
+         "mobileMatvecReason": null,
+         "mobileFusionFlag": null,
+         "mobileProfile": {
+          "applied": false,
+          "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+          "mobileMatvec": "off",
+          "mobilePrefill": "off",
+          "eligible": false,
+          "width": null,
+          "defaulted": [],
+          "hostPinned": []
+         },
+         "subgroupMatrix": false,
+         "dp4a": true,
+         "sg": true,
+         "smallN": true,
+         "wideN": true,
+         "v14": true,
+         "lut": false,
+         "residualFusionKernel": true,
+         "q1Matvec": null,
+         "q1Band": null,
+         "q1Decode": {
+          "enabled": true,
+          "mode": "lut",
+          "rows": 64,
+          "bands": 8,
+          "lanes": 4,
+          "skew": true,
+          "totals": "tile",
+          "variant": "lut64-skew",
+          "passLabel": "vecmatQ2G128.dispatchLutSkew",
+          "barriersPerTile": 3,
+          "wgBytes": 9840,
+          "ldsBankDegree": {
+           "build": 1,
+           "row": 1.997,
+           "totals": 1,
+           "cyclesPerTile": 607.1
+          },
+          "dispatches": {
+           "lut": 30274,
+           "residual": 21888
+          },
+          "opsPerWeightByte": 8.31,
+          "ldsReadsPerWeightByte": 2,
+          "pipelines": 2,
+          "shapes": {
+           "248320x5120": {
+            "workgroups": 3880,
+            "was": 3880,
+            "actMB": 75.78,
+            "wasActMB": 606.25,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "16384x5120": {
+            "workgroups": 256,
+            "was": 256,
+            "actMB": 5,
+            "wasActMB": 40,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "96x5120": {
+            "workgroups": 2,
+            "was": 2,
+            "actMB": 0.04,
+            "wasActMB": 0.23,
+            "actPerCode": 0.67,
+            "wasActPerCode": 4
+           },
+           "5120x6144": {
+            "workgroups": 80,
+            "was": 80,
+            "actMB": 1.88,
+            "wasActMB": 15,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "34816x5120": {
+            "workgroups": 544,
+            "was": 544,
+            "actMB": 10.63,
+            "wasActMB": 85,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "5120x17408": {
+            "workgroups": 80,
+            "was": 80,
+            "actMB": 5.31,
+            "wasActMB": 42.5,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           },
+           "14336x5120": {
+            "workgroups": 224,
+            "was": 224,
+            "actMB": 4.38,
+            "wasActMB": 35,
+            "actPerCode": 0.5,
+            "wasActPerCode": 4
+           }
+          }
+         },
+         "q1Concat": {
+          "enabled": true,
+          "mode": "all",
+          "gateup": true,
+          "qkv": true,
+          "dispatches": {
+           "total": 13680,
+           "gateup": 10944,
+           "qkv": 2736
+          },
+          "arenas": 160,
+          "arenaBytes": 1769472000,
+          "extraBytes": 0,
+          "groups": [
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           },
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           },
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           },
+           {
+            "group": "gateup",
+            "parts": [
+             "mlp.gate_proj",
+             "mlp.up_proj"
+            ],
+            "N": 34816,
+            "K": 5120,
+            "bands": 4352,
+            "codeMB": 21.25,
+            "scaleMB": 2.66
+           }
+          ],
+          "groupCount": 80,
+          "declined": []
+         },
+         "q4Wide": true,
+         "q4Ksplit": true,
+         "q4KsplitWide": true,
+         "q4BlockLayout": null,
+         "megashaderA": true,
+         "megashaderB": true,
+         "chunkedDecodeState": false,
+         "statePrecision": "f32",
+         "flashDecode": false,
+         "flashAttnPrefill": true,
+         "kivi": false,
+         "kvF16": false,
+         "prefillReady": true,
+         "prefillRoute": "gemm-v2+arow",
+         "mobilePrefill": {
+          "route": "off",
+          "requested": false,
+          "reason": "flag unset",
+          "flag": "__mentriaMobilePrefill",
+          "ksplit": "auto",
+          "ksplitFlag": "__mentriaMobilePrefillKsplit",
+          "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+         },
+         "prefillTile": "arow",
+         "prefillTileFlag": "arow",
+         "prefillTileReason": null,
+         "prefillTileSharedBytes": 16384,
+         "prefillTileMinM": null,
+         "prefillTileDispatches": {
+          "armed": 2800,
+          "control": 0
+         },
+         "prefillChunk": 512,
+         "decodeLoop": "gpu-argmax",
+         "decodeLoopReasons": [],
+         "gpuSampleBatch": 4,
+         "bindGroupCache": {
+          "enabled": true,
+          "destroyPatch": true,
+          "hits": 105308,
+          "misses": 15052,
+          "oneShot": 12966,
+          "clears": 0,
+          "invalidations": 97,
+          "created": 15052,
+          "caches": 13,
+          "entries": 1988,
+          "byOperator": {
+           "ic": 1,
+           "yu": 1,
+           "Wi": 129,
+           "Ue": 305,
+           "$d": 48,
+           "Mn": 48,
+           "ec": 64,
+           "cc": 16,
+           "uc": 0,
+           "Ba": 0,
+           "ds": 1360,
+           "Ea": 0,
+           "Qd": 16
+          },
+          "hitRate": 0.8749
+         },
+         "residentDecode": {
+          "argmax": true,
+          "forwardFromBuffer": true,
+          "detectorRewind": {
+           "ok": true,
+           "why": null
+          }
+         },
+         "maxSeq": 2048,
+         "numLayers": 64
+        },
+        "counters": {
+         "installed": true,
+         "installError": null,
+         "promptTokens": 1492,
+         "decodeTokens": 84,
+         "prefill": {
+          "dispatches": 8601,
+          "passes": 8601,
+          "submits": 207,
+          "cmdBufs": 9279,
+          "mapAsync": 0,
+          "workDone": 66,
+          "bindGroupsCreated": 6201,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 4434,
+          "encodersCreated": 9279,
+          "setPipelines": 8601,
+          "setBindGroups": 8601,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 0,
+          "bindGroupCacheMisses": 0,
+          "encodeMs": 85.9,
+          "recordMs": 0,
+          "replayMs": 0,
+          "submitMs": 3.6,
+          "syncMs": 23794.1,
+          "hostMs": 5.1
+         },
+         "decode": {
+          "dispatches": 60265,
+          "passes": 60180,
+          "submits": 108,
+          "cmdBufs": 108,
+          "mapAsync": 22,
+          "workDone": 0,
+          "bindGroupsCreated": 6996,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 3,
+          "encodersCreated": 108,
+          "setPipelines": 60265,
+          "setBindGroups": 60180,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 53184,
+          "bindGroupCacheMisses": 6996,
+          "encodeMs": 169.7,
+          "recordMs": 116.1,
+          "replayMs": 53.2,
+          "submitMs": 1.3,
+          "syncMs": 3612.2,
+          "hostMs": 0
+         },
+         "other": {
+          "dispatches": 0,
+          "passes": 0,
+          "submits": 0,
+          "cmdBufs": 0,
+          "mapAsync": 0,
+          "workDone": 0,
+          "bindGroupsCreated": 0,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 0,
+          "encodersCreated": 0,
+          "setPipelines": 0,
+          "setBindGroups": 0,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 0,
+          "bindGroupCacheMisses": 0,
+          "encodeMs": 0,
+          "recordMs": 0,
+          "replayMs": 0,
+          "submitMs": 0,
+          "syncMs": 0,
+          "hostMs": 0
+         },
+         "perPrefillToken": {
+          "dispatches": 5.76,
+          "passes": 5.76,
+          "submits": 0.14,
+          "cmdBufs": 6.22,
+          "mapAsync": 0,
+          "workDone": 0.04,
+          "bindGroupsCreated": 4.16,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 2.97,
+          "encodersCreated": 6.22,
+          "setPipelines": 5.76,
+          "setBindGroups": 5.76,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 0,
+          "bindGroupCacheMisses": 0,
+          "encodeMs": 0.06,
+          "recordMs": 0,
+          "replayMs": 0,
+          "submitMs": 0,
+          "syncMs": 15.95,
+          "hostMs": 0
+         },
+         "prefillChunks": [
+          {
+           "m": 512,
+           "seqLen0": 0,
+           "wallMs": 8209.5,
+           "encodeMs": 30.5,
+           "submitMs": 1.4,
+           "syncMs": 8176.3,
+           "hostMs": 1.3,
+           "dispatches": 2899,
+           "passes": 2899,
+           "submits": 69,
+           "cmdBufs": 3109,
+           "workDone": 22
+          },
+          {
+           "m": 512,
+           "seqLen0": 512,
+           "wallMs": 7877,
+           "encodeMs": 29.3,
+           "submitMs": 1.2,
+           "syncMs": 7844.6,
+           "hostMs": 1.9,
+           "dispatches": 2899,
+           "passes": 2899,
+           "submits": 69,
+           "cmdBufs": 3109,
+           "workDone": 22
+          },
+          {
+           "m": 468,
+           "seqLen0": 1024,
+           "wallMs": 7802.2,
+           "encodeMs": 26.1,
+           "submitMs": 1,
+           "syncMs": 7773.2,
+           "hostMs": 1.9,
+           "dispatches": 2803,
+           "passes": 2803,
+           "submits": 69,
+           "cmdBufs": 3061,
+           "workDone": 22
+          }
+         ],
+         "perDecodeToken": {
+          "dispatches": 717.44,
+          "passes": 716.43,
+          "submits": 1.29,
+          "cmdBufs": 1.29,
+          "mapAsync": 0.26,
+          "workDone": 0,
+          "bindGroupsCreated": 83.29,
+          "bindGroupLayoutGets": 0,
+          "buffersCreated": 0.04,
+          "encodersCreated": 1.29,
+          "setPipelines": 717.44,
+          "setBindGroups": 716.43,
+          "uniformWrites": 0,
+          "bindGroupCacheHits": 633.14,
+          "bindGroupCacheMisses": 83.29,
+          "encodeMs": 2.02,
+          "recordMs": 1.38,
+          "replayMs": 0.63,
+          "submitMs": 0.02,
+          "syncMs": 43,
+          "hostMs": 0
+         },
+         "ms": {
+          "prefill": 23889.1,
+          "decode": 3788.5,
+          "other": 0.1
+         },
+         "prefillTokensPerSecond": 62.46,
+         "decodeTokensPerSecond": 22.17,
+         "generation": 2,
+         "overlappedGenerations": 0,
+         "staleEnds": 0,
+         "lifetime": {
+          "dispatches": 140702,
+          "passes": 140130,
+          "submits": 861,
+          "cmdBufs": 20653,
+          "mapAsync": 44,
+          "workDone": 139,
+          "bindGroupsCreated": 30327,
+          "bindGroupLayoutGets": 6,
+          "buffersCreated": 14107,
+          "encodersCreated": 20653,
+          "setPipelines": 140702,
+          "setBindGroups": 140531,
+          "uniformWrites": 827,
+          "bindGroupCacheHits": 105308,
+          "bindGroupCacheMisses": 15052,
+          "encodeMs": 592.9,
+          "recordMs": 279.2,
+          "replayMs": 114,
+          "submitMs": 10.6,
+          "syncMs": 57832.2,
+          "hostMs": 15.6
+         },
+         "gpuBytes": {
+          "live": 5265018064,
+          "peak": 8075838400,
+          "created": 36047553672,
+          "destroyed": 30782535608,
+          "liveBuffers": 3802,
+          "createdBuffers": 14107,
+          "destroyedBuffers": 10305,
+          "liveMiB": 5021.11,
+          "peakMiB": 7701.72
+         }
+        },
+        "uniformCache": {
+         "hits": 128224,
+         "misses": 434,
+         "cacheSize": 434,
+         "poolIdx": 0
+        },
+        "bindGroupCache": {
+         "enabled": true,
+         "destroyPatch": true,
+         "hits": 105308,
+         "misses": 15052,
+         "oneShot": 12966,
+         "clears": 0,
+         "invalidations": 97,
+         "created": 15052,
+         "caches": 13,
+         "entries": 1988,
+         "byOperator": {
+          "ic": 1,
+          "yu": 1,
+          "Wi": 129,
+          "Ue": 305,
+          "$d": 48,
+          "Mn": 48,
+          "ec": 64,
+          "cc": 16,
+          "uc": 0,
+          "Ba": 0,
+          "ds": 1360,
+          "Ea": 0,
+          "Qd": 16
+         },
+         "hitRate": 0.8749
+        },
+        "decodeMerge": {
+         "created": 631,
+         "realEncoders": 1,
+         "passes": 708,
+         "replayed": 631,
+         "passthrough": 0,
+         "nested": 1,
+         "internalSubmits": 0,
+         "dropped": 0,
+         "recordMs": 0.9,
+         "replayMs": 0.7,
+         "totalMs": 1.6
+        },
+        "decodeProbe": null,
+        "fallbacks": []
+       },
+       "kernelVariants": {
+        "weightFormat": "q1g128/q2g128",
+        "f16": true,
+        "subgroups": true,
+        "subgroupSize": 32,
+        "narrowSubgroup": false,
+        "narrowSubgroupWidth": null,
+        "narrowSubgroupProbeCached": false,
+        "m1VecmatRoute": false,
+        "m1VecmatRouteFlag": false,
+        "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+        "mobileMatvec": null,
+        "mobileMatvecFlag": "off",
+        "mobileMatvecReason": null,
+        "mobileFusionFlag": null,
+        "mobileProfile": {
+         "applied": false,
+         "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+         "mobileMatvec": "off",
+         "mobilePrefill": "off",
+         "eligible": false,
+         "width": null,
+         "defaulted": [],
+         "hostPinned": []
+        },
+        "subgroupMatrix": false,
+        "dp4a": true,
+        "sg": true,
+        "smallN": true,
+        "wideN": true,
+        "v14": true,
+        "lut": false,
+        "residualFusionKernel": true,
+        "q1Matvec": null,
+        "q1Band": null,
+        "q1Decode": {
+         "enabled": true,
+         "mode": "lut",
+         "rows": 64,
+         "bands": 8,
+         "lanes": 4,
+         "skew": true,
+         "totals": "tile",
+         "variant": "lut64-skew",
+         "passLabel": "vecmatQ2G128.dispatchLutSkew",
+         "barriersPerTile": 3,
+         "wgBytes": 9840,
+         "ldsBankDegree": {
+          "build": 1,
+          "row": 1.997,
+          "totals": 1,
+          "cyclesPerTile": 607.1
+         },
+         "dispatches": {
+          "lut": 30274,
+          "residual": 21888
+         },
+         "opsPerWeightByte": 8.31,
+         "ldsReadsPerWeightByte": 2,
+         "pipelines": 2,
+         "shapes": {
+          "248320x5120": {
+           "workgroups": 3880,
+           "was": 3880,
+           "actMB": 75.78,
+           "wasActMB": 606.25,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "16384x5120": {
+           "workgroups": 256,
+           "was": 256,
+           "actMB": 5,
+           "wasActMB": 40,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "96x5120": {
+           "workgroups": 2,
+           "was": 2,
+           "actMB": 0.04,
+           "wasActMB": 0.23,
+           "actPerCode": 0.67,
+           "wasActPerCode": 4
+          },
+          "5120x6144": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 1.88,
+           "wasActMB": 15,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "34816x5120": {
+           "workgroups": 544,
+           "was": 544,
+           "actMB": 10.63,
+           "wasActMB": 85,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "5120x17408": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 5.31,
+           "wasActMB": 42.5,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "14336x5120": {
+           "workgroups": 224,
+           "was": 224,
+           "actMB": 4.38,
+           "wasActMB": 35,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          }
+         }
+        },
+        "q1Concat": {
+         "enabled": true,
+         "mode": "all",
+         "gateup": true,
+         "qkv": true,
+         "dispatches": {
+          "total": 13680,
+          "gateup": 10944,
+          "qkv": 2736
+         },
+         "arenas": 160,
+         "arenaBytes": 1769472000,
+         "extraBytes": 0,
+         "groups": [
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          }
+         ],
+         "groupCount": 80,
+         "declined": []
+        },
+        "q4Wide": true,
+        "q4Ksplit": true,
+        "q4KsplitWide": true,
+        "q4BlockLayout": null,
+        "megashaderA": true,
+        "megashaderB": true,
+        "chunkedDecodeState": false,
+        "statePrecision": "f32",
+        "flashDecode": false,
+        "flashAttnPrefill": true,
+        "kivi": false,
+        "kvF16": false,
+        "prefillReady": true,
+        "prefillRoute": "gemm-v2+arow",
+        "mobilePrefill": {
+         "route": "off",
+         "requested": false,
+         "reason": "flag unset",
+         "flag": "__mentriaMobilePrefill",
+         "ksplit": "auto",
+         "ksplitFlag": "__mentriaMobilePrefillKsplit",
+         "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+        },
+        "prefillTile": "arow",
+        "prefillTileFlag": "arow",
+        "prefillTileReason": null,
+        "prefillTileSharedBytes": 16384,
+        "prefillTileMinM": null,
+        "prefillTileDispatches": {
+         "armed": 2800,
+         "control": 0
+        },
+        "prefillChunk": 512,
+        "decodeLoop": "gpu-argmax",
+        "decodeLoopReasons": [],
+        "gpuSampleBatch": 4,
+        "bindGroupCache": {
+         "enabled": true,
+         "destroyPatch": true,
+         "hits": 105308,
+         "misses": 15052,
+         "oneShot": 12966,
+         "clears": 0,
+         "invalidations": 98,
+         "created": 15052,
+         "caches": 13,
+         "entries": 1986,
+         "byOperator": {
+          "ic": 0,
+          "yu": 0,
+          "Wi": 129,
+          "Ue": 305,
+          "$d": 48,
+          "Mn": 48,
+          "ec": 64,
+          "cc": 16,
+          "uc": 0,
+          "Ba": 0,
+          "ds": 1360,
+          "Ea": 0,
+          "Qd": 16
+         },
+         "hitRate": 0.8749
+        },
+        "residentDecode": {
+         "argmax": true,
+         "forwardFromBuffer": true,
+         "detectorRewind": {
+          "ok": true,
+          "why": null
+         }
+        },
+        "maxSeq": 2048,
+        "numLayers": 64
+       },
+       "capabilities": {
+        "vendor": "nvidia",
+        "architecture": "ampere",
+        "subgroupMinSize": 32,
+        "subgroupMaxSize": 32,
+        "likelyIntegratedGpu": false,
+        "features": [
+         "core-features-and-limits",
+         "shader-f16",
+         "subgroups",
+         "timestamp-query"
+        ],
+        "limits": {
+         "maxBufferSize": 2147483648,
+         "maxStorageBufferBindingSize": 2147483644,
+         "maxUniformBufferBindingSize": 65536,
+         "maxComputeWorkgroupStorageSize": 32768,
+         "maxComputeInvocationsPerWorkgroup": 256,
+         "maxComputeWorkgroupSizeX": 256,
+         "maxComputeWorkgroupsPerDimension": 65535,
+         "maxStorageBuffersPerShaderStage": 16,
+         "maxBindGroups": 4
+        },
+        "subgroupsListed": true,
+        "subgroupsUsable": true,
+        "f16": true,
+        "dp4a": true,
+        "subgroupMatrix": false,
+        "timestampQuery": true
+       },
+       "fallbacks": [],
+       "gpuErrors": {
+        "count": 0,
+        "samples": []
+       }
+      },
+      "finalEvent": {
+       "token": "<|im_end|>",
+       "tokenId": 248046,
+       "numTokens": 84,
+       "tokensPerSecond": 3.0349342611561747,
+       "finished": true,
+       "finishReason": "eos",
+       "cycleDetected": false,
+       "cyclePeriod": null,
+       "stopReason": null,
+       "prefillReused": 0,
+       "reuseDiag": {
+        "committedLen": 1573,
+        "promptLen": 1492,
+        "seqLen": 1573,
+        "firstDivergence": 1492,
+        "committedAtDiv": [
+         760,
+         1414,
+         5134,
+         421,
+         279,
+         5617
+        ],
+        "promptAtDiv": [],
+        "reason": "prompt-shorter"
+       },
+       "committedTokens": 1573,
+       "promptTokens": 1492,
+       "prefillTokens": 1492,
+       "decodeTokens": 84,
+       "ttftMs": 24254.4,
+       "prefillMs": 23889.1,
+       "decodeMs": 3788.5,
+       "decodeTokensPerSecond": 24.25,
+       "prefillTokensPerSecond": 62.46,
+       "decodeRoute": "gpu-argmax",
+       "decodeRouteReasons": [],
+       "decodeRouteInfo": {
+        "loop": "gpu-argmax",
+        "reasons": [],
+        "gpuSampleBatch": 4,
+        "detector": "off",
+        "detectorBridged": false,
+        "detectorRewinds": 0,
+        "switchedAtStep": null,
+        "allowedTokenIds": 0
+       },
+       "kernelVariants": {
+        "weightFormat": "q1g128/q2g128",
+        "f16": true,
+        "subgroups": true,
+        "subgroupSize": 32,
+        "narrowSubgroup": false,
+        "narrowSubgroupWidth": null,
+        "narrowSubgroupProbeCached": false,
+        "m1VecmatRoute": false,
+        "m1VecmatRouteFlag": false,
+        "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+        "mobileMatvec": null,
+        "mobileMatvecFlag": "off",
+        "mobileMatvecReason": null,
+        "mobileFusionFlag": null,
+        "mobileProfile": {
+         "applied": false,
+         "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+         "mobileMatvec": "off",
+         "mobilePrefill": "off",
+         "eligible": false,
+         "width": null,
+         "defaulted": [],
+         "hostPinned": []
+        },
+        "subgroupMatrix": false,
+        "dp4a": true,
+        "sg": true,
+        "smallN": true,
+        "wideN": true,
+        "v14": true,
+        "lut": false,
+        "residualFusionKernel": true,
+        "q1Matvec": null,
+        "q1Band": null,
+        "q1Decode": {
+         "enabled": true,
+         "mode": "lut",
+         "rows": 64,
+         "bands": 8,
+         "lanes": 4,
+         "skew": true,
+         "totals": "tile",
+         "variant": "lut64-skew",
+         "passLabel": "vecmatQ2G128.dispatchLutSkew",
+         "barriersPerTile": 3,
+         "wgBytes": 9840,
+         "ldsBankDegree": {
+          "build": 1,
+          "row": 1.997,
+          "totals": 1,
+          "cyclesPerTile": 607.1
+         },
+         "dispatches": {
+          "lut": 30274,
+          "residual": 21888
+         },
+         "opsPerWeightByte": 8.31,
+         "ldsReadsPerWeightByte": 2,
+         "pipelines": 2,
+         "shapes": {
+          "248320x5120": {
+           "workgroups": 3880,
+           "was": 3880,
+           "actMB": 75.78,
+           "wasActMB": 606.25,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "16384x5120": {
+           "workgroups": 256,
+           "was": 256,
+           "actMB": 5,
+           "wasActMB": 40,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "96x5120": {
+           "workgroups": 2,
+           "was": 2,
+           "actMB": 0.04,
+           "wasActMB": 0.23,
+           "actPerCode": 0.67,
+           "wasActPerCode": 4
+          },
+          "5120x6144": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 1.88,
+           "wasActMB": 15,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "34816x5120": {
+           "workgroups": 544,
+           "was": 544,
+           "actMB": 10.63,
+           "wasActMB": 85,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "5120x17408": {
+           "workgroups": 80,
+           "was": 80,
+           "actMB": 5.31,
+           "wasActMB": 42.5,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          },
+          "14336x5120": {
+           "workgroups": 224,
+           "was": 224,
+           "actMB": 4.38,
+           "wasActMB": 35,
+           "actPerCode": 0.5,
+           "wasActPerCode": 4
+          }
+         }
+        },
+        "q1Concat": {
+         "enabled": true,
+         "mode": "all",
+         "gateup": true,
+         "qkv": true,
+         "dispatches": {
+          "total": 13680,
+          "gateup": 10944,
+          "qkv": 2736
+         },
+         "arenas": 160,
+         "arenaBytes": 1769472000,
+         "extraBytes": 0,
+         "groups": [
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          },
+          {
+           "group": "gateup",
+           "parts": [
+            "mlp.gate_proj",
+            "mlp.up_proj"
+           ],
+           "N": 34816,
+           "K": 5120,
+           "bands": 4352,
+           "codeMB": 21.25,
+           "scaleMB": 2.66
+          }
+         ],
+         "groupCount": 80,
+         "declined": []
+        },
+        "q4Wide": true,
+        "q4Ksplit": true,
+        "q4KsplitWide": true,
+        "q4BlockLayout": null,
+        "megashaderA": true,
+        "megashaderB": true,
+        "chunkedDecodeState": false,
+        "statePrecision": "f32",
+        "flashDecode": false,
+        "flashAttnPrefill": true,
+        "kivi": false,
+        "kvF16": false,
+        "prefillReady": true,
+        "prefillRoute": "gemm-v2+arow",
+        "mobilePrefill": {
+         "route": "off",
+         "requested": false,
+         "reason": "flag unset",
+         "flag": "__mentriaMobilePrefill",
+         "ksplit": "auto",
+         "ksplitFlag": "__mentriaMobilePrefillKsplit",
+         "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+        },
+        "prefillTile": "arow",
+        "prefillTileFlag": "arow",
+        "prefillTileReason": null,
+        "prefillTileSharedBytes": 16384,
+        "prefillTileMinM": null,
+        "prefillTileDispatches": {
+         "armed": 2800,
+         "control": 0
+        },
+        "prefillChunk": 512,
+        "decodeLoop": "gpu-argmax",
+        "decodeLoopReasons": [],
+        "gpuSampleBatch": 4,
+        "bindGroupCache": {
+         "enabled": true,
+         "destroyPatch": true,
+         "hits": 105308,
+         "misses": 15052,
+         "oneShot": 12966,
+         "clears": 0,
+         "invalidations": 97,
+         "created": 15052,
+         "caches": 13,
+         "entries": 1988,
+         "byOperator": {
+          "ic": 1,
+          "yu": 1,
+          "Wi": 129,
+          "Ue": 305,
+          "$d": 48,
+          "Mn": 48,
+          "ec": 64,
+          "cc": 16,
+          "uc": 0,
+          "Ba": 0,
+          "ds": 1360,
+          "Ea": 0,
+          "Qd": 16
+         },
+         "hitRate": 0.8749
+        },
+        "residentDecode": {
+         "argmax": true,
+         "forwardFromBuffer": true,
+         "detectorRewind": {
+          "ok": true,
+          "why": null
+         }
+        },
+        "maxSeq": 2048,
+        "numLayers": 64
+       },
+       "counters": {
+        "installed": true,
+        "installError": null,
+        "promptTokens": 1492,
+        "decodeTokens": 84,
+        "prefill": {
+         "dispatches": 8601,
+         "passes": 8601,
+         "submits": 207,
+         "cmdBufs": 9279,
+         "mapAsync": 0,
+         "workDone": 66,
+         "bindGroupsCreated": 6201,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 4434,
+         "encodersCreated": 9279,
+         "setPipelines": 8601,
+         "setBindGroups": 8601,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 85.9,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 3.6,
+         "syncMs": 23794.1,
+         "hostMs": 5.1
+        },
+        "decode": {
+         "dispatches": 60265,
+         "passes": 60180,
+         "submits": 108,
+         "cmdBufs": 108,
+         "mapAsync": 22,
+         "workDone": 0,
+         "bindGroupsCreated": 6996,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 3,
+         "encodersCreated": 108,
+         "setPipelines": 60265,
+         "setBindGroups": 60180,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 53184,
+         "bindGroupCacheMisses": 6996,
+         "encodeMs": 169.7,
+         "recordMs": 116.1,
+         "replayMs": 53.2,
+         "submitMs": 1.3,
+         "syncMs": 3612.2,
+         "hostMs": 0
+        },
+        "other": {
+         "dispatches": 0,
+         "passes": 0,
+         "submits": 0,
+         "cmdBufs": 0,
+         "mapAsync": 0,
+         "workDone": 0,
+         "bindGroupsCreated": 0,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 0,
+         "encodersCreated": 0,
+         "setPipelines": 0,
+         "setBindGroups": 0,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 0,
+         "hostMs": 0
+        },
+        "perPrefillToken": {
+         "dispatches": 5.76,
+         "passes": 5.76,
+         "submits": 0.14,
+         "cmdBufs": 6.22,
+         "mapAsync": 0,
+         "workDone": 0.04,
+         "bindGroupsCreated": 4.16,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 2.97,
+         "encodersCreated": 6.22,
+         "setPipelines": 5.76,
+         "setBindGroups": 5.76,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 0,
+         "bindGroupCacheMisses": 0,
+         "encodeMs": 0.06,
+         "recordMs": 0,
+         "replayMs": 0,
+         "submitMs": 0,
+         "syncMs": 15.95,
+         "hostMs": 0
+        },
+        "prefillChunks": [
+         {
+          "m": 512,
+          "seqLen0": 0,
+          "wallMs": 8209.5,
+          "encodeMs": 30.5,
+          "submitMs": 1.4,
+          "syncMs": 8176.3,
+          "hostMs": 1.3,
+          "dispatches": 2899,
+          "passes": 2899,
+          "submits": 69,
+          "cmdBufs": 3109,
+          "workDone": 22
+         },
+         {
+          "m": 512,
+          "seqLen0": 512,
+          "wallMs": 7877,
+          "encodeMs": 29.3,
+          "submitMs": 1.2,
+          "syncMs": 7844.6,
+          "hostMs": 1.9,
+          "dispatches": 2899,
+          "passes": 2899,
+          "submits": 69,
+          "cmdBufs": 3109,
+          "workDone": 22
+         },
+         {
+          "m": 468,
+          "seqLen0": 1024,
+          "wallMs": 7802.2,
+          "encodeMs": 26.1,
+          "submitMs": 1,
+          "syncMs": 7773.2,
+          "hostMs": 1.9,
+          "dispatches": 2803,
+          "passes": 2803,
+          "submits": 69,
+          "cmdBufs": 3061,
+          "workDone": 22
+         }
+        ],
+        "perDecodeToken": {
+         "dispatches": 717.44,
+         "passes": 716.43,
+         "submits": 1.29,
+         "cmdBufs": 1.29,
+         "mapAsync": 0.26,
+         "workDone": 0,
+         "bindGroupsCreated": 83.29,
+         "bindGroupLayoutGets": 0,
+         "buffersCreated": 0.04,
+         "encodersCreated": 1.29,
+         "setPipelines": 717.44,
+         "setBindGroups": 716.43,
+         "uniformWrites": 0,
+         "bindGroupCacheHits": 633.14,
+         "bindGroupCacheMisses": 83.29,
+         "encodeMs": 2.02,
+         "recordMs": 1.38,
+         "replayMs": 0.63,
+         "submitMs": 0.02,
+         "syncMs": 43,
+         "hostMs": 0
+        },
+        "ms": {
+         "prefill": 23889.1,
+         "decode": 3788.5,
+         "other": 0.1
+        },
+        "prefillTokensPerSecond": 62.46,
+        "decodeTokensPerSecond": 22.17,
+        "generation": 2,
+        "overlappedGenerations": 0,
+        "staleEnds": 0,
+        "lifetime": {
+         "dispatches": 140702,
+         "passes": 140130,
+         "submits": 861,
+         "cmdBufs": 20653,
+         "mapAsync": 44,
+         "workDone": 139,
+         "bindGroupsCreated": 30327,
+         "bindGroupLayoutGets": 6,
+         "buffersCreated": 14107,
+         "encodersCreated": 20653,
+         "setPipelines": 140702,
+         "setBindGroups": 140531,
+         "uniformWrites": 827,
+         "bindGroupCacheHits": 105308,
+         "bindGroupCacheMisses": 15052,
+         "encodeMs": 592.9,
+         "recordMs": 279.2,
+         "replayMs": 114,
+         "submitMs": 10.6,
+         "syncMs": 57832.2,
+         "hostMs": 15.6
+        },
+        "gpuBytes": {
+         "live": 5265018064,
+         "peak": 8075838400,
+         "created": 36047553672,
+         "destroyed": 30782535608,
+         "liveBuffers": 3802,
+         "createdBuffers": 14107,
+         "destroyedBuffers": 10305,
+         "liveMiB": 5021.11,
+         "peakMiB": 7701.72
+        }
+       },
+       "uniformCache": {
+        "hits": 128224,
+        "misses": 434,
+        "cacheSize": 434,
+        "poolIdx": 0
+       },
+       "bindGroupCache": {
+        "enabled": true,
+        "destroyPatch": true,
+        "hits": 105308,
+        "misses": 15052,
+        "oneShot": 12966,
+        "clears": 0,
+        "invalidations": 97,
+        "created": 15052,
+        "caches": 13,
+        "entries": 1988,
+        "byOperator": {
+         "ic": 1,
+         "yu": 1,
+         "Wi": 129,
+         "Ue": 305,
+         "$d": 48,
+         "Mn": 48,
+         "ec": 64,
+         "cc": 16,
+         "uc": 0,
+         "Ba": 0,
+         "ds": 1360,
+         "Ea": 0,
+         "Qd": 16
+        },
+        "hitRate": 0.8749
+       },
+       "decodeMerge": {
+        "created": 631,
+        "realEncoders": 1,
+        "passes": 708,
+        "replayed": 631,
+        "passthrough": 0,
+        "nested": 1,
+        "internalSubmits": 0,
+        "dropped": 0,
+        "recordMs": 0.9,
+        "replayMs": 0.7,
+        "totalMs": 1.6
+       },
+       "decodeProbe": null,
+       "fallbacks": []
+      },
+      "visibility": {
+       "start": "visible",
+       "focusStart": true,
+       "end": "visible",
+       "focusEnd": true
+      },
+      "sample": "The text states that the built engine bundles exactly two third-party runtime libraries. T",
+      "answer": "The text states that the built engine bundles exactly two third-party runtime libraries.\nThe text states that the first library is @huggingface/tokenizers version 0.1.3.\nThe text states that the license for the library is the Apache License Version 2.0.\nThe text states that attribution below satisfies the notice-preservation terms.\nThe text states that bundling strips source comments."
+     }
+    ],
+    "cached": true,
+    "initOptions": {
+     "maxSeq": 2048,
+     "specSlots": 1,
+     "weightUpload": "writeBuffer"
+    },
+    "genOptions": [
+     null
+    ],
+    "initResult": {
+     "gpu": "0x2520",
+     "adapter": {
+      "vendor": "nvidia",
+      "architecture": "ampere",
+      "subgroupMinSize": 32,
+      "subgroupMaxSize": 32,
+      "likelyIntegratedGpu": false
+     },
+     "maxBuffer": 2147483648,
+     "f16": true,
+     "subgroups": true,
+     "narrowSubgroup": null,
+     "gpuSampleBatch": 4,
+     "m1VecmatRoute": false,
+     "mobileProfile": {
+      "applied": false,
+      "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+      "mobileMatvec": "off",
+      "mobilePrefill": "off",
+      "eligible": false,
+      "width": null,
+      "defaulted": [],
+      "hostPinned": []
+     },
+     "narrowProbeCacheAvailable": true,
+     "dp4a": true,
+     "protocolVersion": 1,
+     "useShardedWeights": false,
+     "shardingCeiling": 2143289344,
+     "needsEmbeddingShard": false,
+     "needsLMHeadShard": false,
+     "shardingForced": false
+    },
+    "initS": 0.16,
+    "maxSeq": 2048,
+    "loadResult": {
+     "ablation": null,
+     "tensors": 755,
+     "totalBytes": 3792459776,
+     "residentBytes": 4472751036,
+     "residentPeakBytes": 8075838400,
+     "vocabSize": 248320,
+     "numLayers": 64,
+     "visionLoaded": false,
+     "visionResidency": null,
+     "q4BlockLayout": null,
+     "tiedEmbedLmHead": false,
+     "adapter": {
+      "vendor": "nvidia",
+      "architecture": "ampere",
+      "subgroupMinSize": 32,
+      "subgroupMaxSize": 32,
+      "likelyIntegratedGpu": false
+     },
+     "decodeRoute": {
+      "sg": true,
+      "smallN": true,
+      "wideN": true,
+      "v14": true,
+      "residualFusion": true,
+      "residualFusionKernel": true,
+      "q1Matvec": null,
+      "q1Band": null,
+      "q1Fuse": null,
+      "bindGroupCache": true,
+      "weightUpload": "writeBuffer",
+      "specSlots": 1,
+      "residentTrim": null,
+      "q1Concat": "all",
+      "lut": false,
+      "q1Decode": "lut",
+      "q1DecodeRows": 64,
+      "q1LutSkew": true,
+      "q1LutTotals": "tile",
+      "q1LutVariant": "lut64-skew",
+      "prefillTile": "arow",
+      "prefillTileReason": null,
+      "prefillRoute": "gemm-v2+arow",
+      "flashDecode": false
+     },
+     "format": "mentria-q2g128-v1",
+     "kernelVariants": {
+      "weightFormat": "q1g128/q2g128",
+      "f16": true,
+      "subgroups": true,
+      "subgroupSize": 32,
+      "narrowSubgroup": false,
+      "narrowSubgroupWidth": null,
+      "narrowSubgroupProbeCached": false,
+      "m1VecmatRoute": false,
+      "m1VecmatRouteFlag": false,
+      "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+      "mobileMatvec": null,
+      "mobileMatvecFlag": "off",
+      "mobileMatvecReason": null,
+      "mobileFusionFlag": null,
+      "mobileProfile": {
+       "applied": false,
+       "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+       "mobileMatvec": "off",
+       "mobilePrefill": "off",
+       "eligible": false,
+       "width": null,
+       "defaulted": [],
+       "hostPinned": []
+      },
+      "subgroupMatrix": false,
+      "dp4a": true,
+      "sg": true,
+      "smallN": true,
+      "wideN": true,
+      "v14": true,
+      "lut": false,
+      "residualFusionKernel": true,
+      "q1Matvec": null,
+      "q1Band": null,
+      "q1Decode": {
+       "enabled": true,
+       "mode": "lut",
+       "rows": 64,
+       "bands": 8,
+       "lanes": 4,
+       "skew": true,
+       "totals": "tile",
+       "variant": "lut64-skew",
+       "passLabel": "vecmatQ2G128.dispatchLutSkew",
+       "barriersPerTile": 3,
+       "wgBytes": 9840,
+       "ldsBankDegree": {
+        "build": 1,
+        "row": 1.997,
+        "totals": 1,
+        "cyclesPerTile": 607.1
+       },
+       "dispatches": {
+        "lut": 178,
+        "residual": 128
+       },
+       "opsPerWeightByte": 8.31,
+       "ldsReadsPerWeightByte": 2,
+       "pipelines": 2,
+       "shapes": {
+        "248320x5120": {
+         "workgroups": 3880,
+         "was": 3880,
+         "actMB": 75.78,
+         "wasActMB": 606.25,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        },
+        "16384x5120": {
+         "workgroups": 256,
+         "was": 256,
+         "actMB": 5,
+         "wasActMB": 40,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        },
+        "96x5120": {
+         "workgroups": 2,
+         "was": 2,
+         "actMB": 0.04,
+         "wasActMB": 0.23,
+         "actPerCode": 0.67,
+         "wasActPerCode": 4
+        },
+        "5120x6144": {
+         "workgroups": 80,
+         "was": 80,
+         "actMB": 1.88,
+         "wasActMB": 15,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        },
+        "34816x5120": {
+         "workgroups": 544,
+         "was": 544,
+         "actMB": 10.63,
+         "wasActMB": 85,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        },
+        "5120x17408": {
+         "workgroups": 80,
+         "was": 80,
+         "actMB": 5.31,
+         "wasActMB": 42.5,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        },
+        "14336x5120": {
+         "workgroups": 224,
+         "was": 224,
+         "actMB": 4.38,
+         "wasActMB": 35,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        }
+       }
+      },
+      "q1Concat": {
+       "enabled": true,
+       "mode": "all",
+       "gateup": true,
+       "qkv": true,
+       "dispatches": {
+        "total": 80,
+        "gateup": 64,
+        "qkv": 16
+       },
+       "arenas": 160,
+       "arenaBytes": 1769472000,
+       "extraBytes": 0,
+       "groups": [
+        {
+         "group": "gateup",
+         "parts": [
+          "mlp.gate_proj",
+          "mlp.up_proj"
+         ],
+         "N": 34816,
+         "K": 5120,
+         "bands": 4352,
+         "codeMB": 21.25,
+         "scaleMB": 2.66
+        },
+        {
+         "group": "gateup",
+         "parts": [
+          "mlp.gate_proj",
+          "mlp.up_proj"
+         ],
+         "N": 34816,
+         "K": 5120,
+         "bands": 4352,
+         "codeMB": 21.25,
+         "scaleMB": 2.66
+        },
+        {
+         "group": "gateup",
+         "parts": [
+          "mlp.gate_proj",
+          "mlp.up_proj"
+         ],
+         "N": 34816,
+         "K": 5120,
+         "bands": 4352,
+         "codeMB": 21.25,
+         "scaleMB": 2.66
+        },
+        {
+         "group": "gateup",
+         "parts": [
+          "mlp.gate_proj",
+          "mlp.up_proj"
+         ],
+         "N": 34816,
+         "K": 5120,
+         "bands": 4352,
+         "codeMB": 21.25,
+         "scaleMB": 2.66
+        }
+       ],
+       "groupCount": 80,
+       "declined": []
+      },
+      "q4Wide": true,
+      "q4Ksplit": true,
+      "q4KsplitWide": true,
+      "q4BlockLayout": null,
+      "megashaderA": true,
+      "megashaderB": true,
+      "chunkedDecodeState": false,
+      "statePrecision": "f32",
+      "flashDecode": false,
+      "flashAttnPrefill": true,
+      "kivi": false,
+      "kvF16": false,
+      "prefillReady": true,
+      "prefillRoute": "gemm-v2+arow",
+      "mobilePrefill": {
+       "route": "off",
+       "requested": false,
+       "reason": "flag unset",
+       "flag": "__mentriaMobilePrefill",
+       "ksplit": "auto",
+       "ksplitFlag": "__mentriaMobilePrefillKsplit",
+       "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+      },
+      "prefillTile": "arow",
+      "prefillTileFlag": "arow",
+      "prefillTileReason": null,
+      "prefillTileSharedBytes": 16384,
+      "prefillTileMinM": null,
+      "prefillTileDispatches": {
+       "armed": 400,
+       "control": 0
+      },
+      "prefillChunk": 512,
+      "decodeLoop": null,
+      "decodeLoopReasons": null,
+      "gpuSampleBatch": 4,
+      "bindGroupCache": {
+       "enabled": true,
+       "destroyPatch": true,
+       "hits": 0,
+       "misses": 0,
+       "oneShot": 0,
+       "clears": 0,
+       "invalidations": 0,
+       "created": 0,
+       "caches": 0,
+       "entries": 0,
+       "byOperator": {},
+       "hitRate": null
+      },
+      "residentDecode": {
+       "argmax": true,
+       "forwardFromBuffer": true,
+       "detectorRewind": {
+        "ok": true,
+        "why": null
+       }
+      },
+      "maxSeq": 2048,
+      "numLayers": 64
+     },
+     "capabilities": {
+      "vendor": "nvidia",
+      "architecture": "ampere",
+      "subgroupMinSize": 32,
+      "subgroupMaxSize": 32,
+      "likelyIntegratedGpu": false,
+      "features": [
+       "core-features-and-limits",
+       "shader-f16",
+       "subgroups",
+       "timestamp-query"
+      ],
+      "limits": {
+       "maxBufferSize": 2147483648,
+       "maxStorageBufferBindingSize": 2147483644,
+       "maxUniformBufferBindingSize": 65536,
+       "maxComputeWorkgroupStorageSize": 32768,
+       "maxComputeInvocationsPerWorkgroup": 256,
+       "maxComputeWorkgroupSizeX": 256,
+       "maxComputeWorkgroupsPerDimension": 65535,
+       "maxStorageBuffersPerShaderStage": 16,
+       "maxBindGroups": 4
+      },
+      "subgroupsListed": true,
+      "subgroupsUsable": true,
+      "f16": true,
+      "dp4a": true,
+      "subgroupMatrix": false,
+      "timestampQuery": true
+     },
+     "loadPlan": {
+      "rung": 0,
+      "label": "q1g128/f32/seq=2048",
+      "rungsTried": [
+       "q1g128/f32/seq=2048"
+      ],
+      "fallbackEvents": [],
+      "deviceReacquires": 0
+     }
+    },
+    "loadS": 17,
+    "statsAfterLoad": {
+     "modelLoaded": true,
+     "activeAdapter": null,
+     "loadedAdapters": [],
+     "adapterManagerReady": true,
+     "adapterManagerInitError": null,
+     "seqLen": 0,
+     "visionLoaded": false,
+     "residentBytes": 4472751036,
+     "residentPeakBytes": 8075838400,
+     "residentBuffers": 3347,
+     "specSnapshotPool": {
+      "slots": 1,
+      "bundleSize": 156893184,
+      "bytes": 156893184,
+      "initialized": true
+     },
+     "spec": null,
+     "counters": {
+      "installed": true,
+      "installError": null,
+      "promptTokens": 0,
+      "decodeTokens": 0,
+      "prefill": {
+       "dispatches": 0,
+       "passes": 0,
+       "submits": 0,
+       "cmdBufs": 0,
+       "mapAsync": 0,
+       "workDone": 0,
+       "bindGroupsCreated": 0,
+       "bindGroupLayoutGets": 0,
+       "buffersCreated": 0,
+       "encodersCreated": 0,
+       "setPipelines": 0,
+       "setBindGroups": 0,
+       "uniformWrites": 0,
+       "bindGroupCacheHits": 0,
+       "bindGroupCacheMisses": 0,
+       "encodeMs": 0,
+       "recordMs": 0,
+       "replayMs": 0,
+       "submitMs": 0,
+       "syncMs": 0,
+       "hostMs": 0
+      },
+      "decode": {
+       "dispatches": 0,
+       "passes": 0,
+       "submits": 0,
+       "cmdBufs": 0,
+       "mapAsync": 0,
+       "workDone": 0,
+       "bindGroupsCreated": 0,
+       "bindGroupLayoutGets": 0,
+       "buffersCreated": 0,
+       "encodersCreated": 0,
+       "setPipelines": 0,
+       "setBindGroups": 0,
+       "uniformWrites": 0,
+       "bindGroupCacheHits": 0,
+       "bindGroupCacheMisses": 0,
+       "encodeMs": 0,
+       "recordMs": 0,
+       "replayMs": 0,
+       "submitMs": 0,
+       "syncMs": 0,
+       "hostMs": 0
+      },
+      "other": {
+       "dispatches": 2970,
+       "passes": 2568,
+       "submits": 231,
+       "cmdBufs": 1879,
+       "mapAsync": 0,
+       "workDone": 7,
+       "bindGroupsCreated": 2873,
+       "bindGroupLayoutGets": 5,
+       "buffersCreated": 4523,
+       "encodersCreated": 1879,
+       "setPipelines": 2970,
+       "setBindGroups": 2969,
+       "uniformWrites": 827,
+       "bindGroupCacheHits": 0,
+       "bindGroupCacheMisses": 0,
+       "encodeMs": 22.9,
+       "recordMs": 0,
+       "replayMs": 0,
+       "submitMs": 0.4,
+       "syncMs": 2865.6,
+       "hostMs": 2.3
+      },
+      "perPrefillToken": null,
+      "prefillChunks": [
+       {
+        "m": 2,
+        "seqLen0": 0,
+        "wallMs": 2891.2,
+        "encodeMs": 22.9,
+        "submitMs": 0.4,
+        "syncMs": 2865.6,
+        "hostMs": 2.3,
+        "dispatches": 0,
+        "passes": 0,
+        "submits": 0,
+        "cmdBufs": 0,
+        "workDone": 0
+       }
+      ],
+      "perDecodeToken": null,
+      "ms": {
+       "prefill": 0,
+       "decode": 0,
+       "other": 0
+      },
+      "prefillTokensPerSecond": null,
+      "decodeTokensPerSecond": null,
+      "generation": 0,
+      "overlappedGenerations": 0,
+      "staleEnds": 0,
+      "lifetime": {
+       "dispatches": 2970,
+       "passes": 2568,
+       "submits": 231,
+       "cmdBufs": 1879,
+       "mapAsync": 0,
+       "workDone": 7,
+       "bindGroupsCreated": 2873,
+       "bindGroupLayoutGets": 5,
+       "buffersCreated": 4523,
+       "encodersCreated": 1879,
+       "setPipelines": 2970,
+       "setBindGroups": 2969,
+       "uniformWrites": 827,
+       "bindGroupCacheHits": 0,
+       "bindGroupCacheMisses": 0,
+       "encodeMs": 22.9,
+       "recordMs": 0,
+       "replayMs": 0,
+       "submitMs": 0.4,
+       "syncMs": 2865.6,
+       "hostMs": 2.3
+      },
+      "gpuBytes": {
+       "live": 4472751036,
+       "peak": 8075838400,
+       "created": 8093293664,
+       "destroyed": 3620542628,
+       "liveBuffers": 3347,
+       "createdBuffers": 4523,
+       "destroyedBuffers": 1176,
+       "liveMiB": 4265.55,
+       "peakMiB": 7701.72
+      }
+     },
+     "countersInstalled": true,
+     "countersInstallError": null,
+     "uniformCache": {
+      "hits": 2087,
+      "misses": 49,
+      "cacheSize": 49,
+      "poolIdx": 0
+     },
+     "bindGroupCache": {
+      "enabled": true,
+      "destroyPatch": true,
+      "hits": 0,
+      "misses": 0,
+      "oneShot": 0,
+      "clears": 0,
+      "invalidations": 0,
+      "created": 0,
+      "caches": 0,
+      "entries": 0,
+      "byOperator": {},
+      "hitRate": null
+     },
+     "decodeMerge": {
+      "created": 628,
+      "realEncoders": 1,
+      "passes": 707,
+      "replayed": 628,
+      "passthrough": 0,
+      "nested": 0,
+      "internalSubmits": 0,
+      "dropped": 0,
+      "recordMs": 9.6,
+      "replayMs": 1.2,
+      "totalMs": 10.8
+     },
+     "decodeProbe": null,
+     "lastGeneration": null,
+     "kernelVariants": {
+      "weightFormat": "q1g128/q2g128",
+      "f16": true,
+      "subgroups": true,
+      "subgroupSize": 32,
+      "narrowSubgroup": false,
+      "narrowSubgroupWidth": null,
+      "narrowSubgroupProbeCached": false,
+      "m1VecmatRoute": false,
+      "m1VecmatRouteFlag": false,
+      "m1VecmatRouteReason": "off (opt-in; set __mentriaM1VecmatRoute=true)",
+      "mobileMatvec": null,
+      "mobileMatvecFlag": "off",
+      "mobileMatvecReason": null,
+      "mobileFusionFlag": null,
+      "mobileProfile": {
+       "applied": false,
+       "reason": "off: adapter is not narrow-subgroup eligible (the 32/32 subgroup gate already accepted this adapter at width 32) — desktop/32-wide route unchanged",
+       "mobileMatvec": "off",
+       "mobilePrefill": "off",
+       "eligible": false,
+       "width": null,
+       "defaulted": [],
+       "hostPinned": []
+      },
+      "subgroupMatrix": false,
+      "dp4a": true,
+      "sg": true,
+      "smallN": true,
+      "wideN": true,
+      "v14": true,
+      "lut": false,
+      "residualFusionKernel": true,
+      "q1Matvec": null,
+      "q1Band": null,
+      "q1Decode": {
+       "enabled": true,
+       "mode": "lut",
+       "rows": 64,
+       "bands": 8,
+       "lanes": 4,
+       "skew": true,
+       "totals": "tile",
+       "variant": "lut64-skew",
+       "passLabel": "vecmatQ2G128.dispatchLutSkew",
+       "barriersPerTile": 3,
+       "wgBytes": 9840,
+       "ldsBankDegree": {
+        "build": 1,
+        "row": 1.997,
+        "totals": 1,
+        "cyclesPerTile": 607.1
+       },
+       "dispatches": {
+        "lut": 178,
+        "residual": 128
+       },
+       "opsPerWeightByte": 8.31,
+       "ldsReadsPerWeightByte": 2,
+       "pipelines": 2,
+       "shapes": {
+        "248320x5120": {
+         "workgroups": 3880,
+         "was": 3880,
+         "actMB": 75.78,
+         "wasActMB": 606.25,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        },
+        "16384x5120": {
+         "workgroups": 256,
+         "was": 256,
+         "actMB": 5,
+         "wasActMB": 40,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        },
+        "96x5120": {
+         "workgroups": 2,
+         "was": 2,
+         "actMB": 0.04,
+         "wasActMB": 0.23,
+         "actPerCode": 0.67,
+         "wasActPerCode": 4
+        },
+        "5120x6144": {
+         "workgroups": 80,
+         "was": 80,
+         "actMB": 1.88,
+         "wasActMB": 15,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        },
+        "34816x5120": {
+         "workgroups": 544,
+         "was": 544,
+         "actMB": 10.63,
+         "wasActMB": 85,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        },
+        "5120x17408": {
+         "workgroups": 80,
+         "was": 80,
+         "actMB": 5.31,
+         "wasActMB": 42.5,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        },
+        "14336x5120": {
+         "workgroups": 224,
+         "was": 224,
+         "actMB": 4.38,
+         "wasActMB": 35,
+         "actPerCode": 0.5,
+         "wasActPerCode": 4
+        }
+       }
+      },
+      "q1Concat": {
+       "enabled": true,
+       "mode": "all",
+       "gateup": true,
+       "qkv": true,
+       "dispatches": {
+        "total": 80,
+        "gateup": 64,
+        "qkv": 16
+       },
+       "arenas": 160,
+       "arenaBytes": 1769472000,
+       "extraBytes": 0,
+       "groups": [
+        {
+         "group": "gateup",
+         "parts": [
+          "mlp.gate_proj",
+          "mlp.up_proj"
+         ],
+         "N": 34816,
+         "K": 5120,
+         "bands": 4352,
+         "codeMB": 21.25,
+         "scaleMB": 2.66
+        },
+        {
+         "group": "gateup",
+         "parts": [
+          "mlp.gate_proj",
+          "mlp.up_proj"
+         ],
+         "N": 34816,
+         "K": 5120,
+         "bands": 4352,
+         "codeMB": 21.25,
+         "scaleMB": 2.66
+        },
+        {
+         "group": "gateup",
+         "parts": [
+          "mlp.gate_proj",
+          "mlp.up_proj"
+         ],
+         "N": 34816,
+         "K": 5120,
+         "bands": 4352,
+         "codeMB": 21.25,
+         "scaleMB": 2.66
+        },
+        {
+         "group": "gateup",
+         "parts": [
+          "mlp.gate_proj",
+          "mlp.up_proj"
+         ],
+         "N": 34816,
+         "K": 5120,
+         "bands": 4352,
+         "codeMB": 21.25,
+         "scaleMB": 2.66
+        }
+       ],
+       "groupCount": 80,
+       "declined": []
+      },
+      "q4Wide": true,
+      "q4Ksplit": true,
+      "q4KsplitWide": true,
+      "q4BlockLayout": null,
+      "megashaderA": true,
+      "megashaderB": true,
+      "chunkedDecodeState": false,
+      "statePrecision": "f32",
+      "flashDecode": false,
+      "flashAttnPrefill": true,
+      "kivi": false,
+      "kvF16": false,
+      "prefillReady": true,
+      "prefillRoute": "gemm-v2+arow",
+      "mobilePrefill": {
+       "route": "off",
+       "requested": false,
+       "reason": "flag unset",
+       "flag": "__mentriaMobilePrefill",
+       "ksplit": "auto",
+       "ksplitFlag": "__mentriaMobilePrefillKsplit",
+       "ksplitRule": "auto = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)"
+      },
+      "prefillTile": "arow",
+      "prefillTileFlag": "arow",
+      "prefillTileReason": null,
+      "prefillTileSharedBytes": 16384,
+      "prefillTileMinM": null,
+      "prefillTileDispatches": {
+       "armed": 400,
+       "control": 0
+      },
+      "prefillChunk": 512,
+      "decodeLoop": null,
+      "decodeLoopReasons": null,
+      "gpuSampleBatch": 4,
+      "bindGroupCache": {
+       "enabled": true,
+       "destroyPatch": true,
+       "hits": 0,
+       "misses": 0,
+       "oneShot": 0,
+       "clears": 0,
+       "invalidations": 0,
+       "created": 0,
+       "caches": 0,
+       "entries": 0,
+       "byOperator": {},
+       "hitRate": null
+      },
+      "residentDecode": {
+       "argmax": true,
+       "forwardFromBuffer": true,
+       "detectorRewind": {
+        "ok": true,
+        "why": null
+       }
+      },
+      "maxSeq": 2048,
+      "numLayers": 64
+     },
+     "capabilities": {
+      "vendor": "nvidia",
+      "architecture": "ampere",
+      "subgroupMinSize": 32,
+      "subgroupMaxSize": 32,
+      "likelyIntegratedGpu": false,
+      "features": [
+       "core-features-and-limits",
+       "shader-f16",
+       "subgroups",
+       "timestamp-query"
+      ],
+      "limits": {
+       "maxBufferSize": 2147483648,
+       "maxStorageBufferBindingSize": 2147483644,
+       "maxUniformBufferBindingSize": 65536,
+       "maxComputeWorkgroupStorageSize": 32768,
+       "maxComputeInvocationsPerWorkgroup": 256,
+       "maxComputeWorkgroupSizeX": 256,
+       "maxComputeWorkgroupsPerDimension": 65535,
+       "maxStorageBuffersPerShaderStage": 16,
+       "maxBindGroups": 4
+      },
+      "subgroupsListed": true,
+      "subgroupsUsable": true,
+      "f16": true,
+      "dp4a": true,
+      "subgroupMatrix": false,
+      "timestampQuery": true
+     },
+     "fallbacks": [],
+     "gpuErrors": {
+      "count": 0,
+      "samples": []
+     }
+    },
+    "consoleLines": [],
+    "medians": {
+     "xlong": {
+      "runs": 2,
+      "decodeTps": 23.86,
+      "msPerToken": 41.9,
+      "ttftMs": 24280,
+      "gapMedianMs": 0,
+      "spreadTps": 0.09
+     }
+    }
+   }
+  ]
+ },
+ "log": "decision: tier=27b eligible=27b,0.8b,2b,4b\n27b: loaded in 17 s (cached before run: true, vision: false, route: {\"sg\":true,\"smallN\":true,\"wideN\":true,\"v14\":true,\"residualFusion\":true,\"residualFusionKernel\":true,\"q1Matvec\":null,\"q1Band\":null,\"q1Fuse\":null,\"bindGroupCache\":true,\"weightUpload\":\"writeBuffer\",\"specSlots\":1,\"residentTrim\":null,\"q1Concat\":\"all\",\"lut\":false,\"q1Decode\":\"lut\",\"q1DecodeRows\":64,\"q1LutSkew\":true,\"q1LutTotals\":\"tile\",\"q1LutVariant\":\"lut64-skew\",\"prefillTile\":\"arow\",\"prefillTileReason\":null,\"prefillRoute\":\"gemm-v2+arow\",\"flashDecode\":false})\n27b xlong: ttft 24500 ms, 23.86 tok/s, 83 tokens, gap median 0 ms (p90 163) · \"The text states that the built engine bundles exactly two third-party runtime libraries. T\"\n27b xlong: ttft 24280 ms, 23.95 tok/s, 83 tokens, gap median 0 ms (p90 163) · \"The text states that the built engine bundles exactly two third-party runtime libraries. T\"\n27b xlong: median of 2 runs 23.86 tok/s (41.9 ms/token, spread 0.09), ttft 24280 ms\n",
+ "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+ "savedAt": "2026-09-09T08:58:39.767Z",
+ "visibilityTrace": [
+  {
+   "t": 1788944246924,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944247935,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944248947,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944249957,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944250967,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944251978,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944252987,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944253996,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944255006,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944256013,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944257021,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944258029,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944259038,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944260045,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944261052,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944262064,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944263072,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944264079,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944265086,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944266094,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944267101,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944268110,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944269119,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944270130,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944271219,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944272267,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944273279,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944274291,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944275302,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944276310,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944277325,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944278333,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944279341,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944280349,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944281357,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944282373,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944283380,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944284392,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944285399,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944286409,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944287422,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944288435,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944289443,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944290451,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944291463,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944292479,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944293491,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944294503,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944295515,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944296523,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944297536,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944298544,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944299553,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944300560,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944301566,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944302582,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944303591,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944304598,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944305608,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944306619,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944307637,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944308645,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944309652,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944310664,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944311675,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944312691,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944313699,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944314707,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944315715,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944316726,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944317745,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944318753,
+   "v": "visible",
+   "f": true
+  },
+  {
+   "t": 1788944319761,
+   "v": "visible",
+   "f": true
+  }
+ ]
+}

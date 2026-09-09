@@ -117,7 +117,7 @@ footer{padding-top:28px;color:var(--ink-3);font-size:13px;font-family:var(--mono
 
 <div class="wrap">
 <header class="hero">
-  <div class="eyebrow">mentria-engine · 264 things to poke at</div>
+  <div class="eyebrow">mentria-engine · 274 things to poke at</div>
   <h1>Inside the One-Bit Engine</h1>
   <p class="lede">A browser engine that runs a 27-billion-parameter model where every weight is a single bit. Each station below is one surprising fact. Move the control, watch what changes. Words with a dotted underline explain themselves — hover, or tap on a phone. On a phone, diagrams swipe sideways.</p>
   <nav class="rail">
@@ -404,6 +404,18 @@ footer{padding-top:28px;color:var(--ink-3);font-size:13px;font-family:var(--mono
       <a href="#s262">262 · Ask for two decode kernels at once and the e…</a>
       <a href="#s263">263 · One comment deleted 23 MB of the download, a…</a>
       <a href="#s264">264 · Promising the same answer every time caps th…</a>
+    </div>
+    <div class="part"><span class="part-title">Part XI · The sampler nobody certified, and the prompt stage</span>
+      <a href="#s265">265 · A rule meant to stop repeats rewrote a word…</a>
+      <a href="#s266">266 · Every gate switched the suppressor off. The…</a>
+      <a href="#s267">267 · Asking the same thing twice reuses nothing…</a>
+      <a href="#s268">268 · Three different engines wrote the same 84 wo…</a>
+      <a href="#s269">269 · The kernel that reads your prompt had the sa…</a>
+      <a href="#s270">270 · Deleting a queued cycle buys back half a cyc…</a>
+      <a href="#s271">271 · The same speed-up measures −3.3%, −13.4%, −2…</a>
+      <a href="#s272">272 · One two-line swap: 8% slower in one tile, 4%…</a>
+      <a href="#s273">273 · Each extra word of context costs 128 KiB, an…</a>
+      <a href="#s274">274 · A 30-word prompt cannot beat 1.5 seconds her…</a>
     </div>
   </nav>
 </header>
@@ -8012,6 +8024,291 @@ budget gz: 9.5 MB -> 0.75 MB   actual 0.516 MB</pre>
       <svg id="s264_svg" viewBox="0 0 640 372" width="100%" height="372" role="img" aria-label="the 30 cores of an RTX 3060 and how full they get under each thread arrangement"></svg>
     </div>
     <div class="readout"><span>squads <b id="s264_wg">—</b></span><span>threads each <b id="s264_tw">—</b></span><span>total threads <b class="trace" id="s264_tot">—</b></span><span>GPU busy <b id="s264_occ">—</b></span><span>still bit-identical <b id="s264_bit">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 265 ───────────── -->
+<section class="station" id="s265">
+  <div class="words">
+    <div class="eyebrow">station 265 · the sampler</div>
+    <h2>A rule meant to stop repeats rewrote a word the model was sure of.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>logit</b> — the raw score the model gives one candidate word before anything is turned into a probability. Bigger is more wanted.</li><li><b>margin</b> — the gap in logits between the model's favourite word and its second favourite. A big margin means the model is not in two minds.</li><li><b>DRY</b> — the shipped repeat suppressor. It looks at how many words you have just re-typed from earlier in the same text (call that run <b>L</b>) and subtracts a fine from whatever would extend it.</li></ul></div>
+    <p>The 27B was asked for a pomodoro timer and wrote <code>var t1 … var t45</code> until it hit the cap, the same way on three fresh loads. It was not the GPU: on this Mac, with the suppressor off, the engine matched the reference engine on <b>all 900 words</b>. Turn the suppressor to its shipped default and the Mac reproduces the laptop's broken answer <b>word for word, 900 of 900</b>.</p>
+    <p>The fine grows geometrically: <code>1.75^(L−5)</code>. At a five-word repeat it is 1.00 logits; at ten words it is <b>16.413</b>. At generated word 58 the model was writing the second of two sibling <code>&lt;input&gt;</code> tags, so ten words were legitimately identical. Its favourite next word, <code>="</code>, led the runner-up by <b>11.561</b>. It was fined 16.413 and lost. The engine typed <code>='</code>.</p>
+    <p>Two such flips — the second at word 71, a 2.324 lead against a 3.063 fine — pushed the text onto a different track, and 180 words later it arrived at <code>var t0</code> on two coin-flips of 0.064 and 0.090 logits. Station 142 is what happens next: the suppressor cannot see the loop it started, because every <code>var t5</code> / <code>var t6</code> line differs at the digit.</p>
+    <pre class="code">delta = 1.75^(L - 5)   // cycle_detector.js:293
+  L     5     6     7     8     9    <b>10</b>     11
+fine 1.00  1.75  3.06  5.36  9.38  <b>16.41</b>  28.72
+word 58: led by 11.561, fined 16.413 -&gt; flip
+word 71: led by  2.324, fined  3.063 -&gt; flip</pre>
+    <div class="src">src/sampling/cycle_detector.js : 54–57 (<code>multiplier 1.0, base 1.75, allowedLength 6, penaltyLastN 256</code>), 293–295 (the exponent) · src/sampling/sampler.js : 667–669 (<code>effectiveLogits[id] -= delta</code>) · docs/research/2026-09-08-forge-pomodoro-degeneration.md §3.1 (the formula), §3.2 (the per-word table: margins, fines, the two flips), §3.3 (the 0.064 / 0.090 near-ties), §2 rows 2–5 (900/900 both ways) · the fines are re-derived on the CPU from the ids alone: eval_results/forge_pomodoro/dry_penalty_replay.mjs · what happens after the flip: station 142 · why greedy is the only certified route at all: station 68</div>
+    <div class="sowhat"><b>So what:</b> a fine that grows with the length of a repeat will eventually beat any amount of confidence. Nothing in the rule asks how sure the model was.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s265_len">how many words have been re-typed (L)</label><input type="range" id="s265_len" min="4" max="12" step="1" value="10"><span id="s265_lenV" class="readout"></span></div>
+      <div class="ctl"><label for="s265_marg">how far ahead the model's favourite is (logits)</label><input type="range" id="s265_marg" min="0" max="20" step="0.1" value="11.6"><span id="s265_margV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s265_svg" viewBox="0 0 640 476" width="100%" height="476" role="img" aria-label="the fine as the repeated run grows, and whether it buries the model's favourite word"></svg>
+    </div>
+    <div class="readout"><span>the fine <b class="bad" id="s265_fine">—</b></span><span>lead after the fine <b class="trace" id="s265_after">—</b></span><span>which word is typed <b id="s265_win">—</b></span><span id="s265_note"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 266 ───────────── -->
+<section class="station" id="s266">
+  <div class="words">
+    <div class="eyebrow">station 266 · the sampler</div>
+    <h2>Every gate switched the suppressor off. The product left the field blank and got it on.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>a gate</b> — a test that has to pass before anything ships. The strongest ones here compare the engine's words, id by id, against a second engine (llama.cpp) running the same model.</li><li><b>a default</b> — what a setting becomes when the caller says nothing. The engine had to turn "nothing" into a real choice, and it chose <code>dry</code>.</li><li><b>greedy</b> — always take the single best next word. Every gate runs this way, because it is the only setting with one right answer.</li></ul></div>
+    <p>Station 265 showed the repeat suppressor rewriting a word. This is why nothing caught it. Seven harnesses generate words and compare them, and every single one passes <code>cycleDetector: 'off'</code> by hand. The website never passes the key at all — and the resolver turned an absent key into <code>'dry'</code> whenever sampling was greedy, which is always.</p>
+    <p>So the thing that was certified and the thing that shipped were two different samplers, and the difference was an edit to the scores that can change a word. Both halves were reasonable on their own: a gate wants the plainest possible path, a product wants a safety net. Nobody had written down that they were the same knob.</p>
+    <p>The repair is one branch: absent, <code>null</code> and <code>'auto'</code> all become <code>'off'</code> on every sampling shape. <code>'dry'</code> still exists, by name, per call. And the new gate finally scores what the product does: <b>900 generated words</b> against the reference, with the key left exactly where the caller puts it — against a ladder whose rungs stop at <b>12</b>.</p>
+    <pre class="code">// src/worker/cycle_detector_resolver.js:90
+- detectorOpt = isGreedy ? 'dry' : 'off';
++ detectorOpt = 'off';           // s1916
+
+longest byte-check of generated words
+   before: 64        after: 900</pre>
+    <div class="src">src/worker/cycle_detector_resolver.js : 20–46 (the s1916 note: "<code>off</code> makes the certified path and the shipped path the same path"), 90–91 (the branch) · the seven pinning harnesses: tools/native/run_dawn_node.mjs : 98 (which <code>tools/native/cert_ladder.mjs</code> : 57 spawns at <code>MAXTOK: 12</code>), tools/native/run_lora_q1g128_ab.mjs : 99, tests/run_ctx4096_cert.mjs : 107, tests/run_mobile_prefill_flagoff_identity.mjs : 67, tests/run_bonsai_golden_decode.mjs : 27 (<code>N_PREDICT = 64</code>), 150, tests/run_device_lab.mjs : 245 · the new gate: tests/run_forge_pomodoro_repro.mjs : 156–160 (the <code>BYTE-IDENTICAL n/n</code> / <code>MISMATCH at i</code> / <code>SHORT</code> verdicts) · docs/research/2026-09-08-forge-pomodoro-degeneration.md §5 (the two holes), §6.1 (the branch), §6.4 (the verification table) · related: station 261, station 71</div>
+    <div class="sowhat"><b>So what:</b> a default is a decision. If every test overrides it, the default is the one setting nothing has ever certified.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which resolver"><button id="s266_before" aria-pressed="true">before the fix</button><button id="s266_after" aria-pressed="false">after the fix</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s266_svg" viewBox="0 0 640 470" width="100%" height="470" role="img" aria-label="which callers pin the suppressor off, which leave it absent, and how many generated words each gate has ever compared"></svg>
+    </div>
+    <div class="readout"><span>gates that pin it off <b class="ok" id="s266_pin">—</b></span><span>what the product gets <b id="s266_prod">—</b></span><span>certified and shipped <b id="s266_same">—</b></span><span>longest word-for-word check <b class="trace" id="s266_len">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 267 ───────────── -->
+<section class="station" id="s267">
+  <div class="words">
+    <div class="eyebrow">station 267 · the sampler</div>
+    <h2>Asking the same thing twice reuses nothing, because the engine remembers its own reply.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the ledger</b> — the engine's note of what the resident conversation already contains. Crucially it is the prompt <em>plus every word the model then wrote</em>, not the prompt alone.</li><li><b>prefill</b> — reading a prompt. Skipping it for text the GPU already holds is the whole point of reuse.</li><li><b>arithmetic order</b> — the sequence in which a long sum is added up. Same numbers, different order, slightly different answer (station 225).</li></ul></div>
+    <p>A phone reported different answers to the same question and the suspicion fell on session reuse. Reading the rule settles half of it before any GPU runs: the engine reuses the resident session only when the new prompt <em>strictly extends</em> the ledger. An app that re-sends its 429-word system prefix plus a short question is <b>shorter</b> than a ledger of 429 + a 200-word reply, so it is classed <code>prompt-shorter</code> and re-read from the beginning. Reuse on and reuse off were then byte-identical over 30 asks in 5 separate processes.</p>
+    <p>Where reuse <em>does</em> engage — a continued ask, whose prompt is the ledger plus a new turn — it really does change the ids. Not randomly: the same way every time, across processes, with or without a pause between asks. A fresh run adds one prefill pass over 664 words. The reused run adds a pass over 429, then 200 single-word steps, then a pass over the 35 new words, with the memory carried across all three. Two orders, two answers, both correct.</p>
+    <p>The streams agree for <b>14 words</b> and then take different branches of a near-tie. Across <b>228 generations</b> in that session — two trees, four flag arms, two to four processes each — not one pair of identical inputs ever produced two different streams. The rule that falls out is small: never score a continued ask against a fresh one.</p>
+    <pre class="code">ledger = prompt + the words the model wrote
+  ask again  429 vs 629  prompt-shorter  429
+  identical  629 vs 629  no-new-tokens   629
+  continued  664 vs 629  ok, delta 35     35
+                       words re-read ^</pre>
+    <div class="src">src/session/session_manifest.js (<code>matchSessionPrefix</code>: reuse only when the new prompt strictly extends the ledger) · docs/research/2026-09-08-session-reuse-nondeterminism.md §1 (the four-row verdict table), §2.1 (arms A ≡ B, 6 asks × 3 and × 2 processes, <code>prefillTokens</code> 429 on every ask), §2.2 (the append arm: <code>prefillTokens</code> 35, the two shas, the 14-word agreement then the split), §3 (24 asks on the shipped build, one stream), the 228-generation count in the header · harness tests/run_session_reuse_determinism.mjs, records eval_results/session_reuse/*.json · why two orders differ at all: station 225 · what a resident session is: station 8</div>
+    <div class="sowhat"><b>So what:</b> "the same answer every time" and "the same answer as a fresh run" are two different promises. The engine keeps the first one and never promised the second.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which second ask"><button id="s267_same" aria-pressed="true">ask the same thing again</button><button id="s267_cont" aria-pressed="false">continue the conversation</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s267_svg" viewBox="0 0 640 424" width="100%" height="424" role="img" aria-label="two asks on a timeline, the ledger between them, and whether the second ask can reuse it"></svg>
+    </div>
+    <div class="readout"><span>the ledger holds <b id="s267_led">—</b></span><span>the verdict <b class="trace" id="s267_verd">—</b></span><span>words actually re-read <b id="s267_pf">—</b></span><span>same ids as a fresh run <b id="s267_ids">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 268 ───────────── -->
+<section class="station" id="s268">
+  <div class="words">
+    <div class="eyebrow">station 268 · the sampler</div>
+    <h2>Three different engines wrote the same 84 words, and 13 of them were near-ties.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>near-tie</b> — a step where the best word and the second-best are within one logit. The choice is real but fragile: a tiny arithmetic difference could flip it.</li><li><b>transitive check</b> — proving A equals C by measuring A against B and B against C. Here it let a laptop be checked against a reference engine without touching the laptop.</li><li><b>inert</b> — present and running, but not changing the outcome. The repeat suppressor was live in these runs and altered nothing.</li></ul></div>
+    <p>Station 265 pinned the pomodoro failure on the sampler, and one doubt remained: could the laptop's GPU also be wrong? Answering it normally means laptop time. Instead the laptop's own long-prompt reading was re-run here. The same 1,492-word prompt, the same answer text, from an RTX 3060 in Chrome under three different flag stacks, from this Mac under five arms, and from llama.cpp — <b>one sha256, <code>70e8d057</code>, on all nine</b>.</p>
+    <p>The stronger part is what the path looks like. The reference's own confidence at each of the 84 steps is drawn here, and it is not a walk down an easy road: <b>13 of the 84</b> have less than one logit between first and second place, the tightest being <b>0.105</b>. Three independent implementations agreeing at all thirteen is an identity check, not luck.</p>
+    <p>And the suppressor was live on the laptop the whole time — it fired at 8 of the 84 steps. It simply never got a long enough repeat: the longest run was 7 words, so the biggest fine it ever placed on the right word was <b>1.750</b>. At step 43 that landed on a word leading by 1.951. The answer kept its bytes by <b>0.201 logits</b>.</p>
+    <pre class="code">step  L  fine   margin  survived by
+  42  5  1.000   6.029       5.029
+  <b>43  6  1.750   1.951       0.201</b>
+  62  5  1.000   6.084       5.084
+the pomodoro ask reached L=10, fine 16.413</pre>
+    <div class="src">docs/research/2026-09-08-forge-pomodoro-degeneration.md §9.1 (the three laptop flag arms, all <code>answer</code> sha256[:12] = <code>70e8d0572fe1</code>, detector "dry" and bridged in their own telemetry), §9.2 (the prompt recovered verbatim, 1,492 ids cross-checked against llama.cpp's own tokenizer), §9.3 (the 7-row matrix: BYTE-IDENTICAL 84/84 on every Mac arm), §9.4 (the 8 fire steps, L ≤ 7, the 0.201-logit margin at step 43), §9.5 (what it does and does not close) · the 84 per-step margins drawn here are read from eval_results/forge_pomodoro/xlong_margins_ref_0_84.json (llama.cpp's own top-1 minus top-2, teacher-forced) · the same question asked of 12 ids: station 218</div>
+    <div class="sowhat"><b>So what:</b> the honest limit is written down too — the laptop's records keep the answer <em>text</em>, not the ids, so this pins the 3060 to "different ids that spell the same 387 characters", which nothing suggests but nothing excludes.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s268_step">which of the 84 steps</label><input type="range" id="s268_step" min="0" max="83" step="1" value="43"><span id="s268_stepV" class="readout"></span></div>
+      <div class="seg" role="group" aria-label="show the suppressor"><button id="s268_off" aria-pressed="false">just the confidence</button><button id="s268_on" aria-pressed="true">show where the fine landed</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s268_svg" viewBox="0 0 640 448" width="100%" height="448" role="img" aria-label="the reference engine's confidence at each of 84 steps, the thirteen near-ties, and the eight steps where the repeat suppressor fired"></svg>
+    </div>
+    <div class="readout"><span>lead at this step <b class="trace" id="s268_m">—</b></span><span>fine placed on it <b id="s268_f">—</b></span><span>near-ties in the answer <b class="bad">13 of 84</b></span><span>engines that agree <b class="ok" id="s268_ag">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 269 ───────────── -->
+<section class="station" id="s269">
+  <div class="words">
+    <div class="eyebrow">station 269 · the prompt stage</div>
+    <h2>The kernel that reads your prompt had the same disease: 32 threads, one counter.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>bank</b> — the GPU's fast scratch memory is physically <b>32 counters</b>, and which one you queue at is decided by your address alone: <code>address ÷ 4 bytes, remainder 32</code>. Station 259 has the long version.</li><li><b>staging</b> — before multiplying, a squad of threads copies a tile of numbers from slow memory into that scratch. This station is about the <em>copy</em>, not the multiply.</li><li><b>bit-identical</b> — the new code produces the same bits, not merely close ones, so it inherits every test the old code passed.</li></ul></div>
+    <p>Station 259 found a 16-deep queue in the kernel that writes words. This is the kernel that <em>reads</em> your prompt, and it is <b>87%</b> of the 29.2 seconds an RTX 3060 spends before its first word on a 1,491-word prompt. The staging copy writes <code>As[k * 64 + m]</code>. In one warp <code>m</code> never changes and <code>k</code> runs 0…31 — and the bank works out to <code>(m/2) % 32</code>, which does not contain <code>k</code> at all.</p>
+    <p>So all 32 threads queue at one counter, at 32 different addresses, on each of 16 stores: <b>4,096 cycles</b> where one would do, 73% of everything the kernel spends on scratch. Two repairs were built. <code>arow</code> transposes the tile — <code>As[m * 64 + k]</code> — and the queue disappears. <code>pad2</code> leaves the shape alone and widens each row by two, making the stride 33; an odd stride shares no factor with 32, so 32 threads land on 32 counters.</p>
+    <p>Neither changes a number. The order the sums are added in is fixed by the tile depth, and the address only decides <em>where a value sits</em>, so all the arms are bit-identical by construction and were gated as byte-identical ids, not as a tolerance. On the laptop the wait fell <b>29.2 → 24.7 s</b>, and the kernel's own time per pass fell <b>25,344 → 18,342 µs</b>.</p>
+    <pre class="code">As[k*64u+m] // bank (m/2)%32, no k in it
+As[m*64u+k] // arow: transposed, no queue
+As[k*66u+m] // pad2: odd stride 33, all 32
+3060 wait, 1,489 words: 29.2 -&gt; 24.7 s</pre>
+    <div class="src">shaders/matmul_q1g128_gemm_v2.wgsl (the shipped tile BM=BN=BK=64, 16,384 B of scratch) · docs/research/2026-09-08-ttfw-ampere-prefill-discovery.md §1.2 (the bank arithmetic: <code>bank = (k·32 + m/2) % 32 = (m/2) % 32</code>, 16 × 8 × 32 = 4,096 cycles, 73% of the shared budget), §0.1 (the GEMM is 87.05% of the profiled prefill window) · docs/research/2026-09-08-prefill-tile-arms.md §1.2 (the exact index expressions per arm), §1.2 note (<code>arow</code> 5,632 → 3,200 cycles, <code>pad2</code> → 1,664), §1 (why every arm is bit-identical: BK fixed, the <code>kk</code> sequence unchanged), §4 (the gate table: byte-identical ids per arm), §7 (the laptop: 29.2 → 24.7 / 25.2 / 27.5 s; the per-pass median 25,344 → 18,342 µs) · docs/research/2026-09-08-prefill-step2-remaining-excess.md §0.1 (the sum over the same 277 passes: −20.6%) · the same fault in the decode kernel: station 259 · a re-address that was <em>not</em> bit-identical: station 260</div>
+    <div class="sowhat"><b>So what:</b> the same address bug was sitting in two unrelated kernels. Finding it once made it cheap to look for it everywhere else.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which addressing"><button id="s269_off" aria-pressed="true">as shipped · k×64 + m</button><button id="s269_arow" aria-pressed="false">arow · m×64 + k</button><button id="s269_pad2" aria-pressed="false">pad2 · k×66 + m</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s269_svg" viewBox="0 0 640 478" width="100%" height="478" role="img" aria-label="the 32 scratch banks and how many separate addresses one warp's staging store queues at each, under three addressings, with the measured laptop wait"></svg>
+    </div>
+    <div class="readout"><span>busiest counter <b class="bad" id="s269_worst">—</b></span><span>cycles for one store <b class="trace" id="s269_cyc">—</b></span><span>counters used <b id="s269_used">—</b></span><span>the laptop's wait <b class="ok" id="s269_ttft">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 270 ───────────── -->
+<section class="station" id="s270">
+  <div class="words">
+    <div class="eyebrow">station 270 · the prompt stage</div>
+    <h2>Deleting a queued cycle buys back half a cycle — that was the missing half.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>resident squads</b> — a GPU core runs several thread squads at once and switches between them freely. While one waits at a counter, another can be doing arithmetic, so waiting is not automatically <em>time</em>.</li><li><b>exposed vs hidden</b> — a wait that nothing else can fill costs you a cycle. A wait that overlaps with another squad's work costs you nothing.</li><li><b>a fit</b> — drawing the straight line through two measurements and reading its slope. Here the slope <em>is</em> the answer.</li></ul></div>
+    <p>Station 269's arithmetic said the queue was worth 3,968 cycles, so removing it should cut the kernel's time per pass from 25,344 to about 12,700 µs. The card gave <b>18,342</b>. The first reading was that the queue explained only half the gap and something else was hiding. It was not.</p>
+    <p>Put the two measurements on a graph — queued cycles across, real cycles up — and draw the line. Its slope is <b>0.4713</b>. One queued cycle you delete gives back <em>less than half</em> a real cycle, because at six squads per core roughly half of the waiting was already overlapping with other squads' work. 3,968 × 0.4713 = 1,870, which is exactly the 1,870 cycles the fix delivered. The model was right; the accounting was not.</p>
+    <p>The line then predicts an arm it never saw: the wide tile should land at 7,037 and it measured 7,324 — the 287-cycle miss is the wide tile's own cost, fewer squads resident. And the intercept is the real headline: <b>5,830 cycles that are not queueing at all</b>, which is 95% of what the fixed kernel now spends. The one named queue still standing is worth 181 cycles. This axis is closed.</p>
+    <pre class="code">cycles/unit = 5,830 + 0.4713 x queued cycles
+  as shipped  4,608 queued   8,002 measured
+  arow/pad2     640 queued   6,132 / 6,357
+  wider tile  2,560 queued   7,037 predicted
+                             7,324 measured</pre>
+    <div class="src">docs/research/2026-09-08-prefill-step2-remaining-excess.md §1.1 (the fit, the slope 0.4713, the intercept 5,830, the 3,968 × 0.4713 = 1,870 identity, the <code>bn128</code> validation at 7,037 vs 7,324 and its occupancy explanation, and why <code>pad2</code> costs 225 cycles more than <code>arow</code> for the same store count), §0.3 (the measured cycles per 64³ unit per arm: 8,002 / 6,132 / 6,357 / 7,324, and the M4 Pro's 4,664 on the same code; the wall model <code>10,021 + 18,687 × cycles/8,002</code>), §1.2 (what is left: the W-staging 4-way conflict at 181 cycles, 2.9%), the header ("there is no missing term") · the over-prediction it corrects: docs/research/2026-09-08-ttfw-ampere-prefill-discovery.md §1.2 and docs/research/2026-09-08-prefill-tile-arms.md §7 ("the other half is still unexplained") · the queue itself: station 269</div>
+    <div class="sowhat"><b>So what:</b> the first model was not wrong about the mechanism, only about the exchange rate. A wrong exchange rate looks exactly like a missing term.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s270_s">what one deleted queue cycle is worth</label><input type="range" id="s270_s" min="0" max="1000" step="1" value="471"><span id="s270_sV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s270_svg" viewBox="0 0 640 430" width="100%" height="430" role="img" aria-label="queued cycles against real cycles for four measured arms, with a line whose slope the reader sets"></svg>
+    </div>
+    <div class="readout"><span>slope <b class="trace" id="s270_slope">—</b></span><span>predicted for the fixed kernel <b id="s270_pred">—</b></span><span>off the measurement by <b id="s270_err">—</b></span><span>predicted wait <b class="ok" id="s270_wall">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 271 ───────────── -->
+<section class="station" id="s271">
+  <div class="words">
+    <div class="eyebrow">station 271 · the prompt stage</div>
+    <h2>The same speed-up measures −3.3%, −13.4%, −20.6% or −27.6%, depending on the stopwatch.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>profiling</b> — asking the engine to time each piece of GPU work separately. To do that it must make the GPU finish and report, which changes what the GPU was doing.</li><li><b>a drain</b> — a point where the machine waits for every queued job to finish. Work that would have overlapped no longer can.</li><li><b>median vs sum</b> — the middle job's time, against the total of all of them. When the jobs are wildly different sizes, only the total predicts the clock.</li></ul></div>
+    <p>Station 269's change is one thing, measured once. Here it is, measured four ways, all correct, all reported by the same engine on the same laptop. The gap between the smallest and the largest reading is more than <b>eight times</b>.</p>
+    <p>Turning profiling on adds one "wait for the GPU to finish" per layer — <b>192 extra drains</b> on this prompt, taking the count from 66 to 258. That is a different command stream, so the wall clock stops tracking the kernel: the same arm reads <b>−3.3%</b> profiled and <b>−13.4%</b> unprofiled. Four times the value, from the flag alone.</p>
+    <p>The second trap needs no profiler at all. The prompt kernel runs 400 times per chunk on shapes from 96 wide to 17,408 wide, so its <em>median</em> pass is not the thing that predicts the clock. The median says −27.6%; the <em>total</em> of the same 277 passes says −20.6%. And the total is the one that reconciles: the kernel is 65.1% of the wait, and 20.6% × 65.1% = 13.4% — exactly what the unprofiled clock read. The nine-point "unexplained gap" of the week before was the median.</p>
+    <pre class="code">                    control    armed   delta
+profiled clock     29,181.7 28,221.3   -3.3%
+unprofiled clock   28,708.2 24,864.7  -13.4%
+kernel, median       25,344   18,342  -27.6%
+kernel, 277 passes   5.15e6   4.09e6  -20.6%</pre>
+    <div class="src">docs/research/2026-09-08-prefill-step2-remaining-excess.md §0.2 (the profiled/unprofiled table, <code>counters.prefill.workDone</code> 258 against 66, 3 chunks × 64 blocks = 192 extra drains, and the rule: "the profiled export is for attribution, the unprofiled export is for value"), §0.1 (median 25,344 → 18,342 = 0.7237 against sum 5,148,862.5 → 4,089,844.7 = 0.7943, and the whole-window ratio 0.8185), §0.3 (the GEMM is 65.1% of the unprofiled wall, derived from the A/B itself with no profiler; 20.6% × 65.1% = 13.4% against a measured 13.4%), §5.4 (the always-on counters measured at +0.10% against a 4.47% run-to-run spread) · the reading it corrects: docs/research/2026-09-08-prefill-tile-arms.md §7 · other ways an instrument lies: station 257, station 253</div>
+    <div class="sowhat"><b>So what:</b> "which number is the improvement" is a question about the instrument, not the change. Two of these four readings are honest and answer different questions; two are traps.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which stopwatch"><button id="s271_pw" aria-pressed="false">profiled clock</button><button id="s271_uw" aria-pressed="true">unprofiled clock</button><button id="s271_md" aria-pressed="false">median pass</button><button id="s271_sm" aria-pressed="false">total of all passes</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s271_svg" viewBox="0 0 640 448" width="100%" height="448" role="img" aria-label="one change measured four ways, the command stream each measurement runs on, and the arithmetic that reconciles the two honest ones"></svg>
+    </div>
+    <div class="readout"><span>this stopwatch says <b class="trace" id="s271_val">—</b></span><span>drains in the run <b id="s271_dr">—</b></span><span>what it is good for <b id="s271_use">—</b></span><span>the true value <b class="ok">−13.4% of the wait</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 272 ───────────── -->
+<section class="station" id="s272">
+  <div class="words">
+    <div class="eyebrow">station 272 · the prompt stage</div>
+    <h2>One two-line swap: 8% slower in one tile, 4% faster in a wider one.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>a tile</b> — the rectangle of the answer one squad of threads computes at a time. 64×64 is the shipped one; 64×128 is twice as wide; BM=8 is a thin one kept for short prompts.</li><li><b>a thread map</b> — which of the 256 threads fetches which number. Swapping two lines changes who does what, never what is done.</li><li><b>registers</b> — the handful of private slots a thread keeps its working numbers in. Run out and the GPU keeps fewer squads in flight, and everything slows down.</li></ul></div>
+    <p>Stations 269 and 270 fixed one copy by re-addressing it. The other copy in the same kernel — the one that stages weights — has a thread map too, and swapping which index runs fast is a two-line change that provably alters nothing: both forms walk the same slots and write the same values into them.</p>
+    <p>On the shipped 64×64 tile it is <b>8.1% slower</b>. On the thin small-prompt tile it is <b>3.5% faster</b>. Stacked on the 128-wide tile it is <b>4.3% faster still</b>, and that combination — a wide tile with the swapped map — is the quickest bit-exact arrangement this Mac has measured: <b>−8.1%</b>. Run-to-run spread on the repeated arms is ±0.1%, so none of this is noise.</p>
+    <p>No bank arithmetic predicts a sign that depends on the tile; the staging loop is textually identical in all three. The explanation on offer is register pressure — the 64×64 tile sits near a scheduling cliff that the thin and the wide tiles are on opposite sides of — and the doc labels it the leading explanation rather than a measurement, because WebGPU exposes no counter that could settle it. On the laptop the bank model predicts a flat gain in every tile. Only the laptop can say.</p>
+    <pre class="code">// shipped
+let hw = u % (BK/WB);  let n = u / (BK/WB);
+// wmap
+let n = u % BN;        let hw = u / BN;
+
+BM=8 -3.5%   64x64 +8.1%   +bn128 -4.3%</pre>
+    <div class="src">docs/research/2026-09-08-prefill-step2-remaining-excess.md §3.1 (the <code>//__WSTAGE_MAP_BEGIN__</code> anchor and the exact two lines; both forms enumerate the same bijection, so every <code>Ws</code> slot gets the identical value), §3.2 (the pairwise Mac table, M=1491, K=5120, 60 iterations after 5 warm, Δ = median of per-run ratios: <code>arow</code> +0.95, <code>pad2</code> +0.39, <code>bn128</code> −3.99, <code>wmap</code> +8.10, <code>arow+wmap</code> +7.35, <code>arow+bn128</code> −2.71, <code>wmap+bn128</code> −8.12, <code>arow+wmap+bn128</code> −7.43; the BM=8 ladder at M=1/8/32/64; the ±0.1% repeat spread; the register-allocation reading, stated as the leading explanation and not a measurement), §3.3 (the two prediction branches for Ampere, which disagree in sign — which is why both arms ship) · raw: eval_results/prefill_step2/mac_pairwise_m1491.txt, …/mac_pairwise_repeat_n5120.txt · the contract test that pins "nothing else moved": tests/run_prefill_tile_arms_contract_test.mjs · the re-addressing next door: station 269</div>
+    <div class="sowhat"><b>So what:</b> a change with no memory story and no arithmetic story can still be worth 8%, in either direction. "Why" is sometimes below the level anything can observe.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="which tile"><button id="s272_s8" aria-pressed="false">the thin tile · BM=8</button><button id="s272_t64" aria-pressed="true">the shipped tile · 64×64</button><button id="s272_t128" aria-pressed="false">the wide tile · 64×128</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s272_svg" viewBox="0 0 640 400" width="100%" height="400" role="img" aria-label="every measured arm of the prompt kernel in each tile, faster to the left and slower to the right, with the thread-map swap marked"></svg>
+    </div>
+    <div class="readout"><span>the swap here is <b class="trace" id="s272_wm">—</b></span><span>fastest arm in this tile <b class="ok" id="s272_best">—</b></span><span>noise floor <b>±0.1%</b></span><span id="s272_note"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 273 ───────────── -->
+<section class="station" id="s273">
+  <div class="words">
+    <div class="eyebrow">station 273 · what fits</div>
+    <h2>Each extra word of context costs 128 KiB, and the card had 446 MiB left.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the cache</b> — for every word already read, an attention layer keeps two vectors so it never has to read that word again. It grows with the conversation and is never compressed here.</li><li><b>a discrete card</b> — a GPU with its own memory, separate from the computer's. When it fills, work does not fail; it starts crossing the slow cable to main memory instead.</li><li><b>the vision tower</b> — the extra network that turns a picture into words the model can read. It sits in GPU memory whether or not you send a picture.</li></ul></div>
+    <p>Only <b>16 of the 27B's 64 layers</b> are attention layers; the other 48 remember differently and keep nothing per word. Each of those 16 keeps 4 key-and-value heads of 256 numbers, in full precision, for the key and for the value: 8 KiB a layer, <b>128 KiB a word</b>. Doubling the window from 2,048 to 4,096 words therefore costs exactly <b>256 MiB</b>.</p>
+    <p>On the 6 GB laptop that is most of the remaining room. Its measured peak while running was <b>5,698 of 6,144 MiB</b>, with the 741 MiB vision tower resident — the site's own record confirms vision was loaded. That leaves <b>446 MiB</b>, about 3,500 more words of context. Switch the vision tower off and you get roughly 5,900 words more.</p>
+    <p>The failure mode is the important part. Going over does not raise an error and does not trip the seven-rung fallback ladder of station 59 — nothing has failed to allocate. The driver simply starts serving some of that memory across the cable, and decode drops from the 80-words-a-second class to <b>2–3</b>. Silent, and 30× slower.</p>
+    <pre class="code">16 of 64 layers keep a cache
+ 4 KV heads x 256 x 4 B x (K and V) = 8 KiB
+ x 16 layers                       = 128 KiB
+ctx 2048 -&gt; 256 MiB   ctx 4096 -&gt; 512 MiB
+measured peak 5,698 of 6,144 MiB</pre>
+    <div class="src">the weight file's own header, models/bonsai-27b-q1g128-000{01,02}-of-00002.safetensors: 64 layers, of which 16 carry <code>attn.*</code> (indices 3, 7, 11 … 63) and 48 carry <code>dn.*</code>; <code>layers.11.attn.k_proj</code> is [1024, 5120] and <code>attn.q_norm</code> is [256], so 1024 ÷ 256 = <b>4 KV heads of 256</b> · src/core/allocation_budget.js : 188–190 (<code>numKVHeads × maxSeq × headDim</code>, × 4 bytes for f32) and : 306–309 (× 2 for K and V, × the attention layer count) · docs/handoff/2026-09-07-bench-laptop-3060-profile-gpu-samples.csv (100 samples; <code>mem_used_mib</code> peaks at 5,698 at 17:35:31, floor 410) · the same run's docs/handoff/2026-09-07-bench-laptop-3060-profile-4701fd3e.json (<code>visionLoaded: true</code> on every record) · docs/handoff/2026-08-08-engine-3060-response.md (the 741 MB vision tower, the 6 GB budget table, and "spills → 2-3 tok/s") · what the ladder does when memory really runs out: station 59 · where the five kinds of memory live: station 9</div>
+    <div class="sowhat"><b>So what:</b> the budget was never checked against a card this size with a picture-reader resident. The number that decides it is 446 MiB, and nothing in the engine prints it.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s273_ctx">how many words of context to allow</label><input type="range" id="s273_ctx" min="512" max="16384" step="512" value="2048"><span id="s273_ctxV" class="readout"></span></div>
+      <div class="seg" role="group" aria-label="the vision tower"><button id="s273_von" aria-pressed="true">picture-reader loaded</button><button id="s273_voff" aria-pressed="false">text only</button></div>
+    </div>
+    <div class="screen">
+      <svg id="s273_svg" viewBox="0 0 640 358" width="100%" height="358" role="img" aria-label="what is resident in the laptop's 6 GB of GPU memory as the context window and the vision tower change"></svg>
+    </div>
+    <div class="readout"><span>resident <b class="trace" id="s273_tot">—</b></span><span>room left <b id="s273_spare">—</b></span><span>largest window that fits <b class="ok" id="s273_max">—</b></span><span>speed <b id="s273_speed">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 274 ───────────── -->
+<section class="station" id="s274">
+  <div class="words">
+    <div class="eyebrow">station 274 · the prompt stage</div>
+    <h2>A 30-word prompt cannot beat 1.5 seconds here, and the kernel is not why.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>time to first word</b> — everything between pressing send and the first letter appearing. Reading the prompt is nearly all of it on a long prompt.</li><li><b>a dispatch</b> — one job handed to the GPU. Handing one over costs the browser a fixed amount of work whether the job is big or tiny.</li><li><b>a fitted model</b> — a formula whose constants were chosen to match measurements already taken, then checked against measurements it never saw.</li></ul></div>
+    <p>Station 249 counted 804 GPU jobs for one word of reply. Reading a prompt is worse: <b>1,363 jobs per 512-word chunk, plus 96 more for every 32 words in it</b>. That formula reproduces the counter exactly — 1,459 jobs for a 30-word prompt, 8,601 for a 1,491-word one.</p>
+    <p>Multiply the jobs by 322 µs of browser-side handling each, add a fixed 0.63 s, add the GPU's own time, and you can predict the wait: <b>2.06 s predicted against 2.07 measured</b> at 38 words, <b>7.82 against 8.05</b> at 341, <b>29.16 against 29.18</b> at 1,491.</p>
+    <p>Which settles what a short prompt costs. At 38 words the wait is 2.07 s and <b>1.13 s of it — 55% — never touches the GPU</b>. The arithmetic that genuinely must happen is another 0.72 s. Reading all 3.35 GB of weights would be 9.3 ms; tile padding wastes 0.15 s. So no kernel change reaches below about 1.5 s, and the measured short-prompt row confirms it: 1.59 s before the fixes of stations 269–272, and 1.58 after.</p>
+    <p>The counters that would attribute the browser side now exist. On this Mac they read <b>98.3% waiting for the GPU</b>, 1.4% building jobs, 0.3% submitting. The laptop's own split — where roughly 10 of its 28.7 seconds live — is a reading only that machine can take, and it has not been taken yet.</p>
+    <pre class="code">jobs = 1,363 per chunk + 96 per 32 words
+TTFT = 0.63 s + 322 us x jobs + GPU time
+  38 words   2.06 predicted   2.07 measured
+ 341 words   7.82 predicted   8.05 measured
+1491 words  29.16 predicted  29.18 measured</pre>
+    <div class="src">docs/research/2026-09-08-ttfw-ampere-prefill-discovery.md §0.3 (the dispatch formula <code>Σ 1363 + 96·ceil(M/32)</code> with its three counter checks, the fitted TTFT model, the six-row predicted-vs-measured table, and the floor: "~1.13 s of non-GPU time (55% of a 2.07 s TTFT) plus 0.72 s of genuinely required FMA… narrowing tiles further cannot reach below ~1.5 s"; the 3.35 GB = 9.3 ms weight read and the 0.15 s of tile padding) · <code>PREFILL_CHUNK = 512</code> at src/model/qwen_model.js : 191 · docs/research/2026-09-08-prefill-tile-arms.md §7 (the short-30 row: 1.59 s control, 1.58–1.64 across every arm — "the browser-side floor") · docs/research/2026-09-08-prefill-step2-remaining-excess.md §5.2–§5.3 (the new prefill counters and their Mac reading: 98.3% GPU drain, encode 1.4%, submit 0.3%, host 0.03%), §0.3 (the laptop's unattributed ~10.0 s of 28.7 s) · the same counting for one written word: station 249 · what a visitor downloads before any of this: station 263</div>
+    <div class="sowhat"><b>So what:</b> on a short prompt the machine is mostly not computing. Making the computing part faster is then worth almost nothing, and the model says so before anyone builds it.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s274_m">how many words in the prompt</label><input type="range" id="s274_m" min="0" max="5" step="1" value="1"><span id="s274_mV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s274_svg" viewBox="0 0 640 428" width="100%" height="428" role="img" aria-label="the three terms of the wait before the first word, stacked, as the prompt length changes"></svg>
+    </div>
+    <div class="readout"><span>GPU jobs <b class="trace" id="s274_disp">—</b></span><span>predicted wait <b id="s274_pred">—</b></span><span>measured <b class="ok" id="s274_meas">—</b></span><span>never touches the GPU <b class="bad" id="s274_share">—</b></span></div>
   </div>
 </section>
 
@@ -31569,6 +31866,951 @@ if ($('#s264')) {
     $('#s264_tot').textContent = G.total.toLocaleString();
     $('#s264_occ').textContent = (100 * G.occ).toFixed(0) + '% of ' + CAP.toLocaleString();
     $('#s264_bit').textContent = keeps ? 'yes' : 'no — the order changed';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 265 ── */
+/* ── Station 265: the repeat fine against the model's confidence ── */
+if ($('#s265')) {
+  const svg = $('#s265_svg'), slL = $('#s265_len'), slM = $('#s265_marg');
+  // cycle_detector.js:54-57 — the shipped defaults.
+  const MULT = 1.0, BASE = 1.75, ALLOWED = 6;
+  const fine = (L) => (L + 1 - ALLOWED) < 0 ? 0 : MULT * Math.pow(BASE, (L + 1) - ALLOWED);
+  // the two real flips, degeneration doc §3.2
+  const REAL = [
+    { i: 58, L: 10, margin: 11.561, top1: '="', ran: "='" },
+    { i: 71, L: 7, margin: 2.324, top1: '="', ran: "='" },
+  ];
+  slL.addEventListener('input', render); slM.addEventListener('input', render);
+
+  function render() {
+    const L = parseInt(slL.value, 10), margin = parseFloat(slM.value);
+    const f = fine(L), after = margin - f, flips = after < 0;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    // ── 1. the fine ladder ─────────────────────────────────
+    const LX = 14, LW = 612, LB = 150, LH = 108, MAXF = 51;
+    g += `<text x="${LX}" y="16" font-size="11" fill="${ink3}">the fine, in logits, as the re-typed run grows — 1.75 to the power of (L minus 5)</text>`;
+    for (let k = 4; k <= 12; k++) {
+      const x = LX + (k - 4) * (LW / 9), w = LW / 9 - 8, fk = fine(k);
+      const h = Math.max(2, LH * fk / MAXF);
+      const on = k === L;
+      g += `<rect x="${x.toFixed(1)}" y="${(LB - h).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${on ? bad : ink3}" opacity="${on ? 0.9 : 0.32}"/>`;
+      g += `<text x="${(x + w / 2).toFixed(1)}" y="${LB + 15}" text-anchor="middle" font-size="10.5" fill="${on ? ink : ink3}">${k}</text>`;
+      g += `<text x="${(x + w / 2).toFixed(1)}" y="${(LB - h - 5).toFixed(1)}" text-anchor="middle" font-size="10" fill="${on ? ink : ink3}">${fk.toFixed(fk < 10 ? 2 : 1)}</text>`;
+    }
+    g += `<text x="${LX}" y="${LB + 32}" font-size="10.5" fill="${ink3}">L = how many words have already been re-typed · below 5 the rule says nothing at all</text>`;
+
+    // ── 2. the two candidates, on one logit scale ──────────
+    const CY = 214, ZX = 300, PX = 13, LO = -19, HI = 24;
+    g += `<text x="14" y="${CY}" font-size="11" fill="${ink3}">both words drawn on one scale, measured from the runner-up's score</text>`;
+    const clamp = (v) => Math.min(Math.max(v, LO), HI);
+    const bar = (yy, v, col, lab) => {
+      const cv = clamp(v), w = Math.abs(cv) * PX;
+      const x = cv >= 0 ? ZX : ZX - w;
+      let out = `<text x="14" y="${yy}" font-size="11.5" fill="${ink2}">${lab}</text>`;
+      out += `<rect x="${x.toFixed(1)}" y="${yy + 4}" width="${Math.max(w, 1.5).toFixed(1)}" height="18" rx="3" fill="${col}" opacity="0.85"/>`;
+      const tx = cv >= 0 ? x + w + 8 : x - 8;
+      out += `<text x="${tx.toFixed(1)}" y="${yy + 18}" text-anchor="${cv >= 0 ? 'start' : 'end'}" font-size="11.5" fill="${col}">`
+        + `${v >= 0 ? '+' : ''}${v.toFixed(3)}${v !== cv ? ' (off the scale)' : ''}</text>`;
+      return out;
+    };
+    g += `<line x1="${ZX}" y1="${CY + 10}" x2="${ZX}" y2="${CY + 92}" stroke="${ink3}" stroke-width="1.5"/>`;
+    g += `<text x="${ZX - 6}" y="${CY + 106}" text-anchor="end" font-size="10.5" fill="${ink3}">the runner-up sits here, at 0.000 — the line to beat</text>`;
+    g += bar(CY + 22, margin, trace, 'the model’s favourite, before the fine');
+    g += bar(CY + 66, after, after >= 0 ? ok : bad, 'the same word, after the fine of ' + f.toFixed(3));
+
+    // ── 3. the verdict ─────────────────────────────────────
+    const VY = CY + 118;
+    g += `<rect x="14" y="${VY}" width="612" height="38" rx="7" fill="${flips ? bad : ok}" fill-opacity="0.13" stroke="${flips ? bad : ok}"/>`;
+    g += `<text x="26" y="${VY + 24}" font-size="13" fill="${ink}">${flips
+      ? 'the fine wins — the engine types the word the model did NOT choose'
+      : 'the model wins — the fine is not big enough to change anything'}</text>`;
+
+    // ── 4. the two real positions ──────────────────────────
+    const RY = VY + 58;
+    g += `<text x="14" y="${RY}" font-size="11" fill="${ink3}">what actually happened, generated words 52–71 of the pomodoro answer</text>`;
+    REAL.forEach((r, k) => {
+      const y = RY + 10 + k * 24, hit = (L === r.L && Math.abs(margin - r.margin) < 0.06);
+      g += `<rect x="14" y="${y}" width="612" height="20" rx="4" fill="${hit ? trace : card}" fill-opacity="${hit ? 0.16 : 1}" stroke="${hit ? trace : line}"/>`;
+      g += `<text x="26" y="${y + 14}" font-size="11" fill="${ink2}">word ${r.i} · L = ${r.L}</text>`;
+      g += `<text x="150" y="${y + 14}" font-size="11" fill="${ink}">led by ${r.margin.toFixed(3)}</text>`;
+      g += `<text x="278" y="${y + 14}" font-size="11" fill="${bad}">fined ${fine(r.L).toFixed(3)}</text>`;
+      g += `<text x="400" y="${y + 14}" font-size="11" fill="${ink3}">wrote <tspan fill="${bad}">${r.ran}</tspan> instead of <tspan fill="${ok}">${r.top1}</tspan></text>`;
+    });
+    g += `<text x="14" y="${RY + 10 + 2 * 24 + 15}" font-size="10.5" fill="${ink3}">Nowhere else in that window did the ladder overtake the model. Two flips, and the answer never recovered.</text>`;
+    svg.innerHTML = g;
+
+    $('#s265_lenV').textContent = 'L = ' + L + (L < 5 ? ' (below the floor)' : '');
+    $('#s265_margV').textContent = margin.toFixed(1) + ' logits ahead';
+    $('#s265_fine').textContent = f.toFixed(3) + ' logits';
+    $('#s265_after').textContent = (after >= 0 ? '+' : '') + after.toFixed(3) + ' logits';
+    $('#s265_win').textContent = flips ? 'the runner-up' : 'the model’s own choice';
+    $('#s265_note').innerHTML = (L === 10 && Math.abs(margin - 11.6) < 0.06)
+      ? '<b class="bad">this is generated word 58</b>' : '';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 266 ── */
+/* ── Station 266: the certified sampler and the shipped one ── */
+if ($('#s266')) {
+  const svg = $('#s266_svg');
+  const bB = $('#s266_before'), bA = $('#s266_after');
+  // every one of these passes cycleDetector:'off' by hand (paths + lines in .src)
+  const GATES = [
+    ['cert_ladder → run_dawn_node', ':98'],
+    ['run_lora_q1g128_ab', ':99'],
+    ['run_ctx4096_cert', ':107'],
+    ['run_mobile_prefill_flagoff', ':67'],
+    ['run_bonsai_golden_decode', ':150'],
+    ['run_device_lab', ':245'],
+    ['run_dawn_node (on its own)', ':98'],
+  ];
+  // longest run of GENERATED words ever compared word-for-word (degeneration doc §5)
+  const CHECKS = [
+    ['the certificate ladder, a rung', 12, 'vs llama.cpp'],
+    ['the free-running golden', 64, 'vs llama.cpp'],
+    ['the 3060, longest arm-vs-arm', 83, 'engine vs engine'],
+    ['the new pomodoro gate', 900, 'key left absent'],
+  ];
+  let fixed = false;
+  bB.addEventListener('click', () => { fixed = false; render(); });
+  bA.addEventListener('click', () => { fixed = true; render(); });
+
+  function render() {
+    bB.setAttribute('aria-pressed', String(!fixed));
+    bA.setAttribute('aria-pressed', String(fixed));
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    // ── the two lanes ──────────────────────────────────────
+    const RX = 262, RW = 96, RY = 96, OX = 396, OW = 230;
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">who asks for what, and what the engine hands back</text>`;
+    g += `<text x="14" y="38" font-size="11" fill="${ink2}">seven harnesses, each passing the word ‘off’ by hand</text>`;
+    GATES.forEach((gt, i) => {
+      const y = 46 + i * 21;
+      g += `<rect x="14" y="${y}" width="222" height="17" rx="3" fill="${card}" stroke="${line}"/>`;
+      g += `<text x="21" y="${y + 12.5}" font-size="9.5" fill="${ink2}">${gt[0]}</text>`;
+      g += `<text x="231" y="${y + 12.5}" text-anchor="end" font-size="9" fill="${ink3}">${gt[1]}</text>`;
+      g += `<path d="M236 ${y + 8.5} H ${RX}" stroke="${ok}" stroke-width="1.2" opacity="0.55"/>`;
+    });
+    const PY = 46 + 7 * 21 + 16;
+    g += `<rect x="14" y="${PY}" width="222" height="30" rx="4" fill="${bad}" fill-opacity="0.12" stroke="${bad}"/>`;
+    g += `<text x="21" y="${PY + 13}" font-size="10" fill="${ink}">the website, and every real ask</text>`;
+    g += `<text x="21" y="${PY + 25}" font-size="9.5" fill="${ink3}">sends no cycleDetector key at all</text>`;
+    g += `<path d="M236 ${PY + 15} H ${RX}" stroke="${fixed ? ok : bad}" stroke-width="1.8"/>`;
+
+    // resolver
+    g += `<rect x="${RX}" y="${RY}" width="${RW}" height="86" rx="7" fill="${card}" stroke="${ink3}"/>`;
+    g += `<text x="${RX + RW / 2}" y="${RY + 24}" text-anchor="middle" font-size="11" fill="${ink}">the resolver</text>`;
+    g += `<text x="${RX + RW / 2}" y="${RY + 42}" text-anchor="middle" font-size="9" fill="${ink3}">turns “nothing”</text>`;
+    g += `<text x="${RX + RW / 2}" y="${RY + 54}" text-anchor="middle" font-size="9" fill="${ink3}">into a setting</text>`;
+    g += `<text x="${RX + RW / 2}" y="${RY + 74}" text-anchor="middle" font-size="10.5" fill="${fixed ? ok : bad}">absent → ${fixed ? '‘off’' : '‘dry’'}</text>`;
+
+    // outcomes
+    const outcome = (y, lab, sub, on, col) =>
+      `<rect x="${OX}" y="${y}" width="${OW}" height="44" rx="7" fill="${on ? col : card}" fill-opacity="${on ? 0.15 : 1}" stroke="${on ? col : line}"/>`
+      + `<text x="${OX + 12}" y="${y + 18}" font-size="11.5" fill="${ink}">${lab}</text>`
+      + `<text x="${OX + 12}" y="${y + 34}" font-size="9.5" fill="${ink3}">${sub}</text>`;
+    g += outcome(64, 'suppressor OFF', 'the only sampler any gate has scored', true, ok);
+    g += outcome(180, 'suppressor ON (‘dry’)', fixed ? 'now only when asked for by name' : 'what every real ask actually ran', !fixed, bad);
+    g += `<path d="M${RX + RW} ${RY + 30} H ${OX}" stroke="${ok}" stroke-width="1.4" opacity="0.7"/>`;
+    g += `<path d="M${RX + RW} ${RY + 62} H ${OX} V 202" stroke="${fixed ? ink3 : bad}" stroke-width="${fixed ? 1 : 1.8}" fill="none" stroke-dasharray="${fixed ? '4 3' : '0'}" opacity="${fixed ? 0.4 : 1}"/>`;
+    g += `<text x="${OX}" y="244" font-size="11" fill="${fixed ? ok : bad}">${fixed
+      ? 'one sampler: certified = shipped' : 'two samplers: shipped ≠ certified'}</text>`;
+
+    // ── the length of every word-for-word check ────────────
+    const CY = 296, BX = 248, BW = 214, MAXC = 900;
+    g += `<line x1="14" y1="${CY - 18}" x2="626" y2="${CY - 18}" stroke="${line}"/>`;
+    g += `<text x="14" y="${CY}" font-size="11" fill="${ink3}">how many GENERATED words each check has ever compared, one by one</text>`;
+    CHECKS.forEach((c, i) => {
+      const y = CY + 14 + i * 26, isNew = i === 3;
+      const w = Math.max(2, BW * c[1] / MAXC);
+      g += `<text x="14" y="${y + 13}" font-size="11" fill="${ink2}">${c[0]}</text>`;
+      g += `<rect x="${BX}" y="${y + 2}" width="${w.toFixed(1)}" height="14" rx="3" fill="${isNew ? ok : trace}" opacity="${isNew ? 0.9 : 0.6}"/>`;
+      g += `<text x="${(BX + w + 8).toFixed(1)}" y="${y + 13}" font-size="11" fill="${ink}">${c[1]}</text>`;
+      g += `<text x="626" y="${y + 13}" text-anchor="end" font-size="9.5" fill="${ink3}">${c[2]}</text>`;
+    });
+    g += `<text x="14" y="${CY + 14 + 4 * 26 + 14}" font-size="10.5" fill="${ink3}">The pomodoro answer went wrong at word 58. Only the last bar reaches it.</text>`;
+    g += `<text x="14" y="${CY + 14 + 4 * 26 + 30}" font-size="10.5" fill="${ink3}">The ladder is not weak — it certifies prompts up to 63,700 words. It just stops at 12 answers.</text>`;
+    svg.innerHTML = g;
+
+    $('#s266_pin').textContent = '7 of 7';
+    $('#s266_prod').textContent = fixed ? 'the same ‘off’ the gates use' : '‘dry’ — the suppressor, live';
+    $('#s266_same').innerHTML = fixed
+      ? '<b class="ok">the same path</b>' : '<b class="bad">two different paths</b>';
+    $('#s266_len').textContent = fixed ? '900 words' : '64 words';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 267 ── */
+/* ── Station 267: when reuse engages, and what it costs ── */
+if ($('#s267')) {
+  const svg = $('#s267_svg');
+  const bS = $('#s267_same'), bC = $('#s267_cont');
+  // 4B Q4 tier, the real 429-token Forge prompt, 200 generated words
+  const PROMPT = 429, REPLY = 200, LEDGER = PROMPT + REPLY, DELTA = 35;
+  let cont = false;
+  bS.addEventListener('click', () => { cont = false; render(); });
+  bC.addEventListener('click', () => { cont = true; render(); });
+
+  function render() {
+    bS.setAttribute('aria-pressed', String(!cont));
+    bC.setAttribute('aria-pressed', String(cont));
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    const ask2 = cont ? LEDGER + DELTA : PROMPT;
+    const reuse = cont;
+    const prefilled = cont ? DELTA : PROMPT;
+    const X0 = 92, W = 512, MAXT = 700, px = (n) => W * n / MAXT;
+    let g = '';
+
+    // ── the timeline ───────────────────────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">one conversation, drawn in words — 0 to 700</text>`;
+    const lane = (y, lab) => `<text x="14" y="${y + 13}" font-size="11" fill="${ink2}">${lab}</text>`;
+    const seg = (y, from, to, col, txt, faint) =>
+      `<rect x="${(X0 + px(from)).toFixed(1)}" y="${y}" width="${Math.max(px(to - from), 2).toFixed(1)}" height="18" rx="3" fill="${col}" opacity="${faint ? 0.28 : 0.85}"/>`
+      + (px(to - from) > 60 ? `<text x="${(X0 + px(from) + 6).toFixed(1)}" y="${y + 13}" font-size="10" fill="${css('--paper')}">${txt}</text>` : '');
+
+    // ask 1
+    g += lane(30, 'ask 1');
+    g += seg(30, 0, PROMPT, trace, 'the prompt · 429 words', false);
+    g += seg(30, PROMPT, LEDGER, signal, 'its reply · 200', false);
+
+    // the ledger
+    g += lane(64, 'the ledger');
+    g += `<rect x="${X0}" y="64" width="${px(LEDGER).toFixed(1)}" height="18" rx="3" fill="${card}" stroke="${ink3}"/>`;
+    g += `<text x="${(X0 + 8).toFixed(1)}" y="77" font-size="10" fill="${ink2}">what the engine still has on the GPU — 629 words, prompt AND reply</text>`;
+
+    // ask 2
+    g += lane(104, 'ask 2');
+    if (cont) {
+      g += seg(104, 0, LEDGER, trace, 'the same 629 words, re-sent', true);
+      g += seg(104, LEDGER, ask2, ok, '', false);
+      g += `<text x="${(X0 + px(ask2) + 8).toFixed(1)}" y="117" font-size="10.5" fill="${ok}">+35 new</text>`;
+    } else {
+      g += seg(104, 0, PROMPT, trace, 'the same 429 words, re-sent', false);
+      g += `<text x="${(X0 + px(PROMPT) + 8).toFixed(1)}" y="117" font-size="10.5" fill="${bad}">…and it stops here</text>`;
+    }
+
+    // the comparison point
+    const cmpAt = cont ? LEDGER : PROMPT;
+    g += `<line x1="${(X0 + px(cmpAt)).toFixed(1)}" y1="58" x2="${(X0 + px(cmpAt)).toFixed(1)}" y2="128" stroke="${cont ? ok : bad}" stroke-dasharray="3 2" stroke-width="1.4"/>`;
+    g += `<text x="14" y="146" font-size="10.5" fill="${ink3}">${cont
+      ? 'at word 629 the new prompt keeps going, and everything up to there matches — a genuine prefix'
+      : 'at word 429 the ledger holds a reply word and the new prompt has ended — not a prefix'}</text>`;
+
+    // ── the verdict ────────────────────────────────────────
+    const VY = 160;
+    g += `<rect x="14" y="${VY}" width="612" height="50" rx="7" fill="${reuse ? ok : bad}" fill-opacity="0.13" stroke="${reuse ? ok : bad}"/>`;
+    g += `<text x="26" y="${VY + 21}" font-size="13" fill="${ink}">${reuse
+      ? '‘ok’ — reuse engages, deltaStart = 629' : '‘prompt-shorter’ — reset, and read all 429 words again'}</text>`;
+    g += `<text x="26" y="${VY + 39}" font-size="11" fill="${ink3}">${reuse
+      ? 'the GPU keeps its memory of 629 words and prefills only the 35 new ones'
+      : 'the flag is inert here: reuse on and reuse off gave the same ids in every process'}</text>`;
+
+    // ── what came out ──────────────────────────────────────
+    const RY = 228;
+    g += `<text x="14" y="${RY}" font-size="11" fill="${ink3}">the id streams actually recorded (first 12 hex of a hash over the whole stream)</text>`;
+    const ROWS = cont
+      ? [['reuse ON, this ask', 'de5f811531f5', 35, ok], ['reuse OFF, this ask', '090f78d84c09', 664, trace],
+         ['…and every repeat of each, in 2 processes', 'the same again', null, ink3]]
+      : [['reuse ON, 6 asks × 3 processes', 'de5f811531f5', 429, ok], ['reuse OFF, 6 asks × 2 processes', 'de5f811531f5', 429, ok],
+         ['…and with a 250 ms pause between asks', 'de5f811531f5', 429, ok]];
+    ROWS.forEach((r, i) => {
+      const y = RY + 10 + i * 24;
+      g += `<rect x="14" y="${y}" width="612" height="20" rx="4" fill="${card}" stroke="${line}"/>`;
+      g += `<text x="24" y="${y + 14}" font-size="10.5" fill="${ink2}">${r[0]}</text>`;
+      g += `<text x="348" y="${y + 14}" font-size="10.5" fill="${r[3]}">${r[1]}</text>`;
+      if (r[2] !== null) g += `<text x="618" y="${y + 14}" text-anchor="end" font-size="10" fill="${ink3}">${r[2]} words prefilled</text>`;
+    });
+    const NY = RY + 10 + 3 * 24 + 18;
+    g += `<text x="14" y="${NY}" font-size="11" fill="${cont ? bad : ok}">${cont
+      ? 'two different streams — each the same on every run: two arithmetic orders, not randomness'
+      : 'one stream, everywhere: the flag changed nothing because reuse never engaged'}</text>`;
+    g += `<text x="14" y="${NY + 17}" font-size="10.5" fill="${ink3}">${cont
+      ? 'they agree for 14 words: …6040, 3622, 13, then 353, 628 (reused) against 4213, 11, 353 (fresh)'
+      : 'across 228 generations that session, no pair of identical inputs gave two different streams'}</text>`;
+    svg.innerHTML = g;
+
+    $('#s267_led').textContent = LEDGER + ' words (429 asked + 200 answered)';
+    $('#s267_verd').textContent = reuse ? 'ok — reuse engages' : 'prompt-shorter — full reset';
+    $('#s267_pf').textContent = prefilled + ' of ' + ask2;
+    $('#s267_ids').innerHTML = reuse
+      ? '<b class="bad">no — they split after 14</b>' : '<b class="ok">yes, byte for byte</b>';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 268 ── */
+/* ── Station 268: 84 words, three engines, thirteen near-ties ── */
+if ($('#s268')) {
+  const svg = $('#s268_svg'), sl = $('#s268_step');
+  const bOff = $('#s268_off'), bOn = $('#s268_on');
+  // llama.cpp's own top-1 minus top-2 logit gap at each generated step, teacher-forced
+  // along the answer: eval_results/forge_pomodoro/xlong_margins_ref_0_84.json
+  const M = [
+    0.634, 0.524, 2.756, 1.548, 0.72, 1.006, 1.681, 4.358, 2.608, 4.97, 8.104, 9.412,
+    5.334, 7.923, 1.016, 2.052, 0.49, 0.608, 0.484, 4.394, 0.244, 1.088, 0.53, 5.085,
+    2.325, 9.079, 11.394, 11.969, 9.005, 12.313, 0.105, 2.293, 10.768, 9.403, 9.221, 7.864,
+    9.029, 2.984, 6.895, 7.388, 5.274, 5.72, 6.029, 1.951, 1.864, 1.781, 1.147, 1.569,
+    7.02, 0.204, 9.738, 9.355, 0.483, 11.017, 11.874, 7.444, 8.386, 3.316, 5.577, 5.593,
+    6.599, 2.076, 6.084, 0.332, 1.213, 1.232, 1.512, 3.638, 3.678, 9.013, 5.118, 2.104,
+    2.999, 6.008, 8.884, 5.314, 7.361, 0.526, 11.007, 6.451, 6.177, 10.184, 3.159, 6.432,
+  ];
+  // the 8 steps where the shipped repeat suppressor fired, and the fine it placed
+  // on the reference's own top-1 (degeneration doc §9.4)
+  const FINE = { 21: 0.000, 42: 1.000, 43: 1.750, 44: 0.000, 62: 1.000, 63: 0.000, 76: 1.000, 77: 0.000 };
+  const RUN = { 21: 5, 42: 5, 43: 6, 44: 7, 62: 5, 63: 6, 76: 5, 77: 6 };
+  const ENGINES = [
+    ['RTX 3060, Chrome · 3 flag stacks', '70e8d0572fe1', 'suppressor live'],
+    ['this Mac, dawn.node · 5 arms', '70e8d0572fe1', 'live, off, and absent'],
+    ['llama.cpp, the reference', '70e8d0572fe1', 'no suppressor at all'],
+  ];
+  let showFine = true;
+  bOff.addEventListener('click', () => { showFine = false; render(); });
+  bOn.addEventListener('click', () => { showFine = true; render(); });
+  sl.addEventListener('input', render);
+
+  function render() {
+    bOff.setAttribute('aria-pressed', String(!showFine));
+    bOn.setAttribute('aria-pressed', String(showFine));
+    const i = parseInt(sl.value, 10), marg = M[i], f = FINE[i] ?? 0;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    const X0 = 44, BW = 6.9, BASE = 178, CH = 140, MAXM = 12.6;
+    let g = '';
+
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">how far ahead the winning word was, at each of the 84 steps of the answer (logits)</text>`;
+    // the vertical scale, and the one-logit line
+    for (const t of [12, 9, 6, 3, 1]) {
+      const y = BASE - CH * t / MAXM;
+      g += `<line x1="${X0 - 4}" y1="${y.toFixed(1)}" x2="626" y2="${y.toFixed(1)}" stroke="${t === 1 ? bad : line}" stroke-dasharray="3 3" stroke-width="1" opacity="${t === 1 ? 1 : 0.6}"/>`;
+      g += `<text x="${X0 - 8}" y="${(y + 3.5).toFixed(1)}" text-anchor="end" font-size="9.5" fill="${t === 1 ? bad : ink3}">${t}</text>`;
+    }
+    for (let k = 0; k < M.length; k++) {
+      const x = X0 + k * BW, h = Math.max(1.5, CH * Math.min(M[k], MAXM) / MAXM);
+      const tie = M[k] < 1, sel = k === i;
+      g += `<rect x="${x.toFixed(1)}" y="${(BASE - h).toFixed(1)}" width="${(BW - 1.6).toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" fill="${tie ? bad : trace}" opacity="${sel ? 1 : (tie ? 0.85 : 0.5)}"/>`;
+      if (showFine && FINE[k] !== undefined) {
+        const fh = CH * FINE[k] / MAXM;
+        if (fh > 0.5) g += `<rect x="${x.toFixed(1)}" y="${(BASE - h).toFixed(1)}" width="${(BW - 1.6).toFixed(1)}" height="${fh.toFixed(1)}" rx="1.5" fill="${ok}" opacity="0.9"/>`;
+        g += `<circle cx="${(x + (BW - 1.6) / 2).toFixed(1)}" cy="${BASE + 9}" r="2.6" fill="${ok}"/>`;
+      }
+      if (sel) g += `<line x1="${(x + (BW - 1.6) / 2).toFixed(1)}" y1="30" x2="${(x + (BW - 1.6) / 2).toFixed(1)}" y2="${BASE + 3}" stroke="${ink}" stroke-width="1"/>`;
+    }
+    g += `<line x1="${X0}" y1="${BASE + 2}" x2="626" y2="${BASE + 2}" stroke="${line}"/>`;
+    for (const k of [0, 20, 40, 60, 83]) {
+      g += `<text x="${(X0 + k * BW + 2).toFixed(1)}" y="${BASE + 26}" text-anchor="middle" font-size="9.5" fill="${ink3}">${k}</text>`;
+    }
+    g += `<text x="${X0}" y="${BASE + 42}" font-size="10.5" fill="${ink3}">${showFine
+      ? 'green = the fine the suppressor placed on that winning word · dots mark all 8 steps where it fired'
+      : 'red = under one logit, a near-tie. Thirteen of the 84 are, and the tightest is 0.105 at step 30'}</text>`;
+
+    // ── the chosen step ────────────────────────────────────
+    const DY = 232;
+    const survived = marg - f;
+    g += `<rect x="14" y="${DY}" width="612" height="54" rx="7" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="${DY + 20}" font-size="12" fill="${ink}">step ${i} — the winning word led by <tspan fill="${marg < 1 ? bad : trace}">${marg.toFixed(3)}</tspan> logits`
+      + `${f > 0 ? `, and was fined <tspan fill="${ok}">${f.toFixed(3)}</tspan> (a run of ${RUN[i]})` : ''}</text>`;
+    g += `<text x="26" y="${DY + 40}" font-size="11" fill="${ink3}">${f > 0
+      ? `it survived by ${survived.toFixed(3)} logits — ` + (i === 43 ? 'the narrowest escape in the whole answer' : 'comfortably')
+      : (FINE[i] !== undefined ? 'the suppressor fired here, but the fine landed on a different word'
+        : (marg < 1 ? 'a near-tie: three engines still picked the same word' : 'a clear win — nothing could have moved it'))}</text>`;
+
+    // ── the three engines ──────────────────────────────────
+    const EY = 306;
+    g += `<text x="14" y="${EY}" font-size="11" fill="${ink3}">what each of them wrote, hashed — the answer is 387 characters, 84 words</text>`;
+    ENGINES.forEach((e, k) => {
+      const y = EY + 10 + k * 26;
+      g += `<rect x="14" y="${y}" width="612" height="22" rx="4" fill="${ok}" fill-opacity="0.10" stroke="${ok}" stroke-opacity="0.5"/>`;
+      g += `<text x="24" y="${y + 15}" font-size="10.5" fill="${ink2}">${e[0]}</text>`;
+      g += `<text x="300" y="${y + 15}" font-size="10.5" fill="${ok}">${e[1]}</text>`;
+      g += `<text x="618" y="${y + 15}" text-anchor="end" font-size="10" fill="${ink3}">${e[2]}</text>`;
+    });
+    const NY = EY + 10 + 3 * 26 + 20;
+    g += `<text x="14" y="${NY}" font-size="11" fill="${ink}">nine runs, three vendors, one answer — with no time on the laptop at all</text>`;
+    g += `<text x="14" y="${NY + 17}" font-size="10.5" fill="${ink3}">the limit, stated in the doc: the laptop's records keep the text, not the ids</text>`;
+    svg.innerHTML = g;
+
+    $('#s268_stepV').textContent = 'step ' + i + ' of 84';
+    $('#s268_m').textContent = marg.toFixed(3) + ' logits' + (marg < 1 ? ' — a near-tie' : '');
+    $('#s268_f').textContent = f > 0 ? f.toFixed(3) + ' logits' : (FINE[i] !== undefined ? 'fired, but elsewhere' : 'none');
+    $('#s268_ag').textContent = 'all three, all 84 words';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 269 ── */
+/* ── Station 269: the prefill staging store's 32-way bank conflict ── */
+if ($('#s269')) {
+  const svg = $('#s269_svg');
+  const B = { off: $('#s269_off'), arow: $('#s269_arow'), pad2: $('#s269_pad2') };
+  const BM = 64, BK = 64;
+  // one warp: lid 0..31 -> k = lid % 64, m = lid / 64 (so m is constant, k varies)
+  const addr = (k, m, arm) => arm === 'arow' ? m * BK + k : (arm === 'pad2' ? k * (BM + 2) + m : k * BM + m);
+  const ARMS = {
+    off: { label: 'As[k * 64u + m] — as shipped', cyc: 4096, wall: 29.2,
+      why: ['the bank works out to (m/2) % 32, and m never changes inside a warp',
+        'so k — the only thing that varies across the 32 threads — is not in the answer at all'] },
+    arow: { label: 'As[m * 64u + k] — arow', cyc: 128, wall: 24.7,
+      why: ['the tile is transposed, so consecutive threads write consecutive places',
+        'two f16 share a 4-byte word, and two threads writing halves of one word merge for free'] },
+    pad2: { label: 'As[k * 66u + m] — pad2', cyc: 128, wall: 25.2,
+      why: ['each row is two wider, so the stride in words is 33',
+        '33 is odd, so it shares no factor with 32 and visits every counter exactly once'] },
+  };
+  const WALL = [['as shipped', 29.2, 'off'], ['arow', 24.7, 'arow'], ['pad2', 25.2, 'pad2'], ['a wider tile (bn128)', 27.5, null]];
+  let arm = 'off';
+  for (const k of Object.keys(B)) B[k].addEventListener('click', () => { arm = k; render(); });
+
+  function render() {
+    for (const k of Object.keys(B)) B[k].setAttribute('aria-pressed', String(arm === k));
+    const A = ARMS[arm];
+    // 32 lanes of one warp, m = 0
+    const banks = []; for (let i = 0; i < 32; i++) banks.push(new Set());
+    for (let k = 0; k < 32; k++) {
+      const word = Math.floor(addr(k, 0, arm) / 2);      // two f16 to a 4-byte word
+      banks[((word % 32) + 32) % 32].add(word);
+    }
+    const cyc = Math.max(...banks.map((b) => b.size));
+    const used = banks.filter((b) => b.size > 0).length;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    g += `<text x="14" y="16" font-size="12" fill="${ink}">${A.label}</text>`;
+    g += `<text x="14" y="32" font-size="10.5" fill="${ink3}">${A.why[0]}</text>`;
+    g += `<text x="14" y="47" font-size="10.5" fill="${ink3}">${A.why[1]}</text>`;
+
+    // ── the 32 counters ────────────────────────────────────
+    const BX = 14, BW = 15, GAP = 4.4, BASE = 246, UNIT = 4.6;
+    g += `<text x="${BX}" y="68" font-size="11" fill="${ink3}">the 32 counters — the column is how many separate addresses queue at that one counter</text>`;
+    for (let i = 0; i < 32; i++) {
+      const x = BX + i * (BW + GAP), n = banks[i].size;
+      g += `<line x1="${x.toFixed(1)}" y1="${BASE + 6}" x2="${(x + BW).toFixed(1)}" y2="${BASE + 6}" stroke="${line}" stroke-width="1.5"/>`;
+      for (let k = 0; k < n; k++) {
+        const y = BASE - (k + 1) * UNIT + 2;
+        g += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${BW}" height="${UNIT - 1.4}" rx="1" fill="${n > 1 ? bad : ok}" opacity="${0.55 + 0.35 * (k === 0 ? 1 : 0)}"/>`;
+      }
+      if (n === 0) g += `<rect x="${x.toFixed(1)}" y="${BASE - 1}" width="${BW}" height="3" rx="1" fill="${ink3}" opacity="0.25"/>`;
+      if (i % 4 === 0) g += `<text x="${(x + BW / 2).toFixed(1)}" y="${BASE + 20}" text-anchor="middle" font-size="9.5" fill="${ink3}">${i}</text>`;
+    }
+    if (arm !== 'off') {   // the shipped tower, for comparison
+      const gh = 32 * UNIT;
+      g += `<rect x="${BX}" y="${(BASE - gh + 2).toFixed(1)}" width="${BW}" height="${(gh - 2).toFixed(1)}" rx="2" fill="none" stroke="${bad}" stroke-dasharray="3 3" stroke-width="1" opacity="0.55"/>`;
+      g += `<text x="${BX + BW + 10}" y="${(BASE - gh + 12).toFixed(1)}" font-size="10.5" fill="${bad}" opacity="0.8">where the shipped addressing put all 32 threads — one counter, 32 deep</text>`;
+    }
+    const oneY = BASE - UNIT + 2;
+    g += `<line x1="${BX}" y1="${oneY.toFixed(1)}" x2="626" y2="${oneY.toFixed(1)}" stroke="${ink3}" stroke-dasharray="3 3" stroke-width="1"/>`;
+    g += `<text x="626" y="${(oneY - 5).toFixed(1)}" text-anchor="end" font-size="10" fill="${ink3}">one cycle</text>`;
+    g += `<text x="${BX}" y="${BASE + 34}" font-size="10.5" fill="${ink3}">counter number · everything stacked above the dashed line is a thread waiting its turn</text>`;
+
+    // ── the verdict ────────────────────────────────────────
+    const VY = BASE + 46;
+    g += `<rect x="14" y="${VY}" width="612" height="46" rx="8" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="${VY + 19}" font-size="12" fill="${ink}">one store takes <tspan fill="${cyc > 1 ? bad : ok}" font-size="14">${cyc}</tspan> cycle${cyc === 1 ? '' : 's'} ${cyc === 1 ? '— the ideal —' : 'instead of 1 —'} ${used} of 32 counters doing work</text>`;
+    g += `<text x="26" y="${VY + 37}" font-size="11" fill="${ink3}">over the 16 stores and 8 warps a squad does per tile: ${A.cyc.toLocaleString()} cycles of queueing</text>`;
+
+    // ── the measured wait ──────────────────────────────────
+    const WY = VY + 68, WX = 200, WW = 330, WMAX = 30;
+    g += `<text x="14" y="${WY}" font-size="11" fill="${ink3}">measured on the RTX 3060: the wait before the first word, 1,489-word prompt</text>`;
+    WALL.forEach((w, i) => {
+      const y = WY + 12 + i * 22, on = w[2] === arm;
+      const bw = WW * w[1] / WMAX;
+      g += `<text x="14" y="${y + 12}" font-size="11" fill="${on ? ink : ink2}">${w[0]}</text>`;
+      g += `<rect x="${WX}" y="${y + 1}" width="${bw.toFixed(1)}" height="14" rx="3" fill="${on ? ok : ink3}" opacity="${on ? 0.9 : 0.3}"/>`;
+      g += `<text x="${(WX + bw + 8).toFixed(1)}" y="${y + 12}" font-size="11" fill="${on ? ink : ink3}">${w[1].toFixed(1)} s${i ? ' (' + Math.round((w[1] / 29.2 - 1) * 100) + '%)' : ''}</text>`;
+    });
+    g += `<text x="14" y="${WY + 12 + 4 * 22 + 14}" font-size="10.5" fill="${ink3}">The kernel's own time per pass: 25,344 → 18,342 µs. Every arm returns byte-identical words.</text>`;
+    svg.innerHTML = g;
+
+    $('#s269_worst').textContent = cyc + (cyc === 1 ? ' address (no queue)' : ' addresses on one counter');
+    $('#s269_cyc').textContent = cyc + '× the ideal';
+    $('#s269_used').textContent = used + ' of 32';
+    $('#s269_ttft').textContent = A.wall.toFixed(1) + ' s';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 270 ── */
+/* ── Station 270: what a removed bank cycle is actually worth ── */
+if ($('#s270')) {
+  const svg = $('#s270_svg'), sl = $('#s270_s');
+  // store bank cycles per normalised 64x64x64 unit, and the cycles actually measured
+  // on the 3060 (prefill-step2 §0.3, §1.1)
+  const ARMS = [
+    { name: 'as shipped', q: 4608, c: 8002, anchor: true },
+    { name: 'arow', q: 640, c: 6132, anchor: true },
+    { name: 'pad2', q: 640, c: 6357, anchor: false },
+    { name: 'a wider tile (bn128)', q: 2560, c: 7324, anchor: false },
+  ];
+  const MAC = 4664;                        // M4 Pro on byte-identical code
+  const wall = (c) => 10021 + 18687 * c / 8002;   // ms, §3.3's calibration
+  sl.addEventListener('input', render);
+
+  function render() {
+    const s = parseInt(sl.value, 10) / 1000;
+    const C = 8002 - s * 4608;             // the line must pass through the shipped point
+    const predArow = C + s * 640;
+    const err = predArow - 6132;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    // plot frame
+    const PX0 = 62, PX1 = 604, PY0 = 44, PY1 = 250, QMAX = 5000, CLO = 4400, CHI = 8600;
+    const X = (q) => PX0 + (PX1 - PX0) * q / QMAX;
+    const Y = (c) => PY1 - (PY1 - PY0) * (c - CLO) / (CHI - CLO);
+    let g = '';
+
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">every arm of the prompt kernel: cycles spent queueing (across) against cycles really taken (up) (up)</text>`;
+    // axes
+    g += `<line x1="${PX0}" y1="${PY0 - 6}" x2="${PX0}" y2="${PY1}" stroke="${line}"/>`;
+    g += `<line x1="${PX0}" y1="${PY1}" x2="${PX1}" y2="${PY1}" stroke="${line}"/>`;
+    for (const c of [5000, 6000, 7000, 8000]) {
+      g += `<line x1="${PX0}" y1="${Y(c).toFixed(1)}" x2="${PX1}" y2="${Y(c).toFixed(1)}" stroke="${line}" stroke-dasharray="2 4" opacity="0.7"/>`;
+      g += `<text x="${PX0 - 6}" y="${(Y(c) + 3.5).toFixed(1)}" text-anchor="end" font-size="9.5" fill="${ink3}">${c.toLocaleString()}</text>`;
+    }
+    for (const q of [0, 1000, 2000, 3000, 4000, 5000]) {
+      g += `<text x="${X(q).toFixed(1)}" y="${PY1 + 16}" text-anchor="middle" font-size="9.5" fill="${ink3}">${q.toLocaleString()}</text>`;
+    }
+    g += `<text x="${(PX0 + PX1) / 2}" y="${PY1 + 32}" text-anchor="middle" font-size="10.5" fill="${ink3}">cycles spent queueing at a counter, per squad per tile</text>`;
+    // the Mac line
+    g += `<line x1="${PX0}" y1="${Y(MAC).toFixed(1)}" x2="${PX1}" y2="${Y(MAC).toFixed(1)}" stroke="${signal}" stroke-dasharray="5 3"/>`;
+    g += `<text x="${PX1}" y="${(Y(MAC) - 6).toFixed(1)}" text-anchor="end" font-size="10" fill="${signal}">the M4 Pro, on byte-identical code: 4,664</text>`;
+    // the fitted line
+    g += `<line x1="${X(0)}" y1="${Y(C).toFixed(1)}" x2="${X(QMAX)}" y2="${Y(C + s * QMAX).toFixed(1)}" stroke="${trace}" stroke-width="2"/>`;
+    g += `<text x="${PX0 + 8}" y="${PY0 + 6}" font-size="10.5" fill="${trace}">the line: ${Math.round(C).toLocaleString()} + ${s.toFixed(3)} × queued cycles</text>`;
+    // the points, each label placed by hand
+    const LAB = {
+      'as shipped': [-10, 4, 'end'], 'arow': [12, 14, 'start'],
+      'pad2': [12, -6, 'start'], 'a wider tile (bn128)': [-10, -6, 'end'],
+    };
+    ARMS.forEach((a) => {
+      const px = X(a.q), py = Y(a.c), L = LAB[a.name];
+      g += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="5" fill="${a.anchor ? ink : ok}" />`;
+      g += `<text x="${(px + L[0]).toFixed(1)}" y="${(py + L[1]).toFixed(1)}" text-anchor="${L[2]}" font-size="10.5" fill="${ink2}">${a.name} · ${a.c.toLocaleString()}</text>`;
+    });
+    // how well the line does on the arow point it is being judged against
+    if (Math.abs(err) > 25) {
+      g += `<line x1="${X(640).toFixed(1)}" y1="${Y(6132).toFixed(1)}" x2="${X(640).toFixed(1)}" y2="${Y(predArow).toFixed(1)}" stroke="${bad}" stroke-width="3"/>`;
+      g += `<text x="${PX1}" y="${PY1 - 10}" text-anchor="end" font-size="10.5" fill="${bad}">the line misses the arow point by ${Math.abs(Math.round(err)).toLocaleString()} cycles</text>`;
+    } else {
+      g += `<circle cx="${X(640).toFixed(1)}" cy="${Y(6132).toFixed(1)}" r="11" fill="none" stroke="${ok}" stroke-width="2"/>`;
+      g += `<text x="${PX1}" y="${PY1 - 10}" text-anchor="end" font-size="10.5" fill="${ok}">the line lands on the arow measurement</text>`;
+    }
+
+    // ── the exchange rate ──────────────────────────────────
+    const EY = 306;
+    g += `<text x="14" y="${EY - 12}" font-size="11" fill="${ink3}">delete 1,000 cycles of queueing — how many cycles of clock do you get back?</text>`;
+    g += `<rect x="14" y="${EY}" width="440" height="20" rx="4" fill="${ink3}" opacity="0.2"/>`;
+    g += `<rect x="14" y="${EY}" width="${(440 * s).toFixed(1)}" height="20" rx="4" fill="${trace}" opacity="0.85"/>`;
+    g += `<text x="466" y="${EY + 15}" font-size="12" fill="${ink}">${Math.round(1000 * s)} cycles</text>`;
+    g += `<text x="14" y="${EY + 38}" font-size="11" fill="${Math.abs(s - 0.4713) < 0.006 ? ok : ink3}">${Math.abs(s - 0.4713) < 0.006
+      ? 'the measured slope is 0.4713 — about half of every wait was already hidden behind another squad'
+      : (s > 0.9 ? 'this is what the first model assumed: every queued cycle is a cycle of clock' : 'slide until the line lands on the arow point')}</text>`;
+
+    // ── the two consequences ───────────────────────────────
+    const KY = EY + 62;
+    g += `<rect x="14" y="${KY}" width="300" height="44" rx="7" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="${KY + 18}" font-size="11" fill="${ink}">what the kernel spends NOT queueing</text>`;
+    g += `<text x="26" y="${KY + 35}" font-size="11" fill="${trace}">5,830 cycles — 95% of the fixed kernel</text>`;
+    g += `<rect x="326" y="${KY}" width="300" height="44" rx="7" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="338" y="${KY + 18}" font-size="11" fill="${ink}">the biggest queue still standing</text>`;
+    g += `<text x="338" y="${KY + 35}" font-size="11" fill="${ok}">181 cycles — 2.9%. The axis is closed.</text>`;
+    svg.innerHTML = g;
+
+    $('#s270_sV').textContent = s.toFixed(3) + ' cycles of clock per queued cycle';
+    $('#s270_slope').textContent = s.toFixed(3);
+    $('#s270_pred').textContent = Math.round(predArow).toLocaleString() + ' cycles';
+    $('#s270_err').innerHTML = Math.abs(err) < 20
+      ? '<b class="ok">nothing — it fits</b>' : '<b class="bad">' + Math.abs(Math.round(err)).toLocaleString() + ' cycles</b>';
+    $('#s270_wall').textContent = (wall(predArow) / 1000).toFixed(1) + ' s (measured 24.3)';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 271 ── */
+/* ── Station 271: one change, four stopwatches ── */
+if ($('#s271')) {
+  const svg = $('#s271_svg');
+  const B = { pw: $('#s271_pw'), uw: $('#s271_uw'), md: $('#s271_md'), sm: $('#s271_sm') };
+  // prefill-step2 §0.1 / §0.2 — the same arm (pad2) on the same laptop
+  const WAYS = [
+    { k: 'pw', name: 'the wall clock, with profiling on', ctl: '29,181.7 ms', arm: '28,221.3 ms', d: 3.3,
+      drains: 258, use: 'nothing — it is a different command stream',
+      why: 'profiling adds one “wait for the GPU to finish” per layer: 3 chunks × 64 blocks = 192 extra drains. Work that used to overlap no longer can, so the change has less to win back.' },
+    { k: 'uw', name: 'the wall clock, profiling off', ctl: '28,708.2 ms', arm: '24,864.7 ms', d: 13.4,
+      drains: 66, use: 'this is the value — what a person waits',
+      why: 'medians of three runs, the command stream the product actually runs. This is the only reading that answers “is the wait shorter”.' },
+    { k: 'md', name: 'the kernel’s middle pass', ctl: '25,344 µs', arm: '18,342 µs', d: 27.6,
+      drains: 258, use: 'nothing — the passes are not alike',
+      why: 'the kernel runs 400 times a chunk on shapes from 96 wide to 17,408 wide. The middle one of those is not the one that fills the clock, and it flatters the arm by about nine points.' },
+    { k: 'sm', name: 'the kernel’s total, all 277 passes', ctl: '5,148,862 µs', arm: '4,089,845 µs', d: 20.6,
+      drains: 258, use: 'attribution — which pass, how long',
+      why: 'the honest way to read a profile. It reconciles exactly with the clock: the kernel is 65.1% of the wait, and 20.6% of 65.1% is 13.4%.' },
+  ];
+  let cur = 'uw';
+  for (const k of Object.keys(B)) B[k].addEventListener('click', () => { cur = k; render(); });
+
+  function render() {
+    for (const k of Object.keys(B)) B[k].setAttribute('aria-pressed', String(cur === k));
+    const W = WAYS.find((w) => w.k === cur);
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    // ── the four readings ──────────────────────────────────
+    const BX = 250, BW = 300, MAXD = 30;
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">one change to one kernel, measured four ways on the same laptop</text>`;
+    WAYS.forEach((w, i) => {
+      const y = 28 + i * 30, on = w.k === cur, truth = w.k === 'uw';
+      const bw = BW * w.d / MAXD;
+      g += `<rect x="10" y="${y - 4}" width="616" height="26" rx="5" fill="${on ? trace : 'none'}" fill-opacity="0.12"/>`;
+      g += `<text x="18" y="${y + 13}" font-size="11" fill="${on ? ink : ink2}">${w.name}</text>`;
+      g += `<rect x="${BX}" y="${y + 1}" width="${bw.toFixed(1)}" height="15" rx="3" fill="${truth ? ok : (on ? trace : ink3)}" opacity="${on || truth ? 0.88 : 0.32}"/>`;
+      g += `<text x="${(BX + bw + 8).toFixed(1)}" y="${y + 13}" font-size="11.5" fill="${on || truth ? ink : ink3}">−${w.d.toFixed(1)}%</text>`;
+      g += `<text x="620" y="${y + 13}" text-anchor="end" font-size="9.5" fill="${truth ? ok : ink3}">${truth ? 'the value' : ''}</text>`;
+    });
+    g += `<text x="14" y="${28 + 4 * 30 + 8}" font-size="10.5" fill="${ink3}">All four are real readings of the same change. The largest is 8.4× the smallest.</text>`;
+
+    // ── the chosen one ─────────────────────────────────────
+    const DY = 176;
+    g += `<rect x="14" y="${DY}" width="612" height="86" rx="8" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="${DY + 20}" font-size="12.5" fill="${ink}">${W.name}</text>`;
+    g += `<text x="26" y="${DY + 40}" font-size="11.5" fill="${ink2}">control <tspan fill="${ink}">${W.ctl}</tspan>  →  armed <tspan fill="${ink}">${W.arm}</tspan>  =  <tspan fill="${W.k === 'uw' ? ok : trace}">−${W.d.toFixed(1)}%</tspan></text>`;
+    const wrap = (t, n) => { const out = []; let l = ''; for (const word of t.split(' ')) { if ((l + ' ' + word).trim().length > n) { out.push(l.trim()); l = word; } else l += ' ' + word; } out.push(l.trim()); return out; };
+    wrap(W.why, 96).slice(0, 3).forEach((ln, i) => {
+      g += `<text x="26" y="${DY + 58 + i * 14}" font-size="10.5" fill="${ink3}">${ln}</text>`;
+    });
+
+    // ── the command stream ─────────────────────────────────
+    const SY = 282;
+    g += `<text x="14" y="${SY}" font-size="11" fill="${ink3}">how many times the run stops and waits for the GPU to catch up</text>`;
+    [['profiling off', 66, ok], ['profiling on', 258, bad]].forEach((r, i) => {
+      const y = SY + 10 + i * 24, on = (r[1] === W.drains);
+      g += `<text x="14" y="${y + 14}" font-size="11" fill="${on ? ink : ink3}">${r[0]}</text>`;
+      const w = 300 * r[1] / 258;
+      g += `<rect x="120" y="${y + 3}" width="${w.toFixed(1)}" height="14" rx="3" fill="${r[2]}" opacity="${on ? 0.85 : 0.25}"/>`;
+      g += `<text x="${(120 + w + 8).toFixed(1)}" y="${y + 14}" font-size="11" fill="${on ? ink : ink3}">${r[1]}${i ? ' — 192 added by profiling' : ' drains'}</text>`;
+    });
+
+    // ── the reconciliation ─────────────────────────────────
+    const RY = 366;
+    g += `<line x1="14" y1="${RY - 12}" x2="626" y2="${RY - 12}" stroke="${line}"/>`;
+    g += `<text x="14" y="${RY + 4}" font-size="11" fill="${ink3}">the two honest readings agree, and nothing is left over</text>`;
+    g += `<text x="14" y="${RY + 26}" font-size="13" fill="${ink}">`
+      + `<tspan fill="${trace}">20.6%</tspan> off the kernel  ×  <tspan fill="${signal}">65.1%</tspan> of the wait  =  <tspan fill="${ok}">13.4%</tspan>  — and the clock read <tspan fill="${ok}">13.4%</tspan></text>`;
+    g += `<text x="14" y="${RY + 46}" font-size="10.5" fill="${ink3}">The 65.1% comes from this A/B itself, no profiler. With the median, a nine-point gap appears.</text>`;
+    svg.innerHTML = g;
+
+    $('#s271_val').textContent = '−' + W.d.toFixed(1) + '%';
+    $('#s271_dr').textContent = W.drains + (W.drains === 258 ? ' (192 added)' : '');
+    $('#s271_use').textContent = W.use;
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 272 ── */
+/* ── Station 272: the thread-map swap whose sign follows the tile ── */
+if ($('#s272')) {
+  const svg = $('#s272_svg');
+  const B = { s8: $('#s272_s8'), t64: $('#s272_t64'), t128: $('#s272_t128') };
+  // M4 Pro pairwise medians. 64x64 / 64x128: M=1491, N=5120 (step2 §3.2 table).
+  // BM=8: the small-M ladder at M=64, same section.
+  const TILES = {
+    s8: { name: 'the thin tile, BM=8 — kept for short prompts', cond: 'isolated dispatch at M=64, N=5120',
+      base: 'the thin tile as shipped', wmap: -3.5,
+      arms: [['as shipped', 0], ['arow', -14.2], ['pad2', +8.0], ['wmap', -3.5]] },
+    t64: { name: 'the shipped tile, 64×64', cond: 'paired runs at M=1491, N=5120, 60 iterations each',
+      base: 'the shipped tile', wmap: +8.10,
+      arms: [['as shipped', 0], ['arow', +0.95], ['pad2', +0.39], ['wmap', +8.10], ['arow+wmap', +7.35]] },
+    t128: { name: 'the wide tile, 64×128 — used only when the prompt is long', cond: 'paired runs at M=1491, N=5120, 60 iterations each',
+      base: 'the wide tile alone', wmap: -4.30,
+      arms: [['as shipped (64×64)', 0], ['bn128', -3.99], ['arow+bn128', -2.71], ['wmap+bn128', -8.12], ['arow+wmap+bn128', -7.43]] },
+  };
+  let t = 't64';
+  for (const k of Object.keys(B)) B[k].addEventListener('click', () => { t = k; render(); });
+
+  function render() {
+    for (const k of Object.keys(B)) B[k].setAttribute('aria-pressed', String(t === k));
+    const T = TILES[t];
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    const ZX = 320, PXP = 17, LIM = 15;      // px per percent
+    let g = '';
+
+    g += `<text x="14" y="16" font-size="12" fill="${ink}">${T.name}</text>`;
+    g += `<text x="14" y="32" font-size="10.5" fill="${ink3}">${T.cond}</text>`;
+    // the zero line
+    const TOP = 46, ROW = 30, H = 5 * ROW;
+    g += `<line x1="${ZX}" y1="${TOP - 4}" x2="${ZX}" y2="${TOP + H}" stroke="${ink3}" stroke-width="1.4"/>`;
+    for (const p of [-10, -5, 5, 10]) {
+      const x = ZX + p * PXP;
+      g += `<line x1="${x}" y1="${TOP - 4}" x2="${x}" y2="${TOP + H}" stroke="${line}" stroke-dasharray="2 4"/>`;
+      g += `<text x="${x}" y="${TOP + H + 14}" text-anchor="middle" font-size="9.5" fill="${ink3}">${p > 0 ? '+' : ''}${p}%</text>`;
+    }
+    g += `<text x="14" y="${TOP + H + 14}" font-size="10" fill="${ok}">← faster</text>`;
+    g += `<text x="626" y="${TOP + H + 14}" text-anchor="end" font-size="10" fill="${bad}">slower →</text>`;
+    g += `<text x="${ZX}" y="${TOP + H + 14}" text-anchor="middle" font-size="9.5" fill="${ink3}">0</text>`;
+    T.arms.forEach((a, i) => {
+      const y = TOP + i * ROW, v = Math.max(Math.min(a[1], LIM), -LIM);
+      const w = Math.abs(v) * PXP, x = v >= 0 ? ZX : ZX - w;
+      const isW = a[0].indexOf('wmap') >= 0;
+      g += `<text x="14" y="${y + 15}" font-size="11" fill="${isW ? ink : ink2}">${a[0]}${isW ? ' ←' : ''}</text>`;
+      if (Math.abs(a[1]) > 0.01) {
+        g += `<rect x="${x.toFixed(1)}" y="${y + 4}" width="${Math.max(w, 1.5).toFixed(1)}" height="16" rx="3" fill="${a[1] < 0 ? ok : bad}" opacity="${isW ? 0.9 : 0.45}"/>`;
+      }
+      const tx = v >= 0 ? x + w + 8 : x - 8;
+      g += `<text x="${tx.toFixed(1)}" y="${y + 16}" text-anchor="${v >= 0 ? 'start' : 'end'}" font-size="11" fill="${Math.abs(a[1]) < 0.01 ? ink3 : (a[1] < 0 ? ok : bad)}">${a[1] > 0 ? '+' : ''}${a[1].toFixed(2)}%</text>`;
+    });
+
+    // ── the swap, isolated ─────────────────────────────────
+    const SY = TOP + H + 32;
+    const sgn = T.wmap < 0;
+    g += `<rect x="14" y="${SY}" width="612" height="52" rx="8" fill="${sgn ? ok : bad}" fill-opacity="0.13" stroke="${sgn ? ok : bad}"/>`;
+    g += `<text x="26" y="${SY + 21}" font-size="13" fill="${ink}">the same two-line swap, in this tile: <tspan fill="${sgn ? ok : bad}" font-size="15">${T.wmap > 0 ? '+' : ''}${T.wmap.toFixed(2)}%</tspan> — ${sgn ? 'faster' : 'slower'}</text>`;
+    g += `<text x="26" y="${SY + 40}" font-size="10.5" fill="${ink3}">${t === 't128'
+      ? 'derived the way the doc derives it: wmap+bn128 (−8.12%) taken relative to bn128 alone (−3.99%)'
+      : 'measured directly, as a pair against the shipped kernel in the same process'}</text>`;
+
+    // ── the three signs together ───────────────────────────
+    const CY = SY + 72;
+    g += `<text x="14" y="${CY}" font-size="11" fill="${ink3}">the same two lines, all three tiles — nothing about memory explains a sign that follows the tile</text>`;
+    const THREE = [['thin, BM=8', -3.5, 's8'], ['shipped, 64×64', +8.10, 't64'], ['on the wide tile', -4.30, 't128']];
+    THREE.forEach((r, i) => {
+      const x = 14 + i * 204, on = r[2] === t;
+      g += `<rect x="${x}" y="${CY + 10}" width="196" height="44" rx="7" fill="${on ? trace : card}" fill-opacity="${on ? 0.16 : 1}" stroke="${on ? trace : line}"/>`;
+      g += `<text x="${x + 12}" y="${CY + 28}" font-size="10.5" fill="${ink3}">${r[0]}</text>`;
+      g += `<text x="${x + 12}" y="${CY + 47}" font-size="15" fill="${r[1] < 0 ? ok : bad}">${r[1] > 0 ? '+' : ''}${r[1].toFixed(2)}%</text>`;
+    });
+    g += `<text x="14" y="${CY + 74}" font-size="10.5" fill="${ink3}">The leading explanation is register pressure — and the doc says so as an explanation, not a result.</text>`;
+    svg.innerHTML = g;
+
+    const best = T.arms.reduce((a, b) => (b[1] < a[1] ? b : a));
+    $('#s272_wm').textContent = (T.wmap > 0 ? '+' : '') + T.wmap.toFixed(2) + '% — ' + (T.wmap < 0 ? 'faster' : 'slower');
+    $('#s272_best').textContent = best[0] + ' (' + best[1].toFixed(2) + '%)';
+    $('#s272_note').innerHTML = t === 't128'
+      ? '<span>and at the wider shape N=17,408 <b class="ok">−8.27%</b></span>' : '';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 273 ── */
+/* ── Station 273: the 6 GB budget, the cache and the vision tower ── */
+if ($('#s273')) {
+  const svg = $('#s273_svg'), sl = $('#s273_ctx');
+  const bOn = $('#s273_von'), bOff = $('#s273_voff');
+  const CARD = 6144;                 // MiB, the laptop's 3060
+  const VISION = 741;                // MiB, the resident vision tower
+  const PER_TOK = 0.125;             // MiB per word: 16 layers x 4 heads x 256 x 4 B x 2
+  const MEASURED = 5698;             // MiB, the recorded peak at ctx 2048 with vision on
+  const REST = MEASURED - VISION - 2048 * PER_TOK;   // derived: everything that is not vision or cache
+  let vis = true;
+  bOn.addEventListener('click', () => { vis = true; render(); });
+  bOff.addEventListener('click', () => { vis = false; render(); });
+  sl.addEventListener('input', render);
+
+  function render() {
+    bOn.setAttribute('aria-pressed', String(vis));
+    bOff.setAttribute('aria-pressed', String(!vis));
+    const ctx = parseInt(sl.value, 10);
+    const kv = ctx * PER_TOK, base = REST + (vis ? VISION : 0), tot = base + kv;
+    const spare = CARD - tot, over = spare < 0;
+    const maxCtx = Math.floor((CARD - base) / PER_TOK);
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), paper = css('--paper');
+    const BX = 14, BW = 612, SCALE = BW / 7200;      // MiB -> px, room to draw the overflow
+    let g = '';
+
+    // ── the bar ────────────────────────────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">what is sitting in the laptop's GPU memory while it answers</text>`;
+    const BY = 32, BH = 44;
+    let x = BX;
+    const seg = (w, col, lab, sub) => {
+      const px = Math.max(w * SCALE, 0);
+      let out = `<rect x="${x.toFixed(1)}" y="${BY}" width="${px.toFixed(1)}" height="${BH}" fill="${col}" opacity="0.85"/>`;
+      if (px > 74) {
+        out += `<text x="${(x + 8).toFixed(1)}" y="${BY + 19}" font-size="10.5" fill="${paper}">${lab}</text>`;
+        out += `<text x="${(x + 8).toFixed(1)}" y="${BY + 34}" font-size="10.5" fill="${paper}">${sub}</text>`;
+      }
+      x += px;
+      return out;
+    };
+    g += seg(REST, trace, 'the model and everything else', Math.round(REST).toLocaleString() + ' MiB');
+    if (vis) g += seg(VISION, signal, 'the picture-reader', VISION + ' MiB');
+    g += seg(kv, over ? bad : ok, 'the growing cache', Math.round(kv).toLocaleString() + ' MiB');
+    // the card's limit
+    const LX = BX + CARD * SCALE;
+    g += `<line x1="${LX.toFixed(1)}" y1="${BY - 6}" x2="${LX.toFixed(1)}" y2="${BY + BH + 6}" stroke="${ink}" stroke-width="2"/>`;
+    g += `<text x="${LX.toFixed(1)}" y="${BY + BH + 20}" text-anchor="middle" font-size="10.5" fill="${ink}">6,144 MiB — all the card has</text>`;
+    if (over) {
+      g += `<rect x="${LX.toFixed(1)}" y="${BY}" width="${((tot - CARD) * SCALE).toFixed(1)}" height="${BH}" fill="none" stroke="${bad}" stroke-width="2" stroke-dasharray="4 3"/>`;
+      g += `<text x="14" y="${BY + BH + 38}" font-size="11" fill="${bad}">${Math.round(tot - CARD).toLocaleString()} MiB of it has to be served across the cable</text>`;
+    } else {
+      g += `<rect x="${x.toFixed(1)}" y="${BY}" width="${(spare * SCALE).toFixed(1)}" height="${BH}" fill="none" stroke="${ok}" stroke-dasharray="4 3"/>`;
+      g += `<text x="14" y="${BY + BH + 38}" font-size="11" fill="${ok}">${Math.round(spare).toLocaleString()} MiB free — room for ${Math.floor(spare / PER_TOK).toLocaleString()} more words</text>`;
+    }
+
+    // a small key for the two thin bands
+    const leg = (lx, col, txt) => `<rect x="${lx}" y="${BY + BH + 29}" width="9" height="9" rx="2" fill="${col}" opacity="0.85"/>`
+      + `<text x="${lx + 13}" y="${BY + BH + 38}" font-size="10" fill="${ink3}">${txt}</text>`;
+    if (vis) g += leg(330, signal, 'the picture-reader · 741 MiB');
+    g += leg(492, over ? bad : ok, 'the cache · ' + Math.round(kv).toLocaleString() + ' MiB');
+
+    // ── the recorded run ───────────────────────────────────
+    const MY = 134;
+    g += `<text x="14" y="${MY}" font-size="11" fill="${ink3}">the one measured run this is anchored on</text>`;
+    g += `<rect x="14" y="${MY + 8}" width="612" height="30" rx="6" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="${MY + 27}" font-size="11" fill="${ink2}">peak while answering <tspan fill="${ink}">5,698 of 6,144 MiB</tspan> — 2,048 words, picture-reader loaded, 100 samples</text>`;
+
+    // ── the arithmetic ─────────────────────────────────────
+    const AY = 196;
+    g += `<text x="14" y="${AY}" font-size="11" fill="${ink3}">where 128 KiB a word comes from — read out of the weight file's own header</text>`;
+    const STEPS = [['64 layers', '48 keep nothing'], ['16 with attention', 'indices 3, 7 … 63'],
+      ['4 heads × 256', '× 4 bytes each'], ['× 2', 'key and value'], ['× 16 layers', '= 128 KiB a word']];
+    STEPS.forEach((st, i) => {
+      const sx = 14 + i * 123;
+      g += `<rect x="${sx}" y="${AY + 10}" width="115" height="40" rx="6" fill="${i === 4 ? ok : card}" fill-opacity="${i === 4 ? 0.16 : 1}" stroke="${i === 4 ? ok : line}"/>`;
+      g += `<text x="${sx + 9}" y="${AY + 27}" font-size="10.5" fill="${ink}">${st[0]}</text>`;
+      g += `<text x="${sx + 9}" y="${AY + 42}" font-size="9" fill="${ink3}">${st[1]}</text>`;
+    });
+
+    // ── what happens over the line ─────────────────────────
+    const OY = 266;
+    g += `<rect x="14" y="${OY}" width="612" height="56" rx="8" fill="${over ? bad : ok}" fill-opacity="0.13" stroke="${over ? bad : ok}"/>`;
+    g += `<text x="26" y="${OY + 23}" font-size="13" fill="${ink}">${over
+      ? 'over the edge — no error, no fallback, just the slow cable'
+      : 'it fits — the card serves everything out of its own memory'}</text>`;
+    g += `<text x="26" y="${OY + 42}" font-size="11" fill="${ink3}">${over
+      ? 'nothing failed to allocate, so the seven-rung ladder never fires. Decode falls to 2–3 words a second.'
+      : 'the largest window that fits here is ' + maxCtx.toLocaleString() + ' words' + (vis ? '; unloading the picture-reader adds 5,928' : ', with the picture-reader unloaded')}</text>`;
+    g += `<text x="14" y="${OY + 76}" font-size="10.5" fill="${ink3}">Only the cache moves with the slider; the rest is derived from that one peak. A budget, not a measurement.</text>`;
+    svg.innerHTML = g;
+
+    $('#s273_ctxV').textContent = ctx.toLocaleString() + ' words · ' + Math.round(kv).toLocaleString() + ' MiB of cache';
+    $('#s273_tot').textContent = Math.round(tot).toLocaleString() + ' of 6,144 MiB';
+    $('#s273_spare').innerHTML = over
+      ? '<b class="bad">' + Math.round(-spare).toLocaleString() + ' MiB over</b>'
+      : '<b class="ok">' + Math.round(spare).toLocaleString() + ' MiB</b>';
+    $('#s273_max').textContent = maxCtx.toLocaleString() + ' words';
+    $('#s273_speed').innerHTML = over ? '<b class="bad">2–3 words/s</b>' : '<b class="ok">the fast class</b>';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 274 ── */
+/* ── Station 274: the three terms of the wait before the first word ── */
+if ($('#s274')) {
+  const svg = $('#s274_svg'), sl = $('#s274_m');
+  // discovery doc §0.3. gemm/other are the doc's GPU columns; nonGpu is recomputed
+  // live from the fitted model and reproduces the doc's column exactly.
+  const ROWS = [
+    { m: 30, rows: 32, chunks: 1, gemm: 0.50, other: 0.14, pred: 1.73, meas: 2.49, note: 'first prompt of the session — carries one-time warm-up' },
+    { m: 38, rows: 48, chunks: 1, gemm: 0.72, other: 0.20, pred: 2.06, meas: 2.07, note: 'the clean short-prompt floor' },
+    { m: 44, rows: 48, chunks: 1, gemm: 0.72, other: 0.20, pred: 2.06, meas: 2.09, note: 'the same tile, four more words — the same wait' },
+    { m: 341, rows: 384, chunks: 1, gemm: 5.62, other: 0.79, pred: 7.82, meas: 8.05, note: 'two runs, 8.33 and 7.78 s' },
+    { m: 512, rows: 512, chunks: 1, gemm: 7.49, other: 1.11, pred: 10.17, meas: null, note: 'predicted only — no export at exactly this length' },
+    { m: 1491, rows: 1536, chunks: 3, gemm: 22.48, other: 3.28, pred: 29.16, meas: 29.18, note: 'three chunks of 512, 512 and 467' },
+  ];
+  const dispatches = (m) => {              // Σ over 512-word chunks
+    let left = m, d = 0;
+    while (left > 0) { const c = Math.min(512, left); d += 1363 + 96 * Math.ceil(c / 32); left -= c; }
+    return d;
+  };
+  sl.addEventListener('input', render);
+
+  function render() {
+    const i = parseInt(sl.value, 10), R = ROWS[i];
+    const d = dispatches(R.m), nonGpu = 0.63 + 322e-6 * d;
+    const pred = R.pred;   // the doc's own predicted column
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card'), paper = css('--paper');
+    const BX = 14, BW = 612, SC = BW / 31;      // seconds -> px
+    let g = '';
+
+    // ── the stacked wait ───────────────────────────────────
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">the wait before the first word, split into what it is made of</text>`;
+    const BY = 28, BH = 40;
+    let x = BX;
+    const seg = (v, col, lab) => {
+      const px = v * SC;
+      let out = `<rect x="${x.toFixed(1)}" y="${BY}" width="${Math.max(px, 1).toFixed(1)}" height="${BH}" fill="${col}" opacity="0.85"/>`;
+      if (px > 92) out += `<text x="${(x + 8).toFixed(1)}" y="${BY + 24}" font-size="11" fill="${paper}">${lab} ${v.toFixed(2)} s</text>`;
+      x += px;
+      return out;
+    };
+    g += seg(nonGpu, bad, 'the browser side');
+    g += seg(R.gemm, trace, 'the big matrix jobs');
+    g += seg(R.other, signal, 'the rest of the GPU');
+    g += `<line x1="${BX}" y1="${BY + BH + 4}" x2="${(BX + 30 * SC).toFixed(1)}" y2="${BY + BH + 4}" stroke="${line}"/>`;
+    for (const t of [0, 5, 10, 15, 20, 25, 30]) {
+      const tx = BX + t * SC;
+      g += `<line x1="${tx.toFixed(1)}" y1="${BY + BH + 4}" x2="${tx.toFixed(1)}" y2="${BY + BH + 9}" stroke="${line}"/>`;
+      g += `<text x="${tx.toFixed(1)}" y="${BY + BH + 22}" text-anchor="middle" font-size="9.5" fill="${ink3}">${t}s</text>`;
+    }
+    // key
+    [[bad, 'the browser side: ' + nonGpu.toFixed(2) + ' s'], [trace, 'the big matrix jobs: ' + R.gemm.toFixed(2) + ' s'],
+      [signal, 'everything else on the GPU: ' + R.other.toFixed(2) + ' s']].forEach((k, j) => {
+      const kx = 14 + j * 208;
+      g += `<rect x="${kx}" y="${BY + BH + 32}" width="9" height="9" rx="2" fill="${k[0]}" opacity="0.85"/>`;
+      g += `<text x="${kx + 13}" y="${BY + BH + 41}" font-size="10" fill="${ink3}">${k[1]}</text>`;
+    });
+
+    // ── the arithmetic behind the browser term ─────────────
+    const AY = 132;
+    g += `<rect x="14" y="${AY}" width="612" height="46" rx="7" fill="${card}" stroke="${line}"/>`;
+    g += `<text x="26" y="${AY + 19}" font-size="11.5" fill="${ink2}">${R.chunks} chunk${R.chunks > 1 ? 's' : ''} × (1,363 + 96 × ${Math.ceil(Math.min(512, R.m) / 32)}…) = <tspan fill="${ink}">${d.toLocaleString()} GPU jobs</tspan>, at 322 µs each, plus a fixed 0.63 s</text>`;
+    g += `<text x="26" y="${AY + 37}" font-size="11.5" fill="${ink2}">predicted <tspan fill="${ink}">${pred.toFixed(2)} s</tspan>${R.meas !== null
+      ? `   ·   measured <tspan fill="${ok}">${R.meas.toFixed(2)} s</tspan>   ·   ${R.note}` : `   ·   ${R.note}`}</text>`;
+
+    // ── every row ──────────────────────────────────────────
+    const TY = 196;
+    g += `<text x="14" y="${TY}" font-size="11" fill="${ink3}">every prompt length the model was checked against</text>`;
+    g += `<text x="14" y="${TY + 18}" font-size="9.5" fill="${ink3}">words</text>`;
+    g += `<text x="96" y="${TY + 18}" font-size="9.5" fill="${ink3}">GPU jobs</text>`;
+    g += `<text x="200" y="${TY + 18}" font-size="9.5" fill="${ink3}">browser side</text>`;
+    g += `<text x="320" y="${TY + 18}" font-size="9.5" fill="${ink3}">predicted</text>`;
+    g += `<text x="420" y="${TY + 18}" font-size="9.5" fill="${ink3}">measured</text>`;
+    ROWS.forEach((r, k) => {
+      const y = TY + 24 + k * 21, on = k === i;
+      const dd = dispatches(r.m), ng = 0.63 + 322e-6 * dd, pp = r.pred;
+      g += `<rect x="10" y="${y}" width="616" height="19" rx="4" fill="${on ? trace : 'none'}" fill-opacity="0.14"/>`;
+      g += `<text x="14" y="${y + 14}" font-size="10.5" fill="${on ? ink : ink2}">${r.m.toLocaleString()}</text>`;
+      g += `<text x="96" y="${y + 14}" font-size="10.5" fill="${on ? ink : ink3}">${dd.toLocaleString()}</text>`;
+      g += `<text x="200" y="${y + 14}" font-size="10.5" fill="${bad}">${ng.toFixed(2)} s</text>`;
+      g += `<text x="320" y="${y + 14}" font-size="10.5" fill="${on ? ink : ink3}">${pp.toFixed(2)} s</text>`;
+      g += `<text x="420" y="${y + 14}" font-size="10.5" fill="${r.meas === null ? ink3 : ok}">${r.meas === null ? '—' : r.meas.toFixed(2) + ' s'}</text>`;
+      g += `<text x="626" y="${y + 14}" text-anchor="end" font-size="9.5" fill="${ink3}">${k === 0 ? 'warm-up in this one' : (r.meas === null ? 'no export at this length' : '')}</text>`;
+    });
+
+    // ── the floor ──────────────────────────────────────────
+    const FY = TY + 24 + 6 * 21 + 22;
+    g += `<rect x="14" y="${FY}" width="612" height="46" rx="8" fill="${bad}" fill-opacity="0.12" stroke="${bad}"/>`;
+    g += `<text x="26" y="${FY + 19}" font-size="12.5" fill="${ink}">the floor for a short prompt: 1.13 s of browser work + 0.72 s of arithmetic</text>`;
+    g += `<text x="26" y="${FY + 37}" font-size="10.5" fill="${ink3}">no kernel change reaches below ~1.5 s; the measured 30-word row went 1.59 → 1.58 s across every arm</text>`;
+    svg.innerHTML = g;
+
+    $('#s274_mV').textContent = R.m.toLocaleString() + ' words · ' + R.rows.toLocaleString() + ' padded rows';
+    $('#s274_disp').textContent = d.toLocaleString();
+    $('#s274_pred').textContent = pred.toFixed(2) + ' s';
+    $('#s274_meas').textContent = R.meas === null ? 'no export' : R.meas.toFixed(2) + ' s';
+    $('#s274_share').textContent = Math.round(100 * nonGpu / pred) + '% of the wait';
   }
   render(); window.addEventListener('resize', render);
 }

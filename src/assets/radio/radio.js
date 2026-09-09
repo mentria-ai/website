@@ -209,8 +209,12 @@ class MentriaRadio {
 
   scheduleCrossfade() {
     if (this.crossfadeTimer) clearTimeout(this.crossfadeTimer);
-    const crossfadeSec = this.player.crossfadeSec || 4;
-    const delayMs = Math.max(0, (this.currentDuration - this.player.currentTime - crossfadeSec) * 1000);
+    const audio = this.player._a;
+    if (audio) {
+      audio.onended = () => { audio.onended = null; this.crossfadeToNext(); };
+      return;
+    }
+    const delayMs = Math.max(0, (this.currentDuration - this.player.currentTime) * 1000);
     this.crossfadeTimer = setTimeout(() => this.crossfadeToNext(), delayMs);
   }
 

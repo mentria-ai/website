@@ -185,6 +185,7 @@ async function runTier(id, vision, runs, force, profile, quick, label) {
     if (run.initOptions && run.initOptions.maxSeq && merged.config && merged.config.attention) merged.config = Object.assign({}, merged.config, { attention: Object.assign({}, merged.config.attention, { maxSeq: run.initOptions.maxSeq }) });
     run.maxSeq = merged && merged.config && merged.config.attention ? merged.config.attention.maxSeq : null;
     const loadRes = await engine.loadModel(merged);
+    window.__mentriaEngine = engine;
     run.loadResult = compact(loadRes, 0);
   } catch (e) {
     run.loadError = String(e && e.message || e);

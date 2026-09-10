@@ -248,6 +248,7 @@ export async function ensureModel(engineFactory, opts) {
       } catch (_) {}
       if (onDeviceLost) onDeviceLost(info);
     };
+    window.__mentriaEngine = engine;
     return engine;
   };
 

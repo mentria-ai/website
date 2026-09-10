@@ -79,17 +79,14 @@ function albumPool(catalog, history, current) {
   }
   const ids = Object.keys(albums);
   if (ids.length < 2) return catalog;
-  const sourceOf = (id) => albums[id][0].source || "mentria";
   let run = 0;
   for (let i = history.length - 1; i >= 0 && history[i].album === (current && current.album); i--) run++;
   if (current && run < ALBUM_RUN && run < albums[current.album].length) return albums[current.album];
-  const playedIds = new Set(history.map((t) => t.id));
-  const wantSource = current && sourceOf(current.album) === "mentria" ? "external" : "mentria";
-  const pick = ids.filter((id) => id !== (current && current.album) && (wantSource === "mentria" ? sourceOf(id) === "mentria" : sourceOf(id) !== "mentria"));
-  const fallback = ids.filter((id) => id !== (current && current.album));
-  const choices = pick.length ? pick : fallback;
-  choices.sort((a, b) => albums[a].filter((t) => playedIds.has(t.id)).length / albums[a].length - albums[b].filter((t) => playedIds.has(t.id)).length / albums[b].length);
-  const least = choices[0];
-  const tie = choices.filter((id) => albums[id].filter((t) => playedIds.has(t.id)).length / albums[id].length === albums[least].filter((t) => playedIds.has(t.id)).length / albums[least].length);
+  const lastPlayed = {};
+  history.forEach((t, i) => { lastPlayed[t.album] = i; });
+  const choices = ids.filter((id) => id !== (current && current.album));
+  const rank = (id) => (id in lastPlayed ? lastPlayed[id] : -1);
+  const oldest = Math.min(...choices.map(rank));
+  const tie = choices.filter((id) => rank(id) === oldest);
   return albums[tie[Math.floor(Math.random() * tie.length)]];
 }

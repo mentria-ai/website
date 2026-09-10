@@ -326,8 +326,12 @@ self.addEventListener('fetch', event => {
       const network = fetch(event.request).then(resp => {
         if (resp && resp.ok) cache.put(event.request, resp.clone());
         return resp;
-      }).catch(() => cached || Response.error());
-      return cached || network;
+      });
+      const quiet = network.catch(() => null);
+      const fresh = await Promise.race([quiet, new Promise(resolve => setTimeout(() => resolve(null), 4000))]);
+      if (fresh && fresh.ok) return fresh;
+      if (cached) return cached;
+      return network.catch(() => Response.error());
     })());
     return;
   }

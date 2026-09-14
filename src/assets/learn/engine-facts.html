@@ -117,7 +117,7 @@ footer{padding-top:28px;color:var(--ink-3);font-size:13px;font-family:var(--mono
 
 <div class="wrap">
 <header class="hero">
-  <div class="eyebrow">mentria-engine · 284 things to poke at</div>
+  <div class="eyebrow">mentria-engine · 295 things to poke at</div>
   <h1>Inside the One-Bit Engine</h1>
   <p class="lede">A browser engine that runs a 27-billion-parameter model where every weight is a single bit. Each station below is one surprising fact. Move the control, watch what changes. Words with a dotted underline explain themselves — hover, or tap on a phone. On a phone, diagrams swipe sideways.</p>
   <nav class="rail">
@@ -428,6 +428,19 @@ footer{padding-top:28px;color:var(--ink-3);font-size:13px;font-family:var(--mono
       <a href="#s282">282 · The probe ran on the wrong thread, and the b…</a>
       <a href="#s283">283 · A 299 MiB saving that existed at load and no…</a>
       <a href="#s284">284 · Eight arms, one process counter, and only on…</a>
+    </div>
+    <div class="part"><span class="part-title">Part XIII · The long prompt: what it costs, and what was switched off</span>
+      <a href="#s285">285 · The kernel that triples reading speed at dep…</a>
+      <a href="#s286">286 · Memory was never what stopped the long conve…</a>
+      <a href="#s287">287 · Reading a 16,000-word prompt takes 4.8 minut…</a>
+      <a href="#s288">288 · The chat could not fill the window it alread…</a>
+      <a href="#s289">289 · One hidden one-word question threw away two…</a>
+      <a href="#s290">290 · Apple's matrix instruction has one speed, an…</a>
+      <a href="#s291">291 · A flag nobody had turned on took 26 seconds…</a>
+      <a href="#s292">292 · 961 MiB of memory was thrown away and re-mad…</a>
+      <a href="#s293">293 · Pressing Stop used to throw away every secon…</a>
+      <a href="#s294">294 · A 662 MiB file, written in 0.8 s and read ba…</a>
+      <a href="#s295">295 · The probe printed every number it was asked…</a>
     </div>
   </nav>
 </header>
@@ -8605,6 +8618,325 @@ process counter, every arm alike        ~5,028-5,070 MiB</pre>
       <svg id="s284_svg" viewBox="0 0 640 486" width="100%" height="486" role="img" aria-label="the engine's ledger and the card's process counter for each of eight arms, against whether that arm decoded fast"></svg>
     </div>
     <div class="readout"><span>the engine's ledger <b class="trace" id="s284_led">—</b></span><span>the process counter <b id="s284_os">~5,028–5,070 MiB</b></span><span>decode <b id="s284_dec">—</b></span><span id="s284_v"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 285 ───────────── -->
+<section class="station" id="s285">
+  <div class="words">
+    <div class="eyebrow">station 285 · the flag nobody set</div>
+    <h2>The kernel that triples reading speed at depth shipped a month ago, switched off.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>fill</b> — how many words are already sitting in the conversation when the model writes the next one. A fresh chat has a fill of a few dozen; a pasted document has thousands.</li><li><b>the cache</b> — for every word already read, the 16 attention layers keep two small summaries. Writing the next word means reading all of them again, so the work per word grows with the fill.</li><li><b>the split kernel</b> — a second way of doing that same read, which cuts the cache into four pieces, works on them at the same time and then joins the answers. Same arithmetic, more of the chip busy.</li></ul></div>
+    <p>Station 273 showed what a long conversation costs in memory. This is what it costs in speed. On the Apple tier the site hands the engine two settings — the window size and the compact cache — and stops there. It never passes <code>flashDecode</code>, so the split kernel, which is in the shipped bundle, never builds.</p>
+    <p>Without it the same Mac writes <b>14.6</b> words a second at an 8K fill, <b>9.0</b> at 16K and <b>5.1</b> at 32K. With it: <b>30.4</b>, <b>26.0</b>, <b>19.1</b>. For comparison, llama.cpp — a different program, same machine, same weights — manages 22.3 and 18.5 at the two deeper fills. The flag does not just recover the loss; it wins the comparison.</p>
+    <p>The reason the gap widens is arithmetic. A decode step is a fixed ~28.7 ms of everything else plus a part that grows with fill. At 512 words of fill that growing part is <b>8 %</b> of the step; at 16K it is <b>74 %</b>; at 32K about <b>85 %</b>. The split kernel is exactly the part that attacks it. Switched off, the engine spends five sixths of a deep step doing the one thing it already had a faster way to do.</p>
+    <pre class="code">fill      shipped      flag on   llama.cpp
+   512   32.0 tok/s       —          —
+ 7,900   14.6           30.4         —
+15,900    9.0           26.0       22.3
+31,800    5.1           19.1       18.5</pre>
+    <div class="src">docs/research/2026-09-14-27b-long-context-apple.md §2.1 (the Apple tier passes <code>appleMaxSeq</code> + <code>kvF16</code> and not <code>flashDecode</code>), §2.2 (the decode table and the <code>28.7 ms + 5.2e-3 × fill</code> fit, and the attention-share column 8 / 39 / 58 / 74 / ~85 %), §3.4 (llama.cpp 22.32 and 18.55 tok/s on the same GGUF and machine) · the build gate is <code>src/worker/inference_worker.js:3551</code>, <code>if (data.flashDecode === true) {</code>, and the split variant inside it at <code>:3598</code> · certified: docs/research/2026-09-14-flash-decode-split-apple-gate.md §1, <b>5/5 rungs BYTE-IDENTICAL 12/12</b> with the split route armed at every rung (the census proves every rung ran at 2–4 splits, not the degenerate one); gates 2–8 of that document are still in progress · the memory side: station 273 · what the cache is: station 9</div>
+    <div class="sowhat"><b>So what:</b> the most valuable change available on Apple this month is not a kernel — it is one word in a list of load options.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s285_f">fill — words already in the conversation</label><input type="range" id="s285_f" min="0" max="4" step="1" value="3"><span id="s285_fV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s285_svg" viewBox="0 0 640 476" width="100%" height="476" role="img" aria-label="words per second against how full the conversation is, on the shipped route and with the split kernel switched on"></svg>
+    </div>
+    <div class="readout"><span>shipped <b class="bad" id="s285_a">—</b></span><span>with the flag <b class="ok" id="s285_b">—</b></span><span id="s285_c"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 286 ───────────── -->
+<section class="station" id="s286">
+  <div class="words">
+    <div class="eyebrow">station 286 · the ceiling that was never hit</div>
+    <h2>Memory was never what stopped the long conversation on this Mac.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the working set</b> — how much of the Mac's memory the graphics chip is told it may keep in use. Nobody had ever measured it here; a five-line Metal program printed <b>19,069,665,280 bytes = 17.76 GiB</b> on a 24 GB machine, and llama.cpp's own probe agrees to the MiB.</li><li><b>the window</b> — the longest conversation the engine is set up to hold. The site ships 8,192 words on Apple.</li><li><b>the load peak</b> — for a few seconds while the model loads, the raw weights and their repacked copies are both in memory. That transient, not the settled footprint, is the moment that can fail.</li></ul></div>
+    <p>The fear was that a bigger window would not fit. It fits. Measured by a buffer census on this M4 Pro, the load peak is <b>7.93 GiB</b> at today's 8,192 and <b>8.45 / 9.50 / 11.59 GiB</b> at 16K / 32K / 64K — 45 % to 65 % of the 17.76 GiB the chip says it may use.</p>
+    <p>And it is not a fit, it is a formula. Every measured cell is reproduced to the MiB by <b>a fixed base plus the window times 67 KiB</b> — 64 KiB of cache per word plus 3 KiB of scratch — with one constant on top: <b>3,436 MiB</b>, identical in all eight cells, which is the seconds-long window where the original weights and their repacks are both alive. Prompt length does not enter. A 15× longer prompt moved the peak by 10 MiB.</p>
+    <p>The one place it does bind is a smaller machine. Scaling the same 74 % ratio, a 16 GB Mac has ≈ 11.84 GiB, and 64K lands at <b>98 %</b> of it. That number is arithmetic, not a measurement — no 16 GB Mac was available — which is exactly why the station draws both ceilings and labels one of them as a guess.</p>
+    <pre class="code">peak = 4,143.80 MiB + window x 67 KiB + 3,436.17
+window    peak     24 GB Mac   16 GB (calc)
+  8,192  7.93 GiB    44.6 %       66.9 %
+ 16,384  8.45        47.6         71.4
+ 32,768  9.50        53.5         80.2
+ 65,536 11.59        65.3         97.9  X</pre>
+    <div class="src">docs/research/2026-09-14-27b-long-context-apple.md §0 (the Metal probe: <code>recommendedMaxWorkingSetSize=19069665280</code> = 17.76 GiB, and llama.cpp printing <code>18186 MiB</code> for the same device), §1.1 (the measured table, <code>eval_results/longctx_apple/census_maxseq*_{f16,f32}.json</code> + <code>memory_matrix.json</code>), §1.2 (the closed form; cache anchored at <code>src/layers/attention.js:1432-1458</code> and scratch at <code>:1335-1336</code>), §1.3 (<code>loadPeak − postLoadLive = 3436.17</code> in every cell; the engine's own line <code>originals retired: 401 buffers, 3.36 GiB freed</code>), §1.5 (a 15× longer prompt moved the peak by 9.96 MiB), §1.6 (the 16 GB column is arithmetic off the measured 74.0 % ratio; no 16 GB Mac was available) · the per-word cost: station 273 · what happens when it does not fit: station 59</div>
+    <div class="sowhat"><b>So what:</b> when the answer is a formula that reproduces every measured cell, the question stops being "will it fit" and becomes "which machine are we talking about".</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s286_w">window — words the engine is set up to hold</label><input type="range" id="s286_w" min="2048" max="65536" step="2048" value="16384"><span id="s286_wV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s286_svg" viewBox="0 0 640 468" width="100%" height="468" role="img" aria-label="the settled footprint and the load peak for a chosen window, drawn against a 24 GB Mac's measured ceiling and a 16 GB Mac's calculated one"></svg>
+    </div>
+    <div class="readout"><span>load peak <b class="trace" id="s286_p">—</b></span><span>24 GB Mac <b id="s286_a">—</b></span><span>16 GB Mac <b id="s286_b">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 287 ───────────── -->
+<section class="station" id="s287">
+  <div class="words">
+    <div class="eyebrow">station 287 · the wait before the first word</div>
+    <h2>Reading a 16,000-word prompt takes 4.8 minutes, and attention is a sixth of it.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>reading the prompt</b> — before the model writes anything it has to push your whole prompt through all 64 layers, 512 words at a time. The engine calls each of those a chunk; nothing appears on screen until the last one finishes.</li><li><b>attention</b> — the one part of a chunk whose cost depends on how much came before it. Everything else in the chunk costs the same whether it is the first chunk or the sixtieth.</li><li><b>the floor</b> — what a chunk costs with an empty history. Measured three times at three different windows: 7,911 / 7,825 / 7,893 ms, or about <b>15.3 ms per word</b>.</li></ul></div>
+    <p>Station 274 showed that a 30-word prompt cannot beat 1.5 seconds here. This is the other end of the same road. Paste 16,000 words and the first word of the answer is <b>4.8 minutes</b> away; 32,000 words costs <b>11.2 minutes</b>.</p>
+    <p>The obvious suspect is attention, because attention is the part that grows. Measured, it is not the suspect. Fitting all 62 chunks of the 32,000-word run gives <b>7,840 ms of flat cost per chunk plus 0.19 ms for every word already read</b>, and that fit reproduces every measured prompt to about a percent. The growing part is <b>10 %</b> of the wait at 8,000 words, <b>17 %</b> at 16,000 and <b>27 %</b> at 32,000. The other three quarters is the ordinary per-word cost, paid more times.</p>
+    <p>Which is oddly good news. A bigger window does not introduce a new problem at 16K or 32K — it buys more of the cost that was already there. And that cost has a named yardstick: llama.cpp reads the same prompt from the same file on the same Mac at <b>10.54 ms a word</b> against our <b>18.02</b>.</p>
+    <pre class="code">chunk = 7,840 ms + 0.19 ms x words already read
+prompt    wait      per word   attention's share
+   512     7.8 s     15.18 ms        ~0 %
+ 7,900     2.2 min   16.71           10 %
+15,900     4.8 min   18.02           17 %
+31,800    11.2 min   21.12           27 %</pre>
+    <div class="src">docs/research/2026-09-14-27b-long-context-apple.md §3.1 (the TTFT table: 7,774.6 ms / 132,019.2 / 286,566.7 / 671,600.1, with <code>hostMs</code> 112 of 286,567 — it is all GPU), §3.2 (the per-chunk records, the 16K fit <code>8,061.1 ms + 0.17409 × seqLen0</code>, the three empty-cache chunks 7,911.06 / 7,825.36 / 7,892.78 ms = 15.45 / 15.28 / 15.42 ms per word, the attention-share split 10.2 / 16.8 / 27.0 %, and dispatches flat at 2,915 per chunk whatever the depth), §3.4 (llama.cpp 10.54 and 11.77 ms per word) · the <b>7,840 ms + 0.190</b> fit on this station is a least-squares over the <b>62</b> full chunks of the 31,800 run in <code>eval_results/longctx_apple/prefill_chunk_walls.json</code> (the doc quotes the 16K run's 26-chunk fit instead); the slider's curve is that fit, and it lands within ~1 % of all four measured prompts · chunk size: <code>src/model/qwen_model.js:195</code>, <code>static PREFILL_CHUNK = 512;</code> · the short-prompt floor: station 274 · what a single word costs: station 249</div>
+    <div class="sowhat"><b>So what:</b> the thing that grows was never the thing that costs. Three quarters of a four-minute wait is the same ordinary work, done more times.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s287_n">prompt length — words you pasted</label><input type="range" id="s287_n" min="512" max="32768" step="512" value="15872"><span id="s287_nV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s287_svg" viewBox="0 0 640 484" width="100%" height="484" role="img" aria-label="the wait before the first word, split into the flat per-word cost and the part that grows with how much has already been read"></svg>
+    </div>
+    <div class="readout"><span>wait <b class="trace" id="s287_t">—</b></span><span>flat cost <b class="ok" id="s287_f">—</b></span><span>attention <b class="bad" id="s287_a">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 288 ───────────── -->
+<section class="station" id="s288">
+  <div class="words">
+    <div class="eyebrow">station 288 · the window that was never filled</div>
+    <h2>The chat could not fill the window it already had — it was counting the wrong thing.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the window</b> — how many words the engine is set up to hold. On Apple the site asks for <b>8,192</b>.</li><li><b>the history budget</b> — how much of the past conversation the page decides to re-send with your new message. It walks backwards through the turns, adding them up, and stops when it has had enough.</li><li><b>characters vs words</b> — the page counted <b>characters</b> and the engine counts word-pieces. The page's own guess is 3.5 characters to a piece, so a character budget is a word budget seen through a fogged window.</li></ul></div>
+    <p>The budget was <b>14,000 characters</b>. Add the 1,320-character instruction the model always gets, plus 930 more when search is on, and the whole prompt tops out at 16,250 characters. Divided by the page's own 3.5, that is about <b>4,700 word-pieces</b> — plus 768 held back for the reply, roughly <b>5,500 of 8,192</b>. A third of the window the site had already paid for could not be reached from the chat box.</p>
+    <p>The second half is worse than the waste. The kept history is a <i>trailing</i> window, recomputed from nothing every turn. The moment the conversation is longer than the budget, this turn's prompt is not an extension of last turn's — it starts in a different place. The engine's prefix check reports <code>prompt-shorter</code> or <code>prefix-diverged</code> and re-reads everything from the beginning. Reuse was structurally impossible in exactly the long conversations where it would have mattered.</p>
+    <p>Deep-think flips the shape rather than fixing it: only 7,000 characters of history, about 2,460 pieces, and then up to 5,612 pieces of <i>generated</i> thought. It fills the window with output — which costs nothing to read, because the model wrote it.</p>
+    <pre class="code">HISTORY_CHAR_BUDGET = deepThink
+  ? (huge ? 7000 : big ? 5000 : 800)
+  : (huge ? 14000 : big ? 9500 : 3400)
+
+1,320 + 930 + 14,000 chars = 16,250
+16,250 / 3.5 = ~4,700 word-pieces of 8,192</pre>
+    <div class="src">docs/research/2026-09-14-27b-long-context-product-levers.md §1.2 — the budget table and the backwards-walking loop verbatim from the site's <code>ai-chat.njk:1049-1069</code>; the 1,320-character system prompt measured, +930 with the search tool prompt; the site's own 3.5-characters-per-piece estimator at <code>:1088</code>; <code>hugeContext = contextTokens &gt;= 8192</code>; the trailing-window consequence (<code>matchSessionPrefix</code> returning <code>prompt-shorter</code> / <code>prefix-diverged</code>, then the full-reset branch); deep-think's 7,000 chars ≈ 2,460 pieces plus a <code>thinkBudget</code> of up to 5,612 generated pieces · <b>this is the past tense:</b> docs/research/2026-09-14-browser-prefix-registry.md §5.1 records that the site now counts pieces rather than characters (<code>historyTokenBudget</code> via <code>countTokens</code>), so the prefix is a genuinely growing one · why a re-ask reuses nothing: station 267</div>
+    <div class="sowhat"><b>So what:</b> a budget in the wrong unit does not just waste room — it moves the starting line every turn, which is what makes the work unrepeatable.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s288_c">how much conversation has happened, in characters</label><input type="range" id="s288_c" min="1000" max="40000" step="500" value="22000"><span id="s288_cV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s288_svg" viewBox="0 0 640 462" width="100%" height="462" role="img" aria-label="the character history budget converted into word-pieces and drawn against the 8,192-piece window, with the point where the kept history starts sliding"></svg>
+    </div>
+    <div class="readout"><span>sent <b class="trace" id="s288_s">—</b></span><span>window used <b id="s288_u">—</b></span><span id="s288_v"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 289 ───────────── -->
+<section class="station" id="s289">
+  <div class="words">
+    <div class="eyebrow">station 289 · the side question that cost everything</div>
+    <h2>One hidden one-word question threw away two minutes of reading.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the resident conversation</b> — after the engine reads your chat it keeps the whole thing on the graphics chip. Station 8: there is room for exactly one, and whoever reads last owns it.</li><li><b>the router</b> — before answering, the page quietly asks the same model one question of its own: should this turn use web search? Two short messages, one word of answer.</li><li><b>a checkpoint</b> — a copy of the resident conversation written to disk, so it can be put back instead of re-read.</li></ul></div>
+    <p>The router's prompt shares nothing with your conversation. So the prefix check misses, the engine resets its state, the ledger is cleared — and the chat turn queued right behind it starts reading your whole conversation again from word one.</p>
+    <p>At the chat's own ceiling that is about <b>96 seconds</b>. At a full 8,192-word window it is <b>166</b>. At 32,000 words it is <b>849</b> — fourteen minutes, spent because the page wanted a yes-or-no about search. Nothing warns you; the only sign is that the answer takes as long the second time as the first.</p>
+    <p>The fix is not to make the router cheaper. It is to put the conversation down and pick it up again: snapshot before the side question, restore after. Measured on this Mac through the browser's own file store, that guard costs <b>231 milliseconds</b> at an 8,192-word prefix — because the checkpoint for that ledger is already on disk, so the saving half is free and the whole guard is one read.</p>
+    <pre class="code">prefix    re-read today   with the guard
+ 1,024      ~21 s            108 ms
+ 4,096      ~84 s            163 ms
+ 8,192     166 s             231 ms
+32,768     849 s             not measured</pre>
+    <div class="src">docs/research/2026-09-14-27b-long-context-product-levers.md §2.1 (the router verbatim from <code>ai-chat.njk:641-654</code>, called at <code>:1075</code> immediately before the chat's own generate on the <b>same</b> page-level engine; the worker turns the ledger on for every text generate unless the caller opts out, and the site never opts out; the miss then runs <code>model.initState()</code> and sets <code>sessionCommitted = null</code>; <code>engine.swapAdapter</code> at <code>:667-682</code> is a second state-invalidating event on the same engine), §2.2 (~96 s at the ~4,700-word ceiling, 166 s at 8K, 849 s at 32K) · docs/research/2026-09-14-browser-prefix-registry.md §5 (the measured guard: <b>108 / 163 / 231 ms</b> at 1,024 / 4,096 / 8,192, from <code>eval_results/prefix_registry/opfs_browser_smoke.json</code>; the warm case, where content addressing makes the save a no-op) and §5.1 (the router fix end to end) · the re-read seconds are the committed prefill rates of <code>eval_results/needle_tier3/results.jsonl</code> (48.9 / 44.0 / 38.7 words a second at 8K / 16K / 32K); the 1,024 and 4,096 rows are that rate divided out, and are marked derived · one conversation at a time: station 8 · what a session is made of: station 209</div>
+    <div class="sowhat"><b>So what:</b> the expensive thing was never the question. It was that asking it required putting the conversation down, and nobody had written the part where you pick it back up.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s289_p">how much conversation is resident when the router fires</label><input type="range" id="s289_p" min="0" max="4" step="1" value="2"><span id="s289_pV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s289_svg" viewBox="0 0 640 486" width="100%" height="486" role="img" aria-label="a turn's timeline with and without a checkpoint guard around the router's side question"></svg>
+    </div>
+    <div class="readout"><span>today <b class="bad" id="s289_a">—</b></span><span>with the guard <b class="ok" id="s289_b">—</b></span><span id="s289_c"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 290 ───────────── -->
+<section class="station" id="s290">
+  <div class="words">
+    <div class="eyebrow">station 290 · one instruction, two speeds</div>
+    <h2>Apple's matrix instruction has one speed, and our compiler reaches 59 % of it.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the matrix instruction</b> — Apple's chip can multiply two 8×8 blocks of numbers in one step instead of doing 512 separate multiplies. It is the fastest thing the chip does.</li><li><b>component type</b> — how wide each number is going in and coming out. Half-width in, full-width out, and so on. The received wisdom was that half-width is twice as fast.</li><li><b>TFLOP/s</b> — trillions of multiply-adds a second. A speed, not an amount. This chip's plain multiply peak is about 6.5.</li></ul></div>
+    <p>A probe that does nothing but run the instruction, fitted across two loop lengths so the harness cancels out, gives <b>6.38, 6.34 and 6.29</b> TFLOP/s for the three widths. They agree to <b>1.4 %</b>. The half-width advantage everyone assumed does not exist on an M4 — and half-in / full-out, which Apple's own driver does not advertise, turns out to be real and exactly as fast.</p>
+    <p>Then the same person wrote six real matrix-multiply kernels at the shape the engine actually uses. <b>None of them beats the plain scalar kernel we already ship.</b> The best usable matrix kernel reaches 3.68; the shipped one reaches 3.72. Both are about <b>59 % of the 6.33 ceiling</b>. llama.cpp, on the same chip and the same weights, is running its equivalent at <b>77–87 %</b>.</p>
+    <p>That closes the whole avenue. It is not the algorithm, not the number width, not the tiling — both programs use the same instruction at the same rate. What differs is that llama.cpp's inner loop is written by hand in Apple's own shader language, and ours is translated into it from a portable one. The missing 1.7× is the translation.</p>
+    <pre class="code">the instruction itself, fitted across two lengths
+  f32-&gt;f32  6.38   f16-&gt;f32  6.34   f16-&gt;f16  6.29
+
+real kernels at the shape the engine uses
+  f16-&gt;f16  3.83  fails the accuracy check
+  SHIPPED   3.72  59 % of the 6.33 ceiling
+  f16-&gt;f32  3.68  llama.cpp: 4.86-5.50</pre>
+    <div class="src">docs/research/2026-09-14-apple-prefill-gap-vs-llamacpp.md §10.1 (the two-point fit: 6.38 / 6.34 / 6.29 TFLOP/s, all three within 1.4 %; <code>f16-&gt;f32</code> is real and not emulated even though Dawn does not list it; the single-run numbers must not be quoted, only the fit), §10.2 (the six-kernel table at N=17408 K=5120 M=512 against the same band buffers: 23.855 / 24.559 / 24.827 / 25.744 / 27.861 / 28.972 ms; <code>f16-&gt;f16</code> fails the tolerance at relScale 1.672e-2 while <code>f16-&gt;f32</code> is 5.3× <i>more</i> accurate than the shipped kernel; 4×2 matrix-register blocking helps <code>f32-&gt;f32</code> by 3.8 % and hurts <code>f16-&gt;f32</code> by 3.7 %), §10.3 (refuse the accumulator, never the operand), §10.4 (llama.cpp at 4.86–5.50 TFLOP/s = 77–87 % of the ceiling, and the conclusion that the residual is a code-generation gap between hand-written Metal and what Tint/Dawn emit from WGSL) · probe <code>tools/native/probe_sgmat_component_types.mjs</code>, raw <code>eval_results/prefill_gap_apple/sgmat_component_type_probe.txt</code> · a bench win that did not transfer: station 241 · why one-bit weights buy bytes, not multiplies: station 13</div>
+    <div class="sowhat"><b>So what:</b> when two programs run the same instruction at the same rate and one is 1.7× faster, the difference is not in the idea. It is in what the compiler emitted.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="what to measure">
+        <button id="s290_i" aria-pressed="true">the instruction alone</button>
+        <button id="s290_g" aria-pressed="false">a real kernel</button>
+      </div>
+    </div>
+    <div class="screen">
+      <svg id="s290_svg" viewBox="0 0 640 442" width="100%" height="442" role="img" aria-label="the matrix instruction's own rate for three number widths, and the rate six real kernels achieve at the shape the engine uses"></svg>
+    </div>
+    <div class="readout"><span id="s290_r1">—</span><span id="s290_r2"></span><span id="s290_r3"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 291 ───────────── -->
+<section class="station" id="s291">
+  <div class="words">
+    <div class="eyebrow">station 291 · the rule of thumb that was ten times wrong</div>
+    <h2>A flag nobody had turned on took 26 seconds off a 16,000-word prompt.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>a tile arm</b> — the same multiplication, done in a different order and a different shaped block. <code>wmap+bn128</code> is one of these, already written, switched off, and <i>bit-identical by construction</i> — it cannot change a single output bit.</li><li><b>the transfer rule</b> — a rule of thumb this repo has carried for a year: a speed-up you measure on a kernel by itself is worth about <b>8 %</b> of that when you measure the whole engine. Station 240 is where it came from.</li><li><b>a paired run</b> — the two arms run back to back on the same machine, same prompt, same everything, so the only difference is the flag.</li></ul></div>
+    <p>Control: <b>292,828.8 ms</b> to read a 15,900-word prompt. Armed: <b>266,789.8</b>. That is <b>−26 seconds, −8.89 %</b>, and it turns a 4.88-minute wait into 4.45. The number of jobs sent to the chip, the number of passes, the number of submissions — <b>identical to the unit</b>. The 12 words it then wrote were byte-for-byte the reference. Nothing was traded.</p>
+    <p>The interesting part is what was predicted. The transfer rule said <b>−0.6 %</b>. A decomposition written earlier the same day, which splits a chunk into its multiply and its everything-else, said <b>−6.1 %</b>. The measurement was <b>−8.89 %</b> — an order of magnitude above the rule.</p>
+    <p>And there is a held-out check, which is what makes this a result rather than a lucky run. The first chunk of a prompt has an empty history, so it contains no attention at all. The decomposition predicted <b>−7.2 %</b> there before anyone ran it. It measured <b>−7.08 %</b>. The rule of thumb is retired for the prompt stage; the decomposition is promoted.</p>
+    <pre class="code">                   control     armed      delta
+prefill wall     292,828.8   266,789.8   -8.89 %
+time to 1st word    4.88 min    4.45 min
+the no-attention chunk 7,786.6  7,235.1  -7.08 %
+dispatches / submits          identical      0
+the 12 words it wrote         identical      0</pre>
+    <div class="src">docs/research/2026-09-14-apple-prefill-gap-vs-llamacpp.md §11.1 (the paired run: <code>PREFILLTILE=wmap+bn128</code> against control, <code>MAXSEQ=16384 PLEN=15900 KVF16=1</code>; 292,828.8 → 266,789.8 ms; 18.42 → 16.78 ms per word; the <code>seqLen0=0</code> chunk 7,786.6 → 7,235.1 ms; dispatches/passes/submits/cmdBufs 91,840 / 91,840 / 2,208 / 98,096 <b>identical</b>; encode, submit and host times flat; <b>BYTE-IDENTICAL 12/12</b> against the committed <code>eval_results/ctx16k_reference.json</code>), §11.2 (the three predictions: the 0.08 rule −0.6 %, the §2.5 decomposition −6.1 %, and the held-out attention-free chunk predicted −7.2 % against a measured −7.08 %; the armed arm ran <i>second</i>, on a warm machine, which biases against it), §11.3 (make it the Apple default; predicted 10.2–10.6 min at 32K, unmeasured) · raw <code>eval_results/prefill_gap_apple/prefill_tile_ab_15900.txt</code> and the two <code>prefill_15900_*.json</code> · quote <b>−7 %</b> as the kernel-attributable figure and <b>−8.9 %</b> as the paired observation · which stopwatch you use changes the answer: station 271 · the same swap helping one tile and hurting another: station 272</div>
+    <div class="sowhat"><b>So what:</b> a rule of thumb that has been right for a year is still only right about the things it was fitted on. This one was fitted on a small model's decoding, and it was carried into a large model's reading.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="what to look at">
+        <button id="s291_p" aria-pressed="true">what was predicted</button>
+        <button id="s291_m" aria-pressed="false">the paired run</button>
+      </div>
+    </div>
+    <div class="screen">
+      <svg id="s291_svg" viewBox="0 0 640 424" width="100%" height="424" role="img" aria-label="three predictions of a speed-up against the measurement, and the two arms of the paired run side by side"></svg>
+    </div>
+    <div class="readout"><span id="s291_r1">—</span><span id="s291_r2"></span><span id="s291_r3"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 292 ───────────── -->
+<section class="station" id="s292">
+  <div class="words">
+    <div class="eyebrow">station 292 · the rebuild that bought nothing</div>
+    <h2>961 MiB of memory was thrown away and re-made before every single question.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the state</b> — the scratch memory a conversation lives in: two cache buffers for each of the 16 attention layers, two more for each of the 48 other layers, and one pool for the speculative rewind slots. 129 buffers in total.</li><li><b>starting fresh</b> — when a new question does not continue the last one, the engine starts the state over. It used to do that by destroying all 129 and asking for 129 new ones.</li><li><b>zero-initialised</b> — the graphics standard promises that a brand-new buffer arrives full of zeros. So does the command that wipes an existing one. Those two facts are what make the fix free.</li></ul></div>
+    <p>Five of those allocation sites did something strange: they asked for the new buffer to be writable, took a handle on it, <i>wrote nothing into it</i>, and handed it back. They were paying for an upload that never happened, to get zeros the standard already guaranteed.</p>
+    <p>The replacement is one command per buffer — wipe in place — recorded into a single batch. At the shipped 8,192-word window the reset went from <b>31.7 ms to 0.1</b>. At 16,384 it went from <b>60.5 to 0.2</b>. And the shape of the before-numbers is the proof: 1.53× the bytes cost 1.91× the wall, so the wall really was tracking the allocation and not something else. Every competing explanation predicted a flat line.</p>
+    <p>The bytes are identical by argument, not by hope, and the engine's own memory counters read the same to the byte afterwards: <b>4,907,123,716</b> before and after. The saving also lands on restoring a saved conversation, where the same rebuild sat on the critical path: <b>110.2 ms → 65.1</b>, because putting a session back should cost what its bytes cost and nothing else.</p>
+    <pre class="code">destroyed and re-made, every question, at 8,192
+  32 cache buffers     16.00 MiB      512.0 MiB
+  48 recurrent states   3.00 MiB      144.0
+  48 small conv states   120 KiB        5.6
+   1 rewind pool                      299.25
+ 129 buffers                         ~961 MiB</pre>
+    <div class="src">docs/research/2026-09-14-prefill-progress-interrupt-initstate.md §4.1 (the byte table: 129 buffers ≈ 961 MiB at 8,192, 1,473 at 16,384, 2,497 at 32,768; paid per request on the reuse-miss branch, per reset, and on every <code>restoreSession</code>; independent of prompt length — the signature of a fixed floor), §4.2 (the five sites map a range, build a typed-array <i>view</i>, write nothing and unmap; WebGPU guarantees <code>createBuffer</code> returns zero-initialised memory and <code>clearBuffer</code> writes the same zeros; a layer <b>refuses</b> the in-place path on a window change, a missing buffer, or a size mismatch — which is load-bearing for compacted caches; the one non-zero buffer, <code>stateScales</code>, has its 1.0 sentinel re-written, 64 bytes on the shipped tiers), §4.3 (<code>tests/run_initstate_reset_wall.mjs</code>, 8 timed resets after a warm-up, "before" run in a detached worktree at <code>8ce09d5b</code>: <b>31.7 → 0.1 ms</b> at 8,192 and <b>60.5 → 0.2 ms</b> at 16,384; restore <b>110.2 → 65.1 ms</b> and 118.7 → 61.5 at 16,384; <code>residentBytes</code> 4,907,123,716 and <code>residentPeakBytes</code> 8,510,211,080 identical in every field) · raw <code>eval_results/longctx_apple/product/initstate_wall_{before,after}_maxseq{8192,16384}.json</code> · why a freed small buffer never leaves the process total: station 276 · the other copy of the weights: station 279</div>
+    <div class="sowhat"><b>So what:</b> the fix was not a faster allocation. It was noticing that five places asked to write, wrote nothing, and could simply stop asking.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s292_w">window the engine was set up for</label><input type="range" id="s292_w" min="0" max="2" step="1" value="0"><span id="s292_wV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s292_svg" viewBox="0 0 640 484" width="100%" height="484" role="img" aria-label="the 129 buffers destroyed and re-created before every question, and the reset and restore walls before and after the fix"></svg>
+    </div>
+    <div class="readout"><span>churned per question <b class="bad" id="s292_b">—</b></span><span>reset before <b id="s292_x">—</b></span><span>after <b class="ok" id="s292_y">—</b></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 293 ───────────── -->
+<section class="station" id="s293">
+  <div class="words">
+    <div class="eyebrow">station 293 · stopping without losing</div>
+    <h2>Pressing Stop used to throw away every second of reading it had already done.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>a pass</b> — the engine reads a long prompt in 512-word passes, and each pass is 64 blocks of layers. The ledger of "how much is resident" only moves at the <i>end</i> of a pass.</li><li><b>state advanced in place</b> — each of the 48 recurrent layers updates its own memory the moment its block runs. So stopping halfway through a pass leaves blocks 0–12 one step ahead of blocks 13–63.</li><li><b>the ledger</b> — the list of words the engine is willing to claim it has already read. If it cannot describe the state honestly, it claims nothing.</li></ul></div>
+    <p>The old Stop was fast and useless. It checked for cancellation at every block, so it stopped within about a sixty-fourth of a pass — into a state no ledger can describe: some layers stepped, others not, the word count unmoved. The only honest thing left to do was discard it, so it did. Up to fourteen minutes of reading, gone at a click.</p>
+    <p>The new Stop checks <i>between</i> passes instead. You pay for at most one more pass — about <b>10 seconds</b> at an 8,000-word depth, <b>13</b> at 32,000 — and in exchange the engine keeps everything up to that boundary and hands it back, with the request <i>resolving</i> rather than failing.</p>
+    <p>Why the resumed reading is not merely close but the same: an uninterrupted prompt issues passes of 512, 512, … then the remainder. Interrupted after <i>k</i> passes and continued, it issues 512 <i>k</i> times, then 512 the rest of the times, then the remainder. Those are the same calls in the same order against the same state. The gate checked it anyway: the continued run produced the same words, byte for byte.</p>
+    <pre class="code">committable =  n % 512 == 0        // a clean boundary
+   &amp;&amp; n &lt;= promptIds.length
+   &amp;&amp; model.attentionCursorsInSync()
+   &amp;&amp; !deviceLost                   // else: keep nothing</pre>
+    <div class="src">docs/research/2026-09-14-prefill-progress-interrupt-initstate.md §2.1 (the old behaviour: the flag was polled at every block boundary, so a stop after block 12 leaves blocks 0–12 advanced by 512 words and 13–63 not, with the word count unmoved — "a state no manifest can describe and no cursor can rewind"; the error then propagated and the ledger was cleared, discarding up to 14 minutes at 32K; the facade's own documentation claimed it resolved, which was true of the writing stage only), §2.2 (the three guards, each of which turns a keep into a discard), §2.3 (the pass-sequence argument — the same calls in the same order, not "equivalent by contract"), §2.4 (the price: up to one whole 512-word pass of extra grind, ~10.4 s at 8K depth and ~13 s at 32K, bought against up to 849 s of retained work; single-pass prompts and vision prompts deliberately keep the old fast-cancel and still fail; <code>prefillAbortAt: 'block'</code> opts back in) · §5, gate <code>tests/run_prefill_interrupt_resume_gate.mjs</code>: interrupted at 512 words, resolved with <code>finishReason:'interrupted'</code>, <code>committedTokens: 512</code>, and the continued generate reused 512 and produced words <b>byte-identical to the uninterrupted prefill</b> · why a re-ask reuses nothing: station 267 · why order changes answers: station 225</div>
+    <div class="sowhat"><b>So what:</b> a cancel that stops instantly and keeps nothing is worse than one that finishes the sentence it is on.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s293_t">when you press Stop, seconds into an 8,000-word prompt</label><input type="range" id="s293_t" min="0" max="166" step="1" value="88"><span id="s293_tV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s293_svg" viewBox="0 0 640 430" width="100%" height="430" role="img" aria-label="sixteen reading passes with a cancel marker, showing what the old design kept and what the new one keeps"></svg>
+    </div>
+    <div class="readout"><span>old design keeps <b class="bad" id="s293_a">—</b></span><span>new design keeps <b class="ok" id="s293_b">—</b></span><span id="s293_c"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 294 ───────────── -->
+<section class="station" id="s294">
+  <div class="words">
+    <div class="eyebrow">station 294 · the file that buys back the minutes</div>
+    <h2>A 662 MiB file, written in 0.8 s and read back in 0.25, replaces 166 seconds of reading.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>a checkpoint</b> — the whole resident conversation copied out to disk: 128 files on this model, one per piece of state, plus the exact list of words it covers.</li><li><b>OPFS</b> — a private folder the browser gives a page, invisible in Finder, faster than anything else the browser offers. The site used none of it before this.</li><li><b>the quota</b> — how much the browser says the page may store. It is a promise about policy, not about the disk.</li></ul></div>
+    <p>A checkpoint's size is a formula, not a measurement: <b>149.6 MiB that never changes, plus 64 KiB for every word</b>. Predicted and stored bytes matched <i>exactly</i> at 1,024, 4,096 and 8,192 words — 224,002,048 and 425,328,640 and 693,764,096, to the byte.</p>
+    <p>And the storage is not the cost. Writing 661.6 MiB took <b>783 ms</b>; reading it back took <b>245</b>. Reading the same 8,192 words out of the prompt instead takes <b>164 to 169 seconds</b>. Storage is a rounding error on a rounding error — which is the whole reason this is worth building.</p>
+    <p>Two numbers do bite. The browser reported a <b>296.6 GB</b> quota on a normal profile while the disk actually had 16 GiB free — an overstatement of about eighteen times — so no budget may be arithmetic on that figure. And in a private window the quota is <b>1.48 GB</b>: one 8K checkpoint fits twice, a 16K one fits once with no room for the model, a 32K one does not fit at all. Meanwhile the request to make the storage permanent <b>came back false</b>, so every entry can vanish at any time. That is why <code>meta.json</code> is written last: until it exists, a half-written checkpoint is not a checkpoint, it is litter.</p>
+    <pre class="code">prefix  checkpoint  write   read back  re-read
+ 1,024   213.6 MiB  269 ms    113 ms     ~21 s
+ 4,096   405.6      392       168        ~84 s
+ 8,192   661.6      783       245       166 s
+floor 149.6 MiB + 64 KiB a word — exact at all 3</pre>
+    <div class="src">docs/research/2026-09-14-browser-prefix-registry.md §5 (the measured table, Chrome 147, persistent profile, main-thread async OPFS handles, the real 128-entry manifest shape: 213.6 / 405.6 / 661.6 MiB, write 269 / 392 / 783 ms, read 113 / 168 / 245 ms; <code>eval_results/prefix_registry/opfs_browser_smoke.json</code>), §3.3 (the byte model <code>floor = 48 × (3,145,728 + 122,880) = 156,893,184 B = 149.6 MiB</code>, <code>perToken = 65,536 B = 64 KiB</code>, matched to the byte at all three rungs), §3 (the store layout — one file per entry, <code>ledger.bin</code>, <code>use.json</code>, and <code>meta.json</code> <b>written last</b>, under a 2 GiB default budget with an LRU), §3.2 (<code>persist()</code> returned <b>false</b> on both profiles, so every store including OPFS is evictable and a vanished checkpoint must cost exactly what not having it would have cost; <code>estimate().quota</code> = <b>296.6 GB</b> against 16 GiB actually free, ~18× over; incognito <b>1.48 GB</b>) · docs/research/2026-09-14-27b-long-context-product-levers.md §3.2 (the four-store probe: OPFS through a worker writes at 1,129 MB/s and reads at 4,226 MB/s — the fastest of the four, and the only one offering byte-range writes; one big blob is <i>slower</i> than 128 files in both directions) · the 164–169 s is <code>eval_results/needle_tier3/results.jsonl</code> · a session is a fixed number of pieces: station 209 · how the browser stores the model itself: station 211 · why one big block is a bad idea: station 15</div>
+    <div class="sowhat"><b>So what:</b> a store that may be emptied without warning is still worth building, as long as losing it costs exactly what never having it would have cost.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s294_n">how many words the checkpoint covers</label><input type="range" id="s294_n" min="1024" max="32768" step="512" value="8192"><span id="s294_nV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s294_svg" viewBox="0 0 640 478" width="100%" height="478" role="img" aria-label="a checkpoint's size against the browser's two quotas, and the time to write and read it against the time to read the prompt again"></svg>
+    </div>
+    <div class="readout"><span>checkpoint <b class="trace" id="s294_s">—</b></span><span>read back <b class="ok" id="s294_r">—</b></span><span id="s294_v"></span></div>
+  </div>
+</section>
+
+<!-- ───────────── STATION 295 ───────────── -->
+<section class="station" id="s295">
+  <div class="words">
+    <div class="eyebrow">station 295 · finished, and still not gone</div>
+    <h2>The probe printed every number it was asked for, then never exited.</h2>
+    <div class="prereq"><b>Before you start:</b><ul><li><b>the GPU lock</b> — one folder on disk. Whoever creates it owns the graphics chip and stamps their process number inside; everyone else waits. It is the only thing stopping two model-sized jobs from crashing this machine.</li><li><b>dawn.node</b> — the piece that lets a plain command-line program talk to the graphics chip the same way a browser page does. It is how every measurement in this arc was taken.</li><li><b>a hard timeout</b> — a limit on the <i>process</i>, not on the work. The two are not the same limit, and this is the station about why.</li></ul></div>
+    <p>Twice in a row, the matrix-instruction probe did everything correctly. It ran its loops, printed every measurement, wrote its summary file — and then the program simply did not return. It sat there, holding the lock, with nothing left to do.</p>
+    <p>This is the failure mode that defeats every obvious health check. The process number in the lock folder points at a process that genuinely exists. Nothing has crashed, nothing has errored, no message is waiting to be read. A watcher that asks "is the owner still alive?" gets a truthful yes, forever — and the repo's own rule, that a lock held more than fifteen minutes should be reported rather than removed, is exactly the right rule and does nothing on its own.</p>
+    <p>The lesson is one line in the document and it is the whole station: anything scripted around this runtime needs a timeout on the <i>process</i>, not just on the work. The same page of notes records the sibling mistake — a loop mis-sized into eleven-second batches, the pattern that once made macOS report no check-ins from its watchdog for 94 seconds. Both are the same shape: the job was fine, the container was not.</p>
+    <pre class="code">every measurement printed. summary JSON written.
+then: node never returns, still holding the lock.
+reproduced on both runs.
+-&gt; time out the PROCESS, not only the work.</pre>
+    <div class="src">docs/research/2026-09-14-apple-prefill-gap-vs-llamacpp.md §10.5, both process notes verbatim: "<code>dawn.node</code> hangs on process exit after this probe, reproducibly (both runs): every measurement and the summary JSON are printed, then <code>node</code> never returns and keeps holding the GPU lock. Anything scripted around dawn.node needs a hard timeout on the process, not just on the work." — and the first note, the mis-sized loop (~11 s dispatches, ten batched into one command buffer, fixed to one submit per dispatch and 2000 → 100 iterations), which is the long-no-checkin pattern the <code>qwen_model.js</code> watchdog comment records as having kernel-panicked macOS ("no checkins from watchdogd in 94 seconds", §5.3) · the lock protocol itself is docs/learning/stations/README.md: take it with <code>mkdir</code>, stamp the owner file, release <b>only your own</b>, and "if the lock is held for &gt;15 min, report it instead of removing it" — written after an agent removed a sibling's lock and two GPU jobs overlapped · a probe that measured the wrong thing for an environmental reason: station 282 · what else the GPU lock is holding back: station 63</div>
+    <div class="sowhat"><b>So what:</b> "the process is alive" and "work is happening" are different facts, and only one of them is easy to check.</div>
+  </div>
+  <div class="instrument">
+    <div class="controls">
+      <div class="ctl"><label for="s295_t">the timeout your script puts on the process, in minutes (0 = none)</label><input type="range" id="s295_t" min="0" max="30" step="1" value="0"><span id="s295_tV" class="readout"></span></div>
+    </div>
+    <div class="screen">
+      <svg id="s295_svg" viewBox="0 0 640 410" width="100%" height="410" role="img" aria-label="what happens after the probe's last line is printed, with and without a timeout on the process itself"></svg>
+    </div>
+    <div class="readout"><span>lock held after the work <b class="bad" id="s295_a">—</b></span><span>the next job starts <b id="s295_b">—</b></span><span id="s295_c"></span></div>
   </div>
 </section>
 
@@ -34117,6 +34449,1043 @@ if ($('#s284')) {
     $('#s284_led').textContent = A.led.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' MiB';
     $('#s284_dec').innerHTML = `<b class="${slow ? 'bad' : 'ok'}">${A.dec[0].toFixed(2)} then ${A.dec[1].toFixed(2)}</b>`;
     $('#s284_v').innerHTML = slow ? '<b class="bad">this is the one that stalled</b>' : '';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 285 ── */
+/* ── Station 285: the split-KV decode kernel, shipped and switched off ── */
+if ($('#s285')) {
+  const svg = $('#s285_svg'), sl = $('#s285_f');
+  // docs/research/2026-09-14-27b-long-context-apple.md §2.2 (decode table +
+  // attention-share table) and §3.4 (llama.cpp anchors). tok/s.
+  const ROWS = [
+    { fill: 512, ship: 32.0, split: null, llama: null, att: 8 },
+    { fill: 3900, ship: 21.1, split: null, llama: null, att: 39 },
+    { fill: 7900, ship: 14.6, split: 30.4, llama: null, att: 58 },
+    { fill: 15900, ship: 9.0, split: 26.0, llama: 22.3, att: 74 },
+    { fill: 31800, ship: 5.1, split: 19.1, llama: 18.5, att: 85 },
+  ];
+  sl.addEventListener('input', render);
+
+  function render() {
+    const i = parseInt(sl.value, 10), R = ROWS[i];
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), grid = css('--grid');
+    const L = 56, Rt = 606, T = 42, B = 244;
+    const X = (f) => L + (Rt - L) * Math.sqrt(f / 32768);       // sqrt scale: the shallow rows are not squashed
+    const Y = (v) => B - (B - T) * v / 34;
+    let g = '';
+
+    g += `<text x="14" y="16" font-size="11" fill="${ink3}">words written per second, against how full the conversation already is (measured, M4 Pro, 27B one-bit)</text>`;
+    g += `<text x="14" y="30" font-size="9.5" fill="${ink3}">the sideways axis is stretched near the left so the shallow rows stay readable</text>`;
+
+    // grid + axes
+    [0, 10, 20, 30].forEach((v) => {
+      g += `<line x1="${L}" y1="${Y(v).toFixed(1)}" x2="${Rt}" y2="${Y(v).toFixed(1)}" stroke="${grid}"/>`;
+      g += `<text x="${L - 6}" y="${(Y(v) + 4).toFixed(1)}" text-anchor="end" font-size="10" fill="${ink3}">${v}</text>`;
+    });
+    g += `<text x="14" y="${T + 4}" font-size="10" fill="${ink3}">tok/s</text>`;
+    ROWS.forEach((r) => {
+      g += `<line x1="${X(r.fill).toFixed(1)}" y1="${B}" x2="${X(r.fill).toFixed(1)}" y2="${B + 4}" stroke="${ink3}"/>`;
+      g += `<text x="${X(r.fill).toFixed(1)}" y="${B + 17}" text-anchor="middle" font-size="9.5" fill="${ink3}">${r.fill.toLocaleString()}</text>`;
+    });
+    g += `<text x="${Rt}" y="${B + 31}" text-anchor="end" font-size="10" fill="${ink3}">words of fill →</text>`;
+
+    // the two curves
+    const path = (key) => ROWS.filter((r) => r[key] != null)
+      .map((r, k) => `${k ? 'L' : 'M'}${X(r.fill).toFixed(1)},${Y(r[key]).toFixed(1)}`).join(' ');
+    g += `<path d="${path('split')}" fill="none" stroke="${ok}" stroke-width="2.4"/>`;
+    g += `<path d="${path('ship')}" fill="none" stroke="${bad}" stroke-width="2.4"/>`;
+    ROWS.forEach((r) => {
+      const on = r === R;
+      g += `<circle cx="${X(r.fill).toFixed(1)}" cy="${Y(r.ship).toFixed(1)}" r="${on ? 5.5 : 3.5}" fill="${bad}"/>`;
+      if (r.split != null) g += `<circle cx="${X(r.fill).toFixed(1)}" cy="${Y(r.split).toFixed(1)}" r="${on ? 5.5 : 3.5}" fill="${ok}"/>`;
+      if (r.llama != null) {
+        g += `<rect x="${(X(r.fill) - 4).toFixed(1)}" y="${(Y(r.llama) - 4).toFixed(1)}" width="8" height="8" fill="none" stroke="${trace}" stroke-width="1.8"/>`;
+      }
+    });
+    // labels on the curves, anchored inside the frame
+    g += `<text x="${(X(7900) + 8).toFixed(1)}" y="${(Y(30.4) - 11).toFixed(1)}" font-size="11" fill="${ok}">with the flag on</text>`;
+    g += `<text x="${(X(7900) + 8).toFixed(1)}" y="${(Y(14.6) + 16).toFixed(1)}" font-size="11" fill="${bad}">what the site ships</text>`;
+    g += `<text x="${(X(31800) - 6).toFixed(1)}" y="${(Y(18.5) + 16).toFixed(1)}" text-anchor="end" font-size="10.5" fill="${trace}">llama.cpp, same Mac</text>`;
+
+    // the marker for the chosen fill
+    g += `<line x1="${X(R.fill).toFixed(1)}" y1="${T}" x2="${X(R.fill).toFixed(1)}" y2="${B}" stroke="${signal}" stroke-dasharray="3 3"/>`;
+
+    // ── the chosen row, written out ───────────────────────────
+    const PY = B + 48;
+    g += `<rect x="14" y="${PY}" width="612" height="92" rx="8" fill="${signal}" fill-opacity="0.08" stroke="${signal}"/>`;
+    g += `<text x="26" y="${PY + 20}" font-size="12.5" fill="${ink}">${R.fill.toLocaleString()} words already in the conversation — one more word costs:</text>`;
+    const bw = (v) => 300 * v / 34;
+    g += `<rect x="188" y="${PY + 30}" width="${bw(R.ship).toFixed(1)}" height="15" rx="3" fill="${bad}" opacity="0.85"/>`;
+    g += `<text x="180" y="${PY + 42}" text-anchor="end" font-size="10.5" fill="${ink2}">shipped</text>`;
+    g += `<text x="${(192 + bw(R.ship)).toFixed(1)}" y="${PY + 42}" font-size="11" fill="${ink}">${R.ship.toFixed(1)} words a second</text>`;
+    if (R.split != null) {
+      g += `<rect x="188" y="${PY + 52}" width="${bw(R.split).toFixed(1)}" height="15" rx="3" fill="${ok}" opacity="0.85"/>`;
+      g += `<text x="180" y="${PY + 64}" text-anchor="end" font-size="10.5" fill="${ink2}">flag on</text>`;
+      g += `<text x="${(192 + bw(R.split)).toFixed(1)}" y="${PY + 64}" font-size="11" fill="${ink}">${R.split.toFixed(1)} — ${fmt(R.split / R.ship, 1)}× faster</text>`;
+    } else {
+      g += `<text x="188" y="${PY + 64}" font-size="11" fill="${ink3}">the split kernel was not measured this shallow — it is the deep rows it exists for</text>`;
+    }
+    g += `<text x="26" y="${PY + 80}" font-size="10.5" fill="${ink3}">of that step, ${R.att} % is re-reading the cache — which is the part the split kernel divides up.</text>`;
+
+    // ── the reading ───────────────────────────────────────────
+    const NY = PY + 112;
+    g += `<line x1="14" y1="${NY - 14}" x2="626" y2="${NY - 14}" stroke="${line}"/>`;
+    g += `<text x="14" y="${NY}" font-size="11.5" fill="${ink}">Both lines are the same engine on the same Mac.</text>`;
+    g += `<text x="14" y="${NY + 18}" font-size="10.5" fill="${ink3}">The only difference is one load option the site does not pass.</text>`;
+    g += `<text x="14" y="${NY + 34}" font-size="10.5" fill="${ink3}">A step is ~28.7 ms fixed plus 0.0052 ms per word of fill — so depth is</text>`;
+    g += `<text x="14" y="${NY + 50}" font-size="10.5" fill="${ink3}">exactly what makes the flag worth more.</text>`;
+    svg.innerHTML = g;
+
+    $('#s285_fV').textContent = R.fill.toLocaleString() + ' words of fill';
+    $('#s285_a').textContent = R.ship.toFixed(1) + ' tok/s';
+    $('#s285_b').textContent = R.split == null ? 'not measured here' : R.split.toFixed(1) + ' tok/s';
+    $('#s285_c').innerHTML = R.split == null ? '' : `<b class="trace">${fmt(R.split / R.ship, 1)}× for free</b>`;
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 286 ── */
+/* ── Station 286: memory was never the long-context blocker ── */
+if ($('#s286')) {
+  const svg = $('#s286_svg'), sl = $('#s286_w');
+  // The closed form of docs/research/2026-09-14-27b-long-context-apple.md §1.2,
+  // which reproduces every measured cell of §1.1 to the MiB. f16 KV = the
+  // shipped Apple cache, so es = 2.
+  const BASE = 4139.80, TAIL = 4.00, STEADY = 386.85, RETIRE = 3436.17;
+  const KV_PER = 32768 * 2 / 1048576;        // MiB per word of window, f16 cache
+  const SCR_PER = 3072 / 1048576;            // MiB per word, scores+weights scratch
+  const CEIL_24 = 17.76 * 1024, CEIL_16 = 11.84 * 1024;   // MiB; the second is arithmetic
+  // The four cells that were actually censused (§1.1, f16 rows).
+  const CELLS = [
+    { w: 8192, peak: 8116.0, a: 44.6, b: 66.9, note: 'what the site ships today' },
+    { w: 16384, peak: 8652.0, a: 47.6, b: 71.4, note: 'the recommended next step' },
+    { w: 32768, peak: 9724.0, a: 53.5, b: 80.2, note: 'fine here, tight on a 16 GB Mac' },
+    { w: 65536, peak: 11868.0, a: 65.3, b: 97.9, note: 'fits here; 98 % on a 16 GB Mac' },
+  ];
+  const live = (w) => BASE + w * KV_PER + w * SCR_PER + TAIL;
+  sl.addEventListener('input', render);
+
+  function render() {
+    const w = parseInt(sl.value, 10);
+    const pl = live(w), steady = pl + STEADY, peak = pl + RETIRE;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), grid = css('--grid');
+    const L = 16, R = 624, TOP = 18400;                 // MiB across the ruler
+    const X = (m) => L + (R - L) * m / TOP;
+    let g = '';
+
+    g += `<text x="14" y="14" font-size="11" fill="${ink3}">memory in use, in MiB — the whole ruler is 18 GiB</text>`;
+
+    // ── the two ceilings ──────────────────────────────────────
+    [[CEIL_24, '24 GB Mac — 17.76 GiB, measured', ok],
+     [CEIL_16, '16 GB Mac — 11.84 GiB, calculated', trace]].forEach(([v, label, col], k) => {
+      g += `<line x1="${X(v).toFixed(1)}" y1="26" x2="${X(v).toFixed(1)}" y2="176" stroke="${col}" stroke-width="1.8" stroke-dasharray="4 3"/>`;
+      g += `<text x="${(X(v) - 6).toFixed(1)}" y="${k ? 38 : 52}" text-anchor="end" font-size="10" fill="${col}">${label}</text>`;
+    });
+
+    // ── the settled footprint, stacked ────────────────────────
+    const rows = [
+      { y: 70, h: 26, label: 'settled, while you chat', parts: [
+        { v: BASE + TAIL, c: ink3, o: 0.55, n: 'weights + fixed' },
+        { v: w * KV_PER, c: signal, o: 0.85, n: 'the cache' },
+        { v: w * SCR_PER + STEADY, c: trace, o: 0.75, n: 'scratch' }] },
+      { y: 112, h: 26, label: 'at its peak, while it loads', parts: [
+        { v: pl, c: ink3, o: 0.45, n: 'the settled state, minus the chat scratch' },
+        { v: RETIRE, c: bad, o: 0.8, n: 'the second copy of the weights' }] },
+    ];
+    rows.forEach((r) => {
+      g += `<text x="16" y="${r.y - 5}" font-size="10.5" fill="${ink2}">${r.label}</text>`;
+      let x = 0;
+      r.parts.forEach((p) => {
+        g += `<rect x="${X(x).toFixed(1)}" y="${r.y}" width="${(X(x + p.v) - X(x)).toFixed(1)}" height="${r.h}" fill="${p.c}" opacity="${p.o}"/>`;
+        x += p.v;
+      });
+      g += `<text x="${(X(x) + 7).toFixed(1)}" y="${r.y + 18}" font-size="11.5" fill="${ink}">${fmt(x / 1024, 2)} GiB</text>`;
+    });
+    // what the bands are
+    g += `<text x="16" y="${154}" font-size="9.5" fill="${ink3}">grey = the weights and everything fixed · orange = the cache, 64 KiB a word · blue = scratch</text>`;
+    g += `<text x="16" y="${167}" font-size="9.5" fill="${ink3}">red = the second copy of the weights, alive only while it loads</text>`;
+
+    // ── the verdict for this window ───────────────────────────
+    const p24 = 100 * peak / CEIL_24, p16 = 100 * peak / CEIL_16;
+    const VY = 186, safe16 = p16 < 90;
+    g += `<rect x="14" y="${VY}" width="612" height="60" rx="8" fill="${safe16 ? ok : bad}" fill-opacity="0.12" stroke="${safe16 ? ok : bad}"/>`;
+    g += `<text x="26" y="${VY + 22}" font-size="12.5" fill="${ink}">a ${w.toLocaleString()}-word window peaks at ${fmt(peak / 1024, 2)} GiB while loading</text>`;
+    g += `<text x="26" y="${VY + 42}" font-size="11" fill="${ink2}">${fmt(p24, 1)} % of this 24 GB Mac · ${fmt(p16, 1)} % of a 16 GB one${safe16 ? '' : ' — too close'}</text>`;
+
+    // ── the four censused cells ───────────────────────────────
+    const TY = 268;
+    g += `<text x="14" y="${TY}" font-size="11" fill="${ink3}">the four windows a buffer census actually measured (the formula above reproduces each one to the MiB)</text>`;
+    g += `<text x="24" y="${TY + 18}" font-size="9.5" fill="${ink3}">window</text>`;
+    g += `<text x="180" y="${TY + 18}" text-anchor="end" font-size="9.5" fill="${ink3}">load peak</text>`;
+    g += `<text x="196" y="${TY + 18}" font-size="9.5" fill="${ink3}">share of a 24 GB Mac, then of a 16 GB one</text>`;
+    CELLS.forEach((c, k) => {
+      const y = TY + 26 + k * 30, near = Math.abs(c.w - w) <= 1024;
+      g += `<rect x="14" y="${y}" width="612" height="26" rx="4" fill="${near ? signal : 'none'}" fill-opacity="0.13" stroke="${near ? signal : line}"/>`;
+      g += `<text x="24" y="${y + 17}" font-size="10.5" fill="${near ? ink : ink2}">${c.w.toLocaleString()}</text>`;
+      g += `<text x="180" y="${y + 17}" text-anchor="end" font-size="10.5" fill="${ink}">${fmt(c.peak / 1024, 2)} GiB</text>`;
+      const bw = (v) => 170 * v / 100;
+      g += `<rect x="196" y="${y + 8}" width="${bw(c.a).toFixed(1)}" height="10" rx="2" fill="${ok}" opacity="0.8"/>`;
+      g += `<text x="${(200 + bw(c.a)).toFixed(1)}" y="${y + 17}" font-size="9.5" fill="${ink3}">${fmt(c.a, 1)} %</text>`;
+      g += `<rect x="418" y="${y + 8}" width="${bw(c.b).toFixed(1)}" height="10" rx="2" fill="${c.b > 90 ? bad : trace}" opacity="0.8"/>`;
+      g += `<text x="${(422 + bw(c.b)).toFixed(1)}" y="${y + 17}" font-size="9.5" fill="${c.b > 90 ? bad : ink3}">${fmt(c.b, 1)} %</text>`;
+    });
+
+    // ── the reading ───────────────────────────────────────────
+    const NY = 424;
+    g += `<line x1="14" y1="${NY - 14}" x2="626" y2="${NY - 14}" stroke="${line}"/>`;
+    g += `<text x="14" y="${NY}" font-size="11.5" fill="${ink}">The tall red band is the same 3,436 MiB at every window.</text>`;
+    g += `<text x="14" y="${NY + 18}" font-size="10.5" fill="${ink3}">It is the few seconds when both copies of the weights are alive, and it decides a 16 GB Mac.</text>`;
+    g += `<text x="14" y="${NY + 34}" font-size="10.5" fill="${ink3}">The 16 GB column is arithmetic off this machine's 74 % ratio. No 16 GB Mac was measured.</text>`;
+    svg.innerHTML = g;
+
+    $('#s286_wV').textContent = w.toLocaleString() + ' words';
+    $('#s286_p').textContent = fmt(peak / 1024, 2) + ' GiB';
+    $('#s286_a').innerHTML = `<b class="ok">${fmt(p24, 1)} %</b>`;
+    $('#s286_b').innerHTML = `<b class="${p16 > 90 ? 'bad' : 'trace'}">${fmt(p16, 1)} %</b>`;
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 287 ── */
+/* ── Station 287: the wait before the first word, split into floor and attention ── */
+if ($('#s287')) {
+  const svg = $('#s287_svg'), sl = $('#s287_n');
+  // Least squares over the 62 full chunks of the plen 31,800 run in
+  // eval_results/longctx_apple/prefill_chunk_walls.json:
+  //   wall(512-token chunk) = 7,840.1 ms + 0.18994 ms x seqLen0
+  const A = 7840.1, B = 0.18994, C = 512;
+  // The four prompts actually timed (doc §3.1), for the honesty check.
+  const MEAS = [
+    { n: 512, ms: 7774.6, per: 15.18 },
+    { n: 7900, ms: 132019.2, per: 16.71 },
+    { n: 15900, ms: 286566.7, per: 18.02 },
+    { n: 31800, ms: 671600.1, per: 21.12 },
+  ];
+  // the model: full chunks plus a part-chunk tail, each chunk paying A plus B per
+  // word already in the cache.
+  function split(n) {
+    const full = Math.floor(n / C), rem = (n - full * C) / C;
+    const floorMs = (full + rem) * A;
+    let depth = 0;
+    for (let k = 0; k < full; k++) depth += k * C;
+    depth += rem * full * C;
+    return { floorMs, attMs: B * depth, n };
+  }
+  sl.addEventListener('input', render);
+
+  function render() {
+    const n = parseInt(sl.value, 10), S = split(n);
+    const tot = S.floorMs + S.attMs, share = 100 * S.attMs / tot;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), grid = css('--grid');
+    const L = 16, R = 624, MAXMS = split(32768).floorMs + split(32768).attMs;
+    const X = (ms) => L + (R - L) * ms / MAXMS;
+    let g = '';
+
+    // ── 1. the bar ───────────────────────────────────────────
+    g += `<text x="14" y="14" font-size="11" fill="${ink3}">the wait before the first word — the whole ruler is the 32,768-word case, 11.6 minutes</text>`;
+    g += `<rect x="${L}" y="30" width="${(X(S.floorMs) - L).toFixed(1)}" height="34" rx="3" fill="${ok}" opacity="0.85"/>`;
+    g += `<rect x="${X(S.floorMs).toFixed(1)}" y="30" width="${(X(tot) - X(S.floorMs)).toFixed(1)}" height="34" rx="3" fill="${bad}" opacity="0.85"/>`;
+    g += `<line x1="${L}" y1="70" x2="${X(tot).toFixed(1)}" y2="70" stroke="${ink3}"/>`;
+    g += `<text x="${(X(tot) + 8 > 520 ? X(tot) - 8 : X(tot) + 8).toFixed(1)}" y="${X(tot) + 8 > 520 ? 86 : 52}" text-anchor="${X(tot) + 8 > 520 ? 'end' : 'start'}" font-size="12.5" fill="${ink}">${fmt(tot / 60000, 2)} minutes</text>`;
+    g += `<text x="${L + 6}" y="${52}" font-size="11" fill="${css('--paper')}">the flat per-word cost</text>`;
+    g += `<text x="${L}" y="${86}" font-size="10.5" fill="${ok}">green — the same work every chunk: ${fmt(S.floorMs / 1000, 1)} s, ${fmt(100 - share, 0)} %</text>`;
+    g += `<text x="${L}" y="${102}" font-size="10.5" fill="${bad}">red — attention, the only part that grows: ${fmt(S.attMs / 1000, 1)} s, ${fmt(share, 0)} %</text>`;
+
+    // ── 2. chunk by chunk ────────────────────────────────────
+    const full = Math.max(1, Math.ceil(n / C));
+    const CY = 130, CH = 96, CB = CY + CH;
+    g += `<text x="14" y="${CY - 6}" font-size="11" fill="${ink3}">every 512-word chunk, in order — each one pays the same flat cost, plus more attention than the last</text>`;
+    const cw = (R - L) / full;
+    const maxChunk = A + B * (full - 1) * C;
+    for (let k = 0; k < full; k++) {
+      const x = L + k * cw, fh = CH * A / maxChunk, ah = CH * (B * k * C) / maxChunk;
+      const w = Math.max(0.7, cw - (full > 40 ? 0.3 : 1.2));
+      g += `<rect x="${x.toFixed(1)}" y="${(CB - fh).toFixed(1)}" width="${w.toFixed(2)}" height="${fh.toFixed(1)}" fill="${ok}" opacity="0.8"/>`;
+      if (ah > 0.4) g += `<rect x="${x.toFixed(1)}" y="${(CB - fh - ah).toFixed(1)}" width="${w.toFixed(2)}" height="${ah.toFixed(1)}" fill="${bad}" opacity="0.8"/>`;
+    }
+    g += `<line x1="${L}" y1="${CB}" x2="${R}" y2="${CB}" stroke="${ink3}"/>`;
+    g += `<text x="${L}" y="${CB + 14}" font-size="9.5" fill="${ink3}">first chunk — 7.84 s</text>`;
+    g += `<text x="${R}" y="${CB + 14}" text-anchor="end" font-size="9.5" fill="${ink3}">chunk ${full} — ${fmt((A + B * (full - 1) * C) / 1000, 2)} s</text>`;
+
+    // ── 3. the four prompts that were actually timed ─────────
+    const TY = 280;
+    g += `<text x="14" y="${TY}" font-size="11" fill="${ink3}">the four prompts that were actually timed, against what the fit above predicts</text>`;
+    g += `<text x="24" y="${TY + 18}" font-size="9.5" fill="${ink3}">prompt</text>`;
+    g += `<text x="200" y="${TY + 18}" text-anchor="end" font-size="9.5" fill="${ink3}">measured wait</text>`;
+    g += `<text x="330" y="${TY + 18}" text-anchor="end" font-size="9.5" fill="${ink3}">the fit says</text>`;
+    g += `<text x="470" y="${TY + 18}" text-anchor="end" font-size="9.5" fill="${ink3}">per word</text>`;
+    g += `<text x="614" y="${TY + 18}" text-anchor="end" font-size="9.5" fill="${ink3}">attention's share</text>`;
+    MEAS.forEach((m, k) => {
+      const y = TY + 26 + k * 25, p = split(m.n), pt = p.floorMs + p.attMs;
+      const near = Math.abs(m.n - n) < 700;
+      g += `<rect x="14" y="${y}" width="612" height="21" rx="4" fill="${near ? signal : 'none'}" fill-opacity="0.13" stroke="${near ? signal : line}"/>`;
+      g += `<text x="24" y="${y + 15}" font-size="10.5" fill="${near ? ink : ink2}">${m.n.toLocaleString()}</text>`;
+      g += `<text x="200" y="${y + 15}" text-anchor="end" font-size="10.5" fill="${ink}">${m.ms < 60000 ? fmt(m.ms / 1000, 1) + ' s' : fmt(m.ms / 60000, 2) + ' min'}</text>`;
+      g += `<text x="330" y="${y + 15}" text-anchor="end" font-size="10.5" fill="${ink3}">${pt < 60000 ? fmt(pt / 1000, 1) + ' s' : fmt(pt / 60000, 2) + ' min'}</text>`;
+      g += `<text x="470" y="${y + 15}" text-anchor="end" font-size="10.5" fill="${ink3}">${fmt(m.per, 2)} ms</text>`;
+      const sh = 100 * p.attMs / pt, bw = 92 * sh / 30;
+      g += `<rect x="${(614 - bw).toFixed(1)}" y="${y + 6}" width="${bw.toFixed(1)}" height="10" rx="2" fill="${bad}" opacity="0.75"/>`;
+      g += `<text x="${(610 - bw).toFixed(1)}" y="${y + 15}" text-anchor="end" font-size="9.5" fill="${ink3}">${fmt(sh, 0)} %</text>`;
+    });
+
+    // ── 4. the reading ───────────────────────────────────────
+    const NY = 432;
+    g += `<line x1="14" y1="${NY - 14}" x2="626" y2="${NY - 14}" stroke="${line}"/>`;
+    g += `<text x="14" y="${NY}" font-size="11.5" fill="${ink}">Green is the same height in every chunk. Only the red tip grows.</text>`;
+    g += `<text x="14" y="${NY + 18}" font-size="10.5" fill="${ink3}">llama.cpp reads the same prompt on the same Mac at 10.54 ms a word against our 18.02.</text>`;
+    g += `<text x="14" y="${NY + 34}" font-size="10.5" fill="${ink3}">So the gap is in the flat part, not in the growing one.</text>`;
+    svg.innerHTML = g;
+
+    $('#s287_nV').textContent = n.toLocaleString() + ' words';
+    $('#s287_t').textContent = tot < 60000 ? fmt(tot / 1000, 1) + ' s' : fmt(tot / 60000, 2) + ' min';
+    $('#s287_f').textContent = fmt(100 - share, 0) + ' %';
+    $('#s287_a').textContent = fmt(share, 0) + ' %';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 288 ── */
+/* ── Station 288: a character budget against a word-piece window ── */
+if ($('#s288')) {
+  const svg = $('#s288_svg'), sl = $('#s288_c');
+  // docs/research/2026-09-14-27b-long-context-product-levers.md §1.2, read out of
+  // the site's ai-chat.njk:1049-1088. Characters; 3.5 chars per piece is the
+  // site's own estimator.
+  const BUDGET = 14000, SYS = 1320, SEARCH = 930, CPT = 3.5;
+  const WINDOW = 8192, REPLY = 768;
+  sl.addEventListener('input', render);
+
+  function render() {
+    const conv = parseInt(sl.value, 10);
+    const kept = Math.min(conv, BUDGET), dropped = conv - kept;
+    const chars = kept + SYS + SEARCH;
+    const pieces = chars / CPT;
+    const used = pieces + REPLY;
+    const sliding = conv > BUDGET;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), card = css('--card');
+    let g = '';
+
+    // ── 1. the conversation, in characters ───────────────────
+    const L = 16, R = 624;
+    const cX = (c) => L + (R - L) * c / 40000;
+    g += `<text x="14" y="14" font-size="11" fill="${ink3}">what you have said so far, measured in characters — the ruler runs to 40,000</text>`;
+    g += `<rect x="${L}" y="24" width="${(cX(conv) - L).toFixed(1)}" height="24" rx="3" fill="${ink3}" opacity="0.35"/>`;
+    g += `<rect x="${cX(Math.max(0, dropped)).toFixed(1)}" y="24" width="${(cX(kept + Math.max(0, dropped)) - cX(Math.max(0, dropped))).toFixed(1)}" height="24" rx="3" fill="${signal}" opacity="0.85"/>`;
+    g += `<line x1="${cX(BUDGET).toFixed(1)}" y1="18" x2="${cX(BUDGET).toFixed(1)}" y2="56" stroke="${bad}" stroke-dasharray="3 3"/>`;
+    g += `<text x="${(cX(BUDGET) + 6).toFixed(1)}" y="${64}" font-size="10" fill="${bad}">14,000 — the budget</text>`;
+    if (dropped > 0) g += `<text x="${L}" y="${64}" font-size="10" fill="${ink3}">${dropped.toLocaleString()} chars dropped off the front</text>`;
+    g += `<text x="${(cX(conv) + 6 > 540 ? cX(conv) - 6 : cX(conv) + 6).toFixed(1)}" y="40" text-anchor="${cX(conv) + 6 > 540 ? 'end' : 'start'}" font-size="11" fill="${ink}">${conv.toLocaleString()}</text>`;
+
+    // ── 2. the window, in word-pieces ────────────────────────
+    const WY = 92, wX = (t) => L + (R - L) * t / WINDOW;
+    g += `<text x="14" y="${WY - 8}" font-size="11" fill="${ink3}">the same turn, converted into word-pieces and laid inside the 8,192-piece window</text>`;
+    g += `<rect x="${L}" y="${WY}" width="${R - L}" height="30" rx="4" fill="none" stroke="${ink3}"/>`;
+    let x = L;
+    const seg = (t, col, op) => { const w = wX(t) - L; g += `<rect x="${x.toFixed(1)}" y="${WY}" width="${w.toFixed(1)}" height="30" fill="${col}" opacity="${op}"/>`; x += w; };
+    seg((SYS + SEARCH) / CPT, trace, 0.8);
+    seg(kept / CPT, signal, 0.85);
+    seg(REPLY, ok, 0.7);
+    g += `<rect x="${x.toFixed(1)}" y="${WY}" width="${(R - x).toFixed(1)}" height="30" fill="${bad}" opacity="0.13"/>`;
+    g += `<text x="${(R - 8).toFixed(1)}" y="${WY + 19}" text-anchor="end" font-size="11" fill="${bad}">${Math.round(WINDOW - used).toLocaleString()} pieces out of reach</text>`;
+    g += `<text x="${L}" y="${WY + 46}" font-size="9.5" fill="${trace}">blue — the standing instructions (1,320 + 930 chars)</text>`;
+    g += `<text x="${L}" y="${WY + 60}" font-size="9.5" fill="${signal}">orange — as much of the conversation as the budget allows</text>`;
+    g += `<text x="${L}" y="${WY + 74}" font-size="9.5" fill="${ok}">green — 768 pieces held back for the reply</text>`;
+
+    // ── 3. the verdict ───────────────────────────────────────
+    const VY = 194;
+    g += `<rect x="14" y="${VY}" width="612" height="66" rx="8" fill="${sliding ? bad : ok}" fill-opacity="0.12" stroke="${sliding ? bad : ok}"/>`;
+    g += `<text x="26" y="${VY + 22}" font-size="12.5" fill="${ink}">${Math.round(pieces).toLocaleString()} pieces of prompt + 768 for the reply = ${Math.round(used).toLocaleString()} of 8,192 (${fmt(100 * used / WINDOW, 0)} %)</text>`;
+    g += `<text x="26" y="${VY + 44}" font-size="11" fill="${sliding ? bad : ok}">${sliding
+      ? 'the kept history starts later than it did last turn — this prompt is not an extension of the last'
+      : 'the whole conversation still fits the budget, so next turn really does extend this one'}</text>`;
+    g += `<text x="26" y="${VY + 59}" font-size="10" fill="${ink3}">${sliding
+      ? 'the engine reports prompt-shorter or prefix-diverged and reads the whole thing again'
+      : 'the engine can reuse what it already read — until the conversation passes 14,000 characters'}</text>`;
+
+    // ── 4. the ladder of budgets ─────────────────────────────
+    const TY = 288;
+    const ROWS = [
+      { n: 'window 8,192, plain chat', b: 14000, deep: false },
+      { n: 'window 8,192, deep think', b: 7000, deep: true },
+      { n: 'window 3,072, plain chat', b: 9500, deep: false },
+      { n: 'window 1,024, plain chat', b: 3400, deep: false },
+    ];
+    g += `<text x="14" y="${TY}" font-size="11" fill="${ink3}">every budget the page carried, in characters — and none of them is a word-piece count</text>`;
+    ROWS.forEach((r, k) => {
+      const y = TY + 12 + k * 24, on = k === 0;
+      g += `<rect x="14" y="${y}" width="612" height="20" rx="4" fill="${on ? signal : 'none'}" fill-opacity="0.12" stroke="${on ? signal : line}"/>`;
+      g += `<text x="24" y="${y + 14}" font-size="10.5" fill="${on ? ink : ink2}">${r.n}</text>`;
+      const bw = 190 * r.b / 14000;
+      g += `<rect x="240" y="${y + 5}" width="${bw.toFixed(1)}" height="10" rx="2" fill="${r.deep ? trace : signal}" opacity="0.75"/>`;
+      g += `<text x="${(244 + bw).toFixed(1)}" y="${y + 14}" font-size="9.5" fill="${ink3}">${r.b.toLocaleString()} chars ≈ ${Math.round(r.b / CPT).toLocaleString()} pieces</text>`;
+    });
+
+    // ── 5. the reading ───────────────────────────────────────
+    const NY = 424;
+    g += `<line x1="14" y1="${NY - 14}" x2="626" y2="${NY - 14}" stroke="${line}"/>`;
+    g += `<text x="14" y="${NY}" font-size="11.5" fill="${ink}">A character budget is a word budget seen through a fogged window.</text>`;
+    g += `<text x="14" y="${NY + 18}" font-size="10.5" fill="${ink3}">Since then the page counts pieces instead — so the prefix grows rather than sliding.</text>`;
+    svg.innerHTML = g;
+
+    $('#s288_cV').textContent = conv.toLocaleString() + ' characters';
+    $('#s288_s').textContent = Math.round(used).toLocaleString() + ' pieces';
+    $('#s288_u').innerHTML = `<b class="${used / WINDOW < 0.75 ? 'bad' : 'ok'}">${fmt(100 * used / WINDOW, 0)} %</b>`;
+    $('#s288_v').innerHTML = sliding ? '<b class="bad">the prefix moved — nothing is reusable</b>' : '<b class="ok">the prefix still grows</b>';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 289 ── */
+/* ── Station 289: the router clobbers the resident conversation ── */
+if ($('#s289')) {
+  const svg = $('#s289_svg'), sl = $('#s289_p');
+  // Re-read seconds: measured at 8K (166 s) and 32K (849 s) in the levers doc §2.2;
+  // 1,024 / 4,096 / ~4,700 divided out of the committed 48.9 tok/s f16 prefill rate
+  // (eval_results/needle_tier3/results.jsonl) and marked derived.
+  // Guard ms: measured, browser-prefix-registry §5 (opfs_browser_smoke.json).
+  const ROWS = [
+    { n: 1024, reread: 20.9, derived: true, guard: 108 },
+    { n: 4096, reread: 83.8, derived: true, guard: 163 },
+    { n: 4700, reread: 96, derived: false, guard: null, label: "the chat's own ceiling" },
+    { n: 8192, reread: 166, derived: false, guard: 231 },
+    { n: 32768, reread: 849, derived: false, guard: null },
+  ];
+  sl.addEventListener('input', render);
+
+  function render() {
+    const R = ROWS[parseInt(sl.value, 10)];
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line');
+    const L = 96, Rt = 620, SCALE = Math.max(30, R.reread * 1.12);
+    const X = (s) => L + (Rt - L) * s / SCALE;
+    let g = '';
+
+    // ── the two timelines ────────────────────────────────────
+    g += `<text x="14" y="14" font-size="11" fill="${ink3}">one turn, second by second — the whole width is ${fmt(SCALE, 0)} seconds</text>`;
+
+    // today
+    g += `<text x="14" y="${46}" font-size="11" fill="${ink2}">today</text>`;
+    g += `<rect x="${L}" y="32" width="6" height="24" fill="${trace}"/>`;
+    g += `<rect x="${L + 6}" y="32" width="${(X(R.reread) - L - 6).toFixed(1)}" height="24" rx="3" fill="${bad}" opacity="0.85"/>`;
+    g += `<text x="${L + 14}" y="${48}" font-size="11" fill="${css('--paper')}">reading your conversation all over again</text>`;
+    g += `<text x="${(X(R.reread) + 8 > 540 ? X(R.reread) - 8 : X(R.reread) + 8).toFixed(1)}" y="${48}" text-anchor="${X(R.reread) + 8 > 540 ? 'end' : 'start'}" font-size="11.5" fill="${ink}">${R.reread >= 180 ? fmt(R.reread / 60, 1) + ' min' : fmt(R.reread, 0) + ' s'}</text>`;
+
+    // with the guard
+    const gs = R.guard == null ? null : R.guard / 1000;
+    g += `<text x="14" y="${92}" font-size="11" fill="${ink2}">with a guard</text>`;
+    g += `<rect x="${L}" y="78" width="6" height="24" fill="${trace}"/>`;
+    if (gs != null) {
+      const w = Math.max(3, X(gs) - L - 6);
+      g += `<rect x="${L + 6}" y="78" width="${w.toFixed(1)}" height="24" rx="3" fill="${ok}" opacity="0.9"/>`;
+      g += `<text x="${(L + 12 + w).toFixed(1)}" y="${94}" font-size="11.5" fill="${ink}">${R.guard} ms — put it down, pick it back up</text>`;
+    } else {
+      g += `<text x="${L + 12}" y="${94}" font-size="11" fill="${ink3}">not measured at this depth — the guard was timed at 1,024 / 4,096 / 8,192</text>`;
+    }
+    g += `<text x="${L}" y="${118}" font-size="9.5" fill="${trace}">the narrow blue mark is the router's own question: two short messages, one word of answer</text>`;
+
+    // ── the mechanism, as four steps ─────────────────────────
+    const SY = 146;
+    const STEPS = [
+      { t: 'you press send', c: ink3 },
+      { t: 'the page asks the model, quietly: search or not?', c: trace },
+      { t: 'no shared beginning — the engine resets and forgets', c: bad },
+      { t: 'your turn starts reading from word one', c: bad },
+    ];
+    g += `<text x="14" y="${SY}" font-size="11" fill="${ink3}">what actually happens, in order</text>`;
+    STEPS.forEach((s, k) => {
+      const y = SY + 12 + k * 26;
+      g += `<circle cx="26" cy="${y + 10}" r="8" fill="${s.c}" opacity="0.25"/>`;
+      g += `<text x="26" y="${y + 14}" text-anchor="middle" font-size="10" fill="${s.c}">${k + 1}</text>`;
+      g += `<text x="42" y="${y + 14}" font-size="11" fill="${k >= 2 ? s.c : ink2}">${s.t}</text>`;
+      if (k < 3) g += `<line x1="26" y1="${y + 18}" x2="26" y2="${y + 28}" stroke="${ink3}" opacity="0.5"/>`;
+    });
+
+    // ── the rungs ────────────────────────────────────────────
+    const TY = 272;
+    g += `<text x="14" y="${TY}" font-size="11" fill="${ink3}">what the clobber costs at each depth, and what the guard costs instead</text>`;
+    g += `<text x="24" y="${TY + 18}" font-size="9.5" fill="${ink3}">resident</text>`;
+    g += `<text x="300" y="${TY + 18}" text-anchor="end" font-size="9.5" fill="${ink3}">re-read today</text>`;
+    g += `<text x="316" y="${TY + 18}" font-size="9.5" fill="${ink3}">the guard, measured through the browser's file store</text>`;
+    ROWS.forEach((r, k) => {
+      const y = TY + 26 + k * 24, on = r === R;
+      g += `<rect x="14" y="${y}" width="612" height="20" rx="4" fill="${on ? signal : 'none'}" fill-opacity="0.13" stroke="${on ? signal : line}"/>`;
+      g += `<text x="24" y="${y + 14}" font-size="10.5" fill="${on ? ink : ink2}">${r.n.toLocaleString()}${r.label ? ' · ' + r.label : ''}</text>`;
+      g += `<text x="300" y="${y + 14}" text-anchor="end" font-size="10.5" fill="${bad}">${r.reread >= 180 ? fmt(r.reread / 60, 1) + ' min' : fmt(r.reread, 0) + ' s'}${r.derived ? ' *' : ''}</text>`;
+      if (r.guard != null) {
+        const bw = 150 * r.guard / 849000;
+        g += `<rect x="316" y="${y + 5}" width="${Math.max(2, bw).toFixed(1)}" height="10" rx="2" fill="${ok}"/>`;
+        g += `<text x="322" y="${y + 14}" font-size="10.5" fill="${ok}">${r.guard} ms</text>`;
+      } else {
+        g += `<text x="316" y="${y + 14}" font-size="10.5" fill="${ink3}">not measured at this depth</text>`;
+      }
+    });
+    g += `<text x="24" y="${TY + 26 + ROWS.length * 24 + 13}" font-size="9.5" fill="${ink3}">* derived: the measured 48.9 words-a-second prefill rate, divided out. The other three are measured walls.</text>`;
+
+    // ── the reading ──────────────────────────────────────────
+    const NY = 462;
+    g += `<line x1="14" y1="${NY - 14}" x2="626" y2="${NY - 14}" stroke="${line}"/>`;
+    g += `<text x="14" y="${NY}" font-size="11.5" fill="${ink}">The router is cheap. Losing the conversation to ask it is not.</text>`;
+    svg.innerHTML = g;
+
+    $('#s289_pV').textContent = R.n.toLocaleString() + ' words resident';
+    $('#s289_a').textContent = R.reread >= 180 ? fmt(R.reread / 60, 1) + ' min re-read' : fmt(R.reread, 0) + ' s re-read';
+    $('#s289_b').textContent = R.guard == null ? 'not measured here' : R.guard + ' ms';
+    $('#s289_c').innerHTML = R.guard == null ? '' : `<b class="trace">${fmt(R.reread * 1000 / R.guard, 0)}× cheaper</b>`;
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 290 ── */
+/* ── Station 290: one instruction rate, and how little of it a kernel reaches ── */
+if ($('#s290')) {
+  const svg = $('#s290_svg'), bi = $('#s290_i'), bg = $('#s290_g');
+  // docs/research/2026-09-14-apple-prefill-gap-vs-llamacpp.md §10.1 and §10.2.
+  const CEIL = 6.33;                                   // the fitted instruction ceiling
+  const INSTR = [
+    { n: 'f32 in, f32 out', t: 6.38, note: 'the one the driver advertises' },
+    { n: 'f16 in, f32 out', t: 6.34, note: 'NOT advertised — and real' },
+    { n: 'f16 in, f16 out', t: 6.29, note: 'advertised; no faster' },
+  ];
+  const GEMM = [
+    { n: 'f16 in, f16 out', ms: 23.855, t: 3.83, rel: '1.672e-2', pass: false },
+    { n: 'the kernel we ship', ms: 24.559, t: 3.72, rel: '1.196e-3', pass: true, ship: true },
+    { n: 'f16 in, f32 out', ms: 24.827, t: 3.68, rel: '2.264e-4', pass: true, best: true },
+    { n: 'f16 in, f32 out, 4x2 blocked', ms: 25.744, t: 3.55, rel: '2.264e-4', pass: true },
+    { n: 'f32 in, f32 out, 4x2 blocked', ms: 27.861, t: 3.28, rel: '2.124e-6', pass: true },
+    { n: 'f32 in, f32 out', ms: 28.972, t: 3.15, rel: '2.124e-6', pass: true },
+  ];
+  let mode = 'instr';
+  bi.addEventListener('click', () => { mode = 'instr'; render(); });
+  bg.addEventListener('click', () => { mode = 'gemm'; render(); });
+
+  function render() {
+    bi.setAttribute('aria-pressed', String(mode === 'instr'));
+    bg.setAttribute('aria-pressed', String(mode === 'gemm'));
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line'), grid = css('--grid');
+    const L = 226, R = 590, TOP = 7.0;
+    const X = (t) => L + (R - L) * t / TOP;
+    let g = '';
+
+    // the ceiling, drawn in both modes
+    g += `<line x1="${X(CEIL).toFixed(1)}" y1="34" x2="${X(CEIL).toFixed(1)}" y2="316" stroke="${ok}" stroke-width="1.8" stroke-dasharray="4 3"/>`;
+    g += `<text x="${(X(CEIL) - 6).toFixed(1)}" y="31" text-anchor="end" font-size="10" fill="${ok}">6.33 — the instruction's own rate →</text>`;
+    [0, 2, 4, 6].forEach((v) => {
+      g += `<line x1="${X(v).toFixed(1)}" y1="316" x2="${X(v).toFixed(1)}" y2="320" stroke="${ink3}"/>`;
+      g += `<text x="${X(v).toFixed(1)}" y="332" text-anchor="middle" font-size="9.5" fill="${ink3}">${v}</text>`;
+    });
+    g += `<text x="${R}" y="346" text-anchor="end" font-size="9.5" fill="${ink3}">trillions of multiply-adds a second →</text>`;
+
+    if (mode === 'instr') {
+      g += `<text x="14" y="16" font-size="11" fill="${ink3}">the matrix instruction on its own — a loop that does nothing but multiply, fitted across two lengths</text>`;
+      INSTR.forEach((r, k) => {
+        const y = 60 + k * 62;
+        g += `<text x="14" y="${y + 16}" font-size="11.5" fill="${ink}">${r.n}</text>`;
+        g += `<text x="14" y="${y + 31}" font-size="9.5" fill="${ink3}">${r.note}</text>`;
+        g += `<rect x="${L}" y="${y}" width="${(X(r.t) - L).toFixed(1)}" height="26" rx="3" fill="${trace}" opacity="0.85"/>`;
+        g += `<text x="${(X(r.t) + 8).toFixed(1)}" y="${y + 18}" font-size="12" fill="${ink}">${fmt(r.t, 2)}</text>`;
+      });
+      g += `<rect x="14" y="364" width="612" height="52" rx="8" fill="${ok}" fill-opacity="0.12" stroke="${ok}"/>`;
+      g += `<text x="26" y="${386}" font-size="12.5" fill="${ink}">All three widths agree to 1.4 %. There is no half-width speed advantage on this chip.</text>`;
+      g += `<text x="26" y="${404}" font-size="10.5" fill="${ink3}">Which means the received wisdom the whole plan rested on was simply wrong, and cheap to check.</text>`;
+      $('#s290_r1').innerHTML = 'three widths <b class="trace">6.38 · 6.34 · 6.29</b>';
+      $('#s290_r2').innerHTML = 'spread <b class="ok">1.4 %</b>';
+      $('#s290_r3').innerHTML = '';
+    } else {
+      g += `<text x="14" y="16" font-size="11" fill="${ink3}">six real kernels at the shape the engine uses, all reading the same weights, all timed in one process</text>`;
+      GEMM.forEach((r, k) => {
+        const y = 40 + k * 40;
+        g += `<text x="14" y="${y + 13}" font-size="10.5" fill="${r.ship ? ink : ink2}">${r.n}${r.ship ? '  ←' : ''}</text>`;
+        g += `<text x="14" y="${y + 26}" font-size="9" fill="${r.pass ? ink3 : bad}">${r.ms} ms${r.pass ? '' : ' · rejected'} · error ${r.rel}${r.ship ? ' · plain multiplies' : ''}</text>`;
+        const col = r.ship ? signal : (r.pass ? trace : bad);
+        g += `<rect x="${L}" y="${y}" width="${(X(r.t) - L).toFixed(1)}" height="22" rx="3" fill="${col}" opacity="0.85"/>`;
+        g += `<text x="${(X(r.t) + 8).toFixed(1)}" y="${y + 16}" font-size="11" fill="${ink}">${fmt(r.t, 2)} — ${fmt(100 * r.t / CEIL, 0)} %</text>`;
+      });
+      // llama.cpp's band
+      const y = 40 + GEMM.length * 40;
+      g += `<text x="14" y="${y + 15}" font-size="10.5" fill="${ok}">llama.cpp, same chip, same weights</text>`;
+      g += `<rect x="${X(4.86).toFixed(1)}" y="${y}" width="${(X(5.50) - X(4.86)).toFixed(1)}" height="22" rx="3" fill="${ok}" opacity="0.8"/>`;
+      g += `<text x="${(X(5.50) + 8).toFixed(1)}" y="${y + 16}" font-size="11" fill="${ok}">4.86–5.50 — 77 to 87 %</text>`;
+      g += `<rect x="14" y="360" width="612" height="70" rx="8" fill="${bad}" fill-opacity="0.1" stroke="${bad}"/>`;
+      g += `<text x="26" y="${382}" font-size="12.5" fill="${ink}">Not one matrix kernel beats the plain one already shipped.</text>`;
+      g += `<text x="26" y="${400}" font-size="10.5" fill="${ink3}">Same instruction, same rate, same tiles, same 512-word batch — and a 1.7× gap remains.</text>`;
+      g += `<text x="26" y="${416}" font-size="10.5" fill="${ink3}">Theirs is written by hand in Apple's language. Ours is translated into it. That is the gap.</text>`;
+      $('#s290_r1').innerHTML = 'shipped <b class="trace">3.72</b>';
+      $('#s290_r2').innerHTML = 'best matrix kernel <b>3.68</b>';
+      $('#s290_r3').innerHTML = 'llama.cpp <b class="ok">4.86–5.50</b>';
+    }
+    svg.innerHTML = g;
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 291 ── */
+/* ── Station 291: a free 9 %, and the transfer rule falsified for the prompt stage ── */
+if ($('#s291')) {
+  const svg = $('#s291_svg'), bp = $('#s291_p'), bm = $('#s291_m');
+  // docs/research/2026-09-14-apple-prefill-gap-vs-llamacpp.md §11.1 and §11.2.
+  const PRED = [
+    { n: 'the transfer rule of thumb', v: 0.6, kind: 'predicted', why: '-8.1 % on the kernel alone, times 0.08' },
+    { n: 'the decomposition, whole prompt', v: 6.1, kind: 'predicted', why: '-8.1 % x 89.3 % of the floor x 84.8 % of the wait' },
+    { n: 'measured, paired, same session', v: 8.89, kind: 'measured', why: '292,828.8 ms -> 266,789.8 ms' },
+  ];
+  const HELD = [
+    { n: 'the decomposition, said first', v: 7.2, kind: 'predicted' },
+    { n: 'the chunk with no attention in it', v: 7.08, kind: 'measured' },
+  ];
+  const PAIR = [
+    { n: 'time to read the prompt', a: '292,828.8 ms', b: '266,789.8 ms', d: '-8.89 %', good: true },
+    { n: 'per word', a: '18.42 ms', b: '16.78 ms', d: '-8.89 %', good: true },
+    { n: 'time to the first word', a: '4.88 min', b: '4.45 min', d: '-0.43 min', good: true },
+    { n: 'the chunk with no attention', a: '7,786.6 ms', b: '7,235.1 ms', d: '-7.08 %', good: true },
+    { n: 'jobs sent to the chip', a: '91,840', b: '91,840', d: 'identical', good: null },
+    { n: 'submissions', a: '2,208', b: '2,208', d: 'identical', good: null },
+    { n: 'the 12 words it wrote', a: 'the reference', b: 'the reference', d: 'identical', good: null },
+  ];
+  let mode = 'pred';
+  bp.addEventListener('click', () => { mode = 'pred'; render(); });
+  bm.addEventListener('click', () => { mode = 'meas'; render(); });
+
+  function render() {
+    bp.setAttribute('aria-pressed', String(mode === 'pred'));
+    bm.setAttribute('aria-pressed', String(mode === 'meas'));
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line');
+    let g = '';
+
+    if (mode === 'pred') {
+      const L = 246, R = 540, X = (v) => L + (R - L) * v / 10;
+      g += `<text x="14" y="16" font-size="11" fill="${ink3}">how much faster reading a 15,900-word prompt would get — three answers, one of them measured</text>`;
+      PRED.forEach((r, k) => {
+        const y = 40 + k * 56, meas = r.kind === 'measured';
+        g += `<text x="14" y="${y + 15}" font-size="11" fill="${meas ? ink : ink2}">${r.n}</text>`;
+        g += `<text x="14" y="${y + 29}" font-size="9" fill="${ink3}">${r.why}</text>`;
+        g += `<rect x="${L}" y="${y}" width="${Math.max(2, X(r.v) - L).toFixed(1)}" height="24" rx="3" fill="${meas ? ok : ink3}" opacity="${meas ? 0.9 : 0.55}"/>`;
+        g += `<text x="${(X(r.v) + 8).toFixed(1)}" y="${y + 17}" font-size="12" fill="${meas ? ok : ink2}">${fmt(r.v, 2)} %${meas ? '  ← measured' : ''}</text>`;
+      });
+      g += `<line x1="14" y1="212" x2="626" y2="212" stroke="${line}"/>`;
+      g += `<text x="14" y="${232}" font-size="11" fill="${ink3}">the held-out check — the first chunk of a prompt has an empty history, so it contains no attention</text>`;
+      HELD.forEach((r, k) => {
+        const y = 244 + k * 40, meas = r.kind === 'measured';
+        g += `<text x="14" y="${y + 15}" font-size="11" fill="${meas ? ink : ink2}">${r.n}</text>`;
+        g += `<rect x="${L}" y="${y}" width="${(X(r.v) - L).toFixed(1)}" height="22" rx="3" fill="${meas ? ok : trace}" opacity="0.8"/>`;
+        g += `<text x="${(X(r.v) + 8).toFixed(1)}" y="${y + 16}" font-size="11.5" fill="${ink}">${fmt(r.v, 2)} %</text>`;
+      });
+      g += `<rect x="14" y="332" width="612" height="74" rx="8" fill="${ok}" fill-opacity="0.12" stroke="${ok}"/>`;
+      g += `<text x="26" y="${354}" font-size="12.5" fill="${ink}">A prediction made before the run landed within a tenth of a point.</text>`;
+      g += `<text x="26" y="${372}" font-size="10.5" fill="${ink3}">So the rule of thumb is retired for the prompt stage, and the decomposition is promoted.</text>`;
+      g += `<text x="26" y="${390}" font-size="10.5" fill="${ink3}">The rule was fitted on a small model's writing. It was carried into a large model's reading.</text>`;
+      $('#s291_r1').innerHTML = 'the rule said <b class="bad">0.6 %</b>';
+      $('#s291_r2').innerHTML = 'the decomposition said <b>6.1 %</b>';
+      $('#s291_r3').innerHTML = 'measured <b class="ok">8.89 %</b>';
+    } else {
+      g += `<text x="14" y="16" font-size="11" fill="${ink3}">the two arms, back to back, same machine, same prompt — the only difference is one load flag</text>`;
+      g += `<text x="24" y="${40}" font-size="9.5" fill="${ink3}">what was counted</text>`;
+      g += `<text x="330" y="${40}" text-anchor="end" font-size="9.5" fill="${ink3}">flag off</text>`;
+      g += `<text x="470" y="${40}" text-anchor="end" font-size="9.5" fill="${ink3}">flag on</text>`;
+      g += `<text x="614" y="${40}" text-anchor="end" font-size="9.5" fill="${ink3}">difference</text>`;
+      PAIR.forEach((r, k) => {
+        const y = 48 + k * 30;
+        g += `<rect x="14" y="${y}" width="612" height="26" rx="4" fill="${r.good ? ok : ink3}" fill-opacity="${r.good ? 0.1 : 0.06}" stroke="${line}"/>`;
+        g += `<text x="24" y="${y + 17}" font-size="11" fill="${ink2}">${r.n}</text>`;
+        g += `<text x="330" y="${y + 17}" text-anchor="end" font-size="11" fill="${ink3}">${r.a}</text>`;
+        g += `<text x="470" y="${y + 17}" text-anchor="end" font-size="11" fill="${ink}">${r.b}</text>`;
+        g += `<text x="614" y="${y + 17}" text-anchor="end" font-size="11" fill="${r.good ? ok : ink3}">${r.d}</text>`;
+      });
+      const NY = 288;
+      g += `<rect x="14" y="${NY}" width="612" height="92" rx="8" fill="${signal}" fill-opacity="0.1" stroke="${signal}"/>`;
+      g += `<text x="26" y="${NY + 22}" font-size="12.5" fill="${ink}">Same jobs, same submissions, same words out. 26 seconds less.</text>`;
+      g += `<text x="26" y="${NY + 42}" font-size="10.5" fill="${ink3}">Every host-side timer is flat, so the whole saving is time the chip spent computing.</text>`;
+      g += `<text x="26" y="${NY + 58}" font-size="10.5" fill="${ink3}">The flag is bit-identical by construction: it cannot change an output bit, only the order.</text>`;
+      g += `<text x="26" y="${NY + 74}" font-size="10.5" fill="${ink3}">And the fast arm ran second, on an already-warm machine, which counts against it.</text>`;
+      $('#s291_r1').innerHTML = 'flag off <b>292,828.8 ms</b>';
+      $('#s291_r2').innerHTML = 'flag on <b class="ok">266,789.8 ms</b>';
+      $('#s291_r3').innerHTML = '<b class="trace">byte-identical 12/12</b>';
+    }
+    svg.innerHTML = g;
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 292 ── */
+/* ── Station 292: 961 MiB re-allocated per request, for zeros the spec already gave ── */
+if ($('#s292')) {
+  const svg = $('#s292_svg'), sl = $('#s292_w');
+  // docs/research/2026-09-14-prefill-progress-interrupt-initstate.md §4.1 and §4.3.
+  const CELLS = [
+    { w: 8192, kv: 512.0, rec: 144.0, conv: 5.6, spec: 299.25, total: 961,
+      before: 31.7, after: 0.1, bmin: 31.2, bmax: 34.0,
+      rBefore: [40.9, 69.3], rAfter: [0.6, 64.5] },
+    { w: 16384, kv: 1024.0, rec: 144.0, conv: 5.6, spec: 299.25, total: 1473,
+      before: 60.5, after: 0.2, bmin: 54.2, bmax: 77.6,
+      rBefore: [57.2, 61.5], rAfter: [0.7, 60.8] },
+    { w: 32768, kv: 2048.0, rec: 144.0, conv: 5.6, spec: 299.25, total: 2497,
+      before: null, after: null, rBefore: null, rAfter: null },
+  ];
+  sl.addEventListener('input', render);
+
+  function render() {
+    const C = CELLS[parseInt(sl.value, 10)];
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line');
+    const L = 16, R = 624, TOP = 2600;
+    const X = (m) => L + (R - L) * m / TOP;
+    let g = '';
+
+    // ── 1. what gets churned ─────────────────────────────────
+    g += `<text x="14" y="14" font-size="11" fill="${ink3}">129 buffers destroyed and re-created before every question — the ruler is 2,600 MiB</text>`;
+    let x = 0;
+    const PARTS = [
+      { v: C.kv, c: signal, n: '32 cache buffers' },
+      { v: C.rec, c: trace, n: '48 recurrent states' },
+      { v: C.conv, c: ok, n: '48 small ones' },
+      { v: C.spec, c: bad, n: 'the rewind pool' },
+    ];
+    PARTS.forEach((p) => {
+      g += `<rect x="${X(x).toFixed(1)}" y="26" width="${(X(x + p.v) - X(x)).toFixed(1)}" height="28" fill="${p.c}" opacity="0.85"/>`;
+      x += p.v;
+    });
+    g += `<text x="${(X(x) + 8 > 500 ? X(x) - 8 : X(x) + 8).toFixed(1)}" y="45" text-anchor="${X(x) + 8 > 500 ? 'end' : 'start'}" font-size="12" fill="${X(x) + 8 > 500 ? css('--paper') : ink}">${C.total.toLocaleString()} MiB</text>`;
+    PARTS.forEach((p, k) => {
+      const lx = 16 + (k % 2) * 300, ly = 64 + Math.floor(k / 2) * 14;
+      g += `<rect x="${lx}" y="${ly}" width="9" height="9" fill="${p.c}" opacity="0.85"/>`;
+      g += `<text x="${lx + 13}" y="${ly + 8}" font-size="9.5" fill="${ink3}">${p.n} · ${fmt(p.v, p.v < 10 ? 1 : 0)} MiB</text>`;
+    });
+
+    // ── 2. the reset wall ────────────────────────────────────
+    const WY = 114;
+    g += `<text x="14" y="${WY}" font-size="11" fill="${ink3}">how long a fresh start takes — measured by one reset message, which is exactly one rebuild</text>`;
+    if (C.before == null) {
+      g += `<rect x="14" y="${WY + 10}" width="612" height="52" rx="8" fill="${ink3}" fill-opacity="0.08" stroke="${line}"/>`;
+      g += `<text x="26" y="${WY + 32}" font-size="11.5" fill="${ink2}">the wall was timed at 8,192 and 16,384 only — this window's byte figure is arithmetic</text>`;
+      g += `<text x="26" y="${WY + 50}" font-size="10.5" fill="${ink3}">2,497 MiB per question, and the fix removes all of it the same way</text>`;
+    } else {
+      const BX = 268, BW = 322, wX = (ms) => BX + BW * ms / 80;
+      [['before — destroy all 129, re-make all 129', C.before, bad, `min ${C.bmin}, max ${C.bmax}, median of 8`],
+       ['after — wipe 129 in place', C.after, ok, 'flat at 0.1–0.2 ms at both windows']].forEach(([n, v, col, note], k) => {
+        const y = WY + 14 + k * 42;
+        g += `<text x="14" y="${y + 14}" font-size="10.5" fill="${ink2}">${n}</text>`;
+        g += `<text x="14" y="${y + 27}" font-size="9" fill="${ink3}">${note}</text>`;
+        g += `<rect x="${BX}" y="${y}" width="${Math.max(2.5, wX(v) - BX).toFixed(1)}" height="22" rx="3" fill="${col}" opacity="0.85"/>`;
+        g += `<text x="${(Math.max(BX + 3, wX(v)) + 8).toFixed(1)}" y="${y + 16}" font-size="11.5" fill="${ink}">${fmt(v, 1)} ms</text>`;
+      });
+      g += `<text x="14" y="${WY + 106}" font-size="10.5" fill="${trace}">${fmt(C.before / C.after, 0)}× — and 1.53× the bytes cost 1.91× the wall, which is how the cause was pinned</text>`;
+    }
+
+    // ── 3. restoring a saved conversation ────────────────────
+    const RY = 256;
+    g += `<text x="14" y="${RY}" font-size="11" fill="${ink3}">and the same rebuild sat in the middle of putting a saved conversation back</text>`;
+    if (C.rBefore) {
+      const BX = 150, BW = 300, tot = (a) => a.reduce((s, v) => s + v, 0);
+      [['before', C.rBefore, bad], ['after', C.rAfter, ok]].forEach(([n, arr, col], k) => {
+        const y = RY + 14 + k * 34;
+        g += `<text x="14" y="${y + 16}" font-size="10.5" fill="${ink2}">${n}</text>`;
+        let ax = BX;
+        arr.forEach((v, j) => {
+          const w = BW * v / 120;
+          g += `<rect x="${ax.toFixed(1)}" y="${y}" width="${Math.max(1, w).toFixed(1)}" height="22" fill="${j === 0 ? col : ink3}" opacity="${j === 0 ? 0.9 : 0.45}"/>`;
+          ax += w;
+        });
+        g += `<text x="${(ax + 8).toFixed(1)}" y="${y + 16}" font-size="11.5" fill="${ink}">${fmt(tot(arr), 1)} ms</text>`;
+      });
+      g += `<text x="14" y="${RY + 96}" font-size="9.5" fill="${ink3}">the coloured block is the rebuild; the grey is moving the session's own bytes, which barely moved</text>`;
+    } else {
+      g += `<text x="14" y="${RY + 20}" font-size="10.5" fill="${ink3}">restore was timed at 8,192 and 16,384 — not at this window</text>`;
+    }
+
+    // ── 4. the argument ──────────────────────────────────────
+    const NY = 380;
+    g += `<rect x="14" y="${NY}" width="612" height="88" rx="8" fill="${ok}" fill-opacity="0.1" stroke="${ok}"/>`;
+    g += `<text x="26" y="${NY + 22}" font-size="12.5" fill="${ink}">Why this cannot change an answer, stated rather than hoped:</text>`;
+    g += `<text x="26" y="${NY + 42}" font-size="10.5" fill="${ink3}">a new buffer is guaranteed to arrive full of zeros, and the wipe writes the same zeros.</text>`;
+    g += `<text x="26" y="${NY + 58}" font-size="10.5" fill="${ink3}">Five of the sites were asking to write and writing nothing at all.</text>`;
+    g += `<text x="26" y="${NY + 76}" font-size="10.5" fill="${ink3}">Afterwards the memory counters read 4,907,123,716 bytes — the same number, to the byte.</text>`;
+    svg.innerHTML = g;
+
+    $('#s292_wV').textContent = C.w.toLocaleString() + ' words';
+    $('#s292_b').textContent = C.total.toLocaleString() + ' MiB';
+    $('#s292_x').textContent = C.before == null ? 'not timed here' : fmt(C.before, 1) + ' ms';
+    $('#s292_y').textContent = C.after == null ? '—' : fmt(C.after, 1) + ' ms';
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 293 ── */
+/* ── Station 293: the chunk-boundary interrupt that keeps its prefix ── */
+if ($('#s293')) {
+  const svg = $('#s293_svg'), sl = $('#s293_t');
+  // An 8,192-word prompt at PREFILL_CHUNK 512 = 16 passes. 166 s of prefill at the
+  // committed f16 rate (levers doc §2.2 / needle_tier3), i.e. ~10.4 s per pass,
+  // which is the figure §2.4 quotes for the extra grind at 8K depth.
+  const N = 16, PASS = 10.4, TOTAL = N * PASS;
+  sl.addEventListener('input', render);
+
+  function render() {
+    const t = Math.min(TOTAL, parseInt(sl.value, 10));
+    const inPass = Math.min(N - 1, Math.floor(t / PASS));        // the pass running now
+    const done = inPass;                                          // passes fully finished
+    const keptNew = Math.min(N, inPass + 1) * 512;                // it finishes this one
+    const stopNew = Math.min(TOTAL, (inPass + 1) * PASS);
+    const extra = stopNew - t;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line');
+    const L = 16, R = 624, X = (s) => L + (R - L) * s / TOTAL;
+    let g = '';
+
+    g += `<text x="14" y="14" font-size="11" fill="${ink3}">an 8,000-word prompt is 16 passes of 512 words, about 10.4 seconds each</text>`;
+
+    // ── lane 1: the old design ───────────────────────────────
+    const drawLane = (y, label, keptPasses, stopAt, col, note) => {
+      g += `<text x="14" y="${y - 6}" font-size="11" fill="${ink2}">${label}</text>`;
+      for (let k = 0; k < N; k++) {
+        const x0 = X(k * PASS), x1 = X((k + 1) * PASS);
+        const kept = k < keptPasses;
+        const started = k * PASS < stopAt;
+        g += `<rect x="${x0.toFixed(1)}" y="${y}" width="${(x1 - x0 - 1.5).toFixed(1)}" height="26" rx="2" fill="${kept ? col : ink3}" opacity="${kept ? 0.9 : started ? 0.28 : 0.1}"/>`;
+      }
+      g += `<line x1="${X(stopAt).toFixed(1)}" y1="${y - 4}" x2="${X(stopAt).toFixed(1)}" y2="${y + 30}" stroke="${bad}" stroke-width="2"/>`;
+      g += `<text x="14" y="${y + 44}" font-size="10" fill="${ink3}">${note}</text>`;
+    };
+    drawLane(40, 'the old design — stop at the next block', 0, t,
+      bad, 'it stops within a fraction of a second, and the whole bar goes grey: nothing is claimable.');
+    drawLane(110, 'the new design — stop at the next pass boundary', inPass + 1, stopNew,
+      ok, `it finishes the pass it is inside, then stops: ${(inPass + 1) * 512} words kept and handed back.`);
+
+    // the stop marker on the ruler
+    g += `<line x1="${X(t).toFixed(1)}" y1="168" x2="${X(t).toFixed(1)}" y2="178" stroke="${signal}" stroke-width="2"/>`;
+    g += `<text x="${X(t) < 300 ? X(t) + 6 : X(t) - 6}" y="190" text-anchor="${X(t) < 300 ? 'start' : 'end'}" font-size="10.5" fill="${signal}">you pressed Stop at ${fmt(t, 0)} s</text>`;
+
+    // ── the two outcomes ─────────────────────────────────────
+    const VY = 204;
+    g += `<rect x="14" y="${VY}" width="299" height="86" rx="8" fill="${bad}" fill-opacity="0.1" stroke="${bad}"/>`;
+    g += `<text x="26" y="${VY + 22}" font-size="11.5" fill="${bad}">old: 0 words kept</text>`;
+    g += `<text x="26" y="${VY + 42}" font-size="10.5" fill="${ink3}">${fmt(t, 0)} seconds of reading discarded</text>`;
+    g += `<text x="26" y="${VY + 58}" font-size="10.5" fill="${ink3}">the request fails rather than finishing</text>`;
+    g += `<text x="26" y="${VY + 74}" font-size="10.5" fill="${ink3}">and the next ask starts at word one</text>`;
+
+    g += `<rect x="327" y="${VY}" width="299" height="86" rx="8" fill="${ok}" fill-opacity="0.12" stroke="${ok}"/>`;
+    g += `<text x="339" y="${VY + 22}" font-size="11.5" fill="${ok}">new: ${keptNew.toLocaleString()} words kept</text>`;
+    g += `<text x="339" y="${VY + 42}" font-size="10.5" fill="${ink3}">you wait ${fmt(extra, 1)} s longer for the boundary</text>`;
+    g += `<text x="339" y="${VY + 58}" font-size="10.5" fill="${ink3}">the request finishes, marked interrupted</text>`;
+    g += `<text x="339" y="${VY + 74}" font-size="10.5" fill="${ink3}">and the next ask reads only the rest</text>`;
+
+    // ── the pass sequence argument ───────────────────────────
+    const AY = 312;
+    g += `<text x="14" y="${AY}" font-size="11" fill="${ink3}">why continuing gives the same words, not merely similar ones</text>`;
+    g += `<text x="14" y="${AY + 20}" font-size="10.5" fill="${ink2}">straight through</text>`;
+    g += `<text x="170" y="${AY + 20}" font-size="10.5" fill="${ink}">512, 512, 512, … , remainder</text>`;
+    g += `<text x="14" y="${AY + 40}" font-size="10.5" fill="${ink2}">stopped and continued</text>`;
+    g += `<text x="170" y="${AY + 40}" font-size="10.5" fill="${ink}">512 × ${inPass + 1}  ‖  512 × ${Math.max(0, N - inPass - 1)}, remainder</text>`;
+    g += `<text x="170" y="${AY + 58}" font-size="10" fill="${ok}">the same calls, in the same order, against the same state</text>`;
+    g += `<line x1="14" y1="${AY + 74}" x2="626" y2="${AY + 74}" stroke="${line}"/>`;
+    g += `<text x="14" y="${AY + 92}" font-size="10.5" fill="${ink3}">A boundary that is not a multiple of 512 is refused: correct, but not certifiably the same bytes.</text>`;
+    svg.innerHTML = g;
+
+    $('#s293_tV').textContent = fmt(t, 0) + ' s in — pass ' + (inPass + 1) + ' of 16';
+    $('#s293_a').textContent = 'nothing (' + fmt(t, 0) + ' s lost)';
+    $('#s293_b').textContent = keptNew.toLocaleString() + ' words';
+    $('#s293_c').innerHTML = `<b class="trace">for ${fmt(extra, 1)} s more of waiting</b>`;
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 294 ── */
+/* ── Station 294: the checkpoint file, its size, and what it replaces ── */
+if ($('#s294')) {
+  const svg = $('#s294_svg'), sl = $('#s294_n');
+  // docs/research/2026-09-14-browser-prefix-registry.md §3.3 and §5.
+  const FLOOR = 156893184, PER = 65536;                 // bytes
+  const MEAS = [
+    { n: 1024, bytes: 224002048, write: 269, read: 113 },
+    { n: 4096, bytes: 425328640, write: 392, read: 168 },
+    { n: 8192, bytes: 693764096, write: 783, read: 245 },
+  ];
+  const W_RATE = 845e6, R_RATE = 2706e6;                // the 8K row's measured rates, B/s
+  const PREFILL_TPS = 48.9;                             // eval_results/needle_tier3, f16 @8K
+  const INCOG = 1.48e9, NORMAL = 296.6e9;
+  sl.addEventListener('input', render);
+
+  function render() {
+    const n = parseInt(sl.value, 10);
+    const bytes = FLOOR + n * PER;
+    const hit = MEAS.find((m) => m.n === n);
+    const write = hit ? hit.write : 1000 * bytes / W_RATE;
+    const read = hit ? hit.read : 1000 * bytes / R_RATE;
+    const prefill = n / PREFILL_TPS;
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line');
+    const L = 16, R = 624;
+    let g = '';
+
+    // ── 1. the size, against the private-window quota ────────
+    const TOP = 2.6e9, X = (b) => L + (R - L) * b / TOP;
+    g += `<text x="14" y="14" font-size="11" fill="${ink3}">what the checkpoint weighs — the ruler is 2.6 GB</text>`;
+    g += `<rect x="${L}" y="26" width="${(X(FLOOR) - L).toFixed(1)}" height="26" fill="${ink3}" opacity="0.5"/>`;
+    g += `<rect x="${X(FLOOR).toFixed(1)}" y="26" width="${(X(bytes) - X(FLOOR)).toFixed(1)}" height="26" fill="${signal}" opacity="0.85"/>`;
+    g += `<line x1="${X(INCOG).toFixed(1)}" y1="20" x2="${X(INCOG).toFixed(1)}" y2="60" stroke="${bad}" stroke-dasharray="3 3"/>`;
+    g += `<text x="${(X(INCOG) + 6).toFixed(1)}" y="70" font-size="10" fill="${bad}">1.48 GB — all a private window gets</text>`;
+    g += `<text x="${(X(bytes) + 8 > 480 ? X(bytes) - 8 : X(bytes) + 8).toFixed(1)}" y="44" text-anchor="${X(bytes) + 8 > 480 ? 'end' : 'start'}" font-size="12" fill="${X(bytes) + 8 > 480 ? css('--paper') : ink}">${fmt(bytes / 1048576, 1)} MiB</text>`;
+    g += `<text x="${L}" y="70" font-size="10" fill="${ink3}">grey 149.6 MiB fixed · orange 64 KiB a word</text>`;
+    const fitsIncog = Math.floor(INCOG / bytes);
+    g += `<text x="${L}" y="86" font-size="10.5" fill="${fitsIncog >= 1 ? ink3 : bad}">${fitsIncog >= 1
+      ? fitsIncog + ' of these fit in a private window (and ' + Math.floor(NORMAL / bytes).toLocaleString() + ' in a normal one)'
+      : 'this one does not fit in a private window at all'}</text>`;
+
+    // ── 2. the three timings, side by side ───────────────────
+    const TY = 112, BX = 206, BW = 380;
+    g += `<text x="14" y="${TY}" font-size="11" fill="${ink3}">how long each way of getting this conversation back takes — the ruler is 180 seconds</text>`;
+    const tX = (s) => BX + BW * s / 180;
+    const ROWS = [
+      { n: 'read the prompt again', s: prefill, c: bad, note: 'what it costs today' },
+      { n: 'write the checkpoint', s: write / 1000, c: trace, note: hit ? 'measured' : 'derived at the measured 845 MB/s' },
+      { n: 'read the checkpoint back', s: read / 1000, c: ok, note: hit ? 'measured' : 'derived at the measured 2,706 MB/s' },
+    ];
+    ROWS.forEach((r, k) => {
+      const y = TY + 14 + k * 40;
+      g += `<text x="14" y="${y + 14}" font-size="10.5" fill="${ink2}">${r.n}</text>`;
+      g += `<text x="14" y="${y + 27}" font-size="9" fill="${ink3}">${r.note}</text>`;
+      g += `<rect x="${BX}" y="${y}" width="${Math.max(2, tX(r.s) - BX).toFixed(1)}" height="22" rx="3" fill="${r.c}" opacity="0.85"/>`;
+      g += `<text x="${(Math.max(BX + 3, tX(r.s)) + 8).toFixed(1)}" y="${y + 16}" font-size="11.5" fill="${ink}">${r.s >= 1 ? fmt(r.s, 1) + ' s' : Math.round(r.s * 1000) + ' ms'}</text>`;
+    });
+    g += `<text x="14" y="${TY + 148}" font-size="11" fill="${trace}">putting it back is ${fmt(prefill / (read / 1000), 0)}× cheaper than reading it again</text>`;
+
+    // ── 3. the three rungs that were actually measured ───────
+    const MY = 292;
+    g += `<text x="14" y="${MY}" font-size="11" fill="${ink3}">the three prefixes actually written and read back, and what the formula predicted for each</text>`;
+    g += `<text x="24" y="${MY + 18}" font-size="9.5" fill="${ink3}">prefix</text>`;
+    g += `<text x="250" y="${MY + 18}" text-anchor="end" font-size="9.5" fill="${ink3}">predicted bytes</text>`;
+    g += `<text x="420" y="${MY + 18}" text-anchor="end" font-size="9.5" fill="${ink3}">stored bytes</text>`;
+    g += `<text x="614" y="${MY + 18}" text-anchor="end" font-size="9.5" fill="${ink3}">write / read back</text>`;
+    MEAS.forEach((m, k) => {
+      const y = MY + 26 + k * 24, on = m.n === n;
+      g += `<rect x="14" y="${y}" width="612" height="20" rx="4" fill="${on ? signal : 'none'}" fill-opacity="0.13" stroke="${on ? signal : line}"/>`;
+      g += `<text x="24" y="${y + 14}" font-size="10.5" fill="${on ? ink : ink2}">${m.n.toLocaleString()}</text>`;
+      g += `<text x="250" y="${y + 14}" text-anchor="end" font-size="10.5" fill="${ink3}">${(FLOOR + m.n * PER).toLocaleString()}</text>`;
+      g += `<text x="420" y="${y + 14}" text-anchor="end" font-size="10.5" fill="${ok}">${m.bytes.toLocaleString()}</text>`;
+      g += `<text x="614" y="${y + 14}" text-anchor="end" font-size="10.5" fill="${ink}">${m.write} ms / ${m.read} ms</text>`;
+    });
+
+    // ── 4. the reading ───────────────────────────────────────
+    const NY = 422;
+    g += `<line x1="14" y1="${NY - 14}" x2="626" y2="${NY - 14}" stroke="${line}"/>`;
+    g += `<text x="14" y="${NY}" font-size="11.5" fill="${ink}">The browser would not promise to keep any of this.</text>`;
+    g += `<text x="14" y="${NY + 18}" font-size="10.5" fill="${ink3}">So a missing checkpoint is treated as an ordinary miss, never an error — and meta.json is written last,</text>`;
+    g += `<text x="14" y="${NY + 34}" font-size="10.5" fill="${ink3}">so a half-written one is never mistaken for a whole one.</text>`;
+    svg.innerHTML = g;
+
+    $('#s294_nV').textContent = n.toLocaleString() + ' words';
+    $('#s294_s').textContent = fmt(bytes / 1048576, 1) + ' MiB';
+    $('#s294_r').textContent = read >= 1000 ? fmt(read / 1000, 2) + ' s' : Math.round(read) + ' ms';
+    $('#s294_v').innerHTML = `<b class="bad">vs ${fmt(prefill, 0)} s of re-reading</b>`;
+  }
+  render(); window.addEventListener('resize', render);
+}
+
+/* ── Station 295 ── */
+/* ── Station 295: dawn.node finishes its work and never exits ── */
+if ($('#s295')) {
+  const svg = $('#s295_svg'), sl = $('#s295_t');
+  const SPAN = 30;                       // minutes drawn, after the last line is printed
+  const REPORT = 15;                     // the README's "held >15 min, report it" rule
+  sl.addEventListener('input', render);
+
+  function render() {
+    const t = parseInt(sl.value, 10);
+    const ends = t === 0 ? null : t;      // when the process actually goes away
+    const ink = css('--ink'), ink2 = css('--ink-2'), ink3 = css('--ink-3');
+    const trace = css('--trace'), signal = css('--signal'), ok = css('--ok'), bad = css('--bad');
+    const line = css('--line');
+    const L = 150, R = 620, X = (m) => L + (R - L) * m / SPAN;
+    let g = '';
+
+    g += `<text x="14" y="14" font-size="11" fill="${ink3}">minutes after the probe printed its last line — everything it was asked for is already done</text>`;
+    // the axis
+    [0, 5, 10, 15, 20, 25, 30].forEach((m) => {
+      g += `<line x1="${X(m).toFixed(1)}" y1="26" x2="${X(m).toFixed(1)}" y2="${ends === null ? 172 : 172}" stroke="${line}"/>`;
+      g += `<text x="${X(m).toFixed(1)}" y="190" text-anchor="middle" font-size="9.5" fill="${ink3}">${m}</text>`;
+    });
+    // the report-it rule
+    g += `<line x1="${X(REPORT).toFixed(1)}" y1="22" x2="${X(REPORT).toFixed(1)}" y2="178" stroke="${trace}" stroke-dasharray="4 3"/>`;
+    g += `<text x="${(X(REPORT) + 6).toFixed(1)}" y="204" font-size="9.5" fill="${trace}">15 min — report it, don't remove it</text>`;
+
+    const LANES = [
+      { n: 'the work', sub: 'measurements + summary file', done: 0, col: ok },
+      { n: 'the process', sub: 'alive, nothing left to do', done: ends, col: bad },
+      { n: 'the GPU lock', sub: 'held by that process', done: ends, col: bad },
+      { n: 'the next job', sub: 'a sibling waiting its turn', done: ends, col: signal, waits: true },
+    ];
+    LANES.forEach((r, k) => {
+      const y = 34 + k * 36;
+      g += `<text x="14" y="${y + 14}" font-size="11" fill="${ink2}">${r.n}</text>`;
+      g += `<text x="14" y="${y + 26}" font-size="9" fill="${ink3}">${r.sub}</text>`;
+      if (k === 0) {
+        g += `<rect x="${L - 6}" y="${y}" width="6" height="22" fill="${ok}"/>`;
+        g += `<text x="${L + 6}" y="${y + 16}" font-size="10.5" fill="${ok}">finished before minute zero</text>`;
+        return;
+      }
+      const end = r.done === null ? SPAN : r.done;
+      if (r.waits) {
+        g += `<rect x="${L}" y="${y}" width="${(X(end) - L).toFixed(1)}" height="22" rx="3" fill="${ink3}" opacity="0.3"/>`;
+        if (r.done !== null) {
+          g += `<rect x="${X(end).toFixed(1)}" y="${y}" width="${(R - X(end)).toFixed(1)}" height="22" rx="3" fill="${signal}" opacity="0.85"/>`;
+          g += `<text x="${(X(end) + 8).toFixed(1)}" y="${y + 16}" font-size="10.5" fill="${ink}">starts at ${end} min</text>`;
+        } else {
+          g += `<text x="${L + 8}" y="${y + 16}" font-size="10.5" fill="${ink3}">still waiting — and it will keep waiting</text>`;
+        }
+      } else {
+        g += `<rect x="${L}" y="${y}" width="${(X(end) - L).toFixed(1)}" height="22" rx="3" fill="${r.col}" opacity="0.75"/>`;
+        if (r.done === null) {
+          g += `<text x="${R - 8}" y="${y + 16}" text-anchor="end" font-size="10.5" fill="${css('--paper')}">…and on, and on</text>`;
+        } else {
+          g += `<text x="${(X(end) + 8).toFixed(1)}" y="${y + 16}" font-size="10.5" fill="${ink}">killed at ${end} min</text>`;
+        }
+      }
+    });
+
+    // ── the health check that lies ───────────────────────────
+    const VY = 216;
+    g += `<rect x="14" y="${VY}" width="612" height="72" rx="8" fill="${bad}" fill-opacity="0.1" stroke="${bad}"/>`;
+    g += `<text x="26" y="${VY + 22}" font-size="12.5" fill="${ink}">what a watcher sees at minute ${t === 0 ? SPAN : Math.min(t, SPAN)}:</text>`;
+    g += `<text x="26" y="${VY + 42}" font-size="10.5" fill="${ink3}">the lock folder exists · the process number inside it is alive · no error anywhere</text>`;
+    g += `<text x="26" y="${VY + 60}" font-size="10.5" fill="${ends === null ? bad : ok}">${ends === null
+      ? 'so "is the owner still running?" answers yes, truthfully, for ever'
+      : 'the only thing that ended it was a clock the script set on the process itself'}</text>`;
+
+    // ── the reading ──────────────────────────────────────────
+    const NY = 312;
+    g += `<text x="14" y="${NY}" font-size="11" fill="${ink3}">the two process notes on the same page of the same document</text>`;
+    [['the loop was mis-sized: eleven-second batches, ten to a submission', 'the shape that once made macOS report no check-ins for 94 seconds'],
+     ['the program finished and did not exit', 'the shape that quietly holds a shared machine hostage']].forEach((r, k) => {
+      const y = NY + 12 + k * 38;
+      g += `<circle cx="26" cy="${y + 10}" r="8" fill="${trace}" opacity="0.25"/>`;
+      g += `<text x="26" y="${y + 14}" text-anchor="middle" font-size="10" fill="${trace}">${k + 1}</text>`;
+      g += `<text x="42" y="${y + 10}" font-size="11" fill="${ink2}">${r[0]}</text>`;
+      g += `<text x="42" y="${y + 25}" font-size="9.5" fill="${ink3}">${r[1]}</text>`;
+    });
+    g += `<line x1="14" y1="${NY + 76}" x2="626" y2="${NY + 76}" stroke="${line}"/>`;
+    g += `<text x="14" y="${NY + 94}" font-size="11.5" fill="${ink}">Both are the same shape: the job was fine, the container was not.</text>`;
+    svg.innerHTML = g;
+
+    $('#s295_tV').textContent = t === 0 ? 'no timeout' : t + ' minutes';
+    $('#s295_a').textContent = ends === null ? 'for ever' : ends + ' minutes';
+    $('#s295_b').innerHTML = ends === null ? '<b class="bad">never</b>' : `<b class="ok">at ${ends} min</b>`;
+    $('#s295_c').innerHTML = ends === null ? '<b class="bad">a truthful health check says all is well</b>' : '';
   }
   render(); window.addEventListener('resize', render);
 }

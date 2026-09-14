@@ -854,7 +854,8 @@
       "err_prefix": "Error: ",
       "err_delete_prefix": "Failed to delete cache: ",
       "empty_response": "(empty response)",
-      "confirm_delete": "Delete the downloaded AI model? Other AI tools on this site share it, and it will need to be downloaded again."
+      "confirm_delete": "Delete the downloaded AI model? Other AI tools on this site share it, and it will need to be downloaded again.",
+      "status_rereading": "Reading the conversation again…"
     },
     "extensions": {
       "install_heading": "Install an extension",

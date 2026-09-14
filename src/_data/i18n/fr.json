@@ -854,7 +854,8 @@
       "err_prefix": "Erreur : ",
       "err_delete_prefix": "Échec de la suppression du cache : ",
       "empty_response": "(réponse vide)",
-      "confirm_delete": "Supprimer le modèle d'IA téléchargé ? Les autres outils d'IA du site le partagent et il devra être téléchargé à nouveau."
+      "confirm_delete": "Supprimer le modèle d'IA téléchargé ? Les autres outils d'IA du site le partagent et il devra être téléchargé à nouveau.",
+      "status_rereading": "Relecture de la conversation…"
     },
     "extensions": {
       "install_heading": "Installer une extension",

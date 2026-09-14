@@ -854,7 +854,8 @@
       "err_prefix": "Error: ",
       "err_delete_prefix": "Fallo al eliminar caché: ",
       "empty_response": "(respuesta vacía)",
-      "confirm_delete": "¿Eliminar el modelo de IA descargado? Otras herramientas de IA del sitio lo comparten y habrá que descargarlo de nuevo."
+      "confirm_delete": "¿Eliminar el modelo de IA descargado? Otras herramientas de IA del sitio lo comparten y habrá que descargarlo de nuevo.",
+      "status_rereading": "Releyendo la conversación…"
     },
     "extensions": {
       "install_heading": "Instalar una extensión",

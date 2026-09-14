@@ -362,7 +362,7 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
     weightUpload: 'writeBuffer'
   };
   if (vendor === 'nvidia' && t.nvidiaMaxSeq) { opts.residualFusion = true; opts.q1Decode = 'lut'; opts.q1Concat = 'all'; opts.bindGroupCache = true; opts.q1LutSkew = true; opts.prefillTile = 'arow'; opts.specSlots = 1; opts.residentTrim = 'all'; }
-  if (vendor === 'apple' && t.appleMaxSeq) opts.kvF16 = true;
+  if (vendor === 'apple' && t.appleMaxSeq) { opts.kvF16 = true; opts.specSlots = 1; opts.residentTrim = 'all'; }
   if (t.streamingLoad) opts.streamingLoad = true;
   if (vision) {
     opts.visionModelUrl = shardBase;

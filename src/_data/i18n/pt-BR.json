@@ -855,7 +855,11 @@
       "err_delete_prefix": "Falha ao excluir cache: ",
       "empty_response": "(resposta vazia)",
       "confirm_delete": "Excluir o modelo de IA baixado? Outras ferramentas de IA do site o compartilham e será preciso baixá-lo novamente.",
-      "status_rereading": "Relendo a conversa…"
+      "status_rereading": "Relendo a conversa…",
+      "progress_prefill": "Lendo sua mensagem…",
+      "prefill_tokens": "{done} / {total} tokens",
+      "prefill_rate": "{rate} tok/s",
+      "prefill_eta": "faltam {eta}"
     },
     "extensions": {
       "install_heading": "Instalar uma extensão",

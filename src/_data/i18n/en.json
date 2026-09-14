@@ -855,7 +855,11 @@
       "err_delete_prefix": "Failed to delete cache: ",
       "empty_response": "(empty response)",
       "confirm_delete": "Delete the downloaded AI model? Other AI tools on this site share it, and it will need to be downloaded again.",
-      "status_rereading": "Reading the conversation again…"
+      "status_rereading": "Reading the conversation again…",
+      "progress_prefill": "Reading your prompt…",
+      "prefill_tokens": "{done} / {total} tokens",
+      "prefill_rate": "{rate} tok/s",
+      "prefill_eta": "{eta} left"
     },
     "extensions": {
       "install_heading": "Install an extension",

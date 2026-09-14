@@ -134,7 +134,7 @@ function runApp(MentriaEngine) {
      for non-byte stages (engine multiplexes byte counts and step counters
      on the same channel; see ai-chat.njk for the long-form rationale). */
   function onEngineProgress(p) {
-    if (!p) return;
+    if (!p || p.stage === 'prefill') return;
     progressWrap.style.display = '';
     if (p.message) progressLabel.textContent = p.message;
     if (p.loaded != null && p.total != null && p.total > 0) {

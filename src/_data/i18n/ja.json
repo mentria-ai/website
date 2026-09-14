@@ -855,7 +855,11 @@
       "err_delete_prefix": "キャッシュ削除失敗: ",
       "empty_response": "(空の応答)",
       "confirm_delete": "ダウンロード済みのAIモデルを削除しますか？このサイトの他のAIツールも共有しており、再ダウンロードが必要になります。",
-      "status_rereading": "会話を読み直しています…"
+      "status_rereading": "会話を読み直しています…",
+      "progress_prefill": "プロンプトを読み込んでいます…",
+      "prefill_tokens": "{done} / {total} トークン",
+      "prefill_rate": "{rate} トークン/秒",
+      "prefill_eta": "残り {eta}"
     },
     "extensions": {
       "install_heading": "拡張機能をインストール",

@@ -250,6 +250,7 @@ function runApp(MentriaEngine, Tiers) {
 
   /* ── State ───────────────────────────────────────── */
   let engine = null;
+  let prefixCache = null;
   let generating = false;
   let abortCtrl = null;
   let genEpoch = 0;
@@ -841,6 +842,7 @@ function runApp(MentriaEngine, Tiers) {
     updateEmptySub(id);
     try { engine?.terminate(); } catch (_) {}
     engine = null;
+    prefixCache = null;
     inputEl.disabled = true; sendBtn.disabled = true;
     loadModel();
   });
@@ -861,6 +863,7 @@ function runApp(MentriaEngine, Tiers) {
         offerUpgrade: true,
         onProgress: onEngineProgress,
         onDeviceLost: (info) => {
+          prefixCache = null;
           setStatus('error', COPY.errDeviceLost);
           inputEl.disabled = true; sendBtn.disabled = true;
           console.error('WebGPU device lost:', info);
@@ -869,6 +872,17 @@ function runApp(MentriaEngine, Tiers) {
       engine = res.engine;
       currentTier = res.tier;
       contextTokens = res.maxSeq || 2048;
+      prefixCache = null;
+      if (currentTier === '27b' && typeof engine.createPrefixCache === 'function') {
+        try {
+          const t = Tiers.TIERS[currentTier] || {};
+          prefixCache = await engine.createPrefixCache({
+            modelId: (t.shards && t.shards[0]) || currentTier,
+            maxSeq: contextTokens,
+            kvMode: (t.appleMaxSeq && contextTokens === t.appleMaxSeq) ? 'f16' : 'f32'
+          });
+        } catch (_) { prefixCache = null; }
+      }
       routerIds = null; searchAdapterSpecState = null; searchAdapterLoaded = false; searchAdapterActive = false;
       systemMessage.content = systemPromptFor(currentTier);
       syncThinkToggle();
@@ -1124,7 +1138,10 @@ function runApp(MentriaEngine, Tiers) {
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
     const searchActive = webSearchOn && !!(getSearchCfg() || {}).url;
     if (searchActive && currentTier === '27b' && !imagesForRequest && rest.length > 1) setStatus('generating', COPY.statusRereading);
-    const route = (searchActive && currentTier === '27b' && !imagesForRequest && rest.length) ? await routeTurn(turnText(rest[rest.length - 1])) : null;
+    const routeAsk = () => routeTurn(turnText(rest[rest.length - 1]));
+    const route = (searchActive && currentTier === '27b' && !imagesForRequest && rest.length)
+      ? (prefixCache ? await prefixCache.withCheckpoint(routeAsk) : await routeAsk())
+      : null;
     if (epoch !== genEpoch) return;
     const useTool = route ? route === 'tool' : searchActive;
     markRoute(bodyEl, route);
@@ -1156,7 +1173,15 @@ function runApp(MentriaEngine, Tiers) {
         };
         if (imagesForRequest) params.images = imagesForRequest;
 
+        let promptIds = null;
+        if (prefixCache && !imagesForRequest) {
+          try { promptIds = (await engine.encodeChat(params.messages, { enableThinking: deepThink })).ids; } catch (_) { promptIds = null; }
+        }
+        const replyIds = [];
+        let committedTokens = 0;
         await engine.generate(params, (event) => {
+          if (typeof event.tokenId === 'number' && event.tokenId >= 0) replyIds.push(event.tokenId);
+          if (event.finished && typeof event.committedTokens === 'number') committedTokens = event.committedTokens;
           if (typeof event.token === 'string' && event.token.length > 0) {
             // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
             if (/^<\|[^|]*\|>$/.test(event.token)) return;
@@ -1169,6 +1194,10 @@ function runApp(MentriaEngine, Tiers) {
             }
           }
         });
+        if (prefixCache) {
+          if (promptIds && committedTokens > 0) prefixCache.noteLedger(promptIds.concat(replyIds).slice(0, committedTokens));
+          else prefixCache.invalidate();
+        }
 
         if (!useTool || round >= 2 || epoch !== genEpoch) break;
         const answerPart = deepThink ? splitThink().answer : fullText.replace(/<think>[\s\S]*?<\/think>/g, '');
@@ -1208,6 +1237,7 @@ function runApp(MentriaEngine, Tiers) {
       }
     } catch (err) {
       generating = false;
+      if (prefixCache) prefixCache.invalidate();
       const aborted = err && err.name === 'AbortError';
       if (epoch === genEpoch) {
         const friendly = /maxseq/i.test(String(err && err.message))
@@ -1252,6 +1282,7 @@ function runApp(MentriaEngine, Tiers) {
       }
       try { await engine?.unload(); } catch {}
       engine = null;
+      prefixCache = null;
       messages = [systemMessage];
       conversationImages = [];
       if (window.MentriaStore) window.MentriaStore.remove('ai_chat', 'conversation');

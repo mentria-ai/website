@@ -49,7 +49,7 @@ function ensureOverlayStyle() {
   if (document.getElementById('mm-gate-style')) return;
   const st = document.createElement('style');
   st.id = 'mm-gate-style';
-  st.textContent = '.mm-gate{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);font-family:var(--font-mono,monospace)}.mm-gate[hidden]{display:none}.mm-gate__card{position:relative;background:var(--term-bg-raised,#0d1014);border:1px solid var(--term-border-strong,#2a3138);border-radius:var(--radius-md,10px);padding:1.1rem 1.25rem 1.15rem;width:100%;max-width:24rem;display:flex;flex-direction:column;gap:.7rem}.mm-gate__title{font-size:.9rem;color:var(--accent,#6ef3c5)}.mm-gate__strip{display:flex;flex-direction:column}.mm-gate__strip:empty{display:none}.mm-gate__strip .es{border-bottom:0;padding:.2rem 0 .3rem}.mm-gate__detail{font-size:.75rem;color:var(--term-muted,#9ba6b1);display:flex;flex-direction:column;gap:.45rem}.mm-gate__detail:empty{display:none}.mm-gate__hint-line{font-size:.72rem;color:var(--term-subtle,var(--term-muted,#9ba6b1));line-height:1.5}.mm-gate__hint-line[hidden]{display:none}.mm-gate__actions{display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem}.mm-gate__actions[hidden]{display:none}.mm-gate__actions--row{flex-direction:row}.mm-gate__actions--row .mm-gate__btn{flex:1;justify-content:center}.mm-gate__btn{font:inherit;font-size:.8rem;text-align:left;background:var(--term-bg,#0a0d10);border:1px solid var(--term-border-strong,#2a3138);color:var(--term-fg-strong,#e6edf3);padding:.6rem .8rem;border-radius:var(--radius-sm,8px);cursor:pointer;display:flex;justify-content:space-between;gap:1rem}.mm-gate__btn:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}.mm-gate__btn-size{color:var(--term-muted,#9ba6b1);font-size:.78rem}.mm-gate__btn--stop{color:var(--syn-pink,#f472b6);border-color:rgba(244,114,182,.5)}.mm-gate__btn--stop:hover{border-color:var(--syn-pink,#f472b6);color:var(--syn-pink,#f472b6)}.mm-gate__pitch{color:var(--term-fg-strong,#e6edf3)}.mm-gate__sample{color:var(--term-muted,#9ba6b1);font-style:italic}.mm-gate__hint{color:var(--term-muted,#9ba6b1)}.mm-gate__btn--ghost{justify-content:center;color:var(--term-muted,#9ba6b1);border-style:dashed}';
+  st.textContent = '.mm-gate{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);font-family:var(--font-mono,monospace)}.mm-gate[hidden]{display:none}.mm-gate__card{position:relative;background:var(--term-bg-raised,#0d1014);border:1px solid var(--term-border-strong,#2a3138);border-radius:var(--radius-md,10px);padding:1.1rem 1.25rem 1.15rem;width:100%;max-width:24rem;display:flex;flex-direction:column;gap:.7rem}.mm-gate__title{font-size:.9rem;color:var(--accent,#6ef3c5)}.mm-gate__strip{display:flex;flex-direction:column}.mm-gate__strip:empty{display:none}.mm-gate__strip .es{border-bottom:0;padding:.2rem 0 .3rem}.mm-gate__detail{font-size:.75rem;color:var(--term-muted,#9ba6b1);display:flex;flex-direction:column;gap:.45rem}.mm-gate__detail:empty{display:none}.mm-gate__hint-line{font-size:.72rem;color:var(--term-subtle,var(--term-muted,#9ba6b1));line-height:1.5}.mm-gate__hint-line[hidden]{display:none}.mm-gate__actions{display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem}.mm-gate__actions[hidden]{display:none}.mm-gate__actions--row{flex-direction:row;align-items:stretch}.mm-gate__actions--row .mm-gate__btn{flex:1 1 auto;align-items:center;justify-content:center;text-align:center;line-height:1.35;padding:.55rem .7rem}.mm-gate__actions--row .mm-gate__btn--stop{flex:0 0 auto;min-width:5.5rem}.mm-gate__btn{font:inherit;font-size:.8rem;text-align:left;background:var(--term-bg,#0a0d10);border:1px solid var(--term-border-strong,#2a3138);color:var(--term-fg-strong,#e6edf3);padding:.6rem .8rem;border-radius:var(--radius-sm,8px);cursor:pointer;display:flex;justify-content:space-between;gap:1rem}.mm-gate__btn:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}.mm-gate__btn-size{color:var(--term-muted,#9ba6b1);font-size:.78rem}.mm-gate__btn--stop{color:var(--syn-pink,#f472b6);border-color:rgba(244,114,182,.5)}.mm-gate__btn--stop:hover{border-color:var(--syn-pink,#f472b6);color:var(--syn-pink,#f472b6)}.mm-gate__pitch{color:var(--term-fg-strong,#e6edf3)}.mm-gate__sample{color:var(--term-muted,#9ba6b1);font-style:italic}.mm-gate__hint{color:var(--term-muted,#9ba6b1)}.mm-gate__btn--ghost{justify-content:center;color:var(--term-muted,#9ba6b1);border-style:dashed}';
   document.head.appendChild(st);
 }
 
@@ -147,12 +147,12 @@ function trapFocus(el, actions, onDismiss) {
   };
 }
 
-function showCheck(candidate, ctl) {
+function showCheck(candidate, ctl, cached) {
   const el = overlay();
   setTitle(el, t('checking'));
   setDetail(el, t('testing', { name: tierName(candidate) }));
   setHint(el, '');
-  gateStrip.setTier(tierInfo(Tiers.TIERS[candidate], candidate));
+  gateStrip.setTier(Object.assign(tierInfo(Tiers.TIERS[candidate], candidate), { cached: !!cached }));
   gateStrip.phase('testing', { name: tierName(candidate) });
   const actions = clearActions(el);
   actions.classList.add('mm-gate__actions--row');
@@ -346,7 +346,7 @@ export async function ensureModel(engineFactory, opts) {
       stopReject(new Error('stopped'));
     }
   };
-  release = showCheck(candidate, ctl);
+  release = showCheck(candidate, ctl, cached);
   if (!cached && typeof window.mentriaConfirmHeavyDownload === 'function') {
     const ok = await window.mentriaConfirmHeavyDownload();
     if (!ok) { release(); hide(); throw new Error('download-postponed'); }
@@ -370,7 +370,7 @@ export async function ensureModel(engineFactory, opts) {
           const el = document.getElementById('mm-gate');
           if (el) { setDetail(el, t('degrade', { from: tierName(from), to: tierName(to) })); setHint(el, ''); }
           Tiers.isTierCached(to).then((c) => tellTier(to, c), () => tellTier(to, false));
-          if (gateStrip) { gateStrip.setTier(tierInfo(Tiers.TIERS[to], to)); gateStrip.phase('testing', { name: tierName(to) }); }
+          if (gateStrip) { Tiers.isTierCached(to).then((c) => gateStrip.setTier(Object.assign(tierInfo(Tiers.TIERS[to], to), { cached: !!c })), () => {}); gateStrip.phase('testing', { name: tierName(to) }); }
         }
       }),
       stopSignal

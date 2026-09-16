@@ -1328,6 +1328,11 @@ function runApp(MentriaEngine, Tiers) {
   flex-direction: column;
   font-family: var(--font-mono);
   height: min(600px, 70vh);
+  container-type: inline-size;
+}
+@container (max-width: 640px) {
+  .ac__counter { display: none; }
+  .ac__delete-btn span { display: none; }
 }
 
 /* ── Status bar ─────────────────────────────────── */
@@ -1340,6 +1345,13 @@ function runApp(MentriaEngine, Tiers) {
   font-size: 0.75rem;
   color: var(--term-muted);
   flex-shrink: 0;
+}
+
+.ac__status-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ac__counter {

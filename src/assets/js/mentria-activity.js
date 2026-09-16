@@ -87,7 +87,7 @@ const CSS = `
   .es__bit--more,.es__note{display:inline}
   .es{padding:.55rem 0 .6rem}
 }
-.es-panel{display:flex;flex-direction:column;gap:var(--space-3,.75rem);margin-top:var(--space-3,.75rem);padding:var(--space-3,.75rem);border:1px solid var(--term-border);border-radius:var(--radius-md,8px);background:rgba(0,0,0,.28);font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.es-panel{display:flex;flex-direction:column;gap:var(--space-3,.75rem);margin:var(--space-2,.5rem) 0;padding:var(--space-3,.75rem);border:1px solid var(--term-border);border-radius:var(--radius-md,8px);background:rgba(0,0,0,.28);font-family:var(--font-mono);font-variant-numeric:tabular-nums;max-height:min(42vh,340px);overflow-y:auto;overscroll-behavior:contain}
 .es-panel[hidden]{display:none}
 .es-panel__hd{display:flex;align-items:center}
 .es-panel__lb,.es-dev__lb{font-size:var(--text-2xs,.68rem);letter-spacing:.14em;text-transform:uppercase;color:var(--term-subtle,var(--term-muted))}

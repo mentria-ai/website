@@ -102,7 +102,7 @@ export const TIERS = {
     configExport: 'QWEN35_27B_BONSAI_CONFIG',
     visionConfigExport: 'QWEN35_VL_27B_VISION_CONFIG',
     streamingLoad: true,
-    appleMaxSeq: 8192,
+    appleMaxSeq: 16384,
     nvidiaMaxSeq: 3072,
     discreteMaxSeq: 1024
   }
@@ -362,7 +362,7 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
     weightUpload: 'writeBuffer'
   };
   if (vendor === 'nvidia' && t.nvidiaMaxSeq) { opts.residualFusion = true; opts.q1Decode = 'lut'; opts.q1Concat = 'all'; opts.bindGroupCache = true; opts.q1LutSkew = true; opts.prefillTile = 'arow'; opts.specSlots = 1; opts.residentTrim = 'all'; }
-  if (vendor === 'apple' && t.appleMaxSeq) { opts.kvF16 = true; opts.specSlots = 1; opts.residentTrim = 'all'; }
+  if (vendor === 'apple' && t.appleMaxSeq) { opts.kvF16 = true; opts.flashDecode = true; opts.prefillTile = 'wmap+bn128'; opts.specSlots = 1; opts.residentTrim = 'all'; }
   if (t.streamingLoad) opts.streamingLoad = true;
   if (vision) {
     opts.visionModelUrl = shardBase;

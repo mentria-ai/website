@@ -22,6 +22,7 @@ eleventyComputed:
 <section class="cs" id="cs">
   <div class="cs__chat">
     <div class="cs__status" id="cs-status"><span class="cs__dot" id="cs-dot"></span><span id="cs-status-text">{{ "tool.console.status_idle" | t }}</span></div>
+    <div class="cs__activity" id="cs-activity"></div>
     <div class="cs__log" id="cs-log" role="log" aria-live="polite"></div>
     <form class="cs__form" id="cs-form">
       <textarea id="cs-input" rows="2" placeholder="{{ 'tool.console.input_placeholder' | t }}" aria-label="{{ 'tool.console.input_placeholder' | t }}"></textarea>
@@ -293,7 +294,7 @@ eleventyComputed:
     return 'error: unknown action';
   }
 
-  let engine = null, engineCtx = 2048, loading = null, stopFlag = false, busy = false;
+  let engine = null, engineCtx = 2048, loading = null, stopFlag = false, busy = false, csStrip = null;
   let adapterCfg = null, adapterOn = false, adapterBusy = false, hosting = false;
   function renderAdapterBtn() {
     adapterBtn.setAttribute('aria-pressed', adapterOn ? 'true' : 'false');
@@ -334,6 +335,7 @@ eleventyComputed:
         if ((await Tiers.effectiveTier()) !== '27b') throw new Error(COPY.notSupported);
       }
       setStatus('loading', COPY.statusLoading);
+      if (!csStrip) { const Activity = await import('/assets/js/mentria-activity.js'); csStrip = Activity.createActivityStrip($('cs-activity')); }
       const parked = frame.src;
       const parkedRoute = (() => { try { return frame.contentWindow.location.href; } catch (_) { return parked; } })();
       frame.src = 'about:blank';
@@ -345,7 +347,8 @@ eleventyComputed:
       if (await Tiers.isTierCached('27b')) { try { Tiers.setUserTier('27b'); } catch (_) {} }
       res = await ensureModel(() => { const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs'); if (window.mentriaWrapEngine) window.mentriaWrapEngine(e); return e; }, {
         vision: false, offerUpgrade: false,
-        onProgress: (p) => { if (!p) return; const pct = p.loaded != null && p.total > 0 ? ' ' + Math.round(Math.min(1, p.loaded / p.total) * 100) + '%' : ''; setStatus('loading', (p.message || COPY.statusLoading) + pct); },
+        onProgress: (p) => { if (!p) return; if (csStrip) csStrip.onProgress(p); const pct = p.loaded != null && p.total > 0 ? ' ' + Math.round(Math.min(1, p.loaded / p.total) * 100) + '%' : ''; setStatus('loading', (p.message || COPY.statusLoading) + pct); },
+        onTier: (info) => { if (csStrip) csStrip.setTier(info); },
         onDeviceLost: () => { engine = null; setStatus('error', COPY.notSupported); }
       });
       if (res.tier !== '27b') { try { if (res.engine.terminate) res.engine.terminate(); else if (res.engine.unload) res.engine.unload(); } catch (_) {} throw new Error(COPY.notSupported); }
@@ -377,14 +380,16 @@ eleventyComputed:
       const back = loaded();
       frame.src = parkedRoute && parkedRoute !== 'about:blank' ? parkedRoute : routeFor('');
       await back;
+      if (csStrip) csStrip.done({ prime: COPY.statusReady, linger: 1200 });
       setStatus('ready', COPY.statusReady);
       return engine;
     })();
     try { return await loading; } finally { loading = null; }
   }
   async function ask(messages, maxTokens, onToken) {
-    let out = '';
-    await engine.generate({ messages, maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false }, (ev) => { if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) { out += ev.token; if (onToken) onToken(out); } });
+    let out = '', n = 0;
+    await engine.generate({ messages, maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false }, (ev) => { if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) { out += ev.token; if (csStrip) csStrip.token(++n); if (onToken) onToken(out); } });
+    if (csStrip) csStrip.done({ tokens: n });
     return out;
   }
 

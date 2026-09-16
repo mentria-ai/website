@@ -26,7 +26,7 @@ eleventyComputed:
     <span id="an-status-text" role="status" aria-live="polite">{{ "tool.annotate-image.status_idle" | t }}</span>
     <button type="button" class="an-mini-btn" id="an-delete" style="display:none">{{ "tool.annotate-image.delete_model" | t }}</button>
   </div>
-  <div class="an-progress" id="an-progress" style="display:none"><div class="an-progress__bar" id="an-progress-bar"></div><span class="an-progress__label" id="an-progress-label"></span></div>
+  <div class="an-activity" id="an-activity"></div>
 
   <label class="an-drop" id="an-drop">
     <input type="file" id="an-file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" hidden>
@@ -74,10 +74,6 @@ eleventyComputed:
   .an-result-actions .an-mini-btn { margin-left: 0; }
   .an-mini-btn:hover { border-color: var(--syn-cyan); color: var(--syn-cyan); }
 
-  .an-progress { display: flex; align-items: center; gap: 10px; }
-  .an-progress__bar { flex: 1; height: 6px; border-radius: 3px; background: var(--term-surface-2); overflow: hidden; position: relative; }
-  .an-progress__bar::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p, 0%); background: linear-gradient(90deg, var(--syn-cyan), var(--syn-purple)); transition: width 200ms; }
-  .an-progress__label { font-family: var(--font-mono); font-size: 11px; color: var(--term-muted); min-width: 3ch; text-align: right; }
 
   .an-drop { display: flex; align-items: center; justify-content: center; min-height: 220px; border: 1.5px dashed var(--term-border-strong); border-radius: var(--radius-lg); background: var(--term-surface-2); cursor: pointer; position: relative; overflow: hidden; transition: border-color 150ms, background 150ms; }
   .an-drop:hover, .an-drop.dragover { border-color: var(--syn-cyan); background: var(--cyan-8); }
@@ -148,9 +144,15 @@ eleventyComputed:
 
   const dot = document.getElementById('an-status-dot');
   const statusText = document.getElementById('an-status-text');
-  const progressWrap = document.getElementById('an-progress');
-  const progressBar = document.getElementById('an-progress-bar');
-  const progressLabel = document.getElementById('an-progress-label');
+  const activityHost = document.getElementById('an-activity');
+  let strip = null;
+  let Activity = null;
+  async function ensureStrip() {
+    if (strip) return strip;
+    Activity = await import('/assets/js/mentria-activity.js');
+    strip = Activity.createActivityStrip(activityHost);
+    return strip;
+  }
   const drop = document.getElementById('an-drop');
   const fileInput = document.getElementById('an-file');
   const dropInner = document.getElementById('an-drop-inner');
@@ -185,17 +187,13 @@ eleventyComputed:
     return { rgbHwc, h, w };
   }
 
-  function onProgress(p){
-    if (!p) return;
-    if (typeof p.progress === 'number'){ const pct = Math.round(p.progress * 100); progressBar.style.setProperty('--p', pct + '%'); progressLabel.textContent = pct + '%'; }
-    if (p.message) statusText.textContent = p.message;
-  }
+  function onProgress(p){ if (strip) strip.onProgress(p); }
 
   async function ensureModel(){
     if (loaded) return true;
     if (loadingPromise) return loadingPromise;
     loadingPromise = (async () => {
-      setStatus('loading', COPY.statusLoading); progressWrap.style.display = 'flex';
+      setStatus('loading', COPY.statusLoading); await ensureStrip();
       try {
         if (!MentriaEngine) ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
         const { ensureModel: ensureSharedModel } = await import('/assets/js/mentria-model.js');
@@ -208,14 +206,15 @@ eleventyComputed:
           vision: true,
           offerUpgrade: true,
           onProgress: onProgress,
+          onTier: (info) => strip.setTier(info),
           onDeviceLost: (info) => { setStatus('error', COPY.errDeviceLost); console.error('WebGPU device lost:', info); loaded = false; engine = null; loadingPromise = null; }
         });
         engine = res.engine;
-        progressWrap.style.display = 'none';
+        strip.done({ prime: COPY.statusReady, linger: 1200 });
         loaded = true; deleteBtn.style.display = '';
         return true;
       } catch (err){
-        progressWrap.style.display = 'none';
+        if (strip) strip.hide();
         if (err && err.message === 'download-postponed') setStatus('idle', COPY.downloadPostponed);
         else if (err && (err.message === 'no-webgpu' || err.name === 'NoWebGpuError' || err.name === 'WebGPUUnsupportedError')) setStatus('error', COPY.errNoWebgpu);
         else setStatus('error', COPY.errLoad + (err && err.message || err));
@@ -237,7 +236,7 @@ eleventyComputed:
     resultWrap.hidden = false;
     resultLabel.textContent = COPY.labels[mode] || '';
     if (window.renderMarkdownReady){ try { await window.renderMarkdownReady; } catch(_){} }
-    let full = '', pending = false;
+    let full = '', pending = false, nTok = 0;
     const paint = () => {
       const display = full.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
       if (window.renderMarkdown) resultEl.innerHTML = (renderMarkdown(display) || '') + '<span class="an-cursor"></span>';
@@ -258,9 +257,11 @@ eleventyComputed:
         if (typeof event.token === 'string' && event.token.length > 0){
           if (/^<\|[^|]*\|>$/.test(event.token)) return;
           full += event.token;
+          if (strip) strip.token(++nTok);
           if (!pending){ pending = true; requestAnimationFrame(paint); }
         }
       });
+      if (strip) strip.done({ tokens: nTok });
       const display = full.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<\|[^|]*\|>/g, '').trim();
       lastText = display;
       if (window.renderMarkdown) resultEl.innerHTML = renderMarkdown(display) || ('<p>' + esc(COPY.emptyResponse) + '</p>');
@@ -268,6 +269,7 @@ eleventyComputed:
       setStatus('ready', COPY.statusReady);
     } catch (err){
       resultEl.innerHTML = '<span class="an-error">' + esc(COPY.errLoad + (err && err.message || err)) + '</span>';
+      if (strip) strip.error(String(err && err.message || err), { phase: 'answering' });
       setStatus('error', COPY.errLoad);
     } finally {
       generating = false;

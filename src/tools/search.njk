@@ -37,6 +37,7 @@ eleventyComputed:
       <span class="sx__ai-label">{{ "tool.search.ai_summary_label" | t }}</span>
       <button class="sx__ai-btn" id="sx-ai-btn">{{ "tool.search.ai_run_btn" | t }}</button>
     </div>
+    <div class="sx__activity" id="sx-activity"></div>
     <div class="sx__ai-body" id="sx-ai-body"></div>
   </div>
 
@@ -69,6 +70,8 @@ eleventyComputed:
   const $ai      = document.getElementById('sx-ai');
   const $aiBtn   = document.getElementById('sx-ai-btn');
   const $aiBody  = document.getElementById('sx-ai-body');
+  const $aiAct   = document.getElementById('sx-activity');
+  let aiStrip = null;
   const $filters = document.getElementById('sx-filters');
 
   let INDEX = [];
@@ -289,6 +292,7 @@ eleventyComputed:
     const epoch = ++aiEpoch;
     $aiBtn.disabled = true;
     $aiBody.textContent = COPY.aiThinking;
+    if (!aiStrip) { try { const A = await import('/assets/js/mentria-activity.js'); aiStrip = A.createActivityStrip($aiAct, { panel: false }); } catch (_) {} }
 
     try {
       if (!aiEngine || aiEngine.cached) {
@@ -299,7 +303,7 @@ eleventyComputed:
           window.mentriaWrapEngine && window.mentriaWrapEngine(e);
           return e;
         };
-        const res = await ensureModel(createEngine, { vision: false, cachedOnly: true });
+        const res = await ensureModel(createEngine, { vision: false, cachedOnly: true, onProgress: (p) => { if (aiStrip) aiStrip.onProgress(p); }, onTier: (i) => { if (aiStrip) aiStrip.setTier(i); } });
         aiEngine = res.engine;
       }
 
@@ -314,7 +318,7 @@ eleventyComputed:
         { role: 'user', content: 'Query: ' + $input.value.trim() + '\n\nTop results:\n' + top }
       ];
 
-      let buffer = '';
+      let buffer = '', nTok = 0;
       $aiBody.textContent = '';
       await aiEngine.generate({
         messages, maxTokens: 96,
@@ -325,11 +329,14 @@ eleventyComputed:
         if (typeof event.token === 'string' && event.token.length > 0) {
           if (/^<\|[^|]*\|>$/.test(event.token)) return;
           buffer += event.token;
+          if (aiStrip) aiStrip.token(++nTok);
           $aiBody.textContent = buffer.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
         }
       });
+      if (aiStrip && epoch === aiEpoch) aiStrip.done({ tokens: nTok });
     } catch (err) {
       console.warn('AI summary failed:', err);
+      if (aiStrip) aiStrip.hide();
       if (epoch === aiEpoch) $aiBody.textContent = COPY.aiUnavailable;
     } finally {
       $aiBtn.disabled = false;

@@ -35,16 +35,7 @@ eleventyComputed:
     </button>
   </div>
 
-  <div class="ac__progress-wrap" id="ac-progress-wrap" style="display:none;">
-    <div class="ac__progress-info">
-      <span id="ac-progress-label">{{ "tool.ai-chat.progress_label" | t }}</span>
-      <span id="ac-progress-pct">0%</span>
-    </div>
-    <div class="ac__progress-bar">
-      <div class="ac__progress-fill" id="ac-progress-fill"></div>
-    </div>
-    <div class="ac__progress-detail" id="ac-progress-detail"></div>
-  </div>
+  <div class="ac__activity" id="ac-activity"></div>
 
   <div class="ac__search-cfg" id="ac-search-cfg" hidden>
     <div class="ac__search-cfg-title">{{ "tool.ai-chat.search_panel_title" | t }}</div>
@@ -103,10 +94,6 @@ const COPY = {
   routeChat:           {{ ("tool.ai-chat.route_chat"            | t) | dump | safe }},
   statusGenerating:    {{ ("tool.ai-chat.status_generating"     | t) | dump | safe }},
   statusRereading:     {{ ("tool.ai-chat.status_rereading"      | t) | dump | safe }},
-  progressPrefill:     {{ ("tool.ai-chat.progress_prefill"      | t) | dump | safe }},
-  prefillTokens:       {{ ("tool.ai-chat.prefill_tokens"        | t) | dump | safe }},
-  prefillRate:         {{ ("tool.ai-chat.prefill_rate"          | t) | dump | safe }},
-  prefillEta:          {{ ("tool.ai-chat.prefill_eta"           | t) | dump | safe }},
   counter:             {{ ("tool.ai-chat.counter"               | t) | dump | safe }},
   statusReady:         {{ ("tool.ai-chat.status_ready"          | t) | dump | safe }},
   statusModelDeleted:  {{ ("tool.ai-chat.status_model_deleted"  | t) | dump | safe }},
@@ -226,11 +213,7 @@ function runApp(MentriaEngine, Tiers) {
   const tierSel       = document.getElementById('ac-tier');
   const deleteBtn     = document.getElementById('ac-delete-model');
   const clearChatBtn  = document.getElementById('ac-clear-chat');
-  const progressWrap  = document.getElementById('ac-progress-wrap');
-  const progressLabel = document.getElementById('ac-progress-label');
-  const progressPct   = document.getElementById('ac-progress-pct');
-  const progressFill  = document.getElementById('ac-progress-fill');
-  const progressDetail= document.getElementById('ac-progress-detail');
+  const activityHost  = document.getElementById('ac-activity');
   const messagesEl    = document.getElementById('ac-messages');
   const emptyEl       = document.getElementById('ac-empty');
   const imgPreview    = document.getElementById('ac-img-preview');
@@ -348,11 +331,6 @@ function runApp(MentriaEngine, Tiers) {
     if (nativeFieldSizing) return;
     inputEl.style.height = 'auto';
     inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
-  }
-  function formatBytes(b) {
-    if (b < 1024) return b + ' B';
-    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
-    return (b / 1048576).toFixed(1) + ' MB';
   }
 
   function addMessage(role, content, imageUrl) {
@@ -508,52 +486,15 @@ function runApp(MentriaEngine, Tiers) {
     return { rgbHwc, h, w };
   }
 
-  /* ── Progress tracking ───────────────────────────── */
-  // The engine multiplexes two progress semantics on one channel: BYTE counts
-  // for shard download/upload (loaded/total in the hundreds-of-millions) and
-  // STEP counters for discrete stage transitions (loaded=0/1, loaded=1/1).
-  // We clamp the ratio to [0,1] so a stale byte loaded paired with a step
-  // total can't render as "60-billion-percent", and we only show the
-  // human-readable byte line when total looks like real bytes (>= 1 KiB).
-  let prefillShown = false;
-  function hidePrefill() {
-    if (!prefillShown) return;
-    prefillShown = false;
-    progressWrap.style.display = 'none';
+  let strip = null;
+  let Activity = null;
+  async function ensureStrip() {
+    if (strip) return strip;
+    Activity = await import('/assets/js/mentria-activity.js');
+    strip = Activity.createActivityStrip(activityHost);
+    return strip;
   }
-  function formatEta(ms) {
-    const s = Math.max(1, Math.round(ms / 1000));
-    return s < 60 ? s + 's' : Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-  }
-  function onPrefillProgress(p) {
-    if (!generating) return;
-    if (!(p.total > 0) || p.loaded >= p.total || !(p.chunks > 1)) { hidePrefill(); return; }
-    prefillShown = true;
-    progressWrap.style.display = '';
-    progressLabel.textContent = COPY.progressPrefill;
-    const pct = Math.round(Math.max(0, Math.min(1, p.loaded / p.total)) * 100);
-    progressFill.style.width = pct + '%';
-    progressPct.textContent = pct + '%';
-    const n = (v) => Number(v).toLocaleString(document.documentElement.lang || undefined);
-    const parts = [COPY.prefillTokens.replace('{done}', n(p.loaded)).replace('{total}', n(p.total))];
-    if (p.tokPerSec) parts.push(COPY.prefillRate.replace('{rate}', n(Math.round(p.tokPerSec))));
-    if (p.etaMs != null && p.etaMs > 1000) parts.push(COPY.prefillEta.replace('{eta}', formatEta(p.etaMs)));
-    progressDetail.textContent = parts.join(' · ');
-  }
-  function onEngineProgress(p) {
-    if (!p) return;
-    if (p.stage === 'prefill') { onPrefillProgress(p); return; }
-    progressWrap.style.display = '';
-    if (p.message) progressLabel.textContent = p.message;
-    if (p.loaded != null && p.total != null && p.total > 0) {
-      const ratio = Math.max(0, Math.min(1, p.loaded / p.total));
-      const pct = Math.round(ratio * 100);
-      progressFill.style.width = pct + '%';
-      progressPct.textContent = pct + '%';
-      progressDetail.textContent =
-        p.total >= 1024 ? (formatBytes(p.loaded) + ' / ' + formatBytes(p.total)) : '';
-    }
-  }
+  function onEngineProgress(p) { if (strip) strip.onProgress(p); }
 
   /* ── Tier selection ──────────────────────────────── */
   let tierDecision = null;
@@ -850,7 +791,7 @@ function runApp(MentriaEngine, Tiers) {
   /* ── Load engine + model ─────────────────────────── */
   async function loadModel() {
     setStatus('loading', COPY.statusLoadingModel);
-    progressWrap.style.display = '';
+    await ensureStrip();
     try {
       const { ensureModel } = await import('/assets/js/mentria-model.js');
       const createEngine = () => {
@@ -862,6 +803,7 @@ function runApp(MentriaEngine, Tiers) {
         vision: true,
         offerUpgrade: true,
         onProgress: onEngineProgress,
+        onTier: (info) => strip.setTier(info),
         onDeviceLost: (info) => {
           prefixCache = null;
           setStatus('error', COPY.errDeviceLost);
@@ -872,6 +814,7 @@ function runApp(MentriaEngine, Tiers) {
       engine = res.engine;
       currentTier = res.tier;
       contextTokens = res.maxSeq || 2048;
+      strip.setTier(Activity.tierInfo(Tiers.TIERS[currentTier], currentTier));
       prefixCache = null;
       if (currentTier === '27b' && typeof engine.createPrefixCache === 'function') {
         try {
@@ -890,16 +833,16 @@ function runApp(MentriaEngine, Tiers) {
       try { await navigator.storage?.persist?.(); } catch (_) {}
       syncTierSelector();
       updateEmptySub();
-      progressWrap.style.display = 'none';
+      strip.done({ prime: COPY.statusReady, linger: 1200 });
       setStatus('ready', COPY.statusReady);
       deleteBtn.style.display = '';
       inputEl.disabled = false;
       sendBtn.disabled = false;
       inputEl.focus();
     } catch (err) {
-      progressWrap.style.display = 'none';
-      if (err && err.message === 'download-postponed') { setStatus('idle', COPY.downloadPostponed); return; }
+      if (err && err.message === 'download-postponed') { if (strip) strip.hide(); setStatus('idle', COPY.downloadPostponed); return; }
       console.error('Model load error:', err);
+      if (strip) strip.error(String(err && err.message || err), { phase: strip.phaseName || 'loading', onRetry: () => { inputEl.disabled = true; sendBtn.disabled = true; loadModel(); } });
       setStatus('error', COPY.errLoadPrefix + (err.message || err));
     }
   }
@@ -1185,8 +1128,8 @@ function runApp(MentriaEngine, Tiers) {
           if (typeof event.token === 'string' && event.token.length > 0) {
             // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
             if (/^<\|[^|]*\|>$/.test(event.token)) return;
-            hidePrefill();
             counterTick();
+            if (strip) strip.token(counterN, { ctxUsed: estPromptTokens + counterN, ctxWindow: contextTokens });
             fullText += event.token;
             if (!pendingPaint) {
               pendingPaint = true;
@@ -1258,7 +1201,7 @@ function runApp(MentriaEngine, Tiers) {
     }
 
     abortCtrl = null;
-    hidePrefill();
+    if (strip) { if (strip.phaseName === 'answering') strip.done({ tokens: counterN }); else strip.hide(); }
     setSendMode(false);
     setStatus('ready', COPY.statusReady);
     inputEl.focus();
@@ -1465,37 +1408,9 @@ function runApp(MentriaEngine, Tiers) {
   cursor: not-allowed;
 }
 
-/* ── Progress bar ───────────────────────────────── */
-.ac__progress-wrap {
-  padding: 0.75rem;
-  border-bottom: 1px solid var(--term-border);
+.ac__activity {
+  padding: 0 0.75rem;
   flex-shrink: 0;
-}
-.ac__progress-info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.7rem;
-  color: var(--term-muted);
-  margin-bottom: 0.4rem;
-}
-.ac__progress-bar {
-  height: 4px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.ac__progress-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--syn-cyan), var(--syn-purple));
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-.ac__progress-detail {
-  font-size: 0.65rem;
-  color: var(--term-muted);
-  margin-top: 0.3rem;
-  text-align: right;
 }
 
 /* ── Messages ───────────────────────────────────── */

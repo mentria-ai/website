@@ -25,16 +25,7 @@ eleventyComputed:
     <span class="mq__status-text" id="mq-status-text" role="status" aria-live="polite">{{ "tool.quote.status_initializing" | t }}</span>
   </div>
 
-  <div class="mq__progress-wrap" id="mq-progress-wrap" style="display:none;">
-    <div class="mq__progress-info">
-      <span id="mq-progress-label">{{ "tool.quote.progress_label" | t }}</span>
-      <span id="mq-progress-pct">0%</span>
-    </div>
-    <div class="mq__progress-bar">
-      <div class="mq__progress-fill" id="mq-progress-fill"></div>
-    </div>
-    <div class="mq__progress-detail" id="mq-progress-detail"></div>
-  </div>
+  <div class="mq__activity" id="mq-activity"></div>
 
   <div class="mq__quote-area">
     <div class="mq__quote" id="mq-quote"></div>
@@ -111,11 +102,15 @@ if (!navigator.gpu) {
 
 function runApp(MentriaEngine) {
   /* DOM refs */
-  const progressWrap   = document.getElementById('mq-progress-wrap');
-  const progressLabel  = document.getElementById('mq-progress-label');
-  const progressPct    = document.getElementById('mq-progress-pct');
-  const progressFill   = document.getElementById('mq-progress-fill');
-  const progressDetail = document.getElementById('mq-progress-detail');
+  const activityHost   = document.getElementById('mq-activity');
+  let strip = null;
+  let Activity = null;
+  async function ensureStrip() {
+    if (strip) return strip;
+    Activity = await import('/assets/js/mentria-activity.js');
+    strip = Activity.createActivityStrip(activityHost);
+    return strip;
+  }
   const quoteEl        = document.getElementById('mq-quote');
   const newBtn         = document.getElementById('mq-new');
   const copyBtn        = document.getElementById('mq-copy');
@@ -124,33 +119,13 @@ function runApp(MentriaEngine) {
   let engine = null;
   let generating = false;
 
-  function formatBytes(b) {
-    if (b < 1024) return b + ' B';
-    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
-    return (b / 1048576).toFixed(1) + ' MB';
-  }
 
-  /* Progress tracking — clamps ratio to [0,1] and suppresses the byte-line
-     for non-byte stages (engine multiplexes byte counts and step counters
-     on the same channel; see ai-chat.njk for the long-form rationale). */
-  function onEngineProgress(p) {
-    if (!p || p.stage === 'prefill') return;
-    progressWrap.style.display = '';
-    if (p.message) progressLabel.textContent = p.message;
-    if (p.loaded != null && p.total != null && p.total > 0) {
-      const ratio = Math.max(0, Math.min(1, p.loaded / p.total));
-      const pct = Math.round(ratio * 100);
-      progressFill.style.width = pct + '%';
-      progressPct.textContent = pct + '%';
-      progressDetail.textContent =
-        p.total >= 1024 ? (formatBytes(p.loaded) + ' / ' + formatBytes(p.total)) : '';
-    }
-  }
+  function onEngineProgress(p) { if (strip) strip.onProgress(p); }
 
   /* Load engine + model */
   async function loadModel() {
     setStatus('loading', COPY.statusLoadingModel);
-    progressWrap.style.display = '';
+    await ensureStrip();
     try {
       const { ensureModel } = await import('/assets/js/mentria-model.js');
       const Tiers = await import('/assets/js/mentria-tiers.js');
@@ -163,6 +138,7 @@ function runApp(MentriaEngine) {
         vision: false,
         offerUpgrade: true,
         onProgress: onEngineProgress,
+        onTier: (info) => strip.setTier(info),
         onDeviceLost: (info) => {
           setStatus('error', COPY.errDeviceLost);
           newBtn.disabled = true;
@@ -180,11 +156,11 @@ function runApp(MentriaEngine) {
       } catch (err) {
         console.warn('Quotes LoRA load failed, using base model:', err);
       }
-      progressWrap.style.display = 'none';
+      strip.done({ prime: COPY.statusReady, linger: 1200 });
       setStatus('ready', COPY.statusReady);
       newBtn.disabled = false;
     } catch (err) {
-      progressWrap.style.display = 'none';
+      if (strip) strip.hide();
       console.error('Model load error:', err);
       if (err && err.message === 'download-postponed') setStatus('idle', COPY.downloadPostponed);
       else if (err && (err.message === 'no-webgpu' || err.name === 'NoWebGpuError' || err.name === 'WebGPUUnsupportedError')) showUnsupportedError(COPY.errNoWebGpu);
@@ -209,6 +185,8 @@ function runApp(MentriaEngine) {
     ];
 
     let fullText = '';
+
+    let nTok = 0;
     let pendingPaint = false;
 
     function paintToken() {
@@ -235,6 +213,7 @@ function runApp(MentriaEngine) {
           // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
           if (/^<\|[^|]*\|>$/.test(event.token)) return;
           fullText += event.token;
+          if (strip) strip.token(++nTok);
           if (!pendingPaint) {
             pendingPaint = true;
             requestAnimationFrame(paintToken);
@@ -242,6 +221,7 @@ function runApp(MentriaEngine) {
         }
       });
 
+      if (strip) strip.done({ tokens: nTok });
       const display = stripWrapQuotes(fullText
         .replace(/<think>[\s\S]*?<\/think>/g, '')
         .replace(/<\|[^|]*\|>/g, '')
@@ -254,6 +234,7 @@ function runApp(MentriaEngine) {
       if (display && navigator.share) shareBtn.style.display = '';
     } catch (err) {
       console.error('Generation error:', err);
+      if (strip) strip.error(String(err && err.message || err), { phase: 'answering' });
       quoteEl.textContent = COPY.errGeneration;
       quoteEl.classList.remove('mq__quote--typing');
     }
@@ -348,37 +329,6 @@ function runApp(MentriaEngine) {
 }
 
 /* Progress bar */
-.mq__progress-wrap {
-  padding: 0.75rem;
-  border-bottom: 1px solid var(--term-border);
-  flex-shrink: 0;
-}
-.mq__progress-info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.7rem;
-  color: var(--term-muted);
-  margin-bottom: 0.4rem;
-}
-.mq__progress-bar {
-  height: 4px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.mq__progress-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--syn-cyan), var(--syn-purple));
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-.mq__progress-detail {
-  font-size: 0.65rem;
-  color: var(--term-muted);
-  margin-top: 0.3rem;
-  text-align: right;
-}
 
 /* Quote area */
 .mq__quote-area {

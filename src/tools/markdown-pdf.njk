@@ -57,6 +57,7 @@ eleventyComputed:
       <span class="mp__filename-btn-label">{{ "tool.markdown-pdf.btn_ai_generate" | t }}</span>
     </button>
   </div>
+  <div class="mp__activity no-print" id="mp-activity"></div>
 
   <div class="mp__panes">
     <section class="mp__pane mp__pane--editor" data-tab="edit">
@@ -273,6 +274,7 @@ const filenameInput = document.getElementById('mp-filename');
 const aiBtn         = document.getElementById('mp-ai-name');
 const aiBtnLabel    = aiBtn?.querySelector('.mp__filename-btn-label');
 const AI_LABEL_DEFAULT = aiBtnLabel?.textContent || '';
+let mpStrip = null;
 
 let aiEngine = null;
 const aiNameByHash = new Map();
@@ -326,7 +328,7 @@ async function ensureEngine(onProgress) {
     window.mentriaWrapEngine && window.mentriaWrapEngine(e);
     return e;
   };
-  const res = await ensureModel(createEngine, { vision: false, cachedOnly: true, onProgress });
+  const res = await ensureModel(createEngine, { vision: false, cachedOnly: true, onProgress: (p) => { if (mpStrip) mpStrip.onProgress(p); if (onProgress) onProgress(p); }, onTier: (i) => { if (mpStrip) mpStrip.setTier(i); } });
   aiEngine = res.engine;
   return aiEngine;
 }
@@ -347,7 +349,7 @@ async function aiSuggestFilename(onLoadProgress) {
     { role: 'assistant', content: 'Banana Bread Recipe' },
     { role: 'user', content: 'Document:\n\n' + text }
   ];
-  let buf = '';
+  let buf = '', nTok = 0;
   await engine.generate({
     messages, maxTokens: 24,
     temperature: 0.3, topP: 0.9, topK: 30,
@@ -356,8 +358,10 @@ async function aiSuggestFilename(onLoadProgress) {
     if (typeof event.token === 'string' && event.token.length > 0) {
       if (/^<\|[^|]*\|>$/.test(event.token)) return;
       buf += event.token;
+      if (mpStrip) mpStrip.token(++nTok);
     }
   });
+  if (mpStrip) mpStrip.done({ tokens: nTok });
   const slug0 = buf
     .replace(/<think>[\s\S]*?<\/think>/g, '')
     .replace(/<\|[^|]*\|>/g, '')
@@ -386,6 +390,7 @@ async function runAINameGeneration() {
 
   aiBtn.disabled = true;
   if (aiBtnLabel) aiBtnLabel.textContent = (COPY.aiGenerating || 'Generating…');
+  if (!mpStrip) { try { const A = await import('/assets/js/mentria-activity.js'); mpStrip = A.createActivityStrip(document.getElementById('mp-activity'), { panel: false }); } catch (_) {} }
 
   function onProgress(p) {
     if (!p || p.total == null || p.loaded == null || p.total <= 0) return;
@@ -401,6 +406,7 @@ async function runAINameGeneration() {
     }
   } catch (err) {
     console.warn('AI naming failed:', err);
+    if (mpStrip) mpStrip.hide();
   } finally {
     if (aiBtnLabel) aiBtnLabel.textContent = AI_LABEL_DEFAULT;
     reflectAvailability();

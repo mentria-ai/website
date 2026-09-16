@@ -45,16 +45,20 @@ jobs:
           tag="$base"; n=1
           while git rev-parse -q --verify "refs/tags/$tag" >/dev/null; do n=$((n+1)); tag="$base-$n"; done
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ steps.tag.outputs.tag }}" --target "$GITHUB_SHA" --generate-notes --title "${{ steps.tag.outputs.tag }}"
+      - name: Capture the release notes for the site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release view "${{ steps.tag.outputs.tag }}" --json tagName,url,publishedAt,body --jq '{tag: .tagName, url: .url, date: .publishedAt, items: [(.body | split("\n")[] | select(startswith("* ")) | ltrimstr("* ") | sub(" by @[^ ]+ in .*$"; ""))]}' > src/_data/release.json
       - name: Build site
         env:
           RELEASE_TAG: ${{ steps.tag.outputs.tag }}
         run: npm run build
       - name: Check built scripts and internal links
         run: node .github/scripts/check-build.mjs build
-      - name: Publish the release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ steps.tag.outputs.tag }}" --target "$GITHUB_SHA" --generate-notes --title "${{ steps.tag.outputs.tag }}"
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

@@ -1415,3 +1415,17 @@ html.mentria-no-motion [data-requires="motion"] { display: none !important; }
   color: var(--term-subtle, var(--term-muted));
 }
 .m-build a { color: inherit; }
+
+.nav-link--about { position: relative; }
+.nav-dot {
+  position: absolute;
+  top: -3px;
+  right: -10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent, #6ef3c5);
+  box-shadow: 0 0 0 2px var(--term-bg, #0a0d10), 0 0 8px rgba(110, 243, 197, 0.6);
+  pointer-events: none;
+}
+.nav-dot[hidden] { display: none; }

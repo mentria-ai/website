@@ -473,13 +473,26 @@
             reloaded = true;
             location.reload();
           });
+          var pending = null;
+          var registration = null;
+          var setPending = function (sw) {
+            pending = sw;
+            var dots = document.querySelectorAll('[data-update-dot]');
+            for (var i = 0; i < dots.length; i++) dots[i].hidden = !sw;
+            try { document.dispatchEvent(new CustomEvent('mentria:update', { detail: { pending: !!sw } })); } catch (_) {}
+          };
+          window.MentriaUpdate = {
+            get pending() { return !!pending; },
+            apply: function () { var sw = pending || (registration && registration.waiting); if (sw) sw.postMessage({ type: 'SKIP_WAITING' }); },
+            check: function () { return registration ? registration.update() : Promise.resolve(); }
+          };
           navigator.serviceWorker.register('/sw.js').then(function (reg) {
+            registration = reg;
             var chip = document.getElementById('m-update');
             if (!chip) return;
-            var pending = null;
             var show = function (sw) {
               if (!sw) return;
-              pending = sw;
+              setPending(sw);
               try { if (sessionStorage.getItem('m-update-later')) return; } catch (_) {}
               chip.hidden = false;
             };
@@ -492,9 +505,8 @@
               });
             });
             document.getElementById('m-update-go').addEventListener('click', function () {
-              var sw = pending || reg.waiting;
               chip.hidden = true;
-              if (sw) sw.postMessage({ type: 'SKIP_WAITING' });
+              window.MentriaUpdate.apply();
             });
             document.getElementById('m-update-later').addEventListener('click', function () {
               try { sessionStorage.setItem('m-update-later', '1'); } catch (_) {}

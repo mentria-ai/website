@@ -1368,23 +1368,28 @@ html.mentria-no-motion [data-requires="motion"] { display: none !important; }
 
 .m-update {
   position: fixed;
-  left: 16px;
-  bottom: 16px;
-  z-index: 9000;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 9990;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  max-width: calc(100vw - 32px);
-  padding: 0.5rem 0.6rem 0.5rem 0.85rem;
+  gap: 10px;
+  width: max-content;
+  max-width: min(420px, calc(100vw - 24px));
+  padding: 10px 10px 10px 14px;
   border: 1px solid var(--term-border-strong);
-  border-radius: 999px;
+  border-radius: 14px;
   background: var(--term-bg-raised);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--term-fg);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--elev-3), var(--glow-cyan-soft);
 }
 .m-update[hidden] { display: none; }
+.m-update__text { flex: 1; min-width: 0; }
+html.is-standalone .m-update { bottom: calc(var(--app-bar-h) + 12px); }
+html:has(.pwa-install-banner--visible) .m-update { bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
 .m-update__btn {
   font: inherit;
   padding: 0.3rem 0.75rem;

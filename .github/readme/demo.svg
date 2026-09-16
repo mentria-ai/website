@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="100%" role="img" aria-label="AI Chat on mentria.ai: a 27B model answering in the browser, with the activity strip showing tokens per second, milliseconds per word, effective bandwidth and context used">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c0d12"/>
+      <stop offset="1" stop-color="#13161f"/>
+    </linearGradient>
+    <clipPath id="l1"><rect x="96" y="286" width="0" height="30"><animate attributeName="width" values="0;0;120;120;120" keyTimes="0;0.34;0.42;0.9;1" dur="7s" repeatCount="indefinite"/></rect></clipPath>
+    <clipPath id="l2"><rect x="96" y="318" width="0" height="30"><animate attributeName="width" values="0;0;150;150;150" keyTimes="0;0.44;0.54;0.9;1" dur="7s" repeatCount="indefinite"/></rect></clipPath>
+    <clipPath id="l3"><rect x="96" y="350" width="0" height="30"><animate attributeName="width" values="0;0;120;120;120" keyTimes="0;0.56;0.64;0.9;1" dur="7s" repeatCount="indefinite"/></rect></clipPath>
+  </defs>
+  <style>
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .muted{fill:#8a90a2}.strong{fill:#e8eaf0}.cyan{fill:#5bd6ff}.mint{fill:#6ef3c5}.sub{fill:#5b6474}
+  </style>
+
+  <rect width="1200" height="420" rx="18" fill="url(#bg)"/>
+  <rect x="0.5" y="0.5" width="1199" height="419" rx="17.5" fill="none" stroke="#ffffff14"/>
+
+  <circle cx="42" cy="42" r="6.5" fill="#ff5f57"/>
+  <circle cx="66" cy="42" r="6.5" fill="#febc2e"/>
+  <circle cx="90" cy="42" r="6.5" fill="#28c840"/>
+  <text x="1158" y="47" text-anchor="end" class="mono muted" font-size="15">ai-chat.js</text>
+  <rect x="0" y="70" width="1200" height="1" fill="#ffffff10"/>
+
+  <circle cx="60" cy="106" r="5" fill="#5bd6ff">
+    <animate attributeName="opacity" values="1;0.35;1" dur="1s" repeatCount="indefinite"/>
+  </circle>
+  <text x="78" y="111" class="mono muted" font-size="16">Generating…</text>
+  <text x="330" y="111" class="mono muted" font-size="16">
+    <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.328;0.33;1" dur="7s" repeatCount="indefinite"/>
+    <tspan id="ctr">41 tokens · 30.4 tok/s</tspan>
+  </text>
+  <rect x="948" y="91" width="192" height="30" rx="6" fill="none" stroke="#2a3138"/>
+  <text x="1044" y="111" text-anchor="middle" class="mono muted" font-size="14">27B · 1-bit · 3.8 GB</text>
+  <rect x="40" y="132" width="1120" height="1" fill="#ffffff10"/>
+
+  <g>
+    <text x="60" y="164" class="mono cyan" font-size="13" letter-spacing="2">READING PROMPT
+      <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.328;0.33;1" dur="7s" repeatCount="indefinite"/>
+    </text>
+    <text x="60" y="164" class="mono cyan" font-size="13" letter-spacing="2" opacity="0">ANSWERING
+      <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.328;0.33;1" dur="7s" repeatCount="indefinite"/>
+    </text>
+    <text x="230" y="166" class="mono strong" font-size="19" font-weight="600">
+      <tspan>0 / 412 tokens<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.328;0.33;1" dur="7s" repeatCount="indefinite"/></tspan>
+    </text>
+    <text x="230" y="166" class="mono strong" font-size="19" font-weight="600" opacity="0">30.4 tok/s<animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.328;0.33;1" dur="7s" repeatCount="indefinite"/></text>
+    <text x="360" y="166" class="mono muted" font-size="14" opacity="0">41 tokens   33 ms/word   108 GB/s   ctx 453 / 3,072<animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.328;0.33;1" dur="7s" repeatCount="indefinite"/></text>
+    <text x="1140" y="166" text-anchor="end" class="mono sub" font-size="14"><tspan>1,240 tok/s<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.328;0.33;1" dur="7s" repeatCount="indefinite"/></tspan></text>
+    <text x="1140" y="166" text-anchor="end" class="mono sub" font-size="14" opacity="0">1.4 s<animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.328;0.33;1" dur="7s" repeatCount="indefinite"/></text>
+    <g id="seg">
+      <rect x="60" y="180" width="1080" height="4" rx="1" fill="#1b1f27"/>
+      <rect x="60" y="180" width="0" height="4" rx="1" fill="#5bd6ff">
+        <animate attributeName="width" values="0;1080;1080;160;160" keyTimes="0;0.3;0.33;0.34;1" dur="7s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+  </g>
+
+  <rect x="620" y="206" width="520" height="52" rx="10" fill="#10161c" stroke="#1f3a44"/>
+  <text x="640" y="226" class="mono sub" font-size="11" letter-spacing="2">YOU</text>
+  <text x="640" y="248" class="mono strong" font-size="16">Name three colours, one per line.</text>
+
+  <rect x="60" y="270" width="300" height="118" rx="10" fill="#0f1116" stroke="#1d2129">
+    <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.328;0.33;1" dur="7s" repeatCount="indefinite"/>
+  </rect>
+  <text x="80" y="292" class="mono sub" font-size="11" letter-spacing="2">BONSAI-27B
+    <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.328;0.33;1" dur="7s" repeatCount="indefinite"/>
+  </text>
+  <g class="mono strong" font-size="18">
+    <g clip-path="url(#l1)"><text x="96" y="310">Red</text></g>
+    <g clip-path="url(#l2)"><text x="96" y="342">Green</text></g>
+    <g clip-path="url(#l3)"><text x="96" y="374">Blue</text></g>
+  </g>
+  <rect x="142" y="360" width="9" height="20" fill="#6ef3c5">
+    <animate attributeName="opacity" values="0;0;1;0;1;0;0" keyTimes="0;0.64;0.7;0.78;0.86;0.92;1" dur="7s" repeatCount="indefinite"/>
+  </rect>
+
+  <text x="1140" y="404" text-anchor="end" class="mono sub" font-size="13">nothing leaves your device</text>
+</svg>

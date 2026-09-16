@@ -8,13 +8,12 @@
   🌐 <a href="https://mentria.ai">mentria.ai</a> &nbsp;·&nbsp;
   🧰 <a href="https://mentria.ai/tools/">Tools</a> &nbsp;·&nbsp;
   📡 <a href="https://mentria.ai/feed/">Feed</a> &nbsp;·&nbsp;
-  📚 <a href="https://mentria.ai/assets/learn/engine-facts.html">Engine facts</a> &nbsp;·&nbsp;
   📊 <a href="benchmarks/">Benchmarks</a>
 </p>
 
 <p align="center">
   <b>A from-scratch WebGPU inference engine, and the tools built on it, running entirely in your browser.</b><br>
-  <sub>Qwen3.5 0.8B · 2B · 4B and a natively 1-bit 27B. No server, no API key, no account. Nothing leaves your device.</sub>
+  <sub>0.8B · 2B · 4B and a natively 1-bit 27B. No server, no API key, no account. Nothing leaves your device.</sub>
 </p>
 
 <p align="center">
@@ -33,7 +32,6 @@
 
 ## What this is
 
-- **A 27B model in a browser tab.** Bonsai-27B, natively 1-bit, sits in 3.8 GB of GPU memory and answers at 25–30 tokens/s on a 6 GB RTX 3060 Laptop, about 30 on an M4 Pro. The [engine facts page](https://mentria.ai/assets/learn/engine-facts.html) has the write-up behind every kernel, and [benchmarks](benchmarks/) has the raw runs and how they were measured.
 - **One engine, every tool.** The same runtime powers chat with vision, image annotation, search summaries, a console agent, a quote generator and more. A model downloads once and every tool reuses it.
 - **Nothing to trust but your browser.** Static site, no third-party scripts, no telemetry, works offline as a PWA in five languages.
 
@@ -53,8 +51,8 @@ flowchart LR
   L[LoRA adapter<br/>2–8 MB] -. fused at the matmul .-> D
 ```
 
-- **1-bit decode.** Four 1-bit weights have sixteen possible partial sums, so the kernel computes them once into on-chip scratch and each row reads its answer from that table. With a bank-conflict skew it runs the 27B at 32 tokens/s on a 6 GB laptop card ([station 258](https://mentria.ai/assets/learn/engine-facts.html#s258), [259](https://mentria.ai/assets/learn/engine-facts.html#s259)).
-- **Hybrid attention.** Qwen3.5's Gated DeltaNet recurrent layers alongside grouped-query attention with partial RoPE; only the 16 attention layers keep a cache, at 128 KiB per token.
+- **1-bit decode.** Four 1-bit weights have sixteen possible partial sums, so the kernel computes them once into on-chip scratch and each row reads its answer from that table. With a bank-conflict skew it runs the 27B at 32 tokens/s on a 6 GB laptop card; the raw runs are in [benchmarks](benchmarks/).
+- **Hybrid attention.** Gated DeltaNet recurrent layers alongside grouped-query attention with partial RoPE; only the 16 attention layers keep a cache, at 128 KiB per token.
 - **Memory that fits the card.** One snapshot slot, pool trimming and a write-buffer upload path keep the 27B under a 6 GB budget with a 3,072-token window; Apple GPUs get 8,192 with a half-precision cache.
 - **Prefix checkpoints.** Long conversations are checkpointed to the origin's private file system, so a side question, a router ask or a page reload restores the processed prefix in under half a second instead of re-reading everything.
 - **Hot-swap LoRA.** Adapters of a few megabytes are fused at the matmul and switch in under a second.
@@ -62,12 +60,13 @@ flowchart LR
 
 | Device | Model | Decode | Context |
 |---|---|---|---|
-| RTX 3060 Laptop, 6 GB, Windows, Chrome | Bonsai-27B 1-bit | 25–30 tok/s | 3,072 |
-| M4 Pro, 24 GB, macOS, Chrome | Bonsai-27B 1-bit | ~30 tok/s | 8,192 |
-| Flagship Android, Adreno 8xx | Qwen3.5 4B | 10–11 tok/s | 2,048 |
+| RTX 3060 Laptop, 6 GB, Windows, Chrome | 27B, 1-bit | 25–30 tok/s | 3,072 |
+| M4 Pro, 24 GB, macOS, Chrome | 27B, 1-bit | ~30 tok/s | 8,192 |
+| Flagship Android, Adreno 8xx | 4B | 10–11 tok/s | 2,048 |
+| iPhone, Safari | 0.8B | ~3 tok/s | 2,048 |
 
 > [!NOTE]
-> Chrome and Edge on Windows and macOS are the tested paths. Chrome on Android runs the small tiers. Firefox works slowly on the small tiers only, because it charges about ten times more per submitted command buffer. Safari is untested. The 27B is offered only where the GPU qualifies.
+> Chrome and Edge on Windows and macOS are the tested paths. Chrome on Android runs the small tiers. Safari on iPhone runs the 0.8B at about 3 tokens/s. Firefox works slowly on the small tiers only, because it charges about ten times more per submitted command buffer. The 27B is offered only where the GPU qualifies.
 
 ## Tools
 
@@ -106,9 +105,9 @@ npm run build   # production build → ./build
 <details>
 <summary><b>Model ladder</b></summary>
 
-The site shares one ladder: 0.8B · 2B · 4B · 27B. On the first visit a device check loads the best model the hardware qualifies for and runs a real generation to prove the route works, dropping a tier if it does not, then remembers the verdict. Bigger models are an explicit one-time choice, never a surprise download, and the check can be sent to the background or stopped at any point.
+The site shares one ladder: 0.8B · 2B · 4B · 27B. The three small tiers are Qwen3.5; the 27B is Bonsai-27B, natively 1-bit, repacked for this engine and published with its evaluation at [huggingface.co/mentriaai/Bonsai-27B-mentria](https://huggingface.co/mentriaai/Bonsai-27B-mentria). On the first visit a device check loads the best model the hardware qualifies for and runs a real generation to prove the route works, dropping a tier if it does not, then remembers the verdict. Bigger models are an explicit one-time choice, never a surprise download, and the check can be sent to the background or stopped at any point.
 </details>
 
 ## License
 
-MIT — see [LICENSE](LICENSE). The 1-bit 27B repack and its evaluation are at [huggingface.co/mentriaai/Bonsai-27B-mentria](https://huggingface.co/mentriaai/Bonsai-27B-mentria).
+MIT — see [LICENSE](LICENSE).

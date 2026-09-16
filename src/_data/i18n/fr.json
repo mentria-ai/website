@@ -137,7 +137,10 @@
     "identity_passkey_mismatch": "La clé d'accès a renvoyé des clés incohérentes, elle n'a donc pas été enregistrée. Votre coffre est intact — réessayez directement sur cet appareil.",
     "identity_passkey_remove_confirm": "Retirer le déverrouillage par clé d'accès ? La clé reste dans votre gestionnaire, mais elle ne déverrouillera plus ce coffre.",
     "identity_device_label": "Se souvenir de cet appareil",
-    "identity_device_note": "Se souvenir de cet appareil déverrouille automatiquement sur ce navigateur : pratique, mais quiconque utilise ce profil pourrait l'ouvrir. La clé d'accès et la phrase restent disponibles."
+    "identity_device_note": "Se souvenir de cet appareil déverrouille automatiquement sur ce navigateur : pratique, mais quiconque utilise ce profil pourrait l'ouvrir. La clé d'accès et la phrase restent disponibles.",
+    "whats_new": "Nouveautés de {tag}",
+    "update_now": "Mettre à jour maintenant",
+    "release_notes": "Notes de version sur GitHub"
   },
   "common": {
     "tldr": {

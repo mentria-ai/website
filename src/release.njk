@@ -1,0 +1,6 @@
+---
+permalink: /assets/release.json
+eleventyExcludeFromCollections: true
+eleventyExcludeFromSitemap: true
+---
+{{ { tag: release.tag, url: release.url, date: release.date, hash: release.hash or buildHash, items: release.items } | dump | safe }}

@@ -15,6 +15,7 @@ module.exports = function(eleventyConfig) {
     }
   })();
   eleventyConfig.addGlobalData("buildHash", buildHash);
+  eleventyConfig.addGlobalData("releaseTag", process.env.RELEASE_TAG || "");
 
   // Inline SVG sprite content so it can be injected directly into the HTML.
   // iOS Safari PWA has a sticky cache layer for external `<use href="X.svg#id">`

@@ -252,6 +252,8 @@ eleventyComputed:
       <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-disconnect-btn" hidden>{{ "about.sync_disconnect" | t }}</button>
     </div>
   </section>
+<p class="m-build">{% if releaseTag %}<a href="https://github.com/mentria-ai/website/releases/tag/{{ releaseTag }}">{{ releaseTag }}</a> · {% endif %}<a href="https://github.com/mentria-ai/website/commit/{{ buildHash }}">{{ buildHash }}</a></p>
+
 
     </div>
   </details>

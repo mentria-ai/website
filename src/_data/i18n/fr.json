@@ -258,7 +258,10 @@
     "macos_step3": "Cliquez sur <strong>Ajouter</strong>.",
     "chrome_step1": "Cliquez sur l'icône d'<strong>installation</strong> dans la barre d'adresse de votre navigateur.",
     "chrome_step2": "Ou ouvrez le menu (⋮) et choisissez <strong>Installer Mentria</strong>.",
-    "note": "Une fois installée, Mentria fonctionne hors ligne et vos données locales restent sur votre appareil."
+    "note": "Une fois installée, Mentria fonctionne hors ligne et vos données locales restent sur votre appareil.",
+    "update_title": "Nouvelle version disponible",
+    "update_btn": "Mettre à jour",
+    "update_later": "Plus tard"
   },
   "lang_switcher": {
     "label": "Langue",

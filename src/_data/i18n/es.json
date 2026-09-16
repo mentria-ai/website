@@ -258,7 +258,10 @@
     "macos_step3": "Haz clic en <strong>Añadir</strong>.",
     "chrome_step1": "Haz clic en el icono de <strong>instalación</strong> en la barra de direcciones de tu navegador.",
     "chrome_step2": "O abre el menú (⋮) y elige <strong>Instalar Mentria</strong>.",
-    "note": "Una vez instalada, Mentria funciona sin conexión y tus datos locales permanecen en tu dispositivo."
+    "note": "Una vez instalada, Mentria funciona sin conexión y tus datos locales permanecen en tu dispositivo.",
+    "update_title": "Nueva versión disponible",
+    "update_btn": "Actualizar",
+    "update_later": "Más tarde"
   },
   "lang_switcher": {
     "label": "Idioma",

@@ -458,9 +458,50 @@
         h1.insertAdjacentElement('afterend', btn);
       })();
     </script>
+    <div class="m-update" id="m-update" hidden role="status" aria-live="polite">
+      <span class="m-update__text">{{ "pwa.update_title" | t }}</span>
+      <button type="button" class="m-update__btn" id="m-update-go">{{ "pwa.update_btn" | t }}</button>
+      <button type="button" class="m-update__x" id="m-update-later" aria-label="{{ 'pwa.update_later' | t }}" title="{{ 'pwa.update_later' | t }}">&times;</button>
+    </div>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js');
+        (function () {
+          var hadController = !!navigator.serviceWorker.controller;
+          var reloaded = false;
+          navigator.serviceWorker.addEventListener('controllerchange', function () {
+            if (!hadController || reloaded) return;
+            reloaded = true;
+            location.reload();
+          });
+          navigator.serviceWorker.register('/sw.js').then(function (reg) {
+            var chip = document.getElementById('m-update');
+            if (!chip) return;
+            var pending = null;
+            var show = function (sw) {
+              if (!sw) return;
+              pending = sw;
+              try { if (sessionStorage.getItem('m-update-later')) return; } catch (_) {}
+              chip.hidden = false;
+            };
+            if (reg.waiting && navigator.serviceWorker.controller) show(reg.waiting);
+            reg.addEventListener('updatefound', function () {
+              var nw = reg.installing;
+              if (!nw) return;
+              nw.addEventListener('statechange', function () {
+                if (nw.state === 'installed' && navigator.serviceWorker.controller) show(nw);
+              });
+            });
+            document.getElementById('m-update-go').addEventListener('click', function () {
+              var sw = pending || reg.waiting;
+              chip.hidden = true;
+              if (sw) sw.postMessage({ type: 'SKIP_WAITING' });
+            });
+            document.getElementById('m-update-later').addEventListener('click', function () {
+              try { sessionStorage.setItem('m-update-later', '1'); } catch (_) {}
+              chip.hidden = true;
+            });
+          }).catch(function () {});
+        })();
       }
     </script>
     <script>

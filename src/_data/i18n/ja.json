@@ -258,7 +258,10 @@
     "macos_step3": "<strong>追加</strong>をクリック。",
     "chrome_step1": "ブラウザのアドレスバーにある<strong>インストール</strong>アイコンをクリック。",
     "chrome_step2": "または、メニュー(⋮)を開いて<strong>Mentriaをインストール</strong>を選択。",
-    "note": "インストール後、Mentriaはオフラインで動作し、ローカルデータはお使いのデバイスに保存されます。"
+    "note": "インストール後、Mentriaはオフラインで動作し、ローカルデータはお使いのデバイスに保存されます。",
+    "update_title": "新しいバージョンがあります",
+    "update_btn": "更新",
+    "update_later": "あとで"
   },
   "lang_switcher": {
     "label": "言語",

@@ -258,7 +258,10 @@
     "macos_step3": "Click <strong>Add</strong>.",
     "chrome_step1": "Click the <strong>install</strong> icon in your browser's address bar.",
     "chrome_step2": "Or open the menu (⋮) and choose <strong>Install Mentria</strong>.",
-    "note": "Once installed, Mentria runs offline and your local data stays on your device."
+    "note": "Once installed, Mentria runs offline and your local data stays on your device.",
+    "update_title": "New version available",
+    "update_btn": "Update",
+    "update_later": "Later"
   },
   "lang_switcher": {
     "label": "Language",

@@ -22,6 +22,7 @@
             <a href="{{ aboutHref }}" class="nav-link nav-link--about{% if page.url | startsWith(aboutHref) %} active{% endif %}"{% if page.url | startsWith(aboutHref) %} aria-current="page"{% endif %} title="{{ 'nav.about' | t }}">
                 <svg class="nav-link__i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="7.8" r="1.1" fill="currentColor"/></svg>
                 <span class="nav-link__t">{{ "nav.about" | t }}</span>
+                <span class="nav-dot" data-update-dot hidden></span>
             </a>
 
             {%- set currentLocale = lang | findLocale -%}

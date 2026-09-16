@@ -137,7 +137,10 @@
     "identity_passkey_mismatch": "A chave de acesso retornou chaves inconsistentes e não foi salva. Seu cofre está intacto — tente de novo diretamente neste aparelho.",
     "identity_passkey_remove_confirm": "Remover o desbloqueio por chave de acesso? A chave continua no seu gerenciador, mas não vai mais desbloquear este cofre.",
     "identity_device_label": "Lembrar deste aparelho",
-    "identity_device_note": "Lembrar deste aparelho desbloqueia automaticamente neste navegador — conveniente, mas qualquer pessoa usando este perfil pode abrir. A chave de acesso e a frase-senha continuam disponíveis."
+    "identity_device_note": "Lembrar deste aparelho desbloqueia automaticamente neste navegador — conveniente, mas qualquer pessoa usando este perfil pode abrir. A chave de acesso e a frase-senha continuam disponíveis.",
+    "whats_new": "Novidades em {tag}",
+    "update_now": "Atualizar agora",
+    "release_notes": "Notas da versão no GitHub"
   },
   "common": {
     "tldr": {

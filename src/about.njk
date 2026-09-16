@@ -34,7 +34,7 @@ eleventyComputed:
       </div>
     </div>
     <div class="about-actions__group">
-      <span class="about-build">build <span class="h">{{ buildHash }}</span></span>
+      <span class="about-build">{% if releaseTag %}<a class="h" href="https://github.com/mentria-ai/website/releases/tag/{{ releaseTag }}">{{ releaseTag }}</a> · {% endif %}build <a class="h" href="https://github.com/mentria-ai/website/commit/{{ buildHash }}">{{ buildHash }}</a></span>
       <button type="button" class="about-refresh" id="about-refresh" aria-label="{{ 'about.update_check' | t }}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         <span class="about-refresh__label">{{ "about.update_check" | t }}</span>
@@ -45,6 +45,15 @@ eleventyComputed:
       </button>
     </div>
   </div>
+
+  <section class="about-whatsnew reveal" id="about-whatsnew" hidden>
+    <h2 class="about-section-h" id="about-whatsnew-h"></h2>
+    <ul class="about-whatsnew__list" id="about-whatsnew-list"></ul>
+    <div class="about-whatsnew__row">
+      <button type="button" class="about-refresh about-refresh--go" id="about-whatsnew-go"><span class="about-refresh__label">{{ "about.update_now" | t }}</span></button>
+      <a class="about-whatsnew__link" id="about-whatsnew-link" href="https://github.com/mentria-ai/website/releases" target="_blank" rel="noopener">{{ "about.release_notes" | t }}</a>
+    </div>
+  </section>
 
   <section class="reveal">
     <div class="about-section-label">{{ "about.s1_label" | t }}</div>
@@ -252,7 +261,6 @@ eleventyComputed:
       <button type="button" class="about-data-btn about-data-btn--ghost" id="about-sync-disconnect-btn" hidden>{{ "about.sync_disconnect" | t }}</button>
     </div>
   </section>
-<p class="m-build">{% if releaseTag %}<a href="https://github.com/mentria-ai/website/releases/tag/{{ releaseTag }}">{{ releaseTag }}</a> · {% endif %}<a href="https://github.com/mentria-ai/website/commit/{{ buildHash }}">{{ buildHash }}</a></p>
 
 
     </div>
@@ -330,7 +338,14 @@ eleventyComputed:
   .about-socials a:hover { border-color: var(--cyan-30); color: var(--syn-cyan); box-shadow: var(--glow-cyan-soft); }
   .about-socials svg { width: 17px; height: 17px; }
   .about-build { font-family: var(--font-mono); font-size: 12px; color: var(--term-subtle); }
-  .about-build .h { color: var(--syn-cyan); }
+  .about-build .h { color: var(--syn-cyan); text-decoration: none; }
+  .about-whatsnew { border: 1px solid var(--term-border-strong); border-radius: 12px; padding: 18px 20px; margin: 0 0 28px; background: var(--term-bg-raised); }
+  .about-whatsnew[hidden] { display: none; }
+  .about-whatsnew .about-section-h { font-size: 1.1rem; margin-bottom: 12px; }
+  .about-whatsnew__list { margin: 0 0 14px; padding-left: 1.1em; font-family: var(--font-mono); font-size: 13px; line-height: 1.6; color: var(--term-fg); }
+  .about-whatsnew__row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .about-whatsnew__link { font-family: var(--font-mono); font-size: 12px; color: var(--term-muted); }
+  .about-refresh--go { color: var(--accent); border-color: var(--accent); }
   .about-copyright { font-size: 12px; }
   .about-refresh { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 12px; padding: 7px 14px; border: 1px solid var(--term-border); border-radius: 999px; background: transparent; color: var(--term-fg); cursor: pointer; transition: color 120ms, border-color 120ms, box-shadow 150ms; }
   .about-refresh:hover { color: var(--syn-cyan); border-color: var(--syn-cyan); box-shadow: var(--glow-cyan-soft); }
@@ -475,7 +490,12 @@ eleventyComputed:
       try { reg = await navigator.serviceWorker.getRegistration(); } catch (_) {}
       if (!reg) { location.reload(); return; }
       var updating = false;
-      function onFound() { if (!updating) { updating = true; setLabel(COPY.updating); } }
+      function takeOver(sw) {
+        if (!sw) return;
+        if (sw.state === 'installed') { sw.postMessage({ type: 'SKIP_WAITING' }); return; }
+        sw.addEventListener('statechange', function () { if (sw.state === 'installed') sw.postMessage({ type: 'SKIP_WAITING' }); });
+      }
+      function onFound() { if (!updating) { updating = true; setLabel(COPY.updating); } takeOver(reg.waiting || reg.installing); }
       reg.addEventListener('updatefound', onFound);
       try { await reg.update(); } catch (_) {}
       if (reg.installing || reg.waiting) onFound();
@@ -486,6 +506,45 @@ eleventyComputed:
         btn.classList.remove('is-busy');
         setTimeout(function () { setLabel(COPY.idle); btn.disabled = false; }, 2000);
       }, 1500);
+    });
+  })();
+
+  (function () {
+    var box = document.getElementById('about-whatsnew');
+    if (!box) return;
+    var CUR = '{{ buildHash }}';
+    var COPY = {
+      h:        {{ ("about.whats_new"       | t) | dump | safe }},
+      updating: {{ ("about.update_updating" | t) | dump | safe }}
+    };
+    var data = null;
+    function render() {
+      if (!data && !(window.MentriaUpdate && window.MentriaUpdate.pending)) return;
+      box.hidden = false;
+      document.getElementById('about-whatsnew-h').textContent = COPY.h.replace('{tag}', data && data.tag ? data.tag : '…');
+      var ul = document.getElementById('about-whatsnew-list');
+      ul.innerHTML = '';
+      ((data && data.items) || []).forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+      if (data && data.url) document.getElementById('about-whatsnew-link').href = data.url;
+    }
+    fetch('/assets/release.json?_=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && j.hash && j.hash !== CUR) { data = j; render(); } })
+      .catch(function () {});
+    document.addEventListener('mentria:update', function (e) { if (e.detail && e.detail.pending) render(); });
+    if (window.MentriaUpdate && window.MentriaUpdate.pending) render();
+    document.getElementById('about-whatsnew-go').addEventListener('click', async function () {
+      var b = this;
+      if (b.disabled) return;
+      b.disabled = true;
+      b.querySelector('.about-refresh__label').textContent = COPY.updating;
+      if (!window.MentriaUpdate) { location.reload(); return; }
+      if (!window.MentriaUpdate.pending) { try { await window.MentriaUpdate.check(); } catch (_) {} }
+      var t0 = Date.now();
+      (function wait() {
+        if (window.MentriaUpdate.pending) { window.MentriaUpdate.apply(); return; }
+        if (Date.now() - t0 < 20000) setTimeout(wait, 300); else location.reload();
+      })();
     });
   })();
 

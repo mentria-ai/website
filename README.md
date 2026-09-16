@@ -53,7 +53,7 @@ flowchart LR
 
 - **1-bit decode.** Four 1-bit weights have sixteen possible partial sums, so the kernel computes them once into on-chip scratch and each row reads its answer from that table. With a bank-conflict skew it runs the 27B at 32 tokens/s on a 6 GB laptop card; the raw runs are in [benchmarks](benchmarks/).
 - **Hybrid attention.** Gated DeltaNet recurrent layers alongside grouped-query attention with partial RoPE; only the 16 attention layers keep a cache, at 128 KiB per token.
-- **Memory that fits the card.** One snapshot slot, pool trimming and a write-buffer upload path keep the 27B under a 6 GB budget with a 3,072-token window; Apple GPUs get 8,192 with a half-precision cache.
+- **Memory that fits the card.** One snapshot slot, pool trimming and a write-buffer upload path keep the 27B under a 6 GB budget with a 3,072-token window; Apple GPUs get 16,384 with a half-precision cache and a split-cache attention kernel that keeps decode at 26 tokens/s with the window full.
 - **Prefix checkpoints.** Long conversations are checkpointed to the origin's private file system, so a side question, a router ask or a page reload restores the processed prefix in under half a second instead of re-reading everything.
 - **Hot-swap LoRA.** Adapters of a few megabytes are fused at the matmul and switch in under a second.
 - **A vision tower** on WebGPU for image input, and an **activity strip** on every AI page showing the honest numbers for each slow phase: download, upload to GPU, prompt reading, answering.
@@ -61,7 +61,7 @@ flowchart LR
 | Device | Model | Decode | Context |
 |---|---|---|---|
 | RTX 3060 Laptop, 6 GB, Windows, Chrome | 27B, 1-bit | 25–30 tok/s | 3,072 |
-| M4 Pro, 24 GB, macOS, Chrome | 27B, 1-bit | ~30 tok/s | 8,192 |
+| M4 Pro, 24 GB, macOS, Chrome | 27B, 1-bit | ~30 tok/s | 16,384 |
 | Flagship Android, Adreno 8xx | 4B | 10–11 tok/s | 2,048 |
 | iPhone, Safari | 0.8B | ~3 tok/s | 2,048 |
 

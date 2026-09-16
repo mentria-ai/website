@@ -1,9 +1,10 @@
 import * as Tiers from '/assets/js/mentria-tiers.js';
+import { createActivityStrip, tierInfo } from '/assets/js/mentria-activity.js';
 
 const IS_MOBILE = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const PROBE_TIMEOUT = IS_MOBILE ? 120000 : 60000;
 const PROBE_STILL_MS = 20000;
-const READY_LINGER = 600;
+const READY_LINGER = 900;
 
 const DEFAULT_COPY = {
   checking: 'Checking your device…',
@@ -16,7 +17,14 @@ const DEFAULT_COPY = {
   chooseHint: 'Your device can run up to {name}. Bigger models are smarter but download more.',
   choosePitch: 'Runs fully on your device — private, free, and works offline after the one-time download.',
   chooseSample: 'Ask things like “explain quantum computing simply” and the answer is generated on your own hardware.',
-  chooseNotNow: 'Not now'
+  chooseNotNow: 'Not now',
+  continueBg: 'Continue in background',
+  stop: 'Stop',
+  stoppedTitle: 'Stopped',
+  stoppedHint: 'Try a smaller model, or come back later.',
+  tryTier: 'Try {name}',
+  failedTitle: '{name} didn’t run on this device',
+  failedHint: 'You can try a smaller model or skip for now.'
 };
 
 function t(key, vars) {
@@ -41,9 +49,11 @@ function ensureOverlayStyle() {
   if (document.getElementById('mm-gate-style')) return;
   const st = document.createElement('style');
   st.id = 'mm-gate-style';
-  st.textContent = '.mm-gate{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);font-family:var(--font-mono,monospace)}.mm-gate[hidden]{display:none}.mm-gate__card{position:relative;background:#0d1014;border:1px solid #2a3138;border-radius:10px;padding:1.2rem 1.4rem;width:100%;max-width:22rem;display:flex;flex-direction:column;gap:.7rem}.mm-gate__title{font-size:.9rem;color:var(--accent,#6ef3c5)}.mm-gate__bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}.mm-gate__fill{height:100%;width:0;background:var(--accent,#6ef3c5);transition:width .3s}.mm-gate__detail{font-size:.75rem;color:var(--muted,#9ba6b1);min-height:1em}.mm-gate__actions{display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem}.mm-gate__actions[hidden]{display:none}.mm-gate__btn{font:inherit;text-align:left;background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.6rem .8rem;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;gap:1rem}.mm-gate__btn:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}.mm-gate__btn-size{color:var(--muted,#9ba6b1);font-size:.78rem}.mm-gate__detail{display:flex;flex-direction:column;gap:.45rem}.mm-gate__pitch{color:#e6edf3}.mm-gate__sample{color:var(--muted,#9ba6b1);font-style:italic}.mm-gate__hint{color:var(--muted,#9ba6b1)}.mm-gate__btn--ghost{justify-content:center;color:var(--muted,#9ba6b1);border-style:dashed}@media (prefers-reduced-motion: no-preference){.mm-gate__card{overflow:hidden}.mm-gate__card::before{content:\'\';position:absolute;left:0;right:0;top:0;height:30%;background:linear-gradient(transparent,rgba(110,243,197,.07),transparent);animation:mm-sweep 1.4s ease-in-out infinite;pointer-events:none}@keyframes mm-sweep{from{transform:translateY(-120%)}to{transform:translateY(420%)}}}';
+  st.textContent = '.mm-gate{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);font-family:var(--font-mono,monospace)}.mm-gate[hidden]{display:none}.mm-gate__card{position:relative;background:var(--term-bg-raised,#0d1014);border:1px solid var(--term-border-strong,#2a3138);border-radius:var(--radius-md,10px);padding:1.1rem 1.25rem 1.15rem;width:100%;max-width:24rem;display:flex;flex-direction:column;gap:.7rem}.mm-gate__title{font-size:.9rem;color:var(--accent,#6ef3c5)}.mm-gate__strip{display:flex;flex-direction:column}.mm-gate__strip:empty{display:none}.mm-gate__strip .es{border-bottom:0;padding:.2rem 0 .3rem}.mm-gate__detail{font-size:.75rem;color:var(--term-muted,#9ba6b1);display:flex;flex-direction:column;gap:.45rem}.mm-gate__detail:empty{display:none}.mm-gate__hint-line{font-size:.72rem;color:var(--term-subtle,var(--term-muted,#9ba6b1));line-height:1.5}.mm-gate__hint-line[hidden]{display:none}.mm-gate__actions{display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem}.mm-gate__actions[hidden]{display:none}.mm-gate__actions--row{flex-direction:row}.mm-gate__actions--row .mm-gate__btn{flex:1;justify-content:center}.mm-gate__btn{font:inherit;font-size:.8rem;text-align:left;background:var(--term-bg,#0a0d10);border:1px solid var(--term-border-strong,#2a3138);color:var(--term-fg-strong,#e6edf3);padding:.6rem .8rem;border-radius:var(--radius-sm,8px);cursor:pointer;display:flex;justify-content:space-between;gap:1rem}.mm-gate__btn:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}.mm-gate__btn-size{color:var(--term-muted,#9ba6b1);font-size:.78rem}.mm-gate__btn--stop{color:var(--syn-pink,#f472b6);border-color:rgba(244,114,182,.5)}.mm-gate__btn--stop:hover{border-color:var(--syn-pink,#f472b6);color:var(--syn-pink,#f472b6)}.mm-gate__pitch{color:var(--term-fg-strong,#e6edf3)}.mm-gate__sample{color:var(--term-muted,#9ba6b1);font-style:italic}.mm-gate__hint{color:var(--term-muted,#9ba6b1)}.mm-gate__btn--ghost{justify-content:center;color:var(--term-muted,#9ba6b1);border-style:dashed}';
   document.head.appendChild(st);
 }
+
+let gateStrip = null;
 
 function overlay() {
   let el = document.getElementById('mm-gate');
@@ -63,91 +73,125 @@ function overlay() {
   title.id = 'mm-gate-title';
   title.setAttribute('role', 'heading');
   title.setAttribute('aria-level', '2');
-  const bar = document.createElement('div');
-  bar.className = 'mm-gate__bar';
-  const fill = document.createElement('div');
-  fill.className = 'mm-gate__fill';
-  bar.appendChild(fill);
+  const strip = document.createElement('div');
+  strip.className = 'mm-gate__strip';
   const detail = document.createElement('div');
   detail.className = 'mm-gate__detail';
   detail.setAttribute('role', 'status');
   detail.setAttribute('aria-live', 'polite');
+  const hint = document.createElement('div');
+  hint.className = 'mm-gate__hint-line';
+  hint.hidden = true;
   const actions = document.createElement('div');
   actions.className = 'mm-gate__actions';
   actions.hidden = true;
-  card.append(title, bar, detail, actions);
+  card.append(title, strip, detail, hint, actions);
   el.appendChild(card);
   document.body.appendChild(el);
+  gateStrip = createActivityStrip(strip, { panel: false });
   return el;
 }
 
-function show(title, detail) {
+function setTitle(el, title) { el.querySelector('.mm-gate__title').textContent = title; }
+function setDetail(el, text) {
+  const d = el.querySelector('.mm-gate__detail');
+  d.textContent = text || '';
+}
+function setHint(el, text) {
+  const h = el.querySelector('.mm-gate__hint-line');
+  h.textContent = text || '';
+  h.hidden = !text;
+}
+function clearActions(el) {
+  const a = el.querySelector('.mm-gate__actions');
+  a.innerHTML = '';
+  a.hidden = true;
+  a.classList.remove('mm-gate__actions--row');
+  return a;
+}
+function button(label, cls, onClick) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'mm-gate__btn' + (cls ? ' ' + cls : '');
+  b.textContent = label;
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+function trapFocus(el, actions, onDismiss) {
+  const prevFocus = document.activeElement;
+  const inerted = Array.prototype.slice.call(document.body.children).filter((c) => c !== el && !c.hasAttribute('inert'));
+  inerted.forEach((c) => c.setAttribute('inert', ''));
+  const onKey = (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); onDismiss(); return; }
+    if (e.key === 'Tab') {
+      const btns = Array.prototype.slice.call(actions.querySelectorAll('button'));
+      if (!btns.length) return;
+      const first = btns[0], last = btns[btns.length - 1];
+      if (!actions.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+      else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  };
+  const onBackdrop = (e) => { if (e.target === el) onDismiss(); };
+  document.addEventListener('keydown', onKey);
+  el.addEventListener('click', onBackdrop);
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    document.removeEventListener('keydown', onKey);
+    el.removeEventListener('click', onBackdrop);
+    inerted.forEach((c) => c.removeAttribute('inert'));
+    if (prevFocus && prevFocus.focus) { try { prevFocus.focus(); } catch (_) {} }
+  };
+}
+
+function showCheck(candidate, ctl) {
   const el = overlay();
-  el.querySelector('.mm-gate__title').textContent = title;
-  el.querySelector('.mm-gate__detail').textContent = detail || '';
-  el.querySelector('.mm-gate__bar').style.display = '';
-  const actions = el.querySelector('.mm-gate__actions');
-  actions.innerHTML = '';
-  actions.hidden = true;
+  setTitle(el, t('checking'));
+  setDetail(el, t('testing', { name: tierName(candidate) }));
+  setHint(el, '');
+  gateStrip.setTier(tierInfo(Tiers.TIERS[candidate], candidate));
+  gateStrip.phase('testing', { name: tierName(candidate) });
+  const actions = clearActions(el);
+  actions.classList.add('mm-gate__actions--row');
+  actions.hidden = false;
+  const dismiss = () => { ctl.background(); };
+  actions.appendChild(button(t('continueBg'), 'mm-gate__btn--ghost', dismiss));
+  actions.appendChild(button(t('stop'), 'mm-gate__btn--stop', () => ctl.stop()));
   el.hidden = false;
-  return el;
+  return trapFocus(el, actions, dismiss);
 }
 
-function offerChoice(choices) {
+function offerChoice(choices, titleText, detailNodes, labelFor) {
   const el = overlay();
-  el.querySelector('.mm-gate__title').textContent = t('chooseTitle');
+  setTitle(el, titleText);
+  setHint(el, '');
+  gateStrip.hide();
   const detail = el.querySelector('.mm-gate__detail');
   detail.textContent = '';
-  const pitch = document.createElement('span');
-  pitch.className = 'mm-gate__pitch';
-  pitch.textContent = t('choosePitch');
-  const sample = document.createElement('span');
-  sample.className = 'mm-gate__sample';
-  sample.textContent = t('chooseSample');
-  const hint = document.createElement('span');
-  hint.className = 'mm-gate__hint';
-  hint.textContent = t('chooseHint', { name: tierName(choices[0]) });
-  detail.append(pitch, sample, hint);
-  el.querySelector('.mm-gate__bar').style.display = 'none';
-  const actions = el.querySelector('.mm-gate__actions');
-  actions.innerHTML = '';
+  detailNodes.forEach((n) => detail.appendChild(n));
+  const actions = clearActions(el);
   actions.hidden = false;
   el.hidden = false;
   return new Promise((resolve) => {
     let done = false;
-    const prevFocus = document.activeElement;
-    const inerted = Array.prototype.slice.call(document.body.children).filter((c) => c !== el && !c.hasAttribute('inert'));
-    inerted.forEach((c) => c.setAttribute('inert', ''));
+    let release = null;
     const finish = (id) => {
       if (done) return;
       done = true;
       actions.hidden = true;
-      document.removeEventListener('keydown', onKey);
-      el.removeEventListener('click', onBackdrop);
-      inerted.forEach((c) => c.removeAttribute('inert'));
-      if (prevFocus && prevFocus.focus) { try { prevFocus.focus(); } catch (_) {} }
+      if (release) release();
       resolve(id);
     };
-    const onKey = (e) => {
-      if (e.key === 'Escape') { e.preventDefault(); finish('postpone'); return; }
-      if (e.key === 'Tab') {
-        const btns = Array.prototype.slice.call(actions.querySelectorAll('button'));
-        if (!btns.length) return;
-        const first = btns[0], last = btns[btns.length - 1];
-        if (!actions.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
-        else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      }
-    };
-    const onBackdrop = (e) => { if (e.target === el) finish('postpone'); };
-    document.addEventListener('keydown', onKey);
-    el.addEventListener('click', onBackdrop);
+    release = trapFocus(el, actions, () => finish('postpone'));
     choices.forEach((id) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'mm-gate__btn';
       const nm = document.createElement('span');
-      nm.textContent = tierName(id);
+      nm.textContent = labelFor ? labelFor(id) : tierName(id);
       const sz = document.createElement('span');
       sz.className = 'mm-gate__btn-size';
       sz.textContent = tierSize(id);
@@ -155,15 +199,20 @@ function offerChoice(choices) {
       b.addEventListener('click', () => finish(id));
       actions.appendChild(b);
     });
-    const notNow = document.createElement('button');
-    notNow.type = 'button';
-    notNow.className = 'mm-gate__btn mm-gate__btn--ghost';
-    notNow.textContent = t('chooseNotNow');
-    notNow.addEventListener('click', () => finish('postpone'));
-    actions.appendChild(notNow);
+    actions.appendChild(button(t('chooseNotNow'), 'mm-gate__btn--ghost', () => finish('postpone')));
     const firstBtn = actions.querySelector('button');
     if (firstBtn) firstBtn.focus();
   });
+}
+
+function span(cls, text) { const s = document.createElement('span'); s.className = cls; s.textContent = text; return s; }
+
+function offerTiers(choices) {
+  return offerChoice(choices, t('chooseTitle'), [
+    span('mm-gate__pitch', t('choosePitch')),
+    span('mm-gate__sample', t('chooseSample')),
+    span('mm-gate__hint', t('chooseHint', { name: tierName(choices[0]) }))
+  ]);
 }
 
 async function tierChoices() {
@@ -173,45 +222,39 @@ async function tierChoices() {
   return Tiers.TIER_CHAIN.filter((id) => set.has(id));
 }
 
-function setProgress(p) {
-  const el = document.getElementById('mm-gate');
-  if (!el || el.hidden) return;
-  let ratio = null;
-  if (p && typeof p.progress === 'number') ratio = p.progress;
-  else if (p && p.total) ratio = p.loaded / p.total;
-  if (ratio == null) return;
-  const fill = el.querySelector('.mm-gate__fill');
-  if (fill) fill.style.width = Math.round(Math.max(0, Math.min(1, ratio)) * 100) + '%';
+async function smallerChoices(candidate) {
+  const all = await tierChoices();
+  const idx = Tiers.TIER_CHAIN.indexOf(candidate);
+  return all.filter((id) => Tiers.TIER_CHAIN.indexOf(id) > idx);
 }
 
 function hide() {
   const el = document.getElementById('mm-gate');
   if (el) el.hidden = true;
+  if (gateStrip) gateStrip.hide();
 }
 
-async function probeOnce(engine) {
+async function probeOnce(engine, candidate) {
   let timer;
   let stillTimer;
   let firstToken;
   const alive = new Promise((res) => { firstToken = res; });
+  if (gateStrip) gateStrip.phase('testing', { name: tierName(candidate) });
   const run = engine.generate({ messages: [{ role: 'user', content: 'hi' }], maxTokens: 2, temperature: 0, enableThinking: false }, () => { firstToken(); });
   const timeout = new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('validation timeout')), PROBE_TIMEOUT); });
   stillTimer = setTimeout(() => {
     const el = document.getElementById('mm-gate');
-    if (el && !el.hidden) {
-      const detail = el.querySelector('.mm-gate__detail');
-      if (detail) detail.textContent = t('still');
-    }
+    if (el && !el.hidden) setHint(el, t('still'));
   }, PROBE_STILL_MS);
   try { await Promise.race([run, alive, timeout]); } finally { clearTimeout(timer); clearTimeout(stillTimer); }
 }
 
-async function validateRun(engine) {
+async function validateRun(engine, candidate) {
   try {
-    await probeOnce(engine);
+    await probeOnce(engine, candidate);
   } catch (e) {
     if (!e || e.message !== 'validation timeout') throw e;
-    await probeOnce(engine);
+    await probeOnce(engine, candidate);
   }
 }
 
@@ -227,14 +270,20 @@ export async function ensureModel(engineFactory, opts) {
   const vision = !!opts.vision;
   const onProgress = opts.onProgress || null;
   const onDeviceLost = opts.onDeviceLost || null;
+  const onTier = typeof opts.onTier === 'function' ? opts.onTier : null;
+  const tellTier = (id, cached) => { if (onTier) { try { onTier(Object.assign(tierInfo(Tiers.TIERS[id], id), { cached: !!cached }), id); } catch (_) {} } };
   const offerUpgrade = !!opts.offerUpgrade;
   const cachedOnly = !!opts.cachedOnly;
 
   if (typeof navigator === 'undefined' || !navigator.gpu) throw new NoWebGpuError();
 
+  let stopped = false;
+  let lastEngine = null;
   const makeEngine = () => {
+    if (stopped) throw new Error('stopped');
     const e = engineFactory();
-    e.onProgress = (p) => { setProgress(p); if (onProgress) onProgress(p); };
+    lastEngine = e;
+    e.onProgress = (p) => { if (gateStrip) gateStrip.onProgress(p); if (onProgress) onProgress(p); };
     return e;
   };
 
@@ -255,14 +304,15 @@ export async function ensureModel(engineFactory, opts) {
   if (cachedOnly) {
     const c = await Tiers.effectiveTier({ cachedOnly: true });
     if (!c) throw new Error('model-not-cached');
-    const res = await Tiers.loadWithFallback(makeEngine, c, { vision });
+    tellTier(c, true);
+    const res = await Tiers.loadWithFallback(makeEngine, c, { vision, onFallback: (from, to) => tellTier(to, true) });
     return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
   }
 
   if (offerUpgrade && !Tiers.getUserTier()) {
     const choices = await tierChoices();
     if (choices.length > 1) {
-      const pick = await offerChoice(choices);
+      const pick = await offerTiers(choices);
       if (pick === 'postpone') { hide(); throw new Error('download-postponed'); }
       if (pick) Tiers.setUserTier(pick);
     }
@@ -274,41 +324,86 @@ export async function ensureModel(engineFactory, opts) {
   const validated = Tiers.getValidatedTier();
   const proven = validated && Tiers.TIERS[candidate].order <= Tiers.TIERS[validated].order;
   const cached = await Tiers.isTierCached(candidate);
+  tellTier(candidate, cached);
 
   if (proven && cached) {
     hide();
     requestPersistentStorage();
-    const res = await Tiers.loadWithFallback(makeEngine, candidate, { vision });
+    const res = await Tiers.loadWithFallback(makeEngine, candidate, { vision, onFallback: (from, to) => { Tiers.isTierCached(to).then((c) => tellTier(to, c), () => tellTier(to, false)); } });
     if (res.tier !== candidate) Tiers.clearValidatedTier();
     return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
   }
 
-  show(t('checking'), t('testing', { name: tierName(candidate) }));
+  let stopReject = null;
+  const stopSignal = new Promise((_, rej) => { stopReject = rej; });
+  stopSignal.catch(() => {});
+  let release = () => {};
+  const ctl = {
+    background: () => { const el = document.getElementById('mm-gate'); if (el) el.hidden = true; release(); },
+    stop: () => {
+      stopped = true;
+      try { lastEngine && lastEngine.terminate && lastEngine.terminate(); } catch (_) {}
+      stopReject(new Error('stopped'));
+    }
+  };
+  release = showCheck(candidate, ctl);
   if (!cached && typeof window.mentriaConfirmHeavyDownload === 'function') {
     const ok = await window.mentriaConfirmHeavyDownload();
-    if (!ok) { hide(); throw new Error('download-postponed'); }
+    if (!ok) { release(); hide(); throw new Error('download-postponed'); }
   }
   requestPersistentStorage();
   try {
     const P2P = await import('/assets/js/mentria-p2p-models.js');
     await Promise.race([
-      P2P.prefetchTier(Tiers, candidate, { vision, onStatus: (st) => setProgress({ progress: st.progress || 0 }) }),
-      new Promise((r) => setTimeout(r, 480000))
+      P2P.prefetchTier(Tiers, candidate, { vision, onStatus: (st) => { if (gateStrip) gateStrip.onProgress({ stage: 'download', progress: st.progress || 0, downSpeed: st.downSpeed }); } }),
+      new Promise((r) => setTimeout(r, 480000)),
+      stopSignal
     ]);
   } catch (_) {}
   try {
-    const res = await Tiers.loadWithFallback(makeEngine, candidate, {
-      vision,
-      validate: validateRun,
-      onFallback: (from, to) => { show(t('checking'), t('degrade', { from: tierName(from), to: tierName(to) })); }
-    });
+    if (stopped) throw new Error('stopped');
+    const res = await Promise.race([
+      Tiers.loadWithFallback(makeEngine, candidate, {
+        vision,
+        validate: (engine) => validateRun(engine, candidate),
+        onFallback: (from, to) => {
+          const el = document.getElementById('mm-gate');
+          if (el) { setDetail(el, t('degrade', { from: tierName(from), to: tierName(to) })); setHint(el, ''); }
+          Tiers.isTierCached(to).then((c) => tellTier(to, c), () => tellTier(to, false));
+          if (gateStrip) { gateStrip.setTier(tierInfo(Tiers.TIERS[to], to)); gateStrip.phase('testing', { name: tierName(to) }); }
+        }
+      }),
+      stopSignal
+    ]);
     Tiers.setValidatedTier(res.tier);
-    show(t('checking'), t('ready', { name: tierName(res.tier) }));
-    await new Promise((r) => setTimeout(r, READY_LINGER));
+    release();
+    const el = document.getElementById('mm-gate');
+    if (el && !el.hidden) {
+      clearActions(el);
+      setDetail(el, t('ready', { name: tierName(res.tier) }));
+      setHint(el, '');
+      gateStrip.done({ prime: t('ready', { name: tierName(res.tier) }), linger: READY_LINGER });
+      await new Promise((r) => setTimeout(r, READY_LINGER));
+    } else if (gateStrip) gateStrip.hide();
     hide();
     return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
   } catch (e) {
+    release();
+    try { lastEngine && lastEngine.terminate && lastEngine.terminate(); } catch (_) {}
+    const el = document.getElementById('mm-gate');
+    if (el) el.hidden = false;
+    const smaller = await smallerChoices(candidate);
+    const wasStopped = stopped || (e && e.message === 'stopped');
+    const nodes = wasStopped
+      ? [span('mm-gate__hint', t('stoppedHint'))]
+      : [span('mm-gate__pitch', String(e && e.message || t('failed'))), span('mm-gate__hint', t('failedHint'))];
+    const pick = await offerChoice(smaller, wasStopped ? t('stoppedTitle') : t('failedTitle', { name: tierName(candidate) }), nodes, (id) => t('tryTier', { name: tierName(id) }));
+    if (pick && pick !== 'postpone') {
+      Tiers.setUserTier(pick);
+      hide();
+      return ensureModel(engineFactory, opts);
+    }
     hide();
-    throw e;
+    throw wasStopped ? new Error('download-postponed') : e;
   }
 }

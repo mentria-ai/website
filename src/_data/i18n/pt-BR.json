@@ -166,7 +166,8 @@
     "gamepad_disconnected": "🎮 controle desconectado",
     "offline_title": "Off-line",
     "offline_msg": "Você está off-line e esta página ainda não está em cache.",
-    "offline_home": "Ir para a página inicial em cache"
+    "offline_home": "Ir para a página inicial em cache",
+    "close": "Fechar"
   },
   "home": {
     "cli": {

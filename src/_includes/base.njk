@@ -463,6 +463,61 @@
       <button type="button" class="m-update__btn" id="m-update-go">{{ "pwa.update_btn" | t }}</button>
       <button type="button" class="m-update__x" id="m-update-later" aria-label="{{ 'pwa.update_later' | t }}" title="{{ 'pwa.update_later' | t }}">&times;</button>
     </div>
+    <template id="tools-popup-tpl">{% include "tool-launcher.njk" %}</template>
+    <div class="tools-popup" id="tools-popup" hidden role="dialog" aria-modal="true" aria-label="{{ 'nav.tools' | t }}">
+      <div class="tools-popup__scrim" data-tools-close></div>
+      <div class="tools-popup__panel" tabindex="-1">
+        <button type="button" class="tools-popup__close" data-tools-close aria-label="{{ 'common.close' | t }}" title="{{ 'common.close' | t }}">&times;</button>
+        <div class="tools-popup__body"></div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var popup = document.getElementById('tools-popup');
+        var tpl = document.getElementById('tools-popup-tpl');
+        if (!popup || !tpl) return;
+        var body = popup.querySelector('.tools-popup__body');
+        var panel = popup.querySelector('.tools-popup__panel');
+        var built = false;
+        var prevFocus = null;
+        function build() {
+          if (built) return;
+          built = true;
+          body.appendChild(document.importNode(tpl.content, true));
+          ['/assets/js/tool-launcher.js?v={{ buildHash }}', '/assets/js/mentria-ext-launch.js'].forEach(function (src) {
+            var s = document.createElement('script'); s.src = src; s.defer = true; document.body.appendChild(s);
+          });
+        }
+        function open(fromHash) {
+          if (document.getElementById('tools-preview') && !popup.contains(document.getElementById('tools-preview'))) { document.getElementById('tools-preview').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+          build();
+          prevFocus = document.activeElement;
+          popup.hidden = false;
+          document.body.classList.add('is-tools-open');
+          if (!fromHash) history.pushState({ tools: true }, '', '#tools');
+          var input = popup.querySelector('input[type="search"], input');
+          setTimeout(function () { (input || panel).focus(); }, 30);
+        }
+        function close(fromPop) {
+          if (popup.hidden) return;
+          popup.hidden = true;
+          document.body.classList.remove('is-tools-open');
+          if (!fromPop && history.state && history.state.tools) history.back();
+          if (prevFocus && prevFocus.focus) { try { prevFocus.focus(); } catch (_) {} }
+        }
+        document.addEventListener('click', function (e) {
+          var a = e.target.closest && e.target.closest('[data-tools-open]');
+          if (a && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); if (popup.hidden) open(); else close(); return; }
+          var c = e.target.closest && e.target.closest('[data-tools-close]');
+          if (c) { e.preventDefault(); close(); return; }
+          var link = e.target.closest && e.target.closest('a[href]');
+          if (link && popup.contains(link) && !popup.hidden) close(true);
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !popup.hidden) { e.preventDefault(); close(); } });
+        window.addEventListener('popstate', function () { if (!(history.state && history.state.tools)) close(true); else open(true); });
+        if (location.hash === '#tools') { history.replaceState({ tools: true }, '', '#tools'); open(true); }
+      })();
+    </script>
     <script>
       if ('serviceWorker' in navigator) {
         (function () {
@@ -636,8 +691,9 @@
         });
         document.addEventListener('DOMContentLoaded', function () {
           var slug = toolSlug();
-          if (!slug || !window.MentriaStore || typeof window.MentriaStore.get !== 'function') return;
-          if (window.MentriaStore.get('ui', 'fullscreen.' + slug) !== true) return;
+          if (!slug) return;
+          var pref = (window.MentriaStore && typeof window.MentriaStore.get === 'function') ? window.MentriaStore.get('ui', 'fullscreen.' + slug) : null;
+          if (pref === false) return;
           var frame = document.querySelector('.terminal-frame');
           if (frame) enter(frame, true);
         });

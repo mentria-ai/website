@@ -166,7 +166,8 @@
     "gamepad_disconnected": "🎮 manette déconnectée",
     "offline_title": "Hors ligne",
     "offline_msg": "Vous êtes hors ligne et cette page n'est pas encore en cache.",
-    "offline_home": "Aller à la page d'accueil en cache"
+    "offline_home": "Aller à la page d'accueil en cache",
+    "close": "Fermer"
   },
   "home": {
     "cli": {

@@ -166,7 +166,8 @@
     "gamepad_disconnected": "🎮 mando desconectado",
     "offline_title": "Sin conexión",
     "offline_msg": "Estás sin conexión y esta página aún no está en caché.",
-    "offline_home": "Ir a la página de inicio en caché"
+    "offline_home": "Ir a la página de inicio en caché",
+    "close": "Cerrar"
   },
   "home": {
     "cli": {

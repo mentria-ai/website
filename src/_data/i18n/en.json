@@ -166,7 +166,8 @@
     "gamepad_disconnected": "🎮 controller disconnected",
     "offline_title": "Offline",
     "offline_msg": "You're offline and this page isn't cached yet.",
-    "offline_home": "Go to the cached home page"
+    "offline_home": "Go to the cached home page",
+    "close": "Close"
   },
   "home": {
     "cli": {

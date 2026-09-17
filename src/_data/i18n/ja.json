@@ -166,7 +166,8 @@
     "gamepad_disconnected": "🎮 コントローラー切断",
     "offline_title": "オフライン",
     "offline_msg": "オフラインです。このページはまだキャッシュされていません。",
-    "offline_home": "キャッシュ済みのホームへ"
+    "offline_home": "キャッシュ済みのホームへ",
+    "close": "閉じる"
   },
   "home": {
     "cli": {

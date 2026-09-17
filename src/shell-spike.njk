@@ -1,0 +1,64 @@
+---
+layout: base.njk
+permalink: /shell-spike/index.html
+title: "Shell spike"
+robots: "noindex, nofollow"
+englishOnly: true
+eleventyExcludeFromCollections: true
+eleventyExcludeFromSitemap: true
+---
+<section class="shell">
+  <div class="shell__bar">
+    <span class="shell__dot" id="shell-dot"></span>
+    <span id="shell-status">one engine, two cards</span>
+    <span class="shell__meta" id="shell-meta"></span>
+  </div>
+  <div class="shell__cards">
+    <div class="shell__card"><div class="shell__label">ai-chat.js · embedded</div><iframe id="f1" src="/tools/ai-chat/?embed=1" title="AI Chat"></iframe></div>
+    <div class="shell__card"><div class="shell__label">quote.js · embedded</div><iframe id="f2" src="/tools/quote/?embed=1" title="Motivational Quote"></iframe></div>
+  </div>
+</section>
+
+<style>
+  .shell { font-family: var(--font-mono); }
+  .shell__bar { display: flex; align-items: center; gap: .6rem; padding: .6rem .9rem; border: 1px solid var(--term-border); border-radius: 10px; background: var(--term-bg-raised); font-size: .8rem; color: var(--term-muted); margin-bottom: 1rem; }
+  .shell__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--syn-amber); }
+  .shell__dot.is-ready { background: var(--syn-green); box-shadow: 0 0 6px var(--syn-green); }
+  .shell__meta { margin-left: auto; color: var(--term-subtle, var(--term-muted)); }
+  .shell__cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1rem; }
+  .shell__card { border: 1px solid var(--term-border-strong); border-radius: 12px; overflow: hidden; background: var(--term-bg); }
+  .shell__label { padding: .4rem .8rem; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--term-subtle, var(--term-muted)); border-bottom: 1px solid var(--term-border); }
+  .shell__card iframe { display: block; width: 100%; height: 640px; border: 0; background: var(--term-bg); }
+</style>
+
+<script type="module">
+  import { serveEngine } from '/assets/js/mentria-engine-proxy.js';
+  import { ensureModel } from '/assets/js/mentria-model.js';
+  const MENTRIA_DIST_BASE = '/assets/mentria/dist/';
+  const status = document.getElementById('shell-status');
+  const meta = document.getElementById('shell-meta');
+  const dot = document.getElementById('shell-dot');
+  const broker = serveEngine();
+  window.__shellBroker = broker;
+  try {
+    const { MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs');
+    const createEngine = () => {
+      const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+      window.mentriaWrapEngine && window.mentriaWrapEngine(e);
+      return e;
+    };
+    const res = await ensureModel(createEngine, {
+      vision: true,
+      offerUpgrade: false,
+      onProgress: (p) => { if (p && p.message) status.textContent = p.message; broker.progress(p); },
+      onDeviceLost: () => { status.textContent = 'device lost'; dot.classList.remove('is-ready'); }
+    });
+    broker.setReady(res);
+    window.__shellEngine = res.engine;
+    dot.classList.add('is-ready');
+    status.textContent = 'engine ready · ' + res.tier + ' · window ' + res.maxSeq;
+    setInterval(() => { meta.textContent = broker.clients + ' card' + (broker.clients === 1 ? '' : 's') + ' connected'; }, 500);
+  } catch (err) {
+    status.textContent = 'engine failed: ' + (err && err.message || err);
+  }
+</script>

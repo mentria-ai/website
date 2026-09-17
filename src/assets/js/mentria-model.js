@@ -277,6 +277,20 @@ export async function ensureModel(engineFactory, opts) {
 
   if (typeof navigator === 'undefined' || !navigator.gpu) throw new NoWebGpuError();
 
+  if (window.parent !== window && /[?&]embed=1/.test(location.search)) {
+    try {
+      const Proxy = await import('/assets/js/mentria-engine-proxy.js');
+      const remote = await Proxy.connectRemoteEngine({ timeoutMs: 120000, onProgress });
+      if (remote) {
+        remote.onProgress = onProgress;
+        remote.onDeviceLost = onDeviceLost;
+        window.__mentriaEngine = remote;
+        if (onTier) { try { onTier(Object.assign(tierInfo(Tiers.TIERS[remote.tier], remote.tier), { cached: true }), remote.tier); } catch (_) {} }
+        return { engine: remote, tier: remote.tier, maxSeq: remote.maxSeq, remote: true };
+      }
+    } catch (_) {}
+  }
+
   let stopped = false;
   let lastEngine = null;
   const makeEngine = () => {

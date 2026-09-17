@@ -32,6 +32,7 @@
       (function () {
         var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
         if (standalone) document.documentElement.classList.add('is-standalone');
+        if (/[?&]embed=1(&|$)/.test(location.search)) document.documentElement.classList.add('is-embed');
         var seen = null;
         try { seen = localStorage.getItem('mentria_seen'); } catch (e) {}
         if (seen || standalone) document.documentElement.classList.add('app-chrome');

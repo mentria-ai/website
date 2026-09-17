@@ -1434,3 +1434,15 @@ html:has(.pwa-install-banner--visible) .m-update { bottom: calc(88px + env(safe-
   pointer-events: none;
 }
 .nav-dot[hidden] { display: none; }
+
+html.is-embed .site-header,
+html.is-embed .app-bar,
+html.is-embed .pwa-install-banner,
+html.is-embed .pwa-install-sheet,
+html.is-embed .m-update,
+html.is-embed .related-tools,
+html.is-embed .tldr,
+html.is-embed .site-footer,
+html.is-embed .hero { display: none !important; }
+html.is-embed body { padding: 0; }
+html.is-embed main { padding: 0; margin: 0; max-width: none; }

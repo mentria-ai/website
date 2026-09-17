@@ -10,7 +10,63 @@ eleventyComputed:
   title: "{{ 'nav.home' | t }}"
   description: "{{ 'site.metaDescription' | t }}"
 ---
-<section class="cli grid-bg">
+{%- set shellDefaults = ['ai-chat', 'radio', 'chess', 'quick-notes', 'countdown-timer', 'qr-scanner', 'extensions'] -%}
+{%- set catByGroup = { "AI": "var(--syn-purple)", "Games": "var(--syn-orange)", "Everyday": "var(--syn-cyan)", "Create": "var(--accent)", "Dev": "var(--syn-pink)" } -%}
+<script>document.documentElement.classList.add('is-shell');</script>
+<link rel="stylesheet" href="/assets/css/shell.css?v={{ buildHash }}">
+<div class="shell" id="shell">
+  <nav class="shell-pos" id="shell-pos" aria-label="{{ 'shell.position' | t }}"></nav>
+  <div class="shell-feed" id="shell-feed">
+    {%- for slug in shellDefaults -%}
+      {%- for tool in tools -%}
+        {%- if tool.slug == slug -%}
+    <article class="shell-card" data-slug="{{ tool.slug }}">
+      <div class="terminal-frame shell-frame" style="--cat:{{ catByGroup[tool.group] or 'var(--syn-cyan)' }}">
+        <div class="terminal-frame__titlebar">
+          <div class="terminal-frame__dots">
+            <button type="button" class="terminal-frame__dot terminal-frame__dot--red shell-dotbtn" data-act="close" aria-label="{{ 'shell.close' | t }}" title="{{ 'shell.close' | t }}"></button>
+            <button type="button" class="terminal-frame__dot terminal-frame__dot--yellow shell-dotbtn" data-act="dock" aria-label="{{ 'shell.minimize' | t }}" title="{{ 'shell.minimize' | t }}"></button>
+            <button type="button" class="terminal-frame__dot terminal-frame__dot--green shell-dotbtn" data-act="full" aria-label="{{ 'shell.fullscreen' | t }}" title="{{ 'shell.fullscreen' | t }}"></button>
+          </div>
+          <span class="shell-frame__status" data-status hidden><span class="shell-frame__dot"></span><span data-status-text></span></span>
+          <span class="terminal-frame__filename">{{ tool.slug }}.js</span>
+          <a class="terminal-frame__help shell-frame__about" href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}" data-act="page" aria-label="{{ 'shell.about_tool' | t }}" title="{{ 'shell.about_tool' | t }}">?</a>
+          <button type="button" class="terminal-frame__expand" data-act="full" aria-label="{{ 'shell.fullscreen' | t }}" title="{{ 'shell.fullscreen' | t }}">⤢</button>
+        </div>
+        <div class="terminal-frame__body shell-frame__body"></div>
+      </div>
+      <a class="shell-card__seo" href="{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}">{{ ("tools." + tool.slug + ".title") | t }} — {{ tool.summary }}</a>
+    </article>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endfor -%}
+  </div>
+  <aside class="shell-rail" aria-label="{{ 'shell.rail_label' | t }}">
+    <div class="shell-rail__blk" hidden>
+      <span class="shell-rail__lb">{{ 'shell.dock' | t }}</span>
+      <div class="shell-dock__items" id="shell-rail-dock"></div>
+    </div>
+    <div class="shell-rail__blk">
+      <span class="shell-rail__lb">{{ 'shell.next' | t }}</span>
+      <div id="shell-rail-next"></div>
+      <p class="shell-rail__note">{{ 'shell.rail_note' | t }}</p>
+    </div>
+    <div class="shell-rail__blk">
+      <span class="shell-rail__lb">{{ 'shell.engine' | t }}</span>
+      <span class="shell-engine" id="shell-engine">{{ 'shell.engine_idle' | t }}</span>
+    </div>
+    <div class="shell-rail__blk">
+      <a class="shell-rail__row" href="{{ '/tools/' | localeUrl(lang) }}"><span class="shell-rail__row-n">{{ 'shell.all_apps' | t }}</span><span class="shell-rail__row-c">{{ tools | length }}</span></a>
+    </div>
+  </aside>
+  <div class="shell-dock" id="shell-dock" hidden>
+    <span class="shell-dock__lb">{{ 'shell.dock' | t }}</span>
+    <div class="shell-dock__items" id="shell-dock-items"></div>
+  </div>
+  <div class="shell-keys" aria-hidden="true"><span class="shell-key">↓ / j</span><span>{{ 'shell.keys_next' | t }}</span><span class="shell-key">↑ / k</span><span>{{ 'shell.keys_prev' | t }}</span><span class="shell-key">⏎</span><span>{{ 'shell.keys_expand' | t }}</span><span class="shell-key">esc</span><span>{{ 'shell.keys_back' | t }}</span></div>
+</div>
+
+<section class="cli shell-cli">
     <div class="cli__output" role="log" aria-live="polite"></div>
     <div class="cli__prompt-line">
         <span class="cli__prompt">$&nbsp;</span>
@@ -26,14 +82,34 @@ eleventyComputed:
     </nav>
 </section>
 
-{% include "feed-preview.njk" %}
-
-{% include "tool-launcher.njk" %}
-<script src="/assets/js/tool-launcher.js?v={{ buildHash }}"></script>
-<script src="/assets/js/mentria-ext-launch.js" defer></script>
-
 <script>
-  // Welcome lines for the home CLI, localized per page.
+  window.MENTRIA_SHELL = {
+    prefix: {{ locale.pathPrefix | dump | safe }},
+    defaults: {{ shellDefaults | dump | safe }},
+    engineTools: ["ai-chat", "annotate-image", "quote", "console", "model-mirror"],
+    tools: [
+      {%- for tool in tools -%}
+      { slug: {{ tool.slug | dump | safe }}, title: {{ (("tools." + tool.slug + ".title") | t) | dump | safe }}, summary: {{ tool.summary | dump | safe }}, group: {{ (tool.group or tool.category or '') | dump | safe }}, requires: {{ (tool.requires or '') | dump | safe }}, url: {{ (tool.url or '') | dump | safe }}, cat: {{ (catByGroup[tool.group] or 'var(--syn-cyan)') | dump | safe }} }{% if not loop.last %},{% endif %}
+      {%- endfor -%}
+    ],
+    copy: {
+      close: {{ ('shell.close' | t) | dump | safe }},
+      minimize: {{ ('shell.minimize' | t) | dump | safe }},
+      fullscreen: {{ ('shell.fullscreen' | t) | dump | safe }},
+      windowed: {{ ('shell.windowed' | t) | dump | safe }},
+      about_tool: {{ ('shell.about_tool' | t) | dump | safe }},
+      undock: {{ ('shell.undock' | t) | dump | safe }},
+      gate_q: {{ ('shell.gate_q' | t) | dump | safe }},
+      gate_sub: {{ ('shell.gate_sub' | t) | dump | safe }},
+      gate_btn: {{ ('shell.gate_btn' | t) | dump | safe }},
+      gate_note: {{ ('shell.gate_note' | t) | dump | safe }},
+      gate_loading: {{ ('shell.gate_loading' | t) | dump | safe }},
+      engine_idle: {{ ('shell.engine_idle' | t) | dump | safe }},
+      engine_ready: {{ ('shell.engine_ready' | t) | dump | safe }},
+      engine_lost: {{ ('shell.engine_lost' | t) | dump | safe }},
+      engine_error: {{ ('shell.engine_error' | t) | dump | safe }}
+    }
+  };
   window.MENTRIA_CLI_WELCOME = {
     cmd:  {{ ("home.cli.welcomeCmd"  | t) | dump | safe }},
     out1: {{ ("home.cli.welcomeOut1" | t) | dump | safe }},
@@ -59,5 +135,10 @@ eleventyComputed:
     navigatingTo:   {{ ("home.cli.navigating_to"   | t) | dump | safe }},
     aboutLine:      {{ ("home.cli.about_line"      | t) | dump | safe }}
   };
+  (function () {
+    var h = document.querySelector('.site-header');
+    if (h) document.documentElement.style.setProperty('--shell-hdr', h.offsetHeight + 'px');
+  })();
 </script>
+<script type="module" src="/assets/js/mentria-shell.js?v={{ buildHash }}"></script>
 <script src="/assets/js/mentria-cli.js"></script>

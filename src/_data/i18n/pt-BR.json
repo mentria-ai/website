@@ -2145,5 +2145,33 @@
     "slide_of": "Slide {n} de {total}",
     "share_slide": "Compartilhar este cartão como imagem",
     "coming_soon": "Capítulo 2 — em breve"
+  },
+  "shell": {
+    "position": "Posição no feed",
+    "close": "Remover cartão",
+    "minimize": "Minimizar para o dock",
+    "fullscreen": "Tela cheia",
+    "windowed": "Em janela",
+    "about_tool": "Sobre esta ferramenta",
+    "undock": "Voltar ao cartão",
+    "dock": "dock",
+    "next": "a seguir, ordenado no seu dispositivo",
+    "rail_label": "Dock e sugestões",
+    "rail_note": "fixados e recentes, conforme o cartão em que você está. sem rastreamento.",
+    "engine": "motor",
+    "engine_idle": "modelo não carregado",
+    "engine_ready": "{name} pronto · janela {seq}",
+    "engine_lost": "dispositivo GPU perdido",
+    "engine_error": "não foi possível carregar o modelo:",
+    "all_apps": "Todos os apps",
+    "keys_next": "próximo cartão",
+    "keys_prev": "anterior",
+    "keys_expand": "expandir",
+    "keys_back": "voltar",
+    "gate_q": "Rodar {name} nesta aba?",
+    "gate_sub": "{size}, baixado uma vez, guardado neste dispositivo.",
+    "gate_btn": "Carregar {name}",
+    "gate_note": "sem conta · sem upload · funciona offline depois de guardado",
+    "gate_loading": "Carregando…"
   }
 }

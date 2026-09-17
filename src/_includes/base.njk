@@ -465,6 +465,39 @@
       <button type="button" class="m-update__x" id="m-update-later" aria-label="{{ 'pwa.update_later' | t }}" title="{{ 'pwa.update_later' | t }}">&times;</button>
     </div>
     <script>
+      (function () {
+        if (!document.documentElement.classList.contains('is-embed') || window.parent === window) return;
+        var post = function (m) { try { window.parent.postMessage(m, location.origin); } catch (_) {} };
+        var stateOf = function (el) {
+          var dot = el.parentElement ? el.parentElement.querySelector('[class*="dot--"]') : null;
+          if (!dot) return '';
+          var m = /dot--([a-z]+)/.exec(dot.className);
+          return m ? m[1] : '';
+        };
+        var report = function () {
+          var el = document.querySelector('[role="status"]');
+          if (!el) return;
+          post({ type: 'mentria-status', text: (el.textContent || '').trim().slice(0, 80), state: stateOf(el) });
+        };
+        var mo = new MutationObserver(report);
+        document.addEventListener('DOMContentLoaded', function () {
+          document.querySelectorAll('[role="status"]').forEach(function (el) { mo.observe(el, { childList: true, characterData: true, subtree: true }); if (el.parentElement) mo.observe(el.parentElement, { attributes: true, subtree: true, attributeFilter: ['class'] }); });
+          report();
+        });
+        document.addEventListener('click', function (e) {
+          var t = e.target.closest ? e.target.closest('[data-action="toggle-fullscreen"], .terminal-frame__dot--yellow, .terminal-frame__dot--minimize, a[href]') : null;
+          if (!t) return;
+          if (t.matches('[data-action="toggle-fullscreen"]')) { e.preventDefault(); e.stopPropagation(); post({ type: 'mentria-full' }); return; }
+          if (t.matches('.terminal-frame__dot--yellow, .terminal-frame__dot--minimize')) { e.preventDefault(); e.stopPropagation(); post({ type: 'mentria-dock' }); return; }
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || t.target === '_blank') return;
+          var m = (t.getAttribute('href') || '').replace(/^https?:\/\/[^/]+/, '').match(/^(?:\/(?:es|fr|ja|pt-br))?\/tools\/([^/?#]+)\/?(?:[?#].*)?$/);
+          if (!m) return;
+          e.preventDefault();
+          post({ type: 'mentria-open', slug: m[1] });
+        }, true);
+      })();
+    </script>
+    <script>
       if ('serviceWorker' in navigator) {
         (function () {
           var hadController = !!navigator.serviceWorker.controller;
@@ -637,8 +670,9 @@
         });
         document.addEventListener('DOMContentLoaded', function () {
           var slug = toolSlug();
-          if (!slug || !window.MentriaStore || typeof window.MentriaStore.get !== 'function') return;
-          if (window.MentriaStore.get('ui', 'fullscreen.' + slug) !== true) return;
+          if (!slug || document.documentElement.classList.contains('is-embed')) return;
+          var pref = (window.MentriaStore && typeof window.MentriaStore.get === 'function') ? window.MentriaStore.get('ui', 'fullscreen.' + slug) : null;
+          if (pref === false) return;
           var frame = document.querySelector('.terminal-frame');
           if (frame) enter(frame, true);
         });

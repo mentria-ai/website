@@ -2145,5 +2145,33 @@
     "slide_of": "スライド {n} / {total}",
     "share_slide": "このカードを画像として共有",
     "coming_soon": "第2章 — 近日公開"
+  },
+  "shell": {
+    "position": "フィードの位置",
+    "close": "カードを外す",
+    "minimize": "ドックに最小化",
+    "fullscreen": "全画面",
+    "windowed": "ウィンドウ表示",
+    "about_tool": "このツールについて",
+    "undock": "カードに戻す",
+    "dock": "ドック",
+    "next": "次のおすすめ（端末内で並べ替え）",
+    "rail_label": "ドックとおすすめ",
+    "rail_note": "ピン留めと最近使ったもの。今のカードに合わせて表示。追跡はしません。",
+    "engine": "エンジン",
+    "engine_idle": "モデル未読み込み",
+    "engine_ready": "{name} 準備完了 · ウィンドウ {seq}",
+    "engine_lost": "GPU デバイスが失われました",
+    "engine_error": "モデルを読み込めませんでした:",
+    "all_apps": "すべてのアプリ",
+    "keys_next": "次のカード",
+    "keys_prev": "前のカード",
+    "keys_expand": "拡大",
+    "keys_back": "戻る",
+    "gate_q": "このタブで {name} を実行しますか？",
+    "gate_sub": "{size}、一度だけダウンロードしてこの端末に保存します。",
+    "gate_btn": "{name} を読み込む",
+    "gate_note": "アカウント不要 · アップロードなし · 保存後はオフラインで動作",
+    "gate_loading": "読み込み中…"
   }
 }

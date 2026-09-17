@@ -2145,5 +2145,33 @@
     "slide_of": "Diapositive {n} sur {total}",
     "share_slide": "Partager cette carte en image",
     "coming_soon": "Chapitre 2 — bientôt disponible"
+  },
+  "shell": {
+    "position": "Position dans le fil",
+    "close": "Retirer la carte",
+    "minimize": "Réduire dans le dock",
+    "fullscreen": "Plein écran",
+    "windowed": "Fenêtré",
+    "about_tool": "À propos de cet outil",
+    "undock": "Revenir à la carte",
+    "dock": "dock",
+    "next": "ensuite, classé sur votre appareil",
+    "rail_label": "Dock et suggestions",
+    "rail_note": "épinglés et récents, selon la carte où vous êtes. aucun suivi.",
+    "engine": "moteur",
+    "engine_idle": "modèle non chargé",
+    "engine_ready": "{name} prêt · fenêtre {seq}",
+    "engine_lost": "périphérique GPU perdu",
+    "engine_error": "impossible de charger le modèle :",
+    "all_apps": "Toutes les apps",
+    "keys_next": "carte suivante",
+    "keys_prev": "précédente",
+    "keys_expand": "agrandir",
+    "keys_back": "retour",
+    "gate_q": "Exécuter {name} dans cet onglet ?",
+    "gate_sub": "{size}, téléchargé une fois, conservé sur cet appareil.",
+    "gate_btn": "Charger {name}",
+    "gate_note": "sans compte · sans envoi · fonctionne hors ligne une fois en cache",
+    "gate_loading": "Chargement…"
   }
 }

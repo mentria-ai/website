@@ -2145,5 +2145,33 @@
     "slide_of": "Slide {n} of {total}",
     "share_slide": "Share this card as an image",
     "coming_soon": "Chapter 2 — coming soon"
+  },
+  "shell": {
+    "position": "Feed position",
+    "close": "Remove card",
+    "minimize": "Minimize to dock",
+    "fullscreen": "Fullscreen",
+    "windowed": "Windowed",
+    "about_tool": "About this tool",
+    "undock": "Back to card",
+    "dock": "dock",
+    "next": "next, ranked on your device",
+    "rail_label": "Dock and suggestions",
+    "rail_note": "pinned and recent, paired to the card you are on. no tracking.",
+    "engine": "engine",
+    "engine_idle": "model not loaded",
+    "engine_ready": "{name} ready · window {seq}",
+    "engine_lost": "GPU device lost",
+    "engine_error": "could not load the model:",
+    "all_apps": "All apps",
+    "keys_next": "next card",
+    "keys_prev": "previous",
+    "keys_expand": "expand",
+    "keys_back": "back",
+    "gate_q": "Run {name} in this tab?",
+    "gate_sub": "{size}, downloaded once, kept on this device.",
+    "gate_btn": "Load {name}",
+    "gate_note": "no account · no upload · works offline once cached",
+    "gate_loading": "Loading…"
   }
 }

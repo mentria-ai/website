@@ -6,7 +6,7 @@
             {% else %}
             <span class="terminal-frame__dot terminal-frame__dot--red"></span>
             {% endif %}
-            <span class="terminal-frame__dot terminal-frame__dot--yellow"></span>
+            {% if terminalTitle %}<a class="terminal-frame__dot terminal-frame__dot--yellow terminal-frame__dot--minimize" href="{{ '/' | localeUrl(lang) }}#dock={{ page.fileSlug }}" aria-label="{{ 'shell.minimize' | t }}" title="{{ 'shell.minimize' | t }}"></a>{% else %}<span class="terminal-frame__dot terminal-frame__dot--yellow"></span>{% endif %}
             <button type="button" class="terminal-frame__dot terminal-frame__dot--green" data-action="toggle-fullscreen" aria-pressed="false" aria-label="{{ 'common.toggle_fullscreen' | t }}" title="{{ 'common.toggle_fullscreen' | t }}"></button>
         </div>
         {% if terminalTitle %}

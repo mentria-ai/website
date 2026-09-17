@@ -2145,5 +2145,33 @@
     "slide_of": "Diapositiva {n} de {total}",
     "share_slide": "Compartir esta tarjeta como imagen",
     "coming_soon": "Capítulo 2 — próximamente"
+  },
+  "shell": {
+    "position": "Posición en el feed",
+    "close": "Quitar tarjeta",
+    "minimize": "Minimizar al dock",
+    "fullscreen": "Pantalla completa",
+    "windowed": "En ventana",
+    "about_tool": "Sobre esta herramienta",
+    "undock": "Volver a la tarjeta",
+    "dock": "dock",
+    "next": "siguiente, ordenado en tu dispositivo",
+    "rail_label": "Dock y sugerencias",
+    "rail_note": "fijadas y recientes, según la tarjeta en la que estás. sin rastreo.",
+    "engine": "motor",
+    "engine_idle": "modelo no cargado",
+    "engine_ready": "{name} listo · ventana {seq}",
+    "engine_lost": "se perdió el dispositivo GPU",
+    "engine_error": "no se pudo cargar el modelo:",
+    "all_apps": "Todas las apps",
+    "keys_next": "siguiente",
+    "keys_prev": "anterior",
+    "keys_expand": "expandir",
+    "keys_back": "volver",
+    "gate_q": "¿Ejecutar {name} en esta pestaña?",
+    "gate_sub": "{size}, se descarga una vez y se guarda en este dispositivo.",
+    "gate_btn": "Cargar {name}",
+    "gate_note": "sin cuenta · sin subidas · funciona sin conexión una vez guardado",
+    "gate_loading": "Cargando…"
   }
 }

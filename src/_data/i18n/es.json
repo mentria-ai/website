@@ -22,7 +22,9 @@
     "home": "Inicio",
     "comms": "Comms",
     "search": "Buscar",
-    "about": "Acerca de"
+    "about": "Acerca de",
+    "week_ring": "Tu semana",
+    "week_ring_n": "Tu semana: {n} de 7 días"
   },
   "about": {
     "title": "Acerca de",
@@ -2218,5 +2220,19 @@
     "review_wrong": "Repasar las que fallé",
     "more": "más",
     "less": "menos"
+  },
+  "stream": {
+    "hero_title": "Un feed que enseña.",
+    "hero_lede": "Tarjetas para leer, responder y volver. Importa un paquete desde un libro o tus apuntes, o empieza con los nuestros. Todo se ejecuta en tu dispositivo.",
+    "browse": "Ver paquetes",
+    "scroll_hint": "desliza",
+    "open": "Abrir",
+    "start": "Empezar",
+    "today": "Hoy",
+    "review": "Repaso",
+    "imported": "Importado",
+    "card_pos": "Tarjeta {n} de {total}",
+    "done_title": "Eso es todo por hoy.",
+    "done_text": "Tus tarjetas nuevas de hoy están hechas. Sigue deslizando para ver más paquetes o abre uno para continuar."
   }
 }

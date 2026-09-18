@@ -3,6 +3,9 @@
     <div class="site-header__inner">
         <a class="brand" href="{{ '/' | localeUrl(lang) }}" aria-label="Mentria home">MENTRIA<span class="brand__ai" aria-hidden="true"><span class="brand__ai-text"><span class="brand__ai-a">A</span><span class="brand__ai-i">I</span></span><svg class="brand__star" viewBox="0 0 48 48" aria-hidden="true"><path class="brand__spark" d="M24 1c1.8 16.5 4.7 19.2 23 23-18.3 3.8-21.2 6.5-23 23-1.8-16.5-4.7-19.2-23-23 18.3-3.8 21.2-6.5 23-23z" fill="currentColor"/></svg></span><span class="brand__cursor">_</span></a>
         <nav class="site-nav">
+            <a class="week-ring" href="{{ '/learn/' | localeUrl(lang) }}" data-week-ring data-label-n="{{ 'nav.week_ring_n' | t }}" aria-label="{{ 'nav.week_ring' | t }}" title="{{ 'nav.week_ring' | t }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true">{% for i in range(0, 7) %}<circle class="week-ring__seg" cx="12" cy="12" r="9" transform="rotate({{ i * 51.43 }} 12 12)"/>{% endfor %}</svg>
+            </a>
             {% set feedHref  = '/feed/'  | localeUrl(lang) %}
             {% set toolsHref = '/tools/' | localeUrl(lang) %}
             <a href="{{ feedHref }}"  class="nav-link{% if page.url | startsWith(feedHref) %} active{% endif %}"{% if page.url | startsWith(feedHref) %} aria-current="page"{% endif %} title="{{ 'nav.feed' | t }}">

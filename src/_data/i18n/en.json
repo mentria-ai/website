@@ -22,7 +22,9 @@
     "home": "Home",
     "comms": "Comms",
     "search": "Search",
-    "about": "About"
+    "about": "About",
+    "week_ring": "Your week",
+    "week_ring_n": "Your week: {n} of 7 days"
   },
   "about": {
     "title": "About",
@@ -2218,5 +2220,19 @@
     "review_wrong": "Review the ones I missed",
     "more": "more",
     "less": "less"
+  },
+  "stream": {
+    "hero_title": "A feed that teaches.",
+    "hero_lede": "Cards you read, answer, and come back to. Import a pack from a book or your notes, or start with ours. Everything runs on your device.",
+    "browse": "Browse packs",
+    "scroll_hint": "scroll",
+    "open": "Open",
+    "start": "Start",
+    "today": "Today",
+    "review": "Review",
+    "imported": "Imported",
+    "card_pos": "Card {n} of {total}",
+    "done_title": "That's today's set.",
+    "done_text": "Your new cards are done for today. Keep scrolling for more packs, or open one to keep going."
   }
 }

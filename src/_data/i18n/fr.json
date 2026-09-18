@@ -22,7 +22,9 @@
     "home": "Accueil",
     "comms": "Comms",
     "search": "Recherche",
-    "about": "À propos"
+    "about": "À propos",
+    "week_ring": "Votre semaine",
+    "week_ring_n": "Votre semaine : {n} jours sur 7"
   },
   "about": {
     "title": "À propos",
@@ -2218,5 +2220,19 @@
     "review_wrong": "Revoir celles que j’ai ratées",
     "more": "plus",
     "less": "moins"
+  },
+  "stream": {
+    "hero_title": "Un fil qui enseigne.",
+    "hero_lede": "Des cartes à lire, à répondre et à revoir. Importez un pack à partir d’un livre ou de vos notes, ou commencez avec les nôtres. Tout tourne sur votre appareil.",
+    "browse": "Voir les packs",
+    "scroll_hint": "faites défiler",
+    "open": "Ouvrir",
+    "start": "Commencer",
+    "today": "Aujourd’hui",
+    "review": "Révision",
+    "imported": "Importé",
+    "card_pos": "Carte {n} sur {total}",
+    "done_title": "C’est tout pour aujourd’hui.",
+    "done_text": "Vos nouvelles cartes du jour sont faites. Continuez à faire défiler pour d’autres packs, ou ouvrez-en un pour poursuivre."
   }
 }

@@ -12,11 +12,14 @@ let scriptErrors = 0;
 let linkErrors = 0;
 const tmp = mkdtempSync(join(tmpdir(), 'mentria-check-'));
 const seenLinks = new Set();
+const seenScripts = new Set();
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
   if (!page.includes('/feed/')) {
     const scripts = [...html.matchAll(/<script(?:\s+type="module")?\s*>([\s\S]*?)<\/script>/g)].map((m) => m[1]).filter((s) => s.trim().length > 400);
     scripts.forEach((src, i) => {
+      if (seenScripts.has(src)) return;
+      seenScripts.add(src);
       const f = join(tmp, `${pages.indexOf(page)}-${i}.mjs`);
       writeFileSync(f, src);
       try { execFileSync(process.execPath, ['--check', f], { stdio: 'pipe' }); }

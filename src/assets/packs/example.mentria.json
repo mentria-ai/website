@@ -1,16 +1,47 @@
 {
   "id": "example-attention",
   "version": 1,
-  "title": "Attention in five cards",
-  "subtitle": "An example pack showing every card type the player supports today.",
+  "title": "Attention in ten cards",
+  "subtitle": "An example pack showing every card type the player supports.",
   "cover": "https://cdn.mentria.ai/source01/01_chess.webp",
-  "author": { "name": "mentria" },
+  "author": {
+    "name": "mentria"
+  },
   "language": "en",
-  "tags": ["ai", "example"],
-  "minutes": 4,
+  "tags": [
+    "ai",
+    "example"
+  ],
+  "minutes": 7,
   "sections": [
-    { "id": "s1", "title": "The idea", "cards": ["c1", "c2", "c3"] },
-    { "id": "s2", "title": "Check yourself", "cards": ["c4", "c5", "c6"] }
+    {
+      "id": "s1",
+      "title": "The idea",
+      "cards": [
+        "c1",
+        "c2",
+        "c3"
+      ]
+    },
+    {
+      "id": "s2",
+      "title": "Check yourself",
+      "cards": [
+        "c4",
+        "c5"
+      ]
+    },
+    {
+      "id": "s3",
+      "title": "Practice",
+      "cards": [
+        "c7",
+        "c8",
+        "c9",
+        "c10",
+        "c6"
+      ]
+    }
   ],
   "cards": [
     {
@@ -28,9 +59,30 @@
       "caption": "Tap the numbered spots to see what each part does.",
       "image": "https://cdn.mentria.ai/source01/02_query.webp",
       "hotspots": [
-        { "x": 8, "y": 20, "w": 26, "h": 22, "label": "Query", "body": "What this word is looking for." },
-        { "x": 38, "y": 20, "w": 26, "h": 22, "label": "Key", "body": "What each other word offers." },
-        { "x": 68, "y": 20, "w": 26, "h": 22, "label": "Value", "body": "What gets passed along once a match is found." }
+        {
+          "x": 8,
+          "y": 20,
+          "w": 26,
+          "h": 22,
+          "label": "Query",
+          "body": "What this word is looking for."
+        },
+        {
+          "x": 38,
+          "y": 20,
+          "w": 26,
+          "h": 22,
+          "label": "Key",
+          "body": "What each other word offers."
+        },
+        {
+          "x": 68,
+          "y": 20,
+          "w": 26,
+          "h": 22,
+          "label": "Value",
+          "body": "What gets passed along once a match is found."
+        }
       ]
     },
     {
@@ -38,29 +90,101 @@
       "type": "slide",
       "caption": "How many words can a small model attend to at once?",
       "body": "The window is the number of tokens the model can hold in view. The on-device 4B model here runs with a 16K window on recent Apple devices.",
-      "guess": { "prompt": "Guess the window size, in tokens.", "kind": "number", "answer": 16384, "unit": "tokens" }
+      "guess": {
+        "prompt": "Guess the window size, in tokens.",
+        "kind": "number",
+        "answer": 16384,
+        "unit": "tokens"
+      }
     },
     {
       "id": "c4",
       "type": "mcq",
       "question": "In attention, what does the **query** represent?",
       "choices": [
-        { "text": "What the current word is looking for", "correct": true, "why": "The query is the question a word asks of the others." },
-        { "text": "The final answer the model prints", "why": "That comes much later, after many layers." },
-        { "text": "A list of every word in the training data", "why": "Attention works on the current input, not on the training set." }
+        {
+          "text": "What the current word is looking for",
+          "correct": true,
+          "why": "The query is the question a word asks of the others."
+        },
+        {
+          "text": "The final answer the model prints",
+          "why": "That comes much later, after many layers."
+        },
+        {
+          "text": "A list of every word in the training data",
+          "why": "Attention works on the current input, not on the training set."
+        }
       ]
     },
     {
       "id": "c5",
       "type": "cloze",
       "text": "Each word compares its {{query}} against every other word's {{key}}, then collects their {{values}}.",
-      "answers": ["query", "key", ["values", "value"]],
-      "chips": ["weights", "tokens"]
+      "answers": [
+        "query",
+        "key",
+        [
+          "values",
+          "value"
+        ]
+      ],
+      "chips": [
+        "weights",
+        "tokens"
+      ]
     },
     {
       "id": "c6",
       "type": "checkpoint",
       "summary": "Attention lets every token weigh every other token. Query asks, key answers, value carries. The window caps how many tokens can take part at once."
+    },
+    {
+      "id": "c7",
+      "type": "order",
+      "prompt": "Put the steps of one attention pass in order.",
+      "items": [
+        "Turn each token into a query, a key and a value",
+        "Compare the query with every key",
+        "Turn the scores into weights",
+        "Add up the values by those weights"
+      ]
+    },
+    {
+      "id": "c8",
+      "type": "match",
+      "prompt": "Match each part to what it does.",
+      "pairs": [
+        [
+          "Query",
+          "What this token is looking for"
+        ],
+        [
+          "Key",
+          "What each token offers"
+        ],
+        [
+          "Value",
+          "What gets passed along"
+        ],
+        [
+          "Window",
+          "How many tokens can take part"
+        ]
+      ]
+    },
+    {
+      "id": "c9",
+      "type": "canvas",
+      "title": "Weigh the words",
+      "html": "<div style=\"padding:18px;max-width:420px;margin:0 auto;font-size:15px;line-height:1.5\"><p style=\"margin:0 0 10px\">Drag the slider to give <b>bank</b> more weight from either neighbour, then decide the meaning.</p><p style=\"font-family:monospace;font-size:14px\">the river <b>bank</b> money</p><input id=\"w\" type=\"range\" min=\"0\" max=\"100\" value=\"50\" style=\"width:100%\"><p id=\"o\" style=\"margin:8px 0;color:#8b949e\">river 50% · money 50%</p><button id=\"river\" style=\"margin-right:8px\">It's a riverbank</button><button id=\"money\">It's a money bank</button><p id=\"r\" style=\"margin-top:10px\"></p><script>var w=document.getElementById('w'),o=document.getElementById('o'),r=document.getElementById('r');w.oninput=function(){o.textContent='river '+(100-w.value)+'% · money '+w.value+'%'};function pick(side){var v=+w.value;var ok=(side==='river'&&v<50)||(side==='money'&&v>50);r.textContent=ok?'Right. The heavier neighbour decides the meaning.':'Look at which neighbour has more weight.';window.mentria.done(ok)}document.getElementById('river').onclick=function(){pick('river')};document.getElementById('money').onclick=function(){pick('money')};</script></div>"
+    },
+    {
+      "id": "c10",
+      "type": "ask",
+      "prompt": "In one or two sentences, explain why a model needs attention at all.",
+      "model_answer": "Words change meaning depending on their neighbours, so each token has to look at the others to decide what it means here. Attention is the step that lets every token weigh every other one.",
+      "rubric": "Meaning depends on context; tokens look at each other; weights decide how much each one counts."
     }
   ]
 }

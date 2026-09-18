@@ -17,7 +17,9 @@
   var localePrefix = root.dataset.prefix || '';
   var libraryHref = localePrefix + '/learn/';
 
-  var pack = null, native = false, order = [], byId = {}, sectionOf = {}, current = 0, mode = 'quiz', progress = null, reviewOnly = false;
+  var pack = null, native = false, order = [], byId = {}, sectionOf = {}, current = 0, mode = 'quiz', progress = null;
+  var BUDGET = 10;
+  function renderMode() { return mode === 'read' ? 'read' : 'quiz'; }
   var slides = [], segs = [], stage, progressBar, liveEl, hint, modeWrap, secLabel;
 
   function load() {
@@ -43,7 +45,7 @@
 
   function ctx() {
     return new C.Ctx({
-      pack: pack, mode: mode, lang: lang, t: t, native: native,
+      pack: pack, mode: renderMode(), lang: lang, t: t, native: native,
       sectionOf: function (id) { return sectionOf[id] || null; },
       getProgress: function () { return progress; },
       onAnswer: function (card, right, extra) {
@@ -61,7 +63,7 @@
     pack.cards.forEach(function (c) { byId[c.id] = c; });
     pack.sections.forEach(function (s) { s.cards.forEach(function (id) { sectionOf[id] = s; }); });
     progress = P.getProgress(pack.id);
-    mode = progress.mode || (pack.modes.indexOf('quiz') >= 0 ? 'quiz' : 'read');
+    mode = pack.modes.indexOf(progress.mode) >= 0 ? progress.mode : (pack.modes.indexOf('quiz') >= 0 ? 'quiz' : pack.modes[0]);
     root.innerHTML = '';
     root.dataset.mode = mode;
 
@@ -87,7 +89,7 @@
     modeWrap = el('div', 'pack-mode');
     modeWrap.setAttribute('role', 'group');
     modeWrap.setAttribute('aria-label', t('mode_label'));
-    ['read', 'quiz'].forEach(function (m) {
+    ['read', 'quiz', 'review', 'budget'].forEach(function (m) {
       if (pack.modes.indexOf(m) < 0) return;
       var b = el('button', 'pack-mode__btn', esc(t('mode_' + m)));
       b.type = 'button';
@@ -164,29 +166,44 @@
     p.appendChild(stats);
     var again = el('button', 'pack-btn pack-btn--primary', esc(t('restart')));
     again.type = 'button';
-    again.addEventListener('click', function () { reviewOnly = false; rebuildOrder(); go(0); });
+    again.addEventListener('click', function () { if (mode === 'review' || mode === 'budget') setMode('quiz', true); else { rebuildOrder(); go(0); } });
     var review = el('button', 'pack-btn', esc(t('review_wrong')));
     review.type = 'button';
-    review.addEventListener('click', function () { reviewOnly = true; if (mode !== 'quiz') { mode = 'quiz'; P.setMode(pack.id, mode); } rebuildOrder(); go(0); });
+    review.addEventListener('click', function () { setMode('review', true); });
     var lib = el('a', 'pack-btn pack-btn--ghost', esc(t('back_to_library')));
     lib.href = libraryHref;
     var row = el('div', 'pack-card__actions');
     row.appendChild(again); row.appendChild(review); row.appendChild(lib);
     p.appendChild(row);
     s.appendChild(p);
+    var note = el('p', 'pack-card__text');
+    note.hidden = true;
+    p.insertBefore(note, stats);
     s.addEventListener('pack:enter', function () {
       var sum = P.summary(pack, progress);
       stats.textContent = t('finish_stats', { seen: sum.seen, total: sum.total, right: sum.right, wrong: sum.wrong });
-      review.hidden = !sum.wrong;
+      note.hidden = !(mode === 'review' && !order.length) && !(mode === 'budget');
+      note.textContent = mode === 'review' && !order.length ? t('nothing_to_review') : (mode === 'budget' ? t('budget_done') : '');
+      review.hidden = !sum.wrong || mode === 'review';
       P.setMode(pack.id, mode);
     });
     return s;
   }
 
   function rebuildOrder() {
-    order = [];
-    pack.sections.forEach(function (s) { s.cards.forEach(function (id) { if (!byId[id]) return; if (reviewOnly) { var r = progress.cards[id]; if (!r || r.r !== 'wrong') return; } order.push(id); }); });
-    if (!order.length) { reviewOnly = false; rebuildOrder(); return; }
+    var all = [];
+    pack.sections.forEach(function (s) { s.cards.forEach(function (id) { if (byId[id]) all.push(id); }); });
+    if (mode === 'review') {
+      order = all.filter(function (id) { var r = progress.cards[id]; return r && r.r === 'wrong'; });
+    } else if (mode === 'budget') {
+      var now = Date.now();
+      var due = all.filter(function (id) { var r = progress.cards[id]; return r && r.r === 'wrong' && r.d && r.d <= now; });
+      var fresh = all.filter(function (id) { return !progress.cards[id]; });
+      var answeredToday = P.getDays()[P.dayKey()] || 0;
+      order = due.concat(fresh).slice(0, Math.max(0, BUDGET - answeredToday) + due.length).slice(0, BUDGET);
+    } else {
+      order = all;
+    }
     renderAll();
   }
 
@@ -227,18 +244,19 @@
     var target = s.querySelector('.pack-card') || s;
     try { target.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
     try { s.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
-    if (!silent && hint) hint.classList.add('is-fading');
+    if (hint && (!silent || (i < order.length && byId[order[i]].type === 'canvas'))) hint.classList.add('is-fading');
     var focusable = s.querySelector('input, button:not(.deck__tap):not(.pack-more):not([disabled])');
     if (focusable && !silent && document.activeElement && document.activeElement.tagName !== 'INPUT') { try { focusable.focus({ preventScroll: true }); } catch (_) {} }
   }
 
-  function setMode(m) {
-    if (m === mode) return;
+  function setMode(m, restart) {
+    if (m === mode && !restart) return;
+    var structural = m === 'review' || m === 'budget' || mode === 'review' || mode === 'budget';
     mode = m;
     P.setMode(pack.id, mode);
     var keep = current;
-    renderAll();
-    go(Math.min(keep, order.length), true);
+    rebuildOrder();
+    go(structural || restart ? 0 : Math.min(keep, order.length), true);
   }
 
   function exit() {

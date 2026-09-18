@@ -61,6 +61,10 @@
       case 'image': body = renderImage(card, ctx, s); break;
       case 'mcq': body = renderMcq(card, ctx); break;
       case 'cloze': body = renderCloze(card, ctx); break;
+      case 'order': body = renderOrder(card, ctx); break;
+      case 'match': body = renderMatch(card, ctx); break;
+      case 'canvas': body = renderCanvas(card, ctx); break;
+      case 'ask': body = renderAsk(card, ctx); break;
       case 'checkpoint': body = renderCheckpoint(card, ctx); break;
       default: body = renderUnsupported(card, ctx);
     }
@@ -424,6 +428,274 @@
       ctx.onAnswer(card, right, { distance: distance });
     }
     return veil;
+  }
+
+
+  function renderOrder(card, ctx) {
+    var t = ctx.t;
+    var p = panel(card, ctx, 'kicker_order');
+    p.appendChild(el('div', 'pack-card__q', ctx.md(card.prompt)));
+    var correct = card.items.map(function (x) { return ctx.tx(x); });
+    var shown = correct.slice();
+    if (ctx.mode === 'quiz') { var tries = 0; do { shown = shuffle(correct); tries++; } while (tries < 8 && shown.join('||') === correct.join('||')); }
+    var list = el('ol', 'pack-order');
+    var graded = false;
+    function renumber() { Array.prototype.forEach.call(list.children, function (li, i) { li.querySelector('.pack-order__n').textContent = String(i + 1); var up = li.querySelector('[data-dir="up"]'), dn = li.querySelector('[data-dir="down"]'); if (up) up.disabled = i === 0 || graded; if (dn) dn.disabled = i === list.children.length - 1 || graded; }); }
+    shown.forEach(function (text) {
+      var li = el('li', 'pack-order__item');
+      li.dataset.text = text;
+      li.innerHTML = '<span class="pack-order__n"></span><span class="pack-order__text">' + esc(text) + '</span>';
+      if (ctx.mode === 'quiz') {
+        var btns = el('span', 'pack-order__btns');
+        [['up', t('move_up'), '<path d="M6 14l6-6 6 6"/>'], ['down', t('move_down'), '<path d="M6 10l6 6 6-6"/>']].forEach(function (d) {
+          var b = el('button', 'pack-order__btn');
+          b.type = 'button'; b.dataset.dir = d[0]; b.setAttribute('aria-label', d[1]); b.title = d[1];
+          b.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d[2] + '</svg>';
+          b.addEventListener('click', function () {
+            if (graded) return;
+            var sib = d[0] === 'up' ? li.previousElementSibling : li.nextElementSibling;
+            if (!sib) return;
+            if (d[0] === 'up') list.insertBefore(li, sib); else list.insertBefore(sib, li);
+            renumber();
+            b.focus();
+          });
+          btns.appendChild(b);
+        });
+        li.appendChild(btns);
+      }
+      list.appendChild(li);
+    });
+    p.appendChild(list);
+    renumber();
+    if (ctx.mode === 'read') { Array.prototype.forEach.call(list.children, function (li) { li.classList.add('is-correct'); }); return p; }
+    var check = el('button', 'pack-btn pack-btn--primary', esc(t('check')));
+    check.type = 'button';
+    check.addEventListener('click', function () {
+      if (graded) return;
+      graded = true;
+      var right = true;
+      Array.prototype.forEach.call(list.children, function (li, i) {
+        var ok = li.dataset.text === correct[i];
+        li.classList.toggle('is-correct', ok); li.classList.toggle('is-wrong', !ok);
+        if (!ok) right = false;
+      });
+      renumber();
+      check.remove();
+      var msg = right ? '' : esc(t('answer_was')) + ' <em>' + correct.map(esc).join(' → ') + '</em>';
+      feedback(p, ctx, right, msg);
+      continueBtn(p, card, ctx);
+      done(p, card, ctx, right);
+    });
+    p.appendChild(check);
+    return p;
+  }
+
+  function renderMatch(card, ctx) {
+    var t = ctx.t;
+    var p = panel(card, ctx, 'kicker_match');
+    p.appendChild(el('div', 'pack-card__q', ctx.md(card.prompt)));
+    var pairs = card.pairs.map(function (pr) { return [ctx.tx(pr[0]), ctx.tx(pr[1])]; });
+    var grid = el('div', 'pack-match');
+    if (ctx.mode === 'read') {
+      pairs.forEach(function (pr) {
+        grid.appendChild(el('div', 'pack-match__row is-correct', '<span class="pack-match__cell">' + esc(pr[0]) + '</span><span class="pack-match__arrow" aria-hidden="true">→</span><span class="pack-match__cell">' + esc(pr[1]) + '</span>'));
+      });
+      p.appendChild(grid);
+      return p;
+    }
+    p.appendChild(el('p', 'pack-card__note', esc(t('match_hint'))));
+    var leftCol = el('div', 'pack-match__col'), rightCol = el('div', 'pack-match__col');
+    var rights = shuffle(pairs.map(function (pr, i) { return { text: pr[1], i: i }; }));
+    var selected = null, link = {}, graded = false;
+    var leftBtns = [], rightBtns = [];
+    var check = el('button', 'pack-btn pack-btn--primary', esc(t('check')));
+    check.type = 'button';
+    function paint() {
+      leftBtns.forEach(function (b, i) { b.classList.toggle('is-selected', selected === i); b.classList.toggle('is-paired', link[i] != null); b.dataset.pair = link[i] != null ? String((link[i] % 6) + 1) : ''; });
+      rightBtns.forEach(function (b, j) { var li = Object.keys(link).find(function (k) { return link[k] === j; }); b.classList.toggle('is-paired', li != null); b.dataset.pair = li != null ? String((j % 6) + 1) : ''; });
+      check.disabled = Object.keys(link).length !== pairs.length;
+    }
+    pairs.forEach(function (pr, i) {
+      var b = el('button', 'pack-match__cell pack-match__btn', esc(pr[0]));
+      b.type = 'button';
+      b.addEventListener('click', function () {
+        if (graded) return;
+        if (link[i] != null) delete link[i];
+        selected = i;
+        paint();
+      });
+      leftBtns.push(b); leftCol.appendChild(b);
+    });
+    rights.forEach(function (r, j) {
+      var b = el('button', 'pack-match__cell pack-match__btn', esc(r.text));
+      b.type = 'button';
+      b.addEventListener('click', function () {
+        if (graded) return;
+        var owner = Object.keys(link).find(function (k) { return link[k] === j; });
+        if (owner != null) { delete link[owner]; if (selected == null) { paint(); return; } }
+        if (selected == null) return;
+        link[selected] = j;
+        selected = null;
+        var nextFree = pairs.findIndex(function (_, k) { return link[k] == null; });
+        if (nextFree >= 0) selected = nextFree;
+        paint();
+      });
+      rightBtns.push(b); rightCol.appendChild(b);
+    });
+    grid.appendChild(leftCol); grid.appendChild(rightCol);
+    p.appendChild(grid);
+    check.addEventListener('click', function () {
+      if (graded || check.disabled) return;
+      graded = true;
+      var right = true;
+      pairs.forEach(function (pr, i) {
+        var ok = rights[link[i]].text === pr[1];
+        leftBtns[i].classList.toggle('is-correct', ok); leftBtns[i].classList.toggle('is-wrong', !ok);
+        rightBtns[link[i]].classList.toggle('is-correct', ok); rightBtns[link[i]].classList.toggle('is-wrong', !ok);
+        leftBtns[i].disabled = true; rightBtns[link[i]].disabled = true;
+        if (!ok) right = false;
+      });
+      check.remove();
+      var msg = right ? '' : esc(t('answer_was')) + ' <em>' + pairs.map(function (pr) { return esc(pr[0] + ' → ' + pr[1]); }).join(' · ') + '</em>';
+      feedback(p, ctx, right, msg);
+      continueBtn(p, card, ctx);
+      done(p, card, ctx, right);
+    });
+    p.appendChild(check);
+    selected = 0;
+    paint();
+    return p;
+  }
+
+  function themeSnapshot() {
+    var cs = getComputedStyle(document.documentElement);
+    var v = function (n, d) { return (cs.getPropertyValue(n) || '').trim() || d; };
+    return { accent: v('--accent', '#6ef3c5'), bg: v('--term-bg', '#0b0e11'), fg: v('--term-fg', '#e6edf3'), muted: v('--term-muted', '#8b949e'), fontMono: v('--font-mono', 'monospace'), fontBody: v('--font-body', 'sans-serif') };
+  }
+
+  function renderCanvas(card, ctx) {
+    var t = ctx.t;
+    var wrap = el('div', 'pack-canvas');
+    var frame = el('iframe', 'pack-canvas__frame');
+    frame.setAttribute('sandbox', 'allow-scripts allow-forms allow-pointer-lock');
+    frame.setAttribute('title', ctx.tx(card.title || card.id));
+    var token = Math.random().toString(36).slice(2);
+    var theme = themeSnapshot();
+    var boot = '<scr' + 'ipt>(function(){var T=' + JSON.stringify(token) + ';var post=function(m){parent.postMessage(Object.assign({mentriaCanvas:T},m),"*")};' +
+      'window.mentria={theme:' + JSON.stringify(theme) + ',lang:' + JSON.stringify(ctx.lang) + ',done:function(r){post({type:"done",right:r!==false})},next:function(){post({type:"next"})},notify:function(m){post({type:"notify",text:String(m).slice(0,120)})}};' +
+      'window.addEventListener("error",function(e){post({type:"error",text:String(e.message||"error")})});})();</scr' + 'ipt>';
+    var meta = '<meta name="viewport" content="width=device-width, initial-scale=1"><style>html,body{margin:0;background:' + theme.bg + ';color:' + theme.fg + ';font-family:' + theme.fontBody + '}</style>';
+    frame.srcdoc = meta + boot + String(card.html);
+    wrap.appendChild(frame);
+    var bar = el('div', 'pack-canvas__bar');
+    var hint = el('span', 'pack-canvas__hint', esc(ctx.tx(card.title || '') || t('canvas_hint')));
+    bar.appendChild(hint);
+    var cont = el('button', 'pack-btn pack-btn--primary pack-btn--continue', esc(t('continue')));
+    cont.type = 'button';
+    cont.addEventListener('click', function () { ctx.onContinue(card); });
+    bar.appendChild(cont);
+    wrap.appendChild(bar);
+    window.addEventListener('message', function (e) {
+      if (!e.data || e.data.mentriaCanvas !== token || e.source !== frame.contentWindow) return;
+      if (e.data.type === 'done') {
+        var slide = wrap.closest('.pack-slide');
+        if (slide && !slide.dataset.answered) { slide.dataset.answered = '1'; ctx.onAnswer(card, e.data.right !== false); }
+        hint.textContent = e.data.right === false ? t('wrong') : t('correct');
+        hint.className = 'pack-canvas__hint ' + (e.data.right === false ? 'is-wrong' : 'is-right');
+      } else if (e.data.type === 'next') ctx.onContinue(card);
+      else if (e.data.type === 'notify') hint.textContent = e.data.text;
+      else if (e.data.type === 'error') { hint.textContent = e.data.text; hint.className = 'pack-canvas__hint is-wrong'; }
+    });
+    return wrap;
+  }
+
+  var enginePromise = null;
+  function loadEngine() {
+    if (window.__mentriaEngine) return Promise.resolve(window.__mentriaEngine);
+    if (enginePromise) return enginePromise;
+    enginePromise = Promise.all([import('/assets/js/mentria-model.js'), import('/assets/mentria/dist/mentria.mjs')]).then(function (mods) {
+      var ensureModel = mods[0].ensureModel, MentriaEngine = mods[1].MentriaEngine;
+      var createEngine = function () { var e = new MentriaEngine('/assets/mentria/dist/worker.mjs'); if (window.mentriaWrapEngine) window.mentriaWrapEngine(e); return e; };
+      return ensureModel(createEngine, { cachedOnly: true }).then(function (res) { return res.engine; });
+    });
+    enginePromise.catch(function () { enginePromise = null; });
+    return enginePromise;
+  }
+  function canUseModel() {
+    try { return !!(navigator.gpu && localStorage.getItem('mentria-tier-validated')); } catch (_) { return false; }
+  }
+  function gradeWithModel(card, answer, ctx) {
+    return loadEngine().then(function (engine) {
+      var ref = ctx.tx(card.model_answer || ''), rubric = ctx.tx(card.rubric || '');
+      var system = 'You grade a learner\'s short answer. Reply with exactly two lines. Line 1: VERDICT: RIGHT, VERDICT: PARTIAL or VERDICT: WRONG. Line 2: one short sentence of feedback addressed to the learner. No other text.';
+      var user = 'Question: ' + ctx.tx(card.prompt) + (ref ? '\nReference answer: ' + ref : '') + (rubric ? '\nA good answer covers: ' + rubric : '') + '\nLearner\'s answer: ' + answer;
+      var out = '';
+      return engine.generate({ messages: [{ role: 'system', content: system }, { role: 'user', content: user }], maxTokens: 96, temperature: 0, enableThinking: false }, function (ev) {
+        if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) out += ev.token;
+      }).then(function () {
+        var m = out.match(/VERDICT:\s*(RIGHT|PARTIAL|WRONG)/i);
+        if (!m) throw new Error('no-verdict');
+        var line = out.replace(/[\s\S]*?VERDICT:\s*(RIGHT|PARTIAL|WRONG)\s*/i, '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean)[0] || '';
+        return { verdict: m[1].toLowerCase(), text: line.slice(0, 240) };
+      });
+    });
+  }
+
+  function renderAsk(card, ctx) {
+    var t = ctx.t;
+    var p = panel(card, ctx, 'kicker_ask');
+    p.appendChild(el('div', 'pack-card__q', ctx.md(card.prompt)));
+    var ref = el('div', 'pack-ask__ref');
+    if (card.model_answer) ref.appendChild(el('div', 'pack-ask__ref-block', '<span class="pack-ask__label">' + esc(t('reference')) + '</span>' + ctx.md(card.model_answer)));
+    if (card.rubric) ref.appendChild(el('div', 'pack-ask__ref-block', '<span class="pack-ask__label">' + esc(t('rubric')) + '</span>' + ctx.md(card.rubric)));
+    if (ctx.mode === 'read') { if (ref.children.length) p.appendChild(ref); continueBtn(p, card, ctx); return p; }
+    var ta = el('textarea', 'pack-ask__input');
+    ta.rows = 4; ta.placeholder = t('type_here'); ta.setAttribute('aria-label', t('your_answer'));
+    p.appendChild(ta);
+    var actions = el('div', 'pack-card__actions pack-card__actions--start');
+    var useModel = canUseModel();
+    var check = el('button', 'pack-btn pack-btn--primary', esc(useModel ? t('check_model') : t('compare')));
+    check.type = 'button';
+    actions.appendChild(check);
+    p.appendChild(actions);
+    var finished = false;
+    function finish(right, msg) {
+      if (finished) return;
+      finished = true;
+      if (ref.children.length && !ref.parentNode) p.appendChild(ref);
+      feedback(p, ctx, right, msg);
+      continueBtn(p, card, ctx);
+      done(p, card, ctx, right);
+    }
+    function selfGrade() {
+      actions.innerHTML = '';
+      if (ref.children.length) p.insertBefore(ref, actions);
+      var yes = el('button', 'pack-btn pack-btn--primary', esc(t('self_right')));
+      var no = el('button', 'pack-btn', esc(t('self_wrong')));
+      yes.type = 'button'; no.type = 'button';
+      yes.addEventListener('click', function () { actions.remove(); finish(true); });
+      no.addEventListener('click', function () { actions.remove(); finish(false); });
+      actions.appendChild(yes); actions.appendChild(no);
+    }
+    check.addEventListener('click', function () {
+      var answer = ta.value.trim();
+      if (!answer) { ta.focus(); return; }
+      ta.disabled = true;
+      if (!useModel) { selfGrade(); return; }
+      check.disabled = true;
+      check.textContent = t('checking');
+      p.classList.add('is-busy');
+      gradeWithModel(card, answer, ctx).then(function (v) {
+        p.classList.remove('is-busy');
+        actions.remove();
+        var msg = (v.verdict === 'partial' ? '<strong>' + esc(t('partial')) + '</strong> ' : '') + esc(v.text);
+        finish(v.verdict === 'right', msg);
+      }).catch(function () {
+        p.classList.remove('is-busy');
+        selfGrade();
+      });
+    });
+    return p;
   }
 
   global.MentriaPackCards = { render: render, Ctx: Ctx, esc: esc, el: el };

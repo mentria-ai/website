@@ -184,6 +184,7 @@
       "desc_clear": "clear the terminal",
       "not_found": "command not found: {name}. type 'help' for available commands.",
       "scrolling_tools": "> scrolling to tools...",
+      "opening_tools": "> opening tools...",
       "navigating_to": "> navigating to {dest}...",
       "about_line": "> mentria — a creative studio for tools, experiments & visual transmissions. est. 2025.",
       "suggestions_label": "Command suggestions",

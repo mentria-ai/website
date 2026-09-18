@@ -491,7 +491,6 @@
           });
         }
         function open(fromHash) {
-          if (document.getElementById('tools-preview') && !popup.contains(document.getElementById('tools-preview'))) { document.getElementById('tools-preview').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
           build();
           prevFocus = document.activeElement;
           popup.hidden = false;

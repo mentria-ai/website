@@ -28,10 +28,6 @@ eleventyComputed:
 
 {% include "feed-preview.njk" %}
 
-{% include "tool-launcher.njk" %}
-<script src="/assets/js/tool-launcher.js?v={{ buildHash }}"></script>
-<script src="/assets/js/mentria-ext-launch.js" defer></script>
-
 <script>
   // Welcome lines for the home CLI, localized per page.
   window.MENTRIA_CLI_WELCOME = {
@@ -56,6 +52,7 @@ eleventyComputed:
     askUnsupported: {{ ("home.cli.ask_unsupported" | t) | dump | safe }},
     notFound:       {{ ("home.cli.not_found"       | t) | dump | safe }},
     scrollingTools: {{ ("home.cli.scrolling_tools" | t) | dump | safe }},
+    openingTools:   {{ ("home.cli.opening_tools"   | t) | dump | safe }},
     navigatingTo:   {{ ("home.cli.navigating_to"   | t) | dump | safe }},
     aboutLine:      {{ ("home.cli.about_line"      | t) | dump | safe }}
   };

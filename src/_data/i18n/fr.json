@@ -184,6 +184,7 @@
       "desc_clear": "effacer le terminal",
       "not_found": "commande introuvable : {name}. tapez 'help' pour voir les commandes.",
       "scrolling_tools": "> défilement vers les outils...",
+      "opening_tools": "> ouverture des outils...",
       "navigating_to": "> navigation vers {dest}...",
       "about_line": "> mentria — un studio créatif d’outils, d’expériences et de transmissions visuelles. est. 2025.",
       "suggestions_label": "Suggestions de commandes",

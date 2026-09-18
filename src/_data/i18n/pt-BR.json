@@ -184,6 +184,7 @@
       "desc_clear": "limpar o terminal",
       "not_found": "comando não encontrado: {name}. digite 'help' para ver os comandos.",
       "scrolling_tools": "> rolando até as ferramentas...",
+      "opening_tools": "> abrindo ferramentas...",
       "navigating_to": "> navegando para {dest}...",
       "about_line": "> mentria — um estúdio criativo de ferramentas, experimentos e transmissões visuais. est. 2025.",
       "suggestions_label": "Sugestões de comandos",

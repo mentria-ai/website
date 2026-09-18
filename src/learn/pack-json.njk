@@ -1,0 +1,10 @@
+---
+pagination:
+  data: packs
+  size: 1
+  alias: pack
+permalink: "/learn/{{ pack.id }}/pack.json"
+eleventyExcludeFromCollections: true
+eleventyExcludeFromSitemap: true
+---
+{{ pack | dump | safe }}

@@ -287,6 +287,31 @@
     }).then(function (t) { return put(parse(t), Object.assign({ from: u.href }, meta || {})); });
   }
 
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function dayKey(d) { d = d || new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function getDays() { var d = global.MentriaStore ? global.MentriaStore.get('packs', 'days') : null; return d && typeof d === 'object' ? d : {}; }
+  function markDay() {
+    if (!global.MentriaStore) return;
+    var days = getDays(), k = dayKey();
+    days[k] = (days[k] || 0) + 1;
+    var keys = Object.keys(days).sort();
+    while (keys.length > 120) delete days[keys.shift()];
+    global.MentriaStore.set('packs', 'days', days);
+  }
+  function week(d) {
+    d = d || new Date();
+    var days = getDays(), today = dayKey(d);
+    var start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var dow = (start.getDay() + 6) % 7;
+    start.setDate(start.getDate() - dow);
+    var out = [];
+    for (var i = 0; i < 7; i++) {
+      var x = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+      var k = dayKey(x);
+      out.push({ key: k, on: !!days[k], today: k === today, count: days[k] || 0 });
+    }
+    return out;
+  }
   function progressKey(id) { return 'p.' + id; }
   function getProgress(id) {
     var p = global.MentriaStore ? global.MentriaStore.get('packs', progressKey(id)) : null;
@@ -305,6 +330,7 @@
     if (!c.r) c.r = 'seen';
     c.t = Date.now();
     p.cards[cardId] = c;
+    markDay();
     return saveProgress(id, p);
   }
   function recordAnswer(id, cardId, right, extra) {
@@ -316,6 +342,7 @@
     c.t = Date.now();
     if (extra && typeof extra.distance === 'number') c.g = extra.distance;
     p.cards[cardId] = c;
+    markDay();
     return saveProgress(id, p);
   }
   function setMode(id, mode) { var p = getProgress(id); p.mode = mode; return saveProgress(id, p); }
@@ -339,7 +366,8 @@
     text: text, isText: isText, validate: validate, normalize: normalize, outline: outline,
     put: put, get: get, list: list, remove: remove,
     importText: importText, importFile: importFile, importUrl: importUrl,
-    getProgress: getProgress, recordSeen: recordSeen, recordAnswer: recordAnswer, setMode: setMode, resetProgress: resetProgress, summary: summary
+    getProgress: getProgress, recordSeen: recordSeen, recordAnswer: recordAnswer, setMode: setMode, resetProgress: resetProgress, summary: summary,
+    dayKey: dayKey, getDays: getDays, week: week
   };
   global.MentriaPacks = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

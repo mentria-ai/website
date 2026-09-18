@@ -22,7 +22,9 @@
     "home": "Início",
     "comms": "Comms",
     "search": "Buscar",
-    "about": "Sobre"
+    "about": "Sobre",
+    "week_ring": "Sua semana",
+    "week_ring_n": "Sua semana: {n} de 7 dias"
   },
   "about": {
     "title": "Sobre",
@@ -2218,5 +2220,19 @@
     "review_wrong": "Revisar os que errei",
     "more": "mais",
     "less": "menos"
+  },
+  "stream": {
+    "hero_title": "Um feed que ensina.",
+    "hero_lede": "Cartões para ler, responder e revisitar. Importe um pacote a partir de um livro ou das suas anotações, ou comece com os nossos. Tudo roda no seu dispositivo.",
+    "browse": "Ver pacotes",
+    "scroll_hint": "role",
+    "open": "Abrir",
+    "start": "Começar",
+    "today": "Hoje",
+    "review": "Revisão",
+    "imported": "Importado",
+    "card_pos": "Cartão {n} de {total}",
+    "done_title": "Por hoje é isso.",
+    "done_text": "Seus cartões novos de hoje estão feitos. Continue rolando para ver mais pacotes ou abra um para seguir em frente."
   }
 }

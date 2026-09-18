@@ -162,7 +162,7 @@
       }
       var entry = it.entry, pack = entry.pack;
       var progress = P.getProgress(pack.id);
-      var mode = it.kind === 'review' ? 'quiz' : (progress.mode || 'quiz');
+      var mode = it.kind === 'review' ? 'quiz' : (progress.mode === 'read' ? 'read' : 'quiz');
       var sectionOf = {};
       pack.sections.forEach(function (s) { s.cards.forEach(function (id) { sectionOf[id] = s; }); });
       var sec;

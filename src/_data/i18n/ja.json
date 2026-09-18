@@ -166,7 +166,8 @@
     "gamepad_disconnected": "🎮 コントローラー切断",
     "offline_title": "オフライン",
     "offline_msg": "オフラインです。このページはまだキャッシュされていません。",
-    "offline_home": "キャッシュ済みのホームへ"
+    "offline_home": "キャッシュ済みのホームへ",
+    "close": "閉じる"
   },
   "home": {
     "cli": {
@@ -183,6 +184,7 @@
       "desc_clear": "ターミナルをクリア",
       "not_found": "コマンドが見つかりません: {name}。「help」でコマンド一覧を表示できます。",
       "scrolling_tools": "> ツールへスクロール中...",
+      "opening_tools": "> ツールを開いています...",
       "navigating_to": "> {dest} へ移動中...",
       "about_line": "> mentria — ツール・実験・ビジュアル発信のクリエイティブスタジオ。est. 2025。",
       "suggestions_label": "コマンド候補",

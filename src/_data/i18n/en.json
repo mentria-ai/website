@@ -166,7 +166,8 @@
     "gamepad_disconnected": "🎮 controller disconnected",
     "offline_title": "Offline",
     "offline_msg": "You're offline and this page isn't cached yet.",
-    "offline_home": "Go to the cached home page"
+    "offline_home": "Go to the cached home page",
+    "close": "Close"
   },
   "home": {
     "cli": {
@@ -183,6 +184,7 @@
       "desc_clear": "clear the terminal",
       "not_found": "command not found: {name}. type 'help' for available commands.",
       "scrolling_tools": "> scrolling to tools...",
+      "opening_tools": "> opening tools...",
       "navigating_to": "> navigating to {dest}...",
       "about_line": "> mentria — a creative studio for tools, experiments & visual transmissions. est. 2025.",
       "suggestions_label": "Command suggestions",

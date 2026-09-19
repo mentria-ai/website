@@ -195,6 +195,86 @@
     return p;
   }
 
+  function gradable(pack) {
+    return (pack.cards || []).some(function (c) { return c && (INTERACTIVE[c.type] || c.guess); });
+  }
+  function availableModes(pack, progress) {
+    var declared = pack.modes && pack.modes.length ? pack.modes : ['read', 'quiz', 'review', 'budget'];
+    var modes = ['read'];
+    if (gradable(pack)) {
+      if (declared.indexOf('quiz') >= 0) modes.push('quiz');
+      var wrong = progress && progress.cards ? Object.keys(progress.cards).some(function (id) { return progress.cards[id].r === 'wrong'; }) : false;
+      if (wrong && declared.indexOf('review') >= 0) modes.push('review');
+      if (declared.indexOf('budget') >= 0) modes.push('budget');
+    }
+    return modes.filter(function (m) { return m === 'read' ? declared.indexOf('read') >= 0 || modes.length === 1 : true; });
+  }
+
+  function isCourse(obj) {
+    return !!(obj && typeof obj === 'object' && !Array.isArray(obj) && (obj.kind === 'course' || (Array.isArray(obj.packs) && !obj.cards)));
+  }
+  function validateCourse(course) {
+    var errors = [], warnings = [];
+    if (!isCourse(course)) { errors.push('not a course'); return { ok: false, errors: errors, warnings: warnings }; }
+    if (typeof course.id !== 'string' || !ID_RE.test(course.id)) errors.push('id: letters, digits, dots, dashes; 1-100 chars');
+    if (!isText(course.title)) errors.push('title: required text');
+    if (!Array.isArray(course.packs) || !course.packs.length) errors.push('packs: non-empty array of packs or https URLs');
+    else {
+      if (course.packs.length > 200) errors.push('packs: at most 200');
+      var seen = {};
+      course.packs.forEach(function (p, i) {
+        if (typeof p === 'string') { if (!/^https:\/\//.test(p) && !/^\/learn\//.test(p)) errors.push('packs[' + i + ']: https URL or an object'); return; }
+        var v = validate(p);
+        if (!v.ok) errors.push('packs[' + i + '] (' + (p && p.id) + '): ' + v.errors[0]);
+        v.warnings.forEach(function (w) { warnings.push('packs[' + i + ']: ' + w); });
+        if (p && p.id) { if (seen[p.id]) errors.push('packs[' + i + ']: duplicate pack id ' + p.id); seen[p.id] = true; }
+      });
+    }
+    return { ok: !errors.length, errors: errors, warnings: warnings };
+  }
+  function getCourses() {
+    var c = global.MentriaStore ? global.MentriaStore.get('packs', 'courses') : null;
+    return c && typeof c === 'object' ? c : {};
+  }
+  function saveCourses(c) { if (global.MentriaStore) global.MentriaStore.set('packs', 'courses', c); }
+  function fetchPack(url) {
+    return fetch(url, { mode: 'cors' }).then(function (r) { if (!r.ok) throw new Error('fetch failed: ' + r.status + ' ' + url); return r.json(); });
+  }
+  function importCourse(course, meta) {
+    var v = validateCourse(course);
+    if (!v.ok) return Promise.reject(Object.assign(new Error(v.errors[0]), { errors: v.errors }));
+    return Promise.all(course.packs.map(function (p) { return typeof p === 'string' ? fetchPack(p) : Promise.resolve(p); })).then(function (packs) {
+      var order = 0, results = [];
+      var chain = Promise.resolve();
+      packs.forEach(function (p) {
+        var idx = order++;
+        chain = chain.then(function () {
+          return put(p, Object.assign({}, meta || {}, { course: { id: course.id, order: idx } })).then(function (r) { results.push(r); });
+        });
+      });
+      return chain.then(function () {
+        var courses = getCourses();
+        var prev = courses[course.id];
+        courses[course.id] = {
+          id: course.id, version: course.version || 1, title: course.title, subtitle: course.subtitle || null, cover: course.cover || (packs[0] && packs[0].cover) || null,
+          packs: packs.map(function (p) { return p.id; }), added: prev ? prev.added : Date.now(), updated: Date.now(), source: (meta && meta.source) || 'import'
+        };
+        saveCourses(courses);
+        emit('course', { id: course.id });
+        return { course: courses[course.id], imported: results.length, replaced: !!prev, warnings: v.warnings.concat(results.reduce(function (a, r) { return a.concat(r.warnings); }, [])) };
+      });
+    });
+  }
+  function removeCourse(id) {
+    var courses = getCourses(), c = courses[id];
+    if (!c) return Promise.resolve();
+    var chain = Promise.resolve();
+    c.packs.forEach(function (pid) { chain = chain.then(function () { return remove(pid); }); });
+    return chain.then(function () { delete courses[id]; saveCourses(courses); emit('course', { id: id }); });
+  }
+  function courseOf(row) { return row && row.course ? row.course.id : null; }
+  function importAny(obj, meta) { return isCourse(obj) ? importCourse(obj, meta) : put(obj, meta); }
+
   function outline(pack) {
     var counts = {};
     pack.cards.forEach(function (c) { counts[c.type] = (counts[c.type] || 0) + 1; });
@@ -236,7 +316,8 @@
     var p = normalize(pack);
     var row = {
       id: p.id, version: p.version, title: p.title, subtitle: p.subtitle || null, cover: p.cover || null,
-      cards: p.cards.length, bytes: v.bytes, added: Date.now(), source: (meta && meta.source) || 'import', from: (meta && meta.from) || null, pack: p
+      cards: p.cards.length, bytes: v.bytes, added: Date.now(), source: (meta && meta.source) || 'import', from: (meta && meta.from) || null, pack: p,
+      course: (meta && meta.course) || p.course || null
     };
     return get(p.id).then(function (existing) {
       if (existing) row.added = existing.added;
@@ -266,14 +347,14 @@
   function parse(textIn) {
     var t = String(textIn || '').trim();
     if (!t) throw new Error('empty');
-    if (t.charAt(0) !== '{') throw new Error('not a pack file');
+    if (t.charAt(0) !== '{') throw new Error('not a pack or course file');
     return JSON.parse(t);
   }
-  function importText(textIn, meta) { return Promise.resolve().then(function () { return put(parse(textIn), meta); }); }
+  function importText(textIn, meta) { return Promise.resolve().then(function () { return importAny(parse(textIn), meta); }); }
   function importFile(file, meta) {
     if (!file) return Promise.reject(new Error('no file'));
     if (file.size > MAX_BYTES) return Promise.reject(new Error('file is larger than 25 MB'));
-    return file.text().then(function (t) { return put(parse(t), Object.assign({ from: file.name }, meta || {})); });
+    return file.text().then(function (t) { return importAny(parse(t), Object.assign({ from: file.name }, meta || {})); });
   }
   function importUrl(url, meta) {
     var u;
@@ -284,7 +365,7 @@
       var len = +r.headers.get('content-length') || 0;
       if (len > MAX_BYTES) throw new Error('file is larger than 25 MB');
       return r.text();
-    }).then(function (t) { return put(parse(t), Object.assign({ from: u.href }, meta || {})); });
+    }).then(function (t) { return importAny(parse(t), Object.assign({ from: u.href }, meta || {})); });
   }
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -363,7 +444,8 @@
 
   var api = {
     TYPES: TYPES, INTERACTIVE: INTERACTIVE, MAX_BYTES: MAX_BYTES, INTERVALS: INTERVALS,
-    text: text, isText: isText, validate: validate, normalize: normalize, outline: outline,
+    text: text, isText: isText, validate: validate, normalize: normalize, outline: outline, gradable: gradable, availableModes: availableModes,
+    isCourse: isCourse, validateCourse: validateCourse, importCourse: importCourse, importAny: importAny, getCourses: getCourses, removeCourse: removeCourse, courseOf: courseOf,
     put: put, get: get, list: list, remove: remove,
     importText: importText, importFile: importFile, importUrl: importUrl,
     getProgress: getProgress, recordSeen: recordSeen, recordAnswer: recordAnswer, setMode: setMode, resetProgress: resetProgress, summary: summary,

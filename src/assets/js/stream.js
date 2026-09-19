@@ -93,8 +93,23 @@
 
   function activePacks() {
     var touched = S.list('packs').filter(function (k) { return k.indexOf('p.') === 0; }).map(function (k) { return k.slice(2); });
-    return P.list().then(function (rows) {
-      var importedIds = rows.map(function (r) { return r.id; });
+    return P.list().then(function (allRows) {
+      var now = Date.now();
+      var byCourse = {};
+      allRows.forEach(function (r) { var cid = P.courseOf(r); if (cid) (byCourse[cid] = byCourse[cid] || []).push(r); });
+      var rows = allRows.filter(function (r) { return !P.courseOf(r); });
+      Object.keys(byCourse).forEach(function (cid) {
+        var packs = byCourse[cid].sort(function (a, b) { return (a.course.order || 0) - (b.course.order || 0); });
+        var picked = false;
+        packs.forEach(function (r) {
+          var pr = P.getProgress(r.id);
+          var seen = Object.keys(pr.cards || {}).length;
+          var due = Object.keys(pr.cards || {}).some(function (id) { var c = pr.cards[id]; return c.r === 'wrong' && c.d && c.d <= now; });
+          if (!picked && seen < r.cards) { picked = true; rows.push(r); }
+          else if (due) rows.push(r);
+        });
+      });
+      var importedIds = allRows.map(function (r) { return r.id; });
       var nativeIds = touched.filter(function (id) { return byId[id] && importedIds.indexOf(id) < 0; });
       nativeIds.sort(function (a, b) { return (P.getProgress(b).last || 0) - (P.getProgress(a).last || 0); });
       var jobs = [];
@@ -187,7 +202,7 @@
       }
       var entry = it.entry, pack = entry.pack;
       var progress = P.getProgress(pack.id);
-      var mode = it.kind === 'review' ? 'quiz' : (progress.mode === 'read' ? 'read' : 'quiz');
+      var mode = it.kind === 'review' ? 'quiz' : (progress.mode === 'read' || !P.gradable(pack) ? 'read' : 'quiz');
       var sectionOf = {};
       pack.sections.forEach(function (s) { s.cards.forEach(function (id) { sectionOf[id] = s; }); });
       var sec;

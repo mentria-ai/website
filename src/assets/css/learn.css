@@ -60,3 +60,12 @@
 .prose th { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--term-muted); }
 .prose td:first-child code { white-space: nowrap; }
 .prose strong { color: var(--term-fg); }
+
+.learn-course { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; padding: 14px 0 4px; border-top: 1px solid var(--term-border); }
+.learn-course:first-child { border-top: 0; padding-top: 0; }
+.learn-course__k { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--syn-cyan); }
+.learn-course__title { font-weight: 600; font-size: 1rem; }
+.learn-course__meta { font-family: var(--font-mono); font-size: 0.72rem; color: var(--term-muted); }
+.learn-course__remove { margin-left: auto; font-size: 0.78rem; color: var(--term-muted); text-decoration: none; }
+.learn-course__remove:hover { color: var(--term-fg); }
+.learn-course--loose .learn-course__title { color: var(--term-muted); font-weight: 500; font-size: 0.9rem; }

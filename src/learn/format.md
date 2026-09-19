@@ -107,6 +107,36 @@ Keep everything inline: no external scripts, stylesheets or images unless they a
 
 The learner chooses how to play, and the same pack serves all four modes. **Read** shows every answer. **Quiz** grades. **Review** replays only the cards they missed. **Today** mixes due reviews with new cards up to a daily budget. Cards answered wrong come back after 1, 3, 7, 16 and 35 days.
 
+## Courses
+
+A syllabus is a course: one JSON file that carries several packs in order. Import it once and the library shows the packs grouped under the course name; the home stream serves the first unfinished pack, then the next, so the order you wrote is the order they learn in.
+
+```json
+{
+  "kind": "course",
+  "id": "signals-101",
+  "version": 1,
+  "title": "Signals and systems",
+  "subtitle": "Twelve weeks, one pack per lecture.",
+  "cover": "https://example.com/cover.webp",
+  "packs": [
+    { "id": "signals-101-w01", "title": "Week 1: what a signal is", "cards": [ ... ] },
+    { "id": "signals-101-w02", "title": "Week 2: sampling", "cards": [ ... ] },
+    "https://example.com/signals-101-w03.mentria.json"
+  ]
+}
+```
+
+Each entry in `packs` is a full pack or an HTTPS URL to one. A course may hold up to 200 packs. Re-importing a course with the same id updates its packs in place and keeps your progress on cards whose ids did not change.
+
+To assemble a course from a folder of pack files:
+
+```
+node scripts/pack-course.mjs ./my-course --id signals-101 --title "Signals and systems"
+```
+
+It validates every pack, orders them by filename (or by an `order` field inside each pack), and writes `signals-101.mentria-course.json`.
+
 ## Checking a pack
 
 The repository ships a validator:
@@ -115,7 +145,7 @@ The repository ships a validator:
 node scripts/pack-check.mjs my-pack.mentria.json
 ```
 
-It prints the outline and every problem it finds. The same rules run in the browser on import.
+It prints the outline and every problem it finds, for a single pack or a whole course. The same rules run in the browser on import.
 
 ## Limits
 

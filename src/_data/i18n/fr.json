@@ -2242,7 +2242,13 @@
     "budget_done": "C’est tout pour aujourd’hui dans ce pack.",
     "share": "Partager",
     "shared_hint": "Fichier du pack prêt à partager. Vos contacts l’importent sur leur page Apprendre, ou envoyez-le via Comms.",
-    "format_link": "Format des packs"
+    "format_link": "Format des packs",
+    "course": "Cours",
+    "course_packs_n": "{done} packs sur {total} terminés",
+    "remove_course": "Retirer le cours",
+    "remove_course_confirm": "Retirer « {title} » et tous ses packs de cet appareil ?",
+    "imported_course": "« {title} » importé : {n} packs.",
+    "single_packs": "Packs isolés"
   },
   "stream": {
     "hero_title": "Un fil qui enseigne.",

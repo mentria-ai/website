@@ -44,3 +44,6 @@ html.is-standalone .stream-card--pack .deck__slide-overlay { padding-bottom: cal
 html:has(.m-update:not([hidden])) .stream-card--cover .feed-card__info,
 html:has(.m-update:not([hidden])) .stream-card--note .stream-note { padding-bottom: calc(2rem + 72px); }
 html:has(.m-update:not([hidden])) .stream-card--pack .deck__slide-overlay { padding-bottom: calc(22px + 72px + env(safe-area-inset-bottom)); }
+.stream-card--daily .feed-card__caption { text-transform: none; letter-spacing: 0; font-family: var(--font-body, 'Inter', sans-serif); font-size: 0.95rem; line-height: 1.5; color: rgba(255, 255, 255, 0.8); }
+.stream-note .stream-chip { position: static; }
+.stream-note .stream-card__cta { align-self: center; }

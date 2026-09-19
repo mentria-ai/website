@@ -2239,7 +2239,10 @@
     "mode_review": "Revisão",
     "mode_budget": "Hoje",
     "nothing_to_review": "Nada para revisar agora.",
-    "budget_done": "Por hoje é isso neste pacote."
+    "budget_done": "Por hoje é isso neste pacote.",
+    "share": "Compartilhar",
+    "shared_hint": "Arquivo do pacote pronto para compartilhar. Contatos importam na página Aprender, ou envie pelo Comms.",
+    "format_link": "Formato do pacote"
   },
   "stream": {
     "hero_title": "Um feed que ensina.",
@@ -2253,6 +2256,11 @@
     "imported": "Importado",
     "card_pos": "Cartão {n} de {total}",
     "done_title": "Por hoje é isso.",
-    "done_text": "Seus cartões novos de hoje estão feitos. Continue rolando para ver mais pacotes ou abra um para seguir em frente."
+    "done_text": "Seus cartões novos de hoje estão feitos. Continue rolando para ver mais pacotes ou abra um para seguir em frente.",
+    "try_tool": "Experimente uma ferramenta",
+    "open_tool": "Abrir",
+    "lab": "Laboratório de sábado",
+    "lab_title": "Pergunte ao modelo algo que você domina.",
+    "lab_text": "Sábado é dia de cutucar o modelo no dispositivo. Escolha um assunto que você conhece bem e veja onde ele acerta e onde escorrega."
   }
 }

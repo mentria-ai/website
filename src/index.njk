@@ -50,8 +50,15 @@ eleventyComputed:
 
 <script>
   window.MENTRIA_STREAM_TAIL = [{% for pack in packs %}{{ { id: pack.id, title: (pack.title | tloc(locale.code)), cover: pack.cover, cards: pack.cards.length, minutes: pack.minutes, collection: pack.collection } | dump | safe }}{% if not loop.last %},{% endif %}{% endfor %}];
+  window.MENTRIA_STREAM_DAILY = {{ daily | dump | safe }};
+  window.MENTRIA_STREAM_TOOLS = [{% for tool in tools %}{% if tool.category != "Game" and tool.slug != "extensions" and tool.slug != "search" %}{{ { slug: tool.slug, title: (("tools." + tool.slug + ".title") | traw), summary: (("tools." + tool.slug + ".lede") | traw) } | dump | safe }},{% endif %}{% endfor %}];
   window.MENTRIA_STREAM_I18N = {
     prefix: {{ locale.pathPrefix | dump | safe }},
+    try_tool: {{ ("stream.try_tool" | t) | dump | safe }},
+    open_tool: {{ ("stream.open_tool" | t) | dump | safe }},
+    lab: {{ ("stream.lab" | t) | dump | safe }},
+    lab_title: {{ ("stream.lab_title" | t) | dump | safe }},
+    lab_text: {{ ("stream.lab_text" | t) | dump | safe }},
     open: {{ ("stream.open" | t) | dump | safe }},
     start: {{ ("stream.start" | t) | dump | safe }},
     today: {{ ("stream.today" | t) | dump | safe }},

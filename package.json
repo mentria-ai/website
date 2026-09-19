@@ -5,7 +5,8 @@
   "scripts": {
     "start": "eleventy --serve",
     "build": "eleventy",
-    "ext:sync": "node tools/sync-extensions.mjs"
+    "ext:sync": "node tools/sync-extensions.mjs",
+    "pack:check": "node scripts/pack-check.mjs"
   },
   "keywords": [],
   "author": "",

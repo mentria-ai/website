@@ -2242,7 +2242,13 @@
     "budget_done": "このパックの今日の分は終わりです。",
     "share": "共有",
     "shared_hint": "パックファイルを共有できます。相手は「学ぶ」ページで取り込むか、Comms で送ることもできます。",
-    "format_link": "パック形式"
+    "format_link": "パック形式",
+    "course": "コース",
+    "course_packs_n": "{total} パック中 {done} 完了",
+    "remove_course": "コースを削除",
+    "remove_course_confirm": "「{title}」とそのすべてのパックをこの端末から削除しますか？",
+    "imported_course": "「{title}」を取り込みました: {n} パック。",
+    "single_packs": "単体のパック"
   },
   "stream": {
     "hero_title": "学べるフィード。",

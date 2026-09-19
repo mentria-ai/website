@@ -52,6 +52,7 @@
         P.recordAnswer(pack.id, card.id, right, extra);
         progress = P.getProgress(pack.id);
         updateSeg(current);
+        refreshModes();
       },
       onContinue: function () { go(current + 1); },
       live: function (text) { if (liveEl) liveEl.textContent = text; }
@@ -63,7 +64,8 @@
     pack.cards.forEach(function (c) { byId[c.id] = c; });
     pack.sections.forEach(function (s) { s.cards.forEach(function (id) { sectionOf[id] = s; }); });
     progress = P.getProgress(pack.id);
-    mode = pack.modes.indexOf(progress.mode) >= 0 ? progress.mode : (pack.modes.indexOf('quiz') >= 0 ? 'quiz' : pack.modes[0]);
+    var avail = P.availableModes(pack, progress);
+    mode = avail.indexOf(progress.mode) >= 0 ? progress.mode : (avail.indexOf('quiz') >= 0 ? 'quiz' : 'read');
     root.innerHTML = '';
     root.dataset.mode = mode;
 
@@ -89,15 +91,8 @@
     modeWrap = el('div', 'pack-mode');
     modeWrap.setAttribute('role', 'group');
     modeWrap.setAttribute('aria-label', t('mode_label'));
-    ['read', 'quiz', 'review', 'budget'].forEach(function (m) {
-      if (pack.modes.indexOf(m) < 0) return;
-      var b = el('button', 'pack-mode__btn', esc(t('mode_' + m)));
-      b.type = 'button';
-      b.dataset.mode = m;
-      b.addEventListener('click', function () { setMode(m); });
-      modeWrap.appendChild(b);
-    });
     root.appendChild(modeWrap);
+    refreshModes();
 
     var prev = el('button', 'deck__tap deck__tap--prev'); prev.type = 'button'; prev.tabIndex = -1; prev.setAttribute('aria-label', t('prev_card'));
     var next = el('button', 'deck__tap deck__tap--next'); next.type = 'button'; next.tabIndex = -1; next.setAttribute('aria-label', t('next_card'));
@@ -116,6 +111,21 @@
     rebuildOrder();
     go(startIndex(), true);
     bindInput();
+  }
+
+  function refreshModes() {
+    var avail = P.availableModes(pack, progress);
+    modeWrap.innerHTML = '';
+    avail.forEach(function (m) {
+      var b = el('button', 'pack-mode__btn', esc(t('mode_' + m)));
+      b.type = 'button';
+      b.dataset.mode = m;
+      b.classList.toggle('is-active', m === mode);
+      b.setAttribute('aria-pressed', m === mode ? 'true' : 'false');
+      b.addEventListener('click', function () { setMode(m); });
+      modeWrap.appendChild(b);
+    });
+    modeWrap.hidden = avail.length < 2;
   }
 
   function startIndex() {
@@ -152,7 +162,7 @@
     var fin = renderFinish();
     stage.appendChild(fin);
     slides.push(fin);
-    Array.prototype.forEach.call(modeWrap.children, function (b) { b.classList.toggle('is-active', b.dataset.mode === mode); b.setAttribute('aria-pressed', b.dataset.mode === mode ? 'true' : 'false'); });
+    refreshModes();
     root.dataset.mode = mode;
   }
 

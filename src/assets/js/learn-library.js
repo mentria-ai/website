@@ -64,10 +64,38 @@
     return li;
   }
 
+  function courseHead(course, rows) {
+    var li = document.createElement('li');
+    li.className = 'learn-course';
+    li.dataset.courseId = course.id;
+    var done = rows.filter(function (r) { var pr = P.getProgress(r.id); return Object.keys(pr.cards || {}).length >= r.cards; }).length;
+    li.innerHTML =
+      '<span class="learn-course__k">' + esc(t('course')) + '</span>' +
+      '<span class="learn-course__title">' + esc(P.text(course.title, lang)) + '</span>' +
+      '<span class="learn-course__meta">' + esc(t('course_packs_n', { done: done, total: rows.length })) + '</span>' +
+      '<button type="button" class="learn-course__remove learn-link">' + esc(t('remove_course')) + '</button>';
+    li.querySelector('.learn-course__remove').addEventListener('click', function () {
+      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('remove_course_confirm', { title: P.text(course.title, lang) })) : Promise.resolve(true);
+      Promise.resolve(ask).then(function (ok) { if (ok) P.removeCourse(course.id).then(refresh); });
+    });
+    return li;
+  }
+
   function refresh() {
     return P.list().then(function (rows) {
       list.innerHTML = '';
-      rows.forEach(function (r) { list.appendChild(tile(r)); });
+      var courses = P.getCourses();
+      var grouped = {};
+      rows.forEach(function (r) { var cid = P.courseOf(r); if (cid && courses[cid]) (grouped[cid] = grouped[cid] || []).push(r); });
+      Object.keys(courses).sort(function (a, b) { return (courses[b].updated || 0) - (courses[a].updated || 0); }).forEach(function (cid) {
+        var packs = (grouped[cid] || []).sort(function (a, b) { return (a.course.order || 0) - (b.course.order || 0); });
+        if (!packs.length) return;
+        list.appendChild(courseHead(courses[cid], packs));
+        packs.forEach(function (r) { list.appendChild(tile(r)); });
+      });
+      var loose = rows.filter(function (r) { var cid = P.courseOf(r); return !(cid && courses[cid] && grouped[cid]); });
+      if (loose.length && Object.keys(grouped).length) { var h = document.createElement('li'); h.className = 'learn-course learn-course--loose'; h.innerHTML = '<span class="learn-course__title">' + esc(t('single_packs')) + '</span>'; list.appendChild(h); }
+      loose.forEach(function (r) { list.appendChild(tile(r)); });
       list.hidden = !rows.length;
       empty.hidden = !!rows.length;
     });
@@ -90,7 +118,8 @@
   }
 
   function handleResult(res) {
-    say(t(res.replaced ? 'replaced' : 'imported', { title: P.text(res.row.title, lang) }) + (res.warnings.length ? ' · ' + res.warnings[0] : ''), 'ok');
+    if (res.course) say(t('imported_course', { title: P.text(res.course.title, lang), n: res.imported }) + (res.warnings.length ? ' · ' + res.warnings[0] : ''), 'ok');
+    else say(t(res.replaced ? 'replaced' : 'imported', { title: P.text(res.row.title, lang) }) + (res.warnings.length ? ' · ' + res.warnings[0] : ''), 'ok');
     refresh();
   }
   function handleError(e) {

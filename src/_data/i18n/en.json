@@ -2242,7 +2242,13 @@
     "budget_done": "That's today's set for this pack.",
     "share": "Share",
     "shared_hint": "Pack file ready to share. Contacts import it on their Learn page, or you can send it in Comms.",
-    "format_link": "Pack format"
+    "format_link": "Pack format",
+    "course": "Course",
+    "course_packs_n": "{done} of {total} packs done",
+    "remove_course": "Remove course",
+    "remove_course_confirm": "Remove “{title}” and all of its packs from this device?",
+    "imported_course": "Imported “{title}”: {n} packs.",
+    "single_packs": "Single packs"
   },
   "stream": {
     "hero_title": "A feed that teaches.",

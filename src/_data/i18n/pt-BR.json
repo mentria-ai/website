@@ -2242,7 +2242,13 @@
     "budget_done": "Por hoje é isso neste pacote.",
     "share": "Compartilhar",
     "shared_hint": "Arquivo do pacote pronto para compartilhar. Contatos importam na página Aprender, ou envie pelo Comms.",
-    "format_link": "Formato do pacote"
+    "format_link": "Formato do pacote",
+    "course": "Curso",
+    "course_packs_n": "{done} de {total} pacotes concluídos",
+    "remove_course": "Remover curso",
+    "remove_course_confirm": "Remover “{title}” e todos os seus pacotes deste dispositivo?",
+    "imported_course": "“{title}” importado: {n} pacotes.",
+    "single_packs": "Pacotes avulsos"
   },
   "stream": {
     "hero_title": "Um feed que ensina.",

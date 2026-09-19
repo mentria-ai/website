@@ -21,6 +21,27 @@ try {
   process.exit(2);
 }
 
+if (Packs.isCourse(pack)) {
+  const cv = Packs.validateCourse(pack);
+  if (!cv.ok) {
+    console.error(`INVALID course ${file}`);
+    cv.errors.forEach((e) => console.error('  error: ' + e));
+    cv.warnings.forEach((w) => console.error('  warning: ' + w));
+    process.exit(1);
+  }
+  const inline = pack.packs.filter((p) => typeof p === 'object');
+  const totalCards = inline.reduce((n, p) => n + p.cards.length, 0);
+  console.log(`OK course ${Packs.text(pack.title, 'en')} (${pack.id})`);
+  console.log(`  ${pack.packs.length} packs, ${totalCards} cards inline${pack.packs.length - inline.length ? `, ${pack.packs.length - inline.length} by URL` : ''}`);
+  pack.packs.forEach((p, i) => {
+    if (typeof p === 'string') { console.log(`  ${i + 1}. ${p}`); return; }
+    const o = Packs.outline(Packs.normalize(p));
+    console.log(`  ${i + 1}. ${Packs.text(p.title, 'en')} (${p.id}) — ${o.cards} cards, ${o.interactive} interactive, ~${o.minutes} min`);
+  });
+  cv.warnings.forEach((w) => console.log('  warning: ' + w));
+  process.exit(0);
+}
+
 const result = Packs.validate(pack);
 if (!result.ok) {
   console.error(`INVALID ${file}`);

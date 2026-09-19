@@ -37,7 +37,7 @@ eleventyComputed:
             <textarea class="learn-input learn-textarea" id="learn-paste" rows="6" placeholder="{{ 'learn.paste_placeholder' | t }}" spellcheck="false"></textarea>
             <button type="button" class="learn-btn" id="learn-paste-go">{{ "learn.import" | t }}</button>
         </details>
-        <p class="learn-import__hint">{{ "learn.import_hint" | t }} <button type="button" class="learn-link" id="learn-example">{{ "learn.try_example" | t }}</button></p>
+        <p class="learn-import__hint">{{ "learn.import_hint" | t }} <button type="button" class="learn-link" id="learn-example">{{ "learn.try_example" | t }}</button> · <a class="learn-link" href="/learn/format/">{{ "learn.format_link" | t }}</a></p>
         <p class="learn-import__status" id="learn-status" role="status" aria-live="polite"></p>
     </div>
     <p class="learn-empty" id="learn-empty">{{ "learn.empty_packs" | t }}</p>
@@ -82,6 +82,8 @@ eleventyComputed:
     import_failed: {{ ("learn.import_failed" | t) | dump | safe }},
     importing: {{ ("learn.importing" | t) | dump | safe }},
     remove: {{ ("learn.remove" | t) | dump | safe }},
+    share: {{ ("learn.share" | t) | dump | safe }},
+    shared_hint: {{ ("learn.shared_hint" | t) | dump | safe }},
     remove_confirm: {{ ("learn.remove_confirm" | t) | dump | safe }},
     open: {{ ("learn.open" | t) | dump | safe }},
     progress_n: {{ ("learn.progress_n" | t) | dump | safe }},

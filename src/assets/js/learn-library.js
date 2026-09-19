@@ -41,9 +41,22 @@
           '<span class="learn-tile__progress"' + (pct ? '' : ' hidden') + '><span class="learn-tile__progress-fill" style="width:' + pct + '%"></span></span>' +
         '</span>' +
       '</a>' +
+      '<button type="button" class="learn-tile__share" aria-label="' + esc(t('share')) + '" title="' + esc(t('share')) + '">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.7" x2="15.4" y2="6.3"/><line x1="8.6" y1="13.3" x2="15.4" y2="17.7"/></svg>' +
+      '</button>' +
       '<button type="button" class="learn-tile__remove" aria-label="' + esc(t('remove')) + '" title="' + esc(t('remove')) + '">' +
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
       '</button>';
+    li.querySelector('.learn-tile__share').addEventListener('click', function () {
+      P.get(row.id).then(function (full) {
+        if (!full || !full.pack) return;
+        var blob = new Blob([JSON.stringify(full.pack)], { type: 'application/json' });
+        var name = row.id + '.mentria.json';
+        if (window.MentriaUI && window.MentriaUI.shareFile) window.MentriaUI.shareFile(name, blob);
+        else if (window.MentriaUI && window.MentriaUI.downloadFile) window.MentriaUI.downloadFile(name, blob);
+        say(t('shared_hint'), 'ok');
+      });
+    });
     li.querySelector('.learn-tile__remove').addEventListener('click', function () {
       var ask = window.mentriaConfirm ? window.mentriaConfirm(t('remove_confirm', { title: P.text(row.title, lang) })) : Promise.resolve(true);
       Promise.resolve(ask).then(function (ok) { if (ok) P.remove(row.id).then(refresh); });

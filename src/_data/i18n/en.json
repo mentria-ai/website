@@ -2239,7 +2239,10 @@
     "mode_review": "Review",
     "mode_budget": "Today",
     "nothing_to_review": "Nothing to review right now.",
-    "budget_done": "That's today's set for this pack."
+    "budget_done": "That's today's set for this pack.",
+    "share": "Share",
+    "shared_hint": "Pack file ready to share. Contacts import it on their Learn page, or you can send it in Comms.",
+    "format_link": "Pack format"
   },
   "stream": {
     "hero_title": "A feed that teaches.",
@@ -2253,6 +2256,11 @@
     "imported": "Imported",
     "card_pos": "Card {n} of {total}",
     "done_title": "That's today's set.",
-    "done_text": "Your new cards are done for today. Keep scrolling for more packs, or open one to keep going."
+    "done_text": "Your new cards are done for today. Keep scrolling for more packs, or open one to keep going.",
+    "try_tool": "Try a tool",
+    "open_tool": "Open",
+    "lab": "Saturday lab",
+    "lab_title": "Ask the model something you know well.",
+    "lab_text": "Saturdays are for poking at the on-device model. Pick a topic you know cold and see where it holds up and where it slips."
   }
 }

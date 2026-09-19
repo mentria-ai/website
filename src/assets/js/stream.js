@@ -10,6 +10,8 @@
   var T = window.MENTRIA_STREAM_I18N || {};
   var L = window.MENTRIA_LEARN_I18N || {};
   var tail = window.MENTRIA_STREAM_TAIL || [];
+  var daily = window.MENTRIA_STREAM_DAILY || [];
+  var tools = window.MENTRIA_STREAM_TOOLS || [];
   var prefix = T.prefix || '';
   var lang = document.documentElement.lang || 'en';
   var BUDGET = 10, MAX_REVIEWS = 5, MAX_PACKS = 6, PAGE = 24;
@@ -124,6 +126,14 @@
     reviews.sort(function (a, b) { return a.due - b.due; });
     reviews.slice(0, MAX_REVIEWS).forEach(function (r) { items.push({ kind: 'review', entry: r.entry, card: r.card }); });
 
+    var todayKey = P.dayKey();
+    daily.filter(function (d) { return d.date === todayKey; }).forEach(function (d) { items.push({ kind: 'daily', item: d }); });
+    if (tools.length) {
+      var tool = seededOrder(tools)[0];
+      items.push({ kind: 'daily', item: { kind: 'tool', title: tx(tool.title), text: tx(tool.summary), href: prefix + '/tools/' + tool.slug + '/', cta: t('open_tool'), chip: t('try_tool') } });
+    }
+    if (new Date().getDay() === 6) items.push({ kind: 'daily', item: { kind: 'lab', title: t('lab_title'), text: t('lab_text'), href: prefix + '/tools/ai-chat/', cta: t('open_tool'), chip: t('lab') } });
+
     var picks = [];
     var busy = {};
     packs.forEach(function (e) { busy[e.pack.id] = true; });
@@ -158,6 +168,21 @@
     res.items.forEach(function (it) {
       if (it.kind === 'today') {
         frag.appendChild(coverCard({ id: it.pick.id, title: it.pick.title, cover: it.pick.cover, meta: metaFor(it.pick), cta: t('start') }, 'today', t('today')));
+        return;
+      }
+      if (it.kind === 'daily') {
+        var d = it.item;
+        var note = el('section', 'feed-card stream-card stream-card--note stream-card--daily');
+        if (d.image) { note.classList.add('stream-card--cover'); note.classList.remove('stream-card--note'); note.style.setProperty('--feed-card-bg', 'url("' + d.image + '")'); }
+        note.innerHTML =
+          (d.image ? '<img class="feed-card__media" src="' + esc(d.image) + '" alt="" loading="lazy" decoding="async"><div class="feed-card__gradient"></div>' : '') +
+          '<div class="' + (d.image ? 'feed-card__info' : 'stream-note') + '">' +
+            '<p class="stream-chip stream-chip--today">' + esc(d.chip || t('today')) + '</p>' +
+            '<h2 class="' + (d.image ? 'feed-card__title' : 'stream-note__title') + '">' + esc(tx(d.title)) + '</h2>' +
+            (d.text ? '<p class="' + (d.image ? 'feed-card__caption stream-card__text' : 'stream-note__text') + '">' + esc(tx(d.text)) + '</p>' : '') +
+            (d.href ? '<a class="pack-btn pack-btn--primary stream-card__cta" href="' + esc(d.href) + '">' + esc(d.cta || t('open')) + '</a>' : '') +
+          '</div>';
+        frag.appendChild(note);
         return;
       }
       var entry = it.entry, pack = entry.pack;
@@ -244,5 +269,5 @@
   }
 
   reorderTail();
-  activePacks().then(buildDynamic).then(renderDynamic).catch(function () {});
+  activePacks().then(buildDynamic).then(renderDynamic).catch(function (e) { console.error('stream', e); });
 })();

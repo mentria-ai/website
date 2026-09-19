@@ -2239,7 +2239,10 @@
     "mode_review": "Révision",
     "mode_budget": "Aujourd’hui",
     "nothing_to_review": "Rien à réviser pour le moment.",
-    "budget_done": "C’est tout pour aujourd’hui dans ce pack."
+    "budget_done": "C’est tout pour aujourd’hui dans ce pack.",
+    "share": "Partager",
+    "shared_hint": "Fichier du pack prêt à partager. Vos contacts l’importent sur leur page Apprendre, ou envoyez-le via Comms.",
+    "format_link": "Format des packs"
   },
   "stream": {
     "hero_title": "Un fil qui enseigne.",
@@ -2253,6 +2256,11 @@
     "imported": "Importé",
     "card_pos": "Carte {n} sur {total}",
     "done_title": "C’est tout pour aujourd’hui.",
-    "done_text": "Vos nouvelles cartes du jour sont faites. Continuez à faire défiler pour d’autres packs, ou ouvrez-en un pour poursuivre."
+    "done_text": "Vos nouvelles cartes du jour sont faites. Continuez à faire défiler pour d’autres packs, ou ouvrez-en un pour poursuivre.",
+    "try_tool": "Essayez un outil",
+    "open_tool": "Ouvrir",
+    "lab": "Labo du samedi",
+    "lab_title": "Posez au modèle une question que vous maîtrisez.",
+    "lab_text": "Le samedi, on titille le modèle sur l’appareil. Choisissez un sujet que vous connaissez par cœur et voyez où il tient et où il dérape."
   }
 }

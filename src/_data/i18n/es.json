@@ -2239,7 +2239,10 @@
     "mode_review": "Repaso",
     "mode_budget": "Hoy",
     "nothing_to_review": "No hay nada que repasar ahora mismo.",
-    "budget_done": "Eso es todo por hoy en este paquete."
+    "budget_done": "Eso es todo por hoy en este paquete.",
+    "share": "Compartir",
+    "shared_hint": "Archivo del paquete listo para compartir. Tus contactos lo importan en su página Aprender, o puedes enviarlo por Comms.",
+    "format_link": "Formato de paquete"
   },
   "stream": {
     "hero_title": "Un feed que enseña.",
@@ -2253,6 +2256,11 @@
     "imported": "Importado",
     "card_pos": "Tarjeta {n} de {total}",
     "done_title": "Eso es todo por hoy.",
-    "done_text": "Tus tarjetas nuevas de hoy están hechas. Sigue deslizando para ver más paquetes o abre uno para continuar."
+    "done_text": "Tus tarjetas nuevas de hoy están hechas. Sigue deslizando para ver más paquetes o abre uno para continuar.",
+    "try_tool": "Prueba una herramienta",
+    "open_tool": "Abrir",
+    "lab": "Laboratorio del sábado",
+    "lab_title": "Pregúntale al modelo algo que domines.",
+    "lab_text": "Los sábados son para curiosear con el modelo del dispositivo. Elige un tema que conozcas bien y mira dónde acierta y dónde falla."
   }
 }

@@ -43,3 +43,20 @@
 @media (max-width: 480px) {
   .learn-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }
+
+.learn-tile__share { position: absolute; top: 6px; right: 38px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--term-border-strong); background: rgba(0, 0, 0, 0.6); color: var(--term-muted); cursor: pointer; }
+.learn-tile__share:hover { color: var(--term-fg); border-color: var(--term-fg); }
+
+.prose { max-width: 720px; margin: 0 auto; padding: 0 0 3rem; line-height: 1.6; color: var(--term-fg); }
+.prose h2 { margin: 2.2rem 0 0.6rem; font-size: 1.25rem; }
+.prose h3 { margin: 1.6rem 0 0.4rem; font-size: 1.02rem; }
+.prose p, .prose li { color: rgba(230, 237, 243, 0.86); }
+.prose a { color: var(--syn-cyan); }
+.prose code { font-family: var(--font-mono); font-size: 0.86em; background: rgba(255, 255, 255, 0.08); padding: 0.05em 0.35em; border-radius: 4px; }
+.prose pre { overflow-x: auto; padding: 14px 16px; border-radius: var(--radius-md, 10px); border: 1px solid var(--term-border); background: var(--term-bg-raised); font-size: 0.82rem; line-height: 1.5; }
+.prose pre code { background: none; padding: 0; font-size: inherit; }
+.prose table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; font-size: 0.9rem; display: block; overflow-x: auto; }
+.prose th, .prose td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--term-border); }
+.prose th { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--term-muted); }
+.prose td:first-child code { white-space: nowrap; }
+.prose strong { color: var(--term-fg); }

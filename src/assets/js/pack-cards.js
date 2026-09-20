@@ -584,7 +584,10 @@
     var boot = '<scr' + 'ipt>(function(){var T=' + JSON.stringify(token) + ';var post=function(m){parent.postMessage(Object.assign({mentriaCanvas:T},m),"*")};' +
       'window.mentria={theme:' + JSON.stringify(theme) + ',lang:' + JSON.stringify(ctx.lang) + ',done:function(r){post({type:"done",right:r!==false})},next:function(){post({type:"next"})},notify:function(m){post({type:"notify",text:String(m).slice(0,120)})}};' +
       'window.addEventListener("error",function(e){post({type:"error",text:String(e.message||"error")})});})();</scr' + 'ipt>';
-    var meta = '<meta name="viewport" content="width=device-width, initial-scale=1"><style>html,body{margin:0;background:' + theme.bg + ';color:' + theme.fg + ';font-family:' + theme.fontBody + '}</style>';
+    var origin = location.origin;
+    var fonts = '@font-face{font-family:Inter;font-style:normal;font-weight:100 900;font-display:swap;src:url(' + origin + '/assets/fonts/inter-latin.woff2) format("woff2")}' +
+      '@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:100 900;font-display:swap;src:url(' + origin + '/assets/fonts/jbm-latin.woff2) format("woff2")}';
+    var meta = '<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><style>' + fonts + 'html,body{margin:0;background:' + theme.bg + ';color:' + theme.fg + ';font-family:' + theme.fontBody + ';color-scheme:dark}</style>';
     frame.srcdoc = meta + boot + String(card.html);
     wrap.appendChild(frame);
     var bar = el('div', 'pack-canvas__bar');

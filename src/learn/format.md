@@ -101,7 +101,7 @@ window.mentria.next()       // move to the next card
 window.mentria.notify(text) // show a short line under the frame
 ```
 
-Keep everything inline: no external scripts, stylesheets or images unless they are data URIs.
+The frame inherits the site's content security policy, so external stylesheets, scripts and fonts never load; a Google Fonts link fails silently. The site's own faces are already available by name inside the frame: `Inter` for reading and `JetBrains Mono` for code and labels, and `body` starts with the theme's background, colour and body font. Images may be data URIs or hosted on cdn.mentria.ai. The page is dark only and the frame is set to `color-scheme: dark`; `prefers-color-scheme` inside the frame follows the visitor's operating system, not the site, so do not branch on it. Read colours from `window.mentria.theme` or write the dark values directly. Keep everything else inline.
 
 ## Modes
 

@@ -52,9 +52,16 @@
       img.addEventListener('error', function () { img.classList.add('is-broken'); });
       if (interactive || card.type === 'checkpoint') img.classList.add('pack-slide__bg');
       s.appendChild(img);
+      s.style.setProperty('--slide-bg', 'url("' + card.image + '")');
     } else if (card.type !== 'image') {
       var ph = el('div', 'deck__slide-img deck__slide-img--placeholder pack-slide__ph');
-      if (global.MentriaBackdrop) global.MentriaBackdrop.apply(ph, ctx.pack.id + '/' + card.id, { dim: interactive || card.type === 'checkpoint' ? 0.55 : 1 });
+      if (global.MentriaBackdrop) {
+        var uri = global.MentriaBackdrop.dataUri(ctx.pack.id + '/' + card.id, { dim: interactive || card.type === 'checkpoint' ? 0.55 : 1 });
+        ph.style.backgroundImage = 'url("' + uri + '")';
+        ph.style.backgroundSize = 'cover';
+        ph.style.backgroundPosition = 'center';
+        s.style.setProperty('--slide-bg', 'url("' + uri + '")');
+      }
       s.appendChild(ph);
     }
     var body;

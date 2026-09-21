@@ -95,6 +95,7 @@ body:has(.deck) .site-header,
 }
 .deck__share:hover { background: rgba(0, 0, 0, 0.6); }
 .deck__share.is-busy { opacity: 0.5; pointer-events: none; }
+.deck__share[hidden] { display: none; }
 
 /* ── Chapter meta strip ───────────────────────────────────── */
 .deck__chapter-meta {
@@ -102,6 +103,7 @@ body:has(.deck) .site-header,
   top: calc(20px + env(safe-area-inset-top));
   left: 16px;
   display: flex; flex-direction: column; gap: 2px;
+  max-width: calc(100% - 124px);
   z-index: 6;
   pointer-events: none;
 }
@@ -282,6 +284,7 @@ body:has(.deck) .site-header,
   opacity: 1;
   transition: opacity 0.5s ease;
 }
+.deck__hint span { white-space: nowrap; }
 .deck__hint.is-fading { opacity: 0; }
 
 /* ── Story-type tinted gradients (subtle character per slide type) ── */
@@ -303,8 +306,10 @@ body:has(.deck) .site-header,
     width: calc(var(--stage-w) - 24px);
     transform: translateX(-50%);
   }
-  .deck__chapter-meta { left: calc(50% - var(--stage-w) / 2 + 16px); }
+  .deck__slide::before { left: calc(var(--stage-w) / 2 - 50vw); right: calc(var(--stage-w) / 2 - 50vw); transform: none; }
+  .deck__chapter-meta { left: calc(50% - var(--stage-w) / 2 + 16px); max-width: calc(var(--stage-w) - 124px); }
   .deck__close { right: calc(50% - var(--stage-w) / 2 + 16px); }
+  .deck__share { right: calc(50% - var(--stage-w) / 2 + 62px); }
   .deck__tap--prev { left: calc(50% - var(--stage-w) / 2); width: calc(var(--stage-w) / 2); }
   .deck__tap--next { right: calc(50% - var(--stage-w) / 2); width: calc(var(--stage-w) / 2); }
 }

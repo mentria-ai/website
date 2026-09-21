@@ -2268,6 +2268,7 @@
     "open_tool": "Open",
     "lab": "Saturday lab",
     "lab_title": "Ask the model something you know well.",
-    "lab_text": "Saturdays are for poking at the on-device model. Pick a topic you know cold and see where it holds up and where it slips."
+    "lab_text": "Saturdays are for poking at the on-device model. Pick a topic you know cold and see where it holds up and where it slips.",
+    "home_title": "A feed that teaches"
   }
 }

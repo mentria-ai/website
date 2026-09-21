@@ -2268,6 +2268,7 @@
     "open_tool": "Abrir",
     "lab": "Laboratorio del sábado",
     "lab_title": "Pregúntale al modelo algo que domines.",
-    "lab_text": "Los sábados son para curiosear con el modelo del dispositivo. Elige un tema que conozcas bien y mira dónde acierta y dónde falla."
+    "lab_text": "Los sábados son para curiosear con el modelo del dispositivo. Elige un tema que conozcas bien y mira dónde acierta y dónde falla.",
+    "home_title": "Un feed que enseña"
   }
 }

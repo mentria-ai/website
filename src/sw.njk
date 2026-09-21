@@ -29,7 +29,6 @@ const ASSETS = [
   '/assets/i18n/ja.json',
   '/assets/i18n/pt-BR.json',
   '/manifest.json',
-  '/feed/',
   '/assets/css/feed-deck.css',
   '/assets/css/source-deck.css',
   '/assets/js/feed-deck.js',
@@ -151,7 +150,7 @@ const ASSETS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS.map(u => u.indexOf('?') >= 0 ? u : u + '?v={{ buildHash }}')))
   );
 });
 

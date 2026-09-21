@@ -45,10 +45,11 @@ jobs:
           tag="$base"; n=1
           while git rev-parse -q --verify "refs/tags/$tag" >/dev/null; do n=$((n+1)); tag="$base-$n"; done
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "prev=$(git tag --list 'v*' --sort=-creatordate | head -n1)" >> "$GITHUB_OUTPUT"
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ steps.tag.outputs.tag }}" --target "$GITHUB_SHA" --generate-notes --title "${{ steps.tag.outputs.tag }}"
+        run: gh release create "${{ steps.tag.outputs.tag }}" --target "$GITHUB_SHA" --generate-notes --title "${{ steps.tag.outputs.tag }}" ${{ steps.tag.outputs.prev && format('--notes-start-tag {0}', steps.tag.outputs.prev) || '' }}
       - name: Capture the release notes for the site
         env:
           GH_TOKEN: ${{ github.token }}

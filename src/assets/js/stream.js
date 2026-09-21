@@ -46,7 +46,7 @@
         '<h2 class="feed-card__title">' + esc(tx(item.title)) + '</h2>' +
         '<a class="pack-btn pack-btn--primary stream-card__cta" href="' + esc(href) + '">' + esc(item.cta || t('open')) + '</a>' +
       '</div>';
-    if (!item.cover && window.MentriaBackdrop) window.MentriaBackdrop.apply(sec.querySelector('.stream-card__blank'), 'cover/' + item.id);
+    if (!item.cover && window.MentriaBackdrop) { var bl = sec.querySelector('.stream-card__blank'); window.MentriaBackdrop.apply(bl, 'cover/' + item.id); sec.style.setProperty('--feed-card-bg', bl.style.backgroundImage); }
     return sec;
   }
 
@@ -78,7 +78,21 @@
     slide.classList.add('is-active');
     sec.appendChild(slide);
     sec.appendChild(head);
+    var ph = slide.querySelector('.pack-slide__ph');
+    if (card.image) ambient(sec, card.image);
+    if (!card.image && ph && ph.style.backgroundImage) sec.style.setProperty('--feed-card-bg', ph.style.backgroundImage);
     return sec;
+  }
+
+  var currentIo = ('IntersectionObserver' in window) ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { e.target.classList.toggle('is-current', e.isIntersecting && e.intersectionRatio > 0.55); });
+  }, { root: scroller, threshold: [0.55] }) : null;
+  function watchCurrent(root) {
+    if (!currentIo) return;
+    Array.prototype.forEach.call((root || scroller).querySelectorAll('.feed-card'), function (c) { if (!c.dataset.watched) { c.dataset.watched = '1'; currentIo.observe(c); } });
+  }
+  function ambient(sec, url) {
+    if (url) sec.style.setProperty('--feed-card-bg', 'url("' + url + '")');
   }
 
   function scrollToNext(sec) {
@@ -198,7 +212,8 @@
             (d.text ? '<p class="' + (d.image ? 'feed-card__caption stream-card__text' : 'stream-note__text') + '">' + esc(tx(d.text)) + '</p>' : '') +
             (d.href ? '<a class="pack-btn pack-btn--primary stream-card__cta" href="' + esc(d.href) + '">' + esc(d.cta || t('open')) + '</a>' : '') +
           '</div>';
-        if (!d.image && window.MentriaBackdrop) window.MentriaBackdrop.apply(note, 'daily/' + (d.kind || 'note') + '/' + tx(d.title), { dim: 0.8 });
+        if (!d.image && window.MentriaBackdrop) { window.MentriaBackdrop.apply(note, 'daily/' + (d.kind || 'note') + '/' + tx(d.title), { dim: 0.8 }); note.style.setProperty('--feed-card-bg', note.style.backgroundImage); }
+        if (d.image) ambient(note, d.image);
         frag.appendChild(note);
         return;
       }
@@ -223,11 +238,12 @@
     });
     if (res.exhausted) {
       var doneCard = el('section', 'feed-card stream-card stream-card--note');
-      if (window.MentriaBackdrop) window.MentriaBackdrop.apply(doneCard, 'done/' + P.dayKey(), { dim: 0.7 });
+      if (window.MentriaBackdrop) { window.MentriaBackdrop.apply(doneCard, 'done/' + P.dayKey(), { dim: 0.7 }); doneCard.style.setProperty('--feed-card-bg', doneCard.style.backgroundImage); }
       doneCard.innerHTML = '<div class="stream-note"><p class="stream-chip stream-chip--today">' + esc(t('today')) + '</p><h2 class="stream-note__title">' + esc(t('done_title')) + '</h2><p class="stream-note__text">' + esc(t('done_text')) + '</p></div>';
       frag.appendChild(doneCard);
     }
     dyn.appendChild(frag);
+    watchCurrent(dyn);
     watchSeen();
   }
 
@@ -281,12 +297,16 @@
       var f = document.createDocumentFragment();
       batch.forEach(function (x) { f.appendChild(coverCard({ id: x.id, title: x.title, cover: x.cover, meta: metaFor(x, P.getProgress(x.id)) }, x.collection, x.collection === 'source' ? 'Source' : 'Deep Cuts')); });
       tailEl.appendChild(f);
+      watchCurrent(tailEl);
       if (!pending.length) { io.disconnect(); more.remove(); }
     }, { root: scroller, rootMargin: '200% 0px' });
     io.observe(more);
   }
 
-  Array.prototype.forEach.call(document.querySelectorAll('#stream-tail .stream-card__blank'), function (b) { var sec = b.closest('.stream-card'); if (window.MentriaBackdrop && sec) window.MentriaBackdrop.apply(b, 'cover/' + sec.dataset.packId); });
+  Array.prototype.forEach.call(document.querySelectorAll('#stream-tail .stream-card__blank'), function (b) { var sec = b.closest('.stream-card'); if (window.MentriaBackdrop && sec) { window.MentriaBackdrop.apply(b, 'cover/' + sec.dataset.packId); sec.style.setProperty('--feed-card-bg', b.style.backgroundImage); } });
+  var heroCard = scroller.querySelector('.stream-card--hero');
+  if (heroCard) heroCard.style.setProperty('--feed-card-bg', 'url("/assets/img/stream-hero.svg")');
+  watchCurrent();
   reorderTail();
   activePacks().then(buildDynamic).then(renderDynamic).catch(function (e) { console.error('stream', e); });
 })();

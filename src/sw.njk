@@ -151,7 +151,7 @@ const ASSETS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS.map(u => u.indexOf('?') >= 0 ? u : u + '?v={{ buildHash }}')))
   );
 });
 

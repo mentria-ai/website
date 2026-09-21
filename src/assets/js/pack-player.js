@@ -20,7 +20,8 @@
   var pack = null, native = false, order = [], byId = {}, sectionOf = {}, current = 0, mode = 'quiz', progress = null;
   var BUDGET = 10;
   function renderMode() { return mode === 'read' ? 'read' : 'quiz'; }
-  var slides = [], segs = [], stage, progressBar, liveEl, hint, modeWrap, secLabel;
+  var slides = [], segs = [], stage, progressBar, liveEl, hint, modeWrap, secLabel, shareBtn;
+  var coarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
   function load() {
     var inline = document.getElementById('pack-data');
@@ -82,6 +83,14 @@
     close.addEventListener('click', exit);
     root.appendChild(close);
 
+    shareBtn = el('button', 'deck__share');
+    shareBtn.type = 'button';
+    shareBtn.id = 'deckShare';
+    shareBtn.setAttribute('aria-label', t('share_card'));
+    shareBtn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.7" x2="15.4" y2="6.3"/><line x1="8.6" y1="13.3" x2="15.4" y2="17.7"/></svg>';
+    shareBtn.addEventListener('click', shareCard);
+    root.appendChild(shareBtn);
+
     var meta = el('div', 'deck__chapter-meta pack-meta');
     secLabel = el('span', 'deck__chapter-num');
     meta.appendChild(secLabel);
@@ -103,7 +112,9 @@
     stage = el('div', 'pack-stage');
     root.appendChild(stage);
 
-    hint = el('div', 'deck__hint', '<span>' + esc(t('hint_tap')) + '</span><span>' + esc(t('hint_keys')) + '</span>');
+    hint = el('div', 'deck__hint', coarse
+      ? '<span>' + esc(t('hint_tap_short')) + '</span><span>' + esc(t('hint_depth')) + '</span><span>' + esc(t('hint_exit')) + '</span>'
+      : '<span>' + esc(t('hint_tap')) + '</span><span>' + esc(t('hint_keys')) + '</span>');
     root.appendChild(hint);
     liveEl = el('div', 'sr-only'); liveEl.setAttribute('role', 'status'); liveEl.setAttribute('aria-live', 'polite');
     root.appendChild(liveEl);
@@ -250,6 +261,7 @@
       secLabel.textContent = '';
       try { history.replaceState(null, '', '#end'); } catch (_) {}
     }
+    if (shareBtn) shareBtn.hidden = i >= order.length;
     updateSeg(i);
     var target = s.querySelector('.pack-card') || s;
     try { target.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
@@ -269,6 +281,35 @@
     go(structural || restart ? 0 : Math.min(keep, order.length), true);
   }
 
+  function moreBtn() { return slides[current] ? slides[current].querySelector('.pack-more') : null; }
+  function isExpanded() { var m = moreBtn(); return !!m && m.getAttribute('aria-expanded') === 'true'; }
+  function expandCurrent() { var m = moreBtn(); if (m && !isExpanded()) m.click(); }
+  function collapseCurrent() { var m = moreBtn(); if (m && isExpanded()) m.click(); }
+
+  function slideImageUrl(s) {
+    var img = s.querySelector('img.deck__slide-img, img.pack-image__img');
+    if (img && (img.currentSrc || img.src)) return img.currentSrc || img.src;
+    var bg = s.style.getPropertyValue('--slide-bg');
+    var m = bg && bg.match(/url\((['"]?)([^'")]+)\1\)/);
+    return m ? m[2] : '';
+  }
+
+  function shareCard() {
+    if (!shareBtn || shareBtn.classList.contains('is-busy') || !window.MentriaShareCard || current >= order.length) return;
+    var s = slides[current];
+    var textEl = s.querySelector('.deck__caption, .pack-card__q, .pack-cloze, .pack-card__text, .pack-overlay__title, .pack-card__title');
+    var caption = textEl ? textEl.textContent.replace(/\s+/g, ' ').trim() : tx(pack.title);
+    var tag = secLabel.textContent || t('card_of', { n: current + 1, total: order.length });
+    var pageUrl = native ? location.origin + location.pathname : location.origin + libraryHref;
+    shareBtn.classList.add('is-busy');
+    window.MentriaShareCard.render({ imageUrl: slideImageUrl(s), caption: caption, subtitle: tx(pack.title), tag: tag })
+      .then(function (blob) {
+        return window.MentriaShareCard.share(blob, pack.id + '-c' + (current + 1) + '.png', { title: document.title, text: tx(pack.title) + ' — ' + pageUrl });
+      })
+      .catch(function () {})
+      .then(function () { shareBtn.classList.remove('is-busy'); });
+  }
+
   function exit() {
     try {
       var ref = document.referrer ? new URL(document.referrer) : null;
@@ -281,18 +322,33 @@
     document.addEventListener('keydown', function (e) {
       var tag = (e.target && e.target.tagName) || '';
       if (tag === 'INPUT' || tag === 'TEXTAREA') { if (e.key === 'Escape') { e.target.blur(); } return; }
+      if (e.target && e.target.closest && (e.key === ' ' || e.key === 'Enter') && e.target.closest('button, a[href], [role="button"]')) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); go(current + 1); }
       else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(current - 1); }
-      else if (e.key === 'Escape') { e.preventDefault(); exit(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); expandCurrent(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); if (isExpanded()) collapseCurrent(); else exit(); }
+      else if (e.key === 'Escape') { e.preventDefault(); if (isExpanded()) collapseCurrent(); else exit(); }
     });
-    var sx = 0, sy = 0, st = 0;
-    stage.addEventListener('touchstart', function (e) { var tch = e.touches[0]; sx = tch.clientX; sy = tch.clientY; st = Date.now(); }, { passive: true });
-    stage.addEventListener('touchend', function (e) {
+    var sx = 0, sy = 0, st = 0, scrolls = false;
+    root.addEventListener('touchstart', function (e) {
+      var tch = e.touches[0]; sx = tch.clientX; sy = tch.clientY; st = Date.now();
+      var c = e.target.closest ? e.target : null;
+      scrolls = !!(c && c.closest('.pack-card, .pack-canvas, .pack-body:not(.is-collapsed), input, textarea'));
+    }, { passive: true });
+    root.addEventListener('touchend', function (e) {
       var tch = e.changedTouches[0];
       var dx = tch.clientX - sx, dy = tch.clientY - sy;
-      if (Date.now() - st > 600 || Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
+      var ax = Math.abs(dx), ay = Math.abs(dy);
+      if (Date.now() - st > 700 || Math.max(ax, ay) < 40) return;
       if (e.target.closest && e.target.closest('input[type="range"]')) return;
-      if (dx < 0) go(current + 1); else go(current - 1);
+      if (ay > ax) {
+        if (scrolls) return;
+        if (dy < 0) expandCurrent();
+        else if (isExpanded()) collapseCurrent();
+        else exit();
+      } else if (ax >= 50) {
+        if (dx < 0) go(current + 1); else go(current - 1);
+      }
     }, { passive: true });
   }
 

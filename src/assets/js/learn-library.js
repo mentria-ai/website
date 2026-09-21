@@ -47,6 +47,8 @@
       '<button type="button" class="learn-tile__remove" aria-label="' + esc(t('remove')) + '" title="' + esc(t('remove')) + '">' +
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
       '</button>';
+    var blank = li.querySelector('.learn-tile__cover--blank');
+    if (blank && window.MentriaBackdrop) window.MentriaBackdrop.apply(blank, 'tile/' + row.id, { square: true });
     li.querySelector('.learn-tile__share').addEventListener('click', function () {
       P.get(row.id).then(function (full) {
         if (!full || !full.pack) return;

@@ -52,8 +52,10 @@
       img.addEventListener('error', function () { img.classList.add('is-broken'); });
       if (interactive || card.type === 'checkpoint') img.classList.add('pack-slide__bg');
       s.appendChild(img);
-    } else if (!interactive && card.type !== 'checkpoint' && card.type !== 'image') {
-      s.appendChild(el('div', 'deck__slide-img deck__slide-img--placeholder pack-slide__ph'));
+    } else if (card.type !== 'image') {
+      var ph = el('div', 'deck__slide-img deck__slide-img--placeholder pack-slide__ph');
+      if (global.MentriaBackdrop) global.MentriaBackdrop.apply(ph, ctx.pack.id + '/' + card.id, { dim: interactive || card.type === 'checkpoint' ? 0.55 : 1 });
+      s.appendChild(ph);
     }
     var body;
     switch (card.type) {

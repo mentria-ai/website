@@ -1,6 +1,7 @@
 .stream { --pack-right: var(--accent, #6ef3c5); --pack-wrong: #ff7b7b; --pack-panel: rgba(12, 14, 18, 0.92); }
 .stream-card { background: #000; color: #fff; isolation: isolate; }
-.stream-card--hero { align-items: center; justify-content: center; text-align: center; padding: 0 1.5rem; background: radial-gradient(120% 80% at 50% 0%, rgba(34, 211, 238, 0.12), transparent 60%), #000; }
+.stream-card--hero { align-items: center; justify-content: center; text-align: center; padding: 0 1.5rem; background: url('/assets/img/stream-hero.svg') center / cover no-repeat, #000; }
+.stream-card--note { background-size: cover; background-position: center; }
 .stream-hero { max-width: 34rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
 .stream-hero__kicker { margin: 0; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--syn-cyan); }
 .stream-hero__title { margin: 0; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
@@ -28,7 +29,7 @@ html.is-standalone .stream-card--pack .deck__slide-overlay { padding-bottom: cal
 
 .stream-card--cover { align-items: flex-end; }
 .stream-card--cover .feed-card__media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
-.stream-card__blank { position: absolute; inset: 0; background: linear-gradient(160deg, #0b1220, #14213a); }
+.stream-card__blank { position: absolute; inset: 0; background: linear-gradient(160deg, #0b1220, #14213a) center / cover no-repeat; }
 .stream-card--cover .feed-card__info { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
 .stream-card--cover .feed-card__title { margin: 0; font-size: 1.5rem; line-height: 1.2; text-wrap: balance; }
 .stream-card--cover .feed-card__caption { margin: 0; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.65); }

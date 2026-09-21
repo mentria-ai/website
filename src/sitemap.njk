@@ -6,13 +6,20 @@ layout: null
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 {%- for page in collections.all -%}
-{%- if not page.data.eleventyExcludeFromSitemap -%}
+{%- if not page.data.eleventyExcludeFromSitemap and not (page.url | startsWith('/assets/')) -%}
+{%- if page.data.englishOnly %}
+  <url>
+    <loc>{{ site.siteUrl }}{{ page.url }}</loc>
+    <lastmod>{{ (page.data.modified or page.date).toISOString() }}</lastmod>
+  </url>
+{%- else -%}
 {%- for locale in locales %}
   <url>
     <loc>{{ site.siteUrl }}{{ locale.pathPrefix }}{{ page.url }}</loc>
     <lastmod>{{ (page.data.modified or page.date).toISOString() }}</lastmod>
   </url>
 {%- endfor -%}
+{%- endif -%}
 {%- endif -%}
 {%- endfor -%}
 {%- for pair in deepcutsLocalized %}

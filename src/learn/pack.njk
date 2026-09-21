@@ -9,8 +9,9 @@ eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ pair.locale.code }}"
   title: "{{ pair.pack.title | tloc(pair.locale.code) }} · {{ 'learn.title' | t }}"
-  description: "{{ pair.pack.subtitle | tloc(pair.locale.code) }}"
+  description: "{{ pair.pack.title | tloc(pair.locale.code) }} · {{ pair.pack.subtitle | tloc(pair.locale.code) }}"
   socialImageOverride: "{{ pair.pack.cover }}"
+  robots: "noindex, follow"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 <link rel="stylesheet" href="/assets/css/pack.css?v={{ buildHash }}">

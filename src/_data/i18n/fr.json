@@ -2268,6 +2268,7 @@
     "open_tool": "Ouvrir",
     "lab": "Labo du samedi",
     "lab_title": "Posez au modèle une question que vous maîtrisez.",
-    "lab_text": "Le samedi, on titille le modèle sur l’appareil. Choisissez un sujet que vous connaissez par cœur et voyez où il tient et où il dérape."
+    "lab_text": "Le samedi, on titille le modèle sur l’appareil. Choisissez un sujet que vous connaissez par cœur et voyez où il tient et où il dérape.",
+    "home_title": "Un fil qui enseigne"
   }
 }

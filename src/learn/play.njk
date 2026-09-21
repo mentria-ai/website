@@ -1,0 +1,28 @@
+---
+layout: deck-layout.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/learn/play/index.html"
+eleventyExcludeFromSitemap: true
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'learn.play_title' | t }}"
+  description: "{{ 'learn.lede' | t }}"
+  robots: "noindex, nofollow"
+---
+<link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
+<link rel="stylesheet" href="/assets/css/pack.css?v={{ buildHash }}">
+
+<div class="deck deck--pack" id="packRoot" data-prefix="{{ locale.pathPrefix }}">
+  <h1 class="sr-only">{{ "learn.play_title" | t }}</h1>
+  <noscript><p class="pack-card pack-card--center">{{ "learn.no_js" | t }}</p></noscript>
+</div>
+
+{% include "learn-i18n.njk" %}
+<script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
+<script src="/assets/js/mentria-backdrop.js?v={{ buildHash }}"></script>
+<script src="/assets/js/mentria-packs.js?v={{ buildHash }}"></script>
+<script src="/assets/js/pack-cards.js?v={{ buildHash }}"></script>
+<script src="/assets/js/pack-player.js?v={{ buildHash }}" defer></script>

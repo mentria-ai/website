@@ -226,6 +226,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
         <span class="comms__lbl">this device</span>
         <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">sound: on</button>
         <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">attach extension</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-attach-pack" type="button">attach learning pack</button>
         <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>add face id / touch id</button>
         <a class="comms__btn comms__btn--ghost" href="/about/">identity settings</a>
       </div>
@@ -536,6 +537,7 @@ import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/asset
 import { MentriaBus } from '/assets/js/mentria-bus.js';
 import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 import * as CID from '/assets/js/mentria-comms-id.js';
+import '/assets/js/mentria-packs.js';
 
 const RELAY = 'wss://relay.mentria.ai';
 const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';
@@ -1561,7 +1563,26 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     if (m.done) {
       entry.line.line.removeAttribute('aria-live');
       const blob = new Blob(entry.chunks, { type: entry.meta.type || 'application/octet-stream' });
-      if (entry.meta.kind === 'mentria-ext') {
+      if (entry.meta.kind === 'mentria-pack' || /\.mentria\.json$/i.test(entry.meta.name || '')) {
+        const text = await blob.text();
+        const who = short(ctx.peerId);
+        const label = document.createElement('span');
+        label.textContent = 'learning pack from ' + who + ': ' + (entry.meta.packTitle || entry.meta.name) + ' ';
+        const importBtn = document.createElement('button');
+        importBtn.type = 'button';
+        importBtn.className = 'comms__btn comms__btn--ghost';
+        importBtn.textContent = 'import';
+        importBtn.addEventListener('click', async () => {
+          importBtn.disabled = true;
+          try {
+            const res = await window.MentriaPacks.importText(text, { source: 'contact', from: who });
+            importBtn.replaceWith(Object.assign(document.createElement('a'), { href: '/learn/play/?id=' + encodeURIComponent(res.row.id), textContent: 'open' }));
+            label.textContent = (res.replaced ? 'updated' : 'imported') + ' \u2713 ';
+          } catch (e) { sys('import failed: ' + ((e && e.errors && e.errors[0]) || e.message)); importBtn.disabled = false; }
+        });
+        entry.line.what.innerHTML = '';
+        entry.line.what.append(label, importBtn);
+      } else if (entry.meta.kind === 'mentria-ext') {
         const html = await blob.text();
         const who = short(ctx.peerId);
         const label = document.createElement('span');
@@ -1820,6 +1841,32 @@ attachExtBtn.addEventListener('click', async () => {
     await sendOne(file, { kind: 'mentria-ext', extName: chosen.name });
   } catch (e) { sys('send failed: ' + e.message); }
   finally { attachExtBtn.disabled = false; }
+});
+
+const attachPackBtn = document.getElementById('comms-attach-pack');
+attachPackBtn.addEventListener('click', async () => {
+  if (attachPackBtn.disabled) return;
+  attachPackBtn.disabled = true;
+  try {
+    if (peers.size === 0) {
+      sys(currentDmContact
+        ? `packs go device-to-device — ${whoNow()} isn't connected right now.`
+        : 'nobody is connected to this room yet.');
+      return;
+    }
+    const P = window.MentriaPacks;
+    const rows = P ? await P.list() : [];
+    if (!rows.length) { sys('no imported packs to share. Packs you import on /learn/ show up here.'); return; }
+    const chosen = await pickExtension(rows.map((r) => ({ id: r.id, name: P.text(r.title), version: String(r.version), icon: '' })));
+    if (!chosen) return;
+    const row = await P.get(chosen.id);
+    if (!row || !row.pack) { sys('pack missing.'); return; }
+    const json = JSON.stringify(row.pack);
+    if (new Blob([json]).size > MAX_FILE) { sys('pack too large to send.'); return; }
+    const file = new File([json], chosen.id + '.mentria.json', { type: 'application/json' });
+    await sendOne(file, { kind: 'mentria-pack', packTitle: chosen.name });
+  } catch (e) { sys('send failed: ' + e.message); }
+  finally { attachPackBtn.disabled = false; }
 });
 
 els.mute.addEventListener('click', () => {

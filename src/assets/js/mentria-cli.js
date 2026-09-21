@@ -37,6 +37,11 @@
     tools: {
       description: T.descTools || 'browse utility tools',
       run: function () {
+        var toolsLink = document.querySelector('[data-tools-open]');
+        if (toolsLink) {
+          toolsLink.click();
+          return { lines: [T.openingTools || '> opening tools...'], type: 'result' };
+        }
         var toolsSection = document.getElementById('tools-preview');
         if (toolsSection) {
           var noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

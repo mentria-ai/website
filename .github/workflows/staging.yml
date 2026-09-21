@@ -1,0 +1,40 @@
+name: Staging
+
+on:
+  push:
+    branches: ["develop"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "staging"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - name: Build site
+        env:
+          RELEASE_TAG: beta
+        run: npm run build
+      - name: Check built scripts and internal links
+        run: node .github/scripts/check-build.mjs build
+      - name: Sync to beta.mentria.ai
+        env:
+          BETA_DEPLOY_KEY: ${{ secrets.BETA_DEPLOY_KEY }}
+          CDN_KNOWN_HOSTS: ${{ secrets.CDN_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$BETA_DEPLOY_KEY" > ~/.ssh/beta_deploy
+          printf '%s\n' "$CDN_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/beta_deploy ~/.ssh/known_hosts
+          rsync -az --delete -e "ssh -i ~/.ssh/beta_deploy -o IdentitiesOnly=yes" build/ cdnpub@91.99.55.13:./

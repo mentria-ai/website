@@ -3,13 +3,16 @@
     <div class="site-header__inner">
         <a class="brand" href="{{ '/' | localeUrl(lang) }}" aria-label="Mentria home">MENTRIA<span class="brand__ai" aria-hidden="true"><span class="brand__ai-text"><span class="brand__ai-a">A</span><span class="brand__ai-i">I</span></span><svg class="brand__star" viewBox="0 0 48 48" aria-hidden="true"><path class="brand__spark" d="M24 1c1.8 16.5 4.7 19.2 23 23-18.3 3.8-21.2 6.5-23 23-1.8-16.5-4.7-19.2-23-23 18.3-3.8 21.2-6.5 23-23z" fill="currentColor"/></svg></span><span class="brand__cursor">_</span></a>
         <nav class="site-nav">
+            <a class="week-ring" href="{{ '/learn/' | localeUrl(lang) }}" data-week-ring data-label-n="{{ 'nav.week_ring_n' | t }}" aria-label="{{ 'nav.week_ring' | t }}" title="{{ 'nav.week_ring' | t }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true">{% for i in range(0, 7) %}<circle class="week-ring__seg" cx="12" cy="12" r="9" transform="rotate({{ i * 51.43 }} 12 12)"/>{% endfor %}</svg>
+            </a>
             {% set feedHref  = '/feed/'  | localeUrl(lang) %}
             {% set toolsHref = '/tools/' | localeUrl(lang) %}
             <a href="{{ feedHref }}"  class="nav-link{% if page.url | startsWith(feedHref) %} active{% endif %}"{% if page.url | startsWith(feedHref) %} aria-current="page"{% endif %} title="{{ 'nav.feed' | t }}">
                 <svg class="nav-link__i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="6" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="13.5" width="17" height="6" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
                 <span class="nav-link__t">{{ "nav.feed"  | t }}</span>
             </a>
-            <a href="{{ toolsHref }}" class="nav-link{% if page.url | startsWith(toolsHref) %} active{% endif %}"{% if page.url | startsWith(toolsHref) %} aria-current="page"{% endif %} title="{{ 'nav.tools' | t }}">
+            <a href="{{ toolsHref }}" class="nav-link{% if page.url | startsWith(toolsHref) %} active{% endif %}"{% if page.url | startsWith(toolsHref) %} aria-current="page"{% endif %} title="{{ 'nav.tools' | t }}" data-tools-open>
                 <svg class="nav-link__i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.8 3.6a5.2 5.2 0 0 0-5.8 7l-5.4 5.4a1.6 1.6 0 0 0 0 2.3l1.1 1.1a1.6 1.6 0 0 0 2.3 0l5.4-5.4a5.2 5.2 0 0 0 7-5.8l-3 3-2.6-.7-.7-2.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
                 <span class="nav-link__t">{{ "nav.tools" | t }}</span>
             </a>

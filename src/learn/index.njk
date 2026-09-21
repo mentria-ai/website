@@ -1,0 +1,102 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/learn/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'learn.title' | t }}"
+  description: "{{ 'learn.lede' | t }}"
+---
+<link rel="stylesheet" href="/assets/css/learn.css?v={{ buildHash }}">
+<section class="hero" style="padding-top:1rem;">
+    <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">learn</span></p>
+    <h1>{{ "learn.title" | t }}</h1>
+    <p>{{ "learn.lede" | t }}</p>
+</section>
+
+<section class="learn-mine" id="learn-mine" aria-labelledby="learn-mine-h">
+    <div class="learn-section-head">
+        <h2 id="learn-mine-h">{{ "learn.your_packs" | t }}</h2>
+        <button type="button" class="learn-btn learn-btn--primary" id="learn-import-toggle" aria-expanded="false" aria-controls="learn-import">{{ "learn.import" | t }}</button>
+    </div>
+    <div class="learn-import" id="learn-import" hidden>
+        <label class="learn-import__drop" id="learn-drop">
+            <input type="file" id="learn-file" accept=".json,application/json" hidden>
+            <span class="learn-import__drop-text">{{ "learn.import_file" | t }}</span>
+            <span class="learn-import__drop-hint">{{ "learn.drop_hint" | t }}</span>
+        </label>
+        <div class="learn-import__row">
+            <input type="url" class="learn-input" id="learn-url" placeholder="{{ 'learn.url_placeholder' | t }}" autocomplete="off" spellcheck="false">
+            <button type="button" class="learn-btn" id="learn-url-go">{{ "learn.import_url" | t }}</button>
+        </div>
+        <details class="learn-import__paste">
+            <summary>{{ "learn.import_paste" | t }}</summary>
+            <textarea class="learn-input learn-textarea" id="learn-paste" rows="6" placeholder="{{ 'learn.paste_placeholder' | t }}" spellcheck="false"></textarea>
+            <button type="button" class="learn-btn" id="learn-paste-go">{{ "learn.import" | t }}</button>
+        </details>
+        <p class="learn-import__hint">{{ "learn.import_hint" | t }} <button type="button" class="learn-link" id="learn-example">{{ "learn.try_example" | t }}</button> · <a class="learn-link" href="/learn/format/">{{ "learn.format_link" | t }}</a></p>
+        <p class="learn-import__status" id="learn-status" role="status" aria-live="polite"></p>
+    </div>
+    <p class="learn-empty" id="learn-empty">{{ "learn.empty_packs" | t }}</p>
+    <ul class="learn-grid" id="learn-list" hidden></ul>
+    <noscript><p class="learn-empty">{{ "learn.no_js" | t }}</p></noscript>
+</section>
+
+{% set groups = [
+  { key: "source", title: ("learn.source_shelf" | t), lede: ("learn.source_lede" | t) },
+  { key: "deepcuts", title: ("learn.deepcuts_shelf" | t), lede: ("learn.deepcuts_lede" | t) }
+] %}
+{% for g in groups %}
+<section class="learn-shelf" aria-labelledby="learn-shelf-{{ g.key }}">
+    <div class="learn-section-head">
+        <h2 id="learn-shelf-{{ g.key }}">{{ g.title }}</h2>
+        <p class="learn-section-lede">{{ g.lede }}</p>
+    </div>
+    <ul class="learn-grid learn-grid--native" data-collection="{{ g.key }}">
+        {% for pack in packs %}{% if pack.collection == g.key %}
+        <li class="learn-tile" data-pack-id="{{ pack.id }}">
+            <a class="learn-tile__link" href="{{ locale.pathPrefix }}/learn/{{ pack.id }}/">
+                {% if pack.cover %}<img class="learn-tile__cover" src="{{ pack.cover }}" alt="" loading="lazy" decoding="async">{% else %}<span class="learn-tile__cover learn-tile__cover--blank"></span>{% endif %}
+                <span class="learn-tile__body">
+                    <span class="learn-tile__title">{{ pack.title | tloc(locale.code) }}</span>
+                    <span class="learn-tile__meta">{{ ("learn.cards_n" | t) | replace("{n}", pack.cards.length) }} · {{ ("learn.minutes_n" | t) | replace("{n}", pack.minutes) }}</span>
+                    <span class="learn-tile__progress" hidden><span class="learn-tile__progress-fill"></span></span>
+                </span>
+            </a>
+        </li>
+        {% endif %}{% endfor %}
+    </ul>
+</section>
+{% endfor %}
+
+<script>
+  window.MENTRIA_LEARN_PAGE = {
+    prefix: {{ locale.pathPrefix | dump | safe }},
+    cards_n: {{ ("learn.cards_n" | t) | dump | safe }},
+    minutes_n: {{ ("learn.minutes_n" | t) | dump | safe }},
+    imported: {{ ("learn.imported" | t) | dump | safe }},
+    replaced: {{ ("learn.replaced" | t) | dump | safe }},
+    import_failed: {{ ("learn.import_failed" | t) | dump | safe }},
+    importing: {{ ("learn.importing" | t) | dump | safe }},
+    remove: {{ ("learn.remove" | t) | dump | safe }},
+    share: {{ ("learn.share" | t) | dump | safe }},
+    course: {{ ("learn.course" | t) | dump | safe }},
+    course_packs_n: {{ ("learn.course_packs_n" | t) | dump | safe }},
+    remove_course: {{ ("learn.remove_course" | t) | dump | safe }},
+    remove_course_confirm: {{ ("learn.remove_course_confirm" | t) | dump | safe }},
+    imported_course: {{ ("learn.imported_course" | t) | dump | safe }},
+    single_packs: {{ ("learn.single_packs" | t) | dump | safe }},
+    show_all_packs: {{ ("learn.show_all_packs" | t) | dump | safe }},
+    shared_hint: {{ ("learn.shared_hint" | t) | dump | safe }},
+    remove_confirm: {{ ("learn.remove_confirm" | t) | dump | safe }},
+    open: {{ ("learn.open" | t) | dump | safe }},
+    progress_n: {{ ("learn.progress_n" | t) | dump | safe }},
+    from_contact: {{ ("learn.from_contact" | t) | dump | safe }}
+  };
+</script>
+<script src="/assets/js/mentria-backdrop.js?v={{ buildHash }}"></script>
+<script src="/assets/js/mentria-packs.js?v={{ buildHash }}"></script>
+<script src="/assets/js/learn-library.js?v={{ buildHash }}" defer></script>

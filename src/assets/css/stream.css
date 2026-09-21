@@ -1,5 +1,6 @@
 .stream { --pack-right: var(--accent, #6ef3c5); --pack-wrong: #ff7b7b; --pack-panel: rgba(12, 14, 18, 0.92); }
-.stream-card { background: #000; color: #fff; isolation: isolate; }
+.stream-card { background: transparent; color: #fff; isolation: isolate; }
+.stream { background: #000; }
 .stream-card--hero { align-items: center; justify-content: center; text-align: center; padding: 0 1.5rem; background: url('/assets/img/stream-hero.svg') center / cover no-repeat, #000; }
 .stream-card--note { background-size: cover; background-position: center; }
 .stream-hero { max-width: 34rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }

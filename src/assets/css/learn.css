@@ -69,3 +69,4 @@
 .learn-course__remove { margin-left: auto; font-size: 0.78rem; color: var(--term-muted); text-decoration: none; }
 .learn-course__remove:hover { color: var(--term-fg); }
 .learn-course--loose .learn-course__title { color: var(--term-muted); font-weight: 500; font-size: 0.9rem; }
+.learn-course__more { grid-column: 1 / -1; display: flex; justify-content: center; padding: 4px 0 8px; }

@@ -2248,7 +2248,8 @@
     "remove_course": "Remover curso",
     "remove_course_confirm": "Remover “{title}” e todos os seus pacotes deste dispositivo?",
     "imported_course": "“{title}” importado: {n} pacotes.",
-    "single_packs": "Pacotes avulsos"
+    "single_packs": "Pacotes avulsos",
+    "show_all_packs": "Mostrar todos os {n} pacotes"
   },
   "stream": {
     "hero_title": "Um feed que ensina.",

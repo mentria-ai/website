@@ -2248,7 +2248,8 @@
     "remove_course": "Retirer le cours",
     "remove_course_confirm": "Retirer « {title} » et tous ses packs de cet appareil ?",
     "imported_course": "« {title} » importé : {n} packs.",
-    "single_packs": "Packs isolés"
+    "single_packs": "Packs isolés",
+    "show_all_packs": "Afficher les {n} packs"
   },
   "stream": {
     "hero_title": "Un fil qui enseigne.",

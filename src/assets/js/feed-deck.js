@@ -178,9 +178,9 @@
   function exit() {
     const back = document.referrer && document.referrer.indexOf(location.origin) === 0
       ? -1
-      : localePrefix + '/feed/';
+      : localePrefix + '/learn/';
     if (back === -1) history.back();
-    else location.href = localePrefix + '/feed/';
+    else location.href = localePrefix + '/learn/';
   }
 
   /* ── Tap zones ─────────────────────────────────────────── */

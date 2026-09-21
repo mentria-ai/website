@@ -143,7 +143,7 @@ async function start() {
   await safeRegister({
     name: 'site__open',
     title: 'Open a mentria.ai page',
-    description: 'Navigate this tab to a site page by path, e.g. /tools/countdown-timer/ or /feed/. New tools become available after the page loads.',
+    description: 'Navigate this tab to a site page by path, e.g. /tools/countdown-timer/ or /learn/. New tools become available after the page loads.',
     inputSchema: { type: 'object', properties: { path: { type: 'string' } }, required: ['path'] },
     execute: (args) => tracked('site__open', args, async () => {
       const p = String((args || {}).path || '');

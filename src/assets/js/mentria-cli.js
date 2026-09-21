@@ -53,10 +53,10 @@
         return { lines: [tfmt(T.navigatingTo || '> navigating to {dest}...', { dest: dest })], type: 'result' };
       }
     },
-    feed: {
-      description: T.descFeed || 'view the feed',
+    learn: {
+      description: T.descLearn || 'open your learning packs',
       run: function () {
-        var dest = localePrefix() + '/feed/';
+        var dest = localePrefix() + '/learn/';
         window.location.href = dest;
         return { lines: [tfmt(T.navigatingTo || '> navigating to {dest}...', { dest: dest })], type: 'result' };
       }

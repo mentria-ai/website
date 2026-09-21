@@ -86,7 +86,7 @@ eleventyComputed:
         <span class="about-ship-label">{{ "about.shelf_ai" | t }}</span>
         <div class="about-units" aria-hidden="true">{% for i in range(0, maxCount) %}<i class="unit{% if i < shelves.ai %} on{% endif %}" style="--i:{{ i }}"></i>{% endfor %}</div>
       </a>
-      <a class="about-ship-card purple" href="{{ '/feed/' | localeUrl(lang) }}">
+      <a class="about-ship-card purple" href="{{ '/learn/' | localeUrl(lang) }}">
         <span class="about-ship-num">{{ postCount }}</span>
         <span class="about-ship-label">{{ "about.shelf_writing" | t }}</span>
         <div class="about-units" aria-hidden="true">{% for i in range(0, maxCount) %}<i class="unit{% if i < postCount %} on{% endif %}" style="--i:{{ i }}"></i>{% endfor %}</div>

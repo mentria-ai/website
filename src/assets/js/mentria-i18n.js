@@ -172,7 +172,7 @@
   }
 
   function shellRoutes(prefix) {
-    var routes = [prefix + '/', prefix + '/tools/', prefix + '/feed/', prefix + '/about/'];
+    var routes = [prefix + '/', prefix + '/tools/', prefix + '/learn/', prefix + '/about/'];
     var data = window.MENTRIA_PALETTE_DATA;
     var tools = (data && data.tools) || [];
     for (var i = 0; i < tools.length; i++) {

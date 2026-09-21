@@ -46,6 +46,7 @@
         '<h2 class="feed-card__title">' + esc(tx(item.title)) + '</h2>' +
         '<a class="pack-btn pack-btn--primary stream-card__cta" href="' + esc(href) + '">' + esc(item.cta || t('open')) + '</a>' +
       '</div>';
+    if (!item.cover && window.MentriaBackdrop) window.MentriaBackdrop.apply(sec.querySelector('.stream-card__blank'), 'cover/' + item.id);
     return sec;
   }
 
@@ -197,6 +198,7 @@
             (d.text ? '<p class="' + (d.image ? 'feed-card__caption stream-card__text' : 'stream-note__text') + '">' + esc(tx(d.text)) + '</p>' : '') +
             (d.href ? '<a class="pack-btn pack-btn--primary stream-card__cta" href="' + esc(d.href) + '">' + esc(d.cta || t('open')) + '</a>' : '') +
           '</div>';
+        if (!d.image && window.MentriaBackdrop) window.MentriaBackdrop.apply(note, 'daily/' + (d.kind || 'note') + '/' + tx(d.title), { dim: 0.8 });
         frag.appendChild(note);
         return;
       }
@@ -221,6 +223,7 @@
     });
     if (res.exhausted) {
       var doneCard = el('section', 'feed-card stream-card stream-card--note');
+      if (window.MentriaBackdrop) window.MentriaBackdrop.apply(doneCard, 'done/' + P.dayKey(), { dim: 0.7 });
       doneCard.innerHTML = '<div class="stream-note"><p class="stream-chip stream-chip--today">' + esc(t('today')) + '</p><h2 class="stream-note__title">' + esc(t('done_title')) + '</h2><p class="stream-note__text">' + esc(t('done_text')) + '</p></div>';
       frag.appendChild(doneCard);
     }
@@ -283,6 +286,7 @@
     io.observe(more);
   }
 
+  Array.prototype.forEach.call(document.querySelectorAll('#stream-tail .stream-card__blank'), function (b) { var sec = b.closest('.stream-card'); if (window.MentriaBackdrop && sec) window.MentriaBackdrop.apply(b, 'cover/' + sec.dataset.packId); });
   reorderTail();
   activePacks().then(buildDynamic).then(renderDynamic).catch(function (e) { console.error('stream', e); });
 })();

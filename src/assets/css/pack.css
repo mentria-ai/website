@@ -4,7 +4,7 @@
 .pack-slide { z-index: 2; pointer-events: none; }
 .pack-card, .pack-canvas, .pack-guess, .pack-hotspot, .pack-hotspot-tip, .deck__slide-overlay > * { pointer-events: auto; }
 .pack-slide__bg { filter: brightness(0.35) saturate(0.8); }
-.pack-slide__ph { background: linear-gradient(160deg, #0b1220, #101a2e); }
+.pack-slide__ph { background: linear-gradient(160deg, #0b1220, #101a2e) center / cover no-repeat; }
 
 .pack-meta { max-width: calc(100% - 90px); }
 .deck__chapter-num { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; }

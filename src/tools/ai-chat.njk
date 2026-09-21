@@ -25,6 +25,7 @@ eleventyComputed:
     <span class="ac__status-text" id="ac-status-text" role="status" aria-live="polite">{{ "tool.ai-chat.status_checking_webgpu" | t }}</span>
     <span class="ac__counter" id="ac-counter" hidden></span>
     <select class="ac__tier" id="ac-tier" aria-label="{{ 'tool.ai-chat.tier_label' | t }}" hidden></select>
+    <button type="button" class="ac__adapter-chip" id="ac-adapter-chip" hidden></button>
     <button class="ac__delete-btn" id="ac-clear-chat" title="{{ 'tool.ai-chat.btn_new_chat' | t }}" style="display:none;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       <span>{{ "tool.ai-chat.btn_new_chat" | t }}</span>
@@ -49,6 +50,17 @@ eleventyComputed:
       <button type="button" class="ac__search-cfg-btn ac__search-cfg-btn--ghost" id="ac-search-remove" hidden>{{ "tool.ai-chat.search_remove" | t }}</button>
     </div>
     <div class="ac__search-cfg-status" id="ac-search-status" aria-live="polite"></div>
+  </div>
+
+  <div class="ac__adapters" id="ac-adapters" hidden>
+    <div class="ac__adapters-head">
+      <span class="ac__adapters-title">{{ "tool.ai-chat.adapters_title" | t }}</span>
+      <button type="button" class="ac__adapters-close" id="ac-adapters-close" aria-label="{{ 'tool.ai-chat.adapters_close' | t }}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="ac__adapters-list" id="ac-adapters-list"></div>
+    <div class="ac__adapters-note" id="ac-adapters-note" aria-live="polite"></div>
   </div>
 
   <div class="ac__messages" id="ac-messages">
@@ -138,6 +150,21 @@ const COPY = {
   searching:           {{ ("tool.ai-chat.searching"             | t) | dump | safe }},
   searchSources:       {{ ("tool.ai-chat.search_sources"        | t) | dump | safe }},
   searchFailedNote:    {{ ("tool.ai-chat.search_failed_note"    | t) | dump | safe }},
+  adaptersBase:        {{ ("tool.ai-chat.adapters_base"         | t) | dump | safe }},
+  adaptersBaseDesc:    {{ ("tool.ai-chat.adapters_base_desc"    | t) | dump | safe }},
+  adaptersNone:        {{ ("tool.ai-chat.adapters_none"         | t) | dump | safe }},
+  adaptersOnly27:      {{ ("tool.ai-chat.adapters_only27"       | t) | dump | safe }},
+  adaptersPin:         {{ ("tool.ai-chat.adapters_pin"          | t) | dump | safe }},
+  adaptersActive:      {{ ("tool.ai-chat.adapters_active"       | t) | dump | safe }},
+  adaptersRouter:      {{ ("tool.ai-chat.adapters_router"       | t) | dump | safe }},
+  adaptersNote:        {{ ("tool.ai-chat.adapters_note"         | t) | dump | safe }},
+  adaptersLoading:     {{ ("tool.ai-chat.adapters_loading"      | t) | dump | safe }},
+  adaptersPinned:      {{ ("tool.ai-chat.adapters_pinned"       | t) | dump | safe }},
+  adaptersFailed:      {{ ("tool.ai-chat.adapters_failed"       | t) | dump | safe }},
+  adaptersSha:         {{ ("tool.ai-chat.adapters_sha"          | t) | dump | safe }},
+  adaptersThinking:    { off: {{ ("tool.ai-chat.adapters_thinking_off" | t) | dump | safe }}, on: {{ ("tool.ai-chat.adapters_thinking_on" | t) | dump | safe }}, either: {{ ("tool.ai-chat.adapters_thinking_either" | t) | dump | safe }} },
+  thinkPinned:         {{ ("tool.ai-chat.think_pinned"          | t) | dump | safe }},
+  searchPinned:        {{ ("tool.ai-chat.search_pinned"         | t) | dump | safe }},
   thinking:            {{ ("tool.ai-chat.thinking"              | t) | dump | safe }},
   thoughtFor:          {{ ("tool.ai-chat.thought_for"           | t) | dump | safe }},
   thinkCut:            {{ ("tool.ai-chat.think_cut"             | t) | dump | safe }}
@@ -230,6 +257,11 @@ function runApp(MentriaEngine, Tiers) {
   const searchSaveBtn = document.getElementById('ac-search-save');
   const searchRemBtn  = document.getElementById('ac-search-remove');
   const searchStatus  = document.getElementById('ac-search-status');
+  const adaptersPanel = document.getElementById('ac-adapters');
+  const adaptersList  = document.getElementById('ac-adapters-list');
+  const adaptersNote  = document.getElementById('ac-adapters-note');
+  const adaptersClose = document.getElementById('ac-adapters-close');
+  const adapterChip   = document.getElementById('ac-adapter-chip');
 
   /* ── State ───────────────────────────────────────── */
   let engine = null;
@@ -339,7 +371,7 @@ function runApp(MentriaEngine, Tiers) {
     bubble.className = 'ac__msg ac__msg--' + role;
     const label = document.createElement('div');
     label.className = 'ac__msg-label';
-    label.textContent = role === 'user' ? COPY.labelYou : (currentTier === '27b' ? 'bonsai-' : 'qwen-') + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B');
+    label.textContent = role === 'user' ? COPY.labelYou : (currentTier === '27b' ? 'bonsai-' : 'qwen-') + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B') + (pinned && role !== 'user' ? ' · ' + pinned.name : '');
     bubble.appendChild(label);
     if (imageUrl) {
       const img = document.createElement('img');
@@ -513,10 +545,10 @@ function runApp(MentriaEngine, Tiers) {
     const slowTier = fits && contextTokens < 4096;
     const label = !fits ? COPY.thinkNeedsCtx : slowTier ? COPY.thinkToggleSlow : COPY.thinkToggle;
     thinkToggle.hidden = !onTier;
-    thinkToggle.disabled = !fits;
-    thinkToggle.title = label;
-    thinkToggle.setAttribute('aria-label', label);
-    if ((!onTier || !fits) && deepThinkOn) {
+    thinkToggle.disabled = !fits || !!pinned;
+    thinkToggle.title = pinned ? COPY.thinkPinned : label;
+    thinkToggle.setAttribute('aria-label', thinkToggle.title);
+    if ((!onTier || !fits || pinned) && deepThinkOn) {
       deepThinkOn = false;
       thinkToggle.setAttribute('aria-pressed', 'false');
     }
@@ -655,6 +687,194 @@ function runApp(MentriaEngine, Tiers) {
     }
   }
 
+  /* ── Adapter picker (long-press the send arrow) ──── */
+  const ADAPTER_INDEX_OVERRIDE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? new URLSearchParams(location.search).get('adapters') : null;
+  let adapterIndex = null;
+  let pinned = null;
+  let pinning = false;
+  const pinnedLoaded = new Set();
+
+  function adapterBase() { return (Tiers.TIERS[currentTier] && Tiers.TIERS[currentTier].base) || ''; }
+
+  async function fetchAdapterIndex() {
+    if (adapterIndex && adapterIndex.tier === currentTier) return adapterIndex.entries;
+    let entries = [];
+    try {
+      const res = await fetch(ADAPTER_INDEX_OVERRIDE || (adapterBase() + 'loras/index.json'), { cache: 'no-cache' });
+      if (res.ok) {
+        const raw = await res.json();
+        entries = (Array.isArray(raw) ? raw : (raw && raw.adapters) || []).filter((e) => e && typeof e.name === 'string' && typeof e.path === 'string');
+      }
+    } catch (_) { entries = []; }
+    adapterIndex = { tier: currentTier, entries };
+    return entries;
+  }
+
+  async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function fmtBytes(n) {
+    if (!(n > 0)) return '';
+    return n >= 1048576 ? Math.round(n / 1048576) + ' MB' : Math.round(n / 1024) + ' KB';
+  }
+
+  function adapterMeta(e) {
+    const parts = [];
+    if (e.r) parts.push('r' + e.r);
+    if (e.alpha) parts.push('α' + e.alpha);
+    if (e.bytes) parts.push(fmtBytes(e.bytes));
+    if (e.thinking && COPY.adaptersThinking[e.thinking]) parts.push(COPY.adaptersThinking[e.thinking]);
+    if (e.date) parts.push(e.date);
+    return parts.join(' · ');
+  }
+
+  function adapterRow(opts) {
+    const row = document.createElement('div');
+    row.className = 'ac__adapter' + (opts.active ? ' is-active' : '');
+    const main = document.createElement('div');
+    main.className = 'ac__adapter-main';
+    const title = document.createElement('div');
+    title.className = 'ac__adapter-title';
+    title.textContent = opts.title;
+    if (opts.version) {
+      const v = document.createElement('span');
+      v.className = 'ac__adapter-ver';
+      v.textContent = opts.version;
+      title.appendChild(v);
+    }
+    main.appendChild(title);
+    if (opts.desc) { const d = document.createElement('div'); d.className = 'ac__adapter-desc'; d.textContent = opts.desc; main.appendChild(d); }
+    if (opts.meta) { const m = document.createElement('div'); m.className = 'ac__adapter-meta'; m.textContent = opts.meta; main.appendChild(m); }
+    if (opts.tags && opts.tags.length) { const t = document.createElement('div'); t.className = 'ac__adapter-tags'; t.textContent = opts.tags.map((x) => '#' + x).join(' '); main.appendChild(t); }
+    row.appendChild(main);
+    if (opts.label) {
+      const l = document.createElement('span');
+      l.className = 'ac__adapter-label';
+      l.textContent = opts.label;
+      row.appendChild(l);
+    } else {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'ac__adapter-btn' + (opts.active ? ' is-active' : '');
+      b.textContent = opts.active ? COPY.adaptersActive : COPY.adaptersPin;
+      b.disabled = opts.active || pinning || generating;
+      b.addEventListener('click', opts.onPick);
+      row.appendChild(b);
+    }
+    return row;
+  }
+
+  async function renderAdapters() {
+    adaptersList.innerHTML = '';
+    adaptersNote.textContent = '';
+    if (currentTier !== '27b' || !engine || typeof engine.swapAdapter !== 'function') {
+      adaptersNote.textContent = COPY.adaptersOnly27;
+      return;
+    }
+    adaptersList.appendChild(adapterRow({
+      title: COPY.adaptersBase, desc: COPY.adaptersBaseDesc, meta: modelFamilyFor(currentTier),
+      active: !pinned, onPick: () => pinAdapter(null)
+    }));
+    const entries = await fetchAdapterIndex();
+    entries.forEach((e) => {
+      const isRouter = e.name === SEARCH_ADAPTER.name;
+      adaptersList.appendChild(adapterRow({
+        title: e.title || e.name, version: e.version, desc: e.description, meta: adapterMeta(e), tags: e.tags,
+        active: !!pinned && pinned.name === e.name,
+        label: isRouter ? COPY.adaptersRouter : null,
+        onPick: () => pinAdapter(e)
+      }));
+    });
+    adaptersNote.textContent = entries.filter((e) => e.name !== SEARCH_ADAPTER.name).length ? COPY.adaptersNote : COPY.adaptersNone;
+  }
+
+  function openAdapters() {
+    if (!engine) return;
+    searchCfg.hidden = true;
+    adaptersPanel.hidden = false;
+    renderAdapters();
+  }
+
+  function closeAdapters() { adaptersPanel.hidden = true; }
+
+  function syncAdapterChip() {
+    adapterChip.hidden = !pinned;
+    adapterChip.textContent = pinned ? (pinned.title || pinned.name) : '';
+    adapterChip.title = pinned ? (pinned.description || pinned.name) : '';
+  }
+
+  function resetPinned() {
+    pinned = null;
+    pinning = false;
+    pinnedLoaded.clear();
+    adapterIndex = null;
+    syncAdapterChip();
+  }
+
+  async function pinAdapter(entry) {
+    if (pinning || !engine || typeof engine.swapAdapter !== 'function') return;
+    if ((entry && pinned && pinned.name === entry.name) || (!entry && !pinned)) return;
+    pinning = true;
+    adaptersNote.textContent = entry ? COPY.adaptersLoading.replace('{name}', entry.title || entry.name) : '';
+    try {
+      if (entry && entry.system_sha256 && typeof entry.system === 'string') {
+        const digest = await sha256Hex(entry.system);
+        if (digest !== String(entry.system_sha256).toLowerCase()) throw new Error(COPY.adaptersSha);
+      }
+      if (generating) stopGeneration();
+      const outgoing = pinned;
+      if (searchAdapterActive) { await engine.swapAdapter({ name: null }); searchAdapterActive = false; }
+      if (outgoing) {
+        await engine.swapAdapter({ name: null });
+        if (outgoing.name !== SEARCH_ADAPTER.name && pinnedLoaded.has(outgoing.name)) {
+          try { await engine.unloadAdapter(outgoing.name); } catch (_) {}
+          pinnedLoaded.delete(outgoing.name);
+        }
+      }
+      if (entry) {
+        const base = adapterBase();
+        const path = String(entry.path).replace(/\/?$/, '/');
+        const spec = pinnedLoaded.has(entry.name)
+          ? { name: entry.name }
+          : { name: entry.name, configUrl: base + path + 'adapter_config.json', weightsUrl: base + path + 'adapter_model.safetensors' };
+        await engine.swapAdapter(spec);
+        pinnedLoaded.add(entry.name);
+      }
+      pinned = entry;
+      if (prefixCache) prefixCache.invalidate();
+      systemMessage.content = pinned && typeof pinned.system === 'string' && pinned.system ? pinned.system : systemPromptFor(currentTier);
+      clearConversation();
+      webSearchOn = false;
+      syncSearchToggle();
+      syncThinkToggle();
+      syncAdapterChip();
+      if (pinned && window.MentriaUI) MentriaUI.toast(COPY.adaptersPinned.replace('{name}', pinned.title || pinned.name));
+      pinning = false;
+      closeAdapters();
+    } catch (err) {
+      pinning = false;
+      const msg = COPY.adaptersFailed.replace('{name}', entry ? (entry.title || entry.name) : COPY.adaptersBase).replace('{err}', String(err && err.message || err));
+      renderAdapters().then(() => { adaptersNote.textContent = msg; });
+      console.warn('adapter pin failed:', err);
+    }
+  }
+
+  adaptersClose.addEventListener('click', closeAdapters);
+  adapterChip.addEventListener('click', openAdapters);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !adaptersPanel.hidden) closeAdapters(); });
+
+  let pressTimer = null;
+  let longPressAt = 0;
+  sendBtn.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    clearTimeout(pressTimer);
+    pressTimer = setTimeout(() => { longPressAt = Date.now(); openAdapters(); }, 500);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => sendBtn.addEventListener(ev, () => clearTimeout(pressTimer)));
+  sendBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); clearTimeout(pressTimer); openAdapters(); });
+
   function markRoute(bodyEl, route) {
     if (!route) return;
     const bubble = bodyEl && bodyEl.closest ? bodyEl.closest('.ac__msg') : null;
@@ -675,9 +895,10 @@ function runApp(MentriaEngine, Tiers) {
 
   function syncSearchToggle() {
     const cfg = getSearchCfg();
-    if (!cfg || !cfg.url) { webSearchOn = false; }
+    if (!cfg || !cfg.url || pinned) { webSearchOn = false; }
     searchToggle.hidden = false;
-    searchToggle.title = cfg && cfg.url ? COPY.searchToggle : COPY.searchConfigure;
+    searchToggle.disabled = !!pinned;
+    searchToggle.title = pinned ? COPY.searchPinned : cfg && cfg.url ? COPY.searchToggle : COPY.searchConfigure;
     searchToggle.setAttribute('aria-label', searchToggle.title);
     searchToggle.setAttribute('aria-pressed', String(webSearchOn));
   }
@@ -827,6 +1048,7 @@ function runApp(MentriaEngine, Tiers) {
         } catch (_) { prefixCache = null; }
       }
       routerIds = null; searchAdapterSpecState = null; searchAdapterLoaded = false; searchAdapterActive = false;
+      resetPinned();
       systemMessage.content = systemPromptFor(currentTier);
       syncThinkToggle();
       syncSearchToggle();
@@ -907,7 +1129,7 @@ function runApp(MentriaEngine, Tiers) {
 
   async function runGeneration() {
     const epoch = genEpoch;
-    const deepThink = deepThinkOn && currentTier === '27b' && contextTokens >= 2048;
+    const deepThink = deepThinkOn && !pinned && currentTier === '27b' && contextTokens >= 2048;
     generating = true;
     setSendMode(true);
     setStatus('generating', deepThink ? COPY.thinking : COPY.statusGenerating);
@@ -1079,7 +1301,7 @@ function runApp(MentriaEngine, Tiers) {
     const imagesForRequest = windowImages.length ? windowImages : undefined;
 
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
-    const searchActive = webSearchOn && !!(getSearchCfg() || {}).url;
+    const searchActive = webSearchOn && !pinned && !!(getSearchCfg() || {}).url;
     if (searchActive && currentTier === '27b' && !imagesForRequest && rest.length > 1) setStatus('generating', COPY.statusRereading);
     const routeAsk = () => routeTurn(turnText(rest[rest.length - 1]));
     const route = (searchActive && currentTier === '27b' && !imagesForRequest && rest.length)
@@ -1102,16 +1324,19 @@ function runApp(MentriaEngine, Tiers) {
           ? exactPromptTokens + Math.ceil((toolChars + (useTool ? SEARCH_TOOL_PROMPT.length : 0)) / 3.5) + 16
           : Math.ceil((systemContent.length + keptChars + toolChars) / 3.5) + windowImages.length * 300 + 80;
         const thinkBudget = Math.max(512, Math.min(hugeContext ? 6000 : 3400, contextTokens - estPromptTokens - 120));
+        const smp = (pinned && pinned.sampling) || null;
+        const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
         const params = {
           messages: [{ role: 'system', content: systemContent }, ...kept, ...toolTurns],
           maxTokens: (imagesForRequest && IS_IOS) ? 256
+            : (pinned && num(pinned.maxTokens, 0) > 0) ? pinned.maxTokens
             : deepThink ? thinkBudget
             : (bigContext ? 768 : contextTokens >= 2048 ? MAX_TOKENS : 320),
-          temperature: deepThink ? 0.7 : 0,
-          topK: deepThink ? 20 : 1,
-          topP: deepThink ? 0.95 : 1.0,
-          repetitionPenalty: currentTier === '27b' ? 1.0 : 1.15,
-          enableThinking: deepThink,
+          temperature: smp ? num(smp.temperature, 0.7) : deepThink ? 0.7 : 0,
+          topK: smp ? num(smp.topK, 50) : deepThink ? 20 : 1,
+          topP: smp ? num(smp.topP, 0.9) : deepThink ? 0.95 : 1.0,
+          repetitionPenalty: smp ? num(smp.repetitionPenalty, 1.0) : currentTier === '27b' ? 1.0 : 1.15,
+          enableThinking: pinned ? !!pinned.enableThinking : deepThink,
           signal: abortCtrl.signal,
         };
         if (imagesForRequest) params.images = imagesForRequest;
@@ -1273,6 +1498,7 @@ function runApp(MentriaEngine, Tiers) {
 
   /* ── Events ──────────────────────────────────────── */
   sendBtn.addEventListener('click', () => {
+    if (Date.now() - longPressAt < 800) return;
     if (generating) { stopGeneration(); return; }
     generate();
   });
@@ -1702,6 +1928,7 @@ function runApp(MentriaEngine, Tiers) {
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
+.ac__send-btn { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 .ac__send-btn:hover:not(:disabled) {
   background: #67e8f9;
   box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
@@ -1755,6 +1982,56 @@ function runApp(MentriaEngine, Tiers) {
 .ac__search-cfg-btn--ghost { color: var(--term-muted); border-style: dashed; }
 .ac__search-cfg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .ac__search-cfg-status { font-size: 0.7rem; color: var(--term-muted); min-height: 1em; }
+
+.ac__adapters {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  max-height: 60vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.ac__adapters[hidden] { display: none; }
+.ac__adapters-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.ac__adapters-title { font-size: 0.78rem; color: var(--syn-cyan); }
+.ac__adapters-close { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--term-border); background: transparent; color: var(--term-muted); cursor: pointer; }
+.ac__adapters-close:hover { color: var(--term-fg); border-color: var(--syn-cyan); }
+.ac__adapters-list { display: flex; flex-direction: column; gap: 0.45rem; }
+.ac__adapter {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.6rem 0.7rem; border-radius: 8px;
+  border: 1px solid var(--term-border); background: rgba(255,255,255,0.03);
+}
+.ac__adapter.is-active { border-color: rgba(110, 243, 197, 0.45); background: rgba(110, 243, 197, 0.06); }
+.ac__adapter-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.ac__adapter-title { font-size: 0.82rem; color: var(--term-fg); font-family: var(--font-body, 'Inter', sans-serif); font-weight: 600; }
+.ac__adapter-ver { margin-left: 0.4rem; font-family: var(--font-mono); font-size: 0.66rem; font-weight: 400; color: var(--term-muted); }
+.ac__adapter-desc { font-size: 0.78rem; line-height: 1.4; color: rgba(255,255,255,0.78); font-family: var(--font-body, 'Inter', sans-serif); }
+.ac__adapter-meta { font-size: 0.66rem; letter-spacing: 0.04em; color: var(--term-muted); }
+.ac__adapter-tags { font-size: 0.66rem; color: var(--syn-cyan); opacity: 0.8; }
+.ac__adapter-btn {
+  flex-shrink: 0; background: transparent; border: 1px solid var(--syn-cyan); color: var(--syn-cyan);
+  border-radius: 6px; padding: 0.35rem 0.8rem; font-family: var(--font-mono); font-size: 0.72rem; cursor: pointer;
+}
+.ac__adapter-btn:hover:not(:disabled) { background: rgba(34, 211, 238, 0.12); }
+.ac__adapter-btn.is-active { border-color: var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); cursor: default; }
+.ac__adapter-btn:disabled:not(.is-active) { opacity: 0.4; cursor: not-allowed; }
+.ac__adapter-label { flex-shrink: 0; font-size: 0.66rem; color: var(--term-muted); text-align: right; max-width: 7rem; }
+.ac__adapters-note { font-size: 0.7rem; line-height: 1.4; color: var(--term-muted); min-height: 1em; }
+.ac__adapter-chip {
+  font: inherit; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.04em;
+  padding: 2px 9px; border-radius: 999px; border: 1px solid rgba(110, 243, 197, 0.45);
+  background: rgba(110, 243, 197, 0.08); color: var(--accent, #6ef3c5); cursor: pointer; white-space: nowrap;
+  max-width: 10rem; overflow: hidden; text-overflow: ellipsis;
+}
+.ac__adapter-chip[hidden] { display: none; }
+@media (max-width: 480px) {
+  .ac__adapter { flex-wrap: wrap; }
+  .ac__adapter-btn, .ac__adapter-label { margin-left: auto; }
+}
 
 .ac__sources { margin-top: 0.45rem; }
 .ac__sources-q { color: var(--term-subtle, #6b7280); }

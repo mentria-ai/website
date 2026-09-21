@@ -2248,7 +2248,8 @@
     "remove_course": "コースを削除",
     "remove_course_confirm": "「{title}」とそのすべてのパックをこの端末から削除しますか？",
     "imported_course": "「{title}」を取り込みました: {n} パック。",
-    "single_packs": "単体のパック"
+    "single_packs": "単体のパック",
+    "show_all_packs": "{n} パックをすべて表示"
   },
   "stream": {
     "hero_title": "学べるフィード。",

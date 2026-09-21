@@ -64,6 +64,8 @@
     return li;
   }
 
+  var SHOW = 6;
+  var expanded = {};
   function courseHead(course, rows) {
     var li = document.createElement('li');
     li.className = 'learn-course';
@@ -91,7 +93,20 @@
         var packs = (grouped[cid] || []).sort(function (a, b) { return (a.course.order || 0) - (b.course.order || 0); });
         if (!packs.length) return;
         list.appendChild(courseHead(courses[cid], packs));
-        packs.forEach(function (r) { list.appendChild(tile(r)); });
+        var firstOpen = packs.findIndex(function (r) { var pr = P.getProgress(r.id); return Object.keys(pr.cards || {}).length < r.cards; });
+        var start = Math.max(0, (firstOpen < 0 ? packs.length : firstOpen) - 1);
+        var visible = expanded[cid] ? packs : packs.slice(start, start + SHOW);
+        visible.forEach(function (r) { list.appendChild(tile(r)); });
+        if (!expanded[cid] && visible.length < packs.length) {
+          var moreLi = document.createElement('li');
+          moreLi.className = 'learn-course__more';
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'learn-btn';
+          b.textContent = t('show_all_packs', { n: packs.length });
+          b.addEventListener('click', function () { expanded[cid] = true; refresh(); });
+          moreLi.appendChild(b);
+          list.appendChild(moreLi);
+        }
       });
       var loose = rows.filter(function (r) { var cid = P.courseOf(r); return !(cid && courses[cid] && grouped[cid]); });
       if (loose.length && Object.keys(grouped).length) { var h = document.createElement('li'); h.className = 'learn-course learn-course--loose'; h.innerHTML = '<span class="learn-course__title">' + esc(t('single_packs')) + '</span>'; list.appendChild(h); }

@@ -215,6 +215,7 @@ eleventyComputed:
     let format = true;
     const fence = t.match(/```(?:[a-z]+)?\s*\n([\s\S]*?)\n```/i);
     if (fence) { t = fence[1].trim(); format = false; }
+    else if (/^```/.test(t)) { t = t.replace(/^```[a-z]*\s*\n?/i, '').replace(/\n?```\s*$/, '').trim(); format = false; }
     if (/<script|<\/script|<html|<!DOCTYPE/i.test(t)) format = false;
     return { body: t, format };
   }

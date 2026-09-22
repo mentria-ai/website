@@ -1,0 +1,188 @@
+{
+  "library": "three.js",
+  "version": "0.186.0",
+  "revision": "186",
+  "source": "https://cdn.jsdelivr.net/npm/three@0.186.0/",
+  "fetched_utc": "2026-09-21T16:10:05.973Z",
+  "license": "MIT (see LICENSE; Copyright (c) 2010-2026 three.js authors)",
+  "note": "Vendored because mentria.ai CSP has no cdn.jsdelivr.net in script-src, and because a hashed local copy is the version-drift mitigation: the trained distribution and the served library cannot diverge without a deliberate commit.",
+  "file_count": 35,
+  "total_bytes": 1040623,
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 1081,
+      "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc"
+    },
+    {
+      "path": "build/three.core.min.js",
+      "bytes": 415816,
+      "sha256": "f3556fb8c9aff8fc6f8e090b918ae5d4e6b45152afb93815002d3319d875cdec"
+    },
+    {
+      "path": "build/three.module.min.js",
+      "bytes": 392831,
+      "sha256": "6a238d5d0c711f1f008488aff06a2ab9ab478959842044d243e89c316f6a5fc2"
+    },
+    {
+      "path": "examples/jsm/controls/OrbitControls.js",
+      "bytes": 40755,
+      "sha256": "3d79d07ecb686b4e5d93232eedab255331c1beef711e13164eaa1f68655a5f2b"
+    },
+    {
+      "path": "examples/jsm/environments/RoomEnvironment.js",
+      "bytes": 4960,
+      "sha256": "55f466192cc84298755a424c5e040345006b2ee1455589b3b54126c2ea4123f4"
+    },
+    {
+      "path": "examples/jsm/geometries/ParametricGeometry.js",
+      "bytes": 3808,
+      "sha256": "f25b69d9f8a5a7f8e206bb151875609349dabaf9bd81830779033ed2521e8a7a"
+    },
+    {
+      "path": "examples/jsm/lines/Line2.js",
+      "bytes": 1486,
+      "sha256": "69dd2120d4df14208796acf199f80a64d37e042cfa65dc2b98286694b2954194"
+    },
+    {
+      "path": "examples/jsm/lines/LineGeometry.js",
+      "bytes": 3479,
+      "sha256": "b7ec6b0011e3b09dc72e17cfd8e8945295cb2bc8c8aa9aa19e47119680bdad7e"
+    },
+    {
+      "path": "examples/jsm/lines/LineMaterial.js",
+      "bytes": 14020,
+      "sha256": "d4517001f9d7b3e885ea5baa930de0077351e885db52ef4565cde4c7dd17eb23"
+    },
+    {
+      "path": "examples/jsm/lines/LineSegments2.js",
+      "bytes": 11477,
+      "sha256": "fcbc20f576e88343cea12131f49b7003d7ab44ede422fcb694e567456022f7a0"
+    },
+    {
+      "path": "examples/jsm/lines/LineSegmentsGeometry.js",
+      "bytes": 6893,
+      "sha256": "471f0a954a0c9c59d3d151392f424142a9164a722802f63b371971378a84a1b1"
+    },
+    {
+      "path": "examples/jsm/math/ImprovedNoise.js",
+      "bytes": 3034,
+      "sha256": "d3821241e25bf0c8bfc13cec941924573bbaaf8f599a4fa07d60664b97832b39"
+    },
+    {
+      "path": "examples/jsm/math/SimplexNoise.js",
+      "bytes": 15148,
+      "sha256": "4b1455617135e6b477de76244de07547d95570643379b72f4758e50161b06072"
+    },
+    {
+      "path": "examples/jsm/objects/Sky.js",
+      "bytes": 11526,
+      "sha256": "34121b60a3bd9adc004a5a637f6135e9d2b72757eeb9e476ae1988fe2db6a9fb"
+    },
+    {
+      "path": "examples/jsm/postprocessing/AfterimagePass.js",
+      "bytes": 4388,
+      "sha256": "8cc0c8724a674a649d438c932e0b5f287e7d02f9fc35f627b669180bf4d2cc01"
+    },
+    {
+      "path": "examples/jsm/postprocessing/BokehPass.js",
+      "bytes": 5531,
+      "sha256": "5b9b0bc5cee6e24b2417da95f40eb2d178943c2ffbacbc4c2993a89d0597bfb3"
+    },
+    {
+      "path": "examples/jsm/postprocessing/EffectComposer.js",
+      "bytes": 8501,
+      "sha256": "4e079a5886152d7e529a59aef644e968ab4d32c6a33ce016b36bf29b2eac26f7"
+    },
+    {
+      "path": "examples/jsm/postprocessing/FilmPass.js",
+      "bytes": 2684,
+      "sha256": "709a6e640b5ced2449e458d57656173208e81af064e414b9c6f775cbf1287ed2"
+    },
+    {
+      "path": "examples/jsm/postprocessing/MaskPass.js",
+      "bytes": 4694,
+      "sha256": "7cd08eee9d5d6f5578beaddbdcbe9c384f6873810af27f22ab7db3ceeb127aa3"
+    },
+    {
+      "path": "examples/jsm/postprocessing/OutputPass.js",
+      "bytes": 4184,
+      "sha256": "02e4a261af34de71338185e9e87f0cbe5cba9115608d984363e1269dec1d2272"
+    },
+    {
+      "path": "examples/jsm/postprocessing/Pass.js",
+      "bytes": 4218,
+      "sha256": "444b409c235ead986893c472e720da1b779a56985c7d10b279c7944b52bd61c5"
+    },
+    {
+      "path": "examples/jsm/postprocessing/RenderPass.js",
+      "bytes": 4280,
+      "sha256": "817f6c3cdcd0fd41515d112359ea0532568eefb5aabd3b33903957ebca1b8a6a"
+    },
+    {
+      "path": "examples/jsm/postprocessing/ShaderPass.js",
+      "bytes": 3228,
+      "sha256": "e2500a5913b26bbf5148ceaae644c6edcff06a18b01494ee37bf856353d2ab9d"
+    },
+    {
+      "path": "examples/jsm/postprocessing/UnrealBloomPass.js",
+      "bytes": 15397,
+      "sha256": "ba8f2fcadfa6588384c9473498f974d81d120f02f0e63a0e59c265202a006b5a"
+    },
+    {
+      "path": "examples/jsm/shaders/AfterimageShader.js",
+      "bytes": 1048,
+      "sha256": "fb842ae657379a6ee3b431bd864b4e4956d36df14daf502bf6ffecdbf14de8bb"
+    },
+    {
+      "path": "examples/jsm/shaders/BokehShader.js",
+      "bytes": 5934,
+      "sha256": "bd8525158e3574a803f2e2ce5d5e263349a80ee41bf789e71446b9caa256aa9a"
+    },
+    {
+      "path": "examples/jsm/shaders/CopyShader.js",
+      "bytes": 729,
+      "sha256": "a33057d5ac91c43304c186ac0e8816e62bb2ed471d3a00ff3018dfd5c0389718"
+    },
+    {
+      "path": "examples/jsm/shaders/DotScreenShader.js",
+      "bytes": 1378,
+      "sha256": "959a2e0ea3d4a89d67754e417c56bd67abd632427d51fab19361003cd0ca7cef"
+    },
+    {
+      "path": "examples/jsm/shaders/FilmShader.js",
+      "bytes": 1227,
+      "sha256": "744c619c70f949af5d3f0f9edb27573743ab9ad12869e7c306ffb3d0caff7bb5"
+    },
+    {
+      "path": "examples/jsm/shaders/LuminosityHighPassShader.js",
+      "bytes": 1291,
+      "sha256": "5044f780b6e6cf863947f64c36fe1587132f7fbe395ada863cd1e5f0388dcf1e"
+    },
+    {
+      "path": "examples/jsm/shaders/OutputShader.js",
+      "bytes": 1876,
+      "sha256": "353479f77a8d7e2629d49ccac9fc2f5dbfdda5442e0adf867b00377a2fcb0cb2"
+    },
+    {
+      "path": "examples/jsm/shaders/RGBShiftShader.js",
+      "bytes": 1288,
+      "sha256": "69e7872f4719533013da7ca2a0bbbf9f369bc85a6efb6db76361a75fd4816b8b"
+    },
+    {
+      "path": "examples/jsm/shaders/VignetteShader.js",
+      "bytes": 1049,
+      "sha256": "5b122990efab55aa39ac5c72a09bc840e572773f5037b9127acfc8e31ee08b83"
+    },
+    {
+      "path": "examples/jsm/utils/BufferGeometryUtils.js",
+      "bytes": 37712,
+      "sha256": "9fb63427ce6641fa14fd0baff9cc4d1b5f9c3d85fd084bf2e90e803c44ec1797"
+    },
+    {
+      "path": "package.json",
+      "bytes": 3672,
+      "sha256": "ab4ff6950aab522dfe6980f19914a5eb2cadb689a36c6c44f4d3869c5e46dc89"
+    }
+  ]
+}

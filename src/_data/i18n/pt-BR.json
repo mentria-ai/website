@@ -515,6 +515,11 @@
       "title": "Console",
       "lede": "Converse com o modelo local enquanto ele usa os apps da Mentria em uma tela de celular compartilhada — ou deixe que ele atue como usuário de teste e relate o que encontrar.",
       "tldr": "O Console coloca uma tela da Mentria do tamanho de um celular ao lado de um chat. Peça ao modelo 27B local para fazer algo (\"crie um timer de 5 minutos\") e ele abre o app e o usa na sua frente — cada ação é exibida e ele precisa citar a tela para dizer que concluiu. Inicie uma sessão de teste e ele explora um app como uma pessoa fictícia, depois escreve um relatório com bugs que você pode registrar como issues. Nada sai do seu dispositivo."
+    },
+    "forge": {
+      "title": "Forge",
+      "lede": "Descreva uma cena 3D e o modelo 27B no seu dispositivo a escreve em three.js, renderiza em um sandbox, verifica e repara uma vez. Sem servidor, nada é enviado.",
+      "tldr": "O Forge transforma uma frase em uma cena three.js ao vivo. O modelo 27B rodando no seu navegador escreve apenas o corpo de um módulo ES; a página é dona do renderer, da câmera e do loop de renderização, executa o corpo em um quadro isolado, lê os pixels e o grafo da cena para verificar que algo está visível e se movendo sem erros, e se uma verificação falha envia o problema exato de volta ao modelo para um reparo. Você recebe a cena rodando, o código e um HTML independente. Tudo roda no seu dispositivo."
     }
   },
   "game": {
@@ -2115,6 +2120,46 @@
       "btn_reload": "Recarregar",
       "btn_screen": "Mostrar o que o modelo vê",
       "frame_title": "Tela de app compartilhada"
+    },
+    "forge": {
+      "status_idle": "Pronto para carregar o modelo",
+      "status_loading": "Carregando modelo…",
+      "status_ready": "Pronto",
+      "status_writing": "Escrevendo a cena…",
+      "status_rendering": "Renderizando e verificando…",
+      "status_repairing": "Reparando…",
+      "needs_27b": "O Forge precisa do nível 27B. Abra o AI Chat e escolha 27B no menu do modelo.",
+      "err_no_webgpu": "WebGPU não está disponível neste navegador.",
+      "err_load": "Erro: ",
+      "err_device_lost": "O dispositivo GPU foi perdido. Recarregue a página.",
+      "adapter_on": "adaptador forge {v}",
+      "adapter_off": "modelo base",
+      "placeholder": "Um toro cromado sobre um piso escuro refletivo, girando devagar",
+      "make": "Criar",
+      "empty": "Descreva uma cena acima. O modelo escreve o three.js, a página renderiza e verifica.",
+      "example_1": "Um campo de partículas brilhantes flutuando como neve",
+      "example_2": "Icosaedro em wireframe pulsando em rosa neon sobre névoa",
+      "example_3": "Uma ilha low-poly com câmera orbitando devagar ao pôr do sol",
+      "veil_writing": "escrevendo",
+      "veil_repair": "reparando",
+      "check_errors": "Sem erros",
+      "check_visible": "Algo visível",
+      "check_moves": "Anima",
+      "check_update": "Exporta update(t)",
+      "check_canvas": "Um só canvas",
+      "check_api": "API atual do three.js",
+      "check_colours": "Cores ricas",
+      "first_try": "De primeira",
+      "repaired": "Reparado uma vez",
+      "still_broken": "Ainda falha após um reparo",
+      "format_note": "cercas removidas",
+      "frame_failed": "O sandbox não conseguiu renderizar.",
+      "copied": "Código copiado",
+      "tokens_time": "{n} tokens · {s} s",
+      "again": "De novo",
+      "copy": "Copiar código",
+      "download": "Baixar HTML",
+      "show_code": "Ver o corpo do módulo"
     }
   },
   "category": {

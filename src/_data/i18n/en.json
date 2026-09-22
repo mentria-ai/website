@@ -515,6 +515,11 @@
       "title": "Console",
       "lede": "Chat with the on-device model while it uses Mentria apps on a shared phone screen — or let it play a test user and report what it finds.",
       "tldr": "The Console puts a phone-sized Mentria screen next to a chat. Ask the 27B on-device model to do something (\"set a 5 minute timer\") and it opens the app and taps through it in front of you — every action is shown, and it must quote the screen to claim success. Start a test session and it explores an app as a made-up person, then writes a report with bugs you can file as issues. Nothing leaves your device."
+    },
+    "forge": {
+      "title": "Forge",
+      "lede": "Describe a 3D scene and the on-device 27B model writes it in three.js, renders it in a sandbox, checks it, and repairs it once. No server, nothing uploaded.",
+      "tldr": "Forge turns a sentence into a live three.js scene. The 27B model running in your browser writes only the body of an ES module; the page owns the renderer, camera and render loop, renders the body in a sandboxed frame, reads the pixels and the scene graph to check that something is visible and moving with no errors, and if a check fails it sends the exact problem back to the model for one repair. You get the running scene, the code, and a standalone HTML file to keep. Everything runs on your device."
     }
   },
   "game": {
@@ -2115,6 +2120,46 @@
       "btn_reload": "Reload",
       "btn_screen": "Show what the model sees",
       "frame_title": "Shared app screen"
+    },
+    "forge": {
+      "status_idle": "Ready to load the model",
+      "status_loading": "Loading model…",
+      "status_ready": "Ready",
+      "status_writing": "Writing the scene…",
+      "status_rendering": "Rendering and checking…",
+      "status_repairing": "Repairing…",
+      "needs_27b": "Forge needs the 27B tier. Open AI Chat and pick 27B in the model menu.",
+      "err_no_webgpu": "WebGPU is not available in this browser.",
+      "err_load": "Error: ",
+      "err_device_lost": "The GPU device was lost. Reload the page.",
+      "adapter_on": "forge adapter {v}",
+      "adapter_off": "base model",
+      "placeholder": "A chrome torus over a dark reflective floor, slowly turning",
+      "make": "Make",
+      "empty": "Describe a scene above. The model writes the three.js, the page renders and checks it.",
+      "example_1": "A field of glowing particles drifting like snow",
+      "example_2": "Wireframe icosahedron pulsing in neon pink over a fog",
+      "example_3": "A low-poly island with a slow orbiting camera at sunset",
+      "veil_writing": "writing",
+      "veil_repair": "repairing",
+      "check_errors": "No errors",
+      "check_visible": "Something visible",
+      "check_moves": "Animates",
+      "check_update": "Exports update(t)",
+      "check_canvas": "One canvas",
+      "check_api": "Current three.js API",
+      "check_colours": "Rich colours",
+      "first_try": "First try",
+      "repaired": "Repaired once",
+      "still_broken": "Still failing after one repair",
+      "format_note": "fences stripped",
+      "frame_failed": "The sandbox could not render.",
+      "copied": "Code copied",
+      "tokens_time": "{n} tokens · {s} s",
+      "again": "Again",
+      "copy": "Copy code",
+      "download": "Download HTML",
+      "show_code": "Show the module body"
     }
   },
   "category": {

@@ -1,0 +1,476 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/forge/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.forge.title' | t }}"
+  description: "{{ 'tools.forge.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">forge</span></p>
+  <h1>{{ "tools.forge.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
+  <p>{{ "tools.forge.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "forge.js" %}
+{% include "terminal-frame-open.njk" %}
+
+<div class="fg">
+  <div class="fg__status">
+    <span class="fg__dot" id="fg-dot"></span>
+    <span class="fg__status-text" id="fg-status" role="status" aria-live="polite">{{ "tool.forge.status_idle" | t }}</span>
+    <span class="fg__chip" id="fg-adapter" hidden></span>
+  </div>
+  <div class="fg__activity" id="fg-activity"></div>
+
+  <form class="fg__ask" id="fg-form">
+    <input class="fg__input" id="fg-input" type="text" autocomplete="off" spellcheck="false" maxlength="400" placeholder="{{ 'tool.forge.placeholder' | t }}">
+    <button type="submit" class="fg__make" id="fg-make">{{ "tool.forge.make" | t }}</button>
+  </form>
+  <div class="fg__examples" id="fg-examples">
+    <button type="button" class="fg__example">{{ "tool.forge.example_1" | t }}</button>
+    <button type="button" class="fg__example">{{ "tool.forge.example_2" | t }}</button>
+    <button type="button" class="fg__example">{{ "tool.forge.example_3" | t }}</button>
+  </div>
+
+  <div class="fg__stage" id="fg-stage">
+    <div class="fg__empty" id="fg-empty"><span aria-hidden="true">&#9670;</span><p>{{ "tool.forge.empty" | t }}</p></div>
+    <div class="fg__veil" id="fg-veil" hidden><p class="fg__veil-text" id="fg-veil-text"></p></div>
+  </div>
+
+  <div class="fg__result" id="fg-result" hidden>
+    <ul class="fg__checks" id="fg-checks"></ul>
+    <p class="fg__note" id="fg-note" hidden></p>
+    <div class="fg__actions">
+      <button type="button" class="fg__btn" id="fg-again">{{ "tool.forge.again" | t }}</button>
+      <button type="button" class="fg__btn" id="fg-copy">{{ "tool.forge.copy" | t }}</button>
+      <button type="button" class="fg__btn" id="fg-download">{{ "tool.forge.download" | t }}</button>
+    </div>
+    <details class="fg__code">
+      <summary>{{ "tool.forge.show_code" | t }}</summary>
+      <pre id="fg-pre"></pre>
+    </details>
+  </div>
+</div>
+
+{% include "terminal-frame-close.njk" %}
+
+<script>
+(function () {
+  'use strict';
+  const MENTRIA_DIST_BASE = '/assets/mentria/dist/';
+  const COPY = {
+    statusIdle:      {{ ("tool.forge.status_idle"      | t) | dump | safe }},
+    statusLoading:   {{ ("tool.forge.status_loading"   | t) | dump | safe }},
+    statusReady:     {{ ("tool.forge.status_ready"     | t) | dump | safe }},
+    statusWriting:   {{ ("tool.forge.status_writing"   | t) | dump | safe }},
+    statusRendering: {{ ("tool.forge.status_rendering" | t) | dump | safe }},
+    statusRepairing: {{ ("tool.forge.status_repairing" | t) | dump | safe }},
+    needs27:         {{ ("tool.forge.needs_27b"        | t) | dump | safe }},
+    errNoWebgpu:     {{ ("tool.forge.err_no_webgpu"    | t) | dump | safe }},
+    errLoad:         {{ ("tool.forge.err_load"         | t) | dump | safe }},
+    errDeviceLost:   {{ ("tool.forge.err_device_lost"  | t) | dump | safe }},
+    downloadPostponed: {{ ("common.download_postponed" | t) | dump | safe }},
+    adapterOn:       {{ ("tool.forge.adapter_on"       | t) | dump | safe }},
+    adapterOff:      {{ ("tool.forge.adapter_off"      | t) | dump | safe }},
+    veilWriting:     {{ ("tool.forge.veil_writing"     | t) | dump | safe }},
+    veilRepair:      {{ ("tool.forge.veil_repair"      | t) | dump | safe }},
+    checkErrors:     {{ ("tool.forge.check_errors"     | t) | dump | safe }},
+    checkVisible:    {{ ("tool.forge.check_visible"    | t) | dump | safe }},
+    checkMoves:      {{ ("tool.forge.check_moves"      | t) | dump | safe }},
+    checkUpdate:     {{ ("tool.forge.check_update"     | t) | dump | safe }},
+    checkCanvas:     {{ ("tool.forge.check_canvas"     | t) | dump | safe }},
+    checkApi:        {{ ("tool.forge.check_api"        | t) | dump | safe }},
+    checkColours:    {{ ("tool.forge.check_colours"    | t) | dump | safe }},
+    firstTry:        {{ ("tool.forge.first_try"        | t) | dump | safe }},
+    repaired:        {{ ("tool.forge.repaired"         | t) | dump | safe }},
+    stillBroken:     {{ ("tool.forge.still_broken"     | t) | dump | safe }},
+    formatNote:      {{ ("tool.forge.format_note"      | t) | dump | safe }},
+    frameFailed:     {{ ("tool.forge.frame_failed"     | t) | dump | safe }},
+    copied:          {{ ("tool.forge.copied"           | t) | dump | safe }},
+    tokensTime:      {{ ("tool.forge.tokens_time"      | t) | dump | safe }}
+  };
+
+  const HEADER = "You are the Mentria AI assistant. You run Bonsai 27B locally in the user's browser via WebGPU, with weights fine-tuned and shipped by mentria.ai; say so if you are asked who you are or what model you run. You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly. Use markdown sparingly, and for tables output strict GitHub-flavored markdown: one header row, one divider row made only of pipes and dashes, then data rows.";
+  const BLOCK = "When the user describes a 3D scene, reply with ONLY the body of an ES module. three.js r186 is already imported as THREE; scene, camera, renderer and a Timer exist; the page owns the canvas, the resize handler and the render loop. Do not write HTML, an import map, a WebGLRenderer, a resize listener or requestAnimationFrame. You may import from 'three/addons/'. Set camera.position and scene.background, add lights, and export one function update(t) that advances the animation. No prose, no fences, no explanation.";
+  const SYSTEM_BASE = HEADER + "\n\n" + BLOCK;
+  const REPAIR = "Make: {ask}\n\nThis scene has a problem: {error}\n{body}\n\nRewrite the whole module body with the problem fixed. Output only the module body.";
+  const ADAPTER_NAME = 'threejs-forge';
+  const MAX_TOKENS = 700;
+  const TH = { lumStd: 6, animDelta: 1, colours: 24 };
+  const BANNED = ['outputEncoding', 'sRGBEncoding', 'LinearEncoding', 'gammaFactor', 'physicallyCorrectLights', 'useLegacyLights', 'THREE.Geometry', 'Face3', 'THREE.Math.', 'ImageUtils', 'MeshFaceMaterial', 'RGBFormat', 'three/examples/j', 'three.min.js', 'WebGLMultipleRenderTargets', 'renderAsync', 'viewportTopLeft', 'THREE.Source', 'new THREE.WebGLRenderer', 'requestAnimationFrame', "window.addEventListener('resize'", 'document.body.appendChild'];
+  const BANNED_RE = [
+    { id: 'window.addEventListener("resize"', re: /window\s*\.\s*addEventListener\s*\(\s*["']resize["']/ },
+    { id: 'setAnimationLoop', re: /\.\s*setAnimationLoop\s*\(/ }
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const dot = $('fg-dot'), statusText = $('fg-status'), chip = $('fg-adapter'), activityHost = $('fg-activity');
+  const form = $('fg-form'), input = $('fg-input'), makeBtn = $('fg-make'), examples = $('fg-examples');
+  const stage = $('fg-stage'), empty = $('fg-empty'), veil = $('fg-veil'), veilText = $('fg-veil-text');
+  const result = $('fg-result'), checksEl = $('fg-checks'), noteEl = $('fg-note'), pre = $('fg-pre');
+  const againBtn = $('fg-again'), copyBtn = $('fg-copy'), downloadBtn = $('fg-download');
+
+  let MentriaEngine = null, Tiers = null, engine = null, tier = null, loaded = false, loadingPromise = null;
+  let strip = null, Activity = null;
+  let busy = false, frame = null, lastAsk = '', lastBody = '', frameSeq = 0;
+  let adapter = { entry: null, active: false, system: SYSTEM_BASE };
+
+  function setStatus(state, text) { dot.className = 'fg__dot fg__dot--' + state; statusText.textContent = text; }
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  async function ensureStrip() {
+    if (strip) return strip;
+    Activity = await import('/assets/js/mentria-activity.js');
+    strip = Activity.createActivityStrip(activityHost);
+    return strip;
+  }
+  async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  if (!navigator.gpu) { setStatus('error', COPY.errNoWebgpu); makeBtn.disabled = true; input.disabled = true; return; }
+
+  async function ensureModel() {
+    if (loaded) return true;
+    if (loadingPromise) return loadingPromise;
+    loadingPromise = (async () => {
+      setStatus('loading', COPY.statusLoading);
+      await ensureStrip();
+      try {
+        if (!MentriaEngine) ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
+        if (!Tiers) Tiers = await import('/assets/js/mentria-tiers.js');
+        const { ensureModel: ensureSharedModel } = await import('/assets/js/mentria-model.js');
+        const createEngine = () => {
+          const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
+          window.mentriaWrapEngine && window.mentriaWrapEngine(e);
+          return e;
+        };
+        const res = await ensureSharedModel(createEngine, {
+          vision: false,
+          offerUpgrade: true,
+          onProgress: (p) => { if (strip) strip.onProgress(p); },
+          onTier: (info) => strip.setTier(info),
+          onDeviceLost: (info) => { setStatus('error', COPY.errDeviceLost); console.error('WebGPU device lost:', info); loaded = false; engine = null; loadingPromise = null; adapter.active = false; }
+        });
+        engine = res.engine;
+        tier = res.tier;
+        if (tier !== '27b') {
+          strip.hide();
+          setStatus('error', COPY.needs27);
+          return false;
+        }
+        await ensureAdapter();
+        strip.done({ prime: COPY.statusReady, linger: 1200 });
+        loaded = true;
+        return true;
+      } catch (err) {
+        if (strip) strip.hide();
+        if (err && err.message === 'download-postponed') setStatus('idle', COPY.downloadPostponed);
+        else if (err && (err.message === 'no-webgpu' || err.name === 'NoWebGpuError' || err.name === 'WebGPUUnsupportedError')) setStatus('error', COPY.errNoWebgpu);
+        else setStatus('error', COPY.errLoad + (err && err.message || err));
+        console.error('forge model load error:', err);
+        loadingPromise = null;
+        return false;
+      }
+    })();
+    return loadingPromise;
+  }
+
+  async function ensureAdapter() {
+    chip.hidden = false;
+    chip.textContent = COPY.adapterOff;
+    chip.classList.remove('is-on');
+    if (!engine || typeof engine.swapAdapter !== 'function') return;
+    const base = (Tiers.TIERS[tier] && Tiers.TIERS[tier].base) || '';
+    try {
+      const res = await fetch(base + 'loras/index.json', { cache: 'no-cache' });
+      if (!res.ok) return;
+      const raw = await res.json();
+      const entries = Array.isArray(raw) ? raw : (raw && raw.adapters) || [];
+      const entry = entries.find((e) => e && e.name === ADAPTER_NAME && typeof e.path === 'string');
+      if (!entry) return;
+      if (entry.system_sha256 && typeof entry.system === 'string') {
+        const digest = await sha256Hex(entry.system);
+        if (digest !== String(entry.system_sha256).toLowerCase()) throw new Error('system checksum mismatch');
+      }
+      const path = String(entry.path).replace(/\/?$/, '/');
+      await engine.swapAdapter({ name: entry.name, configUrl: base + path + 'adapter_config.json', weightsUrl: base + path + 'adapter_model.safetensors' });
+      adapter = { entry, active: true, system: typeof entry.system === 'string' && entry.system ? entry.system : SYSTEM_BASE };
+      chip.textContent = COPY.adapterOn.replace('{v}', entry.version || '');
+      chip.classList.add('is-on');
+    } catch (err) {
+      console.warn('forge adapter unavailable, base model writes:', err);
+      adapter = { entry: null, active: false, system: SYSTEM_BASE };
+    }
+  }
+
+  function clean(text) {
+    let t = String(text || '').replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<\|[^|]*\|>/g, '').trim();
+    let format = true;
+    const fence = t.match(/```(?:[a-z]+)?\s*\n([\s\S]*?)\n```/i);
+    if (fence) { t = fence[1].trim(); format = false; }
+    if (/<script|<\/script|<html|<!DOCTYPE/i.test(t)) format = false;
+    return { body: t, format };
+  }
+
+  function lint(body) {
+    const hard = [];
+    for (const tok of BANNED) if (body.includes(tok)) hard.push(tok);
+    for (const { id, re } of BANNED_RE) if (re.test(body) && !hard.includes(id)) hard.push(id);
+    return hard;
+  }
+
+  function hasUpdate(body) { return /^[ \t]*export\s+function\s+update\s*\(/m.test(body); }
+
+  async function generate(messages, onToken) {
+    const params = { messages, maxTokens: MAX_TOKENS, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false, cycleDetector: 'off' };
+    let full = '', n = 0;
+    await engine.generate(params, (event) => {
+      if (typeof event.token === 'string' && event.token.length > 0) {
+        if (/^<\|[^|]*\|>$/.test(event.token)) return;
+        full += event.token;
+        n++;
+        if (strip) strip.token(n);
+        onToken(n);
+      }
+    });
+    return { text: full, tokens: n };
+  }
+
+  function mountFrame() {
+    if (frame) { frame.remove(); frame = null; }
+    const f = document.createElement('iframe');
+    f.className = 'fg__frame';
+    f.setAttribute('sandbox', 'allow-scripts');
+    f.setAttribute('title', 'scene');
+    f.src = '/assets/forge.html?r=' + (++frameSeq);
+    stage.appendChild(f);
+    frame = f;
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { window.removeEventListener('message', on); reject(new Error('frame timeout')); }, 20000);
+      function on(e) {
+        if (e.source !== f.contentWindow || !e.data || e.data.source !== 'mentria-forge-frame' || e.data.type !== 'ready') return;
+        clearTimeout(timer);
+        window.removeEventListener('message', on);
+        if (e.data.noContext) reject(new Error(e.data.noContext)); else resolve(f);
+      }
+      window.addEventListener('message', on);
+    });
+  }
+
+  function renderInFrame(body) {
+    return mountFrame().then((f) => new Promise((resolve, reject) => {
+      const id = String(frameSeq);
+      const timer = setTimeout(() => { window.removeEventListener('message', on); reject(new Error('render timeout')); }, 25000);
+      function on(e) {
+        if (e.source !== f.contentWindow || !e.data || e.data.source !== 'mentria-forge-frame' || e.data.type !== 'result' || e.data.id !== id) return;
+        clearTimeout(timer);
+        window.removeEventListener('message', on);
+        resolve(e.data);
+      }
+      window.addEventListener('message', on);
+      f.contentWindow.postMessage({ source: 'mentria-forge', type: 'load', id, body }, '*');
+    }));
+  }
+
+  function evaluate(body, res) {
+    const checks = [];
+    const hard = lint(body);
+    checks.push({ key: 'api', label: COPY.checkApi, ok: hard.length === 0, why: hard.length ? hard.join(', ') : '' });
+    const upd = hasUpdate(body);
+    checks.push({ key: 'update', label: COPY.checkUpdate, ok: upd });
+    const s = res && res.stats;
+    const errs = [];
+    if (res && res.loaded && res.loaded.error) errs.push(res.loaded.error);
+    if (s && s.updateThrew) errs.push(s.updateThrew);
+    const list = (res && res.errors) || (s && s.errors) || [];
+    list.forEach((e) => { if (errs.length < 3) errs.push((e.kind ? e.kind + ': ' : '') + e.message); });
+    checks.push({ key: 'errors', label: COPY.checkErrors, ok: errs.length === 0, why: errs[0] || '' });
+    checks.push({ key: 'visible', label: COPY.checkVisible, ok: !!s && s.lumStd >= TH.lumStd, why: s ? Math.round(s.lumStd * 10) / 10 : '' });
+    checks.push({ key: 'moves', label: COPY.checkMoves, ok: !!s && s.animDelta >= TH.animDelta, why: s ? Math.round(s.animDelta * 10) / 10 : '' });
+    checks.push({ key: 'canvas', label: COPY.checkCanvas, ok: !!s && s.graph && s.graph.canvases === 1, why: s && s.graph ? String(s.graph.canvases) : '' });
+    checks.push({ key: 'colours', label: COPY.checkColours, ok: !!s && s.colours15bit >= TH.colours, soft: true, why: s ? String(s.colours15bit) : '' });
+    const failed = checks.filter((c) => !c.ok && !c.soft);
+    let error = '';
+    if (failed.length) {
+      const f = failed[0];
+      if (f.key === 'api') error = 'banned API: ' + f.why;
+      else if (f.key === 'update') error = 'no exported update(t) function';
+      else if (f.key === 'errors') error = f.why;
+      else if (f.key === 'visible') error = 'the render is blank, nothing is visible (luminance std ' + f.why + ')';
+      else if (f.key === 'moves') error = 'the scene does not animate, update(t) changes nothing';
+      else if (f.key === 'canvas') error = 'extra canvas: do not create a WebGLRenderer';
+    }
+    return { checks, ok: failed.length === 0, error };
+  }
+
+  function showChecks(ev, tag) {
+    checksEl.innerHTML = '';
+    ev.checks.forEach((c) => {
+      const li = document.createElement('li');
+      li.className = 'fg__check ' + (c.ok ? 'is-ok' : c.soft ? 'is-soft' : 'is-bad');
+      li.innerHTML = '<span class="fg__check-mark" aria-hidden="true">' + (c.ok ? '&#10003;' : c.soft ? '&#8226;' : '&#10007;') + '</span><span class="fg__check-label">' + esc(c.label) + '</span>' + (c.why ? '<span class="fg__check-why">' + esc(String(c.why)) + '</span>' : '');
+      checksEl.appendChild(li);
+    });
+    noteEl.hidden = !tag;
+    noteEl.textContent = tag || '';
+    result.hidden = false;
+  }
+
+  async function attempt(messages, label) {
+    veil.hidden = false;
+    veilText.textContent = label;
+    const t0 = performance.now();
+    const gen = await generate(messages, (n) => { veilText.textContent = label + ' · ' + n; });
+    const secs = Math.round((performance.now() - t0) / 100) / 10;
+    const c = clean(gen.text);
+    let res = null;
+    setStatus('generating', COPY.statusRendering);
+    if (lint(c.body).length === 0 && hasUpdate(c.body)) {
+      try { res = await renderInFrame(c.body); } catch (err) { res = { loaded: { ok: false, error: String(err && err.message || err) }, stats: null, errors: [] }; }
+    }
+    veil.hidden = true;
+    return { body: c.body, format: c.format, res, tokens: gen.tokens, secs };
+  }
+
+  async function make(ask) {
+    ask = String(ask || '').trim();
+    if (!ask || busy) return;
+    const ok = await ensureModel();
+    if (!ok || !engine) return;
+    busy = true;
+    makeBtn.disabled = true;
+    empty.hidden = true;
+    result.hidden = true;
+    lastAsk = ask;
+    setStatus('generating', COPY.statusWriting);
+    try {
+      const system = adapter.system;
+      let a = await attempt([{ role: 'system', content: system }, { role: 'user', content: 'Make: ' + ask }], COPY.veilWriting);
+      let ev = evaluate(a.body, a.res);
+      let tag = COPY.firstTry;
+      if (!ev.ok) {
+        setStatus('generating', COPY.statusRepairing);
+        const user = REPAIR.replace('{ask}', ask).replace('{error}', ev.error).replace('{body}', a.body);
+        const b = await attempt([{ role: 'system', content: system }, { role: 'user', content: user }], COPY.veilRepair);
+        const ev2 = evaluate(b.body, b.res);
+        if (ev2.ok || !a.res) { a = b; ev = ev2; tag = ev2.ok ? COPY.repaired : COPY.stillBroken; }
+        else { tag = COPY.stillBroken; if (b.res && b.res.stats && a.res && a.res.stats && b.res.stats.lumStd > a.res.stats.lumStd) { a = b; ev = ev2; } }
+        if (a !== b && frame) { try { await renderInFrame(a.body); } catch (_) {} }
+      }
+      if (!a.res && frame) { frame.remove(); frame = null; empty.hidden = false; }
+      lastBody = a.body;
+      pre.textContent = a.body;
+      const meta = COPY.tokensTime.replace('{n}', String(a.tokens)).replace('{s}', String(a.secs));
+      showChecks(ev, tag + ' · ' + meta + (a.format ? '' : ' · ' + COPY.formatNote));
+      if (strip) strip.done({ tokens: a.tokens });
+      setStatus('ready', COPY.statusReady);
+    } catch (err) {
+      veil.hidden = true;
+      if (strip) strip.error(String(err && err.message || err), { phase: 'answering' });
+      setStatus('error', COPY.errLoad + (err && err.message || err));
+      console.error('forge error:', err);
+    } finally {
+      busy = false;
+      makeBtn.disabled = false;
+    }
+  }
+
+  function standaloneHtml(body) {
+    const origin = 'https://mentria.ai';
+    const map = JSON.stringify({ imports: {
+      'three': origin + '/assets/vendor/three-0.186.0/build/three.module.min.js',
+      'three/addons/': origin + '/assets/vendor/three-0.186.0/examples/jsm/',
+      [origin + '/assets/vendor/three-0.186.0/build/three.core.js']: origin + '/assets/vendor/three-0.186.0/build/three.core.min.js'
+    } });
+    const bodyJson = JSON.stringify(body).replace(/<\/script/gi, '<\\/script');
+    return '<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + esc(lastAsk) + ' · mentria forge</title>\n' +
+      '<style>html,body{margin:0;height:100%;overflow:hidden;background:#000}canvas{display:block;width:100%;height:100%}</style>\n' +
+      '<script type="importmap">' + map + '<\/script>\n</head><body>\n<script type="module">\n' +
+      "import * as THREE from 'three';\n" +
+      'const renderer = new THREE.WebGLRenderer({ antialias: true });\nrenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));\nrenderer.setSize(window.innerWidth, window.innerHeight);\nrenderer.outputColorSpace = THREE.SRGBColorSpace;\nrenderer.toneMapping = THREE.ACESFilmicToneMapping;\nrenderer.toneMappingExposure = 1.1;\ndocument.body.appendChild(renderer.domElement);\n' +
+      'const scene = new THREE.Scene();\nconst camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 400);\nconst timer = new THREE.Timer();\nObject.assign(window, { THREE, scene, camera, renderer, timer });\n' +
+      'let composer = null;\nwindow.addEventListener("resize", () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); if (composer) composer.setSize(window.innerWidth, window.innerHeight); });\n' +
+      'const body = await import(URL.createObjectURL(new Blob([' + bodyJson + '], { type: "text/javascript" })));\nif (body.composer) { composer = body.composer; composer.setSize(window.innerWidth, window.innerHeight); }\n' +
+      'renderer.setAnimationLoop((ts) => { timer.update(ts); if (body.update) body.update(timer.getElapsed()); if (composer) composer.render(); else renderer.render(scene, camera); });\n' +
+      '<\/script>\n</body></html>\n';
+  }
+
+  form.addEventListener('submit', (e) => { e.preventDefault(); make(input.value); });
+  examples.addEventListener('click', (e) => {
+    const b = e.target.closest('.fg__example');
+    if (!b) return;
+    input.value = b.textContent;
+    make(input.value);
+  });
+  againBtn.addEventListener('click', () => make(lastAsk || input.value));
+  copyBtn.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(lastBody); if (window.MentriaUI) MentriaUI.toast(COPY.copied); } catch (_) {}
+  });
+  downloadBtn.addEventListener('click', () => {
+    const blob = new Blob([standaloneHtml(lastBody)], { type: 'text/html' });
+    const name = 'forge-' + (lastAsk.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'scene') + '.html';
+    if (window.MentriaUI && MentriaUI.downloadFile) MentriaUI.downloadFile(name, blob);
+  });
+})();
+</script>
+
+<style>
+.fg { display: flex; flex-direction: column; gap: 0.75rem; padding: 0.75rem; font-family: var(--font-mono); }
+.fg__status { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: var(--term-muted); }
+.fg__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--term-muted); flex-shrink: 0; }
+.fg__dot--loading, .fg__dot--generating { background: var(--syn-amber, #fbbf24); animation: fg-pulse 1.2s ease-in-out infinite; }
+.fg__dot--ready { background: var(--accent, #6ef3c5); }
+.fg__dot--error { background: var(--syn-pink, #f472b6); }
+@keyframes fg-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .fg__dot--loading, .fg__dot--generating { animation: none; } }
+.fg__status-text { color: var(--term-fg); }
+.fg__chip { margin-left: auto; font-size: 0.64rem; letter-spacing: 0.04em; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--term-border); color: var(--term-muted); white-space: nowrap; }
+.fg__chip.is-on { border-color: rgba(110, 243, 197, 0.45); color: var(--accent, #6ef3c5); background: rgba(110, 243, 197, 0.08); }
+.fg__chip[hidden] { display: none; }
+.fg__ask { display: flex; gap: 0.5rem; }
+.fg__input { flex: 1; min-width: 0; background: rgba(255,255,255,0.04); border: 1px solid var(--term-border); border-radius: 8px; padding: 0.6rem 0.75rem; color: var(--term-fg); font-family: var(--font-body, 'Inter', sans-serif); font-size: 0.95rem; }
+.fg__input:focus { outline: none; border-color: rgba(34, 211, 238, 0.4); }
+.fg__make { flex-shrink: 0; border: none; border-radius: 8px; padding: 0 1.1rem; background: var(--syn-cyan); color: #000; font-family: var(--font-mono); font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+.fg__make:disabled { opacity: 0.4; cursor: not-allowed; }
+.fg__examples { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.fg__example { font: inherit; font-size: 0.72rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--term-border); background: transparent; color: var(--term-muted); cursor: pointer; }
+.fg__example:hover { color: var(--syn-cyan); border-color: var(--syn-cyan); }
+.fg__stage { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #000; border: 1px solid var(--term-border); border-radius: 12px; overflow: hidden; }
+.fg__frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+.fg__empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: var(--term-muted); font-size: 0.8rem; text-align: center; padding: 1rem; }
+.fg__empty span { color: var(--syn-cyan); font-size: 1.4rem; }
+.fg__empty p { margin: 0; max-width: 34ch; font-family: var(--font-body, 'Inter', sans-serif); }
+.fg__empty[hidden] { display: none; }
+.fg__veil { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(4px); }
+.fg__veil[hidden] { display: none; }
+.fg__veil-text { margin: 0; font-size: 0.8rem; letter-spacing: 0.08em; color: var(--syn-cyan); text-transform: uppercase; }
+.fg__result { display: flex; flex-direction: column; gap: 0.6rem; }
+.fg__result[hidden] { display: none; }
+.fg__checks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.35rem 0.75rem; }
+.fg__check { display: flex; align-items: baseline; gap: 0.5rem; font-size: 0.74rem; color: var(--term-muted); }
+.fg__check-mark { flex-shrink: 0; width: 1.1em; text-align: center; }
+.fg__check.is-ok .fg__check-mark { color: var(--accent, #6ef3c5); }
+.fg__check.is-bad { color: var(--term-fg); }
+.fg__check.is-bad .fg__check-mark { color: var(--syn-pink, #f472b6); }
+.fg__check.is-soft .fg__check-mark { color: var(--syn-amber, #fbbf24); }
+.fg__check-why { margin-left: auto; font-size: 0.66rem; opacity: 0.7; max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fg__note { margin: 0; font-size: 0.72rem; color: var(--term-muted); }
+.fg__note[hidden] { display: none; }
+.fg__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.fg__btn { background: transparent; border: 1px solid var(--term-border); color: var(--term-fg); border-radius: 6px; padding: 0.35rem 0.9rem; font-family: var(--font-mono); font-size: 0.75rem; cursor: pointer; }
+.fg__btn:hover { border-color: var(--syn-cyan); color: var(--syn-cyan); }
+.fg__code summary { cursor: pointer; font-size: 0.74rem; color: var(--term-muted); }
+.fg__code pre { margin: 0.5rem 0 0; padding: 0.75rem; border-radius: 8px; background: rgba(0, 0, 0, 0.45); border: 1px solid var(--term-border); font-size: 0.72rem; line-height: 1.5; overflow: auto; max-height: 50vh; white-space: pre; }
+@media (max-width: 480px) {
+  .fg { padding: 0.6rem; }
+  .fg__stage { aspect-ratio: 4 / 3; }
+  .fg__check-why { display: none; }
+}
+</style>

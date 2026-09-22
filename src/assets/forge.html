@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mentria forge frame r186</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #000; }
+  canvas { display: block; width: 100%; height: 100%; }
+</style>
+<script>
+(function () {
+  var errs = [];
+  window.__mentriaErrors = errs;
+  function push(kind, msg) {
+    if (errs.length > 40) return;
+    msg = String(msg == null ? '' : msg).slice(0, 400);
+    errs.push({ kind: kind, message: msg });
+    try { parent.postMessage({ source: 'mentria-forge-frame', type: 'error', kind: kind, message: msg }, '*'); } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    if (e && e.target && e.target !== window && e.target.tagName) {
+      var src = e.target.src || e.target.href || '';
+      if (src.indexOf('/.11ty/') < 0) push('resource', 'failed to load ' + e.target.tagName + ' ' + src);
+      return;
+    }
+    push('error', (e && (e.message || (e.error && e.error.message))) || 'script error');
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    var r = e && e.reason;
+    push('rejection', (r && (r.message || r)) || 'unhandled rejection');
+  });
+  var realError = console.error.bind(console);
+  console.error = function () {
+    var parts = [];
+    for (var i = 0; i < arguments.length; i++) { var a = arguments[i]; parts.push(a && a.message ? a.message : String(a)); }
+    push('console.error', parts.join(' '));
+    realError.apply(console, arguments);
+  };
+  var realWarn = console.warn.bind(console);
+  window.__mentriaWarnings = [];
+  console.warn = function () {
+    var parts = [];
+    for (var i = 0; i < arguments.length; i++) parts.push(String(arguments[i]));
+    if (window.__mentriaWarnings.length < 40) window.__mentriaWarnings.push(parts.join(' ').slice(0, 300));
+    realWarn.apply(console, arguments);
+  };
+})();
+</script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three-0.186.0/build/three.module.min.js",
+    "three/addons/": "./vendor/three-0.186.0/examples/jsm/",
+    "./vendor/three-0.186.0/build/three.core.js": "./vendor/three-0.186.0/build/three.core.min.js"
+  }
+}
+</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+} catch (e) {
+  window.__mentriaNoContext = String((e && e.message) || e);
+}
+if (renderer) {
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  document.body.appendChild(renderer.domElement);
+  if (!renderer.getContext()) window.__mentriaNoContext = 'getContext() returned null';
+}
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 400);
+const timer = new THREE.Timer();
+Object.assign(window, { THREE, scene, camera, renderer, timer });
+
+let composer = null;
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  if (renderer) renderer.setSize(w, h);
+  if (composer) composer.setSize(w, h);
+}
+window.addEventListener('resize', resize);
+
+let body = null;
+function renderAt(t) {
+  if (body && typeof body.update === 'function') body.update(t);
+  if (composer) composer.render();
+  else if (renderer) renderer.render(scene, camera);
+}
+function renderSceneAt(t) {
+  if (body && typeof body.update === 'function') body.update(t);
+  if (!renderer) return;
+  renderer.setRenderTarget(null);
+  renderer.render(scene, camera);
+}
+
+let looping = false;
+function tick(ts) {
+  timer.update(ts);
+  renderAt(timer.getElapsed());
+}
+function start() {
+  if (looping || !renderer) return;
+  looping = true;
+  renderer.setAnimationLoop(tick);
+}
+function stop() {
+  looping = false;
+  if (renderer) renderer.setAnimationLoop(null);
+}
+
+async function loadBody(url) {
+  const out = { ok: false, hasUpdate: false, hasComposer: false, exports: [], error: null };
+  try {
+    body = await import(/* @vite-ignore */ url);
+    out.exports = Object.keys(body);
+    out.hasUpdate = typeof body.update === 'function';
+    if (body.composer && typeof body.composer.render === 'function') {
+      composer = body.composer;
+      composer.setSize(window.innerWidth, window.innerHeight);
+      out.hasComposer = true;
+    }
+    out.ok = true;
+  } catch (e) {
+    out.error = String((e && e.message) || e).slice(0, 400);
+  }
+  window.__body = out;
+  return out;
+}
+
+function sample() {
+  const gl = renderer.getContext();
+  const c = renderer.domElement;
+  const w = c.width, h = c.height;
+  const raw = new Uint8Array(w * h * 4);
+  gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw);
+  const n = Math.floor((w * h) / 7);
+  const s = new Uint8Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const p = i * 7 * 4;
+    s[i * 3] = raw[p]; s[i * 3 + 1] = raw[p + 1]; s[i * 3 + 2] = raw[p + 2];
+  }
+  return s;
+}
+function frameStats(s) {
+  const n = s.length / 3;
+  const lum = new Float64Array(n);
+  const seen = new Set();
+  let ink = 0, mean = 0;
+  for (let i = 0; i < n; i++) {
+    const r = s[i * 3], g = s[i * 3 + 1], b = s[i * 3 + 2];
+    const l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    lum[i] = l; mean += l;
+    if (r > 8 || g > 8 || b > 8) ink++;
+    seen.add(((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3));
+  }
+  mean /= n;
+  let v = 0;
+  for (let i = 0; i < n; i++) { const d = lum[i] - mean; v += d * d; }
+  return { lumStd: Math.sqrt(v / n), lumMean: mean, colours15bit: seen.size, inkFrac: ink / n, samples: n };
+}
+function delta(a, b) {
+  let acc = 0;
+  for (let i = 0; i < a.length; i++) acc += Math.abs(a[i] - b[i]);
+  return acc / a.length;
+}
+function graph() {
+  let lights = 0, meshes = 0, objects = 0;
+  scene.traverse((o) => { objects++; if (o.isLight) lights++; if (o.isMesh) meshes++; });
+  return {
+    objects, lights, meshes,
+    hasBackground: !!scene.background, hasFog: !!scene.fog,
+    camDist: camera.position.length(),
+    composerPasses: composer ? composer.passes.length : 0,
+    canvases: document.querySelectorAll('canvas').length
+  };
+}
+
+function stats() {
+  if (window.__mentriaNoContext) return { noContext: window.__mentriaNoContext, errors: window.__mentriaErrors.slice() };
+  stop();
+  let s0, s1, s6, d1, d2, thrown = null;
+  try {
+    renderAt(0); s0 = sample();
+    renderAt(0.9); s1 = sample();
+    renderAt(6); s6 = sample();
+    renderSceneAt(0.9); d1 = sample();
+    renderSceneAt(0.9); d2 = sample();
+  } catch (e) {
+    thrown = String((e && e.message) || e).slice(0, 400);
+  }
+  const out = { rev: THREE.REVISION, updateThrew: thrown, errors: window.__mentriaErrors.slice(), warnings: window.__mentriaWarnings.slice(), body: window.__body || null, graph: graph() };
+  if (s1) {
+    Object.assign(out, frameStats(s1));
+    out.animShort = delta(s0, s1);
+    out.animLong = delta(s0, s6);
+    out.animMid = delta(s1, s6);
+    out.animDelta = Math.max(out.animShort, out.animLong, out.animMid);
+    out.determinism = delta(d1, d2);
+  }
+  return out;
+}
+
+function reply(msg) { try { parent.postMessage(Object.assign({ source: 'mentria-forge-frame' }, msg), '*'); } catch (e) {} }
+
+window.addEventListener('message', async (e) => {
+  const m = e.data;
+  if (!m || m.source !== 'mentria-forge' || m.type !== 'load' || typeof m.body !== 'string') return;
+  const url = URL.createObjectURL(new Blob([m.body], { type: 'text/javascript' }));
+  const loaded = await loadBody(url);
+  let result = null;
+  if (loaded.ok) {
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    result = stats();
+  }
+  reply({ type: 'result', id: m.id, loaded, stats: result, errors: window.__mentriaErrors.slice() });
+  if (loaded.ok && renderer && !(result && result.updateThrew)) start();
+});
+
+window.__harnessReady = true;
+reply({ type: 'ready', rev: THREE.REVISION, noContext: window.__mentriaNoContext || null });
+</script>
+</body>
+</html>

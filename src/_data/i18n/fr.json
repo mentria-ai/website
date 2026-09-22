@@ -515,6 +515,11 @@
       "title": "Console",
       "lede": "Discutez avec le modèle local pendant qu'il utilise les apps Mentria sur un écran de téléphone partagé — ou laissez-le jouer un utilisateur test et rapporter ce qu'il trouve.",
       "tldr": "La Console place un écran Mentria au format téléphone à côté d'un chat. Demandez au modèle 27B local de faire quelque chose (« lance un minuteur de 5 minutes ») : il ouvre l'app et la manipule sous vos yeux — chaque action est visible et il doit citer l'écran pour déclarer la tâche terminée. Lancez une session test : il explore une app comme une personne fictive, puis rédige un rapport de bugs à transformer en issues. Rien ne quitte votre appareil."
+    },
+    "forge": {
+      "title": "Forge",
+      "lede": "Décrivez une scène 3D : le modèle 27B sur votre appareil l’écrit en three.js, la rend dans un bac à sable, la vérifie et la répare une fois. Sans serveur, rien n’est envoyé.",
+      "tldr": "Forge transforme une phrase en scène three.js vivante. Le modèle 27B qui tourne dans votre navigateur n’écrit que le corps d’un module ES ; la page possède le renderer, la caméra et la boucle de rendu, exécute le corps dans un cadre isolé, lit les pixels et le graphe de scène pour vérifier que quelque chose est visible et bouge sans erreur, et si une vérification échoue elle renvoie le problème exact au modèle pour une réparation. Vous obtenez la scène en marche, le code et un HTML autonome. Tout tourne sur votre appareil."
     }
   },
   "game": {
@@ -2115,6 +2120,46 @@
       "btn_reload": "Recharger",
       "btn_screen": "Afficher ce que voit le modèle",
       "frame_title": "Écran d'app partagé"
+    },
+    "forge": {
+      "status_idle": "Prêt à charger le modèle",
+      "status_loading": "Chargement du modèle…",
+      "status_ready": "Prêt",
+      "status_writing": "Écriture de la scène…",
+      "status_rendering": "Rendu et vérification…",
+      "status_repairing": "Réparation…",
+      "needs_27b": "Forge nécessite le palier 27B. Ouvrez AI Chat et choisissez 27B dans le menu du modèle.",
+      "err_no_webgpu": "WebGPU n’est pas disponible dans ce navigateur.",
+      "err_load": "Erreur : ",
+      "err_device_lost": "Le périphérique GPU a été perdu. Rechargez la page.",
+      "adapter_on": "adaptateur forge {v}",
+      "adapter_off": "modèle de base",
+      "placeholder": "Un tore chromé sur un sol sombre réfléchissant, tournant lentement",
+      "make": "Créer",
+      "empty": "Décrivez une scène ci-dessus. Le modèle écrit le three.js, la page le rend et le vérifie.",
+      "example_1": "Un champ de particules lumineuses qui dérivent comme de la neige",
+      "example_2": "Icosaèdre en fil de fer pulsant en rose néon dans la brume",
+      "example_3": "Une île low-poly avec une caméra en orbite lente au coucher du soleil",
+      "veil_writing": "écriture",
+      "veil_repair": "réparation",
+      "check_errors": "Aucune erreur",
+      "check_visible": "Quelque chose de visible",
+      "check_moves": "S’anime",
+      "check_update": "Exporte update(t)",
+      "check_canvas": "Un seul canvas",
+      "check_api": "API three.js actuelle",
+      "check_colours": "Couleurs riches",
+      "first_try": "Du premier coup",
+      "repaired": "Réparé une fois",
+      "still_broken": "Échoue encore après une réparation",
+      "format_note": "clôtures retirées",
+      "frame_failed": "Le bac à sable n’a pas pu rendre.",
+      "copied": "Code copié",
+      "tokens_time": "{n} tokens · {s} s",
+      "again": "Encore",
+      "copy": "Copier le code",
+      "download": "Télécharger le HTML",
+      "show_code": "Voir le corps du module"
     }
   },
   "category": {

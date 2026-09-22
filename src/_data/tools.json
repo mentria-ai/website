@@ -92,6 +92,13 @@
     "group": "AI"
   },
   {
+    "slug": "forge",
+    "title": "Forge",
+    "summary": "Describe a 3D scene and the on-device 27B model writes it in three.js, renders it in a sandbox, checks it and repairs it once.",
+    "category": "AI",
+    "group": "AI"
+  },
+  {
     "slug": "console",
     "title": "Console",
     "summary": "A shared screen for you and the on-device model: chat, and let it open apps and use them like a person would — or watch it test the site and report what it finds.",

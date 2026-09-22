@@ -285,6 +285,12 @@ module.exports = function(eleventyConfig) {
 
   // Passthrough copy for assets
   eleventyConfig.addPassthroughCopy("src/assets");
+  eleventyConfig.setServerOptions({
+    middleware: [(req, res, next) => {
+      if (req.url && req.url.startsWith("/assets/vendor/")) res.setHeader("Access-Control-Allow-Origin", "*");
+      next();
+    }]
+  });
   eleventyConfig.ignores.add("src/assets/extensions/*.html");
   eleventyConfig.ignores.add("src/assets/learn/*.html");
   // Passthrough copy for PWA files (sw.js is now a Nunjucks template)

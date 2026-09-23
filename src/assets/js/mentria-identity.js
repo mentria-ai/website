@@ -181,8 +181,16 @@
     return null;
   }
 
+  function withTimeout(promise, ms, code) {
+    return new Promise(function (resolve, reject) {
+      var t = setTimeout(function () { reject(new Error(code)); }, ms);
+      promise.then(function (v) { clearTimeout(t); resolve(v); }, function (e) { clearTimeout(t); reject(e); });
+    });
+  }
+  const WEBAUTHN_MS = 90000;
+
   async function assertPrf(credId, prfSalt) {
-    const cred = await navigator.credentials.get({
+    const cred = await withTimeout(navigator.credentials.get({
       publicKey: {
         challenge: crypto.getRandomValues(new Uint8Array(32)),
         rpId: location.hostname,
@@ -190,7 +198,7 @@
         userVerification: 'required',
         extensions: { prf: { eval: { first: prfSalt } } }
       }
-    });
+    }), WEBAUTHN_MS, 'webauthn-timeout');
     if (!cred) throw new Error('no-credential');
     return prfFromCredential(cred);
   }
@@ -202,7 +210,7 @@
     if (!vault) throw new Error('no-vault');
     if (!global.PublicKeyCredential || !navigator.credentials) throw new Error('prf-unsupported');
     const prfSalt = crypto.getRandomValues(new Uint8Array(32));
-    const cred = await navigator.credentials.create({
+    const cred = await withTimeout(navigator.credentials.create({
       publicKey: {
         challenge: crypto.getRandomValues(new Uint8Array(32)),
         rp: { id: location.hostname, name: RP_NAME },
@@ -215,15 +223,14 @@
         authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
         extensions: { prf: { eval: { first: prfSalt } } }
       }
-    });
+    }), WEBAUTHN_MS, 'webauthn-timeout');
     if (!cred) throw new Error('prf-unsupported');
     const credId = new Uint8Array(cred.rawId);
     const k1bytes = prfFromCredential(cred);
-    const k2bytes = await assertPrf(credId, prfSalt);
-    if (!k2bytes) throw new Error('prf-unsupported');
-    if (k1bytes && !timingSafeEq(k1bytes, k2bytes)) throw new Error('prf-mismatch');
+    const keyBytes = k1bytes || await assertPrf(credId, prfSalt);
+    if (!keyBytes) throw new Error('prf-unsupported');
     const hkdfSalt = crypto.getRandomValues(new Uint8Array(32));
-    const wrapKey = await hkdfKey(k2bytes, hkdfSalt);
+    const wrapKey = await hkdfKey(keyBytes, hkdfSalt);
     const enc = await encryptWith(wrapKey, state.secret);
     const fresh = loadVault();
     if (!fresh) throw new Error('no-vault');

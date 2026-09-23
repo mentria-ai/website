@@ -874,8 +874,10 @@ function runApp(MentriaEngine, Tiers) {
   let tuneCount = 0;
   let tuneOverrides = {};
   let lastParams = null;
-  let gripTaps = [];
-  let gripStart = null;
+  let gripDrag = null;
+  let lastTapAt = 0;
+  const PULL_ARM = 34;
+  const PULL_MAX = 64;
 
   function tuneActive() { return currentTier === '27b' && Object.keys(tuneOverrides).length > 0; }
 
@@ -893,15 +895,15 @@ function runApp(MentriaEngine, Tiers) {
     gripOn = false;
     clearTune();
     lastParams = null;
-    gripTaps = [];
+    lastTapAt = 0;
     syncGrip();
   }
 
   function flashGrip(cls) {
-    grip.classList.remove('is-ok', 'is-err');
+    grip.classList.remove('is-run', 'is-ok', 'is-err');
     void grip.offsetWidth;
     grip.classList.add(cls);
-    setTimeout(() => grip.classList.remove(cls), 700);
+    setTimeout(() => grip.classList.remove(cls), 1000);
   }
 
   function applyTune(params) {
@@ -912,6 +914,10 @@ function runApp(MentriaEngine, Tiers) {
   async function runTune() {
     if (tuneBusy || !engine || currentTier !== '27b') return;
     tuneBusy = true;
+    grip.classList.remove('is-ok', 'is-err');
+    grip.classList.add('is-run');
+    const started = performance.now();
+    const settle = () => new Promise((r) => setTimeout(r, Math.max(0, 420 - (performance.now() - started))));
     const n = tuneCount + 1;
     try {
       const ctx = {
@@ -933,9 +939,12 @@ function runApp(MentriaEngine, Tiers) {
       if (res && typeof res === 'object') Object.assign(tuneOverrides, res);
       TUNE_KEEP.forEach((k) => { delete tuneOverrides[k]; });
       if (prefixCache) prefixCache.invalidate();
+      await settle();
       flashGrip('is-ok');
+      if (navigator.vibrate) { try { navigator.vibrate([10, 40, 18]); } catch (_) {} }
     } catch (err) {
       console.warn('mentria-tune:', err);
+      await settle();
       flashGrip('is-err');
     } finally {
       tuneBusy = false;
@@ -943,22 +952,46 @@ function runApp(MentriaEngine, Tiers) {
     }
   }
 
+  function setPull(px, armed) {
+    grip.style.setProperty('--pull', px + 'px');
+    grip.style.setProperty('--pull-k', String(Math.min(1, Math.abs(px) / PULL_ARM)));
+    grip.classList.toggle('is-armed', !!armed);
+  }
+
+  function endGrip(e, cancelled) {
+    const d = gripDrag;
+    if (!d || (e && e.pointerId !== d.id)) return;
+    gripDrag = null;
+    grip.classList.remove('is-drag');
+    setPull(0, false);
+    if (cancelled || tuneBusy) return;
+    if (d.armed) { lastTapAt = 0; runTune(); return; }
+    if (d.moved || Date.now() - d.t > 350) { lastTapAt = 0; return; }
+    const now = Date.now();
+    if (now - lastTapAt < 380) { lastTapAt = 0; runTune(); return; }
+    lastTapAt = now;
+  }
+
   grip.addEventListener('pointerdown', (e) => {
-    gripStart = { x: e.clientX, y: e.clientY };
+    if (tuneBusy || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    gripDrag = { id: e.pointerId, x: e.clientX, y: e.clientY, t: Date.now(), moved: false, armed: false };
+    grip.classList.add('is-drag');
     try { grip.setPointerCapture(e.pointerId); } catch (_) {}
   });
-  grip.addEventListener('pointerup', (e) => {
-    const s = gripStart;
-    gripStart = null;
-    if (!s) return;
-    const dx = e.clientX - s.x, dy = e.clientY - s.y;
-    if (Math.abs(dx) >= 30 && Math.abs(dx) > Math.abs(dy)) { gripTaps = []; runTune(); return; }
-    const now = Date.now();
-    gripTaps = gripTaps.filter((t) => now - t < 1000);
-    gripTaps.push(now);
-    if (gripTaps.length >= 3) { gripTaps = []; runTune(); }
+  grip.addEventListener('pointermove', (e) => {
+    const d = gripDrag;
+    if (!d || e.pointerId !== d.id) return;
+    const up = d.y - e.clientY;
+    if (Math.abs(up) > 6 || Math.abs(e.clientX - d.x) > 6) d.moved = true;
+    const lift = Math.max(0, up);
+    const pull = lift <= PULL_ARM ? lift : PULL_ARM + (lift - PULL_ARM) * 0.3;
+    const armed = lift >= PULL_ARM;
+    if (armed && !d.armed && navigator.vibrate) { try { navigator.vibrate(8); } catch (_) {} }
+    d.armed = armed;
+    setPull(-Math.min(pull, PULL_MAX), armed);
   });
-  grip.addEventListener('pointercancel', () => { gripStart = null; });
+  grip.addEventListener('pointerup', (e) => endGrip(e, false));
+  grip.addEventListener('pointercancel', (e) => endGrip(e, true));
   grip.addEventListener('contextmenu', (e) => e.preventDefault());
 
   function sendGesture() {
@@ -1980,11 +2013,11 @@ function runApp(MentriaEngine, Tiers) {
 
 .ac__grip {
   position: absolute;
-  top: -11px;
+  top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  width: 64px;
-  height: 22px;
+  width: 72px;
+  height: 24px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -1999,18 +2032,74 @@ function runApp(MentriaEngine, Tiers) {
   z-index: 2;
 }
 .ac__grip[hidden] { display: none; }
+.ac__grip.is-drag { cursor: grabbing; }
 .ac__grip-line {
   display: block;
   width: 28px;
   height: 3px;
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.22);
-  transition: background 0.2s ease, width 0.2s ease, box-shadow 0.2s ease;
+  translate: 0 var(--pull, 0px);
+  transition: translate 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.25s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.ac__grip::before,
+.ac__grip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64px;
+  height: 22px;
+  margin: -11px 0 0 -32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent, #6ef3c5);
+  opacity: 0;
+  pointer-events: none;
 }
 .ac__grip.is-set .ac__grip-line { background: var(--accent, #6ef3c5); opacity: 0.75; }
-.ac__grip.is-ok .ac__grip-line { background: var(--accent, #6ef3c5); opacity: 1; width: 40px; box-shadow: 0 0 10px rgba(110, 243, 197, 0.55); }
-.ac__grip.is-err .ac__grip-line { background: var(--syn-pink, #f472b6); opacity: 1; }
-@media (prefers-reduced-motion: reduce) { .ac__grip-line { transition: none; } }
+.ac__grip.is-drag .ac__grip-line {
+  transition: width 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  width: calc(28px + 10px * var(--pull-k, 0));
+  background: rgba(255, 255, 255, calc(0.3 + 0.4 * var(--pull-k, 0)));
+}
+.ac__grip.is-armed .ac__grip-line {
+  width: 46px;
+  background: var(--accent, #6ef3c5);
+  opacity: 1;
+  box-shadow: 0 0 12px rgba(110, 243, 197, 0.65);
+}
+.ac__grip.is-run .ac__grip-line {
+  width: 46px;
+  opacity: 1;
+  background: linear-gradient(90deg, rgba(110, 243, 197, 0.2) 0%, var(--accent, #6ef3c5) 50%, rgba(110, 243, 197, 0.2) 100%);
+  background-size: 200% 100%;
+  box-shadow: 0 0 10px rgba(110, 243, 197, 0.4);
+  animation: ac-grip-run 0.7s linear infinite;
+}
+.ac__grip.is-ok .ac__grip-line { background: var(--accent, #6ef3c5); opacity: 1; animation: ac-grip-ok 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+.ac__grip.is-ok::before { animation: ac-grip-ring 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+.ac__grip.is-ok::after { animation: ac-grip-ring 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.14s; }
+.ac__grip.is-err .ac__grip-line { background: var(--syn-pink, #f472b6); opacity: 1; animation: ac-grip-shake 0.45s ease; }
+@keyframes ac-grip-run { from { background-position: 200% 0; } to { background-position: 0 0; } }
+@keyframes ac-grip-ok {
+  0% { width: 46px; box-shadow: 0 0 10px rgba(110, 243, 197, 0.4); }
+  28% { width: 68px; box-shadow: 0 0 22px rgba(110, 243, 197, 0.9); }
+  100% { width: 28px; box-shadow: 0 0 0 rgba(110, 243, 197, 0); }
+}
+@keyframes ac-grip-ring {
+  0% { transform: scale(0.35); opacity: 0.85; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+@keyframes ac-grip-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ac__grip-line, .ac__grip::before, .ac__grip::after { transition: none; animation: none !important; }
+}
 
 .ac__attach-btn {
   display: flex;

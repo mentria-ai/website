@@ -2549,8 +2549,13 @@ els.idPasskey.addEventListener('click', async () => {
   try {
     await window.MentriaIdentity.unlockWithPasskey();
     await initIdentity();
-  } catch {
-    els.idErr.textContent = 'passkey unlock failed — use your passphrase';
+  } catch (err) {
+    const code = err && err.message;
+    els.idErr.textContent = code === 'webauthn-timeout'
+      ? 'no passkey prompt appeared — open this page in your browser, or use your recovery code'
+      : code === 'no-passkey' || code === 'no-credential'
+        ? 'this device has no passkey for comms any more — use your recovery code'
+        : 'passkey unlock failed — use your recovery code';
   } finally {
     els.idPasskey.disabled = false;
   }

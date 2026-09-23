@@ -1232,6 +1232,11 @@ html.is-standalone .app-bar__item {
 html.is-standalone .app-bar__item[aria-current="page"] {
   color: var(--syn-cyan);
 }
+html.is-standalone body.is-tools-open .app-bar__item--tools {
+  color: var(--syn-cyan);
+}
+body.is-tools-open .app-bar__item[aria-current="page"]:not(.app-bar__item--tools) { color: var(--term-muted); }
+
 html.is-standalone body {
   padding-bottom: var(--app-bar-h);
 }

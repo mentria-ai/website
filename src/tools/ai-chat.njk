@@ -914,10 +914,7 @@ function runApp(MentriaEngine, Tiers) {
     tuneBusy = true;
     const n = tuneCount + 1;
     try {
-      const mod = await import(TUNE_URL + '?t=' + Date.now());
-      const fn = typeof mod.default === 'function' ? mod.default : mod.tune;
-      if (typeof fn !== 'function') throw new Error('mentria-tune: no default export');
-      const res = await fn({
+      const ctx = {
         engine: engine,
         tier: currentTier,
         maxSeq: contextTokens,
@@ -926,7 +923,12 @@ function runApp(MentriaEngine, Tiers) {
         last: lastParams ? Object.assign({}, lastParams) : null,
         overrides: tuneOverrides,
         reset: () => { Object.keys(tuneOverrides).forEach((k) => { delete tuneOverrides[k]; }); }
-      });
+      };
+      window.__mentriaEngine = engine;
+      window.__mentriaTune = ctx;
+      const mod = await import(TUNE_URL + '?t=' + Date.now());
+      const fn = typeof mod.default === 'function' ? mod.default : (typeof mod.tune === 'function' ? mod.tune : null);
+      const res = fn ? await fn(ctx) : null;
       tuneCount = n;
       if (res && typeof res === 'object') Object.assign(tuneOverrides, res);
       TUNE_KEEP.forEach((k) => { delete tuneOverrides[k]; });

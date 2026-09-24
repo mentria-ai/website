@@ -13,7 +13,7 @@ eleventyComputed:
 {% set terminalTitle = "…" %}
 {% set terminalBackHref = locale.pathPrefix + "/tools/extensions/" %}
 {% include "terminal-frame-open.njk" %}
-<section class="xr" data-prefix="{{ locale.pathPrefix }}">
+<section class="xr" data-prefix="{{ locale.pathPrefix }}" data-blocked="{{ 'tool.extensions.run_blocked' | t }}">
   <p class="xr__error" id="xr-error" hidden></p>
   <p class="xr__missing" id="xr-missing" hidden>{{ "tool.extensions.run_not_installed" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
   <p class="xr__missing" id="xr-disabled" hidden>{{ "tool.extensions.run_disabled" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
@@ -69,10 +69,21 @@ if (!source) {
     errEl.textContent = m.name + ': ' + msg;
     errEl.hidden = false;
   };
+  const blockedHosts = new Set();
+  window.__mentriaExtReportBlocked = (uri) => {
+    let host = String(uri || '');
+    try { host = new URL(host).host || host; } catch (_) {}
+    if (!host || blockedHosts.has(host)) return;
+    blockedHosts.add(host);
+    const tpl = document.querySelector('.xr').dataset.blocked || '{name}: {host}';
+    errEl.textContent = Array.from(blockedHosts).map((h) => tpl.replace('{name}', m.name).replace('{host}', h)).join(' ');
+    errEl.hidden = false;
+  };
   const bootstrap = '<scr' + 'ipt>' +
     'window.mentria = window.parent.__mentriaExtHost;' +
     'window.addEventListener("error", (e) => { window.parent.__mentriaExtReportError(e.message || "runtime error"); });' +
     'window.addEventListener("unhandledrejection", (e) => { window.parent.__mentriaExtReportError(String(e.reason || "unhandled rejection")); });' +
+    'document.addEventListener("securitypolicyviolation", (e) => { if (/^(https?|wss?):/.test(e.blockedURI || "")) window.parent.__mentriaExtReportBlocked(e.blockedURI); });' +
     '</scr' + 'ipt>';
   frame.srcdoc = bootstrap + source;
 }

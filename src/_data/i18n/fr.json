@@ -965,6 +965,7 @@
       "toggle_label": "Activer {name}",
       "run_not_installed": "non installée —",
       "run_disabled": "installée mais désactivée — réactivez-la dans",
+      "run_blocked": "{name} a tenté de joindre {host}. La politique de sécurité de ce site n’autorise les extensions qu’à se connecter aux serveurs de Mentria.",
       "run_manager_link": "le gestionnaire",
       "btn_open": "ouvrir",
       "btn_export": "exporter",

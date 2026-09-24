@@ -106,7 +106,7 @@ eleventyComputed:
         <tr><td><code>icon</code></td><td>string</td><td>no</td><td>An emoji (≤8 chars) <em>or</em> a <code>data:image/…</code> URI up to 8 KB.</td></tr>
         <tr><td><code>author</code></td><td>string</td><td>no</td><td>≤200 chars.</td></tr>
         <tr><td><code>description</code></td><td>string</td><td>no</td><td>≤200 chars.</td></tr>
-        <tr><td><code>permissions</code></td><td>string[]</td><td>no</td><td>Up to 16 labels (≤32 chars each). Vocabulary: <code>storage ai bluetooth usb serial network notifications share</code>. Advisory only — surfaced in the trust prompt and the manager row; not enforced by a sandbox.</td></tr>
+        <tr><td><code>permissions</code></td><td>string[]</td><td>no</td><td>Up to 16 labels (≤32 chars each). Vocabulary: <code>storage ai bluetooth usb serial network notifications share</code>. Advisory only — surfaced in the trust prompt and the manager row; not enforced by a sandbox. Network access is limited separately by the site’s content security policy (see <a href="#sdk-network">Network</a>).</td></tr>
         <tr><td><code>mounts</code></td><td>object</td><td>no</td><td>Where the extension appears (below).</td></tr>
         <tr><td><code>mounts.tool</code></td><td>object</td><td>no</td><td>Present (usually <code>{}</code>) → a launcher tile plus the manager's <em>open</em> button.</td></tr>
         <tr><td><code>mounts.commands</code></td><td>object[]</td><td>no</td><td>Each <code>{ name, description, usage? }</code> registers a terminal/palette command. <code>name</code> kebab-case 2–16 chars; <code>description</code> required; <code>usage</code> is an optional hint. Colliding names are skipped.</td></tr>
@@ -157,6 +157,9 @@ eleventyComputed:
     </table>
   </div>
   <p class="sdk__note">Anything else under that key — a plain string, an array, an empty <code>text</code> — is ignored silently: the tile simply stays hidden until the key holds a valid snapshot object.</p>
+
+  <h3 class="sdk__h3" id="sdk-network">Network</h3>
+  <p class="sdk__note">Extensions run inside this site’s content security policy, the same one that keeps Mentria free of third-party requests. An extension’s <code>fetch</code>, WebSocket, image and media requests can reach this site, <code>cdn.mentria.ai</code>, <code>relay.mentria.ai</code> (https and wss), <code>mentria-ai.github.io</code> and Hugging Face (<code>huggingface.co</code>, <code>*.hf.co</code>). The browser refuses every other host, and the run page shows a notice naming the blocked host so the failure is never silent. Declare <code>network</code> in <code>permissions</code> when an extension uses these endpoints.</p>
 
   <h3 class="sdk__h3">Install &amp; share</h3>
   <ul class="sdk__list">

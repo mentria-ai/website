@@ -965,6 +965,7 @@
       "toggle_label": "Enable {name}",
       "run_not_installed": "not installed —",
       "run_disabled": "installed but disabled — re-enable it in",
+      "run_blocked": "{name} tried to reach {host}. This site’s security policy only lets extensions connect to Mentria’s own servers.",
       "run_manager_link": "the manager",
       "btn_open": "open",
       "btn_export": "export",

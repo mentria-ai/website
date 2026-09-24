@@ -25,6 +25,10 @@ eleventyComputed:
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       {{ "tool.invoice.btn_print" | t }}
     </button>
+    <button type="button" class="m-btn m-btn--ghost" id="iv-new" title="{{ 'tool.invoice.title_new' | t }}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      {{ "tool.invoice.btn_new" | t }}
+    </button>
     <button class="m-btn m-btn--ghost" id="iv-export" title="{{ 'tool.invoice.title_export' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       {{ "tool.invoice.btn_export" | t }}
@@ -39,6 +43,12 @@ eleventyComputed:
       {{ "tool.invoice.btn_clear" | t }}
     </button>
   </div>
+
+  <details class="iv__saved no-print" id="iv-saved">
+    <summary class="iv__saved-sum">{{ "tool.invoice.saved_title" | t }} <span class="iv__saved-count" id="iv-saved-count"></span></summary>
+    <p class="iv__saved-hint">{{ "tool.invoice.saved_hint" | t }}</p>
+    <ul class="iv__saved-list" id="iv-saved-list"></ul>
+  </details>
 
   <div class="iv__doc" id="iv-doc">
     <div class="iv__header">
@@ -175,7 +185,14 @@ eleventyComputed:
     alertInvalidJson: {{ ("tool.invoice.alert_invalid_json" | t) | dump | safe }},
     alertUnknownFmt:  {{ ("tool.invoice.alert_unknown_format" | t) | dump | safe }},
     alertSelectJson:  {{ ("tool.invoice.alert_select_json" | t) | dump | safe }},
-    confirmClear:     {{ ("tool.invoice.confirm_clear"     | t) | dump | safe }}
+    confirmClear:     {{ ("tool.invoice.confirm_clear"     | t) | dump | safe }},
+    savedEmpty:       {{ ("tool.invoice.saved_empty"       | t) | dump | safe }},
+    savedNoClient:    {{ ("tool.invoice.saved_no_client"   | t) | dump | safe }},
+    savedOpen:        {{ ("tool.invoice.saved_open"        | t) | dump | safe }},
+    savedDuplicate:   {{ ("tool.invoice.saved_duplicate"   | t) | dump | safe }},
+    savedDelete:      {{ ("tool.invoice.saved_delete"      | t) | dump | safe }},
+    savedEditing:     {{ ("tool.invoice.saved_editing"     | t) | dump | safe }},
+    savedDeleted:     {{ ("tool.invoice.saved_deleted"     | t) | dump | safe }}
   };
 
   const LS = 'mentria-iv-';
@@ -400,7 +417,8 @@ eleventyComputed:
     const target = nextRow && (nextRow.querySelector('.remove-row') || nextRow.querySelector('.add-row'));
     if (target) target.focus();
     else { const add = table.querySelector('.add-row'); if (add) add.focus(); }
-    if (window.MentriaUI && MentriaUI.undoToast) MentriaUI.undoToast(COPY.rowRemoved, () => restoreRow(data, index));
+    scheduleSync();
+    if (window.MentriaUI && MentriaUI.undoToast) MentriaUI.undoToast(COPY.rowRemoved, () => { restoreRow(data, index); scheduleSync(); });
   };
 
   /* ── Import / Export ───────────────────────────────── */
@@ -429,16 +447,18 @@ eleventyComputed:
     }));
   };
 
+  const collectPayload = () => ({
+    version: 1,
+    from:    collectFields(FROM_FIELDS),
+    billTo:  collectFields(BILL_FIELDS),
+    meta:    collectFields(META_FIELDS),
+    lines:   collectLines(),
+    notes:   document.getElementById('notesInp')?.value || '',
+    bank:    collectFields(BANK_FIELDS)
+  });
+
   const exportJSON = () => {
-    const payload = {
-      version: 1,
-      from:    collectFields(FROM_FIELDS),
-      billTo:  collectFields(BILL_FIELDS),
-      meta:    collectFields(META_FIELDS),
-      lines:   collectLines(),
-      notes:   document.getElementById('notesInp')?.value || '',
-      bank:    collectFields(BANK_FIELDS)
-    };
+    const payload = collectPayload();
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
@@ -502,6 +522,24 @@ eleventyComputed:
     calculateGrandTotal();
   };
 
+  const applyPayload = (parsed) => {
+    applyFields(FROM_FIELDS, parsed.from);
+    applyFields(BILL_FIELDS, parsed.billTo);
+    applyFields(META_FIELDS, parsed.meta);
+    applyFields(BANK_FIELDS, parsed.bank);
+    if (typeof parsed.notes === 'string') {
+      const notesEl = document.getElementById('notesInp');
+      if (notesEl) {
+        notesEl.value = parsed.notes;
+        persist(notesEl);
+        autoResizeTextarea(notesEl);
+      }
+    }
+    changeCurrency();
+    replaceLines(parsed.lines || []);
+    document.querySelectorAll('.iv__doc textarea').forEach(autoResizeTextarea);
+  };
+
   const importJSON = (text) => {
     let parsed;
     try { parsed = JSON.parse(text); }
@@ -511,24 +549,211 @@ eleventyComputed:
       // Legacy: array of line items
       replaceLines(parsed);
     } else if (parsed && typeof parsed === 'object') {
-      applyFields(FROM_FIELDS, parsed.from);
-      applyFields(BILL_FIELDS, parsed.billTo);
-      applyFields(META_FIELDS, parsed.meta);
-      applyFields(BANK_FIELDS, parsed.bank);
-      if (typeof parsed.notes === 'string') {
-        const notesEl = document.getElementById('notesInp');
-        if (notesEl) {
-          notesEl.value = parsed.notes;
-          persist(notesEl);
-          autoResizeTextarea(notesEl);
-        }
-      }
-      changeCurrency();
-      replaceLines(parsed.lines || []);
+      applyPayload(parsed);
     } else {
       mentriaAlert(COPY.alertUnknownFmt);
     }
   };
+
+  const DOCS_KEY = 'docs';
+  const CUR_KEY = 'current_id';
+  const savedList = document.getElementById('iv-saved-list');
+  const savedCount = document.getElementById('iv-saved-count');
+  const getDocs = () => {
+    const v = window.MentriaStore ? window.MentriaStore.get(NS, DOCS_KEY) : null;
+    return Array.isArray(v) ? v.filter((d) => d && d.id && d.data) : [];
+  };
+  const setDocs = (docs) => { if (window.MentriaStore) window.MentriaStore.set(NS, DOCS_KEY, docs); };
+  const getCur = () => (window.MentriaStore ? window.MentriaStore.get(NS, CUR_KEY) : null) || null;
+  const setCur = (id) => {
+    if (!window.MentriaStore) return;
+    if (id) window.MentriaStore.set(NS, CUR_KEY, id);
+    else window.MentriaStore.remove(NS, CUR_KEY);
+  };
+  const newDocId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const hasContent = (p) => !!(String((p.billTo && p.billTo.companyNameInp) || '').trim()
+    || (p.lines || []).some((l) => String(l.Description || '').trim() || parseFloat(l['Unit Price']) > 0));
+  const blankFields = (ids) => ids.reduce((o, id) => { o[id] = ''; return o; }, {});
+  const blankLine = (src) => ({ Description: '', 'SAC code': (src && src.lines && src.lines[0] && src.lines[0]['SAC code']) || '', Quantity: '1', 'Unit Price': '0' });
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+
+  const nextNumber = () => {
+    const nums = getDocs().map((d) => d.data.meta && d.data.meta.invnoInp).concat([document.getElementById('invnoInp')?.value]).filter(Boolean);
+    let best = null;
+    nums.forEach((raw) => {
+      const m = String(raw).match(/^(.*?)(\d+)(\D*)$/);
+      if (!m) return;
+      const n = parseInt(m[2], 10);
+      if (!best || n > best.n) best = { pre: m[1], n, width: m[2].length, post: m[3] };
+    });
+    if (!best) return '0001';
+    return best.pre + String(best.n + 1).padStart(best.width, '0') + best.post;
+  };
+
+  const totalOf = (p) => {
+    let sum = 0;
+    (p.lines || []).forEach((l) => {
+      const q = parseFloat(l.Quantity), pr = parseFloat(l['Unit Price']);
+      if (!isNaN(q) && !isNaN(pr)) sum += roundToTwo(q * pr);
+    });
+    try {
+      return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'currency', currency: SYMBOL_TO_CODE[p.meta && p.meta.currencyInp] || 'USD' }).format(roundToTwo(sum));
+    } catch (_) { return String(roundToTwo(sum)); }
+  };
+
+  let syncTimer = 0;
+  const syncNow = () => {
+    clearTimeout(syncTimer);
+    syncTimer = 0;
+    if (!window.MentriaStore) return;
+    const p = collectPayload();
+    const docs = getDocs();
+    let id = getCur();
+    const i = id ? docs.findIndex((d) => d.id === id) : -1;
+    if (i === -1) {
+      if (!hasContent(p)) { renderSaved(); return; }
+      id = newDocId();
+      setCur(id);
+      docs.push({ id, savedAt: Date.now(), data: p });
+    } else {
+      docs[i] = { id, savedAt: Date.now(), data: p };
+    }
+    setDocs(docs);
+    renderSaved();
+  };
+  const scheduleSync = () => { clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 600); };
+
+  const showDoc = (id) => {
+    const doc = getDocs().find((d) => d.id === id);
+    if (!doc) return;
+    setCur(id);
+    applyPayload(clone(doc.data));
+    renderSaved();
+  };
+  const openDoc = (id) => { syncNow(); showDoc(id); };
+  const startDoc = (payload) => {
+    syncNow();
+    const id = newDocId();
+    const docs = getDocs();
+    docs.push({ id, savedAt: Date.now(), data: payload });
+    setDocs(docs);
+    showDoc(id);
+    document.getElementById('iv-doc').scrollIntoView({ block: 'start', behavior: 'smooth' });
+  };
+  const newInvoice = () => {
+    const cur = collectPayload();
+    startDoc({
+      version: 1,
+      from: cur.from,
+      billTo: blankFields(BILL_FIELDS),
+      meta: { invnoInp: nextNumber(), invoiceDate: localDateStr(), currencyInp: cur.meta.currencyInp },
+      lines: [blankLine(cur)],
+      notes: '',
+      bank: cur.bank
+    });
+  };
+  const duplicateDoc = (id) => {
+    syncNow();
+    const doc = getDocs().find((d) => d.id === id);
+    if (!doc) return;
+    const src = clone(doc.data);
+    src.meta = Object.assign({}, src.meta, { invnoInp: nextNumber(), invoiceDate: localDateStr() });
+    src.lines = [blankLine(doc.data)];
+    startDoc(src);
+  };
+  const deleteDoc = (id) => {
+    syncNow();
+    const docs = getDocs();
+    const i = docs.findIndex((d) => d.id === id);
+    if (i === -1) return;
+    const removed = docs.splice(i, 1)[0];
+    setDocs(docs);
+    const wasCur = getCur() === id;
+    if (wasCur) {
+      setCur(null);
+      const recent = docs.slice().sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))[0];
+      if (recent) showDoc(recent.id);
+      else {
+        const cur = removed.data;
+        applyPayload({ version: 1, from: cur.from, billTo: blankFields(BILL_FIELDS), meta: { invnoInp: nextNumber(), invoiceDate: localDateStr(), currencyInp: (cur.meta || {}).currencyInp }, lines: [blankLine(cur)], notes: '', bank: cur.bank });
+      }
+    }
+    renderSaved();
+    const label = (removed.data.meta && removed.data.meta.invnoInp) || '';
+    if (window.MentriaUI && MentriaUI.undoToast) MentriaUI.undoToast(COPY.savedDeleted.replace('{n}', label), () => {
+      const now = getDocs();
+      if (now.some((d) => d.id === removed.id)) return;
+      if (wasCur) syncNow();
+      const after = getDocs();
+      after.splice(Math.min(i, after.length), 0, removed);
+      setDocs(after);
+      if (wasCur) showDoc(removed.id);
+      else renderSaved();
+    });
+  };
+
+  const renderSaved = () => {
+    const docs = getDocs().slice().sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+    const cur = getCur();
+    savedCount.textContent = docs.length ? String(docs.length) : '';
+    savedList.textContent = '';
+    if (!docs.length) {
+      const li = document.createElement('li');
+      li.className = 'iv__saved-empty';
+      li.textContent = COPY.savedEmpty;
+      savedList.appendChild(li);
+      return;
+    }
+    docs.forEach((d) => {
+      const p = d.data;
+      const li = document.createElement('li');
+      li.className = 'iv__saved-item' + (d.id === cur ? ' is-current' : '');
+      const meta = document.createElement('div');
+      meta.className = 'iv__saved-meta';
+      [['iv__saved-no', '#' + ((p.meta && p.meta.invnoInp) || '—')],
+       ['iv__saved-client', String((p.billTo && p.billTo.companyNameInp) || '').trim() || COPY.savedNoClient],
+       ['iv__saved-date', (p.meta && p.meta.invoiceDate) || ''],
+       ['iv__saved-total', totalOf(p)]].forEach(([cls, text]) => {
+        const sp = document.createElement('span');
+        sp.className = cls;
+        sp.textContent = text;
+        meta.appendChild(sp);
+      });
+      const actions = document.createElement('div');
+      actions.className = 'iv__saved-actions';
+      const btn = (act, label, variant) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'm-btn ' + variant + ' iv__saved-btn';
+        b.dataset.act = act;
+        b.dataset.id = d.id;
+        b.textContent = label;
+        actions.appendChild(b);
+      };
+      if (d.id === cur) {
+        const badge = document.createElement('span');
+        badge.className = 'iv__saved-badge';
+        badge.textContent = COPY.savedEditing;
+        actions.appendChild(badge);
+      } else btn('open', COPY.savedOpen, 'm-btn--ghost');
+      btn('duplicate', COPY.savedDuplicate, 'm-btn--ghost');
+      btn('delete', COPY.savedDelete, 'm-btn--danger');
+      li.append(meta, actions);
+      savedList.appendChild(li);
+    });
+  };
+
+  savedList.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'open') openDoc(b.dataset.id);
+    else if (b.dataset.act === 'duplicate') duplicateDoc(b.dataset.id);
+    else if (b.dataset.act === 'delete') deleteDoc(b.dataset.id);
+  });
+  document.getElementById('iv-new').addEventListener('click', newInvoice);
+  document.getElementById('iv-doc').addEventListener('input', scheduleSync);
+  document.getElementById('iv-doc').addEventListener('change', scheduleSync);
+  window.addEventListener('pagehide', () => { if (syncTimer) syncNow(); });
 
   /* ── Event wiring ──────────────────────────────────── */
   table.addEventListener('click', removeRow);
@@ -574,6 +799,7 @@ eleventyComputed:
     const reader = new FileReader();
     reader.onload = (ev) => {
       importJSON(ev.target.result);
+      scheduleSync();
       fileInput.value = '';
     };
     reader.readAsText(file);
@@ -605,7 +831,7 @@ eleventyComputed:
   window.addEventListener('beforeprint', buildPrintMirrors);
   window.addEventListener('afterprint', clearPrintMirrors);
 
-  document.querySelector('.add-row').addEventListener('click', () => addRow());
+  document.querySelector('.add-row').addEventListener('click', () => { addRow(); scheduleSync(); });
   currencyInput.addEventListener('change', changeCurrency);
   printBtn.addEventListener('click', () => window.print());
   exportBtn.addEventListener('click', exportJSON);
@@ -659,11 +885,29 @@ eleventyComputed:
 
   // 4. Auto-set today's date (only if no stored value)
   setCurrentDateIfEmpty();
+  syncNow();
 })();
 </script>
 
 <style>
 /* ─── Edit mode (terminal/synthwave aesthetic) ────────────────────────── */
+.iv__saved { margin: 0 0 1rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-md, 8px); background: var(--term-bg-raised); }
+.iv__saved-sum { cursor: pointer; padding: 0.65rem 0.9rem; font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--term-muted); }
+.iv__saved-count { display: inline-block; min-width: 1.4em; margin-left: 0.3rem; padding: 0 0.4em; border-radius: 999px; background: var(--term-border-strong); color: var(--term-fg); text-align: center; }
+.iv__saved-count:empty { display: none; }
+.iv__saved-hint { margin: 0 0.9rem 0.6rem; font-size: 0.78rem; color: var(--term-subtle); }
+.iv__saved-list { list-style: none; margin: 0; padding: 0 0.6rem 0.6rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.iv__saved-empty { padding: 0.4rem 0.3rem; font-size: 0.82rem; color: var(--term-muted); }
+.iv__saved-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 0.8rem; padding: 0.55rem 0.7rem; border: 1px solid var(--term-border); border-radius: var(--radius-sm, 6px); }
+.iv__saved-item.is-current { border-color: var(--syn-cyan, #22d3ee); }
+.iv__saved-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.9rem; min-width: 0; font-size: 0.85rem; }
+.iv__saved-no { font-family: var(--font-mono); color: var(--term-fg-strong); }
+.iv__saved-client { color: var(--term-fg); overflow-wrap: anywhere; }
+.iv__saved-date, .iv__saved-total { font-family: var(--font-mono); font-size: 0.78rem; color: var(--term-muted); font-variant-numeric: tabular-nums; }
+.iv__saved-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+.iv__saved-btn { padding: 0.3rem 0.65rem; font-size: 0.75rem; }
+.iv__saved-badge { font-family: var(--font-mono); font-size: 0.72rem; color: var(--syn-cyan, #22d3ee); padding: 0 0.3rem; }
+
 .iv {
   display: flex;
   flex-direction: column;

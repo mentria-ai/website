@@ -737,6 +737,17 @@
       "preset_save_invalid": "Set a duration first, then save it"
     },
     "invoice": {
+      "btn_new": "New invoice",
+      "title_new": "Start the next invoice with your details and the next number",
+      "saved_title": "Saved invoices",
+      "saved_hint": "Invoices stay on this device and update as you edit.",
+      "saved_empty": "Nothing saved yet. As soon as you add a client or a line, the invoice is saved here.",
+      "saved_no_client": "No client yet",
+      "saved_open": "Open",
+      "saved_duplicate": "Duplicate as next",
+      "saved_delete": "Delete",
+      "saved_editing": "Editing",
+      "saved_deleted": "Invoice {n} deleted.",
       "row_removed": "Line removed.",
       "btn_print": "Print / Save PDF",
       "btn_export": "Export JSON",

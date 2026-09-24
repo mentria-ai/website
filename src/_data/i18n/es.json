@@ -737,6 +737,17 @@
       "preset_save_invalid": "Define una duración primero y luego guárdala"
     },
     "invoice": {
+      "btn_new": "Nueva factura",
+      "title_new": "Empieza la siguiente factura con tus datos y el número siguiente",
+      "saved_title": "Facturas guardadas",
+      "saved_hint": "Las facturas se quedan en este dispositivo y se actualizan mientras editas.",
+      "saved_empty": "Aún no hay nada guardado. En cuanto añadas un cliente o una línea, la factura se guarda aquí.",
+      "saved_no_client": "Sin cliente",
+      "saved_open": "Abrir",
+      "saved_duplicate": "Duplicar como siguiente",
+      "saved_delete": "Eliminar",
+      "saved_editing": "Editando",
+      "saved_deleted": "Factura {n} eliminada.",
       "row_removed": "Línea eliminada.",
       "btn_print": "Imprimir / Guardar PDF",
       "btn_export": "Exportar JSON",

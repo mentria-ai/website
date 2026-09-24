@@ -172,7 +172,17 @@
     "offline_home": "キャッシュ済みのホームへ",
     "offline_strip": "オフライン · この端末に保存済みの内容を表示中",
     "offline_works": "オフラインでも使えるもの",
-    "close": "閉じる"
+    "close": "閉じる",
+    "mini": {
+      "minimize": "フローティングの小窓にする",
+      "open": "{name}を開く",
+      "close": "小窓を閉じる",
+      "timer": "タイマー",
+      "times_up": "時間です",
+      "paused": "一時停止中",
+      "steps": "{n} 歩",
+      "tap_resume": "タップしてカウントを続ける"
+    }
   },
   "home": {
     "cli": {
@@ -772,7 +782,8 @@
       "preset_1hr": "1時間",
       "preset_save_aria": "現在の時間をプリセットとして保存",
       "preset_remove_aria": "プリセット {label} を削除",
-      "preset_save_invalid": "先に時間を設定してから保存してください"
+      "preset_save_invalid": "先に時間を設定してから保存してください",
+      "mini_nothing": "先にタイマーを開始してから小窓にしてください。"
     },
     "invoice": {
       "btn_new": "新しい請求書",
@@ -1107,7 +1118,8 @@
       "pocket_note": "ポケットモードは画面を真っ黒のまま点灯し続け、ポケットの中でも歩数をカウントし続けます。OLED画面に最適。画面下の丸を右へスライドすると解除できます。",
       "pocket_exit": "スライドして解除",
       "est_label": "推定",
-      "est_explain": "画面ロック中の推定値（歩行ペースから算出）"
+      "est_explain": "画面ロック中の推定値（歩行ペースから算出）",
+      "mini_nothing": "先にカウントを開始してから小窓にしてください。"
     },
     "qr-scanner": {
       "aria_video": "ライブカメラプレビュー",

@@ -222,6 +222,32 @@ main:has(.terminal-frame) { max-width: var(--wide); }
 main:has(.terminal-frame) .hero { max-width: 912px; margin-inline: auto; }
 
 .site-header { background: var(--term-bg-raised); border-bottom: 1px solid var(--term-border); }
+.m-mini { --mini-base: calc(12px + env(safe-area-inset-bottom, 0px)); position: fixed; right: 12px; bottom: min(calc(var(--mini-base) + var(--mini-y, 0px)), calc(100vh - 128px)); bottom: min(calc(var(--mini-base) + var(--mini-y, 0px)), calc(100dvh - 128px)); z-index: 9999; display: flex; align-items: stretch; max-width: min(78vw, 320px); border: 1px solid var(--syn-cyan, #22d3ee); border-radius: 999px; background: var(--term-bg-raised); box-shadow: var(--elev-3), var(--glow-cyan-soft, none); font-family: var(--font-mono); color: var(--term-fg); overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
+.m-mini.is-left { right: auto; left: 12px; }
+.m-mini.is-dragging { cursor: grabbing; opacity: 0.92; }
+html.is-standalone .m-mini { --mini-base: calc(var(--app-bar-h, 52px) + 12px); }
+@media (max-width: 1100px) {
+  html:has(.pwa-install-banner--visible) .m-mini,
+  html:has(.m-update:not([hidden])) .m-mini { --mini-base: calc(88px + env(safe-area-inset-bottom, 0px)); }
+  html.is-standalone:has(.m-update:not([hidden])) .m-mini { --mini-base: calc(var(--app-bar-h, 52px) + 76px); }
+  html:has(.pwa-install-banner--visible):has(.m-update:not([hidden])) .m-mini { --mini-base: calc(150px + env(safe-area-inset-bottom, 0px)); }
+}
+.m-mini.is-done { border-color: var(--syn-pink, #f25fa8); animation: m-mini-pulse 1.2s ease-in-out infinite; }
+.m-mini.is-paused { border-color: var(--syn-amber, #fbbf24); }
+.m-mini__open { display: flex; align-items: center; gap: 0.5rem; min-width: 0; padding: 0.45rem 0.4rem 0.45rem 0.8rem; border: none; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.m-mini__icon { font-size: 1.05rem; line-height: 1; }
+.m-mini__text { display: flex; flex-direction: column; min-width: 0; }
+.m-mini__value { font-size: 0.95rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.m-mini__label { font-size: 0.68rem; color: var(--term-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.m-mini__label[hidden] { display: none; }
+.m-mini__close { flex: 0 0 auto; padding: 0 0.8rem; border: none; border-left: 1px solid var(--term-border-strong); background: transparent; color: var(--term-muted); font-size: 1rem; cursor: pointer; }
+.m-mini__close:hover { color: var(--term-fg); }
+@keyframes m-mini-pulse { 50% { box-shadow: 0 0 0 4px rgba(242, 95, 168, 0.25); } }
+@media (prefers-reduced-motion: reduce) { .m-mini.is-done { animation: none; } }
+.terminal-frame__dot--mini { position: relative; z-index: 1; padding: 0; border: none; cursor: pointer; transition: filter 0.15s ease, transform 0.15s ease; }
+.terminal-frame__dot--mini::after { content: ''; position: absolute; inset: -8px -3px; }
+.terminal-frame__dot--mini:hover { filter: brightness(1.2); transform: scale(1.15); }
+.terminal-frame__dot--mini:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: 2px; }
 .m-offline { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.35rem 1rem; border-top: 1px solid var(--term-border); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--syn-amber); text-align: center; }
 .m-offline::before { content: ""; flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .m-offline[hidden] { display: none; }
@@ -1306,7 +1332,7 @@ body.is-fullscreen-tool .app-bar {
   body::before, body::after { display: none !important; }
   .site-header, .skip-link, .no-print { display: none !important; }
   .app-bar, .related-tools, .pwa-install-banner, .pwa-install-sheet { display: none !important; }
-  .m-offline, .m-update, .tool-share, .tldr, .eyebrow--crumbs, .terminal-frame__titlebar, .m-btn { display: none !important; }
+  .m-offline, .m-update, .m-mini, .tool-share, .tldr, .eyebrow--crumbs, .terminal-frame__titlebar, .m-btn { display: none !important; }
   .terminal-frame { background: none !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important; }
   .terminal-frame__body { padding: 0 !important; }
   html.is-standalone body { padding-bottom: 0 !important; }

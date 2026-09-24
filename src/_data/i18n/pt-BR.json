@@ -172,7 +172,17 @@
     "offline_home": "Ir para a página inicial em cache",
     "offline_strip": "Offline · mostrando o que este aparelho tem salvo",
     "offline_works": "Isto ainda funciona offline",
-    "close": "Fechar"
+    "close": "Fechar",
+    "mini": {
+      "minimize": "Minimizar em uma pílula flutuante",
+      "open": "Abrir {name}",
+      "close": "Fechar a pílula flutuante",
+      "timer": "Timer",
+      "times_up": "Tempo esgotado",
+      "paused": "Pausado",
+      "steps": "{n} passos",
+      "tap_resume": "Toque para continuar contando"
+    }
   },
   "home": {
     "cli": {
@@ -772,7 +782,8 @@
       "preset_1hr": "1 h",
       "preset_save_aria": "Salvar a duração atual como predefinição",
       "preset_remove_aria": "Remover predefinição {label}",
-      "preset_save_invalid": "Defina uma duração primeiro e depois salve"
+      "preset_save_invalid": "Defina uma duração primeiro e depois salve",
+      "mini_nothing": "Inicie um timer primeiro e depois minimize."
     },
     "invoice": {
       "btn_new": "Nova fatura",
@@ -1107,7 +1118,8 @@
       "pocket_note": "O modo bolso mantém a tela acesa, mas em preto puro — os passos continuam sendo contados no bolso. Ideal em telas OLED. Deslize o ponto na parte de baixo para sair.",
       "pocket_exit": "Deslize para sair",
       "est_label": "est.",
-      "est_explain": "Estimativa com base no seu ritmo de caminhada enquanto a tela estava bloqueada"
+      "est_explain": "Estimativa com base no seu ritmo de caminhada enquanto a tela estava bloqueada",
+      "mini_nothing": "Comece a contar primeiro e depois minimize."
     },
     "qr-scanner": {
       "aria_video": "Pré-visualização da câmera ao vivo",

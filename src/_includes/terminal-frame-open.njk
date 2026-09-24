@@ -6,7 +6,11 @@
             {% else %}
             <span class="terminal-frame__dot terminal-frame__dot--red"></span>
             {% endif %}
+            {% if terminalMini %}
+            <button type="button" class="terminal-frame__dot terminal-frame__dot--yellow terminal-frame__dot--mini" data-mini="{{ terminalMini }}" aria-label="{{ 'common.mini.minimize' | t }}" title="{{ 'common.mini.minimize' | t }}"></button>
+            {% else %}
             <span class="terminal-frame__dot terminal-frame__dot--yellow"></span>
+            {% endif %}
             <button type="button" class="terminal-frame__dot terminal-frame__dot--green" data-action="toggle-fullscreen" aria-pressed="false" aria-label="{{ 'common.toggle_fullscreen' | t }}" title="{{ 'common.toggle_fullscreen' | t }}"></button>
         </div>
         {% if terminalTitle %}

@@ -18,6 +18,7 @@ eleventyComputed:
 </section>
 
 {% set terminalTitle = "countdown-timer.js" %}
+{% set terminalMini = "timer" %}
 {% include "terminal-frame-open.njk" %}
 <section class="countdown-tool">
   <div class="ct-notif-bar" id="ct-notif-bar" role="status" aria-live="polite">
@@ -107,6 +108,7 @@ eleventyComputed:
 (() => {
   const COPY = {
     statusReady:    {{ ("tool.countdown-timer.status_ready"     | t) | dump | safe }},
+    miniNothing:    {{ ("tool.countdown-timer.mini_nothing"     | t) | dump | safe }},
     statusRunning:  {{ ("tool.countdown-timer.status_running"   | t) | dump | safe }},
     statusPaused:   {{ ("tool.countdown-timer.status_paused"    | t) | dump | safe }},
     statusTimesUp:  {{ ("tool.countdown-timer.status_times_up"  | t) | dump | safe }},
@@ -853,6 +855,15 @@ eleventyComputed:
     MentriaBus.provide('timer.status', () => [...widgetApi.values()].map((w) => ({ running: w.running(), remainingSeconds: w.remaining() })), { description: 'List the countdown timers and how many seconds remain.', ai: true, readonly: true });
   }).catch(() => {});
   addWidget();
+
+  const miniDot = document.querySelector('[data-mini="timer"]');
+  if (miniDot) miniDot.addEventListener('click', () => {
+    persistActive();
+    const active = window.MentriaStore && window.MentriaStore.get('tools', 'countdown_active');
+    if (!Array.isArray(active) || !active.length || !window.MentriaMini) { MentriaUI.toast(COPY.miniNothing); return; }
+    window.MentriaMini.start('timer', location.pathname);
+    window.MentriaMini.leave();
+  });
 
   let restoredActive = 0;
   (function restoreActive() {

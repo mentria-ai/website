@@ -18,6 +18,7 @@ eleventyComputed:
 </section>
 
 {% set terminalTitle = "step-counter.js" %}
+{% set terminalMini = "steps" %}
 {% include "terminal-frame-open.njk" %}
 <section class="sc" id="sc">
 
@@ -141,6 +142,7 @@ eleventyComputed:
   const LANG = document.documentElement.lang || undefined;
   const COPY = {
     btnStart:    {{ ("tool.step-counter.btn_start"    | t) | dump | safe }},
+    miniNothing: {{ ("tool.step-counter.mini_nothing" | t) | dump | safe }},
     btnPause:    {{ ("tool.step-counter.btn_pause"    | t) | dump | safe }},
     btnResume:   {{ ("tool.step-counter.btn_resume"   | t) | dump | safe }},
     goalOf:      {{ ("tool.step-counter.goal_of"      | t) | dump | safe }},
@@ -695,9 +697,40 @@ eleventyComputed:
   pocketEl.addEventListener('contextmenu', e => e.preventDefault());
   pocketEl.addEventListener('selectstart', e => e.preventDefault());
 
+  const miniDot = document.querySelector('[data-mini="steps"]');
+  if (miniDot) miniDot.addEventListener('click', () => {
+    if (!running || !window.MentriaMini) { MentriaUI.toast(COPY.miniNothing); return; }
+    stopTracking(false);
+    window.MentriaMini.start('steps', location.pathname);
+    window.MentriaMini.leave();
+  });
+
+  function resumeFromMini() {
+    const miniSession = window.MentriaStore && window.MentriaStore.get('ui', 'mini');
+    if (!miniSession || miniSession.kind !== 'steps') return;
+    window.MentriaStore.remove('ui', 'mini');
+    if (running) return;
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function' && window.isSecureContext) {
+      DeviceMotionEvent.requestPermission()
+        .then((res) => { if (res === 'granted') { showPanel(null); beginTracking(); } else start(); })
+        .catch(() => start());
+      return;
+    }
+    start();
+  }
+
   renderCount();
   renderHistory();
   renderSettings();
+  resumeFromMini();
+
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    Object.assign(state, loadState());
+    renderCount();
+    renderHistory();
+    resumeFromMini();
+  });
 })();
 </script>
 

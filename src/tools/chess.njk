@@ -148,6 +148,10 @@ eleventyComputed:
         </div>
         <div class="moves-table" id="moves-table"></div>
         <button class="btn scrub-back" id="scrub-back">{{ "tool.chess.back_to_live" | t }}</button>
+        <div class="export-row">
+          <button class="btn" id="btn-pgn">{{ "tool.chess.export_pgn" | t }}</button>
+          <button class="btn" id="btn-fen">{{ "tool.chess.copy_fen" | t }}</button>
+        </div>
       </div>
 
       <div class="panel" data-tab="connect">
@@ -281,6 +285,7 @@ eleventyComputed:
   .chess-app .moves-table .empty { padding: 12px 14px; color: var(--term-subtle); font-size: 11px; }
   .chess-app .scrub-back { display: none; margin: 6px 14px 10px; }
   .chess-app .scrub-back.show { display: inline-flex; }
+  .chess-app .export-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 14px 12px; }
 
   .chess-app .conn-section { padding: 12px 14px; border-bottom: 1px solid var(--term-divider); display: flex; flex-direction: column; gap: 8px; }
   .chess-app .conn-section:last-child { border-bottom: none; }
@@ -380,6 +385,8 @@ eleventyComputed:
     peer_connected: {{ ("tool.chess.peer_connected" | t) | dump | safe }},
     peer_disconnected: {{ ("tool.chess.peer_disconnected" | t) | dump | safe }},
     peer_error: {{ ("tool.chess.peer_error" | t) | dump | safe }},
+    relay_unreachable: {{ ("tool.chess.relay_unreachable" | t) | dump | safe }},
+    copy_fen: {{ ("tool.chess.copy_fen" | t) | dump | safe }},
     room_invalid: {{ ("tool.chess.room_invalid" | t) | dump | safe }},
     copy: {{ ("tool.chess.copy" | t) | dump | safe }},
     copied: {{ ("tool.chess.copied" | t) | dump | safe }},

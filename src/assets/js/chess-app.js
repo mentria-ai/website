@@ -13,6 +13,7 @@
     chat_you: 'you', chat_peer: 'peer',
     peer_offline: 'offline', peer_waiting: 'waiting for opponent', peer_connecting: 'connecting…',
     peer_connected: 'connected', peer_disconnected: 'opponent left', peer_error: 'connection error',
+    relay_unreachable: "can't reach the game relay", copy_fen: 'copy FEN',
     room_invalid: 'invalid room code', copied: 'copied',
     play_black: 'play black', play_white: 'play white',
     board_label: 'chess board', a11y_empty: 'empty', a11y_target: 'legal move',
@@ -655,6 +656,56 @@
     newGame(true);
   }
 
+  function toFEN(pos){
+    const rows = [];
+    for (let r = 0; r < 8; r++){
+      let row = '', empty = 0;
+      for (let c = 0; c < 8; c++){
+        const p = pos.b[r * 8 + c];
+        if (p === ' ') empty++;
+        else { if (empty) { row += empty; empty = 0; } row += p; }
+      }
+      if (empty) row += empty;
+      rows.push(row);
+    }
+    return rows.join('/') + ' ' + pos.turn + ' ' + (pos.cas || '-') + ' ' + (pos.ep >= 0 ? sqName(pos.ep) : '-') + ' ' + (pos.half || 0) + ' ' + (pos.full || 1);
+  }
+  function pgnResult(over){
+    if (!over) return '*';
+    if (over.winner === 'w') return '1-0';
+    if (over.winner === 'b') return '0-1';
+    return '1/2-1/2';
+  }
+  function toPGN(){
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    let white = 'White', black = 'Black';
+    if (State.mode === 'engine'){
+      const eng = 'Mentria engine (level ' + State.skill + ')';
+      white = State.humanColor === 'w' ? 'You' : eng;
+      black = State.humanColor === 'w' ? eng : 'You';
+    } else if (State.mode === 'online' && P2P.color){
+      white = P2P.color === 'w' ? 'You' : 'Opponent';
+      black = P2P.color === 'w' ? 'Opponent' : 'You';
+    }
+    const result = pgnResult(State.over);
+    const tags = [['Event', 'Casual game'], ['Site', 'mentria.ai'], ['Date', d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())], ['Round', '-'], ['White', white], ['Black', black], ['Result', result]];
+    const tokens = [];
+    State.history.forEach((h, i) => {
+      if (i % 2 === 0) tokens.push((i / 2 + 1) + '.');
+      tokens.push(h.san);
+    });
+    tokens.push(result);
+    const lines = [];
+    let line = '';
+    tokens.forEach((t) => {
+      if (line && (line + ' ' + t).length > 79){ lines.push(line); line = t; }
+      else line = line ? line + ' ' + t : t;
+    });
+    if (line) lines.push(line);
+    return tags.map(([k, v]) => '[' + k + ' "' + String(v).replace(/[\\"]/g, '') + '"]').join('\n') + '\n\n' + lines.join('\n') + '\n';
+  }
+
   /* ===== P2P (Trystero) ===== */
   let iceCache = null, iceExp = 0;
   async function getIce(){
@@ -676,9 +727,22 @@
       this.room = null; this.action = null; this.role = null; this.color = null; this.peers = new Set();
       this.setLed('', T.peer_offline);
     },
+    relaySockets: null,
+    async waitRelay(ms){
+      const deadline = Date.now() + ms;
+      while (Date.now() < deadline){
+        if (!this.room) return false;
+        const socks = this.relaySockets ? Object.values(this.relaySockets() || {}) : [];
+        if (socks.some(ws => ws && ws.readyState === 1)) return true;
+        await new Promise(r => setTimeout(r, 200));
+      }
+      return false;
+    },
     async start(role, code){
       this.cleanup();
-      const { joinRoom } = await import('/assets/vendor/trystero-nostr.js');
+      if (navigator.onLine === false){ this.setLed('warn', T.relay_unreachable); return false; }
+      const { joinRoom, getRelaySockets } = await import('/assets/vendor/trystero-nostr.js');
+      this.relaySockets = getRelaySockets;
       const ice = await getIce();
       this.role = role; this.color = role === 'host' ? 'w' : 'b';
       this.room = joinRoom({ appId:'mentria-chess', relayConfig:{ urls:['wss://relay.mentria.ai'] }, rtcConfig:{ iceServers: ice } }, 'chess-' + code);
@@ -696,7 +760,14 @@
       else { State.flipped = false; buildBoardCells(); }
       State.focusSq = homeSquare();
       render();
-      this.setLed('warn', role === 'host' ? T.peer_waiting : T.peer_connecting);
+      this.setLed('warn', T.peer_connecting);
+      if (!(await this.waitRelay(10000))){
+        this.cleanup();
+        this.setLed('warn', T.relay_unreachable);
+        return false;
+      }
+      if (!this.peers.size) this.setLed('warn', role === 'host' ? T.peer_waiting : T.peer_connecting);
+      return true;
     },
     send(obj){ if (this.action) this.action.send(obj); },
     onMsg(m){
@@ -731,6 +802,18 @@
     $('btn-rematch').onclick = () => newGame(true);
     $('btn-hint').onclick = () => { pendingHint = true; askEngine(); };
     $('scrub-back').onclick = backToLive;
+    $('btn-pgn').onclick = () => {
+      const name = 'mentria-chess-' + new Date().toISOString().slice(0, 10) + '.pgn';
+      const blob = new Blob([toPGN()], { type: 'application/x-chess-pgn' });
+      if (window.MentriaUI && window.MentriaUI.downloadFile) window.MentriaUI.downloadFile(name, blob);
+    };
+    $('btn-fen').onclick = () => {
+      const b = $('btn-fen');
+      navigator.clipboard.writeText(toFEN(State.pos)).then(
+        () => { b.textContent = T.copied; },
+        () => { b.textContent = T.copy_failed; }
+      ).then(() => { setTimeout(() => { b.textContent = T.copy_fen; }, 1200); });
+    };
 
     document.querySelectorAll('.modes button').forEach(b => { b.onclick = () => setMode(b.dataset.mode); });
     document.querySelectorAll('#skill-pills button').forEach(b => {
@@ -739,8 +822,8 @@
 
     $('btn-host').onclick = async () => {
       const code = randCode();
-      $('room-code').value = code; $('host-panel').style.display = 'flex'; $('guest-panel').style.display = 'none';
-      try { await P2P.start('host', code); } catch(e){ P2P.setLed('warn', T.peer_error); }
+      $('room-code').value = code; $('host-panel').style.display = 'none'; $('guest-panel').style.display = 'none';
+      try { if (await P2P.start('host', code)) $('host-panel').style.display = 'flex'; } catch(e){ P2P.setLed('warn', T.peer_error); }
     };
     $('btn-guest').onclick = () => { $('guest-panel').style.display = 'flex'; $('host-panel').style.display = 'none'; setTimeout(()=>$('join-code').focus(), 50); };
     $('btn-join').onclick = async () => {

@@ -1,0 +1,2499 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/json-formatter/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.json-formatter.title' | t }}"
+  description: "{{ 'tools.json-formatter.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">json-formatter</span></p>
+  <h1>{{ "tools.json-formatter.title" | t }}</h1>
+  <p>{{ "tools.json-formatter.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "json-formatter.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="jf" id="jf">
+
+  <div class="jf__bar">
+    <div class="jf__group">
+      <span class="jf__label" id="jf-style-label">{{ "tool.json-formatter.label_output" | t }}</span>
+      <div class="m-seg jf__seg" id="jf-style" aria-labelledby="jf-style-label">
+        <button type="button" data-value="format">{{ "tool.json-formatter.style_format" | t }}</button>
+        <button type="button" data-value="minify">{{ "tool.json-formatter.style_minify" | t }}</button>
+      </div>
+    </div>
+    <div class="jf__group" id="jf-indent-group">
+      <span class="jf__label" id="jf-indent-label">{{ "tool.json-formatter.label_indent" | t }}</span>
+      <div class="m-seg jf__seg" id="jf-indent" aria-labelledby="jf-indent-label">
+        <button type="button" data-value="2">{{ "tool.json-formatter.indent_2" | t }}</button>
+        <button type="button" data-value="4">{{ "tool.json-formatter.indent_4" | t }}</button>
+        <button type="button" data-value="tab">{{ "tool.json-formatter.indent_tab" | t }}</button>
+      </div>
+    </div>
+    <button type="button" class="m-btn m-btn--ghost jf__sort" id="jf-sort" aria-pressed="false"><span class="jf__check" aria-hidden="true"></span><span>{{ "tool.json-formatter.btn_sort" | t }}</span></button>
+  </div>
+
+  <div class="jf__grid">
+    <div class="jf__pane jf__pane--in">
+      <div class="jf__head">
+        <label class="jf__label" for="jf-input">{{ "tool.json-formatter.label_input" | t }}</label>
+        <div class="jf__actions">
+          <button type="button" class="m-btn m-btn--ghost jf__small" id="jf-open">{{ "tool.json-formatter.btn_open" | t }}</button>
+          <button type="button" class="m-btn m-btn--ghost jf__small" id="jf-clear">{{ "tool.json-formatter.btn_clear" | t }}</button>
+        </div>
+      </div>
+      <div class="jf__drop" id="jf-drop">
+        <textarea class="jf__input" id="jf-input" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" translate="no" dir="ltr" placeholder="{{ 'tool.json-formatter.input_placeholder' | t }}" aria-describedby="jf-state-text jf-error-msg"></textarea>
+        <div class="jf__drop-hint" aria-hidden="true">{{ "tool.json-formatter.drop_hint" | t }}</div>
+      </div>
+      <input type="file" class="jf__file" id="jf-file" accept=".json,application/json,text/json,text/plain,.geojson,.webmanifest,.har" tabindex="-1" aria-hidden="true">
+      <p class="jf__state" id="jf-state" data-state="empty">
+        <span class="jf__state-dot" aria-hidden="true"></span>
+        <span class="jf__state-text" id="jf-state-text">{{ "tool.json-formatter.state_empty" | t }}</span>
+      </p>
+      <div class="jf__box jf__box--err" id="jf-error" hidden>
+        <p class="jf__box-msg" id="jf-error-msg"></p>
+        <div class="jf__excerpt" id="jf-excerpt" translate="no" dir="ltr"></div>
+        <button type="button" class="m-btn m-btn--ghost jf__small" id="jf-jump">{{ "tool.json-formatter.btn_jump" | t }}</button>
+      </div>
+      <div class="jf__box jf__box--warn" id="jf-warn" hidden>
+        <p class="jf__box-msg" id="jf-warn-msg"></p>
+        <button type="button" class="m-btn m-btn--ghost jf__small" id="jf-warn-jump">{{ "tool.json-formatter.btn_jump" | t }}</button>
+      </div>
+      <div class="jf__box jf__box--warn" id="jf-paused" hidden>
+        <p class="jf__box-msg" id="jf-paused-msg"></p>
+        <button type="button" class="m-btn m-btn--primary jf__small" id="jf-process">{{ "tool.json-formatter.btn_process" | t }}</button>
+      </div>
+    </div>
+
+    <div class="jf__pane jf__pane--out" id="jf-out">
+      <div class="jf__head">
+        <div class="m-seg jf__seg" id="jf-view" aria-label="{{ 'tool.json-formatter.label_view' | t }}">
+          <button type="button" data-value="text">{{ "tool.json-formatter.view_text" | t }}</button>
+          <button type="button" data-value="tree">{{ "tool.json-formatter.view_tree" | t }}</button>
+        </div>
+        <div class="jf__actions">
+          <button type="button" class="m-btn m-btn--ghost jf__small jf__copy" id="jf-copy" disabled><span class="jf__lbl">{{ "tool.json-formatter.btn_copy" | t }}</span><span class="jf__lbl-alt"></span></button>
+          <button type="button" class="m-btn m-btn--ghost jf__small" id="jf-download" disabled>{{ "tool.json-formatter.btn_download" | t }}</button>
+        </div>
+      </div>
+      <p class="jf__meta" id="jf-meta"></p>
+      <p class="jf__empty" id="jf-empty">{{ "tool.json-formatter.output_empty" | t }}</p>
+      <div class="jf__view" id="jf-textview" hidden>
+        <pre class="jf__code" id="jf-code" role="region" tabindex="0" translate="no" dir="ltr" aria-label="{{ 'tool.json-formatter.label_code' | t }}"></pre>
+        <p class="jf__note" id="jf-trunc" hidden></p>
+      </div>
+      <div class="jf__view" id="jf-treeview" hidden>
+        <div class="jf__actions">
+          <button type="button" class="m-btn m-btn--ghost jf__small" id="jf-expand">{{ "tool.json-formatter.btn_expand_all" | t }}</button>
+          <button type="button" class="m-btn m-btn--ghost jf__small" id="jf-collapse">{{ "tool.json-formatter.btn_collapse_all" | t }}</button>
+        </div>
+        <div class="jf__pathbar">
+          <span class="jf__label" id="jf-path-label">{{ "tool.json-formatter.label_path" | t }}</span>
+          <code class="jf__path" id="jf-path" translate="no" dir="ltr" aria-labelledby="jf-path-label">$</code>
+          <button type="button" class="m-btn m-btn--ghost jf__small jf__copy" id="jf-copy-path"><span class="jf__lbl">{{ "tool.json-formatter.btn_copy_path" | t }}</span><span class="jf__lbl-alt"></span></button>
+        </div>
+        <div class="jf__tree" id="jf-tree" role="region" translate="no" dir="ltr" aria-label="{{ 'tool.json-formatter.label_tree' | t }}" aria-describedby="jf-tree-hint"></div>
+        <p class="jf__note jf__hint" id="jf-tree-hint">{{ "tool.json-formatter.tree_hint" | t }}</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="m-status jf__status" id="jf-status" role="status" aria-live="polite"></p>
+  <p class="jf-sr" id="jf-live" role="status" aria-live="polite"></p>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+{% set toolSchemaCategory = "DeveloperApplication" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(function () {
+  'use strict';
+
+  const COPY = {
+    state_empty: {{ ("tool.json-formatter.state_empty" | t) | dump | safe }},
+    state_valid: {{ ("tool.json-formatter.state_valid" | t) | dump | safe }},
+    state_invalid: {{ ("tool.json-formatter.state_invalid" | t) | dump | safe }},
+    state_busy: {{ ("tool.json-formatter.state_busy" | t) | dump | safe }},
+    state_paused: {{ ("tool.json-formatter.state_paused" | t) | dump | safe }},
+    line_col: {{ ("tool.json-formatter.line_col" | t) | dump | safe }},
+    invalid_announce: {{ ("tool.json-formatter.invalid_announce" | t) | dump | safe }},
+    type_object: {{ ("tool.json-formatter.type_object" | t) | dump | safe }},
+    type_array: {{ ("tool.json-formatter.type_array" | t) | dump | safe }},
+    type_string: {{ ("tool.json-formatter.type_string" | t) | dump | safe }},
+    type_number: {{ ("tool.json-formatter.type_number" | t) | dump | safe }},
+    type_boolean: {{ ("tool.json-formatter.type_boolean" | t) | dump | safe }},
+    type_null: {{ ("tool.json-formatter.type_null" | t) | dump | safe }},
+    empty: {{ ("tool.json-formatter.empty" | t) | dump | safe }},
+    keys_one: {{ ("tool.json-formatter.keys_one" | t) | dump | safe }},
+    keys_other: {{ ("tool.json-formatter.keys_other" | t) | dump | safe }},
+    items_one: {{ ("tool.json-formatter.items_one" | t) | dump | safe }},
+    items_other: {{ ("tool.json-formatter.items_other" | t) | dump | safe }},
+    err_eof: {{ ("tool.json-formatter.err_eof" | t) | dump | safe }},
+    err_eof_open: {{ ("tool.json-formatter.err_eof_open" | t) | dump | safe }},
+    err_eof_string: {{ ("tool.json-formatter.err_eof_string" | t) | dump | safe }},
+    err_expect_value: {{ ("tool.json-formatter.err_expect_value" | t) | dump | safe }},
+    err_expect_key: {{ ("tool.json-formatter.err_expect_key" | t) | dump | safe }},
+    err_expect_colon: {{ ("tool.json-formatter.err_expect_colon" | t) | dump | safe }},
+    err_expect_comma_obj: {{ ("tool.json-formatter.err_expect_comma_obj" | t) | dump | safe }},
+    err_expect_comma_arr: {{ ("tool.json-formatter.err_expect_comma_arr" | t) | dump | safe }},
+    err_trailing_comma: {{ ("tool.json-formatter.err_trailing_comma" | t) | dump | safe }},
+    err_extra: {{ ("tool.json-formatter.err_extra" | t) | dump | safe }},
+    err_single_quote: {{ ("tool.json-formatter.err_single_quote" | t) | dump | safe }},
+    err_comment: {{ ("tool.json-formatter.err_comment" | t) | dump | safe }},
+    err_leading_zero: {{ ("tool.json-formatter.err_leading_zero" | t) | dump | safe }},
+    err_number_digit: {{ ("tool.json-formatter.err_number_digit" | t) | dump | safe }},
+    err_bad_escape: {{ ("tool.json-formatter.err_bad_escape" | t) | dump | safe }},
+    err_bad_unicode: {{ ("tool.json-formatter.err_bad_unicode" | t) | dump | safe }},
+    err_control_char: {{ ("tool.json-formatter.err_control_char" | t) | dump | safe }},
+    err_string_newline: {{ ("tool.json-formatter.err_string_newline" | t) | dump | safe }},
+    err_word: {{ ("tool.json-formatter.err_word" | t) | dump | safe }},
+    lossy_one: {{ ("tool.json-formatter.lossy_one" | t) | dump | safe }},
+    lossy_other: {{ ("tool.json-formatter.lossy_other" | t) | dump | safe }},
+    lossy_badge: {{ ("tool.json-formatter.lossy_badge" | t) | dump | safe }},
+    big_confirm: {{ ("tool.json-formatter.big_confirm" | t) | dump | safe }},
+    paused_msg: {{ ("tool.json-formatter.paused_msg" | t) | dump | safe }},
+    too_large_input: {{ ("tool.json-formatter.too_large_input" | t) | dump | safe }},
+    too_large_output: {{ ("tool.json-formatter.too_large_output" | t) | dump | safe }},
+    file_too_large: {{ ("tool.json-formatter.file_too_large" | t) | dump | safe }},
+    file_read_failed: {{ ("tool.json-formatter.file_read_failed" | t) | dump | safe }},
+    file_opened: {{ ("tool.json-formatter.file_opened" | t) | dump | safe }},
+    meta_format: {{ ("tool.json-formatter.meta_format" | t) | dump | safe }},
+    meta_minify: {{ ("tool.json-formatter.meta_minify" | t) | dump | safe }},
+    meta_sorted: {{ ("tool.json-formatter.meta_sorted" | t) | dump | safe }},
+    meta_stale: {{ ("tool.json-formatter.meta_stale" | t) | dump | safe }},
+    trunc_note: {{ ("tool.json-formatter.trunc_note" | t) | dump | safe }},
+    copied: {{ ("tool.json-formatter.copied" | t) | dump | safe }},
+    copy_failed: {{ ("tool.json-formatter.copy_failed" | t) | dump | safe }},
+    copied_output: {{ ("tool.json-formatter.copied_output" | t) | dump | safe }},
+    copied_path: {{ ("tool.json-formatter.copied_path" | t) | dump | safe }},
+    downloaded: {{ ("tool.json-formatter.downloaded" | t) | dump | safe }},
+    cleared: {{ ("tool.json-formatter.cleared" | t) | dump | safe }},
+    expand_capped: {{ ("tool.json-formatter.expand_capped" | t) | dump | safe }},
+    show_more: {{ ("tool.json-formatter.show_more" | t) | dump | safe }},
+    download_base: {{ ("tool.json-formatter.download_base" | t) | dump | safe }}
+  };
+
+  const Core = (function () {
+    const T = { OBJ: 1, OBJ_END: 2, ARR: 3, ARR_END: 4, KEY: 5, STR: 6, NUM: 7, NUM_LOSSY: 8, TRUE: 9, FALSE: 10, NULL: 11 };
+    const TOKEN_CLASS = ['', '', '', '', '', 'jf-k', 'jf-s', 'jf-n', 'jf-n jf-lossy', 'jf-b', 'jf-b', 'jf-z'];
+    const S_TOP = 0;
+    const S_AFTER_COLON = 1;
+    const S_AFTER_COMMA = 2;
+    const S_ARRAY_START = 3;
+    const S_OBJECT_START = 4;
+    const S_KEY = 5;
+    const S_COLON = 6;
+    const S_NEXT = 7;
+    const S_DONE = 8;
+    const WINDOW_BEFORE = 36;
+    const WINDOW_AFTER = 28;
+    const INVISIBLE = /[\p{C}\p{Z}]/u;
+    const DOT_NAME = /^[A-Za-z_\u0080-\uD7FF\uE000-\u{10FFFF}][A-Za-z0-9_\u0080-\uD7FF\uE000-\u{10FFFF}]*$/u;
+    const PATH_ESCAPES = { 8: '\\b', 9: '\\t', 10: '\\n', 12: '\\f', 13: '\\r', 39: "\\'", 92: '\\\\' };
+    const STRING_ESCAPES = { 34: '"', 47: '/', 92: '\\', 98: '\b', 102: '\f', 110: '\n', 114: '\r', 116: '\t' };
+
+    function isDigit(c) {
+      return c >= 48 && c <= 57;
+    }
+
+    function isHex(c) {
+      return (c >= 48 && c <= 57) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102);
+    }
+
+    function isWordStart(c) {
+      return (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c === 95 || c === 36;
+    }
+
+    function isWordChar(c) {
+      return isWordStart(c) || isDigit(c);
+    }
+
+    function isOpen(t) {
+      return t === T.OBJ || t === T.ARR;
+    }
+
+    function describeChar(text, i) {
+      const cp = text.codePointAt(i);
+      const ch = String.fromCodePoint(cp);
+      if (INVISIBLE.test(ch)) return 'U+' + cp.toString(16).toUpperCase().padStart(4, '0');
+      return ch;
+    }
+
+    function wordAt(text, i) {
+      let j = i;
+      while (j < text.length && j - i < 40 && isWordChar(text.charCodeAt(j))) j++;
+      return j > i ? text.slice(i, j) : describeChar(text, i);
+    }
+
+    function decimalKey(s) {
+      let i = 0;
+      let neg = false;
+      if (s.charCodeAt(0) === 45) {
+        neg = true;
+        i = 1;
+      }
+      let digits = '';
+      let frac = 0;
+      let inFrac = false;
+      for (; i < s.length; i++) {
+        const c = s.charCodeAt(i);
+        if (c === 46) {
+          inFrac = true;
+          continue;
+        }
+        if (c === 101 || c === 69) break;
+        digits += s[i];
+        if (inFrac) frac++;
+      }
+      let exp = i < s.length ? Number(s.slice(i + 1)) : 0;
+      exp -= frac;
+      let a = 0;
+      while (a < digits.length && digits.charCodeAt(a) === 48) a++;
+      let b = digits.length;
+      while (b > a && digits.charCodeAt(b - 1) === 48) b--;
+      if (a === b) return '0';
+      exp += digits.length - b;
+      return (neg ? '-' : '') + digits.slice(a, b) + 'e' + exp;
+    }
+
+    function isLossy(literal) {
+      const n = Number(literal);
+      if (!isFinite(n)) return true;
+      if (n === 0) return decimalKey(literal) !== '0';
+      return decimalKey(String(n)) !== decimalKey(literal);
+    }
+
+    function utf8Length(s) {
+      const n = s.length;
+      let bytes = 0;
+      for (let i = 0; i < n; i++) {
+        const c = s.charCodeAt(i);
+        if (c < 0x80) bytes += 1;
+        else if (c < 0x800) bytes += 2;
+        else if (c >= 0xD800 && c <= 0xDBFF && i + 1 < n && (s.charCodeAt(i + 1) & 0xFC00) === 0xDC00) {
+          bytes += 4;
+          i++;
+        } else bytes += 3;
+      }
+      return bytes;
+    }
+
+    function scan(text) {
+      const len = text.length;
+      let cap = 256;
+      while (cap < (len >> 4)) cap *= 2;
+      let type = new Uint8Array(cap);
+      let start = new Int32Array(cap);
+      let end = new Int32Array(cap);
+      let link = new Int32Array(cap);
+      let size = new Int32Array(cap);
+      let n = 0;
+      let stack = new Int32Array(64);
+      let sp = 0;
+      let state = S_TOP;
+      let i = len > 0 && text.charCodeAt(0) === 0xFEFF ? 1 : 0;
+      let numberHasExponent = false;
+      let failure = null;
+      let lossyCount = 0;
+      const lossyList = [];
+
+      function grow() {
+        cap *= 2;
+        const t2 = new Uint8Array(cap);
+        t2.set(type);
+        type = t2;
+        const s2 = new Int32Array(cap);
+        s2.set(start);
+        start = s2;
+        const e2 = new Int32Array(cap);
+        e2.set(end);
+        end = e2;
+        const l2 = new Int32Array(cap);
+        l2.set(link);
+        link = l2;
+        const z2 = new Int32Array(cap);
+        z2.set(size);
+        size = z2;
+      }
+
+      function push(t, s, e) {
+        if (n === cap) grow();
+        type[n] = t;
+        start[n] = s;
+        end[n] = e;
+        link[n] = -1;
+        size[n] = 0;
+        return n++;
+      }
+
+      function fail(offset, code, found, extra) {
+        failure = { offset: offset, code: code, found: found || '' };
+        if (extra) {
+          failure.at = extra.at;
+          if (extra.bracket) failure.bracket = extra.bracket;
+        }
+        return -1;
+      }
+
+      function scanString(s) {
+        let j = s + 1;
+        for (;;) {
+          if (j >= len) return fail(len, 'eof_string', '', { at: s });
+          const c = text.charCodeAt(j);
+          if (c === 34) return j + 1;
+          if (c === 92) {
+            j++;
+            if (j >= len) return fail(len, 'eof_string', '', { at: s });
+            const e = text.charCodeAt(j);
+            if (e === 117) {
+              j++;
+              for (let k = 0; k < 4; k++, j++) {
+                if (j >= len) return fail(len, 'eof_string', '', { at: s });
+                if (!isHex(text.charCodeAt(j))) return fail(j, 'bad_unicode', describeChar(text, j));
+              }
+            } else if (e === 34 || e === 92 || e === 47 || e === 98 || e === 102 || e === 110 || e === 114 || e === 116) {
+              j++;
+            } else {
+              return fail(j, 'bad_escape', describeChar(text, j));
+            }
+          } else if (c < 32) {
+            return fail(j, c === 10 || c === 13 ? 'string_newline' : 'control_char', describeChar(text, j));
+          } else {
+            j++;
+          }
+        }
+      }
+
+      function scanDigits(j) {
+        while (j < len && isDigit(text.charCodeAt(j))) j++;
+        return j;
+      }
+
+      function scanNumber(s) {
+        let j = s;
+        numberHasExponent = false;
+        if (text.charCodeAt(j) === 45) {
+          j++;
+          if (j >= len) return fail(len, 'eof');
+        }
+        let c = text.charCodeAt(j);
+        if (c === 48) {
+          j++;
+          if (j < len && isDigit(text.charCodeAt(j))) return fail(j, 'leading_zero', describeChar(text, j));
+        } else if (c >= 49 && c <= 57) {
+          j = scanDigits(j + 1);
+        } else {
+          return fail(j, 'number_digit', describeChar(text, j));
+        }
+        if (j < len && text.charCodeAt(j) === 46) {
+          j++;
+          if (j >= len) return fail(len, 'eof');
+          if (!isDigit(text.charCodeAt(j))) return fail(j, 'number_digit', describeChar(text, j));
+          j = scanDigits(j + 1);
+        }
+        if (j < len && (text.charCodeAt(j) | 32) === 101) {
+          numberHasExponent = true;
+          j++;
+          if (j >= len) return fail(len, 'eof');
+          c = text.charCodeAt(j);
+          if (c === 43 || c === 45) {
+            j++;
+            if (j >= len) return fail(len, 'eof');
+          }
+          if (!isDigit(text.charCodeAt(j))) return fail(j, 'number_digit', describeChar(text, j));
+          j = scanDigits(j + 1);
+        }
+        return j;
+      }
+
+      function scanWord(s, word) {
+        for (let k = 1; k < word.length; k++) {
+          if (s + k >= len) return fail(len, 'eof');
+          if (text.charCodeAt(s + k) !== word.charCodeAt(k)) return fail(s + k, 'word', wordAt(text, s));
+        }
+        const j = s + word.length;
+        if (j < len && isWordChar(text.charCodeAt(j))) return fail(j, 'word', wordAt(text, s));
+        return j;
+      }
+
+      function openContainer(t) {
+        const k = push(t, i, i + 1);
+        if (sp === stack.length) {
+          const bigger = new Int32Array(stack.length * 2);
+          bigger.set(stack);
+          stack = bigger;
+        }
+        stack[sp++] = k;
+        i++;
+      }
+
+      function closeContainer() {
+        const o = stack[--sp];
+        const k = push(type[o] === T.OBJ ? T.OBJ_END : T.ARR_END, i, i + 1);
+        link[o] = k;
+        link[k] = o;
+        i++;
+        state = sp > 0 ? S_NEXT : S_DONE;
+      }
+
+      function error(offset, code, found) {
+        fail(offset, code, found);
+        return { error: failure };
+      }
+
+      function valueError(c) {
+        if (c === 39) return error(i, 'single_quote', "'");
+        if (c === 47) return error(i, 'comment', '/');
+        if (isWordStart(c)) return error(i, 'word', wordAt(text, i));
+        return error(i, 'expect_value', describeChar(text, i));
+      }
+
+      function keyError(c) {
+        if (c === 39) return error(i, 'single_quote', "'");
+        if (c === 47) return error(i, 'comment', '/');
+        return error(i, 'expect_key', isWordStart(c) ? wordAt(text, i) : describeChar(text, i));
+      }
+
+      for (;;) {
+        while (i < len) {
+          const w = text.charCodeAt(i);
+          if (w === 32 || w === 10 || w === 13 || w === 9) i++;
+          else break;
+        }
+        if (i >= len) {
+          if (state === S_DONE) break;
+          if (state === S_TOP) return { empty: true };
+          if (sp > 0) {
+            const o = stack[sp - 1];
+            fail(len, 'eof_open', '', { at: start[o], bracket: type[o] === T.OBJ ? '{' : '[' });
+            return { error: failure };
+          }
+          return error(len, 'eof', '');
+        }
+        const c = text.charCodeAt(i);
+        if (state <= S_ARRAY_START) {
+          if (c === 93 && state === S_ARRAY_START) {
+            closeContainer();
+            continue;
+          }
+          if (c === 93 && state === S_AFTER_COMMA) return error(i, 'trailing_comma', ']');
+          if (sp > 0 && type[stack[sp - 1]] === T.ARR) size[stack[sp - 1]]++;
+          if (c === 123) {
+            openContainer(T.OBJ);
+            state = S_OBJECT_START;
+            continue;
+          }
+          if (c === 91) {
+            openContainer(T.ARR);
+            state = S_ARRAY_START;
+            continue;
+          }
+          let j;
+          let t;
+          if (c === 34) {
+            j = scanString(i);
+            t = T.STR;
+          } else if (c === 45 || isDigit(c)) {
+            j = scanNumber(i);
+            t = T.NUM;
+          } else if (c === 116) {
+            j = scanWord(i, 'true');
+            t = T.TRUE;
+          } else if (c === 102) {
+            j = scanWord(i, 'false');
+            t = T.FALSE;
+          } else if (c === 110) {
+            j = scanWord(i, 'null');
+            t = T.NULL;
+          } else {
+            return valueError(c);
+          }
+          if (j < 0) return { error: failure };
+          if (t === T.NUM && (numberHasExponent || j - i > 15) && isLossy(text.slice(i, j))) {
+            t = T.NUM_LOSSY;
+            lossyCount++;
+            if (lossyList.length < 64) lossyList.push(n);
+          }
+          push(t, i, j);
+          i = j;
+          state = sp > 0 ? S_NEXT : S_DONE;
+          continue;
+        }
+        if (state === S_OBJECT_START || state === S_KEY) {
+          if (c === 34) {
+            const j = scanString(i);
+            if (j < 0) return { error: failure };
+            size[stack[sp - 1]]++;
+            push(T.KEY, i, j);
+            i = j;
+            state = S_COLON;
+            continue;
+          }
+          if (c === 125) {
+            if (state === S_OBJECT_START) {
+              closeContainer();
+              continue;
+            }
+            return error(i, 'trailing_comma', '}');
+          }
+          return keyError(c);
+        }
+        if (state === S_COLON) {
+          if (c === 58) {
+            i++;
+            state = S_AFTER_COLON;
+            continue;
+          }
+          return error(i, c === 47 ? 'comment' : 'expect_colon', describeChar(text, i));
+        }
+        if (state === S_NEXT) {
+          const top = type[stack[sp - 1]];
+          if (c === 44) {
+            i++;
+            state = top === T.OBJ ? S_KEY : S_AFTER_COMMA;
+            continue;
+          }
+          if ((c === 125 && top === T.OBJ) || (c === 93 && top === T.ARR)) {
+            closeContainer();
+            continue;
+          }
+          if (c === 47) return error(i, 'comment', '/');
+          return error(i, top === T.OBJ ? 'expect_comma_obj' : 'expect_comma_arr', describeChar(text, i));
+        }
+        return error(i, c === 47 ? 'comment' : 'extra', describeChar(text, i));
+      }
+
+      return {
+        doc: {
+          text: text,
+          n: n,
+          type: type,
+          start: start,
+          end: end,
+          link: link,
+          size: size,
+          lossyCount: lossyCount,
+          lossyList: lossyList
+        }
+      };
+    }
+
+    function decodeString(raw) {
+      const last = raw.length - 1;
+      if (raw.indexOf('\\') === -1) return raw.slice(1, last);
+      let out = '';
+      let run = 1;
+      let i = 1;
+      while (i < last) {
+        if (raw.charCodeAt(i) !== 92) {
+          i++;
+          continue;
+        }
+        out += raw.slice(run, i);
+        const e = raw.charCodeAt(i + 1);
+        if (e === 117) {
+          out += String.fromCharCode(parseInt(raw.slice(i + 2, i + 6), 16));
+          i += 6;
+        } else {
+          out += STRING_ESCAPES[e];
+          i += 2;
+        }
+        run = i;
+      }
+      return out + raw.slice(run, last);
+    }
+
+    function compareCodePoints(a, b) {
+      const n = Math.min(a.length, b.length);
+      let i = 0;
+      while (i < n) {
+        const x = a.codePointAt(i);
+        const y = b.codePointAt(i);
+        if (x !== y) return x - y;
+        i += x > 0xFFFF ? 2 : 1;
+      }
+      return (a.length - i) - (b.length - i);
+    }
+
+    function keyText(doc, k) {
+      return decodeString(doc.text.slice(doc.start[k], doc.end[k]));
+    }
+
+    function children(doc, open, sort) {
+      const type = doc.type;
+      const link = doc.link;
+      const obj = type[open] === T.OBJ;
+      const stop = link[open];
+      const out = [];
+      let k = open + 1;
+      while (k < stop) {
+        out.push(k);
+        const v = obj ? k + 1 : k;
+        k = (isOpen(type[v]) ? link[v] : v) + 1;
+      }
+      if (!sort || !obj || out.length < 2) return out;
+      const names = out.map(function (key) { return keyText(doc, key); });
+      const order = out.map(function (key, idx) { return idx; });
+      order.sort(function (p, q) { return compareCodePoints(names[p], names[q]) || p - q; });
+      return order.map(function (idx) { return out[idx]; });
+    }
+
+    function escapeHtml(s) {
+      if (s.indexOf('&') === -1 && s.indexOf('<') === -1 && s.indexOf('>') === -1) return s;
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function render(doc, opts) {
+      const text = doc.text;
+      const type = doc.type;
+      const start = doc.start;
+      const end = doc.end;
+      const minify = !!opts.minify;
+      const sort = !!opts.sort;
+      const html = !!opts.html;
+      const unit = minify ? '' : (typeof opts.indent === 'string' ? opts.indent : '  ');
+      const colon = minify ? ':' : ': ';
+      const limit = opts.limit > 0 ? opts.limit : Infinity;
+      const pads = [''];
+      const out = [];
+      const frames = [];
+      let total = 0;
+
+      function pad(d) {
+        while (pads.length <= d) pads.push(pads[pads.length - 1] + unit);
+        return pads[d];
+      }
+
+      function emit(s) {
+        total += s.length;
+        out.push(s);
+      }
+
+      function piece(k) {
+        const raw = text.slice(start[k], end[k]);
+        if (!html) return raw;
+        const t = type[k];
+        return '<span class="' + TOKEN_CLASS[t] + '">' + (t === T.KEY || t === T.STR ? escapeHtml(raw) : raw) + '</span>';
+      }
+
+      function enter(k, depth) {
+        const obj = type[k] === T.OBJ;
+        if (doc.size[k] === 0) {
+          emit(obj ? '{}' : '[]');
+          return;
+        }
+        emit(obj ? '{' : '[');
+        frames.push({ obj: obj, kids: children(doc, k, sort), pos: 0, depth: depth + 1 });
+      }
+
+      if (isOpen(type[0])) enter(0, 0);
+      else emit(piece(0));
+      while (frames.length) {
+        if (total > limit) return null;
+        const f = frames[frames.length - 1];
+        if (f.pos === f.kids.length) {
+          frames.pop();
+          if (!minify) emit('\n' + pad(f.depth - 1));
+          emit(f.obj ? '}' : ']');
+          continue;
+        }
+        const k = f.kids[f.pos];
+        if (f.pos > 0) emit(',');
+        f.pos++;
+        if (!minify) emit('\n' + pad(f.depth));
+        let v = k;
+        if (f.obj) {
+          emit(piece(k));
+          emit(colon);
+          v = k + 1;
+        }
+        if (isOpen(type[v])) enter(v, f.depth);
+        else emit(piece(v));
+      }
+      if (total > limit) return null;
+      return out.join('');
+    }
+
+    function lineCol(text, offset) {
+      let line = 1;
+      let lineStart = 0;
+      if (text.indexOf('\r') === -1) {
+        let p = text.indexOf('\n');
+        while (p !== -1 && p < offset) {
+          line++;
+          lineStart = p + 1;
+          p = text.indexOf('\n', p + 1);
+        }
+      } else {
+        for (let q = 0; q < offset; q++) {
+          const c = text.charCodeAt(q);
+          if (c === 10 || (c === 13 && text.charCodeAt(q + 1) !== 10)) {
+            line++;
+            lineStart = q + 1;
+          }
+        }
+      }
+      let col = 1;
+      for (let q = lineStart; q < offset; q++) {
+        const c = text.charCodeAt(q);
+        if (c >= 0xD800 && c <= 0xDBFF && q + 1 < offset && (text.charCodeAt(q + 1) & 0xFC00) === 0xDC00) q++;
+        col++;
+      }
+      return { line: line, col: col, lineStart: lineStart };
+    }
+
+    function lineEndFrom(text, p) {
+      const a = text.indexOf('\n', p);
+      const b = text.indexOf('\r', p);
+      if (a === -1) return b === -1 ? text.length : b;
+      return b === -1 ? a : Math.min(a, b);
+    }
+
+    function lineStartBefore(text, p) {
+      while (p > 0) {
+        const c = text.charCodeAt(p - 1);
+        if (c === 10 || c === 13) return p;
+        p--;
+      }
+      return 0;
+    }
+
+    function safeStart(text, p) {
+      return (text.charCodeAt(p) & 0xFC00) === 0xDC00 && p > 0 && (text.charCodeAt(p - 1) & 0xFC00) === 0xD800 ? p + 1 : p;
+    }
+
+    function safeEnd(text, p) {
+      return p > 0 && (text.charCodeAt(p - 1) & 0xFC00) === 0xD800 && (text.charCodeAt(p) & 0xFC00) === 0xDC00 ? p - 1 : p;
+    }
+
+    function visible(s) {
+      let out = '';
+      for (let i = 0; i < s.length; i++) {
+        const c = s.charCodeAt(i);
+        if (c < 32 && c !== 9) out += String.fromCharCode(0x2400 + c);
+        else if (c === 127) out += String.fromCharCode(0x2421);
+        else out += s[i];
+      }
+      return out;
+    }
+
+    function visibleAt(s) {
+      if (!s) return '';
+      const c = s.charCodeAt(0);
+      if (c < 32) return String.fromCharCode(0x2400 + c);
+      if (c === 127) return String.fromCharCode(0x2421);
+      if (c !== 32 && INVISIBLE.test(s)) return '·';
+      return s;
+    }
+
+    function excerpt(text, offset) {
+      const lc = lineCol(text, offset);
+      const lineStart = lc.lineStart;
+      const lineEnd = lineEndFrom(text, lineStart);
+      const cutStart = offset - lineStart > WINDOW_BEFORE;
+      const from = cutStart ? safeStart(text, offset - WINDOW_BEFORE) : lineStart;
+      let atEnd = offset;
+      if (offset < lineEnd) atEnd = offset + ((text.charCodeAt(offset) & 0xFC00) === 0xD800 && offset + 1 < lineEnd && (text.charCodeAt(offset + 1) & 0xFC00) === 0xDC00 ? 2 : 1);
+      const cutEnd = lineEnd - atEnd > WINDOW_AFTER;
+      const to = cutEnd ? safeEnd(text, atEnd + WINDOW_AFTER) : lineEnd;
+      const rows = [];
+      if (lineStart > 0) {
+        const prevEnd = lineStart - (lineStart > 1 && text.charCodeAt(lineStart - 1) === 10 && text.charCodeAt(lineStart - 2) === 13 ? 2 : 1);
+        const prevStart = lineStartBefore(text, prevEnd);
+        const a = safeStart(text, prevStart + (from - lineStart));
+        const b = safeEnd(text, Math.min(prevEnd, prevStart + (from - lineStart) + WINDOW_BEFORE + WINDOW_AFTER + 2));
+        if (a < b) {
+          const seg = text.slice(a, b);
+          if (seg.trim()) rows.push({ num: lc.line - 1, text: (a > prevStart ? '…' : '') + visible(seg) + (b < prevEnd ? '…' : '') });
+        }
+      }
+      rows.push({
+        num: lc.line,
+        before: (cutStart ? '…' : '') + visible(text.slice(from, offset)),
+        at: visibleAt(text.slice(offset, atEnd)),
+        after: visible(text.slice(atEnd, to)) + (cutEnd ? '…' : '')
+      });
+      return { line: lc.line, col: lc.col, rows: rows };
+    }
+
+    function quoteName(name) {
+      let out = '';
+      for (let i = 0; i < name.length; i++) {
+        const c = name.charCodeAt(i);
+        const e = PATH_ESCAPES[c];
+        if (e) out += e;
+        else if (c < 32) out += '\\u00' + (c < 16 ? '0' : '') + c.toString(16);
+        else out += name[i];
+      }
+      return "['" + out + "']";
+    }
+
+    function appendPath(base, seg) {
+      if (typeof seg === 'number') return base + '[' + seg + ']';
+      return DOT_NAME.test(seg) ? base + '.' + seg : base + quoteName(seg);
+    }
+
+    function buildPath(segs) {
+      let path = '$';
+      for (let i = 0; i < segs.length; i++) path = appendPath(path, segs[i]);
+      return path;
+    }
+
+    return {
+      T: T,
+      scan: scan,
+      render: render,
+      children: children,
+      decodeString: decodeString,
+      compareCodePoints: compareCodePoints,
+      isLossy: isLossy,
+      decimalKey: decimalKey,
+      utf8Length: utf8Length,
+      describeChar: describeChar,
+      lineCol: lineCol,
+      excerpt: excerpt,
+      appendPath: appendPath,
+      buildPath: buildPath
+    };
+  })();
+
+  const T = Core.T;
+  const SETTINGS_KEY = 'json_formatter_settings';
+  const BIG_INPUT = 10000000;
+  const MAX_FILE = 64000000;
+  const BUSY_AT = 1000000;
+  const HIGHLIGHT_MAX = 200000;
+  const DISPLAY_MAX = 1000000;
+  const OUTPUT_LIMIT = 120000000;
+  const PAGE = 100;
+  const AUTO_BUDGET = 160;
+  const AUTO_DEPTH = 3;
+  const EXPAND_ALL_BUDGET = 2000;
+  const EXPAND_ALL_DEPTH = 48;
+  const KEY_SHOW = 80;
+  const VALUE_SHOW = 120;
+  const EXAMPLE_SHOW = 40;
+  const INDENTS = { '2': '  ', '4': '    ', tab: '\t' };
+  const VALUE_CLASS = ['', '', '', '', '', '', 'jf-v jf-s', 'jf-v jf-n', 'jf-v jf-n jf-lossy', 'jf-v jf-b', 'jf-v jf-b', 'jf-v jf-z'];
+  const CONTROL_NAMES = { 8: '\\b', 9: '\\t', 10: '\\n', 12: '\\f', 13: '\\r' };
+
+  const $ = function (id) { return document.getElementById(id); };
+  const input = $('jf-input');
+  const dropEl = $('jf-drop');
+  const fileInput = $('jf-file');
+  const openBtn = $('jf-open');
+  const clearBtn = $('jf-clear');
+  const stateEl = $('jf-state');
+  const stateText = $('jf-state-text');
+  const errorBox = $('jf-error');
+  const errorMsg = $('jf-error-msg');
+  const excerptEl = $('jf-excerpt');
+  const jumpBtn = $('jf-jump');
+  const warnBox = $('jf-warn');
+  const warnMsg = $('jf-warn-msg');
+  const warnJump = $('jf-warn-jump');
+  const pausedBox = $('jf-paused');
+  const pausedMsg = $('jf-paused-msg');
+  const processBtn = $('jf-process');
+  const sortBtn = $('jf-sort');
+  const indentGroup = $('jf-indent-group');
+  const indentSegEl = $('jf-indent');
+  const outPane = $('jf-out');
+  const metaEl = $('jf-meta');
+  const emptyEl = $('jf-empty');
+  const textView = $('jf-textview');
+  const codeEl = $('jf-code');
+  const truncEl = $('jf-trunc');
+  const treeView = $('jf-treeview');
+  const treeEl = $('jf-tree');
+  const pathEl = $('jf-path');
+  const copyBtn = $('jf-copy');
+  const downloadBtn = $('jf-download');
+  const copyPathBtn = $('jf-copy-path');
+  const expandBtn = $('jf-expand');
+  const collapseBtn = $('jf-collapse');
+  const liveEl = $('jf-live');
+  const status = MentriaUI.status($('jf-status'));
+
+  const state = { style: 'format', indent: '2', sort: false, view: 'text' };
+  const intl = {};
+  const rows = new WeakMap();
+  const moreOwner = new WeakMap();
+  const expanded = new Set();
+
+  let doc = null;
+  let valid = false;
+  let version = 0;
+  let lastText = '';
+  let lastResult = null;
+  let fileBase = '';
+  let bigApproved = false;
+  let bigDeclined = false;
+  let asking = false;
+  let runTimer = 0;
+  let statusTimer = 0;
+  let liveKey = '';
+  let outKey = '';
+  let outText = null;
+  let outBytes = 0;
+  let textKey = '';
+  let treeKey = '';
+  let treeDoc = null;
+  let treeSort = false;
+  let rootRow = null;
+  let activeRow = null;
+  let selectedRow = null;
+  let selectedPath = '$';
+  let errorOffset = 0;
+  let lossyAt = null;
+  let freshSource = false;
+
+  function el(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+
+  function lang() {
+    return document.documentElement.lang || 'en';
+  }
+
+  function numberFormat(key, options) {
+    const id = key + '|' + lang();
+    if (!intl[id]) {
+      try {
+        intl[id] = new Intl.NumberFormat(lang(), options);
+      } catch (_) {
+        intl[id] = new Intl.NumberFormat('en', options);
+      }
+    }
+    return intl[id];
+  }
+
+  function fmtInt(n) {
+    return numberFormat('int', {}).format(n);
+  }
+
+  function fmtSize(bytes) {
+    let unit = 'byte';
+    let value = bytes;
+    if (bytes >= 1e6) {
+      unit = 'megabyte';
+      value = bytes / 1e6;
+    } else if (bytes >= 1e3) {
+      unit = 'kilobyte';
+      value = bytes / 1e3;
+    }
+    try {
+      return numberFormat(unit, { style: 'unit', unit: unit, unitDisplay: unit === 'byte' ? 'narrow' : 'short', maximumFractionDigits: 1 }).format(value);
+    } catch (_) {
+      return fmtInt(Math.round(value * 10) / 10) + (unit === 'byte' ? ' B' : unit === 'kilobyte' ? ' kB' : ' MB');
+    }
+  }
+
+  function pluralCategory(n) {
+    const id = 'plural|' + lang();
+    if (!intl[id]) {
+      try {
+        intl[id] = new Intl.PluralRules(lang());
+      } catch (_) {
+        intl[id] = new Intl.PluralRules('en');
+      }
+    }
+    return intl[id].select(n);
+  }
+
+  function pick(base, n) {
+    return COPY[base + '_' + pluralCategory(n)] || COPY[base + '_other'];
+  }
+
+  function fill(template, vars) {
+    let s = String(template);
+    Object.keys(vars).forEach(function (k) {
+      s = s.split('{' + k + '}').join(String(vars[k]));
+    });
+    return s;
+  }
+
+  function countLabel(t, n) {
+    if (n === 0) return COPY.empty;
+    return fill(pick(t === T.OBJ ? 'keys' : 'items', n), { n: fmtInt(n) });
+  }
+
+  function typeLabel(t) {
+    if (t === T.OBJ) return COPY.type_object;
+    if (t === T.ARR) return COPY.type_array;
+    if (t === T.STR) return COPY.type_string;
+    if (t === T.NUM || t === T.NUM_LOSSY) return COPY.type_number;
+    if (t === T.TRUE || t === T.FALSE) return COPY.type_boolean;
+    return COPY.type_null;
+  }
+
+  function clip(text, s, e, max) {
+    if (e - s <= max) return text.slice(s, e);
+    let cut = s + max;
+    if ((text.charCodeAt(cut - 1) & 0xFC00) === 0xD800) cut--;
+    return text.slice(s, cut) + '…';
+  }
+
+  function keyLabel(key) {
+    if (key === '') return '""';
+    const shown = clip(key, 0, key.length, KEY_SHOW);
+    let out = '';
+    for (let i = 0; i < shown.length; i++) {
+      const c = shown.charCodeAt(i);
+      if (c < 32 || c === 127) out += CONTROL_NAMES[c] || '\\u' + c.toString(16).padStart(4, '0');
+      else out += shown[i];
+    }
+    return out;
+  }
+
+  function baseName(name) {
+    let b = String(name || '').replace(/\.[^.]*$/, '');
+    if (/\.min$/i.test(b)) b = b.slice(0, -4);
+    return b.slice(0, 80);
+  }
+
+  function overBig(text) {
+    if (text.length > BIG_INPUT) return true;
+    if (text.length * 3 <= BIG_INPUT) return false;
+    return Core.utf8Length(text) > BIG_INPUT;
+  }
+
+  function flash(message, tone) {
+    status.set(message, tone);
+    clearTimeout(statusTimer);
+    if (tone !== 'err') statusTimer = setTimeout(function () { status.clear(); }, 5000);
+  }
+
+  function announce(message, key) {
+    if (key === liveKey) return;
+    liveKey = key;
+    liveEl.textContent = message;
+  }
+
+  function loadSettings() {
+    let saved = null;
+    try {
+      saved = window.MentriaStore ? window.MentriaStore.get('tools', SETTINGS_KEY) : null;
+    } catch (_) {
+      saved = null;
+    }
+    if (!saved || typeof saved !== 'object') return;
+    if (typeof saved.indent === 'string' && Object.prototype.hasOwnProperty.call(INDENTS, saved.indent)) state.indent = saved.indent;
+    if (saved.view === 'text' || saved.view === 'tree') state.view = saved.view;
+  }
+
+  function saveSettings() {
+    try {
+      if (window.MentriaStore) window.MentriaStore.set('tools', SETTINGS_KEY, { indent: state.indent, view: state.view });
+    } catch (_) {}
+  }
+
+  function setState(kind, text) {
+    stateEl.setAttribute('data-state', kind);
+    stateText.textContent = text;
+  }
+
+  function hideBoxes() {
+    errorBox.hidden = true;
+    errorMsg.textContent = '';
+    warnBox.hidden = true;
+    pausedBox.hidden = true;
+    input.removeAttribute('aria-invalid');
+  }
+
+  function errorMessage(err) {
+    const vars = { found: err.found, bracket: err.bracket || '' };
+    if (typeof err.at === 'number') {
+      const lc = Core.lineCol(lastText, err.at);
+      vars.line = fmtInt(lc.line);
+      vars.col = fmtInt(lc.col);
+    }
+    return fill(COPY['err_' + err.code] || COPY.err_expect_value, vars);
+  }
+
+  function renderExcerpt(x) {
+    excerptEl.textContent = '';
+    x.rows.forEach(function (r) {
+      excerptEl.appendChild(el('span', 'jf__xnum', String(r.num)));
+      if (typeof r.text === 'string') {
+        excerptEl.appendChild(el('span', 'jf__xcode', r.text));
+        return;
+      }
+      const code = el('span', 'jf__xcode jf__xcode--err');
+      code.appendChild(document.createTextNode(r.before));
+      code.appendChild(el('mark', r.at ? 'jf__xat' : 'jf__xat jf__xat--end', r.at || ' '));
+      code.appendChild(document.createTextNode(r.after));
+      excerptEl.appendChild(code);
+      const gutter = el('span', 'jf__xnum');
+      gutter.setAttribute('aria-hidden', 'true');
+      const caretRow = el('span', 'jf__xcode jf__xcaretrow');
+      caretRow.setAttribute('aria-hidden', 'true');
+      caretRow.appendChild(el('span', 'jf__xghost', r.before));
+      caretRow.appendChild(el('span', 'jf__xcaret', '^'));
+      excerptEl.appendChild(gutter);
+      excerptEl.appendChild(caretRow);
+    });
+  }
+
+  function paintLossy(d) {
+    if (!d.lossyCount) {
+      warnBox.hidden = true;
+      lossyAt = null;
+      return;
+    }
+    const k = d.lossyList[0];
+    const s = d.start[k];
+    const e = d.end[k];
+    const literal = d.text.slice(s, e);
+    const parsed = String(Number(literal));
+    warnMsg.textContent = fill(pick('lossy', d.lossyCount), {
+      n: fmtInt(d.lossyCount),
+      example: clip(literal, 0, literal.length, EXAMPLE_SHOW),
+      parsed: clip(parsed, 0, parsed.length, EXAMPLE_SHOW),
+      line: fmtInt(Core.lineCol(d.text, s).line)
+    });
+    lossyAt = { offset: s, length: e - s };
+    warnBox.hidden = false;
+  }
+
+  function paintValidation() {
+    const r = lastResult;
+    hideBoxes();
+    if (!r || r.empty) {
+      setState('empty', COPY.state_empty);
+      announce('', '');
+      return;
+    }
+    if (r.tooLarge) {
+      setState('invalid', COPY.too_large_input);
+      announce(COPY.too_large_input, 'big');
+      return;
+    }
+    if (r.error) {
+      const x = Core.excerpt(lastText, r.error.offset);
+      const where = fill(COPY.line_col, { line: fmtInt(x.line), col: fmtInt(x.col) });
+      const message = errorMessage(r.error);
+      setState('invalid', COPY.state_invalid + ' · ' + where);
+      errorMsg.textContent = message;
+      renderExcerpt(x);
+      errorOffset = r.error.offset;
+      errorBox.hidden = false;
+      input.setAttribute('aria-invalid', 'true');
+      announce(fill(COPY.invalid_announce, { where: where, message: message }), 'e|' + r.error.code + '|' + x.line);
+      return;
+    }
+    const d = r.doc;
+    const t = d.type[0];
+    const parts = [COPY.state_valid, typeLabel(t)];
+    if (t === T.OBJ || t === T.ARR) parts.push(countLabel(t, d.size[0]));
+    parts.push(fmtSize(Core.utf8Length(lastText)));
+    setState('valid', parts.join(' · '));
+    paintLossy(d);
+    announce(COPY.state_valid, 'valid');
+  }
+
+  function showPaused(text) {
+    hideBoxes();
+    setState('paused', COPY.state_paused);
+    pausedMsg.textContent = fill(COPY.paused_msg, { size: fmtSize(Core.utf8Length(text)) });
+    pausedBox.hidden = false;
+    valid = false;
+    refreshOutput();
+  }
+
+  function analyze(text) {
+    let result;
+    try {
+      result = Core.scan(text);
+    } catch (_) {
+      result = { tooLarge: true };
+    }
+    lastText = text;
+    lastResult = result;
+    if (result.empty) {
+      doc = null;
+      valid = false;
+      version++;
+      fileBase = '';
+      expanded.clear();
+      selectedPath = '$';
+    } else if (result.doc) {
+      if (freshSource) {
+        freshSource = false;
+        expanded.clear();
+        selectedPath = '$';
+      }
+      doc = result.doc;
+      valid = true;
+      version++;
+    } else {
+      valid = false;
+    }
+    paintValidation();
+    refreshOutput();
+  }
+
+  function nextPaint() {
+    return new Promise(function (resolve) {
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(function () { setTimeout(resolve, 0); });
+      else setTimeout(resolve, 0);
+    });
+  }
+
+  function confirmBig(bytes) {
+    const message = fill(COPY.big_confirm, { size: fmtSize(bytes) });
+    if (typeof window.mentriaConfirm !== 'function') return Promise.resolve(true);
+    return Promise.resolve(window.mentriaConfirm(message)).then(function (ok) { return !!ok; }, function () { return false; });
+  }
+
+  async function run() {
+    runTimer = 0;
+    const text = input.value;
+    if (overBig(text)) {
+      if (!bigApproved) {
+        if (bigDeclined) {
+          showPaused(text);
+          return;
+        }
+        if (asking) return;
+        asking = true;
+        let ok = false;
+        try {
+          ok = await confirmBig(Core.utf8Length(text));
+        } finally {
+          asking = false;
+        }
+        if (!ok) {
+          bigDeclined = true;
+          showPaused(input.value);
+          return;
+        }
+        bigApproved = true;
+        return run();
+      }
+    } else {
+      bigApproved = false;
+      bigDeclined = false;
+    }
+    if (text.length > BUSY_AT) {
+      hideBoxes();
+      setState('busy', COPY.state_busy);
+      await nextPaint();
+      if (input.value !== text) return;
+    }
+    analyze(text);
+  }
+
+  function schedule() {
+    clearTimeout(runTimer);
+    const n = input.value.length;
+    runTimer = setTimeout(run, n < 50000 ? 150 : n < 2000000 ? 400 : 900);
+  }
+
+  function runNow() {
+    clearTimeout(runTimer);
+    return run();
+  }
+
+  function outputKey() {
+    return version + '|' + state.style + '|' + state.indent + '|' + (state.sort ? 1 : 0);
+  }
+
+  function outputOptions(html) {
+    return { minify: state.style === 'minify', indent: INDENTS[state.indent], sort: state.sort, html: !!html, limit: OUTPUT_LIMIT };
+  }
+
+  function currentOutput() {
+    const key = outputKey();
+    if (key !== outKey) {
+      outKey = key;
+      outText = null;
+      outBytes = 0;
+      try {
+        outText = Core.render(doc, outputOptions(false));
+      } catch (_) {
+        outText = null;
+      }
+      if (outText !== null) outBytes = Core.utf8Length(outText);
+    }
+    return outText;
+  }
+
+  function cutPoint(s, max) {
+    const nl = s.lastIndexOf('\n', max);
+    let cut = nl > max * 0.9 ? nl : max;
+    if ((s.charCodeAt(cut - 1) & 0xFC00) === 0xD800) cut--;
+    return cut;
+  }
+
+  function renderText() {
+    const out = currentOutput();
+    if (textKey === outKey) return;
+    textKey = outKey;
+    truncEl.hidden = true;
+    if (out === null) {
+      codeEl.textContent = '';
+      truncEl.textContent = COPY.too_large_output;
+      truncEl.hidden = false;
+      return;
+    }
+    if (out.length <= HIGHLIGHT_MAX) {
+      codeEl.innerHTML = Core.render(doc, outputOptions(true));
+    } else if (out.length <= DISPLAY_MAX) {
+      codeEl.textContent = out;
+    } else {
+      const cut = cutPoint(out, DISPLAY_MAX);
+      codeEl.textContent = out.slice(0, cut);
+      truncEl.textContent = fill(COPY.trunc_note, { shown: fmtSize(Core.utf8Length(out.slice(0, cut))), total: fmtSize(outBytes) });
+      truncEl.hidden = false;
+    }
+  }
+
+  function renderMeta() {
+    if (!valid) {
+      metaEl.textContent = COPY.meta_stale;
+      return;
+    }
+    const out = currentOutput();
+    if (out === null) {
+      metaEl.textContent = COPY.too_large_output;
+      return;
+    }
+    const parts = [fill(state.style === 'minify' ? COPY.meta_minify : COPY.meta_format, { size: fmtSize(outBytes) })];
+    if (state.sort) parts.push(COPY.meta_sorted);
+    metaEl.textContent = parts.join(' · ');
+  }
+
+  function refreshOutput() {
+    const has = !!doc;
+    outPane.classList.toggle('is-stale', has && !valid);
+    emptyEl.hidden = has;
+    textView.hidden = !has || state.view !== 'text';
+    treeView.hidden = !has || state.view !== 'tree';
+    if (!has) {
+      codeEl.textContent = '';
+      truncEl.hidden = true;
+      metaEl.textContent = '';
+      outKey = '';
+      outText = null;
+      textKey = '';
+      clearTree();
+      copyBtn.disabled = true;
+      downloadBtn.disabled = true;
+      return;
+    }
+    if (state.view === 'text') renderText();
+    else renderTree(false);
+    renderMeta();
+    const usable = valid && currentOutput() !== null;
+    copyBtn.disabled = !usable;
+    downloadBtn.disabled = !usable;
+  }
+
+  function clearTree() {
+    treeEl.textContent = '';
+    treeKey = '';
+    treeDoc = null;
+    rootRow = null;
+    activeRow = null;
+    selectedRow = null;
+    pathEl.textContent = '$';
+  }
+
+  function isContainerRow(btn) {
+    return btn.hasAttribute('aria-expanded');
+  }
+
+  function makeRow(tok, seg, path, depth) {
+    const d = treeDoc;
+    const t = d.type[tok];
+    const box = t === T.OBJ || t === T.ARR;
+    const container = box && d.size[tok] > 0;
+    const li = el('li', 'jf-li');
+    const btn = el('button', 'jf-row');
+    btn.type = 'button';
+    btn.tabIndex = -1;
+    const twisty = el('span', container ? 'jf-tw' : 'jf-tw jf-tw--leaf');
+    twisty.setAttribute('aria-hidden', 'true');
+    btn.appendChild(twisty);
+    if (container) btn.setAttribute('aria-expanded', 'false');
+    if (seg === null) btn.appendChild(el('span', 'jf-root', '$'));
+    else if (typeof seg === 'number') btn.appendChild(el('span', 'jf-idx', String(seg)));
+    else btn.appendChild(el('span', 'jf-key', keyLabel(seg)));
+    const colon = el('span', 'jf-punct', ':');
+    colon.setAttribute('aria-hidden', 'true');
+    btn.appendChild(colon);
+    if (box) {
+      const brace = el('span', 'jf-punct', t === T.OBJ ? (container ? '{…}' : '{}') : (container ? '[…]' : '[]'));
+      brace.setAttribute('aria-hidden', 'true');
+      btn.appendChild(brace);
+      btn.appendChild(el('span', 'jf-sr', typeLabel(t)));
+      btn.appendChild(el('span', 'jf-count', countLabel(t, d.size[tok])));
+    } else {
+      btn.appendChild(el('span', VALUE_CLASS[t], clip(d.text, d.start[tok], d.end[tok], VALUE_SHOW)));
+      if (t === T.NUM_LOSSY) btn.appendChild(el('span', 'jf-flag', COPY.lossy_badge));
+    }
+    li.appendChild(btn);
+    rows.set(btn, { tok: tok, path: path, depth: depth, li: li, ul: null, kids: null, shown: 0, more: null });
+    return li;
+  }
+
+  function moreLabel(info) {
+    const left = info.kids.length - info.shown;
+    return fill(COPY.show_more, { n: fmtInt(Math.min(PAGE, left)), left: fmtInt(left) });
+  }
+
+  function renderPage(btn, info, budget) {
+    const d = treeDoc;
+    const obj = d.type[info.tok] === T.OBJ;
+    const from = info.shown;
+    const to = Math.min(info.kids.length, from + PAGE);
+    const frag = document.createDocumentFragment();
+    const again = [];
+    for (let k = from; k < to; k++) {
+      const c = info.kids[k];
+      const seg = obj ? Core.decodeString(d.text.slice(d.start[c], d.end[c])) : k;
+      const v = obj ? c + 1 : c;
+      const path = Core.appendPath(info.path, seg);
+      const li = makeRow(v, seg, path, info.depth + 1);
+      frag.appendChild(li);
+      if ((d.type[v] === T.OBJ || d.type[v] === T.ARR) && expanded.has(path)) again.push(li.firstElementChild);
+    }
+    info.shown = to;
+    if (info.more) {
+      info.more.remove();
+      info.more = null;
+    }
+    info.ul.appendChild(frag);
+    if (to < info.kids.length) {
+      const li = el('li', 'jf-li jf-li--more');
+      const more = el('button', 'jf-more', moreLabel(info));
+      more.type = 'button';
+      more.tabIndex = -1;
+      li.appendChild(more);
+      info.ul.appendChild(li);
+      info.more = li;
+      moreOwner.set(more, btn);
+    }
+    budget.left -= to - from;
+    for (let q = 0; q < again.length && budget.left > 0; q++) expand(again[q], budget);
+  }
+
+  function expand(btn, budget) {
+    const info = rows.get(btn);
+    if (!info || btn.getAttribute('aria-expanded') !== 'false') return;
+    btn.setAttribute('aria-expanded', 'true');
+    expanded.add(info.path);
+    if (info.ul) {
+      info.ul.hidden = false;
+      return;
+    }
+    info.kids = Core.children(treeDoc, info.tok, treeSort);
+    info.ul = el('ul', 'jf-ul');
+    info.ul.setAttribute('role', 'list');
+    info.li.appendChild(info.ul);
+    renderPage(btn, info, budget || { left: Infinity });
+  }
+
+  function collapse(btn) {
+    const info = rows.get(btn);
+    if (!info || btn.getAttribute('aria-expanded') !== 'true') return;
+    btn.setAttribute('aria-expanded', 'false');
+    expanded.delete(info.path);
+    if (info.ul) info.ul.hidden = true;
+    if (activeRow && activeRow !== btn && info.li.contains(activeRow)) {
+      const hadFocus = document.activeElement === activeRow;
+      setActive(btn, hadFocus);
+      select(btn);
+    }
+  }
+
+  function setActive(btn, focus) {
+    if (activeRow && activeRow !== btn) activeRow.tabIndex = -1;
+    activeRow = btn;
+    btn.tabIndex = 0;
+    if (focus) btn.focus();
+  }
+
+  function select(btn) {
+    const info = rows.get(btn);
+    if (!info) return;
+    if (selectedRow && selectedRow !== btn) selectedRow.classList.remove('is-selected');
+    selectedRow = btn;
+    btn.classList.add('is-selected');
+    selectedPath = info.path;
+    pathEl.textContent = info.path;
+  }
+
+  function childRows(btn) {
+    const info = rows.get(btn);
+    const list = [];
+    if (!info || !info.ul) return list;
+    for (let li = info.ul.firstElementChild; li; li = li.nextElementSibling) {
+      const b = li.firstElementChild;
+      if (b && rows.has(b)) list.push(b);
+    }
+    return list;
+  }
+
+  function visibleKids(btn) {
+    const info = rows.get(btn);
+    return info && info.ul && btn.getAttribute('aria-expanded') === 'true' ? info.ul : null;
+  }
+
+  function rowOf(li) {
+    return li ? li.firstElementChild : null;
+  }
+
+  function parentRow(btn) {
+    const ul = btn.parentElement ? btn.parentElement.parentElement : null;
+    if (!ul || ul.classList.contains('jf-ul--root')) return null;
+    return rowOf(ul.parentElement);
+  }
+
+  function nextRow(btn) {
+    const ul = visibleKids(btn);
+    if (ul && ul.firstElementChild) return rowOf(ul.firstElementChild);
+    let cur = btn;
+    while (cur) {
+      const li = cur.parentElement;
+      if (li && li.nextElementSibling) return rowOf(li.nextElementSibling);
+      cur = parentRow(cur);
+    }
+    return null;
+  }
+
+  function lastVisible(btn) {
+    let b = btn;
+    for (;;) {
+      const ul = visibleKids(b);
+      if (!ul || !ul.lastElementChild) return b;
+      b = rowOf(ul.lastElementChild);
+    }
+  }
+
+  function prevRow(btn) {
+    const li = btn.parentElement;
+    if (li && li.previousElementSibling) return lastVisible(rowOf(li.previousElementSibling));
+    return parentRow(btn);
+  }
+
+  function findRow(path) {
+    const all = treeEl.querySelectorAll('.jf-row');
+    for (let i = 0; i < all.length; i++) {
+      const info = rows.get(all[i]);
+      if (info && info.path === path) return all[i];
+    }
+    return null;
+  }
+
+  function autoExpand(budget) {
+    const queue = childRows(rootRow);
+    for (let q = 0; q < queue.length && budget.left > 0; q++) {
+      const b = queue[q];
+      if (!isContainerRow(b) || rows.get(b).depth > AUTO_DEPTH) continue;
+      if (b.getAttribute('aria-expanded') === 'false') expand(b, budget);
+      const kids = childRows(b);
+      for (let k = 0; k < kids.length; k++) queue.push(kids[k]);
+    }
+  }
+
+  function renderTree(force) {
+    const key = version + '|' + (state.sort ? 1 : 0);
+    if (!force && key === treeKey && rootRow) return;
+    treeKey = key;
+    const hadFocus = treeEl.contains(document.activeElement);
+    const scrollTop = treeEl.scrollTop;
+    const fresh = expanded.size === 0;
+    treeEl.textContent = '';
+    treeDoc = doc;
+    treeSort = state.sort;
+    activeRow = null;
+    selectedRow = null;
+    const ul = el('ul', 'jf-ul jf-ul--root');
+    ul.setAttribute('role', 'list');
+    const li = makeRow(0, null, '$', 0);
+    ul.appendChild(li);
+    treeEl.appendChild(ul);
+    rootRow = li.firstElementChild;
+    if (isContainerRow(rootRow)) {
+      const budget = { left: fresh ? AUTO_BUDGET : EXPAND_ALL_BUDGET };
+      expand(rootRow, budget);
+      if (fresh) autoExpand(budget);
+    }
+    const target = findRow(selectedPath) || rootRow;
+    setActive(target, hadFocus);
+    select(target);
+    treeEl.scrollTop = scrollTop;
+  }
+
+  function showMore(moreBtn) {
+    const owner = moreOwner.get(moreBtn);
+    const info = owner ? rows.get(owner) : null;
+    if (!info) return;
+    const hadFocus = document.activeElement === moreBtn;
+    const first = info.shown;
+    renderPage(owner, info, { left: Infinity });
+    const target = childRows(owner)[first];
+    if (target) {
+      setActive(target, hadFocus);
+      select(target);
+    }
+  }
+
+  function expandAll() {
+    if (!rootRow) return;
+    const budget = { left: EXPAND_ALL_BUDGET };
+    const queue = [rootRow];
+    let capped = false;
+    for (let q = 0; q < queue.length; q++) {
+      const b = queue[q];
+      if (!isContainerRow(b)) continue;
+      const info = rows.get(b);
+      if (b.getAttribute('aria-expanded') === 'false') {
+        if (budget.left <= 0 || info.depth >= EXPAND_ALL_DEPTH) {
+          capped = true;
+          continue;
+        }
+        expand(b, budget);
+      }
+      if (info.more) capped = true;
+      const kids = childRows(b);
+      for (let k = 0; k < kids.length; k++) queue.push(kids[k]);
+    }
+    if (capped) flash(fill(COPY.expand_capped, { n: fmtInt(treeEl.querySelectorAll('.jf-row').length) }));
+  }
+
+  function collapseAll() {
+    if (!doc) return;
+    expanded.clear();
+    expanded.add('$');
+    selectedPath = '$';
+    renderTree(true);
+    treeEl.scrollTop = 0;
+  }
+
+  function onTreeKey(e) {
+    const b = e.target;
+    if (!b || b.tagName !== 'BUTTON' || !treeEl.contains(b)) return;
+    const exp = b.getAttribute('aria-expanded');
+    let next = null;
+    switch (e.key) {
+      case 'ArrowDown':
+        next = nextRow(b);
+        break;
+      case 'ArrowUp':
+        next = prevRow(b);
+        break;
+      case 'ArrowRight':
+        if (exp === 'false') {
+          e.preventDefault();
+          expand(b, { left: Infinity });
+          return;
+        }
+        if (exp === 'true') {
+          const ul = visibleKids(b);
+          next = ul && ul.firstElementChild ? rowOf(ul.firstElementChild) : null;
+        }
+        break;
+      case 'ArrowLeft':
+        if (exp === 'true') {
+          e.preventDefault();
+          collapse(b);
+          return;
+        }
+        next = parentRow(b);
+        break;
+      case 'Home':
+        next = rootRow;
+        break;
+      case 'End':
+        next = rootRow ? lastVisible(rootRow) : null;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    if (next) {
+      setActive(next, true);
+      select(next);
+    }
+  }
+
+  function selectInInput(offset, length) {
+    const text = input.value;
+    const from = Math.min(offset, text.length);
+    input.focus();
+    try {
+      input.setSelectionRange(from, Math.min(text.length, from + length));
+    } catch (_) {}
+    const lc = Core.lineCol(text, from);
+    const cs = window.getComputedStyle(input);
+    const lineHeight = parseFloat(cs.lineHeight) || 20;
+    const charWidth = (parseFloat(cs.fontSize) || 13) * 0.6;
+    input.scrollTop = Math.max(0, (lc.line - 1) * lineHeight - input.clientHeight / 3);
+    input.scrollLeft = Math.max(0, (lc.col - 1) * charWidth - input.clientWidth / 2);
+  }
+
+  function readText(file) {
+    if (typeof file.text === 'function') return file.text();
+    return new Promise(function (resolve, reject) {
+      const reader = new FileReader();
+      reader.onload = function () { resolve(String(reader.result)); };
+      reader.onerror = function () { reject(reader.error); };
+      reader.readAsText(file);
+    });
+  }
+
+  async function openFile(file) {
+    if (!file || asking) return;
+    if (file.size > MAX_FILE) {
+      flash(fill(COPY.file_too_large, { name: file.name, size: fmtSize(file.size), limit: fmtSize(MAX_FILE) }), 'err');
+      return;
+    }
+    if (file.size > BIG_INPUT) {
+      asking = true;
+      let ok = false;
+      try {
+        ok = await confirmBig(file.size);
+      } finally {
+        asking = false;
+      }
+      if (!ok) return;
+    }
+    let text;
+    try {
+      text = await readText(file);
+    } catch (_) {
+      flash(fill(COPY.file_read_failed, { name: file.name }), 'err');
+      return;
+    }
+    bigApproved = overBig(text);
+    bigDeclined = false;
+    input.value = text;
+    expanded.clear();
+    selectedPath = '$';
+    await runNow();
+    fileBase = baseName(file.name);
+    flash(fill(COPY.file_opened, { name: file.name, size: fmtSize(file.size) }), 'ok');
+  }
+
+  function hasFiles(e) {
+    const types = e.dataTransfer ? e.dataTransfer.types : null;
+    if (!types) return false;
+    for (let i = 0; i < types.length; i++) {
+      if (types[i] === 'Files') return true;
+    }
+    return false;
+  }
+
+  function bindCopy(btn, getText, describe) {
+    const alt = btn.querySelector('.jf__lbl-alt');
+    let timer = 0;
+    btn.addEventListener('click', function () {
+      const text = getText();
+      if (text == null || text === '') return;
+      const settle = function (ok) {
+        alt.textContent = ok ? COPY.copied : COPY.copy_failed;
+        btn.classList.add('is-alt');
+        btn.classList.toggle('is-copied', ok);
+        btn.classList.toggle('is-failed', !ok);
+        clearTimeout(timer);
+        timer = setTimeout(function () { btn.classList.remove('is-alt', 'is-copied', 'is-failed'); }, 1400);
+        flash(ok ? describe(text) : COPY.copy_failed, ok ? 'ok' : 'err');
+      };
+      let pending;
+      try {
+        pending = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject(new Error('clipboard'));
+      } catch (err) {
+        pending = Promise.reject(err);
+      }
+      pending.then(function () { settle(true); }, function () { settle(false); });
+    });
+  }
+
+  const styleSeg = MentriaUI.segmented($('jf-style'), function (value) {
+    state.style = value === 'minify' ? 'minify' : 'format';
+    syncIndent();
+    refreshOutput();
+  });
+  const indentSeg = MentriaUI.segmented(indentSegEl, function (value) {
+    if (!Object.prototype.hasOwnProperty.call(INDENTS, value)) return;
+    state.indent = value;
+    saveSettings();
+    refreshOutput();
+  });
+  const viewSeg = MentriaUI.segmented($('jf-view'), function (value) {
+    state.view = value === 'tree' ? 'tree' : 'text';
+    saveSettings();
+    refreshOutput();
+  });
+
+  function syncIndent() {
+    const off = state.style === 'minify';
+    indentGroup.classList.toggle('is-off', off);
+    const buttons = indentSegEl.querySelectorAll('button');
+    for (let i = 0; i < buttons.length; i++) buttons[i].disabled = off;
+  }
+
+  sortBtn.addEventListener('click', function () {
+    state.sort = !state.sort;
+    sortBtn.setAttribute('aria-pressed', state.sort ? 'true' : 'false');
+    refreshOutput();
+  });
+
+  input.addEventListener('input', schedule);
+
+  input.addEventListener('paste', function () {
+    if (input.selectionStart === 0 && input.selectionEnd === input.value.length) freshSource = true;
+  });
+
+  openBtn.addEventListener('click', function () {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', function () {
+    const file = fileInput.files && fileInput.files[0];
+    fileInput.value = '';
+    if (file) openFile(file);
+  });
+
+  let dragDepth = 0;
+  dropEl.addEventListener('dragenter', function (e) {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    dragDepth++;
+    dropEl.classList.add('is-drag');
+  });
+  dropEl.addEventListener('dragover', function (e) {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+    dropEl.classList.add('is-drag');
+  });
+  dropEl.addEventListener('dragleave', function (e) {
+    if (!hasFiles(e)) return;
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (!dragDepth) dropEl.classList.remove('is-drag');
+  });
+  dropEl.addEventListener('drop', function (e) {
+    dragDepth = 0;
+    dropEl.classList.remove('is-drag');
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) openFile(file);
+  });
+
+  clearBtn.addEventListener('click', function () {
+    clearTimeout(runTimer);
+    input.value = '';
+    bigApproved = false;
+    bigDeclined = false;
+    analyze('');
+    flash(COPY.cleared);
+    input.focus();
+  });
+
+  processBtn.addEventListener('click', function () {
+    bigApproved = true;
+    bigDeclined = false;
+    runNow();
+  });
+
+  jumpBtn.addEventListener('click', function () {
+    selectInInput(errorOffset, errorOffset < input.value.length ? 1 : 0);
+  });
+
+  warnJump.addEventListener('click', function () {
+    if (lossyAt) selectInInput(lossyAt.offset, lossyAt.length);
+  });
+
+  bindCopy(copyBtn, function () {
+    if (!valid || !doc) return null;
+    const out = currentOutput();
+    if (out === null) flash(COPY.too_large_output, 'err');
+    return out;
+  }, function () {
+    return COPY.copied_output;
+  });
+
+  bindCopy(copyPathBtn, function () {
+    return rootRow ? selectedPath : null;
+  }, function (path) {
+    return fill(COPY.copied_path, { path: path });
+  });
+
+  downloadBtn.addEventListener('click', function () {
+    if (!valid || !doc) return;
+    const out = currentOutput();
+    if (out === null) {
+      flash(COPY.too_large_output, 'err');
+      return;
+    }
+    const minify = state.style === 'minify';
+    const name = (fileBase || COPY.download_base || 'data') + (minify ? '.min' : '') + '.json';
+    MentriaUI.downloadFile(name, new Blob([minify ? out : out + '\n'], { type: 'application/json' }));
+    flash(fill(COPY.downloaded, { name: name }), 'ok');
+  });
+
+  expandBtn.addEventListener('click', expandAll);
+  collapseBtn.addEventListener('click', collapseAll);
+
+  treeEl.addEventListener('click', function (e) {
+    const target = e.target && e.target.closest ? e.target.closest('button') : null;
+    if (!target || !treeEl.contains(target)) return;
+    if (target.classList.contains('jf-more')) {
+      showMore(target);
+      return;
+    }
+    if (!rows.has(target)) return;
+    const exp = target.getAttribute('aria-expanded');
+    if (exp === 'false') expand(target, { left: Infinity });
+    else if (exp === 'true') collapse(target);
+    setActive(target, false);
+    select(target);
+  });
+
+  treeEl.addEventListener('focusin', function (e) {
+    const b = e.target;
+    if (!b || b.tagName !== 'BUTTON') return;
+    setActive(b, false);
+    select(b);
+  });
+
+  treeEl.addEventListener('keydown', onTreeKey);
+
+  document.addEventListener('mentria:localechange', function () {
+    const I18n = window.MentriaI18n;
+    if (I18n && typeof I18n.t === 'function') {
+      Object.keys(COPY).forEach(function (k) {
+        const v = I18n.t('tool.json-formatter.' + k);
+        if (typeof v === 'string' && v) COPY[k] = v;
+      });
+    }
+    Object.keys(intl).forEach(function (k) { delete intl[k]; });
+    liveKey = '';
+    if (!pausedBox.hidden) showPaused(input.value);
+    else paintValidation();
+    textKey = '';
+    treeKey = '';
+    refreshOutput();
+  });
+
+  loadSettings();
+  styleSeg.set(state.style);
+  indentSeg.set(state.indent);
+  viewSeg.set(state.view);
+  syncIndent();
+  paintValidation();
+  refreshOutput();
+  if (input.value) runNow();
+})();
+</script>
+
+<style>
+.jf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 1rem);
+  width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+  font-family: var(--font-mono);
+  color: var(--term-fg);
+}
+.jf [hidden] { display: none !important; }
+
+.jf__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3, 0.75rem) var(--space-5, 1.5rem);
+}
+.jf__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+}
+.jf__group.is-off .jf__label { opacity: 0.5; }
+.jf__label {
+  font-size: var(--text-2xs, 0.65rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+}
+.jf__seg { max-width: 100%; }
+.jf__seg > button { padding-inline: var(--space-3, 0.75rem); }
+.jf__seg > button:disabled { cursor: not-allowed; opacity: 0.5; }
+
+.jf__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  padding: 0.35rem 0.75rem;
+  font-size: var(--text-xs, 0.75rem);
+}
+.jf__check {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1px solid var(--term-border-strong);
+  border-radius: 3px;
+}
+.jf__sort[aria-pressed="true"] {
+  color: var(--syn-cyan);
+  border-color: var(--cyan-30, rgba(34, 211, 238, 0.3));
+  background: var(--cyan-8, rgba(34, 211, 238, 0.08));
+}
+.jf__sort[aria-pressed="true"] .jf__check {
+  background: var(--syn-cyan);
+  border-color: var(--syn-cyan);
+}
+.jf__sort[aria-pressed="true"] .jf__check::after {
+  content: "";
+  width: 0.24rem;
+  height: 0.46rem;
+  border: solid #041016;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg);
+}
+
+.jf__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5, 1.5rem) var(--space-4, 1rem);
+}
+@media (min-width: 960px) {
+  .jf__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.jf__pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+}
+.jf__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2, 0.5rem);
+  min-height: 2.1rem;
+}
+.jf__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+.jf__small {
+  padding: 0.3rem 0.7rem;
+  font-size: var(--text-xs, 0.75rem);
+}
+
+.jf__drop { position: relative; }
+.jf__input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: clamp(15rem, 46vh, 34rem);
+  margin: 0;
+  padding: var(--space-3, 0.75rem);
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--term-fg);
+  background: var(--term-bg);
+  border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-md, 6px);
+  white-space: pre;
+  overflow: auto;
+  tab-size: 2;
+}
+.jf__input:focus { border-color: var(--syn-cyan); }
+.jf__input::placeholder {
+  color: var(--term-subtle);
+  white-space: pre-wrap;
+}
+.jf__drop-hint {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  padding: var(--space-4, 1rem);
+  border: 2px dashed var(--syn-cyan);
+  border-radius: var(--radius-md, 6px);
+  background: rgba(10, 10, 10, 0.9);
+  color: var(--syn-cyan);
+  font-size: var(--text-sm, 0.85rem);
+  text-align: center;
+  pointer-events: none;
+}
+.jf__drop.is-drag .jf__drop-hint { display: grid; }
+.jf__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}
+
+.jf__state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  min-height: 1.5em;
+  margin: 0;
+  font-size: var(--text-xs, 0.75rem);
+  line-height: 1.5;
+  color: var(--term-muted);
+  overflow-wrap: anywhere;
+}
+.jf__state-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--term-subtle);
+}
+.jf__state[data-state="valid"] { color: var(--syn-green); }
+.jf__state[data-state="valid"] .jf__state-dot { background: var(--syn-green); box-shadow: 0 0 8px rgba(74, 222, 128, 0.45); }
+.jf__state[data-state="invalid"] { color: var(--syn-pink); }
+.jf__state[data-state="invalid"] .jf__state-dot { background: var(--syn-pink); }
+.jf__state[data-state="paused"],
+.jf__state[data-state="busy"] { color: var(--syn-amber); }
+.jf__state[data-state="paused"] .jf__state-dot,
+.jf__state[data-state="busy"] .jf__state-dot { background: var(--syn-amber); }
+
+.jf__box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+  padding: var(--space-3, 0.75rem);
+  border-radius: var(--radius-md, 6px);
+  font-size: var(--text-xs, 0.75rem);
+  line-height: 1.6;
+}
+.jf__box--err {
+  border: 1px solid var(--pink-30, rgba(244, 114, 182, 0.3));
+  background: var(--pink-10, rgba(244, 114, 182, 0.1));
+}
+.jf__box--warn {
+  border: 1px solid var(--amber-30, rgba(251, 191, 36, 0.3));
+  background: var(--amber-8, rgba(251, 191, 36, 0.08));
+}
+.jf__box-msg {
+  margin: 0;
+  color: var(--term-fg-strong);
+  overflow-wrap: anywhere;
+}
+
+.jf__excerpt {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--space-3, 0.75rem);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  background: var(--term-bg);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-sm, 4px);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.jf__xnum {
+  color: var(--term-subtle);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.jf__xcode {
+  white-space: pre;
+  tab-size: 2;
+  color: var(--term-muted);
+}
+.jf__xcode--err { color: var(--term-fg); }
+.jf__xat {
+  border-radius: 2px;
+  background: var(--syn-pink);
+  color: #16060f;
+}
+.jf__xat--end { background: var(--pink-30, rgba(244, 114, 182, 0.3)); }
+.jf__xcaretrow { line-height: 1; }
+.jf__xghost { visibility: hidden; }
+.jf__xcaret {
+  color: var(--syn-pink);
+  font-weight: 700;
+}
+
+.jf__meta {
+  min-height: 1.4em;
+  margin: 0;
+  font-size: var(--text-2xs, 0.65rem);
+  letter-spacing: 0.04em;
+  color: var(--term-subtle);
+  overflow-wrap: anywhere;
+}
+.jf__pane--out.is-stale .jf__meta { color: var(--syn-amber); }
+.jf__pane--out.is-stale .jf__code,
+.jf__pane--out.is-stale .jf__tree { opacity: 0.45; }
+
+.jf__empty {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-height: clamp(15rem, 46vh, 34rem);
+  margin: 0;
+  padding: var(--space-5, 1.5rem);
+  border: 1px dashed var(--term-border-strong);
+  border-radius: var(--radius-md, 6px);
+  font-size: var(--text-xs, 0.75rem);
+  line-height: 1.6;
+  color: var(--term-subtle);
+  text-align: center;
+}
+
+.jf__view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+}
+.jf__code {
+  box-sizing: border-box;
+  height: clamp(15rem, 46vh, 34rem);
+  margin: 0;
+  padding: var(--space-3, 0.75rem);
+  overflow: auto;
+  background: var(--term-bg);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md, 6px);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--term-muted);
+  white-space: pre;
+  tab-size: 4;
+}
+.jf-k, .jf-key { color: var(--syn-cyan); }
+.jf-s { color: var(--syn-green); }
+.jf-n { color: var(--syn-amber); }
+.jf-b { color: var(--syn-purple); }
+.jf-z { color: var(--syn-pink); }
+.jf-lossy {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.jf__note {
+  margin: 0;
+  font-size: var(--text-2xs, 0.65rem);
+  line-height: 1.55;
+  color: var(--term-subtle);
+}
+
+.jf__pathbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  min-width: 0;
+  padding: 0.35rem 0.4rem 0.35rem var(--space-3, 0.75rem);
+  background: var(--term-bg);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md, 6px);
+}
+.jf__path {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-size: 0.78rem;
+  color: var(--syn-cyan);
+  overflow-wrap: anywhere;
+}
+
+.jf__tree {
+  box-sizing: border-box;
+  height: clamp(13rem, 40vh, 30rem);
+  padding: var(--space-2, 0.5rem);
+  overflow: auto;
+  background: var(--term-bg);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md, 6px);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.jf-ul {
+  list-style: none;
+  margin: 0 0 0 0.62rem;
+  padding: 0 0 0 0.5rem;
+  border-left: 1px solid var(--term-border-strong);
+}
+.jf-ul--root {
+  margin: 0;
+  padding: 0;
+  border-left: 0;
+}
+.jf-li {
+  margin: 0;
+  padding: 0;
+}
+.jf-row,
+.jf-more {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55ch;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+  padding: 0.08rem 0.45rem 0.08rem 0.3rem;
+  border: 0;
+  border-radius: var(--radius-sm, 4px);
+  background: transparent;
+  font: inherit;
+  color: var(--term-fg);
+  text-align: start;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+}
+.jf-row:focus-visible,
+.jf-more:focus-visible { outline-offset: -2px; }
+.jf-row:hover,
+.jf-more:hover { background: rgba(255, 255, 255, 0.045); }
+.jf-row.is-selected {
+  background: var(--cyan-8, rgba(34, 211, 238, 0.08));
+  box-shadow: inset 2px 0 0 var(--syn-cyan);
+}
+.jf-tw {
+  flex: none;
+  width: 1ch;
+  color: var(--term-muted);
+}
+.jf-row[aria-expanded] > .jf-tw::before {
+  content: "\25B8";
+  display: inline-block;
+}
+.jf-row[aria-expanded="true"] > .jf-tw::before { transform: rotate(90deg); }
+.jf-idx { color: var(--term-subtle); }
+.jf-root {
+  font-weight: 700;
+  color: var(--term-fg-strong);
+}
+.jf-punct { color: var(--term-muted); }
+.jf-count {
+  font-size: 0.72rem;
+  color: var(--term-subtle);
+}
+.jf-flag {
+  align-self: center;
+  padding: 0 0.4rem;
+  border: 1px solid var(--amber-30, rgba(251, 191, 36, 0.3));
+  border-radius: var(--radius-pill, 999px);
+  font-size: 0.64rem;
+  line-height: 1.5;
+  color: var(--syn-amber);
+}
+.jf-more { color: var(--syn-cyan); }
+.jf-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.jf__copy {
+  display: inline-grid;
+  justify-items: center;
+}
+.jf__copy > span { grid-area: 1 / 1; }
+.jf__lbl-alt { visibility: hidden; }
+.jf__copy.is-alt .jf__lbl { visibility: hidden; }
+.jf__copy.is-alt .jf__lbl-alt { visibility: visible; }
+.jf__copy.is-copied {
+  color: var(--syn-green);
+  border-color: var(--green-30, rgba(74, 222, 128, 0.3));
+}
+.jf__copy.is-failed {
+  color: var(--syn-pink);
+  border-color: var(--pink-30, rgba(244, 114, 182, 0.3));
+}
+
+.jf__status {
+  margin: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .jf-tw::before { transition: transform var(--duration-fast, 150ms) var(--ease-out, ease-out); }
+  .jf__state-dot { transition: background-color var(--duration-base, 250ms) ease; }
+}
+
+@media (max-width: 480px) {
+  .jf__bar { gap: var(--space-3, 0.75rem); }
+  .jf__seg > button { padding-inline: var(--space-2, 0.5rem); }
+  .jf__input,
+  .jf__code { font-size: 0.76rem; }
+}
+
+body.is-fullscreen-tool .terminal-frame--fullscreen .jf__input,
+body.is-fullscreen-tool .terminal-frame--fullscreen .jf__empty { min-height: max(15rem, calc(100dvh - 21rem)); }
+body.is-fullscreen-tool .terminal-frame--fullscreen .jf__code { height: max(15rem, calc(100dvh - 21rem)); }
+body.is-fullscreen-tool .terminal-frame--fullscreen .jf__tree { height: max(12rem, calc(100dvh - 27rem)); }
+
+@media print {
+  .jf__bar,
+  .jf__pane--in,
+  .jf__pathbar,
+  .jf__meta,
+  .jf__status,
+  .jf__hint { display: none !important; }
+  .jf__grid { display: block; }
+  .jf__code,
+  .jf__tree {
+    height: auto;
+    overflow: visible;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .jf__code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+</style>

@@ -81,6 +81,14 @@
     "group": "Dev"
   },
   {
+    "slug": "json-formatter",
+    "title": "JSON Formatter & Validator",
+    "summary": "JSON formatter and validator in the browser: pretty-print, minify or sort keys, with the exact line and column for every error, a collapsible tree that copies paths like $.items[3].name, and big numbers kept digit for digit. Runs on-device; nothing is uploaded.",
+    "category": "Developer",
+    "group": "Dev",
+    "added": "2026-09-24"
+  },
+  {
     "slug": "totp",
     "title": "TOTP",
     "summary": "Two-factor codes that live in your browser, not on a server. Encrypted at rest, unlocked with a passphrase or Touch ID. Mandatory encrypted backup before your first secret saves.",

@@ -31,15 +31,10 @@
     </button>
     <div class="pwa-install-sheet__body">
       <h2 class="pwa-install-sheet__title" id="pwaInstallSheetTitle">{{ "pwa.banner_title" | t }}</h2>
-      <!--
-        MP4 listed first so iOS Safari (no WebM) picks it up. Square
-        720x720 source. width/height attrs + poster + preload give
-        Safari intrinsic dimensions before metadata loads.
-      -->
       <video class="pwa-install-sheet__video" id="pwaInstallSheetVideo"
              width="720" height="720"
-             poster="/assets/videos/mentria-install-poster.jpg"
-             muted playsinline loop controls preload="metadata" hidden>
+             data-poster="/assets/videos/mentria-install-poster.jpg"
+             muted playsinline loop controls preload="none" hidden>
         <source src="/assets/videos/mentria-install.mp4" type="video/mp4">
         <source src="/assets/videos/mentria-install.webm" type="video/webm">
       </video>
@@ -256,7 +251,11 @@
     sheetNote.innerHTML    = noteHtml || '';
     sheetNote.hidden       = !noteHtml;
     sheetVideo.hidden      = !showVideo;
-    if (showVideo) sheetVideo.load();
+    if (showVideo) {
+      if (!sheetVideo.getAttribute('poster')) sheetVideo.setAttribute('poster', sheetVideo.dataset.poster);
+      sheetVideo.preload = 'metadata';
+      sheetVideo.load();
+    }
   }
 
   // ── Wire up interactions ───────────────────────────────────

@@ -64,6 +64,81 @@
     return toastEl;
   }
 
+  var undoEl = null;
+  var undoTimer = null;
+  var undoFire = null;
+
+  function hideUndo() {
+    if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; }
+    undoFire = null;
+    var el = undoEl;
+    undoEl = null;
+    if (!el) return;
+    el.classList.add('m-toast--hide');
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
+  }
+
+  function undoToast(message, onUndo, opts) {
+    opts = opts || {};
+    hideUndo();
+    var el = document.createElement('div');
+    el.className = 'm-toast m-toast--undo m-toast--hide';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    var text = document.createElement('span');
+    text.className = 'm-toast__text';
+    text.textContent = message == null ? '' : String(message);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'm-toast__action';
+    btn.textContent = opts.label || (window.MentriaUICopy && window.MentriaUICopy.undo) || 'Undo';
+    el.appendChild(text);
+    el.appendChild(btn);
+    document.body.appendChild(el);
+    void el.offsetWidth;
+    el.classList.remove('m-toast--hide');
+    undoEl = el;
+    var used = false;
+    function fire() {
+      if (used) return;
+      used = true;
+      if (undoEl === el) hideUndo();
+      try { onUndo(); } catch (_) {}
+    }
+    undoFire = fire;
+    btn.addEventListener('click', fire);
+    var left = opts.duration != null ? opts.duration : 6000;
+    var started = 0;
+    function arm() {
+      started = Date.now();
+      undoTimer = setTimeout(function () { if (undoEl === el) hideUndo(); }, left);
+    }
+    function pause() {
+      if (!undoTimer || undoEl !== el) return;
+      clearTimeout(undoTimer);
+      undoTimer = null;
+      left = Math.max(1500, left - (Date.now() - started));
+    }
+    function resume() {
+      if (undoTimer || undoEl !== el) return;
+      arm();
+    }
+    el.addEventListener('mouseenter', pause);
+    el.addEventListener('mouseleave', resume);
+    el.addEventListener('focusin', pause);
+    el.addEventListener('focusout', resume);
+    arm();
+    return { dismiss: function () { if (undoEl === el) hideUndo(); } };
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (!undoFire || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || (e.key !== 'z' && e.key !== 'Z')) return;
+    var t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    e.preventDefault();
+    undoFire();
+  });
+
   function status(el) {
     if (el.getAttribute('role') !== 'status') el.setAttribute('role', 'status');
     if (!el.getAttribute('aria-live')) el.setAttribute('aria-live', 'polite');
@@ -301,6 +376,7 @@
   window.MentriaUI = {
     copyButton: copyButton,
     toast: toast,
+    undoToast: undoToast,
     status: status,
     segmented: segmented,
     debouncedSaver: debouncedSaver,

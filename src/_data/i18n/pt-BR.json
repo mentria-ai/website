@@ -145,6 +145,7 @@
     "release_notes": "Notas da versão no GitHub"
   },
   "common": {
+    "undo": "Desfazer",
     "tldr": {
       "read_more": "O que é isso?",
       "read_less": "Ocultar detalhes",
@@ -571,6 +572,7 @@
       "result_tails_wins": "Coroa vence a série!"
     },
     "quick-notes": {
+      "note_deleted": "“{name}” foi excluída.",
       "toggle_sidebar": "Alternar barra lateral",
       "notes_label": "Notas",
       "new_note_btn": "Nova Nota",
@@ -735,6 +737,7 @@
       "preset_save_invalid": "Defina uma duração primeiro e depois salve"
     },
     "invoice": {
+      "row_removed": "Linha removida.",
       "btn_print": "Imprimir / Salvar PDF",
       "btn_export": "Exportar JSON",
       "btn_import": "Importar JSON",

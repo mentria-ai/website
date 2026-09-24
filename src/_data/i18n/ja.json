@@ -145,6 +145,7 @@
     "release_notes": "GitHub のリリースノート"
   },
   "common": {
+    "undo": "元に戻す",
     "tldr": {
       "read_more": "これは何?",
       "read_less": "詳細を隠す",
@@ -571,6 +572,7 @@
       "result_tails_wins": "裏がシリーズに勝ちました!"
     },
     "quick-notes": {
+      "note_deleted": "「{name}」を削除しました。",
       "toggle_sidebar": "サイドバーを切り替え",
       "notes_label": "ノート",
       "new_note_btn": "新規ノート",
@@ -735,6 +737,7 @@
       "preset_save_invalid": "先に時間を設定してから保存してください"
     },
     "invoice": {
+      "row_removed": "行を削除しました。",
       "btn_print": "印刷 / PDF保存",
       "btn_export": "JSONをエクスポート",
       "btn_import": "JSONをインポート",

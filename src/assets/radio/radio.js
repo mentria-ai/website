@@ -80,6 +80,11 @@ class MentriaRadio {
 
     try {
       this.catalog = await loadCatalog();
+      if (!this.canPlayCatalog()) {
+        this.setStatus("error", COPY.errFormat);
+        this.el.play.disabled = true;
+        return;
+      }
       this.preferences = await getAllPreferences();
       this.el.trackCount.textContent = COPY.trackCountFmt.replace("{n}", this.catalog.length);
       this.setStatus("ready", COPY.ready);
@@ -89,6 +94,13 @@ class MentriaRadio {
       this.setStatus("error", COPY.errLoadCatalog);
       if (this.el.retry) this.el.retry.hidden = false;
     }
+  }
+
+  canPlayCatalog() {
+    const first = this.catalog && this.catalog[0];
+    if (!first || !/\.(opus|ogg)(\?|$)/i.test(String(first.url || ""))) return true;
+    const probe = document.createElement("audio");
+    return !!(probe.canPlayType && (probe.canPlayType('audio/ogg; codecs="opus"') || probe.canPlayType("audio/ogg; codecs=opus")));
   }
 
   // ── Transport ─────────────────────────────────────

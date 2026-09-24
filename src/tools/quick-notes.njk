@@ -385,6 +385,7 @@ eleventyComputed:
     lockedPanel.hidden = !locked;
     exportBtn.hidden = locked;
     shareBtn.hidden = locked || !navigator.share;
+    mdpdfBtn.hidden = locked;
     if (!cryptoOK) {
       lockBtn.hidden = true;
     } else {

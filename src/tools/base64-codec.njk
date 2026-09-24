@@ -219,6 +219,7 @@ eleventyComputed:
         outputEl.value = encoded;
         showStatus(textStatus, COPY.statusEncoded.replace('{size}', formatBytes(encoded.length)), 'ok');
       } catch (e) {
+        outputEl.value = '';
         showStatus(textStatus, COPY.statusEncodeFailed.replace('{reason}', e.message), 'err');
       }
     });
@@ -256,6 +257,7 @@ eleventyComputed:
       try {
         bytes = Uint8Array.from(atob(normalizeB64(raw)), c => c.charCodeAt(0));
       } catch (e) {
+        outputEl.value = '';
         showStatus(textStatus, COPY.statusDecodeFailedInv, 'err');
         return;
       }

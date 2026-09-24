@@ -849,7 +849,8 @@
       "track_count_format": "{n} 曲",
       "untitled": "無題",
       "progress_aria": "再生位置",
-      "retry": "再試行"
+      "retry": "再試行",
+      "err_format": "このブラウザはラジオの音声形式を再生できません。iPhone と iPad では iOS 18.4 以降が必要です。"
     },
     "ai-chat": {
       "tldr_heading": "AI Chatとは?",

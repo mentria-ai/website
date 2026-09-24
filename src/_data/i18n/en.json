@@ -849,7 +849,8 @@
       "track_count_format": "{n} tracks",
       "untitled": "Untitled",
       "progress_aria": "Playback position",
-      "retry": "Retry"
+      "retry": "Retry",
+      "err_format": "This browser can't play the radio's audio format. On iPhone and iPad it needs iOS 18.4 or later."
     },
     "ai-chat": {
       "tldr_heading": "What is AI Chat?",

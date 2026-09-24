@@ -164,8 +164,8 @@ eleventyComputed:
     return Notification.permission;
   }
 
-  function refreshNotifBar() {
-    const s = notifState();
+  function refreshNotifBar(result) {
+    const s = result === 'denied' ? 'denied' : notifState();
     notifBar.classList.toggle('is-unsupported', s === 'unsupported');
     notifBar.classList.toggle('is-granted',     s === 'granted');
     notifBar.classList.toggle('is-denied',      s === 'denied');
@@ -181,7 +181,7 @@ eleventyComputed:
     if (!notifSupported()) return;
     try {
       const result = await Notification.requestPermission();
-      refreshNotifBar();
+      refreshNotifBar(result);
       if (result === 'granted') {
         if (window.MentriaPush) await MentriaPush.requestPermission();
         await showRawNotification(COPY.notifOnTitle, {
@@ -458,6 +458,7 @@ eleventyComputed:
       if (state.totalSeconds > 0) {
         updateDisplay();
       } else {
+        updateDisplay();
         clearInterval(state.countdown);
         state.countdown = null;
         statusEl.textContent = COPY.statusTimesUp;

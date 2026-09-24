@@ -546,8 +546,9 @@ render();
 (async function importHandoff() {
   if (!window.MentriaStore) return;
   const h = window.MentriaStore.get('handoff', 'md');
-  if (!h || typeof h.text !== 'string' || !h.text.trim()) return;
+  if (!h) return;
   window.MentriaStore.remove('handoff', 'md');
+  if (typeof h.text !== 'string' || !h.text.trim() || !(Date.now() - (h.ts || 0) < 600000)) return;
   const current = inputEl.value || '';
   if (current.trim() && current.trim() !== h.text.trim() && current !== SAMPLE) {
     if (!(await window.mentriaConfirm(COPY.importNoteConfirm))) return;

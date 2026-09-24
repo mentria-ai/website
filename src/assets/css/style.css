@@ -1287,7 +1287,18 @@ body.is-fullscreen-tool .app-bar {
 }
 
 @media print {
-  :root { color-scheme: light; }
+  :root {
+    color-scheme: light;
+    --term-bg: #fff;
+    --term-bg-raised: #fff;
+    --term-fg: #111;
+    --term-fg-strong: #000;
+    --term-muted: #444;
+    --term-subtle: #666;
+    --term-border: #ddd;
+    --term-border-strong: #bbb;
+    --term-divider: #ddd;
+  }
   body {
     background: #fff !important;
     color: #111 !important;
@@ -1295,6 +1306,9 @@ body.is-fullscreen-tool .app-bar {
   body::before, body::after { display: none !important; }
   .site-header, .skip-link, .no-print { display: none !important; }
   .app-bar, .related-tools, .pwa-install-banner, .pwa-install-sheet { display: none !important; }
+  .m-offline, .m-update, .tool-share, .tldr, .eyebrow--crumbs, .terminal-frame__titlebar, .m-btn { display: none !important; }
+  .terminal-frame { background: none !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important; }
+  .terminal-frame__body { padding: 0 !important; }
   html.is-standalone body { padding-bottom: 0 !important; }
   main { max-width: none !important; }
   a { color: #0a4ea3 !important; }

@@ -566,9 +566,20 @@ eleventyComputed:
       mirror.textContent = ta.value;
       ta.insertAdjacentElement('afterend', mirror);
     });
+    document.querySelectorAll('.iv__table tbody tr:not(.last-row)').forEach(tr => {
+      const desc = tr.querySelector('textarea');
+      const price = tr.querySelector('.input-price-cell');
+      const untouched = desc && !desc.value.trim() && !(parseFloat(price && price.value) || 0);
+      tr.classList.toggle('is-print-skip', !!untouched);
+    });
+    const bank = document.querySelector('.iv__bank');
+    if (bank) bank.classList.toggle('is-print-empty', Array.from(bank.querySelectorAll('input')).every(i => !i.value.trim()));
   };
   const clearPrintMirrors = () => {
     document.querySelectorAll('.iv__print-mirror').forEach(el => el.remove());
+    document.querySelectorAll('.is-print-skip').forEach(el => el.classList.remove('is-print-skip'));
+    const bank = document.querySelector('.iv__bank');
+    if (bank) bank.classList.remove('is-print-empty');
   };
   window.addEventListener('beforeprint', buildPrintMirrors);
   window.addEventListener('afterprint', clearPrintMirrors);
@@ -1133,6 +1144,11 @@ td.total .currency {
 
   /* Bank */
   .iv__bank { page-break-inside: avoid; }
+  .iv__table tr.is-print-skip { display: none !important; }
+  .iv__cell-price .currency { display: none !important; }
+  .iv__bank.is-print-empty .iv__section-title,
+  .iv__bank.is-print-empty .iv__label,
+  .iv__bank.is-print-empty .iv__input { display: none !important; }
   .iv__bank .iv__declaration {
     color: #444 !important;
     font-size: 8pt !important;

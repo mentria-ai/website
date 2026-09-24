@@ -951,6 +951,7 @@ eleventyComputed:
     const f = e.target.files && e.target.files[0];
     if (f) inspect(f);
   });
+  if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(inspect);
   dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('is-over'); });
   dropEl.addEventListener('dragleave', () => dropEl.classList.remove('is-over'));
   dropEl.addEventListener('drop', e => {

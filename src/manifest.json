@@ -105,13 +105,19 @@
     }
   ],
   "share_target": {
-    "action": "/tools/quick-notes/",
-    "method": "GET",
-    "enctype": "application/x-www-form-urlencoded",
+    "action": "/share-target/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
     "params": {
       "title": "title",
       "text": "text",
-      "url": "url"
+      "url": "url",
+      "files": [
+        {
+          "name": "image",
+          "accept": ["image/*", ".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif", ".heic", ".heif"]
+        }
+      ]
     }
   },
   "file_handlers": [

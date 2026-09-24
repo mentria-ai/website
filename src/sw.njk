@@ -8,6 +8,7 @@ const MODELS_CACHE = 'mentria-models';
 const MODELS_MARKER = 'mentria-models-{{ modelsVersion }}';
 const DECKS_CACHE = 'mentria-decks-{{ buildHash }}';
 const ART_CACHE = 'mentria-deck-art';
+const SHARE_CACHE = 'mentria-share';
 const DECKS_LIMIT = 40;
 const ART_LIMIT = 200;
 const FEED_PAGE = /^\/((es|fr|ja|pt-br)\/)?feed\//;
@@ -57,6 +58,7 @@ const ASSETS = [
   '/tools/annotate-image/',
   '/tools/quote/',
   '/offline/',
+  '/share/',
   '/fragments/tools-popup.en.html',
   '/fragments/tools-popup.es.html',
   '/fragments/tools-popup.fr.html',
@@ -171,7 +173,7 @@ self.addEventListener('activate', event => {
     const keys = await caches.keys();
     const hadOldModels = keys.some(k => k.startsWith('mentria-models-') && k !== MODELS_MARKER);
     await Promise.all(keys.map(key => {
-      if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER || key === DECKS_CACHE || key === ART_CACHE) return;
+      if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER || key === DECKS_CACHE || key === ART_CACHE || key === SHARE_CACHE) return;
       if (key.startsWith('mentria-cache-') || key.startsWith('mentria-models-') || key.startsWith('mentria-decks-')) return caches.delete(key);
       if (key.startsWith('mentria-locale-') && !key.endsWith('-{{ buildHash }}')) return caches.delete(key);
     }));
@@ -332,7 +334,28 @@ async function stashCapped(cacheName, key, response, limit) {
   if (keys.length > limit) await Promise.all(keys.slice(0, keys.length - limit).map(k => cache.delete(k)));
 }
 
+async function handleShareTarget(request) {
+  let form = null;
+  try { form = await request.formData(); } catch (_) {}
+  if (!form) return Response.redirect('/share/', 303);
+  const pick = (k) => { const v = form.get(k); return typeof v === 'string' ? v : ''; };
+  const file = form.get('image');
+  if (file && typeof file !== 'string' && file.size) {
+    const cache = await caches.open(SHARE_CACHE);
+    await cache.put('/share-target/file', new Response(file, { headers: { 'content-type': file.type || 'application/octet-stream', 'x-file-name': encodeURIComponent(file.name || 'shared-image') } }));
+    return Response.redirect('/share/', 303);
+  }
+  const q = new URLSearchParams();
+  ['title', 'text', 'url'].forEach((k) => { const v = pick(k); if (v) q.set(k, v); });
+  return Response.redirect('/tools/quick-notes/' + (q.toString() ? '?' + q.toString() : ''), 303);
+}
+
 self.addEventListener('fetch', event => {
+  if (event.request.method === 'POST') {
+    const postUrl = new URL(event.request.url);
+    if (postUrl.origin === self.location.origin && postUrl.pathname === '/share-target/') event.respondWith(handleShareTarget(event.request));
+    return;
+  }
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);

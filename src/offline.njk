@@ -15,3 +15,48 @@ eleventyExcludeFromSitemap: true
     <p style="margin-top: 2rem;"><a href="/">{{ "common.offline_home" | t }}</a></p>
   </div>
 </section>
+{{ toolIconsSvg | safe }}
+<section class="offline-tools" id="offline-tools" aria-labelledby="offline-tools-h" hidden>
+  <h2 class="launcher__label" id="offline-tools-h">{{ "common.offline_works" | t }}</h2>
+  <div class="offline-tools__grid" id="offline-tools-grid">
+    {%- for tool in tools %}
+    <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}"{% if tool.offline %} data-needs="{{ tool.offline }}"{% endif %} href="{{ tool.url or ('/tools/' + tool.slug + '/') }}" hidden>
+      <span class="launch-tile__icon" aria-hidden="true"><svg viewBox="0 0 48 48"><use href="#tool-{{ tool.slug }}"></use></svg></span>
+      <span class="launch-tile__label">{{ ("tools." + tool.slug + ".title") | t }}</span>
+    </a>
+    {%- endfor %}
+  </div>
+</section>
+<script>
+(async () => {
+  if (!('caches' in window)) return;
+  const grid = document.getElementById('offline-tools-grid');
+  const tiles = Array.from(grid.querySelectorAll('.launch-tile'));
+  let usage = {};
+  try { usage = JSON.parse(localStorage.getItem('mentria_tool_usage')) || {}; } catch (_) {}
+  const now = Date.now();
+  const score = (slug) => { const e = usage[slug]; return e ? (e.count || 0) + 6 / (1 + (now - (e.last || 0)) / 86400000) : 0; };
+  let hasModel = false;
+  try {
+    for (const name of await caches.keys()) {
+      if (name.indexOf('mentria-models') === 0 && (await (await caches.open(name)).keys()).length) { hasModel = true; break; }
+    }
+  } catch (_) {}
+  const found = [];
+  for (const tile of tiles) {
+    const needs = tile.dataset.needs;
+    if (needs === 'network' || (needs === 'model' && !hasModel)) continue;
+    try { if (await caches.match(tile.getAttribute('href'), { ignoreSearch: true })) found.push(tile); } catch (_) {}
+  }
+  if (!found.length) return;
+  found.sort((a, b) => score(b.dataset.slug) - score(a.dataset.slug));
+  found.forEach((tile) => { tile.hidden = false; grid.appendChild(tile); });
+  document.getElementById('offline-tools').hidden = false;
+})();
+</script>
+<style>
+.offline-tools { max-width: 760px; margin: 1rem auto 3rem; padding: 0 1rem; }
+.offline-tools[hidden] { display: none; }
+.offline-tools .launcher__label { text-align: center; }
+.offline-tools__grid { display: grid; grid-template-columns: repeat(auto-fill, 84px); justify-content: center; gap: 1.4rem 1.1rem; }
+</style>

@@ -222,6 +222,9 @@ main:has(.terminal-frame) { max-width: var(--wide); }
 main:has(.terminal-frame) .hero { max-width: 912px; margin-inline: auto; }
 
 .site-header { background: var(--term-bg-raised); border-bottom: 1px solid var(--term-border); }
+.m-offline { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.35rem 1rem; border-top: 1px solid var(--term-border); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--syn-amber); text-align: center; }
+.m-offline::before { content: ""; flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.m-offline[hidden] { display: none; }
 .site-header__inner {
   max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between;
   align-items: center; padding: 1.15rem 1.5rem; gap: 1rem;

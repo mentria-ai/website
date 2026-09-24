@@ -169,6 +169,8 @@
     "offline_title": "Off-line",
     "offline_msg": "Você está off-line e esta página ainda não está em cache.",
     "offline_home": "Ir para a página inicial em cache",
+    "offline_strip": "Offline · mostrando o que este aparelho tem salvo",
+    "offline_works": "Isto ainda funciona offline",
     "close": "Fechar"
   },
   "home": {

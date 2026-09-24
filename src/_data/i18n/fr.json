@@ -169,6 +169,8 @@
     "offline_title": "Hors ligne",
     "offline_msg": "Vous êtes hors ligne et cette page n'est pas encore en cache.",
     "offline_home": "Aller à la page d'accueil en cache",
+    "offline_strip": "Hors ligne · affichage de ce que cet appareil a enregistré",
+    "offline_works": "Ceci fonctionne encore hors ligne",
     "close": "Fermer"
   },
   "home": {

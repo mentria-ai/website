@@ -11,7 +11,7 @@ eleventyComputed:
   description: "{{ 'tools.files.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">files</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">files</span></p>
   <h1>{{ "tools.files.title" | t }}</h1>
   <p>{{ "tools.files.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -106,6 +106,11 @@ eleventyComputed:
     nsExt:        {{ ("tool.files.ns_ext"         | t) | dump | safe }},
     nsExtdata:    {{ ("tool.files.ns_extdata"     | t) | dump | safe }},
     nsUi:         {{ ("tool.files.ns_ui"          | t) | dump | safe }},
+    nsPacks:      {{ ("tool.files.ns_packs"       | t) | dump | safe }},
+    nsFeed:       {{ ("tool.files.ns_feed"        | t) | dump | safe }},
+    nsHandoff:    {{ ("tool.files.ns_handoff"     | t) | dump | safe }},
+    nsComms:      {{ ("nav.comms"                 | t) | dump | safe }},
+    nsAiChat:     {{ ("tools.ai-chat.title"       | t) | dump | safe }},
     nsLegacy:     {{ ("tool.files.ns_legacy"      | t) | dump | safe }},
     treeItemLabel:{{ ("tool.files.tree_item_label"| t) | dump | safe }},
     view:         {{ ("tool.files.view"           | t) | dump | safe }},
@@ -144,7 +149,12 @@ eleventyComputed:
     games: COPY.nsGames,
     identity: COPY.nsIdentity,
     ext: COPY.nsExt,
-    ui: COPY.nsUi
+    ui: COPY.nsUi,
+    packs: COPY.nsPacks,
+    feed: COPY.nsFeed,
+    handoff: COPY.nsHandoff,
+    comms: COPY.nsComms,
+    ai_chat: COPY.nsAiChat
   };
 
   const $ = (id) => document.getElementById(id);

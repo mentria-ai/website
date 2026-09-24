@@ -12,7 +12,7 @@ eleventyComputed:
   lang: "{{ locale.code }}"
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">bench</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">bench</span></p>
   <h1>Model benchmark</h1>
   <p class="lede">Loads a tier in this tab, runs fixed prompts, and reports load time, time to first token and decode speed. Close other model tabs first: one engine per device.</p>
 </section>

@@ -12,7 +12,7 @@ eleventyComputed:
 ---
 <link rel="stylesheet" href="/assets/css/learn.css?v={{ buildHash }}">
 <section class="hero" style="padding-top:1rem;">
-    <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">learn</span></p>
+    <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">learn</span></p>
     <h1>{{ "learn.title" | t }}</h1>
     <p>{{ "learn.lede" | t }}</p>
 </section>

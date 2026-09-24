@@ -7,7 +7,7 @@ description: How to write a learning pack for mentria.ai. One JSON file, nine ca
 ---
 
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="/learn/">learn</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">format</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="/" aria-label="Home">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="/learn/">learn</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">format</span></p>
   <h1>Pack format</h1>
   <p>A pack is one JSON file. mentria plays it as cards you read, answer and come back to. Anything that writes JSON can make one, including an AI assistant working from a book or your notes.</p>
 </section>
@@ -72,7 +72,7 @@ Every card has `id` (unique in the pack) and `type`. Every card may also have `t
 | `slide` | `caption`, `body`, `image` | reads |
 | `image` | `image`, `caption`, `hotspots[]` of `{x, y, w, h, label, body}` in percent | taps the spots; tapping all of them counts as done |
 | `mcq` | `question`, `choices[]` of `{text, correct, why}`, `multi`, `shuffle` | picks one, or every correct one when `multi` is true. `why` shows after answering. |
-| `cloze` | `text` with `{{blank}}` markers, `answers[]` (one per blank; an array lists accepted alternatives), `chips[]` extra distractors | fills the blanks with chips when `chips` is given, otherwise by typing |
+| `cloze` | `text` with `{% raw %}{{blank}}{% endraw %}` markers, `answers[]` (one per blank; an array lists accepted alternatives), `chips[]` extra distractors | fills the blanks with chips when `chips` is given, otherwise by typing |
 | `order` | `prompt`, `items[]` in the correct order | puts the shuffled items back in order |
 | `match` | `prompt`, `pairs[]` of `[left, right]` | pairs each left item with its right item |
 | `canvas` | `html` (one self-contained HTML document, up to 512 KB) | uses your interactive; see below |

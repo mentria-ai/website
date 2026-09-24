@@ -688,6 +688,9 @@
       "decoded_preview": "デコードされた画像のプレビュー"
     },
     "countdown-timer": {
+      "float_doc_title": "タイマー",
+      "float_title": "このタイマーを他のウィンドウより前面に表示",
+      "btn_float": "フロート表示",
       "status_ready": "準備完了",
       "status_running": "実行中",
       "status_paused": "一時停止",
@@ -861,6 +864,8 @@
       "err_generation": "生成中にエラー。再試行してください。"
     },
     "radio": {
+      "float_doc_title": "インフィニットラジオ",
+      "float_aria": "フローティングのミニプレーヤーを開く",
       "sleep_label": "スリープタイマー（分）",
       "sleep_off": "オフ",
       "sleep_minutes": "{n}分後に停止",

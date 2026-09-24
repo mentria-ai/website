@@ -688,6 +688,9 @@
       "decoded_preview": "Pré-visualização da imagem decodificada"
     },
     "countdown-timer": {
+      "float_doc_title": "Timer",
+      "float_title": "Manter este timer sobre as outras janelas",
+      "btn_float": "Flutuar",
       "status_ready": "Pronto",
       "status_running": "Em execução",
       "status_paused": "Em pausa",
@@ -861,6 +864,8 @@
       "err_generation": "Erro ao gerar a frase. Tente novamente."
     },
     "radio": {
+      "float_doc_title": "Rádio infinita",
+      "float_aria": "Abrir um miniplayer flutuante",
       "sleep_label": "Timer para dormir (min)",
       "sleep_off": "Desl.",
       "sleep_minutes": "Parar depois de {n} minutos",

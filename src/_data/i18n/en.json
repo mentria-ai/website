@@ -688,6 +688,9 @@
       "decoded_preview": "Decoded image preview"
     },
     "countdown-timer": {
+      "float_doc_title": "Timer",
+      "float_title": "Keep this timer on top of other windows",
+      "btn_float": "Float",
       "status_ready": "Ready",
       "status_running": "Running",
       "status_paused": "Paused",
@@ -861,6 +864,8 @@
       "err_generation": "Error generating quote. Try again."
     },
     "radio": {
+      "float_doc_title": "Infinite Radio",
+      "float_aria": "Open a floating mini player",
       "sleep_label": "Sleep timer (min)",
       "sleep_off": "Off",
       "sleep_minutes": "Stop after {n} minutes",

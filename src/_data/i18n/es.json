@@ -145,6 +145,7 @@
     "release_notes": "Notas de la versión en GitHub"
   },
   "common": {
+    "undo": "Deshacer",
     "tldr": {
       "read_more": "¿Qué es esto?",
       "read_less": "Ocultar detalles",
@@ -571,6 +572,7 @@
       "result_tails_wins": "¡Cruz gana la serie!"
     },
     "quick-notes": {
+      "note_deleted": "Se eliminó «{name}».",
       "toggle_sidebar": "Alternar barra lateral",
       "notes_label": "Notas",
       "new_note_btn": "Nueva Nota",
@@ -735,6 +737,7 @@
       "preset_save_invalid": "Define una duración primero y luego guárdala"
     },
     "invoice": {
+      "row_removed": "Línea eliminada.",
       "btn_print": "Imprimir / Guardar PDF",
       "btn_export": "Exportar JSON",
       "btn_import": "Importar JSON",

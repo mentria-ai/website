@@ -145,6 +145,7 @@
     "release_notes": "Release notes on GitHub"
   },
   "common": {
+    "undo": "Undo",
     "tldr": {
       "read_more": "What is this?",
       "read_less": "Hide details",
@@ -571,6 +572,7 @@
       "result_tails_wins": "Tails wins the series!"
     },
     "quick-notes": {
+      "note_deleted": "Deleted “{name}”.",
       "toggle_sidebar": "Toggle sidebar",
       "notes_label": "Notes",
       "new_note_btn": "New Note",
@@ -735,6 +737,7 @@
       "preset_save_invalid": "Set a duration first, then save it"
     },
     "invoice": {
+      "row_removed": "Line removed.",
       "btn_print": "Print / Save PDF",
       "btn_export": "Export JSON",
       "btn_import": "Import JSON",

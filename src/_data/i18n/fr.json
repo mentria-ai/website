@@ -145,6 +145,7 @@
     "release_notes": "Notes de version sur GitHub"
   },
   "common": {
+    "undo": "Annuler",
     "tldr": {
       "read_more": "Qu'est-ce que c'est ?",
       "read_less": "Masquer les détails",
@@ -571,6 +572,7 @@
       "result_tails_wins": "Face gagne la série !"
     },
     "quick-notes": {
+      "note_deleted": "« {name} » supprimée.",
       "toggle_sidebar": "Basculer la barre latérale",
       "notes_label": "Notes",
       "new_note_btn": "Nouvelle Note",
@@ -735,6 +737,7 @@
       "preset_save_invalid": "Définissez d’abord une durée, puis enregistrez-la"
     },
     "invoice": {
+      "row_removed": "Ligne supprimée.",
       "btn_print": "Imprimer / Enregistrer en PDF",
       "btn_export": "Exporter JSON",
       "btn_import": "Importer JSON",

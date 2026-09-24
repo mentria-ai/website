@@ -87,6 +87,7 @@ eleventyComputed:
     savedPrefix:       {{ ("tool.quick-notes.saved_prefix"       | t) | dump | safe }},
     emptyPreview:      {{ ("tool.quick-notes.empty_preview"      | t) | dump | safe }},
     confirmDelete:     {{ ("tool.quick-notes.confirm_delete"     | t) | dump | safe }},
+    noteDeleted:       {{ ("tool.quick-notes.note_deleted"       | t) | dump | safe }},
     lockBtn:           {{ ("tool.quick-notes.lock_btn"           | t) | dump | safe }},
     removeLockBtn:     {{ ("tool.quick-notes.remove_lock_btn"    | t) | dump | safe }},
     lockedTag:         {{ ("tool.quick-notes.locked_tag"         | t) | dump | safe }},
@@ -575,13 +576,35 @@ eleventyComputed:
     renderList();
   }
 
-  async function confirmDelete() {
+  function confirmDelete() {
     const note = getNote(activeId);
     if (!note) return;
-    const name = note.title || COPY.untitled;
-    if (await mentriaConfirm(COPY.confirmDelete.replace('{name}', name))) {
-      deleteNote(activeId);
+    saver.flush();
+    const snapshot = Object.assign({}, getNote(activeId));
+    const index = notes.findIndex(n => n.id === snapshot.id);
+    const wasLast = notes.length === 1;
+    deleteNote(snapshot.id);
+    const placeholderId = wasLast ? activeId : null;
+    const name = (snapshot.title || '').trim() || COPY.untitled;
+    MentriaUI.undoToast(COPY.noteDeleted.replace('{name}', name), () => restoreNote(snapshot, index, placeholderId));
+  }
+
+  function restoreNote(snapshot, index, placeholderId) {
+    if (notes.some(n => n.id === snapshot.id)) return;
+    if (placeholderId) {
+      const p = notes.findIndex(n => n.id === placeholderId && !n.enc && !(n.title || '').trim() && !(n.body || '').trim());
+      if (p !== -1) notes.splice(p, 1);
     }
+    notes.splice(Math.min(index, notes.length), 0, Object.assign({}, snapshot, { updatedAt: Date.now() }));
+    if (window.MentriaStore) {
+      const del = window.MentriaStore.get('quick_notes', 'deleted');
+      if (del && typeof del === 'object' && del[String(snapshot.id)] != null) {
+        delete del[String(snapshot.id)];
+        window.MentriaStore.set('quick_notes', 'deleted', del);
+      }
+    }
+    persist();
+    selectNote(snapshot.id);
   }
 
   function toggleSidebar() {

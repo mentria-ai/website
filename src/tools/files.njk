@@ -838,18 +838,27 @@ eleventyComputed:
   }
 
   async function deleteItem(bucket, key) {
-    const msg = (bucket.id === 'totp')
-      ? COPY.confirmDeleteTotp.replace('{name}', key)
-      : COPY.confirmDelete.replace('{name}', key);
-    const ok = await window.mentriaConfirm(msg);
-    if (!ok) return;
+    const guarded = bucket.id === 'totp' || bucket.id === 'identity';
+    if (guarded) {
+      const msg = bucket.id === 'totp' ? COPY.confirmDeleteTotp.replace('{name}', key) : COPY.confirmDelete.replace('{name}', key);
+      if (!(await window.mentriaConfirm(msg))) return;
+    }
+    let saved = null;
     if (bucket.kind === 'legacy') {
-      try { localStorage.removeItem(key); } catch (_) {}
+      try { saved = localStorage.getItem(key); localStorage.removeItem(key); } catch (_) {}
     } else {
+      try { saved = store.get(bucket.id, key); } catch (_) {}
       store.remove(bucket.id, key);
     }
     status.set(COPY.statusDeleted.replace('{name}', key), 'ok');
     refresh();
+    if (guarded || saved == null) return;
+    MentriaUI.undoToast(COPY.statusDeleted.replace('{name}', key), () => {
+      if (bucket.kind === 'legacy') { try { localStorage.setItem(key, saved); } catch (_) {} }
+      else store.set(bucket.id, key, saved);
+      status.clear();
+      refresh();
+    });
   }
 
   function exportItem(bucket, key) {

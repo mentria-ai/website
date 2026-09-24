@@ -388,6 +388,7 @@
         var okBtn = document.getElementById('m-dialog-ok');
         var cancelBtn = document.getElementById('m-dialog-cancel');
         var okLabel = {{ ("common.dialog.ok" | t) | dump | safe }};
+        window.MentriaUICopy = { undo: {{ ("common.undo" | t) | dump | safe }} };
         var confirmLabel = {{ ("common.dialog.confirm" | t) | dump | safe }};
         var resolver = null;
         var opener = null;

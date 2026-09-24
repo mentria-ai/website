@@ -168,6 +168,7 @@ eleventyComputed:
 (() => {
   const COPY = {
     rowRemove:        {{ ("tool.invoice.row_remove"        | t) | dump | safe }},
+    rowRemoved:       {{ ("tool.invoice.row_removed"       | t) | dump | safe }},
     phLineDesc:       {{ ("tool.invoice.ph_line_desc"      | t) | dump | safe }},
     phQty:            {{ ("tool.invoice.ph_qty"            | t) | dump | safe }},
     phPrice:          {{ ("tool.invoice.ph_price"          | t) | dump | safe }},
@@ -354,22 +355,41 @@ eleventyComputed:
 
   const renumberRows = () => {
     const rows = Array.from(table.querySelector('tbody').children).slice(0, -1);
+    const moves = [];
     rows.forEach((row, i) => {
       const idx = i + 1;
       row.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(el => {
         const newId = el.id.replace(/\d+Inp$/, idx + 'Inp');
-        if (newId !== el.id) {
-          dropField(el.id);
-          el.id = newId;
-          persist(el);
-        }
+        if (newId !== el.id) moves.push({ el, newId });
       });
     });
+    moves.forEach(({ el }) => dropField(el.id));
+    moves.forEach(({ el, newId }) => { el.id = newId; persist(el); });
+  };
+
+  const restoreRow = (data, index) => {
+    addRow(data);
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.children).slice(0, -1);
+    const added = rows[rows.length - 1];
+    const ref = rows[index];
+    if (added && ref && ref !== added) tbody.insertBefore(added, ref);
+    renumberRows();
+    calculateGrandTotal();
+    const focusEl = added && added.querySelector('textarea');
+    if (focusEl) focusEl.focus();
   };
 
   const removeRow = (event) => {
     if (!event.target.classList.contains('remove-row')) return;
     const row = event.target.closest('tr');
+    const index = Array.from(table.querySelector('tbody').children).indexOf(row);
+    const data = {
+      Description: row.querySelector('textarea')?.value || '',
+      'SAC code': row.querySelector('input[id^="sac"]')?.value || '',
+      Quantity: row.querySelector('.input-qty-cell')?.value || '',
+      'Unit Price': row.querySelector('.input-price-cell')?.value || ''
+    };
     row.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(el => {
       dropField(el.id);
     });
@@ -380,6 +400,7 @@ eleventyComputed:
     const target = nextRow && (nextRow.querySelector('.remove-row') || nextRow.querySelector('.add-row'));
     if (target) target.focus();
     else { const add = table.querySelector('.add-row'); if (add) add.focus(); }
+    if (window.MentriaUI && MentriaUI.undoToast) MentriaUI.undoToast(COPY.rowRemoved, () => restoreRow(data, index));
   };
 
   /* ── Import / Export ───────────────────────────────── */

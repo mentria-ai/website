@@ -737,6 +737,17 @@
       "preset_save_invalid": "先に時間を設定してから保存してください"
     },
     "invoice": {
+      "btn_new": "新しい請求書",
+      "title_new": "あなたの情報と次の番号で次の請求書を作成",
+      "saved_title": "保存した請求書",
+      "saved_hint": "請求書はこの端末に保存され、編集に合わせて更新されます。",
+      "saved_empty": "まだ保存された請求書はありません。取引先か明細を入力すると、ここに保存されます。",
+      "saved_no_client": "取引先未入力",
+      "saved_open": "開く",
+      "saved_duplicate": "次の請求書として複製",
+      "saved_delete": "削除",
+      "saved_editing": "編集中",
+      "saved_deleted": "請求書 {n} を削除しました。",
       "row_removed": "行を削除しました。",
       "btn_print": "印刷 / PDF保存",
       "btn_export": "JSONをエクスポート",

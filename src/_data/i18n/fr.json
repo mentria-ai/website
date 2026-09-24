@@ -737,6 +737,17 @@
       "preset_save_invalid": "Définissez d’abord une durée, puis enregistrez-la"
     },
     "invoice": {
+      "btn_new": "Nouvelle facture",
+      "title_new": "Commencer la facture suivante avec vos coordonnées et le numéro suivant",
+      "saved_title": "Factures enregistrées",
+      "saved_hint": "Les factures restent sur cet appareil et se mettent à jour pendant que vous les modifiez.",
+      "saved_empty": "Rien d’enregistré pour l’instant. Dès que vous ajoutez un client ou une ligne, la facture est enregistrée ici.",
+      "saved_no_client": "Pas encore de client",
+      "saved_open": "Ouvrir",
+      "saved_duplicate": "Dupliquer comme suivante",
+      "saved_delete": "Supprimer",
+      "saved_editing": "En cours",
+      "saved_deleted": "Facture {n} supprimée.",
       "row_removed": "Ligne supprimée.",
       "btn_print": "Imprimer / Enregistrer en PDF",
       "btn_export": "Exporter JSON",

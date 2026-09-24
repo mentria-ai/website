@@ -11,7 +11,7 @@ eleventyComputed:
   description: "{{ 'tools.countdown-timer.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">countdown-timer</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">countdown-timer</span></p>
   <h1>{{ "tools.countdown-timer.title" | t }}</h1>
   <p>{{ "tools.countdown-timer.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -39,7 +39,7 @@ eleventyComputed:
 
 <template id="ct-widget-tpl">
   <div class="ct-widget" data-widget-id="">
-    <button class="ct-widget__close" title="{{ 'tool.countdown-timer.btn_remove_timer' | t }}">&times;</button>
+    <button type="button" class="ct-widget__close" title="{{ 'tool.countdown-timer.btn_remove_timer' | t }}" aria-label="{{ 'tool.countdown-timer.btn_remove_timer' | t }}">&times;</button>
 
     <div class="ct-widget__title" contenteditable="true" spellcheck="false" data-placeholder="Timer"></div>
 

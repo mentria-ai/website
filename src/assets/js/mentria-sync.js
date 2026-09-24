@@ -366,7 +366,7 @@ const mergeV2 = async (msg, isBack) => {
 
     const localMtime = localMtimeOf(ns, key);
 
-    if (suffix === 'quick_notes.blob') {
+    if (suffix === 'quick_notes.blob' || suffix === 'quick_notes.inbox') {
       unions.push({ suffix, ns, key, value: mergeNotes(parseRaw(rawLocal), parseRaw(rawIn), mergedDeletedNotes) });
       return;
     }

@@ -11,7 +11,7 @@ eleventyComputed:
   description: "{{ 'tools.totp.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">totp</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">totp</span></p>
   <h1>{{ "tools.totp.title" | t }}</h1>
   <p>{{ "tools.totp.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -216,6 +216,7 @@ eleventyComputed:
     add_invalid_uri:          {{ ('tool.totp.add_invalid_uri'          | t) | dump | safe }},
     add_missing_fields:       {{ ('tool.totp.add_missing_fields'       | t) | dump | safe }},
     delete_confirm:           {{ ('tool.totp.delete_confirm'           | t) | dump | safe }},
+    delete_label:             {{ ('tool.totp.delete_label'             | t) | dump | safe }},
     copied:                   {{ ('tool.totp.copied'                   | t) | dump | safe }},
     copyFailed:               {{ ('common.copy_failed'                  | t) | dump | safe }},
     backup_required:          {{ ('tool.totp.backup_required'          | t) | dump | safe }},
@@ -498,10 +499,14 @@ eleventyComputed:
           <span class="totp-row__code" data-copy>—</span>
           <span class="totp-row__next"><span class="totp-row__next-label">${COPY.next_label}</span><span class="totp-row__next-value">—</span></span>
         </div>
-        <button type="button" class="totp-row__del" data-del title="${COPY.delete_confirm.replace(/{name}/g, '')}"><svg viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6"></path></svg></button>
+        <button type="button" class="totp-row__del" data-del><svg viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6"></path></svg></button>
       `;
       li.querySelector('.totp-row__issuer').textContent = acc.issuer || '—';
       li.querySelector('.totp-row__account').textContent = acc.account || '';
+      const delLabel = COPY.delete_label.replace(/{name}/g, ((acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '')).trim());
+      const delBtn = li.querySelector('.totp-row__del');
+      delBtn.setAttribute('aria-label', delLabel);
+      delBtn.title = delLabel;
       list.appendChild(li);
     });
   }
@@ -973,7 +978,7 @@ eleventyComputed:
       e.target.classList.add('is-copied');
       e.target.textContent = ok ? COPY.copied : COPY.copyFailed;
       setTimeout(() => { e.target.classList.remove('is-copied'); tick(); }, ok ? 900 : 1600);
-    } else if (e.target.matches('[data-del]')) {
+    } else if (e.target.closest('[data-del]')) {
       const acc = state.accounts.find((a) => a.id === row.dataset.id);
       if (!acc) return;
       const name = (acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '');

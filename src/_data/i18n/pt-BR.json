@@ -861,6 +861,14 @@
       "err_generation": "Erro ao gerar a frase. Tente novamente."
     },
     "radio": {
+      "sleep_label": "Timer para dormir (min)",
+      "sleep_off": "Desl.",
+      "sleep_minutes": "Parar depois de {n} minutos",
+      "sleep_left": "Encerra em {time}",
+      "liked_title": "Faixas curtidas",
+      "liked_empty": "Toque em ♥ enquanto uma faixa toca para guardá-la aqui.",
+      "liked_play": "Tocar {title}",
+      "liked_remove": "Remover {title} das faixas curtidas",
       "now_playing_label": "TOCANDO AGORA",
       "up_next_label": "A SEGUIR",
       "press_play": "Toque em reproduzir para começar",

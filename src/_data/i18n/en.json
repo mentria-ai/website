@@ -861,6 +861,14 @@
       "err_generation": "Error generating quote. Try again."
     },
     "radio": {
+      "sleep_label": "Sleep timer (min)",
+      "sleep_off": "Off",
+      "sleep_minutes": "Stop after {n} minutes",
+      "sleep_left": "Fades out in {time}",
+      "liked_title": "Liked tracks",
+      "liked_empty": "Tap ♥ while a track plays to keep it here.",
+      "liked_play": "Play {title}",
+      "liked_remove": "Remove {title} from liked tracks",
       "now_playing_label": "NOW PLAYING",
       "up_next_label": "UP NEXT",
       "press_play": "Press play to start",

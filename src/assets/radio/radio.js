@@ -64,7 +64,14 @@ class MentriaRadio {
       volume: document.getElementById("rd-volume"),
       nextTitle: document.getElementById("rd-next-title"),
       retry: document.getElementById("rd-retry"),
+      likedList: document.getElementById("rd-liked-list"),
+      likedCount: document.getElementById("rd-liked-count"),
+      sleepSeg: document.getElementById("rd-sleep-seg"),
+      sleepLeft: document.getElementById("rd-sleep-left"),
     };
+    this.sleepAt = 0;
+    this.sleepTimer = null;
+    this.sleepControl = null;
   }
 
   // ── Init ──────────────────────────────────────────
@@ -86,6 +93,7 @@ class MentriaRadio {
         return;
       }
       this.preferences = await getAllPreferences();
+      this.renderLiked();
       this.el.trackCount.textContent = COPY.trackCountFmt.replace("{n}", this.catalog.length);
       this.setStatus("ready", COPY.ready);
       this.el.play.disabled = false;
@@ -280,14 +288,107 @@ class MentriaRadio {
 
   async toggleLike() {
     if (!this.currentTrack) return;
-    const trackId = this.currentTrack.id;
-    const current = this.preferences[trackId];
-    const isLiked = current ? !current.liked : true;
+    const current = this.preferences[this.currentTrack.id];
+    await this.setLiked(this.currentTrack.id, current ? !current.liked : true);
+  }
 
-    const updated = await updatePreference(trackId, { liked: isLiked });
+  async setLiked(trackId, liked) {
+    const updated = await updatePreference(trackId, { liked });
     this.preferences[trackId] = updated;
-    this.el.like.classList.toggle("liked", isLiked);
-    this.el.like.setAttribute("aria-pressed", isLiked ? "true" : "false");
+    if (this.currentTrack && this.currentTrack.id === trackId) {
+      this.el.like.classList.toggle("liked", liked);
+      this.el.like.setAttribute("aria-pressed", liked ? "true" : "false");
+    }
+    this.renderLiked();
+  }
+
+  async playTrack(track) {
+    if (!track) return;
+    if (!this.player._a) this.player.init();
+    this.player.setVolume(this.el.volume.value / 100);
+    if (this.crossfadeTimer) clearTimeout(this.crossfadeTimer);
+    if (this.currentTrack && this.currentTrack.id !== track.id) {
+      await this.recordEnd(false);
+      this.history.push(this.currentTrack);
+    }
+    await this.loadAndPlay(track);
+    this.renderLiked();
+    this.prepareNext();
+  }
+
+  renderLiked() {
+    const list = this.el.likedList;
+    if (!list) return;
+    const liked = this.catalog.filter((t) => this.preferences[t.id] && this.preferences[t.id].liked);
+    this.el.likedCount.textContent = liked.length ? String(liked.length) : "";
+    list.textContent = "";
+    if (!liked.length) {
+      const li = document.createElement("li");
+      li.className = "rd__liked-empty";
+      li.textContent = COPY.likedEmpty || "";
+      list.appendChild(li);
+      return;
+    }
+    liked.forEach((t) => {
+      const title = t.title || t.id;
+      const li = document.createElement("li");
+      li.className = "rd__liked-item";
+      const play = document.createElement("button");
+      play.type = "button";
+      play.className = "rd__liked-play" + (this.currentTrack && this.currentTrack.id === t.id ? " is-current" : "");
+      play.setAttribute("aria-label", (COPY.likedPlay || "{title}").replace("{title}", title));
+      const name = document.createElement("span");
+      name.className = "rd__liked-title";
+      name.textContent = title;
+      const mood = document.createElement("span");
+      mood.className = "rd__liked-mood";
+      mood.textContent = (t.mood || "").replace(/_/g, " ");
+      play.append(name, mood);
+      play.addEventListener("click", () => this.playTrack(t));
+      const unlike = document.createElement("button");
+      unlike.type = "button";
+      unlike.className = "rd__liked-unlike";
+      unlike.textContent = "\u2665";
+      const unlikeLabel = (COPY.likedRemove || "{title}").replace("{title}", title);
+      unlike.setAttribute("aria-label", unlikeLabel);
+      unlike.title = unlikeLabel;
+      unlike.addEventListener("click", () => this.setLiked(t.id, false));
+      li.append(play, unlike);
+      list.appendChild(li);
+    });
+  }
+
+  setSleep(minutes) {
+    if (this.sleepTimer) { clearInterval(this.sleepTimer); this.sleepTimer = null; }
+    this.sleepAt = minutes > 0 ? Date.now() + minutes * 60000 : 0;
+    if (!this.sleepAt) { this.el.sleepLeft.textContent = ""; return; }
+    const tick = () => {
+      const left = this.sleepAt - Date.now();
+      if (left <= 0) { this.fireSleep(); return; }
+      this.el.sleepLeft.textContent = (COPY.sleepLeft || "{time}").replace("{time}", formatTime(Math.ceil(left / 1000)));
+    };
+    tick();
+    this.sleepTimer = setInterval(tick, 1000);
+  }
+
+  fireSleep() {
+    if (this.sleepTimer) { clearInterval(this.sleepTimer); this.sleepTimer = null; }
+    this.sleepAt = 0;
+    this.el.sleepLeft.textContent = "";
+    if (this.sleepControl) this.sleepControl.set("0");
+    if (!this.player.isPlaying) return;
+    const target = this.el.volume.value / 100;
+    const steps = 40;
+    let i = 0;
+    const fade = setInterval(() => {
+      i += 1;
+      this.player.setVolume(target * Math.max(0, 1 - i / steps));
+      if (i >= steps) {
+        clearInterval(fade);
+        this.pausePlayback();
+        this.player.setVolume(target);
+      }
+    }, 200);
   }
 
   async recordEnd(skipped) {
@@ -423,6 +524,14 @@ class MentriaRadio {
 
     this.el.skip.addEventListener("click", () => this.skip());
     this.el.like.addEventListener("click", () => this.toggleLike());
+    if (this.el.sleepSeg && window.MentriaUI && window.MentriaUI.segmented) {
+      this.sleepControl = window.MentriaUI.segmented(this.el.sleepSeg, (value) => this.setSleep(Number(value) || 0));
+      this.sleepControl.set("0");
+      Array.prototype.forEach.call(this.el.sleepSeg.querySelectorAll("button[data-value]"), (b) => {
+        const v = Number(b.dataset.value);
+        if (v > 0) b.setAttribute("aria-label", (COPY.sleepMinutes || "{n}").replace("{n}", String(v)));
+      });
+    }
     if (this.el.retry) {
       this.el.retry.addEventListener("click", () => this.loadCatalogAndInit());
     }

@@ -861,6 +861,14 @@
       "err_generation": "Error al generar la frase. Inténtalo de nuevo."
     },
     "radio": {
+      "sleep_label": "Temporizador (min)",
+      "sleep_off": "No",
+      "sleep_minutes": "Parar tras {n} minutos",
+      "sleep_left": "Se apaga en {time}",
+      "liked_title": "Pistas que te gustan",
+      "liked_empty": "Pulsa ♥ mientras suena una pista para guardarla aquí.",
+      "liked_play": "Reproducir {title}",
+      "liked_remove": "Quitar {title} de las pistas que te gustan",
       "now_playing_label": "AHORA SUENA",
       "up_next_label": "A CONTINUACIÓN",
       "press_play": "Pulsa reproducir para empezar",

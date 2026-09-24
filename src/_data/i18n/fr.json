@@ -861,6 +861,14 @@
       "err_generation": "Erreur lors de la génération. Réessaie."
     },
     "radio": {
+      "sleep_label": "Minuterie de sommeil (min)",
+      "sleep_off": "Non",
+      "sleep_minutes": "Arrêter après {n} minutes",
+      "sleep_left": "Fondu de fin dans {time}",
+      "liked_title": "Titres aimés",
+      "liked_empty": "Touchez ♥ pendant la lecture d’un titre pour le garder ici.",
+      "liked_play": "Lire {title}",
+      "liked_remove": "Retirer {title} des titres aimés",
       "now_playing_label": "EN COURS",
       "up_next_label": "À SUIVRE",
       "press_play": "Appuie sur lecture pour commencer",

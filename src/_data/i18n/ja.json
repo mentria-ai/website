@@ -861,6 +861,14 @@
       "err_generation": "生成中にエラー。再試行してください。"
     },
     "radio": {
+      "sleep_label": "スリープタイマー（分）",
+      "sleep_off": "オフ",
+      "sleep_minutes": "{n}分後に停止",
+      "sleep_left": "あと {time} でフェードアウト",
+      "liked_title": "いいねした曲",
+      "liked_empty": "再生中に♥をタップすると、ここに残ります。",
+      "liked_play": "{title} を再生",
+      "liked_remove": "{title} をいいねから外す",
       "now_playing_label": "再生中",
       "up_next_label": "次の曲",
       "press_play": "再生を押して開始",

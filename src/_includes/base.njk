@@ -378,6 +378,8 @@
         var resolver = null;
         var opener = null;
         var backHandle = null;
+        var queue = [];
+        var lockUntil = 0;
         function trapKey(e) {
           if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); settle(false); return; }
           if (e.key !== 'Tab') return;
@@ -397,21 +399,33 @@
           var o = opener; opener = null;
           if (o && document.contains(o)) { try { o.focus(); } catch (_) {} }
           if (r) r(result);
+          if (queue.length) setTimeout(function () { show(true); }, 0);
         }
-        okBtn.addEventListener('click', function () { settle(true); });
+        okBtn.addEventListener('click', function () {
+          if (Date.now() < lockUntil) return;
+          settle(true);
+        });
         cancelBtn.addEventListener('click', function () { settle(false); });
-        function open(message, mode) {
-          if (resolver) settle(false);
+        function show(queued) {
+          if (resolver || !queue.length) return;
+          var item = queue.shift();
           opener = document.activeElement;
-          msgEl.textContent = message;
-          cancelBtn.hidden = (mode === 'alert');
-          okBtn.textContent = (mode === 'alert') ? okLabel : confirmLabel;
+          msgEl.textContent = item.message;
+          cancelBtn.hidden = (item.mode === 'alert');
+          okBtn.textContent = (item.mode === 'alert') ? okLabel : confirmLabel;
           dlg.showPopover();
           document.addEventListener('keydown', trapKey, true);
           backHandle = (window.MentriaUI && window.MentriaUI.backDismiss)
             ? window.MentriaUI.backDismiss(function () { settle(false); }) : null;
           okBtn.focus();
-          return new Promise(function (res) { resolver = res; });
+          lockUntil = queued ? Date.now() + 400 : 0;
+          resolver = item.res;
+        }
+        function open(message, mode) {
+          return new Promise(function (res) {
+            queue.push({ message: message, mode: mode, res: res });
+            show(false);
+          });
         }
         window.mentriaConfirm = function (m) { return open(m, 'confirm'); };
         window.mentriaAlert = function (m) { return open(m, 'alert'); };

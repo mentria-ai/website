@@ -32,20 +32,17 @@
     pins.forEach(function (slug) {
       var tile = document.querySelector('.launcher__pages .launch-tile[data-slug="' + slug + '"]');
       if (tile) {
-        var clone = tile.cloneNode(true);
-        var pinBtn = clone.querySelector('.launch-pin');
-        if (pinBtn) pinBtn.remove();
-        pinnedRow.appendChild(clone);
+        pinnedRow.appendChild(tile.cloneNode(true));
         added++;
       }
     });
     pinnedBand.hidden = !added;
     document.querySelectorAll('.launcher__pages .launch-pin').forEach(function (btn) {
-      var slug = btn.parentNode.getAttribute('data-slug');
-      var on = pins.indexOf(slug) !== -1;
+      var tile = btn.previousElementSibling;
+      var on = pins.indexOf(btn.getAttribute('data-slug')) !== -1;
       btn.classList.toggle('is-pinned', on);
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      btn.setAttribute('aria-label', pinLabel(btn.parentNode, on));
+      btn.setAttribute('aria-label', pinLabel(tile, on));
       btn.textContent = on ? '\u2605' : '\u2606';
     });
   }
@@ -60,20 +57,19 @@
 
   if (pinnedBand && window.MentriaStore) {
     document.querySelectorAll('.launcher__pages .launch-tile').forEach(function (tile) {
-      var btn = document.createElement('span');
+      var slot = document.createElement('div');
+      slot.className = 'launch-slot';
+      tile.parentNode.insertBefore(slot, tile);
+      slot.appendChild(tile);
+      var btn = document.createElement('button');
+      btn.type = 'button';
       btn.className = 'launch-pin';
-      btn.setAttribute('role', 'button');
-      btn.tabIndex = 0;
-      var act = function (e) {
-        e.preventDefault();
+      btn.setAttribute('data-slug', tile.getAttribute('data-slug'));
+      btn.addEventListener('click', function (e) {
         e.stopPropagation();
         togglePin(tile.getAttribute('data-slug'));
-      };
-      btn.addEventListener('click', act);
-      btn.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') act(e);
       });
-      tile.appendChild(btn);
+      slot.appendChild(btn);
     });
     renderPinned();
   }
@@ -90,10 +86,7 @@
   slugs.slice(0, 6).forEach(function (slug) {
     var tile = document.querySelector('.launcher__pages .launch-tile[data-slug="' + slug + '"]');
     if (tile) {
-      var clone = tile.cloneNode(true);
-      var pinBtn = clone.querySelector('.launch-pin');
-      if (pinBtn) pinBtn.remove();
-      row.appendChild(clone);
+      row.appendChild(tile.cloneNode(true));
       added++;
     }
   });

@@ -79,6 +79,7 @@ eleventyComputed:
   <canvas id="game" width="640" height="720"></canvas>
 
   <div class="toast" id="toast"></div>
+  <p class="sr-only" id="sr-live" role="status" aria-live="polite"></p>
 
   <div class="overlay" id="overlay">
     <div class="modal" id="modal">
@@ -808,11 +809,22 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
       '<button class="m-btn m-btn--primary" data-act="retry">' + COPY.btnRetry + '</button>';
     State.dying = false;
     overlay.classList.remove('hidden');
+    announce(COPY.gameOver + '. ' + COPY.score + ' ' + State.score + '. ' + COPY.best + ' ' + State.best + (State.newBest ? '. ' + COPY.newBest : ''));
+    const retry = modal.querySelector('[data-act="retry"]');
+    if (retry) retry.focus({ preventScroll: true });
+  }
+
+  function announce(msg) {
+    const el = document.getElementById('sr-live');
+    if (!el) return;
+    el.textContent = '';
+    setTimeout(() => { el.textContent = msg; }, 60);
   }
 
   let toastTimer = null;
   function showToast(msg) {
     const t = document.getElementById('toast');
+    announce(msg);
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(toastTimer);
@@ -835,6 +847,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     if (State.paused === v) return;
     State.paused = v;
     pauseOverlay.classList.toggle('hidden', !v);
+    if (v) announce(pauseOverlay.querySelector('h2').textContent);
   }
 
   function togglePause() { setPaused(!State.paused); }

@@ -451,6 +451,7 @@ main:has(.terminal-frame) .hero { max-width: 912px; margin-inline: auto; }
 .launch-tile[data-group="Dev"] { --cat: var(--syn-amber); }
 .launch-tile[data-group="Everyday"] { --cat: var(--syn-green); }
 .launch-tile { display: flex; flex-direction: column; align-items: center; gap: 0.55rem; text-decoration: none; color: var(--term-fg); width: 84px; -webkit-tap-highlight-color: transparent; position: relative; }
+.launch-slot { position: relative; width: 84px; }
 .launch-pin {
   position: absolute;
   top: -6px;
@@ -458,10 +459,13 @@ main:has(.terminal-frame) .hero { max-width: 912px; margin-inline: auto; }
   z-index: 2;
   width: 24px;
   height: 24px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: inherit;
   font-size: 13px;
+  line-height: 1;
   color: var(--term-muted);
   background: var(--term-bg-raised, #14181d);
   border: 1px solid var(--term-border-strong, #2a3138);
@@ -470,8 +474,8 @@ main:has(.terminal-frame) .hero { max-width: 912px; margin-inline: auto; }
   opacity: 0;
   transition: opacity 0.15s ease, color 0.15s ease;
 }
-.launch-tile:hover .launch-pin,
-.launch-tile:focus-within .launch-pin,
+.launch-slot:hover .launch-pin,
+.launch-slot:focus-within .launch-pin,
 .launch-pin:focus-visible { opacity: 1; }
 .launch-pin.is-pinned { color: var(--syn-cyan); opacity: 1; }
 @media (hover: none) { .launch-pin { opacity: 0.55; } .launch-pin.is-pinned { opacity: 1; } }
@@ -526,7 +530,7 @@ main:has(.terminal-frame) .hero { max-width: 912px; margin-inline: auto; }
     scrollbar-width: none;
   }
   .launcher__grid::-webkit-scrollbar { display: none; }
-  .launch-tile { flex: 0 0 auto; width: 76px; scroll-snap-align: start; }
+  .launch-tile, .launch-slot { flex: 0 0 auto; width: 76px; scroll-snap-align: start; }
   .launch-tile__icon { width: 76px; height: 76px; }
   .launch-tile__icon svg { width: 54px; height: 54px; }
 }

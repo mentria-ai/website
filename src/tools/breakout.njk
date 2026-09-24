@@ -96,6 +96,7 @@ eleventyComputed:
   <canvas id="game" width="900" height="640" role="img" aria-label="{{ 'tool.breakout.canvas_label' | t }}"></canvas>
 
   <div class="toast" id="toast"></div>
+  <p class="sr-only" id="sr-live" role="status" aria-live="polite"></p>
 
   <button type="button" class="brk__touchbtn brk__touchbtn--launch" id="brk-launch" hidden>
     <span aria-hidden="true">▲</span><span>{{ "tool.breakout.btn_launch" | t }}</span>
@@ -931,7 +932,7 @@ canvas {
       bump(elHigh);
     }
     showOverlay('gameover');
-    if (beat) showToast(T.newHigh);
+    if (beat) showToast(T.newHigh, true);
     updateHUD();
   }
 
@@ -1388,6 +1389,7 @@ canvas {
       elOverlay.classList.remove('hidden');
       $('btn-resume').onclick = () => togglePause();
       $('btn-restart').onclick = () => startGame();
+      announce(T.paused);
     } else if (kind === 'gameover') {
       const desc = T.gameoverDesc
         .replace('{level}', String(State.level))
@@ -1400,11 +1402,21 @@ canvas {
         '<button class="m-btn m-btn--primary" id="btn-again">$ ' + esc(T.btnAgain) + '</button>';
       elOverlay.classList.remove('hidden');
       $('btn-again').onclick = () => startGame();
+      announce(T.gameOver + '. ' + desc.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, ''));
+      $('btn-again').focus({ preventScroll: true });
     }
   }
 
+  function announce(msg) {
+    const el = document.getElementById('sr-live');
+    if (!el) return;
+    el.textContent = '';
+    setTimeout(() => { el.textContent = msg; }, 60);
+  }
+
   let toastTimer = null;
-  function showToast(msg) {
+  function showToast(msg, quiet) {
+    if (!quiet) announce(msg);
     elToast.textContent = msg;
     elToast.classList.add('show');
     clearTimeout(toastTimer);

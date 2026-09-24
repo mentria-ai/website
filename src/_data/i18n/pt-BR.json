@@ -965,6 +965,7 @@
       "toggle_label": "Ativar {name}",
       "run_not_installed": "não instalada —",
       "run_disabled": "instalada mas desativada — reative em",
+      "run_blocked": "{name} tentou acessar {host}. A política de segurança deste site só permite que extensões se conectem aos servidores da Mentria.",
       "run_manager_link": "o gerenciador",
       "btn_open": "abrir",
       "btn_export": "exportar",

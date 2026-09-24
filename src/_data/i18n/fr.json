@@ -688,6 +688,9 @@
       "decoded_preview": "Aperçu de l'image décodée"
     },
     "countdown-timer": {
+      "float_doc_title": "Minuteur",
+      "float_title": "Garder ce minuteur au-dessus des autres fenêtres",
+      "btn_float": "Flottant",
       "status_ready": "Prêt",
       "status_running": "En cours",
       "status_paused": "En pause",
@@ -861,6 +864,8 @@
       "err_generation": "Erreur lors de la génération. Réessaie."
     },
     "radio": {
+      "float_doc_title": "Radio infinie",
+      "float_aria": "Ouvrir un mini-lecteur flottant",
       "sleep_label": "Minuterie de sommeil (min)",
       "sleep_off": "Non",
       "sleep_minutes": "Arrêter après {n} minutes",

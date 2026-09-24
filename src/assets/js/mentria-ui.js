@@ -139,6 +139,31 @@
     undoFire();
   });
 
+  function floatSupported() {
+    return 'documentPictureInPicture' in window;
+  }
+
+  function floatWindow(opts) {
+    opts = opts || {};
+    if (!floatSupported()) return Promise.resolve(null);
+    try { if (window.documentPictureInPicture.window) window.documentPictureInPicture.window.close(); } catch (_) {}
+    return window.documentPictureInPicture.requestWindow({ width: opts.width || 300, height: opts.height || 180 }).then(function (win) {
+      var cs = getComputedStyle(document.documentElement);
+      var v = function (name, fallback) { return (cs.getPropertyValue(name) || '').trim() || fallback; };
+      win.document.title = opts.title || document.title;
+      win.document.documentElement.lang = document.documentElement.lang || 'en';
+      var style = win.document.createElement('style');
+      style.textContent = ':root{color-scheme:dark;--bg:' + v('--term-bg', '#0b0e11') + ';--raised:' + v('--term-bg-raised', '#14181d') +
+        ';--fg:' + v('--term-fg', '#e6edf3') + ';--muted:' + v('--term-muted', '#8b98a5') + ';--border:' + v('--term-border-strong', '#2a3138') +
+        ';--accent:' + v('--syn-cyan', '#22d3ee') + ';--pink:' + v('--syn-pink', '#f25fa8') + '}' +
+        'html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}' +
+        'button{font:inherit;color:var(--fg);background:var(--raised);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer}' +
+        'button:disabled{opacity:.45;cursor:default}button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}' + (opts.css || '');
+      win.document.head.appendChild(style);
+      return win;
+    }).catch(function () { return null; });
+  }
+
   function status(el) {
     if (el.getAttribute('role') !== 'status') el.setAttribute('role', 'status');
     if (!el.getAttribute('aria-live')) el.setAttribute('aria-live', 'polite');
@@ -377,6 +402,8 @@
     copyButton: copyButton,
     toast: toast,
     undoToast: undoToast,
+    floatSupported: floatSupported,
+    floatWindow: floatWindow,
     status: status,
     segmented: segmented,
     debouncedSaver: debouncedSaver,

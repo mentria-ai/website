@@ -96,6 +96,7 @@ eleventyComputed:
     <div class="ct-widget__controls">
       <button class="m-btn m-btn--primary" data-action="start">{{ "tool.countdown-timer.btn_start" | t }}</button>
       <button class="m-btn m-btn--ghost" data-action="reset" disabled>{{ "tool.countdown-timer.btn_reset" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" data-action="float" title="{{ 'tool.countdown-timer.float_title' | t }}" hidden>{{ "tool.countdown-timer.btn_float" | t }}</button>
     </div>
   </div>
 </template>
@@ -110,6 +111,7 @@ eleventyComputed:
     statusPaused:   {{ ("tool.countdown-timer.status_paused"    | t) | dump | safe }},
     statusTimesUp:  {{ ("tool.countdown-timer.status_times_up"  | t) | dump | safe }},
     btnStart:       {{ ("tool.countdown-timer.btn_start"        | t) | dump | safe }},
+    floatDocTitle:  {{ ("tool.countdown-timer.float_doc_title"  | t) | dump | safe }},
     btnPause:       {{ ("tool.countdown-timer.btn_pause"        | t) | dump | safe }},
     btnResume:      {{ ("tool.countdown-timer.btn_resume"       | t) | dump | safe }},
     errPickDt:      {{ ("tool.countdown-timer.err_pick_dt"      | t) | dump | safe }},
@@ -428,6 +430,55 @@ eleventyComputed:
     const btnStart = $('[data-action="start"]');
     const btnReset = $('[data-action="reset"]');
     const btnClose = $('.ct-widget__close');
+    const btnFloat = $('[data-action="float"]');
+    let floatWin = null;
+    function closeFloat() {
+      if (floatWin && !floatWin.closed) { try { floatWin.close(); } catch (_) {} }
+      floatWin = null;
+    }
+    async function floatWidget() {
+      const win = await MentriaUI.floatWindow({
+        width: 280,
+        height: 180,
+        title: COPY.floatDocTitle,
+        css: '.pip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:100%;padding:10px;box-sizing:border-box;text-align:center}' +
+          '.pip__title{max-width:100%;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+          '.pip__time{font-size:clamp(28px,16vw,56px);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em}' +
+          '.pip__status{font-size:11px;color:var(--muted)}.is-done .pip__time{color:var(--pink)}' +
+          '.pip__row{display:flex;gap:8px;margin-top:4px}'
+      });
+      if (!win) return;
+      floatWin = win;
+      const d = win.document;
+      d.body.innerHTML = '<main class="pip"><div class="pip__title"></div><div class="pip__time" role="timer"></div><div class="pip__status" aria-live="polite"></div><div class="pip__row"><button type="button" data-act="toggle"></button><button type="button" data-act="reset"></button></div></main>';
+      const sync = () => {
+        if (!floatWin || floatWin.closed || floatWin !== win) { clearInterval(timer); return; }
+        d.querySelector('.pip__title').textContent = (titleEl.textContent || '').trim() || fmtTimer(state.id);
+        d.querySelector('.pip__time').textContent = displayH.textContent + ':' + displayM.textContent + ':' + displayS.textContent;
+        d.querySelector('.pip__status').textContent = statusEl.textContent;
+        const toggle = d.querySelector('[data-act="toggle"]');
+        toggle.textContent = btnStart.textContent;
+        toggle.disabled = btnStart.disabled;
+        const reset = d.querySelector('[data-act="reset"]');
+        reset.textContent = btnReset.textContent;
+        reset.disabled = btnReset.disabled;
+        d.body.classList.toggle('is-done', displayWrap.classList.contains('ct-widget__display--finished'));
+      };
+      d.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-act]');
+        if (!b || b.disabled) return;
+        if (b.dataset.act === 'toggle') btnStart.click();
+        else btnReset.click();
+        sync();
+      });
+      const timer = setInterval(sync, 250);
+      sync();
+      win.addEventListener('pagehide', () => { clearInterval(timer); if (floatWin === win) floatWin = null; });
+    }
+    if (btnFloat && window.MentriaUI && MentriaUI.floatSupported && MentriaUI.floatSupported()) {
+      btnFloat.hidden = false;
+      btnFloat.addEventListener('click', floatWidget);
+    }
     const modeToggle = $('.ct-widget__mode-toggle');
     const presetButtons = $$('.ct-preset');
 
@@ -572,6 +623,7 @@ eleventyComputed:
     }
 
     function resetTimer() {
+      closeFloat();
       stopAlarmFor(state);
       if (state.countdown) { clearInterval(state.countdown); state.countdown = null; }
       disarmServerPush(state);
@@ -671,7 +723,7 @@ eleventyComputed:
     });
     btnReset.addEventListener('click', resetTimer);
 
-    btnClose.addEventListener('click', () => removeWidget(id));
+    btnClose.addEventListener('click', () => { closeFloat(); removeWidget(id); });
 
     const modeSeg = MentriaUI.segmented(modeToggle, (mode) => {
       if (state.countdown || state.isPaused) { modeSeg.set(state.mode); return; }

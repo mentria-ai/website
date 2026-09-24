@@ -688,6 +688,9 @@
       "decoded_preview": "Vista previa de la imagen decodificada"
     },
     "countdown-timer": {
+      "float_doc_title": "Temporizador",
+      "float_title": "Mantén este temporizador encima de otras ventanas",
+      "btn_float": "Flotante",
       "status_ready": "Listo",
       "status_running": "En curso",
       "status_paused": "En pausa",
@@ -861,6 +864,8 @@
       "err_generation": "Error al generar la frase. Inténtalo de nuevo."
     },
     "radio": {
+      "float_doc_title": "Radio infinita",
+      "float_aria": "Abrir un minirreproductor flotante",
       "sleep_label": "Temporizador (min)",
       "sleep_off": "No",
       "sleep_minutes": "Parar tras {n} minutos",

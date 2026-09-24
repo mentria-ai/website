@@ -67,6 +67,7 @@ class MentriaRadio {
       likedList: document.getElementById("rd-liked-list"),
       likedCount: document.getElementById("rd-liked-count"),
       sleepSeg: document.getElementById("rd-sleep-seg"),
+      float: document.getElementById("rd-float"),
       sleepLeft: document.getElementById("rd-sleep-left"),
     };
     this.sleepAt = 0;
@@ -358,6 +359,55 @@ class MentriaRadio {
     });
   }
 
+  async floatPlayer() {
+    const win = await window.MentriaUI.floatWindow({
+      width: 340,
+      height: 150,
+      title: COPY.floatDocTitle || "Radio",
+      css: ".pip{display:flex;align-items:center;gap:12px;height:100%;padding:12px;box-sizing:border-box}" +
+        ".pip__art{width:96px;height:96px;flex:0 0 auto;border-radius:8px;object-fit:cover;background:var(--raised)}" +
+        ".pip__art[hidden]{display:none}.pip__info{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}" +
+        ".pip__title{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}" +
+        ".pip__mood{font-size:11px;color:var(--muted)}.pip__row{display:flex;gap:6px;margin-top:6px}" +
+        ".pip__row button{padding:6px 10px}.pip__like[aria-pressed=true]{color:var(--pink);border-color:var(--pink)}",
+    });
+    if (!win) return;
+    this.floatWin = win;
+    const d = win.document;
+    d.body.innerHTML = '<main class="pip"><img class="pip__art" alt=""><div class="pip__info"><div class="pip__title"></div><div class="pip__mood"></div><div class="pip__row"><button type="button" data-act="play"></button><button type="button" data-act="skip">\u23ED</button><button type="button" class="pip__like" data-act="like">\u2665</button></div></div></main>';
+    const sync = () => {
+      if (win.closed || this.floatWin !== win) { clearInterval(timer); return; }
+      const art = d.querySelector(".pip__art");
+      const src = this.el.art.getAttribute("src") || "";
+      if (art.getAttribute("src") !== src) art.setAttribute("src", src);
+      art.hidden = !src;
+      d.querySelector(".pip__title").textContent = this.el.title.textContent;
+      d.querySelector(".pip__mood").textContent = this.el.mood.textContent;
+      const play = d.querySelector('[data-act="play"]');
+      play.textContent = this.player.isPlaying ? "\u275A\u275A" : "\u25B6";
+      play.setAttribute("aria-label", this.el.play.getAttribute("aria-label") || "");
+      play.disabled = this.el.play.disabled;
+      const skip = d.querySelector('[data-act="skip"]');
+      skip.setAttribute("aria-label", this.el.skip.getAttribute("aria-label") || "");
+      skip.disabled = this.el.skip.disabled;
+      const like = d.querySelector('[data-act="like"]');
+      like.setAttribute("aria-label", this.el.like.getAttribute("aria-label") || "");
+      like.setAttribute("aria-pressed", this.el.like.getAttribute("aria-pressed") || "false");
+      like.disabled = this.el.like.disabled;
+    };
+    d.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-act]");
+      if (!b || b.disabled) return;
+      if (b.dataset.act === "play") this.el.play.click();
+      else if (b.dataset.act === "skip") this.el.skip.click();
+      else this.el.like.click();
+      setTimeout(sync, 60);
+    });
+    const timer = setInterval(sync, 400);
+    sync();
+    win.addEventListener("pagehide", () => { clearInterval(timer); if (this.floatWin === win) this.floatWin = null; });
+  }
+
   setSleep(minutes) {
     if (this.sleepTimer) { clearInterval(this.sleepTimer); this.sleepTimer = null; }
     this.sleepAt = minutes > 0 ? Date.now() + minutes * 60000 : 0;
@@ -524,6 +574,10 @@ class MentriaRadio {
 
     this.el.skip.addEventListener("click", () => this.skip());
     this.el.like.addEventListener("click", () => this.toggleLike());
+    if (this.el.float && window.MentriaUI && window.MentriaUI.floatSupported && window.MentriaUI.floatSupported()) {
+      this.el.float.hidden = false;
+      this.el.float.addEventListener("click", () => this.floatPlayer());
+    }
     if (this.el.sleepSeg && window.MentriaUI && window.MentriaUI.segmented) {
       this.sleepControl = window.MentriaUI.segmented(this.el.sleepSeg, (value) => this.setSleep(Number(value) || 0));
       this.sleepControl.set("0");

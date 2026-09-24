@@ -1,0 +1,1813 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/image-compressor/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.image-compressor.title' | t }}"
+  description: "{{ 'tools.image-compressor.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">image-compressor</span></p>
+  <h1>{{ "tools.image-compressor.title" | t }}</h1>
+  <p>{{ "tools.image-compressor.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "image-compressor.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="imc" id="imc">
+
+  <div class="imc__drop" id="imc-drop">
+    <svg class="imc__drop-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="11" y="13" width="26" height="22" rx="4"/>
+      <circle cx="18.5" cy="20.5" r="2.5"/>
+      <path d="M11 31l7-6 5 4 4-3 10 8"/>
+      <path d="M44 4l-7.5 7.5M36.5 6.5v5h5"/>
+      <path d="M4 44l7.5-7.5M11.5 41.5v-5h-5"/>
+    </svg>
+    <p class="imc__drop-title">{{ "tool.image-compressor.drop_title" | t }}</p>
+    <p class="imc__drop-hint">{{ "tool.image-compressor.drop_hint" | t }}</p>
+    <button type="button" class="m-btn m-btn--primary m-btn--pill" id="imc-pick">{{ "tool.image-compressor.btn_choose" | t }}</button>
+    <input type="file" id="imc-file" accept="image/*,.heic,.heif,.avif" multiple hidden>
+  </div>
+
+  <p class="imc__privacy">
+    <svg class="imc__privacy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6z"/>
+      <path d="M9 12l2.2 2.2L15.5 10"/>
+    </svg>
+    <span>{{ "tool.image-compressor.privacy_note" | t }}</span>
+  </p>
+
+  <fieldset class="imc__settings" id="imc-settings">
+    <legend class="imc__legend">{{ "tool.image-compressor.settings_legend" | t }}</legend>
+
+    <div class="imc__group">
+      <div class="imc__field">
+        <span class="imc__label" id="imc-format-label">{{ "tool.image-compressor.label_format" | t }}</span>
+        <div class="m-seg imc__seg" id="imc-format" aria-labelledby="imc-format-label">
+          <button type="button" data-value="jpeg">JPEG</button>
+          <button type="button" data-value="webp">WebP</button>
+          <button type="button" data-value="png">PNG</button>
+          <button type="button" data-value="avif" hidden disabled>AVIF</button>
+        </div>
+        <p class="imc__hint imc__hint--warn" id="imc-jpeg-note">{{ "tool.image-compressor.note_jpeg" | t }}</p>
+      </div>
+
+      <div class="imc__field">
+        <div class="imc__row">
+          <label class="imc__label" for="imc-quality">{{ "tool.image-compressor.label_quality" | t }}</label>
+          <output class="imc__qval" id="imc-quality-out" for="imc-quality" aria-hidden="true">80</output>
+        </div>
+        <input class="imc__range" type="range" id="imc-quality" min="1" max="100" step="1" value="80">
+        <p class="imc__hint" id="imc-png-note" hidden>{{ "tool.image-compressor.note_png" | t }}</p>
+      </div>
+    </div>
+
+    <div class="imc__group">
+      <div class="imc__field">
+        <span class="imc__label" id="imc-resize-label">{{ "tool.image-compressor.label_resize" | t }}</span>
+        <div class="m-seg imc__seg" id="imc-resize" aria-labelledby="imc-resize-label">
+          <button type="button" data-value="none">{{ "tool.image-compressor.resize_none" | t }}</button>
+          <button type="button" data-value="fit">{{ "tool.image-compressor.resize_fit" | t }}</button>
+          <button type="button" data-value="percent">{{ "tool.image-compressor.resize_percent" | t }}</button>
+        </div>
+      </div>
+
+      <div class="imc__field" id="imc-fit" hidden>
+        <div class="imc__dims">
+          <div class="imc__num">
+            <label class="imc__sub" for="imc-max-w">{{ "tool.image-compressor.label_max_width" | t }}</label>
+            <input class="m-input" type="number" id="imc-max-w" min="1" max="30000" step="1" inputmode="numeric" placeholder="{{ 'tool.image-compressor.placeholder_auto' | t }}">
+          </div>
+          <div class="imc__num">
+            <label class="imc__sub" for="imc-max-h">{{ "tool.image-compressor.label_max_height" | t }}</label>
+            <input class="m-input" type="number" id="imc-max-h" min="1" max="30000" step="1" inputmode="numeric" placeholder="{{ 'tool.image-compressor.placeholder_auto' | t }}">
+          </div>
+        </div>
+        <p class="imc__hint">{{ "tool.image-compressor.hint_fit" | t }}</p>
+      </div>
+
+      <div class="imc__field" id="imc-pct" hidden>
+        <div class="imc__num imc__num--single">
+          <label class="imc__sub" for="imc-percent">{{ "tool.image-compressor.label_percent" | t }}</label>
+          <input class="m-input" type="number" id="imc-percent" min="1" max="100" step="1" inputmode="numeric">
+        </div>
+        <p class="imc__hint">{{ "tool.image-compressor.hint_percent" | t }}</p>
+      </div>
+    </div>
+  </fieldset>
+
+  <p class="imc__status" id="imc-status" role="status" aria-live="polite"></p>
+
+  <div class="imc__bar" id="imc-bar" hidden>
+    <p class="imc__total"><span id="imc-total" aria-hidden="true"></span><span class="sr-only" id="imc-total-sr"></span></p>
+    <div class="imc__bar-actions">
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="imc-recompress" hidden>{{ "tool.image-compressor.btn_recompress" | t }}</button>
+      <button type="button" class="m-btn m-btn--primary m-btn--pill" id="imc-download-all">{{ "tool.image-compressor.btn_download_all" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="imc-clear">{{ "tool.image-compressor.btn_clear" | t }}</button>
+    </div>
+  </div>
+
+  <ul class="imc__list" id="imc-list" tabindex="-1" aria-label="{{ 'tool.image-compressor.aria_results' | t }}"></ul>
+
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(() => {
+  'use strict';
+
+  const COPY = {
+    count_one:          {{ ("tool.image-compressor.count_one"          | t) | dump | safe }},
+    count_other:        {{ ("tool.image-compressor.count_other"        | t) | dump | safe }},
+    total_fmt:          {{ ("tool.image-compressor.total_fmt"          | t) | dump | safe }},
+    total_sr:           {{ ("tool.image-compressor.total_sr"           | t) | dump | safe }},
+    smaller_fmt:        {{ ("tool.image-compressor.smaller_fmt"        | t) | dump | safe }},
+    larger_fmt:         {{ ("tool.image-compressor.larger_fmt"         | t) | dump | safe }},
+    same_size:          {{ ("tool.image-compressor.same_size"          | t) | dump | safe }},
+    sr_change:          {{ ("tool.image-compressor.sr_change"          | t) | dump | safe }},
+    state_queued:       {{ ("tool.image-compressor.state_queued"       | t) | dump | safe }},
+    state_working:      {{ ("tool.image-compressor.state_working"      | t) | dump | safe }},
+    btn_download:       {{ ("tool.image-compressor.btn_download"       | t) | dump | safe }},
+    btn_original:       {{ ("tool.image-compressor.btn_original"       | t) | dump | safe }},
+    btn_compare:        {{ ("tool.image-compressor.btn_compare"        | t) | dump | safe }},
+    aria_download:      {{ ("tool.image-compressor.aria_download"      | t) | dump | safe }},
+    aria_original:      {{ ("tool.image-compressor.aria_original"      | t) | dump | safe }},
+    aria_compare:       {{ ("tool.image-compressor.aria_compare"       | t) | dump | safe }},
+    aria_remove:        {{ ("tool.image-compressor.aria_remove"        | t) | dump | safe }},
+    aria_split:         {{ ("tool.image-compressor.aria_split"         | t) | dump | safe }},
+    label_before:       {{ ("tool.image-compressor.label_before"       | t) | dump | safe }},
+    label_after:        {{ ("tool.image-compressor.label_after"        | t) | dump | safe }},
+    alt_before:         {{ ("tool.image-compressor.alt_before"         | t) | dump | safe }},
+    alt_after:          {{ ("tool.image-compressor.alt_after"          | t) | dump | safe }},
+    note_larger:        {{ ("tool.image-compressor.note_larger"        | t) | dump | safe }},
+    note_gif:           {{ ("tool.image-compressor.note_gif"           | t) | dump | safe }},
+    note_fallback:      {{ ("tool.image-compressor.note_fallback"      | t) | dump | safe }},
+    err_decode:         {{ ("tool.image-compressor.err_decode"         | t) | dump | safe }},
+    err_heic:           {{ ("tool.image-compressor.err_heic"           | t) | dump | safe }},
+    err_too_big:        {{ ("tool.image-compressor.err_too_big"        | t) | dump | safe }},
+    err_encode:         {{ ("tool.image-compressor.err_encode"         | t) | dump | safe }},
+    err_read:           {{ ("tool.image-compressor.err_read"           | t) | dump | safe }},
+    confirm_big:        {{ ("tool.image-compressor.confirm_big"        | t) | dump | safe }},
+    status_working:     {{ ("tool.image-compressor.status_working"     | t) | dump | safe }},
+    status_done:        {{ ("tool.image-compressor.status_done"        | t) | dump | safe }},
+    status_errors:      {{ ("tool.image-compressor.status_errors"      | t) | dump | safe }},
+    status_skipped:     {{ ("tool.image-compressor.status_skipped"     | t) | dump | safe }},
+    status_cleared:     {{ ("tool.image-compressor.status_cleared"     | t) | dump | safe }},
+    status_downloading: {{ ("tool.image-compressor.status_downloading" | t) | dump | safe }},
+    status_downloaded:  {{ ("tool.image-compressor.status_downloaded"  | t) | dump | safe }}
+  };
+
+  const IC = (function () {
+    const MIME = { jpeg: 'image/jpeg', webp: 'image/webp', png: 'image/png', avif: 'image/avif' };
+    const FORMATS = ['jpeg', 'webp', 'png', 'avif'];
+    const RESIZE_MODES = ['none', 'fit', 'percent'];
+    const MAX_DIM = 30000;
+    const DEFAULTS = { format: 'jpeg', quality: 80, resize: 'none', maxWidth: 1920, maxHeight: 1920, percent: 50 };
+    const EXT = { 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/png': 'png', 'image/avif': 'avif', 'image/gif': 'gif', 'image/bmp': 'bmp', 'image/heic': 'heic', 'image/heif': 'heif', 'image/svg+xml': 'svg', 'image/tiff': 'tif' };
+    const LABELS = { jpeg: 'JPEG', jpg: 'JPEG', pjpeg: 'JPEG', webp: 'WebP', png: 'PNG', apng: 'PNG', avif: 'AVIF', gif: 'GIF', heic: 'HEIC', heif: 'HEIF', bmp: 'BMP', 'x-ms-bmp': 'BMP', 'svg+xml': 'SVG', svg: 'SVG', tiff: 'TIFF', tif: 'TIFF', 'x-icon': 'ICO', 'vnd.microsoft.icon': 'ICO', ico: 'ICO', jxl: 'JPEG XL' };
+    const HEIF_BRANDS = ['heic', 'heix', 'heim', 'heis', 'hevc', 'hevx', 'hevm', 'hevs'];
+    const BMP_HEADERS = [12, 40, 52, 56, 64, 108, 124];
+    const IMAGE_NAME = /\.(jpe?g|jfif|pjpeg|png|apng|gif|webp|avif|heic|heif|bmp|dib|svg|tiff?|ico|jxl)$/i;
+    const BAD_CHARS = /[\\/:*?"<>|\u0000-\u001f\u007f]+/g;
+    const UNITS = ['kilobyte', 'megabyte', 'gigabyte'];
+    const formatters = new Map();
+
+    function numberFormat(lang, opts) {
+      const key = lang + '|' + JSON.stringify(opts);
+      let f = formatters.get(key);
+      if (!f) {
+        try { f = new Intl.NumberFormat(lang, opts); } catch (_) { f = new Intl.NumberFormat('en', opts); }
+        formatters.set(key, f);
+      }
+      return f;
+    }
+
+    function formatBytes(bytes, lang) {
+      const n = Math.max(0, Math.round(Number(bytes) || 0));
+      if (n < 1000) return numberFormat(lang, { style: 'unit', unit: 'byte', unitDisplay: 'long' }).format(n);
+      let v = n / 1000;
+      let i = 0;
+      while (i < UNITS.length - 1 && v >= 999.5) { v /= 1000; i += 1; }
+      return numberFormat(lang, { style: 'unit', unit: UNITS[i], unitDisplay: 'short', maximumFractionDigits: v < 100 ? 1 : 0 }).format(v);
+    }
+
+    function formatPercent(fraction, lang) {
+      let v = Math.abs(Number(fraction) || 0);
+      if (v > 0 && v < 0.001) v = 0.001;
+      return numberFormat(lang, { style: 'percent', maximumFractionDigits: v < 0.1 ? 1 : 0 }).format(v);
+    }
+
+    function formatMegapixels(pixels, lang) {
+      return numberFormat(lang, { maximumFractionDigits: 1 }).format((Number(pixels) || 0) / 1e6);
+    }
+
+    function formatDims(w, h) {
+      return w + ' × ' + h;
+    }
+
+    function formatLabel(kind) {
+      const key = String(kind || '').toLowerCase().replace(/^image\//, '');
+      return LABELS[key] || key.toUpperCase();
+    }
+
+    function savedFraction(before, after) {
+      const b = Number(before) || 0;
+      return b > 0 ? (b - (Number(after) || 0)) / b : 0;
+    }
+
+    function changeKind(before, after) {
+      const b = Number(before) || 0;
+      const a = Number(after) || 0;
+      if (a < b) return 'smaller';
+      if (a > b) return 'larger';
+      return 'same';
+    }
+
+    function pluralKey(n, lang) {
+      let cat = 'other';
+      try { cat = new Intl.PluralRules(lang).select(n); } catch (_) { cat = n === 1 ? 'one' : 'other'; }
+      return cat === 'one' ? 'one' : 'other';
+    }
+
+    function fill(template, vars) {
+      return String(template).replace(/\{(\w+)\}/g, (match, key) => (Object.prototype.hasOwnProperty.call(vars, key) ? String(vars[key]) : match));
+    }
+
+    function toDim(value) {
+      if (value === null || value === undefined || value === '') return null;
+      const n = Math.round(Number(value));
+      if (!Number.isFinite(n) || n < 1) return null;
+      return Math.min(n, MAX_DIM);
+    }
+
+    function clampPercent(value) {
+      if (value === null || value === undefined || value === '') return null;
+      const n = Math.round(Number(value));
+      if (!Number.isFinite(n) || n < 1) return null;
+      return Math.min(n, 100);
+    }
+
+    function clampQuality(value) {
+      if (value === null || value === undefined || value === '') return DEFAULTS.quality;
+      const n = Math.round(Number(value));
+      if (!Number.isFinite(n)) return DEFAULTS.quality;
+      return Math.min(100, Math.max(1, n));
+    }
+
+    function normalizeSettings(raw) {
+      const s = Object.assign({}, DEFAULTS);
+      if (!raw || typeof raw !== 'object') return s;
+      if (FORMATS.indexOf(raw.format) !== -1) s.format = raw.format;
+      if (raw.quality !== undefined && raw.quality !== null) s.quality = clampQuality(raw.quality);
+      if (RESIZE_MODES.indexOf(raw.resize) !== -1) s.resize = raw.resize;
+      if (Object.prototype.hasOwnProperty.call(raw, 'maxWidth')) s.maxWidth = toDim(raw.maxWidth);
+      if (Object.prototype.hasOwnProperty.call(raw, 'maxHeight')) s.maxHeight = toDim(raw.maxHeight);
+      const p = clampPercent(raw.percent);
+      if (p !== null) s.percent = p;
+      return s;
+    }
+
+    function targetSize(width, height, s) {
+      const w = Math.max(1, Math.round(Number(width) || 1));
+      const h = Math.max(1, Math.round(Number(height) || 1));
+      const mode = s ? s.resize : 'none';
+      if (mode === 'percent') {
+        const p = clampPercent(s.percent);
+        if (p === null || p >= 100) return { w, h };
+        return { w: Math.max(1, Math.round(w * p / 100)), h: Math.max(1, Math.round(h * p / 100)) };
+      }
+      if (mode === 'fit') {
+        const mw = toDim(s.maxWidth);
+        const mh = toDim(s.maxHeight);
+        const rw = mw === null ? Infinity : mw / w;
+        const rh = mh === null ? Infinity : mh / h;
+        if (!(Math.min(rw, rh) < 1)) return { w, h };
+        if (rw <= rh) return { w: mw, h: Math.max(1, Math.min(h, Math.round(h * mw / w))) };
+        return { w: Math.max(1, Math.min(w, Math.round(w * mh / h))), h: mh };
+      }
+      return { w, h };
+    }
+
+    function signature(s) {
+      const parts = [s.format, s.format === 'png' ? '' : String(clampQuality(s.quality)), s.resize];
+      if (s.resize === 'fit') parts.push(String(toDim(s.maxWidth)) + 'x' + String(toDim(s.maxHeight)));
+      if (s.resize === 'percent') parts.push(String(clampPercent(s.percent)));
+      return parts.join('|');
+    }
+
+    function baseName(name) {
+      let s = String(name === null || name === undefined ? '' : name).replace(BAD_CHARS, '-').trim();
+      const dot = s.lastIndexOf('.');
+      if (dot > 0) s = s.slice(0, dot);
+      s = s.replace(/^[\s.]+/, '').replace(/[\s.]+$/, '');
+      const chars = Array.from(s);
+      if (chars.length > 120) s = chars.slice(0, 120).join('').replace(/[\s.]+$/, '');
+      return s || 'image';
+    }
+
+    function uniqueBase(base, taken) {
+      if (!taken.has(base)) return base;
+      let k = 2;
+      while (taken.has(base + '-' + k)) k += 1;
+      return base + '-' + k;
+    }
+
+    function extFor(type) {
+      const t = String(type || '').toLowerCase();
+      if (EXT[t]) return EXT[t];
+      const sub = t.indexOf('image/') === 0 ? t.slice(6).replace(/[^a-z0-9]+/g, '') : '';
+      return sub || 'img';
+    }
+
+    function outputName(base, type) {
+      return base + '-compressed.' + extFor(type);
+    }
+
+    function originalName(name, base, type) {
+      const n = String(name === null || name === undefined ? '' : name).trim();
+      return n || base + '.' + extFor(type);
+    }
+
+    function isImageLike(type, name) {
+      return /^image\//i.test(String(type || '')) || IMAGE_NAME.test(String(name || ''));
+    }
+
+    function isHeic(kind, type, name) {
+      return kind === 'heic' || kind === 'heif' || /^image\/hei[cf]/i.test(String(type || '')) || /\.hei[cf]$/i.test(String(name || ''));
+    }
+
+    function preferOriginal(c) {
+      return c.after > c.before && c.sameDims === true && c.sameType === true;
+    }
+
+    function u16be(b, i) { return (b[i] << 8) | b[i + 1]; }
+    function u16le(b, i) { return b[i] | (b[i + 1] << 8); }
+    function u24le(b, i) { return b[i] | (b[i + 1] << 8) | (b[i + 2] << 16); }
+    function u32be(b, i) { return ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0; }
+    function u32le(b, i) { return (b[i] | (b[i + 1] << 8) | (b[i + 2] << 16) | (b[i + 3] << 24)) >>> 0; }
+
+    function ascii(b, i, n) {
+      let s = '';
+      for (let k = 0; k < n && i + k < b.length; k += 1) s += String.fromCharCode(b[i + k]);
+      return s;
+    }
+
+    function info(type, width, height) {
+      return width > 0 && height > 0 ? { type, width, height } : { type, width: 0, height: 0 };
+    }
+
+    function jpegInfo(b) {
+      let i = 2;
+      while (i + 3 < b.length) {
+        if (b[i] !== 0xFF) return info('jpeg', 0, 0);
+        const m = b[i + 1];
+        if (m === 0xFF) { i += 1; continue; }
+        if (m === 0xD8 || m === 0x01 || (m >= 0xD0 && m <= 0xD7)) { i += 2; continue; }
+        if (m === 0xD9 || m === 0xDA) return info('jpeg', 0, 0);
+        const len = u16be(b, i + 2);
+        if (len < 2) return info('jpeg', 0, 0);
+        if (m >= 0xC0 && m <= 0xCF && m !== 0xC4 && m !== 0xC8 && m !== 0xCC) {
+          if (i + 8 >= b.length) return info('jpeg', 0, 0);
+          return info('jpeg', u16be(b, i + 7), u16be(b, i + 5));
+        }
+        i += 2 + len;
+      }
+      return info('jpeg', 0, 0);
+    }
+
+    function webpInfo(b) {
+      const chunk = ascii(b, 12, 4);
+      if (chunk === 'VP8 ' && b.length >= 30 && b[23] === 0x9D && b[24] === 0x01 && b[25] === 0x2A) {
+        return info('webp', u16le(b, 26) & 0x3FFF, u16le(b, 28) & 0x3FFF);
+      }
+      if (chunk === 'VP8L' && b.length >= 25 && b[20] === 0x2F) {
+        const bits = u32le(b, 21);
+        return info('webp', (bits & 0x3FFF) + 1, ((bits >>> 14) & 0x3FFF) + 1);
+      }
+      if (chunk === 'VP8X' && b.length >= 30) return info('webp', u24le(b, 24) + 1, u24le(b, 27) + 1);
+      return info('webp', 0, 0);
+    }
+
+    function bmpInfo(b) {
+      const header = u32le(b, 14);
+      if (BMP_HEADERS.indexOf(header) === -1) return info(null, 0, 0);
+      if (header === 12) return info('bmp', u16le(b, 18), u16le(b, 20));
+      return info('bmp', Math.abs(u32le(b, 18) | 0), Math.abs(u32le(b, 22) | 0));
+    }
+
+    function isoInfo(b) {
+      const boxSize = u32be(b, 0);
+      const end = Math.min(b.length, boxSize >= 16 ? boxSize : 16);
+      const brands = [ascii(b, 8, 4)];
+      for (let i = 16; i + 4 <= end; i += 4) brands.push(ascii(b, i, 4));
+      let type = null;
+      if (brands.indexOf('avif') !== -1 || brands.indexOf('avis') !== -1) type = 'avif';
+      else if (brands.some((x) => HEIF_BRANDS.indexOf(x) !== -1)) type = 'heic';
+      else if (brands.indexOf('mif1') !== -1 || brands.indexOf('msf1') !== -1) type = 'heif';
+      if (!type) return info(null, 0, 0);
+      let bw = 0;
+      let bh = 0;
+      const limit = Math.min(b.length - 16, 1 << 19);
+      for (let i = 4; i <= limit; i += 1) {
+        if (b[i] === 0x69 && b[i + 1] === 0x73 && b[i + 2] === 0x70 && b[i + 3] === 0x65 && u32be(b, i - 4) === 20) {
+          const w = u32be(b, i + 8);
+          const h = u32be(b, i + 12);
+          if (w * h > bw * bh) { bw = w; bh = h; }
+        }
+      }
+      return info(type, bw, bh);
+    }
+
+    function sniffImage(bytes) {
+      const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || 0);
+      if (b.length >= 4 && b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) return jpegInfo(b);
+      if (b.length >= 24 && b[0] === 0x89 && ascii(b, 1, 3) === 'PNG') {
+        return ascii(b, 12, 4) === 'IHDR' ? info('png', u32be(b, 16), u32be(b, 20)) : info('png', 0, 0);
+      }
+      if (b.length >= 10 && ascii(b, 0, 4) === 'GIF8') return info('gif', u16le(b, 6), u16le(b, 8));
+      if (b.length >= 16 && ascii(b, 0, 4) === 'RIFF' && ascii(b, 8, 4) === 'WEBP') return webpInfo(b);
+      if (b.length >= 26 && ascii(b, 0, 2) === 'BM') return bmpInfo(b);
+      if (b.length >= 16 && ascii(b, 4, 4) === 'ftyp') return isoInfo(b);
+      return info(null, 0, 0);
+    }
+
+    return {
+      MIME, FORMATS, DEFAULTS,
+      formatBytes, formatPercent, formatMegapixels, formatDims, formatLabel,
+      savedFraction, changeKind, pluralKey, fill,
+      toDim, clampPercent, clampQuality, normalizeSettings, targetSize, signature,
+      baseName, uniqueBase, outputName, originalName, isImageLike, isHeic, preferOriginal,
+      sniffImage
+    };
+  })();
+
+  const STORE_NS = 'tools';
+  const STORE_KEY = 'image_compressor_settings';
+  const HEAD_BYTES = 1 << 20;
+  const MAX_PIXELS = 100e6;
+  const WARN_PIXELS = 40e6;
+  const DOWNLOAD_GAP_MS = 450;
+  const DRAG_LINGER_MS = 700;
+  const PROBE_TIMEOUT_MS = 1500;
+  const THUMB_PX = 128;
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  const $ = (id) => document.getElementById(id);
+  const dropEl = $('imc-drop');
+  const pickBtn = $('imc-pick');
+  const fileInput = $('imc-file');
+  const formatSegEl = $('imc-format');
+  const jpegNote = $('imc-jpeg-note');
+  const qualityInput = $('imc-quality');
+  const qualityOut = $('imc-quality-out');
+  const pngNote = $('imc-png-note');
+  const resizeSegEl = $('imc-resize');
+  const fitField = $('imc-fit');
+  const maxWInput = $('imc-max-w');
+  const maxHInput = $('imc-max-h');
+  const pctField = $('imc-pct');
+  const pctInput = $('imc-percent');
+  const statusEl = $('imc-status');
+  const barEl = $('imc-bar');
+  const totalEl = $('imc-total');
+  const totalSrEl = $('imc-total-sr');
+  const recompressBtn = $('imc-recompress');
+  const downloadAllBtn = $('imc-download-all');
+  const clearBtn = $('imc-clear');
+  const listEl = $('imc-list');
+
+  const status = MentriaUI.status(statusEl);
+  const lang = () => document.documentElement.lang || 'en';
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const supported = { jpeg: true, webp: true, png: true, avif: false };
+  const entries = [];
+  const settings = IC.normalizeSettings(readStored());
+  let dirty = false;
+  let seq = 0;
+  let runId = 0;
+  let running = false;
+  let downloading = false;
+  let dragTimer = 0;
+
+  const saver = MentriaUI.debouncedSaver(() => {
+    if (!dirty || !window.MentriaStore) return;
+    dirty = false;
+    try { window.MentriaStore.set(STORE_NS, STORE_KEY, settings); } catch (_) {}
+  }, 400);
+
+  function readStored() {
+    try { return window.MentriaStore ? window.MentriaStore.get(STORE_NS, STORE_KEY) : null; } catch (_) { return null; }
+  }
+
+  function el(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined && text !== null) node.textContent = text;
+    return node;
+  }
+
+  function effectiveFormat() {
+    return supported[settings.format] ? settings.format : 'jpeg';
+  }
+
+  function effectiveSettings() {
+    return Object.assign({}, settings, { format: effectiveFormat() });
+  }
+
+  function snapshot() {
+    const s = effectiveSettings();
+    return {
+      format: s.format,
+      mime: IC.MIME[s.format],
+      quality: s.quality,
+      resize: s.resize,
+      maxWidth: s.maxWidth,
+      maxHeight: s.maxHeight,
+      percent: s.percent,
+      sig: IC.signature(s)
+    };
+  }
+
+  const formatSeg = MentriaUI.segmented(formatSegEl, (value) => {
+    if (!supported[value]) { syncSettingsUI(); return; }
+    settings.format = value;
+    syncSettingsUI();
+    changed();
+  });
+
+  const resizeSeg = MentriaUI.segmented(resizeSegEl, (value) => {
+    settings.resize = value;
+    syncSettingsUI();
+    changed();
+  });
+
+  function setNumber(input, value) {
+    if (document.activeElement === input) return;
+    input.value = value === null || value === undefined ? '' : String(value);
+  }
+
+  function syncSettingsUI() {
+    const format = effectiveFormat();
+    const lossy = format !== 'png';
+    formatSeg.set(format);
+    resizeSeg.set(settings.resize);
+    qualityInput.value = String(settings.quality);
+    qualityInput.disabled = !lossy;
+    qualityOut.textContent = String(settings.quality);
+    pngNote.hidden = lossy;
+    jpegNote.hidden = format !== 'jpeg';
+    fitField.hidden = settings.resize !== 'fit';
+    pctField.hidden = settings.resize !== 'percent';
+    setNumber(maxWInput, settings.maxWidth);
+    setNumber(maxHInput, settings.maxHeight);
+    setNumber(pctInput, settings.percent);
+  }
+
+  function changed() {
+    dirty = true;
+    saver.schedule();
+    refreshBar();
+  }
+
+  qualityInput.addEventListener('input', () => {
+    settings.quality = IC.clampQuality(qualityInput.value);
+    qualityOut.textContent = String(settings.quality);
+    changed();
+  });
+
+  maxWInput.addEventListener('input', () => {
+    settings.maxWidth = IC.toDim(maxWInput.value);
+    changed();
+  });
+  maxWInput.addEventListener('change', () => {
+    maxWInput.value = settings.maxWidth === null ? '' : String(settings.maxWidth);
+  });
+
+  maxHInput.addEventListener('input', () => {
+    settings.maxHeight = IC.toDim(maxHInput.value);
+    changed();
+  });
+  maxHInput.addEventListener('change', () => {
+    maxHInput.value = settings.maxHeight === null ? '' : String(settings.maxHeight);
+  });
+
+  pctInput.addEventListener('input', () => {
+    const p = IC.clampPercent(pctInput.value);
+    if (p === null) return;
+    settings.percent = p;
+    changed();
+  });
+  pctInput.addEventListener('change', () => {
+    pctInput.value = String(settings.percent);
+  });
+
+  function probeEncode(mime) {
+    const attempt = new Promise((resolve) => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.fillRect(0, 0, 1, 1);
+        canvas.toBlob((blob) => resolve(!!blob && blob.type === mime), mime, 0.8);
+      } catch (_) {
+        resolve(false);
+      }
+    });
+    return Promise.race([attempt, wait(PROBE_TIMEOUT_MS).then(() => false)]);
+  }
+
+  function formatButton(id) {
+    const kids = formatSegEl.children;
+    for (let i = 0; i < kids.length; i += 1) {
+      if (kids[i].getAttribute('data-value') === id) return kids[i];
+    }
+    return null;
+  }
+
+  function setSupport(id, ok) {
+    supported[id] = !!ok;
+    const btn = formatButton(id);
+    if (!btn) return;
+    btn.hidden = !ok;
+    btn.disabled = !ok;
+  }
+
+  const formatsReady = Promise.all([probeEncode('image/webp'), probeEncode('image/avif')]).then((found) => {
+    setSupport('webp', found[0]);
+    setSupport('avif', found[1]);
+    syncSettingsUI();
+    refreshBar();
+  }, () => {});
+
+  function changeText(before, after, L) {
+    const kind = IC.changeKind(before, after);
+    if (kind === 'same') return COPY.same_size;
+    const pct = IC.formatPercent(IC.savedFraction(before, after), L);
+    return IC.fill(kind === 'smaller' ? COPY.smaller_fmt : COPY.larger_fmt, { pct });
+  }
+
+  function sameType(entry) {
+    return IC.formatLabel(entry.srcKind) === IC.formatLabel(entry.out.type);
+  }
+
+  function pickFor(entry) {
+    const useOriginal = IC.preferOriginal({
+      before: entry.file.size,
+      after: entry.out.blob.size,
+      sameDims: entry.srcW === entry.out.w && entry.srcH === entry.out.h,
+      sameType: sameType(entry)
+    });
+    if (useOriginal) return { blob: entry.file, name: IC.originalName(entry.file.name, entry.base, entry.file.type) };
+    return { blob: entry.out.blob, name: IC.outputName(entry.base, entry.out.type) };
+  }
+
+  function totals() {
+    const done = entries.filter((e) => e.state === 'done');
+    let before = 0;
+    let after = 0;
+    done.forEach((e) => {
+      before += e.file.size;
+      after += pickFor(e).blob.size;
+    });
+    return { count: done.length, before, after };
+  }
+
+  function needsRecompress(entry, sig) {
+    return (entry.state === 'done' && entry.sig !== sig) || (entry.state === 'error' && entry.error === 'encode');
+  }
+
+  function refreshBar() {
+    barEl.hidden = entries.length === 0;
+    listEl.setAttribute('aria-busy', running ? 'true' : 'false');
+    const sig = IC.signature(effectiveSettings());
+    recompressBtn.hidden = running || !entries.some((e) => needsRecompress(e, sig));
+    const t = totals();
+    downloadAllBtn.disabled = running || downloading || t.count === 0;
+    if (!t.count) {
+      totalEl.textContent = '';
+      totalSrEl.textContent = '';
+      return;
+    }
+    const L = lang();
+    const vars = {
+      count: IC.fill(COPY['count_' + IC.pluralKey(t.count, L)], { n: t.count }),
+      before: IC.formatBytes(t.before, L),
+      after: IC.formatBytes(t.after, L),
+      change: changeText(t.before, t.after, L)
+    };
+    totalEl.textContent = IC.fill(COPY.total_fmt, vars);
+    totalSrEl.textContent = IC.fill(COPY.total_sr, vars);
+  }
+
+  function buildCard(entry) {
+    const li = el('li', 'imc__item');
+    li.dataset.id = String(entry.id);
+    const thumb = el('canvas', 'imc__thumb');
+    thumb.width = THUMB_PX;
+    thumb.height = THUMB_PX;
+    thumb.setAttribute('aria-hidden', 'true');
+    const body = el('div', 'imc__body');
+    const remove = el('button', 'm-btn m-btn--ghost m-btn--icon imc__remove', '×');
+    remove.type = 'button';
+    remove.addEventListener('click', () => onRemove(entry));
+    const actions = el('div', 'imc__actions');
+    const compare = el('div', 'imc__compare');
+    compare.id = 'imc-cmp-' + entry.id;
+    compare.hidden = true;
+    li.append(thumb, body, remove, actions, compare);
+    entry.el = li;
+    entry.thumbEl = thumb;
+    entry.bodyEl = body;
+    entry.removeBtn = remove;
+    entry.actionsEl = actions;
+    entry.cmpEl = compare;
+    entry.buttons = {};
+    return li;
+  }
+
+  function errorText(entry) {
+    if (entry.error === 'heic') return COPY.err_heic;
+    if (entry.error === 'too-big') return IC.fill(COPY.err_too_big, { mp: IC.formatMegapixels(entry.errorPixels, lang()) });
+    if (entry.error === 'encode') return COPY.err_encode;
+    if (entry.error === 'read') return COPY.err_read;
+    return COPY.err_decode;
+  }
+
+  function sizesLine(entry, L) {
+    const before = IC.formatBytes(entry.file.size, L);
+    const after = IC.formatBytes(entry.out.blob.size, L);
+    const larger = IC.changeKind(entry.file.size, entry.out.blob.size) === 'larger';
+    const line = el('p', 'imc__sizes');
+    const visual = el('span', 'imc__sizes-visual');
+    visual.setAttribute('aria-hidden', 'true');
+    visual.append(el('span', 'imc__was', before), document.createTextNode(' → '), el('strong', null, after));
+    const spoken = el('span', 'sr-only', IC.fill(COPY.sr_change, { before, after }));
+    const badge = el('span', larger ? 'imc__badge imc__badge--worse' : 'imc__badge', changeText(entry.file.size, entry.out.blob.size, L));
+    line.append(visual, spoken, badge);
+    return line;
+  }
+
+  function metaLine(entry) {
+    const srcDims = IC.formatDims(entry.srcW, entry.srcH);
+    const outDims = IC.formatDims(entry.out.w, entry.out.h);
+    const srcFmt = IC.formatLabel(entry.srcKind);
+    const outFmt = IC.formatLabel(entry.out.type);
+    const shown = [];
+    const spoken = [];
+    if (srcDims !== outDims) {
+      shown.push(srcDims + ' → ' + outDims);
+      spoken.push(IC.fill(COPY.sr_change, { before: srcDims, after: outDims }));
+    } else {
+      shown.push(outDims);
+      spoken.push(outDims);
+    }
+    if (srcFmt && srcFmt !== outFmt) {
+      shown.push(srcFmt + ' → ' + outFmt);
+      spoken.push(IC.fill(COPY.sr_change, { before: srcFmt, after: outFmt }));
+    } else {
+      shown.push(outFmt);
+      spoken.push(outFmt);
+    }
+    const line = el('p', 'imc__meta');
+    const visual = el('span', null, shown.join(' · '));
+    visual.setAttribute('aria-hidden', 'true');
+    line.append(visual, el('span', 'sr-only', spoken.join('. ')));
+    return line;
+  }
+
+  function notesFor(entry) {
+    const notes = [];
+    if (IC.changeKind(entry.file.size, entry.out.blob.size) === 'larger') notes.push(COPY.note_larger);
+    if (entry.requestedMime && entry.out.type !== entry.requestedMime) {
+      notes.push(IC.fill(COPY.note_fallback, { actual: IC.formatLabel(entry.out.type), format: IC.formatLabel(entry.requestedMime) }));
+    }
+    if (entry.srcKind === 'gif') notes.push(COPY.note_gif);
+    return notes;
+  }
+
+  function actionButton(entry, act, variant, text, label, onClick) {
+    const btn = el('button', 'm-btn m-btn--pill ' + variant, text);
+    btn.type = 'button';
+    btn.dataset.act = act;
+    btn.setAttribute('aria-label', label);
+    btn.addEventListener('click', onClick);
+    entry.buttons[act] = btn;
+    return btn;
+  }
+
+  function buildActions(entry) {
+    const larger = IC.changeKind(entry.file.size, entry.out.blob.size) === 'larger';
+    const outName = IC.outputName(entry.base, entry.out.type);
+    const origName = IC.originalName(entry.file.name, entry.base, entry.file.type);
+    const download = actionButton(entry, 'download', larger ? 'm-btn--ghost' : 'm-btn--primary', COPY.btn_download,
+      IC.fill(COPY.aria_download, { file: outName }), () => { if (entry.out) MentriaUI.downloadFile(outName, entry.out.blob); });
+    const compare = actionButton(entry, 'compare', 'm-btn--ghost', COPY.btn_compare,
+      IC.fill(COPY.aria_compare, { name: entry.name }), () => toggleCompare(entry));
+    compare.setAttribute('aria-expanded', entry.urls ? 'true' : 'false');
+    compare.setAttribute('aria-controls', entry.cmpEl.id);
+    if (larger) {
+      const original = actionButton(entry, 'original', 'm-btn--primary', COPY.btn_original,
+        IC.fill(COPY.aria_original, { file: origName }), () => MentriaUI.downloadFile(origName, entry.file));
+      entry.actionsEl.append(original, download, compare);
+    } else {
+      entry.actionsEl.append(download, compare);
+    }
+  }
+
+  function renderEntry(entry) {
+    const L = lang();
+    entry.el.dataset.state = entry.state;
+    entry.removeBtn.setAttribute('aria-label', IC.fill(COPY.aria_remove, { name: entry.name }));
+    const name = el('p', 'imc__name', entry.name);
+    name.title = entry.name;
+    const parts = [name];
+    entry.buttons = {};
+    entry.actionsEl.replaceChildren();
+    if (entry.state === 'queued') parts.push(el('p', 'imc__state', COPY.state_queued));
+    else if (entry.state === 'working') parts.push(el('p', 'imc__state', COPY.state_working));
+    else if (entry.state === 'error') parts.push(el('p', 'imc__err', errorText(entry)));
+    else if (entry.state === 'done') {
+      parts.push(sizesLine(entry, L), metaLine(entry));
+      notesFor(entry).forEach((text) => parts.push(el('p', 'imc__note', text)));
+      buildActions(entry);
+    }
+    entry.bodyEl.replaceChildren(...parts);
+  }
+
+  function drawThumb(entry, source) {
+    const ctx = entry.thumbEl.getContext('2d');
+    if (!ctx) return;
+    const sw = source.width;
+    const sh = source.height;
+    const side = Math.min(sw, sh);
+    ctx.clearRect(0, 0, THUMB_PX, THUMB_PX);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(source, (sw - side) / 2, (sh - side) / 2, side, side, 0, 0, THUMB_PX, THUMB_PX);
+  }
+
+  function clearThumb(entry) {
+    const ctx = entry.thumbEl.getContext('2d');
+    if (ctx) ctx.clearRect(0, 0, THUMB_PX, THUMB_PX);
+  }
+
+  function gripIcon() {
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2.2');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', 'M9 7l-5 5 5 5M15 7l5 5-5 5');
+    svg.appendChild(path);
+    return svg;
+  }
+
+  function applySplit(entry, value) {
+    const v = Math.min(100, Math.max(0, Math.round((Number(value) || 0) * 10) / 10));
+    entry.split = v;
+    if (!entry.stageEl || !entry.handleEl) return;
+    entry.stageEl.style.setProperty('--imc-split', String(v));
+    entry.handleEl.setAttribute('aria-valuenow', String(Math.round(v)));
+    entry.handleEl.setAttribute('aria-valuetext', IC.formatPercent(v / 100, lang()));
+  }
+
+  function wireSplit(entry, stage, handle) {
+    let pointerId = null;
+    let startX = 0;
+    let moved = false;
+    const fromPointer = (e) => {
+      const rect = stage.getBoundingClientRect();
+      if (!rect.width) return;
+      applySplit(entry, ((e.clientX - rect.left) / rect.width) * 100);
+    };
+    stage.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      pointerId = e.pointerId;
+      startX = e.clientX;
+      moved = false;
+      if (e.pointerType === 'mouse') {
+        e.preventDefault();
+        handle.focus({ preventScroll: true });
+        moved = true;
+        fromPointer(e);
+      }
+      try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    stage.addEventListener('pointermove', (e) => {
+      if (e.pointerId !== pointerId) return;
+      if (!moved && Math.abs(e.clientX - startX) < 4) return;
+      moved = true;
+      fromPointer(e);
+    });
+    stage.addEventListener('pointerup', (e) => {
+      if (e.pointerId !== pointerId) return;
+      if (!moved) fromPointer(e);
+      pointerId = null;
+    });
+    stage.addEventListener('pointercancel', (e) => {
+      if (e.pointerId === pointerId) pointerId = null;
+    });
+    handle.addEventListener('keydown', (e) => {
+      const step = e.shiftKey ? 10 : 1;
+      let v = entry.split;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') v -= step;
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') v += step;
+      else if (e.key === 'PageDown') v -= 10;
+      else if (e.key === 'PageUp') v += 10;
+      else if (e.key === 'Home') v = 0;
+      else if (e.key === 'End') v = 100;
+      else return;
+      e.preventDefault();
+      applySplit(entry, v);
+    });
+  }
+
+  function buildStage(entry) {
+    const stage = el('div', 'imc__stage');
+    stage.style.setProperty('--imc-ar', entry.out.w + ' / ' + entry.out.h);
+    stage.style.setProperty('--imc-arn', String(entry.out.w / entry.out.h));
+    const before = el('img', 'imc__img');
+    before.alt = IC.fill(COPY.alt_before, { name: entry.name });
+    before.decoding = 'async';
+    before.draggable = false;
+    before.src = entry.urls.before;
+    const after = el('img', 'imc__img imc__img--after');
+    after.alt = IC.fill(COPY.alt_after, { name: entry.name });
+    after.decoding = 'async';
+    after.draggable = false;
+    after.src = entry.urls.after;
+    const tagBefore = el('span', 'imc__tag imc__tag--before', COPY.label_before);
+    tagBefore.setAttribute('aria-hidden', 'true');
+    const tagAfter = el('span', 'imc__tag imc__tag--after', COPY.label_after);
+    tagAfter.setAttribute('aria-hidden', 'true');
+    const handle = el('div', 'imc__handle');
+    handle.tabIndex = 0;
+    handle.setAttribute('role', 'slider');
+    handle.setAttribute('aria-label', COPY.aria_split);
+    handle.setAttribute('aria-valuemin', '0');
+    handle.setAttribute('aria-valuemax', '100');
+    handle.setAttribute('aria-orientation', 'horizontal');
+    const grip = el('span', 'imc__grip');
+    grip.appendChild(gripIcon());
+    handle.appendChild(grip);
+    stage.append(before, after, tagBefore, tagAfter, handle);
+    entry.cmpEl.replaceChildren(stage);
+    entry.stageEl = stage;
+    entry.handleEl = handle;
+    wireSplit(entry, stage, handle);
+    applySplit(entry, entry.split);
+  }
+
+  function openCompare(entry) {
+    if (!entry.out) return;
+    entries.forEach((other) => { if (other !== entry && other.urls) closeCompare(other); });
+    entry.urls = { before: URL.createObjectURL(entry.file), after: URL.createObjectURL(entry.out.blob) };
+    buildStage(entry);
+    entry.cmpEl.hidden = false;
+    if (entry.buttons.compare) entry.buttons.compare.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeCompare(entry) {
+    if (entry.cmpEl) {
+      entry.cmpEl.replaceChildren();
+      entry.cmpEl.hidden = true;
+    }
+    entry.stageEl = null;
+    entry.handleEl = null;
+    if (entry.urls) {
+      URL.revokeObjectURL(entry.urls.before);
+      URL.revokeObjectURL(entry.urls.after);
+      entry.urls = null;
+    }
+    if (entry.buttons && entry.buttons.compare) entry.buttons.compare.setAttribute('aria-expanded', 'false');
+  }
+
+  function toggleCompare(entry) {
+    if (entry.urls) closeCompare(entry);
+    else openCompare(entry);
+  }
+
+  function toBlob(canvas, mime, quality) {
+    return new Promise((resolve) => {
+      try { canvas.toBlob((blob) => resolve(blob), mime, quality); } catch (_) { resolve(null); }
+    });
+  }
+
+  function wrapBitmap(bitmap) {
+    return {
+      source: bitmap,
+      width: bitmap.width,
+      height: bitmap.height,
+      close: () => { try { bitmap.close(); } catch (_) {} }
+    };
+  }
+
+  function decodeWithImage(file) {
+    return new Promise((resolve) => {
+      let url = '';
+      try { url = URL.createObjectURL(file); } catch (_) { resolve(null); return; }
+      const img = new Image();
+      let settled = false;
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        URL.revokeObjectURL(url);
+        resolve(value);
+      };
+      img.addEventListener('load', () => {
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        if (!w || !h) { finish(null); return; }
+        finish({ source: img, width: w, height: h, close: () => { img.removeAttribute('src'); } });
+      });
+      img.addEventListener('error', () => finish(null));
+      img.decoding = 'async';
+      img.src = url;
+    });
+  }
+
+  async function decodeImage(file) {
+    if (typeof createImageBitmap === 'function') {
+      try { return wrapBitmap(await createImageBitmap(file, { imageOrientation: 'from-image' })); } catch (_) {}
+      try { return wrapBitmap(await createImageBitmap(file)); } catch (_) {}
+    }
+    return decodeWithImage(file);
+  }
+
+  async function gatePixels(entry, pixels) {
+    if (pixels > MAX_PIXELS) return { error: 'too-big', pixels };
+    if (pixels > WARN_PIXELS && !entry.approved) {
+      const message = IC.fill(COPY.confirm_big, { name: entry.name, mp: IC.formatMegapixels(pixels, lang()) });
+      const ok = typeof window.mentriaConfirm === 'function' ? await window.mentriaConfirm(message) : true;
+      if (!ok) return { skip: true };
+      entry.approved = true;
+    }
+    return null;
+  }
+
+  async function compress(entry, opts) {
+    const file = entry.file;
+    if (!entry.info) {
+      let head;
+      try { head = new Uint8Array(await file.slice(0, HEAD_BYTES).arrayBuffer()); } catch (_) { return { error: 'read' }; }
+      entry.info = IC.sniffImage(head);
+      entry.srcKind = entry.info.type || String(file.type || '').toLowerCase().replace(/^image\//, '');
+    }
+    const found = entry.info;
+    const heic = IC.isHeic(found.type, file.type, file.name);
+    if (!found.type && !IC.isImageLike(file.type, file.name)) return { error: heic ? 'heic' : 'decode' };
+    if (found.width && found.height) {
+      const gate = await gatePixels(entry, found.width * found.height);
+      if (gate) return gate;
+    }
+    if (entry.removed) return { skip: true };
+    const src = await decodeImage(file);
+    if (!src) return { error: heic ? 'heic' : 'decode' };
+    try {
+      if (!(found.width && found.height)) {
+        const gate = await gatePixels(entry, src.width * src.height);
+        if (gate) return gate;
+      }
+      if (entry.removed) return { skip: true };
+      const size = IC.targetSize(src.width, src.height, opts);
+      const canvas = document.createElement('canvas');
+      canvas.width = size.w;
+      canvas.height = size.h;
+      let blob = null;
+      const ctx = canvas.getContext('2d', { alpha: opts.format !== 'jpeg' });
+      if (ctx) {
+        if (opts.format === 'jpeg') {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, size.w, size.h);
+        }
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(src.source, 0, 0, size.w, size.h);
+        src.close();
+        blob = await toBlob(canvas, opts.mime, opts.quality / 100);
+        if (blob && blob.size) drawThumb(entry, canvas);
+      }
+      canvas.width = 0;
+      canvas.height = 0;
+      if (!blob || !blob.size) return { error: 'encode' };
+      return { out: { blob, type: blob.type || opts.mime, w: size.w, h: size.h }, srcW: src.width, srcH: src.height };
+    } finally {
+      src.close();
+    }
+  }
+
+  async function processEntry(entry) {
+    entry.state = 'working';
+    closeCompare(entry);
+    renderEntry(entry);
+    const opts = snapshot();
+    let res;
+    try { res = await compress(entry, opts); } catch (_) { res = { error: 'encode' }; }
+    if (entry.removed) return;
+    if (res.skip) {
+      removeEntry(entry);
+      status.set(IC.fill(COPY.status_skipped, { name: entry.name }));
+      return;
+    }
+    if (res.error) {
+      entry.state = 'error';
+      entry.error = res.error;
+      entry.errorPixels = res.pixels || 0;
+      entry.out = null;
+      clearThumb(entry);
+    } else {
+      entry.state = 'done';
+      entry.error = null;
+      entry.out = res.out;
+      entry.srcW = res.srcW;
+      entry.srcH = res.srcH;
+      entry.sig = opts.sig;
+      entry.requestedMime = opts.mime;
+    }
+    renderEntry(entry);
+    refreshBar();
+  }
+
+  function nextQueued() {
+    return entries.find((e) => e.state === 'queued') || null;
+  }
+
+  function announceDone() {
+    if (!entries.length) return;
+    const parts = [];
+    const t = totals();
+    if (t.count) {
+      const L = lang();
+      parts.push(IC.fill(COPY.status_done, { before: IC.formatBytes(t.before, L), after: IC.formatBytes(t.after, L) }));
+    }
+    if (entries.some((e) => e.state === 'error')) parts.push(COPY.status_errors);
+    if (parts.length) status.set(parts.join(' '));
+  }
+
+  function failEntry(entry) {
+    if (entry.removed) return;
+    entry.state = 'error';
+    entry.error = 'encode';
+    entry.out = null;
+    try { renderEntry(entry); } catch (_) {}
+  }
+
+  async function pump() {
+    if (running) return;
+    running = true;
+    runId += 1;
+    const run = runId;
+    refreshBar();
+    try {
+      await formatsReady;
+      let entry = nextQueued();
+      while (entry) {
+        entry.run = run;
+        const current = entry;
+        const index = entries.filter((e) => e.run === run).length;
+        const waiting = entries.filter((e) => e.state === 'queued' && e !== current).length;
+        status.set(IC.fill(COPY.status_working, { i: index, n: index + waiting, name: entry.name }));
+        try { await processEntry(entry); } catch (_) { failEntry(entry); }
+        entry = nextQueued();
+      }
+    } finally {
+      running = false;
+      refreshBar();
+    }
+    announceDone();
+  }
+
+  function addFiles(list) {
+    const files = Array.prototype.slice.call(list || []).filter((f) => f && typeof f.size === 'number');
+    if (!files.length) return;
+    const taken = new Set(entries.map((e) => e.base));
+    files.forEach((file) => {
+      const base = IC.uniqueBase(IC.baseName(file.name), taken);
+      taken.add(base);
+      seq += 1;
+      const name = String(file.name || '').trim() || base;
+      const entry = { id: seq, file, base, name, state: 'queued', approved: false, split: 50, out: null, urls: null };
+      listEl.appendChild(buildCard(entry));
+      entries.push(entry);
+      renderEntry(entry);
+    });
+    refreshBar();
+    pump();
+  }
+
+  function removeEntry(entry) {
+    entry.removed = true;
+    closeCompare(entry);
+    entry.out = null;
+    const idx = entries.indexOf(entry);
+    if (idx !== -1) entries.splice(idx, 1);
+    if (entry.el) entry.el.remove();
+    refreshBar();
+  }
+
+  function onRemove(entry) {
+    const idx = entries.indexOf(entry);
+    const next = idx === -1 ? null : (entries[idx + 1] || entries[idx - 1] || null);
+    removeEntry(entry);
+    if (next && next.removeBtn) next.removeBtn.focus();
+    else pickBtn.focus();
+  }
+
+  pickBtn.addEventListener('click', () => fileInput.click());
+
+  dropEl.addEventListener('click', (e) => {
+    if (e.target === fileInput || pickBtn.contains(e.target)) return;
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', () => {
+    const files = Array.prototype.slice.call(fileInput.files || []);
+    fileInput.value = '';
+    addFiles(files);
+  });
+
+  function hasFiles(e) {
+    const types = e.dataTransfer && e.dataTransfer.types;
+    if (!types) return false;
+    for (let i = 0; i < types.length; i += 1) {
+      if (types[i] === 'Files') return true;
+    }
+    return false;
+  }
+
+  function markDrag(e) {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    try { e.dataTransfer.dropEffect = 'copy'; } catch (_) {}
+    dropEl.classList.add('is-over');
+    clearTimeout(dragTimer);
+    dragTimer = setTimeout(() => dropEl.classList.remove('is-over'), DRAG_LINGER_MS);
+  }
+
+  document.addEventListener('dragenter', markDrag);
+  document.addEventListener('dragover', markDrag);
+  document.addEventListener('drop', (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    clearTimeout(dragTimer);
+    dropEl.classList.remove('is-over');
+    addFiles(e.dataTransfer.files);
+  });
+
+  function clipboardImages(data) {
+    if (!data) return [];
+    const found = [];
+    if (data.files && data.files.length) {
+      for (let i = 0; i < data.files.length; i += 1) found.push(data.files[i]);
+    } else if (data.items) {
+      for (let i = 0; i < data.items.length; i += 1) {
+        const item = data.items[i];
+        if (item.kind !== 'file') continue;
+        const f = item.getAsFile();
+        if (f) found.push(f);
+      }
+    }
+    return found.filter((f) => IC.isImageLike(f.type, f.name));
+  }
+
+  document.addEventListener('paste', (e) => {
+    const files = clipboardImages(e.clipboardData);
+    if (!files.length) return;
+    e.preventDefault();
+    addFiles(files);
+  });
+
+  recompressBtn.addEventListener('click', () => {
+    const sig = IC.signature(effectiveSettings());
+    let any = false;
+    entries.forEach((entry) => {
+      if (!needsRecompress(entry, sig)) return;
+      closeCompare(entry);
+      entry.state = 'queued';
+      renderEntry(entry);
+      any = true;
+    });
+    if (!any) return;
+    listEl.focus();
+    pump();
+  });
+
+  downloadAllBtn.addEventListener('click', async () => {
+    if (downloading || running) return;
+    const list = entries.filter((e) => e.state === 'done');
+    if (!list.length) return;
+    downloading = true;
+    refreshBar();
+    for (let i = 0; i < list.length; i += 1) {
+      const entry = list[i];
+      if (entry.removed || entry.state !== 'done') continue;
+      status.set(IC.fill(COPY.status_downloading, { i: i + 1, n: list.length }));
+      const pick = pickFor(entry);
+      MentriaUI.downloadFile(pick.name, pick.blob);
+      if (i < list.length - 1) await wait(DOWNLOAD_GAP_MS);
+    }
+    downloading = false;
+    refreshBar();
+    status.set(COPY.status_downloaded);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    entries.slice().forEach(removeEntry);
+    fileInput.value = '';
+    status.set(COPY.status_cleared);
+    pickBtn.focus();
+  });
+
+  if ('launchQueue' in window && window.launchQueue && typeof window.launchQueue.setConsumer === 'function') {
+    window.launchQueue.setConsumer(async (params) => {
+      if (!params || !params.files || !params.files.length) return;
+      const files = [];
+      for (const handle of params.files) {
+        try { files.push(await handle.getFile()); } catch (_) {}
+      }
+      addFiles(files);
+    });
+  }
+
+  document.addEventListener('mentria:localechange', () => {
+    const lookup = window.MentriaI18n && window.MentriaI18n.t;
+    if (typeof lookup !== 'function') return;
+    Object.keys(COPY).forEach((key) => {
+      const value = lookup('tool.image-compressor.' + key);
+      if (typeof value === 'string') COPY[key] = value;
+    });
+    const active = document.activeElement;
+    let refocus = null;
+    entries.forEach((entry) => {
+      Object.keys(entry.buttons || {}).forEach((act) => {
+        if (entry.buttons[act] === active) refocus = () => { if (entry.buttons[act]) entry.buttons[act].focus(); };
+      });
+      if (entry.handleEl && entry.handleEl === active) refocus = () => { if (entry.handleEl) entry.handleEl.focus(); };
+    });
+    entries.forEach((entry) => {
+      renderEntry(entry);
+      if (entry.urls) buildStage(entry);
+    });
+    refreshBar();
+    if (refocus) refocus();
+  });
+
+  syncSettingsUI();
+  refreshBar();
+})();
+</script>
+
+<style>
+.imc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--space-1) 0 var(--space-3);
+  font-family: var(--font-mono);
+  color: var(--term-fg);
+}
+.imc [hidden] { display: none !important; }
+
+.imc__drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  border: 1.5px dashed var(--term-border-strong);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.015);
+  text-align: center;
+  cursor: pointer;
+}
+.imc__drop:hover,
+.imc__drop.is-over {
+  border-color: var(--syn-cyan);
+  background: var(--cyan-8);
+}
+.imc__drop.is-over { box-shadow: inset 0 0 28px var(--cyan-15); }
+.imc__drop-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--syn-cyan);
+}
+.imc__drop-title {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--term-fg-strong);
+}
+.imc__drop-hint {
+  margin: 0;
+  max-width: 46ch;
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  color: var(--term-muted);
+}
+
+.imc__privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  color: var(--term-muted);
+}
+.imc__privacy-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 0.12rem;
+  color: var(--syn-green);
+}
+
+.imc__settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: var(--space-5);
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-lg);
+  background: var(--term-bg);
+}
+.imc__legend {
+  padding: 0 var(--space-2);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--syn-cyan);
+}
+.imc__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.imc__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.imc__label {
+  font-size: var(--text-2xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+}
+.imc__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.imc__qval {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--syn-cyan);
+  font-variant-numeric: tabular-nums;
+}
+.imc__range {
+  width: 100%;
+  margin: var(--space-1) 0;
+  accent-color: var(--syn-cyan);
+}
+.imc__range:disabled { opacity: 0.35; }
+.imc__seg > button {
+  min-width: 0;
+  min-height: 34px;
+  line-height: 1.25;
+  white-space: normal;
+}
+.imc__seg > button:disabled { cursor: not-allowed; }
+.imc__hint {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--term-subtle);
+}
+.imc__hint--warn { color: var(--syn-amber); }
+.imc__dims {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.imc__num {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+.imc__num--single { max-width: 12rem; }
+.imc__sub {
+  font-size: var(--text-2xs);
+  letter-spacing: 0.06em;
+  color: var(--term-muted);
+}
+.imc__num .m-input {
+  width: 100%;
+  min-width: 0;
+  font-size: var(--text-base);
+}
+
+.imc__status {
+  margin: 0;
+  min-height: 1.5em;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--term-muted);
+  overflow-wrap: anywhere;
+}
+
+.imc__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--term-border);
+}
+.imc__total {
+  margin: 0;
+  min-width: 0;
+  font-size: var(--text-xs);
+  color: var(--term-fg);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.imc__bar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.imc__bar-actions .m-btn { font-size: var(--text-xs); }
+
+.imc__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--radius-lg);
+}
+.imc__list:empty { display: none; }
+
+.imc__item {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "thumb body remove"
+    "thumb actions actions"
+    "cmp cmp cmp";
+  column-gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-lg);
+  background: var(--term-bg);
+}
+.imc__item[data-state="error"] { border-color: var(--pink-30); }
+.imc__thumb {
+  grid-area: thumb;
+  display: block;
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md);
+  background: var(--term-surface-2);
+}
+.imc__item[data-state="error"] .imc__thumb {
+  border-color: var(--pink-30);
+  background: var(--pink-10);
+}
+.imc__body {
+  grid-area: body;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.imc__remove.m-btn--icon {
+  grid-area: remove;
+  align-self: start;
+  width: 32px;
+  height: 32px;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+.imc__actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.imc__actions:empty { display: none; }
+.imc__actions .m-btn {
+  min-height: 32px;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+}
+.imc__compare {
+  grid-area: cmp;
+  margin-top: var(--space-3);
+}
+
+.imc__name {
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  color: var(--term-fg-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.imc__sizes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+.imc__sizes strong { color: var(--term-fg-strong); }
+.imc__was { color: var(--term-muted); }
+.imc__badge {
+  padding: 0.05rem 0.5rem;
+  border: 1px solid var(--green-30);
+  border-radius: var(--radius-pill);
+  background: var(--green-8);
+  color: var(--syn-green);
+  font-size: var(--text-2xs);
+  white-space: nowrap;
+}
+.imc__badge--worse {
+  border-color: var(--amber-30);
+  background: var(--amber-8);
+  color: var(--syn-amber);
+}
+.imc__meta {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--term-muted);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.imc__note {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--syn-amber);
+}
+.imc__state {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--term-muted);
+}
+.imc__err {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--syn-pink);
+}
+
+.imc__stage {
+  position: relative;
+  width: min(100%, calc(70vh * var(--imc-arn, 1)));
+  width: min(100%, calc(70svh * var(--imc-arn, 1)));
+  aspect-ratio: var(--imc-ar, 1);
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-md);
+  background-color: #141414;
+  background-image: conic-gradient(#222 25%, transparent 0 50%, #222 0 75%, transparent 0);
+  background-size: 16px 16px;
+  cursor: ew-resize;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.imc__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.imc__img--after { clip-path: inset(0 0 0 calc(var(--imc-split, 50) * 1%)); }
+.imc__tag {
+  position: absolute;
+  top: var(--space-2);
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: rgba(10, 10, 10, 0.72);
+  color: var(--term-fg);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.imc__tag--before { left: var(--space-2); }
+.imc__tag--after { right: var(--space-2); }
+.imc__handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--imc-split, 50) * 1%);
+  width: 44px;
+  margin-left: -22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.imc__handle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--term-fg-strong);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.imc__handle:focus-visible { outline: none; }
+.imc__grip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--term-fg-strong);
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.78);
+  color: var(--term-fg-strong);
+}
+.imc__grip svg {
+  width: 18px;
+  height: 18px;
+}
+.imc__handle:focus-visible .imc__grip {
+  outline: 2px solid var(--syn-cyan);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .imc__drop {
+    transition: border-color var(--duration-fast) var(--ease-out),
+      background-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
+  }
+  .imc__item[data-state="working"] .imc__thumb { animation: imc-pulse 1.1s ease-in-out infinite alternate; }
+}
+@keyframes imc-pulse {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 520px) {
+  .imc__drop { padding: var(--space-5) var(--space-3); }
+  .imc__settings { padding: var(--space-3); }
+  .imc__item {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "thumb body remove"
+      "actions actions actions"
+      "cmp cmp cmp";
+    column-gap: var(--space-2);
+  }
+  .imc__thumb {
+    width: 48px;
+    height: 48px;
+  }
+  .imc__bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .imc__bar-actions .m-btn { flex: 1 1 auto; }
+}
+</style>

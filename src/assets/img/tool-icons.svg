@@ -661,4 +661,151 @@
    <circle cx="35.5" cy="33.5" r="5.8" fill="url(#ammirror)"></circle>
    <path d="M10 32.2l2 2 2.8-2.9M33 32.2l2 2 2.8-2.9" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path>
  </g></symbol>
+<symbol id="tool-unit-converter" viewBox="0 0 48 48"><defs>
+<linearGradient id="cyunitconverter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="puunitconverter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4B5FD"></stop><stop offset="1" stop-color="#9B7DF7"></stop></linearGradient>
+<linearGradient id="cyEunitconverter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1597B0"></stop><stop offset="1" stop-color="#0B7489"></stop></linearGradient>
+<linearGradient id="puEunitconverter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7C5BE0"></stop><stop offset="1" stop-color="#5B36C4"></stop></linearGradient>
+<linearGradient id="glossunitconverter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<filter id="shunitconverter" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shunitconverter)">
+   <path d="M8.5 10.5H30V6L43 15.25L30 24.5V20H8.5A4.75 4.75 0 0 1 8.5 10.5Z" fill="url(#cyunitconverter)"></path>
+   <rect x="8.4" y="11.6" width="20.4" height="3.4" rx="1.7" fill="url(#glossunitconverter)" opacity=".75"></rect>
+   <g fill="url(#cyEunitconverter)">
+     <rect x="12.2" y="15.6" width="1.6" height="4.4" rx=".8"></rect>
+     <rect x="16.7" y="17" width="1.6" height="3" rx=".8"></rect>
+     <rect x="21.2" y="15.6" width="1.6" height="4.4" rx=".8"></rect>
+     <rect x="25.7" y="17" width="1.6" height="3" rx=".8"></rect>
+   </g>
+   <path d="M39.5 27.5H18V23L5 32.25L18 41.5V37H39.5A4.75 4.75 0 0 0 39.5 27.5Z" fill="url(#puunitconverter)"></path>
+   <rect x="19.2" y="28.6" width="20.4" height="3.4" rx="1.7" fill="url(#glossunitconverter)" opacity=".6"></rect>
+   <g fill="url(#puEunitconverter)">
+     <circle cx="24" cy="34.6" r="1.25"></circle>
+     <circle cx="29" cy="34.6" r="1.25"></circle>
+     <circle cx="34" cy="34.6" r="1.25"></circle>
+   </g>
+ </g></symbol>
+<symbol id="tool-world-clock" viewBox="0 0 48 48"><defs>
+<linearGradient id="cyworldclock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="puworldclock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4B5FD"></stop><stop offset="1" stop-color="#9B7DF7"></stop></linearGradient>
+<linearGradient id="amworldclock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="glossworldclock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<radialGradient id="dkworldclock" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#3a3550"></stop><stop offset="1" stop-color="#171522"></stop></radialGradient>
+<filter id="shworldclock" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shworldclock)">
+   <circle cx="21" cy="21" r="16.5" fill="url(#cyworldclock)"></circle>
+   <g fill="none" stroke="#fff" stroke-linecap="round" opacity=".4">
+     <ellipse cx="21" cy="21" rx="7.2" ry="16.5" stroke-width="1.6"></ellipse>
+     <path d="M21 4.5V37.5" stroke-width="1.6"></path>
+     <path d="M4.5 21H37.5" stroke-width="1.6"></path>
+     <path d="M7.2 12.8H34.8M7.2 29.2H34.8" stroke-width="1.3"></path>
+   </g>
+   <circle cx="21" cy="21" r="16.5" fill="url(#glossworldclock)" opacity=".34"></circle>
+   <ellipse cx="14.6" cy="12.4" rx="5.2" ry="3.2" transform="rotate(-35 14.6 12.4)" fill="#fff" opacity=".28"></ellipse>
+   <circle cx="34.5" cy="34.5" r="10.5" fill="url(#puworldclock)"></circle>
+   <circle cx="34.5" cy="34.5" r="8" fill="url(#dkworldclock)"></circle>
+   <g fill="#fff" opacity=".55">
+     <circle cx="34.5" cy="28.2" r=".8"></circle>
+     <circle cx="40.8" cy="34.5" r=".8"></circle>
+     <circle cx="34.5" cy="40.8" r=".8"></circle>
+     <circle cx="28.2" cy="34.5" r=".8"></circle>
+   </g>
+   <path d="M34.5 34.5V29.8M34.5 34.5L38 36.6" fill="none" stroke="url(#amworldclock)" stroke-width="2.2" stroke-linecap="round"></path>
+   <circle cx="34.5" cy="34.5" r="1.5" fill="#fff"></circle>
+   <ellipse cx="31.2" cy="29.6" rx="3" ry="1.7" transform="rotate(-35 31.2 29.6)" fill="#fff" opacity=".2"></ellipse>
+ </g></symbol>
+<symbol id="tool-password-generator" viewBox="0 0 48 48"><defs>
+<linearGradient id="cypwgen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="pupwgen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4B5FD"></stop><stop offset="1" stop-color="#9B7DF7"></stop></linearGradient>
+<linearGradient id="pkpwgen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBA6D2"></stop><stop offset="1" stop-color="#F25FA8"></stop></linearGradient>
+<linearGradient id="ampwgen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="glosspwgen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<radialGradient id="dkpwgen" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#3a3550"></stop><stop offset="1" stop-color="#171522"></stop></radialGradient>
+<filter id="shpwgen" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shpwgen)">
+   <path d="M15.5 21v-4.5a8.5 8.5 0 0 1 17 0V21" fill="none" stroke="url(#cypwgen)" stroke-width="4.2" stroke-linecap="round"></path>
+   <ellipse cx="17.6" cy="11.6" rx="2.3" ry="1.1" transform="rotate(-52 17.6 11.6)" fill="#fff" opacity=".4"></ellipse>
+   <rect x="7" y="19" width="34" height="24" rx="6" fill="url(#pupwgen)"></rect>
+   <rect x="8.4" y="20.4" width="31.2" height="7.4" rx="3.6" fill="url(#glosspwgen)" opacity=".55"></rect>
+   <rect x="11" y="27" width="26" height="11" rx="3.6" fill="url(#dkpwgen)"></rect>
+   <g fill="none" stroke-width="1.7" stroke-linecap="round">
+     <path d="M17 29.9v5.2M14.75 31.2l4.5 2.6M14.75 33.8l4.5-2.6" stroke="url(#cypwgen)"></path>
+     <path d="M24 29.9v5.2M21.75 31.2l4.5 2.6M21.75 33.8l4.5-2.6" stroke="url(#pkpwgen)"></path>
+     <path d="M31 29.9v5.2M28.75 31.2l4.5 2.6M28.75 33.8l4.5-2.6" stroke="url(#ampwgen)"></path>
+   </g>
+ </g></symbol>
+<symbol id="tool-image-compressor" viewBox="0 0 48 48"><defs>
+<linearGradient id="cyimagecompressor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="puimagecompressor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4B5FD"></stop><stop offset="1" stop-color="#9B7DF7"></stop></linearGradient>
+<linearGradient id="pkimagecompressor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBA6D2"></stop><stop offset="1" stop-color="#F25FA8"></stop></linearGradient>
+<linearGradient id="amimagecompressor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="gnimagecompressor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
+<linearGradient id="glossimagecompressor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<radialGradient id="dkimagecompressor" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#3a3550"></stop><stop offset="1" stop-color="#171522"></stop></radialGradient>
+<filter id="shimagecompressor" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shimagecompressor)">
+   <rect x="14" y="4.5" width="29.5" height="29.5" rx="5" fill="url(#puimagecompressor)" opacity=".3"></rect>
+   <rect x="14" y="4.5" width="29.5" height="29.5" rx="5" fill="none" stroke="url(#puimagecompressor)" stroke-width="2" stroke-dasharray="4.2 3.1" stroke-linecap="round"></rect>
+   <rect x="4.5" y="17" width="25.5" height="25.5" rx="5" fill="url(#dkimagecompressor)" stroke="url(#cyimagecompressor)" stroke-width="2.4"></rect>
+   <circle cx="12" cy="24.6" r="2.6" fill="url(#amimagecompressor)"></circle>
+   <path d="M6.9 37.2 L13.6 30.5 L18 34.9 L22.4 30.5 L27.6 35.7 V37.6 A2.6 2.6 0 0 1 25 40.2 H9.5 A2.6 2.6 0 0 1 6.9 37.6 Z" fill="url(#gnimagecompressor)" opacity=".92"></path>
+   <rect x="6" y="18.5" width="22.5" height="6" rx="3" fill="url(#glossimagecompressor)" opacity=".3"></rect>
+   <path d="M40.5 8 L32.5 16" stroke="url(#pkimagecompressor)" stroke-width="3.2" stroke-linecap="round"></path>
+   <path d="M32 10.2 V16.5 H38.3" fill="none" stroke="url(#pkimagecompressor)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></path>
+ </g></symbol>
+<symbol id="tool-calculator" viewBox="0 0 48 48"><defs>
+<linearGradient id="cycalculator" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="pucalculator" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4B5FD"></stop><stop offset="1" stop-color="#9B7DF7"></stop></linearGradient>
+<linearGradient id="pkcalculator" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBA6D2"></stop><stop offset="1" stop-color="#F25FA8"></stop></linearGradient>
+<linearGradient id="amcalculator" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="gncalculator" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86EFAC"></stop><stop offset="1" stop-color="#34C46A"></stop></linearGradient>
+<linearGradient id="glosscalculator" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<radialGradient id="dkcalculator" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#3a3550"></stop><stop offset="1" stop-color="#171522"></stop></radialGradient>
+<filter id="shcalculator" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shcalculator)">
+   <rect x="9" y="4" width="30" height="40" rx="6" fill="url(#pucalculator)"></rect>
+   <path d="M15 4h18a6 6 0 0 1 6 6v1.6a6 6 0 0 0-6-6H15a6 6 0 0 0-6 6V10a6 6 0 0 1 6-6Z" fill="#fff" opacity=".28"></path>
+   <rect x="13" y="8.5" width="22" height="9.5" rx="2.6" fill="url(#dkcalculator)"></rect>
+   <rect x="22.4" y="11.3" width="9.6" height="3.8" rx="1.3" fill="url(#gncalculator)"></rect>
+   <rect x="16" y="12.2" width="4.4" height="2" rx="1" fill="#fff" opacity=".32"></rect>
+   <g fill="#fff" opacity=".86">
+     <rect x="13" y="21.5" width="6" height="5" rx="1.6"></rect>
+     <rect x="21" y="21.5" width="6" height="5" rx="1.6"></rect>
+     <rect x="13" y="28.5" width="6" height="5" rx="1.6"></rect>
+     <rect x="21" y="28.5" width="6" height="5" rx="1.6"></rect>
+     <rect x="13" y="35.5" width="6" height="5" rx="1.6"></rect>
+     <rect x="21" y="35.5" width="6" height="5" rx="1.6"></rect>
+   </g>
+   <rect x="29" y="21.5" width="6" height="5" rx="1.6" fill="url(#pkcalculator)"></rect>
+   <rect x="29" y="28.5" width="6" height="5" rx="1.6" fill="url(#amcalculator)"></rect>
+   <rect x="29" y="35.5" width="6" height="5" rx="1.6" fill="url(#cycalculator)"></rect>
+   <g fill="url(#glosscalculator)" opacity=".7">
+     <rect x="29.6" y="22" width="4.8" height="1.8" rx=".9"></rect>
+     <rect x="29.6" y="29" width="4.8" height="1.8" rx=".9"></rect>
+     <rect x="29.6" y="36" width="4.8" height="1.8" rx=".9"></rect>
+   </g>
+ </g></symbol>
+<symbol id="tool-forge" viewBox="0 0 48 48"><defs>
+<linearGradient id="cyforge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="puforge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4B5FD"></stop><stop offset="1" stop-color="#9B7DF7"></stop></linearGradient>
+<linearGradient id="puEforge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7C5BE0"></stop><stop offset="1" stop-color="#5B36C4"></stop></linearGradient>
+<linearGradient id="pkforge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBA6D2"></stop><stop offset="1" stop-color="#F25FA8"></stop></linearGradient>
+<linearGradient id="amforge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="glossforge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<filter id="shforge" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shforge)">
+   <path d="M21 13 34 20.5 21 28 8 20.5Z" fill="url(#cyforge)"></path>
+   <path d="M8 20.5 21 28V43L8 35.5Z" fill="url(#puforge)"></path>
+   <path d="M34 20.5 21 28V43L34 35.5Z" fill="url(#puEforge)"></path>
+   <path d="M21 13 34 20.5 21 28 8 20.5Z" fill="url(#glossforge)" opacity=".5"></path>
+   <ellipse cx="13.6" cy="27.4" rx="2.2" ry="4.2" transform="rotate(-30 13.6 27.4)" fill="#fff" opacity=".2"></ellipse>
+   <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+     <path d="M21 13V28M21 28 8 35.5M21 28 34 35.5" stroke-width="1.1" stroke-dasharray="1.6 1.9" opacity=".55"></path>
+     <path d="M21 13 34 20.5 34 35.5 21 43 8 35.5 8 20.5Z M8 20.5 21 28 34 20.5M21 28V43" stroke-width="1.5" opacity=".92"></path>
+   </g>
+   <circle cx="21" cy="28" r="1.5" fill="#fff"></circle>
+   <path d="M38 2.8 39.5 7.6 44.3 9.1 39.5 10.6 38 15.4 36.5 10.6 31.7 9.1 36.5 7.6Z" fill="url(#amforge)"></path>
+   <circle cx="38" cy="9.1" r="1.4" fill="#fff" opacity=".85"></circle>
+   <path d="M42.6 15 43.2 17 45.2 17.6 43.2 18.2 42.6 20.2 42 18.2 40 17.6 42 17Z" fill="url(#pkforge)"></path>
+ </g></symbol>
 </svg>

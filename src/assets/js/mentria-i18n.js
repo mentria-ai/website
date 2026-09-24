@@ -176,7 +176,7 @@
     var data = window.MENTRIA_PALETTE_DATA;
     var tools = (data && data.tools) || [];
     for (var i = 0; i < tools.length; i++) {
-      if (tools[i] && tools[i].slug) routes.push(prefix + '/tools/' + tools[i].slug + '/');
+      if (tools[i] && tools[i].slug && !tools[i].url) routes.push(prefix + '/tools/' + tools[i].slug + '/');
     }
     return routes;
   }

@@ -67,6 +67,22 @@ eleventyComputed:
     <span class="rd__next-title" id="rd-next-title">&mdash;</span>
   </div>
 
+  <div class="rd__sleep">
+    <span class="rd__label" id="rd-sleep-label">{{ "tool.radio.sleep_label" | t }}</span>
+    <div class="m-seg rd__sleep-seg" id="rd-sleep-seg" role="group" aria-labelledby="rd-sleep-label">
+      <button type="button" data-value="0">{{ "tool.radio.sleep_off" | t }}</button>
+      <button type="button" data-value="15">15</button>
+      <button type="button" data-value="30">30</button>
+      <button type="button" data-value="60">60</button>
+    </div>
+    <span class="rd__sleep-left" id="rd-sleep-left" aria-live="polite"></span>
+  </div>
+
+  <details class="rd__liked" id="rd-liked">
+    <summary class="rd__liked-sum">{{ "tool.radio.liked_title" | t }} <span class="rd__liked-count" id="rd-liked-count"></span></summary>
+    <ul class="rd__liked-list" id="rd-liked-list"></ul>
+  </details>
+
 </section>
 {% include "terminal-frame-close.njk" %}
 
@@ -84,7 +100,12 @@ window.RADIO_COPY = {
   errLoadTrack:    {{ ("tool.radio.err_load_track"   | t) | dump | safe }},
   errFormat:       {{ ("tool.radio.err_format"       | t) | dump | safe }},
   trackCountFmt:   {{ ("tool.radio.track_count_format" | t) | dump | safe }},
-  untitled:        {{ ("tool.radio.untitled"         | t) | dump | safe }}
+  untitled:        {{ ("tool.radio.untitled"         | t) | dump | safe }},
+  likedEmpty:      {{ ("tool.radio.liked_empty"      | t) | dump | safe }},
+  likedPlay:       {{ ("tool.radio.liked_play"       | t) | dump | safe }},
+  likedRemove:     {{ ("tool.radio.liked_remove"     | t) | dump | safe }},
+  sleepLeft:       {{ ("tool.radio.sleep_left"       | t) | dump | safe }},
+  sleepMinutes:    {{ ("tool.radio.sleep_minutes"    | t) | dump | safe }}
 };
 </script>
 <script type="module" src="/assets/radio/radio.js"></script>
@@ -95,6 +116,21 @@ window.RADIO_COPY = {
   flex-direction: column;
   font-family: var(--font-mono);
 }
+.rd__sleep { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.8rem; margin-top: 1rem; }
+.rd__sleep-seg button { min-width: 2.6rem; }
+.rd__sleep-left { font-size: 0.75rem; color: var(--term-muted); font-variant-numeric: tabular-nums; }
+.rd__liked { margin-top: 1rem; border: 1px solid var(--term-border); border-radius: var(--radius-md, 8px); }
+.rd__liked-sum { cursor: pointer; padding: 0.6rem 0.8rem; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--term-muted); }
+.rd__liked-count { margin-left: 0.3rem; color: var(--syn-pink, #f25fa8); }
+.rd__liked-list { list-style: none; margin: 0; padding: 0 0.5rem 0.5rem; display: flex; flex-direction: column; gap: 0.3rem; max-height: min(50vh, 360px); overflow-y: auto; }
+.rd__liked-empty { padding: 0.3rem 0.3rem 0.5rem; font-size: 0.78rem; color: var(--term-muted); }
+.rd__liked-item { display: flex; align-items: center; gap: 0.5rem; }
+.rd__liked-play { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; padding: 0.45rem 0.6rem; border: 1px solid transparent; border-radius: var(--radius-sm, 6px); background: transparent; color: var(--term-fg); font: inherit; font-size: 0.82rem; text-align: left; cursor: pointer; }
+.rd__liked-play:hover { border-color: var(--term-border-strong); }
+.rd__liked-play.is-current { border-color: var(--syn-cyan, #22d3ee); }
+.rd__liked-title { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rd__liked-mood { font-size: 0.7rem; color: var(--term-subtle); }
+.rd__liked-unlike { flex: 0 0 auto; padding: 0.3rem 0.5rem; border: none; background: transparent; color: var(--syn-pink, #f25fa8); font-size: 1rem; line-height: 1; cursor: pointer; }
 
 .rd__status {
   display: flex;

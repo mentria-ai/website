@@ -54,6 +54,8 @@
 
   var DISMISS_KEY   = 'mentria_pwa_install_dismissed_at';
   var INSTALLED_KEY = 'mentria_pwa_installed_at';
+  var SEEN_KEY      = 'mentria_pwa_install_seen';
+  var SEEN_CAP      = 3;
   var DISMISS_MS    = 7 * 24 * 60 * 60 * 1000; // 7 days
   var SHOW_DELAY    = 3000;                     // 3s on first visit
 
@@ -137,6 +139,15 @@
   }
 
   function showBanner() {
+    if (ls) {
+      var seen = (parseInt(ls.getItem(SEEN_KEY), 10) || 0) + 1;
+      if (seen > SEEN_CAP) {
+        ls.setItem(DISMISS_KEY, String(Date.now()));
+        ls.removeItem(SEEN_KEY);
+        return;
+      }
+      ls.setItem(SEEN_KEY, String(seen));
+    }
     banner.hidden = false;
     void banner.offsetHeight; // reflow so the slide-in transition runs
     banner.classList.add('pwa-install-banner--visible');
@@ -144,7 +155,7 @@
   }
 
   function dismissBanner() {
-    if (ls) ls.setItem(DISMISS_KEY, String(Date.now()));
+    if (ls) { ls.setItem(DISMISS_KEY, String(Date.now())); ls.removeItem(SEEN_KEY); }
     banner.classList.remove('pwa-install-banner--visible');
     setTimeout(function () { banner.hidden = true; }, 280);
   }
@@ -260,6 +271,7 @@
 
   // ── Wire up interactions ───────────────────────────────────
   bannerBtn.addEventListener('click', function () {
+    if (ls) ls.removeItem(SEEN_KEY);
     if (deferredPrompt) {
       // Chrome-family with native prompt ready — trigger directly.
       deferredPrompt.prompt();

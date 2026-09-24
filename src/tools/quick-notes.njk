@@ -32,6 +32,7 @@ eleventyComputed:
     <button class="qn-sidebar__new" id="qn-new-btn" title="{{ 'tool.quick-notes.new_note_title' | t }}">
       <span>+</span> {{ "tool.quick-notes.new_note_btn" | t }}
     </button>
+    <button type="button" class="qn-sidebar__export" id="qn-export-all-btn" title="{{ 'tool.quick-notes.export_all_title' | t }}">{{ "tool.quick-notes.export_all_btn" | t }}</button>
   </aside>
 
   <div class="qn-editor" id="qn-editor">
@@ -81,6 +82,7 @@ eleventyComputed:
 (() => {
   const COPY = {
     untitled:          {{ ("tool.quick-notes.untitled"           | t) | dump | safe }},
+    exportAllSkipped:  {{ ("tool.quick-notes.export_all_skipped" | t) | dump | safe }},
     savedPrefix:       {{ ("tool.quick-notes.saved_prefix"       | t) | dump | safe }},
     emptyPreview:      {{ ("tool.quick-notes.empty_preview"      | t) | dump | safe }},
     confirmDelete:     {{ ("tool.quick-notes.confirm_delete"     | t) | dump | safe }},
@@ -490,6 +492,26 @@ eleventyComputed:
     MentriaUI.downloadFile(filename, blob);
   }
 
+  async function exportAll() {
+    const sorted = notes.slice().sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0));
+    const parts = [];
+    let skipped = 0;
+    for (const n of sorted) {
+      let body;
+      if (!n.enc) body = n.id === activeId && !textarea.hidden ? textarea.value : String(n.body || '');
+      else if (sessionKey) {
+        try { body = await decryptNote(n); } catch (_) { body = null; }
+      } else body = null;
+      if (body == null) { skipped++; continue; }
+      parts.push('# ' + ((n.title || '').trim() || COPY.untitled) + '\n\n' + body.trim() + '\n');
+    }
+    if (parts.length) {
+      const stamp = new Date().toISOString().slice(0, 10);
+      MentriaUI.downloadFile('mentria-notes-' + stamp + '.md', new Blob([parts.join('\n---\n\n')], { type: 'text/markdown;charset=utf-8' }));
+    }
+    if (skipped) MentriaUI.toast(COPY.exportAllSkipped.replace('{n}', skipped));
+  }
+
   async function shareNote() {
     const note = getNote(activeId);
     if (!note || !textarea.value) return;
@@ -591,6 +613,7 @@ eleventyComputed:
     MentriaBus.provide('notes.list', () => notes.map((n) => ({ title: n.title || '', preview: String(n.body || n.text || '').replace(/\s+/g, ' ').slice(0, 80), updatedAt: n.updatedAt || 0 })), { description: 'List saved notes: title, a short preview, and last-updated time.', parameters: { type: 'object', properties: {} }, ai: true, readonly: true });
   }).catch(() => {});
   exportBtn.addEventListener('click', exportNote);
+  document.getElementById('qn-export-all-btn').addEventListener('click', exportAll);
   if (navigator.share) shareBtn.addEventListener('click', shareNote);
   else shareBtn.hidden = true;
   mdpdfBtn.addEventListener('click', () => {
@@ -815,6 +838,24 @@ eleventyComputed:
   cursor: pointer;
   transition: all 0.2s ease;
 }
+.qn-sidebar__export {
+  margin: 0 0.6rem 0.6rem;
+  padding: 0.45rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--term-muted);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.qn-sidebar__export:hover,
+.qn-sidebar__export:focus-visible {
+  color: var(--syn-purple);
+  background: var(--purple-8);
+}
+
 .qn-sidebar__new:hover {
   background: var(--purple-8);
   border-color: rgba(167, 139, 250, 0.6);

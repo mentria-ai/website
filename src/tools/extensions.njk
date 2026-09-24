@@ -61,6 +61,7 @@ const COPY = {
   permsRemoved:  {{ ("tool.extensions.update_perms_removed" | t) | dump | safe }},
   confirmRemove: {{ ("tool.extensions.confirm_remove" | t) | dump | safe }},
   installedOk:   {{ ("tool.extensions.installed_ok"   | t) | dump | safe }},
+  installedWhere:{{ ("tool.extensions.installed_where" | t) | dump | safe }},
   errPrefix:     {{ ("tool.extensions.err_prefix"     | t) | dump | safe }},
   btnOpen:       {{ ("tool.extensions.btn_open"       | t) | dump | safe }},
   btnExport:     {{ ("tool.extensions.btn_export"     | t) | dump | safe }},
@@ -130,6 +131,12 @@ function fmt(tpl, vars) {
   return tpl.replace(/\{(\w+)\}/g, (s, k) => (vars[k] != null ? vars[k] : s));
 }
 
+function announceInstall(entry) {
+  const m = entry && entry.manifest;
+  if (!m || !(m.mounts && m.mounts.tool) || !window.MentriaUI || !window.MentriaUI.toast) return;
+  window.MentriaUI.toast(fmt(COPY.installedWhere, { name: m.name }));
+}
+
 async function installFlow(html) {
   clearError();
   try {
@@ -137,6 +144,7 @@ async function installFlow(html) {
     if (!entry) return;
     showOk(entry.manifest.name + ' ' + COPY.installedOk);
     render();
+    announceInstall(entry);
   } catch (e) { showError(e.message); }
 }
 
@@ -348,6 +356,7 @@ async function galInstall(entry, card, b) {
     const result = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
     if (!result) { b.disabled = false; return; }
     render();
+    announceInstall(result);
   } catch (e) {
     b.disabled = false;
     galStatus(card, e.message);

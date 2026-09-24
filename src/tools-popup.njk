@@ -1,0 +1,12 @@
+---
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "/fragments/tools-popup.{{ locale.code }}.html"
+eleventyExcludeFromCollections: true
+eleventyExcludeFromSitemap: true
+eleventyComputed:
+  lang: "{{ locale.code }}"
+---
+{% include "tool-launcher.njk" %}

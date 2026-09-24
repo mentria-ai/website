@@ -527,7 +527,6 @@
       <button type="button" class="m-update__btn" id="m-update-go">{{ "pwa.update_btn" | t }}</button>
       <button type="button" class="m-update__x" id="m-update-later" aria-label="{{ 'pwa.update_later' | t }}" title="{{ 'pwa.update_later' | t }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
-    <template id="tools-popup-tpl">{% include "tool-launcher.njk" %}</template>
     <div class="tools-popup" id="tools-popup" hidden role="dialog" aria-modal="true" aria-label="{{ 'nav.tools' | t }}">
       <div class="tools-popup__scrim" data-tools-close></div>
       <div class="tools-popup__panel" tabindex="-1">
@@ -538,31 +537,48 @@
     <script>
       (function () {
         var popup = document.getElementById('tools-popup');
-        var tpl = document.getElementById('tools-popup-tpl');
-        if (!popup || !tpl) return;
+        if (!popup) return;
         var body = popup.querySelector('.tools-popup__body');
         var panel = popup.querySelector('.tools-popup__panel');
-        var built = false;
+        var FRAG = '/fragments/tools-popup.';
+        var FRAG_V = '.html?v={{ buildHash }}';
+        var fragPromise = null;
+        var built = null;
         var prevFocus = null;
+        function loadFrag() {
+          if (!fragPromise) {
+            var get = function (code) { return fetch(FRAG + code + FRAG_V).then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.text(); }); };
+            fragPromise = get(document.documentElement.lang || {{ (lang or 'en') | dump | safe }}).catch(function () { return get('en'); }).catch(function (err) { fragPromise = null; throw err; });
+          }
+          return fragPromise;
+        }
         function build() {
-          if (built) return;
-          built = true;
-          body.appendChild(document.importNode(tpl.content, true));
-          var rv = body.querySelectorAll('.reveal');
-          for (var i = 0; i < rv.length; i++) rv[i].classList.add('revealed');
-          ['/assets/js/tool-launcher.js?v={{ buildHash }}', '/assets/js/mentria-ext-launch.js'].forEach(function (src) {
-            var s = document.createElement('script'); s.src = src; s.defer = true; document.body.appendChild(s);
-          });
+          if (built) return built;
+          built = loadFrag().then(function (html) {
+            body.appendChild(document.createRange().createContextualFragment(html));
+            var rv = body.querySelectorAll('.reveal');
+            for (var i = 0; i < rv.length; i++) rv[i].classList.add('revealed');
+            ['/assets/js/tool-launcher.js?v={{ buildHash }}', '/assets/js/mentria-ext-launch.js'].forEach(function (src) {
+              var s = document.createElement('script'); s.src = src; s.defer = true; document.body.appendChild(s);
+            });
+          }).catch(function () { built = null; });
+          return built;
         }
         function open(fromHash) {
-          build();
           prevFocus = document.activeElement;
           popup.hidden = false;
           document.body.classList.add('is-tools-open');
           if (!fromHash) history.pushState({ tools: true }, '', '#tools');
-          var input = popup.querySelector('input[type="search"], input');
-          setTimeout(function () { (input || panel).focus(); }, 30);
+          panel.focus();
+          build().then(function () {
+            if (popup.hidden) return;
+            var input = popup.querySelector('input[type="search"], input');
+            if (input) input.focus();
+          });
         }
+        window.addEventListener('load', function () {
+          (window.requestIdleCallback || function (fn) { return setTimeout(fn, 2000); })(function () { loadFrag().catch(function () {}); });
+        });
         function close(fromPop) {
           if (popup.hidden) return;
           popup.hidden = true;

@@ -1,0 +1,2003 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/world-clock/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.world-clock.title' | t }}"
+  description: "{{ 'tools.world-clock.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">world-clock</span></p>
+  <h1>{{ "tools.world-clock.title" | t }}</h1>
+  <p>{{ "tools.world-clock.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "world-clock.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="wc" id="wc">
+
+  <div class="wc__search">
+    <label class="wc__label" for="wc-q">{{ "tool.world-clock.search_label" | t }}</label>
+    <div class="wc__field">
+      <svg class="wc__glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5 20 20"></path></svg>
+      <input class="m-input wc__input" id="wc-q" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="wc-options" aria-describedby="wc-q-hint" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="{{ 'tool.world-clock.search_placeholder' | t }}">
+    </div>
+    <p class="sr-only" id="wc-q-hint">{{ "tool.world-clock.search_hint" | t }}</p>
+    <ul class="wc__options" id="wc-options" role="listbox" aria-label="{{ 'tool.world-clock.listbox_label' | t }}" hidden></ul>
+    <p class="wc__status" id="wc-status" role="status" aria-live="polite"></p>
+  </div>
+
+  <details class="wc__conv" id="wc-conv">
+    <summary class="wc__conv-sum"><span>{{ "tool.world-clock.conv_title" | t }}</span><span class="wc__caret" aria-hidden="true">▾</span></summary>
+    <div class="wc__conv-body">
+      <div class="wc__conv-head">
+        <span class="wc__mode"><span class="wc__mode-dot" aria-hidden="true"></span><span id="wc-mode-text"></span></span>
+        <button class="m-btn m-btn--ghost m-btn--pill wc__now" id="wc-now" type="button">{{ "tool.world-clock.btn_now" | t }}</button>
+      </div>
+      <div class="wc__conv-grid">
+        <div class="wc__cf">
+          <label class="wc__label" for="wc-date">{{ "tool.world-clock.conv_date" | t }}</label>
+          <input class="m-input wc__cin" id="wc-date" type="date" min="1900-01-01" max="2199-12-31">
+        </div>
+        <div class="wc__cf">
+          <label class="wc__label" for="wc-time">{{ "tool.world-clock.conv_time" | t }}</label>
+          <input class="m-input wc__cin" id="wc-time" type="time" step="60">
+        </div>
+        <div class="wc__cf wc__cf--zone">
+          <label class="wc__label" for="wc-ref">{{ "tool.world-clock.conv_zone" | t }}</label>
+          <select class="m-input wc__cin" id="wc-ref"></select>
+        </div>
+      </div>
+      <p class="wc__note" id="wc-note" role="status" aria-live="polite"></p>
+      <button class="m-btn m-btn--ghost m-btn--pill wc__alt" id="wc-alt" type="button" hidden></button>
+    </div>
+  </details>
+
+  <div class="wc__head">
+    <h2 class="wc__heading" id="wc-list-title">{{ "tool.world-clock.list_title" | t }}</h2>
+    <div class="m-seg wc__seg" id="wc-fmt" role="radiogroup" aria-label="{{ 'tool.world-clock.format_aria' | t }}">
+      <button type="button" data-value="12">{{ "tool.world-clock.format_12" | t }}</button>
+      <button type="button" data-value="24">{{ "tool.world-clock.format_24" | t }}</button>
+    </div>
+  </div>
+  <ol class="wc__list" id="wc-list" aria-labelledby="wc-list-title"></ol>
+  <p class="wc__empty" id="wc-empty" hidden>{{ "tool.world-clock.empty_hint" | t }}</p>
+
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(() => {
+  'use strict';
+
+  const COPY = {
+    local_badge:          {{ ("tool.world-clock.local_badge"          | t) | dump | safe }},
+    ref_local:            {{ ("tool.world-clock.ref_local"            | t) | dump | safe }},
+    day:                  {{ ("tool.world-clock.day"                  | t) | dump | safe }},
+    night:                {{ ("tool.world-clock.night"                | t) | dump | safe }},
+    move_up:              {{ ("tool.world-clock.move_up"              | t) | dump | safe }},
+    move_down:            {{ ("tool.world-clock.move_down"            | t) | dump | safe }},
+    remove:               {{ ("tool.world-clock.remove"               | t) | dump | safe }},
+    added:                {{ ("tool.world-clock.added"                | t) | dump | safe }},
+    removed:              {{ ("tool.world-clock.removed"              | t) | dump | safe }},
+    moved_up:             {{ ("tool.world-clock.moved_up"             | t) | dump | safe }},
+    moved_down:           {{ ("tool.world-clock.moved_down"           | t) | dump | safe }},
+    already:              {{ ("tool.world-clock.already"              | t) | dump | safe }},
+    is_local:             {{ ("tool.world-clock.is_local"             | t) | dump | safe }},
+    list_full:            {{ ("tool.world-clock.list_full"            | t) | dump | safe }},
+    results_one:          {{ ("tool.world-clock.results_one"          | t) | dump | safe }},
+    results_other:        {{ ("tool.world-clock.results_other"        | t) | dump | safe }},
+    no_results:           {{ ("tool.world-clock.no_results"           | t) | dump | safe }},
+    added_tag:            {{ ("tool.world-clock.added_tag"            | t) | dump | safe }},
+    mode_live:            {{ ("tool.world-clock.mode_live"            | t) | dump | safe }},
+    mode_chosen:          {{ ("tool.world-clock.mode_chosen"          | t) | dump | safe }},
+    note_exact:           {{ ("tool.world-clock.note_exact"           | t) | dump | safe }},
+    note_skipped:         {{ ("tool.world-clock.note_skipped"         | t) | dump | safe }},
+    note_repeated_first:  {{ ("tool.world-clock.note_repeated_first"  | t) | dump | safe }},
+    note_repeated_second: {{ ("tool.world-clock.note_repeated_second" | t) | dump | safe }},
+    btn_show_first:       {{ ("tool.world-clock.btn_show_first"       | t) | dump | safe }},
+    btn_show_second:      {{ ("tool.world-clock.btn_show_second"      | t) | dump | safe }},
+    note_incomplete:      {{ ("tool.world-clock.note_incomplete"      | t) | dump | safe }},
+    note_live:            {{ ("tool.world-clock.note_live"            | t) | dump | safe }},
+    region_africa:        {{ ("tool.world-clock.region_africa"        | t) | dump | safe }},
+    region_america:       {{ ("tool.world-clock.region_america"       | t) | dump | safe }},
+    region_antarctica:    {{ ("tool.world-clock.region_antarctica"    | t) | dump | safe }},
+    region_arctic:        {{ ("tool.world-clock.region_arctic"        | t) | dump | safe }},
+    region_asia:          {{ ("tool.world-clock.region_asia"          | t) | dump | safe }},
+    region_atlantic:      {{ ("tool.world-clock.region_atlantic"      | t) | dump | safe }},
+    region_australia:     {{ ("tool.world-clock.region_australia"     | t) | dump | safe }},
+    region_europe:        {{ ("tool.world-clock.region_europe"        | t) | dump | safe }},
+    region_indian:        {{ ("tool.world-clock.region_indian"        | t) | dump | safe }},
+    region_pacific:       {{ ("tool.world-clock.region_pacific"       | t) | dump | safe }}
+  };
+
+  function zoneKit() {
+    const MINUTE = 60000;
+    const DAY = 86400000;
+    const MODERN = Object.assign(Object.create(null), {
+      'Africa/Asmera': 'Africa/Asmara',
+      'America/Buenos_Aires': 'America/Argentina/Buenos_Aires',
+      'America/Catamarca': 'America/Argentina/Catamarca',
+      'America/Coral_Harbour': 'America/Atikokan',
+      'America/Cordoba': 'America/Argentina/Cordoba',
+      'America/Godthab': 'America/Nuuk',
+      'America/Indianapolis': 'America/Indiana/Indianapolis',
+      'America/Jujuy': 'America/Argentina/Jujuy',
+      'America/Louisville': 'America/Kentucky/Louisville',
+      'America/Mendoza': 'America/Argentina/Mendoza',
+      'Asia/Calcutta': 'Asia/Kolkata',
+      'Asia/Dacca': 'Asia/Dhaka',
+      'Asia/Katmandu': 'Asia/Kathmandu',
+      'Asia/Macao': 'Asia/Macau',
+      'Asia/Rangoon': 'Asia/Yangon',
+      'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+      'Asia/Thimbu': 'Asia/Thimphu',
+      'Asia/Ulan_Bator': 'Asia/Ulaanbaatar',
+      'Atlantic/Faeroe': 'Atlantic/Faroe',
+      'Europe/Kiev': 'Europe/Kyiv',
+      'Pacific/Enderbury': 'Pacific/Kanton',
+      'Pacific/Ponape': 'Pacific/Pohnpei',
+      'Pacific/Truk': 'Pacific/Chuuk',
+      'Etc/GMT': 'UTC',
+      'Etc/GMT+0': 'UTC',
+      'Etc/GMT-0': 'UTC',
+      'Etc/GMT0': 'UTC',
+      'Etc/Greenwich': 'UTC',
+      'Etc/UCT': 'UTC',
+      'Etc/UTC': 'UTC',
+      'Etc/Universal': 'UTC',
+      'Etc/Zulu': 'UTC',
+      'GMT': 'UTC',
+      'GMT0': 'UTC',
+      'Greenwich': 'UTC',
+      'UCT': 'UTC',
+      'Universal': 'UTC',
+      'Zulu': 'UTC'
+    });
+    const LEGACY = Object.create(null);
+    Object.keys(MODERN).forEach((old) => {
+      const current = MODERN[old];
+      if (current !== 'UTC' && !LEGACY[current]) LEGACY[current] = old;
+    });
+    const DEFAULTS = ['America/New_York', 'Europe/London', 'Asia/Tokyo'];
+    const FALLBACK = [
+      'Pacific/Pago_Pago', 'Pacific/Honolulu', 'Pacific/Marquesas', 'America/Anchorage', 'America/Los_Angeles',
+      'America/Denver', 'America/Phoenix', 'America/Chicago', 'America/Mexico_City', 'America/New_York',
+      'America/Toronto', 'America/Bogota', 'America/Lima', 'America/Caracas', 'America/Halifax',
+      'America/Santiago', 'America/St_Johns', 'America/Sao_Paulo', 'America/Argentina/Buenos_Aires', 'Atlantic/South_Georgia',
+      'Atlantic/Azores', 'Atlantic/Cape_Verde', 'UTC', 'Europe/London', 'Europe/Lisbon',
+      'Africa/Lagos', 'Europe/Paris', 'Europe/Berlin', 'Europe/Madrid', 'Europe/Rome',
+      'Africa/Cairo', 'Africa/Johannesburg', 'Europe/Athens', 'Europe/Kiev', 'Asia/Jerusalem',
+      'Europe/Istanbul', 'Europe/Moscow', 'Asia/Riyadh', 'Africa/Nairobi', 'Asia/Tehran',
+      'Asia/Dubai', 'Asia/Kabul', 'Asia/Karachi', 'Asia/Kolkata', 'Asia/Kathmandu',
+      'Asia/Dhaka', 'Asia/Rangoon', 'Asia/Bangkok', 'Asia/Jakarta', 'Asia/Shanghai',
+      'Asia/Hong_Kong', 'Asia/Singapore', 'Australia/Perth', 'Australia/Eucla', 'Asia/Tokyo',
+      'Asia/Seoul', 'Australia/Darwin', 'Australia/Adelaide', 'Australia/Brisbane', 'Australia/Sydney',
+      'Australia/Lord_Howe', 'Pacific/Noumea', 'Pacific/Auckland', 'Pacific/Fiji', 'Pacific/Chatham',
+      'Pacific/Tongatapu', 'Pacific/Kiritimati'
+    ];
+    const canon = new Map();
+    const partFmt = new Map();
+    let nameFmt = new Map();
+
+    function canonicalOf(id) {
+      if (typeof id !== 'string' || !id || id.length > 64) return null;
+      if (canon.has(id)) return canon.get(id);
+      let found = null;
+      try {
+        found = new Intl.DateTimeFormat('en-US', { timeZone: id }).resolvedOptions().timeZone || id;
+      } catch (_) {
+        found = null;
+      }
+      canon.set(id, found);
+      return found;
+    }
+
+    function isValidZone(id) {
+      return canonicalOf(id) !== null;
+    }
+
+    function zoneKey(id) {
+      const found = canonicalOf(id);
+      if (!found) return null;
+      return MODERN[found] || MODERN[id] || found;
+    }
+
+    function sameZone(a, b) {
+      const ka = zoneKey(a);
+      return ka !== null && ka === zoneKey(b);
+    }
+
+    function storageId(id) {
+      const key = zoneKey(id);
+      if (!key) return null;
+      return isValidZone(key) ? key : canonicalOf(id);
+    }
+
+    function resolveStoredId(id) {
+      if (isValidZone(id)) return storageId(id);
+      const old = typeof id === 'string' ? LEGACY[id] : null;
+      return old && isValidZone(old) ? storageId(old) : null;
+    }
+
+    function utcMs(y, mo, d, h, mi, s) {
+      const dt = new Date(0);
+      dt.setUTCFullYear(y, mo - 1, d);
+      dt.setUTCHours(h || 0, mi || 0, s || 0, 0);
+      return dt.getTime();
+    }
+
+    function wallParts(zone, ms) {
+      let fmt = partFmt.get(zone);
+      if (!fmt) {
+        fmt = new Intl.DateTimeFormat('en-US', {
+          timeZone: zone, hour12: false,
+          year: 'numeric', month: 'numeric', day: 'numeric',
+          hour: 'numeric', minute: 'numeric', second: 'numeric'
+        });
+        partFmt.set(zone, fmt);
+      }
+      const out = { year: 1970, month: 1, day: 1, hour: 0, minute: 0, second: 0 };
+      const parts = fmt.formatToParts(ms);
+      for (let i = 0; i < parts.length; i++) {
+        const type = parts[i].type;
+        if (type === 'year' || type === 'month' || type === 'day' || type === 'hour' || type === 'minute' || type === 'second') {
+          out[type] = parseInt(parts[i].value, 10);
+        }
+      }
+      if (out.hour === 24) out.hour = 0;
+      return out;
+    }
+
+    function offsetFromParts(p, ms) {
+      const base = Math.floor(ms / 1000) * 1000;
+      return Math.round((utcMs(p.year, p.month, p.day, p.hour, p.minute, p.second) - base) / MINUTE);
+    }
+
+    function offsetMinutes(zone, ms) {
+      return offsetFromParts(wallParts(zone, ms), ms);
+    }
+
+    function resolveWall(zone, y, mo, d, h, mi) {
+      const local = utcMs(y, mo, d, h, mi, 0);
+      const before = offsetMinutes(zone, local - DAY);
+      const after = offsetMinutes(zone, local + DAY);
+      const tries = before === after ? [before] : [before, after];
+      const hits = [];
+      for (let i = 0; i < tries.length; i++) {
+        const at = local - tries[i] * MINUTE;
+        if (offsetMinutes(zone, at) === tries[i] && hits.indexOf(at) < 0) hits.push(at);
+      }
+      hits.sort((a, b) => a - b);
+      if (hits.length > 1) {
+        return { kind: 'repeated', ms: hits[0], options: [hits[0], hits[hits.length - 1]], shift: Math.abs(before - after) };
+      }
+      if (hits.length === 1 || before === after) {
+        const at = hits.length ? hits[0] : local - before * MINUTE;
+        return { kind: 'exact', ms: at, options: [at], shift: 0 };
+      }
+      return { kind: 'skipped', ms: local - before * MINUTE, options: [], shift: Math.abs(after - before) };
+    }
+
+    function pad2(n) {
+      return (n < 10 ? '0' : '') + n;
+    }
+
+    function formatOffset(min) {
+      const abs = Math.abs(min);
+      const h = Math.floor(abs / 60);
+      const m = abs % 60;
+      return 'UTC' + (min < 0 ? '\u2212' : '+') + h + (m ? ':' + pad2(m) : '');
+    }
+
+    function dayNumber(p) {
+      return Math.round(utcMs(p.year, p.month, p.day, 0, 0, 0) / DAY);
+    }
+
+    function dayDiff(a, b) {
+      return dayNumber(a) - dayNumber(b);
+    }
+
+    function isoString(p, off) {
+      const abs = Math.abs(off);
+      return String(p.year).padStart(4, '0') + '-' + pad2(p.month) + '-' + pad2(p.day) +
+        'T' + pad2(p.hour) + ':' + pad2(p.minute) + ':' + pad2(p.second) +
+        (off < 0 ? '-' : '+') + pad2(Math.floor(abs / 60)) + ':' + pad2(abs % 60);
+    }
+
+    function toDateValue(p) {
+      return String(p.year).padStart(4, '0') + '-' + pad2(p.month) + '-' + pad2(p.day);
+    }
+
+    function toTimeValue(p) {
+      return pad2(p.hour) + ':' + pad2(p.minute);
+    }
+
+    function intOf(s) {
+      if (typeof s !== 'string' || !s.length || s.length > 6) return NaN;
+      for (let i = 0; i < s.length; i++) {
+        const c = s.charCodeAt(i);
+        if (c < 48 || c > 57) return NaN;
+      }
+      return parseInt(s, 10);
+    }
+
+    function parseDateValue(v) {
+      const parts = String(v || '').split('-');
+      if (parts.length !== 3) return null;
+      const y = intOf(parts[0]);
+      const m = intOf(parts[1]);
+      const d = intOf(parts[2]);
+      if (!(y >= 1900 && y <= 2199) || !(m >= 1 && m <= 12) || !(d >= 1 && d <= 31)) return null;
+      const check = new Date(utcMs(y, m, d, 0, 0, 0));
+      if (check.getUTCMonth() !== m - 1 || check.getUTCDate() !== d) return null;
+      return { y, m, d };
+    }
+
+    function parseTimeValue(v) {
+      const parts = String(v || '').split(':');
+      if (parts.length < 2 || parts.length > 3) return null;
+      const h = intOf(parts[0]);
+      const mi = intOf(parts[1]);
+      if (!(h >= 0 && h <= 23) || !(mi >= 0 && mi <= 59)) return null;
+      return { h, mi };
+    }
+
+    function isDaytime(hour) {
+      return hour >= 6 && hour < 18;
+    }
+
+    function tickDelay(now) {
+      const into = ((now % 1000) + 1000) % 1000;
+      return 1000 - into + 15;
+    }
+
+    function prettify(s) {
+      return String(s).split('_').join(' ');
+    }
+
+    function cityOf(id) {
+      const key = zoneKey(id) || String(id || '');
+      if (key === 'UTC') return 'UTC';
+      const parts = key.split('/');
+      if (parts[0] === 'Etc') return formatOffset(offsetMinutes(canonicalOf(id) || key, 0));
+      return prettify(parts[parts.length - 1]);
+    }
+
+    function subRegionOf(id) {
+      const parts = (zoneKey(id) || '').split('/');
+      return parts.length > 2 ? prettify(parts[1]) : '';
+    }
+
+    function regionOf(id) {
+      const parts = (zoneKey(id) || '').split('/');
+      return parts.length > 1 && parts[0] !== 'Etc' ? parts[0] : '';
+    }
+
+    function normalizeText(s) {
+      let text = String(s == null ? '' : s);
+      try { text = text.normalize('NFKD'); } catch (_) {}
+      let out = '';
+      for (let i = 0; i < text.length; i++) {
+        const c = text.charCodeAt(i);
+        if (c >= 0x300 && c <= 0x36f) continue;
+        const ch = text.charAt(i);
+        if (c <= 32 || ch === '_' || ch === '/' || ch === ',' || ch === '.' || ch === '(' || ch === ')' || ch === '\u00b7' || ch === '\u2019' || ch === '\'') out += ' ';
+        else if (ch === '\u2212') out += '-';
+        else out += ch;
+      }
+      return out.toLowerCase().split(' ').filter(Boolean).join(' ');
+    }
+
+    function wordStart(hay, token) {
+      return hay.indexOf(token) === 0 || hay.indexOf(' ' + token) >= 0;
+    }
+
+    function scoreEntry(entry, tokens) {
+      let score = 0;
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        if (entry.cityNorm.indexOf(token) === 0) score += 6;
+        else if (wordStart(entry.cityNorm, token)) score += 5;
+        else if (entry.cityNorm.indexOf(token) >= 0) score += 3;
+        else if (wordStart(entry.hayNorm, token)) score += 2;
+        else if (entry.hayNorm.indexOf(token) >= 0) score += 1;
+        else return 0;
+      }
+      return score;
+    }
+
+    function zoneLongName(zone, lang, ms, style) {
+      const key = lang + '|' + style + '|' + zone;
+      let fmt = nameFmt.get(key);
+      if (fmt === undefined) {
+        try {
+          fmt = new Intl.DateTimeFormat(lang, { timeZone: zone, timeZoneName: style });
+        } catch (_) {
+          fmt = null;
+        }
+        nameFmt.set(key, fmt);
+      }
+      if (!fmt) return '';
+      try {
+        const parts = fmt.formatToParts(ms);
+        for (let i = 0; i < parts.length; i++) {
+          if (parts[i].type === 'timeZoneName') return parts[i].value;
+        }
+      } catch (_) {}
+      return '';
+    }
+
+    function looksLikeOffset(name) {
+      const s = String(name || '').trim();
+      if (!s) return true;
+      const head = s.slice(0, 3).toUpperCase();
+      if (head !== 'GMT' && head !== 'UTC') return false;
+      const rest = s.slice(3).trim();
+      return rest === '' || rest.charAt(0) === '+' || rest.charAt(0) === '-' || rest.charAt(0) === '\u2212';
+    }
+
+    function displayZoneName(zone, lang, ms) {
+      const long = zoneLongName(zone, lang, ms, 'long');
+      if (long && !looksLikeOffset(long)) return long;
+      const generic = zoneLongName(zone, lang, ms, 'longGeneric');
+      if (generic && !looksLikeOffset(generic)) return generic;
+      return '';
+    }
+
+    function resetNames() {
+      nameFmt = new Map();
+    }
+
+    function buildEntries(ids, lang, ms, regionLabel) {
+      const seen = new Set();
+      const out = [];
+      for (let i = 0; i < ids.length; i++) {
+        const key = zoneKey(ids[i]);
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        const id = storageId(ids[i]);
+        const off = offsetMinutes(id, ms);
+        const city = cityOf(id);
+        const sub = subRegionOf(id);
+        const regionRaw = regionOf(id);
+        const region = regionRaw ? (regionLabel(regionRaw) || regionRaw) : '';
+        const name = displayZoneName(id, lang, ms);
+        const generic = zoneLongName(id, lang, ms, 'longGeneric');
+        const offLabel = formatOffset(off);
+        out.push({
+          id: id, key: key, city: city, sub: sub, region: region, name: name, off: off, offLabel: offLabel,
+          cityNorm: normalizeText(city),
+          hayNorm: normalizeText([city, sub, region, regionRaw, key, ids[i], name, generic, offLabel].join(' '))
+        });
+      }
+      return out;
+    }
+
+    function makeCollator(lang) {
+      try {
+        return new Intl.Collator(lang, { sensitivity: 'base' });
+      } catch (_) {
+        return new Intl.Collator('en', { sensitivity: 'base' });
+      }
+    }
+
+    function searchEntries(entries, query, limit, lang) {
+      const whole = normalizeText(query);
+      if (!whole) return [];
+      const tokens = whole.split(' ');
+      const coll = makeCollator(lang);
+      const scored = [];
+      for (let i = 0; i < entries.length; i++) {
+        const score = scoreEntry(entries[i], tokens);
+        if (score > 0) scored.push({ entry: entries[i], score: score });
+      }
+      scored.sort((a, b) => (b.score - a.score) || coll.compare(a.entry.city, b.entry.city) || (a.entry.off - b.entry.off));
+      return scored.slice(0, limit).map((r) => r.entry);
+    }
+
+    function allZoneIds() {
+      let list = null;
+      try {
+        if (typeof Intl.supportedValuesOf === 'function') list = Intl.supportedValuesOf('timeZone');
+      } catch (_) {
+        list = null;
+      }
+      const base = list && list.length ? list.slice() : FALLBACK.slice();
+      if (base.indexOf('UTC') < 0) base.push('UTC');
+      return base.filter(isValidZone);
+    }
+
+    function sanitizeState(raw, max) {
+      const out = { saved: false, zones: [], h12: null };
+      if (!raw || typeof raw !== 'object') return out;
+      if (raw.h12 === true || raw.h12 === false) out.h12 = raw.h12;
+      if (!Array.isArray(raw.zones)) return out;
+      out.saved = true;
+      const seen = new Set();
+      for (let i = 0; i < raw.zones.length && out.zones.length < max; i++) {
+        const id = resolveStoredId(raw.zones[i]);
+        if (!id) continue;
+        const key = zoneKey(id);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.zones.push(id);
+      }
+      return out;
+    }
+
+    function pickDefaults(localId) {
+      const localKey = zoneKey(localId);
+      return DEFAULTS.filter((id) => isValidZone(id) && zoneKey(id) !== localKey).map(storageId);
+    }
+
+    function defaultHour12(lang) {
+      try {
+        const o = new Intl.DateTimeFormat(lang, { hour: 'numeric' }).resolvedOptions();
+        if (o.hourCycle) return o.hourCycle === 'h12' || o.hourCycle === 'h11';
+        if (typeof o.hour12 === 'boolean') return o.hour12;
+      } catch (_) {}
+      return false;
+    }
+
+    return {
+      DEFAULTS: DEFAULTS, FALLBACK: FALLBACK,
+      canonicalOf: canonicalOf, isValidZone: isValidZone, zoneKey: zoneKey, sameZone: sameZone,
+      storageId: storageId, resolveStoredId: resolveStoredId,
+      utcMs: utcMs, wallParts: wallParts, offsetFromParts: offsetFromParts, offsetMinutes: offsetMinutes,
+      resolveWall: resolveWall, formatOffset: formatOffset, dayDiff: dayDiff, isoString: isoString,
+      toDateValue: toDateValue, toTimeValue: toTimeValue, parseDateValue: parseDateValue, parseTimeValue: parseTimeValue,
+      isDaytime: isDaytime, tickDelay: tickDelay,
+      cityOf: cityOf, subRegionOf: subRegionOf, regionOf: regionOf,
+      normalizeText: normalizeText, scoreEntry: scoreEntry,
+      zoneLongName: zoneLongName, looksLikeOffset: looksLikeOffset, displayZoneName: displayZoneName, resetNames: resetNames,
+      buildEntries: buildEntries, searchEntries: searchEntries, allZoneIds: allZoneIds,
+      sanitizeState: sanitizeState, pickDefaults: pickDefaults, defaultHour12: defaultHour12
+    };
+  }
+
+  const Z = zoneKit();
+  const NS = 'tools';
+  const KEY = 'world_clock_zones';
+  const MAX_CLOCKS = 30;
+  const MAX_RESULTS = 60;
+  const ENTRY_TTL = 600000;
+  const REGION_COPY = {
+    Africa: 'region_africa', America: 'region_america', Antarctica: 'region_antarctica', Arctic: 'region_arctic',
+    Asia: 'region_asia', Atlantic: 'region_atlantic', Australia: 'region_australia', Europe: 'region_europe',
+    Indian: 'region_indian', Pacific: 'region_pacific'
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const root = $('wc');
+  const qInput = $('wc-q');
+  const optionsEl = $('wc-options');
+  const statusEl = $('wc-status');
+  const conv = $('wc-conv');
+  const modeText = $('wc-mode-text');
+  const nowBtn = $('wc-now');
+  const dateInput = $('wc-date');
+  const timeInput = $('wc-time');
+  const refSelect = $('wc-ref');
+  const noteEl = $('wc-note');
+  const altBtn = $('wc-alt');
+  const fmtEl = $('wc-fmt');
+  const listEl = $('wc-list');
+  const emptyEl = $('wc-empty');
+  const status = MentriaUI.status(statusEl);
+
+  let localId = detectLocal();
+  let saved = [];
+  let hasSaved = false;
+  let h12Choice = null;
+  let rows = [];
+  let mode = 'live';
+  let moment = Date.now();
+  let resolution = null;
+  let pickLater = false;
+  let refZone = localId;
+  let timer = 0;
+  let blurTimer = 0;
+  let noteKind = '';
+  let entries = null;
+  let entriesAt = 0;
+  let entriesLang = '';
+  let results = [];
+  let active = -1;
+  let fmtCache = new Map();
+
+  function detectLocal() {
+    let id = '';
+    try {
+      id = new Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    } catch (_) {
+      id = '';
+    }
+    return Z.isValidZone(id) ? id : 'UTC';
+  }
+
+  function lang() {
+    const l = document.documentElement.lang || 'en';
+    try {
+      Intl.DateTimeFormat.supportedLocalesOf([l]);
+      return l;
+    } catch (_) {
+      return 'en';
+    }
+  }
+
+  function fill(tpl, vars) {
+    let out = String(tpl);
+    Object.keys(vars).forEach((k) => { out = out.split('{' + k + '}').join(String(vars[k])); });
+    return out;
+  }
+
+  function el(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+
+  function setText(node, text) {
+    if (node.textContent !== text) node.textContent = text;
+  }
+
+  function cached(key, make) {
+    let value = fmtCache.get(key);
+    if (value === undefined) {
+      try {
+        value = make();
+      } catch (_) {
+        value = null;
+      }
+      fmtCache.set(key, value);
+    }
+    return value;
+  }
+
+  function hour12() {
+    return h12Choice === null ? Z.defaultHour12(lang()) : h12Choice;
+  }
+
+  function withCycle(o) {
+    if (hour12()) o.hour12 = true;
+    else o.hourCycle = 'h23';
+    return o;
+  }
+
+  function timeFmt(zone, seconds) {
+    return cached('t|' + (seconds ? 's' : 'm') + '|' + zone, () => {
+      const o = { timeZone: zone, hour: 'numeric', minute: '2-digit' };
+      if (seconds) o.second = '2-digit';
+      return new Intl.DateTimeFormat(lang(), withCycle(o));
+    });
+  }
+
+  function dateFmt(zone) {
+    return cached('d|' + zone, () => new Intl.DateTimeFormat(lang(), { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric' }));
+  }
+
+  function momentFmt(zone) {
+    return cached('m|' + zone, () => {
+      try {
+        return new Intl.DateTimeFormat(lang(), withCycle({ timeZone: zone, dateStyle: 'medium', timeStyle: 'short' }));
+      } catch (_) {
+        return new Intl.DateTimeFormat(lang(), withCycle({ timeZone: zone, year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }));
+      }
+    });
+  }
+
+  function wallTimeFmt() {
+    return cached('wt', () => new Intl.DateTimeFormat(lang(), withCycle({ timeZone: 'UTC', hour: 'numeric', minute: '2-digit' })));
+  }
+
+  function wallDateFmt() {
+    return cached('wd', () => {
+      try {
+        return new Intl.DateTimeFormat(lang(), { timeZone: 'UTC', dateStyle: 'medium' });
+      } catch (_) {
+        return new Intl.DateTimeFormat(lang(), { timeZone: 'UTC', year: 'numeric', month: 'short', day: 'numeric' });
+      }
+    });
+  }
+
+  function formatWith(fmt, ms) {
+    if (!fmt) return new Date(ms).toISOString();
+    try {
+      return fmt.format(ms);
+    } catch (_) {
+      return new Date(ms).toISOString();
+    }
+  }
+
+  function dayShiftLabel(diff) {
+    const fmt = cached('n|day', () => new Intl.NumberFormat(lang(), { style: 'unit', unit: 'day', unitDisplay: 'long', signDisplay: 'always' }));
+    const text = fmt ? fmt.format(diff) : (diff > 0 ? '+' : '-') + Math.abs(diff);
+    return text.replace('-', '\u2212');
+  }
+
+  function durationLabel(min) {
+    const whole = min % 60 === 0;
+    const unit = whole ? 'hour' : 'minute';
+    const n = whole ? min / 60 : min;
+    const fmt = cached('n|' + unit, () => new Intl.NumberFormat(lang(), { style: 'unit', unit: unit, unitDisplay: 'long' }));
+    return fmt ? fmt.format(n) : n + (whole ? ' h' : ' min');
+  }
+
+  function isOne(n) {
+    try {
+      return new Intl.PluralRules(lang()).select(n) === 'one';
+    } catch (_) {
+      return n === 1;
+    }
+  }
+
+  function timeParts(zone, ms, seconds) {
+    const fmt = timeFmt(zone, seconds);
+    if (!fmt) return { main: new Date(ms).toISOString().slice(11, seconds ? 19 : 16), period: '', first: false };
+    let parts;
+    try {
+      parts = fmt.formatToParts(ms);
+    } catch (_) {
+      return { main: formatWith(fmt, ms), period: '', first: false };
+    }
+    let main = '';
+    let period = '';
+    let first = false;
+    let seenHour = false;
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      if (p.type === 'dayPeriod' || p.type === 'dayperiod') {
+        period = p.value;
+        first = !seenHour;
+      } else {
+        if (p.type === 'hour') seenHour = true;
+        main += p.value;
+      }
+    }
+    return { main: main.trim(), period: period.trim(), first: first };
+  }
+
+  function cityName(zone) {
+    const city = Z.cityOf(zone);
+    const sub = Z.subRegionOf(zone);
+    return sub ? city + ', ' + sub : city;
+  }
+
+  function regionLabel(raw) {
+    const k = REGION_COPY[raw];
+    return k ? COPY[k] : raw;
+  }
+
+  function announce(msg, tone) {
+    status.set(msg, tone);
+  }
+
+  function currentMs() {
+    return mode === 'live' ? Date.now() : moment;
+  }
+
+  function loadState() {
+    let raw = null;
+    try {
+      raw = window.MentriaStore ? window.MentriaStore.get(NS, KEY) : null;
+    } catch (_) {
+      raw = null;
+    }
+    const state = Z.sanitizeState(raw, MAX_CLOCKS);
+    hasSaved = state.saved;
+    saved = state.saved ? state.zones : Z.pickDefaults(localId);
+    h12Choice = state.h12;
+  }
+
+  function persist() {
+    hasSaved = true;
+    if (!window.MentriaStore) return;
+    const value = { zones: saved.slice() };
+    if (h12Choice !== null) value.h12 = h12Choice;
+    try {
+      window.MentriaStore.set(NS, KEY, value);
+    } catch (_) {}
+  }
+
+  function makeButton(act, glyph, label, disabled) {
+    const b = el('button', 'm-btn m-btn--ghost wc__icon' + (act === 'remove' ? ' wc__icon--rm' : ''), glyph);
+    b.type = 'button';
+    b.dataset.act = act;
+    b.setAttribute('aria-label', label);
+    b.title = label;
+    b.disabled = !!disabled;
+    return b;
+  }
+
+  function makeRow(zone, isLocal, index, count) {
+    const li = el('li', 'wc__row' + (isLocal ? ' wc__row--local' : ''));
+    li.dataset.zone = zone;
+    const sky = el('span', 'wc__sky');
+    sky.setAttribute('role', 'img');
+    const place = el('div', 'wc__place');
+    place.appendChild(el('span', 'wc__city', Z.cityOf(zone)));
+    const sub = Z.subRegionOf(zone);
+    if (sub) place.appendChild(el('span', 'wc__sub', sub));
+    if (isLocal) place.appendChild(el('span', 'wc__here', COPY.local_badge));
+    const time = el('time', 'wc__time');
+    const main = el('span', 'wc__hm');
+    const period = el('span', 'wc__ap');
+    time.appendChild(main);
+    time.appendChild(period);
+    const zoneLine = el('div', 'wc__zone');
+    const zname = el('span', 'wc__zname');
+    const off = el('span', 'wc__off');
+    zoneLine.appendChild(zname);
+    zoneLine.appendChild(off);
+    const dateLine = el('div', 'wc__date');
+    const dtext = el('span', 'wc__dtext');
+    const shift = el('span', 'wc__shift');
+    dateLine.appendChild(dtext);
+    dateLine.appendChild(shift);
+    li.appendChild(sky);
+    li.appendChild(place);
+    li.appendChild(time);
+    li.appendChild(zoneLine);
+    li.appendChild(dateLine);
+    if (!isLocal) {
+      const name = cityName(zone);
+      const ctrls = el('div', 'wc__ctrls');
+      ctrls.appendChild(makeButton('up', '\u2191', fill(COPY.move_up, { city: name }), index === 0));
+      ctrls.appendChild(makeButton('down', '\u2193', fill(COPY.move_down, { city: name }), index === count - 1));
+      ctrls.appendChild(makeButton('remove', '\u00d7', fill(COPY.remove, { city: name }), false));
+      li.appendChild(ctrls);
+    }
+    return {
+      li: li, zone: zone, isLocal: isLocal, sky: sky, time: time, main: main, period: period,
+      zname: zname, off: off, dateLine: dateLine, dtext: dtext, shift: shift,
+      daytime: null, offMin: null, dayKey: ''
+    };
+  }
+
+  function updateRow(r, ms, localWall, live) {
+    const w = Z.wallParts(r.zone, ms);
+    const off = Z.offsetFromParts(w, ms);
+    const t = timeParts(r.zone, ms, live);
+    setText(r.main, t.main);
+    setText(r.period, t.period);
+    r.period.classList.toggle('is-first', t.first);
+    r.time.setAttribute('datetime', Z.isoString(w, off));
+    const day = Z.isDaytime(w.hour);
+    if (r.daytime !== day) {
+      r.daytime = day;
+      r.sky.dataset.sky = day ? 'day' : 'night';
+      r.sky.setAttribute('aria-label', day ? COPY.day : COPY.night);
+      r.sky.title = day ? COPY.day : COPY.night;
+    }
+    if (r.offMin !== off) {
+      r.offMin = off;
+      setText(r.off, Z.formatOffset(off));
+      const name = Z.displayZoneName(r.zone, lang(), ms);
+      setText(r.zname, name);
+      r.zname.hidden = !name;
+    }
+    const diff = Z.dayDiff(w, localWall);
+    const dayKey = Z.toDateValue(w) + '|' + diff;
+    if (r.dayKey !== dayKey) {
+      r.dayKey = dayKey;
+      const showDate = r.isLocal || diff !== 0;
+      r.dateLine.hidden = !showDate;
+      if (showDate) setText(r.dtext, formatWith(dateFmt(r.zone), ms));
+      setText(r.shift, diff ? dayShiftLabel(diff) : '');
+      r.shift.hidden = !diff;
+      r.dateLine.dataset.dir = diff > 0 ? 'ahead' : (diff < 0 ? 'behind' : 'same');
+    }
+  }
+
+  function renderTimes(ms) {
+    const localWall = Z.wallParts(localId, ms);
+    const live = mode === 'live';
+    for (let i = 0; i < rows.length; i++) updateRow(rows[i], ms, localWall, live);
+  }
+
+  function savedRow(zone) {
+    return rows.find((x) => !x.isLocal && x.zone === zone);
+  }
+
+  function focusRowControl(zone, act) {
+    const r = savedRow(zone);
+    if (!r) return false;
+    const order = act === 'up' ? ['up', 'down', 'remove'] : (act === 'down' ? ['down', 'up', 'remove'] : ['remove', 'up', 'down']);
+    for (let i = 0; i < order.length; i++) {
+      const b = r.li.querySelector('[data-act="' + order[i] + '"]');
+      if (b && !b.disabled) {
+        b.focus();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function rebuildRows(focusTarget) {
+    let target = focusTarget || null;
+    if (!target) {
+      const a = document.activeElement;
+      if (a && a !== listEl && listEl.contains(a) && a.dataset && a.dataset.act) {
+        const row = a.closest('.wc__row');
+        if (row) target = { zone: row.dataset.zone, act: a.dataset.act };
+      }
+    }
+    rows = [makeRow(localId, true, -1, 0)];
+    for (let i = 0; i < saved.length; i++) rows.push(makeRow(saved[i], false, i, saved.length));
+    const frag = document.createDocumentFragment();
+    rows.forEach((r) => frag.appendChild(r.li));
+    listEl.textContent = '';
+    listEl.appendChild(frag);
+    emptyEl.hidden = saved.length > 0;
+    rebuildRefOptions();
+    renderTimes(currentMs());
+    if (target) focusRowControl(target.zone, target.act);
+  }
+
+  function flashRow(zone) {
+    const r = savedRow(zone);
+    if (!r) return;
+    const li = r.li;
+    li.classList.add('is-new');
+    setTimeout(() => { li.classList.remove('is-new'); }, 1800);
+  }
+
+  function addZone(id) {
+    const name = cityName(id);
+    if (Z.sameZone(id, localId)) {
+      announce(fill(COPY.is_local, { city: name }));
+      return false;
+    }
+    if (saved.some((z) => Z.sameZone(z, id))) {
+      announce(fill(COPY.already, { city: name }));
+      return false;
+    }
+    if (saved.length >= MAX_CLOCKS) {
+      announce(fill(COPY.list_full, { n: MAX_CLOCKS }), 'err');
+      return false;
+    }
+    const sid = Z.storageId(id) || id;
+    saved.push(sid);
+    persist();
+    rebuildRows();
+    flashRow(sid);
+    announce(fill(COPY.added, { city: name }), 'ok');
+    return true;
+  }
+
+  function moveZone(i, dir) {
+    const j = i + dir;
+    if (j < 0 || j >= saved.length) return;
+    const zone = saved[i];
+    saved[i] = saved[j];
+    saved[j] = zone;
+    persist();
+    rebuildRows({ zone: zone, act: dir < 0 ? 'up' : 'down' });
+    announce(fill(dir < 0 ? COPY.moved_up : COPY.moved_down, { city: cityName(zone) }));
+  }
+
+  function removeZone(i) {
+    const zone = saved[i];
+    saved.splice(i, 1);
+    persist();
+    const next = saved[i] || saved[i - 1] || null;
+    rebuildRows(next ? { zone: next, act: 'remove' } : null);
+    if (!next) qInput.focus();
+    const msg = fill(COPY.removed, { city: cityName(zone) });
+    if (typeof MentriaUI.undoToast === 'function') {
+      status.clear();
+      MentriaUI.undoToast(msg, () => { restoreZone(zone, i); });
+    } else {
+      announce(msg);
+    }
+  }
+
+  function restoreZone(zone, index) {
+    if (saved.some((z) => Z.sameZone(z, zone))) return;
+    if (saved.length >= MAX_CLOCKS) {
+      announce(fill(COPY.list_full, { n: MAX_CLOCKS }), 'err');
+      return;
+    }
+    saved.splice(Math.min(index, saved.length), 0, zone);
+    persist();
+    rebuildRows({ zone: zone, act: 'remove' });
+    flashRow(zone);
+    announce(fill(COPY.added, { city: cityName(zone) }), 'ok');
+  }
+
+  function rebuildRefOptions() {
+    const zones = [localId].concat(saved.filter((z) => !Z.sameZone(z, localId)));
+    const keep = zones.find((z) => Z.sameZone(z, refZone)) || localId;
+    const frag = document.createDocumentFragment();
+    zones.forEach((z, i) => {
+      const o = document.createElement('option');
+      o.value = z;
+      o.textContent = i === 0 ? fill(COPY.ref_local, { city: cityName(z) }) : cityName(z);
+      frag.appendChild(o);
+    });
+    refSelect.textContent = '';
+    refSelect.appendChild(frag);
+    refSelect.value = keep;
+    if (keep !== refZone) {
+      refZone = keep;
+      if (mode === 'convert') {
+        fieldsFromMoment();
+        applyConversion();
+      } else {
+        syncFields(Date.now(), true);
+      }
+    }
+  }
+
+  function updateModeUI() {
+    const converting = mode === 'convert';
+    root.classList.toggle('is-converting', converting);
+    setText(modeText, converting ? COPY.mode_chosen : COPY.mode_live);
+    nowBtn.classList.toggle('m-btn--primary', converting);
+    nowBtn.classList.toggle('m-btn--ghost', !converting);
+  }
+
+  function setNote(text, kind) {
+    noteKind = text ? kind : '';
+    noteEl.dataset.kind = noteKind;
+    setText(noteEl, text);
+  }
+
+  function syncFields(now, force) {
+    const a = document.activeElement;
+    if (!force && (a === dateInput || a === timeInput)) return;
+    const w = Z.wallParts(refZone, now);
+    const dv = Z.toDateValue(w);
+    const tv = Z.toTimeValue(w);
+    let changed = false;
+    if (dateInput.value !== dv) { dateInput.value = dv; changed = true; }
+    if (timeInput.value !== tv) { timeInput.value = tv; changed = true; }
+    if (changed && noteKind === 'incomplete') setNote('', '');
+  }
+
+  function fieldsFromMoment() {
+    const w = Z.wallParts(refZone, moment);
+    dateInput.value = Z.toDateValue(w);
+    timeInput.value = Z.toTimeValue(w);
+    const r = Z.resolveWall(refZone, w.year, w.month, w.day, w.hour, w.minute);
+    pickLater = r.kind === 'repeated' && r.options[1] === Math.floor(moment / 60000) * 60000;
+  }
+
+  function explain() {
+    if (!resolution) return;
+    const r = resolution.r;
+    const d = resolution.d;
+    const t = resolution.t;
+    const city = cityName(refZone);
+    const wallMs = Z.utcMs(d.y, d.m, d.d, t.h, t.mi, 0);
+    const vars = {
+      time: formatWith(wallTimeFmt(), wallMs),
+      date: formatWith(wallDateFmt(), wallMs),
+      city: city,
+      shift: durationLabel(r.shift)
+    };
+    altBtn.hidden = r.kind !== 'repeated';
+    if (r.kind === 'skipped') {
+      vars.shown = formatWith(timeFmt(refZone, false), moment);
+      setNote(fill(COPY.note_skipped, vars), 'skipped');
+    } else if (r.kind === 'repeated') {
+      vars.offset = Z.formatOffset(Z.offsetMinutes(refZone, moment));
+      setNote(fill(pickLater ? COPY.note_repeated_second : COPY.note_repeated_first, vars), 'repeated');
+      setText(altBtn, pickLater ? COPY.btn_show_first : COPY.btn_show_second);
+    } else {
+      setNote(fill(COPY.note_exact, { when: formatWith(momentFmt(refZone), moment), city: city }), 'exact');
+    }
+  }
+
+  function stopTicking() {
+    if (timer) {
+      clearTimeout(timer);
+      timer = 0;
+    }
+  }
+
+  function schedule() {
+    stopTicking();
+    if (mode !== 'live' || document.hidden) return;
+    timer = setTimeout(onTick, Z.tickDelay(Date.now()));
+  }
+
+  function onTick() {
+    timer = 0;
+    if (mode !== 'live' || document.hidden) return;
+    const now = Date.now();
+    renderTimes(now);
+    if (conv.open) syncFields(now, false);
+    schedule();
+  }
+
+  function applyConversion() {
+    const d = Z.parseDateValue(dateInput.value);
+    const t = Z.parseTimeValue(timeInput.value);
+    if (!d || !t) {
+      altBtn.hidden = true;
+      setNote(COPY.note_incomplete, 'incomplete');
+      return;
+    }
+    const r = Z.resolveWall(refZone, d.y, d.m, d.d, t.h, t.mi);
+    resolution = { r: r, d: d, t: t };
+    moment = r.kind === 'repeated' ? r.options[pickLater ? 1 : 0] : r.ms;
+    if (mode !== 'convert') {
+      mode = 'convert';
+      stopTicking();
+    }
+    updateModeUI();
+    renderTimes(moment);
+    explain();
+  }
+
+  function goLive(say) {
+    const was = mode;
+    mode = 'live';
+    resolution = null;
+    pickLater = false;
+    altBtn.hidden = true;
+    setNote('', '');
+    updateModeUI();
+    const now = Date.now();
+    syncFields(now, true);
+    renderTimes(now);
+    schedule();
+    if (say && was === 'convert') announce(COPY.note_live);
+  }
+
+  function onFieldEdit() {
+    pickLater = false;
+    applyConversion();
+  }
+
+  function ensureEntries() {
+    const l = lang();
+    const now = Date.now();
+    if (entries && entriesLang === l && now - entriesAt < ENTRY_TTL) return entries;
+    entries = Z.buildEntries(Z.allZoneIds(), l, now, regionLabel);
+    entriesLang = l;
+    entriesAt = now;
+    return entries;
+  }
+
+  function isOpen() {
+    return !optionsEl.hidden;
+  }
+
+  function openList() {
+    optionsEl.hidden = false;
+    qInput.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeList() {
+    optionsEl.hidden = true;
+    qInput.setAttribute('aria-expanded', 'false');
+    qInput.removeAttribute('aria-activedescendant');
+    active = -1;
+  }
+
+  function optionState(entry) {
+    if (Z.sameZone(entry.id, localId)) return 'local';
+    if (saved.some((z) => Z.sameZone(z, entry.id))) return 'added';
+    return '';
+  }
+
+  function makeOption(entry, i, now) {
+    const li = el('li', 'wc__opt');
+    li.id = 'wc-opt-' + i;
+    li.setAttribute('role', 'option');
+    li.setAttribute('aria-selected', 'false');
+    li.dataset.index = String(i);
+    const state = optionState(entry);
+    const tag = state === 'local' ? COPY.local_badge : (state === 'added' ? COPY.added_tag : '');
+    if (state) li.setAttribute('aria-disabled', 'true');
+    const main = el('span', 'wc__opt-main');
+    main.appendChild(el('span', 'wc__opt-city', entry.city));
+    if (entry.sub) main.appendChild(el('span', 'wc__opt-sub', entry.sub));
+    if (tag) main.appendChild(el('span', 'wc__opt-tag', tag));
+    const meta = el('span', 'wc__opt-meta', [entry.region, entry.name].filter(Boolean).join(' \u00b7 '));
+    const side = el('span', 'wc__opt-side');
+    const nowText = formatWith(timeFmt(entry.id, false), now);
+    side.appendChild(el('span', 'wc__opt-now', nowText));
+    side.appendChild(el('span', 'wc__opt-off', entry.offLabel));
+    li.appendChild(main);
+    li.appendChild(meta);
+    li.appendChild(side);
+    const label = [entry.sub ? entry.city + ', ' + entry.sub : entry.city, entry.region, entry.name, entry.offLabel, nowText, tag];
+    li.setAttribute('aria-label', label.filter(Boolean).join(', '));
+    return li;
+  }
+
+  function setActive(i, scroll) {
+    const opts = optionsEl.children;
+    if (active >= 0 && opts[active]) opts[active].setAttribute('aria-selected', 'false');
+    if (i < 0 || i >= opts.length) {
+      active = -1;
+      qInput.removeAttribute('aria-activedescendant');
+      return;
+    }
+    active = i;
+    opts[i].setAttribute('aria-selected', 'true');
+    qInput.setAttribute('aria-activedescendant', opts[i].id);
+    if (scroll && opts[i].scrollIntoView) opts[i].scrollIntoView({ block: 'nearest' });
+  }
+
+  function moveActive(delta) {
+    const n = optionsEl.children.length;
+    if (!n) return;
+    const next = active < 0 ? (delta > 0 ? 0 : n - 1) : (active + delta + n) % n;
+    setActive(next, true);
+  }
+
+  function renderResults() {
+    const query = qInput.value;
+    if (!Z.normalizeText(query)) {
+      results = [];
+      optionsEl.textContent = '';
+      closeList();
+      status.clear();
+      return;
+    }
+    results = Z.searchEntries(ensureEntries(), query, MAX_RESULTS, lang());
+    const now = Date.now();
+    const frag = document.createDocumentFragment();
+    results.forEach((entry, i) => frag.appendChild(makeOption(entry, i, now)));
+    optionsEl.textContent = '';
+    optionsEl.appendChild(frag);
+    optionsEl.scrollTop = 0;
+    active = -1;
+    if (results.length) {
+      openList();
+      setActive(0, false);
+      announce(fill(isOne(results.length) ? COPY.results_one : COPY.results_other, { n: results.length }));
+    } else {
+      closeList();
+      announce(fill(COPY.no_results, { q: query.trim() }));
+    }
+  }
+
+  function choose(i) {
+    const entry = results[i];
+    if (!entry) return;
+    const state = optionState(entry);
+    if (state === 'local') {
+      announce(fill(COPY.is_local, { city: cityName(entry.id) }));
+      return;
+    }
+    if (state === 'added') {
+      announce(fill(COPY.already, { city: cityName(entry.id) }));
+      return;
+    }
+    if (addZone(entry.id)) {
+      qInput.value = '';
+      results = [];
+      optionsEl.textContent = '';
+      closeList();
+    }
+  }
+
+  function refreshCopy() {
+    const I = window.MentriaI18n;
+    if (!I || typeof I.t !== 'function') return;
+    Object.keys(COPY).forEach((k) => {
+      let v = null;
+      try {
+        v = I.t('tool.world-clock.' + k);
+      } catch (_) {
+        v = null;
+      }
+      if (typeof v === 'string' && v && v !== 'tool.world-clock.' + k) COPY[k] = v;
+    });
+  }
+
+  function refreshLocal() {
+    const id = detectLocal();
+    if (Z.sameZone(id, localId)) return;
+    const wasRef = Z.sameZone(refZone, localId);
+    localId = id;
+    if (!hasSaved) saved = Z.pickDefaults(localId);
+    if (wasRef) {
+      refZone = localId;
+      if (mode === 'convert') {
+        fieldsFromMoment();
+        applyConversion();
+      }
+    }
+    rebuildRows();
+  }
+
+  function onExternalChange() {
+    loadState();
+    fmtCache = new Map();
+    fmtSeg.set(hour12() ? '12' : '24');
+    rebuildRows();
+    if (mode === 'convert') explain();
+    if (isOpen()) renderResults();
+  }
+
+  qInput.addEventListener('input', renderResults);
+
+  qInput.addEventListener('focus', () => {
+    if (blurTimer) {
+      clearTimeout(blurTimer);
+      blurTimer = 0;
+    }
+    if (!entries) setTimeout(ensureEntries, 0);
+  });
+
+  qInput.addEventListener('blur', () => {
+    if (blurTimer) clearTimeout(blurTimer);
+    blurTimer = setTimeout(() => {
+      blurTimer = 0;
+      if (document.activeElement !== qInput) closeList();
+    }, 180);
+  });
+
+  qInput.addEventListener('keydown', (e) => {
+    if (e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!isOpen()) renderResults();
+      else moveActive(e.key === 'ArrowDown' ? 1 : -1);
+      return;
+    }
+    if (e.key === 'Enter') {
+      if (isOpen()) {
+        e.preventDefault();
+        choose(active >= 0 ? active : 0);
+      } else if (Z.normalizeText(qInput.value)) {
+        e.preventDefault();
+        renderResults();
+      }
+      return;
+    }
+    if (e.key === 'Escape') {
+      if (isOpen()) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeList();
+      } else if (qInput.value) {
+        e.preventDefault();
+        e.stopPropagation();
+        qInput.value = '';
+        results = [];
+        optionsEl.textContent = '';
+        status.clear();
+      }
+      return;
+    }
+    if (e.key === 'Tab') closeList();
+  });
+
+  optionsEl.addEventListener('mousedown', (e) => { e.preventDefault(); });
+
+  optionsEl.addEventListener('click', (e) => {
+    const li = e.target.closest ? e.target.closest('[role="option"]') : null;
+    if (!li || !optionsEl.contains(li)) return;
+    choose(parseInt(li.dataset.index, 10));
+  });
+
+  optionsEl.addEventListener('pointermove', (e) => {
+    const li = e.target.closest ? e.target.closest('[role="option"]') : null;
+    if (!li || !optionsEl.contains(li)) return;
+    const i = parseInt(li.dataset.index, 10);
+    if (i !== active) setActive(i, false);
+  });
+
+  listEl.addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('button[data-act]') : null;
+    if (!b || !listEl.contains(b) || b.disabled) return;
+    const row = b.closest('.wc__row');
+    if (!row) return;
+    const i = saved.indexOf(row.dataset.zone);
+    if (i < 0) return;
+    const act = b.dataset.act;
+    if (act === 'up') moveZone(i, -1);
+    else if (act === 'down') moveZone(i, 1);
+    else if (act === 'remove') removeZone(i);
+  });
+
+  dateInput.addEventListener('input', onFieldEdit);
+  dateInput.addEventListener('change', onFieldEdit);
+  timeInput.addEventListener('input', onFieldEdit);
+  timeInput.addEventListener('change', onFieldEdit);
+
+  refSelect.addEventListener('change', () => {
+    const z = refSelect.value;
+    refZone = Z.isValidZone(z) ? z : localId;
+    pickLater = false;
+    if (mode === 'live') syncFields(Date.now(), true);
+    else applyConversion();
+  });
+
+  nowBtn.addEventListener('click', () => { goLive(true); });
+
+  altBtn.addEventListener('click', () => {
+    pickLater = !pickLater;
+    applyConversion();
+  });
+
+  conv.addEventListener('toggle', () => {
+    if (conv.open) {
+      if (mode === 'live') syncFields(Date.now(), true);
+    } else if (mode === 'convert') {
+      goLive(true);
+    }
+  });
+
+  const fmtSeg = MentriaUI.segmented(fmtEl, (value) => {
+    h12Choice = value === '12';
+    fmtCache = new Map();
+    persist();
+    renderTimes(currentMs());
+    if (mode === 'convert') explain();
+    if (isOpen()) renderResults();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopTicking();
+      return;
+    }
+    refreshLocal();
+    if (mode === 'live') {
+      const now = Date.now();
+      renderTimes(now);
+      if (conv.open) syncFields(now, false);
+    }
+    schedule();
+  });
+
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    refreshLocal();
+    if (mode === 'live') renderTimes(Date.now());
+    schedule();
+  });
+
+  document.addEventListener('mentria:localechange', () => {
+    refreshCopy();
+    fmtCache = new Map();
+    Z.resetNames();
+    entries = null;
+    fmtSeg.set(hour12() ? '12' : '24');
+    updateModeUI();
+    rebuildRows();
+    if (mode === 'convert') explain();
+    if (isOpen()) renderResults();
+    else status.clear();
+  });
+
+  window.addEventListener('mentria:write', (e) => {
+    const d = e.detail || {};
+    if (d.ns === NS && d.key === KEY && d.remote) onExternalChange();
+  });
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === null || e.key === 'mentria.store.' + NS + '.' + KEY) onExternalChange();
+  });
+
+  loadState();
+  fmtSeg.set(hour12() ? '12' : '24');
+  updateModeUI();
+  rebuildRows();
+  syncFields(Date.now(), true);
+  schedule();
+})();
+</script>
+
+<style>
+.wc {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 1rem);
+  width: min(100%, 780px);
+  margin: 0 auto;
+  padding: var(--space-1, 0.25rem) 0 var(--space-3, 0.75rem);
+  font-family: var(--font-body);
+  color: var(--term-fg);
+}
+
+.wc__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs, 0.65rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+}
+
+.wc__search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.wc__field {
+  position: relative;
+}
+
+.wc__glass {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  transform: translateY(-50%);
+  color: var(--term-subtle);
+  pointer-events: none;
+}
+
+.wc__input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding-left: 2.3rem;
+  font-size: 1rem;
+  border-radius: var(--radius-md, 6px);
+}
+
+.wc__options {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem;
+  max-height: min(19rem, 55vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--term-border-strong);
+  border-radius: var(--radius-md, 6px);
+  background: var(--term-bg);
+  box-shadow: var(--elev-2);
+}
+.wc__options[hidden] { display: none; }
+
+.wc__opt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "main side"
+    "meta side";
+  column-gap: 0.75rem;
+  row-gap: 0.1rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+}
+.wc__opt[aria-selected="true"] {
+  background: var(--cyan-8);
+  box-shadow: inset 0 0 0 1px var(--cyan-30);
+}
+.wc__opt[aria-disabled="true"] { cursor: default; }
+.wc__opt[aria-disabled="true"] .wc__opt-city { color: var(--term-muted); }
+
+.wc__opt-main {
+  grid-area: main;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.45rem;
+  min-width: 0;
+}
+.wc__opt-city {
+  font-weight: 600;
+  color: var(--term-fg-strong);
+  overflow-wrap: anywhere;
+}
+.wc__opt-sub {
+  font-size: 0.78rem;
+  color: var(--term-muted);
+}
+.wc__opt-tag {
+  padding: 0 0.4rem;
+  border: 1px solid rgba(110, 243, 197, 0.35);
+  border-radius: var(--radius-pill, 999px);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.wc__opt-meta {
+  grid-area: meta;
+  min-width: 0;
+  font-size: 0.75rem;
+  color: var(--term-muted);
+  overflow-wrap: anywhere;
+}
+.wc__opt-side {
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.1rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.wc__opt-now {
+  font-size: 0.85rem;
+  color: var(--term-fg);
+  white-space: nowrap;
+}
+.wc__opt-off {
+  font-size: 0.68rem;
+  color: var(--syn-cyan);
+  white-space: nowrap;
+}
+
+.wc__status {
+  margin: 0;
+  min-height: 1.25em;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs, 0.75rem);
+  line-height: 1.5;
+  color: var(--term-muted);
+}
+.wc__status[data-tone="ok"] { color: var(--syn-green); }
+.wc__status[data-tone="err"] { color: var(--syn-pink); }
+
+.wc__conv {
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-lg, 10px);
+  background: rgba(255, 255, 255, 0.015);
+}
+.wc__conv[open] { border-color: var(--term-border-strong); }
+
+.wc__conv-sum {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-lg, 10px);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm, 0.85rem);
+  color: var(--term-fg);
+  transition: color var(--duration-fast, 150ms) var(--ease-out, ease-out);
+}
+.wc__conv-sum::-webkit-details-marker { display: none; }
+.wc__conv-sum:hover { color: var(--syn-cyan); }
+
+.wc__caret {
+  margin-left: auto;
+  font-size: 0.8em;
+  color: var(--term-muted);
+  transition: transform var(--dur-2, 140ms) var(--ease-out, ease-out);
+}
+.wc__conv[open] .wc__caret { transform: rotate(180deg); }
+
+.wc__conv-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+  padding: 0 0.9rem 0.9rem;
+}
+
+.wc__conv-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.wc__mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--syn-green);
+}
+.wc__mode-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+.wc.is-converting .wc__mode { color: var(--syn-amber); }
+
+.wc__now,
+.wc__alt {
+  padding: 0.35rem 1rem;
+  font-size: var(--text-xs, 0.75rem);
+}
+.wc__alt { align-self: flex-start; }
+.wc__alt[hidden] { display: none; }
+
+.wc__conv-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-3, 0.75rem);
+}
+.wc__cf {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.wc__cf--zone { grid-column: 1 / -1; }
+.wc__cin {
+  width: 100%;
+  min-width: 0;
+  font-size: 1rem;
+  border-radius: var(--radius-md, 6px);
+}
+.wc__cin::-webkit-date-and-time-value { text-align: left; }
+
+.wc__note {
+  margin: 0;
+  padding: 0.1rem 0 0.1rem 0.75rem;
+  border-left: 2px solid var(--syn-cyan);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--term-fg);
+}
+.wc__note[data-kind="skipped"],
+.wc__note[data-kind="repeated"],
+.wc__note[data-kind="incomplete"] { border-left-color: var(--syn-amber); }
+.wc__note:empty {
+  padding: 0;
+  border: 0;
+}
+
+.wc__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+}
+.wc__heading {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+}
+.wc__seg > button {
+  min-width: 3.4rem;
+  padding: 0.4rem 0.7rem;
+}
+
+.wc__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.wc__row {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr) auto;
+  grid-template-areas:
+    "sky place time"
+    "sky zone zone"
+    "sky date ctrl";
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.25rem;
+  padding: 0.8rem 0.85rem;
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-lg, 10px);
+  background: var(--term-bg);
+}
+.wc__row--local {
+  grid-template-areas:
+    "sky place time"
+    "sky zone zone"
+    "sky date date";
+  border-color: rgba(110, 243, 197, 0.28);
+  background:
+    linear-gradient(180deg, rgba(110, 243, 197, 0.05), rgba(110, 243, 197, 0) 70%),
+    var(--term-bg);
+}
+.wc__row.is-new { border-color: var(--cyan-30); }
+
+.wc__sky {
+  grid-area: sky;
+  align-self: start;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-top: 0.3rem;
+  border-radius: 50%;
+}
+.wc__sky[data-sky="day"] {
+  background: radial-gradient(circle at 35% 35%, #fde68a, var(--syn-amber) 65%);
+  box-shadow: 0 0 9px rgba(251, 191, 36, 0.55);
+}
+.wc__sky[data-sky="night"] {
+  background: transparent;
+  box-shadow: inset 0.3rem -0.15rem 0 0 var(--syn-purple);
+  transform: rotate(-20deg);
+}
+
+.wc__place {
+  grid-area: place;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.5rem;
+  min-width: 0;
+}
+.wc__city {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--term-fg-strong);
+  overflow-wrap: anywhere;
+}
+.wc__sub {
+  font-size: 0.78rem;
+  color: var(--term-muted);
+}
+.wc__here {
+  padding: 0.05rem 0.45rem;
+  border: 1px solid rgba(110, 243, 197, 0.4);
+  border-radius: var(--radius-pill, 999px);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.wc__time {
+  grid-area: time;
+  justify-self: end;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-size: clamp(1.25rem, 6cqi, 1.9rem);
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--term-fg-strong);
+  white-space: nowrap;
+}
+.wc__ap {
+  font-size: 0.5em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--term-muted);
+}
+.wc__ap.is-first { order: -1; }
+.wc__ap:empty { display: none; }
+.wc.is-converting .wc__hm { color: var(--syn-amber); }
+
+.wc__zone {
+  grid-area: zone;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.6rem;
+  min-width: 0;
+  font-size: 0.78rem;
+  color: var(--term-muted);
+}
+.wc__zname { overflow-wrap: anywhere; }
+.wc__off {
+  font-family: var(--font-mono);
+  color: var(--syn-cyan);
+  white-space: nowrap;
+}
+
+.wc__date {
+  grid-area: date;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.45rem;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--term-muted);
+}
+.wc__date[hidden] { display: none; }
+.wc__shift {
+  padding: 0.05rem 0.45rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill, 999px);
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+.wc__shift[hidden] { display: none; }
+.wc__date[data-dir="ahead"] .wc__shift {
+  color: var(--syn-amber);
+  border-color: var(--amber-30);
+  background: var(--amber-8);
+}
+.wc__date[data-dir="behind"] .wc__shift {
+  color: var(--syn-purple);
+  border-color: var(--purple-20);
+  background: var(--purple-8);
+}
+
+.wc__ctrls {
+  grid-area: ctrl;
+  justify-self: end;
+  display: flex;
+  gap: 0.35rem;
+}
+.wc__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+}
+.wc__icon--rm:hover {
+  color: var(--syn-pink);
+  border-color: var(--pink-30);
+}
+
+.wc__empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--term-muted);
+  text-align: center;
+}
+.wc__empty[hidden] { display: none; }
+
+@container (min-width: 560px) {
+  .wc__conv-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1.3fr); }
+  .wc__cf--zone { grid-column: auto; }
+  .wc__row,
+  .wc__row--local {
+    grid-template-columns: 1rem minmax(0, 1fr) auto 7.5rem;
+    grid-template-areas:
+      "sky place time ctrl"
+      "sky zone date ctrl";
+    padding: 0.85rem 1rem;
+  }
+  .wc__date { justify-self: end; justify-content: flex-end; }
+  .wc__ctrls { align-self: center; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wc:not(.is-converting) .wc__mode-dot { animation: wc-pulse 2.4s ease-in-out infinite; }
+  .wc__row.is-new { animation: wc-new 1.6s var(--ease-out, ease-out); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc__caret,
+  .wc__conv-sum { transition: none; }
+}
+@keyframes wc-pulse {
+  50% { opacity: 0.35; }
+}
+@keyframes wc-new {
+  from {
+    border-color: var(--syn-cyan);
+    box-shadow: 0 0 0 3px var(--cyan-15);
+  }
+  to {
+    border-color: var(--term-border);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (forced-colors: active) {
+  .wc__sky { forced-color-adjust: none; }
+}
+</style>

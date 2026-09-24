@@ -1,0 +1,1243 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/unit-converter/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.unit-converter.title' | t }}"
+  description: "{{ 'tools.unit-converter.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">unit-converter</span></p>
+  <h1>{{ "tools.unit-converter.title" | t }}</h1>
+  <p>{{ "tools.unit-converter.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "unit-converter.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="uc" id="uc">
+
+  <div class="m-seg uc__cats" id="uc-cats" aria-label="{{ 'tool.unit-converter.cats_label' | t }}">
+    <button type="button" data-value="length">{{ "tool.unit-converter.cat_length" | t }}</button>
+    <button type="button" data-value="mass">{{ "tool.unit-converter.cat_mass" | t }}</button>
+    <button type="button" data-value="temperature">{{ "tool.unit-converter.cat_temperature" | t }}</button>
+    <button type="button" data-value="volume">{{ "tool.unit-converter.cat_volume" | t }}</button>
+    <button type="button" data-value="area">{{ "tool.unit-converter.cat_area" | t }}</button>
+    <button type="button" data-value="speed">{{ "tool.unit-converter.cat_speed" | t }}</button>
+    <button type="button" data-value="time">{{ "tool.unit-converter.cat_time" | t }}</button>
+    <button type="button" data-value="data">{{ "tool.unit-converter.cat_data" | t }}</button>
+    <button type="button" data-value="pressure">{{ "tool.unit-converter.cat_pressure" | t }}</button>
+    <button type="button" data-value="energy">{{ "tool.unit-converter.cat_energy" | t }}</button>
+    <button type="button" data-value="fuel">{{ "tool.unit-converter.cat_fuel" | t }}</button>
+    <button type="button" data-value="angle">{{ "tool.unit-converter.cat_angle" | t }}</button>
+  </div>
+
+  <div class="uc__pair">
+    <div class="uc__side is-anchor" id="uc-side-a">
+      <label class="uc__cap" id="uc-cap-a" for="uc-val-a">{{ "tool.unit-converter.from" | t }}</label>
+      <div class="uc__field">
+        <input class="m-input uc__num" id="uc-val-a" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" value="1" aria-labelledby="uc-cap-a uc-name-a" aria-describedby="uc-status">
+        <button class="m-btn m-btn--ghost uc__sign" id="uc-sign-a" type="button" aria-label="{{ 'tool.unit-converter.sign_a' | t }}" title="{{ 'tool.unit-converter.sign_a' | t }}">±</button>
+      </div>
+      <span class="sr-only" id="uc-name-a"></span>
+      <select class="m-input uc__unit" id="uc-unit-a" aria-label="{{ 'tool.unit-converter.unit_from' | t }}"></select>
+    </div>
+
+    <button class="m-btn m-btn--ghost m-btn--icon uc__swap" id="uc-swap" type="button" aria-label="{{ 'tool.unit-converter.swap' | t }}" title="{{ 'tool.unit-converter.swap' | t }}">
+      <svg class="uc__swap-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 8h15m-4-4 4 4-4 4M20 16H5m4-4-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <div class="uc__side" id="uc-side-b">
+      <label class="uc__cap" id="uc-cap-b" for="uc-val-b">{{ "tool.unit-converter.to" | t }}</label>
+      <div class="uc__field">
+        <input class="m-input uc__num" id="uc-val-b" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" aria-labelledby="uc-cap-b uc-name-b" aria-describedby="uc-status">
+        <button class="m-btn m-btn--ghost uc__sign" id="uc-sign-b" type="button" aria-label="{{ 'tool.unit-converter.sign_b' | t }}" title="{{ 'tool.unit-converter.sign_b' | t }}">±</button>
+      </div>
+      <span class="sr-only" id="uc-name-b"></span>
+      <select class="m-input uc__unit" id="uc-unit-b" aria-label="{{ 'tool.unit-converter.unit_to' | t }}"></select>
+    </div>
+  </div>
+
+  <div class="uc__out">
+    <div class="uc__status" id="uc-status" role="status" aria-live="polite" aria-atomic="true">
+      <span class="uc__sentence" id="uc-sentence"></span>
+      <span class="uc__warn" id="uc-warn" hidden></span>
+    </div>
+    <button class="m-btn m-btn--ghost uc__copy" id="uc-copy" type="button" disabled>{{ "tool.unit-converter.copy" | t }}</button>
+  </div>
+
+  <p class="uc__formula"><span class="uc__formula-label" id="uc-formula-label"></span><span class="uc__formula-text" id="uc-formula-text"></span></p>
+
+  <table class="uc__table">
+    <caption class="uc__caption" id="uc-caption"></caption>
+    <thead><tr><th scope="col" id="uc-th-a"></th><th scope="col" id="uc-th-b"></th></tr></thead>
+    <tbody id="uc-rows"></tbody>
+  </table>
+
+  <p class="uc__note">{{ "tool.unit-converter.privacy_note" | t }}</p>
+
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<script>
+(() => {
+  'use strict';
+
+  const COPY = {
+    copy:          {{ ("tool.unit-converter.copy" | t) | dump | safe }},
+    copied:        {{ ("tool.unit-converter.copied" | t) | dump | safe }},
+    copy_failed:   {{ ("tool.unit-converter.copy_failed" | t) | dump | safe }},
+    factor:        {{ ("tool.unit-converter.factor" | t) | dump | safe }},
+    formula:       {{ ("tool.unit-converter.formula" | t) | dump | safe }},
+    ref_caption:   {{ ("tool.unit-converter.ref_caption" | t) | dump | safe }},
+    invalid:       {{ ("tool.unit-converter.invalid" | t) | dump | safe }},
+    too_big:       {{ ("tool.unit-converter.too_big" | t) | dump | safe }},
+    negative_fuel: {{ ("tool.unit-converter.negative_fuel" | t) | dump | safe }},
+    below_zero:    {{ ("tool.unit-converter.below_zero" | t) | dump | safe }},
+    opt_fmt:       {{ ("tool.unit-converter.opt_fmt" | t) | dump | safe }},
+    grp_metric:    {{ ("tool.unit-converter.grp_metric" | t) | dump | safe }},
+    grp_imperial:  {{ ("tool.unit-converter.grp_imperial" | t) | dump | safe }},
+    grp_us:        {{ ("tool.unit-converter.grp_us" | t) | dump | safe }},
+    grp_uk:        {{ ("tool.unit-converter.grp_uk" | t) | dump | safe }},
+    grp_other:     {{ ("tool.unit-converter.grp_other" | t) | dump | safe }},
+    grp_bits:      {{ ("tool.unit-converter.grp_bits" | t) | dump | safe }},
+    grp_si:        {{ ("tool.unit-converter.grp_si" | t) | dump | safe }},
+    grp_iec:       {{ ("tool.unit-converter.grp_iec" | t) | dump | safe }},
+    u_nm:          {{ ("tool.unit-converter.u_nm" | t) | dump | safe }},
+    s_nm:          {{ ("tool.unit-converter.s_nm" | t) | dump | safe }},
+    u_um:          {{ ("tool.unit-converter.u_um" | t) | dump | safe }},
+    s_um:          {{ ("tool.unit-converter.s_um" | t) | dump | safe }},
+    u_mm:          {{ ("tool.unit-converter.u_mm" | t) | dump | safe }},
+    s_mm:          {{ ("tool.unit-converter.s_mm" | t) | dump | safe }},
+    u_cm:          {{ ("tool.unit-converter.u_cm" | t) | dump | safe }},
+    s_cm:          {{ ("tool.unit-converter.s_cm" | t) | dump | safe }},
+    u_m:           {{ ("tool.unit-converter.u_m" | t) | dump | safe }},
+    s_m:           {{ ("tool.unit-converter.s_m" | t) | dump | safe }},
+    u_km:          {{ ("tool.unit-converter.u_km" | t) | dump | safe }},
+    s_km:          {{ ("tool.unit-converter.s_km" | t) | dump | safe }},
+    u_in:          {{ ("tool.unit-converter.u_in" | t) | dump | safe }},
+    s_in:          {{ ("tool.unit-converter.s_in" | t) | dump | safe }},
+    u_ft:          {{ ("tool.unit-converter.u_ft" | t) | dump | safe }},
+    s_ft:          {{ ("tool.unit-converter.s_ft" | t) | dump | safe }},
+    u_yd:          {{ ("tool.unit-converter.u_yd" | t) | dump | safe }},
+    s_yd:          {{ ("tool.unit-converter.s_yd" | t) | dump | safe }},
+    u_mi:          {{ ("tool.unit-converter.u_mi" | t) | dump | safe }},
+    s_mi:          {{ ("tool.unit-converter.s_mi" | t) | dump | safe }},
+    u_nmi:         {{ ("tool.unit-converter.u_nmi" | t) | dump | safe }},
+    s_nmi:         {{ ("tool.unit-converter.s_nmi" | t) | dump | safe }},
+    u_ug:          {{ ("tool.unit-converter.u_ug" | t) | dump | safe }},
+    s_ug:          {{ ("tool.unit-converter.s_ug" | t) | dump | safe }},
+    u_mg:          {{ ("tool.unit-converter.u_mg" | t) | dump | safe }},
+    s_mg:          {{ ("tool.unit-converter.s_mg" | t) | dump | safe }},
+    u_g:           {{ ("tool.unit-converter.u_g" | t) | dump | safe }},
+    s_g:           {{ ("tool.unit-converter.s_g" | t) | dump | safe }},
+    u_kg:          {{ ("tool.unit-converter.u_kg" | t) | dump | safe }},
+    s_kg:          {{ ("tool.unit-converter.s_kg" | t) | dump | safe }},
+    u_t:           {{ ("tool.unit-converter.u_t" | t) | dump | safe }},
+    s_t:           {{ ("tool.unit-converter.s_t" | t) | dump | safe }},
+    u_oz:          {{ ("tool.unit-converter.u_oz" | t) | dump | safe }},
+    s_oz:          {{ ("tool.unit-converter.s_oz" | t) | dump | safe }},
+    u_lb:          {{ ("tool.unit-converter.u_lb" | t) | dump | safe }},
+    s_lb:          {{ ("tool.unit-converter.s_lb" | t) | dump | safe }},
+    u_st:          {{ ("tool.unit-converter.u_st" | t) | dump | safe }},
+    s_st:          {{ ("tool.unit-converter.s_st" | t) | dump | safe }},
+    u_ton_us:      {{ ("tool.unit-converter.u_ton_us" | t) | dump | safe }},
+    s_ton_us:      {{ ("tool.unit-converter.s_ton_us" | t) | dump | safe }},
+    u_ton_uk:      {{ ("tool.unit-converter.u_ton_uk" | t) | dump | safe }},
+    s_ton_uk:      {{ ("tool.unit-converter.s_ton_uk" | t) | dump | safe }},
+    u_ct:          {{ ("tool.unit-converter.u_ct" | t) | dump | safe }},
+    s_ct:          {{ ("tool.unit-converter.s_ct" | t) | dump | safe }},
+    u_ozt:         {{ ("tool.unit-converter.u_ozt" | t) | dump | safe }},
+    s_ozt:         {{ ("tool.unit-converter.s_ozt" | t) | dump | safe }},
+    u_c:           {{ ("tool.unit-converter.u_c" | t) | dump | safe }},
+    s_c:           {{ ("tool.unit-converter.s_c" | t) | dump | safe }},
+    u_f:           {{ ("tool.unit-converter.u_f" | t) | dump | safe }},
+    s_f:           {{ ("tool.unit-converter.s_f" | t) | dump | safe }},
+    u_k:           {{ ("tool.unit-converter.u_k" | t) | dump | safe }},
+    s_k:           {{ ("tool.unit-converter.s_k" | t) | dump | safe }},
+    u_r:           {{ ("tool.unit-converter.u_r" | t) | dump | safe }},
+    s_r:           {{ ("tool.unit-converter.s_r" | t) | dump | safe }},
+    u_ml:          {{ ("tool.unit-converter.u_ml" | t) | dump | safe }},
+    s_ml:          {{ ("tool.unit-converter.s_ml" | t) | dump | safe }},
+    u_cl:          {{ ("tool.unit-converter.u_cl" | t) | dump | safe }},
+    s_cl:          {{ ("tool.unit-converter.s_cl" | t) | dump | safe }},
+    u_l:           {{ ("tool.unit-converter.u_l" | t) | dump | safe }},
+    s_l:           {{ ("tool.unit-converter.s_l" | t) | dump | safe }},
+    u_m3:          {{ ("tool.unit-converter.u_m3" | t) | dump | safe }},
+    s_m3:          {{ ("tool.unit-converter.s_m3" | t) | dump | safe }},
+    u_tsp_us:      {{ ("tool.unit-converter.u_tsp_us" | t) | dump | safe }},
+    s_tsp_us:      {{ ("tool.unit-converter.s_tsp_us" | t) | dump | safe }},
+    u_tbsp_us:     {{ ("tool.unit-converter.u_tbsp_us" | t) | dump | safe }},
+    s_tbsp_us:     {{ ("tool.unit-converter.s_tbsp_us" | t) | dump | safe }},
+    u_floz_us:     {{ ("tool.unit-converter.u_floz_us" | t) | dump | safe }},
+    s_floz_us:     {{ ("tool.unit-converter.s_floz_us" | t) | dump | safe }},
+    u_cup_us:      {{ ("tool.unit-converter.u_cup_us" | t) | dump | safe }},
+    s_cup_us:      {{ ("tool.unit-converter.s_cup_us" | t) | dump | safe }},
+    u_pt_us:       {{ ("tool.unit-converter.u_pt_us" | t) | dump | safe }},
+    s_pt_us:       {{ ("tool.unit-converter.s_pt_us" | t) | dump | safe }},
+    u_qt_us:       {{ ("tool.unit-converter.u_qt_us" | t) | dump | safe }},
+    s_qt_us:       {{ ("tool.unit-converter.s_qt_us" | t) | dump | safe }},
+    u_gal_us:      {{ ("tool.unit-converter.u_gal_us" | t) | dump | safe }},
+    s_gal_us:      {{ ("tool.unit-converter.s_gal_us" | t) | dump | safe }},
+    u_in3:         {{ ("tool.unit-converter.u_in3" | t) | dump | safe }},
+    s_in3:         {{ ("tool.unit-converter.s_in3" | t) | dump | safe }},
+    u_ft3:         {{ ("tool.unit-converter.u_ft3" | t) | dump | safe }},
+    s_ft3:         {{ ("tool.unit-converter.s_ft3" | t) | dump | safe }},
+    u_floz_uk:     {{ ("tool.unit-converter.u_floz_uk" | t) | dump | safe }},
+    s_floz_uk:     {{ ("tool.unit-converter.s_floz_uk" | t) | dump | safe }},
+    u_pt_uk:       {{ ("tool.unit-converter.u_pt_uk" | t) | dump | safe }},
+    s_pt_uk:       {{ ("tool.unit-converter.s_pt_uk" | t) | dump | safe }},
+    u_gal_uk:      {{ ("tool.unit-converter.u_gal_uk" | t) | dump | safe }},
+    s_gal_uk:      {{ ("tool.unit-converter.s_gal_uk" | t) | dump | safe }},
+    u_cm2:         {{ ("tool.unit-converter.u_cm2" | t) | dump | safe }},
+    s_cm2:         {{ ("tool.unit-converter.s_cm2" | t) | dump | safe }},
+    u_m2:          {{ ("tool.unit-converter.u_m2" | t) | dump | safe }},
+    s_m2:          {{ ("tool.unit-converter.s_m2" | t) | dump | safe }},
+    u_ha:          {{ ("tool.unit-converter.u_ha" | t) | dump | safe }},
+    s_ha:          {{ ("tool.unit-converter.s_ha" | t) | dump | safe }},
+    u_km2:         {{ ("tool.unit-converter.u_km2" | t) | dump | safe }},
+    s_km2:         {{ ("tool.unit-converter.s_km2" | t) | dump | safe }},
+    u_in2:         {{ ("tool.unit-converter.u_in2" | t) | dump | safe }},
+    s_in2:         {{ ("tool.unit-converter.s_in2" | t) | dump | safe }},
+    u_ft2:         {{ ("tool.unit-converter.u_ft2" | t) | dump | safe }},
+    s_ft2:         {{ ("tool.unit-converter.s_ft2" | t) | dump | safe }},
+    u_yd2:         {{ ("tool.unit-converter.u_yd2" | t) | dump | safe }},
+    s_yd2:         {{ ("tool.unit-converter.s_yd2" | t) | dump | safe }},
+    u_ac:          {{ ("tool.unit-converter.u_ac" | t) | dump | safe }},
+    s_ac:          {{ ("tool.unit-converter.s_ac" | t) | dump | safe }},
+    u_mi2:         {{ ("tool.unit-converter.u_mi2" | t) | dump | safe }},
+    s_mi2:         {{ ("tool.unit-converter.s_mi2" | t) | dump | safe }},
+    u_mps:         {{ ("tool.unit-converter.u_mps" | t) | dump | safe }},
+    s_mps:         {{ ("tool.unit-converter.s_mps" | t) | dump | safe }},
+    u_kmh:         {{ ("tool.unit-converter.u_kmh" | t) | dump | safe }},
+    s_kmh:         {{ ("tool.unit-converter.s_kmh" | t) | dump | safe }},
+    u_fps:         {{ ("tool.unit-converter.u_fps" | t) | dump | safe }},
+    s_fps:         {{ ("tool.unit-converter.s_fps" | t) | dump | safe }},
+    u_mph:         {{ ("tool.unit-converter.u_mph" | t) | dump | safe }},
+    s_mph:         {{ ("tool.unit-converter.s_mph" | t) | dump | safe }},
+    u_kn:          {{ ("tool.unit-converter.u_kn" | t) | dump | safe }},
+    s_kn:          {{ ("tool.unit-converter.s_kn" | t) | dump | safe }},
+    u_nsec:        {{ ("tool.unit-converter.u_nsec" | t) | dump | safe }},
+    s_nsec:        {{ ("tool.unit-converter.s_nsec" | t) | dump | safe }},
+    u_usec:        {{ ("tool.unit-converter.u_usec" | t) | dump | safe }},
+    s_usec:        {{ ("tool.unit-converter.s_usec" | t) | dump | safe }},
+    u_msec:        {{ ("tool.unit-converter.u_msec" | t) | dump | safe }},
+    s_msec:        {{ ("tool.unit-converter.s_msec" | t) | dump | safe }},
+    u_sec:         {{ ("tool.unit-converter.u_sec" | t) | dump | safe }},
+    s_sec:         {{ ("tool.unit-converter.s_sec" | t) | dump | safe }},
+    u_min:         {{ ("tool.unit-converter.u_min" | t) | dump | safe }},
+    s_min:         {{ ("tool.unit-converter.s_min" | t) | dump | safe }},
+    u_hr:          {{ ("tool.unit-converter.u_hr" | t) | dump | safe }},
+    s_hr:          {{ ("tool.unit-converter.s_hr" | t) | dump | safe }},
+    u_day:         {{ ("tool.unit-converter.u_day" | t) | dump | safe }},
+    s_day:         {{ ("tool.unit-converter.s_day" | t) | dump | safe }},
+    u_wk:          {{ ("tool.unit-converter.u_wk" | t) | dump | safe }},
+    s_wk:          {{ ("tool.unit-converter.s_wk" | t) | dump | safe }},
+    u_mo:          {{ ("tool.unit-converter.u_mo" | t) | dump | safe }},
+    s_mo:          {{ ("tool.unit-converter.s_mo" | t) | dump | safe }},
+    u_yr:          {{ ("tool.unit-converter.u_yr" | t) | dump | safe }},
+    s_yr:          {{ ("tool.unit-converter.s_yr" | t) | dump | safe }},
+    u_bit:         {{ ("tool.unit-converter.u_bit" | t) | dump | safe }},
+    s_bit:         {{ ("tool.unit-converter.s_bit" | t) | dump | safe }},
+    u_kbit:        {{ ("tool.unit-converter.u_kbit" | t) | dump | safe }},
+    s_kbit:        {{ ("tool.unit-converter.s_kbit" | t) | dump | safe }},
+    u_mbit:        {{ ("tool.unit-converter.u_mbit" | t) | dump | safe }},
+    s_mbit:        {{ ("tool.unit-converter.s_mbit" | t) | dump | safe }},
+    u_gbit:        {{ ("tool.unit-converter.u_gbit" | t) | dump | safe }},
+    s_gbit:        {{ ("tool.unit-converter.s_gbit" | t) | dump | safe }},
+    u_tbit:        {{ ("tool.unit-converter.u_tbit" | t) | dump | safe }},
+    s_tbit:        {{ ("tool.unit-converter.s_tbit" | t) | dump | safe }},
+    u_byte:        {{ ("tool.unit-converter.u_byte" | t) | dump | safe }},
+    s_byte:        {{ ("tool.unit-converter.s_byte" | t) | dump | safe }},
+    u_kb:          {{ ("tool.unit-converter.u_kb" | t) | dump | safe }},
+    s_kb:          {{ ("tool.unit-converter.s_kb" | t) | dump | safe }},
+    u_mb:          {{ ("tool.unit-converter.u_mb" | t) | dump | safe }},
+    s_mb:          {{ ("tool.unit-converter.s_mb" | t) | dump | safe }},
+    u_gb:          {{ ("tool.unit-converter.u_gb" | t) | dump | safe }},
+    s_gb:          {{ ("tool.unit-converter.s_gb" | t) | dump | safe }},
+    u_tb:          {{ ("tool.unit-converter.u_tb" | t) | dump | safe }},
+    s_tb:          {{ ("tool.unit-converter.s_tb" | t) | dump | safe }},
+    u_pb:          {{ ("tool.unit-converter.u_pb" | t) | dump | safe }},
+    s_pb:          {{ ("tool.unit-converter.s_pb" | t) | dump | safe }},
+    u_kib:         {{ ("tool.unit-converter.u_kib" | t) | dump | safe }},
+    s_kib:         {{ ("tool.unit-converter.s_kib" | t) | dump | safe }},
+    u_mib:         {{ ("tool.unit-converter.u_mib" | t) | dump | safe }},
+    s_mib:         {{ ("tool.unit-converter.s_mib" | t) | dump | safe }},
+    u_gib:         {{ ("tool.unit-converter.u_gib" | t) | dump | safe }},
+    s_gib:         {{ ("tool.unit-converter.s_gib" | t) | dump | safe }},
+    u_tib:         {{ ("tool.unit-converter.u_tib" | t) | dump | safe }},
+    s_tib:         {{ ("tool.unit-converter.s_tib" | t) | dump | safe }},
+    u_pib:         {{ ("tool.unit-converter.u_pib" | t) | dump | safe }},
+    s_pib:         {{ ("tool.unit-converter.s_pib" | t) | dump | safe }},
+    u_pa:          {{ ("tool.unit-converter.u_pa" | t) | dump | safe }},
+    s_pa:          {{ ("tool.unit-converter.s_pa" | t) | dump | safe }},
+    u_hpa:         {{ ("tool.unit-converter.u_hpa" | t) | dump | safe }},
+    s_hpa:         {{ ("tool.unit-converter.s_hpa" | t) | dump | safe }},
+    u_kpa:         {{ ("tool.unit-converter.u_kpa" | t) | dump | safe }},
+    s_kpa:         {{ ("tool.unit-converter.s_kpa" | t) | dump | safe }},
+    u_mpa:         {{ ("tool.unit-converter.u_mpa" | t) | dump | safe }},
+    s_mpa:         {{ ("tool.unit-converter.s_mpa" | t) | dump | safe }},
+    u_mbar:        {{ ("tool.unit-converter.u_mbar" | t) | dump | safe }},
+    s_mbar:        {{ ("tool.unit-converter.s_mbar" | t) | dump | safe }},
+    u_bar:         {{ ("tool.unit-converter.u_bar" | t) | dump | safe }},
+    s_bar:         {{ ("tool.unit-converter.s_bar" | t) | dump | safe }},
+    u_psi:         {{ ("tool.unit-converter.u_psi" | t) | dump | safe }},
+    s_psi:         {{ ("tool.unit-converter.s_psi" | t) | dump | safe }},
+    u_inhg:        {{ ("tool.unit-converter.u_inhg" | t) | dump | safe }},
+    s_inhg:        {{ ("tool.unit-converter.s_inhg" | t) | dump | safe }},
+    u_atm:         {{ ("tool.unit-converter.u_atm" | t) | dump | safe }},
+    s_atm:         {{ ("tool.unit-converter.s_atm" | t) | dump | safe }},
+    u_torr:        {{ ("tool.unit-converter.u_torr" | t) | dump | safe }},
+    s_torr:        {{ ("tool.unit-converter.s_torr" | t) | dump | safe }},
+    u_mmhg:        {{ ("tool.unit-converter.u_mmhg" | t) | dump | safe }},
+    s_mmhg:        {{ ("tool.unit-converter.s_mmhg" | t) | dump | safe }},
+    u_kgfcm2:      {{ ("tool.unit-converter.u_kgfcm2" | t) | dump | safe }},
+    s_kgfcm2:      {{ ("tool.unit-converter.s_kgfcm2" | t) | dump | safe }},
+    u_j:           {{ ("tool.unit-converter.u_j" | t) | dump | safe }},
+    s_j:           {{ ("tool.unit-converter.s_j" | t) | dump | safe }},
+    u_kj:          {{ ("tool.unit-converter.u_kj" | t) | dump | safe }},
+    s_kj:          {{ ("tool.unit-converter.s_kj" | t) | dump | safe }},
+    u_mj:          {{ ("tool.unit-converter.u_mj" | t) | dump | safe }},
+    s_mj:          {{ ("tool.unit-converter.s_mj" | t) | dump | safe }},
+    u_wh:          {{ ("tool.unit-converter.u_wh" | t) | dump | safe }},
+    s_wh:          {{ ("tool.unit-converter.s_wh" | t) | dump | safe }},
+    u_kwh:         {{ ("tool.unit-converter.u_kwh" | t) | dump | safe }},
+    s_kwh:         {{ ("tool.unit-converter.s_kwh" | t) | dump | safe }},
+    u_cal:         {{ ("tool.unit-converter.u_cal" | t) | dump | safe }},
+    s_cal:         {{ ("tool.unit-converter.s_cal" | t) | dump | safe }},
+    u_kcal:        {{ ("tool.unit-converter.u_kcal" | t) | dump | safe }},
+    s_kcal:        {{ ("tool.unit-converter.s_kcal" | t) | dump | safe }},
+    u_btu:         {{ ("tool.unit-converter.u_btu" | t) | dump | safe }},
+    s_btu:         {{ ("tool.unit-converter.s_btu" | t) | dump | safe }},
+    u_ftlbf:       {{ ("tool.unit-converter.u_ftlbf" | t) | dump | safe }},
+    s_ftlbf:       {{ ("tool.unit-converter.s_ftlbf" | t) | dump | safe }},
+    u_ev:          {{ ("tool.unit-converter.u_ev" | t) | dump | safe }},
+    s_ev:          {{ ("tool.unit-converter.s_ev" | t) | dump | safe }},
+    u_l100km:      {{ ("tool.unit-converter.u_l100km" | t) | dump | safe }},
+    s_l100km:      {{ ("tool.unit-converter.s_l100km" | t) | dump | safe }},
+    u_kml:         {{ ("tool.unit-converter.u_kml" | t) | dump | safe }},
+    s_kml:         {{ ("tool.unit-converter.s_kml" | t) | dump | safe }},
+    u_mpg_us:      {{ ("tool.unit-converter.u_mpg_us" | t) | dump | safe }},
+    s_mpg_us:      {{ ("tool.unit-converter.s_mpg_us" | t) | dump | safe }},
+    u_mpg_uk:      {{ ("tool.unit-converter.u_mpg_uk" | t) | dump | safe }},
+    s_mpg_uk:      {{ ("tool.unit-converter.s_mpg_uk" | t) | dump | safe }},
+    u_deg:         {{ ("tool.unit-converter.u_deg" | t) | dump | safe }},
+    s_deg:         {{ ("tool.unit-converter.s_deg" | t) | dump | safe }},
+    u_arcmin:      {{ ("tool.unit-converter.u_arcmin" | t) | dump | safe }},
+    s_arcmin:      {{ ("tool.unit-converter.s_arcmin" | t) | dump | safe }},
+    u_arcsec:      {{ ("tool.unit-converter.u_arcsec" | t) | dump | safe }},
+    s_arcsec:      {{ ("tool.unit-converter.s_arcsec" | t) | dump | safe }},
+    u_rad:         {{ ("tool.unit-converter.u_rad" | t) | dump | safe }},
+    s_rad:         {{ ("tool.unit-converter.s_rad" | t) | dump | safe }},
+    u_mrad:        {{ ("tool.unit-converter.u_mrad" | t) | dump | safe }},
+    s_mrad:        {{ ("tool.unit-converter.s_mrad" | t) | dump | safe }},
+    u_grad:        {{ ("tool.unit-converter.u_grad" | t) | dump | safe }},
+    s_grad:        {{ ("tool.unit-converter.s_grad" | t) | dump | safe }},
+    u_turn:        {{ ("tool.unit-converter.u_turn" | t) | dump | safe }},
+    s_turn:        {{ ("tool.unit-converter.s_turn" | t) | dump | safe }}
+  };
+
+  const Units = (() => {
+    const LB = 0.45359237;
+    const LBF = 4.4482216152605;
+    const GAL_US = 3.785411784;
+    const GAL_UK = 4.54609;
+    const MMHG = 133.322387415;
+    const MILE = 1609.344;
+
+    const CATEGORIES = [
+      { id: 'length', def: ['km', 'mi'], groups: [
+        ['metric', [['nm', 1e-9], ['um', 1e-6], ['mm', 0.001], ['cm', 0.01], ['m', 1], ['km', 1000]]],
+        ['imperial', [['in', 0.0254], ['ft', 0.3048], ['yd', 0.9144], ['mi', MILE]]],
+        ['other', [['nmi', 1852]]]
+      ] },
+      { id: 'mass', def: ['kg', 'lb'], groups: [
+        ['metric', [['ug', 1e-9], ['mg', 1e-6], ['g', 0.001], ['kg', 1], ['t', 1000]]],
+        ['imperial', [['oz', LB / 16], ['lb', LB], ['st', LB * 14], ['ton_us', LB * 2000], ['ton_uk', LB * 2240]]],
+        ['other', [['ct', 0.0002], ['ozt', 0.0311034768]]]
+      ] },
+      { id: 'temperature', def: ['c', 'f'], groups: [
+        [null, [['c', 1, 273.15], ['f', 5 / 9, 459.67 * 5 / 9], ['k', 1, 0], ['r', 5 / 9, 0]]]
+      ] },
+      { id: 'volume', def: ['l', 'gal_us'], groups: [
+        ['metric', [['ml', 0.001], ['cl', 0.01], ['l', 1], ['m3', 1000]]],
+        ['us', [['tsp_us', GAL_US / 768], ['tbsp_us', GAL_US / 256], ['floz_us', GAL_US / 128], ['cup_us', GAL_US / 16], ['pt_us', GAL_US / 8], ['qt_us', GAL_US / 4], ['gal_us', GAL_US], ['in3', 0.016387064], ['ft3', 28.316846592]]],
+        ['uk', [['floz_uk', GAL_UK / 160], ['pt_uk', GAL_UK / 8], ['gal_uk', GAL_UK]]]
+      ] },
+      { id: 'area', def: ['m2', 'ft2'], groups: [
+        ['metric', [['cm2', 0.0001], ['m2', 1], ['ha', 10000], ['km2', 1e6]]],
+        ['imperial', [['in2', 0.00064516], ['ft2', 0.09290304], ['yd2', 0.83612736], ['ac', 4046.8564224], ['mi2', 2589988.110336]]]
+      ] },
+      { id: 'speed', def: ['kmh', 'mph'], groups: [
+        ['metric', [['mps', 1], ['kmh', 1 / 3.6]]],
+        ['imperial', [['fps', 0.3048], ['mph', 0.44704]]],
+        ['other', [['kn', 1852 / 3600]]]
+      ] },
+      { id: 'time', def: ['hr', 'min'], groups: [
+        [null, [['nsec', 1e-9], ['usec', 1e-6], ['msec', 0.001], ['sec', 1], ['min', 60], ['hr', 3600], ['day', 86400], ['wk', 604800], ['mo', 2629746], ['yr', 31556952]]]
+      ] },
+      { id: 'data', def: ['gb', 'gib'], groups: [
+        ['bits', [['bit', 0.125], ['kbit', 125], ['mbit', 125000], ['gbit', 1.25e8], ['tbit', 1.25e11]]],
+        ['si', [['byte', 1], ['kb', 1e3], ['mb', 1e6], ['gb', 1e9], ['tb', 1e12], ['pb', 1e15]]],
+        ['iec', [['kib', 1024], ['mib', 1048576], ['gib', 1073741824], ['tib', 1099511627776], ['pib', 1125899906842624]]]
+      ] },
+      { id: 'pressure', def: ['bar', 'psi'], groups: [
+        ['metric', [['pa', 1], ['hpa', 100], ['kpa', 1000], ['mpa', 1e6], ['mbar', 100], ['bar', 1e5]]],
+        ['imperial', [['psi', LBF / 0.00064516], ['inhg', MMHG * 25.4]]],
+        ['other', [['atm', 101325], ['torr', 101325 / 760], ['mmhg', MMHG], ['kgfcm2', 98066.5]]]
+      ] },
+      { id: 'energy', def: ['kcal', 'kj'], groups: [
+        ['metric', [['j', 1], ['kj', 1000], ['mj', 1e6], ['wh', 3600], ['kwh', 3.6e6], ['cal', 4.184], ['kcal', 4184]]],
+        ['imperial', [['btu', 1055.05585262], ['ftlbf', 0.3048 * LBF]]],
+        ['other', [['ev', 1.602176634e-19]]]
+      ] },
+      { id: 'fuel', def: ['l100km', 'mpg_us'], groups: [
+        ['metric', [['l100km', 100, 'inv'], ['kml', 1]]],
+        ['imperial', [['mpg_us', MILE / 1000 / GAL_US], ['mpg_uk', MILE / 1000 / GAL_UK]]]
+      ] },
+      { id: 'angle', def: ['deg', 'rad'], groups: [
+        [null, [['deg', 1], ['arcmin', 1 / 60], ['arcsec', 1 / 3600], ['rad', 180 / Math.PI], ['mrad', 0.18 / Math.PI], ['grad', 0.9], ['turn', 360]]]
+      ] }
+    ];
+
+    const TEMP_FORMULAS = {
+      'c>f': ['@', ' × 9/5 + ', 32],
+      'c>k': ['@', ' + ', 273.15],
+      'c>r': ['(', '@', ' + ', 273.15, ') × 9/5'],
+      'f>c': ['(', '@', ' − ', 32, ') × 5/9'],
+      'f>k': ['(', '@', ' + ', 459.67, ') × 5/9'],
+      'f>r': ['@', ' + ', 459.67],
+      'k>c': ['@', ' − ', 273.15],
+      'k>f': ['@', ' × 9/5 − ', 459.67],
+      'k>r': ['@', ' × 9/5'],
+      'r>c': ['(', '@', ' − ', 491.67, ') × 5/9'],
+      'r>f': ['@', ' − ', 459.67],
+      'r>k': ['@', ' × 5/9']
+    };
+
+    const ROWS = {
+      c: [-40, -10, 0, 10, 20, 30, 37, 100],
+      f: [-40, 0, 32, 50, 68, 86, 98.6, 212],
+      k: [0, 233.15, 273.15, 293.15, 310.15, 373.15],
+      r: [0, 419.67, 491.67, 527.67, 558.27, 671.67],
+      l100km: [3, 4, 5, 6, 8, 10, 12, 15],
+      kml: [5, 8, 10, 12, 15, 20, 25, 30],
+      mpg_us: [15, 20, 25, 30, 35, 40, 50, 60],
+      mpg_uk: [20, 25, 30, 40, 50, 60, 70, 80],
+      kmh: [10, 30, 50, 60, 80, 100, 120, 130],
+      mph: [10, 20, 30, 40, 50, 60, 70, 80],
+      bar: [0.5, 1, 1.5, 2, 2.5, 3, 5, 10],
+      psi: [10, 20, 30, 32, 35, 40, 50, 100],
+      gb: [1, 8, 16, 32, 64, 128, 256, 512],
+      tb: [1, 2, 4, 6, 8, 12, 16, 20],
+      mbit: [1, 10, 25, 50, 100, 250, 500, 1000],
+      kcal: [50, 100, 200, 250, 500, 1000, 2000, 2500],
+      cup_us: [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4],
+      tbsp_us: [0.5, 1, 2, 3, 4, 6, 8],
+      tsp_us: [0.25, 0.5, 1, 2, 3, 4, 6],
+      floz_us: [1, 2, 4, 8, 12, 16, 32],
+      deg: [1, 15, 30, 45, 60, 90, 180, 360],
+      turn: [0.125, 0.25, 0.5, 0.75, 1, 2]
+    };
+    const DEFAULT_ROWS = [1, 5, 10, 25, 50, 100];
+
+    const ALIASES = {
+      metre: 'm', kilometre: 'km', centimetre: 'cm', millimetre: 'mm', micrometre: 'um', micron: 'um', nanometre: 'nm',
+      inch: 'in', foot: 'ft', feet: 'ft', yard: 'yd', mile: 'mi', 'nautical mile': 'nmi',
+      gram: 'g', kilogram: 'kg', kilo: 'kg', milligram: 'mg', microgram: 'ug', mcg: 'ug', tonne: 't', 'metric ton': 't',
+      ounce: 'oz', pound: 'lb', lbs: 'lb', stone: 'st', 'short ton': 'ton_us', 'long ton': 'ton_uk', carat: 'ct', 'troy ounce': 'ozt',
+      celsius: 'c', centigrade: 'c', fahrenheit: 'f', kelvin: 'k', rankine: 'r', degc: 'c', degf: 'f',
+      litre: 'l', millilitre: 'ml', cc: 'ml', centilitre: 'cl', 'cubic metre': 'm3',
+      gallon: 'gal_us', gal: 'gal_us', 'imperial gallon': 'gal_uk', 'fluid ounce': 'floz_us', 'fl oz': 'floz_us', floz: 'floz_us',
+      cup: 'cup_us', pint: 'pt_us', pt: 'pt_us', quart: 'qt_us', qt: 'qt_us', tablespoon: 'tbsp_us', tbsp: 'tbsp_us', teaspoon: 'tsp_us', tsp: 'tsp_us',
+      'cubic inch': 'in3', 'cubic foot': 'ft3', 'cubic feet': 'ft3',
+      'square metre': 'm2', sqm: 'm2', 'square foot': 'ft2', 'square feet': 'ft2', sqft: 'ft2', acre: 'ac', hectare: 'ha',
+      'square kilometre': 'km2', 'square mile': 'mi2', 'square inch': 'in2', 'square yard': 'yd2', 'square centimetre': 'cm2',
+      kph: 'kmh', kmph: 'kmh', knot: 'kn', kt: 'kn',
+      second: 'sec', s: 'sec', minute: 'min', hour: 'hr', h: 'hr', d: 'day', week: 'wk', month: 'mo', year: 'yr',
+      millisecond: 'msec', ms: 'msec', microsecond: 'usec', nanosecond: 'nsec',
+      bit: 'bit', byte: 'byte', b: 'byte', kilobyte: 'kb', megabyte: 'mb', gigabyte: 'gb', terabyte: 'tb', petabyte: 'pb',
+      kibibyte: 'kib', mebibyte: 'mib', gibibyte: 'gib', tebibyte: 'tib', pebibyte: 'pib',
+      kilobit: 'kbit', megabit: 'mbit', gigabit: 'gbit', terabit: 'tbit',
+      pascal: 'pa', hectopascal: 'hpa', kilopascal: 'kpa', megapascal: 'mpa', millibar: 'mbar', atmosphere: 'atm',
+      joule: 'j', kilojoule: 'kj', megajoule: 'mj', calorie: 'cal', kilocalorie: 'kcal', 'watt hour': 'wh', 'kilowatt hour': 'kwh', electronvolt: 'ev',
+      mpg: 'mpg_us', 'l/100km': 'l100km', kmpl: 'kml',
+      degree: 'deg', radian: 'rad', gradian: 'grad', revolution: 'turn', rev: 'turn', arcminute: 'arcmin', arcsecond: 'arcsec', milliradian: 'mrad'
+    };
+
+    const UNITS = {};
+    const CATS = {};
+    CATEGORIES.forEach((cat) => {
+      cat.ids = [];
+      cat.sets = cat.groups.map(([group, list]) => ({
+        group,
+        ids: list.map(([id, f, extra]) => {
+          UNITS[id] = { id, cat: cat.id, f, b: typeof extra === 'number' ? extra : 0, inv: extra === 'inv' };
+          cat.ids.push(id);
+          return id;
+        })
+      }));
+      CATS[cat.id] = cat;
+    });
+
+    const toBase = (u, x) => (u.inv ? u.f / x : x * u.f + u.b);
+    const fromBase = (u, v) => (u.inv ? u.f / v : (v - u.b) / u.f);
+
+    const convert = (fromId, toId, x) => {
+      const a = UNITS[fromId];
+      const c = UNITS[toId];
+      if (!a || !c || a.cat !== c.cat || typeof x !== 'number' || Number.isNaN(x)) return null;
+      let value = fromId === toId ? x : fromBase(c, toBase(a, x));
+      let scale = Math.abs(value);
+      if (fromId !== toId && (a.b || c.b)) {
+        scale = (Math.abs(x * a.f) + Math.abs(a.b) + Math.abs(c.b)) / c.f;
+        if (Math.abs(value) < scale * 1e-13) value = 0;
+      }
+      if (value === 0) value = 0;
+      return { value, scale };
+    };
+
+    const kelvin = (id, x) => {
+      const u = UNITS[id];
+      return u && u.cat === 'temperature' ? toBase(u, x) : NaN;
+    };
+
+    const digits = (value, scale) => {
+      if (!isFinite(value) || value === 0 || !(scale > 0)) return 10;
+      const lost = Math.log10(scale / Math.abs(value));
+      return lost <= 5 ? 10 : Math.max(1, Math.min(10, Math.floor(15 - lost)));
+    };
+
+    const isExact = (value, scale) => {
+      if (!isFinite(value)) return true;
+      const rounded = Number(value.toPrecision(10));
+      return Math.abs(rounded - value) <= Math.max(Math.abs(value), scale || 0) * 4e-15;
+    };
+
+    const describe = (fromId, toId) => {
+      const a = UNITS[fromId];
+      const c = UNITS[toId];
+      if (!a || !c || a.cat !== c.cat) return null;
+      if (fromId === toId) return { type: 'same' };
+      if (a.cat === 'temperature') return { type: 'formula', parts: TEMP_FORMULAS[fromId + '>' + toId] };
+      if (a.inv || c.inv) {
+        const k = a.inv ? a.f / c.f : c.f / a.f;
+        return { type: 'reciprocal', k, exact: isExact(k, 0) };
+      }
+      const f = a.f / c.f;
+      const inverse = c.f / a.f;
+      return { type: 'factor', f, inverse, exact: isExact(f, 0), inverseExact: isExact(inverse, 0) };
+    };
+
+    const rows = (id) => (ROWS[id] || DEFAULT_ROWS).slice();
+
+    const parse = (raw, decimal) => {
+      const s = String(raw == null ? '' : raw)
+        .replace(/[\uff10-\uff19]/g, (d) => String.fromCharCode(d.charCodeAt(0) - 0xfee0))
+        .replace(/\uff0e/g, '.')
+        .replace(/\uff0c/g, ',')
+        .replace(/\uff0b/g, '+')
+        .replace(/[\u2212\u2012\u2013\ufe63\uff0d]/g, '-')
+        .replace(/[\s\u00a0\u202f\u2009\u2007\u0027\u2019]/g, '');
+      if (s === '') return { state: 'empty' };
+      if (/^[+-]?[.,]?$/.test(s) || /^[+-]?[\d.,]*\d[.,]?[eE][+-]?$/.test(s)) return { state: 'partial' };
+      const m = /^([+-]?)([\d.,]+)(?:[eE]([+-]?\d+))?$/.exec(s);
+      if (!m || !/\d/.test(m[2])) return { state: 'invalid' };
+      let body = m[2];
+      const dots = body.split('.').length - 1;
+      const commas = body.split(',').length - 1;
+      const grouped = /^\d{1,3}([.,])\d{3}(?:\1\d{3})*$/.test(body);
+      if (dots && commas) {
+        const point = body.lastIndexOf('.') > body.lastIndexOf(',') ? '.' : ',';
+        if (body.split(point).length > 2) return { state: 'invalid' };
+        body = body.split(point === '.' ? ',' : '.').join('').replace(point, '.');
+      } else if (dots + commas > 1) {
+        if (!grouped) return { state: 'invalid' };
+        body = body.replace(/[.,]/g, '');
+      } else if (commas === 1) {
+        body = decimal !== ',' && grouped ? body.replace(',', '') : body.replace(',', '.');
+      }
+      if (!/^(?:\d+\.?\d*|\.\d+)$/.test(body)) return { state: 'invalid' };
+      const value = Number(m[1] + body + (m[3] ? 'e' + m[3] : ''));
+      if (!isFinite(value)) return { state: 'overflow' };
+      return { state: 'ok', value: value === 0 ? 0 : value };
+    };
+
+    const formatter = (lang) => {
+      const cache = {};
+      const make = (opts) => {
+        try { return new Intl.NumberFormat(lang, opts); } catch (_) { return new Intl.NumberFormat('en', opts); }
+      };
+      const get = (sci, d, grouping) => {
+        const key = (sci ? 's' : 'n') + d + (grouping ? 'g' : '');
+        if (!cache[key]) cache[key] = make(sci ? { notation: 'scientific', maximumSignificantDigits: d } : grouping ? { maximumSignificantDigits: d } : { maximumSignificantDigits: d, useGrouping: false });
+        return cache[key];
+      };
+      let decimal = '.';
+      try {
+        const part = make({}).formatToParts(1.5).find((p) => p.type === 'decimal');
+        if (part) decimal = part.value;
+      } catch (_) {}
+      const format = (x, d, grouping) => {
+        if (typeof x !== 'number' || Number.isNaN(x)) return '';
+        const v = x === 0 ? 0 : x;
+        const abs = Math.abs(v);
+        const sci = isFinite(v) && abs !== 0 && (abs >= 1e15 || abs < 1e-6);
+        return get(sci, Math.max(1, Math.min(10, d || 10)), grouping !== false).format(v);
+      };
+      return { lang, decimal, format };
+    };
+
+    const alias = (token) => {
+      const t = String(token == null ? '' : token).toLowerCase().trim().replace(/[\s-]+/g, ' ').replace(/(met|lit)er(?=s?\b)/g, '$1re');
+      const tries = [t, t.replace(/es$/, ''), t.replace(/s$/, '')];
+      for (let i = 0; i < tries.length; i++) {
+        if (Object.prototype.hasOwnProperty.call(ALIASES, tries[i])) return ALIASES[tries[i]];
+      }
+      return null;
+    };
+
+    return {
+      CATEGORIES,
+      category: (id) => (Object.prototype.hasOwnProperty.call(CATS, id) ? CATS[id] : null),
+      unit: (id) => (Object.prototype.hasOwnProperty.call(UNITS, id) ? UNITS[id] : null),
+      convert,
+      kelvin,
+      digits,
+      isExact,
+      describe,
+      rows,
+      parse,
+      formatter,
+      alias
+    };
+  })();
+
+  const $ = (id) => document.getElementById(id);
+  const catsEl = $('uc-cats');
+  const sides = {
+    a: { box: $('uc-side-a'), input: $('uc-val-a'), select: $('uc-unit-a'), name: $('uc-name-a'), sign: $('uc-sign-a') },
+    b: { box: $('uc-side-b'), input: $('uc-val-b'), select: $('uc-unit-b'), name: $('uc-name-b'), sign: $('uc-sign-b') }
+  };
+  const swapBtn = $('uc-swap');
+  const statusEl = $('uc-status');
+  const sentenceEl = $('uc-sentence');
+  const warnEl = $('uc-warn');
+  const copyBtn = $('uc-copy');
+  const formulaLabel = $('uc-formula-label');
+  const formulaText = $('uc-formula-text');
+  const captionEl = $('uc-caption');
+  const thA = $('uc-th-a');
+  const thB = $('uc-th-b');
+  const rowsEl = $('uc-rows');
+
+  const STORE_KEY = 'unit_converter_state';
+  const NBSP = '\u00a0';
+  const CJK = /[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff]/;
+  const TIGHT = ['°', '′', '″'];
+  const SIDES = ['a', 'b'];
+  const STATUS_DELAY = 450;
+
+  const pageLang = () => document.documentElement.lang || 'en';
+  let fmt = Units.formatter(pageLang());
+  let copyText = '';
+  let statusTimer = 0;
+
+  const state = { cat: 'length', units: {}, anchor: 'a' };
+  Units.CATEGORIES.forEach((cat) => { state.units[cat.id] = cat.def.slice(); });
+
+  const other = (k) => (k === 'a' ? 'b' : 'a');
+  const pair = () => state.units[state.cat];
+  const unitOf = (k) => pair()[k === 'a' ? 0 : 1];
+  const sym = (id) => COPY['s_' + id] || id;
+  const unitName = (id) => COPY['u_' + id] || id;
+  const fill = (template, map) => Object.keys(map).reduce((s, key) => s.split('{' + key + '}').join(map[key]), template);
+  const isTight = (s) => TIGHT.indexOf(s) !== -1 || CJK.test(s.charAt(0));
+  const withUnit = (num, id) => {
+    const s = sym(id);
+    return isTight(s) ? num + s : num + NBSP + s;
+  };
+  const rel = (exact) => (exact ? ' = ' : ' ≈ ');
+  const echo = (value) => String(value).replace('.', fmt.decimal);
+  const optionLabel = (id) => {
+    const n = unitName(id);
+    const s = sym(id);
+    if (n.toLowerCase() === s.toLowerCase() || (CJK.test(s) && n.indexOf(s) !== -1)) return n;
+    return fill(COPY.opt_fmt, { name: n, sym: s });
+  };
+
+  const storeGet = () => {
+    try { return window.MentriaStore ? window.MentriaStore.get('tools', STORE_KEY) : null; } catch (_) { return null; }
+  };
+  const persist = () => {
+    try { if (window.MentriaStore) window.MentriaStore.set('tools', STORE_KEY, { cat: state.cat, units: state.units }); } catch (_) {}
+  };
+  const validPair = (catId, ids) => Array.isArray(ids) && ids.length === 2 && ids.every((id) => {
+    const u = Units.unit(id);
+    return !!u && u.cat === catId;
+  });
+  const restore = () => {
+    const saved = storeGet();
+    if (!saved || typeof saved !== 'object') return;
+    const units = saved.units && typeof saved.units === 'object' ? saved.units : {};
+    Units.CATEGORIES.forEach((cat) => {
+      if (validPair(cat.id, units[cat.id])) state.units[cat.id] = units[cat.id].slice();
+    });
+    if (Units.category(saved.cat)) state.cat = saved.cat;
+  };
+
+  const fillSelect = (select, cat, selected) => {
+    select.textContent = '';
+    cat.sets.forEach((set) => {
+      let parent = select;
+      if (set.group) {
+        parent = document.createElement('optgroup');
+        parent.label = COPY['grp_' + set.group];
+        select.appendChild(parent);
+      }
+      set.ids.forEach((id) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = optionLabel(id);
+        parent.appendChild(option);
+      });
+    });
+    select.value = selected;
+  };
+
+  const renderSides = () => {
+    SIDES.forEach((k) => {
+      sides[k].name.textContent = unitName(unitOf(k));
+      sides[k].sign.hidden = state.cat === 'fuel';
+      sides[k].box.classList.toggle('is-anchor', state.anchor === k);
+    });
+  };
+
+  const factorLine = (from, to, f, exact) => withUnit(fmt.format(1), from) + rel(exact) + withUnit(fmt.format(f), to);
+
+  const renderFormula = () => {
+    const a = unitOf('a');
+    const b = unitOf('b');
+    const d = Units.describe(a, b);
+    const lines = [];
+    let label = COPY.factor;
+    if (d.type === 'same') {
+      lines.push(factorLine(a, b, 1, true));
+    } else if (d.type === 'factor') {
+      lines.push(factorLine(a, b, d.f, d.exact));
+      lines.push(factorLine(b, a, d.inverse, d.inverseExact));
+    } else if (d.type === 'formula') {
+      label = COPY.formula;
+      lines.push(sym(b) + ' = ' + d.parts.map((p) => (p === '@' ? sym(a) : typeof p === 'number' ? fmt.format(p) : p)).join(''));
+    } else {
+      label = COPY.formula;
+      lines.push(sym(b) + rel(d.exact) + fmt.format(d.k) + ' ÷ ' + sym(a));
+    }
+    formulaLabel.textContent = label;
+    formulaText.textContent = '';
+    lines.forEach((line) => {
+      const span = document.createElement('span');
+      span.className = 'uc__formula-line';
+      span.textContent = line;
+      formulaText.appendChild(span);
+    });
+  };
+
+  const renderTable = () => {
+    const a = unitOf('a');
+    const b = unitOf('b');
+    captionEl.textContent = fill(COPY.ref_caption, { a: sym(a), b: sym(b) });
+    thA.textContent = sym(a);
+    thB.textContent = sym(b);
+    rowsEl.textContent = '';
+    Units.rows(a).forEach((x) => {
+      const r = Units.convert(a, b, x);
+      const tr = document.createElement('tr');
+      const th = document.createElement('th');
+      th.scope = 'row';
+      th.textContent = fmt.format(x);
+      const td = document.createElement('td');
+      td.textContent = fmt.format(r.value, Units.digits(r.value, r.scale));
+      tr.appendChild(th);
+      tr.appendChild(td);
+      rowsEl.appendChild(tr);
+    });
+  };
+
+  const showStatus = (text, tone, warn, immediate) => {
+    const apply = () => {
+      statusTimer = 0;
+      sentenceEl.textContent = text;
+      if (tone) statusEl.dataset.tone = tone;
+      else delete statusEl.dataset.tone;
+      warnEl.textContent = warn;
+      warnEl.hidden = !warn;
+    };
+    if (statusTimer) clearTimeout(statusTimer);
+    statusTimer = 0;
+    if (immediate) apply();
+    else statusTimer = setTimeout(apply, STATUS_DELAY);
+  };
+
+  const compute = (immediate) => {
+    const src = state.anchor;
+    const from = unitOf(src);
+    const to = unitOf(other(src));
+    const input = sides[src].input;
+    const target = sides[other(src)].input;
+    const parsed = Units.parse(input.value, fmt.decimal);
+    let problem = '';
+    if (parsed.state === 'invalid') problem = fill(COPY.invalid, { example: fmt.format(12.5) });
+    else if (parsed.state === 'overflow') problem = COPY.too_big;
+    else if (parsed.state === 'ok' && state.cat === 'fuel' && parsed.value < 0) problem = COPY.negative_fuel;
+    if (problem) input.setAttribute('aria-invalid', 'true');
+    else input.removeAttribute('aria-invalid');
+    target.removeAttribute('aria-invalid');
+    renderSides();
+    if (problem || parsed.state !== 'ok') {
+      target.value = '';
+      copyText = '';
+      copyBtn.disabled = true;
+      showStatus(problem, problem ? 'err' : '', '', immediate);
+      return;
+    }
+    const r = Units.convert(from, to, parsed.value);
+    const d = Units.digits(r.value, r.scale);
+    target.value = fmt.format(r.value, d, false);
+    const sentence = withUnit(fmt.format(parsed.value), from) + rel(Units.isExact(r.value, r.scale)) + withUnit(fmt.format(r.value, d), to);
+    const warn = state.cat === 'temperature' && Units.kelvin(from, parsed.value) < -1e-9 ? COPY.below_zero : '';
+    copyText = sentence.split(NBSP).join(' ');
+    copyBtn.disabled = false;
+    showStatus(sentence, '', warn, immediate);
+  };
+
+  const refresh = () => {
+    renderSides();
+    renderFormula();
+    renderTable();
+    compute(true);
+  };
+
+  const setCategory = (id) => {
+    const cat = Units.category(id);
+    if (!cat) return;
+    state.cat = id;
+    fillSelect(sides.a.select, cat, unitOf('a'));
+    fillSelect(sides.b.select, cat, unitOf('b'));
+    refresh();
+  };
+
+  const flipSign = (k) => {
+    const input = sides[k].input;
+    const raw = input.value.trim();
+    const head = raw.charAt(0);
+    input.value = head === '-' || head === '\u2212' ? raw.slice(1) : '-' + (head === '+' ? raw.slice(1) : raw);
+    state.anchor = k;
+    compute(true);
+    if (!raw) input.focus();
+  };
+
+  const nudge = (k, e) => {
+    if (e.isComposing || e.keyCode === 229) return;
+    if ((e.key !== 'ArrowUp' && e.key !== 'ArrowDown') || e.altKey || e.ctrlKey || e.metaKey) return;
+    const input = sides[k].input;
+    const p = Units.parse(input.value, fmt.decimal);
+    if (p.state !== 'ok' && p.state !== 'empty') return;
+    e.preventDefault();
+    const step = (e.shiftKey ? 10 : 1) * (e.key === 'ArrowUp' ? 1 : -1);
+    let next = Number(((p.state === 'ok' ? p.value : 0) + step).toPrecision(12));
+    if (state.cat === 'fuel' && next < 0) next = 0;
+    input.value = echo(next);
+    state.anchor = k;
+    compute(true);
+  };
+
+  const matchUnit = (cat, token) => {
+    const raw = String(token == null ? '' : token).trim();
+    if (!raw) return null;
+    const low = raw.toLowerCase();
+    const aka = Units.alias(raw);
+    const tests = [
+      (id) => id === low,
+      (id) => sym(id) === raw,
+      (id) => sym(id).toLowerCase() === low,
+      (id) => unitName(id).toLowerCase() === low,
+      (id) => id === aka
+    ];
+    for (let i = 0; i < tests.length; i++) {
+      const hit = cat.ids.find(tests[i]);
+      if (hit) return hit;
+    }
+    return null;
+  };
+
+  const resolvePair = (from, to) => {
+    const order = [Units.category(state.cat)].concat(Units.CATEGORIES.filter((c) => c.id !== state.cat));
+    for (let i = 0; i < order.length; i++) {
+      const a = matchUnit(order[i], from);
+      const b = a ? matchUnit(order[i], to) : null;
+      if (a && b) return { cat: order[i].id, from: a, to: b };
+    }
+    return null;
+  };
+
+  restore();
+
+  const catSeg = MentriaUI.segmented(catsEl, (value) => {
+    setCategory(value);
+    persist();
+  });
+
+  const load = (found, value) => {
+    state.units[found.cat] = [found.from, found.to];
+    state.anchor = 'a';
+    if (typeof value === 'number') sides.a.input.value = echo(value);
+    catSeg.set(found.cat);
+    setCategory(found.cat);
+    persist();
+  };
+
+  SIDES.forEach((k) => {
+    const s = sides[k];
+    s.input.addEventListener('input', () => {
+      state.anchor = k;
+      compute(false);
+    });
+    s.input.addEventListener('keydown', (e) => nudge(k, e));
+    s.select.addEventListener('change', () => {
+      if (!Units.unit(s.select.value)) return;
+      pair()[k === 'a' ? 0 : 1] = s.select.value;
+      refresh();
+      persist();
+    });
+    s.sign.addEventListener('click', () => flipSign(k));
+  });
+
+  swapBtn.addEventListener('click', () => {
+    pair().reverse();
+    sides.a.select.value = unitOf('a');
+    sides.b.select.value = unitOf('b');
+    swapBtn.classList.toggle('is-flipped');
+    refresh();
+    persist();
+  });
+
+  MentriaUI.copyButton(copyBtn, () => copyText, { copiedText: COPY.copied, failedText: COPY.copy_failed });
+
+  document.addEventListener('mentria:localechange', () => {
+    const lookup = window.MentriaI18n && window.MentriaI18n.t;
+    if (typeof lookup === 'function') {
+      Object.keys(COPY).forEach((key) => {
+        const v = lookup('tool.unit-converter.' + key);
+        if (typeof v === 'string') COPY[key] = v;
+      });
+    }
+    const anchorInput = sides[state.anchor].input;
+    const p = Units.parse(anchorInput.value, fmt.decimal);
+    fmt = Units.formatter(pageLang());
+    if (p.state === 'ok') anchorInput.value = echo(p.value);
+    copyBtn.textContent = COPY.copy;
+    setCategory(state.cat);
+  });
+
+  catSeg.set(state.cat);
+  setCategory(state.cat);
+
+  (() => {
+    let q;
+    try { q = new URLSearchParams(location.search); } catch (_) { return; }
+    if (!q.has('from') && !q.has('to') && !q.has('v')) return;
+    const found = resolvePair(q.get('from'), q.get('to'));
+    const p = q.has('v') ? Units.parse(q.get('v'), '.') : null;
+    const value = p && p.state === 'ok' ? p.value : undefined;
+    try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (_) {}
+    if (found) {
+      load(found, value);
+    } else if (typeof value === 'number') {
+      sides.a.input.value = echo(value);
+      state.anchor = 'a';
+      compute(true);
+    }
+  })();
+
+  import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
+    MentriaBus.provide('unit.convert', (args) => {
+      const o = args || {};
+      const value = Number(o.value);
+      if (!Number.isFinite(value)) throw new Error('value must be a finite number');
+      const found = resolvePair(o.from, o.to);
+      if (!found) throw new Error('unknown or mismatched units; use ids such as km, mi, kg, lb, c, f, l, gal_us, m2, kmh, mph, hr, gb, gib, psi, kwh, l100km, mpg_us, deg, rad');
+      if (found.cat === 'fuel' && value < 0) throw new Error('fuel economy cannot be negative');
+      load(found, value);
+      const r = Units.convert(found.from, found.to, value);
+      const shown = isFinite(r.value) ? Number(r.value.toPrecision(Units.digits(r.value, r.scale))) : r.value;
+      return { result: copyText, value: shown, from: found.from, to: found.to, category: found.cat };
+    }, {
+      description: 'Convert a number between units of length, weight, temperature, volume, area, speed, time, data size, pressure, energy, fuel economy or angle; the result is shown in the tool.',
+      ai: true,
+      parameters: {
+        type: 'object',
+        properties: {
+          value: { type: 'number' },
+          from: { type: 'string', description: 'unit id or symbol, e.g. km, °F, US gal, GiB, L/100 km' },
+          to: { type: 'string', description: 'unit id or symbol in the same category' }
+        },
+        required: ['value', 'from', 'to']
+      }
+    });
+  }).catch(() => {});
+})();
+</script>
+
+<style>
+.uc {
+  container: uc / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: min(100%, 46rem);
+  margin: 0 auto;
+  padding: var(--space-1) 0 var(--space-2);
+  font-family: var(--font-mono);
+  color: var(--term-fg);
+}
+
+.uc .uc__cats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--term-border);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.uc .uc__cats > button {
+  min-height: 2.6rem;
+  padding: var(--space-2) var(--space-1);
+  background: var(--term-bg-raised);
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.uc .uc__cats > button:hover { color: var(--term-fg); }
+.uc .uc__cats > button.is-active {
+  background: linear-gradient(var(--cyan-15), var(--cyan-15)), var(--term-bg-raised);
+  color: var(--syn-cyan);
+}
+.uc .uc__cats > button:focus-visible { outline-offset: -2px; }
+
+.uc__pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.uc__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  background: var(--term-bg);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-lg);
+}
+.uc__side.is-anchor { border-color: var(--term-border-strong); }
+
+.uc__cap {
+  font-size: var(--text-2xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+  cursor: pointer;
+}
+.uc__side.is-anchor .uc__cap { color: var(--syn-cyan); }
+
+.uc__field {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.uc .uc__num {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-lg) !important;
+  font-variant-numeric: tabular-nums;
+  color: var(--term-fg-strong);
+}
+.uc .uc__num[aria-invalid="true"] { border-color: var(--syn-pink); }
+
+.uc .uc__sign {
+  flex: 0 0 auto;
+  min-width: 2.75rem;
+  padding: 0 var(--space-2);
+  font-size: var(--text-md);
+  border-color: var(--term-border-strong);
+}
+.uc .uc__sign[hidden] { display: none; }
+
+.uc .uc__unit {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2) 2.25rem var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--term-muted) 50%),
+    linear-gradient(135deg, var(--term-muted) 50%, transparent 50%);
+  background-position: calc(100% - 1.15rem) 50%, calc(100% - 0.8rem) 50%;
+  background-size: 0.35rem 0.35rem, 0.35rem 0.35rem;
+  background-repeat: no-repeat;
+}
+
+.uc .uc__swap {
+  justify-self: center;
+  color: var(--syn-cyan);
+  border-color: var(--term-border-strong);
+}
+.uc__swap-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  transform: rotate(calc(90deg + var(--uc-flip, 0deg)));
+}
+.uc__swap.is-flipped { --uc-flip: 180deg; }
+
+.uc__out {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 3.5rem;
+  padding: var(--space-3) var(--space-4);
+  background: var(--term-bg);
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-lg);
+}
+.uc__status {
+  display: flex;
+  flex: 1 1 14rem;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.uc__sentence {
+  font-size: var(--text-md);
+  line-height: 1.4;
+  color: var(--term-fg-strong);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.uc__status[data-tone="err"] .uc__sentence {
+  font-size: var(--text-sm);
+  color: var(--syn-pink);
+}
+.uc__warn {
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--syn-amber);
+}
+.uc__warn[hidden] { display: none; }
+
+.uc .uc__copy {
+  flex: 0 0 auto;
+  margin-left: auto;
+  min-height: 2.5rem;
+  border-color: var(--term-border-strong);
+}
+.uc .uc__copy.is-copied { color: var(--syn-green); border-color: var(--green-30); }
+.uc .uc__copy.is-failed { color: var(--syn-pink); border-color: var(--pink-30); }
+
+.uc__formula {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: 0 var(--space-1);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+.uc__formula-label {
+  font-size: var(--text-2xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--syn-purple);
+}
+.uc__formula-text {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  min-width: 0;
+  color: var(--term-fg);
+  font-variant-numeric: tabular-nums;
+}
+.uc__formula-line { overflow-wrap: anywhere; }
+
+.uc__table {
+  width: min(100%, 26rem);
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+.uc__caption {
+  caption-side: top;
+  padding: 0 var(--space-3) var(--space-2);
+  text-align: left;
+  font-size: var(--text-xs);
+  color: var(--term-muted);
+}
+.uc__table th,
+.uc__table td {
+  width: 50%;
+  padding: var(--space-1) var(--space-3);
+  text-align: right;
+  border-bottom: 1px solid var(--term-divider);
+  overflow-wrap: anywhere;
+}
+.uc__table thead th {
+  font-weight: 600;
+  color: var(--syn-cyan);
+  border-bottom-color: var(--term-border-strong);
+}
+.uc__table tbody th {
+  font-weight: 400;
+  color: var(--term-muted);
+}
+.uc__table tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.015); }
+
+.uc__note {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-2xs);
+  line-height: 1.55;
+  color: var(--term-subtle);
+}
+
+@container uc (min-width: 34rem) {
+  .uc .uc__cats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .uc__pair { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .uc__swap-icon { transform: rotate(var(--uc-flip, 0deg)); }
+}
+
+@container uc (min-width: 44rem) {
+  .uc .uc__cats { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .uc__swap-icon { transition: transform var(--dur-4, 320ms) var(--ease-out, ease-out); }
+  .uc__side { transition: border-color var(--duration-fast, 150ms) var(--ease-out, ease-out); }
+}
+</style>

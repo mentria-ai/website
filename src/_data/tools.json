@@ -43,6 +43,30 @@
     "group": "Everyday"
   },
   {
+    "slug": "calculator",
+    "title": "Calculator",
+    "summary": "Calculator online with no app to install — type or tap an expression and watch the answer update as you go, with brackets, percent, powers, square roots, sin/cos/tan in degrees or radians, ln, log, π and e. Keeps your last 20 calculations on this device; nothing is uploaded.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-09-24"
+  },
+  {
+    "slug": "unit-converter",
+    "title": "Unit Converter",
+    "summary": "Unit converter online with no app to install — length, weight, temperature, volume, area, speed, time, data (kB and KiB), pressure, energy, fuel economy (L/100 km to mpg) and angles. Type in either field to see the other update with the exact factor or formula and a quick-reference table; it all runs on-device and nothing is uploaded.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-09-24"
+  },
+  {
+    "slug": "world-clock",
+    "title": "World Clock",
+    "summary": "World clock online with no app — compare the time in cities worldwide with the date, UTC offset and day or night at a glance, and convert any date and time across time zones with daylight saving handled. Searchable time zone picker, 12/24-hour format, runs on-device and works offline.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-09-24"
+  },
+  {
     "slug": "quick-notes",
     "title": "Quick Notes",
     "summary": "Minimal scratchpad that saves to your browser. Supports multiple notes with localStorage persistence.",
@@ -64,6 +88,14 @@
     "group": "Everyday"
   },
   {
+    "slug": "password-generator",
+    "title": "Password Generator",
+    "summary": "Password generator online with no app to install — strong random passwords from 8 to 128 characters with every chosen character set guaranteed and an optional no-look-alikes mode, or passphrases from the EFF short wordlist, with an honest entropy readout. Made on-device with the Web Crypto API; passwords are never stored or sent.",
+    "category": "Security",
+    "group": "Everyday",
+    "added": "2026-09-24"
+  },
+  {
     "slug": "exif",
     "title": "EXIF Inspector",
     "summary": "See the metadata hiding in a photo — camera, timestamps, GPS position — and download a byte-identical clean copy with it all stripped. Nothing is uploaded.",
@@ -76,6 +108,14 @@
     "summary": "Pick colors, generate harmonious palettes, and copy values in HEX, RGB, and HSL. Works offline.",
     "category": "Design",
     "group": "Create"
+  },
+  {
+    "slug": "image-compressor",
+    "title": "Image Compressor",
+    "summary": "Compress and resize images online with no app to install — shrink JPEG, PNG and WebP photos, convert formats and strip EXIF location data, all on your device. Nothing is uploaded.",
+    "category": "Design",
+    "group": "Create",
+    "added": "2026-09-24"
   },
   {
     "slug": "annotate-image",

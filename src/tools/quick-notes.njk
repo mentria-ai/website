@@ -68,6 +68,7 @@ eleventyComputed:
       <p class="qn-locked__body">{{ "tool.quick-notes.locked_body" | t }}</p>
       <button class="qn-unlock-btn m-btn m-btn--primary m-btn--pill" id="qn-unlock-btn">{{ "tool.quick-notes.unlock_btn" | t }}</button>
     </div>
+    <div class="qn-print" id="qn-print" aria-hidden="true"></div>
     <div class="qn-editor__statusbar">
       <span class="qn-status__counts" id="qn-counts">{{ ('tool.quick-notes.count_summary' | t) | replace('{words}', '0') | replace('{chars}', '0') }}</span>
       <span class="qn-status__saved" id="qn-saved"></span>
@@ -613,6 +614,17 @@ eleventyComputed:
     MentriaBus.provide('notes.list', () => notes.map((n) => ({ title: n.title || '', preview: String(n.body || n.text || '').replace(/\s+/g, ' ').slice(0, 80), updatedAt: n.updatedAt || 0 })), { description: 'List saved notes: title, a short preview, and last-updated time.', parameters: { type: 'object', properties: {} }, ai: true, readonly: true });
   }).catch(() => {});
   exportBtn.addEventListener('click', exportNote);
+  window.addEventListener('beforeprint', () => {
+    const out = document.getElementById('qn-print');
+    out.textContent = '';
+    if (textarea.hidden) return;
+    const h = document.createElement('h1');
+    h.textContent = titleInput.value.trim() || COPY.untitled;
+    const body = document.createElement('div');
+    body.className = 'qn-print__body';
+    body.textContent = textarea.value;
+    out.append(h, body);
+  });
   document.getElementById('qn-export-all-btn').addEventListener('click', exportAll);
   if (navigator.share) shareBtn.addEventListener('click', shareNote);
   else shareBtn.hidden = true;
@@ -697,6 +709,17 @@ eleventyComputed:
 </script>
 
 <style>
+.qn-print { display: none; }
+
+@media print {
+  .hero, .qn-sidebar, .qn-editor__titlebar, .qn-editor__textarea, .qn-editor__statusbar, .qn-locked { display: none !important; }
+  .qn-tool { display: block !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; background: none !important; }
+  .qn-editor { display: block !important; }
+  .qn-print { display: block; color: #111; }
+  .qn-print h1 { margin: 0 0 0.6em; font-family: var(--font-body, sans-serif); font-size: 18pt; line-height: 1.25; color: #000; }
+  .qn-print__body { font-family: var(--font-body, sans-serif); font-size: 12pt; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+}
+
 .qn-tool {
   display: flex;
   min-height: 520px;

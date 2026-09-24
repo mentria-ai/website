@@ -25,6 +25,7 @@ eleventyComputed:
     <p class="files__summary" id="files-summary"></p>
     <div class="files__toolbar-actions">
       <button type="button" class="m-btn m-btn--ghost" id="files-export-all">{{ "tool.files.export_all" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" id="files-restore">{{ "about.data_import_button" | t }}…</button>
       <button type="button" class="m-btn m-btn--ghost" id="files-refresh">{{ "tool.files.refresh" | t }}</button>
     </div>
   </div>
@@ -89,6 +90,27 @@ eleventyComputed:
   </div>
 </div>
 
+<div class="files-modal m-modal" id="files-restore-modal" hidden>
+  <div class="files-modal__backdrop" data-close></div>
+  <div class="files-modal__card m-modal__card">
+    <h3 class="files-modal__h">{{ "about.data_import_title" | t }}</h3>
+    <p class="files-modal__p">{{ "about.data_import_lede" | t }}</p>
+    <div class="m-field">
+      <label for="files-restore-file">{{ "about.data_import_choose" | t }}</label>
+      <input class="m-input" type="file" id="files-restore-file" accept="application/json,.json">
+    </div>
+    <div class="m-field">
+      <label for="files-restore-pass">{{ "tool.files.passphrase_label" | t }}</label>
+      <input class="m-input" type="password" id="files-restore-pass" autocomplete="current-password" spellcheck="false">
+    </div>
+    <p class="files-modal__strength" id="files-restore-status" aria-live="polite"></p>
+    <div class="files-modal__actions">
+      <button type="button" class="m-btn m-btn--ghost" data-close>{{ "tool.files.cancel" | t }}</button>
+      <button type="button" class="m-btn m-btn--primary" id="files-restore-confirm">{{ "about.data_import_button" | t }}</button>
+    </div>
+  </div>
+</div>
+
 {% include "terminal-frame-close.njk" %}
 {% include "tool-schema.njk" %}
 
@@ -130,6 +152,9 @@ eleventyComputed:
     statusDeleted:{{ ("tool.files.status_deleted" | t) | dump | safe }},
     statusExported:{{ ("tool.files.status_exported" | t) | dump | safe }},
     backupDone:   {{ ("tool.files.status_backup_done" | t) | dump | safe }},
+    restoreBusy:  {{ ("about.data_import_busy" | t) | dump | safe }},
+    restoreDone:  {{ ("about.data_import_done" | t) | dump | safe }},
+    restoreFail:  {{ ("about.data_import_fail" | t) | dump | safe }},
     passShort:    {{ ("tool.files.status_pass_short" | t) | dump | safe }},
     backupFailed: {{ ("tool.files.status_backup_failed" | t) | dump | safe }},
     strengthHint: {{ ("tool.files.strength_hint"  | t) | dump | safe }},
@@ -537,6 +562,7 @@ eleventyComputed:
 
   const viewModal = MentriaUI.modal($('files-view-modal'));
   const exportModal = MentriaUI.modal($('files-export-modal'));
+  const restoreModal = MentriaUI.modal($('files-restore-modal'));
   document.body.appendChild($('files-view-modal'));
   document.body.appendChild($('files-export-modal'));
 
@@ -643,8 +669,42 @@ eleventyComputed:
     }
   });
 
+  $('files-restore').addEventListener('click', () => {
+    $('files-restore-file').value = '';
+    $('files-restore-pass').value = '';
+    $('files-restore-status').textContent = '';
+    restoreModal.open();
+    $('files-restore-file').focus();
+  });
+
+  $('files-restore-confirm').addEventListener('click', async () => {
+    const fileEl = $('files-restore-file');
+    const passEl = $('files-restore-pass');
+    const out = $('files-restore-status');
+    const f = fileEl.files && fileEl.files[0];
+    if (!f) { fileEl.focus(); return; }
+    if (!passEl.value) { passEl.focus(); return; }
+    if (!window.MentriaBackup) { out.textContent = COPY.restoreFail.replace('{err}', 'MentriaBackup'); return; }
+    if (f.size > 32 * 1024 * 1024) { out.textContent = COPY.restoreFail.replace('{err}', 'file too large'); return; }
+    const btn = $('files-restore-confirm');
+    btn.disabled = true;
+    out.textContent = COPY.restoreBusy;
+    try {
+      const env = JSON.parse(await f.text());
+      const data = await MentriaBackup.decryptBackup(env, passEl.value);
+      const result = store.importAll(data, { mode: 'merge' });
+      out.textContent = COPY.restoreDone.replace('{n}', result.restored);
+      setTimeout(() => { location.reload(); }, 1200);
+    } catch (err) {
+      out.textContent = COPY.restoreFail.replace('{err}', String(err && err.message || err));
+      btn.disabled = false;
+    } finally {
+      passEl.value = '';
+    }
+  });
+
   document.querySelectorAll('.files-modal [data-close]').forEach((el) => {
-    el.addEventListener('click', () => { viewModal.close(); exportModal.close(); });
+    el.addEventListener('click', () => { viewModal.close(); exportModal.close(); restoreModal.close(); });
   });
 
   $('files-refresh').addEventListener('click', () => { refresh(); status.set('', ''); status.clear(); });

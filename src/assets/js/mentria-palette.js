@@ -196,6 +196,11 @@
       for (i = 0; i < model.recents.length; i++) rg.appendChild(makeOption(model.recents[i]));
       listEl.appendChild(rg);
     }
+    var qa = makeGroup(labels.actions || 'Actions');
+    qa.appendChild(makeOption({ title: labels.actNoteNew || 'New note\u2026', hint: '', action: function () { stage('note: '); } }));
+    qa.appendChild(makeOption({ title: labels.actTimerNew || 'Start a timer\u2026', hint: '', action: function () { stage('timer '); } }));
+    qa.appendChild(makeOption({ title: labels.actFlip || 'Flip a coin', hint: '', action: flipCoin }));
+    listEl.appendChild(qa);
     for (i = 0; i < model.nav.length; i++) listEl.appendChild(makeOption(model.nav[i]));
     var order = [];
     var byCat = {};
@@ -224,6 +229,30 @@
     return -1;
   }
 
+  function subseqSpan(hay, q) {
+    var best = -1;
+    for (var st = hay.indexOf(q.charAt(0)); st !== -1; st = hay.indexOf(q.charAt(0), st + 1)) {
+      var j = 1, i = st + 1;
+      for (; i < hay.length && j < q.length; i++) if (hay.charAt(i) === q.charAt(j)) j++;
+      if (j === q.length && (best < 0 || i - st < best)) best = i - st;
+    }
+    return best;
+  }
+
+  function fuzzyResults(qN) {
+    var qS = qN.replace(/\s+/g, '');
+    var out = [];
+    if (qS.length < 3) return out;
+    var pools = [model.tools, model.nav, model.extensions];
+    for (var p = 0; p < pools.length; p++) {
+      for (var i = 0; i < pools[p].length; i++) {
+        var span = subseqSpan(pools[p][i].titleN.replace(/\s+/g, ''), qS);
+        if (span > 0 && span <= qS.length * 2) out.push({ e: pools[p][i], tier: span });
+      }
+    }
+    return out;
+  }
+
   function renderResults(qN) {
     var out = [];
     var i, e, idx, tier;
@@ -248,11 +277,14 @@
       if (tier < 0) continue;
       out.push({ e: e, tier: tier });
     }
+    var fuzzy = !out.length;
+    if (fuzzy) out = fuzzyResults(qN);
     out.sort(function (a, b) {
       if (a.tier !== b.tier) return a.tier - b.tier;
       if (b.e.usage !== a.e.usage) return b.e.usage - a.e.usage;
       return a.e.titleN < b.e.titleN ? -1 : (a.e.titleN > b.e.titleN ? 1 : 0);
     });
+    if (fuzzy) out = out.slice(0, 6);
     for (i = 0; i < out.length; i++) listEl.appendChild(makeOption(out[i].e));
   }
 
@@ -269,6 +301,13 @@
       var ag = makeGroup(labels.actions || 'Actions');
       for (var ai = 0; ai < acts.length; ai++) ag.appendChild(makeOption(acts[ai]));
       listEl.appendChild(ag);
+    }
+    var staged = /^(note[:\s]|timer\s)\s*$/i.test(String(query || ''));
+    if (staged) {
+      input.setAttribute('aria-expanded', 'false');
+      setActive(-1);
+      setStatus('');
+      return;
     }
     if (qN) {
       renderResults(qN);
@@ -383,19 +422,24 @@
       }
     }
     if (/^flip$/i.test(q)) {
-      out.push({
-        title: labels.actFlip || 'Flip a coin',
-        hint: '',
-        action: function () {
-          var b = new Uint8Array(1);
-          try { crypto.getRandomValues(b); } catch (_) { b[0] = Math.random() * 256; }
-          var result = b[0] < 128 ? (labels.actHeads || 'Heads') : (labels.actTails || 'Tails');
-          toast('\uD83E\uDE99 ' + result);
-          setStatus(result);
-        }
-      });
+      out.push({ title: labels.actFlip || 'Flip a coin', hint: '', action: flipCoin });
     }
     return out;
+  }
+
+  function flipCoin() {
+    var b = new Uint8Array(1);
+    try { crypto.getRandomValues(b); } catch (_) { b[0] = Math.random() * 256; }
+    var result = b[0] < 128 ? (labels.actHeads || 'Heads') : (labels.actTails || 'Tails');
+    toast('\uD83E\uDE99 ' + result);
+    setStatus(result);
+  }
+
+  function stage(prefix) {
+    input.value = prefix;
+    render(prefix);
+    input.focus();
+    try { input.setSelectionRange(prefix.length, prefix.length); } catch (_) {}
   }
 
   function navigate(el) {

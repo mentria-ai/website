@@ -139,6 +139,28 @@
     undoFire();
   });
 
+  function takeSharedFile() {
+    if (typeof caches === 'undefined') return Promise.resolve(null);
+    return caches.open('mentria-share').then(function (cache) {
+      return cache.match('/share-target/file').then(function (res) {
+        if (!res) return null;
+        return res.blob().then(function (blob) {
+          var name = 'shared-image';
+          try { name = decodeURIComponent(res.headers.get('x-file-name') || name); } catch (_) {}
+          return cache.delete('/share-target/file').then(function () {
+            return new File([blob], name, { type: blob.type || res.headers.get('content-type') || '' });
+          });
+        });
+      });
+    }).catch(function () { return null; });
+  }
+
+  function consumeShared(handler) {
+    if (!/[?&]shared=1(&|$)/.test(location.search)) return;
+    try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (_) {}
+    takeSharedFile().then(function (file) { if (file) handler(file); });
+  }
+
   function floatSupported() {
     return 'documentPictureInPicture' in window;
   }
@@ -403,6 +425,8 @@
     toast: toast,
     undoToast: undoToast,
     floatSupported: floatSupported,
+    takeSharedFile: takeSharedFile,
+    consumeShared: consumeShared,
     floatWindow: floatWindow,
     status: status,
     segmented: segmented,

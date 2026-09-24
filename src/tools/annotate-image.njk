@@ -349,6 +349,8 @@ eleventyComputed:
   setStatus('idle', COPY.statusIdle);
 
   // "open with" — PWA file handler
+  if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(loadImage);
+
   if ('launchQueue' in window && 'setConsumer' in window.launchQueue){
     window.launchQueue.setConsumer(async (params) => {
       if (!params || !params.files || !params.files.length) return;

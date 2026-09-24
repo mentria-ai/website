@@ -531,6 +531,16 @@
       "game_over": "fim de jogo"
     }
   },
+  "share_target": {
+    "title": "Abrir a foto compartilhada",
+    "lede": "Escolha o que fazer com ela. A foto fica neste aparelho.",
+    "annotate": "Descrever com IA no aparelho",
+    "qr": "Ler um QR code ou código de barras",
+    "exif": "Ver os detalhes da foto (EXIF)",
+    "cancel": "Cancelar",
+    "empty": "Nada foi compartilhado, ou a foto compartilhada já foi aberta.",
+    "home": "Ir para o início"
+  },
   "tool": {
     "decision-wheel": {
       "btn_share": "Copiar link",

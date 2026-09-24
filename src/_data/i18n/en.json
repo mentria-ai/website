@@ -531,6 +531,16 @@
       "game_over": "game over"
     }
   },
+  "share_target": {
+    "title": "Open the shared photo",
+    "lede": "Choose what to do with it. The photo stays on this device.",
+    "annotate": "Describe it with on-device AI",
+    "qr": "Scan it for a QR code or barcode",
+    "exif": "Read its photo details (EXIF)",
+    "cancel": "Cancel",
+    "empty": "Nothing was shared, or the shared photo has already been opened.",
+    "home": "Go home"
+  },
   "tool": {
     "decision-wheel": {
       "btn_share": "Copy link",

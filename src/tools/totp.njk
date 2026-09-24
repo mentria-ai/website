@@ -66,6 +66,10 @@ eleventyComputed:
       </span>
     </div>
 
+    <div class="totp-clock" id="totp-clock" hidden>
+      <p class="totp-clock__msg" id="totp-clock-msg"></p>
+      <button type="button" class="m-btn m-btn--ghost" id="totp-clock-fix">{{ "tool.totp.clock_fix" | t }}</button>
+    </div>
     <ul class="totp-list" id="totp-list"></ul>
     <p class="totp-empty" id="totp-empty" hidden>{{ "tool.totp.empty_state" | t }}</p>
   </div>
@@ -150,6 +154,9 @@ eleventyComputed:
 
   .totp-toolbar { display: flex; flex-wrap: wrap; gap: var(--space-2); }
   .totp-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .totp-clock { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--syn-amber, #fbbf24); border-radius: var(--radius-md, 8px); font-size: 13px; line-height: 1.45; color: var(--term-fg); }
+  .totp-clock[hidden] { display: none; }
+  .totp-clock__msg { margin: 0; flex: 1 1 240px; }
   .totp-empty { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--term-muted); text-align: center; padding: var(--space-5); }
 
   .totp-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: var(--radius-md); }
@@ -217,6 +224,9 @@ eleventyComputed:
     add_missing_fields:       {{ ('tool.totp.add_missing_fields'       | t) | dump | safe }},
     delete_confirm:           {{ ('tool.totp.delete_confirm'           | t) | dump | safe }},
     delete_label:             {{ ('tool.totp.delete_label'             | t) | dump | safe }},
+    clock_fast:               {{ ('tool.totp.clock_fast'               | t) | dump | safe }},
+    clock_slow:               {{ ('tool.totp.clock_slow'               | t) | dump | safe }},
+    clock_fixed:              {{ ('tool.totp.clock_fixed'              | t) | dump | safe }},
     copied:                   {{ ('tool.totp.copied'                   | t) | dump | safe }},
     copyFailed:               {{ ('common.copy_failed'                  | t) | dump | safe }},
     backup_required:          {{ ('tool.totp.backup_required'          | t) | dump | safe }},
@@ -298,7 +308,7 @@ eleventyComputed:
     const digits = opts.digits || 6;
     const offset = opts.offset || 0;
     const hash = { SHA1: 'SHA-1', SHA256: 'SHA-256', SHA512: 'SHA-512' }[(opts.algorithm || 'SHA1').toUpperCase()] || 'SHA-1';
-    const counter = Math.floor(Date.now() / 1000 / period) + offset;
+    const counter = Math.floor(nowMs() / 1000 / period) + offset;
     const buf = new ArrayBuffer(8);
     const view = new DataView(buf);
     view.setUint32(4, counter >>> 0, false);
@@ -455,6 +465,34 @@ eleventyComputed:
     }
   }
 
+  let clockOffset = 0;
+  let clockChecked = false;
+  function nowMs() { return Date.now() + clockOffset; }
+
+  async function checkClock() {
+    if (clockChecked || navigator.onLine === false) return;
+    clockChecked = true;
+    try {
+      const t0 = Date.now();
+      const res = await fetch('/manifest.json?clock=' + t0, { method: 'HEAD', cache: 'no-store' });
+      const t1 = Date.now();
+      const server = Date.parse(res.headers.get('date') || '');
+      if (!server || t1 - t0 > 4000) return;
+      const drift = server + 500 - (t0 + t1) / 2;
+      if (Math.abs(drift) < 20000) return;
+      const secs = String(Math.round(Math.abs(drift) / 1000));
+      $('totp-clock-msg').textContent = (drift < 0 ? COPY.clock_fast : COPY.clock_slow).replace('{n}', secs);
+      $('totp-clock-fix').hidden = false;
+      $('totp-clock-fix').onclick = () => {
+        clockOffset = Math.round(drift);
+        $('totp-clock-msg').textContent = COPY.clock_fixed;
+        $('totp-clock-fix').hidden = true;
+        tick();
+      };
+      $('totp-clock').hidden = false;
+    } catch (_) {}
+  }
+
   function showVault() {
     $('totp-locked').hidden = true;
     $('totp-vault').hidden = false;
@@ -462,6 +500,7 @@ eleventyComputed:
     renderList();
     if (!state.timer) state.timer = setInterval(tick, 1000);
     tick();
+    checkClock();
   }
 
   function lock() {
@@ -559,7 +598,7 @@ eleventyComputed:
         }
         lastCodes.set(acc.id, { current: code, next: nextCode });
 
-        const remaining = period - (Math.floor(Date.now() / 1000) % period);
+        const remaining = period - (Math.floor(nowMs() / 1000) % period);
         const ring = row.querySelector('.totp-row__ring');
         const fg = ring.querySelector('.fg');
         const circumference = 2 * Math.PI * 14;

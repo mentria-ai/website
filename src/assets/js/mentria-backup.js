@@ -6,8 +6,12 @@
   const SALT_BYTES = 16;
   const IV_BYTES = 12;
   const KEY_LENGTH = 256;
-  const ENVELOPE_VERSION = 1;
+  const ENVELOPE_VERSION = 2;
   const MAX_PAYLOAD_BYTES = 32 * 1024 * 1024;
+  const CAN_GZIP = typeof CompressionStream === 'function' && typeof DecompressionStream === 'function';
+
+  const pipeBytes = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
+  const isGzip = (bytes) => bytes.length > 2 && bytes[0] === 0x1f && bytes[1] === 0x8b;
 
   const b64uEncode = (bytes) => {
     let bin = '';
@@ -52,9 +56,10 @@
     const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
     const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES));
     const key = await deriveKey(passphrase, salt);
-    const ctBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, plaintext);
+    const body = CAN_GZIP ? await pipeBytes(plaintext, new CompressionStream('gzip')) : plaintext;
+    const ctBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, body);
     return {
-      v: ENVELOPE_VERSION,
+      v: CAN_GZIP ? ENVELOPE_VERSION : 1,
       kdf: 'PBKDF2',
       iter: ITER,
       hash: HASH,
@@ -66,7 +71,7 @@
 
   const validateEnvelope = (env) => {
     if (!env || typeof env !== 'object') throw new Error('not an envelope');
-    if (env.v !== ENVELOPE_VERSION) throw new Error('unsupported envelope version: ' + env.v);
+    if (env.v !== 1 && env.v !== ENVELOPE_VERSION) throw new Error('unsupported envelope version: ' + env.v);
     if (env.kdf !== 'PBKDF2') throw new Error('unsupported kdf: ' + env.kdf);
     if (env.hash !== 'SHA-256') throw new Error('unsupported hash: ' + env.hash);
     if (typeof env.iter !== 'number' || env.iter < 100000 || env.iter > 10000000) {
@@ -103,7 +108,13 @@
     } catch (_) {
       throw new Error('wrong passphrase or corrupted file');
     }
-    const text = new TextDecoder().decode(ptBuf);
+    let pt = new Uint8Array(ptBuf);
+    if (isGzip(pt)) {
+      if (!CAN_GZIP) throw new Error('this browser cannot open compressed backups');
+      pt = await pipeBytes(pt, new DecompressionStream('gzip'));
+      if (pt.byteLength > MAX_PAYLOAD_BYTES * 2) throw new Error('payload too large');
+    }
+    const text = new TextDecoder().decode(pt);
     let parsed;
     try { parsed = JSON.parse(text); } catch (_) { throw new Error('decrypted payload is not valid JSON'); }
     if (!parsed || typeof parsed !== 'object') throw new Error('decrypted payload is not an object');

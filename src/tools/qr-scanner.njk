@@ -910,6 +910,14 @@ eleventyComputed:
   })();
 
   setState('idle');
+
+  const sharedText = new URLSearchParams(location.search).get('text');
+  if (sharedText && sharedText.trim()) {
+    history.replaceState(null, '', location.pathname);
+    setMode('generate');
+    genInput.value = sharedText.trim().slice(0, 1000);
+    genRender();
+  }
 })();
 </script>
 

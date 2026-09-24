@@ -530,6 +530,9 @@
   },
   "tool": {
     "decision-wheel": {
+      "btn_share": "Copiar link",
+      "link_copied": "Link copiado",
+      "use_shared": "Usar a roleta deste link? {list}",
       "aria_wheel": "Roda de decisões",
       "aria_spin": "Girar a roda",
       "result_label": "RESULTADO",
@@ -599,6 +602,9 @@
       "to_mdpdf_title": "Abrir esta nota no Markdown → PDF"
     },
     "color-picker": {
+      "btn_link": "Link",
+      "title_link": "Copiar um link para esta cor",
+      "link_copied": "Link copiado",
       "title_pick_color": "Clique para escolher uma cor",
       "aria_pick_color": "Escolher uma cor",
       "aria_hex_value": "Valor de cor hexadecimal",
@@ -626,6 +632,9 @@
       "toast_already_saved": "Já salvo"
     },
     "base64-codec": {
+      "big_file_confirm": "Este arquivo tem {size}. Codificá-lo pode travar a página por alguns segundos. Continuar?",
+      "file_too_large": "Arquivos com mais de 100 MB são grandes demais para codificar aqui.",
+      "too_large_to_show": "Grande demais para mostrar aqui. Use os botões de copiar abaixo.",
       "tab_text": "Texto",
       "tab_file": "Arquivo",
       "input_label": "Entrada",
@@ -1096,6 +1105,10 @@
       "btn_save_event": "Adicionar ao calendário (.ics)"
     },
     "totp": {
+      "clock_fast": "O relógio deste aparelho está uns {n} segundos adiantado, então os serviços podem recusar estes códigos. Ative a hora automática nas configurações do sistema ou corrija aqui.",
+      "clock_slow": "O relógio deste aparelho está uns {n} segundos atrasado, então os serviços podem recusar estes códigos. Ative a hora automática nas configurações do sistema ou corrija aqui.",
+      "clock_fix": "Corrigir a hora",
+      "clock_fixed": "Os códigos agora usam a hora corrigida nesta visita.",
       "locked_title": "Bloqueado",
       "locked_lede_setup": "Escolha uma senha para configurar seu cofre. Você a usará a cada desbloqueio.",
       "locked_lede_unlock": "Digite sua senha para desbloquear seu cofre TOTP.",

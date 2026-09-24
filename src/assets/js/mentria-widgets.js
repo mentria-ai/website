@@ -161,7 +161,7 @@
           '<span class="widget__icon widget__icon--stroke" aria-hidden="true">' + STORAGE_SVG + '</span>' +
           '<span class="widget__name">' + esc(T.storage) + '</span>' +
         '</span>' +
-        '<span class="widget__value widget__value--sm">' + esc(usedStr) + '</span>' +
+        '<span class="widget__value widget__value--sm' + (usedStr.length > 12 ? ' is-long' : '') + '">' + esc(usedStr) + '</span>' +
         '<span class="widget__bar" aria-hidden="true"><span class="widget__bar-fill" style="width:' + pct + '%"></span></span>';
       upsert('storage', '/tools/files/', html);
       updateVisibility();

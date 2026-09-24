@@ -827,5 +827,19 @@
         });
       });
     </script>
+    <script>
+      window.MentriaMiniCopy = {
+        open: {{ ("common.mini.open" | t) | dump | safe }},
+        close: {{ ("common.mini.close" | t) | dump | safe }},
+        timer: {{ ("common.mini.timer" | t) | dump | safe }},
+        timesUp: {{ ("common.mini.times_up" | t) | dump | safe }},
+        paused: {{ ("common.mini.paused" | t) | dump | safe }},
+        steps: {{ ("common.mini.steps" | t) | dump | safe }},
+        tapResume: {{ ("common.mini.tap_resume" | t) | dump | safe }},
+        timerTool: {{ ("tools.countdown-timer.title" | t) | dump | safe }},
+        stepsTool: {{ ("tools.step-counter.title" | t) | dump | safe }}
+      };
+    </script>
+    <script src="/assets/js/mentria-mini.js?v={{ buildHash }}"></script>
 </body>
 </html>

@@ -172,7 +172,17 @@
     "offline_home": "Aller à la page d'accueil en cache",
     "offline_strip": "Hors ligne · affichage de ce que cet appareil a enregistré",
     "offline_works": "Ceci fonctionne encore hors ligne",
-    "close": "Fermer"
+    "close": "Fermer",
+    "mini": {
+      "minimize": "Réduire en pastille flottante",
+      "open": "Ouvrir {name}",
+      "close": "Fermer la pastille flottante",
+      "timer": "Minuteur",
+      "times_up": "Temps écoulé",
+      "paused": "En pause",
+      "steps": "{n} pas",
+      "tap_resume": "Touchez pour continuer à compter"
+    }
   },
   "home": {
     "cli": {
@@ -772,7 +782,8 @@
       "preset_1hr": "1 h",
       "preset_save_aria": "Enregistrer la durée actuelle comme préréglage",
       "preset_remove_aria": "Supprimer le préréglage {label}",
-      "preset_save_invalid": "Définissez d’abord une durée, puis enregistrez-la"
+      "preset_save_invalid": "Définissez d’abord une durée, puis enregistrez-la",
+      "mini_nothing": "Lancez d’abord un minuteur, puis réduisez-le."
     },
     "invoice": {
       "btn_new": "Nouvelle facture",
@@ -1107,7 +1118,8 @@
       "pocket_note": "Le mode poche garde l'écran allumé mais tout noir : les pas continuent d'être comptés dans la poche. Idéal sur écran OLED. Faites glisser le point en bas pour quitter.",
       "pocket_exit": "Glissez pour quitter",
       "est_label": "est.",
-      "est_explain": "Estimation d'après votre cadence de marche pendant que l'écran était verrouillé"
+      "est_explain": "Estimation d'après votre cadence de marche pendant que l'écran était verrouillé",
+      "mini_nothing": "Commencez d’abord à compter, puis réduisez."
     },
     "qr-scanner": {
       "aria_video": "Aperçu de la caméra en direct",

@@ -169,6 +169,8 @@
     "offline_title": "Offline",
     "offline_msg": "You're offline and this page isn't cached yet.",
     "offline_home": "Go to the cached home page",
+    "offline_strip": "Offline · showing what this device has saved",
+    "offline_works": "These still work offline",
     "close": "Close"
   },
   "home": {

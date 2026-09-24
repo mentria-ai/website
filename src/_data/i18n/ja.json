@@ -169,6 +169,8 @@
     "offline_title": "オフライン",
     "offline_msg": "オフラインです。このページはまだキャッシュされていません。",
     "offline_home": "キャッシュ済みのホームへ",
+    "offline_strip": "オフライン · この端末に保存済みの内容を表示中",
+    "offline_works": "オフラインでも使えるもの",
     "close": "閉じる"
   },
   "home": {

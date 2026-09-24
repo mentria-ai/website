@@ -62,6 +62,10 @@ eleventyComputed:
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 4l3 3-3 3"/><path d="M18 20l3-3-3-3"/><path d="M3 7h4a5 5 0 015 5 5 5 0 005 5h4"/><path d="M21 7h-4a5 5 0 00-3.07 1.05"/><path d="M3 17h4a5 5 0 003.07-1.05"/></svg>
       {{ "tool.color-picker.btn_random" | t }}
     </button>
+    <button type="button" class="m-btn m-btn--ghost cp__btn" id="cp-link" title="{{ 'tool.color-picker.title_link' | t }}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>
+      {{ "tool.color-picker.btn_link" | t }}
+    </button>
     <button type="button" class="m-btn m-btn--ghost cp__btn" id="cp-eyedrop" title="{{ 'tool.color-picker.title_eyedrop' | t }}" hidden>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5l4 4"/><path d="M17.2 2.8a2.3 2.3 0 013.3 3.3l-2.3 2.3-3.3-3.3z"/><path d="M15.4 8.6L6 18l-3 1 1-3 9.4-9.4"/></svg>
       {{ "tool.color-picker.btn_eyedrop" | t }}
@@ -111,6 +115,7 @@ eleventyComputed:
     selectSwatchTitle: {{ ("tool.color-picker.title_select_swatch" | t) | dump | safe }},
     removeTitle:       {{ ("tool.color-picker.title_remove"        | t) | dump | safe }},
     toastCopied:       {{ ("tool.color-picker.toast_copied"        | t) | dump | safe }},
+    linkCopied:        {{ ("tool.color-picker.link_copied"         | t) | dump | safe }},
     toastSaved:        {{ ("tool.color-picker.toast_saved"         | t) | dump | safe }},
     toastAlreadySaved: {{ ("tool.color-picker.toast_already_saved" | t) | dump | safe }},
     confirmRemove:     {{ ("tool.color-picker.confirm_remove"      | t) | dump | safe }}
@@ -414,7 +419,18 @@ eleventyComputed:
   });
 
   /* ── Init ──────────────────────────────────────────── */
-  const init = () => { setColor('#22d3ee'); renderSaved(); };
+  document.getElementById('cp-link').addEventListener('click', () => {
+    const url = location.origin + location.pathname + '?c=' + currentHex.slice(1);
+    navigator.clipboard.writeText(url).then(() => { MentriaUI.toast(COPY.linkCopied); }).catch(() => {});
+  });
+
+  const init = () => {
+    const qc = new URLSearchParams(location.search).get('c');
+    const shared = qc && /^#?[0-9a-f]{6}$/i.test(qc) ? '#' + qc.replace('#', '') : null;
+    if (qc != null) history.replaceState(null, '', location.pathname);
+    setColor(shared || '#22d3ee');
+    renderSaved();
+  };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

@@ -119,6 +119,9 @@ eleventyComputed:
     statusNothingCopy:       {{ ("tool.base64-codec.status_nothing_copy"         | t) | dump | safe }},
     statusFileLoaded:        {{ ("tool.base64-codec.status_file_loaded"          | t) | dump | safe }},
     statusFileReadFailed:    {{ ("tool.base64-codec.status_file_read_failed"     | t) | dump | safe }},
+    bigFileConfirm:          {{ ("tool.base64-codec.big_file_confirm"            | t) | dump | safe }},
+    fileTooLarge:            {{ ("tool.base64-codec.file_too_large"              | t) | dump | safe }},
+    tooLargeToShow:          {{ ("tool.base64-codec.too_large_to_show"           | t) | dump | safe }},
     statusPasteFirst:        {{ ("tool.base64-codec.status_paste_first"          | t) | dump | safe }},
     statusInvalidB64:        {{ ("tool.base64-codec.status_invalid_b64"          | t) | dump | safe }},
     statusFileDecoded:       {{ ("tool.base64-codec.status_file_decoded_template"| t) | dump | safe }},
@@ -131,6 +134,9 @@ eleventyComputed:
 
     const inputEl       = document.getElementById('b64-input');
     const outputEl      = document.getElementById('b64-output');
+    const FILE_WARN_BYTES = 10 * 1024 * 1024;
+    const FILE_MAX_BYTES = 100 * 1024 * 1024;
+    const TEXTAREA_MAX_CHARS = 2 * 1024 * 1024;
     const encodeBtn     = document.getElementById('b64-encode-btn');
     const decodeBtn     = document.getElementById('b64-decode-btn');
     const copyBtn       = document.getElementById('b64-copy-btn');
@@ -307,7 +313,17 @@ eleventyComputed:
       if (fileInput.files.length) handleFile(fileInput.files[0]);
     });
 
-    function handleFile(file) {
+    let previewUrl = null;
+    async function handleFile(file) {
+      if (file.size > FILE_MAX_BYTES) {
+        showStatus(fileStatus, COPY.fileTooLarge, 'err');
+        return;
+      }
+      if (file.size > FILE_WARN_BYTES) {
+        const msg = COPY.bigFileConfirm.replace('{size}', formatBytes(file.size));
+        const ok = window.mentriaConfirm ? await window.mentriaConfirm(msg) : true;
+        if (!ok) return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
         currentDataUri = reader.result;
@@ -318,12 +334,16 @@ eleventyComputed:
         fileTypeEl.textContent = file.type || COPY.unknown;
         fileSizeEl.textContent = formatBytes(file.size);
         fileB64SizeEl.textContent = formatBytes(currentRawB64.length);
-        fileDataUri.value = currentDataUri;
+        const showable = currentDataUri.length <= TEXTAREA_MAX_CHARS;
+        fileDataUri.value = showable ? currentDataUri : '';
+        fileDataUri.placeholder = showable ? '' : COPY.tooLargeToShow;
 
         filePreview.innerHTML = '';
+        if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
         if (isImageMime(file.type)) {
           const img = document.createElement('img');
-          img.src = currentDataUri;
+          previewUrl = URL.createObjectURL(file);
+          img.src = previewUrl;
           img.alt = COPY.previewOf.replace('{name}', file.name);
           img.className = 'b64-preview-img';
           filePreview.appendChild(img);
@@ -350,12 +370,23 @@ eleventyComputed:
       copyText(currentRawB64, fileStatus);
     });
 
+    const hashMatch = location.hash.match(/^#v=([^&]*)/);
+    if (hashMatch && hashMatch[1].length <= 20000) {
+      history.replaceState(null, '', location.pathname + location.search);
+      try {
+        inputEl.value = decodeURIComponent(hashMatch[1]);
+        decodeBtn.click();
+      } catch (_) {}
+    }
+
     fileClearBtn.addEventListener('click', () => {
       currentDataUri = '';
       currentRawB64 = '';
       fileInfoWrap.classList.add('b64-file-info--hidden');
       filePreview.innerHTML = '';
+      if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
       fileDataUri.value = '';
+      fileDataUri.placeholder = '';
       fileInput.value = '';
       fileStatus.clear();
     });

@@ -530,6 +530,9 @@
   },
   "tool": {
     "decision-wheel": {
+      "btn_share": "Copy link",
+      "link_copied": "Link copied",
+      "use_shared": "Use the wheel from this link? {list}",
       "aria_wheel": "Decision wheel",
       "aria_spin": "Spin the wheel",
       "result_label": "RESULT",
@@ -599,6 +602,9 @@
       "to_mdpdf_title": "Open this note in Markdown → PDF"
     },
     "color-picker": {
+      "btn_link": "Link",
+      "title_link": "Copy a link to this color",
+      "link_copied": "Link copied",
       "title_pick_color": "Click to pick a color",
       "aria_pick_color": "Pick a color",
       "aria_hex_value": "Hex color value",
@@ -626,6 +632,9 @@
       "toast_already_saved": "Already saved"
     },
     "base64-codec": {
+      "big_file_confirm": "This file is {size}. Encoding it can freeze the page for a few seconds. Continue?",
+      "file_too_large": "Files over 100 MB are too large to encode here.",
+      "too_large_to_show": "Too large to show here. Use the copy buttons below.",
       "tab_text": "Text",
       "tab_file": "File",
       "input_label": "Input",
@@ -1096,6 +1105,10 @@
       "btn_save_event": "Add to calendar (.ics)"
     },
     "totp": {
+      "clock_fast": "This device's clock is about {n} seconds fast, so services may reject these codes. Turn on automatic time in your system settings, or correct it here.",
+      "clock_slow": "This device's clock is about {n} seconds slow, so services may reject these codes. Turn on automatic time in your system settings, or correct it here.",
+      "clock_fix": "Correct the time",
+      "clock_fixed": "Codes now use the corrected time for this visit.",
       "locked_title": "Locked",
       "locked_lede_setup": "Pick a passphrase to set up your vault. You will use it every time you unlock.",
       "locked_lede_unlock": "Enter your passphrase to unlock your TOTP vault.",

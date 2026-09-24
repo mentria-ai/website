@@ -55,6 +55,7 @@ eleventyComputed:
       <input class="m-input dw__option-input" id="dw-option-input" maxlength="24" autocomplete="off" placeholder="{{ 'tool.decision-wheel.add_placeholder' | t }}" aria-label="{{ 'tool.decision-wheel.add_placeholder' | t }}">
       <button type="submit" class="m-btn m-btn--ghost" id="dw-option-add">{{ "tool.decision-wheel.btn_add" | t }}</button>
       <button type="button" class="m-btn m-btn--ghost" id="dw-option-reset">{{ "tool.decision-wheel.btn_reset" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" id="dw-option-share">{{ "tool.decision-wheel.btn_share" | t }}</button>
     </form>
   </div>
 </section>
@@ -71,7 +72,9 @@ eleventyComputed:
     wait: {{ ("tool.decision-wheel.outcome_wait" | t) | dump | safe }},
     errMin: {{ ("tool.decision-wheel.err_min" | t) | dump | safe }},
     errMax: {{ ("tool.decision-wheel.err_max" | t) | dump | safe }},
-    btnRemove: {{ ("tool.decision-wheel.btn_remove" | t) | dump | safe }}
+    btnRemove: {{ ("tool.decision-wheel.btn_remove" | t) | dump | safe }},
+    linkCopied: {{ ("tool.decision-wheel.link_copied" | t) | dump | safe }},
+    useShared: {{ ("tool.decision-wheel.use_shared" | t) | dump | safe }}
   };
   const DEFAULTS = [COPY.yes, COPY.no, COPY.upto, COPY.wait];
   const PALETTE = [
@@ -293,6 +296,25 @@ eleventyComputed:
   }
 
   if (spinBtn) spinBtn.addEventListener("click", spin);
+
+  document.getElementById("dw-option-share").addEventListener("click", () => {
+    const url = location.origin + location.pathname + "?" + options.map((o) => "o=" + encodeURIComponent(o)).join("&");
+    navigator.clipboard.writeText(url).then(() => { if (window.MentriaUI) MentriaUI.toast(COPY.linkCopied); }).catch(() => {});
+  });
+
+  const sharedOpts = new URLSearchParams(location.search).getAll("o").map((s) => s.trim().slice(0, 24)).filter(Boolean);
+  if (sharedOpts.length) {
+    history.replaceState(null, "", location.pathname);
+    if (sharedOpts.length >= MINN && sharedOpts.length <= MAXN && sharedOpts.join("\n") !== options.join("\n")) {
+      const useShared = () => { options = sharedOpts; customized = true; applyChange(); };
+      const offer = () => {
+        if (!customized) useShared();
+        else if (window.mentriaConfirm) window.mentriaConfirm(COPY.useShared.replace("{list}", sharedOpts.join(", "))).then((ok) => { if (ok) useShared(); });
+      };
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", offer, { once: true });
+      else offer();
+    }
+  }
 
   import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
     MentriaBus.provide('wheel.spin', async (p) => {

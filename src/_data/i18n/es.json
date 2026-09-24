@@ -530,6 +530,9 @@
   },
   "tool": {
     "decision-wheel": {
+      "btn_share": "Copiar enlace",
+      "link_copied": "Enlace copiado",
+      "use_shared": "¿Usar la ruleta de este enlace? {list}",
       "aria_wheel": "Rueda de decisiones",
       "aria_spin": "Girar la rueda",
       "result_label": "RESULTADO",
@@ -599,6 +602,9 @@
       "to_mdpdf_title": "Abrir esta nota en Markdown → PDF"
     },
     "color-picker": {
+      "btn_link": "Enlace",
+      "title_link": "Copiar un enlace a este color",
+      "link_copied": "Enlace copiado",
       "title_pick_color": "Haz clic para elegir un color",
       "aria_pick_color": "Elegir un color",
       "aria_hex_value": "Valor de color hexadecimal",
@@ -626,6 +632,9 @@
       "toast_already_saved": "Ya guardado"
     },
     "base64-codec": {
+      "big_file_confirm": "Este archivo pesa {size}. Codificarlo puede congelar la página unos segundos. ¿Continuar?",
+      "file_too_large": "Los archivos de más de 100 MB son demasiado grandes para codificarlos aquí.",
+      "too_large_to_show": "Demasiado grande para mostrarlo aquí. Usa los botones de copiar de abajo.",
       "tab_text": "Texto",
       "tab_file": "Archivo",
       "input_label": "Entrada",
@@ -1096,6 +1105,10 @@
       "btn_save_event": "Añadir al calendario (.ics)"
     },
     "totp": {
+      "clock_fast": "El reloj de este dispositivo va unos {n} segundos adelantado, así que los servicios pueden rechazar estos códigos. Activa la hora automática en los ajustes del sistema o corrígela aquí.",
+      "clock_slow": "El reloj de este dispositivo va unos {n} segundos atrasado, así que los servicios pueden rechazar estos códigos. Activa la hora automática en los ajustes del sistema o corrígela aquí.",
+      "clock_fix": "Corregir la hora",
+      "clock_fixed": "Los códigos usan ahora la hora corregida durante esta visita.",
       "locked_title": "Bloqueado",
       "locked_lede_setup": "Elige una contraseña para configurar tu bóveda. La usarás cada vez que la desbloquees.",
       "locked_lede_unlock": "Introduce tu contraseña para desbloquear tu bóveda TOTP.",

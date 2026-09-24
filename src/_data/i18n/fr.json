@@ -530,6 +530,9 @@
   },
   "tool": {
     "decision-wheel": {
+      "btn_share": "Copier le lien",
+      "link_copied": "Lien copié",
+      "use_shared": "Utiliser la roue de ce lien ? {list}",
       "aria_wheel": "Roue de décision",
       "aria_spin": "Faire tourner la roue",
       "result_label": "RÉSULTAT",
@@ -599,6 +602,9 @@
       "to_mdpdf_title": "Ouvrir cette note dans Markdown → PDF"
     },
     "color-picker": {
+      "btn_link": "Lien",
+      "title_link": "Copier un lien vers cette couleur",
+      "link_copied": "Lien copié",
       "title_pick_color": "Cliquez pour choisir une couleur",
       "aria_pick_color": "Choisir une couleur",
       "aria_hex_value": "Valeur de couleur hexadécimale",
@@ -626,6 +632,9 @@
       "toast_already_saved": "Déjà enregistré"
     },
     "base64-codec": {
+      "big_file_confirm": "Ce fichier fait {size}. L’encoder peut figer la page quelques secondes. Continuer ?",
+      "file_too_large": "Les fichiers de plus de 100 Mo sont trop volumineux pour être encodés ici.",
+      "too_large_to_show": "Trop volumineux pour être affiché ici. Utilisez les boutons de copie ci-dessous.",
       "tab_text": "Texte",
       "tab_file": "Fichier",
       "input_label": "Entrée",
@@ -1096,6 +1105,10 @@
       "btn_save_event": "Ajouter au calendrier (.ics)"
     },
     "totp": {
+      "clock_fast": "L’horloge de cet appareil avance d’environ {n} secondes : les services risquent de refuser ces codes. Activez l’heure automatique dans les réglages du système, ou corrigez-la ici.",
+      "clock_slow": "L’horloge de cet appareil retarde d’environ {n} secondes : les services risquent de refuser ces codes. Activez l’heure automatique dans les réglages du système, ou corrigez-la ici.",
+      "clock_fix": "Corriger l’heure",
+      "clock_fixed": "Les codes utilisent maintenant l’heure corrigée pour cette visite.",
       "locked_title": "Verrouillé",
       "locked_lede_setup": "Choisissez une phrase secrète pour configurer votre coffre. Vous l'utiliserez à chaque déverrouillage.",
       "locked_lede_unlock": "Saisissez votre phrase secrète pour déverrouiller votre coffre TOTP.",

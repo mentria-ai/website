@@ -719,6 +719,7 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
 
 .feed-card {
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   height: 100vh;
   height: 100dvh;
   max-width: calc(100dvh * 832 / 1472);

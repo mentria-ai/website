@@ -557,15 +557,26 @@ html.is-standalone .m-mini { --mini-base: calc(var(--app-bar-h, 52px) + 12px); }
     justify-content: flex-start;
     overflow-x: auto;
     scroll-snap-type: x proximity;
-    gap: 1rem;
+    scroll-padding-inline: 1rem;
+    container-type: inline-size;
+    gap: 0.75rem;
     margin: 0 -1rem;
     padding: 0.85rem 1rem 0.5rem;
     scrollbar-width: none;
   }
   .launcher__grid::-webkit-scrollbar { display: none; }
-  .launch-tile, .launch-slot { flex: 0 0 auto; width: 76px; scroll-snap-align: start; }
-  .launch-tile__icon { width: 76px; height: 76px; }
-  .launch-tile__icon svg { width: 54px; height: 54px; }
+  .launch-tile, .launch-slot { flex: 0 0 auto; width: 76px; width: min(96px, calc((100cqi + 1rem - 3rem) / 4.4)); scroll-snap-align: start; }
+  .launch-tile__icon { width: 100%; height: auto; aspect-ratio: 1; border-radius: 28%; }
+  .launch-tile__icon svg { width: 71%; height: 71%; }
+  .tools-popup .launcher { display: block; }
+  .tools-popup .launcher > :not([hidden]) ~ :not([hidden]) { margin-top: 2.25rem; }
+  .tools-popup .launcher__pinned, .tools-popup .launcher__recents, .tools-popup .launcher__pages { clear: right; }
+  .tools-popup__close { margin-left: 0.75rem; }
+  .tools-popup .launcher__widgets:not([hidden]) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin: 0; padding: 0; overflow: visible; }
+  .tools-popup .launcher__widgets .widget { width: auto; min-width: 0; }
+}
+@media (min-width: 480px) and (max-width: 640px) {
+  .launch-tile, .launch-slot { width: min(96px, calc((100cqi + 1rem - 4.5rem) / 6.4)); }
 }
 
 .launcher__widgets { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9rem; }
@@ -1395,9 +1406,6 @@ html.mentria-no-motion [data-requires="motion"] { display: none !important; }
 
 @media (max-width: 720px) {
   .feed-preview__strip { margin-left: -0.75rem; margin-right: -0.75rem; padding-left: 0.75rem; padding-right: 0.75rem; }
-}
-@media (max-width: 640px) {
-  .launcher__widgets, .launcher__grid { margin-left: -0.75rem; margin-right: -0.75rem; padding-left: 0.75rem; padding-right: 0.75rem; }
 }
 
 .nav-link__i { width: 18px; height: 18px; flex: none; }

@@ -120,6 +120,7 @@ eleventyComputed:
     noteCameraErr:  {{ ("tool.qr-scanner.note_camera_error" | t) | dump | safe }},
     noteNoMatch:    {{ ("tool.qr-scanner.note_no_match"   | t) | dump | safe }},
     noteNoMatchQrOnly: {{ ("tool.qr-scanner.note_no_match_qr_only" | t) | dump | safe }},
+    toTotp:         {{ ("tool.qr-scanner.to_totp"         | t) | dump | safe }},
     idlePromptQr:   {{ ("tool.qr-scanner.idle_prompt_qr" | t) | dump | safe }},
     genTooLong:     {{ ("tool.qr-scanner.gen_too_long"    | t) | dump | safe }},
     parsedWifi:     {{ ("tool.qr-scanner.parsed_wifi"     | t) | dump | safe }},
@@ -760,7 +761,20 @@ eleventyComputed:
     parsedBox.hidden = false;
   }
 
-  function showResult(value, format) {
+  function isTotpUri(v) {
+    return /^otpauth:\/\/totp\/[^?#]*\?(?:[^#]*&)?secret=[^&#]/i.test(v) || /^otpauth-migration:\/\/offline\?(?:[^#]*&)?data=[^&#]/i.test(v);
+  }
+
+  function showResult(value, format, keep) {
+    const text = String(value || '').trim();
+    if (!keep && isTotpUri(text) && MentriaUI.sendTargets({ text }).indexOf('totp') !== -1) {
+      setState('idle');
+      showNote(COPY.toTotp);
+      window.addEventListener('pagehide', hideNote, { once: true });
+      if (navigator.vibrate) navigator.vibrate(40);
+      MentriaUI.sendTo('totp', { text }).then((ok) => { if (!ok) { hideNote(); showResult(value, format, true); } });
+      return;
+    }
     lastValue = value || '';
     resultValue.textContent = lastValue;
     resultFmt.textContent = format ? format.replace(/_/g, ' ') : '';

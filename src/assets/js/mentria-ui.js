@@ -184,6 +184,7 @@
       { slug: 'annotate-image', ok: function () { return !!navigator.gpu; } }
     ],
     text: [
+      { slug: 'totp', ok: function (p) { return /^(otpauth:\/\/totp\/|otpauth-migration:\/\/)/i.test(p.text.trim()); } },
       { slug: 'quick-notes', ok: function (p) { return p.text.length <= 100000; } },
       { slug: 'base64-codec', ok: function (p) { return p.text.length <= 2097152; } },
       { slug: 'json-formatter', ok: function (p) { return /^\s*[[{]/.test(p.text); } },

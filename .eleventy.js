@@ -201,6 +201,10 @@ module.exports = function(eleventyConfig) {
     return str.startsWith(prefix);
   });
 
+  eleventyConfig.addFilter("contains", function (value, part) {
+    return String(value == null ? "" : value).indexOf(part) !== -1;
+  });
+
   eleventyConfig.addFilter("head", function(array, n) {
     if (!Array.isArray(array)) return [];
     if (n < 0) {

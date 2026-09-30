@@ -1,4 +1,4 @@
-<div class="terminal-frame" style="view-transition-name: tool-{{ page.fileSlug }}">
+<div class="terminal-frame{% if page.url | contains('/tools/') %} terminal-frame--fullscreen{% endif %}" style="view-transition-name: tool-{{ page.fileSlug }}">
     <div class="terminal-frame__titlebar">
         <div class="terminal-frame__dots">
             {% if terminalBackHref %}

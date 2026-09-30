@@ -38,6 +38,17 @@
         try { localStorage.setItem('mentria_seen', '1'); } catch (e) {}
       })();
     </script>
+    {%- if content | contains('terminal-frame--fullscreen') %}
+    <script>
+      (function () {
+        var m = (location.pathname || '').match(/\/tools\/([^/]+)\//);
+        if (!m) return;
+        var pref = null;
+        try { pref = localStorage.getItem('mentria.store.ui.fullscreen.' + m[1]); } catch (e) {}
+        if (pref !== 'false') document.documentElement.classList.add('is-fullscreen-tool');
+      })();
+    </script>
+    {%- endif %}
     <script>
       (function () {
         try {
@@ -761,7 +772,7 @@
           var frame = activeFrame();
           if (!frame) return;
           frame.classList.remove(FS);
-          document.body.classList.remove(BODY_FS);
+          document.documentElement.classList.remove(BODY_FS);
           syncPressed(frame, false);
           if (!skipPersist) persist(false);
           window.dispatchEvent(new Event('resize'));
@@ -770,7 +781,7 @@
           var current = activeFrame();
           if (current && current !== frame) { current.classList.remove(FS); syncPressed(current, false); }
           frame.classList.add(FS);
-          document.body.classList.add(BODY_FS);
+          document.documentElement.classList.add(BODY_FS);
           syncPressed(frame, true);
           if (!skipPersist) persist(true);
           window.dispatchEvent(new Event('resize'));
@@ -813,11 +824,12 @@
         });
         document.addEventListener('DOMContentLoaded', function () {
           var slug = toolSlug();
-          if (!slug) return;
-          var pref = (window.MentriaStore && typeof window.MentriaStore.get === 'function') ? window.MentriaStore.get('ui', 'fullscreen.' + slug) : null;
-          if (pref === false) return;
           var frame = document.querySelector('.terminal-frame');
-          if (frame) enter(frame, true);
+          var pref = (slug && window.MentriaStore && typeof window.MentriaStore.get === 'function') ? window.MentriaStore.get('ui', 'fullscreen.' + slug) : null;
+          if (slug && frame && pref !== false) { enter(frame, true); return; }
+          document.documentElement.classList.remove(BODY_FS);
+          var stale = activeFrame();
+          if (stale) { stale.classList.remove(FS); syncPressed(stale, false); }
         });
       })();
     </script>

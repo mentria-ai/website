@@ -1297,7 +1297,7 @@ body.is-tools-open .app-bar__item[aria-current="page"]:not(.app-bar__item--tools
 html.is-standalone body {
   padding-bottom: var(--app-bar-h);
 }
-body.is-fullscreen-tool .app-bar {
+html.is-fullscreen-tool body .app-bar {
   display: none !important;
 }
 

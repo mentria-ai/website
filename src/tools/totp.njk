@@ -282,6 +282,8 @@ eleventyComputed:
     prf_enroll_failed:        {{ ('tool.totp.prf_enroll_failed'        | t) | dump | safe }},
     locked_lede_setup:        {{ ('tool.totp.locked_lede_setup'        | t) | dump | safe }},
     locked_lede_unlock:       {{ ('tool.totp.locked_lede_unlock'       | t) | dump | safe }},
+    handoff_unlock:           {{ ('tool.totp.handoff_unlock'           | t) | dump | safe }},
+    handoff_setup:            {{ ('tool.totp.handoff_setup'            | t) | dump | safe }},
     add_invalid_secret:       {{ ('tool.totp.add_invalid_secret'       | t) | dump | safe }},
     add_secret_bad_chars:     {{ ('tool.totp.add_secret_bad_chars'     | t) | dump | safe }},
     add_invalid_uri:          {{ ('tool.totp.add_invalid_uri'          | t) | dump | safe }},
@@ -660,6 +662,8 @@ eleventyComputed:
     } catch (_) {}
   }
 
+  let pendingHandoff = null;
+
   function showVault() {
     $('totp-locked').hidden = true;
     $('totp-vault').hidden = false;
@@ -668,6 +672,43 @@ eleventyComputed:
     if (!state.timer) state.timer = setInterval(tick, 1000);
     tick();
     checkClock();
+    if (pendingHandoff) runHandoff();
+  }
+
+  function takeHandoff(text) {
+    const uri = String(text || '').trim();
+    if (!/^otpauth(-migration)?:\/\//i.test(uri)) return;
+    pendingHandoff = uri;
+    if (state.masterKey) { runHandoff(); return; }
+    setStatus(state.vault ? COPY.handoff_unlock : COPY.handoff_setup, null);
+  }
+
+  function runHandoff() {
+    const uri = pendingHandoff;
+    pendingHandoff = null;
+    if (!uri) return;
+    let result;
+    try {
+      if (/^otpauth-migration:/i.test(uri)) {
+        result = parseMigrationUri(uri);
+      } else {
+        const p = parseOtpauthUri(uri);
+        const secretBytes = b32Dec(p.secret_b32);
+        if (!secretBytes.length) throw new Error('empty secret');
+        const label = ((p.issuer ? p.issuer + ' ' : '') + p.account).trim() || '—';
+        const known = /^SHA(1|256|512)$/.test(p.algorithm);
+        result = {
+          accounts: known ? [{ issuer: p.issuer, account: p.account, label, secretBytes, digits: p.digits, period: p.period, algorithm: p.algorithm }] : [],
+          skipped: known ? [] : [{ label, reason: 'algo' }],
+          batchSize: 1,
+          batchIndex: 0
+        };
+      }
+    } catch (_) {
+      setStatus(COPY.import_invalid, 'err');
+      return;
+    }
+    openImport(result);
   }
 
   function lock() {
@@ -1408,5 +1449,6 @@ eleventyComputed:
   });
 
   init();
+  if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(null, takeHandoff);
 })();
 </script>

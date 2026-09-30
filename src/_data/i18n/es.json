@@ -3075,7 +3075,12 @@
     "single_packs": "Paquetes sueltos",
     "show_all_packs": "Mostrar los {n} paquetes",
     "next_pack": "Siguiente paquete",
-    "finish_stats_read": "{seen} de {total} tarjetas leídas"
+    "finish_stats_read": "{seen} de {total} tarjetas leídas",
+    "search_label": "Buscar paquetes",
+    "search_placeholder": "Busca paquetes por título",
+    "no_match": "Ningún paquete coincide con «{q}».",
+    "see_all": "Ver los {n}",
+    "show_less": "Ver menos"
   },
   "stream": {
     "hero_title": "Un feed que enseña.",

@@ -17,6 +17,19 @@ eleventyComputed:
     <p>{{ "learn.lede" | t }}</p>
 </section>
 
+<div class="learn-search" role="search">
+    <label class="sr-only" for="learn-q">{{ "learn.search_label" | t }}</label>
+    <input type="search" id="learn-q" class="learn-input learn-search__input" placeholder="{{ 'learn.search_placeholder' | t }}" autocomplete="off" spellcheck="false" enterkeyhint="search">
+</div>
+<p class="learn-empty learn-search__none" id="learn-none" role="status" hidden></p>
+
+<section class="learn-shelf learn-continue" id="learn-continue" aria-labelledby="learn-continue-h" hidden>
+    <div class="learn-section-head">
+        <h2 id="learn-continue-h">{{ "learn.continue" | t }}</h2>
+    </div>
+    <ul class="learn-grid learn-grid--row" id="learn-continue-list"></ul>
+</section>
+
 <section class="learn-mine" id="learn-mine" aria-labelledby="learn-mine-h">
     <div class="learn-section-head">
         <h2 id="learn-mine-h">{{ "learn.your_packs" | t }}</h2>
@@ -50,9 +63,10 @@ eleventyComputed:
   { key: "deepcuts", title: ("learn.deepcuts_shelf" | t), lede: ("learn.deepcuts_lede" | t) }
 ] %}
 {% for g in groups %}
-<section class="learn-shelf" aria-labelledby="learn-shelf-{{ g.key }}">
+<section class="learn-shelf learn-shelf--native" aria-labelledby="learn-shelf-{{ g.key }}">
     <div class="learn-section-head">
         <h2 id="learn-shelf-{{ g.key }}">{{ g.title }}</h2>
+        <button type="button" class="learn-btn learn-shelf__all" hidden></button>
         <p class="learn-section-lede">{{ g.lede }}</p>
     </div>
     <ul class="learn-grid learn-grid--native" data-collection="{{ g.key }}">
@@ -94,7 +108,11 @@ eleventyComputed:
     remove_confirm: {{ ("learn.remove_confirm" | t) | dump | safe }},
     open: {{ ("learn.open" | t) | dump | safe }},
     progress_n: {{ ("learn.progress_n" | t) | dump | safe }},
-    from_contact: {{ ("learn.from_contact" | t) | dump | safe }}
+    from_contact: {{ ("learn.from_contact" | t) | dump | safe }},
+    finished: {{ ("learn.finish_kicker" | t) | dump | safe }},
+    no_match: {{ ("learn.no_match" | t) | dump | safe }},
+    see_all: {{ ("learn.see_all" | t) | dump | safe }},
+    show_less: {{ ("learn.show_less" | t) | dump | safe }}
   };
 </script>
 <script src="/assets/js/mentria-backdrop.js?v={{ buildHash }}"></script>

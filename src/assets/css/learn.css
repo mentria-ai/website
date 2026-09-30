@@ -40,6 +40,23 @@
 .learn-tile__remove { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--term-border-strong); background: rgba(0, 0, 0, 0.6); color: var(--term-muted); cursor: pointer; }
 .learn-tile__remove:hover { color: var(--term-fg); border-color: var(--term-fg); }
 .learn-shelf { margin-bottom: 1.5rem; }
+.learn-shelf[hidden] { display: none; }
+.learn-search { margin: 1.25rem 0 0; }
+.learn-search__input { width: 100%; max-width: 560px; font-size: 0.95rem; padding: 0.65rem 0.9rem; box-sizing: border-box; }
+.learn-search__none { margin-top: 1rem; }
+.learn-section-head .learn-shelf__all { margin-left: auto; }
+.learn-shelf__all[hidden] { display: none; }
+.learn-grid--row, .learn-shelf.is-row .learn-grid--native:not(.is-expanded) { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; gap: 12px; padding-bottom: 8px; scrollbar-width: thin; }
+.learn-grid--row > .learn-tile, .learn-shelf.is-row .learn-grid--native:not(.is-expanded) > .learn-tile { flex: 0 0 150px; scroll-snap-align: start; }
+.learn-shelf.is-row .learn-grid--native:not(.is-expanded) > .learn-tile.is-extra { display: none; }
+.learn-searching .learn-shelf.is-row .learn-grid--native { display: grid; overflow: visible; padding-bottom: 0; }
+.learn-searching .learn-shelf.is-row .learn-grid--native > .learn-tile { flex: none; }
+.learn-searching .learn-shelf.is-row .learn-grid--native > .learn-tile.is-extra { display: block; }
+.learn-searching .learn-continue, .learn-searching .learn-shelf__all, .learn-shelf.is-empty, .learn-mine.is-empty { display: none; }
+.learn-tile.is-miss { display: none !important; }
+.learn-tile__badge { position: absolute; top: 8px; left: 8px; z-index: 1; font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 7px; border-radius: 999px; background: rgba(0, 0, 0, 0.72); color: var(--accent); border: 1px solid var(--accent); pointer-events: none; }
+.learn-tile.is-done .learn-tile__badge { background: var(--accent); color: #062018; border-color: transparent; }
+.learn-tile__link { position: relative; }
 @media (max-width: 480px) {
   .learn-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }

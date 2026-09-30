@@ -40,6 +40,7 @@ eleventyComputed:
       <button class="m-btn m-btn--primary" id="b64-encode-btn">{{ "tool.base64-codec.btn_encode" | t }}</button>
       <button class="m-btn m-btn--primary" id="b64-decode-btn">{{ "tool.base64-codec.btn_decode" | t }}</button>
       <button class="m-btn m-btn--ghost" id="b64-copy-btn">{{ "tool.base64-codec.btn_copy_output" | t }}</button>
+      <button class="m-btn m-btn--ghost" id="b64-send-btn" type="button" hidden>{{ "common.send_to" | t }}</button>
       <button class="m-btn m-btn--ghost" id="b64-clear-btn">{{ "tool.base64-codec.btn_clear" | t }}</button>
     </div>
     <div class="b64-status m-status" id="b64-text-status"></div>
@@ -285,6 +286,26 @@ eleventyComputed:
       inputEl.value = '';
       outputEl.value = '';
       textStatus.clear();
+    });
+
+    const sendBtn = document.getElementById('b64-send-btn');
+    const syncSend = () => { sendBtn.hidden = !MentriaUI.sendTargets({ text: outputEl.value }).length; };
+    [encodeBtn, decodeBtn, clearBtn].forEach((b) => b.addEventListener('click', syncSend));
+    MentriaUI.sendMenu(sendBtn, () => (outputEl.value ? { text: outputEl.value } : null));
+
+    function looksBase64(text) {
+      const v = text.replace(/\s+/g, '');
+      if (v.length < 16 || !/^[A-Za-z0-9+/_-]+={0,2}$/.test(v)) return false;
+      try {
+        new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(atob(normalizeB64(v)), c => c.charCodeAt(0)));
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+    MentriaUI.consumeShared(null, (text) => {
+      inputEl.value = text;
+      (looksBase64(text) ? decodeBtn : encodeBtn).click();
     });
 
     browseBtn.addEventListener('click', () => fileInput.click());

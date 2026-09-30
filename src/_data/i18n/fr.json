@@ -184,7 +184,11 @@
       "steps": "{n} pas",
       "tap_resume": "Touchez pour continuer à compter"
     },
-    "close_tool": "Fermer l’outil"
+    "close_tool": "Fermer l’outil",
+    "send_to": "Envoyer vers…",
+    "send_to_label": "Envoyer vers un autre outil",
+    "send_named": "Envoyer {name} vers un autre outil",
+    "send_failed": "Impossible d’envoyer vers {tool}"
   },
   "home": {
     "cli": {
@@ -582,6 +586,7 @@
     "annotate": "La décrire avec l’IA sur l’appareil",
     "qr": "Y chercher un QR code ou un code-barres",
     "exif": "Lire les détails de la photo (EXIF)",
+    "compress": "La rendre plus légère (compresser)",
     "cancel": "Annuler",
     "empty": "Rien n’a été partagé, ou la photo partagée a déjà été ouverte.",
     "home": "Aller à l’accueil"

@@ -720,6 +720,15 @@ eleventyComputed:
     if (e.key === 'mentria.store.quick_notes.blob' && !e.newValue) acceptExternalDelete();
   });
 
+  function addSharedText(text) {
+    const body = String(text || '').trim();
+    if (!body) return;
+    const note = { id: genId(), title: '', body, createdAt: Date.now(), updatedAt: Date.now() };
+    notes.unshift(note);
+    persist();
+    selectNote(note.id);
+  }
+
   load();
   drainInbox();
   if (ingestSharedContent()) {
@@ -728,6 +737,7 @@ eleventyComputed:
     selectNote(notes[0].id);
   }
   renderList();
+  if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(null, addSharedText);
 })();
 </script>
 

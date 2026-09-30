@@ -184,7 +184,11 @@
       "steps": "{n} 歩",
       "tap_resume": "タップしてカウントを続ける"
     },
-    "close_tool": "ツールを閉じる"
+    "close_tool": "ツールを閉じる",
+    "send_to": "ツールに送る…",
+    "send_to_label": "別のツールに送る",
+    "send_named": "{name} を別のツールに送る",
+    "send_failed": "{tool} に送れませんでした"
   },
   "home": {
     "cli": {
@@ -582,6 +586,7 @@
     "annotate": "端末内のAIで説明する",
     "qr": "QRコードやバーコードを読み取る",
     "exif": "写真の詳細（EXIF）を見る",
+    "compress": "サイズを小さくする（圧縮）",
     "cancel": "キャンセル",
     "empty": "何も共有されていないか、共有された写真はすでに開かれています。",
     "home": "ホームへ"

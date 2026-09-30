@@ -184,7 +184,11 @@
       "steps": "{n} pasos",
       "tap_resume": "Toca para seguir contando"
     },
-    "close_tool": "Cerrar herramienta"
+    "close_tool": "Cerrar herramienta",
+    "send_to": "Enviar a…",
+    "send_to_label": "Enviar a otra herramienta",
+    "send_named": "Enviar {name} a otra herramienta",
+    "send_failed": "No se pudo enviar a {tool}"
   },
   "home": {
     "cli": {
@@ -582,6 +586,7 @@
     "annotate": "Describirla con IA en el dispositivo",
     "qr": "Buscar un código QR o de barras",
     "exif": "Ver los datos de la foto (EXIF)",
+    "compress": "Reducir su tamaño (comprimir)",
     "cancel": "Cancelar",
     "empty": "No se compartió nada, o la foto compartida ya se abrió.",
     "home": "Ir al inicio"

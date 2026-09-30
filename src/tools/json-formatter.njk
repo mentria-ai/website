@@ -82,6 +82,7 @@ eleventyComputed:
         <div class="jf__actions">
           <button type="button" class="m-btn m-btn--ghost jf__small jf__copy" id="jf-copy" disabled><span class="jf__lbl">{{ "tool.json-formatter.btn_copy" | t }}</span><span class="jf__lbl-alt"></span></button>
           <button type="button" class="m-btn m-btn--ghost jf__small" id="jf-download" disabled>{{ "tool.json-formatter.btn_download" | t }}</button>
+          <button type="button" class="m-btn m-btn--ghost jf__small" id="jf-send" disabled>{{ "common.send_to" | t }}</button>
         </div>
       </div>
       <p class="jf__meta" id="jf-meta"></p>
@@ -918,6 +919,7 @@ eleventyComputed:
   const pathEl = $('jf-path');
   const copyBtn = $('jf-copy');
   const downloadBtn = $('jf-download');
+  const sendBtn = $('jf-send');
   const copyPathBtn = $('jf-copy-path');
   const expandBtn = $('jf-expand');
   const collapseBtn = $('jf-collapse');
@@ -1392,6 +1394,7 @@ eleventyComputed:
       clearTree();
       copyBtn.disabled = true;
       downloadBtn.disabled = true;
+      sendBtn.disabled = true;
       return;
     }
     if (state.view === 'text') renderText();
@@ -1400,6 +1403,7 @@ eleventyComputed:
     const usable = valid && currentOutput() !== null;
     copyBtn.disabled = !usable;
     downloadBtn.disabled = !usable;
+    sendBtn.disabled = !usable || !MentriaUI.sendTargets({ text: currentOutput() }).length;
   }
 
   function clearTree() {
@@ -1947,6 +1951,14 @@ eleventyComputed:
     const name = (fileBase || COPY.download_base || 'data') + (minify ? '.min' : '') + '.json';
     MentriaUI.downloadFile(name, new Blob([minify ? out : out + '\n'], { type: 'application/json' }));
     flash(fill(COPY.downloaded, { name: name }), 'ok');
+  });
+
+  MentriaUI.sendMenu(sendBtn, function () {
+    const out = valid && doc ? currentOutput() : null;
+    return out === null ? null : { text: out };
+  });
+  MentriaUI.consumeShared(null, function (text) {
+    openFile(new File([text], 'shared.json', { type: 'application/json' }));
   });
 
   expandBtn.addEventListener('click', expandAll);

@@ -71,6 +71,7 @@ eleventyComputed:
     <div class="ex__controls">
       <button type="button" class="m-btn m-btn--primary m-btn--pill" id="ex-strip" hidden>{{ "tool.exif.btn_strip" | t }}</button>
       <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="ex-share" hidden>{{ "common.share" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="ex-send" hidden>{{ "common.send_to" | t }}</button>
       <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="ex-again">{{ "tool.exif.btn_another" | t }}</button>
     </div>
 
@@ -147,12 +148,15 @@ eleventyComputed:
   const noteEl    = $('ex-note');
   const stripBtn  = $('ex-strip');
   const shareBtn  = $('ex-share');
+  const sendBtn   = $('ex-send');
   const canShareClean = window.MentriaUI && MentriaUI.canShareFile && MentriaUI.canShareFile('img-clean.jpg', 'image/jpeg');
   const againBtn  = $('ex-again');
   const resultEl  = $('ex-result');
 
   let origBuf = null;
   let origName = '';
+  let origFile = null;
+  let sendClean = false;
   let origKind = '';
   let objUrl = null;
   let coordsText = '';
@@ -862,6 +866,8 @@ eleventyComputed:
     cleanEl.hidden = removable || !canStrip;
     stripBtn.hidden = !(canStrip && removable);
     shareBtn.hidden = !(canStrip && removable && canShareClean);
+    sendClean = canStrip && removable;
+    sendBtn.hidden = !(origFile && MentriaUI.sendTargets({ blob: origFile, name: origName }).length);
     noteEl.hidden = canStrip;
     if (!canStrip) { noteEl.textContent = COPY.stripUnsupported; noteEl.hidden = false; }
     resultEl.hidden = true;
@@ -884,6 +890,7 @@ eleventyComputed:
     origBuf = buf;
     origName = file.name || 'image';
     origKind = kind;
+    origFile = file;
     if (objUrl) URL.revokeObjectURL(objUrl);
     objUrl = URL.createObjectURL(file);
     thumbEl.src = objUrl;
@@ -913,6 +920,7 @@ eleventyComputed:
     if (objUrl) { URL.revokeObjectURL(objUrl); objUrl = null; }
     thumbEl.src = '';
     origBuf = null;
+    origFile = null;
     fileInput.value = '';
   }
 
@@ -931,6 +939,16 @@ eleventyComputed:
     });
     return { blob, name: base + '-clean.' + KINDS[origKind].ext };
   }
+
+  function sendPayload() {
+    if (!origFile) return null;
+    if (!sendClean || !origBuf || !KINDS[origKind]) return { blob: origFile, name: origName };
+    const { blob } = KINDS[origKind].strip(origBuf);
+    const dot = origName.lastIndexOf('.');
+    return { blob, name: (dot > 0 ? origName.slice(0, dot) : origName) + '-clean.' + KINDS[origKind].ext };
+  }
+
+  MentriaUI.sendMenu(sendBtn, sendPayload);
 
   stripBtn.addEventListener('click', () => {
     if (!origBuf || !KINDS[origKind]) return;

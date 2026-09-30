@@ -22,7 +22,6 @@ eleventyComputed:
       <p class="stream-hero__lede">{{ "stream.hero_lede" | t }}</p>
       <div class="stream-hero__actions">
         <a class="pack-btn pack-btn--primary" href="{{ locale.pathPrefix }}/learn/">{{ "stream.browse" | t }}</a>
-        <a class="pack-btn pack-btn--ghost" href="/learn/format/">{{ "learn.format_link" | t }}</a>
       </div>
     </div>
     <p class="stream-hero__hint" aria-hidden="true">{{ "stream.scroll_hint" | t }} ↓</p>
@@ -51,7 +50,7 @@ eleventyComputed:
 <script>
   window.MENTRIA_STREAM_TAIL = [{% for pack in packs %}{{ { id: pack.id, title: (pack.title | tloc(locale.code)), cover: pack.cover, cards: pack.cards.length, minutes: pack.minutes, collection: pack.collection } | dump | safe }}{% if not loop.last %},{% endif %}{% endfor %}];
   window.MENTRIA_STREAM_DAILY = {{ daily | dump | safe }};
-  window.MENTRIA_STREAM_TOOLS = [{% for tool in tools %}{% if tool.category != "Game" and tool.slug != "extensions" and tool.slug != "search" %}{{ { slug: tool.slug, title: (("tools." + tool.slug + ".title") | traw), summary: (("tools." + tool.slug + ".lede") | traw) } | dump | safe }},{% endif %}{% endfor %}];
+  window.MENTRIA_STREAM_TOOLS = [{% for tool in tools %}{% if tool.category != "Game" and tool.slug != "extensions" and tool.slug != "search" and tool.slug != "files" and not tool.url and not tool.offline and not tool.requires %}{{ { slug: tool.slug, title: (("tools." + tool.slug + ".title") | traw), summary: (("tools." + tool.slug + ".lede") | traw) } | dump | safe }},{% endif %}{% endfor %}];
   window.MENTRIA_STREAM_I18N = {
     prefix: {{ locale.pathPrefix | dump | safe }},
     try_tool: {{ ("stream.try_tool" | t) | dump | safe }},
@@ -69,7 +68,14 @@ eleventyComputed:
     done_text: {{ ("stream.done_text" | t) | dump | safe }},
     cards_n: {{ ("learn.cards_n" | t) | dump | safe }},
     minutes_n: {{ ("learn.minutes_n" | t) | dump | safe }},
-    progress_n: {{ ("learn.progress_n" | t) | dump | safe }}
+    progress_n: {{ ("learn.progress_n" | t) | dump | safe }},
+    browse: {{ ("stream.browse" | t) | dump | safe }},
+    start_today: {{ ("stream.start_today" | t) | dump | safe }},
+    welcome_back: {{ ("stream.welcome_back" | t) | dump | safe }},
+    continue: {{ ("stream.continue" | t) | dump | safe }},
+    week_n: {{ ("stream.week_n" | t) | dump | safe }},
+    week_zero: {{ ("stream.week_zero" | t) | dump | safe }},
+    your_tools: {{ ("stream.your_tools" | t) | dump | safe }}
   };
 </script>
 {% include "learn-i18n.njk" %}

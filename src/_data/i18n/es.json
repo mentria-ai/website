@@ -24,7 +24,8 @@
     "search": "Buscar",
     "about": "Acerca de",
     "week_ring": "Tu semana",
-    "week_ring_n": "Tu semana: {n} de 7 días"
+    "week_ring_n": "Tu semana: {n} de 7 días",
+    "week_ring_toast": "El anillo del encabezado suma un tramo por cada día que aprendes: {n} de 7 esta semana."
   },
   "about": {
     "title": "Acerca de",
@@ -3092,6 +3093,12 @@
     "lab": "Laboratorio del sábado",
     "lab_title": "Pregúntale al modelo algo que domines.",
     "lab_text": "Los sábados son para curiosear con el modelo del dispositivo. Elige un tema que conozcas bien y mira dónde acierta y dónde falla.",
-    "home_title": "Un feed que enseña"
+    "home_title": "Un feed que enseña",
+    "start_today": "Empezar el paquete de hoy",
+    "welcome_back": "Hola de nuevo",
+    "continue": "Continuar",
+    "week_n": "Esta semana aprendiste {n} de 7 días.",
+    "week_zero": "Una tarjeta hoy empieza tu semana.",
+    "your_tools": "Tus herramientas"
   }
 }

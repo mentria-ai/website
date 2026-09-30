@@ -267,6 +267,19 @@
             segs[i].classList.toggle('is-today', k === today);
           }
           if (labelN) { var l = labelN.split('{n}').join(String(n)); ring.setAttribute('aria-label', l); ring.setAttribute('title', l); }
+          clearTimeout(tipTimer);
+          if (n) tipTimer = setTimeout(function () { explain(n); }, 1500);
+        }
+        var tipTimer = 0;
+        function explain(n) {
+          var tip = ring.getAttribute('data-toast');
+          if (!tip || !window.MentriaUI || ring.offsetParent === null || window.MentriaStore.get('ui', 'week_ring_told')) return;
+          var r = ring.getBoundingClientRect();
+          if (!r.width || r.bottom <= 0 || r.top >= innerHeight) return;
+          var hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          if (!hit || !ring.contains(hit)) return;
+          window.MentriaStore.set('ui', 'week_ring_told', true);
+          window.MentriaUI.toast(tip.split('{n}').join(String(n)), { duration: 6000 });
         }
         paint();
         window.addEventListener('mentria:write', paint);

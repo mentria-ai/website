@@ -24,7 +24,8 @@
     "search": "Recherche",
     "about": "À propos",
     "week_ring": "Votre semaine",
-    "week_ring_n": "Votre semaine : {n} jours sur 7"
+    "week_ring_n": "Votre semaine : {n} jours sur 7",
+    "week_ring_toast": "L’anneau de l’en-tête gagne un segment chaque jour où vous apprenez : {n} jours sur 7 cette semaine."
   },
   "about": {
     "title": "À propos",
@@ -3092,6 +3093,12 @@
     "lab": "Labo du samedi",
     "lab_title": "Posez au modèle une question que vous maîtrisez.",
     "lab_text": "Le samedi, on titille le modèle sur l’appareil. Choisissez un sujet que vous connaissez par cœur et voyez où il tient et où il dérape.",
-    "home_title": "Un fil qui enseigne"
+    "home_title": "Un fil qui enseigne",
+    "start_today": "Commencer le pack du jour",
+    "welcome_back": "Bon retour",
+    "continue": "Continuer",
+    "week_n": "Cette semaine, vous avez appris {n} jours sur 7.",
+    "week_zero": "Une carte aujourd’hui lance votre semaine.",
+    "your_tools": "Vos outils"
   }
 }

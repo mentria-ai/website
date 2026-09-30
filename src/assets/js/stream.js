@@ -24,9 +24,10 @@
   var byId = {};
   tail.forEach(function (x) { byId[x.id] = x; });
 
-  var seed = Math.floor(Date.now() / 86400000);
-  function rng() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
-  function seededOrder(list) {
+  var DAY = Math.floor(Date.now() / 86400000);
+  function seededOrder(list, salt) {
+    var seed = (DAY * 2654435761 + (salt || 0) * 40503) % 4294967296;
+    function rng() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
     var a = list.map(function (x, i) { return { x: x, r: rng() + i * 1e-9 }; });
     a.sort(function (p, q) { return p.r - q.r; });
     return a.map(function (o) { return o.x; });
@@ -143,6 +144,7 @@
 
   function buildDynamic(packs) {
     var now = Date.now();
+    var dailyItems = [], toolItems = [];
     var days = P.getDays(), answeredToday = days[P.dayKey()] || 0;
     var items = [];
     var reviews = [];
@@ -157,17 +159,18 @@
     reviews.slice(0, MAX_REVIEWS).forEach(function (r) { items.push({ kind: 'review', entry: r.entry, card: r.card }); });
 
     var todayKey = P.dayKey();
-    daily.filter(function (d) { return d.date === todayKey; }).forEach(function (d) { items.push({ kind: 'daily', item: d }); });
+    daily.filter(function (d) { return d.date === todayKey; }).forEach(function (d) { dailyItems.push({ kind: 'daily', item: d }); });
     if (tools.length) {
-      var tool = seededOrder(tools)[0];
-      items.push({ kind: 'daily', item: { kind: 'tool', title: tx(tool.title), text: tx(tool.summary), href: prefix + '/tools/' + tool.slug + '/', cta: t('open_tool'), chip: t('try_tool') } });
+      var tool = seededOrder(tools, 1)[0];
+      toolItems.push({ kind: 'daily', item: { kind: 'tool', title: tx(tool.title), text: tx(tool.summary), href: prefix + '/tools/' + tool.slug + '/', cta: t('open_tool'), chip: t('try_tool') } });
     }
-    if (new Date().getDay() === 6) items.push({ kind: 'daily', item: { kind: 'lab', title: t('lab_title'), text: t('lab_text'), href: prefix + '/tools/ai-chat/', cta: t('open_tool'), chip: t('lab') } });
+    if (new Date().getDay() === 6) toolItems.push({ kind: 'daily', item: { kind: 'lab', title: t('lab_title'), text: t('lab_text'), href: prefix + '/tools/ai-chat/', cta: t('open_tool'), chip: t('lab') } });
 
     var picks = [];
     var busy = {};
     packs.forEach(function (e) { busy[e.pack.id] = true; });
-    seededOrder(tail).some(function (x) {
+    if (hero.pickId) busy[hero.pickId] = true;
+    seededOrder(tail, 2).some(function (x) {
       if (busy[x.id]) return false;
       var pr = P.getProgress(x.id);
       if (Object.keys(pr.cards || {}).length >= x.cards) return false;
@@ -175,6 +178,7 @@
       return picks.length >= 2;
     });
     picks.forEach(function (x) { items.push({ kind: 'today', pick: x }); });
+    items = items.concat(dailyItems);
 
     var budget = Math.max(0, BUDGET - answeredToday);
     var queues = packs.map(function (entry) {
@@ -189,6 +193,7 @@
         q.taken++; added++;
       });
     }
+    items = items.concat(toolItems);
     var exhausted = packs.length && !added && !reviews.length && budget === 0;
     return { items: items, exhausted: exhausted, packs: packs };
   }
@@ -273,7 +278,7 @@
   }
 
   function reorderTail() {
-    var order = seededOrder(tail);
+    var order = seededOrder(tail, 3);
     var existing = {};
     Array.prototype.forEach.call(tailEl.querySelectorAll('.stream-card'), function (s) { existing[s.dataset.packId] = s; });
     var frag = document.createDocumentFragment();
@@ -306,7 +311,130 @@
   Array.prototype.forEach.call(document.querySelectorAll('#stream-tail .stream-card__blank'), function (b) { var sec = b.closest('.stream-card'); if (window.MentriaBackdrop && sec) { window.MentriaBackdrop.apply(b, 'cover/' + sec.dataset.packId); sec.style.setProperty('--feed-card-bg', b.style.backgroundImage); } });
   var heroCard = scroller.querySelector('.stream-card--hero');
   if (heroCard) heroCard.style.setProperty('--feed-card-bg', 'url("/assets/img/stream-hero.svg")');
+  var hero = { pickId: null, contId: null };
+
+  function toolUsage() {
+    try { return JSON.parse(localStorage.getItem('mentria_tool_usage')) || {}; } catch (_) { return {}; }
+  }
+  function recentTools(limit) {
+    var usage = toolUsage();
+    var data = (window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.tools) || [];
+    var bySlug = {};
+    data.forEach(function (x) { bySlug[x.slug] = x; });
+    var now = Date.now();
+    function score(e) { return (e.count || 0) + 6 / (1 + (now - (e.last || 0)) / 86400000); }
+    return Object.keys(usage).filter(function (s) { return bySlug[s]; })
+      .sort(function (a, b) { return score(usage[b]) - score(usage[a]); })
+      .slice(0, limit).map(function (s) { return bySlug[s]; });
+  }
+  function weekCount() {
+    var days = P.getDays() || {};
+    var d = new Date(), n = 0;
+    var start = new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
+    for (var i = 0; i < 7; i++) {
+      var x = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+      var k = x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+      if (days[k]) n++;
+    }
+    return n;
+  }
+  function touchedNative() {
+    return S.list('packs').filter(function (k) { return k.indexOf('p.') === 0; }).map(function (k) { return k.slice(2); }).filter(function (id) { return byId[id]; });
+  }
+  function nativeContinue() {
+    var best = null, bestLast = -1;
+    touchedNative().forEach(function (id) {
+      var x = byId[id], pr = P.getProgress(id);
+      var seen = Object.keys(pr.cards || {}).length;
+      if (!seen || seen >= x.cards) return;
+      if ((pr.last || 0) > bestLast) { bestLast = pr.last || 0; best = { id: id, title: x.title, cover: x.cover, total: x.cards, seen: seen, collection: x.collection, href: prefix + '/learn/' + id + '/', last: pr.last || 0 }; }
+    });
+    return best;
+  }
+  function heroPick() {
+    var pick = null;
+    seededOrder(tail, 2).some(function (x) {
+      if (Object.keys(P.getProgress(x.id).cards || {}).length) return false;
+      pick = x;
+      return true;
+    });
+    return pick;
+  }
+  function collectionLabel(c) { return c === 'source' ? 'Source' : (c === 'deepcuts' ? 'Deep Cuts' : t('imported')); }
+
+  function renderHero(cont) {
+    var box = heroCard && heroCard.querySelector('.stream-hero');
+    if (!box) return;
+    var usage = toolUsage();
+    var returning = !!cont || touchedNative().length > 0 || Object.keys(usage).length > 0 || Object.keys(P.getDays() || {}).length > 0;
+    var pick = cont ? null : heroPick();
+    if (!returning && !pick) return;
+    hero.pickId = pick ? pick.id : null;
+    hero.contId = cont ? cont.id : null;
+    var cover = cont ? cont.cover : pick && pick.cover;
+    var media = heroCard.querySelector('.stream-hero__bg');
+    if (cover) {
+      if (!media) {
+        media = el('img', 'feed-card__media stream-hero__bg');
+        media.alt = '';
+        media.decoding = 'async';
+        heroCard.insertBefore(el('div', 'stream-hero__shade'), heroCard.firstChild);
+        heroCard.insertBefore(media, heroCard.firstChild);
+      }
+      if (media.getAttribute('src') !== cover) media.src = cover;
+      heroCard.classList.add('stream-card--hero-media');
+      heroCard.style.setProperty('--feed-card-bg', 'url("' + cover + '")');
+    }
+    var html = '';
+    var action = '';
+    if (cont) {
+      var pct = Math.round((cont.seen / cont.total) * 100);
+      html += '<p class="stream-hero__kicker">' + esc(t('welcome_back')) + '</p>' +
+        '<h1 class="stream-hero__title stream-hero__title--pack">' + esc(tx(cont.title)) + '</h1>' +
+        '<p class="stream-hero__meta">' + esc(collectionLabel(cont.collection) + ' · ' + t('card_pos', { n: Math.min(cont.seen + 1, cont.total), total: cont.total })) + '</p>' +
+        '<div class="stream-hero__bar" aria-hidden="true"><span style="width:' + pct + '%"></span></div>';
+      action = '<a class="pack-btn pack-btn--primary" href="' + esc(cont.href) + '">' + esc(t('continue')) + '</a>';
+    } else if (returning && !pick) {
+      html += '<p class="stream-hero__kicker">' + esc(t('welcome_back')) + '</p>';
+    } else if (returning) {
+      html += '<p class="stream-hero__kicker">' + esc(t('welcome_back')) + '</p>' +
+        '<p class="stream-chip stream-chip--today stream-hero__chip">' + esc(t('today')) + '</p>' +
+        '<h1 class="stream-hero__title stream-hero__title--pack">' + esc(tx(pick.title)) + '</h1>' +
+        '<p class="stream-hero__meta">' + esc(metaFor(pick)) + '</p>';
+      action = '<a class="pack-btn pack-btn--primary" href="' + esc(prefix + '/learn/' + pick.id + '/') + '">' + esc(t('start_today')) + '</a>';
+    } else {
+      html += box.querySelector('.stream-hero__kicker').outerHTML + box.querySelector('.stream-hero__title').outerHTML + box.querySelector('.stream-hero__lede').outerHTML +
+        '<p class="stream-hero__pick"><span class="stream-chip stream-chip--today">' + esc(t('today')) + '</span><span class="stream-hero__pick-title">' + esc(tx(pick.title)) + '</span><span class="stream-hero__pick-meta">' + esc(metaFor(pick)) + '</span></p>';
+      action = '<a class="pack-btn pack-btn--primary" href="' + esc(prefix + '/learn/' + pick.id + '/') + '">' + esc(t('start_today')) + '</a>';
+    }
+    html += '<div class="stream-hero__actions">' + action + '<a class="pack-btn ' + (action ? 'pack-btn--ghost' : 'pack-btn--primary') + '" href="' + esc(prefix + '/learn/') + '">' + esc(t('browse')) + '</a></div>';
+    if (returning) {
+      var n = weekCount();
+      html += '<p class="stream-hero__week">' + esc(n ? t('week_n', { n: n }) : t('week_zero')) + '</p>';
+      var recent = recentTools(4);
+      if (recent.length) {
+        html += '<div class="stream-hero__tools"><span class="stream-hero__tools-label">' + esc(t('your_tools')) + '</span>' +
+          recent.map(function (x) { return '<a class="stream-hero__tool" href="' + esc(x.url || prefix + '/tools/' + x.slug + '/') + '">' + esc(x.title) + '</a>'; }).join('') +
+          '</div>';
+      }
+    }
+    box.innerHTML = html;
+    box.classList.toggle('stream-hero--back', returning);
+  }
+
+  renderHero(nativeContinue());
   watchCurrent();
   reorderTail();
-  activePacks().then(buildDynamic).then(renderDynamic).catch(function (e) { console.error('stream', e); });
+  activePacks().then(function (packs) {
+    if (!hero.contId) {
+      var imported = null, last = -1;
+      packs.forEach(function (e) {
+        if (e.native) return;
+        var pr = P.getProgress(e.pack.id), seen = Object.keys(pr.cards || {}).length, total = e.pack.cards.length;
+        if (seen && seen < total && (pr.last || 0) > last) { last = pr.last || 0; imported = { id: e.pack.id, title: e.pack.title, cover: e.pack.cover || (e.meta && e.meta.cover), total: total, seen: seen, collection: 'import', href: prefix + '/learn/play/?id=' + encodeURIComponent(e.pack.id) }; }
+      });
+      if (imported) renderHero(imported);
+    }
+    return buildDynamic(packs);
+  }).then(renderDynamic).catch(function (e) { console.error('stream', e); });
 })();

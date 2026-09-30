@@ -24,7 +24,8 @@
     "search": "Buscar",
     "about": "Sobre",
     "week_ring": "Sua semana",
-    "week_ring_n": "Sua semana: {n} de 7 dias"
+    "week_ring_n": "Sua semana: {n} de 7 dias",
+    "week_ring_toast": "O anel do cabeçalho ganha um segmento a cada dia em que você aprende: {n} de 7 nesta semana."
   },
   "about": {
     "title": "Sobre",
@@ -3092,6 +3093,12 @@
     "lab": "Laboratório de sábado",
     "lab_title": "Pergunte ao modelo algo que você domina.",
     "lab_text": "Sábado é dia de cutucar o modelo no dispositivo. Escolha um assunto que você conhece bem e veja onde ele acerta e onde escorrega.",
-    "home_title": "Um feed que ensina"
+    "home_title": "Um feed que ensina",
+    "start_today": "Começar o pacote de hoje",
+    "welcome_back": "Que bom ver você de novo",
+    "continue": "Continuar",
+    "week_n": "Nesta semana você aprendeu em {n} de 7 dias.",
+    "week_zero": "Um cartão hoje começa a sua semana.",
+    "your_tools": "Suas ferramentas"
   }
 }

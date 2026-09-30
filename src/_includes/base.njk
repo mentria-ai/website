@@ -408,7 +408,7 @@
         var okBtn = document.getElementById('m-dialog-ok');
         var cancelBtn = document.getElementById('m-dialog-cancel');
         var okLabel = {{ ("common.dialog.ok" | t) | dump | safe }};
-        window.MentriaUICopy = { undo: {{ ("common.undo" | t) | dump | safe }} };
+        window.MentriaUICopy = { undo: {{ ("common.undo" | t) | dump | safe }}, sendTo: {{ ("common.send_to" | t) | dump | safe }}, sendLabel: {{ ("common.send_to_label" | t) | dump | safe }}, sendNamed: {{ ("common.send_named" | t) | dump | safe }}, sendFailed: {{ ("common.send_failed" | t) | dump | safe }} };
         var confirmLabel = {{ ("common.dialog.confirm" | t) | dump | safe }};
         var resolver = null;
         var opener = null;
@@ -571,6 +571,12 @@
           ['pointerdown', 'pointerover', 'focusin'].forEach(function (t) { document.removeEventListener(t, early, true); });
           built = loadFrag().then(function (html) {
             body.appendChild(document.createRange().createContextualFragment(html));
+            var sym = body.querySelector('symbol[id^="tool-"]');
+            var sprite = sym && sym.closest('svg');
+            if (sprite) {
+              if (document.getElementById(sym.id) !== sym) sprite.remove();
+              else document.body.appendChild(sprite);
+            }
             var rv = body.querySelectorAll('.reveal');
             for (var i = 0; i < rv.length; i++) rv[i].classList.add('revealed');
             ['/assets/js/tool-launcher.js?v={{ buildHash }}', '/assets/js/mentria-ext-launch.js'].forEach(function (src) {
@@ -597,6 +603,7 @@
         function early(e) {
           if (e.target.closest && e.target.closest('[data-tools-open]')) build();
         }
+        window.MentriaToolsPopup = { load: build };
         ['pointerdown', 'pointerover', 'focusin'].forEach(function (t) { document.addEventListener(t, early, true); });
         function close(fromPop) {
           if (popup.hidden) return;

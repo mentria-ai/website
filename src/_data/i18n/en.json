@@ -184,7 +184,11 @@
       "steps": "{n} steps",
       "tap_resume": "Tap to keep counting"
     },
-    "close_tool": "Close tool"
+    "close_tool": "Close tool",
+    "send_to": "Send to…",
+    "send_to_label": "Send to another tool",
+    "send_named": "Send {name} to another tool",
+    "send_failed": "Couldn’t send to {tool}"
   },
   "home": {
     "cli": {
@@ -582,6 +586,7 @@
     "annotate": "Describe it with on-device AI",
     "qr": "Scan it for a QR code or barcode",
     "exif": "Read its photo details (EXIF)",
+    "compress": "Make it smaller (compress)",
     "cancel": "Cancel",
     "empty": "Nothing was shared, or the shared photo has already been opened.",
     "home": "Go home"

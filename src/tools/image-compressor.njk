@@ -813,12 +813,18 @@ eleventyComputed:
       IC.fill(COPY.aria_compare, { name: entry.name }), () => toggleCompare(entry));
     compare.setAttribute('aria-expanded', entry.urls ? 'true' : 'false');
     compare.setAttribute('aria-controls', entry.cmpEl.id);
+    const pick = pickFor(entry);
+    let send = null;
+    if (MentriaUI.sendTargets && MentriaUI.sendTargets(pick).length) {
+      send = actionButton(entry, 'send', 'm-btn--ghost', MentriaUI.sendLabel(), MentriaUI.sendLabel(pick.name), () => {});
+      MentriaUI.sendMenu(send, () => (entry.out ? pickFor(entry) : null));
+    }
     if (larger) {
       const original = actionButton(entry, 'original', 'm-btn--primary', COPY.btn_original,
         IC.fill(COPY.aria_original, { file: origName }), () => MentriaUI.downloadFile(origName, entry.file));
-      entry.actionsEl.append(original, download, compare);
+      entry.actionsEl.append(...[original, download, compare, send].filter(Boolean));
     } else {
-      entry.actionsEl.append(download, compare);
+      entry.actionsEl.append(...[download, compare, send].filter(Boolean));
     }
   }
 
@@ -1237,6 +1243,7 @@ eleventyComputed:
     fileInput.value = '';
     addFiles(files);
   });
+  if (MentriaUI.consumeShared) MentriaUI.consumeShared((f) => addFiles([f]));
 
   function hasFiles(e) {
     const types = e.dataTransfer && e.dataTransfer.types;

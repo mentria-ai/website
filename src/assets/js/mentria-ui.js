@@ -155,10 +155,207 @@
     }).catch(function () { return null; });
   }
 
-  function consumeShared(handler) {
+  function takeSharedText() {
+    if (typeof caches === 'undefined') return Promise.resolve(null);
+    return caches.open('mentria-share').then(function (cache) {
+      return cache.match('/share-target/text').then(function (res) {
+        if (!res) return null;
+        return res.text().then(function (text) {
+          return cache.delete('/share-target/text').then(function () { return text; });
+        });
+      });
+    }).catch(function () { return null; });
+  }
+
+  function consumeShared(onFile, onText) {
     if (!/[?&]shared=1(&|$)/.test(location.search)) return;
     try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (_) {}
-    takeSharedFile().then(function (file) { if (file) handler(file); });
+    takeSharedFile().then(function (file) {
+      if (file) { if (onFile) onFile(file); return; }
+      return takeSharedText().then(function (text) { if (text && onText) onText(text); });
+    });
+  }
+
+  var SEND_TARGETS = {
+    image: [
+      { slug: 'exif', ok: function (p) { return /^image\/(jpeg|png|webp|tiff)$/.test(p.blob.type); } },
+      { slug: 'image-compressor' },
+      { slug: 'qr-scanner' },
+      { slug: 'annotate-image', ok: function () { return !!navigator.gpu; } }
+    ],
+    text: [
+      { slug: 'quick-notes', ok: function (p) { return p.text.length <= 100000; } },
+      { slug: 'base64-codec', ok: function (p) { return p.text.length <= 2097152; } },
+      { slug: 'json-formatter', ok: function (p) { return /^\s*[[{]/.test(p.text); } },
+      { slug: 'qr-scanner', ok: function (p) { var t = p.text.trim(); return t.length <= 1000 && !/[\r\n]/.test(t); } }
+    ]
+  };
+
+  function uiText(key, fallback) {
+    var I = window.MentriaI18n;
+    var v = I && typeof I.t === 'function' ? I.t(key) : null;
+    return typeof v === 'string' && v !== key ? v : fallback;
+  }
+
+  function uiCopy(name, key, fallback) {
+    var c = window.MentriaUICopy || {};
+    return uiText(key, c[name] || fallback);
+  }
+
+  function localePrefix() {
+    var L = window.MENTRIA_LOCALES || [];
+    var p = location.pathname;
+    for (var i = 0; i < L.length; i++) {
+      var pre = L[i].prefix;
+      if (pre && (p === pre || p.indexOf(pre + '/') === 0)) return pre;
+    }
+    return '';
+  }
+
+  function toolTitle(slug) {
+    var tools = (window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.tools) || [];
+    for (var i = 0; i < tools.length; i++) {
+      if (tools[i].slug === slug) return uiText('tools.' + slug + '.title', tools[i].title);
+    }
+    return '';
+  }
+
+  function sendTargets(payload) {
+    var kind = payload && payload.blob ? 'image' : (payload && typeof payload.text === 'string' && payload.text.trim() ? 'text' : '');
+    if (!kind || typeof caches === 'undefined') return [];
+    var m = location.pathname.slice(localePrefix().length).match(/^\/tools\/([^/]+)\//);
+    var from = m ? m[1] : '';
+    return SEND_TARGETS[kind].filter(function (t) {
+      return t.slug !== from && (!t.ok || t.ok(payload)) && !!toolTitle(t.slug);
+    }).map(function (t) { return t.slug; });
+  }
+
+  function sendTo(slug, payload) {
+    return caches.open('mentria-share').then(function (cache) {
+      return Promise.all([cache.delete('/share-target/file'), cache.delete('/share-target/text')]).then(function () {
+        if (payload.blob) {
+          return cache.put('/share-target/file', new Response(payload.blob, { headers: { 'content-type': payload.blob.type || 'application/octet-stream', 'x-file-name': encodeURIComponent(payload.name || 'image') } }));
+        }
+        return cache.put('/share-target/text', new Response(payload.text, { headers: { 'content-type': 'text/plain; charset=utf-8' } }));
+      });
+    }).then(function () {
+      location.href = localePrefix() + '/tools/' + slug + '/?shared=1';
+      return true;
+    }, function () {
+      toast(uiCopy('sendFailed', 'common.send_failed', 'Couldn’t send to {tool}').split('{tool}').join(toolTitle(slug)));
+      return false;
+    });
+  }
+
+  var sendOpen = null;
+
+  function openSendMenu(btn, payload, slugs) {
+    var menu = document.createElement('div');
+    menu.className = 'm-send';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', uiCopy('sendLabel', 'common.send_to_label', 'Send to another tool'));
+    slugs.forEach(function (slug) {
+      var item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'm-send__item';
+      item.setAttribute('role', 'menuitem');
+      item.setAttribute('data-slug', slug);
+      item.innerHTML = '<span class="m-send__icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><use href="#tool-' + slug + '"></use></svg></span><span class="m-send__name"></span>';
+      item.lastChild.textContent = toolTitle(slug);
+      menu.appendChild(item);
+    });
+    if (!document.getElementById('tool-' + slugs[0]) && window.MentriaToolsPopup) window.MentriaToolsPopup.load();
+    document.body.appendChild(menu);
+
+    var r = btn.getBoundingClientRect();
+    var vw = document.documentElement.clientWidth;
+    var vh = window.innerHeight;
+    var mw = menu.offsetWidth;
+    var mh = menu.offsetHeight;
+    var below = r.bottom + 6 + mh <= vh - 12 || r.top - 6 - mh < 12;
+    var end = r.left + mw > vw - 12;
+    menu.style.left = Math.max(12, Math.min(end ? r.right - mw : r.left, vw - mw - 12)) + 'px';
+    menu.style.top = Math.max(12, below ? r.bottom + 6 : r.top - 6 - mh) + 'px';
+    menu.style.transformOrigin = (below ? 'top ' : 'bottom ') + (end ? 'right' : 'left');
+    if (!below) menu.classList.add('is-above');
+    btn.setAttribute('aria-expanded', 'true');
+
+    var watcher = null;
+    if (typeof window.CloseWatcher === 'function') {
+      try {
+        watcher = new window.CloseWatcher();
+        watcher.addEventListener('close', function () { watcher = null; close(true); });
+      } catch (_) { watcher = null; }
+    }
+    function items() { return Array.prototype.slice.call(menu.querySelectorAll('.m-send__item')); }
+    function close(refocus) {
+      if (sendOpen !== state) return;
+      sendOpen = null;
+      document.removeEventListener('pointerdown', onDown, true);
+      document.removeEventListener('keydown', onKey, true);
+      window.removeEventListener('resize', onAway);
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('pagehide', onAway);
+      if (watcher) { try { watcher.destroy(); } catch (_) {} watcher = null; }
+      if (menu.parentNode) menu.parentNode.removeChild(menu);
+      btn.setAttribute('aria-expanded', 'false');
+      if (refocus) { try { btn.focus({ preventScroll: true }); } catch (_) {} }
+    }
+    function onAway() { close(false); }
+    function onScroll(e) { if (!menu.contains(e.target)) close(false); }
+    function onDown(e) { if (!menu.contains(e.target) && !btn.contains(e.target)) close(false); }
+    function onKey(e) {
+      var list = items();
+      var i = list.indexOf(document.activeElement);
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
+      else if (e.key === 'Tab') close(false);
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        var step = e.key === 'ArrowDown' ? 1 : list.length - 1;
+        list[i < 0 ? (step === 1 ? 0 : list.length - 1) : (i + step) % list.length].focus();
+      } else if (e.key === 'Home' || e.key === 'End') {
+        e.preventDefault();
+        list[e.key === 'Home' ? 0 : list.length - 1].focus();
+      }
+    }
+    menu.addEventListener('click', function (e) {
+      var item = e.target.closest && e.target.closest('.m-send__item');
+      if (!item || menu.classList.contains('is-sending')) return;
+      menu.classList.add('is-sending');
+      item.classList.add('is-active');
+      sendTo(item.getAttribute('data-slug'), payload).then(function (ok) { if (!ok) close(true); });
+    });
+    document.addEventListener('pointerdown', onDown, true);
+    document.addEventListener('keydown', onKey, true);
+    window.addEventListener('resize', onAway);
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('pagehide', onAway);
+    var state = { btn: btn, close: close };
+    sendOpen = state;
+    try { items()[0].focus({ preventScroll: true }); } catch (_) {}
+  }
+
+  function sendMenu(btn, getPayload) {
+    if (!btn) return;
+    if (typeof caches === 'undefined') { btn.hidden = true; return; }
+    btn.setAttribute('aria-haspopup', 'menu');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.addEventListener('click', function () {
+      if (sendOpen) {
+        var mine = sendOpen.btn === btn;
+        sendOpen.close(false);
+        if (mine) return;
+      }
+      Promise.resolve(getPayload()).then(function (payload) {
+        var slugs = sendTargets(payload);
+        if (slugs.length && btn.isConnected) openSendMenu(btn, payload, slugs);
+      });
+    });
+  }
+
+  function sendLabel(name) {
+    if (name) return uiCopy('sendNamed', 'common.send_named', 'Send {name} to another tool').split('{name}').join(name);
+    return uiCopy('sendTo', 'common.send_to', 'Send to…');
   }
 
   function floatSupported() {
@@ -427,6 +624,10 @@
     floatSupported: floatSupported,
     takeSharedFile: takeSharedFile,
     consumeShared: consumeShared,
+    sendTargets: sendTargets,
+    sendTo: sendTo,
+    sendMenu: sendMenu,
+    sendLabel: sendLabel,
     floatWindow: floatWindow,
     status: status,
     segmented: segmented,

@@ -3073,7 +3073,9 @@
     "remove_course_confirm": "Remove “{title}” and all of its packs from this device?",
     "imported_course": "Imported “{title}”: {n} packs.",
     "single_packs": "Single packs",
-    "show_all_packs": "Show all {n} packs"
+    "show_all_packs": "Show all {n} packs",
+    "next_pack": "Next pack",
+    "finish_stats_read": "{seen} of {total} cards read"
   },
   "stream": {
     "hero_title": "A feed that teaches.",

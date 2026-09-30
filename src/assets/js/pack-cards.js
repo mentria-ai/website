@@ -50,6 +50,10 @@
       img.loading = 'lazy';
       img.decoding = 'async';
       img.addEventListener('error', function () { img.classList.add('is-broken'); });
+      img.addEventListener('load', function () {
+        img.classList.add('is-loaded');
+        if (img.dataset.warm && img.decode) img.decode().catch(function () {});
+      });
       if (interactive || card.type === 'checkpoint') img.classList.add('pack-slide__bg');
       s.appendChild(img);
       s.style.setProperty('--slide-bg', 'url("' + card.image + '")');
@@ -82,6 +86,53 @@
     return s;
   }
 
+  var STOPS = '.!?…', CJK_STOPS = '。！？', CLOSERS = '"\'”’)]」』）';
+  function sentences(text) {
+    var out = [], start = 0, i = 0, n = text.length, depth = 0;
+    while (i < n) {
+      var ch = text.charAt(i);
+      if (ch === '<') {
+        var close = text.indexOf('>', i);
+        if (close < 0) break;
+        var tag = text.slice(i + 1, close);
+        if (tag.charAt(0) === '/') depth = Math.max(0, depth - 1);
+        else if (tag.charAt(tag.length - 1) !== '/' && !/^(br|hr|img|wbr)\b/i.test(tag)) depth++;
+        i = close + 1;
+        continue;
+      }
+      if (!depth && (CJK_STOPS.indexOf(ch) >= 0 || STOPS.indexOf(ch) >= 0)) {
+        var j = i + 1;
+        while (j < n && (CLOSERS.indexOf(text.charAt(j)) >= 0 || STOPS.indexOf(text.charAt(j)) >= 0)) j++;
+        var cjk = CJK_STOPS.indexOf(ch) >= 0;
+        if (cjk || j >= n || /\s/.test(text.charAt(j))) {
+          out.push(text.slice(start, j).trim());
+          while (j < n && /\s/.test(text.charAt(j))) j++;
+          start = j;
+          i = j;
+          continue;
+        }
+      }
+      i++;
+    }
+    if (start < n && text.slice(start).trim()) out.push(text.slice(start).trim());
+    return out;
+  }
+  function splitLead(text) {
+    var cjk = (text.match(/[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g) || []).length > text.length * 0.3;
+    var limit = cjk ? 110 : 240;
+    if (text.length <= limit + 60) return null;
+    var paras = text.split(/\n{2,}/);
+    var first = sentences(paras[0]);
+    if (first.length < 2 && paras.length < 2) return null;
+    var lead = first[0], k = 1;
+    while (k < first.length && ((lead.length + 1 + first[k].length) <= limit || lead.length < limit * 0.4)) { lead += (cjk ? '' : ' ') + first[k]; k++; }
+    var rest = first.slice(k).join(cjk ? '' : ' ');
+    var tail = paras.slice(1).join('\n\n');
+    rest = rest && tail ? rest + '\n\n' + tail : (rest || tail);
+    if (!rest || rest.length < 40) return null;
+    return { lead: lead, rest: rest };
+  }
+
   function renderSlide(card, ctx) {
     var t = ctx.t;
     var o = el('div', 'deck__slide-overlay pack-overlay');
@@ -89,9 +140,10 @@
     if (card.caption) o.appendChild(el('p', 'deck__caption', inline(ctx.md(card.caption))));
     if (card.equation_html && ctx.native) o.appendChild(el('div', 'deck__eq', card.equation_html));
     if (card.body) {
-      var body = el('div', 'deck__body pack-body', ctx.md(card.body));
+      var parts = splitLead(ctx.tx(card.body));
+      var body = el('div', 'deck__body pack-body', parts ? ctx.md(parts.lead) + '<div class="pack-body__rest">' + ctx.md(parts.rest) + '</div>' : ctx.md(card.body));
       o.appendChild(body);
-      if (body.textContent.trim().length > 220) {
+      if (parts) {
         body.classList.add('is-collapsed');
         var more = el('button', 'deck__more pack-more', esc(t('more')));
         more.type = 'button';

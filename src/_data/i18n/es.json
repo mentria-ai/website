@@ -3073,7 +3073,9 @@
     "remove_course_confirm": "¿Quitar «{title}» y todos sus paquetes de este dispositivo?",
     "imported_course": "Importado «{title}»: {n} paquetes.",
     "single_packs": "Paquetes sueltos",
-    "show_all_packs": "Mostrar los {n} paquetes"
+    "show_all_packs": "Mostrar los {n} paquetes",
+    "next_pack": "Siguiente paquete",
+    "finish_stats_read": "{seen} de {total} tarjetas leídas"
   },
   "stream": {
     "hero_title": "Un feed que enseña.",

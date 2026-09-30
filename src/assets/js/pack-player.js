@@ -18,6 +18,7 @@
   var libraryHref = localePrefix + '/learn/';
 
   var pack = null, native = false, order = [], byId = {}, sectionOf = {}, current = 0, mode = 'quiz', progress = null;
+  var importedRow = null, nextInfo = null, finishRefresh = null;
   var BUDGET = 10;
   function renderMode() { return mode === 'read' ? 'read' : 'quiz'; }
   var slides = [], segs = [], stage, progressBar, liveEl, hint, modeWrap, secLabel, shareBtn;
@@ -30,7 +31,7 @@
     }
     var id = new URLSearchParams(location.search).get('id');
     if (!id) return Promise.resolve(null);
-    return P.get(id).then(function (row) { return row ? row.pack : null; });
+    return P.get(id).then(function (row) { importedRow = row || null; return row ? row.pack : null; });
   }
 
   function notFound() {
@@ -69,6 +70,8 @@
     mode = avail.indexOf(progress.mode) >= 0 ? progress.mode : (avail.indexOf('quiz') >= 0 ? 'quiz' : 'read');
     root.innerHTML = '';
     root.dataset.mode = mode;
+    if (pack.cover) root.style.setProperty('--pack-cover', 'url("' + String(pack.cover).replace(/"/g, '%22') + '")');
+    findNext();
 
     progressBar = el('div', 'deck__progress');
     progressBar.setAttribute('role', 'progressbar');
@@ -177,6 +180,27 @@
     root.dataset.mode = mode;
   }
 
+  function findNext() {
+    var inline = document.getElementById('pack-next');
+    if (inline) {
+      try {
+        var n = JSON.parse(inline.textContent);
+        nextInfo = { title: n.title, cover: n.cover, href: localePrefix + '/learn/' + n.id + '/' };
+      } catch (_) {}
+      return;
+    }
+    var cid = P.courseOf(importedRow);
+    if (!cid) return;
+    var at = importedRow.course.order || 0;
+    P.list().then(function (rows) {
+      var after = rows.filter(function (r) { return P.courseOf(r) === cid && (r.course.order || 0) > at; })
+        .sort(function (a, b) { return (a.course.order || 0) - (b.course.order || 0); })[0];
+      if (!after) return;
+      nextInfo = { title: after.title, cover: after.cover, href: localePrefix + '/learn/play/?id=' + encodeURIComponent(after.id) };
+      if (finishRefresh) finishRefresh();
+    });
+  }
+
   function renderFinish() {
     var s = el('article', 'deck__slide pack-slide pack-slide--finish');
     s.dataset.idx = String(order.length);
@@ -185,6 +209,9 @@
     p.appendChild(el('h2', 'pack-card__title', esc(tx(pack.title))));
     var stats = el('p', 'pack-card__stats');
     p.appendChild(stats);
+    var up = el('a', 'pack-next');
+    up.hidden = true;
+    p.appendChild(up);
     var again = el('button', 'pack-btn pack-btn--primary', esc(t('restart')));
     again.type = 'button';
     again.addEventListener('click', function () { if (mode === 'review' || mode === 'budget') setMode('quiz', true); else { rebuildOrder(); go(0); } });
@@ -200,9 +227,22 @@
     var note = el('p', 'pack-card__text');
     note.hidden = true;
     p.insertBefore(note, stats);
+    function paintNext() {
+      if (!nextInfo) return;
+      up.href = nextInfo.href;
+      up.innerHTML = (nextInfo.cover ? '<img class="pack-next__img" src="' + esc(nextInfo.cover) + '" alt="" loading="lazy" decoding="async">' : '') +
+        '<span class="pack-next__text"><span class="pack-next__k">' + esc(t('next_pack')) + '</span><span class="pack-next__t">' + esc(tx(nextInfo.title)) + '</span></span>' +
+        '<span class="pack-next__go" aria-hidden="true">→</span>';
+      up.hidden = false;
+      again.className = 'pack-btn';
+    }
+    finishRefresh = paintNext;
+    paintNext();
     s.addEventListener('pack:enter', function () {
       var sum = P.summary(pack, progress);
-      stats.textContent = t('finish_stats', { seen: sum.seen, total: sum.total, right: sum.right, wrong: sum.wrong });
+      stats.textContent = mode === 'read'
+        ? t('finish_stats_read', { seen: sum.seen, total: sum.total })
+        : t('finish_stats', { seen: sum.seen, total: sum.total, right: sum.right, wrong: sum.wrong });
       note.hidden = !(mode === 'review' && !order.length) && !(mode === 'budget');
       note.textContent = mode === 'review' && !order.length ? t('nothing_to_review') : (mode === 'budget' ? t('budget_done') : '');
       review.hidden = !sum.wrong || mode === 'review';
@@ -243,9 +283,19 @@
     });
   }
 
+  function warm(k, high) {
+    var s = slides[k];
+    var img = s && s.querySelector('img.deck__slide-img, img.pack-image__img');
+    if (!img) return;
+    if (img.loading === 'lazy') img.loading = 'eager';
+    if (high && 'fetchPriority' in img) img.fetchPriority = 'high';
+    if (!high) img.dataset.warm = '1';
+  }
+
   function go(i, silent) {
     if (i < 0 || i > order.length) return;
     current = i;
+    warm(i, true); warm(i + 1); warm(i + 2);
     slides.forEach(function (s, k) { s.classList.toggle('is-active', k === i); });
     var s = slides[i];
     if (i < order.length) {
@@ -267,7 +317,7 @@
     try { target.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
     try { s.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
     if (hint && (!silent || (i < order.length && byId[order[i]].type === 'canvas'))) hint.classList.add('is-fading');
-    var focusable = s.querySelector('input, button:not(.deck__tap):not(.pack-more):not([disabled])');
+    var focusable = s.querySelector('.pack-next:not([hidden])') || s.querySelector('input, button:not(.deck__tap):not(.pack-more):not([disabled])');
     if (focusable && !silent && document.activeElement && document.activeElement.tagName !== 'INPUT') { try { focusable.focus({ preventScroll: true }); } catch (_) {} }
   }
 

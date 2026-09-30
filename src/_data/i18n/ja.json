@@ -3073,7 +3073,9 @@
     "remove_course_confirm": "「{title}」とそのすべてのパックをこの端末から削除しますか？",
     "imported_course": "「{title}」を取り込みました: {n} パック。",
     "single_packs": "単体のパック",
-    "show_all_packs": "{n} パックをすべて表示"
+    "show_all_packs": "{n} パックをすべて表示",
+    "next_pack": "次のパック",
+    "finish_stats_read": "{total} 枚中 {seen} 枚を読みました"
   },
   "stream": {
     "hero_title": "学べるフィード。",

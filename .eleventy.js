@@ -2,7 +2,7 @@ const { execSync } = require("child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const toolsCatalog = require("./src/_data/tools.json");
+const toolsCatalog = require("./src/_data/tools.js");
 const chapterCatalog = require("./src/_data/chapter_list.json");
 
 module.exports = function(eleventyConfig) {

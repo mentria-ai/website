@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const locales = require("./locales.js");
-const tools = require("./tools.json");
+const tools = require("./tools.js");
 const chapters = require("./chapter_list.json");
 
 const I18N_DIR = path.join(__dirname, "i18n");

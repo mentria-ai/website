@@ -1,4 +1,4 @@
-const tools = require("./tools.json");
+const tools = require("./tools.js");
 const deepcuts = require("./deepcuts.json");
 
 module.exports = () => {

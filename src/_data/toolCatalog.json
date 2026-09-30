@@ -143,6 +143,7 @@
   },
   {
     "slug": "forge",
+    "held": true,
     "title": "Forge",
     "summary": "Describe a 3D scene and the on-device 27B model writes it in three.js, renders it in a sandbox, checks it and repairs it once.",
     "category": "AI",

@@ -183,7 +183,8 @@
       "paused": "一時停止中",
       "steps": "{n} 歩",
       "tap_resume": "タップしてカウントを続ける"
-    }
+    },
+    "close_tool": "ツールを閉じる"
   },
   "home": {
     "cli": {

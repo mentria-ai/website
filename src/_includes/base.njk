@@ -784,6 +784,21 @@
           if (frame.classList.contains(FS)) withTransition(function () { exit(); });
           else withTransition(function () { enter(frame); });
         });
+        document.addEventListener('click', function (e) {
+          var btn = e.target.closest && e.target.closest('[data-action="close-tool"]');
+          if (!btn) return;
+          e.preventDefault();
+          var here = location.pathname, ref = null;
+          try { ref = document.referrer ? new URL(document.referrer) : null; } catch (_) { ref = null; }
+          if (ref && ref.origin === location.origin && ref.pathname !== here && history.length > 1) {
+            var gone = false;
+            window.addEventListener('pagehide', function () { gone = true; }, { once: true });
+            history.back();
+            setTimeout(function () { if (!gone && location.pathname === here) location.href = ref.href; }, 800);
+          } else {
+            location.href = ((window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.prefix) || '') + '/tools/';
+          }
+        });
         document.addEventListener('keydown', function (e) {
           if (e.key !== 'Escape' || !activeFrame()) return;
           if (document.querySelector('.m-modal:not([hidden]), .m-palette:not([hidden]), .hero--peek')) return;

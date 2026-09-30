@@ -183,7 +183,8 @@
       "paused": "En pause",
       "steps": "{n} pas",
       "tap_resume": "Touchez pour continuer à compter"
-    }
+    },
+    "close_tool": "Fermer l’outil"
   },
   "home": {
     "cli": {

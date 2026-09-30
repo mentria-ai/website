@@ -183,7 +183,8 @@
       "paused": "Paused",
       "steps": "{n} steps",
       "tap_resume": "Tap to keep counting"
-    }
+    },
+    "close_tool": "Close tool"
   },
   "home": {
     "cli": {

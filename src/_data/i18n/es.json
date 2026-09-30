@@ -183,7 +183,8 @@
       "paused": "En pausa",
       "steps": "{n} pasos",
       "tap_resume": "Toca para seguir contando"
-    }
+    },
+    "close_tool": "Cerrar herramienta"
   },
   "home": {
     "cli": {

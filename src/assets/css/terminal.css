@@ -141,6 +141,10 @@ a.terminal-frame__dot--back::after {
 }
 a.terminal-frame__dot--back:hover { filter: brightness(1.25); transform: scale(1.15); }
 a.terminal-frame__dot--back:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: 2px; }
+button.terminal-frame__dot--close { border: none; padding: 0; cursor: pointer; position: relative; transition: filter 0.15s ease, transform 0.15s ease; }
+button.terminal-frame__dot--close::after { content: ''; position: absolute; inset: -8px -3px -8px -8px; }
+button.terminal-frame__dot--close:hover { filter: brightness(1.25); transform: scale(1.15); }
+button.terminal-frame__dot--close:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: 2px; }
 
 body.is-fullscreen-tool .terminal-frame--fullscreen {
   position: fixed;
@@ -460,6 +464,10 @@ body.is-fullscreen-tool .terminal-frame--fullscreen .qn-editor__textarea {
   font-size: 0.75rem;
   color: var(--term-muted);
   margin-left: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .terminal-frame__help {

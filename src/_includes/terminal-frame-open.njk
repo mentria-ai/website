@@ -4,7 +4,7 @@
             {% if terminalBackHref %}
             <a class="terminal-frame__dot terminal-frame__dot--red terminal-frame__dot--back" href="{{ terminalBackHref }}" aria-label="{{ 'common.back' | t }}" title="{{ 'common.back' | t }}"></a>
             {% else %}
-            <span class="terminal-frame__dot terminal-frame__dot--red"></span>
+            <button type="button" class="terminal-frame__dot terminal-frame__dot--red terminal-frame__dot--close" data-action="close-tool" aria-label="{{ 'common.close_tool' | t }}" title="{{ 'common.close_tool' | t }}"></button>
             {% endif %}
             {% if terminalMini %}
             <button type="button" class="terminal-frame__dot terminal-frame__dot--yellow terminal-frame__dot--mini" data-mini="{{ terminalMini }}" aria-label="{{ 'common.mini.minimize' | t }}" title="{{ 'common.mini.minimize' | t }}"></button>
@@ -13,7 +13,10 @@
             {% endif %}
             <button type="button" class="terminal-frame__dot terminal-frame__dot--green" data-action="toggle-fullscreen" aria-pressed="false" aria-label="{{ 'common.toggle_fullscreen' | t }}" title="{{ 'common.toggle_fullscreen' | t }}"></button>
         </div>
-        {% if terminalTitle %}
+        {% set frameName = "tools." + page.fileSlug + ".title" %}
+        {% if frameName | hasKey %}
+        <span class="terminal-frame__filename">{{ frameName | t }}</span>
+        {% elif terminalTitle %}
         <span class="terminal-frame__filename">{{ terminalTitle }}</span>
         {% endif %}
         {% if terminalHelpId %}

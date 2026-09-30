@@ -1,0 +1,106 @@
+---
+layout: base.njk
+pagination:
+  data: extensionsLocalized
+  size: 1
+  alias: pair
+permalink: "{{ pair.locale.pathPrefix }}/extensions/{{ pair.ext.id }}/index.html"
+eleventyExcludeFromSitemap: true
+eleventyComputed:
+  lang: "{{ pair.locale.code }}"
+  title: "{{ pair.ext.name }} · {{ 'store.kind' | t }}"
+  description: "{{ ('tool.ext_gallery.desc.' + pair.ext.id) | t }}"
+---
+<link rel="stylesheet" href="/assets/css/store.css?v={{ buildHash }}">
+{% set ext = pair.ext %}
+{% set prefix = pair.locale.pathPrefix %}
+{% set cardPrefix = prefix %}
+<section class="hero xs-hero xs-hero--app">
+  <p class="eyebrow eyebrow--crumbs eyebrow--start"><a class="eyebrow__link" href="{{ prefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ prefix }}/extensions/">extensions</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">{{ ext.id }}</span></p>
+  <div class="xs-head">
+    <span class="xs-head__icon" aria-hidden="true">{{ ext.icon }}</span>
+    <div class="xs-head__text">
+      <h1 class="xs-head__name">{{ ext.name }}</h1>
+      <p class="xs-head__by">{% tvar "store.by", "author", ext.author %}</p>
+      <div class="xs-head__actions">
+        <a class="m-btn m-btn--primary" id="xs-add" href="{{ prefix }}/tools/extensions/?add={{ ext.id }}">{{ "store.add" | t }}</a>
+        <a class="m-btn m-btn--primary" id="xs-open" href="{{ prefix }}/tools/extensions/run/?id={{ ext.id }}" hidden>{{ "tool.ext_gallery.btn_open" | t }}</a>
+        <span class="xs-head__state" id="xs-state" hidden>{{ "tool.ext_gallery.installed" | t }}</span>
+      </div>
+    </div>
+  </div>
+  <p class="xs-lede">{{ ("tool.ext_gallery.desc." + ext.id) | t }}</p>
+</section>
+
+<section class="xs-sec" aria-labelledby="xs-access">
+  <h2 class="xs-sec__h" id="xs-access">{{ "store.access_title" | t }}</h2>
+  {%- if ext.permissions.length %}
+  <dl class="xs-perms">
+    {%- for p in ext.permissions %}
+    {%- set pk = "store.perm_" + p %}
+    <div class="xs-perms__row">
+      <dt>{% if pk | hasKey %}{{ pk | t }}{% else %}{{ p }}{% endif %}</dt>
+      <dd>{% if (pk + "_desc") | hasKey %}{{ (pk + "_desc") | t }}{% endif %}</dd>
+    </div>
+    {%- endfor %}
+  </dl>
+  {%- else %}
+  <p class="xs-note">{{ "store.access_none" | t }}</p>
+  {%- endif %}
+  <p class="xs-note">{{ "store.access_trust" | t }}</p>
+</section>
+
+<section class="xs-sec" aria-labelledby="xs-info">
+  <h2 class="xs-sec__h" id="xs-info">{{ "store.info_title" | t }}</h2>
+  <dl class="xs-info">
+    <div><dt>{{ "store.info_developer" | t }}</dt><dd>{{ ext.author }}</dd></div>
+    <div><dt>{{ "store.info_version" | t }}</dt><dd>{{ ext.version }}</dd></div>
+    <div><dt>{{ "store.info_size" | t }}</dt><dd>{{ ext.kb }} KB</dd></div>
+    <div><dt>{{ "store.info_price" | t }}</dt><dd>{{ "store.free" | t }}</dd></div>
+  </dl>
+</section>
+
+{%- if extensions.length > 1 %}
+<section class="xs-sec" aria-labelledby="xs-more">
+  <h2 class="xs-sec__h" id="xs-more">{{ "store.more_title" | t }}</h2>
+  <ul class="xs-grid" role="list">
+    {%- for card in extensions %}{% if card.id != ext.id %}
+    <li>{% include "extension-card.njk" %}</li>
+    {%- endif %}{% endfor %}
+  </ul>
+</section>
+{%- endif %}
+
+<p class="xs-links"><a href="{{ prefix }}/extensions/">{{ "store.all_link" | t }}</a><a href="{{ prefix }}/tools/extensions/">{{ "store.manage_link" | t }}</a></p>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": {{ ext.name | dump | safe }},
+  "description": {{ (("tool.ext_gallery.desc." + ext.id) | t) | dump | safe }},
+  "url": "{{ site.siteUrl }}{{ page.url }}",
+  "applicationCategory": "{{ ext.schemaCategory }}",
+  "operatingSystem": "Web browser",
+  "softwareVersion": {{ ext.version | dump | safe }},
+  "fileSize": "{{ ext.kb }} KB",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Organization", "name": {{ ext.author | dump | safe }} },
+  "publisher": { "@id": "{{ site.siteUrl }}/#organization" },
+  "inLanguage": "{{ lang }}"
+}
+</script>
+<script type="module">
+const add = document.getElementById('xs-add');
+const open = document.getElementById('xs-open');
+const state = document.getElementById('xs-state');
+try {
+  const X = await import('/assets/js/mentria-extensions.js');
+  if (X.getEntry({{ ext.id | dump | safe }})) {
+    add.hidden = true;
+    open.hidden = false;
+    state.hidden = false;
+  }
+} catch (_) {}
+</script>

@@ -1,0 +1,8 @@
+[
+  { "id": "pomodoro-timer", "schemaCategory": "UtilitiesApplication" },
+  { "id": "dice-roller", "schemaCategory": "UtilitiesApplication" },
+  { "id": "image-gen", "schemaCategory": "MultimediaApplication" },
+  { "id": "story-studio", "schemaCategory": "MultimediaApplication" },
+  { "id": "forge", "schemaCategory": "DeveloperApplication", "held": true },
+  { "id": "unit-converter", "retired": true }
+]

@@ -28,6 +28,9 @@ layout: null
 {%- for pair in sourceLocalized %}
   <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/source/{{ pair.deck.id }}/</loc></url>
 {%- endfor -%}
+{%- for pair in extensionsLocalized %}
+  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/extensions/{{ pair.ext.id }}/</loc></url>
+{%- endfor -%}
 {%- for pair in chaptersLocalized %}
   <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/chapter/{{ pair.chapter.id }}/</loc></url>
 {%- endfor -%}

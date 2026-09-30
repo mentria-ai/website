@@ -1,0 +1,50 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/extensions/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tool.ext_gallery.title' | t }}"
+  description: "{{ 'store.lede' | t }}"
+---
+<link rel="stylesheet" href="/assets/css/store.css?v={{ buildHash }}">
+{% set cardPrefix = locale.pathPrefix %}
+<section class="hero xs-hero">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">extensions</span></p>
+  <h1>{{ "tool.ext_gallery.title" | t }}</h1>
+  <p class="xs-lede">{{ "store.lede" | t }}</p>
+</section>
+
+<ul class="xs-grid" role="list">
+  {%- for card in extensions %}
+  <li>{% include "extension-card.njk" %}</li>
+  {%- endfor %}
+</ul>
+
+<section class="xs-sec" aria-labelledby="xs-build">
+  <h2 class="xs-sec__h" id="xs-build">{{ "store.build_title" | t }}</h2>
+  <p class="xs-note">{{ "store.build_body" | t }}</p>
+  <p class="xs-links"><a href="{{ locale.pathPrefix }}/tools/extensions/sdk/">{{ "tools.extensions-sdk.title" | t }}</a><a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "store.manage_link" | t }}</a></p>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": {{ ("tool.ext_gallery.title" | t) | dump | safe }},
+  "description": {{ ("store.lede" | t) | dump | safe }},
+  "url": "{{ site.siteUrl }}{{ page.url }}",
+  "inLanguage": "{{ lang }}",
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+      {%- for e in extensions %}
+      { "@type": "ListItem", "position": {{ loop.index }}, "url": "{{ site.siteUrl }}{{ locale.pathPrefix }}/extensions/{{ e.id }}/", "name": {{ e.name | dump | safe }} }{% if not loop.last %},{% endif %}
+      {%- endfor %}
+    ]
+  }
+}
+</script>

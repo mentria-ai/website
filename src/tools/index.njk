@@ -17,29 +17,51 @@ eleventyComputed:
 </section>
 
 {% set toolList = tools | default([]) %}
+{%- set groups = [
+  ["Everyday", "home.launcher.everyday"], ["AI", "home.launcher.ai"],
+  ["Games", "home.launcher.games"], ["Create", "home.launcher.create"],
+  ["Dev", "home.launcher.dev"]
+] -%}
 {% if toolList.length %}
-<div class="tools-filters" id="tools-filters">
-    <button class="tools-filter is-active" type="button" data-shelf="all">{{ "tool.search.type_all" | t }}</button>
-    <button class="tools-filter" type="button" data-shelf="tools">{{ "about.shelf_tools" | t }}</button>
-    <button class="tools-filter" type="button" data-shelf="games">{{ "about.shelf_games" | t }}</button>
-    <button class="tools-filter" type="button" data-shelf="ai">{{ "about.shelf_ai" | t }}</button>
+<div class="tools-bar">
+    <div class="tools-search" role="search">
+        <label class="sr-only" for="tools-q">{{ "tools_page.search_label" | t }}</label>
+        <input type="search" id="tools-q" class="tools-search__input" placeholder="{{ 'tools_page.search_placeholder' | t }}" autocomplete="off" spellcheck="false" enterkeyhint="search">
+    </div>
+    <div class="tools-filters" id="tools-filters">
+        <button class="tools-filter is-active" type="button" data-shelf="all">{{ "tool.search.type_all" | t }}</button>
+        <button class="tools-filter" type="button" data-shelf="tools">{{ "about.shelf_tools" | t }}</button>
+        <button class="tools-filter" type="button" data-shelf="games">{{ "about.shelf_games" | t }}</button>
+        <button class="tools-filter" type="button" data-shelf="ai">{{ "about.shelf_ai" | t }}</button>
+    </div>
 </div>
 {{ toolIconsSvg | safe }}
-<div class="tools-listing">
-    <div class="tools-listing__header">
-        <span>{{ "tools_page.header.category" | t }}</span>
-        <span>{{ "tools_page.header.name" | t }}</span>
-        <span>{{ "tools_page.header.summary" | t }}</span>
+<section class="tools-group tools-group--recent" id="tools-recent" aria-labelledby="tools-recent-h" hidden>
+    <h2 class="tools-group__h" id="tools-recent-h">{{ "home.launcher.recents" | t }}</h2>
+    <div class="tools-grid" id="tools-recent-grid"></div>
+</section>
+{% for g in groups %}
+{% set members = (toolList | groupby("group"))[g[0]] %}
+{% if members and members.length %}
+<section class="tools-group" data-group="{{ g[0] }}" aria-labelledby="tools-g-{{ g[0] | lower }}">
+    <h2 class="tools-group__h" id="tools-g-{{ g[0] | lower }}">{{ g[1] | t }}</h2>
+    <div class="tools-grid">
+        {% for tool in members %}
+        {% set shelf = "games" if tool.category == "Game" else ("ai" if tool.category == "AI" else "tools") %}
+        <a class="tool-tile" data-slug="{{ tool.slug }}" data-shelf="{{ shelf }}"{% if tool.requires %} data-requires="{{ tool.requires }}"{% endif %} href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
+            <span class="tool-tile__icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><use href="#tool-{{ tool.slug }}"></use></svg></span>
+            <span class="tool-tile__text">
+                <span class="tool-tile__name">{{ ("tools." + tool.slug + ".title") | t }}{% if tool.added | isNew %}<span class="tool-tile__new">{{ "home.launcher.new_badge" | t }}</span>{% endif %}</span>
+                <span class="tool-tile__cat">{{ ("category." + tool.category) | t }}</span>
+                <span class="tool-tile__sum">{{ ("tools." + tool.slug + ".lede") | t }}</span>
+            </span>
+        </a>
+        {% endfor %}
     </div>
-    {% for tool in toolList %}
-    {% set shelf = "games" if tool.category == "Game" else ("ai" if tool.category == "AI" else "tools") %}
-    <div class="tools-listing__row" data-shelf="{{ shelf }}" style="--i: {{ loop.index0 }}"{% if tool.requires %} data-requires="{{ tool.requires }}"{% endif %}>
-        <span class="tools-listing__category">{{ ("category." + tool.category) | t }}</span>
-        <span class="tools-listing__name"><svg class="tools-listing__icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#tool-{{ tool.slug }}"></use></svg><a href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">{{ ("tools." + tool.slug + ".title") | t }}</a></span>
-        <span class="tools-listing__summary">{{ ("tools." + tool.slug + ".lede") | t }}</span>
-    </div>
-    {% endfor %}
-</div>
+</section>
+{% endif %}
+{% endfor %}
+<p class="tools-none" id="tools-none" role="status" hidden></p>
 {% else %}
 <div style="margin-top: 2rem; font-family: var(--font-mono); color: var(--term-muted);">
     <p>{{ "tools_page.empty_cmd" | t }}</p>
@@ -48,38 +70,98 @@ eleventyComputed:
 {% endif %}
 
 <style>
-  .tools-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 2rem; }
-  .tools-filter { background: transparent; border: 1px solid var(--term-border); color: var(--term-muted); font-family: var(--font-mono); font-size: 0.8rem; padding: 5px 14px; border-radius: 999px; cursor: pointer; transition: all 120ms; }
+  .tools-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; margin-top: 2rem; }
+  .tools-search { flex: 1 1 260px; max-width: 420px; }
+  .tools-search__input { width: 100%; box-sizing: border-box; font: inherit; font-family: var(--font-mono); font-size: 0.9rem; padding: 0.6rem 0.85rem; border-radius: var(--radius-md, 10px); border: 1px solid var(--term-border-strong); background: var(--term-bg-raised); color: var(--term-fg); }
+  .tools-search__input:focus { outline: none; border-color: var(--syn-cyan); }
+  .tools-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tools-filter { background: transparent; border: 1px solid var(--term-border); color: var(--term-muted); font-family: var(--font-mono); font-size: 0.8rem; padding: 5px 14px; border-radius: 999px; cursor: pointer; transition: color 120ms, border-color 120ms, background 120ms; }
   .tools-filter:hover { color: var(--term-fg); border-color: var(--term-border-strong); }
   .tools-filter.is-active { color: var(--syn-cyan); border-color: var(--syn-cyan); background: var(--cyan-8); }
-  .tools-filters + .tools-listing { margin-top: 0.75rem; }
-  .tools-listing__row[hidden] { display: none; }
+  .tools-group { margin-top: 2rem; }
+  .tools-group[hidden] { display: none; }
+  .tools-group__h { margin: 0 0 0.75rem; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--term-muted); }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .tool-tile { display: flex; align-items: flex-start; gap: 12px; min-width: 0; padding: 12px; border: 1px solid var(--term-border); border-radius: var(--radius-lg, 14px); background: var(--term-bg-raised); color: var(--term-fg); text-decoration: none; transition: border-color 120ms ease, transform 120ms ease; }
+  .tool-tile[hidden] { display: none; }
+  .tool-tile:hover { border-color: var(--term-border-strong); }
+  .tool-tile:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: 2px; }
+  .tool-tile__icon { flex: 0 0 auto; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; border: 1px solid var(--term-border-strong); background: var(--term-bg); }
+  .tool-tile__icon svg { width: 34px; height: 34px; }
+  .tool-tile__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .tool-tile__name { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-weight: 600; font-size: 0.95rem; line-height: 1.25; color: var(--syn-cyan); }
+  .tool-tile__new { font-family: var(--font-mono); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; color: #0b0e11; background: var(--syn-cyan); padding: 2px 6px; border-radius: 999px; }
+  .tool-tile__cat { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--syn-purple, #a78bfa); }
+  .tool-tile__sum { font-size: 0.8rem; line-height: 1.4; color: var(--term-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2; overflow: hidden; }
+  .tools-none { margin-top: 1.5rem; font-family: var(--font-mono); color: var(--term-muted); }
+  .tools-none[hidden] { display: none; }
+  @media (max-width: 560px) {
+    .tools-grid { grid-template-columns: 1fr; gap: 8px; }
+    .tool-tile { padding: 10px; }
+  }
 </style>
 
 <script>
 (function () {
   var filters = document.getElementById('tools-filters');
-  if (!filters) return;
-  var rows = Array.prototype.slice.call(document.querySelectorAll('.tools-listing__row'));
+  var q = document.getElementById('tools-q');
+  if (!filters || !q) return;
+  var tiles = Array.prototype.slice.call(document.querySelectorAll('.tools-group:not(.tools-group--recent) .tool-tile'));
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.tools-group:not(.tools-group--recent)'));
+  var recent = document.getElementById('tools-recent');
+  var recentGrid = document.getElementById('tools-recent-grid');
+  var none = document.getElementById('tools-none');
+  var NO_MATCH = {{ ("tools_page.no_match" | t) | dump | safe }};
   var valid = { all: 1, tools: 1, games: 1, ai: 1 };
-  function apply(shelf) {
-    if (!valid[shelf]) shelf = 'all';
-    rows.forEach(function (r) {
-      r.hidden = !(shelf === 'all' || r.getAttribute('data-shelf') === shelf);
+  var shelf = 'all';
+  function norm(v) { return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); }
+  var text = tiles.map(function (t) { return norm(t.textContent); });
+
+  function buildRecent() {
+    var usage = {};
+    try { usage = JSON.parse(localStorage.getItem('mentria_tool_usage')) || {}; } catch (_) {}
+    var now = Date.now();
+    function score(e) { return (e.count || 0) + 6 / (1 + (now - (e.last || 0)) / 86400000); }
+    var bySlug = {};
+    tiles.forEach(function (t) { bySlug[t.getAttribute('data-slug')] = t; });
+    var slugs = Object.keys(usage).filter(function (s) { return bySlug[s]; }).sort(function (a, b) { return score(usage[b]) - score(usage[a]); }).slice(0, 6);
+    slugs.forEach(function (s) { recentGrid.appendChild(bySlug[s].cloneNode(true)); });
+    return slugs.length > 0;
+  }
+  var hasRecent = buildRecent();
+
+  function apply() {
+    var v = norm(q.value);
+    var hits = 0;
+    tiles.forEach(function (t, i) {
+      var ok = (shelf === 'all' || t.getAttribute('data-shelf') === shelf) && (!v || text[i].indexOf(v) >= 0);
+      t.hidden = !ok;
+      if (ok) hits++;
     });
+    groups.forEach(function (g) { g.hidden = !g.querySelector('.tool-tile:not([hidden])'); });
+    recent.hidden = !hasRecent || !!v || shelf !== 'all';
+    none.hidden = !v || hits > 0;
+    none.textContent = none.hidden ? '' : NO_MATCH.split('{q}').join(q.value.trim());
     Array.prototype.forEach.call(filters.querySelectorAll('[data-shelf]'), function (b) {
       var on = b.getAttribute('data-shelf') === shelf;
       b.classList.toggle('is-active', on);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
+  }
+  function setShelf(s) {
+    shelf = valid[s] ? s : 'all';
     var url = new URL(location.href);
     if (shelf !== 'all') url.searchParams.set('shelf', shelf); else url.searchParams.delete('shelf');
     history.replaceState(null, '', url);
+    apply();
   }
   filters.addEventListener('click', function (e) {
     var b = e.target.closest('[data-shelf]');
-    if (b) apply(b.getAttribute('data-shelf'));
+    if (b) setShelf(b.getAttribute('data-shelf'));
   });
-  apply(new URLSearchParams(location.search).get('shelf') || 'all');
+  var timer = 0;
+  q.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(apply, 100); });
+  q.addEventListener('keydown', function (e) { if (e.key === 'Escape' && q.value) { q.value = ''; apply(); } });
+  setShelf(new URLSearchParams(location.search).get('shelf') || 'all');
 })();
 </script>

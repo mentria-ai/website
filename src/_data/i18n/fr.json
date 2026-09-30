@@ -237,7 +237,7 @@
     }
   },
   "tools_page": {
-    "title": "Outils Utilitaires",
+    "title": "Outils",
     "lede": "Des utilitaires simples et ciblés qui fonctionnent hors ligne. Chacun fait une chose bien.",
     "header": {
       "category": "catégorie",
@@ -247,7 +247,10 @@
     "empty_cmd": "$ ls -la tools/",
     "empty_msg": "> aucun outil trouvé.",
     "related_heading": "Plus d'outils",
-    "related_all": "Tous les outils"
+    "related_all": "Tous les outils",
+    "search_label": "Rechercher un outil",
+    "search_placeholder": "Rechercher un outil",
+    "no_match": "Aucun outil ne correspond à « {q} »."
   },
   "feed_page": {
     "title": "Fil",

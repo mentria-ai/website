@@ -237,7 +237,7 @@
     }
   },
   "tools_page": {
-    "title": "Utility Tools",
+    "title": "Tools",
     "lede": "Simple, focused utilities that work offline. Each one does one thing well.",
     "header": {
       "category": "category",
@@ -247,7 +247,10 @@
     "empty_cmd": "$ ls -la tools/",
     "empty_msg": "> no tools found.",
     "related_heading": "More tools",
-    "related_all": "All tools"
+    "related_all": "All tools",
+    "search_label": "Search tools",
+    "search_placeholder": "Search tools",
+    "no_match": "No tools match “{q}”."
   },
   "feed_page": {
     "title": "Feed",

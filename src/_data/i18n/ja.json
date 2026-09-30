@@ -3075,7 +3075,12 @@
     "single_packs": "単体のパック",
     "show_all_packs": "{n} パックをすべて表示",
     "next_pack": "次のパック",
-    "finish_stats_read": "{total} 枚中 {seen} 枚を読みました"
+    "finish_stats_read": "{total} 枚中 {seen} 枚を読みました",
+    "search_label": "パックを検索",
+    "search_placeholder": "タイトルでパックを検索",
+    "no_match": "「{q}」に一致するパックはありません。",
+    "see_all": "すべて見る（{n}）",
+    "show_less": "折りたたむ"
   },
   "stream": {
     "hero_title": "学べるフィード。",

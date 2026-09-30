@@ -3075,7 +3075,12 @@
     "single_packs": "Single packs",
     "show_all_packs": "Show all {n} packs",
     "next_pack": "Next pack",
-    "finish_stats_read": "{seen} of {total} cards read"
+    "finish_stats_read": "{seen} of {total} cards read",
+    "search_label": "Search packs",
+    "search_placeholder": "Search packs by title",
+    "no_match": "No packs match “{q}”.",
+    "see_all": "See all {n}",
+    "show_less": "Show less"
   },
   "stream": {
     "hero_title": "A feed that teaches.",

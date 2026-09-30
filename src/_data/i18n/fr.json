@@ -3075,7 +3075,12 @@
     "single_packs": "Packs isolés",
     "show_all_packs": "Afficher les {n} packs",
     "next_pack": "Pack suivant",
-    "finish_stats_read": "{seen} cartes lues sur {total}"
+    "finish_stats_read": "{seen} cartes lues sur {total}",
+    "search_label": "Rechercher des packs",
+    "search_placeholder": "Rechercher un pack par titre",
+    "no_match": "Aucun pack ne correspond à « {q} ».",
+    "see_all": "Voir les {n}",
+    "show_less": "Voir moins"
   },
   "stream": {
     "hero_title": "Un fil qui enseigne.",

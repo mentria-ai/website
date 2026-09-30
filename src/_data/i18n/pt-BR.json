@@ -3075,7 +3075,12 @@
     "single_packs": "Pacotes avulsos",
     "show_all_packs": "Mostrar todos os {n} pacotes",
     "next_pack": "Próximo pacote",
-    "finish_stats_read": "{seen} de {total} cartões lidos"
+    "finish_stats_read": "{seen} de {total} cartões lidos",
+    "search_label": "Buscar pacotes",
+    "search_placeholder": "Busque pacotes pelo título",
+    "no_match": "Nenhum pacote corresponde a “{q}”.",
+    "see_all": "Ver todos os {n}",
+    "show_less": "Ver menos"
   },
   "stream": {
     "hero_title": "Um feed que ensina.",

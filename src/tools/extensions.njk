@@ -84,6 +84,7 @@ const CATALOG = [
   { id: "story-studio",   desc: {{ ("tool.ext_gallery.desc.story-studio"   | t) | dump | safe }} }
 ];
 const CATALOG_URL = 'https://mentria-ai.github.io/extensions/catalog.json';
+const RETIRED = ['unit-converter'];
 let remoteCatalog = null;
 async function loadRemoteCatalog() {
   try {
@@ -91,7 +92,7 @@ async function loadRemoteCatalog() {
     if (!res.ok) return null;
     const c = await res.json();
     if (!c || !Array.isArray(c.extensions)) return null;
-    for (const e of c.extensions) if (!CATALOG.some((k) => k.id === e.id)) CATALOG.push({ id: e.id, desc: e.summary || '' });
+    for (const e of c.extensions) if (RETIRED.indexOf(e.id) === -1 && !CATALOG.some((k) => k.id === e.id)) CATALOG.push({ id: e.id, desc: e.summary || '' });
     return c;
   } catch (_) { return null; }
 }

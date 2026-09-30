@@ -61,6 +61,23 @@ eleventyComputed:
 </section>
 {% endif %}
 {% endfor %}
+{% if extensions.length %}
+<section class="tools-group" data-group="Extensions" aria-labelledby="tools-g-extensions">
+    <h2 class="tools-group__h" id="tools-g-extensions"><a class="tools-group__link" href="{{ locale.pathPrefix }}/extensions/">{{ "tool.ext_gallery.title" | t }}</a></h2>
+    <div class="tools-grid">
+        {% for e in extensions %}
+        <a class="tool-tile" data-slug="ext-{{ e.id }}" data-shelf="tools" href="{{ locale.pathPrefix }}/extensions/{{ e.id }}/">
+            <span class="tool-tile__icon tool-tile__icon--emoji" aria-hidden="true">{{ e.icon }}</span>
+            <span class="tool-tile__text">
+                <span class="tool-tile__name">{{ e.name }}</span>
+                <span class="tool-tile__cat">{{ "store.kind" | t }}</span>
+                <span class="tool-tile__sum">{{ ("tool.ext_gallery.desc." + e.id) | t }}</span>
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 <p class="tools-none" id="tools-none" role="status" hidden></p>
 {% else %}
 <div style="margin-top: 2rem; font-family: var(--font-mono); color: var(--term-muted);">
@@ -88,6 +105,9 @@ eleventyComputed:
   .tool-tile:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: 2px; }
   .tool-tile__icon { flex: 0 0 auto; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; border: 1px solid var(--term-border-strong); background: var(--term-bg); }
   .tool-tile__icon svg { width: 34px; height: 34px; }
+  .tool-tile__icon--emoji { font-size: 28px; line-height: 1; }
+  .tools-group__link { color: inherit; text-decoration: none; }
+  .tools-group__link:hover, .tools-group__link:focus-visible { color: var(--syn-cyan); text-decoration: underline; }
   .tool-tile__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
   .tool-tile__name { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-weight: 600; font-size: 0.95rem; line-height: 1.25; color: var(--syn-cyan); }
   .tool-tile__new { font-family: var(--font-mono); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; color: #0b0e11; background: var(--syn-cyan); padding: 2px 6px; border-radius: 999px; }

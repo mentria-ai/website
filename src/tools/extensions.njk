@@ -77,13 +77,12 @@ const COPY = {
   galErrLoad:    {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }}
 };
 const CATALOG = [
-  { id: "pomodoro-timer", desc: {{ ("tool.ext_gallery.desc.pomodoro-timer" | t) | dump | safe }} },
-  { id: "dice-roller",    desc: {{ ("tool.ext_gallery.desc.dice-roller"    | t) | dump | safe }} },
-  { id: "image-gen",      desc: {{ ("tool.ext_gallery.desc.image-gen"      | t) | dump | safe }} },
-  { id: "story-studio",   desc: {{ ("tool.ext_gallery.desc.story-studio"   | t) | dump | safe }} }
+  {%- for e in extensions %}
+  { id: {{ e.id | dump | safe }}, page: true, desc: {{ (("tool.ext_gallery.desc." + e.id) | t) | dump | safe }} }{% if not loop.last %},{% endif %}
+  {%- endfor %}
 ];
 const CATALOG_URL = 'https://mentria-ai.github.io/extensions/catalog.json';
-const HIDDEN = ['unit-converter', 'forge'];
+const HIDDEN = [{% for e in extensionCatalog %}{% if e.held or e.retired %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
 let remoteCatalog = null;
 async function loadRemoteCatalog() {
   try {
@@ -294,7 +293,13 @@ function galMakeCard(entry) {
   icon.setAttribute('aria-hidden', 'true');
   const name = document.createElement('h3');
   name.className = 'exg__name';
-  name.textContent = entry.id;
+  let label = name;
+  if (entry.page) {
+    label = document.createElement('a');
+    label.href = PREFIX + '/extensions/' + encodeURIComponent(entry.id) + '/';
+    name.appendChild(label);
+  }
+  label.textContent = entry.id;
   head.append(icon, name);
   const desc = document.createElement('p');
   desc.className = 'exg__desc';
@@ -308,7 +313,7 @@ function galMakeCard(entry) {
   const actions = document.createElement('div');
   actions.className = 'exg__actions';
   card.append(head, desc, badges, status, actions);
-  card._parts = { icon, name, badges, status, actions };
+  card._parts = { icon, name: label, badges, status, actions };
   galGrid.appendChild(card);
   return card;
 }
@@ -400,9 +405,23 @@ refreshGallery = () => {
 remoteCatalog = await loadRemoteCatalog();
 CATALOG.forEach((entry) => {
   const card = galMakeCard(entry);
-  galCards.push({ entry, card });
-  galLoad(entry, card);
+  galCards.push({ entry, card, loaded: galLoad(entry, card) });
 });
+
+const wanted = new URLSearchParams(location.search).get('add');
+if (wanted) {
+  history.replaceState(history.state, '', location.pathname + location.hash);
+  const hit = galCards.find((g) => g.entry.id === wanted);
+  if (hit) {
+    hit.card.classList.add('exg__card--target');
+    hit.card.scrollIntoView({ block: 'center' });
+    hit.loaded.then(() => {
+      if (!hit.entry.ready || X.getEntry(wanted)) return;
+      const b = hit.card.querySelector('.exg__actions button');
+      if (b) b.click();
+    });
+  }
+}
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') { render(); }
@@ -467,6 +486,9 @@ render();
 .exg__head { display: flex; align-items: center; gap: 0.55rem; }
 .exg__icon { font-size: 1.4rem; line-height: 1; }
 .exg__name { font-size: 0.85rem; margin: 0; color: var(--term-fg); overflow-wrap: anywhere; }
+.exg__name a { color: inherit; text-decoration: none; }
+.exg__name a:hover, .exg__name a:focus-visible { color: var(--accent, #6ef3c5); text-decoration: underline; }
+.exg__card--target { border-color: var(--accent, #6ef3c5); box-shadow: 0 0 0 1px var(--accent, #6ef3c5); }
 .exg__desc { margin: 0; font-size: 0.75rem; color: var(--term-muted); line-height: 1.5; flex: 1; }
 .exg__badges { display: flex; flex-wrap: wrap; gap: 0.25rem; }
 .exg__chip { font-size: 0.62rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--term-border, #2a3138); color: var(--term-muted); }

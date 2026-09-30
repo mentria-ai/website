@@ -77,14 +77,13 @@ const COPY = {
   galErrLoad:    {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }}
 };
 const CATALOG = [
-  { id: "forge",          desc: {{ ("tool.ext_gallery.desc.forge"          | t) | dump | safe }} },
   { id: "pomodoro-timer", desc: {{ ("tool.ext_gallery.desc.pomodoro-timer" | t) | dump | safe }} },
   { id: "dice-roller",    desc: {{ ("tool.ext_gallery.desc.dice-roller"    | t) | dump | safe }} },
   { id: "image-gen",      desc: {{ ("tool.ext_gallery.desc.image-gen"      | t) | dump | safe }} },
   { id: "story-studio",   desc: {{ ("tool.ext_gallery.desc.story-studio"   | t) | dump | safe }} }
 ];
 const CATALOG_URL = 'https://mentria-ai.github.io/extensions/catalog.json';
-const RETIRED = ['unit-converter'];
+const HIDDEN = ['unit-converter', 'forge'];
 let remoteCatalog = null;
 async function loadRemoteCatalog() {
   try {
@@ -92,7 +91,7 @@ async function loadRemoteCatalog() {
     if (!res.ok) return null;
     const c = await res.json();
     if (!c || !Array.isArray(c.extensions)) return null;
-    for (const e of c.extensions) if (RETIRED.indexOf(e.id) === -1 && !CATALOG.some((k) => k.id === e.id)) CATALOG.push({ id: e.id, desc: e.summary || '' });
+    for (const e of c.extensions) if (HIDDEN.indexOf(e.id) === -1 && !CATALOG.some((k) => k.id === e.id)) CATALOG.push({ id: e.id, desc: e.summary || '' });
     return c;
   } catch (_) { return null; }
 }

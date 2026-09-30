@@ -15,6 +15,7 @@ eleventyComputed:
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 <link rel="stylesheet" href="/assets/css/pack.css?v={{ buildHash }}">
+{% for c in pair.pack.cards %}{% if c.id == pair.pack.sections[0].cards[0] and c.image %}<link rel="preload" as="image" href="{{ c.image }}" fetchpriority="high">{% endif %}{% endfor %}
 
 <div class="deck deck--pack" id="packRoot" data-prefix="{{ pair.locale.pathPrefix }}" data-pack-id="{{ pair.pack.id }}">
   <h1 class="sr-only">{{ pair.pack.title | tloc(pair.locale.code) }}</h1>
@@ -22,6 +23,7 @@ eleventyComputed:
 </div>
 
 <script type="application/json" id="pack-data">{{ (pair.pack | dump) | replace("</", "<\\/") | safe }}</script>
+{% if pair.next %}<script type="application/json" id="pack-next">{{ ({ id: pair.next.id, title: (pair.next.title | tloc(pair.locale.code)), cover: pair.next.cover, cards: pair.next.cards, minutes: pair.next.minutes } | dump) | replace("</", "<\\/") | safe }}</script>{% endif %}
 {% include "learn-i18n.njk" %}
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 <script src="/assets/js/mentria-backdrop.js?v={{ buildHash }}"></script>

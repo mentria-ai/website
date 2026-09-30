@@ -237,7 +237,7 @@
     }
   },
   "tools_page": {
-    "title": "ユーティリティツール",
+    "title": "ツール",
     "lede": "シンプルでオフラインで動作する焦点を絞ったユーティリティ。各ツールは一つのことを上手にこなします。",
     "header": {
       "category": "カテゴリ",
@@ -247,7 +247,10 @@
     "empty_cmd": "$ ls -la tools/",
     "empty_msg": "> ツールが見つかりません。",
     "related_heading": "その他のツール",
-    "related_all": "すべてのツール"
+    "related_all": "すべてのツール",
+    "search_label": "ツールを検索",
+    "search_placeholder": "ツールを検索",
+    "no_match": "「{q}」に一致するツールはありません。"
   },
   "feed_page": {
     "title": "フィード",

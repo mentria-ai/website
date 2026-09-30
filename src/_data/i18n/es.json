@@ -237,7 +237,7 @@
     }
   },
   "tools_page": {
-    "title": "Herramientas Útiles",
+    "title": "Herramientas",
     "lede": "Utilidades sencillas y enfocadas que funcionan sin conexión. Cada una hace una cosa bien.",
     "header": {
       "category": "categoría",
@@ -247,7 +247,10 @@
     "empty_cmd": "$ ls -la tools/",
     "empty_msg": "> no se encontraron herramientas.",
     "related_heading": "Más herramientas",
-    "related_all": "Todas las herramientas"
+    "related_all": "Todas las herramientas",
+    "search_label": "Buscar herramientas",
+    "search_placeholder": "Buscar herramientas",
+    "no_match": "No hay herramientas que coincidan con «{q}»."
   },
   "feed_page": {
     "title": "Feed",

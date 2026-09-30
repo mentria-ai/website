@@ -237,7 +237,7 @@
     }
   },
   "tools_page": {
-    "title": "Ferramentas Úteis",
+    "title": "Ferramentas",
     "lede": "Utilitários simples e focados que funcionam offline. Cada um faz uma coisa bem feita.",
     "header": {
       "category": "categoria",
@@ -247,7 +247,10 @@
     "empty_cmd": "$ ls -la tools/",
     "empty_msg": "> nenhuma ferramenta encontrada.",
     "related_heading": "Mais ferramentas",
-    "related_all": "Todas as ferramentas"
+    "related_all": "Todas as ferramentas",
+    "search_label": "Buscar ferramentas",
+    "search_placeholder": "Buscar ferramentas",
+    "no_match": "Nenhuma ferramenta corresponde a “{q}”."
   },
   "feed_page": {
     "title": "Feed",

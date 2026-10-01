@@ -1232,10 +1232,10 @@ export function createParticles(max){
         life: 0.7 + r() * 0.5, size: 0.016 + r() * 0.02, shape: KIND_CHUNK, gravity: 1, drag: 0.5, alpha: true,
         r: 0.05, g: 0.055, b: 0.06, a: 1, floorY: 0.012 });
     }
-    spawn({ x: center[0], y: center[1], z: center[2], life: 0.16, size: radius * 1.2, size1: radius * 3.4, shape: 3,
-      r: mint[0] * 2.6, g: mint[1] * 2.6, b: mint[2] * 2.6 });
-    spawn({ x: center[0], y: center[1], z: center[2], life: 0.10, size: radius * 1.0, size1: radius * 1.9, shape: KIND_SOFT,
-      r: mint[0] * 1.6, g: mint[1] * 1.6, b: mint[2] * 1.6 });
+    spawn({ x: center[0], y: center[1], z: center[2], life: 0.15, size: radius * 1.0, size1: radius * 2.6, shape: 3,
+      r: mint[0] * 2.0, g: mint[1] * 2.0, b: mint[2] * 2.0 });
+    spawn({ x: center[0], y: center[1], z: center[2], life: 0.09, size: radius * 0.8, size1: radius * 1.5, shape: KIND_SOFT,
+      r: mint[0] * 1.3, g: mint[1] * 1.3, b: mint[2] * 1.3 });
   }
 
   function muzzle(p, fwd, right, up, ambient){
@@ -1253,8 +1253,8 @@ export function createParticles(max){
       vx: right[0] * sp + up[0] * 1.4 + fwd[0] * 0.3 + (r() - 0.5) * 0.4,
       vy: right[1] * sp + up[1] * 1.4 + fwd[1] * 0.3 + 0.6,
       vz: right[2] * sp + up[2] * 1.4 + fwd[2] * 0.3 + (r() - 0.5) * 0.4,
-      life: 0.55 + r() * 0.2, size: 0.0032, stretch: 0.006, shape: KIND_STREAK, gravity: 1, drag: 0.3, alpha: true,
-      r: 0.42 * light, g: 0.31 * light, b: 0.13 * light, a: 1 });
+      life: 0.55 + r() * 0.2, size: 0.0024, stretch: 0.004, shape: KIND_STREAK, gravity: 1, drag: 0.3, alpha: true,
+      r: 0.36 * light, g: 0.27 * light, b: 0.12 * light, a: 1 });
   }
 
   function mote(x, y, z, cR, cG, cB){

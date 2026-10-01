@@ -271,6 +271,16 @@ export function tiltSteerDegrees(beta, gamma, angle) {
   return Math.asin(clamp(gsx, -1, 1)) / DEG;
 }
 
+function tiltNeedsGesture() {
+  try {
+    if (typeof DeviceOrientationEvent === 'undefined' || typeof DeviceOrientationEvent.requestPermission !== 'function') return false;
+    const ua = navigator.userAgent || '';
+    return /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  } catch (_) {
+    return false;
+  }
+}
+
 function coarsePointer() {
   try { return window.matchMedia('(pointer: coarse)').matches; } catch (_) { return false; }
 }
@@ -361,10 +371,12 @@ export function createInput(opts = {}) {
           if (c.axes[1] === name && !c.springY && c.pointer === -1) {
             c.vy = cur * 2 - 1;
             renderStick(c);
+            applyStickAxes(c);
           }
           if (c.axes[0] === name && !c.springX && c.pointer === -1) {
             c.vx = cur * 2 - 1;
             renderStick(c);
+            applyStickAxes(c);
           }
         }
       }
@@ -558,15 +570,17 @@ export function createInput(opts = {}) {
     pad.id = String(p.id || '').slice(0, 60);
     const ax = p.axes;
     if (!pad.restSampled) {
+      let centered = true;
+      for (let i = 0; i < Math.min(2, ax.length); i++) if (Math.abs(isNum(ax[i]) ? ax[i] : 0) > 0.3) centered = false;
       for (let i = 0; i < ax.length; i++) pad.rest[i] = isNum(ax[i]) ? ax[i] : 0;
-      pad.restSampled = true;
+      pad.restSampled = centered;
     }
     let active = false;
     for (let i = 0; i < ax.length; i++) {
       const v = isNum(ax[i]) ? ax[i] : 0;
       const r = pad.rest[i] || 0;
       pad.axes[i] = v;
-      const rel = Math.abs(r) > 0.6 ? v - r : v;
+      const rel = p.mapping !== 'standard' && i >= 2 && Math.abs(r) > 0.6 ? v - r : v;
       if (Math.abs(rel) > 0.35) active = true;
     }
     pad.axes.length = ax.length;
@@ -593,15 +607,18 @@ export function createInput(opts = {}) {
       if (bv > 0) return bv;
       const ai = i === 7 ? 5 : 4;
       const r = pad.rest[ai] || 0;
-      if (ai < pad.axes.length && Math.abs(r) > 0.6) return clamp(((pad.axes[ai] || 0) - r) / (-2 * Math.sign(r)), 0, 1);
+      if (ai < pad.axes.length && triggerLikeAxis(ai)) return clamp(((pad.axes[ai] || 0) - r) / (-2 * Math.sign(r)), 0, 1);
     }
     return 0;
   }
 
+  function triggerLikeAxis(i) {
+    return pad.mapping !== 'standard' && i >= 2 && Math.abs(pad.rest[i] || 0) > 0.6;
+  }
+
   function padAxisRaw(i) {
     if (!pad.connected || i >= pad.axes.length) return 0;
-    const r = pad.rest[i] || 0;
-    if (Math.abs(r) > 0.6) return 0;
+    if (triggerLikeAxis(i)) return 0;
     return clamp(pad.axes[i] || 0, -1, 1);
   }
 
@@ -1088,14 +1105,16 @@ export function createInput(opts = {}) {
       else if (c.type === 'wheel') built.push(buildWheel(c));
       else if (c.type === 'tilt') {
         built.push({ type: 'tilt', axis: c.axis || 'steer' });
-        if (tilt.state === 'off') {
-          let needsGesture = false;
-          try { needsGesture = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'; } catch (_) {}
-          if (!needsGesture) requestTilt();
-        }
+        if (tilt.state === 'off' && !tiltNeedsGesture()) requestTilt();
       }
     }
     layoutTouch();
+    autoStartTilt();
+  }
+
+  function autoStartTilt() {
+    if (!layout || !layout.touchBySteer || settings.steer !== 'tilt' || tilt.state !== 'off') return;
+    if (!tiltNeedsGesture()) requestTilt();
   }
 
   function clearTouchChildren() {
@@ -1628,6 +1647,7 @@ export function createInput(opts = {}) {
     requestTilt,
     calibrateTilt,
     get tiltState() { return tilt.state; },
+    get tiltNeedsGesture() { return tiltNeedsGesture() && tilt.state !== 'on'; },
     get tiltDegrees() { return tilt.raw; },
     method: function () { return method; },
     showTouch,

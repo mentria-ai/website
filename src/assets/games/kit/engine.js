@@ -284,6 +284,14 @@ export function createEngine(opts = {}) {
     adaptStep(t);
   }
 
+  function resetAdaptWindow() {
+    adapt.windowT0 = nowMs();
+    adapt.windowFrames = 0;
+    adapt.slowWindows = 0;
+    adapt.fastWindows = 0;
+    adapt.pendingCheck = false;
+  }
+
   function start() {
     if (disposed || running) return;
     running = true;
@@ -291,6 +299,12 @@ export function createEngine(opts = {}) {
     lastT = -1;
     fpsT0 = nowMs();
     fpsFrames = 0;
+    resetAdaptWindow();
+    if (paused && pauseReason === 'hidden') {
+      paused = false;
+      pauseReason = '';
+      acc = 0;
+    }
     applySize(true);
     if (!raf) raf = requestAnimationFrame(frame);
   }
@@ -305,15 +319,17 @@ export function createEngine(opts = {}) {
     let hidden = false;
     try { hidden = document.visibilityState === 'hidden'; } catch (_) {}
     if (hidden) {
-      if (running) {
-        hiddenStopped = true;
-        if (raf) cancelAnimationFrame(raf);
-        raf = 0;
-      }
+      if (!running) return;
+      hiddenStopped = true;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
       if (!paused) setPaused(true, 'hidden');
     } else {
       lastT = -1;
       acc = 0;
+      resetAdaptWindow();
+      fpsT0 = nowMs();
+      fpsFrames = 0;
       if (hiddenStopped && running && !raf) raf = requestAnimationFrame(frame);
       hiddenStopped = false;
       if (autoResume && paused && pauseReason === 'hidden') setPaused(false);

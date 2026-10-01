@@ -288,7 +288,7 @@ const UI_STYLE = [
   '.gk-toast::before{content:"";flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--gk-mint);box-shadow:0 0 10px rgba(var(--gk-mint-rgb),.8)}',
   '.gk-toast--warn{border-color:rgba(255,184,107,.5)}.gk-toast--warn::before{background:#ffb86b;box-shadow:0 0 10px rgba(255,184,107,.8)}',
   '.gk-toast.is-on{opacity:1;transform:translate(-50%,0)}',
-  '.gk-splash{position:absolute;left:50%;top:calc(var(--gk-safe-t) + 21%);z-index:34;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;',
+  '.gk-splash{position:absolute;left:50%;top:calc(var(--gk-safe-t) + 21%);z-index:34;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;',
   'pointer-events:none;text-align:center;white-space:nowrap}',
   '.gk-splash__t{font:900 clamp(22px,8cqh,46px)/1 var(--gk-display);font-style:italic;letter-spacing:-.01em;text-transform:uppercase;color:#fff;',
   'text-shadow:0 0 24px rgba(255,255,255,.25),0 3px 18px rgba(0,0,0,.7);font-variant-numeric:tabular-nums}',
@@ -609,7 +609,8 @@ export function createUI(stage, copyIn, opts = {}) {
       const p = req.call(stage, { navigationUI: 'hide' });
       const lock = function () {
         try {
-          if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(function () {});
+          const so = window.screen && window.screen.orientation;
+          if (so && so.lock) so.lock('landscape').catch(function () {});
         } catch (_) {}
       };
       if (p && typeof p.then === 'function') p.then(lock).catch(function () {});
@@ -1345,13 +1346,16 @@ export function createUI(stage, copyIn, opts = {}) {
     splashEl.classList.add('is-on');
     clearTimeout(splashTimer);
     splashTimer = setTimeout(function () {
-      if (splashEl) splashEl.classList.remove('is-on');
+      if (!splashEl) return;
+      splashEl.classList.remove('is-on');
+      splashEl.innerHTML = '';
     }, ms + 30);
   }
 
   function countdown(n) {
     const v = isNum(n) ? Math.round(n) : null;
     if (v === null || v < 0) {
+      countSeq++;
       countValue = null;
       countEl.hidden = true;
       countEl.innerHTML = '';
@@ -1376,17 +1380,20 @@ export function createUI(stage, copyIn, opts = {}) {
     }, v === 0 ? 1050 : 1000);
   }
 
+  let countSeq = 0;
+
   function countdownSequence(n, onTick) {
     const total = isNum(n) ? Math.max(0, Math.round(n)) : 3;
+    const token = ++countSeq;
     return new Promise(function (resolve) {
       let k = total;
       const step = function () {
-        if (disposed) { resolve(); return; }
+        if (disposed || token !== countSeq) { resolve(false); return; }
         countdown(k);
         if (typeof onTick === 'function') {
           try { onTick(k); } catch (_) {}
         }
-        if (k === 0) { resolve(); return; }
+        if (k === 0) { resolve(true); return; }
         k--;
         setTimeout(step, 1000);
       };
@@ -1676,6 +1683,7 @@ export function createUI(stage, copyIn, opts = {}) {
   function dispose() {
     if (disposed) return;
     disposed = true;
+    closeAskSilently();
     clearReveal();
     clearTimeout(toastTimer);
     clearTimeout(splashTimer);

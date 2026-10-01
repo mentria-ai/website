@@ -688,7 +688,7 @@ function setupRace(quick) {
     const car = createVehicle(vehicleParamsFromStats(specs[i].stats), { track, s: g.s, lateral: lat, index: i, lap: -1 });
     cars.push(car);
     let view;
-    const opts = { lod: i === playerSlot || q === 'high' ? 'high' : 'low', envMap: world.env.envMap, color: paints[i] };
+    const opts = { lod: i === playerSlot || q === 'high' ? 'high' : 'low', envMap: world.env.envMap, color: paints[i], cheap: q === 'low' };
     try {
       view = (i !== playerSlot && q === 'high' && typeof createCarLOD === 'function') ? createCarLOD(specs[i], opts) : createCar(specs[i], opts);
     } catch (err) {
@@ -1452,8 +1452,8 @@ function onRender(alpha, dt) {
   lastFrameDt = dt > 0 ? Math.min(dt, 0.1) : lastFrameDt;
   if (stepFrame !== frameId) input.update(lastFrameDt);
   frameId++;
-  const size = engine.size;
   if (garage.isOpen) {
+    const size = engine.size;
     renderer.toneMappingExposure = 1;
     garage.render(dt, size.width, size.height);
     return;

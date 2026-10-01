@@ -383,7 +383,7 @@ function assistThrottle(dt) {
   const m = methodNow();
   let climb;
   if (m === 'keyboard') climb = input.axis('climb') || 0;
-  else climb = deadband(((input.axis('throttle') || 0) - 0.5) * 2, 0.1);
+  else climb = deadband(((input.axis('throttle') || 0) - 0.5) * 2, m === 'touch' ? 0.18 : 0.1);
   if (drone.grounded && climb <= 0.05) {
     run.altI = 0;
     run.holdY = null;
@@ -843,7 +843,7 @@ function onFinish(total, gp) {
   let saved = null;
   try { saved = store.saveRecord(run.course.id, { time: run.finalTime, medal, splits: run.splits.slice(), crashes: run.crashes }); } catch (_) { saved = null; }
   run.saved = { isBest: !!(saved && saved.isBest), prevTime: prev && typeof prev.time === 'number' ? prev.time : null };
-  if (saved && saved.isBest && run.recorder && !run.autopilot) {
+  if (saved && saved.isBest && run.recorder) {
     try {
       run.recorder.push(run.time, drone.pos, drone.quat, [drone.rpm]);
       const enc = run.recorder.encode({ c: run.course.id, t: run.finalTime });
@@ -1226,25 +1226,113 @@ function updateHud(dt) {
   updateFlightPath();
 }
 
+const DUST_COLORS = { meadow: 0xb8a57c, yard: 0x8f8f8c, canyon: 0xd49a68, freestyle: 0xa9a37f };
+const washPos = { x: 0, y: 0, z: 0 };
+const washOpts = { kind: 'dust', rate: 0, dir: { x: 0, y: 1, z: 0 }, speed: 2.6, spread: 1.3, color: 0xb8a57c, inherit: 0 };
+
+function updateWash() {
+  const p = world && world.particles;
+  if (!p || !inRun() || engine.paused || drone.crashed) return;
+  const alt = drone.altitude;
+  if (alt > 2.4 || drone.thrustFrac < 0.18) return;
+  washPos.x = drone.pos.x;
+  washPos.z = drone.pos.z;
+  washPos.y = world.heightAt(washPos.x, washPos.z) + 0.06;
+  washOpts.rate = 46 * (1 - alt / 2.4) * Math.min(1, drone.thrustFrac * 1.6);
+  washOpts.color = DUST_COLORS[run.course ? run.course.id : 'meadow'] || 0xb8a57c;
+  try { p.trail('wash', washPos, washOpts); } catch (_) {}
+}
+
+const motorState = { rpm: [0, 0, 0, 0], load: 0, speed: 0 };
+const windState = { speed: 0 };
+
 function updateAudio() {
   if (!motorsVoice && !windVoice) return;
   const live = inRun() && !(engine && engine.paused);
+  for (let i = 0; i < 4; i++) motorState.rpm[i] = live ? drone.motors[i] : 0;
+  motorState.load = live ? drone.load : 0;
+  motorState.speed = live ? drone.speed : 0;
+  windState.speed = motorState.speed;
   try {
-    if (motorsVoice) motorsVoice.set(live ? { rpm: drone.motors, load: drone.load, speed: drone.speed } : { rpm: 0, load: 0, speed: 0 });
-    if (windVoice) windVoice.set({ speed: live ? drone.speed : 0 });
+    if (motorsVoice) motorsVoice.set(motorState);
+    if (windVoice) windVoice.set(windState);
   } catch (_) {}
+}
+
+const TRAIL_POINTS = 28;
+const TRAIL_STEP = 0.045;
+let ghostGlow = null;
+let ghostTrail = null;
+
+function glowTexture() {
+  const size = 64;
+  const c = document.createElement('canvas');
+  c.width = size;
+  c.height = size;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.22, 'rgba(255,255,255,0.75)');
+  g.addColorStop(0.55, 'rgba(255,255,255,0.18)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function buildGhostMarkers() {
+  const col = new THREE.Color(GHOST_COLOR);
+  ghostGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: col.clone().multiplyScalar(1.6), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: false }));
+  ghostGlow.scale.set(0.045, 0.045, 1);
+  ghostGlow.renderOrder = 6;
+  ghostGlow.visible = false;
+  scene.add(ghostGlow);
+  const pos = new Float32Array(TRAIL_POINTS * 3);
+  const colors = new Float32Array(TRAIL_POINTS * 3);
+  for (let i = 0; i < TRAIL_POINTS; i++) {
+    const k = Math.pow(1 - i / (TRAIL_POINTS - 1), 1.6) * 1.4;
+    colors[i * 3] = col.r * k;
+    colors[i * 3 + 1] = col.g * k;
+    colors[i * 3 + 2] = col.b * k;
+  }
+  const geo = new THREE.BufferGeometry();
+  const attr = new THREE.BufferAttribute(pos, 3);
+  attr.setUsage(THREE.DynamicDrawUsage);
+  geo.setAttribute('position', attr);
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  ghostTrail = new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+  ghostTrail.frustumCulled = false;
+  ghostTrail.renderOrder = 6;
+  ghostTrail.visible = false;
+  scene.add(ghostTrail);
 }
 
 function updateGhost(dt) {
   const show = !!run.ghost && run.kind === 'race' && (run.phase === 'countdown' || run.phase === 'flying' || run.phase === 'crashed' || run.phase === 'finished');
-  ghostMesh.group.visible = show;
-  if (!show) return;
   const tg = run.phase === 'countdown' ? 0 : run.time;
+  const alive = show && tg <= run.ghost.duration + 1.5;
+  ghostMesh.group.visible = alive;
+  if (ghostGlow) ghostGlow.visible = alive;
+  if (ghostTrail) ghostTrail.visible = alive && tg > 0.2;
+  if (!alive) return;
   run.ghost.sample(tg, ghostSample);
   ghostMesh.group.position.set(ghostSample.pos.x, ghostSample.pos.y, ghostSample.pos.z);
   ghostMesh.group.quaternion.set(ghostSample.quat.x, ghostSample.quat.y, ghostSample.quat.z, ghostSample.quat.w);
   ghostMesh.setProps(ghostSample.extra && ghostSample.extra.length ? ghostSample.extra[0] : 0.4, dt);
-  if (tg > run.ghost.duration + 1.5) ghostMesh.group.visible = false;
+  if (ghostGlow) ghostGlow.position.set(ghostSample.pos.x, ghostSample.pos.y, ghostSample.pos.z);
+  if (ghostTrail && ghostTrail.visible) {
+    const attr = ghostTrail.geometry.attributes.position;
+    const arr = attr.array;
+    for (let i = 0; i < TRAIL_POINTS; i++) {
+      run.ghost.sample(Math.max(0, tg - i * TRAIL_STEP), ghostSample);
+      arr[i * 3] = ghostSample.pos.x;
+      arr[i * 3 + 1] = ghostSample.pos.y;
+      arr[i * 3 + 2] = ghostSample.pos.z;
+    }
+    attr.needsUpdate = true;
+  }
 }
 
 function onRender(alpha, dt) {
@@ -1266,6 +1354,7 @@ function onRender(alpha, dt) {
     shake.apply(camera);
   }
   camera.updateMatrixWorld();
+  updateWash();
   world.update(camera, paused ? 0 : frameDt, time);
   if (inRun() || run.phase === 'results') updateHud(frameDt);
   updateAudio();
@@ -1562,6 +1651,9 @@ function exposeTestHook() {
       if (engine.setTimeScale) engine.setTimeScale(s);
       return s;
     },
+    input() {
+      try { return Object.assign({ climb: input.axis('climb'), throttle: input.axis('throttle') }, input.snapshot ? input.snapshot() : {}); } catch (err) { return { error: String(err) }; }
+    },
     menu() { goMenu(); },
     select() { goSelect(); },
     pause() { openPause(); },
@@ -1677,6 +1769,7 @@ function boot() {
   ghostMesh = createDroneMesh({ color: GHOST_COLOR, ghost: true, lod: 'low' });
   ghostMesh.group.visible = false;
   droneMesh.group.visible = false;
+  buildGhostMarkers();
   scene.add(droneMesh.group);
   scene.add(ghostMesh.group);
   applyDroneParams(false);

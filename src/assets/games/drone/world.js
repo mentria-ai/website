@@ -92,6 +92,47 @@ function latticeTexture() {
   return tex;
 }
 
+function claddingTexture(base, rib, seed) {
+  const size = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, size, size);
+  const ribs = 16;
+  const w = size / ribs;
+  for (let i = 0; i < ribs; i++) {
+    const g = ctx.createLinearGradient(i * w, 0, (i + 1) * w, 0);
+    g.addColorStop(0, 'rgba(0,0,0,0.22)');
+    g.addColorStop(0.35, 'rgba(255,255,255,0.10)');
+    g.addColorStop(0.55, 'rgba(255,255,255,0.16)');
+    g.addColorStop(1, 'rgba(0,0,0,0.18)');
+    ctx.fillStyle = g;
+    ctx.fillRect(i * w, 0, w, size);
+  }
+  ctx.fillStyle = rib;
+  ctx.fillRect(0, size - 6, size, 6);
+  let s = seed >>> 0;
+  const rnd = () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+  for (let i = 0; i < 260; i++) {
+    const x = rnd() * size;
+    const y = rnd() * size;
+    const h = 6 + rnd() * 40;
+    ctx.fillStyle = 'rgba(40,32,24,' + (0.025 + rnd() * 0.05).toFixed(3) + ')';
+    ctx.fillRect(x, y, 1 + rnd() * 2, h);
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
 function padTexture() {
   const size = 256;
   const canvas = document.createElement('canvas');
@@ -530,23 +571,27 @@ function buildStructures(course, heightAt, q) {
   }
   if (walls.length) {
     const g = mergeInto(walls);
-    const m = standardMaterial('metal-panel', { color: 0x7d858c, roughness: 0.6, metalness: 0.6 }, { color: 0xb9c0c6 });
-    const mesh = new THREE.Mesh(g, m.material);
+    const tex = claddingTexture('#aeb3b5', '#969b9d', 7);
+    texs.push(tex);
+    const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.58, metalness: 0.45 });
+    const mesh = new THREE.Mesh(g, mat);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     group.add(mesh);
     geos.push(g);
-    if (!m.shared) mats.push(m.material);
+    mats.push(mat);
   }
   if (roofs.length) {
     const g = mergeInto(roofs);
-    const m = standardMaterial('metal-panel', { color: 0x4a5056, roughness: 0.65, metalness: 0.6 }, { color: 0x6c737a });
-    const mesh = new THREE.Mesh(g, m.material);
+    const tex = claddingTexture('#6b7175', '#5a6064', 11);
+    texs.push(tex);
+    const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.62, metalness: 0.5 });
+    const mesh = new THREE.Mesh(g, mat);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     group.add(mesh);
     geos.push(g);
-    if (!m.shared) mats.push(m.material);
+    mats.push(mat);
   }
   if (floors.length) {
     const g = mergeInto(floors);

@@ -1046,8 +1046,8 @@ export function defaultGraphics(gl){
     if (/swiftshader|llvmpipe|software|basic render/.test(gpu)) return GFX_CLASSIC;
     if (!touch) return GFX_ENHANCED;
     if (mem < 4 || cores < 4) return GFX_CLASSIC;
-    const adreno = /adreno[^0-9]{0,8}(\d{3})/.exec(gpu);
-    if (adreno && +adreno[1] < 615) return GFX_CLASSIC;
+    const series = /adreno[^0-9]{0,8}(\d{3})/.exec(gpu);
+    if (series && +series[1] < 615) return GFX_CLASSIC;
     if (/mali-(t|4|g3\d\b|g5\d\b|g7[12]\b)|powervr|sgx|videocore/.test(gpu)) return GFX_CLASSIC;
     return GFX_ENHANCED;
   } catch (_) {

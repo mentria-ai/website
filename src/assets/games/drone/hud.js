@@ -75,8 +75,11 @@ const STYLE = [
   '.sk-osd[data-kind="freestyle"] .sk-osd__race{display:none}',
   '.sk-osd[data-kind="race"] .sk-osd__free{display:none}',
   '.sk-osd[data-view="chase"] .sk-osd__cross,.sk-osd[data-view="chase"] .sk-osd__fpm{display:none}',
+  '.sk-osd__static{position:absolute;inset:0;opacity:0;background-size:160px 160px;mix-blend-mode:screen}',
+  '.sk-osd__static.is-on{animation:sk-static .55s steps(7) both}',
+  '@keyframes sk-static{0%{opacity:.85;background-position:0 0;filter:contrast(1.4)}25%{opacity:.7;background-position:-37px 61px}50%{opacity:.5;background-position:53px -29px}75%{opacity:.25;background-position:-71px -43px}100%{opacity:0;background-position:19px 83px}}',
   '@container (max-height: 300px){.sk-osd__coach{bottom:calc(var(--sk-sb) + 36px)}}',
-  '@media (prefers-reduced-motion: reduce){.sk-osd__flash,.sk-osd__tc,.sk-osd__coach{transition:none}}'
+  '@media (prefers-reduced-motion: reduce){.sk-osd__flash,.sk-osd__tc,.sk-osd__coach{transition:none}.sk-osd__static.is-on{animation:none;opacity:0}}'
 ].join('');
 
 const ARROW_SVG = '<svg viewBox="-17 -17 34 34" aria-hidden="true"><path d="M13 0 L-9 -11 L-4 0 L-9 11 Z" fill="rgba(110,243,197,.92)" stroke="rgba(3,19,13,.8)" stroke-width="1.4" stroke-linejoin="round"/></svg>';
@@ -128,6 +131,32 @@ export function projectPoint(camera, x, y, z, out) {
   out.nx = px * iw;
   out.ny = py * iw;
   return out;
+}
+
+function noiseUrl() {
+  try {
+    const size = 160;
+    const c = document.createElement('canvas');
+    c.width = size;
+    c.height = size;
+    const ctx = c.getContext('2d');
+    const img = ctx.createImageData(size, size);
+    let s = 1234567;
+    for (let i = 0; i < size * size; i++) {
+      s = (s * 1103515245 + 12345) >>> 0;
+      const row = Math.floor(i / size);
+      const band = row % 3 === 0 ? 0.55 : 1;
+      const v = Math.round(((s >>> 16) & 255) * band);
+      img.data[i * 4] = v;
+      img.data[i * 4 + 1] = v;
+      img.data[i * 4 + 2] = v;
+      img.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    return c.toDataURL('image/png');
+  } catch (_) {
+    return '';
+  }
 }
 
 function el(tag, cls, parent, html) {
@@ -208,6 +237,8 @@ export function createHud(stage, copyIn) {
   const arrowText = arrow.querySelector('span');
   arrow.style.display = 'none';
 
+  const staticEl = el('div', 'sk-osd__static', root);
+  let staticReady = false;
   const crash = el('div', 'sk-osd__crash', root);
   const crashTitle = el('b', 'sk-osd__t', crash);
   const crashSub = el('em', 'sk-osd__t', crash);
@@ -370,6 +401,17 @@ export function createHud(stage, copyIn) {
     crash.classList.remove('is-on');
   }
 
+  function videoStatic() {
+    if (!staticReady) {
+      staticReady = true;
+      const url = noiseUrl();
+      if (url) staticEl.style.backgroundImage = 'url(' + url + ')';
+    }
+    staticEl.classList.remove('is-on');
+    void staticEl.offsetWidth;
+    staticEl.classList.add('is-on');
+  }
+
   function flashText(text, ms) {
     clearTimeout(flashTimer);
     flash.textContent = text || '';
@@ -499,6 +541,7 @@ export function createHud(stage, copyIn) {
     crashProgress,
     clearCrash: crashHide,
     flash: flashText,
+    videoStatic,
     coach: coachSet,
     reset,
     dispose

@@ -775,6 +775,7 @@ function onCrash(reason) {
   burst('debris', pos, n, 10);
   burst('smoke', pos, n, 6);
   if (shake) shake.add(0.35 + 0.45 * intensity);
+  if (settings.view === 'fpv') hud.videoStatic();
   sfx('crash', { intensity });
   const title = t(run.crashReason === 'flipped' ? 'crash.flipped' : 'crash.impact');
   hud.crash(title, run.kind === 'race' ? t('hud.penaltyNote').replace('{n}', String(PENALTY)) : '');
@@ -1636,6 +1637,9 @@ function boot() {
     });
   }
   stage.addEventListener('pointerdown', unlockAudio, { passive: true });
+  stage.addEventListener('keydown', (e) => {
+    if ((e.code === 'Space' || e.code === 'PageDown' || e.code === 'PageUp') && inRun() && !(ui.current && ui.current())) e.preventDefault();
+  });
   window.addEventListener('keydown', unlockAudio, { once: true });
   document.addEventListener('mentria:localechange', refreshCopy);
   document.addEventListener('visibilitychange', () => {

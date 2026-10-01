@@ -241,6 +241,7 @@ let mapTick = 0;
 let headlight = null;
 let lastResults = null;
 let testAutopilot = false;
+let testAutopilotLevel = 'hard';
 
 const pIn = { throttle: 0, brake: 0, steer: 0, nitro: false, drift: false, brakeDrift: true };
 const camState = { yaw: 0, y: 0, boost: 0, fov: 66, init: false, mode: settings.camera === 'hood' ? 'hood' : 'chase', flyS: 0 };
@@ -872,7 +873,7 @@ function muteVoices(on) {
 function enableAutopilot(on) {
   testAutopilot = !!on;
   if (!race) return;
-  if (on && !race.autopilot) race.autopilot = createAIDriver(race.track, race.cars[race.pi], { difficulty: 'hard', seed: 99 });
+  if (on && !race.autopilot) race.autopilot = createAIDriver(race.track, race.cars[race.pi], { difficulty: testAutopilotLevel, seed: 99 });
   if (!on && race.phase !== 'finished') race.autopilot = null;
 }
 
@@ -1012,6 +1013,7 @@ function simulate(dt) {
         R.inputs[i] = R.autopilot.update(dt, autoCtx);
       } else {
         R.inputs[i] = readPlayerInput();
+        if (input.method && input.method() === 'touch') applyTouchAssist(dt);
       }
     } else {
       R.inputs[i] = R.drivers[i].update(dt, R.ctx);
@@ -1029,6 +1031,18 @@ function simulate(dt) {
     R.finishedAt += dt;
     if (R.finishedAt > 1.6) showResults();
   }
+}
+
+function applyTouchAssist(dt) {
+  const R = race;
+  if (!R.assist) R.assist = createAIDriver(R.track, R.cars[R.pi], { difficulty: 'hard', seed: 77 + attemptSeed });
+  autoCtx.cars = R.cars;
+  autoCtx.time = R.time;
+  const a = R.assist.update(dt, autoCtx);
+  const user = pIn.steer;
+  if (Math.abs(user) < 0.06) pIn.steer = clamp(a.steer * 0.55, -1, 1);
+  else pIn.steer = clamp(user * 0.85 + a.steer * 0.3, -1, 1);
+  if (autoGasOn() && pIn.brake < 0.05 && a.brake > 0.25 && !pIn.nitro) pIn.throttle = Math.min(pIn.throttle, 0.35);
 }
 
 function burstAt(kind, car, lx, ly, lz, count, up) {
@@ -1677,6 +1691,7 @@ if (TEST) {
   window.__nitroTest = {
     start: function (trackId, m, o) {
       if (o && o.autopilot) testAutopilot = true;
+      if (o && o.level) testAutopilotLevel = o.level;
       return startRace(m || 'race', trackId || settings.track).then(function () { return testState(); });
     },
     autopilot: function (on) { enableAutopilot(on !== false); return !!(race && race.autopilot); },

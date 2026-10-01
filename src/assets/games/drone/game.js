@@ -904,7 +904,12 @@ function stepCoach(dt) {
 }
 
 function handleButtons() {
-  if (!inRun() || !input) return;
+  if (!input) return;
+  if (run.phase === 'results') {
+    if (input.button('restart').pressed && run.course) startRun(run.course.id, 'race');
+    return;
+  }
+  if (!inRun()) return;
   if (input.button('camera').pressed) toggleView();
   if (input.button('mode').pressed) cycleFlightMode();
   if (input.button('restart').pressed) restartRun();
@@ -1564,6 +1569,13 @@ function boot() {
     if ((e.code === 'Space' || e.code === 'PageDown' || e.code === 'PageUp') && inRun() && !(ui.current && ui.current())) e.preventDefault();
   });
   window.addEventListener('keydown', unlockAudio, { once: true });
+  window.addEventListener('keydown', (e) => {
+    if (run.phase !== 'results' || e.code !== 'KeyR' || e.repeat || e.metaKey || e.ctrlKey || e.altKey || !run.course) return;
+    const a = document.activeElement;
+    if (a && a !== document.body && !stage.contains(a)) return;
+    e.preventDefault();
+    startRun(run.course.id, 'race');
+  });
   document.addEventListener('mentria:localechange', refreshCopy);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible' || !engine) return;

@@ -44,6 +44,8 @@ const AQ_STEP = 0.1;
 const AQ_FLOOR = 0.5;
 
 const COURSE_KEY = 'phosphor_course';
+const GFX_KEY = 'phosphor_gfx';
+const GFX_MODES = ['enhanced', 'classic'];
 const FALLBACK_COURSE_IDS = ['c01', 'c02', 'c03', 'c04', 'c05'];
 const MEDALS = ['bronze', 'silver', 'gold', 'signal'];
 const MENU_DEAD = 0.55;
@@ -73,7 +75,7 @@ const scene = {
 };
 const vm = scene.viewmodel;
 
-const settings = { fov: 100, quality: 1, glitchTest: 0 };
+const settings = { fov: 100, quality: 1, glitchTest: 0, gfx: 'classic' };
 const sens = { mnk: 1, pad: 1, touch: 1, gyro: 1, adsMul: 0.75 };
 const levels = { master: 0.8, sfx: 0.9, ambient: 0.5 };
 
@@ -136,6 +138,7 @@ let touchDevice = false;
 let touchUiOn = false;
 let contextLost = false;
 let autoQuality = true;
+let gfxAuto = true;
 let qualityCap = 1;
 let qualityLowSince = 0;
 let qualityHighSince = 0;
@@ -215,6 +218,8 @@ function grabDom() {
   dom.gyro = $('ph-gyro');
   dom.fs = $('ph-fs');
   dom.pauseBtn = $('ph-pausebtn');
+  dom.gfx = $('ph-gfx');
+  dom.gfxPause = $('ph-gfx-pause');
   dom.pauseNoteDefault = dom.pauseNote ? dom.pauseNote.textContent : '';
   dom.gyroLabel = dom.gyro ? dom.gyro.textContent : '';
 }
@@ -730,6 +735,48 @@ function saveCoursePref(id) {
   try {
     localStorage.setItem(COURSE_KEY, id);
   } catch (_) {}
+}
+
+function loadGfxPref() {
+  try {
+    const v = localStorage.getItem(GFX_KEY);
+    if (typeof v === 'string' && GFX_MODES.indexOf(v) >= 0) return v;
+  } catch (_) {}
+  return '';
+}
+
+function saveGfxPref(mode) {
+  try {
+    localStorage.setItem(GFX_KEY, mode);
+  } catch (_) {}
+}
+
+function updateGfxBtns() {
+  const on = settings.gfx === 'enhanced';
+  const mode = on ? COPY.gfxEnhanced : COPY.gfxClassic;
+  const label = mode ? (COPY.gfxLabel ? COPY.gfxLabel + ': ' + mode : mode) : '';
+  const btns = [dom.gfx, dom.gfxPause];
+  for (let i = 0; i < btns.length; i++) {
+    const b = btns[i];
+    if (!b) continue;
+    if (label) b.textContent = label;
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+}
+
+function applyGraphics() {
+  const got = call(renderer, 'setGraphics', settings.gfx);
+  if (typeof got === 'string' && GFX_MODES.indexOf(got) >= 0) settings.gfx = got;
+  else settings.gfx = 'classic';
+  if (dom.stage) dom.stage.classList.toggle('is-gfx-enhanced', settings.gfx === 'enhanced');
+  updateGfxBtns();
+}
+
+function toggleGraphics() {
+  settings.gfx = settings.gfx === 'enhanced' ? 'classic' : 'enhanced';
+  gfxAuto = false;
+  applyGraphics();
+  saveGfxPref(settings.gfx);
 }
 
 function markSel() {
@@ -1409,6 +1456,11 @@ function adaptQuality(now) {
     else if (now - qualityLowSince >= AQ_LOW_MS) {
       qualityLowSince = now;
       if (settings.quality > AQ_FLOOR) applyQuality(settings.quality - AQ_STEP);
+      else if (gfxAuto && settings.gfx === 'enhanced') {
+        settings.gfx = 'classic';
+        applyGraphics();
+        setAutoNote('auto graphics classic');
+      }
     }
     return;
   }
@@ -1998,6 +2050,7 @@ function wireUi() {
     dom.ready.addEventListener('pointerdown', (e) => {
       const t = e.target;
       if (t && t === dom.gyro) return;
+      if (t && t === dom.gfx) return;
       if (dom.sel && t && dom.sel.contains(t)) return;
       firstGesture();
     });
@@ -2053,6 +2106,18 @@ function wireUi() {
       askGyro();
     });
   }
+  if (dom.gfx) {
+    dom.gfx.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleGraphics();
+    });
+  }
+  if (dom.gfxPause) {
+    dom.gfxPause.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleGraphics();
+    });
+  }
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', onResize);
@@ -2104,6 +2169,11 @@ function boot() {
     fail('renderer.js: createRenderer returned nothing');
     return;
   }
+
+  const storedGfx = loadGfxPref();
+  gfxAuto = !storedGfx;
+  settings.gfx = storedGfx || call(renderer, 'defaultGraphics') || 'enhanced';
+  applyGraphics();
 
   constants = simMod.CONSTANTS && typeof simMod.CONSTANTS === 'object' ? simMod.CONSTANTS : FALLBACK_CONSTANTS;
 

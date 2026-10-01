@@ -334,5 +334,13 @@
     "category": "Media",
     "group": "Everyday",
     "added": "2026-10-01"
+  },
+  {
+    "slug": "music-player",
+    "title": "Music Player",
+    "summary": "Music player for your own files in the browser: open songs or a folder, browse songs, albums and artists from their tags with cover art, then shuffle, repeat, queue and build playlists with M3U export. Lock-screen controls and a sleep timer included. A private local music player that never uploads your files.",
+    "category": "Media",
+    "group": "Everyday",
+    "added": "2026-10-01"
   }
 ]

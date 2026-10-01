@@ -7,7 +7,8 @@ const EXTS = {
   video: ['mp4', 'm4v', 'webm', 'mkv', 'mov', 'ogv', 'avi'],
   audio: ['mp3', 'm4a', 'aac', 'flac', 'ogg', 'oga', 'opus', 'wav', 'aif', 'aiff', 'alac', 'weba'],
   image: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif', 'heic', 'heif', 'bmp', 'jxl'],
-  subtitle: ['srt', 'vtt']
+  subtitle: ['srt', 'vtt'],
+  playlist: ['m3u', 'm3u8']
 };
 const BOM = String.fromCharCode(65279);
 
@@ -37,9 +38,11 @@ export function baseName(name) {
 }
 
 export function kindOf(file) {
+  const ext = extOf(file && file.name);
+  if (EXTS.playlist.indexOf(ext) !== -1) return 'playlist';
+  if (EXTS.subtitle.indexOf(ext) !== -1) return 'subtitle';
   const type = String((file && file.type) || '');
   for (const k of ['video', 'audio', 'image']) if (type.indexOf(k + '/') === 0) return k;
-  const ext = extOf(file && file.name);
   for (const k of Object.keys(EXTS)) if (EXTS[k].indexOf(ext) !== -1) return k;
   return '';
 }
@@ -66,6 +69,10 @@ function hash(str) {
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
   h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');
+}
+
+export function hashKey(str) {
+  return hash(String(str || ''));
 }
 
 export function fingerprint(file) {
@@ -504,6 +511,14 @@ export async function imageThumb(entry) {
   return blob;
 }
 
+export async function storeArt(key, blob) {
+  if (!key || !blob) return null;
+  let out = await viaWorker(blob);
+  if (!out) out = await viaMain(blob);
+  if (out) await run('thumbs', 'readwrite', (s) => s.put(out, key)).catch(() => {});
+  return out;
+}
+
 export function thumbFor(entry) {
   return entry.kind === 'video' ? videoThumb(entry) : imageThumb(entry);
 }
@@ -734,6 +749,7 @@ export async function preflight(file) {
   if (container === 'avi') issues.push('avi');
   if ((container === 'mp4' || container === 'mov' || container === 'mkv') && !caps.apple) {
     try { if (await findCodes(file, ['ac-3', 'ec-3', 'dtsc', 'dtsh', 'dtsl', 'dtse', 'A_AC', 'A_DT'])) issues.push('dolby'); } catch (_) {}
+    try { if (container !== 'mkv' && await findCodes(file, ['alac'])) issues.push('alac'); } catch (_) {}
   }
   return { container, issues };
 }

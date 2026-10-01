@@ -861,4 +861,24 @@
    <circle cx="29.6" cy="21.4" r="3.2" fill="url(#amgallery)"></circle>
    <path d="M8.6 35.6 L17.6 25.2 Q18.9 23.8 20.2 25.2 L26.2 31.8 L28.9 29.1 Q30.1 27.9 31.3 29.1 L35.4 33.4 L35.4 35.6 Q35.4 36.6 34.4 36.6 L9.6 36.6 Q8.6 36.6 8.6 35.6 Z" fill="url(#pkgallery)"></path>
  </g></symbol>
+<symbol id="tool-music-player" viewBox="0 0 48 48"><defs>
+<linearGradient id="cymusicplayer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"></stop><stop offset="1" stop-color="#1FBFDB"></stop></linearGradient>
+<linearGradient id="pkmusicplayer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBA6D2"></stop><stop offset="1" stop-color="#F25FA8"></stop></linearGradient>
+<linearGradient id="ammusicplayer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD661"></stop><stop offset="1" stop-color="#F7B015"></stop></linearGradient>
+<linearGradient id="pumusicplayer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4B5FD"></stop><stop offset="1" stop-color="#9B7DF7"></stop></linearGradient>
+<linearGradient id="glossmusicplayer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+<radialGradient id="dkmusicplayer" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#3a3550"></stop><stop offset="1" stop-color="#171522"></stop></radialGradient>
+<filter id="shmusicplayer" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity="0.32"></feDropShadow></filter>
+</defs><g filter="url(#shmusicplayer)">
+   <circle cx="21" cy="22" r="16.5" fill="url(#dkmusicplayer)" stroke="url(#cymusicplayer)" stroke-width="2.4"></circle>
+   <circle cx="21" cy="22" r="11.2" fill="none" stroke="#fff" stroke-opacity=".09" stroke-width="1.2"></circle>
+   <circle cx="21" cy="22" r="5.4" fill="url(#pumusicplayer)"></circle>
+   <circle cx="21" cy="22" r="1.5" fill="#171522"></circle>
+   <path d="M9.6 15.2 A13.2 13.2 0 0 1 21 8.8" fill="none" stroke="url(#glossmusicplayer)" stroke-width="2.2" stroke-linecap="round" opacity=".6"></path>
+   <path d="M34.6 21.3 L44.6 18.8 L44.6 22.2 L34.6 24.7 Z" fill="url(#ammusicplayer)"></path>
+   <rect x="33.4" y="22.4" width="2.4" height="15.4" rx="1.2" fill="url(#pkmusicplayer)"></rect>
+   <rect x="43.4" y="19.9" width="2.4" height="15.2" rx="1.2" fill="url(#pkmusicplayer)"></rect>
+   <ellipse cx="31.6" cy="38" rx="3.6" ry="2.8" transform="rotate(-20 31.6 38)" fill="url(#pkmusicplayer)"></ellipse>
+   <ellipse cx="41.6" cy="35.4" rx="3.6" ry="2.8" transform="rotate(-20 41.6 35.4)" fill="url(#pkmusicplayer)"></ellipse>
+ </g></symbol>
 </svg>

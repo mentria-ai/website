@@ -418,6 +418,7 @@ export function createInput(opts = {}) {
     if (isEditable(e.target)) return;
     const bound = isBoundKey(e.code);
     if (!bound) return;
+    if (element && element.hasAttribute('data-gk-menu')) return;
     if (engagedNow()) {
       try { e.preventDefault(); } catch (_) {}
     }
@@ -482,7 +483,9 @@ export function createInput(opts = {}) {
     if (!element || typeof MutationObserver === 'undefined') return;
     try {
       menuObserver = new MutationObserver(function () {
-        if (element.hasAttribute('data-gk-menu')) releaseTouch();
+        if (!element.hasAttribute('data-gk-menu')) return;
+        releaseTouch();
+        for (const k in keyEdges) keyEdges[k] = 0;
       });
       menuObserver.observe(element, { attributes: true, attributeFilter: ['data-gk-menu'] });
     } catch (_) {

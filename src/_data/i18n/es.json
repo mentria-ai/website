@@ -1748,7 +1748,8 @@
         "dice-roller": "Tira dados con notación estándar como 2d6+1, o elige una opción al azar de tu propia lista.",
         "image-gen": "Genera imágenes desde un texto en el nodo de render compartido de Mentria. Gratis y sin configuración: describe la escena y espera tu turno.",
         "story-studio": "Crea tus propios decks de historias: genera imágenes en el nodo de render de Mentria o importa las tuyas, escribe subtítulos y une las diapositivas en una historia deslizable.",
-        "meal-planner": "Planifica las comidas de la semana, obtén una lista de la compra agrupada por pasillos y aprovecha lo que tienes en la despensa. Incluye 30 recetas para empezar y estimaciones nutricionales con datos del USDA."
+        "meal-planner": "Planifica las comidas de la semana, obtén una lista de la compra agrupada por pasillos y aprovecha lo que tienes en la despensa. Incluye 30 recetas para empezar y estimaciones nutricionales con datos del USDA.",
+        "pregnancy-check": "Información y el momento de hacer la prueba, no un diagnóstico: cuándo es fiable una prueba de embarazo casera, cómo planificar un embarazo y tu fecha de parto, semanas y citas. Todo se queda en este dispositivo."
       }
     },
     "bubble-level": {

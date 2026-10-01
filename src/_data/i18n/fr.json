@@ -1748,7 +1748,8 @@
         "dice-roller": "Lancez des dés en notation standard comme 2d6+1, ou tirez au sort une option dans votre propre liste.",
         "image-gen": "Générez des images à partir d'un texte sur le nœud de rendu partagé de Mentria. Gratuit, sans configuration : décrivez la scène et attendez votre tour.",
         "story-studio": "Créez vos propres decks d'histoires : générez des images sur le nœud de rendu de Mentria ou importez les vôtres, écrivez des légendes et assemblez les diapositives en une histoire à faire défiler.",
-        "meal-planner": "Planifiez les repas de la semaine, obtenez une liste de courses classée par rayon et finissez ce qui reste dans vos placards. Avec 30 recettes pour commencer et des estimations nutritionnelles issues des données de l'USDA."
+        "meal-planner": "Planifiez les repas de la semaine, obtenez une liste de courses classée par rayon et finissez ce qui reste dans vos placards. Avec 30 recettes pour commencer et des estimations nutritionnelles issues des données de l'USDA.",
+        "pregnancy-check": "Des informations et le bon moment pour faire un test, pas un diagnostic : quand un test de grossesse urinaire est fiable, la préparation d'une grossesse, la date du terme, les semaines et les rendez-vous. Tout reste sur cet appareil."
       }
     },
     "bubble-level": {

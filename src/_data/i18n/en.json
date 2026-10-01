@@ -1748,7 +1748,8 @@
         "dice-roller": "Roll dice with standard notation like 2d6+1, or pick a random option from your own list.",
         "image-gen": "Generate images from a text prompt on Mentria's shared render node. Free, no setup — describe the scene and wait your turn.",
         "story-studio": "Build your own story decks: generate images on Mentria's render node or import your own, write captions, and stitch slides into a swipeable story.",
-        "meal-planner": "Plan the week's meals, get a shopping list grouped by aisle, and use up what's in your pantry. Comes with 30 starter recipes and nutrition estimates from USDA data."
+        "meal-planner": "Plan the week's meals, get a shopping list grouped by aisle, and use up what's in your pantry. Comes with 30 starter recipes and nutrition estimates from USDA data.",
+        "pregnancy-check": "Information and test timing, not a diagnosis: when a home pregnancy test is reliable, planning a pregnancy, and your due date, weeks and appointments. Everything stays on this device."
       }
     },
     "bubble-level": {

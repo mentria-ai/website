@@ -4,6 +4,7 @@
   { "id": "image-gen", "schemaCategory": "MultimediaApplication" },
   { "id": "story-studio", "schemaCategory": "MultimediaApplication" },
   { "id": "meal-planner", "schemaCategory": "LifestyleApplication" },
+  { "id": "pregnancy-check", "schemaCategory": "HealthApplication", "held": true },
   { "id": "forge", "schemaCategory": "DeveloperApplication", "held": true },
   { "id": "unit-converter", "retired": true }
 ]

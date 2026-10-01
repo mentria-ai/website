@@ -1,3 +1,5 @@
+import * as FX from './fx.js';
+
 const MAT_ID = { concrete: 0, metal: 1, paint: 2, emissive: 3 };
 const SHADOW_SIZE = 2048;
 const MAX_LIGHTS = 16;
@@ -19,6 +21,7 @@ const TRAIL_LIFE = 0.7;
 const TRAIL_STEP = 0.028;
 const SPEC_HEADROOM = 0.32;
 const LDR_SCALE = 0.58;
+const DECAL_CORNERS = [-1, -1, 1, -1, 1, 1, -1, 1];
 
 const GLSL_NOISE = `
 float h21(vec2 p){ vec3 q = fract(vec3(p.x, p.y, p.x) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
@@ -1259,6 +1262,18 @@ export function createRenderer(canvas){
   let world = null;
   let vm = buildViewmodel();
   let gm = buildGhost();
+  let gfxOn = false;
+  let E = null;
+  let enhancedFailed = false;
+  const particles = FX.createParticles(900);
+  const motion = FX.createMotion();
+  const recoilFx = FX.createRecoilSpring();
+  let seenSparks = new WeakMap();
+  let lastMuzzle = 0;
+  let shotFrame = false;
+  let flashSpin = 0;
+  const texSrc = { panel: null, floor: null, voidImg: null, voidHorizon: -1, procPanel: null, procFloor: null };
+  let texLoadStarted = false;
 
   const P = {};
   const GLB = {
@@ -1524,6 +1539,8 @@ export function createRenderer(canvas){
     GLB.staticVBO = null;
     GLB.staticIBO = null;
     initGL();
+    E = null;
+    if (gfxOn && !initEnhanced()) gfxOn = false;
     const def = worldDef;
     world = null;
     if (def) compileWorld(def);
@@ -1741,7 +1758,9 @@ export function createRenderer(canvas){
         phase: hash01(i + 7) * Math.PI * 2,
         bobRate: 0.9 + hash01(i + 19) * 0.5,
         seed: hash01(i + 31) * 6.283,
-        downAt: -1
+        downAt: -1,
+        hitAt: -9,
+        spawnAt: -9
       });
     }
 
@@ -1774,8 +1793,18 @@ export function createRenderer(canvas){
       zenR: fogC[0] * 0.18 + 0.006, zenG: fogC[1] * 0.18 + 0.012, zenB: fogC[2] * 0.20 + 0.032,
       grdR: fogC[0] * 0.45, grdG: fogC[1] * 0.45, grdB: fogC[2] * 0.45,
       exposure: typeof def.exposure === 'number' && def.exposure > 0 ? def.exposure : 1.05,
-      specCap: SPEC_HEADROOM / Math.max(0.2126 * sunR + 0.7152 * sunG + 0.0722 * sunB, 0.001)
+      specCap: SPEC_HEADROOM / Math.max(0.2126 * sunR + 0.7152 * sunG + 0.0722 * sunB, 0.001),
+      fxPrims: prims,
+      fxLights: lights,
+      fxLamps: lampFloors(props, prims),
+      stars: 0.22 + 0.78 * clamp((sunC[2] - sunC[0]) / 0.15, 0, 1)
     };
+    particles.clear();
+    motion.reset();
+    recoilFx.reset();
+    seenSparks = new WeakMap();
+    decals.length = 0;
+    decalHead = 0;
 
     let amnx = Infinity, amny = Infinity, amnz = Infinity;
     let amxx = -Infinity, amxy = -Infinity, amxz = -Infinity;
@@ -1805,6 +1834,28 @@ export function createRenderer(canvas){
     m4Mul(mLightVP, mLightProj, mLightView);
     m4Mul(mShadow, mBias, mLightVP);
     renderShadowMap();
+  }
+
+  function lampFloors(props, prims){
+    const out = [];
+    for (let i = 0; i < props.length; i++){
+      const pr = props[i];
+      let fy = 0;
+      for (let k = 0; k < prims.length; k++){
+        const p = prims[k];
+        if (pr.x < p.min[0] || pr.x > p.max[0] || pr.z < p.min[2] || pr.z > p.max[2]) continue;
+        let top = p.max[1];
+        if (p.type === 'ramp'){
+          const a = p.axis;
+          let t = ((a === 0 ? pr.x : pr.z) - p.min[a]) / Math.max(p.max[a] - p.min[a], 1e-4);
+          if (p.sign < 0) t = 1 - t;
+          top = p.min[1] + (p.max[1] - p.min[1]) * clamp(t, 0, 1);
+        }
+        if (top <= pr.y - 0.2 && top > fy) fy = top;
+      }
+      out.push({ x: pr.x, y: pr.y, z: pr.z, r: pr.r, g: pr.g, b: pr.b, floor: fy });
+    }
+    return out;
   }
 
   function renderShadowMap(){
@@ -1873,7 +1924,7 @@ export function createRenderer(canvas){
     const cam = scene.camera || null;
     const cpos = cam && cam.pos && cam.pos.length >= 3 ? cam.pos : null;
     const px = cpos ? fnum(cpos[0], 0) : 0;
-    const py = cpos ? fnum(cpos[1], 1.62) : 1.62;
+    let py = cpos ? fnum(cpos[1], 1.62) : 1.62;
     const pz = cpos ? fnum(cpos[2], 0) : 0;
     const yaw = cam ? fnum(cam.yaw, 0) : 0;
     const pitch = clamp(cam ? fnum(cam.pitch, 0) : 0, -1.55, 1.55);
@@ -1881,9 +1932,23 @@ export function createRenderer(canvas){
     const cpit = Math.cos(pitch), spit = Math.sin(pitch);
     const cyaw = Math.cos(yaw), syaw = Math.sin(yaw);
     const fx = -syaw * cpit, fy = spit, fz = -cyaw * cpit;
-    const rx = cyaw, ry = 0, rz = -syaw;
-    const ux = ry * fz - rz * fy, uy = rz * fx - rx * fz, uz = rx * fy - ry * fx;
+    let rx = cyaw, ry = 0, rz = -syaw;
+    let ux = ry * fz - rz * fy, uy = rz * fx - rx * fz, uz = rx * fy - ry * fx;
     const aspect = drawW / drawH;
+    const enh = gfxOn && E !== null && world !== null;
+    if (enh){
+      motion.update(px, py, pz, rx, rz, step, time);
+      const calm = reducedMotion();
+      if (!calm) py -= motion.state.dip;
+      const rl = calm ? 0 : motion.state.roll;
+      if (rl !== 0){
+        const cr = Math.cos(rl), sr = Math.sin(rl);
+        const nrx = rx * cr + ux * sr, nry = ry * cr + uy * sr, nrz = rz * cr + uz * sr;
+        const nux = ux * cr - rx * sr, nuy = uy * cr - ry * sr, nuz = uz * cr - rz * sr;
+        rx = nrx; ry = nry; rz = nrz;
+        ux = nux; uy = nuy; uz = nuz;
+      }
+    }
 
     m4Perspective(mProj, fovY, aspect, 0.045, 420);
     m4LookAt(mView, px, py, pz, px + fx, py + fy, pz + fz, ux, uy, uz);
@@ -1918,54 +1983,58 @@ export function createRenderer(canvas){
     gl.disable(gl.BLEND);
     gl.disable(gl.CULL_FACE);
     gl.depthMask(false);
-    gl.useProgram(P.sky.p);
+    const PS = enh ? E.P.sky : P.sky;
+    gl.useProgram(PS.p);
     gl.bindVertexArray(GLB.emptyVAO);
     const tanH = Math.tan(fovY * 0.5);
-    s3f(P.sky, 'uRight', rx, ry, rz);
-    s3f(P.sky, 'uUp', ux, uy, uz);
-    s3f(P.sky, 'uFwd', fx, fy, fz);
-    s2f(P.sky, 'uTanFov', tanH * aspect, tanH);
-    s3f(P.sky, 'uZenith', world.zenR, world.zenG, world.zenB);
-    s3f(P.sky, 'uGround', world.grdR, world.grdG, world.grdB);
-    s3f(P.sky, 'uFogColor', world.fogR, world.fogG, world.fogB);
-    s3f(P.sky, 'uFogParam', world.fogDensity, world.fogFalloff, world.fogRef);
-    s3f(P.sky, 'uSunDir', world.sunX, world.sunY, world.sunZ);
-    s3f(P.sky, 'uSunColor', world.sunR, world.sunG, world.sunB);
-    s1f(P.sky, 'uPreExpose', preExpose);
+    s3f(PS, 'uRight', rx, ry, rz);
+    s3f(PS, 'uUp', ux, uy, uz);
+    s3f(PS, 'uFwd', fx, fy, fz);
+    s2f(PS, 'uTanFov', tanH * aspect, tanH);
+    s3f(PS, 'uZenith', world.zenR, world.zenG, world.zenB);
+    s3f(PS, 'uGround', world.grdR, world.grdG, world.grdB);
+    s3f(PS, 'uFogColor', world.fogR, world.fogG, world.fogB);
+    s3f(PS, 'uFogParam', world.fogDensity, world.fogFalloff, world.fogRef);
+    s3f(PS, 'uSunDir', world.sunX, world.sunY, world.sunZ);
+    s3f(PS, 'uSunColor', world.sunR, world.sunG, world.sunB);
+    s1f(PS, 'uPreExpose', preExpose);
+    if (enh) skyExtras(PS);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     gl.enable(gl.DEPTH_TEST);
     gl.depthMask(true);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
-    gl.useProgram(P.world.p);
+    const PW = enh ? E.P.world : P.world;
+    gl.useProgram(PW.p);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, GLB.shadowTex);
-    s1i(P.world, 'uShadow', 0);
-    s2f(P.world, 'uShadowTexel', 1 / SHADOW_SIZE, 1 / SHADOW_SIZE);
-    sm4(P.world, 'uViewProj', mVP);
-    sm4(P.world, 'uShadowMat', mShadow);
-    s3f(P.world, 'uCamPos', px, py, pz);
-    s3f(P.world, 'uSunDir', world.sunX, world.sunY, world.sunZ);
-    s3f(P.world, 'uSunColor', world.sunR, world.sunG, world.sunB);
-    s3f(P.world, 'uAmbient', world.ambR, world.ambG, world.ambB);
-    s3f(P.world, 'uFogColor', world.fogR, world.fogG, world.fogB);
-    s3f(P.world, 'uFogParam', world.fogDensity, world.fogFalloff, world.fogRef);
-    s4f(P.world, 'uMuzzle', mzx, mzy, mzz, muzzle);
-    s3f(P.world, 'uMuzzleColor', 1.0, 0.76, 0.42);
-    s1f(P.world, 'uPreExpose', preExpose);
-    s1f(P.world, 'uSpecCap', world.specCap);
+    s1i(PW, 'uShadow', 0);
+    s2f(PW, 'uShadowTexel', 1 / SHADOW_SIZE, 1 / SHADOW_SIZE);
+    sm4(PW, 'uViewProj', mVP);
+    sm4(PW, 'uShadowMat', mShadow);
+    s3f(PW, 'uCamPos', px, py, pz);
+    s3f(PW, 'uSunDir', world.sunX, world.sunY, world.sunZ);
+    s3f(PW, 'uSunColor', world.sunR, world.sunG, world.sunB);
+    s3f(PW, 'uAmbient', world.ambR, world.ambG, world.ambB);
+    s3f(PW, 'uFogColor', world.fogR, world.fogG, world.fogB);
+    s3f(PW, 'uFogParam', world.fogDensity, world.fogFalloff, world.fogRef);
+    s4f(PW, 'uMuzzle', mzx, mzy, mzz, muzzle);
+    s3f(PW, 'uMuzzleColor', 1.0, 0.76, 0.42);
+    s1f(PW, 'uPreExpose', preExpose);
+    s1f(PW, 'uSpecCap', world.specCap);
+    if (enh) worldExtras(PW);
     gl.bindVertexArray(GLB.staticVAO);
     const chunks = world.chunks;
     for (let i = 0; i < chunks.length; i++){
       const c = chunks[i];
       if (!aabbVisible(planes, c.mnx, c.mny, c.mnz, c.mxx, c.mxy, c.mxz)) continue;
-      s1i(P.world, 'uMat', c.mat);
-      s1i(P.world, 'uLightCount', c.lightCount);
+      s1i(PW, 'uMat', c.mat);
+      s1i(PW, 'uLightCount', c.lightCount);
       if (c.lightCount > 0){
-        s3v(P.world, 'uLightPos', c.lp);
-        s3v(P.world, 'uLightColor', c.lc);
-        s1fv(P.world, 'uLightRadius', c.lr);
+        s3v(PW, 'uLightPos', c.lp);
+        s3v(PW, 'uLightColor', c.lc);
+        s1fv(PW, 'uLightRadius', c.lr);
       }
       gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, c.start);
     }
@@ -1974,34 +2043,50 @@ export function createRenderer(canvas){
     if (targets.length > 0){
       const down = scene.targetsDown || null;
       gl.disable(gl.CULL_FACE);
-      gl.useProgram(P.target.p);
+      const PT = enh ? E.P.target : P.target;
+      gl.useProgram(PT.p);
       gl.bindVertexArray(GLB.quadVAO);
-      sm4(P.target, 'uViewProj', mVP);
-      s3f(P.target, 'uCamPos', px, py, pz);
-      s3f(P.target, 'uAmbient', world.ambR, world.ambG, world.ambB);
-      s3f(P.target, 'uMint', MINT[0], MINT[1], MINT[2]);
-      s3f(P.target, 'uAmberC', AMBER[0], AMBER[1], AMBER[2]);
-      s3f(P.target, 'uFogColor', world.fogR, world.fogG, world.fogB);
-      s3f(P.target, 'uFogParam', world.fogDensity, world.fogFalloff, world.fogRef);
-      s3f(P.target, 'uSunDir', world.sunX, world.sunY, world.sunZ);
-      s3f(P.target, 'uSunColor', world.sunR, world.sunG, world.sunB);
-      s1f(P.target, 'uPreExpose', preExpose);
-      s1f(P.target, 'uTime', time);
-      s3f(P.target, 'uRight', rx, ry, rz);
-      s3f(P.target, 'uUp', ux, uy, uz);
+      sm4(PT, 'uViewProj', mVP);
+      s3f(PT, 'uCamPos', px, py, pz);
+      s3f(PT, 'uAmbient', world.ambR, world.ambG, world.ambB);
+      s3f(PT, 'uMint', MINT[0], MINT[1], MINT[2]);
+      s3f(PT, 'uAmberC', AMBER[0], AMBER[1], AMBER[2]);
+      s3f(PT, 'uFogColor', world.fogR, world.fogG, world.fogB);
+      s3f(PT, 'uFogParam', world.fogDensity, world.fogFalloff, world.fogRef);
+      s3f(PT, 'uSunDir', world.sunX, world.sunY, world.sunZ);
+      s3f(PT, 'uSunColor', world.sunR, world.sunG, world.sunB);
+      s1f(PT, 'uPreExpose', preExpose);
+      s1f(PT, 'uTime', time);
+      s3f(PT, 'uRight', rx, ry, rz);
+      s3f(PT, 'uUp', ux, uy, uz);
       for (let i = 0; i < targets.length; i++){
         const t = targets[i];
         const isDown = down && down[t.id] ? 1 : 0;
+        const wasDown = t.downAt >= 0;
         if (isDown){
           if (t.downAt < 0) t.downAt = time;
         } else if (t.downAt >= 0) t.downAt = -1;
-        const by = t.y + Math.sin(time * t.bobRate + t.phase) * 0.055;
+        let by = t.y + Math.sin(time * t.bobRate + t.phase) * 0.055;
+        if (enh){
+          if (isDown && !wasDown) particles.burst([t.x, by, t.z], t.radius, [rx, ry, rz], [ux, uy, uz], MINT, AMBER);
+          if (!isDown && wasDown) t.spawnAt = time;
+          if (isDown){
+            const age = time - t.downAt;
+            if (age > 0.66) continue;
+            by -= 0.9 * age * age;
+            const tilt = Math.min(1.25, age * age * 5.5);
+            const ct = Math.cos(tilt), st = Math.sin(tilt);
+            s3f(PT, 'uUp', ux * ct + fx * st, uy * ct + fy * st, uz * ct + fz * st);
+          } else s3f(PT, 'uUp', ux, uy, uz);
+          s1f(PT, 'uHit', Math.max(0, 1 - (time - t.hitAt) / 0.12));
+          s1f(PT, 'uSpawn', clamp((time - t.spawnAt) / 0.4, 0, 1));
+        }
         if (!sphereVisible(planes, t.x, by, t.z, t.radius * 1.5)) continue;
-        s3f(P.target, 'uCenter', t.x, by, t.z);
-        s1f(P.target, 'uRadius', t.radius);
-        s1f(P.target, 'uDown', isDown);
-        s1f(P.target, 'uDownAge', isDown ? time - t.downAt : 0);
-        s1f(P.target, 'uSeed', t.seed);
+        s3f(PT, 'uCenter', t.x, by, t.z);
+        s1f(PT, 'uRadius', t.radius);
+        s1f(PT, 'uDown', isDown);
+        s1f(PT, 'uDownAge', isDown ? time - t.downAt : 0);
+        s1f(PT, 'uSeed', t.seed);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       }
     }
@@ -2009,7 +2094,7 @@ export function createRenderer(canvas){
     drawGhost(scene, px, py, pz, rx, ry, rz, ux, uy, uz, preExpose);
 
     let tc = 0;
-    const tracers = scene.tracers;
+    const tracers = enh ? null : scene.tracers;
     if (tracers && tracers.length > 0){
       for (let i = 0; i < tracers.length && tc < MAX_TRACERS; i++){
         const t = tracers[i];
@@ -2039,7 +2124,7 @@ export function createRenderer(canvas){
       }
     }
     let sc = 0;
-    const sparks = scene.sparks;
+    const sparks = enh ? null : scene.sparks;
     if (sparks && sparks.length > 0){
       for (let i = 0; i < sparks.length && sc < MAX_SPARKS; i++){
         const s = sparks[i];
@@ -2083,8 +2168,10 @@ export function createRenderer(canvas){
       gl.disable(gl.BLEND);
     }
 
-    drawViewmodel(scene, aspect, muzzle, preExpose);
-    postProcess(postExpose, glitch, aspect);
+    if (enh) transparentE(scene, step, px, py, pz, fx, fy, fz, rx, ry, rz, ux, uy, uz, preExpose, muzzle);
+    drawViewmodel(scene, aspect, muzzle, preExpose, enh, step);
+    if (enh) postProcessE(postExpose, glitch, aspect, preExpose, fx, fy, fz);
+    else postProcess(postExpose, glitch, aspect);
   }
 
   function fnum(v, d){ return typeof v === 'number' && isFinite(v) ? v : d; }
@@ -2192,7 +2279,7 @@ export function createRenderer(canvas){
     gl.depthMask(true);
   }
 
-  function drawViewmodel(scene, aspect, muzzle, preExpose){
+  function drawViewmodel(scene, aspect, muzzle, preExpose, enh, step){
     const vs = scene.viewmodel || null;
     const ads = clamp(vs ? fnum(vs.adsBlend, 0) : 0, 0, 1);
     const recoil = clamp(vs ? fnum(vs.recoil, 0) : 0, 0, 1);
@@ -2246,6 +2333,29 @@ export function createRenderer(canvas){
       magOut = clamp(seg(reload, 0.08, 0.30) - seg(reload, 0.50, 0.78), 0, 1);
     }
 
+    if (enh){
+      if (shotFrame) recoilFx.shot(particles.rnd);
+      recoilFx.update(step);
+      const ms = motion.state;
+      const rs = recoilFx.state;
+      gy -= ms.gunDip * 0.30 + ms.dip * 0.35;
+      grx -= ms.gunDip * 0.9;
+      grz += ms.roll * 1.8;
+      gx -= ms.lat * 0.0016 * hip;
+      grx += rs.rot * 0.30;
+      gz += rs.back * 1.0;
+      grz += rs.roll * 0.25;
+      if (reload >= 0){
+        const seat = Math.exp(-Math.pow((reload - 0.60) / 0.035, 2));
+        gy += 0.012 * seat;
+        grx += 0.06 * seat;
+        const pull = seg(reload, 0.80, 0.87) - seg(reload, 0.87, 0.95);
+        gz += 0.028 * pull;
+        grz -= 0.10 * pull;
+        gry -= 0.06 * pull;
+      }
+    }
+
     m4TR(mGun, gx, gy, gz, grx, gry, grz);
     m4TR(mMagLocal, 0, -0.30 * magOut, 0.03 * magOut, -0.55 * magOut, 0, 0.22 * magOut);
     m4Mul(mMag, mGun, mMagLocal);
@@ -2262,26 +2372,42 @@ export function createRenderer(canvas){
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
     gl.disable(gl.BLEND);
-    gl.useProgram(P.viewmodel.p);
+    const PV = enh ? E.P.viewmodel : P.viewmodel;
+    gl.useProgram(PV.p);
     gl.bindVertexArray(GLB.vmVAO);
-    sm4(P.viewmodel, 'uProj', mGunProj);
-    s3v(P.viewmodel, 'uSunCam', sunCam);
-    s3f(P.viewmodel, 'uSunColor', world.sunR, world.sunG, world.sunB);
-    s3f(P.viewmodel, 'uAmbient', world.ambR, world.ambG, world.ambB);
-    s1f(P.viewmodel, 'uFlash', muzzle);
-    s3v(P.viewmodel, 'uFlashPos', tmp3);
-    s1f(P.viewmodel, 'uPreExpose', preExpose);
-    s1f(P.viewmodel, 'uSpecCap', world.specCap);
+    sm4(PV, 'uProj', mGunProj);
+    s3v(PV, 'uSunCam', sunCam);
+    s3f(PV, 'uSunColor', world.sunR, world.sunG, world.sunB);
+    s3f(PV, 'uAmbient', world.ambR, world.ambG, world.ambB);
+    s1f(PV, 'uFlash', muzzle);
+    s3v(PV, 'uFlashPos', tmp3);
+    s1f(PV, 'uPreExpose', preExpose);
+    s1f(PV, 'uSpecCap', world.specCap);
+    if (enh){
+      s1f(PV, 'uTime', time);
+      s3f(PV, 'uRimColor', MINT[0] * 0.18 + world.fogR * 0.6, MINT[1] * 0.18 + world.fogG * 0.6, MINT[2] * 0.18 + world.fogB * 0.6);
+    }
     const parts = vm.parts;
     let boundMag = -1;
     for (let i = 0; i < parts.length; i++){
       const pt = parts[i];
       if (pt.dyn !== boundMag){
-        sm4(P.viewmodel, 'uModel', pt.dyn ? mMag : mGun);
+        sm4(PV, 'uModel', pt.dyn ? mMag : mGun);
         boundMag = pt.dyn;
       }
-      s1i(P.viewmodel, 'uMat', pt.mat);
+      s1i(PV, 'uMat', pt.mat);
       gl.drawElements(gl.TRIANGLES, pt.count, gl.UNSIGNED_INT, pt.start * 4);
+    }
+    if (enh && E.vmx){
+      gl.bindVertexArray(E.vmx.vao);
+      sm4(PV, 'uModel', mMag);
+      s1i(PV, 'uMat', 2);
+      gl.drawElements(gl.TRIANGLES, E.vmx.magCount, gl.UNSIGNED_INT, E.vmx.magStart * 4);
+      sm4(PV, 'uModel', mGun);
+      s1i(PV, 'uMat', 1);
+      gl.drawElements(gl.TRIANGLES, E.vmx.plainCount, gl.UNSIGNED_INT, 0);
+      s1i(PV, 'uMat', 3);
+      gl.drawElements(gl.TRIANGLES, E.vmx.glowCount, gl.UNSIGNED_INT, E.vmx.glowStart * 4);
     }
 
     if (muzzle > 0.003){
@@ -2289,13 +2415,15 @@ export function createRenderer(canvas){
       gl.blendFunc(gl.ONE, gl.ONE);
       gl.depthMask(false);
       gl.disable(gl.CULL_FACE);
-      gl.useProgram(P.flash.p);
+      const PF = enh ? E.P.flash : P.flash;
+      gl.useProgram(PF.p);
       gl.bindVertexArray(GLB.quadVAO);
-      sm4(P.flash, 'uProj', mGunProj);
-      s3v(P.flash, 'uCenter', tmp3);
-      s1f(P.flash, 'uSize', 0.085 + 0.075 * muzzle);
-      s1f(P.flash, 'uIntensity', muzzle);
-      s1f(P.flash, 'uPreExpose', preExpose);
+      sm4(PF, 'uProj', mGunProj);
+      s3v(PF, 'uCenter', tmp3);
+      s1f(PF, 'uSize', enh ? 0.10 + 0.10 * muzzle : 0.085 + 0.075 * muzzle);
+      s1f(PF, 'uIntensity', muzzle);
+      s1f(PF, 'uPreExpose', preExpose);
+      if (enh) s1f(PF, 'uSpin', flashSpin);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       gl.disable(gl.BLEND);
     }
@@ -2355,6 +2483,677 @@ export function createRenderer(canvas){
     gl.depthMask(true);
   }
 
+  function makeTex(data, size, wrapS, wrapT){
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS || gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT || gl.REPEAT);
+    if (E && E.aniso) gl.texParameterf(gl.TEXTURE_2D, E.aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, E.anisoMax));
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    return t;
+  }
+
+  function setSurface(name, src){
+    if (!E) return;
+    const slot = E.tex[name];
+    if (slot){
+      gl.deleteTexture(slot.a);
+      gl.deleteTexture(slot.n);
+    }
+    E.tex[name] = { a: makeTex(src.albedo, src.size), n: makeTex(src.normal, src.size), avg: src.avg };
+  }
+
+  function setVoid(img){
+    if (!E || !img) return;
+    if (E.tex.void){ gl.deleteTexture(E.tex.void); E.tex.void = null; }
+    const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+    if (!(w > 0 && h > 0)) return;
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    const span = (Math.PI * 2) * (h / w);
+    const rep = clamp(Math.round(span / 0.5), 1, 6);
+    const range = span / rep;
+    const hv = texSrc.voidHorizon >= 0 ? texSrc.voidHorizon : (texSrc.voidHorizon = FX.horizonOf(img));
+    const hi = 0.012 + hv * range;
+    E.tex.void = t;
+    E.voidBand = [hi - range, hi, rep];
+  }
+
+  function startTextureLoads(){
+    if (texLoadStarted) return;
+    texLoadStarted = true;
+    FX.loadImage(FX.TEXTURE_URLS.panel).then((img) => {
+      const t = img ? FX.textureFromImage(img, 768) : null;
+      if (!t) return;
+      texSrc.panel = t;
+      if (E && !contextLost) setSurface('metal', t);
+    });
+    FX.loadImage(FX.TEXTURE_URLS.floor).then((img) => {
+      const t = img ? FX.textureFromImage(img, 768) : null;
+      if (!t) return;
+      texSrc.floor = t;
+      if (E && !contextLost) setSurface('plate', t);
+    });
+    FX.loadImage(FX.TEXTURE_URLS.void).then((img) => {
+      if (!img) return;
+      texSrc.voidImg = img;
+      if (E && !contextLost) setVoid(img);
+    });
+  }
+
+  function buildVmExtras(){
+    const m = newMesh();
+    const dark = 0.055;
+    vmBox(m, -0.0155, 0.053, -0.112, 0.0155, 0.0552, 0.012, dark, dark * 1.03, dark * 1.1);
+    for (let z = -0.108; z < 0.008; z += 0.0125) vmBox(m, -0.0155, 0.0552, z, 0.0155, 0.0578, z + 0.0062, dark, dark * 1.03, dark * 1.1);
+    for (let k = 0; k < 5; k++){
+      const z0 = -0.392 + k * 0.031;
+      vmBox(m, -0.0257, -0.017, z0, -0.0249, -0.009, z0 + 0.018, 0.03, 0.031, 0.034);
+    }
+    vmCyl(m, 0.0, 0.004, -0.656, -0.651, 0.0194, 10, 0.035, 0.036, 0.04);
+    vmCyl(m, 0.0, 0.004, -0.638, -0.633, 0.0194, 10, 0.035, 0.036, 0.04);
+    vmBox(m, -0.012, 0.041, 0.150, 0.012, 0.048, 0.174, dark * 1.2, dark * 1.2, dark * 1.3);
+    const plain = m.i.length;
+    const v0 = m.v.length / VSTRIDE;
+    for (let k = 0; k < 5; k++){
+      const y0 = -0.152 + k * 0.022;
+      vmBox(m, -0.0208, y0, -0.103, -0.0199, y0 + 0.0045, -0.015, 0.07, 0.072, 0.075);
+    }
+    rotateRangeX(m, v0, 0.14, -0.028, -0.060);
+    const magEnd = m.i.length;
+    vmBox(m, -0.0262, -0.004, -0.392, -0.0250, 0.002, -0.240, MINT[0], MINT[1], MINT[2]);
+    vmBox(m, -0.0300, 0.019, -0.150, -0.0289, 0.0225, -0.030, MINT[0], MINT[1], MINT[2]);
+    vmBox(m, -0.0026, 0.067, 0.025, 0.0026, 0.0722, 0.030, MINT[0], MINT[1], MINT[2]);
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(m.v), gl.STATIC_DRAW);
+    const ibo = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(m.i), gl.STATIC_DRAW);
+    const vao = meshVAO(vbo, ibo);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    return { vao: vao, vbo: vbo, ibo: ibo, plainCount: plain, magStart: plain, magCount: magEnd - plain,
+      glowStart: magEnd, glowCount: m.i.length - magEnd };
+  }
+
+  function partVAO(){
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, particles.max * FX.PART_FLOATS * 4, gl.DYNAMIC_DRAW);
+    const vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, GLB.quadVBO);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 8, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    const stride = FX.PART_FLOATS * 4;
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, stride, 0);
+    gl.vertexAttribDivisor(1, 1);
+    gl.enableVertexAttribArray(2);
+    gl.vertexAttribPointer(2, 3, gl.FLOAT, false, stride, 12);
+    gl.vertexAttribDivisor(2, 1);
+    gl.enableVertexAttribArray(3);
+    gl.vertexAttribPointer(3, 3, gl.FLOAT, false, stride, 24);
+    gl.vertexAttribDivisor(3, 1);
+    gl.enableVertexAttribArray(4);
+    gl.vertexAttribPointer(4, 4, gl.FLOAT, false, stride, 36);
+    gl.vertexAttribDivisor(4, 1);
+    gl.bindVertexArray(null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    return { vao: vao, vbo: vbo };
+  }
+
+  function initEnhanced(){
+    if (E) return true;
+    if (contextLost) return false;
+    try {
+      const e = { P: {}, tex: {}, rt: null, rtW: 0, rtH: 0, aniso: null, anisoMax: 1, voidBand: [-0.03, 0.3, 1] };
+      e.P.world = makeProgram(gl, VS_WORLD, FX.FS_WORLD_E);
+      e.P.sky = makeProgram(gl, VS_SKY, FX.FS_SKY_E);
+      e.P.target = makeProgram(gl, VS_TARGET, FX.FS_TARGET_E);
+      e.P.viewmodel = makeProgram(gl, VS_VIEWMODEL, FX.FS_VIEWMODEL_E);
+      e.P.flash = makeProgram(gl, VS_FLASH, FX.FS_FLASH_E);
+      e.P.tracer = makeProgram(gl, VS_TRACER, FX.FS_TRACER_E);
+      e.P.part = makeProgram(gl, FX.VS_PART, FX.FS_PART);
+      e.P.decal = makeProgram(gl, FX.VS_DECAL, FX.FS_DECAL);
+      e.P.down = makeProgram(gl, VS_FULL, FX.FS_DOWN);
+      e.P.up = makeProgram(gl, VS_FULL, FX.FS_UP);
+      e.P.rays = makeProgram(gl, VS_FULL, FX.FS_RAYS);
+      e.P.composite = makeProgram(gl, VS_FULL, FX.FS_COMPOSITE_E);
+      e.P.glitch = makeProgram(gl, VS_FULL, '#version 300 es\n#define GLITCH 1\n' + FX.FS_COMPOSITE_E.slice(FX.FS_COMPOSITE_E.indexOf('\n') + 1));
+      e.aniso = gl.getExtension('EXT_texture_filter_anisotropic') || gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
+      if (e.aniso) e.anisoMax = gl.getParameter(e.aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 1;
+      E = e;
+      if (!texSrc.procPanel) texSrc.procPanel = FX.makePanelTexture(512);
+      if (!texSrc.procFloor) texSrc.procFloor = FX.makeFloorTexture(512);
+      setSurface('panel', texSrc.procPanel);
+      setSurface('floor', texSrc.procFloor);
+      if (texSrc.panel) setSurface('metal', texSrc.panel);
+      if (texSrc.floor) setSurface('plate', texSrc.floor);
+      E.tex.blank = makeTex(new Uint8Array([0, 0, 0, 0]), 1);
+      if (texSrc.voidImg) setVoid(texSrc.voidImg);
+      E.vmx = buildVmExtras();
+      E.partA = partVAO();
+      E.partB = partVAO();
+      E.decal = decalVAO();
+      gl.bindVertexArray(null);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      startTextureLoads();
+      return true;
+    } catch (err) {
+      E = null;
+      enhancedFailed = true;
+      try { console.error('[phosphor] enhanced graphics unavailable', err); } catch (_) {}
+      return false;
+    }
+  }
+
+  function setGraphics(mode){
+    const want = mode === FX.GFX_ENHANCED;
+    if (want && !E && (enhancedFailed || !initEnhanced())){
+      gfxOn = false;
+      return FX.GFX_CLASSIC;
+    }
+    if (want !== gfxOn){
+      gfxOn = want;
+      particles.clear();
+      motion.reset();
+      recoilFx.reset();
+      seenSparks = new WeakMap();
+      decals.length = 0;
+      decalHead = 0;
+      if (world){
+        for (let i = 0; i < world.targets.length; i++){ world.targets[i].hitAt = -9; world.targets[i].spawnAt = -9; }
+      }
+    }
+    return gfxOn ? FX.GFX_ENHANCED : FX.GFX_CLASSIC;
+  }
+
+  function getGraphics(){ return gfxOn ? FX.GFX_ENHANCED : FX.GFX_CLASSIC; }
+
+  let motionQuery = null;
+  function reducedMotion(){
+    if (motionQuery === null){
+      try {
+        motionQuery = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : false;
+      } catch (_) {
+        motionQuery = false;
+      }
+    }
+    return !!(motionQuery && motionQuery.matches);
+  }
+
+  function defaultGraphics(){ return FX.defaultGraphics(contextLost ? null : gl); }
+
+  function skyExtras(PS){
+    s1f(PS, 'uTime', time);
+    s1f(PS, 'uStars', world.stars);
+    gl.activeTexture(gl.TEXTURE7);
+    gl.bindTexture(gl.TEXTURE_2D, E.tex.void || E.tex.blank);
+    s1i(PS, 'uVoid', 7);
+    s1f(PS, 'uVoidOn', E.tex.void ? 1 : 0);
+    s3f(PS, 'uVoidBand', E.voidBand[0], E.voidBand[1], E.voidBand[2]);
+    gl.activeTexture(gl.TEXTURE0);
+  }
+
+  function worldExtras(PW){
+    const tp = E.tex.panel, tf = E.tex.floor;
+    const tm = E.tex.metal || tp, tl = E.tex.plate || tp;
+    const sets = [tp, tf, tm, tl];
+    const names = ['uPanel', 'uFloor', 'uMetal', 'uPlate'];
+    for (let i = 0; i < 4; i++){
+      const t = sets[i];
+      gl.activeTexture(gl.TEXTURE3 + i * 2);
+      gl.bindTexture(gl.TEXTURE_2D, t.a);
+      gl.activeTexture(gl.TEXTURE4 + i * 2);
+      gl.bindTexture(gl.TEXTURE_2D, t.n);
+      s1i(PW, names[i] + 'A', 3 + i * 2);
+      s1i(PW, names[i] + 'N', 4 + i * 2);
+      s3f(PW, names[i] + 'Avg', t.avg[0], t.avg[1], t.avg[2]);
+    }
+    gl.activeTexture(gl.TEXTURE0);
+    s2f(PW, 'uGen', E.tex.metal ? 1 : 0, E.tex.plate ? 1 : 0);
+    s3f(PW, 'uZenith', world.zenR, world.zenG, world.zenB);
+    s1f(PW, 'uTime', time);
+  }
+
+  const impactDir = [0, 0, -1];
+  const impactLight = [1, 1, 1];
+
+  function spawnImpact(s, fx, fy, fz){
+    const x = s.pos[0], y = s.pos[1], z = s.pos[2];
+    impactDir[0] = fx; impactDir[1] = fy; impactDir[2] = fz;
+    const trs = currentTracers;
+    if (trs){
+      for (let i = 0; i < trs.length; i++){
+        const t = trs[i];
+        if (!t || !t.to || !t.from) continue;
+        const dx = t.to[0] - x, dy = t.to[1] - y, dz = t.to[2] - z;
+        if (dx * dx + dy * dy + dz * dz > 1e-4) continue;
+        const ax = t.to[0] - t.from[0], ay = t.to[1] - t.from[1], az = t.to[2] - t.from[2];
+        const l = Math.sqrt(ax * ax + ay * ay + az * az);
+        if (l > 1e-4){ impactDir[0] = ax / l; impactDir[1] = ay / l; impactDir[2] = az / l; }
+        break;
+      }
+    }
+    const tg = world.targets;
+    for (let i = 0; i < tg.length; i++){
+      const t = tg[i];
+      const dx = x - t.x, dy = y - t.y, dz = z - t.z;
+      const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (d <= t.radius * 1.15 && d > 1e-4){
+        t.hitAt = time;
+        particles.impact(s.pos, [dx / d, dy / d, dz / d], impactDir, 'target', null);
+        return;
+      }
+    }
+    const surf = FX.surfaceAt(world.fxPrims, x, y, z);
+    const n = surf ? surf.n : [-impactDir[0], -impactDir[1], -impactDir[2]];
+    if (surf) addDecal(x, y, z, n);
+    impactLight[0] = clamp(world.ambR * 3.0 + world.sunR * 0.10, 0.25, 1.4);
+    impactLight[1] = clamp(world.ambG * 3.0 + world.sunG * 0.10, 0.25, 1.4);
+    impactLight[2] = clamp(world.ambB * 3.0 + world.sunB * 0.10, 0.25, 1.4);
+    particles.impact(s.pos, n, impactDir, surf ? surf.mat : 'concrete', impactLight);
+  }
+
+  const DECAL_MAX = 64;
+  const DECAL_LIFE = 14;
+  const decals = [];
+  let decalHead = 0;
+  const decalData = new Float32Array(DECAL_MAX * 4 * 7);
+
+  function addDecal(x, y, z, n){
+    let d;
+    if (decals.length < DECAL_MAX){ d = {}; decals.push(d); }
+    else { d = decals[decalHead]; decalHead = (decalHead + 1) % DECAL_MAX; }
+    d.x = x + n[0] * 0.004; d.y = y + n[1] * 0.004; d.z = z + n[2] * 0.004;
+    d.nx = n[0]; d.ny = n[1]; d.nz = n[2];
+    d.rot = particles.rnd() * Math.PI * 2;
+    d.size = 0.075 + particles.rnd() * 0.035;
+    d.born = time;
+  }
+
+  function fillDecals(){
+    let k = 0;
+    for (let i = 0; i < decals.length; i++){
+      const d = decals[i];
+      const age = time - d.born;
+      if (age < 0 || age > DECAL_LIFE) continue;
+      const alpha = Math.min(1, (DECAL_LIFE - age) / 3);
+      const heat = Math.exp(-age * 5.5);
+      let ax = 0, ay = 1, az = 0;
+      if (Math.abs(d.ny) > 0.9){ ax = 1; ay = 0; az = 0; }
+      let tx = ay * d.nz - az * d.ny, ty = az * d.nx - ax * d.nz, tz = ax * d.ny - ay * d.nx;
+      const tl = 1 / Math.max(Math.sqrt(tx * tx + ty * ty + tz * tz), 1e-6);
+      tx *= tl; ty *= tl; tz *= tl;
+      const bx = d.ny * tz - d.nz * ty, by = d.nz * tx - d.nx * tz, bz = d.nx * ty - d.ny * tx;
+      const c = Math.cos(d.rot) * d.size, s = Math.sin(d.rot) * d.size;
+      const ux1 = tx * c + bx * s, uy1 = ty * c + by * s, uz1 = tz * c + bz * s;
+      const vx1 = bx * c - tx * s, vy1 = by * c - ty * s, vz1 = bz * c - tz * s;
+      const o = k * 28;
+      for (let v = 0; v < 4; v++){
+        const cu = DECAL_CORNERS[v * 2], cv = DECAL_CORNERS[v * 2 + 1];
+        const q = o + v * 7;
+        decalData[q] = d.x + ux1 * cu + vx1 * cv;
+        decalData[q + 1] = d.y + uy1 * cu + vy1 * cv;
+        decalData[q + 2] = d.z + uz1 * cu + vz1 * cv;
+        decalData[q + 3] = cu; decalData[q + 4] = cv;
+        decalData[q + 5] = alpha; decalData[q + 6] = heat;
+      }
+      k++;
+    }
+    return k;
+  }
+
+  function decalVAO(){
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, decalData.byteLength, gl.DYNAMIC_DRAW);
+    const vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GLB.tracerIBO);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 28, 0);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 28, 12);
+    gl.enableVertexAttribArray(2);
+    gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 28, 20);
+    gl.enableVertexAttribArray(3);
+    gl.vertexAttribPointer(3, 1, gl.FLOAT, false, 28, 24);
+    gl.bindVertexArray(null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    return { vao: vao, vbo: vbo };
+  }
+
+  let currentTracers = null;
+  const mzPos = [0, 0, 0];
+  const casePos = [0, 0, 0];
+  const vF = [0, 0, -1];
+  const vR = [1, 0, 0];
+  const vU = [0, 1, 0];
+
+  function transparentE(scene, step, px, py, pz, fx, fy, fz, rx, ry, rz, ux, uy, uz, preExpose, muzzle){
+    shotFrame = muzzle > lastMuzzle + 0.4;
+    lastMuzzle = muzzle;
+    vF[0] = fx; vF[1] = fy; vF[2] = fz;
+    vR[0] = rx; vR[1] = ry; vR[2] = rz;
+    vU[0] = ux; vU[1] = uy; vU[2] = uz;
+    if (shotFrame){
+      flashSpin = particles.rnd() * Math.PI * 2;
+      const ads = scene.viewmodel ? clamp(fnum(scene.viewmodel.adsBlend, 0), 0, 1) : 0;
+      const lat = 0.13 * (1 - ads);
+      mzPos[0] = px + fx * 0.62 + rx * lat - ux * 0.08;
+      mzPos[1] = py + fy * 0.62 + ry * lat - uy * 0.08;
+      mzPos[2] = pz + fz * 0.62 + rz * lat - uz * 0.08;
+      const lit = clamp(world.ambG * 4 + 0.35, 0.4, 1.2);
+      particles.muzzle(mzPos, vF, vR, vU, lit);
+      casePos[0] = px + fx * 0.30 + rx * (0.12 + lat * 0.5) - ux * 0.08;
+      casePos[1] = py + fy * 0.30 + ry * (0.12 + lat * 0.5) - uy * 0.08;
+      casePos[2] = pz + fz * 0.30 + rz * (0.12 + lat * 0.5) - uz * 0.08;
+      particles.casing(casePos, vF, vR, vU, lit * 1.6);
+    }
+    currentTracers = scene.tracers || null;
+    const sparks = scene.sparks;
+    if (sparks && sparks.length > 0){
+      for (let i = 0; i < sparks.length; i++){
+        const s = sparks[i];
+        if (!s || !s.pos || s.pos.length < 3) continue;
+        const a01 = fnum(s.age01, 0);
+        const prev = seenSparks.get(s);
+        if (prev === undefined || a01 < prev) spawnImpact(s, fx, fy, fz);
+        seenSparks.set(s, a01);
+      }
+    }
+    const lights = world.fxLights;
+    for (let i = 0; i < lights.length; i++){
+      const l = lights[i];
+      const dx = l.x - px, dz = l.z - pz;
+      if (dx * dx + dz * dz > 900) continue;
+      if (particles.rnd() > step * 1.6) continue;
+      const a = particles.rnd() * Math.PI * 2, r = Math.sqrt(particles.rnd()) * Math.min(2.6, l.radius * 0.3);
+      const y = 0.3 + particles.rnd() * Math.max(0.4, l.y - 0.5);
+      const m = Math.max(l.r, l.g, l.b, 0.001);
+      particles.mote(l.x + Math.cos(a) * r, y, l.z + Math.sin(a) * r, l.r / m * 0.9, l.g / m * 0.9, l.b / m * 0.9);
+    }
+    particles.update(step);
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthMask(false);
+    gl.disable(gl.CULL_FACE);
+    gl.enable(gl.BLEND);
+
+    const dc = decals.length > 0 ? fillDecals() : 0;
+    if (dc > 0){
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      const PDc = E.P.decal;
+      gl.useProgram(PDc.p);
+      sm4(PDc, 'uViewProj', mVP);
+      s3f(PDc, 'uCamPos', px, py, pz);
+      s1f(PDc, 'uPreExpose', preExpose);
+      s3f(PDc, 'uTint', 0.068, 0.064, 0.060);
+      s3f(PDc, 'uFogColor', world.fogR, world.fogG, world.fogB);
+      s3f(PDc, 'uFogParam', world.fogDensity, world.fogFalloff, world.fogRef);
+      s3f(PDc, 'uSunDir', world.sunX, world.sunY, world.sunZ);
+      s3f(PDc, 'uSunColor', world.sunR, world.sunG, world.sunB);
+      s1f(PDc, 'uTime', time);
+      gl.bindVertexArray(E.decal.vao);
+      gl.bindBuffer(gl.ARRAY_BUFFER, E.decal.vbo);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, decalData, 0, dc * 28);
+      gl.drawElements(gl.TRIANGLES, dc * 6, gl.UNSIGNED_INT, 0);
+    }
+
+    let tc = 0;
+    const tracers = currentTracers;
+    if (tracers && tracers.length > 0){
+      for (let i = 0; i < tracers.length && tc < MAX_TRACERS - 1; i++){
+        const t = tracers[i];
+        if (!t || !t.from || !t.to || t.from.length < 3 || t.to.length < 3) continue;
+        const a01 = clamp(fnum(t.age01, 0), 0, 1);
+        const fade = (1 - a01) * (1 - a01);
+        if (fade < 0.003) continue;
+        const ax = t.from[0], ay = t.from[1], az = t.from[2];
+        const dx = t.to[0] - ax, dy = t.to[1] - ay, dz = t.to[2] - az;
+        const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (len < 1e-4) continue;
+        const head = Math.min(1, a01 * 2.6 + 0.08);
+        const tail = Math.max(0, head - 4.0 / len);
+        tc = pushTracer(tc, ax, ay, az, dx, dy, dz, 0, 1, fade * 0.10, fade * 0.16, px, py, pz, 0.020);
+        tc = pushTracer(tc, ax, ay, az, dx, dy, dz, tail, head, fade * 0.15, fade * 1.15, px, py, pz, 0.030);
+      }
+    }
+    if (tc > 0){
+      gl.blendFunc(gl.ONE, gl.ONE);
+      gl.bindVertexArray(GLB.tracerVAO);
+      gl.bindBuffer(gl.ARRAY_BUFFER, GLB.tracerVBO);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, tracerData, 0, tc * 20);
+      gl.useProgram(E.P.tracer.p);
+      sm4(E.P.tracer, 'uViewProj', mVP);
+      s1f(E.P.tracer, 'uPreExpose', preExpose);
+      gl.drawElements(gl.TRIANGLES, tc * 6, gl.UNSIGNED_INT, 0);
+    }
+
+    const pf = particles.fill();
+    const lamps = world.fxLamps;
+    for (let i = 0; i < lamps.length && pf.addCount < particles.max - 2; i++){
+      const lp = lamps[i];
+      const dx = lp.x - px, dz = lp.z - pz;
+      if (dx * dx + dz * dz > 3600) continue;
+      const L = lp.y - lp.floor - 0.05;
+      const flick = 0.94 + 0.06 * Math.sin(time * 7.3 + i * 1.7) * Math.sin(time * 2.1 + i);
+      let o = pf.addCount * FX.PART_FLOATS;
+      const A = pf.add;
+      A[o] = lp.x; A[o + 1] = lp.y; A[o + 2] = lp.z;
+      A[o + 3] = 0; A[o + 4] = 0; A[o + 5] = 0;
+      A[o + 6] = 0.55; A[o + 7] = 0; A[o + 8] = 0;
+      A[o + 9] = lp.r * 0.55 * flick; A[o + 10] = lp.g * 0.55 * flick; A[o + 11] = lp.b * 0.55 * flick; A[o + 12] = 0;
+      pf.addCount++;
+      if (L > 0.4){
+        o = pf.addCount * FX.PART_FLOATS;
+        A[o] = lp.x; A[o + 1] = lp.floor + 0.05; A[o + 2] = lp.z;
+        A[o + 3] = 0; A[o + 4] = -L; A[o + 5] = 0;
+        A[o + 6] = 0.55 + L * 0.28; A[o + 7] = 1; A[o + 8] = 4;
+        A[o + 9] = lp.r * 0.15 * flick; A[o + 10] = lp.g * 0.15 * flick; A[o + 11] = lp.b * 0.15 * flick; A[o + 12] = 0;
+        pf.addCount++;
+      }
+    }
+    if (pf.alphaCount > 0 || pf.addCount > 0){
+      const PP = E.P.part;
+      gl.useProgram(PP.p);
+      sm4(PP, 'uViewProj', mVP);
+      s3f(PP, 'uCamPos', px, py, pz);
+      s3f(PP, 'uRight', rx, ry, rz);
+      s3f(PP, 'uUp', ux, uy, uz);
+      s1f(PP, 'uPreExpose', preExpose);
+      if (pf.alphaCount > 0){
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        gl.bindVertexArray(E.partA.vao);
+        gl.bindBuffer(gl.ARRAY_BUFFER, E.partA.vbo);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, pf.alpha, 0, pf.alphaCount * FX.PART_FLOATS);
+        gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, pf.alphaCount);
+      }
+      if (pf.addCount > 0){
+        gl.blendFunc(gl.ONE, gl.ONE);
+        gl.bindVertexArray(E.partB.vao);
+        gl.bindBuffer(gl.ARRAY_BUFFER, E.partB.vbo);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, pf.add, 0, pf.addCount * FX.PART_FLOATS);
+        gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, pf.addCount);
+      }
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindVertexArray(null);
+    gl.disable(gl.BLEND);
+    gl.depthMask(true);
+  }
+
+  function pushTracer(tc, ax, ay, az, dx, dy, dz, t0, t1, f0, f1, px, py, pz, width){
+    if (tc >= MAX_TRACERS || t1 <= t0) return tc;
+    const sx0 = ax + dx * t0, sy0 = ay + dy * t0, sz0 = az + dz * t0;
+    const sx1 = ax + dx * t1, sy1 = ay + dy * t1, sz1 = az + dz * t1;
+    const vx = (sx0 + sx1) * 0.5 - px, vy = (sy0 + sy1) * 0.5 - py, vz = (sz0 + sz1) * 0.5 - pz;
+    let wx = dy * vz - dz * vy, wy = dz * vx - dx * vz, wz = dx * vy - dy * vx;
+    const wl = Math.sqrt(wx * wx + wy * wy + wz * wz);
+    if (wl < 1e-7) return tc;
+    const hw = width / wl;
+    wx *= hw; wy *= hw; wz *= hw;
+    const o = tc * 20;
+    tracerData[o] = sx0 - wx; tracerData[o + 1] = sy0 - wy; tracerData[o + 2] = sz0 - wz;
+    tracerData[o + 3] = -1; tracerData[o + 4] = f0;
+    tracerData[o + 5] = sx0 + wx; tracerData[o + 6] = sy0 + wy; tracerData[o + 7] = sz0 + wz;
+    tracerData[o + 8] = 1; tracerData[o + 9] = f0;
+    tracerData[o + 10] = sx1 + wx; tracerData[o + 11] = sy1 + wy; tracerData[o + 12] = sz1 + wz;
+    tracerData[o + 13] = 1; tracerData[o + 14] = f1;
+    tracerData[o + 15] = sx1 - wx; tracerData[o + 16] = sy1 - wy; tracerData[o + 17] = sz1 - wz;
+    tracerData[o + 18] = -1; tracerData[o + 19] = f1;
+    return tc + 1;
+  }
+
+  function ensureETargets(){
+    if (E.rt && E.rtW === drawW && E.rtH === drawH) return;
+    if (E.rt){
+      for (let i = 0; i < E.rt.down.length; i++) dropTarget(E.rt.down[i]);
+      for (let i = 0; i < E.rt.up.length; i++) dropTarget(E.rt.up[i]);
+      dropTarget(E.rt.rays);
+    }
+    const down = [], up = [];
+    for (let i = 0; i < 5; i++){
+      const w = Math.max(2, drawW >> (i + 1)), h = Math.max(2, drawH >> (i + 1));
+      down.push(makeTarget(w, h, true, false));
+      if (i < 4) up.push(makeTarget(w, h, true, false));
+    }
+    const rays = makeTarget(Math.max(2, drawW >> 2), Math.max(2, drawH >> 2), true, false);
+    E.rt = { down: down, up: up, rays: rays };
+    E.rtW = drawW;
+    E.rtH = drawH;
+  }
+
+  function postProcessE(exposure, glitch, aspect, preExpose, fx, fy, fz){
+    ensureETargets();
+    const rt = E.rt;
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.BLEND);
+    gl.disable(gl.CULL_FACE);
+    gl.depthMask(false);
+    gl.bindVertexArray(GLB.emptyVAO);
+
+    const d0 = rt.down[0];
+    gl.bindFramebuffer(gl.FRAMEBUFFER, d0.fb);
+    gl.viewport(0, 0, d0.w, d0.h);
+    gl.useProgram(P.bright.p);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, GLB.scene.tex);
+    s1i(P.bright, 'uScene', 1);
+    s1f(P.bright, 'uThreshold', hdr ? 1.0 : 0.74);
+    s1f(P.bright, 'uKnee', hdr ? 0.75 : 0.22);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    const PD = E.P.down;
+    gl.useProgram(PD.p);
+    s1i(PD, 'uSrc', 2);
+    gl.activeTexture(gl.TEXTURE2);
+    for (let i = 1; i < 5; i++){
+      const src = rt.down[i - 1], dst = rt.down[i];
+      gl.bindFramebuffer(gl.FRAMEBUFFER, dst.fb);
+      gl.viewport(0, 0, dst.w, dst.h);
+      gl.bindTexture(gl.TEXTURE_2D, src.tex);
+      s2f(PD, 'uTexel', 1 / src.w, 1 / src.h);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    const PU = E.P.up;
+    gl.useProgram(PU.p);
+    s1i(PU, 'uSrc', 2);
+    s1i(PU, 'uBase', 3);
+    s1f(PU, 'uScatter', 0.62);
+    for (let i = 3; i >= 0; i--){
+      const src = i === 3 ? rt.down[4] : rt.up[i + 1];
+      const base = rt.down[i], dst = rt.up[i];
+      gl.bindFramebuffer(gl.FRAMEBUFFER, dst.fb);
+      gl.viewport(0, 0, dst.w, dst.h);
+      gl.activeTexture(gl.TEXTURE2);
+      gl.bindTexture(gl.TEXTURE_2D, src.tex);
+      gl.activeTexture(gl.TEXTURE3);
+      gl.bindTexture(gl.TEXTURE_2D, base.tex);
+      s2f(PU, 'uTexel', 1 / src.w, 1 / src.h);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    const sdx = -world.sunX, sdy = -world.sunY, sdz = -world.sunZ;
+    const facing = fx * sdx + fy * sdy + fz * sdz;
+    let rayK = 0, sunU = 0.5, sunV = 0.5;
+    if (facing > 0.08){
+      const wx = mVP[0] * sdx + mVP[4] * sdy + mVP[8] * sdz;
+      const wy = mVP[1] * sdx + mVP[5] * sdy + mVP[9] * sdz;
+      const ww = mVP[3] * sdx + mVP[7] * sdy + mVP[11] * sdz;
+      if (ww > 1e-4){
+        sunU = (wx / ww) * 0.5 + 0.5;
+        sunV = (wy / ww) * 0.5 + 0.5;
+        const off = Math.max(Math.abs(sunU - 0.5), Math.abs(sunV - 0.5));
+        rayK = sstep((facing - 0.08) / 0.5) * (1 - sstep((off - 0.6) / 0.6));
+      }
+    }
+    const rays = rt.rays;
+    if (rayK > 0.002){
+      gl.bindFramebuffer(gl.FRAMEBUFFER, rays.fb);
+      gl.viewport(0, 0, rays.w, rays.h);
+      const PR = E.P.rays;
+      gl.useProgram(PR.p);
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, GLB.scene.tex);
+      s1i(PR, 'uScene', 1);
+      s2f(PR, 'uSun', sunU, sunV);
+      s1f(PR, 'uThreshold', 1.15 * preExpose);
+      s1f(PR, 'uAspect', aspect);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, drawW, drawH);
+    const prog = glitch > 0.002 ? E.P.glitch : E.P.composite;
+    gl.useProgram(prog.p);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, GLB.scene.tex);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, rt.up[0].tex);
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, rayK > 0.002 ? rays.tex : E.tex.blank);
+    s1i(prog, 'uScene', 1);
+    s1i(prog, 'uBloom', 2);
+    s1i(prog, 'uRays', 3);
+    s1f(prog, 'uExposure', exposure);
+    s1f(prog, 'uBloomStrength', hdr ? 0.34 : 0.34 / LDR_SCALE);
+    s1f(prog, 'uGrain', 0.020);
+    s1f(prog, 'uTime', time);
+    s2f(prog, 'uRes', drawW, drawH);
+    s1f(prog, 'uAspect', aspect);
+    s1f(prog, 'uGlitch', glitch);
+    const sm = Math.max(world.sunR, world.sunG, world.sunB, 0.001);
+    s3f(prog, 'uRayColor', world.sunR / sm, world.sunG / sm * 0.95, world.sunB / sm * 0.9);
+    s1f(prog, 'uRayStrength', rayK * (hdr ? 1.0 : 1.0 / LDR_SCALE) * 0.6);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindVertexArray(null);
+    gl.depthMask(true);
+  }
+
   function onContextLost(cb){ if (typeof cb === 'function') lostCbs.push(cb); }
 
   function onContextRestored(cb){ if (typeof cb === 'function') restoredCbs.push(cb); }
@@ -2364,7 +3163,10 @@ export function createRenderer(canvas){
     render: render,
     resize: resize,
     onContextLost: onContextLost,
-    onContextRestored: onContextRestored
+    onContextRestored: onContextRestored,
+    setGraphics: setGraphics,
+    getGraphics: getGraphics,
+    defaultGraphics: defaultGraphics
   };
 }
 

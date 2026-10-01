@@ -200,6 +200,40 @@ eleventyComputed:
   border-radius: var(--radius-pill); color: var(--term-muted); padding: 0.3rem 0.6rem;
 }
 
+.ph-gfx[aria-pressed="true"] { border-color: rgba(110, 243, 197, 0.55); color: var(--accent); }
+
+.ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-ov__time { animation: ph-time-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-medal--lg {
+  position: relative; overflow: hidden;
+  animation: ph-medal-in 760ms cubic-bezier(0.18, 0.9, 0.24, 1.18) 260ms both;
+}
+.ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-medal--lg::after {
+  content: ""; position: absolute; top: -20%; bottom: -20%; left: -60%; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-18deg); pointer-events: none;
+  animation: ph-medal-shine 900ms ease-out 820ms both;
+}
+.ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-par__row { animation: ph-row-in 380ms ease-out both; }
+.ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-par__row:nth-child(1) { animation-delay: 700ms; }
+.ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-par__row:nth-child(2) { animation-delay: 780ms; }
+.ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-par__row:nth-child(3) { animation-delay: 860ms; }
+.ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-par__row:nth-child(4) { animation-delay: 940ms; }
+@keyframes ph-medal-in {
+  0% { opacity: 0; transform: scale(2.4); filter: blur(5px) brightness(2.2); }
+  55% { opacity: 1; transform: scale(0.94); filter: blur(0) brightness(1.6); }
+  78% { transform: scale(1.03); filter: brightness(1.15); }
+  100% { opacity: 1; transform: scale(1); filter: none; }
+}
+@keyframes ph-medal-shine { 0% { left: -60%; } 100% { left: 130%; } }
+@keyframes ph-row-in { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: none; } }
+@keyframes ph-time-in { 0% { opacity: 0; letter-spacing: 0.35em; } 100% { opacity: 1; letter-spacing: normal; } }
+@media (prefers-reduced-motion: reduce) {
+  .ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-medal--lg,
+  .ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-par__row,
+  .ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-ov__time { animation: none; }
+  .ph-stage.is-gfx-enhanced .ph-ov--complete:not([hidden]) .ph-medal--lg::after { display: none; }
+}
+
 @media (max-width: 720px) {
   .ph-stage { aspect-ratio: auto; height: 70vh; height: 70svh; max-height: none; }
   .ph-hud__tl { gap: 0.8rem; }
@@ -290,6 +324,9 @@ eleventyComputed:
       <p class="ph-ov__cta" id="ph-ready-click">{{ "tool.phosphor.ready_click" | t }}</p>
       <button type="button" class="ph-btn ph-btn--primary" id="ph-ready-start" hidden>{{ "tool.phosphor.ready_touch_start" | t }}</button>
       <p class="ph-ov__note">{{ "tool.phosphor.select_hint" | t }}</p>
+      <div class="ph-ov__row">
+        <button type="button" class="ph-btn ph-btn--sm ph-gfx" id="ph-gfx" aria-pressed="false" title="{{ 'tool.phosphor.gfx_hint' | t }}">{{ "tool.phosphor.gfx_label" | t }}</button>
+      </div>
       <p class="ph-ov__hint">{{ "tool.phosphor.hint_controls" | t }}</p>
       <p class="ph-ov__note">{{ "tool.phosphor.ready_note" | t }}</p>
     </div>
@@ -301,6 +338,9 @@ eleventyComputed:
         <button type="button" class="ph-btn ph-btn--primary" id="ph-resume">{{ "tool.phosphor.paused_resume" | t }}</button>
         <button type="button" class="ph-btn" id="ph-pause-restart">{{ "tool.phosphor.paused_restart" | t }}</button>
         <button type="button" class="ph-btn" id="ph-pause-courses">{{ "tool.phosphor.back_to_courses" | t }}</button>
+      </div>
+      <div class="ph-ov__row">
+        <button type="button" class="ph-btn ph-btn--sm ph-gfx" id="ph-gfx-pause" aria-pressed="false" title="{{ 'tool.phosphor.gfx_hint' | t }}">{{ "tool.phosphor.gfx_label" | t }}</button>
       </div>
     </div>
 
@@ -371,6 +411,10 @@ eleventyComputed:
     ghostTime:       {{ ("tool.phosphor.ghost_time"        | t) | dump | safe }},
     ghostAhead:      {{ ("tool.phosphor.ghost_ahead"       | t) | dump | safe }},
     ghostBehind:     {{ ("tool.phosphor.ghost_behind"      | t) | dump | safe }},
+
+    gfxLabel:    {{ ("tool.phosphor.gfx_label"    | t) | dump | safe }},
+    gfxEnhanced: {{ ("tool.phosphor.gfx_enhanced" | t) | dump | safe }},
+    gfxClassic:  {{ ("tool.phosphor.gfx_classic"  | t) | dump | safe }},
 
     courseNames: {
       "tool.phosphor.c01_name": {{ ("tool.phosphor.c01_name" | t) | dump | safe }},

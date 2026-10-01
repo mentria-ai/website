@@ -128,7 +128,7 @@ function hudCopy() {
 
 function medalLabel(m) {
   const k = m === 'gold' ? 'medal_gold' : m === 'silver' ? 'medal_silver' : m === 'bronze' ? 'medal_bronze' : 'medal_none';
-  return kitText(k) || m || '';
+  return kitText(k) || '';
 }
 
 function courseName(c) {
@@ -345,12 +345,12 @@ function buildLayout() {
       if (c.side === 'left') {
         copy.axes = mode1 ? ['yaw', 'pitch'] : ['yaw', 'throttle'];
         copy.spring = mode1 ? { x: true, y: true } : { x: true, y: false };
-        copy.caption = mode1 ? 'pitchRoll' : c.caption;
+        copy.caption = mode1 ? '' : c.caption;
         copy.gate = mode1 ? undefined : c.gate;
       } else {
         copy.axes = mode1 ? ['roll', 'throttle'] : ['roll', 'pitch'];
         copy.spring = mode1 ? { x: true, y: false } : { x: true, y: true };
-        copy.caption = mode1 ? 'throttleYaw' : c.caption;
+        copy.caption = mode1 ? '' : c.caption;
         copy.gate = mode1 ? 'square' : c.gate;
       }
       touch.push(copy);
@@ -829,6 +829,9 @@ function showResults() {
   voicesVolume(0);
   const c = run.course;
   const rows = [];
+  const prevTime = run.saved && run.saved.prevTime != null ? run.saved.prevTime : null;
+  const bestNow = prevTime == null ? run.finalTime : Math.min(prevTime, run.finalTime);
+  rows.push({ label: kitText('ui_best') || '', value: formatTime(bestNow), good: run.saved && run.saved.isBest ? true : undefined });
   rows.push({ label: t('results.penalty'), value: '+' + run.penalty.toFixed(1) + ' ' + t('hud.seconds'), good: run.penalty === 0 ? true : undefined });
   rows.push({ label: t('results.crashes'), value: String(run.crashes) });
   if (c.medals) {
@@ -1240,8 +1243,8 @@ function qualityOptions() {
 function settingsRows() {
   const autoOnOff = [
     { value: 'auto', label: t('settings.auto') },
-    { value: 'on', label: kitText('ui_on') || 'On' },
-    { value: 'off', label: kitText('ui_off') || 'Off' }
+    { value: 'on', label: kitText('ui_on') || '' },
+    { value: 'off', label: kitText('ui_off') || '' }
   ];
   const deg = (v) => Math.round(v) + '°';
   return [

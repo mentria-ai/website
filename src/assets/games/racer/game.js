@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { clamp, lerp, damp, wrapAngle, mulberry32, hashString } from '../kit/math.js';
+import { clamp, lerp, mulberry32, hashString } from '../kit/math.js';
 import { createEngine } from '../kit/engine.js';
 import { detectQuality, qualityPreset, isTouchDevice } from '../kit/quality.js';
 import { createInput, inputLayoutRacer } from '../kit/input.js';
@@ -16,7 +16,7 @@ import { createCar, createCarLOD } from './carmesh.js';
 import { CARS, CAR_PAINTS, carById, paintById } from './cars.js';
 import { createRacerHud, formatRacerTime } from './hud.js';
 import { buildRacerWorld } from './world.js';
-import { createGarage, createSettingsStore, engineSpecFor } from './modes.js';
+import { createGarage, createSettingsStore, engineSpecFor, createCameraRig } from './modes.js';
 
 const SLUG = 'nitro-racer';
 const NS = 'tool.nitro-racer.';
@@ -196,6 +196,7 @@ const renderer = engine.renderer;
 const scene = engine.scene;
 const camera = new THREE.PerspectiveCamera(66, 16 / 9, 0.3, 2400);
 engine.setCamera(camera);
+const rig = createCameraRig(camera);
 
 const audio = createAudio({ master: settings.volume });
 function unlockAudio() { try { audio.unlock(); } catch (_) {} }
@@ -244,7 +245,8 @@ let testAutopilot = false;
 let testAutopilotLevel = 'hard';
 
 const pIn = { throttle: 0, brake: 0, steer: 0, nitro: false, drift: false, brakeDrift: true };
-const camState = { yaw: 0, y: 0, boost: 0, fov: 66, init: false, mode: settings.camera === 'hood' ? 'hood' : 'chase', flyS: 0 };
+let camMode = settings.camera === 'hood' ? 'hood' : 'chase';
+const camIn = { px: 0, py: 0, pz: 0, car: null, view: null, intro: null, lookBack: false, bumper: false, heightAt: null };
 const v3a = new THREE.Vector3();
 const v3b = new THREE.Vector3();
 const qa = new THREE.Quaternion();
@@ -335,7 +337,7 @@ function settingsRows() {
     { kind: 'header', label: t('set_header_race') },
     { id: 'difficulty', kind: 'choice', label: t('set_difficulty'), value: settings.difficulty, options: [
       { value: 'easy', label: diffLabel('easy') }, { value: 'normal', label: diffLabel('normal') }, { value: 'hard', label: diffLabel('hard') }] },
-    { id: 'camera', kind: 'choice', label: t('set_camera'), value: camState.mode, options: [
+    { id: 'camera', kind: 'choice', label: t('set_camera'), value: camMode, options: [
       { value: 'chase', label: t('cam_chase') }, { value: 'hood', label: t('cam_hood') }] },
     { id: 'ghost', kind: 'toggle', label: t('set_ghost'), value: settings.ghost !== false },
     { kind: 'header', label: t('set_header_display') },
@@ -385,8 +387,8 @@ function onSettingChange(id, value) {
   } else if (id === 'difficulty') {
     saveSettings({ difficulty: value });
   } else if (id === 'camera') {
-    camState.mode = value === 'hood' ? 'hood' : 'chase';
-    saveSettings({ camera: camState.mode });
+    camMode = value === 'hood' ? 'hood' : 'chase';
+    saveSettings({ camera: camMode });
   } else if (id === 'ghost') {
     saveSettings({ ghost: !!value });
     if (race && race.ghostView) race.ghostView.group.visible = !!value;
@@ -539,7 +541,7 @@ async function ensureWorld(trackId) {
     try { shake = createCameraShake({ maxOffset: 0.22, maxAngle: 0.035, decay: 1.8 }); } catch (_) { shake = null; }
     world = built;
     worldKey = key;
-    camState.flyS = 0;
+    rig.resetFly();
     return built;
   })();
   worldPromise = { key, promise };
@@ -767,8 +769,7 @@ function setupRace(quick) {
   hud.setDots(dots);
   hud.show(true);
   hud.setDim(false);
-  camState.init = false;
-  camState.yaw = player.yaw;
+  rig.reset(player.yaw);
   input.setSettings({ steer: settings.steer, autoGas: autoGasOn() });
   setRaceChrome(true);
   state = 'race';
@@ -1286,14 +1287,6 @@ function camDistance(car) {
   return Math.sqrt(dx * dx + dz * dz);
 }
 
-function angleLerp(a, b, k) {
-  return a + wrapAngle(b - a) * k;
-}
-
-function dampAngle(a, b, lambda, dt) {
-  return a + wrapAngle(b - a) * (1 - Math.exp(-lambda * dt));
-}
-
 function syncCarView(i, alpha) {
   const R = race;
   const c = R.cars[i];
@@ -1362,85 +1355,20 @@ function updateCamera(alpha, dt) {
   const R = race;
   const c = R.cars[R.pi];
   const o = R.pi * 7;
-  const px = lerp(R.prev[o], c.x, alpha);
-  const py = lerp(R.prev[o + 1], c.y, alpha);
-  const pz = lerp(R.prev[o + 2], c.z, alpha);
-  const top = c.params.topSpeed;
-  const sf = clamp(c.speed / top, 0, 1.25);
-  camState.boost = damp(camState.boost, c.boosting ? 1 : 0, 3.5, dt);
-  const lookBack = !!(input.button('lookBack') && input.button('lookBack').down) && R.phase !== 'grid';
-  const baseYaw = c.reverse ? c.yaw : angleLerp(c.vHeading, c.yaw, 0.45);
-  if (!camState.init) {
-    camState.yaw = baseYaw;
-    camState.y = py;
-    camState.fov = 64;
-    camState.init = true;
-  }
-  camState.yaw = dampAngle(camState.yaw, baseYaw, 4.5 + 3.5 * Math.min(sf, 1), dt);
-  camState.y = damp(camState.y, py, c.grounded ? 10 : 3.2, dt);
-  let fov;
-  if (R.phase === 'grid') {
-    const k = clamp(R.introT / Math.max(0.01, R.introLen), 0, 1);
-    const e = k * k * (3 - 2 * k);
-    const yaw = c.yaw + Math.PI * (1 - e) * 0.85;
-    const dist = lerp(14, 6.6, e);
-    const h = lerp(5.2, 2.15, e);
-    camera.position.set(px + Math.sin(yaw) * dist, py + h, pz + Math.cos(yaw) * dist);
-    v3a.set(px - Math.sin(c.yaw) * 3 * e, py + 1.0, pz - Math.cos(c.yaw) * 3 * e);
-    camera.lookAt(v3a);
-    fov = lerp(52, 64, e);
-    camState.yaw = c.yaw;
-  } else if (lookBack) {
-    const yaw = c.yaw;
-    camera.position.set(px - Math.sin(yaw) * 4.2, py + 1.75, pz - Math.cos(yaw) * 4.2);
-    v3a.set(px + Math.sin(yaw) * 12, py + 1.1, pz + Math.cos(yaw) * 12);
-    camera.lookAt(v3a);
-    fov = 66;
-  } else if (camState.mode === 'hood' && R.phase !== 'finished') {
-    const v = R.views[R.pi];
-    const front = v.dims && typeof v.dims.front === 'number' ? Math.min(-1.6, v.dims.front) : -2.3;
-    v3a.set(0, 0.74, front - 0.32).applyQuaternion(v.group.quaternion).add(v.group.position);
-    camera.position.copy(v3a);
-    v3b.set(0, 0.62, front - 14).applyQuaternion(v.group.quaternion).add(v.group.position);
-    camera.lookAt(v3b);
-    fov = 74 + 10 * Math.min(sf, 1) + 7 * camState.boost;
-  } else {
-    const yaw = camState.yaw;
-    const dist = 5.3 + 1.5 * Math.min(sf, 1.1) + 1.0 * camState.boost;
-    const h = 1.8 + 0.3 * Math.min(sf, 1);
-    let cx = px + Math.sin(yaw) * dist;
-    let cz = pz + Math.cos(yaw) * dist;
-    let cy = camState.y + h;
-    const ground = world.terrain.heightAt(cx, cz) + 0.8;
-    if (cy < ground) cy = ground;
-    camera.position.set(cx, cy, cz);
-    v3a.set(px - Math.sin(yaw) * 5.5, camState.y + 0.95, pz - Math.cos(yaw) * 5.5);
-    camera.lookAt(v3a);
-    fov = 62 + 12 * Math.min(sf, 1.1) + 9 * camState.boost;
-  }
-  camState.fov = damp(camState.fov, fov, 6, dt);
-  if (Math.abs(camera.fov - camState.fov) > 0.01) {
-    camera.fov = camState.fov;
-    camera.updateProjectionMatrix();
-  }
+  camIn.px = lerp(R.prev[o], c.x, alpha);
+  camIn.py = lerp(R.prev[o + 1], c.y, alpha);
+  camIn.pz = lerp(R.prev[o + 2], c.z, alpha);
+  camIn.car = c;
+  camIn.view = R.views[R.pi];
+  camIn.intro = R.phase === 'grid' ? R.introT / Math.max(0.01, R.introLen) : null;
+  camIn.lookBack = !!(input.button('lookBack') && input.button('lookBack').down) && R.phase !== 'grid';
+  camIn.bumper = camMode === 'hood' && R.phase !== 'finished';
+  camIn.heightAt = world.terrain.heightAt;
+  rig.follow(camIn, dt);
   if (shake) {
     if (c.boosting && c.grounded) shake.add(0.012);
     shake.update(dt);
     shake.apply(camera);
-  }
-}
-
-function updateAttractCamera(dt) {
-  const tr = world.track;
-  camState.flyS = tr.wrapS(camState.flyS + dt * 24);
-  const s = camState.flyS;
-  const a = tr.pointAt(s, 0, 9);
-  const b = tr.pointAt(s + 40, 0, 2);
-  camera.position.set(a.x, a.y, a.z);
-  camera.lookAt(b.x, b.y, b.z);
-  if (Math.abs(camera.fov - 60) > 0.01) {
-    camera.fov = 60;
-    camera.updateProjectionMatrix();
   }
 }
 
@@ -1539,8 +1467,8 @@ function onRender(alpha, dt) {
     if (state === 'race') {
       const cam = input.button('camera');
       if (cam && cam.pressed) {
-        camState.mode = camState.mode === 'hood' ? 'chase' : 'hood';
-        saveSettings({ camera: camState.mode });
+        camMode = camMode === 'hood' ? 'chase' : 'hood';
+        saveSettings({ camera: camMode });
       }
       const rs = input.button('restart');
       if (rs && rs.pressed) restartRace();
@@ -1592,7 +1520,7 @@ function onRender(alpha, dt) {
       postFx.setSpeedFx(clamp((kmh - 170) / 150, 0, 1) * 0.55 + (p.boosting ? 0.3 : 0));
     }
   } else {
-    updateAttractCamera(dt);
+    rig.attract(world.track, dt);
     if (postFx) postFx.setSpeedFx(0);
   }
   if (world.env && typeof world.env.exposure === 'number') renderer.toneMappingExposure = world.env.exposure;
@@ -1682,7 +1610,7 @@ function testState() {
     worldMs: world ? world.buildMs : null,
     worldTimings: world ? world.timings : null,
     results: lastResults,
-    camera: camState.mode,
+    camera: camMode,
     draw: { calls: frameStats.calls, triangles: frameStats.triangles }
   };
 }
@@ -1715,7 +1643,7 @@ if (TEST) {
     settings: function () { showSettings(); return state; },
     pause: function () { requestPause(); return state; },
     resume: function () { resume(); return state; },
-    setCamera: function (m) { camState.mode = m === 'hood' ? 'hood' : 'chase'; return camState.mode; },
+    setCamera: function (m) { camMode = m === 'hood' ? 'hood' : 'chase'; return camMode; },
     setQuality: function (q) { saveSettings({ quality: q }); try { engine.setQuality(qualityName()); } catch (_) {} return qualityName(); },
     inject: function (patch) { if (race) Object.assign(race.cars[race.pi], patch || {}); return testState(); },
     toast: function (kind, label, gain) { hud.toast(kind, label, gain); },

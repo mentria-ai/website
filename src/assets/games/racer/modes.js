@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { gameStore } from '../kit/store.js';
+import { clamp, lerp, damp, wrapAngle } from '../kit/math.js';
 import { createCar } from './carmesh.js';
 
 const GARAGE_STYLE_ID = 'nrg-style';
@@ -562,5 +563,116 @@ export function createGarage(opts) {
     applyCopy,
     dispose,
     get isOpen() { return open; }
+  };
+}
+
+function rigAngleLerp(a, b, k) {
+  return a + wrapAngle(b - a) * k;
+}
+
+function rigDampAngle(a, b, lambda, dt) {
+  return a + wrapAngle(b - a) * (1 - Math.exp(-lambda * dt));
+}
+
+export function createCameraRig(camera) {
+  const st = { yaw: 0, y: 0, boost: 0, fov: 66, init: false, flyS: 0 };
+  const va = new THREE.Vector3();
+  const vb = new THREE.Vector3();
+  const pa = { x: 0, y: 0, z: 0 };
+  const pb = { x: 0, y: 0, z: 0 };
+
+  function applyFov(target, dt) {
+    st.fov = dt > 0 ? damp(st.fov, target, 6, dt) : st.fov;
+    if (Math.abs(camera.fov - st.fov) > 0.01) {
+      camera.fov = st.fov;
+      camera.updateProjectionMatrix();
+    }
+  }
+
+  function reset(yaw) {
+    st.init = false;
+    st.yaw = yaw || 0;
+  }
+
+  function follow(o, dt) {
+    const c = o.car;
+    const px = o.px;
+    const py = o.py;
+    const pz = o.pz;
+    const sf = clamp(c.speed / c.params.topSpeed, 0, 1.25);
+    st.boost = damp(st.boost, c.boosting ? 1 : 0, 3.5, dt);
+    const baseYaw = c.reverse ? c.yaw : rigAngleLerp(c.vHeading, c.yaw, 0.45);
+    if (!st.init) {
+      st.yaw = baseYaw;
+      st.y = py;
+      st.fov = 64;
+      st.init = true;
+    }
+    st.yaw = rigDampAngle(st.yaw, baseYaw, 4.5 + 3.5 * Math.min(sf, 1), dt);
+    st.y = damp(st.y, py, c.grounded ? 10 : 3.2, dt);
+    let fov;
+    if (o.intro != null) {
+      const k = clamp(o.intro, 0, 1);
+      const e = k * k * (3 - 2 * k);
+      const yaw = c.yaw + Math.PI * (1 - e) * 0.85;
+      const dist = lerp(14, 6.6, e);
+      const h = lerp(5.2, 2.15, e);
+      camera.position.set(px + Math.sin(yaw) * dist, py + h, pz + Math.cos(yaw) * dist);
+      va.set(px - Math.sin(c.yaw) * 3 * e, py + 1.0, pz - Math.cos(c.yaw) * 3 * e);
+      camera.lookAt(va);
+      fov = lerp(52, 64, e);
+      st.yaw = c.yaw;
+    } else if (o.lookBack) {
+      const yaw = c.yaw;
+      camera.position.set(px - Math.sin(yaw) * 4.2, py + 1.75, pz - Math.cos(yaw) * 4.2);
+      va.set(px + Math.sin(yaw) * 12, py + 1.1, pz + Math.cos(yaw) * 12);
+      camera.lookAt(va);
+      fov = 66;
+    } else if (o.bumper && o.view) {
+      const v = o.view;
+      const front = v.dims && typeof v.dims.front === 'number' ? Math.min(-1.6, v.dims.front) : -2.3;
+      va.set(0, 0.74, front - 0.32).applyQuaternion(v.group.quaternion).add(v.group.position);
+      camera.position.copy(va);
+      vb.set(0, 0.62, front - 14).applyQuaternion(v.group.quaternion).add(v.group.position);
+      camera.lookAt(vb);
+      fov = 74 + 10 * Math.min(sf, 1) + 7 * st.boost;
+    } else {
+      const yaw = st.yaw;
+      const dist = 5.3 + 1.5 * Math.min(sf, 1.1) + 1.0 * st.boost;
+      const h = 1.8 + 0.3 * Math.min(sf, 1);
+      const cx = px + Math.sin(yaw) * dist;
+      const cz = pz + Math.cos(yaw) * dist;
+      let cy = st.y + h;
+      if (o.heightAt) {
+        const ground = o.heightAt(cx, cz) + 0.8;
+        if (cy < ground) cy = ground;
+      }
+      camera.position.set(cx, cy, cz);
+      va.set(px - Math.sin(yaw) * 5.5, st.y + 0.95, pz - Math.cos(yaw) * 5.5);
+      camera.lookAt(va);
+      fov = 62 + 12 * Math.min(sf, 1.1) + 9 * st.boost;
+    }
+    applyFov(fov, dt);
+  }
+
+  function attract(track, dt) {
+    st.flyS = track.wrapS(st.flyS + dt * 24);
+    track.pointAt(st.flyS, 0, 9, pa);
+    track.pointAt(st.flyS + 40, 0, 2, pb);
+    camera.position.set(pa.x, pa.y, pa.z);
+    camera.lookAt(pb.x, pb.y, pb.z);
+    if (Math.abs(camera.fov - 60) > 0.01) {
+      camera.fov = 60;
+      st.fov = 60;
+      camera.updateProjectionMatrix();
+    }
+  }
+
+  return {
+    state: st,
+    reset,
+    follow,
+    attract,
+    resetFly() { st.flyS = 0; }
   };
 }

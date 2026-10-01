@@ -343,6 +343,7 @@ export function createRecorder(hz = 20, opts = {}) {
     push,
     encode,
     reset,
+    dispose: reset,
     get frames() { return count; },
     get duration() { return count > 0 ? (count - 1) / rate : 0; },
     get full() { return full; },
@@ -503,7 +504,8 @@ function ghostPlayer(hz, t0, n, extraCount, pos, rot, ext, meta, metaData) {
     duration: last / hz,
     meta,
     metaData,
-    sample
+    sample,
+    dispose: function () {}
   };
 }
 

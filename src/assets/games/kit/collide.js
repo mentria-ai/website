@@ -762,6 +762,7 @@ export function createCollisionWorld(opts = {}) {
     get count() { return byId.size; },
     sphereVsWorld,
     sphereContacts,
-    raycast
+    raycast,
+    dispose: clear
   };
 }

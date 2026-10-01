@@ -198,7 +198,8 @@ export function createCheckpoints(list, opts = {}) {
     testAny,
     crossing,
     progress,
-    reset
+    reset,
+    dispose: function () {}
   };
   return cp;
 }
@@ -225,7 +226,8 @@ export function createRaceClock(opts = {}) {
     split,
     lap,
     finish,
-    reset
+    reset,
+    dispose: function () { reset(); }
   };
 
   function reset() {

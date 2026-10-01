@@ -573,6 +573,7 @@ export function createAudio(opts) {
         } catch (_) {}
       }
     };
+    api.dispose = api.stop;
     if (extra) extra(api, v);
     S.voices.add(v);
     v.ensure();

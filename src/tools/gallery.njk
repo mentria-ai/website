@@ -132,6 +132,7 @@ let lastWidth = 0;
 let busyImg = 0;
 let busyVid = 0;
 let monthNames = new Map();
+let launched = false;
 let dateFmt = null;
 let timeFmt = null;
 const rendered = new Map();
@@ -525,14 +526,15 @@ async function readDates(token) {
   if (moved) relayout(true);
 }
 
-async function openFolder(folder) {
-  const ok = await M.folderAccess(folder, true);
-  if (!ok) { toast(C.folder_denied); renderStart(); return; }
+async function openFolder(folder, auto) {
+  const ok = await M.folderAccess(folder, !auto);
+  if (!ok) { if (!auto) { toast(C.folder_denied); renderStart(); } return; }
   await M.touchFolder(folder);
   progress(fill(C.scanning, { n: num(0) }));
   let found = [];
   try { found = await M.scanFolder(folder, KINDS, (n) => progress(fill(C.scanning, { n: num(n) }))); } catch (_) {}
   progress('');
+  if (auto && (launched || !mainEl.hidden)) return;
   if (!found.length) { toast(C.no_media); renderStart(); return; }
   load(found, { folderId: folder.id, folderName: folder.name });
 }
@@ -1224,12 +1226,28 @@ document.addEventListener('mentria:localechange', () => {
   renderStart();
 });
 
+if (M.caps.launchQueue) {
+  window.launchQueue.setConsumer(async (params) => {
+    if (!params || !params.files || !params.files.length) return;
+    launched = true;
+    const found = [];
+    for (const h of params.files) {
+      try { const file = await h.getFile(); found.push({ file, relPath: file.name }); } catch (_) {}
+    }
+    if (!found.length) return;
+    await load(found, {});
+    const fp = M.fingerprint(found[0].file);
+    const i = items.findIndex((e) => e.fp === fp);
+    if (i !== -1) openBox(i);
+  });
+}
+
 if (!document.getElementById('tool-gallery') && window.MentriaToolsPopup) window.MentriaToolsPopup.load();
 updatePlayBtn();
 renderStart().then(async () => {
-  if (!M.caps.folders) return;
+  if (!M.caps.folders || launched) return;
   const folders = await M.listFolders('gallery');
-  if (folders.length && mainEl.hidden && await M.folderAccess(folders[0], false)) openFolder(folders[0]);
+  if (folders.length && mainEl.hidden && !launched && await M.folderAccess(folders[0], false)) openFolder(folders[0], true);
 });
 </script>
 

@@ -708,8 +708,8 @@ function addGlassAndTrim(S, B, hi) {
   if (!g) return;
   const nu = hi ? 10 : 4, nv = hi ? 4 : 2;
   const ws = g.ws;
-  addPatch(S, B, [[ws[0] - 0.03, 7.86], [ws[1] + 0.035, 7.86], [ws[1] + 0.035, 9], [ws[0] - 0.03, 9]], PART.trim, 0.0025, nu, hi ? 5 : 2);
-  addPatch(S, B, [[ws[0], 8.1], [ws[1], 8.1], [ws[1], 9], [ws[0], 9]], PART.glass, 0.0055, nu, hi ? 5 : 2);
+  addPatch(S, B, [[ws[0] - 0.01, 7.86], [ws[1] + 0.035, 7.86], [ws[1] + 0.035, 9], [ws[0] - 0.01, 9]], PART.trim, 0.006, nu, hi ? 5 : 2);
+  addPatch(S, B, [[ws[0] + 0.03, 8.1], [ws[1], 8.1], [ws[1], 9], [ws[0] + 0.03, 9]], PART.glass, 0.0095, nu, hi ? 5 : 2);
   const sd = g.side;
   const wins = [];
   if (g.split) {
@@ -734,23 +734,24 @@ function addLamps(S, B, hi) {
   if (!lp) return;
   const nu = hi ? 8 : 3, nv = hi ? 3 : 1;
   const grow = (q, e) => q.map((c, i) => [clamp(c[0] + (i === 0 || i === 3 ? -e : e), 0, S.L), c[1] + (i < 2 ? -e * 2 : e * 2)]);
-  if (hi) addPatch(S, B, grow(lp.head, 0.012), PART.trim, 0.003, nu, nv);
-  addPatch(S, B, lp.head, PART.lamp, 0.006, nu, nv);
-  if (lp.drl) addPatch(S, B, lp.drl, PART.drl, 0.009, nu, 1);
-  if (hi) addPatch(S, B, grow(lp.tail, 0.01), PART.trim, 0.003, nu, nv);
-  addPatch(S, B, lp.tail, PART.tail, 0.006, nu, nv);
-  if (lp.brake) addPatch(S, B, lp.brake, PART.brake, 0.009, nu, 1);
+  if (hi) addPatch(S, B, grow(lp.head, 0.012), PART.trim, 0.0075, nu, nv);
+  addPatch(S, B, lp.head, PART.lamp, 0.0095, nu, nv);
+  if (lp.drl) addPatch(S, B, lp.drl, PART.drl, 0.012, nu, 1);
+  if (hi) addPatch(S, B, grow(lp.tail, 0.01), PART.trim, 0.0075, nu, nv);
+  addPatch(S, B, lp.tail, PART.tail, 0.0095, nu, nv);
+  if (lp.brake) addPatch(S, B, lp.brake, PART.brake, 0.012, nu, 1);
 }
 
 function addSurfaceDetails(S, B, hi) {
   const b = S.b;
   for (const it of b.intakes || []) addPatch(S, B, it.q, PART[it.part] ?? PART.grille, it.off ?? 0.012, hi ? 8 : 3, hi ? 4 : 2);
   if (b.grilleFull) {
-    addPatch(S, B, [[0.0, 4.95], [0.3, 4.95], [0.3, 5.95], [0.0, 5.95]], PART.grille, 0.003, hi ? 6 : 2, hi ? 3 : 1);
+    const gd = Math.min(0.3, S.noseRound - 0.015);
+    addPatch(S, B, [[0.0, 4.95], [gd, 4.95], [gd, 5.95], [0.0, 5.95]], PART.grille, 0.003, hi ? 6 : 2, hi ? 3 : 1);
     if (hi) {
       for (let k = 0; k < 4; k++) {
         const s0 = 5.08 + k * 0.22;
-        addPatch(S, B, [[0.0, s0], [0.28, s0], [0.28, s0 + 0.035], [0.0, s0 + 0.035]], PART.chrome, 0.006, 6, 1);
+        addPatch(S, B, [[0.0, s0], [gd - 0.02, s0], [gd - 0.02, s0 + 0.035], [0.0, s0 + 0.035]], PART.chrome, 0.0055, 6, 1);
       }
     }
   }
@@ -917,7 +918,7 @@ function addParts(S, B, hi) {
       }
       const lowEdge = top.map(([z, y]) => [z, Math.max(yFlat - 0.002, y - 0.085)]);
       const contour = [...lowEdge, ...top.reverse()];
-      prism(B, contour, null, 'x', x - 0.006, x + 0.006, PART.carbon);
+      prism(B, contour, null, 'x', x - 0.006, x + 0.006, PART.matte);
     }
   }
   if (b.exhaust) {
@@ -929,8 +930,8 @@ function addParts(S, B, hi) {
       const m = new THREE.Matrix4().makeBasis(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 1, 0), new THREE.Vector3(1, 0, 0));
       m.setPosition(x, ex.y, zOf(ex.d));
       const r = ex.r;
-      lathe(B, [[r * 0.98, 0.16], [r, -0.06], [r * 0.84, -0.066], [r * 0.82, -0.02]], segs, [PART.chrome, PART.chrome, PART.nozzle], m);
-      lathe(B, [[0.001, -0.02], [r * 0.82, -0.02]], segs, PART.nozzle, m);
+      lathe(B, [[r * 0.98, 0.16], [r, -0.05], [r * 1.02, -0.062], [r * 0.8, -0.07], [r * 0.78, -0.03]], segs, [PART.chrome, PART.chrome, PART.chrome, PART.nozzle], m);
+      lathe(B, [[0.001, -0.03], [r * 0.78, -0.03]], segs, PART.nozzle, m);
     }
   }
   if (b.flaps) {
@@ -1110,6 +1111,84 @@ function buildWheel(spec, k, hi) {
     caliperTris = C.triangles;
   }
   return { spin, caliper, radius: R, width: W, tris: spinTris + caliperTris };
+}
+
+function decalGeometry(S, hi) {
+  const b = S.b;
+  const a0 = S.arches[0], a1 = S.arches[1];
+  const door = b.lines && b.lines[0];
+  const dc = door ? (door[0] + door[1]) / 2 : (a0.d + a1.d) / 2;
+  const fine = 64, s0 = 3.9, s1 = 7.0;
+  const pts = [];
+  for (let i = 0; i <= fine; i++) pts.push(surf(S, dc, s0 + (s1 - s0) * i / fine, [0, 0, 0]));
+  const cum = [0];
+  for (let i = 1; i <= fine; i++) {
+    const p = pts[i], q = pts[i - 1];
+    cum.push(cum[i - 1] + Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]));
+  }
+  const total = cum[fine];
+  const size = Math.min(0.4, total * 0.6);
+  const mid = total * 0.5;
+  const sAt = (len) => {
+    let i = 1;
+    while (i < fine && cum[i] < len) i++;
+    const f = clamp((len - cum[i - 1]) / Math.max(1e-9, cum[i] - cum[i - 1]), 0, 1);
+    return s0 + (s1 - s0) * (i - 1 + f) / fine;
+  };
+  const sa = sAt(mid - size / 2), sb = sAt(mid + size / 2);
+  const q = [[dc - size / 2, sa], [dc + size / 2, sa], [dc + size / 2, sb], [dc - size / 2, sb]];
+  const n = hi ? 6 : 2;
+  const pos = [], nor = [], uv = [], idx = [];
+  for (const sx of [1, -1]) {
+    const base = pos.length / 3;
+    for (let iv = 0; iv <= n; iv++) {
+      for (let iu = 0; iu <= n; iu++) {
+        const u = iu / n, v = iv / n;
+        const [d, s] = bilinear(q, u, v);
+        surf(S, d, s, pp);
+        surfNormal(S, d, s, pn);
+        const k = 0.006 * S.offScale;
+        pos.push((pp[0] + pn[0] * k) * sx, pp[1] + pn[1] * k, pp[2] + pn[2] * k);
+        nor.push(pn[0] * sx, pn[1], pn[2]);
+        uv.push(sx > 0 ? 1 - u : u, v);
+      }
+    }
+    for (let iv = 0; iv < n; iv++) {
+      for (let iu = 0; iu < n; iu++) {
+        const a = base + iv * (n + 1) + iu, bb = a + 1, c = a + n + 2, e = a + n + 1;
+        if (sx > 0) idx.push(a, c, bb, a, e, c);
+        else idx.push(a, bb, c, a, c, e);
+      }
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx);
+  return g;
+}
+
+function numberCanvas(canvas, num, ink) {
+  const g = canvas.getContext('2d');
+  const w = canvas.width;
+  g.clearRect(0, 0, w, w);
+  if (num == null || num === '') return;
+  g.fillStyle = '#f3f3f0';
+  g.beginPath();
+  g.arc(w / 2, w / 2, w * 0.47, 0, Math.PI * 2);
+  g.fill();
+  g.lineWidth = w * 0.035;
+  g.strokeStyle = ink;
+  g.beginPath();
+  g.arc(w / 2, w / 2, w * 0.42, 0, Math.PI * 2);
+  g.stroke();
+  const text = String(num).slice(0, 2);
+  g.fillStyle = ink;
+  g.font = `900 ${Math.round(w * (text.length > 1 ? 0.48 : 0.58))}px system-ui, sans-serif`;
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(text, w / 2, w * 0.535);
 }
 
 let flakeTexture = null;
@@ -1294,14 +1373,17 @@ function buildAssets(spec, hi) {
   addSurfaceDetails(S, B, hi);
   addParts(S, B, hi);
   const geometry = B.build();
+  const decal = decalGeometry(S, hi);
   const zOf = (d) => d - S.zShift;
   const wheels = S.arches.map((a, k) => ({ x: a.x, z: zOf(a.d), r: a.r, w: a.w, front: a.front, k }));
   const wheelGeo = [buildWheel(spec, 0, hi), buildWheel(spec, 1, hi)];
   const bb = geometry.boundingBox;
   const dims = {
     length: S.L,
-    width: Math.max(bb.max.x - bb.min.x, 2 * Math.max(...wheels.map((w) => w.x + w.w / 2))),
+    width: 2 * Math.max(body.maxX, ...wheels.map((w) => w.x + w.w / 2)),
+    widthWithMirrors: bb.max.x - bb.min.x,
     height: bb.max.y,
+    roofHeight: body.maxY,
     wheelbase: S.b.wheelbase,
     frontOverhang: S.dF,
     rearOverhang: S.L - S.dR,
@@ -1328,6 +1410,7 @@ function buildAssets(spec, hi) {
   if (ex) for (const x of ex.x) { tips.push([x, ex.y, zOf(ex.d) + 0.16]); if (!ex.single) tips.push([-x, ex.y, zOf(ex.d) + 0.16]); }
   return {
     geometry,
+    decal,
     wheels,
     wheelGeo,
     dims,
@@ -1357,6 +1440,7 @@ function releaseAssets(a) {
   if (a.refs > 0) return;
   geometryCache.delete(a.key);
   a.geometry.dispose();
+  a.decal.dispose();
   for (const w of a.wheelGeo) { w.spin.dispose(); if (w.caliper) w.caliper.dispose(); }
   a.shadow.dispose();
 }
@@ -1365,7 +1449,7 @@ function flameGeometry(tips, hi) {
   const segs = hi ? 10 : 6;
   const pos = [], uv = [], idx = [];
   for (const [x, y, z] of tips) {
-    for (const [len, rad] of [[1.15, 0.07], [0.6, 0.04]]) {
+    for (const [len, rad] of [[0.95, 0.07], [0.5, 0.04]]) {
       const base = pos.length / 3;
       const rings = 5;
       for (let r = 0; r <= rings; r++) {
@@ -1396,6 +1480,7 @@ export function createCar(specIn, opts = {}) {
   const spec = typeof specIn === 'string' ? carById(specIn) : specIn || carById();
   const lod = opts.lod === 'low' ? 'low' : 'high';
   const hi = lod === 'high';
+  const cheap = !!opts.cheap;
   const assets = acquireAssets(spec, lod);
   const group = new THREE.Group();
   group.name = `car-${spec.id}-${lod}`;
@@ -1422,7 +1507,7 @@ export function createCar(specIn, opts = {}) {
     else def = { hex: p.hex ?? 0x9a0a14, metal: p.metal ?? 0.6, rough: p.rough ?? 0.32 };
     state.paint = def;
     setPartColor(PART.paint, def.hex);
-    setPartPbr(PART.paint, def.rough, def.metal, 1);
+    setPartPbr(PART.paint, cheap ? def.rough * 0.55 : def.rough, def.metal, 1);
     if (state.stripe == null) setPartColor(PART.stripe, def.hex);
     atlas.color.needsUpdate = true;
     atlas.pbr.needsUpdate = true;
@@ -1451,23 +1536,28 @@ export function createCar(specIn, opts = {}) {
     e.needsUpdate = true;
   };
   writeEmissive();
-  const material = new THREE.MeshPhysicalMaterial({
+  const shared = {
     color: 0xffffff,
     map: atlas.color,
     roughness: 1,
     roughnessMap: atlas.pbr,
     metalness: 1,
     metalnessMap: atlas.pbr,
-    clearcoat: 1,
-    clearcoatMap: atlas.pbr,
-    clearcoatRoughness: 0.035,
     emissive: 0xffffff,
     emissiveMap: atlas.emissive,
     emissiveIntensity: EMISSIVE_GAIN,
-    normalMap: hi ? flakeTex() : null,
-    normalScale: new THREE.Vector2(0.07, 0.07),
     envMapIntensity: opts.envMapIntensity ?? 1
-  });
+  };
+  const material = cheap
+    ? new THREE.MeshStandardMaterial(shared)
+    : new THREE.MeshPhysicalMaterial({
+      ...shared,
+      clearcoat: 1,
+      clearcoatMap: atlas.pbr,
+      clearcoatRoughness: 0.035,
+      normalMap: hi ? flakeTex() : null,
+      normalScale: new THREE.Vector2(0.07, 0.07)
+    });
   if (opts.envMap) material.envMap = opts.envMap;
   material.name = 'car-atlas';
   const body = new THREE.Mesh(assets.geometry, material);
@@ -1554,6 +1644,29 @@ export function createCar(specIn, opts = {}) {
     };
     group.add(flames);
   }
+  let decal = null, decalTex = null, decalCanvas = null;
+  const applyNumber = (num) => {
+    if (num == null || num === '') {
+      if (decal) decal.visible = false;
+      return;
+    }
+    if (!decal) {
+      decalCanvas = makeCanvas(hi ? 128 : 64, hi ? 128 : 64);
+      decalTex = new THREE.CanvasTexture(decalCanvas);
+      decalTex.colorSpace = THREE.SRGBColorSpace;
+      decalTex.anisotropy = 4;
+      const decalMat = new THREE.MeshPhysicalMaterial({ map: decalTex, transparent: true, depthWrite: false, roughness: 0.35, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.04, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+      if (opts.envMap) decalMat.envMap = opts.envMap;
+      decal = new THREE.Mesh(assets.decal, decalMat);
+      decal.name = 'car-number';
+      group.add(decal);
+    }
+    numberCanvas(decalCanvas, num, '#111214');
+    decalTex.needsUpdate = true;
+    decal.visible = true;
+  };
+  const startNumber = opts.number !== undefined ? opts.number : spec.livery ? spec.livery.number : null;
+  if (startNumber != null) applyNumber(startNumber);
   const updateGlows = () => {
     const col = glowGeo.getAttribute('color');
     const head = state.head ? 1 : 0;
@@ -1623,10 +1736,14 @@ export function createCar(specIn, opts = {}) {
     setStripe(hex) {
       applyStripe(hex);
     },
+    setNumber(num) {
+      applyNumber(num);
+    },
     setEnvMap(tex, intensity) {
       material.envMap = tex || null;
       if (intensity != null) material.envMapIntensity = intensity;
       material.needsUpdate = true;
+      if (decal) { decal.material.envMap = tex || null; decal.material.needsUpdate = true; }
     },
     setShadowStrength(v) {
       shadowMat.opacity = clamp(v, 0, 1);
@@ -1645,11 +1762,44 @@ export function createCar(specIn, opts = {}) {
       poolGeo.dispose();
       poolMat.dispose();
       if (flames) { flames.geometry.dispose(); flames.material.dispose(); }
+      if (decal) { decal.material.dispose(); decalTex.dispose(); }
       releaseAssets(assets);
     }
   };
   updateGlows();
   return api;
+}
+
+export function createCarLOD(spec, opts = {}) {
+  const near = createCar(spec, { ...opts, lod: 'high' });
+  const far = createCar(spec, { ...opts, lod: 'low' });
+  const lod = new THREE.LOD();
+  lod.name = `car-lod-${near.spec.id}`;
+  lod.addLevel(near.group, 0);
+  lod.addLevel(far.group, opts.lodDistance ?? 30);
+  const both = (fn) => (...args) => { near[fn](...args); far[fn](...args); };
+  return {
+    group: lod,
+    levels: [near, far],
+    wheels: near.wheels,
+    dims: near.dims,
+    spec: near.spec,
+    setSteer: both('setSteer'),
+    setSpin: both('setSpin'),
+    setBrake: both('setBrake'),
+    setNitro: both('setNitro'),
+    setHeadlights: both('setHeadlights'),
+    setColor: both('setColor'),
+    setStripe: both('setStripe'),
+    setNumber: both('setNumber'),
+    setEnvMap: both('setEnvMap'),
+    setShadowStrength: both('setShadowStrength'),
+    dispose() {
+      lod.removeFromParent();
+      near.dispose();
+      far.dispose();
+    }
+  };
 }
 
 export function carStats(specIn, lod = 'high') {

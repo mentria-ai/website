@@ -933,7 +933,7 @@ const RAIL_PROFILE = [[0.16, 0.52], [0.2, 0.6], [0.16, 0.68], [0.2, 0.76], [0.16
 
 export function buildTrackMeshes(THREE, track, opts = {}) {
   const style = Object.assign({}, TRACK_STYLE_DEFAULT, track.def && track.def.style || {}, opts.style || {});
-  const step = opts.step || 2;
+  const step = opts.step || (opts.quality === 'low' ? 3.5 : 2);
   const L = track.length;
   const N = Math.max(8, Math.round(L / step));
   const ds = L / N;

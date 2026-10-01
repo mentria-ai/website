@@ -765,6 +765,7 @@ function buildStartPad(course, heightAt) {
   lamps.instanceMatrix.needsUpdate = true;
   if (lamps.instanceColor) lamps.instanceColor.needsUpdate = true;
   standRoot.add(lamps);
+  standRoot.visible = course.kind !== 'freestyle';
 
   function set(stateName, count) {
     for (let i = 0; i < 3; i++) {

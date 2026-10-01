@@ -1725,7 +1725,8 @@
       "strength_medium": "moyenne",
       "strength_strong": "forte",
       "db_media": "Bibliothèque de photos et vidéos (miniatures, dates, où vous vous êtes arrêté)",
-      "db_ext_local": "Données d’extensions gardées sur cet appareil"
+      "db_ext_local": "Données d’extensions gardées sur cet appareil",
+      "cache_ext_data": "Fichiers de données des extensions"
     },
     "extensions-sdk": {
       "heading_start": "Démarrage rapide",
@@ -1746,7 +1747,8 @@
         "pomodoro-timer": "Une minuterie de concentration avec des phases de travail et de pause. Le compte à rebours continue même si vous rechargez.",
         "dice-roller": "Lancez des dés en notation standard comme 2d6+1, ou tirez au sort une option dans votre propre liste.",
         "image-gen": "Générez des images à partir d'un texte sur le nœud de rendu partagé de Mentria. Gratuit, sans configuration : décrivez la scène et attendez votre tour.",
-        "story-studio": "Créez vos propres decks d'histoires : générez des images sur le nœud de rendu de Mentria ou importez les vôtres, écrivez des légendes et assemblez les diapositives en une histoire à faire défiler."
+        "story-studio": "Créez vos propres decks d'histoires : générez des images sur le nœud de rendu de Mentria ou importez les vôtres, écrivez des légendes et assemblez les diapositives en une histoire à faire défiler.",
+        "meal-planner": "Planifiez les repas de la semaine, obtenez une liste de courses classée par rayon et finissez ce qui reste dans vos placards. Avec 30 recettes pour commencer et des estimations nutritionnelles issues des données de l'USDA."
       }
     },
     "bubble-level": {

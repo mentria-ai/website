@@ -10,6 +10,7 @@ const ENGINE_FILES = {{ engineFiles | dump | safe }};
 const DECKS_CACHE = 'mentria-decks-{{ buildHash }}';
 const ART_CACHE = 'mentria-deck-art';
 const SHARE_CACHE = 'mentria-share';
+const EXT_DATA_CACHE = 'mentria-ext-data';
 const DECKS_LIMIT = 40;
 const ART_LIMIT = 200;
 const FEED_PAGE = /^\/((es|fr|ja|pt-br)\/)?feed\//;
@@ -505,6 +506,18 @@ self.addEventListener('fetch', event => {
       const resp = await fetch(event.request);
       if (resp && resp.ok) { const copy = resp.clone(); caches.open(MODELS_CACHE).then(c => c.put(event.request, copy)); }
       return resp;
+    }
+    if (/^\/assets\/extensions\/[^/]+\//.test(url.pathname)) {
+      const data = await caches.open(EXT_DATA_CACHE);
+      try {
+        const resp = await fetch(event.request);
+        if (resp && resp.ok) event.waitUntil(data.put(url.pathname, resp.clone()).catch(() => {}));
+        return resp;
+      } catch (err) {
+        const kept = await data.match(url.pathname);
+        if (kept) return kept;
+        throw err;
+      }
     }
     const precache = await caches.open(CACHE_NAME);
     const cached = await precache.match(event.request, { ignoreSearch: true });

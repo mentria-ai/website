@@ -1725,7 +1725,8 @@
       "strength_medium": "medium",
       "strength_strong": "strong",
       "db_media": "Photo and video library (thumbnails, dates, places you stopped)",
-      "db_ext_local": "Extension data kept on this device"
+      "db_ext_local": "Extension data kept on this device",
+      "cache_ext_data": "Extension data files"
     },
     "extensions-sdk": {
       "heading_start": "Quick start",
@@ -1746,7 +1747,8 @@
         "pomodoro-timer": "A focus timer with work and break phases. The countdown keeps running even if you reload.",
         "dice-roller": "Roll dice with standard notation like 2d6+1, or pick a random option from your own list.",
         "image-gen": "Generate images from a text prompt on Mentria's shared render node. Free, no setup — describe the scene and wait your turn.",
-        "story-studio": "Build your own story decks: generate images on Mentria's render node or import your own, write captions, and stitch slides into a swipeable story."
+        "story-studio": "Build your own story decks: generate images on Mentria's render node or import your own, write captions, and stitch slides into a swipeable story.",
+        "meal-planner": "Plan the week's meals, get a shopping list grouped by aisle, and use up what's in your pantry. Comes with 30 starter recipes and nutrition estimates from USDA data."
       }
     },
     "bubble-level": {

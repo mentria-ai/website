@@ -183,6 +183,7 @@ eleventyComputed:
     dbExt: {{ ("tool.files.db_ext" | t) | dump | safe }},
     dbExtLocal: {{ ("tool.files.db_ext_local" | t) | dump | safe }},
     dbMedia: {{ ("tool.files.db_media" | t) | dump | safe }},
+    cacheExtData: {{ ("tool.files.cache_ext_data" | t) | dump | safe }},
     deleteModels: {{ ("tool.files.delete_models" | t) | dump | safe }},
     confirmDeleteModels: {{ ("tool.files.confirm_delete_models" | t) | dump | safe }},
     clearCache: {{ ("tool.files.clear_cache" | t) | dump | safe }},
@@ -253,6 +254,7 @@ eleventyComputed:
     if (nm.indexOf('mentria-cache-') === 0) return COPY.cacheApp;
     if (nm.indexOf('mentria-decks-') === 0) return COPY.cacheDecks;
     if (nm === 'mentria-deck-art') return COPY.cacheArt;
+    if (nm === 'mentria-ext-data') return COPY.cacheExtData;
     return nm;
   }
   function dbLabel(nm) {

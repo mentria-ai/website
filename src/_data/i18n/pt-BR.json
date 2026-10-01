@@ -3155,5 +3155,13 @@
     "build_title": "Crie a sua",
     "build_body": "Uma extensão é um único arquivo HTML. O SDK explica o formato e o que uma extensão pode usar.",
     "manage_link": "Gerenciar extensões instaladas"
+  },
+  "image_use": {
+    "title": "Uso das imagens do Mentria",
+    "lede": "As imagens do Mentria, incluindo as dos decks e dos pacotes de aprendizado, são feitas para este site.",
+    "rights": "Todas as imagens do Mentria são © Mentria. Todos os direitos reservados.",
+    "share": "Você pode criar links para qualquer página ou compartilhá-la como está.",
+    "ask": "Para usar uma imagem em outro lugar, fale com a gente antes:",
+    "contact": "fale com a gente no X"
   }
 }

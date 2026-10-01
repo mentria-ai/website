@@ -105,5 +105,6 @@ eleventyComputed:
 {% if devMode %}{% include "dev-feedback.njk" %}{% endif %}
 </div>
 
+{% set schemaDeck = pair.chapter %}{% include "deck-schema.njk" %}
 <script src="/assets/js/share-card.js?v={{ buildHash }}" defer></script>
 <script src="/assets/js/feed-deck.js?v={{ buildHash }}" defer></script>

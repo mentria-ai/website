@@ -519,11 +519,17 @@ async function ensureWorld(course) {
     renderer,
     camera,
     quality: q,
+    beforeCompile() {
+      droneMesh.group.visible = true;
+      ghostView.prime();
+    },
     onProgress: (p, label) => {
       if (token !== loadToken) return;
       ui.loading(Math.min(0.99, p), label === 'shaders' || label === 'ready' ? t('load.shaders') : t('load.building'));
     }
   });
+  ghostView.hide();
+  droneMesh.group.visible = false;
   if (token !== loadToken) {
     w.dispose();
     return null;
@@ -1165,8 +1171,15 @@ function updateGhost(dt) {
   ghostView.update(run.ghost, p === 'countdown' ? 0 : run.time, show, dt);
 }
 
+const hitch = { max: 0, over33: 0, frames: 0 };
+
 function onRender(alpha, dt) {
   frameDt = dt > 0 ? Math.min(dt, 0.1) : 1 / 60;
+  if (TEST && dt > 0) {
+    hitch.frames++;
+    if (dt > hitch.max) hitch.max = dt;
+    if (dt > 0.034) hitch.over33++;
+  }
   const time = performance.now() / 1000;
   const live = run.phase !== 'boot' && run.phase !== 'loading';
   if (!live || !world) return;
@@ -1478,6 +1491,13 @@ function exposeTestHook() {
       if (engine.setTimeScale) engine.setTimeScale(s);
       return s;
     },
+    hitches() {
+      const out = { maxMs: Math.round(hitch.max * 1000), over33: hitch.over33, frames: hitch.frames };
+      hitch.max = 0;
+      hitch.over33 = 0;
+      hitch.frames = 0;
+      return out;
+    },
     input() {
       try { return Object.assign({ climb: input.axis('climb'), throttle: input.axis('throttle') }, input.snapshot ? input.snapshot() : {}); } catch (err) { return { error: String(err) }; }
     },
@@ -1527,7 +1547,9 @@ function exposeTestHook() {
         ghostPace: run.ghostPace,
         ui: ui.current ? ui.current() : null,
         coachStep: run.coachStep,
-        paused: !!engine.paused
+        paused: !!engine.paused,
+        audio: audio ? !!audio.unlocked : null,
+        voices: !!motorsVoice && !!windVoice
       };
     }
   };

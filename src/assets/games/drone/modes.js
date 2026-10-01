@@ -144,6 +144,12 @@ export function createGhostView(scene, color) {
     trail.visible = false;
   }
 
+  function prime() {
+    mesh.group.visible = true;
+    glow.visible = true;
+    trail.visible = true;
+  }
+
   function update(player, t, show, dt) {
     const alive = !!player && show && t <= player.duration + 1.5;
     if (!alive) {
@@ -178,5 +184,5 @@ export function createGhostView(scene, color) {
     lineMat.dispose();
   }
 
-  return { update, hide, dispose, get visible() { return mesh.group.visible; } };
+  return { update, hide, prime, dispose, get visible() { return mesh.group.visible; } };
 }

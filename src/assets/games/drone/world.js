@@ -463,6 +463,9 @@ export async function buildWorld(course, opts = {}) {
     try { await withTimeout(KitMat.texturesReady(), 6000); } catch (_) {}
   }
   await report(0.93, 'shaders');
+  if (typeof opts.beforeCompile === 'function') {
+    try { opts.beforeCompile(); } catch (_) {}
+  }
   if (camera && renderer && typeof renderer.compileAsync === 'function') {
     try { await withTimeout(renderer.compileAsync(scene, camera), 8000); } catch (_) {}
   }

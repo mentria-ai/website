@@ -311,7 +311,7 @@ export function createAIDriver(track, car, opts = {}) {
         useNitro = true;
       }
     }
-    if (!car.grounded) { brk = 0; }
+    if (!car.grounded) { brk = 0; steerCmd = 0; }
     input.throttle = thr;
     input.brake = brk;
     input.steer = steerCmd;

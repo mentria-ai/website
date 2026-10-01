@@ -115,6 +115,7 @@ export function createVehicle(params, spawn = {}) {
     driftCounter: 0,
     driftReleaseT: 0,
     driftWallT: 0,
+    airSlip0: 0,
     nitroFullFlag: false,
     nitro: spawn.nitro == null ? 0.34 : spawn.nitro,
     boosting: false,
@@ -305,7 +306,8 @@ export function stepVehicle(car, input, dt, track) {
     car.vHeading = wrapAngle(car.vHeading + omega * dt);
   } else {
     speed -= p.airDrag * speed * speed * 0.3 * dt;
-    car.slip += turn * 0.9 * dt;
+    const lim = Math.max(0.35, car.airSlip0 || 0);
+    car.slip = clamp(car.slip + turn * 0.9 * dt, -lim, lim);
   }
 
   car.spin *= Math.exp(-2.4 * dt);
@@ -401,6 +403,7 @@ export function stepVehicle(car, input, dt, track) {
   } else {
     if (car.grounded && surf - car.y < -0.3) {
       car.grounded = false;
+      car.airSlip0 = Math.abs(car.slip);
       ev.takeoff = true;
     }
     if (!car.grounded) {

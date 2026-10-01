@@ -671,14 +671,19 @@ export function layoutTrackScenery(track, rules, seed) {
         const sc = track.wrapS(s + w / 2);
         if (inRange(sc, r.ranges) && !skipTunnel(sc)) {
           const setback = lerp(r.setback[0], r.setback[1], rng());
-          const p = placeBeside(track, sc, side, setback + d / 2, 0);
-          const rad = Math.hypot(w, d) / 2;
-          if (track.clearOfRoad(p.x, p.z, rad + (r.clearance == null ? 3 : r.clearance))) {
-            list.push({
-              x: p.x, y: p.y, z: p.z, yaw: wrapAngle(p.heading), w, d, h,
-              style: styles[Math.floor(rng() * styles.length)],
-              seed: Math.floor(rng() * 1e6)
-            });
+          for (let attempt = 0; attempt < 3; attempt++) {
+            const k = attempt === 0 ? 1 : attempt === 1 ? 0.7 : 0.5;
+            const bw = w * k, bd = d * k;
+            const p = placeBeside(track, sc, side, setback + attempt * 5 + bd / 2, 0);
+            const rad = Math.hypot(bw, bd) / 2;
+            if (track.clearOfRoad(p.x, p.z, rad + (r.clearance == null ? 3 : r.clearance))) {
+              list.push({
+                x: p.x, y: p.y, z: p.z, yaw: wrapAngle(p.heading), w: bw, d: bd, h,
+                style: styles[Math.floor(rng() * styles.length)],
+                seed: Math.floor(rng() * 1e6)
+              });
+              break;
+            }
           }
         }
         s += w + gap;

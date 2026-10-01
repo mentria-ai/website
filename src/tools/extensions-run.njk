@@ -54,6 +54,12 @@ if (!source) {
   window.__mentriaExtHost = Object.freeze({
     manifest: Object.freeze(JSON.parse(JSON.stringify(m))),
     storage: X.dataApiFor(id),
+    db: X.dbApiFor(id),
+    get locale() { return document.documentElement.lang || 'en'; },
+    onLocaleChange: (fn) => {
+      if (typeof fn !== 'function') return;
+      document.addEventListener('mentria:localechange', (e) => { try { fn((e.detail && e.detail.code) || document.documentElement.lang || 'en'); } catch (_) {} });
+    },
     theme,
     args: parseHashArgs(),
     notify: (msg) => {

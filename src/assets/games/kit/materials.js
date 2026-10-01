@@ -8,7 +8,7 @@ const materialCache = new Map();
 const imageCache = new Map();
 const resultCache = new Map();
 const proceduralStats = { genMs: 0, perTexture: {} };
-const PROCEDURAL_ONLY = new Set(['facade-office-lit', 'facade-apartment-lit', 'container', 'container-doors', 'carbon', 'rubber', 'paint-flake']);
+const PROCEDURAL_ONLY = new Set(['facade-office', 'facade-apartment', 'facade-night', 'facade-office-lit', 'facade-apartment-lit', 'container', 'container-doors', 'carbon', 'rubber', 'paint-flake']);
 
 const FACADE_LAYOUTS = {
   office: { x: 12, y: 14.4, bays: 4, floors: 4 },

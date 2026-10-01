@@ -12,7 +12,9 @@ function resolveEnvQuality(q) {
   if (typeof q === 'string') return { ...(ENV_QUALITY[q] || ENV_QUALITY.medium) };
   if (q && typeof q === 'object') {
     const base = ENV_QUALITY[q.name] || ENV_QUALITY.medium;
-    return { ...base, ...q };
+    const merged = { ...base, ...q };
+    if (typeof q.envMapSize === 'number') merged.envSize = q.envMapSize;
+    return merged;
   }
   return { ...ENV_QUALITY.medium };
 }
@@ -963,7 +965,7 @@ export function createEnvironment(scene, renderer, opts = {}) {
   let backdrop = null;
   let backdropTexture = null;
   const backdropName = opts.backdrop || null;
-  const backdropHeightDeg = opts.backdropHeight ?? 7;
+  const backdropHeightDeg = opts.backdropHeight ?? 5;
   if (backdropName) {
     backdropTexture = new THREE.CanvasTexture(paintBackdropFallback(backdropName, 2048, 256));
     backdropTexture.colorSpace = THREE.SRGBColorSpace;

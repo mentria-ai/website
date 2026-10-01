@@ -207,7 +207,7 @@ function stripUv(geo) {
 
 const PALETTES = {
   temperate: {
-    pineDeep: hex('#22402a'), pineMid: hex('#36603a'), pineTip: hex('#6a9450'),
+    pineDeep: hex('#1c3424'), pineMid: hex('#2b4f31'), pineTip: hex('#5a8048'),
     oakDeep: hex('#28441a'), oakMid: hex('#4a6e26'), oakTip: hex('#93b04a'),
     bushDeep: hex('#2a4a1c'), bushMid: hex('#4b6e2c'), bushTip: hex('#86a448'),
     bark: hex('#4a3626'), barkDark: hex('#241912'),
@@ -417,7 +417,7 @@ function buildPalmGeometry(seed, pal) {
     b.add(nut, null, hex('#3a2d18'));
   }
   const geo = b.build();
-  return { geometry: geo, height: H + 1.2, width: 9.5, trunkRadius: 0.3, canopyRadius: 4, canopyY: H, topY: H - 0.2, sway: 0.28, doubleSided: true };
+  return { geometry: geo, height: H + 1.2, width: 9.5, trunkRadius: 0.3, canopyRadius: 4, canopyY: H, topY: H - 0.2, sway: 0.28, doubleSided: true, foliageDetail: false };
 }
 
 function ribbedColumn(radius, height, ribs, radialSegs, heightSegs) {
@@ -507,7 +507,7 @@ function buildCactusGeometry(seed) {
     b.add(stripUv(acap), null, colorFn);
   }
   const geo = b.build();
-  return { geometry: geo, height: H + 0.45, width: 3.2, trunkRadius: 0.45, canopyRadius: 1.2, canopyY: H * 0.6, topY: H * 0.7, sway: 0, doubleSided: false };
+  return { geometry: geo, height: H + 0.45, width: 3.2, trunkRadius: 0.45, canopyRadius: 1.2, canopyY: H * 0.6, topY: H * 0.7, sway: 0, doubleSided: false, foliageDetail: false };
 }
 
 function buildBushGeometry(seed, pal) {
@@ -563,7 +563,7 @@ function buildRockGeometry(seed, pal, detail) {
     return tmpColor2;
   });
   const out = b.build();
-  return { geometry: out, height: 1.0, width: 2, trunkRadius: 0.85, canopyRadius: 1, canopyY: 0.3, topY: 0.6, sway: 0, doubleSided: false };
+  return { geometry: out, height: 1.0, width: 2, trunkRadius: 0.85, canopyRadius: 1, canopyY: 0.3, topY: 0.6, sway: 0, doubleSided: false, foliageDetail: false };
 }
 
 const VEG_BUILDERS = {
@@ -606,6 +606,32 @@ float kwPropsDither(vec2 fc) {
 }
 `;
 
+const FOLIAGE_GLSL = `
+float kwVegHash(vec3 p) {
+  p = fract(p * 0.3183099 + 0.1);
+  p *= 17.0;
+  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+float kwVegNoise(vec3 x) {
+  vec3 i = floor(x);
+  vec3 f = fract(x);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(kwVegHash(i), kwVegHash(i + vec3(1.0, 0.0, 0.0)), f.x),
+                 mix(kwVegHash(i + vec3(0.0, 1.0, 0.0)), kwVegHash(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
+             mix(mix(kwVegHash(i + vec3(0.0, 0.0, 1.0)), kwVegHash(i + vec3(1.0, 0.0, 1.0)), f.x),
+                 mix(kwVegHash(i + vec3(0.0, 1.0, 1.0)), kwVegHash(i + vec3(1.0, 1.0, 1.0)), f.x), f.y), f.z);
+}
+vec3 kwVegPerturb(vec3 surfPos, vec3 surfNorm, vec2 dHdxy) {
+  vec3 sigX = dFdx(surfPos);
+  vec3 sigY = dFdy(surfPos);
+  vec3 r1 = cross(sigY, surfNorm);
+  vec3 r2 = cross(surfNorm, sigX);
+  float det = dot(sigX, r1);
+  vec3 grad = sign(det) * (dHdxy.x * r1 + dHdxy.y * r2);
+  return normalize(abs(det) * surfNorm - grad);
+}
+`;
+
 function nearVegetationMaterial(model, fadeStart, fadeEnd, castShadow) {
   const mat = new THREE.MeshStandardMaterial({
     vertexColors: true,
@@ -621,8 +647,9 @@ function nearVegetationMaterial(model, fadeStart, fadeEnd, castShadow) {
     shader.uniforms.kwFade = fade;
     shader.uniforms.kwSway = sway;
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nuniform float kwPropsTime;\nuniform vec2 kwFade;\nuniform vec2 kwSway;\nvarying float kwFadeAlpha;')
+      .replace('#include <common>', '#include <common>\nuniform float kwPropsTime;\nuniform vec2 kwFade;\nuniform vec2 kwSway;\nvarying float kwFadeAlpha;\nvarying vec3 kwLocalPos;')
       .replace('#include <begin_vertex>', `#include <begin_vertex>
+  kwLocalPos = position;
 #ifdef USE_INSTANCING
   vec3 kwOrigin = instanceMatrix[3].xyz;
 #else
@@ -636,10 +663,27 @@ function nearVegetationMaterial(model, fadeStart, fadeEnd, castShadow) {
   float kwDist = distance(cameraPosition.xz, kwOrigin.xz);
   kwFadeAlpha = 1.0 - smoothstep(kwFade.x, kwFade.y, kwDist);`);
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying float kwFadeAlpha;\n' + DITHER_GLSL)
-      .replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n  if (kwFadeAlpha < 0.999 && kwFadeAlpha <= kwPropsDither(gl_FragCoord.xy)) discard;');
+      .replace('#include <common>', '#include <common>\nvarying float kwFadeAlpha;\nvarying vec3 kwLocalPos;\nfloat kwBumpH = 0.0;\nfloat kwLeaf = 0.0;\nfloat kwClump = 1.0;\n' + DITHER_GLSL + FOLIAGE_GLSL)
+      .replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n  if (kwFadeAlpha < 0.999 && kwFadeAlpha <= kwPropsDither(gl_FragCoord.xy)) discard;')
+      .replace('#include <color_fragment>', `#include <color_fragment>
+  kwLeaf = clamp((diffuseColor.g - diffuseColor.r) * 10.0, 0.0, 1.0) * kwFoliage;
+  if (kwLeaf > 0.0) {
+    float kwN1 = kwVegNoise(kwLocalPos * 2.4);
+    float kwN2 = kwVegNoise(kwLocalPos * 6.8 + 3.1);
+    kwClump = kwN1 * 0.6 + kwN2 * 0.4;
+    diffuseColor.rgb *= mix(1.0, mix(0.42, 1.22, kwClump), kwLeaf);
+    kwBumpH = kwClump * kwLeaf * 0.9;
+  }`)
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+  if (kwLeaf > 0.0) {
+    normal = kwVegPerturb(-vViewPosition, normal, vec2(dFdx(kwBumpH), dFdy(kwBumpH)));
+    float kwGraze = 1.0 - abs(dot(normal, normalize(vViewPosition)));
+    if (kwLeaf > 0.5 && kwClump < kwGraze * 1.05 - 0.32) discard;
+  }`);
+    shader.uniforms.kwFoliage = { value: model.foliageDetail === false ? 0 : 1 };
+    shader.fragmentShader = shader.fragmentShader.replace('varying vec3 kwLocalPos;', 'varying vec3 kwLocalPos;\nuniform float kwFoliage;');
   };
-  mat.customProgramCacheKey = () => 'kwNearVeg' + (model.doubleSided ? 'D' : 'S');
+  mat.customProgramCacheKey = () => 'kwNearVeg' + (model.doubleSided ? 'D' : 'S') + (model.foliageDetail === false ? 'n' : 'f');
   mat.userData.kwFade = fade;
   return mat;
 }

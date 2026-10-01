@@ -20,7 +20,7 @@ function resolveTerrainQuality(q) {
 export const TERRAIN_BIOMES = {
   meadow: {
     layers: {
-      grass: { tex: 'grass', tint: [1.0, 1.0, 0.92], scale: 7 },
+      grass: { tex: 'grass', tint: [1.0, 1.0, 0.92], fileTint: [0.78, 0.8, 0.6], fileSat: 0.62, scale: 7 },
       dirt: { tex: 'dirt', tint: [1, 1, 1], scale: 6 },
       rock: { tex: 'rock', tint: [1.0, 0.98, 0.95], scale: 11 },
       sand: { tex: 'sand', tint: [0.95, 0.92, 0.85], scale: 8 },
@@ -29,16 +29,16 @@ export const TERRAIN_BIOMES = {
   },
   desert: {
     layers: {
-      grass: { tex: 'sand', tint: [1.04, 0.86, 0.68], scale: 9 },
-      dirt: { tex: 'dirt', tint: [1.12, 0.84, 0.64], scale: 6 },
-      rock: { tex: 'rock', tint: [1.22, 0.8, 0.6], scale: 9 },
-      sand: { tex: 'sand', tint: [1.1, 0.94, 0.76], scale: 7 },
+      grass: { tex: 'sand', tint: [1.04, 0.86, 0.68], fileTint: [0.98, 0.86, 0.74], scale: 9 },
+      dirt: { tex: 'dirt', tint: [1.12, 0.84, 0.64], fileTint: [1.08, 0.86, 0.7], scale: 6 },
+      rock: { tex: 'sandstone', procedural: 'rock', tint: [1.22, 0.8, 0.6], fileTint: [0.9, 0.84, 0.84], fileSat: 0.82, scale: 9 },
+      sand: { tex: 'sand', tint: [1.1, 0.94, 0.76], fileTint: [1.0, 0.92, 0.82], scale: 7 },
     },
     rockSlope: 0.22, dirtAmount: 0.4, sandTop: 6, snowLine: 1e9, macro: 0.26, macroTint: [1.08, 0.92, 0.8],
   },
   coast: {
     layers: {
-      grass: { tex: 'grass', tint: [0.98, 1.02, 0.86], scale: 7 },
+      grass: { tex: 'grass', tint: [0.98, 1.02, 0.86], fileTint: [0.8, 0.82, 0.62], fileSat: 0.62, scale: 7 },
       dirt: { tex: 'dirt', tint: [1, 0.96, 0.92], scale: 6 },
       rock: { tex: 'rock', tint: [0.92, 0.92, 0.9], scale: 10 },
       sand: { tex: 'sand', tint: [1.02, 0.98, 0.9], scale: 7 },
@@ -47,16 +47,16 @@ export const TERRAIN_BIOMES = {
   },
   urban: {
     layers: {
-      grass: { tex: 'concrete', tint: [0.86, 0.86, 0.84], scale: 9 },
-      dirt: { tex: 'asphalt', tint: [0.95, 0.95, 0.95], scale: 7 },
+      grass: { tex: 'asphalt', tint: [1.05, 1.05, 1.05], scale: 8 },
+      dirt: { tex: 'concrete', tint: [0.82, 0.82, 0.8], scale: 9 },
       rock: { tex: 'rock', tint: [0.9, 0.9, 0.9], scale: 9 },
       sand: { tex: 'dirt', tint: [0.8, 0.78, 0.76], scale: 6 },
     },
-    rockSlope: 0.3, dirtAmount: 0.45, sandTop: -1000, snowLine: 1e9, macro: 0.22, macroTint: [0.95, 0.95, 0.92],
+    rockSlope: 0.3, dirtAmount: 0.3, sandTop: -1000, snowLine: 1e9, macro: 0.18, macroTint: [0.96, 0.96, 0.94],
   },
   park: {
     layers: {
-      grass: { tex: 'grass', tint: [0.9, 0.95, 0.82], scale: 6 },
+      grass: { tex: 'grass', tint: [0.9, 0.95, 0.82], fileTint: [0.78, 0.82, 0.62], fileSat: 0.7, scale: 6 },
       dirt: { tex: 'dirt', tint: [0.9, 0.88, 0.86], scale: 5 },
       rock: { tex: 'concrete', tint: [0.9, 0.9, 0.9], scale: 8 },
       sand: { tex: 'dirt', tint: [0.8, 0.78, 0.76], scale: 6 },
@@ -65,7 +65,7 @@ export const TERRAIN_BIOMES = {
   },
   alpine: {
     layers: {
-      grass: { tex: 'grass', tint: [0.92, 1.0, 0.86], scale: 7 },
+      grass: { tex: 'grass', tint: [0.92, 1.0, 0.86], fileTint: [0.74, 0.8, 0.62], fileSat: 0.6, scale: 7 },
       dirt: { tex: 'forest-floor', tint: [1, 1, 1], scale: 5 },
       rock: { tex: 'rock', tint: [0.95, 0.96, 1.0], scale: 12 },
       sand: { tex: 'sand', tint: [0.9, 0.88, 0.84], scale: 8 },
@@ -87,6 +87,7 @@ uniform vec4 kwScales;
 uniform vec4 kwSplat;
 uniform vec4 kwMacro;
 uniform vec3 kwMacroTint;
+uniform vec4 kwLayerSat;
 varying vec3 vKwWorld;
 varying vec3 vKwNormal;
 varying float vKwSunVis;
@@ -148,11 +149,15 @@ const TERRAIN_SPLAT_MAIN = `
   vec3 kwCol = vec3(0.0);
   float kwRough = 0.0;
   if (kwWeights.x > 0.004) {
-    kwCol += kwSampleLayer(kwGrassMap, kwW.xz / kwScales.x, kwDist).rgb * kwGrassTint * kwWeights.x;
+    vec3 kwG = kwSampleLayer(kwGrassMap, kwW.xz / kwScales.x, kwDist).rgb;
+    kwG = mix(vec3(dot(kwG, vec3(0.2126, 0.7152, 0.0722))), kwG, kwLayerSat.x);
+    kwCol += kwG * kwGrassTint * kwWeights.x;
     kwRough += 0.96 * kwWeights.x;
   }
   if (kwWeights.y > 0.004) {
-    kwCol += kwSampleLayer(kwDirtMap, kwW.xz / kwScales.y, kwDist).rgb * kwDirtTint * kwWeights.y;
+    vec3 kwD = kwSampleLayer(kwDirtMap, kwW.xz / kwScales.y, kwDist).rgb;
+    kwD = mix(vec3(dot(kwD, vec3(0.2126, 0.7152, 0.0722))), kwD, kwLayerSat.y);
+    kwCol += kwD * kwDirtTint * kwWeights.y;
     kwRough += 0.94 * kwWeights.y;
   }
   if (kwWeights.z > 0.004) {
@@ -160,11 +165,15 @@ const TERRAIN_SPLAT_MAIN = `
     vec3 kwTop = kwSampleLayer(kwRockMap, kwW.xz / kwScales.z, kwDist).rgb;
     vec3 kwWall = kwSampleLayer(kwRockMap, kwSide / kwScales.z * vec2(1.0, 1.6), kwDist).rgb;
     float kwWallW = smoothstep(0.35, 0.7, kwSlope);
-    kwCol += mix(kwTop, kwWall, kwWallW) * kwRockTint * kwWeights.z;
+    vec3 kwR = mix(kwTop, kwWall, kwWallW);
+    kwR = mix(vec3(dot(kwR, vec3(0.2126, 0.7152, 0.0722))), kwR, kwLayerSat.z);
+    kwCol += kwR * kwRockTint * kwWeights.z;
     kwRough += 0.86 * kwWeights.z;
   }
   if (kwWeights.w > 0.004) {
-    kwCol += kwSampleLayer(kwSandMap, kwW.xz / kwScales.w, kwDist).rgb * kwSandTint * kwWeights.w;
+    vec3 kwS = kwSampleLayer(kwSandMap, kwW.xz / kwScales.w, kwDist).rgb;
+    kwS = mix(vec3(dot(kwS, vec3(0.2126, 0.7152, 0.0722))), kwS, kwLayerSat.w);
+    kwCol += kwS * kwSandTint * kwWeights.w;
     kwRough += 0.92 * kwWeights.w;
   }
   float kwMacroV = (kwN3 - 0.5) * 2.0;
@@ -257,7 +266,7 @@ export function createTerrain(opts = {}) {
   const tex = {};
   for (const key of ['grass', 'dirt', 'rock', 'sand']) {
     const spec = layerSpec[key];
-    const t = loadTexture(spec.tex, { size: texSize });
+    const t = loadTexture(spec.tex, { size: texSize, procedural: spec.procedural || spec.tex });
     tex[key] = t;
   }
 
@@ -274,7 +283,19 @@ export function createTerrain(opts = {}) {
     kwSplat: { value: new THREE.Vector4(opts.rockSlope ?? biome.rockSlope, opts.dirtAmount ?? biome.dirtAmount, opts.sandTop ?? biome.sandTop, 0) },
     kwMacro: { value: new THREE.Vector4(opts.macro ?? biome.macro, 0.12, opts.bump ?? 0.5, 0) },
     kwMacroTint: { value: new THREE.Vector3().fromArray(opts.macroTint ?? biome.macroTint) },
+    kwLayerSat: { value: new THREE.Vector4(1, 1, 1, 1) },
   };
+  const tintUniform = { grass: uniforms.kwGrassTint, dirt: uniforms.kwDirtTint, rock: uniforms.kwRockTint, sand: uniforms.kwSandTint };
+  const satIndex = { grass: 'x', dirt: 'y', rock: 'z', sand: 'w' };
+  for (const key of ['grass', 'dirt', 'rock', 'sand']) {
+    const spec = layerSpec[key];
+    if (!spec.fileTint && spec.fileSat == null) continue;
+    tex[key].userData.ready.then((t) => {
+      if (t.userData.source !== 'file') return;
+      if (spec.fileTint) tintUniform[key].value.fromArray(spec.fileTint);
+      if (spec.fileSat != null) uniforms.kwLayerSat.value[satIndex[key]] = spec.fileSat;
+    });
+  }
 
   const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, metalness: 0 });
   material.name = 'kw-terrain';
@@ -294,13 +315,14 @@ export function createTerrain(opts = {}) {
   };
   material.customProgramCacheKey = () => 'kw-terrain-' + (quality.noTile ? 'nt' : 't') + (quality.farBlend ? 'f' : 'n');
 
-  const chunkCells = opts.chunkCells || (segments >= 320 ? 64 : 32);
+  const chunkCells = opts.chunkCells || Math.min(128, Math.max(16, Math.pow(2, Math.ceil(Math.log2(Math.ceil(segments / 7))))));
   const chunksPerSide = Math.ceil(segments / chunkCells);
   const group = new THREE.Group();
   group.name = 'kw-terrain';
   const lods = [];
   const geometries = [];
-  const resFactor = clamp(quality.terrainRes ?? 1, 0.25, 2);
+  const rawRes = quality.terrainRes ?? 1;
+  const resFactor = clamp(rawRes > 4 ? rawRes / 256 : rawRes, 0.3, 2);
   const chunkWorld = chunkCells * cell;
   const lodSteps = [1, 2, 4, 8].filter((s) => s <= chunkCells / 2);
   const lodDistances = lodSteps.map((s, i) => (i === 0 ? 0 : chunkWorld * (0.9 + i * 1.25) * resFactor * (i >= 2 ? 1.6 : 1)));

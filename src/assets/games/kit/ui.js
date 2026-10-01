@@ -178,7 +178,7 @@ const UI_STYLE = [
   '.gk-tile__desc{font:500 clamp(9.5px,2.6cqh,12.5px)/1.45 var(--gk-mono);letter-spacing:.04em;color:var(--gk-muted);max-width:34ch}',
   '.gk-tile.is-focus{transform:translateY(-6px);box-shadow:0 0 0 2px var(--gk-mint),0 0 34px rgba(var(--gk-mint-rgb),.3),0 20px 44px rgba(0,0,0,.55)}',
   '.gk-tile.is-focus .gk-tile__label{color:var(--gk-mint)}',
-  '.gk-settings{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,clamp(260px,40cqw,420px)),1fr));align-content:start;',
+  '.gk-settings{display:grid;grid-template-columns:minmax(0,1fr);width:min(100%,clamp(420px,62cqw,780px));align-content:start;',
   'gap:clamp(5px,1.4cqh,10px) clamp(10px,2.4cqw,22px);margin-top:clamp(10px,3cqh,24px);overflow-y:auto;overflow-x:hidden;flex:1 1 auto;min-height:0;',
   'padding:4px 6px 18px 4px;scrollbar-width:thin;scrollbar-color:rgba(var(--gk-mint-rgb),.35) transparent;',
   '-webkit-mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 22px),transparent)}',

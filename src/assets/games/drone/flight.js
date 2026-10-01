@@ -41,6 +41,7 @@ export const DRONE_DEFAULTS = {
   propWash: 1,
   washAccel: 30,
   radius: 0.12,
+  footHeight: 0.03,
   crashSpeed: 7,
   restitution: 0.3,
   friction: 0.6,
@@ -302,7 +303,7 @@ function angleSetpoint(s, roll, pitch, yaw, dt, out) {
   return out;
 }
 
-function probe(world, p, x, y, z, r) {
+function probe(world, p, x, y, z, r, rt) {
   let best = 0;
   if (world.heightAt) {
     const h = world.heightAt(x, z);
@@ -313,7 +314,7 @@ function probe(world, p, x, y, z, r) {
       let nx = -hx, ny = 2 * e, nz = -hz;
       const l = Math.sqrt(nx * nx + ny * ny + nz * nz);
       nx /= l; ny /= l; nz /= l;
-      const depth = r - (y - h) * ny;
+      const depth = rt - (y - h) * ny;
       if (depth > 0) {
         best = depth;
         HIT.depth = depth; HIT.nx = nx; HIT.ny = ny; HIT.nz = nz; HIT.terrain = true;
@@ -340,11 +341,15 @@ function collide(s, world) {
   const dx = s.pos.x - fx, dy = s.pos.y - fy, dz = s.pos.z - fz;
   const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
   const n = Math.min(8, Math.max(1, Math.ceil(dist / (r * 0.8))));
+  qRotate(T_UP, s.quat, BODY_UP);
+  const sv = s.vel;
+  const slow = sv.x * sv.x + sv.y * sv.y + sv.z * sv.z < 9;
+  const rt = T_UP.y > 0.8 && slow ? Math.min(p.footHeight, r) : r;
   let hit = false;
   for (let i = 1; i <= n; i++) {
     const t = i / n;
     const x = fx + dx * t, y = fy + dy * t, z = fz + dz * t;
-    if (probe(world, p, x, y, z, r)) {
+    if (probe(world, p, x, y, z, r, rt)) {
       s.pos.x = x; s.pos.y = y; s.pos.z = z;
       hit = true;
       break;

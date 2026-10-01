@@ -3,7 +3,7 @@ export const GATE_SIZES = {
   arch: [4, 3.4],
   flag: [4.5, 3.6],
   pylon: [6, 6],
-  finish: [7, 4.6],
+  finish: [8, 8],
 };
 
 export const CONTAINER_SIZE = [12.2, 2.59, 2.44];
@@ -122,7 +122,7 @@ export const COURSES = [
     nameKey: 'tool.fpv-drone.course.meadow',
     kind: 'race',
     env: {preset: 'golden', terrain: {shape: 'hills', seed: 11, size: 1200, height: 32, flatten: [{x: 0, z: 20, radius: 70, height: 4, falloff: 150}]}, backdrop: 'forest-hills'},
-    start: {pos: [0, 4.2, 40], yaw: 0},
+    start: {pos: [0, 4.04, 40], yaw: 0},
     gates: [
       {pos: [0, 9.6, -50], yaw: 0.256, w: 3.2, h: 2.8, type: 'square'},
       {pos: [-45, 2.8, -130], yaw: 0.798, w: 3.2, h: 2.8, type: 'square'},
@@ -135,10 +135,10 @@ export const COURSES = [
       {pos: [-10, 13.7, 190], yaw: -1.634, w: 4, h: 3.4, type: 'arch'},
       {pos: [90, 5.9, 150], yaw: -0.434, w: 4.5, h: 3.6, type: 'flag'},
       {pos: [70, 9.8, 90], yaw: 0.561, w: 6, h: 6, type: 'pylon', side: 'left'},
-      {pos: [0, 9, 22], yaw: 0, w: 7, h: 4.6, type: 'arch', finish: true},
+      {pos: [0, 8.4, 22], yaw: 0, w: 8, h: 8, type: 'arch', finish: true},
     ],
     medals: {gold: 49, silver: 59, bronze: 72.6},
-    botTime: 45.4,
+    botTime: 45.3,
     scenery: {
       scatter: [
         {kind: 'pine', count: 260, area: [-560, -560, 560, -235], seed: 11},
@@ -157,7 +157,7 @@ export const COURSES = [
     nameKey: 'tool.fpv-drone.course.yard',
     kind: 'race',
     env: {preset: 'day', terrain: {shape: 'flat', seed: 4, size: 900, height: 6, flatten: [{x: 0, z: 0, radius: 300, height: 0, falloff: 80}]}, backdrop: 'mountains'},
-    start: {pos: [0, 0.2, 160], yaw: 0},
+    start: {pos: [0, 0.04, 160], yaw: 0},
     gates: [
       {pos: [0, 5, 75], yaw: 0, w: 3.2, h: 2.8, type: 'square'},
       {pos: [0, 5, -40], yaw: 0, w: 3.2, h: 2.8, type: 'square'},
@@ -171,8 +171,8 @@ export const COURSES = [
       {pos: [-75, 5, 170], yaw: -2.581, w: 3.2, h: 2.8, type: 'square'},
       {pos: [-40, 5, 222], yaw: -2.215, w: 4, h: 3.4, type: 'arch'},
       {pos: [10, 6, 238], yaw: -1.348, w: 3.2, h: 2.8, type: 'square'},
-      {pos: [45, 5, 205], yaw: -0.097, w: 6, h: 6, type: 'pylon', side: 'left'},
-      {pos: [0, 5, 142], yaw: 0, w: 7, h: 4.6, type: 'arch', finish: true},
+      {pos: [45, 5.4, 205], yaw: -0.097, w: 6, h: 6, type: 'pylon', side: 'left'},
+      {pos: [0, 4.4, 142], yaw: 0, w: 8, h: 8, type: 'arch', finish: true},
     ],
     medals: {gold: 45.5, silver: 54.8, bronze: 67.4},
     botTime: 42.1,
@@ -192,7 +192,7 @@ export const COURSES = [
         {kind: 'bush', count: 40, area: [-260, -280, 260, 280], seed: 23},
       ],
       flags: [[8, 150, 0], [-8, 150, 1], [-36, -185, 2], [-118, 104, 3], [52, 214, 0]],
-      avoid: [[0, 160, 12], [0, 131, 12], [0, 101, 12], [0, 71, 12], [0, 41, 12], [0, 11, 12], [0, -19, 12], [0, -49, 12], [4, -79, 12], [7, -109, 12], [-1, -137, 12], [-12, -165, 12], [-20, -193, 12], [-31, -186, 12], [-39, -158, 12], [-60, -138, 12], [-78, -114, 12], [-88, -86, 12], [-97, -57, 12], [-101, -27, 12], [-100, 3, 12], [-100, 33, 12], [-104, 62, 12], [-110, 92, 12], [-107, 121, 12], [-91, 146, 12], [-74, 171, 12], [-59, 197, 12], [-41, 221, 12], [-15, 234, 12], [14, 237, 12], [38, 220, 12], [43, 193, 12], [21, 172, 12], [1, 150, 12]],
+      avoid: [[0, 160, 12], [0, 131, 12], [0, 101, 12], [0, 71, 12], [0, 41, 12], [0, 11, 12], [0, -19, 12], [0, -49, 12], [4, -79, 12], [7, -108, 12], [-1, -137, 12], [-12, -165, 12], [-20, -193, 12], [-31, -186, 12], [-39, -158, 12], [-60, -138, 12], [-78, -114, 12], [-88, -86, 12], [-97, -57, 12], [-101, -27, 12], [-100, 3, 12], [-100, 33, 12], [-104, 62, 12], [-110, 92, 12], [-107, 121, 12], [-91, 146, 12], [-74, 171, 12], [-59, 197, 12], [-41, 221, 12], [-15, 234, 12], [14, 237, 12], [38, 220, 12], [43, 193, 12], [21, 172, 12], [1, 150, 12]],
     },
   },
   {
@@ -200,7 +200,7 @@ export const COURSES = [
     nameKey: 'tool.fpv-drone.course.canyon',
     kind: 'race',
     env: {preset: 'sunset', terrain: {shape: 'canyon', seed: 5, size: 1400, height: 70, canyonWidth: 64, flatten: [{x: 142, z: 330, radius: 8, height: 58.7, falloff: 10}]}, backdrop: 'desert-mesas'},
-    start: {pos: [142, 58.9, 330], yaw: 0.374},
+    start: {pos: [142, 58.74, 330], yaw: 0.374},
     gates: [
       {pos: [126.3, 66.2, 290], yaw: 0.548, w: 3.2, h: 2.8, type: 'square'},
       {pos: [91.1, 62.3, 250], yaw: 0.902, w: 4, h: 3.4, type: 'arch'},
@@ -212,10 +212,10 @@ export const COURSES = [
       {pos: [-115.9, 5.5, -150], yaw: 0.201, w: 3.2, h: 2.8, type: 'square'},
       {pos: [-114.5, 5.9, -220], yaw: -0.046, w: 4.5, h: 3.6, type: 'flag'},
       {pos: [-109.4, 5.5, -290], yaw: -0.235, w: 6, h: 6, type: 'pylon', side: 'right'},
-      {pos: [-84.2, 7.6, -350], yaw: -0.3, w: 3.2, h: 2.8, type: 'square'},
-      {pos: [-71.9, 5.1, -410], yaw: -0.202, w: 7, h: 4.6, type: 'arch', finish: true},
+      {pos: [-84.2, 7.5, -350], yaw: -0.3, w: 3.2, h: 2.8, type: 'square'},
+      {pos: [-71.9, 4.6, -410], yaw: -0.202, w: 8, h: 8, type: 'arch', finish: true},
     ],
-    medals: {gold: 40.3, silver: 48.4, bronze: 59.6},
+    medals: {gold: 40.3, silver: 48.5, bronze: 59.7},
     botTime: 37.3,
     scenery: {
       scatter: [
@@ -224,7 +224,7 @@ export const COURSES = [
         {kind: 'bush', count: 90, area: [-560, -560, 560, 560], seed: 33},
       ],
       flags: [[145, 322, 0], [139, 338, 1], [-78, -412, 2], [-66, -408, 3]],
-      avoid: [[142, 330, 12], [133, 303, 12], [117, 277, 12], [97, 255, 12], [74, 239, 12], [50, 227, 12], [26, 216, 12], [2, 204, 12], [-22, 190, 12], [-44, 170, 12], [-65, 148, 12], [-84, 125, 12], [-79, 97, 12], [-64, 71, 12], [-58, 43, 12], [-70, 15, 12], [-83, -12, 12], [-87, -41, 12], [-87, -70, 12], [-91, -99, 12], [-105, -124, 12], [-116, -151, 12], [-117, -181, 12], [-115, -211, 12], [-114, -241, 12], [-112, -271, 12], [-106, -300, 12], [-94, -328, 12], [-82, -355, 12], [-77, -385, 12], [-71, -414, 12]],
+      avoid: [[142, 330, 12], [133, 303, 12], [117, 277, 12], [98, 255, 12], [74, 239, 12], [50, 227, 12], [26, 216, 12], [2, 204, 12], [-22, 190, 12], [-44, 170, 12], [-65, 148, 12], [-84, 125, 12], [-79, 97, 12], [-64, 71, 12], [-58, 43, 12], [-70, 15, 12], [-83, -12, 12], [-87, -41, 12], [-87, -70, 12], [-91, -99, 12], [-105, -124, 12], [-116, -151, 12], [-117, -181, 12], [-115, -211, 12], [-114, -241, 12], [-112, -271, 12], [-106, -300, 12], [-94, -328, 12], [-82, -355, 12], [-77, -385, 12], [-71, -414, 12]],
     },
   },
   {
@@ -232,7 +232,7 @@ export const COURSES = [
     nameKey: 'tool.fpv-drone.course.freestyle',
     kind: 'freestyle',
     env: {preset: 'day', terrain: {shape: 'valley', seed: 3, size: 1800, height: 70, flatten: [{x: 0, z: 100, radius: 120, height: 0, falloff: 60}, {x: 0, z: 380, radius: 8, height: -0.9, falloff: 10}]}, backdrop: 'mountains'},
-    start: {pos: [0, -0.7, 380], yaw: 0},
+    start: {pos: [0, -0.86, 380], yaw: 0},
     gates: [
       {pos: [0, 6.3, 300], yaw: 0, w: 3.2, h: 2.8, type: 'square'},
       {pos: [0, 5, 150], yaw: 0, w: 3.2, h: 2.8, type: 'square'},

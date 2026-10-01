@@ -470,6 +470,25 @@ export function createInput(opts = {}) {
   }
 
   function onBlur() { clearHeld(); }
+
+  function releaseTouch() {
+    pointerMap.clear();
+    for (const k in touchBtnDown) touchBtnDown[k] = 0;
+    for (let i = 0; i < built.length; i++) releaseControl(built[i]);
+  }
+
+  let menuObserver = null;
+  function watchMenu() {
+    if (!element || typeof MutationObserver === 'undefined') return;
+    try {
+      menuObserver = new MutationObserver(function () {
+        if (element.hasAttribute('data-gk-menu')) releaseTouch();
+      });
+      menuObserver.observe(element, { attributes: true, attributeFilter: ['data-gk-menu'] });
+    } catch (_) {
+      menuObserver = null;
+    }
+  }
   function onVisibility() {
     try { if (document.visibilityState === 'hidden') clearHeld(); } catch (_) {}
   }
@@ -1543,6 +1562,7 @@ export function createInput(opts = {}) {
     disposed = true;
     destroyTouch();
     stopTiltListening();
+    try { if (menuObserver) menuObserver.disconnect(); } catch (_) {}
     try {
       window.removeEventListener('keydown', onKeyDown, true);
       window.removeEventListener('keyup', onKeyUp, true);
@@ -1588,5 +1608,6 @@ export function createInput(opts = {}) {
     document.addEventListener('pointerdown', onDocPointerDown, true);
   } catch (_) {}
   syncTouch();
+  watchMenu();
   return api;
 }

@@ -412,6 +412,42 @@ function hashHue(str) {
   return h % 360;
 }
 
+const KIT_I18N_MAP = {
+  input: {
+    gas: 'input_gas', brake: 'input_brake', drift: 'input_drift', nitro: 'input_nitro', camera: 'input_camera', mode: 'input_mode',
+    reset: 'input_reset', lookBack: 'input_look_back', steerLeft: 'input_steer_left', steerRight: 'input_steer_right',
+    wheel: 'input_wheel', steer: 'input_steer', throttleYaw: 'input_throttle_yaw', pitchRoll: 'input_pitch_roll'
+  },
+  ui: {
+    back: 'ui_back', select: 'ui_select', move: 'ui_move', confirm: 'ui_confirm', cancel: 'ui_cancel', go: 'ui_go',
+    loading: 'ui_loading', best: 'ui_best', locked: 'ui_locked', newBest: 'ui_new_best', on: 'ui_on', off: 'ui_off',
+    pause: 'ui_pause', fullscreen: 'ui_fullscreen', exitFullscreen: 'ui_exit_fullscreen', position: 'ui_position', time: 'ui_time',
+    rotate: 'ui_rotate', rotateDismiss: 'ui_rotate_dismiss', medalGold: 'medal_gold', medalSilver: 'medal_silver',
+    medalBronze: 'medal_bronze', medalNone: 'medal_none'
+  },
+  tilt: { enable: 'tilt_enable', unavailable: 'tilt_unavailable', centered: 'tilt_centered' }
+};
+
+export const KIT_I18N_KEYS = (function () {
+  const out = [];
+  for (const g in KIT_I18N_MAP) for (const k in KIT_I18N_MAP[g]) out.push('games.kit.' + KIT_I18N_MAP[g][k]);
+  return out;
+})();
+
+export function kitCopy(translate) {
+  const out = { input: {}, ui: {}, tilt: {} };
+  if (typeof translate !== 'function') return out;
+  for (const g in KIT_I18N_MAP) {
+    for (const k in KIT_I18N_MAP[g]) {
+      const key = 'games.kit.' + KIT_I18N_MAP[g][k];
+      let v = null;
+      try { v = translate(key); } catch (_) { v = null; }
+      if (typeof v === 'string' && v && v !== key) out[g][k] = v;
+    }
+  }
+  return out;
+}
+
 export function createUI(stage, copyIn, opts = {}) {
   if (!stage) throw new Error('createUI: stage required');
   let copy = Object.assign({}, UI_COPY_DEFAULTS, copyIn || null);

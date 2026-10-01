@@ -155,10 +155,31 @@ const ASSETS = [
   '/assets/vendor/trystero-nostr.js'
 ];
 
+const REVISIONS = {/*REVISIONS*/};
+
+function precacheUrl(u) {
+  return u.indexOf('?') >= 0 ? u : u + '?v=' + (REVISIONS[u] || '{{ buildHash }}');
+}
+
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS.map(u => u.indexOf('?') >= 0 ? u : u + '?v={{ buildHash }}')))
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const names = (await caches.keys()).filter(k => k.startsWith('mentria-cache-') && k !== CACHE_NAME);
+    const previous = await Promise.all(names.map(n => caches.open(n)));
+    const fetchList = [];
+    await Promise.all(ASSETS.map(async (u) => {
+      const url = precacheUrl(u);
+      if (await cache.match(url)) return;
+      if (REVISIONS[u]) {
+        for (const old of previous) {
+          const hit = await old.match(url);
+          if (hit) { await cache.put(url, hit); return; }
+        }
+      }
+      fetchList.push(url);
+    }));
+    await cache.addAll(fetchList);
+  })());
 });
 
 self.addEventListener('message', event => {

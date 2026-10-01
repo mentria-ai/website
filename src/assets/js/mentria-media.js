@@ -1,6 +1,8 @@
 const DB_NAME = 'mentria-media';
 const DB_VERSION = 1;
-const MAX_FILES = 5000;
+const MAX_FILES = 20000;
+const THUMB_W = 400;
+const EXIF_READ = 131072;
 const EXTS = {
   video: ['mp4', 'm4v', 'webm', 'mkv', 'mov', 'ogv', 'avi'],
   audio: ['mp3', 'm4a', 'aac', 'flac', 'ogg', 'oga', 'opus', 'wav', 'aif', 'aiff', 'alac', 'weba'],
@@ -133,6 +135,21 @@ export function patchEntry(fp, patch) {
   })).catch(() => null);
 }
 
+export function patchEntries(list) {
+  if (!list.length) return Promise.resolve();
+  return openDb().then((d) => new Promise((resolve) => {
+    const t = d.transaction('entries', 'readwrite');
+    const s = t.objectStore('entries');
+    list.forEach(([fp, patch]) => {
+      const g = s.get(fp);
+      g.onsuccess = () => { if (g.result) s.put(Object.assign(g.result, patch)); };
+    });
+    t.oncomplete = () => resolve();
+    t.onerror = () => resolve();
+    t.onabort = () => resolve();
+  })).catch(() => {});
+}
+
 export function forgetEntry(fp) {
   live.delete(fp);
   return Promise.all([
@@ -212,22 +229,23 @@ export async function folderAccess(folder, ask) {
   }
 }
 
-async function walk(dir, kinds, prefix, depth, out) {
+async function walk(dir, kinds, prefix, depth, out, onProgress) {
   for await (const [name, h] of dir.entries()) {
     if (out.length >= MAX_FILES) return;
     if (name.charAt(0) === '.') continue;
     if (h.kind === 'file') {
       if (kinds.indexOf(kindOf({ name })) === -1) continue;
       try { out.push({ file: await h.getFile(), relPath: prefix + name }); } catch (_) {}
+      if (onProgress && out.length % 100 === 0) onProgress(out.length);
     } else if (h.kind === 'directory' && depth < 6) {
-      await walk(h, kinds, prefix + name + '/', depth + 1, out);
+      await walk(h, kinds, prefix + name + '/', depth + 1, out, onProgress);
     }
   }
 }
 
-export async function scanFolder(folder, kinds) {
+export async function scanFolder(folder, kinds, onProgress) {
   const out = [];
-  await walk(folder.handle, kinds, '', 0, out);
+  await walk(folder.handle, kinds, '', 0, out, onProgress);
   return out;
 }
 
@@ -359,7 +377,7 @@ export function videoThumb(entry) {
     const patch = {};
     if (shot.duration) patch.duration = shot.duration;
     if (shot.width) { patch.width = shot.width; patch.height = shot.height; }
-    if (Object.keys(patch).length) await patchEntry(entry.fp, patch);
+    if (Object.keys(patch).length) { Object.assign(entry, patch); await patchEntry(entry.fp, patch); }
     if (shot.blob) await run('thumbs', 'readwrite', (s) => s.put(shot.blob, entry.fp)).catch(() => {});
     return shot.blob;
   });
@@ -369,6 +387,322 @@ export function videoThumb(entry) {
 
 export function cachedThumb(fp) {
   return run('thumbs', 'readonly', (s) => s.get(fp)).catch(() => null);
+}
+
+export function cachedThumbs(fps) {
+  const out = new Map();
+  if (!fps.length) return Promise.resolve(out);
+  return openDb().then((d) => new Promise((resolve) => {
+    const t = d.transaction('thumbs', 'readonly');
+    const s = t.objectStore('thumbs');
+    fps.forEach((fp) => {
+      const g = s.get(fp);
+      g.onsuccess = () => { if (g.result) out.set(fp, g.result); };
+    });
+    t.oncomplete = () => resolve(out);
+    t.onerror = () => resolve(out);
+    t.onabort = () => resolve(out);
+  })).catch(() => out);
+}
+
+const WORKER_URL = new URL('mentria-media-worker.js' + new URL(import.meta.url).search, import.meta.url).href;
+let pool = null;
+
+function makePool() {
+  pool = { all: [], idle: [], queue: [], jobs: new Map(), seq: 0 };
+  if (typeof Worker !== 'function' || typeof OffscreenCanvas !== 'function') return pool;
+  const n = IOS ? 1 : Math.max(1, Math.min(3, (navigator.hardwareConcurrency || 2) - 1));
+  for (let i = 0; i < n; i++) {
+    let w;
+    try { w = new Worker(WORKER_URL); } catch (_) { break; }
+    w.onmessage = (e) => {
+      const job = pool.jobs.get(e.data && e.data.id);
+      if (job) { pool.jobs.delete(job.id); job.resolve(e.data.blob || null); }
+      pool.idle.push(w);
+      drainPool();
+    };
+    w.onerror = (e) => {
+      if (e && e.preventDefault) e.preventDefault();
+      pool.all = pool.all.filter((x) => x !== w);
+      pool.idle = pool.idle.filter((x) => x !== w);
+      pool.jobs.forEach((job) => { if (job.worker === w) { pool.jobs.delete(job.id); job.resolve(null); } });
+      try { w.terminate(); } catch (_) {}
+      if (!pool.all.length) { pool.queue.splice(0).forEach((job) => job.resolve(null)); }
+      else drainPool();
+    };
+    pool.all.push(w);
+    pool.idle.push(w);
+  }
+  return pool;
+}
+
+function drainPool() {
+  while (pool.idle.length && pool.queue.length) {
+    const w = pool.idle.shift();
+    const job = pool.queue.shift();
+    job.worker = w;
+    pool.jobs.set(job.id, job);
+    try { w.postMessage({ id: job.id, file: job.file, width: THUMB_W }); }
+    catch (_) { pool.jobs.delete(job.id); pool.idle.push(w); job.resolve(null); }
+  }
+}
+
+function viaWorker(file) {
+  const p = pool || makePool();
+  if (!p.all.length) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    p.queue.push({ id: ++p.seq, file, resolve, worker: null });
+    drainPool();
+  });
+}
+
+function decodeOnMain(file) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    const done = (b) => { URL.revokeObjectURL(url); resolve(b || null); };
+    img.decoding = 'async';
+    img.onload = () => {
+      try {
+        const nw = img.naturalWidth;
+        const nh = img.naturalHeight;
+        if (!nw || !nh) { done(null); return; }
+        const w = Math.min(THUMB_W, nw);
+        const h = Math.max(1, Math.round(w * nh / nw));
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#16181d';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        c.toBlob((b) => done(b), 'image/jpeg', 0.8);
+      } catch (_) {
+        done(null);
+      }
+    };
+    img.onerror = () => done(null);
+    img.src = url;
+  });
+}
+
+let mainChain = Promise.resolve();
+function viaMain(file) {
+  const job = mainChain.then(() => decodeOnMain(file));
+  mainChain = job.catch(() => null);
+  return job;
+}
+
+export async function imageThumb(entry) {
+  const cached = await cachedThumb(entry.fp);
+  if (cached) return cached;
+  const file = live.get(entry.fp);
+  if (!file) return null;
+  let blob = await viaWorker(file);
+  if (!blob) blob = await viaMain(file);
+  if (blob) await run('thumbs', 'readwrite', (s) => s.put(blob, entry.fp)).catch(() => {});
+  return blob;
+}
+
+export function thumbFor(entry) {
+  return entry.kind === 'video' ? videoThumb(entry) : imageThumb(entry);
+}
+
+export function thumbSlots() {
+  const p = pool || makePool();
+  return Math.max(1, p.all.length);
+}
+
+function tiffValue(dv, base, at, le) {
+  const type = dv.getUint16(at + 2, le);
+  const count = dv.getUint32(at + 4, le);
+  const unit = [0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8][type] || 0;
+  if (!unit || count > 4096) return null;
+  const len = unit * count;
+  const off = len <= 4 ? at + 8 : base + dv.getUint32(at + 8, le);
+  if (off + len > dv.byteLength) return null;
+  if (type === 2) {
+    let str = '';
+    for (let i = 0; i < count; i++) {
+      const c = dv.getUint8(off + i);
+      if (!c) break;
+      str += String.fromCharCode(c);
+    }
+    return str.trim();
+  }
+  const vals = [];
+  for (let i = 0; i < Math.min(count, 16); i++) {
+    if (type === 1 || type === 7) vals.push(dv.getUint8(off + i));
+    else if (type === 3) vals.push(dv.getUint16(off + i * 2, le));
+    else if (type === 4) vals.push(dv.getUint32(off + i * 4, le));
+    else if (type === 9) vals.push(dv.getInt32(off + i * 4, le));
+    else if (type === 5) { const b = dv.getUint32(off + i * 8 + 4, le); vals.push(b ? dv.getUint32(off + i * 8, le) / b : 0); }
+    else if (type === 10) { const b = dv.getInt32(off + i * 8 + 4, le); vals.push(b ? dv.getInt32(off + i * 8, le) / b : 0); }
+    else return null;
+  }
+  return count === 1 ? vals[0] : vals;
+}
+
+function tiffIfd(dv, base, off, le, out) {
+  const at = base + off;
+  if (!off || at + 2 > dv.byteLength) return;
+  const n = dv.getUint16(at, le);
+  if (n > 400) return;
+  for (let i = 0; i < n; i++) {
+    const e = at + 2 + i * 12;
+    if (e + 12 > dv.byteLength) return;
+    try { out[dv.getUint16(e, le)] = tiffValue(dv, base, e, le); } catch (_) {}
+  }
+}
+
+function parseTiff(dv, base) {
+  if (base + 8 > dv.byteLength) return null;
+  const mark = dv.getUint16(base, false);
+  const le = mark === 0x4949;
+  if (!le && mark !== 0x4d4d) return null;
+  if (dv.getUint16(base + 2, le) !== 42) return null;
+  const i0 = {};
+  const ex = {};
+  const gps = {};
+  tiffIfd(dv, base, dv.getUint32(base + 4, le), le, i0);
+  if (typeof i0[0x8769] === 'number') tiffIfd(dv, base, i0[0x8769], le, ex);
+  if (typeof i0[0x8825] === 'number') tiffIfd(dv, base, i0[0x8825], le, gps);
+  return { i0, ex, gps };
+}
+
+function exifDate(v) {
+  const m = /^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/.exec(typeof v === 'string' ? v : '');
+  if (!m) return 0;
+  const t = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]).getTime();
+  return t > 0 && t < Date.now() + 86400000 ? t : 0;
+}
+
+function gpsDeg(v, ref) {
+  if (!Array.isArray(v) || v.length < 3) return null;
+  const d = v[0] + v[1] / 60 + v[2] / 3600;
+  return ref === 'S' || ref === 'W' ? -d : d;
+}
+
+function exifSummary(t) {
+  const { i0, ex, gps } = t;
+  const out = { taken: exifDate(ex[0x9003]) || exifDate(ex[0x9004]) || exifDate(i0[0x0132]) };
+  const text = (v) => (typeof v === 'string' && v ? v : '');
+  const num = (v) => (typeof v === 'number' && v > 0 ? v : 0);
+  if (text(i0[0x010f])) out.make = i0[0x010f];
+  if (text(i0[0x0110])) out.model = i0[0x0110];
+  if (text(ex[0xa434])) out.lens = ex[0xa434];
+  if (num(ex[0x829a])) out.exposure = ex[0x829a];
+  if (num(ex[0x829d])) out.fnumber = ex[0x829d];
+  const iso = Array.isArray(ex[0x8827]) ? ex[0x8827][0] : ex[0x8827];
+  if (num(iso)) out.iso = iso;
+  if (num(ex[0x920a])) out.focal = ex[0x920a];
+  if (num(i0[0x0112])) out.orientation = i0[0x0112];
+  if (num(ex[0xa002]) && num(ex[0xa003])) { out.width = ex[0xa002]; out.height = ex[0xa003]; }
+  const lat = gpsDeg(gps[2], gps[1]);
+  const lon = gpsDeg(gps[4], gps[3]);
+  if (lat !== null && lon !== null && (lat || lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) { out.lat = lat; out.lon = lon; }
+  return out;
+}
+
+function tag4(u8, at) {
+  return String.fromCharCode(u8[at], u8[at + 1], u8[at + 2], u8[at + 3]);
+}
+
+export async function readExif(file) {
+  try {
+    const buf = await file.slice(0, EXIF_READ).arrayBuffer();
+    const dv = new DataView(buf);
+    const u8 = new Uint8Array(buf);
+    let tiff = null;
+    if (u8[0] === 0xff && u8[1] === 0xd8) {
+      let p = 2;
+      while (p + 10 <= u8.length && u8[p] === 0xff) {
+        const mk = u8[p + 1];
+        if (mk === 0xda || mk === 0xd9) break;
+        if (mk === 0xd8 || mk === 0x01 || (mk >= 0xd0 && mk <= 0xd7)) { p += 2; continue; }
+        const len = dv.getUint16(p + 2, false);
+        if (len < 2) break;
+        if (mk === 0xe1 && tag4(u8, p + 4) === 'Exif' && u8[p + 8] === 0 && u8[p + 9] === 0) { tiff = parseTiff(dv, p + 10); break; }
+        p += 2 + len;
+      }
+    } else if (u8[0] === 0x89 && tag4(u8, 1) === 'PNG\r') {
+      let p = 8;
+      while (p + 8 <= u8.length) {
+        const len = dv.getUint32(p, false);
+        const type = tag4(u8, p + 4);
+        if (type === 'eXIf') { tiff = parseTiff(dv, p + 8); break; }
+        if (type === 'IDAT' || type === 'IEND') break;
+        p += 12 + len;
+      }
+    } else if (tag4(u8, 0) === 'RIFF' && tag4(u8, 8) === 'WEBP') {
+      let p = 12;
+      while (p + 8 <= u8.length) {
+        const type = tag4(u8, p);
+        const len = dv.getUint32(p + 4, true);
+        if (type === 'EXIF') {
+          let b = p + 8;
+          if (tag4(u8, b) === 'Exif') b += 6;
+          tiff = parseTiff(dv, b);
+          break;
+        }
+        p += 8 + len + (len & 1);
+      }
+    }
+    return tiff ? exifSummary(tiff) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+async function boxAt(file, off) {
+  if (off + 8 > file.size) return null;
+  const dv = new DataView(await file.slice(off, off + 16).arrayBuffer());
+  let size = dv.getUint32(0, false);
+  const type = String.fromCharCode(dv.getUint8(4), dv.getUint8(5), dv.getUint8(6), dv.getUint8(7));
+  let header = 8;
+  if (size === 1 && dv.byteLength >= 16) { size = dv.getUint32(8, false) * 4294967296 + dv.getUint32(12, false); header = 16; }
+  else if (size === 0) size = file.size - off;
+  return size < header ? null : { type, size, header };
+}
+
+export async function mediaDate(file) {
+  try {
+    let off = 0;
+    for (let i = 0; i < 64 && off < file.size; i++) {
+      const box = await boxAt(file, off);
+      if (!box) return 0;
+      if (box.type === 'moov') {
+        let p = off + box.header;
+        const end = Math.min(file.size, off + box.size);
+        for (let j = 0; j < 64 && p < end; j++) {
+          const child = await boxAt(file, p);
+          if (!child) return 0;
+          if (child.type === 'mvhd') {
+            const dv = new DataView(await file.slice(p + child.header, p + child.header + 12).arrayBuffer());
+            const secs = dv.getUint8(0) === 1 ? dv.getUint32(4, false) * 4294967296 + dv.getUint32(8, false) : dv.getUint32(4, false);
+            const ms = (secs - 2082844800) * 1000;
+            return ms > 0 && ms < Date.now() + 86400000 ? ms : 0;
+          }
+          p += child.size;
+        }
+        return 0;
+      }
+      off += box.size;
+    }
+  } catch (_) {}
+  return 0;
+}
+
+export function formatBytes(n, lang) {
+  const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'];
+  let v = Number(n) || 0;
+  let i = 0;
+  while (v >= 1000 && i < units.length - 1) { v /= 1000; i++; }
+  try {
+    return new Intl.NumberFormat(lang, { style: 'unit', unit: units[i], unitDisplay: 'short', maximumFractionDigits: i ? 1 : 0 }).format(v);
+  } catch (_) {
+    return v.toFixed(i ? 1 : 0) + ' ' + ['B', 'kB', 'MB', 'GB'][i];
+  }
 }
 
 async function findCodes(file, codes) {

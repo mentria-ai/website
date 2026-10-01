@@ -126,6 +126,13 @@ eleventyComputed:
         <tr><td><code>storage.set</code></td><td><code>(key, value) → bool</code></td><td>Write any JSON value. Returns <code>false</code> when storage is full. <code>storage.set('note', text)</code></td></tr>
         <tr><td><code>storage.remove</code></td><td><code>(key) → bool</code></td><td>Delete one key. <code>storage.remove('note')</code></td></tr>
         <tr><td><code>storage.list</code></td><td><code>() → string[]</code></td><td>List your keys. <code>storage.list()</code></td></tr>
+        <tr><td><code>db.get</code></td><td><code>(key) → Promise&lt;value | null&gt;</code></td><td>Read from your local-only database. <code>await db.get('log')</code></td></tr>
+        <tr><td><code>db.set</code></td><td><code>(key, value) → Promise&lt;bool&gt;</code></td><td>Store objects, arrays, dates or Blobs. Resolves <code>false</code> if the browser refuses. <code>await db.set('log', entries)</code></td></tr>
+        <tr><td><code>db.remove</code></td><td><code>(key) → Promise&lt;bool&gt;</code></td><td>Delete one key. <code>await db.remove('log')</code></td></tr>
+        <tr><td><code>db.keys</code></td><td><code>() → Promise&lt;string[]&gt;</code></td><td>List your keys. <code>await db.keys()</code></td></tr>
+        <tr><td><code>db.clear</code></td><td><code>() → Promise&lt;bool&gt;</code></td><td>Delete everything in your database. <code>await db.clear()</code></td></tr>
+        <tr><td><code>locale</code></td><td>string</td><td>The page's current language code, such as <code>en</code>, <code>es</code>, <code>fr</code>, <code>ja</code> or <code>pt-BR</code>. Read it when you render.</td></tr>
+        <tr><td><code>onLocaleChange</code></td><td><code>(fn) → void</code></td><td>Calls <code>fn(code)</code> when the visitor switches language without reloading. <code>onLocaleChange(render)</code></td></tr>
         <tr><td><code>theme</code></td><td><code>{ accent, bg, fg, muted, fontMono }</code></td><td>The site's live CSS token values. <code>root.style.setProperty('--x', theme.accent)</code></td></tr>
         <tr><td><code>args</code></td><td><code>null | { cmd, args }</code></td><td>Set when opened via a command (<code>#cmd=…&amp;args=…</code>); otherwise <code>null</code>. <code>if (args) run(args.args)</code></td></tr>
         <tr><td><code>notify</code></td><td><code>(msg) → void</code></td><td>Host toast, bottom-center, first 120 chars. <code>notify('saved')</code></td></tr>
@@ -142,6 +149,15 @@ eleventyComputed:
     <li>Your data is covered by the site's encrypted local backup, and shows up in the <a href="{{ locale.pathPrefix }}/tools/files/">Files</a> tool grouped as <em>extension: &lt;id&gt;</em>.</li>
     <li>Removing the extension in the manager also clears its <code>extdata.&lt;id&gt;</code> keys.</li>
     <li>The whole <code>.html</code> is stored too: over 512 KB warns at install, over 1536 KB is rejected outright.</li>
+  </ul>
+
+  <h3 class="sdk__h3">Local-only data</h3>
+  <p><code>window.mentria.db</code> is a second store for data that should stay on this device: health logs, private journals, anything large. It lives in IndexedDB, so it holds structured values (objects, arrays, dates, Blobs) well beyond <code>localStorage</code> limits, and every call returns a promise.</p>
+  <ul class="sdk__list">
+    <li>It is never included in the encrypted backup or in device sync. Offer your own export if people need a copy.</li>
+    <li>Values come back as copies made by the host page, so test them with <code>Array.isArray</code> or by their fields rather than <code>instanceof</code>.</li>
+    <li>Removing the extension in the manager deletes it.</li>
+    <li>Browsers can evict site storage under pressure unless the site has persistent storage; treat it as local, not guaranteed forever.</li>
   </ul>
 
   <h3 class="sdk__h3">Widgets</h3>

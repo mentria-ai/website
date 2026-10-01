@@ -7,6 +7,8 @@ const REJECT_BYTES = 1536 * 1024;
 const ID_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const VERSION_RE = /^\d+\.\d+\.\d+$/;
 const CMD_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const DB_NAME = 'mentria-ext-db';
+const DB_STORE = 'kv';
 
 function store() {
   if (!window.MentriaStore) throw new Error('MentriaStore unavailable');
@@ -125,6 +127,7 @@ export function remove(id) {
   if (!getEntry(id)) return false;
   const srcOk = store().remove(NS, 'src.' + id);
   store().clear(DATA_NS_PREFIX + id);
+  clearDb(id);
   const registry = getRegistry().filter((e) => e.manifest.id !== id);
   const regOk = registry.length
     ? store().set(NS, 'registry', registry)
@@ -148,6 +151,54 @@ export function dataApiFor(id) {
     remove: (key) => store().remove(ns, key),
     list: () => store().list(ns)
   };
+}
+
+let dbPromise = null;
+
+function openDb() {
+  if (!dbPromise) {
+    dbPromise = new Promise((resolve, reject) => {
+      if (typeof indexedDB === 'undefined') { reject(new Error('IndexedDB unavailable')); return; }
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        if (!req.result.objectStoreNames.contains(DB_STORE)) req.result.createObjectStore(DB_STORE);
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    dbPromise.catch(() => { dbPromise = null; });
+  }
+  return dbPromise;
+}
+
+function dbRun(mode, run) {
+  return openDb().then((db) => new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, mode);
+    const req = run(tx.objectStore(DB_STORE));
+    tx.oncomplete = () => resolve(req ? req.result : undefined);
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  }));
+}
+
+function idRange(id) {
+  return IDBKeyRange.bound(id + '/', id + '/\uffff');
+}
+
+export function clearDb(id) {
+  return dbRun('readwrite', (s) => s.delete(idRange(id))).then(() => true, () => false);
+}
+
+export function dbApiFor(id) {
+  const full = (key) => id + '/' + String(key);
+  const cut = id.length + 1;
+  return Object.freeze({
+    get: (key) => dbRun('readonly', (s) => s.get(full(key))).then((v) => (v === undefined ? null : v)),
+    set: (key, value) => dbRun('readwrite', (s) => s.put(value, full(key))).then(() => true, () => false),
+    remove: (key) => dbRun('readwrite', (s) => s.delete(full(key))).then(() => true, () => false),
+    keys: () => dbRun('readonly', (s) => s.getAllKeys(idRange(id))).then((list) => (list || []).map((k) => String(k).slice(cut))),
+    clear: () => clearDb(id)
+  });
 }
 
 export { KNOWN_PERMISSIONS, WARN_BYTES, REJECT_BYTES };

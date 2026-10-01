@@ -14,7 +14,12 @@ export const DRONE_DEFAULTS = {
   idle: 0.055,
   motorTau: 0.03,
   rateTau: 0.026,
+  yawTau: 0.045,
   maxAngularAccel: 240,
+  maxYawAccel: 140,
+  throttleMid: 0.5,
+  throttleExpo: 0,
+  hoverAtMidStick: false,
   rates: {
     roll: { rc: 1.0, superRate: 0.7, expo: 0.2 },
     pitch: { rc: 1.0, superRate: 0.7, expo: 0.2 },
@@ -42,7 +47,7 @@ export const DRONE_DEFAULTS = {
   tumble: 7,
   crashSpinDamping: 1.2,
   cameraTilt: 25 * DEG,
-  cameraOffset: { x: 0, y: 0.028, z: -0.07 },
+  cameraOffset: { x: 0, y: -0.006, z: -0.06 },
   batterySeconds: 95,
   cells: 6,
 };
@@ -90,6 +95,18 @@ export function thrustCurveInverse(f, a) {
   if (f <= 0) return 0;
   if (a >= 0.9999) return f;
   return (-a + Math.sqrt(a * a + 4 * (1 - a) * f)) / (2 * (1 - a));
+}
+
+export function throttleCurve(t, p) {
+  let x = clamp(t, 0, 1);
+  if (p.hoverAtMidStick) x = x < 0.5 ? (x / 0.5) * p.hoverThrottle : p.hoverThrottle + ((x - 0.5) / 0.5) * (1 - p.hoverThrottle);
+  if (p.throttleExpo > 0) {
+    const mid = p.hoverAtMidStick ? p.hoverThrottle : p.throttleMid;
+    const d = x - mid;
+    const range = d > 0 ? 1 - mid : mid;
+    if (range > 1e-6) x = mid + d * (1 - p.throttleExpo + (p.throttleExpo * d * d) / (range * range));
+  }
+  return clamp(x, 0, 1);
 }
 
 export function shapeStick(stick, expo) {
@@ -442,9 +459,11 @@ export function step(s, input, dt, world) {
     if (mode === 'angle') s.heading = headingOf(s.quat);
   } else {
     const k = 1 - Math.exp(-dt / p.rateTau);
+    const ky = 1 - Math.exp(-dt / p.yawTau);
     const lim = p.maxAngularAccel * dt;
+    const limY = p.maxYawAccel * dt;
     w.x += clamp((tx - w.x) * k, -lim, lim);
-    w.y += clamp((ty - w.y) * k, -lim, lim);
+    w.y += clamp((ty - w.y) * ky, -limY, limY);
     w.z += clamp((tz - w.z) * k, -lim, lim);
   }
   qRotate(T_UP, s.quat, BODY_UP);
@@ -467,7 +486,7 @@ export function step(s, input, dt, world) {
   qRotate(T_UP, s.quat, BODY_UP);
   let cmd = 0;
   if (!s.crashed) {
-    cmd = p.idle + (1 - p.idle) * thr;
+    cmd = p.idle + (1 - p.idle) * throttleCurve(thr, p);
     if (mode === 'angle' && p.angleTiltComp > 0 && T_UP.y > 0.2 && !s.grounded) {
       const f = thrustCurve(cmd, p.curveA) * (1 + p.angleTiltComp * (1 / Math.max(T_UP.y, 0.55) - 1));
       cmd = thrustCurveInverse(Math.min(f, 1), p.curveA);

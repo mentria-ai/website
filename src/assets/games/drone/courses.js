@@ -138,8 +138,8 @@ export const COURSES = [
       {pos: [70, 9.8, 90], yaw: 0.561, w: 6, h: 6, type: 'pylon', side: 'left'},
       {pos: [0, 9, 22], yaw: 0, w: 7, h: 4.6, type: 'arch', finish: true},
     ],
-    medals: {gold: 48.9, silver: 58.9, bronze: 72.5},
-    botTime: 45.3,
+    medals: {gold: 49, silver: 59, bronze: 72.6},
+    botTime: 45.4,
     scenery: {
       scatter: [
         {kind: 'pine', count: 260, area: [-560, -560, 560, -235], seed: 11},
@@ -175,7 +175,7 @@ export const COURSES = [
       {pos: [45, 5, 205], yaw: -0.097, w: 6, h: 6, type: 'pylon', side: 'left'},
       {pos: [0, 5, 142], yaw: 0, w: 7, h: 4.6, type: 'arch', finish: true},
     ],
-    medals: {gold: 45.4, silver: 54.7, bronze: 67.3},
+    medals: {gold: 45.5, silver: 54.8, bronze: 67.4},
     botTime: 42.1,
     scenery: {
       warehouses: [
@@ -216,8 +216,8 @@ export const COURSES = [
       {pos: [-84.2, 7.6, -350], yaw: -0.3, w: 3.2, h: 2.8, type: 'square'},
       {pos: [-71.9, 5.1, -410], yaw: -0.202, w: 7, h: 4.6, type: 'arch', finish: true},
     ],
-    medals: {gold: 40.2, silver: 48.3, bronze: 59.5},
-    botTime: 37.2,
+    medals: {gold: 40.3, silver: 48.5, bronze: 59.6},
+    botTime: 37.3,
     scenery: {
       scatter: [
         {kind: 'cactus', count: 160, area: [-560, -560, 560, 560], seed: 31},
@@ -248,7 +248,7 @@ export const COURSES = [
       {pos: [60, 9.2, -600], yaw: -0.359, w: 3.2, h: 2.8, type: 'square'},
     ],
     medals: null,
-    botTime: 41.4,
+    botTime: 41.5,
     scenery: {
       warehouses: [
         {x: 0, z: 150, yaw: 0, w: 30, d: 56, h: 14, doors: [{side: 's', w: 12, h: 10}, {side: 'n', w: 12, h: 10}]},

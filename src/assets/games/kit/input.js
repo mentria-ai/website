@@ -873,7 +873,6 @@ export function createInput(opts = {}) {
     v = applyExpo(clamp(v, -1, 1), 0.18);
     tilt.value = v;
     touchAxis[ctrl.axis] = v;
-    if (Math.abs(v) > 0.2 && touchVisible) setMethod('touch');
   }
 
   function ensureStyle() {

@@ -289,7 +289,17 @@ const UI_STYLE = [
   '.gk-loading{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,3cqh,20px);',
   'background:radial-gradient(ellipse at 50% 40%,#0c171a 0%,#04070a 70%);transition:opacity .3s ease;pointer-events:auto;container-type:size}',
   '.gk-loading.is-out{opacity:0;pointer-events:none}',
-  '.gk-loading__title{font:900 clamp(22px,8cqh,48px)/1 var(--gk-display);font-style:italic;text-transform:uppercase;letter-spacing:-.01em;color:#f5fbf9}',
+  '.gk-loading__art{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity .6s ease}',
+  '.gk-loading__art.is-loaded{opacity:.42}',
+  '.gk-loading__art::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(4,7,10,.35) 0%,rgba(4,7,10,.92) 75%)}',
+  '.gk-loading__inner{position:relative;display:flex;flex-direction:column;align-items:center;gap:clamp(8px,2.4cqh,16px)}',
+  '.gk-loading .gk-kicker{margin:0}',
+  '.gk-loading__title{font:900 clamp(26px,11cqh,72px)/.95 var(--gk-display);font-style:italic;text-transform:uppercase;letter-spacing:-.015em;color:#f5fbf9;text-align:center;text-shadow:0 4px 30px rgba(0,0,0,.6)}',
+  '.gk-loading__title:empty{display:none}',
+  '.gk-loading__tip{max-width:min(46ch,80cqw);margin:clamp(4px,2cqh,14px) 0 0;text-align:center;font:500 clamp(10px,2.8cqh,12.5px)/1.5 var(--gk-mono);color:var(--gk-muted)}',
+  '.gk-loading__tip:empty{display:none}',
+  '.gk-loading__bar i::after{content:"";position:absolute;top:0;bottom:0;width:60px;right:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:gk-shimmer 1.1s ease-in-out infinite}',
+  '@keyframes gk-shimmer{0%{opacity:0;transform:translateX(-80px)}50%{opacity:1}100%{opacity:0;transform:translateX(0)}}',
   '.gk-loading__bar{position:relative;width:clamp(180px,34cqw,360px);height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden}',
   '.gk-loading__bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:linear-gradient(90deg,rgba(var(--gk-mint-rgb),.4),var(--gk-mint));',
   'box-shadow:0 0 12px rgba(var(--gk-mint-rgb),.7);transition:width .25s ease}',
@@ -415,6 +425,8 @@ export function createUI(stage, copyIn, opts = {}) {
   let toastEl = null;
   let toastTimer = 0;
   let loadingEl = null;
+  let loadingArt = '';
+  const loadingInfo = {};
   let loadingTimer = 0;
   let countValue = null;
   let countTimer = 0;
@@ -1242,7 +1254,7 @@ export function createUI(stage, copyIn, opts = {}) {
     });
   }
 
-  function loading(p, text) {
+  function loading(p, text, info) {
     if (p == null || !(p < 1)) {
       if (!loadingEl) return;
       const el = loadingEl;
@@ -1263,11 +1275,28 @@ export function createUI(stage, copyIn, opts = {}) {
     if (!loadingEl) {
       loadingEl = document.createElement('div');
       loadingEl.className = 'gk-loading';
-      loadingEl.innerHTML = '<div class="gk-loading__title"></div><div class="gk-loading__bar"><i></i></div><div class="gk-loading__meta"><span></span><b>0%</b></div>';
+      loadingEl.innerHTML = '<div class="gk-loading__art"></div><div class="gk-loading__inner"><p class="gk-kicker"></p><div class="gk-loading__title"></div>' +
+        '<div class="gk-loading__bar"><i></i></div><div class="gk-loading__meta"><span></span><b>0%</b></div><p class="gk-loading__tip"></p></div>';
       stage.appendChild(loadingEl);
+      loadingArt = '';
     }
+    if (info && typeof info === 'object') Object.assign(loadingInfo, info);
     const pv = Math.max(0, Math.min(1, isNum(p) ? p : 0));
-    loadingEl.querySelector('.gk-loading__title').textContent = opts.title || '';
+    const kick = loadingEl.querySelector('.gk-kicker');
+    kick.textContent = loadingInfo.kicker || '';
+    kick.hidden = !loadingInfo.kicker;
+    loadingEl.querySelector('.gk-loading__title').textContent = loadingInfo.title || opts.title || '';
+    loadingEl.querySelector('.gk-loading__tip').textContent = loadingInfo.tip || '';
+    if (loadingInfo.image && loadingInfo.image !== loadingArt) {
+      loadingArt = loadingInfo.image;
+      const artEl = loadingEl.querySelector('.gk-loading__art');
+      const img = new Image();
+      img.onload = function () {
+        artEl.style.backgroundImage = 'url(' + JSON.stringify(String(loadingArt)) + ')';
+        artEl.classList.add('is-loaded');
+      };
+      img.src = loadingInfo.image;
+    }
     loadingEl.querySelector('.gk-loading__bar i').style.width = (pv * 100).toFixed(1) + '%';
     loadingEl.querySelector('.gk-loading__meta span').textContent = text != null ? String(text) : copy.loading;
     loadingEl.querySelector('.gk-loading__meta b').textContent = Math.round(pv * 100) + '%';

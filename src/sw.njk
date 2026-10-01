@@ -24,12 +24,7 @@ const ASSETS = [
   '/assets/js/mentria-webmcp.js',
   '/assets/js/qrcode.js',
   '/assets/js/tool-launcher.js',
-  '/assets/img/tool-icons.svg',
   '/assets/i18n/en.json',
-  '/assets/i18n/es.json',
-  '/assets/i18n/fr.json',
-  '/assets/i18n/ja.json',
-  '/assets/i18n/pt-BR.json',
   '/manifest.json',
   '/assets/css/feed-deck.css',
   '/assets/css/source-deck.css',
@@ -59,10 +54,6 @@ const ASSETS = [
   '/offline/',
   '/share/',
   '/fragments/tools-popup.en.html',
-  '/fragments/tools-popup.es.html',
-  '/fragments/tools-popup.fr.html',
-  '/fragments/tools-popup.ja.html',
-  '/fragments/tools-popup.pt-BR.html',
   '/tools/radio/',
   '/assets/radio/radio.js',
   '/assets/radio/player.js',
@@ -118,13 +109,8 @@ const ASSETS = [
   '/assets/img/shortcuts/ai-chat.png',
   '/assets/img/shortcuts/qr-scanner.png',
   '/assets/img/shortcuts/quick-notes.png',
-  '/assets/videos/mentria-install.mp4',
-  '/assets/videos/mentria-install.webm',
-  '/assets/videos/mentria-install-poster.jpg',
   '/assets/fonts/inter-latin.woff2',
-  '/assets/fonts/inter-latin-ext.woff2',
   '/assets/fonts/jbm-latin.woff2',
-  '/assets/fonts/jbm-latin-ext.woff2',
   '/assets/fonts/mentrialogofont.woff2',
   '/assets/js/marked.esm.js',
   '/assets/js/markdown.js',
@@ -499,8 +485,16 @@ self.addEventListener('fetch', event => {
       if (resp && resp.ok && event.request.mode === 'navigate' && FEED_PAGE.test(url.pathname)) {
         stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT);
       }
+      if (resp && resp.ok && url.pathname.startsWith('/assets/fonts/')) {
+        const copy = resp.clone();
+        event.waitUntil(precache.put(event.request, copy).catch(() => {}));
+      }
       return resp;
     } catch (err) {
+      if (event.request.mode !== 'navigate') {
+        const kept = await caches.match(event.request, { ignoreSearch: true });
+        if (kept) return kept;
+      }
       if (event.request.mode === 'navigate') {
         const localized = await caches.match(event.request, { ignoreSearch: true });
         if (localized) return localized;

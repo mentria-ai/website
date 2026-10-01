@@ -214,7 +214,6 @@ let worldCourseId = '';
 let worldQuality = '';
 let quality = 'medium';
 let frameDt = 1 / 60;
-let simClock = 0;
 let motorsVoice = null;
 let windVoice = null;
 let settingsFrom = 'main';
@@ -642,7 +641,7 @@ async function startRun(courseId, kind) {
   } catch (err) {
     console.error('[skyrush] world', err);
     ui.loading(1);
-    ui.toast(String(err && err.message ? err.message : err), { tone: 'warn' });
+    ui.toast(t('load.error'), { tone: 'warn', ms: 4000 });
     goMenu();
     return false;
   }
@@ -656,6 +655,10 @@ function restartRun() {
   if (run.kind === 'freestyle') {
     placeDroneOnStart();
     run.rings = createRings(run.course);
+    run.safe = [];
+    run.safeT = 0;
+    run.stuckT = 0;
+    run.graceT = 0;
     world.gates.reset();
     hud.reset();
     hud.setModeLabel(modeLabel());
@@ -799,7 +802,10 @@ function onGate(i) {
   burst('spark', gp, { x: 0, y: 1, z: 0 }, 10, { color: 0x6ef3c5 });
   const best = run.best && Array.isArray(run.best.splits) ? run.best.splits[i] : null;
   if (typeof best === 'number' && isFinite(best)) hud.split(total - best, t('hud.gate') + ' ' + (i + 1));
-  if (run.coachStep === 2 && i === 0) advanceCoach();
+  if (run.coachStep >= 0 && run.coachStep < 3) {
+    run.coachStep = 2;
+    advanceCoach();
+  }
 }
 
 function onFinish(total, gp) {
@@ -1011,7 +1017,6 @@ function cycleFlightMode() {
 }
 
 function onStep(dt) {
-  simClock += dt;
   if (input) {
     try { input.update(dt); } catch (_) {}
   }
@@ -1200,7 +1205,7 @@ function onRender(alpha, dt) {
   camera.updateMatrixWorld();
   updateWash();
   world.update(camera, paused ? 0 : frameDt, time);
-  if (inRun() || run.phase === 'results') updateHud(frameDt);
+  if (inRun()) updateHud(frameDt);
   updateAudio();
   if (postFx && typeof postFx.setSpeedFx === 'function') {
     const sp = inRun() && !paused ? clamp((drone.speed - 10) / 22, 0, 1) * 0.9 : 0;
@@ -1355,10 +1360,7 @@ function defineScreens() {
       unlockAudio();
       startRun(id, 'race');
     },
-    onBack() {
-      setPhase('menu');
-      ui.show('main', { focus: 'race' });
-    }
+    onBack() { goMenu(); }
   });
   ui.screen('settings', {
     type: 'settings',
@@ -1433,6 +1435,7 @@ function refreshCopy() {
     const cur = ui.current ? ui.current() : null;
     if (cur === 'settings') ui.show('settings', { rows: settingsRows() });
     else if (cur === 'courses') ui.show('courses', { cards: courseCards() });
+    else if (cur === 'results' && run.phase === 'results') showResults();
   }
   if (input && input.setCopy) {
     try { input.setCopy(inputCopy()); } catch (_) {}

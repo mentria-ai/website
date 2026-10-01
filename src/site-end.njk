@@ -1,0 +1,12 @@
+---
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "/assets/js/site-end.{{ locale.code | lower }}.js"
+eleventyExcludeFromCollections: true
+eleventyComputed:
+  lang: "{{ locale.code }}"
+---
+{%- set localePrefix = (locale.pathPrefix | default("")) -%}
+{% include "site/end.njk" %}

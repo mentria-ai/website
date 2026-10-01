@@ -383,7 +383,9 @@ module.exports = function(eleventyConfig) {
   }
   eleventyConfig.addTransform("i18nInstrument", function (content) {
     const op = (this.page && this.page.outputPath) || arguments[1];
-    if (!op || typeof op !== "string" || !op.endsWith(".html")) return content;
+    if (!op || typeof op !== "string") return content;
+    if (op.endsWith(".js")) return content.indexOf(I18N_S0) === -1 ? content : content.replace(SENT_RE, (m, key, val) => val);
+    if (!op.endsWith(".html")) return content;
     if (content.indexOf(I18N_S0) === -1) return content;
     const tokens = [];
     const tokenized = content.replace(SENT_RE, (m, key, val) => {

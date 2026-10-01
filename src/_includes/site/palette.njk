@@ -1,0 +1,33 @@
+      window.MENTRIA_PALETTE_DATA = {
+        locale: {{ (lang | default('en')) | dump | safe }},
+        prefix: {{ localePrefix | dump | safe }},
+        tools: [
+          {%- for tool in tools %}
+          { slug: {{ tool.slug | dump | safe }}, title: {{ (("tools." + tool.slug + ".title") | t) | dump | safe }}, category: {{ (("category." + tool.category) | t) | dump | safe }}, keywords: {{ (("tools." + tool.slug + ".lede") | t) | dump | safe }}{% if tool.url %}, url: {{ tool.url | dump | safe }}{% endif %}{% if tool.requires %}, requires: {{ tool.requires | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
+          {%- endfor %}
+        ],
+        nav: [
+          { id: "home", title: {{ ("nav.home" | t) | dump | safe }}, href: "/" },
+          { id: "tools", title: {{ ("nav.tools" | t) | dump | safe }}, href: "/tools/" },
+          { id: "learn", title: {{ ("learn.title" | t) | dump | safe }}, href: "/learn/" },
+          { id: "about", title: {{ ("about.title" | t) | dump | safe }}, href: "/about/" }
+        ],
+        labels: {
+          placeholder: {{ ("palette.placeholder" | t) | dump | safe }},
+          listLabel: {{ ("palette.list_label" | t) | dump | safe }},
+          noResults: {{ ("palette.no_results" | t) | dump | safe }},
+          recents: {{ ("palette.recents" | t) | dump | safe }},
+          extensions: {{ ("palette.extensions" | t) | dump | safe }},
+          actions: {{ ("palette.actions" | t) | dump | safe }},
+          actNote: {{ ("palette.act_note" | t) | dump | safe }},
+          actNoteDone: {{ ("palette.act_note_done" | t) | dump | safe }},
+          actNoteFail: {{ ("palette.act_note_fail" | t) | dump | safe }},
+          actTimer: {{ ("palette.act_timer" | t) | dump | safe }},
+          actNoteNew: {{ ("palette.act_note_new" | t) | dump | safe }},
+          actTimerNew: {{ ("palette.act_timer_new" | t) | dump | safe }},
+          actFlip: {{ ("palette.act_flip" | t) | dump | safe }},
+          actHeads: {{ ("palette.act_heads" | t) | dump | safe }},
+          actTails: {{ ("palette.act_tails" | t) | dump | safe }},
+          searchSite: {{ ("palette.search_site" | t) | dump | safe }}
+        }
+      };

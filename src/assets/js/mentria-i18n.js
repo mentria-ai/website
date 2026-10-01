@@ -193,7 +193,8 @@
       return shell.match(marker).then(function (done) {
         if (done) return;
         var chain = Promise.resolve();
-        var routes = shellRoutes(loc.prefix).concat([DICT_BASE + code + '.json', '/fragments/tools-popup.' + code + '.html?v=' + i18nBuild()]);
+        var lower = code.toLowerCase();
+        var routes = shellRoutes(loc.prefix).concat([DICT_BASE + code + '.json', '/fragments/tools-popup.' + code + '.html?v=' + i18nBuild(), '/assets/js/site-palette.' + lower + '.js', '/assets/js/site-end.' + lower + '.js']);
         routes.forEach(function (route) {
           chain = chain.then(function () {
             return fetch(route).then(function (resp) {

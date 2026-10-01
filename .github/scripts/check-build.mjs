@@ -35,5 +35,15 @@ for (const page of pages) {
     if (!existsSync(target) && !existsSync(join(root, path, 'index.html'))) { linkErrors++; console.error(`LINK ${path} (from ${page.slice(root.length)})`); }
   }
 }
+const jsDir = join(root, 'assets', 'js');
+if (existsSync(jsDir)) {
+  for (const n of readdirSync(jsDir)) {
+    if (!/^site-[a-z]+\.[a-z-]+\.js$/.test(n)) continue;
+    const f = join(tmp, n);
+    writeFileSync(f, readFileSync(join(jsDir, n), 'utf8'));
+    try { execFileSync(process.execPath, ['--check', f], { stdio: 'pipe' }); }
+    catch (e) { scriptErrors++; console.error(`SCRIPT /assets/js/${n}\n${String(e.stderr).split('\n').slice(0, 4).join('\n')}`); }
+  }
+}
 console.log(`${pages.length} pages, ${seenLinks.size} internal paths, ${scriptErrors} script errors, ${linkErrors} broken links`);
 process.exit(scriptErrors || linkErrors ? 1 : 0);

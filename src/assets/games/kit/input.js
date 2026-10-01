@@ -488,11 +488,15 @@ export function createInput(opts = {}) {
   }
 
   let menuObserver = null;
+  let absorbNext = false;
   function watchMenu() {
     if (!element || typeof MutationObserver === 'undefined') return;
     try {
       menuObserver = new MutationObserver(function () {
-        if (!element.hasAttribute('data-gk-menu')) return;
+        if (!element.hasAttribute('data-gk-menu')) {
+          absorbNext = true;
+          return;
+        }
         releaseTouch();
         for (const k in keyEdges) keyEdges[k] = 0;
       });
@@ -698,9 +702,22 @@ export function createInput(opts = {}) {
       axisOut[ga] = braking ? 0 : 1;
     }
 
+    const absorb = absorbNext;
+    absorbNext = false;
     for (const name in buttonsOut) {
       const spec = buttonSpecs[name] || { keys: [], pad: [] };
       const o = buttonsOut[name];
+      if (absorb) {
+        let held = 0;
+        for (let i = 0; i < spec.pad.length; i++) held = Math.max(held, padButtonValue(spec.pad[i]));
+        if (anyKey(spec.keys) || touchBtnDown[name] > 0) held = 1;
+        o.down = held > 0.45;
+        o.value = held;
+        o.pressed = false;
+        o.released = false;
+        touchBtnEdge[name] = 0;
+        continue;
+      }
       let value = 0;
       if (anyKey(spec.keys)) value = 1;
       for (let i = 0; i < spec.pad.length; i++) value = Math.max(value, padButtonValue(spec.pad[i]));

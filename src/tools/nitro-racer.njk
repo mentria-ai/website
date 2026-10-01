@@ -1,0 +1,279 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/nitro-racer/index.html"
+usesThree: true
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.nitro-racer.title' | t }}"
+  description: "{{ 'tools.nitro-racer.lede' | t }}"
+---
+<style>
+.nr-wrap { margin: 1.25rem 0 1.5rem; }
+.nr-stage {
+  position: relative; width: 100%; aspect-ratio: 16 / 9;
+  max-height: 78vh; max-height: 78svh;
+  overflow: hidden; background: #04060a;
+  border: 1px solid var(--term-border-strong); border-radius: var(--radius-lg);
+  font-family: var(--font-mono); touch-action: none;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.nr-stage:fullscreen { aspect-ratio: auto; width: 100vw; height: 100vh; height: 100svh; max-height: none; border: 0; border-radius: 0; }
+.nr-stage:-webkit-full-screen { aspect-ratio: auto; width: 100vw; height: 100vh; max-height: none; border: 0; border-radius: 0; }
+.nr-canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.nr-boot {
+  position: absolute; inset: 0; z-index: 60;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+  background: radial-gradient(ellipse at 50% 120%, rgba(110, 243, 197, 0.12), transparent 60%), #04060a;
+  transition: opacity 0.35s ease;
+}
+.nr-boot.is-done { opacity: 0; pointer-events: none; }
+.nr-boot[hidden] { display: none; }
+.nr-boot__logo { width: min(340px, 56%); height: auto; filter: drop-shadow(0 0 18px rgba(110, 243, 197, 0.25)); }
+.nr-boot__logo[hidden] { display: none; }
+.nr-boot__word {
+  margin: 0; font-family: var(--font-body, system-ui, sans-serif); font-weight: 900; font-style: italic;
+  font-size: clamp(1.8rem, 6vw, 3.4rem); letter-spacing: 0.04em; color: #f2fbf8;
+  text-shadow: 0 0 22px rgba(110, 243, 197, 0.35);
+}
+.nr-boot__word span { color: var(--accent); }
+.nr-boot__bar { width: min(260px, 50%); height: 3px; border-radius: 3px; background: rgba(110, 243, 197, 0.14); overflow: hidden; }
+.nr-boot__fill { display: block; height: 100%; width: 0; background: var(--accent); box-shadow: 0 0 10px rgba(110, 243, 197, 0.7); transition: width 0.25s ease; }
+.nr-boot__text { margin: 0; color: var(--term-muted); font-size: var(--text-2xs); letter-spacing: 0.18em; text-transform: uppercase; }
+
+.nr-fail {
+  position: absolute; inset: 0; z-index: 70;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.7rem;
+  padding: 1.5rem; text-align: center; background: rgba(4, 6, 10, 0.94);
+}
+.nr-fail[hidden] { display: none; }
+.nr-fail__title { margin: 0; color: var(--syn-amber); font-size: clamp(1.1rem, 3.4vw, 1.6rem); letter-spacing: 0.14em; text-transform: uppercase; }
+.nr-fail__body { margin: 0; max-width: 54ch; color: var(--term-muted); font-size: var(--text-xs); line-height: 1.7; }
+.nr-fail__code { display: block; max-width: 60ch; color: var(--syn-pink); font-size: var(--text-2xs); word-break: break-word; }
+
+.nr-under { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.6rem; flex-wrap: wrap; }
+.nr-under__note { margin: 0; color: var(--term-subtle); font-size: var(--text-2xs); letter-spacing: 0.06em; }
+.nr-helpbtn {
+  display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;
+  font-family: var(--font-mono); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--term-fg); background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--term-border-strong); border-radius: var(--radius-pill);
+  padding: 0.45rem 0.9rem; min-height: 40px;
+}
+.nr-helpbtn:hover, .nr-helpbtn:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.nr-helpbtn svg { flex: none; }
+
+.nr-help { max-width: min(420px, calc(100vw - 1.5rem)); }
+.nr-help__head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.nr-help__head .game-help-title { margin: 0; flex: 1; }
+.nr-help__close {
+  appearance: none; background: transparent; border: 1px solid var(--term-border);
+  border-radius: var(--radius-sm); color: var(--term-muted);
+  width: 28px; height: 28px; line-height: 1; cursor: pointer; font-size: 11px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.nr-help__close:hover { color: var(--accent); border-color: var(--accent); }
+.nr-help__sec { margin-bottom: 12px; padding: 8px 9px; border: 1px solid var(--term-border); border-radius: var(--radius-md); }
+.nr-help__sec[hidden] { display: none; }
+.nr-help__sec-title { display: flex; align-items: center; gap: 6px; margin: 0 0 7px; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--term-fg-strong, var(--term-fg)); font-weight: 600; font-family: var(--font-mono); }
+.nr-help__sec-title svg { color: var(--accent); flex: none; }
+.nr-help__sec .game-help-list li { align-items: center; justify-content: space-between; gap: 10px; }
+.nr-help__sec .game-help-label { text-align: right; }
+.nr-help__keys { display: inline-flex; flex-wrap: wrap; gap: 2px; flex: none; }
+.nr-help__keys .kbd { margin-right: 0; }
+.nr-help__glyph { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border-radius: 3px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--term-border); color: var(--accent); font-size: 12px; flex: none; }
+.nr-help__tip { margin: 4px 2px 0; color: var(--term-muted); font-size: 0.75rem; line-height: 1.6; }
+
+@media (max-width: 720px) {
+  .nr-wrap { margin: 0.75rem 0 1rem; }
+}
+@media (orientation: landscape) and (max-height: 560px) and (pointer: coarse) {
+  .nr-wrap { margin: 0; }
+  .nr-stage {
+    aspect-ratio: auto; width: 100vw; margin-left: calc(50% - 50vw);
+    height: 100vh; height: 100svh; max-height: none; border: 0; border-radius: 0;
+  }
+}
+@media (orientation: portrait) and (pointer: coarse) {
+  .nr-stage { aspect-ratio: auto; height: 62vh; height: 62svh; max-height: none; }
+}
+</style>
+
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">nitro-racer</span></p>
+  <h1>{{ "tools.nitro-racer.title" | t }}</h1>
+  <p>{{ "tools.nitro-racer.lede" | t }}</p>
+</section>
+
+<div class="nr-wrap">
+  <div class="nr-stage" id="nr-stage">
+    <canvas class="nr-canvas" id="nr-canvas"></canvas>
+
+    <div class="nr-boot" id="nr-boot">
+      <img class="nr-boot__logo" id="nr-boot-logo" src="/assets/games/sprites/logo-nitro.webp" alt="" width="680" height="300" decoding="async">
+      <p class="nr-boot__word" id="nr-boot-word" hidden>NITRO <span>RACER</span></p>
+      <div class="nr-boot__bar"><span class="nr-boot__fill" id="nr-boot-fill"></span></div>
+      <p class="nr-boot__text" id="nr-boot-text">{{ "tool.nitro-racer.boot_loading" | t }}</p>
+    </div>
+
+    <div class="nr-fail" id="nr-fail" hidden>
+      <p class="nr-fail__title">{{ "tool.nitro-racer.fail_title" | t }}</p>
+      <p class="nr-fail__body">{{ "tool.nitro-racer.fail_body" | t }}</p>
+      <code class="nr-fail__code" id="nr-fail-detail"></code>
+    </div>
+  </div>
+
+  <div class="nr-under">
+    <button type="button" class="nr-helpbtn" id="nr-help-btn" popovertarget="nr-help">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="7.5" width="19" height="9" rx="4.5"></rect><path d="M6.5 10.2v3.6M4.7 12h3.6M16.2 10.8h.01M18.6 13.2h.01"></path></svg>
+      <span>{{ "tool.nitro-racer.help_btn" | t }}</span>
+    </button>
+    <p class="nr-under__note">{{ "tool.nitro-racer.under_note" | t }}</p>
+  </div>
+</div>
+
+<div id="nr-help" popover class="game-help nr-help">
+  <div class="nr-help__head">
+    <p class="game-help-title">{{ "tool.nitro-racer.help_title" | t }}</p>
+    <button type="button" class="nr-help__close" popovertarget="nr-help" popovertargetaction="hide" aria-label="{{ 'tool.nitro-racer.help_close' | t }}">{% include "icon-x.njk" %}</button>
+  </div>
+
+  <section class="nr-help__sec" data-input="keyboard pointer">
+    <h3 class="nr-help__sec-title">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.2"/><path d="M6 9.6h.01M9.5 9.6h.01M13 9.6h.01M16.5 9.6h.01M6 13.1h.01M9.5 13.1h.01M13 13.1h.01M16.5 13.1h.01M8.4 16.1h7.2"/></svg>
+      <span>{{ "tool.nitro-racer.help_keyboard" | t }}</span>
+    </h3>
+    <ul class="game-help-list">
+      <li><span class="nr-help__keys"><span class="kbd">←</span><span class="kbd">→</span><span class="kbd">A</span><span class="kbd">D</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_steer" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">↑</span><span class="kbd">W</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_gas" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">↓</span><span class="kbd">S</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_brake" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">SPACE</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_drift" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">SHIFT</span><span class="kbd">N</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_nitro" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">C</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_camera" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">B</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_look_back" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">R</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_restart" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">ESC</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_pause" | t }}</span></li>
+    </ul>
+  </section>
+
+  <section class="nr-help__sec" data-input="gamepad">
+    <h3 class="nr-help__sec-title">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="7.5" width="19" height="9" rx="4.5"/><path d="M6.5 10.2v3.6M4.7 12h3.6M16.2 10.8h.01M18.6 13.2h.01"/></svg>
+      <span>{{ "tool.nitro-racer.help_gamepad" | t }}</span>
+    </h3>
+    <ul class="game-help-list">
+      <li><span class="nr-help__keys"><span class="kbd">L</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_steer" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">RT</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_gas" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">LT</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_brake" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">A</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_nitro" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">X</span><span class="kbd">B</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_drift" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">Y</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_camera" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">LB</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_look_back" | t }}</span></li>
+      <li><span class="nr-help__keys"><span class="kbd">START</span></span><span class="game-help-label">{{ "tool.nitro-racer.act_pause" | t }}</span></li>
+    </ul>
+  </section>
+
+  <section class="nr-help__sec" data-input="touch">
+    <h3 class="nr-help__sec-title">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.2"/><path d="M10.5 18.5h3"/></svg>
+      <span>{{ "tool.nitro-racer.help_touch" | t }}</span>
+    </h3>
+    <ul class="game-help-list">
+      <li><span class="nr-help__glyph">⇄</span><span class="game-help-label">{{ "tool.nitro-racer.touch_steer" | t }}</span></li>
+      <li><span class="nr-help__glyph">▲</span><span class="game-help-label">{{ "tool.nitro-racer.touch_gas" | t }}</span></li>
+      <li><span class="nr-help__glyph">⚡</span><span class="game-help-label">{{ "tool.nitro-racer.touch_buttons" | t }}</span></li>
+      <li><span class="nr-help__glyph">⟳</span><span class="game-help-label">{{ "tool.nitro-racer.touch_settings" | t }}</span></li>
+    </ul>
+  </section>
+
+  <p class="nr-help__tip">{{ "tool.nitro-racer.help_tip" | t }}</p>
+  <p class="nr-help__tip">{{ "tool.nitro-racer.help_start_tip" | t }}</p>
+</div>
+
+{% set nrKeys = [
+  "boot_loading", "loading_track", "fail_title", "fail_body", "fail_module", "context_lost",
+  "tagline", "menu_race", "menu_race_hint", "menu_tt", "menu_tt_hint", "menu_garage", "menu_garage_hint",
+  "menu_settings", "menu_settings_hint", "menu_help", "menu_help_hint",
+  "select_title", "select_race", "select_tt", "track_laps", "track_km", "track_ghost",
+  "garage_title", "garage_kicker", "garage_paint", "garage_drive", "garage_prev", "garage_next", "garage_keys",
+  "settings_title", "set_header_controls", "set_header_race", "set_header_display",
+  "set_steer", "steer_zones", "steer_tilt", "steer_wheel", "set_autogas", "set_tilt_center", "set_tilt_center_action",
+  "set_difficulty",
+  "set_camera", "cam_chase", "cam_hood", "set_quality", "q_auto", "q_low", "q_medium", "q_high",
+  "set_volume", "set_units", "units_kmh", "units_mph", "set_ghost",
+  "hud_pos", "hud_lap", "hud_time", "hud_lap_time", "hud_best", "hud_gear", "hud_nitro",
+  "final_lap", "wrong_way", "ghost_label", "ghost_ahead", "ghost_behind",
+  "toast_drift", "toast_near_miss", "toast_takedown", "toast_airtime", "toast_overtake",
+  "toast_perfect_start", "toast_nitro_ready", "toast_best_lap", "toast_wrecked", "toast_lap",
+  "get_ready", "start_hint_keys", "start_hint_touch",
+  "res_race", "res_tt", "res_best_lap", "res_top_speed", "res_takedowns", "res_drifts", "res_you",
+  "res_ghost_saved", "res_retry", "res_next", "res_garage", "res_menu", "res_place",
+  "pause_title", "pause_resume", "pause_restart", "pause_settings", "pause_quit"
+] %}
+{% set nrKitKeys = [
+  "input_gas", "input_brake", "input_drift", "input_nitro", "input_camera", "input_look_back", "input_mode", "input_reset",
+  "input_steer_left", "input_steer_right", "input_wheel", "input_steer", "input_throttle_yaw", "input_pitch_roll",
+  "ui_back", "ui_select", "ui_move", "ui_confirm", "ui_cancel", "ui_go", "ui_loading", "ui_best", "ui_locked",
+  "ui_new_best", "ui_on", "ui_off", "ui_pause", "ui_fullscreen", "ui_exit_fullscreen", "ui_position", "ui_time",
+  "ui_rotate", "ui_rotate_dismiss", "medal_gold", "medal_silver", "medal_bronze", "medal_none",
+  "tilt_enable", "tilt_unavailable", "tilt_centered"
+] %}
+{% set nrTrackIds = ["neon-city", "coast", "canyon-run"] %}
+{% set nrCarIds = ["shardfire", "marlowe", "aethra", "ironjaw", "mudlark", "nocturne"] %}
+{% set nrCarKinds = ["wedge", "gt", "hyper", "muscle", "rally", "sedan"] %}
+{% set nrStats = ["accel", "top", "handling", "nitro"] %}
+{% set nrDiffs = ["easy", "normal", "hard", "pro"] %}
+{% set nrPaints = ["crimson", "sunburst", "saffron", "lime", "mint", "emerald", "electric", "midnight", "amethyst", "bronze", "silver", "graphite", "obsidian", "pearl"] %}
+<script>
+  window.NITRO_COPY = {
+{%- for k in nrKeys %}
+    {{ ("tool.nitro-racer." + k) | dump | safe }}: {{ ("tool.nitro-racer." + k) | t | dump | safe }},
+{%- endfor %}
+{%- for k in nrKitKeys %}
+    {{ ("games.kit." + k) | dump | safe }}: {{ ("games.kit." + k) | t | dump | safe }},
+{%- endfor %}
+{%- for id in nrTrackIds %}
+    {{ ("tool.nitro-racer.tracks." + id) | dump | safe }}: {{ ("tool.nitro-racer.tracks." + id) | t | dump | safe }},
+    {{ ("tool.nitro-racer.tracks." + id + "-desc") | dump | safe }}: {{ ("tool.nitro-racer.tracks." + id + "-desc") | t | dump | safe }},
+{%- endfor %}
+{%- for id in nrCarIds %}
+    {{ ("tool.nitro-racer.cars." + id + ".name") | dump | safe }}: {{ ("tool.nitro-racer.cars." + id + ".name") | t | dump | safe }},
+{%- endfor %}
+{%- for id in nrCarKinds %}
+    {{ ("tool.nitro-racer.cars.kind." + id) | dump | safe }}: {{ ("tool.nitro-racer.cars.kind." + id) | t | dump | safe }},
+{%- endfor %}
+{%- for id in nrStats %}
+    {{ ("tool.nitro-racer.cars.stat." + id) | dump | safe }}: {{ ("tool.nitro-racer.cars.stat." + id) | t | dump | safe }},
+{%- endfor %}
+{%- for id in nrDiffs %}
+    {{ ("tool.nitro-racer.difficulty." + id) | dump | safe }}: {{ ("tool.nitro-racer.difficulty." + id) | t | dump | safe }},
+{%- endfor %}
+{%- for id in nrPaints %}
+    {{ ("tool.nitro-racer.paint." + id) | dump | safe }}: {{ ("tool.nitro-racer.paint." + id) | t | dump | safe }},
+{%- endfor %}
+    "lang": {{ locale.code | dump | safe }}
+  };
+</script>
+<script type="module" id="nr-mod" src="/assets/games/racer/game.js?v={{ buildHash }}"></script>
+<script>
+  (function () {
+    var s = document.getElementById('nr-mod');
+    if (!s) return;
+    s.addEventListener('error', function () {
+      var boot = document.getElementById('nr-boot');
+      var panel = document.getElementById('nr-fail');
+      var detail = document.getElementById('nr-fail-detail');
+      var C = window.NITRO_COPY || {};
+      var msg = C['tool.nitro-racer.fail_module'];
+      if (detail) detail.textContent = (msg && msg !== 'tool.nitro-racer.fail_module') ? msg : 'game.js failed to load';
+      if (boot) boot.hidden = true;
+      if (panel) panel.hidden = false;
+      try { console.error('[nitro-racer] module script failed to load'); } catch (e) {}
+    });
+  })();
+</script>

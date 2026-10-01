@@ -398,8 +398,66 @@ module.exports = function(eleventyConfig) {
     return instrumentHead(tokenized.slice(0, headEnd), tokens) + instrumentBody(tokenized.slice(headEnd), tokens);
   });
 
+  function stabilizeVersions(out) {
+    const token = "?v=" + buildHash;
+    const known = new Map();
+    const fileHash = (rel) => {
+      if (!known.has(rel)) {
+        let h = null;
+        try { h = crypto.createHash("sha1").update(fs.readFileSync(path.join(out, rel))).digest("hex").slice(0, 10); } catch {}
+        known.set(rel, h);
+      }
+      return known.get(rel);
+    };
+    const refRe = new RegExp("(/[A-Za-z0-9_\\-./%~]+)\\?v=" + buildHash + "(?![A-Za-z0-9])", "g");
+    const rewrite = (rel, extra) => {
+      const file = path.join(out, rel);
+      let s;
+      try { s = fs.readFileSync(file, "utf8"); } catch { return; }
+      if (s.indexOf(token) === -1) return;
+      let next = s.replace(refRe, (m, ref) => {
+        let target = ref.replace(/^\//, "");
+        try { target = decodeURIComponent(target); } catch {}
+        const h = fileHash(target);
+        return h ? ref + "?v=" + h : m;
+      });
+      if (extra) next = extra(next);
+      if (next !== s) {
+        fs.writeFileSync(file, next);
+        known.delete(rel);
+      }
+    };
+    const list = (rel, re) => {
+      try { return fs.readdirSync(path.join(out, rel)).filter((n) => re.test(n)).sort().map((n) => rel + "/" + n); } catch { return []; }
+    };
+    const fragments = list("fragments", /\.html$/);
+    fragments.forEach((rel) => rewrite(rel));
+    const fragHash = crypto.createHash("sha1");
+    fragments.forEach((rel) => { try { fragHash.update(fs.readFileSync(path.join(out, rel))); } catch {} });
+    const fragV = fragHash.digest("hex").slice(0, 10);
+    list("assets/js", /^site-[a-z]+\.[a-z-]+\.js$/).forEach((rel) => rewrite(rel, (s) => s.split(".html" + token).join(".html?v=" + fragV)));
+    const version = '"softwareVersion": "' + buildHash + '"';
+    const pages = [];
+    const walk = (rel) => {
+      for (const e of fs.readdirSync(path.join(out, rel), { withFileTypes: true })) {
+        const child = rel ? rel + "/" + e.name : e.name;
+        if (e.isDirectory()) { if (child !== "fragments") walk(child); }
+        else if (e.name.endsWith(".html")) pages.push(child);
+      }
+    };
+    walk("");
+    pages.forEach((rel) => rewrite(rel, (s) => {
+      if (s.indexOf(version) === -1) return s;
+      const blank = s.split(version).join('"softwareVersion": ""');
+      const v = crypto.createHash("sha1").update(blank).digest("hex").slice(0, 10);
+      return s.split(version).join('"softwareVersion": "' + v + '"');
+    }));
+    rewrite("sw.js");
+  }
+
   eleventyConfig.on("eleventy.after", ({ directories, dir }) => {
     const out = (directories && directories.output) || (dir && dir.output) || "build";
+    stabilizeVersions(out);
     const swPath = path.join(out, "sw.js");
     let sw;
     try { sw = fs.readFileSync(swPath, "utf8"); } catch { return; }

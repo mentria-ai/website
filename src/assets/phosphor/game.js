@@ -138,6 +138,7 @@ let touchDevice = false;
 let touchUiOn = false;
 let contextLost = false;
 let autoQuality = true;
+let gfxAuto = true;
 let qualityCap = 1;
 let qualityLowSince = 0;
 let qualityHighSince = 0;
@@ -773,6 +774,7 @@ function applyGraphics() {
 
 function toggleGraphics() {
   settings.gfx = settings.gfx === 'enhanced' ? 'classic' : 'enhanced';
+  gfxAuto = false;
   applyGraphics();
   saveGfxPref(settings.gfx);
 }
@@ -1454,6 +1456,11 @@ function adaptQuality(now) {
     else if (now - qualityLowSince >= AQ_LOW_MS) {
       qualityLowSince = now;
       if (settings.quality > AQ_FLOOR) applyQuality(settings.quality - AQ_STEP);
+      else if (gfxAuto && settings.gfx === 'enhanced') {
+        settings.gfx = 'classic';
+        applyGraphics();
+        setAutoNote('auto graphics classic');
+      }
     }
     return;
   }
@@ -2163,7 +2170,9 @@ function boot() {
     return;
   }
 
-  settings.gfx = loadGfxPref() || call(renderer, 'defaultGraphics') || 'enhanced';
+  const storedGfx = loadGfxPref();
+  gfxAuto = !storedGfx;
+  settings.gfx = storedGfx || call(renderer, 'defaultGraphics') || 'enhanced';
   applyGraphics();
 
   constants = simMod.CONSTANTS && typeof simMod.CONSTANTS === 'object' ? simMod.CONSTANTS : FALLBACK_CONSTANTS;

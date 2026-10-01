@@ -1270,7 +1270,7 @@ export function createRenderer(canvas){
   let lastMuzzle = 0;
   let shotFrame = false;
   let flashSpin = 0;
-  const texSrc = { panel: null, floor: null, voidImg: null, procPanel: null, procFloor: null };
+  const texSrc = { panel: null, floor: null, voidImg: null, voidHorizon: -1, procPanel: null, procFloor: null };
   let texLoadStarted = false;
 
   const P = {};
@@ -2517,9 +2517,12 @@ export function createRenderer(canvas){
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.bindTexture(gl.TEXTURE_2D, null);
     const span = (Math.PI * 2) * (h / w);
-    const rep = clamp(Math.round(span / 0.33), 1, 6);
+    const rep = clamp(Math.round(span / 0.5), 1, 6);
+    const range = span / rep;
+    const hv = texSrc.voidHorizon >= 0 ? texSrc.voidHorizon : (texSrc.voidHorizon = FX.horizonOf(img));
+    const hi = 0.012 + hv * range;
     E.tex.void = t;
-    E.voidBand = [-0.03, -0.03 + span / rep, rep];
+    E.voidBand = [hi - range, hi, rep];
   }
 
   function startTextureLoads(){
@@ -2529,13 +2532,13 @@ export function createRenderer(canvas){
       const t = img ? FX.textureFromImage(img, 768) : null;
       if (!t) return;
       texSrc.panel = t;
-      if (E && !contextLost) setSurface('panel', t);
+      if (E && !contextLost) setSurface('metal', t);
     });
     FX.loadImage(FX.TEXTURE_URLS.floor).then((img) => {
       const t = img ? FX.textureFromImage(img, 768) : null;
       if (!t) return;
       texSrc.floor = t;
-      if (E && !contextLost) setSurface('floor', t);
+      if (E && !contextLost) setSurface('plate', t);
     });
     FX.loadImage(FX.TEXTURE_URLS.void).then((img) => {
       if (!img) return;
@@ -2616,8 +2619,10 @@ export function createRenderer(canvas){
       E = e;
       if (!texSrc.procPanel) texSrc.procPanel = FX.makePanelTexture(512);
       if (!texSrc.procFloor) texSrc.procFloor = FX.makeFloorTexture(512);
-      setSurface('panel', texSrc.panel || texSrc.procPanel);
-      setSurface('floor', texSrc.floor || texSrc.procFloor);
+      setSurface('panel', texSrc.procPanel);
+      setSurface('floor', texSrc.procFloor);
+      if (texSrc.panel) setSurface('metal', texSrc.panel);
+      if (texSrc.floor) setSurface('plate', texSrc.floor);
       E.tex.blank = makeTex(new Uint8Array([0, 0, 0, 0]), 1);
       if (texSrc.voidImg) setVoid(texSrc.voidImg);
       E.vmx = buildVmExtras();
@@ -2675,21 +2680,21 @@ export function createRenderer(canvas){
 
   function worldExtras(PW){
     const tp = E.tex.panel, tf = E.tex.floor;
-    gl.activeTexture(gl.TEXTURE3);
-    gl.bindTexture(gl.TEXTURE_2D, tp.a);
-    gl.activeTexture(gl.TEXTURE4);
-    gl.bindTexture(gl.TEXTURE_2D, tp.n);
-    gl.activeTexture(gl.TEXTURE5);
-    gl.bindTexture(gl.TEXTURE_2D, tf.a);
-    gl.activeTexture(gl.TEXTURE6);
-    gl.bindTexture(gl.TEXTURE_2D, tf.n);
+    const tm = E.tex.metal || tp, tl = E.tex.plate || tp;
+    const sets = [tp, tf, tm, tl];
+    const names = ['uPanel', 'uFloor', 'uMetal', 'uPlate'];
+    for (let i = 0; i < 4; i++){
+      const t = sets[i];
+      gl.activeTexture(gl.TEXTURE3 + i * 2);
+      gl.bindTexture(gl.TEXTURE_2D, t.a);
+      gl.activeTexture(gl.TEXTURE4 + i * 2);
+      gl.bindTexture(gl.TEXTURE_2D, t.n);
+      s1i(PW, names[i] + 'A', 3 + i * 2);
+      s1i(PW, names[i] + 'N', 4 + i * 2);
+      s3f(PW, names[i] + 'Avg', t.avg[0], t.avg[1], t.avg[2]);
+    }
     gl.activeTexture(gl.TEXTURE0);
-    s1i(PW, 'uPanelA', 3);
-    s1i(PW, 'uPanelN', 4);
-    s1i(PW, 'uFloorA', 5);
-    s1i(PW, 'uFloorN', 6);
-    s3f(PW, 'uPanelAvg', tp.avg[0], tp.avg[1], tp.avg[2]);
-    s3f(PW, 'uFloorAvg', tf.avg[0], tf.avg[1], tf.avg[2]);
+    s2f(PW, 'uGen', E.tex.metal ? 1 : 0, E.tex.plate ? 1 : 0);
     s3f(PW, 'uZenith', world.zenR, world.zenG, world.zenB);
     s1f(PW, 'uTime', time);
   }

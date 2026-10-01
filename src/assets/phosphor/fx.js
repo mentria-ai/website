@@ -74,8 +74,15 @@ uniform sampler2D uPanelA;
 uniform sampler2D uPanelN;
 uniform sampler2D uFloorA;
 uniform sampler2D uFloorN;
+uniform sampler2D uMetalA;
+uniform sampler2D uMetalN;
+uniform sampler2D uPlateA;
+uniform sampler2D uPlateN;
 uniform vec3 uPanelAvg;
 uniform vec3 uFloorAvg;
+uniform vec3 uMetalAvg;
+uniform vec3 uPlateAvg;
+uniform vec2 uGen;
 uniform vec3 uZenith;
 out vec4 oColor;
 ${NOISE}
@@ -164,17 +171,26 @@ void main(){
     else { uv = vPos.xy; T = vec3(1.0, 0.0, 0.0); B = vec3(0.0, 1.0, 0.0); }
   }
   float pw = max(fwidth(uv.x), fwidth(uv.y));
-  float tsc = floorish ? 1.0 / 3.2 : 1.0 / 2.4;
+  int tset = uMat == 1 ? (an.y > 0.5 ? 3 : 2) : (floorish ? 1 : 0);
+  float tsc = tset == 1 ? 1.0 / 3.2 : (tset == 3 && uGen.y > 0.5 ? 1.0 / 1.6 : 1.0 / 2.4);
   vec2 tuv = uv * tsc;
   vec2 gdx = dFdx(tuv);
   vec2 gdy = dFdy(tuv);
   vec4 ta;
   vec4 tn;
   vec3 tavg;
-  if (floorish){
+  if (tset == 1){
     ta = textureGrad(uFloorA, tuv, gdx, gdy);
     tn = textureGrad(uFloorN, tuv, gdx, gdy);
     tavg = uFloorAvg;
+  } else if (tset == 2){
+    ta = textureGrad(uMetalA, tuv, gdx, gdy);
+    tn = textureGrad(uMetalN, tuv, gdx, gdy);
+    tavg = uMetalAvg;
+  } else if (tset == 3){
+    ta = textureGrad(uPlateA, tuv, gdx, gdy);
+    tn = textureGrad(uPlateN, tuv, gdx, gdy);
+    tavg = uPlateAvg;
   } else {
     ta = textureGrad(uPanelA, tuv, gdx, gdy);
     tn = textureGrad(uPanelN, tuv, gdx, gdy);
@@ -188,7 +204,7 @@ void main(){
   float gloss;
   float aniso = 1.0;
   float detK;
-  int sk = uMat == 1 ? 2 : (floorish ? 1 : 0);
+  int sk = uMat == 1 ? ((an.y > 0.5 ? uGen.y : uGen.x) > 0.5 ? 3 : 2) : (floorish ? 1 : 0);
   float wet = 0.0;
   if (uMat == 1){
     float streak = n2(vec2(vPos.y * 26.0, (vPos.x + vPos.z) * 1.3));
@@ -200,7 +216,7 @@ void main(){
     vec3 bt = normalize(cross(n, vec3(0.0, 1.0, 0.0)) + vec3(0.0001, 0.0, 0.0));
     vec3 shv = normalize(-uSunDir + v);
     aniso = 0.55 + 1.0 * pow(1.0 - abs(dot(shv, bt)), 3.0);
-    detK = 0.5;
+    detK = (an.y > 0.5 ? uGen.y : uGen.x) > 0.5 ? 0.72 : 0.5;
   } else if (uMat == 2){
     float g = 0.355 + (nC - 0.5) * 0.034;
     albedo = vec3(g, g * 0.99, g * 0.96);
@@ -362,7 +378,8 @@ void main(){
   if (uVoidOn > 0.5){
     float vv = 1.0 - (elev - uVoidBand.x) / (uVoidBand.y - uVoidBand.x);
     if (vv > 0.0 && vv < 1.0){
-      vec4 bd = texture(uVoid, vec2(u * uVoidBand.z, vv));
+      vec4 bd = textureLod(uVoid, vec2(u * uVoidBand.z, vv), 0.0);
+      bd.a *= smoothstep(0.02, 0.30, vv);
       vec3 bl = pow(bd.rgb, vec3(2.2)) * 0.55;
       bl = mix(bl, uFogColor, 0.35 + 0.25 * hazeB);
       col = mix(col, bl, bd.a);
@@ -973,6 +990,26 @@ export function textureFromImage(img, maxSize){
   }
   const n = S * S * 255;
   return { size: S, albedo: albedo, avg: [sr / n, sg / n, sb / n], normal: heightToNormal(S, blur, 3.2 * (S / 512)) };
+}
+
+export function horizonOf(img){
+  try {
+    const w0 = img.naturalWidth || img.width, h0 = img.naturalHeight || img.height;
+    if (!(w0 > 0 && h0 > 0)) return 0.7;
+    const W = 96, H = Math.max(8, Math.min(256, h0));
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return 0.7;
+    ctx.drawImage(img, 0, 0, W, H);
+    const d = ctx.getImageData(0, 0, W, H).data;
+    for (let y = 0; y < H; y++){
+      let a = 0;
+      for (let x = 0; x < W; x++) a += d[(y * W + x) * 4 + 3];
+      if (a / W >= 204) return y / H;
+    }
+  } catch (_) {}
+  return 0.7;
 }
 
 export function loadImage(url){

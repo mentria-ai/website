@@ -93,6 +93,7 @@ try {
   }
 
   function showBanner() {
+    if (document.querySelector('[data-install-quiet]')) return;
     if (ls) {
       var seen = (parseInt(ls.getItem(SEEN_KEY), 10) || 0) + 1;
       if (seen > SEEN_CAP) {

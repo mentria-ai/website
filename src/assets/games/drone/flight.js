@@ -679,7 +679,7 @@ export function buildRacingLine(course, opts = {}) {
 export function createFlightBot(course, opts = {}) {
   const o = Object.assign({
     cruise: 27, latAccel: 19, accel: 12, decel: 15, climbAccel: 9,
-    posGain: 6, velGain: 4.4, attGain: 9, lookTime: 0.06, maxTilt: 82 * DEG,
+    posGain: 9, velGain: 5.5, attGain: 11, lookTime: 0.06, maxTilt: 82 * DEG, rateFeed: 1,
   }, opts);
   const line = buildRacingLine(course, o);
   const n = line.count, ds = line.ds, P = line.pos;
@@ -727,7 +727,8 @@ export function createFlightBot(course, opts = {}) {
   let heading = num(course.start.yaw, 0);
   const out = { throttle: 0, roll: 0, pitch: 0, yaw: 0, mode: 'acro' };
   const F = { x: 0, y: 0, z: 0 }, D = { x: 0, y: 0, z: 0 }, U = { x: 0, y: 1, z: 0 };
-  const qd = { x: 0, y: 0, z: 0, w: 1 }, E = { x: 0, y: 0, z: 0 };
+  const qd = { x: 0, y: 0, z: 0, w: 1 }, qp = { x: 0, y: 0, z: 0, w: 1 }, E = { x: 0, y: 0, z: 0 }, W = { x: 0, y: 0, z: 0 };
+  let hasPrev = false;
   function nearest(pos) {
     let bi = idx, bd = Infinity;
     const hi = Math.min(n - 1, idx + 80);
@@ -739,8 +740,9 @@ export function createFlightBot(course, opts = {}) {
     idx = Math.max(idx, bi);
     return Math.sqrt(bd);
   }
-  function control(s) {
+  function control(s, dt) {
     const p = s.params;
+    const h = dt > 0 ? dt : 1 / 120;
     const err = nearest(s.pos);
     const look = Math.min(n - 1, idx + Math.round((s.speed * o.lookTime) / ds) + 1);
     const i3 = look * 3;
@@ -760,12 +762,15 @@ export function createFlightBot(course, opts = {}) {
     if (fm < 1e-6) { F.x = 0; F.y = 1; F.z = 0; fm = 1e-6; }
     let ux = F.x / fm, uy = F.y / fm, uz = F.z / fm;
     const minY = Math.cos(o.maxTilt);
+    let clamped = false;
     if (uy < minY) {
       const hl = Math.sqrt(ux * ux + uz * uz) || 1;
       const sh = Math.sqrt(1 - minY * minY);
       ux = (ux / hl) * sh; uz = (uz / hl) * sh; uy = minY;
+      clamped = true;
     }
-    const fAlong = F.x * ux + F.y * uy + F.z * uz;
+    let fAlong = F.x * ux + F.y * uy + F.z * uz;
+    if (clamped) fAlong = Math.min(fAlong, Math.max(0, F.y) / uy);
     const vAx = s.vel.x * ux + s.vel.y * uy + s.vel.z * uz;
     const need = Math.max(0, fAlong) / (p.maxThrust * inflowFactor(p, vAx, s.motor));
     const m = thrustCurveInverse(clamp(need, 0, 1), p.curveA);
@@ -780,11 +785,22 @@ export function createFlightBot(course, opts = {}) {
     fx /= fl; fy /= fl; fz /= fl;
     const rx = fy * uz - fz * uy, ry = fz * ux - fx * uz, rz = fx * uy - fy * ux;
     matToQuat(rx, ry, rz, ux, uy, uz, -fx, -fy, -fz, qd);
+    W.x = 0; W.y = 0; W.z = 0;
+    if (hasPrev && o.rateFeed > 0) {
+      rotationError(qp, qd, W);
+      const k = o.rateFeed / h;
+      const wl = Math.sqrt(W.x * W.x + W.y * W.y + W.z * W.z) * k;
+      const cap = 8;
+      const sc = wl > cap ? (k * cap) / wl : k;
+      W.x *= sc; W.y *= sc; W.z *= sc;
+    }
+    qcopy(qp, qd);
+    hasPrev = true;
     rotationError(s.quat, qd, E);
     const lim = maxRate(p.rates.roll) * DEG * 0.95;
-    const wx = clamp(E.x * o.attGain, -lim, lim);
-    const wy = clamp(E.y * o.attGain, -lim, lim);
-    const wz = clamp(E.z * o.attGain, -lim, lim);
+    const wx = clamp(E.x * o.attGain + W.x, -lim, lim);
+    const wy = clamp(E.y * o.attGain + W.y, -lim, lim);
+    const wz = clamp(E.z * o.attGain + W.z, -lim, lim);
     out.pitch = rateToStick(-wx / DEG, p.rates.pitch);
     out.yaw = rateToStick(-wy / DEG, p.rates.yaw);
     out.roll = rateToStick(-wz / DEG, p.rates.roll);
@@ -795,6 +811,7 @@ export function createFlightBot(course, opts = {}) {
   }
   function reset() {
     idx = 0;
+    hasPrev = false;
     heading = num(course.start.yaw, 0);
   }
   return { line, speed, control, reset, get index() { return idx; } };

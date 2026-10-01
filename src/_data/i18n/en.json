@@ -456,6 +456,7 @@
     },
     "qr-scanner": {
       "title": "QR & Barcode Scanner + Generator",
+      "short": "QR Scanner",
       "lede": "Scan QR codes and barcodes, or generate a QR code from any link or text — all on-device, nothing uploaded.",
       "tldr": "Two tools in one, both fully on-device. Scan mode reads QR codes and barcodes from your camera or an uploaded image: it uses the browser's native BarcodeDetector when available (Chromium, with the widest format support) and falls back to a built-in JavaScript decoder elsewhere, so QR scanning works on Safari and Firefox too. Generate mode turns any link or text into a QR code with a built-in encoder. Nothing is uploaded and there is no server round-trip — decoded results can be copied or opened, and generated codes downloaded as PNG, copied, or shared."
     },
@@ -545,6 +546,7 @@
     },
     "unit-converter": {
       "title": "Unit Converter",
+      "short": "Unit Converter",
       "lede": "A unit converter online with no app to install — length, weight, temperature, volume, data, fuel economy and more, converted on your device with nothing uploaded.",
       "tldr": "Type a number on either side and the other side updates as you type, across twelve categories from centimetres and pounds to gibibytes, psi and miles per gallon. Factors follow the exact official definitions (an inch is exactly 25.4 mm, a US gallon exactly 3.785411784 litres), and a line under the fields shows the factor or formula for the pair you picked. Temperature and fuel economy aren't simple multiplications, so they use the proper formulas, including the reciprocal jump from L/100 km to mpg. Everything runs in your browser and works offline; nothing you type is uploaded, and only your last category and units are remembered on this device."
     },
@@ -555,6 +557,7 @@
     },
     "password-generator": {
       "title": "Password Generator",
+      "short": "Password Generator",
       "lede": "A password generator online with no app to install — make strong random passwords or easy-to-type passphrases right on your device, with nothing uploaded or saved.",
       "tldr": "Pick a length and the kinds of characters you want, or switch to passphrase mode for a few random words from EFF's short wordlist. Every character and word is drawn without bias from your browser's cryptographic random number generator, and each password is guaranteed to include every character set you switch on. The entropy readout shows how much guessing your settings demand, so you can see what extra length or one more word buys you. It all runs on your device: only your settings are remembered, and generated passwords are never stored, logged or sent anywhere."
     },
@@ -570,6 +573,7 @@
     },
     "json-formatter": {
       "title": "JSON Formatter & Validator",
+      "short": "JSON Formatter",
       "lede": "A JSON formatter and validator online with no app to install — pretty-print, minify or sort keys, and see the exact line and column where invalid JSON breaks. It runs on your device; nothing is uploaded.",
       "tldr": "Paste JSON, drop a file or open one, and it is checked as you type: invalid input gets the exact line and column plus the offending snippet with a caret under the mistake. Format it with 2 spaces, 4 spaces or tabs, minify it, or sort every object's keys, then copy the result or download it as a .json file. The tree view opens large documents one level at a time and copies the path of any value, like $.items[3].name. Numbers too big or too precise for JavaScript are flagged and kept digit for digit instead of being silently rounded. Everything runs in your browser, so the JSON never leaves your device."
     }

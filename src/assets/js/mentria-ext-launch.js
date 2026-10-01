@@ -48,7 +48,14 @@
         grid.appendChild(a);
       });
       if (grid.children.length) {
-        section.appendChild(label);
+        var head = document.createElement('div');
+        head.className = 'launcher__head';
+        var count = document.createElement('span');
+        count.className = 'launcher__count';
+        count.textContent = String(grid.children.length);
+        head.appendChild(label);
+        head.appendChild(count);
+        section.appendChild(head);
         section.appendChild(grid);
         pages.appendChild(section);
       }

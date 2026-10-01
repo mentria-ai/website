@@ -1,0 +1,203 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/fpv-drone/index.html"
+usesThree: true
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.fpv-drone.title' | t }}"
+  description: "{{ 'tools.fpv-drone.lede' | t }}"
+---
+<style>
+.sk-wrap { margin: 1.25rem 0 2rem; }
+.sk-hero__row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 0.6rem; }
+.sk-helpbtn {
+  font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--term-fg); background: rgba(255, 255, 255, 0.05); cursor: pointer;
+  border: 1px solid var(--term-border-strong); border-radius: var(--radius-pill);
+  padding: 0.45rem 0.95rem; min-height: 40px;
+}
+.sk-helpbtn:hover, .sk-helpbtn:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.sk-stage {
+  position: relative; width: 100%; aspect-ratio: 16 / 9;
+  max-height: 80vh; max-height: 80svh;
+  overflow: hidden; background: #04060a; outline: none;
+  border: 1px solid var(--term-border-strong); border-radius: var(--radius-lg);
+  font-family: var(--font-mono); touch-action: none;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+.sk-stage:fullscreen { aspect-ratio: auto; width: 100vw; height: 100vh; height: 100svh; max-height: none; border: 0; border-radius: 0; }
+.sk-stage:-webkit-full-screen { aspect-ratio: auto; width: 100vw; height: 100vh; max-height: none; border: 0; border-radius: 0; }
+.sk-canvas { display: block; width: 100%; height: 100%; }
+.sk-ov {
+  position: absolute; inset: 0; z-index: 45;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.8rem; padding: 1.5rem; text-align: center;
+  background: radial-gradient(ellipse at 50% 40%, rgba(110, 243, 197, 0.08), transparent 60%), #04060a;
+  font-family: var(--font-mono); color: var(--term-fg);
+}
+.sk-ov[hidden] { display: none; }
+.sk-ov p { margin: 0; }
+.sk-ov__logo { width: min(340px, 62%); height: auto; filter: drop-shadow(0 0 22px rgba(110, 243, 197, 0.25)); }
+.sk-ov__status { color: var(--term-muted); font-size: var(--text-xs); letter-spacing: 0.16em; text-transform: uppercase; }
+.sk-ov__bar { width: min(260px, 60%); height: 3px; border-radius: 3px; background: rgba(110, 243, 197, 0.14); overflow: hidden; }
+.sk-ov__bar i { display: block; width: 40%; height: 100%; background: var(--accent); animation: sk-boot 1.2s ease-in-out infinite; }
+@keyframes sk-boot { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+.sk-ov__title { margin: 0; font-size: clamp(1.2rem, 3.6vw, 1.8rem); letter-spacing: 0.14em; color: var(--syn-amber); text-transform: uppercase; }
+.sk-ov__hint { color: var(--term-muted); font-size: var(--text-xs); max-width: 56ch; line-height: 1.7; }
+.sk-ov__code { display: block; max-width: 60ch; color: var(--syn-pink); font-size: var(--text-2xs); word-break: break-word; }
+.sk-help { max-width: min(420px, calc(100vw - 1.5rem)); }
+.sk-help__block { margin: 0 0 0.9rem; }
+.sk-help__block[hidden] { display: none; }
+.sk-help__head { margin: 0 0 0.45rem; color: var(--term-muted); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; }
+.sk-help__text { margin: 0 0 0.35rem; color: var(--term-fg); font-size: 0.8rem; line-height: 1.5; }
+.sk-help__note { margin: 0.4rem 0 0; color: var(--term-muted); font-size: 0.74rem; line-height: 1.55; }
+@media (prefers-reduced-motion: reduce) { .sk-ov__bar i { animation: none; width: 100%; } }
+@media (max-width: 720px) and (orientation: portrait) {
+  .sk-stage { aspect-ratio: auto; height: 70vh; height: 70svh; max-height: none; }
+}
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  .sk-stage {
+    position: fixed; inset: 0; z-index: 9000;
+    width: 100vw; height: 100vh; height: 100svh; max-height: none;
+    aspect-ratio: auto; border: 0; border-radius: 0;
+  }
+}
+</style>
+
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">fpv-drone</span></p>
+  <h1>{{ "tools.fpv-drone.title" | t }}</h1>
+  <p>{{ "tools.fpv-drone.lede" | t }}</p>
+  {% include "tldr.njk" %}
+  <div class="sk-hero__row">
+    <button type="button" class="sk-helpbtn" popovertarget="sk-help">{{ "tool.fpv-drone.help.title" | t }}</button>
+  </div>
+</section>
+
+<div id="sk-help" popover class="game-help sk-help">
+  <p class="game-help-title">{{ "tool.fpv-drone.help.title" | t }}</p>
+  <div class="sk-help__block" data-input="touch">
+    <p class="sk-help__head">{{ "tool.fpv-drone.help.touch" | t }}</p>
+    <p class="sk-help__text">{{ "tool.fpv-drone.help.touchLeft" | t }}</p>
+    <p class="sk-help__text">{{ "tool.fpv-drone.help.touchRight" | t }}</p>
+    <p class="sk-help__text">{{ "tool.fpv-drone.help.touchButtons" | t }}</p>
+  </div>
+  <div class="sk-help__block" data-input="keyboard pointer">
+    <p class="sk-help__head">{{ "tool.fpv-drone.help.keyboard" | t }}</p>
+    <ul class="game-help-list">
+      <li><span><span class="kbd">W</span><span class="kbd">S</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.throttle" | t }}</span></li>
+      <li><span><span class="kbd">A</span><span class="kbd">D</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.yaw" | t }}</span></li>
+      <li><span><span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd">←</span><span class="kbd">→</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.tilt" | t }}</span></li>
+      <li><span><span class="kbd">C</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.camera" | t }}</span></li>
+      <li><span><span class="kbd">M</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.mode" | t }}</span></li>
+      <li><span><span class="kbd">R</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.restart" | t }}</span></li>
+      <li><span><span class="kbd">Esc</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.pause" | t }}</span></li>
+    </ul>
+  </div>
+  <div class="sk-help__block" data-input="gamepad">
+    <p class="sk-help__head">{{ "tool.fpv-drone.help.gamepad" | t }}</p>
+    <ul class="game-help-list">
+      <li><span><span class="kbd">L</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.padLeft" | t }}</span></li>
+      <li><span><span class="kbd">R</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.padRight" | t }}</span></li>
+      <li><span><span class="kbd">Y</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.camera" | t }}</span></li>
+      <li><span><span class="kbd">RB</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.mode" | t }}</span></li>
+      <li><span><span class="kbd">Back</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.restart" | t }}</span></li>
+      <li><span><span class="kbd">Start</span></span><span class="game-help-label">{{ "tool.fpv-drone.help.pause" | t }}</span></li>
+    </ul>
+  </div>
+  <p class="sk-help__note">{{ "tool.fpv-drone.help.note" | t }}</p>
+</div>
+
+<div class="sk-wrap">
+  <div class="sk-stage" id="sk-stage" tabindex="-1">
+    <canvas class="sk-canvas" id="sk-canvas"></canvas>
+    <div class="sk-ov" id="sk-boot">
+      <img class="sk-ov__logo" src="/assets/games/sprites/logo-skyrush.webp" alt="{{ 'tools.fpv-drone.title' | t }}" width="640" height="200">
+      <div class="sk-ov__bar" aria-hidden="true"><i></i></div>
+      <p class="sk-ov__status">{{ "tool.fpv-drone.boot" | t }}</p>
+    </div>
+    <div class="sk-ov" id="sk-fail" hidden>
+      <p class="sk-ov__title">{{ "tool.fpv-drone.fail.title" | t }}</p>
+      <p class="sk-ov__hint">{{ "tool.fpv-drone.fail.body" | t }}</p>
+      <code class="sk-ov__code" id="sk-fail-detail"></code>
+    </div>
+  </div>
+</div>
+
+{%- set skKeys = [
+  "tool.fpv-drone.boot", "tool.fpv-drone.contextLost",
+  "tool.fpv-drone.menu.kicker", "tool.fpv-drone.menu.tagline", "tool.fpv-drone.menu.race", "tool.fpv-drone.menu.raceHint",
+  "tool.fpv-drone.menu.freestyle", "tool.fpv-drone.menu.freestyleHint", "tool.fpv-drone.menu.settings", "tool.fpv-drone.menu.help",
+  "tool.fpv-drone.select.kicker", "tool.fpv-drone.select.title",
+  "tool.fpv-drone.load.kicker", "tool.fpv-drone.load.building", "tool.fpv-drone.load.shaders",
+  "tool.fpv-drone.tip.angle", "tool.fpv-drone.tip.acro", "tool.fpv-drone.tip.chase", "tool.fpv-drone.tip.ghost", "tool.fpv-drone.tip.uptilt",
+  "tool.fpv-drone.hud.time", "tool.fpv-drone.hud.gate", "tool.fpv-drone.hud.rings", "tool.fpv-drone.hud.speed", "tool.fpv-drone.hud.alt",
+  "tool.fpv-drone.hud.kmh", "tool.fpv-drone.hud.meters", "tool.fpv-drone.hud.throttle", "tool.fpv-drone.hud.seconds", "tool.fpv-drone.hud.assist",
+  "tool.fpv-drone.hud.penaltyNote", "tool.fpv-drone.hud.finish", "tool.fpv-drone.hud.allRings",
+  "tool.fpv-drone.view.fpv", "tool.fpv-drone.view.chase",
+  "tool.fpv-drone.coach.throttleKeys", "tool.fpv-drone.coach.throttleStick", "tool.fpv-drone.coach.steerKeys", "tool.fpv-drone.coach.steerStick",
+  "tool.fpv-drone.coach.gate", "tool.fpv-drone.coach.done",
+  "tool.fpv-drone.results.title", "tool.fpv-drone.results.retry", "tool.fpv-drone.results.next", "tool.fpv-drone.results.courses",
+  "tool.fpv-drone.results.penalty", "tool.fpv-drone.results.crashes",
+  "tool.fpv-drone.pause.title", "tool.fpv-drone.pause.resume", "tool.fpv-drone.pause.restart", "tool.fpv-drone.pause.settings",
+  "tool.fpv-drone.pause.help", "tool.fpv-drone.pause.quit",
+  "tool.fpv-drone.settings.kicker", "tool.fpv-drone.settings.title", "tool.fpv-drone.settings.flight", "tool.fpv-drone.settings.camera",
+  "tool.fpv-drone.settings.controls", "tool.fpv-drone.settings.graphics", "tool.fpv-drone.settings.sound",
+  "tool.fpv-drone.settings.assist", "tool.fpv-drone.settings.assistNote", "tool.fpv-drone.settings.mode", "tool.fpv-drone.settings.rates",
+  "tool.fpv-drone.settings.ratesBeginner", "tool.fpv-drone.settings.ratesPro", "tool.fpv-drone.settings.auto",
+  "tool.fpv-drone.settings.view", "tool.fpv-drone.settings.fov", "tool.fpv-drone.settings.stickMode", "tool.fpv-drone.settings.stickModeNote",
+  "tool.fpv-drone.settings.mode2", "tool.fpv-drone.settings.mode1", "tool.fpv-drone.settings.invertPitch", "tool.fpv-drone.settings.stickSize",
+  "tool.fpv-drone.settings.quality", "tool.fpv-drone.settings.low", "tool.fpv-drone.settings.medium", "tool.fpv-drone.settings.high",
+  "tool.fpv-drone.settings.volume", "tool.fpv-drone.settings.ghost", "tool.fpv-drone.settings.ghostNote",
+  "tool.fpv-drone.course.meadow", "tool.fpv-drone.course.yard", "tool.fpv-drone.course.canyon", "tool.fpv-drone.course.freestyle",
+  "tool.fpv-drone.courseInfo.meadow", "tool.fpv-drone.courseInfo.yard", "tool.fpv-drone.courseInfo.canyon", "tool.fpv-drone.courseInfo.freestyle",
+  "tool.fpv-drone.mode.acro", "tool.fpv-drone.mode.angle", "tool.fpv-drone.modeInfo.acro", "tool.fpv-drone.modeInfo.angle", "tool.fpv-drone.cameraTilt",
+  "tool.fpv-drone.crash.impact", "tool.fpv-drone.crash.flipped",
+  "games.kit.ui_back", "games.kit.ui_select", "games.kit.ui_move", "games.kit.ui_confirm", "games.kit.ui_cancel", "games.kit.ui_go",
+  "games.kit.ui_loading", "games.kit.ui_best", "games.kit.ui_locked", "games.kit.ui_new_best", "games.kit.ui_on", "games.kit.ui_off",
+  "games.kit.ui_pause", "games.kit.ui_fullscreen", "games.kit.ui_exit_fullscreen", "games.kit.ui_position", "games.kit.ui_time",
+  "games.kit.ui_rotate", "games.kit.ui_rotate_dismiss",
+  "games.kit.medal_gold", "games.kit.medal_silver", "games.kit.medal_bronze", "games.kit.medal_none",
+  "games.kit.input_gas", "games.kit.input_brake", "games.kit.input_drift", "games.kit.input_nitro", "games.kit.input_camera",
+  "games.kit.input_mode", "games.kit.input_reset", "games.kit.input_look_back", "games.kit.input_steer_left",
+  "games.kit.input_steer_right", "games.kit.input_wheel", "games.kit.input_steer", "games.kit.input_throttle_yaw",
+  "games.kit.input_pitch_roll", "games.kit.tilt_enable", "games.kit.tilt_unavailable", "games.kit.tilt_centered"
+] %}
+<script>
+  window.SKYRUSH_COPY = {
+    {%- for k in skKeys %}
+    {{ k | dump | safe }}: {{ (k | t) | dump | safe }}{% if not loop.last %},{% endif %}
+    {%- endfor %}
+  };
+</script>
+<script type="module" id="sk-mod" src="/assets/games/drone/game.js?v={{ buildHash }}"></script>
+<script>
+  (function () {
+    var s = document.getElementById('sk-mod');
+    if (!s) return;
+    s.addEventListener('error', function () {
+      var boot = document.getElementById('sk-boot');
+      var panel = document.getElementById('sk-fail');
+      var detail = document.getElementById('sk-fail-detail');
+      if (detail) detail.textContent = 'game.js failed to load';
+      if (boot) boot.hidden = true;
+      if (panel) panel.hidden = false;
+      try { console.error('[skyrush] module script failed to load'); } catch (e) {}
+    });
+    window.addEventListener('error', function (e) {
+      var boot = document.getElementById('sk-boot');
+      if (!boot || boot.hidden) return;
+      var src = e && e.filename ? String(e.filename) : '';
+      if (src.indexOf('/assets/games/') === -1) return;
+      var panel = document.getElementById('sk-fail');
+      var detail = document.getElementById('sk-fail-detail');
+      if (detail) detail.textContent = String(e.message || 'error');
+      boot.hidden = true;
+      if (panel) panel.hidden = false;
+    });
+  })();
+</script>

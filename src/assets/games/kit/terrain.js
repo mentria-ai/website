@@ -88,6 +88,8 @@ uniform vec4 kwSplat;
 uniform vec4 kwMacro;
 uniform vec3 kwMacroTint;
 uniform vec4 kwLayerSat;
+uniform vec4 kwCloudShadow;
+uniform vec3 kwCloudWind;
 varying vec3 vKwWorld;
 varying vec3 vKwNormal;
 varying float vKwSunVis;
@@ -284,6 +286,8 @@ export function createTerrain(opts = {}) {
     kwMacro: { value: new THREE.Vector4(opts.macro ?? biome.macro, 0.12, opts.bump ?? 0.5, 0) },
     kwMacroTint: { value: new THREE.Vector3().fromArray(opts.macroTint ?? biome.macroTint) },
     kwLayerSat: { value: new THREE.Vector4(1, 1, 1, 1) },
+    kwCloudShadow: { value: new THREE.Vector4(clamp(opts.cloudShadows ?? 0, 0, 1) * 0.55, 1 / (opts.cloudShadowScale ?? 260), 0.62 - clamp(opts.cloudShadows ?? 0, 0, 1) * 0.25, 0) },
+    kwCloudWind: { value: new THREE.Vector3(0.6, 0.25, 0) },
   };
   const tintUniform = { grass: uniforms.kwGrassTint, dirt: uniforms.kwDirtTint, rock: uniforms.kwRockTint, sand: uniforms.kwSandTint };
   const satIndex = { grass: 'x', dirt: 'y', rock: 'z', sand: 'w' };
@@ -311,7 +315,16 @@ export function createTerrain(opts = {}) {
       .replace('#include <map_fragment>', TERRAIN_SPLAT_MAIN)
       .replace('#include <roughnessmap_fragment>', 'float roughnessFactor = kwRough;')
       .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = kwPerturbNormal(-vViewPosition, normal, vec2(dFdx(kwBumpLum), dFdy(kwBumpLum)));')
-      .replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\nreflectedLight.directDiffuse *= vKwSunVis;\nreflectedLight.directSpecular *= vKwSunVis;');
+      .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
+  float kwShade = vKwSunVis;
+  if (kwCloudShadow.x > 0.0) {
+    vec2 kwCp = vKwWorld.xz * kwCloudShadow.y + kwCloudWind.xy * kwCloudWind.z;
+    float kwCn = kwValueNoise(kwCp) * 0.55 + kwValueNoise(kwCp * 2.13 + 5.7) * 0.3 + kwValueNoise(kwCp * 4.7 + 1.3) * 0.15;
+    float kwCover = smoothstep(kwCloudShadow.z, kwCloudShadow.z + 0.16, kwCn);
+    kwShade *= 1.0 - kwCover * kwCloudShadow.x;
+  }
+  reflectedLight.directDiffuse *= kwShade;
+  reflectedLight.directSpecular *= kwShade;`);
   };
   material.customProgramCacheKey = () => 'kw-terrain-' + (quality.noTile ? 'nt' : 't') + (quality.farBlend ? 'f' : 'n');
 
@@ -496,11 +509,18 @@ export function createTerrain(opts = {}) {
   let time = 0;
   function update(camera, dt = 1 / 60) {
     time += dt;
+    uniforms.kwCloudWind.value.z = time * (opts.cloudShadowSpeed ?? 0.012);
     if (water) water.userData.uniforms.kwTime.value = time;
     if (camera && water) {
       water.position.x = Math.round(camera.position.x / 50) * 50;
       water.position.z = Math.round(camera.position.z / 50) * 50;
     }
+  }
+
+  function setCloudShadows(amount) {
+    const a = clamp(amount || 0, 0, 1);
+    uniforms.kwCloudShadow.value.x = a * 0.55;
+    uniforms.kwCloudShadow.value.z = 0.62 - a * 0.25;
   }
 
   function dispose() {
@@ -519,6 +539,7 @@ export function createTerrain(opts = {}) {
     heightAt,
     normalAt,
     update,
+    setCloudShadows,
     size,
     segments,
     cell,

@@ -1183,6 +1183,8 @@ export function createEnvironment(scene, renderer, opts = {}) {
   return {
     preset: presetName,
     isNight,
+    cloudCoverage: su.cloudCoverage.value,
+    cloudShadows: isNight ? 0 : clamp(su.cloudCoverage.value * 2.2, 0, 1) * (sunDir.y > 0.08 ? 1 : 0.4),
     group,
     sky,
     sun,

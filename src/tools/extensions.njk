@@ -83,6 +83,7 @@ const CATALOG = [
 ];
 const CATALOG_URL = 'https://mentria-ai.github.io/extensions/catalog.json';
 const HIDDEN = [{% for e in extensionCatalog %}{% if e.held or e.retired %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
+const HELD = [{% for e in extensionCatalog %}{% if e.held %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
 let remoteCatalog = null;
 async function loadRemoteCatalog() {
   try {
@@ -403,12 +404,13 @@ refreshGallery = () => {
 };
 
 remoteCatalog = await loadRemoteCatalog();
+const wanted = new URLSearchParams(location.search).get('add');
+if (wanted && HELD.indexOf(wanted) !== -1 && !CATALOG.some((k) => k.id === wanted)) CATALOG.push({ id: wanted, desc: '' });
 CATALOG.forEach((entry) => {
   const card = galMakeCard(entry);
   galCards.push({ entry, card, loaded: galLoad(entry, card) });
 });
 
-const wanted = new URLSearchParams(location.search).get('add');
 if (wanted) {
   history.replaceState(history.state, '', location.pathname + location.hash);
   const hit = galCards.find((g) => g.entry.id === wanted);

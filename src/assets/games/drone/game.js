@@ -1202,7 +1202,7 @@ function onRender(alpha, dt) {
   if (inRun() || run.phase === 'results') updateHud(frameDt);
   updateAudio();
   if (postFx && typeof postFx.setSpeedFx === 'function') {
-    const sp = inRun() && !paused ? clamp((drone.speed - 16) / 26, 0, 1) * 0.85 : 0;
+    const sp = inRun() && !paused ? clamp((drone.speed - 10) / 22, 0, 1) * 0.9 : 0;
     postFx.setSpeedFx(sp);
   }
 }
@@ -1537,6 +1537,10 @@ function exposeTestHook() {
         fps: engine.stats.fps,
         frameMs: engine.stats.frameMs,
         cpuMs: engine.stats.cpuMs,
+        gpuGeometries: engine.stats.geometries,
+        gpuTextures: engine.stats.textures,
+        programs: engine.stats.programs,
+        sceneChildren: scene.children.length,
         stepMs: engine.stats.stepMs,
         renderMs: engine.stats.renderMs,
         dpr: engine.stats.dpr,

@@ -165,6 +165,31 @@
           ".mov"
         ]
       }
+    },
+    {
+      "action": "/tools/music-player/",
+      "accept": {
+        "audio/mpeg": [
+          ".mp3"
+        ],
+        "audio/mp4": [
+          ".m4a"
+        ],
+        "audio/aac": [
+          ".aac"
+        ],
+        "audio/flac": [
+          ".flac"
+        ],
+        "audio/ogg": [
+          ".ogg",
+          ".oga",
+          ".opus"
+        ],
+        "audio/wav": [
+          ".wav"
+        ]
+      }
     }
   ],
   "screenshots": [

@@ -446,6 +446,7 @@
     },
     "qr-scanner": {
       "title": "Scanner e gerador de QR e códigos de barras",
+      "short": "Scanner QR",
       "lede": "Escaneie códigos QR e de barras, ou gere um código QR a partir de qualquer link ou texto — tudo no dispositivo, sem enviar nada.",
       "tldr": "Duas ferramentas em uma, ambas totalmente no dispositivo. O modo scanner lê códigos QR e de barras pela câmera ou por uma imagem: usa a API nativa BarcodeDetector quando disponível (Chromium, com o maior suporte a formatos) e recorre a um decodificador JavaScript embutido nos demais, então a leitura de QR também funciona no Safari e no Firefox. O modo gerar transforma qualquer link ou texto em um código QR com um codificador embutido. Nada é enviado e não há ida e volta ao servidor: os resultados lidos podem ser copiados ou abertos, e os códigos gerados baixados como PNG, copiados ou compartilhados."
     },
@@ -545,6 +546,7 @@
     },
     "unit-converter": {
       "title": "Conversor de unidades",
+      "short": "Conversor de unidades",
       "lede": "Um conversor de unidades online, sem instalar aplicativo: comprimento, peso, temperatura, volume, dados, consumo de combustível e mais, calculado no seu aparelho sem enviar nada.",
       "tldr": "Digite um número em qualquer um dos lados e o outro se atualiza enquanto você digita, em doze categorias que vão de centímetros e libras a gibibytes, psi e milhas por galão. Os fatores seguem as definições oficiais exatas (uma polegada tem exatamente 25,4 mm e um galão americano, exatamente 3,785411784 litros), e uma linha abaixo dos campos mostra o fator ou a fórmula do par escolhido. Temperatura e consumo de combustível não são simples multiplicações, então usam as fórmulas certas, incluindo a relação inversa entre L/100 km e mpg. Tudo roda no seu navegador e funciona offline: nada do que você digita é enviado, e só a última categoria e as unidades ficam salvas neste aparelho."
     },
@@ -555,6 +557,7 @@
     },
     "password-generator": {
       "title": "Gerador de senhas",
+      "short": "Gerador de senhas",
       "lede": "Um gerador de senhas online sem app para instalar: crie senhas aleatórias fortes ou frases secretas fáceis de digitar direto no seu dispositivo, sem enviar nem salvar nada.",
       "tldr": "Escolha o tamanho e os tipos de caractere que quiser, ou mude para o modo frase secreta e receba algumas palavras sorteadas da lista curta da EFF. Cada caractere e cada palavra são sorteados sem viés pelo gerador criptográfico de números aleatórios do seu navegador, e toda senha tem a garantia de trazer pelo menos um caractere de cada conjunto que você ativar. O indicador de entropia mostra quanto esforço de adivinhação as suas configurações exigem, para você ver o que ganha com mais caracteres ou uma palavra a mais. Tudo roda no seu dispositivo: só as configurações ficam guardadas, e as senhas geradas nunca são salvas, registradas nem enviadas para lugar nenhum."
     },
@@ -570,6 +573,7 @@
     },
     "json-formatter": {
       "title": "Formatador e validador de JSON",
+      "short": "Formatador JSON",
       "lede": "Um formatador e validador de JSON online sem instalar nada: formate, minifique ou ordene as chaves e veja a linha e a coluna exatas onde um JSON inválido quebra. Tudo roda no seu dispositivo; nada é enviado.",
       "tldr": "Cole JSON, solte um arquivo ou abra um, e ele é validado enquanto você digita: quando algo está errado, você vê a linha e a coluna exatas e o trecho com problema, com um ^ embaixo do erro. Formate com 2 espaços, 4 espaços ou tabulações, minifique ou ordene as chaves de cada objeto e depois copie o resultado ou baixe como arquivo .json. A visualização em árvore abre documentos grandes um nível por vez e copia o caminho de qualquer valor, como $.items[3].name. Números grandes ou precisos demais para o JavaScript são sinalizados e mantidos dígito por dígito, em vez de arredondados sem aviso. Tudo roda no seu navegador, então o JSON nunca sai do seu dispositivo."
     }

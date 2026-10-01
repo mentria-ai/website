@@ -1,10 +1,14 @@
 (function () {
   'use strict';
+  var launcher = document.querySelector('.launcher');
+  var pages = document.querySelector('.launcher__pages');
   var pinnedBand = document.getElementById('launcher-pinned');
   var pinnedRow = document.getElementById('launcher-pinned-row');
   var band = document.getElementById('launcher-recents');
   var row = document.getElementById('launcher-recents-row');
-  if (!band || !row) return;
+  var find = document.getElementById('tools-find');
+  var none = document.getElementById('launcher-nomatch');
+  if (!launcher || !pages) return;
 
   function getPins() {
     var v = window.MentriaStore ? window.MentriaStore.get('ui', 'pinned_tools') : null;
@@ -21,7 +25,7 @@
 
   function pinLabel(tile, pinned) {
     var tpl = pinnedBand ? pinnedBand.getAttribute(pinned ? 'data-label-unpin' : 'data-label-pin') : '';
-    return (tpl || (pinned ? 'Unpin {name}' : 'Pin {name}')).replace('{name}', tileName(tile));
+    return (tpl || (pinned ? 'Unpin {name}' : 'Pin {name}')).replace('{name}', tile.getAttribute('data-name') || tileName(tile));
   }
 
   function renderPinned() {
@@ -30,20 +34,20 @@
     pinnedRow.innerHTML = '';
     var added = 0;
     pins.forEach(function (slug) {
-      var tile = document.querySelector('.launcher__pages .launch-tile[data-slug="' + slug + '"]');
+      var tile = pages.querySelector('.launch-tile[data-slug="' + slug + '"]');
       if (tile) {
         pinnedRow.appendChild(tile.cloneNode(true));
         added++;
       }
     });
     pinnedBand.hidden = !added;
-    document.querySelectorAll('.launcher__pages .launch-pin').forEach(function (btn) {
+    pages.querySelectorAll('.launch-pin').forEach(function (btn) {
       var tile = btn.previousElementSibling;
       var on = pins.indexOf(btn.getAttribute('data-slug')) !== -1;
       btn.classList.toggle('is-pinned', on);
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
       btn.setAttribute('aria-label', pinLabel(tile, on));
-      btn.textContent = on ? '\u2605' : '\u2606';
+      btn.textContent = on ? '★' : '☆';
     });
   }
 
@@ -56,7 +60,7 @@
   }
 
   if (pinnedBand && window.MentriaStore) {
-    document.querySelectorAll('.launcher__pages .launch-tile').forEach(function (tile) {
+    pages.querySelectorAll('.launch-tile').forEach(function (tile) {
       var slot = document.createElement('div');
       slot.className = 'launch-slot';
       tile.parentNode.insertBefore(slot, tile);
@@ -74,21 +78,80 @@
     renderPinned();
   }
 
-  var usage = {};
-  try { usage = JSON.parse(localStorage.getItem('mentria_tool_usage')) || {}; } catch (_) {}
-  var pinsNow = getPins();
-  var slugs = Object.keys(usage).filter(function (s) { return pinsNow.indexOf(s) === -1; });
-  if (!slugs.length) return;
-  var now = Date.now(), DAY = 86400000;
-  function score(e) { return (e.count || 0) + 6 / (1 + (now - (e.last || 0)) / DAY); }
-  slugs.sort(function (a, b) { return score(usage[b]) - score(usage[a]); });
-  var added = 0;
-  slugs.slice(0, 6).forEach(function (slug) {
-    var tile = document.querySelector('.launcher__pages .launch-tile[data-slug="' + slug + '"]');
-    if (tile) {
-      row.appendChild(tile.cloneNode(true));
-      added++;
+  function renderRecents() {
+    if (!band || !row) return;
+    var usage = {};
+    try { usage = JSON.parse(localStorage.getItem('mentria_tool_usage')) || {}; } catch (_) {}
+    var pinsNow = getPins();
+    var slugs = Object.keys(usage).filter(function (s) { return pinsNow.indexOf(s) === -1; });
+    if (!slugs.length) return;
+    var now = Date.now(), DAY = 86400000;
+    function score(e) { return (e.count || 0) + 6 / (1 + (now - (e.last || 0)) / DAY); }
+    slugs.sort(function (a, b) { return score(usage[b]) - score(usage[a]); });
+    var added = 0;
+    slugs.slice(0, 6).forEach(function (slug) {
+      var tile = pages.querySelector('.launch-tile[data-slug="' + slug + '"]');
+      if (tile) {
+        row.appendChild(tile.cloneNode(true));
+        added++;
+      }
+    });
+    if (added) band.hidden = false;
+  }
+  renderRecents();
+
+  function norm(v) {
+    return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  }
+  var firstHit = null;
+  function filter() {
+    var raw = find ? find.value.trim() : '';
+    var q = norm(raw);
+    launcher.classList.toggle('is-searching', !!q);
+    var hits = 0;
+    firstHit = null;
+    pages.querySelectorAll('.launcher__cat').forEach(function (cat) {
+      var shown = 0;
+      cat.querySelectorAll('.launch-tile').forEach(function (tile) {
+        var text = tileName(tile) + ' ' + (tile.getAttribute('data-name') || '') + ' ' + (tile.getAttribute('data-search') || '');
+        var ok = !q || norm(text).indexOf(q) !== -1;
+        var box = tile.parentNode && tile.parentNode.classList.contains('launch-slot') ? tile.parentNode : tile;
+        box.hidden = !ok;
+        if (ok) {
+          shown++;
+          if (!firstHit) firstHit = tile;
+        }
+      });
+      cat.hidden = shown === 0;
+      var count = cat.querySelector('.launcher__count');
+      if (count) count.textContent = String(shown);
+      hits += shown;
+    });
+    if (none) {
+      none.hidden = !q || hits > 0;
+      var I = window.MentriaI18n;
+      var tpl = (I && typeof I.t === 'function' && I.t('tools_page.no_match')) || none.getAttribute('data-label') || '';
+      none.textContent = none.hidden ? '' : tpl.split('{q}').join(raw);
     }
-  });
-  if (added) band.hidden = false;
+    if (!q) firstHit = null;
+  }
+
+  if (find) {
+    find.addEventListener('input', filter);
+    find.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && firstHit) {
+        e.preventDefault();
+        firstHit.click();
+      } else if (e.key === 'Escape' && find.value) {
+        e.preventDefault();
+        e.stopPropagation();
+        find.value = '';
+        filter();
+      }
+    });
+  }
+  if (window.MutationObserver) {
+    new MutationObserver(function () { if (find && find.value.trim()) filter(); }).observe(pages, { childList: true });
+  }
+  filter();
 })();

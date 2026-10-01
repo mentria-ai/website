@@ -446,6 +446,7 @@
     },
     "qr-scanner": {
       "title": "Escáner y generador de QR y códigos de barras",
+      "short": "Escáner QR",
       "lede": "Escanea códigos QR y de barras, o genera un código QR a partir de cualquier enlace o texto, todo en el dispositivo y sin subir nada.",
       "tldr": "Dos herramientas en una, ambas totalmente en el dispositivo. El modo escáner lee códigos QR y de barras desde la cámara o una imagen: usa la API nativa BarcodeDetector cuando está disponible (Chromium, con la mayor compatibilidad de formatos) y recurre a un decodificador JavaScript integrado en el resto, así que escanear QR también funciona en Safari y Firefox. El modo generar convierte cualquier enlace o texto en un código QR con un codificador integrado. No se sube nada y no hay ida y vuelta al servidor: los resultados leídos se pueden copiar o abrir, y los códigos generados descargar como PNG, copiar o compartir."
     },
@@ -545,6 +546,7 @@
     },
     "unit-converter": {
       "title": "Conversor de unidades",
+      "short": "Conversor de unidades",
       "lede": "Un conversor de unidades online sin instalar ninguna app: longitud, peso, temperatura, volumen, datos, consumo de combustible y más, calculado en tu dispositivo sin subir nada.",
       "tldr": "Escribe un número en cualquiera de los dos lados y el otro se actualiza mientras escribes, en doce categorías que van de centímetros y libras a gibibytes, psi y millas por galón. Los factores siguen las definiciones oficiales exactas (una pulgada son exactamente 25,4 mm y un galón estadounidense, exactamente 3,785411784 litros), y bajo los campos una línea muestra el factor o la fórmula del par elegido. La temperatura y el consumo de combustible no son simples multiplicaciones, así que usan las fórmulas correctas, incluido el salto recíproco de L/100 km a mpg. Todo funciona en tu navegador y sin conexión: nada de lo que escribes se sube a ningún sitio y en este dispositivo solo se recuerdan la última categoría y las unidades."
     },
@@ -555,6 +557,7 @@
     },
     "password-generator": {
       "title": "Generador de contraseñas",
+      "short": "Generador de contraseñas",
       "lede": "Un generador de contraseñas online sin app que instalar: crea contraseñas aleatorias robustas o frases de contraseña fáciles de teclear en tu propio dispositivo, sin subir ni guardar nada.",
       "tldr": "Elige la longitud y los tipos de caracteres que quieras, o cambia al modo frase de contraseña para obtener unas cuantas palabras al azar de la lista corta de la EFF. Cada carácter y cada palabra se eligen sin sesgo con el generador criptográfico de números aleatorios de tu navegador, y cada contraseña incluye siempre al menos un carácter de cada conjunto que actives. El indicador de entropía muestra cuánto trabajo de adivinación exigen tus ajustes, para que veas qué ganas con un poco más de longitud o con una palabra extra. Todo funciona en tu dispositivo: solo se recuerdan tus ajustes, y las contraseñas generadas nunca se guardan, se registran ni se envían a ninguna parte."
     },
@@ -570,6 +573,7 @@
     },
     "json-formatter": {
       "title": "Formateador y validador de JSON",
+      "short": "Formateador JSON",
       "lede": "Un formateador y validador de JSON online sin instalar nada: embellece, minifica u ordena las claves, y ve la línea y la columna exactas donde falla un JSON no válido. Funciona en tu dispositivo; no se sube nada.",
       "tldr": "Pega JSON, suelta un archivo o ábrelo, y se valida mientras escribes: si algo falla, verás la línea y la columna exactas junto al fragmento problemático, con un ^ bajo el error. Formatéalo con 2 espacios, 4 espacios o tabulaciones, minifícalo u ordena las claves de cada objeto, y luego copia el resultado o descárgalo como archivo .json. La vista de árbol abre los documentos grandes nivel a nivel y copia la ruta de cualquier valor, como $.items[3].name. Los números demasiado grandes o precisos para JavaScript se señalan y se conservan cifra a cifra en lugar de redondearse en silencio. Todo ocurre en tu navegador, así que el JSON nunca sale de tu dispositivo."
     }

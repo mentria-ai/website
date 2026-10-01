@@ -192,11 +192,12 @@ self.addEventListener('message', event => {
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
+    const updating = keys.some(k => k.startsWith('mentria-cache-') && k !== CACHE_NAME);
     const hadOldModels = keys.some(k => k.startsWith('mentria-models-') && k !== MODELS_MARKER);
     await Promise.all(keys.map(key => {
       if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER || key === DECKS_CACHE || key === ART_CACHE || key === SHARE_CACHE) return;
       if (key.startsWith('mentria-cache-') || key.startsWith('mentria-models-') || key.startsWith('mentria-decks-')) return caches.delete(key);
-      if (key.startsWith('mentria-locale-') && !key.endsWith('-{{ buildHash }}')) return caches.delete(key);
+      if (key.startsWith('mentria-locale-') && updating) return caches.delete(key);
     }));
     if (!keys.includes(MODELS_MARKER)) {
       if (hadOldModels) {

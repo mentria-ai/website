@@ -9,8 +9,8 @@ const CREASE_SEG = new Set([1, 2, 3, 5, 6]);
 
 const PART = {
   paint: 0, glass: 1, trim: 2, matte: 3, carbon: 4, chrome: 5, lamp: 6, drl: 7,
-  tail: 8, brake: 9, grille: 10, accent: 11, rubber: 12, rim: 13, disc: 14, caliper: 15,
-  nozzle: 16, barrel: 17, lip: 18, sidewall: 19, mirror: 20, lens: 21, hub: 22, under: 23, stripe: 24
+  tail: 8, brake: 9, grille: 10, rubber: 11, rim: 12, disc: 13, caliper: 14, nozzle: 15,
+  barrel: 16, lip: 17, sidewall: 18, mirror: 19, hub: 20, under: 21, stripe: 22
 };
 
 const BASE = {
@@ -21,10 +21,9 @@ const BASE = {
   chrome: [0xd8d9dc, 0.12, 1, 0],
   lamp: [0xc4ccd5, 0.07, 0.95, 1],
   drl: [0xe2e8ef, 0.16, 0.4, 1],
-  tail: [0x6a0a10, 0.12, 0.2, 1],
+  tail: [0x8c0c14, 0.12, 0.2, 1],
   brake: [0x4a060b, 0.12, 0.2, 1],
   grille: [0x0b0c0d, 0.6, 0.3, 0],
-  accent: [0xd12a1f, 0.35, 0.2, 1],
   rubber: [0x171717, 0.9, 0, 0],
   rim: [0xc5c9ce, 0.25, 1, 0],
   disc: [0x76787b, 0.42, 1, 0],
@@ -34,7 +33,6 @@ const BASE = {
   lip: [0xe6e7e9, 0.08, 1, 0],
   sidewall: [0x1e1e1e, 0.8, 0, 0],
   mirror: [0xbfc3c8, 0.02, 1, 0],
-  lens: [0x10161c, 0.05, 0.6, 1],
   hub: [0x2a2c30, 0.35, 0.9, 0],
   under: [0x0b0b0c, 0.9, 0, 0],
   stripe: [0xf2f2f2, 0.32, 0.25, 1]
@@ -110,11 +108,9 @@ function buildShape(spec) {
     const w = Array.isArray(width) ? width[k] : width;
     S.arches.push({ d: k ? dR : dF, r, w, ra: r + (b.archGap ?? 0.034), yc: r, flare: b.flare[k], front: k === 0, x: 0, xin: 0 });
   }
-  const saved = S.arches.slice();
-  S.arches = saved.map((a) => ({ ...a, ra: 0 }));
-  for (let k = 0; k < 2; k++) {
-    const a = saved[k];
-    S.arches = saved.map((q) => ({ ...q, ra: -1 }));
+  const saved = S.arches;
+  S.arches = saved.map((q) => ({ ...q, ra: -1 }));
+  for (const a of saved) {
     const K = keysAt(S, a.d);
     const top = a.yc + a.ra;
     const outer = K.xSide(Math.min(top - 0.02, K.ys - 0.01)) - (b.tireInset ?? 0.016);
@@ -654,8 +650,7 @@ function lathe(B, profile, segs, parts, xf, phi0 = 0, phiLen = Math.PI * 2) {
   }
 }
 
-function addBox(B, cx, cy, cz, hx, hy, hz, part, rotY = 0) {
-  const c = Math.cos(rotY), s = Math.sin(rotY);
+function addBox(B, cx, cy, cz, hx, hy, hz, part) {
   const faces = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
   for (const [fx, fy, fz] of faces) {
     const ax = fx ? [0, 1, 0] : fy ? [1, 0, 0] : [1, 0, 0];
@@ -665,8 +660,7 @@ function addBox(B, cx, cy, cz, hx, hy, hz, part, rotY = 0) {
       const lx = (fx + ax[0] * su + bx[0] * sv) * hx;
       const ly = (fy + ax[1] * su + bx[1] * sv) * hy;
       const lz = (fz + ax[2] * su + bx[2] * sv) * hz;
-      const nx = fx * c + fz * s, nz = -fx * s + fz * c;
-      ids.push(B.vert(cx + lx * c + lz * s, cy + ly, cz - lx * s + lz * c, nx, fy, nz, part));
+      ids.push(B.vert(cx + lx, cy + ly, cz + lz, fx, fy, fz, part));
     }
     B.triFacing(ids[0], ids[1], ids[2]);
     B.triFacing(ids[0], ids[2], ids[3]);
@@ -721,6 +715,10 @@ function addGlassAndTrim(S, B, hi) {
   }
   addPatch(S, B, [[sd[0] - 0.035, 7.0], [sd[3] + 0.03, 7.0], [sd[2] + 0.03, 8.06], [sd[1] - 0.04, 8.06]], PART.trim, 0.0025, nu, nv);
   for (const w of wins) addPatch(S, B, w, PART.glass, 0.0055, hi ? 8 : 3, nv);
+  if (g.roof) {
+    const r0 = ws[1] - 0.04, r1 = g.rear ? g.rear[0] + 0.02 : sd[2] + 0.08;
+    addPatch(S, B, [[r0, 7.94], [r1, 7.94], [r1, 9], [r0, 9]], PART[g.roof] ?? PART.trim, 0.003, hi ? 10 : 3, hi ? 4 : 2);
+  }
   if (g.rear) {
     const [r0, r1, wf] = g.rear;
     const sOuter = 8 + (1 - wf);
@@ -1527,7 +1525,7 @@ export function createCar(specIn, opts = {}) {
     set(PART.lamp, 0.62 * head, 0.66 * head, 0.72 * head);
     const drl = state.head ? 0.6 : 0.3;
     set(PART.drl, drl * 0.92, drl * 0.96, drl);
-    const tail = state.brake > 0 ? 0.32 + 0.3 * state.brake : state.head ? 0.17 : 0.05;
+    const tail = state.brake > 0 ? 0.32 + 0.3 * state.brake : state.head ? 0.17 : 0.07;
     set(PART.tail, tail, tail * 0.04, tail * 0.05);
     const br = state.brake;
     set(PART.brake, 0.7 * br, 0.02 * br, 0.03 * br);

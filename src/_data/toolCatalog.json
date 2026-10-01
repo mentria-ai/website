@@ -320,6 +320,14 @@
     "added": "2026-07-28"
   },
   {
+    "slug": "gallery",
+    "title": "Gallery",
+    "summary": "Photo gallery and image viewer that runs in your browser: open a folder or pick photos and videos, browse them by the month they were taken, zoom, play videos, run a slideshow and see camera details. A private local gallery that never uploads your files.",
+    "category": "Media",
+    "group": "Everyday",
+    "added": "2026-10-01"
+  },
+  {
     "slug": "video-player",
     "title": "Video Player",
     "summary": "Play videos from your phone or computer in the browser: open files or a whole folder, resume where you stopped, change speed from 0.25× to 3×, load .srt or .vtt subtitles, and use picture-in-picture. A free local video player that never uploads your files.",

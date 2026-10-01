@@ -623,6 +623,19 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+document.addEventListener('mentria:localechange', () => {
+  const I = window.MentriaI18n;
+  if (I && typeof I.t === 'function') {
+    Object.keys(C).forEach((k) => {
+      const key = 'tool.video-player.' + k.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase());
+      const v = I.t(key);
+      if (typeof v === 'string' && v !== key) C[k] = v;
+    });
+  }
+  if (!mainEl.hidden && items.length) renderList();
+  renderStart();
+});
+
 window.addEventListener('pagehide', () => savePosition(true));
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') savePosition(true); });
 

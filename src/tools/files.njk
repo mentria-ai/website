@@ -181,6 +181,8 @@ eleventyComputed:
     dbPacks: {{ ("tool.files.db_packs" | t) | dump | safe }},
     dbIdentity: {{ ("tool.files.db_identity" | t) | dump | safe }},
     dbExt: {{ ("tool.files.db_ext" | t) | dump | safe }},
+    dbExtLocal: {{ ("tool.files.db_ext_local" | t) | dump | safe }},
+    dbMedia: {{ ("tool.files.db_media" | t) | dump | safe }},
     deleteModels: {{ ("tool.files.delete_models" | t) | dump | safe }},
     confirmDeleteModels: {{ ("tool.files.confirm_delete_models" | t) | dump | safe }},
     clearCache: {{ ("tool.files.clear_cache" | t) | dump | safe }},
@@ -242,7 +244,7 @@ eleventyComputed:
   const state = { buckets: [], cacheBuckets: [], dbBuckets: [], selected: null, cacheView: null, dbView: null };
   function allBuckets() { return state.buckets.concat(state.cacheBuckets, state.dbBuckets); }
   const mainActions = $('files-main-actions');
-  const KNOWN_DBS = ['mentria-radio', 'mentria-push', 'mentria-packs', 'mentria-identity'];
+  const KNOWN_DBS = ['mentria-radio', 'mentria-push', 'mentria-packs', 'mentria-identity', 'mentria-media', 'mentria-ext-db'];
   const isModelCache = (nm) => nm === 'mentria-models' || nm.indexOf('mentria-models-') === 0;
 
   function cacheLabel(nm) {
@@ -258,6 +260,8 @@ eleventyComputed:
     if (nm === 'mentria-push') return COPY.dbPush;
     if (nm === 'mentria-packs') return COPY.dbPacks;
     if (nm === 'mentria-identity') return COPY.dbIdentity;
+    if (nm === 'mentria-media') return COPY.dbMedia;
+    if (nm === 'mentria-ext-db') return COPY.dbExtLocal;
     if (nm.indexOf('mentria-ext-') === 0) return COPY.dbExt.replace('{id}', nm.slice('mentria-ext-'.length));
     return nm;
   }

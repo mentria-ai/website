@@ -1648,6 +1648,7 @@ if (TEST) {
     inject: function (patch) { if (race) Object.assign(race.cars[race.pi], patch || {}); return testState(); },
     toast: function (kind, label, gain) { hud.toast(kind, label, gain); },
     get race() { return race; },
+    get rig() { return rig; },
     get world() { return world; },
     get engine() { return engine; },
     get hud() { return hud; },

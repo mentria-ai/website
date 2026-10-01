@@ -408,7 +408,7 @@ export async function buildRacerWorld(opts = {}) {
       const base = groundAt(b.x, b.z);
       const h = b.h || 6;
       images.push(b.image || 'billboard-1');
-      return { x: b.x, z: b.z, yaw: (b.yaw || 0) + Math.PI, width: b.w || 12, height: h, elevation: Math.max(2, b.y - base - h / 2) };
+      return { x: b.x, z: b.z, yaw: b.yaw || 0, width: b.w || 12, height: h, elevation: Math.max(2, b.y - base - h / 2) };
     });
     safeCall('billboards', builders, [scene, { terrain, items, images, night, quality }]);
   }

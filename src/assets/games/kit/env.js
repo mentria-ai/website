@@ -123,6 +123,7 @@ vec3 kwFogRing(vec3 dir, vec3 sunDir, vec3 toward, vec3 side, vec3 away, vec4 ex
 `;
 
 let worldFogInstalled = false;
+let activeEnvToken = 0;
 
 function installWorldFog() {
   if (worldFogInstalled) return;
@@ -740,6 +741,7 @@ function prepareBackdropImage(img, heightDeg) {
 
 export function createEnvironment(scene, renderer, opts = {}) {
   installWorldFog();
+  const envToken = ++activeEnvToken;
   const presetName = ENV_PRESETS[opts.preset] ? opts.preset : 'day';
   const preset = { ...ENV_PRESETS[presetName], ...(opts.overrides || {}) };
   const quality = resolveEnvQuality(opts.quality);
@@ -980,7 +982,7 @@ export function createEnvironment(scene, renderer, opts = {}) {
         uvScale: { value: new THREE.Vector2(opts.backdropRepeat ?? 2, 1) },
         tint: { value: new THREE.Vector3().fromArray(isNight ? [0.55, 0.55, 0.62] : tintBase.map((v, i) => v * (0.45 + zenithCol[i] * 0.5))) },
         hazeBottom: { value: opts.backdropHaze ?? (isNight ? 0.4 : 0.82) },
-        hazeTop: { value: (opts.backdropHaze ?? (isNight ? 0.4 : 0.82)) * 0.62 },
+        hazeTop: { value: (opts.backdropHaze ?? (isNight ? 0.4 : 0.82)) * 0.8 },
         sunDir: { value: lightDir.clone() },
         ringToward: { value: new THREE.Vector3().fromArray(toward) },
         ringSide: { value: new THREE.Vector3().fromArray(side) },
@@ -1076,6 +1078,7 @@ export function createEnvironment(scene, renderer, opts = {}) {
   function update(target, dt = 1 / 60) {
     elapsed += dt;
     su.time.value = elapsed;
+    if (activeEnvToken === envToken) worldFog.tone.x = renderer.toneMappingExposure;
     let pos;
     let camera = null;
     if (target && target.isCamera) {
@@ -1172,7 +1175,7 @@ export function createEnvironment(scene, renderer, opts = {}) {
     envTarget.dispose();
     if (scene.fog === fog) scene.fog = null;
     if (sun.shadow && sun.shadow.map) sun.shadow.map.dispose();
-    worldFog.params.w = 0;
+    if (activeEnvToken === envToken) worldFog.params.w = 0;
   }
 
   update(new THREE.Vector3(0, 0, 0), 0);

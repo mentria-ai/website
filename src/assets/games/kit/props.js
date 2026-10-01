@@ -899,7 +899,7 @@ function paintVegetationFallback(kind, model, size) {
   return canvas;
 }
 
-function vegetationTexture(kind, model, card, renderer, size, onUpdate) {
+function vegetationTexture(kind, model, card, renderer, size, onUpdate, spriteMode) {
   let texture;
   let rt = null;
   if (renderer) {
@@ -910,6 +910,8 @@ function vegetationTexture(kind, model, card, renderer, size, onUpdate) {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = 4;
   }
+  const useFile = spriteMode === 'file' || (spriteMode !== 'impostor' && !renderer);
+  if (!useFile) return { texture, rt };
   loadGameImage('sprites', kind).then((img) => {
     if (!img) return;
     let base;
@@ -1140,7 +1142,7 @@ export function scatter(scene, terrain, opts = {}) {
         farMat.needsUpdate = true;
         if (old && !old.isRenderTargetTexture) old.dispose();
       }
-    });
+    }, opts.sprites);
     farMat = farVegetationMaterial(impostor.texture, size, nearDist - band, nearDist, brightness);
     farMesh = new THREE.InstancedMesh(card.geometry, farMat, Math.max(1, n));
     farMesh.receiveShadow = q.shadows;

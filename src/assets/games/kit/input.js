@@ -461,6 +461,13 @@ export function createInput(opts = {}) {
   function onDocPointerDown(e) {
     if (!element || !e) return;
     try { engaged = element.contains(e.target); } catch (_) {}
+    if (e.pointerType === 'touch' && engaged && !touchSeen) {
+      touchSeen = true;
+      if (settings.touch === 'auto' && !root) {
+        syncTouch();
+        setMethod('touch');
+      }
+    }
   }
 
   function clearHeld() {
@@ -1493,10 +1500,16 @@ export function createInput(opts = {}) {
     try { element.removeAttribute('data-gk-touch'); } catch (_) {}
   }
 
+  let touchSeen = false;
+
+  function finePointer() {
+    try { return window.matchMedia('(pointer: fine)').matches; } catch (_) { return false; }
+  }
+
   function wantTouch() {
     if (settings.touch === 'on') return true;
     if (settings.touch === 'off') return false;
-    return hasTouch() || coarsePointer();
+    return touchSeen || coarsePointer() || (hasTouch() && !finePointer());
   }
 
   function syncTouch() {

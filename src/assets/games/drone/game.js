@@ -959,8 +959,8 @@ function advanceCoach() {
 function stepCoach(dt) {
   run.coachT += dt;
   const s = run.coachStep;
-  if (s === 0 && !drone.grounded && drone.altitude > 1.4) advanceCoach();
-  else if (s === 1 && drone.speed > 4.5) advanceCoach();
+  if (s === 0 && !drone.grounded && drone.altitude > 1.4 && run.coachT > 0.8) advanceCoach();
+  else if (s === 1 && Math.hypot(drone.vel.x, drone.vel.z) > 4.5 && run.coachT > 0.8) advanceCoach();
   else if (s === 3 && run.coachT > 3.2) {
     run.coachStep = -1;
     hud.coach(null);

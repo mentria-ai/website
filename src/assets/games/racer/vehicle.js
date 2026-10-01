@@ -34,7 +34,7 @@ export function vehicleParamsFromStats(stats) {
     driftAngleMin: 12 * RAD,
     driftAngleMax: (30 + 1.3 * h) * RAD,
     driftSwing: 4.2 + 0.12 * h,
-    driftDrag: 2.7 - 0.09 * h,
+    driftDrag: 5.6 - 0.13 * h,
     gripRecover: 7.5 + 0.3 * h,
     nitroTopMult: 1.11 + 0.009 * n,
     nitroAccelMult: 1.45 + 0.05 * n,
@@ -264,14 +264,14 @@ export function stepVehicle(car, input, dt, track) {
   let omega = 0;
 
   if (car.grounded) {
-    const align = Math.max(0, Math.cos(car.slip));
+    const cs = Math.max(0, Math.cos(car.slip));
+    const align = car.drift ? cs * cs : cs;
     if (!car.reverse) {
       let a = 0;
       if (thr > 0) a += accelCurve(p, speed, top, (car.boosting ? p.nitroAccelMult : 1) * powerMult) * thr * align;
       if (car.boosting && thr <= 0) a += accelCurve(p, speed, top, p.nitroAccelMult * 0.7) * align;
       if (brk > 0) a -= p.brake * brk * (car.drift ? 0.45 : 1);
-      if (thr <= 0 && brk <= 0 && !car.boosting) a -= p.coastDrag;
-      a -= p.airDrag * speed * speed * 0.4;
+      if (thr <= 0 && brk <= 0 && !car.boosting) a -= p.coastDrag + p.airDrag * speed * speed * 0.4;
       if (speed > top) a -= (speed - top) * p.overTopDecay;
       if (car.drift) a -= p.driftDrag * Math.abs(Math.sin(car.slip)) / Math.sin(35 * RAD);
       if (car.crashT > 0) a -= 6;
@@ -469,7 +469,8 @@ function updateDrift(car, input, dt, wantDrift, brk, ev) {
   else car.driftCounter = Math.max(0, car.driftCounter - dt);
   if (car.wallT > 0) car.driftWallT = (car.driftWallT || 0) + dt;
   else car.driftWallT = 0;
-  const end = car.speed < 10 || car.reverse || car.crashT > 0 ||
+  const released = !brakeDrift && !wantDrift && car.driftT > 0.2;
+  const end = released || car.speed < 10 || car.reverse || car.crashT > 0 ||
     car.driftReleaseT > 0.32 || car.driftCounter > 0.2 || car.driftWallT > 0.3 ||
     (!car.grounded && car.airTime > 0.6);
   if (end) {

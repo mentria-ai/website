@@ -501,13 +501,27 @@ export function createTrack(def, opts = {}) {
     return nearestFlat(x, z, reach == null ? 60 : reach);
   }
 
+  function tunnelRidge(s) {
+    let best = 0;
+    for (let i = 0; i < tunnels.length; i++) {
+      const t = tunnels[i];
+      const w = wrapS(s);
+      const along = w < t.s0 ? t.s0 - w : w > t.s1 ? w - t.s1 : 0;
+      if (along > 45) continue;
+      const v = ((t.height || 7.5) + 2.4) * (1 - smoothstep(0, 45, along));
+      if (v > best) best = v;
+    }
+    return best;
+  }
+
   function terrainModify(o = {}) {
     const shoulder = o.shoulder == null ? 5 : o.shoulder;
     const blend = o.blend == null ? 38 : o.blend;
     const drop = o.drop == null ? 0.45 : o.drop;
-    const tunnelShoulder = o.tunnelShoulder == null ? 10 : o.tunnelShoulder;
+    const tunnelShoulder = o.tunnelShoulder == null ? 6 : o.tunnelShoulder;
     const tunnelBlend = o.tunnelBlend == null ? 12 : o.tunnelBlend;
-    const reach = Math.max(shoulder + blend, tunnelShoulder + tunnelBlend) + 2;
+    const ridgeReach = o.ridgeReach == null ? 70 : o.ridgeReach;
+    const reach = Math.max(shoulder + blend, tunnelShoulder + ridgeReach) + 2;
     const tmp = {};
     reachGrid(reach);
     return function modifyTerrainForTrack(x, z, h) {
@@ -517,10 +531,20 @@ export function createTrack(def, opts = {}) {
       const sh = tun ? tunnelShoulder : shoulder;
       const bl = tun ? tunnelBlend : blend;
       const target = r.roadY - drop;
-      if (r.edgeDist <= sh) return target;
-      const d = r.edgeDist - sh;
-      if (d >= bl) return h;
-      return lerp(target, h, smoothstep(0, bl, d));
+      let out;
+      if (r.edgeDist <= sh) out = target;
+      else {
+        const d = r.edgeDist - sh;
+        out = d >= bl ? h : lerp(target, h, smoothstep(0, bl, d));
+        if (tunnels.length) {
+          const ridge = tunnelRidge(r.s);
+          if (ridge > 0) {
+            const rise = tun ? 1 : smoothstep(0, 6, d);
+            out = Math.max(out, r.roadY + ridge * rise * (1 - smoothstep(0, ridgeReach, d)));
+          }
+        }
+      }
+      return out;
     };
   }
 
@@ -741,4 +765,662 @@ export function layoutTrackScenery(track, rules, seed) {
   }
 
   return out;
+}
+
+const TRACK_STYLE_DEFAULT = {
+  apron: 'gravel',
+  apronWidth: 5,
+  wallGlow: null,
+  line: '#f2f2f2',
+  laneCount: 2,
+  curbColors: ['#d8232e', '#f2f2f2'],
+  lightsColor: '#ffe2b0'
+};
+
+function trackCanvas(w, h) {
+  if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  return c;
+}
+
+function trackNoiseFill(ctx, w, h, base, spread, count, seed, size) {
+  const rng = mulberry32(seed);
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, w, h);
+  for (let i = 0; i < count; i++) {
+    const x = rng() * w, y = rng() * h;
+    const v = Math.floor((rng() - 0.5) * spread);
+    const a = 0.25 + rng() * 0.5;
+    ctx.fillStyle = v >= 0 ? 'rgba(255,255,255,' + (a * v / spread).toFixed(3) + ')' : 'rgba(0,0,0,' + (a * -v / spread).toFixed(3) + ')';
+    const r = (size || 1.5) * (0.5 + rng());
+    ctx.fillRect(x, y, r, r);
+  }
+}
+
+function trackTexture(THREE, canvas, repeat, srgb) {
+  const t = new THREE.CanvasTexture(canvas);
+  t.wrapS = THREE.RepeatWrapping;
+  t.wrapT = THREE.RepeatWrapping;
+  if (srgb !== false) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  if (repeat) t.repeat.set(repeat[0], repeat[1]);
+  t.needsUpdate = true;
+  return t;
+}
+
+function makeTrackTextures(THREE) {
+  const asphalt = trackCanvas(512, 512);
+  let g = asphalt.getContext('2d');
+  trackNoiseFill(g, 512, 512, '#34363b', 70, 26000, 11, 1.6);
+  const rng = mulberry32(5);
+  for (let i = 0; i < 40; i++) {
+    g.fillStyle = 'rgba(0,0,0,' + (0.04 + rng() * 0.06).toFixed(3) + ')';
+    const x = rng() * 512, y = rng() * 512, r = 20 + rng() * 70;
+    for (let ox = -512; ox <= 512; ox += 512) for (let oy = -512; oy <= 512; oy += 512) {
+      g.beginPath(); g.ellipse(x + ox, y + oy, r, r * (0.4 + rng() * 0.6), rng() * 3, 0, Math.PI * 2); g.fill();
+    }
+  }
+  const concrete = trackCanvas(256, 256);
+  g = concrete.getContext('2d');
+  trackNoiseFill(g, 256, 256, '#a7a49d', 60, 9000, 21, 1.4);
+  g.fillStyle = 'rgba(0,0,0,0.18)';
+  g.fillRect(0, 0, 2, 256);
+  g.fillStyle = 'rgba(0,0,0,0.08)';
+  g.fillRect(0, 250, 256, 6);
+  const chevron = trackCanvas(256, 256);
+  g = chevron.getContext('2d');
+  g.fillStyle = '#16171a';
+  g.fillRect(0, 0, 256, 256);
+  g.fillStyle = '#f2c018';
+  for (let k = -4; k < 8; k++) {
+    g.beginPath();
+    g.moveTo(k * 64, 256); g.lineTo(k * 64 + 32, 256); g.lineTo(k * 64 + 32 + 128, 128); g.lineTo(k * 64 + 32, 0);
+    g.lineTo(k * 64, 0); g.lineTo(k * 64 + 128, 128); g.closePath(); g.fill();
+  }
+  const checker = trackCanvas(128, 32);
+  g = checker.getContext('2d');
+  for (let x = 0; x < 16; x++) for (let y = 0; y < 4; y++) {
+    g.fillStyle = (x + y) % 2 ? '#111' : '#f4f4f4';
+    g.fillRect(x * 8, y * 8, 8, 8);
+  }
+  const sidewalk = trackCanvas(256, 256);
+  g = sidewalk.getContext('2d');
+  trackNoiseFill(g, 256, 256, '#8d8c88', 50, 7000, 31, 1.3);
+  g.fillStyle = 'rgba(0,0,0,0.22)';
+  for (let k = 0; k < 4; k++) { g.fillRect(0, k * 64, 256, 2); g.fillRect(k * 64, 0, 2, 256); }
+  const gravel = trackCanvas(256, 256);
+  g = gravel.getContext('2d');
+  trackNoiseFill(g, 256, 256, '#7b746a', 120, 14000, 41, 2.2);
+  const dirt = trackCanvas(256, 256);
+  g = dirt.getContext('2d');
+  trackNoiseFill(g, 256, 256, '#a0714a', 90, 12000, 51, 2.4);
+  const rock = trackCanvas(256, 256);
+  g = rock.getContext('2d');
+  trackNoiseFill(g, 256, 256, '#7d6f62', 140, 16000, 61, 3.2);
+  return {
+    asphalt: trackTexture(THREE, asphalt),
+    concrete: trackTexture(THREE, concrete),
+    chevron: trackTexture(THREE, chevron),
+    checker: trackTexture(THREE, checker),
+    sidewalk: trackTexture(THREE, sidewalk),
+    gravel: trackTexture(THREE, gravel),
+    dirt: trackTexture(THREE, dirt),
+    rock: trackTexture(THREE, rock)
+  };
+}
+
+function createStrips() {
+  return { pos: [], uv: [], col: [], idx: [], hasColor: false };
+}
+
+function stripAdd(b, rows, color) {
+  const base = b.pos.length / 3;
+  const n = rows.length;
+  for (let i = 0; i < n; i++) {
+    const r = rows[i];
+    b.pos.push(r[0], r[1], r[2], r[3], r[4], r[5]);
+    b.uv.push(r[6], r[7], r[8], r[9]);
+    const c = r[10] || color || null;
+    if (c) { b.hasColor = true; b.col.push(c[0], c[1], c[2], c[0], c[1], c[2]); }
+    else b.col.push(1, 1, 1, 1, 1, 1);
+  }
+  for (let i = 0; i < n - 1; i++) {
+    const a0 = base + i * 2, b0 = a0 + 1, a1 = a0 + 2, b1 = a0 + 3;
+    b.idx.push(a0, b0, a1, b0, b1, a1);
+  }
+}
+
+function stripQuad(b, p, uv, color) {
+  const base = b.pos.length / 3;
+  for (let k = 0; k < 4; k++) {
+    b.pos.push(p[k][0], p[k][1], p[k][2]);
+    b.uv.push(uv[k][0], uv[k][1]);
+    const c = color || [1, 1, 1];
+    b.col.push(c[0], c[1], c[2]);
+  }
+  if (color) b.hasColor = true;
+  b.idx.push(base, base + 1, base + 2, base + 1, base + 3, base + 2);
+}
+
+function stripGeometry(THREE, b) {
+  if (!b.idx.length) return null;
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(b.pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(b.uv, 2));
+  if (b.hasColor) g.setAttribute('color', new THREE.Float32BufferAttribute(b.col, 3));
+  g.setIndex(b.pos.length / 3 > 65535 ? new THREE.Uint32BufferAttribute(b.idx, 1) : new THREE.Uint16BufferAttribute(b.idx, 1));
+  g.computeVertexNormals();
+  g.computeBoundingSphere();
+  return g;
+}
+
+function hexRgb(hex) {
+  const h = String(hex || '#ffffff').replace('#', '');
+  const v = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16);
+  return [((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255];
+}
+
+const BARRIER_PROFILE = [[0, 0], [0, 0.08], [0.07, 0.32], [0.2, 0.84], [0.36, 0.84], [0.5, 0.32], [0.58, 0.08], [0.58, 0]];
+const WALL_PROFILE = [[0, -0.2], [0, 1.45], [0.42, 1.45], [0.42, -0.2]];
+const NEON_PROFILE = [[0, -0.2], [0, 1.15], [0.36, 1.15], [0.36, -0.2]];
+const RAIL_PROFILE = [[0.16, 0.52], [0.2, 0.6], [0.16, 0.68], [0.2, 0.76], [0.16, 0.84]];
+
+export function buildTrackMeshes(THREE, track, opts = {}) {
+  const style = Object.assign({}, TRACK_STYLE_DEFAULT, track.def && track.def.style || {}, opts.style || {});
+  const step = opts.step || 2;
+  const L = track.length;
+  const N = Math.max(8, Math.round(L / step));
+  const ds = L / N;
+  const group = new THREE.Group();
+  group.name = 'track';
+  const disposables = [];
+  const mats = opts.materials || {};
+  const tex = makeTrackTextures(THREE);
+  Object.values(tex).forEach((t) => disposables.push(t));
+  const sm = makeTrackSample();
+  const shadows = opts.shadows !== false;
+
+  function own(m) { disposables.push(m); return m; }
+
+  const roadMat = mats.road || own(new THREE.MeshStandardMaterial({ map: tex.asphalt, roughness: 0.86, metalness: 0.02, color: 0xffffff }));
+  const lineMat = mats.line || own(new THREE.MeshStandardMaterial({ color: new THREE.Color(style.line), roughness: 0.6, metalness: 0, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+  const curbMat = mats.curb || own(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, metalness: 0, side: THREE.DoubleSide }));
+  const concreteMat = mats.concrete || own(new THREE.MeshStandardMaterial({ map: tex.concrete, roughness: 0.9, metalness: 0, side: THREE.DoubleSide }));
+  const railMat = mats.guardrail || own(new THREE.MeshStandardMaterial({ color: 0xc9ced4, roughness: 0.35, metalness: 0.85, side: THREE.DoubleSide, envMap: opts.envMap || null }));
+  const postMat = mats.post || own(new THREE.MeshStandardMaterial({ color: 0x8f959c, roughness: 0.5, metalness: 0.6 }));
+  const glowMat = mats.glow || own(new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }));
+  const apronTex = style.apron === 'sidewalk' ? tex.sidewalk : style.apron === 'dirt' ? tex.dirt : tex.gravel;
+  const apronMat = mats.apron || own(new THREE.MeshStandardMaterial({ map: apronTex, roughness: 0.95, metalness: 0, side: THREE.DoubleSide }));
+  const rampMat = mats.ramp || own(new THREE.MeshStandardMaterial({ map: tex.chevron, roughness: 0.6, metalness: 0.1 }));
+  const rampSideMat = own(new THREE.MeshStandardMaterial({ color: 0x2a2c30, roughness: 0.7, metalness: 0.3, side: THREE.DoubleSide }));
+  const checkerMat = own(new THREE.MeshStandardMaterial({ map: tex.checker, roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
+  const tunnelMat = mats.tunnel || own(new THREE.MeshStandardMaterial({ map: tex.concrete, color: 0x9a978f, emissive: 0x2a2014, roughness: 0.92, metalness: 0, side: THREE.DoubleSide }));
+  const rockMat = mats.rock || own(new THREE.MeshStandardMaterial({ map: tex.rock, color: style.hillColor || 0x8a8f68, roughness: 0.96, metalness: 0, side: THREE.DoubleSide }));
+  const lampMat = own(new THREE.MeshBasicMaterial({ color: new THREE.Color(style.lightsColor), toneMapped: false, side: THREE.DoubleSide }));
+
+  function addMesh(geo, mat, name, cast, receive) {
+    if (!geo) return null;
+    disposables.push(geo);
+    const m = new THREE.Mesh(geo, mat);
+    m.name = name;
+    m.castShadow = shadows && !!cast;
+    m.receiveShadow = shadows && receive !== false;
+    group.add(m);
+    return m;
+  }
+
+  function edgePoint(s, side, out, lateralExtra, height, lift) {
+    track.sample(s, sm);
+    const half = sm.width / 2;
+    const e = side * half;
+    const yRamp = lift ? track.rampHeight(s) : 0;
+    out[0] = sm.pos.x + sm.right.x * e + sm.rightFlat.x * side * lateralExtra;
+    out[1] = sm.pos.y + sm.right.y * e + height + yRamp * sm.up.y;
+    out[2] = sm.pos.z + sm.right.z * e + sm.rightFlat.z * side * lateralExtra;
+    return out;
+  }
+
+  function surfacePoint(s, lat, lift, out) {
+    track.sample(s, sm);
+    out[0] = sm.pos.x + sm.right.x * lat + sm.up.x * lift;
+    out[1] = sm.pos.y + sm.right.y * lat + sm.up.y * lift;
+    out[2] = sm.pos.z + sm.right.z * lat + sm.up.z * lift;
+    return out;
+  }
+
+  const road = createStrips();
+  {
+    const rows = [];
+    const a = [0, 0, 0], b = [0, 0, 0];
+    for (let i = 0; i <= N; i++) {
+      const s = i * ds;
+      track.sample(s, sm);
+      const half = sm.width / 2;
+      surfacePoint(s, -half - 0.05, 0, a);
+      surfacePoint(s, half + 0.05, 0, b);
+      rows.push([a[0], a[1], a[2], b[0], b[1], b[2], -half / 10, s / 10, half / 10, s / 10]);
+    }
+    stripAdd(road, rows);
+  }
+  const roadMesh = addMesh(stripGeometry(THREE, road), roadMat, 'road', false, true);
+
+  const lines = createStrips();
+  const curbRanges = [];
+  {
+    const raw = new Int8Array(N + 1);
+    for (let i = 0; i <= N; i++) {
+      const k = track.curvatureAt(i * ds);
+      raw[i] = Math.abs(k) > 1 / 150 ? (k > 0 ? 1 : -1) : 0;
+    }
+    const reach = Math.max(1, Math.round(14 / ds));
+    for (let i = 0; i <= N; i++) {
+      let v = 0;
+      for (let d = 0; d <= reach && !v; d++) {
+        if (i - d >= 0 && raw[i - d]) v = raw[i - d];
+        else if (i + d <= N && raw[i + d]) v = raw[i + d];
+      }
+      curbRanges.push(v);
+    }
+    const lc = Math.max(1, style.laneCount | 0);
+    const a = [0, 0, 0], b = [0, 0, 0];
+    for (const side of [-1, 1]) {
+      let rows = [];
+      for (let i = 0; i <= N; i++) {
+        const s = i * ds;
+        const curbHere = curbRanges[i] && (curbRanges[i] === -side || Math.abs(track.curvatureAt(s)) > 1 / 80);
+        if (curbHere || track.rampAt(s)) {
+          if (rows.length > 1) stripAdd(lines, rows);
+          rows = [];
+          continue;
+        }
+        track.sample(s, sm);
+        const half = sm.width / 2;
+        surfacePoint(s, side * (half - 0.55), 0.02, a);
+        surfacePoint(s, side * (half - 0.33), 0.02, b);
+        rows.push(side < 0 ? [a[0], a[1], a[2], b[0], b[1], b[2], 0, s, 1, s] : [b[0], b[1], b[2], a[0], a[1], a[2], 0, s, 1, s]);
+      }
+      if (rows.length > 1) stripAdd(lines, rows);
+    }
+    const dash = 4, gap = 8;
+    for (let k = 1; k < lc; k++) {
+      const f = k / lc;
+      for (let s = 3; s < L - 2; s += dash + gap) {
+        if (track.rampAt(s) || track.rampAt(s + dash)) continue;
+        const rows = [];
+        for (let q = 0; q <= 2; q++) {
+          const ss = s + (dash * q) / 2;
+          track.sample(ss, sm);
+          const lat = -sm.width / 2 + sm.width * f;
+          surfacePoint(ss, lat - 0.08, 0.02, a);
+          surfacePoint(ss, lat + 0.08, 0.02, b);
+          rows.push([a[0], a[1], a[2], b[0], b[1], b[2], 0, ss, 1, ss]);
+        }
+        stripAdd(lines, rows);
+      }
+    }
+  }
+  addMesh(stripGeometry(THREE, lines), lineMat, 'lines', false, true);
+
+  {
+    const start = createStrips();
+    const a = [0, 0, 0], b = [0, 0, 0];
+    const rows = [];
+    for (let q = 0; q <= 1; q++) {
+      const s = track.wrapS(-1 + q * 2);
+      track.sample(s, sm);
+      const half = sm.width / 2;
+      surfacePoint(s, -half + 0.3, 0.025, a);
+      surfacePoint(s, half - 0.3, 0.025, b);
+      rows.push([a[0], a[1], a[2], b[0], b[1], b[2], 0, q, Math.round(sm.width / 2), q]);
+    }
+    stripAdd(start, rows);
+    addMesh(stripGeometry(THREE, start), checkerMat, 'start-line', false, true);
+  }
+
+  const curbs = createStrips();
+  {
+    const cA = hexRgb(style.curbColors[0]), cB = hexRgb(style.curbColors[1]);
+    const p0 = [0, 0, 0], p1 = [0, 0, 0], p2 = [0, 0, 0];
+    for (const side of [-1, 1]) {
+      let i = 0;
+      while (i <= N) {
+        if (!curbRanges[i] || track.tunnelAt(i * ds)) { i++; continue; }
+        const inner = curbRanges[i] === -side;
+        let j = i;
+        while (j <= N && curbRanges[j] && !track.tunnelAt(j * ds)) j++;
+        const tight = (() => { for (let q = i; q < j; q++) if (Math.abs(track.curvatureAt(q * ds)) > 1 / 80) return true; return false; })();
+        if (inner || tight) {
+          const rowsA = [], rowsB = [];
+          for (let q = i; q < j; q++) {
+            const s = q * ds;
+            track.sample(s, sm);
+            const half = sm.width / 2;
+            const c = Math.floor(s / 2) % 2 ? cA : cB;
+            surfacePoint(s, side * (half - 1.15), 0.0, p0);
+            surfacePoint(s, side * (half - 0.55), 0.07, p1);
+            surfacePoint(s, side * (half + 0.02), 0.07, p2);
+            rowsA.push([p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], 0, s, 1, s, c]);
+            rowsB.push([p1[0], p1[1], p1[2], p2[0], p2[1], p2[2], 0, s, 1, s, c]);
+          }
+          for (let q = 0; q < rowsA.length - 1; q++) {
+            stripAdd(curbs, [rowsA[q], Object.assign(rowsA[q + 1].slice(), { 10: rowsA[q][10] })]);
+            stripAdd(curbs, [rowsB[q], Object.assign(rowsB[q + 1].slice(), { 10: rowsB[q][10] })]);
+          }
+        }
+        i = j;
+      }
+    }
+  }
+  addMesh(stripGeometry(THREE, curbs), curbMat, 'curbs', false, true);
+
+  const concrete = createStrips();
+  const rails = createStrips();
+  const glow = createStrips();
+  const apron = createStrips();
+  const posts = [];
+  {
+    const glowColors = (style.wallGlow || []).map(hexRgb);
+    const pa = [0, 0, 0], pb = [0, 0, 0];
+    for (const side of [-1, 1]) {
+      const sideName = side < 0 ? 'left' : 'right';
+      const kindAt = (q) => (track.tunnelAt(q * ds) ? 'tunnel' : track.edgeAt(q * ds, sideName));
+      let i = 0;
+      while (i < N) {
+        const kind = kindAt(i);
+        let j = i + 1;
+        while (j < N && kindAt(j) === kind) j++;
+        const end = j;
+        if (kind !== 'tunnel') {
+          const profile = kind === 'wall' ? WALL_PROFILE : kind === 'neon' ? NEON_PROFILE : kind === 'guardrail' ? null : BARRIER_PROFILE;
+          if (profile) {
+            for (let k = 0; k < profile.length - 1; k++) {
+              const rows = [];
+              for (let q = i; q <= end; q++) {
+                const s = q * ds;
+                edgePoint(s, side, pa, profile[k][0], profile[k][1], false);
+                edgePoint(s, side, pb, profile[k + 1][0], profile[k + 1][1], false);
+                rows.push([pa[0], pa[1], pa[2], pb[0], pb[1], pb[2], s / 4, k * 0.25, s / 4, (k + 1) * 0.25]);
+              }
+              stripAdd(concrete, rows);
+            }
+            if (kind === 'neon' && glowColors.length) {
+              const rows = [];
+              for (let q = i; q <= end; q++) {
+                const s = q * ds;
+                const c = glowColors[Math.floor(s / 90) % glowColors.length];
+                edgePoint(s, side, pa, -0.012, 0.86, false);
+                edgePoint(s, side, pb, -0.012, 0.98, false);
+                rows.push([pa[0], pa[1], pa[2], pb[0], pb[1], pb[2], 0, 0, 1, 1, c]);
+              }
+              stripAdd(glow, rows);
+              const top = [];
+              for (let q = i; q <= end; q++) {
+                const s = q * ds;
+                const c = glowColors[Math.floor(s / 90) % glowColors.length];
+                edgePoint(s, side, pa, 0.06, 1.16, false);
+                edgePoint(s, side, pb, 0.3, 1.16, false);
+                top.push([pa[0], pa[1], pa[2], pb[0], pb[1], pb[2], 0, 0, 1, 1, c]);
+              }
+              stripAdd(glow, top);
+            }
+          } else {
+            for (let k = 0; k < RAIL_PROFILE.length - 1; k++) {
+              const rows = [];
+              for (let q = i; q <= end; q++) {
+                const s = q * ds;
+                edgePoint(s, side, pa, RAIL_PROFILE[k][0], RAIL_PROFILE[k][1], false);
+                edgePoint(s, side, pb, RAIL_PROFILE[k + 1][0], RAIL_PROFILE[k + 1][1], false);
+                rows.push([pa[0], pa[1], pa[2], pb[0], pb[1], pb[2], s / 4, 0, s / 4, 1]);
+              }
+              stripAdd(rails, rows);
+            }
+            for (let s = Math.ceil(i * ds / 4) * 4; s < end * ds; s += 4) {
+              edgePoint(s, side, pa, 0.34, 0, false);
+              track.sample(s, sm);
+              posts.push([pa[0], pa[1], pa[2], sm.heading]);
+            }
+          }
+          const ap0 = kind === 'guardrail' ? 0.5 : profile ? profile[profile.length - 1][0] : 0.5;
+          const raise = style.apron === 'sidewalk' ? 0.16 : 0.02;
+          const width = style.apronWidth || 5;
+          const rowsTop = [], rowsSkirt = [];
+          const pc = [0, 0, 0];
+          for (let q = i; q <= end; q++) {
+            const s = q * ds;
+            edgePoint(s, side, pa, ap0, raise, false);
+            edgePoint(s, side, pb, ap0 + width, raise, false);
+            edgePoint(s, side, pc, ap0 + width + 0.6, -1.6, false);
+            rowsTop.push([pa[0], pa[1], pa[2], pb[0], pb[1], pb[2], s / 6, 0, s / 6, width / 6]);
+            rowsSkirt.push([pb[0], pb[1], pb[2], pc[0], pc[1], pc[2], s / 6, width / 6, s / 6, (width + 1.6) / 6]);
+          }
+          stripAdd(apron, rowsTop);
+          stripAdd(apron, rowsSkirt);
+        }
+        i = end;
+      }
+    }
+  }
+  addMesh(stripGeometry(THREE, concrete), concreteMat, 'walls', true, true);
+  addMesh(stripGeometry(THREE, rails), railMat, 'guardrails', true, true);
+  addMesh(stripGeometry(THREE, glow), glowMat, 'wall-glow', false, false);
+  addMesh(stripGeometry(THREE, apron), apronMat, 'apron', false, true);
+  if (posts.length) {
+    const pg = new THREE.BoxGeometry(0.12, 0.9, 0.12);
+    pg.translate(0, 0.45, 0);
+    disposables.push(pg);
+    const inst = new THREE.InstancedMesh(pg, postMat, posts.length);
+    const m4 = new THREE.Matrix4(), qq = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), one = new THREE.Vector3(1, 1, 1), pv = new THREE.Vector3();
+    posts.forEach((p, k) => {
+      qq.setFromAxisAngle(up, p[3]);
+      pv.set(p[0], p[1], p[2]);
+      m4.compose(pv, qq, one);
+      inst.setMatrixAt(k, m4);
+    });
+    inst.castShadow = shadows;
+    inst.name = 'guardrail-posts';
+    group.add(inst);
+  }
+
+  const ramps = createStrips();
+  const rampSides = createStrips();
+  for (const r of track.ramps) {
+    const pa = [0, 0, 0], pb = [0, 0, 0];
+    const rows = [], left = [], right = [];
+    const n = Math.max(4, Math.ceil((r.s1 - r.s0) / 0.5));
+    for (let q = 0; q <= n; q++) {
+      const s = r.s0 + (r.s1 - r.s0) * q / n;
+      track.sample(s, sm);
+      const half = sm.width / 2 - 0.25;
+      const h = track.rampHeight(s);
+      surfacePoint(s, -half, h + 0.01, pa);
+      surfacePoint(s, half, h + 0.01, pb);
+      const v = (s - r.s0) / 4;
+      rows.push([pa[0], pa[1], pa[2], pb[0], pb[1], pb[2], 0, v, sm.width / 8, v]);
+      const ga = [0, 0, 0], gb = [0, 0, 0];
+      surfacePoint(s, -half, -0.05, ga);
+      surfacePoint(s, half, -0.05, gb);
+      left.push([ga[0], ga[1], ga[2], pa[0], pa[1], pa[2], 0, 0, 1, 1]);
+      right.push([pb[0], pb[1], pb[2], gb[0], gb[1], gb[2], 0, 0, 1, 1]);
+    }
+    stripAdd(ramps, rows);
+    stripAdd(rampSides, left);
+    stripAdd(rampSides, right);
+    const last = rows[rows.length - 1];
+    track.sample(r.s1, sm);
+    const half = sm.width / 2 - 0.25;
+    const ga = [0, 0, 0], gb = [0, 0, 0];
+    surfacePoint(r.s1, -half, -0.05, ga);
+    surfacePoint(r.s1, half, -0.05, gb);
+    stripQuad(rampSides, [[ga[0], ga[1], ga[2]], [gb[0], gb[1], gb[2]], [last[0], last[1], last[2]], [last[3], last[4], last[5]]], [[0, 0], [1, 0], [0, 1], [1, 1]]);
+  }
+  addMesh(stripGeometry(THREE, ramps), rampMat, 'ramps', true, true);
+  addMesh(stripGeometry(THREE, rampSides), rampSideMat, 'ramp-sides', true, true);
+
+  const tunnelShell = createStrips();
+  const tunnelRock = createStrips();
+  const tunnelLights = createStrips();
+  const portals = [];
+  for (const t of track.tunnels) {
+    const height = t.height || 7.5;
+    const n = Math.max(4, Math.ceil((t.s1 - t.s0) / 2));
+    const arc = 10;
+    const shoulder = 6;
+    const profileAt = (s) => {
+      track.sample(s, sm);
+      const half = sm.width / 2 + 0.6;
+      const wallH = height * 0.55;
+      const pts = [[-half, -0.3], [-half, wallH]];
+      for (let k = 1; k < arc; k++) {
+        const ang = Math.PI * k / arc;
+        pts.push([-half * Math.cos(ang), wallH + Math.sin(ang) * (height - wallH)]);
+      }
+      pts.push([half, wallH], [half, -0.3]);
+      return pts;
+    };
+    const outerAt = (s) => {
+      track.sample(s, sm);
+      const half = sm.width / 2 + shoulder;
+      const top = height + 2.4;
+      const pts = [[-half - 8, -0.8], [-half, top]];
+      const m = 14;
+      for (let k = 1; k < m; k++) {
+        const u = k / m;
+        const bump = Math.sin(Math.PI * u);
+        pts.push([-half + 2 * half * u, top + 1.8 * bump + Math.sin(u * 17 + s * 0.05) * 0.35 * bump]);
+      }
+      pts.push([half, top], [half + 8, -0.8]);
+      return pts;
+    };
+    const pa = [0, 0, 0], pb = [0, 0, 0];
+    const addProfileSweep = (b, fn, uScale) => {
+      const first = fn(t.s0);
+      for (let k = 0; k < first.length - 1; k++) {
+        const rows = [];
+        for (let q = 0; q <= n; q++) {
+          const s = t.s0 + (t.s1 - t.s0) * q / n;
+          const prof = fn(s);
+          track.sample(s, sm);
+          for (const [pt, out] of [[prof[k], pa], [prof[k + 1], pb]]) {
+            out[0] = sm.pos.x + sm.rightFlat.x * pt[0];
+            out[1] = sm.pos.y + pt[1];
+            out[2] = sm.pos.z + sm.rightFlat.z * pt[0];
+          }
+          rows.push([pa[0], pa[1], pa[2], pb[0], pb[1], pb[2], s / uScale, k / 4, s / uScale, (k + 1) / 4]);
+        }
+        stripAdd(b, rows);
+      }
+    };
+    addProfileSweep(tunnelShell, profileAt, 4);
+    addProfileSweep(tunnelRock, outerAt, 8);
+    for (let s = t.s0 + 6; s < t.s1 - 4; s += 10) {
+      const c = [];
+      for (const [lat, ds2] of [[-1.1, 0], [1.1, 0], [-1.1, 4], [1.1, 4]]) {
+        track.sample(s + ds2, sm);
+        c.push([sm.pos.x + sm.rightFlat.x * lat, sm.pos.y + height - 0.15, sm.pos.z + sm.rightFlat.z * lat]);
+      }
+      stripQuad(tunnelLights, c, [[0, 0], [1, 0], [0, 1], [1, 1]]);
+    }
+    for (const sEnd of [t.s0, t.s1]) {
+      const outer = outerAt(sEnd);
+      const hole = profileAt(sEnd);
+      const shape = new THREE.Shape(outer.map((p) => new THREE.Vector2(p[0], p[1])));
+      shape.holes.push(new THREE.Path(hole.slice().reverse().map((p) => new THREE.Vector2(p[0], p[1] + 0.001))));
+      const geo = new THREE.ShapeGeometry(shape, 4);
+      track.sample(sEnd, sm);
+      const m4 = new THREE.Matrix4().makeBasis(
+        new THREE.Vector3(sm.rightFlat.x, 0, sm.rightFlat.z),
+        new THREE.Vector3(0, 1, 0),
+        new THREE.Vector3(Math.sin(sm.heading), 0, Math.cos(sm.heading))
+      );
+      m4.setPosition(sm.pos.x, sm.pos.y, sm.pos.z);
+      geo.applyMatrix4(m4);
+      portals.push(geo);
+    }
+  }
+  addMesh(stripGeometry(THREE, tunnelShell), tunnelMat, 'tunnel', true, true);
+  addMesh(stripGeometry(THREE, tunnelRock), rockMat, 'tunnel-hill', true, true);
+  addMesh(stripGeometry(THREE, tunnelLights), lampMat, 'tunnel-lights', false, false);
+  portals.forEach((geo) => {
+    const m = addMesh(geo, concreteMat, 'tunnel-portal', true, true);
+    if (m) m.material = concreteMat;
+  });
+
+  const lights = [];
+  const gantry = new THREE.Group();
+  gantry.name = 'gantry';
+  {
+    track.sample(0, sm);
+    const half = sm.width / 2;
+    const span = half + 1.6;
+    const frameMat = own(new THREE.MeshStandardMaterial({ color: 0x23262b, roughness: 0.45, metalness: 0.7, envMap: opts.envMap || null }));
+    const bannerMat = own(new THREE.MeshStandardMaterial({ map: tex.checker, roughness: 0.6 }));
+    const pillar = new THREE.BoxGeometry(0.7, 8, 0.7);
+    pillar.translate(0, 4, 0);
+    const beam = new THREE.BoxGeometry(span * 2 + 0.7, 1.1, 1.0);
+    const banner = new THREE.BoxGeometry(span * 2 - 1, 0.9, 0.12);
+    disposables.push(pillar, beam, banner);
+    for (const side of [-1, 1]) {
+      const p = new THREE.Mesh(pillar, frameMat);
+      p.position.set(side * span, 0, 0);
+      p.castShadow = shadows;
+      gantry.add(p);
+    }
+    const bm = new THREE.Mesh(beam, frameMat);
+    bm.position.set(0, 7.4, 0);
+    bm.castShadow = shadows;
+    gantry.add(bm);
+    const bn = new THREE.Mesh(banner, bannerMat);
+    bn.position.set(0, 6.4, 0);
+    gantry.add(bn);
+    const lightGeo = new THREE.BoxGeometry(0.55, 0.55, 0.2);
+    disposables.push(lightGeo);
+    for (let k = 0; k < 5; k++) {
+      const lm = own(new THREE.MeshBasicMaterial({ color: 0x220707, toneMapped: false }));
+      const l = new THREE.Mesh(lightGeo, lm);
+      l.position.set((k - 2) * 1.0, 7.4, 0.58);
+      gantry.add(l);
+      lights.push(l);
+    }
+    const roadY = sm.pos.y;
+    gantry.position.set(sm.pos.x, roadY, sm.pos.z);
+    gantry.rotation.y = sm.heading;
+    group.add(gantry);
+  }
+
+  function setStartLights(state) {
+    for (let k = 0; k < lights.length; k++) {
+      const m = lights[k].material;
+      if (state === 'go') m.color.setHex(0x22ff66);
+      else if (state === 'off' || state == null) m.color.setHex(0x220707);
+      else m.color.setHex(k < state ? 0xff2020 : 0x220707);
+    }
+  }
+
+  const checkpoints = track.checkpoints(opts.checkpoints);
+  if (opts.showCheckpoints) {
+    const cpMat = own(new THREE.MeshBasicMaterial({ color: 0x6ef3c5, transparent: true, opacity: 0.18, side: THREE.DoubleSide, depthWrite: false }));
+    for (const c of checkpoints) {
+      const geo = new THREE.PlaneGeometry(c.halfW * 2, c.halfH * 2);
+      disposables.push(geo);
+      const m = new THREE.Mesh(geo, cpMat);
+      m.position.set(c.pos.x, c.pos.y, c.pos.z);
+      m.lookAt(c.pos.x + c.normal.x, c.pos.y + c.normal.y, c.pos.z + c.normal.z);
+      group.add(m);
+    }
+  }
+
+  return {
+    group,
+    road: roadMesh,
+    checkpoints,
+    minimap: track.minimap(opts.minimapPoints || 256),
+    grid: track.startGrid(opts.gridSize || 6),
+    setStartLights,
+    dispose() {
+      group.removeFromParent();
+      disposables.forEach((d) => d && d.dispose && d.dispose());
+      group.traverse((o) => { if (o.isInstancedMesh) o.dispose(); });
+    }
+  };
 }

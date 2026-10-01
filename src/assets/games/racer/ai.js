@@ -180,8 +180,8 @@ export function createAIDriver(track, car, opts = {}) {
     if (pi < 0 || !ctx.cars || !ctx.cars[pi] || ctx.cars[pi] === car) return { speed: 1, power: diff.power, nitro: 1 };
     const player = ctx.cars[pi];
     const gap = car.progress - player.progress;
-    const x = clamp(gap / 170, -1, 1) * diff.rubber;
-    if (x > 0) return { speed: 1 - 0.075 * x, power: diff.power * (1 - 0.05 * x), nitro: 1 - 0.7 * x };
+    const x = clamp(gap / 200, -1, 1) * diff.rubber;
+    if (x > 0) return { speed: 1 - 0.13 * x, power: diff.power * (1 - 0.08 * x), nitro: Math.max(0, 1 - 0.9 * x) };
     return { speed: 1 + 0.03 * -x, power: Math.min(1.06, diff.power * (1 + 0.065 * -x)), nitro: 1 + 0.8 * -x };
   }
 
@@ -248,16 +248,16 @@ export function createAIDriver(track, car, opts = {}) {
     if (!blocked && Math.abs(target) < 0.01) avoid *= Math.exp(-0.8 * dt);
     let latGoal = clamp(wantOff + avoid, -halfW, halfW);
 
-    const lead = Math.max(speed, 4) * 0.1;
-    const offA = clamp(line.offsetAt(car.s + lead) * diff.line + sideBias * (1 - diff.line) + avoid, -halfW, halfW);
-    const offB = clamp(line.offsetAt(car.s + lead + 5) * diff.line + sideBias * (1 - diff.line) + avoid, -halfW, halfW);
-    const pa = track.pointAt(car.s + lead, offA, 0, ptA);
-    const pb = track.pointAt(car.s + lead + 5, offB, 0, ptB);
+    const lead = Math.max(speed, 4) * 0.08;
+    const offA = clamp(line.offsetAt(car.s) * diff.line + sideBias * (1 - diff.line) + avoid, -halfW, halfW);
+    const offB = clamp(line.offsetAt(car.s + 4) * diff.line + sideBias * (1 - diff.line) + avoid, -halfW, halfW);
+    const pa = track.pointAt(car.s, offA, 0, ptA);
+    const pb = track.pointAt(car.s + 4, offB, 0, ptB);
     const lineHead = Math.atan2(-(pb.x - pa.x), -(pb.z - pa.z));
     const e = latGoal - car.lateral;
     const phi = wrapAngle(car.vHeading - lineHead);
     const phiTarget = -Math.atan(1.25 * e / Math.max(speed, 8));
-    const kff = line.kappaAt(car.s + lead * 1.5) * diff.line;
+    const kff = line.kappaAt(car.s + lead) * diff.line;
     const omegaNeed = Math.max(speed, 1) * kff + 4.2 * (phiTarget - phi);
     const gripAvail = Math.min(p.maxTurn, p.grip / Math.max(speed, 1));
     const driftAvail = Math.min(p.maxTurn * 1.2, p.driftGrip / Math.max(speed, 1));
@@ -267,13 +267,13 @@ export function createAIDriver(track, car, opts = {}) {
     if (car.drift) {
       const f = clamp(Math.abs(omegaNeed) / driftAvail, 0, 1);
       const sameDir = Math.sign(omegaNeed) === car.driftDir;
-      if (sameDir && f > 0.28) {
+      if (sameDir && Math.abs(omegaNeed) > gripAvail * 0.92) {
         drift = true;
         const turn = car.driftDir * (2 * f - 1);
         steerCmd = clamp(-turn, -1, 1);
       } else {
         drift = false;
-        steerCmd = car.driftDir * 0.75;
+        steerCmd = clamp(-omegaNeed / gripAvail, -1, 1);
       }
     } else if (diff.drift > 0 && car.grounded && speed > 18 && Math.abs(omegaNeed) > gripAvail * 1.04 && rng() < diff.drift) {
       drift = true;

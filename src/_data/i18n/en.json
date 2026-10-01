@@ -184,6 +184,16 @@
       "steps": "{n} steps",
       "tap_resume": "Tap to keep counting"
     },
+    "window": {
+      "label": "Window controls",
+      "close_hint": "Back to where you were",
+      "minimize": "Minimize",
+      "minimize_hint": "Keep it as a pill while you look around",
+      "fullscreen": "Full screen",
+      "fullscreen_hint": "Hide the site header",
+      "exit_fullscreen": "Exit full screen",
+      "exit_fullscreen_hint": "Show the site header again"
+    },
     "close_tool": "Close tool",
     "send_to": "Send to…",
     "send_to_label": "Send to another tool",
@@ -801,8 +811,7 @@
       "preset_1hr": "1 hr",
       "preset_save_aria": "Save the current duration as a preset",
       "preset_remove_aria": "Remove preset {label}",
-      "preset_save_invalid": "Set a duration first, then save it",
-      "mini_nothing": "Start a timer first, then minimize it."
+      "preset_save_invalid": "Set a duration first, then save it"
     },
     "invoice": {
       "btn_new": "New invoice",
@@ -1137,8 +1146,7 @@
       "pocket_note": "Pocket mode keeps the screen on but pure black, so steps keep counting in your pocket. Best on OLED screens. Slide the dot at the bottom to exit.",
       "pocket_exit": "Slide to exit",
       "est_label": "est.",
-      "est_explain": "Estimated from your walking pace while the screen was locked",
-      "mini_nothing": "Start counting first, then minimize."
+      "est_explain": "Estimated from your walking pace while the screen was locked"
     },
     "qr-scanner": {
       "aria_video": "Live camera preview",

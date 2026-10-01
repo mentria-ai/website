@@ -1171,7 +1171,7 @@ eleventyComputed:
   }
 
   function overlayOpen() {
-    if (document.querySelector('.m-modal:not([hidden]), .m-palette:not([hidden]), dialog[open]')) return true;
+    if (document.querySelector('.m-modal:not([hidden]), .m-wmenu:not([hidden]), .m-palette:not([hidden]), dialog[open]')) return true;
     try {
       return !!document.querySelector(':popover-open');
     } catch (_) {

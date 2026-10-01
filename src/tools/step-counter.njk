@@ -142,7 +142,6 @@ eleventyComputed:
   const LANG = document.documentElement.lang || undefined;
   const COPY = {
     btnStart:    {{ ("tool.step-counter.btn_start"    | t) | dump | safe }},
-    miniNothing: {{ ("tool.step-counter.mini_nothing" | t) | dump | safe }},
     btnPause:    {{ ("tool.step-counter.btn_pause"    | t) | dump | safe }},
     btnResume:   {{ ("tool.step-counter.btn_resume"   | t) | dump | safe }},
     goalOf:      {{ ("tool.step-counter.goal_of"      | t) | dump | safe }},
@@ -699,7 +698,8 @@ eleventyComputed:
 
   const miniDot = document.querySelector('[data-mini="steps"]');
   if (miniDot) miniDot.addEventListener('click', () => {
-    if (!running || !window.MentriaMini) { MentriaUI.toast(COPY.miniNothing); return; }
+    if (!window.MentriaMini) return;
+    if (!running) { window.MentriaMini.minimizeTool(); return; }
     stopTracking(false);
     window.MentriaMini.start('steps', location.pathname);
     window.MentriaMini.leave();

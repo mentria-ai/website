@@ -1,0 +1,26 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/image-use/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'image_use.title' | t }}"
+  description: "{{ 'image_use.rights' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">image-use</span></p>
+  <h1>{{ "image_use.title" | t }}</h1>
+  <p>{{ "image_use.lede" | t }}</p>
+</section>
+<section class="image-use">
+  <p>{{ "image_use.rights" | t }}</p>
+  <p>{{ "image_use.share" | t }}</p>
+  <p>{{ "image_use.ask" | t }} <a href="https://x.com/mentria_ai" rel="noopener">{{ "image_use.contact" | t }}</a></p>
+</section>
+<style>
+  .image-use { max-width: 640px; margin: 0 auto 3rem; display: grid; gap: 0.9rem; line-height: 1.6; }
+  .image-use p { margin: 0; }
+</style>

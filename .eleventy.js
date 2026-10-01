@@ -201,6 +201,30 @@ module.exports = function(eleventyConfig) {
     return str.startsWith(prefix);
   });
 
+  const siteUrl = require("./src/_data/site.json").siteUrl;
+  eleventyConfig.addFilter("deckImages", function (deck, lang, coverCaption) {
+    if (!deck) return [];
+    const pick = (value) => {
+      if (value == null) return "";
+      if (typeof value === "string") return value;
+      return value[lang] || value.en || value[Object.keys(value)[0]] || "";
+    };
+    const seen = new Set();
+    const out = [];
+    const add = (url, caption) => {
+      if (!url || typeof url !== "string") return;
+      const abs = url.startsWith("/") ? siteUrl + url : url;
+      if (seen.has(abs)) return;
+      seen.add(abs);
+      out.push({ url: abs, caption: pick(caption) });
+    };
+    add(deck.cover_image, coverCaption != null ? coverCaption : deck.subtitle || deck.title);
+    (deck.slides || []).forEach((slide) => {
+      if (slide && slide.image && slide.image_status !== "pending") add(slide.image, slide.caption);
+    });
+    return out;
+  });
+
   eleventyConfig.addFilter("contains", function (value, part) {
     return String(value == null ? "" : value).indexOf(part) !== -1;
   });

@@ -1,0 +1,33 @@
+{%- set schemaImages = schemaDeck | deckImages(pair.locale.code, title) -%}
+{%- set imageUse = site.siteUrl + pair.locale.pathPrefix + "/image-use/" -%}
+{%- if schemaImages.length %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "LearningResource",
+      "@id": "{{ site.siteUrl }}{{ page.url }}#deck",
+      "name": {{ title | dump | safe }},
+      "description": {{ description | dump | safe }},
+      "url": "{{ site.siteUrl }}{{ page.url }}",
+      "inLanguage": "{{ pair.locale.code }}",
+      "isAccessibleForFree": true,
+      "publisher": { "@id": "{{ site.siteUrl }}/#organization" },
+      "image": [{% for img in schemaImages %}{ "@id": {{ (img.url + "#image") | dump | safe }} }{% if not loop.last %}, {% endif %}{% endfor %}]
+    }{% for img in schemaImages %},
+    {
+      "@type": "ImageObject",
+      "@id": {{ (img.url + "#image") | dump | safe }},
+      "contentUrl": {{ img.url | dump | safe }},
+      "caption": {{ img.caption | dump | safe }},
+      "creditText": "Mentria",
+      "creator": { "@type": "Organization", "name": "Mentria", "url": "{{ site.siteUrl }}/" },
+      "copyrightNotice": "© Mentria",
+      "license": "{{ imageUse }}",
+      "acquireLicensePage": "{{ imageUse }}"
+    }{% endfor %}
+  ]
+}
+</script>
+{%- endif %}

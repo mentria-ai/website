@@ -3155,5 +3155,13 @@
     "build_title": "Make your own",
     "build_body": "An extension is one HTML file. The SDK explains the format and what an extension can use.",
     "manage_link": "Manage installed extensions"
+  },
+  "image_use": {
+    "title": "Using Mentria's images",
+    "lede": "The pictures on Mentria, including the ones in decks and learning packs, are made for this site.",
+    "rights": "All images on Mentria are © Mentria. All rights reserved.",
+    "share": "You're welcome to link to any page, or share it as it is.",
+    "ask": "To use an image anywhere else, ask us first:",
+    "contact": "contact us on X"
   }
 }

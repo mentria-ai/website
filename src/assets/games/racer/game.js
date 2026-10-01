@@ -562,6 +562,7 @@ function disposeWorld() {
 }
 
 function makeGhostLook(view) {
+  const owned = [];
   view.group.traverse(function (o) {
     if (!o.isMesh || !o.material) return;
     const list = Array.isArray(o.material) ? o.material : [o.material];
@@ -571,12 +572,14 @@ function makeGhostLook(view) {
       c.opacity = 0.32;
       c.depthWrite = false;
       if (c.emissive) c.emissive.setHex(0x1a6f5a);
+      owned.push(c);
       return c;
     });
     o.material = Array.isArray(o.material) ? next : next[0];
     o.castShadow = false;
     o.renderOrder = 3;
   });
+  view.ghostMaterials = owned;
 }
 
 function disposeRace() {
@@ -584,7 +587,11 @@ function disposeRace() {
   for (let i = 0; i < race.views.length; i++) {
     try { race.views[i].dispose(); } catch (_) {}
   }
-  if (race.ghostView) { try { race.ghostView.dispose(); } catch (_) {} }
+  if (race.ghostView) {
+    try { race.ghostView.dispose(); } catch (_) {}
+    const gm = race.ghostView.ghostMaterials || [];
+    for (let i = 0; i < gm.length; i++) { try { gm[i].dispose(); } catch (_) {} }
+  }
   stopVoices();
   if (headlight) { headlight.removeFromParent(); headlight.target.removeFromParent(); headlight = null; }
   if (particles) { try { particles.clear(); } catch (_) {} }
@@ -1289,6 +1296,14 @@ function syncCarView(i, alpha) {
   if (v.setSpin) v.setSpin(c.wheelSpin);
   if (v.setBrake) v.setBrake(c.brake > 0.1 || (c.reverse && c.speed > 0.5) ? 1 : 0);
   if (v.setNitro) v.setNitro(c.boosting);
+  if (v.setShadowStrength) {
+    const lift = c.grounded ? 0 : Math.max(0, c.y - c.surf);
+    const k = clamp(1 - lift / 5, 0.15, 1);
+    if (v.__shadowK !== k) {
+      v.__shadowK = k;
+      v.setShadowStrength(k);
+    }
+  }
 }
 
 function carFx(i, frameDt) {

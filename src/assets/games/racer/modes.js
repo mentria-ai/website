@@ -179,18 +179,18 @@ function createStudio(renderer) {
   room.dispose && room.dispose();
   pmrem.dispose();
   scene.environment = envRT.texture;
-  scene.environmentIntensity = 0.9;
+  scene.environmentIntensity = 0.7;
 
   const floorTex = floorTexture();
   const floorGeo = new THREE.CircleGeometry(18, 64);
   floorGeo.rotateX(-Math.PI / 2);
-  const floorMat = new THREE.MeshStandardMaterial({ map: floorTex, color: 0x6a7276, roughness: 0.55, metalness: 0.1, envMapIntensity: 0.18 });
+  const floorMat = new THREE.MeshStandardMaterial({ map: floorTex, color: 0x3a4044, roughness: 0.88, metalness: 0, envMapIntensity: 0.08 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.receiveShadow = true;
   scene.add(floor);
 
   const discGeo = new THREE.CylinderGeometry(3.3, 3.4, 0.08, 64);
-  const discMat = new THREE.MeshStandardMaterial({ color: 0x14191c, roughness: 0.32, metalness: 0.55, envMapIntensity: 0.35 });
+  const discMat = new THREE.MeshStandardMaterial({ color: 0x14191c, roughness: 0.45, metalness: 0.5, envMapIntensity: 0.25 });
   const disc = new THREE.Mesh(discGeo, discMat);
   disc.position.y = 0.04;
   disc.receiveShadow = true;
@@ -204,7 +204,7 @@ function createStudio(renderer) {
 
   const hemi = new THREE.HemisphereLight(0xcfe8ff, 0x1a1410, 0.5);
   scene.add(hemi);
-  const key = new THREE.DirectionalLight(0xfff4e6, 2.6);
+  const key = new THREE.DirectionalLight(0xfff4e6, 2.2);
   key.position.set(4, 7, 5);
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
@@ -212,7 +212,7 @@ function createStudio(renderer) {
   key.shadow.camera.near = 1; key.shadow.camera.far = 20;
   key.shadow.bias = -0.0004;
   scene.add(key);
-  const rim = new THREE.DirectionalLight(0x8ff7d6, 0.75);
+  const rim = new THREE.DirectionalLight(0x8ff7d6, 0.45);
   rim.position.set(-5, 3, -6);
   scene.add(rim);
   const fill = new THREE.DirectionalLight(0x9fc4ff, 0.7);
@@ -369,7 +369,7 @@ export function createGarage(opts) {
     try {
       carView = createCar(car, { lod: 'high', envMap: studio.envMap, color: paintId });
       carView.group.traverse(function (o) { if (o.isMesh) o.castShadow = true; });
-      if (carView.setHeadlights) carView.setHeadlights(true);
+      if (carView.setHeadlights) carView.setHeadlights(false);
       if (carView.setEnvMap) carView.setEnvMap(studio.envMap, 1.1);
       studio.turntable.add(carView.group);
     } catch (err) {

@@ -601,6 +601,16 @@
       "title": "Music Player",
       "lede": "Play the music on your phone or computer with albums, artists, playlists, shuffle and a sleep timer. Your files never leave your device.",
       "tldr": "Open some songs or a whole folder and Mentria builds a library from their tags: songs, albums with cover art, and artists, with search. Play in order or shuffle, repeat, line songs up in a queue, and keep playlists that you can export as M3U. Lock-screen and headphone controls work, a sleep timer fades the music out, and on a computer a mini player can float above other windows. It reads MP3, AAC, FLAC, Ogg, Opus and WAV; Apple Lossless and AIFF play on Apple devices. Nothing is uploaded: the player reads files straight from your device."
+    },
+    "fpv-drone": {
+      "title": "SKYRUSH FPV",
+      "lede": "Fly a racing drone through glowing gates over hills, a container yard and a desert canyon. Acro or self-level flight, medals, ghost races and a free-flight map. Works with touch, controller or keyboard.",
+      "tldr": "First-person drone racing through gates, with medals and ghost races."
+    },
+    "nitro-racer": {
+      "title": "NITRO RACER",
+      "lede": "Arcade street racing against five rivals: drift to fill your nitro, hit the jumps and chase medals on a neon city circuit, a coastal highway and a desert canyon. Works with touch, tilt, controller or keyboard.",
+      "tldr": "Arcade racing with drifts, nitro and jumps on three tracks."
     }
   },
   "game": {

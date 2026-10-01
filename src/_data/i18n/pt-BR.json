@@ -601,6 +601,16 @@
       "title": "Player de música",
       "lede": "Ouça as músicas do seu celular ou computador com álbuns, artistas, playlists, modo aleatório e timer para dormir. Seus arquivos nunca saem do seu dispositivo.",
       "tldr": "Abra algumas músicas ou uma pasta inteira e o Mentria monta uma biblioteca com as tags delas: músicas, álbuns com capa e artistas, com busca. Toque em ordem ou no aleatório, repita, coloque músicas na fila e mantenha playlists que você pode exportar em M3U. Os controles da tela de bloqueio e dos fones funcionam, o timer abaixa a música até parar e, no computador, um miniplayer pode flutuar sobre outras janelas. Lê MP3, AAC, FLAC, Ogg, Opus e WAV; Apple Lossless e AIFF tocam em dispositivos Apple. Nada é enviado: o player lê os arquivos direto do seu dispositivo."
+    },
+    "fpv-drone": {
+      "title": "SKYRUSH FPV",
+      "lede": "Pilote um drone de corrida por portais luminosos sobre colinas, um pátio de contêineres e um cânion no deserto. Voo acrobático ou autonivelado, medalhas, corridas contra fantasmas e um mapa de voo livre. Funciona com toque, controle ou teclado.",
+      "tldr": "Corrida de drones em primeira pessoa por portais, com medalhas e fantasmas."
+    },
+    "nitro-racer": {
+      "title": "NITRO RACER",
+      "lede": "Corrida de rua arcade contra cinco rivais: drifte para encher o nitro, salte nas rampas e conquiste medalhas num circuito urbano neon, numa rodovia litorânea e num cânion no deserto. Funciona com toque, inclinação, controle ou teclado.",
+      "tldr": "Corrida arcade com drifts, nitro e saltos em três pistas."
     }
   },
   "game": {

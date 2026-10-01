@@ -601,6 +601,16 @@
       "title": "Lecteur de musique",
       "lede": "Écoutez la musique de votre téléphone ou de votre ordinateur avec albums, artistes, playlists, lecture aléatoire et minuterie de veille. Vos fichiers ne quittent jamais votre appareil.",
       "tldr": "Ouvrez quelques morceaux ou un dossier entier : Mentria crée une bibliothèque à partir de leurs tags, avec morceaux, albums illustrés et artistes, et une recherche. Lisez dans l’ordre ou en aléatoire, répétez, mettez des morceaux en file d’attente et gardez des playlists exportables en M3U. Les commandes de l’écran verrouillé et des écouteurs fonctionnent, la minuterie baisse la musique jusqu’à l’arrêt et, sur un ordinateur, un mini-lecteur peut flotter au-dessus des autres fenêtres. Il lit le MP3, l’AAC, le FLAC, l’Ogg, l’Opus et le WAV ; l’Apple Lossless et l’AIFF se lisent sur les appareils Apple. Rien n’est envoyé : le lecteur lit les fichiers directement depuis votre appareil."
+    },
+    "fpv-drone": {
+      "title": "SKYRUSH FPV",
+      "lede": "Pilotez un drone de course à travers des portes lumineuses au-dessus de collines, d'un parc à conteneurs et d'un canyon désertique. Vol acrobatique ou auto-stabilisé, médailles, courses contre des fantômes et une carte de vol libre. Fonctionne au toucher, à la manette ou au clavier.",
+      "tldr": "Course de drones en vue subjective à travers des portes, avec médailles et fantômes."
+    },
+    "nitro-racer": {
+      "title": "NITRO RACER",
+      "lede": "Course de rue arcade contre cinq rivaux : driftez pour remplir votre nitro, prenez les tremplins et visez les médailles sur un circuit urbain néon, une route côtière et un canyon désertique. Fonctionne au toucher, à l'inclinaison, à la manette ou au clavier.",
+      "tldr": "Course arcade avec drifts, nitro et sauts sur trois circuits."
     }
   },
   "game": {

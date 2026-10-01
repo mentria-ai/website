@@ -342,5 +342,23 @@
     "category": "Media",
     "group": "Everyday",
     "added": "2026-10-01"
+  },
+  {
+    "slug": "fpv-drone",
+    "held": true,
+    "title": "SKYRUSH FPV",
+    "summary": "Fly a racing drone through glowing gates over hills, a container yard and a desert canyon. Acro or self-level flight, medals, ghost races and a free-flight map. Works with touch, controller or keyboard.",
+    "category": "Game",
+    "group": "Games",
+    "added": "2026-10-02"
+  },
+  {
+    "slug": "nitro-racer",
+    "held": true,
+    "title": "NITRO RACER",
+    "summary": "Arcade street racing against five rivals: drift to fill your nitro, hit the jumps and chase medals on a neon city circuit, a coastal highway and a desert canyon. Works with touch, tilt, controller or keyboard.",
+    "category": "Game",
+    "group": "Games",
+    "added": "2026-10-02"
   }
 ]

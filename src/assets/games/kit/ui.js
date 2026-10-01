@@ -465,6 +465,9 @@ export function createUI(stage, copyIn, opts = {}) {
 
   ensureStyle();
   stage.classList.add('gk-stage');
+  try {
+    if (getComputedStyle(stage).position === 'static') stage.style.position = 'relative';
+  } catch (_) {}
 
   const hud = document.createElement('div');
   hud.className = 'gk-hud';

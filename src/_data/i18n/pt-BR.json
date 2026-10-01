@@ -586,6 +586,11 @@
       "short": "Formatador JSON",
       "lede": "Um formatador e validador de JSON online sem instalar nada: formate, minifique ou ordene as chaves e veja a linha e a coluna exatas onde um JSON inválido quebra. Tudo roda no seu dispositivo; nada é enviado.",
       "tldr": "Cole JSON, solte um arquivo ou abra um, e ele é validado enquanto você digita: quando algo está errado, você vê a linha e a coluna exatas e o trecho com problema, com um ^ embaixo do erro. Formate com 2 espaços, 4 espaços ou tabulações, minifique ou ordene as chaves de cada objeto e depois copie o resultado ou baixe como arquivo .json. A visualização em árvore abre documentos grandes um nível por vez e copia o caminho de qualquer valor, como $.items[3].name. Números grandes ou precisos demais para o JavaScript são sinalizados e mantidos dígito por dígito, em vez de arredondados sem aviso. Tudo roda no seu navegador, então o JSON nunca sai do seu dispositivo."
+    },
+    "video-player": {
+      "title": "Player de vídeo",
+      "lede": "Assista aos vídeos do seu celular ou computador com retomada, controle de velocidade, legendas e picture-in-picture. Seus arquivos nunca saem do seu dispositivo.",
+      "tldr": "Abra alguns vídeos ou uma pasta inteira e eles viram uma playlist com miniaturas. O Mentria lembra onde você parou em cada um para você continuar depois e, no computador ou no Android, também pode lembrar a pasta. Mude a velocidade de 0,25× a 3×, pule 10 segundos, carregue legendas .srt ou .vtt e ajuste a sincronia, ou abra o vídeo em picture-in-picture. Nada é enviado: o player lê os arquivos direto do seu dispositivo e avisa quando um arquivo usa um formato que o seu navegador não consegue reproduzir."
     }
   },
   "game": {
@@ -2939,6 +2944,52 @@
       "expand_capped": "As primeiras {n} linhas foram abertas. Abra os nós mais profundos um de cada vez.",
       "show_more": "Mostrar mais {n} (restam {left})",
       "download_base": "dados"
+    },
+    "video-player": {
+      "drop": "Solte vídeos ou uma pasta aqui",
+      "open_files": "Abrir vídeos",
+      "open_folder": "Abrir pasta",
+      "drop_hint": "Seus vídeos ficam neste dispositivo. Nada é enviado.",
+      "ios_hint": "No iPhone, escolha os vídeos a cada vez ou abra uma pasta pelo app Arquivos. O Mentria lembra onde você parou.",
+      "saved_title": "Suas pastas",
+      "recent_title": "Continuar assistindo",
+      "start_over": "Começar do início",
+      "controls": "Controles do player",
+      "prev": "Vídeo anterior",
+      "back10": "Voltar 10 segundos",
+      "fwd10": "Avançar 10 segundos",
+      "next": "Próximo vídeo",
+      "speed": "Velocidade de reprodução",
+      "subs": "Legendas",
+      "pip": "Picture-in-picture",
+      "add": "Adicionar vídeos",
+      "library": "Voltar aos seus vídeos",
+      "subs_off": "Desativadas",
+      "subs_load": "Carregar legendas",
+      "subs_timing": "Sincronia",
+      "subs_earlier": "Antes",
+      "subs_later": "Depois",
+      "subs_reset": "Redefinir",
+      "playlist": "Playlist",
+      "keys": "Teclas: Espaço reproduzir ou pausar · J e L pulam 10 s · F tela cheia · N e P próximo ou anterior · [ e ] velocidade · C legendas",
+      "count": "{n} vídeos",
+      "count_one": "1 vídeo",
+      "resumed": "Retomado em {time}.",
+      "watched": "Assistido",
+      "played": "Parou em {time}",
+      "pick_again": "Escolha este arquivo de novo para reproduzi-lo",
+      "reconnect": "Reconectar",
+      "open": "Abrir",
+      "forget_label": "Remover {name}",
+      "no_videos": "Nenhum vídeo encontrado ali.",
+      "folder_denied": "O Mentria precisa de permissão para ler esta pasta. Toque em Reconectar para permitir.",
+      "subs_loaded": "Legendas carregadas: {name}",
+      "subs_bad": "{name} não parece um arquivo de legenda. Use .srt ou .vtt.",
+      "err_play": "Este navegador não consegue reproduzir {name}. Tente outro navegador ou converta para MP4 (H.264).",
+      "err_mkv_apple": "Vídeos MKV não rodam no iPhone, no iPad nem no Safari. Abra no Chrome ou no Firefox, ou converta para MP4.",
+      "err_avi": "Vídeos AVI não rodam em navegadores. Converta para MP4 primeiro.",
+      "warn_dolby": "O som deste vídeo é Dolby ou DTS, que este navegador não consegue reproduzir, então ele pode ficar mudo. O Safari consegue reproduzir.",
+      "err_generic": "Não foi possível reproduzir este vídeo. O arquivo pode estar danificado ou em um formato que este navegador não suporta."
     }
   },
   "category": {
@@ -2951,7 +3002,8 @@
     "Utility": "Utilitário",
     "Health": "Saúde",
     "Security": "Segurança",
-    "Social": "Social"
+    "Social": "Social",
+    "Media": "Mídia"
   },
   "palette": {
     "placeholder": "Buscar ferramentas e páginas…",

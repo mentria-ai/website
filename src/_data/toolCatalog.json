@@ -318,5 +318,13 @@
     "category": "Utility",
     "group": "Everyday",
     "added": "2026-07-28"
+  },
+  {
+    "slug": "video-player",
+    "title": "Video Player",
+    "summary": "Play videos from your phone or computer in the browser: open files or a whole folder, resume where you stopped, change speed from 0.25× to 3×, load .srt or .vtt subtitles, and use picture-in-picture. A free local video player that never uploads your files.",
+    "category": "Media",
+    "group": "Everyday",
+    "added": "2026-10-01"
   }
 ]

@@ -586,6 +586,11 @@
       "short": "Formateur JSON",
       "lede": "Un formateur et validateur JSON en ligne, sans rien installer : indentez, minifiez ou triez les clés, et voyez la ligne et la colonne exactes où un JSON invalide casse. Tout se passe sur votre appareil ; rien n’est envoyé.",
       "tldr": "Collez du JSON, déposez un fichier ou ouvrez-en un : il est vérifié pendant la saisie, et en cas d’erreur vous obtenez la ligne et la colonne exactes ainsi que l’extrait fautif, avec un ^ sous l’erreur. Indentez-le avec 2 espaces, 4 espaces ou des tabulations, minifiez-le ou triez les clés de chaque objet, puis copiez le résultat ou téléchargez-le en fichier .json. La vue en arbre ouvre les gros documents niveau par niveau et copie le chemin de n’importe quelle valeur, comme $.items[3].name. Les nombres trop grands ou trop précis pour JavaScript sont signalés et conservés chiffre pour chiffre au lieu d’être arrondis en silence. Tout fonctionne dans votre navigateur : le JSON ne quitte jamais votre appareil."
+    },
+    "video-player": {
+      "title": "Lecteur vidéo",
+      "lede": "Lisez les vidéos de votre téléphone ou de votre ordinateur, avec reprise, vitesse, sous-titres et image dans l’image. Vos fichiers ne quittent jamais votre appareil.",
+      "tldr": "Ouvrez quelques vidéos ou un dossier entier : ils deviennent une liste de lecture avec miniatures. Mentria retient où vous vous êtes arrêté dans chacune pour reprendre plus tard, et sur un ordinateur ou un téléphone Android il peut aussi retenir le dossier. Réglez la vitesse de 0,25× à 3×, sautez de 10 secondes, chargez des sous-titres .srt ou .vtt et ajustez leur synchronisation, ou détachez la vidéo en image dans l’image. Rien n’est envoyé : le lecteur lit les fichiers directement depuis votre appareil et vous prévient quand un fichier utilise un format que votre navigateur ne sait pas lire."
     }
   },
   "game": {
@@ -2939,6 +2944,52 @@
       "expand_capped": "Les {n} premières lignes sont dépliées. Ouvrez les nœuds plus profonds un par un.",
       "show_more": "Afficher {n} de plus (encore {left})",
       "download_base": "données"
+    },
+    "video-player": {
+      "drop": "Déposez des vidéos ou un dossier ici",
+      "open_files": "Ouvrir des vidéos",
+      "open_folder": "Ouvrir un dossier",
+      "drop_hint": "Vos vidéos restent sur cet appareil. Rien n’est envoyé.",
+      "ios_hint": "Sur iPhone, choisissez les vidéos à chaque fois ou ouvrez un dossier depuis Fichiers. Mentria retient où vous vous êtes arrêté.",
+      "saved_title": "Vos dossiers",
+      "recent_title": "Reprendre",
+      "start_over": "Recommencer",
+      "controls": "Commandes du lecteur",
+      "prev": "Vidéo précédente",
+      "back10": "Reculer de 10 secondes",
+      "fwd10": "Avancer de 10 secondes",
+      "next": "Vidéo suivante",
+      "speed": "Vitesse de lecture",
+      "subs": "Sous-titres",
+      "pip": "Image dans l’image",
+      "add": "Ajouter des vidéos",
+      "library": "Retour à vos vidéos",
+      "subs_off": "Désactivés",
+      "subs_load": "Charger des sous-titres",
+      "subs_timing": "Synchronisation",
+      "subs_earlier": "Plus tôt",
+      "subs_later": "Plus tard",
+      "subs_reset": "Réinitialiser",
+      "playlist": "Liste de lecture",
+      "keys": "Touches : Espace lecture ou pause · J et L sautent de 10 s · F plein écran · N et P suivante ou précédente · [ et ] vitesse · C sous-titres",
+      "count": "{n} vidéos",
+      "count_one": "1 vidéo",
+      "resumed": "Reprise à {time}.",
+      "watched": "Vue",
+      "played": "Arrêtée à {time}",
+      "pick_again": "Choisissez à nouveau ce fichier pour le lire",
+      "reconnect": "Reconnecter",
+      "open": "Ouvrir",
+      "forget_label": "Retirer {name}",
+      "no_videos": "Aucune vidéo trouvée ici.",
+      "folder_denied": "Mentria a besoin de votre autorisation pour lire ce dossier. Touchez Reconnecter pour l’accorder.",
+      "subs_loaded": "Sous-titres chargés : {name}",
+      "subs_bad": "{name} ne ressemble pas à un fichier de sous-titres. Utilisez .srt ou .vtt.",
+      "err_play": "Ce navigateur ne peut pas lire {name}. Essayez un autre navigateur ou convertissez-la en MP4 (H.264).",
+      "err_mkv_apple": "Les vidéos MKV ne se lisent pas sur iPhone, iPad ni dans Safari. Ouvrez-la dans Chrome ou Firefox, ou convertissez-la en MP4.",
+      "err_avi": "Les vidéos AVI ne se lisent pas dans les navigateurs. Convertissez-la d’abord en MP4.",
+      "warn_dolby": "Le son de cette vidéo est en Dolby ou DTS, que ce navigateur ne sait pas lire : elle risque d’être muette. Safari peut la lire.",
+      "err_generic": "Impossible de lire cette vidéo. Le fichier est peut-être endommagé ou dans un format que ce navigateur ne prend pas en charge."
     }
   },
   "category": {
@@ -2951,7 +3002,8 @@
     "Utility": "Utilitaire",
     "Health": "Santé",
     "Security": "Sécurité",
-    "Social": "Social"
+    "Social": "Social",
+    "Media": "Médias"
   },
   "palette": {
     "placeholder": "Rechercher outils et pages…",

@@ -1794,12 +1794,15 @@ export function createRenderer(canvas){
       specCap: SPEC_HEADROOM / Math.max(0.2126 * sunR + 0.7152 * sunG + 0.0722 * sunB, 0.001),
       fxPrims: prims,
       fxLights: lights,
+      fxLamps: lampFloors(props, prims),
       stars: 0.22 + 0.78 * clamp((sunC[2] - sunC[0]) / 0.15, 0, 1)
     };
     particles.clear();
     motion.reset();
     recoilFx.reset();
     seenSparks = new WeakMap();
+    decals.length = 0;
+    decalHead = 0;
 
     let amnx = Infinity, amny = Infinity, amnz = Infinity;
     let amxx = -Infinity, amxy = -Infinity, amxz = -Infinity;
@@ -1829,6 +1832,28 @@ export function createRenderer(canvas){
     m4Mul(mLightVP, mLightProj, mLightView);
     m4Mul(mShadow, mBias, mLightVP);
     renderShadowMap();
+  }
+
+  function lampFloors(props, prims){
+    const out = [];
+    for (let i = 0; i < props.length; i++){
+      const pr = props[i];
+      let fy = 0;
+      for (let k = 0; k < prims.length; k++){
+        const p = prims[k];
+        if (pr.x < p.min[0] || pr.x > p.max[0] || pr.z < p.min[2] || pr.z > p.max[2]) continue;
+        let top = p.max[1];
+        if (p.type === 'ramp'){
+          const a = p.axis;
+          let t = ((a === 0 ? pr.x : pr.z) - p.min[a]) / Math.max(p.max[a] - p.min[a], 1e-4);
+          if (p.sign < 0) t = 1 - t;
+          top = p.min[1] + (p.max[1] - p.min[1]) * clamp(t, 0, 1);
+        }
+        if (top <= pr.y - 0.2 && top > fy) fy = top;
+      }
+      out.push({ x: pr.x, y: pr.y, z: pr.z, r: pr.r, g: pr.g, b: pr.b, floor: fy });
+    }
+    return out;
   }
 
   function renderShadowMap(){
@@ -2580,6 +2605,7 @@ export function createRenderer(canvas){
       e.P.flash = makeProgram(gl, VS_FLASH, FX.FS_FLASH_E);
       e.P.tracer = makeProgram(gl, VS_TRACER, FX.FS_TRACER_E);
       e.P.part = makeProgram(gl, FX.VS_PART, FX.FS_PART);
+      e.P.decal = makeProgram(gl, FX.VS_DECAL, FX.FS_DECAL);
       e.P.down = makeProgram(gl, VS_FULL, FX.FS_DOWN);
       e.P.up = makeProgram(gl, VS_FULL, FX.FS_UP);
       e.P.rays = makeProgram(gl, VS_FULL, FX.FS_RAYS);
@@ -2597,6 +2623,7 @@ export function createRenderer(canvas){
       E.vmx = buildVmExtras();
       E.partA = partVAO();
       E.partB = partVAO();
+      E.decal = decalVAO();
       gl.bindVertexArray(null);
       gl.bindBuffer(gl.ARRAY_BUFFER, null);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
@@ -2622,6 +2649,8 @@ export function createRenderer(canvas){
       motion.reset();
       recoilFx.reset();
       seenSparks = new WeakMap();
+      decals.length = 0;
+      decalHead = 0;
       if (world){
         for (let i = 0; i < world.targets.length; i++){ world.targets[i].hitAt = -9; world.targets[i].spawnAt = -9; }
       }
@@ -2697,10 +2726,83 @@ export function createRenderer(canvas){
     }
     const surf = FX.surfaceAt(world.fxPrims, x, y, z);
     const n = surf ? surf.n : [-impactDir[0], -impactDir[1], -impactDir[2]];
+    if (surf) addDecal(x, y, z, n);
     impactLight[0] = clamp(world.ambR * 3.0 + world.sunR * 0.10, 0.25, 1.4);
     impactLight[1] = clamp(world.ambG * 3.0 + world.sunG * 0.10, 0.25, 1.4);
     impactLight[2] = clamp(world.ambB * 3.0 + world.sunB * 0.10, 0.25, 1.4);
     particles.impact(s.pos, n, impactDir, surf ? surf.mat : 'concrete', impactLight);
+  }
+
+  const DECAL_MAX = 64;
+  const DECAL_LIFE = 14;
+  const decals = [];
+  let decalHead = 0;
+  const decalData = new Float32Array(DECAL_MAX * 4 * 7);
+
+  function addDecal(x, y, z, n){
+    let d;
+    if (decals.length < DECAL_MAX){ d = {}; decals.push(d); }
+    else { d = decals[decalHead]; decalHead = (decalHead + 1) % DECAL_MAX; }
+    d.x = x + n[0] * 0.004; d.y = y + n[1] * 0.004; d.z = z + n[2] * 0.004;
+    d.nx = n[0]; d.ny = n[1]; d.nz = n[2];
+    d.rot = particles.rnd() * Math.PI * 2;
+    d.size = 0.075 + particles.rnd() * 0.035;
+    d.born = time;
+  }
+
+  function fillDecals(){
+    let k = 0;
+    for (let i = 0; i < decals.length; i++){
+      const d = decals[i];
+      const age = time - d.born;
+      if (age < 0 || age > DECAL_LIFE) continue;
+      const alpha = Math.min(1, (DECAL_LIFE - age) / 3);
+      const heat = Math.exp(-age * 5.5);
+      let ax = 0, ay = 1, az = 0;
+      if (Math.abs(d.ny) > 0.9){ ax = 1; ay = 0; az = 0; }
+      let tx = ay * d.nz - az * d.ny, ty = az * d.nx - ax * d.nz, tz = ax * d.ny - ay * d.nx;
+      const tl = 1 / Math.max(Math.sqrt(tx * tx + ty * ty + tz * tz), 1e-6);
+      tx *= tl; ty *= tl; tz *= tl;
+      const bx = d.ny * tz - d.nz * ty, by = d.nz * tx - d.nx * tz, bz = d.nx * ty - d.ny * tx;
+      const c = Math.cos(d.rot) * d.size, s = Math.sin(d.rot) * d.size;
+      const ux1 = tx * c + bx * s, uy1 = ty * c + by * s, uz1 = tz * c + bz * s;
+      const vx1 = bx * c - tx * s, vy1 = by * c - ty * s, vz1 = bz * c - tz * s;
+      const o = k * 28;
+      const cs = [-1, -1, 1, -1, 1, 1, -1, 1];
+      for (let v = 0; v < 4; v++){
+        const cu = cs[v * 2], cv = cs[v * 2 + 1];
+        const q = o + v * 7;
+        decalData[q] = d.x + ux1 * cu + vx1 * cv;
+        decalData[q + 1] = d.y + uy1 * cu + vy1 * cv;
+        decalData[q + 2] = d.z + uz1 * cu + vz1 * cv;
+        decalData[q + 3] = cu; decalData[q + 4] = cv;
+        decalData[q + 5] = alpha; decalData[q + 6] = heat;
+      }
+      k++;
+    }
+    return k;
+  }
+
+  function decalVAO(){
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, decalData.byteLength, gl.DYNAMIC_DRAW);
+    const vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GLB.tracerIBO);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 28, 0);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 28, 12);
+    gl.enableVertexAttribArray(2);
+    gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 28, 20);
+    gl.enableVertexAttribArray(3);
+    gl.vertexAttribPointer(3, 1, gl.FLOAT, false, 28, 24);
+    gl.bindVertexArray(null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    return { vao: vao, vbo: vbo };
   }
 
   let currentTracers = null;
@@ -2760,6 +2862,26 @@ export function createRenderer(canvas){
     gl.disable(gl.CULL_FACE);
     gl.enable(gl.BLEND);
 
+    const dc = decals.length > 0 ? fillDecals() : 0;
+    if (dc > 0){
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      const PDc = E.P.decal;
+      gl.useProgram(PDc.p);
+      sm4(PDc, 'uViewProj', mVP);
+      s3f(PDc, 'uCamPos', px, py, pz);
+      s1f(PDc, 'uPreExpose', preExpose);
+      s3f(PDc, 'uTint', 0.068, 0.064, 0.060);
+      s3f(PDc, 'uFogColor', world.fogR, world.fogG, world.fogB);
+      s3f(PDc, 'uFogParam', world.fogDensity, world.fogFalloff, world.fogRef);
+      s3f(PDc, 'uSunDir', world.sunX, world.sunY, world.sunZ);
+      s3f(PDc, 'uSunColor', world.sunR, world.sunG, world.sunB);
+      s1f(PDc, 'uTime', time);
+      gl.bindVertexArray(E.decal.vao);
+      gl.bindBuffer(gl.ARRAY_BUFFER, E.decal.vbo);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, decalData, 0, dc * 28);
+      gl.drawElements(gl.TRIANGLES, dc * 6, gl.UNSIGNED_INT, 0);
+    }
+
     let tc = 0;
     const tracers = currentTracers;
     if (tracers && tracers.length > 0){
@@ -2791,6 +2913,29 @@ export function createRenderer(canvas){
     }
 
     const pf = particles.fill();
+    const lamps = world.fxLamps;
+    for (let i = 0; i < lamps.length && pf.addCount < particles.max - 2; i++){
+      const lp = lamps[i];
+      const dx = lp.x - px, dz = lp.z - pz;
+      if (dx * dx + dz * dz > 3600) continue;
+      const L = lp.y - lp.floor - 0.05;
+      const flick = 0.94 + 0.06 * Math.sin(time * 7.3 + i * 1.7) * Math.sin(time * 2.1 + i);
+      let o = pf.addCount * FX.PART_FLOATS;
+      const A = pf.add;
+      A[o] = lp.x; A[o + 1] = lp.y; A[o + 2] = lp.z;
+      A[o + 3] = 0; A[o + 4] = 0; A[o + 5] = 0;
+      A[o + 6] = 0.55; A[o + 7] = 0; A[o + 8] = 0;
+      A[o + 9] = lp.r * 0.55 * flick; A[o + 10] = lp.g * 0.55 * flick; A[o + 11] = lp.b * 0.55 * flick; A[o + 12] = 0;
+      pf.addCount++;
+      if (L > 0.4){
+        o = pf.addCount * FX.PART_FLOATS;
+        A[o] = lp.x; A[o + 1] = lp.floor + 0.05; A[o + 2] = lp.z;
+        A[o + 3] = 0; A[o + 4] = -L; A[o + 5] = 0;
+        A[o + 6] = 0.55 + L * 0.28; A[o + 7] = 1; A[o + 8] = 4;
+        A[o + 9] = lp.r * 0.15 * flick; A[o + 10] = lp.g * 0.15 * flick; A[o + 11] = lp.b * 0.15 * flick; A[o + 12] = 0;
+        pf.addCount++;
+      }
+    }
     if (pf.alphaCount > 0 || pf.addCount > 0){
       const PP = E.P.part;
       gl.useProgram(PP.p);
@@ -2898,7 +3043,7 @@ export function createRenderer(canvas){
     gl.useProgram(PU.p);
     s1i(PU, 'uSrc', 2);
     s1i(PU, 'uBase', 3);
-    s1f(PU, 'uScatter', 0.85);
+    s1f(PU, 'uScatter', 0.62);
     for (let i = 3; i >= 0; i--){
       const src = i === 3 ? rt.down[4] : rt.up[i + 1];
       const base = rt.down[i], dst = rt.up[i];
@@ -2936,7 +3081,7 @@ export function createRenderer(canvas){
       gl.bindTexture(gl.TEXTURE_2D, GLB.scene.tex);
       s1i(PR, 'uScene', 1);
       s2f(PR, 'uSun', sunU, sunV);
-      s1f(PR, 'uThreshold', 0.9 * preExpose);
+      s1f(PR, 'uThreshold', 1.15 * preExpose);
       s1f(PR, 'uAspect', aspect);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
@@ -2955,7 +3100,7 @@ export function createRenderer(canvas){
     s1i(prog, 'uBloom', 2);
     s1i(prog, 'uRays', 3);
     s1f(prog, 'uExposure', exposure);
-    s1f(prog, 'uBloomStrength', hdr ? 0.30 : 0.30 / LDR_SCALE);
+    s1f(prog, 'uBloomStrength', hdr ? 0.34 : 0.34 / LDR_SCALE);
     s1f(prog, 'uGrain', 0.020);
     s1f(prog, 'uTime', time);
     s2f(prog, 'uRes', drawW, drawH);
@@ -2963,7 +3108,7 @@ export function createRenderer(canvas){
     s1f(prog, 'uGlitch', glitch);
     const sm = Math.max(world.sunR, world.sunG, world.sunB, 0.001);
     s3f(prog, 'uRayColor', world.sunR / sm, world.sunG / sm * 0.95, world.sunB / sm * 0.9);
-    s1f(prog, 'uRayStrength', rayK * (hdr ? 1.0 : 1.0 / LDR_SCALE) * 0.85);
+    s1f(prog, 'uRayStrength', rayK * (hdr ? 1.0 : 1.0 / LDR_SCALE) * 0.6);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     gl.activeTexture(gl.TEXTURE0);

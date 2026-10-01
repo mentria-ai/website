@@ -44,7 +44,6 @@ vec3 applyFog(vec3 col, vec3 wpos, vec3 campos){
   float f = 1.0 - exp(-uFogParam.x * max(optical, 0.0) * (1.0 + (wisp - 0.45) * 0.95 * low));
   float sd = max(dot(rd, -uSunDir), 0.0);
   vec3 fc = mix(uFogColor, uSunColor * 0.85, pow(sd, 9.0) * 0.30);
-  fc += uSunColor * pow(sd, 3.0) * 0.05;
   return mix(col, fc, clamp(f, 0.0, 1.0));
 }
 `;
@@ -156,11 +155,11 @@ void main(){
   float nC = triNoise(vPos, w, 0.155);
   vec2 puv = w.y > 0.5 ? vPos.xz : (w.x > w.z ? vPos.zy : vPos.xy);
   vec3 an = abs(n);
-  bool floorish = an.y > 0.5;
+  bool floorish = an.y > 0.5 && uMat != 1;
   vec3 T = vec3(1.0, 0.0, 0.0);
   vec3 B = vec3(0.0, 0.0, 1.0);
   vec2 uv = vPos.xz;
-  if (!floorish){
+  if (an.y <= 0.5){
     if (an.x > an.z){ uv = vPos.zy; T = vec3(0.0, 0.0, 1.0); B = vec3(0.0, 1.0, 0.0); }
     else { uv = vPos.xy; T = vec3(1.0, 0.0, 0.0); B = vec3(0.0, 1.0, 0.0); }
   }
@@ -338,11 +337,11 @@ void main(){
     float c2 = n2(cp * 7.0 + 3.1);
     float dens = smoothstep(0.50, 0.80, c * 0.86 + c2 * 0.14);
     float hor = smoothstep(0.0, 0.16, rd.y) * (1.0 - smoothstep(0.75, 1.0, rd.y) * 0.5);
-    float a = dens * hor * 0.82;
+    float a = dens * hor * 0.82 * (1.0 - 0.75 * pow(sd, 60.0));
     float tw2 = pow(sd, 2.5);
-    vec3 lit = mix(uFogColor * 0.92 + uZenith * 0.25, uSunColor * 0.30 + uFogColor * 0.55, clamp(tw2 * 0.9 + 0.1, 0.0, 1.0));
+    vec3 lit = mix(uFogColor * 0.92 + uZenith * 0.25, uSunColor * 0.26 + uFogColor * 0.55, clamp(tw2 * 0.9 + 0.1, 0.0, 1.0));
     vec3 cc = lit * (0.78 + 0.30 * (1.0 - c2));
-    cc += uSunColor * pow(sd, 10.0) * (1.0 - dens) * dens * 1.6 * day;
+    cc += uSunColor * pow(sd, 10.0) * (1.0 - dens) * dens * 0.9 * day;
     col = mix(col, cc, a);
   }
   float band = n2(rd.xz * 3.0 + rd.y * 2.0) - 0.5;
@@ -555,7 +554,7 @@ void main(){
     if (vl > 0.01){
       vec3 dir = vel / vl;
       vec3 ax = normalize(cross(dir, toCam));
-      float hl = vl * aISize.y * 0.5 + s;
+      float hl = vl * aISize.y * 0.5 + (aISize.z > 3.5 ? 0.0 : s);
       vec3 c = p - dir * (vl * aISize.y * 0.5);
       gl_Position = uViewProj * vec4(c + ax * (aCorner.x * s) + dir * (aCorner.y * hl), 1.0);
       return;
@@ -580,11 +579,58 @@ void main(){
     a = (1.0 - smoothstep(0.35, 1.0, abs(vUv.x))) * (1.0 - smoothstep(0.55, 1.0, abs(vUv.y)));
   } else if (vShape < 2.5){
     a = 1.0 - smoothstep(0.70, 1.0, max(abs(vUv.x), abs(vUv.y)));
-  } else {
+  } else if (vShape < 3.5){
     float r = length(vUv);
     a = smoothstep(0.55, 0.85, r) * (1.0 - smoothstep(0.85, 1.0, r));
+  } else {
+    float t = vUv.y * 0.5 + 0.5;
+    float w = mix(0.16, 1.0, t);
+    float ax = abs(vUv.x) / w;
+    a = (1.0 - smoothstep(0.0, 1.0, ax)) * (1.0 - ax * 0.35) * smoothstep(0.0, 0.10, t) * (1.0 - smoothstep(0.70, 1.0, t)) * (1.0 - t * 0.55);
   }
   oColor = vec4(vColor.rgb * a * uPreExpose, vColor.a * a);
+}`;
+
+export const VS_DECAL = `#version 300 es
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec2 aUv;
+layout(location=2) in float aAlpha;
+layout(location=3) in float aHeat;
+uniform mat4 uViewProj;
+out vec2 vUv;
+out float vAlpha;
+out float vHeat;
+out vec3 vPos;
+void main(){
+  vUv = aUv;
+  vAlpha = aAlpha;
+  vHeat = aHeat;
+  vPos = aPos;
+  gl_Position = uViewProj * vec4(aPos, 1.0);
+}`;
+
+export const FS_DECAL = `#version 300 es
+precision highp float;
+in vec2 vUv;
+in float vAlpha;
+in float vHeat;
+in vec3 vPos;
+uniform vec3 uCamPos;
+uniform float uPreExpose;
+uniform vec3 uTint;
+out vec4 oColor;
+${NOISE}
+${FOG}
+void main(){
+  float r = length(vUv);
+  float nz = n2(vUv * 3.2 + vPos.xz * 5.0 + vPos.y * 3.0);
+  float a = (1.0 - smoothstep(0.50, 1.0, r + (nz - 0.5) * 0.45)) * vAlpha;
+  if (a <= 0.003) discard;
+  float core = 1.0 - smoothstep(0.16, 0.34, r + (nz - 0.5) * 0.16);
+  vec3 c = mix(uTint, vec3(0.008, 0.008, 0.009), core);
+  a *= mix(0.72, 1.0, core);
+  vec3 glow = vec3(1.9, 0.62, 0.16) * vHeat * core * 2.2;
+  oColor = vec4((applyFog(c, vPos, uCamPos) * a + glow) * uPreExpose, a);
 }`;
 
 export const FS_DOWN = `#version 300 es
@@ -651,7 +697,7 @@ void main(){
     uv += d;
   }
   vec2 dd = (vUv - uSun) * vec2(uAspect, 1.0);
-  float prox = exp(-dot(dd, dd) * 1.6);
+  float prox = exp(-dot(dd, dd) * 2.6);
   oColor = vec4(acc * (prox / 36.0), 1.0);
 }`;
 
@@ -679,18 +725,19 @@ void main(){
   vec2 uv = vUv;
   vec3 c;
   vec2 dc = uv - 0.5;
-  float ca = dot(dc, dc) * 0.0042;
 #ifdef GLITCH
   float g = clamp(uGlitch, 0.0, 1.0);
   float row = floor(uv.y * uRes.y / 3.0);
   float pick = step(0.74, h11(row * 1.7 + floor(uTime * 13.0)));
   float tear = (h11(row + floor(uTime * 24.0)) - 0.5) * 0.075 * g * pick;
   uv.x = clamp(uv.x + tear, 0.0, 1.0);
-  ca += 0.009 * g;
-#endif
-  c.r = texture(uScene, clamp(uv + dc * ca * 2.0, 0.0, 1.0)).r;
+  float sp = 0.009 * g;
+  c.r = texture(uScene, vec2(clamp(uv.x + sp, 0.0, 1.0), uv.y)).r;
   c.g = texture(uScene, uv).g;
-  c.b = texture(uScene, clamp(uv - dc * ca * 2.0, 0.0, 1.0)).b;
+  c.b = texture(uScene, vec2(clamp(uv.x - sp, 0.0, 1.0), uv.y)).b;
+#else
+  c = texture(uScene, uv).rgb;
+#endif
   c *= uExposure;
   c += texture(uBloom, uv).rgb * uBloomStrength;
   c += texture(uRays, uv).rgb * uRayColor * uRayStrength;
@@ -834,9 +881,9 @@ export function makePanelTexture(size){
       h[i] = mott[i] * 0.6 + grain[i] * 0.35 + (r() - 0.5) * 0.08;
     }
   }
-  for (let k = 0; k < 1100; k++){
-    const cx = r() * S, cy = r() * S, rad = 0.9 + r() * 2.0;
-    stamp(S, lum, cx, cy, rad, (i, f) => { lum[i] -= 0.10 * f; h[i] -= 0.9 * f; });
+  for (let k = 0; k < 380; k++){
+    const cx = r() * S, cy = r() * S, rad = 0.9 + r() * 2.2;
+    stamp(S, lum, cx, cy, rad, (i, f) => { lum[i] -= 0.09 * f; h[i] -= 0.8 * f; });
   }
   for (let k = 0; k < 70; k++){
     let x = r() * S, y = r() * S;
@@ -850,7 +897,7 @@ export function makePanelTexture(size){
     }
   }
   const alb = packAlbedo(S, lum, [1, 1, 1]);
-  return { size: S, albedo: alb.data, avg: alb.avg, normal: heightToNormal(S, h, 2.6) };
+  return { size: S, albedo: alb.data, avg: alb.avg, normal: heightToNormal(S, h, 1.7) };
 }
 
 export function makeFloorTexture(size){
@@ -878,16 +925,16 @@ export function makeFloorTexture(size){
       stamp(S, lum, cx + dx * s, cy + dy * s, wid * (1 - Math.abs(s) / len), (i, f) => { lum[i] -= 0.012 * f; });
     }
   }
-  for (let k = 0; k < 7; k++){
+  for (let k = 0; k < 4; k++){
     let x = r() * S, y = r() * S;
     let a = r() * Math.PI * 2;
-    const steps = 120 + Math.floor(r() * 220);
+    const steps = 90 + Math.floor(r() * 160);
     for (let s = 0; s < steps; s++){
-      a += (r() - 0.5) * 0.7;
+      a += (r() - 0.5) * 0.35;
       x += Math.cos(a); y += Math.sin(a);
       const wx = ((Math.round(x) % S) + S) % S, wy = ((Math.round(y) % S) + S) % S;
-      lum[wy * S + wx] *= 0.72;
-      h[wy * S + wx] -= 0.9;
+      lum[wy * S + wx] *= 0.88;
+      h[wy * S + wx] -= 0.5;
     }
   }
   const alb = packAlbedo(S, lum, [1, 0.995, 0.97]);
@@ -1073,7 +1120,7 @@ export function createParticles(max){
     const dn = rx * n[0] + ry * n[1] + rz * n[2];
     rx -= 2 * dn * n[0]; ry -= 2 * dn * n[1]; rz -= 2 * dn * n[2];
     const fy = n[1] > 0.5 ? p[1] + 0.004 : 0.004;
-    const sparks = target ? 14 : (metal ? 16 : 9);
+    const sparks = target ? 16 : (metal ? 22 : 14);
     for (let k = 0; k < sparks; k++){
       const sp = (metal ? 4.5 : 3.0) + r() * (metal ? 7 : 4.5);
       let dx = n[0] * 0.8 + rx * 0.7 + (r() - 0.5) * 1.3;
@@ -1084,20 +1131,20 @@ export function createParticles(max){
       const hot = 0.6 + r() * 0.4;
       const mint = target && r() < 0.6;
       spawn({ x: p[0], y: p[1], z: p[2], vx: dx * sp, vy: dy * sp, vz: dz * sp, life: 0.16 + r() * 0.30,
-        size: 0.007 + r() * 0.006, stretch: 0.028, shape: KIND_STREAK, gravity: 1.1, drag: 1.2,
+        size: 0.010 + r() * 0.008, stretch: 0.032, shape: KIND_STREAK, gravity: 1.1, drag: 1.2,
         r: mint ? 0.43 * 3.2 : 3.2 * hot, g: mint ? 0.95 * 3.2 : 2.0 * hot, b: mint ? 0.77 * 3.2 : 0.8 * hot, floorY: fy });
     }
-    spawn({ x: p[0] + n[0] * 0.03, y: p[1] + n[1] * 0.03, z: p[2] + n[2] * 0.03, life: 0.07, size: 0.10, size1: 0.22,
-      shape: KIND_SOFT, r: target ? 0.8 : 2.4, g: target ? 2.0 : 1.7, b: target ? 1.6 : 0.9 });
+    spawn({ x: p[0] + n[0] * 0.03, y: p[1] + n[1] * 0.03, z: p[2] + n[2] * 0.03, life: 0.08, size: 0.16, size1: 0.30,
+      shape: KIND_SOFT, r: target ? 0.8 : 3.0, g: target ? 2.0 : 2.1, b: target ? 1.6 : 1.1 });
     if (target) return;
-    const dustC = metal ? [0.30, 0.30, 0.31] : [0.48, 0.45, 0.41];
+    const dustC = metal ? [0.34, 0.33, 0.32] : [0.58, 0.52, 0.45];
     const lr = light ? light[0] : 1, lg = light ? light[1] : 1, lb = light ? light[2] : 1;
-    for (let k = 0; k < (metal ? 2 : 4); k++){
-      const sp = 0.25 + r() * 0.6;
+    for (let k = 0; k < (metal ? 3 : 5); k++){
+      const sp = 0.3 + r() * 0.8;
       spawn({ x: p[0] + n[0] * 0.05, y: p[1] + n[1] * 0.05, z: p[2] + n[2] * 0.05,
-        vx: n[0] * sp + (r() - 0.5) * 0.3, vy: n[1] * sp + 0.15 + r() * 0.25, vz: n[2] * sp + (r() - 0.5) * 0.3,
-        life: 0.7 + r() * 0.6, size: 0.05 + r() * 0.03, size1: 0.30 + r() * 0.25, shape: KIND_SOFT, drag: 2.2, alpha: true,
-        r: dustC[0] * lr, g: dustC[1] * lg, b: dustC[2] * lb, a: 0.32 + r() * 0.12, fadeIn: 0.04 });
+        vx: n[0] * sp + (r() - 0.5) * 0.35, vy: n[1] * sp + 0.15 + r() * 0.25, vz: n[2] * sp + (r() - 0.5) * 0.35,
+        life: 0.8 + r() * 0.7, size: 0.06 + r() * 0.04, size1: 0.42 + r() * 0.32, shape: KIND_SOFT, drag: 2.2, alpha: true,
+        r: dustC[0] * lr, g: dustC[1] * lg, b: dustC[2] * lb, a: 0.40 + r() * 0.14, fadeIn: 0.04 });
     }
     for (let k = 0; k < (metal ? 3 : 6); k++){
       const sp = 1.6 + r() * 3.2;
@@ -1139,8 +1186,8 @@ export function createParticles(max){
     }
     spawn({ x: center[0], y: center[1], z: center[2], life: 0.16, size: radius * 1.2, size1: radius * 3.4, shape: 3,
       r: mint[0] * 2.6, g: mint[1] * 2.6, b: mint[2] * 2.6 });
-    spawn({ x: center[0], y: center[1], z: center[2], life: 0.12, size: radius * 1.6, size1: radius * 2.6, shape: KIND_SOFT,
-      r: mint[0] * 2.2, g: mint[1] * 2.2, b: mint[2] * 2.2 });
+    spawn({ x: center[0], y: center[1], z: center[2], life: 0.10, size: radius * 1.0, size1: radius * 1.9, shape: KIND_SOFT,
+      r: mint[0] * 1.6, g: mint[1] * 1.6, b: mint[2] * 1.6 });
   }
 
   function muzzle(p, fwd, right, up, ambient){
@@ -1201,16 +1248,17 @@ export function createMotion(){
     m.tHist[m.head] = now;
     m.head = (m.head + 1) % 8;
     if (m.n < 8) m.n++;
-    let older = prevVy, olderT = now;
+    let older = prevVy, olderT = now, minVy = prevVy;
     for (let k = 2; k <= m.n; k++){
       const idx = (m.head - k + 16) % 8;
       older = m.vyHist[idx];
       olderT = m.tHist[idx];
+      if (older < minVy) minVy = older;
       if (now - olderT >= 0.09) break;
     }
-    if (prevVy < -2.6 && vy > -0.8 && older - prevVy > 0.9 && now - olderT > 0.04){
-      const impact = -prevVy;
-      kick(Math.min(0.9, (impact - 2.0) * 0.22));
+    if (minVy < -2.6 && prevVy < -1.2 && vy > -0.8 && older - minVy > 0.8 && now - olderT > 0.04){
+      const impact = -minVy;
+      kick(Math.min(1.9, (impact - 1.5) * 0.30));
     }
     if (prevVy > -0.5 && prevVy < 1.0 && vy > 3.2) m.gunDipV += 0.35;
     const k = 170, c = 2 * Math.sqrt(k) * 0.62;

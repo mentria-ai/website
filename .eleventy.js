@@ -59,6 +59,11 @@ module.exports = function(eleventyConfig) {
     }
   })();
   eleventyConfig.addGlobalData("modelsVersion", modelsVersion);
+  eleventyConfig.addGlobalData("engineFiles", (() => {
+    const dir = path.join(__dirname, "src", "assets", "mentria", "dist");
+    if (!fs.existsSync(dir)) return [];
+    return fs.readdirSync(dir).filter((name) => name.endsWith(".mjs")).sort().map((name) => "/assets/mentria/dist/" + name);
+  })());
 
   // ── i18n: load locales + dictionaries once at startup ──────────
   // Layout: src/_data/i18n/<code>.json. Same key tree across all files;

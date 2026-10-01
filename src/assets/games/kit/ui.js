@@ -288,6 +288,15 @@ const UI_STYLE = [
   '.gk-toast::before{content:"";flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--gk-mint);box-shadow:0 0 10px rgba(var(--gk-mint-rgb),.8)}',
   '.gk-toast--warn{border-color:rgba(255,184,107,.5)}.gk-toast--warn::before{background:#ffb86b;box-shadow:0 0 10px rgba(255,184,107,.8)}',
   '.gk-toast.is-on{opacity:1;transform:translate(-50%,0)}',
+  '.gk-splash{position:absolute;left:50%;top:calc(var(--gk-safe-t) + 21%);z-index:34;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;',
+  'pointer-events:none;text-align:center;white-space:nowrap}',
+  '.gk-splash__t{font:900 clamp(22px,8cqh,46px)/1 var(--gk-display);font-style:italic;letter-spacing:-.01em;text-transform:uppercase;color:#fff;',
+  'text-shadow:0 0 24px rgba(255,255,255,.25),0 3px 18px rgba(0,0,0,.7);font-variant-numeric:tabular-nums}',
+  '.gk-splash__s{font:600 clamp(9px,2.6cqh,12px)/1 var(--gk-mono);letter-spacing:.2em;text-transform:uppercase;color:rgba(234,243,240,.75);text-shadow:0 1px 6px rgba(0,0,0,.8)}',
+  '.gk-splash--good .gk-splash__t{color:var(--gk-mint);text-shadow:0 0 26px rgba(var(--gk-mint-rgb),.55),0 3px 18px rgba(0,0,0,.7)}',
+  '.gk-splash--bad .gk-splash__t{color:#ffb86b;text-shadow:0 0 26px rgba(255,184,107,.45),0 3px 18px rgba(0,0,0,.7)}',
+  '.gk-splash.is-on{animation:gk-splash var(--gk-splash-ms,1400ms) cubic-bezier(.2,.9,.25,1) both}',
+  '@keyframes gk-splash{0%{opacity:0;transform:translateX(-50%) scale(1.35)}10%{opacity:1;transform:translateX(-50%) scale(1)}80%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-10px) scale(.96)}}',
   '.gk-loading{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,3cqh,20px);',
   'background:radial-gradient(ellipse at 50% 40%,#0c171a 0%,#04070a 70%);transition:opacity .3s ease;pointer-events:auto;container-type:size}',
   '.gk-loading.is-out{opacity:0;pointer-events:none}',
@@ -1308,6 +1317,30 @@ export function createUI(stage, copyIn, opts = {}) {
     toastTimer = setTimeout(function () { if (toastEl) toastEl.classList.remove('is-on'); }, ms);
   }
 
+  let splashEl = null;
+  let splashTimer = 0;
+
+  function splash(text, o) {
+    const cfg = o || {};
+    const ms = isNum(cfg.ms) ? Math.max(400, cfg.ms) : 1400;
+    if (!splashEl) {
+      splashEl = document.createElement('div');
+      splashEl.setAttribute('aria-live', 'polite');
+      hud.appendChild(splashEl);
+    }
+    splashEl.className = 'gk-splash' + (cfg.tone === 'good' ? ' gk-splash--good' : cfg.tone === 'bad' ? ' gk-splash--bad' : '');
+    splashEl.style.setProperty('--gk-splash-ms', ms + 'ms');
+    splashEl.innerHTML = '<span class="gk-splash__t"></span>' + (cfg.sub ? '<span class="gk-splash__s"></span>' : '');
+    splashEl.querySelector('.gk-splash__t').textContent = String(text == null ? '' : text);
+    if (cfg.sub) splashEl.querySelector('.gk-splash__s').textContent = String(cfg.sub);
+    void splashEl.offsetWidth;
+    splashEl.classList.add('is-on');
+    clearTimeout(splashTimer);
+    splashTimer = setTimeout(function () {
+      if (splashEl) splashEl.classList.remove('is-on');
+    }, ms + 30);
+  }
+
   function countdown(n) {
     const v = isNum(n) ? Math.round(n) : null;
     if (v === null || v < 0) {
@@ -1637,6 +1670,7 @@ export function createUI(stage, copyIn, opts = {}) {
     disposed = true;
     clearReveal();
     clearTimeout(toastTimer);
+    clearTimeout(splashTimer);
     clearTimeout(countTimer);
     clearTimeout(loadingTimer);
     if (padPollRaf) cancelAnimationFrame(padPollRaf);
@@ -1679,6 +1713,7 @@ export function createUI(stage, copyIn, opts = {}) {
     back,
     current,
     toast,
+    splash,
     countdown,
     countdownSequence,
     loading,

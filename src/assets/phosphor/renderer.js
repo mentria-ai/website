@@ -1938,8 +1938,9 @@ export function createRenderer(canvas){
     const enh = gfxOn && E !== null && world !== null;
     if (enh){
       motion.update(px, py, pz, rx, rz, step, time);
-      py -= motion.state.dip;
-      const rl = motion.state.roll;
+      const calm = reducedMotion();
+      if (!calm) py -= motion.state.dip;
+      const rl = calm ? 0 : motion.state.roll;
       if (rl !== 0){
         const cr = Math.cos(rl), sr = Math.sin(rl);
         const nrx = rx * cr + ux * sr, nry = ry * cr + uy * sr, nrz = rz * cr + uz * sr;
@@ -2685,6 +2686,18 @@ export function createRenderer(canvas){
   }
 
   function getGraphics(){ return gfxOn ? FX.GFX_ENHANCED : FX.GFX_CLASSIC; }
+
+  let motionQuery = null;
+  function reducedMotion(){
+    if (motionQuery === null){
+      try {
+        motionQuery = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : false;
+      } catch (_) {
+        motionQuery = false;
+      }
+    }
+    return !!(motionQuery && motionQuery.matches);
+  }
 
   function defaultGraphics(){ return FX.defaultGraphics(contextLost ? null : gl); }
 

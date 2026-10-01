@@ -6,8 +6,8 @@
   "fetched_utc": "2026-09-21T16:10:05.973Z",
   "license": "MIT (see LICENSE; Copyright (c) 2010-2026 three.js authors)",
   "note": "Vendored because mentria.ai CSP has no cdn.jsdelivr.net in script-src, and because a hashed local copy is the version-drift mitigation: the trained distribution and the served library cannot diverge without a deliberate commit.",
-  "file_count": 35,
-  "total_bytes": 1040623,
+  "file_count": 41,
+  "total_bytes": 1202284,
   "files": [
     {
       "path": "LICENSE",
@@ -40,6 +40,11 @@
       "sha256": "f25b69d9f8a5a7f8e206bb151875609349dabaf9bd81830779033ed2521e8a7a"
     },
     {
+      "path": "examples/jsm/geometries/RoundedBoxGeometry.js",
+      "bytes": 6470,
+      "sha256": "c5feab96123858ed8823c889b238dc8734adab7e760e3cfd21e7f3f2f3e348e3"
+    },
+    {
       "path": "examples/jsm/lines/Line2.js",
       "bytes": 1486,
       "sha256": "69dd2120d4df14208796acf199f80a64d37e042cfa65dc2b98286694b2954194"
@@ -65,14 +70,29 @@
       "sha256": "471f0a954a0c9c59d3d151392f424142a9164a722802f63b371971378a84a1b1"
     },
     {
+      "path": "examples/jsm/loaders/GLTFLoader.js",
+      "bytes": 117570,
+      "sha256": "131c0f78c01d19368ae495caa65b3adaa10487810a36a05bb5901b769a35ac16"
+    },
+    {
       "path": "examples/jsm/math/ImprovedNoise.js",
       "bytes": 3034,
       "sha256": "d3821241e25bf0c8bfc13cec941924573bbaaf8f599a4fa07d60664b97832b39"
     },
     {
+      "path": "examples/jsm/math/MeshSurfaceSampler.js",
+      "bytes": 8161,
+      "sha256": "a70ab7a8f28b96cd51f09b7c4d5987167bdc23b91b2a26134766a180751aee43"
+    },
+    {
       "path": "examples/jsm/math/SimplexNoise.js",
       "bytes": 15148,
       "sha256": "4b1455617135e6b477de76244de07547d95570643379b72f4758e50161b06072"
+    },
+    {
+      "path": "examples/jsm/objects/Lensflare.js",
+      "bytes": 11110,
+      "sha256": "f313c7d783dd25b29194e51aeed046ff9f52716d226b66984dc90aa925d00447"
     },
     {
       "path": "examples/jsm/objects/Sky.js",
@@ -150,6 +170,11 @@
       "sha256": "959a2e0ea3d4a89d67754e417c56bd67abd632427d51fab19361003cd0ca7cef"
     },
     {
+      "path": "examples/jsm/shaders/FXAAShader.js",
+      "bytes": 6815,
+      "sha256": "b8303d179f9d5d40a052483e8cfb49c29afb6e60396080e472a6950b51700dac"
+    },
+    {
       "path": "examples/jsm/shaders/FilmShader.js",
       "bytes": 1227,
       "sha256": "744c619c70f949af5d3f0f9edb27573743ab9ad12869e7c306ffb3d0caff7bb5"
@@ -178,6 +203,11 @@
       "path": "examples/jsm/utils/BufferGeometryUtils.js",
       "bytes": 37712,
       "sha256": "9fb63427ce6641fa14fd0baff9cc4d1b5f9c3d85fd084bf2e90e803c44ec1797"
+    },
+    {
+      "path": "examples/jsm/utils/SkeletonUtils.js",
+      "bytes": 11535,
+      "sha256": "b1632a703206c3d830de9fcbe515696770d04b71a15ee6b50afa6d2c3298c86f"
     },
     {
       "path": "package.json",

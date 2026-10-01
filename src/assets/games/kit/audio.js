@@ -1271,6 +1271,7 @@ export function createAudio(opts) {
 
   function dispose() {
     if (S.disposed) return;
+    disarmAuto();
     S.voices.forEach(function (v) {
       try {
         v.dead = true;
@@ -1324,6 +1325,31 @@ export function createAudio(opts) {
     dispose: dispose
   };
 
+  const AUTO_EVENTS = ['pointerup', 'touchend', 'keydown', 'click'];
+  let autoArmed = false;
+
+  function onFirstGesture() {
+    disarmAuto();
+    if (!S.ctx && !S.disposed) unlock();
+  }
+
+  function armAuto() {
+    if (autoArmed || typeof window === 'undefined') return;
+    autoArmed = true;
+    for (let i = 0; i < AUTO_EVENTS.length; i++) {
+      try { window.addEventListener(AUTO_EVENTS[i], onFirstGesture, true); } catch (_) {}
+    }
+  }
+
+  function disarmAuto() {
+    if (!autoArmed) return;
+    autoArmed = false;
+    for (let i = 0; i < AUTO_EVENTS.length; i++) {
+      try { window.removeEventListener(AUTO_EVENTS[i], onFirstGesture, true); } catch (_) {}
+    }
+  }
+
   if (options.context) unlock();
+  else if (options.autoUnlock !== false) armAuto();
   return api;
 }

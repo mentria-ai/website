@@ -26,32 +26,28 @@ const HALF_TRACK = 0.82;
 const KMH = 3.6;
 
 const EN = {
-  boot_loading: 'Starting the engine', loading_track: 'Building the track',
-  fail_title: "The game couldn't start", fail_module: 'The game files did not load. Check your connection and reload.',
-  fail_body: "This browser couldn't start 3D graphics. Try a recent browser with hardware acceleration turned on.",
-  context_lost: 'The graphics restarted. Resume to keep racing.',
-  tagline: 'Street racing with nitro',
-  menu_race: 'Race', menu_race_hint: 'Beat five rivals to the line', menu_tt: 'Time Trial', menu_tt_hint: 'Race your own ghost',
-  menu_garage: 'Garage', menu_garage_hint: 'Pick your car and paint', menu_settings: 'Settings', menu_settings_hint: 'Controls, camera and sound',
-  menu_help: 'Help', menu_help_hint: 'How to drive',
-  select_title: 'Pick a track', select_race: 'Race', select_tt: 'Time Trial', track_laps: '{n} laps', track_km: '{n} km', track_ghost: 'Ghost ready',
-  garage_title: 'Garage', garage_kicker: 'Garage', garage_paint: 'Paint', garage_drive: 'Drive this car', garage_prev: 'Previous car',
-  garage_next: 'Next car', garage_keys: 'Left and right change the car, up and down change the paint',
-  settings_title: 'Settings', set_header_controls: 'Controls', set_header_race: 'Race', set_header_display: 'Display and sound',
-  set_steer: 'Touch steering', steer_zones: 'Touch sides', steer_tilt: 'Tilt', steer_wheel: 'Wheel', set_autogas: 'Auto accelerate',
-  set_tilt_center: 'Tilt center', set_tilt_center_action: 'Center now',
-  set_difficulty: 'Rival skill',
-  set_camera: 'Camera', cam_chase: 'Chase', cam_hood: 'Hood', set_quality: 'Graphics', q_auto: 'Auto', q_low: 'Low', q_medium: 'Medium', q_high: 'High',
-  set_volume: 'Volume', set_units: 'Speed units', units_kmh: 'km/h', units_mph: 'mph', set_ghost: 'Ghost car',
-  hud_pos: 'Pos', hud_lap: 'Lap', hud_time: 'Time', hud_lap_time: 'Lap', hud_best: 'Best', hud_gear: 'Gear', hud_nitro: 'Nitro',
-  final_lap: 'Final lap', wrong_way: 'Wrong way', ghost_label: 'Ghost',
-  toast_drift: 'Drift', toast_near_miss: 'Near miss', toast_takedown: 'Takedown', toast_airtime: 'Airtime', toast_overtake: 'Overtake',
-  toast_perfect_start: 'Perfect start', toast_nitro_ready: 'Nitro ready', toast_best_lap: 'Best lap', toast_wrecked: 'Wrecked', toast_lap: 'Lap {n}',
-  get_ready: 'Get ready', start_hint_keys: 'Hit the gas right on GO for a perfect start', start_hint_touch: 'Tap nitro right on GO for a perfect start',
-  res_race: 'Race over', res_tt: 'Time trial', res_best_lap: 'Best lap', res_top_speed: 'Top speed', res_takedowns: 'Takedowns',
-  res_drifts: 'Drifts', res_you: 'You', res_ghost_saved: 'Ghost saved', res_retry: 'Race again', res_next: 'Next track',
-  res_garage: 'Garage', res_menu: 'Menu', res_place: 'Place',
-  pause_title: 'Paused', pause_resume: 'Resume', pause_restart: 'Restart', pause_settings: 'Settings', pause_quit: 'Quit to menu'
+  boot_loading: "Starting the engine", loading_track: "Building the track", fail_body: "This browser couldn't start 3D graphics. Try a recent browser with hardware acceleration turned on.", fail_module: "The game files didn't load. Check your connection and reload the page.",
+  context_lost: "The graphics restarted. Resume to keep racing.", tagline: "Street racing with nitro", menu_race: "Race", menu_tt: "Time Trial",
+  menu_garage: "Garage", menu_settings: "Settings", menu_help: "Help", select_title: "Pick a track",
+  select_race: "Race", select_tt: "Time Trial", track_laps: "{n} laps", track_km: "{n} km",
+  track_ghost: "Ghost ready", garage_kicker: "Garage", garage_paint: "Paint", garage_drive: "Drive this car",
+  garage_prev: "Previous car", garage_next: "Next car", garage_keys: "Left and right change the car, up and down change the paint", settings_title: "Settings",
+  set_header_controls: "Controls", set_header_race: "Race", set_header_display: "Display and sound", set_steer: "Touch steering",
+  steer_zones: "Touch sides", steer_tilt: "Tilt", steer_wheel: "Wheel", set_autogas: "Auto accelerate",
+  set_tilt_center: "Tilt center", set_tilt_center_action: "Center now", set_difficulty: "Rival skill", set_camera: "Camera",
+  cam_chase: "Chase", cam_hood: "Bumper", set_quality: "Graphics", q_auto: "Auto",
+  q_low: "Low", q_medium: "Medium", q_high: "High", set_volume: "Volume",
+  set_units: "Speed units", units_kmh: "km/h", units_mph: "mph", set_ghost: "Ghost car",
+  hud_pos: "Pos", hud_lap: "Lap", hud_time: "Time", hud_lap_time: "Lap",
+  hud_best: "Best", hud_gear: "Gear", hud_nitro: "Nitro", final_lap: "Final lap",
+  wrong_way: "Wrong way", ghost_label: "Ghost", toast_drift: "Drift", toast_near_miss: "Near miss",
+  toast_takedown: "Takedown", toast_airtime: "Airtime", toast_overtake: "Overtake", toast_perfect_start: "Perfect start",
+  toast_nitro_ready: "Nitro ready", toast_best_lap: "Best lap", toast_wrecked: "Wrecked", toast_lap: "Lap {n}",
+  start_hint_keys: "Hit the gas right on GO for a perfect start", start_hint_touch: "Tap nitro right on GO for a perfect start", res_race: "Race over", res_tt: "Time Trial",
+  res_best_lap: "Best lap", res_top_speed: "Top speed", res_takedowns: "Takedowns", res_drifts: "Drifts",
+  res_you: "You", res_ghost_saved: "Ghost saved", res_retry: "Race again", res_next: "Next track",
+  res_garage: "Garage", res_menu: "Menu", pause_title: "Paused", pause_resume: "Resume",
+  pause_restart: "Restart", pause_settings: "Settings", pause_quit: "Quit to menu"
 };
 
 const KIT_EN = {
@@ -260,6 +256,15 @@ const smokeTrail = { kind: 'smoke', rate: 30 };
 const flameTrail = { kind: 'flame', rate: 24, size: [0.1, 0.18], life: [0.1, 0.2], speed: 1.4 };
 const burstOpts = { velocity: { x: 0, y: 0, z: 0 } };
 const frameStats = { calls: 0, triangles: 0 };
+const hudFrame = { speed: 0, gear: 1, reverse: false, rpm: 0, nitro: 0, boosting: false, position: 1, total: 6, lap: 1, laps: 3, time: 0, lapTime: 0, bestLap: Infinity, delta: null };
+const autoCtx = { cars: null, playerIndex: -1, time: 0 };
+const projOut = { s: 0, lateral: 0, height: 0 };
+const nearPair = [-1, -1];
+const voicePatch = { rpm: 0, throttle: 0, nitro: 0, skid: 0 };
+const windPatch = { speed: 0 };
+const aiPatch = { rpm: 0, throttle: 0, nitro: 0, skid: 0, volume: 0, pan: 0 };
+const mutePatch = { volume: 0 };
+const nearDist = [Infinity, Infinity];
 const smokeIds = [];
 for (let i = 0; i < 12; i++) smokeIds.push(['sm' + i + 'l', 'sm' + i + 'r', 'sk' + i + 'l', 'sk' + i + 'r', 'fl' + i]);
 
@@ -451,12 +456,14 @@ function showMain() {
 
 function showTracks() {
   state = 'menu';
+  garage.close();
   ui.screen('tracks', tracksSpec());
   ui.show('tracks');
 }
 
 function showSettings() {
   screenBeforeSettings = 'main';
+  garage.close();
   ui.screen('settings', settingsSpec());
   ui.show('settings');
 }
@@ -607,8 +614,18 @@ function pickRivals(rng, playerCarId) {
   return out;
 }
 
+function focusStage() {
+  if (!touchDevice) return;
+  try {
+    const r = stage.getBoundingClientRect();
+    if (Math.abs(r.top) > 4) stage.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  } catch (_) {}
+}
+
 async function startRace(m, trackId) {
   mode = m === 'tt' ? 'tt' : 'race';
+  garage.close();
+  focusStage();
   saveSettings({ track: trackId });
   state = 'loading';
   ui.hide();
@@ -722,7 +739,7 @@ function setupRace(quick) {
   if (mode === 'tt') setupGhost();
   setupAudio();
   if (night && qualityName() !== 'low') {
-    headlight = new THREE.SpotLight(0xfff1dc, 260, 80, 0.5, 0.55, 1.4);
+    headlight = new THREE.SpotLight(0xfff1dc, 1400, 90, 0.42, 0.6, 1.5);
     headlight.castShadow = false;
     scene.add(headlight);
     scene.add(headlight.target);
@@ -979,8 +996,9 @@ function simulate(dt) {
   for (let i = 0; i < R.n; i++) {
     if (i === pi) {
       if (R.autopilot) {
-        const auto = R.autopilot.update(dt, { cars, playerIndex: -1, time: R.time });
-        R.inputs[i] = auto;
+        autoCtx.cars = cars;
+        autoCtx.time = R.time;
+        R.inputs[i] = R.autopilot.update(dt, autoCtx);
       } else {
         R.inputs[i] = readPlayerInput();
       }
@@ -1400,13 +1418,20 @@ function updateAudio(dt) {
     const revving = R.phase === 'countdown' || R.phase === 'grid';
     const gas = revving ? (input.axis('gas') || 0) : c.throttle;
     const rpm = revving ? 0.18 + 0.6 * gas : c.rpm;
-    R.voice.set({ rpm: clamp(rpm, 0, 1), throttle: gas, nitro: c.boosting ? 1 : 0, skid: c.grounded ? c.skid : 0 });
+    voicePatch.rpm = clamp(rpm, 0, 1);
+    voicePatch.throttle = gas;
+    voicePatch.nitro = c.boosting ? 1 : 0;
+    voicePatch.skid = c.grounded ? c.skid : 0;
+    R.voice.set(voicePatch);
     if (c.gear !== R.lastGear && R.voice.shift) {
       R.voice.shift(c.gear > R.lastGear);
       R.lastGear = c.gear;
     }
   }
-  if (R.wind) R.wind.set({ speed: clamp(c.speed / 70, 0, 1.2) });
+  if (R.wind) {
+    windPatch.speed = clamp(c.speed / 70, 0, 1.2);
+    R.wind.set(windPatch);
+  }
   if (R.aiVoices.length) {
     let a = -1;
     let b = -1;
@@ -1418,19 +1443,27 @@ function updateAudio(dt) {
       if (d < da) { db = da; b = a; da = d; a = i; }
       else if (d < db) { db = d; b = i; }
     }
-    const pair = [a, b];
-    const dist = [da, db];
+    nearPair[0] = a; nearPair[1] = b;
+    nearDist[0] = da; nearDist[1] = db;
+    const pair = nearPair;
+    const dist = nearDist;
     camera.getWorldDirection(v3b);
     for (let k = 0; k < R.aiVoices.length; k++) {
       const i = pair[k];
       const v = R.aiVoices[k];
-      if (i < 0) { v.set({ volume: 0 }); continue; }
+      if (i < 0) { v.set(mutePatch); continue; }
       const car = R.cars[i];
       const vol = clamp(1 - dist[k] / 70, 0, 1) * 0.55;
       const dx = car.x - camera.position.x;
       const dz = car.z - camera.position.z;
       const pan = clamp((dx * -v3b.z + dz * v3b.x) / Math.max(dist[k], 1), -1, 1);
-      v.set({ rpm: car.rpm, throttle: car.throttle, nitro: car.boosting ? 1 : 0, skid: car.skid * 0.6, volume: vol, pan });
+      aiPatch.rpm = car.rpm;
+      aiPatch.throttle = car.throttle;
+      aiPatch.nitro = car.boosting ? 1 : 0;
+      aiPatch.skid = car.skid * 0.6;
+      aiPatch.volume = vol;
+      aiPatch.pan = pan;
+      v.set(aiPatch);
     }
   }
 }
@@ -1445,7 +1478,7 @@ function updateGhostView() {
   g.quaternion.set(ghostOut.quat.x, ghostOut.quat.y, ghostOut.quat.z, ghostOut.quat.w);
   if (R.ghostView.setNitro) R.ghostView.setNitro(ghostOut.extra && ghostOut.extra[0] > 0.5);
   if (R.phase !== 'racing') { R.delta = null; return; }
-  const proj = R.track.project(ghostOut.pos, R.ghostS, {});
+  const proj = R.track.project(ghostOut.pos, R.ghostS, projOut);
   const ds = R.track.deltaS(R.ghostS, proj.s);
   R.ghostS = proj.s;
   R.ghostProg += ds;
@@ -1498,22 +1531,22 @@ function onRender(alpha, dt) {
       headlight.target.position.copy(v3b);
     }
     const p = R.cars[R.pi];
-    hud.update({
-      speed: p.speed,
-      gear: p.gear,
-      reverse: p.reverse,
-      rpm: p.rpm,
-      nitro: p.nitro,
-      boosting: p.boosting,
-      position: R.place[R.pi],
-      total: R.n,
-      lap: clamp(p.lap + 1, 1, R.laps),
-      laps: R.laps,
-      time: R.phase === 'racing' || R.phase === 'finished' ? (R.finish[R.pi] < Infinity ? R.finish[R.pi] : R.time) : 0,
-      lapTime: R.phase === 'racing' ? R.time - R.lapStamp : 0,
-      bestLap: R.bestLap,
-      delta: R.mode === 'tt' ? R.delta : null
-    });
+    const hf = hudFrame;
+    hf.speed = p.speed;
+    hf.gear = p.gear;
+    hf.reverse = p.reverse;
+    hf.rpm = p.rpm;
+    hf.nitro = p.nitro;
+    hf.boosting = p.boosting;
+    hf.position = R.place[R.pi];
+    hf.total = R.n;
+    hf.lap = clamp(p.lap + 1, 1, R.laps);
+    hf.laps = R.laps;
+    hf.time = R.phase === 'racing' || R.phase === 'finished' ? (R.finish[R.pi] < Infinity ? R.finish[R.pi] : R.time) : 0;
+    hf.lapTime = R.phase === 'racing' ? R.time - R.lapStamp : 0;
+    hf.bestLap = R.bestLap;
+    hf.delta = R.mode === 'tt' ? R.delta : null;
+    hud.update(hf);
     try { input.setMeter('nitro', p.nitro, p.nitro > 0.12); } catch (_) {}
     mapTick++;
     if (mapTick % 3 === 0) {
@@ -1523,7 +1556,7 @@ function onRender(alpha, dt) {
     }
     if (postFx) {
       const kmh = p.speed * KMH;
-      postFx.setSpeedFx(clamp((kmh - 140) / 160, 0, 1) * 0.75 + (p.boosting ? 0.35 : 0));
+      postFx.setSpeedFx(clamp((kmh - 170) / 150, 0, 1) * 0.55 + (p.boosting ? 0.3 : 0));
     }
   } else {
     updateAttractCamera(dt);

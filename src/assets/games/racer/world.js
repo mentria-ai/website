@@ -47,15 +47,16 @@ function safeCall(name, list, args) {
 
 function glowTexture() {
   const c = document.createElement('canvas');
-  c.width = 64;
+  c.width = 128;
   c.height = 128;
   const g = c.getContext('2d');
-  const grad = g.createRadialGradient(32, 64, 2, 32, 64, 62);
-  grad.addColorStop(0, 'rgba(255,255,255,0.95)');
-  grad.addColorStop(0.35, 'rgba(255,255,255,0.45)');
+  const grad = g.createRadialGradient(64, 64, 0, 64, 64, 63);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.22, 'rgba(255,255,255,0.62)');
+  grad.addColorStop(0.55, 'rgba(255,255,255,0.18)');
   grad.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = grad;
-  g.fillRect(0, 0, 64, 128);
+  g.fillRect(0, 0, 128, 128);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
@@ -69,35 +70,34 @@ function buildRoadGlows(track, items, tintFor, intensity) {
   const col = [];
   const idx = [];
   const color = new THREE.Color();
+  const segs = 4;
   let v = 0;
   for (let i = 0; i < items.length; i++) {
     const it = items[i];
-    const near = track.nearest(it.x, it.z, 40);
+    const near = track.nearest(it.x, it.z, 45);
     if (!near) continue;
-    const s = near.s;
-    const smp = track.sample(s);
+    const smp = track.sample(near.s);
     const side = near.lateralFlat >= 0 ? 1 : -1;
     const halfW = smp.width / 2;
-    const len = it.len || Math.min(halfW * 1.7, 13);
-    const wid = it.wid || 3.2;
-    const lat0 = side * (halfW - 0.4);
-    const lat1 = side * (halfW - 0.4 - len);
-    const along = wid / 2;
-    const p = [
-      track.pointAt(s - along, lat0, 0.06),
-      track.pointAt(s + along, lat0, 0.06),
-      track.pointAt(s + along, lat1, 0.06),
-      track.pointAt(s - along, lat1, 0.06)
-    ];
+    const len = it.len || 16;
+    const wid = it.wid || 2.6;
+    const latC = side * Math.max(0.8, halfW - (it.inset || 2.2));
     color.set(tintFor(it, i));
     const k = intensity * (it.strength || 1);
-    for (let q = 0; q < 4; q++) {
-      pos.push(p[q].x, p[q].y, p[q].z);
-      col.push(color.r * k, color.g * k, color.b * k);
+    for (let j = 0; j <= segs; j++) {
+      const f = j / segs;
+      const s = near.s - len / 2 + len * f;
+      const a = track.pointAt(s, latC - wid / 2, 0.05);
+      const b = track.pointAt(s, latC + wid / 2, 0.05);
+      pos.push(a.x, a.y, a.z, b.x, b.y, b.z);
+      uv.push(0, f, 1, f);
+      col.push(color.r * k, color.g * k, color.b * k, color.r * k, color.g * k, color.b * k);
     }
-    uv.push(0, 0.5, 1, 0.5, 1, 0, 0, 0);
-    idx.push(v, v + 1, v + 2, v, v + 2, v + 3);
-    v += 4;
+    for (let j = 0; j < segs; j++) {
+      const base = v + j * 2;
+      idx.push(base, base + 1, base + 3, base, base + 3, base + 2);
+    }
+    v += (segs + 1) * 2;
   }
   if (!v) { tex.dispose(); return null; }
   const geo = new THREE.BufferGeometry();
@@ -106,7 +106,7 @@ function buildRoadGlows(track, items, tintFor, intensity) {
   geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
   geo.setIndex(idx);
   const mat = new THREE.MeshBasicMaterial({
-    map: tex, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    map: tex, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
     toneMapped: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4
   });
   const mesh = new THREE.Mesh(geo, mat);
@@ -350,8 +350,15 @@ export async function buildRacerWorld(opts = {}) {
   onProgress(0.45);
   await yieldFrame();
 
-  const trackOpts = { envMap: env.envMap, shadows: !!quality.shadows };
-  if (opts.roadMaterial) trackOpts.materials = { road: opts.roadMaterial };
+  const trackOpts = { envMap: env.envMap, shadows: !!quality.shadows, quality: qualityName };
+  let roadMat = opts.roadMaterial || null;
+  if (!roadMat && typeof mats.gameMaterial === 'function') {
+    try {
+      roadMat = mats.gameMaterial('asphalt', { unique: true, repeat: [2.5, 2.5], roughness: night ? 0.62 : 0.92 });
+      if (night) roadMat.envMapIntensity = 0.55;
+    } catch (_) { roadMat = null; }
+  }
+  if (roadMat) trackOpts.materials = { road: roadMat };
   const trackMeshes = buildTrackMeshes(THREE, track, trackOpts);
   scene.add(trackMeshes.group);
   trackMeshes.group.traverse(function (o) {
@@ -456,14 +463,14 @@ export async function buildRacerWorld(opts = {}) {
     const glowItems = [];
     const neon = layout.neonSigns || [];
     for (let i = 0; i < neon.length; i++) {
-      glowItems.push({ x: neon[i].x, z: neon[i].z, tint: NEON_TINTS[(NEON_INDEX[neon[i].image] == null ? i : NEON_INDEX[neon[i].image]) % NEON_TINTS.length], strength: 0.9, len: 10, wid: 4.2 });
+      glowItems.push({ x: neon[i].x, z: neon[i].z, tint: NEON_TINTS[(NEON_INDEX[neon[i].image] == null ? i : NEON_INDEX[neon[i].image]) % NEON_TINTS.length], strength: 2.2, len: 22, wid: 4.2, inset: 2.6 });
     }
     const lamps = layout.lampPosts || [];
     const lampTint = (def.style && def.style.lightsColor) || '#ffd8a6';
     for (let i = 0; i < lamps.length; i++) {
-      glowItems.push({ x: lamps[i].x, z: lamps[i].z, tint: lampTint, strength: 0.42, len: 7, wid: 5.5 });
+      glowItems.push({ x: lamps[i].x, z: lamps[i].z, tint: lampTint, strength: 0.9, len: 13, wid: 3, inset: 2.8 });
     }
-    glows = buildRoadGlows(track, glowItems, function (it) { return it.tint; }, 0.5);
+    glows = buildRoadGlows(track, glowItems, function (it) { return it.tint; }, 0.62);
     if (glows) {
       scene.add(glows.mesh);
       parts.push(glows);
@@ -508,6 +515,7 @@ export async function buildRacerWorld(opts = {}) {
     }
     parts.length = 0;
     try { trackMeshes.dispose(); } catch (_) {}
+    if (roadMat && !opts.roadMaterial) { try { roadMat.dispose(); } catch (_) {} }
     try { scene.remove(terrain.mesh); terrain.dispose(); } catch (_) {}
     try { env.dispose(); } catch (_) {}
   }
@@ -520,6 +528,7 @@ export async function buildRacerWorld(opts = {}) {
     heightfield,
     trackMeshes,
     skids,
+    glows: glows ? glows.mesh : null,
     night,
     biome,
     builders,

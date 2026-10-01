@@ -193,7 +193,8 @@
       return shell.match(marker).then(function (done) {
         if (done) return;
         var chain = Promise.resolve();
-        shellRoutes(loc.prefix).forEach(function (route) {
+        var routes = shellRoutes(loc.prefix).concat([DICT_BASE + code + '.json', '/fragments/tools-popup.' + code + '.html?v=' + i18nBuild()]);
+        routes.forEach(function (route) {
           chain = chain.then(function () {
             return fetch(route).then(function (resp) {
               if (resp && resp.ok) return shell.put(route, resp.clone());

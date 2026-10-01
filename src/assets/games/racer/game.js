@@ -1219,18 +1219,19 @@ function showResults() {
   const rows = [];
   let medal = null;
   let place = 1;
-  const roomy = (engine.size && engine.size.height) >= 520;
+  const stageH = (engine.size && engine.size.height) || 0;
+  const roomy = stageH >= 600;
+  const podium = stageH >= 480;
   if (R.mode === 'race') {
     const order = [];
     for (let i = 0; i < R.n; i++) order.push({ i, time: estimateFinish(i) });
     order.sort(function (a, b) { return a.time - b.time; });
     for (let k = 0; k < order.length; k++) if (order[k].i === pi) place = k + 1;
     medal = place === 1 ? 'gold' : place === 2 ? 'silver' : place === 3 ? 'bronze' : null;
-    const shown = roomy ? 3 : 1;
+    const shown = podium ? 3 : 0;
     for (let k = 0; k < order.length; k++) {
       const o = order[k];
       if (k >= shown && o.i !== pi) continue;
-      if (!roomy && o.i !== pi) continue;
       const name = o.i === pi ? t('res_you') : carName(R.specs[o.i]);
       const value = k === 0 ? formatRacerTime(o.time) : '+' + numberText(o.time - order[0].time, 2);
       rows.push({ label: (k + 1) + '  ' + name, value, good: o.i === pi ? true : undefined });
@@ -1239,7 +1240,7 @@ function showResults() {
     medal = medalFor(time, def.medals);
   }
   rows.push({ label: t('res_best_lap'), value: formatRacerTime(R.bestLap) });
-  rows.push({ label: t('res_top_speed'), value: Math.round(R.stats.top * (settings.units === 'mph' ? 2.2369363 : KMH)) + ' ' + t(settings.units === 'mph' ? 'units_mph' : 'units_kmh') });
+  if (roomy || !podium || R.mode !== 'race') rows.push({ label: t('res_top_speed'), value: Math.round(R.stats.top * (settings.units === 'mph' ? 2.2369363 : KMH)) + ' ' + t(settings.units === 'mph' ? 'units_mph' : 'units_kmh') });
   if (roomy) {
     if (R.mode === 'race') rows.push({ label: t('res_takedowns'), value: String(R.stats.takedowns) });
     else rows.push({ label: t('res_drifts'), value: String(R.stats.drifts) });

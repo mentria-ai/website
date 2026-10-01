@@ -586,6 +586,11 @@
       "short": "JSON Formatter",
       "lede": "A JSON formatter and validator online with no app to install — pretty-print, minify or sort keys, and see the exact line and column where invalid JSON breaks. It runs on your device; nothing is uploaded.",
       "tldr": "Paste JSON, drop a file or open one, and it is checked as you type: invalid input gets the exact line and column plus the offending snippet with a caret under the mistake. Format it with 2 spaces, 4 spaces or tabs, minify it, or sort every object's keys, then copy the result or download it as a .json file. The tree view opens large documents one level at a time and copies the path of any value, like $.items[3].name. Numbers too big or too precise for JavaScript are flagged and kept digit for digit instead of being silently rounded. Everything runs in your browser, so the JSON never leaves your device."
+    },
+    "video-player": {
+      "title": "Video Player",
+      "lede": "Play videos from your phone or computer, with resume, speed control, subtitles and picture-in-picture. Your files never leave your device.",
+      "tldr": "Open a few videos or a whole folder and they become a playlist with thumbnails. Mentria remembers where you stopped in each one, so you can pick up later, and on a computer or an Android phone it can remember the folder too. Change the speed from 0.25× to 3×, jump 10 seconds, load .srt or .vtt subtitles and nudge their timing, or pop the video out into picture-in-picture. Nothing is uploaded: the player reads the files straight from your device, and it warns you when a file uses a format your browser can't play."
     }
   },
   "game": {
@@ -2939,6 +2944,52 @@
       "expand_capped": "Opened the first {n} rows. Open deeper nodes one at a time.",
       "show_more": "Show {n} more ({left} left)",
       "download_base": "data"
+    },
+    "video-player": {
+      "drop": "Drop videos or a folder here",
+      "open_files": "Open videos",
+      "open_folder": "Open folder",
+      "drop_hint": "Your videos stay on this device. Nothing is uploaded.",
+      "ios_hint": "On iPhone, choose videos each time or open a folder from Files. Mentria remembers where you stopped.",
+      "saved_title": "Your folders",
+      "recent_title": "Continue watching",
+      "start_over": "Start over",
+      "controls": "Player controls",
+      "prev": "Previous video",
+      "back10": "Back 10 seconds",
+      "fwd10": "Forward 10 seconds",
+      "next": "Next video",
+      "speed": "Playback speed",
+      "subs": "Subtitles",
+      "pip": "Picture in picture",
+      "add": "Add videos",
+      "library": "Back to your videos",
+      "subs_off": "Off",
+      "subs_load": "Load subtitles",
+      "subs_timing": "Timing",
+      "subs_earlier": "Earlier",
+      "subs_later": "Later",
+      "subs_reset": "Reset",
+      "playlist": "Playlist",
+      "keys": "Keys: Space play or pause · J and L jump 10 s · F full screen · N and P next or previous · [ and ] speed · C subtitles",
+      "count": "{n} videos",
+      "count_one": "1 video",
+      "resumed": "Resumed at {time}.",
+      "watched": "Watched",
+      "played": "Stopped at {time}",
+      "pick_again": "Choose this file again to play it",
+      "reconnect": "Reconnect",
+      "open": "Open",
+      "forget_label": "Remove {name}",
+      "no_videos": "No videos found there.",
+      "folder_denied": "Mentria needs permission to read this folder. Tap Reconnect to allow it.",
+      "subs_loaded": "Subtitles loaded: {name}",
+      "subs_bad": "{name} doesn't look like a subtitle file. Use .srt or .vtt.",
+      "err_play": "This browser can't play {name}. Try another browser, or convert it to MP4 (H.264).",
+      "err_mkv_apple": "MKV videos don't play on iPhone, iPad or Safari. Open it in Chrome or Firefox, or convert it to MP4.",
+      "err_avi": "AVI videos don't play in browsers. Convert it to MP4 first.",
+      "warn_dolby": "This video's sound is Dolby or DTS, which this browser can't play, so it may be silent. Safari can play it.",
+      "err_generic": "This video couldn't be played. The file may be damaged or in a format this browser doesn't support."
     }
   },
   "category": {
@@ -2951,7 +3002,8 @@
     "Utility": "Utility",
     "Health": "Health",
     "Security": "Security",
-    "Social": "Social"
+    "Social": "Social",
+    "Media": "Media"
   },
   "palette": {
     "placeholder": "Search tools and pages…",

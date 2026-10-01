@@ -21,6 +21,7 @@ const TRAIL_LIFE = 0.7;
 const TRAIL_STEP = 0.028;
 const SPEC_HEADROOM = 0.32;
 const LDR_SCALE = 0.58;
+const DECAL_CORNERS = [-1, -1, 1, -1, 1, 1, -1, 1];
 
 const GLSL_NOISE = `
 float h21(vec2 p){ vec3 q = fract(vec3(p.x, p.y, p.x) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
@@ -2793,9 +2794,8 @@ export function createRenderer(canvas){
       const ux1 = tx * c + bx * s, uy1 = ty * c + by * s, uz1 = tz * c + bz * s;
       const vx1 = bx * c - tx * s, vy1 = by * c - ty * s, vz1 = bz * c - tz * s;
       const o = k * 28;
-      const cs = [-1, -1, 1, -1, 1, 1, -1, 1];
       for (let v = 0; v < 4; v++){
-        const cu = cs[v * 2], cv = cs[v * 2 + 1];
+        const cu = DECAL_CORNERS[v * 2], cv = DECAL_CORNERS[v * 2 + 1];
         const q = o + v * 7;
         decalData[q] = d.x + ux1 * cu + vx1 * cv;
         decalData[q + 1] = d.y + uy1 * cu + vy1 * cv;

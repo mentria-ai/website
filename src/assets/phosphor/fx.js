@@ -1072,6 +1072,7 @@ export function createParticles(max){
   const floorY = new Float32Array(N);
   const add = new Float32Array(N * PART_FLOATS);
   const alpha = new Float32Array(N * PART_FLOATS);
+  const filled = { add: add, addCount: 0, alpha: alpha, alphaCount: 0 };
   let cursor = 0;
   let count = 0;
   const rnd = rng(77);
@@ -1154,7 +1155,9 @@ export function createParticles(max){
         dst[o + 9] = cr[i] * a; dst[o + 10] = cg[i] * a; dst[o + 11] = cb[i] * a; dst[o + 12] = 0;
       }
     }
-    return { add: add, addCount: na, alpha: alpha, alphaCount: nb };
+    filled.addCount = na;
+    filled.alphaCount = nb;
+    return filled;
   }
 
   function impact(p, n, inDir, kind, light){

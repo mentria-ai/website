@@ -1,12 +1,103 @@
 import * as THREE from 'three';
 import * as KitRace from '../kit/race.js';
 import * as KitGhost from '../kit/ghost.js';
-import { courseCheckpoints, gateCrossing, createDrone, resetDrone, step as stepDrone, createFlightBot } from './flight.js';
+import { clamp } from '../kit/math.js';
+import { courseCheckpoints, gateCrossing, createDrone, resetDrone, step as stepDrone, createFlightBot, throttleCurve, DRONE_DEFAULTS } from './flight.js';
 import { createDroneMesh } from './mesh.js';
 
 const TRAIL_POINTS = 28;
 const TRAIL_STEP = 0.045;
 const GHOST_HZ = 20;
+const MID_STICK = { hoverAtMidStick: true, hoverThrottle: DRONE_DEFAULTS.hoverThrottle, throttleMid: 0.5, throttleExpo: 0 };
+
+export function midStickThrottle(stick) {
+  return throttleCurve(stick, MID_STICK);
+}
+
+export function deadband(v, d) {
+  const a = Math.abs(v);
+  if (a <= d) return 0;
+  return Math.sign(v) * (a - d) / (1 - d);
+}
+
+export function createHeightAssist() {
+  let integ = 0;
+  let holdY = null;
+
+  function reset() {
+    integ = 0;
+    holdY = null;
+  }
+
+  function throttle(drone, climb, dt) {
+    if (drone.grounded && climb <= 0.05) {
+      reset();
+      return 0;
+    }
+    const vy = drone.vel.y;
+    let vz;
+    if (Math.abs(climb) > 0.02) {
+      holdY = null;
+      vz = climb >= 0 ? climb * 6.5 : climb * 5;
+    } else {
+      if (holdY == null) holdY = drone.pos.y + (vy > 0 ? (vy * vy) / 19 : -(vy * vy) / 50);
+      vz = clamp((holdY - drone.pos.y) * 1.6, -3, 3);
+    }
+    const alt = drone.altitude;
+    if (vz < 0 && alt < 6) vz = Math.max(vz, -Math.max(0.9, alt * 0.85));
+    const err = vz - vy;
+    integ = clamp(integ + err * dt * 0.1, -0.32, 0.32);
+    return midStickThrottle(clamp(0.5 + err * 0.16 + integ, 0, 1));
+  }
+
+  return { reset, throttle };
+}
+
+export function buildDroneLayout(base, stickMode) {
+  const src = base || {};
+  const baseAxes = src.axes || {};
+  const mode1 = Number(stickMode) === 1;
+  const axes = {
+    throttle: {
+      range: 'unsigned',
+      keys: { neg: [], pos: [] },
+      pad: { axis: mode1 ? 3 : 1, invert: true, center: 0.5, deadzone: 0.04 }
+    },
+    climb: {
+      keys: { neg: ['KeyS'], pos: ['KeyW'] },
+      keyRate: 5,
+      keyReturn: 8
+    },
+    yaw: Object.assign({ keys: { neg: ['KeyA'], pos: ['KeyD'] }, keyRate: 6, keyReturn: 10 }, baseAxes.yaw || {}, { pad: { axis: 0, deadzone: 0.06 } }),
+    pitch: Object.assign({ keys: { neg: ['ArrowDown', 'KeyK'], pos: ['ArrowUp', 'KeyI'] }, keyRate: 7, keyReturn: 12, invertSetting: 'invertPitch' }, baseAxes.pitch || {}, { pad: { axis: mode1 ? 1 : 3, invert: true, deadzone: 0.05 } }),
+    roll: Object.assign({ keys: { neg: ['ArrowLeft', 'KeyJ'], pos: ['ArrowRight', 'KeyL'] }, keyRate: 7, keyReturn: 12 }, baseAxes.roll || {}, { pad: { axis: 2, deadzone: 0.05 } })
+  };
+  const buttons = {
+    camera: { keys: ['KeyC'], pad: [3] },
+    mode: { keys: ['KeyM'], pad: [5] },
+    restart: { keys: ['KeyR'], pad: [8] }
+  };
+  const touch = [];
+  for (const c of Array.isArray(src.touch) ? src.touch : []) {
+    if (c.type === 'stick') {
+      const s = Object.assign({}, c);
+      const left = c.side === 'left';
+      const throttleHere = left !== mode1;
+      s.axes = left ? ['yaw', mode1 ? 'pitch' : 'throttle'] : ['roll', mode1 ? 'throttle' : 'pitch'];
+      s.spring = { x: true, y: !throttleHere };
+      s.caption = mode1 ? '' : c.caption;
+      s.gate = throttleHere ? 'square' : undefined;
+      touch.push(s);
+    } else if (c.type === 'button' && (c.id === 'camera' || c.id === 'mode' || c.id === 'restart')) {
+      touch.push(c);
+    }
+  }
+  if (!touch.length) {
+    touch.push({ type: 'stick', id: 'left', side: 'left', axes: ['yaw', 'throttle'], spring: { x: true, y: false }, gate: 'square', caption: 'throttleYaw' });
+    touch.push({ type: 'stick', id: 'right', side: 'right', axes: ['roll', 'pitch'], spring: { x: true, y: true }, caption: 'pitchRoll' });
+  }
+  return Object.assign({}, src, { id: 'drone', axes, buttons, touch });
+}
 
 export function createRings(course) {
   const cps = courseCheckpoints(course);

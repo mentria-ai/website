@@ -8,12 +8,12 @@ import * as KitStore from '../kit/store.js';
 import * as KitUi from '../kit/ui.js';
 import * as KitFx from '../kit/fx.js';
 import { DEG, clamp } from '../kit/math.js';
-import { createDrone, step as stepDrone, resetDrone, configureDrone, interpolateDrone, throttleCurve, courseCheckpoints, createFlightBot, headingOf, gateFrame, DRONE_DEFAULTS } from './flight.js';
+import { createDrone, step as stepDrone, resetDrone, configureDrone, interpolateDrone, courseCheckpoints, createFlightBot, headingOf, gateFrame } from './flight.js';
 import { courseById } from './courses.js';
 import { createDroneMesh } from './mesh.js';
 import { buildWorld, startYawToGate, gateFacing } from './world.js';
 import { createHud, formatTime } from './hud.js';
-import { createRings, ringStep, createGhostView, simulatePaceGhost, decodeGhostString, createGhostRecorder } from './modes.js';
+import { createRings, ringStep, createGhostView, simulatePaceGhost, decodeGhostString, createGhostRecorder, createHeightAssist, buildDroneLayout, midStickThrottle, deadband } from './modes.js';
 
 const SLUG = 'fpv-drone';
 const NS = 'tool.fpv-drone.';
@@ -62,7 +62,6 @@ const RATE_SETS = {
   }
 };
 
-const MID_STICK = { hoverAtMidStick: true, hoverThrottle: DRONE_DEFAULTS.hoverThrottle, throttleMid: 0.5, throttleExpo: 0 };
 const IDLE_INPUT = { throttle: 0, roll: 0, pitch: 0, yaw: 0, mode: 'angle' };
 
 const stage = document.getElementById('sk-stage');
@@ -222,6 +221,7 @@ let lastMethod = 'keyboard';
 const paceCache = new Map();
 
 const drone = createDrone({ pos: [0, 0, 0] });
+const heightAssist = createHeightAssist();
 const physWorld = { heightAt: null, sphereVsWorld: null };
 const flightInput = { throttle: 0, roll: 0, pitch: 0, yaw: 0, mode: 'angle' };
 
@@ -250,8 +250,6 @@ const run = {
   rings: null,
   safe: [],
   safeT: 0,
-  altI: 0,
-  holdY: null,
   kbThr: 0,
   coachStep: -1,
   coachT: 0,
@@ -313,55 +311,7 @@ function applyDroneParams(forBot) {
 }
 
 function buildLayout() {
-  const base = KitInput.inputLayoutDrone || {};
-  const baseAxes = base.axes || {};
-  const mode1 = Number(settings.stickMode) === 1;
-  const axes = {
-    throttle: {
-      range: 'unsigned',
-      keys: { neg: [], pos: [] },
-      pad: { axis: mode1 ? 3 : 1, invert: true, center: 0.5, deadzone: 0.04 }
-    },
-    climb: {
-      keys: { neg: ['KeyS'], pos: ['KeyW'] },
-      keyRate: 5,
-      keyReturn: 8
-    },
-    yaw: Object.assign({ keys: { neg: ['KeyA'], pos: ['KeyD'] }, keyRate: 6, keyReturn: 10 }, baseAxes.yaw || {}, { pad: { axis: 0, deadzone: 0.06 } }),
-    pitch: Object.assign({ keys: { neg: ['ArrowDown', 'KeyK'], pos: ['ArrowUp', 'KeyI'] }, keyRate: 7, keyReturn: 12, invertSetting: 'invertPitch' }, baseAxes.pitch || {}, { pad: { axis: mode1 ? 1 : 3, invert: true, deadzone: 0.05 } }),
-    roll: Object.assign({ keys: { neg: ['ArrowLeft', 'KeyJ'], pos: ['ArrowRight', 'KeyL'] }, keyRate: 7, keyReturn: 12 }, baseAxes.roll || {}, { pad: { axis: 2, deadzone: 0.05 } })
-  };
-  const buttons = {
-    camera: { keys: ['KeyC'], pad: [3] },
-    mode: { keys: ['KeyM'], pad: [5] },
-    restart: { keys: ['KeyR'], pad: [8] }
-  };
-  const baseTouch = Array.isArray(base.touch) ? base.touch : [];
-  const touch = [];
-  for (const c of baseTouch) {
-    if (c.type === 'stick') {
-      const copy = Object.assign({}, c);
-      if (c.side === 'left') {
-        copy.axes = mode1 ? ['yaw', 'pitch'] : ['yaw', 'throttle'];
-        copy.spring = mode1 ? { x: true, y: true } : { x: true, y: false };
-        copy.caption = mode1 ? '' : c.caption;
-        copy.gate = mode1 ? undefined : c.gate;
-      } else {
-        copy.axes = mode1 ? ['roll', 'throttle'] : ['roll', 'pitch'];
-        copy.spring = mode1 ? { x: true, y: false } : { x: true, y: true };
-        copy.caption = mode1 ? '' : c.caption;
-        copy.gate = mode1 ? 'square' : c.gate;
-      }
-      touch.push(copy);
-    } else if (c.type === 'button' && (c.id === 'camera' || c.id === 'mode' || c.id === 'restart')) {
-      touch.push(c);
-    }
-  }
-  if (!touch.length) {
-    touch.push({ type: 'stick', id: 'left', side: 'left', axes: ['yaw', 'throttle'], spring: { x: true, y: false }, gate: 'square', caption: 'throttleYaw' });
-    touch.push({ type: 'stick', id: 'right', side: 'right', axes: ['roll', 'pitch'], spring: { x: true, y: true }, caption: 'pitchRoll' });
-  }
-  return Object.assign({}, base, { id: 'drone', axes, buttons, touch });
+  return buildDroneLayout(KitInput.inputLayoutDrone, settings.stickMode);
 }
 
 function refreshInputLayout() {
@@ -369,37 +319,10 @@ function refreshInputLayout() {
   try { input.setLayout(buildLayout()); } catch (err) { console.error('[skyrush] layout', err); }
 }
 
-function deadband(v, d) {
-  const a = Math.abs(v);
-  if (a <= d) return 0;
-  return Math.sign(v) * (a - d) / (1 - d);
-}
-
 function assistThrottle(dt) {
   const m = methodNow();
-  let climb;
-  if (m === 'keyboard') climb = input.axis('climb') || 0;
-  else climb = deadband(((input.axis('throttle') || 0) - 0.5) * 2, m === 'touch' ? 0.18 : 0.1);
-  if (drone.grounded && climb <= 0.05) {
-    run.altI = 0;
-    run.holdY = null;
-    return 0;
-  }
-  const vy = drone.vel.y;
-  let vz;
-  if (Math.abs(climb) > 0.02) {
-    run.holdY = null;
-    vz = climb >= 0 ? climb * 6.5 : climb * 5;
-  } else {
-    if (run.holdY == null) run.holdY = drone.pos.y + (vy > 0 ? (vy * vy) / 19 : -(vy * vy) / 50);
-    vz = clamp((run.holdY - drone.pos.y) * 1.6, -3, 3);
-  }
-  const alt = drone.altitude;
-  if (vz < 0 && alt < 6) vz = Math.max(vz, -Math.max(0.9, alt * 0.85));
-  const err = vz - vy;
-  run.altI = clamp(run.altI + err * dt * 0.1, -0.32, 0.32);
-  const stick = clamp(0.5 + err * 0.16 + run.altI, 0, 1);
-  return throttleCurve(stick, MID_STICK);
+  const climb = m === 'keyboard' ? input.axis('climb') || 0 : deadband(((input.axis('throttle') || 0) - 0.5) * 2, m === 'touch' ? 0.18 : 0.1);
+  return heightAssist.throttle(drone, climb, dt);
 }
 
 function manualThrottleStick(dt) {
@@ -423,7 +346,7 @@ function readFlightInput(dt) {
   flightInput.roll = input.axis('roll') || 0;
   flightInput.pitch = input.axis('pitch') || 0;
   flightInput.yaw = input.axis('yaw') || 0;
-  flightInput.throttle = assist ? assistThrottle(dt) : throttleCurve(manualThrottleStick(dt), MID_STICK);
+  flightInput.throttle = assist ? assistThrottle(dt) : midStickThrottle(manualThrottleStick(dt));
   return flightInput;
 }
 
@@ -462,16 +385,14 @@ function focusStage() {
 function placeDroneOnStart() {
   const c = run.course;
   resetDrone(drone, { pos: c.start.pos, yaw: startYawToGate(c) });
-  run.altI = 0;
-  run.holdY = null;
+  heightAssist.reset();
   run.kbThr = 0;
   chaseSnap = true;
 }
 
 function seedManualThrottle() {
   run.kbThr = drone.grounded ? 0 : 0.5;
-  run.holdY = null;
-  run.altI = 0;
+  heightAssist.reset();
 }
 
 function unlockAudio() {
@@ -583,7 +504,6 @@ function setupRun() {
   run.time = 0;
   run.safe = [];
   run.safeT = 0;
-  run.altI = 0;
   run.lightsT = -1;
   run.attract = null;
   run.bot = run.autopilot ? createFlightBot(c) : null;

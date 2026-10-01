@@ -2277,7 +2277,11 @@
       "ghost_ahead": "ahead by",
       "ghost_behind": "behind by",
       "course_error": "That course didn't load.",
-      "course_error_hint": "Pick another course, or reload the page."
+      "course_error_hint": "Pick another course, or reload the page.",
+      "gfx_label": "Graphics",
+      "gfx_enhanced": "Enhanced",
+      "gfx_classic": "Classic",
+      "gfx_hint": "Enhanced adds glow, particles, detailed surfaces and a living sky. Classic is the original look and runs lighter."
     },
     "model-mirror": {
       "btn_start": "Start mirroring (450 MB)",
@@ -3159,6 +3163,99 @@
       "err_apple_only": "“{name}” is Apple Lossless or AIFF, which only play on Apple devices.",
       "pick_again": "Choose this song's file again to play it.",
       "search_hint": "Search"
+    },
+    "fpv-drone": {
+      "course": {
+        "meadow": "Golden Meadow",
+        "yard": "Container Yard",
+        "canyon": "Red Canyon",
+        "freestyle": "Freestyle Valley"
+      },
+      "courseInfo": {
+        "meadow": "Rolling hills at golden hour. A flowing line through the meadow and over the slopes.",
+        "yard": "Fly through the warehouse, split-S over the gate and thread the container alleys.",
+        "canyon": "Start on the mesa, dive off the rim and race the winding canyon floor.",
+        "freestyle": "A big open valley with a warehouse, cranes and containers. No clock, just flying."
+      },
+      "mode": {
+        "acro": "Acro",
+        "angle": "Angle"
+      },
+      "modeInfo": {
+        "acro": "Full manual. The sticks set how fast the drone rotates and nothing levels it for you.",
+        "angle": "Self-leveling. The sticks set the tilt and the drone levels out when you let go."
+      },
+      "cameraTilt": "Camera angle",
+      "crash": {
+        "impact": "Crashed",
+        "flipped": "Flipped over"
+      }
+    },
+    "nitro-racer": {
+      "tracks": {
+        "neon-city": "Neon City",
+        "neon-city-desc": "Night street circuit with tight city corners and fast sweepers under the neon.",
+        "coast": "Coast Highway",
+        "coast-desc": "Sunny cliff-top highway above the sea, with long climbs and a tunnel through the hills.",
+        "canyon-run": "Canyon Run",
+        "canyon-run-desc": "Desert canyon at sunset with two big jumps and tight hairpins."
+      },
+      "difficulty": {
+        "easy": "Easy",
+        "normal": "Normal",
+        "hard": "Hard",
+        "pro": "Pro"
+      },
+      "cars": {
+        "shardfire": {
+          "name": "Shardfire"
+        },
+        "marlowe": {
+          "name": "Marlowe GT"
+        },
+        "aethra": {
+          "name": "Aethra"
+        },
+        "ironjaw": {
+          "name": "Ironjaw"
+        },
+        "mudlark": {
+          "name": "Mudlark R"
+        },
+        "nocturne": {
+          "name": "Nocturne S"
+        },
+        "kind": {
+          "wedge": "Wedge supercar",
+          "gt": "GT coupé",
+          "hyper": "Hypercar",
+          "muscle": "Muscle car",
+          "rally": "Rally hatch",
+          "sedan": "Sport sedan"
+        },
+        "stat": {
+          "accel": "Acceleration",
+          "top": "Top speed",
+          "handling": "Handling",
+          "nitro": "Nitro"
+        }
+      },
+      "paint": {
+        "crimson": "Crimson",
+        "sunburst": "Sunburst Orange",
+        "saffron": "Saffron Yellow",
+        "lime": "Lime",
+        "mint": "Mint",
+        "emerald": "Emerald",
+        "electric": "Electric Blue",
+        "midnight": "Midnight Blue",
+        "amethyst": "Amethyst",
+        "bronze": "Bronze",
+        "silver": "Silver",
+        "graphite": "Graphite",
+        "obsidian": "Obsidian Black",
+        "pearl": "Pearl White"
+      }
     }
   },
   "category": {

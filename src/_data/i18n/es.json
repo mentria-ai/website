@@ -2277,7 +2277,11 @@
       "ghost_ahead": "ventaja de",
       "ghost_behind": "desventaja de",
       "course_error": "Ese recorrido no se pudo cargar.",
-      "course_error_hint": "Elige otro recorrido o recarga la página."
+      "course_error_hint": "Elige otro recorrido o recarga la página.",
+      "gfx_label": "Gráficos",
+      "gfx_enhanced": "Mejorados",
+      "gfx_classic": "Clásicos",
+      "gfx_hint": "Mejorados añade brillo, partículas, superficies detalladas y un cielo vivo. Clásicos es el aspecto original y es más ligero."
     },
     "model-mirror": {
       "btn_start": "Empezar a compartir (450 MB)",
@@ -3159,6 +3163,99 @@
       "err_apple_only": "«{name}» está en Apple Lossless o AIFF, que solo se reproducen en dispositivos Apple.",
       "pick_again": "Vuelve a elegir el archivo de esta canción para reproducirla.",
       "search_hint": "Buscar"
+    },
+    "fpv-drone": {
+      "course": {
+        "meadow": "Pradera Dorada",
+        "yard": "Patio de contenedores",
+        "canyon": "Cañón Rojo",
+        "freestyle": "Valle libre"
+      },
+      "courseInfo": {
+        "meadow": "Colinas suaves a la hora dorada. Una línea fluida por la pradera y sobre las laderas.",
+        "yard": "Atraviesa el almacén, haz un split-S sobre la puerta y cruza los pasillos de contenedores.",
+        "canyon": "Sal desde la meseta, lánzate en picado desde el borde y recorre el fondo sinuoso del cañón.",
+        "freestyle": "Un gran valle abierto con almacén, grúas y contenedores. Sin reloj, solo vuelo."
+      },
+      "mode": {
+        "acro": "Acro",
+        "angle": "Ángulo"
+      },
+      "modeInfo": {
+        "acro": "Manual total. Los sticks fijan la velocidad de giro y nada nivela el dron por ti.",
+        "angle": "Autonivelado. Los sticks fijan la inclinación y el dron se nivela al soltarlos."
+      },
+      "cameraTilt": "Ángulo de cámara",
+      "crash": {
+        "impact": "Choque",
+        "flipped": "Volcado"
+      }
+    },
+    "nitro-racer": {
+      "tracks": {
+        "neon-city": "Ciudad Neón",
+        "neon-city-desc": "Circuito urbano nocturno con curvas cerradas entre edificios y curvas rápidas bajo el neón.",
+        "coast": "Autopista de la Costa",
+        "coast-desc": "Autopista soleada sobre los acantilados, con largas subidas y un túnel entre las colinas.",
+        "canyon-run": "Carrera del Cañón",
+        "canyon-run-desc": "Cañón desértico al atardecer con dos grandes saltos y horquillas cerradas."
+      },
+      "difficulty": {
+        "easy": "Fácil",
+        "normal": "Normal",
+        "hard": "Difícil",
+        "pro": "Pro"
+      },
+      "cars": {
+        "shardfire": {
+          "name": "Shardfire"
+        },
+        "marlowe": {
+          "name": "Marlowe GT"
+        },
+        "aethra": {
+          "name": "Aethra"
+        },
+        "ironjaw": {
+          "name": "Ironjaw"
+        },
+        "mudlark": {
+          "name": "Mudlark R"
+        },
+        "nocturne": {
+          "name": "Nocturne S"
+        },
+        "kind": {
+          "wedge": "Superdeportivo en cuña",
+          "gt": "Coupé GT",
+          "hyper": "Hiperdeportivo",
+          "muscle": "Muscle car",
+          "rally": "Compacto de rally",
+          "sedan": "Sedán deportivo"
+        },
+        "stat": {
+          "accel": "Aceleración",
+          "top": "Velocidad máxima",
+          "handling": "Manejo",
+          "nitro": "Nitro"
+        }
+      },
+      "paint": {
+        "crimson": "Carmesí",
+        "sunburst": "Naranja solar",
+        "saffron": "Amarillo azafrán",
+        "lime": "Lima",
+        "mint": "Menta",
+        "emerald": "Esmeralda",
+        "electric": "Azul eléctrico",
+        "midnight": "Azul medianoche",
+        "amethyst": "Amatista",
+        "bronze": "Bronce",
+        "silver": "Plata",
+        "graphite": "Grafito",
+        "obsidian": "Negro obsidiana",
+        "pearl": "Blanco perla"
+      }
     }
   },
   "category": {

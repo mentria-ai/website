@@ -2277,7 +2277,11 @@
       "ghost_ahead": "avance de",
       "ghost_behind": "retard de",
       "course_error": "Ce parcours n'a pas pu être chargé.",
-      "course_error_hint": "Choisissez un autre parcours ou rechargez la page."
+      "course_error_hint": "Choisissez un autre parcours ou rechargez la page.",
+      "gfx_label": "Graphismes",
+      "gfx_enhanced": "Améliorés",
+      "gfx_classic": "Classiques",
+      "gfx_hint": "Améliorés ajoute des lueurs, des particules, des surfaces détaillées et un ciel vivant. Classiques garde le rendu d'origine, plus léger."
     },
     "model-mirror": {
       "btn_start": "Commencer à partager (450 Mo)",
@@ -3159,6 +3163,99 @@
       "err_apple_only": "« {name} » est en Apple Lossless ou AIFF, des formats lus uniquement sur les appareils Apple.",
       "pick_again": "Choisissez à nouveau le fichier de ce morceau pour le lire.",
       "search_hint": "Rechercher"
+    },
+    "fpv-drone": {
+      "course": {
+        "meadow": "Prairie dorée",
+        "yard": "Parc à conteneurs",
+        "canyon": "Canyon rouge",
+        "freestyle": "Vallée libre"
+      },
+      "courseInfo": {
+        "meadow": "Des collines douces à l'heure dorée. Une ligne fluide à travers la prairie et sur les pentes.",
+        "yard": "Traversez l'entrepôt, enchaînez un split-S au-dessus de la porte et faufilez-vous entre les conteneurs.",
+        "canyon": "Partez du plateau, plongez depuis le bord et filez au fond du canyon sinueux.",
+        "freestyle": "Une grande vallée ouverte avec un entrepôt, des grues et des conteneurs. Pas de chrono, juste le vol."
+      },
+      "mode": {
+        "acro": "Acro",
+        "angle": "Angle"
+      },
+      "modeInfo": {
+        "acro": "Tout manuel. Les manches règlent la vitesse de rotation et rien ne remet le drone à plat.",
+        "angle": "Stabilisé. Les manches règlent l'inclinaison et le drone se remet à plat quand vous les lâchez."
+      },
+      "cameraTilt": "Angle de caméra",
+      "crash": {
+        "impact": "Crash",
+        "flipped": "Retourné"
+      }
+    },
+    "nitro-racer": {
+      "tracks": {
+        "neon-city": "Ville Néon",
+        "neon-city-desc": "Circuit urbain de nuit, avec des virages serrés entre les immeubles et de grandes courbes rapides sous les néons.",
+        "coast": "Route de la Côte",
+        "coast-desc": "Route ensoleillée au sommet des falaises, avec de longues montées et un tunnel à travers les collines.",
+        "canyon-run": "Course du Canyon",
+        "canyon-run-desc": "Canyon désertique au coucher du soleil, avec deux grands sauts et des épingles serrées."
+      },
+      "difficulty": {
+        "easy": "Facile",
+        "normal": "Normal",
+        "hard": "Difficile",
+        "pro": "Pro"
+      },
+      "cars": {
+        "shardfire": {
+          "name": "Shardfire"
+        },
+        "marlowe": {
+          "name": "Marlowe GT"
+        },
+        "aethra": {
+          "name": "Aethra"
+        },
+        "ironjaw": {
+          "name": "Ironjaw"
+        },
+        "mudlark": {
+          "name": "Mudlark R"
+        },
+        "nocturne": {
+          "name": "Nocturne S"
+        },
+        "kind": {
+          "wedge": "Supercar cunéiforme",
+          "gt": "Coupé GT",
+          "hyper": "Hypercar",
+          "muscle": "Muscle car",
+          "rally": "Compacte de rallye",
+          "sedan": "Berline sportive"
+        },
+        "stat": {
+          "accel": "Accélération",
+          "top": "Vitesse de pointe",
+          "handling": "Tenue de route",
+          "nitro": "Nitro"
+        }
+      },
+      "paint": {
+        "crimson": "Cramoisi",
+        "sunburst": "Orange soleil",
+        "saffron": "Jaune safran",
+        "lime": "Citron vert",
+        "mint": "Menthe",
+        "emerald": "Émeraude",
+        "electric": "Bleu électrique",
+        "midnight": "Bleu nuit",
+        "amethyst": "Améthyste",
+        "bronze": "Bronze",
+        "silver": "Argent",
+        "graphite": "Graphite",
+        "obsidian": "Noir obsidienne",
+        "pearl": "Blanc nacré"
+      }
     }
   },
   "category": {

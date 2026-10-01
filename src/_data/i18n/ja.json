@@ -2277,7 +2277,11 @@
       "ghost_ahead": "リード",
       "ghost_behind": "ビハインド",
       "course_error": "そのコースを読み込めませんでした。",
-      "course_error_hint": "別のコースを選ぶか、ページを再読み込みしてください。"
+      "course_error_hint": "別のコースを選ぶか、ページを再読み込みしてください。",
+      "gfx_label": "グラフィック",
+      "gfx_enhanced": "高画質",
+      "gfx_classic": "クラシック",
+      "gfx_hint": "高画質では発光、パーティクル、精細な質感、動く空が加わります。クラシックは元の見た目で、動作が軽くなります。"
     },
     "model-mirror": {
       "btn_start": "ミラーリングを開始（450 MB）",
@@ -3159,6 +3163,99 @@
       "err_apple_only": "「{name}」は Apple Lossless または AIFF 形式で、Apple 製デバイスでのみ再生できます。",
       "pick_again": "再生するには、この曲のファイルをもう一度選んでください。",
       "search_hint": "検索"
+    },
+    "fpv-drone": {
+      "course": {
+        "meadow": "黄金の草原",
+        "yard": "コンテナヤード",
+        "canyon": "レッドキャニオン",
+        "freestyle": "フリースタイル・バレー"
+      },
+      "courseInfo": {
+        "meadow": "夕暮れの金色に染まる丘。草原を抜けて斜面を越える、流れるようなコース。",
+        "yard": "倉庫を突き抜け、ゲートの上でスプリットS、コンテナの路地をすり抜けよう。",
+        "canyon": "台地から飛び立ち、崖から急降下して、曲がりくねった谷底を駆け抜けよう。",
+        "freestyle": "倉庫やクレーン、コンテナがある広い谷。タイムはなし、ただ自由に飛ぼう。"
+      },
+      "mode": {
+        "acro": "アクロ",
+        "angle": "アングル"
+      },
+      "modeInfo": {
+        "acro": "完全マニュアル。スティックで回転の速さを決め、機体は自動で水平に戻りません。",
+        "angle": "自動水平。スティックで傾きを決め、離すと機体が水平に戻ります。"
+      },
+      "cameraTilt": "カメラ角度",
+      "crash": {
+        "impact": "クラッシュ",
+        "flipped": "ひっくり返った"
+      }
+    },
+    "nitro-racer": {
+      "tracks": {
+        "neon-city": "ネオンシティ",
+        "neon-city-desc": "ネオン街を駆け抜ける夜の市街地コース。ビルの間の鋭いコーナーと高速カーブ。",
+        "coast": "コーストハイウェイ",
+        "coast-desc": "海を見下ろす晴れた崖上のハイウェイ。長い上り坂と丘を抜けるトンネル。",
+        "canyon-run": "キャニオンラン",
+        "canyon-run-desc": "夕暮れの砂漠の峡谷。2つの大ジャンプとタイトなヘアピン。"
+      },
+      "difficulty": {
+        "easy": "かんたん",
+        "normal": "ふつう",
+        "hard": "むずかしい",
+        "pro": "プロ"
+      },
+      "cars": {
+        "shardfire": {
+          "name": "Shardfire"
+        },
+        "marlowe": {
+          "name": "Marlowe GT"
+        },
+        "aethra": {
+          "name": "Aethra"
+        },
+        "ironjaw": {
+          "name": "Ironjaw"
+        },
+        "mudlark": {
+          "name": "Mudlark R"
+        },
+        "nocturne": {
+          "name": "Nocturne S"
+        },
+        "kind": {
+          "wedge": "ウェッジ型スーパーカー",
+          "gt": "GTクーペ",
+          "hyper": "ハイパーカー",
+          "muscle": "マッスルカー",
+          "rally": "ラリーハッチ",
+          "sedan": "スポーツセダン"
+        },
+        "stat": {
+          "accel": "加速",
+          "top": "最高速度",
+          "handling": "ハンドリング",
+          "nitro": "ニトロ"
+        }
+      },
+      "paint": {
+        "crimson": "クリムゾン",
+        "sunburst": "サンバーストオレンジ",
+        "saffron": "サフランイエロー",
+        "lime": "ライム",
+        "mint": "ミント",
+        "emerald": "エメラルド",
+        "electric": "エレクトリックブルー",
+        "midnight": "ミッドナイトブルー",
+        "amethyst": "アメジスト",
+        "bronze": "ブロンズ",
+        "silver": "シルバー",
+        "graphite": "グラファイト",
+        "obsidian": "オブシディアンブラック",
+        "pearl": "パールホワイト"
+      }
     }
   },
   "category": {

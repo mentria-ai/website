@@ -6,6 +6,7 @@ importScripts('/assets/js/mentria-push-db.js?v={{ buildHash }}');
 const CACHE_NAME = 'mentria-cache-{{ buildHash }}';
 const MODELS_CACHE = 'mentria-models';
 const MODELS_MARKER = 'mentria-models-{{ modelsVersion }}';
+const ENGINE_FILES = {{ engineFiles | dump | safe }};
 const DECKS_CACHE = 'mentria-decks-{{ buildHash }}';
 const ART_CACHE = 'mentria-deck-art';
 const SHARE_CACHE = 'mentria-share';
@@ -354,6 +355,67 @@ async function handleShareTarget(request) {
   return Response.redirect('/tools/quick-notes/' + (q.toString() ? '?' + q.toString() : ''), 303);
 }
 
+function bufferedResponse(body, resp) {
+  return new Response(body, { status: resp.status, statusText: resp.statusText, headers: { 'content-type': resp.headers.get('content-type') || 'application/octet-stream' } });
+}
+
+let engineKit = null;
+function keepEngineOffline() {
+  if (!engineKit) {
+    engineKit = (async () => {
+      const cache = await caches.open(MODELS_CACHE);
+      let complete = true;
+      for (const path of ENGINE_FILES) {
+        if (await cache.match(path, { ignoreSearch: true })) continue;
+        try {
+          const resp = await fetch(path, { cache: 'no-cache' });
+          if (!resp.ok) throw new Error(path);
+          await cache.put(path, bufferedResponse(await resp.arrayBuffer(), resp));
+        } catch (_) {
+          complete = false;
+        }
+      }
+      if (!complete) engineKit = null;
+    })().catch(() => { engineKit = null; });
+  }
+  return engineKit;
+}
+
+const TOKENIZER_FILES = ['tokenizer.json', 'tokenizer_config.json', 'chat_template.jinja'];
+const MODEL_SHARD = /^(https:\/\/cdn\.mentria\.ai\/models\/[^/]+\/|https:\/\/huggingface\.co\/mentriaai\/[^/]+\/resolve\/[^/]+\/)[^/]+\.safetensors$/;
+
+let modelBackfill = null;
+function keepModelsOffline() {
+  if (!modelBackfill) {
+    modelBackfill = (async () => {
+      const cache = await caches.open(MODELS_CACHE);
+      const bases = new Set();
+      for (const req of await cache.keys()) {
+        const m = req.url.split('?')[0].match(MODEL_SHARD);
+        if (m) bases.add(m[1]);
+      }
+      if (!bases.size) return;
+      await keepEngineOffline();
+      for (const base of bases) {
+        for (const name of TOKENIZER_FILES) {
+          if (await cache.match(base + name)) continue;
+          try {
+            const resp = await fetch(base + name);
+            if (resp.ok) await cache.put(base + name, bufferedResponse(await resp.arrayBuffer(), resp));
+          } catch (_) {}
+        }
+      }
+    })().catch(() => {});
+  }
+  return modelBackfill;
+}
+
+function isTokenizerFile(url) {
+  const fromCdn = url.origin === 'https://cdn.mentria.ai' && url.pathname.startsWith('/models/');
+  const fromHub = url.origin === 'https://huggingface.co' && /^\/mentriaai\/[^/]+\/resolve\//.test(url.pathname);
+  return (fromCdn || fromHub) && TOKENIZER_FILES.includes(url.pathname.slice(url.pathname.lastIndexOf('/') + 1));
+}
+
 self.addEventListener('fetch', event => {
   if (event.request.method === 'POST') {
     const postUrl = new URL(event.request.url);
@@ -363,6 +425,20 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+
+  if (isTokenizerFile(url)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(MODELS_CACHE);
+      const cached = await cache.match(event.request.url);
+      if (cached) return cached;
+      const resp = await fetch(event.request);
+      if (!resp.ok) return resp;
+      const body = await resp.arrayBuffer();
+      event.waitUntil(cache.put(event.request.url, bufferedResponse(body, resp)).catch(() => {}));
+      return bufferedResponse(body, resp);
+    })());
+    return;
+  }
 
   if (url.origin === 'https://mentria-ai.github.io' && url.pathname === '/radio-catalog/catalog.json') {
     event.respondWith((async () => {
@@ -403,6 +479,9 @@ self.addEventListener('fetch', event => {
     event.respondWith(wtRelay(event.request));
     return;
   }
+
+  if (event.request.mode === 'navigate') event.waitUntil(keepModelsOffline());
+  if (url.pathname.startsWith('/assets/mentria/dist/')) event.waitUntil(keepEngineOffline());
 
   event.respondWith((async () => {
     if (url.pathname.startsWith('/assets/mentria/dist/')) {

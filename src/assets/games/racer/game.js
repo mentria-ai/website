@@ -773,6 +773,10 @@ function setupRace(quick) {
   state = 'race';
   ui.hide();
   engine.pause(false);
+  if (!quick && typeof ui.splash === 'function') {
+    const touchNow = input.method && input.method() === 'touch';
+    try { ui.splash(trackName(def), { sub: touchNow && autoGasOn() ? t('start_hint_touch') : t('start_hint_keys'), ms: 2200 }); } catch (_) {}
+  }
   if (testAutopilot) enableAutopilot(true);
 }
 
@@ -781,7 +785,7 @@ function paintHex(id) {
 }
 
 function setupGhost() {
-  race.ghostRec = createRecorder(GHOST_HZ, { maxSeconds: 900 });
+  race.ghostRec = createRecorder(GHOST_HZ, { maxSeconds: 300 });
   const str = safeGhost(race.def.id);
   if (!str) return;
   const g = decodeGhost(str);

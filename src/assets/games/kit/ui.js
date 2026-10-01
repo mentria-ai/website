@@ -614,8 +614,13 @@ export function createUI(stage, copyIn, opts = {}) {
     } catch (_) {}
   }
 
+  let wasFullscreen = false;
+
   function onFsChange() {
     syncFsIcon();
+    const now = fullscreenElement() === stage;
+    if (wasFullscreen && !now && !currentName && !askEl) requestPause();
+    wasFullscreen = now;
   }
 
   function requestPause() {

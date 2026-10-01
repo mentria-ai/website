@@ -2,16 +2,16 @@
     <div class="terminal-frame__titlebar">
         <div class="terminal-frame__dots">
             {% if terminalBackHref %}
-            <a class="terminal-frame__dot terminal-frame__dot--red terminal-frame__dot--back" href="{{ terminalBackHref }}" aria-label="{{ 'common.back' | t }}" title="{{ 'common.back' | t }}"></a>
+            <a class="terminal-frame__dot terminal-frame__dot--red terminal-frame__dot--back" href="{{ terminalBackHref }}" aria-label="{{ 'common.back' | t }}" title="{{ 'common.back' | t }}" data-i18na="aria-label=common.back;title=common.back"></a>
             {% else %}
-            <button type="button" class="terminal-frame__dot terminal-frame__dot--red terminal-frame__dot--close" data-action="close-tool" aria-label="{{ 'common.close_tool' | t }}" title="{{ 'common.close_tool' | t }}"></button>
+            <button type="button" class="terminal-frame__dot terminal-frame__dot--red terminal-frame__dot--close" data-action="close-tool" aria-label="{{ 'common.close_tool' | t }}" title="{{ 'common.close_tool' | t }}" data-i18na="aria-label=common.close_tool;title=common.close_tool"></button>
             {% endif %}
-            {% if terminalMini %}
-            <button type="button" class="terminal-frame__dot terminal-frame__dot--yellow terminal-frame__dot--mini" data-mini="{{ terminalMini }}" aria-label="{{ 'common.mini.minimize' | t }}" title="{{ 'common.mini.minimize' | t }}"></button>
+            {% if terminalMini or (page.url | contains('/tools/')) %}
+            <button type="button" class="terminal-frame__dot terminal-frame__dot--yellow terminal-frame__dot--mini" data-mini="{{ terminalMini or 'tool' }}" aria-label="{{ 'common.mini.minimize' | t }}" title="{{ 'common.mini.minimize' | t }}" data-i18na="aria-label=common.mini.minimize;title=common.mini.minimize"></button>
             {% else %}
             <span class="terminal-frame__dot terminal-frame__dot--yellow"></span>
             {% endif %}
-            <button type="button" class="terminal-frame__dot terminal-frame__dot--green" data-action="toggle-fullscreen" aria-pressed="false" aria-label="{{ 'common.toggle_fullscreen' | t }}" title="{{ 'common.toggle_fullscreen' | t }}"></button>
+            <button type="button" class="terminal-frame__dot terminal-frame__dot--green" data-action="toggle-fullscreen" aria-pressed="false" aria-label="{{ 'common.toggle_fullscreen' | t }}" title="{{ 'common.toggle_fullscreen' | t }}" data-i18na="aria-label=common.toggle_fullscreen;title=common.toggle_fullscreen"></button>
         </div>
         {% set frameName = "tools." + page.fileSlug + ".title" %}
         {% if frameName | hasKey %}

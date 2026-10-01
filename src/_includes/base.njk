@@ -425,7 +425,7 @@
         var okBtn = document.getElementById('m-dialog-ok');
         var cancelBtn = document.getElementById('m-dialog-cancel');
         var okLabel = {{ ("common.dialog.ok" | t) | dump | safe }};
-        window.MentriaUICopy = { undo: {{ ("common.undo" | t) | dump | safe }}, sendTo: {{ ("common.send_to" | t) | dump | safe }}, sendLabel: {{ ("common.send_to_label" | t) | dump | safe }}, sendNamed: {{ ("common.send_named" | t) | dump | safe }}, sendFailed: {{ ("common.send_failed" | t) | dump | safe }} };
+        window.MentriaUICopy = { undo: {{ ("common.undo" | t) | dump | safe }}, sendTo: {{ ("common.send_to" | t) | dump | safe }}, sendLabel: {{ ("common.send_to_label" | t) | dump | safe }}, sendNamed: {{ ("common.send_named" | t) | dump | safe }}, sendFailed: {{ ("common.send_failed" | t) | dump | safe }}, windowLabel: {{ ("common.window.label" | t) | dump | safe }}, windowClose: {{ ("common.close_tool" | t) | dump | safe }}, windowCloseHint: {{ ("common.window.close_hint" | t) | dump | safe }}, windowMinimize: {{ ("common.window.minimize" | t) | dump | safe }}, windowMinimizeHint: {{ ("common.window.minimize_hint" | t) | dump | safe }}, windowFull: {{ ("common.window.fullscreen" | t) | dump | safe }}, windowFullHint: {{ ("common.window.fullscreen_hint" | t) | dump | safe }}, windowExitFull: {{ ("common.window.exit_fullscreen" | t) | dump | safe }}, windowExitFullHint: {{ ("common.window.exit_fullscreen_hint" | t) | dump | safe }}, windowCancel: {{ ("common.dialog.cancel" | t) | dump | safe }} };
         var confirmLabel = {{ ("common.dialog.confirm" | t) | dump | safe }};
         var resolver = null;
         var opener = null;
@@ -828,7 +828,7 @@
         });
         document.addEventListener('keydown', function (e) {
           if (e.key !== 'Escape' || !activeFrame()) return;
-          if (document.querySelector('.m-modal:not([hidden]), .m-palette:not([hidden]), .hero--peek')) return;
+          if (document.querySelector('.m-modal:not([hidden]), .m-wmenu:not([hidden]), .m-palette:not([hidden]), .hero--peek')) return;
           withTransition(function () { exit(); });
         });
         document.addEventListener('DOMContentLoaded', function () {

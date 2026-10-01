@@ -577,7 +577,7 @@
 
     function focusable() {
       return Array.prototype.slice.call(
-        el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+        el.querySelectorAll('button, a[href], area[href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
       ).filter(function (n) { return !n.disabled && !n.hidden && n.type !== 'hidden'; });
     }
     function onKey(e) {
@@ -618,6 +618,104 @@
     return { open: open, close: close };
   }
 
+  var wmenu = null;
+  var wmenuModal = null;
+  var lastPointer = '';
+
+  function windowRows(dots) {
+    var red = dots.querySelector('.terminal-frame__dot--red');
+    var yellow = dots.querySelector('[data-mini]');
+    var green = dots.querySelector('[data-action="toggle-fullscreen"]');
+    var full = !!(green && green.getAttribute('aria-pressed') === 'true');
+    var rows = [];
+    if (red && (red.tagName === 'A' || red.tagName === 'BUTTON')) {
+      rows.push({ dot: red, color: 'red', label: red.getAttribute('aria-label') || uiCopy('windowClose', 'common.close_tool', 'Close tool'), hint: uiCopy('windowCloseHint', 'common.window.close_hint', 'Back to where you were') });
+    }
+    if (yellow) {
+      rows.push({ dot: yellow, color: 'yellow', label: uiCopy('windowMinimize', 'common.window.minimize', 'Minimize'), hint: uiCopy('windowMinimizeHint', 'common.window.minimize_hint', 'Keep it as a pill while you look around') });
+    }
+    if (green) {
+      rows.push({
+        dot: green,
+        color: 'green',
+        label: full ? uiCopy('windowExitFull', 'common.window.exit_fullscreen', 'Exit full screen') : uiCopy('windowFull', 'common.window.fullscreen', 'Full screen'),
+        hint: full ? uiCopy('windowExitFullHint', 'common.window.exit_fullscreen_hint', 'Show the site header again') : uiCopy('windowFullHint', 'common.window.fullscreen_hint', 'Hide the site header')
+      });
+    }
+    return rows;
+  }
+
+  function windowMenu(dots) {
+    var rows = windowRows(dots);
+    if (!rows.length) return;
+    if (!wmenu) {
+      wmenu = document.createElement('div');
+      wmenu.className = 'm-wmenu';
+      wmenu.hidden = true;
+      wmenu.setAttribute('role', 'dialog');
+      wmenu.setAttribute('aria-modal', 'true');
+      wmenu.innerHTML = '<div class="m-wmenu__scrim" aria-hidden="true"></div>' +
+        '<div class="m-wmenu__sheet"><span class="m-wmenu__grip" aria-hidden="true"></span>' +
+        '<div class="m-wmenu__head"><span class="m-wmenu__icon" aria-hidden="true"></span><span class="m-wmenu__name"></span></div>' +
+        '<div class="m-wmenu__rows"></div><button type="button" class="m-wmenu__cancel"></button></div>';
+      document.body.appendChild(wmenu);
+      wmenuModal = modal(wmenu);
+      wmenu.querySelector('.m-wmenu__scrim').addEventListener('click', function () { wmenuModal.close(); });
+      wmenu.querySelector('.m-wmenu__cancel').addEventListener('click', function () { wmenuModal.close(); });
+    }
+    var frame = dots.closest('.terminal-frame');
+    var nameEl = frame && frame.querySelector('.terminal-frame__filename');
+    var slug = (location.pathname.match(/\/tools\/([^/]+)\//) || [])[1] || '';
+    wmenu.setAttribute('aria-label', uiCopy('windowLabel', 'common.window.label', 'Window controls'));
+    var icon = wmenu.querySelector('.m-wmenu__icon');
+    icon.innerHTML = slug ? '<svg viewBox="0 0 48 48" focusable="false"><use href="#tool-' + slug + '"></use></svg>' : '';
+    if (slug && !document.getElementById('tool-' + slug) && window.MentriaToolsPopup) window.MentriaToolsPopup.load();
+    wmenu.querySelector('.m-wmenu__name').textContent = (nameEl && nameEl.textContent.trim()) || document.title;
+    wmenu.querySelector('.m-wmenu__cancel').textContent = uiCopy('windowCancel', 'common.dialog.cancel', 'Cancel');
+    var list = wmenu.querySelector('.m-wmenu__rows');
+    list.innerHTML = '';
+    var pushed = false;
+    rows.forEach(function (r) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'm-wmenu__row';
+      btn.innerHTML = '<span class="m-wmenu__dot m-wmenu__dot--' + r.color + '" aria-hidden="true"></span><span class="m-wmenu__text"><span class="m-wmenu__label"></span><span class="m-wmenu__hint"></span></span>';
+      btn.querySelector('.m-wmenu__label').textContent = r.label;
+      btn.querySelector('.m-wmenu__hint').textContent = r.hint;
+      btn.addEventListener('click', function () {
+        var done = false;
+        function go() {
+          if (done) return;
+          done = true;
+          window.removeEventListener('popstate', go);
+          r.dot.click();
+        }
+        if (pushed) {
+          window.addEventListener('popstate', go);
+          setTimeout(go, 400);
+        }
+        wmenuModal.close();
+        if (!pushed) go();
+      });
+      list.appendChild(btn);
+    });
+    wmenuModal.open();
+    pushed = !!(history.state && history.state.mOverlay);
+  }
+
+  document.addEventListener('pointerdown', function (e) { lastPointer = e.pointerType || ''; }, true);
+  document.addEventListener('keydown', function () { lastPointer = ''; }, true);
+  document.addEventListener('click', function (e) {
+    var type = lastPointer;
+    lastPointer = '';
+    if (type !== 'touch') return;
+    var dots = e.target.closest && e.target.closest('.terminal-frame__dots');
+    if (!dots) return;
+    e.preventDefault();
+    e.stopPropagation();
+    windowMenu(dots);
+  }, true);
+
   window.MentriaUI = {
     copyButton: copyButton,
     toast: toast,
@@ -638,6 +736,8 @@
     shareFile: shareFile,
     migrateStore: migrateStore,
     modal: modal,
-    backDismiss: backDismiss
+    backDismiss: backDismiss,
+    toolTitle: toolTitle,
+    windowMenu: windowMenu
   };
 })();

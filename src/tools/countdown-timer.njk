@@ -108,7 +108,6 @@ eleventyComputed:
 (() => {
   const COPY = {
     statusReady:    {{ ("tool.countdown-timer.status_ready"     | t) | dump | safe }},
-    miniNothing:    {{ ("tool.countdown-timer.mini_nothing"     | t) | dump | safe }},
     statusRunning:  {{ ("tool.countdown-timer.status_running"   | t) | dump | safe }},
     statusPaused:   {{ ("tool.countdown-timer.status_paused"    | t) | dump | safe }},
     statusTimesUp:  {{ ("tool.countdown-timer.status_times_up"  | t) | dump | safe }},
@@ -860,7 +859,8 @@ eleventyComputed:
   if (miniDot) miniDot.addEventListener('click', () => {
     persistActive();
     const active = window.MentriaStore && window.MentriaStore.get('tools', 'countdown_active');
-    if (!Array.isArray(active) || !active.length || !window.MentriaMini) { MentriaUI.toast(COPY.miniNothing); return; }
+    if (!window.MentriaMini) return;
+    if (!Array.isArray(active) || !active.length) { window.MentriaMini.minimizeTool(); return; }
     window.MentriaMini.start('timer', location.pathname);
     window.MentriaMini.leave();
   });

@@ -184,6 +184,16 @@
       "steps": "{n} pas",
       "tap_resume": "Touchez pour continuer à compter"
     },
+    "window": {
+      "label": "Commandes de la fenêtre",
+      "close_hint": "Revenir là où vous étiez",
+      "minimize": "Réduire",
+      "minimize_hint": "Gardez-le en pastille pendant que vous naviguez",
+      "fullscreen": "Plein écran",
+      "fullscreen_hint": "Masquer l’en-tête du site",
+      "exit_fullscreen": "Quitter le plein écran",
+      "exit_fullscreen_hint": "Réafficher l’en-tête du site"
+    },
     "close_tool": "Fermer l’outil",
     "send_to": "Envoyer vers…",
     "send_to_label": "Envoyer vers un autre outil",
@@ -801,8 +811,7 @@
       "preset_1hr": "1 h",
       "preset_save_aria": "Enregistrer la durée actuelle comme préréglage",
       "preset_remove_aria": "Supprimer le préréglage {label}",
-      "preset_save_invalid": "Définissez d’abord une durée, puis enregistrez-la",
-      "mini_nothing": "Lancez d’abord un minuteur, puis réduisez-le."
+      "preset_save_invalid": "Définissez d’abord une durée, puis enregistrez-la"
     },
     "invoice": {
       "btn_new": "Nouvelle facture",
@@ -1137,8 +1146,7 @@
       "pocket_note": "Le mode poche garde l'écran allumé mais tout noir : les pas continuent d'être comptés dans la poche. Idéal sur écran OLED. Faites glisser le point en bas pour quitter.",
       "pocket_exit": "Glissez pour quitter",
       "est_label": "est.",
-      "est_explain": "Estimation d'après votre cadence de marche pendant que l'écran était verrouillé",
-      "mini_nothing": "Commencez d’abord à compter, puis réduisez."
+      "est_explain": "Estimation d'après votre cadence de marche pendant que l'écran était verrouillé"
     },
     "qr-scanner": {
       "aria_video": "Aperçu de la caméra en direct",

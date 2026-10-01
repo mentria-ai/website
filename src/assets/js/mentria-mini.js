@@ -4,12 +4,15 @@
   var S = window.MentriaStore;
   var COPY = window.MentriaMiniCopy || {};
   var KEY = 'mini';
+  var TOOL_KEY = 'mini_tool';
   var POS_KEY = 'mini_pos';
   var MAX_AGE = 12 * 3600000;
   var SENS = { low: 1.7, med: 1.1, high: 0.7 };
   var STEP_MIN_MS = 300;
   var TOP_GAP = 64;
+  var dock = null;
   var pill = null;
+  var parked = null;
   var tickTimer = 0;
   var listening = false;
   var sawMotion = false;
@@ -48,6 +51,7 @@
     clearInterval(tickTimer);
     tickTimer = 0;
     if (pill) { pill.remove(); pill = null; }
+    tidyDock();
   }
   function leave() {
     var here = location.pathname;
@@ -61,6 +65,45 @@
     } else {
       location.href = prefix() + '/';
     }
+  }
+
+  function toolSession() {
+    var v = S ? S.get('ui', TOOL_KEY) : null;
+    if (!v || !v.path) return null;
+    if (Date.now() - (v.since || 0) > MAX_AGE) { unpark(); return null; }
+    return v;
+  }
+  function slugOf(path) {
+    var m = /^\/tools\/([^/]+)\//.exec(path || '');
+    return m ? m[1] : '';
+  }
+  function minimizeTool() {
+    if (!S) return;
+    var id = new URLSearchParams(location.search).get('id') || '';
+    var nameEl = document.querySelector('.terminal-frame__filename');
+    S.set('ui', TOOL_KEY, {
+      path: bare(location.pathname),
+      id: id,
+      name: (nameEl && nameEl.textContent.trim()) || document.title,
+      since: Date.now()
+    });
+    leave();
+  }
+  function unpark() {
+    if (S) S.remove('ui', TOOL_KEY);
+    if (parked) { parked.remove(); parked = null; }
+    tidyDock();
+  }
+  function isHere(ps) {
+    if (bare(location.pathname) !== ps.path) return false;
+    return !ps.id || new URLSearchParams(location.search).get('id') === ps.id;
+  }
+  function parkedName(ps) {
+    if (!ps.id && window.MentriaUI && typeof window.MentriaUI.toolTitle === 'function') {
+      var title = window.MentriaUI.toolTitle(slugOf(ps.path));
+      if (title) return title;
+    }
+    return ps.name || '';
   }
 
   function holdWake() {
@@ -170,11 +213,30 @@
   function setText(el, text) {
     if (el.textContent !== text) el.textContent = text;
   }
+  function iconFor(slug) {
+    var icon = document.createElement('span');
+    icon.className = 'm-mini__icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.innerHTML = '<svg viewBox="0 0 48 48" focusable="false"><use href="#tool-' + slug + '"></use></svg>';
+    if (!document.getElementById('tool-' + slug) && window.MentriaToolsPopup) window.MentriaToolsPopup.load();
+    return icon;
+  }
+  function closeButton(onClose) {
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'm-mini__close';
+    close.setAttribute('aria-label', COPY.close || 'Close');
+    close.textContent = '×';
+    close.addEventListener('click', onClose);
+    return close;
+  }
+
   function render() {
     var ses = session();
-    if (!ses) { if (pill) { pill.remove(); pill = null; } return; }
+    if (!ses) { if (pill) { pill.remove(); pill = null; tidyDock(); } return; }
     var view = ses.kind === 'timer' ? timerView() : stepsView();
     if (!view) { stop(); return; }
+    if (pill && pill.getAttribute('data-kind') !== ses.kind) { pill.remove(); pill = null; }
     if (!pill) build(ses);
     setText(pill.querySelector('.m-mini__value'), view.value);
     var label = pill.querySelector('.m-mini__label');
@@ -190,12 +252,26 @@
       wasDone = !!view.done;
     }
   }
+  function renderParked() {
+    var ps = toolSession();
+    if (!ps) { if (parked) { parked.remove(); parked = null; tidyDock(); } return; }
+    if (isHere(ps)) { unpark(); return; }
+    if (parked && parked.getAttribute('data-key') !== ps.path + '#' + ps.id) { parked.remove(); parked = null; }
+    if (!parked) buildParked(ps);
+    var name = parkedName(ps);
+    setText(parked.querySelector('.m-mini__value'), name);
+    parked.setAttribute('aria-label', name);
+    var open = parked.querySelector('.m-mini__open');
+    var label = (COPY.open || 'Open {name}').replace('{name}', name);
+    if (open.getAttribute('aria-label') !== label) open.setAttribute('aria-label', label);
+  }
+
   function applyPos() {
-    if (!pill) return;
+    if (!dock) return;
     var p = S ? S.get('ui', POS_KEY) : null;
-    pill.classList.toggle('is-left', !!(p && p.side === 'left'));
-    if (p && typeof p.y === 'number' && p.y > 0) pill.style.setProperty('--mini-y', p.y + 'px');
-    else pill.style.removeProperty('--mini-y');
+    dock.classList.toggle('is-left', !!(p && p.side === 'left'));
+    if (p && typeof p.y === 'number' && p.y > 0) dock.style.setProperty('--mini-y', p.y + 'px');
+    else dock.style.removeProperty('--mini-y');
   }
   function draggable(el) {
     var id = null, sx = 0, sy = 0, dragging = false, moved = false;
@@ -243,18 +319,28 @@
       e.stopPropagation();
     }, true);
   }
+  function ensureDock() {
+    if (!dock) {
+      dock = document.createElement('div');
+      dock.className = 'm-mini-dock';
+      draggable(dock);
+      document.body.appendChild(dock);
+      applyPos();
+    }
+    return dock;
+  }
+  function tidyDock() {
+    if (dock && !dock.children.length) { dock.remove(); dock = null; }
+  }
   function build(ses) {
     pill = document.createElement('div');
     pill.className = 'm-mini';
+    pill.setAttribute('data-kind', ses.kind);
     pill.setAttribute('role', 'group');
     pill.setAttribute('aria-label', toolName(ses.kind));
     var open = document.createElement('button');
     open.type = 'button';
     open.className = 'm-mini__open';
-    var icon = document.createElement('span');
-    icon.className = 'm-mini__icon';
-    icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = ses.kind === 'timer' ? '⏱' : '\u{1F463}';
     var text = document.createElement('span');
     text.className = 'm-mini__text';
     var value = document.createElement('span');
@@ -262,7 +348,7 @@
     var label = document.createElement('span');
     label.className = 'm-mini__label';
     text.append(value, label);
-    open.append(icon, text);
+    open.append(iconFor(ses.kind === 'timer' ? 'countdown-timer' : 'step-counter'), text);
     open.addEventListener('click', function () {
       var cur = session();
       if (!cur) { render(); return; }
@@ -277,23 +363,39 @@
       }
       location.href = prefix() + cur.url;
     });
-    var close = document.createElement('button');
-    close.type = 'button';
-    close.className = 'm-mini__close';
-    close.setAttribute('aria-label', COPY.close || 'Close');
-    close.textContent = '×';
-    close.addEventListener('click', stop);
-    pill.append(open, close);
-    draggable(pill);
-    document.body.appendChild(pill);
-    applyPos();
+    pill.append(open, closeButton(stop));
+    ensureDock().appendChild(pill);
+  }
+  function buildParked(ps) {
+    parked = document.createElement('div');
+    parked.className = 'm-mini m-mini--tool';
+    parked.setAttribute('data-key', ps.path + '#' + ps.id);
+    parked.setAttribute('role', 'group');
+    var open = document.createElement('button');
+    open.type = 'button';
+    open.className = 'm-mini__open';
+    var text = document.createElement('span');
+    text.className = 'm-mini__text';
+    var value = document.createElement('span');
+    value.className = 'm-mini__value';
+    text.appendChild(value);
+    open.append(iconFor(ps.id ? 'extensions' : slugOf(ps.path)), text);
+    open.addEventListener('click', function () {
+      var cur = toolSession();
+      if (!cur) { renderParked(); return; }
+      location.href = prefix() + cur.path + (cur.id ? '?id=' + encodeURIComponent(cur.id) : '');
+    });
+    parked.append(open, closeButton(unpark));
+    var host = ensureDock();
+    host.insertBefore(parked, host.firstChild);
   }
 
   function boot() {
     clearInterval(tickTimer);
     tickTimer = 0;
+    renderParked();
     var ses = session();
-    if (!ses) { if (pill) { pill.remove(); pill = null; } return; }
+    if (!ses) { if (pill) { pill.remove(); pill = null; tidyDock(); } return; }
     if (bare(location.pathname) === ses.url) { stop(); return; }
     wasDone = null;
     if (ses.kind === 'steps') {
@@ -310,13 +412,20 @@
     tickTimer = setInterval(function () { if (document.visibilityState === 'visible') render(); }, 1000);
   }
 
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('[data-mini="tool"]');
+    if (!btn) return;
+    e.preventDefault();
+    minimizeTool();
+  });
   document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState !== 'visible' || !pill) return;
+    if (document.visibilityState !== 'visible' || !dock) return;
     render();
+    renderParked();
     if (listening) holdWake();
   });
   window.addEventListener('pageshow', function (e) { if (e.persisted) boot(); });
 
-  window.MentriaMini = { start: start, stop: stop, leave: leave, active: session };
+  window.MentriaMini = { start: start, stop: stop, leave: leave, active: session, minimizeTool: minimizeTool };
   boot();
 })();

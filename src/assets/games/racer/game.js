@@ -144,6 +144,15 @@ function showFail(detail) {
   if (panel) panel.hidden = false;
 }
 
+let booted = false;
+function bootError(e) {
+  if (booted) return;
+  const m = e && (e.message || (e.reason && (e.reason.message || String(e.reason)))) || 'boot failed';
+  showFail(String(m));
+}
+window.addEventListener('error', bootError);
+window.addEventListener('unhandledrejection', bootError);
+
 function bootProgress(p, text) {
   if (bootFill) bootFill.style.width = Math.round(clamp(p, 0, 1) * 100) + '%';
   if (text && bootText) bootText.textContent = text;
@@ -1661,4 +1670,7 @@ bootProgress(0.7, t('boot_loading'));
 engine.start();
 showMain();
 finishBoot();
+booted = true;
+window.removeEventListener('error', bootError);
+window.removeEventListener('unhandledrejection', bootError);
 prebuildWorld();

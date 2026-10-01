@@ -1263,6 +1263,7 @@ export function createRenderer(canvas){
   let gm = buildGhost();
   let gfxOn = false;
   let E = null;
+  let enhancedFailed = false;
   const particles = FX.createParticles(900);
   const motion = FX.createMotion();
   const recoilFx = FX.createRecoilSpring();
@@ -2396,12 +2397,15 @@ export function createRenderer(canvas){
       gl.drawElements(gl.TRIANGLES, pt.count, gl.UNSIGNED_INT, pt.start * 4);
     }
     if (enh && E.vmx){
-      sm4(PV, 'uModel', mGun);
       gl.bindVertexArray(E.vmx.vao);
+      sm4(PV, 'uModel', mMag);
+      s1i(PV, 'uMat', 2);
+      gl.drawElements(gl.TRIANGLES, E.vmx.magCount, gl.UNSIGNED_INT, E.vmx.magStart * 4);
+      sm4(PV, 'uModel', mGun);
       s1i(PV, 'uMat', 1);
       gl.drawElements(gl.TRIANGLES, E.vmx.plainCount, gl.UNSIGNED_INT, 0);
       s1i(PV, 'uMat', 3);
-      gl.drawElements(gl.TRIANGLES, E.vmx.glowCount, gl.UNSIGNED_INT, E.vmx.plainCount * 4);
+      gl.drawElements(gl.TRIANGLES, E.vmx.glowCount, gl.UNSIGNED_INT, E.vmx.glowStart * 4);
     }
 
     if (muzzle > 0.003){
@@ -2552,7 +2556,21 @@ export function createRenderer(canvas){
     const dark = 0.055;
     vmBox(m, -0.0155, 0.053, -0.112, 0.0155, 0.0552, 0.012, dark, dark * 1.03, dark * 1.1);
     for (let z = -0.108; z < 0.008; z += 0.0125) vmBox(m, -0.0155, 0.0552, z, 0.0155, 0.0578, z + 0.0062, dark, dark * 1.03, dark * 1.1);
+    for (let k = 0; k < 5; k++){
+      const z0 = -0.392 + k * 0.031;
+      vmBox(m, -0.0257, -0.017, z0, -0.0249, -0.009, z0 + 0.018, 0.03, 0.031, 0.034);
+    }
+    vmCyl(m, 0.0, 0.004, -0.656, -0.651, 0.0194, 10, 0.035, 0.036, 0.04);
+    vmCyl(m, 0.0, 0.004, -0.638, -0.633, 0.0194, 10, 0.035, 0.036, 0.04);
+    vmBox(m, -0.012, 0.041, 0.150, 0.012, 0.048, 0.174, dark * 1.2, dark * 1.2, dark * 1.3);
     const plain = m.i.length;
+    const v0 = m.v.length / VSTRIDE;
+    for (let k = 0; k < 5; k++){
+      const y0 = -0.152 + k * 0.022;
+      vmBox(m, -0.0208, y0, -0.103, -0.0199, y0 + 0.0045, -0.015, 0.07, 0.072, 0.075);
+    }
+    rotateRangeX(m, v0, 0.14, -0.028, -0.060);
+    const magEnd = m.i.length;
     vmBox(m, -0.0262, -0.004, -0.392, -0.0250, 0.002, -0.240, MINT[0], MINT[1], MINT[2]);
     vmBox(m, -0.0300, 0.019, -0.150, -0.0289, 0.0225, -0.030, MINT[0], MINT[1], MINT[2]);
     vmBox(m, -0.0026, 0.067, 0.025, 0.0026, 0.0722, 0.030, MINT[0], MINT[1], MINT[2]);
@@ -2565,7 +2583,8 @@ export function createRenderer(canvas){
     const vao = meshVAO(vbo, ibo);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-    return { vao: vao, vbo: vbo, ibo: ibo, plainCount: plain, glowCount: m.i.length - plain };
+    return { vao: vao, vbo: vbo, ibo: ibo, plainCount: plain, magStart: plain, magCount: magEnd - plain,
+      glowStart: magEnd, glowCount: m.i.length - magEnd };
   }
 
   function partVAO(){
@@ -2637,6 +2656,7 @@ export function createRenderer(canvas){
       return true;
     } catch (err) {
       E = null;
+      enhancedFailed = true;
       try { console.error('[phosphor] enhanced graphics unavailable', err); } catch (_) {}
       return false;
     }
@@ -2644,7 +2664,7 @@ export function createRenderer(canvas){
 
   function setGraphics(mode){
     const want = mode === FX.GFX_ENHANCED;
-    if (want && !E && !initEnhanced()){
+    if (want && !E && (enhancedFailed || !initEnhanced())){
       gfxOn = false;
       return FX.GFX_CLASSIC;
     }

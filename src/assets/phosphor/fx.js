@@ -87,18 +87,24 @@ uniform vec3 uZenith;
 out vec4 oColor;
 ${NOISE}
 ${FOG}
+const vec2 POISSON[12] = vec2[12](
+  vec2(-0.326, -0.406), vec2(-0.840, -0.074), vec2(-0.696, 0.457), vec2(-0.203, 0.621),
+  vec2(0.962, -0.195), vec2(0.473, -0.480), vec2(0.519, 0.767), vec2(0.185, -0.893),
+  vec2(0.507, 0.064), vec2(0.896, 0.412), vec2(-0.322, -0.933), vec2(-0.792, -0.598)
+);
 float shadowAt(){
   if (vShadow.w <= 0.0) return 1.0;
   vec3 pc = vShadow.xyz / vShadow.w;
   if (pc.x < 0.002 || pc.x > 0.998 || pc.y < 0.002 || pc.y > 0.998 || pc.z > 1.0) return 1.0;
   float d = pc.z - 0.0018;
+  float a = h21(gl_FragCoord.xy) * 6.2831853;
+  float ca = cos(a), sa = sin(a);
+  mat2 rot = mat2(ca, sa, -sa, ca);
   float s = 0.0;
-  for (int y = -1; y <= 1; y++){
-    for (int x = -1; x <= 1; x++){
-      s += texture(uShadow, vec3(pc.xy + vec2(float(x), float(y)) * uShadowTexel, d));
-    }
+  for (int i = 0; i < 12; i++){
+    s += texture(uShadow, vec3(pc.xy + rot * POISSON[i] * uShadowTexel * 1.9, d));
   }
-  return s * 0.11111;
+  return s / 12.0;
 }
 vec3 skyTint(vec3 r){
   float up = clamp(r.y, 0.0, 1.0);
@@ -1040,7 +1046,9 @@ export function defaultGraphics(gl){
     if (/swiftshader|llvmpipe|software|basic render/.test(gpu)) return GFX_CLASSIC;
     if (!touch) return GFX_ENHANCED;
     if (mem < 4 || cores < 4) return GFX_CLASSIC;
-    if (/adreno \(tm\) [2-5]\d\d|adreno [2-5]\d\d|mali-[4t]|mali-g[357]\d\b|powervr|sgx|videocore/.test(gpu)) return GFX_CLASSIC;
+    const adreno = /adreno[^0-9]{0,8}(\d{3})/.exec(gpu);
+    if (adreno && +adreno[1] < 615) return GFX_CLASSIC;
+    if (/mali-(t|4|g3\d\b|g5\d\b|g7[12]\b)|powervr|sgx|videocore/.test(gpu)) return GFX_CLASSIC;
     return GFX_ENHANCED;
   } catch (_) {
     return GFX_ENHANCED;

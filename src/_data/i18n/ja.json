@@ -48,6 +48,7 @@
     "stack_3": "webgpu推論（独自エンジン）",
     "stack_4": "5言語、手作りのi18n",
     "stack_5": "pwa、オフライン対応、github pagesでホスティング",
+    "stack_6": "three.js による 3d ゲーム、小物は kenney の car kit（cc0）",
     "principles_label": "原則",
     "principles_h": "3つのルール",
     "principle_1": "ループにサーバーを挟まない",

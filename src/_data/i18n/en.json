@@ -48,6 +48,7 @@
     "stack_3": "webgpu inference (custom engine)",
     "stack_4": "5 locales, hand-rolled i18n",
     "stack_5": "pwa, offline-capable, hosted on github pages",
+    "stack_6": "3d games on three.js; props from kenney's car kit (cc0)",
     "principles_label": "principles",
     "principles_h": "Three rules",
     "principle_1": "no servers in the loop",

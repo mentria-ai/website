@@ -48,6 +48,7 @@
     "stack_3": "inferência webgpu (motor próprio)",
     "stack_4": "5 idiomas, i18n feito à mão",
     "stack_5": "pwa, funciona offline, hospedado no github pages",
+    "stack_6": "jogos 3d com three.js; objetos do car kit da kenney (cc0)",
     "principles_label": "princípios",
     "principles_h": "Três regras",
     "principle_1": "sem servidores no circuito",

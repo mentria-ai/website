@@ -112,6 +112,24 @@ export function formatDelta(d) {
   return sign + a.toFixed(3);
 }
 
+export function projectPoint(camera, x, y, z, out) {
+  const v = camera.matrixWorldInverse.elements;
+  const cx = v[0] * x + v[4] * y + v[8] * z + v[12];
+  const cy = v[1] * x + v[5] * y + v[9] * z + v[13];
+  const cz = v[2] * x + v[6] * y + v[10] * z + v[14];
+  const p = camera.projectionMatrix.elements;
+  const px = p[0] * cx + p[4] * cy + p[8] * cz + p[12];
+  const py = p[1] * cx + p[5] * cy + p[9] * cz + p[13];
+  const pw = p[3] * cx + p[7] * cy + p[11] * cz + p[15];
+  const iw = Math.abs(pw) > 1e-9 ? 1 / pw : 0;
+  out.behind = cz > -0.05;
+  out.cx = cx;
+  out.cy = cy;
+  out.nx = px * iw;
+  out.ny = py * iw;
+  return out;
+}
+
 function el(tag, cls, parent, html) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -370,6 +388,78 @@ export function createHud(stage, copyIn) {
     coach.classList.add('is-on');
   }
 
+  const pa = { behind: false, cx: 0, cy: 0, nx: 0, ny: 0 };
+  const pb = { behind: false, cx: 0, cy: 0, nx: 0, ny: 0 };
+
+  function trackTarget(camera, x, y, z, label) {
+    const w = size.w;
+    const h = size.h;
+    projectPoint(camera, x, y, z, pa);
+    if (!pa.behind && Math.abs(pa.nx) < 0.9 && Math.abs(pa.ny) < 0.86) {
+      pointer('on', (pa.nx * 0.5 + 0.5) * w, (0.5 - pa.ny * 0.5) * h, 0, label);
+      return;
+    }
+    const ax = pa.cx;
+    let ay = -pa.cy;
+    if (pa.behind && Math.abs(ax) < 1e-3 && Math.abs(ay) < 1e-3) ay = 1;
+    const ang = Math.atan2(ay, ax);
+    const mx = w / 2 - 44;
+    const my = h / 2 - 44;
+    const ca = Math.cos(ang);
+    const sa = Math.sin(ang);
+    const s = Math.min(mx / Math.max(1e-4, Math.abs(ca)), my / Math.max(1e-4, Math.abs(sa)));
+    pointer('edge', w / 2 + ca * s, h / 2 + sa * s, ang, label);
+  }
+
+  function trackHorizon(camera, on) {
+    if (!on) {
+      horizonLine(false);
+      return;
+    }
+    const m = camera.matrixWorld.elements;
+    const fx0 = -m[8];
+    const fz0 = -m[10];
+    const fl = Math.sqrt(fx0 * fx0 + fz0 * fz0);
+    if (fl < 0.2) {
+      horizonLine(false);
+      return;
+    }
+    const fx = fx0 / fl;
+    const fz = fz0 / fl;
+    const px = m[12];
+    const py = m[13];
+    const pz = m[14];
+    const R = 2000;
+    const ca = Math.cos(0.35);
+    const sa = Math.sin(0.35);
+    projectPoint(camera, px + fx * R, py, pz + fz * R, pa);
+    projectPoint(camera, px + (fx * ca - fz * sa) * R, py, pz + (fz * ca + fx * sa) * R, pb);
+    if (pa.behind || pb.behind || Math.abs(pa.ny) > 0.95) {
+      horizonLine(false);
+      return;
+    }
+    const x1 = (pa.nx * 0.5 + 0.5) * size.w;
+    const y1 = (0.5 - pa.ny * 0.5) * size.h;
+    const x2 = (pb.nx * 0.5 + 0.5) * size.w;
+    const y2 = (0.5 - pb.ny * 0.5) * size.h;
+    horizonLine(true, x1, y1, Math.atan2(y2 - y1, x2 - x1));
+  }
+
+  function trackVelocity(camera, vx, vy, vz, speed, on) {
+    if (!on || speed < 3) {
+      flightPath(false);
+      return;
+    }
+    const m = camera.matrixWorld.elements;
+    const s = 60 / Math.max(speed, 1e-3);
+    projectPoint(camera, m[12] + vx * s, m[13] + vy * s, m[14] + vz * s, pa);
+    if (pa.behind || Math.abs(pa.nx) > 0.95 || Math.abs(pa.ny) > 0.92) {
+      flightPath(false);
+      return;
+    }
+    flightPath(true, (pa.nx * 0.5 + 0.5) * size.w, (0.5 - pa.ny * 0.5) * size.h);
+  }
+
   function reset() {
     clearSplit();
     crashHide();
@@ -400,6 +490,9 @@ export function createHud(stage, copyIn) {
     pointer,
     horizon: horizonLine,
     flightPath,
+    trackTarget,
+    trackHorizon,
+    trackVelocity,
     split,
     clearSplit,
     crash: crashShow,

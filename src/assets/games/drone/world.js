@@ -18,10 +18,9 @@ const SLABS_BY_COURSE = {
 const FLAG_COLORS = [0x6ef3c5, 0xff5c8a, 0xffc94d, 0x4d8dff];
 const CRANE_YELLOW = 0xf0b429;
 const LIGHT_OFF = new THREE.Color(0.06, 0.06, 0.07);
-const LIGHT_RED = new THREE.Color(2.2, 0.03, 0.02);
-const LIGHT_GO = new THREE.Color(0.22, 2.4, 1.35);
+const LIGHT_RED = new THREE.Color(1.15, 0, 0);
+const LIGHT_GO = new THREE.Color(0.08, 1.3, 0.7);
 const SUN_BY_COURSE = { canyon: { sunAzimuth: 95, sunElevation: 9 } };
-const UP = new THREE.Vector3(0, 1, 0);
 
 function nextFrame() {
   return new Promise((resolve) => {
@@ -716,14 +715,14 @@ function buildStartPad(course, heightAt) {
   const yaw = startYawToGate(course);
   const gy = heightAt(sp[0], sp[2]);
   const tex = padTexture();
-  const padGeo = new THREE.PlaneGeometry(1.2, 1.2);
+  const padGeo = new THREE.PlaneGeometry(0.9, 0.9);
   padGeo.rotateX(-Math.PI / 2);
   const padMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.18, polygonOffset: true, polygonOffsetFactor: -2 });
   const pad = new THREE.Mesh(padGeo, padMat);
   const fx = -Math.sin(yaw);
   const fz = -Math.cos(yaw);
   pad.rotation.y = yaw;
-  pad.position.set(sp[0] - fx * 0.45, heightAt(sp[0] - fx * 0.45, sp[2] - fz * 0.45) + 0.012, sp[2] - fz * 0.45);
+  pad.position.set(sp[0] - fx * 0.5, heightAt(sp[0] - fx * 0.5, sp[2] - fz * 0.5) + 0.012, sp[2] - fz * 0.5);
   pad.receiveShadow = true;
   group.add(pad);
 
@@ -799,5 +798,3 @@ export function gateFacing(course, index) {
   if (!next) return g.yaw || 0;
   return yawToward(g.pos[0], g.pos[2], next.pos[0], next.pos[2]);
 }
-
-export { UP as WORLD_UP };

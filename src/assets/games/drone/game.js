@@ -4,17 +4,16 @@ import * as KitQuality from '../kit/quality.js';
 import * as KitInput from '../kit/input.js';
 import * as KitAudio from '../kit/audio.js';
 import * as KitRace from '../kit/race.js';
-import * as KitGhost from '../kit/ghost.js';
 import * as KitStore from '../kit/store.js';
 import * as KitUi from '../kit/ui.js';
 import * as KitFx from '../kit/fx.js';
 import { DEG, clamp } from '../kit/math.js';
 import { createDrone, step as stepDrone, resetDrone, configureDrone, interpolateDrone, throttleCurve, courseCheckpoints, createFlightBot, headingOf, gateFrame, DRONE_DEFAULTS } from './flight.js';
-import { COURSES, courseById } from './courses.js';
+import { courseById } from './courses.js';
 import { createDroneMesh } from './mesh.js';
 import { buildWorld, startYawToGate, gateFacing } from './world.js';
 import { createHud, formatTime } from './hud.js';
-import { createRings, ringStep } from './modes.js';
+import { createRings, ringStep, createGhostView, simulatePaceGhost, decodeGhostString, createGhostRecorder } from './modes.js';
 
 const SLUG = 'fpv-drone';
 const NS = 'tool.fpv-drone.';
@@ -26,7 +25,6 @@ const RESPAWN_GRACE = 0.45;
 const PENALTY = 2;
 const STUCK_TIME = 2;
 const FINISH_HOLD = 1.25;
-const GHOST_HZ = 20;
 const ART = '/assets/games/art/drone-key.webp';
 const LOGO = '/assets/games/sprites/logo-skyrush.webp';
 const DRONE_COLOR = 0x6ef3c5;
@@ -210,7 +208,7 @@ let input = null;
 let audio = null;
 let hud = null;
 let droneMesh = null;
-let ghostMesh = null;
+let ghostView = null;
 let world = null;
 let worldCourseId = '';
 let worldQuality = '';
@@ -276,7 +274,6 @@ const camPos = new THREE.Vector3();
 const chaseDir = new THREE.Vector3(0, 0, -1);
 const chaseGoal = new THREE.Vector3();
 const X_AXIS = new THREE.Vector3(1, 0, 0);
-const ghostSample = { pos: { x: 0, y: 0, z: 0 }, quat: { x: 0, y: 0, z: 0, w: 1 }, extra: [0] };
 const rayOrigin = { x: 0, y: 0, z: 0 };
 const rayDir = { x: 0, y: 0, z: 0 };
 let chaseSnap = true;
@@ -547,38 +544,9 @@ function bestRecord(id) {
   try { return store.record(id); } catch (_) { return null; }
 }
 
-function decodeGhost(str) {
-  if (!str || typeof KitGhost.decodeGhost !== 'function') return null;
-  try { return KitGhost.decodeGhost(str); } catch (_) { return null; }
-}
-
 function paceGhost(course) {
-  if (paceCache.has(course.id)) return paceCache.get(course.id);
-  if (typeof KitGhost.createRecorder !== 'function') return null;
-  const d = createDrone({ pos: course.start.pos, yaw: startYawToGate(course) });
-  resetDrone(d, { pos: course.start.pos, yaw: startYawToGate(course) });
-  const bot = createFlightBot(course);
-  const rec = KitGhost.createRecorder(GHOST_HZ);
-  const cps = courseCheckpoints(course);
-  const cp = typeof KitRace.createCheckpoints === 'function' ? KitRace.createCheckpoints(cps) : null;
-  const dt = 1 / 120;
-  const limit = (course.botTime || 60) + 15;
-  let tt = 0;
-  let after = -1;
-  while (tt < limit) {
-    stepDrone(d, bot.control(d, dt), dt, physWorld);
-    tt += dt;
-    rec.push(tt, d.pos, d.quat, [d.rpm]);
-    if (d.crashed) break;
-    if (cp && after < 0) {
-      cp.test(d.prevPos, d.pos);
-      if (cp.finished) after = tt;
-    }
-    if (after >= 0 && tt > after + 0.8) break;
-  }
-  const player = after >= 0 ? decodeGhost(rec.encode({ c: course.id, pace: 1 })) : null;
-  paceCache.set(course.id, player);
-  return player;
+  if (!paceCache.has(course.id)) paceCache.set(course.id, simulatePaceGhost(course, physWorld, startYawToGate(course)));
+  return paceCache.get(course.id);
 }
 
 function setupGhost() {
@@ -587,7 +555,7 @@ function setupGhost() {
   if (run.kind !== 'race' || !settings.ghost) return;
   let str = null;
   try { str = store.ghost(run.course.id); } catch (_) {}
-  run.ghost = decodeGhost(str);
+  run.ghost = decodeGhostString(str);
   if (!run.ghost && settings.coached) {
     run.ghost = paceGhost(run.course);
     run.ghostPace = !!run.ghost;
@@ -629,7 +597,7 @@ function setupRun() {
     run.clock.start();
     run.rings = null;
     world.gates.highlight(0);
-    run.recorder = typeof KitGhost.createRecorder === 'function' ? KitGhost.createRecorder(GHOST_HZ) : null;
+    run.recorder = createGhostRecorder();
     setupGhost();
     if (world.startLights) world.startLights.set('off', 0);
     run.coachStep = settings.coached ? -1 : 0;
@@ -646,7 +614,6 @@ function setupRun() {
   }
   run.coachT = 0;
   hud.coach(null);
-  ghostMesh.group.visible = !!run.ghost;
   droneMesh.group.visible = settings.view === 'chase';
   ui.hide();
   focusStage();
@@ -717,7 +684,7 @@ function startAttract() {
   applyDroneParams(true);
   placeDroneOnStart();
   droneMesh.group.visible = true;
-  ghostMesh.group.visible = false;
+  ghostView.hide();
   world.gates.reset();
   world.gates.highlight(-1);
 }
@@ -1100,24 +1067,13 @@ function updateChaseCamera(dt) {
   camera.lookAt(tv3);
 }
 
-function projectToScreen(x, y, z, out) {
-  tv.set(x, y, z).applyMatrix4(camera.matrixWorldInverse);
-  out.behind = tv.z > -0.05;
-  out.cx = tv.x;
-  out.cy = tv.y;
-  tv.applyMatrix4(camera.projectionMatrix);
-  out.nx = tv.x;
-  out.ny = tv.y;
-  return out;
-}
-
-const proj = { behind: false, cx: 0, cy: 0, nx: 0, ny: 0 };
-const proj2 = { behind: false, cx: 0, cy: 0, nx: 0, ny: 0 };
-
 function nextTargetIndex() {
   if (run.kind === 'race') return run.cp ? run.cp.next : -1;
   return run.rings ? run.rings.nearest : -1;
 }
+
+let pointerDist = -1;
+let pointerLabel = '';
 
 function updatePointer() {
   const i = nextTargetIndex();
@@ -1127,76 +1083,16 @@ function updatePointer() {
     return;
   }
   const g = c.gates[i].pos;
-  const w = hud.size.w;
-  const h = hud.size.h;
-  const dx = g[0] - camera.position.x;
-  const dy = g[1] - camera.position.y;
-  const dz = g[2] - camera.position.z;
-  const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-  const label = Math.round(dist) + ' ' + t('hud.meters');
-  projectToScreen(g[0], g[1], g[2], proj);
-  if (!proj.behind && Math.abs(proj.nx) < 0.9 && Math.abs(proj.ny) < 0.86) {
-    hud.pointer('on', (proj.nx * 0.5 + 0.5) * w, (0.5 - proj.ny * 0.5) * h, 0, label);
-    return;
-  }
-  let ax = proj.cx;
-  let ay = -proj.cy;
-  if (proj.behind && Math.abs(ax) < 1e-3 && Math.abs(ay) < 1e-3) ay = 1;
-  const ang = Math.atan2(ay, ax);
-  const mx = w / 2 - 44;
-  const my = h / 2 - 44;
-  const ca = Math.cos(ang);
-  const sa = Math.sin(ang);
-  const s = Math.min(mx / Math.max(1e-4, Math.abs(ca)), my / Math.max(1e-4, Math.abs(sa)));
-  hud.pointer('edge', w / 2 + ca * s, h / 2 + sa * s, ang, label);
-}
-
-function updateHorizon() {
-  if (settings.view !== 'fpv' || flightMode() !== 'angle') {
-    hud.horizon(false);
-    return;
-  }
-  tv2.set(0, 0, -1).applyQuaternion(camera.quaternion);
-  const fl = Math.sqrt(tv2.x * tv2.x + tv2.z * tv2.z);
-  if (fl < 0.2) {
-    hud.horizon(false);
-    return;
-  }
-  const fx = tv2.x / fl;
-  const fz = tv2.z / fl;
   const p = camera.position;
-  const R = 2000;
-  projectToScreen(p.x + fx * R, p.y, p.z + fz * R, proj);
-  const ca = Math.cos(0.35);
-  const sa = Math.sin(0.35);
-  projectToScreen(p.x + (fx * ca - fz * sa) * R, p.y, p.z + (fz * ca + fx * sa) * R, proj2);
-  if (proj.behind || proj2.behind || Math.abs(proj.ny) > 0.95) {
-    hud.horizon(false);
-    return;
+  const dx = g[0] - p.x;
+  const dy = g[1] - p.y;
+  const dz = g[2] - p.z;
+  const dist = Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz));
+  if (dist !== pointerDist) {
+    pointerDist = dist;
+    pointerLabel = dist + ' ' + t('hud.meters');
   }
-  const w = hud.size.w;
-  const h = hud.size.h;
-  const x1 = (proj.nx * 0.5 + 0.5) * w;
-  const y1 = (0.5 - proj.ny * 0.5) * h;
-  const x2 = (proj2.nx * 0.5 + 0.5) * w;
-  const y2 = (0.5 - proj2.ny * 0.5) * h;
-  hud.horizon(true, x1, y1, Math.atan2(y2 - y1, x2 - x1));
-}
-
-function updateFlightPath() {
-  if (settings.view !== 'fpv' || drone.speed < 3) {
-    hud.flightPath(false);
-    return;
-  }
-  const v = drone.vel;
-  const s = 60 / Math.max(drone.speed, 1e-3);
-  const p = camera.position;
-  projectToScreen(p.x + v.x * s, p.y + v.y * s, p.z + v.z * s, proj);
-  if (proj.behind || Math.abs(proj.nx) > 0.95 || Math.abs(proj.ny) > 0.92) {
-    hud.flightPath(false);
-    return;
-  }
-  hud.flightPath(true, (proj.nx * 0.5 + 0.5) * hud.size.w, (0.5 - proj.ny * 0.5) * hud.size.h);
+  hud.trackTarget(camera, g[0], g[1], g[2], pointerLabel);
 }
 
 const hudData = { time: 0, gate: 0, gates: 0, penalty: 0, speedKmh: 0, alt: 0, throttle: 0, volts: 0, rings: 0, ringsTotal: 0 };
@@ -1222,8 +1118,9 @@ function updateHud(dt) {
   hudData.volts = drone.voltage;
   hud.frame(hudData, dt);
   updatePointer();
-  updateHorizon();
-  updateFlightPath();
+  const fpv = settings.view === 'fpv';
+  hud.trackHorizon(camera, fpv && flightMode() === 'angle');
+  hud.trackVelocity(camera, drone.vel.x, drone.vel.y, drone.vel.z, drone.speed, fpv);
 }
 
 const DUST_COLORS = { meadow: 0xb8a57c, yard: 0x8f8f8c, canyon: 0xd49a68, freestyle: 0xa9a37f };
@@ -1259,80 +1156,10 @@ function updateAudio() {
   } catch (_) {}
 }
 
-const TRAIL_POINTS = 28;
-const TRAIL_STEP = 0.045;
-let ghostGlow = null;
-let ghostTrail = null;
-
-function glowTexture() {
-  const size = 64;
-  const c = document.createElement('canvas');
-  c.width = size;
-  c.height = size;
-  const ctx = c.getContext('2d');
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.22, 'rgba(255,255,255,0.75)');
-  g.addColorStop(0.55, 'rgba(255,255,255,0.18)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size, size);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
-}
-
-function buildGhostMarkers() {
-  const col = new THREE.Color(GHOST_COLOR);
-  ghostGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: col.clone().multiplyScalar(1.6), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: false }));
-  ghostGlow.scale.set(0.045, 0.045, 1);
-  ghostGlow.renderOrder = 6;
-  ghostGlow.visible = false;
-  scene.add(ghostGlow);
-  const pos = new Float32Array(TRAIL_POINTS * 3);
-  const colors = new Float32Array(TRAIL_POINTS * 3);
-  for (let i = 0; i < TRAIL_POINTS; i++) {
-    const k = Math.pow(1 - i / (TRAIL_POINTS - 1), 1.6) * 1.4;
-    colors[i * 3] = col.r * k;
-    colors[i * 3 + 1] = col.g * k;
-    colors[i * 3 + 2] = col.b * k;
-  }
-  const geo = new THREE.BufferGeometry();
-  const attr = new THREE.BufferAttribute(pos, 3);
-  attr.setUsage(THREE.DynamicDrawUsage);
-  geo.setAttribute('position', attr);
-  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  ghostTrail = new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
-  ghostTrail.frustumCulled = false;
-  ghostTrail.renderOrder = 6;
-  ghostTrail.visible = false;
-  scene.add(ghostTrail);
-}
-
 function updateGhost(dt) {
-  const show = !!run.ghost && run.kind === 'race' && (run.phase === 'countdown' || run.phase === 'flying' || run.phase === 'crashed' || run.phase === 'finished');
-  const tg = run.phase === 'countdown' ? 0 : run.time;
-  const alive = show && tg <= run.ghost.duration + 1.5;
-  ghostMesh.group.visible = alive;
-  if (ghostGlow) ghostGlow.visible = alive;
-  if (ghostTrail) ghostTrail.visible = alive && tg > 0.2;
-  if (!alive) return;
-  run.ghost.sample(tg, ghostSample);
-  ghostMesh.group.position.set(ghostSample.pos.x, ghostSample.pos.y, ghostSample.pos.z);
-  ghostMesh.group.quaternion.set(ghostSample.quat.x, ghostSample.quat.y, ghostSample.quat.z, ghostSample.quat.w);
-  ghostMesh.setProps(ghostSample.extra && ghostSample.extra.length ? ghostSample.extra[0] : 0.4, dt);
-  if (ghostGlow) ghostGlow.position.set(ghostSample.pos.x, ghostSample.pos.y, ghostSample.pos.z);
-  if (ghostTrail && ghostTrail.visible) {
-    const attr = ghostTrail.geometry.attributes.position;
-    const arr = attr.array;
-    for (let i = 0; i < TRAIL_POINTS; i++) {
-      run.ghost.sample(Math.max(0, tg - i * TRAIL_STEP), ghostSample);
-      arr[i * 3] = ghostSample.pos.x;
-      arr[i * 3 + 1] = ghostSample.pos.y;
-      arr[i * 3 + 2] = ghostSample.pos.z;
-    }
-    attr.needsUpdate = true;
-  }
+  const p = run.phase;
+  const show = !!run.ghost && run.kind === 'race' && (p === 'countdown' || p === 'flying' || p === 'crashed' || p === 'finished');
+  ghostView.update(run.ghost, p === 'countdown' ? 0 : run.time, show, dt);
 }
 
 function onRender(alpha, dt) {
@@ -1470,10 +1297,7 @@ function applySetting(id, value) {
   } else if (id === 'volume') {
     try { audio.setMaster(value); } catch (_) {}
   } else if (id === 'ghost') {
-    if (run.kind === 'race' && inRun()) {
-      setupGhost();
-      ghostMesh.group.visible = !!run.ghost;
-    }
+    if (run.kind === 'race' && inRun()) setupGhost();
   }
 }
 
@@ -1491,7 +1315,7 @@ function defineScreens() {
     subtitle: t('menu.tagline'),
     items: [
       { id: 'race', label: t('menu.race'), hint: t('menu.raceHint'), primary: true },
-      { id: 'freestyle', label: t('menu.freestyle'), hint: t('menu.freestyleHint') },
+      { id: 'freestyle', label: t('menu.freestyle') },
       { id: 'settings', label: t('menu.settings') },
       { id: 'help', label: t('menu.help') }
     ],
@@ -1689,6 +1513,10 @@ function exposeTestHook() {
         quality,
         fps: engine.stats.fps,
         frameMs: engine.stats.frameMs,
+        cpuMs: engine.stats.cpuMs,
+        stepMs: engine.stats.stepMs,
+        renderMs: engine.stats.renderMs,
+        dpr: engine.stats.dpr,
         drawCalls: engine.stats.drawCalls,
         triangles: engine.stats.triangles,
         buildMs: world ? world.buildMs : 0,
@@ -1766,12 +1594,9 @@ function boot() {
   hud = createHud(stage, hudCopy());
 
   droneMesh = createDroneMesh({ color: DRONE_COLOR, cameraTilt: cameraTiltDeg() * DEG, lod: quality === 'low' ? 'low' : 'high' });
-  ghostMesh = createDroneMesh({ color: GHOST_COLOR, ghost: true, lod: 'low' });
-  ghostMesh.group.visible = false;
   droneMesh.group.visible = false;
-  buildGhostMarkers();
   scene.add(droneMesh.group);
-  scene.add(ghostMesh.group);
+  ghostView = createGhostView(scene, GHOST_COLOR);
   applyDroneParams(false);
 
   defineScreens();

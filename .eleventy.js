@@ -396,6 +396,26 @@ module.exports = function(eleventyConfig) {
     return instrumentHead(tokenized.slice(0, headEnd), tokens) + instrumentBody(tokenized.slice(headEnd), tokens);
   });
 
+  eleventyConfig.on("eleventy.after", ({ directories, dir }) => {
+    const out = (directories && directories.output) || (dir && dir.output) || "build";
+    const swPath = path.join(out, "sw.js");
+    let sw;
+    try { sw = fs.readFileSync(swPath, "utf8"); } catch { return; }
+    const marker = "/*REVISIONS*/";
+    const start = sw.indexOf("const ASSETS = [");
+    if (start === -1 || sw.indexOf(marker) === -1) return;
+    const list = sw.slice(start, sw.indexOf("];", start));
+    const revisions = {};
+    for (const m of list.matchAll(/'([^']+)'/g)) {
+      const url = m[1];
+      if (url.indexOf("?") !== -1) continue;
+      let file = path.join(out, decodeURIComponent(url));
+      if (url.endsWith("/")) file = path.join(file, "index.html");
+      try { revisions[url] = crypto.createHash("sha1").update(fs.readFileSync(file)).digest("hex").slice(0, 12); } catch {}
+    }
+    fs.writeFileSync(swPath, sw.replace(marker, JSON.stringify(revisions).slice(1, -1)));
+  });
+
   return {
     dir: {
       input: "src",

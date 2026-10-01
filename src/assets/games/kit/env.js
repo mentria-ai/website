@@ -21,8 +21,8 @@ function resolveEnvQuality(q) {
 
 export const ENV_PRESETS = {
   golden: {
-    elevation: 10, azimuth: 228, turbidity: 5, rayleigh: 2.2, mie: 0.004, mieG: 0.88,
-    exposure: 1.0, sunIntensity: 5.2, sunTint: [1, 0.86, 0.66], hemiIntensity: 1.1, envIntensity: 1.2, skyScale: 0.3,
+    elevation: 9, azimuth: 228, turbidity: 5.5, rayleigh: 2.3, mie: 0.0042, mieG: 0.88,
+    exposure: 1.08, sunIntensity: 5.4, sunTint: [1, 0.84, 0.62], sunSaturation: 0.7, hemiIntensity: 1.05, envIntensity: 1.15, skyScale: 0.3,
     groundTint: [0.32, 0.27, 0.16], fogDensity: 1 / 1700, fogFalloff: 1 / 160, cloudCoverage: 0.22, cloudDensity: 0.32,
     cloudSprites: 10, night: 0, horizonBand: 0.11, shadowStrength: 0.88,
   },

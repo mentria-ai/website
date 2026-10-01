@@ -3189,6 +3189,131 @@
       "crash": {
         "impact": "Crashed",
         "flipped": "Flipped over"
+      },
+      "boot": "Starting the motors…",
+      "contextLost": "Graphics were reset. Restoring the view…",
+      "menu": {
+        "kicker": "FPV drone league",
+        "tagline": "Race the gates. Beat your ghost.",
+        "race": "Race",
+        "raceHint": "3 courses",
+        "freestyle": "Freestyle",
+        "settings": "Settings",
+        "help": "Controls"
+      },
+      "select": {
+        "kicker": "Race",
+        "title": "Pick a course"
+      },
+      "load": {
+        "kicker": "Next up",
+        "building": "Building the world",
+        "shaders": "Warming up the GPU",
+        "error": "This course didn't load. Try again, or lower the graphics quality in Settings."
+      },
+      "tip": {
+        "angle": "Angle mode levels the drone when you let go of the stick.",
+        "acro": "Acro mode is full manual: the drone holds any angle until you change it.",
+        "chase": "Press C or tap the camera button to switch between the FPV view and the chase view.",
+        "ghost": "Set a best time and your ghost will race you next time.",
+        "uptilt": "Racing pilots tilt the camera up so they can see ahead while flying fast and leaning forward."
+      },
+      "hud": {
+        "time": "Time",
+        "gate": "Gate",
+        "rings": "Rings",
+        "speed": "Speed",
+        "alt": "Alt",
+        "kmh": "km/h",
+        "meters": "m",
+        "throttle": "Thr",
+        "seconds": "s",
+        "assist": "Assist",
+        "penaltyNote": "+{n} s penalty",
+        "finish": "Finish!",
+        "allRings": "All rings cleared!"
+      },
+      "view": {
+        "fpv": "FPV",
+        "chase": "Chase"
+      },
+      "coach": {
+        "throttleKeys": "Hold W to take off. Let go and the drone holds its height.",
+        "throttleStick": "Push the throttle stick up to take off. Center it to hold your height.",
+        "steerKeys": "Use the arrow keys to tilt and fly toward the glowing gate.",
+        "steerStick": "Tilt with the other stick to fly toward the glowing gate.",
+        "gate": "Fly through gate 1, the one glowing green.",
+        "done": "Nice! Follow the glowing gates to the finish."
+      },
+      "results": {
+        "title": "Finished",
+        "retry": "Retry",
+        "next": "Next course",
+        "courses": "Courses",
+        "penalty": "Penalty",
+        "crashes": "Crashes"
+      },
+      "pause": {
+        "title": "Paused",
+        "resume": "Resume",
+        "restart": "Restart",
+        "settings": "Settings",
+        "help": "Controls",
+        "quit": "Main menu"
+      },
+      "settings": {
+        "kicker": "Options",
+        "title": "Settings",
+        "flight": "Flight",
+        "camera": "Camera",
+        "controls": "Controls",
+        "graphics": "Graphics",
+        "sound": "Sound",
+        "assist": "Beginner assist",
+        "assistNote": "Self-leveling with height hold",
+        "mode": "Flight mode",
+        "rates": "Rates",
+        "ratesBeginner": "Beginner",
+        "ratesPro": "Pro",
+        "auto": "Auto",
+        "view": "View",
+        "fov": "Field of view",
+        "stickMode": "Stick mode",
+        "stickModeNote": "Mode 2 puts the throttle on the left stick",
+        "mode2": "Mode 2",
+        "mode1": "Mode 1",
+        "invertPitch": "Invert pitch",
+        "stickSize": "Touch stick size",
+        "quality": "Quality",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "volume": "Volume",
+        "ghost": "Ghost",
+        "ghostNote": "Race against your best run"
+      },
+      "help": {
+        "title": "Controls",
+        "touch": "Touch",
+        "touchLeft": "Left stick: throttle up and down, turn left and right. The throttle stays where you leave it.",
+        "touchRight": "Right stick: tilt the drone to fly in that direction.",
+        "touchButtons": "Small buttons at the top: restart, camera view and flight mode.",
+        "keyboard": "Keyboard",
+        "throttle": "Throttle",
+        "yaw": "Turn left and right",
+        "tilt": "Tilt to fly",
+        "camera": "FPV or chase view",
+        "mode": "Flight mode",
+        "restart": "Restart",
+        "pause": "Pause",
+        "gamepad": "Controller",
+        "padLeft": "Left stick: throttle and turn",
+        "padRight": "Right stick: tilt to fly",
+        "note": "Beginner assist holds your height when the throttle is centered. Switch it off in Settings for full manual flight."
+      },
+      "fail": {
+        "title": "SKYRUSH can't start here",
+        "body": "This game needs WebGL 2. Try an up-to-date browser, or turn on hardware acceleration."
       }
     },
     "nitro-racer": {

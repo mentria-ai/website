@@ -3189,6 +3189,131 @@
       "crash": {
         "impact": "Crash",
         "flipped": "Retourné"
+      },
+      "boot": "Démarrage des moteurs…",
+      "contextLost": "L'affichage a été réinitialisé. Restauration de la vue…",
+      "menu": {
+        "kicker": "Ligue de drones FPV",
+        "tagline": "Passez les portes. Battez votre fantôme.",
+        "race": "Course",
+        "raceHint": "3 parcours",
+        "freestyle": "Freestyle",
+        "settings": "Réglages",
+        "help": "Commandes"
+      },
+      "select": {
+        "kicker": "Course",
+        "title": "Choisissez un parcours"
+      },
+      "load": {
+        "kicker": "Au programme",
+        "building": "Construction du monde",
+        "shaders": "Préchauffage du GPU",
+        "error": "Ce parcours ne s'est pas chargé. Réessayez ou baissez la qualité graphique dans les réglages."
+      },
+      "tip": {
+        "angle": "Le mode Angle remet le drone à plat quand vous lâchez le manche.",
+        "acro": "Le mode Acro est entièrement manuel : le drone garde son inclinaison jusqu'à ce que vous la changiez.",
+        "chase": "Appuyez sur C ou touchez le bouton caméra pour passer de la vue FPV à la vue poursuite.",
+        "ghost": "Établissez un record et votre fantôme vous affrontera la prochaine fois.",
+        "uptilt": "Les pilotes de course inclinent la caméra vers le haut pour voir devant eux en volant vite, penchés vers l'avant."
+      },
+      "hud": {
+        "time": "Temps",
+        "gate": "Porte",
+        "rings": "Anneaux",
+        "speed": "Vitesse",
+        "alt": "Alt.",
+        "kmh": "km/h",
+        "meters": "m",
+        "throttle": "Gaz",
+        "seconds": "s",
+        "assist": "Assist.",
+        "penaltyNote": "+{n} s de pénalité",
+        "finish": "Arrivée !",
+        "allRings": "Tous les anneaux !"
+      },
+      "view": {
+        "fpv": "FPV",
+        "chase": "Poursuite"
+      },
+      "coach": {
+        "throttleKeys": "Maintenez W pour décoller. Relâchez et le drone garde son altitude.",
+        "throttleStick": "Poussez le manche des gaz vers le haut pour décoller. Centrez-le pour garder l'altitude.",
+        "steerKeys": "Utilisez les flèches pour vous incliner et voler vers la porte lumineuse.",
+        "steerStick": "Inclinez avec l'autre manche pour voler vers la porte lumineuse.",
+        "gate": "Passez la porte 1, celle qui brille en vert.",
+        "done": "Bien joué ! Suivez les portes lumineuses jusqu'à l'arrivée."
+      },
+      "results": {
+        "title": "Terminé",
+        "retry": "Recommencer",
+        "next": "Parcours suivant",
+        "courses": "Parcours",
+        "penalty": "Pénalité",
+        "crashes": "Crashs"
+      },
+      "pause": {
+        "title": "Pause",
+        "resume": "Reprendre",
+        "restart": "Recommencer",
+        "settings": "Réglages",
+        "help": "Commandes",
+        "quit": "Menu principal"
+      },
+      "settings": {
+        "kicker": "Options",
+        "title": "Réglages",
+        "flight": "Vol",
+        "camera": "Caméra",
+        "controls": "Commandes",
+        "graphics": "Graphismes",
+        "sound": "Son",
+        "assist": "Aide aux débutants",
+        "assistNote": "Stabilisation avec maintien d'altitude",
+        "mode": "Mode de vol",
+        "rates": "Sensibilité",
+        "ratesBeginner": "Débutant",
+        "ratesPro": "Pro",
+        "auto": "Auto",
+        "view": "Vue",
+        "fov": "Champ de vision",
+        "stickMode": "Mode des manches",
+        "stickModeNote": "Le mode 2 place les gaz sur le manche gauche",
+        "mode2": "Mode 2",
+        "mode1": "Mode 1",
+        "invertPitch": "Inverser le tangage",
+        "stickSize": "Taille des manches tactiles",
+        "quality": "Qualité",
+        "low": "Basse",
+        "medium": "Moyenne",
+        "high": "Haute",
+        "volume": "Volume",
+        "ghost": "Fantôme",
+        "ghostNote": "Affrontez votre meilleure course"
+      },
+      "help": {
+        "title": "Commandes",
+        "touch": "Tactile",
+        "touchLeft": "Manche gauche : gaz vers le haut et vers le bas, rotation à gauche et à droite. Les gaz restent là où vous les laissez.",
+        "touchRight": "Manche droit : inclinez le drone pour voler dans cette direction.",
+        "touchButtons": "Petits boutons en haut : recommencer, vue caméra et mode de vol.",
+        "keyboard": "Clavier",
+        "throttle": "Gaz",
+        "yaw": "Tourner à gauche et à droite",
+        "tilt": "S'incliner pour voler",
+        "camera": "Vue FPV ou poursuite",
+        "mode": "Mode de vol",
+        "restart": "Recommencer",
+        "pause": "Pause",
+        "gamepad": "Manette",
+        "padLeft": "Stick gauche : gaz et rotation",
+        "padRight": "Stick droit : s'incliner pour voler",
+        "note": "L'aide aux débutants garde l'altitude quand les gaz sont au centre. Désactivez-la dans les réglages pour voler en manuel."
+      },
+      "fail": {
+        "title": "SKYRUSH ne peut pas démarrer ici",
+        "body": "Ce jeu a besoin de WebGL 2. Essayez un navigateur à jour ou activez l'accélération matérielle."
       }
     },
     "nitro-racer": {

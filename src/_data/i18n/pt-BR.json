@@ -3189,6 +3189,131 @@
       "crash": {
         "impact": "Batida",
         "flipped": "Capotou"
+      },
+      "boot": "Ligando os motores…",
+      "contextLost": "Os gráficos foram reiniciados. Restaurando a visão…",
+      "menu": {
+        "kicker": "Liga de drones FPV",
+        "tagline": "Passe pelos portões. Vença seu fantasma.",
+        "race": "Corrida",
+        "raceHint": "3 pistas",
+        "freestyle": "Freestyle",
+        "settings": "Configurações",
+        "help": "Controles"
+      },
+      "select": {
+        "kicker": "Corrida",
+        "title": "Escolha uma pista"
+      },
+      "load": {
+        "kicker": "A seguir",
+        "building": "Construindo o mundo",
+        "shaders": "Aquecendo a GPU",
+        "error": "Esta pista não carregou. Tente de novo ou diminua a qualidade gráfica em Configurações."
+      },
+      "tip": {
+        "angle": "O modo Ângulo nivela o drone quando você solta o stick.",
+        "acro": "O modo Acro é totalmente manual: o drone mantém qualquer inclinação até você mudar.",
+        "chase": "Aperte C ou toque no botão da câmera para alternar entre a visão FPV e a visão de perseguição.",
+        "ghost": "Faça um tempo recorde e seu fantasma vai correr contra você na próxima vez.",
+        "uptilt": "Pilotos de corrida inclinam a câmera para cima para enxergar à frente voando rápido e inclinados."
+      },
+      "hud": {
+        "time": "Tempo",
+        "gate": "Portão",
+        "rings": "Anéis",
+        "speed": "Veloc.",
+        "alt": "Alt.",
+        "kmh": "km/h",
+        "meters": "m",
+        "throttle": "Acel.",
+        "seconds": "s",
+        "assist": "Assist.",
+        "penaltyNote": "+{n} s de penalidade",
+        "finish": "Chegada!",
+        "allRings": "Todos os anéis!"
+      },
+      "view": {
+        "fpv": "FPV",
+        "chase": "Perseguição"
+      },
+      "coach": {
+        "throttleKeys": "Segure W para decolar. Solte e o drone mantém a altura.",
+        "throttleStick": "Empurre o stick do acelerador para cima para decolar. Centralize para manter a altura.",
+        "steerKeys": "Use as setas para inclinar e voar até o portão iluminado.",
+        "steerStick": "Incline com o outro stick para voar até o portão iluminado.",
+        "gate": "Passe pelo portão 1, o que brilha em verde.",
+        "done": "Boa! Siga os portões iluminados até a chegada."
+      },
+      "results": {
+        "title": "Concluído",
+        "retry": "Tentar de novo",
+        "next": "Próxima pista",
+        "courses": "Pistas",
+        "penalty": "Penalidade",
+        "crashes": "Batidas"
+      },
+      "pause": {
+        "title": "Pausado",
+        "resume": "Continuar",
+        "restart": "Reiniciar",
+        "settings": "Configurações",
+        "help": "Controles",
+        "quit": "Menu principal"
+      },
+      "settings": {
+        "kicker": "Opções",
+        "title": "Configurações",
+        "flight": "Voo",
+        "camera": "Câmera",
+        "controls": "Controles",
+        "graphics": "Gráficos",
+        "sound": "Som",
+        "assist": "Ajuda para iniciantes",
+        "assistNote": "Autonivelamento com altura travada",
+        "mode": "Modo de voo",
+        "rates": "Sensibilidade",
+        "ratesBeginner": "Iniciante",
+        "ratesPro": "Pro",
+        "auto": "Auto",
+        "view": "Visão",
+        "fov": "Campo de visão",
+        "stickMode": "Modo dos sticks",
+        "stickModeNote": "O modo 2 coloca o acelerador no stick esquerdo",
+        "mode2": "Modo 2",
+        "mode1": "Modo 1",
+        "invertPitch": "Inverter arfagem",
+        "stickSize": "Tamanho dos sticks na tela",
+        "quality": "Qualidade",
+        "low": "Baixa",
+        "medium": "Média",
+        "high": "Alta",
+        "volume": "Volume",
+        "ghost": "Fantasma",
+        "ghostNote": "Corra contra sua melhor corrida"
+      },
+      "help": {
+        "title": "Controles",
+        "touch": "Toque",
+        "touchLeft": "Stick esquerdo: acelerador para cima e para baixo, giro para a esquerda e a direita. O acelerador fica onde você deixar.",
+        "touchRight": "Stick direito: incline o drone para voar nessa direção.",
+        "touchButtons": "Botões pequenos no topo: reiniciar, visão da câmera e modo de voo.",
+        "keyboard": "Teclado",
+        "throttle": "Acelerador",
+        "yaw": "Girar para a esquerda e a direita",
+        "tilt": "Inclinar para voar",
+        "camera": "Visão FPV ou de perseguição",
+        "mode": "Modo de voo",
+        "restart": "Reiniciar",
+        "pause": "Pausar",
+        "gamepad": "Controle",
+        "padLeft": "Stick esquerdo: acelerador e giro",
+        "padRight": "Stick direito: inclinar para voar",
+        "note": "A ajuda para iniciantes mantém a altura quando o acelerador está no centro. Desligue em Configurações para voar no manual."
+      },
+      "fail": {
+        "title": "O SKYRUSH não consegue iniciar aqui",
+        "body": "Este jogo precisa de WebGL 2. Tente um navegador atualizado ou ative a aceleração por hardware."
       }
     },
     "nitro-racer": {

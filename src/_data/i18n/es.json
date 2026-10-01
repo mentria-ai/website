@@ -3189,6 +3189,131 @@
       "crash": {
         "impact": "Choque",
         "flipped": "Volcado"
+      },
+      "boot": "Arrancando los motores…",
+      "contextLost": "Los gráficos se reiniciaron. Restaurando la vista…",
+      "menu": {
+        "kicker": "Liga de drones FPV",
+        "tagline": "Cruza las puertas. Supera a tu fantasma.",
+        "race": "Carrera",
+        "raceHint": "3 circuitos",
+        "freestyle": "Estilo libre",
+        "settings": "Ajustes",
+        "help": "Controles"
+      },
+      "select": {
+        "kicker": "Carrera",
+        "title": "Elige un circuito"
+      },
+      "load": {
+        "kicker": "A continuación",
+        "building": "Construyendo el mundo",
+        "shaders": "Calentando la GPU",
+        "error": "Este circuito no se cargó. Inténtalo de nuevo o baja la calidad gráfica en Ajustes."
+      },
+      "tip": {
+        "angle": "El modo Ángulo nivela el dron cuando sueltas el stick.",
+        "acro": "El modo Acro es totalmente manual: el dron mantiene cualquier ángulo hasta que lo cambies.",
+        "chase": "Pulsa C o toca el botón de cámara para alternar entre la vista FPV y la vista de persecución.",
+        "ghost": "Marca un mejor tiempo y tu fantasma correrá contra ti la próxima vez.",
+        "uptilt": "Los pilotos de carreras inclinan la cámara hacia arriba para ver por delante mientras vuelan rápido e inclinados."
+      },
+      "hud": {
+        "time": "Tiempo",
+        "gate": "Puerta",
+        "rings": "Aros",
+        "speed": "Vel.",
+        "alt": "Alt.",
+        "kmh": "km/h",
+        "meters": "m",
+        "throttle": "Gas",
+        "seconds": "s",
+        "assist": "Asist.",
+        "penaltyNote": "+{n} s de penalización",
+        "finish": "¡Meta!",
+        "allRings": "¡Todos los aros!"
+      },
+      "view": {
+        "fpv": "FPV",
+        "chase": "Persecución"
+      },
+      "coach": {
+        "throttleKeys": "Mantén W para despegar. Suéltala y el dron mantiene la altura.",
+        "throttleStick": "Sube el stick de gas para despegar. Céntralo para mantener la altura.",
+        "steerKeys": "Usa las flechas para inclinarte y volar hacia la puerta iluminada.",
+        "steerStick": "Inclina con el otro stick para volar hacia la puerta iluminada.",
+        "gate": "Cruza la puerta 1, la que brilla en verde.",
+        "done": "¡Bien! Sigue las puertas iluminadas hasta la meta."
+      },
+      "results": {
+        "title": "Terminado",
+        "retry": "Reintentar",
+        "next": "Siguiente circuito",
+        "courses": "Circuitos",
+        "penalty": "Penalización",
+        "crashes": "Choques"
+      },
+      "pause": {
+        "title": "En pausa",
+        "resume": "Continuar",
+        "restart": "Reiniciar",
+        "settings": "Ajustes",
+        "help": "Controles",
+        "quit": "Menú principal"
+      },
+      "settings": {
+        "kicker": "Opciones",
+        "title": "Ajustes",
+        "flight": "Vuelo",
+        "camera": "Cámara",
+        "controls": "Controles",
+        "graphics": "Gráficos",
+        "sound": "Sonido",
+        "assist": "Ayuda para principiantes",
+        "assistNote": "Autonivelado con altura fija",
+        "mode": "Modo de vuelo",
+        "rates": "Sensibilidad",
+        "ratesBeginner": "Principiante",
+        "ratesPro": "Pro",
+        "auto": "Auto",
+        "view": "Vista",
+        "fov": "Campo de visión",
+        "stickMode": "Modo de sticks",
+        "stickModeNote": "El modo 2 pone el gas en el stick izquierdo",
+        "mode2": "Modo 2",
+        "mode1": "Modo 1",
+        "invertPitch": "Invertir cabeceo",
+        "stickSize": "Tamaño de los sticks táctiles",
+        "quality": "Calidad",
+        "low": "Baja",
+        "medium": "Media",
+        "high": "Alta",
+        "volume": "Volumen",
+        "ghost": "Fantasma",
+        "ghostNote": "Compite contra tu mejor carrera"
+      },
+      "help": {
+        "title": "Controles",
+        "touch": "Táctil",
+        "touchLeft": "Stick izquierdo: gas arriba y abajo, giro a izquierda y derecha. El gas se queda donde lo dejas.",
+        "touchRight": "Stick derecho: inclina el dron para volar en esa dirección.",
+        "touchButtons": "Botones pequeños arriba: reiniciar, vista de cámara y modo de vuelo.",
+        "keyboard": "Teclado",
+        "throttle": "Gas",
+        "yaw": "Girar a izquierda y derecha",
+        "tilt": "Inclinar para volar",
+        "camera": "Vista FPV o de persecución",
+        "mode": "Modo de vuelo",
+        "restart": "Reiniciar",
+        "pause": "Pausa",
+        "gamepad": "Mando",
+        "padLeft": "Stick izquierdo: gas y giro",
+        "padRight": "Stick derecho: inclinar para volar",
+        "note": "La ayuda para principiantes mantiene la altura cuando el gas está centrado. Desactívala en Ajustes para volar en manual."
+      },
+      "fail": {
+        "title": "SKYRUSH no puede arrancar aquí",
+        "body": "Este juego necesita WebGL 2. Prueba un navegador actualizado o activa la aceleración por hardware."
       }
     },
     "nitro-racer": {

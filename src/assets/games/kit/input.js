@@ -310,7 +310,8 @@ export function createInput(opts = {}) {
     rest: [],
     restSampled: false,
     buttons: [],
-    seen: {}
+    seen: {},
+    ref: null
   };
 
   const tilt = {
@@ -502,6 +503,7 @@ export function createInput(opts = {}) {
 
   function readPad() {
     const p = pickPad();
+    pad.ref = p || null;
     if (!p || !p.axes || !p.buttons) {
       if (pad.connected) {
         pad.connected = false;
@@ -1300,6 +1302,43 @@ export function createInput(opts = {}) {
     } catch (_) {}
   }
 
+  function rumble(strong, weak, ms) {
+    if (!settings.haptics) return false;
+    const p = pad.ref;
+    const act = p && p.vibrationActuator;
+    if (!act || typeof act.playEffect !== 'function') return false;
+    try {
+      const r = act.playEffect('dual-rumble', {
+        startDelay: 0,
+        duration: Math.max(10, Math.min(2000, isNum(ms) ? ms : 120)),
+        strongMagnitude: clamp(isNum(strong) ? strong : 0.5, 0, 1),
+        weakMagnitude: clamp(isNum(weak) ? weak : 0.5, 0, 1)
+      });
+      if (r && typeof r.catch === 'function') r.catch(function () {});
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  const FEEDBACK = {
+    tap: [6, 0, 0.25, 40],
+    bump: [14, 0.35, 0.5, 90],
+    boost: [18, 0.2, 0.7, 260],
+    crash: [40, 1, 0.8, 320],
+    land: [12, 0.5, 0.3, 110]
+  };
+
+  function feedback(kind) {
+    const f = FEEDBACK[kind] || FEEDBACK.tap;
+    if (method === 'gamepad') return rumble(f[1], f[2], f[3]);
+    if (method === 'touch') {
+      haptic(f[0]);
+      return true;
+    }
+    return false;
+  }
+
   function onPointerDown(e) {
     if (!e || !e.target || typeof e.target.closest !== 'function') return;
     const el = e.target.closest('[data-gk]');
@@ -1534,6 +1573,8 @@ export function createInput(opts = {}) {
     padInfo: function () { return pad.connected ? { id: pad.id, mapping: pad.mapping, axes: pad.axes.slice(), buttons: pad.buttons.slice() } : null; },
     setMeter,
     haptic,
+    rumble,
+    feedback,
     snapshot,
     dispose
   };

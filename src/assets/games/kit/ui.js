@@ -24,7 +24,9 @@ const UI_COPY_DEFAULTS = {
   fullscreen: 'Fullscreen',
   exitFullscreen: 'Exit fullscreen',
   position: 'Position',
-  time: 'Time'
+  time: 'Time',
+  rotate: 'Turn your phone sideways to play',
+  rotateDismiss: 'Tap to dismiss'
 };
 
 const UI_STYLE = [
@@ -306,10 +308,36 @@ const UI_STYLE = [
   '.gk-loading__meta{display:flex;justify-content:space-between;width:clamp(180px,34cqw,360px);font:600 10px/1 var(--gk-mono);letter-spacing:.18em;text-transform:uppercase;color:var(--gk-muted)}',
   '.gk-loading__meta b{color:var(--gk-mint);font-variant-numeric:tabular-nums}',
   '.gk-ask{position:absolute;inset:0;z-index:46;pointer-events:auto;container-type:size}',
+  '.gk-rotate{position:absolute;inset:0;z-index:48;display:flex;align-items:center;justify-content:center;padding:24px;pointer-events:auto;',
+  'background:radial-gradient(ellipse at 50% 45%,rgba(8,16,18,.9) 0%,rgba(3,6,8,.96) 70%);font-family:var(--gk-display);color:var(--gk-fg);text-align:center}',
+  '.gk-rotate[hidden]{display:none}',
+  '.gk-rotate__card{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:280px}',
+  '.gk-rotate__icon{width:72px;height:72px;color:var(--gk-mint);animation:gk-rot 2.6s cubic-bezier(.6,0,.3,1) infinite}',
+  '.gk-rotate__icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
+  '@keyframes gk-rot{0%,18%{transform:rotate(0)}48%,78%{transform:rotate(-90deg)}100%{transform:rotate(0)}}',
+  '.gk-rotate__text{margin:0;font-size:20px;font-weight:800;font-style:italic;text-transform:uppercase;line-height:1.1;letter-spacing:.01em}',
+  '.gk-rotate__sub{margin:0;font:500 11px/1.4 var(--gk-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--gk-muted)}',
+  '@media (prefers-reduced-motion: reduce){.gk-rotate__icon{animation:none;transform:rotate(-90deg)}}',
   '.gk-ask .gk-bg{background:rgba(3,6,8,.82)}',
   '.gk-ask .gk-panel{background:linear-gradient(180deg,#0e171b,#070c0f);box-shadow:0 0 0 1px rgba(var(--gk-mint-rgb),.22),0 30px 80px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06)}',
   '.gk-ask .gk-title::after{margin-left:auto;margin-right:auto}',
   '.gk-ask .gk-row-actions{justify-content:center;margin-top:clamp(8px,3cqh,20px)}',
+  '@container (orientation: portrait){',
+  '.gk-slab{width:min(100%,88cqw);height:clamp(42px,6.4cqh,56px);font-size:clamp(16px,5.4cqw,24px)}',
+  '.gk-slab__hint{display:none}',
+  '.gk-title{font-size:clamp(28px,12.5cqw,64px)}',
+  '.gk-title--md{font-size:clamp(24px,9.5cqw,48px)}',
+  '.gk-art{width:100%;opacity:.5}',
+  '.gk-tiles{grid-auto-flow:row;grid-auto-rows:minmax(0,1fr);max-height:none}',
+  '.gk-card{width:72cqw;max-height:62cqh}',
+  '.gk-res{grid-template-columns:1fr;align-content:start}',
+  '.gk-res__time{font-size:clamp(32px,16cqw,96px)}',
+  '.gk-loading__title{font-size:clamp(24px,11cqw,56px)}',
+  '.gk-medal{--gk-md:clamp(84px,30cqw,160px);grid-row:1}',
+  '.gk-row-actions{flex-direction:column;align-items:stretch}',
+  '.gk-row-actions .gk-slab{width:100%}',
+  '.gk-head{flex-direction:column-reverse;align-items:flex-start}',
+  '}',
   '@media (prefers-reduced-motion: reduce){.gk-enter,.gk-enter-up{animation:none}.gk-slab,.gk-card,.gk-tile{transition:none}',
   '.gk-res.is-revealed .gk-medal__disc,.gk-res.is-revealed .gk-medal__label,.gk-res.is-revealed .gk-flair{animation:none;opacity:1;transform:none}',
   '.gk-res.is-revealed .gk-medal__rays{animation:none;opacity:1}.gk-count__n{animation-duration:.01s}}'
@@ -323,6 +351,7 @@ const SVG = {
   pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5v13M15.5 5.5v13"/></svg>',
   fs: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>',
   fsExit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg>',
+  phone: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="15" y="5" width="18" height="38" rx="3.5"/><path d="M21 9h6M22.5 38h3"/></svg>',
   lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>',
   updown: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>',
   leftright: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg>',
@@ -405,6 +434,40 @@ export function createUI(stage, copyIn, opts = {}) {
   stage.appendChild(root);
   stage.appendChild(countEl);
   stage.appendChild(chrome);
+
+  const rotateEl = document.createElement('div');
+  rotateEl.className = 'gk-rotate';
+  rotateEl.hidden = true;
+  rotateEl.innerHTML = '<div class="gk-rotate__card"><span class="gk-rotate__icon">' + SVG.phone + '</span><p class="gk-rotate__text"></p><p class="gk-rotate__sub"></p></div>';
+  stage.appendChild(rotateEl);
+  let rotateDismissed = false;
+  let rotatePortrait = false;
+  const rotateEnabled = opts.rotateHint !== false;
+  function syncRotateText() {
+    rotateEl.querySelector('.gk-rotate__text').textContent = copy.rotate;
+    rotateEl.querySelector('.gk-rotate__sub').textContent = copy.rotateDismiss;
+  }
+  function syncRotate() {
+    if (!rotateEnabled || disposed) {
+      rotateEl.hidden = true;
+      return;
+    }
+    const r = stage.getBoundingClientRect();
+    const portrait = r.height > r.width * 1.05 && coarsePointer();
+    if (!portrait) rotateDismissed = false;
+    rotatePortrait = portrait;
+    rotateEl.hidden = !portrait || rotateDismissed;
+  }
+  syncRotateText();
+  rotateEl.addEventListener('click', function () {
+    rotateDismissed = true;
+    rotateEl.hidden = true;
+  });
+  let rotateRO = null;
+  try {
+    rotateRO = new ResizeObserver(function () { syncRotate(); });
+    rotateRO.observe(stage);
+  } catch (_) {}
 
   const fsBtn = chromeButton('fs', copy.fullscreen);
   const pauseBtn = chromeButton('pause', copy.pause);
@@ -1527,6 +1590,7 @@ export function createUI(stage, copyIn, opts = {}) {
   function setCopy(next) {
     copy = Object.assign({}, UI_COPY_DEFAULTS, next || null);
     syncFsIcon();
+    syncRotateText();
     pauseBtn.setAttribute('aria-label', copy.pause);
     pauseBtn.title = copy.pause;
     if (currentName) show(currentName);
@@ -1548,7 +1612,8 @@ export function createUI(stage, copyIn, opts = {}) {
     document.removeEventListener('pointermove', onDocPointerMove, true);
     document.removeEventListener('fullscreenchange', onFsChange);
     document.removeEventListener('webkitfullscreenchange', onFsChange);
-    const nodes = [hud, root, countEl, chrome, toastEl, loadingEl, askEl];
+    try { if (rotateRO) rotateRO.disconnect(); } catch (_) {}
+    const nodes = [hud, root, countEl, chrome, toastEl, loadingEl, askEl, rotateEl];
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
       if (n && n.parentNode) n.parentNode.removeChild(n);
@@ -1592,6 +1657,7 @@ export function createUI(stage, copyIn, opts = {}) {
     activate,
     toggleFullscreen,
     get method() { return lastMethod; },
+    get portrait() { return rotatePortrait; },
     dispose
   };
   return api;

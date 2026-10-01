@@ -131,7 +131,7 @@
       }
     },
     {
-      "action": "/tools/annotate-image/",
+      "action": "/tools/gallery/",
       "accept": {
         "image/png": [
           ".png"
@@ -145,6 +145,12 @@
         ],
         "image/gif": [
           ".gif"
+        ],
+        "image/avif": [
+          ".avif"
+        ],
+        "image/bmp": [
+          ".bmp"
         ]
       }
     },

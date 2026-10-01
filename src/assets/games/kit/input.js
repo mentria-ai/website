@@ -69,6 +69,8 @@ const STYLE_TEXT = [
   '.gk-stick__tick--w,.gk-stick__tick--e{top:50%;height:2px;width:7px;margin-top:-1px}',
   '.gk-stick__tick--w{left:5px}.gk-stick__tick--e{right:5px}',
   '.gk-stick__level{position:absolute;left:-12px;top:14%;bottom:14%;width:4px;border-radius:3px;background:rgba(var(--gk-mint),.14);overflow:hidden}',
+  '.gk-stick__lv{position:absolute;left:-22px;top:calc(14% - 16px);width:24px;text-align:center;font:600 9px/1 var(--font-mono,ui-monospace,monospace);',
+  'letter-spacing:.04em;color:rgba(var(--gk-mint),.8);text-shadow:0 1px 3px rgba(0,0,0,.8);font-variant-numeric:tabular-nums}',
   '.gk-stick__level i{position:absolute;left:0;right:0;bottom:0;height:0;background:rgba(var(--gk-mint),.85);border-radius:3px;box-shadow:0 0 8px rgba(var(--gk-mint),.6)}',
   '.gk-stick__knob{position:absolute;left:50%;top:50%;border-radius:50%;will-change:transform;',
   'background:radial-gradient(circle at 50% 38%,rgba(var(--gk-mint),.42),rgba(var(--gk-mint),.2) 70%);',
@@ -954,7 +956,7 @@ export function createInput(opts = {}) {
     const st = document.createElement('div');
     st.className = 'gk-stick gk-stick--' + (c.side || 'left') + (c.gate === 'square' ? ' gk-stick--square' : '');
     st.innerHTML = '<div class="gk-stick__ring"><i class="gk-stick__tick gk-stick__tick--n"></i><i class="gk-stick__tick gk-stick__tick--s"></i><i class="gk-stick__tick gk-stick__tick--w"></i><i class="gk-stick__tick gk-stick__tick--e"></i></div>' +
-      (c.spring && c.spring.y === false ? '<div class="gk-stick__level"><i></i></div>' : '') +
+      (c.spring && c.spring.y === false ? '<div class="gk-stick__level"><i></i></div><span class="gk-stick__lv"></span>' : '') +
       '<div class="gk-stick__knob"></div><span class="gk-stick__cap"></span>';
     st.querySelector('.gk-stick__cap').textContent = c.caption ? label(c.caption) : '';
     root.appendChild(zone);
@@ -974,6 +976,8 @@ export function createInput(opts = {}) {
       el: st,
       knob: st.querySelector('.gk-stick__knob'),
       level: st.querySelector('.gk-stick__level i'),
+      levelText: st.querySelector('.gk-stick__lv'),
+      levelShown: -1,
       pointer: -1,
       bx: 0,
       by: 0,
@@ -1132,7 +1136,7 @@ export function createInput(opts = {}) {
         c.zone.style.width = zoneW.toFixed(1) + 'px';
         if (c.side === 'left') {
           c.zone.style.left = '0px';
-          c.homeX = geo.safeL + e + c.ringR + 10 * s;
+          c.homeX = geo.safeL + e + c.ringR + (c.level ? 20 : 10) * s;
         } else {
           c.zone.style.right = '0px';
           c.homeX = geo.w - geo.safeR - e - c.ringR - 10 * s;
@@ -1189,7 +1193,14 @@ export function createInput(opts = {}) {
     const kx = c.vx * c.R;
     const ky = -c.vy * c.R;
     c.knob.style.transform = 'translate3d(' + kx.toFixed(1) + 'px,' + ky.toFixed(1) + 'px,0)';
-    if (c.level) c.level.style.height = (((c.vy + 1) / 2) * 100).toFixed(1) + '%';
+    if (c.level) {
+      const pct = Math.round(((c.vy + 1) / 2) * 100);
+      c.level.style.height = pct + '%';
+      if (c.levelText && pct !== c.levelShown) {
+        c.levelShown = pct;
+        c.levelText.textContent = String(pct);
+      }
+    }
   }
 
   function stickBounds(c) {
@@ -1198,7 +1209,7 @@ export function createInput(opts = {}) {
     const pad = 4;
     let x0, x1;
     if (c.side === 'left') {
-      x0 = geo.safeL + c.ringR + pad;
+      x0 = geo.safeL + c.ringR + pad + (c.level ? 22 : 0);
       x1 = zoneW - c.ringR;
     } else {
       x0 = geo.w - zoneW + c.ringR;

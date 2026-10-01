@@ -622,6 +622,17 @@ export function createCameraRig(camera) {
       camera.lookAt(va);
       fov = lerp(52, 64, e);
       st.yaw = c.yaw;
+    } else if (o.finish != null) {
+      const ang = c.yaw + 2.2 + o.finish * 0.32;
+      const dist = 7.6 - Math.min(1.4, o.finish * 0.25);
+      camera.position.set(px + Math.sin(ang) * dist, py + 2.1, pz + Math.cos(ang) * dist);
+      if (o.heightAt) {
+        const ground = o.heightAt(camera.position.x, camera.position.z) + 0.8;
+        if (camera.position.y < ground) camera.position.y = ground;
+      }
+      va.set(px, py + 0.75, pz);
+      camera.lookAt(va);
+      fov = 52;
     } else if (o.lookBack) {
       const yaw = c.yaw;
       camera.position.set(px - Math.sin(yaw) * 4.2, py + 1.75, pz - Math.cos(yaw) * 4.2);

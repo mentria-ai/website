@@ -246,7 +246,7 @@ let testAutopilotLevel = 'hard';
 
 const pIn = { throttle: 0, brake: 0, steer: 0, nitro: false, drift: false, brakeDrift: true };
 let camMode = settings.camera === 'hood' ? 'hood' : 'chase';
-const camIn = { px: 0, py: 0, pz: 0, car: null, view: null, intro: null, lookBack: false, bumper: false, heightAt: null };
+const camIn = { px: 0, py: 0, pz: 0, car: null, view: null, intro: null, finish: null, lookBack: false, bumper: false, heightAt: null };
 const v3a = new THREE.Vector3();
 const v3b = new THREE.Vector3();
 const qa = new THREE.Quaternion();
@@ -1028,9 +1028,9 @@ function simulate(dt) {
     ghostExtra[0] = p.boosting ? 1 : 0;
     R.ghostRec.push(R.time, p, p.quat, ghostExtra);
   }
-  if (R.phase === 'finished' && !R.resultsShown) {
+  if (R.phase === 'finished') {
     R.finishedAt += dt;
-    if (R.finishedAt > 1.6) showResults();
+    if (!R.resultsShown && R.finishedAt > 1.6) showResults();
   }
 }
 
@@ -1361,6 +1361,7 @@ function updateCamera(alpha, dt) {
   camIn.car = c;
   camIn.view = R.views[R.pi];
   camIn.intro = R.phase === 'grid' ? R.introT / Math.max(0.01, R.introLen) : null;
+  camIn.finish = R.phase === 'finished' && R.finishedAt > 0.9 ? R.finishedAt - 0.9 : null;
   camIn.lookBack = !!(input.button('lookBack') && input.button('lookBack').down) && R.phase !== 'grid';
   camIn.bumper = camMode === 'hood' && R.phase !== 'finished';
   camIn.heightAt = world.terrain.heightAt;

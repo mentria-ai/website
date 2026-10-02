@@ -111,6 +111,8 @@ const HUD_CSS = [
   '@container (max-height: 430px){.nrh-map{width:calc(118*var(--nrh-u));height:calc(118*var(--nrh-u))}',
   '.nrh-toasts{top:17%}}',
   '.nrh.is-touch .nrh-speedo{bottom:calc(var(--nrh-safe-b) + 6px)}',
+  '@container (orientation: portrait){.nrh>*{--nrh-u:clamp(.62px,calc(100cqw/440),1px)}',
+  '.nrh.is-touch .nrh-speedo{bottom:calc(var(--nrh-safe-b) + 150px)}}',
   '@media (prefers-reduced-motion: reduce){.nrh-pos__n.is-pop,.nrh-nitro.is-full .nrh-nitro__fill,.nrh-wrong.is-on{animation:none}',
   '.nrh-toast,.nrh-banner{transition:opacity .2s linear}}'
 ].join('');

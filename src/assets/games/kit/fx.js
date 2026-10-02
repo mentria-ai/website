@@ -808,10 +808,57 @@ export function createCameraShake(opts = {}) {
 }
 
 const FX_POST_PRESETS = {
-  day: { strength: 0.11, radius: 0.15, threshold: 2.9, knee: 1.0, adapt: 2.6, saturation: 0.5, vignette: 0.22 },
-  golden: { strength: 0.15, radius: 0.2, threshold: 2.5, knee: 0.9, adapt: 2.4, saturation: 0.55, vignette: 0.28 },
-  sunset: { strength: 0.22, radius: 0.35, threshold: 1.7, knee: 0.7, adapt: 2.1, saturation: 0.65, vignette: 0.3 },
-  night: { strength: 0.6, radius: 0.55, threshold: 0.8, knee: 0.45, adapt: 2.2, saturation: 0.9, vignette: 0.34 },
+  day: { strength: 0.11, radius: 0.15, threshold: 2.9, knee: 1.0, adapt: 2.6, saturation: 0.5, vignette: 0.22, shafts: 0.2 },
+  golden: { strength: 0.15, radius: 0.2, threshold: 2.5, knee: 0.9, adapt: 2.4, saturation: 0.55, vignette: 0.28, shafts: 0.36 },
+  sunset: { strength: 0.22, radius: 0.35, threshold: 1.7, knee: 0.7, adapt: 2.1, saturation: 0.65, vignette: 0.3, shafts: 0.48 },
+  night: { strength: 0.6, radius: 0.55, threshold: 0.8, knee: 0.45, adapt: 2.2, saturation: 0.9, vignette: 0.34, shafts: 0 },
+};
+
+const SHAFT_SAMPLES = 28;
+
+const SHAFT_SHADER = {
+  uniforms: {
+    tDiffuse: { value: null },
+    uSun: { value: new THREE.Vector2(0.5, 0.5) },
+    uAspect: { value: 1 },
+    uIntensity: { value: 0 },
+    uColor: { value: new THREE.Color(1, 0.9, 0.75) },
+    uThreshold: { value: 1.6 },
+  },
+  vertexShader: `varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`,
+  fragmentShader: `uniform sampler2D tDiffuse;
+uniform vec2 uSun;
+uniform float uAspect;
+uniform float uIntensity;
+uniform vec3 uColor;
+uniform float uThreshold;
+varying vec2 vUv;
+void main() {
+  vec4 base = texture2D(tDiffuse, vUv);
+  vec2 delta = (vUv - uSun) * (0.92 / float(${SHAFT_SAMPLES}));
+  vec2 uv = vUv;
+  float decay = 1.0;
+  vec3 acc = vec3(0.0);
+  float jitter = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  uv -= delta * jitter;
+  for (int i = 0; i < ${SHAFT_SAMPLES}; i++) {
+    uv -= delta;
+    vec3 c = texture2D(tDiffuse, clamp(uv, 0.0, 1.0)).rgb;
+    float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+    float near = 1.0 - smoothstep(0.0, 0.3, length((uv - uSun) * vec2(uAspect, 1.0)));
+    float mx = max(c.r, max(c.g, c.b));
+    float sat = (mx - min(c.r, min(c.g, c.b))) / max(mx, 1e-4);
+    acc += min(c, vec3(6.0)) * smoothstep(uThreshold, uThreshold * 1.8, l) * (1.0 - smoothstep(0.25, 0.55, sat)) * near * decay;
+    decay *= 0.955;
+  }
+  acc *= 1.0 / float(${SHAFT_SAMPLES});
+  float d = length((vUv - uSun) * vec2(uAspect, 1.0));
+  gl_FragColor = vec4(base.rgb + acc * uColor * uIntensity * (1.0 - smoothstep(0.05, 0.8, d)), base.a);
+}`,
 };
 
 const SOFT_HIGHPASS_FRAGMENT = `
@@ -1030,8 +1077,38 @@ export function createPostFx(renderer, scene, camera, opts = {}) {
   let renderPass = null;
   let luminancePass = null;
   let bloomPass = null;
+  let shaftPass = null;
   let outputPass = null;
   let finishPass = null;
+  let sunLight = null;
+  const sunDirTmp = new THREE.Vector3();
+  const sunPosTmp = new THREE.Vector3();
+  const camDirTmp = new THREE.Vector3();
+  const shaftWhite = new THREE.Color(1, 1, 1);
+
+  function updateShafts() {
+    if (!shaftPass) return;
+    const preset = FX_POST_PRESETS[presetName] || FX_POST_PRESETS.day;
+    let strength = preset.shafts || 0;
+    if (!sunLight || !sunLight.parent) sunLight = scene.getObjectByName('kw-sun') || null;
+    if (strength > 0 && sunLight && currentCamera) {
+      sunDirTmp.copy(sunLight.position).sub(sunLight.target.position).normalize();
+      currentCamera.getWorldDirection(camDirTmp);
+      const facing = camDirTmp.dot(sunDirTmp);
+      if (facing > 0.05 && sunDirTmp.y > -0.02) {
+        sunPosTmp.copy(currentCamera.position).addScaledVector(sunDirTmp, 1000).project(currentCamera);
+        const u = sunPosTmp.x * 0.5 + 0.5;
+        const v = sunPosTmp.y * 0.5 + 0.5;
+        const off = Math.max(Math.max(-u, u - 1), Math.max(-v, v - 1), 0);
+        strength *= smoothstep(0.05, 0.45, facing) * (1 - smoothstep(0, 0.45, off));
+        shaftPass.uniforms.uSun.value.set(u, v);
+        shaftPass.uniforms.uColor.value.copy(sunLight.color).lerp(shaftWhite, 0.35);
+        shaftPass.uniforms.uThreshold.value = preset.threshold * 0.9;
+      } else strength = 0;
+    } else strength = 0;
+    shaftPass.uniforms.uIntensity.value = strength;
+    shaftPass.enabled = strength > 0.002;
+  }
 
   const overlayUniforms = {
     uSpeed: { value: 0 },
@@ -1127,6 +1204,16 @@ export function createPostFx(renderer, scene, camera, opts = {}) {
       composer.addPass(bloomPass);
       applyBloom();
     }
+    if (quality.name === 'high' && quality.shafts !== false) {
+      shaftPass = new ShaderPass(SHAFT_SHADER);
+      shaftPass.material.name = 'kw-post-shafts';
+      const shaftRender = shaftPass.render.bind(shaftPass);
+      shaftPass.render = (r, writeBuffer, readBuffer, deltaTime, maskActive) => {
+        shaftPass.uniforms.uAspect.value = lastW / Math.max(1, lastH);
+        shaftRender(r, writeBuffer, readBuffer, deltaTime, maskActive);
+      };
+      composer.addPass(shaftPass);
+    }
     outputPass = new OutputPass();
     composer.addPass(outputPass);
     finishPass = new ShaderPass(makeFinishShader(!!quality.fxaa));
@@ -1154,6 +1241,7 @@ export function createPostFx(renderer, scene, camera, opts = {}) {
     renderPass = null;
     luminancePass = null;
     bloomPass = null;
+    shaftPass = null;
     outputPass = null;
     finishPass = null;
   }
@@ -1190,6 +1278,7 @@ export function createPostFx(renderer, scene, camera, opts = {}) {
     stepSpeed(step);
     syncSize();
     if (composer) {
+      updateShafts();
       composer.render(step);
       return;
     }

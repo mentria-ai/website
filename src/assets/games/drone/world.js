@@ -9,6 +9,7 @@ import * as KitCollide from '../kit/collide.js';
 import * as KitFx from '../kit/fx.js';
 import { gateColliders, sceneryColliders } from './courses.js';
 import { createGates } from './gates.js';
+import { paintMarkings, yardProps } from './yard.js';
 
 const BIOME_BY_COURSE = { meadow: 'meadow', yard: 'park', canyon: 'desert', freestyle: 'alpine' };
 const SLABS_BY_COURSE = {
@@ -335,7 +336,7 @@ export async function buildWorld(course, opts = {}) {
   disposers.push(() => env.dispose());
   await report(0.16, 'sky');
 
-  const segments = Math.max(192, Math.min(384, Math.round(hf.size / 4.7 / 32) * 32));
+  const segments = Math.max(192, Math.min(384, Math.round(hf.size / 4 / 32) * 32));
   let terrain = null;
   if (typeof KitTerrain.createTerrain === 'function') {
     try {
@@ -372,7 +373,9 @@ export async function buildWorld(course, opts = {}) {
   for (const g of course.gates) avoid.push({ x: g.pos[0], z: g.pos[2], radius: Math.max(8, (g.w || 3) * 1.6) });
 
   for (const slab of SLABS_BY_COURSE[course.id] || []) {
-    const mat = standardMaterial('asphalt', { color: 0x4a4c4e, roughness: 0.95 }, { repeat: [slab.w / 8, slab.d / 8], color: 0x9a9a98 });
+    const painted = Array.isArray(sc.markings) && sc.markings.length > 0;
+    const mat = standardMaterial('asphalt', { color: 0x4a4c4e, roughness: 0.95 }, { repeat: [slab.w / 8, slab.d / 8], color: 0x9a9a98, unique: painted });
+    if (painted) paintMarkings(mat.material, sc.markings);
     const g = new THREE.PlaneGeometry(slab.w, slab.d, 1, 1);
     g.rotateX(-Math.PI / 2);
     g.translate(slab.x, heightAt(slab.x, slab.z) + 0.035, slab.z);
@@ -380,7 +383,7 @@ export async function buildWorld(course, opts = {}) {
     m.receiveShadow = true;
     root.add(m);
     geometries.push(g);
-    if (!mat.shared) ownMaterials.push(mat.material);
+    if (!mat.shared || painted) ownMaterials.push(mat.material);
   }
 
   if (typeof KitProps.setPropsRenderer === 'function') {
@@ -417,6 +420,12 @@ export async function buildWorld(course, opts = {}) {
       if (res) props.push(res);
     } catch (err) {
       console.error('[skyrush] containers', err);
+    }
+  }
+  if (sc.dressing) {
+    for (const res of yardProps(scene, sc.dressing, groundTerrain, q)) {
+      props.push(res);
+      addColliders(res.colliders);
     }
   }
   await report(0.66, 'yard');

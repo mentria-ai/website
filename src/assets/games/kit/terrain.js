@@ -25,7 +25,7 @@ export const TERRAIN_BIOMES = {
       rock: { tex: 'rock', tint: [1.0, 0.98, 0.95], scale: 11 },
       sand: { tex: 'sand', tint: [0.95, 0.92, 0.85], scale: 8 },
     },
-    rockSlope: 0.3, dirtAmount: 0.32, sandTop: -1000, snowLine: 1e9, macro: 0.32, macroTint: [0.92, 1.06, 0.78],
+    rockSlope: 0.3, dirtAmount: 0.32, sandTop: -1000, snowLine: 1e9, macro: 0.32, macroTint: [0.92, 1.06, 0.78], flowers: 1,
   },
   desert: {
     layers: {
@@ -34,7 +34,7 @@ export const TERRAIN_BIOMES = {
       rock: { tex: 'sandstone', procedural: 'rock', tint: [1.22, 0.8, 0.6], fileTint: [0.9, 0.84, 0.84], fileSat: 0.82, scale: 9 },
       sand: { tex: 'sand', tint: [1.1, 0.94, 0.76], fileTint: [1.0, 0.92, 0.82], scale: 7 },
     },
-    rockSlope: 0.22, dirtAmount: 0.4, sandTop: 6, snowLine: 1e9, macro: 0.26, macroTint: [1.08, 0.92, 0.8],
+    rockSlope: 0.22, dirtAmount: 0.4, sandTop: 6, snowLine: 1e9, macro: 0.26, macroTint: [1.08, 0.92, 0.8], strata: 1, rockAbove: 5.5,
   },
   coast: {
     layers: {
@@ -61,7 +61,7 @@ export const TERRAIN_BIOMES = {
       rock: { tex: 'concrete', tint: [0.9, 0.9, 0.9], scale: 8 },
       sand: { tex: 'dirt', tint: [0.8, 0.78, 0.76], scale: 6 },
     },
-    rockSlope: 0.3, dirtAmount: 0.55, sandTop: -1000, snowLine: 1e9, macro: 0.2, macroTint: [0.95, 0.97, 0.9],
+    rockSlope: 0.3, dirtAmount: 0.55, sandTop: -1000, snowLine: 1e9, macro: 0.2, macroTint: [0.95, 0.97, 0.9], flowers: 0.5,
   },
   alpine: {
     layers: {
@@ -70,7 +70,7 @@ export const TERRAIN_BIOMES = {
       rock: { tex: 'rock', tint: [0.95, 0.96, 1.0], scale: 12 },
       sand: { tex: 'sand', tint: [0.9, 0.88, 0.84], scale: 8 },
     },
-    rockSlope: 0.26, dirtAmount: 0.3, sandTop: -1000, snowLine: 1e9, macro: 0.3, macroTint: [0.9, 1.05, 0.85],
+    rockSlope: 0.26, dirtAmount: 0.3, sandTop: -1000, snowLine: 1e9, macro: 0.3, macroTint: [0.9, 1.05, 0.85], flowers: 0.8,
   },
 };
 
@@ -90,9 +90,10 @@ uniform vec3 kwMacroTint;
 uniform vec4 kwLayerSat;
 uniform vec4 kwCloudShadow;
 uniform vec3 kwCloudWind;
+uniform sampler2D kwShapeTex;
+uniform vec3 kwShapeGrid;
+uniform float kwFlowers;
 varying vec3 vKwWorld;
-varying vec3 vKwNormal;
-varying float vKwSunVis;
 ${NO_TILE_GLSL}
 vec4 kwSampleLayer(sampler2D s, vec2 uv, float dist) {
 #ifdef KW_NO_TILE
@@ -131,14 +132,17 @@ float kwFbmTerrain(vec2 p) {
 `;
 
 const TERRAIN_SPLAT_MAIN = `
-  vec3 kwN = normalize(vKwNormal);
   vec3 kwW = vKwWorld;
+  vec4 kwShape = texture2D(kwShapeTex, ((kwW.xz + kwShapeGrid.x) / kwShapeGrid.y + 0.5) / kwShapeGrid.z);
+  vec3 kwN = normalize(kwShape.xyz * 2.0 - 1.0);
   float kwDist = length(kwW - cameraPosition);
   float kwSlope = 1.0 - kwN.y;
   float kwN1 = kwFbmTerrain(kwW.xz * 0.012);
   float kwN2 = kwValueNoise(kwW.xz * 0.09);
   float kwN3 = kwFbmTerrain(kwW.xz * 0.0035 + 41.0);
-  float kwRockW = smoothstep(kwSplat.x - 0.07, kwSplat.x + 0.07, kwSlope + (kwN2 - 0.5) * 0.09 + (kwN1 - 0.5) * 0.06);
+  float kwN4 = kwValueNoise(kwW.xz * 0.37 + 7.3);
+  float kwRockW = smoothstep(kwSplat.x - 0.1, kwSplat.x + 0.1, kwSlope + (kwN2 - 0.5) * 0.16 + (kwN1 - 0.5) * 0.12 + (kwN4 - 0.5) * 0.07);
+  if (kwMacro.w > 0.0) kwRockW = max(kwRockW, smoothstep(kwMacro.w - 0.8, kwMacro.w + 1.6, kwW.y + (kwN2 - 0.5) * 3.0 + (kwN4 - 0.5) * 1.2));
   float kwSandW = 1.0 - smoothstep(kwSplat.z - 1.2, kwSplat.z + 1.4, kwW.y + (kwN2 - 0.5) * 2.4);
   float kwDirtW = smoothstep(1.0 - kwSplat.y, 1.0 - kwSplat.y + 0.16, kwN1 * 0.75 + kwN2 * 0.35 + kwSlope * 0.7);
   kwDirtW = max(kwDirtW, smoothstep(0.12, 0.24, kwSlope) * 0.65);
@@ -153,7 +157,21 @@ const TERRAIN_SPLAT_MAIN = `
   if (kwWeights.x > 0.004) {
     vec3 kwG = kwSampleLayer(kwGrassMap, kwW.xz / kwScales.x, kwDist).rgb;
     kwG = mix(vec3(dot(kwG, vec3(0.2126, 0.7152, 0.0722))), kwG, kwLayerSat.x);
-    kwCol += kwG * kwGrassTint * kwWeights.x;
+    kwG *= kwGrassTint;
+    if (kwFlowers > 0.0 && kwDist < 50.0) {
+      vec2 kwFp = kwW.xz / 0.55;
+      vec2 kwFc = floor(kwFp);
+      float kwFh = fract(sin(dot(kwFc, vec2(41.3, 289.1))) * 43758.5453);
+      vec2 kwFo = vec2(fract(kwFh * 13.7), fract(kwFh * 71.3)) * 0.6 + 0.2;
+      float kwFr = 0.1 + 0.08 * fract(kwFh * 5.3);
+      float kwFd = length(fract(kwFp) - kwFo);
+      float kwPatch = smoothstep(0.46, 0.66, kwFbmTerrain(kwW.xz * 0.05 + 3.1));
+      float kwFm = (1.0 - smoothstep(kwFr * 0.55, kwFr, kwFd)) * step(1.0 - 0.5 * kwPatch * kwFlowers, kwFh) * (1.0 - smoothstep(26.0, 50.0, kwDist));
+      float kwPick = fract(kwFh * 31.7);
+      vec3 kwFcol = kwPick < 0.4 ? vec3(1.0, 0.86, 0.22) : kwPick < 0.7 ? vec3(0.96, 0.95, 0.9) : kwPick < 0.88 ? vec3(0.72, 0.5, 0.95) : vec3(1.0, 0.45, 0.4);
+      kwG = mix(kwG, mix(kwG, kwFcol * 0.72, 0.8), kwFm);
+    }
+    kwCol += kwG * kwWeights.x;
     kwRough += 0.96 * kwWeights.x;
   }
   if (kwWeights.y > 0.004) {
@@ -163,11 +181,19 @@ const TERRAIN_SPLAT_MAIN = `
     kwRough += 0.94 * kwWeights.y;
   }
   if (kwWeights.z > 0.004) {
-    vec2 kwSide = abs(kwN.x) > abs(kwN.z) ? kwW.zy : kwW.xy;
+    vec3 kwBw = pow(abs(kwN), vec3(4.0));
+    kwBw /= kwBw.x + kwBw.y + kwBw.z + 1e-4;
     vec3 kwTop = kwSampleLayer(kwRockMap, kwW.xz / kwScales.z, kwDist).rgb;
-    vec3 kwWall = kwSampleLayer(kwRockMap, kwSide / kwScales.z * vec2(1.0, 1.6), kwDist).rgb;
-    float kwWallW = smoothstep(0.35, 0.7, kwSlope);
-    vec3 kwR = mix(kwTop, kwWall, kwWallW);
+    vec3 kwR = kwTop * kwBw.y;
+    if (kwBw.x > 0.01) kwR += kwSampleLayer(kwRockMap, kwW.zy / kwScales.z * vec2(1.0, 1.6), kwDist).rgb * kwBw.x;
+    if (kwBw.z > 0.01) kwR += kwSampleLayer(kwRockMap, kwW.xy / kwScales.z * vec2(1.0, 1.6) + 0.37, kwDist).rgb * kwBw.z;
+    if (kwSplat.w > 0.0) {
+      float kwStr = kwSplat.w * (1.0 - kwBw.y);
+      float kwBand = sin(kwW.y * 1.35 + kwN1 * 5.0 + kwN3 * 9.0) * 0.5 + 0.5;
+      float kwFine = sin(kwW.y * 6.1 + kwN2 * 3.0 + kwN4 * 2.0) * 0.5 + 0.5;
+      vec3 kwStrata = mix(vec3(0.82, 0.74, 0.72), vec3(1.14, 1.06, 0.98), kwBand) * (1.0 - 0.1 * kwFine);
+      kwR *= mix(vec3(1.0), kwStrata, kwStr);
+    }
     kwR = mix(vec3(dot(kwR, vec3(0.2126, 0.7152, 0.0722))), kwR, kwLayerSat.z);
     kwCol += kwR * kwRockTint * kwWeights.z;
     kwRough += 0.86 * kwWeights.z;
@@ -262,6 +288,29 @@ export function createTerrain(opts = {}) {
     sunVis = bakeSunVisibility(heights, verts, segments, cell, half, opts.sunDirection, quality.name === 'low' ? 2 : 1);
   }
 
+  const shapeData = new Uint8Array(verts * verts * 4);
+  for (let iz = 0; iz < verts; iz++) {
+    for (let ix = 0; ix < verts; ix++) {
+      const hx = gridH(ix + 1, iz) - gridH(ix - 1, iz);
+      const hz = gridH(ix, iz + 1) - gridH(ix, iz - 1);
+      const ny = 2 * cell;
+      const l = Math.sqrt(hx * hx + ny * ny + hz * hz);
+      const o = (iz * verts + ix) * 4;
+      shapeData[o] = Math.round((-hx / l * 0.5 + 0.5) * 255);
+      shapeData[o + 1] = Math.round((ny / l * 0.5 + 0.5) * 255);
+      shapeData[o + 2] = Math.round((-hz / l * 0.5 + 0.5) * 255);
+      shapeData[o + 3] = Math.round((sunVis ? sunVis[iz * verts + ix] : 1) * 255);
+    }
+  }
+  const shapeTex = new THREE.DataTexture(shapeData, verts, verts, THREE.RGBAFormat, THREE.UnsignedByteType);
+  shapeTex.magFilter = THREE.LinearFilter;
+  shapeTex.minFilter = THREE.LinearFilter;
+  shapeTex.wrapS = THREE.ClampToEdgeWrapping;
+  shapeTex.wrapT = THREE.ClampToEdgeWrapping;
+  shapeTex.generateMipmaps = false;
+  shapeTex.name = 'kw-terrain-shape';
+  shapeTex.needsUpdate = true;
+
   const biome = TERRAIN_BIOMES[opts.biome] || TERRAIN_BIOMES.meadow;
   const layerSpec = { ...biome.layers, ...(opts.layers || opts.materials || {}) };
   const texSize = quality.name === 'low' ? 256 : 512;
@@ -282,12 +331,15 @@ export function createTerrain(opts = {}) {
     kwRockTint: { value: new THREE.Vector3().fromArray(layerSpec.rock.tint) },
     kwSandTint: { value: new THREE.Vector3().fromArray(layerSpec.sand.tint) },
     kwScales: { value: new THREE.Vector4(layerSpec.grass.scale, layerSpec.dirt.scale, layerSpec.rock.scale, layerSpec.sand.scale) },
-    kwSplat: { value: new THREE.Vector4(opts.rockSlope ?? biome.rockSlope, opts.dirtAmount ?? biome.dirtAmount, opts.sandTop ?? biome.sandTop, 0) },
-    kwMacro: { value: new THREE.Vector4(opts.macro ?? biome.macro, 0.12, opts.bump ?? 0.5, 0) },
+    kwSplat: { value: new THREE.Vector4(opts.rockSlope ?? biome.rockSlope, opts.dirtAmount ?? biome.dirtAmount, opts.sandTop ?? biome.sandTop, opts.strata ?? biome.strata ?? 0) },
+    kwMacro: { value: new THREE.Vector4(opts.macro ?? biome.macro, 0.12, opts.bump ?? 0.5, opts.rockAbove ?? biome.rockAbove ?? 0) },
     kwMacroTint: { value: new THREE.Vector3().fromArray(opts.macroTint ?? biome.macroTint) },
     kwLayerSat: { value: new THREE.Vector4(1, 1, 1, 1) },
     kwCloudShadow: { value: new THREE.Vector4(clamp(opts.cloudShadows ?? 0, 0, 1) * 0.55, 1 / (opts.cloudShadowScale ?? 260), 0.62 - clamp(opts.cloudShadows ?? 0, 0, 1) * 0.25, 0) },
     kwCloudWind: { value: new THREE.Vector3(0.6, 0.25, 0) },
+    kwShapeTex: { value: shapeTex },
+    kwShapeGrid: { value: new THREE.Vector3(half, cell, verts) },
+    kwFlowers: { value: quality.name === 'low' ? 0 : (opts.flowers ?? biome.flowers ?? 0) },
   };
   const tintUniform = { grass: uniforms.kwGrassTint, dirt: uniforms.kwDirtTint, rock: uniforms.kwRockTint, sand: uniforms.kwSandTint };
   const satIndex = { grass: 'x', dirt: 'y', rock: 'z', sand: 'w' };
@@ -308,15 +360,16 @@ export function createTerrain(opts = {}) {
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vKwWorld;\nvarying vec3 vKwNormal;\nattribute float kwSunVis;\nvarying float vKwSunVis;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvKwWorld = (modelMatrix * vec4(position, 1.0)).xyz;\nvKwNormal = normalize(mat3(modelMatrix) * normal);\nvKwSunVis = kwSunVis;');
+      .replace('#include <common>', '#include <common>\nvarying vec3 vKwWorld;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvKwWorld = (modelMatrix * vec4(position, 1.0)).xyz;');
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\n' + TERRAIN_SPLAT_GLSL)
       .replace('#include <map_fragment>', TERRAIN_SPLAT_MAIN)
       .replace('#include <roughnessmap_fragment>', 'float roughnessFactor = kwRough;')
+      .replace('#include <normal_fragment_begin>', '#include <normal_fragment_begin>\nnormal = normalize((viewMatrix * vec4(kwN, 0.0)).xyz);\nnonPerturbedNormal = normal;')
       .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = kwPerturbNormal(-vViewPosition, normal, vec2(dFdx(kwBumpLum), dFdy(kwBumpLum)));')
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
-  float kwShade = vKwSunVis;
+  float kwShade = kwShape.a;
   if (kwCloudShadow.x > 0.0) {
     vec2 kwCp = vKwWorld.xz * kwCloudShadow.y + kwCloudWind.xy * kwCloudWind.z;
     float kwCn = kwValueNoise(kwCp) * 0.55 + kwValueNoise(kwCp * 2.13 + 5.7) * 0.3 + kwValueNoise(kwCp * 4.7 + 1.3) * 0.15;
@@ -326,7 +379,7 @@ export function createTerrain(opts = {}) {
   reflectedLight.directDiffuse *= kwShade;
   reflectedLight.directSpecular *= kwShade;`);
   };
-  material.customProgramCacheKey = () => 'kw-terrain-' + (quality.noTile ? 'nt' : 't') + (quality.farBlend ? 'f' : 'n');
+  material.customProgramCacheKey = () => 'kw-terrain-px-' + (quality.noTile ? 'nt' : 't') + (quality.farBlend ? 'f' : 'n');
 
   const chunkCells = opts.chunkCells || Math.min(128, Math.max(16, Math.pow(2, Math.ceil(Math.log2(Math.ceil(segments / 7))))));
   const chunksPerSide = Math.ceil(segments / chunkCells);
@@ -351,7 +404,6 @@ export function createTerrain(opts = {}) {
     const total = nx * nz + skirtCount;
     const pos = new Float32Array(total * 3);
     const nor = new Float32Array(total * 3);
-    const vis = new Float32Array(total);
     const index = [];
     let v = 0;
     const normalOf = (ix, iz) => {
@@ -373,7 +425,6 @@ export function createTerrain(opts = {}) {
         pos[v * 3 + 2] = -half + iz * cell - oz;
         const n = normalOf(ix, iz);
         nor[v * 3] = n[0]; nor[v * 3 + 1] = n[1]; nor[v * 3 + 2] = n[2];
-        vis[v] = sunVis ? sunVis[iz * verts + ix] : 1;
         v++;
       }
     }
@@ -394,7 +445,6 @@ export function createTerrain(opts = {}) {
         pos[v * 3 + 1] = pos[k * 3 + 1] - skirtDepth;
         pos[v * 3 + 2] = pos[k * 3 + 2];
         nor[v * 3] = nor[k * 3]; nor[v * 3 + 1] = nor[k * 3 + 1]; nor[v * 3 + 2] = nor[k * 3 + 2];
-        vis[v] = vis[k];
         v++;
       }
       for (let k = 0; k < list.length - 1; k++) {
@@ -419,7 +469,6 @@ export function createTerrain(opts = {}) {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos.subarray(0, v * 3), 3));
     geo.setAttribute('normal', new THREE.BufferAttribute(nor.subarray(0, v * 3), 3));
-    geo.setAttribute('kwSunVis', new THREE.BufferAttribute(vis.subarray(0, v), 1));
     geo.setIndex(index);
     geo.computeBoundingSphere();
     geo.computeBoundingBox();
@@ -527,6 +576,7 @@ export function createTerrain(opts = {}) {
     if (group.parent) group.parent.remove(group);
     for (const g of geometries) g.dispose();
     material.dispose();
+    shapeTex.dispose();
     if (water) { water.geometry.dispose(); waterMaterial.dispose(); }
     if (waterNormal) waterNormal.dispose();
   }

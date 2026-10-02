@@ -3087,6 +3087,7 @@
       "open_folder": "Ouvrir un dossier",
       "drop_hint": "Votre musique reste sur cet appareil. Rien n’est envoyé.",
       "ios_hint": "Sur iPhone, choisissez des morceaux ou un dossier de l’app Fichiers à chaque visite. Les morceaux d’Apple Music ne peuvent pas être ouverts. Mentria garde les informations et les pochettes, pour que les mêmes fichiers se chargent plus vite la fois suivante.",
+      "lock_hint": "Sur iPhone, si le morceau suivant ne démarre pas alors que l'écran verrouillé est allumé, appuyez sur lecture à cet endroit pour relancer la musique. Pour une longue écoute, un onglet Safari est plus fiable que l'app de l'écran d'accueil.",
       "saved_title": "Vos dossiers",
       "search": "Rechercher des morceaux, albums et artistes",
       "add": "Ajouter des morceaux",

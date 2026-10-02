@@ -282,5 +282,5 @@ export function createGun(){
     if (hemiGround) hemi.groundColor.copy(hemiGround);
   }
 
-  return { scene, camera, update, setAspect, setEnvironment, muzzleWorld: flashGroup };
+  return { scene, camera, update, setAspect, setEnvironment };
 }

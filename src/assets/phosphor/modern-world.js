@@ -180,7 +180,7 @@ function texSet(name, repeat, size){
   };
 }
 
-export function worldMaterials(look){
+function worldMaterials(look){
   const L = look || {};
   const conc = texSet('concrete', 1, 1024);
   const concTop = new THREE.MeshStandardMaterial({ map: conc.map, normalMap: conc.normalMap, roughnessMap: conc.roughnessMap, color: new THREE.Color(L.floorTint || 0x8d8983), roughness: 0.94, metalness: 0, vertexColors: true, envMapIntensity: 0.45 });
@@ -209,22 +209,6 @@ export function buildStatic(prims, look){
   mesh.receiveShadow = true;
   mesh.name = 'ph-world';
   return mesh;
-}
-
-export function floorBelow(prims, x, y, z){
-  let best = -0.6;
-  for (const p of prims){
-    if (x < p.min[0] || x > p.max[0] || z < p.min[2] || z > p.max[2]) continue;
-    let top = p.max[1];
-    if (p.type === 'ramp'){
-      const v = p.axis === 0 ? x : z;
-      let t = (v - p.min[p.axis]) / (p.max[p.axis] - p.min[p.axis]);
-      if (p.sign < 0) t = 1 - t;
-      top = p.min[1] + (p.max[1] - p.min[1]) * t;
-    }
-    if (top <= y + 0.01 && top > best) best = top;
-  }
-  return best;
 }
 
 export function bounds(prims){

@@ -239,7 +239,6 @@ export function createRenderer(canvas){
     sizeDirty = false;
   }
 
-  const tmpV = new THREE.Vector3();
   function placeLights(){
     if (!lamps.length){ for (const l of lampLights) l.visible = false; return; }
     const cp = camera.position;

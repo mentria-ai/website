@@ -215,6 +215,39 @@ export function createGun(){
   const sunCam = new THREE.Vector3();
   let flashSpin = 0;
   let lastMuzzle = 0;
+  const casingGeo = new THREE.CylinderGeometry(0.0046, 0.0052, 0.042, 10);
+  const brass = new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 1, roughness: 0.3 });
+  const casings = [];
+  for (let i = 0; i < 12; i++){
+    const m = new THREE.Mesh(casingGeo, brass);
+    m.visible = false;
+    m.frustumCulled = false;
+    scene.add(m);
+    casings.push({ m, v: new THREE.Vector3(), w: new THREE.Vector3(), life: 0 });
+  }
+  let casingCursor = 0;
+  function ejectCasing(){
+    const c = casings[casingCursor];
+    casingCursor = (casingCursor + 1) % casings.length;
+    port.getWorldPosition(c.m.position);
+    c.v.set(1.4 + Math.random() * 0.8, 1.0 + Math.random() * 0.7, 0.15 + Math.random() * 0.35);
+    c.w.set((Math.random() - 0.5) * 34, (Math.random() - 0.5) * 34, (Math.random() - 0.5) * 34);
+    c.m.rotation.set(Math.random() * 6.28, Math.random() * 6.28, Math.random() * 6.28);
+    c.life = 0.75;
+    c.m.visible = true;
+  }
+  function stepCasings(dt){
+    for (const c of casings){
+      if (c.life <= 0) continue;
+      c.life -= dt;
+      if (c.life <= 0){ c.m.visible = false; continue; }
+      c.v.y -= 9.8 * dt;
+      c.m.position.addScaledVector(c.v, dt);
+      c.m.rotation.x += c.w.x * dt;
+      c.m.rotation.y += c.w.y * dt;
+      c.m.rotation.z += c.w.z * dt;
+    }
+  }
   let reloadTilt = 0;
 
   function update(vm, muzzle, sunDirWorld, sunColor, worldCam, dt){
@@ -253,8 +286,12 @@ export function createGun(){
     }
     glass.material.opacity = Math.max(0, (ads - 0.55) / 0.45);
     const m = Math.max(0, Math.min(1, muzzle || 0));
-    if (m > lastMuzzle + 0.05) flashSpin = Math.random() * Math.PI;
+    if (m > lastMuzzle + 0.05){
+      flashSpin = Math.random() * Math.PI;
+      ejectCasing();
+    }
     lastMuzzle = m;
+    stepCasings(Math.min(0.05, dt || 0));
     const fk = m * m;
     fm.opacity = fk;
     flashGroup.rotation.z = flashSpin;

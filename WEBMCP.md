@@ -108,9 +108,8 @@ Browsers without WebMCP never load the bridge.
 
 1. Chrome 149+: the origin-trial token served by the site enables the API on
    its own; `chrome://flags/#enable-webmcp-testing` + relaunch also works.
-2. Open the submission build at https://webmcp.mentria.ai/tools/decision-wheel/
-   (or the live site, https://mentria.ai) with a WebMCP-capable agent and ask
-   it to "spin the wheel between chai and coffee".
+2. Open https://mentria.ai/tools/decision-wheel/ with a WebMCP-capable agent
+   and ask it to "spin the wheel between chai and coffee".
 3. Or ask the on-device agent the same thing at /tools/console/ — no cloud
    involved.
 

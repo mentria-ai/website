@@ -9,6 +9,7 @@ import { normalizePrim, buildStatic, buildStrips, buildLamps, buildYard, bounds 
 import { createActors } from './modern-actors.js';
 import { createGun } from './modern-gun.js';
 import { buildDressing, addFloorJoints, addFormwork } from './modern-dress.js';
+import { buildFacility } from './modern-site.js';
 import { createMotion, GFX_ENHANCED } from './fx.js';
 
 const LOOK_BASE = {
@@ -116,6 +117,7 @@ export function createRenderer(canvas){
   let world = null;
   let worldGroup = null;
   let strips = null;
+  let site = null;
   let lamps = [];
   let time = 0;
   let qScale = 1;
@@ -151,6 +153,7 @@ export function createRenderer(canvas){
     }
     if (env){ try { env.dispose(); } catch (_) {} env = null; }
     strips = null;
+    site = null;
     lamps = [];
     if (particles && particles.clear) particles.clear();
   }
@@ -198,6 +201,8 @@ export function createRenderer(canvas){
     const lampProps = (Array.isArray(def.props) ? def.props : []).filter((pr) => pr && pr.type === 'lamp' && pr.pos).map((pr) => ({ pos: new THREE.Vector3(pr.pos[0], pr.pos[1], pr.pos[2]) }));
     const dress = buildDressing(prims, b, lampProps);
     worldGroup.add(dress.group);
+    site = buildFacility(b, { beaconSpots: dress.beaconSpots });
+    worldGroup.add(site.group);
     const lampSet = buildLamps(def.props, prims, dress.gantryHeight);
     worldGroup.add(lampSet.group);
     lamps = [];
@@ -289,6 +294,7 @@ export function createRenderer(canvas){
     }
     if (env && env.update) env.update(camera, step);
     if (strips) strips.material.uniforms.uTime.value = time;
+    if (site) site.update(time);
     placeLights();
     actors.update(sc, camera, time, step);
     if (particles && particles.update) particles.update(step, camera);

@@ -255,6 +255,12 @@ export function buildDressing(prims, bounds, lamps){
   const c0 = longZ ? bounds.min[0] - 1.2 : bounds.min[2] - 1.2;
   const c1 = longZ ? bounds.max[0] + 1.2 : bounds.max[2] + 1.2;
   const span = c1 - c0;
+  const beaconSpots = [];
+  placed.forEach((a, gi) => {
+    if (gi % 2 === 0){
+      for (const end of [c0, c1]) beaconSpots.push(longZ ? [end, H + 0.72, a] : [a, H + 0.72, end]);
+    }
+  });
   for (const a of placed){
     for (const dy of [0, 0.62]){
       if (longZ) put(trussList, (c0 + c1) / 2, H + dy, a, span, 0.09, 0.09);
@@ -276,7 +282,7 @@ export function buildDressing(prims, bounds, lamps){
   }
   const truss = inst(trussList, trussMat, true);
   if (truss) truss.name = 'ph-gantries';
-  return { group, gantryHeight: H };
+  return { group, gantryHeight: H, beaconSpots };
 }
 
 function mergeGeometries(list){

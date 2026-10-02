@@ -271,7 +271,7 @@ export const COURSES = [
     id: 'freestyle',
     nameKey: 'tool.fpv-drone.course.freestyle',
     kind: 'freestyle',
-    env: {preset: 'day', terrain: {shape: 'valley', seed: 3, size: 1800, height: 70, flatten: [{x: 0, z: 100, radius: 120, height: 0, falloff: 60}, {x: 0, z: 380, radius: 8, height: -0.9, falloff: 10}]}, backdrop: 'mountains'},
+    env: {preset: 'day', terrain: {shape: 'valley', seed: 3, size: 1800, height: 70, flatten: [{x: 0, z: 100, radius: 120, height: 0, falloff: 60}, {x: 0, z: 380, radius: 8, height: -0.9, falloff: 10}]}, waterLevel: -1.5, backdrop: 'mountains'},
     start: {pos: [0, -0.86, 380], yaw: 0},
     gates: [
       {pos: [0, 6.3, 300], yaw: 0, w: 3.2, h: 2.8, type: 'square'},

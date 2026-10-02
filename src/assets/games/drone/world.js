@@ -347,6 +347,8 @@ export async function buildWorld(course, opts = {}) {
         biome: BIOME_BY_COURSE[course.id] || 'meadow',
         sunDirection: env.lightDirection || env.sunDirection,
         cloudShadows: env.cloudShadows,
+        waterLevel: typeof course.env.waterLevel === 'number' ? course.env.waterLevel : undefined,
+        waterCalm: true,
         scene
       });
       if (terrain && terrain.mesh && !terrain.mesh.parent) scene.add(terrain.mesh);

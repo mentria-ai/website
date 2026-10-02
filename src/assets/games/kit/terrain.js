@@ -519,7 +519,7 @@ export function createTerrain(opts = {}) {
       roughness: 0.07,
       metalness: 0.0,
       normalMap: waterNormal,
-      normalScale: new THREE.Vector2(0.62, 0.62),
+      normalScale: new THREE.Vector2(opts.waterCalm ? 0.32 : 0.62, opts.waterCalm ? 0.32 : 0.62),
       transparent: true,
       opacity: 0.92,
       envMapIntensity: 1.0,
@@ -531,6 +531,7 @@ export function createTerrain(opts = {}) {
       kwDepthTex: { value: depthTex },
       kwDepthGrid: { value: new THREE.Vector3(half, cell, verts) },
       kwFoamLight: { value: opts.foamLight ?? 1 },
+      kwFoamAmt: { value: opts.waterCalm ? 0 : 1 },
     };
     waterMaterial.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, waterUniforms);
@@ -538,7 +539,7 @@ export function createTerrain(opts = {}) {
         .replace('#include <common>', '#include <common>\nvarying vec3 vKwWaterWorld;')
         .replace('#include <begin_vertex>', '#include <begin_vertex>\nvKwWaterWorld = (modelMatrix * vec4(position, 1.0)).xyz;');
       shader.fragmentShader = shader.fragmentShader
-        .replace('#include <common>', '#include <common>\nuniform float kwTime;\nuniform vec3 kwShallow;\nuniform sampler2D kwDepthTex;\nuniform vec3 kwDepthGrid;\nuniform float kwFoamLight;\nvarying vec3 vKwWaterWorld;')
+        .replace('#include <common>', '#include <common>\nuniform float kwTime;\nuniform vec3 kwShallow;\nuniform sampler2D kwDepthTex;\nuniform vec3 kwDepthGrid;\nuniform float kwFoamLight;\nuniform float kwFoamAmt;\nvarying vec3 vKwWaterWorld;')
         .replace('#include <normal_fragment_maps>', `
           vec2 kwUvA = vKwWaterWorld.xz * 0.045 + vec2(kwTime * 0.012, kwTime * 0.007);
           vec2 kwUvB = vKwWaterWorld.xz * 0.11 + vec2(-kwTime * 0.017, kwTime * 0.013);
@@ -562,7 +563,7 @@ export function createTerrain(opts = {}) {
           float kwLace = texture2D(normalMap, vKwWaterWorld.xz * 0.21 + vec2(kwTime * 0.02, 0.0)).x;
           float kwFoam = (1.0 - smoothstep(0.05, 0.45, kwDepth)) * (0.75 + 0.25 * kwLace);
           kwFoam += smoothstep(0.72, 0.96, kwBreak) * (1.0 - smoothstep(0.25, 1.6, kwDepth)) * smoothstep(0.35, 0.65, kwLace) * 0.9;
-          kwFoam = clamp(kwFoam, 0.0, 1.0) * step(0.02, kwDepth);
+          kwFoam = clamp(kwFoam, 0.0, 1.0) * step(0.02, kwDepth) * kwFoamAmt;
           vec3 kwDeep = vec3(0.035, 0.15, 0.25) * kwFoamLight;
           outgoingLight = mix(kwDeep, outgoingLight * vec3(0.62, 0.8, 0.97), 0.24 + 0.3 * kwFres);
           outgoingLight = mix(outgoingLight, vec3(0.8, 0.85, 0.87) * kwFoamLight, kwFoam * 0.85);

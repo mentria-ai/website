@@ -37,6 +37,7 @@ export default {
       { type: 'box', min: [-21, 0, -58], max: [-18, 1.05, -55], mat: 'metal' },
       { type: 'box', min: [18, 0, -40], max: [21, 1.05, -37], mat: 'metal' }
     ],
+    mood: { preset: 'day', backdrop: 'forest-hills' },
     sun: { dir: [-0.52, -0.4, -0.755], color: [0.82, 0.88, 1], intensity: 2.6 },
     ambient: [0.1, 0.14, 0.2],
     fog: { color: [0.12, 0.16, 0.24], density: 0.006, heightFalloff: 0.09, heightRef: 0 },

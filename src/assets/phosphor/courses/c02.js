@@ -43,6 +43,7 @@ export default {
       { type: 'box', min: [-21, 0, -50], max: [-18, 1.05, -47], mat: 'concrete' },
       { type: 'box', min: [-12, 0, -10], max: [-9.6, 1.2, -7.6], mat: 'concrete' }
     ],
+    mood: { preset: 'golden', backdrop: 'desert-mesas' },
     sun: { dir: [0.62, -0.26, -0.74], color: [1, 0.68, 0.42], intensity: 3 },
     ambient: [0.08, 0.11, 0.17],
     fog: { color: [0.15, 0.18, 0.27], density: 0.014, heightFalloff: 0.1, heightRef: 0 },

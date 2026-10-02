@@ -39,6 +39,7 @@ export default {
       { type: 'box', min: [9.5, 0, -34], max: [12.5, 2.4, -31], mat: 'concrete' },
       { type: 'box', min: [2.4, 0, -16], max: [4.4, 0.9, -14], mat: 'metal' }
     ],
+    mood: { preset: 'golden', backdrop: 'mountains' },
     sun: { dir: [-0.281, -0.301, -0.912], color: [1, 0.73, 0.46], intensity: 3.3 },
     ambient: [0.09, 0.12, 0.17],
     fog: { color: [0.17, 0.2, 0.27], density: 0.011, heightFalloff: 0.12, heightRef: 0 },

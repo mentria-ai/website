@@ -255,6 +255,12 @@ export function buildDressing(prims, bounds, lamps){
   const c0 = longZ ? bounds.min[0] - 1.2 : bounds.min[2] - 1.2;
   const c1 = longZ ? bounds.max[0] + 1.2 : bounds.max[2] + 1.2;
   const span = c1 - c0;
+  const beaconSpots = [];
+  placed.forEach((a, gi) => {
+    if (gi % 2 === 0){
+      for (const end of [c0, c1]) beaconSpots.push(longZ ? [end, H + 0.72, a] : [a, H + 0.72, end]);
+    }
+  });
   for (const a of placed){
     for (const dy of [0, 0.62]){
       if (longZ) put(trussList, (c0 + c1) / 2, H + dy, a, span, 0.09, 0.09);
@@ -276,7 +282,7 @@ export function buildDressing(prims, bounds, lamps){
   }
   const truss = inst(trussList, trussMat, true);
   if (truss) truss.name = 'ph-gantries';
-  return { group, gantryHeight: H };
+  return { group, gantryHeight: H, beaconSpots };
 }
 
 function mergeGeometries(list){
@@ -305,11 +311,12 @@ function mergeGeometries(list){
   return out;
 }
 
-export function addFloorJoints(material, spacing){
+export function addFloorJoints(material, spacing, wet){
   const S = (spacing || 4).toFixed(1);
+  const W = Math.max(0, Math.min(1, wet || 0)).toFixed(2);
   const prev = material.onBeforeCompile;
   const prevKey = material.customProgramCacheKey ? material.customProgramCacheKey.bind(material) : null;
-  material.customProgramCacheKey = () => (prevKey ? prevKey() : '') + '|joints' + S;
+  material.customProgramCacheKey = () => (prevKey ? prevKey() : '') + '|joints' + S + '|wet' + W;
   material.onBeforeCompile = (shader, renderer) => {
     if (typeof prev === 'function') prev(shader, renderer);
     shader.vertexShader = shader.vertexShader
@@ -327,11 +334,24 @@ export function addFloorJoints(material, spacing){
   float line = max(lx, lz) * fade;
   float h = fract(sin(dot(cell, vec2(127.1, 311.7))) * 43758.5453);
   diffuseColor.rgb *= mix(0.92 + 0.12 * h, 0.55, line);
+  vec2 wp = vJointPos.xz * 0.11;
+  vec2 wi = floor(wp);
+  vec2 wf = fract(wp);
+  wf = wf * wf * (3.0 - 2.0 * wf);
+  float wa = fract(sin(dot(wi, vec2(12.9898, 78.233))) * 43758.5453);
+  float wb = fract(sin(dot(wi + vec2(1.0, 0.0), vec2(12.9898, 78.233))) * 43758.5453);
+  float wc = fract(sin(dot(wi + vec2(0.0, 1.0), vec2(12.9898, 78.233))) * 43758.5453);
+  float wd = fract(sin(dot(wi + vec2(1.0, 1.0), vec2(12.9898, 78.233))) * 43758.5453);
+  float wn = mix(mix(wa, wb, wf.x), mix(wc, wd, wf.x), wf.y);
+  phWet = ${W} * smoothstep(0.55, 0.68, wn + line * 0.25);
+  diffuseColor.rgb *= 1.0 - phWet * 0.45;
 }
 #include <alphamap_fragment>`;
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vJointPos;')
-      .replace('#include <alphamap_fragment>', joint);
+      .replace('void main() {', 'void main() {\n  float phWet = 0.0;')
+      .replace('#include <alphamap_fragment>', joint)
+      .replace('#include <normal_fragment_begin>', 'roughnessFactor = mix(roughnessFactor, 0.04, phWet);\n#include <normal_fragment_begin>');
   };
   material.needsUpdate = true;
 }

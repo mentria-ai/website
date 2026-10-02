@@ -55,7 +55,7 @@ export default {
       { type: 'box', min: [-26, 0, -40], max: [-23, 1.4, -37], mat: 'concrete' },
       { type: 'box', min: [-10, 0, -22], max: [-7, 1.05, -19], mat: 'concrete' }
     ],
-    mood: { preset: 'sunset', backdrop: 'city-night' },
+    mood: { preset: 'sunset', backdrop: 'city-night', wet: 1 },
     sun: { dir: [-0.36, -0.155, -0.92], color: [1, 0.52, 0.26], intensity: 2.6 },
     ambient: [0.08, 0.07, 0.11],
     fog: { color: [0.19, 0.13, 0.14], density: 0.018, heightFalloff: 0.13, heightRef: 0 },

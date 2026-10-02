@@ -502,27 +502,43 @@ export function createTerrain(opts = {}) {
   let water = null;
   let waterMaterial = null;
   let waterNormal = null;
+  let depthTex = null;
   if (opts.waterLevel != null) {
     waterNormal = makeWaterNormalTexture(256);
+    const depthData = new Uint8Array(verts * verts);
+    for (let i = 0; i < depthData.length; i++) depthData[i] = Math.round(clamp((opts.waterLevel - heights[i]) / 6, 0, 1) * 255);
+    depthTex = new THREE.DataTexture(depthData, verts, verts, THREE.RedFormat, THREE.UnsignedByteType);
+    depthTex.magFilter = THREE.LinearFilter;
+    depthTex.minFilter = THREE.LinearFilter;
+    depthTex.wrapS = THREE.ClampToEdgeWrapping;
+    depthTex.wrapT = THREE.ClampToEdgeWrapping;
+    depthTex.generateMipmaps = false;
+    depthTex.needsUpdate = true;
     waterMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color().setRGB(0.012, 0.05, 0.07),
-      roughness: 0.06,
+      color: new THREE.Color().setRGB(0.008, 0.045, 0.085),
+      roughness: 0.07,
       metalness: 0.0,
       normalMap: waterNormal,
-      normalScale: new THREE.Vector2(0.35, 0.35),
+      normalScale: new THREE.Vector2(0.62, 0.62),
       transparent: true,
       opacity: 0.92,
-      envMapIntensity: 1.35,
+      envMapIntensity: 1.0,
     });
     waterMaterial.name = 'kw-water';
-    const waterUniforms = { kwTime: { value: 0 }, kwShallow: { value: new THREE.Vector3(0.05, 0.16, 0.16) } };
+    const waterUniforms = {
+      kwTime: { value: 0 },
+      kwShallow: { value: new THREE.Vector3(0.05, 0.16, 0.16) },
+      kwDepthTex: { value: depthTex },
+      kwDepthGrid: { value: new THREE.Vector3(half, cell, verts) },
+      kwFoamLight: { value: opts.foamLight ?? 1 },
+    };
     waterMaterial.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, waterUniforms);
       shader.vertexShader = shader.vertexShader
         .replace('#include <common>', '#include <common>\nvarying vec3 vKwWaterWorld;')
         .replace('#include <begin_vertex>', '#include <begin_vertex>\nvKwWaterWorld = (modelMatrix * vec4(position, 1.0)).xyz;');
       shader.fragmentShader = shader.fragmentShader
-        .replace('#include <common>', '#include <common>\nuniform float kwTime;\nuniform vec3 kwShallow;\nvarying vec3 vKwWaterWorld;')
+        .replace('#include <common>', '#include <common>\nuniform float kwTime;\nuniform vec3 kwShallow;\nuniform sampler2D kwDepthTex;\nuniform vec3 kwDepthGrid;\nuniform float kwFoamLight;\nvarying vec3 vKwWaterWorld;')
         .replace('#include <normal_fragment_maps>', `
           vec2 kwUvA = vKwWaterWorld.xz * 0.045 + vec2(kwTime * 0.012, kwTime * 0.007);
           vec2 kwUvB = vKwWaterWorld.xz * 0.11 + vec2(-kwTime * 0.017, kwTime * 0.013);
@@ -538,6 +554,19 @@ export function createTerrain(opts = {}) {
           float kwFres = pow(1.0 - clamp(-kwViewDirW.y, 0.0, 1.0), 4.0);
           outgoingLight = mix(outgoingLight + kwShallow * 0.05 * (1.0 - kwFres), outgoingLight, kwFres);
           diffuseColor.a = mix(0.82, 1.0, kwFres);
+          float kwDepth = texture2D(kwDepthTex, ((vKwWaterWorld.xz + kwDepthGrid.x) / kwDepthGrid.y + 0.5) / kwDepthGrid.z).r * 6.0;
+          float kwShallowW = 1.0 - smoothstep(0.0, 4.5, kwDepth);
+          outgoingLight += vec3(0.012, 0.07, 0.065) * kwShallowW * (1.0 - kwFres * 0.7) * kwFoamLight;
+          float kwSwell = sin(vKwWaterWorld.x * 0.19 + kwTime * 0.6) * 0.5 + sin(vKwWaterWorld.z * 0.23 - kwTime * 0.45) * 0.5;
+          float kwBreak = sin(kwDepth * 4.2 - kwTime * 1.7 + kwSwell * 1.8) * 0.5 + 0.5;
+          float kwLace = texture2D(normalMap, vKwWaterWorld.xz * 0.21 + vec2(kwTime * 0.02, 0.0)).x;
+          float kwFoam = (1.0 - smoothstep(0.05, 0.45, kwDepth)) * (0.75 + 0.25 * kwLace);
+          kwFoam += smoothstep(0.72, 0.96, kwBreak) * (1.0 - smoothstep(0.25, 1.6, kwDepth)) * smoothstep(0.35, 0.65, kwLace) * 0.9;
+          kwFoam = clamp(kwFoam, 0.0, 1.0) * step(0.02, kwDepth);
+          vec3 kwDeep = vec3(0.035, 0.15, 0.25) * kwFoamLight;
+          outgoingLight = mix(kwDeep, outgoingLight * vec3(0.62, 0.8, 0.97), 0.24 + 0.3 * kwFres);
+          outgoingLight = mix(outgoingLight, vec3(0.8, 0.85, 0.87) * kwFoamLight, kwFoam * 0.85);
+          diffuseColor.a = max(diffuseColor.a, kwFoam);
           #include <opaque_fragment>
         `);
     };
@@ -548,7 +577,7 @@ export function createTerrain(opts = {}) {
     water.name = 'kw-water';
     water.position.y = opts.waterLevel;
     water.receiveShadow = !!quality.shadows;
-    water.renderOrder = 1;
+    water.renderOrder = -1;
     water.userData.uniforms = waterUniforms;
     group.add(water);
   }
@@ -578,6 +607,7 @@ export function createTerrain(opts = {}) {
     material.dispose();
     shapeTex.dispose();
     if (water) { water.geometry.dispose(); waterMaterial.dispose(); }
+    if (depthTex) depthTex.dispose();
     if (waterNormal) waterNormal.dispose();
   }
 

@@ -126,6 +126,18 @@ module.exports = function(eleventyConfig) {
     return str == null ? key : str;
   });
 
+  eleventyConfig.addFilter("tsub", function (prefix) {
+    const lang = (this.ctx && this.ctx.lang) || DEFAULT_LANG;
+    const merge = (a, b) => {
+      const out = Object.assign({}, a);
+      for (const k of Object.keys(b || {})) {
+        out[k] = b[k] && typeof b[k] === "object" && out[k] && typeof out[k] === "object" ? merge(out[k], b[k]) : b[k];
+      }
+      return out;
+    };
+    return merge(lookupKey(dictionaries[DEFAULT_LANG], prefix) || {}, lookupKey(dictionaries[lang] || {}, prefix) || {});
+  });
+
   eleventyConfig.addFilter("hasKey", function (key) {
     const lang = (this.ctx && this.ctx.lang) || DEFAULT_LANG;
     return tResolve(lang, key) != null;

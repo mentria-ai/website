@@ -12,8 +12,10 @@
     <link rel="stylesheet" href="/assets/css/style.css?v={{ buildHash }}">
     <link rel="stylesheet" href="/assets/css/terminal.css?v={{ buildHash }}">
     <script src="/assets/js/mentria-store.js?v={{ buildHash }}"></script>
+    {%- if not appPlain %}
     <script src="/assets/js/mentria-gamepad.js?v={{ buildHash }}" defer></script>
     <script src="/assets/js/mentria-input-help.js?v={{ buildHash }}" defer></script>
+    {%- endif %}
     <style>
       html.ext-app, html.ext-app body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #04060a; }
       html.ext-app body::before, html.ext-app body::after { content: none; display: none; }

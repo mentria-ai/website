@@ -74,11 +74,13 @@ const COPY = {
   galInstalled:  {{ ("tool.ext_gallery.installed"   | t) | dump | safe }},
   galUpdate:    {{ ("tool.ext_gallery.btn_update" | t) | dump | safe }},
   galOpen:       {{ ("tool.ext_gallery.btn_open"    | t) | dump | safe }},
-  galErrLoad:    {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }}
+  galErrLoad:    {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }},
+  galInstalling: {{ ("store.installing" | t) | dump | safe }},
+  galFailed:     {{ ("store.install_failed" | t) | dump | safe }}
 };
 const CATALOG = [
   {%- for e in extensions %}
-  { id: {{ e.id | dump | safe }}, page: true, desc: {{ (("tool.ext_gallery.desc." + e.id) | t) | dump | safe }} }{% if not loop.last %},{% endif %}
+  { id: {{ e.id | dump | safe }}, page: true, desc: {{ (("tool.ext_gallery.desc." + e.id) | t) | dump | safe }}, size: {{ e.size | dump | safe }}{% if e.kind == 'app' %}, app: {{ e.app | dump | safe }}, manifest: {{ e.manifest | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
   {%- endfor %}
 ];
 const CATALOG_URL = 'https://mentria-ai.github.io/extensions/catalog.json';
@@ -166,7 +168,7 @@ function row(entry) {
   sub.textContent = 'v' + m.version + (m.author ? ' · ' + m.author : '');
   const perms = document.createElement('div');
   perms.className = 'xt__perms';
-  perms.textContent = (m.permissions || []).join(' · ') + '  (' + Math.round(entry.size / 1024) + ' KB)';
+  perms.textContent = (m.permissions || []).join(' · ') + (X.isApp(entry) ? '' : '  (' + Math.round(entry.size / 1024) + ' KB)');
   meta.appendChild(title); meta.appendChild(sub); meta.appendChild(perms);
   const actions = document.createElement('div');
   actions.className = 'xt__actions';
@@ -209,7 +211,8 @@ function row(entry) {
     if (!(await window.mentriaConfirm(fmt(COPY.confirmRemove, { name: m.name })))) return;
     X.remove(m.id); render();
   });
-  actions.append(toggle, open, exp, share, rem);
+  if (X.isApp(entry)) actions.append(toggle, open, rem);
+  else actions.append(toggle, open, exp, share, rem);
   div.append(icon, meta, actions);
   return div;
 }
@@ -356,12 +359,30 @@ function galActions(entry, card) {
 async function galInstall(entry, card, b) {
   galStatus(card, '');
   b.disabled = true;
+  if (entry.app) {
+    let created = false;
+    try {
+      const pkg = await X.fetchPackage(entry.id);
+      X.installApp(pkg.manifest);
+      created = true;
+      await X.downloadFiles(entry.id, pkg.files, [PREFIX + pkg.app], (f) => galStatus(card, COPY.galInstalling.replace('{pct}', String(Math.round(f * 100)))));
+      galStatus(card, '');
+      render();
+      announceInstall(X.getEntry(entry.id));
+    } catch (e) {
+      if (created) X.remove(entry.id);
+      b.disabled = false;
+      galStatus(card, COPY.galFailed);
+    }
+    return;
+  }
   try {
     const html = entry.html || await fetchSource(entry.id);
     const result = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
     if (!result) { b.disabled = false; return; }
     render();
     announceInstall(result);
+    if (entry.page) X.fetchPackage(entry.id).then((pkg) => X.downloadFiles(entry.id, pkg.files, [PREFIX + '/extensions/' + entry.id + '/'])).catch(() => {});
   } catch (e) {
     b.disabled = false;
     galStatus(card, e.message);
@@ -370,6 +391,31 @@ async function galInstall(entry, card, b) {
 
 async function galLoad(entry, card) {
   const p = card._parts;
+  if (entry.app && entry.manifest) {
+    const am = entry.manifest;
+    entry.ready = true;
+    entry.version = am.version;
+    entry.name = am.name;
+    p.icon.textContent = '';
+    if (/^data:image\//.test(am.icon || '')) {
+      const img = document.createElement('img');
+      img.src = am.icon;
+      img.alt = '';
+      img.width = 32;
+      img.height = 32;
+      p.icon.appendChild(img);
+    } else {
+      p.icon.textContent = am.icon || '🧩';
+    }
+    p.name.textContent = am.name;
+    p.badges.innerHTML = '';
+    p.badges.append(galChip('v' + am.version));
+    if (am.author) p.badges.append(galChip(am.author));
+    (am.permissions || []).forEach((perm) => p.badges.append(galChip(perm, 'perm')));
+    if (entry.size) p.badges.append(galChip(entry.size));
+    galActions(entry, card);
+    return;
+  }
   let html;
   try {
     html = await fetchSource(entry.id);

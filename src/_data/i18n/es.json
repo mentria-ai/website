@@ -1760,7 +1760,9 @@
         "image-gen": "Genera imágenes desde un texto en el nodo de render compartido de Mentria. Gratis y sin configuración: describe la escena y espera tu turno.",
         "story-studio": "Crea tus propios decks de historias: genera imágenes en el nodo de render de Mentria o importa las tuyas, escribe subtítulos y une las diapositivas en una historia deslizable.",
         "meal-planner": "Planifica las comidas de la semana, obtén una lista de la compra agrupada por pasillos y aprovecha lo que tienes en la despensa. Incluye 30 recetas para empezar y estimaciones nutricionales con datos del USDA.",
-        "pregnancy-check": "Información y el momento de hacer la prueba, no un diagnóstico: cuándo es fiable una prueba de embarazo casera, cómo planificar un embarazo y tu fecha de parto, semanas y citas. Todo se queda en este dispositivo."
+        "pregnancy-check": "Información y el momento de hacer la prueba, no un diagnóstico: cuándo es fiable una prueba de embarazo casera, cómo planificar un embarazo y tu fecha de parto, semanas y citas. Todo se queda en este dispositivo.",
+        "fpv-drone": "Pilota un dron de carreras entre puertas luminosas sobre colinas, un patio de contenedores y un cañón del desierto. Vuelo acrobático o autonivelado, medallas, carreras contra fantasmas y un mapa de vuelo libre. Funciona con pantalla táctil, mando o teclado.",
+        "nitro-racer": "Carreras arcade callejeras contra cinco rivales: derrapa para llenar el nitro, salta las rampas y consigue medallas en un circuito urbano de neón, una autopista costera y un cañón del desierto. Funciona con pantalla táctil, inclinación, mando o teclado."
       }
     },
     "bubble-level": {
@@ -3687,8 +3689,15 @@
   },
   "store": {
     "kind": "Extensión",
-    "lede": "Pequeñas apps que puedes añadir a Mentria. Cada una es un único archivo que se instala con un toque, tiene su propio icono en tu menú de herramientas y se puede quitar cuando quieras.",
+    "lede": "Pequeñas apps que puedes añadir a Mentria. Prueba cada una en su propia página, instálala con un toque para usarla sin conexión y quítala cuando quieras.",
     "add": "Añadir a Mentria",
+    "install": "Instalar",
+    "installing": "Instalando… {pct} %",
+    "installed_offline": "Instalada · funciona sin conexión",
+    "remove": "Quitar",
+    "remove_confirm": "¿Quitar {name}? También se borran sus datos guardados en este dispositivo.",
+    "install_failed": "No se pudo descargar todo. Revisa tu conexión e inténtalo de nuevo.",
+    "offline_needs_install": "Estás sin conexión. Instala esta extensión mientras tengas conexión para usarla sin internet.",
     "by": "Por {author}",
     "access_title": "Qué puede usar",
     "access_none": "Solo su propia pantalla. No pide ningún acceso adicional.",

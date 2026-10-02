@@ -298,7 +298,7 @@ export function createInput(opts = {}) {
 
   let method = coarsePointer() ? 'touch' : 'keyboard';
   let disposed = false;
-  let engaged = false;
+  let engaged = window.self !== window.top;
   let lastUpdate = -1;
 
   const keys = Object.create(null);

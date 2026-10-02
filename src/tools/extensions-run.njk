@@ -13,16 +13,18 @@ eleventyComputed:
 {% set terminalTitle = "…" %}
 {% set terminalBackHref = locale.pathPrefix + "/tools/extensions/" %}
 {% include "terminal-frame-open.njk" %}
-<section class="xr" data-prefix="{{ locale.pathPrefix }}" data-blocked="{{ 'tool.extensions.run_blocked' | t }}">
+<section class="xr" data-prefix="{{ locale.pathPrefix }}" data-blocked="{{ 'tool.extensions.run_blocked' | t }}" data-install-quiet>
   <p class="xr__error" id="xr-error" hidden></p>
   <p class="xr__missing" id="xr-missing" hidden>{{ "tool.extensions.run_not_installed" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
   <p class="xr__missing" id="xr-disabled" hidden>{{ "tool.extensions.run_disabled" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
-  <iframe class="xr__frame" id="xr-frame" allow="bluetooth; usb; serial; camera; microphone"></iframe>
+  <iframe class="xr__frame" id="xr-frame" allow="bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay" allowfullscreen></iframe>
 </section>
 {% include "terminal-frame-close.njk" %}
 
 <script type="module">
 const X = await import('/assets/js/mentria-extensions.js');
+const H = await import('/assets/js/mentria-ext-host.js');
+const root = document.querySelector('.xr');
 const params = new URLSearchParams(location.search);
 const id = params.get('id') || '';
 const entry = X.getEntry(id);
@@ -34,8 +36,9 @@ function parseHashArgs() {
   return h.get('cmd') ? { cmd: h.get('cmd'), args: h.get('args') || '' } : null;
 }
 
-const source = entry && entry.enabled ? X.getSource(id) : null;
-if (!source) {
+const app = entry && X.isApp(entry);
+const source = entry && entry.enabled && !app ? X.getSource(id) : null;
+if (!entry || !entry.enabled || (!app && !source)) {
   document.getElementById(entry && !entry.enabled ? 'xr-disabled' : 'xr-missing').hidden = false;
   frame.remove();
 } else {
@@ -43,66 +46,33 @@ if (!source) {
   const filename = document.querySelector('.terminal-frame__filename');
   if (filename) filename.textContent = m.icon && !/^data:/.test(m.icon) ? m.icon + ' ' + m.name : m.name;
   document.title = m.name + ' · Mentria';
-  const cs = getComputedStyle(document.documentElement);
-  const theme = Object.freeze({
-    accent: cs.getPropertyValue('--accent').trim() || '#6ef3c5',
-    bg: cs.getPropertyValue('--term-bg').trim() || '#0b0e11',
-    fg: cs.getPropertyValue('--term-fg').trim() || '#e6edf3',
-    muted: cs.getPropertyValue('--term-muted').trim(),
-    fontMono: cs.getPropertyValue('--font-mono').trim()
-  });
-  window.__mentriaExtHost = Object.freeze({
-    manifest: Object.freeze(JSON.parse(JSON.stringify(m))),
-    storage: X.dataApiFor(id),
-    db: X.dbApiFor(id),
-    get locale() { return document.documentElement.lang || 'en'; },
-    onLocaleChange: (fn) => {
-      if (typeof fn !== 'function') return;
-      document.addEventListener('mentria:localechange', (e) => { try { fn((e.detail && e.detail.code) || document.documentElement.lang || 'en'); } catch (_) {} });
-    },
-    theme,
+  if (app) root.classList.add('xr--app');
+  H.mountExtension(frame, {
+    manifest: m,
+    source,
+    prefix: root.dataset.prefix || '',
     args: parseHashArgs(),
-    notify: (msg) => {
-      const t = document.createElement('div');
-      t.className = 'xr__toast';
-      t.textContent = String(msg).slice(0, 120);
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 2200);
-    },
-    close: () => { location.href = (document.querySelector('.xr').dataset.prefix || '') + '/'; }
+    blockedTemplate: root.dataset.blocked,
+    onError: (msg) => { errEl.textContent = msg; errEl.hidden = false; },
+    onClose: () => { location.href = (root.dataset.prefix || '') + '/'; }
   });
-  window.__mentriaExtReportError = (msg) => {
-    errEl.textContent = m.name + ': ' + msg;
-    errEl.hidden = false;
-  };
-  const blockedHosts = new Set();
-  window.__mentriaExtReportBlocked = (uri) => {
-    let host = String(uri || '');
-    try { host = new URL(host).host || host; } catch (_) {}
-    if (!host || blockedHosts.has(host)) return;
-    blockedHosts.add(host);
-    const tpl = document.querySelector('.xr').dataset.blocked || '{name}: {host}';
-    errEl.textContent = Array.from(blockedHosts).map((h) => tpl.replace('{name}', m.name).replace('{host}', h)).join(' ');
-    errEl.hidden = false;
-  };
-  const bootstrap = '<scr' + 'ipt>' +
-    'window.mentria = window.parent.__mentriaExtHost;' +
-    'window.addEventListener("error", (e) => { window.parent.__mentriaExtReportError(e.message || "runtime error"); });' +
-    'window.addEventListener("unhandledrejection", (e) => { window.parent.__mentriaExtReportError(String(e.reason || "unhandled rejection")); });' +
-    'document.addEventListener("securitypolicyviolation", (e) => { if (/^(https?|wss?):/.test(e.blockedURI || "")) window.parent.__mentriaExtReportBlocked(e.blockedURI); });' +
-    '</scr' + 'ipt>';
-  frame.srcdoc = bootstrap + source;
 }
 </script>
 
 <style>
 .xr { display: flex; flex-direction: column; height: min(820px, 78vh); }
 .xr__frame { flex: 1; width: 100%; border: 0; min-height: 0; background: transparent; }
+.xr--app { height: min(820px, 82vh); }
 @media (max-width: 480px) {
   .xr { height: min(600px, 70vh); }
 }
 .xr__error, .xr__missing { font-family: var(--font-mono); font-size: 0.8rem; color: var(--syn-pink, #f472b6); padding: 0.6rem 0.8rem; margin: 0; }
 .xr__missing a { color: var(--accent, #6ef3c5); }
 .xr__error[hidden], .xr__missing[hidden] { display: none; }
-.xr__toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--accent, #6ef3c5); color: #0b0e11; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; padding: 8px 16px; border-radius: 16px; z-index: 50; }
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  .terminal-frame:has(.xr--app) { position: fixed; inset: 0; z-index: 9000; margin: 0; max-width: none; border: 0; border-radius: 0; }
+  .terminal-frame:has(.xr--app) .terminal-frame__titlebar { display: none; }
+  .terminal-frame:has(.xr--app) .terminal-frame__body { padding: 0; height: 100%; }
+  .xr.xr--app { height: 100vh; height: 100svh; }
+}
 </style>

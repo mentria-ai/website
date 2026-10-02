@@ -1760,7 +1760,9 @@
         "image-gen": "Gere imagens a partir de um texto no nó de render compartilhado da Mentria. Grátis e sem configuração: descreva a cena e aguarde sua vez.",
         "story-studio": "Monte seus próprios decks de histórias: gere imagens no nó de render da Mentria ou importe as suas, escreva legendas e junte os slides em uma história deslizável.",
         "meal-planner": "Planeje as refeições da semana, receba uma lista de compras separada por seção e aproveite o que tem na despensa. Inclui 30 receitas para começar e estimativas nutricionais com dados do USDA.",
-        "pregnancy-check": "Informação e o momento certo do teste, não um diagnóstico: quando um teste de gravidez de farmácia é confiável, como planejar uma gravidez e sua data do parto, semanas e consultas. Tudo fica neste dispositivo."
+        "pregnancy-check": "Informação e o momento certo do teste, não um diagnóstico: quando um teste de gravidez de farmácia é confiável, como planejar uma gravidez e sua data do parto, semanas e consultas. Tudo fica neste dispositivo.",
+        "fpv-drone": "Pilote um drone de corrida por portais luminosos sobre colinas, um pátio de contêineres e um cânion no deserto. Voo acrobático ou autonivelado, medalhas, corridas contra fantasmas e um mapa de voo livre. Funciona com toque, controle ou teclado.",
+        "nitro-racer": "Corrida de rua arcade contra cinco rivais: drifte para encher o nitro, salte nas rampas e conquiste medalhas num circuito urbano neon, numa rodovia litorânea e num cânion no deserto. Funciona com toque, inclinação, controle ou teclado."
       }
     },
     "bubble-level": {
@@ -3687,8 +3689,15 @@
   },
   "store": {
     "kind": "Extensão",
-    "lede": "Pequenos apps que você pode adicionar ao Mentria. Cada um é um único arquivo que instala com um toque, ganha um atalho próprio no seu menu de ferramentas e pode ser removido quando quiser.",
+    "lede": "Pequenos apps que você pode adicionar ao Mentria. Teste cada um na própria página, instale com um toque para usar offline e remova quando quiser.",
     "add": "Adicionar ao Mentria",
+    "install": "Instalar",
+    "installing": "Instalando… {pct}%",
+    "installed_offline": "Instalada · funciona offline",
+    "remove": "Remover",
+    "remove_confirm": "Remover {name}? Os dados salvos neste aparelho também serão apagados.",
+    "install_failed": "Não foi possível baixar tudo. Verifique sua conexão e tente de novo.",
+    "offline_needs_install": "Você está offline. Instale esta extensão enquanto estiver online para usá-la sem conexão.",
     "by": "Por {author}",
     "access_title": "O que pode usar",
     "access_none": "Só a própria tela. Não pede nenhum acesso extra.",

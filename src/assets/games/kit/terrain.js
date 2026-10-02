@@ -25,7 +25,7 @@ export const TERRAIN_BIOMES = {
       rock: { tex: 'rock', tint: [1.0, 0.98, 0.95], scale: 11 },
       sand: { tex: 'sand', tint: [0.95, 0.92, 0.85], scale: 8 },
     },
-    rockSlope: 0.3, dirtAmount: 0.32, sandTop: -1000, snowLine: 1e9, macro: 0.32, macroTint: [0.92, 1.06, 0.78],
+    rockSlope: 0.3, dirtAmount: 0.32, sandTop: -1000, snowLine: 1e9, macro: 0.32, macroTint: [0.92, 1.06, 0.78], flowers: 1,
   },
   desert: {
     layers: {
@@ -61,7 +61,7 @@ export const TERRAIN_BIOMES = {
       rock: { tex: 'concrete', tint: [0.9, 0.9, 0.9], scale: 8 },
       sand: { tex: 'dirt', tint: [0.8, 0.78, 0.76], scale: 6 },
     },
-    rockSlope: 0.3, dirtAmount: 0.55, sandTop: -1000, snowLine: 1e9, macro: 0.2, macroTint: [0.95, 0.97, 0.9],
+    rockSlope: 0.3, dirtAmount: 0.55, sandTop: -1000, snowLine: 1e9, macro: 0.2, macroTint: [0.95, 0.97, 0.9], flowers: 0.5,
   },
   alpine: {
     layers: {
@@ -70,7 +70,7 @@ export const TERRAIN_BIOMES = {
       rock: { tex: 'rock', tint: [0.95, 0.96, 1.0], scale: 12 },
       sand: { tex: 'sand', tint: [0.9, 0.88, 0.84], scale: 8 },
     },
-    rockSlope: 0.26, dirtAmount: 0.3, sandTop: -1000, snowLine: 1e9, macro: 0.3, macroTint: [0.9, 1.05, 0.85],
+    rockSlope: 0.26, dirtAmount: 0.3, sandTop: -1000, snowLine: 1e9, macro: 0.3, macroTint: [0.9, 1.05, 0.85], flowers: 0.8,
   },
 };
 
@@ -92,6 +92,7 @@ uniform vec4 kwCloudShadow;
 uniform vec3 kwCloudWind;
 uniform sampler2D kwShapeTex;
 uniform vec3 kwShapeGrid;
+uniform float kwFlowers;
 varying vec3 vKwWorld;
 ${NO_TILE_GLSL}
 vec4 kwSampleLayer(sampler2D s, vec2 uv, float dist) {
@@ -156,7 +157,21 @@ const TERRAIN_SPLAT_MAIN = `
   if (kwWeights.x > 0.004) {
     vec3 kwG = kwSampleLayer(kwGrassMap, kwW.xz / kwScales.x, kwDist).rgb;
     kwG = mix(vec3(dot(kwG, vec3(0.2126, 0.7152, 0.0722))), kwG, kwLayerSat.x);
-    kwCol += kwG * kwGrassTint * kwWeights.x;
+    kwG *= kwGrassTint;
+    if (kwFlowers > 0.0 && kwDist < 50.0) {
+      vec2 kwFp = kwW.xz / 0.55;
+      vec2 kwFc = floor(kwFp);
+      float kwFh = fract(sin(dot(kwFc, vec2(41.3, 289.1))) * 43758.5453);
+      vec2 kwFo = vec2(fract(kwFh * 13.7), fract(kwFh * 71.3)) * 0.6 + 0.2;
+      float kwFr = 0.1 + 0.08 * fract(kwFh * 5.3);
+      float kwFd = length(fract(kwFp) - kwFo);
+      float kwPatch = smoothstep(0.46, 0.66, kwFbmTerrain(kwW.xz * 0.05 + 3.1));
+      float kwFm = (1.0 - smoothstep(kwFr * 0.55, kwFr, kwFd)) * step(1.0 - 0.5 * kwPatch * kwFlowers, kwFh) * (1.0 - smoothstep(26.0, 50.0, kwDist));
+      float kwPick = fract(kwFh * 31.7);
+      vec3 kwFcol = kwPick < 0.4 ? vec3(1.0, 0.86, 0.22) : kwPick < 0.7 ? vec3(0.96, 0.95, 0.9) : kwPick < 0.88 ? vec3(0.72, 0.5, 0.95) : vec3(1.0, 0.45, 0.4);
+      kwG = mix(kwG, mix(kwG, kwFcol * 0.72, 0.8), kwFm);
+    }
+    kwCol += kwG * kwWeights.x;
     kwRough += 0.96 * kwWeights.x;
   }
   if (kwWeights.y > 0.004) {
@@ -324,6 +339,7 @@ export function createTerrain(opts = {}) {
     kwCloudWind: { value: new THREE.Vector3(0.6, 0.25, 0) },
     kwShapeTex: { value: shapeTex },
     kwShapeGrid: { value: new THREE.Vector3(half, cell, verts) },
+    kwFlowers: { value: quality.name === 'low' ? 0 : (opts.flowers ?? biome.flowers ?? 0) },
   };
   const tintUniform = { grass: uniforms.kwGrassTint, dirt: uniforms.kwDirtTint, rock: uniforms.kwRockTint, sand: uniforms.kwSandTint };
   const satIndex = { grass: 'x', dirt: 'y', rock: 'z', sand: 'w' };

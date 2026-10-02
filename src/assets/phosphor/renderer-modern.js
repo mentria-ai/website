@@ -56,6 +56,9 @@ export function createRenderer(canvas){
   try { particles = KitFx.createParticles(scene, { quality, max: 2200 }); } catch (_) { particles = null; }
   const flashLight = new THREE.PointLight(0x9fffe0, 0, 9, 2);
   scene.add(flashLight);
+  const muzzleLight = quality === 'low' ? null : new THREE.PointLight(0xffb46a, 0, 10, 2);
+  if (muzzleLight) scene.add(muzzleLight);
+  const muzzleLocal = new THREE.Vector3(0.18, -0.12, -0.75);
   const actors = createActors(scene, { particles, flashLight });
   const gun = createGun();
 
@@ -300,6 +303,12 @@ export function createRenderer(canvas){
     if (particles && particles.update) particles.update(step, camera);
     const sunDir = env ? env.sunDirection : world.sunDirection;
     gun.update(sc.viewmodel, sc.muzzle, sunDir, env ? env.sunColor : null, camera, step);
+    if (muzzleLight){
+      const mz = Math.max(0, Math.min(1, sc.muzzle || 0));
+      muzzleLight.intensity = mz * mz * 22;
+      muzzleLight.position.copy(muzzleLocal);
+      camera.localToWorld(muzzleLight.position);
+    }
     if (post){
       post.render(step);
       if (!gunPass || !post.composer){

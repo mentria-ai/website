@@ -302,6 +302,12 @@ export function createRenderer(canvas){
     gun.update(sc.viewmodel, sc.muzzle, sunDir, env ? env.sunColor : null, camera, step);
     if (post){
       post.render(step);
+      if (!gunPass || !post.composer){
+        renderer.autoClear = false;
+        renderer.clearDepth();
+        renderer.render(gun.scene, gun.camera);
+        renderer.autoClear = true;
+      }
     } else {
       renderer.autoClear = true;
       renderer.render(scene, camera);

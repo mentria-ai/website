@@ -36,7 +36,7 @@ export function createHeightfield(opts = {}) {
       const d = Math.abs(x - canyonCenter(z));
       const wall = smoothstep(canyonWidth * 0.32, canyonWidth, d);
       const plateau = 0.72 + 0.28 * ridged2D(n1, u * 1.6, v * 1.6, 4);
-      const h = terrace(wall * plateau, 6, 0.18);
+      const h = terrace(wall * plateau, 6, 0.28);
       return height * h + 1.2 * fbm2D(n3, u * 14, v * 14, 3);
     }
     if (shape === 'valley') {

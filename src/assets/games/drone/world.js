@@ -335,7 +335,7 @@ export async function buildWorld(course, opts = {}) {
   disposers.push(() => env.dispose());
   await report(0.16, 'sky');
 
-  const segments = Math.max(192, Math.min(384, Math.round(hf.size / 4.7 / 32) * 32));
+  const segments = Math.max(192, Math.min(384, Math.round(hf.size / 4 / 32) * 32));
   let terrain = null;
   if (typeof KitTerrain.createTerrain === 'function') {
     try {

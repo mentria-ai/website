@@ -10,13 +10,22 @@ function wordsOf(list) {
 
 function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
+const CJK = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/;
+
+function minLen(name) { return CJK.test(name) ? 2 : 3; }
+
 function hasWord(text, word) {
   if (!word) return false;
+  if (CJK.test(word)) return text.toLowerCase().includes(word.toLowerCase());
   try { return new RegExp('(^|[^\\p{L}\\p{N}])' + escapeRe(word) + '($|[^\\p{L}\\p{N}])', 'iu').test(text); }
   catch (_) { return text.toLowerCase().includes(word.toLowerCase()); }
 }
 
 function stripWord(text, word) {
+  if (CJK.test(word)) {
+    const i = text.toLowerCase().indexOf(word.toLowerCase());
+    return i < 0 ? text : text.slice(0, i) + ' ' + text.slice(i + word.length);
+  }
   try { return text.replace(new RegExp('(^|[^\\p{L}\\p{N}])' + escapeRe(word) + '(?=$|[^\\p{L}\\p{N}])', 'iu'), '$1 '); }
   catch (_) { return text; }
 }
@@ -110,7 +119,7 @@ export function parseEntry(text, ctx) {
   for (const w of wordsOf(W.transfer)) if (hasWord(lower, w)) { out.transfer = true; rest = stripWord(rest, w); break; }
   const accounts = (ctx.accounts || []).slice().sort((a, b) => b.name.length - a.name.length);
   for (const a of accounts) {
-    if (a.name && a.name.length >= 3 && hasWord(rest, a.name)) {
+    if (a.name && a.name.length >= minLen(a.name) && hasWord(rest, a.name)) {
       if (!out.account) out.account = a.id;
       else if (!out.toAccount && a.id !== out.account) out.toAccount = a.id;
       rest = stripWord(rest, a.name);
@@ -118,12 +127,12 @@ export function parseEntry(text, ctx) {
   }
   const cats = (ctx.categories || []).slice().sort((a, b) => b.name.length - a.name.length);
   for (const c of cats) {
-    if (c.name && c.name.length >= 3 && hasWord(rest, c.name)) { out.category = c.id; if (c.kind === 'income') out.income = true; rest = stripWord(rest, c.name); break; }
+    if (c.name && c.name.length >= minLen(c.name) && hasWord(rest, c.name)) { out.category = c.id; if (c.kind === 'income') out.income = true; rest = stripWord(rest, c.name); break; }
   }
   for (const w of wordsOf(W.income).concat(wordsOf(W.filler))) rest = stripWord(rest, w);
   for (const a of amounts) rest = rest.replace(a.text, ' ');
   const payees = (ctx.payees || []).slice().sort((a, b) => b.length - a.length);
-  let payee = payees.find((p) => p.length >= 3 && hasWord(rest, p));
+  let payee = payees.find((p) => p.length >= minLen(p) && hasWord(rest, p));
   if (payee) rest = stripWord(rest, payee);
   const words = rest.replace(/[^\p{L}\p{N}&'\- ]/gu, ' ').split(/\s+/).filter((w) => w && !/^\d+$/.test(w));
   if (!payee && words.length) {

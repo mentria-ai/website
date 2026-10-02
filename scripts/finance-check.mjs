@@ -389,6 +389,11 @@ test('nl: parses amounts, dates and payees', () => {
   assert.equal(db.date, '2026-09-30'); assert.equal(db.payee, 'Rent');
   const c = N.parseEntry('got paid 52,000', ctx);
   assert.equal(c.income, true); assert.equal(c.amount, '52000');
+  const ja = { today: '2026-10-02', locale: 'ja-JP', words: { today: '今日|きょう', yesterday: '昨日|きのう', daybefore: '一昨日|おととい', tomorrow: '明日', last: '先週', income: '給料|入金', transfer: '振替', filler: 'で|に|を' }, accounts: [{ id: 'a1', name: '現金' }], categories: [{ id: 'c1', name: '食費', kind: 'expense' }], payees: [] };
+  const j1 = N.parseEntry('昨日コンビニで食費850円', ja);
+  assert.equal(j1.date, '2026-10-01'); assert.equal(j1.amount, '850'); assert.equal(j1.category, 'c1');
+  const j2 = N.parseEntry('一昨日現金で給料', ja);
+  assert.equal(j2.date, '2026-09-30'); assert.equal(j2.account, 'a1'); assert.equal(j2.income, true);
   assert.deepEqual(N.parseAiJson('payee":"Cafe","amount":4.5}'), { payee: 'Cafe', amount: 4.5 });
   assert.deepEqual(N.parseAiJson('Sure! {"payee":"X","amount":2,}'), { payee: 'X', amount: 2 });
 });

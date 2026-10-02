@@ -31,6 +31,7 @@ eleventyComputed:
       </div>
       <p class="mu__hint">{{ "tool.music-player.drop_hint" | t }}</p>
       <p class="mu__hint" id="mu-ios-hint" hidden>{{ "tool.music-player.ios_hint" | t }}</p>
+      <p class="mu__hint" id="mu-lock-hint" hidden>{{ "tool.music-player.lock_hint" | t }}</p>
     </div>
     <section class="mu__shelf" id="mu-folders" hidden>
       <h2 class="mu__h2">{{ "tool.music-player.saved_title" | t }}</h2>
@@ -148,6 +149,10 @@ let curFp = '';
 let curUrl = '';
 let wantPlay = false;
 let errStreak = 0;
+let playAskAt = 0;
+let heardAt = 0;
+let lastTime = 0;
+let retryTimer = 0;
 let shuffle = false;
 let repeat = 'off';
 let lastSave = 0;
@@ -842,15 +847,47 @@ function playAt(i, autoplay) {
   if (curUrl) URL.revokeObjectURL(curUrl);
   curUrl = URL.createObjectURL(file);
   audio.src = curUrl;
+  lastTime = 0;
+  playAskAt = 0;
   wantPlay = !!autoplay;
-  if (autoplay) {
-    M.playbackAudioSession();
-    audio.play().catch(() => {});
-  }
+  if (autoplay) requestPlay();
   updateNowPlaying();
   session();
   markPlaying();
   saveState(true);
+}
+
+function audible() {
+  return !audio.paused && Date.now() - heardAt < 1500;
+}
+
+function reloadCurrent(at) {
+  const file = M.fileFor(curFp);
+  if (!file) return false;
+  if (curUrl) URL.revokeObjectURL(curUrl);
+  curUrl = URL.createObjectURL(file);
+  restoreAt = at > 1 ? at : 0;
+  lastTime = 0;
+  audio.src = curUrl;
+  audio.load();
+  return true;
+}
+
+function requestPlay() {
+  const now = Date.now();
+  if (audio.getAttribute('src') && (audio.error || (playAskAt && now - playAskAt > 1200 && heardAt < playAskAt))) reloadCurrent(audio.currentTime);
+  playAskAt = now;
+  wantPlay = true;
+  M.playbackAudioSession();
+  audio.play().catch(() => {});
+}
+
+function armRetry() {
+  clearTimeout(retryTimer);
+  const ask = playAskAt;
+  retryTimer = setTimeout(() => {
+    if (wantPlay && playAskAt === ask && heardAt < ask) requestPlay();
+  }, 2500);
 }
 
 function next() {
@@ -873,9 +910,7 @@ function toggle() {
   }
   if (audio.paused) {
     if (!audio.getAttribute('src')) { playAt(qi, true); return; }
-    wantPlay = true;
-    M.playbackAudioSession();
-    audio.play().catch(() => {});
+    requestPlay();
   } else {
     wantPlay = false;
     audio.pause();
@@ -890,8 +925,8 @@ function seekBy(sec) {
 function onEnded() {
   if (sleep.mode === 'end') { setSleep('off', true); wantPlay = false; syncPlay(); return; }
   if (repeat === 'one') { audio.currentTime = 0; audio.play().catch(() => {}); return; }
-  if (qi + 1 < queue.length) playAt(qi + 1, true);
-  else if (repeat === 'all' && queue.length) playAt(0, true);
+  if (qi + 1 < queue.length) { playAt(qi + 1, true); armRetry(); }
+  else if (repeat === 'all' && queue.length) { playAt(0, true); armRetry(); }
   else { wantPlay = false; syncPlay(); saveState(true); }
 }
 
@@ -989,7 +1024,7 @@ function syncPlay() {
   const label = playing ? C.pause : C.play;
   playBtn.setAttribute('aria-label', label);
   playBtn.title = label;
-  M.sessionState(playing, audio.duration, audio.currentTime, 1);
+  M.sessionState(audible(), audio.duration, audio.currentTime, 1);
   updateMini();
 }
 
@@ -1042,7 +1077,7 @@ function session() {
     artworkSize: '400x400',
     artworkType: artTypes.get(key) || 'image/jpeg',
     actions: {
-      play: () => { if (audio.paused) toggle(); },
+      play: () => { if (!audio.getAttribute('src')) toggle(); else requestPlay(); },
       pause: () => { if (!audio.paused) toggle(); },
       previoustrack: () => prev(),
       nexttrack: () => next(),
@@ -1184,8 +1219,10 @@ audio.addEventListener('loadedmetadata', () => {
   updateTime();
 });
 audio.addEventListener('timeupdate', () => {
+  if (!audio.paused && audio.currentTime > lastTime + 0.01) heardAt = Date.now();
+  lastTime = audio.currentTime;
   updateTime();
-  M.sessionState(!audio.paused, audio.duration, audio.currentTime, 1);
+  M.sessionState(audible(), audio.duration, audio.currentTime, 1);
   if (typeof sleep.mode === 'number') tickSleep();
   saveState(false);
 });
@@ -1341,6 +1378,7 @@ async function openFolder(folder) {
 
 async function renderStart() {
   $('mu-ios-hint').hidden = !M.caps.ios;
+  $('mu-lock-hint').hidden = !(M.caps.ios && M.caps.standalone);
   const list = $('mu-folder-list');
   const folders = M.caps.folders ? await M.listFolders('music') : [];
   list.textContent = '';

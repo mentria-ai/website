@@ -3087,6 +3087,7 @@
       "open_folder": "Abrir carpeta",
       "drop_hint": "Tu música se queda en este dispositivo. No se sube nada.",
       "ios_hint": "En iPhone, elige canciones o una carpeta de la app Archivos en cada visita. Las canciones de Apple Music no se pueden abrir. Mentria guarda los datos y las portadas, así que los mismos archivos cargan más rápido la próxima vez.",
+      "lock_hint": "En el iPhone, si la siguiente canción no empieza con la pantalla de bloqueo encendida, pulsa reproducir ahí para reanudarla. Para escuchar mucho rato, una pestaña de Safari es más fiable que la app de la pantalla de inicio.",
       "saved_title": "Tus carpetas",
       "search": "Buscar canciones, álbumes y artistas",
       "add": "Añadir canciones",

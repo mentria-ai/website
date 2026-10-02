@@ -3087,6 +3087,7 @@
       "open_folder": "Abrir pasta",
       "drop_hint": "Suas músicas ficam neste dispositivo. Nada é enviado.",
       "ios_hint": "No iPhone, escolha músicas ou uma pasta do app Arquivos a cada visita. Músicas do Apple Music não podem ser abertas. O Mentria guarda as informações e as capas, então os mesmos arquivos carregam mais rápido da próxima vez.",
+      "lock_hint": "No iPhone, se a próxima música não começar com a tela de bloqueio acesa, toque em reproduzir ali para retomar. Para ouvir por muito tempo, uma aba do Safari é mais confiável que o app da tela de início.",
       "saved_title": "Suas pastas",
       "search": "Buscar músicas, álbuns e artistas",
       "add": "Adicionar músicas",

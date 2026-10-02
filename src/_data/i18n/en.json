@@ -3087,6 +3087,7 @@
       "open_folder": "Open folder",
       "drop_hint": "Your music stays on this device. Nothing is uploaded.",
       "ios_hint": "On iPhone, choose songs or a folder from the Files app each visit. Songs in Apple Music can't be opened. Mentria keeps song details and covers, so the same files load faster next time.",
+      "lock_hint": "On iPhone, if the next song doesn't start while the lock screen is on, press play there to restart it. For long listening, a Safari tab is more reliable than the home-screen app.",
       "saved_title": "Your folders",
       "search": "Search songs, albums and artists",
       "add": "Add songs",

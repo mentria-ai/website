@@ -2041,6 +2041,11 @@ function frame(now) {
   }
 
   if (worldReady) call(renderer, 'render', scene, dt);
+  if (settings.gfx === 'enhanced' && call(renderer, 'getGraphics') === 'classic') {
+    settings.gfx = 'classic';
+    if (dom.stage) dom.stage.classList.remove('is-gfx-enhanced');
+    updateGfxBtns();
+  }
 
   if (state === 'playing' && !runDone && targetTotal > 0 && downCount >= targetTotal) completeRun();
 }

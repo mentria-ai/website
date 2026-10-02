@@ -6,6 +6,7 @@ import { createTerrain } from '../kit/terrain.js';
 import * as props from '../kit/props.js';
 import * as mats from '../kit/materials.js';
 import { buildTrackMeshes } from '../kit/track.js';
+import { detailRoad } from '../kit/roadfx.js';
 
 const TRACK_BIOMES = { 'neon-city': 'urban', coast: 'coast', 'canyon-run': 'desert' };
 const PRESET_BIOMES = { night: 'urban', day: 'coast', sunset: 'desert', golden: 'meadow' };
@@ -356,6 +357,7 @@ export async function buildRacerWorld(opts = {}) {
     try {
       roadMat = mats.gameMaterial('asphalt', { unique: true, repeat: [2.5, 2.5], roughness: night ? 0.62 : 0.92 });
       if (night) roadMat.envMapIntensity = 0.55;
+      if (roadMat) detailRoad(roadMat, { lanes: (def.style && def.style.laneCount) || 2 });
     } catch (_) { roadMat = null; }
   }
   if (roadMat) trackOpts.materials = { road: roadMat };

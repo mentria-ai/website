@@ -188,8 +188,8 @@ export function createActors(scene, opts){
         if (particles){
           particles.burst('spark', p, toCam, 34, { color: [0.6, 1.4, 1.1], speed: 9, radius: t.radius * 0.6 });
           particles.burst('spark', p, toCam, 14, { color: [1.6, 1.1, 0.4], speed: 7, radius: t.radius * 0.4 });
-          particles.burst('debris', p, toCam, 8, { size: 0.5, speed: 5, radius: t.radius * 0.5 });
-          particles.burst('smoke', p, toCam, 3, { size: 0.45, life: 0.6 });
+          particles.burst('debris', p, toCam, 10, { size: 0.045, speed: 4.5, radius: t.radius * 0.4, color: [0.11, 0.12, 0.13] });
+          particles.burst('smoke', p, toCam, 2, { size: 0.32, life: 0.5, opacity: 0.6 });
         }
         wave(p, t.radius);
         flash = 1;
@@ -284,9 +284,12 @@ export function createActors(scene, opts){
       const len = tmpDir.length();
       if (len < 0.05){ m.visible = false; continue; }
       tmpDir.divideScalar(len);
-      const head = Math.min(1, age * 1.6);
-      const seg = Math.min(len, 6 + len * 0.15);
-      const start = tmpA.clone().addScaledVector(tmpDir, Math.max(0, (len - seg) * head));
+      const skip = Math.min(len * 0.4, 1.4);
+      const travel = len - skip;
+      const headD = skip + travel * Math.min(1, 0.18 + age * 1.15);
+      const seg = Math.min(headD - skip, 2.2 + travel * 0.12);
+      if (seg < 0.05){ m.visible = false; continue; }
+      const start = tmpA.clone().addScaledVector(tmpDir, headD - seg);
       tmpCam.subVectors(camera.position, start);
       tmpSide.crossVectors(tmpDir, tmpCam).normalize();
       tmpUp.copy(tmpDir);
@@ -294,8 +297,8 @@ export function createActors(scene, opts){
       basisM.makeBasis(tmpSide, tmpUp, n);
       m.quaternion.setFromRotationMatrix(basisM);
       m.position.copy(start);
-      m.scale.set(0.035, seg, 1);
-      m.material.opacity = Math.max(0, 1 - age) * 0.9;
+      m.scale.set(0.014, seg, 1);
+      m.material.opacity = Math.max(0, 1 - age * age) * 0.95;
       m.visible = m.material.opacity > 0.02;
     }
   }

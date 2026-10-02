@@ -306,7 +306,7 @@ function mergeGeometries(list){
 }
 
 export function addFloorJoints(material, spacing){
-  const S = spacing || 4;
+  const S = (spacing || 4).toFixed(1);
   const prev = material.onBeforeCompile;
   const prevKey = material.customProgramCacheKey ? material.customProgramCacheKey.bind(material) : null;
   material.customProgramCacheKey = () => (prevKey ? prevKey() : '') + '|joints' + S;
@@ -315,18 +315,22 @@ export function addFloorJoints(material, spacing){
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vJointPos;')
       .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvJointPos = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    const joint = `
+{
+  vec2 jp = vJointPos.xz / ${S};
+  vec2 cell = floor(jp);
+  vec2 jd = abs(fract(jp) - 0.5);
+  vec2 fw = fwidth(jp) * 1.5 + 0.001;
+  float lx = smoothstep(0.5 - 0.006 - fw.x, 0.5 - 0.006, jd.x);
+  float lz = smoothstep(0.5 - 0.006 - fw.y, 0.5 - 0.006, jd.y);
+  float line = max(lx, lz);
+  float h = fract(sin(dot(cell, vec2(127.1, 311.7))) * 43758.5453);
+  diffuseColor.rgb *= mix(0.9 + 0.16 * h, 0.42, line);
+}
+#include <alphamap_fragment>`;
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vJointPos;')
-      .replace('#include <map_fragment>', `#include <map_fragment>
-{
-  vec2 jp = vJointPos.xz / ${S.toFixed(1)};
-  vec2 jd = abs(fract(jp) - 0.5);
-  vec2 fw = fwidth(jp) * 1.2 + 0.0015;
-  float lx = smoothstep(0.5 - 0.005 - fw.x, 0.5 - 0.005, jd.x);
-  float lz = smoothstep(0.5 - 0.005 - fw.y, 0.5 - 0.005, jd.y);
-  float line = max(lx, lz);
-  diffuseColor.rgb *= mix(1.0, 0.55, line);
-}`);
+      .replace('#include <alphamap_fragment>', joint);
   };
   material.needsUpdate = true;
 }

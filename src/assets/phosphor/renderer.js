@@ -3,6 +3,27 @@ import { GFX_CLASSIC, GFX_ENHANCED, defaultGraphics as pickDefault } from './fx.
 
 const MODERN_URL = './renderer-modern.js';
 const LOAD_TIMEOUT_MS = 12000;
+const HD_CACHE = 'mentria-phosphor-hd';
+const HD_PATHS = /^\/assets\/(vendor\/three-[^/]+|games|phosphor)\//;
+
+function keepOffline(){
+  try {
+    if (typeof caches === 'undefined' || typeof performance === 'undefined' || !performance.getEntriesByType) return;
+    const seen = new Set();
+    for (const e of performance.getEntriesByType('resource')){
+      let u = null;
+      try { u = new URL(e.name); } catch (_) { continue; }
+      if (u.origin !== location.origin || !HD_PATHS.test(u.pathname)) continue;
+      seen.add(u.pathname);
+    }
+    if (!seen.size) return;
+    caches.open(HD_CACHE).then(function(cache){
+      return Promise.all(Array.from(seen).map(function(path){
+        return cache.match(path).then(function(hit){ return hit ? null : cache.add(path).catch(function(){}); });
+      }));
+    }).catch(function(){});
+  } catch (_) {}
+}
 
 export function createRenderer(canvas){
   let mode = GFX_CLASSIC;
@@ -42,6 +63,7 @@ export function createRenderer(canvas){
       modern = mod.createRenderer(canvas);
       if (world) modern.compileWorld(world);
       modernState = 'ready';
+      setTimeout(keepOffline, 9000);
     }).catch(function(err){
       try { console.warn('[phosphor] enhanced renderer unavailable, using classic', err); } catch (_) {}
       modern = null;

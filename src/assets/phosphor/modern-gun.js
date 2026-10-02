@@ -85,9 +85,12 @@ export function createGun(){
   const upper = rbox(0.054, 0.03, 0.3, 0.008, polymer);
   upper.position.set(0, 0.052, -0.02);
   body.add(upper);
-  for (let i = 0; i < 13; i++){
-    const n = box(0.046, 0.006, 0.009, gunmetal);
-    n.position.set(0, 0.07, -0.16 + i * 0.022);
+  const railBase = box(0.03, 0.006, 0.3, gunmetal);
+  railBase.position.set(0, 0.07, -0.02);
+  body.add(railBase);
+  for (let i = 0; i < 15; i++){
+    const n = box(0.034, 0.004, 0.008, polymer);
+    n.position.set(0, 0.075, -0.16 + i * 0.019);
     body.add(n);
   }
   const port = box(0.002, 0.026, 0.07, silver);
@@ -145,26 +148,32 @@ export function createGun(){
   const stock = rbox(0.046, 0.075, 0.2, 0.016, polymer);
   stock.position.set(0, -0.006, 0.27);
   body.add(stock);
+  const OY = 0.136;
   const mount = box(0.03, 0.014, 0.05, gunmetal);
-  mount.position.set(0, 0.08, 0.035);
+  mount.position.set(0, 0.08, 0.045);
   body.add(mount);
+  const riser = rbox(0.024, 0.042, 0.042, 0.004, gunmetal);
+  riser.position.set(0, 0.104, 0.045);
+  body.add(riser);
+  const knob = cyl(0.0065, 0.0065, 0.012, silver, 14);
+  knob.rotation.z = Math.PI / 2;
+  knob.position.set(0.017, 0.104, 0.045);
+  body.add(knob);
   const hood = new THREE.Mesh(new THREE.TorusGeometry(0.0165, 0.0026, 8, 32), gunmetal);
-  hood.position.set(0, 0.104, 0.04);
-  hood.scale.set(1, 0.86, 1);
+  hood.position.set(0, OY, 0.032);
   body.add(hood);
-  const hoodTube = new THREE.Mesh(new THREE.CylinderGeometry(0.0172, 0.0172, 0.03, 32, 1, true), gunmetal);
+  const hoodTube = new THREE.Mesh(new THREE.CylinderGeometry(0.0172, 0.0172, 0.034, 32, 1, true), gunmetal);
   hoodTube.rotation.x = Math.PI / 2;
-  hoodTube.scale.set(1, 1, 0.86);
-  hoodTube.position.set(0, 0.104, 0.054);
+  hoodTube.position.set(0, OY, 0.049);
   body.add(hoodTube);
-  const post = box(0.008, 0.014, 0.03, gunmetal);
-  post.position.set(0, 0.089, 0.05);
-  body.add(post);
+  const hoodBack = new THREE.Mesh(new THREE.TorusGeometry(0.0165, 0.0022, 8, 32), polymer);
+  hoodBack.position.set(0, OY, 0.066);
+  body.add(hoodBack);
   const glass = new THREE.Mesh(new THREE.CircleGeometry(0.0155, 28), new THREE.MeshBasicMaterial({ map: reticleTexture(), transparent: true, opacity: 0, depthWrite: false, toneMapped: false, color: new THREE.Color(1.6, 2.4, 2) }));
-  glass.position.set(0, 0.104, 0.05);
+  glass.position.set(0, OY, 0.056);
   body.add(glass);
-  const lens = new THREE.Mesh(new THREE.CircleGeometry(0.016, 28), new THREE.MeshPhysicalMaterial({ color: 0x0c1a1c, roughness: 0.04, metalness: 0.2, transparent: true, opacity: 0.32, depthWrite: false }));
-  lens.position.set(0, 0.104, 0.041);
+  const lens = new THREE.Mesh(new THREE.CircleGeometry(0.016, 28), new THREE.MeshPhysicalMaterial({ color: 0x0c1a1c, roughness: 0.04, metalness: 0.2, transparent: true, opacity: 0.3, depthWrite: false }));
+  lens.position.set(0, OY, 0.034);
   body.add(lens);
 
   const flashGroup = new THREE.Group();
@@ -186,7 +195,7 @@ export function createGun(){
 
   const hemi = new THREE.HemisphereLight(0xbfd4ea, 0x1a1712, 0.55);
   scene.add(hemi);
-  const key = new THREE.DirectionalLight(0xffffff, 3.2);
+  const key = new THREE.DirectionalLight(0xffffff, 2.4);
   scene.add(key);
   scene.add(key.target);
   const rimLight = new THREE.DirectionalLight(0x6ef3c5, 1.1);
@@ -200,7 +209,7 @@ export function createGun(){
   body.add(muzzleLight);
 
   const HIP = new THREE.Vector3(0.118, -0.128, -0.33);
-  const ADS = new THREE.Vector3(0, -0.0811, -0.2);
+  const ADS = new THREE.Vector3(0, -OY * 0.78, -0.21);
   const pos = new THREE.Vector3();
   const tmpQ = new THREE.Quaternion();
   const sunCam = new THREE.Vector3();
@@ -236,11 +245,11 @@ export function createGun(){
       const out = Math.max(0, Math.min(1, (rl - 0.12) / 0.22));
       const back = Math.max(0, Math.min(1, (rl - 0.55) / 0.25));
       const drop = out * (1 - back);
-      mag.position.set(0, -0.04 - drop * 0.28, -0.04 + drop * 0.04);
-      mag.rotation.x = -0.2 - drop * 0.6;
+      mag.position.set(0, -0.034 - drop * 0.28, -0.045 + drop * 0.04);
+      mag.rotation.x = -0.24 - drop * 0.6;
     } else {
-      mag.position.set(0, -0.04, -0.04);
-      mag.rotation.x = -0.2;
+      mag.position.set(0, -0.034, -0.045);
+      mag.rotation.x = -0.24;
     }
     glass.material.opacity = Math.max(0, (ads - 0.55) / 0.45);
     const m = Math.max(0, Math.min(1, muzzle || 0));
@@ -268,6 +277,7 @@ export function createGun(){
 
   function setEnvironment(envMap, hemiSky, hemiGround){
     scene.environment = envMap || null;
+    scene.environmentIntensity = 0.55;
     if (hemiSky) hemi.color.copy(hemiSky);
     if (hemiGround) hemi.groundColor.copy(hemiGround);
   }

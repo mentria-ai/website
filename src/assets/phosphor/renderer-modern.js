@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import * as KitEnv from '../games/kit/env.js';
 import * as KitFx from '../games/kit/fx.js';
 import * as KitQuality from '../games/kit/quality.js';
@@ -56,8 +58,35 @@ export function createRenderer(canvas){
   const actors = createActors(scene, { particles, flashLight });
   const gun = createGun();
 
+  const fill = new THREE.DirectionalLight(0xffffff, 0);
+  fill.castShadow = false;
+  scene.add(fill);
+  scene.add(fill.target);
   let post = null;
   let gunPass = null;
+  let aoPass = null;
+  function createAO(){
+    try {
+      const pass = new GTAOPass(scene, camera, 640, 360);
+      pass.updateGtaoMaterial({ radius: 1.1, distanceExponent: 1.4, thickness: 1.6, scale: 1.5, samples: 12, distanceFallOff: 1, screenSpaceRadius: false });
+      pass.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 5, radiusExponent: 1, rings: 2, samples: 12 });
+      pass.blendIntensity = 1;
+      const baseHide = pass._overrideVisibility.bind(pass);
+      pass._overrideVisibility = function(){
+        baseHide();
+        const cache = this._visibilityCache;
+        this.scene.traverse((o) => {
+          if (!o.visible || !o.isMesh) return;
+          const m = o.material;
+          const soft = !Array.isArray(m) && m && (m.transparent || m.depthWrite === false);
+          if (soft || o.userData.noAO){ o.visible = false; cache.push(o); }
+        });
+      };
+      const baseSize = pass.setSize.bind(pass);
+      pass.setSize = (w, h) => baseSize(Math.max(2, Math.round(w * 0.5)), Math.max(2, Math.round(h * 0.5)));
+      return pass;
+    } catch (_) { return null; }
+  }
   try {
     post = KitFx.createPostFx(renderer, scene, camera, { quality, preset: 'day' });
     if (post && post.composer){
@@ -65,6 +94,8 @@ export function createRenderer(canvas){
       gunPass.clear = false;
       gunPass.clearDepth = true;
       post.composer.insertPass(gunPass, 1);
+      if (quality === 'high') aoPass = createAO();
+      if (aoPass) post.composer.insertPass(aoPass, 1);
     }
   } catch (err) {
     try { console.warn('[phosphor] post fx unavailable', err); } catch (_) {}
@@ -96,7 +127,19 @@ export function createRenderer(canvas){
   let contextLost = false;
 
   canvas.addEventListener('webglcontextlost', () => { contextLost = true; });
-  canvas.addEventListener('webglcontextrestored', () => { contextLost = false; sizeDirty = true; });
+  canvas.addEventListener('webglcontextrestored', () => { contextLost = false; sizeDirty = true; studioEnv = null; });
+  let studioEnv = null;
+  function studio(){
+    if (studioEnv) return studioEnv;
+    try {
+      const pm = new THREE.PMREMGenerator(renderer);
+      const room = new RoomEnvironment();
+      studioEnv = pm.fromScene(room, 0.04).texture;
+      if (room.dispose) room.dispose();
+      pm.dispose();
+    } catch (_) { studioEnv = null; }
+    return studioEnv;
+  }
 
   function disposeWorld(){
     if (worldGroup){
@@ -127,12 +170,13 @@ export function createRenderer(canvas){
     scene.add(worldGroup);
     const sd = def.sun && def.sun.dir && def.sun.dir.length >= 3 ? def.sun.dir : [-0.3, -0.3, -0.9];
     const raw = new THREE.Vector3(-sd[0], -sd[1], -sd[2]).normalize();
-    const capDeg = look.preset === 'sunset' ? 6.5 : look.preset === 'golden' ? 10 : 32;
+    const capDeg = look.preset === 'sunset' ? 8 : look.preset === 'golden' ? 15 : 32;
     const elev = Math.min(Math.asin(Math.max(-1, Math.min(1, raw.y))), capDeg * Math.PI / 180);
     const az = Math.atan2(raw.x, raw.z);
     const sunDirection = new THREE.Vector3(Math.sin(az) * Math.cos(elev), Math.sin(elev), Math.cos(az) * Math.cos(elev));
     try {
       env = KitEnv.createEnvironment(scene, renderer, { preset: look.preset, quality, sunDirection, backdrop: look.backdrop, exposure: look.exposure, farFade: false, seed: 7 });
+      if (env && env.group) env.group.traverse((o) => { o.userData.noAO = true; });
       if (env && env.setFogDensity) env.setFogDensity(look.fog);
     } catch (err) {
       try { console.warn('[phosphor] environment unavailable', err); } catch (_) {}
@@ -165,7 +209,11 @@ export function createRenderer(canvas){
     actors.setTargets(def.targets);
     actors.setPrims(prims);
     if (env){
-      gun.setEnvironment(env.envMap, env.hemi ? env.hemi.color : null, env.hemi ? env.hemi.groundColor : null);
+      if (env.hemi) env.hemi.intensity *= 1.6;
+      fill.color.copy(env.hemi ? env.hemi.color : new THREE.Color(0xbfd0e6)).lerp(new THREE.Color(0xffffff), 0.45);
+      fill.position.set(-sunDirection.x, 0.9, -sunDirection.z).normalize().multiplyScalar(50);
+      fill.intensity = look.preset === 'day' ? 0.35 : 0.55;
+      gun.setEnvironment(studio() || env.envMap, env.hemi ? env.hemi.color : null, env.hemi ? env.hemi.groundColor : null);
       if (post && post.setPreset) post.setPreset(look.preset === 'sunset' ? 'sunset' : look.preset === 'golden' ? 'golden' : 'day');
     }
     world = { prims, look, sunDirection };
@@ -213,6 +261,7 @@ export function createRenderer(canvas){
     const step = typeof dt === 'number' && isFinite(dt) && dt > 0 && dt < 0.5 ? dt : 1 / 60;
     time += step;
     const qs = sc.quality && typeof sc.quality.scale === 'number' && isFinite(sc.quality.scale) ? Math.max(0.5, Math.min(1, sc.quality.scale)) : 1;
+    if (aoPass) aoPass.enabled = qs >= 0.85;
     if (Math.abs(qs - qScale) > 0.01){ qScale = qs; sizeDirty = true; }
     if (canvas.clientWidth !== lastW || canvas.clientHeight !== lastH) sizeDirty = true;
     if (sizeDirty) resize();

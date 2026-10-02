@@ -183,11 +183,11 @@ function texSet(name, repeat, size){
 export function worldMaterials(look){
   const L = look || {};
   const conc = texSet('concrete', 1, 1024);
-  const concTop = new THREE.MeshStandardMaterial({ map: conc.map, normalMap: conc.normalMap, roughnessMap: conc.roughnessMap, color: new THREE.Color(L.floorTint || 0x6f6c68), roughness: 0.96, metalness: 0, vertexColors: true, envMapIntensity: 0.3 });
+  const concTop = new THREE.MeshStandardMaterial({ map: conc.map, normalMap: conc.normalMap, roughnessMap: conc.roughnessMap, color: new THREE.Color(L.floorTint || 0x8d8983), roughness: 0.94, metalness: 0, vertexColors: true, envMapIntensity: 0.45 });
   const concSide = new THREE.MeshStandardMaterial({ map: conc.map, normalMap: conc.normalMap, roughnessMap: conc.roughnessMap, color: new THREE.Color(L.wallTint || 0xa9a7a3), roughness: 0.93, metalness: 0, vertexColors: true, envMapIntensity: 0.35 });
   stochasticTiling(concTop);
-  const plate = texSet('ph-floor', 1, 512);
-  const metalTop = new THREE.MeshStandardMaterial({ map: plate.map, normalMap: plate.normalMap, roughnessMap: plate.roughnessMap, color: new THREE.Color(L.plateTint || 0xc4ccd6), roughness: 0.52, metalness: 0.7, vertexColors: true, envMapIntensity: 0.9 });
+  const plate = texSet('ph-floor', 3, 512);
+  const metalTop = new THREE.MeshStandardMaterial({ map: plate.map, normalMap: plate.normalMap, roughnessMap: plate.roughnessMap, color: new THREE.Color(L.plateTint || 0xf2e2cc), roughness: 0.5, metalness: 0.5, vertexColors: true, envMapIntensity: 0.7 });
   const panel = texSet('ph-panel', 1, 512);
   const metalSide = new THREE.MeshStandardMaterial({ map: panel.map, normalMap: panel.normalMap, roughnessMap: panel.roughnessMap, color: new THREE.Color(L.panelTint || 0xd4dbe4), roughness: 0.45, metalness: 0.78, vertexColors: true, envMapIntensity: 1 });
   const emissive = new THREE.MeshStandardMaterial({ color: 0x0b0f12, emissive: new THREE.Color(0x6ef3c5), emissiveIntensity: 2.4, roughness: 0.4, metalness: 0.1 });

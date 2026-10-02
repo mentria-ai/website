@@ -369,13 +369,21 @@ void main() {
     float region = kwNoise( cloudUV * 300.0 ) * 0.37 + 0.5;
     float cov = clamp( cloudCoverage + ( region - 0.5 ) * 0.6, 0.0, 1.0 );
     float threshold = 1.0 - cov;
+#ifdef KW_HQ_CLOUDS
+    float erode = kwNoise( cloudUV * 16000.0 + evolve * 3.0 ) * 0.055 + kwNoise( cloudUV * 34000.0 - evolve * 2.0 ) * 0.03;
+    cloudNoise = clamp( cloudNoise + erode * smoothstep( threshold - 0.12, threshold + 0.3, cloudNoise ), 0.0, 1.0 );
+    float toward = clamp( kwFbm( ( cloudUV + normalize( vSunDirection.xz + vec2( 1e-4 ) ) * 0.00009 ) * 1000.0, evolve ) * 0.7 + 0.5, 0.0, 1.0 );
+    float selfShadow = clamp( ( toward - cloudNoise ) * 4.0, 0.0, 1.0 ) * ( 1.0 - nightAmount );
+#else
+    float selfShadow = 0.0;
+#endif
     float cloudMask = smoothstep( threshold, threshold + 0.3, cloudNoise );
     float horizonFade = smoothstep( 0.0, 0.03 + 0.06 * cloudElevation, direction.y );
     cloudMask *= horizonFade;
     float depth = max( 0.0, cloudNoise - threshold );
     float beer = exp( depth * -4.0 );
     float powder = 1.0 - beer * beer;
-    float shade = mix( 0.45, 1.0, clamp( beer * powder * 2.6, 0.0, 1.0 ) );
+    float shade = mix( 0.45, 1.0, clamp( beer * powder * 2.6, 0.0, 1.0 ) ) * ( 1.0 - selfShadow * 0.42 );
     float silver = clamp( 0.51 / pow( 1.49 - cosTheta * 1.4, 1.5 ), 0.0, 3.0 );
     float edge = cloudMask * ( 1.0 - cloudMask ) * 4.0;
     vec3 dayCloud = cloudShadeColor + cloudLitColor * shade;
@@ -831,6 +839,10 @@ export function createEnvironment(scene, renderer, opts = {}) {
   scene.fog = fog;
 
   const skyMaterial = makeSkyMaterial();
+  if (quality.name === 'high') {
+    skyMaterial.defines = Object.assign({}, skyMaterial.defines, { KW_HQ_CLOUDS: '' });
+    skyMaterial.needsUpdate = true;
+  }
   const su = skyMaterial.uniforms;
   su.sunDirection.value.copy(sunDir);
   su.rayleigh.value = preset.rayleigh;

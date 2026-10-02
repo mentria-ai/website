@@ -43,9 +43,9 @@ export function findDate(text, ctx) {
   const lower = text.toLowerCase();
   const today = ctx.today;
   const W = ctx.words || {};
+  for (const w of wordsOf(W.daybefore)) if (hasWord(lower, w)) return { date: addDays(today, -2), word: w };
   for (const w of wordsOf(W.today)) if (hasWord(lower, w)) return { date: today, word: w };
   for (const w of wordsOf(W.yesterday)) if (hasWord(lower, w)) return { date: addDays(today, -1), word: w };
-  for (const w of wordsOf(W.daybefore)) if (hasWord(lower, w)) return { date: addDays(today, -2), word: w };
   for (const w of wordsOf(W.tomorrow)) if (hasWord(lower, w)) return { date: addDays(today, 1), word: w };
   const iso1 = text.match(/\b(\d{4}-\d{2}-\d{2})\b/);
   if (iso1 && isISODate(iso1[1])) return { date: iso1[1], word: iso1[1] };

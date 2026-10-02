@@ -385,6 +385,8 @@ test('nl: parses amounts, dates and payees', () => {
   assert.equal(a.amount, '4.50'); assert.equal(a.date, '2026-10-01'); assert.equal(a.payee, 'Coffee');
   const b = N.parseEntry('Uber $12.40 on 28 Sep from Cash', ctx);
   assert.equal(b.amount, '12.40'); assert.equal(b.currency, 'USD'); assert.equal(b.date, '2026-09-28'); assert.equal(b.account, 'a1');
+  const db = N.parseEntry('rent 800 day before yesterday', ctx);
+  assert.equal(db.date, '2026-09-30'); assert.equal(db.payee, 'Rent');
   const c = N.parseEntry('got paid 52,000', ctx);
   assert.equal(c.income, true); assert.equal(c.amount, '52000');
   assert.deepEqual(N.parseAiJson('payee":"Cafe","amount":4.5}'), { payee: 'Cafe', amount: 4.5 });

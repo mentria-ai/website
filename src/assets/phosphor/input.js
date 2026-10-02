@@ -29,6 +29,13 @@ const GYRO_SMOOTH_MAX = 0.95;
 const TOUCH_SMOOTH_MAX = 0.6;
 const LOOK_DEFAULTS = { touchSmooth: 0.35, gyroSmooth: 0.5, gyroPolarity: 1 };
 
+const TOUCH_ICONS = {
+  fire: [['circle', { cx: 12, cy: 12, r: 7 }], ['circle', { cx: 12, cy: 12, r: 1.2 }], ['path', { d: 'M12 2v4M12 18v4M2 12h4M18 12h4' }]],
+  ads: [['circle', { cx: 12, cy: 12, r: 8 }], ['circle', { cx: 12, cy: 12, r: 3 }], ['path', { d: 'M12 4v2.5M12 17.5V20M4 12h2.5M17.5 12H20' }]],
+  jump: [['path', { d: 'M6 14l6-6 6 6' }], ['path', { d: 'M6 19l6-6 6 6' }]],
+  reload: [['path', { d: 'M20 11a8 8 0 1 0-2.3 5.7' }], ['path', { d: 'M20 4v7h-7' }]]
+};
+
 const STYLE_ID = 'ph-touch-style';
 const STYLE_TEXT = [
   '.ph-touch{position:absolute;inset:0;z-index:6;pointer-events:none;touch-action:none;',
@@ -49,20 +56,25 @@ const STYLE_TEXT = [
   "grid-template-areas:'reload ads' 'jump fire';gap:12px;align-items:end;justify-items:center;",
   'right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));',
   'pointer-events:none}',
-  '.ph-touch__btn{pointer-events:auto;touch-action:none;-webkit-appearance:none;appearance:none;',
+  '.ph-touch__btn{pointer-events:auto;touch-action:none;-webkit-appearance:none;appearance:none;position:relative;',
   'min-width:60px;min-height:60px;width:60px;height:60px;border-radius:50%;',
-  'display:flex;align-items:center;justify-content:center;padding:0;',
-  'font:inherit;font-size:10px;letter-spacing:.06em;font-weight:600;',
-  'color:rgba(226,232,240,.86);background:rgba(10,10,10,.38);',
-  'border:1px solid rgba(255,255,255,.16);backdrop-filter:none;cursor:pointer}',
-  '.ph-touch__btn--fire{grid-area:fire;width:76px;height:76px;min-width:76px;min-height:76px;font-size:11px;',
-  'color:#0a0a0a;background:rgba(110,243,197,.62);border-color:rgba(110,243,197,.85)}',
+  'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;',
+  'font:inherit;font-size:9px;letter-spacing:.12em;font-weight:600;text-transform:uppercase;',
+  'color:#eaf3f0;background:rgba(4,8,10,.55);border:1px solid rgba(255,255,255,.16);',
+  'box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;transition:transform .08s ease,background .12s ease,border-color .12s ease}',
+  '.ph-touch__btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}',
+  '.ph-touch__lbl{line-height:1;white-space:nowrap;pointer-events:none}',
+  '.ph-touch__btn svg{pointer-events:none}',
+  '.ph-touch__btn--fire{grid-area:fire;width:78px;height:78px;min-width:78px;min-height:78px;font-size:10px;',
+  'color:#03130d;background:linear-gradient(160deg,#8af7d2,#6ef3c5);border-color:#6ef3c5;',
+  'box-shadow:0 0 0 4px rgba(110,243,197,.18),0 8px 24px rgba(110,243,197,.28)}',
+  '.ph-touch__btn--fire svg{width:28px;height:28px;stroke-width:2.4}',
   '.ph-touch__btn--ads{grid-area:ads}',
   '.ph-touch__btn--jump{grid-area:jump}',
   '.ph-touch__btn--reload{grid-area:reload}',
-  '.ph-touch__btn.is-down{background:rgba(110,243,197,.34);border-color:rgba(110,243,197,.75);color:#e2e8f0}',
-  '.ph-touch__btn--fire.is-down{background:rgba(110,243,197,.92);color:#0a0a0a}',
-  '.ph-touch__btn.is-on{background:rgba(110,243,197,.20);border-color:rgba(110,243,197,.70);color:#6ef3c5}'
+  '.ph-touch__btn.is-down{transform:scale(.93);background:rgba(110,243,197,.3);border-color:rgba(110,243,197,.8)}',
+  '.ph-touch__btn--fire.is-down{background:linear-gradient(160deg,#b4fbe4,#8af7d2);color:#03130d}',
+  '.ph-touch__btn.is-on{background:rgba(110,243,197,.2);border-color:rgba(110,243,197,.8);color:#6ef3c5}'
 ].join('');
 
 function isNum(v) {
@@ -727,7 +739,22 @@ export function createInput(stageEl, canvas, opts) {
     b.setAttribute('data-ph', kind);
     b.setAttribute('tabindex', '-1');
     b.setAttribute('aria-label', text);
-    b.textContent = text;
+    const icon = TOUCH_ICONS[kind];
+    if (icon) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('aria-hidden', 'true');
+      for (const d of icon) {
+        const el = document.createElementNS('http://www.w3.org/2000/svg', d[0]);
+        for (const k in d[1]) el.setAttribute(k, d[1][k]);
+        svg.appendChild(el);
+      }
+      b.appendChild(svg);
+    }
+    const lbl = document.createElement('span');
+    lbl.className = 'ph-touch__lbl';
+    lbl.textContent = text;
+    b.appendChild(lbl);
     return b;
   }
 

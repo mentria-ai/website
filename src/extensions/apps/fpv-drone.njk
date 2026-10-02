@@ -1,31 +1,23 @@
 ---
-layout: base.njk
+layout: ext-app.njk
 pagination:
   data: locales
   size: 1
   alias: locale
-permalink: "{{ locale.pathPrefix }}/tools/fpv-drone/index.html"
+permalink: "{{ locale.pathPrefix }}/extensions/fpv-drone/app/index.html"
 usesThree: true
+eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.fpv-drone.title' | t }}"
   description: "{{ 'tools.fpv-drone.lede' | t }}"
 ---
 <style>
-.sk-wrap { margin: 1.25rem 0 2rem; }
-.sk-hero__row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 0.6rem; }
-.sk-helpbtn {
-  font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--term-fg); background: rgba(255, 255, 255, 0.05); cursor: pointer;
-  border: 1px solid var(--term-border-strong); border-radius: var(--radius-pill);
-  padding: 0.45rem 0.95rem; min-height: 40px;
-}
-.sk-helpbtn:hover, .sk-helpbtn:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.sk-wrap { position: fixed; inset: 0; margin: 0; }
 .sk-stage {
-  position: relative; width: 100%; aspect-ratio: 16 / 9;
-  max-height: 80vh; max-height: 80svh;
+  position: absolute; inset: 0; width: 100%; height: 100%;
   overflow: hidden; background: #04060a; outline: none;
-  border: 1px solid var(--term-border-strong); border-radius: var(--radius-lg);
+  border: 0; border-radius: 0;
   font-family: var(--font-mono); touch-action: none;
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
 }
@@ -56,27 +48,8 @@ eleventyComputed:
 .sk-help__text { margin: 0 0 0.35rem; color: var(--term-fg); font-size: 0.8rem; line-height: 1.5; }
 .sk-help__note { margin: 0.4rem 0 0; color: var(--term-muted); font-size: 0.74rem; line-height: 1.55; }
 @media (prefers-reduced-motion: reduce) { .sk-ov__bar i { animation: none; width: 100%; } }
-@media (max-width: 720px) and (orientation: portrait) {
-  .sk-stage { aspect-ratio: auto; height: 70vh; height: 70svh; max-height: none; }
-}
-@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
-  .sk-stage {
-    position: fixed; inset: 0; z-index: 9000;
-    width: 100vw; height: 100vh; height: 100svh; max-height: none;
-    aspect-ratio: auto; border: 0; border-radius: 0;
-  }
-}
 </style>
 
-<section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">fpv-drone</span></p>
-  <h1>{{ "tools.fpv-drone.title" | t }}</h1>
-  <p>{{ "tools.fpv-drone.lede" | t }}</p>
-  {% include "tldr.njk" %}
-  <div class="sk-hero__row">
-    <button type="button" class="sk-helpbtn" popovertarget="sk-help">{{ "tool.fpv-drone.help.title" | t }}</button>
-  </div>
-</section>
 
 <div id="sk-help" popover class="game-help sk-help">
   <p class="game-help-title">{{ "tool.fpv-drone.help.title" | t }}</p>

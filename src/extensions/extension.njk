@@ -18,17 +18,39 @@ eleventyComputed:
 <section class="hero xs-hero xs-hero--app">
   <p class="eyebrow eyebrow--crumbs eyebrow--start"><a class="eyebrow__link" href="{{ prefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ prefix }}/extensions/">extensions</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">{{ ext.id }}</span></p>
   <div class="xs-head">
-    <span class="xs-head__icon" aria-hidden="true">{{ ext.icon }}</span>
+    <span class="xs-head__icon" aria-hidden="true">{% if ext.iconIsImage %}<img src="{{ ext.icon }}" alt="" width="40" height="40">{% else %}{{ ext.icon }}{% endif %}</span>
     <div class="xs-head__text">
       <h1 class="xs-head__name">{{ ext.name }}</h1>
       <p class="xs-head__by">{% tvar "store.by", "author", ext.author %}</p>
-      <div class="xs-head__actions">
-        <a class="m-btn m-btn--primary" id="xs-add" href="{{ prefix }}/tools/extensions/?add={{ ext.id }}">{{ "store.add" | t }}</a>
-        <a class="m-btn m-btn--primary" id="xs-open" href="{{ prefix }}/tools/extensions/run/?id={{ ext.id }}" hidden>{{ "tool.ext_gallery.btn_open" | t }}</a>
-        <span class="xs-head__state" id="xs-state" hidden>{{ "tool.ext_gallery.installed" | t }}</span>
-      </div>
     </div>
   </div>
+</section>
+
+{% set terminalTitle = ext.name %}
+{% set terminalBackHref = prefix + "/extensions/" %}
+{% set terminalMini = "tool" %}
+{% include "terminal-frame-open.njk" %}
+<section class="xr xs-run{% if ext.kind == 'app' %} xr--app{% endif %}" data-blocked="{{ 'tool.extensions.run_blocked' | t }}" data-install-quiet>
+  <p class="xr__error" id="xr-error" hidden></p>
+  <p class="xr__missing" id="xs-offline" hidden>{{ "store.offline_needs_install" | t }}</p>
+  <iframe class="xr__frame" id="xr-frame" title="{{ ext.name }}" allow="bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay" allowfullscreen></iframe>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<section class="xs-bar" aria-label="{{ ext.name }}">
+  <div class="xs-head__actions">
+    <button type="button" class="m-btn m-btn--primary" id="xs-install">{{ "store.install" | t }} · {{ ext.size }}</button>
+    <span class="xs-head__state" id="xs-state" hidden>{{ "store.installed_offline" | t }}</span>
+    <button type="button" class="m-btn" id="xs-remove" hidden>{{ "store.remove" | t }}</button>
+  </div>
+  <div class="xs-progress" id="xs-progress" hidden>
+    <span class="xs-progress__bar"><i id="xs-progress-fill"></i></span>
+    <span class="xs-progress__text" id="xs-progress-text"></span>
+  </div>
+  <p class="xs-head__error" id="xs-install-error" role="status" hidden></p>
+</section>
+
+<section class="xs-sec xs-about">
   <p class="xs-lede">{{ ("tool.ext_gallery.desc." + ext.id) | t }}</p>
 </section>
 
@@ -55,7 +77,7 @@ eleventyComputed:
   <dl class="xs-info">
     <div><dt>{{ "store.info_developer" | t }}</dt><dd>{{ ext.author }}</dd></div>
     <div><dt>{{ "store.info_version" | t }}</dt><dd>{{ ext.version }}</dd></div>
-    <div><dt>{{ "store.info_size" | t }}</dt><dd>{{ ext.kb }} KB</dd></div>
+    <div><dt>{{ "store.info_size" | t }}</dt><dd>{{ ext.size }}</dd></div>
     <div><dt>{{ "store.info_price" | t }}</dt><dd>{{ "store.free" | t }}</dd></div>
   </dl>
 </section>
@@ -83,7 +105,7 @@ eleventyComputed:
   "applicationCategory": "{{ ext.schemaCategory }}",
   "operatingSystem": "Web browser",
   "softwareVersion": {{ ext.version | dump | safe }},
-  "fileSize": "{{ ext.kb }} KB",
+  "fileSize": "{{ ext.size }}",
   "isAccessibleForFree": true,
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "author": { "@type": "Organization", "name": {{ ext.author | dump | safe }} },
@@ -91,16 +113,170 @@ eleventyComputed:
   "inLanguage": "{{ lang }}"
 }
 </script>
-<script type="module">
-const add = document.getElementById('xs-add');
-const open = document.getElementById('xs-open');
-const state = document.getElementById('xs-state');
-try {
-  const X = await import('/assets/js/mentria-extensions.js');
-  if (X.getEntry({{ ext.id | dump | safe }})) {
-    add.hidden = true;
-    open.hidden = false;
-    state.hidden = false;
-  }
-} catch (_) {}
+<script type="application/json" id="xs-data">{{ { id: ext.id, kind: ext.kind, app: ext.app, prefix: prefix, manifest: ext.manifest } | dump | safe }}</script>
+<script>
+  window.XS_COPY = {
+    installing: {{ ("store.installing" | t) | dump | safe }},
+    failed: {{ ("store.install_failed" | t) | dump | safe }},
+    removeConfirm: {{ ("store.remove_confirm" | t) | dump | safe }}
+  };
 </script>
+<script type="module">
+const D = JSON.parse(document.getElementById('xs-data').textContent);
+const C = window.XS_COPY;
+const installBtn = document.getElementById('xs-install');
+const removeBtn = document.getElementById('xs-remove');
+const stateEl = document.getElementById('xs-state');
+const progressEl = document.getElementById('xs-progress');
+const fillEl = document.getElementById('xs-progress-fill');
+const progressText = document.getElementById('xs-progress-text');
+const installErr = document.getElementById('xs-install-error');
+const frame = document.getElementById('xr-frame');
+const runRoot = document.querySelector('.xs-run');
+const runErr = document.getElementById('xr-error');
+const offlineEl = document.getElementById('xs-offline');
+let X;
+let H;
+try {
+  X = await import('/assets/js/mentria-extensions.js');
+  H = await import('/assets/js/mentria-ext-host.js');
+} catch (_) {
+  installBtn.hidden = true;
+}
+
+function installedEntry() {
+  try { return X ? X.getEntry(D.id) : null; } catch (_) { return null; }
+}
+
+function showState() {
+  const entry = installedEntry();
+  installBtn.hidden = !!entry;
+  stateEl.hidden = !entry;
+  removeBtn.hidden = !entry;
+}
+
+function showProgress(p) {
+  progressEl.hidden = false;
+  const pct = Math.round(p * 100);
+  fillEl.style.width = pct + '%';
+  progressText.textContent = C.installing.replace('{pct}', String(pct));
+}
+
+function extraUrls() {
+  const urls = [location.pathname];
+  if (D.app) urls.push(D.prefix + D.app);
+  return urls;
+}
+
+async function start() {
+  if (!X || !H) return;
+  const entry = installedEntry();
+  const onError = (msg) => { runErr.textContent = msg; runErr.hidden = false; };
+  if (D.kind === 'app') {
+    if (!navigator.onLine && !(entry && X.offlineReady(D.id))) { offlineEl.hidden = false; frame.remove(); return; }
+    H.mountExtension(frame, { manifest: entry ? entry.manifest : D.manifest, prefix: D.prefix, blockedTemplate: runRoot.dataset.blocked, onError, onClose: () => { location.href = D.prefix + '/extensions/'; } });
+    return;
+  }
+  let source = entry && entry.enabled ? X.getSource(D.id) : null;
+  if (!source) {
+    try {
+      const res = await fetch('/assets/extensions/' + D.id + '.html');
+      if (!res.ok) throw new Error(String(res.status));
+      source = await res.text();
+    } catch (_) {
+      offlineEl.hidden = false;
+      frame.remove();
+      return;
+    }
+  }
+  const manifest = entry && entry.enabled ? entry.manifest : X.parseManifest(source);
+  H.mountExtension(frame, { manifest, source, prefix: D.prefix, blockedTemplate: runRoot.dataset.blocked, onError, onClose: () => { location.href = D.prefix + '/extensions/'; } });
+}
+
+async function install() {
+  installErr.hidden = true;
+  installBtn.disabled = true;
+  showProgress(0);
+  let created = false;
+  try {
+    const pkg = await X.fetchPackage(D.id);
+    if (pkg.kind === 'app') {
+      X.installApp(pkg.manifest);
+    } else {
+      const res = await fetch('/assets/extensions/' + D.id + '.html', { cache: 'no-store' });
+      if (!res.ok) throw new Error(String(res.status));
+      const html = await res.text();
+      X.install(html, X.inspect(html).manifest);
+    }
+    created = true;
+    await X.downloadFiles(D.id, pkg.files, extraUrls(), showProgress);
+    progressEl.hidden = true;
+    showState();
+    if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast(stateEl.textContent);
+  } catch (e) {
+    if (created) X.remove(D.id);
+    progressEl.hidden = true;
+    installErr.textContent = C.failed;
+    installErr.hidden = false;
+    showState();
+  } finally {
+    installBtn.disabled = false;
+  }
+}
+
+async function removeExtension() {
+  const name = (D.manifest && D.manifest.name) || D.id;
+  const ok = window.mentriaConfirm ? await window.mentriaConfirm(C.removeConfirm.replace('{name}', name)) : false;
+  if (!ok) return;
+  X.remove(D.id);
+  showState();
+}
+
+async function refreshInstalled() {
+  const entry = installedEntry();
+  if (!entry || !navigator.onLine) return;
+  try {
+    const pkg = await X.fetchPackage(D.id);
+    if (pkg.kind === 'app' && pkg.manifest && pkg.manifest.version !== entry.manifest.version) X.installApp(pkg.manifest);
+    await X.downloadFiles(D.id, pkg.files, extraUrls());
+  } catch (_) {}
+}
+
+if (X) {
+  showState();
+  installBtn.addEventListener('click', install);
+  removeBtn.addEventListener('click', removeExtension);
+  await start();
+  refreshInstalled();
+}
+</script>
+<style>
+.xs-run { display: flex; flex-direction: column; height: min(640px, 70vh); }
+.xs-run.xr--app { height: min(820px, 80vh); }
+.xs-run .xr__frame { flex: 1; width: 100%; border: 0; min-height: 0; background: transparent; }
+.xs-run .xr__error, .xs-run .xr__missing { font-family: var(--font-mono); font-size: 0.8rem; color: var(--syn-pink, #f472b6); padding: 0.6rem 0.8rem; margin: 0; }
+.xs-run .xr__missing { color: var(--term-muted); }
+.xs-run [hidden] { display: none; }
+.xs-bar { margin-top: 1rem; }
+.xs-bar .xs-head__actions { margin-top: 0; }
+.xs-about { margin-top: 1.25rem; }
+.xs-about .xs-lede { max-width: 62ch; margin: 0; }
+.xs-progress { display: flex; align-items: center; gap: 0.7rem; margin-top: 0.7rem; }
+.xs-progress[hidden] { display: none; }
+.xs-progress__bar { flex: 0 1 220px; height: 4px; border-radius: 4px; background: rgba(110, 243, 197, 0.16); overflow: hidden; }
+.xs-progress__bar i { display: block; width: 0; height: 100%; background: var(--accent); transition: width 0.2s ease; }
+.xs-progress__text { font-family: var(--font-mono); font-size: 0.78rem; color: var(--term-muted); font-variant-numeric: tabular-nums; }
+.xs-head__error { margin: 0.6rem 0 0; font-family: var(--font-mono); font-size: 0.78rem; color: var(--syn-amber); }
+.xs-head__error[hidden] { display: none; }
+.xs-head__icon img { display: block; width: 100%; height: 100%; }
+@media (max-width: 480px) {
+  .xs-run { height: min(560px, 68vh); }
+  .xs-run.xr--app { height: min(620px, 70vh); }
+}
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  .terminal-frame:has(.xr--app) { position: fixed; inset: 0; z-index: 9000; margin: 0; max-width: none; border: 0; border-radius: 0; }
+  .terminal-frame:has(.xr--app) .terminal-frame__titlebar { display: none; }
+  .terminal-frame:has(.xr--app) .terminal-frame__body { padding: 0; height: 100%; }
+  .xr.xr--app { height: 100vh; height: 100svh; }
+}
+</style>

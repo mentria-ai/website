@@ -1760,7 +1760,9 @@
         "image-gen": "Générez des images à partir d'un texte sur le nœud de rendu partagé de Mentria. Gratuit, sans configuration : décrivez la scène et attendez votre tour.",
         "story-studio": "Créez vos propres decks d'histoires : générez des images sur le nœud de rendu de Mentria ou importez les vôtres, écrivez des légendes et assemblez les diapositives en une histoire à faire défiler.",
         "meal-planner": "Planifiez les repas de la semaine, obtenez une liste de courses classée par rayon et finissez ce qui reste dans vos placards. Avec 30 recettes pour commencer et des estimations nutritionnelles issues des données de l'USDA.",
-        "pregnancy-check": "Des informations et le bon moment pour faire un test, pas un diagnostic : quand un test de grossesse urinaire est fiable, la préparation d'une grossesse, la date du terme, les semaines et les rendez-vous. Tout reste sur cet appareil."
+        "pregnancy-check": "Des informations et le bon moment pour faire un test, pas un diagnostic : quand un test de grossesse urinaire est fiable, la préparation d'une grossesse, la date du terme, les semaines et les rendez-vous. Tout reste sur cet appareil.",
+        "fpv-drone": "Pilotez un drone de course à travers des portes lumineuses au-dessus de collines, d'un parc à conteneurs et d'un canyon désertique. Vol acrobatique ou auto-stabilisé, médailles, courses contre des fantômes et une carte de vol libre. Fonctionne au toucher, à la manette ou au clavier.",
+        "nitro-racer": "Course de rue arcade contre cinq rivaux : driftez pour remplir votre nitro, prenez les tremplins et visez les médailles sur un circuit urbain néon, une route côtière et un canyon désertique. Fonctionne au toucher, à l'inclinaison, à la manette ou au clavier."
       }
     },
     "bubble-level": {
@@ -3687,8 +3689,15 @@
   },
   "store": {
     "kind": "Extension",
-    "lede": "De petites apps à ajouter à Mentria. Chacune est un seul fichier qui s’installe d’un geste, obtient sa propre tuile dans votre menu Outils et se retire à tout moment.",
+    "lede": "De petites applis à ajouter à Mentria. Essayez chacune directement sur sa page, installez-la d'un geste pour l'utiliser hors ligne et supprimez-la quand vous voulez.",
     "add": "Ajouter à Mentria",
+    "install": "Installer",
+    "installing": "Installation… {pct} %",
+    "installed_offline": "Installée · fonctionne hors ligne",
+    "remove": "Supprimer",
+    "remove_confirm": "Supprimer {name} ? Ses données enregistrées sur cet appareil sont aussi effacées.",
+    "install_failed": "Le téléchargement n'a pas abouti. Vérifiez votre connexion et réessayez.",
+    "offline_needs_install": "Vous êtes hors ligne. Installez cette extension quand vous êtes en ligne pour l'utiliser sans connexion.",
     "by": "Par {author}",
     "access_title": "Ce qu’elle peut utiliser",
     "access_none": "Uniquement son propre écran. Elle ne demande aucun accès supplémentaire.",

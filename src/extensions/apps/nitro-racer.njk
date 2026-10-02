@@ -1,23 +1,23 @@
 ---
-layout: base.njk
+layout: ext-app.njk
 pagination:
   data: locales
   size: 1
   alias: locale
-permalink: "{{ locale.pathPrefix }}/tools/nitro-racer/index.html"
+permalink: "{{ locale.pathPrefix }}/extensions/nitro-racer/app/index.html"
 usesThree: true
+eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.nitro-racer.title' | t }}"
   description: "{{ 'tools.nitro-racer.lede' | t }}"
 ---
 <style>
-.nr-wrap { margin: 1.25rem 0 1.5rem; }
+.nr-wrap { position: fixed; inset: 0; margin: 0; }
 .nr-stage {
-  position: relative; width: 100%; aspect-ratio: 16 / 9;
-  max-height: 78vh; max-height: 78svh;
+  position: absolute; inset: 0; width: 100%; height: 100%;
   overflow: hidden; background: #04060a;
-  border: 1px solid var(--term-border-strong); border-radius: var(--radius-lg);
+  border: 0; border-radius: 0;
   font-family: var(--font-mono); touch-action: none;
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
@@ -56,17 +56,6 @@ eleventyComputed:
 .nr-fail__body { margin: 0; max-width: 54ch; color: var(--term-muted); font-size: var(--text-xs); line-height: 1.7; }
 .nr-fail__code { display: block; max-width: 60ch; color: var(--syn-pink); font-size: var(--text-2xs); word-break: break-word; }
 
-.nr-under { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.6rem; flex-wrap: wrap; }
-.nr-under__note { margin: 0; color: var(--term-subtle); font-size: var(--text-2xs); letter-spacing: 0.06em; }
-.nr-helpbtn {
-  display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;
-  font-family: var(--font-mono); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.12em;
-  color: var(--term-fg); background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--term-border-strong); border-radius: var(--radius-pill);
-  padding: 0.45rem 0.9rem; min-height: 40px;
-}
-.nr-helpbtn:hover, .nr-helpbtn:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
-.nr-helpbtn svg { flex: none; }
 
 .nr-help { max-width: min(420px, calc(100vw - 1.5rem)); }
 .nr-help__head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
@@ -89,26 +78,8 @@ eleventyComputed:
 .nr-help__glyph { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border-radius: 3px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--term-border); color: var(--accent); font-size: 12px; flex: none; }
 .nr-help__tip { margin: 4px 2px 0; color: var(--term-muted); font-size: 0.75rem; line-height: 1.6; }
 
-@media (max-width: 720px) {
-  .nr-wrap { margin: 0.75rem 0 1rem; }
-}
-@media (orientation: landscape) and (max-height: 560px) and (pointer: coarse) {
-  .nr-wrap { margin: 0; }
-  .nr-stage {
-    aspect-ratio: auto; width: 100vw; margin-left: calc(50% - 50vw);
-    height: 100vh; height: 100svh; max-height: none; border: 0; border-radius: 0;
-  }
-}
-@media (orientation: portrait) and (pointer: coarse) {
-  .nr-stage { aspect-ratio: auto; height: 62vh; height: 62svh; max-height: none; }
-}
 </style>
 
-<section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">nitro-racer</span></p>
-  <h1>{{ "tools.nitro-racer.title" | t }}</h1>
-  <p>{{ "tools.nitro-racer.lede" | t }}</p>
-</section>
 
 <div class="nr-wrap">
   <div class="nr-stage" id="nr-stage" data-install-quiet>
@@ -126,14 +97,6 @@ eleventyComputed:
       <p class="nr-fail__body">{{ "tool.nitro-racer.fail_body" | t }}</p>
       <code class="nr-fail__code" id="nr-fail-detail"></code>
     </div>
-  </div>
-
-  <div class="nr-under">
-    <button type="button" class="nr-helpbtn" id="nr-help-btn" popovertarget="nr-help">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="7.5" width="19" height="9" rx="4.5"></rect><path d="M6.5 10.2v3.6M4.7 12h3.6M16.2 10.8h.01M18.6 13.2h.01"></path></svg>
-      <span>{{ "tool.nitro-racer.help_btn" | t }}</span>
-    </button>
-    <p class="nr-under__note">{{ "tool.nitro-racer.under_note" | t }}</p>
   </div>
 </div>
 

@@ -1,0 +1,9 @@
+---
+pagination:
+  data: extensions
+  size: 1
+  alias: ext
+permalink: "/extensions/{{ ext.id }}/files.json"
+eleventyExcludeFromSitemap: true
+---
+{{ { id: ext.id, kind: ext.kind, app: ext.app, version: ext.version, manifest: ext.manifest, files: ext.files } | dump | safe }}

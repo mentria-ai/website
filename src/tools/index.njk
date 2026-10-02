@@ -67,7 +67,7 @@ eleventyComputed:
     <div class="tools-grid">
         {% for e in extensions %}
         <a class="tool-tile" data-slug="ext-{{ e.id }}" data-shelf="tools" href="{{ locale.pathPrefix }}/extensions/{{ e.id }}/">
-            <span class="tool-tile__icon tool-tile__icon--emoji" aria-hidden="true">{{ e.icon }}</span>
+            <span class="tool-tile__icon{% if not e.iconIsImage %} tool-tile__icon--emoji{% endif %}" aria-hidden="true">{% if e.iconIsImage %}<img src="{{ e.icon }}" alt="" width="40" height="40">{% else %}{{ e.icon }}{% endif %}</span>
             <span class="tool-tile__text">
                 <span class="tool-tile__name">{{ e.name }}</span>
                 <span class="tool-tile__cat">{{ "store.kind" | t }}</span>

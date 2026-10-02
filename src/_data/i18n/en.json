@@ -1760,7 +1760,9 @@
         "image-gen": "Generate images from a text prompt on Mentria's shared render node. Free, no setup — describe the scene and wait your turn.",
         "story-studio": "Build your own story decks: generate images on Mentria's render node or import your own, write captions, and stitch slides into a swipeable story.",
         "meal-planner": "Plan the week's meals, get a shopping list grouped by aisle, and use up what's in your pantry. Comes with 30 starter recipes and nutrition estimates from USDA data.",
-        "pregnancy-check": "Information and test timing, not a diagnosis: when a home pregnancy test is reliable, planning a pregnancy, and your due date, weeks and appointments. Everything stays on this device."
+        "pregnancy-check": "Information and test timing, not a diagnosis: when a home pregnancy test is reliable, planning a pregnancy, and your due date, weeks and appointments. Everything stays on this device.",
+        "fpv-drone": "Fly a racing drone through glowing gates over hills, a container yard and a desert canyon. Acro or self-level flight, medals, ghost races and a free-flight map. Works with touch, controller or keyboard.",
+        "nitro-racer": "Arcade street racing against five rivals: drift to fill your nitro, hit the jumps and chase medals on a neon city circuit, a coastal highway and a desert canyon. Works with touch, tilt, controller or keyboard."
       }
     },
     "bubble-level": {
@@ -3687,8 +3689,15 @@
   },
   "store": {
     "kind": "Extension",
-    "lede": "Small apps you can add to Mentria. Each one is a single file that installs in a tap, gets its own tile in your Tools menu, and can be removed at any time.",
+    "lede": "Small apps you can add to Mentria. Try each one right on its page, install it in a tap to use it offline, and remove it at any time.",
     "add": "Add to Mentria",
+    "install": "Install",
+    "installing": "Installing… {pct}%",
+    "installed_offline": "Installed · works offline",
+    "remove": "Remove",
+    "remove_confirm": "Remove {name}? Its saved data on this device is deleted too.",
+    "install_failed": "Couldn't download everything. Check your connection and try again.",
+    "offline_needs_install": "You're offline. Install this extension while you're online to use it without a connection.",
     "by": "By {author}",
     "access_title": "What it can use",
     "access_none": "Only its own screen. It doesn't ask for any extra access.",

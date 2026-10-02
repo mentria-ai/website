@@ -544,7 +544,7 @@ export function createUI(stage, copyIn, opts = {}) {
   let askEl = null;
   let askResolve = null;
   let lastMethod = coarsePointer() ? 'touch' : 'keyboard';
-  let engaged = false;
+  let engaged = window.self !== window.top;
   let disposed = false;
   let revealTimers = [];
   let padPollRaf = 0;

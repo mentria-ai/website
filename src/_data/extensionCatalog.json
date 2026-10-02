@@ -4,6 +4,8 @@
   { "id": "image-gen", "schemaCategory": "MultimediaApplication" },
   { "id": "story-studio", "schemaCategory": "MultimediaApplication" },
   { "id": "meal-planner", "schemaCategory": "LifestyleApplication" },
+  { "id": "fpv-drone", "schemaCategory": "GameApplication", "app": "/extensions/fpv-drone/app/" },
+  { "id": "nitro-racer", "schemaCategory": "GameApplication", "app": "/extensions/nitro-racer/app/" },
   { "id": "pregnancy-check", "schemaCategory": "HealthApplication", "held": true },
   { "id": "forge", "schemaCategory": "DeveloperApplication", "held": true },
   { "id": "unit-converter", "retired": true }

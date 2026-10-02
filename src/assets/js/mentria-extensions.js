@@ -9,6 +9,8 @@ const VERSION_RE = /^\d+\.\d+\.\d+$/;
 const CMD_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DB_NAME = 'mentria-ext-db';
 const DB_STORE = 'kv';
+const FILES_CACHE = 'mentria-ext-files';
+const FILES_KEY = 'files.';
 
 function store() {
   if (!window.MentriaStore) throw new Error('MentriaStore unavailable');
@@ -59,6 +61,7 @@ export function validateManifest(m, sizeBytes) {
       if (typeof w.label !== 'string' || w.label.length < 1 || w.label.length > 48) fail('mounts.widget.label must be a string, 1-48 chars');
     }
   }
+  if (m.app !== undefined && m.app !== '/extensions/' + m.id + '/app/') fail('app must be /extensions/' + m.id + '/app/');
   if (sizeBytes > REJECT_BYTES) fail('file is ' + Math.round(sizeBytes / 1024) + ' KB — extensions are stored in local storage, keep them under 1536 KB');
   return true;
 }
@@ -88,6 +91,7 @@ export function inspect(html) {
   const size = new Blob([html]).size;
   const manifest = parseManifest(html);
   validateManifest(manifest, size);
+  if (manifest.app) throw new Error('app extensions install from their page in the extension store');
   return { manifest, size, warnLarge: size > WARN_BYTES, existing: getEntry(manifest.id), mounts: mountSummary(manifest) };
 }
 
@@ -115,6 +119,111 @@ export function install(html, manifest) {
   return entry;
 }
 
+export function isApp(entry) {
+  const m = entry && (entry.manifest || entry);
+  return !!(m && m.app);
+}
+
+export function installApp(manifest) {
+  validateManifest(manifest, 0);
+  if (!manifest.app) throw new Error('not an app extension');
+  const prev = getEntry(manifest.id);
+  const registry = getRegistry().filter((e) => e.manifest.id !== manifest.id);
+  const entry = {
+    manifest,
+    enabled: prev ? prev.enabled : true,
+    installedAt: prev ? prev.installedAt : new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    size: 0
+  };
+  registry.push(entry);
+  if (!store().set(NS, 'registry', registry)) throw new Error('storage full — remove an extension or free space');
+  return entry;
+}
+
+export async function fetchPackage(id) {
+  const res = await fetch('/extensions/' + encodeURIComponent(id) + '/files.json', { cache: 'no-store' });
+  if (!res.ok) throw new Error('package unavailable (' + res.status + ')');
+  return res.json();
+}
+
+function ownedFiles(id) {
+  return store().get(NS, FILES_KEY + id) || null;
+}
+
+export function offlineReady(id) {
+  const owned = ownedFiles(id);
+  return !!(owned && owned.complete);
+}
+
+function usedElsewhere(id) {
+  const used = new Set();
+  for (const e of getRegistry()) {
+    if (e.manifest.id === id) continue;
+    const owned = ownedFiles(e.manifest.id);
+    if (owned && Array.isArray(owned.list)) for (const f of owned.list) used.add(f.u);
+  }
+  return used;
+}
+
+async function prune(id, urls, keep) {
+  if (typeof caches === 'undefined') return;
+  const cache = await caches.open(FILES_CACHE);
+  const used = usedElsewhere(id);
+  for (const u of urls) {
+    if (keep.has(u) || used.has(u)) continue;
+    try { await cache.delete(u); } catch (_) {}
+  }
+}
+
+export async function downloadFiles(id, files, extra, onProgress) {
+  if (typeof caches === 'undefined') throw new Error('offline storage unavailable in this browser');
+  const cache = await caches.open(FILES_CACHE);
+  const list = (files || []).map((f) => ({ u: f.u, b: f.b || 0, h: f.h || '' }));
+  for (const u of extra || []) if (!list.some((f) => f.u === u)) list.push({ u, b: 0, h: '' });
+  const prev = ownedFiles(id);
+  const prevHash = new Map(((prev && prev.list) || []).map((f) => [f.u, f.h]));
+  const weight = (f) => f.b || 24000;
+  const total = list.reduce((n, f) => n + weight(f), 0) || 1;
+  let done = 0;
+  let failed = null;
+  const queue = list.slice();
+  const report = () => { if (onProgress) { try { onProgress(Math.min(1, done / total)); } catch (_) {} } };
+  async function worker() {
+    while (queue.length && !failed) {
+      const f = queue.shift();
+      try {
+        const fresh = f.h && prevHash.get(f.u) === f.h && await cache.match(f.u);
+        if (!fresh) {
+          const resp = await fetch(f.u, { cache: 'no-cache' });
+          if (!resp.ok) throw new Error(f.u + ' (' + resp.status + ')');
+          const body = await resp.arrayBuffer();
+          await cache.put(f.u, new Response(body, { status: resp.status, statusText: resp.statusText, headers: { 'content-type': resp.headers.get('content-type') || 'application/octet-stream' } }));
+        }
+      } catch (e) {
+        failed = e;
+        break;
+      }
+      done += weight(f);
+      report();
+    }
+  }
+  report();
+  await Promise.all([worker(), worker(), worker(), worker()]);
+  if (failed) throw failed;
+  if (!store().set(NS, FILES_KEY + id, { complete: true, at: new Date().toISOString(), list: list.map((f) => ({ u: f.u, h: f.h })) })) {
+    throw new Error('storage full — remove an extension or free space');
+  }
+  if (prev && Array.isArray(prev.list)) await prune(id, prev.list.map((f) => f.u), new Set(list.map((f) => f.u)));
+  return list.length;
+}
+
+export async function removeFiles(id) {
+  const owned = ownedFiles(id);
+  store().remove(NS, FILES_KEY + id);
+  if (owned && Array.isArray(owned.list)) await prune(id, owned.list.map((f) => f.u), new Set());
+}
+
 export function setEnabled(id, enabled) {
   const registry = getRegistry();
   const entry = registry.find((e) => e.manifest.id === id);
@@ -125,7 +234,8 @@ export function setEnabled(id, enabled) {
 
 export function remove(id) {
   if (!getEntry(id)) return false;
-  const srcOk = store().remove(NS, 'src.' + id);
+  const srcOk = getSource(id) == null ? true : store().remove(NS, 'src.' + id);
+  removeFiles(id).catch(() => {});
   store().clear(DATA_NS_PREFIX + id);
   clearDb(id);
   const registry = getRegistry().filter((e) => e.manifest.id !== id);
@@ -201,4 +311,4 @@ export function dbApiFor(id) {
   });
 }
 
-export { KNOWN_PERMISSIONS, WARN_BYTES, REJECT_BYTES };
+export { KNOWN_PERMISSIONS, WARN_BYTES, REJECT_BYTES, FILES_CACHE };

@@ -321,16 +321,49 @@ export function addFloorJoints(material, spacing){
   vec2 cell = floor(jp);
   vec2 jd = abs(fract(jp) - 0.5);
   vec2 fw = fwidth(jp) * 1.5 + 0.001;
-  float lx = smoothstep(0.5 - 0.006 - fw.x, 0.5 - 0.006, jd.x);
-  float lz = smoothstep(0.5 - 0.006 - fw.y, 0.5 - 0.006, jd.y);
-  float line = max(lx, lz);
+  float lx = smoothstep(0.5 - 0.004 - fw.x, 0.5 - 0.004, jd.x);
+  float lz = smoothstep(0.5 - 0.004 - fw.y, 0.5 - 0.004, jd.y);
+  float fade = 1.0 - smoothstep(14.0, 46.0, distance(cameraPosition, vJointPos));
+  float line = max(lx, lz) * fade;
   float h = fract(sin(dot(cell, vec2(127.1, 311.7))) * 43758.5453);
-  diffuseColor.rgb *= mix(0.9 + 0.16 * h, 0.42, line);
+  diffuseColor.rgb *= mix(0.92 + 0.12 * h, 0.55, line);
 }
 #include <alphamap_fragment>`;
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vJointPos;')
       .replace('#include <alphamap_fragment>', joint);
+  };
+  material.needsUpdate = true;
+}
+
+export function addFormwork(material){
+  const prev = material.onBeforeCompile;
+  const prevKey = material.customProgramCacheKey ? material.customProgramCacheKey.bind(material) : null;
+  material.customProgramCacheKey = () => (prevKey ? prevKey() : '') + '|formwork';
+  material.onBeforeCompile = (shader, renderer) => {
+    if (typeof prev === 'function') prev(shader, renderer);
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vFwPos;\nvarying vec3 vFwN;')
+      .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvFwPos = (modelMatrix * vec4(transformed, 1.0)).xyz;\nvFwN = normalize(mat3(modelMatrix) * objectNormal);');
+    const fw = `
+{
+  vec3 an = abs(vFwN);
+  if (an.y < 0.5) {
+    float u = an.x > an.z ? vFwPos.z : vFwPos.x;
+    vec2 q = vec2(u, vFwPos.y);
+    vec2 pw = fwidth(q) + 0.0008;
+    vec2 seam = abs(fract(q / vec2(2.4, 1.2)) - 0.5) * vec2(2.4, 1.2);
+    float sl = max(1.0 - smoothstep(0.004, 0.004 + pw.x * 1.5, abs(seam.x - 1.2)), 1.0 - smoothstep(0.004, 0.004 + pw.y * 1.5, abs(seam.y - 0.6)));
+    vec2 hc = (fract((q + vec2(0.3, 0.3)) / 0.6) - 0.5) * 0.6;
+    float hole = 1.0 - smoothstep(0.016, 0.016 + max(pw.x, pw.y) * 1.5, length(hc));
+    float fade = 1.0 - smoothstep(10.0, 34.0, distance(cameraPosition, vFwPos));
+    diffuseColor.rgb *= 1.0 - fade * (sl * 0.22 + hole * 0.55);
+  }
+}
+#include <alphamap_fragment>`;
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vFwPos;\nvarying vec3 vFwN;')
+      .replace('#include <alphamap_fragment>', fw);
   };
   material.needsUpdate = true;
 }

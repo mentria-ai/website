@@ -189,7 +189,7 @@ export function worldMaterials(look){
   const plate = texSet('ph-floor', 3, 512);
   const metalTop = new THREE.MeshStandardMaterial({ map: plate.map, normalMap: plate.normalMap, roughnessMap: plate.roughnessMap, color: new THREE.Color(L.plateTint || 0xf2e2cc), roughness: 0.5, metalness: 0.5, vertexColors: true, envMapIntensity: 0.7 });
   const panel = texSet('ph-panel', 1, 512);
-  const metalSide = new THREE.MeshStandardMaterial({ map: panel.map, normalMap: panel.normalMap, roughnessMap: panel.roughnessMap, color: new THREE.Color(L.panelTint || 0xd4dbe4), roughness: 0.45, metalness: 0.78, vertexColors: true, envMapIntensity: 1 });
+  const metalSide = new THREE.MeshStandardMaterial({ map: panel.map, normalMap: panel.normalMap, roughnessMap: panel.roughnessMap, color: new THREE.Color(L.panelTint || 0xf4f0ea), roughness: 0.5, metalness: 0.55, vertexColors: true, envMapIntensity: 0.9 });
   const emissive = new THREE.MeshStandardMaterial({ color: 0x0b0f12, emissive: new THREE.Color(0x6ef3c5), emissiveIntensity: 2.4, roughness: 0.4, metalness: 0.1 });
   for (const m of [concTop, concSide, metalTop, metalSide, emissive]) m.name = 'ph-' + m.uuid.slice(0, 6);
   return [concTop, concSide, metalTop, metalSide, emissive];

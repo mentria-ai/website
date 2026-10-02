@@ -68,6 +68,7 @@ export function createRenderer(canvas){
       try { console.warn('[phosphor] enhanced renderer unavailable, using classic', err); } catch (_) {}
       modern = null;
       modernState = 'failed';
+      if (mode === GFX_ENHANCED){ mode = GFX_CLASSIC; getClassic(); }
     });
   }
 
@@ -89,7 +90,7 @@ export function createRenderer(canvas){
         modern.render(scene, dt);
         return;
       }
-      if (modernState === 'loading' && now() - loadStartedAt > LOAD_TIMEOUT_MS) modernState = 'failed';
+      if (modernState === 'loading' && now() - loadStartedAt > LOAD_TIMEOUT_MS){ modernState = 'failed'; mode = GFX_CLASSIC; }
       if (!classic) return;
     }
     const c = getClassic();

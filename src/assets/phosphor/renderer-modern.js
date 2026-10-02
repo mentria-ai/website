@@ -8,7 +8,7 @@ import * as KitQuality from '../games/kit/quality.js';
 import { normalizePrim, buildStatic, buildStrips, buildLamps, buildYard, bounds } from './modern-world.js';
 import { createActors } from './modern-actors.js';
 import { createGun } from './modern-gun.js';
-import { buildDressing, addFloorJoints } from './modern-dress.js';
+import { buildDressing, addFloorJoints, addFormwork } from './modern-dress.js';
 import { createMotion, GFX_ENHANCED } from './fx.js';
 
 const LOOK_BASE = {
@@ -190,7 +190,7 @@ export function createRenderer(canvas){
     }
     const b = bounds(prims);
     const stat = buildStatic(prims, look);
-    if (Array.isArray(stat.material)) addFloorJoints(stat.material[0], 4);
+    if (Array.isArray(stat.material)){ addFloorJoints(stat.material[0], 4); addFormwork(stat.material[1]); }
     worldGroup.add(stat);
     worldGroup.add(buildYard(b, look));
     strips = buildStrips(def.strips);

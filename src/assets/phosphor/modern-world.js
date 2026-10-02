@@ -188,6 +188,11 @@ function worldMaterials(look){
   stochasticTiling(concTop);
   const plate = texSet('ph-floor', 3, 512);
   const metalTop = new THREE.MeshStandardMaterial({ map: plate.map, normalMap: plate.normalMap, roughnessMap: plate.roughnessMap, color: new THREE.Color(L.plateTint || 0xf2e2cc), roughness: 0.5, metalness: 0.5, vertexColors: true, envMapIntensity: 0.7 });
+  if (L.wet > 0){
+    metalTop.roughness = 0.5 * (1 - 0.55 * L.wet);
+    metalTop.envMapIntensity = 0.7 + 0.5 * L.wet;
+    metalTop.color.multiplyScalar(1 - 0.18 * L.wet);
+  }
   const panel = texSet('ph-panel', 1, 512);
   const metalSide = new THREE.MeshStandardMaterial({ map: panel.map, normalMap: panel.normalMap, roughnessMap: panel.roughnessMap, color: new THREE.Color(L.panelTint || 0xf4f0ea), roughness: 0.5, metalness: 0.55, vertexColors: true, envMapIntensity: 0.9 });
   const emissive = new THREE.MeshStandardMaterial({ color: 0x0b0f12, emissive: new THREE.Color(0x6ef3c5), emissiveIntensity: 2.4, roughness: 0.4, metalness: 0.1 });

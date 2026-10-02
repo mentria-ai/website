@@ -31,7 +31,7 @@ function lookFor(def){
     presetName = warmth < 0.2 ? 'day' : warmth > 0.6 || elev < 10 ? 'sunset' : 'golden';
   }
   const backdrop = mood && typeof mood.backdrop === 'string' ? mood.backdrop : BACKDROPS[Math.abs(Math.round(sd[0] * 97 + sd[2] * 31)) % BACKDROPS.length];
-  return Object.assign({ preset: presetName, backdrop }, LOOK_BASE[presetName], mood && typeof mood.exposure === 'number' ? { exposure: mood.exposure } : null);
+  return Object.assign({ preset: presetName, backdrop, wet: mood && typeof mood.wet === 'number' ? mood.wet : 0 }, LOOK_BASE[presetName], mood && typeof mood.exposure === 'number' ? { exposure: mood.exposure } : null);
 }
 
 function reducedMotion(){
@@ -193,7 +193,7 @@ export function createRenderer(canvas){
     }
     const b = bounds(prims);
     const stat = buildStatic(prims, look);
-    if (Array.isArray(stat.material)){ addFloorJoints(stat.material[0], 4); addFormwork(stat.material[1]); }
+    if (Array.isArray(stat.material)){ addFloorJoints(stat.material[0], 4, look.wet); addFormwork(stat.material[1]); }
     worldGroup.add(stat);
     worldGroup.add(buildYard(b, look));
     strips = buildStrips(def.strips);

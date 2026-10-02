@@ -1,0 +1,20 @@
+---
+layout: ext-app.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/extensions/finance/app/index.html"
+appPlain: true
+eleventyExcludeFromSitemap: true
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tool.finance.app.name' | traw }}"
+  description: "{{ 'tool.ext_gallery.desc.finance' | traw }}"
+---
+<link rel="stylesheet" href="/assets/finance/finance.css?v={{ buildHash }}">
+<script src="/assets/js/mentria-backup.js?v={{ buildHash }}"></script>
+<div id="fin" class="fin" data-install-quiet></div>
+<noscript><p style="padding:24px;color:#e2e8f0;font-family:sans-serif">{{ "tool.finance.errors.no_js" | traw }}</p></noscript>
+<script>window.FIN_COPY = {{ "tool.finance" | tsub | dump | safe }};</script>
+<script type="module" src="/assets/finance/app.js?v={{ buildHash }}"></script>

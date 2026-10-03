@@ -375,7 +375,14 @@ try {
           if (blocked && storageBlockedTold) return;
           if (blocked) storageBlockedTold = true;
           storageErrorActive = true;
-          Promise.resolve(typeof window.mentriaAlert === 'function' ? window.mentriaAlert(blocked ? storageMsg.blocked : storageMsg.full) : null)
+          var msg = blocked ? storageMsg.blocked : storageMsg.full;
+          var ui = window.MentriaUI;
+          if (ui && typeof ui.toast === 'function') {
+            ui.toast(msg, { duration: 6000 });
+            setTimeout(function () { storageErrorActive = false; }, 9000);
+            return;
+          }
+          Promise.resolve(typeof window.mentriaAlert === 'function' ? window.mentriaAlert(msg) : null)
             .catch(function () {})
             .then(function () { setTimeout(function () { storageErrorActive = false; }, 3000); });
         });

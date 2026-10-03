@@ -4978,6 +4978,7 @@
     "import_hint": "Tout outil qui écrit du JSON peut créer un pack, y compris un assistant IA à partir d’un livre ou de vos notes.",
     "try_example": "Essayer le pack d’exemple",
     "importing": "Import en cours…",
+    "import_url_confirm": "Importer un pack depuis {host} ? N’importez que des packs de sources de confiance.",
     "imported": "« {title} » importé.",
     "replaced": "« {title} » mis à jour.",
     "import_failed": "Import impossible :",

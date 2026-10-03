@@ -440,7 +440,7 @@ localeReload: true
 
       const dataUriMatch = val.match(/^data:([^;,]+)[^,]*;base64,(.*)$/s);
       if (dataUriMatch) {
-        mime = dataUriMatch[1];
+        mime = /^[\w.+-]+\/[\w.+-]+$/.test(dataUriMatch[1]) ? dataUriMatch[1] : 'application/octet-stream';
         b64 = dataUriMatch[2];
       } else if (!isBase64(val)) {
         clearDecoded();
@@ -464,7 +464,10 @@ localeReload: true
           img.className = 'b64-preview-img';
           decodePreview.appendChild(img);
         } else {
-          decodePreview.innerHTML = '<p class="b64-preview-placeholder">' + COPY.decodedPreview.replace('{mime}', mime).replace('{size}', formatBytes(decodedBlob.size)) + '</p>';
+          const note = document.createElement('p');
+          note.className = 'b64-preview-placeholder';
+          note.textContent = COPY.decodedPreview.replace('{mime}', mime).replace('{size}', formatBytes(decodedBlob.size));
+          decodePreview.appendChild(note);
         }
 
         downloadBtn.disabled = false;

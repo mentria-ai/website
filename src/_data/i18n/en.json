@@ -4978,6 +4978,7 @@
     "import_hint": "Any tool that writes JSON can make a pack, including an AI assistant working from a book or your notes.",
     "try_example": "Try the example pack",
     "importing": "Importing…",
+    "import_url_confirm": "Import a pack from {host}? Only import packs from sources you trust.",
     "imported": "Imported “{title}”.",
     "replaced": "Updated “{title}”.",
     "import_failed": "Could not import:",

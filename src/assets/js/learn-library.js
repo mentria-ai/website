@@ -18,7 +18,7 @@
   var fileInput = document.getElementById('learn-file');
   var drop = document.getElementById('learn-drop');
 
-  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function say(msg, kind) {
     if (!status) return;
     status.textContent = msg;
@@ -278,10 +278,18 @@
     P.importUrl(location.origin + '/assets/packs/example.mentria.json').then(handleResult, handleError);
   });
   var params = new URLSearchParams(location.search);
-  if (params.get('pack')) {
-    if (importBox && importBox.hidden) toggle.click();
-    say(t('importing'));
-    P.importUrl(params.get('pack')).then(function (r) { try { history.replaceState(null, '', location.pathname); } catch (_) {} handleResult(r); }, handleError);
+  var packUrl = params.get('pack');
+  if (packUrl) {
+    try { history.replaceState(null, '', location.pathname); } catch (_) {}
+    var host = packUrl;
+    try { host = new URL(packUrl, location.href).host; } catch (_) {}
+    var ask = window.mentriaConfirm ? window.mentriaConfirm(t('import_url_confirm', { host: host })) : Promise.resolve(false);
+    Promise.resolve(ask).then(function (ok) {
+      if (!ok) return;
+      if (importBox && importBox.hidden) toggle.click();
+      say(t('importing'));
+      P.importUrl(packUrl).then(handleResult, handleError);
+    });
   }
   window.addEventListener('mentria:packs', refresh);
   window.addEventListener('pageshow', function (e) {

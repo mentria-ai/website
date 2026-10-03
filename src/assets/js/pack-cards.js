@@ -3,7 +3,7 @@
   var P = global.MentriaPacks;
   if (!P) return;
 
-  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function el(tag, cls, html) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;

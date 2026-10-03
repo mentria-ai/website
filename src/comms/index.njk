@@ -1562,7 +1562,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.meta.size, entry.received);
     if (m.done) {
       entry.line.line.removeAttribute('aria-live');
-      const blob = new Blob(entry.chunks, { type: entry.meta.type || 'application/octet-stream' });
+      const safeType = /^image\/(png|jpeg|gif|webp|avif|bmp)$/i.test(entry.meta.type || '') ? entry.meta.type : 'application/octet-stream';
+      const blob = new Blob(entry.chunks, { type: safeType });
       if (entry.meta.kind === 'mentria-pack' || /\.mentria\.json$/i.test(entry.meta.name || '')) {
         const text = await blob.text();
         const who = short(ctx.peerId);
@@ -1605,7 +1606,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
         entry.line.what.append(label, installBtn);
       } else {
         const url = trackObjectUrl(blob);
-        entry.line.what.innerHTML = 'received ' + completeHTML(entry.meta.name, entry.meta.size, entry.meta.type, url);
+        entry.line.what.innerHTML = 'received ' + completeHTML(entry.meta.name, entry.meta.size, safeType, url);
       }
       incoming.delete(key);
       playPing(660);

@@ -2,7 +2,7 @@
 {
   "id": "image-gen",
   "name": "Image Generator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "icon": "🎨",
   "author": "Mentria",
   "description": "Text-to-image on Mentria's shared z-image-turbo render node. Type a prompt, wait your turn, get an image.",
@@ -236,7 +236,7 @@ room.onPush = (event, data) => {
     return;
   }
   if (event === 'job:pos') {
-    stage('<span class="pos">position ' + data.pos + ' in queue</span><span class="eta"></span><span class="hint">estimated wait</span>');
+    stage('<span class="pos">position ' + (parseInt(data.pos, 10) || 0) + ' in queue</span><span class="eta"></span><span class="hint">estimated wait</span>');
     countdown(data.etaMs);
   } else if (event === 'job:start') {
     stage('<div class="spin"></div><span class="eta"></span><span class="hint">rendering your image…</span>');
@@ -296,7 +296,7 @@ async function generate() {
     myJob = r.job;
     setStatus('');
     paintQueue(r.queue, null);
-    stage('<span class="pos">position ' + r.pos + ' in queue</span><span class="eta"></span><span class="hint">estimated wait</span>');
+    stage('<span class="pos">position ' + (parseInt(r.pos, 10) || 0) + ' in queue</span><span class="eta"></span><span class="hint">estimated wait</span>');
     countdown(r.etaMs);
   } catch (e) {
     setStatus(String(e.message || e), true);

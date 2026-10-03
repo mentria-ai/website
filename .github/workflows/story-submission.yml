@@ -48,11 +48,14 @@ jobs:
             [ "$code" = "200" ] || { echo "CDN verify failed for $f ($code)"; exit 1; }
           done
       - name: Commit
+        env:
+          STORY_TITLE: ${{ steps.publish.outputs.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           git config user.name "mentria-bot"
           git config user.email "agent@mentria.ai"
           git add src/_data/stories.json src/_data/feed.json
-          git commit -m "stories: ${{ steps.publish.outputs.title }} (#${{ github.event.issue.number }})"
+          git commit -m "stories: ${STORY_TITLE} (#${ISSUE_NUMBER})"
           git push origin main
       - name: Deploy
         env:

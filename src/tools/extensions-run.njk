@@ -31,10 +31,18 @@ const id = params.get('id') || '';
 const entry = X.getEntry(id);
 const frame = document.getElementById('xr-frame');
 const errEl = document.getElementById('xr-error');
+let prefix = root.dataset.prefix || '';
 
-function parseHashArgs() {
-  const h = new URLSearchParams(location.hash.replace(/^#/, ''));
-  return h.get('cmd') ? { cmd: h.get('cmd'), args: h.get('args') || '' } : null;
+function takeHashArgs() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  const cmd = h.get('cmd');
+  if (!cmd) return null;
+  const args = h.get('args') || '';
+  h.delete('cmd');
+  h.delete('args');
+  const rest = h.toString();
+  try { history.replaceState(history.state, '', location.pathname + location.search + (rest ? '#' + rest : '')); } catch (_) {}
+  return { cmd, args };
 }
 
 const app = entry && X.isApp(entry);
@@ -51,18 +59,25 @@ if (!entry || !entry.enabled || (!app && !source)) {
   const m = entry.manifest;
   const filename = document.querySelector('.terminal-frame__filename');
   if (filename) filename.textContent = m.icon && !/^data:/.test(m.icon) ? m.icon + ' ' + m.name : m.name;
-  document.title = m.name + ' · Mentria';
+  const title = m.name + ' · Mentria';
+  document.title = title;
   const xrH1 = document.getElementById('xr-h1');
   if (xrH1) xrH1.textContent = m.name;
   if (app) root.classList.add('xr--app');
+  document.addEventListener('mentria:localechange', (e) => {
+    const code = (e && e.detail && e.detail.code) || document.documentElement.lang;
+    const locale = (window.MENTRIA_LOCALES || []).find((l) => l.code === code);
+    if (locale) prefix = locale.prefix;
+    document.title = title;
+  });
   H.mountExtension(frame, {
     manifest: m,
     source,
-    prefix: root.dataset.prefix || '',
-    args: parseHashArgs(),
-    blockedTemplate: root.dataset.blocked,
+    get prefix() { return prefix; },
+    args: takeHashArgs(),
+    get blockedTemplate() { return root.dataset.blocked; },
     onError: (msg) => { errEl.textContent = msg; errEl.hidden = false; },
-    onClose: () => { location.href = (root.dataset.prefix || '') + '/'; }
+    onClose: () => { location.href = prefix + '/'; }
   });
 }
 </script>

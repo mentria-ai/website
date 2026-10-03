@@ -2,7 +2,7 @@
 {
   "id": "dice-roller",
   "name": "Dice Roller",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "icon": "🎲",
   "author": "Mentria",
   "description": "Roll dice with standard notation and pick randomly from a list.",
@@ -39,8 +39,12 @@
   button.primary { border-color: var(--ext-accent); color: var(--ext-accent); }
   button:hover { border-color: var(--ext-accent); }
   .out { margin-top: 0.9rem; padding: 0.9rem 1rem; border: 1px solid #2a3138; border-radius: 8px; background: #10141a; min-height: 2.4rem; }
-  .out b { color: var(--ext-accent); font-size: 1.6rem; }
+  .out b { display: inline-block; color: var(--ext-accent); font-size: 1.6rem; }
   .out small { display: block; color: var(--ext-muted); margin-top: 0.3rem; font-size: 0.72rem; word-break: break-word; }
+  .out .pop { animation: pop 0.28s ease-out; }
+  @keyframes pop { from { opacity: 0.25; transform: scale(0.82); } to { opacity: 1; transform: none; } }
+  @keyframes fade { from { opacity: 0.25; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .out .pop { animation-name: fade; } }
 </style>
 <div class="wrap">
   <h1>🎲 <span data-t="title"></span></h1>
@@ -149,10 +153,21 @@
       return { total: f(res.total), breakdown: '[' + res.rolls.map(f).join(', ') + ']' + (res.mod ? (res.mod > 0 ? ' +' : ' ') + f(res.mod) : '') };
     }
 
-    function paint() {
+    function show(el, text, fresh) {
+      if (fresh) el.replaceChildren(document.createTextNode(text));
+      else if (el.textContent !== text) el.textContent = text;
+    }
+    function flash(el) {
+      el.classList.remove('pop');
+      void el.offsetWidth;
+      el.classList.add('pop');
+    }
+
+    function paint(fresh) {
       var v = view(L, num);
-      totalEl.textContent = v.total;
-      breakdownEl.textContent = v.breakdown;
+      show(totalEl, v.total, fresh);
+      show(breakdownEl, v.breakdown, fresh);
+      if (fresh) flash(totalEl);
     }
 
     function render() {
@@ -162,24 +177,25 @@
       paint();
     }
 
-    function roll() {
+    function roll(fresh) {
       var mch = notationEl.value.replace(/\s+/g, '').match(/^(\d*)d(\d+)([+-]\d+)?$/i);
       var count = mch ? parseInt(mch[1] || '1', 10) : 0;
       var sides = mch ? parseInt(mch[2], 10) : 0;
-      if (!mch || count < 1 || sides < 1) { res = { err: 'hint' }; paint(); return; }
-      if (count > MAX_DICE || sides > MAX_SIDES) { res = { err: 'limits' }; paint(); return; }
+      if (!mch || count < 1 || sides < 1) { res = { err: 'hint' }; paint(fresh); return; }
+      if (count > MAX_DICE || sides > MAX_SIDES) { res = { err: 'limits' }; paint(fresh); return; }
       var mod = parseInt(mch[3] || '0', 10);
       var rolls = [], sum = 0;
       for (var i = 0; i < count; i++) { var v = rnd(sides) + 1; rolls.push(v); sum += v; }
       res = { rolls: rolls, mod: mod, total: sum + mod };
-      paint();
+      paint(fresh);
       storage.set('state', { notation: notationEl.value, items: itemsEl.value });
     }
 
     function pick() {
       var opts = itemsEl.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
-      if (!opts.length) { pickedEl.textContent = '—'; return; }
-      pickedEl.textContent = opts[rnd(opts.length)];
+      if (!opts.length) { show(pickedEl, '—', true); flash(pickedEl); return; }
+      show(pickedEl, opts[rnd(opts.length)], true);
+      flash(pickedEl);
       storage.set('state', { notation: notationEl.value, items: itemsEl.value });
     }
 
@@ -187,7 +203,7 @@
     ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'].forEach(function (d) {
       var b = document.createElement('button');
       b.type = 'button'; b.textContent = d;
-      b.addEventListener('click', function () { notationEl.value = '1' + d; roll(); });
+      b.addEventListener('click', function () { notationEl.value = '1' + d; roll(true); });
       quick.appendChild(b);
     });
 
@@ -196,13 +212,13 @@
         var notation = String((p || {}).notation || '').trim();
         if (!/^\d*d\d+([+-]\d+)?$/i.test(notation)) throw new Error('use dice notation like 2d6 or 1d20+3');
         notationEl.value = notation;
-        roll();
+        roll(true);
         return view('en', String);
       }, { description: 'Roll dice with standard notation (for example 2d6 or 1d20+3); the roll is shown in the tool.', parameters: { type: 'object', properties: { notation: { type: 'string' } }, required: ['notation'] }, ai: true });
     }).catch(function () {});
 
-    document.getElementById('roll').addEventListener('click', roll);
-    notationEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') roll(); });
+    document.getElementById('roll').addEventListener('click', function () { roll(true); });
+    notationEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') roll(true); });
     document.getElementById('pick').addEventListener('click', pick);
     itemsEl.addEventListener('change', function () { storage.set('state', { notation: notationEl.value, items: itemsEl.value }); });
 

@@ -119,6 +119,7 @@ eleventyComputed:
 {% include "terminal-frame-close.njk" %}
 {% include "tool-schema.njk" %}
 
+<script src="/assets/js/mentria-meta-strip.js?v={{ buildHash }}"></script>
 <script>
 (() => {
   'use strict';
@@ -659,13 +660,14 @@ eleventyComputed:
   }
 
   function pickFor(entry) {
-    const useOriginal = IC.preferOriginal({
-      before: entry.file.size,
+    const clean = entry.clean;
+    const useOriginal = !!clean && IC.preferOriginal({
+      before: clean.size,
       after: entry.out.blob.size,
       sameDims: entry.srcW === entry.out.w && entry.srcH === entry.out.h,
       sameType: sameType(entry)
     });
-    if (useOriginal) return { blob: entry.file, name: IC.originalName(entry.file.name, entry.base, entry.file.type) };
+    if (useOriginal) return { blob: clean, name: IC.originalName(entry.file.name, entry.base, entry.file.type) };
     return { blob: entry.out.blob, name: IC.outputName(entry.base, entry.out.type) };
   }
 
@@ -821,7 +823,7 @@ eleventyComputed:
     }
     if (larger) {
       const original = actionButton(entry, 'original', 'm-btn--primary', COPY.btn_original,
-        IC.fill(COPY.aria_original, { file: origName }), () => MentriaUI.downloadFile(origName, entry.file));
+        IC.fill(COPY.aria_original, { file: origName }), () => MentriaUI.downloadFile(origName, entry.clean || entry.file));
       entry.actionsEl.append(...[original, download, compare, send].filter(Boolean));
     } else {
       entry.actionsEl.append(...[download, compare, send].filter(Boolean));
@@ -1134,6 +1136,11 @@ eleventyComputed:
       entry.out = null;
       clearThumb(entry);
     } else {
+      entry.clean = null;
+      if (window.MentriaMetaStrip) {
+        try { entry.clean = await MentriaMetaStrip.stripFile(entry.file); } catch (_) { entry.clean = null; }
+      }
+      if (entry.removed) return;
       entry.state = 'done';
       entry.error = null;
       entry.out = res.out;

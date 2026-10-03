@@ -1359,6 +1359,8 @@
       "seg_comment": "コメント",
       "seg_text": "テキストチャンク",
       "seg_time": "タイムスタンプ",
+      "seg_other": "その他のアプリデータ",
+      "seg_trailer": "画像の後ろのデータ",
       "emb_exif": "EXIFタグ",
       "emb_xmp": "XMPプロパティ",
       "emb_iptc": "IPTCフィールド",

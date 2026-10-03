@@ -139,6 +139,13 @@ localeReload: true
     notifStopAlarm: {{ ("tool.countdown-timer.notif_stop_alarm" | t) | dump | safe }}
   };
   const fmtTimer = n => COPY.timerDefault.replace('{n}', n);
+  const freeTimerName = (except) => {
+    const taken = new Set();
+    document.querySelectorAll('.ct-widget__title').forEach((t) => { if (t !== except) taken.add(t.textContent.trim()); });
+    let n = 1;
+    while (taken.has(fmtTimer(n))) n++;
+    return fmtTimer(n);
+  };
 
   const MAX_WIDGETS = 4;
   const MAX_SECONDS = 99 * 3600;
@@ -403,7 +410,7 @@ localeReload: true
     el.dataset.widgetId = id;
 
     const titleEl = el.querySelector('.ct-widget__title');
-    titleEl.textContent = fmtTimer(widgets.size + 1);
+    titleEl.textContent = freeTimerName(null);
     titleEl.dataset.isDefault = '1';
 
     const $ = sel => el.querySelector(sel);
@@ -430,6 +437,10 @@ localeReload: true
       label.htmlFor = fid;
     });
     const btnStart = $('[data-action="start"]');
+    const durationSeconds = () => {
+      const part = (inp) => Math.max(0, Number(inp.value) || 0);
+      return Math.round(part(inputH) * 3600 + part(inputM) * 60 + part(inputS));
+    };
     const btnReset = $('[data-action="reset"]');
     const btnClose = $('.ct-widget__close');
     const btnFloat = $('[data-action="float"]');
@@ -592,10 +603,7 @@ localeReload: true
         if (secs < 0) return;
         state.totalSeconds = secs;
       } else {
-        const h = parseInt(inputH.value) || 0;
-        const m = parseInt(inputM.value) || 0;
-        const s = parseInt(inputS.value) || 0;
-        state.totalSeconds = h * 3600 + m * 60 + s;
+        state.totalSeconds = durationSeconds();
       }
 
       if (state.totalSeconds <= 0) {
@@ -737,12 +745,14 @@ localeReload: true
     [inputH, inputM, inputS].forEach(inp => {
       inp.addEventListener('input', () => {
         if (!state.countdown && !state.isPaused) {
-          const h = parseInt(inputH.value) || 0;
-          const m = parseInt(inputM.value) || 0;
-          const s = parseInt(inputS.value) || 0;
-          state.totalSeconds = h * 3600 + m * 60 + s;
+          state.totalSeconds = durationSeconds();
           updateDisplay();
         }
+      });
+      inp.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' || e.isComposing) return;
+        e.preventDefault();
+        if (!state.countdown) btnStart.click();
       });
     });
 
@@ -806,7 +816,7 @@ localeReload: true
     });
     titleEl.addEventListener('blur', () => {
       if (!titleEl.textContent.trim()) {
-        titleEl.textContent = fmtTimer(id);
+        titleEl.textContent = freeTimerName(titleEl);
         titleEl.dataset.isDefault = '1';
       }
       persistActive();

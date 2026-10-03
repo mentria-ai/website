@@ -1154,7 +1154,9 @@
       "ph_input": "Rechercher…",
       "result_count_one": "{n} résultat",
       "result_count_many": "{n} résultats",
+      "show_more": "Afficher plus",
       "no_results": "Aucun résultat. Essayez un autre mot-clé.",
+      "no_results_filter": "Aucun résultat avec ce filtre. Essayez Tout.",
       "offline_partial": "Hors ligne · recherche limitée aux outils. Les publications et les chapitres nécessitent une connexion.",
       "empty_hint": "Tapez un nom d'outil, une fonctionnalité, ou décrivez ce que vous cherchez.",
       "ai_summary_label": "Résumé IA",
@@ -1164,7 +1166,10 @@
       "type_all": "Tout",
       "type_tool": "Outils",
       "type_post": "Publications",
-      "type_chapter": "Chapitres"
+      "type_chapter": "Chapitres",
+      "label_tool": "Outil",
+      "label_post": "Publication",
+      "label_chapter": "Chapitre"
     },
     "common": {
       "controls": "Commandes"

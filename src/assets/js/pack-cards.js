@@ -159,6 +159,7 @@
     return o;
   }
 
+  var tipSeq = 0;
   function renderImage(card, ctx, slide) {
     var t = ctx.t;
     var wrap = el('div', 'pack-image');
@@ -166,26 +167,44 @@
     if (img) { img.classList.remove('deck__slide-img'); img.classList.add('pack-image__img'); img.addEventListener('error', function () { img.classList.add('is-broken'); }); wrap.appendChild(img); }
     var tip = el('div', 'pack-hotspot-tip');
     tip.hidden = true;
+    tip.id = 'pack-tip-' + (++tipSeq);
     var seen = {};
+    function closeTip() {
+      Array.prototype.forEach.call(wrap.querySelectorAll('.pack-hotspot'), function (x) { x.classList.remove('is-open'); x.setAttribute('aria-expanded', 'false'); });
+      tip.hidden = true;
+      tip.dataset.n = '';
+    }
     (card.hotspots || []).forEach(function (h, j) {
       var b = el('button', 'pack-hotspot');
+      var label = ctx.tx(h.label);
       b.type = 'button';
       b.style.left = h.x + '%'; b.style.top = h.y + '%'; b.style.width = h.w + '%'; b.style.height = h.h + '%';
-      b.setAttribute('aria-label', ctx.tx(h.label));
+      b.setAttribute('aria-label', label);
+      b.setAttribute('aria-expanded', 'false');
+      b.setAttribute('aria-controls', tip.id);
       b.dataset.n = String(j + 1);
       b.addEventListener('click', function (e) {
         e.stopPropagation();
         var open = tip.dataset.n === b.dataset.n && !tip.hidden;
-        Array.prototype.forEach.call(wrap.querySelectorAll('.pack-hotspot'), function (x) { x.classList.remove('is-open'); });
-        if (open) { tip.hidden = true; tip.dataset.n = ''; return; }
+        closeTip();
+        if (open) return;
         b.classList.add('is-open');
+        b.setAttribute('aria-expanded', 'true');
         tip.dataset.n = b.dataset.n;
-        tip.innerHTML = '<strong>' + esc(ctx.tx(h.label)) + '</strong>' + (h.body ? ctx.md(h.body) : '');
+        tip.innerHTML = '<strong>' + esc(label) + '</strong>' + (h.body ? ctx.md(h.body) : '');
         tip.hidden = false;
+        var said = tip.textContent.slice(tip.firstChild.textContent.length).trim();
+        ctx.live(said ? label + ': ' + said : label);
         seen[j] = true;
         if (Object.keys(seen).length >= card.hotspots.length && !slide.dataset.answered) { slide.dataset.answered = '1'; ctx.onAnswer(card, true); }
       });
       wrap.appendChild(b);
+    });
+    wrap.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || tip.hidden) return;
+      e.preventDefault();
+      e.stopPropagation();
+      closeTip();
     });
     wrap.appendChild(tip);
     var o = el('div', 'deck__slide-overlay pack-overlay pack-overlay--thin');
@@ -226,6 +245,13 @@
     if (slide && slide.dataset.answered) return;
     if (slide) slide.dataset.answered = '1';
     ctx.onAnswer(card, right);
+  }
+
+  function refocus(p, had, target) {
+    var a = document.activeElement;
+    if (!had || (a && a !== document.body && !p.contains(a))) return;
+    var f = target || p.querySelector('.pack-btn--continue');
+    if (f) f.focus();
   }
 
   function renderMcq(card, ctx) {
@@ -294,7 +320,7 @@
       feedback(p, ctx, right, right ? '' : esc(t('answer_was')) + ' <em>' + correctText.map(esc).join(', ') + '</em>');
       continueBtn(p, card, ctx);
       done(p, card, ctx, right);
-      if (hadFocus) { var next = p.querySelector('.pack-btn--continue'); if (next) next.focus(); }
+      refocus(p, hadFocus);
     }
     return p;
   }
@@ -373,6 +399,7 @@
     }
     function grade() {
       if (graded) return;
+      var hadFocus = p.contains(document.activeElement);
       var allRight = true, anyFilled = false;
       blanks.forEach(function (b, i) {
         var val = useChips ? (b.dataset.val || '') : b.value;
@@ -391,6 +418,7 @@
       feedback(p, ctx, allRight, reveal);
       continueBtn(p, card, ctx);
       done(p, card, ctx, allRight);
+      refocus(p, hadFocus);
     }
     return p;
   }
@@ -467,13 +495,25 @@
     box.appendChild(lock);
     var skip = el('button', 'pack-btn pack-btn--ghost', esc(t('skip')));
     skip.type = 'button';
-    skip.addEventListener('click', function () { veil.remove(); });
+    skip.addEventListener('click', function () { var had = leave(); veil.remove(); land(had); });
     box.appendChild(skip);
     veil.appendChild(box);
     veil.addEventListener('click', function (e) { e.stopPropagation(); });
+    var home = null;
+    function leave() {
+      home = veil.parentNode;
+      return veil.contains(document.activeElement);
+    }
+    function land(had) {
+      if (!home || !had) return;
+      var f = Array.prototype.find.call(home.querySelectorAll('input:not([disabled]), textarea:not([disabled]), button:not(.pack-more):not([disabled])'), function (x) { return !veil.contains(x); });
+      if (!f) { home.tabIndex = -1; f = home; }
+      refocus(home, had, f);
+    }
     function reveal() {
       var v = getVal();
       if (v == null || (g.kind === 'choice' && v < 0)) return;
+      var had = veil.contains(document.activeElement);
       var right, msg, distance = null;
       if (g.kind === 'choice') {
         right = v === g.answer;
@@ -490,8 +530,9 @@
       feedback(box, ctx, right, msg);
       var show = el('button', 'pack-btn pack-btn--primary', esc(t('reveal')));
       show.type = 'button';
-      show.addEventListener('click', function () { veil.classList.add('is-gone'); setTimeout(function () { veil.remove(); }, 260); });
+      show.addEventListener('click', function () { var was = leave(); veil.classList.add('is-gone'); land(was); setTimeout(function () { veil.remove(); }, 260); });
       box.appendChild(show);
+      refocus(veil, had, show);
       var slide = veil.closest('.pack-slide');
       if (slide) slide.dataset.answered = '1';
       ctx.onAnswer(card, right, { distance: distance });
@@ -543,6 +584,7 @@
     check.addEventListener('click', function () {
       if (graded) return;
       graded = true;
+      var hadFocus = p.contains(document.activeElement);
       var right = true;
       Array.prototype.forEach.call(list.children, function (li, i) {
         var ok = li.dataset.text === correct[i];
@@ -555,6 +597,7 @@
       feedback(p, ctx, right, msg);
       continueBtn(p, card, ctx);
       done(p, card, ctx, right);
+      refocus(p, hadFocus);
     });
     p.appendChild(check);
     return p;
@@ -581,7 +624,7 @@
     var check = el('button', 'pack-btn pack-btn--primary', esc(t('check')));
     check.type = 'button';
     function paint() {
-      leftBtns.forEach(function (b, i) { b.classList.toggle('is-selected', selected === i); b.classList.toggle('is-paired', link[i] != null); b.dataset.pair = link[i] != null ? String((link[i] % 6) + 1) : ''; });
+      leftBtns.forEach(function (b, i) { b.classList.toggle('is-selected', selected === i); b.setAttribute('aria-pressed', selected === i ? 'true' : 'false'); b.classList.toggle('is-paired', link[i] != null); b.dataset.pair = link[i] != null ? String((link[i] % 6) + 1) : ''; });
       rightBtns.forEach(function (b, j) { var li = Object.keys(link).find(function (k) { return link[k] === j; }); b.classList.toggle('is-paired', li != null); b.dataset.pair = li != null ? String((j % 6) + 1) : ''; });
       check.disabled = Object.keys(link).length !== pairs.length;
     }
@@ -602,13 +645,15 @@
       b.addEventListener('click', function () {
         if (graded) return;
         var owner = Object.keys(link).find(function (k) { return link[k] === j; });
-        if (owner != null) { delete link[owner]; if (selected == null) { paint(); return; } }
+        if (owner != null) { delete link[owner]; if (selected == null) { selected = +owner; paint(); return; } }
         if (selected == null) return;
+        var from = selected;
         link[selected] = j;
         selected = null;
         var nextFree = pairs.findIndex(function (_, k) { return link[k] == null; });
         if (nextFree >= 0) selected = nextFree;
         paint();
+        ctx.live(t('match_paired', { a: pairs[from][0], b: r.text }));
       });
       rightBtns.push(b); rightCol.appendChild(b);
     });
@@ -617,6 +662,7 @@
     check.addEventListener('click', function () {
       if (graded || check.disabled) return;
       graded = true;
+      var hadFocus = p.contains(document.activeElement);
       var right = true;
       pairs.forEach(function (pr, i) {
         var ok = rights[link[i]].text === pr[1];
@@ -630,6 +676,7 @@
       feedback(p, ctx, right, msg);
       continueBtn(p, card, ctx);
       done(p, card, ctx, right);
+      refocus(p, hadFocus);
     });
     p.appendChild(check);
     selected = 0;
@@ -732,29 +779,34 @@
     actions.appendChild(check);
     p.appendChild(actions);
     var finished = false;
-    function finish(right, msg) {
+    function finish(right, msg, had) {
       if (finished) return;
       finished = true;
       if (ref.children.length && !ref.parentNode) p.appendChild(ref);
       feedback(p, ctx, right, msg);
       continueBtn(p, card, ctx);
       done(p, card, ctx, right);
+      refocus(p, had);
     }
-    function selfGrade() {
+    function selfGrade(why, had) {
       actions.innerHTML = '';
       if (ref.children.length) p.insertBefore(ref, actions);
+      if (why) p.insertBefore(el('p', 'pack-card__note', esc(why)), actions);
       var yes = el('button', 'pack-btn pack-btn--primary', esc(t('self_right')));
       var no = el('button', 'pack-btn', esc(t('self_wrong')));
       yes.type = 'button'; no.type = 'button';
-      yes.addEventListener('click', function () { actions.remove(); finish(true); });
-      no.addEventListener('click', function () { actions.remove(); finish(false); });
+      yes.addEventListener('click', function () { var f = p.contains(document.activeElement); actions.remove(); finish(true, '', f); });
+      no.addEventListener('click', function () { var f = p.contains(document.activeElement); actions.remove(); finish(false, '', f); });
       actions.appendChild(yes); actions.appendChild(no);
+      if (why) ctx.live(why);
+      refocus(p, had, yes);
     }
     check.addEventListener('click', function () {
       var answer = ta.value.trim();
       if (!answer) { ta.focus(); return; }
+      var had = p.contains(document.activeElement);
       ta.disabled = true;
-      if (!useModel) { selfGrade(); return; }
+      if (!useModel) { selfGrade('', had); return; }
       check.disabled = true;
       check.textContent = t('checking');
       p.classList.add('is-busy');
@@ -762,10 +814,10 @@
         p.classList.remove('is-busy');
         actions.remove();
         var msg = (v.verdict === 'partial' ? '<strong>' + esc(t('partial')) + '</strong> ' : '') + esc(v.text);
-        finish(v.verdict === 'right', msg);
-      }).catch(function () {
+        finish(v.verdict === 'right', msg, had);
+      }).catch(function (err) {
         p.classList.remove('is-busy');
-        selfGrade();
+        selfGrade(t(err && err.message === 'model-not-cached' ? 'model_missing' : 'model_failed'), had);
       });
     });
     return p;

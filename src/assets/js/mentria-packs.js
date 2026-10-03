@@ -6,6 +6,7 @@
   var MAX_BYTES = 25 * 1024 * 1024;
   var INTERVALS = [1, 3, 7, 16, 35];
   var ID_RE = /^[a-z0-9][a-z0-9._-]{0,99}$/i;
+  var ID_RULE = 'letters, digits, dots, dashes and underscores, starting with a letter or digit; 1-100 chars';
   var DB = 'mentria-packs', STORE = 'packs', VER = 1;
 
   function isText(v) {
@@ -49,7 +50,7 @@
     var err = function (m) { errors.push(m); };
     var warn = function (m) { warnings.push(m); };
     if (!pack || typeof pack !== 'object' || Array.isArray(pack)) { err('pack must be an object'); return { ok: false, errors: errors, warnings: warnings }; }
-    if (typeof pack.id !== 'string' || !ID_RE.test(pack.id)) err('id: letters, digits, dots, dashes; 1-100 chars');
+    if (typeof pack.id !== 'string' || !ID_RE.test(pack.id)) err('id: ' + ID_RULE);
     if (pack.version != null && !(Number.isInteger(pack.version) && pack.version >= 1)) err('version: integer >= 1');
     if (!isText(pack.title)) err('title: required text');
     if (pack.subtitle != null && !isText(pack.subtitle)) err('subtitle: text');
@@ -64,7 +65,7 @@
     pack.cards.forEach(function (c, i) {
       var at = 'cards[' + i + ']';
       if (!c || typeof c !== 'object') { err(at + ': object'); return; }
-      if (typeof c.id !== 'string' || !ID_RE.test(c.id)) err(at + '.id: required, letters/digits/dots/dashes');
+      if (typeof c.id !== 'string' || !ID_RE.test(c.id)) err(at + '.id: required; ' + ID_RULE);
       else if (ids[c.id]) err(at + '.id: duplicate ' + c.id);
       else ids[c.id] = true;
       if (typeof c.type !== 'string') { err(at + '.type: required'); return; }
@@ -166,7 +167,7 @@
         pack.sections.forEach(function (s, i) {
           var sat = 'sections[' + i + ']';
           if (!s || typeof s !== 'object') { err(sat + ': object'); return; }
-          if (typeof s.id !== 'string' || !ID_RE.test(s.id)) err(sat + '.id: required');
+          if (typeof s.id !== 'string' || !ID_RE.test(s.id)) err(sat + '.id: required; ' + ID_RULE);
           if (!isText(s.title)) err(sat + '.title: text');
           if (!Array.isArray(s.cards) || !s.cards.length) err(sat + '.cards: non-empty array of card ids');
           else s.cards.forEach(function (cid) {
@@ -237,7 +238,7 @@
   function validateCourse(course) {
     var errors = [], warnings = [];
     if (!isCourse(course)) { errors.push('not a course'); return { ok: false, errors: errors, warnings: warnings }; }
-    if (typeof course.id !== 'string' || !ID_RE.test(course.id)) errors.push('id: letters, digits, dots, dashes; 1-100 chars');
+    if (typeof course.id !== 'string' || !ID_RE.test(course.id)) errors.push('id: ' + ID_RULE);
     if (!isText(course.title)) errors.push('title: required text');
     if (!Array.isArray(course.packs) || !course.packs.length) errors.push('packs: non-empty array of packs or https URLs');
     else {

@@ -11,13 +11,13 @@ description: "Measures load time, time to first token and decode speed of the on
 eleventyComputed:
   lang: "{{ locale.code }}"
 ---
-<section class="hero" style="padding-top:1rem;">
+<section class="hero" style="padding-top:1rem;"{% if locale.code != "en" %} lang="en"{% endif %}>
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">bench</span></p>
   <h1>Model benchmark</h1>
   <p class="lede">Loads a tier in this tab, runs fixed prompts, and reports load time, time to first token and decode speed. Close other model tabs first: one engine per device.</p>
 </section>
 
-<section class="bench" id="bench">
+<section class="bench" id="bench"{% if locale.code != "en" %} lang="en"{% endif %}>
   <div class="bench__grid">
     <fieldset class="bench__box">
       <legend>Tiers</legend>

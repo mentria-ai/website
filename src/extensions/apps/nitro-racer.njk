@@ -78,9 +78,11 @@ eleventyComputed:
 .nr-help__glyph { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border-radius: 3px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--term-border); color: var(--accent); font-size: 12px; flex: none; }
 .nr-help__tip { margin: 4px 2px 0; color: var(--term-muted); font-size: 0.75rem; line-height: 1.6; }
 
+.app-h1 { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 </style>
 
 
+<h1 class="app-h1">{{ "tools.nitro-racer.title" | t }}</h1>
 <div class="nr-wrap">
   <div class="nr-stage" id="nr-stage" data-install-quiet>
     <canvas class="nr-canvas" id="nr-canvas"></canvas>

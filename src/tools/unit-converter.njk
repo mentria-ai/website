@@ -551,7 +551,7 @@ eleventyComputed:
       let body = m[2];
       const dots = body.split('.').length - 1;
       const commas = body.split(',').length - 1;
-      const grouped = /^\d{1,3}([.,])\d{3}(?:\1\d{3})*$/.test(body);
+      const grouped = /^\d{1,3}([.,])\d{3}(?:\1\d{3})*$/.test(body) && !/^0[.,]/.test(body);
       if (dots && commas) {
         const point = body.lastIndexOf('.') > body.lastIndexOf(',') ? '.' : ',';
         if (body.split(point).length > 2) return { state: 'invalid' };
@@ -561,6 +561,8 @@ eleventyComputed:
         body = body.replace(/[.,]/g, '');
       } else if (commas === 1) {
         body = decimal !== ',' && grouped ? body.replace(',', '') : body.replace(',', '.');
+      } else if (dots === 1 && decimal === ',' && grouped) {
+        body = body.replace('.', '');
       }
       if (!/^(?:\d+\.?\d*|\.\d+)$/.test(body)) return { state: 'invalid' };
       const value = Number(m[1] + body + (m[3] ? 'e' + m[3] : ''));

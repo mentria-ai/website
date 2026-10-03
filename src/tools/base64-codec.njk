@@ -105,7 +105,7 @@ localeReload: true
 (() => {
   const COPY = {
     previewOf:      {{ ("tool.base64-codec.preview_of"      | t) | dump | safe }},
-    decodedPreview: {{ ("tool.base64-codec.decoded_preview" | t) | dump | safe }},
+    decodedAlt:     {{ ("tool.base64-codec.decoded_preview" | t) | dump | safe }},
     unknown:                 {{ ("tool.base64-codec.meta_unknown"                | t) | dump | safe }},
     noPreview:               {{ ("tool.base64-codec.preview_no_preview"          | t) | dump | safe }},
     decodedPreview:          {{ ("tool.base64-codec.preview_decoded_template"    | t) | dump | safe }},
@@ -177,9 +177,11 @@ localeReload: true
       return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     }
 
+    const statusTimers = new WeakMap();
     function showStatus(status, msg, tone) {
+      clearTimeout(statusTimers.get(status));
       status.set(msg, tone);
-      if (tone !== 'err') setTimeout(() => status.clear(), 3000);
+      if (tone !== 'err') statusTimers.set(status, setTimeout(() => status.clear(), 3000));
     }
 
     async function copyText(text, status) {
@@ -195,7 +197,7 @@ localeReload: true
       const s = str.trim();
       if (s.startsWith('data:')) return true;
       if (s.length < 4) return false;
-      return /^[A-Za-z0-9+/\n\r]+=*$/.test(s);
+      return /^[A-Za-z0-9+/_\-\s]+=*$/.test(s);
     }
 
     function isImageMime(mime) {
@@ -413,9 +415,25 @@ localeReload: true
       fileStatus.clear();
     });
 
+    function clearDecoded() {
+      decodedBlob = null;
+      decodePreview.innerHTML = '';
+      downloadBtn.disabled = true;
+    }
+
+    function sniffMime(bytes) {
+      const at = (i, arr) => arr.every((b, k) => bytes[i + k] === b);
+      if (at(0, [0x89, 0x50, 0x4E, 0x47])) return 'image/png';
+      if (at(0, [0xFF, 0xD8, 0xFF])) return 'image/jpeg';
+      if (at(0, [0x47, 0x49, 0x46, 0x38])) return 'image/gif';
+      if (at(0, [0x52, 0x49, 0x46, 0x46]) && at(8, [0x57, 0x45, 0x42, 0x50])) return 'image/webp';
+      if (at(0, [0x25, 0x50, 0x44, 0x46])) return 'application/pdf';
+      return null;
+    }
+
     decodeFileBtn.addEventListener('click', () => {
       const val = decodeInput.value.trim();
-      if (!val) { showStatus(fileStatus, COPY.statusPasteFirst, 'err'); return; }
+      if (!val) { clearDecoded(); showStatus(fileStatus, COPY.statusPasteFirst, 'err'); return; }
 
       let mime = 'application/octet-stream';
       let b64 = val;
@@ -425,6 +443,7 @@ localeReload: true
         mime = dataUriMatch[1];
         b64 = dataUriMatch[2];
       } else if (!isBase64(val)) {
+        clearDecoded();
         showStatus(fileStatus, COPY.statusInvalidB64, 'err');
         return;
       }
@@ -433,14 +452,15 @@ localeReload: true
         const binary = atob(normalizeB64(b64));
         const bytes = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        if (!dataUriMatch) mime = sniffMime(bytes) || mime;
         decodedBlob = new Blob([bytes], { type: mime });
         decodedFilename = 'decoded-file.' + mimeToExt(mime);
 
         decodePreview.innerHTML = '';
         if (isImageMime(mime)) {
           const img = document.createElement('img');
-          img.src = val.startsWith('data:') ? val : 'data:' + mime + ';base64,' + b64;
-          img.alt = COPY.decodedPreview;
+          img.src = val.startsWith('data:') ? val : 'data:' + mime + ';base64,' + normalizeB64(b64);
+          img.alt = COPY.decodedAlt;
           img.className = 'b64-preview-img';
           decodePreview.appendChild(img);
         } else {
@@ -450,9 +470,8 @@ localeReload: true
         downloadBtn.disabled = false;
         showStatus(fileStatus, COPY.statusFileDecoded.replace('{size}', formatBytes(decodedBlob.size)), 'ok');
       } catch (e) {
+        clearDecoded();
         showStatus(fileStatus, COPY.statusDecodeFailedB64, 'err');
-        decodedBlob = null;
-        downloadBtn.disabled = true;
       }
     });
 

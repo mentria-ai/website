@@ -691,6 +691,7 @@
       "delete_title": "Excluir nota",
       "saved_prefix": "Salvo",
       "confirm_delete": "Excluir \"{name}\"? Isso não pode ser desfeito.",
+      "link_confirm": "Adicionar o texto deste link como uma nova nota?",
       "lock_btn": "Bloquear",
       "remove_lock_btn": "Remover bloqueio",
       "lock_title": "Criptografar esta nota com a chave de acesso do dispositivo",

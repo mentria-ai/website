@@ -88,6 +88,7 @@ localeReload: true
     savedPrefix:       {{ ("tool.quick-notes.saved_prefix"       | t) | dump | safe }},
     emptyPreview:      {{ ("tool.quick-notes.empty_preview"      | t) | dump | safe }},
     confirmDelete:     {{ ("tool.quick-notes.confirm_delete"     | t) | dump | safe }},
+    linkConfirm:       {{ ("tool.quick-notes.link_confirm"       | t) | dump | safe }},
     noteDeleted:       {{ ("tool.quick-notes.note_deleted"       | t) | dump | safe }},
     lockBtn:           {{ ("tool.quick-notes.lock_btn"           | t) | dump | safe }},
     removeLockBtn:     {{ ("tool.quick-notes.remove_lock_btn"    | t) | dump | safe }},
@@ -693,18 +694,23 @@ localeReload: true
     const text  = (p.get('text')  || '').trim();
     const url   = (p.get('url')   || '').trim();
     if (!title && !text && !url) return false;
-    const note = {
-      id: genId(),
-      title: title,
-      body: [text, url].filter(Boolean).join('\n\n'),
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-    notes.unshift(note);
-    persist();
     history.replaceState(null, '', location.pathname);
-    activeId = note.id;
-    return true;
+    const ask = () => window.mentriaConfirm(COPY.linkConfirm).then((ok) => {
+      if (!ok) return;
+      const note = {
+        id: genId(),
+        title: title,
+        body: [text, url].filter(Boolean).join('\n\n'),
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+      notes.unshift(note);
+      persist();
+      selectNote(note.id);
+    });
+    if (typeof window.mentriaConfirm === 'function') ask();
+    else document.addEventListener('DOMContentLoaded', ask, { once: true });
+    return false;
   }
 
   function drainInbox() {
@@ -742,10 +748,11 @@ localeReload: true
     if (e.key === 'mentria.store.quick_notes.blob' && !e.newValue) acceptExternalDelete();
   });
 
-  function addSharedText(text) {
+  function addSharedText(text, meta) {
     const body = String(text || '').trim();
     if (!body) return;
-    const note = { id: genId(), title: '', body, createdAt: Date.now(), updatedAt: Date.now() };
+    const title = String((meta && meta.title) || '').trim();
+    const note = { id: genId(), title, body, createdAt: Date.now(), updatedAt: Date.now() };
     notes.unshift(note);
     persist();
     selectNote(note.id);

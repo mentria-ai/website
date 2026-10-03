@@ -479,6 +479,18 @@ html.is-standalone .m-mini-dock { --mini-base: calc(var(--app-bar-h, 52px) + 12p
   .site-nav { gap: 0.55rem; flex-wrap: nowrap; justify-content: flex-end; min-width: 0; }
   .brand { font-size: 0.95rem; }
 }
+@media (min-width: 641px) and (max-width: 740px) {
+  .site-nav { gap: 0.75rem; }
+  .lang-switcher__current { display: none; }
+  .lang-switcher > summary { padding: 0.3rem 0.5rem; }
+  html:is(:lang(es), :lang(fr), :lang(pt)) .nav-link__t { display: none; }
+  html:is(:lang(es), :lang(fr), :lang(pt)) .nav-link { gap: 0; }
+}
+@media (min-width: 641px) and (max-width: 880px) {
+  html:is(:lang(es), :lang(fr), :lang(pt)) .site-nav { gap: 0.6rem; }
+  html:is(:lang(es), :lang(fr), :lang(pt)) .lang-switcher__current { display: none; }
+  html:is(:lang(es), :lang(fr), :lang(pt)) .lang-switcher > summary { padding: 0.3rem 0.5rem; }
+}
 
 .section-heading { margin: 3rem 0 1rem; font-size: 1.5rem; color: var(--syn-cyan); }
 .section-heading::before { content: '> '; color: var(--syn-pink); }

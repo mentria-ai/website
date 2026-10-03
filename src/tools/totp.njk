@@ -9,6 +9,7 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.totp.title' | t }}"
   description: "{{ 'tools.totp.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">totp</span></p>

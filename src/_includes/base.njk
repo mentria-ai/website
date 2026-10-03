@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ lang | default('en') }}"{% if feedLayout %} class="feed-layout"{% endif %}>
+<html lang="{{ lang | default('en') }}"{% if feedLayout %} class="feed-layout"{% endif %}{% if localeReload %} data-locale-reload{% endif %}>
 <head>
     <meta charset="UTF-8">
     <style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
@@ -21,6 +21,7 @@
     </script>
     <script>
       window.MENTRIA_PAGE_LOCALIZED = {{ 'true' if (locale or pair) else 'false' }};
+      window.MENTRIA_EN_ONLY = {{ englishOnlyUrls | dump | safe }};
       window.MENTRIA_LOCALES = [
         {%- for loc in locales -%}
         { code: {{ loc.code | dump | safe }}, prefix: {{ loc.pathPrefix | dump | safe }}, name: {{ loc.nativeName | dump | safe }}, isDefault: {{ loc.isDefault | dump | safe }} }{% if not loop.last %},{% endif %}
@@ -266,7 +267,6 @@
         var ring = document.querySelector('[data-week-ring]');
         if (!ring || !window.MentriaStore) return;
         var segs = ring.querySelectorAll('.week-ring__seg');
-        var labelN = ring.getAttribute('data-label-n') || '';
         function pad(n) { return (n < 10 ? '0' : '') + n; }
         function key(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
         function paint() {
@@ -281,6 +281,7 @@
             segs[i].classList.toggle('is-on', on);
             segs[i].classList.toggle('is-today', k === today);
           }
+          var labelN = ring.getAttribute('data-label-n') || '';
           if (labelN) { var l = labelN.split('{n}').join(String(n)); ring.setAttribute('aria-label', l); ring.setAttribute('title', l); }
           clearTimeout(tipTimer);
           if (n) tipTimer = setTimeout(function () { explain(n); }, 1500);
@@ -298,6 +299,7 @@
         }
         paint();
         window.addEventListener('mentria:write', paint);
+        document.addEventListener('mentria:localechange', paint);
         }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
       })();

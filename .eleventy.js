@@ -16,6 +16,20 @@ module.exports = function(eleventyConfig) {
   })();
   eleventyConfig.addGlobalData("buildHash", buildHash);
   eleventyConfig.addGlobalData("releaseTag", process.env.RELEASE_TAG || "");
+  eleventyConfig.addGlobalData("englishOnlyUrls", (() => {
+    const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      if (entry.isDirectory()) return entry.name === "assets" || entry.name.startsWith("_") ? [] : walk(path.join(dir, entry.name));
+      return /\.(njk|md)$/.test(entry.name) ? [path.join(dir, entry.name)] : [];
+    });
+    const urls = [];
+    for (const file of walk(path.join(__dirname, "src"))) {
+      const head = /^---\r?\n([\s\S]*?)\r?\n---/.exec(fs.readFileSync(file, "utf8"));
+      if (!head || !/^englishOnly:\s*true\s*$/m.test(head[1])) continue;
+      const link = /^permalink:\s*["']?([^"'\r\n]+)/m.exec(head[1]);
+      if (link) urls.push(link[1].trim().replace(/index\.html$/, ""));
+    }
+    return urls.sort();
+  })());
 
   // Inline SVG sprite content so it can be injected directly into the HTML.
   // iOS Safari PWA has a sticky cache layer for external `<use href="X.svg#id">`

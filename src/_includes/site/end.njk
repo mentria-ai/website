@@ -708,6 +708,7 @@ try {
         btn.className = 'terminal-frame__info m-btn m-btn--ghost';
         btn.textContent = 'ⓘ';
         btn.setAttribute('aria-label', {{ ("common.tool_info" | t) | dump | safe }});
+        btn.setAttribute('data-i18na', 'aria-label=common.tool_info');
         btn.setAttribute('aria-expanded', 'false');
         var filename = titlebar.querySelector('.terminal-frame__filename');
         if (filename) filename.insertAdjacentElement('afterend', btn);

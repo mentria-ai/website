@@ -397,7 +397,9 @@ localeReload: true
     updateSavedLabel(note.updatedAt);
   }
 
+  let editorMode = 'plain';
   function applyEditorMode(mode) {
+    editorMode = mode;
     const locked = mode === 'locked';
     if (!locked) drainInbox();
     textarea.hidden = locked;
@@ -443,8 +445,13 @@ localeReload: true
     const note = getNote(activeId);
     if (!note) return;
     note.title = titleInput.value;
+    if (note.enc && (!sessionKey || editorMode !== 'unlocked')) {
+      note.updatedAt = Date.now();
+      persist();
+      renderList();
+      return;
+    }
     if (note.enc) {
-      if (!sessionKey) return;
       try {
         const enc = await encryptText(textarea.value);
         note.body = enc.body;

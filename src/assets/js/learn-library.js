@@ -284,6 +284,11 @@
     P.importUrl(params.get('pack')).then(function (r) { try { history.replaceState(null, '', location.pathname); } catch (_) {} handleResult(r); }, handleError);
   }
   window.addEventListener('mentria:packs', refresh);
+  window.addEventListener('pageshow', function (e) {
+    if (!e.persisted) return;
+    nativeProgress();
+    refresh();
+  });
   nativeProgress();
   shelves();
   refresh();

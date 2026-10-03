@@ -422,19 +422,27 @@
     box.classList.toggle('stream-hero--back', returning);
   }
 
+  function importedContinue(packs) {
+    if (hero.contId) return;
+    var imported = null, last = -1;
+    packs.forEach(function (e) {
+      if (e.native) return;
+      var pr = P.getProgress(e.pack.id), seen = Object.keys(pr.cards || {}).length, total = e.pack.cards.length;
+      if (seen && seen < total && (pr.last || 0) > last) { last = pr.last || 0; imported = { id: e.pack.id, title: e.pack.title, cover: e.pack.cover || (e.meta && e.meta.cover), total: total, seen: seen, collection: 'import', href: prefix + '/learn/play/?id=' + encodeURIComponent(e.pack.id) }; }
+    });
+    if (imported) renderHero(imported);
+  }
+
   renderHero(nativeContinue());
   watchCurrent();
   reorderTail();
   activePacks().then(function (packs) {
-    if (!hero.contId) {
-      var imported = null, last = -1;
-      packs.forEach(function (e) {
-        if (e.native) return;
-        var pr = P.getProgress(e.pack.id), seen = Object.keys(pr.cards || {}).length, total = e.pack.cards.length;
-        if (seen && seen < total && (pr.last || 0) > last) { last = pr.last || 0; imported = { id: e.pack.id, title: e.pack.title, cover: e.pack.cover || (e.meta && e.meta.cover), total: total, seen: seen, collection: 'import', href: prefix + '/learn/play/?id=' + encodeURIComponent(e.pack.id) }; }
-      });
-      if (imported) renderHero(imported);
-    }
+    importedContinue(packs);
     return buildDynamic(packs);
   }).then(renderDynamic).catch(function (e) { console.error('stream', e); });
+  window.addEventListener('pageshow', function (e) {
+    if (!e.persisted) return;
+    renderHero(nativeContinue());
+    activePacks().then(importedContinue).catch(function () {});
+  });
 })();

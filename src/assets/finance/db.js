@@ -167,5 +167,10 @@ export async function estimate() {
 }
 
 export async function requestPersist() {
-  try { return navigator.storage && navigator.storage.persist ? await navigator.storage.persist() : false; } catch (_) { return false; }
+  try {
+    const st = navigator.storage;
+    if (!st || !st.persist) return false;
+    if (st.persisted && await st.persisted()) return true;
+    return await st.persist();
+  } catch (_) { return false; }
 }

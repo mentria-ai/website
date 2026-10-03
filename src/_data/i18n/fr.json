@@ -3630,6 +3630,7 @@
         "locked": "Verrouillé",
         "open": "Ouvrez pour voir ce mois-ci",
         "spent": "{amount} de dépenses · {month}",
+        "spent_of": "{spent} sur un budget de {budget} · {month}",
         "next": "Prochain : {name} {amount} le {date}",
         "no_upcoming": "Aucune facture dans les 2 prochaines semaines"
       },
@@ -3813,6 +3814,8 @@
         "budgets": "Budgets",
         "set_budgets": "Définir des budgets",
         "of_budget": "sur un budget de {budget} · {pct}",
+        "budget_part": "{spent} sur un budget de {budget} · {pct}",
+        "outside_budgets": "{amount} hors budget",
         "no_budget": "Aucun budget défini pour ce mois-ci.",
         "ribbon_label": "Dépenses de chaque jour ce mois-ci, avec le cumul comparé au rythme de votre budget",
         "income": "Revenus",
@@ -3848,6 +3851,10 @@
         "conflicts": {
           "one": "{n} modification faite sur deux appareils en même temps est à vérifier.",
           "other": "{n} modifications faites sur deux appareils en même temps sont à vérifier."
+        },
+        "orphans": {
+          "one": "Le compte de {name} a été supprimé : ce paiement n'est plus ajouté automatiquement.",
+          "other": "Les comptes de {n} paiements ont été supprimés : ils ne sont plus ajoutés automatiquement."
         },
         "review": "Vérifier",
         "fx_banner": "Ajoutez les taux de change de {list} pour les inclure dans les totaux en {base}.",
@@ -4237,6 +4244,9 @@
         "trial_ends": "fin de l'essai le {date}",
         "trial_short": "Essai",
         "stopped": "Arrêté",
+        "no_account": "Sans compte",
+        "no_account_meta": "compte supprimé",
+        "account_gone": "Son compte a été supprimé. Choisissez-en un autre.",
         "show_stopped": "Afficher les arrêtés",
         "next_on": "prochain : {date}",
         "ended": "Terminé",

@@ -3630,6 +3630,7 @@
         "locked": "Bloqueado",
         "open": "Abra para ver este mês",
         "spent": "{amount} gastos · {month}",
+        "spent_of": "{spent} de um orçamento de {budget} · {month}",
         "next": "A seguir: {name} {amount} em {date}",
         "no_upcoming": "Nenhuma conta a pagar nas próximas 2 semanas"
       },
@@ -3813,6 +3814,8 @@
         "budgets": "Orçamentos",
         "set_budgets": "Definir orçamentos",
         "of_budget": "de um orçamento de {budget} · {pct}",
+        "budget_part": "{spent} de um orçamento de {budget} · {pct}",
+        "outside_budgets": "{amount} fora dos orçamentos",
         "no_budget": "Nenhum orçamento definido para este mês.",
         "ribbon_label": "Gastos de cada dia deste mês, com o total acumulado comparado ao ritmo do orçamento",
         "income": "Receitas",
@@ -3848,6 +3851,10 @@
         "conflicts": {
           "one": "{n} edição feita em dois dispositivos ao mesmo tempo precisa de revisão.",
           "other": "{n} edições feitas em dois dispositivos ao mesmo tempo precisam de revisão."
+        },
+        "orphans": {
+          "one": "A conta usada por {name} foi excluída, então o lançamento automático parou.",
+          "other": "As contas usadas por {n} pagamentos recorrentes foram excluídas, então o lançamento automático parou."
         },
         "review": "Revisar",
         "fx_banner": "Adicione as cotações de {list} para incluir esses valores nos totais em {base}.",
@@ -4237,6 +4244,9 @@
         "trial_ends": "teste termina em {date}",
         "trial_short": "Teste",
         "stopped": "Inativa",
+        "no_account": "Sem conta",
+        "no_account_meta": "conta excluída",
+        "account_gone": "A conta usada aqui foi excluída. Escolha outra.",
         "show_stopped": "Mostrar inativas",
         "next_on": "próximo em {date}",
         "ended": "Encerrada",

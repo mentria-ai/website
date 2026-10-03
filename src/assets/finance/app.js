@@ -3,7 +3,7 @@ import * as db from './db.js';
 import * as V from './vault.js';
 import { Engine } from './engine.js';
 import { Ledger, accountGroup } from './ledger.js';
-import { occurrences, addDays, monthKey, isISODate } from './dates.js';
+import { monthKey, isISODate } from './dates.js';
 import { randomId } from './crypto.js';
 import { showLock } from './lock.js';
 import { openEntry } from './entry.js';
@@ -239,22 +239,24 @@ function updateSyncBadge() {
 
 function updateWidget() {
   const S = window.MentriaStore;
-  if (!S || !app.ledger) return;
+  if (!S) return;
+  const open = !!(app.engine && !app.engine.closed && app.ledger);
   let snap = { text: t('app.name'), detail: t('widget.locked') };
-  if (app.engine && !app.engine.closed && app.local.widget_amounts) {
+  if (open && app.local.widget_amounts) {
     try {
       const L = app.ledger;
       const key = monthKey(L.today());
       const b = L.budgetSummary(key);
-      const spent = U.money(b.expense, L.base(), { compact: true });
+      const month = U.month(key, true);
+      const cash = (v) => U.money(v, L.base(), { compact: true });
       const up = L.upcoming(14)[0];
       snap = {
-        text: t('widget.spent', { amount: spent, month: U.month(key, true) }),
+        text: b.total > 0 ? t('widget.spent_of', { spent: cash(b.spent), budget: cash(b.total), month }) : t('widget.spent', { amount: cash(b.expense), month }),
         detail: up ? t('widget.next', { name: up.schedule.name || '', amount: U.money(Math.abs(up.amount), up.currency), date: U.date(up.date, 'dayMonth') }) : t('widget.no_upcoming')
       };
       if (b.total > 0) snap.progress = Math.max(0, Math.min(1, b.spent / b.total));
     } catch (_) {}
-  } else if (app.engine && !app.engine.closed) {
+  } else if (open) {
     snap = { text: t('app.name'), detail: t('widget.open') };
   }
   try { S.set('extdata.finance', 'widget', snap); } catch (_) {}
@@ -266,15 +268,11 @@ async function autoPost() {
   const today = L.today();
   const ops = [];
   for (const s of L.schedules()) {
-    if (!s.auto_post || !isISODate(s.anchor) || !s.account) continue;
-    const created = (s.created || s.anchor).slice(0, 10);
-    const from = created > s.anchor ? created : s.anchor;
-    const start = from < addDays(today, -400) ? addDays(today, -400) : from;
-    const dates = occurrences(s.rule || { freq: 'month' }, s.anchor, start, today, s.end && s.end.mode !== 'never' ? s.end : null);
+    const dates = L.autoPostDates(s, today);
+    if (!dates.length) continue;
+    const acct = L.get('account', s.account);
     for (const d of dates) {
       const id = 'sch:' + s.id + ':' + d;
-      if (L.known('transaction', id)) continue;
-      const acct = L.get('account', s.account);
       ops.push(...app.engine.createOps('transaction', id, {
         date: d, amount_minor: s.amount_minor || 0, currency: (acct && acct.currency) || s.currency || L.base(), account: s.account,
         category: s.category || null, payee: s.payee || s.name || '', note: '', tags: [], kind: (s.amount_minor || 0) > 0 ? 'income' : 'expense',
@@ -337,7 +335,7 @@ export async function openSession(session) {
   app.ledger = new Ledger(engine);
   U.setNumberLocale(app.ledger.settings().locale || null);
   engine.addEventListener('change', () => { scheduleRender(); updateWidgetSoon(); });
-  engine.addEventListener('writer', () => { scheduleRender(); afterWriter(); });
+  engine.addEventListener('writer', () => { scheduleRender(); afterWriter().then(() => updateWidget()); });
   shell();
   app.sync = syncController(ctx);
   app.sync.onStatus = () => updateSyncBadge();
@@ -346,6 +344,14 @@ export async function openSession(session) {
   routeCommand();
   armTimers();
   updateWidget();
+  askPersist();
+}
+
+let persistAsked = false;
+function askPersist() {
+  if (persistAsked) return;
+  persistAsked = true;
+  db.requestPersist().catch(() => {});
 }
 
 async function afterWriter(session) {
@@ -431,6 +437,7 @@ export function lock() {
   if (app.sync) { app.sync.stop(); app.sync = null; }
   if (app.engine) { app.engine.close(); app.engine = null; }
   app.ledger = null;
+  clearTimeout(widgetTimer);
   updateWidget();
   start();
 }
@@ -474,7 +481,6 @@ export async function boot() {
   if (!app.root) return;
   try {
     await db.open();
-    await db.requestPersist();
   } catch (e) {
     app.root.replaceChildren(h('div', { class: 'flock' }, h('div', { class: 'flock__inner' }, h('h1', null, t('app.name')), h('p', { class: 'flock__lede' }, t('errors.no_storage') + ' ' + String(e && e.message || e)))));
     return;

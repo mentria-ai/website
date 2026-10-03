@@ -1,4 +1,4 @@
-import { diffDays, addDays, addMonths } from './dates.js';
+import { diffDays, addDays, addMonths, nextOccurrence, isISODate } from './dates.js';
 import { payeeKey } from './ledger.js';
 
 const CADENCES = [
@@ -61,6 +61,13 @@ export function detectStreams(rows, opts) {
   }
   out.sort((a, b) => (a.state === b.state ? b.amount - a.amount : a.state === 'active' ? -1 : 1));
   return out;
+}
+
+export function nextDue(stream, today) {
+  const next = stream && stream.next;
+  if (!isISODate(next) || !isISODate(today)) return today;
+  if (next >= today) return next;
+  return nextOccurrence(stream.rule || { freq: 'month', interval: 1 }, next, addDays(today, -1)) || today;
 }
 
 export function cycleLabelKey(rule) {

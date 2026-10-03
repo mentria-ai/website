@@ -23,16 +23,28 @@ export function toUTC(s) { const p = parts(s); return Date.UTC(p.y, p.m - 1, p.d
 
 export function fromUTC(t) { const d = new Date(t); return iso(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()); }
 
-export function todayISO(tz) {
+export function dateInZone(when, tz) {
+  const d = when instanceof Date ? when : new Date(when);
+  if (isNaN(d.getTime())) return null;
   try {
     const f = new Intl.DateTimeFormat('en-CA', { timeZone: tz || undefined, year: 'numeric', month: '2-digit', day: '2-digit' });
-    const p = f.formatToParts(new Date());
+    const p = f.formatToParts(d);
     const g = (t) => (p.find((x) => x.type === t) || {}).value;
     return g('year') + '-' + g('month') + '-' + g('day');
   } catch (_) {
-    const d = new Date();
     return iso(d.getFullYear(), d.getMonth() + 1, d.getDate());
   }
+}
+
+export function todayISO(tz) {
+  return dateInZone(new Date(), tz);
+}
+
+export function localDateOf(stamp, tz) {
+  const s = String(stamp || '');
+  if (isISODate(s)) return s;
+  if (!/^\d{4}-\d{2}-\d{2}T/.test(s)) return null;
+  return dateInZone(s, tz);
 }
 
 export function localTimeZone() {

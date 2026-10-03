@@ -943,7 +943,8 @@
       "preview_region_aria": "レンダリングされたプレビュー",
       "tab_hint": "Tabはスペースを挿入します。エディタから出るには、Escapeを押してからTabを押してください。",
       "remote_img_blocked": "リモート画像をブロックしました: {src}",
-      "import_note_confirm": "現在のMarkdown下書きをクイックメモのノートで置き換えますか？"
+      "import_note_confirm": "現在のMarkdown下書きをクイックメモのノートで置き換えますか？",
+      "sample": "# Markdown → PDF へようこそ\n\nドキュメントがどのように印刷されるかを確認できる簡単なデモです。\n**左側で編集**し、右側でプレビューを確認して、問題なければ **PDFをダウンロード** を押してください。\n\n## 機能\n\n- GitHub 形式の Markdown（表、タスクリスト、取り消し線）\n- 見やすいコードブロック\n- すばやいライブプレビュー\n- ブラウザーに自動保存\n\n### コード\n\n```js\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n```\n\n### 表\n\n| 機能 | 状態 |\n| ---- | :--: |\n| 表 | ✓ |\n| リスト | ✓ |\n| コードブロック | ✓ |\n| 数式 (KaTeX) | 今後対応 |\n\n### タスクリスト\n\n- [x] Markdown を入力する\n- [x] プレビューが更新されるのを確認する\n- [ ] **PDFをダウンロード** を押す\n\n> ヒント: 印刷ダイアログで送信先に **PDF に保存** を選び、余白を *デフォルト* にして、ヘッダーとフッターをオフにすると、きれいに仕上がります。\n\n---\n\n[Mentria](https://mentria.ai) で作成。\n"
     },
     "quote": {
       "tldr_heading": "モチベーション名言とは?",

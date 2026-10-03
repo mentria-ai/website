@@ -246,6 +246,7 @@ localeReload: true
     overTitle:     {{ ("tool.sudoku.over_title"     | t) | dump | safe }},
     tryAgain:      {{ ("tool.sudoku.try_again"      | t) | dump | safe }},
     newGame:       {{ ("tool.sudoku.btn_new"        | t) | dump | safe }},
+    confirmNew:    {{ ("tool.sudoku.confirm_new"    | t) | dump | safe }},
     mLevel:    {{ ("tool.sudoku.mlabel_level"    | t) | dump | safe }},
     mTime:     {{ ("tool.sudoku.mlabel_time"     | t) | dump | safe }},
     mMistakes: {{ ("tool.sudoku.mlabel_mistakes" | t) | dump | safe }},
@@ -265,6 +266,7 @@ localeReload: true
     aPos:     {{ ("tool.sudoku.a11y_pos"     | t) | dump | safe }},
     aEmpty:   {{ ("tool.sudoku.a11y_empty"   | t) | dump | safe }},
     aGiven:   {{ ("tool.sudoku.a11y_given"   | t) | dump | safe }},
+    aWrong:   {{ ("tool.sudoku.a11y_wrong"   | t) | dump | safe }},
     aNotes:   {{ ("tool.sudoku.a11y_notes"   | t) | dump | safe }},
     aPlaced:  {{ ("tool.sudoku.a11y_placed"  | t) | dump | safe }},
     aMistake: {{ ("tool.sudoku.a11y_mistake" | t) | dump | safe }},
@@ -351,13 +353,18 @@ localeReload: true
     else try { localStorage.setItem('mentria_sudoku_best_' + diff, String(s)); } catch (_) {}
   }
 
+  function syncElapsed(){
+    if (State.timer && !State.paused && !State.over) State.elapsed = Math.floor((performance.now() - State.started)/1000);
+  }
   function save(){
     if (State.over || !State.solution.length) return;
+    syncElapsed();
     const data = {
       diff: State.diff, solution: State.solution, puzzle: State.puzzle,
       grid: State.grid, given: State.given, notes: State.notes.map(s => Array.from(s)),
       flag: State.flag, errMode: State.errMode,
-      mistakes: State.mistakes, hints: State.hints, elapsed: State.elapsed, notesMode: State.notesMode
+      mistakes: State.mistakes, hints: State.hints, elapsed: State.elapsed, notesMode: State.notesMode,
+      paused: State.paused
     };
     try {
       if (window.MentriaStore) window.MentriaStore.set('games', 'sudoku', data);
@@ -387,6 +394,7 @@ localeReload: true
       State.hints = typeof d.hints === 'number' ? d.hints : 3;
       State.elapsed = d.elapsed || 0;
       State.notesMode = !!d.notesMode;
+      State.paused = !!d.paused;
       return true;
     } catch(e){ return false; }
   }
@@ -488,8 +496,11 @@ localeReload: true
     hintCountEl.textContent = State.hints;
     syncPauseBtn(); syncUndoBtn(); syncErrUI();
     buildBoard(); render(); updateHUD(); save();
+    prefSet('games', 'sudoku_diff', State.diff);
   }
   function resume(){
+    const wasPaused = State.paused;
+    State.paused = false;
     if (State.timer) clearInterval(State.timer);
     State.started = performance.now() - State.elapsed*1000;
     State.timer = setInterval(tick, 1000);
@@ -503,6 +514,7 @@ localeReload: true
     errSeg.set(State.errMode);
     syncPauseBtn(); syncUndoBtn(); syncErrUI();
     buildBoard(); render(); updateHUD();
+    if (wasPaused) setPaused(true, true);
   }
   function tick(){
     if (State.over || State.paused) return;
@@ -570,10 +582,12 @@ localeReload: true
         if (v!==0 && selVal!==0 && v===selVal) cell.classList.add('samenum');
       }
       if (i===State.sel) cell.classList.add('sel');
+      let wrong = false;
       if (v!==0 && !State.given[i]){
-        if (live && hasConflict(i, v)) cell.classList.add('conflict');
-        else if (checkMode && State.flag[i]) cell.classList.add('conflict');
+        if (live) wrong = v !== State.solution[i];
+        else if (checkMode) wrong = !!State.flag[i];
       }
+      if (wrong) cell.classList.add('conflict');
       cell.innerHTML = '';
       if (v!==0){ cell.textContent = v; }
       else if (State.notes[i].size){
@@ -590,7 +604,7 @@ localeReload: true
       }
       const pos = COPY.aPos.replace('{r}', r+1).replace('{c}', c+1);
       let label;
-      if (v!==0){ label = pos + ', ' + v + (State.given[i] ? ', ' + COPY.aGiven : ''); }
+      if (v!==0){ label = pos + ', ' + v + (State.given[i] ? ', ' + COPY.aGiven : '') + (wrong ? ', ' + COPY.aWrong : ''); }
       else if (State.notes[i].size){
         const list = [];
         for (let n=1;n<=9;n++) if (State.notes[i].has(n)) list.push(n);
@@ -601,13 +615,6 @@ localeReload: true
       cell.tabIndex = i===tab ? 0 : -1;
     }
     updateKeypad();
-  }
-  function hasConflict(i, v){
-    const r = Math.floor(i/9), c = i%9;
-    for (let k=0;k<9;k++){ if (k!==c && State.grid[r*9+k]===v) return true; if (k!==r && State.grid[k*9+c]===v) return true; }
-    const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
-    for (let a=0;a<3;a++) for (let b=0;b<3;b++){ const j=(br+a)*9+(bc+b); if (j!==i && State.grid[j]===v) return true; }
-    return false;
   }
 
   function snapshot(){
@@ -657,6 +664,7 @@ localeReload: true
       toggleNote(i, n);
       return;
     }
+    if (State.grid[i] === n && (n !== 0 || !State.notes[i].size)) return;
     snapshot();
     if (n===0){
       State.grid[i]=0; State.notes[i].clear(); State.flag[i] = false;
@@ -737,7 +745,9 @@ localeReload: true
     appEl.classList.remove('is-paused');
     syncUndoBtn(); syncPauseBtn();
     clearSave();
+    prefSet('games', 'sudoku_diff', State.diff);
     if (won) writeBest(State.diff, State.elapsed);
+    updateHUD();
     const m = document.getElementById('modal');
     const best = readBest(State.diff);
     const missCount = State.errMode === 'live' ? (State.mistakes + '/' + State.maxMistakes) : '—';
@@ -768,9 +778,10 @@ localeReload: true
     mNew.focus();
   }
 
-  function setPaused(on){
+  function setPaused(on, quiet){
     if (State.over || !State.solution.length) return;
     if (on === State.paused) return;
+    if (on) syncElapsed();
     State.paused = on;
     if (on){
       if (State.timer) clearInterval(State.timer);
@@ -785,8 +796,8 @@ localeReload: true
       overlay.classList.add('show');
       const rb = document.getElementById('sk-resume');
       rb.onclick = () => setPaused(false);
-      rb.focus();
-      announce(COPY.aPaused);
+      document.getElementById('stat-time').textContent = fmt(State.elapsed);
+      if (!quiet){ rb.focus(); announce(COPY.aPaused); }
     } else {
       overlay.classList.remove('show');
       boardEl.classList.remove('is-paused');
@@ -798,6 +809,7 @@ localeReload: true
       if (State.sel >= 0) focusCell(State.sel);
     }
     syncPauseBtn(); syncUndoBtn();
+    if (!quiet) save();
   }
   function syncPauseBtn(){
     pauseLabel.textContent = State.paused ? COPY.btnResume : COPY.btnPause;
@@ -821,7 +833,9 @@ localeReload: true
     hintCountEl.textContent = State.hints;
     render();
     announce(COPY.aPlaced.replace('{n}', State.solution[target]));
-    checkWin(); save();
+    checkWin();
+    if (State.over) return;
+    save();
     showToast(COPY.hintToast.replace('{n}', State.hints));
     focusCell(target);
   }
@@ -945,12 +959,36 @@ localeReload: true
     try { helpEl.showPopover(); } catch (_) {}
   }
 
+  let asking = false;
+  function dialogOpen(){
+    if (asking) return true;
+    const dlg = document.getElementById('m-dialog');
+    try { return !!(dlg && dlg.matches(':popover-open')); } catch (_) { return false; }
+  }
+  function inProgress(){
+    if (State.over || !State.solution.length) return false;
+    if (State.mistakes > 0 || State.hints < 3) return true;
+    for (let i=0;i<81;i++){ if (State.grid[i] !== State.puzzle[i] || State.notes[i].size) return true; }
+    return false;
+  }
+  function confirmNew(){
+    if (!inProgress() || typeof window.mentriaConfirm !== 'function') return Promise.resolve(true);
+    if (asking) return Promise.resolve(false);
+    asking = true;
+    return window.mentriaConfirm(COPY.confirmNew, { danger: true })
+      .then(ok => { asking = false; return !!ok; }, () => { asking = false; return false; });
+  }
+  function requestNewGame(){
+    confirmNew().then(ok => { if (ok) newGame(); });
+  }
+
   document.addEventListener('keydown', e => {
     if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return;
     const k = e.key;
     if (helpOpen) return;
     if (k === 'Escape'){ if (State.padOpen){ e.preventDefault(); closePad(); } return; }
+    if (e.repeat && k.indexOf('Arrow') !== 0) return;
     if (k >= '1' && k <= '9'){ e.preventDefault(); markInput('keyboard'); placeNumber(+k); return; }
     if (k === 'Backspace' || k === 'Delete' || k === '0'){ e.preventDefault(); markInput('keyboard'); placeNumber(0); return; }
     if (k === 'n' || k === 'N'){ e.preventDefault(); markInput('keyboard'); toggleNotes(); return; }
@@ -1010,13 +1048,14 @@ localeReload: true
   });
 
   window.addEventListener('mentria:gamepad:direction', e => {
+    if (dialogOpen()) return;
     markInput('controller');
     if (State.over || State.paused) return;
     if (State.padOpen) movePadDir(e.detail.direction);
     else moveSelDir(e.detail.direction);
   });
   window.addEventListener('mentria:gamepad:button', e => {
-    if (!e.detail.pressed) return;
+    if (!e.detail.pressed || dialogOpen()) return;
     markInput('controller');
     const n = e.detail.name;
     if (n === 'start'){ setPaused(!State.paused); return; }
@@ -1047,7 +1086,7 @@ localeReload: true
   notesBtn.onclick = toggleNotes;
   document.getElementById('btn-erase').onclick = () => placeNumber(0);
   document.getElementById('btn-hint').onclick = useHint;
-  document.getElementById('btn-new').onclick = newGame;
+  document.getElementById('btn-new').onclick = requestNewGame;
   undoBtn.onclick = undoMove;
   checkBtn.onclick = runCheck;
   pauseBtn.onclick = () => setPaused(!State.paused);
@@ -1056,8 +1095,12 @@ localeReload: true
   });
 
   const diffSeg = MentriaUI.segmented(document.getElementById('diff-seg'), (value) => {
-    State.diff = value;
-    newGame();
+    if (!DIFF[value]) return;
+    confirmNew().then(ok => {
+      if (!ok){ diffSeg.set(State.diff); return; }
+      State.diff = value;
+      newGame();
+    });
   });
   const errSeg = MentriaUI.segmented(document.getElementById('sk-err-seg'), (value) => {
     setErrMode(value);
@@ -1070,8 +1113,12 @@ localeReload: true
   syncErrUI();
   syncPauseBtn();
   buildKeypad();
-  if (load()) resume(); else newGame();
+  const savedDiff = prefGet('games', 'sudoku_diff', null);
+  if (DIFF[savedDiff]) State.diff = savedDiff;
+  if (load()) resume(); else { diffSeg.set(State.diff); newGame(); }
   errSeg.set(State.errMode);
+  window.addEventListener('pagehide', save);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
   maybeAutoHelp();
 })();
 </script>

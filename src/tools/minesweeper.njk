@@ -95,12 +95,12 @@ localeReload: true
 </div>
 
 <div class="ms-controls">
-  <span class="ctrl-label">{{ "tool.minesweeper.difficulty" | t }}</span>
-  <div class="m-seg" id="diff-seg">
-    <button data-d="easy" data-value="easy">{{ "tool.minesweeper.diff_easy" | t }}</button>
-    <button data-d="medium" data-value="medium" class="is-active">{{ "tool.minesweeper.diff_medium" | t }}</button>
-    <button data-d="hard" data-value="hard">{{ "tool.minesweeper.diff_hard" | t }}</button>
-    <button data-d="extreme" data-value="extreme">{{ "tool.minesweeper.diff_extreme" | t }}</button>
+  <span class="ctrl-label" id="ms-diff-label">{{ "tool.minesweeper.difficulty" | t }}</span>
+  <div class="m-seg ms-diff" id="diff-seg" aria-labelledby="ms-diff-label">
+    <button type="button" data-d="easy" data-value="easy" aria-label="{{ 'tool.minesweeper.diff_easy' | t }}"><span class="ms-diff__name">{{ "tool.minesweeper.name_easy" | t }}</span><span class="ms-diff__meta">9×9 · 10</span></button>
+    <button type="button" data-d="medium" data-value="medium" class="is-active" aria-label="{{ 'tool.minesweeper.diff_medium' | t }}"><span class="ms-diff__name">{{ "tool.minesweeper.name_medium" | t }}</span><span class="ms-diff__meta">14×14 · 32</span></button>
+    <button type="button" data-d="hard" data-value="hard" aria-label="{{ 'tool.minesweeper.diff_hard' | t }}"><span class="ms-diff__name">{{ "tool.minesweeper.name_hard" | t }}</span><span class="ms-diff__meta">18×22 · 70</span></button>
+    <button type="button" data-d="extreme" data-value="extreme" aria-label="{{ 'tool.minesweeper.diff_extreme' | t }}"><span class="ms-diff__name">{{ "tool.minesweeper.name_extreme" | t }}</span><span class="ms-diff__meta">20×30 · 125</span></button>
   </div>
   <div class="stats-spread">
     <div class="stat-item">
@@ -181,6 +181,31 @@ main { max-width: 1100px; }
   padding: 12px 16px;
   border-bottom: 1px solid var(--term-border);
   flex-wrap: wrap;
+  container: ms-controls / inline-size;
+}
+.m-seg.ms-diff > button { display: inline-flex; align-items: baseline; justify-content: center; gap: 1ch; }
+.ms-diff__meta::before { content: "· "; }
+@container ms-controls (max-width: 47.5rem) {
+  .m-seg.ms-diff { flex: 1 1 auto; }
+  .m-seg.ms-diff > button {
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    white-space: normal;
+    line-height: 1.25;
+  }
+  .ms-diff__name { white-space: nowrap; }
+  .ms-diff__meta { font-size: 10px; color: var(--term-subtle); }
+  .ms-diff__meta::before { content: none; }
+  .m-seg.ms-diff > button.is-active .ms-diff__meta { color: inherit; opacity: 0.8; }
+}
+@container ms-controls (max-width: 32rem) {
+  .m-seg.ms-diff { flex-basis: 100%; }
+}
+@media (max-width: 720px) {
+  html.is-fullscreen-tool body .game-page .ms-controls .stats-spread { flex: 0 0 auto; margin-left: auto; }
 }
 .ctrl-label {
   font-family: var(--font-mono);
@@ -248,6 +273,7 @@ main { max-width: 1100px; }
 }
 
 @media (pointer: coarse) {
+  .m-seg.ms-diff > button { min-height: 44px; }
   .ms-toolbar { gap: 10px; }
   .mode-toggle { min-height: 44px; padding: 0 16px; font-size: 12px; }
   .hint { flex-basis: 100%; margin-left: 0; }
@@ -551,6 +577,7 @@ main { max-width: 1100px; }
     btnTryAgain:   {{ ("tool.minesweeper.btn_try_again"      | t) | dump | safe }},
     btnResume:     {{ ("tool.minesweeper.btn_resume"         | t) | dump | safe }},
     btnRestart:    {{ ("tool.minesweeper.btn_restart"        | t) | dump | safe }},
+    confirmNew:    {{ ("tool.minesweeper.confirm_new"        | t) | dump | safe }},
     methodTouch:   {{ ("tool.minesweeper.method_touch"       | t) | dump | safe }},
     methodMouse:   {{ ("tool.minesweeper.method_mouse"       | t) | dump | safe }},
     methodKeyboard:{{ ("tool.minesweeper.method_keyboard"    | t) | dump | safe }},
@@ -574,6 +601,7 @@ main { max-width: 1100px; }
   const HELP_NS = 'tools';
   const HELP_KEY = 'minesweeper_help_seen';
   const METHOD_KEY = 'minesweeper_last_method';
+  const GAME_KEY = 'msw_game';
 
   const State = {
     diff: 'medium',
@@ -610,6 +638,8 @@ main { max-width: 1100px; }
   let cellEls = [];
   let cursorIdx = 0;
   let longPressed = false;
+  let asking = false;
+  let diffSeg = null;
 
   function announce(msg) {
     if (!liveEl) return;
@@ -638,6 +668,25 @@ main { max-width: 1100px; }
   function storeSet(ns, key, value) {
     if (window.MentriaStore) { window.MentriaStore.set(ns, key, value); return; }
     try { localStorage.setItem('mentria_' + ns + '_' + key, JSON.stringify(value)); } catch (_) {}
+  }
+  function storeRemove(ns, key) {
+    if (window.MentriaStore) { window.MentriaStore.remove(ns, key); return; }
+    try { localStorage.removeItem('mentria_' + ns + '_' + key); } catch (_) {}
+  }
+
+  function saveGame() {
+    if (!State.started || State.over) return;
+    let cells = '';
+    for (let r = 0; r < State.rows; r++) {
+      for (let c = 0; c < State.cols; c++) {
+        const cell = State.grid[r][c];
+        cells += ((cell.mine ? 1 : 0) | (cell.revealed ? 2 : 0) | (cell.flag ? 4 : 0) | (cell.q ? 8 : 0)).toString(16);
+      }
+    }
+    storeSet('games', GAME_KEY, { v: 1, diff: State.diff, cells: cells, elapsed: Math.round(elapsedMs()), paused: State.paused });
+  }
+  function clearGame() {
+    if (storeGet('games', GAME_KEY) != null) storeRemove('games', GAME_KEY);
   }
 
   function loadBest(d) {
@@ -727,12 +776,42 @@ main { max-width: 1100px; }
     if (!helpEl) return false;
     try { return helpEl.matches(':popover-open'); } catch (_) { return false; }
   }
+  function isDialogOpen() {
+    if (asking) return true;
+    const dlg = document.getElementById('m-dialog');
+    try { return !!(dlg && dlg.matches(':popover-open')); } catch (_) { return false; }
+  }
+
+  function inProgress() { return State.started && !State.over; }
+  function confirmNew() {
+    if (!inProgress() || typeof window.mentriaConfirm !== 'function') return Promise.resolve(true);
+    if (asking) return Promise.resolve(false);
+    asking = true;
+    return window.mentriaConfirm(COPY.confirmNew, { danger: true })
+      .then((ok) => { asking = false; return !!ok; }, () => { asking = false; return false; });
+  }
+  function restart() {
+    confirmNew().then((ok) => { if (ok) build(); });
+  }
+  function syncSeg() {
+    if (diffSeg) { diffSeg.set(State.diff); return; }
+    const seg = document.getElementById('diff-seg');
+    if (!seg) return;
+    Array.prototype.forEach.call(seg.querySelectorAll('button'), (b) => {
+      b.classList.toggle('is-active', b.getAttribute('data-value') === State.diff);
+    });
+  }
   function openHelp() {
     if (!helpEl || typeof helpEl.showPopover !== 'function') return;
     try { if (!isHelpOpen()) helpEl.showPopover(); } catch (_) {}
   }
 
   function build() {
+    clearGame();
+    resetBoard();
+  }
+
+  function resetBoard() {
     const cfg = DIFFS[State.diff] || DIFFS.medium;
     State.rows = cfg.rows; State.cols = cfg.cols; State.mines = cfg.mines;
     State.grid = [];
@@ -788,6 +867,79 @@ main { max-width: 1100px; }
     if (extra > 0) boardWrap.scrollLeft = Math.round(extra / 2);
   }
 
+  function paintCell(r, c) {
+    const cell = State.grid[r][c];
+    const el = cellEl(r, c);
+    if (!el) return;
+    if (cell.revealed) {
+      el.classList.add('revealed');
+      if (cell.n > 0) {
+        el.textContent = String(cell.n);
+        el.classList.add('n' + cell.n);
+      } else {
+        el.classList.add('empty');
+      }
+    } else {
+      el.classList.toggle('flag', cell.flag);
+      el.classList.toggle('q', cell.q);
+    }
+    setCellLabel(r, c);
+  }
+
+  function restoreGame() {
+    const d = storeGet('games', GAME_KEY);
+    if (!d || typeof d !== 'object' || d.v !== 1 || !DIFFS[d.diff] || typeof d.cells !== 'string') return false;
+    const cfg = DIFFS[d.diff];
+    const total = cfg.rows * cfg.cols;
+    if (d.cells.length !== total) return false;
+    const codes = [];
+    let mines = 0, revealed = 0;
+    for (let i = 0; i < total; i++) {
+      const v = parseInt(d.cells.charAt(i), 16);
+      if (isNaN(v)) return false;
+      if ((v & 1) && (v & 2)) return false;
+      if (v & 1) mines++;
+      if (v & 2) revealed++;
+      codes.push(v);
+    }
+    if (mines !== cfg.mines || revealed === 0 || revealed >= total - cfg.mines) return false;
+
+    State.diff = d.diff;
+    resetBoard();
+    for (let i = 0; i < total; i++) {
+      const v = codes[i];
+      const cell = State.grid[Math.floor(i / State.cols)][i % State.cols];
+      cell.mine = !!(v & 1);
+      cell.revealed = !!(v & 2);
+      cell.flag = !cell.revealed && !!(v & 4);
+      cell.q = !cell.revealed && !cell.flag && !!(v & 8);
+    }
+    for (let r = 0; r < State.rows; r++) {
+      for (let c = 0; c < State.cols; c++) {
+        const cell = State.grid[r][c];
+        if (!cell.mine) {
+          let n = 0;
+          forEachNeighbor(r, c, (rr, cc) => { if (State.grid[rr][cc].mine) n++; });
+          cell.n = n;
+        }
+        if (cell.flag) State.flagsPlaced++;
+        if (cell.revealed) State.revealedCount++;
+        paintCell(r, c);
+      }
+    }
+    State.started = true;
+    const elapsed = (typeof d.elapsed === 'number' && isFinite(d.elapsed) && d.elapsed > 0) ? d.elapsed : 0;
+    startTimer(elapsed);
+    if (d.paused) {
+      State.paused = true;
+      State.pausedAt = performance.now();
+      showPauseMenu(true);
+    }
+    updateHUD();
+    paintTime();
+    return true;
+  }
+
   function placeMines(safeR, safeC) {
     const safeSet = new Set();
     safeSet.add(safeR * State.cols + safeC);
@@ -815,15 +967,16 @@ main { max-width: 1100px; }
     }
   }
 
-  function elapsedSec() {
+  function elapsedMs() {
     if (!State.started) return 0;
     const end = State.over ? State.endedAt : (State.paused ? State.pausedAt : performance.now());
-    return Math.max(0, Math.floor((end - State.startedAt) / 1000));
+    return Math.max(0, end - State.startedAt);
   }
+  function elapsedSec() { return Math.floor(elapsedMs() / 1000); }
   function fmtTime(sec) { return String(Math.min(sec, 999)).padStart(3, '0'); }
   function paintTime() { if (timeEl) timeEl.textContent = fmtTime(elapsedSec()); }
-  function startTimer() {
-    State.startedAt = performance.now();
+  function startTimer(offsetMs) {
+    State.startedAt = performance.now() - (offsetMs || 0);
     stopTimer();
     State.timer = setInterval(() => {
       if (State.over || State.paused) return;
@@ -840,9 +993,11 @@ main { max-width: 1100px; }
     const cell = State.grid[r][c];
     if (cell.revealed || cell.flag) return;
     cell.revealed = true;
+    cell.q = false;
     setCellLabel(r, c);
 
     const el = cellEl(r, c);
+    el.classList.remove('q');
     el.classList.add('revealed');
     if (cell.mine) {
       el.classList.add('mine', 'exploded');
@@ -931,6 +1086,7 @@ main { max-width: 1100px; }
     State.won = won;
     State.paused = false;
     stopTimer();
+    clearGame();
 
     for (let r = 0; r < State.rows; r++) {
       for (let c = 0; c < State.cols; c++) {
@@ -947,6 +1103,8 @@ main { max-width: 1100px; }
         }
         if (!won && cell.mine && !cell.flag) {
           cell.revealed = true;
+          cell.q = false;
+          el.classList.remove('q');
           el.classList.add('revealed', 'mine');
           setCellLabel(r, c);
         }
@@ -966,7 +1124,7 @@ main { max-width: 1100px; }
     updateHUD();
   }
 
-  function renderModal(kind, opts) {
+  function renderModal(kind, opts, noFocus) {
     modal.className = 'modal ' + kind;
     modal.textContent = '';
     modal.appendChild(make('p', 'eyebrow', '> ' + opts.eyebrow));
@@ -992,7 +1150,7 @@ main { max-width: 1100px; }
     overlay.classList.remove('hidden');
     if (boardWrap) boardWrap.classList.add('is-veiled');
     const first = actions.querySelector('button');
-    if (first) first.focus();
+    if (first && !noFocus) first.focus();
   }
 
   function hideOverlay(refocus) {
@@ -1035,7 +1193,7 @@ main { max-width: 1100px; }
     });
   }
 
-  function showPauseMenu() {
+  function showPauseMenu(noFocus) {
     renderModal('pause', {
       eyebrow: COPY.eyebrowPaused,
       title: COPY.titlePaused,
@@ -1046,9 +1204,9 @@ main { max-width: 1100px; }
       ],
       buttons: [
         { label: COPY.btnResume, primary: true, onClick: () => setPaused(false) },
-        { label: COPY.btnRestart, onClick: () => build() }
+        { label: COPY.btnRestart, onClick: () => restart() }
       ]
-    });
+    }, noFocus);
   }
 
   function setPaused(on) {
@@ -1057,7 +1215,7 @@ main { max-width: 1100px; }
     if (on) {
       State.paused = true;
       State.pausedAt = performance.now();
-      showPauseMenu();
+      showPauseMenu(isDialogOpen());
       announce(COPY.aPaused);
     } else {
       State.startedAt += performance.now() - State.pausedAt;
@@ -1066,6 +1224,7 @@ main { max-width: 1100px; }
       announce(COPY.aResumed);
     }
     paintTime();
+    saveGame();
   }
 
   function togglePause() {
@@ -1179,6 +1338,7 @@ main { max-width: 1100px; }
   boardEl.addEventListener('keydown', (e) => {
     const t = e.target.closest('.cell');
     if (!t) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || isDialogOpen()) return;
     setMethod('keyboard');
     const r = +t.dataset.r, c = +t.dataset.c;
     const idx = r * State.cols + c;
@@ -1189,13 +1349,14 @@ main { max-width: 1100px; }
     if (k === 'ArrowRight') { e.preventDefault(); if (c < State.cols - 1) setCursor(idx + 1, true); return; }
     if (k === 'Home') { e.preventDefault(); setCursor(r * State.cols, true); return; }
     if (k === 'End') { e.preventDefault(); setCursor(r * State.cols + State.cols - 1, true); return; }
-    if (k === 'Enter' || k === ' ' || k === 'Spacebar') { e.preventDefault(); activate(r, c); return; }
-    if (k === 'f' || k === 'F') { e.preventDefault(); e.stopPropagation(); flag(r, c); return; }
-    if (k === 'c' || k === 'C') { e.preventDefault(); e.stopPropagation(); chordAt(r, c); }
+    if (k === 'Enter' || k === ' ' || k === 'Spacebar') { e.preventDefault(); if (!e.repeat) activate(r, c); return; }
+    if (k === 'f' || k === 'F') { e.preventDefault(); e.stopPropagation(); if (!e.repeat) flag(r, c); return; }
+    if (k === 'c' || k === 'C') { e.preventDefault(); e.stopPropagation(); if (!e.repeat) chordAt(r, c); }
   });
 
   document.addEventListener('keydown', (e) => {
     if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || isDialogOpen()) return;
     const k = e.key;
     if (k === 'Escape') {
       if (isHelpOpen()) return;
@@ -1203,9 +1364,10 @@ main { max-width: 1100px; }
       return;
     }
     if (isHelpOpen()) return;
+    if (e.repeat && k.length === 1) return;
     if (k === '?') { openHelp(); return; }
     if (k === 'f' || k === 'F') { setMethod('keyboard'); setFlagMode(!State.flagMode); return; }
-    if (k === 'r' || k === 'R') { setMethod('keyboard'); build(); return; }
+    if (k === 'r' || k === 'R') { setMethod('keyboard'); restart(); return; }
     if (k === 'p' || k === 'P') { setMethod('keyboard'); togglePause(); return; }
     if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'ArrowLeft' || k === 'ArrowRight') {
       if (document.activeElement && document.activeElement !== document.body) return;
@@ -1218,7 +1380,7 @@ main { max-width: 1100px; }
   });
 
   window.addEventListener('mentria:gamepad:direction', (e) => {
-    if (!e.detail) return;
+    if (!e.detail || isDialogOpen()) return;
     setMethod('gamepad');
     if (State.over || State.paused) return;
     const d = e.detail.direction;
@@ -1230,7 +1392,7 @@ main { max-width: 1100px; }
   });
 
   window.addEventListener('mentria:gamepad:button', (e) => {
-    if (!e.detail || !e.detail.pressed) return;
+    if (!e.detail || !e.detail.pressed || isDialogOpen()) return;
     setMethod('gamepad');
     const n = e.detail.name;
     if (n === 'start') { togglePause(); return; }
@@ -1246,13 +1408,17 @@ main { max-width: 1100px; }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && State.started && !State.over && !State.paused) setPaused(true);
   });
+  window.addEventListener('pagehide', saveGame);
 
   if (window.MentriaUI && typeof window.MentriaUI.segmented === 'function') {
-    window.MentriaUI.segmented(document.getElementById('diff-seg'), (value) => {
+    diffSeg = window.MentriaUI.segmented(document.getElementById('diff-seg'), (value) => {
       if (!DIFFS[value]) return;
-      State.diff = value;
-      storeSet('games', 'msw_diff', value);
-      build();
+      confirmNew().then((ok) => {
+        if (!ok) { syncSeg(); return; }
+        State.diff = value;
+        storeSet('games', 'msw_diff', value);
+        build();
+      });
     });
   }
 
@@ -1260,7 +1426,7 @@ main { max-width: 1100px; }
   const pauseBtn = document.getElementById('pause-btn');
   if (pauseBtn) pauseBtn.addEventListener('click', () => togglePause());
   const restartBtn = document.getElementById('restart-btn');
-  if (restartBtn) restartBtn.addEventListener('click', () => build());
+  if (restartBtn) restartBtn.addEventListener('click', () => restart());
 
   if (helpEl) {
     helpEl.addEventListener('toggle', (e) => {
@@ -1273,21 +1439,14 @@ main { max-width: 1100px; }
   window.addEventListener('resize', centerBoard);
 
   const savedDiff = storeGet('games', 'msw_diff');
-  if (savedDiff && DIFFS[savedDiff]) {
-    State.diff = savedDiff;
-    const seg = document.getElementById('diff-seg');
-    if (seg) {
-      Array.prototype.forEach.call(seg.querySelectorAll('button'), (b) => {
-        b.classList.toggle('is-active', b.getAttribute('data-value') === savedDiff);
-      });
-    }
-  }
+  if (savedDiff && DIFFS[savedDiff]) State.diff = savedDiff;
 
   const lastMethod = storeGet(HELP_NS, METHOD_KEY);
   if (methodEl && METHOD_LABELS[lastMethod]) methodEl.textContent = METHOD_LABELS[lastMethod];
 
   setFlagMode(false);
-  build();
+  if (!restoreGame()) build();
+  syncSeg();
 
   if (!storeGet(HELP_NS, HELP_KEY)) {
     setTimeout(() => {

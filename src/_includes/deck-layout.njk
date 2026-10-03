@@ -5,3 +5,6 @@ deckLayout: true
 localeReload: true
 ---
 {{ content | safe }}
+{%- if '/feed/' in page.url %}
+<script>window.MENTRIA_DECK_I18N = { more: {{ ("learn.more" | t) | dump | safe }}, less: {{ ("learn.less" | t) | dump | safe }} };</script>
+{%- endif %}

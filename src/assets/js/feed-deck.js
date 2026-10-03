@@ -70,7 +70,7 @@
     });
     collapseAll();
     fadeHint();
-    try { history.replaceState(null, '', '#s' + (i + 1)); } catch (_) {}
+    try { history.replaceState(history.state, '', '#s' + (i + 1)); } catch (_) {}
     warm(i);
   }
 

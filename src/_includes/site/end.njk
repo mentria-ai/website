@@ -57,7 +57,7 @@ try {
     banner.hidden = true;
     banner.classList.remove('pwa-install-banner--visible');
     closeSheet();
-    if (ls) { ls.setItem(INSTALLED_KEY, String(Date.now())); ls.setItem(DISMISS_KEY, String(Date.now())); }
+    if (ls) { try { ls.setItem(INSTALLED_KEY, String(Date.now())); ls.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {} }
   });
 
   // Belt-and-suspenders: Chromium exposes getInstalledRelatedApps(); if it
@@ -66,7 +66,7 @@ try {
   if (navigator.getInstalledRelatedApps) {
     navigator.getInstalledRelatedApps().then(function (apps) {
       if (apps && apps.length) {
-        if (ls) ls.setItem(INSTALLED_KEY, String(Date.now()));
+        if (ls) { try { ls.setItem(INSTALLED_KEY, String(Date.now())); } catch (_) {} }
         banner.hidden = true;
         banner.classList.remove('pwa-install-banner--visible');
         closeSheet();

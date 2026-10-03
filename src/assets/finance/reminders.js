@@ -53,7 +53,7 @@ export async function armReminders(ctx) {
     const id = 'fin-' + sc.id.slice(0, 18) + '-' + u.date;
     const when = days === 0 ? t('reminders.today') : days === 1 ? t('reminders.tomorrow') : t('reminders.on', { date: fmtDate(u.date, 'dayMonth') });
     const title = showNames ? t('reminders.title_named', { name: sc.name, when }) : t('reminders.title', { when });
-    const body = showAmounts ? money(Math.abs(u.amount), u.currency) + (sc.auto_post ? ' · ' + t('reminders.auto') : '') : t('reminders.body');
+    const body = showAmounts ? money(Math.abs(u.amount), u.currency) + (sc.auto_post && !L.scheduleOrphaned(sc) ? ' · ' + t('reminders.auto') : '') : t('reminders.body');
     try {
       const ok = await P.schedule({ id, fireAt, title, body, url: runUrl(), tag: 'finance-' + sc.id.slice(0, 18) });
       if (ok) ids.push(id);

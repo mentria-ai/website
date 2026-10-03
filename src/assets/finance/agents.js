@@ -58,7 +58,7 @@ function caps(getCtx) {
       const key = a && /^\d{4}-\d{2}$/.test(a.month || '') ? a.month : monthKey(L.today());
       const b = L.budgetSummary(key);
       const base = L.base();
-      return { month: key, currency: base, spent: n(b.expense, base), budget: n(b.total, base), by_category: b.items.filter((x) => x.spent || x.budget).map((x) => ({ name: x.group.name, spent: n(x.spent, base), budget: x.budget == null ? null : n(x.budget, base) })) };
+      return { month: key, currency: base, spent: n(b.spent, base), budget: n(b.total, base), outside_budgets: n(b.outside, base), by_category: b.items.filter((x) => x.spent || x.budget).map((x) => ({ name: x.group.name, spent: n(x.spent, base), budget: x.budget == null ? null : n(x.budget, base) })) };
     }, { description: 'Monthly spending and budget totals by category from the private Finance ledger (aggregates only).', parameters: { type: 'object', properties: { month: { type: 'string', description: 'YYYY-MM, default this month' } } }, ai: true, readonly: true }],
     ['finance.subscriptions', async (a) => {
       if (locked(getCtx)) return { error: 'locked' };

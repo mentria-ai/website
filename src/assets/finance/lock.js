@@ -4,6 +4,7 @@ import * as C from './crypto.js';
 import * as db from './db.js';
 import { defaultOps, guessCurrency, COMMON_CCY } from './defaults.js';
 import { todayISO } from './dates.js';
+import { decimalToInput } from './money.js';
 import { readFileJson, decryptExport, wrapRecords, foreignSafe } from './backup.js';
 import { pairJoin } from './sync.js';
 
@@ -265,7 +266,7 @@ function askNewPass(session) {
 }
 
 function quickAddLocked(opts, countEl) {
-  const amount = U.moneyField({ placeholder: '0.00', 'aria-label': t('entry.amount') });
+  const amount = U.moneyField({ placeholder: decimalToInput('0.00', U.locale()), 'aria-label': t('entry.amount') });
   const note = U.input({ placeholder: t('lock.qa_note'), maxlength: '200' });
   let income = false;
   const kind = U.seg([{ value: 'out', label: t('entry.expense') }, { value: 'in', label: t('entry.income') }], 'out', (v) => { income = v === 'in'; });

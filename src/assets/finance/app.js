@@ -67,7 +67,11 @@ const app = {
   viewState: {}
 };
 
+let queuedCmd = null;
+const COMMANDS = ['fin-add', 'fin-budget', 'fin-subs', 'fin-tax'];
+
 function readArgs() {
+  if (queuedCmd) { const q = queuedCmd; queuedCmd = null; return q; }
   const a = host && host.args;
   if (a && a.cmd) return a;
   const hp = new URLSearchParams((location.hash.split('?')[1] || ''));
@@ -399,7 +403,18 @@ function armRemindersSoon(ms) {
 
 function routeCommand() {
   const a = readArgs();
-  if (!a) return;
+  if (a) runCommand(a);
+}
+
+window.addEventListener('mentria:command', (e) => {
+  const d = e.detail || {};
+  if (COMMANDS.indexOf(String(d.cmd || '')) === -1) return;
+  e.preventDefault();
+  if (app.engine) runCommand(d);
+  else queuedCmd = { cmd: String(d.cmd), args: d.args || '' };
+});
+
+function runCommand(a) {
   const cmd = String(a.cmd || '');
   if (cmd === 'fin-add') openEntry(ctx(), { text: a.args || '' });
   else if (cmd === 'fin-budget') go('budgets');

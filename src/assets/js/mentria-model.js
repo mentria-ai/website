@@ -27,6 +27,16 @@ const DEFAULT_COPY = {
   failedHint: 'You can try a smaller model or skip for now.'
 };
 
+function i18nReady(ms) {
+  try {
+    const r = window.MentriaI18n && typeof window.MentriaI18n.ready === 'function' ? window.MentriaI18n.ready() : null;
+    if (!r) return Promise.resolve();
+    return Promise.race([r, new Promise((res) => setTimeout(res, ms))]);
+  } catch (_) {
+    return Promise.resolve();
+  }
+}
+
 function t(key, vars) {
   let s = DEFAULT_COPY[key];
   try {
@@ -276,6 +286,7 @@ export async function ensureModel(engineFactory, opts) {
   const cachedOnly = !!opts.cachedOnly;
 
   if (typeof navigator === 'undefined' || !navigator.gpu) throw new NoWebGpuError();
+  await i18nReady(2500);
 
   let stopped = false;
   let lastEngine = null;

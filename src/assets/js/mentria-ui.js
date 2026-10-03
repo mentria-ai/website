@@ -458,7 +458,9 @@
     var delay = ms || 500;
     var timer = null;
     function flush() {
-      if (timer) { clearTimeout(timer); timer = null; }
+      if (!timer) return;
+      clearTimeout(timer);
+      timer = null;
       return fn();
     }
     function schedule() {
@@ -469,7 +471,7 @@
       if (document.visibilityState === 'hidden') flush();
     });
     window.addEventListener('pagehide', flush);
-    return { schedule: schedule, flush: flush };
+    return { schedule: schedule, flush: flush, pending: function () { return !!timer; } };
   }
 
   function downloadFile(filename, blob) {

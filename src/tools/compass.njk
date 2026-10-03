@@ -421,7 +421,10 @@ localeReload: true
   function start() {
     if (typeof DeviceOrientationEvent === 'undefined') { showPanel('unsupported'); renderQR(); return; }
     if (!window.isSecureContext) { showPanel('insecure'); return; }
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') { showPanel('perm'); return; }
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      MentriaUI.sensorsGranted(['accelerometer', 'gyroscope', 'magnetometer']).then(function (ok) { if (ok) begin(); else showPanel('perm'); });
+      return;
+    }
     begin();
   }
 
@@ -507,7 +510,10 @@ localeReload: true
 
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') stopLoop();
-    else startLoop();
+    else {
+      startLoop();
+      if (running && !wakeLock) requestWakeLock();
+    }
   });
 
   buildRose();

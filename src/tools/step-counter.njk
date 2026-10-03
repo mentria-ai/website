@@ -511,7 +511,7 @@ localeReload: true
       return;
     }
     if (typeof DeviceMotionEvent.requestPermission === 'function') {
-      showPanel('perm');
+      MentriaUI.sensorsGranted(['accelerometer']).then((ok) => { if (ok) beginTracking(); else showPanel('perm'); });
       return;
     }
     beginTracking();

@@ -148,7 +148,7 @@ localeReload: true
   var DB_MIN = 30;
   var DB_MAX = 120;
   var FLOOR_DBFS = -100;
-  var EMA_ALPHA = 0.2;
+  var FAST_TAU_S = 0.125;
   var SLOW_WINDOW_MS = 1000;
   var PEAK_HOLD_MS = 2000;
   var PEAK_DECAY_PER_S = 20;
@@ -209,6 +209,7 @@ localeReload: true
   var running = false;
 
   var fastDbfs = null;
+  var fastPower = null;
   var slowTimes = [];
   var slowPowers = [];
   var statMinDbfs = null;
@@ -316,9 +317,11 @@ localeReload: true
     var sum = 0;
     for (var i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
     var power = sum / buf.length;
-    var dbfs = powerToDbfs(power);
-
-    fastDbfs = fastDbfs === null ? dbfs : fastDbfs + (dbfs - fastDbfs) * EMA_ALPHA;
+    var dt = lastFrameAt ? (now - lastFrameAt) / 1000 : 0;
+    lastFrameAt = now;
+    var alpha = dt > 0 ? 1 - Math.exp(-dt / FAST_TAU_S) : 1;
+    fastPower = fastPower === null ? power : fastPower + (power - fastPower) * alpha;
+    fastDbfs = powerToDbfs(fastPower);
 
     slowTimes.push(now);
     slowPowers.push(power);
@@ -335,8 +338,6 @@ localeReload: true
     if (statMinDbfs === null || fastDbfs < statMinDbfs) statMinDbfs = fastDbfs;
     if (statPeakDbfs === null || fastDbfs > statPeakDbfs) statPeakDbfs = fastDbfs;
 
-    var dt = lastFrameAt ? (now - lastFrameAt) / 1000 : 0;
-    lastFrameAt = now;
     if (peakDbfs === null || fastDbfs >= peakDbfs) {
       peakDbfs = fastDbfs;
       peakAt = now;
@@ -368,6 +369,7 @@ localeReload: true
   }
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') syncWakeLock();
+    else if (running) stop();
   });
 
   function showPanel(name) {
@@ -452,6 +454,7 @@ localeReload: true
       micSource.connect(analyser);
 
       fastDbfs = null;
+      fastPower = null;
       slowTimes = [];
       slowPowers = [];
       statMinDbfs = null;
@@ -492,7 +495,7 @@ localeReload: true
       var name = err && err.name;
       if (name === 'NotAllowedError' || name === 'SecurityError') {
         showPanel('denied');
-      } else if (name === 'NotFoundError' || name === 'OverconstrainedError' || name === 'NotReadableError') {
+      } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
         showPanel('start');
         setStartError(COPY.errNoMic);
       } else {

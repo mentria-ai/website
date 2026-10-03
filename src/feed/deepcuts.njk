@@ -9,7 +9,29 @@ eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ pair.locale.code }}"
   title: "{{ pair.edition.subtitle | tloc(pair.locale.code) }} · Deep Cuts"
-  description: "{{ pair.edition.subtitle | tloc(pair.locale.code) }}"
+  description: |-
+    {%- set ja = pair.locale.code == "ja" -%}
+    {%- set minLen = 50 if ja else 110 -%}
+    {%- set maxLen = 80 if ja else 160 -%}
+    {%- set desc = "" -%}
+    {%- set done = false -%}
+    {%- for slide in pair.edition.slides -%}
+    {%- set caption = slide.caption | tloc(pair.locale.code) | striptags | htmlDecode | replace(r/[\uD83C-\uD83E][\uDC00-\uDFFF]\uFE0F?\s*/g, "") | trim -%}
+    {%- if caption and not done -%}
+    {%- if not r/[.!?。！？…]["'”’»」』)）]*$/.test(caption) -%}{%- set caption = caption ~ ("。" if ja else ".") -%}{%- endif -%}
+    {%- set joined = (desc ~ (" " if (not ja or (desc | last) in "?!") else "") ~ caption) if desc else caption -%}
+    {%- if joined.length <= maxLen -%}
+    {%- set desc = joined -%}
+    {%- else -%}
+    {%- if desc.length < minLen -%}
+    {%- set cut = joined | truncate(maxLen - 1, ja, "") | replace(r/[\s,;:、，—–\-«“‘(（「『…\uD800-\uDBFF]+$/, "") -%}
+    {%- set desc = cut if r/[.!?。！？]$/.test(cut) else cut ~ "…" -%}
+    {%- endif -%}
+    {%- set done = true -%}
+    {%- endif -%}
+    {%- endif -%}
+    {%- endfor -%}
+    {{ (desc or (pair.edition.subtitle | tloc(pair.locale.code))) | safe }}
   socialImageOverride: "{{ pair.edition.cover_image }}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">

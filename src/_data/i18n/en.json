@@ -14,7 +14,8 @@
     "tagline": "creative studio. tools & transmissions.",
     "description": "A creative studio for tools, experiments, and visual transmissions.",
     "metaTitle": "Mentria — Creative Studio",
-    "metaDescription": "A creative studio for tools, experiments, and visual transmissions. Built with craft."
+    "metaDescription": "A creative studio for tools, experiments, and visual transmissions. Built with craft.",
+    "socialImageAlt": "Mentria — tools, games and AI that run entirely in your browser"
   },
   "nav": {
     "feed": "Feed",
@@ -298,7 +299,15 @@
     "related_all": "All tools",
     "search_label": "Search tools",
     "search_placeholder": "Search tools",
-    "no_match": "No tools match “{q}”."
+    "no_match": "No tools match “{q}”.",
+    "schema": {
+      "requires_js": "Requires JavaScript",
+      "requires_webgpu": "Requires WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+",
+      "feature_browser": "Runs entirely in your browser",
+      "feature_private": "No data leaves your device",
+      "feature_no_key": "No API key required",
+      "feature_offline": "Works offline once cached"
+    }
   },
   "feed_page": {
     "title": "Feed",

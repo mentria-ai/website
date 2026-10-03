@@ -2,7 +2,7 @@
 {
   "id": "pomodoro-timer",
   "name": "Pomodoro Timer",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "icon": "🍅",
   "author": "Mentria",
   "description": "In-page focus timer with work and break phases. State survives reloads.",
@@ -30,27 +30,30 @@
   .phase[data-p="break"] { color: var(--ext-accent); }
   .clock { font-size: 4rem; font-weight: 600; margin: 0.4rem 0 0.2rem; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
   .done { font-size: 0.72rem; color: var(--ext-muted); margin-bottom: 1.1rem; }
-  .controls { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.4rem; }
+  .controls { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.4rem; }
   button { background: transparent; border: 1px solid #2a3138; color: var(--ext-fg); border-radius: 8px; padding: 0.55rem 1.1rem; font-family: inherit; font-size: 0.9rem; cursor: pointer; }
   button.primary { border-color: var(--ext-accent); color: var(--ext-accent); }
+  .toggle { display: inline-grid; }
+  .toggle > span { grid-area: 1 / 1; }
+  .toggle > .off { visibility: hidden; }
   button:hover { border-color: var(--ext-accent); }
   button:focus-visible { outline: 2px solid var(--ext-accent); outline-offset: 1px; }
   .settings { display: flex; gap: 1rem; justify-content: center; }
-  .settings label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ext-muted); }
+  .settings label { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 0.3rem; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ext-muted); }
   .settings input { width: 5rem; background: #10141a; border: 1px solid #2a3138; border-radius: 6px; padding: 0.4rem; color: var(--ext-fg); font-family: inherit; font-size: 0.95rem; text-align: center; }
 </style>
 <div class="wrap">
-  <div class="phase" id="phase" data-p="work">Focus</div>
-  <div class="clock" id="clock" aria-live="polite">25:00</div>
-  <div class="done" id="done">0 sessions completed</div>
+  <div class="phase" id="phase" data-p="work"></div>
+  <div class="clock" id="clock" aria-live="polite"></div>
+  <div class="done" id="done"></div>
   <div class="controls">
-    <button class="primary" id="toggle" type="button">Start</button>
-    <button id="reset" type="button">Reset</button>
-    <button id="skip" type="button">Skip</button>
+    <button class="primary toggle" id="toggle" type="button"><span id="start-label"></span><span id="pause-label" class="off"></span></button>
+    <button id="reset" type="button"></button>
+    <button id="skip" type="button"></button>
   </div>
   <div class="settings">
-    <label>Focus min<input id="work" type="number" min="1" max="180" value="25"></label>
-    <label>Break min<input id="break" type="number" min="1" max="60" value="5"></label>
+    <label><span id="work-label"></span><input id="work" type="number" min="1" max="180" value="25"></label>
+    <label><span id="break-label"></span><input id="break" type="number" min="1" max="60" value="5"></label>
   </div>
 </div>
 <script>
@@ -64,12 +67,89 @@
       Object.keys(map).forEach(function (k) { if (m.theme[k]) r.style.setProperty(map[k], m.theme[k]); });
     }
 
+    var LOCS = ['en', 'es', 'fr', 'ja', 'pt-BR'];
+    var STR = {
+      en: {
+        focus: 'Focus', brk: 'Break',
+        done: { one: '{n} session completed', other: '{n} sessions completed' },
+        start: 'Start', pause: 'Pause', reset: 'Reset', skip: 'Skip',
+        workMin: 'Focus min', breakMin: 'Break min',
+        toBreak: 'Break time 🍵', toFocus: 'Back to focus 🍅'
+      },
+      es: {
+        focus: 'Concentración', brk: 'Descanso',
+        done: { one: '{n} sesión completada', other: '{n} sesiones completadas' },
+        start: 'Iniciar', pause: 'Pausar', reset: 'Reiniciar', skip: 'Saltar',
+        workMin: 'Concentración (min)', breakMin: 'Descanso (min)',
+        toBreak: 'Hora de descansar 🍵', toFocus: 'Vuelve a concentrarte 🍅'
+      },
+      fr: {
+        focus: 'Concentration', brk: 'Pause',
+        done: { one: '{n} session terminée', other: '{n} sessions terminées' },
+        start: 'Démarrer', pause: 'Pause', reset: 'Réinitialiser', skip: 'Passer',
+        workMin: 'Concentration (min)', breakMin: 'Pause (min)',
+        toBreak: 'C’est l’heure de la pause 🍵', toFocus: 'Retour à la concentration 🍅'
+      },
+      ja: {
+        focus: '集中', brk: '休憩',
+        done: '完了したセッション:{n}回',
+        start: '開始', pause: '一時停止', reset: 'リセット', skip: 'スキップ',
+        workMin: '集中(分)', breakMin: '休憩(分)',
+        toBreak: '休憩しましょう 🍵', toFocus: '集中に戻りましょう 🍅'
+      },
+      'pt-BR': {
+        focus: 'Foco', brk: 'Pausa',
+        done: { one: '{n} sessão concluída', other: '{n} sessões concluídas' },
+        start: 'Iniciar', pause: 'Pausar', reset: 'Reiniciar', skip: 'Pular',
+        workMin: 'Foco (min)', breakMin: 'Pausa (min)',
+        toBreak: 'Hora da pausa 🍵', toFocus: 'De volta ao foco 🍅'
+      }
+    };
+
     var phaseEl = document.getElementById('phase');
     var clockEl = document.getElementById('clock');
     var doneEl = document.getElementById('done');
     var toggleEl = document.getElementById('toggle');
+    var startLabelEl = document.getElementById('start-label');
+    var pauseLabelEl = document.getElementById('pause-label');
+    var resetEl = document.getElementById('reset');
+    var skipEl = document.getElementById('skip');
     var workEl = document.getElementById('work');
     var breakEl = document.getElementById('break');
+    var workLabelEl = document.getElementById('work-label');
+    var breakLabelEl = document.getElementById('break-label');
+
+    var L = 'en', PR, NF, NF2;
+    function pickLoc(c) {
+      c = String(c || 'en');
+      if (LOCS.indexOf(c) >= 0) return c;
+      var b = c.slice(0, 2).toLowerCase();
+      if (b === 'pt') return 'pt-BR';
+      return LOCS.indexOf(b) >= 0 ? b : 'en';
+    }
+    function setLocale(c) {
+      L = pickLoc(c);
+      document.documentElement.lang = L;
+      try { PR = new Intl.PluralRules(L); } catch (e) { PR = { select: function (n) { return n === 1 ? 'one' : 'other'; } }; }
+      NF = new Intl.NumberFormat(L, { maximumFractionDigits: 0 });
+      NF2 = new Intl.NumberFormat(L, { minimumIntegerDigits: 2, useGrouping: false });
+      startLabelEl.textContent = t('start');
+      pauseLabelEl.textContent = t('pause');
+      resetEl.textContent = t('reset');
+      skipEl.textContent = t('skip');
+      workLabelEl.textContent = t('workMin');
+      breakLabelEl.textContent = t('breakMin');
+    }
+    function t(k, v) {
+      var str = STR[L] && STR[L][k] != null ? STR[L][k] : STR.en[k];
+      if (str == null) return k;
+      if (typeof str === 'object') {
+        var n = v && typeof v.n === 'number' ? v.n : 1;
+        str = str[PR.select(n)] || str.other;
+      }
+      if (v) str = str.replace(/\{(\w+)\}/g, function (a, b) { return v[b] == null ? a : (typeof v[b] === 'number' ? NF.format(v[b]) : String(v[b])); });
+      return str;
+    }
 
     var s = storage.get('state') || { phase: 'work', running: false, endsAt: 0, remaining: 25 * 60, work: 25, brk: 5, done: 0 };
     if (typeof s.work !== 'number') s.work = 25;
@@ -85,13 +165,12 @@
     }
     function render() {
       var sec = left();
-      var mm = String(Math.floor(sec / 60)).padStart(2, '0');
-      var ss = String(sec % 60).padStart(2, '0');
-      clockEl.textContent = mm + ':' + ss;
-      phaseEl.textContent = s.phase === 'work' ? 'Focus' : 'Break';
+      clockEl.textContent = NF2.format(Math.floor(sec / 60)) + ':' + NF2.format(sec % 60);
+      phaseEl.textContent = t(s.phase === 'work' ? 'focus' : 'brk');
       phaseEl.dataset.p = s.phase;
-      doneEl.textContent = s.done + (s.done === 1 ? ' session completed' : ' sessions completed');
-      toggleEl.textContent = s.running ? 'Pause' : 'Start';
+      doneEl.textContent = t('done', { n: s.done });
+      startLabelEl.classList.toggle('off', s.running);
+      pauseLabelEl.classList.toggle('off', !s.running);
     }
 
     var audio = null;
@@ -107,18 +186,18 @@
       if (navigator.vibrate) { try { navigator.vibrate([200, 120, 200]); } catch (e) {} }
       if (!audio) return;
       try {
-        var t = audio.currentTime;
+        var t0 = audio.currentTime;
         [880, 660, 880].forEach(function (f, i) {
           var o = audio.createOscillator();
           var g = audio.createGain();
           o.frequency.value = f;
-          g.gain.setValueAtTime(0.0001, t + i * 0.22);
-          g.gain.exponentialRampToValueAtTime(0.25, t + i * 0.22 + 0.02);
-          g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.22 + 0.2);
+          g.gain.setValueAtTime(0.0001, t0 + i * 0.22);
+          g.gain.exponentialRampToValueAtTime(0.25, t0 + i * 0.22 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.22 + 0.2);
           o.connect(g);
           g.connect(audio.destination);
-          o.start(t + i * 0.22);
-          o.stop(t + i * 0.22 + 0.21);
+          o.start(t0 + i * 0.22);
+          o.stop(t0 + i * 0.22 + 0.21);
         });
       } catch (e) {}
     }
@@ -131,7 +210,7 @@
       save();
       render();
       if (!skipped) chime();
-      notify(s.phase === 'break' ? 'Break time 🍵' : 'Back to focus 🍅');
+      notify(t(s.phase === 'break' ? 'toBreak' : 'toFocus'));
     }
 
     function tick() {
@@ -157,10 +236,10 @@
     }
 
     toggleEl.addEventListener('click', function () { s.running ? pause() : start(); });
-    document.getElementById('reset').addEventListener('click', function () {
+    resetEl.addEventListener('click', function () {
       s.running = false; s.endsAt = 0; s.remaining = total(); save(); render();
     });
-    document.getElementById('skip').addEventListener('click', function () { advance(true); });
+    skipEl.addEventListener('click', function () { advance(true); });
 
     function onSetting() {
       s.work = Math.min(180, Math.max(1, parseInt(workEl.value, 10) || 25));
@@ -172,6 +251,13 @@
     }
     workEl.addEventListener('change', onSetting);
     breakEl.addEventListener('change', onSetting);
+
+    if (typeof m.onLocaleChange === 'function') m.onLocaleChange(function (code) {
+      setLocale(code);
+      render();
+    });
+
+    setLocale(m.locale || document.documentElement.lang || navigator.language);
 
     if (m.args && m.args.cmd === 'pomodoro') {
       var mins = parseInt(String(m.args.args || '').trim(), 10);

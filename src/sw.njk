@@ -11,9 +11,11 @@ const DECKS_CACHE = 'mentria-decks-{{ buildHash }}';
 const ART_CACHE = 'mentria-deck-art';
 const SHARE_CACHE = 'mentria-share';
 const EXT_DATA_CACHE = 'mentria-ext-data';
-const DECKS_LIMIT = 40;
+const DECKS_LIMIT = 60;
 const ART_LIMIT = 200;
-const FEED_PAGE = /^\/((es|fr|ja|pt-br)\/)?feed\//;
+const FEED_PAGE = /^\/((es|fr|ja|pt-br)\/)?(feed\/|learn\/[^/]+\/)/;
+const PACK_JSON = /^\/learn\/[^/]+\/pack\.json$/;
+const PACK_PAGE = /^\/(?:(?:es|fr|ja|pt-br)\/)?learn\/([^/]+)\/$/;
 const ASSETS = [
   '/',
   '/assets/css/style.css',
@@ -41,6 +43,14 @@ const ASSETS = [
   '/assets/js/mentria-backdrop.js',
   '/assets/img/stream-hero.svg',
   '/assets/js/pack-cards.js',
+  '/assets/js/pack-player.js',
+  '/assets/js/learn-library.js',
+  '/assets/css/learn.css',
+  '/assets/js/mentria-p2p-models.js',
+  '/assets/models-manifest.json',
+  '/assets/extensions/meal-planner.html',
+  '/assets/fonts/jbm-latin-ext.woff2',
+  '/assets/phosphor/renderer-modern.js',
   '/assets/js/stream.js',
   '/learn/',
   '/tools/',
@@ -364,6 +374,16 @@ async function stashCapped(cacheName, key, response, limit) {
   if (keys.length > limit) await Promise.all(keys.slice(0, keys.length - limit).map(k => cache.delete(k)));
 }
 
+async function warmPack(id) {
+  const key = '/learn/' + id + '/pack.json';
+  const cache = await caches.open(DECKS_CACHE);
+  if (await cache.match(key, { ignoreSearch: true })) return;
+  try {
+    const resp = await fetch(key, { credentials: 'omit' });
+    if (resp.ok) await stashCapped(DECKS_CACHE, key, resp, DECKS_LIMIT);
+  } catch (_) {}
+}
+
 async function handleShareTarget(request) {
   let form = null;
   try { form = await request.formData(); } catch (_) {}
@@ -531,12 +551,29 @@ self.addEventListener('fetch', event => {
     const precache = await caches.open(CACHE_NAME);
     const cached = await precache.match(event.request, { ignoreSearch: true });
     if (cached) return cached;
+    if (event.request.mode === 'navigate') {
+      const saved = await caches.match(event.request, { ignoreSearch: true });
+      if (saved) {
+        const net = fetch(event.request).then((resp) => {
+          if (resp && resp.ok && FEED_PAGE.test(url.pathname)) event.waitUntil(stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT).catch(() => {}));
+          return resp;
+        });
+        event.waitUntil(net.catch(() => {}));
+        const first = await Promise.race([net.catch(() => null), new Promise((r) => setTimeout(() => r(null), 3500))]);
+        return first && first.ok ? first : saved;
+      }
+    }
     try {
       const resp = await fetch(event.request);
       if (resp && resp.ok && event.request.mode === 'navigate' && FEED_PAGE.test(url.pathname)) {
         stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT);
+        const pack = url.pathname.match(PACK_PAGE);
+        if (pack) event.waitUntil(warmPack(pack[1]));
       }
-      if (resp && resp.ok && url.pathname.startsWith('/assets/fonts/')) {
+      if (resp && resp.ok && PACK_JSON.test(url.pathname)) {
+        stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT);
+      }
+      if (resp && resp.ok && (url.pathname.startsWith('/assets/fonts/') || url.pathname === '/search-index-feed.json')) {
         const copy = resp.clone();
         event.waitUntil(precache.put(event.request, copy).catch(() => {}));
       }

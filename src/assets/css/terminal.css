@@ -764,7 +764,6 @@ html.is-fullscreen-tool body .terminal-frame--fullscreen .qn-editor__textarea {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-image: var(--feed-card-bg);
   background-size: cover;
   background-position: center;
   filter: blur(36px) brightness(0.42) saturate(1.15);
@@ -774,6 +773,7 @@ html.is-fullscreen-tool body .terminal-frame--fullscreen .qn-editor__textarea {
   pointer-events: none;
 }
 
+.feed-card[data-near]::before { background-image: var(--feed-card-bg); }
 .feed-card.is-current::before { opacity: 1; }
 .feed-card:not([style*="--feed-card-bg"])::before { display: none; }
 

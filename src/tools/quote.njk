@@ -54,6 +54,10 @@ const COPY = {
   errNoWebGpu:        {{ ("tool.quote.err_no_webgpu"        | t) | dump | safe }},
   errUnsupportedBody: {{ ("tool.quote.err_unsupported_body" | t) | dump | safe }},
   errLoadRuntime:     {{ ("tool.quote.err_load_runtime"     | t) | dump | safe }},
+  engineOffline:      {{ ("common.ai_engine_offline"        | t) | dump | safe }},
+  engineFailed:       {{ ("common.ai_engine_failed"         | t) | dump | safe }},
+  modelOffline:       {{ ("common.ai_model_offline"         | t) | dump | safe }},
+  offline:            {{ ("common.offline_title"            | t) | dump | safe }},
   errDeviceLost:      {{ ("tool.quote.err_device_lost"      | t) | dump | safe }},
   errLoadPrefix:      {{ ("tool.quote.err_load_prefix"      | t) | dump | safe }},
   errNoQuote:         {{ ("tool.quote.err_no_quote"         | t) | dump | safe }},
@@ -78,11 +82,11 @@ function setStatus(state, text) {
 }
 
 /* \u2500\u2500 WebGPU gate \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-function showUnsupportedError(reason) {
+function showUnsupportedError(reason, note) {
   setStatus('error', reason);
   const quoteEl = document.getElementById('mq-quote');
   if (quoteEl) {
-    quoteEl.textContent = COPY.errUnsupportedBody;
+    quoteEl.textContent = note || COPY.errUnsupportedBody;
   }
   document.getElementById('mq-new').disabled = true;
 }
@@ -95,7 +99,8 @@ if (!navigator.gpu) {
     ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
   } catch (err) {
     console.error('Failed to load mentria-engine bundle:', err);
-    showUnsupportedError(COPY.errLoadRuntime);
+    if (navigator.onLine) showUnsupportedError(COPY.errLoadRuntime, COPY.engineFailed);
+    else showUnsupportedError(COPY.offline, COPY.engineOffline);
   }
   if (MentriaEngine) runApp(MentriaEngine);
 }
@@ -164,7 +169,7 @@ function runApp(MentriaEngine) {
       console.error('Model load error:', err);
       if (err && err.message === 'download-postponed') setStatus('idle', COPY.downloadPostponed);
       else if (err && (err.message === 'no-webgpu' || err.name === 'NoWebGpuError' || err.name === 'WebGPUUnsupportedError')) showUnsupportedError(COPY.errNoWebGpu);
-      else setStatus('error', COPY.errLoadPrefix + (err.message || err));
+      else setStatus('error', navigator.onLine === false ? COPY.modelOffline : COPY.errLoadPrefix + (err.message || err));
     }
   }
 

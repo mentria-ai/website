@@ -42,6 +42,7 @@ eleventyComputed:
   </div>
 
   <p class="sx__count" id="sx-count" aria-live="polite"></p>
+  <p class="sx__count" id="sx-offline" hidden>{{ "tool.search.offline_partial" | t }}</p>
   <ol class="sx__results" id="sx-results"></ol>
   <p class="sx__hint" id="sx-hint">{{ "tool.search.empty_hint" | t }}</p>
 </section>
@@ -67,6 +68,7 @@ eleventyComputed:
   const $count   = document.getElementById('sx-count');
   const $results = document.getElementById('sx-results');
   const $hint    = document.getElementById('sx-hint');
+  const $offline = document.getElementById('sx-offline');
   const $ai      = document.getElementById('sx-ai');
   const $aiBtn   = document.getElementById('sx-ai-btn');
   const $aiBody  = document.getElementById('sx-ai-body');
@@ -346,7 +348,7 @@ eleventyComputed:
   // ── Boot ────────────────────────────────────────────────────────
   const feedIndexP = fetch('/search-index-feed.json')
     .then(r => (r.ok ? r.json() : []))
-    .catch(() => []);
+    .catch(() => { $offline.hidden = false; return []; });
 
   fetch('/search-index.json').then(r => r.json()).then(idx => {
     INDEX = idx;

@@ -20,7 +20,11 @@
   var pack = null, native = false, order = [], byId = {}, sectionOf = {}, current = 0, mode = 'quiz', progress = null;
   var importedRow = null, nextInfo = null, finishRefresh = null;
   var BUDGET = 10;
+  var MODES = ['read', 'quiz', 'review', 'budget'];
+  var EXIT_KEY = 'mentria.packExit';
+  var exitSteps = 0;
   function renderMode() { return mode === 'read' ? 'read' : 'quiz'; }
+  function baseMode(avail) { return avail.indexOf('quiz') >= 0 ? 'quiz' : avail.indexOf('read') >= 0 ? 'read' : avail[0] || 'read'; }
   var slides = [], segs = [], stage, progressBar, liveEl, hint, modeWrap, secLabel, shareBtn;
   var coarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
@@ -67,7 +71,8 @@
     pack.sections.forEach(function (s) { s.cards.forEach(function (id) { sectionOf[id] = s; }); });
     progress = P.getProgress(pack.id);
     var avail = P.availableModes(pack, progress);
-    mode = avail.indexOf(progress.mode) >= 0 ? progress.mode : (avail.indexOf('quiz') >= 0 ? 'quiz' : 'read');
+    mode = avail.indexOf(progress.mode) >= 0 ? progress.mode : baseMode(avail);
+    if (!native) nameImported();
     root.innerHTML = '';
     root.dataset.mode = mode;
     if (pack.cover) root.style.setProperty('--pack-cover', 'url("' + String(pack.cover).replace(/"/g, '%22') + '")');
@@ -127,8 +132,17 @@
     bindInput();
   }
 
+  function nameImported() {
+    var name = tx(pack.title);
+    if (!name) return;
+    var h = document.getElementById('packHeading');
+    if (h) h.textContent = name;
+    if (root.dataset.titleSuffix) document.title = name + root.dataset.titleSuffix;
+  }
+
   function refreshModes() {
     var avail = P.availableModes(pack, progress);
+    if (avail.indexOf(mode) < 0) avail = MODES.filter(function (m) { return m === mode || avail.indexOf(m) >= 0; });
     modeWrap.innerHTML = '';
     avail.forEach(function (m) {
       var b = el('button', 'pack-mode__btn', esc(t('mode_' + m)));
@@ -211,10 +225,13 @@
     p.appendChild(stats);
     var up = el('a', 'pack-next');
     up.hidden = true;
+    up.addEventListener('click', function (e) {
+      if (e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) handOff(up.href);
+    });
     p.appendChild(up);
     var again = el('button', 'pack-btn pack-btn--primary', esc(t('restart')));
     again.type = 'button';
-    again.addEventListener('click', function () { if (mode === 'review' || mode === 'budget') setMode('quiz', true); else { rebuildOrder(); go(0); } });
+    again.addEventListener('click', function () { if (mode === 'review' || mode === 'budget') setMode(baseMode(P.availableModes(pack, progress)), true); else { rebuildOrder(); go(0); } });
     var review = el('button', 'pack-btn', esc(t('review_wrong')));
     review.type = 'button';
     review.addEventListener('click', function () { setMode('review', true); });
@@ -241,7 +258,7 @@
     s.addEventListener('pack:enter', function () {
       var sum = P.summary(pack, progress);
       stats.textContent = mode === 'read'
-        ? t('finish_stats_read', { seen: sum.seen, total: sum.total })
+        ? t('finish_stats_read', { seen: sum.viewed, total: sum.total })
         : t('finish_stats', { seen: sum.seen, total: sum.total, right: sum.right, wrong: sum.wrong });
       note.hidden = !(mode === 'review' && !order.length) && !(mode === 'budget');
       note.textContent = mode === 'review' && !order.length ? t('nothing_to_review') : (mode === 'budget' ? t('budget_done') : '');
@@ -304,13 +321,13 @@
       var sec = sectionOf[id];
       var secTitle = sec ? tx(sec.title) : '';
       secLabel.textContent = secTitle === tx(pack.title) ? '' : secTitle;
-      if (!progress.cards[id] || !P.INTERACTIVE[byId[id].type]) { P.recordSeen(pack.id, id); progress = P.getProgress(pack.id); }
+      if (!progress.cards[id] || !P.INTERACTIVE[byId[id].type]) { P.recordSeen(pack.id, id, P.answerable(byId[id])); progress = P.getProgress(pack.id); }
       progressBar.setAttribute('aria-valuenow', String(i + 1));
       liveEl.textContent = t('card_of', { n: i + 1, total: order.length });
-      try { history.replaceState(null, '', '#c' + (i + 1)); } catch (_) {}
+      try { history.replaceState(history.state, '', '#c' + (i + 1)); } catch (_) {}
     } else {
       secLabel.textContent = '';
-      try { history.replaceState(null, '', '#end'); } catch (_) {}
+      try { history.replaceState(history.state, '', '#end'); } catch (_) {}
     }
     if (shareBtn) shareBtn.hidden = i >= order.length;
     updateSeg(i);
@@ -367,11 +384,37 @@
       .then(function () { shareBtn.classList.remove('is-busy'); });
   }
 
-  function exit() {
+  function prefixOf(path) {
+    var list = window.MENTRIA_LOCALES || [];
+    for (var i = 0; i < list.length; i++) {
+      var pre = list[i].prefix;
+      if (pre && (path === pre || path.indexOf(pre + '/') === 0)) return pre;
+    }
+    return '';
+  }
+
+  function initExit() {
+    var st = history.state;
+    if (st && typeof st.packExit === 'number') { exitSteps = st.packExit; return; }
+    var hand = null, ref = null;
+    try { hand = JSON.parse(sessionStorage.getItem(EXIT_KEY) || 'null'); sessionStorage.removeItem(EXIT_KEY); } catch (_) {}
+    try { ref = document.referrer ? new URL(document.referrer) : null; } catch (_) {}
+    if (ref && ref.origin === location.origin && history.length > 1 && prefixOf(ref.pathname) === localePrefix) {
+      var chained = hand && hand.from === ref.pathname + ref.search && hand.to === location.pathname + location.search;
+      exitSteps = chained ? (hand.steps > 0 ? hand.steps + 1 : 0) : 1;
+    }
+    try { history.replaceState(Object.assign({}, st, { packExit: exitSteps }), ''); } catch (_) {}
+  }
+
+  function handOff(href) {
     try {
-      var ref = document.referrer ? new URL(document.referrer) : null;
-      if (ref && ref.origin === location.origin && history.length > 1) { history.back(); return; }
+      var u = new URL(href, location.href);
+      sessionStorage.setItem(EXIT_KEY, JSON.stringify({ from: location.pathname + location.search, to: u.pathname + u.search, steps: exitSteps }));
     } catch (_) {}
+  }
+
+  function exit() {
+    if (exitSteps > 0 && history.length > exitSteps) { history.go(-exitSteps); return; }
     location.href = libraryHref;
   }
 
@@ -381,6 +424,7 @@
       if (tag === 'INPUT' || tag === 'TEXTAREA') {
         if (e.key === 'Escape') { e.target.blur(); return; }
         if (!((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.target.value)) return;
+        e.target.blur();
       }
       if (e.target && e.target.closest && (e.key === ' ' || e.key === 'Enter') && e.target.closest('button, a[href], [role="button"]')) return;
       if (e.target && e.target.closest && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.target.closest('[role="radiogroup"], [role="listbox"], .pack-order, .pack-match')) return;
@@ -413,6 +457,7 @@
     }, { passive: true });
   }
 
+  initExit();
   load().then(function (p) {
     if (!p) { notFound(); return; }
     var v = P.validate(p);

@@ -123,6 +123,7 @@ const state = {
   peers: new Set(),
   isInitiator: false,
   applyApproved: false,
+  approval: null,
   syncedSinceConnect: 0,
   partner: null,
   exchanged: false,
@@ -179,6 +180,22 @@ const collectConflicts = (payload) => {
 
 const saveRescue = () => {
   try { localStorage.setItem(RESCUE_KEY, JSON.stringify(window.MentriaStore.exportAll())); } catch (_) {}
+};
+
+const approveReplace = (suffixes) => {
+  if (!state.approval) {
+    const decision = new Promise((resolve) => {
+      resolve(typeof window.mentriaConfirm === 'function' ? window.mentriaConfirm(confirmReplaceText(areaList(suffixes))) : false);
+    }).catch(() => false).then((ok) => {
+      if (ok) {
+        saveRescue();
+        if (state.approval === decision) state.applyApproved = true;
+      }
+      return !!ok;
+    });
+    state.approval = decision;
+  }
+  return state.approval;
 };
 
 const restoreRescue = () => {
@@ -426,16 +443,10 @@ const mergeV2 = async (msg, isBack) => {
   });
 
   if (lwwReplace.length && !state.applyApproved) {
-    const areas = areaList(lwwReplace.map((x) => x.suffix));
-    const ok = typeof window.mentriaConfirm === 'function'
-      ? await window.mentriaConfirm(confirmReplaceText(areas))
-      : false;
+    const ok = await approveReplace(lwwReplace.map((x) => x.suffix));
     if (!ok) {
       lwwReplace.forEach((x) => { keeps.push(x.suffix); summary.kept++; });
       lwwReplace.length = 0;
-    } else {
-      state.applyApproved = true;
-      saveRescue();
     }
   }
 
@@ -524,14 +535,7 @@ const handleIncoming = async (payload) => {
     try {
       if (!state.applyApproved) {
         const conflicts = collectConflicts(msg.data).filter((k) => !window.MentriaStore.isLocalOnly(k) && !window.MentriaStore.isLocalLegacy(k));
-        if (conflicts.length) {
-          const areas = areaList(conflicts);
-          const ok = typeof window.mentriaConfirm === 'function'
-            ? await window.mentriaConfirm(confirmReplaceText(areas))
-            : false;
-          if (!ok) { emit('synced', { restored: 0, declined: true }); return; }
-          saveRescue();
-        }
+        if (conflicts.length && !(await approveReplace(conflicts))) { emit('synced', { restored: 0, declined: true }); return; }
         state.applyApproved = true;
       }
       const result = window.MentriaStore.importAll(msg.data, { mode: 'merge' });
@@ -604,6 +608,7 @@ const joinRoomWithCode = async (codeRaw, opts) => {
   state.key = derived.key;
   state.isInitiator = !!opts.initiator;
   state.applyApproved = false;
+  state.approval = null;
   state.syncedSinceConnect = 0;
   state.partner = null;
   state.exchanged = false;
@@ -714,6 +719,7 @@ const joinWithIdentity = async (secretBytes) => {
   state.key = derived.key;
   state.isInitiator = false;
   state.applyApproved = false;
+  state.approval = null;
   state.syncedSinceConnect = 0;
   state.peers.clear();
   setStatus('pairing');
@@ -757,6 +763,7 @@ const disconnect = async () => {
   state.key = null;
   state.isInitiator = false;
   state.applyApproved = false;
+  state.approval = null;
   state.partner = null;
   state.exchanged = false;
   setStatus('idle');

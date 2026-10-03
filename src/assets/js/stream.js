@@ -60,7 +60,7 @@
     parts.push(t('cards_n', { n: x.cards }));
     if (x.minutes) parts.push(t('minutes_n', { n: x.minutes }));
     if (progress) {
-      var seen = Object.keys(progress.cards || {}).length;
+      var seen = P.doneCount(progress);
       if (seen && x.cards) parts.push(t('progress_n', { n: Math.min(100, Math.round((seen / x.cards) * 100)) }));
     }
     return parts.join(' · ');
@@ -125,8 +125,8 @@
         var picked = false;
         packs.forEach(function (r) {
           var pr = P.getProgress(r.id);
-          var seen = Object.keys(pr.cards || {}).length;
-          var due = Object.keys(pr.cards || {}).some(function (id) { var c = pr.cards[id]; return c.r === 'wrong' && c.d && c.d <= now; });
+          var seen = P.doneCount(pr);
+          var due = Object.keys(pr.cards || {}).some(function (id) { return P.isDue(pr.cards[id], now); });
           if (!picked && seen < r.cards) { picked = true; rows.push(r); }
           else if (due) rows.push(r);
         });
@@ -179,7 +179,7 @@
     seededOrder(tail, 2).some(function (x) {
       if (busy[x.id]) return false;
       var pr = P.getProgress(x.id);
-      if (Object.keys(pr.cards || {}).length >= x.cards) return false;
+      if (P.doneCount(pr) >= x.cards) return false;
       picks.push(x);
       return picks.length >= 2;
     });
@@ -189,7 +189,8 @@
     var budget = Math.max(0, BUDGET - answeredToday);
     var queues = packs.map(function (entry) {
       var progress = P.getProgress(entry.pack.id);
-      return { entry: entry, cards: orderedCards(entry.pack).filter(function (c) { return !P.isDone(c, progress.cards[c.id]); }), taken: 0 };
+      var readMode = progress.mode === 'read';
+      return { entry: entry, cards: orderedCards(entry.pack).filter(function (c) { return readMode ? !progress.cards[c.id] : !P.isDone(c, progress.cards[c.id]); }), taken: 0 };
     }).filter(function (q) { return q.cards.length; });
     var added = 0;
     while (added < budget && queues.some(function (q) { return q.cards.length && q.taken < 3; })) {
@@ -204,6 +205,18 @@
     return { items: items, exhausted: exhausted, packs: packs };
   }
 
+  function localHref(href) {
+    var path = href.split('#')[0].split('?')[0];
+    if (path.charAt(0) !== '/' || path.charAt(1) === '/' || path.indexOf('/assets/') === 0 || path.slice(-1) !== '/') return href;
+    (window.MENTRIA_LOCALES || []).some(function (l) {
+      if (!l.prefix || path.indexOf(l.prefix + '/') !== 0) return false;
+      href = href.slice(l.prefix.length);
+      path = path.slice(l.prefix.length);
+      return true;
+    });
+    return (window.MENTRIA_EN_ONLY || []).indexOf(path) < 0 ? prefix + href : href;
+  }
+
   function renderDynamic(res) {
     var renderedAt = Date.now();
     var frag = document.createDocumentFragment();
@@ -213,16 +226,16 @@
         return;
       }
       if (it.kind === 'daily') {
-        var d = it.item;
+        var d = it.item, href = localHref(tx(d.href));
         var note = el('section', 'feed-card stream-card stream-card--note stream-card--daily');
         if (d.image) { note.classList.add('stream-card--cover'); note.classList.remove('stream-card--note'); note.style.setProperty('--feed-card-bg', 'url("' + d.image + '")'); }
         note.innerHTML =
           (d.image ? '<img class="feed-card__media" src="' + esc(d.image) + '" alt="" loading="lazy" decoding="async"><div class="feed-card__gradient"></div>' : '') +
           '<div class="' + (d.image ? 'feed-card__info' : 'stream-note') + '">' +
-            '<p class="stream-chip stream-chip--today">' + esc(d.chip || t('today')) + '</p>' +
+            '<p class="stream-chip stream-chip--today">' + esc(tx(d.chip) || t('today')) + '</p>' +
             '<h2 class="' + (d.image ? 'feed-card__title' : 'stream-note__title') + '">' + esc(tx(d.title)) + '</h2>' +
             (d.text ? '<p class="' + (d.image ? 'feed-card__caption stream-card__text' : 'stream-note__text') + '">' + esc(tx(d.text)) + '</p>' : '') +
-            (d.href ? '<a class="pack-btn pack-btn--primary stream-card__cta" href="' + esc(d.href) + '">' + esc(d.cta || t('open')) + '</a>' : '') +
+            (href ? '<a class="pack-btn pack-btn--primary stream-card__cta" href="' + esc(href) + '">' + esc(tx(d.cta) || t('open')) + '</a>' : '') +
           '</div>';
         if (!d.image && window.MentriaBackdrop) { window.MentriaBackdrop.apply(note, 'daily/' + (d.kind || 'note') + '/' + tx(d.title), { dim: 0.8 }); note.style.setProperty('--feed-card-bg', note.style.backgroundImage); }
         if (d.image) ambient(note, d.image);
@@ -250,6 +263,7 @@
       var idx = orderedCards(pack).findIndex(function (c) { return c.id === it.card.id; });
       var label = it.kind === 'review' ? t('review') : t('card_pos', { n: idx + 1, total: pack.cards.length });
       sec = packCard(Object.assign({ href: entry.native ? prefix + '/learn/' + pack.id + '/' : prefix + '/learn/play/?id=' + encodeURIComponent(pack.id) }, pack), it.card, it.kind, label, opts);
+      sec.dataset.mode = mode;
       frag.appendChild(sec);
     });
     if (res.exhausted) {
@@ -276,7 +290,7 @@
           if (sec.dataset.seen) return;
           timers[key] = setTimeout(function () {
             var type = sec.querySelector('.pack-slide').dataset.type;
-            if (!P.INTERACTIVE[type] && !sec.dataset.done) P.recordSeen(sec.dataset.packId, sec.dataset.cardId);
+            if ((!P.INTERACTIVE[type] || sec.dataset.mode === 'read') && !sec.dataset.done) P.recordSeen(sec.dataset.packId, sec.dataset.cardId, !!P.INTERACTIVE[type]);
             sec.dataset.seen = '1';
           }, 1500);
         } else {
@@ -356,7 +370,7 @@
     var best = null, bestLast = -1;
     touchedNative().forEach(function (id) {
       var x = byId[id], pr = P.getProgress(id);
-      var seen = Object.keys(pr.cards || {}).length;
+      var seen = P.doneCount(pr);
       if (!seen || seen >= x.cards) return;
       if ((pr.last || 0) > bestLast) { bestLast = pr.last || 0; best = { id: id, title: x.title, cover: x.cover, total: x.cards, seen: seen, collection: x.collection, href: prefix + '/learn/' + id + '/', last: pr.last || 0 }; }
     });
@@ -438,7 +452,7 @@
     var imported = null, last = -1;
     packs.forEach(function (e) {
       if (e.native) return;
-      var pr = P.getProgress(e.pack.id), seen = Object.keys(pr.cards || {}).length, total = e.pack.cards.length;
+      var pr = P.getProgress(e.pack.id), seen = P.doneCount(pr), total = e.pack.cards.length;
       if (seen && seen < total && (pr.last || 0) > last) { last = pr.last || 0; imported = { id: e.pack.id, title: e.pack.title, cover: e.pack.cover || (e.meta && e.meta.cover), total: total, seen: seen, collection: 'import', href: prefix + '/learn/play/?id=' + encodeURIComponent(e.pack.id) }; }
     });
     if (imported) renderHero(imported);

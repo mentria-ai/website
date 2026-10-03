@@ -503,7 +503,7 @@ module.exports = function(eleventyConfig) {
       if (url.indexOf("?") !== -1) continue;
       let file = path.join(out, decodeURIComponent(url));
       if (url.endsWith("/")) file = path.join(file, "index.html");
-      try { revisions[url] = crypto.createHash("sha1").update(fs.readFileSync(file)).digest("hex").slice(0, 12); } catch {}
+      try { revisions[url] = crypto.createHash("sha1").update(fs.readFileSync(file)).digest("hex").slice(0, 10); } catch {}
     }
     fs.writeFileSync(swPath, sw.replace(marker, JSON.stringify(revisions).slice(1, -1)));
   });

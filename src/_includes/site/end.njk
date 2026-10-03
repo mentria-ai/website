@@ -502,12 +502,22 @@ try {
 try {
       if ('serviceWorker' in navigator) {
         (function () {
-          var hadController = !!navigator.serviceWorker.controller;
+          var controlledBy = navigator.serviceWorker.controller;
           var reloaded = false;
+          var requested = false;
+          var staleTab = false;
           navigator.serviceWorker.addEventListener('controllerchange', function () {
-            if (!hadController || reloaded) return;
-            reloaded = true;
-            location.reload();
+            var previous = controlledBy;
+            controlledBy = navigator.serviceWorker.controller;
+            if (reloaded) return;
+            if (requested) { reloaded = true; location.reload(); return; }
+            if (!previous) return;
+            staleTab = true;
+            if (!pending) setPending(controlledBy);
+            var chip = document.getElementById('m-update');
+            var later = false;
+            try { later = !!sessionStorage.getItem('m-update-later'); } catch (_) {}
+            if (chip && !later) chip.hidden = false;
           });
           var pending = null;
           var registration = null;
@@ -519,7 +529,13 @@ try {
           };
           window.MentriaUpdate = {
             get pending() { return !!pending; },
-            apply: function () { var sw = pending || (registration && registration.waiting); if (sw) sw.postMessage({ type: 'SKIP_WAITING' }); },
+            apply: function () {
+              if (staleTab) { reloaded = true; location.reload(); return; }
+              var sw = pending || (registration && registration.waiting);
+              if (!sw) return;
+              requested = true;
+              sw.postMessage({ type: 'SKIP_WAITING' });
+            },
             check: function () { return registration ? registration.update() : Promise.resolve(); }
           };
           navigator.serviceWorker.register('/sw.js').then(function (reg) {

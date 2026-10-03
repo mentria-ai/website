@@ -88,9 +88,13 @@
   var currentIo = ('IntersectionObserver' in window) ? new IntersectionObserver(function (entries) {
     entries.forEach(function (e) { e.target.classList.toggle('is-current', e.isIntersecting && e.intersectionRatio > 0.55); });
   }, { root: scroller, threshold: [0.55] }) : null;
+  var nearIo = currentIo ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { e.target.setAttribute('data-near', ''); nearIo.unobserve(e.target); } });
+  }, { root: scroller, rootMargin: '100% 0px' }) : null;
   function watchCurrent(root) {
-    if (!currentIo) return;
-    Array.prototype.forEach.call((root || scroller).querySelectorAll('.feed-card'), function (c) { if (!c.dataset.watched) { c.dataset.watched = '1'; currentIo.observe(c); } });
+    var cards = (root || scroller).querySelectorAll('.feed-card');
+    if (!currentIo) { Array.prototype.forEach.call(cards, function (c) { c.setAttribute('data-near', ''); }); return; }
+    Array.prototype.forEach.call(cards, function (c) { if (!c.dataset.watched) { c.dataset.watched = '1'; currentIo.observe(c); nearIo.observe(c); } });
   }
   function ambient(sec, url) {
     if (url) sec.style.setProperty('--feed-card-bg', 'url("' + url + '")');

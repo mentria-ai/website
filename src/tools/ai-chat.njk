@@ -116,6 +116,10 @@ const COPY = {
   errUnsupportedMain:  {{ ("tool.ai-chat.err_unsupported_main"  | t) | dump | safe }},
   errUnsupportedSub:   {{ ("tool.ai-chat.err_unsupported_sub"   | t) | dump | safe }},
   errLoadRuntime:      {{ ("tool.ai-chat.err_load_runtime"      | t) | dump | safe }},
+  engineOffline:       {{ ("common.ai_engine_offline"           | t) | dump | safe }},
+  engineFailed:        {{ ("common.ai_engine_failed"            | t) | dump | safe }},
+  modelOffline:        {{ ("common.ai_model_offline"            | t) | dump | safe }},
+  offline:             {{ ("common.offline_title"               | t) | dump | safe }},
   errDeviceLost:       {{ ("tool.ai-chat.err_device_lost"       | t) | dump | safe }},
   errBadImage:         {{ ("tool.ai-chat.err_bad_image"         | t) | dump | safe }},
   errLoadPrefix:       {{ ("tool.ai-chat.err_load_prefix"       | t) | dump | safe }},
@@ -206,11 +210,14 @@ function setStatus(state, text) {
 //   - Firefox stable (WebGPU still in nightly as of 2026-04)
 //   - Chrome on Linux without `--enable-features=Vulkan`
 //   - Mobile browsers without WebGPU yet
-function showUnsupportedError(reason) {
+function showUnsupportedError(reason, note) {
   setStatus('error', reason);
   const messagesEl = document.getElementById('ac-messages');
   const emptyEl    = document.getElementById('ac-empty');
-  if (emptyEl) {
+  if (emptyEl && note) {
+    emptyEl.innerHTML = '<div class="ac__empty-icon">&#9888;</div><p></p>';
+    emptyEl.querySelector('p').textContent = note;
+  } else if (emptyEl) {
     const escSub = COPY.errUnsupportedSub.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     emptyEl.innerHTML =
       '<div class="ac__empty-icon">&#9888;</div>' +
@@ -231,7 +238,8 @@ if (!navigator.gpu) {
     Tiers = await import(MENTRIA_TIERS_PATH);
   } catch (err) {
     console.error('Failed to load mentria-engine bundle:', err);
-    showUnsupportedError(COPY.errLoadRuntime);
+    if (navigator.onLine) showUnsupportedError(COPY.errLoadRuntime, COPY.engineFailed);
+    else showUnsupportedError(COPY.offline, COPY.engineOffline);
   }
   if (MentriaEngine && Tiers) runApp(MentriaEngine, Tiers);
 }
@@ -1206,7 +1214,7 @@ function runApp(MentriaEngine, Tiers) {
       if (err && err.message === 'download-postponed') { if (strip) strip.hide(); setStatus('idle', COPY.downloadPostponed); return; }
       console.error('Model load error:', err);
       if (strip) strip.error(String(err && err.message || err), { phase: strip.phaseName || 'loading', onRetry: () => { inputEl.disabled = true; sendBtn.disabled = true; loadModel(); } });
-      setStatus('error', COPY.errLoadPrefix + (err.message || err));
+      setStatus('error', navigator.onLine === false ? COPY.modelOffline : COPY.errLoadPrefix + (err.message || err));
     }
   }
 

@@ -1479,7 +1479,7 @@ html.mentria-no-motion [data-requires="motion"] { display: none !important; }
   left: 12px;
   right: 12px;
   bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  z-index: 9990;
+  z-index: 10000;
   display: flex;
   align-items: center;
   gap: 10px;

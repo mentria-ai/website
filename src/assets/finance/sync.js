@@ -176,7 +176,7 @@ export function syncController(getCtx) {
       if (m && /^[0-9a-f]{16}$/.test(m.device || '')) {
         const cc = getCtx();
         const now = new Date().toISOString();
-        await cc.commit(cc.engine.createOps('device', m.device, { name: String(m.name || '').slice(0, 60), created: now, last_seen: now, platform: '' }));
+        await cc.commit(cc.engine.createOps('device', m.device, { name: String(m.name || '').slice(0, 60), created: now, last_seen: now }));
         finish('done');
         stop();
         start();

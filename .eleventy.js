@@ -345,6 +345,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.ignores.add("src/assets/**");
   // Passthrough copy for PWA files (sw.js is now a Nunjucks template)
   eleventyConfig.addPassthroughCopy({ "src/manifest.json": "manifest.json" });
+  eleventyConfig.addPassthroughCopy({ "src/favicon.ico": "favicon.ico" });
   eleventyConfig.addPassthroughCopy({ "src/_data/i18n": "assets/i18n" });
 
   const PH0 = "\uF000", PH1 = "\uF001";

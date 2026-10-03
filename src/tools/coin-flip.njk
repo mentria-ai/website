@@ -223,6 +223,7 @@ localeReload: true
 
       updateScore();
       updateHistory();
+      setCoinFace(isHeads ? COPY.headsLabel : COPY.tailsLabel);
 
       if (bestOf > 1 && checkSeriesWinner()) {
         flipping = false;
@@ -231,7 +232,6 @@ localeReload: true
 
       resultText.textContent = isHeads ? COPY.headsLabel : COPY.tailsLabel;
       resultEl.dataset.outcome = isHeads ? "heads" : "tails";
-      setCoinFace(isHeads ? COPY.headsLabel : COPY.tailsLabel);
       flipping = false;
     }
     coinInner.addEventListener("transitionend", settle);

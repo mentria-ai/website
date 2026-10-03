@@ -248,16 +248,25 @@ localeReload: true
     try { return (new Intl.NumberFormat(document.documentElement.lang || undefined).formatToParts(1.1).find(p => p.type === 'decimal') || {}).value || '.'; }
     catch (_) { return '.'; }
   })();
-  const sanitizeDecimalInput = (value) => {
-    let s = String(value);
-    if (DECIMAL_SEP === ',') s = s.replace(/,/g, '.');
-    s = s.replace(/[^0-9.]/g, '');
-    const dot = s.indexOf('.');
-    if (dot !== -1) {
-      s = s.slice(0, dot + 1) + s.slice(dot + 1).replace(/\./g, '');
+  const sanitizeDecimalInput = (value) => String(value).replace(/[^0-9.,\s\u00a0\u202f]/g, '');
+  const parseAmount = (value) => {
+    let s = String(value == null ? '' : value).replace(/[\s\u00a0\u202f']/g, '');
+    const lastComma = s.lastIndexOf(','), lastDot = s.lastIndexOf('.');
+    if (lastComma !== -1 && lastDot !== -1) {
+      const dec = lastComma > lastDot ? ',' : '.';
+      s = s.split(dec === ',' ? '.' : ',').join('').replace(',', '.');
+    } else if (lastComma !== -1 || lastDot !== -1) {
+      const sep = lastComma !== -1 ? ',' : '.';
+      const parts = s.split(sep);
+      const grouping = parts.length > 2 || (sep !== DECIMAL_SEP && /^[1-9]\d{0,2}$/.test(parts[0]) && /^\d{3}$/.test(parts[1]));
+      s = grouping ? parts.join('') : parts.join('.');
     }
-    if (s.startsWith('.')) s = '0' + s;
-    return s;
+    s = s.replace(/[^0-9.]/g, '');
+    return s ? parseFloat(s) : NaN;
+  };
+  const canonAmount = (value) => {
+    const n = parseAmount(value);
+    return isNaN(n) ? String(value == null ? '' : value).trim() : String(n);
   };
 
   /* ── Layout / dates ────────────────────────────────── */
@@ -280,27 +289,29 @@ localeReload: true
 
   /* ── Math ──────────────────────────────────────────── */
   const roundToTwo = (n) => (typeof n !== 'number' || isNaN(n))
-    ? 0 : Math.round((n + Number.EPSILON) * 100) / 100;
+    ? 0 : Math.round(Number((n * 100).toPrecision(15))) / 100;
   const SYMBOL_TO_CODE = { '₹': 'INR', '€': 'EUR', '$': 'USD' };
   const fmtMoney = (n) => new Intl.NumberFormat(document.documentElement.lang || undefined, {
     style: 'currency',
     currency: SYMBOL_TO_CODE[currencyInput.value] || 'USD',
+    currencyDisplay: 'narrowSymbol',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(roundToTwo(n));
 
   const calculateLineTotal = (row) => {
-    const qty   = parseFloat(row.querySelector('.input-qty-cell')?.value);
-    const price = parseFloat(row.querySelector('.input-price-cell')?.value);
+    const qty   = parseAmount(row.querySelector('.input-qty-cell')?.value);
+    const price = parseAmount(row.querySelector('.input-price-cell')?.value);
     const total = (!isNaN(qty) && !isNaN(price)) ? qty * price : 0;
-    row.querySelector('.line-total').textContent = fmtMoney(total);
+    const cell = row.querySelector('.line-total');
+    if (cell) cell.textContent = fmtMoney(total);
   };
   const calculateGrandTotal = () => {
     let grand = 0;
     document.querySelectorAll('.input-qty-cell').forEach(qtyEl => {
       const row = qtyEl.closest('tr');
-      const qty = parseFloat(qtyEl.value);
-      const price = parseFloat(row.querySelector('.input-price-cell')?.value);
+      const qty = parseAmount(qtyEl.value);
+      const price = parseAmount(row.querySelector('.input-price-cell')?.value);
       if (!isNaN(qty) && !isNaN(price)) grand += roundToTwo(qty * price);
     });
     document.querySelectorAll('.grand-total').forEach(el => {
@@ -443,8 +454,8 @@ localeReload: true
     return rows.map(row => ({
       Description:  row.querySelector('textarea')?.value || '',
       'SAC code':   row.querySelector('input[id^="sac"]')?.value || '',
-      Quantity:     row.querySelector('.input-qty-cell')?.value || '',
-      'Unit Price': row.querySelector('.input-price-cell')?.value || ''
+      Quantity:     canonAmount(row.querySelector('.input-qty-cell')?.value || ''),
+      'Unit Price': canonAmount(row.querySelector('.input-price-cell')?.value || '')
     }));
   };
 
@@ -496,13 +507,16 @@ localeReload: true
       row.remove();
     });
 
-    if (lines.length === 0) {
+    if (lines.length === 0) lines = [{ Description: '', 'SAC code': '', Quantity: '1', 'Unit Price': '0' }];
+
+    const firstRow = tbody.children[0];
+    if (!firstRow || firstRow.classList.contains('last-row')) {
+      lines.forEach((line) => addRow(line));
       calculateGrandTotal();
       return;
     }
 
     // Apply first line into existing row 1
-    const firstRow = tbody.children[0];
     const setIf = (sel, val) => {
       const el = firstRow.querySelector(sel);
       if (el && val !== undefined) {
@@ -573,7 +587,7 @@ localeReload: true
   };
   const newDocId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const hasContent = (p) => !!(String((p.billTo && p.billTo.companyNameInp) || '').trim()
-    || (p.lines || []).some((l) => String(l.Description || '').trim() || parseFloat(l['Unit Price']) > 0));
+    || (p.lines || []).some((l) => String(l.Description || '').trim() || parseAmount(l['Unit Price']) > 0));
   const blankFields = (ids) => ids.reduce((o, id) => { o[id] = ''; return o; }, {});
   const blankLine = (src) => ({ Description: '', 'SAC code': (src && src.lines && src.lines[0] && src.lines[0]['SAC code']) || '', Quantity: '1', 'Unit Price': '0' });
   const clone = (o) => JSON.parse(JSON.stringify(o));
@@ -594,11 +608,11 @@ localeReload: true
   const totalOf = (p) => {
     let sum = 0;
     (p.lines || []).forEach((l) => {
-      const q = parseFloat(l.Quantity), pr = parseFloat(l['Unit Price']);
+      const q = parseAmount(l.Quantity), pr = parseAmount(l['Unit Price']);
       if (!isNaN(q) && !isNaN(pr)) sum += roundToTwo(q * pr);
     });
     try {
-      return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'currency', currency: SYMBOL_TO_CODE[p.meta && p.meta.currencyInp] || 'USD' }).format(roundToTwo(sum));
+      return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'currency', currency: SYMBOL_TO_CODE[p.meta && p.meta.currencyInp] || 'USD', currencyDisplay: 'narrowSymbol' }).format(roundToTwo(sum));
     } catch (_) { return String(roundToTwo(sum)); }
   };
 
@@ -778,6 +792,19 @@ localeReload: true
     }
   });
 
+  table.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.tagName !== 'INPUT' || !(t.classList.contains('input-price-cell') || t.classList.contains('input-qty-cell'))) return;
+    const canon = canonAmount(t.value);
+    if (canon !== t.value) {
+      t.value = canon;
+      persist(t);
+      calculateLineTotal(t.closest('tr'));
+      calculateGrandTotal();
+      scheduleSync();
+    }
+  });
+
   table.addEventListener('focusout', (e) => {
     const t = e.target;
     if (t.tagName !== 'INPUT') return;
@@ -799,6 +826,8 @@ localeReload: true
     }
     const reader = new FileReader();
     reader.onload = (ev) => {
+      if (syncTimer) syncNow();
+      setCur(null);
       importJSON(ev.target.result);
       scheduleSync();
       fileInput.value = '';
@@ -817,7 +846,7 @@ localeReload: true
     document.querySelectorAll('.iv__table tbody tr:not(.last-row)').forEach(tr => {
       const desc = tr.querySelector('textarea');
       const price = tr.querySelector('.input-price-cell');
-      const untouched = desc && !desc.value.trim() && !(parseFloat(price && price.value) || 0);
+      const untouched = desc && !desc.value.trim() && !(parseAmount(price && price.value) || 0);
       tr.classList.toggle('is-print-skip', !!untouched);
     });
     const bank = document.querySelector('.iv__bank');

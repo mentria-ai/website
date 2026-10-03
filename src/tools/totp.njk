@@ -22,6 +22,7 @@ localeReload: true
 {% include "terminal-frame-open.njk" %}
 <section class="totp" id="totp">
   <div class="totp-status m-status" id="totp-status" role="status" aria-live="polite"></div>
+  <span id="totp-copy-hint" class="sr-only">{{ "tool.totp.copy_code" | t }}</span>
 
   <div class="totp-locked" id="totp-locked" hidden>
     <h2 class="totp-locked__h">{{ "tool.totp.locked_title" | t }}</h2>
@@ -214,7 +215,7 @@ localeReload: true
   .totp-row__issuer { font-family: var(--font-mono); font-size: 11px; color: var(--term-subtle); text-transform: uppercase; letter-spacing: 0.1em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .totp-row__account { font-size: 12px; color: var(--term-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .totp-row__code-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 0; }
-  .totp-row__code { font-family: var(--font-mono); font-size: 22px; letter-spacing: 0.1em; color: var(--accent, #6ef3c5); cursor: pointer; user-select: all; padding: 4px 8px; border-radius: 4px; display: inline-block; will-change: transform, opacity; }
+  .totp-row__code { font-family: var(--font-mono); font-size: 22px; letter-spacing: 0.1em; color: var(--accent, #6ef3c5); cursor: pointer; user-select: all; padding: 4px 8px; border-radius: 4px; display: inline-block; will-change: transform, opacity; background: none; border: 0; line-height: inherit; }
   .totp-row__code:hover { background: rgba(110,243,197,0.08); }
   .totp-row__code.is-copied { color: var(--syn-green, #34c46a); }
   .totp-row__next { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--term-subtle); opacity: .85; padding: 0 8px; transition: color 0.3s ease; display: inline-block; will-change: transform, opacity; }
@@ -295,6 +296,7 @@ localeReload: true
     clock_slow:               {{ ('tool.totp.clock_slow'               | t) | dump | safe }},
     clock_fixed:              {{ ('tool.totp.clock_fixed'              | t) | dump | safe }},
     copied:                   {{ ('tool.totp.copied'                   | t) | dump | safe }},
+    copy_code:                {{ ('tool.totp.copy_code'                | t) | dump | safe }},
     copyFailed:               {{ ('common.copy_failed'                  | t) | dump | safe }},
     backup_required:          {{ ('tool.totp.backup_required'          | t) | dump | safe }},
     backup_done:              {{ ('tool.totp.backup_done'              | t) | dump | safe }},
@@ -745,7 +747,7 @@ localeReload: true
           <div class="totp-row__account"></div>
         </div>
         <div class="totp-row__code-stack">
-          <span class="totp-row__code" data-copy>—</span>
+          <button type="button" class="totp-row__code" data-copy aria-describedby="totp-copy-hint" title="${COPY.copy_code}">—</button>
           <span class="totp-row__next"><span class="totp-row__next-label">${COPY.next_label}</span><span class="totp-row__next-value">—</span></span>
         </div>
         <button type="button" class="totp-row__export" data-export><svg viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10.5V2.5M5 5.2l3-2.9 3 2.9"></path><path d="M3.5 8.5v4.2h9V8.5"></path></svg></button>
@@ -1224,6 +1226,10 @@ localeReload: true
     }
     if (uri) {
       try { parsed = parseOtpauthUri(uri); } catch (_) { setStatus(COPY.add_invalid_uri, 'err'); return; }
+      if (!/^SHA(1|256|512)$/.test(parsed.algorithm || 'SHA1')) {
+        setStatus((((parsed.issuer ? parsed.issuer + ' ' : '') + (parsed.account || '')).trim() + ' ' + COPY.import_algo).trim(), 'err');
+        return;
+      }
     } else {
       const issuer = $('totp-issuer').value.trim();
       const account = $('totp-account').value.trim();
@@ -1261,6 +1267,7 @@ localeReload: true
     await reEncryptSecrets();
     window.MentriaStore.requestPersist();
     addModal.close();
+    setStatus('');
     renderList();
     tick();
   });
@@ -1342,6 +1349,10 @@ localeReload: true
     }
   });
   $('totp-export-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('totp-export-show').click(); });
+  $('totp-setup-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) $('totp-setup-pass2').focus(); });
+  $('totp-setup-pass2').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) $('totp-setup-btn').click(); });
+  $('totp-unlock-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) $('totp-unlock-btn').click(); });
+  $('totp-backup-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) $('totp-backup-confirm-btn').click(); });
   $('totp-export-prf').addEventListener('click', async () => {
     try {
       const prfResult = await prfGet(b64uDec(state.vault.prf.cred_id), b64uDec(state.vault.prf.salt));
@@ -1421,7 +1432,7 @@ localeReload: true
     } else if (e.target.closest('[data-del]')) {
       const acc = state.accounts.find((a) => a.id === row.dataset.id);
       if (!acc) return;
-      const name = (acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '');
+      const name = ((acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '')).trim();
       const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(COPY.delete_confirm.replace(/{name}/g, name)) : Promise.resolve(confirm(COPY.delete_confirm.replace(/{name}/g, name))));
       if (!ok) return;
       state.accounts = state.accounts.filter((a) => a.id !== row.dataset.id);
@@ -1445,8 +1456,23 @@ localeReload: true
     const d = e.detail || {};
     if (d.ns === NS && d.key === VAULT_KEY && d.op === 'remove') acceptExternalDelete();
   });
+  async function acceptExternalChange() {
+    const next = loadVault();
+    if (!next) { acceptExternalDelete(); return; }
+    state.vault = next;
+    if (!state.masterKey) return;
+    try {
+      await decryptSecrets();
+      renderList();
+      tick();
+    } catch (_) {
+      lock();
+    }
+  }
   window.addEventListener('storage', (e) => {
-    if (e.key === 'mentria.store.totp.vault' && !e.newValue) acceptExternalDelete();
+    if (e.key !== 'mentria.store.totp.vault') return;
+    if (!e.newValue) acceptExternalDelete();
+    else acceptExternalChange();
   });
 
   init();

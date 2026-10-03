@@ -204,6 +204,18 @@
     return { items: items, exhausted: exhausted, packs: packs };
   }
 
+  function localHref(href) {
+    var path = href.split('#')[0].split('?')[0];
+    if (path.charAt(0) !== '/' || path.charAt(1) === '/' || path.indexOf('/assets/') === 0 || path.slice(-1) !== '/') return href;
+    (window.MENTRIA_LOCALES || []).some(function (l) {
+      if (!l.prefix || path.indexOf(l.prefix + '/') !== 0) return false;
+      href = href.slice(l.prefix.length);
+      path = path.slice(l.prefix.length);
+      return true;
+    });
+    return (window.MENTRIA_EN_ONLY || []).indexOf(path) < 0 ? prefix + href : href;
+  }
+
   function renderDynamic(res) {
     var renderedAt = Date.now();
     var frag = document.createDocumentFragment();
@@ -213,16 +225,16 @@
         return;
       }
       if (it.kind === 'daily') {
-        var d = it.item;
+        var d = it.item, href = localHref(tx(d.href));
         var note = el('section', 'feed-card stream-card stream-card--note stream-card--daily');
         if (d.image) { note.classList.add('stream-card--cover'); note.classList.remove('stream-card--note'); note.style.setProperty('--feed-card-bg', 'url("' + d.image + '")'); }
         note.innerHTML =
           (d.image ? '<img class="feed-card__media" src="' + esc(d.image) + '" alt="" loading="lazy" decoding="async"><div class="feed-card__gradient"></div>' : '') +
           '<div class="' + (d.image ? 'feed-card__info' : 'stream-note') + '">' +
-            '<p class="stream-chip stream-chip--today">' + esc(d.chip || t('today')) + '</p>' +
+            '<p class="stream-chip stream-chip--today">' + esc(tx(d.chip) || t('today')) + '</p>' +
             '<h2 class="' + (d.image ? 'feed-card__title' : 'stream-note__title') + '">' + esc(tx(d.title)) + '</h2>' +
             (d.text ? '<p class="' + (d.image ? 'feed-card__caption stream-card__text' : 'stream-note__text') + '">' + esc(tx(d.text)) + '</p>' : '') +
-            (d.href ? '<a class="pack-btn pack-btn--primary stream-card__cta" href="' + esc(d.href) + '">' + esc(d.cta || t('open')) + '</a>' : '') +
+            (href ? '<a class="pack-btn pack-btn--primary stream-card__cta" href="' + esc(href) + '">' + esc(tx(d.cta) || t('open')) + '</a>' : '') +
           '</div>';
         if (!d.image && window.MentriaBackdrop) { window.MentriaBackdrop.apply(note, 'daily/' + (d.kind || 'note') + '/' + tx(d.title), { dim: 0.8 }); note.style.setProperty('--feed-card-bg', note.style.backgroundImage); }
         if (d.image) ambient(note, d.image);

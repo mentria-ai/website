@@ -46,7 +46,7 @@
     li.className = 'learn-tile learn-tile--mine';
     li.dataset.packId = row.id;
     var sum = null;
-    try { sum = P.summary(row.pack || { id: row.id, cards: new Array(row.cards) }, P.getProgress(row.id)); } catch (_) {}
+    try { sum = P.summary(row.pack || { id: row.id, cards: row.cardList || [] }, P.getProgress(row.id)); } catch (_) {}
     var pct = sum && sum.total ? Math.round((sum.seen / sum.total) * 100) : 0;
     li.innerHTML =
       '<a class="learn-tile__link" href="' + esc(prefix + '/learn/play/?id=' + encodeURIComponent(row.id)) + '">' +
@@ -89,7 +89,7 @@
     var li = document.createElement('li');
     li.className = 'learn-course';
     li.dataset.courseId = course.id;
-    var done = rows.filter(function (r) { var pr = P.getProgress(r.id); return Object.keys(pr.cards || {}).length >= r.cards; }).length;
+    var done = rows.filter(function (r) { return r.cardList && r.cardList.length && P.summary({ id: r.id, cards: r.cardList }, P.getProgress(r.id)).done; }).length;
     li.innerHTML =
       '<span class="learn-course__k">' + esc(t('course')) + '</span>' +
       '<span class="learn-course__title">' + esc(P.text(course.title, lang)) + '</span>' +

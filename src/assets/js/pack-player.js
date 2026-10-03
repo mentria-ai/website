@@ -145,7 +145,7 @@
   function startIndex() {
     var m = (location.hash || '').match(/^#c(\d+)$/);
     if (m) { var i = +m[1] - 1; if (i >= 0 && i < order.length) return i; }
-    for (var k = 0; k < order.length; k++) if (!progress.cards[order[k]]) return k;
+    for (var k = 0; k < order.length; k++) if (!P.isDone(byId[order[k]], progress.cards[order[k]])) return k;
     return 0;
   }
 
@@ -255,11 +255,12 @@
     var all = [];
     pack.sections.forEach(function (s) { s.cards.forEach(function (id) { if (byId[id]) all.push(id); }); });
     if (mode === 'review') {
-      order = all.filter(function (id) { var r = progress.cards[id]; return r && r.r === 'wrong'; });
+      var nowR = Date.now();
+      order = all.filter(function (id) { var r = progress.cards[id]; return r && (r.r === 'wrong' || P.isDue(r, nowR)); });
     } else if (mode === 'budget') {
       var now = Date.now();
-      var due = all.filter(function (id) { var r = progress.cards[id]; return r && r.r === 'wrong' && r.d && r.d <= now; });
-      var fresh = all.filter(function (id) { return !progress.cards[id]; });
+      var due = all.filter(function (id) { return P.isDue(progress.cards[id], now); });
+      var fresh = all.filter(function (id) { return !P.isDone(byId[id], progress.cards[id]); });
       var answeredToday = P.getDays()[P.dayKey()] || 0;
       order = due.concat(fresh).slice(0, Math.max(0, BUDGET - answeredToday) + due.length).slice(0, BUDGET);
     } else {
@@ -329,6 +330,12 @@
     var keep = current;
     rebuildOrder();
     go(structural || restart ? 0 : Math.min(keep, order.length), true);
+    var a = document.activeElement;
+    if (!a || a === document.body || !document.contains(a)) {
+      var s = slides[current];
+      var f = s && (s.querySelector('.pack-next:not([hidden])') || s.querySelector('button:not(.deck__tap):not(.pack-more):not([disabled]), input'));
+      if (f) { try { f.focus({ preventScroll: true }); } catch (_) {} }
+    }
   }
 
   function moreBtn() { return slides[current] ? slides[current].querySelector('.pack-more') : null; }
@@ -371,8 +378,12 @@
   function bindInput() {
     document.addEventListener('keydown', function (e) {
       var tag = (e.target && e.target.tagName) || '';
-      if (tag === 'INPUT' || tag === 'TEXTAREA') { if (e.key === 'Escape') { e.target.blur(); } return; }
+      if (tag === 'INPUT' || tag === 'TEXTAREA') {
+        if (e.key === 'Escape') { e.target.blur(); return; }
+        if (!((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.target.value)) return;
+      }
       if (e.target && e.target.closest && (e.key === ' ' || e.key === 'Enter') && e.target.closest('button, a[href], [role="button"]')) return;
+      if (e.target && e.target.closest && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.target.closest('[role="radiogroup"], [role="listbox"], .pack-order, .pack-match')) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); go(current + 1); }
       else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(current - 1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); expandCurrent(); }

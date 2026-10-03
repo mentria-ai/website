@@ -24,7 +24,8 @@
   var byId = {};
   tail.forEach(function (x) { byId[x.id] = x; });
 
-  var DAY = Math.floor(Date.now() / 86400000);
+  var today0 = new Date();
+  var DAY = Math.floor(Date.UTC(today0.getFullYear(), today0.getMonth(), today0.getDate()) / 86400000);
   function seededOrder(list, salt) {
     var seed = (DAY * 2654435761 + (salt || 0) * 40503) % 4294967296;
     function rng() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
@@ -104,7 +105,8 @@
     var n = sec.nextElementSibling;
     while (n && !n.classList.contains('feed-card')) n = n.nextElementSibling;
     if (!n) return;
-    try { n.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) { n.scrollIntoView(); }
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    try { n.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' }); } catch (_) { n.scrollIntoView(); }
   }
 
   function loadNative(id) {
@@ -156,7 +158,7 @@
       var progress = P.getProgress(entry.pack.id);
       orderedCards(entry.pack).forEach(function (c) {
         var r = progress.cards[c.id];
-        if (r && r.r === 'wrong' && r.d && r.d <= now) reviews.push({ entry: entry, card: c, due: r.d });
+        if (P.isDue(r, now)) reviews.push({ entry: entry, card: c, due: r.d });
       });
     });
     reviews.sort(function (a, b) { return a.due - b.due; });
@@ -187,7 +189,7 @@
     var budget = Math.max(0, BUDGET - answeredToday);
     var queues = packs.map(function (entry) {
       var progress = P.getProgress(entry.pack.id);
-      return { entry: entry, cards: orderedCards(entry.pack).filter(function (c) { return !progress.cards[c.id]; }), taken: 0 };
+      return { entry: entry, cards: orderedCards(entry.pack).filter(function (c) { return !P.isDone(c, progress.cards[c.id]); }), taken: 0 };
     }).filter(function (q) { return q.cards.length; });
     var added = 0;
     while (added < budget && queues.some(function (q) { return q.cards.length && q.taken < 3; })) {
@@ -203,6 +205,7 @@
   }
 
   function renderDynamic(res) {
+    var renderedAt = Date.now();
     var frag = document.createDocumentFragment();
     res.items.forEach(function (it) {
       if (it.kind === 'today') {
@@ -236,7 +239,11 @@
         pack: pack, mode: mode, lang: lang, t: t, native: entry.native,
         sectionOf: function (id) { return sectionOf[id] || null; },
         getProgress: function () { return P.getProgress(pack.id); },
-        onAnswer: function (card, right, extra) { P.recordAnswer(pack.id, card.id, right, extra); sec.dataset.done = '1'; },
+        onAnswer: function (card, right, extra) {
+          var cur = P.getProgress(pack.id).cards[card.id];
+          if (!(cur && (cur.r === 'right' || cur.r === 'wrong') && cur.t > renderedAt)) P.recordAnswer(pack.id, card.id, right, extra);
+          sec.dataset.done = '1';
+        },
         onContinue: function () { scrollToNext(sec); },
         live: function (text) { var live = document.getElementById('stream-live'); if (live) live.textContent = text; }
       });
@@ -447,6 +454,12 @@
   window.addEventListener('pageshow', function (e) {
     if (!e.persisted) return;
     renderHero(nativeContinue());
-    activePacks().then(importedContinue).catch(function () {});
+    activePacks().then(function (packs) {
+      importedContinue(packs);
+      return buildDynamic(packs);
+    }).then(function (res) {
+      dyn.innerHTML = '';
+      renderDynamic(res);
+    }).catch(function () {});
   });
 })();

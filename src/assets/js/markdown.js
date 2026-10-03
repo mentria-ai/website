@@ -54,6 +54,7 @@
     });
 
     s = escapeHtml(s);
+    s = s.replace(/&lt;(\/?)(em|strong|b|i|sub|sup|del|ins|code|br)\s*\/?&gt;/gi, '<$1$2>');
 
     /* emphasis — bold first so * inside doesn't trip italic match */
     s = s.replace(/\*\*([^*\n](?:[^*\n]|\*(?!\*))*?)\*\*/g, '<strong>$1</strong>');

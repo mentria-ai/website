@@ -1639,6 +1639,7 @@
       "no_moves_yet": "no moves yet — make your move",
       "confirm_resign": "Resign the game?",
       "confirm_new_color": "Start a new game as {color}?",
+      "confirm_new": "Start a new game? The game in progress will be lost.",
       "color_white": "white",
       "color_black": "black",
       "chat_you": "you",

@@ -1639,6 +1639,7 @@
       "no_moves_yet": "まだ手がありません — 指してください",
       "confirm_resign": "投了しますか？",
       "confirm_new_color": "{color}で新しい対局を始めますか？",
+      "confirm_new": "新しい対局を始めますか？ 進行中の対局は失われます。",
       "color_white": "白",
       "color_black": "黒",
       "chat_you": "あなた",

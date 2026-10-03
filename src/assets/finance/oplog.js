@@ -2,6 +2,7 @@ export const MAX_DRIFT = 5 * 60 * 1000;
 const CONFLICT_WINDOW = 24 * 60 * 60 * 1000;
 const CONFLICT_CAP = 300;
 const BAD_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+const SILENT_ENTITIES = new Set(['device']);
 
 export class ClockDriftError extends Error {
   constructor(ms) { super('clock drift'); this.name = 'ClockDriftError'; this.drift = ms; }
@@ -68,7 +69,12 @@ export function canonical(v) {
   return '{' + Object.keys(v).sort().map((k) => JSON.stringify(k) + ':' + canonical(v[k])).join(',') + '}';
 }
 
+export function userConflicts(list) {
+  return Array.isArray(list) ? list.filter((c) => c && !SILENT_ENTITIES.has(c.e)) : [];
+}
+
 function logConflict(state, e, id, f, win, lose) {
+  if (SILENT_ENTITIES.has(e)) return;
   const wa = parseHlc(win.t);
   const la = parseHlc(lose.t);
   if (!wa || !la || wa.node === la.node) return;
@@ -188,8 +194,8 @@ export function mergeSnapshot(state, snap) {
     if (del && applyOp(state, { t: del, e, id, f: '~', v: null }, true)) n++;
   }
   if (Array.isArray(snap.conflicts)) {
-    for (const cf of snap.conflicts) {
-      if (!cf || !cf.win || !cf.lose) continue;
+    for (const cf of userConflicts(snap.conflicts)) {
+      if (!cf.win || !cf.lose) continue;
       if (state.conflicts.some((x) => x.e === cf.e && x.id === cf.id && x.f === cf.f && x.lose.t === cf.lose.t)) continue;
       state.conflicts.push(cf);
     }

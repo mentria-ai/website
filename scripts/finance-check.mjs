@@ -225,6 +225,25 @@ test('oplog: rejects hostile ops and logs concurrent losers', () => {
   assert.equal(s.conflicts[0].lose.v, 'A');
 });
 
+test('oplog: device records from pairing merge without conflicts', () => {
+  const s = L.createState();
+  const phone = 'bbbbbbbbbbbbbbbb';
+  const hostT = L.hlcString(1_700_000_000_000, 0, 'aaaaaaaaaaaaaaaa');
+  const phoneT = L.hlcString(1_700_000_000_020, 0, phone);
+  L.applyOp(s, { t: phoneT, e: 'device', id: phone, f: '*', v: { name: 'Android · Chrome', platform: 'Linux armv8l', created: 'b', last_seen: 'b' } });
+  L.applyOp(s, { t: hostT, e: 'device', id: phone, f: '*', v: { name: 'Android · Chrome', created: 'a', last_seen: 'a', platform: '' } });
+  assert.equal(s.conflicts.length, 0);
+  assert.equal(L.get(s, 'device', phone).platform, 'Linux armv8l');
+  L.applyOp(s, { t: phoneT, e: 'account', id: 'a', f: '*', v: { name: 'B' } });
+  L.applyOp(s, { t: hostT, e: 'account', id: 'a', f: '*', v: { name: 'A' } });
+  assert.equal(s.conflicts.length, 1);
+  const stored = [{ e: 'device', id: phone, f: 'platform', win: { v: 'x', t: phoneT }, lose: { v: '', t: hostT } }, s.conflicts[0]];
+  assert.deepEqual(L.userConflicts(stored).map((c) => c.e), ['account']);
+  const merged = L.createState();
+  L.mergeSnapshot(merged, { v: 1, recs: [], conflicts: stored });
+  assert.deepEqual(merged.conflicts.map((c) => c.e), ['account']);
+});
+
 test('crypto: page seal/open with AAD binding', async () => {
   const root = C.randomBytes(32);
   const keys = await C.deriveKeys(root);

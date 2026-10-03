@@ -128,7 +128,8 @@ export class Engine extends EventTarget {
         opsPages++;
       } catch (_) { this.badPages.push(p.id); }
     }
-    this.state.conflicts = Array.isArray(meta.conflicts) ? meta.conflicts : [];
+    this.state.conflicts = L.userConflicts(meta.conflicts);
+    if (Array.isArray(meta.conflicts) && meta.conflicts.length !== this.state.conflicts.length) await db.setMeta({ conflicts: this.state.conflicts });
     this.observeState();
     let maxOwn = meta.seq || 0;
     const mine = this.have.get(this.deviceId);

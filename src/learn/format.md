@@ -24,7 +24,7 @@ Save it as `something.mentria.json` and import it on the [Learn page](/learn/), 
 {
   "id": "attention-basics",
   "version": 1,
-  "title": "Attention in five cards",
+  "title": "Attention in four cards",
   "subtitle": "How a token decides what to look at.",
   "cover": "https://example.com/cover.webp",
   "author": { "name": "you" },
@@ -53,7 +53,7 @@ Save it as `something.mentria.json` and import it on the [Learn page](/learn/), 
 
 | field | required | notes |
 |---|---|---|
-| `id` | yes | letters, digits, dots, dashes. Stable across versions. Importing the same id again replaces the pack. |
+| `id` | yes | letters, digits, dots, dashes and underscores, starting with a letter or digit, up to 100 characters. Stable across versions. Importing the same id again replaces the pack. |
 | `version` | no | integer, default 1. Bump it when you edit. |
 | `title` | yes | text |
 | `subtitle`, `cover`, `author`, `language`, `tags`, `minutes` | no | `cover` is a URL or data URI. `minutes` is an estimate; it is computed from the card count when missing. |
@@ -129,7 +129,7 @@ A syllabus is a course: one JSON file that carries several packs in order. Impor
 
 Each entry in `packs` is a full pack or an HTTPS URL to one. A course may hold up to 200 packs. Re-importing a course with the same id updates its packs in place and keeps your progress on cards whose ids did not change.
 
-To assemble a course from a folder of pack files:
+To assemble a course from a folder of pack files, run the course script from the [site's source repository](https://github.com/mentria-ai/website):
 
 ```
 node scripts/pack-course.mjs ./my-course --id signals-101 --title "Signals and systems"
@@ -139,7 +139,7 @@ It validates every pack, orders them by filename (or by an `order` field inside 
 
 ## Checking a pack
 
-The repository ships a validator:
+The same [repository](https://github.com/mentria-ai/website) ships a validator:
 
 ```
 node scripts/pack-check.mjs my-pack.mentria.json
@@ -149,7 +149,7 @@ It prints the outline and every problem it finds, for a single pack or a whole c
 
 ## Limits
 
-A pack may be at most 25 MB as JSON. Images should be small WebP files or hosted URLs. Card ids and pack ids must match `[a-z0-9][a-z0-9._-]*`.
+A pack may be at most 25 MB as JSON. Images should be small WebP files or hosted URLs. Pack, course, section and card ids must match `[A-Za-z0-9][A-Za-z0-9._-]{0,99}`: letters, digits, dots, dashes and underscores, starting with a letter or digit, at most 100 characters.
 
 ## Sharing
 

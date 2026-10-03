@@ -9,6 +9,12 @@
     return s;
   };
   var lang = document.documentElement.lang || 'en';
+  var plural = (function () {
+    try { var rules = new Intl.PluralRules(lang); return function (n) { return rules.select(n); }; } catch (_) { return function (n) { return n === 1 ? 'one' : 'other'; }; }
+  })();
+  var tn = function (k, n, vars) {
+    return t(plural(n) === 'one' && T[k + '_one'] ? k + '_one' : k, Object.assign({ n: n }, vars || {}));
+  };
   var prefix = T.prefix || '';
   var list = document.getElementById('learn-list');
   var empty = document.getElementById('learn-empty');
@@ -19,10 +25,14 @@
   var drop = document.getElementById('learn-drop');
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function say(msg, kind) {
+  function say(msg, kind, detail) {
     if (!status) return;
     status.textContent = msg;
     status.dataset.kind = kind || '';
+    if (!detail) return;
+    var small = document.createElement('small');
+    small.textContent = detail;
+    status.append(' ', document.createElement('br'), small);
   }
 
   function mark(li, seen, total) {
@@ -53,7 +63,7 @@
         (row.cover ? '<img class="learn-tile__cover" src="' + esc(row.cover) + '" alt="" loading="lazy">' : '<span class="learn-tile__cover learn-tile__cover--blank"></span>') +
         '<span class="learn-tile__body">' +
           '<span class="learn-tile__title">' + esc(P.text(row.title, lang)) + '</span>' +
-          '<span class="learn-tile__meta">' + esc(t('cards_n', { n: row.cards })) + (row.source === 'contact' ? ' · ' + esc(t('from_contact')) : '') + '</span>' +
+          '<span class="learn-tile__meta">' + esc(tn('cards_n', row.cards)) + (row.source === 'contact' ? ' · ' + esc(t('from_contact')) : '') + '</span>' +
           '<span class="learn-tile__progress"' + (pct ? '' : ' hidden') + '><span class="learn-tile__progress-fill" style="width:' + pct + '%"></span></span>' +
         '</span>' +
       '</a>' +
@@ -77,7 +87,7 @@
       });
     });
     li.querySelector('.learn-tile__remove').addEventListener('click', function () {
-      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('remove_confirm', { title: P.text(row.title, lang) })) : Promise.resolve(true);
+      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('remove_confirm', { title: P.text(row.title, lang) }), { danger: true }) : Promise.resolve(true);
       Promise.resolve(ask).then(function (ok) { if (ok) P.remove(row.id).then(refresh); });
     });
     return li;
@@ -93,48 +103,60 @@
     li.innerHTML =
       '<span class="learn-course__k">' + esc(t('course')) + '</span>' +
       '<span class="learn-course__title">' + esc(P.text(course.title, lang)) + '</span>' +
-      '<span class="learn-course__meta">' + esc(t('course_packs_n', { done: done, total: rows.length })) + '</span>' +
+      '<span class="learn-course__meta">' + esc(tn('course_packs_n', rows.length, { done: done, total: rows.length })) + '</span>' +
       '<button type="button" class="learn-course__remove learn-link">' + esc(t('remove_course')) + '</button>';
     li.querySelector('.learn-course__remove').addEventListener('click', function () {
-      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('remove_course_confirm', { title: P.text(course.title, lang) })) : Promise.resolve(true);
+      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('remove_course_confirm', { title: P.text(course.title, lang) }), { danger: true }) : Promise.resolve(true);
       Promise.resolve(ask).then(function (ok) { if (ok) P.removeCourse(course.id).then(refresh); });
     });
     return li;
   }
 
+  var shelf = null, wide = false, folds = 0;
   function refresh() {
-    return P.list().then(function (rows) {
-      list.innerHTML = '';
-      var courses = P.getCourses();
-      var grouped = {};
-      rows.forEach(function (r) { var cid = P.courseOf(r); if (cid && courses[cid]) (grouped[cid] = grouped[cid] || []).push(r); });
-      Object.keys(courses).sort(function (a, b) { return (courses[b].updated || 0) - (courses[a].updated || 0); }).forEach(function (cid) {
-        var packs = (grouped[cid] || []).sort(function (a, b) { return (a.course.order || 0) - (b.course.order || 0); });
-        if (!packs.length) return;
-        list.appendChild(courseHead(courses[cid], packs));
-        var firstOpen = packs.findIndex(function (r) { return P.doneCount(P.getProgress(r.id)) < r.cards; });
-        var start = Math.max(0, (firstOpen < 0 ? packs.length : firstOpen) - 1);
-        var visible = expanded[cid] ? packs : packs.slice(start, start + SHOW);
-        visible.forEach(function (r) { list.appendChild(tile(r)); });
-        if (!expanded[cid] && visible.length < packs.length) {
-          var moreLi = document.createElement('li');
-          moreLi.className = 'learn-course__more';
-          var b = document.createElement('button');
-          b.type = 'button'; b.className = 'learn-btn';
-          b.textContent = t('show_all_packs', { n: packs.length });
-          b.addEventListener('click', function () { expanded[cid] = true; refresh(); });
-          moreLi.appendChild(b);
-          list.appendChild(moreLi);
-        }
-      });
-      var loose = rows.filter(function (r) { var cid = P.courseOf(r); return !(cid && courses[cid] && grouped[cid]); });
-      if (loose.length && Object.keys(grouped).length) { var h = document.createElement('li'); h.className = 'learn-course learn-course--loose'; h.innerHTML = '<span class="learn-course__title">' + esc(t('single_packs')) + '</span>'; list.appendChild(h); }
-      loose.forEach(function (r) { list.appendChild(tile(r)); });
-      list.hidden = !rows.length;
-      empty.hidden = !!rows.length;
-      renderContinue();
-      applySearch();
+    return P.list().then(function (rows) { shelf = rows; render(); });
+  }
+  function render() {
+    var rows = shelf || [];
+    wide = searching();
+    folds = 0;
+    list.innerHTML = '';
+    var courses = P.getCourses();
+    var grouped = {}, placed = {};
+    rows.forEach(function (r) {
+      var cid = P.courseOf(r), c = cid && courses[cid];
+      if (!c || (Array.isArray(c.packs) && c.packs.indexOf(r.id) < 0)) return;
+      (grouped[cid] = grouped[cid] || []).push(r);
+      placed[r.id] = true;
     });
+    Object.keys(courses).sort(function (a, b) { return (courses[b].updated || 0) - (courses[a].updated || 0); }).forEach(function (cid) {
+      var packs = (grouped[cid] || []).sort(function (a, b) { return (a.course.order || 0) - (b.course.order || 0); });
+      if (!packs.length) return;
+      var name = P.text(courses[cid].title, lang);
+      list.appendChild(courseHead(courses[cid], packs));
+      var firstOpen = packs.findIndex(function (r) { return P.doneCount(P.getProgress(r.id)) < r.cards; });
+      var start = Math.max(0, (firstOpen < 0 ? packs.length : firstOpen) - 1);
+      var visible = expanded[cid] ? packs : packs.slice(start, start + SHOW);
+      folds += packs.length - visible.length;
+      (wide ? packs : visible).forEach(function (r) { var li = tile(r); li.dataset.course = name; list.appendChild(li); });
+      if (!wide && visible.length < packs.length) {
+        var moreLi = document.createElement('li');
+        moreLi.className = 'learn-course__more';
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'learn-btn';
+        b.textContent = tn('show_all_packs', packs.length);
+        b.addEventListener('click', function () { expanded[cid] = true; refresh(); });
+        moreLi.appendChild(b);
+        list.appendChild(moreLi);
+      }
+    });
+    var loose = rows.filter(function (r) { return !placed[r.id]; });
+    if (loose.length && Object.keys(grouped).length) { var h = document.createElement('li'); h.className = 'learn-course learn-course--loose'; h.innerHTML = '<span class="learn-course__title">' + esc(t('single_packs')) + '</span>'; list.appendChild(h); }
+    loose.forEach(function (r) { list.appendChild(tile(r)); });
+    list.hidden = !rows.length;
+    empty.hidden = !!rows.length;
+    renderContinue();
+    filter();
   }
 
   function nativeProgress() {
@@ -184,7 +206,7 @@
       Array.prototype.forEach.call(tiles, function (li, i) { if (i >= ROW) li.classList.add('is-extra'); });
       function label() {
         var open = grid.classList.contains('is-expanded');
-        btn.textContent = open ? t('show_less') : t('see_all', { n: tiles.length });
+        btn.textContent = open ? t('show_less') : tn('see_all', tiles.length);
         btn.setAttribute('aria-expanded', open ? 'true' : 'false');
       }
       label();
@@ -200,7 +222,13 @@
   var q = document.getElementById('learn-q');
   var none = document.getElementById('learn-none');
   function norm(v) { return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); }
+  function searching() { return !!(q && norm(q.value)); }
   function applySearch() {
+    if (!q) return;
+    if (shelf && folds && searching() !== wide) { render(); return; }
+    filter();
+  }
+  function filter() {
     if (!q) return;
     var v = norm(q.value);
     document.body.classList.toggle('learn-searching', !!v);
@@ -211,13 +239,20 @@
       var n = 0;
       Array.prototype.forEach.call(sec.querySelectorAll('.learn-tile'), function (li) {
         var title = li.querySelector('.learn-tile__title');
-        var ok = !v || (where + norm(title && title.textContent)).indexOf(v) >= 0;
+        var ok = !v || (where + norm(li.dataset.course) + ' ' + norm(title && title.textContent)).indexOf(v) >= 0;
         li.classList.toggle('is-miss', !ok);
         if (ok) n++;
       });
       sec.classList.toggle('is-empty', !!v && !n);
       hits += n;
     });
+    var group = null, shown = 0;
+    var endGroup = function () { if (group) group.style.display = v && !shown ? 'none' : ''; };
+    Array.prototype.forEach.call(list.children, function (li) {
+      if (li.classList.contains('learn-course')) { endGroup(); group = li; shown = 0; }
+      else if (li.classList.contains('learn-tile') && !li.classList.contains('is-miss')) shown++;
+    });
+    endGroup();
     if (none) {
       none.hidden = !v || hits > 0;
       none.textContent = none.hidden ? '' : t('no_match', { q: q.value.trim() });
@@ -230,13 +265,19 @@
   }
 
   function handleResult(res) {
-    if (res.course) say(t('imported_course', { title: P.text(res.course.title, lang), n: res.imported }) + (res.warnings.length ? ' · ' + res.warnings[0] : ''), 'ok');
+    if (res.course) say(tn('imported_course', res.imported, { title: P.text(res.course.title, lang) }) + (res.warnings.length ? ' · ' + res.warnings[0] : ''), 'ok');
     else say(t(res.replaced ? 'replaced' : 'imported', { title: P.text(res.row.title, lang) }) + (res.warnings.length ? ' · ' + res.warnings[0] : ''), 'ok');
     refresh();
   }
+  var ERRS = { empty: 'import_err_empty', json: 'import_err_json', kind: 'import_err_kind', size: 'import_err_size', invalid: 'import_err_invalid', network: 'import_err_network', url: 'import_err_url' };
   function handleError(e) {
-    var msg = (e && e.errors && e.errors.slice(0, 3).join('; ')) || (e && e.message) || String(e);
-    say(t('import_failed') + ' ' + msg, 'error');
+    var code = e && Object.prototype.hasOwnProperty.call(ERRS, e.code) ? e.code : '';
+    var detail = '';
+    if (code === 'invalid') detail = (e.errors && e.errors.length ? e.errors : [e.message]).slice(0, 3).join('; ');
+    else if (code === 'json' && e.line) detail = t('import_err_at', { line: e.line, column: e.column });
+    else if (code === 'network' && e.status) detail = 'HTTP ' + e.status;
+    else if (!code) detail = (e && e.message) || String(e);
+    say(t('import_failed') + ' ' + t(code ? ERRS[code] : 'import_err_other'), 'error', detail);
   }
 
   function importFile(file) {

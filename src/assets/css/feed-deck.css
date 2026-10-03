@@ -144,6 +144,7 @@ body:has(.deck) .site-header,
   transition: opacity 0.28s ease;
 }
 .deck__slide.is-active { display: flex; opacity: 1; }
+.deck__slide.is-expanded { z-index: 4; pointer-events: none; }
 
 .deck__slide-img {
   position: absolute;

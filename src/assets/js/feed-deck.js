@@ -31,15 +31,16 @@
     } catch (_) {}
   })();
 
-  const localePrefix = (function () {
+  function prefixOf(path) {
     const locs = window.MENTRIA_LOCALES || [];
-    const path = location.pathname || '/';
     for (let i = 0; i < locs.length; i++) {
       const p = locs[i].prefix;
       if (p && (path === p || path.indexOf(p + '/') === 0)) return p;
     }
     return '';
-  })();
+  }
+  const localePrefix = prefixOf(location.pathname || '/');
+  const words = window.MENTRIA_DECK_I18N || {};
 
   let current = 0;
   let hintFaded = false;
@@ -70,6 +71,23 @@
     collapseAll();
     fadeHint();
     try { history.replaceState(null, '', '#s' + (i + 1)); } catch (_) {}
+    warm(i);
+  }
+
+  function imgAt(i) {
+    return slides[i] ? slides[i].querySelector('img.deck__slide-img') : null;
+  }
+  function whenLoaded(img, fn) {
+    if (!img || img.complete) { fn(); return; }
+    img.addEventListener('load', fn, { once: true });
+    img.addEventListener('error', fn, { once: true });
+  }
+  function warm(i) {
+    const nextImg = imgAt(i + 1), prevImg = imgAt(i - 1);
+    whenLoaded(imgAt(i), () => {
+      if (nextImg) nextImg.loading = 'eager';
+      whenLoaded(nextImg, () => { if (prevImg) prevImg.loading = 'eager'; });
+    });
   }
 
   function next() {
@@ -120,8 +138,8 @@
   function moreLink(label, expanded) {
     return '<button type="button" class="deck__more" data-action="expand" aria-expanded="' + (expanded ? 'true' : 'false') + '">' + label + '</button>';
   }
-  function collapsedHTML(body) { return esc(body.dataset.truncated) + '… ' + moreLink('more', false); }
-  function fullHTML(body) { return body.dataset.full + ' ' + moreLink('less', true); }
+  function collapsedHTML(body) { return esc(body.dataset.truncated) + '… ' + moreLink(esc(words.more || 'more'), false); }
+  function fullHTML(body) { return body.dataset.full + ' ' + moreLink(esc(words.less || 'less'), true); }
 
   function animateBody(body, html, onDone) {
     const startH = body.offsetHeight;
@@ -175,11 +193,27 @@
     setExpanded(slides[current], !isExpanded());
   }
 
+  function basePath(path) {
+    return path.slice(prefixOf(path).length) || '/';
+  }
+
+  function canGoBack() {
+    const nav = window.navigation;
+    let prev = null;
+    if (nav && typeof nav.entries === 'function') {
+      const cur = nav.currentEntry;
+      const entry = cur && cur.index > 0 ? nav.entries()[cur.index - 1] : null;
+      if (!entry || entry.sameDocument) return false;
+      try { prev = new URL(entry.url); } catch (_) { return false; }
+    } else {
+      try { prev = document.referrer ? new URL(document.referrer) : null; } catch (_) {}
+      if (!prev || prev.origin !== location.origin || history.length < 2 || prefixOf(prev.pathname) !== localePrefix) return false;
+    }
+    return basePath(prev.pathname) !== basePath(location.pathname);
+  }
+
   function exit() {
-    const back = document.referrer && document.referrer.indexOf(location.origin) === 0
-      ? -1
-      : localePrefix + '/learn/';
-    if (back === -1) history.back();
+    if (canGoBack()) history.back();
     else location.href = localePrefix + '/learn/';
   }
 
@@ -302,6 +336,7 @@
       if (idx > 0) go(idx);
     }
   }
+  if (!current) warm(0);
 
   /* ── Share the current slide as an image card ─────── */
   const shareBtn = document.getElementById('deckShare');

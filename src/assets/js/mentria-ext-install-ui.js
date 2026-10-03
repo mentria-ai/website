@@ -4,6 +4,7 @@ const DEFAULT_COPY = {
   trust: 'Install "{name}" v{version}? It runs with full access to this site. Permissions: {perms}.',
   update: 'Update "{name}" from v{old} to v{new}?',
   downgrade: 'Replace "{name}" v{old} with older v{new}?',
+  replace: 'Replace "{oldName}" v{old} with "{name}" v{new}? It uses the same ID, so it takes over the saved data and runs with full access to this site.',
   permsAdded: 'New permissions: {perms}.',
   permsRemoved: 'No longer uses: {perms}.',
   from: 'From {from} — ',
@@ -20,8 +21,9 @@ export async function confirmInstall(html, opts) {
   let msg;
   if (ins.existing) {
     const prev = ins.existing.manifest;
-    const tpl = X.compareVersions(m.version, prev.version) < 0 ? copy.downgrade : copy.update;
-    msg = fmt(tpl, { name: m.name, old: prev.version, new: m.version });
+    const renamed = !!(prev.name && m.name && prev.name !== m.name);
+    const tpl = renamed ? copy.replace : (X.compareVersions(m.version, prev.version) < 0 ? copy.downgrade : copy.update);
+    msg = fmt(tpl, { name: m.name, oldName: prev.name, old: prev.version, new: m.version });
     const prevPerms = prev.permissions || [];
     const nextPerms = m.permissions || [];
     const added = nextPerms.filter((p) => !prevPerms.includes(p));

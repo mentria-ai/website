@@ -1110,6 +1110,7 @@
       "trust_prompt": "Installer {name} v{version} ? Elle s'exécutera avec un accès complet à vos données sur cet appareil. N'installez que des fichiers de personnes de confiance. Permissions : {perms}",
       "update_prompt": "Mettre à jour {name} {old} → {new} ? Les données sont conservées.",
       "downgrade_prompt": "Remplacer {name} {old} par la version antérieure {new} ? Les données sont conservées.",
+      "replace_prompt": "Remplacer {oldName} {old} par {name} {new} ? Elle utilise le même identifiant : elle reprend les données enregistrées de {oldName} et s'exécutera avec un accès complet à vos données sur cet appareil. Ne continuez que si vous faites confiance au fichier.",
       "update_perms_added": "Nouvelles permissions : {perms}.",
       "update_perms_removed": "N'utilise plus : {perms}.",
       "installed_ok": "installée.",

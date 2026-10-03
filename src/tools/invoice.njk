@@ -835,7 +835,19 @@ localeReload: true
     reader.readAsText(file);
   });
 
+  const printDate = (value) => {
+    const [y, m, d] = String(value || '').split('-').map(Number);
+    if (!y || !m || !d) return '';
+    return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
   const buildPrintMirrors = () => {
+    if (invoiceDateInput) {
+      const copy = document.querySelector('.iv__date-print') || document.createElement('span');
+      copy.className = 'iv__date-print';
+      copy.setAttribute('aria-hidden', 'true');
+      copy.textContent = printDate(invoiceDateInput.value);
+      if (!copy.isConnected) invoiceDateInput.insertAdjacentElement('beforebegin', copy);
+    }
     document.querySelectorAll('.iv__table textarea, .iv__notes-input').forEach(ta => {
       const mirror = document.createElement('div');
       mirror.className = 'iv__print-mirror';
@@ -853,7 +865,7 @@ localeReload: true
     if (bank) bank.classList.toggle('is-print-empty', Array.from(bank.querySelectorAll('input')).every(i => !i.value.trim()));
   };
   const clearPrintMirrors = () => {
-    document.querySelectorAll('.iv__print-mirror').forEach(el => el.remove());
+    document.querySelectorAll('.iv__print-mirror, .iv__date-print').forEach(el => el.remove());
     document.querySelectorAll('.is-print-skip').forEach(el => el.classList.remove('is-print-skip'));
     const bank = document.querySelector('.iv__bank');
     if (bank) bank.classList.remove('is-print-empty');
@@ -1198,6 +1210,7 @@ td.total .currency {
   white-space: pre-wrap;
 }
 .iv__print-mirror { display: none; }
+.iv__date-print { display: none; }
 
 /* Bank */
 .iv__bank .iv__declaration {
@@ -1229,6 +1242,16 @@ td.total .currency {
   input[type="date"] {
     -webkit-appearance: none !important;
     appearance: none !important;
+  }
+  @supports (-moz-appearance: none) {
+    .iv__date-print {
+      display: inline !important;
+      color: #111 !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 10pt !important;
+      line-height: 1.35 !important;
+    }
+    .iv__date-print + .iv__meta-input--date { display: none !important; }
   }
 
   /* Page setup */

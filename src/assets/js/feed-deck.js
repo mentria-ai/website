@@ -206,7 +206,7 @@
       if (!entry || entry.sameDocument) return false;
       try { prev = new URL(entry.url); } catch (_) { return false; }
     } else {
-      try { prev = document.referrer ? new URL(document.referrer) : null; } catch (_) {}
+      try { prev = window.MentriaNav ? window.MentriaNav.from() : (document.referrer ? new URL(document.referrer) : null); } catch (_) {}
       if (!prev || prev.origin !== location.origin || history.length < 2 || prefixOf(prev.pathname) !== localePrefix) return false;
     }
     return basePath(prev.pathname) !== basePath(location.pathname);

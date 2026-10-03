@@ -398,7 +398,7 @@
     if (st && typeof st.packExit === 'number') { exitSteps = st.packExit; return; }
     var hand = null, ref = null;
     try { hand = JSON.parse(sessionStorage.getItem(EXIT_KEY) || 'null'); sessionStorage.removeItem(EXIT_KEY); } catch (_) {}
-    try { ref = document.referrer ? new URL(document.referrer) : null; } catch (_) {}
+    try { ref = window.MentriaNav ? window.MentriaNav.from() : (document.referrer ? new URL(document.referrer) : null); } catch (_) {}
     if (ref && ref.origin === location.origin && history.length > 1 && prefixOf(ref.pathname) === localePrefix) {
       var chained = hand && hand.from === ref.pathname + ref.search && hand.to === location.pathname + location.search;
       exitSteps = chained ? (hand.steps > 0 ? hand.steps + 1 : 0) : 1;

@@ -29,8 +29,9 @@
                 <span class="nav-dot" data-update-dot hidden></span>
             </a>
 
-            {%- set currentLocale = lang | findLocale -%}
+            {%- set currentLocale = (lang or "en") | findLocale -%}
             <button type="button" class="nav-cmdk" data-palette-open aria-label="{{ 'palette.open' | t }}" aria-keyshortcuts="Meta+K Control+K"><span class="nav-cmdk__keys" aria-hidden="true">⌘K</span><svg class="nav-cmdk__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.6"></circle><path d="M10.4 10.4L14 14"></path></svg></button>
+            <script>(function () { if (/Macintosh|iPhone|iPad|iPod/.test(navigator.userAgent)) return; var b = document.querySelector('.nav-cmdk'), k = b && b.querySelector('.nav-cmdk__keys'); if (!k) return; k.textContent = 'Ctrl K'; b.setAttribute('aria-label', {{ ("palette.open_ctrl" | t) | dump | safe }}); b.setAttribute('data-i18na', 'aria-label=palette.open_ctrl'); })();</script>
             <details class="lang-switcher">
                 <summary aria-label="{{ 'lang_switcher.current_label' | t }}: {{ currentLocale.nativeName }}">
                     <span aria-hidden="true">🌐</span>
@@ -42,7 +43,7 @@
                     <li>
                         <a hreflang="{{ loc.code }}"
                            href="{% if englishOnly %}{{ '/' | switchLocale(loc.code) }}{% else %}{{ page.url | switchLocale(loc.code) }}{% endif %}"
-                           class="lang-switcher__item{% if loc.code == lang %} is-active{% endif %}">
+                           class="lang-switcher__item{% if loc.code == currentLocale.code %} is-active{% endif %}">
                             <span class="lang-switcher__name" lang="{{ loc.code }}">{{ loc.nativeName }}</span>
                             <span class="lang-switcher__code">{{ loc.code }}</span>
                         </a>

@@ -693,6 +693,54 @@ try {
 } catch (e) { console.error(e); }
 try {
       (function () {
+        var KEY = 'mentria.navFrom';
+        var FIELD = 'mNavFrom';
+        var live = window.self === window.top && !(window.navigation && typeof window.navigation.entries === 'function');
+        var docFrom = null;
+        function navType() {
+          try {
+            var nav = performance.getEntriesByType('navigation')[0];
+            if (nav && nav.type) return nav.type;
+          } catch (_) {}
+          var legacy = performance.navigation ? performance.navigation.type : 0;
+          return legacy === 1 ? 'reload' : legacy === 2 ? 'back_forward' : 'navigate';
+        }
+        function own(st) { return !!(st && typeof st === 'object' && typeof st[FIELD] === 'string'); }
+        if (live) {
+          var last = null;
+          try { last = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch (_) { last = null; }
+          var st = history.state;
+          if (own(st)) {
+            docFrom = st[FIELD] || null;
+          } else if (navType() === 'navigate' && (st == null || typeof st === 'object')) {
+            var since = Date.now() - performance.now();
+            if (last && typeof last.u === 'string' && last.u.charAt(0) === '/' && last.t >= since - 2000) docFrom = last.u;
+            var mark = {};
+            mark[FIELD] = docFrom || '';
+            try { history.replaceState(Object.assign({}, st, mark), ''); } catch (_) {}
+          }
+          window.addEventListener('pagehide', function () {
+            try { sessionStorage.setItem(KEY, JSON.stringify({ u: location.pathname + location.search, t: Date.now() })); } catch (_) {}
+          });
+        }
+        function stored() {
+          if (!live) return null;
+          var st = history.state;
+          var path = own(st) ? st[FIELD] : (st == null ? docFrom : null);
+          if (!path) return null;
+          try { return new URL(location.origin + path); } catch (_) { return null; }
+        }
+        window.MentriaNav = {
+          from: function () {
+            var ref = null;
+            try { ref = document.referrer ? new URL(document.referrer) : null; } catch (_) { ref = null; }
+            return ref || stored();
+          }
+        };
+      })();
+} catch (e) { console.error(e); }
+try {
+      (function () {
         var FS = 'terminal-frame--fullscreen';
         var BODY_FS = 'is-fullscreen-tool';
         function activeFrame() { return document.querySelector('.' + FS); }
@@ -749,7 +797,7 @@ try {
           if (!btn) return;
           e.preventDefault();
           var here = location.pathname, ref = null;
-          try { ref = document.referrer ? new URL(document.referrer) : null; } catch (_) { ref = null; }
+          try { ref = window.MentriaNav ? window.MentriaNav.from() : (document.referrer ? new URL(document.referrer) : null); } catch (_) { ref = null; }
           if (ref && ref.origin === location.origin && ref.pathname !== here && history.length > 1) {
             var gone = false;
             window.addEventListener('pagehide', function () { gone = true; }, { once: true });

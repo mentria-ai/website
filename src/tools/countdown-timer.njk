@@ -382,7 +382,10 @@ localeReload: true
         x.dataset.removePreset = String(secs);
         x.textContent = '\u00d7';
         x.setAttribute('aria-label', COPY.presetRemoveAria.replace('{label}', fmtPreset(secs)));
-        holder.append(b, x);
+        const chip = document.createElement('span');
+        chip.className = 'ct-preset-chip';
+        chip.append(b, x);
+        holder.append(chip);
       });
     });
   }
@@ -1174,12 +1177,22 @@ localeReload: true
   font-size: 0.8rem;
   color: var(--term-muted);
 }
+.ct-preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
 .ct-preset-remove {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   padding: 0;
-  font-size: var(--text-2xs);
-  margin-left: -4px;
+  font-size: var(--text-xs);
+}
+@media (pointer: coarse) {
+  .ct-preset-remove {
+    width: 28px;
+    height: 28px;
+  }
 }
 .ct-preset-save {
   min-width: 28px;

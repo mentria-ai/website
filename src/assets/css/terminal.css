@@ -510,6 +510,24 @@ html.is-fullscreen-tool body .terminal-frame--fullscreen .qn-editor__textarea {
   max-height: min(78svh, 660px);
   overflow-y: auto;
 }
+.game-help-x {
+  float: right;
+  margin: -0.3rem -0.35rem 0 0.6rem;
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--term-border);
+  border-radius: var(--radius-sm);
+  color: var(--term-muted);
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.game-help-x:hover,
+.game-help-x:focus-visible { color: var(--syn-cyan); border-color: var(--cyan-30); }
 .game-help::backdrop {
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(2px);

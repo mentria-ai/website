@@ -214,7 +214,7 @@ async function install() {
     showState();
     if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast(stateEl.textContent);
   } catch (e) {
-    if (created) X.remove(D.id);
+    if (created) X.remove(D.id, { keepData: true });
     progressEl.hidden = true;
     installErr.textContent = C.failed;
     installErr.hidden = false;
@@ -238,6 +238,14 @@ async function refreshInstalled() {
   try {
     const pkg = await X.fetchPackage(D.id);
     if (pkg.kind === 'app' && pkg.manifest && pkg.manifest.version !== entry.manifest.version) X.installApp(pkg.manifest);
+    else if (pkg.kind !== 'app') {
+      const res = await fetch('/assets/extensions/' + D.id + '.html', { cache: 'no-store' });
+      if (res.ok) {
+        const html = await res.text();
+        const m = X.inspect(html).manifest;
+        if (X.compareVersions(m.version, entry.manifest.version) > 0) X.install(html, m);
+      }
+    }
     await X.downloadFiles(D.id, pkg.files, extraUrls());
   } catch (_) {}
 }

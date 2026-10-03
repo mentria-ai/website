@@ -25,6 +25,7 @@ localeReload: true
 {% include "terminal-frame-open.njk" %}
 
 <div id="flappy-help" popover class="game-help">
+  <button type="button" class="game-help-x" popovertarget="flappy-help" popovertargetaction="hide" aria-label="{{ 'common.close' | t }}">✕</button>
   <p class="game-help-title">{{ "tool.flappy.controls" | t }}</p>
   <ul class="flappy__ctl-list">
     <li class="flappy__ctl" data-method="touch">
@@ -890,7 +891,7 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
   });
 
   document.addEventListener('keydown', e => {
-    if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"], .game-help')) return;
     const code = e.code;
     if (code === 'Space' || code === 'ArrowUp' || code === 'KeyW') {
       e.preventDefault();

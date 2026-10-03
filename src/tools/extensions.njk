@@ -82,7 +82,7 @@ const COPY = {
 };
 const CATALOG = [
   {%- for e in extensions %}
-  { id: {{ e.id | dump | safe }}, page: true, desc: {{ (("tool.ext_gallery.desc." + e.id) | t) | dump | safe }}, size: {{ e.size | dump | safe }}{% if e.kind == 'app' %}, app: {{ e.app | dump | safe }}, manifest: {{ e.manifest | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
+  { id: {{ e.id | dump | safe }}, page: true, desc: {{ (("tool.ext_gallery.desc." + e.id) | t) | dump | safe }}, size: {{ e.size | dump | safe }}, version: {{ e.version | dump | safe }}{% if e.kind == 'app' %}, app: {{ e.app | dump | safe }}, manifest: {{ e.manifest | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
   {%- endfor %}
 ];
 const CATALOG_URL = 'https://mentria-ai.github.io/extensions/catalog.json';
@@ -180,7 +180,8 @@ function row(entry) {
   sub.textContent = 'v' + m.version + (m.author ? ' · ' + m.author : '');
   const perms = document.createElement('div');
   perms.className = 'xt__perms';
-  perms.textContent = (m.permissions || []).join(' · ') + (X.isApp(entry) ? '' : '  (' + Math.round(entry.size / 1024) + ' KB)');
+  const cat = CATALOG.find((c) => c.id === m.id && c.version === m.version);
+  perms.textContent = (m.permissions || []).join(' · ') + (X.isApp(entry) ? '' : '  (' + (cat ? cat.size : Math.round(entry.size / 1024) + ' KB') + ')');
   meta.appendChild(title); meta.appendChild(sub); meta.appendChild(perms);
   const actions = document.createElement('div');
   actions.className = 'xt__actions';

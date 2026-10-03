@@ -33,6 +33,7 @@ localeReload: true
       {{ "tool.exif.btn_browse" | t }}
       <input type="file" id="ex-file" accept="image/*" hidden>
     </label>
+    <p class="ex__note" id="ex-drop-note" role="alert" hidden></p>
   </div>
 
   <div class="ex__report" id="ex-report" hidden>
@@ -83,6 +84,7 @@ localeReload: true
 {% include "terminal-frame-close.njk" %}
 {% include "tool-schema.njk" %}
 
+<script src="/assets/js/mentria-meta-strip.js?v={{ buildHash }}"></script>
 <script>
 (() => {
   const COPY = {
@@ -107,6 +109,8 @@ localeReload: true
     segComment:    {{ ("tool.exif.seg_comment"     | t) | dump | safe }},
     segText:       {{ ("tool.exif.seg_text"        | t) | dump | safe }},
     segTime:       {{ ("tool.exif.seg_time"        | t) | dump | safe }},
+    segOther:      {{ ("tool.exif.seg_other"       | t) | dump | safe }},
+    segTrailer:    {{ ("tool.exif.seg_trailer"     | t) | dump | safe }},
     embExif:       {{ ("tool.exif.emb_exif"        | t) | dump | safe }},
     embXmp:        {{ ("tool.exif.emb_xmp"         | t) | dump | safe }},
     embIptc:       {{ ("tool.exif.emb_iptc"        | t) | dump | safe }},
@@ -147,6 +151,7 @@ localeReload: true
   const iccNote   = $('ex-icc-note');
   const embeddedEl = $('ex-embedded');
   const noteEl    = $('ex-note');
+  const dropNoteEl = $('ex-drop-note');
   const stripBtn  = $('ex-strip');
   const shareBtn  = $('ex-share');
   const sendBtn   = $('ex-send');
@@ -315,39 +320,16 @@ localeReload: true
         else meta.segments.push({ kind: 'icc', bytes: len + 2, rawParts: [chunk] });
       } else if (marker === 0xFE) {
         meta.segments.push({ kind: 'comment', bytes: len + 2, raw: u8.subarray(dataOff, dataEnd) });
+      } else if (!MentriaMetaStrip.keepJpegSegment(u8, marker, dataOff)) {
+        meta.segments.push({ kind: 'other', bytes: len + 2 });
       }
       p += 2 + len;
     }
+    const end = MentriaMetaStrip.jpegEnd(u8, p);
+    if (end < u8.length) meta.segments.push({ kind: 'trailer', bytes: u8.length - end });
     meta.tiff = exifParsed;
     meta.exif = extractExifSummary(exifParsed);
     return meta;
-  }
-
-  function stripJpeg(buf) {
-    const u8 = new Uint8Array(buf);
-    const dv = new DataView(buf);
-    const parts = [u8.subarray(0, 2)];
-    const removed = new Set();
-    let p = 2;
-    while (p + 4 <= u8.length) {
-      if (u8[p] !== 0xFF) break;
-      const marker = u8[p + 1];
-      if (marker === 0x01 || (marker >= 0xD0 && marker <= 0xD7)) { parts.push(u8.subarray(p, p + 2)); p += 2; continue; }
-      if (marker === 0xDA || marker === 0xD9) break;
-      const len = dv.getUint16(p + 2, false);
-      if (len < 2 || p + 2 + len > u8.length) break;
-      const dataOff = p + 4;
-      let drop = null;
-      if (marker === 0xE1 && matchBytes(u8, dataOff, 'Exif')) drop = 'exif';
-      else if (marker === 0xE1 && matchBytes(u8, dataOff, 'http://ns.adobe.com/xap/1.0/')) drop = 'xmp';
-      else if (marker === 0xED && matchBytes(u8, dataOff, 'Photoshop 3.0')) drop = 'iptc';
-      else if (marker === 0xFE) drop = 'comment';
-      if (drop) removed.add(drop);
-      else parts.push(u8.subarray(p, p + 2 + len));
-      p += 2 + len;
-    }
-    parts.push(u8.subarray(p));
-    return { blob: new Blob(parts, { type: 'image/jpeg' }), removed: Array.from(removed) };
   }
 
   function parsePng(buf) {
@@ -379,25 +361,6 @@ localeReload: true
     return meta;
   }
 
-  function stripPng(buf) {
-    const u8 = new Uint8Array(buf);
-    const dv = new DataView(buf);
-    const parts = [u8.subarray(0, 8)];
-    const removed = new Set();
-    const DROP = { tEXt: 'text', zTXt: 'text', iTXt: 'text', eXIf: 'exif', tIME: 'time' };
-    let p = 8;
-    while (p + 8 <= u8.length) {
-      const len = dv.getUint32(p, false);
-      const type = String.fromCharCode(u8[p + 4], u8[p + 5], u8[p + 6], u8[p + 7]);
-      if (p + 12 + len > u8.length) break;
-      if (DROP[type]) removed.add(DROP[type]);
-      else parts.push(u8.subarray(p, p + 12 + len));
-      if (type === 'IEND') { p += 12 + len; break; }
-      p += 12 + len;
-    }
-    return { blob: new Blob(parts, { type: 'image/png' }), removed: Array.from(removed) };
-  }
-
   function parseWebp(buf) {
     const u8 = new Uint8Array(buf);
     const dv = new DataView(buf);
@@ -425,39 +388,10 @@ localeReload: true
     return meta;
   }
 
-  function stripWebp(buf) {
-    const u8 = new Uint8Array(buf);
-    const dv = new DataView(buf);
-    const parts = [];
-    const removed = new Set();
-    let p = 12;
-    while (p + 8 <= u8.length) {
-      const fourcc = String.fromCharCode(u8[p], u8[p + 1], u8[p + 2], u8[p + 3]);
-      const len = dv.getUint32(p + 4, true);
-      if (p + 8 + len > u8.length) break;
-      const total = 8 + len + (len % 2);
-      if (fourcc === 'EXIF') removed.add('exif');
-      else if (fourcc === 'XMP ') removed.add('xmp');
-      else {
-        const chunk = new Uint8Array(u8.subarray(p, p + total));
-        if (fourcc === 'VP8X' && chunk.length >= 9) chunk[8] = chunk[8] & 0xF3;
-        parts.push(chunk);
-      }
-      p += total;
-    }
-    let bodyLen = 4;
-    for (const c of parts) bodyLen += c.length;
-    const header = new Uint8Array(12);
-    header.set([0x52, 0x49, 0x46, 0x46], 0);
-    new DataView(header.buffer).setUint32(4, bodyLen, true);
-    header.set([0x57, 0x45, 0x42, 0x50], 8);
-    return { blob: new Blob([header, ...parts], { type: 'image/webp' }), removed: Array.from(removed) };
-  }
-
   const KINDS = {
-    jpeg: { parse: parseJpeg, strip: stripJpeg, ext: 'jpg' },
-    png:  { parse: parsePng,  strip: stripPng,  ext: 'png' },
-    webp: { parse: parseWebp, strip: stripWebp, ext: 'webp' }
+    jpeg: { parse: parseJpeg, strip: (buf) => MentriaMetaStrip.strip(buf, 'jpeg'), ext: 'jpg' },
+    png:  { parse: parsePng,  strip: (buf) => MentriaMetaStrip.strip(buf, 'png'),  ext: 'png' },
+    webp: { parse: parseWebp, strip: (buf) => MentriaMetaStrip.strip(buf, 'webp'), ext: 'webp' }
   };
 
   function sniffKind(u8) {
@@ -812,7 +746,7 @@ localeReload: true
     blocks.forEach(b => embeddedEl.appendChild(b));
   }
 
-  const SEG_LABELS = { exif: 'segExif', xmp: 'segXmp', iptc: 'segIptc', icc: 'segIcc', comment: 'segComment', text: 'segText', time: 'segTime' };
+  const SEG_LABELS = { exif: 'segExif', xmp: 'segXmp', iptc: 'segIptc', icc: 'segIcc', comment: 'segComment', text: 'segText', time: 'segTime', other: 'segOther', trailer: 'segTrailer' };
 
   function renderReport(meta, file) {
     factsEl.innerHTML = '';
@@ -909,9 +843,10 @@ localeReload: true
   }
 
   function showError() {
-    noteEl.textContent = COPY.errRead;
-    noteEl.hidden = false;
-    setTimeout(() => { noteEl.hidden = true; }, 4000);
+    const el = reportEl.hidden ? dropNoteEl : noteEl;
+    el.textContent = COPY.errRead;
+    el.hidden = false;
+    setTimeout(() => { el.hidden = true; }, 6000);
   }
 
   function reset() {
@@ -926,12 +861,13 @@ localeReload: true
   }
 
   function stripCleanCopy() {
-    const { blob, removed } = KINDS[origKind].strip(origBuf);
+    const out = KINDS[origKind].strip(origBuf);
+    const { blob, removed } = out;
     const dot = origName.lastIndexOf('.');
     const base = dot > 0 ? origName.slice(0, dot) : origName;
     blob.arrayBuffer().then(cleanBuf => {
       const recheck = KINDS[origKind].parse(cleanBuf);
-      const leftover = recheck && recheck.segments.some(s => s.kind !== 'icc');
+      const leftover = recheck && recheck.segments.some(s => s.kind !== 'icc' && !(s.kind === 'exif' && out.orientation > 1 && s.bytes === 36));
       const names = removed.map(k => COPY[SEG_LABELS[k]]).join(', ');
       let line = COPY.removedLabel + ': ' + names + ' · ' + fmtBytes(origBuf.byteLength) + ' → ' + fmtBytes(blob.size);
       if (!leftover) line += ' · ' + COPY.verifiedClean;

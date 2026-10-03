@@ -1359,6 +1359,8 @@
       "seg_comment": "Commentaire",
       "seg_text": "Blocs de texte",
       "seg_time": "Horodatage",
+      "seg_other": "Autres données d’applis",
+      "seg_trailer": "Données après l’image",
       "emb_exif": "Balises EXIF",
       "emb_xmp": "Propriétés XMP",
       "emb_iptc": "Champs IPTC",

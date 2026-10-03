@@ -1359,6 +1359,8 @@
       "seg_comment": "Comment",
       "seg_text": "Text chunks",
       "seg_time": "Timestamp chunk",
+      "seg_other": "Other app data",
+      "seg_trailer": "Data after the image",
       "emb_exif": "EXIF tags",
       "emb_xmp": "XMP properties",
       "emb_iptc": "IPTC fields",

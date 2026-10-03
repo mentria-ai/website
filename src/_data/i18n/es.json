@@ -1359,6 +1359,8 @@
       "seg_comment": "Comentario",
       "seg_text": "Bloques de texto",
       "seg_time": "Marca de tiempo",
+      "seg_other": "Otros datos de apps",
+      "seg_trailer": "Datos tras la imagen",
       "emb_exif": "Etiquetas EXIF",
       "emb_xmp": "Propiedades XMP",
       "emb_iptc": "Campos IPTC",

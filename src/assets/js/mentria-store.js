@@ -166,6 +166,71 @@
     return victims.length;
   };
 
+  const LOCAL_KEYS = ['tools.ruler_calibration', 'tools.decibel_settings', 'tools.countdown_active', 'ui.mini', 'handoff.md', 'comms.ring_token', 'comms.selftest_token', 'comms.ring_announced'];
+  const LOCAL_KEY_PREFIXES = ['ui.fullscreen.'];
+  const LOCAL_LEGACY = ['mentria_lang', 'mentria_lang_redirected_at', 'mentria_seen', 'mentria_caps'];
+  const VAULTS = ['totp.vault', 'identity.vault'];
+  const NOTE_LISTS = ['quick_notes.blob', 'quick_notes.inbox'];
+  const DELETE_MAPS = ['quick_notes.deleted', 'tools.color_picker_deleted'];
+
+  const isLocalOnly = (suffix) => LOCAL_KEYS.indexOf(suffix) >= 0 || LOCAL_KEY_PREFIXES.some((p) => suffix.indexOf(p) === 0);
+  const isLocalLegacy = (k) => LOCAL_LEGACY.indexOf(k) >= 0;
+
+  const parseJson = (raw) => {
+    if (raw == null) return null;
+    try { return JSON.parse(raw); } catch (_) { return null; }
+  };
+
+  const portable = (suffix, raw) => {
+    if (suffix !== 'identity.vault') return raw;
+    const v = parseJson(raw);
+    if (!v || typeof v !== 'object' || !v.device) return raw;
+    delete v.device;
+    return JSON.stringify(v);
+  };
+
+  const adopt = (suffix, raw) => {
+    if (suffix !== 'identity.vault') return raw;
+    const incoming = parseJson(raw);
+    if (!incoming || typeof incoming !== 'object') return raw;
+    const local = lsAvailable ? parseJson(global.localStorage.getItem(PREFIX + suffix)) : null;
+    if (local && local.device && local.kcv && local.kcv === incoming.kcv) incoming.device = local.device;
+    else delete incoming.device;
+    return JSON.stringify(incoming);
+  };
+
+  const mergeNotes = (localArr, incomingArr, deletedMap) => {
+    const byId = new Map();
+    const consider = (note) => {
+      if (!note || typeof note !== 'object' || note.id == null) return;
+      const id = String(note.id);
+      const del = (deletedMap && typeof deletedMap[id] === 'number') ? deletedMap[id] : null;
+      if (del != null && del > (Number(note.updatedAt) || 0)) return;
+      const existing = byId.get(id);
+      if (!existing || (Number(note.updatedAt) || 0) > (Number(existing.updatedAt) || 0)) byId.set(id, note);
+    };
+    (Array.isArray(localArr) ? localArr : []).forEach(consider);
+    (Array.isArray(incomingArr) ? incomingArr : []).forEach(consider);
+    return Array.from(byId.values()).sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0));
+  };
+
+  const maxMergeMap = (a, b, cap) => {
+    const out = {};
+    [a, b].forEach((m) => {
+      if (!m || typeof m !== 'object') return;
+      Object.keys(m).forEach((k) => {
+        const v = Number(m[k]);
+        if (!isFinite(v)) return;
+        if (!(k in out) || v > out[k]) out[k] = v;
+      });
+    });
+    const keys = Object.keys(out);
+    if (cap && keys.length > cap) {
+      keys.sort((x, y) => out[x] - out[y]).slice(0, keys.length - cap).forEach((k) => { delete out[k]; });
+    }
+    return out;
+  };
+
   const exportAll = () => {
     const store = {};
     const legacy = {};
@@ -176,13 +241,67 @@
         if (!k) continue;
         const v = global.localStorage.getItem(k);
         if (k.indexOf(PREFIX) === 0) {
-          store[k.slice(PREFIX.length)] = v;
+          const suffix = k.slice(PREFIX.length);
+          if (isLocalOnly(suffix)) continue;
+          store[suffix] = portable(suffix, v);
         } else if (k.indexOf(LEGACY_PREFIX) === 0) {
+          if (isLocalLegacy(k)) continue;
           legacy[k] = v;
         }
       }
     } catch (_) {}
     return { version: 1, exportedAt: new Date().toISOString(), store, legacy };
+  };
+
+  const planImport = (payload) => {
+    const plan = { add: [], same: [], merge: [], replace: [], vaults: [] };
+    const store = (payload && payload.store && typeof payload.store === 'object') ? payload.store : {};
+    Object.keys(store).forEach((suffix) => {
+      if (isLocalOnly(suffix)) return;
+      const incoming = adopt(suffix, String(store[suffix]));
+      const local = lsAvailable ? global.localStorage.getItem(PREFIX + suffix) : null;
+      if (local == null) { plan.add.push(suffix); return; }
+      if (local === incoming) { plan.same.push(suffix); return; }
+      if (NOTE_LISTS.indexOf(suffix) >= 0 || DELETE_MAPS.indexOf(suffix) >= 0) { plan.merge.push(suffix); return; }
+      if (VAULTS.indexOf(suffix) >= 0) { plan.vaults.push(suffix); return; }
+      plan.replace.push(suffix);
+    });
+    const legacy = (payload && payload.legacy && typeof payload.legacy === 'object') ? payload.legacy : {};
+    Object.keys(legacy).forEach((k) => {
+      if (k.indexOf(LEGACY_PREFIX) !== 0 || isLocalLegacy(k)) return;
+      const local = lsAvailable ? global.localStorage.getItem(k) : null;
+      if (local == null) plan.add.push(k);
+      else if (local === String(legacy[k])) plan.same.push(k);
+      else plan.replace.push(k);
+    });
+    return plan;
+  };
+
+  const AREA_NAMES = {
+    invoice: 'invoices', totp: 'TOTP accounts', identity: 'Comms identity', comms: 'Comms rooms and contacts',
+    quick_notes: 'notes', packs: 'learning progress', games: 'game saves and scores', tools: 'tool settings',
+    ui: 'layout settings', ai_chat: 'AI chat', ext: 'extensions', extdata: 'extension data', feed: 'feed progress'
+  };
+
+  const areaNames = (suffixes) => {
+    const t = (key, fallback) => {
+      try {
+        const I = global.MentriaI18n;
+        const v = I && typeof I.t === 'function' ? I.t(key) : null;
+        if (typeof v === 'string' && v && v !== key) return v;
+      } catch (_) {}
+      return fallback;
+    };
+    const out = [];
+    (suffixes || []).forEach((suffix) => {
+      let ns = String(suffix).split('.')[0];
+      if (ns.indexOf(LEGACY_PREFIX) === 0) ns = /^mentria_(chess|ludo|sudoku|msw)/.test(ns) ? 'games' : 'tools';
+      if (ns === 'tool') ns = 'games';
+      if (!(ns in AREA_NAMES)) ns = 'other';
+      const name = t('common.data_areas.' + ns, AREA_NAMES[ns] || 'other saved data');
+      if (out.indexOf(name) < 0) out.push(name);
+    });
+    return out;
   };
 
   const importAll = (payload, opts) => {
@@ -196,41 +315,66 @@
     }
     const store = (payload.store && typeof payload.store === 'object') ? payload.store : {};
     const legacy = (payload.legacy && typeof payload.legacy === 'object') ? payload.legacy : {};
+    const skip = Array.isArray(opts.skip) ? opts.skip : [];
+    const backupTime = Date.parse(payload.exportedAt);
+    const restoredMtime = isFinite(backupTime) && backupTime <= Date.now() ? backupTime : Date.now();
 
-    if (mode === 'replace') {
-      const victims = [];
-      try {
+    const writes = [];
+    const deletedNotes = maxMergeMap(parseJson(lsAvailable ? global.localStorage.getItem(PREFIX + 'quick_notes.deleted') : null), parseJson(store['quick_notes.deleted']), 200);
+    Object.keys(store).forEach((suffix) => {
+      if (typeof suffix !== 'string' || isLocalOnly(suffix) || skip.indexOf(suffix) >= 0) return;
+      let raw = adopt(suffix, String(store[suffix]));
+      let mtime = restoredMtime;
+      const local = (mode === 'merge' && lsAvailable) ? global.localStorage.getItem(PREFIX + suffix) : null;
+      if (local != null && local !== raw) {
+        if (NOTE_LISTS.indexOf(suffix) >= 0) { raw = JSON.stringify(mergeNotes(parseJson(local), parseJson(raw), deletedNotes)); mtime = Date.now(); }
+        else if (DELETE_MAPS.indexOf(suffix) >= 0) { raw = JSON.stringify(maxMergeMap(parseJson(local), parseJson(raw), 200)); mtime = Date.now(); }
+      }
+      if (local != null && local === raw) return;
+      writes.push({ key: PREFIX + suffix, meta: META_PREFIX + suffix, raw, mtime });
+    });
+    Object.keys(legacy).forEach((k) => {
+      if (typeof k !== 'string' || k.indexOf(LEGACY_PREFIX) !== 0 || isLocalLegacy(k) || skip.indexOf(k) >= 0) return;
+      writes.push({ key: k, meta: null, raw: String(legacy[k]), mtime: restoredMtime });
+    });
+
+    const undo = [];
+    const remember = (k) => { if (k) undo.push({ k, v: global.localStorage.getItem(k) }); };
+    const rollback = () => {
+      for (let i = undo.length - 1; i >= 0; i--) {
+        try {
+          if (undo[i].v == null) global.localStorage.removeItem(undo[i].k);
+          else global.localStorage.setItem(undo[i].k, undo[i].v);
+        } catch (_) {}
+      }
+    };
+
+    try {
+      if (mode === 'replace') {
+        const victims = [];
         for (let i = 0; i < global.localStorage.length; i++) {
           const k = global.localStorage.key(i);
           if (!k) continue;
+          if (k.indexOf(PREFIX) === 0 && isLocalOnly(k.slice(PREFIX.length))) continue;
+          if (k.indexOf(META_PREFIX) === 0 && isLocalOnly(k.slice(META_PREFIX.length))) continue;
+          if (k.indexOf(LEGACY_PREFIX) === 0 && isLocalLegacy(k)) continue;
           if (k.indexOf(PREFIX) === 0 || k.indexOf(LEGACY_PREFIX) === 0 || k.indexOf(META_PREFIX) === 0) victims.push(k);
         }
-        victims.forEach((k) => global.localStorage.removeItem(k));
-      } catch (_) {}
-    }
-
-    let restored = 0;
-    try {
-      Object.keys(store).forEach((suffix) => {
-        if (typeof suffix !== 'string') return;
-        global.localStorage.setItem(PREFIX + suffix, String(store[suffix]));
-        restored++;
-      });
-      Object.keys(legacy).forEach((k) => {
-        if (typeof k !== 'string' || k.indexOf(LEGACY_PREFIX) !== 0) return;
-        global.localStorage.setItem(k, String(legacy[k]));
-        restored++;
+        victims.forEach((k) => { remember(k); global.localStorage.removeItem(k); });
+      }
+      writes.forEach((w) => {
+        remember(w.key);
+        global.localStorage.setItem(w.key, w.raw);
+        if (w.meta) {
+          remember(w.meta);
+          global.localStorage.setItem(w.meta, JSON.stringify({ m: w.mtime, s: rawSize(w.raw) }));
+        }
       });
     } catch (err) {
+      rollback();
       throw new Error('write failed: ' + (err && err.message || err));
     }
-    Object.keys(store).forEach((suffix) => {
-      if (typeof suffix !== 'string') return;
-      try {
-        global.localStorage.setItem(META_PREFIX + suffix, JSON.stringify({ m: Date.now(), s: rawSize(String(store[suffix])) }));
-      } catch (_) {}
-    });
-    return { restored };
+    return { restored: writes.length };
   };
 
   const tryPersist = async () => {
@@ -273,7 +417,8 @@
   global.MentriaStore = {
     get, set, remove, list, clear: clearNs,
     getMeta, listNamespaces,
-    exportAll, importAll,
+    exportAll, importAll, planImport, areaNames,
+    isLocalOnly, isLocalLegacy, adopt, mergeNotes, maxMergeMap,
     requestPersist, estimate, persisted,
     EVENT_NAME
   };

@@ -204,6 +204,17 @@ localeReload: true
     restoreBusy:  {{ ("about.data_import_busy" | t) | dump | safe }},
     restoreDone:  {{ ("about.data_import_done" | t) | dump | safe }},
     restoreFail:  {{ ("about.data_import_fail" | t) | dump | safe }},
+    restore: {
+      replace:       {{ ("common.restore_replace"        | t) | dump | safe }},
+      totpVault:     {{ ("common.restore_totp_vault"     | t) | dump | safe }},
+      identityVault: {{ ("common.restore_identity_vault" | t) | dump | safe }}
+    },
+    restoreErr: {
+      file:  {{ ("common.restore_err_file"  | t) | dump | safe }},
+      pass:  {{ ("common.restore_err_pass"  | t) | dump | safe }},
+      space: {{ ("common.restore_err_space" | t) | dump | safe }},
+      newer: {{ ("common.restore_err_newer" | t) | dump | safe }}
+    },
     passShort:    {{ ("tool.files.status_pass_short" | t) | dump | safe }},
     backupFailed: {{ ("tool.files.status_backup_failed" | t) | dump | safe }},
     strengthHint: {{ ("tool.files.strength_hint"  | t) | dump | safe }},
@@ -962,11 +973,12 @@ localeReload: true
     try {
       const env = JSON.parse(await f.text());
       const data = await MentriaBackup.decryptBackup(env, passEl.value);
-      const result = store.importAll(data, { mode: 'merge' });
+      const result = await MentriaBackup.applyRestore(data, COPY.restore);
       out.textContent = COPY.restoreDone.replace('{n}', result.restored);
       setTimeout(() => { location.reload(); }, 1200);
     } catch (err) {
-      out.textContent = COPY.restoreFail.replace('{err}', String(err && err.message || err));
+      const code = MentriaBackup.restoreErrorCode(err);
+      out.textContent = code ? COPY.restoreErr[code] : COPY.restoreFail.replace('{err}', String(err && err.message || err));
       btn.disabled = false;
     } finally {
       passEl.value = '';

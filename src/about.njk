@@ -598,7 +598,18 @@ localeReload: true
       exportDone:        {{ ('about.data_export_done'            | t) | dump | safe }},
       importBusy:        {{ ('about.data_import_busy'            | t) | dump | safe }},
       importDone:        {{ ('about.data_import_done'            | t) | dump | safe }},
-      importFail:        {{ ('about.data_import_fail'            | t) | dump | safe }}
+      importFail:        {{ ('about.data_import_fail'            | t) | dump | safe }},
+      restore: {
+        replace:       {{ ('common.restore_replace'        | t) | dump | safe }},
+        totpVault:     {{ ('common.restore_totp_vault'     | t) | dump | safe }},
+        identityVault: {{ ('common.restore_identity_vault' | t) | dump | safe }}
+      },
+      restoreErr: {
+        file:  {{ ('common.restore_err_file'  | t) | dump | safe }},
+        pass:  {{ ('common.restore_err_pass'  | t) | dump | safe }},
+        space: {{ ('common.restore_err_space' | t) | dump | safe }},
+        newer: {{ ('common.restore_err_newer' | t) | dump | safe }}
+      }
     };
 
     var persistEl = document.getElementById('about-data-persist');
@@ -698,11 +709,12 @@ localeReload: true
         var text = await f.text();
         var env = JSON.parse(text);
         var data = await window.MentriaBackup.decryptBackup(env, pw);
-        var result = window.MentriaStore.importAll(data, { mode: 'merge' });
+        var result = await window.MentriaBackup.applyRestore(data, COPY.restore);
         setStatus(importStat, COPY.importDone.replace('{n}', result.restored), 'ok');
         setTimeout(function () { location.reload(); }, 1200);
       } catch (err) {
-        setStatus(importStat, COPY.importFail.replace('{err}', String(err && err.message || err)), 'err');
+        var code = window.MentriaBackup.restoreErrorCode(err);
+        setStatus(importStat, code ? COPY.restoreErr[code] : COPY.importFail.replace('{err}', String(err && err.message || err)), 'err');
       } finally {
         pw = ''; importPass.value = '';
         importBtn.disabled = false;
@@ -725,7 +737,8 @@ localeReload: true
       scanUnsupported: {{ ('about.sync_scan_unsupported' | t) | dump | safe }},
       scanDenied:      {{ ('about.sync_scan_denied'      | t) | dump | safe }},
       scanNoCamera:    {{ ('about.sync_scan_no_camera'   | t) | dump | safe }},
-      scanSecureRequired: {{ ('about.sync_scan_secure_required' | t) | dump | safe }}
+      scanSecureRequired: {{ ('about.sync_scan_secure_required' | t) | dump | safe }},
+      noPeer:          {{ ('about.sync_no_peer'          | t) | dump | safe }}
     };
     var startBtn      = document.getElementById('about-sync-start-btn');
     var joinBtn       = document.getElementById('about-sync-join-btn');
@@ -771,6 +784,7 @@ localeReload: true
         }
       });
       window.MentriaSync.on('error', function (err) {
+        if (err && err.code === 'no-peer') { setStatus(COPY.noPeer, 'err'); return; }
         setStatus(COPY.statusError + ': ' + (err && err.message || err), 'err');
       });
     });

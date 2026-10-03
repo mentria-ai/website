@@ -691,6 +691,7 @@
       "delete_title": "Supprimer la note",
       "saved_prefix": "Enregistré",
       "confirm_delete": "Supprimer « {name} » ? Cela ne peut pas être annulé.",
+      "link_confirm": "Ajouter le texte de ce lien comme nouvelle note ?",
       "lock_btn": "Verrouiller",
       "remove_lock_btn": "Retirer le verrou",
       "lock_title": "Chiffrer cette note avec la clé d'accès de votre appareil",

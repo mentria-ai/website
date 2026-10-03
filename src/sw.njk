@@ -395,9 +395,15 @@ async function handleShareTarget(request) {
     await cache.put('/share-target/file', new Response(file, { headers: { 'content-type': file.type || 'application/octet-stream', 'x-file-name': encodeURIComponent(file.name || 'shared-image') } }));
     return Response.redirect('/share/', 303);
   }
-  const q = new URLSearchParams();
-  ['title', 'text', 'url'].forEach((k) => { const v = pick(k); if (v) q.set(k, v); });
-  return Response.redirect('/tools/quick-notes/' + (q.toString() ? '?' + q.toString() : ''), 303);
+  const title = pick('title').trim();
+  const body = [pick('text').trim(), pick('url').trim()].filter(Boolean).join('\n\n') || title;
+  if (!body) return Response.redirect('/tools/quick-notes/', 303);
+  const cache = await caches.open(SHARE_CACHE);
+  await cache.delete('/share-target/file');
+  const headers = { 'content-type': 'text/plain; charset=utf-8' };
+  if (title && title !== body) headers['x-share-title'] = encodeURIComponent(title);
+  await cache.put('/share-target/text', new Response(body, { headers }));
+  return Response.redirect('/tools/quick-notes/?shared=1', 303);
 }
 
 function bufferedResponse(body, resp) {

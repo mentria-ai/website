@@ -161,7 +161,9 @@
       return cache.match('/share-target/text').then(function (res) {
         if (!res) return null;
         return res.text().then(function (text) {
-          return cache.delete('/share-target/text').then(function () { return text; });
+          var title = '';
+          try { title = decodeURIComponent(res.headers.get('x-share-title') || ''); } catch (_) {}
+          return cache.delete('/share-target/text').then(function () { return { text: text, title: title }; });
         });
       });
     }).catch(function () { return null; });
@@ -172,7 +174,7 @@
     try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (_) {}
     takeSharedFile().then(function (file) {
       if (file) { if (onFile) onFile(file); return; }
-      return takeSharedText().then(function (text) { if (text && onText) onText(text); });
+      return takeSharedText().then(function (shared) { if (shared && shared.text && onText) onText(shared.text, { title: shared.title }); });
     });
   }
 

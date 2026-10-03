@@ -691,6 +691,7 @@
       "delete_title": "Delete note",
       "saved_prefix": "Saved",
       "confirm_delete": "Delete \"{name}\"? This cannot be undone.",
+      "link_confirm": "Add the text from this link as a new note?",
       "lock_btn": "Lock",
       "remove_lock_btn": "Remove lock",
       "lock_title": "Encrypt this note with your device passkey",

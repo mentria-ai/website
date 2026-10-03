@@ -691,6 +691,7 @@
       "delete_title": "ノートを削除",
       "saved_prefix": "保存済み",
       "confirm_delete": "「{name}」を削除しますか？元に戻せません。",
+      "link_confirm": "このリンクのテキストを新しいメモとして追加しますか？",
       "lock_btn": "ロック",
       "remove_lock_btn": "ロックを解除",
       "lock_title": "このノートをデバイスのパスキーで暗号化",

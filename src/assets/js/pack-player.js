@@ -335,7 +335,7 @@
     try { target.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
     try { s.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
     if (hint && (!silent || (i < order.length && byId[order[i]].type === 'canvas'))) hint.classList.add('is-fading');
-    var focusable = s.querySelector('.pack-next:not([hidden])') || s.querySelector('input, button:not(.deck__tap):not(.pack-more):not([disabled])');
+    var focusable = s.querySelector('.pack-guess:not([hidden]) input, .pack-guess:not([hidden]) button:not([disabled])') || s.querySelector('.pack-next:not([hidden])') || s.querySelector('input, textarea, button:not(.deck__tap):not(.pack-more):not([disabled])');
     if (focusable && !silent && document.activeElement && document.activeElement.tagName !== 'INPUT') { try { focusable.focus({ preventScroll: true }); } catch (_) {} }
   }
 

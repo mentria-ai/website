@@ -391,6 +391,18 @@ localeReload: true
     } catch(e){}
   }
 
+  function rememberSetup(){
+    const cur = prefGet('ludo_setup');
+    if (cur && cur.mode === State.mode && cur.players === State.numPlayers) return;
+    prefSet('ludo_setup', { mode: State.mode, players: State.numPlayers });
+  }
+  function restoreSetup(){
+    const saved = prefGet('ludo_setup');
+    if (!saved || typeof saved !== 'object') return;
+    if (saved.mode === 'ai' || saved.mode === 'hotseat') State.mode = saved.mode;
+    if ([2,3,4].includes(saved.players)) State.numPlayers = saved.players;
+  }
+
   function save(){
     if (State.over) return;
     const data = {
@@ -453,11 +465,13 @@ localeReload: true
     document.getElementById('overlay').classList.remove('show');
     renderPlayers(); draw(); updateDie(0); setStatus(); updateRollBtn();
     save();
+    rememberSetup();
     maybeAITurn();
   }
   function resume(){
     modeSeg.set(State.mode);
     countSeg.set(State.numPlayers);
+    rememberSetup();
     State.cursor = 0; State.modal = null; State.forfeit = false;
     document.getElementById('overlay').classList.remove('show');
     renderPlayers(); draw(); setStatus(); updateRollBtn();
@@ -1254,7 +1268,9 @@ localeReload: true
   if (METHOD_LABEL[storedMethod]) State.method = storedMethod;
   applyMethodBadge();
 
-  if (load()) resume(); else newGame();
+  restoreSetup();
+  if (load()) resume();
+  else { modeSeg.set(State.mode); countSeg.set(State.numPlayers); newGame(); }
 
   if (!prefGet('ludo_help_seen')) openHelp();
 })();

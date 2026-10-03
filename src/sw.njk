@@ -11,6 +11,7 @@ const DECKS_CACHE = 'mentria-decks-{{ buildHash }}';
 const ART_CACHE = 'mentria-deck-art';
 const SHARE_CACHE = 'mentria-share';
 const EXT_DATA_CACHE = 'mentria-ext-data';
+const EXT_FILES_CACHE = 'mentria-ext-files';
 const DECKS_LIMIT = 60;
 const ART_LIMIT = 200;
 const FEED_PAGE = /^\/((es|fr|ja|pt-br)\/)?(feed\/|learn\/[^/]+\/)/;
@@ -550,7 +551,9 @@ self.addEventListener('fetch', event => {
         if (resp && resp.ok) event.waitUntil(data.put(url.pathname, resp.clone()).catch(() => {}));
         return resp;
       } catch (err) {
-        const kept = await data.match(url.pathname);
+        const kept = await data.match(url.pathname)
+          || await caches.match(url.pathname, { cacheName: EXT_FILES_CACHE })
+          || await caches.match(url.pathname, { cacheName: CACHE_NAME, ignoreSearch: true });
         if (kept) return kept;
         throw err;
       }

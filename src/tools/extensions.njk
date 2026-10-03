@@ -102,6 +102,18 @@ const INSTALL_OPTS = {
   copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, reinstall: COPY.reinstallPrompt, downgrade: COPY.downgradePrompt, replace: COPY.replacePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved, large: COPY.largeNote },
   perms: PERMS
 };
+const ERROR_CODES = new Map([
+  ['no-manifest', 'errNoManifest'],
+  ['bad-json', 'errJson'],
+  ['bad-id', 'errId'],
+  ['reserved-id', 'errReserved'],
+  ['bad-name', 'errName'],
+  ['bad-version', 'errVersion'],
+  ['too-large', 'errTooLarge'],
+  ['storage-full', 'errFull'],
+  ['app-only', 'errApp'],
+  ['bad-manifest', 'errManifest']
+]);
 const ERRORS = [
   ['no manifest block', 'errNoManifest'],
   ['manifest is not valid JSON', 'errJson'],
@@ -174,6 +186,8 @@ function clearError() { errEl.hidden = true; }
 
 function errText(e) {
   const msg = String((e && e.message) || e || '');
+  const key = e && ERROR_CODES.get(e.code);
+  if (key) return fmt(COPY[key], Object.assign({ detail: msg }, e.vars));
   const hit = ERRORS.find((pair) => msg.startsWith(pair[0]));
   if (hit) return COPY[hit[1]];
   if (msg.startsWith('id "') && msg.endsWith('" is reserved')) return fmt(COPY.errReserved, { id: msg.slice(4, -13) });

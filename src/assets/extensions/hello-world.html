@@ -2,15 +2,15 @@
 {
   "id": "hello-world",
   "name": "Hello World",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "icon": "👋",
   "author": "mentria",
-  "description": "Smallest possible extension — storage counter, theme tokens, terminal command.",
+  "description": "Smallest possible extension — storage counter, theme tokens, command-palette entry.",
   "permissions": ["storage"],
   "mounts": {
     "tool": {},
     "commands": [
-      { "name": "hello", "usage": "hello [name]", "description": "greet from the sample extension" }
+      { "name": "hello", "usage": "#cmd=hello&args=<name>", "description": "greet from the sample extension" }
     ]
   }
 }

@@ -41,6 +41,7 @@ eleventyComputed:
   <div class="xs-head__actions">
     <button type="button" class="m-btn m-btn--primary" id="xs-install">{{ "store.install" | t }} · {{ ext.size }}</button>
     <span class="xs-head__state" id="xs-state" hidden>{{ "store.installed_offline" | t }}</span>
+    <span class="xs-head__state" id="xs-state-plain" hidden>{{ "tool.ext_gallery.installed" | t }}</span>
     <button type="button" class="m-btn" id="xs-remove" hidden>{{ "store.remove" | t }}</button>
   </div>
   <div class="xs-progress" id="xs-progress" hidden>
@@ -127,6 +128,7 @@ const C = window.XS_COPY;
 const installBtn = document.getElementById('xs-install');
 const removeBtn = document.getElementById('xs-remove');
 const stateEl = document.getElementById('xs-state');
+const plainStateEl = document.getElementById('xs-state-plain');
 const progressEl = document.getElementById('xs-progress');
 const fillEl = document.getElementById('xs-progress-fill');
 const progressText = document.getElementById('xs-progress-text');
@@ -138,6 +140,7 @@ const offlineEl = document.getElementById('xs-offline');
 let X;
 let H;
 let lastPct = 0;
+let stateRun = 0;
 document.addEventListener('mentria:localechange', relocalize);
 try {
   X = await import('/assets/js/mentria-extensions.js');
@@ -150,11 +153,28 @@ function installedEntry() {
   try { return X ? X.getEntry(D.id) : null; } catch (_) { return null; }
 }
 
-function showState() {
+async function filesPresent(entry) {
+  if (!X.offlineReady(D.id) || typeof caches === 'undefined') return false;
+  const m = entry.manifest || {};
+  const main = D.kind === 'app' ? (Array.isArray(m.entry) ? m.entry[0] : null) : '/assets/extensions/' + D.id + '.html';
+  if (!main) return true;
+  try {
+    const cache = await caches.open(X.FILES_CACHE);
+    return !!(await cache.match(main));
+  } catch (_) {
+    return false;
+  }
+}
+
+async function showState() {
+  const run = ++stateRun;
   const entry = installedEntry();
   installBtn.hidden = !!entry;
-  stateEl.hidden = !entry;
   removeBtn.hidden = !entry;
+  const offline = !!entry && await filesPresent(entry);
+  if (run !== stateRun) return;
+  stateEl.hidden = !offline;
+  plainStateEl.hidden = !entry || offline;
 }
 
 function showProgress(p) {
@@ -227,8 +247,8 @@ async function install() {
     created = true;
     await X.downloadFiles(D.id, pkg.files, extraUrls(), showProgress);
     progressEl.hidden = true;
-    showState();
-    if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast(stateEl.textContent);
+    await showState();
+    if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast((stateEl.hidden ? plainStateEl : stateEl).textContent);
   } catch (e) {
     if (created) X.remove(D.id, { keepData: true });
     progressEl.hidden = true;
@@ -263,6 +283,7 @@ async function refreshInstalled() {
       }
     }
     await X.downloadFiles(D.id, pkg.files, extraUrls());
+    showState();
   } catch (_) {}
 }
 

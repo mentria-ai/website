@@ -23,6 +23,11 @@
     return l ? l.textContent.trim() : tile.getAttribute('data-slug');
   }
 
+  function gated(tile) {
+    var req = tile.getAttribute('data-requires');
+    return !!req && document.documentElement.classList.contains('mentria-no-' + req);
+  }
+
   function pinLabel(tile, pinned) {
     var tpl = pinnedBand ? pinnedBand.getAttribute(pinned ? 'data-label-unpin' : 'data-label-pin') : '';
     return (tpl || (pinned ? 'Unpin {name}' : 'Pin {name}')).replace('{name}', tile.getAttribute('data-name') || tileName(tile));
@@ -35,7 +40,7 @@
     var added = 0;
     pins.forEach(function (slug) {
       var tile = pages.querySelector('.launch-tile[data-slug="' + slug + '"]');
-      if (tile) {
+      if (tile && !gated(tile)) {
         pinnedRow.appendChild(tile.cloneNode(true));
         added++;
       }
@@ -63,6 +68,7 @@
     pages.querySelectorAll('.launch-tile').forEach(function (tile) {
       var slot = document.createElement('div');
       slot.className = 'launch-slot';
+      if (tile.hasAttribute('data-requires')) slot.setAttribute('data-requires', tile.getAttribute('data-requires'));
       tile.parentNode.insertBefore(slot, tile);
       slot.appendChild(tile);
       var btn = document.createElement('button');
@@ -85,19 +91,20 @@
     try { usage = JSON.parse(localStorage.getItem('mentria_tool_usage')) || {}; } catch (_) {}
     var pinsNow = getPins();
     var slugs = Object.keys(usage).filter(function (s) { return pinsNow.indexOf(s) === -1; });
-    if (!slugs.length) return;
     var now = Date.now(), DAY = 86400000;
     function score(e) { return (e.count || 0) + 6 / (1 + (now - (e.last || 0)) / DAY); }
     slugs.sort(function (a, b) { return score(usage[b]) - score(usage[a]); });
+    row.innerHTML = '';
     var added = 0;
-    slugs.slice(0, 6).forEach(function (slug) {
+    slugs.forEach(function (slug) {
+      if (added >= 6) return;
       var tile = pages.querySelector('.launch-tile[data-slug="' + slug + '"]');
-      if (tile) {
+      if (tile && !gated(tile)) {
         row.appendChild(tile.cloneNode(true));
         added++;
       }
     });
-    if (added) band.hidden = false;
+    band.hidden = !added;
   }
   renderRecents();
 
@@ -115,7 +122,7 @@
       var shown = 0;
       cat.querySelectorAll('.launch-tile').forEach(function (tile) {
         var text = tileName(tile) + ' ' + (tile.getAttribute('data-name') || '') + ' ' + (tile.getAttribute('data-search') || '');
-        var ok = !q || norm(text).indexOf(q) !== -1;
+        var ok = !gated(tile) && (!q || norm(text).indexOf(q) !== -1);
         var box = tile.parentNode && tile.parentNode.classList.contains('launch-slot') ? tile.parentNode : tile;
         box.hidden = !ok;
         if (ok) {
@@ -140,6 +147,7 @@
   if (find) {
     find.addEventListener('input', filter);
     find.addEventListener('keydown', function (e) {
+      if (e.isComposing || e.keyCode === 229) return;
       if (e.key === 'Enter' && firstHit) {
         e.preventDefault();
         firstHit.click();
@@ -153,6 +161,21 @@
   }
   if (window.MutationObserver) {
     new MutationObserver(function () { if (find && find.value.trim()) filter(); }).observe(pages, { childList: true });
+    var root = document.documentElement;
+    var capsKey = function () {
+      var out = [];
+      for (var i = 0; i < root.classList.length; i++) if (root.classList[i].indexOf('mentria-no-') === 0) out.push(root.classList[i]);
+      return out.join(' ');
+    };
+    var caps = capsKey();
+    new MutationObserver(function () {
+      var now = capsKey();
+      if (now === caps) return;
+      caps = now;
+      renderPinned();
+      renderRecents();
+      filter();
+    }).observe(root, { attributes: true, attributeFilter: ['class'] });
   }
   filter();
 })();

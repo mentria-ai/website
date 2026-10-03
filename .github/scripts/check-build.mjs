@@ -45,5 +45,20 @@ if (existsSync(jsDir)) {
     catch (e) { scriptErrors++; console.error(`SCRIPT /assets/js/${n}\n${String(e.stderr).split('\n').slice(0, 4).join('\n')}`); }
   }
 }
-console.log(`${pages.length} pages, ${seenLinks.size} internal paths, ${scriptErrors} script errors, ${linkErrors} broken links`);
-process.exit(scriptErrors || linkErrors ? 1 : 0);
+let precacheErrors = 0;
+const swFile = join(root, 'sw.js');
+if (existsSync(swFile)) {
+  const sw = readFileSync(swFile, 'utf8');
+  const f = join(tmp, 'sw.js');
+  writeFileSync(f, sw);
+  try { execFileSync(process.execPath, ['--check', f], { stdio: 'pipe' }); }
+  catch (e) { scriptErrors++; console.error(`SCRIPT /sw.js\n${String(e.stderr).split('\n').slice(0, 4).join('\n')}`); }
+  const list = sw.match(/const ASSETS = \[([\s\S]*?)\];/);
+  for (const m of list ? list[1].matchAll(/'([^']+)'/g) : []) {
+    const path = decodeURIComponent(m[1].split('?')[0]);
+    const target = path.endsWith('/') ? join(root, path, 'index.html') : join(root, path);
+    if (!existsSync(target)) { precacheErrors++; console.error(`PRECACHE ${m[1]} (the service worker can't install)`); }
+  }
+}
+console.log(`${pages.length} pages, ${seenLinks.size} internal paths, ${scriptErrors} script errors, ${linkErrors} broken links, ${precacheErrors} missing precache files`);
+process.exit(scriptErrors || linkErrors || precacheErrors ? 1 : 0);

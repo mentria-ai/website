@@ -241,7 +241,7 @@
     s.addEventListener('pack:enter', function () {
       var sum = P.summary(pack, progress);
       stats.textContent = mode === 'read'
-        ? t('finish_stats_read', { seen: sum.seen, total: sum.total })
+        ? t('finish_stats_read', { seen: sum.viewed, total: sum.total })
         : t('finish_stats', { seen: sum.seen, total: sum.total, right: sum.right, wrong: sum.wrong });
       note.hidden = !(mode === 'review' && !order.length) && !(mode === 'budget');
       note.textContent = mode === 'review' && !order.length ? t('nothing_to_review') : (mode === 'budget' ? t('budget_done') : '');
@@ -304,7 +304,7 @@
       var sec = sectionOf[id];
       var secTitle = sec ? tx(sec.title) : '';
       secLabel.textContent = secTitle === tx(pack.title) ? '' : secTitle;
-      if (!progress.cards[id] || !P.INTERACTIVE[byId[id].type]) { P.recordSeen(pack.id, id); progress = P.getProgress(pack.id); }
+      if (!progress.cards[id] || !P.INTERACTIVE[byId[id].type]) { P.recordSeen(pack.id, id, P.answerable(byId[id])); progress = P.getProgress(pack.id); }
       progressBar.setAttribute('aria-valuenow', String(i + 1));
       liveEl.textContent = t('card_of', { n: i + 1, total: order.length });
       try { history.replaceState(null, '', '#c' + (i + 1)); } catch (_) {}
@@ -381,6 +381,7 @@
       if (tag === 'INPUT' || tag === 'TEXTAREA') {
         if (e.key === 'Escape') { e.target.blur(); return; }
         if (!((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.target.value)) return;
+        e.target.blur();
       }
       if (e.target && e.target.closest && (e.key === ' ' || e.key === 'Enter') && e.target.closest('button, a[href], [role="button"]')) return;
       if (e.target && e.target.closest && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.target.closest('[role="radiogroup"], [role="listbox"], .pack-order, .pack-match')) return;

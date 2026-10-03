@@ -202,7 +202,15 @@
 
   function answerable(card) { return !!(card && (INTERACTIVE[card.type] || card.guess)); }
   function isDue(rec, now) { return !!(rec && (rec.r === 'wrong' || rec.r === 'right') && rec.d && rec.d <= (now || Date.now())); }
-  function isDone(card, rec) { return !!rec && (!answerable(card) || rec.r === 'right' || rec.r === 'wrong'); }
+  function isDone(card, rec) {
+    if (!rec) return false;
+    if (rec.r === 'right' || rec.r === 'wrong') return true;
+    return !(rec.q || (card && answerable(card)));
+  }
+  function doneCount(progress) {
+    var cards = (progress && progress.cards) || {};
+    return Object.keys(cards).filter(function (id) { return isDone(null, cards[id]); }).length;
+  }
   function gradable(pack) {
     return (pack.cards || []).some(answerable);
   }
@@ -429,10 +437,11 @@
     var d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n).getTime();
   }
-  function recordSeen(id, cardId) {
+  function recordSeen(id, cardId, isAnswerable) {
     var p = getProgress(id), c = p.cards[cardId] || { n: 0, s: 0 };
     c.n = (c.n || 0) + 1;
     if (!c.r) c.r = 'seen';
+    if (isAnswerable) c.q = 1;
     c.t = Date.now();
     touchDay(c);
     p.cards[cardId] = c;
@@ -454,22 +463,23 @@
   function resetProgress(id) { return saveProgress(id, { cards: {}, mode: getProgress(id).mode, last: 0 }); }
   function summary(pack, p) {
     p = p || getProgress(pack.id);
-    var seen = 0, right = 0, wrong = 0, due = 0, now = Date.now();
+    var seen = 0, viewed = 0, right = 0, wrong = 0, due = 0, now = Date.now();
     pack.cards.forEach(function (c) {
       var r = p.cards[c.id];
+      if (r) viewed++;
       if (!isDone(c, r)) return;
       seen++;
       if (r.r === 'right') right++;
       if (r.r === 'wrong') wrong++;
       if (isDue(r, now)) due++;
     });
-    return { total: pack.cards.length, seen: seen, right: right, wrong: wrong, due: due, done: seen >= pack.cards.length };
+    return { total: pack.cards.length, seen: seen, viewed: viewed, right: right, wrong: wrong, due: due, done: seen >= pack.cards.length };
   }
 
   var api = {
     TYPES: TYPES, INTERACTIVE: INTERACTIVE, MAX_BYTES: MAX_BYTES, INTERVALS: INTERVALS,
     text: text, isText: isText, validate: validate, normalize: normalize, outline: outline, gradable: gradable, availableModes: availableModes,
-    answerable: answerable, isDue: isDue, isDone: isDone,
+    answerable: answerable, isDue: isDue, isDone: isDone, doneCount: doneCount,
     isCourse: isCourse, validateCourse: validateCourse, importCourse: importCourse, importAny: importAny, getCourses: getCourses, removeCourse: removeCourse, courseOf: courseOf,
     put: put, get: get, list: list, remove: remove,
     importText: importText, importFile: importFile, importUrl: importUrl,

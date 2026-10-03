@@ -112,7 +112,7 @@
         var packs = (grouped[cid] || []).sort(function (a, b) { return (a.course.order || 0) - (b.course.order || 0); });
         if (!packs.length) return;
         list.appendChild(courseHead(courses[cid], packs));
-        var firstOpen = packs.findIndex(function (r) { var pr = P.getProgress(r.id); return Object.keys(pr.cards || {}).length < r.cards; });
+        var firstOpen = packs.findIndex(function (r) { return P.doneCount(P.getProgress(r.id)) < r.cards; });
         var start = Math.max(0, (firstOpen < 0 ? packs.length : firstOpen) - 1);
         var visible = expanded[cid] ? packs : packs.slice(start, start + SHOW);
         visible.forEach(function (r) { list.appendChild(tile(r)); });
@@ -141,7 +141,7 @@
     var tiles = document.querySelectorAll('.learn-grid--native .learn-tile');
     Array.prototype.forEach.call(tiles, function (li) {
       var p = P.getProgress(li.dataset.packId);
-      var seen = Object.keys(p.cards || {}).length;
+      var seen = P.doneCount(p);
       if (!seen) return;
       var meta = li.querySelector('.learn-tile__meta');
       var m = meta && meta.textContent.match(/^(\d+)/);

@@ -132,11 +132,11 @@ localeReload: true
 
     <div class="about-data-stats">
       <div class="about-data-stat">
-        <span class="about-data-stat__label">{{ "about.data_persist_status_granted" | t | upper }}</span>
+        <span class="about-data-stat__label">{{ "about.data_persist_label" | t }}</span>
         <span class="about-data-stat__value" id="about-data-persist">…</span>
       </div>
       <div class="about-data-stat">
-        <span class="about-data-stat__label">USAGE</span>
+        <span class="about-data-stat__label">{{ "about.data_usage_label" | t }}</span>
         <span class="about-data-stat__value" id="about-data-usage">…</span>
       </div>
     </div>
@@ -386,7 +386,7 @@ localeReload: true
   .about-reveal-btn { align-self: flex-start; }
   .about-data-stats { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; font-family: var(--font-mono); font-size: 12px; }
   .about-data-stat { display: flex; flex-direction: column; gap: 4px; }
-  .about-data-stat__label { color: var(--term-subtle); letter-spacing: 0.1em; font-size: 10px; }
+  .about-data-stat__label { color: var(--term-subtle); letter-spacing: 0.1em; font-size: 10px; text-transform: uppercase; }
   .about-data-stat__value { color: var(--term-fg); font-size: 13px; }
   .about-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   .about-data-card { border: 1px solid var(--term-border); border-radius: 8px; padding: 18px; background: var(--term-bg-raised); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -729,7 +729,8 @@ localeReload: true
       statusIdle:      {{ ('about.sync_status_idle'      | t) | dump | safe }},
       statusPairing:   {{ ('about.sync_status_pairing'   | t) | dump | safe }},
       statusConnecting:{{ ('about.sync_status_connecting'| t) | dump | safe }},
-      statusConnected: {{ ('about.sync_status_connected' | t) | dump | safe }},
+      statusConnectedOne:   {{ ('about.sync_status_connected_one'   | t) | dump | safe }},
+      statusConnectedOther: {{ ('about.sync_status_connected_other' | t) | dump | safe }},
       statusError:     {{ ('about.sync_status_error'     | t) | dump | safe }},
       pairButton:      {{ ('about.sync_pair_button'      | t) | dump | safe }},
       joinButton:      {{ ('about.sync_join_button'      | t) | dump | safe }},
@@ -753,6 +754,12 @@ localeReload: true
       statusLabel.textContent = text;
       if (tone === 'connected' || tone === 'pairing' || tone === 'connecting') { var adv = document.getElementById('about-advanced'); if (adv) adv.open = true; }
       if (tone) statusLabel.dataset.tone = tone; else delete statusLabel.dataset.tone;
+    }
+
+    function connectedText(n) {
+      var one = n === 1;
+      try { one = new Intl.PluralRules(document.documentElement.lang || 'en').select(n) === 'one'; } catch (_) {}
+      return (one ? COPY.statusConnectedOne : COPY.statusConnectedOther).replace('{n}', String(n));
     }
 
     function whenReady(cb) {
@@ -779,7 +786,7 @@ localeReload: true
           setStatus(COPY.statusConnecting, 'pairing');
           disconnectBtn.hidden = false;
         } else if (st.status === 'connected') {
-          setStatus(COPY.statusConnected.replace('{n}', String(st.peers || 1)), 'connected');
+          setStatus(connectedText(st.peers || 1), 'connected');
           disconnectBtn.hidden = false;
         }
       });

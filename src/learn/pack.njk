@@ -17,8 +17,8 @@ eleventyComputed:
 <link rel="stylesheet" href="/assets/css/pack.css?v={{ buildHash }}">
 {% for c in pair.pack.cards %}{% if c.id == pair.pack.sections[0].cards[0] and c.image %}<link rel="preload" as="image" href="{{ c.image }}" fetchpriority="high">{% endif %}{% endfor %}
 
+<h1 class="sr-only">{{ pair.pack.title | tloc(pair.locale.code) }}</h1>
 <div class="deck deck--pack" id="packRoot" data-prefix="{{ pair.locale.pathPrefix }}" data-pack-id="{{ pair.pack.id }}">
-  <h1 class="sr-only">{{ pair.pack.title | tloc(pair.locale.code) }}</h1>
   <noscript><p class="pack-card pack-card--center">{{ "learn.no_js" | t }}</p></noscript>
 </div>
 

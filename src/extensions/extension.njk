@@ -137,6 +137,8 @@ const runErr = document.getElementById('xr-error');
 const offlineEl = document.getElementById('xs-offline');
 let X;
 let H;
+let lastPct = 0;
+document.addEventListener('mentria:localechange', relocalize);
 try {
   X = await import('/assets/js/mentria-extensions.js');
   H = await import('/assets/js/mentria-ext-host.js');
@@ -157,9 +159,23 @@ function showState() {
 
 function showProgress(p) {
   progressEl.hidden = false;
-  const pct = Math.round(p * 100);
-  fillEl.style.width = pct + '%';
-  progressText.textContent = C.installing.replace('{pct}', String(pct));
+  lastPct = Math.round(p * 100);
+  fillEl.style.width = lastPct + '%';
+  progressText.textContent = C.installing.replace('{pct}', String(lastPct));
+}
+
+function relocalize(e) {
+  const I = window.MentriaI18n;
+  if (!I || !I.t) return;
+  const pick = (key, current) => { const v = I.t(key); return typeof v === 'string' && v !== key ? v : current; };
+  C.installing = pick('store.installing', C.installing);
+  C.failed = pick('store.install_failed', C.failed);
+  C.removeConfirm = pick('store.remove_confirm', C.removeConfirm);
+  const code = (e && e.detail && e.detail.code) || document.documentElement.lang;
+  const locale = (window.MENTRIA_LOCALES || []).find((l) => l.code === code);
+  if (locale) D.prefix = locale.prefix;
+  if (!progressEl.hidden) progressText.textContent = C.installing.replace('{pct}', String(lastPct));
+  if (!installErr.hidden) installErr.textContent = C.failed;
 }
 
 function extraUrls() {
@@ -174,7 +190,7 @@ async function start() {
   const onError = (msg) => { runErr.textContent = msg; runErr.hidden = false; };
   if (D.kind === 'app') {
     if (!navigator.onLine && !(entry && X.offlineReady(D.id))) { offlineEl.hidden = false; frame.remove(); return; }
-    H.mountExtension(frame, { manifest: entry ? entry.manifest : D.manifest, prefix: D.prefix, blockedTemplate: runRoot.dataset.blocked, onError, onClose: () => { location.href = D.prefix + '/extensions/'; } });
+    H.mountExtension(frame, { manifest: entry ? entry.manifest : D.manifest, prefix: D.prefix, get blockedTemplate() { return runRoot.dataset.blocked; }, onError, onClose: () => { location.href = D.prefix + '/extensions/'; } });
     return;
   }
   let source = entry && entry.enabled ? X.getSource(D.id) : null;
@@ -190,7 +206,7 @@ async function start() {
     }
   }
   const manifest = entry && entry.enabled ? entry.manifest : X.parseManifest(source);
-  H.mountExtension(frame, { manifest, source, prefix: D.prefix, blockedTemplate: runRoot.dataset.blocked, onError, onClose: () => { location.href = D.prefix + '/extensions/'; } });
+  H.mountExtension(frame, { manifest, source, prefix: D.prefix, get blockedTemplate() { return runRoot.dataset.blocked; }, onError, onClose: () => { location.href = D.prefix + '/extensions/'; } });
 }
 
 async function install() {

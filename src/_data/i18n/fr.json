@@ -350,8 +350,8 @@
     },
     "extensions": {
       "title": "Extensions",
-      "lede": "Installez des extensions privées en un seul fichier qui vivent uniquement sur cet appareil. Elles apparaissent dans votre lanceur et votre terminal — jamais sur le site public.",
-      "tldr": "Une plateforme où vous apportez vos propres outils. Une extension est un fichier HTML avec un manifeste intégré ; installez-la ici et elle obtient une tuile dans votre lanceur, des commandes de terminal optionnelles, et son propre stockage local inclus dans votre sauvegarde chiffrée. Les extensions s'exécutent avec un accès complet sur cet appareil : n'installez que des fichiers de personnes en qui vous avez confiance. Rien à leur sujet n'est jamais envoyé."
+      "lede": "Installez des extensions privées en un seul fichier qui vivent uniquement sur cet appareil. Elles apparaissent dans votre lanceur et votre palette de commandes — jamais sur le site public.",
+      "tldr": "Une plateforme où vous apportez vos propres outils. Une extension est un fichier HTML avec un manifeste intégré ; installez-la ici et elle obtient une tuile dans votre lanceur, des entrées optionnelles dans la palette de commandes, et son propre stockage local inclus dans votre sauvegarde chiffrée. Les extensions s'exécutent avec un accès complet sur cet appareil : n'installez que des fichiers de personnes en qui vous avez confiance. Rien à leur sujet n'est jamais envoyé."
     },
     "coin-flip": {
       "title": "Pile ou Face",
@@ -1136,16 +1136,29 @@
       "confirm_remove": "Supprimer {name} ? Sa source et ses données seront effacées de cet appareil.",
       "trust_prompt": "Installer {name} v{version} ? Elle s'exécutera avec un accès complet à vos données sur cet appareil. N'installez que des fichiers de personnes de confiance. Permissions : {perms}",
       "update_prompt": "Mettre à jour {name} {old} → {new} ? Les données sont conservées.",
+      "reinstall_prompt": "Réinstaller {name} {new} ? Les données sont conservées.",
       "downgrade_prompt": "Remplacer {name} {old} par la version antérieure {new} ? Les données sont conservées.",
       "replace_prompt": "Remplacer {oldName} {old} par {name} {new} ? Elle utilise le même identifiant : elle reprend les données enregistrées de {oldName} et s'exécutera avec un accès complet à vos données sur cet appareil. Ne continuez que si vous faites confiance au fichier.",
       "update_perms_added": "Nouvelles permissions : {perms}.",
       "update_perms_removed": "N'utilise plus : {perms}.",
+      "large_note": "({kb} KB — volumineux pour le stockage local)",
       "installed_ok": "installée.",
       "installed_where": "{name} installée. Ouvrez-la à tout moment depuis le menu Outils.",
       "sample_heading": "Essayez l'exemple",
       "sample_install": "installer hello-world",
       "sample_download": "télécharger le fichier",
       "err_prefix": "échec de l'installation :",
+      "err_no_manifest": "ce fichier n'a pas de manifeste d'extension (script#mentria-ext).",
+      "err_bad_json": "le manifeste n'est pas un JSON valide.",
+      "err_bad_id": "l'id doit être en kebab-case, de 3 à 48 caractères.",
+      "err_reserved_id": "l'id « {id} » est réservé.",
+      "err_bad_name": "le manifeste doit avoir un nom de 40 caractères au plus.",
+      "err_bad_version": "la version doit suivre le format major.minor.patch, par exemple 1.0.0.",
+      "err_too_large": "le fichier fait {kb} KB. Les extensions sont gardées dans le stockage local, elles doivent donc faire moins de 1536 KB.",
+      "err_storage_full": "le stockage est plein. Supprimez une extension ou libérez de l'espace.",
+      "err_app_only": "les extensions de type appli s'installent depuis leur page dans la Galerie d'extensions.",
+      "err_manifest": "le manifeste n'est pas valide ({detail}).",
+      "err_download": "impossible de télécharger {url}",
       "choose_file": "Choisir un fichier"
     },
     "search": {
@@ -1783,7 +1796,7 @@
     },
     "ext_gallery": {
       "title": "Galerie d'extensions",
-      "lede": "Des extensions maison que vous pouvez installer en un clic. Chacune est un seul fichier HTML qui s'exécute uniquement sur cet appareil : elle obtient une tuile dans votre lanceur et son propre stockage local, et ne touche jamais au site public.",
+      "lede": "Des extensions créées par Mentria. Installez-en une en un clic : elle obtient une tuile dans votre lanceur et son propre stockage sur cet appareil, et s'ouvre même hors ligne.",
       "btn_install": "Installer",
       "btn_update": "Mettre à jour vers v{v}",
       "installed": "Installée",

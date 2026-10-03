@@ -348,7 +348,8 @@
       return new Promise(function (resolve, reject) {
         var t = db.transaction(STORE, mode), s = t.objectStore(STORE), out = fn(s);
         t.oncomplete = function () { db.close(); resolve(out && out.result !== undefined ? out.result : undefined); };
-        t.onerror = function () { db.close(); reject(t.error); };
+        t.onerror = function (e) { db.close(); reject((e && e.target && e.target.error) || t.error || new Error('transaction failed')); };
+        t.onabort = function () { db.close(); reject(t.error || new Error('transaction aborted')); };
       });
     });
   }
@@ -386,6 +387,7 @@
   }
   function remove(id) {
     return tx('readwrite', function (s) { s.delete(id); }).then(function () {
+      delete unsaved[id];
       if (global.MentriaStore) global.MentriaStore.remove('packs', 'p.' + id);
       emit('remove', { id: id });
     });
@@ -456,17 +458,20 @@
     return out;
   }
   function progressKey(id) { return 'p.' + id; }
+  var unsaved = {};
   function getProgress(id) {
-    var p = global.MentriaStore ? global.MentriaStore.get('packs', progressKey(id)) : null;
+    var p = unsaved[id] ? JSON.parse(JSON.stringify(unsaved[id])) : global.MentriaStore ? global.MentriaStore.get('packs', progressKey(id)) : null;
     if (!p || typeof p !== 'object') p = { cards: {}, mode: null, last: 0 };
     if (!p.cards) p.cards = {};
     return p;
   }
   function saveProgress(id, p) {
     p.last = Date.now();
-    if (global.MentriaStore) global.MentriaStore.set('packs', progressKey(id), p);
+    if (global.MentriaStore && global.MentriaStore.set('packs', progressKey(id), p)) delete unsaved[id];
+    else unsaved[id] = JSON.parse(JSON.stringify(p));
     return p;
   }
+  function progressSaved(id) { return !unsaved[id]; }
   function touchDay(c) {
     var k = dayKey();
     if (c.day === k) return;
@@ -523,7 +528,7 @@
     isCourse: isCourse, validateCourse: validateCourse, importCourse: importCourse, importAny: importAny, getCourses: getCourses, removeCourse: removeCourse, courseOf: courseOf,
     put: put, get: get, list: list, remove: remove,
     importText: importText, importFile: importFile, importUrl: importUrl,
-    getProgress: getProgress, recordSeen: recordSeen, recordAnswer: recordAnswer, setMode: setMode, resetProgress: resetProgress, summary: summary,
+    getProgress: getProgress, recordSeen: recordSeen, recordAnswer: recordAnswer, setMode: setMode, resetProgress: resetProgress, summary: summary, progressSaved: progressSaved,
     dayKey: dayKey, getDays: getDays, week: week
   };
   global.MentriaPacks = api;

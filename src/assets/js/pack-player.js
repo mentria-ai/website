@@ -55,8 +55,7 @@
       sectionOf: function (id) { return sectionOf[id] || null; },
       getProgress: function () { return progress; },
       onAnswer: function (card, right, extra) {
-        P.recordAnswer(pack.id, card.id, right, extra);
-        progress = P.getProgress(pack.id);
+        progress = P.recordAnswer(pack.id, card.id, right, extra);
         updateSeg(current);
         refreshModes();
       },
@@ -244,6 +243,9 @@
     var note = el('p', 'pack-card__text');
     note.hidden = true;
     p.insertBefore(note, stats);
+    var unsavedNote = el('p', 'pack-card__text');
+    unsavedNote.hidden = true;
+    p.insertBefore(unsavedNote, up);
     function paintNext() {
       if (!nextInfo) return;
       up.href = nextInfo.href;
@@ -264,6 +266,8 @@
       note.textContent = mode === 'review' && !order.length ? t('nothing_to_review') : (mode === 'budget' ? t('budget_done') : '');
       review.hidden = !sum.wrong || mode === 'review';
       P.setMode(pack.id, mode);
+      unsavedNote.hidden = !P.progressSaved || P.progressSaved(pack.id);
+      unsavedNote.textContent = unsavedNote.hidden ? '' : t('progress_unsaved');
     });
     return s;
   }
@@ -321,7 +325,7 @@
       var sec = sectionOf[id];
       var secTitle = sec ? tx(sec.title) : '';
       secLabel.textContent = secTitle === tx(pack.title) ? '' : secTitle;
-      if (!progress.cards[id] || !P.INTERACTIVE[byId[id].type]) { P.recordSeen(pack.id, id, P.answerable(byId[id])); progress = P.getProgress(pack.id); }
+      if (!progress.cards[id] || !P.INTERACTIVE[byId[id].type]) progress = P.recordSeen(pack.id, id, P.answerable(byId[id]));
       progressBar.setAttribute('aria-valuenow', String(i + 1));
       liveEl.textContent = t('card_of', { n: i + 1, total: order.length });
       try { history.replaceState(history.state, '', '#c' + (i + 1)); } catch (_) {}

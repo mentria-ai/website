@@ -43,6 +43,8 @@ class MentriaRadio {
     this.player = new RadioPlayer();
     this.catalog = [];
     this.preferences = {};
+    this.prefsSaved = true;
+    this.prefsNoted = false;
     this.history = [];
     this.currentTrack = null;
     this.currentDuration = 0;
@@ -100,7 +102,7 @@ class MentriaRadio {
         this.el.play.disabled = true;
         return;
       }
-      this.preferences = await getAllPreferences();
+      this.preferences = await this.loadPreferences();
       this.renderLiked();
       this.el.trackCount.textContent = COPY.trackCountFmt.replace("{n}", this.catalog.length);
       this.setStatus("ready", COPY.ready);
@@ -112,6 +114,31 @@ class MentriaRadio {
       return;
     }
     this.restore();
+  }
+
+  async loadPreferences() {
+    try {
+      return await getAllPreferences();
+    } catch (err) {
+      this.preferencesLost(err);
+      return {};
+    }
+  }
+
+  async savePreference(trackId, updates) {
+    try {
+      return await updatePreference(trackId, updates);
+    } catch (err) {
+      this.preferencesLost(err);
+      return { trackId, ...this.preferences[trackId], ...updates };
+    }
+  }
+
+  preferencesLost(err) {
+    if (!this.prefsSaved) return;
+    console.warn("[radio] likes and history are kept for this visit only:", err);
+    this.prefsSaved = false;
+    this.renderLiked();
   }
 
   canPlayCatalog() {
@@ -339,13 +366,16 @@ class MentriaRadio {
   }
 
   async setLiked(trackId, liked) {
-    const updated = await updatePreference(trackId, { liked });
-    this.preferences[trackId] = updated;
+    this.preferences[trackId] = await this.savePreference(trackId, { liked });
     if (this.currentTrack && this.currentTrack.id === trackId) {
       this.el.like.classList.toggle("liked", liked);
       this.el.like.setAttribute("aria-pressed", liked ? "true" : "false");
     }
     this.renderLiked();
+    if (!this.prefsSaved && !this.prefsNoted && COPY.prefsOff && window.MentriaUI && window.MentriaUI.toast) {
+      this.prefsNoted = true;
+      window.MentriaUI.toast(COPY.prefsOff);
+    }
   }
 
   async playTrack(track) {
@@ -367,6 +397,12 @@ class MentriaRadio {
     const liked = this.catalog.filter((t) => this.preferences[t.id] && this.preferences[t.id].liked);
     this.el.likedCount.textContent = liked.length ? String(liked.length) : "";
     list.textContent = "";
+    if (!this.prefsSaved && COPY.prefsOff) {
+      const note = document.createElement("li");
+      note.className = "rd__liked-empty";
+      note.textContent = COPY.prefsOff;
+      list.appendChild(note);
+    }
     if (!liked.length) {
       const li = document.createElement("li");
       li.className = "rd__liked-empty";
@@ -507,17 +543,12 @@ class MentriaRadio {
       ? [...existing.session_contexts, sessionContext]
       : [sessionContext];
 
-    try {
-      const updated = await updatePreference(trackId, {
-        listened_ratio: listenedRatio,
-        skipped,
-        play_count: playCount,
-        session_contexts: contexts,
-      });
-      this.preferences[trackId] = updated;
-    } catch (err) {
-      console.warn("[radio] could not save play history:", err);
-    }
+    this.preferences[trackId] = await this.savePreference(trackId, {
+      listened_ratio: listenedRatio,
+      skipped,
+      play_count: playCount,
+      session_contexts: contexts,
+    });
   }
 
   // ── Progress timer ────────────────────────────────

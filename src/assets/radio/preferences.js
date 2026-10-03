@@ -20,7 +20,10 @@ function openDB() {
       db.onclose = () => { dbPromise = null; };
       resolve(db);
     };
-    req.onerror = () => { dbPromise = null; reject(req.error); };
+    req.onerror = () => reject(req.error);
+  }).catch((err) => {
+    dbPromise = null;
+    throw err;
   });
   return dbPromise;
 }
@@ -32,6 +35,7 @@ export async function getPreference(trackId) {
     const req = tx.objectStore(STORE).get(trackId);
     req.onsuccess = () => resolve(req.result || null);
     req.onerror = () => resolve(null);
+    tx.onabort = () => resolve(null);
   });
 }
 
@@ -46,6 +50,7 @@ export async function getAllPreferences() {
       resolve(map);
     };
     req.onerror = () => resolve({});
+    tx.onabort = () => resolve({});
   });
 }
 
@@ -60,10 +65,12 @@ export async function updatePreference(trackId, updates) {
     session_contexts: [],
   };
   const merged = { ...existing, ...updates };
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, "readwrite");
     tx.objectStore(STORE).put(merged);
     tx.oncomplete = () => resolve(merged);
+    tx.onerror = (e) => reject((e && e.target && e.target.error) || tx.error || new Error("preference write failed"));
+    tx.onabort = () => reject(tx.error || new Error("preference write aborted"));
   });
 }
 

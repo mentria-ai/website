@@ -20,7 +20,7 @@
       { "prefetch": [{ "source": "document", "where": { "href_matches": "/*" }, "eagerness": "moderate" }] }
     </script>
     <script>
-      window.MENTRIA_PAGE_LOCALIZED = {{ 'true' if (locale or pair) else 'false' }};
+      window.MENTRIA_PAGE_LOCALIZED = {{ 'true' if ((locale or pair) and not notFound) else 'false' }};
       window.MENTRIA_EN_ONLY = {{ englishOnlyUrls | dump | safe }};
       window.MENTRIA_LOCALES = [
         {%- for loc in locales -%}
@@ -72,6 +72,10 @@
           }
           function go(loc) { location.replace(loc.prefix + (path === '/' ? '/' : path) + rest); }
           var current = localeOfPath(path);
+          if (current && window.MENTRIA_EN_ONLY && window.MENTRIA_EN_ONLY.indexOf(path.slice(current.prefix.length) || '/') >= 0) {
+            location.replace((path.slice(current.prefix.length) || '/') + rest);
+            return;
+          }
           if (!window.MENTRIA_PAGE_LOCALIZED && !current) return;
 
           var pref = null;

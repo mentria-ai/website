@@ -311,8 +311,8 @@ localeReload: true
   .about-ship-card:hover::after { color: var(--accent); transform: translate(2px, -2px); }
   .about-ship-num { font-family: var(--font-mono); font-size: 36px; font-weight: 700; line-height: 1; color: var(--accent); letter-spacing: -0.02em; text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.35); }
   .about-ship-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
-  .about-units { margin-top: auto; display: flex; align-items: flex-end; gap: 4px; height: 34px; }
-  .about-units .unit { flex: 1; height: 36%; border-radius: 3px; background: rgba(var(--accent-rgb), 0.12); transform-origin: bottom; }
+  .about-units { margin-top: auto; display: flex; align-items: flex-end; gap: clamp(1px, 1.2%, 4px); height: 34px; }
+  .about-units .unit { flex: 1 1 0; min-width: 1px; height: 36%; border-radius: 3px; background: rgba(var(--accent-rgb), 0.12); transform-origin: bottom; }
   .about-units .unit.on { height: 100%; background: var(--accent); box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.45); }
   .reveal .about-units .unit { opacity: 0; transform: scaleY(0.25); }
   .reveal.revealed .about-units .unit { opacity: 1; transform: scaleY(1); transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.2, 1, 0.3, 1); transition-delay: calc(var(--i) * 35ms); }

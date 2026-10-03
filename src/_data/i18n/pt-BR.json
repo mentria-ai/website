@@ -1011,6 +1011,7 @@
       "up_next_label": "A SEGUIR",
       "press_play": "Toque em reproduzir para começar",
       "btn_play_aria": "Reproduzir",
+      "btn_pause_aria": "Pausar",
       "btn_skip_aria": "Pular",
       "btn_like_aria": "Curtir",
       "volume_aria": "Volume",

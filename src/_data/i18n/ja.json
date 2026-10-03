@@ -1011,6 +1011,7 @@
       "up_next_label": "次の曲",
       "press_play": "再生を押して開始",
       "btn_play_aria": "再生",
+      "btn_pause_aria": "一時停止",
       "btn_skip_aria": "スキップ",
       "btn_like_aria": "いいね",
       "volume_aria": "音量",

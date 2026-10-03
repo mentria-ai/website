@@ -1011,6 +1011,7 @@
       "up_next_label": "À SUIVRE",
       "press_play": "Appuyez sur lecture pour commencer",
       "btn_play_aria": "Lecture",
+      "btn_pause_aria": "Pause",
       "btn_skip_aria": "Suivant",
       "btn_like_aria": "J'aime",
       "volume_aria": "Volume",

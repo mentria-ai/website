@@ -1011,6 +1011,7 @@
       "up_next_label": "UP NEXT",
       "press_play": "Press play to start",
       "btn_play_aria": "Play",
+      "btn_pause_aria": "Pause",
       "btn_skip_aria": "Skip",
       "btn_like_aria": "Like",
       "volume_aria": "Volume",

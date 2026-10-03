@@ -3929,6 +3929,14 @@
         "added": "Account added",
         "saved": "Account saved",
         "deleted": "Account deleted",
+        "delete_bills": {
+          "one": "Its bill {names} will be deleted too. To keep it, move it to another account first.",
+          "other": "Its {n} bills ({names}) will be deleted too. To keep them, move them to another account first."
+        },
+        "deleted_bills": {
+          "one": "Account and its bill deleted",
+          "other": "Account and {n} bills deleted"
+        },
         "name": "Name",
         "name_ph": "e.g. Everyday account",
         "type_label": "Type",
@@ -4067,6 +4075,7 @@
         "base_hint": "Changing it recalculates totals using your exchange rates.",
         "base_title": "Switch main currency to {ccy}?",
         "base_body": "Totals, budgets and reports will use {ccy}. Entries in other currencies are converted with your exchange rates; any without a rate stay out of totals until you add one.",
+        "base_no_rate": "There is no exchange rate between {from} and {ccy} yet, so budgets, goals and limits keep their current numbers. Add a rate first to convert them.",
         "base_ok": "Switch",
         "base_done": "Main currency is now {ccy}",
         "base_missing": {

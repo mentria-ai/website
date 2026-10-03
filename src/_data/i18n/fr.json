@@ -3929,6 +3929,14 @@
         "added": "Compte ajouté",
         "saved": "Compte enregistré",
         "deleted": "Compte supprimé",
+        "delete_bills": {
+          "one": "Sa facture {names} sera aussi supprimée. Pour la garder, déplacez-la d'abord vers un autre compte.",
+          "other": "Ses {n} factures ({names}) seront aussi supprimées. Pour les garder, déplacez-les d'abord vers un autre compte."
+        },
+        "deleted_bills": {
+          "one": "Compte et sa facture supprimés",
+          "other": "Compte et {n} factures supprimés"
+        },
         "name": "Nom",
         "name_ph": "p. ex. Compte courant",
         "type_label": "Type",
@@ -4067,6 +4075,7 @@
         "base_hint": "Si vous la changez, les totaux sont recalculés avec vos taux de change.",
         "base_title": "Passer la devise principale en {ccy} ?",
         "base_body": "Les totaux, budgets et rapports utiliseront {ccy}. Les opérations dans d'autres devises sont converties avec vos taux de change ; celles sans taux restent hors des totaux jusqu'à ce que vous en ajoutiez un.",
+        "base_no_rate": "Il n'y a pas encore de taux de change entre {from} et {ccy} : les budgets, objectifs et limites gardent leurs montants actuels. Ajoutez d'abord un taux pour les convertir.",
         "base_ok": "Changer",
         "base_done": "La devise principale est maintenant {ccy}",
         "base_missing": {

@@ -3929,6 +3929,14 @@
         "added": "Conta adicionada",
         "saved": "Conta salva",
         "deleted": "Conta excluída",
+        "delete_bills": {
+          "one": "A conta a pagar {names} também será excluída. Para mantê-la, mova-a antes para outra conta.",
+          "other": "As {n} contas a pagar ({names}) também serão excluídas. Para mantê-las, mova-as antes para outra conta."
+        },
+        "deleted_bills": {
+          "one": "Conta e sua conta a pagar excluídas",
+          "other": "Conta e {n} contas a pagar excluídas"
+        },
         "name": "Nome",
         "name_ph": "ex.: Conta do dia a dia",
         "type_label": "Tipo",
@@ -4067,6 +4075,7 @@
         "base_hint": "Mudar a moeda recalcula os totais usando suas cotações.",
         "base_title": "Mudar a moeda principal para {ccy}?",
         "base_body": "Totais, orçamentos e relatórios vão usar {ccy}. Lançamentos em outras moedas são convertidos com suas cotações; os que não tiverem cotação ficam fora dos totais até você adicionar uma.",
+        "base_no_rate": "Ainda não há cotação entre {from} e {ccy}, então orçamentos, metas e limites mantêm os valores atuais. Adicione uma cotação antes para convertê-los.",
         "base_ok": "Mudar",
         "base_done": "A moeda principal agora é {ccy}",
         "base_missing": {

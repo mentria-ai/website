@@ -161,6 +161,7 @@ export function xirr(flows, guess) {
   if (!list.some((f) => f.amount > 0) || !list.some((f) => f.amount < 0)) throw new RangeError('#NUM!');
   const d0 = Math.floor(list[0].t / DAY);
   const cf = list.map((f) => ({ a: f.amount, t: (Math.floor(f.t / DAY) - d0) / 365 }));
+  if (!(cf[cf.length - 1].t > 0)) throw new RangeError('#NUM!');
   const npv = (r) => cf.reduce((s, c) => s + c.a / Math.pow(1 + r, c.t), 0);
   const dnpv = (r) => cf.reduce((s, c) => s - (c.t * c.a) / Math.pow(1 + r, c.t + 1), 0);
   let r = guess == null ? 0.1 : guess;

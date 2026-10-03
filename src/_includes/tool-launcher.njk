@@ -3,14 +3,16 @@
   ["Games", "home.launcher.games"], ["Create", "home.launcher.create"],
   ["Dev", "home.launcher.dev"]
 ] -%}
-{%- macro tile(tool, lang, i) -%}
+{%- macro tile(tool, lang, i, groupKey) -%}
   {%- set titleKey = "tools." + tool.slug + ".title" -%}
   {%- set shortKey = "tools." + tool.slug + ".short" -%}
   {%- set hasShort = shortKey | hasKey -%}
-  <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}"
+  {%- set groupLabel = (groupKey | traw) if groupKey else "" -%}
+  {%- set catLabel = ("category." + tool.category) | traw -%}
+  <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}" data-cat="{{ tool.category }}"
      {%- if tool.requires %} data-requires="{{ tool.requires }}"{% endif %}
      {%- if hasShort %} data-name="{{ titleKey | t }}" data-i18na="data-name={{ titleKey }}"{% endif %}
-     data-search="{{ tool.summary }} {{ tool.category }} {{ tool.group }} {{ tool.slug }}"
+     data-search="{{ tool.summary }} {{ tool.category }} {{ tool.group }} {{ tool.slug }}{% if groupLabel and groupLabel != tool.group %} {{ groupLabel }}{% endif %}{% if catLabel != tool.category and catLabel != groupLabel %} {{ catLabel }}{% endif %}"
      style="view-transition-name: tool-{{ tool.slug }}; --i: {{ i or 0 }}"
      href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
     <span class="launch-tile__icon" aria-hidden="true">
@@ -38,7 +40,7 @@
     <section class="launcher__cat launcher__cat--{{ g[0] | lower }}" data-group="{{ g[0] }}">
       <div class="launcher__head"><h2 class="launcher__label">{{ g[1] | t }}</h2><span class="launcher__count">{{ catTools | length }}</span></div>
       <div class="launcher__grid">
-        {%- for tool in catTools %}{{ tile(tool, lang, loop.index0) }}{%- endfor %}
+        {%- for tool in catTools %}{{ tile(tool, lang, loop.index0, g[1]) }}{%- endfor %}
       </div>
     </section>
     {%- endfor %}
@@ -108,7 +110,22 @@
     if (a && a.classList && a.classList.contains('launch-tile')) return a;
     return null;
   }
+  function dialogOpen() {
+    var dlg = document.getElementById('m-dialog');
+    try { return !!(dlg && dlg.matches(':popover-open')); } catch (_) { return false; }
+  }
+  function openPopup() {
+    var p = document.getElementById('tools-popup');
+    return p && !p.hidden && !p.closest('[inert]') ? p : null;
+  }
+  function launcherActive() {
+    if (dialogOpen()) return false;
+    if (openPopup()) return true;
+    var t = currentTile();
+    return !!(t && t.closest('.launcher') && !t.closest('[inert]'));
+  }
   function handleDirection(dir) {
+    if (!launcherActive()) return;
     var from = currentTile();
     if (!from) {
       var first = visibleTiles()[0];
@@ -123,13 +140,42 @@
     if (name === 'a') {
       var el = currentTile();
       if (el) { el.click(); }
-    } else if (name === 'b') {
-      if (history.length > 1) history.back();
+      return;
+    }
+    if (!launcherActive()) return;
+    var popup = openPopup();
+    if (name === 'b') {
+      var closer = popup && popup.querySelector('button[data-tools-close]');
+      if (closer) closer.click();
     } else if (name === 'start') {
-      var cli = document.getElementById('mentria-cli-input') || document.querySelector('.cli__input') || document.querySelector('input[type="text"]');
-      if (cli && typeof cli.focus === 'function') cli.focus();
+      var find = popup && popup.querySelector('#tools-find');
+      if (find) find.focus();
     }
   }
+  function addWords(tile, words) {
+    var s = tile.getAttribute('data-search') || '';
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i] == null ? '' : String(words[i]).trim();
+      if (w && s.indexOf(w) === -1) s += ' ' + w;
+    }
+    tile.setAttribute('data-search', s);
+  }
+  function tr(key) {
+    var I = window.MentriaI18n;
+    return I && typeof I.t === 'function' ? I.t(key) : '';
+  }
+  document.addEventListener('mentria:localechange', function () {
+    var cats = document.querySelectorAll('.launcher .launcher__cat');
+    for (var i = 0; i < cats.length; i++) {
+      var head = cats[i].querySelector('.launcher__label');
+      var group = head ? head.textContent : '';
+      var tiles = cats[i].querySelectorAll('.launch-tile[data-search]');
+      for (var j = 0; j < tiles.length; j++) {
+        var cat = tiles[j].getAttribute('data-cat');
+        addWords(tiles[j], [group, cat ? tr('category.' + cat) : '']);
+      }
+    }
+  });
   window.addEventListener('mentria:gamepad:direction', function (e) { handleDirection(e.detail.direction); });
   window.addEventListener('mentria:gamepad:button', function (e) { handleButton(e.detail.name, e.detail.pressed); });
   window.addEventListener('mentria:gamepad:connect', function () {

@@ -1639,6 +1639,7 @@
       "no_moves_yet": "sem lances ainda — faça sua jogada",
       "confirm_resign": "Desistir da partida?",
       "confirm_new_color": "Começar uma nova partida de {color}?",
+      "confirm_new": "Começar uma nova partida? A partida em andamento será perdida.",
       "color_white": "brancas",
       "color_black": "pretas",
       "chat_you": "você",

@@ -9,6 +9,7 @@
     eyebrow_checkmate: 'checkmate', eyebrow_stalemate: 'stalemate', eyebrow_draw: 'draw', eyebrow_resigned: 'resigned',
     no_moves_yet: 'no moves yet — make your move',
     confirm_resign: 'Resign the game?', confirm_new_color: 'Start a new game as {color}?',
+    confirm_new: 'Start a new game? The game in progress will be lost.',
     color_white: 'white', color_black: 'black',
     chat_you: 'you', chat_peer: 'peer',
     peer_offline: 'offline', peer_waiting: 'waiting for opponent', peer_connecting: 'connecting…',
@@ -600,6 +601,18 @@
     if (State.mode === 'online' && P2P.action && P2P.role === 'host'){ P2P.send({ kind:'sync', pos: State.pos, history: [] }); }
     if (State.mode === 'engine' && State.humanColor === 'b') engineMove(); else analyze();
   }
+  let askingNew = false;
+  async function requestNewGame(){
+    if (State.history.length > 0 && !State.over && window.mentriaConfirm){
+      if (askingNew) return;
+      askingNew = true;
+      let ok = false;
+      try { ok = await window.mentriaConfirm(T.confirm_new, { danger: true }); } catch(e){ ok = false; }
+      askingNew = false;
+      if (!ok) return;
+    }
+    newGame(true);
+  }
   async function resign(){
     if (State.over || State.history.length === 0) return;
     const ok = window.mentriaConfirm ? await window.mentriaConfirm(T.confirm_resign) : true;
@@ -820,7 +833,7 @@
 
   /* ===== wire UI ===== */
   function wire(){
-    $('btn-newgame').onclick = () => newGame(true);
+    $('btn-newgame').onclick = requestNewGame;
     $('btn-flip').onclick = flip;
     $('btn-coords').onclick = () => setCoords(!State.coords);
     $('btn-undo').onclick = undo;

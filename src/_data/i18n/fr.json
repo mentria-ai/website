@@ -1639,6 +1639,7 @@
       "no_moves_yet": "aucun coup encore — à vous de jouer",
       "confirm_resign": "Abandonner la partie ?",
       "confirm_new_color": "Commencer une nouvelle partie avec les {color} ?",
+      "confirm_new": "Commencer une nouvelle partie ? La partie en cours sera perdue.",
       "color_white": "blancs",
       "color_black": "noirs",
       "chat_you": "vous",

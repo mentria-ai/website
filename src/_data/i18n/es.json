@@ -1639,6 +1639,7 @@
       "no_moves_yet": "aún sin jugadas — haz tu movimiento",
       "confirm_resign": "¿Abandonar la partida?",
       "confirm_new_color": "¿Empezar una nueva partida con {color}?",
+      "confirm_new": "¿Empezar una partida nueva? Se perderá la partida en curso.",
       "color_white": "blancas",
       "color_black": "negras",
       "chat_you": "tú",

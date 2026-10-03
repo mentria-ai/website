@@ -4963,6 +4963,7 @@
     "list_label": "Resultados da busca",
     "no_results": "Nenhum resultado",
     "recents": "Recentes",
+    "pages": "Páginas",
     "open": "Abrir paleta de comandos (⌘K)",
     "app_bar": "Navegação do aplicativo",
     "extensions": "Extensões",
@@ -4976,6 +4977,11 @@
     "act_flip": "Jogar uma moeda",
     "act_heads": "Cara",
     "act_tails": "Coroa",
+    "kw_note": "nota, anotação",
+    "kw_timer": "timer, temporizador",
+    "kw_flip": "moeda, cara, coroa",
+    "hint_note": "Digite sua nota",
+    "hint_timer": "Digite uma duração, como 5m, 90s ou 1h",
     "search_site": "Buscar “{q}” no site"
   },
   "widgets": {

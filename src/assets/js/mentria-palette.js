@@ -15,7 +15,7 @@
   var prevFocus = null;
 
   var labels = {};
-  var model = { tools: [], nav: [], recents: [], extensions: [] };
+  var model = { tools: [], nav: [], recents: [], extensions: [], quick: [], kwNote: ['note'], kwTimer: ['timer'] };
   var optionEls = [];
   var activeIndex = -1;
   var idSeq = 0;
@@ -25,7 +25,7 @@
   }
 
   function norm(v) {
-    return String(v == null ? '' : v).toLowerCase();
+    return String(v == null ? '' : v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 
   function kwString(kw) {
@@ -80,6 +80,22 @@
     return labels.extensions || 'Extensions';
   }
 
+  function words(list, base) {
+    var raw = String(list || '').split(',').concat(base);
+    var out = [];
+    for (var i = 0; i < raw.length; i++) {
+      var w = norm(raw[i]).trim();
+      if (w && out.indexOf(w) === -1) out.push(w);
+    }
+    return out;
+  }
+
+  function quickEntry(id, title, kw, fn) {
+    var t = norm(title).trim();
+    while (t && (t.slice(-1) === '\u2026' || t.slice(-1) === '.')) t = t.slice(0, -1);
+    return { id: id, title: title, hint: labels.actions || 'Actions', titleN: t.trim(), kw: kw, action: fn, usage: 0, quick: true };
+  }
+
   function buildModel() {
     var d = data();
     var prefix = (d && d.prefix) || '';
@@ -130,7 +146,15 @@
       if (bySlug[slugs[i]]) recents.push(bySlug[slugs[i]]);
     }
 
-    return { tools: normTools, nav: normNav, recents: recents, extensions: buildExtensions(prefix) };
+    var kwNote = words(labels.kwNote, ['note']);
+    var kwTimer = words(labels.kwTimer, ['timer']);
+    var quick = [
+      quickEntry('note', labels.actNoteNew || 'New note\u2026', kwNote, function () { stage(kwNote[0] + ': '); }),
+      quickEntry('timer', labels.actTimerNew || 'Start a timer\u2026', kwTimer, function () { stage(kwTimer[0] + ' '); }),
+      quickEntry('flip', labels.actFlip || 'Flip a coin', words(labels.kwFlip, ['flip', 'coin']), flipCoin)
+    ];
+
+    return { tools: normTools, nav: normNav, recents: recents, extensions: buildExtensions(prefix), quick: quick, kwNote: kwNote, kwTimer: kwTimer };
   }
 
   function applyLabels() {
@@ -197,11 +221,13 @@
       listEl.appendChild(rg);
     }
     var qa = makeGroup(labels.actions || 'Actions');
-    qa.appendChild(makeOption({ title: labels.actNoteNew || 'New note\u2026', hint: '', action: function () { stage('note: '); } }));
-    qa.appendChild(makeOption({ title: labels.actTimerNew || 'Start a timer\u2026', hint: '', action: function () { stage('timer '); } }));
-    qa.appendChild(makeOption({ title: labels.actFlip || 'Flip a coin', hint: '', action: flipCoin }));
+    for (i = 0; i < model.quick.length; i++) qa.appendChild(makeOption({ title: model.quick[i].title, hint: '', action: model.quick[i].action }));
     listEl.appendChild(qa);
-    for (i = 0; i < model.nav.length; i++) listEl.appendChild(makeOption(model.nav[i]));
+    if (model.nav.length) {
+      var ng = makeGroup(labels.pages || 'Pages');
+      for (i = 0; i < model.nav.length; i++) ng.appendChild(makeOption(model.nav[i]));
+      listEl.appendChild(ng);
+    }
     var order = [];
     var byCat = {};
     for (i = 0; i < model.tools.length; i++) {
@@ -253,9 +279,25 @@
     return out;
   }
 
-  function renderResults(qN) {
+  function keyHit(kw, qN) {
+    for (var i = 0; i < kw.length; i++) {
+      if (kw[i] === qN || (qN.length >= 4 && kw[i].indexOf(qN) === 0)) return true;
+    }
+    return false;
+  }
+
+  function renderResults(qN, skip) {
     var out = [];
     var i, e, idx, tier;
+    for (i = 0; i < model.quick.length; i++) {
+      e = model.quick[i];
+      if (skip.indexOf(e.id) !== -1) continue;
+      idx = e.titleN.indexOf(qN);
+      if (idx === 0) tier = 0;
+      else if ((idx > 0 && qN.length >= 2) || keyHit(e.kw, qN)) tier = 3;
+      else continue;
+      out.push({ e: e, tier: tier });
+    }
     for (i = 0; i < model.tools.length; i++) {
       e = model.tools[i];
       idx = e.titleN.indexOf(qN);
@@ -281,6 +323,7 @@
     if (fuzzy) out = fuzzyResults(qN);
     out.sort(function (a, b) {
       if (a.tier !== b.tier) return a.tier - b.tier;
+      if (!a.e.quick !== !b.e.quick) return a.e.quick ? 1 : -1;
       if (b.e.usage !== a.e.usage) return b.e.usage - a.e.usage;
       return a.e.titleN < b.e.titleN ? -1 : (a.e.titleN > b.e.titleN ? 1 : 0);
     });
@@ -296,21 +339,25 @@
     clearList();
     currentActions = [];
     var qN = norm(query).trim();
-    var acts = buildActions(query);
+    var cmd = parseCommand(query);
+    var acts = buildActions(cmd);
+    var used = [];
     if (acts.length) {
       var ag = makeGroup(labels.actions || 'Actions');
-      for (var ai = 0; ai < acts.length; ai++) ag.appendChild(makeOption(acts[ai]));
+      for (var ai = 0; ai < acts.length; ai++) {
+        ag.appendChild(makeOption(acts[ai]));
+        used.push(acts[ai].id);
+      }
       listEl.appendChild(ag);
     }
-    var staged = /^(note[:\s]|timer\s)\s*$/i.test(String(query || ''));
-    if (staged) {
+    if (cmd.staged) {
       input.setAttribute('aria-expanded', 'false');
       setActive(-1);
-      setStatus('');
+      setStatus(cmd.staged === 'note' ? (labels.hintNote || 'Type your note') : (labels.hintTimer || 'Type a time, like 5m, 90s or 1h'));
       return;
     }
     if (qN) {
-      renderResults(qN);
+      renderResults(qN, used);
       var sq = String(query || '').trim();
       var shown = sq.length > 40 ? sq.slice(0, 40) + '…' : sq;
       listEl.appendChild(makeOption({
@@ -384,24 +431,57 @@
   }
 
   function parseDuration(raw) {
-    var m = String(raw || '').trim().match(/^(\d+(?:\.\d+)?)\s*(h|hr|m|min|s|sec)?$/i);
+    var s = String(raw || '').trim().toLowerCase().replace(/[\uff10-\uff19]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xfee0); }).replace(',', '.');
+    var m = s.match(/^(\d+(?:\.\d+)?)\s*([hms][a-z\u00e0-\u00ff]*|\u6642\u9593|\u5206|\u79d2)?$/);
     if (!m) return null;
     var n = parseFloat(m[1]);
     if (!isFinite(n) || n <= 0) return null;
-    var unit = (m[2] || 'm').toLowerCase();
-    var secs = unit[0] === 'h' ? n * 3600 : unit[0] === 's' ? n : n * 60;
-    secs = Math.round(secs);
+    var u = m[2] || 'm';
+    var unit = (u.charAt(0) === 'h' || u === '\u6642\u9593') ? 'h' : (u.charAt(0) === 's' || u === '\u79d2') ? 's' : 'm';
+    var secs = Math.round(unit === 'h' ? n * 3600 : unit === 's' ? n : n * 60);
     if (secs < 1 || secs > 99 * 3600) return null;
-    return { secs: secs, label: m[1] + (m[2] || 'm') };
+    return { secs: secs, label: m[1] + unit };
   }
 
-  function buildActions(rawQuery) {
+  function trimSep(s) {
+    var i = 0;
+    while (i < s.length && ' \t\u3000:\uff1a'.indexOf(s.charAt(i)) !== -1) i++;
+    return s.slice(i);
+  }
+
+  function afterWord(q, kws) {
+    var f = norm(q);
+    for (var i = 0; i < kws.length; i++) {
+      var k = kws[i];
+      if (!k || f.indexOf(k) !== 0 || norm(q.slice(0, k.length)) !== k) continue;
+      var rest = q.slice(k.length);
+      if (!rest || ' \t\u3000:\uff1a'.indexOf(rest.charAt(0)) !== -1) return rest;
+    }
+    return null;
+  }
+
+  function parseCommand(rawQuery) {
+    var q = String(rawQuery || '').trimStart();
+    var cmd = { note: '', timer: '', flip: norm(q).trim() === 'flip', staged: '' };
+    var rest = afterWord(q, model.kwNote);
+    if (rest !== null) {
+      cmd.note = trimSep(rest).trim();
+      if (!cmd.note && rest) cmd.staged = 'note';
+    }
+    rest = afterWord(q, model.kwTimer);
+    if (rest !== null) {
+      cmd.timer = trimSep(rest).trim();
+      if (!cmd.timer && rest) cmd.staged = 'timer';
+    }
+    return cmd;
+  }
+
+  function buildActions(cmd) {
     var out = [];
-    var q = String(rawQuery || '').trim();
-    var noteMatch = q.match(/^note[:\s]\s*(.+)$/i);
-    if (noteMatch && noteMatch[1].trim()) {
-      var text = noteMatch[1].trim();
+    if (cmd.note) {
+      var text = cmd.note;
       out.push({
+        id: 'note',
         title: fmtLabel(labels.actNote || 'Save note: \u201c{text}\u201d', { text: text.length > 40 ? text.slice(0, 40) + '\u2026' : text }),
         hint: '',
         action: function () {
@@ -410,19 +490,19 @@
         }
       });
     }
-    var timerMatch = q.match(/^timer\s+(.+)$/i);
-    if (timerMatch) {
-      var dur = parseDuration(timerMatch[1]);
+    if (cmd.timer) {
+      var dur = parseDuration(cmd.timer);
       if (dur) {
         out.push({
+          id: 'timer',
           title: fmtLabel(labels.actTimer || 'Start a {dur} timer', { dur: dur.label }),
           hint: '',
           href: ((data() && data().prefix) || '') + '/tools/countdown-timer/?start=' + dur.secs
         });
       }
     }
-    if (/^flip$/i.test(q)) {
-      out.push({ title: labels.actFlip || 'Flip a coin', hint: '', action: flipCoin });
+    if (cmd.flip) {
+      out.push({ id: 'flip', title: labels.actFlip || 'Flip a coin', hint: '', action: flipCoin });
     }
     return out;
   }
@@ -521,7 +601,7 @@
     input.addEventListener('keydown', onInputKey);
     listEl.addEventListener('click', onListClick);
     listEl.addEventListener('pointermove', onListPointer);
-    root.addEventListener('mousedown', function (e) { if (e.target === root) close(); });
+    root.addEventListener('mousedown', function (e) { if (e.target === root) { e.preventDefault(); close(); } });
 
     if (window.MentriaUI && typeof window.MentriaUI.modal === 'function') {
       modalCtl = window.MentriaUI.modal(root);

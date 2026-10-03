@@ -4963,6 +4963,7 @@
     "list_label": "Résultats de recherche",
     "no_results": "Aucun résultat",
     "recents": "Récents",
+    "pages": "Pages",
     "open": "Ouvrir la palette de commandes (⌘K)",
     "app_bar": "Navigation de l'application",
     "extensions": "Extensions",
@@ -4976,6 +4977,11 @@
     "act_flip": "Lancer une pièce",
     "act_heads": "Pile",
     "act_tails": "Face",
+    "kw_note": "note, mémo",
+    "kw_timer": "minuteur, minuterie",
+    "kw_flip": "pièce, pile, face",
+    "hint_note": "Saisissez votre note",
+    "hint_timer": "Saisissez une durée, par exemple 5m, 90s ou 1h",
     "search_site": "Rechercher « {q} » sur le site"
   },
   "widgets": {

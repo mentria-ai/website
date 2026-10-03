@@ -270,12 +270,30 @@ async function load(found, ctx) {
     if (kind === 'video') videos.push(it);
     else if (kind === 'subtitle') subs.push(it);
   }
+  const append = !!(ctx && ctx.append) && items.length > 0;
+  if (!videos.length && subs.length && items.length && current !== -1) {
+    for (const s of subs) {
+      subsByBase.set(M.baseName(s.relPath).toLowerCase(), s.file);
+      if (await addTrack(s.file, M.baseName(s.file.name), true)) toast(fill(C.subsLoaded, { name: s.file.name }));
+    }
+    return;
+  }
   if (!videos.length) {
     toast(C.noVideos);
     return;
   }
-  subsByBase = new Map();
+  if (!append) subsByBase = new Map();
   for (const s of subs) subsByBase.set(M.baseName(s.relPath).toLowerCase(), s.file);
+  if (append) {
+    const added = await M.register(videos, { kind: 'video', folderName });
+    const seen = new Set(items.map((e) => e.fp));
+    const playing = items[current];
+    items = M.naturalSort(items.concat(added.filter((e) => !seen.has(e.fp))), (e) => e.relPath || e.name);
+    current = playing ? items.indexOf(playing) : -1;
+    renderList();
+    if (current === -1) play(0, !!ctx.autoplay);
+    return;
+  }
   folderName = (ctx && ctx.folderName) || '';
   const entries = await M.register(videos, { kind: 'video', folderId: ctx && ctx.folderId, folderName });
   items = M.naturalSort(entries, (e) => e.relPath || e.name);
@@ -312,7 +330,7 @@ function clearTracks() {
 async function addTrack(file, label, show) {
   let vtt;
   try { vtt = M.toVtt(await M.readText(file)); } catch (_) { vtt = ''; }
-  if (vtt.indexOf('-->') === -1) { toast(fill(C.subsBad, { name: file.name })); return; }
+  if (vtt.indexOf('-->') === -1) { toast(fill(C.subsBad, { name: file.name })); return false; }
   const url = URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }));
   subsUrls.push(url);
   const track = document.createElement('track');
@@ -327,6 +345,7 @@ async function addTrack(file, label, show) {
   opt.textContent = track.label;
   sel.appendChild(opt);
   if (show) selectTrack(opt.value);
+  return true;
 }
 
 function selectTrack(value) {
@@ -483,8 +502,7 @@ $('vp-subs-track').addEventListener('change', (e) => selectTrack(e.target.value)
 $('vp-subs-load').addEventListener('click', async () => {
   const picked = await M.pickFiles(['subtitle']);
   for (const it of picked) {
-    await addTrack(it.file, M.baseName(it.file.name), true);
-    toast(fill(C.subsLoaded, { name: it.file.name }));
+    if (await addTrack(it.file, M.baseName(it.file.name), true)) toast(fill(C.subsLoaded, { name: it.file.name }));
   }
 });
 $('vp-subs-earlier').addEventListener('click', () => { subsOffset = Math.round((subsOffset - 0.5) * 10) / 10; applyOffset(); });
@@ -499,7 +517,7 @@ if (M.caps.pip && !(M.caps.ios && M.caps.standalone)) {
 }
 $('vp-add').addEventListener('click', async () => {
   const picked = await M.pickFiles(['video', 'subtitle']);
-  if (picked.length) load(picked, { autoplay: true });
+  if (picked.length) load(picked, { autoplay: true, append: true });
 });
 $('vp-home').addEventListener('click', () => {
   video.pause();

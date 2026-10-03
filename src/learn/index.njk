@@ -77,7 +77,7 @@ localeReload: true
                 {% if pack.cover %}<img class="learn-tile__cover" src="{{ pack.cover }}" alt="" loading="lazy" decoding="async">{% else %}<span class="learn-tile__cover learn-tile__cover--blank"></span>{% endif %}
                 <span class="learn-tile__body">
                     <span class="learn-tile__title">{{ pack.title | tloc(locale.code) }}</span>
-                    <span class="learn-tile__meta">{{ ("learn.cards_n" | t) | replace("{n}", pack.cards.length) }} · {{ ("learn.minutes_n" | t) | replace("{n}", pack.minutes) }}</span>
+                    <span class="learn-tile__meta">{{ (("learn.cards_n_one" if pack.cards.length == 1 else "learn.cards_n") | t) | replace("{n}", pack.cards.length) }} · {{ ("learn.minutes_n" | t) | replace("{n}", pack.minutes) }}</span>
                     <span class="learn-tile__progress" hidden><span class="learn-tile__progress-fill"></span></span>
                 </span>
             </a>
@@ -91,21 +91,34 @@ localeReload: true
   window.MENTRIA_LEARN_PAGE = {
     prefix: {{ locale.pathPrefix | dump | safe }},
     cards_n: {{ ("learn.cards_n" | t) | dump | safe }},
+    cards_n_one: {{ ("learn.cards_n_one" | t) | dump | safe }},
     minutes_n: {{ ("learn.minutes_n" | t) | dump | safe }},
     imported: {{ ("learn.imported" | t) | dump | safe }},
     replaced: {{ ("learn.replaced" | t) | dump | safe }},
     import_failed: {{ ("learn.import_failed" | t) | dump | safe }},
+    import_err_empty: {{ ("learn.import_err_empty" | t) | dump | safe }},
+    import_err_json: {{ ("learn.import_err_json" | t) | dump | safe }},
+    import_err_at: {{ ("learn.import_err_at" | t) | dump | safe }},
+    import_err_kind: {{ ("learn.import_err_kind" | t) | dump | safe }},
+    import_err_size: {{ ("learn.import_err_size" | t) | dump | safe }},
+    import_err_invalid: {{ ("learn.import_err_invalid" | t) | dump | safe }},
+    import_err_network: {{ ("learn.import_err_network" | t) | dump | safe }},
+    import_err_url: {{ ("learn.import_err_url" | t) | dump | safe }},
+    import_err_other: {{ ("learn.import_err_other" | t) | dump | safe }},
     importing: {{ ("learn.importing" | t) | dump | safe }},
     import_url_confirm: {{ ("learn.import_url_confirm" | t) | dump | safe }},
     remove: {{ ("learn.remove" | t) | dump | safe }},
     share: {{ ("learn.share" | t) | dump | safe }},
     course: {{ ("learn.course" | t) | dump | safe }},
     course_packs_n: {{ ("learn.course_packs_n" | t) | dump | safe }},
+    course_packs_n_one: {{ ("learn.course_packs_n_one" | t) | dump | safe }},
     remove_course: {{ ("learn.remove_course" | t) | dump | safe }},
     remove_course_confirm: {{ ("learn.remove_course_confirm" | t) | dump | safe }},
     imported_course: {{ ("learn.imported_course" | t) | dump | safe }},
+    imported_course_one: {{ ("learn.imported_course_one" | t) | dump | safe }},
     single_packs: {{ ("learn.single_packs" | t) | dump | safe }},
     show_all_packs: {{ ("learn.show_all_packs" | t) | dump | safe }},
+    show_all_packs_one: {{ ("learn.show_all_packs_one" | t) | dump | safe }},
     shared_hint: {{ ("learn.shared_hint" | t) | dump | safe }},
     remove_confirm: {{ ("learn.remove_confirm" | t) | dump | safe }},
     open: {{ ("learn.open" | t) | dump | safe }},

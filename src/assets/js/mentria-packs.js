@@ -30,6 +30,10 @@
     return k.length ? v[k[0]] : '';
   }
 
+  function fail(code, message, extra) {
+    return Object.assign(new Error(message || code), extra || {}, { code: code });
+  }
+
   function bytesOf(obj) {
     try { return new Blob([JSON.stringify(obj)]).size; } catch (_) { return JSON.stringify(obj).length; }
   }
@@ -247,11 +251,28 @@
   }
   function saveCourses(c) { if (global.MentriaStore) global.MentriaStore.set('packs', 'courses', c); }
   function fetchPack(url) {
-    return fetch(url, { mode: 'cors' }).then(function (r) { if (!r.ok) throw new Error('fetch failed: ' + r.status + ' ' + url); return r.json(); });
+    return fetch(url, { mode: 'cors' }).catch(function (e) { throw fail('network', e && e.message); }).then(function (r) {
+      if (!r.ok) throw fail('network', 'fetch failed: ' + r.status + ' ' + url, { status: r.status });
+      return r.text().catch(function (e) { throw fail('network', e && e.message); });
+    }).then(parse);
+  }
+  function leaveCourse(cid, keep) {
+    return tx('readonly', function (s) { return s.getAll(); }).then(function (rows) {
+      var chain = Promise.resolve();
+      (rows || []).forEach(function (r) {
+        if (!r || !r.course || r.course.id !== cid || keep.indexOf(r.id) >= 0) return;
+        chain = chain.then(function () {
+          if (!r.solo && !Object.keys(getProgress(r.id).cards).length) return remove(r.id);
+          r.course = null;
+          return tx('readwrite', function (s) { s.put(r); }).then(function () { emit('put', r); });
+        });
+      });
+      return chain;
+    });
   }
   function importCourse(course, meta) {
     var v = validateCourse(course);
-    if (!v.ok) return Promise.reject(Object.assign(new Error(v.errors[0]), { errors: v.errors }));
+    if (!v.ok) return Promise.reject(fail('invalid', v.errors[0], { errors: v.errors }));
     return Promise.all(course.packs.map(function (p) { return typeof p === 'string' ? fetchPack(p) : Promise.resolve(p); })).then(function (packs) {
       var order = 0, results = [];
       var chain = Promise.resolve();
@@ -262,6 +283,8 @@
         });
       });
       return chain.then(function () {
+        return leaveCourse(course.id, packs.map(function (p) { return p.id; }));
+      }).then(function () {
         var courses = getCourses();
         var prev = courses[course.id];
         courses[course.id] = {
@@ -278,7 +301,9 @@
     var courses = getCourses(), c = courses[id];
     if (!c) return Promise.resolve();
     var chain = Promise.resolve();
-    c.packs.forEach(function (pid) { chain = chain.then(function () { return remove(pid); }); });
+    c.packs.forEach(function (pid) {
+      chain = chain.then(function () { return get(pid).then(function (row) { if (!row || courseOf(row) === id) return remove(pid); }); });
+    });
     return chain.then(function () { delete courses[id]; saveCourses(courses); emit('course', { id: id }); });
   }
   function courseOf(row) { return row && row.course ? row.course.id : null; }
@@ -321,8 +346,9 @@
 
   function put(pack, meta) {
     var v = validate(pack);
-    if (!v.ok) return Promise.reject(Object.assign(new Error(v.errors[0]), { errors: v.errors }));
+    if (!v.ok) return Promise.reject(fail(v.bytes > MAX_BYTES ? 'size' : 'invalid', v.errors[0], { errors: v.errors }));
     var p = normalize(pack);
+    var viaCourse = !!(meta && meta.course);
     var row = {
       id: p.id, version: p.version, title: p.title, subtitle: p.subtitle || null, cover: safeCover(p.cover),
       cards: p.cards.length, bytes: v.bytes, added: Date.now(), source: (meta && meta.source) || 'import', from: (meta && meta.from) || null, pack: p,
@@ -330,6 +356,7 @@
     };
     return get(p.id).then(function (existing) {
       if (existing) row.added = existing.added;
+      row.solo = !viaCourse || !!(existing && (existing.solo || !existing.course));
       row.updated = Date.now();
       return tx('readwrite', function (s) { s.put(row); }).then(function () {
         emit('put', row);
@@ -358,27 +385,39 @@
     try { global.dispatchEvent(new CustomEvent('mentria:packs', { detail: { kind: kind, id: detail && detail.id } })); } catch (_) {}
   }
 
+  function spot(err, raw, t) {
+    var msg = String((err && err.message) || ''), pos = -1, m;
+    if ((m = /position (\d+)/.exec(msg))) pos = +m[1];
+    else if ((m = /line (\d+) column (\d+)/.exec(msg))) {
+      var lines = t.split('\n'), at = 0;
+      for (var k = 0; k < +m[1] - 1 && k < lines.length; k++) at += lines[k].length + 1;
+      pos = at + +m[2] - 1;
+    }
+    if (pos < 0) return {};
+    var before = raw.slice(0, raw.length - raw.replace(/^\s+/, '').length + pos).split('\n');
+    return { line: before.length, column: before[before.length - 1].length + 1 };
+  }
   function parse(textIn) {
-    var t = String(textIn || '').trim();
-    if (!t) throw new Error('empty');
-    if (t.charAt(0) !== '{') throw new Error('not a pack or course file');
-    return JSON.parse(t);
+    var raw = String(textIn || ''), t = raw.trim();
+    if (!t) throw fail('empty', 'empty');
+    if (t.charAt(0) !== '{') throw fail('kind', 'not a pack or course file');
+    try { return JSON.parse(t); } catch (e) { throw fail('json', e && e.message, spot(e, raw, t)); }
   }
   function importText(textIn, meta) { return Promise.resolve().then(function () { return importAny(parse(textIn), meta); }); }
   function importFile(file, meta) {
-    if (!file) return Promise.reject(new Error('no file'));
-    if (file.size > MAX_BYTES) return Promise.reject(new Error('file is larger than 25 MB'));
+    if (!file) return Promise.reject(fail('empty', 'no file'));
+    if (file.size > MAX_BYTES) return Promise.reject(fail('size', 'file is larger than 25 MB'));
     return file.text().then(function (t) { return importAny(parse(t), Object.assign({ from: file.name }, meta || {})); });
   }
   function importUrl(url, meta) {
     var u;
-    try { u = new URL(url, global.location && global.location.href); } catch (_) { return Promise.reject(new Error('bad url')); }
-    if (u.protocol !== 'https:' && u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') return Promise.reject(new Error('https only'));
-    return fetch(u.href, { mode: 'cors' }).then(function (r) {
-      if (!r.ok) throw new Error('fetch failed: ' + r.status);
+    try { u = new URL(url, global.location && global.location.href); } catch (_) { return Promise.reject(fail('url', 'bad url')); }
+    if (u.protocol !== 'https:' && u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') return Promise.reject(fail('url', 'https only'));
+    return fetch(u.href, { mode: 'cors' }).catch(function (e) { throw fail('network', e && e.message); }).then(function (r) {
+      if (!r.ok) throw fail('network', 'fetch failed: ' + r.status, { status: r.status });
       var len = +r.headers.get('content-length') || 0;
-      if (len > MAX_BYTES) throw new Error('file is larger than 25 MB');
-      return r.text();
+      if (len > MAX_BYTES) throw fail('size', 'file is larger than 25 MB');
+      return r.text().catch(function (e) { throw fail('network', e && e.message); });
     }).then(function (t) { return importAny(parse(t), Object.assign({ from: u.href }, meta || {})); });
   }
 

@@ -291,6 +291,7 @@ try {
         var backHandle = null;
         var queue = [];
         var lockUntil = 0;
+        var safeBtn = okBtn;
         function trapKey(e) {
           if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); settle(false); return; }
           if (e.key !== 'Tab') return;
@@ -300,7 +301,7 @@ try {
           var last = focusables[0];
           if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
           else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-          else if (!dlg.contains(document.activeElement)) { e.preventDefault(); okBtn.focus(); }
+          else if (!dlg.contains(document.activeElement)) { e.preventDefault(); safeBtn.focus(); }
         }
         function settle(result) {
           var r = resolver; resolver = null;
@@ -324,21 +325,22 @@ try {
           msgEl.textContent = item.message;
           cancelBtn.hidden = (item.mode === 'alert');
           okBtn.textContent = (item.mode === 'alert') ? okLabel : confirmLabel;
+          safeBtn = (item.mode === 'confirm' && item.opts && item.opts.danger) ? cancelBtn : okBtn;
           dlg.showPopover();
           document.addEventListener('keydown', trapKey, true);
           backHandle = (window.MentriaUI && window.MentriaUI.backDismiss)
             ? window.MentriaUI.backDismiss(function () { settle(false); }) : null;
-          okBtn.focus();
+          safeBtn.focus();
           lockUntil = queued ? Date.now() + 400 : 0;
           resolver = item.res;
         }
-        function open(message, mode) {
+        function open(message, mode, opts) {
           return new Promise(function (res) {
-            queue.push({ message: message, mode: mode, res: res });
+            queue.push({ message: message, mode: mode, opts: opts, res: res });
             show(false);
           });
         }
-        window.mentriaConfirm = function (m) { return open(m, 'confirm'); };
+        window.mentriaConfirm = function (m, opts) { return open(m, 'confirm', opts); };
         window.mentriaAlert = function (m) { return open(m, 'alert'); };
         document.addEventListener('mentria:localechange', function () {
           if (!window.MentriaI18n || !window.MentriaI18n.t) return;

@@ -3,7 +3,12 @@
         prefix: {{ localePrefix | dump | safe }},
         tools: [
           {%- for tool in tools %}
-          { slug: {{ tool.slug | dump | safe }}, title: {{ (("tools." + tool.slug + ".title") | t) | dump | safe }}, category: {{ (("category." + tool.category) | t) | dump | safe }}, keywords: {{ (("tools." + tool.slug + ".lede") | t) | dump | safe }}{% if tool.url %}, url: {{ tool.url | dump | safe }}{% endif %}{% if tool.requires %}, requires: {{ tool.requires | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
+          { slug: {{ tool.slug | dump | safe }}, title: {{ (("tools." + tool.slug + ".title") | t) | dump | safe }}, category: {{ (("category." + tool.category) | t) | dump | safe }}{% if tool.group %}, group: {{ (("home.launcher." + (tool.group | lower)) | t) | dump | safe }}{% endif %}, keywords: {{ (("tools." + tool.slug + ".lede") | t) | dump | safe }}{% if tool.url %}, url: {{ tool.url | dump | safe }}{% endif %}{% if tool.requires %}, requires: {{ tool.requires | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
+          {%- endfor %}
+        ],
+        gallery: [
+          {%- for ext in extensions %}
+          { id: {{ ext.id | dump | safe }}, title: {{ ext.name | dump | safe }}, keywords: {{ (("tool.ext_gallery.desc." + ext.id) | t) | dump | safe }}{% if ext.schemaCategory == "GameApplication" %}, group: {{ ("home.launcher.games" | t) | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
           {%- endfor %}
         ],
         nav: [
@@ -19,6 +24,7 @@
           recents: {{ ("palette.recents" | t) | dump | safe }},
           pages: {{ ("palette.pages" | t) | dump | safe }},
           extensions: {{ ("palette.extensions" | t) | dump | safe }},
+          extKind: {{ ("store.kind" | t) | dump | safe }},
           actions: {{ ("palette.actions" | t) | dump | safe }},
           actNote: {{ ("palette.act_note" | t) | dump | safe }},
           actNoteDone: {{ ("palette.act_note_done" | t) | dump | safe }},

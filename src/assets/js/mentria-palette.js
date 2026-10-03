@@ -15,7 +15,7 @@
   var prevFocus = null;
 
   var labels = {};
-  var model = { tools: [], nav: [], recents: [], extensions: [], quick: [], kwNote: ['note'], kwTimer: ['timer'] };
+  var model = { tools: [], nav: [], recents: [], gallery: [], extensions: [], quick: [], kwNote: ['note'], kwTimer: ['timer'] };
   var optionEls = [];
   var activeIndex = -1;
   var idSeq = 0;
@@ -80,6 +80,25 @@
     return labels.extensions || 'Extensions';
   }
 
+  function buildGallery(list, prefix) {
+    var out = [];
+    var kind = labels.extKind || '';
+    for (var i = 0; i < list.length; i++) {
+      var g = list[i];
+      if (!g || typeof g.id !== 'string') continue;
+      var title = g.title || g.id;
+      out.push({
+        title: title,
+        hint: kind || extLabel(),
+        href: prefix + '/extensions/' + g.id + '/',
+        titleN: norm(title),
+        hayN: norm(title + ' ' + g.id + ' ' + kwString(g.keywords) + ' ' + (g.group || '') + ' ' + kind + ' ' + extLabel()),
+        usage: 0
+      });
+    }
+    return out;
+  }
+
   function words(list, base) {
     var raw = String(list || '').split(',').concat(base);
     var out = [];
@@ -118,7 +137,7 @@
         hint: cat,
         href: t.url ? t.url : prefix + '/tools/' + t.slug + '/',
         titleN: norm(title),
-        hayN: norm(title + ' ' + t.slug + ' ' + kwString(t.keywords) + ' ' + cat),
+        hayN: norm(title + ' ' + t.slug + ' ' + kwString(t.keywords) + ' ' + cat + ' ' + (t.group || '')),
         usage: usageScore(usage[t.slug])
       };
       normTools.push(entry);
@@ -154,7 +173,7 @@
       quickEntry('flip', labels.actFlip || 'Flip a coin', words(labels.kwFlip, ['flip', 'coin']), flipCoin)
     ];
 
-    return { tools: normTools, nav: normNav, recents: recents, extensions: buildExtensions(prefix), quick: quick, kwNote: kwNote, kwTimer: kwTimer };
+    return { tools: normTools, nav: normNav, recents: recents, gallery: buildGallery((d && d.gallery) || [], prefix), extensions: buildExtensions(prefix), quick: quick, kwNote: kwNote, kwTimer: kwTimer };
   }
 
   function applyLabels() {
@@ -241,9 +260,10 @@
       for (j = 0; j < arr.length; j++) g.appendChild(makeOption(arr[j]));
       listEl.appendChild(g);
     }
-    if (model.extensions.length) {
+    var ext = model.gallery.concat(model.extensions);
+    if (ext.length) {
       var eg = makeGroup(extLabel());
-      for (i = 0; i < model.extensions.length; i++) eg.appendChild(makeOption(model.extensions[i]));
+      for (i = 0; i < ext.length; i++) eg.appendChild(makeOption(ext[i]));
       listEl.appendChild(eg);
     }
   }
@@ -269,7 +289,7 @@
     var qS = qN.replace(/\s+/g, '');
     var out = [];
     if (qS.length < 3) return out;
-    var pools = [model.tools, model.nav, model.extensions];
+    var pools = [model.tools, model.nav, model.gallery, model.extensions];
     for (var p = 0; p < pools.length; p++) {
       for (var i = 0; i < pools[p].length; i++) {
         var span = subseqSpan(pools[p][i].titleN.replace(/\s+/g, ''), qS);
@@ -298,24 +318,19 @@
       else continue;
       out.push({ e: e, tier: tier });
     }
-    for (i = 0; i < model.tools.length; i++) {
-      e = model.tools[i];
-      idx = e.titleN.indexOf(qN);
-      tier = tierOf(idx, e.hayN.indexOf(qN) !== -1);
-      if (tier < 0) continue;
-      out.push({ e: e, tier: tier });
+    var pools = [model.tools, model.gallery, model.extensions];
+    for (var p = 0; p < pools.length; p++) {
+      for (i = 0; i < pools[p].length; i++) {
+        e = pools[p][i];
+        tier = tierOf(e.titleN.indexOf(qN), e.hayN.indexOf(qN) !== -1);
+        if (tier < 0) continue;
+        out.push({ e: e, tier: tier });
+      }
     }
     for (i = 0; i < model.nav.length; i++) {
       e = model.nav[i];
       idx = e.titleN.indexOf(qN);
       tier = tierOf(idx, false);
-      if (tier < 0) continue;
-      out.push({ e: e, tier: tier });
-    }
-    for (i = 0; i < model.extensions.length; i++) {
-      e = model.extensions[i];
-      idx = e.titleN.indexOf(qN);
-      tier = tierOf(idx, e.hayN.indexOf(qN) !== -1);
       if (tier < 0) continue;
       out.push({ e: e, tier: tier });
     }

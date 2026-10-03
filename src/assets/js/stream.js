@@ -24,7 +24,8 @@
   var byId = {};
   tail.forEach(function (x) { byId[x.id] = x; });
 
-  var DAY = Math.floor(Date.now() / 86400000);
+  var today0 = new Date();
+  var DAY = Math.floor(Date.UTC(today0.getFullYear(), today0.getMonth(), today0.getDate()) / 86400000);
   function seededOrder(list, salt) {
     var seed = (DAY * 2654435761 + (salt || 0) * 40503) % 4294967296;
     function rng() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
@@ -59,7 +60,7 @@
     parts.push(t('cards_n', { n: x.cards }));
     if (x.minutes) parts.push(t('minutes_n', { n: x.minutes }));
     if (progress) {
-      var seen = Object.keys(progress.cards || {}).length;
+      var seen = P.doneCount(progress);
       if (seen && x.cards) parts.push(t('progress_n', { n: Math.min(100, Math.round((seen / x.cards) * 100)) }));
     }
     return parts.join(' · ');
@@ -104,7 +105,8 @@
     var n = sec.nextElementSibling;
     while (n && !n.classList.contains('feed-card')) n = n.nextElementSibling;
     if (!n) return;
-    try { n.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) { n.scrollIntoView(); }
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    try { n.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' }); } catch (_) { n.scrollIntoView(); }
   }
 
   function loadNative(id) {
@@ -123,8 +125,8 @@
         var picked = false;
         packs.forEach(function (r) {
           var pr = P.getProgress(r.id);
-          var seen = Object.keys(pr.cards || {}).length;
-          var due = Object.keys(pr.cards || {}).some(function (id) { var c = pr.cards[id]; return c.r === 'wrong' && c.d && c.d <= now; });
+          var seen = P.doneCount(pr);
+          var due = Object.keys(pr.cards || {}).some(function (id) { return P.isDue(pr.cards[id], now); });
           if (!picked && seen < r.cards) { picked = true; rows.push(r); }
           else if (due) rows.push(r);
         });
@@ -156,7 +158,7 @@
       var progress = P.getProgress(entry.pack.id);
       orderedCards(entry.pack).forEach(function (c) {
         var r = progress.cards[c.id];
-        if (r && r.r === 'wrong' && r.d && r.d <= now) reviews.push({ entry: entry, card: c, due: r.d });
+        if (P.isDue(r, now)) reviews.push({ entry: entry, card: c, due: r.d });
       });
     });
     reviews.sort(function (a, b) { return a.due - b.due; });
@@ -177,7 +179,7 @@
     seededOrder(tail, 2).some(function (x) {
       if (busy[x.id]) return false;
       var pr = P.getProgress(x.id);
-      if (Object.keys(pr.cards || {}).length >= x.cards) return false;
+      if (P.doneCount(pr) >= x.cards) return false;
       picks.push(x);
       return picks.length >= 2;
     });
@@ -187,7 +189,8 @@
     var budget = Math.max(0, BUDGET - answeredToday);
     var queues = packs.map(function (entry) {
       var progress = P.getProgress(entry.pack.id);
-      return { entry: entry, cards: orderedCards(entry.pack).filter(function (c) { return !progress.cards[c.id]; }), taken: 0 };
+      var readMode = progress.mode === 'read';
+      return { entry: entry, cards: orderedCards(entry.pack).filter(function (c) { return readMode ? !progress.cards[c.id] : !P.isDone(c, progress.cards[c.id]); }), taken: 0 };
     }).filter(function (q) { return q.cards.length; });
     var added = 0;
     while (added < budget && queues.some(function (q) { return q.cards.length && q.taken < 3; })) {
@@ -203,6 +206,7 @@
   }
 
   function renderDynamic(res) {
+    var renderedAt = Date.now();
     var frag = document.createDocumentFragment();
     res.items.forEach(function (it) {
       if (it.kind === 'today') {
@@ -236,13 +240,18 @@
         pack: pack, mode: mode, lang: lang, t: t, native: entry.native,
         sectionOf: function (id) { return sectionOf[id] || null; },
         getProgress: function () { return P.getProgress(pack.id); },
-        onAnswer: function (card, right, extra) { P.recordAnswer(pack.id, card.id, right, extra); sec.dataset.done = '1'; },
+        onAnswer: function (card, right, extra) {
+          var cur = P.getProgress(pack.id).cards[card.id];
+          if (!(cur && (cur.r === 'right' || cur.r === 'wrong') && cur.t > renderedAt)) P.recordAnswer(pack.id, card.id, right, extra);
+          sec.dataset.done = '1';
+        },
         onContinue: function () { scrollToNext(sec); },
         live: function (text) { var live = document.getElementById('stream-live'); if (live) live.textContent = text; }
       });
       var idx = orderedCards(pack).findIndex(function (c) { return c.id === it.card.id; });
       var label = it.kind === 'review' ? t('review') : t('card_pos', { n: idx + 1, total: pack.cards.length });
       sec = packCard(Object.assign({ href: entry.native ? prefix + '/learn/' + pack.id + '/' : prefix + '/learn/play/?id=' + encodeURIComponent(pack.id) }, pack), it.card, it.kind, label, opts);
+      sec.dataset.mode = mode;
       frag.appendChild(sec);
     });
     if (res.exhausted) {
@@ -269,7 +278,7 @@
           if (sec.dataset.seen) return;
           timers[key] = setTimeout(function () {
             var type = sec.querySelector('.pack-slide').dataset.type;
-            if (!P.INTERACTIVE[type] && !sec.dataset.done) P.recordSeen(sec.dataset.packId, sec.dataset.cardId);
+            if ((!P.INTERACTIVE[type] || sec.dataset.mode === 'read') && !sec.dataset.done) P.recordSeen(sec.dataset.packId, sec.dataset.cardId, !!P.INTERACTIVE[type]);
             sec.dataset.seen = '1';
           }, 1500);
         } else {
@@ -349,7 +358,7 @@
     var best = null, bestLast = -1;
     touchedNative().forEach(function (id) {
       var x = byId[id], pr = P.getProgress(id);
-      var seen = Object.keys(pr.cards || {}).length;
+      var seen = P.doneCount(pr);
       if (!seen || seen >= x.cards) return;
       if ((pr.last || 0) > bestLast) { bestLast = pr.last || 0; best = { id: id, title: x.title, cover: x.cover, total: x.cards, seen: seen, collection: x.collection, href: prefix + '/learn/' + id + '/', last: pr.last || 0 }; }
     });
@@ -431,7 +440,7 @@
     var imported = null, last = -1;
     packs.forEach(function (e) {
       if (e.native) return;
-      var pr = P.getProgress(e.pack.id), seen = Object.keys(pr.cards || {}).length, total = e.pack.cards.length;
+      var pr = P.getProgress(e.pack.id), seen = P.doneCount(pr), total = e.pack.cards.length;
       if (seen && seen < total && (pr.last || 0) > last) { last = pr.last || 0; imported = { id: e.pack.id, title: e.pack.title, cover: e.pack.cover || (e.meta && e.meta.cover), total: total, seen: seen, collection: 'import', href: prefix + '/learn/play/?id=' + encodeURIComponent(e.pack.id) }; }
     });
     if (imported) renderHero(imported);
@@ -447,6 +456,12 @@
   window.addEventListener('pageshow', function (e) {
     if (!e.persisted) return;
     renderHero(nativeContinue());
-    activePacks().then(importedContinue).catch(function () {});
+    activePacks().then(function (packs) {
+      importedContinue(packs);
+      return buildDynamic(packs);
+    }).then(function (res) {
+      dyn.innerHTML = '';
+      renderDynamic(res);
+    }).catch(function () {});
   });
 })();

@@ -5,7 +5,6 @@
   var INTERACTIVE = { mcq: 1, cloze: 1, order: 1, match: 1, ask: 1 };
   var MAX_BYTES = 25 * 1024 * 1024;
   var INTERVALS = [1, 3, 7, 16, 35];
-  var DAY = 86400000;
   var ID_RE = /^[a-z0-9][a-z0-9._-]{0,99}$/i;
   var DB = 'mentria-packs', STORE = 'packs', VER = 1;
 
@@ -201,15 +200,27 @@
     return p;
   }
 
+  function answerable(card) { return !!(card && (INTERACTIVE[card.type] || card.guess)); }
+  function isDue(rec, now) { return !!(rec && (rec.r === 'wrong' || rec.r === 'right') && rec.d && rec.d <= (now || Date.now())); }
+  function isDone(card, rec) {
+    if (!rec) return false;
+    if (rec.r === 'right' || rec.r === 'wrong') return true;
+    return !(rec.q || (card && answerable(card)));
+  }
+  function doneCount(progress) {
+    var cards = (progress && progress.cards) || {};
+    return Object.keys(cards).filter(function (id) { return isDone(null, cards[id]); }).length;
+  }
   function gradable(pack) {
-    return (pack.cards || []).some(function (c) { return c && (INTERACTIVE[c.type] || c.guess); });
+    return (pack.cards || []).some(answerable);
   }
   function availableModes(pack, progress) {
     var declared = pack.modes && pack.modes.length ? pack.modes : ['read', 'quiz', 'review', 'budget'];
     var modes = ['read'];
     if (gradable(pack)) {
       if (declared.indexOf('quiz') >= 0) modes.push('quiz');
-      var wrong = progress && progress.cards ? Object.keys(progress.cards).some(function (id) { return progress.cards[id].r === 'wrong'; }) : false;
+      var now = Date.now();
+      var wrong = progress && progress.cards ? Object.keys(progress.cards).some(function (id) { return progress.cards[id].r === 'wrong' || isDue(progress.cards[id], now); }) : false;
       if (wrong && declared.indexOf('review') >= 0) modes.push('review');
       if (declared.indexOf('budget') >= 0) modes.push('budget');
     }
@@ -337,7 +348,12 @@
   function get(id) { return tx('readonly', function (s) { return s.get(id); }).catch(function () { return undefined; }); }
   function list() {
     return tx('readonly', function (s) { return s.getAll(); }).then(function (rows) {
-      return (rows || []).map(function (r) { var o = Object.assign({}, r); delete o.pack; return o; }).sort(function (a, b) { return (b.updated || b.added) - (a.updated || a.added); });
+      return (rows || []).map(function (r) {
+        var o = Object.assign({}, r);
+        if (r.pack && Array.isArray(r.pack.cards)) o.cardList = r.pack.cards.map(function (c) { return { id: c.id, type: c.type, guess: !!c.guess }; });
+        delete o.pack;
+        return o;
+      }).sort(function (a, b) { return (b.updated || b.added) - (a.updated || a.added); });
     }).catch(function () { return []; });
   }
   function remove(id) {
@@ -411,13 +427,24 @@
     if (global.MentriaStore) global.MentriaStore.set('packs', progressKey(id), p);
     return p;
   }
-  function recordSeen(id, cardId) {
+  function touchDay(c) {
+    var k = dayKey();
+    if (c.day === k) return;
+    c.day = k;
+    markDay();
+  }
+  function localDaysFromNow(n) {
+    var d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n).getTime();
+  }
+  function recordSeen(id, cardId, isAnswerable) {
     var p = getProgress(id), c = p.cards[cardId] || { n: 0, s: 0 };
     c.n = (c.n || 0) + 1;
     if (!c.r) c.r = 'seen';
+    if (isAnswerable) c.q = 1;
     c.t = Date.now();
+    touchDay(c);
     p.cards[cardId] = c;
-    markDay();
     return saveProgress(id, p);
   }
   function recordAnswer(id, cardId, right, extra) {
@@ -425,32 +452,34 @@
     c.n = (c.n || 0) + 1;
     c.r = right ? 'right' : 'wrong';
     c.s = right ? Math.min((c.s || 0) + 1, INTERVALS.length - 1) : 0;
-    c.d = Date.now() + INTERVALS[c.s] * DAY;
+    c.d = localDaysFromNow(INTERVALS[c.s]);
     c.t = Date.now();
     if (extra && typeof extra.distance === 'number') c.g = extra.distance;
+    touchDay(c);
     p.cards[cardId] = c;
-    markDay();
     return saveProgress(id, p);
   }
   function setMode(id, mode) { var p = getProgress(id); p.mode = mode; return saveProgress(id, p); }
   function resetProgress(id) { return saveProgress(id, { cards: {}, mode: getProgress(id).mode, last: 0 }); }
   function summary(pack, p) {
     p = p || getProgress(pack.id);
-    var seen = 0, right = 0, wrong = 0, due = 0, now = Date.now();
+    var seen = 0, viewed = 0, right = 0, wrong = 0, due = 0, now = Date.now();
     pack.cards.forEach(function (c) {
       var r = p.cards[c.id];
-      if (!r) return;
+      if (r) viewed++;
+      if (!isDone(c, r)) return;
       seen++;
       if (r.r === 'right') right++;
       if (r.r === 'wrong') wrong++;
-      if (r.d && r.d <= now) due++;
+      if (isDue(r, now)) due++;
     });
-    return { total: pack.cards.length, seen: seen, right: right, wrong: wrong, due: due, done: seen >= pack.cards.length };
+    return { total: pack.cards.length, seen: seen, viewed: viewed, right: right, wrong: wrong, due: due, done: seen >= pack.cards.length };
   }
 
   var api = {
     TYPES: TYPES, INTERACTIVE: INTERACTIVE, MAX_BYTES: MAX_BYTES, INTERVALS: INTERVALS,
     text: text, isText: isText, validate: validate, normalize: normalize, outline: outline, gradable: gradable, availableModes: availableModes,
+    answerable: answerable, isDue: isDue, isDone: isDone, doneCount: doneCount,
     isCourse: isCourse, validateCourse: validateCourse, importCourse: importCourse, importAny: importAny, getCourses: getCourses, removeCourse: removeCourse, courseOf: courseOf,
     put: put, get: get, list: list, remove: remove,
     importText: importText, importFile: importFile, importUrl: importUrl,

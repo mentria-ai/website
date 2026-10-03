@@ -163,7 +163,7 @@
     var t = ctx.t;
     var wrap = el('div', 'pack-image');
     var img = slide.querySelector('.deck__slide-img');
-    if (img) { img.classList.remove('deck__slide-img'); img.classList.add('pack-image__img'); wrap.appendChild(img); }
+    if (img) { img.classList.remove('deck__slide-img'); img.classList.add('pack-image__img'); img.addEventListener('error', function () { img.classList.add('is-broken'); }); wrap.appendChild(img); }
     var tip = el('div', 'pack-hotspot-tip');
     tip.hidden = true;
     var seen = {};
@@ -273,20 +273,28 @@
     }
     function grade() {
       graded = true;
+      var hadFocus = p.contains(document.activeElement);
       var right = card.choices.every(function (c, i) { return !!c.correct === !!picked[i]; });
+      var correctText = [];
       Array.prototype.forEach.call(list.children, function (b) {
         var i = +b.dataset.i, c = card.choices[i];
         b.disabled = true;
-        if (c.correct) b.classList.add('is-correct');
+        b.setAttribute('aria-pressed', picked[i] ? 'true' : 'false');
+        if (c.correct) {
+          b.classList.add('is-correct');
+          var label = b.querySelector('.pack-choice__text');
+          if (label) correctText.push(label.textContent.trim());
+        }
         if (picked[i] && !c.correct) b.classList.add('is-wrong');
         if (picked[i]) b.classList.add('is-picked');
         var why = b.querySelector('.pack-choice__why');
         if (why && (picked[i] || c.correct)) why.hidden = false;
       });
       if (check) check.remove();
-      feedback(p, ctx, right);
+      feedback(p, ctx, right, right ? '' : esc(t('answer_was')) + ' <em>' + correctText.map(esc).join(', ') + '</em>');
       continueBtn(p, card, ctx);
       done(p, card, ctx, right);
+      if (hadFocus) { var next = p.querySelector('.pack-btn--continue'); if (next) next.focus(); }
     }
     return p;
   }
@@ -518,7 +526,8 @@
             if (!sib) return;
             if (d[0] === 'up') list.insertBefore(li, sib); else list.insertBefore(sib, li);
             renumber();
-            b.focus();
+            if (!b.disabled) b.focus();
+            else { var other = li.querySelector('[data-dir="' + (d[0] === 'up' ? 'down' : 'up') + '"]'); if (other && !other.disabled) other.focus(); }
           });
           btns.appendChild(b);
         });

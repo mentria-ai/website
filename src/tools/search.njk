@@ -272,7 +272,7 @@ localeReload: true
     li.innerHTML =
       '<a class="sx__result-link" href="' + escape(r.url) + '">' +
         '<span class="sx__result-type">' + escape(TYPE_LABEL[r.type] || r.type) + '</span>' +
-        '<h3 class="sx__result-title">' + highlight(r.title, qNorm) + '</h3>' +
+        '<h2 class="sx__result-title">' + highlight(r.title, qNorm) + '</h2>' +
         (r.description ? '<p class="sx__result-desc">' + highlight(snippet(r.description, qNorm), qNorm) + '</p>' : '') +
       '</a>';
     return li;

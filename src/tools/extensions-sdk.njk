@@ -32,13 +32,13 @@ eleventyComputed:
 
   <div class="sdk__code">
     <div class="sdk__code-bar">
-      <span class="sdk__code-name">starter.html</span>
+      <span class="sdk__code-name" id="sdk-code-name">starter.html</span>
       <span class="sdk__code-actions">
         <button type="button" class="m-btn m-btn--ghost sdk__btn" id="sdk-copy">copy</button>
         <button type="button" class="m-btn m-btn--primary sdk__btn" id="sdk-download">download</button>
       </span>
     </div>
-    <pre class="sdk__pre"><code id="sdk-starter-code">{% raw %}&lt;script type="application/json" id="mentria-ext"&gt;
+    <pre class="sdk__pre" tabindex="0" role="region" aria-labelledby="sdk-code-name"><code id="sdk-starter-code">{% raw %}&lt;script type="application/json" id="mentria-ext"&gt;
 {
   "id": "starter",
   "name": "Starter",
@@ -94,9 +94,9 @@ eleventyComputed:
 
   <h2 class="sdk__h2">{{ "tool.extensions-sdk.heading_reference" | t }}</h2>
 
-  <h3 class="sdk__h3">Manifest</h3>
+  <h3 class="sdk__h3" id="sdk-manifest">Manifest</h3>
   <p>The manifest is a JSON block with <code>id="mentria-ext"</code>. It is the only required piece of structure; everything else is ordinary HTML.</p>
-  <div class="sdk__tablewrap">
+  <div class="sdk__tablewrap" tabindex="0" role="region" aria-labelledby="sdk-manifest">
     <table class="sdk__table">
       <thead><tr><th>Field</th><th>Type</th><th>Req</th><th>Rules</th></tr></thead>
       <tbody>
@@ -115,9 +115,9 @@ eleventyComputed:
     </table>
   </div>
 
-  <h3 class="sdk__h3">The host object — <code>window.mentria</code></h3>
+  <h3 class="sdk__h3" id="sdk-host">The host object — <code>window.mentria</code></h3>
   <p>The run host injects a frozen <code>window.mentria</code> before your script executes. Everything an extension can do goes through it.</p>
-  <div class="sdk__tablewrap">
+  <div class="sdk__tablewrap" tabindex="0" role="region" aria-labelledby="sdk-host">
     <table class="sdk__table">
       <thead><tr><th>Member</th><th>Shape</th><th>What it does</th></tr></thead>
       <tbody>
@@ -160,9 +160,9 @@ eleventyComputed:
     <li>Browsers can evict site storage under pressure unless the site has persistent storage; treat it as local, not guaranteed forever.</li>
   </ul>
 
-  <h3 class="sdk__h3">Widgets</h3>
+  <h3 class="sdk__h3" id="sdk-widgets">Widgets</h3>
   <p>Declare <code>mounts.widget</code> and the home launcher shows a live status tile for your extension, named by <code>label</code> and linking to your run page. The tile renders the snapshot object stored under <code>key</code> in your own storage — e.g. <code>storage.set('note', { text: 'bought milk', progress: 0.4 })</code> — and refreshes on every write.</p>
-  <div class="sdk__tablewrap">
+  <div class="sdk__tablewrap" tabindex="0" role="region" aria-labelledby="sdk-widgets">
     <table class="sdk__table">
       <thead><tr><th>Snapshot field</th><th>Type</th><th>Req</th><th>Rules</th></tr></thead>
       <tbody>
@@ -218,6 +218,7 @@ eleventyComputed:
 .sdk__code-actions { display: flex; gap: 0.5rem; }
 .sdk__btn { font-size: 0.72rem; padding: 0.22rem 0.7rem; }
 .sdk__pre { margin: 0; padding: 0.9rem 1rem; overflow-x: auto; font-size: 0.78rem; line-height: 1.55; }
+.sdk__pre:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -2px; }
 .sdk__pre code { background: none; border: 0; padding: 0; color: var(--term-fg); }
 .sdk__note { font-size: 0.85rem; color: var(--term-muted); }
 .sdk__tablewrap { overflow-x: auto; margin: 0.75rem 0; border: 1px solid var(--term-border, #2a3138); border-radius: 8px; }

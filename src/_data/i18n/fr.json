@@ -25,8 +25,8 @@
     "search": "Recherche",
     "about": "À propos",
     "week_ring": "Votre semaine",
-    "week_ring_n": "Votre semaine : {n} jours sur 7",
-    "week_ring_toast": "L’anneau de l’en-tête gagne un segment chaque jour où vous apprenez : {n} jours sur 7 cette semaine."
+    "week_ring_n": "Votre semaine : {n} sur 7 jours",
+    "week_ring_toast": "L’anneau de l’en-tête gagne un segment chaque jour où vous apprenez : {n} sur 7 jours cette semaine."
   },
   "about": {
     "title": "À propos",
@@ -5037,6 +5037,7 @@
     "recents": "Récents",
     "pages": "Pages",
     "open": "Ouvrir la palette de commandes (⌘K)",
+    "open_ctrl": "Ouvrir la palette de commandes (Ctrl+K)",
     "app_bar": "Navigation de l'application",
     "extensions": "Extensions",
     "actions": "Actions",
@@ -5228,7 +5229,7 @@
     "start_today": "Commencer le pack du jour",
     "welcome_back": "Bon retour",
     "continue": "Continuer",
-    "week_n": "Cette semaine, vous avez appris {n} jours sur 7.",
+    "week_n": "Jours d’apprentissage cette semaine : {n} sur 7.",
     "week_zero": "Une carte aujourd’hui lance votre semaine.",
     "your_tools": "Vos outils"
   },

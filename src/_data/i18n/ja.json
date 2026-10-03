@@ -5037,6 +5037,7 @@
     "recents": "最近使ったもの",
     "pages": "ページ",
     "open": "コマンドパレットを開く（⌘K）",
+    "open_ctrl": "コマンドパレットを開く（Ctrl+K）",
     "app_bar": "アプリナビゲーション",
     "extensions": "拡張機能",
     "actions": "アクション",

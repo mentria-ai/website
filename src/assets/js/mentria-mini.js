@@ -78,7 +78,7 @@
   function leave() {
     var here = location.pathname;
     var ref = null;
-    try { ref = document.referrer ? new URL(document.referrer) : null; } catch (_) { ref = null; }
+    try { ref = window.MentriaNav ? window.MentriaNav.from() : (document.referrer ? new URL(document.referrer) : null); } catch (_) { ref = null; }
     if (ref && ref.origin === location.origin && ref.pathname !== here && history.length > 1) {
       var gone = false;
       window.addEventListener('pagehide', function () { gone = true; }, { once: true });

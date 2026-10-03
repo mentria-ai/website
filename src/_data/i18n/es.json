@@ -5037,6 +5037,7 @@
     "recents": "Recientes",
     "pages": "Páginas",
     "open": "Abrir paleta de comandos (⌘K)",
+    "open_ctrl": "Abrir paleta de comandos (Ctrl+K)",
     "app_bar": "Navegación de la aplicación",
     "extensions": "Extensiones",
     "actions": "Acciones",

@@ -70,14 +70,25 @@ if (!entry || !entry.enabled || (!app && !source)) {
     if (locale) prefix = locale.prefix;
     document.title = title;
   });
-  H.mountExtension(frame, {
+  const mount = (args) => H.mountExtension(frame, {
     manifest: m,
     source,
     get prefix() { return prefix; },
-    args: takeHashArgs(),
+    args,
     get blockedTemplate() { return root.dataset.blocked; },
     onError: (msg) => { errEl.textContent = msg; errEl.hidden = false; },
     onClose: () => { location.href = prefix + '/'; }
+  });
+  mount(takeHashArgs());
+  window.addEventListener('hashchange', () => {
+    const next = takeHashArgs();
+    if (!next) return;
+    let taken = false;
+    try {
+      const w = frame.contentWindow;
+      if (w) taken = !w.dispatchEvent(new w.CustomEvent('mentria:command', { detail: { cmd: next.cmd, args: next.args }, cancelable: true }));
+    } catch (_) { taken = false; }
+    if (!taken) mount(next);
   });
 }
 </script>

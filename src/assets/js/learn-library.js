@@ -270,14 +270,20 @@
     refresh();
   }
   var ERRS = { empty: 'import_err_empty', json: 'import_err_json', kind: 'import_err_kind', size: 'import_err_size', invalid: 'import_err_invalid', network: 'import_err_network', url: 'import_err_url' };
+  function storageBlocked() {
+    try { return !window.localStorage || !window.indexedDB; } catch (_) { return true; }
+  }
   function handleError(e) {
     var code = e && Object.prototype.hasOwnProperty.call(ERRS, e.code) ? e.code : '';
+    var key = code ? ERRS[code] : 'import_err_other';
+    if (!code && e && e.name === 'QuotaExceededError') key = 'import_err_storage_full';
+    else if (!code && ((e && e.name === 'SecurityError') || storageBlocked())) key = 'import_err_storage_blocked';
     var detail = '';
     if (code === 'invalid') detail = (e.errors && e.errors.length ? e.errors : [e.message]).slice(0, 3).join('; ');
     else if (code === 'json' && e.line) detail = t('import_err_at', { line: e.line, column: e.column });
     else if (code === 'network' && e.status) detail = 'HTTP ' + e.status;
-    else if (!code) detail = (e && e.message) || String(e);
-    say(t('import_failed') + ' ' + t(code ? ERRS[code] : 'import_err_other'), 'error', detail);
+    else if (key === 'import_err_other') detail = (e && e.message) || String(e);
+    say(t('import_failed') + ' ' + t(key), 'error', detail);
   }
 
   function importFile(file) {

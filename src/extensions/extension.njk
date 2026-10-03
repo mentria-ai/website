@@ -119,6 +119,8 @@ eleventyComputed:
   window.XS_COPY = {
     installing: {{ ("store.installing" | t) | dump | safe }},
     failed: {{ ("store.install_failed" | t) | dump | safe }},
+    blocked: {{ ("store.install_blocked" | t) | dump | safe }},
+    full: {{ ("store.install_full" | t) | dump | safe }},
     removeConfirm: {{ ("store.remove_confirm" | t) | dump | safe }}
   };
 </script>
@@ -141,6 +143,7 @@ let X;
 let H;
 let lastPct = 0;
 let stateRun = 0;
+let failKind = 'failed';
 document.addEventListener('mentria:localechange', relocalize);
 try {
   X = await import('/assets/js/mentria-extensions.js');
@@ -190,12 +193,24 @@ function relocalize(e) {
   const pick = (key, current) => { const v = I.t(key); return typeof v === 'string' && v !== key ? v : current; };
   C.installing = pick('store.installing', C.installing);
   C.failed = pick('store.install_failed', C.failed);
+  C.blocked = pick('store.install_blocked', C.blocked);
+  C.full = pick('store.install_full', C.full);
   C.removeConfirm = pick('store.remove_confirm', C.removeConfirm);
   const code = (e && e.detail && e.detail.code) || document.documentElement.lang;
   const locale = (window.MENTRIA_LOCALES || []).find((l) => l.code === code);
   if (locale) D.prefix = locale.prefix;
   if (!progressEl.hidden) progressText.textContent = C.installing.replace('{pct}', String(lastPct));
-  if (!installErr.hidden) installErr.textContent = C.failed;
+  if (!installErr.hidden) installErr.textContent = C[failKind];
+}
+
+function storageBlocked() {
+  try { return !window.localStorage; } catch (_) { return true; }
+}
+
+function failureKind(e) {
+  if (storageBlocked() || (e && e.name === 'SecurityError')) return 'blocked';
+  if (e && (e.name === 'QuotaExceededError' || e.code === 'storage-full')) return 'full';
+  return 'failed';
 }
 
 function extraUrls() {
@@ -252,7 +267,8 @@ async function install() {
   } catch (e) {
     if (created) X.remove(D.id, { keepData: true });
     progressEl.hidden = true;
-    installErr.textContent = C.failed;
+    failKind = failureKind(e);
+    installErr.textContent = C[failKind];
     installErr.hidden = false;
     showState();
   } finally {
